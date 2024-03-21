@@ -419,6 +419,14 @@ class FaceMLDataDB {
     return result;
   }
 
+  Future<int> getTotalFaceCount() async {
+    final db = await instance.database;
+    final List<Map<String, dynamic>> maps = await db.rawQuery(
+      'SELECT COUNT(*) as count FROM $facesTable WHERE $faceScore > $kMinHighQualityFaceScore AND $faceBlur > $kLaplacianThreshold',
+    );
+    return maps.first['count'] as int;
+  }
+
   Future<void> resetClusterIDs() async {
     final db = await instance.database;
     await db.update(

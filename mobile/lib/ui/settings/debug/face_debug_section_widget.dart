@@ -94,6 +94,23 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
           },
         ),
         MenuItemWidget(
+          captionedTextWidget: FutureBuilder<int>(
+            future: FaceMLDataDB.instance.getTotalFaceCount(),
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                return CaptionedTextWidget(
+                  title: "${snapshot.data!} high quality faces",
+                );
+              }
+              return const SizedBox.shrink();
+            },
+          ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async {},
+        ),
+        MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
             title: "Analyze file ID 25728869",
           ),
