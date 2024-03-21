@@ -539,8 +539,6 @@ func (c *StripeController) UpdateSubscription(stripeID string, userID int64) (en
 			if newStripeSubscription.LatestInvoice.PaymentIntent.Status == stripe.PaymentIntentStatusRequiresAction {
 				return ente.SubscriptionUpdateResponse{Status: "requires_action", ClientSecret: newStripeSubscription.LatestInvoice.PaymentIntent.ClientSecret}, nil
 			} else if newStripeSubscription.LatestInvoice.PaymentIntent.Status == stripe.PaymentIntentStatusRequiresPaymentMethod {
-				// inv := newStripeSubscription.LatestInvoice
-				// client.Invoices.VoidInvoice(inv.ID, nil)
 				return ente.SubscriptionUpdateResponse{Status: "requires_payment_method"}, nil
 			} else if newStripeSubscription.LatestInvoice.PaymentIntent.Status == stripe.PaymentIntentStatusProcessing {
 				return ente.SubscriptionUpdateResponse{Status: "success"}, nil
