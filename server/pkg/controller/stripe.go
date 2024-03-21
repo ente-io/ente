@@ -348,10 +348,6 @@ func (c *StripeController) handleCustomerSubscriptionUpdated(event stripe.Event,
 	}
 
 	userID := currentSubscription.UserID
-	newSubscription, err := c.getEnteSubscriptionFromStripeSubscription(userID, stripeSubscription)
-	if err != nil {
-		return ente.StripeEventLog{}, stacktrace.Propagate(err, "")
-	}
 	if stripeSubscription.Status == stripe.SubscriptionStatusPastDue {
 		user, err := c.UserRepo.Get(userID)
 		if err != nil {
@@ -364,6 +360,11 @@ func (c *StripeController) handleCustomerSubscriptionUpdated(event stripe.Event,
 		if err != nil {
 			return ente.StripeEventLog{}, stacktrace.Propagate(err, "")
 		}
+	}
+
+	newSubscription, err := c.getEnteSubscriptionFromStripeSubscription(userID, stripeSubscription)
+	if err != nil {
+		return ente.StripeEventLog{}, stacktrace.Propagate(err, "")
 	}
 	// If the customer has changed the plan, we update state in the database. If
 	// the plan has not changed, we will ignore this webhook and rely on other
