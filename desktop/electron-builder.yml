@@ -31,6 +31,13 @@ mac:
     hardenedRuntime: true
     x64ArchFiles: Contents/Resources/ggmlclip-mac
 afterSign: electron-builder-notarize
+# When Electron packages our node_modules, they go into the ASAR archive. This
+# is not what we want for the FFMPEG binaries though, and instead put them
+# outside of the ASAR archive so that we can get at a direct path to these files
+# when trying to run it.
+#
+# The filtering by `${os}` and `${arch}` is to include only the binaries for the
+# os/arch combination that we're bundling.
 asarUnpack:
     - node_modules/ffmpeg-static/bin/${os}/${arch}/ffmpeg
     - node_modules/ffmpeg-static/index.js

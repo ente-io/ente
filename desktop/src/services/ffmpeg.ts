@@ -20,6 +20,26 @@ function getFFmpegStaticPath() {
     return pathToFfmpeg.replace("app.asar", "app.asar.unpacked");
 }
 
+/**
+ * Run a ffmpeg command
+ *
+ * [Note: FFMPEG in Electron]
+ *
+ * There is a wasm build of FFMPEG, but that is currently 10-20 times slower
+ * that the native build. That is slow enough to be unusable for our purposes.
+ * https://ffmpegwasm.netlify.app/docs/performance
+ *
+ * So the alternative is to bundle a ffmpeg binary with our app. e.g.
+ *
+ *     yarn add fluent-ffmpeg ffmpeg-static ffprobe-static
+ *
+ * (we only use ffmpeg-static, the rest are mentioned for completeness' sake).
+ *
+ * Interestingly, Electron already bundles an ffmpeg library (it comes from the
+ * ffmpeg fork maintained by Chromium).
+ * https://chromium.googlesource.com/chromium/third_party/ffmpeg
+ * https://stackoverflow.com/questions/53963672/what-version-of-ffmpeg-is-bundled-inside-electron
+ */
 export async function runFFmpegCmd(
     cmd: string[],
     inputFilePath: string,

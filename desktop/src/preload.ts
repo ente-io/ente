@@ -385,7 +385,7 @@ setupLogging();
 // [Note: Transferring large amount of data over IPC]
 //
 // Electron's IPC implementation uses the HTML standard Structured Clone
-// Algorithm to serialize objects passed between processes. [1]
+// Algorithm to serialize objects passed between processes.
 // https://www.electronjs.org/docs/latest/tutorial/ipc#object-serialization
 //
 // In particular, both ArrayBuffer and the web File types are eligible for
@@ -406,6 +406,9 @@ setupLogging();
 // copying, the IPC should be fast enough for even moderately large data:
 // https://github.com/electron/electron/issues/1948#issuecomment-864191345
 //
+// The main problem with transfering large amounts of data is potentially
+// running out of memory, causing the app to crash as it copies it over across
+// the processes.
 contextBridge.exposeInMainWorld("ElectronAPIs", {
     exists,
     checkExistsAndCreateDir,
