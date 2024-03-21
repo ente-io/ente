@@ -86,9 +86,15 @@ func (c *StripeController) GetCheckoutSession(productID string, userID int64, re
 			return "", stacktrace.Propagate(ente.ErrBadRequest, "")
 		}
 	}
-	if subscription.PaymentProvider == ente.Stripe && !subscription.Attributes.IsCancelled {
-		// TODO: Check Stripe's cancellation state instead of our own
-		return "", stacktrace.Propagate(err, "")
+	if hasStripeSubscription {
+		client := c.StripeClients[subscription.Attributes.StripeAccountCountry]
+		stripeSubscription, err := client.Subscriptions.Get(subscription.OriginalTransactionID, nil)
+		if err != nil {
+			return "", stacktrace.Propagate(err, "")
+		}
+		if stripeSubscription.Status != stripe.SubscriptionStatusCanceled {
+			return "", stacktrace.Propagate(ente.ErrBadRequest, "")
+		}
 	}
 	stripeSuccessURL := redirectRootURL + viper.GetString("stripe.path.success")
 	stripeCancelURL := redirectRootURL + viper.GetString("stripe.path.cancel")
