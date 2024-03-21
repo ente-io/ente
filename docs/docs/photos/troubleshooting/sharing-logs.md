@@ -15,7 +15,7 @@ the logs just make the process a bit faster and easier.
 
 ### Mobile
 
-#### To **_Report a bug_** on your mobile device, follow these steps:
+To **_Report a bug_** on your mobile device, follow these steps:
 
 -   Tap on the three horizontal lines to access the settings.
 -   Tap on **"Support"** from the settings.
