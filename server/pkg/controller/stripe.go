@@ -420,9 +420,9 @@ func (c *StripeController) handlePaymentIntentFailed(event stripe.Event, country
 	}
 	// void the invoice, in case the payment intent failed
 	// _, err = client.Invoices.VoidInvoice(invoiceID, nil)
-	if err != nil {
-		return ente.StripeEventLog{}, stacktrace.Propagate(err, "")
-	}
+	// if err != nil {
+	// 	return ente.StripeEventLog{}, stacktrace.Propagate(err, "")
+	// }
 	stripeSubscriptionID := invoice.Subscription.ID
 	currentSubscription, err := c.BillingRepo.GetSubscriptionForTransaction(stripeSubscriptionID, ente.Stripe)
 	if err != nil {
@@ -496,11 +496,20 @@ func (c *StripeController) UpdateSubscription(stripeID string, userID int64) (en
 
 	}
 	client := c.StripeClients[subscription.Attributes.StripeAccountCountry]
-	stripeSubscription, err := client.Subscriptions.Get(subscription.OriginalTransactionID, nil)
+	params := stripe.SubscriptionParams{}
+	params.AddExpand("default_payment_method")
+	stripeSubscription, err := client.Subscriptions.Get(subscription.OriginalTransactionID, &params)
 	if err != nil {
 		return ente.SubscriptionUpdateResponse{}, stacktrace.Propagate(err, "")
 	}
-	params := stripe.SubscriptionParams{
+	isSEPA := stripeSubscription.DefaultPaymentMethod.Type == stripe.PaymentMethodTypeSepaDebit
+	var paymentBehavior stripe.SubscriptionPaymentBehavior
+	if isSEPA {
+		paymentBehavior = stripe.SubscriptionPaymentBehaviorAllowIncomplete
+	} else {
+		paymentBehavior = stripe.SubscriptionPaymentBehaviorPendingIfIncomplete
+	}
+	params = stripe.SubscriptionParams{
 		ProrationBehavior: stripe.String(string(stripe.SubscriptionProrationBehaviorAlwaysInvoice)),
 		Items: []*stripe.SubscriptionItemsParams{
 			{
@@ -508,7 +517,7 @@ func (c *StripeController) UpdateSubscription(stripeID string, userID int64) (en
 				Price: stripe.String(stripeID),
 			},
 		},
-		PaymentBehavior: stripe.String(string(stripe.SubscriptionPaymentBehaviorAllowIncomplete)),
+		PaymentBehavior: stripe.String(string(paymentBehavior)),
 	}
 	params.AddExpand("latest_invoice.payment_intent")
 	newStripeSubscription, err := client.Subscriptions.Update(subscription.OriginalTransactionID, &params)
@@ -521,17 +530,31 @@ func (c *StripeController) UpdateSubscription(stripeID string, userID int64) (en
 			return ente.SubscriptionUpdateResponse{}, stacktrace.Propagate(err, "")
 		}
 	}
-	if newStripeSubscription.Status == stripe.SubscriptionStatusPastDue {
-		if newStripeSubscription.LatestInvoice.PaymentIntent.Status == stripe.PaymentIntentStatusRequiresAction {
-			return ente.SubscriptionUpdateResponse{Status: "requires_action", ClientSecret: newStripeSubscription.LatestInvoice.PaymentIntent.ClientSecret}, nil
-		} else if newStripeSubscription.LatestInvoice.PaymentIntent.Status == stripe.PaymentIntentStatusRequiresPaymentMethod {
-			inv := newStripeSubscription.LatestInvoice
-			client.Invoices.VoidInvoice(inv.ID, nil)
-			return ente.SubscriptionUpdateResponse{Status: "requires_payment_method"}, nil
-		} else if newStripeSubscription.LatestInvoice.PaymentIntent.Status == stripe.PaymentIntentStatusProcessing {
-			return ente.SubscriptionUpdateResponse{Status: "success"}, nil
+	if isSEPA {
+		if newStripeSubscription.Status == stripe.SubscriptionStatusPastDue {
+			if newStripeSubscription.LatestInvoice.PaymentIntent.Status == stripe.PaymentIntentStatusRequiresAction {
+				return ente.SubscriptionUpdateResponse{Status: "requires_action", ClientSecret: newStripeSubscription.LatestInvoice.PaymentIntent.ClientSecret}, nil
+			} else if newStripeSubscription.LatestInvoice.PaymentIntent.Status == stripe.PaymentIntentStatusRequiresPaymentMethod {
+				// inv := newStripeSubscription.LatestInvoice
+				// client.Invoices.VoidInvoice(inv.ID, nil)
+				return ente.SubscriptionUpdateResponse{Status: "requires_payment_method"}, nil
+			} else if newStripeSubscription.LatestInvoice.PaymentIntent.Status == stripe.PaymentIntentStatusProcessing {
+				return ente.SubscriptionUpdateResponse{Status: "success"}, nil
+			}
+			return ente.SubscriptionUpdateResponse{}, stacktrace.Propagate(ente.ErrBadRequest, "")
 		}
-		return ente.SubscriptionUpdateResponse{}, stacktrace.Propagate(ente.ErrBadRequest, "")
+	} else {
+		if newStripeSubscription.PendingUpdate != nil {
+			switch newStripeSubscription.LatestInvoice.PaymentIntent.Status {
+			case stripe.PaymentIntentStatusRequiresAction:
+				return ente.SubscriptionUpdateResponse{Status: "requires_action", ClientSecret: newStripeSubscription.LatestInvoice.PaymentIntent.ClientSecret}, nil
+			case stripe.PaymentIntentStatusRequiresPaymentMethod:
+				inv := newStripeSubscription.LatestInvoice
+				client.Invoices.VoidInvoice(inv.ID, nil)
+				return ente.SubscriptionUpdateResponse{Status: "requires_payment_method"}, nil
+			}
+			return ente.SubscriptionUpdateResponse{}, stacktrace.Propagate(ente.ErrBadRequest, "")
+		}
 	}
 	return ente.SubscriptionUpdateResponse{Status: "success"}, nil
 
