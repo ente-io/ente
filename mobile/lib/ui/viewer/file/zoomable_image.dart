@@ -196,11 +196,7 @@ class _ZoomableImageState extends State<ZoomableImage> {
       _loadingFinalImage = true;
       getFileFromServer(_photo).then((file) {
         if (file != null) {
-          _onFinalImageLoaded(
-            Image.file(
-              file,
-              gaplessPlayback: true,
-            ).image,
+          _onFileLoaded(
             file,
           );
         } else {
@@ -242,8 +238,7 @@ class _ZoomableImageState extends State<ZoomableImage> {
             _isGIF(), // since on iOS GIFs playback only when origin-files are loaded
       ).then((file) {
         if (file != null && file.existsSync()) {
-          _onFinalImageLoaded(
-            Image.file(file).image,
+          _onFileLoaded(
             file,
           );
         } else {
@@ -283,7 +278,12 @@ class _ZoomableImageState extends State<ZoomableImage> {
     }
   }
 
-  void _onFinalImageLoaded(ImageProvider imageProvider, File file) {
+  void _onFileLoaded(File file) {
+    final imageProvider = Image.file(
+      file,
+      gaplessPlayback: true,
+    ).image;
+
     if (mounted) {
       precacheImage(
         imageProvider,
