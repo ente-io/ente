@@ -25,7 +25,6 @@
         "chokidar": "^3.5.3",
         "compare-versions": "^6.1.0",
         "electron-log": "^4.3.5",
-        "electron-reload": "^2.0.0-alpha.1",
         "electron-store": "^8.0.1",
         "electron-updater": "^4.3.8",
         "ffmpeg-static": "^5.1.0",

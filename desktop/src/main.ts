@@ -1,5 +1,4 @@
 import { app, BrowserWindow } from "electron";
-import electronReload from "electron-reload";
 import serveNextAt from "next-electron-server";
 import { initWatcher } from "./services/chokidar";
 import { isDev } from "./utils/common";
@@ -43,19 +42,6 @@ export const setIsUpdateAvailable = (value: boolean): void => {
 };
 
 /**
- * Hot reload the main process if anything changes in the source directory that
- * we're running from.
- *
- * In particular, this gets triggered when the `tsc -w` rebuilds JS files in the
- * `app/` directory when we change the TS files in the `src/` directory.
- */
-const setupMainHotReload = () => {
-    if (isDev) {
-        electronReload(__dirname, {});
-    }
-};
-
-/**
  * The URL where the renderer HTML is being served from.
  */
 export const rendererURL = "next://app";
@@ -77,7 +63,6 @@ const setupRendererServer = () => {
     serveNextAt(rendererURL);
 };
 
-setupMainHotReload();
 setupRendererServer();
 setupLogging(isDev);
 
