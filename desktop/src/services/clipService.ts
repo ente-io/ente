@@ -63,17 +63,9 @@ const TEXT_MODEL_SIZE_IN_BYTES = {
     onnx: 64173509, // 61.2 MB
 };
 
-const MODEL_SAVE_FOLDER = "models";
-
-function getModelSavePath(modelName: string) {
-    let userDataDir: string;
-    if (isDev) {
-        userDataDir = ".";
-    } else {
-        userDataDir = app.getPath("userData");
-    }
-    return path.join(userDataDir, MODEL_SAVE_FOLDER, modelName);
-}
+/** Return the path where the given {@link modelName} is meant to be saved */
+const getModelSavePath = (modelName: string) =>
+    path.join(app.getPath("userData"), "models", modelName);
 
 async function downloadModel(saveLocation: string, url: string) {
     // confirm that the save location exists

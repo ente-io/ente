@@ -95,7 +95,13 @@ export default function setupIpcComs(
         clearElectronStore();
     });
 
-    ipcMain.handle("get-path", (_, message) => {
+    ipcMain.handle("convert-to-jpeg", (_, fileData, filename) => {
+        return convertToJPEG(fileData, filename);
+    });
+
+    ipcMain.handle("open-log-dir", () => {
+        // [Note: Electron app paths]
+        //
         // By default, these paths are at the following locations:
         //
         // * macOS: `~/Library/Application Support/ente`
@@ -104,14 +110,6 @@ export default function setupIpcComs(
         // * Windows: C:\Users\<you>\AppData\Local\<Your App Name>
         //
         // https://www.electronjs.org/docs/latest/api/app
-        return app.getPath(message);
-    });
-
-    ipcMain.handle("convert-to-jpeg", (_, fileData, filename) => {
-        return convertToJPEG(fileData, filename);
-    });
-
-    ipcMain.handle("open-log-dir", () => {
         shell.openPath(app.getPath("logs"));
     });
 
