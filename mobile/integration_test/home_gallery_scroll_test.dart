@@ -7,10 +7,10 @@ import "package:photos/main.dart" as app;
 import "package:scrollable_positioned_list/scrollable_positioned_list.dart";
 
 void main() {
-  group("App test", () {
+  group("Home gallery scroll test", () {
     final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
     binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.fullyLive;
-    testWidgets("Demo test", (tester) async {
+    testWidgets("Home gallery scroll test", (tester) async {
       await runZonedGuarded(
         () async {
           ///Ignore exceptions thrown by the app for the test to pass
@@ -104,7 +104,7 @@ void main() {
               );
               await tester.pumpAndSettle();
             },
-            reportKey: 'scrolling_summary',
+            reportKey: 'home_gallery_scrolling_summary',
           );
         },
         (error, stack) {},
