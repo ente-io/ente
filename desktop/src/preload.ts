@@ -75,10 +75,27 @@ export function logError(error: Error, message: string, info?: string): void {
 
 // -
 
-export const convertBrowserStreamToNode = (
-    fileStream: ReadableStream<Uint8Array>,
-) => {
-    const reader = fileStream.getReader();
+/* preload: duplicated writeStream */
+/**
+ * Write a (web) ReadableStream to a file at the given {@link filePath}.
+ *
+ * The returned promise resolves when the write completes.
+ *
+ * @param filePath The local filesystem path where the file should be written.
+ * @param readableStream A [web
+ * ReadableStream](https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream)
+ */
+const writeStream = (filePath: string, readableStream: ReadableStream) =>
+    writeNodeStream(filePath, convertWebReadableStreamToNode(readableStream));
+
+/**
+ * Convert a Web ReadableStream into a Node.js ReadableStream
+ *
+ * This can be used to, for example, write a ReadableStream obtained via
+ * `net.fetch` into a file using the Node.js `fs` APIs
+ */
+const convertWebReadableStreamToNode = (readableStream: ReadableStream) => {
+    const reader = readableStream.getReader();
     const rs = new Readable();
 
     rs._read = async () => {
@@ -99,10 +116,10 @@ export const convertBrowserStreamToNode = (
     return rs;
 };
 
-export async function writeNodeStream(
+const writeNodeStream = async (
     filePath: string,
     fileStream: NodeJS.ReadableStream,
-) {
+) => {
     const writeable = fs.createWriteStream(filePath);
 
     fileStream.on("error", (error) => {
@@ -120,16 +137,7 @@ export async function writeNodeStream(
             reject(e);
         });
     });
-}
-
-/* preload: duplicated writeStream */
-export async function writeStream(
-    filePath: string,
-    fileStream: ReadableStream<Uint8Array>,
-) {
-    const readable = convertBrowserStreamToNode(fileStream);
-    await writeNodeStream(filePath, readable);
-}
+};
 
 // - Export
 
