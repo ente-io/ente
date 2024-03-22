@@ -343,14 +343,12 @@ class FaceMLDataDB {
   Future<Map<String, (int?, Uint8List)>> getFaceEmbeddingMap({
     double minScore = kMinHighQualityFaceScore,
     int minClarity = kLaplacianThreshold,
-    int maxRows = 20000,
+    int maxFaces = 20000,
+    int offset = 0,
+    int batchSize = 10000,
   }) async {
     _logger.info('reading as float');
     final db = await instance.database;
-
-    // Define the batch size
-    const batchSize = 10000;
-    int offset = 0;
 
     final Map<String, (int?, Uint8List)> result = {};
     while (true) {
@@ -373,7 +371,7 @@ class FaceMLDataDB {
         result[faceID] =
             (map[faceClusterId] as int?, map[faceEmbeddingBlob] as Uint8List);
       }
-      if (result.length >= 20000) {
+      if (result.length >= maxFaces) {
         break;
       }
       offset += batchSize;
@@ -419,10 +417,12 @@ class FaceMLDataDB {
     return result;
   }
 
-  Future<int> getTotalFaceCount() async {
+  Future<int> getTotalFaceCount({
+    double minFaceScore = kMinHighQualityFaceScore,
+  }) async {
     final db = await instance.database;
     final List<Map<String, dynamic>> maps = await db.rawQuery(
-      'SELECT COUNT(*) as count FROM $facesTable WHERE $faceScore > $kMinHighQualityFaceScore AND $faceBlur > $kLaplacianThreshold',
+      'SELECT COUNT(*) as count FROM $facesTable WHERE $faceScore > $minFaceScore AND $faceBlur > $kLaplacianThreshold',
     );
     return maps.first['count'] as int;
   }

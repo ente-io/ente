@@ -365,48 +365,98 @@ class FaceMlService {
 
   Future<void> clusterAllImages({
     double minFaceScore = kMinHighQualityFaceScore,
+    bool clusterInBuckets = false,
   }) async {
     _logger.info("`clusterAllImages()` called");
 
     try {
-      // Read all the embeddings from the database, in a map from faceID to embedding
-      final clusterStartTime = DateTime.now();
-      final faceIdToEmbedding = await FaceMLDataDB.instance.getFaceEmbeddingMap(
-        minScore: minFaceScore,
-      );
-      final gotFaceEmbeddingsTime = DateTime.now();
-      _logger.info(
-        'read embeddings ${faceIdToEmbedding.length} in ${gotFaceEmbeddingsTime.difference(clusterStartTime).inMilliseconds} ms',
-      );
+      if (clusterInBuckets) {
+        // Get a sense of the total number of faces in the database
+        final int totalFaces = await FaceMLDataDB.instance
+            .getTotalFaceCount(minFaceScore: minFaceScore);
 
-      // Read the creation times from Files DB, in a map from fileID to creation time
-      final fileIDToCreationTime =
-          await FilesDB.instance.getFileIDToCreationTime();
-      _logger.info('read creation times from FilesDB in '
-          '${DateTime.now().difference(gotFaceEmbeddingsTime).inMilliseconds} ms');
+        // read the creation times from Files DB, in a map from fileID to creation time
+        final fileIDToCreationTime =
+            await FilesDB.instance.getFileIDToCreationTime();
 
-      // Cluster the embeddings using the linear clustering algorithm, returning a map from faceID to clusterID
-      final faceIdToCluster = await FaceLinearClustering.instance.predict(
-        faceIdToEmbedding,
-        fileIDToCreationTime: fileIDToCreationTime,
-      );
-      if (faceIdToCluster == null) {
-        _logger.warning("faceIdToCluster is null");
-        return;
+        const int bucketSize = 10000;
+        const int offsetIncrement = 7500;
+        const int batchSize = 5000;
+        int offset = 0;
+
+        while (true) {
+          final faceIdToEmbeddingBucket =
+              await FaceMLDataDB.instance.getFaceEmbeddingMap(
+            minScore: minFaceScore,
+            maxFaces: bucketSize,
+            offset: offset,
+            batchSize: batchSize,
+          );
+          if (faceIdToEmbeddingBucket.isEmpty) {
+            break;
+          }
+          if (offset > totalFaces) {
+            _logger.warning(
+              'offset > totalFaces, this should ideally not happen. offset: $offset, totalFaces: $totalFaces',
+            );
+            break;
+          }
+
+          final faceIdToCluster = await FaceLinearClustering.instance.predict(
+            faceIdToEmbeddingBucket,
+            fileIDToCreationTime: fileIDToCreationTime,
+          );
+          if (faceIdToCluster == null) {
+            _logger.warning("faceIdToCluster is null");
+            return;
+          }
+
+          await FaceMLDataDB.instance
+              .updatePersonIDForFaceIDIFNotSet(faceIdToCluster);
+
+          offset += offsetIncrement;
+        }
+      } else {
+        // Read all the embeddings from the database, in a map from faceID to embedding
+        final clusterStartTime = DateTime.now();
+        final faceIdToEmbedding =
+            await FaceMLDataDB.instance.getFaceEmbeddingMap(
+          minScore: minFaceScore,
+        );
+        final gotFaceEmbeddingsTime = DateTime.now();
+        _logger.info(
+          'read embeddings ${faceIdToEmbedding.length} in ${gotFaceEmbeddingsTime.difference(clusterStartTime).inMilliseconds} ms',
+        );
+
+        // Read the creation times from Files DB, in a map from fileID to creation time
+        final fileIDToCreationTime =
+            await FilesDB.instance.getFileIDToCreationTime();
+        _logger.info('read creation times from FilesDB in '
+            '${DateTime.now().difference(gotFaceEmbeddingsTime).inMilliseconds} ms');
+
+        // Cluster the embeddings using the linear clustering algorithm, returning a map from faceID to clusterID
+        final faceIdToCluster = await FaceLinearClustering.instance.predict(
+          faceIdToEmbedding,
+          fileIDToCreationTime: fileIDToCreationTime,
+        );
+        if (faceIdToCluster == null) {
+          _logger.warning("faceIdToCluster is null");
+          return;
+        }
+        final clusterDoneTime = DateTime.now();
+        _logger.info(
+          'done with clustering ${faceIdToEmbedding.length} in ${clusterDoneTime.difference(clusterStartTime).inSeconds} seconds ',
+        );
+
+        // Store the updated clusterIDs in the database
+        _logger.info(
+          'Updating ${faceIdToCluster.length} FaceIDs with clusterIDs in the DB',
+        );
+        await FaceMLDataDB.instance
+            .updatePersonIDForFaceIDIFNotSet(faceIdToCluster);
+        _logger.info('Done updating FaceIDs with clusterIDs in the DB, in '
+            '${DateTime.now().difference(clusterDoneTime).inSeconds} seconds');
       }
-      final clusterDoneTime = DateTime.now();
-      _logger.info(
-        'done with clustering ${faceIdToEmbedding.length} in ${clusterDoneTime.difference(clusterStartTime).inSeconds} seconds ',
-      );
-
-      // Store the updated clusterIDs in the database
-      _logger.info(
-        'Updating ${faceIdToCluster.length} FaceIDs with clusterIDs in the DB',
-      );
-      await FaceMLDataDB.instance
-          .updatePersonIDForFaceIDIFNotSet(faceIdToCluster);
-      _logger.info('Done updating FaceIDs with clusterIDs in the DB, in '
-          '${DateTime.now().difference(clusterDoneTime).inSeconds} seconds');
     } catch (e, s) {
       _logger.severe("`clusterAllImages` failed", e, s);
     }
@@ -522,7 +572,9 @@ class FaceMlService {
           _logger.info(
             "indexAllImages() analyzed $fileAnalyzedCount images, cooldown for 1 minute",
           );
-          await Future.delayed(const Duration(minutes: 1));
+          await Future.delayed(const Duration(minutes: 1), () {
+            _logger.info("indexAllImages() cooldown finished");
+          });
         }
       }
 
