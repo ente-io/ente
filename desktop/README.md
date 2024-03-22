@@ -28,7 +28,7 @@ Install dependencies
 yarn install
 ```
 
-Run in development mode (with hot reload)
+Run in development mode (supports hot reload for the renderer process)
 
 ```sh
 yarn dev
