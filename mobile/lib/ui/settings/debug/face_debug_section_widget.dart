@@ -8,9 +8,10 @@ import "package:photos/events/people_changed_event.dart";
 import "package:photos/extensions/stop_watch.dart";
 import "package:photos/face/db.dart";
 import "package:photos/face/model/person.dart";
+import "package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart";
 import 'package:photos/services/machine_learning/face_ml/face_ml_service.dart';
 import 'package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart';
-import "package:photos/services/search_service.dart";
+// import "package:photos/services/search_service.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/expandable_menu_item_widget.dart';
@@ -108,41 +109,47 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
-          onTap: () async {},
-        ),
-        MenuItemWidget(
-          captionedTextWidget: const CaptionedTextWidget(
-            title: "Analyze file ID 25728869",
-          ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
-          trailingIcon: Icons.chevron_right_outlined,
-          trailingIconIsMuted: true,
           onTap: () async {
-            try {
-              final enteFile = await SearchService.instance.getAllFiles().then(
-                    (value) => value.firstWhere(
-                      (element) => element.uploadedFileID == 25728869,
-                    ),
-                  );
-              _logger.info(
-                'File with ID ${enteFile.uploadedFileID} has name ${enteFile.displayName}',
-              );
-              FaceMlService.instance.isImageIndexRunning = true;
-              final result = await FaceMlService.instance
-                  .analyzeImageInSingleIsolate(enteFile);
-              if (result != null) {
-                final resultJson = result.toJsonString();
-                _logger.info('result: $resultJson');
-              }
-              FaceMlService.instance.isImageIndexRunning = false;
-            } catch (e, s) {
-              _logger.severe('indexing failed ', e, s);
-              await showGenericErrorDialog(context: context, error: e);
-            } finally {
-              FaceMlService.instance.isImageIndexRunning = false;
-            }
+            final faces75 = await FaceMLDataDB.instance
+                .getTotalFaceCount(minFaceScore: 0.75);
+            final faces78 = await FaceMLDataDB.instance
+                .getTotalFaceCount(minFaceScore: kMinHighQualityFaceScore);
+            showShortToast(context, "Faces75: $faces75, Faces78: $faces78");
           },
         ),
+        // MenuItemWidget(
+        //   captionedTextWidget: const CaptionedTextWidget(
+        //     title: "Analyze file ID 25728869",
+        //   ),
+        //   pressedColor: getEnteColorScheme(context).fillFaint,
+        //   trailingIcon: Icons.chevron_right_outlined,
+        //   trailingIconIsMuted: true,
+        //   onTap: () async {
+        //     try {
+        //       final enteFile = await SearchService.instance.getAllFiles().then(
+        //             (value) => value.firstWhere(
+        //               (element) => element.uploadedFileID == 25728869,
+        //             ),
+        //           );
+        //       _logger.info(
+        //         'File with ID ${enteFile.uploadedFileID} has name ${enteFile.displayName}',
+        //       );
+        //       FaceMlService.instance.isImageIndexRunning = true;
+        //       final result = await FaceMlService.instance
+        //           .analyzeImageInSingleIsolate(enteFile);
+        //       if (result != null) {
+        //         final resultJson = result.toJsonString();
+        //         _logger.info('result: $resultJson');
+        //       }
+        //       FaceMlService.instance.isImageIndexRunning = false;
+        //     } catch (e, s) {
+        //       _logger.severe('indexing failed ', e, s);
+        //       await showGenericErrorDialog(context: context, error: e);
+        //     } finally {
+        //       FaceMlService.instance.isImageIndexRunning = false;
+        //     }
+        //   },
+        // ),
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
             title: "Run Clustering",
