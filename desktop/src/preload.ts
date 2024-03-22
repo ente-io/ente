@@ -28,18 +28,12 @@
  */
 
 import { contextBridge, ipcRenderer } from "electron";
-import { existsSync } from "fs";
+import { createWriteStream, existsSync } from "node:fs";
+import * as fs from "node:fs/promises";
+import { Readable } from "node:stream";
 import path from "path";
-import * as fs from "promise-fs";
-import { Readable } from "stream";
 import { deleteDiskCache, openDiskCache } from "./api/cache";
 import { logToDisk, openLogDirectory } from "./api/common";
-import {
-    checkExistsAndCreateDir,
-    exists,
-    saveFileToDisk,
-    saveStreamToDisk,
-} from "./api/export";
 import { runFFmpegCmd } from "./api/ffmpeg";
 import { getDirFiles } from "./api/fs";
 import { convertToJPEG, generateImageThumbnail } from "./api/imageProcessor";
@@ -67,8 +61,12 @@ import {
 } from "./api/watch";
 import { setupLogging } from "./utils/logging";
 
-/* Some of the code below has been duplicated to make this file self contained.
-Enhancement: consider alternatives */
+/*
+  Some of the code below has been duplicated to make this file self contained
+  (see the documentation at the top of why it needs to be a single file).
+
+  Enhancement: consider alternatives
+*/
 
 /* preload: duplicated logError */
 export function logError(error: Error, message: string, info?: string): void {
@@ -77,10 +75,27 @@ export function logError(error: Error, message: string, info?: string): void {
 
 // -
 
-export const convertBrowserStreamToNode = (
-    fileStream: ReadableStream<Uint8Array>,
-) => {
-    const reader = fileStream.getReader();
+/* preload: duplicated writeStream */
+/**
+ * Write a (web) ReadableStream to a file at the given {@link filePath}.
+ *
+ * The returned promise resolves when the write completes.
+ *
+ * @param filePath The local filesystem path where the file should be written.
+ * @param readableStream A [web
+ * ReadableStream](https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream)
+ */
+const writeStream = (filePath: string, readableStream: ReadableStream) =>
+    writeNodeStream(filePath, convertWebReadableStreamToNode(readableStream));
+
+/**
+ * Convert a Web ReadableStream into a Node.js ReadableStream
+ *
+ * This can be used to, for example, write a ReadableStream obtained via
+ * `net.fetch` into a file using the Node.js `fs` APIs
+ */
+const convertWebReadableStreamToNode = (readableStream: ReadableStream) => {
+    const reader = readableStream.getReader();
     const rs = new Readable();
 
     rs._read = async () => {
@@ -101,11 +116,11 @@ export const convertBrowserStreamToNode = (
     return rs;
 };
 
-export async function writeNodeStream(
+const writeNodeStream = async (
     filePath: string,
     fileStream: NodeJS.ReadableStream,
-) {
-    const writeable = fs.createWriteStream(filePath);
+) => {
+    const writeable = createWriteStream(filePath);
 
     fileStream.on("error", (error) => {
         writeable.destroy(error); // Close the writable stream with an error
@@ -115,23 +130,26 @@ export async function writeNodeStream(
 
     await new Promise((resolve, reject) => {
         writeable.on("finish", resolve);
-        writeable.on("error", async (e) => {
+        writeable.on("error", async (e: unknown) => {
             if (existsSync(filePath)) {
                 await fs.unlink(filePath);
             }
             reject(e);
         });
     });
-}
+};
 
-/* preload: duplicated writeStream */
-export async function writeStream(
-    filePath: string,
-    fileStream: ReadableStream<Uint8Array>,
-) {
-    const readable = convertBrowserStreamToNode(fileStream);
-    await writeNodeStream(filePath, readable);
-}
+// - Export
+
+const exists = (path: string) => existsSync(path);
+
+const checkExistsAndCreateDir = (dirPath: string) =>
+    fs.mkdir(dirPath, { recursive: true });
+
+const saveStreamToDisk = writeStream;
+
+const saveFileToDisk = (path: string, contents: string) =>
+    fs.writeFile(path, contents);
 
 // -
 
@@ -154,9 +172,7 @@ async function moveFile(
     }
     // check if destination folder exists
     const destinationFolder = path.dirname(destinationPath);
-    if (!existsSync(destinationFolder)) {
-        await fs.mkdir(destinationFolder, { recursive: true });
-    }
+    await fs.mkdir(destinationFolder, { recursive: true });
     await fs.rename(sourcePath, destinationPath);
 }
 
@@ -183,7 +199,8 @@ async function deleteFolder(folderPath: string): Promise<void> {
     if (!existsSync(folderPath)) {
         return;
     }
-    if (!fs.statSync(folderPath).isDirectory()) {
+    const stat = await fs.stat(folderPath);
+    if (!stat.isDirectory()) {
         throw new Error("Path is not a folder");
     }
     // check if folder is empty
@@ -201,17 +218,18 @@ async function rename(oldPath: string, newPath: string) {
     await fs.rename(oldPath, newPath);
 }
 
-function deleteFile(filePath: string): void {
+const deleteFile = async (filePath: string) => {
     if (!existsSync(filePath)) {
         return;
     }
-    if (!fs.statSync(filePath).isFile()) {
+    const stat = await fs.stat(filePath);
+    if (!stat.isFile()) {
         throw new Error("Path is not a file");
     }
-    fs.rmSync(filePath);
-}
+    return fs.rm(filePath);
+};
 
-// -
+// - ML
 
 /* preload: duplicated Model */
 export enum Model {
@@ -315,7 +333,7 @@ const parseExecError = (err: any) => {
     }
 };
 
-// -
+// - General
 
 const selectDirectory = async (): Promise<string> => {
     try {
@@ -349,7 +367,7 @@ const clearElectronStore = () => {
     ipcRenderer.send("clear-electron-store");
 };
 
-// -
+// - App update
 
 const updateAndRestart = () => {
     ipcRenderer.send("update-and-restart");
@@ -410,10 +428,12 @@ setupLogging();
 // running out of memory, causing the app to crash as it copies it over across
 // the processes.
 contextBridge.exposeInMainWorld("ElectronAPIs", {
+    // - Export
     exists,
     checkExistsAndCreateDir,
     saveStreamToDisk,
     saveFileToDisk,
+
     selectDirectory,
     clearElectronStore,
     readTextFile,
@@ -438,20 +458,29 @@ contextBridge.exposeInMainWorld("ElectronAPIs", {
     updateWatchMappingIgnoredFiles,
     logToDisk,
     convertToJPEG,
-    openLogDirectory,
     registerUpdateEventListener,
-    updateAndRestart,
-    skipAppUpdate,
-    getAppVersion,
+
     runFFmpegCmd,
-    muteUpdateNotification,
     generateImageThumbnail,
     registerForegroundEventListener,
-    openDirectory,
     moveFile,
     deleteFolder,
     rename,
     deleteFile,
+
+    // General
+    getAppVersion,
+    openDirectory,
+
+    // Logging
+    openLogDirectory,
+
+    // - App update
+    updateAndRestart,
+    skipAppUpdate,
+    muteUpdateNotification,
+
+    // - ML
     computeImageEmbedding,
     computeTextEmbedding,
 });

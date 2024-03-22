@@ -1,6 +1,6 @@
 import getFolderSize from "get-folder-size";
-import path from "path";
-import { close, open, readdir, stat, unlink, utimes } from "promise-fs";
+import * as fs from "node:fs/promises";
+import * as path from "node:path";
 import { logError } from "../services/logging";
 
 export interface LeastRecentlyUsedResult {
@@ -12,19 +12,10 @@ class DiskLRUService {
     private isRunning: Promise<any> = null;
     private reRun: boolean = false;
 
-    async touch(path: string) {
-        try {
-            const time = new Date();
-            await utimes(path, time, time);
-        } catch (err) {
-            logError(err, "utimes method touch failed");
-            try {
-                await close(await open(path, "w"));
-            } catch (e) {
-                logError(e, "open-close method touch failed");
-            }
-            // log and ignore
-        }
+    /** Mark "use" of a given file by updating its modified time */
+    async markUse(path: string) {
+        const now = new Date();
+        await fs.utimes(path, now, now);
     }
 
     enforceCacheSizeLimit(cacheDir: string, maxSize: number) {
@@ -53,7 +44,7 @@ class DiskLRUService {
                         const leastRecentlyUsed =
                             await this.findLeastRecentlyUsed(cacheDir);
                         try {
-                            await unlink(leastRecentlyUsed.path);
+                            await fs.unlink(leastRecentlyUsed.path);
                         } catch (e) {
                             // ENOENT: File not found
                             // which can be ignored as we are trying to delete the file anyway
@@ -81,16 +72,15 @@ class DiskLRUService {
     ): Promise<LeastRecentlyUsedResult> {
         result = result || { atime: new Date(), path: "" };
 
-        const files = await readdir(dir);
+        const files = await fs.readdir(dir);
         for (const file of files) {
             const newBase = path.join(dir, file);
-            const stats = await stat(newBase);
-            if (stats.isDirectory()) {
+            const st = await fs.stat(newBase);
+            if (st.isDirectory()) {
                 result = await this.findLeastRecentlyUsed(newBase, result);
             } else {
-                const { atime } = await stat(newBase);
-
-                if (atime.getTime() < result.atime.getTime()) {
+                const { atime } = st;
+                if (st.atime.getTime() < result.atime.getTime()) {
                     result = {
                         atime,
                         path: newBase,

@@ -1,8 +1,8 @@
 import { app, BrowserWindow, Menu, nativeImage, Tray } from "electron";
 import ElectronLog from "electron-log";
+import { existsSync } from "node:fs";
 import os from "os";
 import path from "path";
-import { existsSync } from "promise-fs";
 import util from "util";
 import { rendererURL } from "../main";
 import { setupAutoUpdater } from "../services/appUpdater";

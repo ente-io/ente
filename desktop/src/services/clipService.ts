@@ -1,17 +1,15 @@
-import { app } from "electron";
 import * as log from "electron-log";
+import { app, net } from "electron/main";
 import { existsSync } from "fs";
-import fs from "fs/promises";
-import fetch from "node-fetch";
-import path from "path";
-import { readFile } from "promise-fs";
+import * as fs from "node:fs/promises";
+import * as path from "node:path";
 import util from "util";
 import { CustomErrors } from "../constants/errors";
 import { Model } from "../types";
 import Tokenizer from "../utils/clip-bpe-ts/mod";
 import { isDev } from "../utils/common";
 import { getPlatform } from "../utils/common/platform";
-import { writeNodeStream } from "./fs";
+import { writeStream } from "./fs";
 import { logErrorSentry } from "./sentry";
 const shellescape = require("any-shell-escape");
 const execAsync = util.promisify(require("child_process").exec);
@@ -80,13 +78,11 @@ function getModelSavePath(modelName: string) {
 async function downloadModel(saveLocation: string, url: string) {
     // confirm that the save location exists
     const saveDir = path.dirname(saveLocation);
-    if (!existsSync(saveDir)) {
-        log.info("creating model save dir");
-        await fs.mkdir(saveDir, { recursive: true });
-    }
+    await fs.mkdir(saveDir, { recursive: true });
     log.info("downloading clip model");
-    const resp = await fetch(url);
-    await writeNodeStream(saveLocation, resp.body);
+    const res = await net.fetch(url);
+    if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
+    await writeStream(saveLocation, res.body);
     log.info("clip model downloaded");
 }
 

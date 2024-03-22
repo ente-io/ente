@@ -1,16 +1,14 @@
 import log from "electron-log";
 import pathToFfmpeg from "ffmpeg-static";
-import { existsSync } from "fs";
-import { readFile, rmSync, writeFile } from "promise-fs";
+import { existsSync } from "node:fs";
+import * as fs from "node:fs/promises";
 import util from "util";
-import { promiseWithTimeout } from "../utils/common";
+import { CustomErrors } from "../constants/errors";
 import { generateTempFilePath, getTempDirPath } from "../utils/temp";
 import { logErrorSentry } from "./sentry";
 const shellescape = require("any-shell-escape");
 
 const execAsync = util.promisify(require("child_process").exec);
-
-const FFMPEG_EXECUTION_WAIT_TIME = 30 * 1000;
 
 const INPUT_PATH_PLACEHOLDER = "INPUT";
 const FFMPEG_PLACEHOLDER = "FFMPEG";
@@ -70,10 +68,7 @@ export async function runFFmpegCmd(
         if (dontTimeout) {
             await execAsync(escapedCmd);
         } else {
-            await promiseWithTimeout(
-                execAsync(escapedCmd),
-                FFMPEG_EXECUTION_WAIT_TIME,
-            );
+            await promiseWithTimeout(execAsync(escapedCmd), 30 * 1000);
         }
         if (!existsSync(tempOutputFilePath)) {
             throw new Error("ffmpeg output file not found");
@@ -85,14 +80,14 @@ export async function runFFmpegCmd(
             "ms",
         );
 
-        const outputFile = await readFile(tempOutputFilePath);
+        const outputFile = await fs.readFile(tempOutputFilePath);
         return new Uint8Array(outputFile);
     } catch (e) {
         logErrorSentry(e, "ffmpeg run command error");
         throw e;
     } finally {
         try {
-            rmSync(tempOutputFilePath, { force: true });
+            await fs.rm(tempOutputFilePath, { force: true });
         } catch (e) {
             logErrorSentry(e, "failed to remove tempOutputFile");
         }
@@ -114,7 +109,7 @@ const ffmpegBinaryPath = () => {
 
 export async function writeTempFile(fileStream: Uint8Array, fileName: string) {
     const tempFilePath = await generateTempFilePath(fileName);
-    await writeFile(tempFilePath, fileStream);
+    await fs.writeFile(tempFilePath, fileStream);
     return tempFilePath;
 }
 
@@ -126,5 +121,29 @@ export async function deleteTempFile(tempFilePath: string) {
             "tried to delete a non temp file",
         );
     }
-    rmSync(tempFilePath, { force: true });
+    await fs.rm(tempFilePath, { force: true });
 }
+
+export const promiseWithTimeout = async <T>(
+    request: Promise<T>,
+    timeout: number,
+): Promise<T> => {
+    const timeoutRef: {
+        current: NodeJS.Timeout;
+    } = { current: null };
+    const rejectOnTimeout = new Promise<null>((_, reject) => {
+        timeoutRef.current = setTimeout(
+            () => reject(Error(CustomErrors.WAIT_TIME_EXCEEDED)),
+            timeout,
+        );
+    });
+    const requestWithTimeOutCancellation = async () => {
+        const resp = await request;
+        clearTimeout(timeoutRef.current);
+        return resp;
+    };
+    return await Promise.race([
+        requestWithTimeOutCancellation(),
+        rejectOnTimeout,
+    ]);
+};

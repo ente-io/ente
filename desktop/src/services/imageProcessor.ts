@@ -2,9 +2,8 @@ import { exec } from "child_process";
 import util from "util";
 
 import log from "electron-log";
-import { existsSync, rmSync } from "fs";
+import * as fs from "node:fs/promises";
 import path from "path";
-import { readFile, writeFile } from "promise-fs";
 import { CustomErrors } from "../constants/errors";
 import { isDev } from "../utils/common";
 import { isPlatform } from "../utils/common/platform";
@@ -88,28 +87,22 @@ export async function convertToJPEG(
         tempInputFilePath = await generateTempFilePath(filename);
         tempOutputFilePath = await generateTempFilePath("output.jpeg");
 
-        await writeFile(tempInputFilePath, fileData);
+        await fs.writeFile(tempInputFilePath, fileData);
 
         await runConvertCommand(tempInputFilePath, tempOutputFilePath);
 
-        if (!existsSync(tempOutputFilePath)) {
-            throw new Error("heic convert output file not found");
-        }
-        const convertedFileData = new Uint8Array(
-            await readFile(tempOutputFilePath),
-        );
-        return convertedFileData;
+        return new Uint8Array(await fs.readFile(tempOutputFilePath));
     } catch (e) {
         logErrorSentry(e, "failed to convert heic");
         throw e;
     } finally {
         try {
-            rmSync(tempInputFilePath, { force: true });
+            await fs.rm(tempInputFilePath, { force: true });
         } catch (e) {
             logErrorSentry(e, "failed to remove tempInputFile");
         }
         try {
-            rmSync(tempOutputFilePath, { force: true });
+            await fs.rm(tempOutputFilePath, { force: true });
         } catch (e) {
             logErrorSentry(e, "failed to remove tempOutputFile");
         }
@@ -183,10 +176,7 @@ export async function generateImageThumbnail(
                 quality,
             );
 
-            if (!existsSync(tempOutputFilePath)) {
-                throw new Error("output thumbnail file not found");
-            }
-            thumbnail = new Uint8Array(await readFile(tempOutputFilePath));
+            thumbnail = new Uint8Array(await fs.readFile(tempOutputFilePath));
             quality -= 10;
         } while (thumbnail.length > maxSize && quality > MIN_QUALITY);
         return thumbnail;
@@ -195,7 +185,7 @@ export async function generateImageThumbnail(
         throw e;
     } finally {
         try {
-            rmSync(tempOutputFilePath, { force: true });
+            await fs.rm(tempOutputFilePath, { force: true });
         } catch (e) {
             logErrorSentry(e, "failed to remove tempOutputFile");
         }

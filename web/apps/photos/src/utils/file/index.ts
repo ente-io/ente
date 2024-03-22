@@ -51,10 +51,7 @@ import {
 import { FileTypeInfo } from "types/upload";
 import { isPlaybackPossible } from "utils/photoFrame";
 
-import {
-    default as ElectronAPIs,
-    default as ElectronFSService,
-} from "@ente/shared/electron";
+import { default as ElectronAPIs } from "@ente/shared/electron";
 import { downloadUsingAnchor } from "@ente/shared/utils";
 import { t } from "i18next";
 import imageProcessor from "services/imageProcessor";
@@ -801,7 +798,7 @@ export async function downloadFileDesktop(
                 videoStream,
             );
         } catch (e) {
-            ElectronFSService.deleteFile(
+            await ElectronAPIs.deleteFile(
                 getFileExportPath(downloadPath, imageExportName),
             );
             throw e;

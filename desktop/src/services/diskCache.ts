@@ -1,5 +1,6 @@
-import path from "path";
-import { existsSync, stat, unlink } from "promise-fs";
+import { existsSync } from "node:fs";
+import * as fs from "node:fs/promises";
+import * as path from "node:path";
 import DiskLRUService from "../services/diskLRU";
 import { LimitedCache } from "../types/cache";
 import { getFileStream, writeStream } from "./fs";
@@ -28,19 +29,19 @@ export class DiskCache implements LimitedCache {
     ): Promise<Response> {
         const cachePath = path.join(this.cacheBucketDir, cacheKey);
         if (existsSync(cachePath)) {
-            const fileStats = await stat(cachePath);
+            const fileStats = await fs.stat(cachePath);
             if (sizeInBytes && fileStats.size !== sizeInBytes) {
                 logError(
                     Error(),
                     "Cache key exists but size does not match. Deleting cache key.",
                 );
-                unlink(cachePath).catch((e) => {
+                fs.unlink(cachePath).catch((e) => {
                     if (e.code === "ENOENT") return;
                     logError(e, "Failed to delete cache key");
                 });
                 return undefined;
             }
-            DiskLRUService.touch(cachePath);
+            DiskLRUService.markUse(cachePath);
             return new Response(await getFileStream(cachePath));
         } else {
             return undefined;
@@ -49,7 +50,7 @@ export class DiskCache implements LimitedCache {
     async delete(cacheKey: string): Promise<boolean> {
         const cachePath = path.join(this.cacheBucketDir, cacheKey);
         if (existsSync(cachePath)) {
-            await unlink(cachePath);
+            await fs.unlink(cachePath);
             return true;
         } else {
             return false;

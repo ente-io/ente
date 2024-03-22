@@ -1,7 +1,7 @@
-import { existsSync } from "fs";
 import StreamZip from "node-stream-zip";
-import path from "path";
-import * as fs from "promise-fs";
+import { createWriteStream, existsSync } from "node:fs";
+import * as fs from "node:fs/promises";
+import * as path from "node:path";
 import { Readable } from "stream";
 import { ElectronFile } from "../types";
 import { logError } from "./logging";
@@ -212,7 +212,7 @@ export async function writeNodeStream(
     filePath: string,
     fileStream: NodeJS.ReadableStream,
 ) {
-    const writeable = fs.createWriteStream(filePath);
+    const writeable = createWriteStream(filePath);
 
     fileStream.on("error", (error) => {
         writeable.destroy(error); // Close the writable stream with an error
@@ -222,7 +222,7 @@ export async function writeNodeStream(
 
     await new Promise((resolve, reject) => {
         writeable.on("finish", resolve);
-        writeable.on("error", async (e) => {
+        writeable.on("error", async (e: unknown) => {
             if (existsSync(filePath)) {
                 await fs.unlink(filePath);
             }
