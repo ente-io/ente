@@ -33,7 +33,6 @@
         "html-entities": "^2.4.0",
         "jpeg-js": "^0.4.4",
         "next-electron-server": "^1",
-        "node-fetch": "^2.6.7",
         "node-stream-zip": "^1.15.0",
         "onnxruntime-node": "^1.16.3",
         "promise-fs": "^2.1.1"
