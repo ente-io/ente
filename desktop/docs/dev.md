@@ -4,14 +4,16 @@
 
 ### yarn dev
 
-Launch the app in development mode
+Launch the app in development mode:
 
--   Runs a development server for the renderer, with HMR.
+-   Transpiles the files in `src/` and starts the main process.
+
+-   Runs a development server for the renderer (with hot module reload).
 
 -   Starts tsc in watch mode to recompile the JS files used by the main process.
-
--   Starts the main process, reloading it on changes to the the TS files in
-    `src/`.
+    Note that the main process is not restarted on changes automatically, you'll
+    still need to restart the app manually – running tsc in watch mode is still
+    useful to notice any errors.
 
 ### yarn build
 

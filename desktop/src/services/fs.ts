@@ -25,16 +25,14 @@ export const getDirFilePaths = async (dirPath: string) => {
     return files;
 };
 
-export const getFileStream = async (filePath: string) => {
+const getFileStream = async (filePath: string) => {
     const file = await fs.open(filePath, "r");
     let offset = 0;
     const readableStream = new ReadableStream<Uint8Array>({
         async pull(controller) {
             try {
                 const buff = new Uint8Array(FILE_STREAM_CHUNK_SIZE);
-                // original types were not working correctly
-                const bytesRead = (await fs.read(
-                    file,
+                const bytesRead = (await file.read(
                     buff,
                     0,
                     FILE_STREAM_CHUNK_SIZE,
@@ -43,16 +41,16 @@ export const getFileStream = async (filePath: string) => {
                 offset += bytesRead;
                 if (bytesRead === 0) {
                     controller.close();
-                    await fs.close(file);
+                    await file.close();
                 } else {
                     controller.enqueue(buff.slice(0, bytesRead));
                 }
             } catch (e) {
-                await fs.close(file);
+                await file.close();
             }
         },
         async cancel() {
-            await fs.close(file);
+            await file.close();
         },
     });
     return readableStream;
