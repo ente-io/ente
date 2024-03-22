@@ -94,10 +94,6 @@ export async function handleDockIconHideOnAutoLaunch() {
     }
 }
 
-export function enableSharedArrayBufferSupport() {
-    app.commandLine.appendSwitch("enable-features", "SharedArrayBuffer");
-}
-
 export function logSystemInfo() {
     const systemVersion = process.getSystemVersion();
     const osName = process.platform;

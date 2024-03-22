@@ -1,4 +1,3 @@
-import { LimitedCache } from "@ente/shared/storage/cacheStorage/types";
 import { ElectronFile } from "@ente/shared/upload/types";
 import { WatchMapping } from "@ente/shared/watchFolder/types";
 
@@ -63,11 +62,6 @@ export interface ElectronAPIsType {
     clearElectronStore: () => void;
     setEncryptionKey: (encryptionKey: string) => Promise<void>;
     getEncryptionKey: () => Promise<string>;
-    openDiskCache: (
-        cacheName: string,
-        cacheLimitInBytes?: number,
-    ) => Promise<LimitedCache>;
-    deleteDiskCache: (cacheName: string) => Promise<boolean>;
     logToDisk: (msg: string) => void;
     convertToJPEG: (
         fileData: Uint8Array,

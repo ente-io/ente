@@ -1,4 +1,4 @@
-import { app } from "electron";
+import { app } from "electron/main";
 import { existsSync } from "node:fs";
 import * as fs from "node:fs/promises";
 import path from "path";

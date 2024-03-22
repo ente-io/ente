@@ -32,7 +32,6 @@ import { createWriteStream, existsSync } from "node:fs";
 import * as fs from "node:fs/promises";
 import { Readable } from "node:stream";
 import path from "path";
-import { deleteDiskCache, openDiskCache } from "./api/cache";
 import { logToDisk, openLogDirectory } from "./api/common";
 import { runFFmpegCmd } from "./api/ffmpeg";
 import { getDirFiles } from "./api/fs";
@@ -446,8 +445,6 @@ contextBridge.exposeInMainWorld("ElectronAPIs", {
     setToUploadCollection,
     getEncryptionKey,
     setEncryptionKey,
-    openDiskCache,
-    deleteDiskCache,
     getDirFiles,
     getWatchMappings,
     addWatchMapping,
