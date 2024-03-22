@@ -110,9 +110,16 @@ const increaseDiskCache = () => {
  * versions.
  */
 const deleteLegacyDiskCacheDirIfExists = async () => {
-    // The existing code was passing "cache" as a parameter to getPath. This was
-    // incorrect, cache is not a valid value. However, we replicate that
-    // behaviour so that we get back the same path that the old got was getting.
+    // The existing code was passing "cache" as a parameter to getPath. This is
+    // incorrect if we go by the types - "cache" is not a valid value for the
+    // parameter to `app.getPath`.
+    //
+    // It might be an issue in the types, since at runtime it seems to work. For
+    // example, on macOS I get `~/Library/Caches`.
+    //
+    // Irrespective, we replicate the original behaviour so that we get back the
+    // same path that the old got was getting.
+    //
     // @ts-expect-error
     const cacheDir = path.join(app.getPath("cache"), "ente");
     if (existsSync(cacheDir)) {
