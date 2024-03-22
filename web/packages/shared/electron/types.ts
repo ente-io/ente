@@ -96,7 +96,7 @@ export interface ElectronAPIsType {
     openDirectory: (dirPath: string) => Promise<void>;
     moveFile: (oldPath: string, newPath: string) => Promise<void>;
     deleteFolder: (path: string) => Promise<void>;
-    deleteFile: (path: string) => void;
+    deleteFile: (path: string) => Promise<void>;
     rename: (oldPath: string, newPath: string) => Promise<void>;
     computeImageEmbedding: (
         model: Model,

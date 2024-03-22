@@ -28,10 +28,10 @@
  */
 
 import { contextBridge, ipcRenderer } from "electron";
-import { existsSync } from "fs";
+import { createWriteStream, existsSync } from "node:fs";
+import * as fs from "node:fs/promises";
+import { Readable } from "node:stream";
 import path from "path";
-import * as fs from "promise-fs";
-import { Readable } from "stream";
 import { deleteDiskCache, openDiskCache } from "./api/cache";
 import { logToDisk, openLogDirectory } from "./api/common";
 import { runFFmpegCmd } from "./api/ffmpeg";
@@ -120,7 +120,7 @@ const writeNodeStream = async (
     filePath: string,
     fileStream: NodeJS.ReadableStream,
 ) => {
-    const writeable = fs.createWriteStream(filePath);
+    const writeable = createWriteStream(filePath);
 
     fileStream.on("error", (error) => {
         writeable.destroy(error); // Close the writable stream with an error
@@ -130,7 +130,7 @@ const writeNodeStream = async (
 
     await new Promise((resolve, reject) => {
         writeable.on("finish", resolve);
-        writeable.on("error", async (e) => {
+        writeable.on("error", async (e: unknown) => {
             if (existsSync(filePath)) {
                 await fs.unlink(filePath);
             }
@@ -141,10 +141,10 @@ const writeNodeStream = async (
 
 // - Export
 
-const exists = (path: string) => fs.existsSync(path);
+const exists = (path: string) => existsSync(path);
 
 const checkExistsAndCreateDir = async (dirPath: string) => {
-    if (!fs.existsSync(dirPath)) {
+    if (!existsSync(dirPath)) {
         await fs.mkdir(dirPath);
     }
 };
@@ -204,7 +204,8 @@ async function deleteFolder(folderPath: string): Promise<void> {
     if (!existsSync(folderPath)) {
         return;
     }
-    if (!fs.statSync(folderPath).isDirectory()) {
+    const stat = await fs.stat(folderPath);
+    if (!stat.isDirectory()) {
         throw new Error("Path is not a folder");
     }
     // check if folder is empty
@@ -222,15 +223,16 @@ async function rename(oldPath: string, newPath: string) {
     await fs.rename(oldPath, newPath);
 }
 
-function deleteFile(filePath: string): void {
+const deleteFile = async (filePath: string) => {
     if (!existsSync(filePath)) {
         return;
     }
-    if (!fs.statSync(filePath).isFile()) {
+    const stat = await fs.stat(filePath);
+    if (!stat.isFile()) {
         throw new Error("Path is not a file");
     }
-    fs.rmSync(filePath);
-}
+    return fs.rm(filePath);
+};
 
 // - ML
 
