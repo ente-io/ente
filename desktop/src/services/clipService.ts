@@ -357,7 +357,7 @@ export async function computeONNXTextEmbedding(
 }
 
 async function getRGBData(inputFilePath: string) {
-    const jpegData = await readFile(inputFilePath);
+    const jpegData = await fs.readFile(inputFilePath);
     let rawImageData;
     try {
         rawImageData = jpeg.decode(jpegData, {
