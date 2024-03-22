@@ -34,15 +34,12 @@
         "jpeg-js": "^0.4.4",
         "next-electron-server": "^1",
         "node-stream-zip": "^1.15.0",
-        "onnxruntime-node": "^1.16.3",
-        "promise-fs": "^2.1.1"
+        "onnxruntime-node": "^1.16.3"
     },
     "devDependencies": {
         "@types/auto-launch": "^5.0.2",
         "@types/ffmpeg-static": "^3.0.1",
         "@types/get-folder-size": "^2.0.0",
-        "@types/node-fetch": "^2.6.2",
-        "@types/promise-fs": "^2.1.1",
         "@typescript-eslint/eslint-plugin": "^7",
         "@typescript-eslint/parser": "^7",
         "concurrently": "^8",

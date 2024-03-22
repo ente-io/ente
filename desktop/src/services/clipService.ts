@@ -1,9 +1,8 @@
 import * as log from "electron-log";
 import { app, net } from "electron/main";
 import { existsSync } from "fs";
-import fs from "fs/promises";
-import path from "path";
-import { readFile } from "promise-fs";
+import * as fs from "node:fs/promises";
+import * as path from "node:path";
 import util from "util";
 import { CustomErrors } from "../constants/errors";
 import { Model } from "../types";

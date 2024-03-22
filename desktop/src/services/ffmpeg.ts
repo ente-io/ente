@@ -1,7 +1,7 @@
 import log from "electron-log";
 import pathToFfmpeg from "ffmpeg-static";
-import { existsSync } from "fs";
-import { readFile, rmSync, writeFile } from "promise-fs";
+import { existsSync } from "node:fs";
+import * as fs from "node:fs/promises";
 import util from "util";
 import { CustomErrors } from "../constants/errors";
 import { generateTempFilePath, getTempDirPath } from "../utils/temp";
@@ -80,14 +80,14 @@ export async function runFFmpegCmd(
             "ms",
         );
 
-        const outputFile = await readFile(tempOutputFilePath);
+        const outputFile = await fs.readFile(tempOutputFilePath);
         return new Uint8Array(outputFile);
     } catch (e) {
         logErrorSentry(e, "ffmpeg run command error");
         throw e;
     } finally {
         try {
-            rmSync(tempOutputFilePath, { force: true });
+            await fs.rm(tempOutputFilePath, { force: true });
         } catch (e) {
             logErrorSentry(e, "failed to remove tempOutputFile");
         }
@@ -109,7 +109,7 @@ const ffmpegBinaryPath = () => {
 
 export async function writeTempFile(fileStream: Uint8Array, fileName: string) {
     const tempFilePath = await generateTempFilePath(fileName);
-    await writeFile(tempFilePath, fileStream);
+    await fs.writeFile(tempFilePath, fileStream);
     return tempFilePath;
 }
 
@@ -121,7 +121,7 @@ export async function deleteTempFile(tempFilePath: string) {
             "tried to delete a non temp file",
         );
     }
-    rmSync(tempFilePath, { force: true });
+    await fs.rm(tempFilePath, { force: true });
 }
 
 export const promiseWithTimeout = async <T>(
