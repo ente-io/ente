@@ -34,12 +34,6 @@ import * as fs from "promise-fs";
 import { Readable } from "stream";
 import { deleteDiskCache, openDiskCache } from "./api/cache";
 import { logToDisk, openLogDirectory } from "./api/common";
-import {
-    checkExistsAndCreateDir,
-    exists,
-    saveFileToDisk,
-    saveStreamToDisk,
-} from "./api/export";
 import { runFFmpegCmd } from "./api/ffmpeg";
 import { getDirFiles } from "./api/fs";
 import { convertToJPEG, generateImageThumbnail } from "./api/imageProcessor";
@@ -67,8 +61,12 @@ import {
 } from "./api/watch";
 import { setupLogging } from "./utils/logging";
 
-/* Some of the code below has been duplicated to make this file self contained.
-Enhancement: consider alternatives */
+/*
+  Some of the code below has been duplicated to make this file self contained
+  (see the documentation at the top of why it needs to be a single file).
+
+  Enhancement: consider alternatives
+*/
 
 /* preload: duplicated logError */
 export function logError(error: Error, message: string, info?: string): void {
@@ -132,6 +130,29 @@ export async function writeStream(
     const readable = convertBrowserStreamToNode(fileStream);
     await writeNodeStream(filePath, readable);
 }
+
+// - Export
+
+export const exists = (path: string) => {
+    return fs.existsSync(path);
+};
+
+export const checkExistsAndCreateDir = async (dirPath: string) => {
+    if (!fs.existsSync(dirPath)) {
+        await fs.mkdir(dirPath);
+    }
+};
+
+export const saveStreamToDisk = async (
+    filePath: string,
+    fileStream: ReadableStream<Uint8Array>,
+) => {
+    await writeStream(filePath, fileStream);
+};
+
+export const saveFileToDisk = async (path: string, fileData: string) => {
+    await fs.writeFile(path, fileData);
+};
 
 // -
 
@@ -211,7 +232,7 @@ function deleteFile(filePath: string): void {
     fs.rmSync(filePath);
 }
 
-// -
+// - ML
 
 /* preload: duplicated Model */
 export enum Model {
@@ -315,7 +336,7 @@ const parseExecError = (err: any) => {
     }
 };
 
-// -
+// - General
 
 const selectDirectory = async (): Promise<string> => {
     try {
@@ -349,7 +370,7 @@ const clearElectronStore = () => {
     ipcRenderer.send("clear-electron-store");
 };
 
-// -
+// - App update
 
 const updateAndRestart = () => {
     ipcRenderer.send("update-and-restart");
@@ -410,10 +431,12 @@ setupLogging();
 // running out of memory, causing the app to crash as it copies it over across
 // the processes.
 contextBridge.exposeInMainWorld("ElectronAPIs", {
+    // - Export
     exists,
     checkExistsAndCreateDir,
     saveStreamToDisk,
     saveFileToDisk,
+
     selectDirectory,
     clearElectronStore,
     readTextFile,
@@ -438,20 +461,29 @@ contextBridge.exposeInMainWorld("ElectronAPIs", {
     updateWatchMappingIgnoredFiles,
     logToDisk,
     convertToJPEG,
-    openLogDirectory,
     registerUpdateEventListener,
-    updateAndRestart,
-    skipAppUpdate,
-    getAppVersion,
+
     runFFmpegCmd,
-    muteUpdateNotification,
     generateImageThumbnail,
     registerForegroundEventListener,
-    openDirectory,
     moveFile,
     deleteFolder,
     rename,
     deleteFile,
+
+    // General
+    getAppVersion,
+    openDirectory,
+
+    // Logging
+    openLogDirectory,
+
+    // - App update
+    updateAndRestart,
+    skipAppUpdate,
+    muteUpdateNotification,
+
+    // - ML
     computeImageEmbedding,
     computeTextEmbedding,
 });
