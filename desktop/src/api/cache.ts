@@ -22,9 +22,7 @@ export async function openDiskCache(
     cacheLimitInBytes?: number,
 ) {
     const cacheBucketDir = await getCacheBucketDir(cacheName);
-    if (!existsSync(cacheBucketDir)) {
-        await fs.mkdir(cacheBucketDir, { recursive: true });
-    }
+    await fs.mkdir(cacheBucketDir, { recursive: true });
     return new DiskCache(cacheBucketDir, cacheLimitInBytes);
 }
 

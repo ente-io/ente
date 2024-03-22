@@ -143,11 +143,8 @@ const writeNodeStream = async (
 
 const exists = (path: string) => existsSync(path);
 
-const checkExistsAndCreateDir = async (dirPath: string) => {
-    if (!existsSync(dirPath)) {
-        await fs.mkdir(dirPath);
-    }
-};
+const checkExistsAndCreateDir = (dirPath: string) =>
+    fs.mkdir(dirPath, { recursive: true });
 
 const saveStreamToDisk = writeStream;
 
@@ -175,9 +172,7 @@ async function moveFile(
     }
     // check if destination folder exists
     const destinationFolder = path.dirname(destinationPath);
-    if (!existsSync(destinationFolder)) {
-        await fs.mkdir(destinationFolder, { recursive: true });
-    }
+    await fs.mkdir(destinationFolder, { recursive: true });
     await fs.rename(sourcePath, destinationPath);
 }
 

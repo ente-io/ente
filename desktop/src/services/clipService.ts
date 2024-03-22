@@ -79,10 +79,7 @@ function getModelSavePath(modelName: string) {
 async function downloadModel(saveLocation: string, url: string) {
     // confirm that the save location exists
     const saveDir = path.dirname(saveLocation);
-    if (!existsSync(saveDir)) {
-        log.info("creating model save dir");
-        await fs.mkdir(saveDir, { recursive: true });
-    }
+    await fs.mkdir(saveDir, { recursive: true });
     log.info("downloading clip model");
     const res = await net.fetch(url);
     if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
