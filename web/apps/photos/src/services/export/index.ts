@@ -42,6 +42,10 @@ import { CustomError } from "@ente/shared/error";
 import { Events, eventBus } from "@ente/shared/events";
 import { addLogLine } from "@ente/shared/logging";
 import { User } from "@ente/shared/user/types";
+import QueueProcessor, {
+    CancellationStatus,
+    RequestCanceller,
+} from "@ente/shared/utils/queueProcessor";
 import { ExportStage } from "constants/export";
 import { FILE_TYPE } from "constants/file";
 import { Collection } from "types/collection";
@@ -56,10 +60,6 @@ import {
     getCollectionUserFacingName,
     getNonEmptyPersonalCollections,
 } from "utils/collection";
-import QueueProcessor, {
-    CancellationStatus,
-    RequestCanceller,
-} from "../queueProcessor";
 import { migrateExport } from "./migration";
 
 const EXPORT_RECORD_FILE_NAME = "export_status.json";
