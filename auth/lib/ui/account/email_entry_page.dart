@@ -190,6 +190,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                   padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
                   child: TextFormField(
                     keyboardType: TextInputType.text,
+                    textInputAction: TextInputAction.next,
                     controller: _passwordController1,
                     obscureText: !_password1Visible,
                     enableSuggestions: true,
