@@ -50,8 +50,52 @@ export interface ElectronAPIsType {
      */
     logToDisk: (message: string) => void;
 
-    exists: (path: string) => boolean;
+    /**
+     * A subset of filesystem access APIs.
+     *
+     * The renderer process, being a web process, does not have full access to
+     * the local filesystem apart from files explicitly dragged and dropped (or
+     * selected by the user in a native file open dialog).
+     *
+     * The main process, however, has full filesystem access (limited only be an
+     * OS level sandbox on the entire process).
+     *
+     * When we're running in the desktop app, we want to better utilize the
+     * local filesystem access to provide more integrated features to the user -
+     * things that are not currently possible using web technologies. For
+     * example, continuous exports to an arbitrary user chosen location on disk,
+     * or watching some folders for changes and syncing them automatically.
+     *
+     * Towards this end, this fs object provides some generic file system access
+     * functions that are needed for such features. In addition, there are other
+     * feature specific methods too in the top level electron object.
+     */
+    fs: {
+        /**
+         * Return true if there is a file or directory at the given
+         * {@link path}.
+         */
+        exists: (path: string) => Promise<boolean>;
+    };
+
+    /** TODO: AUDIT below this */
+    // - General
+    registerForegroundEventListener: (onForeground: () => void) => void;
+    clearElectronStore: () => void;
+
+    // - FS legacy
     checkExistsAndCreateDir: (dirPath: string) => Promise<void>;
+
+    // - App update
+    updateAndRestart: () => void;
+    skipAppUpdate: (version: string) => void;
+    muteUpdateNotification: (version: string) => void;
+
+    registerUpdateEventListener: (
+        showUpdateDialog: (updateInfo: AppUpdateInfo) => void,
+    ) => void;
+
+    /** TODO: FIXME or migrate below this */
     saveStreamToDisk: (
         path: string,
         fileStream: ReadableStream<any>,
@@ -97,31 +141,24 @@ export interface ElectronAPIsType {
         removeFolder: (folderPath: string) => Promise<void>,
     ) => void;
     isFolder: (dirPath: string) => Promise<boolean>;
-    clearElectronStore: () => void;
     setEncryptionKey: (encryptionKey: string) => Promise<void>;
     getEncryptionKey: () => Promise<string>;
     convertToJPEG: (
         fileData: Uint8Array,
         filename: string,
     ) => Promise<Uint8Array>;
-    registerUpdateEventListener: (
-        showUpdateDialog: (updateInfo: AppUpdateInfo) => void,
-    ) => void;
-    updateAndRestart: () => void;
-    skipAppUpdate: (version: string) => void;
     runFFmpegCmd: (
         cmd: string[],
         inputFile: File | ElectronFile,
         outputFileName: string,
         dontTimeout?: boolean,
     ) => Promise<File>;
-    muteUpdateNotification: (version: string) => void;
+
     generateImageThumbnail: (
         inputFile: File | ElectronFile,
         maxDimension: number,
         maxSize: number,
     ) => Promise<Uint8Array>;
-    registerForegroundEventListener: (onForeground: () => void) => void;
     moveFile: (oldPath: string, newPath: string) => Promise<void>;
     deleteFolder: (path: string) => Promise<void>;
     deleteFile: (path: string) => Promise<void>;

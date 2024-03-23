@@ -9,7 +9,6 @@ import {
     Tray,
 } from "electron";
 import path from "path";
-import { clearElectronStore } from "../api/electronStore";
 import { attachIPCHandlers } from "../main/ipc";
 import {
     muteUpdateNotification,
@@ -88,41 +87,8 @@ export default function setupIpcComs(
         return safeStorage.decryptString(message);
     });
 
-    ipcMain.on("clear-electron-store", () => {
-        clearElectronStore();
-    });
-
     ipcMain.handle("convert-to-jpeg", (_, fileData, filename) => {
         return convertToJPEG(fileData, filename);
-    });
-
-    ipcMain.handle("open-log-dir", () => {
-        // [Note: Electron app paths]
-        //
-        // By default, these paths are at the following locations:
-        //
-        // * macOS: `~/Library/Application Support/ente`
-        // * Linux: `~/.config/ente`
-        // * Windows: `%APPDATA%`, e.g. `C:\Users\<username>\AppData\Local\ente`
-        // * Windows: C:\Users\<you>\AppData\Local\<Your App Name>
-        //
-        // https://www.electronjs.org/docs/latest/api/app
-        shell.openPath(app.getPath("logs"));
-    });
-
-    ipcMain.handle("open-dir", (_, dirPath) => {
-        shell.openPath(path.normalize(dirPath));
-    });
-
-    ipcMain.on("update-and-restart", () => {
-        updateAndRestart();
-    });
-    ipcMain.on("skip-app-update", (_, version) => {
-        skipAppUpdate(version);
-    });
-
-    ipcMain.on("mute-update-notification", (_, version) => {
-        muteUpdateNotification(version);
     });
 
     ipcMain.handle(

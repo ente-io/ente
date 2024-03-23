@@ -7,11 +7,16 @@
  */
 
 import { ipcMain } from "electron/main";
-import { appVersion } from "../services/appUpdater";
+import { clearElectronStore } from "../api/electronStore";
+import {
+    appVersion,
+    muteUpdateNotification,
+    skipAppUpdate,
+    updateAndRestart,
+} from "../services/appUpdater";
+import { checkExistsAndCreateDir, fsExists } from "./fs";
 import { openDirectory, openLogDirectory } from "./general";
 import { logToDisk } from "./log";
-
-// - General
 
 export const attachIPCHandlers = () => {
     // Notes:
@@ -39,5 +44,26 @@ export const attachIPCHandlers = () => {
     ipcMain.handle("openLogDirectory", (_) => openLogDirectory());
 
     // See: [Note: Catching exception during .send/.on]
-    ipcMain.on("logToDisk", (_, msg) => logToDisk(msg));
+    ipcMain.on("logToDisk", (_, message) => logToDisk(message));
+
+    ipcMain.handle("fsExists", (_, path) => fsExists(path));
+
+    ipcMain.handle("checkExistsAndCreateDir", (_, dirPath) =>
+        checkExistsAndCreateDir(dirPath),
+    );
+
+    ipcMain.on("clear-electron-store", (_) => {
+        clearElectronStore();
+    });
+
+    ipcMain.on("update-and-restart", (_) => {
+        updateAndRestart();
+    });
+    ipcMain.on("skip-app-update", (_, version) => {
+        skipAppUpdate(version);
+    });
+
+    ipcMain.on("mute-update-notification", (_, version) => {
+        muteUpdateNotification(version);
+    });
 };
