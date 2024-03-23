@@ -1,7 +1,7 @@
 import chokidar from "chokidar";
 import { BrowserWindow } from "electron";
 import { getWatchMappings } from "../api/watch";
-import { logError } from "../services/logging";
+import { logError } from "../main/log";
 
 export function initWatcher(mainWindow: BrowserWindow) {
     const mappings = getWatchMappings();

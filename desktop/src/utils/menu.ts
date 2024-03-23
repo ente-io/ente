@@ -7,6 +7,7 @@ import {
 } from "electron";
 import ElectronLog from "electron-log";
 import { setIsAppQuitting } from "../main";
+import { openDirectory, openLogDirectory } from "../main/general";
 import { forceCheckForUpdateAndNotify } from "../services/appUpdater";
 import autoLauncher from "../services/autoLauncher";
 import {
@@ -201,15 +202,11 @@ export async function buildMenuBar(mainWindow: BrowserWindow): Promise<Menu> {
                 { type: "separator" },
                 {
                     label: "View crash reports",
-                    click: () => {
-                        shell.openPath(app.getPath("crashDumps"));
-                    },
+                    click: () => openDirectory(app.getPath("crashDumps")),
                 },
                 {
                     label: "View logs",
-                    click: () => {
-                        shell.openPath(app.getPath("logs"));
-                    },
+                    click: openLogDirectory,
                 },
             ],
         },

@@ -46,9 +46,9 @@ export default function HelpSection() {
                 variant="secondary"
             />
             <EnteMenuItem
-                onClick={() => openLink("mailto:contact@ente.io", true)}
+                onClick={() => openLink("mailto:support@ente.io", true)}
                 labelComponent={
-                    <NoStyleAnchor href="mailto:contact@ente.io">
+                    <NoStyleAnchor href="mailto:support@ente.io">
                         <Typography fontWeight={"bold"}>
                             {t("SUPPORT")}
                         </Typography>

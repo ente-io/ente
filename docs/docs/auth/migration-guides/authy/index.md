@@ -94,11 +94,11 @@ to ente Authenticator!
 ### Method 2.1: If the export worked, but the import didn't
 
 > [!NOTE]
-> 
-> This is intended only for users who successfully exported their codes using the
-> guide in method 2, but could not import it to ente Authenticator for whatever
-> reason. If the import was successful, or you haven't tried to import the codes
-> yet, ignore this section.
+>
+> This is intended only for users who successfully exported their codes using
+> the guide in method 2, but could not import it to ente Authenticator for
+> whatever reason. If the import was successful, or you haven't tried to import
+> the codes yet, ignore this section.
 >
 > If the export itself failed, try using
 > [**method 1**](#method-1-use-neerajs-export-tool) instead.

@@ -3,12 +3,17 @@ import ElectronLog from "electron-log";
 import * as path from "path";
 import { isAppQuitting, rendererURL } from "../main";
 import autoLauncher from "../services/autoLauncher";
-import { logErrorSentry } from "../services/sentry";
+import { logErrorSentry } from "../main/log";
 import { getHideDockIconPreference } from "../services/userPreference";
-import { isDev } from "./common";
+import { isDev } from "../main/general";
 import { isPlatform } from "./common/platform";
 
-export async function createWindow(): Promise<BrowserWindow> {
+/**
+ * Create an return the {@link BrowserWindow} that will form our app's UI.
+ *
+ * This window will show the HTML served from {@link rendererURL}.
+ */
+export const createWindow = async () => {
     const appImgPath = isDev
         ? "resources/window-icon.png"
         : path.join(process.resourcesPath, "window-icon.png");
@@ -16,9 +21,7 @@ export async function createWindow(): Promise<BrowserWindow> {
     // Create the browser window.
     const mainWindow = new BrowserWindow({
         webPreferences: {
-            sandbox: false,
             preload: path.join(__dirname, "../preload.js"),
-            contextIsolation: false,
         },
         icon: appIcon,
         show: false, // don't show the main window on load,
@@ -49,16 +52,6 @@ export async function createWindow(): Promise<BrowserWindow> {
         );
         mainWindow.loadURL(rendererURL);
     }
-    mainWindow.webContents.on("did-fail-load", () => {
-        splash.close();
-        isDev
-            ? mainWindow.loadFile(`../resources/error.html`)
-            : splash.loadURL(
-                  `file://${path.join(process.resourcesPath, "error.html")}`,
-              );
-        mainWindow.maximize();
-        mainWindow.show();
-    });
     mainWindow.once("ready-to-show", async () => {
         try {
             splash.destroy();
@@ -114,4 +107,4 @@ export async function createWindow(): Promise<BrowserWindow> {
         }
     });
     return mainWindow;
-}
+};

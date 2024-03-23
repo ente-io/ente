@@ -1150,7 +1150,7 @@ class ExportService {
                     videoStream,
                 );
             } catch (e) {
-                ElectronAPIs.deleteFile(
+                await ElectronAPIs.deleteFile(
                     getFileExportPath(collectionExportPath, imageExportName),
                 );
                 throw e;

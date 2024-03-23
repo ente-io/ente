@@ -1,14 +1,14 @@
 import { app, BrowserWindow, Menu, nativeImage, Tray } from "electron";
 import ElectronLog from "electron-log";
+import { existsSync } from "node:fs";
 import os from "os";
 import path from "path";
-import { existsSync } from "promise-fs";
 import util from "util";
 import { rendererURL } from "../main";
 import { setupAutoUpdater } from "../services/appUpdater";
 import autoLauncher from "../services/autoLauncher";
 import { getHideDockIconPreference } from "../services/userPreference";
-import { isDev } from "./common";
+import { isDev } from "../main/general";
 import { isPlatform } from "./common/platform";
 import { buildContextMenu, buildMenuBar } from "./menu";
 const execAsync = util.promisify(require("child_process").exec);
@@ -92,10 +92,6 @@ export async function handleDockIconHideOnAutoLaunch() {
     if (isPlatform("mac") && shouldHideDockIcon && wasAutoLaunched) {
         app.dock.hide();
     }
-}
-
-export function enableSharedArrayBufferSupport() {
-    app.commandLine.appendSwitch("enable-features", "SharedArrayBuffer");
 }
 
 export function logSystemInfo() {

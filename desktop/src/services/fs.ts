@@ -1,10 +1,10 @@
-import { existsSync } from "fs";
 import StreamZip from "node-stream-zip";
-import path from "path";
-import * as fs from "promise-fs";
+import { createWriteStream, existsSync } from "node:fs";
+import * as fs from "node:fs/promises";
+import * as path from "node:path";
 import { Readable } from "stream";
 import { ElectronFile } from "../types";
-import { logError } from "./logging";
+import { logError } from "../main/log";
 
 const FILE_STREAM_CHUNK_SIZE: number = 4 * 1024 * 1024;
 
@@ -25,16 +25,14 @@ export const getDirFilePaths = async (dirPath: string) => {
     return files;
 };
 
-export const getFileStream = async (filePath: string) => {
+const getFileStream = async (filePath: string) => {
     const file = await fs.open(filePath, "r");
     let offset = 0;
     const readableStream = new ReadableStream<Uint8Array>({
         async pull(controller) {
             try {
                 const buff = new Uint8Array(FILE_STREAM_CHUNK_SIZE);
-                // original types were not working correctly
-                const bytesRead = (await fs.read(
-                    file,
+                const bytesRead = (await file.read(
                     buff,
                     0,
                     FILE_STREAM_CHUNK_SIZE,
@@ -43,16 +41,16 @@ export const getFileStream = async (filePath: string) => {
                 offset += bytesRead;
                 if (bytesRead === 0) {
                     controller.close();
-                    await fs.close(file);
+                    await file.close();
                 } else {
                     controller.enqueue(buff.slice(0, bytesRead));
                 }
             } catch (e) {
-                await fs.close(file);
+                await file.close();
             }
         },
         async cancel() {
-            await fs.close(file);
+            await file.close();
         },
     });
     return readableStream;
@@ -184,25 +182,6 @@ export const getZipFileStream = async (
     return readableStream;
 };
 
-export async function isFolder(dirPath: string) {
-    try {
-        const stats = await fs.stat(dirPath);
-        return stats.isDirectory();
-    } catch (e) {
-        let err = e;
-        // if code is defined, it's an error from fs.stat
-        if (typeof e.code !== "undefined") {
-            // ENOENT means the file does not exist
-            if (e.code === "ENOENT") {
-                return false;
-            }
-            err = Error(`fs error code: ${e.code}`);
-        }
-        logError(err, "isFolder failed");
-        return false;
-    }
-}
-
 export const convertBrowserStreamToNode = (
     fileStream: ReadableStream<Uint8Array>,
 ) => {
@@ -231,7 +210,7 @@ export async function writeNodeStream(
     filePath: string,
     fileStream: NodeJS.ReadableStream,
 ) {
-    const writeable = fs.createWriteStream(filePath);
+    const writeable = createWriteStream(filePath);
 
     fileStream.on("error", (error) => {
         writeable.destroy(error); // Close the writable stream with an error
@@ -241,7 +220,7 @@ export async function writeNodeStream(
 
     await new Promise((resolve, reject) => {
         writeable.on("finish", resolve);
-        writeable.on("error", async (e) => {
+        writeable.on("error", async (e: unknown) => {
             if (existsSync(filePath)) {
                 await fs.unlink(filePath);
             }
@@ -256,61 +235,4 @@ export async function writeStream(
 ) {
     const readable = convertBrowserStreamToNode(fileStream);
     await writeNodeStream(filePath, readable);
-}
-
-export async function readTextFile(filePath: string) {
-    if (!existsSync(filePath)) {
-        throw new Error("File does not exist");
-    }
-    return await fs.readFile(filePath, "utf-8");
-}
-
-export async function moveFile(
-    sourcePath: string,
-    destinationPath: string,
-): Promise<void> {
-    if (!existsSync(sourcePath)) {
-        throw new Error("File does not exist");
-    }
-    if (existsSync(destinationPath)) {
-        throw new Error("Destination file already exists");
-    }
-    // check if destination folder exists
-    const destinationFolder = path.dirname(destinationPath);
-    if (!existsSync(destinationFolder)) {
-        await fs.mkdir(destinationFolder, { recursive: true });
-    }
-    await fs.rename(sourcePath, destinationPath);
-}
-
-export async function deleteFolder(folderPath: string): Promise<void> {
-    if (!existsSync(folderPath)) {
-        return;
-    }
-    if (!fs.statSync(folderPath).isDirectory()) {
-        throw new Error("Path is not a folder");
-    }
-    // check if folder is empty
-    const files = await fs.readdir(folderPath);
-    if (files.length > 0) {
-        throw new Error("Folder is not empty");
-    }
-    await fs.rmdir(folderPath);
-}
-
-export async function rename(oldPath: string, newPath: string) {
-    if (!existsSync(oldPath)) {
-        throw new Error("Path does not exist");
-    }
-    await fs.rename(oldPath, newPath);
-}
-
-export function deleteFile(filePath: string): void {
-    if (!existsSync(filePath)) {
-        return;
-    }
-    if (!fs.statSync(filePath).isFile()) {
-        throw new Error("Path is not a file");
-    }
-    fs.rmSync(filePath);
 }

@@ -55,6 +55,13 @@ To bring up an additional museum node:
       sudo tee /root/museum/credentials/fcm-service-account.json
       sudo tee /root/museum/credentials.yaml
 
+* Add billing data
+
+      scp /path/to/billing/*.json <instance>:
+
+      sudo mkdir -p /root/museum/data/billing
+      sudo mv *.json /root/museum/data/billing/
+
 * If not running behind Nginx, add the TLS credentials (otherwise add the to
   Nginx)
 
@@ -79,8 +86,8 @@ To bring up an additional museum node:
 
       scp scripts/deploy/museum.nginx.conf <instance>:
 
-      sudo mv museum.nginx.conf /etc/systemd/system
-      sudo systemctl restart nginx
+      sudo mv museum.nginx.conf /root/nginx/conf.d
+      sudo systemctl reload nginx
 
 ## Starting
 

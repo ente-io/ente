@@ -1,9 +1,9 @@
 import { CustomError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { getFileURL, getThumbnailURL } from "@ente/shared/network/api";
+import { retryAsyncFunction } from "@ente/shared/promise";
 import { DownloadClient } from "services/download";
 import { EnteFile } from "types/file";
-import { retryAsyncFunction } from "utils/network";
 
 export class PhotosDownloadClient implements DownloadClient {
     constructor(

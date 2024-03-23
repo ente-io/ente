@@ -1,24 +1,8 @@
 import { LimitedCacheStorage } from "types/cache/index";
-// import { ElectronCacheStorage } from 'services/electron/cache';
-// import { runningInElectron, runningInWorker } from 'utils/common';
-// import { WorkerElectronCacheStorageService } from 'services/workerElectronCache/service';
 
 class cacheStorageFactory {
-    // workerElectronCacheStorageServiceInstance: WorkerElectronCacheStorageService;
     getCacheStorage(): LimitedCacheStorage {
-        // if (runningInElectron()) {
-        //     if (runningInWorker()) {
-        //         if (!this.workerElectronCacheStorageServiceInstance) {
-        //             // this.workerElectronCacheStorageServiceInstance =
-        //             //     new WorkerElectronCacheStorageService();
-        //         }
-        //         return this.workerElectronCacheStorageServiceInstance;
-        //     } else {
-        //         // return ElectronCacheStorage;
-        //     }
-        // } else {
         return transformBrowserCacheStorageToLimitedCacheStorage(caches);
-        // }
     }
 }
 
