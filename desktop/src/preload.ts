@@ -7,14 +7,12 @@
  * functions as an object on the DOM, so that the renderer process can invoke
  * functions that live in the main (Node.js) process if needed.
  *
+ * Ref: https://www.electronjs.org/docs/latest/tutorial/tutorial-preload
+ *
  * Note that this script cannot import other code from `src/` - conceptually it
  * can be thought of as running in a separate, third, process different from
  * both the main or a renderer process (technically, it runs in a BrowserWindow
  * context that runs prior to the renderer process).
- *
- * That said, this can be split into multiple files if we wished. However,
- * that'd require us setting up a bundler to package it back up into a single JS
- * file that can be used at runtime.
  *
  * > Since enabling the sandbox disables Node.js integration in your preload
  * > scripts, you can no longer use require("../my-script"). In other words,
@@ -22,9 +20,10 @@
  * >
  * > https://www.electronjs.org/blog/breach-to-barrier
  *
- * Since most of this is just boilerplate code providing a bridge between the
- * main and renderer, we avoid introducing another moving part into the mix and
- * just keep the entire preload setup in this single file.
+ * If we really wanted, we could setup a bundler to package this into a single
+ * file. However, since this is just boilerplate code providing a bridge between
+ * the main and renderer, we avoid introducing another moving part into the mix
+ * and just keep the entire preload setup in this single file.
  */
 
 import { contextBridge, ipcRenderer } from "electron";
@@ -32,7 +31,6 @@ import { createWriteStream, existsSync } from "node:fs";
 import * as fs from "node:fs/promises";
 import { Readable } from "node:stream";
 import path from "path";
-import { logToDisk, openLogDirectory } from "./api/common";
 import { runFFmpegCmd } from "./api/ffmpeg";
 import { getDirFiles } from "./api/fs";
 import { convertToJPEG, generateImageThumbnail } from "./api/imageProcessor";
@@ -58,21 +56,44 @@ import {
     updateWatchMappingIgnoredFiles,
     updateWatchMappingSyncedFiles,
 } from "./api/watch";
-import { setupLogging } from "./utils/logging";
+import { logErrorSentry, setupLogging } from "./main/log";
 
-/*
-  Some of the code below has been duplicated to make this file self contained
-  (see the documentation at the top of why it needs to be a single file).
+setupLogging();
 
-  Enhancement: consider alternatives
-*/
+// - General
+
+/** Return the version of the desktop app. */
+const appVersion = (): Promise<string> => ipcRenderer.invoke("appVersion");
+
+/**
+ * Open the given {@link dirPath} in the system's folder viewer.
+ *
+ * For example, on macOS this'll open {@link dirPath} in Finder.
+ */
+const openDirectory = (dirPath: string): Promise<void> =>
+    ipcRenderer.invoke("openDirectory");
+
+/**
+ * Open the app's log directory in the system's folder viewer.
+ *
+ * @see {@link openDirectory}
+ */
+const openLogDirectory = (): Promise<void> =>
+    ipcRenderer.invoke("openLogDirectory");
+
+/**
+ * Log the given {@link message} to the on-disk log file maintained by the
+ * desktop app.
+ */
+const logToDisk = (message: string): void =>
+    ipcRenderer.send("logToDisk", message);
+
+// - FIXME below this
 
 /* preload: duplicated logError */
-export function logError(error: Error, message: string, info?: string): void {
-    ipcRenderer.invoke("log-error", error, message, info);
-}
-
-// -
+const logError = (error: Error, message: string, info?: any) => {
+    logErrorSentry(error, message, info);
+};
 
 /* preload: duplicated writeStream */
 /**
@@ -342,26 +363,6 @@ const selectDirectory = async (): Promise<string> => {
     }
 };
 
-const getAppVersion = async (): Promise<string> => {
-    try {
-        return await ipcRenderer.invoke("get-app-version");
-    } catch (e) {
-        logError(e, "failed to get release version");
-        throw e;
-    }
-};
-
-const openDirectory = async (dirPath: string): Promise<void> => {
-    try {
-        await ipcRenderer.invoke("open-dir", dirPath);
-    } catch (e) {
-        logError(e, "error while opening directory");
-        throw e;
-    }
-};
-
-// -
-
 const clearElectronStore = () => {
     ipcRenderer.send("clear-electron-store");
 };
@@ -382,22 +383,16 @@ const muteUpdateNotification = (version: string) => {
 
 // -
 
-setupLogging();
-
 // These objects exposed here will become available to the JS code in our
 // renderer (the web/ code) as `window.ElectronAPIs.*`
 //
-// - Introduction
-//   https://www.electronjs.org/docs/latest/tutorial/tutorial-preload
-//
 // There are a few related concepts at play here, and it might be worthwhile to
 // read their (excellent) documentation to get an understanding;
-//
+//`
 // - ContextIsolation:
 //   https://www.electronjs.org/docs/latest/tutorial/context-isolation
 //
 // - IPC https://www.electronjs.org/docs/latest/tutorial/ipc
-//
 //
 // [Note: Transferring large amount of data over IPC]
 //
@@ -405,28 +400,35 @@ setupLogging();
 // Algorithm to serialize objects passed between processes.
 // https://www.electronjs.org/docs/latest/tutorial/ipc#object-serialization
 //
-// In particular, both ArrayBuffer and the web File types are eligible for
-// structured cloning.
+// In particular, both ArrayBuffer is eligible for structured cloning.
 // https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Structured_clone_algorithm
 //
 // Also, ArrayBuffer is "transferable", which means it is a zero-copy operation
 // operation when it happens across threads.
 // https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Transferable_objects
 //
-// In our case though, we're not dealing with threads but separate processes,
-// and it seems like there is a copy involved since the documentation for
-// contextBridge explicitly calls out that "parameters, errors and return values
-// are **copied** when they're sent over the bridge".
-// https://www.electronjs.org/docs/latest/api/context-bridge#methods
+// In our case though, we're not dealing with threads but separate processes. So
+// the ArrayBuffer will be copied:
+// > "parameters, errors and return values are **copied** when they're sent over
+//   the bridge".
+//   https://www.electronjs.org/docs/latest/api/context-bridge#methods
 //
-// Related is a note from one of Electron's committers stating that even with
-// copying, the IPC should be fast enough for even moderately large data:
-// https://github.com/electron/electron/issues/1948#issuecomment-864191345
-//
-// The main problem with transfering large amounts of data is potentially
-// running out of memory, causing the app to crash as it copies it over across
-// the processes.
+// The copy itself is relatively fast, but the problem with transfering large
+// amounts of data is potentially running out of memory during the copy.
 contextBridge.exposeInMainWorld("ElectronAPIs", {
+    // General
+    appVersion,
+    openDirectory,
+
+    // Logging
+    openLogDirectory,
+    logToDisk,
+
+    // - App update
+    updateAndRestart,
+    skipAppUpdate,
+    muteUpdateNotification,
+
     // - Export
     exists,
     checkExistsAndCreateDir,
@@ -453,7 +455,6 @@ contextBridge.exposeInMainWorld("ElectronAPIs", {
     isFolder,
     updateWatchMappingSyncedFiles,
     updateWatchMappingIgnoredFiles,
-    logToDisk,
     convertToJPEG,
     registerUpdateEventListener,
 
@@ -464,18 +465,6 @@ contextBridge.exposeInMainWorld("ElectronAPIs", {
     deleteFolder,
     rename,
     deleteFile,
-
-    // General
-    getAppVersion,
-    openDirectory,
-
-    // Logging
-    openLogDirectory,
-
-    // - App update
-    updateAndRestart,
-    skipAppUpdate,
-    muteUpdateNotification,
 
     // - ML
     computeImageEmbedding,

@@ -2,7 +2,7 @@ import { ipcRenderer } from "electron/renderer";
 import { existsSync } from "fs";
 import { CustomErrors } from "../constants/errors";
 import { writeStream } from "../services/fs";
-import { logError } from "../services/logging";
+import { logError } from "../main/log";
 import { ElectronFile } from "../types";
 import { isPlatform } from "../utils/common/platform";
 

@@ -5,7 +5,7 @@ import * as fs from "node:fs/promises";
 import util from "util";
 import { CustomErrors } from "../constants/errors";
 import { generateTempFilePath, getTempDirPath } from "../utils/temp";
-import { logErrorSentry } from "./sentry";
+import { logErrorSentry } from "../main/log";
 const shellescape = require("any-shell-escape");
 
 const execAsync = util.promisify(require("child_process").exec);

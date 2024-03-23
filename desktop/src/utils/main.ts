@@ -8,7 +8,7 @@ import { rendererURL } from "../main";
 import { setupAutoUpdater } from "../services/appUpdater";
 import autoLauncher from "../services/autoLauncher";
 import { getHideDockIconPreference } from "../services/userPreference";
-import { isDev } from "./common";
+import { isDev } from "../main/general";
 import { isPlatform } from "./common/platform";
 import { buildContextMenu, buildMenuBar } from "./menu";
 const execAsync = util.promisify(require("child_process").exec);

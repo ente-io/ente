@@ -4,7 +4,7 @@ import * as fs from "node:fs/promises";
 import * as path from "node:path";
 import { Readable } from "stream";
 import { ElectronFile } from "../types";
-import { logError } from "./logging";
+import { logError } from "../main/log";
 
 const FILE_STREAM_CHUNK_SIZE: number = 4 * 1024 * 1024;
 
