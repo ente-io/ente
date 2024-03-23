@@ -1463,6 +1463,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.1.0+1"
+  system_tray:
+    dependency: "direct main"
+    description:
+      name: system_tray
+      sha256: "1bcc11bc230033be20d7443c29f65f68d67169715a838a1122f20fbff5dd2d19"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.1"
   term_glyph:
     dependency: transitive
     description:

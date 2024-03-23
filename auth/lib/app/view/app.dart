@@ -18,6 +18,7 @@ import 'package:ente_auth/ui/settings/app_update_dialog.dart';
 import 'package:flutter/foundation.dart';
 import "package:flutter/material.dart";
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:system_tray/system_tray.dart';
 import 'package:window_manager/window_manager.dart';
 
 class App extends StatefulWidget {
@@ -43,9 +44,14 @@ class _AppState extends State<App> with WindowListener {
     });
   }
 
+  Future<void> initWindowManager() async {
+    windowManager.addListener(this);
+    await windowManager.setPreventClose(true);
+  }
+
   @override
   void initState() {
-    windowManager.addListener(this);
+    initWindowManager();
     _signedOutEvent = Bus.instance.on<SignedOutEvent>().listen((event) {
       if (mounted) {
         setState(() {});
@@ -137,6 +143,12 @@ class _AppState extends State<App> with WindowListener {
           ? const HomePage()
           : const OnboardingPage(),
     };
+  }
+
+  @override
+  void onWindowClose() async {
+    final AppWindow appWindow = AppWindow();
+    await appWindow.hide();
   }
 
   @override
