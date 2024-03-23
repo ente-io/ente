@@ -39,6 +39,7 @@ import { isArchivedFile, updateMagicMetadata } from "utils/magicMetadata";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { CustomError } from "@ente/shared/error";
 import { addLocalLog, addLogLine } from "@ente/shared/logging";
+import { isPlaybackPossible } from "@ente/shared/media/video-playback";
 import { convertBytesToHumanReadable } from "@ente/shared/utils/size";
 import isElectron from "is-electron";
 import { moveToHiddenCollection } from "services/collectionService";
@@ -49,7 +50,6 @@ import {
     updateFilePublicMagicMetadata,
 } from "services/fileService";
 import { FileTypeInfo } from "types/upload";
-import { isPlaybackPossible } from "utils/photoFrame";
 
 import { default as ElectronAPIs } from "@ente/shared/electron";
 import { downloadUsingAnchor } from "@ente/shared/utils";

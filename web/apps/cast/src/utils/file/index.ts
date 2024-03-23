@@ -21,13 +21,13 @@ import { isArchivedFile } from "utils/magicMetadata";
 
 import { CustomError } from "@ente/shared/error";
 import { addLocalLog, addLogLine } from "@ente/shared/logging";
+import { isPlaybackPossible } from "@ente/shared/media/video-playback";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import { User } from "@ente/shared/user/types";
 import { convertBytesToHumanReadable } from "@ente/shared/utils/size";
 import isElectron from "is-electron";
 import { FileTypeInfo } from "types/upload";
 import ComlinkCryptoWorker from "utils/comlink/ComlinkCryptoWorker";
-import { isPlaybackPossible } from "utils/photoFrame";
 
 const WAIT_TIME_IMAGE_CONVERSION = 30 * 1000;
 
