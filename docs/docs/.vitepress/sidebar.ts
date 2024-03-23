@@ -138,7 +138,7 @@ export const sidebar = [
             { text: "FAQ", link: "/auth/faq/" },
             {
                 text: "Migration",
-                collapsed: false,
+                collapsed: true,
                 items: [
                     { text: "Introduction", link: "/auth/migration-guides/" },
                     {
