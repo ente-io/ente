@@ -34,7 +34,7 @@ jobs:
                   base_path: "web/"
                   config: "web/crowdin.yml"
                   upload_sources: true
-                  upload_translations: true
+                  upload_translations: false
                   download_translations: true
                   localization_branch_name: crowdin-translations-web
                   create_pull_request: true
