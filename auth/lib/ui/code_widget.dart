@@ -17,6 +17,7 @@ import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/platform_util.dart';
 import 'package:ente_auth/utils/toast_util.dart';
 import 'package:ente_auth/utils/totp_util.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:logging/logging.dart';
@@ -134,35 +135,59 @@ class _CodeWidgetState extends State<CodeWidget> {
             ),
           ],
         ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(8),
-          child: Container(
-            color: Theme.of(context).colorScheme.codeCardBackgroundColor,
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                customBorder: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+        child: Builder(
+          builder: (context) {
+            return RawGestureDetector(
+              gestures: {
+                PanGestureRecognizer:
+                    GestureRecognizerFactoryWithHandlers<PanGestureRecognizer>(
+                  () => PanGestureRecognizer(
+                    debugOwner: this,
+                    // This recognizer accepts any button press made with a secondary button.
+                    allowedButtonsFilter: (int buttons) =>
+                        buttons & kSecondaryButton != 0,
+                  ),
+                  (PanGestureRecognizer instance) {
+                    instance
+                      ..dragStartBehavior = DragStartBehavior.down
+                      ..onEnd = (DragEndDetails details) {
+                        Slidable.of(context)?.openEndActionPane();
+                      };
+                  },
                 ),
-                onTap: () {
-                  _copyCurrentOTPToClipboard();
-                },
-                onDoubleTap: isMaskingEnabled
-                    ? () {
-                        setState(
-                          () {
-                            _hideCode = !_hideCode;
-                          },
-                        );
-                      }
-                    : null,
-                onLongPress: () {
-                  _copyCurrentOTPToClipboard();
-                },
-                child: _getCardContents(l10n),
+              },
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Container(
+                  color: Theme.of(context).colorScheme.codeCardBackgroundColor,
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      customBorder: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      onTap: () {
+                        _copyCurrentOTPToClipboard();
+                      },
+                      onDoubleTap: isMaskingEnabled
+                          ? () {
+                              setState(
+                                () {
+                                  _hideCode = !_hideCode;
+                                },
+                              );
+                            }
+                          : null,
+                      onLongPress: () {
+                        _copyCurrentOTPToClipboard();
+                      },
+                      child: _getCardContents(l10n),
+                    ),
+                  ),
+                ),
               ),
-            ),
-          ),
+            );
+          },
         ),
       ),
     );

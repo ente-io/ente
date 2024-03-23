@@ -43,7 +43,7 @@ PODS:
     - FlutterMacOS
   - smart_auth (0.0.1):
     - FlutterMacOS
-  - sodium_libs (2.2.0):
+  - sodium_libs (2.2.1):
     - FlutterMacOS
   - sqflite (0.0.3):
     - Flutter
@@ -168,7 +168,7 @@ SPEC CHECKSUMS:
   share_plus: 76dd39142738f7a68dd57b05093b5e8193f220f7
   shared_preferences_foundation: b4c3b4cddf1c21f02770737f147a3f5da9d39695
   smart_auth: b38e3ab4bfe089eacb1e233aca1a2340f96c28e9
-  sodium_libs: 72d908a356801223ec77444e67844b3fe87d996a
+  sodium_libs: d39bd76697736cb11ce4a0be73b9b4bc64466d6f
   sqflite: 673a0e54cc04b7d6dba8d24fb8095b31c3a99eec
   sqlite3: 73b7fc691fdc43277614250e04d183740cb15078
   sqlite3_flutter_libs: 06a05802529659a272beac4ee1350bfec294f386
