@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/ente-io/museum/pkg/controller/commonbilling"
 
@@ -21,6 +20,7 @@ import (
 	"github.com/ente-io/museum/pkg/repo"
 	"github.com/ente-io/museum/pkg/utils/billing"
 	"github.com/ente-io/museum/pkg/utils/email"
+	"github.com/ente-io/museum/pkg/utils/time"
 	"github.com/ente-io/stacktrace"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
@@ -50,6 +50,8 @@ type StripeController struct {
 // This is needed e.g. if this cancellation was as part of a user initiated
 // account deletion.
 const SkipMailKey = "skip_mail"
+
+const BufferPeriodOnPaymentFailureInDays = 7
 
 // Return a new instance of StripeController
 func NewStripeController(plans ente.BillingPlansPerAccount, stripeClients ente.StripeClientPerAccount, billingRepo *repo.BillingRepository, fileRepo *repo.FileRepository, userRepo *repo.UserRepository, storageBonusRepo *storagebonus.Repository, discordController *discord.DiscordController, emailNotificationController *emailCtrl.EmailNotificationController, offerController *offer.OfferController, commonBillCtrl *commonbilling.Controller) *StripeController {
@@ -469,8 +471,7 @@ func (c *StripeController) handlePaymentIntentFailed(event stripe.Event, country
 	}
 	// If the current subscription is the same as the one in the webhook, then
 	// we need to expire the subscription, and send an email to the user.
-	// TODO: Set the expiry time to 7 days from now
-	newExpiryTime := time.Now().UnixMicro()
+	newExpiryTime := time.NDaysFromNow(BufferPeriodOnPaymentFailureInDays)
 	err = c.BillingRepo.UpdateSubscriptionExpiryTime(
 		currentSubscription.ID, newExpiryTime)
 	if err != nil {
