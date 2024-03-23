@@ -3,8 +3,8 @@ import { app, BrowserWindow } from "electron";
 import { default as ElectronLog, default as log } from "electron-log";
 import { autoUpdater } from "electron-updater";
 import { setIsAppQuitting, setIsUpdateAvailable } from "../main";
+import { logErrorSentry } from "../main/log";
 import { AppUpdateInfo } from "../types";
-import { logErrorSentry } from "./sentry";
 import {
     clearMuteUpdateNotificationVersion,
     clearSkipAppVersion,
@@ -110,9 +110,12 @@ export function updateAndRestart() {
     autoUpdater.quitAndInstall();
 }
 
-export function getAppVersion() {
-    return `v${app.getVersion()}`;
-}
+/**
+ * Return the version of the desktop app
+ *
+ * The return value is of the form `v1.2.3`.
+ */
+export const appVersion = () => `v${app.getVersion()}`;
 
 export function skipAppUpdate(version: string) {
     setSkipAppVersion(version);

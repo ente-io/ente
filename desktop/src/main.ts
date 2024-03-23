@@ -14,14 +14,13 @@ import serveNextAt from "next-electron-server";
 import { existsSync } from "node:fs";
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
+import { isDev } from "./main/general";
+import { logErrorSentry, setupLogging } from "./main/log";
 import { initWatcher } from "./services/chokidar";
-import { logErrorSentry } from "./services/sentry";
-import { isDev } from "./utils/common";
 import { addAllowOriginHeader } from "./utils/cors";
 import { createWindow } from "./utils/createWindow";
 import { setupAppEventEmitter } from "./utils/events";
 import setupIpcComs from "./utils/ipcComms";
-import { setupLogging } from "./utils/logging";
 import {
     handleDockIconHideOnAutoLaunch,
     handleDownloads,

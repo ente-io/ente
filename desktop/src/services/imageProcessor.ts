@@ -5,10 +5,10 @@ import log from "electron-log";
 import * as fs from "node:fs/promises";
 import path from "path";
 import { CustomErrors } from "../constants/errors";
-import { isDev } from "../utils/common";
+import { isDev } from "../main/general";
 import { isPlatform } from "../utils/common/platform";
 import { generateTempFilePath } from "../utils/temp";
-import { logErrorSentry } from "./sentry";
+import { logErrorSentry } from "../main/log";
 const shellescape = require("any-shell-escape");
 
 const asyncExec = util.promisify(exec);

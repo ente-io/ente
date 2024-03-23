@@ -10,8 +10,8 @@ import {
 } from "electron";
 import path from "path";
 import { clearElectronStore } from "../api/electronStore";
+import { attachIPCHandlers } from "../main/ipc";
 import {
-    getAppVersion,
     muteUpdateNotification,
     skipAppUpdate,
     updateAndRestart,
@@ -26,7 +26,6 @@ import {
     convertToJPEG,
     generateImageThumbnail,
 } from "../services/imageProcessor";
-import { logErrorSentry } from "../services/sentry";
 import { generateTempFilePath } from "./temp";
 
 export default function setupIpcComs(
@@ -34,6 +33,8 @@ export default function setupIpcComs(
     mainWindow: BrowserWindow,
     watcher: chokidar.FSWatcher,
 ): void {
+    attachIPCHandlers();
+
     ipcMain.handle("select-dir", async () => {
         const result = await dialog.showOpenDialog({
             properties: ["openDirectory"],
@@ -79,10 +80,6 @@ export default function setupIpcComs(
         watcher.unwatch(args.dir);
     });
 
-    ipcMain.handle("log-error", (_, err, msg, info?) => {
-        logErrorSentry(err, msg, info);
-    });
-
     ipcMain.handle("safeStorage-encrypt", (_, message) => {
         return safeStorage.encryptString(message);
     });
@@ -126,10 +123,6 @@ export default function setupIpcComs(
 
     ipcMain.on("mute-update-notification", (_, version) => {
         muteUpdateNotification(version);
-    });
-
-    ipcMain.handle("get-app-version", () => {
-        return getAppVersion();
     });
 
     ipcMain.handle(
