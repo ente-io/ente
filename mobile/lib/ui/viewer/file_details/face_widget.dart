@@ -1,4 +1,5 @@
 import "dart:developer" show log;
+import "dart:io" show Platform;
 import "dart:typed_data";
 
 import "package:flutter/material.dart";
@@ -9,6 +10,7 @@ import 'package:photos/models/file/file.dart';
 import "package:photos/services/search_service.dart";
 import "package:photos/ui/viewer/file/no_thumbnail_widget.dart";
 import "package:photos/ui/viewer/people/cluster_page.dart";
+import "package:photos/ui/viewer/people/cropped_face_image_view.dart";
 import "package:photos/ui/viewer/people/people_page.dart";
 import "package:photos/utils/face/face_box_crop.dart";
 import "package:photos/utils/thumbnail_util.dart";
@@ -29,11 +31,104 @@ class FaceWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<Uint8List?>(
-      future: getFaceCrop(),
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          final ImageProvider imageProvider = MemoryImage(snapshot.data!);
+    if (Platform.isIOS) {
+      return FutureBuilder<Uint8List?>(
+        future: getFaceCrop(),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            final ImageProvider imageProvider = MemoryImage(snapshot.data!);
+            return GestureDetector(
+              onTap: () async {
+                log(
+                  "FaceWidget is tapped, with person $person and clusterID $clusterID",
+                  name: "FaceWidget",
+                );
+                if (person == null && clusterID == null) {
+                  return;
+                }
+                if (person != null) {
+                  await Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => PeoplePage(
+                        person: person!,
+                      ),
+                    ),
+                  );
+                } else if (clusterID != null) {
+                  final fileIdsToClusterIds =
+                      await FaceMLDataDB.instance.getFileIdToClusterIds();
+                  final files = await SearchService.instance.getAllFiles();
+                  final clusterFiles = files
+                      .where(
+                        (file) =>
+                            fileIdsToClusterIds[file.uploadedFileID]
+                                ?.contains(clusterID) ??
+                            false,
+                      )
+                      .toList();
+                  await Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => ClusterPage(
+                        clusterFiles,
+                        cluserID: clusterID!,
+                      ),
+                    ),
+                  );
+                }
+              },
+              child: Column(
+                children: [
+                  ClipRRect(
+                    borderRadius:
+                        const BorderRadius.all(Radius.elliptical(16, 12)),
+                    child: SizedBox(
+                      width: 60,
+                      height: 60,
+                      child: Image(
+                        image: imageProvider,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  if (person != null)
+                    Text(
+                      person!.attr.name.trim(),
+                      style: Theme.of(context).textTheme.bodySmall,
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                    ),
+                ],
+              ),
+            );
+          } else {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const ClipRRect(
+                borderRadius: BorderRadius.all(Radius.elliptical(16, 12)),
+                child: SizedBox(
+                  width: 60, // Ensure consistent sizing
+                  height: 60,
+                  child: CircularProgressIndicator(),
+                ),
+              );
+            }
+            if (snapshot.hasError) {
+              log('Error getting face: ${snapshot.error}');
+            }
+            return const ClipRRect(
+              borderRadius: BorderRadius.all(Radius.elliptical(16, 12)),
+              child: SizedBox(
+                width: 60, // Ensure consistent sizing
+                height: 60,
+                child: NoThumbnailWidget(),
+              ),
+            );
+          }
+        },
+      );
+    } else {
+      return Builder(
+        builder: (context) {
           return GestureDetector(
             onTap: () async {
               log(
@@ -81,9 +176,9 @@ class FaceWidget extends StatelessWidget {
                   child: SizedBox(
                     width: 60,
                     height: 60,
-                    child: Image(
-                      image: imageProvider,
-                      fit: BoxFit.cover,
+                    child: CroppedFaceImageView(
+                      enteFile: file,
+                      face: face,
                     ),
                   ),
                 ),
@@ -98,31 +193,9 @@ class FaceWidget extends StatelessWidget {
               ],
             ),
           );
-        } else {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const ClipRRect(
-              borderRadius: BorderRadius.all(Radius.elliptical(16, 12)),
-              child: SizedBox(
-                width: 60, // Ensure consistent sizing
-                height: 60,
-                child: CircularProgressIndicator(),
-              ),
-            );
-          }
-          if (snapshot.hasError) {
-            log('Error getting face: ${snapshot.error}');
-          }
-          return const ClipRRect(
-            borderRadius: BorderRadius.all(Radius.elliptical(16, 12)),
-            child: SizedBox(
-              width: 60, // Ensure consistent sizing
-              height: 60,
-              child: NoThumbnailWidget(),
-            ),
-          );
-        }
-      },
-    );
+        },
+      );
+    }
   }
 
   Future<Uint8List?> getFaceCrop() async {
