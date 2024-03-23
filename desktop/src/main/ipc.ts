@@ -10,6 +10,7 @@ import { ipcMain } from "electron/main";
 import { appVersion } from "../services/appUpdater";
 import { openDirectory, openLogDirectory } from "./general";
 import { logToDisk } from "./log";
+import { fsExists } from "./fs";
 
 // - General
 
@@ -40,4 +41,6 @@ export const attachIPCHandlers = () => {
 
     // See: [Note: Catching exception during .send/.on]
     ipcMain.on("logToDisk", (_, msg) => logToDisk(msg));
+
+    ipcMain.handle("fsExists", (_, path) => fsExists(path));
 };

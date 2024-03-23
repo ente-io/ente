@@ -88,6 +88,13 @@ const openLogDirectory = (): Promise<void> =>
 const logToDisk = (message: string): void =>
     ipcRenderer.send("logToDisk", message);
 
+/**
+ * Return true if there is a file or directory at the given
+ * {@link path}.
+ */
+const fsExists = (path: string): Promise<boolean> =>
+    ipcRenderer.invoke("fsExists", path);
+
 // - FIXME below this
 
 /* preload: duplicated logError */
@@ -428,6 +435,11 @@ contextBridge.exposeInMainWorld("ElectronAPIs", {
     updateAndRestart,
     skipAppUpdate,
     muteUpdateNotification,
+
+    // - FS
+    fs: {
+        exists: fsExists,
+    },
 
     // - Export
     exists,
