@@ -12,11 +12,13 @@ import 'package:ente_auth/locale.dart';
 import "package:ente_auth/onboarding/view/onboarding_page.dart";
 import 'package:ente_auth/services/update_service.dart';
 import 'package:ente_auth/services/user_service.dart';
+import 'package:ente_auth/services/window_listener_service.dart';
 import 'package:ente_auth/ui/home_page.dart';
 import 'package:ente_auth/ui/settings/app_update_dialog.dart';
 import 'package:flutter/foundation.dart';
 import "package:flutter/material.dart";
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:window_manager/window_manager.dart';
 
 class App extends StatefulWidget {
   final Locale locale;
@@ -31,7 +33,7 @@ class App extends StatefulWidget {
   State<App> createState() => _AppState();
 }
 
-class _AppState extends State<App> {
+class _AppState extends State<App> with WindowListener {
   late StreamSubscription<SignedOutEvent> _signedOutEvent;
   late StreamSubscription<SignedInEvent> _signedInEvent;
   Locale? locale;
@@ -43,6 +45,7 @@ class _AppState extends State<App> {
 
   @override
   void initState() {
+    windowManager.addListener(this);
     _signedOutEvent = Bus.instance.on<SignedOutEvent>().listen((event) {
       if (mounted) {
         setState(() {});
@@ -76,6 +79,7 @@ class _AppState extends State<App> {
   @override
   void dispose() {
     super.dispose();
+    windowManager.removeListener(this);
     _signedOutEvent.cancel();
     _signedInEvent.cancel();
   }
@@ -133,5 +137,10 @@ class _AppState extends State<App> {
           ? const HomePage()
           : const OnboardingPage(),
     };
+  }
+
+  @override
+  void onWindowResize() {
+    WindowListenerService.instance.onWindowResize().ignore();
   }
 }

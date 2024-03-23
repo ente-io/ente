@@ -16,6 +16,7 @@ import 'package:ente_auth/services/preference_service.dart';
 import 'package:ente_auth/services/update_service.dart';
 import 'package:ente_auth/services/user_remote_flag_service.dart';
 import 'package:ente_auth/services/user_service.dart';
+import 'package:ente_auth/services/window_listener_service.dart';
 import 'package:ente_auth/store/code_store.dart';
 import 'package:ente_auth/ui/tools/app_lock.dart';
 import 'package:ente_auth/ui/tools/lock_screen.dart';
@@ -39,8 +40,9 @@ void main() async {
 
   if (PlatformUtil.isDesktop()) {
     await windowManager.ensureInitialized();
-    WindowOptions windowOptions = const WindowOptions(
-      size: Size(450, 800),
+    await WindowListenerService.instance.init();
+    WindowOptions windowOptions = WindowOptions(
+      size: WindowListenerService.instance.getWindowSize(),
     );
     await windowManager.waitUntilReadyToShow(windowOptions, () async {
       await windowManager.show();
