@@ -7,7 +7,13 @@
  */
 
 import { ipcMain } from "electron/main";
-import { appVersion } from "../services/appUpdater";
+import { clearElectronStore } from "../api/electronStore";
+import {
+    appVersion,
+    muteUpdateNotification,
+    skipAppUpdate,
+    updateAndRestart,
+} from "../services/appUpdater";
 import { checkExistsAndCreateDir, fsExists } from "./fs";
 import { openDirectory, openLogDirectory } from "./general";
 import { logToDisk } from "./log";
@@ -45,4 +51,19 @@ export const attachIPCHandlers = () => {
     ipcMain.handle("checkExistsAndCreateDir", (_, dirPath) =>
         checkExistsAndCreateDir(dirPath),
     );
+
+    ipcMain.on("clear-electron-store", (_) => {
+        clearElectronStore();
+    });
+
+    ipcMain.on("update-and-restart", (_) => {
+        updateAndRestart();
+    });
+    ipcMain.on("skip-app-update", (_, version) => {
+        skipAppUpdate(version);
+    });
+
+    ipcMain.on("mute-update-notification", (_, version) => {
+        muteUpdateNotification(version);
+    });
 };

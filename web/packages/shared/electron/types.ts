@@ -79,7 +79,21 @@ export interface ElectronAPIsType {
     };
 
     /** TODO: AUDIT below this */
+    // - General
+    registerForegroundEventListener: (onForeground: () => void) => void;
+    clearElectronStore: () => void;
+
+    // - FS legacy
     checkExistsAndCreateDir: (dirPath: string) => Promise<void>;
+
+    // - App update
+    updateAndRestart: () => void;
+    skipAppUpdate: (version: string) => void;
+    muteUpdateNotification: (version: string) => void;
+
+    registerUpdateEventListener: (
+        showUpdateDialog: (updateInfo: AppUpdateInfo) => void,
+    ) => void;
 
     /** TODO: FIXME or migrate below this */
     saveStreamToDisk: (
@@ -127,31 +141,24 @@ export interface ElectronAPIsType {
         removeFolder: (folderPath: string) => Promise<void>,
     ) => void;
     isFolder: (dirPath: string) => Promise<boolean>;
-    clearElectronStore: () => void;
     setEncryptionKey: (encryptionKey: string) => Promise<void>;
     getEncryptionKey: () => Promise<string>;
     convertToJPEG: (
         fileData: Uint8Array,
         filename: string,
     ) => Promise<Uint8Array>;
-    registerUpdateEventListener: (
-        showUpdateDialog: (updateInfo: AppUpdateInfo) => void,
-    ) => void;
-    updateAndRestart: () => void;
-    skipAppUpdate: (version: string) => void;
     runFFmpegCmd: (
         cmd: string[],
         inputFile: File | ElectronFile,
         outputFileName: string,
         dontTimeout?: boolean,
     ) => Promise<File>;
-    muteUpdateNotification: (version: string) => void;
+
     generateImageThumbnail: (
         inputFile: File | ElectronFile,
         maxDimension: number,
         maxSize: number,
     ) => Promise<Uint8Array>;
-    registerForegroundEventListener: (onForeground: () => void) => void;
     moveFile: (oldPath: string, newPath: string) => Promise<void>;
     deleteFolder: (path: string) => Promise<void>;
     deleteFile: (path: string) => Promise<void>;

@@ -19,7 +19,7 @@ import { logErrorSentry, setupLogging } from "./main/log";
 import { initWatcher } from "./services/chokidar";
 import { addAllowOriginHeader } from "./utils/cors";
 import { createWindow } from "./utils/createWindow";
-import { setupAppEventEmitter } from "./utils/events";
+
 import setupIpcComs from "./utils/ipcComms";
 import {
     handleDockIconHideOnAutoLaunch,
@@ -126,6 +126,13 @@ const deleteLegacyDiskCacheDirIfExists = async () => {
         await fs.rm(cacheDir, { recursive: true });
     }
 };
+
+function setupAppEventEmitter(mainWindow: BrowserWindow) {
+    // fire event when mainWindow is in foreground
+    mainWindow.on("focus", () => {
+        mainWindow.webContents.send("app-in-foreground");
+    });
+}
 
 const main = () => {
     setupLogging(isDev);
