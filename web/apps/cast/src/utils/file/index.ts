@@ -17,7 +17,6 @@ import {
     FileMagicMetadata,
     FilePublicMagicMetadata,
 } from "types/file";
-import { SelectedState } from "types/gallery";
 import { isArchivedFile } from "utils/magicMetadata";
 
 import { CustomError } from "@ente/shared/error";
@@ -31,44 +30,6 @@ import ComlinkCryptoWorker from "utils/comlink/ComlinkCryptoWorker";
 import { isPlaybackPossible } from "utils/photoFrame";
 
 const WAIT_TIME_IMAGE_CONVERSION = 30 * 1000;
-
-export enum FILE_OPS_TYPE {
-    DOWNLOAD,
-    FIX_TIME,
-    ARCHIVE,
-    UNARCHIVE,
-    HIDE,
-    TRASH,
-    DELETE_PERMANENTLY,
-}
-
-export function groupFilesBasedOnCollectionID(files: EnteFile[]) {
-    const collectionWiseFiles = new Map<number, EnteFile[]>();
-    for (const file of files) {
-        if (!collectionWiseFiles.has(file.collectionID)) {
-            collectionWiseFiles.set(file.collectionID, []);
-        }
-        collectionWiseFiles.get(file.collectionID).push(file);
-    }
-    return collectionWiseFiles;
-}
-
-function getSelectedFileIds(selectedFiles: SelectedState) {
-    const filesIDs: number[] = [];
-    for (const [key, val] of Object.entries(selectedFiles)) {
-        if (typeof val === "boolean" && val) {
-            filesIDs.push(Number(key));
-        }
-    }
-    return new Set(filesIDs);
-}
-export function getSelectedFiles(
-    selected: SelectedState,
-    files: EnteFile[],
-): EnteFile[] {
-    const selectedFilesIDs = getSelectedFileIds(selected);
-    return files.filter((file) => selectedFilesIDs.has(file.id));
-}
 
 export function sortFiles(files: EnteFile[], sortAsc = false) {
     // sort based on the time of creation time of the file,

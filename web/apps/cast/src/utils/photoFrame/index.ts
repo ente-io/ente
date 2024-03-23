@@ -1,7 +1,11 @@
 import { logError } from "@ente/shared/sentry";
 import { FILE_TYPE } from "constants/file";
 import { EnteFile } from "types/file";
-import { MergedSourceURL } from "types/gallery";
+
+export type MergedSourceURL = {
+    original: string;
+    converted: string;
+};
 
 const WAIT_FOR_VIDEO_PLAYBACK = 1 * 1000;
 
