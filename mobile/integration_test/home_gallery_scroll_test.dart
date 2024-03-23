@@ -3,6 +3,7 @@ import "dart:async";
 import "package:flutter/material.dart";
 import "package:flutter_test/flutter_test.dart";
 import "package:integration_test/integration_test.dart";
+import "package:logging/logging.dart";
 import "package:photos/main.dart" as app;
 import "package:scrollable_positioned_list/scrollable_positioned_list.dart";
 
@@ -10,7 +11,11 @@ void main() {
   group("Home gallery scroll test", () {
     final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
     binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.fullyLive;
-    testWidgets("Home gallery scroll test", (tester) async {
+    testWidgets("Home gallery scroll test", semanticsEnabled: false,
+        (tester) async {
+      // https://github.com/flutter/flutter/issues/89749#issuecomment-1029965407
+      tester.testTextInput.register();
+
       await runZonedGuarded(
         () async {
           ///Ignore exceptions thrown by the app for the test to pass
@@ -21,30 +26,29 @@ void main() {
 
           app.main();
 
-          await tester.pumpAndSettle(const Duration(seconds: 5));
+          await tester.pumpAndSettle(const Duration(seconds: 1));
 
           await dismissUpdateAppDialog(tester);
 
-          //Automatically clicks the sign in button on the landing page
           final signInButton = find.byKey(const ValueKey("signInButton"));
           await tester.tap(signInButton);
           await tester.pumpAndSettle();
 
-          //Need to enter email address manually and clicks the login button automatically
-          final emailInputField = find.byKey(const ValueKey("emailInputField"));
+          final emailInputField = find.byType(TextFormField);
           final logInButton = find.byKey(const ValueKey("logInButton"));
-          await tester.tap(emailInputField);
-          await tester.pumpAndSettle(const Duration(seconds: 8));
-          await findAndTapFAB(tester, logInButton);
+          await tester.enterText(emailInputField, "enter email here");
+          await tester.pumpAndSettle(const Duration(seconds: 1));
+          await tester.tap(logInButton);
+          await tester.pumpAndSettle(const Duration(seconds: 3));
 
-          //Need to enter password manually and clicks the verify button automatically
           final passwordInputField =
               find.byKey(const ValueKey("passwordInputField"));
           final verifyPasswordButton =
               find.byKey(const ValueKey("verifyPasswordButton"));
-          await tester.tap(passwordInputField);
-          await tester.pumpAndSettle(const Duration(seconds: 10));
-          await findAndTapFAB(tester, verifyPasswordButton);
+          await tester.enterText(passwordInputField, "enter password here");
+          await tester.pumpAndSettle(const Duration(seconds: 1));
+          await tester.tap(verifyPasswordButton);
+          await tester.pumpAndSettle();
 
           await tester.pumpAndSettle(const Duration(seconds: 1));
           await dismissUpdateAppDialog(tester);
@@ -107,19 +111,12 @@ void main() {
             reportKey: 'home_gallery_scrolling_summary',
           );
         },
-        (error, stack) {},
+        (error, stack) {
+          Logger("gallery_scroll_test").info(error, stack);
+        },
       );
     });
   });
-}
-
-Future<void> findAndTapFAB(WidgetTester tester, Finder finder) async {
-  final RenderBox box = tester.renderObject(finder);
-  final Offset desiredOffset = Offset(box.size.width - 10, box.size.height / 2);
-  // Calculate the global position of the desired offset within the widget.
-  final Offset globalPosition = box.localToGlobal(desiredOffset);
-  await tester.tapAt(globalPosition);
-  await tester.pumpAndSettle(const Duration(seconds: 3));
 }
 
 Future<void> dismissUpdateAppDialog(WidgetTester tester) async {
