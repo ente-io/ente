@@ -79,7 +79,6 @@ export interface ElectronAPIsType {
     };
 
     /** TODO: AUDIT below this */
-    exists: (path: string) => boolean;
     checkExistsAndCreateDir: (dirPath: string) => Promise<void>;
     saveStreamToDisk: (
         path: string,

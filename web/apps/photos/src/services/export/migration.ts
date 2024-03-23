@@ -195,7 +195,7 @@ async function migrationV4ToV5(exportDir: string, exportRecord: ExportRecord) {
 }
 
 /*
-    This updates the folder name of already exported folders from the earlier format of 
+    This updates the folder name of already exported folders from the earlier format of
     `collectionID_collectionName` to newer `collectionName(numbered)` format
 */
 async function migrateCollectionFolders(
@@ -209,12 +209,12 @@ async function migrateCollectionFolders(
             collection.id,
             collection.name,
         );
-        const newCollectionExportPath = getUniqueCollectionFolderPath(
+        const newCollectionExportPath = await getUniqueCollectionFolderPath(
             exportDir,
             collection.name,
         );
         collectionIDPathMap.set(collection.id, newCollectionExportPath);
-        if (!exportService.exists(oldCollectionExportPath)) {
+        if (!(await exportService.exists(oldCollectionExportPath))) {
             continue;
         }
         await exportService.rename(
@@ -230,7 +230,7 @@ async function migrateCollectionFolders(
 }
 
 /*
-    This updates the file name of already exported files from the earlier format of 
+    This updates the file name of already exported files from the earlier format of
     `fileID_fileName` to newer `fileName(numbered)` format
 */
 async function migrateFiles(
@@ -246,7 +246,7 @@ async function migrateFiles(
             collectionIDPathMap.get(file.collectionID),
             file,
         );
-        const newFileSaveName = getUniqueFileSaveName(
+        const newFileSaveName = await getUniqueFileSaveName(
             collectionIDPathMap.get(file.collectionID),
             file.metadata.title,
         );
@@ -260,7 +260,7 @@ async function migrateFiles(
             collectionIDPathMap.get(file.collectionID),
             newFileSaveName,
         );
-        if (!exportService.exists(oldFileSavePath)) {
+        if (!(await exportService.exists(oldFileSavePath))) {
             continue;
         }
         await exportService.rename(oldFileSavePath, newFileSavePath);
@@ -306,7 +306,7 @@ async function getCollectionExportNamesFromExportedCollectionPaths(
     return exportedCollectionNames;
 }
 
-/* 
+/*
     Earlier the file were sorted by id,
     which we can use to determine which file got which number suffix
     this can be used to determine the filepaths of the those already exported files
@@ -432,17 +432,27 @@ async function removeCollectionExportMissingMetadataFolder(
         return;
     }
 
-    const properlyExportedCollections = Object.entries(
+    const properlyExportedCollectionsAll = Object.entries(
         exportRecord.collectionExportNames,
-    )
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        .filter(([_, collectionExportName]) =>
-            exportService.exists(
+    );
+    const properlyExportedCollections = [];
+    for (const [
+        collectionID,
+        collectionExportName,
+    ] of properlyExportedCollectionsAll) {
+        if (
+            await exportService.exists(
                 getMetadataFolderExportPath(
                     getCollectionExportPath(exportDir, collectionExportName),
                 ),
-            ),
-        );
+            )
+        ) {
+            properlyExportedCollections.push([
+                collectionID,
+                collectionExportName,
+            ]);
+        }
+    }
 
     const properlyExportedCollectionIDs = properlyExportedCollections.map(
         ([collectionID]) => collectionID,

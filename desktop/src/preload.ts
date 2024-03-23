@@ -168,8 +168,6 @@ const writeNodeStream = async (
 
 // - Export
 
-const exists = (path: string) => existsSync(path);
-
 const checkExistsAndCreateDir = (dirPath: string) =>
     fs.mkdir(dirPath, { recursive: true });
 
@@ -442,7 +440,6 @@ contextBridge.exposeInMainWorld("ElectronAPIs", {
     },
 
     // - Export
-    exists,
     checkExistsAndCreateDir,
     saveStreamToDisk,
     saveFileToDisk,

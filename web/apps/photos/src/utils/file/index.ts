@@ -778,7 +778,7 @@ export async function downloadFileDesktop(
     if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
         const fileBlob = await new Response(updatedFileStream).blob();
         const livePhoto = await decodeLivePhoto(file, fileBlob);
-        const imageExportName = getUniqueFileExportName(
+        const imageExportName = await getUniqueFileExportName(
             downloadPath,
             livePhoto.imageNameTitle,
         );
@@ -788,7 +788,7 @@ export async function downloadFileDesktop(
             imageStream,
         );
         try {
-            const videoExportName = getUniqueFileExportName(
+            const videoExportName = await getUniqueFileExportName(
                 downloadPath,
                 livePhoto.videoNameTitle,
             );
@@ -804,7 +804,7 @@ export async function downloadFileDesktop(
             throw e;
         }
     } else {
-        const fileExportName = getUniqueFileExportName(
+        const fileExportName = await getUniqueFileExportName(
             downloadPath,
             file.metadata.title,
         );
