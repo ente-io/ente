@@ -8,11 +8,9 @@
 
 import { ipcMain } from "electron/main";
 import { appVersion } from "../services/appUpdater";
+import { checkExistsAndCreateDir, fsExists } from "./fs";
 import { openDirectory, openLogDirectory } from "./general";
 import { logToDisk } from "./log";
-import { fsExists } from "./fs";
-
-// - General
 
 export const attachIPCHandlers = () => {
     // Notes:
@@ -40,7 +38,11 @@ export const attachIPCHandlers = () => {
     ipcMain.handle("openLogDirectory", (_) => openLogDirectory());
 
     // See: [Note: Catching exception during .send/.on]
-    ipcMain.on("logToDisk", (_, msg) => logToDisk(msg));
+    ipcMain.on("logToDisk", (_, message) => logToDisk(message));
 
     ipcMain.handle("fsExists", (_, path) => fsExists(path));
+
+    ipcMain.handle("checkExistsAndCreateDir", (_, dirPath) =>
+        checkExistsAndCreateDir(dirPath),
+    );
 };

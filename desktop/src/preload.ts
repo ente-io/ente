@@ -95,6 +95,11 @@ const logToDisk = (message: string): void =>
 const fsExists = (path: string): Promise<boolean> =>
     ipcRenderer.invoke("fsExists", path);
 
+// - AUDIT below this
+
+const checkExistsAndCreateDir = (dirPath: string): Promise<void> =>
+    ipcRenderer.invoke("checkExistsAndCreateDir", dirPath);
+
 // - FIXME below this
 
 /* preload: duplicated logError */
@@ -167,9 +172,6 @@ const writeNodeStream = async (
 };
 
 // - Export
-
-const checkExistsAndCreateDir = (dirPath: string) =>
-    fs.mkdir(dirPath, { recursive: true });
 
 const saveStreamToDisk = writeStream;
 
@@ -439,8 +441,11 @@ contextBridge.exposeInMainWorld("ElectronAPIs", {
         exists: fsExists,
     },
 
-    // - Export
+    // - FS legacy
+    // TODO: Move these into fs + document + rename if needed
     checkExistsAndCreateDir,
+
+    // - Export
     saveStreamToDisk,
     saveFileToDisk,
 

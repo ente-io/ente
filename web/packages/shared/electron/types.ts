@@ -80,6 +80,8 @@ export interface ElectronAPIsType {
 
     /** TODO: AUDIT below this */
     checkExistsAndCreateDir: (dirPath: string) => Promise<void>;
+
+    /** TODO: FIXME or migrate below this */
     saveStreamToDisk: (
         path: string,
         fileStream: ReadableStream<any>,
