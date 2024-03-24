@@ -63,6 +63,11 @@
       "title": "Crowdpear"
     },
     {
+      "title": "DCS",
+      "altNames": ["Digital Combat Simulator"],
+      "slug": "dcs"
+    },
+    {
       "title": "DEGIRO"
     },
     {
@@ -359,6 +364,10 @@
     },
     {
       "title": "Wise"
+    },
+    {
+      "title": "WYZE",
+      "slug": "wyze"
     },
     {
       "title": "X",
