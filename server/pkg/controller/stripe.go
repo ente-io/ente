@@ -43,13 +43,6 @@ type StripeController struct {
 	CommonBillCtrl         *commonbilling.Controller
 }
 
-// A flag we set on Stripe subscriptions to indicate that we should skip on
-// sending out the email when the subscription has been cancelled.
-//
-// This is needed e.g. if this cancellation was as part of a user initiated
-// account deletion.
-const SkipMailKey = "skip_mail"
-
 const BufferPeriodOnPaymentFailureInDays = 7
 
 // Return a new instance of StripeController
@@ -669,9 +662,7 @@ func (c *StripeController) CancelSubAndDeleteCustomer(subscription ente.Subscrip
 	if !subscription.Attributes.IsCancelled {
 		prorateRefund := true
 		logger.Info("cancelling sub with prorated refund")
-		updateParams := &stripe.SubscriptionParams{}
-		updateParams.AddMetadata(SkipMailKey, "true")
-		_, err := client.Subscriptions.Update(subscription.OriginalTransactionID, updateParams)
+		_, err := client.Subscriptions.Update(subscription.OriginalTransactionID, nil)
 		if err != nil {
 			stripeError := err.(*stripe.Error)
 			errorMsg := fmt.Sprintf("subscription updation failed during account deletion: %s, %s", stripeError.Msg, stripeError.Code)
