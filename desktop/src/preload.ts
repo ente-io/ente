@@ -31,15 +31,13 @@ import { createWriteStream, existsSync } from "node:fs";
 import * as fs from "node:fs/promises";
 import { Readable } from "node:stream";
 import path from "path";
+import type { ElectronFile } from "./types";
 import { getDirFiles } from "./api/fs";
 import {
     getElectronFilesFromGoogleZip,
     getPendingUploads,
     setToUploadCollection,
     setToUploadFiles,
-    showUploadDirsDialog,
-    showUploadFilesDialog,
-    showUploadZipDialog,
 } from "./api/upload";
 import {
     addWatchMapping,
@@ -50,7 +48,6 @@ import {
     updateWatchMappingSyncedFiles,
 } from "./api/watch";
 import { logErrorSentry, setupLogging } from "./main/log";
-import type { ElectronFile } from "types";
 
 setupLogging();
 
@@ -176,6 +173,12 @@ const runFFmpegCmd = (
 
 // - ML
 
+/* preload: duplicated Model */
+export enum Model {
+    GGML_CLIP = "ggml-clip",
+    ONNX_CLIP = "onnx-clip",
+}
+
 const computeImageEmbedding = (
     model: Model,
     imageData: Uint8Array,
@@ -187,6 +190,24 @@ const computeTextEmbedding = (
     text: string,
 ): Promise<Float32Array> =>
     ipcRenderer.invoke("computeTextEmbedding", model, text);
+
+// - File selection
+
+// TODO: Deprecated - use dialogs on the renderer process itself
+
+const selectDirectory = (): Promise<string> =>
+    ipcRenderer.invoke("selectDirectory");
+
+const showUploadFilesDialog = (): Promise<ElectronFile[]> =>
+    ipcRenderer.invoke("showUploadFilesDialog");
+
+const showUploadDirsDialog = (): Promise<ElectronFile[]> =>
+    ipcRenderer.invoke("showUploadDirsDialog");
+
+const showUploadZipDialog = (): Promise<{
+    zipPaths: string[];
+    files: ElectronFile[];
+}> => ipcRenderer.invoke("showUploadZipDialog");
 
 // - FIXME below this
 
@@ -344,24 +365,6 @@ const deleteFile = async (filePath: string) => {
     return fs.rm(filePath);
 };
 
-// - ML
-
-/* preload: duplicated Model */
-export enum Model {
-    GGML_CLIP = "ggml-clip",
-    ONNX_CLIP = "onnx-clip",
-}
-
-// -
-
-const selectDirectory = async (): Promise<string> => {
-    try {
-        return await ipcRenderer.invoke("select-dir");
-    } catch (e) {
-        logError(e, "error while selecting root directory");
-    }
-};
-
 // -
 
 // These objects exposed here will become available to the JS code in our
@@ -397,7 +400,7 @@ const selectDirectory = async (): Promise<string> => {
 // The copy itself is relatively fast, but the problem with transfering large
 // amounts of data is potentially running out of memory during the copy.
 contextBridge.exposeInMainWorld("ElectronAPIs", {
-    // General
+    // - General
     appVersion,
     openDirectory,
     registerForegroundEventListener,
@@ -405,7 +408,7 @@ contextBridge.exposeInMainWorld("ElectronAPIs", {
     getEncryptionKey,
     setEncryptionKey,
 
-    // Logging
+    // - Logging
     openLogDirectory,
     logToDisk,
 
@@ -424,6 +427,12 @@ contextBridge.exposeInMainWorld("ElectronAPIs", {
     computeImageEmbedding,
     computeTextEmbedding,
 
+    // - File selection
+    selectDirectory,
+    showUploadFilesDialog,
+    showUploadDirsDialog,
+    showUploadZipDialog,
+
     // - FS
     fs: {
         exists: fsExists,
@@ -436,14 +445,10 @@ contextBridge.exposeInMainWorld("ElectronAPIs", {
     // - Export
     saveStreamToDisk,
     saveFileToDisk,
-
-    selectDirectory,
     readTextFile,
-    showUploadFilesDialog,
-    showUploadDirsDialog,
+
     getPendingUploads,
     setToUploadFiles,
-    showUploadZipDialog,
     getElectronFilesFromGoogleZip,
     setToUploadCollection,
     getDirFiles,

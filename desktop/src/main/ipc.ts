@@ -25,6 +25,12 @@ import {
     generateImageThumbnail,
 } from "../services/imageProcessor";
 import type { ElectronFile, Model } from "../types";
+import {
+    selectDirectory,
+    showUploadDirsDialog,
+    showUploadFilesDialog,
+    showUploadZipDialog,
+} from "./dialogs";
 import { checkExistsAndCreateDir, fsExists } from "./fs";
 import { openDirectory, openLogDirectory } from "./general";
 import { logToDisk } from "./log";
@@ -105,6 +111,14 @@ export const attachIPCHandlers = () => {
     ipcMain.handle("computeTextEmbedding", (_, model: Model, text: string) =>
         computeTextEmbedding(model, text),
     );
+
+    ipcMain.handle("selectDirectory", (_) => selectDirectory());
+
+    ipcMain.handle("showUploadFilesDialog", (_) => showUploadFilesDialog());
+
+    ipcMain.handle("showUploadDirsDialog", (_) => showUploadDirsDialog());
+
+    ipcMain.handle("showUploadZipDialog", (_) => showUploadZipDialog());
 
     ipcMain.handle("fsExists", (_, path) => fsExists(path));
 

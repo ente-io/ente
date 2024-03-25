@@ -123,11 +123,27 @@ export interface ElectronAPIsType {
     ) => Promise<File>;
 
     // - ML
+
     computeImageEmbedding: (
         model: Model,
         imageData: Uint8Array,
     ) => Promise<Float32Array>;
+
     computeTextEmbedding: (model: Model, text: string) => Promise<Float32Array>;
+
+    // - File selection
+    // TODO: Deprecated - use dialogs on the renderer process itself
+
+    selectDirectory: () => Promise<string>;
+
+    showUploadFilesDialog: () => Promise<ElectronFile[]>;
+
+    showUploadDirsDialog: () => Promise<ElectronFile[]>;
+
+    showUploadZipDialog: () => Promise<{
+        zipPaths: string[];
+        files: ElectronFile[];
+    }>;
 
     // - FS legacy
     checkExistsAndCreateDir: (dirPath: string) => Promise<void>;
@@ -138,20 +154,14 @@ export interface ElectronAPIsType {
         fileStream: ReadableStream<any>,
     ) => Promise<void>;
     saveFileToDisk: (path: string, file: any) => Promise<void>;
-    selectDirectory: () => Promise<string>;
     readTextFile: (path: string) => Promise<string>;
-    showUploadFilesDialog: () => Promise<ElectronFile[]>;
-    showUploadDirsDialog: () => Promise<ElectronFile[]>;
+
     getPendingUploads: () => Promise<{
         files: ElectronFile[];
         collectionName: string;
         type: string;
     }>;
     setToUploadFiles: (type: string, filePaths: string[]) => void;
-    showUploadZipDialog: () => Promise<{
-        zipPaths: string[];
-        files: ElectronFile[];
-    }>;
     getElectronFilesFromGoogleZip: (
         filePath: string,
     ) => Promise<ElectronFile[]>;
