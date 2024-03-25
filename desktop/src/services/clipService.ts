@@ -5,12 +5,14 @@ import * as fs from "node:fs/promises";
 import * as path from "node:path";
 import util from "util";
 import { CustomErrors } from "../constants/errors";
+import { writeStream } from "../main/fs";
+import { isDev } from "../main/general";
+import { logErrorSentry } from "../main/log";
 import { Model } from "../types";
 import Tokenizer from "../utils/clip-bpe-ts/mod";
-import { isDev } from "../main/general";
 import { getPlatform } from "../utils/common/platform";
-import { writeStream } from "./fs";
-import { logErrorSentry } from "../main/log";
+import { generateTempFilePath } from "../utils/temp";
+import { deleteTempFile } from "./ffmpeg";
 const shellescape = require("any-shell-escape");
 const execAsync = util.promisify(require("child_process").exec);
 const jpeg = require("jpeg-js");
@@ -198,7 +200,51 @@ function getTokenizer() {
     return tokenizer;
 }
 
-export async function computeImageEmbedding(
+export const computeImageEmbedding = async (
+    model: Model,
+    imageData: Uint8Array,
+): Promise<Float32Array> => {
+    let tempInputFilePath = null;
+    try {
+        tempInputFilePath = await generateTempFilePath("");
+        const imageStream = new Response(imageData.buffer).body;
+        await writeStream(tempInputFilePath, imageStream);
+        const embedding = await computeImageEmbedding_(
+            model,
+            tempInputFilePath,
+        );
+        return embedding;
+    } catch (err) {
+        if (isExecError(err)) {
+            const parsedExecError = parseExecError(err);
+            throw Error(parsedExecError);
+        } else {
+            throw err;
+        }
+    } finally {
+        if (tempInputFilePath) {
+            await deleteTempFile(tempInputFilePath);
+        }
+    }
+};
+
+const isExecError = (err: any) => {
+    return err.message.includes("Command failed:");
+};
+
+const parseExecError = (err: any) => {
+    const errMessage = err.message;
+    if (errMessage.includes("Bad CPU type in executable")) {
+        return CustomErrors.UNSUPPORTED_PLATFORM(
+            process.platform,
+            process.arch,
+        );
+    } else {
+        return errMessage;
+    }
+};
+
+async function computeImageEmbedding_(
     model: Model,
     inputFilePath: string,
 ): Promise<Float32Array> {
@@ -276,6 +322,23 @@ export async function computeONNXImageEmbedding(
 }
 
 export async function computeTextEmbedding(
+    model: Model,
+    text: string,
+): Promise<Float32Array> {
+    try {
+        const embedding = computeTextEmbedding_(model, text);
+        return embedding;
+    } catch (err) {
+        if (isExecError(err)) {
+            const parsedExecError = parseExecError(err);
+            throw Error(parsedExecError);
+        } else {
+            throw err;
+        }
+    }
+}
+
+async function computeTextEmbedding_(
     model: Model,
     text: string,
 ): Promise<Float32Array> {

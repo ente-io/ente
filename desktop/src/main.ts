@@ -15,12 +15,11 @@ import { existsSync } from "node:fs";
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
 import { isDev } from "./main/general";
+import { attachFSWatchIPCHandlers, attachIPCHandlers } from "./main/ipc";
 import { logErrorSentry, setupLogging } from "./main/log";
 import { initWatcher } from "./services/chokidar";
 import { addAllowOriginHeader } from "./utils/cors";
 import { createWindow } from "./utils/createWindow";
-
-import setupIpcComs from "./utils/ipcComms";
 import {
     handleDockIconHideOnAutoLaunch,
     handleDownloads,
@@ -167,11 +166,12 @@ const main = () => {
     app.on("ready", async () => {
         logSystemInfo();
         mainWindow = await createWindow();
-        const tray = setupTrayItem(mainWindow);
         const watcher = initWatcher(mainWindow);
+        setupTrayItem(mainWindow);
         setupMacWindowOnDockIconClick();
         setupMainMenu(mainWindow);
-        setupIpcComs(tray, mainWindow, watcher);
+        attachIPCHandlers();
+        attachFSWatchIPCHandlers(watcher);
         await handleUpdates(mainWindow);
         handleDownloads(mainWindow);
         handleExternalLinks(mainWindow);

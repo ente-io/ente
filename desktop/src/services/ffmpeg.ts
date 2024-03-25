@@ -4,8 +4,11 @@ import { existsSync } from "node:fs";
 import * as fs from "node:fs/promises";
 import util from "util";
 import { CustomErrors } from "../constants/errors";
+import { writeStream } from "../main/fs";
+import { logError, logErrorSentry } from "../main/log";
+import { ElectronFile } from "../types";
 import { generateTempFilePath, getTempDirPath } from "../utils/temp";
-import { logErrorSentry } from "../main/log";
+
 const shellescape = require("any-shell-escape");
 
 const execAsync = util.promisify(require("child_process").exec);
@@ -42,6 +45,41 @@ const OUTPUT_PATH_PLACEHOLDER = "OUTPUT";
  * I'm not sure if our code is supposed to be able to use it, and how.
  */
 export async function runFFmpegCmd(
+    cmd: string[],
+    inputFile: File | ElectronFile,
+    outputFileName: string,
+    dontTimeout?: boolean,
+) {
+    let inputFilePath = null;
+    let createdTempInputFile = null;
+    try {
+        if (!existsSync(inputFile.path)) {
+            const tempFilePath = await generateTempFilePath(inputFile.name);
+            await writeStream(tempFilePath, await inputFile.stream());
+            inputFilePath = tempFilePath;
+            createdTempInputFile = true;
+        } else {
+            inputFilePath = inputFile.path;
+        }
+        const outputFileData = await runFFmpegCmd_(
+            cmd,
+            inputFilePath,
+            outputFileName,
+            dontTimeout,
+        );
+        return new File([outputFileData], outputFileName);
+    } finally {
+        if (createdTempInputFile) {
+            try {
+                await deleteTempFile(inputFilePath);
+            } catch (e) {
+                logError(e, "failed to deleteTempFile");
+            }
+        }
+    }
+}
+
+export async function runFFmpegCmd_(
     cmd: string[],
     inputFilePath: string,
     outputFileName: string,

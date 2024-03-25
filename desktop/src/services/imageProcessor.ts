@@ -1,14 +1,18 @@
 import { exec } from "child_process";
-import util from "util";
-
 import log from "electron-log";
+import { existsSync } from "fs";
 import * as fs from "node:fs/promises";
 import path from "path";
+import util from "util";
 import { CustomErrors } from "../constants/errors";
+import { writeStream } from "../main/fs";
 import { isDev } from "../main/general";
+import { logError, logErrorSentry } from "../main/log";
+import { ElectronFile } from "../types";
 import { isPlatform } from "../utils/common/platform";
 import { generateTempFilePath } from "../utils/temp";
-import { logErrorSentry } from "../main/log";
+import { deleteTempFile } from "./ffmpeg";
+
 const shellescape = require("any-shell-escape");
 
 const asyncExec = util.promisify(exec);
@@ -78,6 +82,17 @@ function getImageMagickStaticPath() {
 }
 
 export async function convertToJPEG(
+    fileData: Uint8Array,
+    filename: string,
+): Promise<Uint8Array> {
+    if (isPlatform("windows")) {
+        throw Error(CustomErrors.WINDOWS_NATIVE_IMAGE_PROCESSING_NOT_SUPPORTED);
+    }
+    const convertedFileData = await convertToJPEG_(fileData, filename);
+    return convertedFileData;
+}
+
+async function convertToJPEG_(
     fileData: Uint8Array,
     filename: string,
 ): Promise<Uint8Array> {
@@ -159,6 +174,44 @@ function constructConvertCommand(
 }
 
 export async function generateImageThumbnail(
+    inputFile: File | ElectronFile,
+    maxDimension: number,
+    maxSize: number,
+): Promise<Uint8Array> {
+    let inputFilePath = null;
+    let createdTempInputFile = null;
+    try {
+        if (isPlatform("windows")) {
+            throw Error(
+                CustomErrors.WINDOWS_NATIVE_IMAGE_PROCESSING_NOT_SUPPORTED,
+            );
+        }
+        if (!existsSync(inputFile.path)) {
+            const tempFilePath = await generateTempFilePath(inputFile.name);
+            await writeStream(tempFilePath, await inputFile.stream());
+            inputFilePath = tempFilePath;
+            createdTempInputFile = true;
+        } else {
+            inputFilePath = inputFile.path;
+        }
+        const thumbnail = await generateImageThumbnail_(
+            inputFilePath,
+            maxDimension,
+            maxSize,
+        );
+        return thumbnail;
+    } finally {
+        if (createdTempInputFile) {
+            try {
+                await deleteTempFile(inputFilePath);
+            } catch (e) {
+                logError(e, "failed to deleteTempFile");
+            }
+        }
+    }
+}
+
+async function generateImageThumbnail_(
     inputFilePath: string,
     width: number,
     maxSize: number,

@@ -5,10 +5,10 @@ import os from "os";
 import path from "path";
 import util from "util";
 import { rendererURL } from "../main";
+import { isDev } from "../main/general";
 import { setupAutoUpdater } from "../services/appUpdater";
 import autoLauncher from "../services/autoLauncher";
 import { getHideDockIconPreference } from "../services/userPreference";
-import { isDev } from "../main/general";
 import { isPlatform } from "./common/platform";
 import { buildContextMenu, buildMenuBar } from "./menu";
 const execAsync = util.promisify(require("child_process").exec);
@@ -19,7 +19,8 @@ export async function handleUpdates(mainWindow: BrowserWindow) {
         setupAutoUpdater(mainWindow);
     }
 }
-export function setupTrayItem(mainWindow: BrowserWindow) {
+
+export const setupTrayItem = (mainWindow: BrowserWindow) => {
     const iconName = isPlatform("mac")
         ? "taskbar-icon-Template.png"
         : "taskbar-icon.png";
@@ -31,8 +32,7 @@ export function setupTrayItem(mainWindow: BrowserWindow) {
     const tray = new Tray(trayIcon);
     tray.setToolTip("ente");
     tray.setContextMenu(buildContextMenu(mainWindow));
-    return tray;
-}
+};
 
 export function handleDownloads(mainWindow: BrowserWindow) {
     mainWindow.webContents.session.on("will-download", (_, item) => {

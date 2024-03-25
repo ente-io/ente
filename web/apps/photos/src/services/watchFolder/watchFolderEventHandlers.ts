@@ -58,7 +58,7 @@ export async function diskFileRemovedCallback(filePath: string) {
 
 export async function diskFolderRemovedCallback(folderPath: string) {
     try {
-        const mappings = watchFolderService.getWatchMappings();
+        const mappings = await watchFolderService.getWatchMappings();
         const mapping = mappings.find(
             (mapping) => mapping.folderPath === folderPath,
         );

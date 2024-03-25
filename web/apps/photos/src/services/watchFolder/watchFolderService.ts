@@ -72,7 +72,7 @@ class watchFolderService {
 
     async getAndSyncDiffOfFiles() {
         try {
-            let mappings = this.getWatchMappings();
+            let mappings = await this.getWatchMappings();
 
             if (!mappings?.length) {
                 return;
@@ -205,14 +205,13 @@ class watchFolderService {
         }
     }
 
-    getWatchMappings(): WatchMapping[] {
+    async getWatchMappings(): Promise<WatchMapping[]> {
         try {
-            return ElectronAPIs.getWatchMappings() ?? [];
+            return (await ElectronAPIs.getWatchMappings()) ?? [];
         } catch (e) {
             logError(e, "error while getting watch mappings");
             return [];
         }
-        return [];
     }
 
     private setIsEventRunning(isEventRunning: boolean) {
@@ -234,7 +233,7 @@ class watchFolderService {
             addLogLine(
                 `running event type:${event.type} collectionName:${event.collectionName} folderPath:${event.folderPath} , fileCount:${event.files?.length} pathsCount: ${event.paths?.length}`,
             );
-            const mappings = this.getWatchMappings();
+            const mappings = await this.getWatchMappings();
             const mapping = mappings.find(
                 (mapping) => mapping.folderPath === event.folderPath,
             );
@@ -380,7 +379,7 @@ class watchFolderService {
                     ...this.currentlySyncedMapping.syncedFiles,
                     ...syncedFiles,
                 ];
-                ElectronAPIs.updateWatchMappingSyncedFiles(
+                await ElectronAPIs.updateWatchMappingSyncedFiles(
                     this.currentlySyncedMapping.folderPath,
                     this.currentlySyncedMapping.syncedFiles,
                 );
@@ -390,7 +389,7 @@ class watchFolderService {
                     ...this.currentlySyncedMapping.ignoredFiles,
                     ...ignoredFiles,
                 ];
-                ElectronAPIs.updateWatchMappingIgnoredFiles(
+                await ElectronAPIs.updateWatchMappingIgnoredFiles(
                     this.currentlySyncedMapping.folderPath,
                     this.currentlySyncedMapping.ignoredFiles,
                 );
@@ -505,7 +504,7 @@ class watchFolderService {
                 this.currentlySyncedMapping.syncedFiles.filter(
                     (file) => !filePathsToRemove.has(file.path),
                 );
-            ElectronAPIs.updateWatchMappingSyncedFiles(
+            await ElectronAPIs.updateWatchMappingSyncedFiles(
                 this.currentlySyncedMapping.folderPath,
                 this.currentlySyncedMapping.syncedFiles,
             );
@@ -561,7 +560,7 @@ class watchFolderService {
 
     async getCollectionNameAndFolderPath(filePath: string) {
         try {
-            const mappings = this.getWatchMappings();
+            const mappings = await this.getWatchMappings();
 
             const mapping = mappings.find(
                 (mapping) =>
