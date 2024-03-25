@@ -1,20 +1,7 @@
 import chokidar from "chokidar";
-import {
-    app,
-    BrowserWindow,
-    dialog,
-    ipcMain,
-    safeStorage,
-    shell,
-    Tray,
-} from "electron";
+import { BrowserWindow, dialog, ipcMain, Tray } from "electron";
 import path from "path";
 import { attachIPCHandlers } from "../main/ipc";
-import {
-    muteUpdateNotification,
-    skipAppUpdate,
-    updateAndRestart,
-} from "../services/appUpdater";
 import {
     computeImageEmbedding,
     computeTextEmbedding,
@@ -77,14 +64,6 @@ export default function setupIpcComs(
 
     ipcMain.handle("remove-watcher", async (_, args: { dir: string }) => {
         watcher.unwatch(args.dir);
-    });
-
-    ipcMain.handle("safeStorage-encrypt", (_, message) => {
-        return safeStorage.encryptString(message);
-    });
-
-    ipcMain.handle("safeStorage-decrypt", (_, message) => {
-        return safeStorage.decryptString(message);
     });
 
     ipcMain.handle("convert-to-jpeg", (_, fileData, filename) => {

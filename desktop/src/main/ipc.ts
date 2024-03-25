@@ -7,18 +7,19 @@
  */
 
 import { ipcMain } from "electron/main";
-import {
-    computeImageEmbedding,
-    computeTextEmbedding,
-} from "services/clipService";
-import type { Model } from "types";
 import { clearElectronStore } from "../api/electronStore";
+import { getEncryptionKey, setEncryptionKey } from "../api/safeStorage";
 import {
     appVersion,
     muteUpdateNotification,
     skipAppUpdate,
     updateAndRestart,
 } from "../services/appUpdater";
+import {
+    computeImageEmbedding,
+    computeTextEmbedding,
+} from "../services/clipService";
+import type { Model } from "../types";
 import { checkExistsAndCreateDir, fsExists } from "./fs";
 import { openDirectory, openLogDirectory } from "./general";
 import { logToDisk } from "./log";
@@ -51,15 +52,15 @@ export const attachIPCHandlers = () => {
     // See: [Note: Catching exception during .send/.on]
     ipcMain.on("logToDisk", (_, message) => logToDisk(message));
 
-    ipcMain.handle("fsExists", (_, path) => fsExists(path));
-
-    ipcMain.handle("checkExistsAndCreateDir", (_, dirPath) =>
-        checkExistsAndCreateDir(dirPath),
-    );
-
     ipcMain.on("clear-electron-store", (_) => {
         clearElectronStore();
     });
+
+    ipcMain.handle("setEncryptionKey", (_, encryptionKey) =>
+        setEncryptionKey(encryptionKey),
+    );
+
+    ipcMain.handle("getEncryptionKey", (_) => getEncryptionKey());
 
     ipcMain.on("update-and-restart", (_) => {
         updateAndRestart();
@@ -81,5 +82,11 @@ export const attachIPCHandlers = () => {
 
     ipcMain.handle("computeTextEmbedding", (_, model: Model, text: string) =>
         computeTextEmbedding(model, text),
+    );
+
+    ipcMain.handle("fsExists", (_, path) => fsExists(path));
+
+    ipcMain.handle("checkExistsAndCreateDir", (_, dirPath) =>
+        checkExistsAndCreateDir(dirPath),
     );
 };

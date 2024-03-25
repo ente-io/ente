@@ -34,7 +34,6 @@ import path from "path";
 import { runFFmpegCmd } from "./api/ffmpeg";
 import { getDirFiles } from "./api/fs";
 import { convertToJPEG, generateImageThumbnail } from "./api/imageProcessor";
-import { getEncryptionKey, setEncryptionKey } from "./api/safeStorage";
 import {
     getElectronFilesFromGoogleZip,
     getPendingUploads,
@@ -121,6 +120,12 @@ const registerForegroundEventListener = (onForeground: () => void) => {
 const clearElectronStore = () => {
     ipcRenderer.send("clear-electron-store");
 };
+
+const setEncryptionKey = (encryptionKey: string): Promise<void> =>
+    ipcRenderer.invoke("setEncryptionKey", encryptionKey);
+
+const getEncryptionKey = (): Promise<string> =>
+    ipcRenderer.invoke("getEncryptionKey");
 
 // - App update
 
@@ -364,6 +369,8 @@ contextBridge.exposeInMainWorld("ElectronAPIs", {
     openDirectory,
     registerForegroundEventListener,
     clearElectronStore,
+    getEncryptionKey,
+    setEncryptionKey,
 
     // Logging
     openLogDirectory,
@@ -401,8 +408,6 @@ contextBridge.exposeInMainWorld("ElectronAPIs", {
     showUploadZipDialog,
     getElectronFilesFromGoogleZip,
     setToUploadCollection,
-    getEncryptionKey,
-    setEncryptionKey,
     getDirFiles,
     getWatchMappings,
     addWatchMapping,

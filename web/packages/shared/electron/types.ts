@@ -83,6 +83,9 @@ export interface ElectronAPIsType {
     registerForegroundEventListener: (onForeground: () => void) => void;
     clearElectronStore: () => void;
 
+    setEncryptionKey: (encryptionKey: string) => Promise<void>;
+    getEncryptionKey: () => Promise<string>;
+
     // - FS legacy
     checkExistsAndCreateDir: (dirPath: string) => Promise<void>;
 
@@ -149,8 +152,6 @@ export interface ElectronAPIsType {
         removeFolder: (folderPath: string) => Promise<void>,
     ) => void;
     isFolder: (dirPath: string) => Promise<boolean>;
-    setEncryptionKey: (encryptionKey: string) => Promise<void>;
-    getEncryptionKey: () => Promise<string>;
     convertToJPEG: (
         fileData: Uint8Array,
         filename: string,
