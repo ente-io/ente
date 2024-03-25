@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/ente-io/museum/pkg/controller/commonbilling"
 
@@ -20,7 +21,6 @@ import (
 	"github.com/ente-io/museum/pkg/repo"
 	"github.com/ente-io/museum/pkg/utils/billing"
 	"github.com/ente-io/museum/pkg/utils/email"
-	"github.com/ente-io/museum/pkg/utils/time"
 	"github.com/ente-io/stacktrace"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
@@ -465,7 +465,7 @@ func (c *StripeController) handlePaymentIntentFailed(event stripe.Event, country
 	}
 	// If the current subscription is the same as the one in the webhook, then
 	// we need to expire the subscription, and send an email to the user.
-	newExpiryTime := time.NDaysFromNow(BufferPeriodOnPaymentFailureInDays)
+	newExpiryTime := time.Now().UnixMicro()
 	err = c.BillingRepo.UpdateSubscriptionExpiryTime(
 		currentSubscription.ID, newExpiryTime)
 	if err != nil {
