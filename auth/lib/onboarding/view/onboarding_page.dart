@@ -167,7 +167,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                           text: l10n.newUser,
                         ),
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 16),
                       Container(
                         height: 56,
                         width: double.infinity,
@@ -219,11 +219,10 @@ class _OnboardingPageState extends State<OnboardingPage> {
   }
 
   Future<void> _optForOfflineMode() async {
-    final canContinue = Platform.isMacOS || Platform.isLinux
+    bool canCheckBio = Platform.isMacOS || Platform.isLinux
         ? true
         : await LocalAuthentication().canCheckBiometrics;
-
-    if (!canContinue) {
+    if (!canCheckBio) {
       showToast(
         context,
         "Sorry, biometric authentication is not supported on this device.",
