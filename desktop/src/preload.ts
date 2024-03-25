@@ -136,6 +136,19 @@ const muteUpdateNotification = (version: string) => {
     ipcRenderer.send("mute-update-notification", version);
 };
 
+// - ML
+
+const computeImageEmbedding = (
+    model: Model,
+    imageData: Uint8Array,
+): Promise<Float32Array> =>
+    ipcRenderer.invoke("computeImageEmbedding", model, imageData);
+
+const computeTextEmbedding = (
+    model: Model,
+    text: string,
+): Promise<Float32Array> =>
+    ipcRenderer.invoke("computeTextEmbedding", model, text);
 
 // - FIXME below this
 
@@ -301,103 +314,7 @@ export enum Model {
     ONNX_CLIP = "onnx-clip",
 }
 
-const computeImageEmbedding = async (
-    model: Model,
-    imageData: Uint8Array,
-): Promise<Float32Array> => {
-    let tempInputFilePath = null;
-    try {
-        tempInputFilePath = await ipcRenderer.invoke("get-temp-file-path", "");
-        const imageStream = new Response(imageData.buffer).body;
-        await writeStream(tempInputFilePath, imageStream);
-        const embedding = await ipcRenderer.invoke(
-            "compute-image-embedding",
-            model,
-            tempInputFilePath,
-        );
-        return embedding;
-    } catch (err) {
-        if (isExecError(err)) {
-            const parsedExecError = parseExecError(err);
-            throw Error(parsedExecError);
-        } else {
-            throw err;
-        }
-    } finally {
-        if (tempInputFilePath) {
-            await ipcRenderer.invoke("remove-temp-file", tempInputFilePath);
-        }
-    }
-};
-
-export async function computeTextEmbedding(
-    model: Model,
-    text: string,
-): Promise<Float32Array> {
-    try {
-        const embedding = await ipcRenderer.invoke(
-            "compute-text-embedding",
-            model,
-            text,
-        );
-        return embedding;
-    } catch (err) {
-        if (isExecError(err)) {
-            const parsedExecError = parseExecError(err);
-            throw Error(parsedExecError);
-        } else {
-            throw err;
-        }
-    }
-}
-
 // -
-
-/**
- * [Note: Custom errors across Electron/Renderer boundary]
- *
- * We need to use the `message` field to disambiguate between errors thrown by
- * the main process when invoked from the renderer process. This is because:
- *
- * > Errors thrown throw `handle` in the main process are not transparent as
- * > they are serialized and only the `message` property from the original error
- * > is provided to the renderer process.
- * >
- * > - https://www.electronjs.org/docs/latest/tutorial/ipc
- * >
- * > Ref: https://github.com/electron/electron/issues/24427
- */
-/* preload: duplicated CustomErrors */
-const CustomErrorsP = {
-    WINDOWS_NATIVE_IMAGE_PROCESSING_NOT_SUPPORTED:
-        "Windows native image processing is not supported",
-    INVALID_OS: (os: string) => `Invalid OS - ${os}`,
-    WAIT_TIME_EXCEEDED: "Wait time exceeded",
-    UNSUPPORTED_PLATFORM: (platform: string, arch: string) =>
-        `Unsupported platform - ${platform} ${arch}`,
-    MODEL_DOWNLOAD_PENDING:
-        "Model download pending, skipping clip search request",
-    INVALID_FILE_PATH: "Invalid file path",
-    INVALID_CLIP_MODEL: (model: string) => `Invalid Clip model - ${model}`,
-};
-
-const isExecError = (err: any) => {
-    return err.message.includes("Command failed:");
-};
-
-const parseExecError = (err: any) => {
-    const errMessage = err.message;
-    if (errMessage.includes("Bad CPU type in executable")) {
-        return CustomErrorsP.UNSUPPORTED_PLATFORM(
-            process.platform,
-            process.arch,
-        );
-    } else {
-        return errMessage;
-    }
-};
-
-// - General
 
 const selectDirectory = async (): Promise<string> => {
     try {
@@ -458,6 +375,10 @@ contextBridge.exposeInMainWorld("ElectronAPIs", {
     muteUpdateNotification,
     registerUpdateEventListener,
 
+    // - ML
+    computeImageEmbedding,
+    computeTextEmbedding,
+
     // - FS
     fs: {
         exists: fsExists,
@@ -498,8 +419,4 @@ contextBridge.exposeInMainWorld("ElectronAPIs", {
     deleteFolder,
     rename,
     deleteFile,
-
-    // - ML
-    computeImageEmbedding,
-    computeTextEmbedding,
 });

@@ -95,6 +95,14 @@ export interface ElectronAPIsType {
         showUpdateDialog: (updateInfo: AppUpdateInfo) => void,
     ) => void;
 
+    // - ML
+    computeImageEmbedding: (
+        model: Model,
+        imageData: Uint8Array,
+    ) => Promise<Float32Array>;
+    computeTextEmbedding: (model: Model, text: string) => Promise<Float32Array>;
+
+
     /** TODO: FIXME or migrate below this */
     saveStreamToDisk: (
         path: string,
@@ -163,9 +171,4 @@ export interface ElectronAPIsType {
     deleteFolder: (path: string) => Promise<void>;
     deleteFile: (path: string) => Promise<void>;
     rename: (oldPath: string, newPath: string) => Promise<void>;
-    computeImageEmbedding: (
-        model: Model,
-        imageData: Uint8Array,
-    ) => Promise<Float32Array>;
-    computeTextEmbedding: (model: Model, text: string) => Promise<Float32Array>;
 }

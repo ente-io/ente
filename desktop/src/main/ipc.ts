@@ -7,6 +7,11 @@
  */
 
 import { ipcMain } from "electron/main";
+import {
+    computeImageEmbedding,
+    computeTextEmbedding,
+} from "services/clipService";
+import type { Model } from "types";
 import { clearElectronStore } from "../api/electronStore";
 import {
     appVersion,
@@ -59,6 +64,7 @@ export const attachIPCHandlers = () => {
     ipcMain.on("update-and-restart", (_) => {
         updateAndRestart();
     });
+
     ipcMain.on("skip-app-update", (_, version) => {
         skipAppUpdate(version);
     });
@@ -66,4 +72,14 @@ export const attachIPCHandlers = () => {
     ipcMain.on("mute-update-notification", (_, version) => {
         muteUpdateNotification(version);
     });
+
+    ipcMain.handle(
+        "computeImageEmbedding",
+        (_, model: Model, imageData: Uint8Array) =>
+            computeImageEmbedding(model, imageData),
+    );
+
+    ipcMain.handle("computeTextEmbedding", (_, model: Model, text: string) =>
+        computeTextEmbedding(model, text),
+    );
 };
