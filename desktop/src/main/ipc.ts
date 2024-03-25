@@ -108,6 +108,8 @@ export const attachIPCHandlers = () => {
 
     ipcMain.handle("getEncryptionKey", (_) => getEncryptionKey());
 
+    // - App update
+
     ipcMain.on("update-and-restart", (_) => updateAndRestart());
 
     ipcMain.on("skip-app-update", (_, version) => skipAppUpdate(version));
@@ -115,6 +117,8 @@ export const attachIPCHandlers = () => {
     ipcMain.on("mute-update-notification", (_, version) =>
         muteUpdateNotification(version),
     );
+
+    // - Conversion
 
     ipcMain.handle("convertToJPEG", (_, fileData, filename) =>
         convertToJPEG(fileData, filename),
@@ -137,6 +141,8 @@ export const attachIPCHandlers = () => {
         ) => runFFmpegCmd(cmd, inputFile, outputFileName, dontTimeout),
     );
 
+    // - ML
+
     ipcMain.handle(
         "computeImageEmbedding",
         (_, model: Model, imageData: Uint8Array) =>
@@ -147,6 +153,8 @@ export const attachIPCHandlers = () => {
         computeTextEmbedding(model, text),
     );
 
+    // - File selection
+
     ipcMain.handle("selectDirectory", (_) => selectDirectory());
 
     ipcMain.handle("showUploadFilesDialog", (_) => showUploadFilesDialog());
@@ -155,7 +163,11 @@ export const attachIPCHandlers = () => {
 
     ipcMain.handle("showUploadZipDialog", (_) => showUploadZipDialog());
 
+    // - FS
+
     ipcMain.handle("fsExists", (_, path) => fsExists(path));
+
+    // - FS Legacy
 
     ipcMain.handle("checkExistsAndCreateDir", (_, dirPath) =>
         checkExistsAndCreateDir(dirPath),
@@ -187,6 +199,8 @@ export const attachIPCHandlers = () => {
         rename(oldPath, newPath),
     );
 
+    // - Upload
+
     ipcMain.handle("getPendingUploads", (_) => getPendingUploads());
 
     ipcMain.handle(
@@ -214,6 +228,8 @@ export const attachIPCHandlers = () => {
  * actual handlers.
  */
 export const attachFSWatchIPCHandlers = (watcher: FSWatcher) => {
+    // - Watch
+
     ipcMain.handle(
         "addWatchMapping",
         (

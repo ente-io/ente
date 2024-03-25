@@ -57,7 +57,10 @@ class ImportService {
                 filePaths.push((fileWithCollection.file as ElectronFile).path);
             }
         }
-        await ElectronAPIs.setToUploadFiles(PICKED_UPLOAD_TYPE.FILES, filePaths);
+        await ElectronAPIs.setToUploadFiles(
+            PICKED_UPLOAD_TYPE.FILES,
+            filePaths,
+        );
     }
 
     async cancelRemainingUploads() {

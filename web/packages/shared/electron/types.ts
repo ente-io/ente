@@ -16,6 +16,12 @@ export enum FILE_PATH_TYPE {
     ZIPS = "zips",
 }
 
+export enum PICKED_UPLOAD_TYPE {
+    FILES = "files",
+    FOLDERS = "folders",
+    ZIPS = "zips",
+}
+
 /**
  * Extra APIs provided by the Node.js layer when our code is running in Electron
  *
@@ -205,7 +211,9 @@ export interface ElectronAPIsType {
         type: string;
     }>;
     setToUploadFiles: (
-        type: FILE_PATH_TYPE,
+        /** TODO(MR): This is the actual type */
+        // type: FILE_PATH_TYPE,
+        type: PICKED_UPLOAD_TYPE,
         filePaths: string[],
     ) => Promise<void>;
     getElectronFilesFromGoogleZip: (

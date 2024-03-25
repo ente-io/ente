@@ -427,7 +427,7 @@ class UploadManager {
         this.setFiles((files) => sortFiles([...files, decryptedFile]));
     }
 
-    private updateElectronRemainingFiles(
+    private async updateElectronRemainingFiles(
         fileWithCollection: FileWithCollection,
     ) {
         if (isElectron()) {

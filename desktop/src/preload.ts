@@ -27,10 +27,11 @@
  */
 
 import { contextBridge, ipcRenderer } from "electron";
-import { setupLogging } from "./main/log";
 import type { ElectronFile } from "./types";
 
-setupLogging();
+// TODO (MR): Uncomment and FIXME once preload is getting loaded.
+// import { setupLogging } from "./main/log";
+// setupLogging();
 
 // - General
 
