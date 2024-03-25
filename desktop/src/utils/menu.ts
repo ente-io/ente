@@ -187,8 +187,8 @@ export async function buildMenuBar(mainWindow: BrowserWindow): Promise<Menu> {
             label: "Help",
             submenu: [
                 {
-                    label: "FAQ",
-                    click: () => shell.openExternal("https://ente.io/faq/"),
+                    label: "Ente Help",
+                    click: () => shell.openExternal("https://help.ente.io/photos/"),
                 },
                 { type: "separator" },
                 {
