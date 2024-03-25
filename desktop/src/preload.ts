@@ -31,7 +31,6 @@ import { createWriteStream, existsSync } from "node:fs";
 import * as fs from "node:fs/promises";
 import { Readable } from "node:stream";
 import path from "path";
-import type { ElectronFile } from "./types";
 import { getDirFiles } from "./api/fs";
 import {
     getElectronFilesFromGoogleZip,
@@ -42,12 +41,12 @@ import {
 import {
     addWatchMapping,
     getWatchMappings,
-    registerWatcherFunctions,
     removeWatchMapping,
     updateWatchMappingIgnoredFiles,
     updateWatchMappingSyncedFiles,
 } from "./api/watch";
 import { logErrorSentry, setupLogging } from "./main/log";
+import type { ElectronFile } from "./types";
 
 setupLogging();
 
@@ -208,6 +207,25 @@ const showUploadZipDialog = (): Promise<{
     zipPaths: string[];
     files: ElectronFile[];
 }> => ipcRenderer.invoke("showUploadZipDialog");
+
+// - Watch
+
+const registerWatcherFunctions = (
+    addFile: (file: ElectronFile) => Promise<void>,
+    removeFile: (path: string) => Promise<void>,
+    removeFolder: (folderPath: string) => Promise<void>,
+) => {
+    ipcRenderer.removeAllListeners("watch-add");
+    ipcRenderer.removeAllListeners("watch-unlink");
+    ipcRenderer.removeAllListeners("watch-unlink-dir");
+    ipcRenderer.on("watch-add", (_, file: ElectronFile) => addFile(file));
+    ipcRenderer.on("watch-unlink", (_, filePath: string) =>
+        removeFile(filePath),
+    );
+    ipcRenderer.on("watch-unlink-dir", (_, folderPath: string) =>
+        removeFolder(folderPath),
+    );
+};
 
 // - FIXME below this
 
@@ -433,6 +451,9 @@ contextBridge.exposeInMainWorld("ElectronAPIs", {
     showUploadDirsDialog,
     showUploadZipDialog,
 
+    // - Watch
+    registerWatcherFunctions,
+
     // - FS
     fs: {
         exists: fsExists,
@@ -455,7 +476,7 @@ contextBridge.exposeInMainWorld("ElectronAPIs", {
     getWatchMappings,
     addWatchMapping,
     removeWatchMapping,
-    registerWatcherFunctions,
+
     isFolder,
     updateWatchMappingSyncedFiles,
     updateWatchMappingIgnoredFiles,

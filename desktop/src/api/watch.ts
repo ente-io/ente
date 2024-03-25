@@ -1,7 +1,5 @@
 import { ipcRenderer } from "electron";
 import ElectronLog from "electron-log";
-import path from "path";
-import { getElectronFile } from "../services/fs";
 import { getWatchMappings, setWatchMappings } from "../services/watch";
 import { ElectronFile, WatchMapping } from "../types";
 import { isMappingPresent } from "../utils/watch";
@@ -87,28 +85,5 @@ export function updateWatchMappingIgnoredFiles(
     setWatchMappings(watchMappings);
 }
 
-export function registerWatcherFunctions(
-    addFile: (file: ElectronFile) => Promise<void>,
-    removeFile: (path: string) => Promise<void>,
-    removeFolder: (folderPath: string) => Promise<void>,
-) {
-    ipcRenderer.removeAllListeners("watch-add");
-    ipcRenderer.removeAllListeners("watch-change");
-    ipcRenderer.removeAllListeners("watch-unlink-dir");
-    ipcRenderer.on("watch-add", async (_, filePath: string) => {
-        filePath = filePath.split(path.sep).join(path.posix.sep);
-
-        await addFile(await getElectronFile(filePath));
-    });
-    ipcRenderer.on("watch-unlink", async (_, filePath: string) => {
-        filePath = filePath.split(path.sep).join(path.posix.sep);
-
-        await removeFile(filePath);
-    });
-    ipcRenderer.on("watch-unlink-dir", async (_, folderPath: string) => {
-        folderPath = folderPath.split(path.sep).join(path.posix.sep);
-        await removeFolder(folderPath);
-    });
-}
 
 export { getWatchMappings } from "../services/watch";

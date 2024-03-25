@@ -145,6 +145,15 @@ export interface ElectronAPIsType {
         files: ElectronFile[];
     }>;
 
+    // - Watch
+
+    registerWatcherFunctions: (
+        addFile: (file: ElectronFile) => Promise<void>,
+        removeFile: (path: string) => Promise<void>,
+        removeFolder: (folderPath: string) => Promise<void>,
+    ) => void;
+
+
     // - FS legacy
     checkExistsAndCreateDir: (dirPath: string) => Promise<void>;
 
@@ -182,11 +191,6 @@ export interface ElectronAPIsType {
         uploadStrategy: number,
     ) => Promise<void>;
     removeWatchMapping: (folderPath: string) => Promise<void>;
-    registerWatcherFunctions: (
-        addFile: (file: ElectronFile) => Promise<void>,
-        removeFile: (path: string) => Promise<void>,
-        removeFolder: (folderPath: string) => Promise<void>,
-    ) => void;
     isFolder: (dirPath: string) => Promise<boolean>;
     moveFile: (oldPath: string, newPath: string) => Promise<void>;
     deleteFolder: (path: string) => Promise<void>;
