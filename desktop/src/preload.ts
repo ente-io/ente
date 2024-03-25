@@ -38,11 +38,6 @@ import {
     setToUploadCollection,
     setToUploadFiles,
 } from "./api/upload";
-import {
-    getWatchMappings,
-    updateWatchMappingIgnoredFiles,
-    updateWatchMappingSyncedFiles,
-} from "./api/watch";
 import { logErrorSentry, setupLogging } from "./main/log";
 import type { ElectronFile } from "./types";
 
@@ -239,6 +234,37 @@ const addWatchMapping = (
 
 const removeWatchMapping = (folderPath: string): Promise<void> =>
     ipcRenderer.invoke("removeWatchMapping", folderPath);
+
+/* preload: duplicated WatchMappingSyncedFile */
+interface WatchMappingSyncedFile {
+    path: string;
+    uploadedFileID: number;
+    collectionID: number;
+}
+
+/* preload: duplicated WatchMapping */
+export interface WatchMapping {
+    rootFolderName: string;
+    uploadStrategy: number;
+    folderPath: string;
+    syncedFiles: WatchMappingSyncedFile[];
+    ignoredFiles: string[];
+}
+
+const getWatchMappings = (): Promise<WatchMapping[]> =>
+    ipcRenderer.invoke("getWatchMappings");
+
+const updateWatchMappingSyncedFiles = (
+    folderPath: string,
+    files: WatchMapping["syncedFiles"],
+): Promise<void> =>
+    ipcRenderer.invoke("updateWatchMappingSyncedFiles", folderPath, files);
+
+const updateWatchMappingIgnoredFiles = (
+    folderPath: string,
+    files: WatchMapping["ignoredFiles"],
+): Promise<void> =>
+    ipcRenderer.invoke("updateWatchMappingIgnoredFiles", folderPath, files);
 
 // - FIXME below this
 
@@ -468,6 +494,9 @@ contextBridge.exposeInMainWorld("ElectronAPIs", {
     registerWatcherFunctions,
     addWatchMapping,
     removeWatchMapping,
+    getWatchMappings,
+    updateWatchMappingSyncedFiles,
+    updateWatchMappingIgnoredFiles,
 
     // - FS
     fs: {
@@ -488,11 +517,8 @@ contextBridge.exposeInMainWorld("ElectronAPIs", {
     getElectronFilesFromGoogleZip,
     setToUploadCollection,
     getDirFiles,
-    getWatchMappings,
 
     isFolder,
-    updateWatchMappingSyncedFiles,
-    updateWatchMappingIgnoredFiles,
     moveFile,
     deleteFolder,
     rename,

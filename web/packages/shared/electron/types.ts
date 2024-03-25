@@ -161,6 +161,17 @@ export interface ElectronAPIsType {
 
     removeWatchMapping: (folderPath: string) => Promise<void>;
 
+    getWatchMappings: () => Promise<WatchMapping[]>;
+
+    updateWatchMappingSyncedFiles: (
+        folderPath: string,
+        files: WatchMapping["syncedFiles"],
+    ) => Promise<void>;
+
+    updateWatchMappingIgnoredFiles: (
+        folderPath: string,
+        files: WatchMapping["ignoredFiles"],
+    ) => Promise<void>;
 
     // - FS legacy
     checkExistsAndCreateDir: (dirPath: string) => Promise<void>;
@@ -184,15 +195,6 @@ export interface ElectronAPIsType {
     ) => Promise<ElectronFile[]>;
     setToUploadCollection: (collectionName: string) => void;
     getDirFiles: (dirPath: string) => Promise<ElectronFile[]>;
-    getWatchMappings: () => WatchMapping[];
-    updateWatchMappingSyncedFiles: (
-        folderPath: string,
-        files: WatchMapping["syncedFiles"],
-    ) => void;
-    updateWatchMappingIgnoredFiles: (
-        folderPath: string,
-        files: WatchMapping["ignoredFiles"],
-    ) => void;
     isFolder: (dirPath: string) => Promise<boolean>;
     moveFile: (oldPath: string, newPath: string) => Promise<void>;
     deleteFolder: (path: string) => Promise<void>;

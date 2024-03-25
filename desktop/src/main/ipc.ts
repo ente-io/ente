@@ -10,7 +10,6 @@ import type { FSWatcher } from "chokidar";
 import { ipcMain } from "electron/main";
 import { clearElectronStore } from "../api/electronStore";
 import { getEncryptionKey, setEncryptionKey } from "../api/safeStorage";
-import { addWatchMapping, removeWatchMapping } from "../api/watch";
 import {
     appVersion,
     muteUpdateNotification,
@@ -26,7 +25,14 @@ import {
     convertToJPEG,
     generateImageThumbnail,
 } from "../services/imageProcessor";
-import type { ElectronFile, Model } from "../types";
+import {
+    addWatchMapping,
+    getWatchMappings,
+    removeWatchMapping,
+    updateWatchMappingIgnoredFiles,
+    updateWatchMappingSyncedFiles,
+} from "../services/watch";
+import type { ElectronFile, Model, WatchMapping } from "../types";
 import {
     selectDirectory,
     showUploadDirsDialog,
@@ -159,5 +165,19 @@ export const attachFSWatchIPCHandlers = (watcher: FSWatcher) => {
 
     ipcMain.handle("removeWatchMapping", (_, folderPath: string) =>
         removeWatchMapping(watcher, folderPath),
+    );
+
+    ipcMain.handle("getWatchMappings", (_) => getWatchMappings());
+
+    ipcMain.handle(
+        "updateWatchMappingSyncedFiles",
+        (_, folderPath: string, files: WatchMapping["syncedFiles"]) =>
+            updateWatchMappingSyncedFiles(folderPath, files),
+    );
+
+    ipcMain.handle(
+        "updateWatchMappingIgnoredFiles",
+        (_, folderPath: string, files: WatchMapping["ignoredFiles"]) =>
+            updateWatchMappingIgnoredFiles(folderPath, files),
     );
 };
