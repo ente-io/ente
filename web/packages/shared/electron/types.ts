@@ -11,6 +11,11 @@ export enum Model {
     ONNX_CLIP = "onnx-clip",
 }
 
+export enum FILE_PATH_TYPE {
+    FILES = "files",
+    ZIPS = "zips",
+}
+
 /**
  * Extra APIs provided by the Node.js layer when our code is running in Electron
  *
@@ -192,17 +197,20 @@ export interface ElectronAPIsType {
     deleteFile: (path: string) => Promise<void>;
     rename: (oldPath: string, newPath: string) => Promise<void>;
 
-    /** TODO: FIXME or migrate below this */
+    // - Upload
 
     getPendingUploads: () => Promise<{
         files: ElectronFile[];
         collectionName: string;
         type: string;
     }>;
-    setToUploadFiles: (type: string, filePaths: string[]) => void;
+    setToUploadFiles: (
+        type: FILE_PATH_TYPE,
+        filePaths: string[],
+    ) => Promise<void>;
     getElectronFilesFromGoogleZip: (
         filePath: string,
     ) => Promise<ElectronFile[]>;
-    setToUploadCollection: (collectionName: string) => void;
+    setToUploadCollection: (collectionName: string) => Promise<void>;
     getDirFiles: (dirPath: string) => Promise<ElectronFile[]>;
 }

@@ -7,6 +7,12 @@ import { ElectronFile } from "../types";
 
 const FILE_STREAM_CHUNK_SIZE: number = 4 * 1024 * 1024;
 
+export async function getDirFiles(dirPath: string) {
+    const files = await getDirFilePaths(dirPath);
+    const electronFiles = await Promise.all(files.map(getElectronFile));
+    return electronFiles;
+}
+
 // https://stackoverflow.com/a/63111390
 export const getDirFilePaths = async (dirPath: string) => {
     if (!(await fs.stat(dirPath)).isDirectory()) {

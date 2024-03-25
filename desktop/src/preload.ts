@@ -27,13 +27,6 @@
  */
 
 import { contextBridge, ipcRenderer } from "electron";
-import { getDirFiles } from "./api/fs";
-import {
-    getElectronFilesFromGoogleZip,
-    getPendingUploads,
-    setToUploadCollection,
-    setToUploadFiles,
-} from "./api/upload";
 import { setupLogging } from "./main/log";
 import type { ElectronFile } from "./types";
 
@@ -159,7 +152,7 @@ const runFFmpegCmd = (
 // - ML
 
 /* preload: duplicated Model */
-export enum Model {
+enum Model {
     GGML_CLIP = "ggml-clip",
     ONNX_CLIP = "onnx-clip",
 }
@@ -236,7 +229,7 @@ interface WatchMappingSyncedFile {
 }
 
 /* preload: duplicated WatchMapping */
-export interface WatchMapping {
+interface WatchMapping {
     rootFolderName: string;
     uploadStrategy: number;
     folderPath: string;
@@ -289,6 +282,36 @@ const deleteFile = (path: string): Promise<void> =>
 
 const rename = (oldPath: string, newPath: string): Promise<void> =>
     ipcRenderer.invoke("rename", oldPath, newPath);
+
+// - Upload
+
+const getPendingUploads = (): Promise<{
+    files: ElectronFile[];
+    collectionName: string;
+    type: string;
+}> => ipcRenderer.invoke("getPendingUploads");
+
+/* preload: duplicated FILE_PATH_TYPE */
+enum FILE_PATH_TYPE {
+    FILES = "files",
+    ZIPS = "zips",
+}
+
+const setToUploadFiles = (
+    type: FILE_PATH_TYPE,
+    filePaths: string[],
+): Promise<void> => ipcRenderer.invoke("setToUploadFiles", type, filePaths);
+
+const getElectronFilesFromGoogleZip = (
+    filePath: string,
+): Promise<ElectronFile[]> =>
+    ipcRenderer.invoke("getElectronFilesFromGoogleZip", filePath);
+
+const setToUploadCollection = (collectionName: string): Promise<void> =>
+    ipcRenderer.invoke("setToUploadCollection", collectionName);
+
+const getDirFiles = (dirPath: string): Promise<ElectronFile[]> =>
+    ipcRenderer.invoke("getDirFiles", dirPath);
 
 // These objects exposed here will become available to the JS code in our
 // renderer (the web/ code) as `window.ElectronAPIs.*`
@@ -381,7 +404,7 @@ contextBridge.exposeInMainWorld("ElectronAPIs", {
     deleteFile,
     rename,
 
-    // - Export
+    // - Upload
 
     getPendingUploads,
     setToUploadFiles,

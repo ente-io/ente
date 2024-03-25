@@ -11,6 +11,12 @@ import { ipcMain } from "electron/main";
 import { clearElectronStore } from "../api/electronStore";
 import { getEncryptionKey, setEncryptionKey } from "../api/safeStorage";
 import {
+    getElectronFilesFromGoogleZip,
+    getPendingUploads,
+    setToUploadCollection,
+    setToUploadFiles,
+} from "../api/upload";
+import {
     appVersion,
     muteUpdateNotification,
     skipAppUpdate,
@@ -21,6 +27,7 @@ import {
     computeTextEmbedding,
 } from "../services/clipService";
 import { runFFmpegCmd } from "../services/ffmpeg";
+import { getDirFiles } from "../services/fs";
 import {
     convertToJPEG,
     generateImageThumbnail,
@@ -32,7 +39,12 @@ import {
     updateWatchMappingIgnoredFiles,
     updateWatchMappingSyncedFiles,
 } from "../services/watch";
-import type { ElectronFile, Model, WatchMapping } from "../types";
+import type {
+    ElectronFile,
+    FILE_PATH_TYPE,
+    Model,
+    WatchMapping,
+} from "../types";
 import {
     selectDirectory,
     showUploadDirsDialog,
@@ -174,6 +186,24 @@ export const attachIPCHandlers = () => {
     ipcMain.handle("rename", (_, oldPath: string, newPath: string) =>
         rename(oldPath, newPath),
     );
+
+    ipcMain.handle("getPendingUploads", (_) => getPendingUploads());
+
+    ipcMain.handle(
+        "setToUploadFiles",
+        (_, type: FILE_PATH_TYPE, filePaths: string[]) =>
+            setToUploadFiles(type, filePaths),
+    );
+
+    ipcMain.handle("getElectronFilesFromGoogleZip", (_, filePath: string) =>
+        getElectronFilesFromGoogleZip(filePath),
+    );
+
+    ipcMain.handle("setToUploadCollection", (_, collectionName: string) =>
+        setToUploadCollection(collectionName),
+    );
+
+    ipcMain.handle("getDirFiles", (_, dirPath: string) => getDirFiles(dirPath));
 };
 
 /**
