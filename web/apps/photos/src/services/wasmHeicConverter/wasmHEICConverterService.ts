@@ -2,9 +2,9 @@ import { CustomError } from "@ente/shared/error";
 import { addLogLine } from "@ente/shared/logging";
 import { retryAsyncFunction } from "@ente/shared/promise";
 import { logError } from "@ente/shared/sentry";
+import QueueProcessor from "@ente/shared/utils/queueProcessor";
 import { convertBytesToHumanReadable } from "@ente/shared/utils/size";
 import { ComlinkWorker } from "@ente/shared/worker/comlinkWorker";
-import QueueProcessor from "services/queueProcessor";
 import { getDedicatedConvertWorker } from "utils/comlink/ComlinkConvertWorker";
 import { DedicatedConvertWorker } from "worker/convert.worker";
 

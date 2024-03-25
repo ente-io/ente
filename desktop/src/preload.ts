@@ -36,10 +36,6 @@ import { getDirFiles } from "./api/fs";
 import { convertToJPEG, generateImageThumbnail } from "./api/imageProcessor";
 import { getEncryptionKey, setEncryptionKey } from "./api/safeStorage";
 import {
-    registerForegroundEventListener,
-    registerUpdateEventListener,
-} from "./api/system";
-import {
     getElectronFilesFromGoogleZip,
     getPendingUploads,
     setToUploadCollection,
@@ -87,6 +83,59 @@ const openLogDirectory = (): Promise<void> =>
  */
 const logToDisk = (message: string): void =>
     ipcRenderer.send("logToDisk", message);
+
+/**
+ * Return true if there is a file or directory at the given
+ * {@link path}.
+ */
+const fsExists = (path: string): Promise<boolean> =>
+    ipcRenderer.invoke("fsExists", path);
+
+// - AUDIT below this
+
+const checkExistsAndCreateDir = (dirPath: string): Promise<void> =>
+    ipcRenderer.invoke("checkExistsAndCreateDir", dirPath);
+
+/* preload: duplicated */
+interface AppUpdateInfo {
+    autoUpdatable: boolean;
+    version: string;
+}
+
+const registerUpdateEventListener = (
+    showUpdateDialog: (updateInfo: AppUpdateInfo) => void,
+) => {
+    ipcRenderer.removeAllListeners("show-update-dialog");
+    ipcRenderer.on("show-update-dialog", (_, updateInfo: AppUpdateInfo) => {
+        showUpdateDialog(updateInfo);
+    });
+};
+
+const registerForegroundEventListener = (onForeground: () => void) => {
+    ipcRenderer.removeAllListeners("app-in-foreground");
+    ipcRenderer.on("app-in-foreground", () => {
+        onForeground();
+    });
+};
+
+const clearElectronStore = () => {
+    ipcRenderer.send("clear-electron-store");
+};
+
+// - App update
+
+const updateAndRestart = () => {
+    ipcRenderer.send("update-and-restart");
+};
+
+const skipAppUpdate = (version: string) => {
+    ipcRenderer.send("skip-app-update", version);
+};
+
+const muteUpdateNotification = (version: string) => {
+    ipcRenderer.send("mute-update-notification", version);
+};
+
 
 // - FIXME below this
 
@@ -160,11 +209,6 @@ const writeNodeStream = async (
 };
 
 // - Export
-
-const exists = (path: string) => existsSync(path);
-
-const checkExistsAndCreateDir = (dirPath: string) =>
-    fs.mkdir(dirPath, { recursive: true });
 
 const saveStreamToDisk = writeStream;
 
@@ -363,24 +407,6 @@ const selectDirectory = async (): Promise<string> => {
     }
 };
 
-const clearElectronStore = () => {
-    ipcRenderer.send("clear-electron-store");
-};
-
-// - App update
-
-const updateAndRestart = () => {
-    ipcRenderer.send("update-and-restart");
-};
-
-const skipAppUpdate = (version: string) => {
-    ipcRenderer.send("skip-app-update", version);
-};
-
-const muteUpdateNotification = (version: string) => {
-    ipcRenderer.send("mute-update-notification", version);
-};
-
 // -
 
 // These objects exposed here will become available to the JS code in our
@@ -419,6 +445,8 @@ contextBridge.exposeInMainWorld("ElectronAPIs", {
     // General
     appVersion,
     openDirectory,
+    registerForegroundEventListener,
+    clearElectronStore,
 
     // Logging
     openLogDirectory,
@@ -428,15 +456,22 @@ contextBridge.exposeInMainWorld("ElectronAPIs", {
     updateAndRestart,
     skipAppUpdate,
     muteUpdateNotification,
+    registerUpdateEventListener,
+
+    // - FS
+    fs: {
+        exists: fsExists,
+    },
+
+    // - FS legacy
+    // TODO: Move these into fs + document + rename if needed
+    checkExistsAndCreateDir,
 
     // - Export
-    exists,
-    checkExistsAndCreateDir,
     saveStreamToDisk,
     saveFileToDisk,
 
     selectDirectory,
-    clearElectronStore,
     readTextFile,
     showUploadFilesDialog,
     showUploadDirsDialog,
@@ -456,11 +491,9 @@ contextBridge.exposeInMainWorld("ElectronAPIs", {
     updateWatchMappingSyncedFiles,
     updateWatchMappingIgnoredFiles,
     convertToJPEG,
-    registerUpdateEventListener,
 
     runFFmpegCmd,
     generateImageThumbnail,
-    registerForegroundEventListener,
     moveFile,
     deleteFolder,
     rename,

@@ -8,13 +8,13 @@ Future<void> main() {
     responseDataCallback: (data) async {
       if (data != null) {
         final timeline = driver.Timeline.fromJson(
-          data['scrolling_summary'] as Map<String, dynamic>,
+          data['home_gallery_scrolling_summary'] as Map<String, dynamic>,
         );
 
         final summary = driver.TimelineSummary.summarize(timeline);
 
         await summary.writeTimelineToFile(
-          'scrolling_summary',
+          'home_gallery_scrolling_summary',
           pretty: true,
           includeSummary: true,
           //Specify destination directory for the timeline files.

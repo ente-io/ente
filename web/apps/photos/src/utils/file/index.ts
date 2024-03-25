@@ -39,6 +39,7 @@ import { isArchivedFile, updateMagicMetadata } from "utils/magicMetadata";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { CustomError } from "@ente/shared/error";
 import { addLocalLog, addLogLine } from "@ente/shared/logging";
+import { isPlaybackPossible } from "@ente/shared/media/video-playback";
 import { convertBytesToHumanReadable } from "@ente/shared/utils/size";
 import isElectron from "is-electron";
 import { moveToHiddenCollection } from "services/collectionService";
@@ -49,7 +50,6 @@ import {
     updateFilePublicMagicMetadata,
 } from "services/fileService";
 import { FileTypeInfo } from "types/upload";
-import { isPlaybackPossible } from "utils/photoFrame";
 
 import { default as ElectronAPIs } from "@ente/shared/electron";
 import { downloadUsingAnchor } from "@ente/shared/utils";
@@ -778,7 +778,7 @@ export async function downloadFileDesktop(
     if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
         const fileBlob = await new Response(updatedFileStream).blob();
         const livePhoto = await decodeLivePhoto(file, fileBlob);
-        const imageExportName = getUniqueFileExportName(
+        const imageExportName = await getUniqueFileExportName(
             downloadPath,
             livePhoto.imageNameTitle,
         );
@@ -788,7 +788,7 @@ export async function downloadFileDesktop(
             imageStream,
         );
         try {
-            const videoExportName = getUniqueFileExportName(
+            const videoExportName = await getUniqueFileExportName(
                 downloadPath,
                 livePhoto.videoNameTitle,
             );
@@ -804,7 +804,7 @@ export async function downloadFileDesktop(
             throw e;
         }
     } else {
-        const fileExportName = getUniqueFileExportName(
+        const fileExportName = await getUniqueFileExportName(
             downloadPath,
             file.metadata.title,
         );
