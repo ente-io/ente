@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:app_links/app_links.dart';
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/models/account/two_factor.dart';
@@ -9,7 +10,6 @@ import 'package:ente_auth/ui/components/models/button_type.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-import 'package:uni_links/uni_links.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 class PasskeyPage extends StatefulWidget {
@@ -17,8 +17,8 @@ class PasskeyPage extends StatefulWidget {
 
   const PasskeyPage(
     this.sessionID, {
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<PasskeyPage> createState() => _PasskeyPageState();
@@ -77,8 +77,9 @@ class _PasskeyPageState extends State<PasskeyPage> {
   }
 
   Future<bool> _initDeepLinks() async {
+    final appLinks = AppLinks();
     // Attach a listener to the stream
-    linkStream.listen(
+    appLinks.stringLinkStream.listen(
       _handleDeeplink,
       onError: (err) {
         _logger.severe(err);

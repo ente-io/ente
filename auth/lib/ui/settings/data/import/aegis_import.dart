@@ -91,7 +91,7 @@ Future<int?> _processAegisExportFile(
   final jsonString = await file.readAsString();
   final decodedJson = jsonDecode(jsonString);
   final isEncrypted = decodedJson['header']['slots'] != null;
-  var aegisDB;
+  Map? aegisDB;
   if (isEncrypted) {
     String? password;
     try {
@@ -127,7 +127,7 @@ Future<int?> _processAegisExportFile(
     aegisDB = decodedJson['db'];
   }
   final parsedCodes = [];
-  for (var item in aegisDB['entries']) {
+  for (var item in aegisDB?['entries']) {
     var kind = item['type'];
     var account = item['name'];
     var issuer = item['issuer'];

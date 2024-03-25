@@ -13,11 +13,12 @@ import 'package:ente_auth/ui/components/menu_item_widget.dart';
 import 'package:ente_auth/ui/settings/common_settings.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/navigation_util.dart';
+import 'package:ente_auth/utils/platform_util.dart';
+import 'package:ente_crypto_dart/ente_crypto_dart.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_sodium/flutter_sodium.dart';
 
 class AccountSectionWidget extends StatelessWidget {
-  AccountSectionWidget({Key? key}) : super(key: key);
+  AccountSectionWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -47,6 +48,7 @@ class AccountSectionWidget extends StatelessWidget {
             context,
             l10n.authToChangeYourEmail,
           );
+          await PlatformUtil.refocusWindows();
           if (hasAuthenticated) {
             // ignore: unawaited_futures
             showDialog(
@@ -106,7 +108,7 @@ class AccountSectionWidget extends StatelessWidget {
             String recoveryKey;
             try {
               recoveryKey =
-                  Sodium.bin2hex(Configuration.instance.getRecoveryKey());
+                  CryptoUtil.bin2hex(Configuration.instance.getRecoveryKey());
             } catch (e) {
               // ignore: unawaited_futures
               showGenericErrorDialog(context: context);

@@ -4,9 +4,10 @@ import 'package:dio/dio.dart';
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/core/event_bus.dart';
 import 'package:ente_auth/events/endpoint_updated_event.dart';
+import 'package:ente_auth/utils/package_info_util.dart';
+import 'package:ente_auth/utils/platform_util.dart';
 import 'package:fk_user_agent/fk_user_agent.dart';
 import 'package:flutter/foundation.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 import 'package:uuid/uuid.dart';
 
 int kConnectTimeout = 15000;
@@ -16,34 +17,41 @@ class Network {
   late Dio _enteDio;
 
   Future<void> init() async {
-    await FkUserAgent.init();
-    final packageInfo = await PackageInfo.fromPlatform();
+    if (PlatformUtil.isMobile()) await FkUserAgent.init();
+    final packageInfo = await PackageInfoUtil().getPackageInfo();
+    final version = PackageInfoUtil().getVersion(packageInfo);
+    final packageName = PackageInfoUtil().getPackageName(packageInfo);
     final endpoint = Configuration.instance.getHttpEndpoint();
-    
+
     _dio = Dio(
       BaseOptions(
-        connectTimeout: kConnectTimeout,
+        connectTimeout: Duration(milliseconds: kConnectTimeout),
         headers: {
-          HttpHeaders.userAgentHeader: FkUserAgent.userAgent,
-          'X-Client-Version': packageInfo.version,
-          'X-Client-Package': packageInfo.packageName,
+          HttpHeaders.userAgentHeader: PlatformUtil.isMobile()
+              ? FkUserAgent.userAgent
+              : Platform.operatingSystem,
+          'X-Client-Version': version,
+          'X-Client-Package': packageName,
         },
       ),
     );
-    
+
     _enteDio = Dio(
       BaseOptions(
         baseUrl: endpoint,
-        connectTimeout: kConnectTimeout,
+        connectTimeout: Duration(milliseconds: kConnectTimeout),
         headers: {
-          HttpHeaders.userAgentHeader: FkUserAgent.userAgent,
-          'X-Client-Version': packageInfo.version,
-          'X-Client-Package': packageInfo.packageName,
+          if (PlatformUtil.isMobile())
+            HttpHeaders.userAgentHeader: FkUserAgent.userAgent
+          else
+            HttpHeaders.userAgentHeader: Platform.operatingSystem,
+          'X-Client-Version': version,
+          'X-Client-Package': packageName,
         },
       ),
     );
     _setupInterceptors(endpoint);
-    
+
     Bus.instance.on<EndpointUpdatedEvent>().listen((event) {
       final endpoint = Configuration.instance.getHttpEndpoint();
       _enteDio.options.baseUrl = endpoint;

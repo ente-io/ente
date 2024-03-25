@@ -25,7 +25,7 @@ class AuthenticatorGateway {
     try {
       final response = await _enteDio.get("/authenticator/key");
       return AuthKey.fromMap(response.data);
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       if (e.response != null && (e.response!.statusCode ?? 0) == 404) {
         throw AuthenticatorKeyNotFound();
       } else {
@@ -90,7 +90,7 @@ class AuthenticatorGateway {
       }
       return authEntities;
     } catch (e) {
-      if (e is DioError && e.response?.statusCode == 401) {
+      if (e is DioException && e.response?.statusCode == 401) {
         throw UnauthorizedError();
       } else {
         rethrow;

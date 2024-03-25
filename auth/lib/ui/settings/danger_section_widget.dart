@@ -11,7 +11,7 @@ import 'package:ente_auth/utils/navigation_util.dart';
 import 'package:flutter/material.dart';
 
 class DangerSectionWidget extends StatelessWidget {
-  const DangerSectionWidget({Key? key}) : super(key: key);
+  const DangerSectionWidget({super.key});
 
   @override
   Widget build(BuildContext context) {

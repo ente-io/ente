@@ -235,14 +235,14 @@ class SuperLogging {
       extraLines = null;
     }
 
-    final str = (config.prefix) + " " + rec.toPrettyString(extraLines);
+    final str = "${config.prefix} ${rec.toPrettyString(extraLines)}";
 
     // write to stdout
     printLog(str);
 
     // push to log queue
     if (fileIsEnabled) {
-      fileQueueEntries.add(str + '\n');
+      fileQueueEntries.add('$str\n');
       if (fileQueueEntries.length == 1) {
         flushQueue();
       }
@@ -275,7 +275,7 @@ class SuperLogging {
   static var logChunkSize = 800;
 
   static void printLog(String text) {
-    text.chunked(logChunkSize).forEach(print);
+    text.chunked(logChunkSize).forEach(debugPrint);
   }
 
   /// A queue to be consumed by [setupSentry].
@@ -354,7 +354,7 @@ class SuperLogging {
         final date = config.dateFmt!.parse(basename(file.path));
         dates[file as File] = date;
         files.add(file);
-      } on FormatException {}
+      } on Exception catch (_) {}
     }
     final nowTime = DateTime.now();
 
@@ -374,7 +374,7 @@ class SuperLogging {
             "deleting log file ${file.path}",
           );
           await file.delete();
-        } catch (ignore) {}
+        } on Exception catch (_) {}
       }
     }
 

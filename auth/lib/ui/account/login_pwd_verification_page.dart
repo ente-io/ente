@@ -1,6 +1,5 @@
 import "package:dio/dio.dart";
 import 'package:ente_auth/core/configuration.dart';
-import "package:ente_auth/core/errors.dart";
 import "package:ente_auth/l10n/l10n.dart";
 import "package:ente_auth/models/api/user/srp.dart";
 import "package:ente_auth/services/user_service.dart";
@@ -9,6 +8,7 @@ import 'package:ente_auth/ui/common/dynamic_fab.dart';
 import "package:ente_auth/ui/components/buttons/button_widget.dart";
 import "package:ente_auth/utils/dialog_util.dart";
 import "package:ente_auth/utils/email_util.dart";
+import "package:ente_crypto_dart/ente_crypto_dart.dart";
 import 'package:flutter/material.dart';
 import "package:logging/logging.dart";
 
@@ -19,8 +19,7 @@ import "package:logging/logging.dart";
 // volatile password.
 class LoginPasswordVerificationPage extends StatefulWidget {
   final SrpAttributes srpAttributes;
-  const LoginPasswordVerificationPage({Key? key, required this.srpAttributes})
-      : super(key: key);
+  const LoginPasswordVerificationPage({super.key, required this.srpAttributes});
 
   @override
   State<LoginPasswordVerificationPage> createState() =>
@@ -35,6 +34,11 @@ class _LoginPasswordVerificationPageState
   String? email;
   bool _passwordInFocus = false;
   bool _passwordVisible = false;
+
+  Future<void> onPressed() async {
+    FocusScope.of(context).unfocus();
+    await verifyPassword(context, _passwordController.text);
+  }
 
   @override
   void initState() {
@@ -77,10 +81,7 @@ class _LoginPasswordVerificationPageState
         isKeypadOpen: isKeypadOpen,
         isFormValid: _passwordController.text.isNotEmpty,
         buttonText: context.l10n.logInLabel,
-        onPressedFunction: () async {
-          FocusScope.of(context).unfocus();
-          await verifyPassword(context, _passwordController.text);
-        },
+        onPressedFunction: onPressed,
       ),
       floatingActionButtonLocation: fabLocation(),
       floatingActionButtonAnimator: NoScalingAnimation(),
@@ -101,7 +102,7 @@ class _LoginPasswordVerificationPageState
         password,
         dialog,
       );
-    } on DioError catch (e, s) {
+    } on DioException catch (e, s) {
       await dialog.hide();
       if (e.response != null && e.response!.statusCode == 401) {
         _logger.severe('server reject, failed verify SRP login', e, s);
@@ -112,7 +113,7 @@ class _LoginPasswordVerificationPageState
         );
       } else {
         _logger.severe('API failure during SRP login', e, s);
-        if (e.type == DioErrorType.other) {
+        if (e.type == DioExceptionType.unknown) {
           await _showContactSupportDialog(
             context,
             context.l10n.noInternetConnection,
@@ -229,6 +230,9 @@ class _LoginPasswordVerificationPageState
                 Padding(
                   padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
                   child: TextFormField(
+                    onFieldSubmitted: _passwordController.text.isNotEmpty
+                        ? (_) => onPressed()
+                        : null,
                     key: const ValueKey("passwordInputField"),
                     autofillHints: const [AutofillHints.password],
                     decoration: InputDecoration(

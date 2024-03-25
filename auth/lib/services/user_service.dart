@@ -30,9 +30,9 @@ import 'package:ente_auth/ui/home_page.dart';
 import 'package:ente_auth/ui/passkey_page.dart';
 import 'package:ente_auth/ui/two_factor_authentication_page.dart';
 import 'package:ente_auth/ui/two_factor_recovery_page.dart';
-import 'package:ente_auth/utils/crypto_util.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/toast_util.dart';
+import 'package:ente_crypto_dart/ente_crypto_dart.dart';
 import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
@@ -80,7 +80,7 @@ class UserService {
     await dialog.show();
     try {
       final response = await _dio.post(
-        _config.getHttpEndpoint() + "/users/ott",
+        "${_config.getHttpEndpoint()}/users/ott",
         data: {"email": email, "purpose": isChangeEmail ? "change" : ""},
       );
       await dialog.hide();
@@ -102,7 +102,7 @@ class UserService {
         return;
       }
       unawaited(showGenericErrorDialog(context: context));
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       await dialog.hide();
       _logger.info(e);
       if (e.response != null && e.response!.statusCode == 403) {
@@ -129,7 +129,7 @@ class UserService {
     String type = "SubCancellation",
   }) async {
     await _dio.post(
-      _config.getHttpEndpoint() + "/anonymous/feedback",
+      "${_config.getHttpEndpoint()}/anonymous/feedback",
       data: {"feedback": feedback, "type": "type"},
     );
   }
@@ -173,7 +173,7 @@ class UserService {
     try {
       final response = await _enteDio.get("/users/sessions");
       return Sessions.fromMap(response.data);
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       _logger.info(e);
       rethrow;
     }
@@ -187,7 +187,7 @@ class UserService {
           "token": token,
         },
       );
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       _logger.info(e);
       rethrow;
     }
@@ -196,7 +196,7 @@ class UserService {
   Future<void> leaveFamilyPlan() async {
     try {
       await _enteDio.delete("/family/leave");
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       _logger.warning('failed to leave family plan', e);
       rethrow;
     }
@@ -306,11 +306,11 @@ class UserService {
       "ott": ott,
     };
     if (!_config.isLoggedIn()) {
-      verifyData["source"] = 'auth:' + _getRefSource();
+      verifyData["source"] = 'auth:${_getRefSource()}';
     }
     try {
       final response = await _dio.post(
-        _config.getHttpEndpoint() + "/users/verify-email",
+        "${_config.getHttpEndpoint()}/users/verify-email",
         data: verifyData,
       );
       await dialog.hide();
@@ -346,7 +346,7 @@ class UserService {
         // should never reach here
         throw Exception("unexpected response during email verification");
       }
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       _logger.info(e);
       await dialog.hide();
       if (e.response != null && e.response!.statusCode == 410) {
@@ -410,7 +410,7 @@ class UserService {
         context.l10n.oops,
         context.l10n.verificationFailedPleaseTryAgain,
       );
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       await dialog.hide();
       if (e.response != null && e.response!.statusCode == 403) {
         // ignore: unawaited_futures
@@ -460,7 +460,7 @@ class UserService {
   Future<SrpAttributes> getSrpAttributes(String email) async {
     try {
       final response = await _dio.get(
-        _config.getHttpEndpoint() + "/users/srp/attributes",
+        "${_config.getHttpEndpoint()}/users/srp/attributes",
         queryParameters: {
           "email": email,
         },
@@ -470,7 +470,7 @@ class UserService {
       } else {
         throw Exception("get-srp-attributes action failed");
       }
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       if (e.response != null && e.response!.statusCode == 404) {
         throw SrpSetupNotCompleteError();
       }
@@ -523,7 +523,7 @@ class UserService {
         // ignore: need to calculate secret to get M1, unused_local_variable
         final clientS = client.calculateSecret(serverB);
         final clientM = client.calculateClientEvidenceMessage();
-        // ignore: unused_local_variable
+
         late Response _;
         if (setKeysRequest == null) {
           _ = await _enteDio.post(
@@ -573,7 +573,7 @@ class UserService {
     late Uint8List keyEncryptionKey;
     _logger.finest('Start deriving key');
     keyEncryptionKey = await CryptoUtil.deriveKey(
-      utf8.encode(userPassword) as Uint8List,
+      utf8.encode(userPassword),
       CryptoUtil.base642bin(srpAttributes.kekSalt),
       srpAttributes.memLimit,
       srpAttributes.opsLimit,
@@ -596,7 +596,7 @@ class UserService {
 
     final A = client.generateClientCredentials(salt, identity, password);
     final createSessionResponse = await _dio.post(
-      _config.getHttpEndpoint() + "/users/srp/create-session",
+      "${_config.getHttpEndpoint()}/users/srp/create-session",
       data: {
         "srpUserID": srpAttributes.srpUserID,
         "srpA": base64Encode(SRP6Util.encodeBigInt(A!)),
@@ -610,7 +610,7 @@ class UserService {
     final clientS = client.calculateSecret(serverB);
     final clientM = client.calculateClientEvidenceMessage();
     final response = await _dio.post(
-      _config.getHttpEndpoint() + "/users/srp/verify-session",
+      "${_config.getHttpEndpoint()}/users/srp/verify-session",
       data: {
         "sessionID": sessionID,
         "srpUserID": srpAttributes.srpUserID,
@@ -709,7 +709,7 @@ class UserService {
     await dialog.show();
     try {
       final response = await _dio.post(
-        _config.getHttpEndpoint() + "/users/two-factor/verify",
+        "${_config.getHttpEndpoint()}/users/two-factor/verify",
         data: {
           "sessionID": sessionID,
           "code": code,
@@ -729,7 +729,7 @@ class UserService {
           (route) => route.isFirst,
         );
       }
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       await dialog.hide();
       _logger.severe(e);
       if (e.response != null && e.response!.statusCode == 404) {
@@ -772,7 +772,7 @@ class UserService {
     await dialog.show();
     try {
       final response = await _dio.get(
-        _config.getHttpEndpoint() + "/users/two-factor/recover",
+        "${_config.getHttpEndpoint()}/users/two-factor/recover",
         queryParameters: {
           "sessionID": sessionID,
           "twoFactorType": twoFactorTypeToString(type),
@@ -794,7 +794,7 @@ class UserService {
           (route) => route.isFirst,
         );
       }
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       await dialog.hide();
       _logger.severe(e);
       if (e.response != null && e.response!.statusCode == 404) {
@@ -868,7 +868,7 @@ class UserService {
     }
     try {
       final response = await _dio.post(
-        _config.getHttpEndpoint() + "/users/two-factor/remove",
+        "${_config.getHttpEndpoint()}/users/two-factor/remove",
         data: {
           "sessionID": sessionID,
           "secret": secret,
@@ -891,7 +891,7 @@ class UserService {
           (route) => route.isFirst,
         );
       }
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       await dialog.hide();
       _logger.severe(e);
       if (e.response != null && e.response!.statusCode == 404) {

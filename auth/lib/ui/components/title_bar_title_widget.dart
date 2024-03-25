@@ -6,11 +6,11 @@ class TitleBarTitleWidget extends StatelessWidget {
   final bool isTitleH2;
   final IconData? icon;
   const TitleBarTitleWidget({
-    Key? key,
+    super.key,
     this.title,
     this.isTitleH2 = false,
     this.icon,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

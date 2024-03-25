@@ -14,8 +14,10 @@ import 'package:ente_auth/store/code_store.dart';
 import 'package:ente_auth/ui/code_timer_progress.dart';
 import 'package:ente_auth/ui/utils/icon_utils.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
+import 'package:ente_auth/utils/platform_util.dart';
 import 'package:ente_auth/utils/toast_util.dart';
 import 'package:ente_auth/utils/totp_util.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:logging/logging.dart';
@@ -24,7 +26,7 @@ import 'package:move_to_background/move_to_background.dart';
 class CodeWidget extends StatefulWidget {
   final Code code;
 
-  const CodeWidget(this.code, {Key? key}) : super(key: key);
+  const CodeWidget(this.code, {super.key});
 
   @override
   State<CodeWidget> createState() => _CodeWidgetState();
@@ -133,35 +135,59 @@ class _CodeWidgetState extends State<CodeWidget> {
             ),
           ],
         ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(8),
-          child: Container(
-            color: Theme.of(context).colorScheme.codeCardBackgroundColor,
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                customBorder: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+        child: Builder(
+          builder: (context) {
+            return RawGestureDetector(
+              gestures: {
+                PanGestureRecognizer:
+                    GestureRecognizerFactoryWithHandlers<PanGestureRecognizer>(
+                  () => PanGestureRecognizer(
+                    debugOwner: this,
+                    // This recognizer accepts any button press made with a secondary button.
+                    allowedButtonsFilter: (int buttons) =>
+                        buttons & kSecondaryButton != 0,
+                  ),
+                  (PanGestureRecognizer instance) {
+                    instance
+                      ..dragStartBehavior = DragStartBehavior.down
+                      ..onEnd = (DragEndDetails details) {
+                        Slidable.of(context)?.openEndActionPane();
+                      };
+                  },
                 ),
-                onTap: () {
-                  _copyCurrentOTPToClipboard();
-                },
-                onDoubleTap: isMaskingEnabled
-                    ? () {
-                        setState(
-                          () {
-                            _hideCode = !_hideCode;
-                          },
-                        );
-                      }
-                    : null,
-                onLongPress: () {
-                  _copyCurrentOTPToClipboard();
-                },
-                child: _getCardContents(l10n),
+              },
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Container(
+                  color: Theme.of(context).colorScheme.codeCardBackgroundColor,
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      customBorder: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      onTap: () {
+                        _copyCurrentOTPToClipboard();
+                      },
+                      onDoubleTap: isMaskingEnabled
+                          ? () {
+                              setState(
+                                () {
+                                  _hideCode = !_hideCode;
+                                },
+                              );
+                            }
+                          : null,
+                      onLongPress: () {
+                        _copyCurrentOTPToClipboard();
+                      },
+                      child: _getCardContents(l10n),
+                    ),
+                  ),
+                ),
               ),
-            ),
-          ),
+            );
+          },
         ),
       ),
     );
@@ -373,9 +399,10 @@ class _CodeWidgetState extends State<CodeWidget> {
   }
 
   Future<void> _onEditPressed(_) async {
-    bool _isAuthSuccessful = await LocalAuthenticationService.instance
+    bool isAuthSuccessful = await LocalAuthenticationService.instance
         .requestLocalAuthentication(context, context.l10n.editCodeAuthMessage);
-    if (!_isAuthSuccessful) {
+    await PlatformUtil.refocusWindows();
+    if (!isAuthSuccessful) {
       return;
     }
     final Code? code = await Navigator.of(context).push(
@@ -391,9 +418,10 @@ class _CodeWidgetState extends State<CodeWidget> {
   }
 
   Future<void> _onShowQrPressed(_) async {
-    bool _isAuthSuccessful = await LocalAuthenticationService.instance
+    bool isAuthSuccessful = await LocalAuthenticationService.instance
         .requestLocalAuthentication(context, context.l10n.showQRAuthMessage);
-    if (!_isAuthSuccessful) {
+    await PlatformUtil.refocusWindows();
+    if (!isAuthSuccessful) {
       return;
     }
     // ignore: unused_local_variable
@@ -407,14 +435,15 @@ class _CodeWidgetState extends State<CodeWidget> {
   }
 
   void _onDeletePressed(_) async {
-    bool _isAuthSuccessful =
+    bool isAuthSuccessful =
         await LocalAuthenticationService.instance.requestLocalAuthentication(
       context,
       context.l10n.deleteCodeAuthMessage,
     );
-    if (!_isAuthSuccessful) {
+    if (!isAuthSuccessful) {
       return;
     }
+    FocusScope.of(context).requestFocus();
     final l10n = context.l10n;
     await showChoiceActionSheet(
       context,
@@ -451,7 +480,7 @@ class _CodeWidgetState extends State<CodeWidget> {
       code = code.replaceAll(RegExp(r'\d'), '•');
     }
     if (code.length == 6) {
-      return code.substring(0, 3) + " " + code.substring(3, 6);
+      return "${code.substring(0, 3)} ${code.substring(3, 6)}";
     }
     return code;
   }
