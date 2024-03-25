@@ -7,14 +7,12 @@
  * functions as an object on the DOM, so that the renderer process can invoke
  * functions that live in the main (Node.js) process if needed.
  *
+ * Ref: https://www.electronjs.org/docs/latest/tutorial/tutorial-preload
+ *
  * Note that this script cannot import other code from `src/` - conceptually it
  * can be thought of as running in a separate, third, process different from
  * both the main or a renderer process (technically, it runs in a BrowserWindow
  * context that runs prior to the renderer process).
- *
- * That said, this can be split into multiple files if we wished. However,
- * that'd require us setting up a bundler to package it back up into a single JS
- * file that can be used at runtime.
  *
  * > Since enabling the sandbox disables Node.js integration in your preload
  * > scripts, you can no longer use require("../my-script"). In other words,
@@ -22,32 +20,21 @@
  * >
  * > https://www.electronjs.org/blog/breach-to-barrier
  *
- * Since most of this is just boilerplate code providing a bridge between the
- * main and renderer, we avoid introducing another moving part into the mix and
- * just keep the entire preload setup in this single file.
+ * If we really wanted, we could setup a bundler to package this into a single
+ * file. However, since this is just boilerplate code providing a bridge between
+ * the main and renderer, we avoid introducing another moving part into the mix
+ * and just keep the entire preload setup in this single file.
  */
 
 import { contextBridge, ipcRenderer } from "electron";
-import { existsSync } from "fs";
+import { createWriteStream, existsSync } from "node:fs";
+import * as fs from "node:fs/promises";
+import { Readable } from "node:stream";
 import path from "path";
-import * as fs from "promise-fs";
-import { Readable } from "stream";
-import { deleteDiskCache, openDiskCache } from "./api/cache";
-import { logToDisk, openLogDirectory } from "./api/common";
-import {
-    checkExistsAndCreateDir,
-    exists,
-    saveFileToDisk,
-    saveStreamToDisk,
-} from "./api/export";
 import { runFFmpegCmd } from "./api/ffmpeg";
 import { getDirFiles } from "./api/fs";
 import { convertToJPEG, generateImageThumbnail } from "./api/imageProcessor";
 import { getEncryptionKey, setEncryptionKey } from "./api/safeStorage";
-import {
-    registerForegroundEventListener,
-    registerUpdateEventListener,
-} from "./api/system";
 import {
     getElectronFilesFromGoogleZip,
     getPendingUploads,
@@ -65,22 +52,119 @@ import {
     updateWatchMappingIgnoredFiles,
     updateWatchMappingSyncedFiles,
 } from "./api/watch";
-import { setupLogging } from "./utils/logging";
+import { logErrorSentry, setupLogging } from "./main/log";
 
-/* Some of the code below has been duplicated to make this file self contained.
-Enhancement: consider alternatives */
+setupLogging();
 
-/* preload: duplicated logError */
-export function logError(error: Error, message: string, info?: string): void {
-    ipcRenderer.invoke("log-error", error, message, info);
+// - General
+
+/** Return the version of the desktop app. */
+const appVersion = (): Promise<string> => ipcRenderer.invoke("appVersion");
+
+/**
+ * Open the given {@link dirPath} in the system's folder viewer.
+ *
+ * For example, on macOS this'll open {@link dirPath} in Finder.
+ */
+const openDirectory = (dirPath: string): Promise<void> =>
+    ipcRenderer.invoke("openDirectory");
+
+/**
+ * Open the app's log directory in the system's folder viewer.
+ *
+ * @see {@link openDirectory}
+ */
+const openLogDirectory = (): Promise<void> =>
+    ipcRenderer.invoke("openLogDirectory");
+
+/**
+ * Log the given {@link message} to the on-disk log file maintained by the
+ * desktop app.
+ */
+const logToDisk = (message: string): void =>
+    ipcRenderer.send("logToDisk", message);
+
+/**
+ * Return true if there is a file or directory at the given
+ * {@link path}.
+ */
+const fsExists = (path: string): Promise<boolean> =>
+    ipcRenderer.invoke("fsExists", path);
+
+// - AUDIT below this
+
+const checkExistsAndCreateDir = (dirPath: string): Promise<void> =>
+    ipcRenderer.invoke("checkExistsAndCreateDir", dirPath);
+
+/* preload: duplicated */
+interface AppUpdateInfo {
+    autoUpdatable: boolean;
+    version: string;
 }
 
-// -
-
-export const convertBrowserStreamToNode = (
-    fileStream: ReadableStream<Uint8Array>,
+const registerUpdateEventListener = (
+    showUpdateDialog: (updateInfo: AppUpdateInfo) => void,
 ) => {
-    const reader = fileStream.getReader();
+    ipcRenderer.removeAllListeners("show-update-dialog");
+    ipcRenderer.on("show-update-dialog", (_, updateInfo: AppUpdateInfo) => {
+        showUpdateDialog(updateInfo);
+    });
+};
+
+const registerForegroundEventListener = (onForeground: () => void) => {
+    ipcRenderer.removeAllListeners("app-in-foreground");
+    ipcRenderer.on("app-in-foreground", () => {
+        onForeground();
+    });
+};
+
+const clearElectronStore = () => {
+    ipcRenderer.send("clear-electron-store");
+};
+
+// - App update
+
+const updateAndRestart = () => {
+    ipcRenderer.send("update-and-restart");
+};
+
+const skipAppUpdate = (version: string) => {
+    ipcRenderer.send("skip-app-update", version);
+};
+
+const muteUpdateNotification = (version: string) => {
+    ipcRenderer.send("mute-update-notification", version);
+};
+
+
+// - FIXME below this
+
+/* preload: duplicated logError */
+const logError = (error: Error, message: string, info?: any) => {
+    logErrorSentry(error, message, info);
+};
+
+/* preload: duplicated writeStream */
+/**
+ * Write a (web) ReadableStream to a file at the given {@link filePath}.
+ *
+ * The returned promise resolves when the write completes.
+ *
+ * @param filePath The local filesystem path where the file should be written.
+ * @param readableStream A [web
+ * ReadableStream](https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream)
+ */
+const writeStream = (filePath: string, readableStream: ReadableStream) =>
+    writeNodeStream(filePath, convertWebReadableStreamToNode(readableStream));
+
+/**
+ * Convert a Web ReadableStream into a Node.js ReadableStream
+ *
+ * This can be used to, for example, write a ReadableStream obtained via
+ * `net.fetch` into a file using the Node.js `fs` APIs
+ */
+const convertWebReadableStreamToNode = (readableStream: ReadableStream) => {
+    const reader = readableStream.getReader();
     const rs = new Readable();
 
     rs._read = async () => {
@@ -101,11 +185,11 @@ export const convertBrowserStreamToNode = (
     return rs;
 };
 
-export async function writeNodeStream(
+const writeNodeStream = async (
     filePath: string,
     fileStream: NodeJS.ReadableStream,
-) {
-    const writeable = fs.createWriteStream(filePath);
+) => {
+    const writeable = createWriteStream(filePath);
 
     fileStream.on("error", (error) => {
         writeable.destroy(error); // Close the writable stream with an error
@@ -115,23 +199,21 @@ export async function writeNodeStream(
 
     await new Promise((resolve, reject) => {
         writeable.on("finish", resolve);
-        writeable.on("error", async (e) => {
+        writeable.on("error", async (e: unknown) => {
             if (existsSync(filePath)) {
                 await fs.unlink(filePath);
             }
             reject(e);
         });
     });
-}
+};
 
-/* preload: duplicated writeStream */
-export async function writeStream(
-    filePath: string,
-    fileStream: ReadableStream<Uint8Array>,
-) {
-    const readable = convertBrowserStreamToNode(fileStream);
-    await writeNodeStream(filePath, readable);
-}
+// - Export
+
+const saveStreamToDisk = writeStream;
+
+const saveFileToDisk = (path: string, contents: string) =>
+    fs.writeFile(path, contents);
 
 // -
 
@@ -154,9 +236,7 @@ async function moveFile(
     }
     // check if destination folder exists
     const destinationFolder = path.dirname(destinationPath);
-    if (!existsSync(destinationFolder)) {
-        await fs.mkdir(destinationFolder, { recursive: true });
-    }
+    await fs.mkdir(destinationFolder, { recursive: true });
     await fs.rename(sourcePath, destinationPath);
 }
 
@@ -183,7 +263,8 @@ async function deleteFolder(folderPath: string): Promise<void> {
     if (!existsSync(folderPath)) {
         return;
     }
-    if (!fs.statSync(folderPath).isDirectory()) {
+    const stat = await fs.stat(folderPath);
+    if (!stat.isDirectory()) {
         throw new Error("Path is not a folder");
     }
     // check if folder is empty
@@ -201,17 +282,18 @@ async function rename(oldPath: string, newPath: string) {
     await fs.rename(oldPath, newPath);
 }
 
-function deleteFile(filePath: string): void {
+const deleteFile = async (filePath: string) => {
     if (!existsSync(filePath)) {
         return;
     }
-    if (!fs.statSync(filePath).isFile()) {
+    const stat = await fs.stat(filePath);
+    if (!stat.isFile()) {
         throw new Error("Path is not a file");
     }
-    fs.rmSync(filePath);
-}
+    return fs.rm(filePath);
+};
 
-// -
+// - ML
 
 /* preload: duplicated Model */
 export enum Model {
@@ -315,7 +397,7 @@ const parseExecError = (err: any) => {
     }
 };
 
-// -
+// - General
 
 const selectDirectory = async (): Promise<string> => {
     try {
@@ -325,62 +407,18 @@ const selectDirectory = async (): Promise<string> => {
     }
 };
 
-const getAppVersion = async (): Promise<string> => {
-    try {
-        return await ipcRenderer.invoke("get-app-version");
-    } catch (e) {
-        logError(e, "failed to get release version");
-        throw e;
-    }
-};
-
-const openDirectory = async (dirPath: string): Promise<void> => {
-    try {
-        await ipcRenderer.invoke("open-dir", dirPath);
-    } catch (e) {
-        logError(e, "error while opening directory");
-        throw e;
-    }
-};
-
 // -
-
-const clearElectronStore = () => {
-    ipcRenderer.send("clear-electron-store");
-};
-
-// -
-
-const updateAndRestart = () => {
-    ipcRenderer.send("update-and-restart");
-};
-
-const skipAppUpdate = (version: string) => {
-    ipcRenderer.send("skip-app-update", version);
-};
-
-const muteUpdateNotification = (version: string) => {
-    ipcRenderer.send("mute-update-notification", version);
-};
-
-// -
-
-setupLogging();
 
 // These objects exposed here will become available to the JS code in our
 // renderer (the web/ code) as `window.ElectronAPIs.*`
 //
-// - Introduction
-//   https://www.electronjs.org/docs/latest/tutorial/tutorial-preload
-//
 // There are a few related concepts at play here, and it might be worthwhile to
 // read their (excellent) documentation to get an understanding;
-//
+//`
 // - ContextIsolation:
 //   https://www.electronjs.org/docs/latest/tutorial/context-isolation
 //
 // - IPC https://www.electronjs.org/docs/latest/tutorial/ipc
-//
 //
 // [Note: Transferring large amount of data over IPC]
 //
@@ -388,34 +426,52 @@ setupLogging();
 // Algorithm to serialize objects passed between processes.
 // https://www.electronjs.org/docs/latest/tutorial/ipc#object-serialization
 //
-// In particular, both ArrayBuffer and the web File types are eligible for
-// structured cloning.
+// In particular, both ArrayBuffer is eligible for structured cloning.
 // https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Structured_clone_algorithm
 //
 // Also, ArrayBuffer is "transferable", which means it is a zero-copy operation
 // operation when it happens across threads.
 // https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Transferable_objects
 //
-// In our case though, we're not dealing with threads but separate processes,
-// and it seems like there is a copy involved since the documentation for
-// contextBridge explicitly calls out that "parameters, errors and return values
-// are **copied** when they're sent over the bridge".
-// https://www.electronjs.org/docs/latest/api/context-bridge#methods
+// In our case though, we're not dealing with threads but separate processes. So
+// the ArrayBuffer will be copied:
+// > "parameters, errors and return values are **copied** when they're sent over
+//   the bridge".
+//   https://www.electronjs.org/docs/latest/api/context-bridge#methods
 //
-// Related is a note from one of Electron's committers stating that even with
-// copying, the IPC should be fast enough for even moderately large data:
-// https://github.com/electron/electron/issues/1948#issuecomment-864191345
-//
-// The main problem with transfering large amounts of data is potentially
-// running out of memory, causing the app to crash as it copies it over across
-// the processes.
+// The copy itself is relatively fast, but the problem with transfering large
+// amounts of data is potentially running out of memory during the copy.
 contextBridge.exposeInMainWorld("ElectronAPIs", {
-    exists,
+    // General
+    appVersion,
+    openDirectory,
+    registerForegroundEventListener,
+    clearElectronStore,
+
+    // Logging
+    openLogDirectory,
+    logToDisk,
+
+    // - App update
+    updateAndRestart,
+    skipAppUpdate,
+    muteUpdateNotification,
+    registerUpdateEventListener,
+
+    // - FS
+    fs: {
+        exists: fsExists,
+    },
+
+    // - FS legacy
+    // TODO: Move these into fs + document + rename if needed
     checkExistsAndCreateDir,
+
+    // - Export
     saveStreamToDisk,
     saveFileToDisk,
+
     selectDirectory,
-    clearElectronStore,
     readTextFile,
     showUploadFilesDialog,
     showUploadDirsDialog,
@@ -426,8 +482,6 @@ contextBridge.exposeInMainWorld("ElectronAPIs", {
     setToUploadCollection,
     getEncryptionKey,
     setEncryptionKey,
-    openDiskCache,
-    deleteDiskCache,
     getDirFiles,
     getWatchMappings,
     addWatchMapping,
@@ -436,22 +490,16 @@ contextBridge.exposeInMainWorld("ElectronAPIs", {
     isFolder,
     updateWatchMappingSyncedFiles,
     updateWatchMappingIgnoredFiles,
-    logToDisk,
     convertToJPEG,
-    openLogDirectory,
-    registerUpdateEventListener,
-    updateAndRestart,
-    skipAppUpdate,
-    getAppVersion,
+
     runFFmpegCmd,
-    muteUpdateNotification,
     generateImageThumbnail,
-    registerForegroundEventListener,
-    openDirectory,
     moveFile,
     deleteFolder,
     rename,
     deleteFile,
+
+    // - ML
     computeImageEmbedding,
     computeTextEmbedding,
 });

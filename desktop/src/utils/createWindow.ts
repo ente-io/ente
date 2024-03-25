@@ -3,9 +3,9 @@ import ElectronLog from "electron-log";
 import * as path from "path";
 import { isAppQuitting, rendererURL } from "../main";
 import autoLauncher from "../services/autoLauncher";
-import { logErrorSentry } from "../services/sentry";
+import { logErrorSentry } from "../main/log";
 import { getHideDockIconPreference } from "../services/userPreference";
-import { isDev } from "./common";
+import { isDev } from "../main/general";
 import { isPlatform } from "./common/platform";
 
 /**

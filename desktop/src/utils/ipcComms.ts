@@ -9,9 +9,8 @@ import {
     Tray,
 } from "electron";
 import path from "path";
-import { clearElectronStore } from "../api/electronStore";
+import { attachIPCHandlers } from "../main/ipc";
 import {
-    getAppVersion,
     muteUpdateNotification,
     skipAppUpdate,
     updateAndRestart,
@@ -26,7 +25,6 @@ import {
     convertToJPEG,
     generateImageThumbnail,
 } from "../services/imageProcessor";
-import { logErrorSentry } from "../services/sentry";
 import { generateTempFilePath } from "./temp";
 
 export default function setupIpcComs(
@@ -34,6 +32,8 @@ export default function setupIpcComs(
     mainWindow: BrowserWindow,
     watcher: chokidar.FSWatcher,
 ): void {
+    attachIPCHandlers();
+
     ipcMain.handle("select-dir", async () => {
         const result = await dialog.showOpenDialog({
             properties: ["openDirectory"],
@@ -79,10 +79,6 @@ export default function setupIpcComs(
         watcher.unwatch(args.dir);
     });
 
-    ipcMain.handle("log-error", (_, err, msg, info?) => {
-        logErrorSentry(err, msg, info);
-    });
-
     ipcMain.handle("safeStorage-encrypt", (_, message) => {
         return safeStorage.encryptString(message);
     });
@@ -91,47 +87,8 @@ export default function setupIpcComs(
         return safeStorage.decryptString(message);
     });
 
-    ipcMain.on("clear-electron-store", () => {
-        clearElectronStore();
-    });
-
-    ipcMain.handle("get-path", (_, message) => {
-        // By default, these paths are at the following locations:
-        //
-        // * macOS: `~/Library/Application Support/ente`
-        // * Linux: `~/.config/ente`
-        // * Windows: `%APPDATA%`, e.g. `C:\Users\<username>\AppData\Local\ente`
-        // * Windows: C:\Users\<you>\AppData\Local\<Your App Name>
-        //
-        // https://www.electronjs.org/docs/latest/api/app
-        return app.getPath(message);
-    });
-
     ipcMain.handle("convert-to-jpeg", (_, fileData, filename) => {
         return convertToJPEG(fileData, filename);
-    });
-
-    ipcMain.handle("open-log-dir", () => {
-        shell.openPath(app.getPath("logs"));
-    });
-
-    ipcMain.handle("open-dir", (_, dirPath) => {
-        shell.openPath(path.normalize(dirPath));
-    });
-
-    ipcMain.on("update-and-restart", () => {
-        updateAndRestart();
-    });
-    ipcMain.on("skip-app-update", (_, version) => {
-        skipAppUpdate(version);
-    });
-
-    ipcMain.on("mute-update-notification", (_, version) => {
-        muteUpdateNotification(version);
-    });
-
-    ipcMain.handle("get-app-version", () => {
-        return getAppVersion();
     });
 
     ipcMain.handle(

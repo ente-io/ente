@@ -1,10 +1,10 @@
-import { existsSync } from "fs";
 import StreamZip from "node-stream-zip";
-import path from "path";
-import * as fs from "promise-fs";
+import { createWriteStream, existsSync } from "node:fs";
+import * as fs from "node:fs/promises";
+import * as path from "node:path";
 import { Readable } from "stream";
 import { ElectronFile } from "../types";
-import { logError } from "./logging";
+import { logError } from "../main/log";
 
 const FILE_STREAM_CHUNK_SIZE: number = 4 * 1024 * 1024;
 
@@ -25,16 +25,14 @@ export const getDirFilePaths = async (dirPath: string) => {
     return files;
 };
 
-export const getFileStream = async (filePath: string) => {
+const getFileStream = async (filePath: string) => {
     const file = await fs.open(filePath, "r");
     let offset = 0;
     const readableStream = new ReadableStream<Uint8Array>({
         async pull(controller) {
             try {
                 const buff = new Uint8Array(FILE_STREAM_CHUNK_SIZE);
-                // original types were not working correctly
-                const bytesRead = (await fs.read(
-                    file,
+                const bytesRead = (await file.read(
                     buff,
                     0,
                     FILE_STREAM_CHUNK_SIZE,
@@ -43,16 +41,16 @@ export const getFileStream = async (filePath: string) => {
                 offset += bytesRead;
                 if (bytesRead === 0) {
                     controller.close();
-                    await fs.close(file);
+                    await file.close();
                 } else {
                     controller.enqueue(buff.slice(0, bytesRead));
                 }
             } catch (e) {
-                await fs.close(file);
+                await file.close();
             }
         },
         async cancel() {
-            await fs.close(file);
+            await file.close();
         },
     });
     return readableStream;
@@ -212,7 +210,7 @@ export async function writeNodeStream(
     filePath: string,
     fileStream: NodeJS.ReadableStream,
 ) {
-    const writeable = fs.createWriteStream(filePath);
+    const writeable = createWriteStream(filePath);
 
     fileStream.on("error", (error) => {
         writeable.destroy(error); // Close the writable stream with an error
@@ -222,7 +220,7 @@ export async function writeNodeStream(
 
     await new Promise((resolve, reject) => {
         writeable.on("finish", resolve);
-        writeable.on("error", async (e) => {
+        writeable.on("error", async (e: unknown) => {
             if (existsSync(filePath)) {
                 await fs.unlink(filePath);
             }

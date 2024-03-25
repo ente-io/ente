@@ -174,7 +174,7 @@ async function createCollectionDownloadFolder(
     downloadDirPath: string,
     collectionName: string,
 ) {
-    const collectionDownloadName = getUniqueCollectionExportName(
+    const collectionDownloadName = await getUniqueCollectionExportName(
         downloadDirPath,
         collectionName,
     );

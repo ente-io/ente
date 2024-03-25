@@ -1,7 +1,7 @@
 import { ipcRenderer } from "electron";
 import { existsSync } from "fs";
 import { writeStream } from "../services/fs";
-import { logError } from "../services/logging";
+import { logError } from "../main/log";
 import { ElectronFile } from "../types";
 
 export async function runFFmpegCmd(

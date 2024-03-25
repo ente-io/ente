@@ -241,7 +241,11 @@ export default function App(props: EnteAppProps) {
                 }
                 await DownloadManager.init(APPS.PHOTOS, { token });
                 const exportSettings = exportService.getExportSettings();
-                if (!exportService.exportFolderExists(exportSettings?.folder)) {
+                if (
+                    !(await exportService.exportFolderExists(
+                        exportSettings?.folder,
+                    ))
+                ) {
                     return;
                 }
                 const exportRecord = await exportService.getExportRecord(

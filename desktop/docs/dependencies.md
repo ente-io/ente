@@ -42,13 +42,6 @@ This spins up a server for serving files using a protocol handler inside our
 Electron process. This allows us to directly use the output produced by
 `next build` for loading into our renderer process.
 
-### electron-reload
-
-Reloads contents of the BrowserWindow (renderer process) when source files are
-changed.
-
-* TODO (MR): Do we need this? Isn't the next-electron-server HMR covering this?
-
 ## DX
 
 See [web/docs/dependencies#DX](../../web/docs/dependencies.md#dx) for the
