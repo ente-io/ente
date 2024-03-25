@@ -518,7 +518,12 @@ func (c *StripeController) UpdateSubscription(stripeID string, userID int64) (en
 	if err != nil {
 		return ente.SubscriptionUpdateResponse{}, stacktrace.Propagate(err, "")
 	}
-	isSEPA := stripeSubscription.DefaultPaymentMethod.Type == stripe.PaymentMethodTypeSepaDebit
+	isSEPA := false
+	if stripeSubscription.DefaultPaymentMethod != nil {
+		isSEPA = stripeSubscription.DefaultPaymentMethod.Type == stripe.PaymentMethodTypeSepaDebit
+	} else {
+		log.Info("No default payment method found")
+	}
 	var paymentBehavior stripe.SubscriptionPaymentBehavior
 	if isSEPA {
 		paymentBehavior = stripe.SubscriptionPaymentBehaviorAllowIncomplete
