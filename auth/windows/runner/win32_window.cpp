@@ -1,14 +1,31 @@
 #include "win32_window.h"
 
+#include <dwmapi.h>
 #include <flutter_windows.h>
 
 #include "resource.h"
-#include "app_links/app_links_plugin_c_api.h"
 
 namespace
 {
 
+/// Window attribute that enables dark mode window decorations.
+///
+/// Redefined in case the developer's machine has a Windows SDK older than
+/// version 10.0.22000.0.
+/// See: https://docs.microsoft.com/windows/win32/api/dwmapi/ne-dwmapi-dwmwindowattribute
+#ifndef DWMWA_USE_IMMERSIVE_DARK_MODE
+#define DWMWA_USE_IMMERSIVE_DARK_MODE 20
+#endif
+
   constexpr const wchar_t kWindowClassName[] = L"FLUTTER_RUNNER_WIN32_WINDOW";
+
+  /// Registry key for app theme preference.
+  ///
+  /// A value of 0 indicates apps should use dark mode. A non-zero or missing
+  /// value indicates apps should use light mode.
+  constexpr const wchar_t kGetPreferredBrightnessRegKey[] =
+      L"Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize";
+  constexpr const wchar_t kGetPreferredBrightnessRegValue[] = L"AppsUseLightTheme";
 
   // The number of Win32Window objects that currently exist.
   static int g_active_window_count = 0;
@@ -37,8 +54,8 @@ namespace
     if (enable_non_client_dpi_scaling != nullptr)
     {
       enable_non_client_dpi_scaling(hwnd);
-      FreeLibrary(user32_module);
     }
+    FreeLibrary(user32_module);
   }
 
 } // namespace
@@ -49,7 +66,7 @@ class WindowClassRegistrar
 public:
   ~WindowClassRegistrar() = default;
 
-  // Returns the singleton registar instance.
+  // Returns the singleton registrar instance.
   static WindowClassRegistrar *GetInstance()
   {
     if (!instance_)
@@ -116,14 +133,10 @@ Win32Window::~Win32Window()
   Destroy();
 }
 
-bool Win32Window::CreateAndShow(const std::wstring &title,
-                                const Point &origin,
-                                const Size &size)
+bool Win32Window::Create(const std::wstring &title,
+                         const Point &origin,
+                         const Size &size)
 {
-  if (SendAppLinkToInstance(title))
-  {
-    return false;
-  }
   Destroy();
 
   const wchar_t *window_class =
@@ -136,18 +149,24 @@ bool Win32Window::CreateAndShow(const std::wstring &title,
   double scale_factor = dpi / 96.0;
 
   HWND window = CreateWindow(
-      window_class, title.c_str(),
-      WS_OVERLAPPEDWINDOW, // do not add WS_VISIBLE since the window will be shown later
+      window_class, title.c_str(), WS_OVERLAPPEDWINDOW,
       Scale(origin.x, scale_factor), Scale(origin.y, scale_factor),
       Scale(size.width, scale_factor), Scale(size.height, scale_factor),
       nullptr, nullptr, GetModuleHandle(nullptr), this);
 
-      if (!window)
-      {
-        return false;
-      }
+  if (!window)
+  {
+    return false;
+  }
 
-      return OnCreate();
+  UpdateTheme(window);
+
+  return OnCreate();
+}
+
+bool Win32Window::Show()
+{
+  return ShowWindow(window_handle_, SW_SHOWNORMAL);
 }
 
 // static
@@ -220,6 +239,10 @@ Win32Window::MessageHandler(HWND hwnd,
       SetFocus(child_content_);
     }
     return 0;
+
+  case WM_DWMCOLORIZATIONCOLORCHANGED:
+    UpdateTheme(hwnd);
+    return 0;
   }
 
   return DefWindowProc(window_handle_, message, wparam, lparam);
@@ -286,40 +309,19 @@ void Win32Window::OnDestroy()
   // No-op; provided for subclasses.
 }
 
-bool Win32Window::SendAppLinkToInstance(const std::wstring &title)
+void Win32Window::UpdateTheme(HWND const window)
 {
-  // Find our exact window
-  HWND hwnd = ::FindWindow(kWindowClassName, title.c_str());
+  DWORD light_mode;
+  DWORD light_mode_size = sizeof(light_mode);
+  LSTATUS result = RegGetValue(HKEY_CURRENT_USER, kGetPreferredBrightnessRegKey,
+                               kGetPreferredBrightnessRegValue,
+                               RRF_RT_REG_DWORD, nullptr, &light_mode,
+                               &light_mode_size);
 
-  if (hwnd)
+  if (result == ERROR_SUCCESS)
   {
-    // Dispatch new link to current window
-    SendAppLink(hwnd);
-
-    // (Optional) Restore our window to front in same state
-    WINDOWPLACEMENT place = {sizeof(WINDOWPLACEMENT)};
-    GetWindowPlacement(hwnd, &place);
-
-    switch (place.showCmd)
-    {
-    case SW_SHOWMAXIMIZED:
-      ShowWindow(hwnd, SW_SHOWMAXIMIZED);
-      break;
-    case SW_SHOWMINIMIZED:
-      ShowWindow(hwnd, SW_RESTORE);
-      break;
-    default:
-      ShowWindow(hwnd, SW_NORMAL);
-      break;
-    }
-
-    SetWindowPos(0, HWND_TOP, 0, 0, 0, 0, SWP_SHOWWINDOW | SWP_NOSIZE | SWP_NOMOVE);
-    SetForegroundWindow(hwnd);
-    // END Restore
-
-    // Window has been found, don't create another one.
-    return true;
+    BOOL enable_dark_mode = light_mode == 0;
+    DwmSetWindowAttribute(window, DWMWA_USE_IMMERSIVE_DARK_MODE,
+                          &enable_dark_mode, sizeof(enable_dark_mode));
   }
-
-  return false;
 }
