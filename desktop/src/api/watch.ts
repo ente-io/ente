@@ -1,23 +1,22 @@
-import { ipcRenderer } from "electron";
+import type { FSWatcher } from "chokidar";
 import ElectronLog from "electron-log";
 import { getWatchMappings, setWatchMappings } from "../services/watch";
-import { ElectronFile, WatchMapping } from "../types";
+import { WatchMapping } from "../types";
 import { isMappingPresent } from "../utils/watch";
 
-export async function addWatchMapping(
+export const addWatchMapping = async (
+    watcher: FSWatcher,
     rootFolderName: string,
     folderPath: string,
     uploadStrategy: number,
-) {
+) => {
     ElectronLog.log(`Adding watch mapping: ${folderPath}`);
     const watchMappings = getWatchMappings();
     if (isMappingPresent(watchMappings, folderPath)) {
         throw new Error(`Watch mapping already exists`);
     }
 
-    await ipcRenderer.invoke("add-watcher", {
-        dir: folderPath,
-    });
+    watcher.add(folderPath);
 
     watchMappings.push({
         rootFolderName,
@@ -28,9 +27,12 @@ export async function addWatchMapping(
     });
 
     setWatchMappings(watchMappings);
-}
+};
 
-export async function removeWatchMapping(folderPath: string) {
+export const removeWatchMapping = async (
+    watcher: FSWatcher,
+    folderPath: string,
+) => {
     let watchMappings = getWatchMappings();
     const watchMapping = watchMappings.find(
         (mapping) => mapping.folderPath === folderPath,
@@ -40,16 +42,14 @@ export async function removeWatchMapping(folderPath: string) {
         throw new Error(`Watch mapping does not exist`);
     }
 
-    await ipcRenderer.invoke("remove-watcher", {
-        dir: watchMapping.folderPath,
-    });
+    watcher.unwatch(watchMapping.folderPath);
 
     watchMappings = watchMappings.filter(
         (mapping) => mapping.folderPath !== watchMapping.folderPath,
     );
 
     setWatchMappings(watchMappings);
-}
+};
 
 export function updateWatchMappingSyncedFiles(
     folderPath: string,
@@ -84,6 +84,5 @@ export function updateWatchMappingIgnoredFiles(
     watchMapping.ignoredFiles = files;
     setWatchMappings(watchMappings);
 }
-
 
 export { getWatchMappings } from "../services/watch";

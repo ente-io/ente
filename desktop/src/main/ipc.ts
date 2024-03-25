@@ -6,9 +6,11 @@
  * context of the main process, and can import other files from `src/`.
  */
 
+import type { FSWatcher } from "chokidar";
 import { ipcMain } from "electron/main";
 import { clearElectronStore } from "../api/electronStore";
 import { getEncryptionKey, setEncryptionKey } from "../api/safeStorage";
+import { addWatchMapping, removeWatchMapping } from "../api/watch";
 import {
     appVersion,
     muteUpdateNotification,
@@ -35,6 +37,10 @@ import { checkExistsAndCreateDir, fsExists } from "./fs";
 import { openDirectory, openLogDirectory } from "./general";
 import { logToDisk } from "./log";
 
+/**
+ * Listen for IPC events sent/invoked by the renderer process, and route them to
+ * their correct handlers.
+ */
 export const attachIPCHandlers = () => {
     // Notes:
     //
@@ -124,5 +130,34 @@ export const attachIPCHandlers = () => {
 
     ipcMain.handle("checkExistsAndCreateDir", (_, dirPath) =>
         checkExistsAndCreateDir(dirPath),
+    );
+};
+
+/**
+ * Sibling of {@link attachIPCHandlers} that attaches handlers specific to the
+ * watch folder functionality.
+ *
+ * It gets passed a {@link FSWatcher} instance which it can then forward to the
+ * actual handlers.
+ */
+export const attachFSWatchIPCHandlers = (watcher: FSWatcher) => {
+    ipcMain.handle(
+        "addWatchMapping",
+        (
+            _,
+            collectionName: string,
+            folderPath: string,
+            uploadStrategy: number,
+        ) =>
+            addWatchMapping(
+                watcher,
+                collectionName,
+                folderPath,
+                uploadStrategy,
+            ),
+    );
+
+    ipcMain.handle("removeWatchMapping", (_, folderPath: string) =>
+        removeWatchMapping(watcher, folderPath),
     );
 };

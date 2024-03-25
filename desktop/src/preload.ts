@@ -39,9 +39,7 @@ import {
     setToUploadFiles,
 } from "./api/upload";
 import {
-    addWatchMapping,
     getWatchMappings,
-    removeWatchMapping,
     updateWatchMappingIgnoredFiles,
     updateWatchMappingSyncedFiles,
 } from "./api/watch";
@@ -226,6 +224,21 @@ const registerWatcherFunctions = (
         removeFolder(folderPath),
     );
 };
+
+const addWatchMapping = (
+    collectionName: string,
+    folderPath: string,
+    uploadStrategy: number,
+): Promise<void> =>
+    ipcRenderer.invoke(
+        "addWatchMapping",
+        collectionName,
+        folderPath,
+        uploadStrategy,
+    );
+
+const removeWatchMapping = (folderPath: string): Promise<void> =>
+    ipcRenderer.invoke("removeWatchMapping", folderPath);
 
 // - FIXME below this
 
@@ -453,6 +466,8 @@ contextBridge.exposeInMainWorld("ElectronAPIs", {
 
     // - Watch
     registerWatcherFunctions,
+    addWatchMapping,
+    removeWatchMapping,
 
     // - FS
     fs: {
@@ -474,8 +489,6 @@ contextBridge.exposeInMainWorld("ElectronAPIs", {
     setToUploadCollection,
     getDirFiles,
     getWatchMappings,
-    addWatchMapping,
-    removeWatchMapping,
 
     isFolder,
     updateWatchMappingSyncedFiles,

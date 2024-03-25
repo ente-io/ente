@@ -153,6 +153,14 @@ export interface ElectronAPIsType {
         removeFolder: (folderPath: string) => Promise<void>,
     ) => void;
 
+    addWatchMapping: (
+        collectionName: string,
+        folderPath: string,
+        uploadStrategy: number,
+    ) => Promise<void>;
+
+    removeWatchMapping: (folderPath: string) => Promise<void>;
+
 
     // - FS legacy
     checkExistsAndCreateDir: (dirPath: string) => Promise<void>;
@@ -185,12 +193,6 @@ export interface ElectronAPIsType {
         folderPath: string,
         files: WatchMapping["ignoredFiles"],
     ) => void;
-    addWatchMapping: (
-        collectionName: string,
-        folderPath: string,
-        uploadStrategy: number,
-    ) => Promise<void>;
-    removeWatchMapping: (folderPath: string) => Promise<void>;
     isFolder: (dirPath: string) => Promise<boolean>;
     moveFile: (oldPath: string, newPath: string) => Promise<void>;
     deleteFolder: (path: string) => Promise<void>;
