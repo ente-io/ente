@@ -6,7 +6,7 @@ import {
     computeImageEmbedding,
     computeTextEmbedding,
 } from "../services/clipService";
-import { deleteTempFile, runFFmpegCmd } from "../services/ffmpeg";
+import { deleteTempFile } from "../services/ffmpeg";
 import { getDirFilePaths } from "../services/fs";
 import {
     convertToJPEG,
@@ -70,17 +70,6 @@ export default function setupIpcComs(
         return convertToJPEG(fileData, filename);
     });
 
-    ipcMain.handle(
-        "run-ffmpeg-cmd",
-        (_, cmd, inputFilePath, outputFileName, dontTimeout) => {
-            return runFFmpegCmd(
-                cmd,
-                inputFilePath,
-                outputFileName,
-                dontTimeout,
-            );
-        },
-    );
     ipcMain.handle("get-temp-file-path", (_, formatSuffix) => {
         return generateTempFilePath(formatSuffix);
     });

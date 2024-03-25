@@ -8,6 +8,7 @@
 
 import { ipcMain } from "electron/main";
 import { clearElectronStore } from "../api/electronStore";
+import { runFFmpegCmd } from "../api/ffmpeg";
 import { getEncryptionKey, setEncryptionKey } from "../api/safeStorage";
 import {
     appVersion,
@@ -62,17 +63,24 @@ export const attachIPCHandlers = () => {
 
     ipcMain.handle("getEncryptionKey", (_) => getEncryptionKey());
 
-    ipcMain.on("update-and-restart", (_) => {
-        updateAndRestart();
-    });
+    ipcMain.on("update-and-restart", (_) => updateAndRestart());
 
-    ipcMain.on("skip-app-update", (_, version) => {
-        skipAppUpdate(version);
-    });
+    ipcMain.on("skip-app-update", (_, version) => skipAppUpdate(version));
 
-    ipcMain.on("mute-update-notification", (_, version) => {
-        muteUpdateNotification(version);
-    });
+    ipcMain.on("mute-update-notification", (_, version) =>
+        muteUpdateNotification(version),
+    );
+
+    ipcMain.handle(
+        "runFFmpegCmd",
+        (
+            _,
+            cmd: string[],
+            inputFile: File | ElectronFile,
+            outputFileName: string,
+            dontTimeout?: boolean,
+        ) => runFFmpegCmd(cmd, inputFile, outputFileName, dontTimeout),
+    );
 
     ipcMain.handle(
         "computeImageEmbedding",

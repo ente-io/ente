@@ -86,9 +86,6 @@ export interface ElectronAPIsType {
     setEncryptionKey: (encryptionKey: string) => Promise<void>;
     getEncryptionKey: () => Promise<string>;
 
-    // - FS legacy
-    checkExistsAndCreateDir: (dirPath: string) => Promise<void>;
-
     // - App update
     updateAndRestart: () => void;
     skipAppUpdate: (version: string) => void;
@@ -98,6 +95,15 @@ export interface ElectronAPIsType {
         showUpdateDialog: (updateInfo: AppUpdateInfo) => void,
     ) => void;
 
+    // - Conversion
+
+    runFFmpegCmd: (
+        cmd: string[],
+        inputFile: File | ElectronFile,
+        outputFileName: string,
+        dontTimeout?: boolean,
+    ) => Promise<File>;
+
     // - ML
     computeImageEmbedding: (
         model: Model,
@@ -105,6 +111,8 @@ export interface ElectronAPIsType {
     ) => Promise<Float32Array>;
     computeTextEmbedding: (model: Model, text: string) => Promise<Float32Array>;
 
+    // - FS legacy
+    checkExistsAndCreateDir: (dirPath: string) => Promise<void>;
 
     /** TODO: FIXME or migrate below this */
     saveStreamToDisk: (
@@ -156,12 +164,6 @@ export interface ElectronAPIsType {
         fileData: Uint8Array,
         filename: string,
     ) => Promise<Uint8Array>;
-    runFFmpegCmd: (
-        cmd: string[],
-        inputFile: File | ElectronFile,
-        outputFileName: string,
-        dontTimeout?: boolean,
-    ) => Promise<File>;
 
     generateImageThumbnail: (
         inputFile: File | ElectronFile,

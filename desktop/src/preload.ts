@@ -31,7 +31,6 @@ import { createWriteStream, existsSync } from "node:fs";
 import * as fs from "node:fs/promises";
 import { Readable } from "node:stream";
 import path from "path";
-import { runFFmpegCmd } from "./api/ffmpeg";
 import { getDirFiles } from "./api/fs";
 import { convertToJPEG, generateImageThumbnail } from "./api/imageProcessor";
 import {
@@ -140,6 +139,22 @@ const skipAppUpdate = (version: string) => {
 const muteUpdateNotification = (version: string) => {
     ipcRenderer.send("mute-update-notification", version);
 };
+
+// - Conversion
+
+const runFFmpegCmd = (
+    cmd: string[],
+    inputFile: File | ElectronFile,
+    outputFileName: string,
+    dontTimeout?: boolean,
+): Promise<File> =>
+    ipcRenderer.invoke(
+        "runFFmpegCmd",
+        cmd,
+        inputFile,
+        outputFileName,
+        dontTimeout,
+    );
 
 // - ML
 
@@ -382,6 +397,9 @@ contextBridge.exposeInMainWorld("ElectronAPIs", {
     muteUpdateNotification,
     registerUpdateEventListener,
 
+    // - Conversion
+    runFFmpegCmd,
+
     // - ML
     computeImageEmbedding,
     computeTextEmbedding,
@@ -418,7 +436,6 @@ contextBridge.exposeInMainWorld("ElectronAPIs", {
     updateWatchMappingIgnoredFiles,
     convertToJPEG,
 
-    runFFmpegCmd,
     generateImageThumbnail,
     moveFile,
     deleteFolder,
