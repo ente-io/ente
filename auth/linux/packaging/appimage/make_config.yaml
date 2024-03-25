@@ -23,5 +23,4 @@ startup_notify: false
 #
 # include:
 #   - libcurl.so.4
-include:
-  - libffi.so.7
+include: []

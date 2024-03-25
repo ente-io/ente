@@ -72,6 +72,8 @@ jobs:
                   SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
 
             - name: Build PlayStore AAB
+              # disable this step if release tag contains nightly or beta
+              if: startsWith(github.ref, 'refs/tags/auth-v') && !contains(github.ref, 'nightly') && !contains(github.ref, 'beta')
               run: |
                   flutter build appbundle --release --flavor playstore --dart-define=app.flavor=playstore
               env:
