@@ -423,21 +423,15 @@ func (c *StripeController) handleInvoicePaid(event stripe.Event, country ente.St
 func (c *StripeController) handlePaymentIntentFailed(event stripe.Event, country ente.StripeAccountCountry) (ente.StripeEventLog, error) {
 	var paymentIntent stripe.PaymentIntent
 	json.Unmarshal(event.Data.Raw, &paymentIntent)
-	client := c.StripeClients[country]
-	params := stripe.PaymentIntentParams{}
-	params.AddExpand("payment_method")
-	fullPaymentIntent, err := client.PaymentIntents.Get(paymentIntent.ID, &params)
-	if err != nil {
-		return ente.StripeEventLog{}, stacktrace.Propagate(err, "")
-	}
-
-	isSEPA := fullPaymentIntent.PaymentMethod.Type == stripe.PaymentMethodTypeSepaDebit
+	isSEPA := paymentIntent.LastPaymentError.PaymentMethod.Type == stripe.PaymentMethodTypeSepaDebit
 	if !isSEPA {
 		// Ignore events for other payment methods, since they will be handled
 		// synchronously
+		log.Info("Ignoring payment intent failed event for non-SEPA payment method")
 		return ente.StripeEventLog{}, nil
 	}
 
+	client := c.StripeClients[country]
 	invoiceID := paymentIntent.Invoice.ID
 	invoice, err := client.Invoices.Get(invoiceID, nil)
 	if err != nil {
@@ -577,7 +571,6 @@ func (c *StripeController) UpdateSubscription(stripeID string, userID int64) (en
 		}
 	}
 	return ente.SubscriptionUpdateResponse{Status: "success"}, nil
-
 }
 
 func (c *StripeController) UpdateSubscriptionCancellationStatus(userID int64, status bool) (ente.Subscription, error) {
