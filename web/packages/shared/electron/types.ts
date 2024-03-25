@@ -11,6 +11,17 @@ export enum Model {
     ONNX_CLIP = "onnx-clip",
 }
 
+export enum FILE_PATH_TYPE {
+    FILES = "files",
+    ZIPS = "zips",
+}
+
+export enum PICKED_UPLOAD_TYPE {
+    FILES = "files",
+    FOLDERS = "folders",
+    ZIPS = "zips",
+}
+
 /**
  * Extra APIs provided by the Node.js layer when our code is running in Electron
  *
@@ -78,75 +89,48 @@ export interface ElectronAPIsType {
         exists: (path: string) => Promise<boolean>;
     };
 
-    /** TODO: AUDIT below this */
+    /*
+     * TODO: AUDIT below this - Some of the types we use below are not copyable
+     * across process boundaries, and such functions will (expectedly) fail at
+     * runtime. For such functions, find an efficient alternative or refactor
+     * the dataflow.
+     */
+
     // - General
+
     registerForegroundEventListener: (onForeground: () => void) => void;
+
     clearElectronStore: () => void;
 
-    // - FS legacy
-    checkExistsAndCreateDir: (dirPath: string) => Promise<void>;
+    setEncryptionKey: (encryptionKey: string) => Promise<void>;
+
+    getEncryptionKey: () => Promise<string>;
 
     // - App update
+
     updateAndRestart: () => void;
+
     skipAppUpdate: (version: string) => void;
+
     muteUpdateNotification: (version: string) => void;
 
     registerUpdateEventListener: (
         showUpdateDialog: (updateInfo: AppUpdateInfo) => void,
     ) => void;
 
-    /** TODO: FIXME or migrate below this */
-    saveStreamToDisk: (
-        path: string,
-        fileStream: ReadableStream<any>,
-    ) => Promise<void>;
-    saveFileToDisk: (path: string, file: any) => Promise<void>;
-    selectDirectory: () => Promise<string>;
-    readTextFile: (path: string) => Promise<string>;
-    showUploadFilesDialog: () => Promise<ElectronFile[]>;
-    showUploadDirsDialog: () => Promise<ElectronFile[]>;
-    getPendingUploads: () => Promise<{
-        files: ElectronFile[];
-        collectionName: string;
-        type: string;
-    }>;
-    setToUploadFiles: (type: string, filePaths: string[]) => void;
-    showUploadZipDialog: () => Promise<{
-        zipPaths: string[];
-        files: ElectronFile[];
-    }>;
-    getElectronFilesFromGoogleZip: (
-        filePath: string,
-    ) => Promise<ElectronFile[]>;
-    setToUploadCollection: (collectionName: string) => void;
-    getDirFiles: (dirPath: string) => Promise<ElectronFile[]>;
-    getWatchMappings: () => WatchMapping[];
-    updateWatchMappingSyncedFiles: (
-        folderPath: string,
-        files: WatchMapping["syncedFiles"],
-    ) => void;
-    updateWatchMappingIgnoredFiles: (
-        folderPath: string,
-        files: WatchMapping["ignoredFiles"],
-    ) => void;
-    addWatchMapping: (
-        collectionName: string,
-        folderPath: string,
-        uploadStrategy: number,
-    ) => Promise<void>;
-    removeWatchMapping: (folderPath: string) => Promise<void>;
-    registerWatcherFunctions: (
-        addFile: (file: ElectronFile) => Promise<void>,
-        removeFile: (path: string) => Promise<void>,
-        removeFolder: (folderPath: string) => Promise<void>,
-    ) => void;
-    isFolder: (dirPath: string) => Promise<boolean>;
-    setEncryptionKey: (encryptionKey: string) => Promise<void>;
-    getEncryptionKey: () => Promise<string>;
+    // - Conversion
+
     convertToJPEG: (
         fileData: Uint8Array,
         filename: string,
     ) => Promise<Uint8Array>;
+
+    generateImageThumbnail: (
+        inputFile: File | ElectronFile,
+        maxDimension: number,
+        maxSize: number,
+    ) => Promise<Uint8Array>;
+
     runFFmpegCmd: (
         cmd: string[],
         inputFile: File | ElectronFile,
@@ -154,18 +138,87 @@ export interface ElectronAPIsType {
         dontTimeout?: boolean,
     ) => Promise<File>;
 
-    generateImageThumbnail: (
-        inputFile: File | ElectronFile,
-        maxDimension: number,
-        maxSize: number,
-    ) => Promise<Uint8Array>;
-    moveFile: (oldPath: string, newPath: string) => Promise<void>;
-    deleteFolder: (path: string) => Promise<void>;
-    deleteFile: (path: string) => Promise<void>;
-    rename: (oldPath: string, newPath: string) => Promise<void>;
+    // - ML
+
     computeImageEmbedding: (
         model: Model,
         imageData: Uint8Array,
     ) => Promise<Float32Array>;
+
     computeTextEmbedding: (model: Model, text: string) => Promise<Float32Array>;
+
+    // - File selection
+    // TODO: Deprecated - use dialogs on the renderer process itself
+
+    selectDirectory: () => Promise<string>;
+
+    showUploadFilesDialog: () => Promise<ElectronFile[]>;
+
+    showUploadDirsDialog: () => Promise<ElectronFile[]>;
+
+    showUploadZipDialog: () => Promise<{
+        zipPaths: string[];
+        files: ElectronFile[];
+    }>;
+
+    // - Watch
+
+    registerWatcherFunctions: (
+        addFile: (file: ElectronFile) => Promise<void>,
+        removeFile: (path: string) => Promise<void>,
+        removeFolder: (folderPath: string) => Promise<void>,
+    ) => void;
+
+    addWatchMapping: (
+        collectionName: string,
+        folderPath: string,
+        uploadStrategy: number,
+    ) => Promise<void>;
+
+    removeWatchMapping: (folderPath: string) => Promise<void>;
+
+    getWatchMappings: () => Promise<WatchMapping[]>;
+
+    updateWatchMappingSyncedFiles: (
+        folderPath: string,
+        files: WatchMapping["syncedFiles"],
+    ) => Promise<void>;
+
+    updateWatchMappingIgnoredFiles: (
+        folderPath: string,
+        files: WatchMapping["ignoredFiles"],
+    ) => Promise<void>;
+
+    // - FS legacy
+    checkExistsAndCreateDir: (dirPath: string) => Promise<void>;
+    saveStreamToDisk: (
+        path: string,
+        fileStream: ReadableStream<any>,
+    ) => Promise<void>;
+    saveFileToDisk: (path: string, file: any) => Promise<void>;
+    readTextFile: (path: string) => Promise<string>;
+    isFolder: (dirPath: string) => Promise<boolean>;
+    moveFile: (oldPath: string, newPath: string) => Promise<void>;
+    deleteFolder: (path: string) => Promise<void>;
+    deleteFile: (path: string) => Promise<void>;
+    rename: (oldPath: string, newPath: string) => Promise<void>;
+
+    // - Upload
+
+    getPendingUploads: () => Promise<{
+        files: ElectronFile[];
+        collectionName: string;
+        type: string;
+    }>;
+    setToUploadFiles: (
+        /** TODO(MR): This is the actual type */
+        // type: FILE_PATH_TYPE,
+        type: PICKED_UPLOAD_TYPE,
+        filePaths: string[],
+    ) => Promise<void>;
+    getElectronFilesFromGoogleZip: (
+        filePath: string,
+    ) => Promise<ElectronFile[]>;
+    setToUploadCollection: (collectionName: string) => Promise<void>;
+    getDirFiles: (dirPath: string) => Promise<ElectronFile[]>;
 }

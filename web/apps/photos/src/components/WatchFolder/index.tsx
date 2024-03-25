@@ -28,7 +28,7 @@ export default function WatchFolder({ open, onClose }: Iprops) {
         if (!isElectron()) {
             return;
         }
-        setMappings(watchFolderService.getWatchMappings());
+        watchFolderService.getWatchMappings().then((m) => setMappings(m));
     }, []);
 
     useEffect(() => {
@@ -87,12 +87,12 @@ export default function WatchFolder({ open, onClose }: Iprops) {
             uploadStrategy,
         );
         setInputFolderPath("");
-        setMappings(watchFolderService.getWatchMappings());
+        setMappings(await watchFolderService.getWatchMappings());
     };
 
     const handleRemoveWatchMapping = async (mapping: WatchMapping) => {
         await watchFolderService.removeWatchMapping(mapping.folderPath);
-        setMappings(watchFolderService.getWatchMappings());
+        setMappings(await watchFolderService.getWatchMappings());
     };
 
     const closeChoiceModal = () => setChoiceModalOpen(false);
