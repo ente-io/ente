@@ -2,17 +2,7 @@ import chokidar from "chokidar";
 import { BrowserWindow, dialog, ipcMain, Tray } from "electron";
 import path from "path";
 import { attachIPCHandlers } from "../main/ipc";
-import {
-    computeImageEmbedding,
-    computeTextEmbedding,
-} from "../services/clipService";
-import { deleteTempFile } from "../services/ffmpeg";
 import { getDirFilePaths } from "../services/fs";
-import {
-    convertToJPEG,
-    generateImageThumbnail,
-} from "../services/imageProcessor";
-import { generateTempFilePath } from "./temp";
 
 export default function setupIpcComs(
     tray: Tray,
@@ -64,30 +54,5 @@ export default function setupIpcComs(
 
     ipcMain.handle("remove-watcher", async (_, args: { dir: string }) => {
         watcher.unwatch(args.dir);
-    });
-
-    ipcMain.handle("convert-to-jpeg", (_, fileData, filename) => {
-        return convertToJPEG(fileData, filename);
-    });
-
-    ipcMain.handle("get-temp-file-path", (_, formatSuffix) => {
-        return generateTempFilePath(formatSuffix);
-    });
-    ipcMain.handle("remove-temp-file", (_, tempFilePath: string) => {
-        return deleteTempFile(tempFilePath);
-    });
-
-    ipcMain.handle(
-        "generate-image-thumbnail",
-        (_, fileData, maxDimension, maxSize) => {
-            return generateImageThumbnail(fileData, maxDimension, maxSize);
-        },
-    );
-
-    ipcMain.handle("compute-image-embedding", (_, model, inputFilePath) => {
-        return computeImageEmbedding(model, inputFilePath);
-    });
-    ipcMain.handle("compute-text-embedding", (_, model, text) => {
-        return computeTextEmbedding(model, text);
     });
 }

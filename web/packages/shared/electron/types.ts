@@ -79,16 +79,23 @@ export interface ElectronAPIsType {
     };
 
     /** TODO: AUDIT below this */
+
     // - General
+
     registerForegroundEventListener: (onForeground: () => void) => void;
+
     clearElectronStore: () => void;
 
     setEncryptionKey: (encryptionKey: string) => Promise<void>;
+
     getEncryptionKey: () => Promise<string>;
 
     // - App update
+
     updateAndRestart: () => void;
+
     skipAppUpdate: (version: string) => void;
+
     muteUpdateNotification: (version: string) => void;
 
     registerUpdateEventListener: (
@@ -96,6 +103,17 @@ export interface ElectronAPIsType {
     ) => void;
 
     // - Conversion
+
+    convertToJPEG: (
+        fileData: Uint8Array,
+        filename: string,
+    ) => Promise<Uint8Array>;
+
+    generateImageThumbnail: (
+        inputFile: File | ElectronFile,
+        maxDimension: number,
+        maxSize: number,
+    ) => Promise<Uint8Array>;
 
     runFFmpegCmd: (
         cmd: string[],
@@ -160,16 +178,6 @@ export interface ElectronAPIsType {
         removeFolder: (folderPath: string) => Promise<void>,
     ) => void;
     isFolder: (dirPath: string) => Promise<boolean>;
-    convertToJPEG: (
-        fileData: Uint8Array,
-        filename: string,
-    ) => Promise<Uint8Array>;
-
-    generateImageThumbnail: (
-        inputFile: File | ElectronFile,
-        maxDimension: number,
-        maxSize: number,
-    ) => Promise<Uint8Array>;
     moveFile: (oldPath: string, newPath: string) => Promise<void>;
     deleteFolder: (path: string) => Promise<void>;
     deleteFile: (path: string) => Promise<void>;

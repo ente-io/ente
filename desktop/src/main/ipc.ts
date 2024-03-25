@@ -8,7 +8,6 @@
 
 import { ipcMain } from "electron/main";
 import { clearElectronStore } from "../api/electronStore";
-import { runFFmpegCmd } from "../api/ffmpeg";
 import { getEncryptionKey, setEncryptionKey } from "../api/safeStorage";
 import {
     appVersion,
@@ -20,7 +19,12 @@ import {
     computeImageEmbedding,
     computeTextEmbedding,
 } from "../services/clipService";
-import type { Model } from "../types";
+import { runFFmpegCmd } from "../services/ffmpeg";
+import {
+    convertToJPEG,
+    generateImageThumbnail,
+} from "../services/imageProcessor";
+import type { ElectronFile, Model } from "../types";
 import { checkExistsAndCreateDir, fsExists } from "./fs";
 import { openDirectory, openLogDirectory } from "./general";
 import { logToDisk } from "./log";
@@ -69,6 +73,16 @@ export const attachIPCHandlers = () => {
 
     ipcMain.on("mute-update-notification", (_, version) =>
         muteUpdateNotification(version),
+    );
+
+    ipcMain.handle("convertToJPEG", (_, fileData, filename) =>
+        convertToJPEG(fileData, filename),
+    );
+
+    ipcMain.handle(
+        "generateImageThumbnail",
+        (_, inputFile, maxDimension, maxSize) =>
+            generateImageThumbnail(inputFile, maxDimension, maxSize),
     );
 
     ipcMain.handle(

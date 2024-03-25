@@ -32,7 +32,6 @@ import * as fs from "node:fs/promises";
 import { Readable } from "node:stream";
 import path from "path";
 import { getDirFiles } from "./api/fs";
-import { convertToJPEG, generateImageThumbnail } from "./api/imageProcessor";
 import {
     getElectronFilesFromGoogleZip,
     getPendingUploads,
@@ -51,6 +50,7 @@ import {
     updateWatchMappingSyncedFiles,
 } from "./api/watch";
 import { logErrorSentry, setupLogging } from "./main/log";
+import type { ElectronFile } from "types";
 
 setupLogging();
 
@@ -141,6 +141,24 @@ const muteUpdateNotification = (version: string) => {
 };
 
 // - Conversion
+
+const convertToJPEG = (
+    fileData: Uint8Array,
+    filename: string,
+): Promise<Uint8Array> =>
+    ipcRenderer.invoke("convertToJPEG", fileData, filename);
+
+const generateImageThumbnail = (
+    inputFile: File | ElectronFile,
+    maxDimension: number,
+    maxSize: number,
+): Promise<Uint8Array> =>
+    ipcRenderer.invoke(
+        "generateImageThumbnail",
+        inputFile,
+        maxDimension,
+        maxSize,
+    );
 
 const runFFmpegCmd = (
     cmd: string[],
@@ -398,6 +416,8 @@ contextBridge.exposeInMainWorld("ElectronAPIs", {
     registerUpdateEventListener,
 
     // - Conversion
+    convertToJPEG,
+    generateImageThumbnail,
     runFFmpegCmd,
 
     // - ML
@@ -434,9 +454,6 @@ contextBridge.exposeInMainWorld("ElectronAPIs", {
     isFolder,
     updateWatchMappingSyncedFiles,
     updateWatchMappingIgnoredFiles,
-    convertToJPEG,
-
-    generateImageThumbnail,
     moveFile,
     deleteFolder,
     rename,
