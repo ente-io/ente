@@ -27,10 +27,6 @@
  */
 
 import { contextBridge, ipcRenderer } from "electron";
-import { createWriteStream, existsSync } from "node:fs";
-import * as fs from "node:fs/promises";
-import { Readable } from "node:stream";
-import path from "path";
 import { getDirFiles } from "./api/fs";
 import {
     getElectronFilesFromGoogleZip,
@@ -38,7 +34,7 @@ import {
     setToUploadCollection,
     setToUploadFiles,
 } from "./api/upload";
-import { logErrorSentry, setupLogging } from "./main/log";
+import { setupLogging } from "./main/log";
 import type { ElectronFile } from "./types";
 
 setupLogging();
@@ -80,24 +76,6 @@ const fsExists = (path: string): Promise<boolean> =>
 
 // - AUDIT below this
 
-const checkExistsAndCreateDir = (dirPath: string): Promise<void> =>
-    ipcRenderer.invoke("checkExistsAndCreateDir", dirPath);
-
-/* preload: duplicated */
-interface AppUpdateInfo {
-    autoUpdatable: boolean;
-    version: string;
-}
-
-const registerUpdateEventListener = (
-    showUpdateDialog: (updateInfo: AppUpdateInfo) => void,
-) => {
-    ipcRenderer.removeAllListeners("show-update-dialog");
-    ipcRenderer.on("show-update-dialog", (_, updateInfo: AppUpdateInfo) => {
-        showUpdateDialog(updateInfo);
-    });
-};
-
 const registerForegroundEventListener = (onForeground: () => void) => {
     ipcRenderer.removeAllListeners("app-in-foreground");
     ipcRenderer.on("app-in-foreground", () => {
@@ -116,6 +94,21 @@ const getEncryptionKey = (): Promise<string> =>
     ipcRenderer.invoke("getEncryptionKey");
 
 // - App update
+
+/* preload: duplicated */
+interface AppUpdateInfo {
+    autoUpdatable: boolean;
+    version: string;
+}
+
+const registerUpdateEventListener = (
+    showUpdateDialog: (updateInfo: AppUpdateInfo) => void,
+) => {
+    ipcRenderer.removeAllListeners("show-update-dialog");
+    ipcRenderer.on("show-update-dialog", (_, updateInfo: AppUpdateInfo) => {
+        showUpdateDialog(updateInfo);
+    });
+};
 
 const updateAndRestart = () => {
     ipcRenderer.send("update-and-restart");
@@ -266,163 +259,36 @@ const updateWatchMappingIgnoredFiles = (
 ): Promise<void> =>
     ipcRenderer.invoke("updateWatchMappingIgnoredFiles", folderPath, files);
 
-// - FIXME below this
+// - FS Legacy
 
-/* preload: duplicated logError */
-const logError = (error: Error, message: string, info?: any) => {
-    logErrorSentry(error, message, info);
-};
+const checkExistsAndCreateDir = (dirPath: string): Promise<void> =>
+    ipcRenderer.invoke("checkExistsAndCreateDir", dirPath);
 
-/* preload: duplicated writeStream */
-/**
- * Write a (web) ReadableStream to a file at the given {@link filePath}.
- *
- * The returned promise resolves when the write completes.
- *
- * @param filePath The local filesystem path where the file should be written.
- * @param readableStream A [web
- * ReadableStream](https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream)
- */
-const writeStream = (filePath: string, readableStream: ReadableStream) =>
-    writeNodeStream(filePath, convertWebReadableStreamToNode(readableStream));
+const saveStreamToDisk = (
+    path: string,
+    fileStream: ReadableStream<any>,
+): Promise<void> => ipcRenderer.invoke("saveStreamToDisk", path, fileStream);
 
-/**
- * Convert a Web ReadableStream into a Node.js ReadableStream
- *
- * This can be used to, for example, write a ReadableStream obtained via
- * `net.fetch` into a file using the Node.js `fs` APIs
- */
-const convertWebReadableStreamToNode = (readableStream: ReadableStream) => {
-    const reader = readableStream.getReader();
-    const rs = new Readable();
+const saveFileToDisk = (path: string, file: any): Promise<void> =>
+    ipcRenderer.invoke("saveFileToDisk", path, file);
 
-    rs._read = async () => {
-        try {
-            const result = await reader.read();
+const readTextFile = (path: string): Promise<string> =>
+    ipcRenderer.invoke("readTextFile", path);
 
-            if (!result.done) {
-                rs.push(Buffer.from(result.value));
-            } else {
-                rs.push(null);
-                return;
-            }
-        } catch (e) {
-            rs.emit("error", e);
-        }
-    };
+const isFolder = (dirPath: string): Promise<boolean> =>
+    ipcRenderer.invoke("isFolder", dirPath);
 
-    return rs;
-};
+const moveFile = (oldPath: string, newPath: string): Promise<void> =>
+    ipcRenderer.invoke("moveFile", oldPath, newPath);
 
-const writeNodeStream = async (
-    filePath: string,
-    fileStream: NodeJS.ReadableStream,
-) => {
-    const writeable = createWriteStream(filePath);
+const deleteFolder = (path: string): Promise<void> =>
+    ipcRenderer.invoke("deleteFolder", path);
 
-    fileStream.on("error", (error) => {
-        writeable.destroy(error); // Close the writable stream with an error
-    });
+const deleteFile = (path: string): Promise<void> =>
+    ipcRenderer.invoke("deleteFile", path);
 
-    fileStream.pipe(writeable);
-
-    await new Promise((resolve, reject) => {
-        writeable.on("finish", resolve);
-        writeable.on("error", async (e: unknown) => {
-            if (existsSync(filePath)) {
-                await fs.unlink(filePath);
-            }
-            reject(e);
-        });
-    });
-};
-
-// - Export
-
-const saveStreamToDisk = writeStream;
-
-const saveFileToDisk = (path: string, contents: string) =>
-    fs.writeFile(path, contents);
-
-// -
-
-async function readTextFile(filePath: string) {
-    if (!existsSync(filePath)) {
-        throw new Error("File does not exist");
-    }
-    return await fs.readFile(filePath, "utf-8");
-}
-
-async function moveFile(
-    sourcePath: string,
-    destinationPath: string,
-): Promise<void> {
-    if (!existsSync(sourcePath)) {
-        throw new Error("File does not exist");
-    }
-    if (existsSync(destinationPath)) {
-        throw new Error("Destination file already exists");
-    }
-    // check if destination folder exists
-    const destinationFolder = path.dirname(destinationPath);
-    await fs.mkdir(destinationFolder, { recursive: true });
-    await fs.rename(sourcePath, destinationPath);
-}
-
-export async function isFolder(dirPath: string) {
-    try {
-        const stats = await fs.stat(dirPath);
-        return stats.isDirectory();
-    } catch (e) {
-        let err = e;
-        // if code is defined, it's an error from fs.stat
-        if (typeof e.code !== "undefined") {
-            // ENOENT means the file does not exist
-            if (e.code === "ENOENT") {
-                return false;
-            }
-            err = Error(`fs error code: ${e.code}`);
-        }
-        logError(err, "isFolder failed");
-        return false;
-    }
-}
-
-async function deleteFolder(folderPath: string): Promise<void> {
-    if (!existsSync(folderPath)) {
-        return;
-    }
-    const stat = await fs.stat(folderPath);
-    if (!stat.isDirectory()) {
-        throw new Error("Path is not a folder");
-    }
-    // check if folder is empty
-    const files = await fs.readdir(folderPath);
-    if (files.length > 0) {
-        throw new Error("Folder is not empty");
-    }
-    await fs.rmdir(folderPath);
-}
-
-async function rename(oldPath: string, newPath: string) {
-    if (!existsSync(oldPath)) {
-        throw new Error("Path does not exist");
-    }
-    await fs.rename(oldPath, newPath);
-}
-
-const deleteFile = async (filePath: string) => {
-    if (!existsSync(filePath)) {
-        return;
-    }
-    const stat = await fs.stat(filePath);
-    if (!stat.isFile()) {
-        throw new Error("Path is not a file");
-    }
-    return fs.rm(filePath);
-};
-
-// -
+const rename = (oldPath: string, newPath: string): Promise<void> =>
+    ipcRenderer.invoke("rename", oldPath, newPath);
 
 // These objects exposed here will become available to the JS code in our
 // renderer (the web/ code) as `window.ElectronAPIs.*`
@@ -506,21 +372,20 @@ contextBridge.exposeInMainWorld("ElectronAPIs", {
     // - FS legacy
     // TODO: Move these into fs + document + rename if needed
     checkExistsAndCreateDir,
-
-    // - Export
     saveStreamToDisk,
     saveFileToDisk,
     readTextFile,
+    isFolder,
+    moveFile,
+    deleteFolder,
+    deleteFile,
+    rename,
+
+    // - Export
 
     getPendingUploads,
     setToUploadFiles,
     getElectronFilesFromGoogleZip,
     setToUploadCollection,
     getDirFiles,
-
-    isFolder,
-    moveFile,
-    deleteFolder,
-    rename,
-    deleteFile,
 });

@@ -78,7 +78,12 @@ export interface ElectronAPIsType {
         exists: (path: string) => Promise<boolean>;
     };
 
-    /** TODO: AUDIT below this */
+    /*
+     * TODO: AUDIT below this - Some of the types we use below are not copyable
+     * across process boundaries, and such functions will (expectedly) fail at
+     * runtime. For such functions, find an efficient alternative or refactor
+     * the dataflow.
+     */
 
     // - General
 
@@ -175,14 +180,19 @@ export interface ElectronAPIsType {
 
     // - FS legacy
     checkExistsAndCreateDir: (dirPath: string) => Promise<void>;
-
-    /** TODO: FIXME or migrate below this */
     saveStreamToDisk: (
         path: string,
         fileStream: ReadableStream<any>,
     ) => Promise<void>;
     saveFileToDisk: (path: string, file: any) => Promise<void>;
     readTextFile: (path: string) => Promise<string>;
+    isFolder: (dirPath: string) => Promise<boolean>;
+    moveFile: (oldPath: string, newPath: string) => Promise<void>;
+    deleteFolder: (path: string) => Promise<void>;
+    deleteFile: (path: string) => Promise<void>;
+    rename: (oldPath: string, newPath: string) => Promise<void>;
+
+    /** TODO: FIXME or migrate below this */
 
     getPendingUploads: () => Promise<{
         files: ElectronFile[];
@@ -195,9 +205,4 @@ export interface ElectronAPIsType {
     ) => Promise<ElectronFile[]>;
     setToUploadCollection: (collectionName: string) => void;
     getDirFiles: (dirPath: string) => Promise<ElectronFile[]>;
-    isFolder: (dirPath: string) => Promise<boolean>;
-    moveFile: (oldPath: string, newPath: string) => Promise<void>;
-    deleteFolder: (path: string) => Promise<void>;
-    deleteFile: (path: string) => Promise<void>;
-    rename: (oldPath: string, newPath: string) => Promise<void>;
 }

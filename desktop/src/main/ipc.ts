@@ -39,7 +39,18 @@ import {
     showUploadFilesDialog,
     showUploadZipDialog,
 } from "./dialogs";
-import { checkExistsAndCreateDir, fsExists } from "./fs";
+import {
+    checkExistsAndCreateDir,
+    deleteFile,
+    deleteFolder,
+    fsExists,
+    isFolder,
+    moveFile,
+    readTextFile,
+    rename,
+    saveFileToDisk,
+    saveStreamToDisk,
+} from "./fs";
 import { openDirectory, openLogDirectory } from "./general";
 import { logToDisk } from "./log";
 
@@ -136,6 +147,32 @@ export const attachIPCHandlers = () => {
 
     ipcMain.handle("checkExistsAndCreateDir", (_, dirPath) =>
         checkExistsAndCreateDir(dirPath),
+    );
+
+    ipcMain.handle(
+        "saveStreamToDisk",
+        (_, path: string, fileStream: ReadableStream<any>) =>
+            saveStreamToDisk(path, fileStream),
+    );
+
+    ipcMain.handle("saveFileToDisk", (_, path: string, file: any) =>
+        saveFileToDisk(path, file),
+    );
+
+    ipcMain.handle("readTextFile", (_, path: string) => readTextFile(path));
+
+    ipcMain.handle("isFolder", (_, dirPath: string) => isFolder(dirPath));
+
+    ipcMain.handle("moveFile", (_, oldPath: string, newPath: string) =>
+        moveFile(oldPath, newPath),
+    );
+
+    ipcMain.handle("deleteFolder", (_, path: string) => deleteFolder(path));
+
+    ipcMain.handle("deleteFile", (_, path: string) => deleteFile(path));
+
+    ipcMain.handle("rename", (_, oldPath: string, newPath: string) =>
+        rename(oldPath, newPath),
     );
 };
 

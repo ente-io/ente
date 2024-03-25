@@ -4,8 +4,8 @@ import { existsSync } from "node:fs";
 import * as fs from "node:fs/promises";
 import util from "util";
 import { CustomErrors } from "../constants/errors";
+import { writeStream } from "../main/fs";
 import { logError, logErrorSentry } from "../main/log";
-import { writeStream } from "../services/fs";
 import { ElectronFile } from "../types";
 import { generateTempFilePath, getTempDirPath } from "../utils/temp";
 

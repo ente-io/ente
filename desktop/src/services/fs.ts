@@ -1,10 +1,9 @@
 import StreamZip from "node-stream-zip";
-import { createWriteStream, existsSync } from "node:fs";
+import { existsSync } from "node:fs";
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
-import { Readable } from "stream";
-import { ElectronFile } from "../types";
 import { logError } from "../main/log";
+import { ElectronFile } from "../types";
 
 const FILE_STREAM_CHUNK_SIZE: number = 4 * 1024 * 1024;
 
@@ -181,58 +180,3 @@ export const getZipFileStream = async (
     });
     return readableStream;
 };
-
-export const convertBrowserStreamToNode = (
-    fileStream: ReadableStream<Uint8Array>,
-) => {
-    const reader = fileStream.getReader();
-    const rs = new Readable();
-
-    rs._read = async () => {
-        try {
-            const result = await reader.read();
-
-            if (!result.done) {
-                rs.push(Buffer.from(result.value));
-            } else {
-                rs.push(null);
-                return;
-            }
-        } catch (e) {
-            rs.emit("error", e);
-        }
-    };
-
-    return rs;
-};
-
-export async function writeNodeStream(
-    filePath: string,
-    fileStream: NodeJS.ReadableStream,
-) {
-    const writeable = createWriteStream(filePath);
-
-    fileStream.on("error", (error) => {
-        writeable.destroy(error); // Close the writable stream with an error
-    });
-
-    fileStream.pipe(writeable);
-
-    await new Promise((resolve, reject) => {
-        writeable.on("finish", resolve);
-        writeable.on("error", async (e: unknown) => {
-            if (existsSync(filePath)) {
-                await fs.unlink(filePath);
-            }
-            reject(e);
-        });
-    });
-}
-
-export async function writeStream(
-    filePath: string,
-    fileStream: ReadableStream<Uint8Array>,
-) {
-    const readable = convertBrowserStreamToNode(fileStream);
-    await writeNodeStream(filePath, readable);
-}
