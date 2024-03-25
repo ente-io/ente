@@ -17,6 +17,7 @@ import ElectronAPIs from "@ente/shared/electron";
 import { getAlbumsURL } from "@ente/shared/network/api";
 import { logError } from "@ente/shared/sentry";
 import localForage from "@ente/shared/storage/localForage";
+import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { getKey, SESSION_KEYS } from "@ente/shared/storage/sessionStorage";
 import isElectron from "is-electron";
 import { Trans } from "react-i18next";
@@ -145,18 +146,11 @@ export default function LandingPage() {
                 );
             }
         }
-        if (key) {
-            // if (appName === APPS.AUTH) {
-            //     await router.push(PAGES.AUTH);
-            // } else {
+        const token = getToken();
+        if (key && token) {
             await router.push(PAGES.GALLERY);
-            // }
         } else if (user?.email) {
             await router.push(PAGES.VERIFY);
-        } else {
-            // if (appName === APPS.AUTH) {
-            //     await router.push(PAGES.LOGIN);
-            // }
         }
         await initLocalForage();
         setLoading(false);
