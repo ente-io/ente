@@ -36,6 +36,7 @@ void main() {
 
           final emailInputField = find.byType(TextFormField);
           final logInButton = find.byKey(const ValueKey("logInButton"));
+          //Fill email id here
           await tester.enterText(emailInputField, "enter email here");
           await tester.pumpAndSettle(const Duration(seconds: 1));
           await tester.tap(logInButton);
@@ -45,6 +46,7 @@ void main() {
               find.byKey(const ValueKey("passwordInputField"));
           final verifyPasswordButton =
               find.byKey(const ValueKey("verifyPasswordButton"));
+          //Fill password here
           await tester.enterText(passwordInputField, "enter password here");
           await tester.pumpAndSettle(const Duration(seconds: 1));
           await tester.tap(verifyPasswordButton);
