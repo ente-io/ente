@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"context"
 	"database/sql"
 	"encoding/json"
 	"errors"
@@ -206,8 +205,6 @@ func (c *StripeController) findHandlerForEvent(event stripe.Event) func(event st
 	switch event.Type {
 	case "checkout.session.completed":
 		return c.handleCheckoutSessionCompleted
-	case "customer.subscription.deleted":
-		return c.handleCustomerSubscriptionDeleted
 	case "customer.subscription.updated":
 		return c.handleCustomerSubscriptionUpdated
 	case "invoice.paid":
@@ -274,63 +271,6 @@ func (c *StripeController) handleCheckoutSessionCompleted(event stripe.Event, co
 		}
 	}
 	return ente.StripeEventLog{}, nil
-}
-
-// Occurs whenever a customer's subscription ends.
-func (c *StripeController) handleCustomerSubscriptionDeleted(event stripe.Event, country ente.StripeAccountCountry) (ente.StripeEventLog, error) {
-	var stripeSubscription stripe.Subscription
-	json.Unmarshal(event.Data.Raw, &stripeSubscription)
-	currentSubscription, err := c.BillingRepo.GetSubscriptionForTransaction(stripeSubscription.ID, ente.Stripe)
-	if err != nil {
-		// Ignore webhooks received before user has been created
-		//
-		// This would happen when we get webhook events out of order, e.g. we
-		// get a "customer.subscription.updated" before
-		// "checkout.session.completed", and the customer has not yet been
-		// created in our database.
-		if errors.Is(err, sql.ErrNoRows) {
-			log.Warn("Webhook is reporting an event for un-verified subscription stripeSubscriptionID:", stripeSubscription.ID)
-			return ente.StripeEventLog{}, nil
-		}
-		return ente.StripeEventLog{}, stacktrace.Propagate(err, "")
-	}
-	userID := currentSubscription.UserID
-	user, err := c.UserRepo.Get(userID)
-	if err != nil {
-		if errors.Is(err, ente.ErrUserDeleted) {
-			// no-op user has already been deleted
-			return ente.StripeEventLog{UserID: userID, StripeSubscription: stripeSubscription, Event: event}, nil
-		}
-		return ente.StripeEventLog{}, stacktrace.Propagate(err, "")
-	}
-
-	err = c.BillingRepo.UpdateSubscriptionCancellationStatus(userID, true)
-	if err != nil {
-		return ente.StripeEventLog{}, stacktrace.Propagate(err, "")
-	}
-
-	skipMail := stripeSubscription.Metadata[SkipMailKey]
-	// Send a cancellation notification email for folks who are either on
-	// individual plan or admin of a family plan.
-	if skipMail != "true" &&
-		(user.FamilyAdminID == nil || *user.FamilyAdminID == userID) {
-		storage, surpErr := c.StorageBonusRepo.GetPaidAddonSurplusStorage(context.Background(), userID)
-		if surpErr != nil {
-			return ente.StripeEventLog{}, stacktrace.Propagate(surpErr, "")
-		}
-		if storage == nil || *storage <= 0 {
-			err = email.SendTemplatedEmail([]string{user.Email}, "ente", "support@ente.io",
-				ente.SubscriptionEndedEmailSubject, ente.SubscriptionEndedEmailTemplate,
-				map[string]interface{}{}, nil)
-			if err != nil {
-				return ente.StripeEventLog{}, stacktrace.Propagate(err, "")
-			}
-		} else {
-			log.WithField("storage", storage).Info("User has surplus storage, not sending email")
-		}
-	}
-	// TODO: Add cron to delete files of users with expired subscriptions
-	return ente.StripeEventLog{UserID: userID, StripeSubscription: stripeSubscription, Event: event}, nil
 }
 
 // Stripe fires this when a subscription starts or changes. For example,
