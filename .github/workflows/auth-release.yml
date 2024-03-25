@@ -169,7 +169,7 @@ jobs:
                       auth/ente-${{ github.ref_name }}-windows/auth.exe
 
             - name: Zip Windows EXE and DLLs
-              run: tar.exe -a -c -f auth/artifacts/ente-${{ github.ref_name }}-windows.zip auth/ente-${{ github.ref_name }}-windows
+              run: tar.exe -a -c -f artifacts/ente-${{ github.ref_name }}-windows.zip ente-${{ github.ref_name }}-windows
 
             - name: Create a draft GitHub release
               uses: ncipollo/release-action@v1
