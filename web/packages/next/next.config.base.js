@@ -11,6 +11,7 @@
  */
 
 const cp = require("child_process");
+const os = require("os");
 
 /**
  * Return the current commit ID if we're running inside a git repository.
@@ -18,8 +19,17 @@ const cp = require("child_process");
 const gitSHA = () => {
     // Allow the command to fail. gitSHA will be an empty string in such cases.
     // This allows us to run the build even when we're outside of a git context.
+    //
+    // The /dev/null redirection is needed so that we don't print error messages
+    // if someone is trying to run outside of a git context. Since the way to
+    // redirect output and ignore failure is different on Windows, the command
+    // needs to be OS specific.
+    const command =
+        os.platform() == "win32"
+            ? "git rev-parse --short HEAD 2> NUL || cd ."
+            : "git rev-parse --short HEAD 2>/dev/null || true";
     const result = cp
-        .execSync("git rev-parse --short HEAD 2>/dev/null || true", {
+        .execSync(command, {
             cwd: __dirname,
             encoding: "utf8",
         })
