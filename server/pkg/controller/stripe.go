@@ -404,6 +404,20 @@ func (c *StripeController) handlePaymentIntentFailed(event stripe.Event, country
 	if err != nil {
 		return ente.StripeEventLog{}, stacktrace.Propagate(err, "")
 	}
+	// Send an email to the user
+	user, err := c.UserRepo.Get(userID)
+	if err != nil {
+		return ente.StripeEventLog{}, stacktrace.Propagate(err, "")
+	}
+	// TODO: Inform customer that payment_failed.html with invoice.HostedInvoiceURL
+	err = email.SendTemplatedEmail([]string{user.Email}, "ente", "support@ente.io",
+		ente.AccountOnHoldEmailSubject, ente.OnHoldTemplate, map[string]interface{}{
+			"PaymentProvider": "Stripe",
+			"InvoiceURL":      invoice.HostedInvoiceURL,
+		}, nil)
+	if err != nil {
+		return ente.StripeEventLog{}, stacktrace.Propagate(err, "")
+	}
 	return ente.StripeEventLog{UserID: userID, StripeSubscription: *stripeSubscription, Event: event}, nil
 }
 
