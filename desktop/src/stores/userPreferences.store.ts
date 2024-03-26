@@ -1,5 +1,5 @@
 import Store, { Schema } from "electron-store";
-import { UserPreferencesType } from "../types";
+import type { UserPreferencesType } from "../types/main";
 
 const userPreferencesSchema: Schema<UserPreferencesType> = {
     hideDockIcon: {

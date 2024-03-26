@@ -8,7 +8,7 @@ import { CustomErrors } from "../constants/errors";
 import { writeStream } from "../main/fs";
 import { isDev } from "../main/general";
 import { logErrorSentry } from "../main/log";
-import { Model } from "../types";
+import { Model } from "../types/ipc";
 import Tokenizer from "../utils/clip-bpe-ts/mod";
 import { getPlatform } from "../utils/common/platform";
 import { generateTempFilePath } from "../utils/temp";

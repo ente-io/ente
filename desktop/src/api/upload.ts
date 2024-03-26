@@ -4,7 +4,7 @@ import {
     getSavedFilePaths,
 } from "../services/upload";
 import { uploadStatusStore } from "../stores/upload.store";
-import { ElectronFile, FILE_PATH_TYPE } from "../types";
+import { ElectronFile, FILE_PATH_TYPE } from "../types/ipc";
 
 export const getPendingUploads = async () => {
     const filePaths = getSavedFilePaths(FILE_PATH_TYPE.FILES);

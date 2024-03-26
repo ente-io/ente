@@ -24,43 +24,43 @@
  * file. However, since this is just boilerplate code providing a bridge between
  * the main and renderer, we avoid introducing another moving part into the mix
  * and just keep the entire preload setup in this single file.
+ *
+ * [Note: types.ts <-> preload.ts <-> ipc.ts]
+ *
+ * The following three files are boilerplatish linkage of the same functions,
+ * and when changing one of them, remember to see if the other two also need
+ * changing:
+ *
+ * -    [renderer]  web/packages/shared/electron/types.ts     contains docs
+ * -    [preload]   desktop/src/preload.ts                          ↕︎
+ * -    [main]      desktop/src/main/ipc.ts                   contains impl
  */
 
-import { contextBridge, ipcRenderer } from "electron";
-import type { ElectronFile } from "./types";
+import { contextBridge, ipcRenderer } from "electron/renderer";
+
+// While we can't import other code, we can import types since they're just
+// needed when compiling and will not be needed / looked around for at runtime.
+import type {
+    AppUpdateInfo,
+    ElectronFile,
+    FILE_PATH_TYPE,
+    Model,
+    WatchMapping,
+} from "./types/ipc";
 
 // - General
 
-/** Return the version of the desktop app. */
 const appVersion = (): Promise<string> => ipcRenderer.invoke("appVersion");
 
-/**
- * Open the given {@link dirPath} in the system's folder viewer.
- *
- * For example, on macOS this'll open {@link dirPath} in Finder.
- */
 const openDirectory = (dirPath: string): Promise<void> =>
     ipcRenderer.invoke("openDirectory");
 
-/**
- * Open the app's log directory in the system's folder viewer.
- *
- * @see {@link openDirectory}
- */
 const openLogDirectory = (): Promise<void> =>
     ipcRenderer.invoke("openLogDirectory");
 
-/**
- * Log the given {@link message} to the on-disk log file maintained by the
- * desktop app.
- */
 const logToDisk = (message: string): void =>
     ipcRenderer.send("logToDisk", message);
 
-/**
- * Return true if there is a file or directory at the given
- * {@link path}.
- */
 const fsExists = (path: string): Promise<boolean> =>
     ipcRenderer.invoke("fsExists", path);
 
@@ -84,12 +84,6 @@ const getEncryptionKey = (): Promise<string> =>
     ipcRenderer.invoke("getEncryptionKey");
 
 // - App update
-
-/* preload: duplicated */
-interface AppUpdateInfo {
-    autoUpdatable: boolean;
-    version: string;
-}
 
 const registerUpdateEventListener = (
     showUpdateDialog: (updateInfo: AppUpdateInfo) => void,
@@ -147,12 +141,6 @@ const runFFmpegCmd = (
     );
 
 // - ML
-
-/* preload: duplicated Model */
-enum Model {
-    GGML_CLIP = "ggml-clip",
-    ONNX_CLIP = "onnx-clip",
-}
 
 const computeImageEmbedding = (
     model: Model,
@@ -218,22 +206,6 @@ const addWatchMapping = (
 const removeWatchMapping = (folderPath: string): Promise<void> =>
     ipcRenderer.invoke("removeWatchMapping", folderPath);
 
-/* preload: duplicated WatchMappingSyncedFile */
-interface WatchMappingSyncedFile {
-    path: string;
-    uploadedFileID: number;
-    collectionID: number;
-}
-
-/* preload: duplicated WatchMapping */
-interface WatchMapping {
-    rootFolderName: string;
-    uploadStrategy: number;
-    folderPath: string;
-    syncedFiles: WatchMappingSyncedFile[];
-    ignoredFiles: string[];
-}
-
 const getWatchMappings = (): Promise<WatchMapping[]> =>
     ipcRenderer.invoke("getWatchMappings");
 
@@ -288,12 +260,6 @@ const getPendingUploads = (): Promise<{
     type: string;
 }> => ipcRenderer.invoke("getPendingUploads");
 
-/* preload: duplicated FILE_PATH_TYPE */
-enum FILE_PATH_TYPE {
-    FILES = "files",
-    ZIPS = "zips",
-}
-
 const setToUploadFiles = (
     type: FILE_PATH_TYPE,
     filePaths: string[],
@@ -327,7 +293,7 @@ const getDirFiles = (dirPath: string): Promise<ElectronFile[]> =>
 // Algorithm to serialize objects passed between processes.
 // https://www.electronjs.org/docs/latest/tutorial/ipc#object-serialization
 //
-// In particular, both ArrayBuffer is eligible for structured cloning.
+// In particular, ArrayBuffer is eligible for structured cloning.
 // https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Structured_clone_algorithm
 //
 // Also, ArrayBuffer is "transferable", which means it is a zero-copy operation

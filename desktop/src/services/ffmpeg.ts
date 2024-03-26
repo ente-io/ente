@@ -6,7 +6,7 @@ import util from "util";
 import { CustomErrors } from "../constants/errors";
 import { writeStream } from "../main/fs";
 import { logError, logErrorSentry } from "../main/log";
-import { ElectronFile } from "../types";
+import { ElectronFile } from "../types/ipc";
 import { generateTempFilePath, getTempDirPath } from "../utils/temp";
 
 const shellescape = require("any-shell-escape");

@@ -4,7 +4,7 @@ import { default as ElectronLog, default as log } from "electron-log";
 import { autoUpdater } from "electron-updater";
 import { setIsAppQuitting, setIsUpdateAvailable } from "../main";
 import { logErrorSentry } from "../main/log";
-import { AppUpdateInfo } from "../types";
+import { AppUpdateInfo } from "../types/ipc";
 import {
     clearMuteUpdateNotificationVersion,
     clearSkipAppVersion,

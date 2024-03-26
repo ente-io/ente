@@ -100,8 +100,9 @@ const increaseDiskCache = () => {
 
 /**
  * Older versions of our app used to maintain a cache dir using the main
- * process. This has been deprecated in favor of using a normal web cache (See:
- * [Note: Increased disk cache for the desktop app]).
+ * process. This has been deprecated in favor of using a normal web cache.
+ *
+ * See [Note: Increased disk cache for the desktop app]
  *
  * Delete the old cache dir if it exists. This code was added March 2024, and
  * can be removed after some time once most people have upgraded to newer

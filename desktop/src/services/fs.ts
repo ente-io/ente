@@ -3,7 +3,7 @@ import { existsSync } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { logError } from "../main/log";
-import { ElectronFile } from "../types";
+import { ElectronFile } from "../types/ipc";
 
 const FILE_STREAM_CHUNK_SIZE: number = 4 * 1024 * 1024;
 

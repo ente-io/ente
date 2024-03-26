@@ -4,6 +4,8 @@
  *
  * This file is meant as a sibling to `preload.ts`, but this one runs in the
  * context of the main process, and can import other files from `src/`.
+ *
+ * See [Note: types.ts <-> preload.ts <-> ipc.ts]
  */
 
 import type { FSWatcher } from "chokidar";
@@ -44,7 +46,7 @@ import type {
     FILE_PATH_TYPE,
     Model,
     WatchMapping,
-} from "../types";
+} from "../types/ipc";
 import {
     selectDirectory,
     showUploadDirsDialog,
@@ -95,7 +97,7 @@ export const attachIPCHandlers = () => {
 
     ipcMain.handle("openLogDirectory", (_) => openLogDirectory());
 
-    // See: [Note: Catching exception during .send/.on]
+    // See [Note: Catching exception during .send/.on]
     ipcMain.on("logToDisk", (_, message) => logToDisk(message));
 
     ipcMain.on("clear-electron-store", (_) => {

@@ -2,7 +2,7 @@ import { dialog } from "electron/main";
 import path from "node:path";
 import { getDirFilePaths, getElectronFile } from "../services/fs";
 import { getElectronFilesFromGoogleZip } from "../services/upload";
-import type { ElectronFile } from "../types";
+import type { ElectronFile } from "../types/ipc";
 
 export const selectDirectory = async () => {
     const result = await dialog.showOpenDialog({

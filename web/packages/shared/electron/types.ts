@@ -1,5 +1,10 @@
-import { ElectronFile } from "@ente/shared/upload/types";
-import { WatchMapping } from "@ente/shared/watchFolder/types";
+// Following are types shared with the Electron process. This list is manually
+// kept in sync with `desktop/src/types/ipc.ts`.
+//
+// See [Note: types.ts <-> preload.ts <-> ipc.ts]
+
+import type { ElectronFile } from "@ente/shared/upload/types";
+import type { WatchMapping } from "@ente/shared/watchFolder/types";
 
 export interface AppUpdateInfo {
     autoUpdatable: boolean;
@@ -26,7 +31,8 @@ export enum PICKED_UPLOAD_TYPE {
  * Extra APIs provided by the Node.js layer when our code is running in Electron
  *
  * This list is manually kept in sync with `desktop/src/preload.ts`. In case of
- * a mismatch, the types may lie.
+ * a mismatch, the types may lie. See also: [Note: types.ts <-> preload.ts <->
+ * ipc.ts]
  *
  * These extra objects and functions will only be available when our code is
  * running as the renderer process in Electron. So something in the code path
