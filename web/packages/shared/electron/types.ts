@@ -63,7 +63,7 @@ export interface ElectronAPIsType {
      * desktop app.
      *
      * Note: Unlike the other functions exposed over the Electron bridge,
-     * logToDisk is fire-and-forge and does not return a promise.
+     * logToDisk is fire-and-forget and does not return a promise.
      */
     logToDisk: (message: string) => void;
 
