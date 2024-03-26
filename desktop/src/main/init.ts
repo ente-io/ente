@@ -20,56 +20,60 @@ const execAsync = util.promisify(require("child_process").exec);
  * This window will show the HTML served from {@link rendererURL}.
  */
 export const createWindow = async () => {
-    console.log({ __dirname });
     const appImgPath = isDev
-        ? "resources/window-icon.png"
+        ? "../build/window-icon.png"
         : path.join(process.resourcesPath, "window-icon.png");
     const appIcon = nativeImage.createFromPath(appImgPath);
-    // Create the browser window.
+
+    // Create the main window. This'll show our web content.
     const mainWindow = new BrowserWindow({
         webPreferences: {
-            preload: path.join(__dirname, "../preload.js"),
+            preload: path.join(app.getAppPath(), "preload.js"),
         },
         icon: appIcon,
-        show: false, // don't show the main window on load,
+        // Don't show the main window on load, we'll show the `splashWindow`
+        // instead until it gets ready-to-show.
+        show: false,
     });
+
     const wasAutoLaunched = await autoLauncher.wasAutoLaunched();
     ElectronLog.log("wasAutoLaunched", wasAutoLaunched);
 
-    const splash = new BrowserWindow({
+    // Create a splash window to show until the web content loads.
+    const splashWindow = new BrowserWindow({
         transparent: true,
         show: false,
     });
-    if (isPlatform("mac") && wasAutoLaunched) {
+
+    if (process.platform == "darwin" && wasAutoLaunched) {
         app.dock.hide();
     }
+
     if (!wasAutoLaunched) {
-        splash.maximize();
-        splash.show();
+        splashWindow.maximize();
+        splashWindow.show();
     }
 
     if (isDev) {
-        splash.loadFile(`../build/splash.html`);
-        mainWindow.loadURL(rendererURL);
-        // Open the DevTools.
-        mainWindow.webContents.openDevTools();
+        splashWindow.loadFile("../build/splash.html");
     } else {
-        splash.loadURL(
-            `file://${path.join(process.resourcesPath, "splash.html")}`,
-        );
-        mainWindow.loadURL(rendererURL);
+        const splashHTMLPath = path.join(process.resourcesPath, "splash.html");
+        splashWindow.loadURL(`file://${splashHTMLPath}`);
     }
+
+    mainWindow.loadURL(rendererURL);
+
+    // Open the DevTools automatically when running in dev mode
+    if (isDev) mainWindow.webContents.openDevTools();
+
     mainWindow.once("ready-to-show", async () => {
-        try {
-            splash.destroy();
-            if (!wasAutoLaunched) {
-                mainWindow.maximize();
-                mainWindow.show();
-            }
-        } catch (e) {
-            // ignore
+        splashWindow.destroy();
+        if (!wasAutoLaunched) {
+            mainWindow.maximize();
+            mainWindow.show();
         }
     });
+
     mainWindow.webContents.on("render-process-gone", (event, details) => {
         mainWindow.webContents.reload();
         logErrorSentry(
@@ -79,6 +83,7 @@ export const createWindow = async () => {
         );
         ElectronLog.log("webContents event render-process-gone", details);
     });
+
     mainWindow.webContents.on("unresponsive", () => {
         mainWindow.webContents.forcefullyCrashRenderer();
         ElectronLog.log("webContents event unresponsive");
@@ -86,7 +91,7 @@ export const createWindow = async () => {
 
     setTimeout(() => {
         try {
-            splash.destroy();
+            splashWindow.destroy();
             if (!wasAutoLaunched) {
                 mainWindow.maximize();
                 mainWindow.show();
@@ -95,6 +100,7 @@ export const createWindow = async () => {
             // ignore
         }
     }, 2000);
+
     mainWindow.on("close", function (event) {
         if (!isAppQuitting()) {
             event.preventDefault();
@@ -102,17 +108,20 @@ export const createWindow = async () => {
         }
         return false;
     });
+
     mainWindow.on("hide", () => {
+        // On macOS, also hide the app's icon in the dock if the user has
+        // selected the Settings > Hide dock icon checkbox.
         const shouldHideDockIcon = getHideDockIconPreference();
-        if (isPlatform("mac") && shouldHideDockIcon) {
+        if (process.platform == "darwin" && shouldHideDockIcon) {
             app.dock.hide();
         }
     });
+
     mainWindow.on("show", () => {
-        if (isPlatform("mac")) {
-            app.dock.show();
-        }
+        if (process.platform == "darwin") app.dock.show();
     });
+
     return mainWindow;
 };
 
@@ -120,15 +129,14 @@ export const createWindow = async () => {
  * Return the source root for the desktop code, i.e. the "desktop" directory in
  * our repository which contains the package.json.
  *
- * This is useful to 
+ * This is useful to
  */
 const srcRoot = () => {
-        // __dirname will be the directory which contains this file. However, this
+    // __dirname will be the directory which contains this file. However, this
     // file is not the one which is running - it'll get transpiled into JS, so
     // the actual running file will be `app/main/init.js`. To get to the source
     // root (the "desktop" folder), we need to go up two levels.
-
-}
+};
 export async function handleUpdates(mainWindow: BrowserWindow) {
     const isInstalledViaBrew = await checkIfInstalledViaBrew();
     if (!isDev && !isInstalledViaBrew) {
