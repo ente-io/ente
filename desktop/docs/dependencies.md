@@ -52,6 +52,7 @@ Some extra ones specific to the code here are:
 
 * [concurrently](https://github.com/open-cli-tools/concurrently) for spawning
   parallel tasks when we do `yarn dev`.
-* [shx](https://github.com/shelljs/shx) for providing a portable way to use
-  Unix commands in scripts. This allows us to use the same commands across
-  different platforms like Linux and Windows.
+
+* [shx](https://github.com/shelljs/shx) for providing a portable way to use Unix
+  commands in our `package.json` scripts. This allows us to use the same
+  commands (like `ln`) across different platforms like Linux and Windows.
