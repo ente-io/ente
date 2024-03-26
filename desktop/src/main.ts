@@ -15,12 +15,9 @@ import { existsSync } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { isDev } from "./main/general";
-import { attachFSWatchIPCHandlers, attachIPCHandlers } from "./main/ipc";
-import { logErrorSentry, setupLogging } from "./main/log";
-import { initWatcher } from "./services/chokidar";
-import { addAllowOriginHeader } from "./utils/cors";
-import { createWindow } from "./utils/createWindow";
 import {
+    addAllowOriginHeader,
+    createWindow,
     handleDockIconHideOnAutoLaunch,
     handleDownloads,
     handleExternalLinks,
@@ -29,7 +26,10 @@ import {
     setupMacWindowOnDockIconClick,
     setupMainMenu,
     setupTrayItem,
-} from "./utils/main";
+} from "./main/init";
+import { attachFSWatchIPCHandlers, attachIPCHandlers } from "./main/ipc";
+import { logErrorSentry, setupLogging } from "./main/log";
+import { initWatcher } from "./services/chokidar";
 
 let appIsQuitting = false;
 
