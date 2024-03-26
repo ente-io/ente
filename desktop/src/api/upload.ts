@@ -1,10 +1,10 @@
+import { getElectronFile } from "../services/fs";
 import {
     getElectronFilesFromGoogleZip,
     getSavedFilePaths,
 } from "../services/upload";
 import { uploadStatusStore } from "../stores/upload.store";
 import { ElectronFile, FILE_PATH_TYPE } from "../types";
-import { getElectronFile } from "./../services/fs";
 
 export const getPendingUploads = async () => {
     const filePaths = getSavedFilePaths(FILE_PATH_TYPE.FILES);
