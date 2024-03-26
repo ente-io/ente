@@ -48,8 +48,6 @@
 
         /* Emit the generated JS into `app/` */
         "outDir": "app",
-        /* Generate source maps */
-        "sourceMap": true,
 
         /* Temporary overrides to get things to compile with the older config */
         "strict": false,
