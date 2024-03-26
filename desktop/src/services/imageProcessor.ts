@@ -1,14 +1,14 @@
 import { exec } from "child_process";
 import log from "electron-log";
 import { existsSync } from "fs";
-import * as fs from "node:fs/promises";
+import fs from "node:fs/promises";
 import path from "path";
 import util from "util";
 import { CustomErrors } from "../constants/errors";
 import { writeStream } from "../main/fs";
 import { isDev } from "../main/general";
 import { logError, logErrorSentry } from "../main/log";
-import { ElectronFile } from "../types";
+import { ElectronFile } from "../types/ipc";
 import { isPlatform } from "../utils/common/platform";
 import { generateTempFilePath } from "../utils/temp";
 import { deleteTempFile } from "./ffmpeg";

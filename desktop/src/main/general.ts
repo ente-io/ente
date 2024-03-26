@@ -1,6 +1,6 @@
 import { shell } from "electron"; /* TODO(MR): Why is this not in /main? */
 import { app } from "electron/main";
-import * as path from "node:path";
+import path from "node:path";
 
 /** `true` if the app is running in development mode. */
 export const isDev = !app.isPackaged;

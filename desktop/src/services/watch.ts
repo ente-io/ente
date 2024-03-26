@@ -1,7 +1,7 @@
 import type { FSWatcher } from "chokidar";
 import ElectronLog from "electron-log";
 import { watchStore } from "../stores/watch.store";
-import { WatchMapping, WatchStoreType } from "../types";
+import { WatchMapping, WatchStoreType } from "../types/ipc";
 import { isMappingPresent } from "../utils/watch";
 
 export const addWatchMapping = async (

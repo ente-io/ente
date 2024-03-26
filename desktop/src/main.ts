@@ -8,19 +8,16 @@
  *
  * https://www.electronjs.org/docs/latest/tutorial/process-model#the-main-process
  */
-import * as log from "electron-log";
+import log from "electron-log";
 import { app, BrowserWindow } from "electron/main";
 import serveNextAt from "next-electron-server";
 import { existsSync } from "node:fs";
-import * as fs from "node:fs/promises";
-import * as path from "node:path";
+import fs from "node:fs/promises";
+import path from "node:path";
 import { isDev } from "./main/general";
-import { attachFSWatchIPCHandlers, attachIPCHandlers } from "./main/ipc";
-import { logErrorSentry, setupLogging } from "./main/log";
-import { initWatcher } from "./services/chokidar";
-import { addAllowOriginHeader } from "./utils/cors";
-import { createWindow } from "./utils/createWindow";
 import {
+    addAllowOriginHeader,
+    createWindow,
     handleDockIconHideOnAutoLaunch,
     handleDownloads,
     handleExternalLinks,
@@ -29,7 +26,10 @@ import {
     setupMacWindowOnDockIconClick,
     setupMainMenu,
     setupTrayItem,
-} from "./utils/main";
+} from "./main/init";
+import { attachFSWatchIPCHandlers, attachIPCHandlers } from "./main/ipc";
+import { logErrorSentry, setupLogging } from "./main/log";
+import { initWatcher } from "./services/chokidar";
 
 let appIsQuitting = false;
 
@@ -100,8 +100,9 @@ const increaseDiskCache = () => {
 
 /**
  * Older versions of our app used to maintain a cache dir using the main
- * process. This has been deprecated in favor of using a normal web cache (See:
- * [Note: Increased disk cache for the desktop app]).
+ * process. This has been deprecated in favor of using a normal web cache.
+ *
+ * See [Note: Increased disk cache for the desktop app]
  *
  * Delete the old cache dir if it exists. This code was added March 2024, and
  * can be removed after some time once most people have upgraded to newer

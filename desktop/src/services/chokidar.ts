@@ -1,6 +1,6 @@
 import chokidar from "chokidar";
 import { BrowserWindow } from "electron";
-import * as path from "path";
+import path from "path";
 import { logError } from "../main/log";
 import { getWatchMappings } from "../services/watch";
 import { getElectronFile } from "./fs";

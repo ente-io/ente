@@ -1,12 +1,12 @@
 import log from "electron-log";
 import pathToFfmpeg from "ffmpeg-static";
 import { existsSync } from "node:fs";
-import * as fs from "node:fs/promises";
+import fs from "node:fs/promises";
 import util from "util";
 import { CustomErrors } from "../constants/errors";
 import { writeStream } from "../main/fs";
 import { logError, logErrorSentry } from "../main/log";
-import { ElectronFile } from "../types";
+import { ElectronFile } from "../types/ipc";
 import { generateTempFilePath, getTempDirPath } from "../utils/temp";
 
 const shellescape = require("any-shell-escape");

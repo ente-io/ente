@@ -48,14 +48,6 @@
 
         /* Emit the generated JS into `app/` */
         "outDir": "app",
-        /* Generate source maps */
-        "sourceMap": true,
-        /* Allow absolute imports starting with src as root */
-        "baseUrl": "src",
-        /* Allow imports of paths from node_modules */
-        "paths": {
-            "*": ["node_modules/*"]
-        },
 
         /* Temporary overrides to get things to compile with the older config */
         "strict": false,

@@ -1,4 +1,10 @@
 /**
+ * @file types that are shared across the IPC boundary with the renderer process
+ *
+ * This file is manually kept in sync with the renderer code.
+ * See [Note: types.ts <-> preload.ts <-> ipc.ts]
+ */
+/**
  * Deprecated - Use File + webUtils.getPathForFile instead
  *
  * Electron used to augment the standard web
@@ -18,18 +24,6 @@ export interface ElectronFile {
     stream: () => Promise<ReadableStream<Uint8Array>>;
     blob: () => Promise<Blob>;
     arrayBuffer: () => Promise<Uint8Array>;
-}
-
-export interface UploadStoreType {
-    filePaths: string[];
-    zipPaths: string[];
-    collectionName: string;
-}
-
-export interface KeysStoreType {
-    AnonymizeUserID: {
-        id: string;
-    };
 }
 
 interface WatchMappingSyncedFile {
@@ -53,23 +47,6 @@ export interface WatchStoreType {
 export enum FILE_PATH_TYPE {
     FILES = "files",
     ZIPS = "zips",
-}
-
-export const FILE_PATH_KEYS: {
-    [k in FILE_PATH_TYPE]: keyof UploadStoreType;
-} = {
-    [FILE_PATH_TYPE.ZIPS]: "zipPaths",
-    [FILE_PATH_TYPE.FILES]: "filePaths",
-};
-
-export interface SafeStorageStoreType {
-    encryptionKey: string;
-}
-
-export interface UserPreferencesType {
-    hideDockIcon: boolean;
-    skipAppVersion: string;
-    muteUpdateNotificationVersion: string;
 }
 
 export interface AppUpdateInfo {
