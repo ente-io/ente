@@ -102,6 +102,10 @@ export const sidebar = [
                 items: [
                     { text: "General", link: "/photos/faq/general" },
                     {
+                        text: "Export",
+                        link: "/photos/faq/export",
+                    },
+                    {
                         text: "Security and privacy",
                         link: "/photos/faq/security-and-privacy",
                     },
