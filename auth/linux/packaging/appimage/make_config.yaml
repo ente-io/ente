@@ -1,7 +1,7 @@
 display_name: Auth
 license: GPLv3
 
-icon: assets/icon-light.png
+icon: assets/icon/auth-icon.png
 
 keywords:
   - Authentication

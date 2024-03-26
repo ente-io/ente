@@ -7,7 +7,7 @@ priority: optional
 section: x11
 essential: false
 license: GPLv3
-icon: assets/icon-light.png
+icon: assets/icon/auth-icon.png
 installed_size: 36000
 
 dependencies:
