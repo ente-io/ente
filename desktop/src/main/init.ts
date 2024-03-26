@@ -31,48 +31,27 @@ export const createWindow = async () => {
             preload: path.join(app.getAppPath(), "preload.js"),
         },
         icon: appIcon,
-        // Don't show the main window on load, we'll show the `splashWindow`
-        // instead until it gets ready-to-show.
+        // The color to show in the window until the web content gets loaded.
+        // See: https://www.electronjs.org/docs/latest/api/browser-window#setting-the-backgroundcolor-property
+        backgroundColor: "black",
+        // We'll show conditionally depending on `wasAutoLaunched` later
         show: false,
     });
 
     const wasAutoLaunched = await autoLauncher.wasAutoLaunched();
-    ElectronLog.log("wasAutoLaunched", wasAutoLaunched);
-
-    // Create a splash window to show until the web content loads.
-    const splashWindow = new BrowserWindow({
-        transparent: true,
-        show: false,
-    });
-
-    if (process.platform == "darwin" && wasAutoLaunched) {
-        app.dock.hide();
-    }
-
-    if (!wasAutoLaunched) {
-        splashWindow.maximize();
-        splashWindow.show();
-    }
-
-    if (isDev) {
-        splashWindow.loadFile("../build/splash.html");
+    if (wasAutoLaunched) {
+        // Keep the macOS dock icon hidden if we were auto launched.
+        if (process.platform == "darwin") app.dock.hide();
     } else {
-        const splashHTMLPath = path.join(process.resourcesPath, "splash.html");
-        splashWindow.loadURL(`file://${splashHTMLPath}`);
+        // Show our window (maximizing it) if this is not an auto-launch on
+        // login.
+        mainWindow.maximize();
     }
 
     mainWindow.loadURL(rendererURL);
 
     // Open the DevTools automatically when running in dev mode
     if (isDev) mainWindow.webContents.openDevTools();
-
-    mainWindow.once("ready-to-show", async () => {
-        splashWindow.destroy();
-        if (!wasAutoLaunched) {
-            mainWindow.maximize();
-            mainWindow.show();
-        }
-    });
 
     mainWindow.webContents.on("render-process-gone", (event, details) => {
         mainWindow.webContents.reload();
@@ -88,18 +67,6 @@ export const createWindow = async () => {
         mainWindow.webContents.forcefullyCrashRenderer();
         ElectronLog.log("webContents event unresponsive");
     });
-
-    setTimeout(() => {
-        try {
-            splashWindow.destroy();
-            if (!wasAutoLaunched) {
-                mainWindow.maximize();
-                mainWindow.show();
-            }
-        } catch (e) {
-            // ignore
-        }
-    }, 2000);
 
     mainWindow.on("close", function (event) {
         if (!isAppQuitting()) {
@@ -125,18 +92,6 @@ export const createWindow = async () => {
     return mainWindow;
 };
 
-/**
- * Return the source root for the desktop code, i.e. the "desktop" directory in
- * our repository which contains the package.json.
- *
- * This is useful to
- */
-const srcRoot = () => {
-    // __dirname will be the directory which contains this file. However, this
-    // file is not the one which is running - it'll get transpiled into JS, so
-    // the actual running file will be `app/main/init.js`. To get to the source
-    // root (the "desktop" folder), we need to go up two levels.
-};
 export async function handleUpdates(mainWindow: BrowserWindow) {
     const isInstalledViaBrew = await checkIfInstalledViaBrew();
     if (!isDev && !isInstalledViaBrew) {
