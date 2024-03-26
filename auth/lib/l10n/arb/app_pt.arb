@@ -47,9 +47,9 @@
   },
   "copyEmailAction": "Copiar e-mail",
   "exportLogsAction": "Exportar logs",
-  "reportABug": "Reportar um bug",
+  "reportABug": "Reportar um problema",
   "crashAndErrorReporting": "Reporte de erros e falhas",
-  "reportBug": "Reportar bug",
+  "reportBug": "Reportar problema",
   "emailUsMessage": "Por favor, envie um e-mail para {email}",
   "@emailUsMessage": {
     "placeholders": {
@@ -163,7 +163,7 @@
   "invalidEmailMessage": "Por favor, insira um endereço de e-mail válido.",
   "deleteAccount": "Excluir conta",
   "deleteAccountQuery": "Sentiremos muito por vê-lo partir. Você está enfrentando algum problema?",
-  "yesSendFeedbackAction": "Sim, enviar feedback",
+  "yesSendFeedbackAction": "Sim, enviar comentário",
   "noDeleteAccountAction": "Não, excluir conta",
   "initiateAccountDeleteTitle": "Por favor, autentique-se para iniciar a exclusão de conta",
   "sendEmail": "Enviar e-mail",
