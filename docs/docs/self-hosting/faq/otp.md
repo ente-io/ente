@@ -1,6 +1,6 @@
 ---
 title: Verification code
-description: Getting the OTP for a self host Ente
+description: Getting the OTP for a self hosted Ente
 ---
 
 # Verification code
