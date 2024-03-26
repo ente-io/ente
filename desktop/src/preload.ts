@@ -29,10 +29,6 @@
 import { contextBridge, ipcRenderer } from "electron";
 import type { ElectronFile } from "./types";
 
-// TODO (MR): Uncomment and FIXME once preload is getting loaded.
-// import { setupLogging } from "./main/log";
-// setupLogging();
-
 // - General
 
 /** Return the version of the desktop app. */
