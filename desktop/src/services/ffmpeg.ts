@@ -1,7 +1,7 @@
 import log from "electron-log";
 import pathToFfmpeg from "ffmpeg-static";
 import { existsSync } from "node:fs";
-import * as fs from "node:fs/promises";
+import fs from "node:fs/promises";
 import util from "util";
 import { CustomErrors } from "../constants/errors";
 import { writeStream } from "../main/fs";

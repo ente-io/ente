@@ -1,7 +1,7 @@
 import { exec } from "child_process";
 import log from "electron-log";
 import { existsSync } from "fs";
-import * as fs from "node:fs/promises";
+import fs from "node:fs/promises";
 import path from "path";
 import util from "util";
 import { CustomErrors } from "../constants/errors";

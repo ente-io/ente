@@ -8,12 +8,12 @@
  *
  * https://www.electronjs.org/docs/latest/tutorial/process-model#the-main-process
  */
-import * as log from "electron-log";
+import log from "electron-log";
 import { app, BrowserWindow } from "electron/main";
 import serveNextAt from "next-electron-server";
 import { existsSync } from "node:fs";
-import * as fs from "node:fs/promises";
-import * as path from "node:path";
+import fs from "node:fs/promises";
+import path from "node:path";
 import { isDev } from "./main/general";
 import { attachFSWatchIPCHandlers, attachIPCHandlers } from "./main/ipc";
 import { logErrorSentry, setupLogging } from "./main/log";

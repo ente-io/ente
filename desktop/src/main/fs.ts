@@ -2,8 +2,8 @@
  * @file file system related functions exposed over the context bridge.
  */
 import { createWriteStream, existsSync } from "node:fs";
-import * as fs from "node:fs/promises";
-import * as path from "node:path";
+import fs from "node:fs/promises";
+import path from "node:path";
 import { Readable } from "node:stream";
 import { logError } from "./log";
 

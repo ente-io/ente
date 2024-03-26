@@ -1,11 +1,11 @@
 import { app, BrowserWindow, nativeImage } from "electron";
 import ElectronLog from "electron-log";
-import * as path from "path";
+import path from "path";
 import { isAppQuitting, rendererURL } from "../main";
-import autoLauncher from "../services/autoLauncher";
-import { logErrorSentry } from "../main/log";
-import { getHideDockIconPreference } from "../services/userPreference";
 import { isDev } from "../main/general";
+import { logErrorSentry } from "../main/log";
+import autoLauncher from "../services/autoLauncher";
+import { getHideDockIconPreference } from "../services/userPreference";
 import { isPlatform } from "./common/platform";
 
 /**

@@ -1,5 +1,5 @@
 import { dialog } from "electron/main";
-import * as path from "node:path";
+import path from "node:path";
 import { getDirFilePaths, getElectronFile } from "../services/fs";
 import { getElectronFilesFromGoogleZip } from "../services/upload";
 import type { ElectronFile } from "../types";

@@ -1,8 +1,8 @@
-import * as log from "electron-log";
+import log from "electron-log";
 import { app, net } from "electron/main";
 import { existsSync } from "fs";
-import * as fs from "node:fs/promises";
-import * as path from "node:path";
+import fs from "node:fs/promises";
+import path from "node:path";
 import util from "util";
 import { CustomErrors } from "../constants/errors";
 import { writeStream } from "../main/fs";

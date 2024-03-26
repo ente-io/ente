@@ -1,7 +1,7 @@
 import StreamZip from "node-stream-zip";
 import { existsSync } from "node:fs";
-import * as fs from "node:fs/promises";
-import * as path from "node:path";
+import fs from "node:fs/promises";
+import path from "node:path";
 import { logError } from "../main/log";
 import { ElectronFile } from "../types";
 
