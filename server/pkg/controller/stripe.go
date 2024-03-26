@@ -287,14 +287,7 @@ func (c *StripeController) handleCustomerSubscriptionUpdated(event stripe.Event,
 
 	userID := currentSubscription.UserID
 	if stripeSubscription.Status == stripe.SubscriptionStatusPastDue {
-		user, err := c.UserRepo.Get(userID)
-		if err != nil {
-			return ente.StripeEventLog{}, stacktrace.Propagate(err, "")
-		}
-		err = email.SendTemplatedEmail([]string{user.Email}, "ente", "support@ente.io",
-			ente.AccountOnHoldEmailSubject, ente.OnHoldTemplate, map[string]interface{}{
-				"PaymentProvider": "Stripe",
-			}, nil)
+		err = c.sendAccountOnHoldEmail(userID)
 		if err != nil {
 			return ente.StripeEventLog{}, stacktrace.Propagate(err, "")
 		}
@@ -404,20 +397,11 @@ func (c *StripeController) handlePaymentIntentFailed(event stripe.Event, country
 	if err != nil {
 		return ente.StripeEventLog{}, stacktrace.Propagate(err, "")
 	}
-	// Send an email to the user
-	user, err := c.UserRepo.Get(userID)
+	err = c.sendAccountOnHoldEmail(userID)
 	if err != nil {
 		return ente.StripeEventLog{}, stacktrace.Propagate(err, "")
 	}
-	// TODO: Inform customer that payment_failed.html with invoice.HostedInvoiceURL
-	err = email.SendTemplatedEmail([]string{user.Email}, "ente", "support@ente.io",
-		ente.AccountOnHoldEmailSubject, ente.OnHoldTemplate, map[string]interface{}{
-			"PaymentProvider": "Stripe",
-			"InvoiceURL":      invoice.HostedInvoiceURL,
-		}, nil)
-	if err != nil {
-		return ente.StripeEventLog{}, stacktrace.Propagate(err, "")
-	}
+
 	return ente.StripeEventLog{UserID: userID, StripeSubscription: *stripeSubscription, Event: event}, nil
 }
 
@@ -561,6 +545,18 @@ func (c *StripeController) GetStripeCustomerPortal(userID int64, redirectRootURL
 		return "", stacktrace.Propagate(err, "")
 	}
 	return ps.URL, nil
+}
+
+func (c *StripeController) sendAccountOnHoldEmail(userID int64) error {
+	user, err := c.UserRepo.Get(userID)
+	if err != nil {
+		return stacktrace.Propagate(err, "")
+	}
+	err = email.SendTemplatedEmail([]string{user.Email}, "ente", "support@ente.io",
+		ente.AccountOnHoldEmailSubject, ente.OnHoldTemplate, map[string]interface{}{
+			"PaymentProvider": "Stripe",
+		}, nil)
+	return err
 }
 
 func (c *StripeController) getStripeSubscriptionFromSession(userID int64, checkoutSessionID string) (stripe.Subscription, error) {
