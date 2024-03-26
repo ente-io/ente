@@ -188,13 +188,10 @@ export const sidebar = [
             {
                 text: "FAQ",
                 items: [
+                    { text: "General", link: "/self-hosting/faq/" },
                     {
                         text: "Verification code",
                         link: "/self-hosting/faq/otp",
-                    },
-                    {
-                        text: "Increase storage space",
-                        link: "/self-hosting/faq/storage-space",
                     },
                 ],
             },
