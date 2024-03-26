@@ -1,6 +1,6 @@
 # Dependencies
 
-## DX
+## Dev
 
 These are some global dev dependencies in the root `package.json`. These set the
 baseline for how our code be in all the workspaces in this (yarn) monorepo.

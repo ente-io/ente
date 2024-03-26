@@ -36,15 +36,27 @@ During the build it uses
 [electron-builder-notarize](https://github.com/karaggeorge/electron-builder-notarize)
 to notarize the macOS binary.
 
+[electron-updater](https://www.electron.build/auto-update#debugging), while a
+separate package, is also a part of Electron Builder. It provides an alternative
+to Electron's built in auto updater, with a more flexible API. It supports auto
+updates for the DMG, AppImage, DEB, RPM and NSIS packages.
+
+### electron-log
+
+[electron-log](https://github.com/megahertz/electron-log) is used for logging.
+Specifically, it allows us to log to a file (in addition to the console of the
+Node.js process), and also handles log rotation and limiting the size of the log
+files.
+
 ### next-electron-server
 
 This spins up a server for serving files using a protocol handler inside our
 Electron process. This allows us to directly use the output produced by
 `next build` for loading into our renderer process.
 
-## DX
+## Dev
 
-See [web/docs/dependencies#DX](../../web/docs/dependencies.md#dx) for the
+See [web/docs/dependencies#DX](../../web/docs/dependencies.md#dev) for the
 general development experience related dependencies like TypeScript etc, which
 are similar to that in the web code.
 
