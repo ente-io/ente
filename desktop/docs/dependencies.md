@@ -27,7 +27,7 @@ There is also a third environment that gets temporarily created:
 -   The [preload script](../src/preload.ts) acts as a gateway between the _main_
     and the _renderer_ process. It runs in its own isolated environment.
 
-### electron-builder
+### Packaging
 
 [Electron Builder](https://www.electron.build) is used for packaging the app for
 distribution.
@@ -36,12 +36,17 @@ During the build it uses
 [electron-builder-notarize](https://github.com/karaggeorge/electron-builder-notarize)
 to notarize the macOS binary.
 
+### Updates
+
 [electron-updater](https://www.electron.build/auto-update#debugging), while a
 separate package, is also a part of Electron Builder. It provides an alternative
 to Electron's built in auto updater, with a more flexible API. It supports auto
 updates for the DMG, AppImage, DEB, RPM and NSIS packages.
 
-### electron-log
+[compare-versions](https://github.com/omichelsen/compare-versions) is used for
+semver comparisons when we decide when to trigger updates.
+
+### Logging
 
 [electron-log](https://github.com/megahertz/electron-log) is used for logging.
 Specifically, it allows us to log to a file (in addition to the console of the
@@ -53,6 +58,18 @@ files.
 This spins up a server for serving files using a protocol handler inside our
 Electron process. This allows us to directly use the output produced by
 `next build` for loading into our renderer process.
+
+### Others
+
+* [any-shell-escape](https://github.com/boazy/any-shell-escape) is for
+  escaping shell commands before we execute them (e.g. say when invoking the
+  embedded ffmpeg CLI).
+
+* [auto-launch](https://github.com/Teamwork/node-auto-launch) is for
+  automatically starting our app on login, if the user so wishes.
+
+* [electron-store](https://github.com/sindresorhus/electron-store) is used for
+  persisting user preferences and other arbitrary data.
 
 ## Dev
 
@@ -68,3 +85,39 @@ Some extra ones specific to the code here are:
 * [shx](https://github.com/shelljs/shx) for providing a portable way to use Unix
   commands in our `package.json` scripts. This allows us to use the same
   commands (like `ln`) across different platforms like Linux and Windows.
+
+## Functionality
+
+### Conversion
+
+The main tool we use is for arbitrary conversions is FFMPEG. To bundle a
+(platform specific) static binary of ffmpeg with our app, we use
+[ffmpeg-static](https://github.com/eugeneware/ffmpeg-static).
+
+> There is a significant (~20x) speed difference between using the compiled
+> FFMPEG binary and using the WASM one (that our renderer process already has).
+> Which is why we bundle it to speed up operations on the desktop app.
+
+In addition, we also bundle a static Linux binary of imagemagick in our extra
+resources (`build`) folder. This is used for thumbnail generation on Linux.
+
+On macOS, we use the `sips` CLI tool for conversion, but that is already
+available on the host machine, and is not bundled with our app.
+
+### Watch Folders
+
+[chokidar](https://github.com/paulmillr/chokidar) is used as a file system
+watcher for the watch folders functionality.
+
+### AI/ML
+
+* [onnxruntime-node](https://github.com/Microsoft/onnxruntime)
+* html-entities is used by the bundled clip-bpe-ts.
+* GGML binaries are bundled
+* We also use [jpeg-js](https://github.com/jpeg-js/jpeg-js#readme) for
+  conversion of all images to JPEG before processing.
+
+## ZIP
+
+[node-stream-zip](https://github.com/antelle/node-stream-zip) is used for
+reading of large ZIP files (e.g. during imports of Google Takeout ZIPs).
