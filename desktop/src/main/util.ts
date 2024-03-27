@@ -16,15 +16,22 @@ export const isDev = !app.isPackaged;
  * command asynchronously and returns its stdout and stderr if there were no
  * errors.
  *
- * It also shellescapes the command before running it.
+ * If the command is passed as a string, then it will be executed verbatim.
  *
- * Note: This is not a 1-1 replacement of child_process.exec - if you're trying
- * to run a trivial shell command, say something that produces a lot of output,
- * this might not be the best option and it might be better to use the
- * underlying functions.
+ * If the command is passed as an array, then the first argument will be treated
+ * as the executable and the remaining (optional) items as the command line
+ * parameters. This function will shellescape and join the array to form the
+ * command that finally gets executed.
+ *
+ * > Note: This is not a 1-1 replacement of child_process.exec - if you're
+ * > trying to run a trivial shell command, say something that produces a lot of
+ * > output, this might not be the best option and it might be better to use the
+ * > underlying functions.
  */
 export const execAsync = (command: string | string[]) => {
-    const escapedCommand = shellescape(command);
+    const escapedCommand = Array.isArray(command)
+        ? shellescape(command)
+        : command;
     const startTime = Date.now();
     log.debug(() => `Running shell command: ${escapedCommand}`);
     const result = execAsync_(escapedCommand);
