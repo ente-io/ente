@@ -157,7 +157,6 @@ export function logStartupBanner() {
     const osRelease = os.release();
     const systemVersion = process.getSystemVersion();
     log.info("Running on", { platform, osRelease, systemVersion });
-    log.debug(() => ({ platform, osRelease, systemVersion }));
 }
 
 function lowerCaseHeaders(responseHeaders: Record<string, string[]>) {
