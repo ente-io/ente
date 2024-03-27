@@ -20,7 +20,7 @@ import {
     handleDownloads,
     handleExternalLinks,
     handleUpdates,
-    logSystemInfo,
+    logStartupBanner,
     setupMacWindowOnDockIconClick,
     setupMainMenu,
     setupTrayItem,
@@ -162,7 +162,7 @@ const main = () => {
     //
     // Note that some Electron APIs can only be used after this event occurs.
     app.on("ready", async () => {
-        logSystemInfo();
+        logStartupBanner();
         mainWindow = await createWindow();
         const watcher = initWatcher(mainWindow);
         setupTrayItem(mainWindow);

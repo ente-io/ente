@@ -6,7 +6,8 @@ import {
     shell,
 } from "electron";
 import ElectronLog from "electron-log";
-import { openDirectory, openLogDirectory, setIsAppQuitting } from "../main";
+import { setIsAppQuitting } from "../main";
+import { openDirectory, openLogDirectory } from "../main/util";
 import { forceCheckForUpdateAndNotify } from "../services/appUpdater";
 import autoLauncher from "../services/autoLauncher";
 import {
