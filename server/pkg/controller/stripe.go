@@ -406,6 +406,12 @@ func (c *StripeController) handlePaymentIntentFailed(event stripe.Event, country
 	if err != nil {
 		return ente.StripeEventLog{}, stacktrace.Propagate(err, "")
 	}
+
+	err = c.BillingRepo.UpdateSubscriptionCancellationStatus(userID, true)
+	if err != nil {
+		return ente.StripeEventLog{}, stacktrace.Propagate(err, "")
+	}
+
 	err = c.sendAccountOnHoldEmail(userID)
 	if err != nil {
 		return ente.StripeEventLog{}, stacktrace.Propagate(err, "")
