@@ -16,14 +16,15 @@ import { openLogDirectory } from "./util";
 
 /** Create and return the entries in the app's main menu bar */
 export const createApplicationMenu = async (mainWindow: BrowserWindow) => {
-    const isMac = process.platform == "darwin";
-
     // The state of checkboxes
     //
     // Whenever the menu is redrawn the current value of these variables is used
     // to set the checked state for the various settings checkboxes.
     let isAutoLaunchEnabled = await autoLauncher.isEnabled();
     let shouldHideDockIcon = getHideDockIconPreference();
+
+    const macOSOnly = (options: MenuItemConstructorOptions[]) =>
+        process.platform == "darwin" ? options : [];
 
     const handleCheckForUpdates = () =>
         forceCheckForUpdateAndNotify(mainWindow);
@@ -55,14 +56,12 @@ export const createApplicationMenu = async (mainWindow: BrowserWindow) => {
         {
             label: "ente",
             submenu: [
-                ...((isMac
-                    ? [
-                          {
-                              label: "About Ente",
-                              role: "about",
-                          },
-                      ]
-                    : []) as MenuItemConstructorOptions[]),
+                ...macOSOnly([
+                    {
+                        label: "About Ente",
+                        role: "about",
+                    },
+                ]),
                 { type: "separator" },
                 {
                     label: "Check for Updates...",
@@ -93,20 +92,17 @@ export const createApplicationMenu = async (mainWindow: BrowserWindow) => {
                 },
 
                 { type: "separator" },
-                ...((isMac
-                    ? [
-                          {
-                              label: "Hide Ente",
-                              role: "hide",
-                          },
-                          {
-                              label: "Hide Others",
-                              role: "hideOthers",
-                          },
-                      ]
-                    : []) as MenuItemConstructorOptions[]),
-
-                { type: "separator" },
+                ...macOSOnly([
+                    {
+                        label: "Hide Ente",
+                        role: "hide",
+                    },
+                    {
+                        label: "Hide Others",
+                        role: "hideOthers",
+                    },
+                    { type: "separator" },
+                ]),
                 {
                     label: "Quit",
                     role: "quit",
@@ -123,24 +119,22 @@ export const createApplicationMenu = async (mainWindow: BrowserWindow) => {
                 { label: "Copy", role: "copy" },
                 { label: "Paste", role: "paste" },
                 { label: "Select All", role: "selectAll" },
-                ...((isMac
-                    ? [
-                          { type: "separator" },
-                          {
-                              label: "Speech",
-                              submenu: [
-                                  {
-                                      role: "startSpeaking",
-                                      label: "start speaking",
-                                  },
-                                  {
-                                      role: "stopSpeaking",
-                                      label: "stop speaking",
-                                  },
-                              ],
-                          },
-                      ]
-                    : []) as MenuItemConstructorOptions[]),
+                ...macOSOnly([
+                    { type: "separator" },
+                    {
+                        label: "Speech",
+                        submenu: [
+                            {
+                                role: "startSpeaking",
+                                label: "start speaking",
+                            },
+                            {
+                                role: "stopSpeaking",
+                                label: "stop speaking",
+                            },
+                        ],
+                    },
+                ]),
             ],
         },
         {
@@ -158,14 +152,12 @@ export const createApplicationMenu = async (mainWindow: BrowserWindow) => {
                 { label: "Minimize", role: "minimize" },
                 { label: "Zoom", role: "zoom" },
                 { label: "Close", role: "close" },
-                ...((isMac
-                    ? [
-                          { type: "separator" },
-                          { label: "Bring All to Front", role: "front" },
-                          { type: "separator" },
-                          { label: "Ente", role: "window" },
-                      ]
-                    : []) as MenuItemConstructorOptions[]),
+                ...macOSOnly([
+                    { type: "separator" },
+                    { label: "Bring All to Front", role: "front" },
+                    { type: "separator" },
+                    { label: "Ente", role: "window" },
+                ]),
             ],
         },
         {
