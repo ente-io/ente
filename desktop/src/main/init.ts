@@ -9,7 +9,7 @@ import { getHideDockIconPreference } from "../services/userPreference";
 import { isPlatform } from "../utils/common/platform";
 import { buildContextMenu, buildMenuBar } from "../utils/menu";
 import log from "./log";
-import { isDev } from "./util";
+import { execAsync, isDev } from "./util";
 
 /**
  * Create an return the {@link BrowserWindow} that will form our app's UI.
@@ -44,19 +44,14 @@ export const createWindow = async () => {
     // Open the DevTools automatically when running in dev mode
     if (isDev) mainWindow.webContents.openDevTools();
 
-    mainWindow.webContents.on("render-process-gone", (event, details) => {
+    mainWindow.webContents.on("render-process-gone", (_, details) => {
+        log.error(`render-process-gone: ${details}`);
         mainWindow.webContents.reload();
-        logErrorSentry(
-            Error("render-process-gone"),
-            "webContents event render-process-gone",
-            { details },
-        );
-        ElectronLog.log("webContents event render-process-gone", details);
     });
 
     mainWindow.webContents.on("unresponsive", () => {
+        log.error("webContents unresponsive");
         mainWindow.webContents.forcefullyCrashRenderer();
-        ElectronLog.log("webContents event unresponsive");
     });
 
     mainWindow.on("close", function (event) {

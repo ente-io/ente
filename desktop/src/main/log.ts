@@ -50,7 +50,7 @@ export function logErrorSentry(
 
 const logError1 = (message: string, e?: unknown) => {
     if (!e) {
-        logError_(message);
+        logError_(`Error: ${message}`);
         return;
     }
 
@@ -64,7 +64,7 @@ const logError1 = (message: string, e?: unknown) => {
         es = String(e);
     }
 
-    logError_(`${message}: ${es}`);
+    logError_(`Error: ${message}: ${es}`);
 };
 
 const logError_ = (message: string) => {
