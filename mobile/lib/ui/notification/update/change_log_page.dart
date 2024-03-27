@@ -123,7 +123,7 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
     items.addAll([
       ChangeLogEntry(
         "Share an Album to Multiple Contacts at Once",
-        'When adding viewers or collaborators to an album, you can now select multiple contacts and share to all of them at once.',
+        'When adding viewers or collaborators to an album, you can now select multiple contacts and share to all of them at once!',
       ),
       ChangeLogEntry(
         "Bug Fixes and Performance Improvements",
