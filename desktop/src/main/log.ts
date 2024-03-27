@@ -12,17 +12,22 @@ import { isDev } from "./general";
  *
  * On dev builds, it will also log to the console.
  */
-const initLogging = () => {
+export const initLogging = () => {
     log.transports.file.fileName = "ente.log";
     log.transports.file.maxSize = 50 * 1024 * 1024; // 50MB;
-    log.transports.file.format =
-        "[{y}-{m}-{d}T{h}:{i}:{s}{z}] [{level}] {text}";
+    log.transports.file.format = "[{y}-{m}-{d}T{h}:{i}:{s}{z}] {text}";
 
-    if (!isDev) log.transports.console.level = false;
+    log.transports.console.level = false;
 };
 
+/**
+ * Write a {@link message} to the on-disk log.
+ *
+ * This is used by the renderer process (via the contextBridge) to add entries
+ * in the log that is saved on disk.
+ */
 export const logToDisk = (message: string) => {
-    log.info(message);
+    log.info(`[rndr] ${message}`);
 };
 
 export const logError = logErrorSentry;
@@ -45,7 +50,7 @@ export function logErrorSentry(
 
 const logError1 = (message: string, e?: unknown) => {
     if (!e) {
-        log.error(message);
+        logError_(message);
         return;
     }
 
@@ -59,15 +64,21 @@ const logError1 = (message: string, e?: unknown) => {
         es = String(e);
     }
 
-    log.error(`${message}: ${es}`);
+    logError_(`${message}: ${es}`);
+};
+
+const logError_ = (message: string) => {
+    log.error(`[main] ${message}`);
+    if (isDev) console.error(message);
 };
 
 const logInfo = (message: string) => {
-    log.info(message);
+    log.info(`[main] ${message}`);
+    if (isDev) console.log(message);
 };
 
 const logDebug = (message: () => string) => {
-    if (isDev) log.debug(() => message);
+    if (isDev) console.log(message());
 };
 
 /**
@@ -83,27 +94,28 @@ export default {
      * Log an error message with an optional associated error object.
      *
      * {@link e} is generally expected to be an `instanceof Error` but it can be
-     * any arbitrary object too that we obtain, say, when in a try-catch
-     * handler.
+     * any arbitrary object that we obtain, say, when in a try-catch handler.
      *
-     * The log is written to disk, and is also printed to the console.
+     * The log is written to disk. In development builds, the log is also
+     * printed to the (Node.js process') console.
      */
     error: logError1,
     /**
      * Log a message.
      *
-     * The log is written to disk, and is also printed to the console.
+     * The log is written to disk. In development builds, the log is also
+     * printed to the (Node.js process') console.
      */
     info: logInfo,
     /**
      * Log a debug message.
      *
-     * The log is not written to disk. And it is printed to the console only on
-     * development builds.
+     * The log is not written to disk. And it is printed to the  (Node.js
+     * process') console only on development builds.
      *
-     * To avoid running unnecessary code in release builds, this function takes
-     * a function to call to get the log message instead of directly taking the
-     * message. This function will only be called in development builds.
+     * To avoid running unnecessary code in release builds, this takes a
+     * function to call to get the log message instead of directly taking the
+     * message. The provided function will only be called in development builds.
      */
     debug: logDebug,
 };
