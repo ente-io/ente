@@ -1,14 +1,13 @@
-import { app, BrowserWindow, Menu, nativeImage, Tray } from "electron";
+import { app, BrowserWindow, nativeImage, Tray } from "electron";
 import { existsSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { isAppQuitting, rendererURL } from "../main";
-import { setupAutoUpdater } from "../services/appUpdater";
 import autoLauncher from "../services/autoLauncher";
 import { getHideDockIconPreference } from "../services/userPreference";
 import { isPlatform } from "../utils/common/platform";
-import { buildContextMenu, buildMenuBar } from "../utils/menu";
 import log from "./log";
+import { createTrayContextMenu } from "./menu";
 import { isDev } from "./util";
 
 /**
@@ -78,8 +77,7 @@ export const createWindow = async () => {
     return mainWindow;
 };
 
-export async function handleUpdates(mainWindow: BrowserWindow) {
-}
+export async function handleUpdates(mainWindow: BrowserWindow) {}
 
 export const setupTrayItem = (mainWindow: BrowserWindow) => {
     const iconName = isPlatform("mac")
@@ -92,7 +90,7 @@ export const setupTrayItem = (mainWindow: BrowserWindow) => {
     const trayIcon = nativeImage.createFromPath(trayImgPath);
     const tray = new Tray(trayIcon);
     tray.setToolTip("ente");
-    tray.setContextMenu(buildContextMenu(mainWindow));
+    tray.setContextMenu(createTrayContextMenu(mainWindow));
 };
 
 export function handleDownloads(mainWindow: BrowserWindow) {
@@ -140,10 +138,6 @@ export function setupMacWindowOnDockIconClick() {
         // we allow only one window
         windows[0].show();
     });
-}
-
-export async function setupMainMenu(mainWindow: BrowserWindow) {
-    Menu.setApplicationMenu(await buildMenuBar(mainWindow));
 }
 
 export async function handleDockIconHideOnAutoLaunch() {

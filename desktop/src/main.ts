@@ -8,7 +8,7 @@
  *
  * https://www.electronjs.org/docs/latest/tutorial/process-model#the-main-process
  */
-import { app, BrowserWindow } from "electron/main";
+import { app, BrowserWindow, Menu } from "electron/main";
 import serveNextAt from "next-electron-server";
 import { existsSync } from "node:fs";
 import fs from "node:fs/promises";
@@ -21,11 +21,11 @@ import {
     handleExternalLinks,
     logStartupBanner,
     setupMacWindowOnDockIconClick,
-    setupMainMenu,
     setupTrayItem,
 } from "./main/init";
 import { attachFSWatchIPCHandlers, attachIPCHandlers } from "./main/ipc";
 import log, { initLogging } from "./main/log";
+import { createApplicationMenu } from "./main/menu";
 import { isDev } from "./main/util";
 import { setupAutoUpdater } from "./services/appUpdater";
 import { initWatcher } from "./services/chokidar";
@@ -168,7 +168,7 @@ const main = () => {
         const watcher = initWatcher(mainWindow);
         setupTrayItem(mainWindow);
         setupMacWindowOnDockIconClick();
-        setupMainMenu(mainWindow);
+        Menu.setApplicationMenu(await createApplicationMenu(mainWindow));
         attachIPCHandlers();
         attachFSWatchIPCHandlers(watcher);
         if (!isDev) setupAutoUpdater(mainWindow);
