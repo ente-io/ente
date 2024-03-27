@@ -19,15 +19,15 @@ import (
 	"github.com/spf13/viper"
 )
 
-func SendSES(toEmails []string, fromName string, fromEmail string, subject string, htmlBody string, inlineImages []map[string]interface{}) error {
+func sendViaSMTP(toEmails []string, fromName string, fromEmail string, subject string, htmlBody string, inlineImages []map[string]interface{}) error {
 	if len(toEmails) == 0 {
 		return ente.ErrBadRequest
 	}
 
-	smtpServer := viper.GetString("ses-smtp.host")
-	smtpPort := viper.GetString("ses-smtp.port")
-	smtpUsername := viper.GetString("ses-smtp.username")
-	smtpPassword := viper.GetString("ses-smtp.password")
+	smtpServer := viper.GetString("smtp.host")
+	smtpPort := viper.GetString("smtp.port")
+	smtpUsername := viper.GetString("smtp.username")
+	smtpPassword := viper.GetString("smtp.password")
 
 	var emailMessage string
 
@@ -134,9 +134,9 @@ func SendTemplatedEmail(to []string, fromName string, fromEmail string, subject 
 		return stacktrace.Propagate(err, "")
 	}
 
-	isSESEnabled := viper.GetBool("ses-smtp.isEnabled")
+	isSESEnabled := viper.GetBool("smtp.isEnabled")
 	if isSESEnabled {
-		return SendSES(to, fromName, fromEmail, subject, body, inlineImages)
+		return sendViaSMTP(to, fromName, fromEmail, subject, body, inlineImages)
 	} else {
 		return Send(to, fromName, fromEmail, subject, body, inlineImages)
 	}

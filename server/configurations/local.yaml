@@ -166,7 +166,7 @@ transmail:
 
 # AWS SES
 # Use case: Sending mails
-ses-smtp:
+smtp:
     isEnabled: false
     host: 
     port: 
