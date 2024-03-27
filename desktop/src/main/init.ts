@@ -161,12 +161,13 @@ export async function handleDockIconHideOnAutoLaunch() {
 
 export function logStartupBanner() {
     const version = isDev ? "dev" : app.getVersion();
-    log.info(`hello from ente-photos-desktop ${version}`);
+    log.info(`Hello from ente-photos-desktop ${version}`);
 
-    const systemVersion = process.getSystemVersion();
-    const osName = process.platform;
+    const platform = process.platform;
     const osRelease = os.release();
-    log.info(`system info ${{ osName, osRelease, systemVersion }}`);
+    const systemVersion = process.getSystemVersion();
+    log.info("Running on", { platform, osRelease, systemVersion });
+    log.debug(() => ({ platform, osRelease, systemVersion }));
 }
 
 async function checkIfInstalledViaBrew() {

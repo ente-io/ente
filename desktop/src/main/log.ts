@@ -1,4 +1,5 @@
 import log from "electron-log";
+import util from "node:util";
 import { isDev } from "./util";
 
 /**
@@ -72,13 +73,16 @@ const logError_ = (message: string) => {
     if (isDev) console.error(`[error] ${message}`);
 };
 
-const logInfo = (message: string) => {
+const logInfo = (...params: any[]) => {
+    const message = params
+        .map((p) => (typeof p == "string" ? p : util.inspect(p)))
+        .join(" ");
     log.info(`[main] ${message}`);
     if (isDev) console.log(message);
 };
 
-const logDebug = (message: () => string) => {
-    if (isDev) console.log(`[debug] ${message()}`);
+const logDebug = (param: () => any) => {
+    if (isDev) console.log(`[debug] ${util.inspect(param())}`);
 };
 
 /**
@@ -103,6 +107,9 @@ export default {
     /**
      * Log a message.
      *
+     * This is meant as a replacement of {@link console.log}, and takes an
+     * arbitrary number of arbitrary parameters that it then serializes.
+     *
      * The log is written to disk. In development builds, the log is also
      * printed to the (Node.js process') console.
      */
@@ -110,12 +117,15 @@ export default {
     /**
      * Log a debug message.
      *
-     * The log is not written to disk. And it is printed to the  (Node.js
-     * process') console only on development builds.
-     *
      * To avoid running unnecessary code in release builds, this takes a
      * function to call to get the log message instead of directly taking the
      * message. The provided function will only be called in development builds.
+     *
+     * The function can return an arbitrary value which is serialied before
+     * being logged.
+     *
+     * This log is not written to disk. It is printed to the (Node.js process')
+     * console only on development builds.
      */
     debug: logDebug,
 };
