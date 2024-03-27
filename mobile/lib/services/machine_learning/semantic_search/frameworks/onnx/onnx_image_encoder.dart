@@ -15,9 +15,10 @@ class OnnxImageEncoder {
       ..setIntraOpNumThreads(1)
       ..setSessionGraphOptimizationLevel(GraphOptimizationLevel.ortEnableAll);
     try {
-      final bytes = await File(args["imageModelPath"]).readAsBytes();
-      final session = OrtSession.fromBuffer(bytes, sessionOptions);
+      final session =
+          OrtSession.fromFile(File(args["imageModelPath"]), sessionOptions);
       _logger.info('image model loaded');
+
       return session.address;
     } catch (e, s) {
       _logger.severe(e, s);
