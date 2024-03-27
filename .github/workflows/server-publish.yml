@@ -5,6 +5,8 @@ on:
     #
     # To obtain the commit from the currently deployed museum, do:
     # curl -s https://api.ente.io/ping | jq -r '.id'
+    #
+    # See server/docs/publish.md for more details.
     workflow_dispatch:
         inputs:
             commit:
@@ -13,7 +15,7 @@ on:
                 required: true
 
 jobs:
-    build:
+    publish:
         runs-on: ubuntu-latest
         steps:
             - name: Checkout code
