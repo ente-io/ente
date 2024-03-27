@@ -32,6 +32,6 @@ running production instance.
 
 Then, trigger the "Publish (server)" workflow, providing it the commit. You can
 trigger it either from GitHub's UI or using the `gh cli`. With the CLI, we can
-combine both these steps too:
+combine both these steps too.
 
-Once the workflow completes, the resultant image will be available at 
+Once the workflow completes, the resultant image will be available at `ghcr.io/ente-io/server`.

@@ -29,8 +29,8 @@ require you to clone the repository or build any images.
     cd ../..
     ```
 
-3. Modify `compose.yaml`. Instead of asking it to build Ente's server (museum),
-   we want to get it to pull and use the published Docker image.
+3. Modify `compose.yaml`. Instead of building from source, we want directly use
+   the published Docker image from `ghcr.io/ente-io/server`
 
     ```diff
     --- a/server/compose.yaml
@@ -52,7 +52,7 @@ require you to clone the repository or build any images.
    touch museum.yaml
    ```
 
-4. That's it. You can now start everything.
+4. That is all. You can now start everything.
 
    ```sh
    docker compose up
