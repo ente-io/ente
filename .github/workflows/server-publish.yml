@@ -16,7 +16,7 @@ jobs:
     build:
         runs-on: ubuntu-latest
         steps:
-            - name: Checkout code @ ${{ inputs.commit }}
+            - name: Checkout code
               uses: actions/checkout@v4
               with:
                   ref: ${{ inputs.commit }}
@@ -26,7 +26,8 @@ jobs:
               with:
                   dockerfile: server/Dockerfile
                   directory: server
-                  image: ghcr.io/ente-io/server
+                  # Resultant package name will be ghcr.io/ente-io/server
+                  image: server
                   registry: ghcr.io
                   enableBuildKit: true
                   buildArgs: GIT_COMMIT=${GITHUB_SHA}
