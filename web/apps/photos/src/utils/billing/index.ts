@@ -157,7 +157,7 @@ export function isSubscriptionPastDue(subscription: Subscription) {
     return (
         !isSubscriptionCancelled(subscription) &&
         subscription.expiryTime < currentTime &&
-        subscription.expiryTime > currentTime - THIRTY_DAYS_IN_MICROSECONDS
+        subscription.expiryTime >= currentTime - THIRTY_DAYS_IN_MICROSECONDS
     );
 }
 
