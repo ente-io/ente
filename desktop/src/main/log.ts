@@ -34,7 +34,7 @@ export function logErrorSentry(
 }
 
 const logError1 = (message: string, e?: unknown) => {
-    if (e === undefined || e === null) {
+    if (!e) {
         log.error(message);
         return;
     }
