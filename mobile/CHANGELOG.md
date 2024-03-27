@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## v0.8.72
+### Added
+* #### Share an Album to Multiple Contacts at Once
+
+    Adding multiple viewers and collaborators just got easier!
+    You can now select multiple contacts and add all of them at once.
+
+* #### Bug Fixes and Performance Improvements
+
+    Many a bugs were squashed in this release. If you run into any, please write to team@ente.io, or let us know on Discord! 🙏
+
 
 ## v0.8.67
 
@@ -85,22 +96,3 @@
     If you would like to help us improve ente, come join the party @ ente.io/community!
 
 
-## v0.7.71
-
-### Added
-* #### Map View ✨
-
-    You can now explore the photos you've taken around the world!
-
-    Click on the Map icon on the Search screen to view your photos laid out on a map.
-
-* #### Cover Photos ✨
-    You can now set cover photos for your albums.
-
-    Open an album, and click on the overflow menu on the top right corner to pick your favorite memory from that album.
-
-### Improvements
-
-* **Translations**: Add support for German language
-* This release contains massive improvements to how smoothly our gallery 
- scrolls. More improvements are on the way!

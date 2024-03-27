@@ -1,5 +1,4 @@
 import "dart:async";
-import "dart:io";
 
 import 'package:flutter/material.dart';
 import "package:photos/generated/l10n.dart";
@@ -85,22 +84,14 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
                     ButtonWidget(
                       buttonType: ButtonType.trailingIconSecondary,
                       buttonSize: ButtonSize.large,
-                      // labelText: S.of(context).joinDiscord,
-                      labelText: "Why we open sourced",
-                      // icon: Icons.discord_outlined,
-                      icon: Icons.rocket_rounded,
+                      labelText: S.of(context).joinDiscord,
+                      icon: Icons.discord_outlined,
                       iconColor: enteColorScheme.primary500,
                       onTap: () async {
-                        // unawaited(
-                        //   launchUrlString(
-                        //     "https://discord.com/invite/z2YVKkycX3",
-                        //     mode: LaunchMode.externalApplication,
-                        //   ),
-                        // );
                         unawaited(
                           launchUrlString(
-                            "https://ente.io/blog/open-sourcing-our-server/",
-                            mode: LaunchMode.inAppBrowserView,
+                            "https://discord.com/invite/z2YVKkycX3",
+                            mode: LaunchMode.externalApplication,
                           ),
                         );
                       },
@@ -129,30 +120,14 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
   Widget _getChangeLog() {
     final scrollController = ScrollController();
     final List<ChangeLogEntry> items = [];
-    if (Platform.isAndroid) {
-      items.add(
-        ChangeLogEntry(
-          "Home Widget ✨",
-          'Introducing our new Android widget! Enjoy your favourite memories directly on your home screen.',
-        ),
-      );
-    }
     items.addAll([
       ChangeLogEntry(
-        "Redesigned Discovery Tab",
-        'We\'ve given it a fresh new look for improved design and better visual separation between each section.',
+        "Share an Album to Multiple Contacts at Once",
+        'Adding multiple viewers and collaborators just got easier!\n'
+            '\nYou can now select multiple contacts and add all of them at once.',
       ),
       ChangeLogEntry(
-        "Location Clustering ",
-        'Now, see photos automatically organize into clusters around a radius of populated cities.',
-      ),
-      ChangeLogEntry(
-        "Ente is now fully Open Source!",
-        'We took the final step in our open source journey.\n\n'
-            'Our clients had always been open source. Now, we have released the source code for our servers.',
-      ),
-      ChangeLogEntry(
-        "Bug Fixes",
+        "Bug Fixes and Performance Improvements",
         'Many a bugs were squashed in this release.\n'
             '\nIf you run into any, please write to team@ente.io, or let us know on Discord! 🙏',
       ),
