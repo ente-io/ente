@@ -8,13 +8,14 @@ environment that doesn't clutter your machine.
 You can also run museum directly on your machine if you wish - it is a single
 static go binary.
 
-This document describes both these approaches, and also outlines configuration.
+This document describes these approaches, and also outlines configuration.
 
-- [Running using Docker](#docker)
-- [Running without Docker](#without-docker)
+- [Run using Docker using a pre-built Docker image](docs/docker.md)
+- [Run using Docker but build an image from source](#build-and-run-using-docker)
+- [Running without Docker](#run-without-docker)
 - [Configuration](#configuration)
 
-## Docker
+## Build and run using Docker
 
 Start the cluster
 
@@ -70,7 +71,7 @@ Each time museum gets rebuilt from source, a new image gets created but the old
 one is retained as a dangling image. You can use `docker image prune --force`,
 or `docker system prune` if that's fine with you, to remove these.
 
-## Without Docker
+## Running without Docker
 
 The museum binary can be run by using `go run cmd/museum/main.go`. But first,
 you'll need to prepare your machine for development. Here we give the steps,
@@ -132,7 +133,7 @@ pg_ctl -D /usr/local/var/postgres -l logfile start
 createuser -s postgres
 ```
 
-## Start museum
+### Start museum
 
 ```sh
 export ENTE_DB_USER=postgres
@@ -148,7 +149,7 @@ ENTE_DB_USER=ente_user
 air
 ```
 
-## Testing
+### Testing
 
 Set up a local database for testing. This is not required for running the server.
 Create a test database with the following name and credentials:

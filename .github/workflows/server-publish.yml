@@ -5,6 +5,8 @@ on:
     #
     # To obtain the commit from the currently deployed museum, do:
     # curl -s https://api.ente.io/ping | jq -r '.id'
+    #
+    # See server/docs/publish.md for more details.
     workflow_dispatch:
         inputs:
             commit:
@@ -13,10 +15,10 @@ on:
                 required: true
 
 jobs:
-    build:
+    publish:
         runs-on: ubuntu-latest
         steps:
-            - name: Checkout code @ ${{ inputs.commit }}
+            - name: Checkout code
               uses: actions/checkout@v4
               with:
                   ref: ${{ inputs.commit }}
@@ -26,10 +28,11 @@ jobs:
               with:
                   dockerfile: server/Dockerfile
                   directory: server
-                  image: ghcr.io/ente-io/server
+                  # Resultant package name will be ghcr.io/ente-io/server
+                  image: server
                   registry: ghcr.io
                   enableBuildKit: true
-                  buildArgs: GIT_COMMIT=${GITHUB_SHA}
-                  tags: ${GITHUB_SHA}, latest
+                  buildArgs: GIT_COMMIT=${{ inputs.commit }}
+                  tags: ${{ inputs.commit }}, latest
                   username: ${{ github.actor }}
                   password: ${{ secrets.GITHUB_TOKEN }}
