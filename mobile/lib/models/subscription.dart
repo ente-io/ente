@@ -30,6 +30,14 @@ class Subscription {
     return expiryTime > DateTime.now().microsecondsSinceEpoch;
   }
 
+  bool isPastDue() {
+    return expiryTime < DateTime.now().microsecondsSinceEpoch &&
+        expiryTime >=
+            DateTime.now()
+                .subtract(const Duration(days: 30))
+                .microsecondsSinceEpoch;
+  }
+
   bool isYearlyPlan() {
     return 'year' == period;
   }
