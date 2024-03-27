@@ -9,7 +9,7 @@ import { getHideDockIconPreference } from "../services/userPreference";
 import { isPlatform } from "../utils/common/platform";
 import { buildContextMenu, buildMenuBar } from "../utils/menu";
 import log from "./log";
-import { execAsync, isDev } from "./util";
+import { isDev } from "./util";
 
 /**
  * Create an return the {@link BrowserWindow} that will form our app's UI.
@@ -79,10 +79,6 @@ export const createWindow = async () => {
 };
 
 export async function handleUpdates(mainWindow: BrowserWindow) {
-    const isInstalledViaBrew = await checkIfInstalledViaBrew();
-    if (!isDev && !isInstalledViaBrew) {
-        setupAutoUpdater(mainWindow);
-    }
 }
 
 export const setupTrayItem = (mainWindow: BrowserWindow) => {
@@ -168,16 +164,6 @@ export function logStartupBanner() {
     const systemVersion = process.getSystemVersion();
     log.info("Running on", { platform, osRelease, systemVersion });
     log.debug(() => ({ platform, osRelease, systemVersion }));
-}
-
-async function checkIfInstalledViaBrew() {
-    if (process.platform != "darwin") return false;
-    try {
-        await execAsync("brew list --cask ente");
-        return true;
-    } catch (e) {
-        return false;
-    }
 }
 
 function lowerCaseHeaders(responseHeaders: Record<string, string[]>) {

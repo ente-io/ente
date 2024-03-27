@@ -19,7 +19,6 @@ import {
     handleDockIconHideOnAutoLaunch,
     handleDownloads,
     handleExternalLinks,
-    handleUpdates,
     logStartupBanner,
     setupMacWindowOnDockIconClick,
     setupMainMenu,
@@ -27,6 +26,8 @@ import {
 } from "./main/init";
 import { attachFSWatchIPCHandlers, attachIPCHandlers } from "./main/ipc";
 import log, { initLogging } from "./main/log";
+import { isDev } from "./main/util";
+import { setupAutoUpdater } from "./services/appUpdater";
 import { initWatcher } from "./services/chokidar";
 
 let appIsQuitting = false;
@@ -170,7 +171,7 @@ const main = () => {
         setupMainMenu(mainWindow);
         attachIPCHandlers();
         attachFSWatchIPCHandlers(watcher);
-        await handleUpdates(mainWindow);
+        if (!isDev) setupAutoUpdater(mainWindow);
         handleDownloads(mainWindow);
         handleExternalLinks(mainWindow);
         addAllowOriginHeader(mainWindow);
