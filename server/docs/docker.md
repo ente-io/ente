@@ -52,7 +52,7 @@ require you to clone the repository or build any images.
    touch museum.yaml
    ```
 
-4. That is all. You can now start everything.
+5. That is all. You can now start everything.
 
    ```sh
    docker compose up
@@ -66,9 +66,18 @@ This will start a cluster containing:
 
 For each of these, it'll use the latest published Docker image.
 
-Alternatively, if you only want to run Ente's server, you can directly pull and
-run the image we publish to **`ghcr.io/ente-io/server`**.
+You can do a quick smoke test by pinging the API:
 
 ```sh
-docker pull ghcr.io/ente-io/server:latest
+curl localhost:8080/ping
+```
+
+## Only the server
+
+Alternatively, if you have setup the database and object storage externally and
+only want to run Ente's server, you can skip the steps above and directly pull
+and run the image from **`ghcr.io/ente-io/server`**.
+
+```sh
+docker pull ghcr.io/ente-io/server
 ```
