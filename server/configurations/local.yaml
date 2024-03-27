@@ -164,6 +164,15 @@ transmail:
     # Mail agent: dev
     key:
 
+# AWS SES
+# Use case: Sending mails
+ses-smtp:
+    isEnabled: false
+    host: 
+    port: 
+    username: 
+    password: 
+
 # Apple config (optional)
 # Use case: In-app purchases
 apple:
