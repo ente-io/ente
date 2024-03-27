@@ -1,15 +1,25 @@
 import log from "electron-log";
 import { isDev } from "./general";
 
-export function setupLogging(isDev?: boolean) {
+/**
+ * Initialize logging in the main process.
+ *
+ * This will set our underlying logger up to log to a file named `ente.log`,
+ *
+ * - on Linux at ~/.config/ente/logs/main.log
+ * - on macOS at ~/Library/Logs/ente/main.log
+ * - on Windows at %USERPROFILE%\AppData\Roaming\ente\logs\main.log
+ *
+ * On dev builds, it will also log to the console.
+ */
+const initLogging = () => {
     log.transports.file.fileName = "ente.log";
     log.transports.file.maxSize = 50 * 1024 * 1024; // 50MB;
-    if (!isDev) {
-        log.transports.console.level = false;
-    }
     log.transports.file.format =
-        "[{y}-{m}-{d}T{h}:{i}:{s}{z}] [{level}]{scope} {text}";
-}
+        "[{y}-{m}-{d}T{h}:{i}:{s}{z}] [{level}] {text}";
+
+    if (!isDev) log.transports.console.level = false;
+};
 
 export const logToDisk = (message: string) => {
     log.info(message);
@@ -60,6 +70,14 @@ const logDebug = (message: () => string) => {
     if (isDev) log.debug(() => message);
 };
 
+/**
+ * Ente's logger.
+ *
+ * This is an object that provides three functions to log at the corresponding
+ * levels - error, info or debug.
+ *
+ * {@link initLogging} needs to be called once before using any of these.
+ */
 export default {
     /**
      * Log an error message with an optional associated error object.

@@ -14,7 +14,6 @@ import serveNextAt from "next-electron-server";
 import { existsSync } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { isDev } from "./main/general";
 import {
     addAllowOriginHeader,
     createWindow,
@@ -28,7 +27,7 @@ import {
     setupTrayItem,
 } from "./main/init";
 import { attachFSWatchIPCHandlers, attachIPCHandlers } from "./main/ipc";
-import { logErrorSentry, setupLogging } from "./main/log";
+import { initLogging, logErrorSentry } from "./main/log";
 import { initWatcher } from "./services/chokidar";
 
 let appIsQuitting = false;
@@ -135,8 +134,6 @@ function setupAppEventEmitter(mainWindow: BrowserWindow) {
 }
 
 const main = () => {
-    setupLogging(isDev);
-
     const gotTheLock = app.requestSingleInstanceLock();
     if (!gotTheLock) {
         app.quit();
@@ -145,6 +142,7 @@ const main = () => {
 
     let mainWindow: BrowserWindow;
 
+    initLogging();
     setupRendererServer();
     handleDockIconHideOnAutoLaunch();
     increaseDiskCache();
@@ -161,9 +159,9 @@ const main = () => {
         }
     });
 
-    // This method will be called when Electron has finished
-    // initialization and is ready to create browser windows.
-    // Some APIs can only be used after this event occurs.
+    // Emitted once, when Electron has finished initializing.
+    //
+    // Note that some Electron APIs can only be used after this event occurs.
     app.on("ready", async () => {
         logSystemInfo();
         mainWindow = await createWindow();
