@@ -81,6 +81,11 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
               userDetails.hasPaidAddon();
       _hasActiveSubscription = _currentSubscription!.isValid();
       _isStripeSubscriber = _currentSubscription!.paymentProvider == stripe;
+
+      if (_isStripeSubscriber && _currentSubscription!.isPastDue()) {
+        _redirectToPaymentPortal();
+      }
+
       return _filterStripeForUI().then((value) {
         _hasLoadedData = true;
         setState(() {});
@@ -254,7 +259,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
             singleBorderRadius: 4,
             alignCaptionedTextToLeft: true,
             onTap: () async {
-              _onStripSupportedPaymentDetailsTap();
+              _redirectToPaymentPortal();
             },
           ),
         ),
@@ -295,9 +300,9 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
     );
   }
 
-  // _onStripSupportedPaymentDetailsTap action allows the user to update
+  // _redirectToPaymentPortal action allows the user to update
   // their stripe payment details
-  void _onStripSupportedPaymentDetailsTap() async {
+  void _redirectToPaymentPortal() async {
     final String paymentProvider = _currentSubscription!.paymentProvider;
     switch (_currentSubscription!.paymentProvider) {
       case stripe:

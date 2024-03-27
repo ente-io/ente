@@ -4,8 +4,10 @@ import { Box, Skeleton } from "@mui/material";
 import Typography from "@mui/material/Typography";
 import { GalleryContext } from "pages/gallery";
 import { useContext, useEffect, useMemo, useState } from "react";
+import billingService from "services/billingService";
 import { getUserDetailsV2 } from "services/userService";
 import { UserDetails } from "types/user";
+import { hasStripeSubscription, isSubscriptionPastDue } from "utils/billing";
 import { isFamilyAdmin, isPartOfFamily } from "utils/user/family";
 import { MemberSubscriptionManage } from "../MemberSubscriptionManage";
 import SubscriptionCard from "./SubscriptionCard";
@@ -50,9 +52,20 @@ export default function UserDetailsSection({ sidebarView }) {
         [userDetails],
     );
 
-    const handleSubscriptionCardClick = isMemberSubscription
-        ? openMemberSubscriptionManage
-        : galleryContext.showPlanSelectorModal;
+    const handleSubscriptionCardClick = () => {
+        if (isMemberSubscription) {
+            openMemberSubscriptionManage();
+        } else {
+            if (
+                hasStripeSubscription(userDetails.subscription) &&
+                isSubscriptionPastDue(userDetails.subscription)
+            ) {
+                billingService.redirectToCustomerPortal();
+            } else {
+                galleryContext.showPlanSelectorModal();
+            }
+        }
+    };
 
     return (
         <>

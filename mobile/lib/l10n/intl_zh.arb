@@ -1200,7 +1200,7 @@
   "joinDiscord": "加入 Discord",
   "locations": "位置",
   "descriptions": "描述",
-  "addViewers": "{count, plural, zero {Add viewer} one {Add viewer} other {Add viewers}}",
-  "addCollaborators": "{count, plural, zero {Add collaborator} one {Add collaborator} other {Add collaborators}}",
-  "longPressAnEmailToVerifyEndToEndEncryption": "Long press an email to verify end to end encryption."
+  "addViewers": "{count, plural, zero {添加查看者} one {添加查看者} other {添加查看者}}",
+  "addCollaborators": "{count, plural, zero {添加协作者} one {添加协作者} other {添加协作者}}",
+  "longPressAnEmailToVerifyEndToEndEncryption": "长按电子邮件以验证端到端加密。"
 }

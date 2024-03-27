@@ -24,6 +24,11 @@ cd ente/server
 docker compose up --build
 ```
 
+> [!TIP]
+>
+> You can also use a pre-built Docker image from `ghcr.io/ente-io/server` ([More
+> info](https://github.com/ente-io/ente/blob/main/server/docs/docker.md))
+
 Then in a separate terminal, you can run (e.g) the web client
 
 ```sh
@@ -42,7 +47,7 @@ For the mobile apps, you don't even need to build, and can install normal Ente
 apps and configure them to use your
 [custom self-hosted server](guides/custom-server/).
 
-> If you want to build from source, see the instructions
+> If you want to build the mobile apps from source, see the instructions
 > [here](guides/mobile-build).
 
 ## Next steps

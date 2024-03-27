@@ -7,11 +7,11 @@ jobs:
     build:
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v4
-              name: Check out code
+            - name: Checkout code
+              uses: actions/checkout@v4
 
-            - uses: mr-smithers-excellent/docker-build-push@v6
-              name: Build & Push
+            - name: Build and push
+              uses: mr-smithers-excellent/docker-build-push@v6
               with:
                   dockerfile: server/Dockerfile
                   directory: server
