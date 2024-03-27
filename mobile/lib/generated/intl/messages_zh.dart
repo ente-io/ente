@@ -21,7 +21,7 @@ class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'zh';
 
   static String m0(count) =>
-      "${Intl.plural(count, zero: 'Add collaborator', one: 'Add collaborator', other: 'Add collaborators')}";
+      "${Intl.plural(count, zero: '添加协作者', one: '添加协作者', other: '添加协作者')}";
 
   static String m2(count) =>
       "${Intl.plural(count, one: '添加一个项目', other: '添加一些项目')}";
@@ -30,7 +30,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "您的 ${storageAmount} 插件有效期至 ${endDate}";
 
   static String m1(count) =>
-      "${Intl.plural(count, zero: 'Add viewer', one: 'Add viewer', other: 'Add viewers')}";
+      "${Intl.plural(count, zero: '添加查看者', one: '添加查看者', other: '添加查看者')}";
 
   static String m4(emailOrName) => "由 ${emailOrName} 添加";
 
@@ -737,8 +737,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "logsDialogBody": MessageLookupByLibrary.simpleMessage(
             "这将跨日志发送以帮助我们调试您的问题。 请注意，将包含文件名以帮助跟踪特定文件的问题。"),
         "longPressAnEmailToVerifyEndToEndEncryption":
-            MessageLookupByLibrary.simpleMessage(
-                "Long press an email to verify end to end encryption."),
+            MessageLookupByLibrary.simpleMessage("长按电子邮件以验证端到端加密。"),
         "longpressOnAnItemToViewInFullscreen":
             MessageLookupByLibrary.simpleMessage("长按一个项目来全屏查看"),
         "lostDevice": MessageLookupByLibrary.simpleMessage("丢失了设备吗？"),

@@ -747,6 +747,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "We don\'t track app installs. It\'d help if you told us where you found us!"),
         "hearUsWhereTitle": MessageLookupByLibrary.simpleMessage(
             "How did you hear about Ente? (optional)"),
+        "help": MessageLookupByLibrary.simpleMessage("Help"),
         "hidden": MessageLookupByLibrary.simpleMessage("Hidden"),
         "hide": MessageLookupByLibrary.simpleMessage("Hide"),
         "hiding": MessageLookupByLibrary.simpleMessage("Hiding..."),

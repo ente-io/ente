@@ -2232,6 +2232,16 @@ class S {
     );
   }
 
+  /// `Help`
+  String get help {
+    return Intl.message(
+      'Help',
+      name: 'help',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Oops, something went wrong`
   String get oopsSomethingWentWrong {
     return Intl.message(
