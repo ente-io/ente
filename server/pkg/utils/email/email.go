@@ -137,8 +137,9 @@ func SendTemplatedEmail(to []string, fromName string, fromEmail string, subject 
 	isSESEnabled := viper.GetBool("ses-smtp.isEnabled")
 	if isSESEnabled {
 		return SendSES(to, fromName, fromEmail, subject, body, inlineImages)
+	} else {
+		return Send(to, fromName, fromEmail, subject, body, inlineImages)
 	}
-	return Send(to, fromName, fromEmail, subject, body, inlineImages)
 }
 
 func GetMaskedEmail(email string) string {
