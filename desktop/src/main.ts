@@ -8,7 +8,6 @@
  *
  * https://www.electronjs.org/docs/latest/tutorial/process-model#the-main-process
  */
-import log from "electron-log";
 import { app, BrowserWindow } from "electron/main";
 import serveNextAt from "next-electron-server";
 import { existsSync } from "node:fs";
@@ -27,7 +26,7 @@ import {
     setupTrayItem,
 } from "./main/init";
 import { attachFSWatchIPCHandlers, attachIPCHandlers } from "./main/ipc";
-import { initLogging, logErrorSentry } from "./main/log";
+import log, { initLogging } from "./main/log";
 import { initWatcher } from "./services/chokidar";
 
 let appIsQuitting = false;
@@ -182,7 +181,7 @@ const main = () => {
         } catch (e) {
             // Log but otherwise ignore errors during non-critical startup
             // actions
-            logErrorSentry(e, "Ignoring startup error");
+            log.error("Ignoring startup error", e);
         }
     });
 

@@ -1,5 +1,5 @@
 import log from "electron-log";
-import { isDev } from "./general";
+import { isDev } from "./util";
 
 /**
  * Initialize logging in the main process.

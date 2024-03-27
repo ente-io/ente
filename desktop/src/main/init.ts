@@ -1,18 +1,15 @@
 import { app, BrowserWindow, Menu, nativeImage, Tray } from "electron";
-import ElectronLog from "electron-log";
 import { existsSync } from "node:fs";
-import os from "os";
-import path from "path";
-import util from "util";
+import os from "node:os";
+import path from "node:path";
 import { isAppQuitting, rendererURL } from "../main";
 import { setupAutoUpdater } from "../services/appUpdater";
 import autoLauncher from "../services/autoLauncher";
 import { getHideDockIconPreference } from "../services/userPreference";
 import { isPlatform } from "../utils/common/platform";
 import { buildContextMenu, buildMenuBar } from "../utils/menu";
-import { isDev } from "./general";
-import { logErrorSentry } from "./log";
-const execAsync = util.promisify(require("child_process").exec);
+import log from "./log";
+import { isDev } from "./util";
 
 /**
  * Create an return the {@link BrowserWindow} that will form our app's UI.
@@ -167,25 +164,22 @@ export async function handleDockIconHideOnAutoLaunch() {
     }
 }
 
-export function logSystemInfo() {
+export function logStartupBanner() {
+    const version = isDev ? "dev" : app.getVersion();
+    log.info(`hello from ente-photos-desktop ${version}`);
+
     const systemVersion = process.getSystemVersion();
     const osName = process.platform;
     const osRelease = os.release();
-    ElectronLog.info({ osName, osRelease, systemVersion });
-    const appVersion = app.getVersion();
-    ElectronLog.info({ appVersion });
+    log.info(`system info ${{ osName, osRelease, systemVersion }}`);
 }
 
-export async function checkIfInstalledViaBrew() {
-    if (!isPlatform("mac")) {
-        return false;
-    }
+async function checkIfInstalledViaBrew() {
+    if (process.platform != "darwin") return false;
     try {
         await execAsync("brew list --cask ente");
-        ElectronLog.info("ente installed via brew");
         return true;
     } catch (e) {
-        ElectronLog.info("ente not installed via brew");
         return false;
     }
 }

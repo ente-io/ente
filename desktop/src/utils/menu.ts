@@ -6,8 +6,7 @@ import {
     shell,
 } from "electron";
 import ElectronLog from "electron-log";
-import { setIsAppQuitting } from "../main";
-import { openDirectory, openLogDirectory } from "../main/general";
+import { openDirectory, openLogDirectory, setIsAppQuitting } from "../main";
 import { forceCheckForUpdateAndNotify } from "../services/appUpdater";
 import autoLauncher from "../services/autoLauncher";
 import {
@@ -188,7 +187,8 @@ export async function buildMenuBar(mainWindow: BrowserWindow): Promise<Menu> {
             submenu: [
                 {
                     label: "Ente Help",
-                    click: () => shell.openExternal("https://help.ente.io/photos/"),
+                    click: () =>
+                        shell.openExternal("https://help.ente.io/photos/"),
                 },
                 { type: "separator" },
                 {

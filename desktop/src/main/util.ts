@@ -1,9 +1,30 @@
+import shellescape from "any-shell-escape";
 import { shell } from "electron"; /* TODO(MR): Why is this not in /main? */
 import { app } from "electron/main";
+import { exec } from "node:child_process";
 import path from "node:path";
+import { promisify } from "node:util";
 
 /** `true` if the app is running in development mode. */
 export const isDev = !app.isPackaged;
+
+/**
+ * Run a shell command asynchronously.
+ *
+ * This is a convenience promisified version of child_process.exec. It runs the
+ * command asynchronously and returns its stdout and stderr if there were no
+ * errors.
+ *
+ * It also shellescapes the command before running it.
+ *
+ * Note: This is not a 1-1 replacement of child_process.exec - if you're trying
+ * to run a trivial shell command, say something that produces a lot of output,
+ * this might not be the best option and it might be better to use the
+ * underlying functions.
+ */
+export const execAsync = (command: string) => execAsync_(shellescape(command));
+
+const execAsync_ = promisify(exec);
 
 /**
  * Open the given {@link dirPath} in the system's folder viewer.
