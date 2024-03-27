@@ -32,7 +32,7 @@ jobs:
                   image: server
                   registry: ghcr.io
                   enableBuildKit: true
-                  buildArgs: GIT_COMMIT=${GITHUB_SHA}
-                  tags: ${GITHUB_SHA}, latest
+                  buildArgs: GIT_COMMIT=$${ inputs.commit }}
+                  tags: ${{ inputs.commit }}, latest
                   username: ${{ github.actor }}
                   password: ${{ secrets.GITHUB_TOKEN }}
