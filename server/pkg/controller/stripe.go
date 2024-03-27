@@ -269,9 +269,8 @@ func (c *StripeController) handleCheckoutSessionCompleted(event stripe.Event, co
 // Stripe fires this when a subscription starts or changes. For example,
 // renewing a subscription, adding a coupon, applying a discount, adding an
 // invoice item, and changing plans all trigger this event. In our case, we use
-// this only to track plan changes or subscriptions going past due. The rest
-// (subscription creations, deletions, renewals and failures) are tracked by
-// individual events.
+// this only to track plan changes and renewal failures resulting in
+// subscriptions going past due.
 func (c *StripeController) handleCustomerSubscriptionUpdated(event stripe.Event, country ente.StripeAccountCountry) (ente.StripeEventLog, error) {
 	var stripeSubscription stripe.Subscription
 	json.Unmarshal(event.Data.Raw, &stripeSubscription)
@@ -284,15 +283,7 @@ func (c *StripeController) handleCustomerSubscriptionUpdated(event stripe.Event,
 		}
 		return ente.StripeEventLog{}, stacktrace.Propagate(err, "")
 	}
-
 	userID := currentSubscription.UserID
-	if stripeSubscription.Status == stripe.SubscriptionStatusPastDue {
-		err = c.sendAccountOnHoldEmail(userID)
-		if err != nil {
-			return ente.StripeEventLog{}, stacktrace.Propagate(err, "")
-		}
-	}
-
 	newSubscription, err := c.getEnteSubscriptionFromStripeSubscription(userID, stripeSubscription)
 	if err != nil {
 		return ente.StripeEventLog{}, stacktrace.Propagate(err, "")
@@ -303,6 +294,24 @@ func (c *StripeController) handleCustomerSubscriptionUpdated(event stripe.Event,
 	if currentSubscription.ProductID != newSubscription.ProductID {
 		c.BillingRepo.ReplaceSubscription(currentSubscription.ID, newSubscription)
 	}
+
+	fullStripeSub, err := c.getStripeSubscriptionWithPaymentMethod(currentSubscription)
+	if err != nil {
+		return ente.StripeEventLog{}, stacktrace.Propagate(err, "")
+	}
+	isSEPA := isSEPASubscription(fullStripeSub)
+
+	if stripeSubscription.Status == stripe.SubscriptionStatusPastDue && !isSEPA {
+		// Unfortunately, customer.subscription.updated is only fired for SEPA
+		// payments in case of updation failures (not for purchase or renewal
+		// failures). So for consistency (and to avoid duplicate mails), we
+		// trigger on-hold emails for SEPA within handlePaymentIntentFailed.
+		err = c.sendAccountOnHoldEmail(userID)
+		if err != nil {
+			return ente.StripeEventLog{}, stacktrace.Propagate(err, "")
+		}
+	}
+
 	return ente.StripeEventLog{UserID: userID, StripeSubscription: stripeSubscription, Event: event}, nil
 }
 
@@ -428,26 +437,18 @@ func (c *StripeController) UpdateSubscription(stripeID string, userID int64) (en
 		log.Info("Usage is good")
 
 	}
-	client := c.StripeClients[subscription.Attributes.StripeAccountCountry]
-	params := stripe.SubscriptionParams{}
-	params.AddExpand("default_payment_method")
-	stripeSubscription, err := client.Subscriptions.Get(subscription.OriginalTransactionID, &params)
+	stripeSubscription, err := c.getStripeSubscriptionWithPaymentMethod(subscription)
 	if err != nil {
 		return ente.SubscriptionUpdateResponse{}, stacktrace.Propagate(err, "")
 	}
-	isSEPA := false
-	if stripeSubscription.DefaultPaymentMethod != nil {
-		isSEPA = stripeSubscription.DefaultPaymentMethod.Type == stripe.PaymentMethodTypeSepaDebit
-	} else {
-		log.Info("No default payment method found")
-	}
+	isSEPA := isSEPASubscription(stripeSubscription)
 	var paymentBehavior stripe.SubscriptionPaymentBehavior
 	if isSEPA {
 		paymentBehavior = stripe.SubscriptionPaymentBehaviorAllowIncomplete
 	} else {
 		paymentBehavior = stripe.SubscriptionPaymentBehaviorPendingIfIncomplete
 	}
-	params = stripe.SubscriptionParams{
+	params := stripe.SubscriptionParams{
 		ProrationBehavior: stripe.String(string(stripe.SubscriptionProrationBehaviorAlwaysInvoice)),
 		Items: []*stripe.SubscriptionItemsParams{
 			{
@@ -458,6 +459,7 @@ func (c *StripeController) UpdateSubscription(stripeID string, userID int64) (en
 		PaymentBehavior: stripe.String(string(paymentBehavior)),
 	}
 	params.AddExpand("latest_invoice.payment_intent")
+	client := c.StripeClients[subscription.Attributes.StripeAccountCountry]
 	newStripeSubscription, err := client.Subscriptions.Update(subscription.OriginalTransactionID, &params)
 	if err != nil {
 		stripeError := err.(*stripe.Error)
@@ -545,6 +547,17 @@ func (c *StripeController) GetStripeCustomerPortal(userID int64, redirectRootURL
 		return "", stacktrace.Propagate(err, "")
 	}
 	return ps.URL, nil
+}
+
+func (c *StripeController) getStripeSubscriptionWithPaymentMethod(subscription ente.Subscription) (stripe.Subscription, error) {
+	client := c.StripeClients[subscription.Attributes.StripeAccountCountry]
+	params := &stripe.SubscriptionParams{}
+	params.AddExpand("default_payment_method")
+	stripeSubscription, err := client.Subscriptions.Get(subscription.OriginalTransactionID, params)
+	if err != nil {
+		return stripe.Subscription{}, stacktrace.Propagate(err, "")
+	}
+	return *stripeSubscription, nil
 }
 
 func (c *StripeController) sendAccountOnHoldEmail(userID int64) error {
@@ -707,4 +720,14 @@ func (c *StripeController) CancelSubAndDeleteCustomer(subscription ente.Subscrip
 		}
 	}
 	return nil
+}
+
+func isSEPASubscription(stripeSubscription stripe.Subscription) bool {
+	isSEPA := false
+	if stripeSubscription.DefaultPaymentMethod != nil {
+		isSEPA = stripeSubscription.DefaultPaymentMethod.Type == stripe.PaymentMethodTypeSepaDebit
+	} else {
+		log.Info("No default payment method found")
+	}
+	return isSEPA
 }
