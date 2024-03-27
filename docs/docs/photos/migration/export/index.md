@@ -29,14 +29,15 @@ videos you have uploaded to Ente.
 
     ![Ente - Rexport](export-4.png)
 
-6. In case your download gets interrupted, Ente will resume from where it left off.
-Simply select **export data** again and click on **resync**.
+6. In case your download gets interrupted, Ente will resume from where it left
+   off. Simply select **export data** again and click on **resync**.
 
+7. **Sync continuously** : You can utilize Continuous Sync to eliminate manual
+   exports each time new photos are added to Ente. This feature automatically
+   detects new files and runs exports accordingly, It also ensures that exported
+   data reflects the latest album states with new files, moves, and deletions.
 
-7. **Sync continuously** : You can utilize Continuous Sync to eliminate manual exports each time new photos are added to Ente. This feature automatically detects new files and runs exports accordingly, It also ensures that exported data reflects the latest album states with new files, moves, and deletions.
-
-    ![Ente - continuous](continuous-sync.webp)
-
+    ![Ente - Continuous sync](continuous-sync.webp)
 
 If you run into any issues during your data export, please reach out to
 [support@ente.io](mailto:support@ente.io) and we will be happy to help you!
