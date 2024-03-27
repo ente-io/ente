@@ -65,8 +65,8 @@ import {
     saveFileToDisk,
     saveStreamToDisk,
 } from "./fs";
-import { openDirectory, openLogDirectory } from "./general";
 import { logToDisk } from "./log";
+import { openDirectory, openLogDirectory } from "./util";
 
 /**
  * Listen for IPC events sent/invoked by the renderer process, and route them to

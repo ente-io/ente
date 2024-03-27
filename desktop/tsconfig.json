@@ -9,12 +9,12 @@
         /* Recommended target, lib and other settings for code running in the
            version of Node.js bundled with Electron.
 
-           Currently, with Electron 25, this is Node.js 18
-           https://www.electronjs.org/blog/electron-25-0
+           Currently, with Electron 29, this is Node.js 20.9
+           https://www.electronjs.org/blog/electron-29-0
 
            Note that we cannot do
 
-               "extends": "@tsconfig/node18/tsconfig.json",
+               "extends": "@tsconfig/node20/tsconfig.json",
 
            because that sets "lib": ["es2023"]. However (and I don't fully
            understand what's going on here), that breaks our compilation since

@@ -12,7 +12,6 @@ linux:
           arch: [x64, arm64]
         - target: pacman
           arch: [x64, arm64]
-    icon: ./resources/icon.icns
     category: Photography
 mac:
     target:

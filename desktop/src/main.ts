@@ -8,27 +8,26 @@
  *
  * https://www.electronjs.org/docs/latest/tutorial/process-model#the-main-process
  */
-import log from "electron-log";
-import { app, BrowserWindow } from "electron/main";
+import { app, BrowserWindow, Menu } from "electron/main";
 import serveNextAt from "next-electron-server";
 import { existsSync } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { isDev } from "./main/general";
 import {
     addAllowOriginHeader,
     createWindow,
     handleDockIconHideOnAutoLaunch,
     handleDownloads,
     handleExternalLinks,
-    handleUpdates,
-    logSystemInfo,
+    logStartupBanner,
     setupMacWindowOnDockIconClick,
-    setupMainMenu,
     setupTrayItem,
 } from "./main/init";
 import { attachFSWatchIPCHandlers, attachIPCHandlers } from "./main/ipc";
-import { logErrorSentry, setupLogging } from "./main/log";
+import log, { initLogging } from "./main/log";
+import { createApplicationMenu } from "./main/menu";
+import { isDev } from "./main/util";
+import { setupAutoUpdater } from "./services/appUpdater";
 import { initWatcher } from "./services/chokidar";
 
 let appIsQuitting = false;
@@ -135,8 +134,6 @@ function setupAppEventEmitter(mainWindow: BrowserWindow) {
 }
 
 const main = () => {
-    setupLogging(isDev);
-
     const gotTheLock = app.requestSingleInstanceLock();
     if (!gotTheLock) {
         app.quit();
@@ -145,6 +142,7 @@ const main = () => {
 
     let mainWindow: BrowserWindow;
 
+    initLogging();
     setupRendererServer();
     handleDockIconHideOnAutoLaunch();
     increaseDiskCache();
@@ -161,19 +159,19 @@ const main = () => {
         }
     });
 
-    // This method will be called when Electron has finished
-    // initialization and is ready to create browser windows.
-    // Some APIs can only be used after this event occurs.
+    // Emitted once, when Electron has finished initializing.
+    //
+    // Note that some Electron APIs can only be used after this event occurs.
     app.on("ready", async () => {
-        logSystemInfo();
+        logStartupBanner();
         mainWindow = await createWindow();
         const watcher = initWatcher(mainWindow);
         setupTrayItem(mainWindow);
         setupMacWindowOnDockIconClick();
-        setupMainMenu(mainWindow);
+        Menu.setApplicationMenu(await createApplicationMenu(mainWindow));
         attachIPCHandlers();
         attachFSWatchIPCHandlers(watcher);
-        await handleUpdates(mainWindow);
+        if (!isDev) setupAutoUpdater(mainWindow);
         handleDownloads(mainWindow);
         handleExternalLinks(mainWindow);
         addAllowOriginHeader(mainWindow);
@@ -184,7 +182,7 @@ const main = () => {
         } catch (e) {
             // Log but otherwise ignore errors during non-critical startup
             // actions
-            logErrorSentry(e, "Ignoring startup error");
+            log.error("Ignoring startup error", e);
         }
     });
 

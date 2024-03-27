@@ -1,18 +1,14 @@
-import { app, BrowserWindow, Menu, nativeImage, Tray } from "electron";
-import ElectronLog from "electron-log";
+import { app, BrowserWindow, nativeImage, Tray } from "electron";
 import { existsSync } from "node:fs";
-import os from "os";
-import path from "path";
-import util from "util";
+import os from "node:os";
+import path from "node:path";
 import { isAppQuitting, rendererURL } from "../main";
-import { setupAutoUpdater } from "../services/appUpdater";
 import autoLauncher from "../services/autoLauncher";
 import { getHideDockIconPreference } from "../services/userPreference";
 import { isPlatform } from "../utils/common/platform";
-import { buildContextMenu, buildMenuBar } from "../utils/menu";
-import { isDev } from "./general";
-import { logErrorSentry } from "./log";
-const execAsync = util.promisify(require("child_process").exec);
+import log from "./log";
+import { createTrayContextMenu } from "./menu";
+import { isDev } from "./util";
 
 /**
  * Create an return the {@link BrowserWindow} that will form our app's UI.
@@ -20,21 +16,15 @@ const execAsync = util.promisify(require("child_process").exec);
  * This window will show the HTML served from {@link rendererURL}.
  */
 export const createWindow = async () => {
-    const appImgPath = isDev
-        ? "../build/window-icon.png"
-        : path.join(process.resourcesPath, "window-icon.png");
-    const appIcon = nativeImage.createFromPath(appImgPath);
-
     // Create the main window. This'll show our web content.
     const mainWindow = new BrowserWindow({
         webPreferences: {
             preload: path.join(app.getAppPath(), "preload.js"),
         },
-        icon: appIcon,
         // The color to show in the window until the web content gets loaded.
         // See: https://www.electronjs.org/docs/latest/api/browser-window#setting-the-backgroundcolor-property
         backgroundColor: "black",
-        // We'll show conditionally depending on `wasAutoLaunched` later
+        // We'll show it conditionally depending on `wasAutoLaunched` later.
         show: false,
     });
 
@@ -53,19 +43,14 @@ export const createWindow = async () => {
     // Open the DevTools automatically when running in dev mode
     if (isDev) mainWindow.webContents.openDevTools();
 
-    mainWindow.webContents.on("render-process-gone", (event, details) => {
+    mainWindow.webContents.on("render-process-gone", (_, details) => {
+        log.error(`render-process-gone: ${details}`);
         mainWindow.webContents.reload();
-        logErrorSentry(
-            Error("render-process-gone"),
-            "webContents event render-process-gone",
-            { details },
-        );
-        ElectronLog.log("webContents event render-process-gone", details);
     });
 
     mainWindow.webContents.on("unresponsive", () => {
+        log.error("webContents unresponsive");
         mainWindow.webContents.forcefullyCrashRenderer();
-        ElectronLog.log("webContents event unresponsive");
     });
 
     mainWindow.on("close", function (event) {
@@ -92,12 +77,7 @@ export const createWindow = async () => {
     return mainWindow;
 };
 
-export async function handleUpdates(mainWindow: BrowserWindow) {
-    const isInstalledViaBrew = await checkIfInstalledViaBrew();
-    if (!isDev && !isInstalledViaBrew) {
-        setupAutoUpdater(mainWindow);
-    }
-}
+export async function handleUpdates(mainWindow: BrowserWindow) {}
 
 export const setupTrayItem = (mainWindow: BrowserWindow) => {
     const iconName = isPlatform("mac")
@@ -110,7 +90,7 @@ export const setupTrayItem = (mainWindow: BrowserWindow) => {
     const trayIcon = nativeImage.createFromPath(trayImgPath);
     const tray = new Tray(trayIcon);
     tray.setToolTip("ente");
-    tray.setContextMenu(buildContextMenu(mainWindow));
+    tray.setContextMenu(createTrayContextMenu(mainWindow));
 };
 
 export function handleDownloads(mainWindow: BrowserWindow) {
@@ -160,10 +140,6 @@ export function setupMacWindowOnDockIconClick() {
     });
 }
 
-export async function setupMainMenu(mainWindow: BrowserWindow) {
-    Menu.setApplicationMenu(await buildMenuBar(mainWindow));
-}
-
 export async function handleDockIconHideOnAutoLaunch() {
     const shouldHideDockIcon = getHideDockIconPreference();
     const wasAutoLaunched = await autoLauncher.wasAutoLaunched();
@@ -173,27 +149,14 @@ export async function handleDockIconHideOnAutoLaunch() {
     }
 }
 
-export function logSystemInfo() {
-    const systemVersion = process.getSystemVersion();
-    const osName = process.platform;
-    const osRelease = os.release();
-    ElectronLog.info({ osName, osRelease, systemVersion });
-    const appVersion = app.getVersion();
-    ElectronLog.info({ appVersion });
-}
+export function logStartupBanner() {
+    const version = isDev ? "dev" : app.getVersion();
+    log.info(`Hello from ente-photos-desktop ${version}`);
 
-export async function checkIfInstalledViaBrew() {
-    if (!isPlatform("mac")) {
-        return false;
-    }
-    try {
-        await execAsync("brew list --cask ente");
-        ElectronLog.info("ente installed via brew");
-        return true;
-    } catch (e) {
-        ElectronLog.info("ente not installed via brew");
-        return false;
-    }
+    const platform = process.platform;
+    const osRelease = os.release();
+    const systemVersion = process.getSystemVersion();
+    log.info("Running on", { platform, osRelease, systemVersion });
 }
 
 function lowerCaseHeaders(responseHeaders: Record<string, string[]>) {

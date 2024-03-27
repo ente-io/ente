@@ -5,7 +5,6 @@ import { createWriteStream, existsSync } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { Readable } from "node:stream";
-import { logError } from "./log";
 
 export const fsExists = (path: string) => existsSync(path);
 
@@ -99,54 +98,36 @@ export const moveFile = async (sourcePath: string, destinationPath: string) => {
 };
 
 export const isFolder = async (dirPath: string) => {
-    try {
-        const stats = await fs.stat(dirPath);
-        return stats.isDirectory();
-    } catch (e) {
-        let err = e;
-        // if code is defined, it's an error from fs.stat
-        if (typeof e.code !== "undefined") {
-            // ENOENT means the file does not exist
-            if (e.code === "ENOENT") {
-                return false;
-            }
-            err = Error(`fs error code: ${e.code}`);
-        }
-        logError(err, "isFolder failed");
-        return false;
-    }
+    if (!existsSync(dirPath)) return false;
+    const stats = await fs.stat(dirPath);
+    return stats.isDirectory();
 };
 
 export const deleteFolder = async (folderPath: string) => {
-    if (!existsSync(folderPath)) {
-        return;
-    }
-    const stat = await fs.stat(folderPath);
-    if (!stat.isDirectory()) {
-        throw new Error("Path is not a folder");
-    }
-    // check if folder is empty
+    // Ensure it is folder
+    if (!isFolder(folderPath)) return;
+
+    // Ensure folder is empty
     const files = await fs.readdir(folderPath);
-    if (files.length > 0) {
-        throw new Error("Folder is not empty");
-    }
+    if (files.length > 0) throw new Error("Folder is not empty");
+
+    // rm -rf it
     await fs.rmdir(folderPath);
 };
 
 export const rename = async (oldPath: string, newPath: string) => {
-    if (!existsSync(oldPath)) {
-        throw new Error("Path does not exist");
-    }
+    if (!existsSync(oldPath)) throw new Error("Path does not exist");
     await fs.rename(oldPath, newPath);
 };
 
 export const deleteFile = async (filePath: string) => {
-    if (!existsSync(filePath)) {
-        return;
-    }
+    // Ensure it exists
+    if (!existsSync(filePath)) return;
+
+    // And is a file
     const stat = await fs.stat(filePath);
-    if (!stat.isFile()) {
-        throw new Error("Path is not a file");
-    }
+    if (!stat.isFile()) throw new Error("Path is not a file");
+
+    // rm it
     return fs.rm(filePath);
 };

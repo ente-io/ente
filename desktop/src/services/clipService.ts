@@ -1,20 +1,16 @@
-import log from "electron-log";
 import { app, net } from "electron/main";
 import { existsSync } from "fs";
 import fs from "node:fs/promises";
 import path from "node:path";
-import util from "util";
 import { CustomErrors } from "../constants/errors";
 import { writeStream } from "../main/fs";
-import { isDev } from "../main/general";
-import { logErrorSentry } from "../main/log";
+import log, { logErrorSentry } from "../main/log";
+import { execAsync, isDev } from "../main/util";
 import { Model } from "../types/ipc";
 import Tokenizer from "../utils/clip-bpe-ts/mod";
 import { getPlatform } from "../utils/common/platform";
 import { generateTempFilePath } from "../utils/temp";
 import { deleteTempFile } from "./ffmpeg";
-const shellescape = require("any-shell-escape");
-const execAsync = util.promisify(require("child_process").exec);
 const jpeg = require("jpeg-js");
 
 const CLIP_MODEL_PATH_PLACEHOLDER = "CLIP_MODEL";
@@ -100,8 +96,7 @@ export async function getClipImageModelPath(type: "ggml" | "onnx") {
                 const localFileSize = (await fs.stat(modelSavePath)).size;
                 if (localFileSize !== IMAGE_MODEL_SIZE_IN_BYTES[type]) {
                     log.info(
-                        "clip image model size mismatch, downloading again got:",
-                        localFileSize,
+                        `clip image model size mismatch, downloading again got: ${localFileSize}`,
                     );
                     imageModelDownloadInProgress = downloadModel(
                         modelSavePath,
@@ -139,8 +134,7 @@ export async function getClipTextModelPath(type: "ggml" | "onnx") {
             const localFileSize = (await fs.stat(modelSavePath)).size;
             if (localFileSize !== TEXT_MODEL_SIZE_IN_BYTES[type]) {
                 log.info(
-                    "clip text model size mismatch, downloading again got:",
-                    localFileSize,
+                    `clip text model size mismatch, downloading again got: ${localFileSize}`,
                 );
                 textModelDownloadInProgress = true;
                 downloadModel(modelSavePath, TEXT_MODEL_DOWNLOAD_URL[type])
@@ -278,11 +272,7 @@ export async function computeGGMLImageEmbedding(
             }
         });
 
-        const escapedCmd = shellescape(cmd);
-        log.info("running clip command", escapedCmd);
-        const startTime = Date.now();
-        const { stdout } = await execAsync(escapedCmd);
-        log.info("clip command execution time ", Date.now() - startTime);
+        const { stdout } = await execAsync(cmd);
         // parse stdout and return embedding
         // get the last line of stdout
         const lines = stdout.split("\n");
@@ -291,7 +281,7 @@ export async function computeGGMLImageEmbedding(
         const embeddingArray = new Float32Array(embedding);
         return embeddingArray;
     } catch (err) {
-        logErrorSentry(err, "Error in computeGGMLImageEmbedding");
+        log.error("Failed to compute GGML image embedding", err);
         throw err;
     }
 }
@@ -316,7 +306,7 @@ export async function computeONNXImageEmbedding(
         const imageEmbedding = results["output"].data; // Float32Array
         return normalizeEmbedding(imageEmbedding);
     } catch (err) {
-        logErrorSentry(err, "Error in computeONNXImageEmbedding");
+        log.error("Failed to compute ONNX image embedding", err);
         throw err;
     }
 }
@@ -367,11 +357,7 @@ export async function computeGGMLTextEmbedding(
             }
         });
 
-        const escapedCmd = shellescape(cmd);
-        log.info("running clip command", escapedCmd);
-        const startTime = Date.now();
-        const { stdout } = await execAsync(escapedCmd);
-        log.info("clip command execution time ", Date.now() - startTime);
+        const { stdout } = await execAsync(cmd);
         // parse stdout and return embedding
         // get the last line of stdout
         const lines = stdout.split("\n");
@@ -383,7 +369,7 @@ export async function computeGGMLTextEmbedding(
         if (err.message === CustomErrors.MODEL_DOWNLOAD_PENDING) {
             log.info(CustomErrors.MODEL_DOWNLOAD_PENDING);
         } else {
-            logErrorSentry(err, "Error in computeGGMLTextEmbedding");
+            log.error("Failed to compute GGML text embedding", err);
         }
         throw err;
     }
