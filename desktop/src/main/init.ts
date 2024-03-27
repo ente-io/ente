@@ -20,21 +20,15 @@ const execAsync = util.promisify(require("child_process").exec);
  * This window will show the HTML served from {@link rendererURL}.
  */
 export const createWindow = async () => {
-    const appImgPath = isDev
-        ? "../build/window-icon.png"
-        : path.join(process.resourcesPath, "window-icon.png");
-    const appIcon = nativeImage.createFromPath(appImgPath);
-
     // Create the main window. This'll show our web content.
     const mainWindow = new BrowserWindow({
         webPreferences: {
             preload: path.join(app.getAppPath(), "preload.js"),
         },
-        icon: appIcon,
         // The color to show in the window until the web content gets loaded.
         // See: https://www.electronjs.org/docs/latest/api/browser-window#setting-the-backgroundcolor-property
         backgroundColor: "black",
-        // We'll show conditionally depending on `wasAutoLaunched` later
+        // We'll show it conditionally depending on `wasAutoLaunched` later.
         show: false,
     });
 
