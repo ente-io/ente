@@ -4,7 +4,8 @@
 ### Added
 * #### Share an Album to Multiple Contacts at Once
 
-    When adding viewers or collaborators to an album, you can now select multiple contacts and share to all of them at once!
+    Adding multiple viewers and collaborators just got easier!
+    You can now select multiple contacts and add all of them at once.
 
 * #### Bug Fixes and Performance Improvements
 
