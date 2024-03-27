@@ -50,7 +50,7 @@ export function logErrorSentry(
 
 const logError1 = (message: string, e?: unknown) => {
     if (!e) {
-        logError_(`Error: ${message}`);
+        logError_(message);
         return;
     }
 
@@ -64,12 +64,12 @@ const logError1 = (message: string, e?: unknown) => {
         es = String(e);
     }
 
-    logError_(`Error: ${message}: ${es}`);
+    logError_(`${message}: ${es}`);
 };
 
 const logError_ = (message: string) => {
-    log.error(`[main] ${message}`);
-    if (isDev) console.error(message);
+    log.error(`[main] [error] ${message}`);
+    if (isDev) console.error(`[error] ${message}`);
 };
 
 const logInfo = (message: string) => {
@@ -78,7 +78,7 @@ const logInfo = (message: string) => {
 };
 
 const logDebug = (message: () => string) => {
-    if (isDev) console.log(message());
+    if (isDev) console.log(`[debug] ${message()}`);
 };
 
 /**
