@@ -155,6 +155,7 @@ export function hasExceededStorageQuota(userDetails: UserDetails) {
 export function isSubscriptionPastDue(subscription: Subscription) {
     const currentTime = Date.now() * 1000;
     return (
+        !isSubscriptionCancelled(subscription) &&
         subscription.expiryTime < currentTime &&
         subscription.expiryTime > currentTime - THIRTY_DAYS_IN_MICROSECONDS
     );

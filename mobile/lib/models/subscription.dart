@@ -30,8 +30,13 @@ class Subscription {
     return expiryTime > DateTime.now().microsecondsSinceEpoch;
   }
 
+  bool isCancelled() {
+    return attributes?.isCancelled ?? false;
+  }
+
   bool isPastDue() {
-    return expiryTime < DateTime.now().microsecondsSinceEpoch &&
+    return !isCancelled() &&
+        expiryTime < DateTime.now().microsecondsSinceEpoch &&
         expiryTime >=
             DateTime.now()
                 .subtract(const Duration(days: 30))
