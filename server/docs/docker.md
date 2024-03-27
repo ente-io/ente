@@ -10,7 +10,7 @@ require you to clone the repository or build any images.
     mkdir ente && cd ente
     ```
 
-2. Copy the starter compose.yaml (and two of its support files) from the
+2. Copy the starter compose.yaml and two of its support files from the
    repository onto your directory. You can do it by hand, or use (e.g.) curl
 
     ```sh
@@ -68,3 +68,7 @@ For each of these, it'll use the latest published Docker image.
 
 Alternatively, if you only want to run Ente's server, you can directly pull and
 run the image we publish to **`ghcr.io/ente-io/server`**.
+
+```sh
+docker pull ghcr.io/ente-io/server:latest
+```
