@@ -21,7 +21,7 @@ class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'pt';
 
   static String m0(count) =>
-      "${Intl.plural(count, zero: 'Add collaborator', one: 'Add collaborator', other: 'Add collaborators')}";
+      "${Intl.plural(count, zero: 'Adicionar colaborador', one: 'Adicionar coloborador', other: 'Adicionar colaboradores')}";
 
   static String m2(count) =>
       "${Intl.plural(count, one: 'Adicionar item', other: 'Adicionar itens')}";
@@ -30,7 +30,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Seu complemento ${storageAmount} é válido até o dia ${endDate}";
 
   static String m1(count) =>
-      "${Intl.plural(count, zero: 'Add viewer', one: 'Add viewer', other: 'Add viewers')}";
+      "${Intl.plural(count, zero: 'Adicionar visualizador', one: 'Adicionar visualizador', other: 'Adicionar Visualizadores')}";
 
   static String m4(emailOrName) => "Adicionado por ${emailOrName}";
 
@@ -309,7 +309,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Aplicar código"),
         "appstoreSubscription":
             MessageLookupByLibrary.simpleMessage("Assinatura da AppStore"),
-        "archive": MessageLookupByLibrary.simpleMessage("Arquivo"),
+        "archive": MessageLookupByLibrary.simpleMessage("Arquivado"),
         "archiveAlbum": MessageLookupByLibrary.simpleMessage("Arquivar álbum"),
         "archiving": MessageLookupByLibrary.simpleMessage("Arquivando..."),
         "areYouSureThatYouWantToLeaveTheFamily":
@@ -520,7 +520,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "decryptingVideo":
             MessageLookupByLibrary.simpleMessage("Descriptografando vídeo..."),
         "deduplicateFiles":
-            MessageLookupByLibrary.simpleMessage("Arquivos Deduplicados"),
+            MessageLookupByLibrary.simpleMessage("Arquivos duplicados"),
         "delete": MessageLookupByLibrary.simpleMessage("Apagar"),
         "deleteAccount": MessageLookupByLibrary.simpleMessage("Excluir conta"),
         "deleteAccountFeedbackPrompt": MessageLookupByLibrary.simpleMessage(
@@ -766,7 +766,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Não rastreamos instalações do aplicativo. Seria útil se você nos contasse onde nos encontrou!"),
         "hearUsWhereTitle": MessageLookupByLibrary.simpleMessage(
             "Como você ouviu sobre o Ente? (opcional)"),
-        "hidden": MessageLookupByLibrary.simpleMessage("Escondido"),
+        "hidden": MessageLookupByLibrary.simpleMessage("Oculto"),
         "hide": MessageLookupByLibrary.simpleMessage("Ocultar"),
         "hiding": MessageLookupByLibrary.simpleMessage("Ocultando..."),
         "hostedAtOsmFrance":
@@ -893,7 +893,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Isso enviará através dos logs para nos ajudar a depurar o seu problema. Por favor, note que nomes de arquivos serão incluídos para ajudar a rastrear problemas com arquivos específicos."),
         "longPressAnEmailToVerifyEndToEndEncryption":
             MessageLookupByLibrary.simpleMessage(
-                "Long press an email to verify end to end encryption."),
+                "Pressione e segure um e-mail para verificar a criptografia de ponta a ponta."),
         "longpressOnAnItemToViewInFullscreen":
             MessageLookupByLibrary.simpleMessage(
                 "Pressione e segure em um item para exibir em tela cheia"),
@@ -1383,7 +1383,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "successfullyUnhid":
             MessageLookupByLibrary.simpleMessage("Desocultado com sucesso"),
         "suggestFeatures":
-            MessageLookupByLibrary.simpleMessage("Sugerir funcionalidades"),
+            MessageLookupByLibrary.simpleMessage("Sugerir recurso"),
         "support": MessageLookupByLibrary.simpleMessage("Suporte"),
         "syncProgress": m60,
         "syncStopped":
