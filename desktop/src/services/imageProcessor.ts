@@ -1,21 +1,14 @@
-import { exec } from "child_process";
-import log from "electron-log";
 import { existsSync } from "fs";
 import fs from "node:fs/promises";
 import path from "path";
-import util from "util";
 import { CustomErrors } from "../constants/errors";
 import { writeStream } from "../main/fs";
 import { logError, logErrorSentry } from "../main/log";
-import { isDev } from "../main/util";
+import { execAsync, isDev } from "../main/util";
 import { ElectronFile } from "../types/ipc";
 import { isPlatform } from "../utils/common/platform";
 import { generateTempFilePath } from "../utils/temp";
 import { deleteTempFile } from "./ffmpeg";
-
-const shellescape = require("any-shell-escape");
-
-const asyncExec = util.promisify(exec);
 
 const IMAGE_MAGICK_PLACEHOLDER = "IMAGE_MAGICK";
 const MAX_DIMENSION_PLACEHOLDER = "MAX_DIMENSION";
@@ -104,7 +97,9 @@ async function convertToJPEG_(
 
         await fs.writeFile(tempInputFilePath, fileData);
 
-        await runConvertCommand(tempInputFilePath, tempOutputFilePath);
+        await execAsync(
+            constructConvertCommand(tempInputFilePath, tempOutputFilePath),
+        );
 
         return new Uint8Array(await fs.readFile(tempOutputFilePath));
     } catch (e) {
@@ -122,19 +117,6 @@ async function convertToJPEG_(
             logErrorSentry(e, "failed to remove tempOutputFile");
         }
     }
-}
-
-async function runConvertCommand(
-    tempInputFilePath: string,
-    tempOutputFilePath: string,
-) {
-    const convertCmd = constructConvertCommand(
-        tempInputFilePath,
-        tempOutputFilePath,
-    );
-    const escapedCmd = shellescape(convertCmd);
-    log.info("running convert command: " + escapedCmd);
-    await asyncExec(escapedCmd);
 }
 
 function constructConvertCommand(
@@ -222,13 +204,14 @@ async function generateImageThumbnail_(
         tempOutputFilePath = await generateTempFilePath("thumb.jpeg");
         let thumbnail: Uint8Array;
         do {
-            await runThumbnailGenerationCommand(
-                inputFilePath,
-                tempOutputFilePath,
-                width,
-                quality,
+            await execAsync(
+                constructThumbnailGenerationCommand(
+                    inputFilePath,
+                    tempOutputFilePath,
+                    width,
+                    quality,
+                ),
             );
-
             thumbnail = new Uint8Array(await fs.readFile(tempOutputFilePath));
             quality -= 10;
         } while (thumbnail.length > maxSize && quality > MIN_QUALITY);
@@ -245,23 +228,6 @@ async function generateImageThumbnail_(
     }
 }
 
-async function runThumbnailGenerationCommand(
-    inputFilePath: string,
-    tempOutputFilePath: string,
-    maxDimension: number,
-    quality: number,
-) {
-    const thumbnailGenerationCmd: string[] =
-        constructThumbnailGenerationCommand(
-            inputFilePath,
-            tempOutputFilePath,
-            maxDimension,
-            quality,
-        );
-    const escapedCmd = shellescape(thumbnailGenerationCmd);
-    log.info("running thumbnail generation command: " + escapedCmd);
-    await asyncExec(escapedCmd);
-}
 function constructThumbnailGenerationCommand(
     inputFilePath: string,
     tempOutputFilePath: string,

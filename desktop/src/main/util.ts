@@ -4,6 +4,7 @@ import { app } from "electron/main";
 import { exec } from "node:child_process";
 import path from "node:path";
 import { promisify } from "node:util";
+import log from "./log";
 
 /** `true` if the app is running in development mode. */
 export const isDev = !app.isPackaged;
@@ -22,7 +23,17 @@ export const isDev = !app.isPackaged;
  * this might not be the best option and it might be better to use the
  * underlying functions.
  */
-export const execAsync = (command: string) => execAsync_(shellescape(command));
+export const execAsync = (command: string | string[]) => {
+    const escapedCommand = shellescape(command);
+    const startTime = Date.now();
+    log.debug(() => `Running shell command: ${escapedCommand}`);
+    const result = execAsync_(escapedCommand);
+    log.debug(
+        () =>
+            `Completed in ${Math.round(Date.now() - startTime)} ms (${escapedCommand})`,
+    );
+    return result;
+};
 
 const execAsync_ = promisify(exec);
 
