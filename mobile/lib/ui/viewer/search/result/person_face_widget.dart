@@ -1,4 +1,5 @@
 import "dart:developer";
+import "dart:io";
 import "dart:typed_data";
 
 import 'package:flutter/widgets.dart';
@@ -7,6 +8,7 @@ import "package:photos/face/db.dart";
 import "package:photos/face/model/face.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
+import "package:photos/ui/viewer/people/cropped_face_image_view.dart";
 import "package:photos/utils/face/face_box_crop.dart";
 import "package:photos/utils/thumbnail_util.dart";
 
@@ -24,29 +26,61 @@ class PersonFaceWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<Uint8List?>(
-      future: getFaceCrop(),
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          final ImageProvider imageProvider = MemoryImage(snapshot.data!);
-          return Stack(
-            fit: StackFit.expand,
-            children: [
-              Image(
-                image: imageProvider,
-                fit: BoxFit.cover,
-              ),
-            ],
-          );
-        } else {
-          if (snapshot.hasError) {
-            log('Error getting cover face for person: ${snapshot.error}');
+    if (Platform.isIOS) {
+      return FutureBuilder<Uint8List?>(
+        future: getFaceCrop(),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            final ImageProvider imageProvider = MemoryImage(snapshot.data!);
+            return Stack(
+              fit: StackFit.expand,
+              children: [
+                Image(
+                  image: imageProvider,
+                  fit: BoxFit.cover,
+                ),
+              ],
+            );
+          } else {
+            if (snapshot.hasError) {
+              log('Error getting cover face for person: ${snapshot.error}');
+            }
+            return ThumbnailWidget(
+              file,
+            );
           }
-          return ThumbnailWidget(
-            file,
-          );
-        }
-      },
+        },
+      );
+    } else {
+      return FutureBuilder<Face?>(
+        future: getFace(),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            final Face face = snapshot.data!;
+            return Stack(
+              fit: StackFit.expand,
+              children: [
+                CroppedFaceImageView(enteFile: file, face: face),
+              ],
+            );
+          } else {
+            if (snapshot.hasError) {
+              log('Error getting cover face for person: ${snapshot.error}');
+            }
+            return ThumbnailWidget(
+              file,
+            );
+          }
+        },
+      );
+    }
+  }
+
+  Future<Face?> getFace() async {
+    return await FaceMLDataDB.instance.getCoverFaceForPerson(
+      recentFileID: file.uploadedFileID!,
+      personID: personId,
+      clusterID: clusterID,
     );
   }
 
