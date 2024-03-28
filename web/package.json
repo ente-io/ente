@@ -23,7 +23,7 @@
         "dev:albums": "yarn workspace photos next dev -p 3002",
         "dev:auth": "yarn workspace auth next dev",
         "dev:cast": "yarn workspace cast next dev",
-        "dev:payments": "yarn workspace photos next dev -p 3004",
+        "dev:payments": "yarn workspace payments next dev -p 3001",
         "dev:photos": "yarn workspace photos next dev",
         "lint": "yarn prettier --check . && yarn workspaces run eslint .",
         "lint-fix": "yarn prettier --write . && yarn workspaces run eslint --fix ."
