@@ -24,7 +24,7 @@ Future<void> showEncryptedImportInstruction(BuildContext context) async {
   final l10n = context.l10n;
   final result = await showDialogWidget(
     context: context,
-    title: l10n.importFromApp("ente Auth"),
+    title: l10n.importFromApp("Ente Auth"),
     body: l10n.importEnteEncGuide,
     buttons: [
       ButtonWidget(

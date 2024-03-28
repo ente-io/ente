@@ -180,7 +180,7 @@ class _HomePageState extends State<HomePage> {
         resizeToAvoidBottomInset: false,
         appBar: AppBar(
           title: !_showSearchBox
-              ? const Text('ente Auth')
+              ? const Text('Ente Auth')
               : TextField(
                   autofocus: _searchText.isEmpty,
                   controller: _textController,
