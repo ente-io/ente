@@ -27,6 +27,7 @@ dependencies:
   battery_info: ^1.1.1
   bip39: ^1.0.6
   cached_network_image: ^3.0.0
+  cast: ^2.0.0
   chewie:
     git:
       url: https://github.com/ente-io/chewie.git
@@ -175,6 +176,7 @@ dependencies:
   widgets_to_image: ^0.0.2
 
 dependency_overrides:
+  connectivity_plus: ^4.0.0
   # current fork of tfite_flutter_helper depends on ffi: ^1.x.x
   # but we need ffi: ^2.0.1 for newer packages. The original tfite_flutter_helper
   #
