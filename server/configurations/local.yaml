@@ -161,7 +161,9 @@ jwt:
 #
 # Configure credentials here for sending mails from museum (e.g. OTP emails).
 #
-# One of smtp or transmail should be configured for a production instance.
+# The smtp credentials will be used if the host is specified. Otherwise it will
+# try to use the transmail credentials. Ideally, one of smtp or transmail should
+# be configured for a production instance.
 smtp:
     isEnabled: false
     host:
