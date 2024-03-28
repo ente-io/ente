@@ -173,6 +173,9 @@ jobs:
             - name: Zip Windows EXE and DLLs
               run: tar.exe -a -c -f artifacts/ente-${{ github.ref_name }}-windows.zip ente-${{ github.ref_name }}-windows
 
+            - name: Generate checksums
+              run: sha256sum artifacts/ente-* > artifacts/sha256sum-windows
+
             - name: Create a draft GitHub release
               uses: ncipollo/release-action@v1
               with:
@@ -266,6 +269,9 @@ jobs:
                   APPLE_ID: ${{ secrets.APPLE_ID }}
                   APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
                   APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+
+            - name: Generate checksums
+              run: sha256sum artifacts/ente-* > artifacts/sha256sum-macos
 
             - name: Create a draft GitHub release
               uses: ncipollo/release-action@v1
