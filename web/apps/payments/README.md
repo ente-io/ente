@@ -1,7 +1,7 @@
 Code that runs on `payments.ente.io`. It brokers between our services and
 Stripe's API for payments.
 
-## Development / New
+## Development
 
 There are three pieces that need to be connected to have a working local setup:
 
