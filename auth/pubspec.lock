@@ -858,21 +858,13 @@ packages:
     source: hosted
     version: "1.0.37"
   local_auth_darwin:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: local_auth_darwin
       sha256: "33381a15b0de2279523eca694089393bb146baebdce72a404555d03174ebc1e9"
       url: "https://pub.dev"
     source: hosted
     version: "1.2.2"
-  local_auth_ios:
-    dependency: "direct main"
-    description:
-      name: local_auth_ios
-      sha256: "6dde47dc852bc0c8343cb58e66a46efb16b62eddf389ce103d4dacb0c6c40c71"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.1.7"
   local_auth_platform_interface:
     dependency: transitive
     description:
