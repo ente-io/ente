@@ -271,7 +271,7 @@ jobs:
                   APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
 
             - name: Generate checksums
-              run: sha256sum artifacts/ente-* > artifacts/sha256sum-macos
+              run: shasum -a 256 artifacts/ente-* > artifacts/sha256sum-macos
 
             - name: Create a draft GitHub release
               uses: ncipollo/release-action@v1
