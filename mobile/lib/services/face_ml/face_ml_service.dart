@@ -118,7 +118,12 @@ class FaceMlService {
       if (LocalSettings.instance.isFaceIndexingEnabled == false) {
         return;
       }
-      unawaited(indexAllImages());
+      // [neeraj] intentional delay in starting indexing on diff sync, this gives time for the user
+      // to disable face-indexing in case it's causing crash. In the future, we
+      // should have a better way to handle this.
+      Future.delayed(const Duration(seconds: 10), () {
+        unawaited(indexAllImages());
+      });
     });
   }
 
