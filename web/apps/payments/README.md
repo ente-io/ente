@@ -70,7 +70,7 @@ stripe:
     us:
         key: stripe_dev_key
         webhook-secret: stripe_dev_webhook_secret
-    whitelisted-redirect-urls: ["http://localhost:3001/gallery", "http://192.168.1.2:3001/frameRedirect"]
+    whitelisted-redirect-urls: ["http://localhost:3000/gallery", "http://192.168.1.2:3001/frameRedirect"]
     path:
         success: ?status=success&session_id={CHECKOUT_SESSION_ID}
         cancel: ?status=fail&reason=canceled
