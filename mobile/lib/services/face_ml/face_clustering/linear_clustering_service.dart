@@ -349,21 +349,7 @@ class FaceLinearClustering {
     int moreThan50Count = 0;
     int moreThan100Count = 0;
 
-    // for (int i = 0; i < clusterSizes.length; i++) {
-    //   if (clusterSizes[i] > 100) {
-    //     moreThan100Count++;
-    //   } else if (clusterSizes[i] > 50) {
-    //     moreThan50Count++;
-    //   } else if (clusterSizes[i] > 20) {
-    //     moreThan20Count++;
-    //   } else if (clusterSizes[i] > 10) {
-    //     moreThan10Count++;
-    //   } else if (clusterSizes[i] > 5) {
-    //     moreThan5Count++;
-    //   } else if (clusterSizes[i] == 1) {
-    //     oneClusterCount++;
-    //   }
-    // }
+ 
     for (int i = 0; i < clusterSizes.length; i++) {
       if (clusterSizes[i] > 100) {
         moreThan100Count++;
