@@ -5,6 +5,7 @@ import 'package:photos/ente_theme_data.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/sessions.dart';
 import 'package:photos/services/user_service.dart';
+import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/common/loading_widget.dart';
 import "package:photos/utils/date_time_util.dart";
 import 'package:photos/utils/dialog_util.dart';
@@ -106,7 +107,9 @@ class _SessionsPageState extends State<SessionsPage> {
             ),
           ),
         ),
-        const Divider(),
+        Divider(
+          color: getEnteColorScheme(context).strokeFaint,
+        ),
       ],
     );
   }

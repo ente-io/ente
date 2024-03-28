@@ -375,7 +375,10 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                     textInputAction: TextInputAction.next,
                   ),
                 ),
-                const Divider(thickness: 1),
+                Divider(
+                  thickness: 1,
+                  color: getEnteColorScheme(context).strokeFaint,
+                ),
                 const SizedBox(height: 12),
                 _getAgreement(),
                 const SizedBox(height: 40),

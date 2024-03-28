@@ -8,6 +8,7 @@ import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/models/api/user/srp.dart";
 import 'package:photos/services/user_service.dart';
+import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/account/login_pwd_verification_page.dart";
 import 'package:photos/ui/common/dynamic_fab.dart';
 import 'package:photos/ui/common/web_page.dart';
@@ -159,10 +160,11 @@ class _LoginPageState extends State<LoginPage> {
                     autofocus: true,
                   ),
                 ),
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 18),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 18),
                   child: Divider(
                     thickness: 1,
+                    color: getEnteColorScheme(context).strokeFaint,
                   ),
                 ),
                 Padding(
