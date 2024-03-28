@@ -1,4 +1,12 @@
-import axios, { AxiosRequestConfig } from 'axios';
+// TODO: Audit
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/prefer-promise-reject-errors */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/consistent-indexed-object-style */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+import axios, { AxiosRequestConfig } from "axios";
 
 interface IHTTPHeaders {
     [headerKey: string]: any;
@@ -29,7 +37,7 @@ class HTTPService {
      * header object to be append to all api calls.
      */
     private headers: IHTTPHeaders = {
-        'content-type': 'application/json',
+        "content-type": "application/json",
     };
 
     /**
@@ -77,7 +85,9 @@ class HTTPService {
             ...config.headers,
         };
         if (customConfig?.cancel) {
-            config.cancelToken=new axios.CancelToken((c)=> (customConfig.cancel.exec=c));
+            config.cancelToken = new axios.CancelToken(
+                (c) => (customConfig.cancel.exec = c),
+            );
         }
         return await axios({ ...config, ...customConfig });
     }
@@ -94,7 +104,7 @@ class HTTPService {
         return this.request(
             {
                 headers,
-                method: 'GET',
+                method: "GET",
                 params,
                 url,
             },
@@ -116,7 +126,7 @@ class HTTPService {
             {
                 data,
                 headers,
-                method: 'POST',
+                method: "POST",
                 params,
                 url,
             },
@@ -138,7 +148,7 @@ class HTTPService {
             {
                 data,
                 headers,
-                method: 'PUT',
+                method: "PUT",
                 params,
                 url,
             },
@@ -160,7 +170,7 @@ class HTTPService {
             {
                 data,
                 headers,
-                method: 'DELETE',
+                method: "DELETE",
                 params,
                 url,
             },

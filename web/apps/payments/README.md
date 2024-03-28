@@ -1,17 +1,7 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with
-[`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+Code that runs on `payments.ente.io`. It brokers between our services and
+Stripe's API for payments.
 
-## Getting Started
-
-First, run the development server:
-
-```bash
-npm run dev
-# or
-yarn dev
-```
-
-## Notes
+## Development
 
 If you're running this to test out the payment flows end-to-end, please do a
 `yarn build`, that will place the output within the `out` folder.
@@ -23,12 +13,12 @@ Aside that, these are the necessary configuration changes.
 
 ### Local configuration
 
-Update the `.env.local` to point to the local museum instance, and to define the
-necessary Stripe keys that can be fetched from [Stripe's developer
+Create an `.env` in this directory to point to the local museum instance, and to
+define the necessary Stripe keys that can be fetched from [Stripe's developer
 dashboard](https://dashboard.stripe.com).
 
 Assuming that your local museum instance is running on `192.168.1.2:8080`, your
-`.env.local` should look as follows.
+`.env` should look as follows.
 
 ```
 NEXT_PUBLIC_ENTE_ENDPOINT = http://192.168.1.2:8080
@@ -42,11 +32,12 @@ NEXT_PUBLIC_STRIPE_US_PUBLISHABLE_KEY = stripe_publishable_key
 
 2. Define this secret within your `musuem.yaml`
 
-3. Update the `whitelisted-redirect-urls` so that it supports redirecting to this locally running project
+3. Update the `whitelisted-redirect-urls` so that it supports redirecting to
+   this locally running project.
 
 Assuming that your local payments app is running on `192.168.1.2:3001`, your
 `museum.yaml` should look as follows.
-   
+
 ```yaml
 stripe:
     us:

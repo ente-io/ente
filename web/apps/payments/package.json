@@ -1,31 +1,11 @@
 {
-  "name": "payments",
-  "version": "0.1.0",
-  "private": true,
-  "scripts": {
-    "dev": "next dev -p 3001",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
-  },
-  "dependencies": {
-    "@sentry/nextjs": "^7.54.0",
-    "@stripe/stripe-js": "^1.17.0",
-    "axios": "^0.21.1",
-    "bootstrap": "4.6.0",
-    "next": "^14.1.4",
-    "react": "^18.2.0",
-    "react-bootstrap": "^1.6.1",
-    "react-dom": "^18.2.0",
-    "styled-components": "^5.3.0"
-  },
-  "devDependencies": {
-    "@types/node": "20.11.30",
-    "@types/react": "17.0.15",
-    "@types/styled-components": "^5.1.12",
-    "babel-plugin-styled-components": "^1.13.2",
-    "eslint": "^8.57.0",
-    "eslint-config-next": "^14.1.4",
-    "typescript": "^5.4.2"
-  }
+    "name": "payments",
+    "version": "0.0.0",
+    "private": true,
+    "dependencies": {
+        "@/next": "*",
+        "@stripe/stripe-js": "^1.17.0",
+        "axios": "^0.21.1",
+        "bootstrap": "4.6.0"
+    }
 }
