@@ -1,21 +1,22 @@
-import { Container } from 'components/Container';
-import EnteSpinner from 'components/EnteSpinner';
-import { ENTE_WEBSITE_URL } from 'constants/common';
-import React, { useEffect, useState } from 'react';
-import { parseAndHandleRequest } from 'services/billingService';
-import { CUSTOM_ERROR } from 'utils/error';
-import constants from 'utils/strings/constants';
+import { Container } from "components/Container";
+import EnteSpinner from "components/EnteSpinner";
+import { ENTE_WEBSITE_URL } from "constants/common";
+import * as React from "react";
+import { parseAndHandleRequest } from "services/billingService";
+import { CUSTOM_ERROR } from "utils/error";
+import constants from "utils/strings/constants";
 
 export default function Home() {
-    const [errorMessageView, setErrorMessageView] = useState(false);
-    const [loading, setLoading] = useState(false);
-    useEffect(() => {
+    const [errorMessageView, setErrorMessageView] = React.useState(false);
+    const [loading, setLoading] = React.useState(false);
+    React.useEffect(() => {
         async function main() {
             try {
                 setLoading(true);
                 await parseAndHandleRequest();
-            } catch (e: any) {
+            } catch (e: unknown) {
                 if (
+                    e instanceof Error &&
                     e.message === CUSTOM_ERROR.DIRECT_OPEN_WITH_NO_QUERY_PARAMS
                 ) {
                     window.location.href = ENTE_WEBSITE_URL;
@@ -24,6 +25,8 @@ export default function Home() {
                 }
             }
         }
+        // TODO: audit
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
         main();
     }, []);
 

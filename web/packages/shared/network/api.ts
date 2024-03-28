@@ -70,14 +70,6 @@ export const getAccountsURL = () => {
     return `https://accounts.ente.io`;
 };
 
-export const getPaymentsURL = () => {
-    const paymentsURL = process.env.NEXT_PUBLIC_ENTE_PAYMENT_ENDPOINT;
-    if (paymentsURL) {
-        return paymentsURL;
-    }
-    return `https://payments.ente.io`;
-};
-
 export const getAlbumsURL = () => {
     const albumsURL = process.env.NEXT_PUBLIC_ENTE_ALBUMS_ENDPOINT;
     if (albumsURL) {
@@ -96,4 +88,15 @@ export const getFamilyPortalURL = () => {
         return familyURL;
     }
     return `https://family.ente.io`;
+};
+
+/**
+ * Return the URL for the host that handles payment related functionality.
+ */
+export const getPaymentsURL = () => {
+    const paymentsURL = process.env.NEXT_PUBLIC_ENTE_PAYMENTS_ENDPOINT;
+    if (paymentsURL) {
+        return paymentsURL;
+    }
+    return `https://payments.ente.io`;
 };
