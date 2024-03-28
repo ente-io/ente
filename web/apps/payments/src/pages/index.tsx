@@ -1,6 +1,5 @@
 import { Container } from "components/Container";
 import EnteSpinner from "components/EnteSpinner";
-import { ENTE_WEBSITE_URL } from "constants/common";
 import * as React from "react";
 import { parseAndHandleRequest } from "services/billingService";
 import { CUSTOM_ERROR } from "utils/error";
@@ -19,7 +18,7 @@ export default function Home() {
                     e instanceof Error &&
                     e.message === CUSTOM_ERROR.DIRECT_OPEN_WITH_NO_QUERY_PARAMS
                 ) {
-                    window.location.href = ENTE_WEBSITE_URL;
+                    window.location.href = "https://ente.io";
                 } else {
                     setErrorMessageView(true);
                 }
