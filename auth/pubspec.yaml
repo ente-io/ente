@@ -93,7 +93,7 @@ dependencies:
   sqlite3_flutter_libs: ^0.5.19+1
   step_progress_indicator: ^1.0.2
   styled_text: ^8.1.0
-  system_tray: ^0.1.1
+  tray_manager: ^0.2.1
   tuple: ^2.0.0
   url_launcher: ^6.1.5
   uuid: ^4.2.2
@@ -122,7 +122,7 @@ flutter:
   # https://docs:flutter:dev/development/ui/assets-and-images:
   assets:
     - assets/
-    - assets/icon/
+    - assets/icons/
     - assets/simple-icons/icons/
     - assets/simple-icons/_data/
     - assets/custom-icons/icons/

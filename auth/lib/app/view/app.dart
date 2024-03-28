@@ -18,7 +18,7 @@ import 'package:ente_auth/ui/settings/app_update_dialog.dart';
 import 'package:flutter/foundation.dart';
 import "package:flutter/material.dart";
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:system_tray/system_tray.dart';
+import 'package:tray_manager/tray_manager.dart';
 import 'package:window_manager/window_manager.dart';
 
 class App extends StatefulWidget {
@@ -34,7 +34,7 @@ class App extends StatefulWidget {
   State<App> createState() => _AppState();
 }
 
-class _AppState extends State<App> with WindowListener {
+class _AppState extends State<App> with WindowListener, TrayListener {
   late StreamSubscription<SignedOutEvent> _signedOutEvent;
   late StreamSubscription<SignedInEvent> _signedInEvent;
   Locale? locale;
@@ -49,9 +49,15 @@ class _AppState extends State<App> with WindowListener {
     await windowManager.setPreventClose(true);
   }
 
+  Future<void> initTrayManager() async {
+    trayManager.addListener(this);
+  }
+
   @override
   void initState() {
     initWindowManager();
+    initTrayManager();
+
     _signedOutEvent = Bus.instance.on<SignedOutEvent>().listen((event) {
       if (mounted) {
         setState(() {});
@@ -85,7 +91,10 @@ class _AppState extends State<App> with WindowListener {
   @override
   void dispose() {
     super.dispose();
+
     windowManager.removeListener(this);
+    trayManager.removeListener(this);
+
     _signedOutEvent.cancel();
     _signedInEvent.cancel();
   }
@@ -147,12 +156,42 @@ class _AppState extends State<App> with WindowListener {
 
   @override
   void onWindowClose() async {
-    final AppWindow appWindow = AppWindow();
-    await appWindow.hide();
+    await windowManager.hide();
   }
 
   @override
   void onWindowResize() {
     WindowListenerService.instance.onWindowResize().ignore();
+  }
+
+  @override
+  void onTrayIconMouseDown() {
+    if (Platform.isWindows) {
+      windowManager.show();
+    } else {
+      trayManager.popUpContextMenu();
+    }
+  }
+
+  @override
+  void onTrayIconRightMouseDown() {
+    if (Platform.isWindows) {
+      trayManager.popUpContextMenu();
+    } else {
+      windowManager.show();
+    }
+  }
+
+  @override
+  void onTrayIconRightMouseUp() {}
+
+  @override
+  void onTrayMenuItemClick(MenuItem menuItem) {
+    if (menuItem.key == 'show_window') {
+      windowManager.show();
+    } else if (menuItem.key == 'exit_app') {
+      windowManager.setPreventClose(false);
+      windowManager.close();
+    }
   }
 }

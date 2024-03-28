@@ -16,7 +16,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   smart_auth
   sodium_libs
   sqlite3_flutter_libs
-  system_tray
+  tray_manager
   url_launcher_windows
   window_manager
 )
