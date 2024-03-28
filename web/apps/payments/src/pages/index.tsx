@@ -1,5 +1,5 @@
 import { Container } from "components/Container";
-import EnteSpinner from "components/EnteSpinner";
+import { EnteSpinner } from "components/EnteSpinner";
 import * as React from "react";
 import { parseAndHandleRequest } from "services/billingService";
 import { CUSTOM_ERROR } from "utils/error";
@@ -8,6 +8,7 @@ import constants from "utils/strings";
 export default function Home() {
     const [errorMessageView, setErrorMessageView] = React.useState(false);
     const [loading, setLoading] = React.useState(false);
+
     React.useEffect(() => {
         async function main() {
             try {
@@ -34,7 +35,7 @@ export default function Home() {
             {errorMessageView ? (
                 <div>{constants.SOMETHING_WENT_WRONG}</div>
             ) : (
-                loading && <EnteSpinner animation="border" />
+                loading && <EnteSpinner />
             )}
         </Container>
     );

@@ -1,5 +1,5 @@
 import { Container } from "components/Container";
-import EnteSpinner from "components/EnteSpinner";
+import { EnteSpinner } from "components/EnteSpinner";
 import * as React from "react";
 
 export default function DesktopRedirect() {
@@ -12,7 +12,7 @@ export default function DesktopRedirect() {
 
     return (
         <Container>
-            <EnteSpinner animation="border" />
+            <EnteSpinner />
         </Container>
     );
 }
