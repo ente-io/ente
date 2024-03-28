@@ -206,7 +206,7 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
         if (kDebugMode)
           MenuItemWidget(
             captionedTextWidget: const CaptionedTextWidget(
-              title: "Pull Embeddings From Local",
+              title: "Compute suggestions",
             ),
             pressedColor: getEnteColorScheme(context).fillFaint,
             trailingIcon: Icons.chevron_right_outlined,

@@ -79,7 +79,7 @@ class ClusterFeedbackService {
     final personClusters = await faceMlDb.getPersonClusterIDs(p.remoteID);
     dev.log(
       'existing clusters for ${p.attr.name} are $personClusters',
-      name: "ClusterFeedbackService",
+      name: "getSuggestionsUsingMedian",
     );
 
     // Get and update the cluster summary to get the avg (centroid) and count
@@ -353,6 +353,9 @@ class ClusterFeedbackService {
     Set<int> ignoredClusters,
   ) async {
     final faceMlDb = FaceMLDataDB.instance;
+    _logger.info(
+      'start getUpdateClusterAvg for ${allClusterIdsToCountMap.length} clusters',
+    );
 
     final Map<int, (Uint8List, int)> clusterToSummary =
         await faceMlDb.clusterSummaryAll();
@@ -389,6 +392,7 @@ class ClusterFeedbackService {
     if (updatesForClusterSummary.isNotEmpty) {
       await faceMlDb.clusterSummaryUpdate(updatesForClusterSummary);
     }
+    _logger.info('end getUpdateClusterAvg for ${clusterAvg.length} clusters');
 
     return clusterAvg;
   }
