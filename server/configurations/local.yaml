@@ -157,8 +157,24 @@ key:
 jwt:
     secret: i2DecQmfGreG6q1vBj5tCokhlN41gcfS2cjOs9Po-u8=
 
+# SMTP configuration (optional)
+#
+# Configure credentials here for sending mails from museum (e.g. OTP emails).
+#
+# The smtp credentials will be used if the host is specified. Otherwise it will
+# try to use the transmail credentials. Ideally, one of smtp or transmail should
+# be configured for a production instance.
+smtp:
+    host:
+    port:
+    username:
+    password:
+
 # Zoho Zeptomail config (optional)
-# Use case: Sending emails
+#
+# This is an alternative to the `smtp` configuration for sending emails. If this
+# is set (and SMTP credentials are not set), then museum will use the transmail
+# SDK for sending emails using Zoho Zeptomail.
 transmail:
     # Transmail token
     # Mail agent: dev

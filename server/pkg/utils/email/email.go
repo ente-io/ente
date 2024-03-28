@@ -10,6 +10,7 @@ import (
 	"encoding/json"
 	"html/template"
 	"net/http"
+	"net/smtp"
 	"strings"
 
 	"github.com/ente-io/museum/ente"
@@ -20,6 +21,78 @@ import (
 
 // Send sends an email
 func Send(toEmails []string, fromName string, fromEmail string, subject string, htmlBody string, inlineImages []map[string]interface{}) error {
+	smtpHost := viper.GetString("smtp.host")
+	if smtpHost != "" {
+		return sendViaSMTP(toEmails, fromName, fromEmail, subject, htmlBody, inlineImages)
+	} else {
+		return sendViaTransmail(toEmails, fromName, fromEmail, subject, htmlBody, inlineImages)
+	}
+}
+
+func sendViaSMTP(toEmails []string, fromName string, fromEmail string, subject string, htmlBody string, inlineImages []map[string]interface{}) error {
+	if len(toEmails) == 0 {
+		return ente.ErrBadRequest
+	}
+
+	smtpServer := viper.GetString("smtp.host")
+	smtpPort := viper.GetString("smtp.port")
+	smtpUsername := viper.GetString("smtp.username")
+	smtpPassword := viper.GetString("smtp.password")
+
+	var emailMessage string
+
+	// Construct 'emailAddresses' with comma-separated email addresses
+	var emailAddresses string
+	for i, email := range toEmails {
+		if i != 0 {
+			emailAddresses += ","
+		}
+		emailAddresses += email
+	}
+
+	header := "From: " + fromName + " <" + fromEmail + ">\n" +
+		"To: " + emailAddresses + "\n" +
+		"Subject: " + subject + "\n" +
+		"MIME-Version: 1.0\n" +
+		"Content-Type: multipart/related; boundary=boundary\n\n" +
+		"--boundary\n"
+	htmlContent := "Content-Type: text/html; charset=us-ascii\n\n" + htmlBody + "\n"
+
+	emailMessage = header + htmlContent
+
+	if inlineImages == nil {
+		emailMessage += "--boundary--"
+	} else {
+		for _, inlineImage := range inlineImages {
+
+			emailMessage += "--boundary\n"
+			var mimeType = inlineImage["mime_type"].(string)
+			var contentID = inlineImage["cid"].(string)
+			var imgBase64Str = inlineImage["content"].(string)
+
+			var image = "Content-Type: " + mimeType + "\n" +
+				"Content-Transfer-Encoding: base64\n" +
+				"Content-ID: <" + contentID + ">\n" +
+				"Content-Disposition: inline\n\n" + imgBase64Str + "\n"
+
+			emailMessage += image
+		}
+		emailMessage += "--boundary--"
+	}
+
+	// Send the email to each recipient
+	for _, toEmail := range toEmails {
+		auth := smtp.PlainAuth("", smtpUsername, smtpPassword, smtpServer)
+		err := smtp.SendMail(smtpServer+":"+smtpPort, auth, fromEmail, []string{toEmail}, []byte(emailMessage))
+		if err != nil {
+			return stacktrace.Propagate(err, "")
+		}
+	}
+
+	return nil
+}
+
+func sendViaTransmail(toEmails []string, fromName string, fromEmail string, subject string, htmlBody string, inlineImages []map[string]interface{}) error {
 	if len(toEmails) == 0 {
 		return ente.ErrBadRequest
 	}
@@ -69,6 +142,7 @@ func SendTemplatedEmail(to []string, fromName string, fromEmail string, subject 
 	if err != nil {
 		return stacktrace.Propagate(err, "")
 	}
+
 	return Send(to, fromName, fromEmail, subject, body, inlineImages)
 }
 
