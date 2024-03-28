@@ -15,6 +15,7 @@ import 'package:photos/utils/exif_util.dart';
 import 'package:photos/utils/file_util.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:share_plus/share_plus.dart';
+import "package:uuid/uuid.dart";
 
 final _logger = Logger("ShareUtil");
 // Set of possible image extensions
@@ -116,14 +117,13 @@ Future<List<EnteFile>> convertIncomingSharedMediaToFile(
       continue;
     }
     final enteFile = EnteFile();
+    final sharedLocalId = const Uuid().v4();
     // fileName: img_x.jpg
     enteFile.title = basename(media.path);
     var ioFile = File(media.path);
     try {
       ioFile = ioFile.renameSync(
-        Configuration.instance.getSharedMediaDirectory() +
-            "/" +
-            enteFile.title!,
+        Configuration.instance.getSharedMediaDirectory() + "/" + sharedLocalId,
       );
     } catch (e) {
       if (e is FileSystemException) {
@@ -135,7 +135,7 @@ Future<List<EnteFile>> convertIncomingSharedMediaToFile(
         final newIoFile = ioFile.copySync(
           Configuration.instance.getSharedMediaDirectory() +
               "/" +
-              enteFile.title!,
+              sharedLocalId,
         );
         if (media.path.contains("io.ente.photos")) {
           _logger.info("delete original file in path ${ioFile.path}");
@@ -146,7 +146,7 @@ Future<List<EnteFile>> convertIncomingSharedMediaToFile(
         rethrow;
       }
     }
-    enteFile.localID = sharedMediaIdentifier + enteFile.title!;
+    enteFile.localID = sharedMediaIdentifier + sharedLocalId;
     enteFile.collectionID = collectionID;
     enteFile.fileType =
         media.type == SharedMediaType.image ? FileType.image : FileType.video;
