@@ -60,7 +60,6 @@ dependencies:
   extended_image: ^8.1.1
   fade_indexed_stack: ^0.2.2
   fast_base58: ^0.2.1
-
   figma_squircle: ^0.5.3
   file_saver:
     # Use forked version till this PR is merged: https://github.com/incrediblezayed/file_saver/pull/87
@@ -177,10 +176,10 @@ dependencies:
 
 dependency_overrides:
   connectivity_plus: ^4.0.0
-  # current fork of tfite_flutter_helper depends on ffi: ^1.x.x
-  # but we need ffi: ^2.0.1 for newer packages. The original tfite_flutter_helper
-  #
-  ffi: ^2.1.0
+  
+  #Remove this after  upgrading to flutter v3.19x
+  #Build fails when resolving to latest version of ffi on flutter v3.16.x
+  ffi: 2.1.0
   video_player:
     git:
       url: https://github.com/ente-io/packages.git
