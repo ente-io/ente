@@ -1,4 +1,4 @@
-Code that runs on `payments.ente.io`, handling and web facing interaction with
+Code that runs on `payments.ente.io`. It brokers between our services and
 Stripe's API for payments.
 
 ## Development
@@ -32,7 +32,8 @@ NEXT_PUBLIC_STRIPE_US_PUBLISHABLE_KEY = stripe_publishable_key
 
 2. Define this secret within your `musuem.yaml`
 
-3. Update the `whitelisted-redirect-urls` so that it supports redirecting to this locally running project
+3. Update the `whitelisted-redirect-urls` so that it supports redirecting to
+   this locally running project.
 
 Assuming that your local payments app is running on `192.168.1.2:3001`, your
 `museum.yaml` should look as follows.
