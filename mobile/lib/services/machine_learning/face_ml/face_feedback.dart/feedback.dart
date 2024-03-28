@@ -1,5 +1,5 @@
 import "package:photos/models/ml/ml_versions.dart";
-import "package:photos/services/face_ml/face_feedback.dart/feedback_types.dart";
+import 'package:photos/services/machine_learning/face_ml/face_feedback.dart/feedback_types.dart';
 import "package:uuid/uuid.dart";
 
 abstract class Feedback {

@@ -6,12 +6,12 @@ import "package:photos/db/ml_data_db.dart";
 import "package:photos/models/file/file.dart";
 import 'package:photos/models/ml/ml_typedefs.dart';
 import "package:photos/models/ml/ml_versions.dart";
-import "package:photos/services/face_ml/blur_detection/blur_constants.dart";
-import "package:photos/services/face_ml/face_alignment/alignment_result.dart";
-import "package:photos/services/face_ml/face_clustering/cosine_distance.dart";
-import "package:photos/services/face_ml/face_detection/detection.dart";
-import "package:photos/services/face_ml/face_feedback.dart/cluster_feedback.dart";
-import "package:photos/services/face_ml/face_ml_methods.dart";
+import 'package:photos/services/machine_learning/face_ml/face_alignment/alignment_result.dart';
+import 'package:photos/services/machine_learning/face_ml/face_clustering/cosine_distance.dart';
+import 'package:photos/services/machine_learning/face_ml/face_detection/detection.dart';
+import 'package:photos/services/machine_learning/face_ml/face_feedback.dart/cluster_feedback.dart';
+import 'package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart';
+import 'package:photos/services/machine_learning/face_ml/face_ml_methods.dart';
 
 final _logger = Logger('ClusterResult_FaceMlResult');
 
@@ -37,7 +37,7 @@ class ClusterResult {
 
   String get thumbnailFaceId => _thumbnailFaceId;
 
-  int get thumbnailFileId => _getFileIdFromFaceId(_thumbnailFaceId);
+  int get thumbnailFileId => getFileIdFromFaceId(_thumbnailFaceId);
 
   /// Sets the thumbnail faceId to the given faceId.
   /// Throws an exception if the faceId is not in the list of faceIds.
@@ -89,7 +89,7 @@ class ClusterResult {
     int removedCount = 0;
     for (var i = 0; i < _fileIds.length; i++) {
       if (_fileIds[i] == fileId) {
-        assert(_getFileIdFromFaceId(_faceIds[i]) == fileId);
+        assert(getFileIdFromFaceId(_faceIds[i]) == fileId);
         _fileIds.removeAt(i);
         _faceIds.removeAt(i);
         debugPrint(
@@ -748,6 +748,6 @@ class FaceResultBuilder {
   }
 }
 
-int _getFileIdFromFaceId(String faceId) {
+int getFileIdFromFaceId(String faceId) {
   return int.parse(faceId.split("_")[0]);
 }

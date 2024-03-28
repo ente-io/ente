@@ -1,8 +1,8 @@
 import "package:logging/logging.dart";
 import "package:photos/db/ml_data_db.dart";
-import "package:photos/services/face_ml/face_detection/detection.dart";
-import "package:photos/services/face_ml/face_feedback.dart/cluster_feedback.dart";
-import "package:photos/services/face_ml/face_ml_result.dart";
+import 'package:photos/services/machine_learning/face_ml/face_detection/detection.dart';
+import 'package:photos/services/machine_learning/face_ml/face_feedback.dart/cluster_feedback.dart';
+import 'package:photos/services/machine_learning/face_ml/face_ml_result.dart';
 
 class FaceFeedbackService {
   final _logger = Logger("FaceFeedbackService");

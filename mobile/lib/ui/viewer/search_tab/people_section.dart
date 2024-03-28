@@ -170,7 +170,6 @@ class SearchExampleRow extends StatelessWidget {
         ),
       );
     });
-    scrollableExamples.add(SearchSectionCTAIcon(sectionType));
     return SizedBox(
       child: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
@@ -237,7 +236,9 @@ class SearchExample extends StatelessWidget {
                 child: searchResult.previewThumbnail() != null
                     ? Hero(
                         tag: heroTag,
-                        child: ClipOval(
+                        child: ClipRRect(
+                          borderRadius:
+                              const BorderRadius.all(Radius.elliptical(16, 12)),
                           child: searchResult.type() != ResultType.faces
                               ? ThumbnailWidget(
                                   searchResult.previewThumbnail()!,
@@ -246,7 +247,9 @@ class SearchExample extends StatelessWidget {
                               : FaceSearchResult(searchResult, heroTag),
                         ),
                       )
-                    : const ClipOval(
+                    : const ClipRRect(
+                        borderRadius:
+                            BorderRadius.all(Radius.elliptical(16, 12)),
                         child: NoThumbnailWidget(
                           addBorder: false,
                         ),

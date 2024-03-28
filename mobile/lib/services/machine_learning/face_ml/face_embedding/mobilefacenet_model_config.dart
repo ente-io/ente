@@ -1,5 +1,5 @@
-import "package:photos/services/face_ml/face_embedding/face_embedding_options.dart";
-import "package:photos/services/face_ml/model_file.dart";
+import 'package:photos/services/machine_learning/face_ml/face_embedding/face_embedding_options.dart';
+import 'package:photos/services/machine_learning/face_ml/model_file.dart';
 
 class MobileFaceNetModelConfig {
   final String modelPath;

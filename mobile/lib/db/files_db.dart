@@ -1304,6 +1304,23 @@ class FilesDB {
     return result;
   }
 
+  Future<Map<int,int>> getFileIDToCreationTime() async {
+    final db = await instance.database;
+    final rows = await db.rawQuery(
+      '''
+      SELECT $columnUploadedFileID, $columnCreationTime
+      FROM $filesTable
+      WHERE 
+      ($columnUploadedFileID IS NOT NULL AND $columnUploadedFileID IS NOT -1);
+    ''',
+    );
+    final result = <int, int>{};
+    for (final row in rows) {
+      result[row[columnUploadedFileID] as int] = row[columnCreationTime] as int;
+    }
+    return result;
+  }
+
   // getCollectionFileFirstOrLast returns the first or last uploaded file in
   // the collection based on the given collectionID and the order.
   Future<EnteFile?> getCollectionFileFirstOrLast(

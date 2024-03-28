@@ -123,7 +123,8 @@ class RemoteFileMLService {
   }
 
   Future<Map<int, FileMl>> decryptFileMLComputer(
-      Map<String, dynamic> args) async {
+    Map<String, dynamic> args,
+  ) async {
     final result = <int, FileMl>{};
     final inputs = args["inputs"] as List<EmbeddingsDecoderInput>;
     for (final input in inputs) {

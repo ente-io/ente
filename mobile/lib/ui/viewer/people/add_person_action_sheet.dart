@@ -10,7 +10,7 @@ import "package:photos/events/people_changed_event.dart";
 import "package:photos/face/db.dart";
 import "package:photos/face/model/person.dart";
 import "package:photos/generated/l10n.dart";
-import "package:photos/services/face_ml/feedback/cluster_feedback.dart";
+import 'package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart';
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/common/loading_widget.dart';

@@ -9,8 +9,8 @@ import 'package:flutter_isolate/flutter_isolate.dart';
 import "package:logging/logging.dart";
 import "package:photos/face/model/box.dart";
 import 'package:photos/models/ml/ml_typedefs.dart';
-import "package:photos/services/face_ml/face_alignment/alignment_result.dart";
-import "package:photos/services/face_ml/face_detection/detection.dart";
+import 'package:photos/services/machine_learning/face_ml/face_alignment/alignment_result.dart';
+import 'package:photos/services/machine_learning/face_ml/face_detection/detection.dart';
 import "package:photos/utils/image_ml_util.dart";
 import "package:synchronized/synchronized.dart";
 

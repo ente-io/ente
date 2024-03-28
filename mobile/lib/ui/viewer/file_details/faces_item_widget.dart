@@ -36,9 +36,18 @@ class FacesItemWidget extends StatelessWidget {
         ];
       }
 
-      final List<Face> faces = await FaceMLDataDB.instance
+      final List<Face>? faces = await FaceMLDataDB.instance
           .getFacesForGivenFileID(file.uploadedFileID!);
-      if (faces.isEmpty || faces.every((face) => face.score < 0.5)) {
+      if (faces == null) {
+        return [
+          const ChipButtonWidget(
+            "Image not analyzed",
+            noChips: true,
+          ),
+        ];
+      }
+      if (faces.isEmpty ||
+          faces.every((face) => face.score < 0.75 || face.isBlurry)) {
         return [
           const ChipButtonWidget(
             "No faces found",
@@ -49,6 +58,9 @@ class FacesItemWidget extends StatelessWidget {
 
       // Sort the faces by score in descending order, so that the highest scoring face is first.
       faces.sort((Face a, Face b) => b.score.compareTo(a.score));
+
+      // Remove faces with low scores and blurry faces
+      faces.removeWhere((face) => face.isHighQuality == false);
 
       // TODO: add deduplication of faces of same person
       final faceIdsToClusterIds = await FaceMLDataDB.instance

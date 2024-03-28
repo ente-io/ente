@@ -11,7 +11,7 @@ import "package:photos/face/db_model_mappers.dart";
 import "package:photos/face/model/face.dart";
 import "package:photos/face/model/person.dart";
 import "package:photos/models/file/file.dart";
-import "package:photos/services/face_ml/blur_detection/blur_constants.dart";
+import 'package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart';
 import 'package:sqflite/sqflite.dart';
 
 /// Stores all data for the ML-related features. The database can be accessed by `MlDataDB.instance.database`.
@@ -185,7 +185,7 @@ class FaceMLDataDB {
     final Map<int, int> result = {};
     final db = await instance.database;
     final List<Map<String, dynamic>> maps = await db.rawQuery(
-      'SELECT $fileIDColumn, COUNT(*) as count FROM $facesTable where $faceScore > 0.8 GROUP BY $fileIDColumn',
+      'SELECT $fileIDColumn, COUNT(*) as count FROM $facesTable where $faceScore > $kMinFaceDetectionScore GROUP BY $fileIDColumn',
     );
 
     for (final map in maps) {
@@ -228,7 +228,7 @@ class FaceMLDataDB {
       final clusterIDs =
           cluterRows.map((e) => e[cluserIDColumn] as int).toList();
       final List<Map<String, dynamic>> faceMaps = await db.rawQuery(
-        'SELECT * FROM $facesTable where $faceClusterId IN (${clusterIDs.join(",")}) AND $fileIDColumn in (${fileId.join(",")}) AND $faceScore > 0.8 ORDER BY $faceScore DESC',
+        'SELECT * FROM $facesTable where $faceClusterId IN (${clusterIDs.join(",")}) AND $fileIDColumn in (${fileId.join(",")}) AND $faceScore > $kMinHighQualityFaceScore ORDER BY $faceScore DESC',
       );
       if (faceMaps.isNotEmpty) {
         if (avatarFileId != null) {
@@ -257,7 +257,7 @@ class FaceMLDataDB {
     return null;
   }
 
-  Future<List<Face>> getFacesForGivenFileID(int fileUploadID) async {
+  Future<List<Face>?> getFacesForGivenFileID(int fileUploadID) async {
     final db = await instance.database;
     final List<Map<String, dynamic>> maps = await db.query(
       facesTable,
@@ -277,6 +277,9 @@ class FaceMLDataDB {
       where: '$fileIDColumn = ?',
       whereArgs: [fileUploadID],
     );
+    if (maps.isEmpty) {
+      return null;
+    }
     return maps.map((e) => mapRowToFace(e)).toList();
   }
 
@@ -347,16 +350,16 @@ class FaceMLDataDB {
   ///
   /// Only selects faces with score greater than [minScore] and blur score greater than [minClarity]
   Future<Map<String, (int?, Uint8List)>> getFaceEmbeddingMap({
-    double minScore = 0.78,
+    double minScore = kMinHighQualityFaceScore,
     int minClarity = kLaplacianThreshold,
-    int maxRows = 10000,
+    int maxFaces = 20000,
+    int offset = 0,
+    int batchSize = 10000,
   }) async {
-    _logger.info('reading as float');
+    _logger.info(
+      'reading as float offset: $offset, maxFaces: $maxFaces, batchSize: $batchSize',
+    );
     final db = await instance.database;
-
-    // Define the batch size
-    const batchSize = 10000;
-    int offset = 0;
 
     final Map<String, (int?, Uint8List)> result = {};
     while (true) {
@@ -379,7 +382,7 @@ class FaceMLDataDB {
         result[faceID] =
             (map[faceClusterId] as int?, map[faceEmbeddingBlob] as Uint8List);
       }
-      if (result.length >= maxRows) {
+      if (result.length >= maxFaces) {
         break;
       }
       offset += batchSize;
@@ -404,7 +407,7 @@ class FaceMLDataDB {
         facesTable,
         columns: [faceIDColumn, faceEmbeddingBlob],
         where:
-            '$faceScore > 0.8 AND $faceBlur > $kLaplacianThreshold AND $fileIDColumn IN (${fileIDs.join(",")})',
+            '$faceScore > $kMinHighQualityFaceScore AND $faceBlur > $kLaplacianThreshold AND $fileIDColumn IN (${fileIDs.join(",")})',
         limit: batchSize,
         offset: offset,
         orderBy: '$faceIDColumn DESC',
@@ -423,6 +426,16 @@ class FaceMLDataDB {
       offset += batchSize;
     }
     return result;
+  }
+
+  Future<int> getTotalFaceCount({
+    double minFaceScore = kMinHighQualityFaceScore,
+  }) async {
+    final db = await instance.database;
+    final List<Map<String, dynamic>> maps = await db.rawQuery(
+      'SELECT COUNT(*) as count FROM $facesTable WHERE $faceScore > $minFaceScore AND $faceBlur > $kLaplacianThreshold',
+    );
+    return maps.first['count'] as int;
   }
 
   Future<void> resetClusterIDs() async {

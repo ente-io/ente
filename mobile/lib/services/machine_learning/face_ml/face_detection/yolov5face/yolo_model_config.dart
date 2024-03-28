@@ -1,5 +1,5 @@
-import "package:photos/services/face_ml/face_detection/yolov5face/yolo_face_detection_options.dart";
-import "package:photos/services/face_ml/model_file.dart";
+import 'package:photos/services/machine_learning/face_ml/face_detection/yolov5face/yolo_face_detection_options.dart';
+import 'package:photos/services/machine_learning/face_ml/model_file.dart';
 
 class YOLOModelConfig {
   final String modelPath;

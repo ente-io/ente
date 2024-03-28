@@ -11,7 +11,7 @@ import "package:photos/face/db.dart";
 import "package:photos/face/model/person.dart";
 import "package:photos/generated/protos/ente/common/vector.pb.dart";
 import "package:photos/models/file/file.dart";
-import "package:photos/services/face_ml/face_clustering/cosine_distance.dart";
+import 'package:photos/services/machine_learning/face_ml/face_clustering/cosine_distance.dart';
 import "package:photos/services/search_service.dart";
 
 class ClusterFeedbackService {

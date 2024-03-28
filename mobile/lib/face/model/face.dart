@@ -1,5 +1,5 @@
 import "package:photos/face/model/detection.dart";
-import "package:photos/services/face_ml/blur_detection/blur_constants.dart";
+import 'package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart';
 
 class Face {
   final int fileID;
@@ -11,6 +11,10 @@ class Face {
 
   bool get isBlurry => blur < kLaplacianThreshold;
 
+  bool get hasHighScore => score > kMinHighQualityFaceScore;
+
+  bool get isHighQuality => (!isBlurry) && hasHighScore;
+
   Face(
     this.faceID,
     this.fileID,
@@ -19,6 +23,17 @@ class Face {
     this.detection,
     this.blur,
   );
+
+  factory Face.empty(int fileID, {bool error = false}) {
+    return Face(
+      "$fileID-0",
+      fileID,
+      <double>[],
+      error ? -1.0 : 0.0,
+      Detection.empty(),
+      0.0,
+    );
+  }
 
   factory Face.fromJson(Map<String, dynamic> json) {
     return Face(

@@ -5,7 +5,7 @@ import 'dart:typed_data' show Float32List;
 import 'package:computer/computer.dart';
 import 'package:logging/logging.dart';
 import 'package:onnxruntime/onnxruntime.dart';
-import "package:photos/services/face_ml/face_detection/detection.dart";
+import 'package:photos/services/machine_learning/face_ml/face_detection/detection.dart';
 import "package:photos/services/remote_assets_service.dart";
 import "package:photos/utils/image_ml_isolate.dart";
 import "package:synchronized/synchronized.dart";
