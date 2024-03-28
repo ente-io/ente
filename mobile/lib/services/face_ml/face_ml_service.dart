@@ -16,6 +16,7 @@ import "package:photos/core/event_bus.dart";
 import "package:photos/db/ml_data_db.dart";
 import "package:photos/events/diff_sync_complete_event.dart";
 import "package:photos/extensions/list.dart";
+import "package:photos/extensions/stop_watch.dart";
 import "package:photos/face/db.dart";
 import "package:photos/face/model/box.dart";
 import "package:photos/face/model/detection.dart" as face_detection;
@@ -458,8 +459,11 @@ class FaceMlService {
           fileIds.add(f.uploadedFileID!);
         }
         try {
+          final EnteWatch? w = kDebugMode ? EnteWatch("face_em_fetch") : null;
+          w?.start();
           final res =
               await RemoteFileMLService.instance.getFilessEmbedding(fileIds);
+          w?.logAndReset('fetched ${res.mlData.length} embeddings');
           final List<Face> faces = [];
           final remoteFileIdToVersion = <int, int>{};
           for (FileMl fileMl in res.mlData.values) {
@@ -481,6 +485,7 @@ class FaceMlService {
             remoteFileIdToVersion[fileMl.fileID] = fileMl.faceEmbedding.version;
           }
           await FaceMLDataDB.instance.bulkInsertFaces(faces);
+          w?.logAndReset('stored embeddings');
           for (final entry in remoteFileIdToVersion.entries) {
             alreadyIndexedFiles[entry.key] = entry.value;
           }
@@ -1167,7 +1172,6 @@ class FaceMlService {
     if (!enteFile.isUploaded || enteFile.isOwner == false) {
       return true;
     }
-
     // Skip if the file is a video
     if (enteFile.fileType == FileType.video) {
       return true;
