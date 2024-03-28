@@ -76,6 +76,9 @@ stripe:
         cancel: ?status=fail&reason=canceled
 ```
 
+Make sure you have test plans available for museum to use, by placing them in
+(say) `server/data/billing/us-testing.json`.
+
 Finally, start museum, for example:
 
 ```
