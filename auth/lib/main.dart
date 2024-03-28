@@ -37,8 +37,9 @@ import 'package:window_manager/window_manager.dart';
 final _logger = Logger("main");
 
 Future<void> initSystemTray() async {
-  String path =
-      Platform.isWindows ? 'assets/icon-light.ico' : 'assets/icon-light.png';
+  String path = Platform.isWindows
+      ? 'assets/icon/auth-icon.ico'
+      : 'assets/icon/auth-icon.png';
 
   final AppWindow appWindow = AppWindow();
   final SystemTray systemTray = SystemTray();
@@ -52,7 +53,7 @@ Future<void> initSystemTray() async {
   // create context menu
   final show = MenuItem(label: 'Show', onClicked: () => appWindow.show());
   final hide = MenuItem(label: 'Hide', onClicked: () => appWindow.hide());
-  final exit = MenuItem(label: 'Exit', onClicked: () => appWindow.close());
+  final exit = MenuItem(label: 'Exit', onClicked: () => windowManager.close());
 
   // set context menu
   await systemTray.setContextMenu([show, hide, exit]);

@@ -122,6 +122,7 @@ flutter:
   # https://docs:flutter:dev/development/ui/assets-and-images:
   assets:
     - assets/
+    - assets/icon/
     - assets/simple-icons/icons/
     - assets/simple-icons/_data/
     - assets/custom-icons/icons/
@@ -141,10 +142,10 @@ flutter:
 
 flutter_icons:
   android: "launcher_icon"
-  adaptive_icon_foreground: "assets/icon-light-adaptive-fg.png"
+  adaptive_icon_foreground: "assets/generation-icons/icon-light-adaptive-fg.png"
   adaptive_icon_background: "#ffffff"
   ios: true
-  image_path: "assets/icon-light.png"
+  image_path: "assets/generation-icons/icon-light.png"
   remove_alpha_ios: true
 
 flutter_native_splash:
