@@ -34,7 +34,7 @@ NEXT_PUBLIC_STRIPE_US_PUBLISHABLE_KEY = stripe_publishable_key
 
 3. Update the `whitelisted-redirect-urls` so that it supports redirecting to this locally running project
 
-Assuming that your local payments app is running on `192.168.1.2:3004`, your
+Assuming that your local payments app is running on `192.168.1.2:3001`, your
 `museum.yaml` should look as follows.
 
 ```yaml
@@ -42,7 +42,7 @@ stripe:
     us:
         key: stripe_dev_key
         webhook-secret: stripe_dev_webhook_secret
-    whitelisted-redirect-urls: ["http://192.168.1.2:3004/frameRedirect"]
+    whitelisted-redirect-urls: ["http://192.168.1.2:3001/frameRedirect"]
     path:
         success: ?status=success&session_id={CHECKOUT_SESSION_ID}
         cancel: ?status=fail&reason=canceled

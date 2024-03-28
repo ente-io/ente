@@ -83,7 +83,7 @@ export const getAlbumsURL = () => {
  * family plans.
  */
 export const getFamilyPortalURL = () => {
-    const familyURL = process.env.NEXT_PUBLIC_ENTE_FAMILY_PORTAL_ENDPOINT;
+    const familyURL = process.env.NEXT_PUBLIC_ENTE_FAMILY_ENDPOINT;
     if (familyURL) {
         return familyURL;
     }
