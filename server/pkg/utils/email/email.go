@@ -19,6 +19,16 @@ import (
 	"github.com/spf13/viper"
 )
 
+// Send sends an email
+func Send(toEmails []string, fromName string, fromEmail string, subject string, htmlBody string, inlineImages []map[string]interface{}) error {
+	isSESEnabled := viper.GetBool("smtp.isEnabled")
+	if isSESEnabled {
+		return sendViaSMTP(toEmails, fromName, fromEmail, subject, htmlBody, inlineImages)
+	} else {
+		return sendViaTransmail(toEmails, fromName, fromEmail, subject, htmlBody, inlineImages)
+	}
+}
+
 func sendViaSMTP(toEmails []string, fromName string, fromEmail string, subject string, htmlBody string, inlineImages []map[string]interface{}) error {
 	if len(toEmails) == 0 {
 		return ente.ErrBadRequest
@@ -82,8 +92,7 @@ func sendViaSMTP(toEmails []string, fromName string, fromEmail string, subject s
 	return nil
 }
 
-// Send sends an email
-func Send(toEmails []string, fromName string, fromEmail string, subject string, htmlBody string, inlineImages []map[string]interface{}) error {
+func sendViaTransmail(toEmails []string, fromName string, fromEmail string, subject string, htmlBody string, inlineImages []map[string]interface{}) error {
 	if len(toEmails) == 0 {
 		return ente.ErrBadRequest
 	}
@@ -134,12 +143,7 @@ func SendTemplatedEmail(to []string, fromName string, fromEmail string, subject 
 		return stacktrace.Propagate(err, "")
 	}
 
-	isSESEnabled := viper.GetBool("smtp.isEnabled")
-	if isSESEnabled {
-		return sendViaSMTP(to, fromName, fromEmail, subject, body, inlineImages)
-	} else {
-		return Send(to, fromName, fromEmail, subject, body, inlineImages)
-	}
+	return Send(to, fromName, fromEmail, subject, body, inlineImages)
 }
 
 func GetMaskedEmail(email string) string {
