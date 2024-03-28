@@ -38,8 +38,8 @@ final _logger = Logger("main");
 
 Future<void> initSystemTray() async {
   String path = Platform.isWindows
-      ? 'assets/icon/auth-icon.ico'
-      : 'assets/icon/auth-icon.png';
+      ? 'assets/icons/auth-icon.ico'
+      : 'assets/icons/auth-icon.png';
 
   final AppWindow appWindow = AppWindow();
   final SystemTray systemTray = SystemTray();
