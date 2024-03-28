@@ -14,9 +14,11 @@ Compression=lzma
 SolidCompression=yes
 SetupIconFile={{SETUP_ICON_FILE}}
 WizardStyle=modern
-PrivilegesRequired={{PRIVILEGES_REQUIRED}}
+;PrivilegesRequired={{PRIVILEGES_REQUIRED}}
+PrivilegesRequiredOverridesAllowed=dialog
 ArchitecturesAllowed=x64
 ArchitecturesInstallIn64BitMode=x64
+UninstallDisplayIcon={app}\auth.exe
 
 [Languages]
 {% for locale in LOCALES %}
