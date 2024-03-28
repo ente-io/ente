@@ -486,7 +486,9 @@ export default function App(props: EnteAppProps) {
                             <EnteSpinner />
                         </Overlay>
                     )}
-                    <Component setLoading={setLoading} {...pageProps} />
+                    {isI18nReady && (
+                        <Component setLoading={setLoading} {...pageProps} />
+                    )}
                 </AppContext.Provider>
             </ThemeProvider>
         </CacheProvider>

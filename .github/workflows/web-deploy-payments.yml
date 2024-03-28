@@ -1,19 +1,9 @@
-name: "Preview (web)"
+name: "Deploy (payments)"
 
 on:
-    workflow_dispatch:
-        inputs:
-            app:
-                description: "App to build and deploy"
-                type: choice
-                required: true
-                default: "photos"
-                options:
-                    - "accounts"
-                    - "auth"
-                    - "cast"
-                    - "payments"
-                    - "photos"
+    push:
+        # Run workflow on pushes to the deploy/payments
+        branches: [deploy/payments]
 
 jobs:
     deploy:
@@ -39,15 +29,15 @@ jobs:
             - name: Install dependencies
               run: yarn install
 
-            - name: Build ${{ inputs.app }}
-              run: yarn build:${{ inputs.app }}
+            - name: Build payments
+              run: yarn build:payments
 
-            - name: Publish ${{ inputs.app }} to preview
+            - name: Publish payments
               uses: cloudflare/pages-action@1
               with:
                   accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
                   apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
                   projectName: ente
-                  branch: preview
-                  directory: web/apps/${{ inputs.app }}/out
+                  branch: deploy/payments
+                  directory: web/apps/payments/out
                   wranglerVersion: "3"

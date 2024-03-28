@@ -8,7 +8,7 @@
 
 import { loadStripe } from "@stripe/stripe-js";
 import { CUSTOM_ERROR } from "utils/error";
-import { logError } from "utils/sentry";
+import { logError } from "utils/log";
 import HTTPService from "./HTTPService";
 
 const getStripePublishableKey = (stripeAccount: StripeAccountCountry) => {
