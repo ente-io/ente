@@ -65,7 +65,10 @@ const handleRequest = async (request: Request, discordWebhookURL: string) => {
         // arrangement (we shouldn't be getting 429s forever), so just try to
         // see if we can extract a URL from something we recognize.
         let activityURL: string | undefined;
-        if (requestJSON["issue"]) {
+        if (requestJSON["comment"]) {
+            activityURL = requestJSON["comment"]["html_url"];
+        }
+        if (!activityURL && requestJSON["issue"]) {
             activityURL = requestJSON["issue"]["html_url"];
         }
         if (!activityURL && requestJSON["discussion"]) {
