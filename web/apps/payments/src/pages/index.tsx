@@ -3,7 +3,7 @@ import EnteSpinner from "components/EnteSpinner";
 import * as React from "react";
 import { parseAndHandleRequest } from "services/billingService";
 import { CUSTOM_ERROR } from "utils/error";
-import constants from "utils/strings/constants";
+import constants from "utils/strings";
 
 export default function Home() {
     const [errorMessageView, setErrorMessageView] = React.useState(false);
