@@ -31,42 +31,30 @@ import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:privacy_screen/privacy_screen.dart';
-import 'package:system_tray/system_tray.dart';
+import 'package:tray_manager/tray_manager.dart';
 import 'package:window_manager/window_manager.dart';
 
 final _logger = Logger("main");
 
 Future<void> initSystemTray() async {
-  String path =
-      Platform.isWindows ? 'assets/icon-light.ico' : 'assets/icon-light.png';
-
-  final AppWindow appWindow = AppWindow();
-  final SystemTray systemTray = SystemTray();
-
-  // We first init the systray menu
-  await systemTray.initSystemTray(
-    title: "",
-    iconPath: path,
+  String path = Platform.isWindows
+      ? 'assets/icons/auth-icon.ico'
+      : 'assets/icons/auth-icon.png';
+  await trayManager.setIcon(path);
+  Menu menu = Menu(
+    items: [
+      MenuItem(
+        key: 'show_window',
+        label: 'Show Window',
+      ),
+      MenuItem.separator(),
+      MenuItem(
+        key: 'exit_app',
+        label: 'Exit App',
+      ),
+    ],
   );
-
-  // create context menu
-  final show = MenuItem(label: 'Show', onClicked: () => appWindow.show());
-  final hide = MenuItem(label: 'Hide', onClicked: () => appWindow.hide());
-  final exit = MenuItem(label: 'Exit', onClicked: () => appWindow.close());
-
-  // set context menu
-  await systemTray.setContextMenu([show, hide, exit]);
-
-  const kSystemTrayEventClick = 'leftMouseDown';
-  const kSystemTrayEventRightClick = 'rightMouseDown';
-  // // handle system tray event
-  systemTray.registerSystemTrayEventHandler((eventName) {
-    if (eventName == kSystemTrayEventClick) {
-      Platform.isWindows ? appWindow.show() : systemTray.popUpContextMenu();
-    } else if (eventName == kSystemTrayEventRightClick) {
-      Platform.isWindows ? systemTray.popUpContextMenu() : appWindow.show();
-    }
-  });
+  await trayManager.setContextMenu(menu);
 }
 
 void main() async {
