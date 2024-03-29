@@ -1,7 +1,5 @@
-import 'dart:convert' show utf8;
 import 'dart:math' show sqrt, pow;
 import 'dart:ui' show Size;
-import 'package:crypto/crypto.dart' show sha256;
 
 abstract class Detection {
   final double score;
@@ -288,11 +286,10 @@ class FaceDetectionRelative extends Detection {
     // Convert the bounding box values to string and concatenate
     final String rawID = "${xMin}_${yMin}_${xMax}_$yMax";
 
-    // Hash the concatenated string using SHA256
-    final digest = sha256.convert(utf8.encode(rawID));
+    final faceID = fileID.toString() + '_' + rawID.toString();
 
     // Return the hexadecimal representation of the hash
-    return fileID.toString() + '_' + digest.toString();
+    return faceID;
   }
 
   /// This method is used to generate a faceID for a face detection that was manually added by the user.
