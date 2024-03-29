@@ -1,20 +1,8 @@
-import { CustomError } from "@ente/shared/error";
-import { addLocalLog, addLogLine } from "@ente/shared/logging";
-import { isPlaybackPossible } from "@ente/shared/media/video-playback";
 import { logError } from "@ente/shared/sentry";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import { User } from "@ente/shared/user/types";
-import { convertBytesToHumanReadable } from "@ente/shared/utils/size";
-import {
-    FILE_TYPE,
-    RAW_FORMATS,
-    SUPPORTED_RAW_FORMATS,
-    TYPE_HEIC,
-    TYPE_HEIF,
-} from "constants/file";
+import { FILE_TYPE, RAW_FORMATS } from "constants/file";
 import CastDownloadManager from "services/castDownloadManager";
-import * as ffmpegService from "services/ffmpeg/ffmpegService";
-import heicConversionService from "services/heicConversionService";
 import { decodeLivePhoto } from "services/livePhotoService";
 import { getFileType } from "services/typeDetectionService";
 import {
@@ -23,7 +11,6 @@ import {
     FileMagicMetadata,
     FilePublicMagicMetadata,
 } from "types/file";
-import { FileTypeInfo } from "types/upload";
 import ComlinkCryptoWorker from "utils/comlink/ComlinkCryptoWorker";
 
 export function sortFiles(files: EnteFile[], sortAsc = false) {
@@ -135,160 +122,6 @@ export function generateStreamFromArrayBuffer(data: Uint8Array) {
     });
 }
 
-export async function getRenderableFileURL(file: EnteFile, fileBlob: Blob) {
-    switch (file.metadata.fileType) {
-        case FILE_TYPE.IMAGE: {
-            const convertedBlob = await getRenderableImage(
-                file.metadata.title,
-                fileBlob,
-            );
-            const { originalURL, convertedURL } = getFileObjectURLs(
-                fileBlob,
-                convertedBlob,
-            );
-            return {
-                converted: [convertedURL],
-                original: [originalURL],
-            };
-        }
-        case FILE_TYPE.LIVE_PHOTO: {
-            return await getRenderableLivePhotoURL(file, fileBlob);
-        }
-        case FILE_TYPE.VIDEO: {
-            const convertedBlob = await getPlayableVideo(
-                file.metadata.title,
-                fileBlob,
-            );
-            const { originalURL, convertedURL } = getFileObjectURLs(
-                fileBlob,
-                convertedBlob,
-            );
-            return {
-                converted: [convertedURL],
-                original: [originalURL],
-            };
-        }
-        default: {
-            const previewURL = await createTypedObjectURL(
-                fileBlob,
-                file.metadata.title,
-            );
-            return {
-                converted: [previewURL],
-                original: [previewURL],
-            };
-        }
-    }
-}
-
-async function getRenderableLivePhotoURL(
-    file: EnteFile,
-    fileBlob: Blob,
-): Promise<{ original: string[]; converted: string[] }> {
-    const livePhoto = await decodeLivePhoto(file, fileBlob);
-    const imageBlob = new Blob([livePhoto.image]);
-    const videoBlob = new Blob([livePhoto.video]);
-    const convertedImageBlob = await getRenderableImage(
-        livePhoto.imageNameTitle,
-        imageBlob,
-    );
-    const convertedVideoBlob = await getPlayableVideo(
-        livePhoto.videoNameTitle,
-        videoBlob,
-        true,
-    );
-    const { originalURL: originalImageURL, convertedURL: convertedImageURL } =
-        getFileObjectURLs(imageBlob, convertedImageBlob);
-
-    const { originalURL: originalVideoURL, convertedURL: convertedVideoURL } =
-        getFileObjectURLs(videoBlob, convertedVideoBlob);
-    return {
-        converted: [convertedImageURL, convertedVideoURL],
-        original: [originalImageURL, originalVideoURL],
-    };
-}
-
-export async function getPlayableVideo(
-    videoNameTitle: string,
-    videoBlob: Blob,
-    forceConvert = false,
-) {
-    try {
-        const isPlayable = await isPlaybackPossible(
-            URL.createObjectURL(videoBlob),
-        );
-        if (isPlayable && !forceConvert) {
-            return videoBlob;
-        } else {
-            if (!forceConvert) {
-                return null;
-            }
-            addLogLine(
-                "video format not supported, converting it name:",
-                videoNameTitle,
-            );
-            const mp4ConvertedVideo = await ffmpegService.convertToMP4(
-                new File([videoBlob], videoNameTitle),
-            );
-            addLogLine("video successfully converted", videoNameTitle);
-            return new Blob([await mp4ConvertedVideo.arrayBuffer()]);
-        }
-    } catch (e) {
-        addLogLine("video conversion failed", videoNameTitle);
-        logError(e, "video conversion failed");
-        return null;
-    }
-}
-
-export async function getRenderableImage(fileName: string, imageBlob: Blob) {
-    let fileTypeInfo: FileTypeInfo;
-    try {
-        const tempFile = new File([imageBlob], fileName);
-        fileTypeInfo = await getFileType(tempFile);
-        addLocalLog(() => `file type info: ${JSON.stringify(fileTypeInfo)}`);
-        const { exactType } = fileTypeInfo;
-        let convertedImageBlob: Blob;
-        if (isRawFile(exactType)) {
-            try {
-                if (!isSupportedRawFormat(exactType)) {
-                    throw Error(CustomError.UNSUPPORTED_RAW_FORMAT);
-                }
-
-                throw Error(CustomError.NOT_AVAILABLE_ON_WEB);
-            } catch (e) {
-                try {
-                    if (!isFileHEIC(exactType)) {
-                        throw e;
-                    }
-                    addLogLine(
-                        `HEICConverter called for ${fileName}-${convertBytesToHumanReadable(
-                            imageBlob.size,
-                        )}`,
-                    );
-                    convertedImageBlob =
-                        await heicConversionService.convert(imageBlob);
-                    addLogLine(`${fileName} successfully converted`);
-                } catch (e) {
-                    throw Error(CustomError.NON_PREVIEWABLE_FILE);
-                }
-            }
-            return convertedImageBlob;
-        } else {
-            return imageBlob;
-        }
-    } catch (e) {
-        logError(e, "get Renderable Image failed", { fileTypeInfo });
-        return null;
-    }
-}
-
-export function isFileHEIC(exactType: string) {
-    return (
-        exactType.toLowerCase().endsWith(TYPE_HEIC) ||
-        exactType.toLowerCase().endsWith(TYPE_HEIF)
-    );
-}
-
 export function isRawFile(exactType: string) {
     return RAW_FORMATS.includes(exactType.toLowerCase());
 }
@@ -300,10 +133,6 @@ export function isRawFileFromFileName(fileName: string) {
         }
     }
     return false;
-}
-
-export function isSupportedRawFormat(exactType: string) {
-    return SUPPORTED_RAW_FORMATS.includes(exactType.toLowerCase());
 }
 
 export function mergeMetadata(files: EnteFile[]): EnteFile[] {
@@ -375,14 +204,4 @@ export const getPreviewableImage = async (
     } catch (e) {
         logError(e, "failed to download file");
     }
-};
-
-const getFileObjectURLs = (originalBlob: Blob, convertedBlob: Blob) => {
-    const originalURL = URL.createObjectURL(originalBlob);
-    const convertedURL = convertedBlob
-        ? convertedBlob === originalBlob
-            ? originalURL
-            : URL.createObjectURL(convertedBlob)
-        : null;
-    return { originalURL, convertedURL };
 };
