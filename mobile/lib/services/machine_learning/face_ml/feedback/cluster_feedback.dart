@@ -63,7 +63,11 @@ class ClusterFeedbackService {
     return suggestions;
   }
 
-  Future<List<int>> getSuggestionsUsingMedian(
+  /// Returns a list of suggestions. For each suggestion we return a record consisting of the following elements:
+  /// 1. clusterID: the ID of the cluster
+  /// 2. distance: the distance between the person's cluster and the suggestion
+  /// 3. usedMean: whether the suggestion was found using the mean (true) or the median (false)
+  Future<List<(int, double, bool)>> getSuggestionsUsingMedian(
     Person p, {
     int sampleSize = 50,
     double maxMedianDistance = 0.65,
@@ -114,7 +118,9 @@ class ClusterFeedbackService {
       _logger.info(
         "Already found good suggestions using mean: $suggestClusterIds, with sizes $suggestClusterIdsSizes and distances $suggestClusterIdsDistances",
       );
-      return suggestClusterIds.map((e) => e.$1).toList(growable: false);
+      return suggestClusterIds
+          .map((e) => (e.$1, e.$2, true))
+          .toList(growable: false);
     }
 
     // Find the other cluster candidates based on the median
@@ -128,7 +134,7 @@ class ClusterFeedbackService {
     if (moreSuggestionsMean.isEmpty) {
       _logger
           .info("No suggestions found using mean, even with higher threshold");
-      return <int>[];
+      return [];
     }
 
     final List<(int, double)> temp = [];
@@ -201,13 +207,13 @@ class ClusterFeedbackService {
     watch.log("Finished median test");
     if (suggestionsMedian.isEmpty) {
       _logger.info("No suggestions found using median");
-      return <int>[];
+      return [];
     } else {
       _logger.info("Found suggestions using median: $suggestionsMedian");
     }
 
-    final List<int> finalSuggestionsMedian = suggestionsMedian
-        .map(((e) => e.$1))
+    final List<(int, double, bool)> finalSuggestionsMedian = suggestionsMedian
+        .map(((e) => (e.$1, e.$2, false)))
         .toList(growable: false)
         .reversed
         .toList(growable: false);
@@ -230,7 +236,12 @@ class ClusterFeedbackService {
     return finalSuggestionsMedian;
   }
 
-  Future<List<(int, List<EnteFile>)>> getClusterFilesForPersonID(
+  /// Returns a list of cluster suggestions for a person. Each suggestion is a tuple of the following elements:
+  /// 1. clusterID: the ID of the cluster
+  /// 2. distance: the distance between the person's cluster and the suggestion
+  /// 3. bool: whether the suggestion was found using the mean (true) or the median (false)
+  /// 4. List<EnteFile>: the files in the cluster
+  Future<List<(int, double, bool, List<EnteFile>)>> getClusterFilesForPersonID(
     Person person,
   ) async {
     _logger.info(
@@ -249,12 +260,14 @@ class ClusterFeedbackService {
 
     try {
       // Get the suggestions for the person using centroids and median
-      final List<int> suggestClusterIds =
+      final List<(int, double, bool)> suggestClusterIds =
           await getSuggestionsUsingMedian(person);
 
       // Get the files for the suggestions
-      final Map<int, Set<int>> fileIdToClusterID = await FaceMLDataDB.instance
-          .getFileIdToClusterIDSetForCluster(suggestClusterIds.toSet());
+      final Map<int, Set<int>> fileIdToClusterID =
+          await FaceMLDataDB.instance.getFileIdToClusterIDSetForCluster(
+        suggestClusterIds.map((e) => e.$1).toSet(),
+      );
       final Map<int, List<EnteFile>> clusterIDToFiles = {};
       final allFiles = await SearchService.instance.getAllFiles();
       for (final f in allFiles) {
@@ -271,11 +284,16 @@ class ClusterFeedbackService {
         }
       }
 
-      final List<(int, List<EnteFile>)> clusterIdAndFiles = [];
-      for (final clusterId in suggestClusterIds) {
-        if (clusterIDToFiles.containsKey(clusterId)) {
+      final List<(int, double, bool, List<EnteFile>)> clusterIdAndFiles = [];
+      for (final clusterSuggestion in suggestClusterIds) {
+        if (clusterIDToFiles.containsKey(clusterSuggestion.$1)) {
           clusterIdAndFiles.add(
-            (clusterId, clusterIDToFiles[clusterId]!),
+            (
+              clusterSuggestion.$1,
+              clusterSuggestion.$2,
+              clusterSuggestion.$3,
+              clusterIDToFiles[clusterSuggestion.$1]!
+            ),
           );
         }
       }
@@ -397,6 +415,7 @@ class ClusterFeedbackService {
     return clusterAvg;
   }
 
+  /// Returns a map of person's clusterID to map of closest clusterID to with disstance
   Map<int, List<(int, double)>> _calcSuggestionsMean(
     Map<int, List<double>> clusterAvg,
     Set<int> personClusters,

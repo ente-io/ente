@@ -1,5 +1,6 @@
 import "dart:math";
 
+import "package:flutter/foundation.dart" show kDebugMode;
 import "package:flutter/material.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/people_changed_event.dart";
@@ -30,7 +31,8 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
   Key futureBuilderKey = UniqueKey();
 
   // Declare a variable for the future
-  late Future<List<(int, List<EnteFile>)>> futureClusterSuggestions;
+  late Future<List<(int, double, bool, List<EnteFile>)>>
+      futureClusterSuggestions;
 
   @override
   void initState() {
@@ -45,7 +47,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
       appBar: AppBar(
         title: const Text('Review suggestions'),
       ),
-      body: FutureBuilder<List<(int, List<EnteFile>)>>(
+      body: FutureBuilder<List<(int, double, bool, List<EnteFile>)>>(
         key: futureBuilderKey,
         future: futureClusterSuggestions,
         builder: (context, snapshot) {
@@ -62,7 +64,9 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
             final numberOfDifferentSuggestions = snapshot.data!.length;
             final currentSuggestion = snapshot.data![currentSuggestionIndex];
             final int clusterID = currentSuggestion.$1;
-            final List<EnteFile> files = currentSuggestion.$2;
+            final double distance = currentSuggestion.$2;
+            final bool isMean = currentSuggestion.$3;
+            final List<EnteFile> files = currentSuggestion.$4;
             return InkWell(
               onTap: () {
                 Navigator.of(context).push(
@@ -82,6 +86,8 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
                 ),
                 child: _buildSuggestionView(
                   clusterID,
+                  distance,
+                  isMean,
                   files,
                   numberOfDifferentSuggestions,
                 ),
@@ -140,12 +146,19 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
 
   Widget _buildSuggestionView(
     int clusterID,
+    double distance,
+    bool isMean,
     List<EnteFile> files,
     int numberOfSuggestions,
   ) {
     return Column(
       key: ValueKey("cluster_id-$clusterID"),
       children: <Widget>[
+        if (kDebugMode)
+          Text(
+            "Debug: Cluster ID: $clusterID, Distance: ${distance.toStringAsFixed(3)}, IsMean: $isMean",
+            style: getEnteTextTheme(context).smallMuted,
+          ),
         Text(
           files.length > 1
               ? "These photos belong to ${widget.person.attr.name}?"
