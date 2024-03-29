@@ -26,8 +26,6 @@ import {
 import { FileTypeInfo } from "types/upload";
 import ComlinkCryptoWorker from "utils/comlink/ComlinkCryptoWorker";
 
-const WAIT_TIME_IMAGE_CONVERSION = 30 * 1000;
-
 export function sortFiles(files: EnteFile[], sortAsc = false) {
     // sort based on the time of creation time of the file,
     // for files with same creation time, sort based on the time of last modification
@@ -40,20 +38,6 @@ export function sortFiles(files: EnteFile[], sortAsc = false) {
             );
         }
         return factor * (b.metadata.creationTime - a.metadata.creationTime);
-    });
-}
-
-export function sortTrashFiles(files: EnteFile[]) {
-    return files.sort((a, b) => {
-        if (a.deleteBy === b.deleteBy) {
-            if (a.metadata.creationTime === b.metadata.creationTime) {
-                return (
-                    b.metadata.modificationTime - a.metadata.modificationTime
-                );
-            }
-            return b.metadata.creationTime - a.metadata.creationTime;
-        }
-        return a.deleteBy - b.deleteBy;
     });
 }
 
@@ -369,106 +353,6 @@ export const getUserOwnedFiles = (files: EnteFile[]) => {
         throw Error("user missing");
     }
     return files.filter((file) => file.ownerID === user.id);
-};
-
-// doesn't work on firefox
-export const copyFileToClipboard = async (fileUrl: string) => {
-    const canvas = document.createElement("canvas");
-    const canvasCTX = canvas.getContext("2d");
-    const image = new Image();
-
-    const blobPromise = new Promise<Blob>((resolve, reject) => {
-        let timeout: NodeJS.Timeout = null;
-        try {
-            image.setAttribute("src", fileUrl);
-            image.onload = () => {
-                canvas.width = image.width;
-                canvas.height = image.height;
-                canvasCTX.drawImage(image, 0, 0, image.width, image.height);
-                canvas.toBlob(
-                    (blob) => {
-                        resolve(blob);
-                    },
-                    "image/png",
-                    1,
-                );
-
-                clearTimeout(timeout);
-            };
-        } catch (e) {
-            void logError(e, "failed to copy to clipboard");
-            reject(e);
-        } finally {
-            clearTimeout(timeout);
-        }
-        timeout = setTimeout(
-            () => reject(Error(CustomError.WAIT_TIME_EXCEEDED)),
-            WAIT_TIME_IMAGE_CONVERSION,
-        );
-    });
-
-    const { ClipboardItem } = window;
-
-    await navigator.clipboard
-        .write([new ClipboardItem({ "image/png": blobPromise })])
-        .catch((e) => logError(e, "failed to copy to clipboard"));
-};
-
-export function getLatestVersionFiles(files: EnteFile[]) {
-    const latestVersionFiles = new Map<string, EnteFile>();
-    files.forEach((file) => {
-        const uid = `${file.collectionID}-${file.id}`;
-        if (
-            !latestVersionFiles.has(uid) ||
-            latestVersionFiles.get(uid).updationTime < file.updationTime
-        ) {
-            latestVersionFiles.set(uid, file);
-        }
-    });
-    return Array.from(latestVersionFiles.values()).filter(
-        (file) => !file.isDeleted,
-    );
-}
-
-export function getPersonalFiles(files: EnteFile[], user: User) {
-    if (!user?.id) {
-        throw Error("user missing");
-    }
-    return files.filter((file) => file.ownerID === user.id);
-}
-
-export function getIDBasedSortedFiles(files: EnteFile[]) {
-    return files.sort((a, b) => a.id - b.id);
-}
-
-export function constructFileToCollectionMap(files: EnteFile[]) {
-    const fileToCollectionsMap = new Map<number, number[]>();
-    (files ?? []).forEach((file) => {
-        if (!fileToCollectionsMap.get(file.id)) {
-            fileToCollectionsMap.set(file.id, []);
-        }
-        fileToCollectionsMap.get(file.id).push(file.collectionID);
-    });
-    return fileToCollectionsMap;
-}
-
-export const shouldShowAvatar = (file: EnteFile, user: User) => {
-    if (!file || !user) {
-        return false;
-    }
-    // is Shared file
-    else if (file.ownerID !== user.id) {
-        return true;
-    }
-    // is public collected file
-    else if (
-        file.ownerID === user.id &&
-        file.pubMagicMetadata?.data?.uploaderName
-    ) {
-        return true;
-    } else {
-        return false;
-    }
 };
 
 export const getPreviewableImage = async (

@@ -57,7 +57,6 @@ class CastDownloadManager {
                     reader.read().then(async ({ done, value }) => {
                         // Is there more data to read?
                         if (!done) {
-                            downloadedBytes += value.byteLength;
                             const buffer = new Uint8Array(
                                 data.byteLength + value.byteLength,
                             );
