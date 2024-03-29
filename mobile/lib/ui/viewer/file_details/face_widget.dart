@@ -99,6 +99,12 @@ class FaceWidget extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       maxLines: 1,
                     ),
+                  if (kDebugMode)
+                    Text(
+                      'S: ${face.score.toStringAsFixed(3)}',
+                      style: Theme.of(context).textTheme.bodySmall,
+                      maxLines: 1,
+                    ),
                 ],
               ),
             );
@@ -193,9 +199,8 @@ class FaceWidget extends StatelessWidget {
                   ),
                 if (kDebugMode)
                   Text(
-                    'Score: ${face.score}',
+                    'S: ${face.score.toStringAsFixed(3)}',
                     style: Theme.of(context).textTheme.bodySmall,
-                    overflow: TextOverflow.ellipsis,
                     maxLines: 1,
                   ),
               ],
