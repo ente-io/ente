@@ -1,6 +1,4 @@
 import { logError } from "@ente/shared/sentry";
-import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
-import { User } from "@ente/shared/user/types";
 import { FILE_TYPE, RAW_FORMATS } from "constants/file";
 import CastDownloadManager from "services/castDownloadManager";
 import { decodeLivePhoto } from "services/livePhotoService";
@@ -122,10 +120,6 @@ export function generateStreamFromArrayBuffer(data: Uint8Array) {
     });
 }
 
-export function isRawFile(exactType: string) {
-    return RAW_FORMATS.includes(exactType.toLowerCase());
-}
-
 export function isRawFileFromFileName(fileName: string) {
     for (const rawFormat of RAW_FORMATS) {
         if (fileName.toLowerCase().endsWith(rawFormat)) {
@@ -147,42 +141,6 @@ export function mergeMetadata(files: EnteFile[]): EnteFile[] {
         return file;
     });
 }
-
-export async function getFileFromURL(fileURL: string) {
-    const fileBlob = await (await fetch(fileURL)).blob();
-    const fileFile = new File([fileBlob], "temp");
-    return fileFile;
-}
-
-export function getUniqueFiles(files: EnteFile[]) {
-    const idSet = new Set<number>();
-    const uniqueFiles = files.filter((file) => {
-        if (!idSet.has(file.id)) {
-            idSet.add(file.id);
-            return true;
-        } else {
-            return false;
-        }
-    });
-
-    return uniqueFiles;
-}
-
-export const isImageOrVideo = (fileType: FILE_TYPE) =>
-    [FILE_TYPE.IMAGE, FILE_TYPE.VIDEO].includes(fileType);
-
-export const createTypedObjectURL = async (blob: Blob, fileName: string) => {
-    const type = await getFileType(new File([blob], fileName));
-    return URL.createObjectURL(new Blob([blob], { type: type.mimeType }));
-};
-
-export const getUserOwnedFiles = (files: EnteFile[]) => {
-    const user: User = getData(LS_KEYS.USER);
-    if (!user?.id) {
-        throw Error("user missing");
-    }
-    return files.filter((file) => file.ownerID === user.id);
-};
 
 export const getPreviewableImage = async (
     file: EnteFile,
