@@ -23,37 +23,32 @@ const colourPool = [
 
 export default function LargeType({ chars }: { chars: string[] }) {
     return (
-        <table
+        <div
             style={{
                 fontSize: "4rem",
                 fontWeight: "bold",
                 fontFamily: "monospace",
                 display: "flex",
-                position: "relative",
             }}
         >
             {chars.map((char, i) => (
-                <tr
+                <span
                     key={i}
                     style={{
                         display: "flex",
                         flexDirection: "column",
                         alignItems: "center",
                         padding: "0.5rem",
+                        lineHeight: 1.2,
                         // alternating background
                         backgroundColor: i % 2 === 0 ? "#2e2e2e" : "#5e5e5e",
+                        // varying colors
+                        color: colourPool[i % colourPool.length],
                     }}
                 >
-                    <span
-                        style={{
-                            color: colourPool[i % colourPool.length],
-                            lineHeight: 1.2,
-                        }}
-                    >
-                        {char}
-                    </span>
-                </tr>
+                    {char}
+                </span>
             ))}
-        </table>
+        </div>
     );
 }
