@@ -158,7 +158,8 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
-            await FaceMlService.instance.clusterAllImages(minFaceScore: 0.75);
+            await FaceMlService.instance
+                .clusterAllImages(minFaceScore: 0.75, clusterInBuckets: true);
             Bus.instance.fire(PeopleChangedEvent());
             showShortToast(context, "Done");
           },
@@ -205,7 +206,7 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
         if (kDebugMode)
           MenuItemWidget(
             captionedTextWidget: const CaptionedTextWidget(
-              title: "Pull Embeddings From Local",
+              title: "Compute suggestions",
             ),
             pressedColor: getEnteColorScheme(context).fillFaint,
             trailingIcon: Icons.chevron_right_outlined,

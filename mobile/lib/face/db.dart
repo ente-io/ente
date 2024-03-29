@@ -78,6 +78,37 @@ class FaceMLDataDB {
     }
   }
 
+  Future<void> updatePersonIDForFaceIDIFNotSet(
+    Map<String, int> faceIDToPersonID,
+  ) async {
+    final db = await instance.database;
+    const batchSize = 500;
+    final numBatches = (faceIDToPersonID.length / batchSize).ceil();
+
+    for (int i = 0; i < numBatches; i++) {
+      _logger.info('updatePersonIDForFaceIDIFNotSet Batch $i of $numBatches');
+      final start = i * batchSize;
+      final end = min((i + 1) * batchSize, faceIDToPersonID.length);
+      final batch = faceIDToPersonID.entries.toList().sublist(start, end);
+
+      final batchUpdate = db.batch();
+
+      for (final entry in batch) {
+        final faceID = entry.key;
+        final personID = entry.value;
+
+        batchUpdate.update(
+          facesTable,
+          {faceClusterId: personID},
+          where: '$faceIDColumn = ? AND $faceClusterId IS NULL',
+          whereArgs: [faceID],
+        );
+      }
+
+      await batchUpdate.commit(noResult: true);
+    }
+  }
+
   Future<Map<int, int>> getIndexedFileIds() async {
     final db = await instance.database;
     final List<Map<String, dynamic>> maps = await db.rawQuery(
@@ -293,28 +324,6 @@ class FaceMLDataDB {
     return result;
   }
 
-  Future<void> updatePersonIDForFaceIDIFNotSet(
-    Map<String, int> faceIDToPersonID,
-  ) async {
-    final db = await instance.database;
-
-    // Start a batch
-    final batch = db.batch();
-
-    for (final map in faceIDToPersonID.entries) {
-      final faceID = map.key;
-      final personID = map.value;
-      batch.update(
-        facesTable,
-        {faceClusterId: personID},
-        where: '$faceIDColumn = ? AND $faceClusterId IS NULL',
-        whereArgs: [faceID],
-      );
-    }
-    // Commit the batch
-    await batch.commit(noResult: true);
-  }
-
   Future<void> forceUpdateClusterIds(
     Map<String, int> faceIDToPersonID,
   ) async {
@@ -347,7 +356,9 @@ class FaceMLDataDB {
     int offset = 0,
     int batchSize = 10000,
   }) async {
-    _logger.info('reading as float');
+    _logger.info(
+      'reading as float offset: $offset, maxFaces: $maxFaces, batchSize: $batchSize',
+    );
     final db = await instance.database;
 
     final Map<String, (int?, Uint8List)> result = {};

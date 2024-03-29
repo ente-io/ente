@@ -37,8 +37,6 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
     super.initState();
     // Initialize the future in initState
     _fetchClusterSuggestions();
-    // futureClusterSuggestions = ClusterFeedbackService.instance
-    //     .getClusterFilesForPersonID(widget.person);
   }
 
   @override

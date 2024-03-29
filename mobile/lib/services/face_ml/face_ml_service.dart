@@ -13,7 +13,6 @@ import "package:logging/logging.dart";
 import "package:onnxruntime/onnxruntime.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
-import "package:photos/db/files_db.dart";
 import "package:photos/db/ml_data_db.dart";
 import "package:photos/events/diff_sync_complete_event.dart";
 import "package:photos/extensions/list.dart";
@@ -27,15 +26,15 @@ import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
 import "package:photos/models/ml/ml_versions.dart";
-import 'package:photos/services/machine_learning/face_ml/face_clustering/linear_clustering_service.dart';
-import 'package:photos/services/machine_learning/face_ml/face_detection/detection.dart';
-import 'package:photos/services/machine_learning/face_ml/face_detection/yolov5face/onnx_face_detection.dart';
-import 'package:photos/services/machine_learning/face_ml/face_detection/yolov5face/yolo_face_detection_exceptions.dart';
-import 'package:photos/services/machine_learning/face_ml/face_embedding/face_embedding_exceptions.dart';
-import 'package:photos/services/machine_learning/face_ml/face_embedding/onnx_face_embedding.dart';
-import 'package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart';
-import 'package:photos/services/machine_learning/face_ml/face_ml_exceptions.dart';
-import 'package:photos/services/machine_learning/face_ml/face_ml_result.dart';
+import "package:photos/services/face_ml/face_clustering/linear_clustering_service.dart";
+import "package:photos/services/face_ml/face_detection/detection.dart";
+import 'package:photos/services/face_ml/face_detection/yolov5face/onnx_face_detection.dart';
+import "package:photos/services/face_ml/face_detection/yolov5face/yolo_face_detection_exceptions.dart";
+import "package:photos/services/face_ml/face_embedding/face_embedding_exceptions.dart";
+import 'package:photos/services/face_ml/face_embedding/onnx_face_embedding.dart';
+import "package:photos/services/face_ml/face_ml_exceptions.dart";
+import "package:photos/services/face_ml/face_ml_result.dart";
+import "package:photos/services/machine_learning/face_ml/face_clustering/linear_clustering_service.dart";
 import 'package:photos/services/machine_learning/file_ml/file_ml.dart';
 import 'package:photos/services/machine_learning/file_ml/remote_fileml_service.dart';
 import "package:photos/services/search_service.dart";
@@ -369,103 +368,37 @@ class FaceMlService {
     await clusterAllImages();
   }
 
-  Future<void> clusterAllImages({
-    double minFaceScore = kMinHighQualityFaceScore,
-    bool clusterInBuckets = false,
-  }) async {
+  Future<void> clusterAllImages({double minFaceScore = 0.75}) async {
     _logger.info("`clusterAllImages()` called");
 
     try {
-      if (clusterInBuckets) {
-        // Get a sense of the total number of faces in the database
-        final int totalFaces = await FaceMLDataDB.instance
-            .getTotalFaceCount(minFaceScore: minFaceScore);
+      // Read all the embeddings from the database, in a map from faceID to embedding
+      final clusterStartTime = DateTime.now();
+      final faceIdToEmbedding = await FaceMLDataDB.instance.getFaceEmbeddingMap(
+        minScore: minFaceScore,
+      );
+      _logger.info('read embeddings ${faceIdToEmbedding.length} ');
 
-        // read the creation times from Files DB, in a map from fileID to creation time
-        final fileIDToCreationTime =
-            await FilesDB.instance.getFileIDToCreationTime();
-
-        const int bucketSize = 10000;
-        const int batchSize = 10000;
-        const int offsetIncrement = 7500;
-        int offset = 0;
-
-        while (true) {
-          final faceIdToEmbeddingBucket =
-              await FaceMLDataDB.instance.getFaceEmbeddingMap(
-            minScore: minFaceScore,
-            maxFaces: bucketSize,
-            offset: offset,
-            batchSize: batchSize,
-          );
-          if (faceIdToEmbeddingBucket.isEmpty) {
-            break;
-          }
-          if (offset > totalFaces) {
-            _logger.warning(
-              'offset > totalFaces, this should ideally not happen. offset: $offset, totalFaces: $totalFaces',
-            );
-            break;
-          }
-
-          final faceIdToCluster = await FaceLinearClustering.instance.predict(
-            faceIdToEmbeddingBucket,
-            fileIDToCreationTime: fileIDToCreationTime,
-          );
-          if (faceIdToCluster == null) {
-            _logger.warning("faceIdToCluster is null");
-            return;
-          }
-
-          await FaceMLDataDB.instance
-              .updatePersonIDForFaceIDIFNotSet(faceIdToCluster);
-          if (offset == 0) {
-            offset += offsetIncrement;
-          } else {
-            offset += bucketSize;
-          }
-        }
-      } else {
-        // Read all the embeddings from the database, in a map from faceID to embedding
-        final clusterStartTime = DateTime.now();
-        final faceIdToEmbedding =
-            await FaceMLDataDB.instance.getFaceEmbeddingMap(
-          minScore: minFaceScore,
-        );
-        final gotFaceEmbeddingsTime = DateTime.now();
-        _logger.info(
-          'read embeddings ${faceIdToEmbedding.length} in ${gotFaceEmbeddingsTime.difference(clusterStartTime).inMilliseconds} ms',
-        );
-
-        // Read the creation times from Files DB, in a map from fileID to creation time
-        final fileIDToCreationTime =
-            await FilesDB.instance.getFileIDToCreationTime();
-        _logger.info('read creation times from FilesDB in '
-            '${DateTime.now().difference(gotFaceEmbeddingsTime).inMilliseconds} ms');
-
-        // Cluster the embeddings using the linear clustering algorithm, returning a map from faceID to clusterID
-        final faceIdToCluster = await FaceLinearClustering.instance.predict(
-          faceIdToEmbedding,
-          fileIDToCreationTime: fileIDToCreationTime,
-        );
-        if (faceIdToCluster == null) {
-          _logger.warning("faceIdToCluster is null");
-          return;
-        }
-        final clusterDoneTime = DateTime.now();
-        _logger.info(
-          'done with clustering ${faceIdToEmbedding.length} in ${clusterDoneTime.difference(clusterStartTime).inSeconds} seconds ',
-        );
-
-        // Store the updated clusterIDs in the database
-        _logger.info(
-          'Updating ${faceIdToCluster.length} FaceIDs with clusterIDs in the DB',
-        );
-        await FaceMLDataDB.instance
-            .updatePersonIDForFaceIDIFNotSet(faceIdToCluster);
-        _logger.info('Done updating FaceIDs with clusterIDs in the DB, in '
-            '${DateTime.now().difference(clusterDoneTime).inSeconds} seconds');
+      // Cluster the embeddings using the linear clustering algorithm, returning a map from faceID to clusterID
+      final faceIdToCluster =
+          await FaceLinearClustering.instance.predict(faceIdToEmbedding);
+      if (faceIdToCluster == null) {
+        _logger.warning("faceIdToCluster is null");
+        return;
       }
+      final clusterDoneTime = DateTime.now();
+      _logger.info(
+        'done with clustering ${faceIdToEmbedding.length} in ${clusterDoneTime.difference(clusterStartTime).inSeconds} seconds ',
+      );
+
+      // Store the updated clusterIDs in the database
+      _logger.info(
+        'Updating ${faceIdToCluster.length} FaceIDs with clusterIDs in the DB',
+      );
+      await FaceMLDataDB.instance
+          .updatePersonIDForFaceIDIFNotSet(faceIdToCluster);
+      _logger.info('Done updating FaceIDs with clusterIDs in the DB, in '
+          '${DateTime.now().difference(clusterDoneTime).inSeconds} seconds');
     } catch (e, s) {
       _logger.severe("`clusterAllImages` failed", e, s);
     }
@@ -520,7 +453,7 @@ class FaceMlService {
       final List<List<EnteFile>> chunks = sortedBylocalID.chunks(kParallelism);
       outerLoop:
       for (final chunk in chunks) {
-        final futures = <Future<bool>>[];
+        final futures = <Future>[];
         final List<int> fileIds = [];
         // Try to find embeddings on the remote server
         for (final f in chunk) {
@@ -535,12 +468,16 @@ class FaceMlService {
           final List<Face> faces = [];
           final remoteFileIdToVersion = <int, int>{};
           for (FileMl fileMl in res.mlData.values) {
-            if (fileMl.faceEmbedding.version < faceMlVersion) continue;
+            if (fileMl.faceEmbedding.version != faceMlVersion) continue;
             if (fileMl.faceEmbedding.faces.isEmpty) {
               faces.add(
-                Face.empty(
+                Face(
+                  '${fileMl.fileID}-0',
                   fileMl.fileID,
-                  error: (fileMl.faceEmbedding.error ?? false),
+                  <double>[],
+                  (fileMl.faceEmbedding.error ?? false) ? -1.0 : 0.0,
+                  face_detection.Detection.empty(),
+                  0.0,
                 ),
               );
             } else {
@@ -573,22 +510,8 @@ class FaceMlService {
           }
           futures.add(processImage(enteFile));
         }
-        final awaitedFutures = await Future.wait(futures);
-        final sumFutures = awaitedFutures.fold<int>(
-          0,
-          (previousValue, element) => previousValue + (element ? 1 : 0),
-        );
-        fileAnalyzedCount += sumFutures;
-
-        // TODO: remove this cooldown later. Cooldown of one minute every 400 images
-        if (fileAnalyzedCount > 400 && fileAnalyzedCount % 400 < kParallelism) {
-          _logger.info(
-            "indexAllImages() analyzed $fileAnalyzedCount images, cooldown for 1 minute",
-          );
-          await Future.delayed(const Duration(minutes: 1), () {
-            _logger.info("indexAllImages() cooldown finished");
-          });
-        }
+        await Future.wait(futures);
+        fileAnalyzedCount += futures.length;
       }
 
       stopwatch.stop();
@@ -606,7 +529,7 @@ class FaceMlService {
     }
   }
 
-  Future<bool> processImage(EnteFile enteFile) async {
+  Future<void> processImage(EnteFile enteFile) async {
     _logger.info(
       "`indexAllImages()` on file number  start processing image with uploadedFileID: ${enteFile.uploadedFileID}",
     );
@@ -618,7 +541,10 @@ class FaceMlService {
         // disposeImageIsolateAfterUse: false,
       );
       if (result == null) {
-        return false;
+        _logger.warning(
+          "Image not analyzed with uploadedFileID: ${enteFile.uploadedFileID}",
+        );
+        return;
       }
       final List<Face> faces = [];
       if (!result.hasFaces) {
@@ -647,14 +573,15 @@ class FaceMlService {
         }
         for (int i = 0; i < result.faces.length; ++i) {
           final FaceResult faceRes = result.faces[i];
+          final FaceDetectionRelative relativeDetection = faceRes.detection;
           final detection = face_detection.Detection(
             box: FaceBox(
-              xMin: faceRes.detection.xMinBox,
-              yMin: faceRes.detection.yMinBox,
-              width: faceRes.detection.width,
-              height: faceRes.detection.height,
+              xMin: relativeDetection.xMinBox,
+              yMin: relativeDetection.yMinBox,
+              width: relativeDetection.width,
+              height: relativeDetection.height,
             ),
-            landmarks: faceRes.detection.allKeypoints
+            landmarks: relativeDetection.allKeypoints
                 .map(
                   (keypoint) => Landmark(
                     x: keypoint[0],
@@ -688,14 +615,12 @@ class FaceMlService {
         ),
       );
       await FaceMLDataDB.instance.bulkInsertFaces(faces);
-      return true;
     } catch (e, s) {
       _logger.severe(
         "Failed to analyze using FaceML for image with ID: ${enteFile.uploadedFileID}",
         e,
         s,
       );
-      return true;
     }
   }
 
@@ -901,9 +826,6 @@ class FaceMlService {
         e,
         s,
       );
-      debugPrint(
-        "This image with ID ${enteFile.uploadedFileID} has name ${enteFile.displayName}.",
-      );
       final resultBuilder = FaceMlResultBuilder.fromEnteFile(enteFile);
       return resultBuilder.buildErrorOccurred();
     }
@@ -964,7 +886,6 @@ class FaceMlService {
     return imagePath;
   }
 
-  @Deprecated('Deprecated in favor of `_getImagePathForML`')
   Future<Uint8List?> _getDataForML(
     EnteFile enteFile, {
     FileDataForML typeOfData = FileDataForML.fileData,
@@ -1248,9 +1169,6 @@ class FaceMlService {
   }
 
   bool _skipAnalysisEnteFile(EnteFile enteFile, Map<int, int> indexedFileIds) {
-    if (isImageIndexRunning == false) {
-      return true;
-    }
     // Skip if the file is not uploaded or not owned by the user
     if (!enteFile.isUploaded || enteFile.isOwner == false) {
       return true;
