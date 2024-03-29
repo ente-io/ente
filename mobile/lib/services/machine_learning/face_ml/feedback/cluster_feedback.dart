@@ -405,6 +405,11 @@ class ClusterFeedbackService {
         updatesForClusterSummary[clusterID] =
             (avgEmbeedingBuffer, embedings.length);
       }
+      // store the intermediate updates
+      if (updatesForClusterSummary.length > 100) {
+        await faceMlDb.clusterSummaryUpdate(updatesForClusterSummary);
+        updatesForClusterSummary.clear();
+      }
       clusterAvg[clusterID] = avg;
     }
     if (updatesForClusterSummary.isNotEmpty) {
