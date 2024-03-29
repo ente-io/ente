@@ -11,28 +11,44 @@ videos you have uploaded to Ente.
 1. Sign in to [our desktop app](https://ente.io/download/desktop), if you
    haven't done so already.
 
-![Ente - Export data](sign-in.png)
+    ![Ente - Sign in to export data](sign-in.png)
+
 2. Open the side bar, and select the option to **export data**.
 
-![Ente - Export data](export-1.png)
+    ![Ente - Export data](export-1.png)
 
 3. Choose the destination folder by clicking on three dots icon.
 
-    ![Ente - Select destination folder and start](export-2.png)
+<div align="center">
+
+![Ente - Select destination folder and start](export-2.png){width=400px}
+
+</div>
 
 4. Select the folder and then click on **Start**
 
-    ![Ente - Export in progress](export-3.png)
+<div align="center">
+
+![Ente - Export in progress](export-3.png){width=400px}
+
+</div>
 
 5. Wait for the export to get completed.
 
-    ![Ente - Rexport](export-4.png)
+<div align="center">
+
+![Ente - Rexport](export-4.png){width=400px}
+
+</div>
 
 6. In case your download gets interrupted, Ente will resume from where it left
    off. Simply select **export data** again and click on **Resync**.
 
-   ![Ente - Rexport](export-5.png)
+<div align="center">
 
+![Ente - Rexport](export-5.png){width=400px}
+
+</div>
 
 7. **Sync continuously** : You can utilize Continuous Sync to eliminate manual
    exports each time new photos are added to Ente. This feature automatically
