@@ -26,7 +26,7 @@ class PersonFaceWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (Platform.isIOS) {
+    if (Platform.isIOS || Platform.isAndroid) {
       return FutureBuilder<Uint8List?>(
         future: getFaceCrop(),
         builder: (context, snapshot) {
