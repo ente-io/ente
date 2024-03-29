@@ -304,6 +304,7 @@
     }
   },
   "faq": "Perguntas frequentes",
+  "help": "Ajuda",
   "oopsSomethingWentWrong": "Ops! Algo deu errado",
   "peopleUsingYourCode": "Pessoas que usam seu código",
   "eligible": "elegível",
@@ -640,7 +641,7 @@
   "thankYou": "Obrigado",
   "failedToVerifyPaymentStatus": "Falha ao verificar status do pagamento",
   "pleaseWaitForSometimeBeforeRetrying": "Por favor, aguarde algum tempo antes de tentar novamente",
-  "paymentFailedWithReason": "Infelizmente o seu pagamento falhou devido a {reason}",
+  "paymentFailedMessage": "Infelizmente o seu pagamento falhou. Entre em contato com o suporte e nós ajudaremos você!",
   "youAreOnAFamilyPlan": "Você está em um plano familiar!",
   "contactFamilyAdmin": "Entre em contato com <green>{familyAdminEmail}</green> para gerenciar sua assinatura",
   "leaveFamily": "Sair da família",

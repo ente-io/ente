@@ -304,6 +304,7 @@
     }
   },
   "faq": "常见问题",
+  "help": "帮助",
   "oopsSomethingWentWrong": "哎呀，似乎出了点问题",
   "peopleUsingYourCode": "使用您的代码的人",
   "eligible": "符合资格",
@@ -640,7 +641,7 @@
   "thankYou": "非常感谢您",
   "failedToVerifyPaymentStatus": "验证支付状态失败",
   "pleaseWaitForSometimeBeforeRetrying": "请稍等片刻后再重试",
-  "paymentFailedWithReason": "很抱歉，您的支付因 {reason} 而失败",
+  "paymentFailedMessage": "不幸的是，您的付款失败。请联系支持人员，我们将为您提供帮助！",
   "youAreOnAFamilyPlan": "你在一个家庭计划中！",
   "contactFamilyAdmin": "请联系 <green>{familyAdminEmail}</green> 来管理您的订阅",
   "leaveFamily": "离开家庭计划",
