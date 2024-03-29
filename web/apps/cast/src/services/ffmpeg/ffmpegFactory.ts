@@ -1,13 +1,12 @@
-import { ElectronFile } from "types/upload";
 import ComlinkFFmpegWorker from "utils/comlink/ComlinkFFmpegWorker";
 
 export interface IFFmpeg {
     run: (
         cmd: string[],
-        inputFile: File | ElectronFile,
+        inputFile: File,
         outputFilename: string,
         dontTimeout?: boolean,
-    ) => Promise<File | ElectronFile>;
+    ) => Promise<File>;
 }
 
 class FFmpegFactory {

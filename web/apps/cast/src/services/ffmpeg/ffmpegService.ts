@@ -4,10 +4,9 @@ import {
     INPUT_PATH_PLACEHOLDER,
     OUTPUT_PATH_PLACEHOLDER,
 } from "constants/ffmpeg";
-import { ElectronFile } from "types/upload";
 import ffmpegFactory from "./ffmpegFactory";
 
-export async function convertToMP4(file: File | ElectronFile) {
+export async function convertToMP4(file: File) {
     try {
         const ffmpegClient = await ffmpegFactory.getFFmpegClient();
         return await ffmpegClient.run(
