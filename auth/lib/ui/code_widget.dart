@@ -1,3 +1,4 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:async';
 import 'dart:io';
 
@@ -87,6 +88,7 @@ class _CodeWidgetState extends State<CodeWidget> {
     return Container(
       margin: const EdgeInsets.only(left: 16, right: 16, bottom: 8, top: 8),
       child: Slidable(
+        enabled: PlatformUtil.isMobile(),
         key: ValueKey(widget.code.hashCode),
         endActionPane: ActionPane(
           extentRatio: 0.60,
@@ -136,58 +138,56 @@ class _CodeWidgetState extends State<CodeWidget> {
           ],
         ),
         child: Builder(
-          builder: (context) {
-            return RawGestureDetector(
-              gestures: {
-                PanGestureRecognizer:
-                    GestureRecognizerFactoryWithHandlers<PanGestureRecognizer>(
-                  () => PanGestureRecognizer(
-                    debugOwner: this,
-                    // This recognizer accepts any button press made with a secondary button.
-                    allowedButtonsFilter: (int buttons) =>
-                        buttons & kSecondaryButton != 0,
-                  ),
-                  (PanGestureRecognizer instance) {
-                    instance
-                      ..dragStartBehavior = DragStartBehavior.down
-                      ..onEnd = (DragEndDetails details) {
-                        Slidable.of(context)?.openEndActionPane();
-                      };
-                  },
+          builder: (context) => RawGestureDetector(
+            gestures: {
+              PanGestureRecognizer:
+                  GestureRecognizerFactoryWithHandlers<PanGestureRecognizer>(
+                () => PanGestureRecognizer(
+                  debugOwner: this,
+                  // This recognizer accepts any button press made with a secondary button.
+                  allowedButtonsFilter: (int buttons) =>
+                      buttons & kSecondaryButton != 0,
                 ),
-              },
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Container(
-                  color: Theme.of(context).colorScheme.codeCardBackgroundColor,
-                  child: Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      customBorder: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      onTap: () {
-                        _copyCurrentOTPToClipboard();
-                      },
-                      onDoubleTap: isMaskingEnabled
-                          ? () {
-                              setState(
-                                () {
-                                  _hideCode = !_hideCode;
-                                },
-                              );
-                            }
-                          : null,
-                      onLongPress: () {
-                        _copyCurrentOTPToClipboard();
-                      },
-                      child: _getCardContents(l10n),
+                (PanGestureRecognizer instance) {
+                  instance
+                    ..dragStartBehavior = DragStartBehavior.down
+                    ..onEnd = (DragEndDetails details) {
+                      Slidable.of(context)?.openEndActionPane();
+                    };
+                },
+              ),
+            },
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Container(
+                color: Theme.of(context).colorScheme.codeCardBackgroundColor,
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    customBorder: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
                     ),
+                    onTap: () {
+                      _copyCurrentOTPToClipboard();
+                    },
+                    onDoubleTap: isMaskingEnabled
+                        ? () {
+                            setState(
+                              () {
+                                _hideCode = !_hideCode;
+                              },
+                            );
+                          }
+                        : null,
+                    onLongPress: () {
+                      _copyCurrentOTPToClipboard();
+                    },
+                    child: _getCardContents(l10n),
                   ),
                 ),
               ),
-            );
-          },
+            ),
+          ),
         ),
       ),
     );
@@ -223,6 +223,55 @@ class _CodeWidgetState extends State<CodeWidget> {
           const SizedBox(
             height: 20,
           ),
+          if (PlatformUtil.isDesktop())
+            Row(
+              children: [
+                Expanded(
+                  child: SlideAction(
+                    onPressed: _onShowQrPressed,
+                    backgroundColor: Colors.grey.withOpacity(0.1),
+                    borderRadius: const BorderRadius.all(Radius.circular(12.0)),
+                    foregroundColor:
+                        Theme.of(context).colorScheme.inverseBackgroundColor,
+                    icon: Icons.qr_code_2_outlined,
+                    label: "QR",
+                    padding: const EdgeInsets.only(left: 4, right: 0),
+                    spacing: 8,
+                  ),
+                ),
+                const SizedBox(
+                  width: 4,
+                ),
+                Expanded(
+                  child: SlideAction(
+                    onPressed: _onEditPressed,
+                    backgroundColor: Colors.grey.withOpacity(0.1),
+                    borderRadius: const BorderRadius.all(Radius.circular(12.0)),
+                    foregroundColor:
+                        Theme.of(context).colorScheme.inverseBackgroundColor,
+                    icon: Icons.edit_outlined,
+                    label: l10n.edit,
+                    padding: const EdgeInsets.only(left: 4, right: 0),
+                    spacing: 8,
+                  ),
+                ),
+                const SizedBox(
+                  width: 4,
+                ),
+                Expanded(
+                  child: SlideAction(
+                    onPressed: _onDeletePressed,
+                    backgroundColor: Colors.grey.withOpacity(0.1),
+                    borderRadius: const BorderRadius.all(Radius.circular(12.0)),
+                    foregroundColor: const Color(0xFFFE4A49),
+                    icon: Icons.delete,
+                    label: l10n.delete,
+                    padding: const EdgeInsets.only(left: 0, right: 0),
+                    spacing: 8,
+                  ),
+                ),
+              ],
+            ),
         ],
       ),
     );
@@ -483,5 +532,58 @@ class _CodeWidgetState extends State<CodeWidget> {
       return "${code.substring(0, 3)} ${code.substring(3, 6)}";
     }
     return code;
+  }
+}
+
+class SlideAction extends StatelessWidget {
+  const SlideAction({
+    super.key,
+    required this.onPressed,
+    required this.backgroundColor,
+    required this.borderRadius,
+    required this.foregroundColor,
+    required this.icon,
+    required this.label,
+    required this.padding,
+    required this.spacing,
+  });
+
+  final void Function(dynamic) onPressed;
+  final Color backgroundColor;
+  final BorderRadius borderRadius;
+  final Color foregroundColor;
+  final IconData icon;
+  final String label;
+  final EdgeInsets padding;
+  final double spacing;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () => onPressed(0),
+      child: Container(
+        color: backgroundColor,
+        height: 32,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              size: 16,
+              color: foregroundColor,
+            ),
+            const SizedBox(
+              width: 4,
+            ),
+            Text(
+              label,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: foregroundColor,
+                  ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
