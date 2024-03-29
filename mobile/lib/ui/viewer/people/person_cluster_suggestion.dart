@@ -65,7 +65,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
             final currentSuggestion = snapshot.data![currentSuggestionIndex];
             final int clusterID = currentSuggestion.$1;
             final double distance = currentSuggestion.$2;
-            final bool isMean = currentSuggestion.$3;
+            final bool usingMean = currentSuggestion.$3;
             final List<EnteFile> files = currentSuggestion.$4;
             return InkWell(
               onTap: () {
@@ -87,7 +87,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
                 child: _buildSuggestionView(
                   clusterID,
                   distance,
-                  isMean,
+                  usingMean,
                   files,
                   numberOfDifferentSuggestions,
                 ),
@@ -147,7 +147,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
   Widget _buildSuggestionView(
     int clusterID,
     double distance,
-    bool isMean,
+    bool usingMean,
     List<EnteFile> files,
     int numberOfSuggestions,
   ) {
@@ -156,7 +156,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
       children: <Widget>[
         if (kDebugMode)
           Text(
-            "Debug: Cluster ID: $clusterID, Distance: ${distance.toStringAsFixed(3)}, IsMean: $isMean",
+            "ClusterID: $clusterID, Distance: ${distance.toStringAsFixed(3)}, usingMean: $usingMean",
             style: getEnteTextTheme(context).smallMuted,
           ),
         Text(
