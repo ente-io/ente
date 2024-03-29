@@ -273,7 +273,8 @@ class FaceLinearClustering {
 
     // Make sure the first face has a clusterId
     final int totalFaces = sortedFaceInfos.length;
-    int clusterID = 1;
+    // set current epoch time as clusterID
+    int clusterID = DateTime.now().millisecondsSinceEpoch;
     if (sortedFaceInfos.isNotEmpty) {
       if (sortedFaceInfos.first.clusterId == null) {
         sortedFaceInfos.first.clusterId = clusterID;
