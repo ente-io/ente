@@ -52,13 +52,6 @@ export default function LargeType({ chars }: { chars: string[] }) {
                     >
                         {char}
                     </span>
-                    <span
-                        style={{
-                            fontSize: "1rem",
-                        }}
-                    >
-                        {i + 1}
-                    </span>
                 </tr>
             ))}
         </table>
