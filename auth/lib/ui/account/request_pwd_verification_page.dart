@@ -5,10 +5,9 @@ import 'package:ente_auth/core/configuration.dart';
 import "package:ente_auth/l10n/l10n.dart";
 import "package:ente_auth/theme/ente_theme.dart";
 import 'package:ente_auth/ui/common/dynamic_fab.dart';
-import "package:ente_auth/utils/crypto_util.dart";
 import "package:ente_auth/utils/dialog_util.dart";
+import 'package:ente_crypto_dart/ente_crypto_dart.dart';
 import 'package:flutter/material.dart';
-import "package:flutter_sodium/flutter_sodium.dart";
 import "package:logging/logging.dart";
 
 typedef OnPasswordVerifiedFn = Future<void> Function(Uint8List bytes);
@@ -17,8 +16,11 @@ class RequestPasswordVerificationPage extends StatefulWidget {
   final OnPasswordVerifiedFn onPasswordVerified;
   final Function? onPasswordError;
 
-  const RequestPasswordVerificationPage(
-      {super.key, required this.onPasswordVerified, this.onPasswordError,});
+  const RequestPasswordVerificationPage({
+    super.key,
+    required this.onPasswordVerified,
+    this.onPasswordError,
+  });
 
   @override
   State<RequestPasswordVerificationPage> createState() =>
@@ -82,15 +84,15 @@ class _RequestPasswordVerificationPageState
           try {
             final attributes = Configuration.instance.getKeyAttributes()!;
             final Uint8List keyEncryptionKey = await CryptoUtil.deriveKey(
-              utf8.encode(_passwordController.text) as Uint8List,
-              Sodium.base642bin(attributes.kekSalt),
+              utf8.encode(_passwordController.text),
+              CryptoUtil.base642bin(attributes.kekSalt),
               attributes.memLimit,
               attributes.opsLimit,
             );
             CryptoUtil.decryptSync(
-              Sodium.base642bin(attributes.encryptedKey),
+              CryptoUtil.base642bin(attributes.encryptedKey),
               keyEncryptionKey,
-              Sodium.base642bin(attributes.keyDecryptionNonce),
+              CryptoUtil.base642bin(attributes.keyDecryptionNonce),
             );
             await dialog.show();
             // pop

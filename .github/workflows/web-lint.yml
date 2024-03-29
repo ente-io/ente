@@ -3,7 +3,7 @@ name: "Lint (web)"
 on:
     # Run on every push to a branch other than main that changes web/
     push:
-        branches-ignore: [main]
+        branches-ignore: [main, "deploy/**"]
         paths:
             - "web/**"
             - ".github/workflows/web-lint.yml"

@@ -98,7 +98,8 @@ func DecryptChaChaBase64(data string, key []byte, nonce string) (string, []byte,
 	// Decode data from base64
 	dataBytes, err := base64.StdEncoding.DecodeString(data)
 	if err != nil {
-		return "", nil, fmt.Errorf("invalid data: %v", err)
+		// safe to log the encrypted data
+		return "", nil, fmt.Errorf("invalid base64 data %s: %v", data, err)
 	}
 	// Decode nonce from base64
 	nonceBytes, err := base64.StdEncoding.DecodeString(nonce)

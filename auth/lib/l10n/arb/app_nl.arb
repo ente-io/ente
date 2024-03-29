@@ -144,6 +144,8 @@
   "enterCodeHint": "Voer de 6-cijferige code van je verificatie-app in",
   "lostDeviceTitle": "Apparaat verloren?",
   "twoFactorAuthTitle": "Tweestapsverificatie",
+  "passkeyAuthTitle": "Passkey verificatie",
+  "verifyPasskey": "Bevestig passkey",
   "recoverAccount": "Account herstellen",
   "enterRecoveryKeyHint": "Voer je herstelsleutel in",
   "recover": "Herstellen",
@@ -404,5 +406,15 @@
   "signOutOtherDevices": "Afmelden bij andere apparaten",
   "doNotSignOut": "Niet uitloggen",
   "hearUsWhereTitle": "Hoe hoorde je over Ente? (optioneel)",
-  "hearUsExplanation": "Wij gebruiken geen tracking. Het zou helpen als je ons vertelt waar je ons gevonden hebt!"
+  "hearUsExplanation": "Wij gebruiken geen tracking. Het zou helpen als je ons vertelt waar je ons gevonden hebt!",
+  "waitingForBrowserRequest": "Wachten op browserverzoek...",
+  "waitingForVerification": "Wachten op verificatie...",
+  "passkey": "Passkey",
+  "developerSettingsWarning": "Weet u zeker dat u de ontwikkelaarsinstellingen wilt wijzigen?",
+  "developerSettings": "Ontwikkelaarsinstellingen",
+  "serverEndpoint": "Server eindpunt",
+  "invalidEndpoint": "Ongeldig eindpunt",
+  "invalidEndpointMessage": "Sorry, het eindpunt dat u hebt ingevoerd is ongeldig. Voer een geldig eindpunt in en probeer het opnieuw.",
+  "endpointUpdatedMessage": "Eindpunt met succes bijgewerkt",
+  "customEndpoint": "Verbonden met {endpoint}"
 }

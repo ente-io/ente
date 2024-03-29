@@ -5,12 +5,16 @@ import 'package:flutter/material.dart';
 final lightThemeData = ThemeData(
   fontFamily: 'Inter',
   brightness: Brightness.light,
+  dividerTheme: const DividerThemeData(
+    color: Colors.black12,
+  ),
   hintColor: const Color.fromRGBO(158, 158, 158, 1),
   primaryColor: const Color.fromRGBO(255, 110, 64, 1),
   primaryColorLight: const Color.fromRGBO(0, 0, 0, 0.541),
   iconTheme: const IconThemeData(color: Colors.black),
   primaryIconTheme:
       const IconThemeData(color: Colors.red, opacity: 1.0, size: 50.0),
+  buttonTheme: const ButtonThemeData(),
   outlinedButtonTheme: buildOutlinedButtonThemeData(
     bgDisabled: const Color.fromRGBO(158, 158, 158, 1),
     bgEnabled: const Color.fromRGBO(0, 0, 0, 1),
@@ -72,24 +76,42 @@ final lightThemeData = ThemeData(
           ? const Color.fromRGBO(255, 255, 255, 1)
           : const Color.fromRGBO(0, 0, 0, 1);
     }),
-  ),  radioTheme: RadioThemeData(
- fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
- if (states.contains(MaterialState.disabled)) { return null; }
- if (states.contains(MaterialState.selected)) { return const Color.fromRGBO(102, 187, 106, 1); }
- return null;
- }),
- ), switchTheme: SwitchThemeData(
- thumbColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
- if (states.contains(MaterialState.disabled)) { return null; }
- if (states.contains(MaterialState.selected)) { return const Color.fromRGBO(102, 187, 106, 1); }
- return null;
- }),
- trackColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
- if (states.contains(MaterialState.disabled)) { return null; }
- if (states.contains(MaterialState.selected)) { return const Color.fromRGBO(102, 187, 106, 1); }
- return null;
- }),
- ), colorScheme: const ColorScheme.light(
+  ),
+  radioTheme: RadioThemeData(
+    fillColor:
+        MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled)) {
+        return null;
+      }
+      if (states.contains(MaterialState.selected)) {
+        return const Color.fromRGBO(102, 187, 106, 1);
+      }
+      return null;
+    }),
+  ),
+  switchTheme: SwitchThemeData(
+    thumbColor:
+        MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled)) {
+        return null;
+      }
+      if (states.contains(MaterialState.selected)) {
+        return const Color.fromRGBO(102, 187, 106, 1);
+      }
+      return null;
+    }),
+    trackColor:
+        MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled)) {
+        return null;
+      }
+      if (states.contains(MaterialState.selected)) {
+        return const Color.fromRGBO(102, 187, 106, 1);
+      }
+      return null;
+    }),
+  ),
+  colorScheme: const ColorScheme.light(
     primary: Colors.black,
     secondary: Color.fromARGB(255, 163, 163, 163),
   ).copyWith(background: const Color.fromRGBO(255, 255, 255, 1)),
@@ -98,6 +120,9 @@ final lightThemeData = ThemeData(
 final darkThemeData = ThemeData(
   fontFamily: 'Inter',
   brightness: Brightness.dark,
+  dividerTheme: const DividerThemeData(
+    color: Colors.white12,
+  ),
   primaryColorLight: const Color.fromRGBO(255, 255, 255, 0.702),
   iconTheme: const IconThemeData(color: Colors.white),
   primaryIconTheme:
@@ -105,6 +130,7 @@ final darkThemeData = ThemeData(
   hintColor: const Color.fromRGBO(158, 158, 158, 1),
   buttonTheme: const ButtonThemeData().copyWith(
     buttonColor: const Color.fromRGBO(45, 194, 98, 1.0),
+    height: 56,
   ),
   textTheme: _buildTextTheme(const Color.fromRGBO(255, 255, 255, 1)),
   outlinedButtonTheme: buildOutlinedButtonThemeData(
@@ -164,24 +190,43 @@ final darkThemeData = ThemeData(
         return const Color.fromRGBO(158, 158, 158, 1);
       }
     }),
-  ), radioTheme: RadioThemeData(
- fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
- if (states.contains(MaterialState.disabled)) { return null; }
- if (states.contains(MaterialState.selected)) { return const Color.fromRGBO(102, 187, 106, 1); }
- return null;
- }),
- ), switchTheme: SwitchThemeData(
- thumbColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
- if (states.contains(MaterialState.disabled)) { return null; }
- if (states.contains(MaterialState.selected)) { return const Color.fromRGBO(102, 187, 106, 1); }
- return null;
- }),
- trackColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
- if (states.contains(MaterialState.disabled)) { return null; }
- if (states.contains(MaterialState.selected)) { return const Color.fromRGBO(102, 187, 106, 1); }
- return null;
- }),
- ), colorScheme: const ColorScheme.dark(primary: Colors.white).copyWith(background: const Color.fromRGBO(0, 0, 0, 1)),
+  ),
+  radioTheme: RadioThemeData(
+    fillColor:
+        MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled)) {
+        return null;
+      }
+      if (states.contains(MaterialState.selected)) {
+        return const Color.fromRGBO(102, 187, 106, 1);
+      }
+      return null;
+    }),
+  ),
+  switchTheme: SwitchThemeData(
+    thumbColor:
+        MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled)) {
+        return null;
+      }
+      if (states.contains(MaterialState.selected)) {
+        return const Color.fromRGBO(102, 187, 106, 1);
+      }
+      return null;
+    }),
+    trackColor:
+        MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled)) {
+        return null;
+      }
+      if (states.contains(MaterialState.selected)) {
+        return const Color.fromRGBO(102, 187, 106, 1);
+      }
+      return null;
+    }),
+  ),
+  colorScheme: const ColorScheme.dark(primary: Colors.white)
+      .copyWith(background: const Color.fromRGBO(0, 0, 0, 1)),
 );
 
 TextTheme _buildTextTheme(Color textColor) {
@@ -400,6 +445,7 @@ OutlinedButtonThemeData buildOutlinedButtonThemeData({
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
       ),
+      fixedSize: const Size.fromHeight(56),
       alignment: Alignment.center,
       padding: const EdgeInsets.fromLTRB(50, 16, 50, 16),
       textStyle: const TextStyle(
@@ -436,7 +482,9 @@ ElevatedButtonThemeData buildElevatedButtonThemeData({
 }) {
   return ElevatedButtonThemeData(
     style: ElevatedButton.styleFrom(
-      foregroundColor: onPrimary, backgroundColor: primary, elevation: elevation,
+      foregroundColor: onPrimary,
+      backgroundColor: primary,
+      elevation: elevation,
       alignment: Alignment.center,
       textStyle: const TextStyle(
         fontWeight: FontWeight.w600,

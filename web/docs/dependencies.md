@@ -1,18 +1,25 @@
 # Dependencies
 
-## Global
+## Dev
 
 These are some global dev dependencies in the root `package.json`. These set the
-baseline for how our code be in all the workspaces in the monorepo.
+baseline for how our code be in all the workspaces in this (yarn) monorepo.
 
 * "prettier" - Formatter
 * "eslint" - Linter
 * "typescript" - Type checker
 
-They also need some support packages:
+They also need some support packages, which come from the leaf `@/build-config`
+package:
 
 * "@typescript-eslint/parser" - Tells ESLint how to read TypeScript syntax
 * "@typescript-eslint/eslint-plugin" - Provides TypeScript rules and presets
+* "eslint-plugin-react-hooks", "eslint-plugin-react-namespace-import" - Some
+  React specific ESLint rules and configurations that are used by the workspaces
+  that have React code.
+* "prettier-plugin-organize-imports" - A Prettier plugin to sort imports.
+* "prettier-plugin-packagejson" - A Prettier plugin to also prettify
+  `package.json`.
 
 ## Utils
 

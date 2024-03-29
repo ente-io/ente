@@ -1,17 +1,74 @@
 {
+    /* TSConfig for a set of vanilla TypeScript files that need to be transpiled
+       into JavaScript that'll then be loaded and run by the main (node) process
+       of our Electron app. */
+
+    /* TSConfig docs: https://aka.ms/tsconfig.json */
+
     "compilerOptions": {
-        "target": "es2021",
-        "module": "commonjs",
+        /* Recommended target, lib and other settings for code running in the
+           version of Node.js bundled with Electron.
+
+           Currently, with Electron 29, this is Node.js 20.9
+           https://www.electronjs.org/blog/electron-29-0
+
+           Note that we cannot do
+
+               "extends": "@tsconfig/node20/tsconfig.json",
+
+           because that sets "lib": ["es2023"]. However (and I don't fully
+           understand what's going on here), that breaks our compilation since
+           tsc can then not find type definitions of things like ReadableStream.
+
+           Adding "dom" to "lib" (e.g. `"lib": ["es2023", "dom"]`) fixes the
+           issue, but that doesn't sound correct - the main Electron process
+           isn't running in a browser context.
+
+           It is possible that we're using some of the types incorrectly. For
+           now, we just omit the "lib" definition and rely on the defaults for
+           the "target" we've chosen. This is also what the current
+           electron-forge starter does:
+
+               yarn create electron-app electron-forge-starter -- --template=webpack-typescript
+
+           Enhancement: Can revisit this later.
+
+           Refs:
+           - https://github.com/electron/electron/issues/27092
+           - https://github.com/electron/electron/issues/16146
+        */
+
+        "target": "es2022",
+        "module": "node16",
+
+        /* Enable various workarounds to play better with CJS libraries */
         "esModuleInterop": true,
-        /* Emit the generated JS into app */
+        /* Speed things up by not type checking `node_modules` */
+        "skipLibCheck": true,
+
+        /* Emit the generated JS into `app/` */
         "outDir": "app",
-        "noImplicitAny": true,
-        "sourceMap": true,
-        "baseUrl": "src",
-        "paths": {
-            "*": ["node_modules/*"]
-        }
+
+        /* Temporary overrides to get things to compile with the older config */
+        "strict": false,
+        "noImplicitAny": true
+
+        /* Below is the state we want */
+        /* Enable these one by one */
+        // "strict": true,
+
+        /* Require the `type` modifier when importing types */
+        // "verbatimModuleSyntax": true
+
+        /* Stricter than strict */
+        // "noImplicitReturns": true,
+        // "noUnusedParameters": true,
+        // "noUnusedLocals": true,
+        // "noFallthroughCasesInSwitch": true,
+        /* e.g. makes array indexing returns undefined */
+        // "noUncheckedIndexedAccess": true,
+        // "exactOptionalPropertyTypes": true,
     },
-    /* Transpile all ts files in src/ */
+    /* Transpile all `.ts` files in `src/` */
     "include": ["src/**/*.ts"]
 }

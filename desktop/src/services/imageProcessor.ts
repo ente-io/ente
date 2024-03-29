@@ -1,18 +1,14 @@
-import { exec } from "child_process";
-import util from "util";
-
-import log from "electron-log";
-import { existsSync, rmSync } from "fs";
+import { existsSync } from "fs";
+import fs from "node:fs/promises";
 import path from "path";
-import { readFile, writeFile } from "promise-fs";
 import { CustomErrors } from "../constants/errors";
-import { isDev } from "../utils/common";
+import { writeStream } from "../main/fs";
+import { logError, logErrorSentry } from "../main/log";
+import { execAsync, isDev } from "../main/util";
+import { ElectronFile } from "../types/ipc";
 import { isPlatform } from "../utils/common/platform";
 import { generateTempFilePath } from "../utils/temp";
-import { logErrorSentry } from "./sentry";
-const shellescape = require("any-shell-escape");
-
-const asyncExec = util.promisify(exec);
+import { deleteTempFile } from "./ffmpeg";
 
 const IMAGE_MAGICK_PLACEHOLDER = "IMAGE_MAGICK";
 const MAX_DIMENSION_PLACEHOLDER = "MAX_DIMENSION";
@@ -59,10 +55,10 @@ const IMAGEMAGICK_HEIC_CONVERT_COMMAND_TEMPLATE = [
 
 const IMAGE_MAGICK_THUMBNAIL_GENERATE_COMMAND_TEMPLATE = [
     IMAGE_MAGICK_PLACEHOLDER,
+    INPUT_PATH_PLACEHOLDER,
     "-auto-orient",
     "-define",
     `jpeg:size=${SAMPLE_SIZE_PLACEHOLDER}x${SAMPLE_SIZE_PLACEHOLDER}`,
-    INPUT_PATH_PLACEHOLDER,
     "-thumbnail",
     `${MAX_DIMENSION_PLACEHOLDER}x${MAX_DIMENSION_PLACEHOLDER}>`,
     "-unsharp",
@@ -82,51 +78,45 @@ export async function convertToJPEG(
     fileData: Uint8Array,
     filename: string,
 ): Promise<Uint8Array> {
+    if (isPlatform("windows")) {
+        throw Error(CustomErrors.WINDOWS_NATIVE_IMAGE_PROCESSING_NOT_SUPPORTED);
+    }
+    const convertedFileData = await convertToJPEG_(fileData, filename);
+    return convertedFileData;
+}
+
+async function convertToJPEG_(
+    fileData: Uint8Array,
+    filename: string,
+): Promise<Uint8Array> {
     let tempInputFilePath: string;
     let tempOutputFilePath: string;
     try {
         tempInputFilePath = await generateTempFilePath(filename);
         tempOutputFilePath = await generateTempFilePath("output.jpeg");
 
-        await writeFile(tempInputFilePath, fileData);
+        await fs.writeFile(tempInputFilePath, fileData);
 
-        await runConvertCommand(tempInputFilePath, tempOutputFilePath);
-
-        if (!existsSync(tempOutputFilePath)) {
-            throw new Error("heic convert output file not found");
-        }
-        const convertedFileData = new Uint8Array(
-            await readFile(tempOutputFilePath),
+        await execAsync(
+            constructConvertCommand(tempInputFilePath, tempOutputFilePath),
         );
-        return convertedFileData;
+
+        return new Uint8Array(await fs.readFile(tempOutputFilePath));
     } catch (e) {
         logErrorSentry(e, "failed to convert heic");
         throw e;
     } finally {
         try {
-            rmSync(tempInputFilePath, { force: true });
+            await fs.rm(tempInputFilePath, { force: true });
         } catch (e) {
             logErrorSentry(e, "failed to remove tempInputFile");
         }
         try {
-            rmSync(tempOutputFilePath, { force: true });
+            await fs.rm(tempOutputFilePath, { force: true });
         } catch (e) {
             logErrorSentry(e, "failed to remove tempOutputFile");
         }
     }
-}
-
-async function runConvertCommand(
-    tempInputFilePath: string,
-    tempOutputFilePath: string,
-) {
-    const convertCmd = constructConvertCommand(
-        tempInputFilePath,
-        tempOutputFilePath,
-    );
-    const escapedCmd = shellescape(convertCmd);
-    log.info("running convert command: " + escapedCmd);
-    await asyncExec(escapedCmd);
 }
 
 function constructConvertCommand(
@@ -166,6 +156,44 @@ function constructConvertCommand(
 }
 
 export async function generateImageThumbnail(
+    inputFile: File | ElectronFile,
+    maxDimension: number,
+    maxSize: number,
+): Promise<Uint8Array> {
+    let inputFilePath = null;
+    let createdTempInputFile = null;
+    try {
+        if (isPlatform("windows")) {
+            throw Error(
+                CustomErrors.WINDOWS_NATIVE_IMAGE_PROCESSING_NOT_SUPPORTED,
+            );
+        }
+        if (!existsSync(inputFile.path)) {
+            const tempFilePath = await generateTempFilePath(inputFile.name);
+            await writeStream(tempFilePath, await inputFile.stream());
+            inputFilePath = tempFilePath;
+            createdTempInputFile = true;
+        } else {
+            inputFilePath = inputFile.path;
+        }
+        const thumbnail = await generateImageThumbnail_(
+            inputFilePath,
+            maxDimension,
+            maxSize,
+        );
+        return thumbnail;
+    } finally {
+        if (createdTempInputFile) {
+            try {
+                await deleteTempFile(inputFilePath);
+            } catch (e) {
+                logError(e, "failed to deleteTempFile");
+            }
+        }
+    }
+}
+
+async function generateImageThumbnail_(
     inputFilePath: string,
     width: number,
     maxSize: number,
@@ -176,17 +204,15 @@ export async function generateImageThumbnail(
         tempOutputFilePath = await generateTempFilePath("thumb.jpeg");
         let thumbnail: Uint8Array;
         do {
-            await runThumbnailGenerationCommand(
-                inputFilePath,
-                tempOutputFilePath,
-                width,
-                quality,
+            await execAsync(
+                constructThumbnailGenerationCommand(
+                    inputFilePath,
+                    tempOutputFilePath,
+                    width,
+                    quality,
+                ),
             );
-
-            if (!existsSync(tempOutputFilePath)) {
-                throw new Error("output thumbnail file not found");
-            }
-            thumbnail = new Uint8Array(await readFile(tempOutputFilePath));
+            thumbnail = new Uint8Array(await fs.readFile(tempOutputFilePath));
             quality -= 10;
         } while (thumbnail.length > maxSize && quality > MIN_QUALITY);
         return thumbnail;
@@ -195,30 +221,13 @@ export async function generateImageThumbnail(
         throw e;
     } finally {
         try {
-            rmSync(tempOutputFilePath, { force: true });
+            await fs.rm(tempOutputFilePath, { force: true });
         } catch (e) {
             logErrorSentry(e, "failed to remove tempOutputFile");
         }
     }
 }
 
-async function runThumbnailGenerationCommand(
-    inputFilePath: string,
-    tempOutputFilePath: string,
-    maxDimension: number,
-    quality: number,
-) {
-    const thumbnailGenerationCmd: string[] =
-        constructThumbnailGenerationCommand(
-            inputFilePath,
-            tempOutputFilePath,
-            maxDimension,
-            quality,
-        );
-    const escapedCmd = shellescape(thumbnailGenerationCmd);
-    log.info("running thumbnail generation command: " + escapedCmd);
-    await asyncExec(escapedCmd);
-}
 function constructThumbnailGenerationCommand(
     inputFilePath: string,
     tempOutputFilePath: string,

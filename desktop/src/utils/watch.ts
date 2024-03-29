@@ -1,4 +1,4 @@
-import { WatchMapping } from "../types";
+import { WatchMapping } from "../types/ipc";
 
 export function isMappingPresent(
     watchMappings: WatchMapping[],

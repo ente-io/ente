@@ -10,8 +10,8 @@ import 'package:url_launcher/url_launcher.dart';
 
 class SupportDevWidget extends StatelessWidget {
   const SupportDevWidget({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {

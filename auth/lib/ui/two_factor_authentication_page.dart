@@ -4,13 +4,13 @@ import 'package:ente_auth/services/user_service.dart';
 import 'package:ente_auth/ui/lifecycle_event_handler.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:pinput/pin_put/pin_put.dart';
+
+import 'package:pinput/pinput.dart';
 
 class TwoFactorAuthenticationPage extends StatefulWidget {
   final String sessionID;
 
-  const TwoFactorAuthenticationPage(this.sessionID, {Key? key})
-      : super(key: key);
+  const TwoFactorAuthenticationPage(this.sessionID, {super.key});
 
   @override
   State<TwoFactorAuthenticationPage> createState() =>
@@ -86,29 +86,31 @@ class _TwoFactorAuthenticationPageState
         const Padding(padding: EdgeInsets.all(32)),
         Padding(
           padding: const EdgeInsets.fromLTRB(40, 0, 40, 0),
-          child: PinPut(
-            fieldsCount: 6,
-            onSubmit: (String code) {
+          child: Pinput(
+            onSubmitted: (String code) {
               _verifyTwoFactorCode(code);
             },
+            length: 6,
+            defaultPinTheme: const PinTheme(),
+            submittedPinTheme: PinTheme(
+              decoration: pinPutDecoration.copyWith(
+                borderRadius: BorderRadius.circular(20.0),
+              ),
+            ),
+            focusedPinTheme: PinTheme(
+              decoration: pinPutDecoration,
+            ),
+            followingPinTheme: PinTheme(
+              decoration: pinPutDecoration.copyWith(
+                borderRadius: BorderRadius.circular(5.0),
+              ),
+            ),
             onChanged: (String pin) {
               setState(() {
                 _code = pin;
               });
             },
             controller: _pinController,
-            submittedFieldDecoration: pinPutDecoration.copyWith(
-              borderRadius: BorderRadius.circular(20.0),
-            ),
-            selectedFieldDecoration: pinPutDecoration,
-            followingFieldDecoration: pinPutDecoration.copyWith(
-              borderRadius: BorderRadius.circular(5.0),
-            ),
-            inputDecoration: const InputDecoration(
-              focusedBorder: InputBorder.none,
-              border: InputBorder.none,
-              counterText: '',
-            ),
             autofocus: true,
           ),
         ),

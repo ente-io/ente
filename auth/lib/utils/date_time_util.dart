@@ -48,25 +48,17 @@ const searchStartYear = 1970;
 
 //Jun 2022
 String getMonthAndYear(DateTime dateTime) {
-  return _months[dateTime.month]! + " " + dateTime.year.toString();
+  return "${_months[dateTime.month]!} ${dateTime.year}";
 }
 
 //Thu, 30 Jun
 String getDayAndMonth(DateTime dateTime) {
-  return _days[dateTime.weekday]! +
-      ", " +
-      dateTime.day.toString() +
-      " " +
-      _months[dateTime.month]!;
+  return "${_days[dateTime.weekday]!}, ${dateTime.day} ${_months[dateTime.month]!}";
 }
 
 //30 Jun, 2022
 String getDateAndMonthAndYear(DateTime dateTime) {
-  return dateTime.day.toString() +
-      " " +
-      _months[dateTime.month]! +
-      ", " +
-      dateTime.year.toString();
+  return "${dateTime.day} ${_months[dateTime.month]!}, ${dateTime.year}";
 }
 
 String getDay(DateTime dateTime) {
@@ -87,13 +79,11 @@ String getAbbreviationOfYear(DateTime dateTime) {
 
 //14:32
 String getTime(DateTime dateTime) {
-  final hours = dateTime.hour > 9
-      ? dateTime.hour.toString()
-      : "0" + dateTime.hour.toString();
-  final minutes = dateTime.minute > 9
-      ? dateTime.minute.toString()
-      : "0" + dateTime.minute.toString();
-  return hours + ":" + minutes;
+  final hours =
+      dateTime.hour > 9 ? dateTime.hour.toString() : "0${dateTime.hour}";
+  final minutes =
+      dateTime.minute > 9 ? dateTime.minute.toString() : "0${dateTime.minute}";
+  return "$hours:$minutes";
 }
 
 //11:22 AM
@@ -103,41 +93,23 @@ String getTimeIn12hrFormat(DateTime dateTime) {
 
 //Thu, Jun 30, 2022 - 14:32
 String getFormattedTime(DateTime dateTime) {
-  return getDay(dateTime) +
-      ", " +
-      getMonth(dateTime) +
-      " " +
-      dateTime.day.toString() +
-      ", " +
-      dateTime.year.toString() +
-      " - " +
-      getTime(dateTime);
+  return "${getDay(dateTime)}, ${getMonth(dateTime)} ${dateTime.day}, ${dateTime.year} - ${getTime(dateTime)}";
 }
 
 //30 Jun'22
 String getFormattedDate(DateTime dateTime) {
-  return dateTime.day.toString() +
-      " " +
-      getMonth(dateTime) +
-      "'" +
-      getAbbreviationOfYear(dateTime);
+  return "${dateTime.day} ${getMonth(dateTime)}'${getAbbreviationOfYear(dateTime)}";
 }
 
 String getFullDate(DateTime dateTime) {
-  return getDay(dateTime) +
-      ", " +
-      getMonth(dateTime) +
-      " " +
-      dateTime.day.toString() +
-      " " +
-      dateTime.year.toString();
+  return "${getDay(dateTime)}, ${getMonth(dateTime)} ${dateTime.day} ${dateTime.year}";
 }
 
 String daysLeft(int futureTime) {
   final int daysLeft = ((futureTime - DateTime.now().microsecondsSinceEpoch) /
           Duration.microsecondsPerDay)
       .ceil();
-  return '$daysLeft day' + (daysLeft <= 1 ? "" : "s");
+  return '$daysLeft day${daysLeft <= 1 ? "" : "s"}';
 }
 
 String formatDuration(Duration position) {
@@ -168,7 +140,7 @@ String formatDuration(Duration position) {
           : '0$seconds';
 
   final formattedTime =
-      '${hoursString == '00' ? '' : hoursString + ':'}$minutesString:$secondsString';
+      '${hoursString == '00' ? '' : '$hoursString:'}$minutesString:$secondsString';
 
   return formattedTime;
 }
@@ -223,7 +195,7 @@ String getDayTitle(int timestamp) {
     }
   }
   if (date.year != DateTime.now().year) {
-    title += " " + date.year.toString();
+    title += " ${date.year}";
   }
   return title;
 }
@@ -233,14 +205,11 @@ String secondsToHHMMSS(int value) {
   h = value ~/ 3600;
   m = ((value - h * 3600)) ~/ 60;
   s = value - (h * 3600) - (m * 60);
-  final String hourLeft =
-      h.toString().length < 2 ? "0" + h.toString() : h.toString();
+  final String hourLeft = h.toString().length < 2 ? "0$h" : h.toString();
 
-  final String minuteLeft =
-      m.toString().length < 2 ? "0" + m.toString() : m.toString();
+  final String minuteLeft = m.toString().length < 2 ? "0$m" : m.toString();
 
-  final String secondsLeft =
-      s.toString().length < 2 ? "0" + s.toString() : s.toString();
+  final String secondsLeft = s.toString().length < 2 ? "0$s" : s.toString();
 
   final String result = "$hourLeft:$minuteLeft:$secondsLeft";
 

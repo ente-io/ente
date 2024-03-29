@@ -47,6 +47,9 @@
       "title": "Bybit"
     },
     {
+      "title": "CERN"
+    },
+    {
       "title": "Channel Island Hosting",
       "slug": "cih",
       "hex": "D14633"
@@ -61,6 +64,11 @@
     },
     {
       "title": "Crowdpear"
+    },
+    {
+      "title": "DCS",
+      "altNames": ["Digital Combat Simulator"],
+      "slug": "dcs"
     },
     {
       "title": "DEGIRO"
@@ -359,6 +367,10 @@
     },
     {
       "title": "Wise"
+    },
+    {
+      "title": "WYZE",
+      "slug": "wyze"
     },
     {
       "title": "X",

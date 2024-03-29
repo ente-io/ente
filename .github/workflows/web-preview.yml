@@ -12,6 +12,7 @@ on:
                     - "accounts"
                     - "auth"
                     - "cast"
+                    - "payments"
                     - "photos"
 
 jobs:

@@ -11,21 +11,20 @@ import 'package:ente_auth/ui/components/buttons/button_widget.dart';
 import 'package:ente_auth/ui/components/dialog_widget.dart';
 import 'package:ente_auth/ui/components/models/button_type.dart';
 import 'package:ente_auth/ui/settings/data/import/import_success.dart';
-import 'package:ente_auth/utils/crypto_util.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/toast_util.dart';
+import 'package:ente_crypto_dart/ente_crypto_dart.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
 
 Future<void> showEncryptedImportInstruction(BuildContext context) async {
   final l10n = context.l10n;
   final result = await showDialogWidget(
     context: context,
-    title: l10n.importFromApp("ente Auth"),
+    title: l10n.importFromApp("Ente Auth"),
     body: l10n.importEnteEncGuide,
     buttons: [
       ButtonWidget(
@@ -80,21 +79,21 @@ Future<void> _decryptExportData(
         try {
           await progressDialog.show();
           final derivedKey = await CryptoUtil.deriveKey(
-            utf8.encode(password) as Uint8List,
-            Sodium.base642bin(enteAuthExport.kdfParams.salt),
+            utf8.encode(password),
+            CryptoUtil.base642bin(enteAuthExport.kdfParams.salt),
             enteAuthExport.kdfParams.memLimit,
             enteAuthExport.kdfParams.opsLimit,
           );
           Uint8List? decryptedContent;
           // Encrypt the key with this derived key
           try {
-            decryptedContent = await CryptoUtil.decryptChaCha(
-              Sodium.base642bin(enteAuthExport.encryptedData),
+            decryptedContent = await CryptoUtil.decryptData(
+              CryptoUtil.base642bin(enteAuthExport.encryptedData),
               derivedKey,
-              Sodium.base642bin(enteAuthExport.encryptionNonce),
+              CryptoUtil.base642bin(enteAuthExport.encryptionNonce),
             );
-          } catch (e,s) {
-            Logger("encryptedImport").warning('failed to decrypt',e,s);
+          } catch (e, s) {
+            Logger("encryptedImport").warning('failed to decrypt', e, s);
             showToast(context, l10n.incorrectPasswordTitle);
             isPasswordIncorrect = true;
           }

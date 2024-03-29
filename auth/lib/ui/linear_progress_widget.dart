@@ -6,8 +6,8 @@ class LinearProgressWidget extends StatelessWidget {
   const LinearProgressWidget({
     required this.color,
     required this.fractionOfStorage,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {

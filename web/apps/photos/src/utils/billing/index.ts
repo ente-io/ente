@@ -17,6 +17,7 @@ const PAYMENT_PROVIDER_STRIPE = "stripe";
 const PAYMENT_PROVIDER_APPSTORE = "appstore";
 const PAYMENT_PROVIDER_PLAYSTORE = "playstore";
 const FREE_PLAN = "free";
+const THIRTY_DAYS_IN_MICROSECONDS = 30 * 24 * 60 * 60 * 1000 * 1000;
 
 enum FAILURE_REASON {
     AUTHENTICATION_FAILED = "authentication_failed",
@@ -149,6 +150,15 @@ export function hasExceededStorageQuota(userDetails: UserDetails) {
             userDetails.usage > userDetails.subscription.storage + bonusStorage
         );
     }
+}
+
+export function isSubscriptionPastDue(subscription: Subscription) {
+    const currentTime = Date.now() * 1000;
+    return (
+        !isSubscriptionCancelled(subscription) &&
+        subscription.expiryTime < currentTime &&
+        subscription.expiryTime >= currentTime - THIRTY_DAYS_IN_MICROSECONDS
+    );
 }
 
 export function isPopularPlan(plan: Plan) {

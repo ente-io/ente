@@ -338,5 +338,22 @@
   "deleteCodeAuthMessage": "Uwierzytelnij, aby usunąć kod",
   "showQRAuthMessage": "Uwierzytelnij, aby pokazać kod QR",
   "confirmAccountDeleteTitle": "Potwierdź usunięcie konta",
-  "confirmAccountDeleteMessage": "To konto jest połączone z innymi aplikacjami ente, jeśli ich używasz.\n\nTwoje przesłane dane, we wszystkich aplikacjach ente, zostaną zaplanowane do usunięcia, a Twoje konto zostanie trwale usunięte."
+  "confirmAccountDeleteMessage": "To konto jest połączone z innymi aplikacjami ente, jeśli ich używasz.\n\nTwoje przesłane dane, we wszystkich aplikacjach ente, zostaną zaplanowane do usunięcia, a Twoje konto zostanie trwale usunięte.",
+  "androidBiometricNotRecognized": "Nie rozpoznano. Spróbuj ponownie.",
+  "@androidBiometricNotRecognized": {
+    "description": "Message to let the user know that authentication was failed. It is used on Android side. Maximum 60 characters."
+  },
+  "androidSignInTitle": "Wymagana autoryzacja",
+  "@androidSignInTitle": {
+    "description": "Message showed as a title in a dialog which indicates the user that they need to scan biometric to continue. It is used on Android side. Maximum 60 characters."
+  },
+  "goToSettings": "Przejdź do Ustawień",
+  "@goToSettings": {
+    "description": "Message showed on a button that the user can click to go to settings pages from the current dialog. It is used on both Android and iOS side. Maximum 30 characters."
+  },
+  "noInternetConnection": "Brak połączenia z Internetem",
+  "pleaseCheckYourInternetConnectionAndTryAgain": "Proszę sprawdzić połączenie internetowe i spróbować ponownie.",
+  "hearUsWhereTitle": "Jak usłyszałeś o Ente? (opcjonalnie)",
+  "waitingForVerification": "Oczekiwanie na weryfikację...",
+  "developerSettings": "Ustawienia deweloperskie"
 }

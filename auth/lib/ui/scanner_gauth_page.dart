@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 
 class ScannerGoogleAuthPage extends StatefulWidget {
-  const ScannerGoogleAuthPage({Key? key}) : super(key: key);
+  const ScannerGoogleAuthPage({super.key});
 
   @override
   State<ScannerGoogleAuthPage> createState() => ScannerGoogleAuthPageState();
@@ -85,7 +85,7 @@ class ScannerGoogleAuthPageState extends State<ScannerGoogleAuthPage> {
       } catch (e) {
         controller.dispose();
         Navigator.of(context).pop();
-        showToast(context, "Error " + e.toString());
+        showToast(context, "Error $e");
       }
     });
   }

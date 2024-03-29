@@ -1,13 +1,14 @@
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/services/update_service.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
+import 'package:ente_auth/utils/platform_util.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 class AppUpdateDialog extends StatefulWidget {
   final LatestVersionInfo? latestVersionInfo;
 
-  const AppUpdateDialog(this.latestVersionInfo, {Key? key}) : super(key: key);
+  const AppUpdateDialog(this.latestVersionInfo, {super.key});
 
   @override
   State<AppUpdateDialog> createState() => _AppUpdateDialogState();
@@ -23,7 +24,7 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
         Padding(
           padding: const EdgeInsets.fromLTRB(8, 4, 0, 4),
           child: Text(
-            "- " + log,
+            "- $log",
             style: Theme.of(context).textTheme.bodySmall!.copyWith(
                   fontSize: 14,
                 ),
@@ -68,7 +69,9 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
               ),
             ),
             onPressed: () => launchUrlString(
-              widget.latestVersionInfo!.url!,
+              PlatformUtil.isDesktop()
+                  ? widget.latestVersionInfo!.release!
+                  : widget.latestVersionInfo!.url!,
               mode: LaunchMode.externalApplication,
             ),
             child: Text(
@@ -80,8 +83,8 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
     );
     final shouldForceUpdate =
         UpdateService.instance.shouldForceUpdate(widget.latestVersionInfo);
-    return WillPopScope(
-      onWillPop: () async => !shouldForceUpdate,
+    return PopScope(
+      canPop: !shouldForceUpdate,
       child: AlertDialog(
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

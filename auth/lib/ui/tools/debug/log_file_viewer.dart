@@ -1,12 +1,12 @@
 import 'dart:io';
-import 'dart:ui';
 
 import 'package:ente_auth/ui/common/loading_widget.dart';
+import 'package:ente_auth/utils/platform_util.dart';
 import 'package:flutter/material.dart';
 
 class LogFileViewer extends StatefulWidget {
   final File file;
-  const LogFileViewer(this.file, {Key? key}) : super(key: key);
+  const LogFileViewer(this.file, {super.key});
 
   @override
   State<LogFileViewer> createState() => _LogFileViewerState();
@@ -42,13 +42,17 @@ class _LogFileViewerState extends State<LogFileViewer> {
     return Container(
       padding: const EdgeInsets.only(left: 12, top: 8, right: 12),
       child: SingleChildScrollView(
-        child: Text(
-          _logs!,
-          style: const TextStyle(
-            fontFeatures: [
-              FontFeature.tabularFigures(),
-            ],
-            height: 1.2,
+        child: SelectableRegion(
+          focusNode: FocusNode(),
+          selectionControls: PlatformUtil.selectionControls,
+          child: Text(
+            _logs!,
+            style: const TextStyle(
+              fontFeatures: [
+                FontFeature.tabularFigures(),
+              ],
+              height: 1.2,
+            ),
           ),
         ),
       ),

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:app_links/app_links.dart';
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/core/event_bus.dart';
 import 'package:ente_auth/ente_theme_data.dart';
@@ -22,28 +23,32 @@ import 'package:ente_auth/ui/home/speed_dial_label_widget.dart';
 import 'package:ente_auth/ui/scanner_page.dart';
 import 'package:ente_auth/ui/settings_page.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
+import 'package:ente_auth/utils/platform_util.dart';
 import 'package:ente_auth/utils/totp_util.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:logging/logging.dart';
 import 'package:move_to_background/move_to_background.dart';
-import 'package:uni_links/uni_links.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
+  const HomePage({super.key});
 
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-  static final _settingsPage = SettingsPage(
+  late final _settingsPage = SettingsPage(
     emailNotifier: UserService.instance.emailValueNotifier,
+    scaffoldKey: scaffoldKey,
   );
   bool _hasLoaded = false;
   bool _isSettingsOpen = false;
   final Logger _logger = Logger("HomePage");
+  final scaffoldKey = GlobalKey<ScaffoldState>();
 
   final TextEditingController _textController = TextEditingController();
   bool _showSearchBox = false;
@@ -144,28 +149,24 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    return WillPopScope(
-      onWillPop: () async {
+    return PopScope(
+      onPopInvoked: (_) async {
         if (_isSettingsOpen) {
-          Navigator.pop(context);
-          return false;
+          scaffoldKey.currentState!.closeDrawer();
+          return;
+        } else if (!Platform.isAndroid) {
+          Navigator.of(context).pop();
+          return;
         }
-        if (Platform.isAndroid) {
-          // ignore: unawaited_futures
-          MoveToBackground.moveTaskToBack();
-          return false;
-        } else {
-          return true;
-        }
+        await MoveToBackground.moveTaskToBack();
       },
+      canPop: false,
       child: Scaffold(
+        key: scaffoldKey,
         drawerEnableOpenDragGesture: !Platform.isAndroid,
-        drawer: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 428),
-          child: Drawer(
-            width: double.infinity,
-            child: _settingsPage,
-          ),
+        drawer: Drawer(
+          width: 428,
+          child: _settingsPage,
         ),
         onDrawerChanged: (isOpened) => _isSettingsOpen = isOpened,
         body: SafeArea(
@@ -179,7 +180,7 @@ class _HomePageState extends State<HomePage> {
         resizeToAvoidBottomInset: false,
         appBar: AppBar(
           title: !_showSearchBox
-              ? const Text('ente Auth')
+              ? const Text('Ente Auth')
               : TextField(
                   autofocus: _searchText.isEmpty,
                   controller: _textController,
@@ -205,6 +206,7 @@ class _HomePageState extends State<HomePage> {
                     _showSearchBox = !_showSearchBox;
                     if (!_showSearchBox) {
                       _textController.clear();
+                      _searchText = "";
                     } else {
                       _searchText = _textController.text;
                     }
@@ -233,10 +235,13 @@ class _HomePageState extends State<HomePage> {
           onManuallySetupTap: _redirectToManualEntryPage,
         );
       } else {
-        final list = ListView.builder(
+        final list = AlignedGridView.count(
+          crossAxisCount: (MediaQuery.sizeOf(context).width ~/ 400)
+              .clamp(1, double.infinity)
+              .toInt(),
           itemBuilder: ((context, index) {
             try {
-              return CodeWidget(_filteredCodes[index]);
+              return ClipRect(child: CodeWidget(_filteredCodes[index]));
             } catch (e) {
               return const Text("Failed");
             }
@@ -255,7 +260,11 @@ class _HomePageState extends State<HomePage> {
             children: [
               Expanded(
                 child: _filteredCodes.isNotEmpty
-                    ? ListView.builder(
+                    ? AlignedGridView.count(
+                        crossAxisCount:
+                            (MediaQuery.sizeOf(context).width ~/ 400)
+                                .clamp(1, double.infinity)
+                                .toInt(),
                         itemBuilder: ((context, index) {
                           Code? code;
                           try {
@@ -290,8 +299,10 @@ class _HomePageState extends State<HomePage> {
 
   Future<bool> _initDeepLinks() async {
     // Platform messages may fail, so we use a try/catch PlatformException.
+    final appLinks = AppLinks();
     try {
-      final String? initialLink = await getInitialLink();
+      String? initialLink;
+      initialLink = await appLinks.getInitialAppLinkString();
       // Parse the link and warn the user, if it is not correct,
       // but keep in mind it could be `null`.
       if (initialLink != null) {
@@ -307,14 +318,16 @@ class _HomePageState extends State<HomePage> {
     }
 
     // Attach a listener to the stream
-    linkStream.listen(
-      (String? link) {
-        _handleDeeplink(context, link);
-      },
-      onError: (err) {
-        _logger.severe(err);
-      },
-    );
+    if (!kIsWeb && !Platform.isLinux) {
+      appLinks.stringLinkStream.listen(
+        (link) {
+          _handleDeeplink(context, link);
+        },
+        onError: (err) {
+          _logger.severe(err);
+        },
+      );
+    }
     return false;
   }
 
@@ -343,6 +356,14 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _getFab() {
+    if (PlatformUtil.isDesktop()) {
+      return FloatingActionButton(
+        onPressed: () => _redirectToManualEntryPage(),
+        child: const Icon(Icons.add),
+        elevation: 8.0,
+        shape: const CircleBorder(),
+      );
+    }
     return SpeedDial(
       icon: Icons.add,
       activeIcon: Icons.close,

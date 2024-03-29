@@ -2232,6 +2232,16 @@ class S {
     );
   }
 
+  /// `Help`
+  String get help {
+    return Intl.message(
+      'Help',
+      name: 'help',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Oops, something went wrong`
   String get oopsSomethingWentWrong {
     return Intl.message(
@@ -4465,13 +4475,13 @@ class S {
     );
   }
 
-  /// `Unfortunately your payment failed due to {reason}`
-  String paymentFailedWithReason(Object reason) {
+  /// `Unfortunately your payment failed. Please contact support and we'll help you out!`
+  String get paymentFailedMessage {
     return Intl.message(
-      'Unfortunately your payment failed due to $reason',
-      name: 'paymentFailedWithReason',
+      'Unfortunately your payment failed. Please contact support and we\'ll help you out!',
+      name: 'paymentFailedMessage',
       desc: '',
-      args: [reason],
+      args: [],
     );
   }
 

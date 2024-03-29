@@ -1,0 +1,11 @@
+{
+    "name": "payments",
+    "version": "0.0.0",
+    "private": true,
+    "dependencies": {
+        "@/next": "*",
+        "@stripe/stripe-js": "^1.17.0",
+        "axios": "^1.6.7",
+        "bootstrap": "4.6.0"
+    }
+}

@@ -86,8 +86,8 @@ class MenuItemWidget extends StatefulWidget {
     this.showOnlyLoadingState = false,
     this.surfaceExecutionStates = true,
     this.alwaysShowSuccessState = false,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<MenuItemWidget> createState() => _MenuItemWidgetState();

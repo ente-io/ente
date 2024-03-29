@@ -1,20 +1,16 @@
-import { app } from "electron";
-import * as log from "electron-log";
+import { app, net } from "electron/main";
 import { existsSync } from "fs";
-import fs from "fs/promises";
-import fetch from "node-fetch";
-import path from "path";
-import { readFile } from "promise-fs";
-import util from "util";
+import fs from "node:fs/promises";
+import path from "node:path";
 import { CustomErrors } from "../constants/errors";
-import { Model } from "../types";
+import { writeStream } from "../main/fs";
+import log, { logErrorSentry } from "../main/log";
+import { execAsync, isDev } from "../main/util";
+import { Model } from "../types/ipc";
 import Tokenizer from "../utils/clip-bpe-ts/mod";
-import { isDev } from "../utils/common";
 import { getPlatform } from "../utils/common/platform";
-import { writeNodeStream } from "./fs";
-import { logErrorSentry } from "./sentry";
-const shellescape = require("any-shell-escape");
-const execAsync = util.promisify(require("child_process").exec);
+import { generateTempFilePath } from "../utils/temp";
+import { deleteTempFile } from "./ffmpeg";
 const jpeg = require("jpeg-js");
 
 const CLIP_MODEL_PATH_PLACEHOLDER = "CLIP_MODEL";
@@ -65,28 +61,18 @@ const TEXT_MODEL_SIZE_IN_BYTES = {
     onnx: 64173509, // 61.2 MB
 };
 
-const MODEL_SAVE_FOLDER = "models";
-
-function getModelSavePath(modelName: string) {
-    let userDataDir: string;
-    if (isDev) {
-        userDataDir = ".";
-    } else {
-        userDataDir = app.getPath("userData");
-    }
-    return path.join(userDataDir, MODEL_SAVE_FOLDER, modelName);
-}
+/** Return the path where the given {@link modelName} is meant to be saved */
+const getModelSavePath = (modelName: string) =>
+    path.join(app.getPath("userData"), "models", modelName);
 
 async function downloadModel(saveLocation: string, url: string) {
     // confirm that the save location exists
     const saveDir = path.dirname(saveLocation);
-    if (!existsSync(saveDir)) {
-        log.info("creating model save dir");
-        await fs.mkdir(saveDir, { recursive: true });
-    }
+    await fs.mkdir(saveDir, { recursive: true });
     log.info("downloading clip model");
-    const resp = await fetch(url);
-    await writeNodeStream(saveLocation, resp.body);
+    const res = await net.fetch(url);
+    if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
+    await writeStream(saveLocation, res.body);
     log.info("clip model downloaded");
 }
 
@@ -110,8 +96,7 @@ export async function getClipImageModelPath(type: "ggml" | "onnx") {
                 const localFileSize = (await fs.stat(modelSavePath)).size;
                 if (localFileSize !== IMAGE_MODEL_SIZE_IN_BYTES[type]) {
                     log.info(
-                        "clip image model size mismatch, downloading again got:",
-                        localFileSize,
+                        `clip image model size mismatch, downloading again got: ${localFileSize}`,
                     );
                     imageModelDownloadInProgress = downloadModel(
                         modelSavePath,
@@ -149,8 +134,7 @@ export async function getClipTextModelPath(type: "ggml" | "onnx") {
             const localFileSize = (await fs.stat(modelSavePath)).size;
             if (localFileSize !== TEXT_MODEL_SIZE_IN_BYTES[type]) {
                 log.info(
-                    "clip text model size mismatch, downloading again got:",
-                    localFileSize,
+                    `clip text model size mismatch, downloading again got: ${localFileSize}`,
                 );
                 textModelDownloadInProgress = true;
                 downloadModel(modelSavePath, TEXT_MODEL_DOWNLOAD_URL[type])
@@ -210,7 +194,51 @@ function getTokenizer() {
     return tokenizer;
 }
 
-export async function computeImageEmbedding(
+export const computeImageEmbedding = async (
+    model: Model,
+    imageData: Uint8Array,
+): Promise<Float32Array> => {
+    let tempInputFilePath = null;
+    try {
+        tempInputFilePath = await generateTempFilePath("");
+        const imageStream = new Response(imageData.buffer).body;
+        await writeStream(tempInputFilePath, imageStream);
+        const embedding = await computeImageEmbedding_(
+            model,
+            tempInputFilePath,
+        );
+        return embedding;
+    } catch (err) {
+        if (isExecError(err)) {
+            const parsedExecError = parseExecError(err);
+            throw Error(parsedExecError);
+        } else {
+            throw err;
+        }
+    } finally {
+        if (tempInputFilePath) {
+            await deleteTempFile(tempInputFilePath);
+        }
+    }
+};
+
+const isExecError = (err: any) => {
+    return err.message.includes("Command failed:");
+};
+
+const parseExecError = (err: any) => {
+    const errMessage = err.message;
+    if (errMessage.includes("Bad CPU type in executable")) {
+        return CustomErrors.UNSUPPORTED_PLATFORM(
+            process.platform,
+            process.arch,
+        );
+    } else {
+        return errMessage;
+    }
+};
+
+async function computeImageEmbedding_(
     model: Model,
     inputFilePath: string,
 ): Promise<Float32Array> {
@@ -244,11 +272,7 @@ export async function computeGGMLImageEmbedding(
             }
         });
 
-        const escapedCmd = shellescape(cmd);
-        log.info("running clip command", escapedCmd);
-        const startTime = Date.now();
-        const { stdout } = await execAsync(escapedCmd);
-        log.info("clip command execution time ", Date.now() - startTime);
+        const { stdout } = await execAsync(cmd);
         // parse stdout and return embedding
         // get the last line of stdout
         const lines = stdout.split("\n");
@@ -257,7 +281,7 @@ export async function computeGGMLImageEmbedding(
         const embeddingArray = new Float32Array(embedding);
         return embeddingArray;
     } catch (err) {
-        logErrorSentry(err, "Error in computeGGMLImageEmbedding");
+        log.error("Failed to compute GGML image embedding", err);
         throw err;
     }
 }
@@ -282,12 +306,29 @@ export async function computeONNXImageEmbedding(
         const imageEmbedding = results["output"].data; // Float32Array
         return normalizeEmbedding(imageEmbedding);
     } catch (err) {
-        logErrorSentry(err, "Error in computeONNXImageEmbedding");
+        log.error("Failed to compute ONNX image embedding", err);
         throw err;
     }
 }
 
 export async function computeTextEmbedding(
+    model: Model,
+    text: string,
+): Promise<Float32Array> {
+    try {
+        const embedding = computeTextEmbedding_(model, text);
+        return embedding;
+    } catch (err) {
+        if (isExecError(err)) {
+            const parsedExecError = parseExecError(err);
+            throw Error(parsedExecError);
+        } else {
+            throw err;
+        }
+    }
+}
+
+async function computeTextEmbedding_(
     model: Model,
     text: string,
 ): Promise<Float32Array> {
@@ -316,11 +357,7 @@ export async function computeGGMLTextEmbedding(
             }
         });
 
-        const escapedCmd = shellescape(cmd);
-        log.info("running clip command", escapedCmd);
-        const startTime = Date.now();
-        const { stdout } = await execAsync(escapedCmd);
-        log.info("clip command execution time ", Date.now() - startTime);
+        const { stdout } = await execAsync(cmd);
         // parse stdout and return embedding
         // get the last line of stdout
         const lines = stdout.split("\n");
@@ -332,7 +369,7 @@ export async function computeGGMLTextEmbedding(
         if (err.message === CustomErrors.MODEL_DOWNLOAD_PENDING) {
             log.info(CustomErrors.MODEL_DOWNLOAD_PENDING);
         } else {
-            logErrorSentry(err, "Error in computeGGMLTextEmbedding");
+            log.error("Failed to compute GGML text embedding", err);
         }
         throw err;
     }
@@ -369,7 +406,7 @@ export async function computeONNXTextEmbedding(
 }
 
 async function getRGBData(inputFilePath: string) {
-    const jpegData = await readFile(inputFilePath);
+    const jpegData = await fs.readFile(inputFilePath);
     let rawImageData;
     try {
         rawImageData = jpeg.decode(jpegData, {

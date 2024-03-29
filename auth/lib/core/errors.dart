@@ -1,9 +1,9 @@
 class InvalidFileError extends ArgumentError {
-  InvalidFileError(String message) : super(message);
+  InvalidFileError(String super.message);
 }
 
 class InvalidFileUploadState extends AssertionError {
-  InvalidFileUploadState(String message) : super(message);
+  InvalidFileUploadState(String super.message);
 }
 
 class SubscriptionAlreadyClaimedError extends Error {}
@@ -30,18 +30,14 @@ class UnauthorizedError extends Error {}
 class RequestCancelledError extends Error {}
 
 class InvalidSyncStatusError extends AssertionError {
-  InvalidSyncStatusError(String message) : super(message);
+  InvalidSyncStatusError(String super.message);
 }
 
 class UnauthorizedEditError extends AssertionError {}
 
 class InvalidStateError extends AssertionError {
-  InvalidStateError(String message) : super(message);
+  InvalidStateError(String super.message);
 }
-
-class KeyDerivationError extends Error {}
-
-class LoginKeyDerivationError extends Error {}
 
 class SrpSetupNotCompleteError extends Error {}
 

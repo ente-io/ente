@@ -87,7 +87,7 @@ To bring up an additional museum node:
       scp scripts/deploy/museum.nginx.conf <instance>:
 
       sudo mv museum.nginx.conf /root/nginx/conf.d
-      sudo systemctl restart nginx
+      sudo systemctl reload nginx
 
 ## Starting
 

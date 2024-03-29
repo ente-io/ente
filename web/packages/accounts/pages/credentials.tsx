@@ -35,6 +35,7 @@ import VerifyMasterPasswordForm, {
 } from "@ente/shared/components/VerifyMasterPasswordForm";
 import { getAccountsURL } from "@ente/shared/network/api";
 import {
+    getToken,
     isFirstLogin,
     setIsFirstLogin,
 } from "@ente/shared/storage/localStorage/helpers";
@@ -86,7 +87,8 @@ export default function Credentials({
                     );
                 }
             }
-            if (key) {
+            const token = getToken();
+            if (key && token) {
                 router.push(APP_HOMES.get(appName));
                 return;
             }

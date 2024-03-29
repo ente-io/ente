@@ -1,17 +1,14 @@
-import { app } from "electron";
+import { app } from "electron/main";
+import { existsSync } from "node:fs";
+import fs from "node:fs/promises";
 import path from "path";
-import { existsSync, mkdir } from "promise-fs";
-
-const ENTE_TEMP_DIRECTORY = "ente";
 
 const CHARACTERS =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
 export async function getTempDirPath() {
-    const tempDirPath = path.join(app.getPath("temp"), ENTE_TEMP_DIRECTORY);
-    if (!existsSync(tempDirPath)) {
-        await mkdir(tempDirPath);
-    }
+    const tempDirPath = path.join(app.getPath("temp"), "ente");
+    await fs.mkdir(tempDirPath, { recursive: true });
     return tempDirPath;
 }
 
