@@ -23,13 +23,13 @@ class PersonAttr {
   final bool isHidden;
   String? avatarFaceId;
   final List<String> faces;
-  final String? birthDatae;
+  final String? birthDate;
   PersonAttr({
     required this.name,
     required this.faces,
     this.avatarFaceId,
     this.isHidden = false,
-    this.birthDatae,
+    this.birthDate,
   });
   // copyWith
   PersonAttr copyWith({
@@ -37,14 +37,14 @@ class PersonAttr {
     List<String>? faces,
     String? avatarFaceId,
     bool? isHidden,
-    String? birthDatae,
+    String? birthDate,
   }) {
     return PersonAttr(
       name: name ?? this.name,
       faces: faces ?? this.faces,
       avatarFaceId: avatarFaceId ?? this.avatarFaceId,
       isHidden: isHidden ?? this.isHidden,
-      birthDatae: birthDatae ?? this.birthDatae,
+      birthDate: birthDate ?? this.birthDate,
     );
   }
 
@@ -54,7 +54,7 @@ class PersonAttr {
         'faces': faces.toList(),
         'avatarFaceId': avatarFaceId,
         'isHidden': isHidden,
-        'birthDatae': birthDatae,
+        'birthDate': birthDate,
       };
 
   // fromJson
@@ -64,7 +64,7 @@ class PersonAttr {
       faces: List<String>.from(json['faces'] as List<dynamic>),
       avatarFaceId: json['avatarFaceId'] as String?,
       isHidden: json['isHidden'] as bool? ?? false,
-      birthDatae: json['birthDatae'] as String?,
+      birthDate: json['birthDatae'] as String?,
     );
   }
 }
