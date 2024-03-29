@@ -225,50 +225,45 @@ class _CodeWidgetState extends State<CodeWidget> {
           ),
           if (PlatformUtil.isDesktop())
             Row(
+              mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                Expanded(
-                  child: SlideAction(
-                    onPressed: _onShowQrPressed,
-                    backgroundColor: Colors.grey.withOpacity(0.1),
-                    borderRadius: const BorderRadius.all(Radius.circular(12.0)),
-                    foregroundColor:
-                        Theme.of(context).colorScheme.inverseBackgroundColor,
-                    icon: Icons.qr_code_2_outlined,
-                    label: "QR",
-                    padding: const EdgeInsets.only(left: 4, right: 0),
-                    spacing: 8,
-                  ),
+                SlideAction(
+                  onPressed: _onShowQrPressed,
+                  backgroundColor: Colors.grey.withOpacity(0.1),
+                  borderRadius: const BorderRadius.all(Radius.circular(12.0)),
+                  foregroundColor:
+                      Theme.of(context).colorScheme.inverseBackgroundColor,
+                  icon: Icons.qr_code_2_outlined,
+                  label: "QR",
+                  padding: const EdgeInsets.only(left: 4, right: 0),
+                  spacing: 8,
                 ),
                 const SizedBox(
                   width: 4,
                 ),
-                Expanded(
-                  child: SlideAction(
-                    onPressed: _onEditPressed,
-                    backgroundColor: Colors.grey.withOpacity(0.1),
-                    borderRadius: const BorderRadius.all(Radius.circular(12.0)),
-                    foregroundColor:
-                        Theme.of(context).colorScheme.inverseBackgroundColor,
-                    icon: Icons.edit_outlined,
-                    label: l10n.edit,
-                    padding: const EdgeInsets.only(left: 4, right: 0),
-                    spacing: 8,
-                  ),
+                SlideAction(
+                  onPressed: _onEditPressed,
+                  backgroundColor: Colors.grey.withOpacity(0.1),
+                  borderRadius: const BorderRadius.all(Radius.circular(12.0)),
+                  foregroundColor:
+                      Theme.of(context).colorScheme.inverseBackgroundColor,
+                  icon: Icons.edit_outlined,
+                  label: l10n.edit,
+                  padding: const EdgeInsets.only(left: 4, right: 0),
+                  spacing: 8,
                 ),
                 const SizedBox(
                   width: 4,
                 ),
-                Expanded(
-                  child: SlideAction(
-                    onPressed: _onDeletePressed,
-                    backgroundColor: Colors.grey.withOpacity(0.1),
-                    borderRadius: const BorderRadius.all(Radius.circular(12.0)),
-                    foregroundColor: const Color(0xFFFE4A49),
-                    icon: Icons.delete,
-                    label: l10n.delete,
-                    padding: const EdgeInsets.only(left: 0, right: 0),
-                    spacing: 8,
-                  ),
+                SlideAction(
+                  onPressed: _onDeletePressed,
+                  backgroundColor: Colors.grey.withOpacity(0.1),
+                  borderRadius: const BorderRadius.all(Radius.circular(12.0)),
+                  foregroundColor: const Color(0xFFFE4A49),
+                  icon: Icons.delete,
+                  label: l10n.delete,
+                  padding: const EdgeInsets.only(left: 0, right: 0),
+                  spacing: 8,
                 ),
               ],
             ),
@@ -563,8 +558,9 @@ class SlideAction extends StatelessWidget {
       onTap: () => onPressed(0),
       child: Container(
         color: backgroundColor,
-        height: 32,
-        child: Row(
+        height: 52,
+        width: 52,
+        child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
@@ -573,7 +569,7 @@ class SlideAction extends StatelessWidget {
               color: foregroundColor,
             ),
             const SizedBox(
-              width: 4,
+              height: 4,
             ),
             Text(
               label,
