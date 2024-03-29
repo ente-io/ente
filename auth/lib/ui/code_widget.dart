@@ -94,7 +94,7 @@ class _CodeWidgetState extends State<CodeWidget> {
                 entries: <ContextMenuEntry>[
                   MenuItem(
                     label: 'QR',
-                    icon: Icons.qr_code,
+                    icon: Icons.qr_code_2_outlined,
                     onSelected: () => _onShowQrPressed(null),
                   ),
                   MenuItem(
