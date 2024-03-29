@@ -20,9 +20,9 @@ export default function PhotoAuditorium({
 
         if (nextSlidePrerendered) {
             const elapsedTime = prerenderTime ? Date.now() - prerenderTime : 0;
-            const delayTime = Math.max(5000 - elapsedTime, 0);
+            const delayTime = Math.max(10000 - elapsedTime, 0);
 
-            if (elapsedTime >= 5000) {
+            if (elapsedTime >= 10000) {
                 setShowPreloadedNextSlide(true);
             } else {
                 timeout = setTimeout(() => {
