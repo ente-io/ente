@@ -2,6 +2,7 @@ import "dart:developer" show log;
 import "dart:io" show Platform;
 import "dart:typed_data";
 
+import "package:flutter/foundation.dart" show kDebugMode;
 import "package:flutter/material.dart";
 import "package:photos/face/db.dart";
 import "package:photos/face/model/face.dart";
@@ -186,6 +187,13 @@ class FaceWidget extends StatelessWidget {
                 if (person != null)
                   Text(
                     person!.attr.name.trim(),
+                    style: Theme.of(context).textTheme.bodySmall,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                  ),
+                if (kDebugMode)
+                  Text(
+                    'Score: ${face.score}',
                     style: Theme.of(context).textTheme.bodySmall,
                     overflow: TextOverflow.ellipsis,
                     maxLines: 1,
