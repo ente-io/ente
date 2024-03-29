@@ -1,4 +1,10 @@
+import { CustomError } from "@ente/shared/error";
+import { addLocalLog, addLogLine } from "@ente/shared/logging";
+import { isPlaybackPossible } from "@ente/shared/media/video-playback";
 import { logError } from "@ente/shared/sentry";
+import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
+import { User } from "@ente/shared/user/types";
+import { convertBytesToHumanReadable } from "@ente/shared/utils/size";
 import {
     FILE_TYPE,
     RAW_FORMATS,
@@ -17,15 +23,6 @@ import {
     FileMagicMetadata,
     FilePublicMagicMetadata,
 } from "types/file";
-import { isArchivedFile } from "utils/magicMetadata";
-
-import { CustomError } from "@ente/shared/error";
-import { addLocalLog, addLogLine } from "@ente/shared/logging";
-import { isPlaybackPossible } from "@ente/shared/media/video-playback";
-import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
-import { User } from "@ente/shared/user/types";
-import { convertBytesToHumanReadable } from "@ente/shared/utils/size";
-import isElectron from "is-electron";
 import { FileTypeInfo } from "types/upload";
 import ComlinkCryptoWorker from "utils/comlink/ComlinkCryptoWorker";
 
@@ -239,7 +236,7 @@ export async function getPlayableVideo(
         if (isPlayable && !forceConvert) {
             return videoBlob;
         } else {
-            if (!forceConvert && !isElectron()) {
+            if (!forceConvert) {
                 return null;
             }
             addLogLine(
@@ -273,19 +270,7 @@ export async function getRenderableImage(fileName: string, imageBlob: Blob) {
                     throw Error(CustomError.UNSUPPORTED_RAW_FORMAT);
                 }
 
-                if (!isElectron()) {
-                    throw Error(CustomError.NOT_AVAILABLE_ON_WEB);
-                }
-                addLogLine(
-                    `RawConverter called for ${fileName}-${convertBytesToHumanReadable(
-                        imageBlob.size,
-                    )}`,
-                );
-                // convertedImageBlob = await imageProcessor.convertToJPEG(
-                //     imageBlob,
-                //     fileName
-                // );
-                addLogLine(`${fileName} successfully converted`);
+                throw Error(CustomError.NOT_AVAILABLE_ON_WEB);
             } catch (e) {
                 try {
                     if (!isFileHEIC(exactType)) {
@@ -372,10 +357,6 @@ export function getUniqueFiles(files: EnteFile[]) {
 
 export const isImageOrVideo = (fileType: FILE_TYPE) =>
     [FILE_TYPE.IMAGE, FILE_TYPE.VIDEO].includes(fileType);
-
-export const getArchivedFiles = (files: EnteFile[]) => {
-    return files.filter(isArchivedFile).map((file) => file.id);
-};
 
 export const createTypedObjectURL = async (blob: Blob, fileName: string) => {
     const type = await getFileType(new File([blob], fileName));
@@ -495,16 +476,9 @@ export const getPreviewableImage = async (
     castToken: string,
 ): Promise<Blob> => {
     try {
-        let fileBlob: Blob;
-        const fileURL =
-            await CastDownloadManager.getCachedOriginalFile(file)[0];
-        if (!fileURL) {
-            fileBlob = await new Response(
-                await CastDownloadManager.downloadFile(castToken, file),
-            ).blob();
-        } else {
-            fileBlob = await (await fetch(fileURL)).blob();
-        }
+        let fileBlob = await new Response(
+            await CastDownloadManager.downloadFile(castToken, file),
+        ).blob();
         if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
             const livePhoto = await decodeLivePhoto(file, fileBlob);
             fileBlob = new Blob([livePhoto.image]);

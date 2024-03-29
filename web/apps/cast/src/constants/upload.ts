@@ -1,11 +1,6 @@
 import { ENCRYPTION_CHUNK_SIZE } from "@ente/shared/crypto/constants";
 import { FILE_TYPE } from "constants/file";
-import {
-    FileTypeInfo,
-    ImportSuggestion,
-    Location,
-    ParsedExtractedMetadata,
-} from "types/upload";
+import { FileTypeInfo, ImportSuggestion } from "types/upload";
 
 // list of format that were missed by type-detection for some files.
 export const WHITELISTED_FILE_FORMATS: FileTypeInfo[] = [
@@ -59,8 +54,6 @@ export const FILE_CHUNKS_COMBINED_FOR_A_UPLOAD_PART = Math.floor(
 
 export const RANDOM_PERCENTAGE_PROGRESS_FOR_PUT = () => 90 + 10 * Math.random();
 
-export const NULL_LOCATION: Location = { latitude: null, longitude: null };
-
 export enum UPLOAD_STAGES {
     START,
     READING_GOOGLE_METADATA_FILES,
@@ -96,13 +89,6 @@ export enum PICKED_UPLOAD_TYPE {
 export const MAX_FILE_SIZE_SUPPORTED = 4 * 1024 * 1024 * 1024; // 4 GB
 
 export const LIVE_PHOTO_ASSET_SIZE_LIMIT = 20 * 1024 * 1024; // 20MB
-
-export const NULL_EXTRACTED_METADATA: ParsedExtractedMetadata = {
-    location: NULL_LOCATION,
-    creationTime: null,
-    width: null,
-    height: null,
-};
 
 export const A_SEC_IN_MICROSECONDS = 1e6;
 
