@@ -36,7 +36,9 @@
     },
     {
       "title": "BorgBase",
-      "altNames": ["borg"],
+      "altNames": [
+        "borg"
+      ],
       "slug": "BorgBase"
     },
     {
@@ -55,6 +57,9 @@
       "hex": "D14633"
     },
     {
+      "title": "ConfigCat"
+    },
+    {
       "title": "Cloudflare"
     },
     {
@@ -67,7 +72,9 @@
     },
     {
       "title": "DCS",
-      "altNames": ["Digital Combat Simulator"],
+      "altNames": [
+        "Digital Combat Simulator"
+      ],
       "slug": "dcs"
     },
     {
@@ -115,8 +122,13 @@
     },
     {
       "title": "Gosuslugi",
-      "altNames": ["Госуслуги"],
+      "altNames": [
+        "Госуслуги"
+      ],
       "slug": "Gosuslugi"
+    },
+    {
+      "title": "Habbo"
     },
     {
       "title": "Healthchecks.io",
@@ -180,13 +192,24 @@
     },
     {
       "title": "Mastodon",
-      "altNames": ["mstdn", "fediscience", "mathstodon", "fosstodon"],
+      "altNames": [
+        "mstdn",
+        "fediscience",
+        "mathstodon",
+        "fosstodon"
+      ],
       "slug": "mastodon",
       "hex": "6364FF"
     },
     {
+      "title": "Mercado Livre",
+      "slug": "mercado_livre"
+    },
+    {
       "title": "Murena",
-      "altNames": ["eCloud"],
+      "altNames": [
+        "eCloud"
+      ],
       "slug": "ecloud"
     },
     {
@@ -285,6 +308,9 @@
       "hex": "000000"
     },
     {
+      "title": "Sendgrid"
+    },
+    {
       "title": "service-bw"
     },
     {
@@ -374,12 +400,17 @@
     },
     {
       "title": "X",
-      "altNames": ["twitter"],
+      "altNames": [
+        "twitter"
+      ],
       "slug": "x"
     },
     {
       "title": "Yandex",
-      "altNames": ["Ya", "Яндекс"],
+      "altNames": [
+        "Ya",
+        "Яндекс"
+      ],
       "slug": "Yandex"
     }
   ]
