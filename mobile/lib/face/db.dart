@@ -681,6 +681,20 @@ class FaceMLDataDB {
     await db.execute(createClusterSummaryTable);
   }
 
+  /// WARNING: This will delete ALL data in the database! Only use this for debug/testing purposes!
+  Future<void> dropPeople() async {
+    final db = await instance.database;
+
+    await db.execute(deletePeopleTable);
+    await db.execute(dropClustersTable);
+    await db.execute(dropNotPersonFeedbackTable);
+
+    // await db.execute(createFacesTable);
+    await db.execute(createPeopleTable);
+    await db.execute(createClusterTable);
+    await db.execute(createNotPersonFeedbackTable);
+  }
+
   Future<void> removePersonFromFiles(List<EnteFile> files, Person p) async {
     final db = await instance.database;
     final result = await db.rawQuery(

@@ -167,16 +167,39 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
+            title: "Reset feedback",
+          ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async {
+            await FaceMLDataDB.instance.dropPeople();
+            Bus.instance.fire(PeopleChangedEvent());
+            showShortToast(context, "Done");
+          },
+        ),
+        sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
             title: "Reset feedback & labels",
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
-            await FaceMLDataDB.instance.resetClusterIDs();
-            await FaceMLDataDB.instance.dropClustersAndPeople();
-            Bus.instance.fire(PeopleChangedEvent());
-            showShortToast(context, "Done");
+            await showChoiceDialog(
+              context,
+              title: "Are you sure?",
+              body:
+                  "You will need to again cluster all the faces. You can drop feedback if you want to return to original cluster labels",
+              firstButtonLabel: "Yes, confirm",
+              firstButtonOnTap: () async {
+                await FaceMLDataDB.instance.resetClusterIDs();
+                await FaceMLDataDB.instance.dropClustersAndPeople();
+                Bus.instance.fire(PeopleChangedEvent());
+                showShortToast(context, "Done");
+              },
+            );
           },
         ),
         sectionOptionSpacing,
