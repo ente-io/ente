@@ -1,4 +1,35 @@
-# Notes for Developers
+# Development
+
+## Yarn commands
+
+### yarn dev:*
+
+Launch the app in development mode. There is one `yarn dev:foo` for each app,
+e.g. `yarn dev:auth`. `yarn dev` is a shortcut for `yarn dev:photos`.
+
+The ports are different for the main apps (3000), various sidecars (3001, 3002).
+
+### yarn build:*
+
+Build a production export for the app. This is a bunch of static HTML/JS/CSS
+that can be then deployed to any web server.
+
+There is one `yarn build:foo` for each app, e.g. `yarn build:auth`. The output
+will be placed in `apps/<foo>/out`, e.g. `apps/auth/out`.
+
+### yarn preview:*
+
+Build a production export and start a local web server to serve it. This uses
+Python's built in web server, and is okay for quick testing but should not be
+used in production.
+
+The ports are the same as that for `yarn dev:*`
+
+### lint, lint-fix
+
+Use `yarn lint` to check that your code formatting is as expected, and that
+there are no linter errors. Use `yarn lint-fix` to try and automatically fix the
+issues.
 
 ## Monorepo
 
