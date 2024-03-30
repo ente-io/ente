@@ -44,6 +44,10 @@ Future<void> initSystemTray() async {
   Menu menu = Menu(
     items: [
       MenuItem(
+        key: 'hide_window',
+        label: 'Hide Window',
+      ),
+      MenuItem(
         key: 'show_window',
         label: 'Show Window',
       ),
