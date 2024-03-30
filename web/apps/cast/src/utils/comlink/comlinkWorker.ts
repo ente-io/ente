@@ -1,6 +1,5 @@
 import { addLocalLog } from "@ente/shared/logging";
 import { Remote, wrap } from "comlink";
-// import { WorkerElectronCacheStorageClient } from 'services/workerElectronCache/client';
 
 export class ComlinkWorker<T extends new () => InstanceType<T>> {
     public remote: Promise<Remote<InstanceType<T>>>;
@@ -17,7 +16,6 @@ export class ComlinkWorker<T extends new () => InstanceType<T>> {
         addLocalLog(() => `Initiated ${this.name}`);
         const comlink = wrap<T>(this.worker);
         this.remote = new comlink() as Promise<Remote<InstanceType<T>>>;
-        // expose(WorkerElectronCacheStorageClient, this.worker);
     }
 
     public terminate() {

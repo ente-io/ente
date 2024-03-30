@@ -933,12 +933,11 @@ packages:
   home_widget:
     dependency: "direct main"
     description:
-      path: "."
-      ref: main
-      resolved-ref: "49158ce4a517e87817dc84c6b96c00639281229a"
-      url: "https://github.com/ente-io/FlutterHomeWidget"
-    source: git
-    version: "0.4.1"
+      name: home_widget
+      sha256: "29565bfee4b32eaf9e7e8b998d504618b779a74b2b1ac62dd4dac7468e66f1a3"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.5.0"
   html:
     dependency: transitive
     description:
