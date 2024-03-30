@@ -128,7 +128,7 @@ export default function App(props: EnteAppProps) {
                         </Overlay>
                     )}
                     {showNavbar && <AppNavbar isMobile={isMobile} />}
-                    <Component {...pageProps} />
+                    {isI18nReady && <Component {...pageProps} />}
                 </AppContext.Provider>
             </ThemeProvider>
         </CacheProvider>
