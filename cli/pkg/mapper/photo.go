@@ -73,7 +73,7 @@ func MapCollectionToAlbum(ctx context.Context, collection api.Collection, holder
 }
 
 func MapApiFileToPhotoFile(ctx context.Context, album model.RemoteAlbum, file api.File, holder *secrets.KeyHolder) (*model.RemoteFile, error) {
-	if file.IsDeleted {
+	if file.IsRemovedFromAlbum() {
 		return nil, errors.New("file is deleted")
 	}
 	albumKey := album.AlbumKey.MustDecrypt(holder.DeviceKey)
