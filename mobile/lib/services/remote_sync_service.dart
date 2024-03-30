@@ -715,6 +715,7 @@ class RemoteSyncService {
     final Set<int> alreadyClaimedLocalFilesGenID = {};
 
     final List<EnteFile> toBeInserted = [];
+    final List<String> remoteFileLocIdsWithMissingGPSData = [];
     for (EnteFile remoteFile in diff) {
       // existingFile will be either set to existing collectionID+localID or
       // to the unclaimed aka not already linked to any uploaded file.
@@ -731,6 +732,16 @@ class RemoteSyncService {
             _shouldClearCache(remoteFile, existingFile)) {
           needsGalleryReload = true;
           await clearCache(remoteFile);
+        }
+
+        //To fix missing GPS data for files uploaded from affected Android devices
+        //after the photo_manager package update
+        //Can remove this code after couple of releases.
+        if (Platform.isAndroid &&
+            existingFile != null &&
+            existingFile.hasLocation &&
+            !remoteFile.hasLocation) {
+          remoteFileLocIdsWithMissingGPSData.add(remoteFile.localID!);
         }
       }
 
@@ -840,6 +851,14 @@ class RemoteSyncService {
       // 'force reload home gallery'
       Bus.instance.fire(ForceReloadHomeGalleryEvent("remoteSync"));
     }
+
+    //To fix missing GPS data for files uploaded from affected Android devices
+    //after the photo_manager package update
+    //Can remove this code after couple of releases.
+    await FileUpdationDB.instance.insertMultiple(
+      remoteFileLocIdsWithMissingGPSData,
+      FileUpdationDB.modificationTimeUpdated,
+    );
   }
 
   bool _shouldClearCache(EnteFile remoteFile, EnteFile existingFile) {
