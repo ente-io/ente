@@ -419,11 +419,7 @@ class FaceMlService {
 
           await FaceMLDataDB.instance
               .updatePersonIDForFaceIDIFNotSet(faceIdToCluster);
-          if (offset == 0) {
-            offset += offsetIncrement;
-          } else {
-            offset += bucketSize;
-          }
+          offset += offsetIncrement;
         }
       } else {
         // Read all the embeddings from the database, in a map from faceID to embedding
