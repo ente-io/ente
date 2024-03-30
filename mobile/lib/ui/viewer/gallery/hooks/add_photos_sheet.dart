@@ -203,7 +203,14 @@ class AddPhotosPhotoWidget extends StatelessWidget {
       }
     } catch (e) {
       if (e is StateError) {
-        final PermissionState ps = await PhotoManager.requestPermissionExtend();
+        final PermissionState ps = await PhotoManager.requestPermissionExtend(
+          requestOption: const PermissionRequestOption(
+            androidPermission: AndroidPermission(
+              type: RequestType.common,
+              mediaLocation: true,
+            ),
+          ),
+        );
         if (ps != PermissionState.authorized && ps != PermissionState.limited) {
           await showChoiceDialog(
             context,
