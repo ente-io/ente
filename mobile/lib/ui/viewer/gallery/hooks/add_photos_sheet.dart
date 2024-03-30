@@ -21,6 +21,7 @@ import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/components/title_bar_title_widget.dart";
 import "package:photos/ui/viewer/gallery/gallery.dart";
 import "package:photos/utils/dialog_util.dart";
+import "package:photos/utils/photo_manager_util.dart";
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 
 Future<dynamic> showAddPhotosSheet(
@@ -203,14 +204,7 @@ class AddPhotosPhotoWidget extends StatelessWidget {
       }
     } catch (e) {
       if (e is StateError) {
-        final PermissionState ps = await PhotoManager.requestPermissionExtend(
-          requestOption: const PermissionRequestOption(
-            androidPermission: AndroidPermission(
-              type: RequestType.common,
-              mediaLocation: true,
-            ),
-          ),
-        );
+        final PermissionState ps = await requestPhotoMangerPermissions();
         if (ps != PermissionState.authorized && ps != PermissionState.limited) {
           await showChoiceDialog(
             context,
