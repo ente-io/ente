@@ -61,7 +61,14 @@ class LocalSyncService {
       return;
     }
     if (Platform.isAndroid && AppLifecycleService.instance.isForeground) {
-      final permissionState = await PhotoManager.requestPermissionExtend();
+      final permissionState = await PhotoManager.requestPermissionExtend(
+        requestOption: const PermissionRequestOption(
+          androidPermission: AndroidPermission(
+            type: RequestType.common,
+            mediaLocation: true,
+          ),
+        ),
+      );
       if (permissionState != PermissionState.authorized) {
         _logger.severe(
           "sync requested with invalid permission",

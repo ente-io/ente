@@ -91,7 +91,14 @@ class GrantPermissionsWidget extends StatelessWidget {
           key: const ValueKey("grantPermissionButton"),
           child: Text(S.of(context).grantPermission),
           onPressed: () async {
-            final state = await PhotoManager.requestPermissionExtend();
+            final state = await PhotoManager.requestPermissionExtend(
+              requestOption: const PermissionRequestOption(
+                androidPermission: AndroidPermission(
+                  type: RequestType.common,
+                  mediaLocation: true,
+                ),
+              ),
+            );
             if (state == PermissionState.authorized ||
                 state == PermissionState.limited) {
               await SyncService.instance.onPermissionGranted(state);

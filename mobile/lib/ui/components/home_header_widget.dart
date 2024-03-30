@@ -48,7 +48,14 @@ class _HomeHeaderWidgetState extends State<HomeHeaderWidget> {
           onTap: () async {
             try {
               final PermissionState state =
-                  await PhotoManager.requestPermissionExtend();
+                  await PhotoManager.requestPermissionExtend(
+                requestOption: const PermissionRequestOption(
+                  androidPermission: AndroidPermission(
+                    type: RequestType.common,
+                    mediaLocation: true,
+                  ),
+                ),
+              );
               await LocalSyncService.instance.onUpdatePermission(state);
             } on Exception catch (e) {
               Logger("HomeHeaderWidget").severe(
