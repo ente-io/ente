@@ -305,8 +305,12 @@ class ClusterFeedbackService {
     }
   }
 
-  Future<void> removePersonFromFiles(List<EnteFile> files, Person p) {
-    return FaceMLDataDB.instance.removePersonFromFiles(files, p);
+  Future<void> removeFilesFromPerson(List<EnteFile> files, Person p) {
+    return FaceMLDataDB.instance.removeFilesFromPerson(files, p);
+  }
+
+  Future<void> removeFilesFromCluster(List<EnteFile> files, int clusterID) {
+    return FaceMLDataDB.instance.removeFilesFromCluster(files, clusterID);
   }
 
   Future<bool> checkAndDoAutomaticMerges(Person p) async {

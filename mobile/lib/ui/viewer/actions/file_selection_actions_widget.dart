@@ -401,12 +401,13 @@ class _FileSelectionActionsWidgetState
       ),
     );
 
+    // if (widget.type == GalleryType.cluster && widget.clusterID != null) {
     if (widget.type == GalleryType.cluster) {
       items.add(
         SelectionActionButton(
           labelText: 'Remove',
           icon: CupertinoIcons.minus,
-          onTap: () => showToast(context, 'yet to implement'),
+          onTap: anyUploadedFiles ? _onRemoveFromClusterClicked : null,
         ),
       );
     }
@@ -690,9 +691,52 @@ class _FileSelectionActionsWidgetState
     );
     if (actionResult?.action != null) {
       if (actionResult!.action == ButtonAction.first) {
-        await ClusterFeedbackService.instance.removePersonFromFiles(
+        await ClusterFeedbackService.instance.removeFilesFromPerson(
           widget.selectedFiles.files.toList(),
           widget.person!,
+        );
+      }
+      Bus.instance.fire(PeopleChangedEvent());
+    }
+    widget.selectedFiles.clearAll();
+    if (mounted) {
+      setState(() => {});
+    }
+  }
+
+  Future<void> _onRemoveFromClusterClicked() async {
+    if (widget.clusterID == null) {
+      showShortToast(context, 'Cluster ID is null. Cannot remove files.');
+      return;
+    }
+    final actionResult = await showActionSheet(
+      context: context,
+      buttons: [
+        ButtonWidget(
+          labelText: S.of(context).yesRemove,
+          buttonType: ButtonType.neutral,
+          buttonSize: ButtonSize.large,
+          shouldStickToDarkTheme: true,
+          buttonAction: ButtonAction.first,
+          isInAlert: true,
+        ),
+        ButtonWidget(
+          labelText: S.of(context).cancel,
+          buttonType: ButtonType.secondary,
+          buttonSize: ButtonSize.large,
+          buttonAction: ButtonAction.second,
+          shouldStickToDarkTheme: true,
+          isInAlert: true,
+        ),
+      ],
+      title: "Remove these photos?",
+      actionSheetType: ActionSheetType.defaultActionSheet,
+    );
+    if (actionResult?.action != null) {
+      if (actionResult!.action == ButtonAction.first) {
+        await ClusterFeedbackService.instance.removeFilesFromCluster(
+          widget.selectedFiles.files.toList(),
+          widget.clusterID!,
         );
       }
       Bus.instance.fire(PeopleChangedEvent());

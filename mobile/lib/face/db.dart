@@ -695,7 +695,7 @@ class FaceMLDataDB {
     await db.execute(createNotPersonFeedbackTable);
   }
 
-  Future<void> removePersonFromFiles(List<EnteFile> files, Person p) async {
+  Future<void> removeFilesFromPerson(List<EnteFile> files, Person p) async {
     final db = await instance.database;
     final result = await db.rawQuery(
       'SELECT $faceIDColumn FROM $facesTable LEFT JOIN $clustersTable '
@@ -712,6 +712,26 @@ class FaceMLDataDB {
       final faceID = faceRow[faceIDColumn] as String;
       faceIDToClusterID[faceID] = maxClusterID + 1;
       maxClusterID = maxClusterID + 1;
+    }
+    await forceUpdateClusterIds(faceIDToClusterID);
+  }
+
+  Future<void> removeFilesFromCluster(
+    List<EnteFile> files,
+    int clusterID,
+  ) async {
+    final db = await instance.database;
+    final result = await db.rawQuery(
+      'SELECT $faceIDColumn FROM $facesTable '
+      'WHERE $facesTable.$faceClusterId = ? AND $facesTable.$fileIDColumn IN (${files.map((e) => e.uploadedFileID).join(",")})',
+      [clusterID],
+    );
+    final Map<String, int> faceIDToClusterID = {};
+    int maxClusterID = DateTime.now().millisecondsSinceEpoch;
+    for (final faceRow in result) {
+      maxClusterID += 1;
+      final faceID = faceRow[faceIDColumn] as String;
+      faceIDToClusterID[faceID] = maxClusterID;
     }
     await forceUpdateClusterIds(faceIDToClusterID);
   }
