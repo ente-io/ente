@@ -4,22 +4,10 @@ import { euclidean } from "hdbscan";
 import { addLogLine } from "@ente/shared/logging";
 import {
     FacesCluster,
-    // Cluster,
-    // FaceDescriptor,
     FaceWithEmbedding,
     MLSyncContext,
     NearestCluster,
 } from "types/machineLearning";
-// import { getAllFacesMap } from 'utils/storage/mlStorage';
-
-// export function getClusterSummary(cluster: Cluster): FaceDescriptor {
-// const faceScore = (f) => f.detection.score; // f.alignedRect.box.width *
-// return cluster
-//     .map((f) => this.allFaces[f].face)
-//     .sort((f1, f2) => faceScore(f2) - faceScore(f1))[0].descriptor;
-// const descriptors = cluster.map((f) => this.allFaces[f].embedding);
-// return f32Average(descriptors);
-// }
 
 export function updateClusterSummaries(syncContext: MLSyncContext) {
     if (

@@ -1,15 +1,6 @@
 import * as tf from "@tensorflow/tfjs-core";
-
-// import {
-//     FaceDetection,
-//     FaceLandmarks68,
-//     WithFaceDescriptor,
-//     WithFaceLandmarks,
-// } from 'face-api.js';
 import { DebugInfo } from "hdbscan";
 import PQueue from "p-queue";
-
-// import { Point as D3Point, RawNodeDatum } from 'react-d3-tree/lib/types/common';
 import { EnteFile } from "types/file";
 import { Dimensions } from "types/image";
 import { Box, Point } from "../../../thirdparty/face-api/classes";
@@ -24,32 +15,8 @@ export interface MLSyncResult {
     error?: Error;
 }
 
-export interface DebugFace {
-    fileId: string;
-    // face: FaceApiResult;
-    face: AlignedFace;
-    embedding: FaceEmbedding;
-    faceImage: FaceImage;
-}
-
-// export interface MLDebugResult {
-//     allFaces: DebugFace[];
-//     clustersWithNoise: FacesClustersWithNoise;
-//     tree: RawNodeDatum;
-//     tsne: TSNEData;
-// }
-
 export declare type FaceImage = Array<Array<Array<number>>>;
 export declare type FaceImageBlob = Blob;
-
-// export declare type FaceApiResult = WithFaceDescriptor<
-//     WithFaceLandmarks<
-//         {
-//             detection: FaceDetection;
-//         },
-//         FaceLandmarks68
-//     >
-// >;
 
 export declare type FaceDescriptor = Float32Array;
 
@@ -78,12 +45,6 @@ export interface NearestCluster {
     cluster: FacesCluster;
     distance: number;
 }
-
-// export interface TSNEData {
-//     width: number;
-//     height: number;
-//     dataset: D3Point[];
-// }
 
 export declare type Landmark = Point;
 
