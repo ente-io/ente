@@ -947,11 +947,6 @@
   resolved "https://registry.yarnpkg.com/@webgpu/types/-/types-0.1.38.tgz#6fda4b410edc753d3213c648320ebcf319669020"
   integrity sha512-7LrhVKz2PRh+DD7+S+PVaFd5HxaWQvoMqBbsV9fNJO1pjUs1P8bM2vQVNfk+3URTqbuTI7gkXi0rfsN0IadoBA==
 
-"@zip.js/zip.js@2.4.2":
-  version "2.4.2"
-  resolved "https://registry.yarnpkg.com/@zip.js/zip.js/-/zip.js-2.4.2.tgz#7c2d4b381c0f73dffa1d02ef630c4168ebd5cc4a"
-  integrity sha512-D4xr9g7U625Q01lQASr9g1sQWEGhndyd+G3v3OvY/qH3pwaJDpbVDy+TO6yEq7c8teQdjjTiiBvlcQcVtT+itg==
-
 acorn-jsx@^5.3.2:
   version "5.3.2"
   resolved "https://registry.yarnpkg.com/acorn-jsx/-/acorn-jsx-5.3.2.tgz#7ed5bb55908b3b2f1bc55c6af1653bada7f07937"
@@ -2828,7 +2823,7 @@ libsodium-wrappers@0.7.9:
   dependencies:
     libsodium "^0.7.0"
 
-libsodium@^0.7.0:
+libsodium@0.7.9, libsodium@^0.7.0:
   version "0.7.9"
   resolved "https://registry.yarnpkg.com/libsodium/-/libsodium-0.7.9.tgz#4bb7bcbf662ddd920d8795c227ae25bbbfa3821b"
   integrity sha512-gfeADtR4D/CM0oRUviKBViMGXZDgnFdMKMzHsvBdqLBHd9ySi6EtYnmuhHVDDYgYpAO8eU8hEY+F8vIUAPh08A==
