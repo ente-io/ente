@@ -271,7 +271,7 @@ const PRSExample: React.FC = () => {
             totalSlides={3}
             isPlaying={true}
         >
-            <CustomSlider>
+            <Slider>
                 <Slide index={0}>
                     <Img
                         src="/images/onboarding-lock/1x.png"
@@ -309,18 +309,34 @@ const PRSExample: React.FC = () => {
                         <TextContainer>{t("HERO_SLIDE_3")}</TextContainer>
                     </SlideContents>
                 </Slide>
-            </CustomSlider>
+            </Slider>
             <CustomDotGroup />
         </CarouselProvider>
     );
 };
 
-const CustomSlider = styled(Slider)`
-    border: 1px solid green;
-`;
-
 const CustomDotGroup = styled(DotGroup)`
-    border: 1px solid tomato;
+    margin-block-start: 2px;
+    margin-block-end: 24px;
+
+    button {
+        margin-inline-end: 12px;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        border: 0;
+        background-color: #fff;
+        opacity: 0.5;
+        transition: opacity 0.6s ease;
+        /* background-clip: padding-box; */
+        /* border-top: 10px solid transparent; */
+        /* border-bottom: 10px solid transparent; */
+    }
+
+    button.carousel__dot--selected {
+        background-color: #51cd7c;
+        opacity: 1;
+    }
 `;
 
 const SlideContents = styled("div")`
