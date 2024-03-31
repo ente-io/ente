@@ -273,13 +273,41 @@ const PRSExample: React.FC = () => {
         >
             <CustomSlider>
                 <Slide index={0}>
-                    <SlideContents>I am the first Slide.</SlideContents>
+                    <Img
+                        src="/images/onboarding-lock/1x.png"
+                        srcSet="/images/onboarding-lock/2x.png 2x,
+/images/onboarding-lock/3x.png 3x"
+                    />
+                    <FeatureText>
+                        <Trans i18nKey={"HERO_SLIDE_1_TITLE"} />
+                    </FeatureText>
+                    <TextContainer>{t("HERO_SLIDE_1")}</TextContainer>
                 </Slide>
                 <Slide index={1}>
-                    <SlideContents>I am the second Slide.</SlideContents>
+                    <SlideContents>
+                        <Img
+                            src="/images/onboarding-safe/1x.png"
+                            srcSet="/images/onboarding-safe/2x.png 2x,
+                /images/onboarding-safe/3x.png 3x"
+                        />
+                        <FeatureText>
+                            <Trans i18nKey={"HERO_SLIDE_2_TITLE"} />
+                        </FeatureText>
+                        <TextContainer>{t("HERO_SLIDE_2")}</TextContainer>
+                    </SlideContents>
                 </Slide>
                 <Slide index={2}>
-                    <SlideContents>I am the third Slide.</SlideContents>
+                    <SlideContents>
+                        <Img
+                            src="/images/onboarding-sync/1x.png"
+                            srcSet="/images/onboarding-sync/2x.png 2x,
+                /images/onboarding-sync/3x.png 3x"
+                        />
+                        <FeatureText>
+                            <Trans i18nKey={"HERO_SLIDE_3_TITLE"} />
+                        </FeatureText>
+                        <TextContainer>{t("HERO_SLIDE_3")}</TextContainer>
+                    </SlideContents>
                 </Slide>
             </CustomSlider>
             <CustomDotGroup />
@@ -293,50 +321,9 @@ const CustomSlider = styled(Slider)`
 
 const CustomDotGroup = styled(DotGroup)`
     border: 1px solid tomato;
-    margin-block-start: 1rem;
 `;
 
 const SlideContents = styled("div")`
     display: flex;
     flex-direction: column;
 `;
-
-export const Slideshow2: React.FC = () => {
-    return (
-        <Carousel controls={false}>
-            <Carousel.Item>
-                <Img
-                    src="/images/onboarding-lock/1x.png"
-                    srcSet="/images/onboarding-lock/2x.png 2x,
-                /images/onboarding-lock/3x.png 3x"
-                />
-                <FeatureText>
-                    <Trans i18nKey={"HERO_SLIDE_1_TITLE"} />
-                </FeatureText>
-                <TextContainer>{t("HERO_SLIDE_1")}</TextContainer>
-            </Carousel.Item>
-            <Carousel.Item>
-                <Img
-                    src="/images/onboarding-safe/1x.png"
-                    srcSet="/images/onboarding-safe/2x.png 2x,
-                /images/onboarding-safe/3x.png 3x"
-                />
-                <FeatureText>
-                    <Trans i18nKey={"HERO_SLIDE_2_TITLE"} />
-                </FeatureText>
-                <TextContainer>{t("HERO_SLIDE_2")}</TextContainer>
-            </Carousel.Item>
-            <Carousel.Item>
-                <Img
-                    src="/images/onboarding-sync/1x.png"
-                    srcSet="/images/onboarding-sync/2x.png 2x,
-                /images/onboarding-sync/3x.png 3x"
-                />
-                <FeatureText>
-                    <Trans i18nKey={"HERO_SLIDE_3_TITLE"} />
-                </FeatureText>
-                <TextContainer>{t("HERO_SLIDE_3")}</TextContainer>
-            </Carousel.Item>
-        </Carousel>
-    );
-};
