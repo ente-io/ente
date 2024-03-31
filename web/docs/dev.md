@@ -6,11 +6,18 @@ We recommend VS Code, with the following extensions:
 
 - Prettier - reformats your code automatically (enable format on save),
 - ESLint - warns you about issues
-- vscode-styled-components - improved support for our CSS in JS library
+
+Optionally, if you're going to make many changes to the CSS in JS, you might
+also find it useful to install the _vscode-styled-components_ extension.
+
+## Yarn commands
 
 Make sure you're on yarn 1.x series (aka yarn "classic").
 
-## Yarn commands
+### yarn install
+
+Installs dependencies. This needs to be done once, and thereafter wherever there
+is a change in `yarn.lock` (e.g. when pulling the latest upstream).
 
 ### yarn dev:*
 
