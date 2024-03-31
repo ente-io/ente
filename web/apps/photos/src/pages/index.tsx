@@ -22,6 +22,15 @@ import { getKey, SESSION_KEYS } from "@ente/shared/storage/sessionStorage";
 import isElectron from "is-electron";
 import { Trans } from "react-i18next";
 
+import {
+    ButtonBack,
+    ButtonNext,
+    CarouselProvider,
+    Slide,
+    Slider,
+} from "pure-react-carousel";
+import "pure-react-carousel/dist/react-carousel.es.css";
+
 const Container = styled("div")`
     display: flex;
     flex: 1;
@@ -186,7 +195,7 @@ export default function LandingPage() {
                 <>
                     <SlideContainer>
                         <EnteLogo height={24} sx={{ mb: 8 }} />
-                        <Slideshow />
+                        {true ? <PRSExample /> : <Slideshow />}
                     </SlideContainer>
                     <MobileBox>
                         <Button
@@ -220,6 +229,64 @@ export default function LandingPage() {
 }
 
 const Slideshow: React.FC = () => {
+    return (
+        <Carousel controls={false}>
+            <Carousel.Item>
+                <Img
+                    src="/images/onboarding-lock/1x.png"
+                    srcSet="/images/onboarding-lock/2x.png 2x,
+                /images/onboarding-lock/3x.png 3x"
+                />
+                <FeatureText>
+                    <Trans i18nKey={"HERO_SLIDE_1_TITLE"} />
+                </FeatureText>
+                <TextContainer>{t("HERO_SLIDE_1")}</TextContainer>
+            </Carousel.Item>
+            <Carousel.Item>
+                <Img
+                    src="/images/onboarding-safe/1x.png"
+                    srcSet="/images/onboarding-safe/2x.png 2x,
+                /images/onboarding-safe/3x.png 3x"
+                />
+                <FeatureText>
+                    <Trans i18nKey={"HERO_SLIDE_2_TITLE"} />
+                </FeatureText>
+                <TextContainer>{t("HERO_SLIDE_2")}</TextContainer>
+            </Carousel.Item>
+            <Carousel.Item>
+                <Img
+                    src="/images/onboarding-sync/1x.png"
+                    srcSet="/images/onboarding-sync/2x.png 2x,
+                /images/onboarding-sync/3x.png 3x"
+                />
+                <FeatureText>
+                    <Trans i18nKey={"HERO_SLIDE_3_TITLE"} />
+                </FeatureText>
+                <TextContainer>{t("HERO_SLIDE_3")}</TextContainer>
+            </Carousel.Item>
+        </Carousel>
+    );
+};
+
+const PRSExample: React.FC = () => {
+    return (
+        <CarouselProvider
+            naturalSlideWidth={100}
+            naturalSlideHeight={125}
+            totalSlides={3}
+        >
+            <Slider>
+                <Slide index={0}>I am the first Slide.</Slide>
+                <Slide index={1}>I am the second Slide.</Slide>
+                <Slide index={2}>I am the third Slide.</Slide>
+            </Slider>
+            <ButtonBack>Back</ButtonBack>
+            <ButtonNext>Next</ButtonNext>
+        </CarouselProvider>
+    );
+};
+
+export const Slideshow2: React.FC = () => {
     return (
         <Carousel controls={false}>
             <Carousel.Item>
