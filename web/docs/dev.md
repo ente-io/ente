@@ -1,5 +1,15 @@
 # Development
 
+## Editor setup
+
+We recommend VS Code, with the following extensions:
+
+- Prettier - reformats your code automatically (enable format on save),
+- ESLint - warns you about issues
+- vscode-styled-components - improved support for our CSS in JS library
+
+Make sure you're on yarn 1.x series (aka yarn "classic").
+
 ## Yarn commands
 
 ### yarn dev:*
