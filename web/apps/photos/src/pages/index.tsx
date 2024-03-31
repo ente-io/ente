@@ -320,17 +320,15 @@ const CustomDotGroup = styled(DotGroup)`
     margin-block-end: 24px;
 
     button {
-        margin-inline-end: 12px;
+        margin-inline-end: 14px;
         width: 10px;
         height: 10px;
         border-radius: 50%;
+        padding: 0;
         border: 0;
         background-color: #fff;
         opacity: 0.5;
         transition: opacity 0.6s ease;
-        /* background-clip: padding-box; */
-        /* border-top: 10px solid transparent; */
-        /* border-bottom: 10px solid transparent; */
     }
 
     button.carousel__dot--selected {
