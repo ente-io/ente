@@ -22,13 +22,7 @@ import { getKey, SESSION_KEYS } from "@ente/shared/storage/sessionStorage";
 import isElectron from "is-electron";
 import { Trans } from "react-i18next";
 
-import {
-    ButtonBack,
-    ButtonNext,
-    CarouselProvider,
-    Slide,
-    Slider,
-} from "pure-react-carousel";
+import { CarouselProvider, DotGroup, Slide, Slider } from "pure-react-carousel";
 import "pure-react-carousel/dist/react-carousel.es.css";
 
 const Container = styled("div")`
@@ -271,21 +265,41 @@ const Slideshow: React.FC = () => {
 const PRSExample: React.FC = () => {
     return (
         <CarouselProvider
-            naturalSlideWidth={100}
-            naturalSlideHeight={125}
+            naturalSlideWidth={400}
+            naturalSlideHeight={300}
+            isIntrinsicHeight={true}
             totalSlides={3}
             isPlaying={true}
         >
-            <Slider>
-                <Slide index={0}>I am the first Slide.</Slide>
-                <Slide index={1}>I am the second Slide.</Slide>
-                <Slide index={2}>I am the third Slide.</Slide>
-            </Slider>
-            <ButtonBack>Back</ButtonBack>
-            <ButtonNext>Next</ButtonNext>
+            <CustomSlider>
+                <Slide index={0}>
+                    <SlideContents>I am the first Slide.</SlideContents>
+                </Slide>
+                <Slide index={1}>
+                    <SlideContents>I am the second Slide.</SlideContents>
+                </Slide>
+                <Slide index={2}>
+                    <SlideContents>I am the third Slide.</SlideContents>
+                </Slide>
+            </CustomSlider>
+            <CustomDotGroup />
         </CarouselProvider>
     );
 };
+
+const CustomSlider = styled(Slider)`
+    border: 1px solid green;
+`;
+
+const CustomDotGroup = styled(DotGroup)`
+    border: 1px solid tomato;
+    margin-block-start: 1rem;
+`;
+
+const SlideContents = styled("div")`
+    display: flex;
+    flex-direction: column;
+`;
 
 export const Slideshow2: React.FC = () => {
     return (
