@@ -274,6 +274,7 @@ const PRSExample: React.FC = () => {
             naturalSlideWidth={100}
             naturalSlideHeight={125}
             totalSlides={3}
+            isPlaying={true}
         >
             <Slider>
                 <Slide index={0}>I am the first Slide.</Slide>
