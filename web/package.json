@@ -26,7 +26,11 @@
         "dev:payments": "yarn workspace payments next dev -p 3001",
         "dev:photos": "yarn workspace photos next dev",
         "lint": "yarn prettier --check . && yarn workspaces run eslint .",
-        "lint-fix": "yarn prettier --write . && yarn workspaces run eslint --fix ."
+        "lint-fix": "yarn prettier --write . && yarn workspaces run eslint --fix .",
+        "preview:accounts": "yarn build:accounts && python3 -m http.server -d apps/accounts/out 3001",
+        "preview:auth": "yarn build:auth && python3 -m http.server -d apps/auth/out 3000",
+        "preview:cast": "yarn build:cast && python3 -m http.server -d apps/accounts/out 3001",
+        "preview:photos": "yarn build:photos && python3 -m http.server -d apps/photos/out 3000"
     },
     "resolutions": {
         "libsodium": "0.7.9"

@@ -4,14 +4,9 @@ import HTTPService from "@ente/shared/network/HTTPService";
 import { getEndpoint } from "@ente/shared/network/api";
 import { logError } from "@ente/shared/sentry";
 import localForage from "@ente/shared/storage/localForage";
-import { REPORT_REASON } from "constants/publicCollection";
 import { Collection, CollectionPublicMagicMetadata } from "types/collection";
 import { EncryptedEnteFile, EnteFile } from "types/file";
-import {
-    AbuseReportDetails,
-    AbuseReportRequest,
-    LocalSavedPublicCollectionFiles,
-} from "types/publicCollection";
+import { LocalSavedPublicCollectionFiles } from "types/publicCollection";
 import { decryptFile, mergeMetadata, sortFiles } from "utils/file";
 
 const ENDPOINT = getEndpoint();
@@ -372,30 +367,6 @@ export const verifyPublicCollectionPassword = async (
         return jwtToken;
     } catch (e) {
         logError(e, "failed to verify public collection password");
-        throw e;
-    }
-};
-
-export const reportAbuse = async (
-    token: string,
-    url: string,
-    reason: REPORT_REASON,
-    details: AbuseReportDetails,
-) => {
-    try {
-        if (!token) {
-            return;
-        }
-        const abuseReportRequest: AbuseReportRequest = { url, reason, details };
-
-        await HTTPService.post(
-            `${ENDPOINT}/public-collection/report-abuse`,
-            abuseReportRequest,
-            null,
-            { "X-Auth-Access-Token": token },
-        );
-    } catch (e) {
-        logError(e, "failed to post abuse report");
         throw e;
     }
 };

@@ -1,15 +1,9 @@
-import AppNavbar from "@ente/shared/components/Navbar/app";
-import { t } from "i18next";
-import { createContext, useEffect, useRef, useState } from "react";
-
 import { setupI18n } from "@/ui/i18n";
-import { CacheProvider } from "@emotion/react";
 import {
-    APP_TITLES,
     APPS,
+    APP_TITLES,
     CLIENT_PACKAGE_NAMES,
 } from "@ente/shared/apps/constants";
-import { EnteAppProps } from "@ente/shared/apps/types";
 import { Overlay } from "@ente/shared/components/Container";
 import DialogBox from "@ente/shared/components/DialogBox";
 import {
@@ -23,11 +17,12 @@ import {
 } from "@ente/shared/components/DialogBoxV2/types";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { MessageContainer } from "@ente/shared/components/MessageContainer";
+import AppNavbar from "@ente/shared/components/Navbar/app";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import ElectronAPIs from "@ente/shared/electron";
 import { AppUpdateInfo } from "@ente/shared/electron/types";
 import { CustomError } from "@ente/shared/error";
-import { eventBus, Events } from "@ente/shared/events";
+import { Events, eventBus } from "@ente/shared/events";
 import { useLocalState } from "@ente/shared/hooks/useLocalState";
 import { addLogLine } from "@ente/shared/logging";
 import {
@@ -36,7 +31,7 @@ import {
 } from "@ente/shared/logging/web";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { logError } from "@ente/shared/sentry";
-import { getData, LS_KEYS } from "@ente/shared/storage/localStorage";
+import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import {
     getLocalMapEnabled,
     getToken,
@@ -44,7 +39,6 @@ import {
 } from "@ente/shared/storage/localStorage/helpers";
 import { getTheme } from "@ente/shared/themes";
 import { THEME_COLOR } from "@ente/shared/themes/constants";
-import createEmotionCache from "@ente/shared/themes/createEmotionCache";
 import { SetTheme } from "@ente/shared/themes/types";
 import ArrowForward from "@mui/icons-material/ArrowForward";
 import { CssBaseline, useMediaQuery } from "@mui/material";
@@ -52,10 +46,13 @@ import { ThemeProvider } from "@mui/material/styles";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Notification from "components/Notification";
 import { REDIRECTS } from "constants/redirects";
+import { t } from "i18next";
 import isElectron from "is-electron";
+import { AppProps } from "next/app";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import "photoswipe/dist/photoswipe.css";
+import { createContext, useEffect, useRef, useState } from "react";
 import LoadingBar from "react-top-loading-bar";
 import DownloadManager from "services/download";
 import exportService from "services/export";
@@ -115,15 +112,8 @@ type AppContextType = {
 
 export const AppContext = createContext<AppContextType>(null);
 
-// Client-side cache, shared for the whole session of the user in the browser.
-const clientSideEmotionCache = createEmotionCache();
-
-export default function App(props: EnteAppProps) {
-    const {
-        Component,
-        emotionCache = clientSideEmotionCache,
-        pageProps,
-    } = props;
+export default function App(props: AppProps) {
+    const { Component, pageProps } = props;
     const router = useRouter();
     const [isI18nReady, setIsI18nReady] = useState<boolean>(false);
     const [loading, setLoading] = useState(false);
@@ -390,7 +380,7 @@ export default function App(props: EnteAppProps) {
         });
 
     return (
-        <CacheProvider value={emotionCache}>
+        <>
             <Head>
                 <title>
                     {isI18nReady
@@ -491,6 +481,6 @@ export default function App(props: EnteAppProps) {
                     )}
                 </AppContext.Provider>
             </ThemeProvider>
-        </CacheProvider>
+        </>
     );
 }

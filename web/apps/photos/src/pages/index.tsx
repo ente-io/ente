@@ -1,26 +1,26 @@
 import Login from "@ente/accounts/components/Login";
 import SignUp from "@ente/accounts/components/SignUp";
-import EnteSpinner from "@ente/shared/components/EnteSpinner";
-import { getData, LS_KEYS } from "@ente/shared/storage/localStorage";
-import { Button, styled, Typography, TypographyProps } from "@mui/material";
-import { t } from "i18next";
-import { useRouter } from "next/router";
-import { useContext, useEffect, useState } from "react";
-import Carousel from "react-bootstrap/Carousel";
-import { AppContext } from "./_app";
-
 import { APPS } from "@ente/shared/apps/constants";
 import { EnteLogo } from "@ente/shared/components/EnteLogo";
+import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { saveKeyInSessionStore } from "@ente/shared/crypto/helpers";
 import ElectronAPIs from "@ente/shared/electron";
 import { getAlbumsURL } from "@ente/shared/network/api";
 import { logError } from "@ente/shared/sentry";
 import localForage from "@ente/shared/storage/localForage";
+import { getData, LS_KEYS } from "@ente/shared/storage/localStorage";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { getKey, SESSION_KEYS } from "@ente/shared/storage/sessionStorage";
+import { Button, styled, Typography, TypographyProps } from "@mui/material";
+import { t } from "i18next";
 import isElectron from "is-electron";
+import { useRouter } from "next/router";
+import { CarouselProvider, DotGroup, Slide, Slider } from "pure-react-carousel";
+import "pure-react-carousel/dist/react-carousel.es.css";
+import { useContext, useEffect, useState } from "react";
 import { Trans } from "react-i18next";
+import { AppContext } from "./_app";
 
 const Container = styled("div")`
     display: flex;
@@ -186,47 +186,7 @@ export default function LandingPage() {
                 <>
                     <SlideContainer>
                         <EnteLogo height={24} sx={{ mb: 8 }} />
-                        <Carousel controls={false}>
-                            <Carousel.Item>
-                                <Img
-                                    src="/images/onboarding-lock/1x.png"
-                                    srcSet="/images/onboarding-lock/2x.png 2x,
-                                        /images/onboarding-lock/3x.png 3x"
-                                />
-                                <FeatureText>
-                                    <Trans i18nKey={"HERO_SLIDE_1_TITLE"} />
-                                </FeatureText>
-                                <TextContainer>
-                                    {t("HERO_SLIDE_1")}
-                                </TextContainer>
-                            </Carousel.Item>
-                            <Carousel.Item>
-                                <Img
-                                    src="/images/onboarding-safe/1x.png"
-                                    srcSet="/images/onboarding-safe/2x.png 2x,
-                                        /images/onboarding-safe/3x.png 3x"
-                                />
-                                <FeatureText>
-                                    <Trans i18nKey={"HERO_SLIDE_2_TITLE"} />
-                                </FeatureText>
-                                <TextContainer>
-                                    {t("HERO_SLIDE_2")}
-                                </TextContainer>
-                            </Carousel.Item>
-                            <Carousel.Item>
-                                <Img
-                                    src="/images/onboarding-sync/1x.png"
-                                    srcSet="/images/onboarding-sync/2x.png 2x,
-                                        /images/onboarding-sync/3x.png 3x"
-                                />
-                                <FeatureText>
-                                    <Trans i18nKey={"HERO_SLIDE_3_TITLE"} />
-                                </FeatureText>
-                                <TextContainer>
-                                    {t("HERO_SLIDE_3")}
-                                </TextContainer>
-                            </Carousel.Item>
-                        </Carousel>
+                        <Slideshow />
                     </SlideContainer>
                     <MobileBox>
                         <Button
@@ -258,3 +218,83 @@ export default function LandingPage() {
         </Container>
     );
 }
+
+const Slideshow: React.FC = () => {
+    return (
+        <CarouselProvider
+            naturalSlideWidth={400}
+            naturalSlideHeight={300}
+            isIntrinsicHeight={true}
+            totalSlides={3}
+            isPlaying={true}
+        >
+            <Slider>
+                <Slide index={0}>
+                    <Img
+                        src="/images/onboarding-lock/1x.png"
+                        srcSet="/images/onboarding-lock/2x.png 2x,
+/images/onboarding-lock/3x.png 3x"
+                    />
+                    <FeatureText>
+                        <Trans i18nKey={"HERO_SLIDE_1_TITLE"} />
+                    </FeatureText>
+                    <TextContainer>{t("HERO_SLIDE_1")}</TextContainer>
+                </Slide>
+                <Slide index={1}>
+                    <SlideContents>
+                        <Img
+                            src="/images/onboarding-safe/1x.png"
+                            srcSet="/images/onboarding-safe/2x.png 2x,
+                /images/onboarding-safe/3x.png 3x"
+                        />
+                        <FeatureText>
+                            <Trans i18nKey={"HERO_SLIDE_2_TITLE"} />
+                        </FeatureText>
+                        <TextContainer>{t("HERO_SLIDE_2")}</TextContainer>
+                    </SlideContents>
+                </Slide>
+                <Slide index={2}>
+                    <SlideContents>
+                        <Img
+                            src="/images/onboarding-sync/1x.png"
+                            srcSet="/images/onboarding-sync/2x.png 2x,
+                /images/onboarding-sync/3x.png 3x"
+                        />
+                        <FeatureText>
+                            <Trans i18nKey={"HERO_SLIDE_3_TITLE"} />
+                        </FeatureText>
+                        <TextContainer>{t("HERO_SLIDE_3")}</TextContainer>
+                    </SlideContents>
+                </Slide>
+            </Slider>
+            <CustomDotGroup />
+        </CarouselProvider>
+    );
+};
+
+const CustomDotGroup = styled(DotGroup)`
+    margin-block-start: 2px;
+    margin-block-end: 24px;
+
+    button {
+        margin-inline-end: 14px;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        padding: 0;
+        border: 0;
+        background-color: #fff;
+        opacity: 0.5;
+        transition: opacity 0.6s ease;
+    }
+
+    button.carousel__dot--selected {
+        background-color: #51cd7c;
+        opacity: 1;
+    }
+`;
+
+const SlideContents = styled("div")`
+    display: flex;
+    flex-direction: column;
+`;

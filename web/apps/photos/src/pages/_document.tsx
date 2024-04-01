@@ -1,7 +1,3 @@
-import DocumentPage, {
-    EnteDocumentProps,
-} from "@ente/shared/next/pages/_document";
+import DocumentPage from "@ente/shared/next/pages/_document";
 
-export default function Document(props: EnteDocumentProps) {
-    return <DocumentPage {...props} />;
-}
+export default DocumentPage;

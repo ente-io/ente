@@ -1,15 +1,13 @@
-import { t } from "i18next";
-import { useContext, useState } from "react";
-
-// import FixLargeThumbnails from 'components/FixLargeThumbnail';
 import RecoveryKey from "@ente/shared/components/RecoveryKey";
 import {
     ACCOUNTS_PAGES,
     PHOTOS_PAGES as PAGES,
 } from "@ente/shared/constants/pages";
 import TwoFactorModal from "components/TwoFactor/Modal";
+import { t } from "i18next";
 import { useRouter } from "next/router";
 import { AppContext } from "pages/_app";
+import { useContext, useState } from "react";
 // import mlIDbStorage from 'utils/storage/mlIDbStorage';
 import {
     configurePasskeyRecovery,

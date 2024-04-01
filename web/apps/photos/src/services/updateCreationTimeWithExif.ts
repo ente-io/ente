@@ -1,6 +1,5 @@
 import { logError } from "@ente/shared/sentry";
 import { FIX_OPTIONS } from "components/FixCreationTime";
-import { SetProgressTracker } from "components/FixLargeThumbnail";
 import { EnteFile } from "types/file";
 import {
     changeFileCreationTime,
@@ -20,6 +19,13 @@ const EXIF_TIME_TAGS = [
     "DateCreated",
     "MetadataDate",
 ];
+
+export type SetProgressTracker = React.Dispatch<
+    React.SetStateAction<{
+        current: number;
+        total: number;
+    }>
+>;
 
 export async function updateCreationTimeWithExif(
     filesToBeUpdated: EnteFile[],
