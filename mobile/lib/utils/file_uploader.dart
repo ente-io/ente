@@ -383,7 +383,6 @@ class FileUploader {
     int collectionID,
     bool forcedUpload,
   ) async {
-    await verifyMediaLocationAccess();
     await checkNetworkForUpload(isForceUpload: forcedUpload);
     if (!forcedUpload) {
       final fileOnDisk = await FilesDB.instance.getFile(file.generatedID!);
