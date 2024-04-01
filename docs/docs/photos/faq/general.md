@@ -74,3 +74,29 @@ If you would like to fund the development of this project, please consider
 ## How do I pronounce ente?
 
 It's like cafe 😊. kaf-_ay_. en-_tay_.
+
+## Does Ente apply compression to uploaded photos?
+
+Ente does not apply compression to uploaded photos. The file size of your photos in Ente will be similar to the original file sizes you have.
+
+## Can I add photos from a shared album to albums that I created in Ente?
+
+Currently, Ente does not support adding photos from a shared album to your personal albums. If you want to include photos from a shared album in your own albums, you will need to ask the owner of the photos to add them to your album. 
+
+## How do I ensure that the Ente desktop app stays up to date on my system?
+
+Ente desktop includes an auto-update feature, ensuring that whenever updates are deployed, the app will automatically download and install them. You don't need to manually update the software.
+
+## Can I sync a folder containing multiple subfolders, each representing an album?
+
+Yes, when you drag and drop the folder onto the desktop app, the app will detect the multiple folders and prompt you to choose whether you want to create a single album or separate albums for each folder.
+
+## What is the difference between **Magic** and **Content** search results on the desktop?
+
+**Magic** is where you can search for long queries. Like, "baby in red dress", or "dog playing at the beach".
+
+**Content** is where you can search for single-words. Like, "car" or "pizza".
+
+## How do I identify which files experienced upload issues within the desktop app?
+
+Check the sections within the upload progress bar for "Failed Uploads," "Ignored Uploads," and "Unsuccessful Uploads."
