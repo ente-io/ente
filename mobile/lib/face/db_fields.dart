@@ -35,13 +35,15 @@ const fcFaceId = 'face_id';
 // fcClusterId & fcFaceId are the primary keys and fcClusterId is a foreign key to faces table
 const createFaceClustersTable = '''
 CREATE TABLE IF NOT EXISTS $faceClustersTable (
-  $fcClusterID	INTEGER NOT NULL,
   $fcFaceId	TEXT NOT NULL,
-  PRIMARY KEY($fcClusterID, $fcFaceId),
+  $fcClusterID INTEGER NOT NULL,
+  PRIMARY KEY($fcFaceId),
   FOREIGN KEY($fcFaceId) REFERENCES $facesTable($faceIDColumn)
 );
 ''';
-
+// -- Creating a non-unique index on clusterID for query optimization
+const fcClusterIDIndex =
+    '''CREATE INDEX IF NOT EXISTS idx_fcClusterID ON faceClustersTable(fcClusterID);''';
 const dropFaceClustersTable = 'DROP TABLE IF EXISTS $faceClustersTable';
 //##endregion
 

@@ -169,7 +169,8 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
                       curve: Curves.easeOut,
                     );
               } else if (snapshot.hasError) {
-                _logger.severe('Failed to load sections: ', snapshot.error);
+                _logger.severe('Failed to load sections: ', snapshot.error,
+                    snapshot.stackTrace,);
                 if (kDebugMode) {
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 72),

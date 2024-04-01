@@ -80,7 +80,7 @@ class FaceMlService {
 
   bool isInitialized = false;
   bool isImageIndexRunning = false;
-  int kParallelism = 15;
+  int kParallelism = 100;
 
   Future<void> init({bool initializeImageMlIsolate = false}) async {
     return _initLock.synchronized(() async {
@@ -524,6 +524,7 @@ class FaceMlService {
         try {
           final EnteWatch? w = kDebugMode ? EnteWatch("face_em_fetch") : null;
           w?.start();
+          w?.log('starting remote fetch for ${fileIds.length} files');
           final res =
               await RemoteFileMLService.instance.getFilessEmbedding(fileIds);
           w?.logAndReset('fetched ${res.mlData.length} embeddings');
@@ -1222,5 +1223,4 @@ class FaceMlService {
     return indexedFileIds.containsKey(id) &&
         indexedFileIds[id]! >= faceMlVersion;
   }
-
 }
