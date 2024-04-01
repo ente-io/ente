@@ -27,8 +27,26 @@ const createFacesTable = '''CREATE TABLE IF NOT EXISTS $facesTable (
 const deleteFacesTable = 'DROP TABLE IF EXISTS $facesTable';
 // End of Faces Table Fields & Schema Queries
 
+//##region Face Clusters Table Fields & Schema Queries
+const faceClustersTable = 'face_clusters';
+const fcClusterID = 'cluster_id';
+const fcFaceId = 'face_id';
+
+// fcClusterId & fcFaceId are the primary keys and fcClusterId is a foreign key to faces table
+const createFaceClustersTable = '''
+CREATE TABLE IF NOT EXISTS $faceClustersTable (
+  $fcClusterID	INTEGER NOT NULL,
+  $fcFaceId	TEXT NOT NULL,
+  PRIMARY KEY($fcClusterID, $fcFaceId),
+  FOREIGN KEY($fcFaceId) REFERENCES $facesTable($faceIDColumn)
+);
+''';
+
+const dropFaceClustersTable = 'DROP TABLE IF EXISTS $faceClustersTable';
+//##endregion
+
 // People Table Fields & Schema Queries
-const personTable = 'people';
+const personTable = 'person';
 const idColumn = 'id';
 const nameColumn = 'name';
 const personHiddenColumn = 'hidden';
@@ -49,18 +67,18 @@ const deletePersonTable = 'DROP TABLE IF EXISTS $personTable';
 //End People Table Fields & Schema Queries
 
 // Clusters Table Fields & Schema Queries
-const clustersTable = 'clusters';
+const clusterPersonTable = 'cluster_person';
 const personIdColumn = 'person_id';
 const cluserIDColumn = 'cluster_id';
 
-const createClusterTable = '''
-CREATE TABLE IF NOT EXISTS $clustersTable (
+const createClusterPersonTable = '''
+CREATE TABLE IF NOT EXISTS $clusterPersonTable (
   $personIdColumn	TEXT NOT NULL,
   $cluserIDColumn	INTEGER NOT NULL,
   PRIMARY KEY($personIdColumn, $cluserIDColumn)
 );
 ''';
-const dropClustersTable = 'DROP TABLE IF EXISTS $clustersTable';
+const dropClusterPersonTable = 'DROP TABLE IF EXISTS $clusterPersonTable';
 // End Clusters Table Fields & Schema Queries
 
 /// Cluster Summary Table Fields & Schema Queries

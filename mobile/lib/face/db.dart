@@ -50,7 +50,7 @@ class FaceMLDataDB {
   Future _onCreate(Database db, int version) async {
     await db.execute(createFacesTable);
     await db.execute(createPersonTable);
-    await db.execute(createClusterTable);
+    await db.execute(createClusterPersonTable);
     await db.execute(createClusterSummaryTable);
     await db.execute(createNotPersonFeedbackTable);
   }
@@ -137,7 +137,7 @@ class FaceMLDataDB {
     final db = await instance.database;
     // find out clusterIds that are assigned to other persons using the clusters table
     final List<Map<String, dynamic>> maps = await db.rawQuery(
-      'SELECT $cluserIDColumn FROM $clustersTable WHERE $personIdColumn != ? AND $personIdColumn IS NOT NULL',
+      'SELECT $cluserIDColumn FROM $clusterPersonTable WHERE $personIdColumn != ? AND $personIdColumn IS NOT NULL',
       [personID],
     );
     final Set<int> ignoredClusterIDs =
@@ -154,7 +154,7 @@ class FaceMLDataDB {
   Future<Set<int>> getPersonClusterIDs(String personID) async {
     final db = await instance.database;
     final List<Map<String, dynamic>> maps = await db.rawQuery(
-      'SELECT $cluserIDColumn FROM $clustersTable WHERE $personIdColumn = ?',
+      'SELECT $cluserIDColumn FROM $clusterPersonTable WHERE $personIdColumn = ?',
       [personID],
     );
     return maps.map((e) => e[cluserIDColumn] as int).toSet();
@@ -163,7 +163,7 @@ class FaceMLDataDB {
   Future<void> clearTable() async {
     final db = await instance.database;
     await db.delete(facesTable);
-    await db.delete(clustersTable);
+    await db.delete(clusterPersonTable);
     await db.delete(clusterSummaryTable);
     await db.delete(personTable);
     await db.delete(notPersonFeedback);
@@ -220,7 +220,7 @@ class FaceMLDataDB {
         }
       }
       final cluterRows = await db.query(
-        clustersTable,
+        clusterPersonTable,
         columns: [cluserIDColumn],
         where: '$personIdColumn = ?',
         whereArgs: [personID],
@@ -450,7 +450,7 @@ class FaceMLDataDB {
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
     await db.insert(
-      clustersTable,
+      clusterPersonTable,
       {
         personIdColumn: p.remoteID,
         cluserIDColumn: cluserID,
@@ -475,7 +475,7 @@ class FaceMLDataDB {
   }) async {
     final db = await instance.database;
     await db.insert(
-      clustersTable,
+      clusterPersonTable,
       {
         personIdColumn: personID,
         cluserIDColumn: clusterID,
@@ -503,7 +503,7 @@ class FaceMLDataDB {
   }) async {
     final db = await instance.database;
     return db.delete(
-      clustersTable,
+      clusterPersonTable,
       where: '$personIdColumn = ? AND $cluserIDColumn = ?',
       whereArgs: [personID, clusterID],
     );
@@ -514,10 +514,10 @@ class FaceMLDataDB {
     final db = instance.database;
     return db.then((db) async {
       final List<Map<String, dynamic>> maps = await db.rawQuery(
-        'SELECT $clustersTable.$cluserIDColumn, $fileIDColumn FROM $facesTable '
-        'INNER JOIN $clustersTable '
-        'ON $facesTable.$faceClusterId = $clustersTable.$cluserIDColumn '
-        'WHERE $clustersTable.$personIdColumn = ?',
+        'SELECT $clusterPersonTable.$cluserIDColumn, $fileIDColumn FROM $facesTable '
+        'INNER JOIN $clusterPersonTable '
+        'ON $facesTable.$faceClusterId = $clusterPersonTable.$cluserIDColumn '
+        'WHERE $clusterPersonTable.$personIdColumn = ?',
         [personID],
       );
       final Map<int, Set<int>> result = {};
@@ -598,7 +598,7 @@ class FaceMLDataDB {
       personMap[p.remoteID] = p;
     }
     final List<Map<String, dynamic>> maps = await db.rawQuery(
-      'SELECT $personIdColumn, $cluserIDColumn FROM $clustersTable',
+      'SELECT $personIdColumn, $cluserIDColumn FROM $clusterPersonTable',
     );
 
     final Map<int, Person> result = {};
@@ -636,38 +636,38 @@ class FaceMLDataDB {
     if (faces) {
       await db.execute(deleteFacesTable);
       await db.execute(createFacesTable);
+      await db.execute(dropFaceClustersTable);
+      await db.execute(createFaceClustersTable);
     }
     await db.execute(deletePersonTable);
-    await db.execute(dropClustersTable);
+    await db.execute(dropClusterPersonTable);
     await db.execute(dropClusterSummaryTable);
     await db.execute(dropNotPersonFeedbackTable);
 
     await db.execute(createPersonTable);
-    await db.execute(createClusterTable);
+    await db.execute(createClusterPersonTable);
     await db.execute(createNotPersonFeedbackTable);
     await db.execute(createClusterSummaryTable);
   }
 
   /// WARNING: This will delete ALL data in the database! Only use this for debug/testing purposes!
-  Future<void> dropPersonTable() async {
+  Future<void> dropFeedbackTables() async {
     final db = await instance.database;
 
     await db.execute(deletePersonTable);
-    await db.execute(dropClustersTable);
+    await db.execute(dropClusterPersonTable);
     await db.execute(dropNotPersonFeedbackTable);
-
-    // await db.execute(createFacesTable);
     await db.execute(createPersonTable);
-    await db.execute(createClusterTable);
+    await db.execute(createClusterPersonTable);
     await db.execute(createNotPersonFeedbackTable);
   }
 
   Future<void> removeFilesFromPerson(List<EnteFile> files, Person p) async {
     final db = await instance.database;
     final result = await db.rawQuery(
-      'SELECT $faceIDColumn FROM $facesTable LEFT JOIN $clustersTable '
-      'ON $facesTable.$faceClusterId = $clustersTable.$cluserIDColumn '
-      'WHERE $clustersTable.$personIdColumn = ? AND $facesTable.$fileIDColumn IN (${files.map((e) => e.uploadedFileID).join(",")})',
+      'SELECT $faceIDColumn FROM $facesTable LEFT JOIN $clusterPersonTable '
+      'ON $facesTable.$faceClusterId = $clusterPersonTable.$cluserIDColumn '
+      'WHERE $clusterPersonTable.$personIdColumn = ? AND $facesTable.$fileIDColumn IN (${files.map((e) => e.uploadedFileID).join(",")})',
       [p.remoteID],
     );
     // get max clusterID

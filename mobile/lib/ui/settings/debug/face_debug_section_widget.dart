@@ -173,7 +173,7 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
-            await FaceMLDataDB.instance.dropPersonTable();
+            await FaceMLDataDB.instance.dropFeedbackTables();
             Bus.instance.fire(PeopleChangedEvent());
             showShortToast(context, "Done");
           },
