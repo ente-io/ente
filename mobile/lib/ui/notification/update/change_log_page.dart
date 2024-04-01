@@ -128,8 +128,8 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
       ),
       ChangeLogEntry(
         "Bug Fixes and Performance Improvements",
-        'Many a bugs were squashed in this release.\n'
-            '\nIf you run into any, please write to team@ente.io, or let us know on Discord! 🙏',
+        'Many a bugs were squashed in this release and have improved performance on app start.\n'
+            '\nIf you run into any bugs, please write to team@ente.io, or let us know on Discord! 🙏',
       ),
     ]);
 
