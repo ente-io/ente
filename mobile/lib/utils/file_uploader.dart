@@ -9,6 +9,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
+import "package:permission_handler/permission_handler.dart";
 import 'package:photos/core/configuration.dart';
 import "package:photos/core/constants.dart";
 import 'package:photos/core/errors.dart';
@@ -363,6 +364,13 @@ class FileUploader {
     }
   }
 
+  Future<void> verifyMediaLocationAccess() async {
+    final bool hasPermission = await Permission.accessMediaLocation.isGranted;
+    if (!hasPermission) {
+      throw NoMediaLocationAccessError();
+    }
+  }
+
   Future<EnteFile> forceUpload(EnteFile file, int collectionID) async {
     _hasInitiatedForceUpload = true;
     return _tryToUpload(file, collectionID, true);
@@ -373,6 +381,7 @@ class FileUploader {
     int collectionID,
     bool forcedUpload,
   ) async {
+    await verifyMediaLocationAccess();
     await checkNetworkForUpload(isForceUpload: forcedUpload);
     if (!forcedUpload) {
       final fileOnDisk = await FilesDB.instance.getFile(file.generatedID!);
