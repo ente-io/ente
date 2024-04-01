@@ -9,9 +9,6 @@ const faceEmbeddingBlob = 'eBlob';
 const faceScore = 'score';
 const faceBlur = 'blur';
 const faceClusterId = 'cluster_id';
-const faceConfirmedColumn = 'confirmed';
-const faceClosestDistColumn = 'close_dist';
-const faceClosestFaceID = 'close_face_id';
 const mlVersionColumn = 'ml_version';
 
 const createFacesTable = '''CREATE TABLE IF NOT EXISTS $facesTable (
@@ -22,9 +19,6 @@ const createFacesTable = '''CREATE TABLE IF NOT EXISTS $facesTable (
   $faceScore  REAL NOT NULL,
   $faceBlur REAL NOT NULL DEFAULT $kLapacianDefault,
 	$faceClusterId	INTEGER,
-	$faceClosestDistColumn	REAL,
-  $faceClosestFaceID  TEXT,
-	$faceConfirmedColumn  INTEGER NOT NULL DEFAULT 0,
   $mlVersionColumn	INTEGER NOT NULL DEFAULT -1,
   PRIMARY KEY($fileIDColumn, $faceIDColumn)
   );

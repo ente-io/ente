@@ -268,10 +268,6 @@ class FaceMLDataDB {
         faceEmbeddingBlob,
         faceScore,
         faceBlur,
-        faceClusterId,
-        faceClosestDistColumn,
-        faceClosestFaceID,
-        faceConfirmedColumn,
         mlVersionColumn,
       ],
       where: '$fileIDColumn = ?',
@@ -370,7 +366,6 @@ class FaceMLDataDB {
         where: '$faceScore > $minScore and $faceBlur > $minClarity',
         limit: batchSize,
         offset: offset,
-        // orderBy: '$faceClusterId DESC',
         orderBy: '$faceIDColumn DESC',
       );
       // Break the loop if no more rows
