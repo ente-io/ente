@@ -54,17 +54,13 @@ const FixCreationTime: React.FC<FixCreationTimeProps> = (props) => {
 
     const startFix = async (option: FIX_OPTIONS, customTime: Date) => {
         setStep("running");
-        const completedWithoutError = await updateCreationTimeWithExif(
+        const failed = await updateCreationTimeWithExif(
             props.attributes.files,
             option,
             customTime,
             setProgressTracker,
         );
-        if (!completedWithoutError) {
-            setStep("completed");
-        } else {
-            setStep("error");
-        }
+        setStep(failed ? "error" : "completed");
         await galleryContext.syncWithRemote();
     };
 
