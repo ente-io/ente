@@ -1,9 +1,5 @@
-import styled from "@emotion/styled";
+import * as React from "react";
 
-export const Container = styled.div`
-    display: flex;
-    flex: 1;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-`;
+export const Container: React.FC<React.PropsWithChildren> = ({ children }) => (
+    <div className="container">{children}</div>
+);
