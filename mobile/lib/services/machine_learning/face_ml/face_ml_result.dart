@@ -2,20 +2,19 @@ import "dart:convert" show jsonEncode, jsonDecode;
 
 import "package:flutter/material.dart" show Size, debugPrint, immutable;
 import "package:logging/logging.dart";
-import "package:photos/db/ml_data_db.dart";
 import "package:photos/models/file/file.dart";
 import 'package:photos/models/ml/ml_typedefs.dart';
 import "package:photos/models/ml/ml_versions.dart";
 import 'package:photos/services/machine_learning/face_ml/face_alignment/alignment_result.dart';
 import 'package:photos/services/machine_learning/face_ml/face_clustering/cosine_distance.dart';
 import 'package:photos/services/machine_learning/face_ml/face_detection/detection.dart';
-import 'package:photos/services/machine_learning/face_ml/face_feedback.dart/cluster_feedback.dart';
 import 'package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart';
 import 'package:photos/services/machine_learning/face_ml/face_ml_methods.dart';
 
 final _logger = Logger('ClusterResult_FaceMlResult');
 
 // TODO: should I add [faceMlVersion] and [clusterMlVersion] to the [ClusterResult] class?
+@Deprecated('We are now just storing the cluster results directly in DB')
 class ClusterResult {
   final int personId;
   String? userDefinedName;
@@ -263,64 +262,6 @@ class ClusterResultBuilder {
     return (medoid!, kthDistance);
   }
 
-  Future<bool> _checkIfClusterIsDeleted() async {
-    assert(medoidAndThresholdCalculated);
-
-    // Check if the medoid is the default medoid for deleted faces
-    if (cosineDistance(medoid, List.filled(medoid.length, 10.0)) < 0.001) {
-      return true;
-    }
-
-    final tempFeedback = DeleteClusterFeedback(
-      medoid: medoid,
-      medoidDistanceThreshold: medoidDistanceThreshold,
-    );
-    return await MlDataDB.instance
-        .doesSimilarClusterFeedbackExist(tempFeedback);
-  }
-
-  Future<void> _checkAndAddPhotos() async {
-    assert(medoidAndThresholdCalculated);
-
-    final tempFeedback = AddPhotosClusterFeedback(
-      medoid: medoid,
-      medoidDistanceThreshold: medoidDistanceThreshold,
-      addedPhotoFileIDs: [],
-    );
-    final allAddPhotosFeedbacks =
-        await MlDataDB.instance.getAllMatchingClusterFeedback(tempFeedback);
-
-    for (final addPhotosFeedback in allAddPhotosFeedbacks) {
-      final fileIDsToAdd = addPhotosFeedback.addedPhotoFileIDs;
-      final faceIDsToAdd = fileIDsToAdd
-          .map((fileID) => FaceDetectionRelative.toFaceIDEmpty(fileID: fileID))
-          .toList();
-      addFileIDsAndFaceIDs(fileIDsToAdd, faceIDsToAdd);
-    }
-  }
-
-  Future<void> _checkAndAddCustomName() async {
-    assert(medoidAndThresholdCalculated);
-
-    final tempFeedback = RenameOrCustomThumbnailClusterFeedback(
-      medoid: medoid,
-      medoidDistanceThreshold: medoidDistanceThreshold,
-      customName: 'test',
-    );
-    final allRenameFeedbacks =
-        await MlDataDB.instance.getAllMatchingClusterFeedback(tempFeedback);
-
-    for (final nameFeedback in allRenameFeedbacks) {
-      userDefinedName ??= nameFeedback.customName;
-      if (!thumbnailFaceIdIsUserDefined) {
-        thumbnailFaceId = nameFeedback.customThumbnailFaceId ?? thumbnailFaceId;
-        thumbnailFaceIdIsUserDefined =
-            nameFeedback.customThumbnailFaceId != null;
-      }
-    }
-    return;
-  }
-
   void changeThumbnailFaceId(String faceId) {
     if (!faceIds.contains(faceId)) {
       throw Exception(
@@ -334,113 +275,6 @@ class ClusterResultBuilder {
     assert(addedFileIDs.length == addedFaceIDs.length);
     fileIds.addAll(addedFileIDs);
     faceIds.addAll(addedFaceIDs);
-  }
-
-  static Future<List<ClusterResult>> buildClusters(
-    List<ClusterResultBuilder> clusterBuilders,
-  ) async {
-    final List<int> deletedClusterIndices = [];
-    for (var i = 0; i < clusterBuilders.length; i++) {
-      final clusterBuilder = clusterBuilders[i];
-      clusterBuilder.calculateAndSetMedoidAndThreshold();
-
-      // Check if the cluster has been deleted
-      if (await clusterBuilder._checkIfClusterIsDeleted()) {
-        deletedClusterIndices.add(i);
-      }
-
-      await clusterBuilder._checkAndAddPhotos();
-    }
-
-    // Check if a cluster should be merged with another cluster
-    for (var i = 0; i < clusterBuilders.length; i++) {
-      // Don't check for clusters that have been deleted
-      if (deletedClusterIndices.contains(i)) {
-        continue;
-      }
-      final clusterBuilder = clusterBuilders[i];
-      final List<MergeClusterFeedback> allMatchingMergeFeedback =
-          await MlDataDB.instance.getAllMatchingClusterFeedback(
-        MergeClusterFeedback(
-          medoid: clusterBuilder.medoid,
-          medoidDistanceThreshold: clusterBuilder.medoidDistanceThreshold,
-          medoidToMoveTo: clusterBuilder.medoid,
-        ),
-      );
-      if (allMatchingMergeFeedback.isEmpty) {
-        continue;
-      }
-      // Merge the cluster with the first merge feedback
-      final mainFeedback = allMatchingMergeFeedback.first;
-      if (allMatchingMergeFeedback.length > 1) {
-        // This is the BUG!!!!
-        _logger.warning(
-          "There are ${allMatchingMergeFeedback.length} merge feedbacks for cluster ${clusterBuilder.personId}. Using the first one.",
-        );
-      }
-      for (var j = 0; j < clusterBuilders.length; j++) {
-        if (i == j) continue;
-        final clusterBuilderToMergeTo = clusterBuilders[j];
-        final distance = cosineDistance(
-          // BUG: it hasn't calculated the medoid for every clusterBuilder yet!!!
-          mainFeedback.medoidToMoveTo,
-          clusterBuilderToMergeTo.medoid,
-        );
-        if (distance < mainFeedback.medoidDistanceThreshold ||
-            distance < clusterBuilderToMergeTo.medoidDistanceThreshold) {
-          clusterBuilderToMergeTo.addFileIDsAndFaceIDs(
-            clusterBuilder.fileIds,
-            clusterBuilder.faceIds,
-          );
-          deletedClusterIndices.add(i);
-        }
-      }
-    }
-
-    final clusterResults = <ClusterResult>[];
-    for (var i = 0; i < clusterBuilders.length; i++) {
-      // Don't build the cluster if it has been deleted or merged
-      if (deletedClusterIndices.contains(i)) {
-        continue;
-      }
-      final clusterBuilder = clusterBuilders[i];
-      // Check if the cluster has a custom name or thumbnail
-      await clusterBuilder._checkAndAddCustomName();
-
-      // Build the clusterResult
-      clusterResults.add(
-        ClusterResult(
-          personId: clusterBuilder.personId,
-          thumbnailFaceId: clusterBuilder.thumbnailFaceId,
-          fileIds: clusterBuilder.fileIds,
-          faceIds: clusterBuilder.faceIds,
-          medoid: clusterBuilder.medoid,
-          medoidDistanceThreshold: clusterBuilder.medoidDistanceThreshold,
-          userDefinedName: clusterBuilder.userDefinedName,
-          thumbnailFaceIdIsUserDefined:
-              clusterBuilder.thumbnailFaceIdIsUserDefined,
-        ),
-      );
-    }
-
-    return clusterResults;
-  }
-
-  // TODO: This function should include the feedback from the user. Should also be nullable, since user might want to delete the cluster.
-  Future<ClusterResult?> _buildSingleCluster() async {
-    calculateAndSetMedoidAndThreshold();
-    if (await _checkIfClusterIsDeleted()) {
-      return null;
-    }
-    await _checkAndAddCustomName();
-    return ClusterResult(
-      personId: personId,
-      thumbnailFaceId: thumbnailFaceId,
-      fileIds: fileIds,
-      faceIds: faceIds,
-      medoid: medoid,
-      medoidDistanceThreshold: medoidDistanceThreshold,
-    );
   }
 }
 

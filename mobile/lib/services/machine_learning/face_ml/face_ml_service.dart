@@ -14,7 +14,6 @@ import "package:onnxruntime/onnxruntime.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
-import "package:photos/db/ml_data_db.dart";
 import "package:photos/events/diff_sync_complete_event.dart";
 import "package:photos/extensions/list.dart";
 import "package:photos/extensions/stop_watch.dart";
@@ -699,48 +698,6 @@ class FaceMlService {
     isImageIndexRunning = false;
   }
 
-  /// Analyzes the given image data by running the full pipeline using [analyzeImageInComputerAndImageIsolate] and stores the result in the database [MlDataDB].
-  /// This function first checks if the image has already been analyzed (with latest ml version) and stored in the database. If so, it returns the stored result.
-  ///
-  /// 'enteFile': The ente file to analyze.
-  ///
-  /// Returns an immutable [FaceMlResult] instance containing the results of the analysis. The result is also stored in the database.
-  Future<FaceMlResult> indexImage(EnteFile enteFile) async {
-    _logger.info(
-      "`indexImage` called on image with uploadedFileID ${enteFile.uploadedFileID}",
-    );
-    _checkEnteFileForID(enteFile);
-
-    // Check if the image has already been analyzed and stored in the database with the latest ml version
-    final existingResult = await _checkForExistingUpToDateResult(enteFile);
-    if (existingResult != null) {
-      return existingResult;
-    }
-
-    // If the image has not been analyzed and stored in the database, analyze it and store the result in the database
-    _logger.info(
-      "Image with uploadedFileID ${enteFile.uploadedFileID} has not been analyzed and stored in the database. Analyzing it now.",
-    );
-    FaceMlResult result;
-    try {
-      result = await analyzeImageInComputerAndImageIsolate(enteFile);
-    } catch (e, s) {
-      _logger.severe(
-        "`indexImage` failed on image with uploadedFileID ${enteFile.uploadedFileID}",
-        e,
-        s,
-      );
-      throw GeneralFaceMlException(
-        "`indexImage` failed on image with uploadedFileID ${enteFile.uploadedFileID}",
-      );
-    }
-
-    // Store the result in the database
-    await MlDataDB.instance.createFaceMlResult(result);
-
-    return result;
-  }
-
   /// Analyzes the given image data by running the full pipeline (face detection, face alignment, face embedding).
   ///
   /// [enteFile] The ente file to analyze.
@@ -1266,22 +1223,4 @@ class FaceMlService {
         indexedFileIds[id]! >= faceMlVersion;
   }
 
-  Future<FaceMlResult?> _checkForExistingUpToDateResult(
-    EnteFile enteFile,
-  ) async {
-    // Check if the image has already been analyzed and stored in the database
-    final existingResult =
-        await MlDataDB.instance.getFaceMlResult(enteFile.uploadedFileID!);
-
-    // If the image has already been analyzed and stored in the database, return the stored result
-    if (existingResult != null) {
-      if (existingResult.mlVersion >= faceMlVersion) {
-        _logger.info(
-          "Image with uploadedFileID ${enteFile.uploadedFileID} has already been analyzed and stored in the database with the latest ml version. Returning the stored result.",
-        );
-        return existingResult;
-      }
-    }
-    return null;
-  }
 }
