@@ -1,7 +1,15 @@
 import DialogBox from "@ente/shared/components/DialogBox/";
-import { Button, LinearProgress, styled } from "@mui/material";
+import {
+    Button,
+    FormControl,
+    FormControlLabel,
+    FormLabel,
+    LinearProgress,
+    Radio,
+    RadioGroup,
+} from "@mui/material";
 import { ComfySpan } from "components/ExportInProgress";
-import { Field, Form, Formik, type FormikHelpers } from "formik";
+import { useFormik } from "formik";
 import { t } from "i18next";
 import { GalleryContext } from "pages/gallery";
 import React, { useContext, useEffect, useState } from "react";
@@ -103,7 +111,7 @@ export default FixCreationTime;
 const messageForStep = (step?: Step) => {
     switch (step) {
         case undefined:
-            return t("UPDATE_CREATION_TIME_NOT_STARTED");
+            return undefined;
         case "running":
             return undefined;
         case "completed":
@@ -115,96 +123,66 @@ const messageForStep = (step?: Step) => {
 
 interface OptionsFormProps {
     step?: Step;
-    onSubmit: (
-        values: FormValues,
-        formikHelpers: FormikHelpers<FormValues>,
-    ) => void | Promise<any>;
+    onSubmit: (values: FormValues) => void | Promise<any>;
     hide: () => void;
 }
 
 const OptionsForm: React.FC<OptionsFormProps> = ({ step, onSubmit, hide }) => {
+    const { values, handleChange, handleSubmit } = useFormik({
+        initialValues: {
+            option: "date-time-original",
+            customTime: new Date(),
+        },
+        validateOnBlur: false,
+        onSubmit,
+    });
+
     return (
-        <Formik<FormValues>
-            initialValues={{
-                option: "date-time-original",
-                customTime: new Date(),
-            }}
-            validateOnBlur={false}
-            onSubmit={onSubmit}
-        >
-            {({ values, handleChange, handleSubmit }) => (
-                <>
-                    {(step === undefined ||
-                        step === "completed-with-errors") && (
-                        <div style={{ marginTop: "10px" }}>
-                            <Form>
-                                <Option
-                                    option={"date-time-original"}
-                                    selectedOption={values.option}
-                                    label={t("DATE_TIME_ORIGINAL")}
-                                />
-
-                                <Option
-                                    option={"date-time-digitized"}
-                                    selectedOption={values.option}
-                                    label={t("DATE_TIME_DIGITIZED")}
-                                />
-
-                                <Option
-                                    option={"metadata-date"}
-                                    selectedOption={values.option}
-                                    label={t("METADATA_DATE")}
-                                />
-
-                                <Option
-                                    option={"custom-time"}
-                                    selectedOption={values.option}
-                                    label={t("CUSTOM_TIME")}
-                                />
-                                {values.option === "custom-time" && (
-                                    <EnteDateTimePicker
-                                        onSubmit={(x: Date) =>
-                                            handleChange("customTime")(
-                                                x.toUTCString(),
-                                            )
-                                        }
-                                    />
-                                )}
-                            </Form>
-                        </div>
-                    )}
-                    <Footer step={step} startFix={handleSubmit} hide={hide} />
-                </>
+        <>
+            {(step === undefined || step === "completed-with-errors") && (
+                <div style={{ marginTop: "10px" }}>
+                    <form onSubmit={handleSubmit}>
+                        <FormControl>
+                            <FormLabel>
+                                {t("UPDATE_CREATION_TIME_NOT_STARTED")}
+                            </FormLabel>
+                        </FormControl>
+                        <RadioGroup name={"option"} onChange={handleChange}>
+                            <FormControlLabel
+                                value={"date-time-original"}
+                                control={<Radio size="small" />}
+                                label={t("DATE_TIME_ORIGINAL")}
+                            />
+                            <FormControlLabel
+                                value={"date-time-digitized"}
+                                control={<Radio size="small" />}
+                                label={t("DATE_TIME_DIGITIZED")}
+                            />
+                            <FormControlLabel
+                                value={"metadata-date"}
+                                control={<Radio size="small" />}
+                                label={t("METADATA_DATE")}
+                            />
+                            <FormControlLabel
+                                value={"custom-time"}
+                                control={<Radio size="small" />}
+                                label={t("CUSTOM_TIME")}
+                            />
+                        </RadioGroup>
+                        {values.option === "custom-time" && (
+                            <EnteDateTimePicker
+                                onSubmit={(x: Date) =>
+                                    handleChange("customTime")(x.toUTCString())
+                                }
+                            />
+                        )}
+                    </form>
+                </div>
             )}
-        </Formik>
+            <Footer step={step} startFix={handleSubmit} hide={hide} />
+        </>
     );
 };
-
-interface OptionProps {
-    option: FixOption;
-    selectedOption: FixOption;
-    label: string;
-}
-
-const Option: React.FC<OptionProps> = ({ option, selectedOption, label }) => {
-    const isSelected = option === selectedOption;
-    return (
-        <Option_
-            style={{
-                color: isSelected ? "#aaa" : "#fff",
-            }}
-        >
-            <label>
-                <Field type="radio" name="option" value={option} />
-                {label}
-            </label>
-        </Option_>
-    );
-};
-
-const Option_ = styled("div")`
-    margin-block: 5px;
-`;
 
 const Footer = ({ step, startFix, ...props }) => {
     return (
