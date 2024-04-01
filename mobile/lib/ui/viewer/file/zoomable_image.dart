@@ -297,20 +297,24 @@ class _ZoomableImageState extends State<ZoomableImage> {
             unawaited(_loadInSupportedFormat(file));
           }
         },
-      ).then((value) async {
+      ).then((value) {
         if (mounted && !_loadedFinalImage && !_convertToSupportedFormat) {
-          await _updatePhotoViewController(
-            previewImageProvider: _imageProvider,
-            finalImageProvider: imageProvider,
-          );
-          setState(() {
-            _imageProvider = imageProvider;
-            _loadedFinalImage = true;
-            _logger.info("Final image loaded");
-          });
+          _updateViewWithFinalImage(imageProvider);
         }
       });
     }
+  }
+
+  Future<void> _updateViewWithFinalImage(ImageProvider imageProvider) async {
+    await _updatePhotoViewController(
+      previewImageProvider: _imageProvider,
+      finalImageProvider: imageProvider,
+    );
+    setState(() {
+      _imageProvider = imageProvider;
+      _loadedFinalImage = true;
+      _logger.info("Final image loaded");
+    });
   }
 
   Future<void> _updatePhotoViewController({
@@ -378,17 +382,9 @@ class _ZoomableImageState extends State<ZoomableImage> {
       final imageProvider = MemoryImage(compressedFile);
 
       unawaited(
-        precacheImage(imageProvider, context).then((value) async {
+        precacheImage(imageProvider, context).then((value) {
           if (mounted) {
-            await _updatePhotoViewController(
-              previewImageProvider: _imageProvider,
-              finalImageProvider: imageProvider,
-            );
-            setState(() {
-              _imageProvider = imageProvider;
-              _loadedFinalImage = true;
-              _logger.info("Final image loaded");
-            });
+            _updateViewWithFinalImage(imageProvider);
           }
         }),
       );
