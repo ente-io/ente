@@ -38,8 +38,7 @@ For this (payments) web app, configure it to connect to the local museum, and
 use a set of (development) Stripe keys which can be found in [Stripe's developer
 dashboard](https://dashboard.stripe.com).
 
-Add the following to
-`web/apps/payments/.env.local`
+Add the following to `web/apps/payments/.env.local`:
 
 ```env
 NEXT_PUBLIC_ENTE_ENDPOINT = http://localhost:8080
