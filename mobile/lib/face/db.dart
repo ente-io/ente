@@ -18,7 +18,7 @@ import 'package:sqflite/sqflite.dart';
 ///
 /// This includes:
 /// [facesTable] - Stores all the detected faces and its embeddings in the images.
-/// [peopleTable] - Stores all the clusters of faces which are considered to be the same person.
+/// [personTable] - Stores all the clusters of faces which are considered to be the same person.
 class FaceMLDataDB {
   static final Logger _logger = Logger("FaceMLDataDB");
 
@@ -49,7 +49,7 @@ class FaceMLDataDB {
 
   Future _onCreate(Database db, int version) async {
     await db.execute(createFacesTable);
-    await db.execute(createPeopleTable);
+    await db.execute(createPersonTable);
     await db.execute(createClusterTable);
     await db.execute(createClusterSummaryTable);
     await db.execute(createNotPersonFeedbackTable);
@@ -165,7 +165,7 @@ class FaceMLDataDB {
     await db.delete(facesTable);
     await db.delete(clustersTable);
     await db.delete(clusterSummaryTable);
-    await db.delete(peopleTable);
+    await db.delete(personTable);
     await db.delete(notPersonFeedback);
   }
 
@@ -203,7 +203,7 @@ class FaceMLDataDB {
     final db = await instance.database;
     if (personID != null) {
       final List<Map<String, dynamic>> maps = await db.rawQuery(
-        'SELECT * FROM $peopleTable where $idColumn = ?',
+        'SELECT * FROM $personTable where $idColumn = ?',
         [personID],
       );
       if (maps.isEmpty) {
@@ -450,7 +450,7 @@ class FaceMLDataDB {
     debugPrint("inserting person");
     final db = await instance.database;
     await db.insert(
-      peopleTable,
+      personTable,
       mapPersonToRow(p),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
@@ -467,7 +467,7 @@ class FaceMLDataDB {
   Future<void> updatePerson(Person p) async {
     final db = await instance.database;
     await db.update(
-      peopleTable,
+      personTable,
       mapPersonToRow(p),
       where: '$idColumn = ?',
       whereArgs: [p.remoteID],
@@ -597,14 +597,18 @@ class FaceMLDataDB {
 
   Future<(Map<int, Person>, Map<String, Person>)> getClusterIdToPerson() async {
     final db = await instance.database;
-    final Map<String, Person> peopleMap = await getPeopleMap();
+    final List<Person> persons = await getPersons();
+    final Map<String, Person> personMap = {};
+    for (final p in persons) {
+      personMap[p.remoteID] = p;
+    }
     final List<Map<String, dynamic>> maps = await db.rawQuery(
       'SELECT $personIdColumn, $cluserIDColumn FROM $clustersTable',
     );
 
     final Map<int, Person> result = {};
     for (final map in maps) {
-      final Person? p = peopleMap[map[personIdColumn] as String];
+      final Person? p = personMap[map[personIdColumn] as String];
       if (p != null) {
         result[map[cluserIDColumn] as int] = p;
       } else {
@@ -613,32 +617,13 @@ class FaceMLDataDB {
         );
       }
     }
-    return (result, peopleMap);
+    return (result, personMap);
   }
 
-  Future<Map<String, Person>> getPeopleMap() async {
+  Future<List<Person>> getPersons() async {
     final db = await instance.database;
     final List<Map<String, dynamic>> maps = await db.query(
-      peopleTable,
-      columns: [
-        idColumn,
-        nameColumn,
-        personHiddenColumn,
-        clusterToFaceIdJson,
-        coverFaceIDColumn,
-      ],
-    );
-    final Map<String, Person> result = {};
-    for (final map in maps) {
-      result[map[idColumn] as String] = mapRowToPerson(map);
-    }
-    return result;
-  }
-
-  Future<List<Person>> getPeople() async {
-    final db = await instance.database;
-    final List<Map<String, dynamic>> maps = await db.query(
-      peopleTable,
+      personTable,
       columns: [
         idColumn,
         nameColumn,
@@ -651,33 +636,33 @@ class FaceMLDataDB {
   }
 
   /// WARNING: This will delete ALL data in the database! Only use this for debug/testing purposes!
-  Future<void> dropClustersAndPeople({bool faces = false}) async {
+  Future<void> dropClustersAndPersonTable({bool faces = false}) async {
     final db = await instance.database;
     if (faces) {
       await db.execute(deleteFacesTable);
       await db.execute(createFacesTable);
     }
-    await db.execute(deletePeopleTable);
+    await db.execute(deletePersonTable);
     await db.execute(dropClustersTable);
     await db.execute(dropClusterSummaryTable);
     await db.execute(dropNotPersonFeedbackTable);
 
-    await db.execute(createPeopleTable);
+    await db.execute(createPersonTable);
     await db.execute(createClusterTable);
     await db.execute(createNotPersonFeedbackTable);
     await db.execute(createClusterSummaryTable);
   }
 
   /// WARNING: This will delete ALL data in the database! Only use this for debug/testing purposes!
-  Future<void> dropPeople() async {
+  Future<void> dropPersonTable() async {
     final db = await instance.database;
 
-    await db.execute(deletePeopleTable);
+    await db.execute(deletePersonTable);
     await db.execute(dropClustersTable);
     await db.execute(dropNotPersonFeedbackTable);
 
     // await db.execute(createFacesTable);
-    await db.execute(createPeopleTable);
+    await db.execute(createPersonTable);
     await db.execute(createClusterTable);
     await db.execute(createNotPersonFeedbackTable);
   }

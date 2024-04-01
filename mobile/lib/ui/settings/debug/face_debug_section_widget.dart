@@ -173,7 +173,7 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
-            await FaceMLDataDB.instance.dropPeople();
+            await FaceMLDataDB.instance.dropPersonTable();
             Bus.instance.fire(PeopleChangedEvent());
             showShortToast(context, "Done");
           },
@@ -195,7 +195,7 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
               firstButtonLabel: "Yes, confirm",
               firstButtonOnTap: () async {
                 await FaceMLDataDB.instance.resetClusterIDs();
-                await FaceMLDataDB.instance.dropClustersAndPeople();
+                await FaceMLDataDB.instance.dropClustersAndPersonTable();
                 Bus.instance.fire(PeopleChangedEvent());
                 showShortToast(context, "Done");
               },
@@ -218,7 +218,8 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
                   "You will need to again re-index all the faces. You can drop feedback if you want to label again",
               firstButtonLabel: "Yes, confirm",
               firstButtonOnTap: () async {
-                await FaceMLDataDB.instance.dropClustersAndPeople(faces: true);
+                await FaceMLDataDB.instance
+                    .dropClustersAndPersonTable(faces: true);
                 Bus.instance.fire(PeopleChangedEvent());
                 showShortToast(context, "Done");
               },
@@ -237,7 +238,7 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
             onTap: () async {
               try {
                 final List<Person> persons =
-                    await FaceMLDataDB.instance.getPeople();
+                    await FaceMLDataDB.instance.getPersons();
                 final EnteWatch w = EnteWatch('feedback')..start();
                 for (final Person p in persons) {
                   await ClusterFeedbackService.instance

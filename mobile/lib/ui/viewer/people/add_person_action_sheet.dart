@@ -275,8 +275,8 @@ class _PersonActionSheetState extends State<PersonActionSheet> {
             PersonAttr(name: text, faces: <String>[]),
           );
           await FaceMLDataDB.instance.insert(p, clusterID);
-          final bool extraPhotosFound =
-              await ClusterFeedbackService.instance.checkAndDoAutomaticMerges(p);
+          final bool extraPhotosFound = await ClusterFeedbackService.instance
+              .checkAndDoAutomaticMerges(p);
           if (extraPhotosFound) {
             showShortToast(context, "Extra photos found for $text");
           }
@@ -296,6 +296,6 @@ class _PersonActionSheetState extends State<PersonActionSheet> {
   }
 
   Future<List<Person>> _getPersons() async {
-    return FaceMLDataDB.instance.getPeople();
+    return FaceMLDataDB.instance.getPersons();
   }
 }
