@@ -1,4 +1,3 @@
-import "bootstrap/dist/css/bootstrap.min.css";
 import type { AppProps } from "next/app";
 import Head from "next/head";
 import constants from "utils/strings";

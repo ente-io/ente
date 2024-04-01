@@ -43,7 +43,6 @@ import { SetTheme } from "@ente/shared/themes/types";
 import ArrowForward from "@mui/icons-material/ArrowForward";
 import { CssBaseline, useMediaQuery } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
-import "bootstrap/dist/css/bootstrap.min.css";
 import Notification from "components/Notification";
 import { REDIRECTS } from "constants/redirects";
 import { t } from "i18next";
