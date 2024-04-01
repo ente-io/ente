@@ -365,9 +365,11 @@ class FileUploader {
   }
 
   Future<void> verifyMediaLocationAccess() async {
-    final bool hasPermission = await Permission.accessMediaLocation.isGranted;
-    if (!hasPermission) {
-      throw NoMediaLocationAccessError();
+    if (Platform.isAndroid) {
+      final bool hasPermission = await Permission.accessMediaLocation.isGranted;
+      if (!hasPermission) {
+        throw NoMediaLocationAccessError();
+      }
     }
   }
 
