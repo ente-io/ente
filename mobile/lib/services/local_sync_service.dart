@@ -220,6 +220,11 @@ class LocalSyncService {
       _logger.warning('Invalid file received for ignoring: $file');
       return;
     }
+    if (Platform.isIOS && error.reason == InvalidReason.sourceFileMissing) {
+      // ignoreSourceFileMissing error on iOS as the file fetch from iCloud might have failed,
+      // but the file might be available later
+      return;
+    }
     final ignored = IgnoredFile(
       file.localID,
       file.title,
