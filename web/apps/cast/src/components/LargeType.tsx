@@ -1,4 +1,4 @@
-import styled from "@emotion/styled";
+import { styled } from "@mui/material";
 
 const colourPool = [
     "#87CEFA", // Light Blue
@@ -43,7 +43,7 @@ export default function LargeType({ chars }: { chars: string[] }) {
     );
 }
 
-const Container = styled.div`
+const Container = styled("div")`
     font-size: 4rem;
     font-weight: bold;
     font-family: monospace;

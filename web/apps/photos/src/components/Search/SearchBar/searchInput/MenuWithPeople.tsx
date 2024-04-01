@@ -1,6 +1,5 @@
 import { Row } from "@ente/shared/components/Container";
-import { Box } from "@mui/material";
-import styled from "@mui/styled-engine";
+import { Box, styled } from "@mui/material";
 import { PeopleList } from "components/MachineLearning/PeopleList";
 import { t } from "i18next";
 import { AppContext } from "pages/_app";
