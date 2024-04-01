@@ -1,0 +1,43 @@
+name: "Deploy (payments)"
+
+on:
+    push:
+        # Run workflow on pushes to the deploy/payments
+        branches: [deploy/payments]
+
+jobs:
+    deploy:
+        runs-on: ubuntu-latest
+
+        defaults:
+            run:
+                working-directory: web
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+              with:
+                  submodules: recursive
+
+            - name: Setup node and enable yarn caching
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 20
+                  cache: "yarn"
+                  cache-dependency-path: "docs/yarn.lock"
+
+            - name: Install dependencies
+              run: yarn install
+
+            - name: Build payments
+              run: yarn build:payments
+
+            - name: Publish payments
+              uses: cloudflare/pages-action@1
+              with:
+                  accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+                  apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+                  projectName: ente
+                  branch: deploy/payments
+                  directory: web/apps/payments/out
+                  wranglerVersion: "3"

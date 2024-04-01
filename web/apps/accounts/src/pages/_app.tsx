@@ -1,7 +1,5 @@
 import { setupI18n } from "@/ui/i18n";
-import { CacheProvider } from "@emotion/react";
 import { APPS, APP_TITLES } from "@ente/shared/apps/constants";
-import { EnteAppProps } from "@ente/shared/apps/types";
 import { Overlay } from "@ente/shared/components/Container";
 import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
 import {
@@ -15,9 +13,9 @@ import HTTPService from "@ente/shared/network/HTTPService";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import { getTheme } from "@ente/shared/themes";
 import { THEME_COLOR } from "@ente/shared/themes/constants";
-import createEmotionCache from "@ente/shared/themes/createEmotionCache";
 import { CssBaseline, useMediaQuery } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
+import { AppProps } from "next/app";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { createContext, useEffect, useState } from "react";
@@ -31,10 +29,7 @@ interface AppContextProps {
 
 export const AppContext = createContext<AppContextProps>({} as AppContextProps);
 
-// Client-side cache, shared for the whole session of the user in the browser.
-const clientSideEmotionCache = createEmotionCache();
-
-export default function App(props: EnteAppProps) {
+export default function App(props: AppProps) {
     const [isI18nReady, setIsI18nReady] = useState<boolean>(false);
 
     const [showNavbar, setShowNavBar] = useState(false);
@@ -54,11 +49,7 @@ export default function App(props: EnteAppProps) {
 
     const router = useRouter();
 
-    const {
-        Component,
-        emotionCache = clientSideEmotionCache,
-        pageProps,
-    } = props;
+    const { Component, pageProps } = props;
 
     const [themeColor] = useLocalState(LS_KEYS.THEME, THEME_COLOR.DARK);
 
@@ -87,7 +78,7 @@ export default function App(props: EnteAppProps) {
 
     // TODO: Localise APP_TITLES
     return (
-        <CacheProvider value={emotionCache}>
+        <>
             <Head>
                 <title>{APP_TITLES.get(APPS.ACCOUNTS)}</title>
                 <meta
@@ -128,9 +119,9 @@ export default function App(props: EnteAppProps) {
                         </Overlay>
                     )}
                     {showNavbar && <AppNavbar isMobile={isMobile} />}
-                    <Component {...pageProps} />
+                    {isI18nReady && <Component {...pageProps} />}
                 </AppContext.Provider>
             </ThemeProvider>
-        </CacheProvider>
+        </>
     );
 }

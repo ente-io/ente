@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/ente-io/cli/internal/api"
 	eCrypto "github.com/ente-io/cli/internal/crypto"
 	"github.com/ente-io/cli/pkg/model"
@@ -41,7 +42,7 @@ func MapCollectionToAlbum(ctx context.Context, collection api.Collection, holder
 	if collection.MagicMetadata != nil {
 		_, encodedJsonBytes, err := eCrypto.DecryptChaChaBase64(collection.MagicMetadata.Data, collectionKey, collection.MagicMetadata.Header)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to decrypt magic metadata for collection %d: %w", collection.ID, err)
 		}
 		err = json.Unmarshal(encodedJsonBytes, &album.PrivateMeta)
 		if err != nil {
@@ -51,28 +52,28 @@ func MapCollectionToAlbum(ctx context.Context, collection api.Collection, holder
 	if collection.PublicMagicMetadata != nil {
 		_, encodedJsonBytes, err := eCrypto.DecryptChaChaBase64(collection.PublicMagicMetadata.Data, collectionKey, collection.PublicMagicMetadata.Header)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to decrypt public magic metadata for collection %d: %w", collection.ID, err)
 		}
 		err = json.Unmarshal(encodedJsonBytes, &album.PublicMeta)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to unmarshal public magic metadata for collection %d: %w", collection.ID, err)
 		}
 	}
 	if album.IsShared && collection.SharedMagicMetadata != nil {
 		_, encodedJsonBytes, err := eCrypto.DecryptChaChaBase64(collection.SharedMagicMetadata.Data, collectionKey, collection.SharedMagicMetadata.Header)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to decrypt shared magic metadata for collection %d: %w", collection.ID, err)
 		}
 		err = json.Unmarshal(encodedJsonBytes, &album.SharedMeta)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to unmarshal shared magic metadata for collection %d: %w", collection.ID, err)
 		}
 	}
 	return &album, nil
 }
 
 func MapApiFileToPhotoFile(ctx context.Context, album model.RemoteAlbum, file api.File, holder *secrets.KeyHolder) (*model.RemoteFile, error) {
-	if file.IsDeleted {
+	if file.IsRemovedFromAlbum() {
 		return nil, errors.New("file is deleted")
 	}
 	albumKey := album.AlbumKey.MustDecrypt(holder.DeviceKey)
@@ -99,7 +100,7 @@ func MapApiFileToPhotoFile(ctx context.Context, album model.RemoteAlbum, file ap
 	if file.Metadata.DecryptionHeader != "" {
 		_, encodedJsonBytes, err := eCrypto.DecryptChaChaBase64(file.Metadata.EncryptedData, fileKey, file.Metadata.DecryptionHeader)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to decrypt metadata for file %d: %w", file.ID, err)
 		}
 		err = json.Unmarshal(encodedJsonBytes, &photoFile.Metadata)
 		if err != nil {
@@ -109,7 +110,7 @@ func MapApiFileToPhotoFile(ctx context.Context, album model.RemoteAlbum, file ap
 	if file.MagicMetadata != nil {
 		_, encodedJsonBytes, err := eCrypto.DecryptChaChaBase64(file.MagicMetadata.Data, fileKey, file.MagicMetadata.Header)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to decrypt magic metadata for file %d: %w", file.ID, err)
 		}
 		err = json.Unmarshal(encodedJsonBytes, &photoFile.PrivateMetadata)
 		if err != nil {
@@ -119,7 +120,7 @@ func MapApiFileToPhotoFile(ctx context.Context, album model.RemoteAlbum, file ap
 	if file.PubicMagicMetadata != nil {
 		_, encodedJsonBytes, err := eCrypto.DecryptChaChaBase64(file.PubicMagicMetadata.Data, fileKey, file.PubicMagicMetadata.Header)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to decrypt public magic metadata for file %d: %w", file.ID, err)
 		}
 		err = json.Unmarshal(encodedJsonBytes, &photoFile.PublicMetadata)
 		if err != nil {

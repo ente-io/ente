@@ -37,7 +37,6 @@ import (
 	embeddingCtrl "github.com/ente-io/museum/pkg/controller/embedding"
 	"github.com/ente-io/museum/pkg/controller/family"
 	kexCtrl "github.com/ente-io/museum/pkg/controller/kex"
-	"github.com/ente-io/museum/pkg/controller/locationtag"
 	"github.com/ente-io/museum/pkg/controller/lock"
 	remoteStoreCtrl "github.com/ente-io/museum/pkg/controller/remotestore"
 	"github.com/ente-io/museum/pkg/controller/storagebonus"
@@ -50,7 +49,6 @@ import (
 	"github.com/ente-io/museum/pkg/repo/datacleanup"
 	"github.com/ente-io/museum/pkg/repo/embedding"
 	"github.com/ente-io/museum/pkg/repo/kex"
-	locationtagRepo "github.com/ente-io/museum/pkg/repo/locationtag"
 	"github.com/ente-io/museum/pkg/repo/passkey"
 	"github.com/ente-io/museum/pkg/repo/remotestore"
 	storageBonusRepo "github.com/ente-io/museum/pkg/repo/storagebonus"
@@ -150,7 +148,6 @@ func main() {
 	twoFactorRecoveryRepo := &two_factor_recovery.Repository{Db: db, SecretEncryptionKey: secretEncryptionKeyBytes}
 	billingRepo := &repo.BillingRepository{DB: db}
 	userEntityRepo := &userEntityRepo.Repository{DB: db}
-	locationTagRepository := &locationtagRepo.Repository{DB: db}
 	authRepo := &authenticatorRepo.Repository{DB: db}
 	remoteStoreRepository := &remotestore.Repository{DB: db}
 	dataCleanupRepository := &datacleanup.Repository{DB: db}
@@ -640,13 +637,6 @@ func main() {
 	privateAPI.PUT("/user-entity/entity", userEntityHandler.UpdateEntity)
 	privateAPI.DELETE("/user-entity/entity", userEntityHandler.DeleteEntity)
 	privateAPI.GET("/user-entity/entity/diff", userEntityHandler.GetDiff)
-
-	locationTagController := &locationtag.Controller{Repo: locationTagRepository}
-	locationTagHandler := &api.LocationTagHandler{Controller: locationTagController}
-	privateAPI.POST("/locationtag/create", locationTagHandler.Create)
-	privateAPI.POST("/locationtag/update", locationTagHandler.Update)
-	privateAPI.DELETE("/locationtag/delete", locationTagHandler.Delete)
-	privateAPI.GET("/locationtag/diff", locationTagHandler.GetDiff)
 
 	authenticatorController := &authenticatorCtrl.Controller{Repo: authRepo}
 	authenticatorHandler := &api.AuthenticatorHandler{Controller: authenticatorController}

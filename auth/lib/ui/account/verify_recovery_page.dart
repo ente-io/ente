@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:bip39/bip39.dart' as bip39;
 import 'package:dio/dio.dart';
 import 'package:ente_auth/core/configuration.dart';
@@ -12,12 +10,13 @@ import 'package:ente_auth/ui/common/gradient_button.dart';
 import 'package:ente_auth/ui/components/buttons/button_widget.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/navigation_util.dart';
+import 'package:ente_auth/utils/platform_util.dart';
+import 'package:ente_crypto_dart/ente_crypto_dart.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
 
 class VerifyRecoveryPage extends StatefulWidget {
-  const VerifyRecoveryPage({Key? key}) : super(key: key);
+  const VerifyRecoveryPage({super.key});
 
   @override
   State<VerifyRecoveryPage> createState() => _VerifyRecoveryPageState();
@@ -34,14 +33,14 @@ class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
     try {
       final String inputKey = _recoveryKey.text.trim();
       final String recoveryKey =
-          Sodium.bin2hex(Configuration.instance.getRecoveryKey());
+          CryptoUtil.bin2hex(Configuration.instance.getRecoveryKey());
       final String recoveryKeyWords = bip39.entropyToMnemonic(recoveryKey);
       if (inputKey == recoveryKey || inputKey == recoveryKeyWords) {
         try {
           await UserRemoteFlagService.instance.markRecoveryVerificationAsDone();
         } catch (e) {
           await dialog.hide();
-          if (e is DioError && e.type == DioErrorType.other) {
+          if (e is DioException && e.type == DioExceptionType.unknown) {
             await showErrorDialog(
               context,
               "No internet connection",
@@ -88,12 +87,14 @@ class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
       context,
       "Please authenticate to view your recovery key",
     );
+    await PlatformUtil.refocusWindows();
+
     if (hasAuthenticated) {
       String recoveryKey;
       try {
-        recoveryKey = Sodium.bin2hex(Configuration.instance.getRecoveryKey());
-        // ignore: unawaited_futures
-        routeToPage(
+        recoveryKey =
+            CryptoUtil.bin2hex(Configuration.instance.getRecoveryKey());
+        await routeToPage(
           context,
           RecoveryKeyPage(
             recoveryKey,

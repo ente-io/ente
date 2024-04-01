@@ -1,5 +1,5 @@
 import Store, { Schema } from "electron-store";
-import { UploadStoreType } from "../types";
+import type { UploadStoreType } from "../types/main";
 
 const uploadStoreSchema: Schema<UploadStoreType> = {
     filePaths: {

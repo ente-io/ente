@@ -7,14 +7,12 @@
  * functions as an object on the DOM, so that the renderer process can invoke
  * functions that live in the main (Node.js) process if needed.
  *
+ * Ref: https://www.electronjs.org/docs/latest/tutorial/tutorial-preload
+ *
  * Note that this script cannot import other code from `src/` - conceptually it
  * can be thought of as running in a separate, third, process different from
  * both the main or a renderer process (technically, it runs in a BrowserWindow
  * context that runs prior to the renderer process).
- *
- * That said, this can be split into multiple files if we wished. However,
- * that'd require us setting up a bundler to package it back up into a single JS
- * file that can be used at runtime.
  *
  * > Since enabling the sandbox disables Node.js integration in your preload
  * > scripts, you can no longer use require("../my-script"). In other words,
@@ -22,334 +20,79 @@
  * >
  * > https://www.electronjs.org/blog/breach-to-barrier
  *
- * Since most of this is just boilerplate code providing a bridge between the
- * main and renderer, we avoid introducing another moving part into the mix and
- * just keep the entire preload setup in this single file.
+ * If we really wanted, we could setup a bundler to package this into a single
+ * file. However, since this is just boilerplate code providing a bridge between
+ * the main and renderer, we avoid introducing another moving part into the mix
+ * and just keep the entire preload setup in this single file.
+ *
+ * [Note: types.ts <-> preload.ts <-> ipc.ts]
+ *
+ * The following three files are boilerplatish linkage of the same functions,
+ * and when changing one of them, remember to see if the other two also need
+ * changing:
+ *
+ * -    [renderer]  web/packages/shared/electron/types.ts     contains docs
+ * -    [preload]   desktop/src/preload.ts                          ↕︎
+ * -    [main]      desktop/src/main/ipc.ts                   contains impl
  */
 
-import { contextBridge, ipcRenderer } from "electron";
-import { existsSync } from "fs";
-import path from "path";
-import * as fs from "promise-fs";
-import { Readable } from "stream";
-import { deleteDiskCache, openDiskCache } from "./api/cache";
-import { logToDisk, openLogDirectory } from "./api/common";
-import {
-    checkExistsAndCreateDir,
-    exists,
-    saveFileToDisk,
-    saveStreamToDisk,
-} from "./api/export";
-import { runFFmpegCmd } from "./api/ffmpeg";
-import { getDirFiles } from "./api/fs";
-import { convertToJPEG, generateImageThumbnail } from "./api/imageProcessor";
-import { getEncryptionKey, setEncryptionKey } from "./api/safeStorage";
-import {
-    registerForegroundEventListener,
-    registerUpdateEventListener,
-} from "./api/system";
-import {
-    getElectronFilesFromGoogleZip,
-    getPendingUploads,
-    setToUploadCollection,
-    setToUploadFiles,
-    showUploadDirsDialog,
-    showUploadFilesDialog,
-    showUploadZipDialog,
-} from "./api/upload";
-import {
-    addWatchMapping,
-    getWatchMappings,
-    registerWatcherFunctions,
-    removeWatchMapping,
-    updateWatchMappingIgnoredFiles,
-    updateWatchMappingSyncedFiles,
-} from "./api/watch";
-import { setupLogging } from "./utils/logging";
+import { contextBridge, ipcRenderer } from "electron/renderer";
 
-/* Some of the code below has been duplicated to make this file self contained.
-Enhancement: consider alternatives */
+// While we can't import other code, we can import types since they're just
+// needed when compiling and will not be needed / looked around for at runtime.
+import type {
+    AppUpdateInfo,
+    ElectronFile,
+    FILE_PATH_TYPE,
+    Model,
+    WatchMapping,
+} from "./types/ipc";
 
-/* preload: duplicated logError */
-export function logError(error: Error, message: string, info?: string): void {
-    ipcRenderer.invoke("log-error", error, message, info);
-}
+// - General
 
-// -
+const appVersion = (): Promise<string> => ipcRenderer.invoke("appVersion");
 
-export const convertBrowserStreamToNode = (
-    fileStream: ReadableStream<Uint8Array>,
-) => {
-    const reader = fileStream.getReader();
-    const rs = new Readable();
+const openDirectory = (dirPath: string): Promise<void> =>
+    ipcRenderer.invoke("openDirectory");
 
-    rs._read = async () => {
-        try {
-            const result = await reader.read();
+const openLogDirectory = (): Promise<void> =>
+    ipcRenderer.invoke("openLogDirectory");
 
-            if (!result.done) {
-                rs.push(Buffer.from(result.value));
-            } else {
-                rs.push(null);
-                return;
-            }
-        } catch (e) {
-            rs.emit("error", e);
-        }
-    };
+const logToDisk = (message: string): void =>
+    ipcRenderer.send("logToDisk", message);
 
-    return rs;
-};
+const fsExists = (path: string): Promise<boolean> =>
+    ipcRenderer.invoke("fsExists", path);
 
-export async function writeNodeStream(
-    filePath: string,
-    fileStream: NodeJS.ReadableStream,
-) {
-    const writeable = fs.createWriteStream(filePath);
+// - AUDIT below this
 
-    fileStream.on("error", (error) => {
-        writeable.destroy(error); // Close the writable stream with an error
+const registerForegroundEventListener = (onForeground: () => void) => {
+    ipcRenderer.removeAllListeners("app-in-foreground");
+    ipcRenderer.on("app-in-foreground", () => {
+        onForeground();
     });
-
-    fileStream.pipe(writeable);
-
-    await new Promise((resolve, reject) => {
-        writeable.on("finish", resolve);
-        writeable.on("error", async (e) => {
-            if (existsSync(filePath)) {
-                await fs.unlink(filePath);
-            }
-            reject(e);
-        });
-    });
-}
-
-/* preload: duplicated writeStream */
-export async function writeStream(
-    filePath: string,
-    fileStream: ReadableStream<Uint8Array>,
-) {
-    const readable = convertBrowserStreamToNode(fileStream);
-    await writeNodeStream(filePath, readable);
-}
-
-// -
-
-async function readTextFile(filePath: string) {
-    if (!existsSync(filePath)) {
-        throw new Error("File does not exist");
-    }
-    return await fs.readFile(filePath, "utf-8");
-}
-
-async function moveFile(
-    sourcePath: string,
-    destinationPath: string,
-): Promise<void> {
-    if (!existsSync(sourcePath)) {
-        throw new Error("File does not exist");
-    }
-    if (existsSync(destinationPath)) {
-        throw new Error("Destination file already exists");
-    }
-    // check if destination folder exists
-    const destinationFolder = path.dirname(destinationPath);
-    if (!existsSync(destinationFolder)) {
-        await fs.mkdir(destinationFolder, { recursive: true });
-    }
-    await fs.rename(sourcePath, destinationPath);
-}
-
-export async function isFolder(dirPath: string) {
-    try {
-        const stats = await fs.stat(dirPath);
-        return stats.isDirectory();
-    } catch (e) {
-        let err = e;
-        // if code is defined, it's an error from fs.stat
-        if (typeof e.code !== "undefined") {
-            // ENOENT means the file does not exist
-            if (e.code === "ENOENT") {
-                return false;
-            }
-            err = Error(`fs error code: ${e.code}`);
-        }
-        logError(err, "isFolder failed");
-        return false;
-    }
-}
-
-async function deleteFolder(folderPath: string): Promise<void> {
-    if (!existsSync(folderPath)) {
-        return;
-    }
-    if (!fs.statSync(folderPath).isDirectory()) {
-        throw new Error("Path is not a folder");
-    }
-    // check if folder is empty
-    const files = await fs.readdir(folderPath);
-    if (files.length > 0) {
-        throw new Error("Folder is not empty");
-    }
-    await fs.rmdir(folderPath);
-}
-
-async function rename(oldPath: string, newPath: string) {
-    if (!existsSync(oldPath)) {
-        throw new Error("Path does not exist");
-    }
-    await fs.rename(oldPath, newPath);
-}
-
-function deleteFile(filePath: string): void {
-    if (!existsSync(filePath)) {
-        return;
-    }
-    if (!fs.statSync(filePath).isFile()) {
-        throw new Error("Path is not a file");
-    }
-    fs.rmSync(filePath);
-}
-
-// -
-
-/* preload: duplicated Model */
-export enum Model {
-    GGML_CLIP = "ggml-clip",
-    ONNX_CLIP = "onnx-clip",
-}
-
-const computeImageEmbedding = async (
-    model: Model,
-    imageData: Uint8Array,
-): Promise<Float32Array> => {
-    let tempInputFilePath = null;
-    try {
-        tempInputFilePath = await ipcRenderer.invoke("get-temp-file-path", "");
-        const imageStream = new Response(imageData.buffer).body;
-        await writeStream(tempInputFilePath, imageStream);
-        const embedding = await ipcRenderer.invoke(
-            "compute-image-embedding",
-            model,
-            tempInputFilePath,
-        );
-        return embedding;
-    } catch (err) {
-        if (isExecError(err)) {
-            const parsedExecError = parseExecError(err);
-            throw Error(parsedExecError);
-        } else {
-            throw err;
-        }
-    } finally {
-        if (tempInputFilePath) {
-            await ipcRenderer.invoke("remove-temp-file", tempInputFilePath);
-        }
-    }
 };
-
-export async function computeTextEmbedding(
-    model: Model,
-    text: string,
-): Promise<Float32Array> {
-    try {
-        const embedding = await ipcRenderer.invoke(
-            "compute-text-embedding",
-            model,
-            text,
-        );
-        return embedding;
-    } catch (err) {
-        if (isExecError(err)) {
-            const parsedExecError = parseExecError(err);
-            throw Error(parsedExecError);
-        } else {
-            throw err;
-        }
-    }
-}
-
-// -
-
-/**
- * [Note: Custom errors across Electron/Renderer boundary]
- *
- * We need to use the `message` field to disambiguate between errors thrown by
- * the main process when invoked from the renderer process. This is because:
- *
- * > Errors thrown throw `handle` in the main process are not transparent as
- * > they are serialized and only the `message` property from the original error
- * > is provided to the renderer process.
- * >
- * > - https://www.electronjs.org/docs/latest/tutorial/ipc
- * >
- * > Ref: https://github.com/electron/electron/issues/24427
- */
-/* preload: duplicated CustomErrors */
-const CustomErrorsP = {
-    WINDOWS_NATIVE_IMAGE_PROCESSING_NOT_SUPPORTED:
-        "Windows native image processing is not supported",
-    INVALID_OS: (os: string) => `Invalid OS - ${os}`,
-    WAIT_TIME_EXCEEDED: "Wait time exceeded",
-    UNSUPPORTED_PLATFORM: (platform: string, arch: string) =>
-        `Unsupported platform - ${platform} ${arch}`,
-    MODEL_DOWNLOAD_PENDING:
-        "Model download pending, skipping clip search request",
-    INVALID_FILE_PATH: "Invalid file path",
-    INVALID_CLIP_MODEL: (model: string) => `Invalid Clip model - ${model}`,
-};
-
-const isExecError = (err: any) => {
-    return err.message.includes("Command failed:");
-};
-
-const parseExecError = (err: any) => {
-    const errMessage = err.message;
-    if (errMessage.includes("Bad CPU type in executable")) {
-        return CustomErrorsP.UNSUPPORTED_PLATFORM(
-            process.platform,
-            process.arch,
-        );
-    } else {
-        return errMessage;
-    }
-};
-
-// -
-
-const selectDirectory = async (): Promise<string> => {
-    try {
-        return await ipcRenderer.invoke("select-dir");
-    } catch (e) {
-        logError(e, "error while selecting root directory");
-    }
-};
-
-const getAppVersion = async (): Promise<string> => {
-    try {
-        return await ipcRenderer.invoke("get-app-version");
-    } catch (e) {
-        logError(e, "failed to get release version");
-        throw e;
-    }
-};
-
-const openDirectory = async (dirPath: string): Promise<void> => {
-    try {
-        await ipcRenderer.invoke("open-dir", dirPath);
-    } catch (e) {
-        logError(e, "error while opening directory");
-        throw e;
-    }
-};
-
-// -
 
 const clearElectronStore = () => {
     ipcRenderer.send("clear-electron-store");
 };
 
-// -
+const setEncryptionKey = (encryptionKey: string): Promise<void> =>
+    ipcRenderer.invoke("setEncryptionKey", encryptionKey);
+
+const getEncryptionKey = (): Promise<string> =>
+    ipcRenderer.invoke("getEncryptionKey");
+
+// - App update
+
+const registerUpdateEventListener = (
+    showUpdateDialog: (updateInfo: AppUpdateInfo) => void,
+) => {
+    ipcRenderer.removeAllListeners("show-update-dialog");
+    ipcRenderer.on("show-update-dialog", (_, updateInfo: AppUpdateInfo) => {
+        showUpdateDialog(updateInfo);
+    });
+};
 
 const updateAndRestart = () => {
     ipcRenderer.send("update-and-restart");
@@ -363,57 +106,272 @@ const muteUpdateNotification = (version: string) => {
     ipcRenderer.send("mute-update-notification", version);
 };
 
-// -
+// - Conversion
 
-setupLogging();
+const convertToJPEG = (
+    fileData: Uint8Array,
+    filename: string,
+): Promise<Uint8Array> =>
+    ipcRenderer.invoke("convertToJPEG", fileData, filename);
+
+const generateImageThumbnail = (
+    inputFile: File | ElectronFile,
+    maxDimension: number,
+    maxSize: number,
+): Promise<Uint8Array> =>
+    ipcRenderer.invoke(
+        "generateImageThumbnail",
+        inputFile,
+        maxDimension,
+        maxSize,
+    );
+
+const runFFmpegCmd = (
+    cmd: string[],
+    inputFile: File | ElectronFile,
+    outputFileName: string,
+    dontTimeout?: boolean,
+): Promise<File> =>
+    ipcRenderer.invoke(
+        "runFFmpegCmd",
+        cmd,
+        inputFile,
+        outputFileName,
+        dontTimeout,
+    );
+
+// - ML
+
+const computeImageEmbedding = (
+    model: Model,
+    imageData: Uint8Array,
+): Promise<Float32Array> =>
+    ipcRenderer.invoke("computeImageEmbedding", model, imageData);
+
+const computeTextEmbedding = (
+    model: Model,
+    text: string,
+): Promise<Float32Array> =>
+    ipcRenderer.invoke("computeTextEmbedding", model, text);
+
+// - File selection
+
+// TODO: Deprecated - use dialogs on the renderer process itself
+
+const selectDirectory = (): Promise<string> =>
+    ipcRenderer.invoke("selectDirectory");
+
+const showUploadFilesDialog = (): Promise<ElectronFile[]> =>
+    ipcRenderer.invoke("showUploadFilesDialog");
+
+const showUploadDirsDialog = (): Promise<ElectronFile[]> =>
+    ipcRenderer.invoke("showUploadDirsDialog");
+
+const showUploadZipDialog = (): Promise<{
+    zipPaths: string[];
+    files: ElectronFile[];
+}> => ipcRenderer.invoke("showUploadZipDialog");
+
+// - Watch
+
+const registerWatcherFunctions = (
+    addFile: (file: ElectronFile) => Promise<void>,
+    removeFile: (path: string) => Promise<void>,
+    removeFolder: (folderPath: string) => Promise<void>,
+) => {
+    ipcRenderer.removeAllListeners("watch-add");
+    ipcRenderer.removeAllListeners("watch-unlink");
+    ipcRenderer.removeAllListeners("watch-unlink-dir");
+    ipcRenderer.on("watch-add", (_, file: ElectronFile) => addFile(file));
+    ipcRenderer.on("watch-unlink", (_, filePath: string) =>
+        removeFile(filePath),
+    );
+    ipcRenderer.on("watch-unlink-dir", (_, folderPath: string) =>
+        removeFolder(folderPath),
+    );
+};
+
+const addWatchMapping = (
+    collectionName: string,
+    folderPath: string,
+    uploadStrategy: number,
+): Promise<void> =>
+    ipcRenderer.invoke(
+        "addWatchMapping",
+        collectionName,
+        folderPath,
+        uploadStrategy,
+    );
+
+const removeWatchMapping = (folderPath: string): Promise<void> =>
+    ipcRenderer.invoke("removeWatchMapping", folderPath);
+
+const getWatchMappings = (): Promise<WatchMapping[]> =>
+    ipcRenderer.invoke("getWatchMappings");
+
+const updateWatchMappingSyncedFiles = (
+    folderPath: string,
+    files: WatchMapping["syncedFiles"],
+): Promise<void> =>
+    ipcRenderer.invoke("updateWatchMappingSyncedFiles", folderPath, files);
+
+const updateWatchMappingIgnoredFiles = (
+    folderPath: string,
+    files: WatchMapping["ignoredFiles"],
+): Promise<void> =>
+    ipcRenderer.invoke("updateWatchMappingIgnoredFiles", folderPath, files);
+
+// - FS Legacy
+
+const checkExistsAndCreateDir = (dirPath: string): Promise<void> =>
+    ipcRenderer.invoke("checkExistsAndCreateDir", dirPath);
+
+const saveStreamToDisk = (
+    path: string,
+    fileStream: ReadableStream<any>,
+): Promise<void> => ipcRenderer.invoke("saveStreamToDisk", path, fileStream);
+
+const saveFileToDisk = (path: string, file: any): Promise<void> =>
+    ipcRenderer.invoke("saveFileToDisk", path, file);
+
+const readTextFile = (path: string): Promise<string> =>
+    ipcRenderer.invoke("readTextFile", path);
+
+const isFolder = (dirPath: string): Promise<boolean> =>
+    ipcRenderer.invoke("isFolder", dirPath);
+
+const moveFile = (oldPath: string, newPath: string): Promise<void> =>
+    ipcRenderer.invoke("moveFile", oldPath, newPath);
+
+const deleteFolder = (path: string): Promise<void> =>
+    ipcRenderer.invoke("deleteFolder", path);
+
+const deleteFile = (path: string): Promise<void> =>
+    ipcRenderer.invoke("deleteFile", path);
+
+const rename = (oldPath: string, newPath: string): Promise<void> =>
+    ipcRenderer.invoke("rename", oldPath, newPath);
+
+// - Upload
+
+const getPendingUploads = (): Promise<{
+    files: ElectronFile[];
+    collectionName: string;
+    type: string;
+}> => ipcRenderer.invoke("getPendingUploads");
+
+const setToUploadFiles = (
+    type: FILE_PATH_TYPE,
+    filePaths: string[],
+): Promise<void> => ipcRenderer.invoke("setToUploadFiles", type, filePaths);
+
+const getElectronFilesFromGoogleZip = (
+    filePath: string,
+): Promise<ElectronFile[]> =>
+    ipcRenderer.invoke("getElectronFilesFromGoogleZip", filePath);
+
+const setToUploadCollection = (collectionName: string): Promise<void> =>
+    ipcRenderer.invoke("setToUploadCollection", collectionName);
+
+const getDirFiles = (dirPath: string): Promise<ElectronFile[]> =>
+    ipcRenderer.invoke("getDirFiles", dirPath);
 
 // These objects exposed here will become available to the JS code in our
 // renderer (the web/ code) as `window.ElectronAPIs.*`
 //
-// https://www.electronjs.org/docs/latest/tutorial/tutorial-preload
+// There are a few related concepts at play here, and it might be worthwhile to
+// read their (excellent) documentation to get an understanding;
+//`
+// - ContextIsolation:
+//   https://www.electronjs.org/docs/latest/tutorial/context-isolation
+//
+// - IPC https://www.electronjs.org/docs/latest/tutorial/ipc
+//
+// [Note: Transferring large amount of data over IPC]
+//
+// Electron's IPC implementation uses the HTML standard Structured Clone
+// Algorithm to serialize objects passed between processes.
+// https://www.electronjs.org/docs/latest/tutorial/ipc#object-serialization
+//
+// In particular, ArrayBuffer is eligible for structured cloning.
+// https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Structured_clone_algorithm
+//
+// Also, ArrayBuffer is "transferable", which means it is a zero-copy operation
+// operation when it happens across threads.
+// https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Transferable_objects
+//
+// In our case though, we're not dealing with threads but separate processes. So
+// the ArrayBuffer will be copied:
+// > "parameters, errors and return values are **copied** when they're sent over
+//   the bridge".
+//   https://www.electronjs.org/docs/latest/api/context-bridge#methods
+//
+// The copy itself is relatively fast, but the problem with transfering large
+// amounts of data is potentially running out of memory during the copy.
 contextBridge.exposeInMainWorld("ElectronAPIs", {
-    exists,
+    // - General
+    appVersion,
+    openDirectory,
+    registerForegroundEventListener,
+    clearElectronStore,
+    getEncryptionKey,
+    setEncryptionKey,
+
+    // - Logging
+    openLogDirectory,
+    logToDisk,
+
+    // - App update
+    updateAndRestart,
+    skipAppUpdate,
+    muteUpdateNotification,
+    registerUpdateEventListener,
+
+    // - Conversion
+    convertToJPEG,
+    generateImageThumbnail,
+    runFFmpegCmd,
+
+    // - ML
+    computeImageEmbedding,
+    computeTextEmbedding,
+
+    // - File selection
+    selectDirectory,
+    showUploadFilesDialog,
+    showUploadDirsDialog,
+    showUploadZipDialog,
+
+    // - Watch
+    registerWatcherFunctions,
+    addWatchMapping,
+    removeWatchMapping,
+    getWatchMappings,
+    updateWatchMappingSyncedFiles,
+    updateWatchMappingIgnoredFiles,
+
+    // - FS
+    fs: {
+        exists: fsExists,
+    },
+
+    // - FS legacy
+    // TODO: Move these into fs + document + rename if needed
     checkExistsAndCreateDir,
     saveStreamToDisk,
     saveFileToDisk,
-    selectDirectory,
-    clearElectronStore,
     readTextFile,
-    showUploadFilesDialog,
-    showUploadDirsDialog,
-    getPendingUploads,
-    setToUploadFiles,
-    showUploadZipDialog,
-    getElectronFilesFromGoogleZip,
-    setToUploadCollection,
-    getEncryptionKey,
-    setEncryptionKey,
-    openDiskCache,
-    deleteDiskCache,
-    getDirFiles,
-    getWatchMappings,
-    addWatchMapping,
-    removeWatchMapping,
-    registerWatcherFunctions,
     isFolder,
-    updateWatchMappingSyncedFiles,
-    updateWatchMappingIgnoredFiles,
-    logToDisk,
-    convertToJPEG,
-    openLogDirectory,
-    registerUpdateEventListener,
-    updateAndRestart,
-    skipAppUpdate,
-    getAppVersion,
-    runFFmpegCmd,
-    muteUpdateNotification,
-    generateImageThumbnail,
-    registerForegroundEventListener,
-    openDirectory,
     moveFile,
     deleteFolder,
-    rename,
     deleteFile,
-    computeImageEmbedding,
-    computeTextEmbedding,
+    rename,
+
+    // - Upload
+
+    getPendingUploads,
+    setToUploadFiles,
+    getElectronFilesFromGoogleZip,
+    setToUploadCollection,
+    getDirFiles,
 });

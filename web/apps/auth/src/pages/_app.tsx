@@ -1,7 +1,9 @@
-import AppNavbar from "@ente/shared/components/Navbar/app";
-import { t } from "i18next";
-import { createContext, useEffect, useRef, useState } from "react";
-
+import { setupI18n } from "@/ui/i18n";
+import {
+    APPS,
+    APP_TITLES,
+    CLIENT_PACKAGE_NAMES,
+} from "@ente/shared/apps/constants";
 import { Overlay } from "@ente/shared/components/Container";
 import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
 import {
@@ -10,32 +12,26 @@ import {
 } from "@ente/shared/components/DialogBoxV2/types";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { MessageContainer } from "@ente/shared/components/MessageContainer";
+import AppNavbar from "@ente/shared/components/Navbar/app";
+import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
+import { useLocalState } from "@ente/shared/hooks/useLocalState";
 import {
     clearLogsIfLocalStorageLimitExceeded,
     logStartupMessage,
 } from "@ente/shared/logging/web";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { LS_KEYS } from "@ente/shared/storage/localStorage";
-import { CssBaseline, useMediaQuery } from "@mui/material";
-import { ThemeProvider } from "@mui/material/styles";
-import Head from "next/head";
-import { useRouter } from "next/router";
-import LoadingBar from "react-top-loading-bar";
-
-import { setupI18n } from "@/ui/i18n";
-import { CacheProvider } from "@emotion/react";
-import {
-    APP_TITLES,
-    APPS,
-    CLIENT_PACKAGE_NAMES,
-} from "@ente/shared/apps/constants";
-import { EnteAppProps } from "@ente/shared/apps/types";
-import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
-import { useLocalState } from "@ente/shared/hooks/useLocalState";
 import { getTheme } from "@ente/shared/themes";
 import { THEME_COLOR } from "@ente/shared/themes/constants";
-import createEmotionCache from "@ente/shared/themes/createEmotionCache";
 import { SetTheme } from "@ente/shared/themes/types";
+import { CssBaseline, useMediaQuery } from "@mui/material";
+import { ThemeProvider } from "@mui/material/styles";
+import { t } from "i18next";
+import { AppProps } from "next/app";
+import Head from "next/head";
+import { useRouter } from "next/router";
+import { createContext, useEffect, useRef, useState } from "react";
+import LoadingBar from "react-top-loading-bar";
 import "../../public/css/global.css";
 
 type AppContextType = {
@@ -51,15 +47,8 @@ type AppContextType = {
 
 export const AppContext = createContext<AppContextType>(null);
 
-// Client-side cache, shared for the whole session of the user in the browser.
-const clientSideEmotionCache = createEmotionCache();
-
-export default function App(props: EnteAppProps) {
-    const {
-        Component,
-        emotionCache = clientSideEmotionCache,
-        pageProps,
-    } = props;
+export default function App(props: AppProps) {
+    const { Component, pageProps } = props;
     const router = useRouter();
     const [isI18nReady, setIsI18nReady] = useState<boolean>(false);
     const [loading, setLoading] = useState(false);
@@ -141,7 +130,7 @@ export default function App(props: EnteAppProps) {
         });
 
     return (
-        <CacheProvider value={emotionCache}>
+        <>
             <Head>
                 <title>
                     {isI18nReady
@@ -195,9 +184,11 @@ export default function App(props: EnteAppProps) {
                             <EnteSpinner />
                         </Overlay>
                     )}
-                    <Component setLoading={setLoading} {...pageProps} />
+                    {isI18nReady && (
+                        <Component setLoading={setLoading} {...pageProps} />
+                    )}
                 </AppContext.Provider>
             </ThemeProvider>
-        </CacheProvider>
+        </>
     );
 }

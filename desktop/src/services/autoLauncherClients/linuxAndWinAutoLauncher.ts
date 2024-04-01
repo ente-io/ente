@@ -1,6 +1,6 @@
 import AutoLaunch from "auto-launch";
 import { app } from "electron";
-import { AutoLauncherClient } from "../../types/autoLauncher";
+import { AutoLauncherClient } from "../../types/main";
 
 const LAUNCHED_AS_HIDDEN_FLAG = "hidden";
 

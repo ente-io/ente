@@ -225,7 +225,8 @@ export default function AlbumCastDialog(props: Props) {
                     <SingleInputForm
                         callback={onSubmit}
                         fieldType="text"
-                        placeholder={"123456"}
+                        realLabel={"Code"}
+                        realPlaceholder={"123456"}
                         buttonText={t("PAIR_DEVICE_TO_TV")}
                         submitButtonProps={{ sx: { mt: 1, mb: 2 } }}
                     />

@@ -28,7 +28,7 @@ jobs:
                   base_path: "auth/"
                   config: "auth/crowdin.yml"
                   upload_sources: true
-                  upload_translations: true
+                  upload_translations: false
                   download_translations: true
                   localization_branch_name: crowdin-translations-auth
                   create_pull_request: true

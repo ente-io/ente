@@ -145,13 +145,7 @@ class HomeWidgetService {
   }
 
   Future<int> countHomeWidgets() async {
-    return await hw.HomeWidget.getWidgetCount(
-          name: 'SlideshowWidgetProvider',
-          androidName: 'SlideshowWidgetProvider',
-          qualifiedAndroidName: 'io.ente.photos.SlideshowWidgetProvider',
-          iOSName: 'SlideshowWidget',
-        ) ??
-        0;
+    return (await hw.HomeWidget.getInstalledWidgets()).length;
   }
 
   Future<void> clearHomeWidget() async {

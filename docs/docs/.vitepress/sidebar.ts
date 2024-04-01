@@ -102,6 +102,10 @@ export const sidebar = [
                 items: [
                     { text: "General", link: "/photos/faq/general" },
                     {
+                        text: "Export",
+                        link: "/photos/faq/export",
+                    },
+                    {
                         text: "Security and privacy",
                         link: "/photos/faq/security-and-privacy",
                     },
@@ -138,7 +142,7 @@ export const sidebar = [
             { text: "FAQ", link: "/auth/faq/" },
             {
                 text: "Migration",
-                collapsed: false,
+                collapsed: true,
                 items: [
                     { text: "Introduction", link: "/auth/migration-guides/" },
                     {
@@ -188,13 +192,10 @@ export const sidebar = [
             {
                 text: "FAQ",
                 items: [
+                    { text: "General", link: "/self-hosting/faq/" },
                     {
                         text: "Verification code",
                         link: "/self-hosting/faq/otp",
-                    },
-                    {
-                        text: "Increase storage space",
-                        link: "/self-hosting/faq/storage-space",
                     },
                 ],
             },

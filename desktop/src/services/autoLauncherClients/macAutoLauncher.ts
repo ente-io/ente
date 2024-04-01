@@ -1,5 +1,5 @@
 import { app } from "electron";
-import { AutoLauncherClient } from "../../types/autoLauncher";
+import { AutoLauncherClient } from "../../types/main";
 
 class MacAutoLauncher implements AutoLauncherClient {
     async isEnabled() {

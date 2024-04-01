@@ -57,8 +57,6 @@ export interface DownloadClient {
     downloadFileStream: (file: EnteFile) => Promise<Response>;
 }
 
-const FILE_CACHE_LIMIT = 5 * 1024 * 1024 * 1024; // 5GB
-
 class DownloadManagerImpl {
     private ready: boolean = false;
     private downloadClient: DownloadClient;
@@ -565,7 +563,7 @@ async function openDiskFileCache() {
         if (!isElectron()) {
             throw Error(CustomError.NOT_AVAILABLE_ON_WEB);
         }
-        return await CacheStorageService.open(CACHES.FILES, FILE_CACHE_LIMIT);
+        return await CacheStorageService.open(CACHES.FILES);
     } catch (e) {
         logError(e, "Failed to open file cache");
         if (isInternalUser()) {

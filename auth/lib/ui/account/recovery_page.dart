@@ -1,8 +1,5 @@
-
-
-import 'dart:ui';
-
 import 'package:ente_auth/core/configuration.dart';
+import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/ui/account/password_entry_page.dart';
 import 'package:ente_auth/ui/common/dynamic_fab.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
@@ -10,7 +7,7 @@ import 'package:ente_auth/utils/toast_util.dart';
 import 'package:flutter/material.dart';
 
 class RecoveryPage extends StatefulWidget {
-  const RecoveryPage({Key? key}) : super(key: key);
+  const RecoveryPage({super.key});
 
   @override
   State<RecoveryPage> createState() => _RecoveryPageState();
@@ -18,6 +15,36 @@ class RecoveryPage extends StatefulWidget {
 
 class _RecoveryPageState extends State<RecoveryPage> {
   final _recoveryKey = TextEditingController();
+
+  Future<void> onPressed() async {
+    FocusScope.of(context).unfocus();
+    final dialog = createProgressDialog(context, "Decrypting...");
+    await dialog.show();
+    try {
+      await Configuration.instance.recover(_recoveryKey.text.trim());
+      await dialog.hide();
+      showToast(context, "Recovery successful!");
+      await Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (BuildContext context) {
+            return const PopScope(
+              canPop: false,
+              child: PasswordEntryPage(
+                mode: PasswordEntryMode.reset,
+              ),
+            );
+          },
+        ),
+      );
+    } catch (e) {
+      await dialog.hide();
+      String errMessage = 'The recovery key you entered is incorrect';
+      if (e is AssertionError) {
+        errMessage = '$errMessage : ${e.message}';
+      }
+      await showErrorDialog(context, "Incorrect recovery key", errMessage);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,37 +73,7 @@ class _RecoveryPageState extends State<RecoveryPage> {
         isKeypadOpen: isKeypadOpen,
         isFormValid: _recoveryKey.text.isNotEmpty,
         buttonText: 'Recover',
-        onPressedFunction: () async {
-          FocusScope.of(context).unfocus();
-          final dialog = createProgressDialog(context, "Decrypting...");
-          await dialog.show();
-          try {
-            await Configuration.instance.recover(_recoveryKey.text.trim());
-            await dialog.hide();
-            showToast(context, "Recovery successful!");
-            // ignore: unawaited_futures
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(
-                builder: (BuildContext context) {
-                  return WillPopScope(
-                    onWillPop: () async => false,
-                    child: const PasswordEntryPage(
-                      mode: PasswordEntryMode.reset,
-                    ),
-                  );
-                },
-              ),
-            );
-          } catch (e) {
-            await dialog.hide();
-            String errMessage = 'The recovery key you entered is incorrect';
-            if (e is AssertionError) {
-              errMessage = '$errMessage : ${e.message}';
-            }
-            // ignore: unawaited_futures
-            showErrorDialog(context, "Incorrect recovery key", errMessage);
-          }
-        },
+        onPressedFunction: onPressed,
       ),
       floatingActionButtonLocation: fabLocation(),
       floatingActionButtonAnimator: NoScalingAnimation(),
@@ -89,7 +86,7 @@ class _RecoveryPageState extends State<RecoveryPage> {
                   padding:
                       const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
                   child: Text(
-                    'Forgot password',
+                    context.l10n.forgotPassword,
                     style: Theme.of(context).textTheme.headlineMedium,
                   ),
                 ),
@@ -140,12 +137,14 @@ class _RecoveryPageState extends State<RecoveryPage> {
                         padding: const EdgeInsets.symmetric(horizontal: 20),
                         child: Center(
                           child: Text(
-                            "No recovery key?",
-                            style:
-                                Theme.of(context).textTheme.titleMedium!.copyWith(
-                                      fontSize: 14,
-                                      decoration: TextDecoration.underline,
-                                    ),
+                            context.l10n.noRecoveryKeyTitle,
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium!
+                                .copyWith(
+                                  fontSize: 14,
+                                  decoration: TextDecoration.underline,
+                                ),
                           ),
                         ),
                       ),

@@ -1,12 +1,17 @@
-import { existsSync } from "fs";
 import StreamZip from "node-stream-zip";
-import path from "path";
-import * as fs from "promise-fs";
-import { Readable } from "stream";
-import { ElectronFile } from "../types";
-import { logError } from "./logging";
+import { existsSync } from "node:fs";
+import fs from "node:fs/promises";
+import path from "node:path";
+import { logError } from "../main/log";
+import { ElectronFile } from "../types/ipc";
 
 const FILE_STREAM_CHUNK_SIZE: number = 4 * 1024 * 1024;
+
+export async function getDirFiles(dirPath: string) {
+    const files = await getDirFilePaths(dirPath);
+    const electronFiles = await Promise.all(files.map(getElectronFile));
+    return electronFiles;
+}
 
 // https://stackoverflow.com/a/63111390
 export const getDirFilePaths = async (dirPath: string) => {
@@ -25,16 +30,14 @@ export const getDirFilePaths = async (dirPath: string) => {
     return files;
 };
 
-export const getFileStream = async (filePath: string) => {
+const getFileStream = async (filePath: string) => {
     const file = await fs.open(filePath, "r");
     let offset = 0;
     const readableStream = new ReadableStream<Uint8Array>({
         async pull(controller) {
             try {
                 const buff = new Uint8Array(FILE_STREAM_CHUNK_SIZE);
-                // original types were not working correctly
-                const bytesRead = (await fs.read(
-                    file,
+                const bytesRead = (await file.read(
                     buff,
                     0,
                     FILE_STREAM_CHUNK_SIZE,
@@ -43,16 +46,16 @@ export const getFileStream = async (filePath: string) => {
                 offset += bytesRead;
                 if (bytesRead === 0) {
                     controller.close();
-                    await fs.close(file);
+                    await file.close();
                 } else {
                     controller.enqueue(buff.slice(0, bytesRead));
                 }
             } catch (e) {
-                await fs.close(file);
+                await file.close();
             }
         },
         async cancel() {
-            await fs.close(file);
+            await file.close();
         },
     });
     return readableStream;
@@ -183,58 +186,3 @@ export const getZipFileStream = async (
     });
     return readableStream;
 };
-
-export const convertBrowserStreamToNode = (
-    fileStream: ReadableStream<Uint8Array>,
-) => {
-    const reader = fileStream.getReader();
-    const rs = new Readable();
-
-    rs._read = async () => {
-        try {
-            const result = await reader.read();
-
-            if (!result.done) {
-                rs.push(Buffer.from(result.value));
-            } else {
-                rs.push(null);
-                return;
-            }
-        } catch (e) {
-            rs.emit("error", e);
-        }
-    };
-
-    return rs;
-};
-
-export async function writeNodeStream(
-    filePath: string,
-    fileStream: NodeJS.ReadableStream,
-) {
-    const writeable = fs.createWriteStream(filePath);
-
-    fileStream.on("error", (error) => {
-        writeable.destroy(error); // Close the writable stream with an error
-    });
-
-    fileStream.pipe(writeable);
-
-    await new Promise((resolve, reject) => {
-        writeable.on("finish", resolve);
-        writeable.on("error", async (e) => {
-            if (existsSync(filePath)) {
-                await fs.unlink(filePath);
-            }
-            reject(e);
-        });
-    });
-}
-
-export async function writeStream(
-    filePath: string,
-    fileStream: ReadableStream<Uint8Array>,
-) {
-    const readable = convertBrowserStreamToNode(fileStream);
-    await writeNodeStream(filePath, readable);
-}

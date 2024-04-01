@@ -1,7 +1,9 @@
 PODS:
-  - connectivity (0.0.1):
+  - app_links (0.0.1):
     - Flutter
-    - Reachability
+  - connectivity_plus (0.0.1):
+    - Flutter
+    - ReachabilitySwift
   - device_info_plus (0.0.1):
     - Flutter
   - DKImagePickerController/Core (4.3.4):
@@ -45,27 +47,26 @@ PODS:
   - Flutter (1.0.0)
   - flutter_email_sender (0.0.1):
     - Flutter
-  - flutter_inappwebview (0.0.1):
+  - flutter_inappwebview_ios (0.0.1):
     - Flutter
-    - flutter_inappwebview/Core (= 0.0.1)
+    - flutter_inappwebview_ios/Core (= 0.0.1)
     - OrderedSet (~> 5.0)
-  - flutter_inappwebview/Core (0.0.1):
+  - flutter_inappwebview_ios/Core (0.0.1):
     - Flutter
     - OrderedSet (~> 5.0)
+  - flutter_local_authentication (1.2.0):
+    - Flutter
   - flutter_local_notifications (0.0.1):
     - Flutter
   - flutter_native_splash (0.0.1):
     - Flutter
   - flutter_secure_storage (6.0.0):
     - Flutter
-  - flutter_sodium (0.0.1):
-    - Flutter
   - fluttertoast (0.0.2):
     - Flutter
     - Toast
-  - FMDB (2.7.5):
-    - FMDB/standard (= 2.7.5)
-  - FMDB/standard (2.7.5)
+  - local_auth_darwin (0.0.1):
+    - Flutter
   - local_auth_ios (0.0.1):
     - Flutter
   - move_to_background (0.0.1):
@@ -82,46 +83,65 @@ PODS:
   - qr_code_scanner (0.2.0):
     - Flutter
     - MTBBarcodeScanner
-  - Reachability (3.2)
-  - SDWebImage (5.17.0):
-    - SDWebImage/Core (= 5.17.0)
-  - SDWebImage/Core (5.17.0)
-  - Sentry/HybridSDK (8.9.1):
-    - SentryPrivate (= 8.9.1)
+  - ReachabilitySwift (5.2.1)
+  - SDWebImage (5.19.0):
+    - SDWebImage/Core (= 5.19.0)
+  - SDWebImage/Core (5.19.0)
+  - Sentry/HybridSDK (8.21.0):
+    - SentryPrivate (= 8.21.0)
   - sentry_flutter (0.0.1):
     - Flutter
     - FlutterMacOS
-    - Sentry/HybridSDK (= 8.9.1)
-  - SentryPrivate (8.9.1)
+    - Sentry/HybridSDK (= 8.21.0)
+  - SentryPrivate (8.21.0)
   - share_plus (0.0.1):
     - Flutter
   - shared_preferences_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
+  - smart_auth (0.0.1):
+    - Flutter
+  - sodium_libs (2.2.1):
+    - Flutter
   - sqflite (0.0.3):
     - Flutter
-    - FMDB (>= 2.7.5)
-  - SwiftyGif (5.4.4)
-  - Toast (4.0.0)
-  - uni_links (0.0.1):
+    - FlutterMacOS
+  - sqlite3 (3.45.1):
+    - sqlite3/common (= 3.45.1)
+  - sqlite3/common (3.45.1)
+  - sqlite3/fts5 (3.45.1):
+    - sqlite3/common
+  - sqlite3/perf-threadsafe (3.45.1):
+    - sqlite3/common
+  - sqlite3/rtree (3.45.1):
+    - sqlite3/common
+  - sqlite3_flutter_libs (0.0.1):
     - Flutter
+    - sqlite3 (~> 3.45.1)
+    - sqlite3/fts5
+    - sqlite3/perf-threadsafe
+    - sqlite3/rtree
+  - SwiftyGif (5.4.4)
+  - Toast (4.1.0)
   - url_launcher_ios (0.0.1):
     - Flutter
 
 DEPENDENCIES:
-  - connectivity (from `.symlinks/plugins/connectivity/ios`)
+  - app_links (from `.symlinks/plugins/app_links/ios`)
+  - connectivity_plus (from `.symlinks/plugins/connectivity_plus/ios`)
   - device_info_plus (from `.symlinks/plugins/device_info_plus/ios`)
   - file_picker (from `.symlinks/plugins/file_picker/ios`)
   - file_saver (from `.symlinks/plugins/file_saver/ios`)
   - fk_user_agent (from `.symlinks/plugins/fk_user_agent/ios`)
   - Flutter (from `Flutter`)
   - flutter_email_sender (from `.symlinks/plugins/flutter_email_sender/ios`)
-  - flutter_inappwebview (from `.symlinks/plugins/flutter_inappwebview/ios`)
+  - flutter_inappwebview_ios (from `.symlinks/plugins/flutter_inappwebview_ios/ios`)
+  - flutter_local_authentication (from `.symlinks/plugins/flutter_local_authentication/ios`)
   - flutter_local_notifications (from `.symlinks/plugins/flutter_local_notifications/ios`)
   - flutter_native_splash (from `.symlinks/plugins/flutter_native_splash/ios`)
   - flutter_secure_storage (from `.symlinks/plugins/flutter_secure_storage/ios`)
-  - flutter_sodium (from `.symlinks/plugins/flutter_sodium/ios`)
   - fluttertoast (from `.symlinks/plugins/fluttertoast/ios`)
+  - local_auth_darwin (from `.symlinks/plugins/local_auth_darwin/darwin`)
   - local_auth_ios (from `.symlinks/plugins/local_auth_ios/ios`)
   - move_to_background (from `.symlinks/plugins/move_to_background/ios`)
   - package_info_plus (from `.symlinks/plugins/package_info_plus/ios`)
@@ -131,27 +151,31 @@ DEPENDENCIES:
   - sentry_flutter (from `.symlinks/plugins/sentry_flutter/ios`)
   - share_plus (from `.symlinks/plugins/share_plus/ios`)
   - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
-  - sqflite (from `.symlinks/plugins/sqflite/ios`)
-  - uni_links (from `.symlinks/plugins/uni_links/ios`)
+  - smart_auth (from `.symlinks/plugins/smart_auth/ios`)
+  - sodium_libs (from `.symlinks/plugins/sodium_libs/ios`)
+  - sqflite (from `.symlinks/plugins/sqflite/darwin`)
+  - sqlite3_flutter_libs (from `.symlinks/plugins/sqlite3_flutter_libs/ios`)
   - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
 
 SPEC REPOS:
   trunk:
     - DKImagePickerController
     - DKPhotoGallery
-    - FMDB
     - MTBBarcodeScanner
     - OrderedSet
-    - Reachability
+    - ReachabilitySwift
     - SDWebImage
     - Sentry
     - SentryPrivate
+    - sqlite3
     - SwiftyGif
     - Toast
 
 EXTERNAL SOURCES:
-  connectivity:
-    :path: ".symlinks/plugins/connectivity/ios"
+  app_links:
+    :path: ".symlinks/plugins/app_links/ios"
+  connectivity_plus:
+    :path: ".symlinks/plugins/connectivity_plus/ios"
   device_info_plus:
     :path: ".symlinks/plugins/device_info_plus/ios"
   file_picker:
@@ -164,18 +188,20 @@ EXTERNAL SOURCES:
     :path: Flutter
   flutter_email_sender:
     :path: ".symlinks/plugins/flutter_email_sender/ios"
-  flutter_inappwebview:
-    :path: ".symlinks/plugins/flutter_inappwebview/ios"
+  flutter_inappwebview_ios:
+    :path: ".symlinks/plugins/flutter_inappwebview_ios/ios"
+  flutter_local_authentication:
+    :path: ".symlinks/plugins/flutter_local_authentication/ios"
   flutter_local_notifications:
     :path: ".symlinks/plugins/flutter_local_notifications/ios"
   flutter_native_splash:
     :path: ".symlinks/plugins/flutter_native_splash/ios"
   flutter_secure_storage:
     :path: ".symlinks/plugins/flutter_secure_storage/ios"
-  flutter_sodium:
-    :path: ".symlinks/plugins/flutter_sodium/ios"
   fluttertoast:
     :path: ".symlinks/plugins/fluttertoast/ios"
+  local_auth_darwin:
+    :path: ".symlinks/plugins/local_auth_darwin/darwin"
   local_auth_ios:
     :path: ".symlinks/plugins/local_auth_ios/ios"
   move_to_background:
@@ -194,50 +220,58 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/share_plus/ios"
   shared_preferences_foundation:
     :path: ".symlinks/plugins/shared_preferences_foundation/darwin"
+  smart_auth:
+    :path: ".symlinks/plugins/smart_auth/ios"
+  sodium_libs:
+    :path: ".symlinks/plugins/sodium_libs/ios"
   sqflite:
-    :path: ".symlinks/plugins/sqflite/ios"
-  uni_links:
-    :path: ".symlinks/plugins/uni_links/ios"
+    :path: ".symlinks/plugins/sqflite/darwin"
+  sqlite3_flutter_libs:
+    :path: ".symlinks/plugins/sqlite3_flutter_libs/ios"
   url_launcher_ios:
     :path: ".symlinks/plugins/url_launcher_ios/ios"
 
 SPEC CHECKSUMS:
-  connectivity: c4130b2985d4ef6fd26f9702e886bd5260681467
-  device_info_plus: e5c5da33f982a436e103237c0c85f9031142abed
+  app_links: e70ca16b4b0f88253b3b3660200d4a10b4ea9795
+  connectivity_plus: bf0076dd84a130856aa636df1c71ccaff908fa1d
+  device_info_plus: c6fb39579d0f423935b0c9ce7ee2f44b71b9fce6
   DKImagePickerController: b512c28220a2b8ac7419f21c491fc8534b7601ac
   DKPhotoGallery: fdfad5125a9fdda9cc57df834d49df790dbb4179
-  file_picker: ce3938a0df3cc1ef404671531facef740d03f920
+  file_picker: 15fd9539e4eb735dc54bae8c0534a7a9511a03de
   file_saver: 503e386464dbe118f630e17b4c2e1190fa0cf808
   fk_user_agent: 1f47ec39291e8372b1d692b50084b0d54103c545
-  Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
+  Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
   flutter_email_sender: 02d7443217d8c41483223627972bfdc09f74276b
-  flutter_inappwebview: acd4fc0f012cefd09015000c241137d82f01ba62
-  flutter_local_notifications: 0c0b1ae97e741e1521e4c1629a459d04b9aec743
+  flutter_inappwebview_ios: 97215cf7d4677db55df76782dbd2930c5e1c1ea0
+  flutter_local_authentication: 1172a4dd88f6306dadce067454e2c4caf07977bb
+  flutter_local_notifications: 4cde75091f6327eb8517fa068a0a5950212d2086
   flutter_native_splash: 52501b97d1c0a5f898d687f1646226c1f93c56ef
   flutter_secure_storage: 23fc622d89d073675f2eaa109381aefbcf5a49be
-  flutter_sodium: c84426b4de738514b5b66cfdeb8a06634e72fe0b
   fluttertoast: 31b00dabfa7fb7bacd9e7dbee580d7a2ff4bf265
-  FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a
-  local_auth_ios: c6cf091ded637a88f24f86a8875d8b0f526e2605
+  local_auth_darwin: c7e464000a6a89e952235699e32b329457608d98
+  local_auth_ios: 5046a18c018dd973247a0564496c8898dbb5adf9
   move_to_background: 39a5b79b26d577b0372cbe8a8c55e7aa9fcd3a2d
   MTBBarcodeScanner: f453b33c4b7dfe545d8c6484ed744d55671788cb
   OrderedSet: aaeb196f7fef5a9edf55d89760da9176ad40b93c
-  package_info_plus: fd030dabf36271f146f1f3beacd48f564b0f17f7
-  path_provider_foundation: 29f094ae23ebbca9d3d0cec13889cd9060c0e943
+  package_info_plus: 115f4ad11e0698c8c1c5d8a689390df880f47e85
+  path_provider_foundation: 3784922295ac71e43754bd15e0653ccfd36a147c
   privacy_screen: 1a131c052ceb3c3659934b003b0d397c2381a24e
   qr_code_scanner: bb67d64904c3b9658ada8c402e8b4d406d5d796e
-  Reachability: 33e18b67625424e47b6cde6d202dce689ad7af96
-  SDWebImage: 750adf017a315a280c60fde706ab1e552a3ae4e9
-  Sentry: e3203780941722a1fcfee99e351de14244c7f806
-  sentry_flutter: 8f0ffd53088e6a4d50c095852c5cad9e4405025c
-  SentryPrivate: 5e3683390f66611fc7c6215e27645873adb55d13
+  ReachabilitySwift: 5ae15e16814b5f9ef568963fb2c87aeb49158c66
+  SDWebImage: 981fd7e860af070920f249fd092420006014c3eb
+  Sentry: ebc12276bd17613a114ab359074096b6b3725203
+  sentry_flutter: dff1df05dc39c83d04f9330b36360fc374574c5e
+  SentryPrivate: d651efb234cf385ec9a1cdd3eff94b5e78a0e0fe
   share_plus: c3fef564749587fc939ef86ffb283ceac0baf9f5
-  shared_preferences_foundation: 5b919d13b803cadd15ed2dc053125c68730e5126
-  sqflite: 31f7eba61e3074736dff8807a9b41581e4f7f15a
+  shared_preferences_foundation: b4c3b4cddf1c21f02770737f147a3f5da9d39695
+  smart_auth: 4bedbc118723912d0e45a07e8ab34039c19e04f2
+  sodium_libs: 1faae17af662384acbd13e41867a0008cd2e2318
+  sqflite: 673a0e54cc04b7d6dba8d24fb8095b31c3a99eec
+  sqlite3: 73b7fc691fdc43277614250e04d183740cb15078
+  sqlite3_flutter_libs: af0e8fe9bce48abddd1ffdbbf839db0302d72d80
   SwiftyGif: 93a1cc87bf3a51916001cf8f3d63835fb64c819f
-  Toast: 91b396c56ee72a5790816f40d3a94dd357abc196
-  uni_links: d97da20c7701486ba192624d99bffaaffcfc298a
-  url_launcher_ios: 08a3dfac5fb39e8759aeb0abbd5d9480f30fc8b4
+  Toast: ec33c32b8688982cecc6348adeae667c1b9938da
+  url_launcher_ios: 6116280ddcfe98ab8820085d8d76ae7449447586
 
 PODFILE CHECKSUM: b4e3a7eabb03395b66e81fc061789f61526ee6bb
 

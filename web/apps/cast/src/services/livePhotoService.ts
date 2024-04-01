@@ -30,16 +30,3 @@ export const decodeLivePhoto = async (file: EnteFile, zipBlob: Blob) => {
     }
     return livePhoto;
 };
-
-export const encodeLivePhoto = async (livePhoto: LivePhoto) => {
-    const zip = new JSZip();
-    zip.file(
-        "image" + getFileExtensionWithDot(livePhoto.imageNameTitle),
-        livePhoto.image,
-    );
-    zip.file(
-        "video" + getFileExtensionWithDot(livePhoto.videoNameTitle),
-        livePhoto.video,
-    );
-    return await zip.generateAsync({ type: "uint8array" });
-};

@@ -59,21 +59,12 @@ export default function Slideshow() {
         }
     };
 
-    const init = async () => {
-        try {
-            const castToken = window.localStorage.getItem("castToken");
-            setCastToken(castToken);
-        } catch (e) {
-            logError(e, "error during sync");
-            router.push("/");
-        }
-    };
-
     useEffect(() => {
         if (castToken) {
             const intervalId = setInterval(() => {
                 syncCastFiles(castToken);
-            }, 5000);
+            }, 10000);
+            syncCastFiles(castToken);
 
             return () => clearInterval(intervalId);
         }
@@ -105,7 +96,20 @@ export default function Slideshow() {
     const router = useRouter();
 
     useEffect(() => {
-        init();
+        try {
+            const castToken = window.localStorage.getItem("castToken");
+            // Wait 2 seconds to ensure the green tick and the confirmation
+            // message remains visible for at least 2 seconds before we start
+            // the slideshow.
+            const timeoutId = setTimeout(() => {
+                setCastToken(castToken);
+            }, 2000);
+
+            return () => clearTimeout(timeoutId);
+        } catch (e) {
+            logError(e, "error during sync");
+            router.push("/");
+        }
     }, []);
 
     useEffect(() => {

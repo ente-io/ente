@@ -4,14 +4,11 @@
 
 ### yarn dev
 
-Launch the app in development mode
+Launch the app in development mode:
 
--   Runs a development server for the renderer, with HMR.
+-   Transpiles the files in `src/` and starts the main process.
 
--   Starts tsc in watch mode to recompile the JS files used by the main process.
-
--   Starts the main process, reloading it on changes to the the TS files in
-    `src/`.
+-   Runs a development server for the renderer, with hot module reload.
 
 ### yarn build
 
@@ -34,7 +31,7 @@ are built against `electron`'s packaged `node` version. We use
 to rebuild those modules automatically after each `yarn install` by invoking it
 in as the `postinstall` step in our package.json.
 
-### lint and lint-fix
+### lint, lint-fix
 
 Use `yarn lint` to check that your code formatting is as expected, and that
 there are no linter errors. Use `yarn lint-fix` to try and automatically fix the
