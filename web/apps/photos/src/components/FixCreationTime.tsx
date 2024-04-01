@@ -6,7 +6,7 @@ import { ComfySpan } from "components/ExportInProgress";
 import { Formik } from "formik";
 import { t } from "i18next";
 import { GalleryContext } from "pages/gallery";
-import { ChangeEvent, useContext, useEffect, useState } from "react";
+import React, { ChangeEvent, useContext, useEffect, useState } from "react";
 import { Form } from "react-bootstrap";
 import { updateCreationTimeWithExif } from "services/updateCreationTimeWithExif";
 import { EnteFile } from "types/file";
@@ -15,21 +15,9 @@ export interface FixCreationTimeAttributes {
     files: EnteFile[];
 }
 
-interface Props {
-    isOpen: boolean;
-    show: () => void;
-    hide: () => void;
-    attributes: FixCreationTimeAttributes;
-}
+type Step = "running" | "completed" | "error";
 
-enum FIX_STATE {
-    NOT_STARTED,
-    RUNNING,
-    COMPLETED,
-    COMPLETED_WITH_ERRORS,
-}
-
-enum FIX_OPTIONS {
+export enum FIX_OPTIONS {
     DATE_TIME_ORIGINAL,
     DATE_TIME_DIGITIZED,
     METADATA_DATE,
@@ -41,41 +29,31 @@ interface formValues {
     customTime: Date;
 }
 
-function Message({ fixState }: { fixState: FIX_STATE }) {
-    let message = null;
-    switch (fixState) {
-        case FIX_STATE.NOT_STARTED:
-            message = t("UPDATE_CREATION_TIME_NOT_STARTED");
-            break;
-        case FIX_STATE.COMPLETED:
-            message = t("UPDATE_CREATION_TIME_COMPLETED");
-            break;
-        case FIX_STATE.COMPLETED_WITH_ERRORS:
-            message = t("UPDATE_CREATION_TIME_COMPLETED_WITH_ERROR");
-            break;
-    }
-    return message ? <div>{message}</div> : <></>;
+interface FixCreationTimeProps {
+    isOpen: boolean;
+    show: () => void;
+    hide: () => void;
+    attributes: FixCreationTimeAttributes;
 }
 
-export default function FixCreationTime(props: Props) {
-    const [fixState, setFixState] = useState(FIX_STATE.NOT_STARTED);
+const FixCreationTime: React.FC<FixCreationTimeProps> = (props) => {
+    const [step, setStep] = useState<Step | undefined>();
     const [progressTracker, setProgressTracker] = useState({
         current: 0,
         total: 0,
     });
+
     const galleryContext = useContext(GalleryContext);
+
     useEffect(() => {
-        if (
-            props.attributes &&
-            props.isOpen &&
-            fixState !== FIX_STATE.RUNNING
-        ) {
-            setFixState(FIX_STATE.NOT_STARTED);
+        // TODO (MR): Not sure why this is needed
+        if (props.attributes && props.isOpen && step !== "running") {
+            setStep(undefined);
         }
     }, [props.isOpen]);
 
     const startFix = async (option: FIX_OPTIONS, customTime: Date) => {
-        setFixState(FIX_STATE.RUNNING);
+        setStep("running");
         const completedWithoutError = await updateCreationTimeWithExif(
             props.attributes.files,
             option,
@@ -83,45 +61,45 @@ export default function FixCreationTime(props: Props) {
             setProgressTracker,
         );
         if (!completedWithoutError) {
-            setFixState(FIX_STATE.COMPLETED);
+            setStep("completed");
         } else {
-            setFixState(FIX_STATE.COMPLETED_WITH_ERRORS);
+            setStep("error");
         }
         await galleryContext.syncWithRemote();
     };
-    if (!props.attributes) {
-        return <></>;
-    }
 
     const onSubmit = (values: formValues) => {
         startFix(Number(values.option), new Date(values.customTime));
     };
 
+    const title =
+        step === "running"
+            ? t("FIX_CREATION_TIME_IN_PROGRESS")
+            : t("FIX_CREATION_TIME");
+
+    const message = messageForStep(step);
+
+    if (!props.attributes) {
+        return <></>;
+    }
+
     return (
         <DialogBox
             open={props.isOpen}
             onClose={props.hide}
-            attributes={{
-                title:
-                    fixState === FIX_STATE.RUNNING
-                        ? t("FIX_CREATION_TIME_IN_PROGRESS")
-                        : t("FIX_CREATION_TIME"),
-                nonClosable: true,
-            }}
+            attributes={{ title, nonClosable: true }}
         >
             <div
                 style={{
                     marginBottom: "10px",
                     display: "flex",
                     flexDirection: "column",
-                    ...(fixState === FIX_STATE.RUNNING
-                        ? { alignItems: "center" }
-                        : {}),
+                    ...(step === "running" ? { alignItems: "center" } : {}),
                 }}
             >
-                <Message fixState={fixState} />
+                {message && <div>{message}</div>}
 
-                {fixState === FIX_STATE.RUNNING && (
+                {step === "running" && (
                     <FixCreationTimeRunning progressTracker={progressTracker} />
                 )}
                 <Formik<formValues>
@@ -134,9 +112,7 @@ export default function FixCreationTime(props: Props) {
                 >
                     {({ values, handleChange, handleSubmit }) => (
                         <>
-                            {(fixState === FIX_STATE.NOT_STARTED ||
-                                fixState ===
-                                    FIX_STATE.COMPLETED_WITH_ERRORS) && (
+                            {(step === undefined || step === "error") && (
                                 <div style={{ marginTop: "10px" }}>
                                     <FixCreationTimeOptions
                                         handleChange={handleChange}
@@ -145,7 +121,7 @@ export default function FixCreationTime(props: Props) {
                                 </div>
                             )}
                             <FixCreationTimeFooter
-                                fixState={fixState}
+                                step={step}
                                 startFix={handleSubmit}
                                 hide={props.hide}
                             />
@@ -155,7 +131,22 @@ export default function FixCreationTime(props: Props) {
             </div>
         </DialogBox>
     );
-}
+};
+
+export default FixCreationTime;
+
+const messageForStep = (step?: Step) => {
+    switch (step) {
+        case undefined:
+            return t("UPDATE_CREATION_TIME_NOT_STARTED");
+        case "running":
+            return undefined;
+        case "completed":
+            return t("UPDATE_CREATION_TIME_COMPLETED");
+        case "error":
+            return t("UPDATE_CREATION_TIME_COMPLETED_WITH_ERROR");
+    }
+};
 
 const Option = ({
     value,
@@ -241,9 +232,9 @@ function FixCreationTimeOptions({ handleChange, values }) {
     );
 }
 
-const FixCreationTimeFooter = ({ fixState, startFix, ...props }) => {
+const FixCreationTimeFooter = ({ step, startFix, ...props }) => {
     return (
-        fixState !== FIX_STATE.RUNNING && (
+        step !== "running" && (
             <div
                 style={{
                     width: "100%",
@@ -252,8 +243,7 @@ const FixCreationTimeFooter = ({ fixState, startFix, ...props }) => {
                     justifyContent: "space-around",
                 }}
             >
-                {(fixState === FIX_STATE.NOT_STARTED ||
-                    fixState === FIX_STATE.COMPLETED_WITH_ERRORS) && (
+                {(step === undefined || step === "error") && (
                     <Button
                         color="secondary"
                         size="large"
@@ -264,13 +254,12 @@ const FixCreationTimeFooter = ({ fixState, startFix, ...props }) => {
                         {t("CANCEL")}
                     </Button>
                 )}
-                {fixState === FIX_STATE.COMPLETED && (
+                {step === "completed" && (
                     <Button color="primary" size="large" onClick={props.hide}>
                         {t("CLOSE")}
                     </Button>
                 )}
-                {(fixState === FIX_STATE.NOT_STARTED ||
-                    fixState === FIX_STATE.COMPLETED_WITH_ERRORS) && (
+                {(step === undefined || step === "error") && (
                     <>
                         <div style={{ width: "30px" }} />
 
