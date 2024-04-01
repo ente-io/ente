@@ -402,7 +402,7 @@ class _FileSelectionActionsWidgetState
     );
 
     // if (widget.type == GalleryType.cluster && widget.clusterID != null) {
-    if (widget.type == GalleryType.cluster) {
+    if (widget.type == GalleryType.cluster && widget.clusterID != null) {
       items.add(
         SelectionActionButton(
           labelText: 'Remove',
