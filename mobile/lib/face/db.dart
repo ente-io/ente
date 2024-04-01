@@ -595,18 +595,6 @@ class FaceMLDataDB {
     return result;
   }
 
-  Future<Map<int, String>> getCluserIDToPersonMap() async {
-    final db = await instance.database;
-    final List<Map<String, dynamic>> maps = await db.rawQuery(
-      'SELECT $personIdColumn, $cluserIDColumn FROM $clustersTable',
-    );
-    final Map<int, String> result = {};
-    for (final map in maps) {
-      result[map[cluserIDColumn] as int] = map[personIdColumn] as String;
-    }
-    return result;
-  }
-
   Future<(Map<int, Person>, Map<String, Person>)> getClusterIdToPerson() async {
     final db = await instance.database;
     final Map<String, Person> peopleMap = await getPeopleMap();
@@ -674,7 +662,6 @@ class FaceMLDataDB {
     await db.execute(dropClusterSummaryTable);
     await db.execute(dropNotPersonFeedbackTable);
 
-    // await db.execute(createFacesTable);
     await db.execute(createPeopleTable);
     await db.execute(createClusterTable);
     await db.execute(createNotPersonFeedbackTable);
