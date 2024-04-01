@@ -21,6 +21,14 @@ body {
     flex-direction: column;
 }
 
+.container {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
 .loading-spinner {
     color: #28a745;
     width: 2rem;

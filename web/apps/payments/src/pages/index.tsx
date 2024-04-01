@@ -1,5 +1,5 @@
 import { Container } from "components/Container";
-import { Spinner } from "components/EnteSpinner";
+import { Spinner } from "components/Spinner";
 import * as React from "react";
 import { parseAndHandleRequest } from "services/billingService";
 import { CUSTOM_ERROR } from "utils/error";
