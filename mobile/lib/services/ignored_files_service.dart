@@ -49,7 +49,9 @@ class IgnoredFilesService {
   }
 
   String? getUploadSkipReason(
-      Map<String, String> idToReasonMap, EnteFile file) {
+    Map<String, String> idToReasonMap,
+    EnteFile file,
+  ) {
     final id = _getIgnoreID(file.localID, file.deviceFolder, file.title);
     if (id != null && id.isNotEmpty) {
       return idToReasonMap[id];
