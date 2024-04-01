@@ -630,6 +630,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "我们不跟踪应用程序安装情况。如果您告诉我们您是在哪里找到我们的，将会有所帮助！"),
         "hearUsWhereTitle":
             MessageLookupByLibrary.simpleMessage("您是如何知道Ente的？ （可选的）"),
+        "help": MessageLookupByLibrary.simpleMessage("帮助"),
         "hidden": MessageLookupByLibrary.simpleMessage("已隐藏"),
         "hide": MessageLookupByLibrary.simpleMessage("隐藏"),
         "hiding": MessageLookupByLibrary.simpleMessage("正在隐藏..."),
@@ -834,6 +835,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "我们不储存这个密码，所以如果忘记， <underline>我们将无法解密您的数据</underline>"),
         "paymentDetails": MessageLookupByLibrary.simpleMessage("付款明细"),
         "paymentFailed": MessageLookupByLibrary.simpleMessage("支付失败"),
+        "paymentFailedMessage": MessageLookupByLibrary.simpleMessage(
+            "不幸的是，您的付款失败。请联系支持人员，我们将为您提供帮助！"),
         "paymentFailedTalkToProvider": m37,
         "pendingItems": MessageLookupByLibrary.simpleMessage("待处理项目"),
         "pendingSync": MessageLookupByLibrary.simpleMessage("正在等待同步"),
