@@ -32,12 +32,12 @@ export type FixOption =
 interface FormValues {
     option: FixOption;
     /**
-     * Date.getTime()
+     * Date.toISOString()
      *
      * Formik doesn't have native support for JS dates, so we instead keep the
-     * corresponding date's epoch milliseconds as the form state.
+     * corresponding date's ISO string representation as the form state.
      */
-    customTime: number;
+    customTimeString: string;
 }
 
 interface FixCreationTimeProps {
@@ -69,7 +69,7 @@ const FixCreationTime: React.FC<FixCreationTimeProps> = (props) => {
         const completedWithErrors = await updateCreationTimeWithExif(
             props.attributes.files,
             values.option,
-            new Date(values.customTime),
+            new Date(values.customTimeString),
             setProgressTracker,
         );
         setStep(completedWithErrors ? "completed-with-errors" : "completed");
@@ -138,7 +138,7 @@ const OptionsForm: React.FC<OptionsFormProps> = ({ step, onSubmit, hide }) => {
     const { values, handleChange, handleSubmit } = useFormik({
         initialValues: {
             option: "date-time-original",
-            customTime: Date.now(),
+            customTimeString: new Date().toISOString(),
         },
         validateOnBlur: false,
         onSubmit,
@@ -179,7 +179,9 @@ const OptionsForm: React.FC<OptionsFormProps> = ({ step, onSubmit, hide }) => {
                         {values.option === "custom-time" && (
                             <EnteDateTimePicker
                                 onSubmit={(d: Date) =>
-                                    handleChange("customTime")(d.getTime())
+                                    handleChange("customTimeString")(
+                                        d.toISOString(),
+                                    )
                                 }
                             />
                         )}
