@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/services/sync_service.dart';
+import "package:photos/utils/photo_manager_util.dart";
 import "package:styled_text/styled_text.dart";
 
 class GrantPermissionsWidget extends StatelessWidget {
@@ -91,14 +92,7 @@ class GrantPermissionsWidget extends StatelessWidget {
           key: const ValueKey("grantPermissionButton"),
           child: Text(S.of(context).grantPermission),
           onPressed: () async {
-            final state = await PhotoManager.requestPermissionExtend(
-              requestOption: const PermissionRequestOption(
-                androidPermission: AndroidPermission(
-                  type: RequestType.common,
-                  mediaLocation: true,
-                ),
-              ),
-            );
+            final state = await requestPhotoMangerPermissions();
             if (state == PermissionState.authorized ||
                 state == PermissionState.limited) {
               await SyncService.instance.onPermissionGranted(state);

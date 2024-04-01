@@ -1533,6 +1533,24 @@ class FilesDB {
     return result;
   }
 
+  Future<List<String>> getLocalFilesBackedUpWithoutLocation(int userId) async {
+    final db = await instance.database;
+    final rows = await db.query(
+      filesTable,
+      columns: [columnLocalID],
+      distinct: true,
+      where:
+          '$columnOwnerID = ? AND $columnLocalID IS NOT NULL AND ($columnUploadedFileID IS NOT NULL AND $columnUploadedFileID IS NOT -1) '
+          'AND ($columnLatitude IS NULL OR $columnLongitude IS NULL OR $columnLongitude = 0.0 or $columnLongitude = 0.0)',
+      whereArgs: [userId],
+    );
+    final result = <String>[];
+    for (final row in rows) {
+      result.add(row[columnLocalID] as String);
+    }
+    return result;
+  }
+
   // updateSizeForUploadIDs takes a map of upploadedFileID and fileSize and
   // update the fileSize for the given uploadedFileID
   Future<void> updateSizeForUploadIDs(
