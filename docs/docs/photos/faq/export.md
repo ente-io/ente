@@ -22,6 +22,8 @@ photos and videos are always available in normal directories and files.
   background without you needing to run any other cron jobs. See
   [migration/export](/photos/migration/export/) for more details.
 
-## Does the exported data from Ente photos preserve the same folder and album structure as in the app? 
+## Does the exported data from Ente photos preserve the same folder and album structure as in the app?
 
-When you export your data for local backup, it will maintain the exact structure how you have set up within Ente. The exported data will reflect the same photos and album structure intac
+When you export your data for local backup, it will maintain the exact structure
+how you have set up within Ente. The exported data will reflect the same photos
+and album structure intact.
