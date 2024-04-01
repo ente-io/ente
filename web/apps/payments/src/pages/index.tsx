@@ -1,5 +1,5 @@
 import { Container } from "components/Container";
-import { EnteSpinner } from "components/EnteSpinner";
+import { Spinner } from "components/EnteSpinner";
 import * as React from "react";
 import { parseAndHandleRequest } from "services/billingService";
 import { CUSTOM_ERROR } from "utils/error";
@@ -35,7 +35,7 @@ export default function Home() {
             {errorMessageView ? (
                 <div>{constants.SOMETHING_WENT_WRONG}</div>
             ) : (
-                loading && <EnteSpinner />
+                loading && <Spinner />
             )}
         </Container>
     );
