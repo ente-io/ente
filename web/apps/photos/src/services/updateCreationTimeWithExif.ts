@@ -1,15 +1,14 @@
 import { logError } from "@ente/shared/sentry";
-import { FIX_OPTIONS } from "components/FixCreationTime";
+import { validateAndGetCreationUnixTimeInMicroSeconds } from "@ente/shared/time";
+import type { FixOption } from "components/FixCreationTime";
+import { FILE_TYPE } from "constants/file";
+import { getFileType } from "services/typeDetectionService";
 import { EnteFile } from "types/file";
 import {
     changeFileCreationTime,
     updateExistingFilePubMetadata,
 } from "utils/file";
 import downloadManager from "./download";
-
-import { validateAndGetCreationUnixTimeInMicroSeconds } from "@ente/shared/time";
-import { FILE_TYPE } from "constants/file";
-import { getFileType } from "services/typeDetectionService";
 import { getParsedExifData } from "./upload/exifService";
 
 const EXIF_TIME_TAGS = [
@@ -29,7 +28,7 @@ export type SetProgressTracker = React.Dispatch<
 
 export async function updateCreationTimeWithExif(
     filesToBeUpdated: EnteFile[],
-    fixOption: FIX_OPTIONS,
+    fixOption: FixOption,
     customTime: Date,
     setProgressTracker: SetProgressTracker,
 ) {
@@ -42,7 +41,7 @@ export async function updateCreationTimeWithExif(
         for (const [index, file] of filesToBeUpdated.entries()) {
             try {
                 let correctCreationTime: number;
-                if (fixOption === FIX_OPTIONS.CUSTOM_TIME) {
+                if (fixOption === "custom-time") {
                     correctCreationTime = customTime.getTime() * 1000;
                 } else {
                     if (file.metadata.fileType !== FILE_TYPE.IMAGE) {
@@ -60,24 +59,22 @@ export async function updateCreationTimeWithExif(
                         fileTypeInfo,
                         EXIF_TIME_TAGS,
                     );
-                    if (fixOption === FIX_OPTIONS.DATE_TIME_ORIGINAL) {
+                    if (fixOption === "date-time-original") {
                         correctCreationTime =
                             validateAndGetCreationUnixTimeInMicroSeconds(
                                 exifData?.DateTimeOriginal ??
                                     exifData?.DateCreated,
                             );
-                    } else if (fixOption === FIX_OPTIONS.DATE_TIME_DIGITIZED) {
+                    } else if (fixOption === "date-time-digitized") {
                         correctCreationTime =
                             validateAndGetCreationUnixTimeInMicroSeconds(
                                 exifData?.CreateDate,
                             );
-                    } else if (fixOption === FIX_OPTIONS.METADATA_DATE) {
+                    } else if (fixOption === "metadata-date") {
                         correctCreationTime =
                             validateAndGetCreationUnixTimeInMicroSeconds(
                                 exifData?.MetadataDate,
                             );
-                    } else {
-                        throw new Error("Invalid fix option");
                     }
                 }
                 if (

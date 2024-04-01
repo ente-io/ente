@@ -1,32 +1,43 @@
-import { Row, Value } from "@ente/shared/components/Container";
 import DialogBox from "@ente/shared/components/DialogBox/";
-import { Button, LinearProgress } from "@mui/material";
-import EnteDateTimePicker from "components/EnteDateTimePicker";
+import {
+    Button,
+    FormControl,
+    FormControlLabel,
+    FormLabel,
+    LinearProgress,
+    Radio,
+    RadioGroup,
+} from "@mui/material";
 import { ComfySpan } from "components/ExportInProgress";
-import { Formik } from "formik";
+import { useFormik } from "formik";
 import { t } from "i18next";
 import { GalleryContext } from "pages/gallery";
-import React, { ChangeEvent, useContext, useEffect, useState } from "react";
-import { Form } from "react-bootstrap";
+import React, { useContext, useEffect, useState } from "react";
 import { updateCreationTimeWithExif } from "services/updateCreationTimeWithExif";
 import { EnteFile } from "types/file";
+import EnteDateTimePicker from "./EnteDateTimePicker";
 
 export interface FixCreationTimeAttributes {
     files: EnteFile[];
 }
 
-type Step = "running" | "completed" | "error";
+type Step = "running" | "completed" | "completed-with-errors";
 
-export enum FIX_OPTIONS {
-    DATE_TIME_ORIGINAL,
-    DATE_TIME_DIGITIZED,
-    METADATA_DATE,
-    CUSTOM_TIME,
-}
+export type FixOption =
+    | "date-time-original"
+    | "date-time-digitized"
+    | "metadata-date"
+    | "custom-time";
 
-interface formValues {
-    option: FIX_OPTIONS;
-    customTime: Date;
+interface FormValues {
+    option: FixOption;
+    /**
+     * Date.toISOString()
+     *
+     * Formik doesn't have native support for JS dates, so we instead keep the
+     * corresponding date's ISO string representation as the form state.
+     */
+    customTimeString: string;
 }
 
 interface FixCreationTimeProps {
@@ -52,20 +63,17 @@ const FixCreationTime: React.FC<FixCreationTimeProps> = (props) => {
         }
     }, [props.isOpen]);
 
-    const startFix = async (option: FIX_OPTIONS, customTime: Date) => {
+    const onSubmit = async (values: FormValues) => {
+        console.log({ values });
         setStep("running");
-        const failed = await updateCreationTimeWithExif(
+        const completedWithErrors = await updateCreationTimeWithExif(
             props.attributes.files,
-            option,
-            customTime,
+            values.option,
+            new Date(values.customTimeString),
             setProgressTracker,
         );
-        setStep(failed ? "error" : "completed");
+        setStep(completedWithErrors ? "completed-with-errors" : "completed");
         await galleryContext.syncWithRemote();
-    };
-
-    const onSubmit = (values: formValues) => {
-        startFix(Number(values.option), new Date(values.customTime));
     };
 
     const title =
@@ -96,34 +104,10 @@ const FixCreationTime: React.FC<FixCreationTimeProps> = (props) => {
                 {message && <div>{message}</div>}
 
                 {step === "running" && (
-                    <FixCreationTimeRunning progressTracker={progressTracker} />
+                    <FixCreationTimeRunning {...{ progressTracker }} />
                 )}
-                <Formik<formValues>
-                    initialValues={{
-                        option: FIX_OPTIONS.DATE_TIME_ORIGINAL,
-                        customTime: new Date(),
-                    }}
-                    validateOnBlur={false}
-                    onSubmit={onSubmit}
-                >
-                    {({ values, handleChange, handleSubmit }) => (
-                        <>
-                            {(step === undefined || step === "error") && (
-                                <div style={{ marginTop: "10px" }}>
-                                    <FixCreationTimeOptions
-                                        handleChange={handleChange}
-                                        values={values}
-                                    />
-                                </div>
-                            )}
-                            <FixCreationTimeFooter
-                                step={step}
-                                startFix={handleSubmit}
-                                hide={props.hide}
-                            />
-                        </>
-                    )}
-                </Formik>
+
+                <OptionsForm {...{ step, onSubmit }} hide={props.hide} />
             </div>
         </DialogBox>
     );
@@ -134,101 +118,82 @@ export default FixCreationTime;
 const messageForStep = (step?: Step) => {
     switch (step) {
         case undefined:
-            return t("UPDATE_CREATION_TIME_NOT_STARTED");
+            return undefined;
         case "running":
             return undefined;
         case "completed":
             return t("UPDATE_CREATION_TIME_COMPLETED");
-        case "error":
+        case "completed-with-errors":
             return t("UPDATE_CREATION_TIME_COMPLETED_WITH_ERROR");
     }
 };
 
-const Option = ({
-    value,
-    selected,
-    onChange,
-    label,
-}: {
-    value: FIX_OPTIONS;
-    selected: FIX_OPTIONS;
-    onChange: (e: string | ChangeEvent<any>) => void;
-    label: string;
-}) => (
-    <Form.Check
-        name="group1"
-        style={{
-            margin: "5px 0",
-            color: value !== Number(selected) ? "#aaa" : "#fff",
-        }}
-    >
-        <Form.Check.Input
-            id={value.toString()}
-            type="radio"
-            value={value}
-            checked={value === Number(selected)}
-            onChange={onChange}
-        />
-        <Form.Check.Label
-            style={{ cursor: "pointer" }}
-            htmlFor={value.toString()}
-        >
-            {label}
-        </Form.Check.Label>
-    </Form.Check>
-);
-
-function FixCreationTimeOptions({ handleChange, values }) {
-    return (
-        <Form noValidate>
-            <Row style={{ margin: "0" }}>
-                <Option
-                    value={FIX_OPTIONS.DATE_TIME_ORIGINAL}
-                    onChange={handleChange("option")}
-                    label={t("DATE_TIME_ORIGINAL")}
-                    selected={Number(values.option)}
-                />
-            </Row>
-            <Row style={{ margin: "0" }}>
-                <Option
-                    value={FIX_OPTIONS.DATE_TIME_DIGITIZED}
-                    onChange={handleChange("option")}
-                    label={t("DATE_TIME_DIGITIZED")}
-                    selected={Number(values.option)}
-                />
-            </Row>
-            <Row style={{ margin: "0" }}>
-                <Option
-                    value={FIX_OPTIONS.METADATA_DATE}
-                    onChange={handleChange("option")}
-                    label={t("METADATA_DATE")}
-                    selected={Number(values.option)}
-                />
-            </Row>
-            <Row style={{ margin: "0" }}>
-                <Value width="50%">
-                    <Option
-                        value={FIX_OPTIONS.CUSTOM_TIME}
-                        onChange={handleChange("option")}
-                        label={t("CUSTOM_TIME")}
-                        selected={Number(values.option)}
-                    />
-                </Value>
-                {Number(values.option) === FIX_OPTIONS.CUSTOM_TIME && (
-                    <Value width="40%">
-                        <EnteDateTimePicker
-                            onSubmit={(x: Date) =>
-                                handleChange("customTime")(x.toUTCString())
-                            }
-                        />
-                    </Value>
-                )}
-            </Row>
-        </Form>
-    );
+interface OptionsFormProps {
+    step?: Step;
+    onSubmit: (values: FormValues) => void | Promise<any>;
+    hide: () => void;
 }
 
-const FixCreationTimeFooter = ({ step, startFix, ...props }) => {
+const OptionsForm: React.FC<OptionsFormProps> = ({ step, onSubmit, hide }) => {
+    const { values, handleChange, handleSubmit } = useFormik({
+        initialValues: {
+            option: "date-time-original",
+            customTimeString: new Date().toISOString(),
+        },
+        validateOnBlur: false,
+        onSubmit,
+    });
+
+    return (
+        <>
+            {(step === undefined || step === "completed-with-errors") && (
+                <div style={{ marginTop: "10px" }}>
+                    <form onSubmit={handleSubmit}>
+                        <FormControl>
+                            <FormLabel>
+                                {t("UPDATE_CREATION_TIME_NOT_STARTED")}
+                            </FormLabel>
+                        </FormControl>
+                        <RadioGroup name={"option"} onChange={handleChange}>
+                            <FormControlLabel
+                                value={"date-time-original"}
+                                control={<Radio size="small" />}
+                                label={t("DATE_TIME_ORIGINAL")}
+                            />
+                            <FormControlLabel
+                                value={"date-time-digitized"}
+                                control={<Radio size="small" />}
+                                label={t("DATE_TIME_DIGITIZED")}
+                            />
+                            <FormControlLabel
+                                value={"metadata-date"}
+                                control={<Radio size="small" />}
+                                label={t("METADATA_DATE")}
+                            />
+                            <FormControlLabel
+                                value={"custom-time"}
+                                control={<Radio size="small" />}
+                                label={t("CUSTOM_TIME")}
+                            />
+                        </RadioGroup>
+                        {values.option === "custom-time" && (
+                            <EnteDateTimePicker
+                                onSubmit={(d: Date) =>
+                                    handleChange("customTimeString")(
+                                        d.toISOString(),
+                                    )
+                                }
+                            />
+                        )}
+                    </form>
+                </div>
+            )}
+            <Footer step={step} startFix={handleSubmit} hide={hide} />
+        </>
+    );
+};
+
+const Footer = ({ step, startFix, ...props }) => {
     return (
         step !== "running" && (
             <div
@@ -239,7 +204,7 @@ const FixCreationTimeFooter = ({ step, startFix, ...props }) => {
                     justifyContent: "space-around",
                 }}
             >
-                {(step === undefined || step === "error") && (
+                {(step === undefined || step === "completed-with-errors") && (
                     <Button
                         color="secondary"
                         size="large"
@@ -255,7 +220,7 @@ const FixCreationTimeFooter = ({ step, startFix, ...props }) => {
                         {t("CLOSE")}
                     </Button>
                 )}
-                {(step === undefined || step === "error") && (
+                {(step === undefined || step === "completed-with-errors") && (
                     <>
                         <div style={{ width: "30px" }} />
 
