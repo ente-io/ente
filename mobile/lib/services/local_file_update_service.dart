@@ -473,9 +473,7 @@ class LocalFileUpdateService {
           }
         } catch (e, s) {
           processedIDs.add(enteFile.localID!);
-          _logger.severe(
-            'failed to check lat/long for file ${enteFile.toString()}',
-          );
+          _logger.severe('lat/long check file ${enteFile.toString()}', e, s);
         }
       }
       for (String id in localIDs) {
