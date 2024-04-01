@@ -75,6 +75,21 @@ Emotion itself comes in many parts, of which we need the following:
   > Keep `@emotion/styled` as a dependency of your project. Even if you never
   > use it explicitly, it's a peer dependency of `@mui/material`.
 
+Note that currently the SWC plugin doesn't allow the use of the component
+selectors API (i.e using `styled.div` instead of `styled("div")`).
+
+> I think the transform for component selectors is not implemented in the swc
+> plugin.
+>
+> https://github.com/vercel/next.js/issues/46973
+
+There is a way of enabling it by installing the `@emotion/babel-plugin` and
+specifying the import map as mentioned
+[here](https://mui.com/system/styled/#how-to-use-components-selector-api) ([full
+example](https://github.com/mui/material-ui/issues/27380#issuecomment-928973157)),
+but that disables the SWC integration altogether, so we live with this
+infelicity for now.
+
 ### Translations
 
 For showing the app's UI in multiple languages, we use the i18next library,
