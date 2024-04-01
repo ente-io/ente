@@ -334,10 +334,10 @@ class FaceMLDataDB {
 
     for (final map in faceIDToPersonID.entries) {
       final faceID = map.key;
-      final personID = map.value;
+      final clusterID = map.value;
       batch.update(
         facesTable,
-        {faceClusterId: personID},
+        {faceClusterId: clusterID},
         where: '$faceIDColumn = ?',
         whereArgs: [faceID],
       );
