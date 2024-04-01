@@ -47,19 +47,20 @@ bit more exhaustively when changing the crypto layer.
 
 ## UI
 
-The UI package uses "react". This is our core framework. We do use layers on top
-of React, but those are contingent and can be replaced, or even removed. But the
-usage of React is deep rooted. React also has a sibling "react-dom" package that
-renders "React" interfaces to the DOM.
+The UI package uses "react". This is our core framework.
+
+React also has a sibling "react-dom" package that renders "React" interfaces to
+the DOM.
 
 ### MUI and Emotion
 
-Currently, we use MUI ("@mui/material"), which is a React component library, to
-get a base set of components. MUI uses Emotion (a styled-component variant) as
-its preferred CSS-in-JS library and to keep things simple, that's also what we
-use to write CSS in our own JS (TS).
+We use [MUI](https://mui.com) ("@mui/material"), which is a React component
+library, to get a base set of components.
 
-Emotion itself comes in many parts, of which we need the following three:
+MUI uses [Emotion](https://emotion.sh/) (a styled-component variant) as its
+preferred CSS-in-JS library.
+
+Emotion itself comes in many parts, of which we need the following:
 
 * "@emotion/react" - React interface to Emotion. In particular, we set this as
   the package that handles the transformation of JSX into JS (via the
@@ -73,8 +74,6 @@ Emotion itself comes in many parts, of which we need the following three:
 
   > Keep `@emotion/styled` as a dependency of your project. Even if you never
   > use it explicitly, it's a peer dependency of `@mui/material`.
-
-* "@emotion/server"
 
 ### Translations
 
