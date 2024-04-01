@@ -159,6 +159,7 @@ class _ClusterPageState extends State<ClusterPage> {
                 FileSelectionOverlayBar(
                   ClusterPage.overlayType,
                   _selectedFiles,
+                  clusterID: widget.cluserID,
                 ),
               ],
             ),

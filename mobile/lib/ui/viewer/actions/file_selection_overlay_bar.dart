@@ -12,6 +12,7 @@ class FileSelectionOverlayBar extends StatefulWidget {
   final Collection? collection;
   final Color? backgroundColor;
   final Person? person;
+  final int? clusterID;
 
   const FileSelectionOverlayBar(
     this.galleryType,
@@ -19,6 +20,7 @@ class FileSelectionOverlayBar extends StatefulWidget {
     this.collection,
     this.backgroundColor,
     this.person,
+    this.clusterID,
     Key? key,
   }) : super(key: key);
 
@@ -69,6 +71,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
               galleryType: widget.galleryType,
               collection: widget.collection,
               person: widget.person,
+              clusterID: widget.clusterID,
               onCancel: () {
                 if (widget.selectedFiles.files.isNotEmpty) {
                   widget.selectedFiles.clearAll();
