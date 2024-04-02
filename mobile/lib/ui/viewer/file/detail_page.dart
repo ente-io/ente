@@ -166,6 +166,7 @@ class _DetailPageState extends State<DetailPage> {
 
   Widget _buildPageView(BuildContext context) {
     return PageView.builder(
+      clipBehavior: Clip.none,
       itemBuilder: (context, index) {
         final file = _files![index];
         _preloadFiles(index);
