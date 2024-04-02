@@ -18,7 +18,6 @@ const createFacesTable = '''CREATE TABLE IF NOT EXISTS $facesTable (
   $faceEmbeddingBlob BLOB NOT NULL,
   $faceScore  REAL NOT NULL,
   $faceBlur REAL NOT NULL DEFAULT $kLapacianDefault,
-	$faceClusterId	INTEGER,
   $mlVersionColumn	INTEGER NOT NULL DEFAULT -1,
   PRIMARY KEY($fileIDColumn, $faceIDColumn)
   );

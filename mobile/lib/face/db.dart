@@ -124,11 +124,11 @@ class FaceMLDataDB {
   Future<Map<int, int>> clusterIdToFaceCount() async {
     final db = await instance.database;
     final List<Map<String, dynamic>> maps = await db.rawQuery(
-      'SELECT $cluserIDColumn, COUNT(*) as count FROM $facesTable where $cluserIDColumn IS NOT NULL GROUP BY $cluserIDColumn ',
+      'SELECT $fcClusterID, COUNT(*) as count FROM $faceClustersTable where $fcClusterID IS NOT NULL GROUP BY $fcClusterID ',
     );
     final Map<int, int> result = {};
     for (final map in maps) {
-      result[map[cluserIDColumn] as int] = map['count'] as int;
+      result[map[fcClusterID] as int] = map['count'] as int;
     }
     return result;
   }
@@ -175,7 +175,7 @@ class FaceMLDataDB {
   }) async {
     final db = await instance.database;
     final List<Map<String, dynamic>> maps = await db.rawQuery(
-      'SELECT $faceEmbeddingBlob FROM $facesTable WHERE $cluserIDColumn = ? ${limit != null ? 'LIMIT $limit' : ''}',
+      'SELECT $faceEmbeddingBlob FROM $facesTable WHERE  $faceIDColumn in (SELECT $fcFaceId from $faceClustersTable where $fcClusterID = ?) ${limit != null ? 'LIMIT $limit' : ''}',
       [clusterID],
     );
     return maps.map((e) => e[faceEmbeddingBlob] as Uint8List);
@@ -250,9 +250,18 @@ class FaceMLDataDB {
         whereArgs: [clusterID],
       );
       final List<Face>? faces = await getFacesForGivenFileID(recentFileID);
+
+      if (clusterID == 1711967560179) {
+        debugPrint("faces: $faces");
+        if (faces != null) {
+          debugPrint("faces: ${faces!.map((e) => e.faceID).toList()}");
+        }
+        debugPrint('faceMaps $faceMaps');
+      }
       if (faces != null) {
         for (final face in faces) {
-          if (faceMaps.any((element) => element[fcFaceId] == face.faceID)) {
+          if (faceMaps
+              .any((element) => (element[fcFaceId] as String) == face.faceID)) {
             return face;
           }
         }
@@ -370,7 +379,7 @@ class FaceMLDataDB {
       // Query a batch of rows
       final List<Map<String, dynamic>> maps = await db.query(
         facesTable,
-        columns: [faceIDColumn, faceClusterId, faceEmbeddingBlob],
+        columns: [faceIDColumn, faceEmbeddingBlob],
         where: '$faceScore > $minScore and $faceBlur > $minClarity',
         limit: batchSize,
         offset: offset,
@@ -526,7 +535,7 @@ class FaceMLDataDB {
     final db = instance.database;
     return db.then((db) async {
       final List<Map<String, dynamic>> maps = await db.rawQuery(
-        'SELECT $clusterPersonTable.$cluserIDColumn, $fcFaceId FROM $faceClustersTable '
+        'SELECT $faceClustersTable.$fcClusterID, $fcFaceId FROM $faceClustersTable '
         'INNER JOIN $clusterPersonTable '
         'ON $faceClustersTable.$fcClusterID = $clusterPersonTable.$cluserIDColumn '
         'WHERE $clusterPersonTable.$personIdColumn = ?',
