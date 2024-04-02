@@ -27,6 +27,8 @@ export const localeName = (locale: SupportedLocale) => {
             return "Español";
         case "pt-BR":
             return "Brazilian Portuguese";
+        case "ru-RU":
+            return "Russian";
     }
 };
 
