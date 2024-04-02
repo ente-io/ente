@@ -631,7 +631,7 @@
     "PAIR_WITH_PIN": "Parear com PIN",
     "CHOOSE_DEVICE_FROM_BROWSER": "Escolha um dispositivo compatível com casts no navegador popup.",
     "PAIR_WITH_PIN_WORKS_FOR_ANY_LARGE_SCREEN_DEVICE": "Parear com o PIN funciona para qualquer dispositivo de tela grande onde você deseja reproduzir seu álbum.",
-    "VISIT_CAST_ENTE_IO": "Acesse cast.ente.io no dispositivo que você deseja parear.",
+    "VISIT_CAST_ENTE_IO": "Acesse <a>{{url}}</a> no dispositivo que você deseja parear.",
     "CAST_AUTO_PAIR_FAILED": "Chromecast Auto Pair falhou. Por favor, tente novamente.",
     "CACHE_DIRECTORY": "Pasta de Cache",
     "FREEHAND": "Mão livre",
