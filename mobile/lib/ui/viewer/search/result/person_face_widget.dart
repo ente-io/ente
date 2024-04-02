@@ -93,7 +93,7 @@ class PersonFaceWidget extends StatelessWidget {
       );
       if (face == null) {
         debugPrint(
-          "No cover face for person: $personId and cluster $clusterID",
+          "No cover face for person: $personId and cluster $clusterID and recentFile ${file.uploadedFileID}",
         );
         return null;
       }

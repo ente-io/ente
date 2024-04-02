@@ -389,6 +389,10 @@ class ClusterFeedbackService {
       if (ignoredClusters.contains(clusterID)) {
         continue;
       }
+      if (allClusterIdsToCountMap[clusterID]! < 2) {
+        continue;
+      }
+
       late List<double> avg;
       if (clusterToSummary[clusterID]?.$2 ==
           allClusterIdsToCountMap[clusterID]) {
@@ -412,6 +416,11 @@ class ClusterFeedbackService {
       if (updatesForClusterSummary.length > 100) {
         await faceMlDb.clusterSummaryUpdate(updatesForClusterSummary);
         updatesForClusterSummary.clear();
+        if (kDebugMode) {
+          _logger.info(
+            'start getUpdateClusterAvg for ${allClusterIdsToCountMap.length} clusters',
+          );
+        }
       }
       clusterAvg[clusterID] = avg;
     }
@@ -441,6 +450,10 @@ class ClusterFeedbackService {
       int? nearestPersonCluster;
       double? minDistance;
       for (final personCluster in personClusters) {
+        if (clusterAvg[personCluster] == null) {
+          _logger.info('no avg for cluster $personCluster');
+          continue;
+        }
         final avg = clusterAvg[personCluster]!;
         final distance = cosineDistForNormVectors(avg, otherAvg);
         if (distance < maxClusterDistance) {
