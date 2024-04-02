@@ -13,23 +13,23 @@ import (
 	"github.com/spf13/viper"
 )
 
-// ZohoMailingListsController is used to keeping the external mailing lists in sync
+// MailingListsController is used to keeping the external mailing lists in sync
 // with customer email changes.
 //
-// ZohoMailingListsController contains methods for keeping external mailing lists in
+// MailingListsController contains methods for keeping external mailing lists in
 // sync when new users sign up, or update their email, or delete their account.
 // Currently, these mailing lists are hosted on Zoho Campaigns.
 //
 // See also: Syncing emails with Zoho Campaigns
-type ZohoMailingListsController struct {
+type MailingListsController struct {
 	zohoAccessToken string
 	zohoListKey     string
 	zohoTopicIds    string
 	zohoCredentials zoho.Credentials
 }
 
-// Return a new instance of ZohoMailingListsController
-func NewZohoMailingListsController() *ZohoMailingListsController {
+// Return a new instance of MailingListsController
+func NewMailingListsController() *MailingListsController {
 	zohoCredentials := zoho.Credentials{
 		ClientID:     viper.GetString("zoho.client-id"),
 		ClientSecret: viper.GetString("zoho.client-secret"),
@@ -58,7 +58,7 @@ func NewZohoMailingListsController() *ZohoMailingListsController {
 	// we'll use the refresh token to create an access token on demand.
 	zohoAccessToken := viper.GetString("zoho.access_token")
 
-	return &ZohoMailingListsController{
+	return &MailingListsController{
 		zohoCredentials: zohoCredentials,
 		zohoListKey:     zohoListKey,
 		zohoTopicIds:    zohoTopicIds,
@@ -101,7 +101,7 @@ func NewListmonkMailingListsController() *ListmonkMailingListsController {
 // that can be later updated or deleted via their API. So instead, we maintain
 // the email addresses of our customers in a Zoho Campaign "list", and subscribe
 // or unsubscribe them to this list.
-func (c *ZohoMailingListsController) Subscribe(email string) error {
+func (c *MailingListsController) Subscribe(email string) error {
 	if c.shouldSkipZoho() {
 		return stacktrace.Propagate(ente.ErrNotImplemented, "")
 	}
@@ -121,7 +121,7 @@ func (c *ZohoMailingListsController) Subscribe(email string) error {
 // Unsubscribe the given email address to our default Zoho Campaigns list.
 //
 // See: [Note: Syncing emails with Zoho Campaigns]
-func (c *ZohoMailingListsController) Unsubscribe(email string) error {
+func (c *MailingListsController) Unsubscribe(email string) error {
 	if c.shouldSkipZoho() {
 		return stacktrace.Propagate(ente.ErrNotImplemented, "")
 	}
@@ -130,9 +130,9 @@ func (c *ZohoMailingListsController) Unsubscribe(email string) error {
 	return c.doListActionZoho("listunsubscribe", email)
 }
 
-// shouldSkipZoho checks if the ZohoMailingListsController should be skipped
+// shouldSkipZoho checks if the MailingListsController should be skipped
 // due to missing credentials.
-func (c *ZohoMailingListsController) shouldSkipZoho() bool {
+func (c *MailingListsController) shouldSkipZoho() bool {
 	if c.zohoCredentials.RefreshToken == "" {
 		log.Info("Skipping Zoho mailing list update because credentials are not configured")
 		return true
@@ -142,7 +142,7 @@ func (c *ZohoMailingListsController) shouldSkipZoho() bool {
 
 // Both the listsubscribe and listunsubscribe Zoho Campaigns API endpoints work
 // similarly, so use this function to keep the common code.
-func (c *ZohoMailingListsController) doListActionZoho(action string, email string) error {
+func (c *MailingListsController) doListActionZoho(action string, email string) error {
 	// Query escape the email so that any pluses get converted to %2B.
 	escapedEmail := url.QueryEscape(email)
 	contactInfo := fmt.Sprintf("{Contact+Email: \"%s\"}", escapedEmail)
