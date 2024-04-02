@@ -140,6 +140,7 @@ class _DetailPageState extends State<DetailPage> {
       ),
       extendBodyBehindAppBar: true,
       resizeToAvoidBottomInset: false,
+      backgroundColor: Colors.black,
       body: Center(
         child: Stack(
           children: [
