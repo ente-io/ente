@@ -545,13 +545,14 @@ class FaceMLDataDB {
     final db = instance.database;
     return db.then((db) async {
       final List<Map<String, dynamic>> maps = await db.rawQuery(
-        'SELECT $cluserIDColumn, $fileIDColumn FROM $facesTable '
-        'WHERE $cluserIDColumn IN (${clusterIDs.join(",")})',
+        'SELECT $fcClusterID, $fcFaceId FROM $faceClustersTable '
+        'WHERE $fcClusterID IN (${clusterIDs.join(",")})',
       );
       final Map<int, Set<int>> result = {};
       for (final map in maps) {
-        final clusterID = map[cluserIDColumn] as int;
-        final fileID = map[fileIDColumn] as int;
+        final clusterID = map[fcClusterID] as int;
+        final faceId = map[fcFaceId] as String;
+        final fileID = int.parse(faceId.split("_").first);
         result[fileID] = (result[fileID] ?? {})..add(clusterID);
       }
       return result;

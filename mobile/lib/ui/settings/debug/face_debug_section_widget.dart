@@ -186,6 +186,7 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
+          alwaysShowSuccessState: true,
           onTap: () async {
             await showChoiceDialog(
               context,
