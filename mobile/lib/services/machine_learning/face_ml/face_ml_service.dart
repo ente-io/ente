@@ -681,6 +681,8 @@ class FaceMlService {
             result.mlVersion,
             error: result.errorOccured ? true : null,
           ),
+          height: result.faceDetectionImageSize!.height.truncate(),
+          width: result.faceDetectionImageSize!.width.truncate(),
         ),
       );
       await FaceMLDataDB.instance.bulkInsertFaces(faces);

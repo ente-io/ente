@@ -2,6 +2,8 @@ import "package:photos/face/model/face.dart";
 
 class FileMl {
   final int fileID;
+  final int? height;
+  final int? width;
   // json: face
   final FaceEmbeddings faceEmbedding;
   final ClipEmbedding? clipEmbedding;
@@ -11,12 +13,16 @@ class FileMl {
   FileMl(
     this.fileID,
     this.faceEmbedding, {
+    this.height,
+    this.width,
     this.clipEmbedding,
   });
 
   // toJson
   Map<String, dynamic> toJson() => {
         'fileID': fileID,
+        'height': height,
+        'width': width,
         'faceEmbedding': faceEmbedding.toJson(),
         'clipEmbedding': clipEmbedding?.toJson(),
       };
@@ -25,6 +31,8 @@ class FileMl {
     return FileMl(
       json['fileID'] as int,
       FaceEmbeddings.fromJson(json['faceEmbedding'] as Map<String, dynamic>),
+      height: json['height'] as int?,
+      width: json['width'] as int?,
       clipEmbedding: json['clipEmbedding'] == null
           ? null
           : ClipEmbedding.fromJson(
