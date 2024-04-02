@@ -181,6 +181,32 @@ class FaceMLDataDB {
     return maps.map((e) => e[faceEmbeddingBlob] as Uint8List);
   }
 
+  Future<Map<int, Iterable<Uint8List>>> getFaceEmbeddingsForClusters(
+    Iterable<int> clusterIDs, {
+    int? limit,
+  }) async {
+    final db = await instance.database;
+    final Map<int, List<Uint8List>> result = {};
+
+    final selectQuery = '''
+    SELECT fc.$fcClusterID, fe.$faceEmbeddingBlob
+    FROM $faceClustersTable fc
+    INNER JOIN $facesTable fe ON fc.$fcFaceId = fe.$faceIDColumn
+    WHERE fc.$fcClusterID IN (${clusterIDs.join(',')})
+    ${limit != null ? 'LIMIT $limit' : ''}
+  ''';
+
+    final List<Map<String, dynamic>> maps = await db.rawQuery(selectQuery);
+
+    for (final map in maps) {
+      final clusterID = map[fcClusterID] as int;
+      final faceEmbedding = map[faceEmbeddingBlob] as Uint8List;
+      result.putIfAbsent(clusterID, () => <Uint8List>[]).add(faceEmbedding);
+    }
+
+    return result;
+  }
+
   Future<Face?> getCoverFaceForPerson({
     required int recentFileID,
     String? personID,
@@ -668,9 +694,11 @@ class FaceMLDataDB {
     await db.execute(deletePersonTable);
     await db.execute(dropClusterPersonTable);
     await db.execute(dropNotPersonFeedbackTable);
+    await db.execute(dropClusterSummaryTable);
     await db.execute(createPersonTable);
     await db.execute(createClusterPersonTable);
     await db.execute(createNotPersonFeedbackTable);
+    await db.execute(createClusterSummaryTable);
   }
 
   Future<void> removeFilesFromPerson(List<EnteFile> files, Person p) async {
