@@ -5,6 +5,7 @@
     "devDependencies": {
         "@typescript-eslint/eslint-plugin": "^7",
         "@typescript-eslint/parser": "^7",
+        "eslint-plugin-react": "^7.34.1",
         "eslint-plugin-react-hooks": "^4.6",
         "prettier-plugin-organize-imports": "^3.2",
         "prettier-plugin-packagejson": "^2.4"
