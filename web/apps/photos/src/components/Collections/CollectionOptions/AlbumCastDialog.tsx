@@ -12,6 +12,7 @@ import castGateway from "@ente/shared/network/cast";
 import { logError } from "@ente/shared/sentry";
 import { Typography } from "@mui/material";
 import { t } from "i18next";
+import { Trans } from "react-i18next";
 import { useEffect, useState } from "react";
 import { Collection } from "types/collection";
 import { v4 as uuidv4 } from "uuid";
@@ -153,7 +154,7 @@ export default function AlbumCastDialog(props: Props) {
             open={props.show}
             onClose={props.onHide}
             attributes={{
-                title: t("CAST_ALBUM_TO_TV"),
+                title: <Trans i18nKey="CAST_ALBUM_TO_TV"/>,
             }}
         >
             {view === "choose" && (
