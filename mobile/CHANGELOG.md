@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## v0.8.72
+## v0.8.73
 ### Added
 * #### Share an Album to Multiple Contacts at Once
 
@@ -9,7 +9,7 @@
 
 * #### Bug Fixes and Performance Improvements
 
-    Many a bugs were squashed in this release. If you run into any, please write to team@ente.io, or let us know on Discord! 🙏
+    Many a bugs were squashed in this release and have improved performance on app start. If you run into any bugs, please write to team@ente.io, or let us know on Discord! 🙏
 
 
 ## v0.8.67
