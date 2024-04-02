@@ -639,7 +639,7 @@
   resolved "https://registry.yarnpkg.com/@types/long/-/long-4.0.2.tgz#b74129719fc8d11c01868010082d483b7545591a"
   integrity sha512-MqTGEo5bj5t157U6fA/BiDynNkn0YknVdh48CMPkTSpFTVmvao5UQmm7uEF6xBEo7qIMAlY/JSleYaE6VOdpaA==
 
-"@types/node@*", "@types/node@^20":
+"@types/node@*":
   version "20.11.20"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-20.11.20.tgz#f0a2aee575215149a62784210ad88b3a34843659"
   integrity sha512-7/rR21OS+fq8IyHTgtLkDK949uzsa6n8BkziAKtPVpugIkO6D+/ooXMvzXxDnZrmtXVfjb1bKQafYpb8s89LOg==
@@ -1765,11 +1765,6 @@ eslint-plugin-jsx-a11y@^6.7.1:
   version "4.6.0"
   resolved "https://registry.yarnpkg.com/eslint-plugin-react-hooks/-/eslint-plugin-react-hooks-4.6.0.tgz#4c3e697ad95b77e93f8646aaa1630c1ba607edd3"
   integrity sha512-oFc7Itz9Qxh2x4gNHStv3BqJq54ExXmfC+a1NjAta66IAN87Wu0R/QArgIS9qKzX3dXKPI9H5crl9QchNMY9+g==
-
-eslint-plugin-react-namespace-import@^1.0:
-  version "1.0.5"
-  resolved "https://registry.yarnpkg.com/eslint-plugin-react-namespace-import/-/eslint-plugin-react-namespace-import-1.0.5.tgz#9da74bb169d13336a187abd3c42e22d2fe10f91d"
-  integrity sha512-0gUj6hSRL8cTxyLtVvbu/Rzr3aEmO4fUyJIc3qkGum2Lth+atx3z/JJgBd+PUpaksdv0D6gmBBHwjmn/nPAobQ==
 
 eslint-plugin-react@^7.33.2, eslint-plugin-react@latest:
   version "7.33.2"
