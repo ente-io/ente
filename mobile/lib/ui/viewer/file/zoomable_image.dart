@@ -59,6 +59,7 @@ class _ZoomableImageState extends State<ZoomableImage> {
 
   @override
   void initState() {
+    super.initState();
     _photo = widget.photo;
     _logger = Logger("ZoomableImage");
     _logger.info('initState for ${_photo.generatedID} with tag ${_photo.tag}');
@@ -70,7 +71,6 @@ class _ZoomableImageState extends State<ZoomableImage> {
       debugPrint("isZooming = $_isZooming, currentState $value");
       // _logger.info('is reakky zooming $_isZooming with state $value');
     };
-    super.initState();
   }
 
   @override
@@ -135,7 +135,9 @@ class _ZoomableImageState extends State<ZoomableImage> {
                 height: screenRelativeImageHeight,
                 child: Hero(
                   tag: widget.tagPrefix! + _photo.tag,
-                  child: const EnteLoadingWidget(),
+                  child: const EnteLoadingWidget(
+                    color: Colors.white,
+                  ),
                 ),
               ),
             );
@@ -143,7 +145,9 @@ class _ZoomableImageState extends State<ZoomableImage> {
         ),
       );
     } else {
-      content = const EnteLoadingWidget();
+      content = const EnteLoadingWidget(
+        color: Colors.white,
+      );
     }
 
     final GestureDragUpdateCallback? verticalDragCallback = _isZooming
