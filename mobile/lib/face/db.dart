@@ -181,19 +181,6 @@ class FaceMLDataDB {
     return maps.map((e) => e[faceEmbeddingBlob] as Uint8List);
   }
 
-  Future<Map<int, int>> getFileIdToCount() async {
-    final Map<int, int> result = {};
-    final db = await instance.database;
-    final List<Map<String, dynamic>> maps = await db.rawQuery(
-      'SELECT $fileIDColumn, COUNT(*) as count FROM $facesTable where $faceScore > $kMinFaceDetectionScore GROUP BY $fileIDColumn',
-    );
-
-    for (final map in maps) {
-      result[map[fileIDColumn] as int] = map['count'] as int;
-    }
-    return result;
-  }
-
   Future<Face?> getCoverFaceForPerson({
     required int recentFileID,
     String? personID,
