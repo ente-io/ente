@@ -241,7 +241,9 @@ class FaceMLDataDB {
       final clusterIDs =
           cluterRows.map((e) => e[cluserIDColumn] as int).toList();
       final List<Map<String, dynamic>> faceMaps = await db.rawQuery(
-        'SELECT * FROM $facesTable where $faceClusterId IN (${clusterIDs.join(",")}) AND $fileIDColumn in (${fileId.join(",")}) AND $faceScore > $kMinHighQualityFaceScore ORDER BY $faceScore DESC',
+        'SELECT * FROM $facesTable where '
+        '$faceIDColumn in (SELECT $fcFaceId from $faceClustersTable where  $fcClusterID IN (${clusterIDs.join(",")}))'
+        'AND $fileIDColumn in (${fileId.join(",")}) AND $faceScore > $kMinHighQualityFaceScore ORDER BY $faceScore DESC',
       );
       if (faceMaps.isNotEmpty) {
         if (avatarFileId != null) {
