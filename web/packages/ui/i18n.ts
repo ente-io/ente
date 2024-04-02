@@ -31,6 +31,7 @@ export const supportedLocales = [
     "nl-NL" /* Dutch */,
     "es-ES" /* Spanish */,
     "pt-BR" /* Portuguese, Brazilian */,
+    "ru-RU" /* Russian */,
 ] as const;
 
 /** The type of {@link supportedLocales}. */
@@ -212,6 +213,8 @@ const closestSupportedLocale = (
             // We'll never get here (it'd already be an exact match), just kept
             // to keep this list consistent.
             return "pt-BR";
+        } else if (ls.startsWith("ru")) {
+            return "ru-RU";
         }
     }
 
