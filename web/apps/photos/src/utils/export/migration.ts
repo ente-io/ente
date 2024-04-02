@@ -41,13 +41,13 @@ export const getExportedFiles = (
 export const oldSanitizeName = (name: string) =>
     name.replaceAll("/", "_").replaceAll(" ", "_");
 
-export const getUniqueCollectionFolderPath = (
+export const getUniqueCollectionFolderPath = async (
     dir: string,
     collectionName: string,
-): string => {
+): Promise<string> => {
     let collectionFolderPath = `${dir}/${sanitizeName(collectionName)}`;
     let count = 1;
-    while (exportService.exists(collectionFolderPath)) {
+    while (await exportService.exists(collectionFolderPath)) {
         collectionFolderPath = `${dir}/${sanitizeName(
             collectionName,
         )}(${count})`;
@@ -59,14 +59,16 @@ export const getUniqueCollectionFolderPath = (
 export const getMetadataFolderPath = (collectionFolderPath: string) =>
     `${collectionFolderPath}/${ENTE_METADATA_FOLDER}`;
 
-export const getUniqueFileSaveName = (
+export const getUniqueFileSaveName = async (
     collectionPath: string,
     filename: string,
 ) => {
     let fileSaveName = sanitizeName(filename);
     let count = 1;
     while (
-        exportService.exists(getFileSavePath(collectionPath, fileSaveName))
+        await exportService.exists(
+            getFileSavePath(collectionPath, fileSaveName),
+        )
     ) {
         const filenameParts = splitFilenameAndExtension(sanitizeName(filename));
         if (filenameParts[1]) {

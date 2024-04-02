@@ -14,9 +14,11 @@ import 'package:ente_auth/store/code_store.dart';
 import 'package:ente_auth/ui/code_timer_progress.dart';
 import 'package:ente_auth/ui/utils/icon_utils.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
+import 'package:ente_auth/utils/platform_util.dart';
 import 'package:ente_auth/utils/toast_util.dart';
 import 'package:ente_auth/utils/totp_util.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_context_menu/flutter_context_menu.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:logging/logging.dart';
 import 'package:move_to_background/move_to_background.dart';
@@ -24,7 +26,7 @@ import 'package:move_to_background/move_to_background.dart';
 class CodeWidget extends StatefulWidget {
   final Code code;
 
-  const CodeWidget(this.code, {Key? key}) : super(key: key);
+  const CodeWidget(this.code, {super.key});
 
   @override
   State<CodeWidget> createState() => _CodeWidgetState();
@@ -84,83 +86,121 @@ class _CodeWidgetState extends State<CodeWidget> {
     final l10n = context.l10n;
     return Container(
       margin: const EdgeInsets.only(left: 16, right: 16, bottom: 8, top: 8),
-      child: Slidable(
-        key: ValueKey(widget.code.hashCode),
-        endActionPane: ActionPane(
-          extentRatio: 0.60,
-          motion: const ScrollMotion(),
-          children: [
-            const SizedBox(
-              width: 4,
-            ),
-            SlidableAction(
-              onPressed: _onShowQrPressed,
-              backgroundColor: Colors.grey.withOpacity(0.1),
-              borderRadius: const BorderRadius.all(Radius.circular(12.0)),
-              foregroundColor:
-                  Theme.of(context).colorScheme.inverseBackgroundColor,
-              icon: Icons.qr_code_2_outlined,
-              label: "QR",
-              padding: const EdgeInsets.only(left: 4, right: 0),
-              spacing: 8,
-            ),
-            const SizedBox(
-              width: 4,
-            ),
-            SlidableAction(
-              onPressed: _onEditPressed,
-              backgroundColor: Colors.grey.withOpacity(0.1),
-              borderRadius: const BorderRadius.all(Radius.circular(12.0)),
-              foregroundColor:
-                  Theme.of(context).colorScheme.inverseBackgroundColor,
-              icon: Icons.edit_outlined,
-              label: l10n.edit,
-              padding: const EdgeInsets.only(left: 4, right: 0),
-              spacing: 8,
-            ),
-            const SizedBox(
-              width: 4,
-            ),
-            SlidableAction(
-              onPressed: _onDeletePressed,
-              backgroundColor: Colors.grey.withOpacity(0.1),
-              borderRadius: const BorderRadius.all(Radius.circular(12.0)),
-              foregroundColor: const Color(0xFFFE4A49),
-              icon: Icons.delete,
-              label: l10n.delete,
-              padding: const EdgeInsets.only(left: 0, right: 0),
-              spacing: 8,
-            ),
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(8),
-          child: Container(
-            color: Theme.of(context).colorScheme.codeCardBackgroundColor,
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                customBorder: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                onTap: () {
-                  _copyCurrentOTPToClipboard();
-                },
-                onDoubleTap: isMaskingEnabled
-                    ? () {
-                        setState(
-                          () {
-                            _hideCode = !_hideCode;
-                          },
-                        );
-                      }
-                    : null,
-                onLongPress: () {
-                  _copyCurrentOTPToClipboard();
-                },
-                child: _getCardContents(l10n),
+      child: Builder(
+        builder: (context) {
+          if (PlatformUtil.isDesktop()) {
+            return ContextMenuRegion(
+              contextMenu: ContextMenu(
+                entries: <ContextMenuEntry>[
+                  MenuItem(
+                    label: 'QR',
+                    icon: Icons.qr_code_2_outlined,
+                    onSelected: () => _onShowQrPressed(null),
+                  ),
+                  MenuItem(
+                    label: l10n.edit,
+                    icon: Icons.edit,
+                    onSelected: () => _onEditPressed(null),
+                  ),
+                  const MenuDivider(),
+                  MenuItem(
+                    label: l10n.delete,
+                    value: "Delete",
+                    icon: Icons.delete,
+                    onSelected: () => _onDeletePressed(null),
+                  ),
+                ],
+                padding: const EdgeInsets.all(8.0),
               ),
+              child: _clippedCard(l10n),
+            );
+          }
+
+          return Slidable(
+            key: ValueKey(widget.code.hashCode),
+            endActionPane: ActionPane(
+              extentRatio: 0.60,
+              motion: const ScrollMotion(),
+              children: [
+                const SizedBox(
+                  width: 4,
+                ),
+                SlidableAction(
+                  onPressed: _onShowQrPressed,
+                  backgroundColor: Colors.grey.withOpacity(0.1),
+                  borderRadius: const BorderRadius.all(Radius.circular(12.0)),
+                  foregroundColor:
+                      Theme.of(context).colorScheme.inverseBackgroundColor,
+                  icon: Icons.qr_code_2_outlined,
+                  label: "QR",
+                  padding: const EdgeInsets.only(left: 4, right: 0),
+                  spacing: 8,
+                ),
+                const SizedBox(
+                  width: 4,
+                ),
+                SlidableAction(
+                  onPressed: _onEditPressed,
+                  backgroundColor: Colors.grey.withOpacity(0.1),
+                  borderRadius: const BorderRadius.all(Radius.circular(12.0)),
+                  foregroundColor:
+                      Theme.of(context).colorScheme.inverseBackgroundColor,
+                  icon: Icons.edit_outlined,
+                  label: l10n.edit,
+                  padding: const EdgeInsets.only(left: 4, right: 0),
+                  spacing: 8,
+                ),
+                const SizedBox(
+                  width: 4,
+                ),
+                SlidableAction(
+                  onPressed: _onDeletePressed,
+                  backgroundColor: Colors.grey.withOpacity(0.1),
+                  borderRadius: const BorderRadius.all(Radius.circular(12.0)),
+                  foregroundColor: const Color(0xFFFE4A49),
+                  icon: Icons.delete,
+                  label: l10n.delete,
+                  padding: const EdgeInsets.only(left: 0, right: 0),
+                  spacing: 8,
+                ),
+              ],
             ),
+            child: Builder(
+              builder: (context) => _clippedCard(l10n),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _clippedCard(AppLocalizations l10n) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        color: Theme.of(context).colorScheme.codeCardBackgroundColor,
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            customBorder: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            onTap: () {
+              _copyCurrentOTPToClipboard();
+            },
+            onDoubleTap: isMaskingEnabled
+                ? () {
+                    setState(
+                      () {
+                        _hideCode = !_hideCode;
+                      },
+                    );
+                  }
+                : null,
+            onLongPress: () {
+              _copyCurrentOTPToClipboard();
+            },
+            child: _getCardContents(l10n),
           ),
         ),
       ),
@@ -373,9 +413,10 @@ class _CodeWidgetState extends State<CodeWidget> {
   }
 
   Future<void> _onEditPressed(_) async {
-    bool _isAuthSuccessful = await LocalAuthenticationService.instance
+    bool isAuthSuccessful = await LocalAuthenticationService.instance
         .requestLocalAuthentication(context, context.l10n.editCodeAuthMessage);
-    if (!_isAuthSuccessful) {
+    await PlatformUtil.refocusWindows();
+    if (!isAuthSuccessful) {
       return;
     }
     final Code? code = await Navigator.of(context).push(
@@ -391,9 +432,10 @@ class _CodeWidgetState extends State<CodeWidget> {
   }
 
   Future<void> _onShowQrPressed(_) async {
-    bool _isAuthSuccessful = await LocalAuthenticationService.instance
+    bool isAuthSuccessful = await LocalAuthenticationService.instance
         .requestLocalAuthentication(context, context.l10n.showQRAuthMessage);
-    if (!_isAuthSuccessful) {
+    await PlatformUtil.refocusWindows();
+    if (!isAuthSuccessful) {
       return;
     }
     // ignore: unused_local_variable
@@ -407,14 +449,15 @@ class _CodeWidgetState extends State<CodeWidget> {
   }
 
   void _onDeletePressed(_) async {
-    bool _isAuthSuccessful =
+    bool isAuthSuccessful =
         await LocalAuthenticationService.instance.requestLocalAuthentication(
       context,
       context.l10n.deleteCodeAuthMessage,
     );
-    if (!_isAuthSuccessful) {
+    if (!isAuthSuccessful) {
       return;
     }
+    FocusScope.of(context).requestFocus();
     final l10n = context.l10n;
     await showChoiceActionSheet(
       context,
@@ -451,7 +494,7 @@ class _CodeWidgetState extends State<CodeWidget> {
       code = code.replaceAll(RegExp(r'\d'), '•');
     }
     if (code.length == 6) {
-      return code.substring(0, 3) + " " + code.substring(3, 6);
+      return "${code.substring(0, 3)} ${code.substring(3, 6)}";
     }
     return code;
   }

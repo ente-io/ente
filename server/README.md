@@ -38,7 +38,13 @@ And ping again
 This time you'll see the updated message.
 
 For more details about how to get museum up and running, see
-[RUNNING.md](RUNNING.md).
+[RUNNING](RUNNING.md).
+
+> [!TIP]
+>
+> Also, there is a way to use our pre-built Docker images to directly start a
+> cluster without needing to clone this repository - see
+> [docs/docker](docs/docker.md).
 
 ## Architecture
 
@@ -84,10 +90,11 @@ And it is built with containerization in mind - both during development and
 deployment. Just use the provided Dockerfile, configure to taste and you're off
 to the races.
 
-> [!CAUTION]
->
-> We don't publish any official docker images (yet). For self-hosters, the
-> recommendation is to build your own image using the provided `Dockerfile`.
+Overall, there are [three approaches](RUNNING.md) you can take:
+
+* Run using Docker using a pre-built Docker image
+* Run using Docker but build an image from source
+* Run without Docker
 
 Everything that you might needed to run museum is all in here, since this is the
 setup we ourselves use in production.
@@ -95,9 +102,10 @@ setup we ourselves use in production.
 > [!TIP]
 >
 > On our production servers, we wrap museum in a [systemd
-> service](scripts/museum.service). Our production machines are vanilla Ubuntu
-> images, with Docker and Promtail installed. We then plonk in this systemd
-> service, and use `systemctl start|stop|status museum` to herd it around.
+> service](scripts/deploy/museum.service). Our production machines are vanilla
+> Ubuntu images, with Docker and Promtail installed. We then plonk in this
+> systemd service, and use `systemctl start|stop|status museum` to herd it
+> around.
 
 Some people new to Docker/Go/Postgres might have general questions though.
 Unfortunately, because of limited engineering bandwidth **we will currently not
@@ -112,6 +120,11 @@ repository's [Discussions](https://github.com/ente-io/ente/discussions), or on
 [our Discord](https://discord.gg/z2YVKkycX3). And whenever time permits, we will
 try to clarify, and also document such FAQs. Please feel free to open
 documentation PRs around this too.
+
+> [!TIP]
+>
+> You can find more guides and documentation around self-hosting at
+> [help.ente.io/self-hosting](https://help.ente.io/self-hosting).
 
 ## Thanks ❤️
 

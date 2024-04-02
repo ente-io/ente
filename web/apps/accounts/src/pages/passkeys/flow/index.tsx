@@ -257,6 +257,18 @@ const PasskeysFlow = () => {
                         >
                             {t("TRY_AGAIN")}
                         </EnteButton>
+                        <EnteButton
+                            href="/passkeys/flow/recover"
+                            fullWidth
+                            style={{
+                                marginTop: "1rem",
+                            }}
+                            color="primary"
+                            type="button"
+                            variant="text"
+                        >
+                            {t("RECOVER_TWO_FACTOR")}
+                        </EnteButton>
                     </FormPaper>
                 </Box>
             </Box>

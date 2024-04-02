@@ -1,0 +1,16 @@
+[Unit]
+Documentation=https://github.com/louislam/uptime-kuma
+Requires=docker.service
+After=docker.service
+
+[Install]
+WantedBy=multi-user.target
+
+[Service]
+ExecStartPre=docker pull louislam/uptime-kuma:1
+ExecStartPre=-docker stop uptime-kuma
+ExecStartPre=-docker rm uptime-kuma
+ExecStart=docker run --name uptime-kuma \
+    -p 3001:3001 \
+    -v /root/uptime-kuma:/app/data \
+    louislam/uptime-kuma:1

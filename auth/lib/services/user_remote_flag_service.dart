@@ -96,7 +96,7 @@ class UserRemoteFlagService {
         queryParams["defaultValue"] = defaultValue;
       }
       final response = await _dio.get(
-        _config.getHttpEndpoint() + "/remote-store",
+        "${_config.getHttpEndpoint()}/remote-store",
         queryParameters: queryParams,
         options: Options(
           headers: {
@@ -119,7 +119,7 @@ class UserRemoteFlagService {
   Future<void> _updateKeyValue(String key, String value) async {
     try {
       final response = await _dio.post(
-        _config.getHttpEndpoint() + "/remote-store/update",
+        "${_config.getHttpEndpoint()}/remote-store/update",
         data: {
           "key": key,
           "value": value,

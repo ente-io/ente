@@ -1,12 +1,10 @@
-import { ipcRenderer } from "electron";
-import { logError } from "../services/logging";
+import { getElectronFile } from "../services/fs";
 import {
     getElectronFilesFromGoogleZip,
     getSavedFilePaths,
 } from "../services/upload";
 import { uploadStatusStore } from "../stores/upload.store";
-import { ElectronFile, FILE_PATH_TYPE } from "../types";
-import { getElectronFile } from "./../services/fs";
+import { ElectronFile, FILE_PATH_TYPE } from "../types/ipc";
 
 export const getPendingUploads = async () => {
     const filePaths = getSavedFilePaths(FILE_PATH_TYPE.FILES);
@@ -34,53 +32,6 @@ export const getPendingUploads = async () => {
         collectionName,
         type,
     };
-};
-
-export const showUploadDirsDialog = async () => {
-    try {
-        const filePaths: string[] = await ipcRenderer.invoke(
-            "show-upload-dirs-dialog",
-        );
-        const files = await Promise.all(filePaths.map(getElectronFile));
-        return files;
-    } catch (e) {
-        logError(e, "error while selecting folders");
-    }
-};
-
-export const showUploadFilesDialog = async () => {
-    try {
-        const filePaths: string[] = await ipcRenderer.invoke(
-            "show-upload-files-dialog",
-        );
-        const files = await Promise.all(filePaths.map(getElectronFile));
-        return files;
-    } catch (e) {
-        logError(e, "error while selecting files");
-    }
-};
-
-export const showUploadZipDialog = async () => {
-    try {
-        const filePaths: string[] = await ipcRenderer.invoke(
-            "show-upload-zip-dialog",
-        );
-        let files: ElectronFile[] = [];
-
-        for (const filePath of filePaths) {
-            files = [
-                ...files,
-                ...(await getElectronFilesFromGoogleZip(filePath)),
-            ];
-        }
-
-        return {
-            zipPaths: filePaths,
-            files,
-        };
-    } catch (e) {
-        logError(e, "error while selecting zips");
-    }
 };
 
 export {

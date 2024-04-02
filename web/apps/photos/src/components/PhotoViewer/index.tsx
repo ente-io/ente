@@ -178,6 +178,14 @@ function PhotoViewer(props: Iprops) {
             switch (event.key) {
                 case "i":
                 case "I":
+                    // Enhancement: This should be calling handleOpenInfo, but
+                    // that handling the case where a keybinding triggers an
+                    // exit from fullscreen and opening the info drawer is not
+                    // currently working (the info drawer opens, but the exit
+                    // from fullscreen doesn't happen).
+                    //
+                    // So for now, let the keybinding only work when not in
+                    // fullscreen instead of doing a mish-mash.
                     setShowInfo(true);
                     break;
                 case "Backspace":
@@ -616,7 +624,18 @@ function PhotoViewer(props: Iprops) {
     const handleCloseInfo = () => {
         setShowInfo(false);
     };
-    const handleOpenInfo = () => {
+
+    const handleOpenInfo = (photoSwipe: any) => {
+        // Get out of full screen mode if needed first to be able to show info
+        if (isInFullScreenMode) {
+            const fullScreenApi: PhotoswipeFullscreenAPI =
+                photoSwipe?.ui?.getFullscreenAPI();
+            if (fullScreenApi && fullScreenApi.isFullscreen()) {
+                fullScreenApi.exit();
+                setIsInFullScreenMode(false);
+            }
+        }
+
         setShowInfo(true);
     };
 
@@ -851,7 +870,7 @@ function PhotoViewer(props: Iprops) {
                             <button
                                 className="pswp__button pswp__button--custom"
                                 title={t("INFO_OPTION")}
-                                onClick={handleOpenInfo}
+                                onClick={() => handleOpenInfo(photoSwipe)}
                             >
                                 <InfoIcon />
                             </button>

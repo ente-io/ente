@@ -2,7 +2,7 @@ name: "Nightly (web)"
 
 on:
     schedule:
-        # [Note: Run every 24 hours]
+        # [Note: Run workflow every 24 hours]
         #
         # Run every 24 hours - First field is minute, second is hour of the day
         # This runs 23:15 UTC everyday - 1 and 15 are just arbitrary offset to
@@ -76,6 +76,19 @@ jobs:
                   projectName: ente
                   branch: n-cast
                   directory: web/apps/cast/out
+                  wranglerVersion: "3"
+
+            - name: Build payments
+              run: yarn build:payments
+
+            - name: Publish payments
+              uses: cloudflare/pages-action@1
+              with:
+                  accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+                  apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+                  projectName: ente
+                  branch: n-payments
+                  directory: web/apps/payments/out
                   wranglerVersion: "3"
 
             - name: Build photos

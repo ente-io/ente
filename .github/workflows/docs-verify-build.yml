@@ -6,7 +6,7 @@ name: "Verify build (docs)"
 on:
     # Run on every push to a branch other than main that changes docs/
     push:
-        branches-ignore: [main]
+        branches-ignore: [main, "deploy/**"]
         paths:
             - "docs/**"
             - ".github/workflows/docs-verify-build.yml"

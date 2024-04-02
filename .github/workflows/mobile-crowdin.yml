@@ -2,15 +2,15 @@ name: "Sync Crowdin translations (mobile)"
 
 on:
     push:
+        branches: [main]
         paths:
             # Run workflow when mobiles's intl_en.arb is changed
             - "mobile/lib/l10n/intl_en.arb"
             # Or the workflow itself is changed
             - ".github/workflows/mobile-crowdin.yml"
-        branches: [main]
     schedule:
-        # See: [Note: Run every 24 hours]
-        - cron: "40 1 * * *"
+        # See: [Note: Run workflow on specific days of the week]
+        - cron: "40 1 * * 2,5"
     # Also allow manually running the workflow
     workflow_dispatch:
 
@@ -28,7 +28,7 @@ jobs:
                   base_path: "mobile/"
                   config: "mobile/crowdin.yml"
                   upload_sources: true
-                  upload_translations: true
+                  upload_translations: false
                   download_translations: true
                   localization_branch_name: crowdin-translations-mobile
                   create_pull_request: true

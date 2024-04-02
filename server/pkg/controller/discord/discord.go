@@ -106,7 +106,7 @@ func (c *DiscordController) NotifyAccountDelete(userID int64, paymentProvider st
 }
 
 func (c *DiscordController) NotifyPotentialAbuse(message string) {
-	c.Notify(message)
+	c.Notify(fmt.Sprintf("%s: %s", c.HostName, message))
 }
 
 func (c *DiscordController) getTimeSinceSignUp(userID int64) string {

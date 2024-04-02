@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:adaptive_theme/adaptive_theme.dart';
-import 'package:computer/computer.dart';
 import "package:ente_auth/app/view/app.dart";
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/core/constants.dart';
@@ -17,11 +16,14 @@ import 'package:ente_auth/services/preference_service.dart';
 import 'package:ente_auth/services/update_service.dart';
 import 'package:ente_auth/services/user_remote_flag_service.dart';
 import 'package:ente_auth/services/user_service.dart';
+import 'package:ente_auth/services/window_listener_service.dart';
 import 'package:ente_auth/store/code_store.dart';
 import 'package:ente_auth/ui/tools/app_lock.dart';
 import 'package:ente_auth/ui/tools/lock_screen.dart';
 import 'package:ente_auth/ui/utils/icon_utils.dart';
-import 'package:ente_auth/utils/crypto_util.dart';
+import 'package:ente_auth/utils/platform_util.dart';
+import 'package:ente_auth/utils/window_protocol_handler.dart';
+import 'package:ente_crypto_dart/ente_crypto_dart.dart';
 import 'package:flutter/foundation.dart';
 import "package:flutter/material.dart";
 import 'package:flutter/scheduler.dart';
@@ -29,11 +31,52 @@ import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:privacy_screen/privacy_screen.dart';
+import 'package:tray_manager/tray_manager.dart';
+import 'package:window_manager/window_manager.dart';
 
 final _logger = Logger("main");
 
+Future<void> initSystemTray() async {
+  String path = Platform.isWindows
+      ? 'assets/icons/auth-icon.ico'
+      : 'assets/icons/auth-icon.png';
+  await trayManager.setIcon(path);
+  Menu menu = Menu(
+    items: [
+      MenuItem(
+        key: 'hide_window',
+        label: 'Hide Window',
+      ),
+      MenuItem(
+        key: 'show_window',
+        label: 'Show Window',
+      ),
+      MenuItem.separator(),
+      MenuItem(
+        key: 'exit_app',
+        label: 'Exit App',
+      ),
+    ],
+  );
+  await trayManager.setContextMenu(menu);
+}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  initSystemTray().ignore();
+
+  if (PlatformUtil.isDesktop()) {
+    await windowManager.ensureInitialized();
+    await WindowListenerService.instance.init();
+    WindowOptions windowOptions = WindowOptions(
+      size: WindowListenerService.instance.getWindowSize(),
+    );
+    await windowManager.waitUntilReadyToShow(windowOptions, () async {
+      await windowManager.show();
+      await windowManager.focus();
+    });
+  }
   await _runInForeground();
   await _setupPrivacyScreen();
   if (Platform.isAndroid) {
@@ -70,10 +113,14 @@ ThemeMode _themeMode(AdaptiveThemeMode? savedThemeMode) {
 }
 
 Future _runWithLogs(Function() function, {String prefix = ""}) async {
+  String dir = "";
+  try {
+    dir = "${(await getApplicationSupportDirectory()).path}/logs";
+  } catch (_) {}
   await SuperLogging.main(
     LogConfig(
       body: function,
-      logDirPath: (await getApplicationSupportDirectory()).path + "/logs",
+      logDirPath: dir,
       maxLogFiles: 5,
       sentryDsn: sentryDSN,
       enableInDebugMode: true,
@@ -82,10 +129,19 @@ Future _runWithLogs(Function() function, {String prefix = ""}) async {
   );
 }
 
+void _registerWindowsProtocol() {
+  const kWindowsScheme = 'ente';
+  // Register our protocol only on Windows platform
+  if (!kIsWeb && Platform.isWindows) {
+    WindowsProtocolHandler()
+        .register(kWindowsScheme, executable: null, arguments: null);
+  }
+}
+
 Future<void> _init(bool bool, {String? via}) async {
-  // Start workers asynchronously. No need to wait for them to start
-  Computer.shared().turnOn(workersCount: 4, verbose: kDebugMode).ignore();
-  CryptoUtil.init();
+  _registerWindowsProtocol();
+  await initCryptoUtil();
+
   await PreferenceService.instance.init();
   await CodeStore.instance.init();
   await Configuration.instance.init();
@@ -100,6 +156,7 @@ Future<void> _init(bool bool, {String? via}) async {
 }
 
 Future<void> _setupPrivacyScreen() async {
+  if (!PlatformUtil.isMobile()) return;
   final brightness =
       SchedulerBinding.instance.platformDispatcher.platformBrightness;
   bool isInDarkMode = brightness == Brightness.dark;

@@ -197,16 +197,16 @@ export const getGoogleLikeMetadataFile = (
 export const sanitizeName = (name: string) =>
     sanitize(name, { replacement: "_" });
 
-export const getUniqueCollectionExportName = (
+export const getUniqueCollectionExportName = async (
     dir: string,
     collectionName: string,
-): string => {
+): Promise<string> => {
     let collectionExportName = sanitizeName(collectionName);
     let count = 1;
     while (
-        exportService.exists(
+        (await exportService.exists(
             getCollectionExportPath(dir, collectionExportName),
-        ) ||
+        )) ||
         collectionExportName === ENTE_TRASH_FOLDER
     ) {
         collectionExportName = `${sanitizeName(collectionName)}(${count})`;
@@ -218,14 +218,14 @@ export const getUniqueCollectionExportName = (
 export const getMetadataFolderExportPath = (collectionExportPath: string) =>
     `${collectionExportPath}/${ENTE_METADATA_FOLDER}`;
 
-export const getUniqueFileExportName = (
+export const getUniqueFileExportName = async (
     collectionExportPath: string,
     filename: string,
 ) => {
     let fileExportName = sanitizeName(filename);
     let count = 1;
     while (
-        exportService.exists(
+        await exportService.exists(
             getFileExportPath(collectionExportPath, fileExportName),
         )
     ) {
@@ -255,11 +255,14 @@ export const getFileExportPath = (
     fileExportName: string,
 ) => `${collectionExportPath}/${fileExportName}`;
 
-export const getTrashedFileExportPath = (exportDir: string, path: string) => {
+export const getTrashedFileExportPath = async (
+    exportDir: string,
+    path: string,
+) => {
     const fileRelativePath = path.replace(`${exportDir}/`, "");
     let trashedFilePath = `${exportDir}/${ENTE_TRASH_FOLDER}/${fileRelativePath}`;
     let count = 1;
-    while (exportService.exists(trashedFilePath)) {
+    while (await exportService.exists(trashedFilePath)) {
         const trashedFilePathParts = splitFilenameAndExtension(trashedFilePath);
         if (trashedFilePathParts[1]) {
             trashedFilePath = `${trashedFilePathParts[0]}(${count}).${trashedFilePathParts[1]}`;

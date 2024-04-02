@@ -30,8 +30,6 @@ flutter run --dart-define=endpoint=http://localhost:8080 --flavor independent --
 flutter run --dart-define=endpoint=http://localhost:8080
 ```
 
-
-
 Or for the auth app:
 
 ```sh
@@ -46,9 +44,11 @@ flutter run --dart-define=endpoint=http://localhost:8080
 ```
 
 ## How to build non-debug builds
-For building APK, [setup your
-     keystore](https://docs.flutter.dev/deployment/android#create-an-upload-keystore)
-     and run 
-```sh         
+
+For building APK,
+[setup your keystore](https://docs.flutter.dev/deployment/android#create-an-upload-keystore)
+and run
+
+```sh
 flutter build apk --release --flavor independent -t lib/main.dart
- ```
+```

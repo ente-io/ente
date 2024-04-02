@@ -2,15 +2,15 @@ name: "Sync Crowdin translations (auth)"
 
 on:
     push:
+        branches: [main]
         paths:
             # Run workflow when auth's intl_en.arb is changed
             - "mobile/lib/l10n/arb/app_en.arb"
             # Or the workflow itself is changed
             - ".github/workflows/auth-crowdin.yml"
-        branches: [main]
     schedule:
-        # See: [Note: Run every 24 hours]
-        - cron: "50 1 * * *"
+        # See: [Note: Run workflow on specific days of the week]
+        - cron: "50 1 * * 2,5"
     # Also allow manually running the workflow
     workflow_dispatch:
 
@@ -28,7 +28,7 @@ jobs:
                   base_path: "auth/"
                   config: "auth/crowdin.yml"
                   upload_sources: true
-                  upload_translations: true
+                  upload_translations: false
                   download_translations: true
                   localization_branch_name: crowdin-translations-auth
                   create_pull_request: true

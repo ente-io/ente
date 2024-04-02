@@ -2232,6 +2232,16 @@ class S {
     );
   }
 
+  /// `Help`
+  String get help {
+    return Intl.message(
+      'Help',
+      name: 'help',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Oops, something went wrong`
   String get oopsSomethingWentWrong {
     return Intl.message(
@@ -4465,13 +4475,13 @@ class S {
     );
   }
 
-  /// `Unfortunately your payment failed due to {reason}`
-  String paymentFailedWithReason(Object reason) {
+  /// `Unfortunately your payment failed. Please contact support and we'll help you out!`
+  String get paymentFailedMessage {
     return Intl.message(
-      'Unfortunately your payment failed due to $reason',
-      name: 'paymentFailedWithReason',
+      'Unfortunately your payment failed. Please contact support and we\'ll help you out!',
+      name: 'paymentFailedMessage',
       desc: '',
-      args: [reason],
+      args: [],
     );
   }
 
@@ -8423,6 +8433,42 @@ class S {
     return Intl.message(
       'Descriptions',
       name: 'descriptions',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{count, plural, zero {Add viewer} one {Add viewer} other {Add viewers}}`
+  String addViewers(num count) {
+    return Intl.plural(
+      count,
+      zero: 'Add viewer',
+      one: 'Add viewer',
+      other: 'Add viewers',
+      name: 'addViewers',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `{count, plural, zero {Add collaborator} one {Add collaborator} other {Add collaborators}}`
+  String addCollaborators(num count) {
+    return Intl.plural(
+      count,
+      zero: 'Add collaborator',
+      one: 'Add collaborator',
+      other: 'Add collaborators',
+      name: 'addCollaborators',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `Long press an email to verify end to end encryption.`
+  String get longPressAnEmailToVerifyEndToEndEncryption {
+    return Intl.message(
+      'Long press an email to verify end to end encryption.',
+      name: 'longPressAnEmailToVerifyEndToEndEncryption',
       desc: '',
       args: [],
     );

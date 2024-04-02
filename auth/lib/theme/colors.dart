@@ -204,6 +204,7 @@ const Color _warning700 = Color.fromRGBO(234, 63, 63, 1);
 const Color _warning500 = Color.fromRGBO(255, 101, 101, 1);
 const Color _warning800 = Color(0xFFF53434);
 const Color warning500 = Color.fromRGBO(255, 101, 101, 1);
+// ignore: unused_element
 const Color _warning400 = Color.fromRGBO(255, 111, 111, 1);
 
 const Color _caution500 = Color.fromRGBO(255, 194, 71, 1);

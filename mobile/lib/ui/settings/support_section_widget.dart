@@ -43,8 +43,8 @@ class SupportSectionWidget extends StatelessWidget {
         ),
         sectionOptionSpacing,
         AboutMenuItemWidget(
-          title: S.of(context).faq,
-          url: "https://ente.io/faq",
+          title: S.of(context).help,
+          url: "https://help.ente.io",
         ),
         sectionOptionSpacing,
         MenuItemWidget(

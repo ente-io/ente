@@ -37,7 +37,6 @@ import (
 	embeddingCtrl "github.com/ente-io/museum/pkg/controller/embedding"
 	"github.com/ente-io/museum/pkg/controller/family"
 	kexCtrl "github.com/ente-io/museum/pkg/controller/kex"
-	"github.com/ente-io/museum/pkg/controller/locationtag"
 	"github.com/ente-io/museum/pkg/controller/lock"
 	remoteStoreCtrl "github.com/ente-io/museum/pkg/controller/remotestore"
 	"github.com/ente-io/museum/pkg/controller/storagebonus"
@@ -50,7 +49,6 @@ import (
 	"github.com/ente-io/museum/pkg/repo/datacleanup"
 	"github.com/ente-io/museum/pkg/repo/embedding"
 	"github.com/ente-io/museum/pkg/repo/kex"
-	locationtagRepo "github.com/ente-io/museum/pkg/repo/locationtag"
 	"github.com/ente-io/museum/pkg/repo/passkey"
 	"github.com/ente-io/museum/pkg/repo/remotestore"
 	storageBonusRepo "github.com/ente-io/museum/pkg/repo/storagebonus"
@@ -150,7 +148,6 @@ func main() {
 	twoFactorRecoveryRepo := &two_factor_recovery.Repository{Db: db, SecretEncryptionKey: secretEncryptionKeyBytes}
 	billingRepo := &repo.BillingRepository{DB: db}
 	userEntityRepo := &userEntityRepo.Repository{DB: db}
-	locationTagRepository := &locationtagRepo.Repository{DB: db}
 	authRepo := &authenticatorRepo.Repository{DB: db}
 	remoteStoreRepository := &remotestore.Repository{DB: db}
 	dataCleanupRepository := &datacleanup.Repository{DB: db}
@@ -178,7 +175,8 @@ func main() {
 	authCache := cache.New(1*time.Minute, 15*time.Minute)
 	accessTokenCache := cache.New(1*time.Minute, 15*time.Minute)
 	discordController := discord.NewDiscordController(userRepo, hostName, environment)
-	rateLimiter := middleware.NewRateLimitMiddleware(discordController)
+	rateLimiter := middleware.NewRateLimitMiddleware(discordController, 1000, 1*time.Second)
+	defer rateLimiter.Stop()
 
 	emailNotificationCtrl := &email.EmailNotificationController{
 		UserRepo:                userRepo,
@@ -360,22 +358,22 @@ func main() {
 	server.Use(requestid.New(), middleware.Logger(urlSanitizer), cors(), gzip.Gzip(gzip.DefaultCompression), middleware.PanicRecover())
 
 	publicAPI := server.Group("/")
-	publicAPI.Use(rateLimiter.APIRateLimitMiddleware(urlSanitizer))
+	publicAPI.Use(rateLimiter.GlobalRateLimiter(), rateLimiter.APIRateLimitMiddleware(urlSanitizer))
 
 	privateAPI := server.Group("/")
-	privateAPI.Use(authMiddleware.TokenAuthMiddleware(nil), rateLimiter.APIRateLimitForUserMiddleware(urlSanitizer))
+	privateAPI.Use(rateLimiter.GlobalRateLimiter(), authMiddleware.TokenAuthMiddleware(nil), rateLimiter.APIRateLimitForUserMiddleware(urlSanitizer))
 
 	adminAPI := server.Group("/admin")
-	adminAPI.Use(authMiddleware.TokenAuthMiddleware(nil), authMiddleware.AdminAuthMiddleware())
+	adminAPI.Use(rateLimiter.GlobalRateLimiter(), authMiddleware.TokenAuthMiddleware(nil), authMiddleware.AdminAuthMiddleware())
 	paymentJwtAuthAPI := server.Group("/")
-	paymentJwtAuthAPI.Use(authMiddleware.TokenAuthMiddleware(jwt.PAYMENT.Ptr()))
+	paymentJwtAuthAPI.Use(rateLimiter.GlobalRateLimiter(), authMiddleware.TokenAuthMiddleware(jwt.PAYMENT.Ptr()))
 
 	familiesJwtAuthAPI := server.Group("/")
 	//The middleware order matters. First, the userID must be set in the context, so that we can apply limit for user.
-	familiesJwtAuthAPI.Use(authMiddleware.TokenAuthMiddleware(jwt.FAMILIES.Ptr()), rateLimiter.APIRateLimitForUserMiddleware(urlSanitizer))
+	familiesJwtAuthAPI.Use(rateLimiter.GlobalRateLimiter(), authMiddleware.TokenAuthMiddleware(jwt.FAMILIES.Ptr()), rateLimiter.APIRateLimitForUserMiddleware(urlSanitizer))
 
 	publicCollectionAPI := server.Group("/public-collection")
-	publicCollectionAPI.Use(accessTokenMiddleware.AccessTokenAuthMiddleware(urlSanitizer))
+	publicCollectionAPI.Use(rateLimiter.GlobalRateLimiter(), accessTokenMiddleware.AccessTokenAuthMiddleware(urlSanitizer))
 
 	healthCheckHandler := &api.HealthCheckHandler{
 		DB: db,
@@ -472,7 +470,7 @@ func main() {
 	privateAPI.DELETE("/users/delete", userHandler.DeleteUser)
 
 	accountsJwtAuthAPI := server.Group("/")
-	accountsJwtAuthAPI.Use(authMiddleware.TokenAuthMiddleware(jwt.ACCOUNTS.Ptr()), rateLimiter.APIRateLimitForUserMiddleware(urlSanitizer))
+	accountsJwtAuthAPI.Use(rateLimiter.GlobalRateLimiter(), authMiddleware.TokenAuthMiddleware(jwt.ACCOUNTS.Ptr()), rateLimiter.APIRateLimitForUserMiddleware(urlSanitizer))
 	passkeysHandler := &api.PasskeyHandler{
 		Controller: passkeyCtrl,
 	}
@@ -531,7 +529,7 @@ func main() {
 
 	castCtrl := cast.NewController(&castDb, accessCtrl)
 	castMiddleware := middleware.CastMiddleware{CastCtrl: castCtrl, Cache: authCache}
-	castAPI.Use(castMiddleware.CastAuthMiddleware())
+	castAPI.Use(rateLimiter.GlobalRateLimiter(), castMiddleware.CastAuthMiddleware())
 
 	castHandler := &api.CastHandler{
 		CollectionCtrl: collectionController,
@@ -640,13 +638,6 @@ func main() {
 	privateAPI.DELETE("/user-entity/entity", userEntityHandler.DeleteEntity)
 	privateAPI.GET("/user-entity/entity/diff", userEntityHandler.GetDiff)
 
-	locationTagController := &locationtag.Controller{Repo: locationTagRepository}
-	locationTagHandler := &api.LocationTagHandler{Controller: locationTagController}
-	privateAPI.POST("/locationtag/create", locationTagHandler.Create)
-	privateAPI.POST("/locationtag/update", locationTagHandler.Update)
-	privateAPI.DELETE("/locationtag/delete", locationTagHandler.Delete)
-	privateAPI.GET("/locationtag/diff", locationTagHandler.GetDiff)
-
 	authenticatorController := &authenticatorCtrl.Controller{Repo: authRepo}
 	authenticatorHandler := &api.AuthenticatorHandler{Controller: authenticatorController}
 
@@ -680,6 +671,7 @@ func main() {
 
 	privateAPI.PUT("/embeddings", embeddingHandler.InsertOrUpdate)
 	privateAPI.GET("/embeddings/diff", embeddingHandler.GetDiff)
+	privateAPI.POST("/embeddings/files", embeddingHandler.GetFilesEmbedding)
 	privateAPI.DELETE("/embeddings", embeddingHandler.DeleteAll)
 
 	offerHandler := &api.OfferHandler{Controller: offerController}
@@ -711,9 +703,8 @@ func main() {
 }
 
 func runServer(environment string, server *gin.Engine) {
-	if environment == "local" {
-		server.Run(":8080")
-	} else {
+	useTLS := viper.GetBool("http.use-tls")
+	if useTLS {
 		certPath, err := config.CredentialFilePath("tls.cert")
 		if err != nil {
 			log.Fatal(err)
@@ -725,6 +716,8 @@ func runServer(environment string, server *gin.Engine) {
 		}
 
 		log.Fatal(server.RunTLS(":443", certPath, keyPath))
+	} else {
+		server.Run(":8080")
 	}
 }
 

@@ -4,8 +4,8 @@ import 'package:package_info_plus/package_info_plus.dart';
 
 class AppVersionWidget extends StatefulWidget {
   const AppVersionWidget({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<AppVersionWidget> createState() => _AppVersionWidgetState();
@@ -48,7 +48,7 @@ class _AppVersionWidgetState extends State<AppVersionWidget> {
             return Padding(
               padding: const EdgeInsets.all(20),
               child: Text(
-                "Version: " + snapshot.data!,
+                "Version: ${snapshot.data!}",
                 style: Theme.of(context).textTheme.bodySmall,
               ),
             );

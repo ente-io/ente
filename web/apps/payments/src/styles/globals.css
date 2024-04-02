@@ -1,0 +1,46 @@
+html,
+body {
+    padding: 0;
+    margin: 0;
+    font-family: system-ui, sans-serif;
+    height: 100%;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background-color: #191919 !important;
+    color: #aaa !important;
+}
+
+:is(h1, h2, h3, h4, h5, h6) {
+    color: #d7d7d7;
+}
+
+#__next {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.container {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.loading-spinner {
+    color: #28a745;
+    width: 2rem;
+    height: 2rem;
+    border: 0.25em solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: 0.75s linear infinite spinner-border;
+}
+
+@keyframes spinner-border {
+    100% {
+        transform: rotate(360deg);
+    }
+}

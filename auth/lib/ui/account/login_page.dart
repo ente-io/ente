@@ -6,13 +6,13 @@ import 'package:ente_auth/models/api/user/srp.dart';
 import 'package:ente_auth/services/user_service.dart';
 import 'package:ente_auth/ui/account/login_pwd_verification_page.dart';
 import 'package:ente_auth/ui/common/dynamic_fab.dart';
-import 'package:ente_auth/ui/common/web_page.dart';
+import 'package:ente_auth/utils/platform_util.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import "package:styled_text/styled_text.dart";
 
 class LoginPage extends StatefulWidget {
-  const LoginPage({Key? key}) : super(key: key);
+  const LoginPage({super.key});
 
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -24,6 +24,36 @@ class _LoginPageState extends State<LoginPage> {
   String? _email;
   Color? _emailInputFieldColor;
   final Logger _logger = Logger('_LoginPageState');
+
+  Future<void> onPressed() async {
+    await UserService.instance.setEmail(_email!);
+    Configuration.instance.resetVolatilePassword();
+    SrpAttributes? attr;
+    bool isEmailVerificationEnabled = true;
+    try {
+      attr = await UserService.instance.getSrpAttributes(_email!);
+      isEmailVerificationEnabled = attr.isEmailMFAEnabled;
+    } catch (e) {
+      if (e is! SrpSetupNotCompleteError) {
+        _logger.severe('Error getting SRP attributes', e);
+      }
+    }
+    if (attr != null && !isEmailVerificationEnabled) {
+      await Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (BuildContext context) {
+            return LoginPasswordVerificationPage(
+              srpAttributes: attr!,
+            );
+          },
+        ),
+      );
+    } else {
+      await UserService.instance
+          .sendOtt(context, _email!, isCreateAccountScreen: false);
+    }
+    FocusScope.of(context).unfocus();
+  }
 
   @override
   void initState() {
@@ -60,36 +90,7 @@ class _LoginPageState extends State<LoginPage> {
         isKeypadOpen: isKeypadOpen,
         isFormValid: _emailIsValid,
         buttonText: context.l10n.logInLabel,
-        onPressedFunction: () async {
-          await UserService.instance.setEmail(_email!);
-          Configuration.instance.resetVolatilePassword();
-          SrpAttributes? attr;
-          bool isEmailVerificationEnabled = true;
-          try {
-            attr = await UserService.instance.getSrpAttributes(_email!);
-            isEmailVerificationEnabled = attr.isEmailMFAEnabled;
-          } catch (e) {
-            if (e is! SrpSetupNotCompleteError) {
-              _logger.severe('Error getting SRP attributes', e);
-            }
-          }
-          if (attr != null && !isEmailVerificationEnabled) {
-            // ignore: unawaited_futures
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (BuildContext context) {
-                  return LoginPasswordVerificationPage(
-                    srpAttributes: attr!,
-                  );
-                },
-              ),
-            );
-          } else {
-            await UserService.instance
-                .sendOtt(context, _email!, isCreateAccountScreen: false);
-          }
-          FocusScope.of(context).unfocus();
-        },
+        onPressedFunction: onPressed,
       ),
       floatingActionButtonLocation: fabLocation(),
       floatingActionButtonAnimator: NoScalingAnimation(),
@@ -116,6 +117,8 @@ class _LoginPageState extends State<LoginPage> {
                   padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
                   child: TextFormField(
                     autofillHints: const [AutofillHints.email],
+                    onFieldSubmitted:
+                        _emailIsValid ? (value) => onPressed() : null,
                     decoration: InputDecoration(
                       fillColor: _emailInputFieldColor,
                       filled: true,
@@ -179,15 +182,10 @@ class _LoginPageState extends State<LoginPage> {
                           tags: {
                             'u-terms': StyledTextActionTag(
                               (String? text, Map<String?, String?> attrs) =>
-                                  Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (BuildContext context) {
-                                    return WebPage(
-                                      context.l10n.termsOfServicesTitle,
-                                      "https://ente.io/terms",
-                                    );
-                                  },
-                                ),
+                                  PlatformUtil.openWebView(
+                                context,
+                                context.l10n.termsOfServicesTitle,
+                                "https://ente.io/terms",
                               ),
                               style: const TextStyle(
                                 decoration: TextDecoration.underline,
@@ -195,15 +193,10 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                             'u-policy': StyledTextActionTag(
                               (String? text, Map<String?, String?> attrs) =>
-                                  Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (BuildContext context) {
-                                    return WebPage(
-                                      context.l10n.privacyPolicyTitle,
-                                      "https://ente.io/privacy",
-                                    );
-                                  },
-                                ),
+                                  PlatformUtil.openWebView(
+                                context,
+                                context.l10n.privacyPolicyTitle,
+                                "https://ente.io/privacy",
                               ),
                               style: const TextStyle(
                                 decoration: TextDecoration.underline,

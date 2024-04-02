@@ -304,6 +304,7 @@
     }
   },
   "faq": "FAQ",
+  "help": "Help",
   "oopsSomethingWentWrong": "Oops, something went wrong",
   "peopleUsingYourCode": "People using your code",
   "eligible": "eligible",
@@ -640,7 +641,7 @@
   "thankYou": "Thank you",
   "failedToVerifyPaymentStatus": "Failed to verify payment status",
   "pleaseWaitForSometimeBeforeRetrying": "Please wait for sometime before retrying",
-  "paymentFailedWithReason": "Unfortunately your payment failed due to {reason}",
+  "paymentFailedMessage": "Unfortunately your payment failed. Please contact support and we'll help you out!",
   "youAreOnAFamilyPlan": "You are on a family plan!",
   "contactFamilyAdmin": "Please contact <green>{familyAdminEmail}</green> to manage your subscription",
   "leaveFamily": "Leave family",
@@ -1199,5 +1200,8 @@
   "deviceCodeHint": "Enter the code",
   "joinDiscord": "Join Discord",
   "locations": "Locations",
-  "descriptions": "Descriptions"
+  "descriptions": "Descriptions",
+  "addViewers": "{count, plural, zero {Add viewer} one {Add viewer} other {Add viewers}}",
+  "addCollaborators": "{count, plural, zero {Add collaborator} one {Add collaborator} other {Add collaborators}}",
+  "longPressAnEmailToVerifyEndToEndEncryption": "Long press an email to verify end to end encryption."
 }

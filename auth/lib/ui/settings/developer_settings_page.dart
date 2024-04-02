@@ -11,7 +11,7 @@ class DeveloperSettingsPage extends StatefulWidget {
   const DeveloperSettingsPage({super.key});
 
   @override
-  _DeveloperSettingsPageState createState() => _DeveloperSettingsPageState();
+  State<DeveloperSettingsPage> createState() => _DeveloperSettingsPageState();
 }
 
 class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
@@ -27,7 +27,7 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
   @override
   Widget build(BuildContext context) {
     _logger.info(
-      "Current endpoint is: " + Configuration.instance.getHttpEndpoint(),
+      "Current endpoint is: ${Configuration.instance.getHttpEndpoint()}",
     );
     return Scaffold(
       appBar: AppBar(
@@ -49,7 +49,7 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
             GradientButton(
               onTap: () async {
                 String url = _urlController.text;
-                _logger.info("Entered endpoint: " + url);
+                _logger.info("Entered endpoint: $url");
                 try {
                   final uri = Uri.parse(url);
                   if ((uri.scheme == "http" || uri.scheme == "https")) {
@@ -79,7 +79,7 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
 
   Future<void> _ping(String endpoint) async {
     try {
-      final response = await Dio().get(endpoint + '/ping');
+      final response = await Dio().get('$endpoint/ping');
       if (response.data['message'] != 'pong') {
         throw Exception('Invalid response');
       }

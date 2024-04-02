@@ -1,9 +1,9 @@
 ---
-title: Quick links
+title: Quick link
 description: Share photos with your friends and family without creating albums
 ---
 
-# Quick Links
+# Quick link
 
 Quick links allows you to select single or multiple photos and create a link
 that you can then share. You don't need to create an album first.
@@ -18,5 +18,5 @@ that you can then share. You don't need to create an album first.
 
 -   Removing a link will not delete the photos that are present in that link.
 
--   Similar to [public-links](./public-links), you can set link expiry,
+-   Similar to a [public-link](./public-link), you can set link expiry,
     passwords or device limits.
