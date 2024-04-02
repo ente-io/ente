@@ -10,9 +10,10 @@ import { loadSender } from "@ente/shared/hooks/useCastSender";
 import { addLogLine } from "@ente/shared/logging";
 import castGateway from "@ente/shared/network/cast";
 import { logError } from "@ente/shared/sentry";
-import { Typography } from "@mui/material";
+import { Link, Typography } from "@mui/material";
 import { t } from "i18next";
 import { useEffect, useState } from "react";
+import { Trans } from "react-i18next";
 import { Collection } from "types/collection";
 import { v4 as uuidv4 } from "uuid";
 
@@ -220,7 +221,20 @@ export default function AlbumCastDialog(props: Props) {
             )}
             {view === "pin" && (
                 <>
-                    <Typography>{t("VISIT_CAST_ENTE_IO")}</Typography>
+                    <Typography>
+                        <Trans
+                            i18nKey="VISIT_CAST_ENTE_IO"
+                            components={{
+                                a: (
+                                    <Link
+                                        target="_blank"
+                                        href="https://cast.ente.io"
+                                    />
+                                ),
+                            }}
+                            values={{ url: "cast.ente.io" }}
+                        />
+                    </Typography>
                     <Typography>{t("ENTER_CAST_PIN_CODE")}</Typography>
                     <SingleInputForm
                         callback={onSubmit}
