@@ -60,7 +60,7 @@ class FacesItemWidget extends StatelessWidget {
       faces.sort((Face a, Face b) => b.score.compareTo(a.score));
 
       // Remove faces with low scores and blurry faces
-      faces.removeWhere((face) => face.isHighQuality == false);
+      faces.removeWhere((face) => (face.isBlurry || face.score < 0.75));
 
       // TODO: add deduplication of faces of same person
       final faceIdsToClusterIds = await FaceMLDataDB.instance
