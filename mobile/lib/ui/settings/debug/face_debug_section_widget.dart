@@ -159,7 +159,7 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
           trailingIconIsMuted: true,
           onTap: () async {
             await FaceMlService.instance
-                .clusterAllImages(minFaceScore: 0.75, clusterInBuckets: true);
+                .clusterAllImages(clusterInBuckets: true);
             Bus.instance.fire(PeopleChangedEvent());
             showShortToast(context, "Done");
           },
