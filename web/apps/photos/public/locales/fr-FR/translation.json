@@ -631,7 +631,7 @@
     "PAIR_WITH_PIN": "Associer avec le code PIN",
     "CHOOSE_DEVICE_FROM_BROWSER": "Choisissez un périphérique compatible avec la caste à partir de la fenêtre pop-up du navigateur.",
     "PAIR_WITH_PIN_WORKS_FOR_ANY_LARGE_SCREEN_DEVICE": "L'association avec le code PIN fonctionne pour tout appareil grand écran sur lequel vous voulez lire votre album.",
-    "VISIT_CAST_ENTE_IO": "Visitez cast.ente.io sur l'appareil que vous voulez associer.",
+    "VISIT_CAST_ENTE_IO": "Visitez <a>{{url}}</a> sur l'appareil que vous voulez associer.",
     "CAST_AUTO_PAIR_FAILED": "La paire automatique de Chromecast a échoué. Veuillez réessayer.",
     "CACHE_DIRECTORY": "Dossier du cache",
     "FREEHAND": "Main levée",
