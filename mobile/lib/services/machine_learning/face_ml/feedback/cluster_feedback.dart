@@ -370,6 +370,7 @@ class ClusterFeedbackService {
     Set<int> ignoredClusters, {
     int minClusterSize = 1,
     int maxClusterInCurrentRun = 500,
+    int maxEmbeddingToRead = 10000,
   }) async {
     final faceMlDb = FaceMLDataDB.instance;
     _logger.info(
@@ -416,9 +417,9 @@ class ClusterFeedbackService {
     w?.log(
       'reading embeddings for $maxClusterInCurrentRun or ${sortedClusterIDs.length} clusters',
     );
-    final int maxEmbeddingToRead = 10000;
+
     int currentPendingRead = 0;
-    List<int> clusterIdsToRead = [];
+    final List<int> clusterIdsToRead = [];
     for (final clusterID in sortedClusterIDs) {
       if (maxClusterInCurrentRun-- <= 0) {
         break;
