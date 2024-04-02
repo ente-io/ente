@@ -3,11 +3,21 @@
     "version": "0.0.0",
     "private": true,
     "dependencies": {
-        "@/ui": "*",
-        "next": "^14.1"
+        "@emotion/react": "^11.11",
+        "@emotion/styled": "^11.11",
+        "@mui/icons-material": "^5.15",
+        "@mui/material": "^5.15",
+        "get-user-locale": "^2.3",
+        "i18next": "^23.10",
+        "i18next-http-backend": "^2.5",
+        "next": "^14.1",
+        "react": "^18",
+        "react-dom": "^18",
+        "react-i18next": "^14"
     },
     "devDependencies": {
         "@/build-config": "*",
-        "@types/node": "^20"
+        "@types/react": "^18",
+        "@types/react-dom": "^18"
     }
 }

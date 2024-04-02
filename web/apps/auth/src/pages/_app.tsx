@@ -1,4 +1,4 @@
-import { setupI18n } from "@/ui/i18n";
+import { setupI18n } from "@/next/i18n";
 import {
     APPS,
     APP_TITLES,
