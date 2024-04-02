@@ -237,6 +237,14 @@ zoho:
     list-key:
     topic-ids:
 
+# Listmonk Campaigns config (optional)
+# Use case: Sending emails
+listmonk:
+    server-url:
+    username:
+    password:
+    list-ids:
+
 # Various low-level configuration options
 internal:
     # If false (the default), then museum will notify the external world of
