@@ -13,7 +13,7 @@ const L = runningInBrowser()
 
 const LAYER_TILE_URL = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
 const LAYER_TILE_ATTRIBUTION =
-    '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+    '&copy; <a target="_blank" rel="noopener" href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
 const ZOOM_LEVEL = 16;
 
 const MapBoxContainer = styled("div")`
