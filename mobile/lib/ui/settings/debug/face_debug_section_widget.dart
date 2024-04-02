@@ -181,7 +181,7 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
-            title: "Reset feedback & labels",
+            title: "Reset feedback & clusters",
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
@@ -194,10 +194,15 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
                   "You will need to again cluster all the faces. You can drop feedback if you want to return to original cluster labels",
               firstButtonLabel: "Yes, confirm",
               firstButtonOnTap: () async {
-                await FaceMLDataDB.instance.resetClusterIDs();
-                await FaceMLDataDB.instance.dropClustersAndPersonTable();
-                Bus.instance.fire(PeopleChangedEvent());
-                showShortToast(context, "Done");
+                try {
+                  await FaceMLDataDB.instance.resetClusterIDs();
+                  await FaceMLDataDB.instance.dropClustersAndPersonTable();
+                  Bus.instance.fire(PeopleChangedEvent());
+                  showShortToast(context, "Done");
+                } catch (e, s) {
+                  _logger.warning('reset feedback failed ', e, s);
+                  await showGenericErrorDialog(context: context, error: e);
+                }
               },
             );
           },

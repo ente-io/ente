@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS $faceClustersTable (
 ''';
 // -- Creating a non-unique index on clusterID for query optimization
 const fcClusterIDIndex =
-    '''CREATE INDEX IF NOT EXISTS idx_fcClusterID ON faceClustersTable(fcClusterID);''';
+    '''CREATE INDEX IF NOT EXISTS idx_fcClusterID ON $faceClustersTable($fcClusterID);''';
 const dropFaceClustersTable = 'DROP TABLE IF EXISTS $faceClustersTable';
 //##endregion
 

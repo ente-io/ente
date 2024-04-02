@@ -444,9 +444,9 @@ class FaceMLDataDB {
 
   Future<void> resetClusterIDs() async {
     final db = await instance.database;
-    await db.rawQuery(dropFaceClustersTable);
-    await db.rawQuery(createFaceClustersTable);
-    await db.rawQuery(fcClusterIDIndex);
+    await db.execute(dropFaceClustersTable);
+    await db.execute(createFaceClustersTable);
+    await db.execute(fcClusterIDIndex);
   }
 
   Future<void> insert(Person p, int cluserID) async {
@@ -647,6 +647,7 @@ class FaceMLDataDB {
       await db.execute(createFacesTable);
       await db.execute(dropFaceClustersTable);
       await db.execute(createFaceClustersTable);
+      await db.execute(fcClusterIDIndex);
     }
     await db.execute(deletePersonTable);
     await db.execute(dropClusterPersonTable);
