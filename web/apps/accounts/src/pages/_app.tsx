@@ -1,4 +1,4 @@
-import { setupI18n } from "@/ui/i18n";
+import { setupI18n } from "@/next/i18n";
 import { APPS, APP_TITLES } from "@ente/shared/apps/constants";
 import { Overlay } from "@ente/shared/components/Container";
 import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";

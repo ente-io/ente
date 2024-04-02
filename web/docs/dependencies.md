@@ -47,10 +47,10 @@ bit more exhaustively when changing the crypto layer.
 
 ## UI
 
-The UI package uses "react". This is our core framework.
+### React
 
-React also has a sibling "react-dom" package that renders "React" interfaces to
-the DOM.
+[React](https://react.dev) ("react") is our core framework. It also has a
+sibling "react-dom" package that renders JSX to the DOM.
 
 ### MUI and Emotion
 
@@ -74,6 +74,8 @@ Emotion itself comes in many parts, of which we need the following:
 
   > Keep `@emotion/styled` as a dependency of your project. Even if you never
   > use it explicitly, it's a peer dependency of `@mui/material`.
+
+#### Component selectors
 
 Note that currently the SWC plugin doesn't allow the use of the component
 selectors API (i.e using `styled.div` instead of `styled("div")`).
@@ -104,3 +106,18 @@ Note that inspite of the "next" in the name of the library, it has nothing to do
 with Next.js.
 
 For more details, see [translations.md](translations.md).
+
+## Meta Frameworks
+
+### Next.js
+
+[Next.js](https://nextjs.org) ("next") provides the meta framework for both the
+Photos and the Auth app, and also for some of the sidecar apps like accounts and
+cast.
+
+We use a limited subset of Next. The main thing we get out of it is a reasonable
+set of defaults for bundling our app into a static export which we can then
+deploy to our webserver. In addition, the Next.js page router is convenient.
+Apart from this, while we use a few tidbits from Next.js here and there, overall
+our apps are regular React SPAs, and are not particularly tied to Next.
+

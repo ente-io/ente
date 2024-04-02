@@ -3,7 +3,7 @@ import {
     setLocaleInUse,
     supportedLocales,
     type SupportedLocale,
-} from "@/ui/i18n";
+} from "@/next/i18n";
 import DropdownInput, { DropdownOption } from "components/DropdownInput";
 import { t } from "i18next";
 import { useRouter } from "next/router";

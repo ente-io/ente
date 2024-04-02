@@ -1,5 +1,5 @@
 module.exports = {
-    extends: ["@/build-config/eslintrc-typescript-react"],
+    extends: ["@/build-config/eslintrc-next"],
     parserOptions: {
         tsconfigRootDir: __dirname,
     },

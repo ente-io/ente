@@ -1,4 +1,5 @@
 import { Container } from "components/Container";
+import React from "react";
 import constants from "utils/strings";
 
 export default function Home() {

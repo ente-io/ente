@@ -1,5 +1,6 @@
 import type { AppProps } from "next/app";
 import Head from "next/head";
+import React from "react";
 import constants from "utils/strings";
 import "../styles/globals.css";
 
