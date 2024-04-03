@@ -10,9 +10,6 @@ module.exports = {
     parserOptions: {
         project: true,
     },
-    settings: {
-        react: { version: "18.2" },
-    },
     root: true,
     ignorePatterns: [".eslintrc.js"],
 };
