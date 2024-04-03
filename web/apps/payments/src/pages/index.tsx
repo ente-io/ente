@@ -1,7 +1,7 @@
 import { Container } from "components/Container";
 import { Spinner } from "components/Spinner";
 import * as React from "react";
-import { parseAndHandleRequest } from "services/billingService";
+import { parseAndHandleRequest } from "services/billing-service";
 import constants from "utils/strings";
 
 export default function Home() {

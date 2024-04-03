@@ -7,7 +7,6 @@
 /* eslint-disable @typescript-eslint/no-unnecessary-condition */
 
 import { loadStripe } from "@stripe/stripe-js";
-import HTTPService from "./HTTPService";
 
 /**
  * Communicate with Stripe using their JS SDK, and redirect back to the client
@@ -65,35 +64,19 @@ const isStripeAccountCountry = (c: unknown): c is StripeAccountCountry => {
 };
 
 const stripePublishableKey = (accountCountry: StripeAccountCountry) => {
-    if (accountCountry == "IN") {
-        return (
-            process.env.NEXT_PUBLIC_STRIPE_IN_PUBLISHABLE_KEY ??
-            "pk_live_51HAhqDK59oeucIMOiTI6MDDM2UWUbCAJXJCGsvjJhiO8nYJz38rQq5T4iyQLDMKxqEDUfU5Hopuj4U5U4dff23oT00fHvZeodC"
-        );
-    } else if (accountCountry == "US") {
-        return (
-            process.env.NEXT_PUBLIC_STRIPE_US_PUBLISHABLE_KEY ??
-            "pk_live_51LZ9P4G1ITnQlpAnrP6pcS7NiuJo3SnJ7gibjJlMRatkrd2EY1zlMVTVQG5RkSpLPbsHQzFfnEtgHnk1PiylIFkk00tC0LWXwi"
-        );
-    } else {
-        throw Error("stripe account not found");
+    switch (accountCountry) {
+        case "IN":
+            return (
+                process.env.NEXT_PUBLIC_STRIPE_IN_PUBLISHABLE_KEY ??
+                "pk_live_51HAhqDK59oeucIMOiTI6MDDM2UWUbCAJXJCGsvjJhiO8nYJz38rQq5T4iyQLDMKxqEDUfU5Hopuj4U5U4dff23oT00fHvZeodC"
+            );
+        case "US":
+            return (
+                process.env.NEXT_PUBLIC_STRIPE_US_PUBLISHABLE_KEY ??
+                "pk_live_51LZ9P4G1ITnQlpAnrP6pcS7NiuJo3SnJ7gibjJlMRatkrd2EY1zlMVTVQG5RkSpLPbsHQzFfnEtgHnk1PiylIFkk00tC0LWXwi"
+            );
     }
 };
-
-enum PAYMENT_INTENT_STATUS {
-    SUCCESS = "success",
-    REQUIRE_ACTION = "requires_action",
-    REQUIRE_PAYMENT_METHOD = "requires_payment_method",
-}
-
-enum STRIPE_ERROR_TYPE {
-    CARD_ERROR = "card_error",
-    AUTHENTICATION_ERROR = "authentication_error",
-}
-
-enum STRIPE_ERROR_CODE {
-    AUTHENTICATION_ERROR = "payment_intent_authentication_failure",
-}
 
 type RedirectStatus = "success" | "fail";
 
@@ -116,13 +99,6 @@ type FailureReason =
     | "stripe_error"
     | "canceled"
     | "server_error";
-
-interface SubscriptionUpdateResponse {
-    result: {
-        status: PAYMENT_INTENT_STATUS;
-        clientSecret: string;
-    };
-}
 
 /** Return the {@link StripeAccountCountry} for the user */
 const getUserStripeAccountCountry = async (
@@ -212,80 +188,102 @@ export async function updateSubscription(
     try {
         const accountCountry = await getUserStripeAccountCountry(paymentToken);
         const stripe = await getStripe(redirectURL, accountCountry);
-        const { result } = await subscriptionUpdateRequest(
+        const { status, clientSecret } = await updateStripeSubscription(
             paymentToken,
             productID,
         );
-        switch (result.status) {
-            case PAYMENT_INTENT_STATUS.SUCCESS:
-                // subscription updated successfully
-                // no-op required
-                return redirectToApp(redirectURL, RESPONSE_STATUS.success);
+        switch (status) {
+            case "success":
+                // Subscription was updated successfully, nothing more required
+                return redirectToApp(redirectURL, "success");
 
-            case PAYMENT_INTENT_STATUS.REQUIRE_PAYMENT_METHOD:
+            case "requires_payment_method":
                 return redirectToApp(
                     redirectURL,
-                    RESPONSE_STATUS.fail,
-                    FAILURE_REASON.REQUIRE_PAYMENT_METHOD,
+                    "fail",
+                    "requires_payment_method",
                 );
-            case PAYMENT_INTENT_STATUS.REQUIRE_ACTION: {
-                const { error } = await stripe.confirmCardPayment(
-                    result.clientSecret,
-                );
-                if (error) {
-                    logError(
-                        error,
-                        `${error.message} - subscription update failed`,
-                    );
-                    if (error.type === STRIPE_ERROR_TYPE.CARD_ERROR) {
+
+            case "requires_action": {
+                const { error } = await stripe.confirmCardPayment(clientSecret);
+                if (!error) {
+                    return redirectToApp(redirectURL, "success");
+                } else {
+                    console.error("Failed to confirm card payment", error);
+                    if (error.type == "card_error") {
                         return redirectToApp(
                             redirectURL,
-                            RESPONSE_STATUS.fail,
-                            FAILURE_REASON.REQUIRE_PAYMENT_METHOD,
+                            "fail",
+                            "requires_payment_method",
                         );
                     } else if (
-                        error.type === STRIPE_ERROR_TYPE.AUTHENTICATION_ERROR ||
-                        error.code === STRIPE_ERROR_CODE.AUTHENTICATION_ERROR
+                        error.type == "authentication_error" ||
+                        error.code == "payment_intent_authentication_failure"
                     ) {
                         return redirectToApp(
                             redirectURL,
-                            RESPONSE_STATUS.fail,
-                            FAILURE_REASON.AUTHENTICATION_FAILED,
+                            "fail",
+                            "authentication_failed",
                         );
                     } else {
-                        return redirectToApp(redirectURL, RESPONSE_STATUS.fail);
+                        return redirectToApp(redirectURL, "fail");
                     }
-                } else {
-                    return redirectToApp(redirectURL, RESPONSE_STATUS.success);
                 }
             }
         }
     } catch (e) {
-        logError(e, "subscription update failed");
-        redirectToApp(
-            redirectURL,
-            RESPONSE_STATUS.fail,
-            FAILURE_REASON.SERVER_ERROR,
-        );
+        console.log("Subscription update failed", e);
+        redirectToApp(redirectURL, "fail", "server_error");
         throw e;
     }
 }
 
-async function subscriptionUpdateRequest(
+type PaymentStatus = "success" | "requires_action" | "requires_payment_method";
+
+const isPaymentStatus = (s: unknown): s is PaymentStatus =>
+    s == "success" || s == "requires_action" || s == "requires_payment_method";
+
+interface UpdateStripeSubscriptionResponse {
+    status: PaymentStatus;
+    clientSecret: string;
+}
+
+/**
+ * Make a request to museum to update an existing Stript subscription with
+ * {@link productID} for the user.
+ */
+async function updateStripeSubscription(
     paymentToken: string,
     productID: string,
-): Promise<SubscriptionUpdateResponse> {
-    const response = await HTTPService.post(
-        `${getEndpoint()}/billing/stripe/update-subscription`,
-        {
-            productID,
-        },
-        undefined,
-        {
+): Promise<UpdateStripeSubscriptionResponse> {
+    const url = `${apiHost}/billing/stripe/update-subscription`;
+    const res = await fetch(url, {
+        method: "POST",
+        headers: {
             "X-Auth-Token": paymentToken,
         },
-    );
-    return response.data;
+        body: JSON.stringify({
+            productID,
+        }),
+    });
+    if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
+    const json: unknown = await res.json();
+    if (json && typeof json == "object" && "result" in json) {
+        const result = json.result;
+        if (
+            result &&
+            typeof result == "object" &&
+            "status" in result &&
+            "clientSecret" in result
+        ) {
+            const status = result.status;
+            const clientSecret = result.clientSecret;
+            if (isPaymentStatus(status) && typeof clientSecret == "string") {
+                return { status, clientSecret };
+            }
+        }
+    }
+    throw new Error(`Unexpected response for ${url}: ${JSON.stringify(json)}`);
 }
 
 const redirectToApp = (
