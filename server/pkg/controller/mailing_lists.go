@@ -217,7 +217,7 @@ func (c *ListmonkMailingListsController) Unsubscribe(email string) error {
 	if err != nil {
 		stacktrace.Propagate(err, "")
 	}
-	// API endpoint expects an array of subscriber id as paarmeter
+	// API endpoint expects an array of subscriber id as parameter
 	subscriberID := []int{id}
 
 	data := map[string]interface{}{
