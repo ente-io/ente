@@ -36,6 +36,14 @@ class ClusterFeedbackService {
   static final ClusterFeedbackService instance =
       ClusterFeedbackService._privateConstructor();
 
+  static int lastViewedClusterID = -1;
+  static setLastViewedClusterID(int clusterID) {
+    lastViewedClusterID = clusterID;
+  }
+  static resetLastViewedClusterID() {
+    lastViewedClusterID = -1;
+  }
+
   /// Returns a map of person's clusterID to map of closest clusterID to with disstance
   Future<Map<int, List<(int, double)>>> getSuggestionsUsingMean(
     Person p, {

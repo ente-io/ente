@@ -4,6 +4,7 @@ import "package:photos/face/db.dart";
 import "package:photos/face/model/face.dart";
 import "package:photos/face/model/person.dart";
 import "package:photos/models/file/file.dart";
+import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart";
 import "package:photos/ui/components/buttons/chip_button_widget.dart";
 import "package:photos/ui/components/info_item_widget.dart";
 import "package:photos/ui/viewer/file_details/face_widget.dart";
@@ -68,16 +69,21 @@ class FacesItemWidget extends StatelessWidget {
       final (clusterIDToPerson, _) =
           await FaceMLDataDB.instance.getClusterIdToPerson();
 
+      final lastViewedClusterID = ClusterFeedbackService.lastViewedClusterID;
+
       final faceWidgets = <FaceWidget>[];
       for (final Face face in faces) {
         final int? clusterID = faceIdsToClusterIds[face.faceID];
         final Person? person = clusterIDToPerson[clusterID];
+        final highlight =
+            (clusterID == lastViewedClusterID) && (person == null);
         faceWidgets.add(
           FaceWidget(
             file,
             face,
             clusterID: clusterID,
             person: person,
+            highlight: highlight,
           ),
         );
       }

@@ -11,6 +11,7 @@ import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/selected_files.dart';
+import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart";
 import "package:photos/ui/components/notification_widget.dart";
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
@@ -25,7 +26,7 @@ class ClusterPage extends StatefulWidget {
   final List<EnteFile> searchResult;
   final bool enableGrouping;
   final String tagPrefix;
-  final int cluserID;
+  final int clusterID;
   final Person? personID;
 
   static const GalleryType appBarType = GalleryType.cluster;
@@ -35,7 +36,7 @@ class ClusterPage extends StatefulWidget {
     this.searchResult, {
     this.enableGrouping = true,
     this.tagPrefix = "",
-    required this.cluserID,
+    required this.clusterID,
     this.personID,
     Key? key,
   }) : super(key: key);
@@ -52,6 +53,7 @@ class _ClusterPageState extends State<ClusterPage> {
   @override
   void initState() {
     super.initState();
+    ClusterFeedbackService.setLastViewedClusterID(widget.clusterID);
     files = widget.searchResult;
     _filesUpdatedEvent =
         Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
@@ -123,8 +125,8 @@ class _ClusterPageState extends State<ClusterPage> {
               child: NotificationWidget(
                 startIcon: Icons.person_add_outlined,
                 actionIcon: Icons.add_outlined,
-                  text: S.of(context).addAName,
-                subText:S.of(context).findPeopleByName,
+                text: S.of(context).addAName,
+                subText: S.of(context).findPeopleByName,
                 // text: S.of(context).addAName,
                 // subText: S.of(context).findPersonsByName,
                 type: NotificationType.greenBanner,
@@ -132,7 +134,7 @@ class _ClusterPageState extends State<ClusterPage> {
                   if (widget.personID == null) {
                     final result = await showAssignPersonAction(
                       context,
-                      clusterID: widget.cluserID,
+                      clusterID: widget.clusterID,
                     );
                     if (result != null && result is Person) {
                       Navigator.pop(context);
@@ -159,7 +161,7 @@ class _ClusterPageState extends State<ClusterPage> {
                 FileSelectionOverlayBar(
                   ClusterPage.overlayType,
                   _selectedFiles,
-                  clusterID: widget.cluserID,
+                  clusterID: widget.clusterID,
                 ),
               ],
             ),

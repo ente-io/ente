@@ -31,8 +31,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
   Key futureBuilderKey = UniqueKey();
 
   // Declare a variable for the future
-  late Future<List<ClusterSuggestion>>
-      futureClusterSuggestions;
+  late Future<List<ClusterSuggestion>> futureClusterSuggestions;
 
   @override
   void initState() {
@@ -74,7 +73,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
                     builder: (context) => ClusterPage(
                       files,
                       personID: widget.person,
-                      cluserID: clusterID,
+                      clusterID: clusterID,
                     ),
                   ),
                 );

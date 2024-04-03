@@ -835,7 +835,7 @@ class SearchService {
               ClusterPage(
                 files,
                 tagPrefix: "${ResultType.faces.toString()}_$clusterName",
-                cluserID: clusterId,
+                clusterID: clusterId,
               ),
             );
           },

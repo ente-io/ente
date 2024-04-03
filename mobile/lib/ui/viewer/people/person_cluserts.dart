@@ -51,7 +51,7 @@ class _PersonClustersState extends State<PersonClusters> {
                         builder: (context) => ClusterPage(
                           files,
                           personID: widget.person,
-                          cluserID: index,
+                          clusterID: index,
                         ),
                       ),
                     );
