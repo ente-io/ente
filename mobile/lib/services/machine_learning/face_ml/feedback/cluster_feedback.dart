@@ -15,6 +15,20 @@ import "package:photos/services/machine_learning/face_ml/face_clustering/linear_
 import "package:photos/services/machine_learning/face_ml/face_ml_result.dart";
 import "package:photos/services/search_service.dart";
 
+class ClusterSuggestion {
+  final int clusterIDToMerge;
+  final double distancePersonToCluster;
+  final bool usedOnlyMeanForSuggestion;
+  final List<EnteFile> filesInCluster;
+
+  ClusterSuggestion(
+    this.clusterIDToMerge,
+    this.distancePersonToCluster,
+    this.usedOnlyMeanForSuggestion,
+    this.filesInCluster,
+  );
+}
+
 class ClusterFeedbackService {
   final Logger _logger = Logger("ClusterFeedbackService");
   ClusterFeedbackService._privateConstructor();
@@ -242,7 +256,7 @@ class ClusterFeedbackService {
   /// 2. distance: the distance between the person's cluster and the suggestion
   /// 3. bool: whether the suggestion was found using the mean (true) or the median (false)
   /// 4. List<EnteFile>: the files in the cluster
-  Future<List<(int, double, bool, List<EnteFile>)>> getClusterFilesForPersonID(
+  Future<List<ClusterSuggestion>> getSuggestionForPerson(
     Person person, {
     bool extremeFilesFirst = true,
   }) async {
@@ -276,15 +290,15 @@ class ClusterFeedbackService {
         }
       }
 
-      final List<(int, double, bool, List<EnteFile>)> clusterIdAndFiles = [];
+      final List<ClusterSuggestion> clusterIdAndFiles = [];
       for (final clusterSuggestion in suggestClusterIds) {
         if (clusterIDToFiles.containsKey(clusterSuggestion.$1)) {
           clusterIdAndFiles.add(
-            (
+            ClusterSuggestion(
               clusterSuggestion.$1,
               clusterSuggestion.$2,
               clusterSuggestion.$3,
-              clusterIDToFiles[clusterSuggestion.$1]!
+              clusterIDToFiles[clusterSuggestion.$1]!,
             ),
           );
         }
@@ -596,7 +610,7 @@ class ClusterFeedbackService {
 
   Future<void> _sortSuggestionsOnDistanceToPerson(
     Person person,
-    List<(int, double, bool, List<EnteFile>)> suggestions,
+    List<ClusterSuggestion> suggestions,
   ) async {
     if (suggestions.isEmpty) {
       debugPrint('No suggestions to sort');
@@ -628,9 +642,9 @@ class ClusterFeedbackService {
 
     // Sort the suggestions based on the distance to the person
     for (final suggestion in suggestions) {
-      final clusterID = suggestion.$1;
+      final clusterID = suggestion.clusterIDToMerge;
       final faceIdToEmbeddingMap = await faceMlDb.getFaceEmbeddingMapForFile(
-        suggestion.$4.map((e) => e.uploadedFileID!).toList(),
+        suggestion.filesInCluster.map((e) => e.uploadedFileID!).toList(),
       );
       final fileIdToDistanceMap = {};
       for (final entry in faceIdToEmbeddingMap.entries) {
@@ -640,7 +654,7 @@ class ClusterFeedbackService {
           EVector.fromBuffer(entry.value).values,
         );
       }
-      suggestion.$4.sort((b, a) {
+      suggestion.filesInCluster.sort((b, a) {
         //todo: review with @laurens, added this to avoid null safety issue
         final double distanceA = fileIdToDistanceMap[a.uploadedFileID!] ?? -1;
         final double distanceB = fileIdToDistanceMap[b.uploadedFileID!] ?? -1;
@@ -648,7 +662,7 @@ class ClusterFeedbackService {
       });
 
       debugPrint(
-        "[${_logger.name}] Sorted suggestions for cluster $clusterID based on distance to person: ${suggestion.$4.map((e) => fileIdToDistanceMap[e.uploadedFileID]).toList()}",
+        "[${_logger.name}] Sorted suggestions for cluster $clusterID based on distance to person: ${suggestion.filesInCluster.map((e) => fileIdToDistanceMap[e.uploadedFileID]).toList()}",
       );
     }
 
