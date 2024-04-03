@@ -11,6 +11,7 @@ import "package:photos/face/model/person.dart";
 import "package:photos/generated/protos/ente/common/vector.pb.dart";
 import "package:photos/models/file/file.dart";
 import 'package:photos/services/machine_learning/face_ml/face_clustering/cosine_distance.dart';
+import "package:photos/services/machine_learning/face_ml/face_clustering/linear_clustering_service.dart";
 import "package:photos/services/machine_learning/face_ml/face_ml_result.dart";
 import "package:photos/services/search_service.dart";
 
@@ -363,6 +364,43 @@ class ClusterFeedbackService {
     Bus.instance.fire(PeopleChangedEvent());
 
     return true;
+  }
+
+  Future<Map<int, List<String>>> breakUpCluster(int clusterID) async {
+    final faceMlDb = FaceMLDataDB.instance;
+
+    final faceIDs = await faceMlDb.getFaceIDsForCluster(clusterID);
+    final fileIDs = faceIDs.map((e) => getFileIdFromFaceId(e)).toList();
+
+    final embeddings = await faceMlDb.getFaceEmbeddingMapForFile(fileIDs);
+    embeddings.removeWhere((key, value) => !faceIDs.contains(key));
+    final clusteringInput = embeddings.map((key, value) {
+      return MapEntry(key, (null, value));
+    });
+
+    final faceIdToCluster = await FaceLinearClustering.instance
+        .predict(clusteringInput, distanceThreshold: 0.15);
+
+    if (faceIdToCluster == null) {
+      return {};
+    }
+
+    final clusterIdToFaceIds = <int, List<String>>{};
+    for (final entry in faceIdToCluster.entries) {
+      final clusterID = entry.value;
+      if (clusterIdToFaceIds.containsKey(clusterID)) {
+        clusterIdToFaceIds[clusterID]!.add(entry.key);
+      } else {
+        clusterIdToFaceIds[clusterID] = [entry.key];
+      }
+    }
+
+    final clusterIdToCount = clusterIdToFaceIds.map((key, value) {
+      return MapEntry(key, value.length);
+    });
+    final amountOfNewClusters = clusterIdToCount.length;
+
+    return clusterIdToFaceIds;
   }
 
   Future<Map<int, List<double>>> _getUpdateClusterAvg(
