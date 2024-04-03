@@ -1203,5 +1203,12 @@
   "descriptions": "Descriptions",
   "addViewers": "{count, plural, zero {Add viewer} one {Add viewer} other {Add viewers}}",
   "addCollaborators": "{count, plural, zero {Add collaborator} one {Add collaborator} other {Add collaborators}}",
-  "longPressAnEmailToVerifyEndToEndEncryption": "Long press an email to verify end to end encryption."
+  "longPressAnEmailToVerifyEndToEndEncryption": "Long press an email to verify end to end encryption.",
+  "developerSettingsWarning": "Are you sure that you want to modify Developer settings?",
+  "developerSettings": "Developer settings",
+  "serverEndpoint": "Server endpoint",
+  "invalidEndpoint": "Invalid endpoint",
+  "invalidEndpointMessage": "Sorry, the endpoint you entered is invalid. Please enter a valid endpoint and try again.",
+  "endpointUpdatedMessage": "Endpoint updated successfully",
+  "customEndpoint": "Connected to {endpoint}"
 }

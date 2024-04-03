@@ -8473,6 +8473,76 @@ class S {
       args: [],
     );
   }
+
+  /// `Are you sure that you want to modify Developer settings?`
+  String get developerSettingsWarning {
+    return Intl.message(
+      'Are you sure that you want to modify Developer settings?',
+      name: 'developerSettingsWarning',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Developer settings`
+  String get developerSettings {
+    return Intl.message(
+      'Developer settings',
+      name: 'developerSettings',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Server endpoint`
+  String get serverEndpoint {
+    return Intl.message(
+      'Server endpoint',
+      name: 'serverEndpoint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Invalid endpoint`
+  String get invalidEndpoint {
+    return Intl.message(
+      'Invalid endpoint',
+      name: 'invalidEndpoint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Sorry, the endpoint you entered is invalid. Please enter a valid endpoint and try again.`
+  String get invalidEndpointMessage {
+    return Intl.message(
+      'Sorry, the endpoint you entered is invalid. Please enter a valid endpoint and try again.',
+      name: 'invalidEndpointMessage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Endpoint updated successfully`
+  String get endpointUpdatedMessage {
+    return Intl.message(
+      'Endpoint updated successfully',
+      name: 'endpointUpdatedMessage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Connected to {endpoint}`
+  String customEndpoint(Object endpoint) {
+    return Intl.message(
+      'Connected to $endpoint',
+      name: 'customEndpoint',
+      desc: '',
+      args: [endpoint],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
