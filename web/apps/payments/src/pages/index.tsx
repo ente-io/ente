@@ -2,7 +2,7 @@ import { Container } from "components/Container";
 import { Spinner } from "components/Spinner";
 import * as React from "react";
 import { parseAndHandleRequest } from "services/billing-service";
-import constants from "utils/strings";
+import S from "utils/strings";
 
 export default function Home() {
     const [failed, setFailed] = React.useState(false);
@@ -20,9 +20,5 @@ export default function Home() {
         main();
     }, []);
 
-    return (
-        <Container>
-            {failed ? constants.SOMETHING_WENT_WRONG : <Spinner />}
-        </Container>
-    );
+    return <Container>{failed ? S.error_generic : <Spinner />}</Container>;
 }

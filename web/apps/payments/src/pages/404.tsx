@@ -1,7 +1,7 @@
 import { Container } from "components/Container";
+import S from "utils/strings";
 import React from "react";
-import constants from "utils/strings";
 
 export default function Home() {
-    return <Container>{constants.NOT_FOUND}</Container>;
+    return <Container>{S.error_404}</Container>;
 }
