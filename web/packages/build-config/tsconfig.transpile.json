@@ -1,6 +1,5 @@
 {
     /* TSConfig for a TypeScript project that'll get transpiled by Next.js */
-
     /* TSConfig docs: https://aka.ms/tsconfig.json */
     "compilerOptions": {
         /* We use TypeScript (tsc) as a type checker, not as a build tool */
