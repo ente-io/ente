@@ -1,32 +1,15 @@
-html,
 body {
-    padding: 0;
-    margin: 0;
     font-family: system-ui, sans-serif;
-    height: 100%;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    background-color: #191919 !important;
-    color: #aaa !important;
-}
-
-:is(h1, h2, h3, h4, h5, h6) {
-    color: #d7d7d7;
-}
-
-#__next {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
+    background-color: #191919;
+    color: #aaa;
 }
 
 .container {
     display: flex;
-    flex: 1;
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    min-width: 80svh;
 }
 
 .loading-spinner {
