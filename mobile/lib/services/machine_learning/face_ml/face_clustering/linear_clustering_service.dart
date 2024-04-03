@@ -47,7 +47,7 @@ class FaceLinearClustering {
   bool isSpawned = false;
   bool isRunning = false;
 
-  static const recommendedDistanceThreshold = 0.3;
+  static const kRecommendedDistanceThreshold = 0.3;
 
   // singleton pattern
   FaceLinearClustering._privateConstructor();
@@ -102,9 +102,11 @@ class FaceLinearClustering {
             final input = args['input'] as Map<String, (int?, Uint8List)>;
             final fileIDToCreationTime =
                 args['fileIDToCreationTime'] as Map<int, int>?;
+            final distanceThreshold = args['distanceThreshold'] as double;
             final result = FaceLinearClustering._runLinearClustering(
               input,
               fileIDToCreationTime: fileIDToCreationTime,
+              distanceThreshold: distanceThreshold,
             );
             sendPort.send(result);
             break;
@@ -183,6 +185,7 @@ class FaceLinearClustering {
   Future<Map<String, int>?> predict(
     Map<String, (int?, Uint8List)> input, {
     Map<int, int>? fileIDToCreationTime,
+    double distanceThreshold = kRecommendedDistanceThreshold,
   }) async {
     if (input.isEmpty) {
       _logger.warning(
@@ -207,7 +210,7 @@ class FaceLinearClustering {
     final Map<String, int> faceIdToCluster = await _runInIsolate(
       (
         ClusterOperation.linearIncrementalClustering,
-        {'input': input, 'fileIDToCreationTime': fileIDToCreationTime}
+        {'input': input, 'fileIDToCreationTime': fileIDToCreationTime, 'distanceThreshold': distanceThreshold}
       ),
     );
     // return _runLinearClusteringInComputer(input);
@@ -223,6 +226,7 @@ class FaceLinearClustering {
   static Map<String, int> _runLinearClustering(
     Map<String, (int?, Uint8List)> x, {
     Map<int, int>? fileIDToCreationTime,
+    double distanceThreshold = kRecommendedDistanceThreshold,
   }) {
     log(
       "[ClusterIsolate] ${DateTime.now()} Copied to isolate ${x.length} faces",
@@ -332,7 +336,7 @@ class FaceLinearClustering {
         }
       }
 
-      if (closestDistance < recommendedDistanceThreshold) {
+      if (closestDistance < distanceThreshold) {
         if (sortedFaceInfos[closestIdx].clusterId == null) {
           // Ideally this should never happen, but just in case log it
           log(
