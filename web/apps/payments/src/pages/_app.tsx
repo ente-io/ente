@@ -4,7 +4,7 @@ import React from "react";
 import S from "utils/strings";
 import "../styles/globals.css";
 
-function MyApp({ Component, pageProps }: AppProps) {
+const MyApp = ({ Component, pageProps }: AppProps): React.JSX.Element => {
     return (
         <>
             <Head>
@@ -13,6 +13,6 @@ function MyApp({ Component, pageProps }: AppProps) {
             <Component {...pageProps} />
         </>
     );
-}
+};
 
 export default MyApp;
