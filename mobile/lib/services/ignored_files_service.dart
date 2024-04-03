@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:logging/logging.dart';
+import "package:photos/core/errors.dart";
 import 'package:photos/db/ignored_files_db.dart';
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/ignored_file.dart';
@@ -47,7 +48,10 @@ class IgnoredFilesService {
     return false;
   }
 
-  String? getUploadSkipReason(Map<String, String> idToReasonMap, EnteFile file) {
+  String? getUploadSkipReason(
+    Map<String, String> idToReasonMap,
+    EnteFile file,
+  ) {
     final id = _getIgnoreID(file.localID, file.deviceFolder, file.title);
     if (id != null && id.isNotEmpty) {
       return idToReasonMap[id];
@@ -100,6 +104,12 @@ class IgnoredFilesService {
     for (IgnoredFile iFile in dbResult) {
       final id = _idForIgnoredFile(iFile);
       if (id != null) {
+        if (Platform.isIOS &&
+            iFile.reason == InvalidReason.sourceFileMissing.name) {
+          // ignoreSourceFileMissing error on iOS as the file fetch from iCloud might have failed,
+          // but the file might be available later
+          continue;
+        }
         result[id] = iFile.reason;
       }
     }

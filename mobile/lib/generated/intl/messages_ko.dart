@@ -20,11 +20,18 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'ko';
 
+  static String m0(count) =>
+      "${Intl.plural(count, zero: 'Add collaborator', one: 'Add collaborator', other: 'Add collaborators')}";
+
+  static String m1(count) =>
+      "${Intl.plural(count, zero: 'Add viewer', one: 'Add viewer', other: 'Add viewers')}";
+
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
-        "addAName": MessageLookupByLibrary.simpleMessage("Add a name"),
+        "addCollaborators": m0,
         "addToHiddenAlbum":
             MessageLookupByLibrary.simpleMessage("Add to hidden album"),
+        "addViewers": m1,
         "changeLocationOfSelectedItems": MessageLookupByLibrary.simpleMessage(
             "Change location of selected items?"),
         "contacts": MessageLookupByLibrary.simpleMessage("Contacts"),
@@ -36,10 +43,11 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage(
                 "Edits to location will only be seen within Ente"),
         "fileTypes": MessageLookupByLibrary.simpleMessage("File types"),
-        "findPeopleByName": MessageLookupByLibrary.simpleMessage(
-            "Find people quickly by searching by name"),
         "joinDiscord": MessageLookupByLibrary.simpleMessage("Join Discord"),
         "locations": MessageLookupByLibrary.simpleMessage("Locations"),
+        "longPressAnEmailToVerifyEndToEndEncryption":
+            MessageLookupByLibrary.simpleMessage(
+                "Long press an email to verify end to end encryption."),
         "modifyYourQueryOrTrySearchingFor":
             MessageLookupByLibrary.simpleMessage(
                 "Modify your query, or try searching for"),

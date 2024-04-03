@@ -65,6 +65,12 @@
 # It must be specified if running in a non-local environment.
 log-file: ""
 
+# HTTP connection parameters
+http:
+    # If true, bind to 443 and use TLS.
+    # By default, this is false, and museum will bind to 8080 without TLS.
+    # use-tls: true
+
 # Database connection parameters
 db:
     host: localhost
@@ -113,10 +119,7 @@ s3:
     #
     # 1. Disable SSL.
     #
-    # 2. Use "path" style S3 URLs where the bucket is part of the URL path, e.g.
-    #    http://localhost:3200/b2-eu-cen. By default the bucket name is part of
-    #    the (sub)domain, e.g. http://b2-eu-cen.localhost:3200/ and cannot be
-    #    resolved when running locally.
+    # 2. Use "path" style S3 URLs (see `use_path_style_urls` below).
     #
     # 3. Directly download the file during replication instead of going via the
     #    Cloudflare worker.
@@ -125,6 +128,17 @@ s3:
     #    not support them, specifically it doesn't support GLACIER).
     #
     #are_local_buckets: true
+    # Uncomment this to use "path" style S3 URLs.
+    #
+    # By default the bucket name is part of the (sub)domain, e.g.
+    # http://b2-eu-cen.localhost:3200/. If this is true, then we use "path"
+    # style S3 URLs where the bucket is part of the URL path, e.g.
+    # http://localhost:3200/b2-eu-cen.
+    #
+    # This is useful in scenarios when sub-domain based addressing cannot be
+    # resolved, e.g. when running a local instance, or when using MinIO as a
+    # production store.
+    #use_path_style_urls: true
 
 # Key used for encrypting customer emails before storing them in DB
 #
@@ -143,8 +157,24 @@ key:
 jwt:
     secret: i2DecQmfGreG6q1vBj5tCokhlN41gcfS2cjOs9Po-u8=
 
+# SMTP configuration (optional)
+#
+# Configure credentials here for sending mails from museum (e.g. OTP emails).
+#
+# The smtp credentials will be used if the host is specified. Otherwise it will
+# try to use the transmail credentials. Ideally, one of smtp or transmail should
+# be configured for a production instance.
+smtp:
+    host:
+    port:
+    username:
+    password:
+
 # Zoho Zeptomail config (optional)
-# Use case: Sending emails
+#
+# This is an alternative to the `smtp` configuration for sending emails. If this
+# is set (and SMTP credentials are not set), then museum will use the transmail
+# SDK for sending emails using Zoho Zeptomail.
 transmail:
     # Transmail token
     # Mail agent: dev
@@ -174,7 +204,7 @@ stripe:
 webauthn:
     rpid: "example.com"
     rporigins:
-      - "https://example.com:3005"
+        - "https://example.com:3005"
 
 # Roadmap SSO (optional)
 #
@@ -220,13 +250,17 @@ internal:
     # If provided, this external healthcheck url is periodically pinged.
     health-check-url:
     # Hardcoded verification codes, useful for logging in when developing.
-    hardcoded-ott:
-        emails:
-            - "example@example.org,123456"
-        # When running in a local environment, hardcode the verification code to
-        # 123456 for email addresses ending with @example.org
-        local-domain-suffix: "@example.org"
-        local-domain-value: 123456
+    #
+    # Uncomment this and set these to your email ID or domain so that you don't
+    # need to peek into the server logs for obtaining the OTP when trying to log
+    # into an instance you're developing on.
+    # hardcoded-ott:
+    #     emails:
+    #         - "example@example.org,123456"
+    #     # When running in a local environment, hardcode the verification code to
+    #     # 123456 for email addresses ending with @example.org
+    #     local-domain-suffix: "@example.org"
+    #     local-domain-value: 123456
     # List of user IDs that can use the admin API endpoints.
     admins: []
 

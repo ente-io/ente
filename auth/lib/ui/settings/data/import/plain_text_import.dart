@@ -1,6 +1,6 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
-import 'dart:ui';
 
 import 'package:ente_auth/ente_theme_data.dart';
 import 'package:ente_auth/l10n/l10n.dart';
@@ -48,9 +48,7 @@ class PlainTextImport extends StatelessWidget {
       ],
     );
   }
-
 }
-
 
 Future<void> showImportInstructionDialog(BuildContext context) async {
   final l10n = context.l10n;
@@ -94,7 +92,6 @@ Future<void> showImportInstructionDialog(BuildContext context) async {
   );
 }
 
-
 Future<void> _pickImportFile(BuildContext context) async {
   final l10n = context.l10n;
   FilePickerResult? result = await FilePicker.platform.pickFiles();
@@ -108,7 +105,7 @@ Future<void> _pickImportFile(BuildContext context) async {
     final codes = await file.readAsString();
     List<String> splitCodes = codes.split(",");
     if (splitCodes.length == 1) {
-      splitCodes = codes.split("\n");
+      splitCodes = const LineSplitter().convert(codes);
     }
     final parsedCodes = [];
     for (final code in splitCodes) {

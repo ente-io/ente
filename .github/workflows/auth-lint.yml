@@ -3,13 +3,13 @@ name: "Lint (auth)"
 on:
     # Run on every push to a branch other than main that changes auth/
     push:
-        branches-ignore: [main]
+        branches-ignore: [main, "deploy/**"]
         paths:
             - "auth/**"
             - ".github/workflows/auth-lint.yml"
 
 env:
-    FLUTTER_VERSION: "3.16.9"
+    FLUTTER_VERSION: "3.19.3"
 
 jobs:
     lint:

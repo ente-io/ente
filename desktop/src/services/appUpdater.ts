@@ -2,11 +2,9 @@ import { compareVersions } from "compare-versions";
 import { app, BrowserWindow } from "electron";
 import { default as ElectronLog, default as log } from "electron-log";
 import { autoUpdater } from "electron-updater";
-import fetch from "node-fetch";
 import { setIsAppQuitting, setIsUpdateAvailable } from "../main";
-import { AppUpdateInfo, GetFeatureFlagResponse } from "../types";
-import { isPlatform } from "../utils/common/platform";
-import { logErrorSentry } from "./sentry";
+import { logErrorSentry } from "../main/log";
+import { AppUpdateInfo } from "../types/ipc";
 import {
     clearMuteUpdateNotificationVersion,
     clearSkipAppVersion,
@@ -64,56 +62,42 @@ async function checkForUpdateAndNotify(mainWindow: BrowserWindow) {
             );
             return;
         }
-        const desktopCutoffVersion = await getDesktopCutoffVersion();
+
+        let timeout: NodeJS.Timeout;
+        log.debug("attempting auto update");
+        autoUpdater.downloadUpdate();
+        const muteUpdateNotificationVersion =
+            getMuteUpdateNotificationVersion();
         if (
-            desktopCutoffVersion &&
-            isPlatform("mac") &&
-            compareVersions(
-                updateCheckResult.updateInfo.version,
-                desktopCutoffVersion,
-            ) > 0
+            muteUpdateNotificationVersion &&
+            updateCheckResult.updateInfo.version ===
+                muteUpdateNotificationVersion
         ) {
-            log.debug("auto update not possible due to key change");
+            log.info(
+                "user chose to mute update notification for version ",
+                updateCheckResult.updateInfo.version,
+            );
+            return;
+        }
+        autoUpdater.on("update-downloaded", () => {
+            timeout = setTimeout(
+                () =>
+                    showUpdateDialog(mainWindow, {
+                        autoUpdatable: true,
+                        version: updateCheckResult.updateInfo.version,
+                    }),
+                FIVE_MIN_IN_MICROSECOND,
+            );
+        });
+        autoUpdater.on("error", (error) => {
+            clearTimeout(timeout);
+            logErrorSentry(error, "auto update failed");
             showUpdateDialog(mainWindow, {
                 autoUpdatable: false,
                 version: updateCheckResult.updateInfo.version,
             });
-        } else {
-            let timeout: NodeJS.Timeout;
-            log.debug("attempting auto update");
-            autoUpdater.downloadUpdate();
-            const muteUpdateNotificationVersion =
-                getMuteUpdateNotificationVersion();
-            if (
-                muteUpdateNotificationVersion &&
-                updateCheckResult.updateInfo.version ===
-                    muteUpdateNotificationVersion
-            ) {
-                log.info(
-                    "user chose to mute update notification for version ",
-                    updateCheckResult.updateInfo.version,
-                );
-                return;
-            }
-            autoUpdater.on("update-downloaded", () => {
-                timeout = setTimeout(
-                    () =>
-                        showUpdateDialog(mainWindow, {
-                            autoUpdatable: true,
-                            version: updateCheckResult.updateInfo.version,
-                        }),
-                    FIVE_MIN_IN_MICROSECOND,
-                );
-            });
-            autoUpdater.on("error", (error) => {
-                clearTimeout(timeout);
-                logErrorSentry(error, "auto update failed");
-                showUpdateDialog(mainWindow, {
-                    autoUpdatable: false,
-                    version: updateCheckResult.updateInfo.version,
-                });
-            });
-        }
+        });
+
         setIsUpdateAvailable(true);
     } catch (e) {
         logErrorSentry(e, "checkForUpdateAndNotify failed");
@@ -126,9 +110,12 @@ export function updateAndRestart() {
     autoUpdater.quitAndInstall();
 }
 
-export function getAppVersion() {
-    return `v${app.getVersion()}`;
-}
+/**
+ * Return the version of the desktop app
+ *
+ * The return value is of the form `v1.2.3`.
+ */
+export const appVersion = () => `v${app.getVersion()}`;
 
 export function skipAppUpdate(version: string) {
     setSkipAppVersion(version);
@@ -136,18 +123,6 @@ export function skipAppUpdate(version: string) {
 
 export function muteUpdateNotification(version: string) {
     setMuteUpdateNotificationVersion(version);
-}
-
-async function getDesktopCutoffVersion() {
-    try {
-        const featureFlags = (
-            await fetch("https://static.ente.io/feature_flags.json")
-        ).json() as GetFeatureFlagResponse;
-        return featureFlags.desktopCutoffVersion;
-    } catch (e) {
-        logErrorSentry(e, "failed to get feature flags");
-        return undefined;
-    }
 }
 
 function showUpdateDialog(

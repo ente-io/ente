@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:ente_auth/core/constants.dart';
 import 'package:ente_auth/core/network.dart';
 import 'package:ente_auth/services/notification_service.dart';
+import 'package:ente_auth/utils/platform_util.dart';
 import 'package:logging/logging.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -130,7 +131,8 @@ class UpdateService {
 
   bool isIndependent() {
     return flavor == "independent" ||
-        _packageInfo.packageName.endsWith("independent");
+        _packageInfo.packageName.endsWith("independent") ||
+        PlatformUtil.isDesktop();
   }
 }
 
@@ -141,6 +143,7 @@ class LatestVersionInfo {
   final bool? shouldForceUpdate;
   final int lastSupportedVersionCode;
   final String? url;
+  final String? release;
   final int? size;
   final bool? shouldNotify;
 
@@ -151,6 +154,7 @@ class LatestVersionInfo {
     this.shouldForceUpdate,
     this.lastSupportedVersionCode,
     this.url,
+    this.release,
     this.size,
     this.shouldNotify,
   );
@@ -163,6 +167,7 @@ class LatestVersionInfo {
       map['shouldForceUpdate'],
       map['lastSupportedVersionCode'] ?? 1,
       map['url'],
+      map['release'],
       map['size'],
       map['shouldNotify'],
     );

@@ -50,7 +50,7 @@ class BillingService {
 
   Future<Response<dynamic>> _fetchPrivateBillingPlans() {
     return _dio.get(
-      _config.getHttpEndpoint() + "/billing/user-plans/",
+      "${_config.getHttpEndpoint()}/billing/user-plans/",
       options: Options(
         headers: {
           "X-Auth-Token": _config.getToken(),
@@ -60,7 +60,7 @@ class BillingService {
   }
 
   Future<Response<dynamic>> _fetchPublicBillingPlans() {
-    return _dio.get(_config.getHttpEndpoint() + "/billing/plans/v2");
+    return _dio.get("${_config.getHttpEndpoint()}/billing/plans/v2");
   }
 
   Future<Subscription> verifySubscription(
@@ -70,7 +70,7 @@ class BillingService {
   }) async {
     try {
       final response = await _dio.post(
-        _config.getHttpEndpoint() + "/billing/verify-subscription",
+        "${_config.getHttpEndpoint()}/billing/verify-subscription",
         data: {
           "paymentProvider": paymentProvider ??
               (Platform.isAndroid ? "playstore" : "appstore"),
@@ -84,7 +84,7 @@ class BillingService {
         ),
       );
       return Subscription.fromMap(response.data["subscription"]);
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       if (e.response != null && e.response!.statusCode == 409) {
         throw SubscriptionAlreadyClaimedError();
       } else {
@@ -100,7 +100,7 @@ class BillingService {
     if (_cachedSubscription == null) {
       try {
         final response = await _dio.get(
-          _config.getHttpEndpoint() + "/billing/subscription",
+          "${_config.getHttpEndpoint()}/billing/subscription",
           options: Options(
             headers: {
               "X-Auth-Token": _config.getToken(),
@@ -109,7 +109,7 @@ class BillingService {
         );
         _cachedSubscription =
             Subscription.fromMap(response.data["subscription"]);
-      } on DioError catch (e, s) {
+      } on DioException catch (e, s) {
         _logger.severe(e, s);
         rethrow;
       }
@@ -120,7 +120,7 @@ class BillingService {
   Future<Subscription> cancelStripeSubscription() async {
     try {
       final response = await _dio.post(
-        _config.getHttpEndpoint() + "/billing/stripe/cancel-subscription",
+        "${_config.getHttpEndpoint()}/billing/stripe/cancel-subscription",
         options: Options(
           headers: {
             "X-Auth-Token": _config.getToken(),
@@ -129,7 +129,7 @@ class BillingService {
       );
       final subscription = Subscription.fromMap(response.data["subscription"]);
       return subscription;
-    } on DioError catch (e, s) {
+    } on DioException catch (e, s) {
       _logger.severe(e, s);
       rethrow;
     }
@@ -138,7 +138,7 @@ class BillingService {
   Future<Subscription> activateStripeSubscription() async {
     try {
       final response = await _dio.post(
-        _config.getHttpEndpoint() + "/billing/stripe/activate-subscription",
+        "${_config.getHttpEndpoint()}/billing/stripe/activate-subscription",
         options: Options(
           headers: {
             "X-Auth-Token": _config.getToken(),
@@ -147,7 +147,7 @@ class BillingService {
       );
       final subscription = Subscription.fromMap(response.data["subscription"]);
       return subscription;
-    } on DioError catch (e, s) {
+    } on DioException catch (e, s) {
       _logger.severe(e, s);
       rethrow;
     }
@@ -158,7 +158,7 @@ class BillingService {
   }) async {
     try {
       final response = await _dio.get(
-        _config.getHttpEndpoint() + "/billing/stripe/customer-portal",
+        "${_config.getHttpEndpoint()}/billing/stripe/customer-portal",
         queryParameters: {
           "redirectURL": kWebPaymentRedirectUrl,
         },
@@ -169,7 +169,7 @@ class BillingService {
         ),
       );
       return response.data["url"];
-    } on DioError catch (e, s) {
+    } on DioException catch (e, s) {
       _logger.severe(e, s);
       rethrow;
     }

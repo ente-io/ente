@@ -1,15 +1,21 @@
+import 'dart:io';
+
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/ui/tools/app_lock.dart';
 import 'package:ente_auth/utils/auth_util.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/toast_util.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_local_authentication/flutter_local_authentication.dart';
 import 'package:local_auth/local_auth.dart';
+import 'package:logging/logging.dart';
 
 class LocalAuthenticationService {
   LocalAuthenticationService._privateConstructor();
   static final LocalAuthenticationService instance =
       LocalAuthenticationService._privateConstructor();
+  final logger = Logger((LocalAuthenticationService).toString());
 
   Future<bool> requestLocalAuthentication(
     BuildContext context,
@@ -38,7 +44,7 @@ class LocalAuthenticationService {
     String errorDialogContent, [
     String errorDialogTitle = "",
   ]) async {
-    if (await LocalAuthentication().isDeviceSupported()) {
+    if (await _isLocalAuthSupportedOnDevice()) {
       AppLock.of(context)!.disable();
       final result = await requestAuthentication(
         context,
@@ -65,6 +71,12 @@ class LocalAuthenticationService {
   }
 
   Future<bool> _isLocalAuthSupportedOnDevice() async {
-    return await LocalAuthentication().isDeviceSupported();
+    try {
+      return Platform.isMacOS || Platform.isLinux
+          ? await FlutterLocalAuthentication().canAuthenticate()
+          : await LocalAuthentication().isDeviceSupported();
+    } on MissingPluginException {
+      return false;
+    }
   }
 }

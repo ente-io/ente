@@ -6,7 +6,6 @@ import "package:logging/logging.dart";
 import "package:photos/core/errors.dart";
 
 import "package:photos/core/event_bus.dart";
-import "package:photos/core/network/network.dart";
 import "package:photos/events/event.dart";
 import "package:photos/services/remote_assets_service.dart";
 
@@ -17,9 +16,9 @@ abstract class MLFramework {
   static final _logger = Logger("MLFramework");
 
   final bool shouldDownloadOverMobileData;
+  final _initializationCompleter = Completer<void>();
 
   InitializationState _state = InitializationState.notInitialized;
-  final _initializationCompleter = Completer<void>();
 
   MLFramework(this.shouldDownloadOverMobileData) {
     Connectivity()
@@ -65,6 +64,7 @@ abstract class MLFramework {
   /// instead of a CDN.
   Future<void> init() async {
     try {
+      _initState = InitializationState.initializing;
       await Future.wait([_initImageModel(), _initTextModel()]);
     } catch (e, s) {
       _logger.warning(e, s);
@@ -102,41 +102,32 @@ abstract class MLFramework {
     if (!kImageEncoderEnabled) {
       return;
     }
-    _initState = InitializationState.initializingImageModel;
-    final imageModel =
-        await RemoteAssetsService.instance.getAsset(getImageModelRemotePath());
+    final imageModel = await _getModel(getImageModelRemotePath());
     await loadImageModel(imageModel.path);
-    _initState = InitializationState.initializedImageModel;
   }
 
   Future<void> _initTextModel() async {
-    _initState = InitializationState.initializingTextModel;
-    final textModel =
-        await RemoteAssetsService.instance.getAsset(getTextModelRemotePath());
+    final textModel = await _getModel(getTextModelRemotePath());
     await loadTextModel(textModel.path);
-    _initState = InitializationState.initializedTextModel;
   }
 
-  Future<void> _downloadFile(
-    String url,
-    String savePath, {
+  Future<File> _getModel(
+    String url, {
     int trialCount = 1,
   }) async {
+    if (await RemoteAssetsService.instance.hasAsset(url)) {
+      return RemoteAssetsService.instance.getAsset(url);
+    }
     if (!await _canDownload()) {
       _initState = InitializationState.waitingForNetwork;
       throw WiFiUnavailableError();
     }
-    _logger.info("Downloading " + url);
-    final existingFile = File(savePath);
-    if (await existingFile.exists()) {
-      await existingFile.delete();
-    }
     try {
-      await NetworkClient.instance.getDio().download(url, savePath);
+      return RemoteAssetsService.instance.getAsset(url);
     } catch (e, s) {
       _logger.severe(e, s);
       if (trialCount < kMaximumRetrials) {
-        return _downloadFile(url, savePath, trialCount: trialCount + 1);
+        return _getModel(url, trialCount: trialCount + 1);
       } else {
         rethrow;
       }
@@ -159,9 +150,6 @@ class MLFrameworkInitializationUpdateEvent extends Event {
 enum InitializationState {
   notInitialized,
   waitingForNetwork,
-  initializingImageModel,
-  initializedImageModel,
-  initializingTextModel,
-  initializedTextModel,
+  initializing,
   initialized,
 }

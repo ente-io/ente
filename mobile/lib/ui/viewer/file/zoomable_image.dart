@@ -1,8 +1,9 @@
 import 'dart:async';
-import 'dart:io' as io;
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import "package:flutter_image_compress/flutter_image_compress.dart";
 import 'package:logging/logging.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photos/core/cache/thumbnail_in_memory_cache.dart';
@@ -50,6 +51,7 @@ class _ZoomableImageState extends State<ZoomableImage> {
   bool _loadedLargeThumbnail = false;
   bool _loadingFinalImage = false;
   bool _loadedFinalImage = false;
+  bool _convertToSupportedFormat = false;
   ValueChanged<PhotoViewScaleState>? _scaleStateChangedCallback;
   bool _isZooming = false;
   PhotoViewController _photoViewController = PhotoViewController();
@@ -57,6 +59,7 @@ class _ZoomableImageState extends State<ZoomableImage> {
 
   @override
   void initState() {
+    super.initState();
     _photo = widget.photo;
     _logger = Logger("ZoomableImage");
     _logger.info('initState for ${_photo.generatedID} with tag ${_photo.tag}');
@@ -68,7 +71,6 @@ class _ZoomableImageState extends State<ZoomableImage> {
       debugPrint("isZooming = $_isZooming, currentState $value");
       // _logger.info('is reakky zooming $_isZooming with state $value');
     };
-    super.initState();
   }
 
   @override
@@ -133,7 +135,9 @@ class _ZoomableImageState extends State<ZoomableImage> {
                 height: screenRelativeImageHeight,
                 child: Hero(
                   tag: widget.tagPrefix! + _photo.tag,
-                  child: const EnteLoadingWidget(),
+                  child: const EnteLoadingWidget(
+                    color: Colors.white,
+                  ),
                 ),
               ),
             );
@@ -141,7 +145,9 @@ class _ZoomableImageState extends State<ZoomableImage> {
         ),
       );
     } else {
-      content = const EnteLoadingWidget();
+      content = const EnteLoadingWidget(
+        color: Colors.white,
+      );
     }
 
     final GestureDragUpdateCallback? verticalDragCallback = _isZooming
@@ -194,11 +200,8 @@ class _ZoomableImageState extends State<ZoomableImage> {
       _loadingFinalImage = true;
       getFileFromServer(_photo).then((file) {
         if (file != null) {
-          _onFinalImageLoaded(
-            Image.file(
-              file,
-              gaplessPlayback: true,
-            ).image,
+          _onFileLoaded(
+            file,
           );
         } else {
           _loadingFinalImage = false;
@@ -235,11 +238,13 @@ class _ZoomableImageState extends State<ZoomableImage> {
       _loadingFinalImage = true;
       getFile(
         _photo,
-        isOrigin: io.Platform.isIOS &&
+        isOrigin: Platform.isIOS &&
             _isGIF(), // since on iOS GIFs playback only when origin-files are loaded
       ).then((file) {
         if (file != null && file.existsSync()) {
-          _onFinalImageLoaded(Image.file(file).image);
+          _onFileLoaded(
+            file,
+          );
         } else {
           _logger.info("File was deleted " + _photo.toString());
           if (_photo.uploadedFileID != null) {
@@ -277,41 +282,43 @@ class _ZoomableImageState extends State<ZoomableImage> {
     }
   }
 
-  void _onFinalImageLoaded(ImageProvider imageProvider) async {
-    // // final result = await FaceMlService.instance.analyzeImage(
-    // //   _photo,
-    // //   preferUsingThumbnailForEverything: false,
-    // //   disposeImageIsolateAfterUse: false,
-    // // );
-    // // _logger.info("FaceMlService result: $result");
-    // // _logger.info("Number of faces detected: ${result.faces.length}");
-    // // _logger.info("Box: ${result.faces[0].detection.box}");
-    // // _logger.info("Landmarks: ${result.faces[0].detection.allKeypoints}");
-    // // final embedding = result.faces[0].embedding;
-    // // Calculate the magnitude of the embedding vector
-    // double sum = 0;
-    // for (final double value in embedding) {
-    //   sum += value * value;
-    // }
-    // final magnitude = math.sqrt(sum);
-    // log("Magnitude: $magnitude");
-    // log("Embedding: $embedding");
+  void _onFileLoaded(File file) {
+    final imageProvider = Image.file(
+      file,
+      gaplessPlayback: true,
+    ).image;
+
     if (mounted) {
-      // ignore: unawaited_futures
-      precacheImage(imageProvider, context).then((value) async {
-        if (mounted) {
-          await _updatePhotoViewController(
-            previewImageProvider: _imageProvider,
-            finalImageProvider: imageProvider,
-          );
-          setState(() {
-            _imageProvider = imageProvider;
-            _loadedFinalImage = true;
-            _logger.info("Final image loaded");
-          });
+      precacheImage(
+        imageProvider,
+        context,
+        onError: (exception, _) async {
+          _logger
+              .info(exception.toString() + ". Filename: ${_photo.displayName}");
+          if (exception.toString().contains(
+                "Codec failed to produce an image, possibly due to invalid image data",
+              )) {
+            unawaited(_loadInSupportedFormat(file));
+          }
+        },
+      ).then((value) {
+        if (mounted && !_loadedFinalImage && !_convertToSupportedFormat) {
+          _updateViewWithFinalImage(imageProvider);
         }
       });
     }
+  }
+
+  Future<void> _updateViewWithFinalImage(ImageProvider imageProvider) async {
+    await _updatePhotoViewController(
+      previewImageProvider: _imageProvider,
+      finalImageProvider: imageProvider,
+    );
+    setState(() {
+      _imageProvider = imageProvider;
+      _loadedFinalImage = true;
+      _logger.info("Final image loaded");
+    });
   }
 
   Future<void> _updatePhotoViewController({
@@ -367,4 +374,28 @@ class _ZoomableImageState extends State<ZoomableImage> {
   }
 
   bool _isGIF() => _photo.displayName.toLowerCase().endsWith(".gif");
+
+  Future<void> _loadInSupportedFormat(File file) async {
+    _logger.info("Compressing ${_photo.displayName} to viewable format");
+    _convertToSupportedFormat = true;
+
+    final compressedFile =
+        await FlutterImageCompress.compressWithFile(file.path);
+
+    if (compressedFile != null) {
+      final imageProvider = MemoryImage(compressedFile);
+
+      unawaited(
+        precacheImage(imageProvider, context).then((value) {
+          if (mounted) {
+            _updateViewWithFinalImage(imageProvider);
+          }
+        }),
+      );
+    } else {
+      _logger.severe(
+        "Failed to compress image ${_photo.displayName} to viewable format",
+      );
+    }
+  }
 }

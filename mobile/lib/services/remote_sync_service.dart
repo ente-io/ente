@@ -170,7 +170,8 @@ class RemoteSyncService {
           e is NoActiveSubscriptionError ||
           e is WiFiUnavailableError ||
           e is StorageLimitExceededError ||
-          e is SyncStopRequestedError) {
+          e is SyncStopRequestedError ||
+          e is NoMediaLocationAccessError) {
         _logger.warning("Error executing remote sync", e, s);
         rethrow;
       } else {
@@ -555,6 +556,7 @@ class RemoteSyncService {
     final int toBeUploaded = filesToBeUploaded.length + updatedFileIDs.length;
     if (toBeUploaded > 0) {
       Bus.instance.fire(SyncStatusUpdate(SyncStatus.preparingForUpload));
+      await _uploader.verifyMediaLocationAccess();
       await _uploader.checkNetworkForUpload();
       // verify if files upload is allowed based on their subscription plan and
       // storage limit. To avoid creating new endpoint, we are using

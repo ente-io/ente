@@ -15,9 +15,8 @@ import 'package:ente_auth/models/authenticator/entity_result.dart';
 import 'package:ente_auth/models/authenticator/local_auth_entity.dart';
 import 'package:ente_auth/store/authenticator_db.dart';
 import 'package:ente_auth/store/offline_authenticator_db.dart';
-import 'package:ente_auth/utils/crypto_util.dart';
+import 'package:ente_crypto_dart/ente_crypto_dart.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -75,10 +74,10 @@ class AuthenticatorService {
     final key = await getOrCreateAuthDataKey(mode);
     for (LocalAuthEntity e in result) {
       try {
-        final decryptedValue = await CryptoUtil.decryptChaCha(
-          Sodium.base642bin(e.encryptedData),
+        final decryptedValue = await CryptoUtil.decryptData(
+          CryptoUtil.base642bin(e.encryptedData),
           key,
-          Sodium.base642bin(e.header),
+          CryptoUtil.base642bin(e.header),
         );
         final hasSynced = !(e.id == null || e.shouldSync);
         entities.add(
@@ -101,12 +100,13 @@ class AuthenticatorService {
     AccountMode accountMode,
   ) async {
     var key = await getOrCreateAuthDataKey(accountMode);
-    final encryptedKeyData = await CryptoUtil.encryptChaCha(
-      utf8.encode(plainText) as Uint8List,
+    final encryptedKeyData = await CryptoUtil.encryptData(
+      utf8.encode(plainText),
       key,
     );
-    String encryptedData = Sodium.bin2base64(encryptedKeyData.encryptedData!);
-    String header = Sodium.bin2base64(encryptedKeyData.header!);
+    String encryptedData =
+        CryptoUtil.bin2base64(encryptedKeyData.encryptedData!);
+    String header = CryptoUtil.bin2base64(encryptedKeyData.header!);
     final insertedID = accountMode.isOnline
         ? await _db.insert(encryptedData, header)
         : await _offlineDb.insert(encryptedData, header);
@@ -123,12 +123,13 @@ class AuthenticatorService {
     AccountMode accountMode,
   ) async {
     var key = await getOrCreateAuthDataKey(accountMode);
-    final encryptedKeyData = await CryptoUtil.encryptChaCha(
-      utf8.encode(plainText) as Uint8List,
+    final encryptedKeyData = await CryptoUtil.encryptData(
+      utf8.encode(plainText),
       key,
     );
-    String encryptedData = Sodium.bin2base64(encryptedKeyData.encryptedData!);
-    String header = Sodium.bin2base64(encryptedKeyData.header!);
+    String encryptedData =
+        CryptoUtil.bin2base64(encryptedKeyData.encryptedData!);
+    String header = CryptoUtil.bin2base64(encryptedKeyData.header!);
     final int affectedRows = accountMode.isOnline
         ? await _db.updateEntry(generatedID, encryptedData, header)
         : await _offlineDb.updateEntry(generatedID, encryptedData, header);
@@ -191,25 +192,25 @@ class AuthenticatorService {
   Future<void> _remoteToLocalSync() async {
     _logger.info('Initiating remote to local sync');
     final int lastSyncTime = _prefs.getInt(_lastEntitySyncTime) ?? 0;
-    _logger.info("Current sync is " + lastSyncTime.toString());
+    _logger.info("Current sync is $lastSyncTime");
     const int fetchLimit = 500;
     final List<AuthEntity> result =
         await _gateway.getDiff(lastSyncTime, limit: fetchLimit);
-    _logger.info(result.length.toString() + " entries fetched from remote");
+    _logger.info("${result.length} entries fetched from remote");
     if (result.isEmpty) {
       return;
     }
     final maxSyncTime = result.map((e) => e.updatedAt).reduce(max);
     List<String> deletedIDs =
         result.where((element) => element.isDeleted).map((e) => e.id).toList();
-    _logger.info(deletedIDs.length.toString() + " entries deleted");
+    _logger.info("${deletedIDs.length} entries deleted");
     result.removeWhere((element) => element.isDeleted);
     await _db.insertOrReplace(result);
     if (deletedIDs.isNotEmpty) {
       await _db.deleteByIDs(ids: deletedIDs);
     }
     await _prefs.setInt(_lastEntitySyncTime, maxSyncTime);
-    _logger.info("Setting synctime to " + maxSyncTime.toString());
+    _logger.info("Setting synctime to $maxSyncTime");
     if (result.length == fetchLimit) {
       _logger.info("Diff limit reached, pulling again");
       await _remoteToLocalSync();
@@ -223,7 +224,7 @@ class AuthenticatorService {
         .where((element) => element.shouldSync || element.id == null)
         .toList();
     _logger.info(
-      pendingUpdate.length.toString() + " entries to be updated at remote",
+      "${pendingUpdate.length} entries to be updated at remote",
     );
     for (LocalAuthEntity entity in pendingUpdate) {
       if (entity.id == null) {
@@ -262,21 +263,21 @@ class AuthenticatorService {
     try {
       final AuthKey response = await _gateway.getKey();
       final authKey = CryptoUtil.decryptSync(
-        Sodium.base642bin(response.encryptedKey),
+        CryptoUtil.base642bin(response.encryptedKey),
         _config.getKey()!,
-        Sodium.base642bin(response.header),
+        CryptoUtil.base642bin(response.header),
       );
-      await _config.setAuthSecretKey(Sodium.bin2base64(authKey));
+      await _config.setAuthSecretKey(CryptoUtil.bin2base64(authKey));
       return authKey;
     } on AuthenticatorKeyNotFound catch (e) {
       _logger.info("AuthenticatorKeyNotFound generating key ${e.stackTrace}");
       final key = CryptoUtil.generateKey();
       final encryptedKeyData = CryptoUtil.encryptSync(key, _config.getKey()!);
       await _gateway.createKey(
-        Sodium.bin2base64(encryptedKeyData.encryptedData!),
-        Sodium.bin2base64(encryptedKeyData.nonce!),
+        CryptoUtil.bin2base64(encryptedKeyData.encryptedData!),
+        CryptoUtil.bin2base64(encryptedKeyData.nonce!),
       );
-      await _config.setAuthSecretKey(Sodium.bin2base64(key));
+      await _config.setAuthSecretKey(CryptoUtil.bin2base64(key));
       return key;
     } catch (e, s) {
       _logger.severe("Failed to getOrCreateAuthDataKey", e, s);

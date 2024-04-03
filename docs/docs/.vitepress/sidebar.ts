@@ -12,14 +12,31 @@ export const sidebar = [
                 items: [
                     { text: "Albums", link: "/photos/features/albums" },
                     { text: "Archiving", link: "/photos/features/archive" },
+                    {
+                        text: "Background sync",
+                        link: "/photos/features/background",
+                    },
+                    { text: "Backup", link: "/photos/features/backup" },
                     { text: "Cast", link: "/photos/features/cast/" },
+                    {
+                        text: "Collaboration",
+                        link: "/photos/features/collaborate",
+                    },
                     {
                         text: "Collecting photos",
                         link: "/photos/features/collect",
                     },
                     {
+                        text: "Deduplicate",
+                        link: "/photos/features/deduplicate",
+                    },
+                    {
                         text: "Family plans",
                         link: "/photos/features/family-plans",
+                    },
+                    {
+                        text: "Free up space",
+                        link: "/photos/features/free-up-space/",
                     },
                     { text: "Hidden photos", link: "/photos/features/hide" },
                     {
@@ -32,20 +49,76 @@ export const sidebar = [
                         link: "/photos/features/public-link",
                     },
                     { text: "Quick link", link: "/photos/features/quick-link" },
-                    { text: "Referrals", link: "/photos/features/referrals" },
-                    { text: "Sharing", link: "/photos/features/sharing" },
+                    {
+                        text: "Referral program",
+                        link: "/photos/features/referral-program/",
+                    },
+                    { text: "Sharing", link: "/photos/features/share" },
                     { text: "Trash", link: "/photos/features/trash" },
                     {
                         text: "Uncategorized",
                         link: "/photos/features/uncategorized",
                     },
                     {
-                        text: "Watch folder",
-                        link: "/photos/features/watch-folder",
+                        text: "Watch folders",
+                        link: "/photos/features/watch-folders",
                     },
                 ],
             },
-            { text: "FAQ", link: "/photos/faq/" },
+            {
+                text: "Migration",
+                collapsed: true,
+                items: [
+                    {
+                        text: "Introduction",
+                        link: "/photos/migration/",
+                    },
+
+                    {
+                        text: "From Google Photos",
+                        link: "/photos/migration/from-google-photos/",
+                    },
+                    {
+                        text: "From Apple Photos",
+                        link: "/photos/migration/from-apple-photos/",
+                    },
+                    {
+                        text: "From Amazon Photos",
+                        link: "/photos/migration/from-amazon-photos",
+                    },
+                    {
+                        text: "From your hard disk",
+                        link: "/photos/migration/from-local-hard-disk",
+                    },
+                    {
+                        text: "Exporting your data",
+                        link: "/photos/migration/export/",
+                    },
+                ],
+            },
+            {
+                text: "FAQ",
+                collapsed: true,
+                items: [
+                    { text: "General", link: "/photos/faq/general" },
+                    {
+                        text: "Export",
+                        link: "/photos/faq/export",
+                    },
+                    {
+                        text: "Security and privacy",
+                        link: "/photos/faq/security-and-privacy",
+                    },
+                    {
+                        text: "Subscription and plans",
+                        link: "/photos/faq/subscription",
+                    },
+                    {
+                        text: "Hide vs archive",
+                        link: "/photos/faq/hidden-and-archive",
+                    },
+                ],
+            },
             {
                 text: "Troubleshooting",
                 collapsed: true,
@@ -68,8 +141,8 @@ export const sidebar = [
             { text: "Introduction", link: "/auth/" },
             { text: "FAQ", link: "/auth/faq/" },
             {
-                text: "Migration guides",
-                collapsed: false,
+                text: "Migration",
+                collapsed: true,
                 items: [
                     { text: "Introduction", link: "/auth/migration-guides/" },
                     {
@@ -119,13 +192,10 @@ export const sidebar = [
             {
                 text: "FAQ",
                 items: [
+                    { text: "General", link: "/self-hosting/faq/" },
                     {
                         text: "Verification code",
                         link: "/self-hosting/faq/otp",
-                    },
-                    {
-                        text: "Increase storage space",
-                        link: "/self-hosting/faq/storage-space",
                     },
                 ],
             },
@@ -185,7 +255,7 @@ function sidebarOld() {
                         },
                         {
                             text: "Watch folder",
-                            link: "/photos/features/watch-folder",
+                            link: "/photos/features/watch-folders",
                         },
                         { text: "Trash", link: "/photos/features/trash" },
                         {

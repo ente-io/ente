@@ -1,23 +1,8 @@
-import { WorkerSafeElectronService } from "@ente/shared/electron/service";
-import { runningInElectron } from "@ente/shared/platform";
 import { LimitedCacheStorage } from "./types";
+
 class cacheStorageFactory {
     getCacheStorage(): LimitedCacheStorage {
-        if (runningInElectron()) {
-            return {
-                open(cacheName, cacheLimitInBytes?: number) {
-                    return WorkerSafeElectronService.openDiskCache(
-                        cacheName,
-                        cacheLimitInBytes,
-                    );
-                },
-                delete(cacheName) {
-                    return WorkerSafeElectronService.deleteDiskCache(cacheName);
-                },
-            };
-        } else {
-            return transformBrowserCacheStorageToLimitedCacheStorage(caches);
-        }
+        return transformBrowserCacheStorageToLimitedCacheStorage(caches);
     }
 }
 

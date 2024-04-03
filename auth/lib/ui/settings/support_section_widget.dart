@@ -12,7 +12,7 @@ import 'package:logging/logging.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 class SupportSectionWidget extends StatefulWidget {
-  const SupportSectionWidget({Key? key}) : super(key: key);
+  const SupportSectionWidget({super.key});
 
   @override
   State<SupportSectionWidget> createState() => _SupportSectionWidgetState();
@@ -64,7 +64,7 @@ class _SupportSectionWidgetState extends State<SupportSectionWidget> {
           onTap: () async {
             // ignore: unawaited_futures
             launchUrlString(
-              githubDiscussionsUrl,
+              githubIssuesUrl,
               mode: LaunchMode.externalApplication,
             );
           },

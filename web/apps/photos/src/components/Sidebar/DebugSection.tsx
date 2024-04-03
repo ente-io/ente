@@ -24,7 +24,7 @@ export default function DebugSection() {
     useEffect(() => {
         const main = async () => {
             if (isElectron()) {
-                const appVersion = await ElectronAPIs.getAppVersion();
+                const appVersion = await ElectronAPIs.appVersion();
                 setAppVersion(appVersion);
             }
         };

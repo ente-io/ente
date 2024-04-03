@@ -87,7 +87,7 @@ class IconUtils {
   Color? _getAdaptiveColor(String? hexColor, BuildContext context) {
     if (hexColor == null) return null;
     final theme = Theme.of(context).brightness;
-    final color = Color(int.parse("0xFF" + hexColor));
+    final color = Color(int.parse("0xFF$hexColor"));
     // Color is close to neutral-grey and it's too light or dark for theme
     if (_isCloseToNeutralGrey(color) &&
         ((theme == Brightness.light && _getColorLuminance(color) > 0.70) ||

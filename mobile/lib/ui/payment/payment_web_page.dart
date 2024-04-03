@@ -5,14 +5,15 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:logging/logging.dart';
+import "package:photos/core/constants.dart";
 import 'package:photos/ente_theme_data.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/subscription.dart';
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/common/loading_widget.dart';
-import 'package:photos/ui/common/progress_dialog.dart';
 import 'package:photos/utils/dialog_util.dart';
+import "package:photos/utils/email_util.dart";
 
 class PaymentWebPage extends StatefulWidget {
   final String? planId;
@@ -30,7 +31,6 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
   final UserService userService = UserService.instance;
   final BillingService billingService = BillingService.instance;
   final String basePaymentUrl = kWebPaymentBaseEndpoint;
-  late ProgressDialog _dialog;
   InAppWebViewController? webView;
   double progress = 0;
   Uri? initPaymentUrl;
@@ -49,11 +49,6 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
 
   @override
   Widget build(BuildContext context) {
-    _dialog = createProgressDialog(
-      context,
-      S.of(context).pleaseWait,
-      isDismissible: true,
-    );
     if (initPaymentUrl == null) {
       return const EnteLoadingWidget();
     }
@@ -93,27 +88,20 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
                   return NavigationActionPolicy.ALLOW;
                 },
                 onConsoleMessage: (controller, consoleMessage) {
-                  _logger.info(consoleMessage);
+                  _logger.info("onConsoleMessage $consoleMessage");
                 },
                 onLoadStart: (controller, navigationAction) async {
-                  if (!_dialog.isShowing()) {
-                    await _dialog.show();
-                  }
+                  _logger.info("onLoadStart $navigationAction");
                 },
                 onLoadError: (controller, navigationAction, code, msg) async {
-                  if (_dialog.isShowing()) {
-                    await _dialog.hide();
-                  }
+                  _logger.severe("onLoadError $navigationAction $code $msg");
                 },
                 onLoadHttpError:
                     (controller, navigationAction, code, msg) async {
                   _logger.info("onHttpError with $code and msg = $msg");
                 },
                 onLoadStop: (controller, navigationAction) async {
-                  _logger.info("loadStart" + navigationAction.toString());
-                  if (_dialog.isShowing()) {
-                    await _dialog.hide();
-                  }
+                  _logger.info("onLoadStop $navigationAction");
                 },
               ),
             ),
@@ -125,7 +113,6 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
 
   @override
   void dispose() {
-    _dialog.hide();
     super.dispose();
   }
 
@@ -207,12 +194,17 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
       barrierDismissible: false,
       builder: (context) => AlertDialog(
         title: Text(S.of(context).paymentFailed),
-        content: Text(S.of(context).paymentFailedWithReason(reason)),
+        content: Text(S.of(context).paymentFailedMessage),
         actions: <Widget>[
           TextButton(
-            child: Text(S.of(context).ok),
-            onPressed: () {
+            child: Text(S.of(context).contactSupport),
+            onPressed: () async {
               Navigator.of(context).pop('dialog');
+              await sendEmail(
+                context,
+                to: supportEmail,
+                subject: "Billing issue",
+              );
             },
           ),
         ],
@@ -224,7 +216,6 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
   // return true if verifySubscription didn't throw any exceptions
   Future<void> _handlePaymentSuccess(Map<String, String> queryParams) async {
     final checkoutSessionID = queryParams['session_id'] ?? '';
-    await _dialog.show();
     try {
       // ignore: unused_local_variable
       final response = await billingService.verifySubscription(
@@ -232,7 +223,6 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
         checkoutSessionID,
         paymentProvider: stripe,
       );
-      await _dialog.hide();
       final content = widget.actionType == 'buy'
           ? S.of(context).yourPurchaseWasSuccessful
           : S.of(context).yourSubscriptionWasUpdatedSuccessfully;
@@ -242,7 +232,6 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
       );
     } catch (error) {
       _logger.severe(error);
-      await _dialog.hide();
       await _showExitPageDialog(
         title: S.of(context).failedToVerifyPaymentStatus,
         content: S.of(context).pleaseWaitForSometimeBeforeRetrying,

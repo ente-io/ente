@@ -3,10 +3,19 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
+  desktop_webview_window
   file_saver
+  flutter_local_authentication
   flutter_secure_storage_linux
+  gtk
+  screen_retriever
   sentry_flutter
+  smart_auth
+  sodium_libs
+  sqlite3_flutter_libs
+  tray_manager
   url_launcher_linux
+  window_manager
 )
 
 list(APPEND FLUTTER_FFI_PLUGIN_LIST

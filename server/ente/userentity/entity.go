@@ -8,6 +8,7 @@ type EntityType string
 
 const (
 	Location EntityType = "location"
+	Person   EntityType = "person"
 )
 
 type EntityKey struct {
