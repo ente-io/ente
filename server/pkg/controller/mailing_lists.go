@@ -225,7 +225,7 @@ func (c *MailingListsController) listmonkUnsubscribe(email string) error {
 
 	data := map[string]interface{}{
 		"ids":             subscriberID,
-		"action":          "unsubscribe",
+		"action":          "remove",
 		"target_list_ids": c.listmonkListIDs,
 	}
 
