@@ -170,13 +170,9 @@ We just have to decode the base64 fields back into `Uint8Array`.
 const options = response.options;
 
 options.publicKey.challenge = _sodium.from_base64(
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
     options.publicKey.challenge,
 );
 options.publicKey.user.id = _sodium.from_base64(
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
     options.publicKey.user.id,
 );
 ```
@@ -195,14 +191,10 @@ The browser returns the newly created credential with a bunch of binary fields, 
 
 ```ts
 const attestationObjectB64 = _sodium.to_base64(
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore
 	new Uint8Array(credential.response.attestationObject),
 	_sodium.base64_variants.URLSAFE_NO_PADDING
 );
 const clientDataJSONB64 = _sodium.to_base64(
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore
 	new Uint8Array(credential.response.clientDataJSON),
 	_sodium.base64_variants.URLSAFE_NO_PADDING
 ```
@@ -381,26 +373,18 @@ Before sending the public key and signature to the server, their outputs must be
 
 ```ts
 authenticatorData: _sodium.to_base64(
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
     new Uint8Array(credential.response.authenticatorData),
     _sodium.base64_variants.URLSAFE_NO_PADDING
 ),
 clientDataJSON: _sodium.to_base64(
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
     new Uint8Array(credential.response.clientDataJSON),
     _sodium.base64_variants.URLSAFE_NO_PADDING
 ),
 signature: _sodium.to_base64(
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
     new Uint8Array(credential.response.signature),
     _sodium.base64_variants.URLSAFE_NO_PADDING
 ),
 userHandle: _sodium.to_base64(
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
     new Uint8Array(credential.response.userHandle),
     _sodium.base64_variants.URLSAFE_NO_PADDING
 ),
