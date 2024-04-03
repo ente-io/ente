@@ -6,4 +6,3 @@ A base package for our UI layer code, for sharing ode between our Next.js apps.
 
 This (internal) package exports a React TypeScript library. We rely on the
 importing project to transpile and bundle it.
-

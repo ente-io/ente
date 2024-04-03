@@ -1,5 +1,6 @@
 {
     "tabWidth": 4,
+    "proseWrap": "always",
     "plugins": [
         "prettier-plugin-organize-imports",
         "prettier-plugin-packagejson"
