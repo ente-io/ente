@@ -7,16 +7,70 @@
 /* eslint-disable @typescript-eslint/no-unnecessary-condition */
 
 import { loadStripe } from "@stripe/stripe-js";
-import { logError } from "utils/log";
 import HTTPService from "./HTTPService";
 
-const getStripePublishableKey = (stripeAccount: StripeAccountCountry) => {
-    if (stripeAccount === StripeAccountCountry.STRIPE_IN) {
+/**
+ * Communicate with Stripe using their JS SDK, and redirect back to the client
+ *
+ * All necessary parameters are obtained by parsing the request parameters.
+ *
+ * In case of unrecoverable errors, this function will throw. Otherwise it will
+ * redirect to the client or to some fallback URL.
+ */
+export const parseAndHandleRequest = async () => {
+    try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const productID = urlParams.get("productID");
+        const paymentToken = urlParams.get("paymentToken");
+        const action = urlParams.get("action");
+        const redirectURL = urlParams.get("redirectURL");
+
+        if (!action && !paymentToken && !productID && !redirectURL) {
+            // Maybe someone attempted to directly open this page in their
+            // browser. Not much we can do, just redirect them to the main site.
+            console.log(
+                "None of the required query parameters were supplied, redirecting to the ente.io",
+            );
+            redirectHome();
+            return;
+        }
+
+        if (!action || !paymentToken || !productID || !redirectURL) {
+            throw Error("Required query parameter was not provided");
+        }
+
+        switch (action) {
+            case "buy":
+                await buySubscription(productID, paymentToken, redirectURL);
+                break;
+            case "update":
+                await updateSubscription(productID, paymentToken, redirectURL);
+                break;
+            default:
+                throw Error(`Unsupported action ${action}`);
+        }
+    } catch (e) {
+        console.error(e);
+        throw e;
+    }
+};
+
+const apiHost = process.env.NEXT_PUBLIC_ENTE_ENDPOINT ?? "https://api.ente.io";
+
+type StripeAccountCountry = "IN" | "US";
+
+const isStripeAccountCountry = (c: unknown): c is StripeAccountCountry => {
+    if (c == "IN" || c == "US") return true;
+    return false;
+};
+
+const stripePublishableKey = (accountCountry: StripeAccountCountry) => {
+    if (accountCountry == "IN") {
         return (
             process.env.NEXT_PUBLIC_STRIPE_IN_PUBLISHABLE_KEY ??
             "pk_live_51HAhqDK59oeucIMOiTI6MDDM2UWUbCAJXJCGsvjJhiO8nYJz38rQq5T4iyQLDMKxqEDUfU5Hopuj4U5U4dff23oT00fHvZeodC"
         );
-    } else if (stripeAccount === StripeAccountCountry.STRIPE_US) {
+    } else if (accountCountry == "US") {
         return (
             process.env.NEXT_PUBLIC_STRIPE_US_PUBLISHABLE_KEY ??
             "pk_live_51LZ9P4G1ITnQlpAnrP6pcS7NiuJo3SnJ7gibjJlMRatkrd2EY1zlMVTVQG5RkSpLPbsHQzFfnEtgHnk1PiylIFkk00tC0LWXwi"
@@ -26,26 +80,10 @@ const getStripePublishableKey = (stripeAccount: StripeAccountCountry) => {
     }
 };
 
-const getEndpoint = () => {
-    const endPoint =
-        process.env.NEXT_PUBLIC_ENTE_ENDPOINT ?? "https://api.ente.io";
-    return endPoint;
-};
 enum PAYMENT_INTENT_STATUS {
     SUCCESS = "success",
     REQUIRE_ACTION = "requires_action",
     REQUIRE_PAYMENT_METHOD = "requires_payment_method",
-}
-
-enum FAILURE_REASON {
-    // Unable to authenticate card or 3DS
-    // User should be showing button for fixing card via customer portal
-    AUTHENTICATION_FAILED = "authentication_failed",
-    // Card declined result in this error. Show button to the customer portal.
-    REQUIRE_PAYMENT_METHOD = "requires_payment_method",
-    STRIPE_ERROR = "stripe_error",
-    CANCELED = "canceled",
-    SERVER_ERROR = "server_error",
 }
 
 enum STRIPE_ERROR_TYPE {
@@ -57,20 +95,27 @@ enum STRIPE_ERROR_CODE {
     AUTHENTICATION_ERROR = "payment_intent_authentication_failure",
 }
 
-enum RESPONSE_STATUS {
-    success = "success",
-    fail = "fail",
-}
+type RedirectStatus = "success" | "fail";
 
-enum PaymentActionType {
-    Buy = "buy",
-    Update = "update",
-}
-
-enum StripeAccountCountry {
-    STRIPE_IN = "IN",
-    STRIPE_US = "US",
-}
+type FailureReason =
+    /**
+     * Unable to authenticate card or 3DS
+     *
+     * User should be shown button for fixing card via customer portal
+     */
+    | "authentication_failed"
+    /**
+     * Card declined results in this error.
+     *
+     * Show button to the customer portal.
+     */
+    | "requires_payment_method"
+    /**
+     * An error in initializing the Stripe JS SDK.
+     */
+    | "stripe_error"
+    | "canceled"
+    | "server_error";
 
 interface SubscriptionUpdateResponse {
     result: {
@@ -79,122 +124,85 @@ interface SubscriptionUpdateResponse {
     };
 }
 
-export async function parseAndHandleRequest() {
-    try {
-        const urlParams = new URLSearchParams(window.location.search);
-        const productID = urlParams.get("productID");
-        const paymentToken = urlParams.get("paymentToken");
-        const action = urlParams.get("action");
-        const redirectURL = urlParams.get("redirectURL");
-        if (!action && !paymentToken && !productID && !redirectURL) {
-            // Maybe someone attempted to directly open this page in their
-            // browser. Not much we can do, just redirect them to the main site.
-            console.log(
-                "None of the required query parameters were supplied, redirecting to the ente.io",
-            );
-            redirectHome();
-            return;
-        } else if (!action || !paymentToken || !productID || !redirectURL) {
-            throw Error("Required query parameter was not provided");
-        }
-        switch (action) {
-            case PaymentActionType.Buy:
-                await buyPaidSubscription(productID, paymentToken, redirectURL);
-                break;
-            case PaymentActionType.Update:
-                await updateSubscription(productID, paymentToken, redirectURL);
-                break;
-            default:
-                throw Error(`Unsupported action ${action}`);
-        }
-    } catch (e: any) {
-        console.error("Error: ", JSON.stringify(e));
-        logError(e);
-        throw e;
-    }
-}
-
-async function getUserStripeAccountCountry(
+/** Return the {@link StripeAccountCountry} for the user */
+const getUserStripeAccountCountry = async (
     paymentToken: string,
-): Promise<{ stripeAccountCountry: StripeAccountCountry }> {
-    const response = await HTTPService.get(
-        `${getEndpoint()}/billing/stripe-account-country`,
-        undefined,
-        {
+): Promise<StripeAccountCountry> => {
+    const url = `${apiHost}/billing/stripe-account-country`;
+    const res = await fetch(url, {
+        headers: {
             "X-Auth-Token": paymentToken,
         },
-    );
-    return response.data;
-}
+    });
+    if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
+    const json: unknown = await res.json();
+    if (json && typeof json === "object" && "stripeAccountCountry" in json) {
+        const c = json.stripeAccountCountry;
+        if (isStripeAccountCountry(c)) return c;
+    }
+    throw new Error(`Unexpected response for ${url}: ${JSON.stringify(json)}`);
+};
 
-async function getStripe(
+/** Load and return the Stripe JS SDK initialized for the given country */
+const getStripe = async (
     redirectURL: string,
-    stripeAccount: StripeAccountCountry,
-) {
+    accountCountry: StripeAccountCountry,
+) => {
+    const publishableKey = stripePublishableKey(accountCountry);
     try {
-        const publishableKey = getStripePublishableKey(stripeAccount);
         const stripe = await loadStripe(publishableKey);
-
-        if (!stripe) {
-            throw Error("stripe load failed");
-        }
+        if (!stripe) throw new Error("Stripe returned null");
         return stripe;
     } catch (e) {
-        logError(e, "stripe load failed");
-        redirectToApp(
-            redirectURL,
-            RESPONSE_STATUS.fail,
-            FAILURE_REASON.STRIPE_ERROR,
-        );
+        console.error("Failed to load Stripe", e);
+        redirectToApp(redirectURL, "fail", "stripe_error");
         throw e;
     }
-}
+};
 
-export async function buyPaidSubscription(
+/** The flow when the user wants to buy a new subscription */
+const buySubscription = async (
     productID: string,
     paymentToken: string,
     redirectURL: string,
-) {
+) => {
     try {
-        const { stripeAccountCountry } =
-            await getUserStripeAccountCountry(paymentToken);
-        const stripe = await getStripe(redirectURL, stripeAccountCountry);
-        const { sessionID } = await createCheckoutSession(
+        const accountCountry = await getUserStripeAccountCountry(paymentToken);
+        const stripe = await getStripe(redirectURL, accountCountry);
+        const sessionId = await createCheckoutSession(
             productID,
             paymentToken,
             redirectURL,
         );
-        await stripe.redirectToCheckout({
-            sessionId: sessionID,
-        });
+        await stripe.redirectToCheckout({ sessionId });
     } catch (e) {
-        logError(e, "subscription purchase failed");
-        redirectToApp(
-            redirectURL,
-            RESPONSE_STATUS.fail,
-            FAILURE_REASON.SERVER_ERROR,
-        );
+        console.log("Subscription purchase failed", e);
+        redirectToApp(redirectURL, "fail", "server_error");
         throw e;
     }
-}
+};
 
-async function createCheckoutSession(
+/** Create a new checkout session on museum and return the sessionID */
+const createCheckoutSession = async (
     productID: string,
     paymentToken: string,
     redirectURL: string,
-): Promise<{ sessionID: string }> {
-    const response = await HTTPService.get(
-        `${getEndpoint()}/billing/stripe/checkout-session`,
-        {
-            productID,
-            redirectURL,
-        },
-        {
+): Promise<string> => {
+    const params = new URLSearchParams({ productID, redirectURL });
+    const url = `${apiHost}/billing/stripe/checkout-session?${params.toString()}`;
+    const res = await fetch(url, {
+        headers: {
             "X-Auth-Token": paymentToken,
         },
-    );
-    return response.data;
-}
+    });
+    if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
+    const json: unknown = await res.json();
+    if (json && typeof json == "object" && "sessionID" in json) {
+        const sid = json.sessionID;
+        if (typeof sid == "string") return sid;
+    }
+    throw new Error(`Unexpected response for ${url}: ${JSON.stringify(json)}`);
+};
 
 export async function updateSubscription(
     productID: string,
@@ -202,9 +210,8 @@ export async function updateSubscription(
     redirectURL: string,
 ) {
     try {
-        const { stripeAccountCountry } =
-            await getUserStripeAccountCountry(paymentToken);
-        const stripe = await getStripe(redirectURL, stripeAccountCountry);
+        const accountCountry = await getUserStripeAccountCountry(paymentToken);
+        const stripe = await getStripe(redirectURL, accountCountry);
         const { result } = await subscriptionUpdateRequest(
             paymentToken,
             productID,
@@ -281,13 +288,15 @@ async function subscriptionUpdateRequest(
     return response.data;
 }
 
-function redirectToApp(redirectURL: string, status: string, reason?: string) {
-    let completePath = `${redirectURL}?status=${status}`;
-    if (reason) {
-        completePath = `${completePath}&reason=${reason}`;
-    }
-    window.location.href = completePath;
-}
+const redirectToApp = (
+    redirectURL: string,
+    status: RedirectStatus,
+    reason?: FailureReason,
+) => {
+    let url = `${redirectURL}?status=${status}`;
+    if (reason) url = `${url}&reason=${reason}`;
+    window.location.href = url;
+};
 
 const redirectHome = () => {
     window.location.href = "https://ente.io";
