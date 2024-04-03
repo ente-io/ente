@@ -70,8 +70,8 @@ func NewMailingListsController() *MailingListsController {
 //
 // It specifies BaseURL (URL of your listmonk server),
 // your listmonk Username and Password
-// and ListIDs (an array of integer values indicating the id of listmonk campaign mailing list
-// to which the subscriber needs to added)
+// and ListIDs (an array of integer values indicating the id of
+// listmonk campaign mailing list to which the subscriber needs to added)
 type ListmonkMailingListsController struct {
 	BaseURL  string
 	Username string
@@ -79,8 +79,8 @@ type ListmonkMailingListsController struct {
 	ListIDs  []int
 }
 
-// NewListmonkMailingListsController creates a new instance of ListmonkMailingListsController
-// with the API credentials provided in config file
+// NewListmonkMailingListsController creates a new instance
+// of ListmonkMailingListsController with the config file credentials
 func NewListmonkMailingListsController() *ListmonkMailingListsController {
 	credentials := &ListmonkMailingListsController{
 		BaseURL:  viper.GetString("listmonk.server-url"),
@@ -102,36 +102,58 @@ func NewListmonkMailingListsController() *ListmonkMailingListsController {
 // the email addresses of our customers in a Zoho Campaign "list", and subscribe
 // or unsubscribe them to this list.
 func (c *MailingListsController) Subscribe(email string) error {
-	if c.shouldSkipZoho() {
-		return stacktrace.Propagate(ente.ErrNotImplemented, "")
-	}
+	listmonkController := NewListmonkMailingListsController()
+	var err error
 
-	// Need to set "Signup Form Disabled" in the list settings since we use this
-	// list to keep track of emails that have already been verified.
-	//
-	// > You can use this API to add contacts to your mailing lists. For signup
-	//   form enabled mailing lists, the contacts will receive a confirmation
-	//   email. For signup form disabled lists, contacts will be added without
-	//   any confirmations.
-	//
-	// https://www.zoho.com/campaigns/help/developers/contact-subscribe.html
-	return c.doListActionZoho("listsubscribe", email)
+	// Checking if either listmonk or zoho credentials are configured
+	if c.shouldSkipZoho() {
+		err = stacktrace.Propagate(ente.ErrNotImplemented, "")
+
+		if listmonkController.shouldSkipListmonk() {
+			err = stacktrace.Propagate(ente.ErrNotImplemented, "")
+		} else {
+			err = listmonkController.doListActionListmonk("listsubscribe", email)
+		}
+
+	} else {
+		// Need to set "Signup Form Disabled" in the list settings since we use this
+		// list to keep track of emails that have already been verified.
+		//
+		// > You can use this API to add contacts to your mailing lists. For signup
+		//   form enabled mailing lists, the contacts will receive a confirmation
+		//   email. For signup form disabled lists, contacts will be added without
+		//   any confirmations.
+		//
+		// https://www.zoho.com/campaigns/help/developers/contact-subscribe.html
+		err = c.doListActionZoho("listsubscribe", email)
+	}
+	return err
 }
 
 // Unsubscribe the given email address to our default Zoho Campaigns list.
 //
 // See: [Note: Syncing emails with Zoho Campaigns]
 func (c *MailingListsController) Unsubscribe(email string) error {
-	if c.shouldSkipZoho() {
-		return stacktrace.Propagate(ente.ErrNotImplemented, "")
-	}
+	listmonkController := NewListmonkMailingListsController()
+	var err error
 
-	// https://www.zoho.com/campaigns/help/developers/contact-unsubscribe.html
-	return c.doListActionZoho("listunsubscribe", email)
+	if c.shouldSkipZoho() {
+		err = stacktrace.Propagate(ente.ErrNotImplemented, "")
+
+		if listmonkController.shouldSkipListmonk() {
+			err = stacktrace.Propagate(ente.ErrNotImplemented, "")
+		} else {
+			err = listmonkController.doListActionListmonk("listunsubscribe", email)
+		}
+	} else {
+		// https://www.zoho.com/campaigns/help/developers/contact-unsubscribe.html
+		err = c.doListActionZoho("listunsubscribe", email)
+	}
+	return err
 }
 
-// shouldSkipZoho checks if the MailingListsController should be skipped
-// due to missing credentials.
+// shouldSkipZoho checks if the MailingListsController
+// should be skipped due to missing credentials.
 func (c *MailingListsController) shouldSkipZoho() bool {
 	if c.zohoCredentials.RefreshToken == "" {
 		log.Info("Skipping Zoho mailing list update because credentials are not configured")
@@ -187,51 +209,44 @@ func (c *MailingListsController) doListActionZoho(action string, email string) e
 	return stacktrace.Propagate(err, "")
 }
 
-// Add or subscribe an email to listmonk mailing list
-func (c *ListmonkMailingListsController) Subscribe(email string) error {
-	if c.shouldSkipListmonk() {
-		return stacktrace.Propagate(ente.ErrNotImplemented, "")
-	}
+// doListActionListmonk subscribes or unsubscribes an email address
+// to a particular mailing list based on the action parameter
+func (c *ListmonkMailingListsController) doListActionListmonk(action string, email string) error {
+	if action == "listsubscribe" {
+		data := map[string]interface{}{
+			"email": email,
+			"lists": c.ListIDs,
+		}
 
-	data := map[string]interface{}{
-		"email": email,
-		"lists": c.ListIDs,
-	}
+		return listmonk.SendRequest("POST", c.BaseURL+"/api/subscribers", data,
+			c.Username, c.Password)
 
-	return listmonk.SendRequest("POST", c.BaseURL+"/api/subscribers", data,
-		c.Username, c.Password)
+	} else {
+		// Listmonk dosen't provide an endpoint for unsubscribing users
+		// from a particular list directly via their email
+		//
+		// Thus, fetching subscriberID through email address,
+		// and then calling endpoint to modify subscription in a list
+		id, err := listmonk.GetSubscriberID(c.BaseURL+"/api/subscribers", c.Username, c.Password, email)
+		if err != nil {
+			stacktrace.Propagate(err, "")
+		}
+		// API endpoint expects an array of subscriber id as parameter
+		subscriberID := []int{id}
+
+		data := map[string]interface{}{
+			"ids":             subscriberID,
+			"action":          "unsubscribe",
+			"target_list_ids": c.ListIDs,
+		}
+
+		return listmonk.SendRequest("PUT", c.BaseURL+"/api/subscribers/lists", data,
+			c.Username, c.Password)
+	}
 }
 
-// Remove or unsubscribe an email from listmonk mailing list
-func (c *ListmonkMailingListsController) Unsubscribe(email string) error {
-	if c.shouldSkipListmonk() {
-		return stacktrace.Propagate(ente.ErrNotImplemented, "")
-	}
-
-	// Listmonk dosen't provide an endpoint for unsubscribing users from a particular list
-	// directly via their email
-	//
-	// Thus, fetching subscriberID through email address,
-	// and then calling endpoint to modify subscription in a list
-	id, err := listmonk.GetSubscriberID(c.BaseURL+"/api/subscribers", c.Username, c.Password, email)
-	if err != nil {
-		stacktrace.Propagate(err, "")
-	}
-	// API endpoint expects an array of subscriber id as parameter
-	subscriberID := []int{id}
-
-	data := map[string]interface{}{
-		"ids":             subscriberID,
-		"action":          "unsubscribe",
-		"target_list_ids": c.ListIDs,
-	}
-
-	return listmonk.SendRequest("PUT", c.BaseURL+"/api/subscribers/lists", data,
-		c.Username, c.Password)
-}
-
-// shouldSkipListmonk checks if the ListmonkMailingListsController should be skipped
-// due to missing credentials.
+// shouldSkipListmonk checks if the ListmonkMailingListsController
+// should be skipped due to missing credentials.
 func (c *ListmonkMailingListsController) shouldSkipListmonk() bool {
 	if c.BaseURL == "" || c.Username == "" || c.Password == "" {
 		log.Info("Skipping Listmonk mailing list because credentials are not configured")
