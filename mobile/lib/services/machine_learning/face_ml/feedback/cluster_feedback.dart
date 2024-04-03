@@ -380,6 +380,7 @@ class ClusterFeedbackService {
     return true;
   }
 
+  // TODO: iterate over this method and actually use it
   Future<Map<int, List<String>>> breakUpCluster(int clusterID) async {
     final faceMlDb = FaceMLDataDB.instance;
 
