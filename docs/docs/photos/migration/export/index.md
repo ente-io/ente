@@ -13,7 +13,7 @@ videos you have uploaded to Ente.
 
     ![Ente - Sign in to export data](sign-in.png)
 
-2. Open the side bar, and select the option to **export data**.
+2. Open the side bar, and select the option to **Export Data**.
 
     ![Ente - Export data](export-1.png)
 
@@ -33,7 +33,7 @@ videos you have uploaded to Ente.
 
 </div>
 
-5. Wait for the export to get completed.
+5. Wait for the export to complete.
 
 <div align="center">
 
@@ -42,7 +42,7 @@ videos you have uploaded to Ente.
 </div>
 
 6. In case your download gets interrupted, Ente will resume from where it left
-   off. Simply select **export data** again and click on **Resync**.
+   off. Simply select **Export Data** again and click on **Resync**.
 
 <div align="center">
 
@@ -50,18 +50,21 @@ videos you have uploaded to Ente.
 
 </div>
 
-7. **Sync continuously** : You can utilize Continuous Sync to eliminate manual
-   exports each time new photos are added to Ente. This feature automatically
-   detects new files and runs exports accordingly, It also ensures that exported
-   data reflects the latest album states with new files, moves, and deletions.
 
-    ![Ente - Continuous sync](continuous-sync.webp)
+### Sync continuously
 
+You can switch on the toggle to **Sync continuously** to eliminate manual
+exports each time new photos are added to Ente. This feature automatically
+detects new files and runs exports accordingly. It also ensures that exported
+data reflects the latest album states with new files, moves, and deletions.
 
+![Ente - Continuous sync](continuous-sync.webp)
+
+---
 
 If you run into any issues during your data export, please reach out to
 [support@ente.io](mailto:support@ente.io) and we will be happy to help you!
 
 Note that we also provide a [CLI
 tool](https://github.com/ente-io/ente/tree/main/cli#export) to export your data.
-Some more details are in this [FAQ entry](/photos/faq/export).
+Please find more details [here](/photos/faq/export).
