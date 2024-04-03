@@ -31,7 +31,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
   Key futureBuilderKey = UniqueKey();
 
   // Declare a variable for the future
-  late Future<List<(int, double, bool, List<EnteFile>)>>
+  late Future<List<ClusterSuggestion>>
       futureClusterSuggestions;
 
   @override
@@ -47,7 +47,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
       appBar: AppBar(
         title: const Text('Review suggestions'),
       ),
-      body: FutureBuilder<List<(int, double, bool, List<EnteFile>)>>(
+      body: FutureBuilder<List<ClusterSuggestion>>(
         key: futureBuilderKey,
         future: futureClusterSuggestions,
         builder: (context, snapshot) {
@@ -63,10 +63,10 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
             }
             final numberOfDifferentSuggestions = snapshot.data!.length;
             final currentSuggestion = snapshot.data![currentSuggestionIndex];
-            final int clusterID = currentSuggestion.$1;
-            final double distance = currentSuggestion.$2;
-            final bool usingMean = currentSuggestion.$3;
-            final List<EnteFile> files = currentSuggestion.$4;
+            final int clusterID = currentSuggestion.clusterIDToMerge;
+            final double distance = currentSuggestion.distancePersonToCluster;
+            final bool usingMean = currentSuggestion.usedOnlyMeanForSuggestion;
+            final List<EnteFile> files = currentSuggestion.filesInCluster;
             return InkWell(
               onTap: () {
                 Navigator.of(context).push(
@@ -140,8 +140,8 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
 
   // Method to fetch cluster suggestions
   void _fetchClusterSuggestions() {
-    futureClusterSuggestions = ClusterFeedbackService.instance
-        .getClusterFilesForPersonID(widget.person);
+    futureClusterSuggestions =
+        ClusterFeedbackService.instance.getSuggestionForPerson(widget.person);
   }
 
   Widget _buildSuggestionView(
