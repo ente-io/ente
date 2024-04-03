@@ -4,6 +4,7 @@ import "dart:math" show Random;
 import "package:flutter/foundation.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
+import "package:photos/db/files_db.dart";
 import "package:photos/events/people_changed_event.dart";
 import "package:photos/extensions/stop_watch.dart";
 import "package:photos/face/db.dart";
@@ -40,6 +41,7 @@ class ClusterFeedbackService {
   static setLastViewedClusterID(int clusterID) {
     lastViewedClusterID = clusterID;
   }
+
   static resetLastViewedClusterID() {
     lastViewedClusterID = -1;
   }
@@ -389,7 +391,10 @@ class ClusterFeedbackService {
   }
 
   // TODO: iterate over this method and actually use it
-  Future<Map<int, List<String>>> breakUpCluster(int clusterID) async {
+  Future<Map<int, List<String>>> breakUpCluster(
+    int clusterID, {
+    useDbscan = true,
+  }) async {
     final faceMlDb = FaceMLDataDB.instance;
 
     final faceIDs = await faceMlDb.getFaceIDsForCluster(clusterID);
@@ -397,24 +402,52 @@ class ClusterFeedbackService {
 
     final embeddings = await faceMlDb.getFaceEmbeddingMapForFile(fileIDs);
     embeddings.removeWhere((key, value) => !faceIDs.contains(key));
-    final clusteringInput = embeddings.map((key, value) {
-      return MapEntry(key, (null, value));
-    });
 
-    final faceIdToCluster = await FaceLinearClustering.instance
-        .predict(clusteringInput, distanceThreshold: 0.15);
+    final fileIDToCreationTime =
+        await FilesDB.instance.getFileIDToCreationTime();
 
-    if (faceIdToCluster == null) {
-      return {};
-    }
+    final Map<int, List<String>> clusterIdToFaceIds = {};
+    if (useDbscan) {
+      final dbscanClusters = await FaceClustering.instance.predictDbscan(
+        embeddings,
+        fileIDToCreationTime: fileIDToCreationTime,
+        eps: 0.25,
+        minPts: 4,
+      );
 
-    final clusterIdToFaceIds = <int, List<String>>{};
-    for (final entry in faceIdToCluster.entries) {
-      final clusterID = entry.value;
-      if (clusterIdToFaceIds.containsKey(clusterID)) {
-        clusterIdToFaceIds[clusterID]!.add(entry.key);
-      } else {
-        clusterIdToFaceIds[clusterID] = [entry.key];
+      if (dbscanClusters.isEmpty) {
+        return {};
+      }
+
+      int maxClusterID = DateTime.now().millisecondsSinceEpoch;
+
+      for (final List<String> cluster in dbscanClusters) {
+        final faceIds = cluster;
+        clusterIdToFaceIds[maxClusterID] = faceIds;
+        maxClusterID++;
+      }
+    } else {
+      final clusteringInput = embeddings.map((key, value) {
+        return MapEntry(key, (null, value));
+      });
+
+      final faceIdToCluster = await FaceClustering.instance.predictLinear(
+        clusteringInput,
+        fileIDToCreationTime: fileIDToCreationTime,
+        distanceThreshold: 0.15,
+      );
+
+      if (faceIdToCluster == null) {
+        return {};
+      }
+
+      for (final entry in faceIdToCluster.entries) {
+        final clusterID = entry.value;
+        if (clusterIdToFaceIds.containsKey(clusterID)) {
+          clusterIdToFaceIds[clusterID]!.add(entry.key);
+        } else {
+          clusterIdToFaceIds[clusterID] = [entry.key];
+        }
       }
     }
 

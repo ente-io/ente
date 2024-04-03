@@ -407,7 +407,7 @@ class FaceMlService {
             break;
           }
 
-          final faceIdToCluster = await FaceLinearClustering.instance.predict(
+          final faceIdToCluster = await FaceClustering.instance.predictLinear(
             faceIdToEmbeddingBucket,
             fileIDToCreationTime: fileIDToCreationTime,
           );
@@ -439,7 +439,7 @@ class FaceMlService {
             '${DateTime.now().difference(gotFaceEmbeddingsTime).inMilliseconds} ms');
 
         // Cluster the embeddings using the linear clustering algorithm, returning a map from faceID to clusterID
-        final faceIdToCluster = await FaceLinearClustering.instance.predict(
+        final faceIdToCluster = await FaceClustering.instance.predictLinear(
           faceIdToEmbedding,
           fileIDToCreationTime: fileIDToCreationTime,
         );
