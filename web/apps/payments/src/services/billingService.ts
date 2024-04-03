@@ -7,7 +7,6 @@
 /* eslint-disable @typescript-eslint/no-unnecessary-condition */
 
 import { loadStripe } from "@stripe/stripe-js";
-import { CUSTOM_ERROR } from "utils/error";
 import { logError } from "utils/log";
 import HTTPService from "./HTTPService";
 
@@ -88,9 +87,15 @@ export async function parseAndHandleRequest() {
         const action = urlParams.get("action");
         const redirectURL = urlParams.get("redirectURL");
         if (!action && !paymentToken && !productID && !redirectURL) {
-            throw Error(CUSTOM_ERROR.DIRECT_OPEN_WITH_NO_QUERY_PARAMS);
+            // Maybe someone attempted to directly open this page in their
+            // browser. Not much we can do, just redirect them to the main site.
+            console.log(
+                "None of the required query parameters were supplied, redirecting to the ente.io",
+            );
+            redirectHome();
+            return;
         } else if (!action || !paymentToken || !productID || !redirectURL) {
-            throw Error(CUSTOM_ERROR.MISSING_REQUIRED_QUERY_PARAM);
+            throw Error("Required query parameter was not provided");
         }
         switch (action) {
             case PaymentActionType.Buy:
@@ -100,13 +105,11 @@ export async function parseAndHandleRequest() {
                 await updateSubscription(productID, paymentToken, redirectURL);
                 break;
             default:
-                throw Error(CUSTOM_ERROR.INVALID_ACTION);
+                throw Error(`Unsupported action ${action}`);
         }
     } catch (e: any) {
         console.error("Error: ", JSON.stringify(e));
-        if (e.message !== CUSTOM_ERROR.DIRECT_OPEN_WITH_NO_QUERY_PARAMS) {
-            logError(e);
-        }
+        logError(e);
         throw e;
     }
 }
@@ -285,3 +288,7 @@ function redirectToApp(redirectURL: string, status: string, reason?: string) {
     }
     window.location.href = completePath;
 }
+
+const redirectHome = () => {
+    window.location.href = "https://ente.io";
+};
