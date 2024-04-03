@@ -456,6 +456,10 @@ class ClusterFeedbackService {
     });
     final amountOfNewClusters = clusterIdToCount.length;
 
+    _logger.info(
+      'Broke up cluster $clusterID into $amountOfNewClusters clusters \n ${clusterIdToCount.toString()}',
+    );
+
     return clusterIdToFaceIds;
   }
 
