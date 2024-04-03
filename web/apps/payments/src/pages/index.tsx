@@ -1,24 +1,19 @@
 import { Container } from "components/Container";
 import { Spinner } from "components/Spinner";
-import * as React from "react";
+import React, { useEffect } from "react";
 import { parseAndHandleRequest } from "services/billing-service";
 import S from "utils/strings";
 
-export default function Home() {
+const Page: React.FC = () => {
     const [failed, setFailed] = React.useState(false);
 
-    React.useEffect(() => {
-        async function main() {
-            try {
-                await parseAndHandleRequest();
-            } catch {
-                setFailed(true);
-            }
-        }
-        // TODO: audit
-        // eslint-disable-next-line @typescript-eslint/no-floating-promises
-        main();
+    useEffect(() => {
+        parseAndHandleRequest().catch(() => {
+            setFailed(true);
+        });
     }, []);
 
     return <Container>{failed ? S.error_generic : <Spinner />}</Container>;
-}
+};
+
+export default Page;

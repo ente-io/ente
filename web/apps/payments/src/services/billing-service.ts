@@ -1,11 +1,4 @@
-// TODO: Audit this and other eslints
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-confusing-void-expression */
-/* eslint-disable @typescript-eslint/no-unsafe-return */
-/* eslint-disable @typescript-eslint/no-unsafe-enum-comparison */
-/* eslint-disable @typescript-eslint/no-unnecessary-condition */
-
 import { loadStripe } from "@stripe/stripe-js";
 
 /**
@@ -180,11 +173,11 @@ const createCheckoutSession = async (
     throw new Error(`Unexpected response for ${url}: ${JSON.stringify(json)}`);
 };
 
-export async function updateSubscription(
+const updateSubscription = async (
     productID: string,
     paymentToken: string,
     redirectURL: string,
-) {
+) => {
     try {
         const accountCountry = await getUserStripeAccountCountry(paymentToken);
         const stripe = await getStripe(redirectURL, accountCountry);
@@ -193,16 +186,18 @@ export async function updateSubscription(
             productID,
         );
         switch (status) {
-            case "success":
+            case "success": {
                 // Subscription was updated successfully, nothing more required
                 return redirectToApp(redirectURL, "success");
+            }
 
-            case "requires_payment_method":
+            case "requires_payment_method": {
                 return redirectToApp(
                     redirectURL,
                     "fail",
                     "requires_payment_method",
                 );
+            }
 
             case "requires_action": {
                 const { error } = await stripe.confirmCardPayment(clientSecret);
@@ -236,7 +231,7 @@ export async function updateSubscription(
         redirectToApp(redirectURL, "fail", "server_error");
         throw e;
     }
-}
+};
 
 type PaymentStatus = "success" | "requires_action" | "requires_payment_method";
 

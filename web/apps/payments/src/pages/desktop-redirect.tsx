@@ -1,9 +1,9 @@
 import { Container } from "components/Container";
 import { Spinner } from "components/Spinner";
-import * as React from "react";
+import React, { useEffect } from "react";
 
-export default function DesktopRedirect() {
-    React.useEffect(() => {
+const Page: React.FC = () => {
+    useEffect(() => {
         const currentURL = new URL(window.location.href);
         const desktopRedirectURL = new URL("ente://app/gallery");
         desktopRedirectURL.search = currentURL.search;
@@ -15,4 +15,6 @@ export default function DesktopRedirect() {
             <Spinner />
         </Container>
     );
-}
+};
+
+export default Page;

@@ -9,7 +9,7 @@ body {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    min-width: 80svh;
+    min-height: 100svh;
 }
 
 .loading-spinner {
