@@ -92,14 +92,7 @@ func NewMailingListsController() *MailingListsController {
 // the email addresses of our customers in a Zoho Campaign "list", and subscribe
 // or unsubscribe them to this list.
 func (c *MailingListsController) Subscribe(email string) error {
-	// Checking if either listmonk or zoho credentials are configured
-	if c.shouldSkipZoho() {
-		if c.shouldSkipListmonk() {
-			return stacktrace.Propagate(ente.ErrNotImplemented, "")
-		} else {
-			return c.doListActionListmonk("listsubscribe", email)
-		}
-	} else {
+	if !(c.shouldSkipZoho()) {
 		// Need to set "Signup Form Disabled" in the list settings since we use this
 		// list to keep track of emails that have already been verified.
 		//
@@ -111,6 +104,10 @@ func (c *MailingListsController) Subscribe(email string) error {
 		// https://www.zoho.com/campaigns/help/developers/contact-subscribe.html
 		return c.doListActionZoho("listsubscribe", email)
 	}
+	if !(c.shouldSkipListmonk()) {
+		return c.listmonkSubscribe(email)
+	}
+	return stacktrace.Propagate(ente.ErrNotImplemented, "")
 }
 
 // Unsubscribe the given email address to our default Zoho Campaigns list
@@ -118,16 +115,14 @@ func (c *MailingListsController) Subscribe(email string) error {
 //
 // See: [Note: Syncing emails with Zoho Campaigns]
 func (c *MailingListsController) Unsubscribe(email string) error {
-	if c.shouldSkipZoho() {
-		if c.shouldSkipListmonk() {
-			return stacktrace.Propagate(ente.ErrNotImplemented, "")
-		} else {
-			return c.doListActionListmonk("listunsubscribe", email)
-		}
-	} else {
+	if !(c.shouldSkipZoho()) {
 		// https://www.zoho.com/campaigns/help/developers/contact-unsubscribe.html
 		return c.doListActionZoho("listunsubscribe", email)
 	}
+	if !(c.shouldSkipListmonk()) {
+		return c.listmonkUnsubscribe(email)
+	}
+	return stacktrace.Propagate(ente.ErrNotImplemented, "")
 }
 
 // shouldSkipZoho() checks if the MailingListsController
@@ -203,40 +198,37 @@ func (c *MailingListsController) doListActionZoho(action string, email string) e
 	return stacktrace.Propagate(err, "")
 }
 
-// doListActionListmonk() subscribes or unsubscribes an email address
-// to a particular mailing list
-// based on the action parameter ("listsubscribe" or "listunsubscribe")
-func (c *MailingListsController) doListActionListmonk(action string, email string) error {
-	if action == "listsubscribe" {
-		data := map[string]interface{}{
-			"email": email,
-			"lists": c.listmonkListIDs,
-		}
-
-		return listmonk.SendRequest("POST", c.listmonkCredentials.BaseURL+"/api/subscribers", data,
-			c.listmonkCredentials.Username, c.listmonkCredentials.Password)
-
-	} else {
-		// Listmonk dosen't provide an endpoint for unsubscribing users
-		// from a particular list directly via their email
-		//
-		// Thus, fetching subscriberID through email address,
-		// and then calling endpoint to modify subscription in a list
-		id, err := listmonk.GetSubscriberID(c.listmonkCredentials.BaseURL+"/api/subscribers",
-			c.listmonkCredentials.Username, c.listmonkCredentials.Password, email)
-		if err != nil {
-			stacktrace.Propagate(err, "")
-		}
-		// API endpoint expects an array of subscriber id as parameter
-		subscriberID := []int{id}
-
-		data := map[string]interface{}{
-			"ids":             subscriberID,
-			"action":          "unsubscribe",
-			"target_list_ids": c.listmonkListIDs,
-		}
-
-		return listmonk.SendRequest("PUT", c.listmonkCredentials.BaseURL+"/api/subscribers/lists", data,
-			c.listmonkCredentials.Username, c.listmonkCredentials.Password)
+// Subscribes an email address to a particular listmonk campaign mailing list
+func (c *MailingListsController) listmonkSubscribe(email string) error {
+	data := map[string]interface{}{
+		"email": email,
+		"lists": c.listmonkListIDs,
 	}
+	return listmonk.SendRequest("POST", c.listmonkCredentials.BaseURL+"/api/subscribers", data,
+		c.listmonkCredentials.Username, c.listmonkCredentials.Password)
+}
+
+// Unsubscribes an email address to a particular listmonk campaign mailing list
+func (c *MailingListsController) listmonkUnsubscribe(email string) error {
+	// Listmonk dosen't provide an endpoint for unsubscribing users
+	// from a particular list directly via their email
+	//
+	// Thus, fetching subscriberID through email address,
+	// and then calling endpoint to modify subscription in a list
+	id, err := listmonk.GetSubscriberID(c.listmonkCredentials.BaseURL+"/api/subscribers",
+		c.listmonkCredentials.Username, c.listmonkCredentials.Password, email)
+	if err != nil {
+		stacktrace.Propagate(err, "")
+	}
+	// API endpoint expects an array of subscriber id as parameter
+	subscriberID := []int{id}
+
+	data := map[string]interface{}{
+		"ids":             subscriberID,
+		"action":          "unsubscribe",
+		"target_list_ids": c.listmonkListIDs,
+	}
+
+	return listmonk.SendRequest("PUT", c.listmonkCredentials.BaseURL+"/api/subscribers/lists", data,
+		c.listmonkCredentials.Username, c.listmonkCredentials.Password)
 }
