@@ -1,10 +1,15 @@
+import { addLogLine } from "@ente/shared/logging";
+import { CACHES } from "@ente/shared/storage/cacheStorage/constants";
+import { cached } from "@ente/shared/storage/cacheStorage/helpers";
 import * as tf from "@tensorflow/tfjs-core";
 import { NormalizedFace } from "blazeface-back";
+import { FILE_TYPE } from "constants/file";
 import { BLAZEFACE_FACE_SIZE } from "constants/mlConfig";
 import { euclidean } from "hdbscan";
 import PQueue from "p-queue";
 import DownloadManager from "services/download";
 import { getLocalFiles } from "services/fileService";
+import { decodeLivePhoto } from "services/livePhotoService";
 import { EnteFile } from "types/file";
 import { Dimensions } from "types/image";
 import {
@@ -18,12 +23,6 @@ import {
     RealWorldObject,
     Versioned,
 } from "types/machineLearning";
-// import { mlFilesStore, mlPeopleStore } from 'utils/storage/mlStorage';
-import { addLogLine } from "@ente/shared/logging";
-import { CACHES } from "@ente/shared/storage/cacheStorage/constants";
-import { cached } from "@ente/shared/storage/cacheStorage/helpers";
-import { FILE_TYPE } from "constants/file";
-import { decodeLivePhoto } from "services/livePhotoService";
 import { getRenderableImage } from "utils/file";
 import { imageBitmapToBlob } from "utils/image";
 import mlIDbStorage from "utils/storage/mlIDbStorage";

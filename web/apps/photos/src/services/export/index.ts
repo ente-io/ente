@@ -42,6 +42,10 @@ import { CustomError } from "@ente/shared/error";
 import { Events, eventBus } from "@ente/shared/events";
 import { addLogLine } from "@ente/shared/logging";
 import { User } from "@ente/shared/user/types";
+import QueueProcessor, {
+    CancellationStatus,
+    RequestCanceller,
+} from "@ente/shared/utils/queueProcessor";
 import { ExportStage } from "constants/export";
 import { FILE_TYPE } from "constants/file";
 import { Collection } from "types/collection";
@@ -56,10 +60,6 @@ import {
     getCollectionUserFacingName,
     getNonEmptyPersonalCollections,
 } from "utils/collection";
-import QueueProcessor, {
-    CancellationStatus,
-    RequestCanceller,
-} from "../queueProcessor";
 import { migrateExport } from "./migration";
 
 const EXPORT_RECORD_FILE_NAME = "export_status.json";
@@ -245,7 +245,7 @@ class ExportService {
     };
 
     async preExport(exportFolder: string) {
-        this.verifyExportFolderExists(exportFolder);
+        await this.verifyExportFolderExists(exportFolder);
         const exportRecord = await this.getExportRecord(exportFolder);
         await this.updateExportStage(ExportStage.MIGRATION);
         await this.runMigration(
@@ -259,7 +259,7 @@ class ExportService {
     async postExport() {
         try {
             const exportFolder = this.getExportSettings()?.folder;
-            if (!this.exportFolderExists(exportFolder)) {
+            if (!(await this.exportFolderExists(exportFolder))) {
                 this.uiUpdater.setExportStage(ExportStage.INIT);
                 return;
             }
@@ -484,7 +484,7 @@ class ExportService {
                     if (isCanceled.status) {
                         throw Error(CustomError.EXPORT_STOPPED);
                     }
-                    this.verifyExportFolderExists(exportFolder);
+                    await this.verifyExportFolderExists(exportFolder);
                     const oldCollectionExportName =
                         collectionIDExportNameMap.get(collection.id);
                     const oldCollectionExportPath = getCollectionExportPath(
@@ -493,7 +493,7 @@ class ExportService {
                     );
 
                     const newCollectionExportName =
-                        getUniqueCollectionExportName(
+                        await getUniqueCollectionExportName(
                             exportFolder,
                             getCollectionUserFacingName(collection),
                         );
@@ -574,7 +574,7 @@ class ExportService {
                     if (isCanceled.status) {
                         throw Error(CustomError.EXPORT_STOPPED);
                     }
-                    this.verifyExportFolderExists(exportFolder);
+                    await this.verifyExportFolderExists(exportFolder);
                     addLogLine(
                         `removing collection with id ${collectionID} from export folder`,
                     );
@@ -662,7 +662,7 @@ class ExportService {
                     throw Error(CustomError.EXPORT_STOPPED);
                 }
                 try {
-                    this.verifyExportFolderExists(exportDir);
+                    await this.verifyExportFolderExists(exportDir);
                     let collectionExportName = collectionIDFolderNameMap.get(
                         file.collectionID,
                     );
@@ -743,7 +743,7 @@ class ExportService {
                 exportRecord.fileExportNames,
             );
             for (const fileUID of removedFileUIDs) {
-                this.verifyExportFolderExists(exportDir);
+                await this.verifyExportFolderExists(exportDir);
                 addLogLine(`trashing file with id ${fileUID}`);
                 if (isCanceled.status) {
                     throw Error(CustomError.EXPORT_STOPPED);
@@ -769,10 +769,10 @@ class ExportService {
                             addLogLine(
                                 `moving image file ${imageExportPath} to trash folder`,
                             );
-                            if (this.exists(imageExportPath)) {
+                            if (await this.exists(imageExportPath)) {
                                 await ElectronAPIs.moveFile(
                                     imageExportPath,
-                                    getTrashedFileExportPath(
+                                    await getTrashedFileExportPath(
                                         exportDir,
                                         imageExportPath,
                                     ),
@@ -782,10 +782,12 @@ class ExportService {
                             const imageMetadataFileExportPath =
                                 getMetadataFileExportPath(imageExportPath);
 
-                            if (this.exists(imageMetadataFileExportPath)) {
+                            if (
+                                await this.exists(imageMetadataFileExportPath)
+                            ) {
                                 await ElectronAPIs.moveFile(
                                     imageMetadataFileExportPath,
-                                    getTrashedFileExportPath(
+                                    await getTrashedFileExportPath(
                                         exportDir,
                                         imageMetadataFileExportPath,
                                     ),
@@ -799,10 +801,10 @@ class ExportService {
                             addLogLine(
                                 `moving video file ${videoExportPath} to trash folder`,
                             );
-                            if (this.exists(videoExportPath)) {
+                            if (await this.exists(videoExportPath)) {
                                 await ElectronAPIs.moveFile(
                                     videoExportPath,
-                                    getTrashedFileExportPath(
+                                    await getTrashedFileExportPath(
                                         exportDir,
                                         videoExportPath,
                                     ),
@@ -810,10 +812,12 @@ class ExportService {
                             }
                             const videoMetadataFileExportPath =
                                 getMetadataFileExportPath(videoExportPath);
-                            if (this.exists(videoMetadataFileExportPath)) {
+                            if (
+                                await this.exists(videoMetadataFileExportPath)
+                            ) {
                                 await ElectronAPIs.moveFile(
                                     videoMetadataFileExportPath,
-                                    getTrashedFileExportPath(
+                                    await getTrashedFileExportPath(
                                         exportDir,
                                         videoMetadataFileExportPath,
                                     ),
@@ -824,14 +828,15 @@ class ExportService {
                                 collectionExportPath,
                                 fileExportName,
                             );
-                            const trashedFilePath = getTrashedFileExportPath(
-                                exportDir,
-                                fileExportPath,
-                            );
+                            const trashedFilePath =
+                                await getTrashedFileExportPath(
+                                    exportDir,
+                                    fileExportPath,
+                                );
                             addLogLine(
                                 `moving file ${fileExportPath} to ${trashedFilePath} trash folder`,
                             );
-                            if (this.exists(fileExportPath)) {
+                            if (await this.exists(fileExportPath)) {
                                 await ElectronAPIs.moveFile(
                                     fileExportPath,
                                     trashedFilePath,
@@ -839,10 +844,10 @@ class ExportService {
                             }
                             const metadataFileExportPath =
                                 getMetadataFileExportPath(fileExportPath);
-                            if (this.exists(metadataFileExportPath)) {
+                            if (await this.exists(metadataFileExportPath)) {
                                 await ElectronAPIs.moveFile(
                                     metadataFileExportPath,
-                                    getTrashedFileExportPath(
+                                    await getTrashedFileExportPath(
                                         exportDir,
                                         metadataFileExportPath,
                                     ),
@@ -995,9 +1000,9 @@ class ExportService {
 
     async getExportRecord(folder: string, retry = true): Promise<ExportRecord> {
         try {
-            this.verifyExportFolderExists(folder);
+            await this.verifyExportFolderExists(folder);
             const exportRecordJSONPath = `${folder}/${EXPORT_RECORD_FILE_NAME}`;
-            if (!this.exists(exportRecordJSONPath)) {
+            if (!(await this.exists(exportRecordJSONPath))) {
                 return this.createEmptyExportRecord(exportRecordJSONPath);
             }
             const recordFile =
@@ -1027,9 +1032,9 @@ class ExportService {
         collectionID: number,
         collectionIDNameMap: Map<number, string>,
     ) {
-        this.verifyExportFolderExists(exportFolder);
+        await this.verifyExportFolderExists(exportFolder);
         const collectionName = collectionIDNameMap.get(collectionID);
-        const collectionExportName = getUniqueCollectionExportName(
+        const collectionExportName = await getUniqueCollectionExportName(
             exportFolder,
             collectionName,
         );
@@ -1070,7 +1075,7 @@ class ExportService {
                     file,
                 );
             } else {
-                const fileExportName = getUniqueFileExportName(
+                const fileExportName = await getUniqueFileExportName(
                     collectionExportPath,
                     file.metadata.title,
                 );
@@ -1109,11 +1114,11 @@ class ExportService {
     ) {
         const fileBlob = await new Response(fileStream).blob();
         const livePhoto = await decodeLivePhoto(file, fileBlob);
-        const imageExportName = getUniqueFileExportName(
+        const imageExportName = await getUniqueFileExportName(
             collectionExportPath,
             livePhoto.imageNameTitle,
         );
-        const videoExportName = getUniqueFileExportName(
+        const videoExportName = await getUniqueFileExportName(
             collectionExportPath,
             livePhoto.videoNameTitle,
         );
@@ -1150,7 +1155,7 @@ class ExportService {
                     videoStream,
                 );
             } catch (e) {
-                ElectronAPIs.deleteFile(
+                await ElectronAPIs.deleteFile(
                     getFileExportPath(collectionExportPath, imageExportName),
                 );
                 throw e;
@@ -1177,7 +1182,7 @@ class ExportService {
     };
 
     exists = (path: string) => {
-        return ElectronAPIs.exists(path);
+        return ElectronAPIs.fs.exists(path);
     };
 
     rename = (oldPath: string, newPath: string) => {
@@ -1188,13 +1193,13 @@ class ExportService {
         return ElectronAPIs.checkExistsAndCreateDir(path);
     };
 
-    exportFolderExists = (exportFolder: string) => {
-        return exportFolder && this.exists(exportFolder);
+    exportFolderExists = async (exportFolder: string) => {
+        return exportFolder && (await this.exists(exportFolder));
     };
 
-    private verifyExportFolderExists = (exportFolder: string) => {
+    private verifyExportFolderExists = async (exportFolder: string) => {
         try {
-            if (!this.exportFolderExists(exportFolder)) {
+            if (!(await this.exportFolderExists(exportFolder))) {
                 throw Error(CustomError.EXPORT_FOLDER_DOES_NOT_EXIST);
             }
         } catch (e) {

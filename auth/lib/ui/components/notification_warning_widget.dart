@@ -21,14 +21,14 @@ class NotificationWidget extends StatelessWidget {
   final NotificationType type;
 
   const NotificationWidget({
-    Key? key,
+    super.key,
     required this.startIcon,
     required this.actionIcon,
     required this.text,
     required this.onTap,
     this.subText,
     this.type = NotificationType.warning,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

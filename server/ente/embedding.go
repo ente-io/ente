@@ -6,6 +6,7 @@ type Embedding struct {
 	EncryptedEmbedding string `json:"encryptedEmbedding"`
 	DecryptionHeader   string `json:"decryptionHeader"`
 	UpdatedAt          int64  `json:"updatedAt"`
+	Version            *int   `json:"version,omitempty"`
 }
 
 type InsertOrUpdateEmbeddingRequest struct {
@@ -13,6 +14,7 @@ type InsertOrUpdateEmbeddingRequest struct {
 	Model              string `json:"model" binding:"required"`
 	EncryptedEmbedding string `json:"encryptedEmbedding" binding:"required"`
 	DecryptionHeader   string `json:"decryptionHeader" binding:"required"`
+	Version            *int   `json:"version,omitempty"`
 }
 
 type GetEmbeddingDiffRequest struct {
@@ -22,11 +24,25 @@ type GetEmbeddingDiffRequest struct {
 	Limit     int16  `form:"limit" binding:"required"`
 }
 
+type GetFilesEmbeddingRequest struct {
+	Model   Model   `form:"model" binding:"required"`
+	FileIDs []int64 `form:"fileIDs" binding:"required"`
+}
+
+type GetFilesEmbeddingResponse struct {
+	Embeddings    []Embedding `json:"embeddings"`
+	NoDataFileIDs []int64     `json:"noDataFileIDs"`
+	ErrFileIDs    []int64     `json:"errFileIDs"`
+}
+
 type Model string
 
 const (
 	OnnxClip Model = "onnx-clip"
 	GgmlClip Model = "ggml-clip"
+
+	// FileMlClipFace is a model for face embeddings, it is used in request validation.
+	FileMlClipFace Model = "file-ml-clip-face"
 )
 
 type EmbeddingObject struct {

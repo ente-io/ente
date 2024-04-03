@@ -27,8 +27,7 @@ class NotificationService {
         _flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<
             AndroidFlutterLocalNotificationsPlugin>();
     if (implementation != null) {
-      // ignore: unawaited_futures
-      implementation.requestPermission();
+      await implementation.requestNotificationsPermission();
     }
   }
 

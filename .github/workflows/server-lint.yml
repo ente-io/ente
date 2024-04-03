@@ -3,7 +3,7 @@ name: "Lint (server)"
 on:
     # Run on every push to a branch other than main that changes server/
     push:
-        branches-ignore: [main]
+        branches-ignore: [main, "deploy/**"]
         paths:
             - "server/**"
             - ".github/workflows/server-lint.yml"

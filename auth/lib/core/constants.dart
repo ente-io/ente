@@ -7,7 +7,8 @@ const String sentryDSN =
     "https://ed4ddd6309b847ba8849935e26e9b648@sentry.ente.io/9";
 const String sentryTunnel = "https://sentry-reporter.ente.io";
 const String roadmapURL = "https://roadmap.ente.io";
-const String githubDiscussionsUrl = "https://github.com/ente-io/ente/discussions";
+const String githubIssuesUrl =
+    "https://github.com/ente-io/ente/issues?q=is%3Aissue+is%3Aopen+sort%3Areactions-%2B1-desc";
 const int microSecondsInDay = 86400000000;
 const int android11SDKINT = 30;
 const int galleryLoadStartTime = -8000000000000000; // Wednesday, March 6, 1748

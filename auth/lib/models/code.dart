@@ -57,14 +57,7 @@ class Code {
       updatedAlgo,
       updatedType,
       updatedCounter,
-      "otpauth://${updatedType.name}/" +
-          updateIssuer +
-          ":" +
-          updateAccount +
-          "?algorithm=${updatedAlgo.name}&digits=$updatedDigits&issuer=" +
-          updateIssuer +
-          "&period=$updatePeriod&secret=" +
-          updatedSecret + (updatedType == Type.hotp ? "&counter=$updatedCounter" : ""),
+      "otpauth://${updatedType.name}/$updateIssuer:$updateAccount?algorithm=${updatedAlgo.name}&digits=$updatedDigits&issuer=$updateIssuer&period=$updatePeriod&secret=$updatedSecret${updatedType == Type.hotp ? "&counter=$updatedCounter" : ""}",
       generatedID: generatedID,
     );
   }
@@ -83,35 +76,28 @@ class Code {
       Algorithm.sha1,
       Type.totp,
       0,
-      "otpauth://totp/" +
-          issuer +
-          ":" +
-          account +
-          "?algorithm=SHA1&digits=6&issuer=" +
-          issuer +
-          "&period=30&secret=" +
-          secret,
+      "otpauth://totp/$issuer:$account?algorithm=SHA1&digits=6&issuer=$issuer&period=30&secret=$secret",
     );
   }
 
   static Code fromRawData(String rawData) {
     Uri uri = Uri.parse(rawData);
     try {
-    return Code(
-      _getAccount(uri),
-      _getIssuer(uri),
-      _getDigits(uri),
-      _getPeriod(uri),
-      getSanitizedSecret(uri.queryParameters['secret']!),
-      _getAlgorithm(uri),
-      _getType(uri),
-      _getCounter(uri),
-      rawData,
-    );
-    } catch(e) {
+      return Code(
+        _getAccount(uri),
+        _getIssuer(uri),
+        _getDigits(uri),
+        _getPeriod(uri),
+        getSanitizedSecret(uri.queryParameters['secret']!),
+        _getAlgorithm(uri),
+        _getType(uri),
+        _getCounter(uri),
+        rawData,
+      );
+    } catch (e) {
       // if account name contains # without encoding,
       // rest of the url are treated as url fragment
-      if(rawData.contains("#")) {
+      if (rawData.contains("#")) {
         return Code.fromRawData(rawData.replaceAll("#", '%23'));
       } else {
         rethrow;
@@ -141,7 +127,7 @@ class Code {
       if (uri.queryParameters.containsKey("issuer")) {
         String issuerName = uri.queryParameters['issuer']!;
         // Handle issuer name with period
-        // See https://github.com/ente-io/auth/pull/77
+        // See https://github.com/ente-io/ente/pull/77
         if (issuerName.contains("period=")) {
           return issuerName.substring(0, issuerName.indexOf("period="));
         }

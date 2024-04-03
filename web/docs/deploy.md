@@ -36,10 +36,12 @@ deployments, and the action that triggers them:
 | [auth.ente.io](https://auth.ente.io) | Production | Push to `deploy/auth` |
 | [accounts.ente.io](https://accounts.ente.io) | Production | Push to `deploy/accounts` |
 | [cast.ente.io](https://cast.ente.io) | Production | Push to `deploy/cast` |
+| [payments.ente.io](https://payments.ente.io) | Production | Push to `deploy/payments` |
 | [help.ente.io](https://help.ente.io) | Production | Push to `main` + changes in `docs/` |
 | [accounts.ente.sh](https://accounts.ente.sh) | Preview | Nightly deploy of `main` |
 | [auth.ente.sh](https://auth.ente.sh) | Preview | Nightly deploy of `main` |
 | [cast.ente.sh](https://cast.ente.sh) | Preview | Nightly deploy of `main` |
+| [payments.ente.sh](https://payments.ente.sh) | Preview | Nightly deploy of `main` |
 | [photos.ente.sh](https://photos.ente.sh) | Preview | Nightly deploy of `main` |
 | [preview.ente.sh](https://preview.ente.sh) | Preview | Manually triggered |
 
@@ -52,8 +54,8 @@ Apart from this, there are also some other deployments:
   `albums.ente.io`, it redirects to the `/shared-albums` page (Enhancement:
   serve it as a separate app with a smaller bundle size).
 
-- `payments.ente.io` and `family.ente.io` are currently in a separate
-  repositories (Enhancement: bring them in here).
+- `family.ente.io` is currently in a separate repositories (Enhancement: bring
+  them in here).
 
 ### Preview deployments
 

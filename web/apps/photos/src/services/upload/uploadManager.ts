@@ -180,7 +180,7 @@ class UploadManager {
             if (e.message === CustomError.UPLOAD_CANCELLED) {
                 if (isElectron()) {
                     this.remainingFiles = [];
-                    ImportService.cancelRemainingUploads();
+                    await ImportService.cancelRemainingUploads();
                 }
             } else {
                 logError(e, "uploading failed with error");
@@ -326,7 +326,7 @@ class UploadManager {
             addLogLine(
                 `post upload action -> fileUploadResult: ${fileUploadResult} uploadedFile present ${!!uploadedFile}`,
             );
-            this.updateElectronRemainingFiles(fileWithCollection);
+            await this.updateElectronRemainingFiles(fileWithCollection);
             switch (fileUploadResult) {
                 case UPLOAD_RESULT.FAILED:
                 case UPLOAD_RESULT.BLOCKED:
@@ -427,14 +427,14 @@ class UploadManager {
         this.setFiles((files) => sortFiles([...files, decryptedFile]));
     }
 
-    private updateElectronRemainingFiles(
+    private async updateElectronRemainingFiles(
         fileWithCollection: FileWithCollection,
     ) {
         if (isElectron()) {
             this.remainingFiles = this.remainingFiles.filter(
                 (file) => !areFileWithCollectionsSame(file, fileWithCollection),
             );
-            ImportService.updatePendingUploads(this.remainingFiles);
+            await ImportService.updatePendingUploads(this.remainingFiles);
         }
     }
 

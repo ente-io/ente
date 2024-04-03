@@ -1,4 +1,3 @@
-import 'package:ente_auth/ui/settings/data/import/2fas_import.dart';
 import 'package:ente_auth/ui/settings/data/import/aegis_import.dart';
 import 'package:ente_auth/ui/settings/data/import/bitwarden_import.dart';
 import 'package:ente_auth/ui/settings/data/import/encrypted_ente_import.dart';
@@ -6,6 +5,7 @@ import 'package:ente_auth/ui/settings/data/import/google_auth_import.dart';
 import 'package:ente_auth/ui/settings/data/import/lastpass_import.dart';
 import 'package:ente_auth/ui/settings/data/import/plain_text_import.dart';
 import 'package:ente_auth/ui/settings/data/import/raivo_plain_text_import.dart';
+import 'package:ente_auth/ui/settings/data/import/two_fas_import.dart';
 import 'package:ente_auth/ui/settings/data/import_page.dart';
 import 'package:flutter/cupertino.dart';
 

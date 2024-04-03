@@ -1,13 +1,10 @@
-import 'dart:ui';
-
 import 'package:ente_auth/core/event_bus.dart';
 import 'package:ente_auth/events/opened_settings_event.dart';
 import 'package:flutter/material.dart';
 
 class HomeHeaderWidget extends StatefulWidget {
   final Widget centerWidget;
-  const HomeHeaderWidget({required this.centerWidget, Key? key})
-      : super(key: key);
+  const HomeHeaderWidget({required this.centerWidget, super.key});
 
   @override
   State<HomeHeaderWidget> createState() => _HomeHeaderWidgetState();
@@ -16,7 +13,7 @@ class HomeHeaderWidget extends StatefulWidget {
 class _HomeHeaderWidgetState extends State<HomeHeaderWidget> {
   @override
   Widget build(BuildContext context) {
-    final hasNotch = window.viewPadding.top > 65;
+    final hasNotch = View.of(context).viewPadding.top > 65;
     return Padding(
       padding: EdgeInsets.fromLTRB(4, hasNotch ? 4 : 8, 4, 4),
       child: Row(

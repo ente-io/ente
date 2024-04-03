@@ -98,8 +98,8 @@ export default function ExportModal(props: Props) {
     // HELPER FUNCTIONS
     // =======================
 
-    const verifyExportFolderExists = () => {
-        if (!exportService.exportFolderExists(exportFolder)) {
+    const verifyExportFolderExists = async () => {
+        if (!(await exportService.exportFolderExists(exportFolder))) {
             appContext.setDialogMessage(
                 getExportDirectoryDoesNotExistMessage(),
             );
@@ -109,7 +109,7 @@ export default function ExportModal(props: Props) {
 
     const syncExportRecord = async (exportFolder: string): Promise<void> => {
         try {
-            if (!exportService.exportFolderExists(exportFolder)) {
+            if (!(await exportService.exportFolderExists(exportFolder))) {
                 const pendingExports =
                     await exportService.getPendingExports(null);
                 setPendingExports(pendingExports);
@@ -145,9 +145,9 @@ export default function ExportModal(props: Props) {
         }
     };
 
-    const toggleContinuousExport = () => {
+    const toggleContinuousExport = async () => {
         try {
-            verifyExportFolderExists();
+            await verifyExportFolderExists();
             const newContinuousExport = !continuousExport;
             if (newContinuousExport) {
                 exportService.enableContinuousExport();
@@ -162,7 +162,7 @@ export default function ExportModal(props: Props) {
 
     const startExport = async () => {
         try {
-            verifyExportFolderExists();
+            await verifyExportFolderExists();
             await exportService.scheduleExport();
         } catch (e) {
             if (e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST) {

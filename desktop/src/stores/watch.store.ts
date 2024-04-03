@@ -1,5 +1,5 @@
 import Store, { Schema } from "electron-store";
-import { WatchStoreType } from "../types";
+import { WatchStoreType } from "../types/ipc";
 
 const watchStoreSchema: Schema<WatchStoreType> = {
     mappings: {

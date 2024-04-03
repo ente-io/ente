@@ -79,3 +79,5 @@ class LoginKeyDerivationError extends Error {}
 class SrpSetupNotCompleteError extends Error {}
 
 class SharingNotPermittedForFreeAccountsError extends Error {}
+
+class NoMediaLocationAccessError extends Error {}

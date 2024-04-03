@@ -14,7 +14,8 @@ node_modules/
 # tsc transpiles src/**/*.ts and emits the generated JS into app
 app/
 
-# out is a symlink to the photos web app's dir
+# out is a symlink to the photos web app's out dir, which contains the built up
+# photos app.
 out
 
 # electron-builder

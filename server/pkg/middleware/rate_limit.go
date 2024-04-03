@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"sync/atomic"
+	"time"
 
 	"github.com/ente-io/museum/pkg/controller/discord"
 	"github.com/ente-io/museum/pkg/utils/auth"
@@ -20,14 +22,40 @@ type RateLimitMiddleware struct {
 	limit10ReqPerMin  *limiter.Limiter
 	limit200ReqPerSec *limiter.Limiter
 	discordCtrl       *discord.DiscordController
+	count             int64 // Use int64 for atomic operations
+	limit             int64
+	reset             time.Duration
+	ticker            *time.Ticker
 }
 
-func NewRateLimitMiddleware(discordCtrl *discord.DiscordController) *RateLimitMiddleware {
-	return &RateLimitMiddleware{
+func NewRateLimitMiddleware(discordCtrl *discord.DiscordController, limit int64, reset time.Duration) *RateLimitMiddleware {
+	rl := &RateLimitMiddleware{
 		limit10ReqPerMin:  rateLimiter("10-M"),
 		limit200ReqPerSec: rateLimiter("200-S"),
 		discordCtrl:       discordCtrl,
+		limit:             limit,
+		reset:             reset,
+		ticker:            time.NewTicker(reset),
 	}
+	go func() {
+		for range rl.ticker.C {
+			atomic.StoreInt64(&rl.count, 0) // Reset the count every reset interval
+		}
+	}()
+	return rl
+}
+
+// Increment increments the counter in a thread-safe manner.
+// Returns true if the increment was within the rate limit, false if the rate limit was exceeded.
+func (r *RateLimitMiddleware) Increment() bool {
+	// Atomically increment the count
+	newCount := atomic.AddInt64(&r.count, 1)
+	return newCount <= r.limit
+}
+
+// Stop the internal ticker, effectively stopping the rate limiter.
+func (r *RateLimitMiddleware) Stop() {
+	r.ticker.Stop()
 }
 
 // rateLimiter will return instance of limiter.Limiter based on internal <limit>-<period>
@@ -42,6 +70,20 @@ func rateLimiter(interval string) *limiter.Limiter {
 	}
 	instance := limiter.New(store, rate)
 	return instance
+}
+
+// GlobalRateLimiter rate limits all requests to the server, regardless of the endpoint.
+func (r *RateLimitMiddleware) GlobalRateLimiter() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		if !r.Increment() {
+			if r.count%100 == 0 {
+				go r.discordCtrl.NotifyPotentialAbuse(fmt.Sprintf("Global ratelimit (%d) breached %d", r.limit, r.count))
+			}
+			c.AbortWithStatusJSON(http.StatusTooManyRequests, gin.H{"error": "Rate limit breached, try later"})
+			return
+		}
+		c.Next()
+	}
 }
 
 // APIRateLimitMiddleware only rate limits sensitive public endpoints which have a higher risk

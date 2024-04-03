@@ -18,7 +18,27 @@ export interface SingleInputFormProps {
         resetForm: (nextState?: Partial<FormikState<formValues>>) => void,
     ) => Promise<void>;
     fieldType: "text" | "email" | "password";
-    placeholder: string;
+    /** deprecated: Use realPlaceholder */
+    placeholder?: string;
+    /**
+     * Placeholder
+     *
+     * The existing `placeholder` property uses the placeholder as a label (i.e.
+     * it doesn't appear as the placeholder within the text input area but
+     * rather as the label on top of it). This happens conditionally, so it is
+     * not a matter of simple rename.
+     *
+     * Gradually migrate the existing UI to use this property when we really
+     * want a placeholder, and then create a separate label property for places
+     * that actually want to set the label.
+     */
+    realPlaceholder?: string;
+    /**
+     * Label to show on top of the text input area.
+     *
+     * Sibling of {@link realPlaceholder}.
+     */
+    realLabel?: string;
     buttonText: string;
     submitButtonProps?: any;
     initialValue?: string;
@@ -102,7 +122,12 @@ export default function SingleInputForm(props: SingleInputFormProps) {
                         name={props.fieldType}
                         {...(props.hiddenLabel
                             ? { placeholder: props.placeholder }
-                            : { label: props.placeholder })}
+                            : props.realPlaceholder
+                              ? {
+                                    placeholder: props.realPlaceholder,
+                                    label: props.realLabel,
+                                }
+                              : { label: props.placeholder })}
                         value={values.inputValue}
                         onChange={handleChange("inputValue")}
                         error={Boolean(errors.inputValue)}

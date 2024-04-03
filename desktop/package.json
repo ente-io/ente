@@ -8,128 +8,46 @@
     "scripts": {
         "build": "yarn build-renderer && yarn build-main",
         "build-main": "tsc && electron-builder",
-        "build-main:quick": "tsc && electron-builder --config.compression=store",
-        "build-renderer": "cd ../web && yarn install && yarn build:photos && cd ../desktop && rm -f out && ln -sf ../web/apps/photos/out",
+        "build-main:quick": "tsc && electron-builder --dir --config.compression=store --config.mac.identity=null",
+        "build-renderer": "cd ../web && yarn install && yarn build:photos && cd ../desktop && shx rm -f out && shx ln -sf ../web/apps/photos/out out",
         "build:quick": "yarn build-renderer && yarn build-main:quick",
-        "dev": "concurrently --names 'main,rndr,tscw' \"yarn dev-main\" \"yarn dev-renderer\" \"yarn dev-main-watch\"",
+        "dev": "concurrently --names 'main,rndr' \"yarn dev-main\" \"yarn dev-renderer\"",
         "dev-main": "tsc && electron app/main.js",
-        "dev-main-watch": "tsc --watch --preserveWatchOutput",
         "dev-renderer": "cd ../web && yarn install && yarn dev:photos",
         "postinstall": "electron-builder install-app-deps",
-        "lint": "yarn prettier --check . && eslint \"src/**/*.ts\"",
-        "lint-fix": "yarn prettier --write . && eslint --fix src"
+        "lint": "yarn prettier --check . && eslint --ext .ts src",
+        "lint-fix": "yarn prettier --write . && eslint --fix --ext .ts src"
     },
     "dependencies": {
-        "any-shell-escape": "^0.1.1",
-        "auto-launch": "^5.0.5",
-        "chokidar": "^3.5.3",
-        "compare-versions": "^6.1.0",
-        "electron-log": "^4.3.5",
-        "electron-reload": "^2.0.0-alpha.1",
-        "electron-store": "^8.0.1",
-        "electron-updater": "^4.3.8",
-        "ffmpeg-static": "^5.1.0",
-        "get-folder-size": "^2.0.1",
-        "html-entities": "^2.4.0",
-        "jpeg-js": "^0.4.4",
+        "any-shell-escape": "^0.1",
+        "auto-launch": "^5.0",
+        "chokidar": "^3.6",
+        "compare-versions": "^6.1",
+        "electron-log": "^5.1",
+        "electron-store": "^8.2",
+        "electron-updater": "^6.1",
+        "ffmpeg-static": "^5.2",
+        "html-entities": "^2.5",
+        "jpeg-js": "^0.4",
         "next-electron-server": "^1",
-        "node-fetch": "^2.6.7",
-        "node-stream-zip": "^1.15.0",
-        "onnxruntime-node": "^1.16.3",
-        "promise-fs": "^2.1.1"
+        "node-stream-zip": "^1.15",
+        "onnxruntime-node": "^1.17"
     },
     "devDependencies": {
-        "@types/auto-launch": "^5.0.2",
-        "@types/ffmpeg-static": "^3.0.1",
-        "@types/get-folder-size": "^2.0.0",
-        "@types/node": "18.15.0",
-        "@types/node-fetch": "^2.6.2",
-        "@types/promise-fs": "^2.1.1",
-        "@typescript-eslint/eslint-plugin": "^5.28.0",
-        "@typescript-eslint/parser": "^5.28.0",
-        "concurrently": "^7.0.0",
-        "electron": "^25.8.4",
-        "electron-builder": "^24.6.4",
-        "electron-builder-notarize": "^1.2.0",
-        "electron-download": "^4.1.1",
-        "eslint": "^7.23.0",
-        "eslint-config-google": "^0.14.0",
-        "eslint-config-prettier": "^8.5.0",
+        "@types/auto-launch": "^5.0",
+        "@types/ffmpeg-static": "^3.0",
+        "@typescript-eslint/eslint-plugin": "^7",
+        "@typescript-eslint/parser": "^7",
+        "concurrently": "^8",
+        "electron": "^29",
+        "electron-builder": "^24",
+        "electron-builder-notarize": "^1.5",
+        "eslint": "^8",
         "prettier": "^3",
         "prettier-plugin-organize-imports": "^3.2",
         "prettier-plugin-packagejson": "^2.4",
-        "typescript": "^4.2.3"
+        "shx": "^0.3",
+        "typescript": "^5"
     },
-    "build": {
-        "appId": "io.ente.bhari-frame",
-        "artifactName": "${productName}-${version}-${arch}.${ext}",
-        "nsis": {
-            "deleteAppDataOnUninstall": true
-        },
-        "linux": {
-            "target": [
-                {
-                    "target": "AppImage",
-                    "arch": [
-                        "x64",
-                        "arm64"
-                    ]
-                },
-                {
-                    "target": "deb",
-                    "arch": [
-                        "x64",
-                        "arm64"
-                    ]
-                },
-                {
-                    "target": "rpm",
-                    "arch": [
-                        "x64",
-                        "arm64"
-                    ]
-                },
-                {
-                    "target": "pacman",
-                    "arch": [
-                        "x64",
-                        "arm64"
-                    ]
-                }
-            ],
-            "icon": "./resources/icon.icns",
-            "category": "Photography"
-        },
-        "mac": {
-            "target": {
-                "target": "default",
-                "arch": [
-                    "universal"
-                ]
-            },
-            "category": "public.app-category.photography",
-            "hardenedRuntime": true,
-            "x64ArchFiles": "Contents/Resources/ggmlclip-mac"
-        },
-        "afterSign": "electron-builder-notarize",
-        "asarUnpack": [
-            "node_modules/ffmpeg-static/bin/${os}/${arch}/ffmpeg",
-            "node_modules/ffmpeg-static/index.js",
-            "node_modules/ffmpeg-static/package.json"
-        ],
-        "extraFiles": [
-            {
-                "from": "build",
-                "to": "resources"
-            }
-        ],
-        "files": [
-            "app/**/*",
-            "out"
-        ]
-    },
-    "productName": "ente",
-    "standard": {
-        "parser": "babel-eslint"
-    }
+    "productName": "ente"
 }

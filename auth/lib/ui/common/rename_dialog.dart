@@ -8,8 +8,7 @@ class RenameDialog extends StatefulWidget {
   final String type;
   final int maxLength;
 
-  const RenameDialog(this.name, this.type, {Key? key, this.maxLength = 100})
-      : super(key: key);
+  const RenameDialog(this.name, this.type, {super.key, this.maxLength = 100});
 
   @override
   State<RenameDialog> createState() => _RenameDialogState();

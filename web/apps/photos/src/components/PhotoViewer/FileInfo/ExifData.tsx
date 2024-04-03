@@ -1,7 +1,6 @@
 import CopyButton from "@ente/shared/components/CodeBlock/CopyButton";
 import { formatDateTimeFull } from "@ente/shared/time/format";
-import { Stack, styled, Typography } from "@mui/material";
-import { Box } from "@mui/system";
+import { Box, Stack, styled, Typography } from "@mui/material";
 import Titlebar from "components/Titlebar";
 import { t } from "i18next";
 import { FileInfoSidebar } from ".";

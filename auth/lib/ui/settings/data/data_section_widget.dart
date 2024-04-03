@@ -10,7 +10,9 @@ import 'package:ente_auth/utils/navigation_util.dart';
 import 'package:flutter/material.dart';
 
 class DataSectionWidget extends StatelessWidget {
-  DataSectionWidget({Key? key}) : super(key: key);
+  // final _logger = Logger("AccountSectionWidget");
+
+  DataSectionWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -35,8 +37,7 @@ class DataSectionWidget extends StatelessWidget {
         trailingIcon: Icons.chevron_right_outlined,
         trailingIconIsMuted: true,
         onTap: () async {
-          // ignore: unawaited_futures
-          routeToPage(context, ImportCodePage());
+          await routeToPage(context, const ImportCodePage());
         },
       ),
       sectionOptionSpacing,

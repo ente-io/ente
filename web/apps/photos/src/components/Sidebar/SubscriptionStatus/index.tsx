@@ -12,6 +12,7 @@ import {
     isOnFreePlan,
     isSubscriptionActive,
     isSubscriptionCancelled,
+    isSubscriptionPastDue,
 } from "utils/billing";
 
 import { Typography } from "@mui/material";
@@ -54,7 +55,10 @@ export default function SubscriptionStatus({
                         showPlanSelectorModal();
                     }
                 } else {
-                    if (hasStripeSubscription(userDetails.subscription)) {
+                    if (
+                        hasStripeSubscription(userDetails.subscription) &&
+                        isSubscriptionPastDue(userDetails.subscription)
+                    ) {
                         billingService.redirectToCustomerPortal();
                     } else {
                         showPlanSelectorModal();

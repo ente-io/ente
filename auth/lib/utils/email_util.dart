@@ -4,22 +4,21 @@ import 'package:archive/archive_io.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/core/logging/super_logging.dart';
-import 'package:ente_auth/ente_theme_data.dart';
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/ui/components/buttons/button_widget.dart';
 import 'package:ente_auth/ui/components/dialog_widget.dart';
 import 'package:ente_auth/ui/components/models/button_type.dart';
 import 'package:ente_auth/ui/tools/debug/log_file_viewer.dart';
-// import 'package:ente_auth/ui/tools/debug/log_file_viewer.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
+import 'package:ente_auth/utils/platform_util.dart';
+import 'package:ente_auth/utils/share_utils.dart';
 import 'package:ente_auth/utils/toast_util.dart';
-import 'package:file_saver/file_saver.dart';
+import "package:file_saver/file_saver.dart";
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_email_sender/flutter_email_sender.dart';
-import 'package:intl/intl.dart';
+import "package:intl/intl.dart";
 import 'package:logging/logging.dart';
-// import 'package:open_mail_app/open_mail_app.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
@@ -27,7 +26,10 @@ import 'package:url_launcher/url_launcher.dart';
 
 final Logger _logger = Logger('email_util');
 
-bool isValidEmail(String email) {
+bool isValidEmail(String? email) {
+  if (email == null) {
+    return false;
+  }
   return EmailValidator.validate(email);
 }
 
@@ -40,91 +42,72 @@ Future<void> sendLogs(
   String? body,
 }) async {
   final l10n = context.l10n;
-  final List<Widget> actions = [
-    TextButton(
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          Icon(
-            Icons.feed_outlined,
-            color: Theme.of(context).iconTheme.color?.withOpacity(0.85),
-          ),
-          const Padding(padding: EdgeInsets.all(4)),
-          Text(
-            l10n.viewLogsAction,
-            style: TextStyle(
-              color: Theme.of(context)
-                  .colorScheme
-                  .defaultTextColor
-                  .withOpacity(0.85),
+  await showDialogWidget(
+    context: context,
+    title: title,
+    icon: Icons.bug_report_outlined,
+    body: l10n.sendLogsDescription,
+    buttons: [
+      ButtonWidget(
+        isInAlert: true,
+        buttonType: ButtonType.neutral,
+        labelText: l10n.reportABug,
+        buttonAction: ButtonAction.first,
+        shouldSurfaceExecutionStates: false,
+        onTap: () async {
+          await _sendLogs(context, toEmail, subject, body);
+          if (postShare != null) {
+            postShare();
+          }
+        },
+      ),
+      //isInAlert is false here as we don't want to the dialog to dismiss
+      //on pressing this button
+      ButtonWidget(
+        buttonType: ButtonType.secondary,
+        labelText: l10n.viewLogsAction,
+        buttonAction: ButtonAction.second,
+        onTap: () async {
+          await showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return LogFileViewer(SuperLogging.logFile!);
+            },
+            barrierColor: Colors.black87,
+            barrierDismissible: false,
+          );
+        },
+      ),
+      ButtonWidget(
+        isInAlert: true,
+        buttonType: ButtonType.secondary,
+        labelText: l10n.exportLogs,
+        buttonAction: ButtonAction.third,
+        onTap: () async {
+          Future.delayed(
+            const Duration(milliseconds: 200),
+            () => shareDialog(
+              context,
+              title,
+              saveAction: () async {
+                final zipFilePath = await getZippedLogsFile(context);
+                await exportLogs(context, zipFilePath);
+              },
+              sendAction: () async {
+                final zipFilePath = await getZippedLogsFile(context);
+                await exportLogs(context, zipFilePath, true);
+              },
             ),
-          ),
-        ],
+          );
+        },
       ),
-      onPressed: () async {
-        // ignore: unawaited_futures
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return LogFileViewer(SuperLogging.logFile!);
-          },
-          barrierColor: Colors.black87,
-          barrierDismissible: false,
-        );
-      },
-    ),
-    TextButton(
-      child: Text(
-        title,
-        style: TextStyle(
-          color: Theme.of(context).colorScheme.alternativeColor,
-        ),
-      ),
-      onPressed: () async {
-        Navigator.of(context, rootNavigator: true).pop('dialog');
-        await _sendLogs(context, toEmail, subject, body);
-        if (postShare != null) {
-          postShare();
-        }
-      },
-    ),
-  ];
-  final List<Widget> content = [];
-  content.addAll(
-    [
-      Text(
-        l10n.sendLogsDescription,
-        style: const TextStyle(
-          height: 1.5,
-          fontSize: 16,
-        ),
-      ),
-      const Padding(padding: EdgeInsets.all(12)),
-      Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: actions,
+      ButtonWidget(
+        isInAlert: true,
+        buttonType: ButtonType.secondary,
+        labelText: l10n.cancel,
+        buttonAction: ButtonAction.cancel,
       ),
     ],
-  );
-  final confirmation = AlertDialog(
-    title: Text(
-      title,
-      style: const TextStyle(
-        fontSize: 18,
-      ),
-    ),
-    content: SingleChildScrollView(
-      child: ListBody(
-        children: content,
-      ),
-    ),
-  );
-  // ignore: unawaited_futures
-  showDialog(
-    context: context,
-    builder: (_) {
-      return confirmation;
-    },
   );
 }
 
@@ -146,6 +129,7 @@ Future<void> _sendLogs(
     await FlutterEmailSender.send(email);
   } catch (e, s) {
     _logger.severe('email sender failed', e, s);
+    Navigator.of(context, rootNavigator: true).pop();
     await shareLogs(context, toEmail, zipFilePath);
   }
 }
@@ -155,10 +139,10 @@ Future<String> getZippedLogsFile(BuildContext context) async {
   final dialog = createProgressDialog(context, l10n.preparingLogsTitle);
   await dialog.show();
   final logsPath = (await getApplicationSupportDirectory()).path;
-  final logsDirectory = Directory(logsPath + "/logs");
+  final logsDirectory = Directory("$logsPath/logs");
   final tempPath = (await getTemporaryDirectory()).path;
   final zipFilePath =
-      tempPath + "/logs-${Configuration.instance.getUserID() ?? 0}.zip";
+      "$tempPath/logs-${Configuration.instance.getUserID() ?? 0}.zip";
   final encoder = ZipFileEncoder();
   encoder.create(zipFilePath);
   await encoder.addDirectory(logsDirectory);
@@ -172,14 +156,15 @@ Future<void> shareLogs(
   String toEmail,
   String zipFilePath,
 ) async {
+  final l10n = context.l10n;
   final result = await showDialogWidget(
     context: context,
-    title: context.l10n.emailYourLogs,
-    body: context.l10n.pleaseSendTheLogsTo(toEmail),
+    title: l10n.emailYourLogs,
+    body: l10n.pleaseSendTheLogsTo(toEmail),
     buttons: [
       ButtonWidget(
         buttonType: ButtonType.neutral,
-        labelText: context.l10n.copyEmailAddress,
+        labelText: l10n.copyEmailAddress,
         isInAlert: true,
         buttonAction: ButtonAction.first,
         onTap: () async {
@@ -189,35 +174,55 @@ Future<void> shareLogs(
       ),
       ButtonWidget(
         buttonType: ButtonType.neutral,
-        labelText: context.l10n.exportLogs,
+        labelText: l10n.exportLogs,
         isInAlert: true,
         buttonAction: ButtonAction.second,
       ),
       ButtonWidget(
         buttonType: ButtonType.secondary,
-        labelText: context.l10n.cancel,
+        labelText: l10n.cancel,
         isInAlert: true,
         buttonAction: ButtonAction.cancel,
       ),
     ],
   );
   if (result?.action != null && result!.action == ButtonAction.second) {
-    await exportLogs(context, zipFilePath);
+    Future.delayed(
+      const Duration(milliseconds: 200),
+      () => shareDialog(
+        context,
+        context.l10n.exportLogs,
+        saveAction: () async {
+          final zipFilePath = await getZippedLogsFile(context);
+          await exportLogs(context, zipFilePath);
+        },
+        sendAction: () async {
+          final zipFilePath = await getZippedLogsFile(context);
+          await exportLogs(context, zipFilePath, true);
+        },
+      ),
+    );
   }
 }
 
-Future<void> exportLogs(BuildContext context, String zipFilePath) async {
+Future<void> exportLogs(
+  BuildContext context,
+  String zipFilePath, [
+  bool isSharing = false,
+]) async {
   final Size size = MediaQuery.of(context).size;
-  if (Platform.isAndroid) {
-    DateTime now = DateTime.now().toUtc();
-    String shortMonthName = DateFormat('MMM').format(now); // Short month name
-    String logFileName =
+  if (!isSharing) {
+    final DateTime now = DateTime.now().toUtc();
+    final String shortMonthName = DateFormat('MMM').format(now); // Short month
+    final String logFileName =
         'ente-logs-${now.year}-$shortMonthName-${now.day}-${now.hour}-${now.minute}';
-    await FileSaver.instance.saveAs(
-      name: logFileName,
-      filePath: zipFilePath,
-      mimeType: MimeType.zip,
-      ext: 'zip',
+
+    final bytes = await File(zipFilePath).readAsBytes();
+    await PlatformUtil.shareFile(
+      logFileName,
+      'zip',
+      bytes,
+      MimeType.zip,
     );
   } else {
     await Share.shareXFiles(
@@ -235,8 +240,8 @@ Future<void> sendEmail(
 }) async {
   try {
     final String clientDebugInfo = await _clientInfo();
-    final String _subject = subject ?? '[Support]';
-    final String _body = (body ?? '') + clientDebugInfo;
+    final String subject0 = subject ?? '[Support]';
+    final String body0 = (body ?? '') + clientDebugInfo;
     // final EmailContent email = EmailContent(
     //   to: [
     //     to,
@@ -250,7 +255,7 @@ Future<void> sendEmail(
       final Uri params = Uri(
         scheme: 'mailto',
         path: to,
-        query: 'subject=$_subject&body=$_body',
+        query: 'subject=$subject0&body=$body0',
       );
       if (await canLaunchUrl(params)) {
         await launchUrl(params);
@@ -280,27 +285,15 @@ Future<String> _clientInfo() async {
 
 void _showNoMailAppsDialog(BuildContext context, String toEmail) {
   final l10n = context.l10n;
-  showDialog(
-    context: context,
-    builder: (context) {
-      return AlertDialog(
-        title: Text(l10n.emailUsMessage(toEmail)),
-        actions: <Widget>[
-          TextButton(
-            child: Text(l10n.copyEmailAction),
-            onPressed: () async {
-              await Clipboard.setData(ClipboardData(text: toEmail));
-              showShortToast(context, l10n.copied);
-            },
-          ),
-          TextButton(
-            child: Text(l10n.ok),
-            onPressed: () {
-              Navigator.pop(context);
-            },
-          ),
-        ],
-      );
+  showChoiceDialog(
+    context,
+    icon: Icons.email_outlined,
+    title: l10n.emailUsMessage(toEmail),
+    firstButtonLabel: l10n.copyEmailAddress,
+    secondButtonLabel: l10n.ok,
+    firstButtonOnTap: () async {
+      await Clipboard.setData(ClipboardData(text: toEmail));
+      showShortToast(context, l10n.copied);
     },
   );
 }

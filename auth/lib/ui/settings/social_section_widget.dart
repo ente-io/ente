@@ -7,11 +7,12 @@ import 'package:ente_auth/ui/components/captioned_text_widget.dart';
 import 'package:ente_auth/ui/components/expandable_menu_item_widget.dart';
 import 'package:ente_auth/ui/components/menu_item_widget.dart';
 import 'package:ente_auth/ui/settings/common_settings.dart';
+import 'package:ente_auth/utils/platform_util.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 class SocialSectionWidget extends StatelessWidget {
-  const SocialSectionWidget({Key? key}) : super(key: key);
+  const SocialSectionWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -31,8 +32,10 @@ class SocialSectionWidget extends StatelessWidget {
 
     final List<Widget> options = [
       sectionOptionSpacing,
-      SocialsMenuItemWidget(l10n.rateUsOnStore(ratePlace), rateUrl),
-      sectionOptionSpacing,
+      if (PlatformUtil.isMobile()) ...[
+        SocialsMenuItemWidget(l10n.rateUsOnStore(ratePlace), rateUrl),
+        sectionOptionSpacing,
+      ],
       SocialsMenuItemWidget(
         l10n.blog,
         "https://ente.io/blog",
@@ -65,11 +68,11 @@ class SocialsMenuItemWidget extends StatelessWidget {
   final bool launchInExternalApp;
 
   const SocialsMenuItemWidget(
-      this.text,
-      this.url, {
-        Key? key,
-        this.launchInExternalApp = true,
-      }) : super(key: key);
+    this.text,
+    this.url, {
+    super.key,
+    this.launchInExternalApp = true,
+  });
 
   @override
   Widget build(BuildContext context) {

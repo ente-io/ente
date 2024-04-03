@@ -1,18 +1,25 @@
 # Dependencies
 
-## Global
+## Dev
 
 These are some global dev dependencies in the root `package.json`. These set the
-baseline for how our code be in all the workspaces in the monorepo.
+baseline for how our code be in all the workspaces in this (yarn) monorepo.
 
 * "prettier" - Formatter
 * "eslint" - Linter
 * "typescript" - Type checker
 
-They also need some support packages:
+They also need some support packages, which come from the leaf `@/build-config`
+package:
 
 * "@typescript-eslint/parser" - Tells ESLint how to read TypeScript syntax
 * "@typescript-eslint/eslint-plugin" - Provides TypeScript rules and presets
+* "eslint-plugin-react-hooks", "eslint-plugin-react-namespace-import" - Some
+  React specific ESLint rules and configurations that are used by the workspaces
+  that have React code.
+* "prettier-plugin-organize-imports" - A Prettier plugin to sort imports.
+* "prettier-plugin-packagejson" - A Prettier plugin to also prettify
+  `package.json`.
 
 ## Utils
 
@@ -40,19 +47,20 @@ bit more exhaustively when changing the crypto layer.
 
 ## UI
 
-The UI package uses "react". This is our core framework. We do use layers on top
-of React, but those are contingent and can be replaced, or even removed. But the
-usage of React is deep rooted. React also has a sibling "react-dom" package that
-renders "React" interfaces to the DOM.
+### React
+
+[React](https://react.dev) ("react") is our core framework. It also has a
+sibling "react-dom" package that renders JSX to the DOM.
 
 ### MUI and Emotion
 
-Currently, we use MUI ("@mui/material"), which is a React component library, to
-get a base set of components. MUI uses Emotion (a styled-component variant) as
-its preferred CSS-in-JS library and to keep things simple, that's also what we
-use to write CSS in our own JS (TS).
+We use [MUI](https://mui.com) ("@mui/material"), which is a React component
+library, to get a base set of components.
 
-Emotion itself comes in many parts, of which we need the following three:
+MUI uses [Emotion](https://emotion.sh/) (a styled-component variant) as its
+preferred CSS-in-JS library.
+
+Emotion itself comes in many parts, of which we need the following:
 
 * "@emotion/react" - React interface to Emotion. In particular, we set this as
   the package that handles the transformation of JSX into JS (via the
@@ -67,7 +75,22 @@ Emotion itself comes in many parts, of which we need the following three:
   > Keep `@emotion/styled` as a dependency of your project. Even if you never
   > use it explicitly, it's a peer dependency of `@mui/material`.
 
-* "@emotion/server"
+#### Component selectors
+
+Note that currently the SWC plugin doesn't allow the use of the component
+selectors API (i.e using `styled.div` instead of `styled("div")`).
+
+> I think the transform for component selectors is not implemented in the swc
+> plugin.
+>
+> https://github.com/vercel/next.js/issues/46973
+
+There is a way of enabling it by installing the `@emotion/babel-plugin` and
+specifying the import map as mentioned
+[here](https://mui.com/system/styled/#how-to-use-components-selector-api) ([full
+example](https://github.com/mui/material-ui/issues/27380#issuecomment-928973157)),
+but that disables the SWC integration altogether, so we live with this
+infelicity for now.
 
 ### Translations
 
@@ -83,3 +106,18 @@ Note that inspite of the "next" in the name of the library, it has nothing to do
 with Next.js.
 
 For more details, see [translations.md](translations.md).
+
+## Meta Frameworks
+
+### Next.js
+
+[Next.js](https://nextjs.org) ("next") provides the meta framework for both the
+Photos and the Auth app, and also for some of the sidecar apps like accounts and
+cast.
+
+We use a limited subset of Next. The main thing we get out of it is a reasonable
+set of defaults for bundling our app into a static export which we can then
+deploy to our webserver. In addition, the Next.js page router is convenient.
+Apart from this, while we use a few tidbits from Next.js here and there, overall
+our apps are regular React SPAs, and are not particularly tied to Next.
+

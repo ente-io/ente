@@ -140,6 +140,7 @@ class _DetailPageState extends State<DetailPage> {
       ),
       extendBodyBehindAppBar: true,
       resizeToAvoidBottomInset: false,
+      backgroundColor: Colors.black,
       body: Center(
         child: Stack(
           children: [
@@ -165,6 +166,7 @@ class _DetailPageState extends State<DetailPage> {
 
   Widget _buildPageView(BuildContext context) {
     return PageView.builder(
+      clipBehavior: Clip.none,
       itemBuilder: (context, index) {
         final file = _files![index];
         _preloadFiles(index);

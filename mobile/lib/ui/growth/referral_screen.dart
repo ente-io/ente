@@ -255,7 +255,7 @@ class ReferralWidget extends StatelessWidget {
               context,
               WebPage(
                 S.of(context).faq,
-                "https://ente.io/faq/general/referral-program",
+                "https://help.ente.io/photos/features/referral-program/",
               ),
             );
           },

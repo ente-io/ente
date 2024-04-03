@@ -530,13 +530,13 @@ export default function Uploader(props: Props) {
             ) {
                 await ImportService.setToUploadCollection(collections);
                 if (zipPaths.current) {
-                    ElectronAPIs.setToUploadFiles(
+                    await ElectronAPIs.setToUploadFiles(
                         PICKED_UPLOAD_TYPE.ZIPS,
                         zipPaths.current,
                     );
                     zipPaths.current = null;
                 }
-                ElectronAPIs.setToUploadFiles(
+                await ElectronAPIs.setToUploadFiles(
                     PICKED_UPLOAD_TYPE.FILES,
                     filesWithCollectionToUploadIn.map(
                         ({ file }) => (file as ElectronFile).path,
