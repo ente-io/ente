@@ -11,10 +11,23 @@ import (
 	"github.com/ente-io/stacktrace"
 )
 
-// GetSubscriberID returns subscriber id of the provided email address, else returns an error if email was not found
+// Listmonk credentials to interact with the Listmonk API.
+// It specifies BaseURL (url of the running listmonk server,
+// Listmonk Username and Password.
+// Visit https://listmonk.app/ to learn more about running
+// Listmonk locally
+type Credentials struct {
+	BaseURL  string
+	Username string
+	Password string
+}
+
+// GetSubscriberID returns subscriber id of the provided email address,
+// else returns an error if email was not found
 func GetSubscriberID(endpoint string, username string, password string, subscriberEmail string) (int, error) {
 	// Struct for the received API response.
-	// Can define other fields as well that can be extracted from response JSON
+	// Can define other fields as well that can be
+	// extracted from response JSON
 	type SubscriberResponse struct {
 		Data struct {
 			Results []struct {
@@ -72,7 +85,8 @@ func GetSubscriberID(endpoint string, username string, password string, subscrib
 	return id, nil
 }
 
-// SendRequest sends a request to the specified Listmonk API endpoint with the provided method and data
+// SendRequest sends a request to the specified Listmonk API endpoint
+// with the provided method and data
 // after authentication with the provided credentials (username, password)
 func SendRequest(method string, url string, data interface{}, username string, password string) error {
 	jsonData, err := json.Marshal(data)
