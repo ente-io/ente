@@ -165,7 +165,9 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
                 ),
               ),
             ),
-            const DeveloperSettingsWidget(),
+            // const DeveloperSettingsWidget() does not refresh when the endpoint is changed
+            // ignore: prefer_const_constructors
+            DeveloperSettingsWidget(),
             const Padding(
               padding: EdgeInsets.all(20),
             ),
