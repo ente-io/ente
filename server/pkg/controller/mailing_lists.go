@@ -103,18 +103,14 @@ func NewListmonkMailingListsController() *ListmonkMailingListsController {
 // or unsubscribe them to this list.
 func (c *MailingListsController) Subscribe(email string) error {
 	listmonkController := NewListmonkMailingListsController()
-	var err error
 
 	// Checking if either listmonk or zoho credentials are configured
 	if c.shouldSkipZoho() {
-		err = stacktrace.Propagate(ente.ErrNotImplemented, "")
-
 		if listmonkController.shouldSkipListmonk() {
-			err = stacktrace.Propagate(ente.ErrNotImplemented, "")
+			return stacktrace.Propagate(ente.ErrNotImplemented, "")
 		} else {
-			err = listmonkController.doListActionListmonk("listsubscribe", email)
+			return listmonkController.doListActionListmonk("listsubscribe", email)
 		}
-
 	} else {
 		// Need to set "Signup Form Disabled" in the list settings since we use this
 		// list to keep track of emails that have already been verified.
@@ -125,9 +121,8 @@ func (c *MailingListsController) Subscribe(email string) error {
 		//   any confirmations.
 		//
 		// https://www.zoho.com/campaigns/help/developers/contact-subscribe.html
-		err = c.doListActionZoho("listsubscribe", email)
+		return c.doListActionZoho("listsubscribe", email)
 	}
-	return err
 }
 
 // Unsubscribe the given email address to our default Zoho Campaigns list.
@@ -135,21 +130,17 @@ func (c *MailingListsController) Subscribe(email string) error {
 // See: [Note: Syncing emails with Zoho Campaigns]
 func (c *MailingListsController) Unsubscribe(email string) error {
 	listmonkController := NewListmonkMailingListsController()
-	var err error
 
 	if c.shouldSkipZoho() {
-		err = stacktrace.Propagate(ente.ErrNotImplemented, "")
-
 		if listmonkController.shouldSkipListmonk() {
-			err = stacktrace.Propagate(ente.ErrNotImplemented, "")
+			return stacktrace.Propagate(ente.ErrNotImplemented, "")
 		} else {
-			err = listmonkController.doListActionListmonk("listunsubscribe", email)
+			return listmonkController.doListActionListmonk("listunsubscribe", email)
 		}
 	} else {
 		// https://www.zoho.com/campaigns/help/developers/contact-unsubscribe.html
-		err = c.doListActionZoho("listunsubscribe", email)
+		return c.doListActionZoho("listunsubscribe", email)
 	}
-	return err
 }
 
 // shouldSkipZoho checks if the MailingListsController
