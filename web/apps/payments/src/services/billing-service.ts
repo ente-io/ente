@@ -1,8 +1,7 @@
-/* eslint-disable @typescript-eslint/no-confusing-void-expression */
 import { loadStripe } from "@stripe/stripe-js";
 
 /**
- * Communicate with Stripe using their JS SDK, and redirect back to the client
+ * Communicate with Stripe using their JS SDK, and redirect back to the client.
  *
  * All necessary parameters are obtained by parsing the request parameters.
  *
@@ -47,14 +46,13 @@ export const parseAndHandleRequest = async () => {
     }
 };
 
-const apiHost = process.env.NEXT_PUBLIC_ENTE_ENDPOINT ?? "https://api.ente.io";
+const apiOrigin =
+    process.env.NEXT_PUBLIC_ENTE_ENDPOINT ?? "https://api.ente.io";
 
 type StripeAccountCountry = "IN" | "US";
 
-const isStripeAccountCountry = (c: unknown): c is StripeAccountCountry => {
-    if (c == "IN" || c == "US") return true;
-    return false;
-};
+const isStripeAccountCountry = (c: unknown): c is StripeAccountCountry =>
+    c == "IN" || c == "US";
 
 const stripePublishableKey = (accountCountry: StripeAccountCountry) => {
     switch (accountCountry) {
@@ -71,33 +69,9 @@ const stripePublishableKey = (accountCountry: StripeAccountCountry) => {
     }
 };
 
-type RedirectStatus = "success" | "fail";
-
-type FailureReason =
-    /**
-     * Unable to authenticate card or 3DS
-     *
-     * User should be shown button for fixing card via customer portal
-     */
-    | "authentication_failed"
-    /**
-     * Card declined results in this error.
-     *
-     * Show button to the customer portal.
-     */
-    | "requires_payment_method"
-    /**
-     * An error in initializing the Stripe JS SDK.
-     */
-    | "stripe_error"
-    | "canceled"
-    | "server_error";
-
-/** Return the {@link StripeAccountCountry} for the user */
-const getUserStripeAccountCountry = async (
-    paymentToken: string,
-): Promise<StripeAccountCountry> => {
-    const url = `${apiHost}/billing/stripe-account-country`;
+/** Return the {@link StripeAccountCountry} for the user. */
+const getUserStripeAccountCountry = async (paymentToken: string) => {
+    const url = `${apiOrigin}/billing/stripe-account-country`;
     const res = await fetch(url, {
         headers: {
             "X-Auth-Token": paymentToken,
@@ -112,7 +86,7 @@ const getUserStripeAccountCountry = async (
     throw new Error(`Unexpected response for ${url}: ${JSON.stringify(json)}`);
 };
 
-/** Load and return the Stripe JS SDK initialized for the given country */
+/** Load and return the Stripe JS SDK initialized for the given country. */
 const getStripe = async (
     redirectURL: string,
     accountCountry: StripeAccountCountry,
@@ -120,16 +94,15 @@ const getStripe = async (
     const publishableKey = stripePublishableKey(accountCountry);
     try {
         const stripe = await loadStripe(publishableKey);
-        if (!stripe) throw new Error("Stripe returned null");
+        if (!stripe) throw new Error("Failed to load Stripe");
         return stripe;
     } catch (e) {
-        console.error("Failed to load Stripe", e);
         redirectToApp(redirectURL, "fail", "stripe_error");
         throw e;
     }
 };
 
-/** The flow when the user wants to buy a new subscription */
+/** The flow when the user wants to buy a new subscription. */
 const buySubscription = async (
     productID: string,
     paymentToken: string,
@@ -145,20 +118,19 @@ const buySubscription = async (
         );
         await stripe.redirectToCheckout({ sessionId });
     } catch (e) {
-        console.log("Subscription purchase failed", e);
         redirectToApp(redirectURL, "fail", "server_error");
         throw e;
     }
 };
 
-/** Create a new checkout session on museum and return the sessionID */
+/** Create a new checkout session on museum and return the sessionID. */
 const createCheckoutSession = async (
     productID: string,
     paymentToken: string,
     redirectURL: string,
 ): Promise<string> => {
     const params = new URLSearchParams({ productID, redirectURL });
-    const url = `${apiHost}/billing/stripe/checkout-session?${params.toString()}`;
+    const url = `${apiOrigin}/billing/stripe/checkout-session?${params.toString()}`;
     const res = await fetch(url, {
         headers: {
             "X-Auth-Token": paymentToken,
@@ -188,25 +160,22 @@ const updateSubscription = async (
         switch (status) {
             case "success": {
                 // Subscription was updated successfully, nothing more required
-                return redirectToApp(redirectURL, "success");
+                redirectToApp(redirectURL, "success");
+                return;
             }
 
-            case "requires_payment_method": {
-                return redirectToApp(
-                    redirectURL,
-                    "fail",
-                    "requires_payment_method",
-                );
-            }
+            case "requires_payment_method":
+                redirectToApp(redirectURL, "fail", "requires_payment_method");
+                return;
 
             case "requires_action": {
                 const { error } = await stripe.confirmCardPayment(clientSecret);
                 if (!error) {
-                    return redirectToApp(redirectURL, "success");
+                    redirectToApp(redirectURL, "success");
                 } else {
                     console.error("Failed to confirm card payment", error);
                     if (error.type == "card_error") {
-                        return redirectToApp(
+                        redirectToApp(
                             redirectURL,
                             "fail",
                             "requires_payment_method",
@@ -215,19 +184,19 @@ const updateSubscription = async (
                         error.type == "authentication_error" ||
                         error.code == "payment_intent_authentication_failure"
                     ) {
-                        return redirectToApp(
+                        redirectToApp(
                             redirectURL,
                             "fail",
                             "authentication_failed",
                         );
                     } else {
-                        return redirectToApp(redirectURL, "fail");
+                        redirectToApp(redirectURL, "fail");
                     }
                 }
+                return;
             }
         }
     } catch (e) {
-        console.log("Subscription update failed", e);
         redirectToApp(redirectURL, "fail", "server_error");
         throw e;
     }
@@ -251,7 +220,7 @@ async function updateStripeSubscription(
     paymentToken: string,
     productID: string,
 ): Promise<UpdateStripeSubscriptionResponse> {
-    const url = `${apiHost}/billing/stripe/update-subscription`;
+    const url = `${apiOrigin}/billing/stripe/update-subscription`;
     const res = await fetch(url, {
         method: "POST",
         headers: {
@@ -281,6 +250,43 @@ async function updateStripeSubscription(
     throw new Error(`Unexpected response for ${url}: ${JSON.stringify(json)}`);
 }
 
+type RedirectStatus = "success" | "fail";
+
+type FailureReason =
+    /**
+     * Unable to authenticate card or 3DS.
+     *
+     * User should be shown button for fixing card via customer portal.
+     */
+    | "authentication_failed"
+    /**
+     * Card declined results in this error.
+     *
+     * Show button to the customer portal.
+     */
+    | "requires_payment_method"
+    /**
+     * An error in initializing the Stripe JS SDK.
+     */
+    | "stripe_error"
+    | "canceled"
+    | "server_error";
+
+/**
+ * Navigate to {@link redirectURL}, passing the given values as query params.
+ *
+ * [Note: Redirects do not interrupt script execution]
+ *
+ * I have been unable to find a documentation / reference source for this, but
+ * in practice when I test it with a following snippet
+ *
+ *     const nonce = Math.random();
+ *     console.log("before", nonce);
+ *     window.location.href = "http://example.org";
+ *     console.log("after", nonce);
+ *
+ * I observe that the code after the navigation also runs.
+ */
 const redirectToApp = (
     redirectURL: string,
     status: RedirectStatus,
