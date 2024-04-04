@@ -14,8 +14,8 @@ import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
-import "package:photos/ui/viewer/people/person_cluserts.dart";
 import "package:photos/ui/viewer/people/person_cluster_suggestion.dart";
+import 'package:photos/ui/viewer/people/person_clusters_page.dart';
 import "package:photos/utils/dialog_util.dart";
 
 class PeopleAppBar extends StatefulWidget {
