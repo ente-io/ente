@@ -30,7 +30,7 @@ Here is a list of all the deployments, whether or not they are production
 deployments, and the action that triggers them:
 
 | URL                                          | Type       | Deployment action                            |
-| -------------------------------------------- | ---------- | ---------------------------------------------|
+| -------------------------------------------- | ---------- | -------------------------------------------- |
 | [web.ente.io](https://web.ente.io)           | Production | Push to `deploy/photos`                      |
 | [photos.ente.io](https://photos.ente.io)     | Production | Alias of [web.ente.io](https://web.ente.io)  |
 | [auth.ente.io](https://auth.ente.io)         | Production | Push to `deploy/auth`                        |
@@ -38,7 +38,7 @@ deployments, and the action that triggers them:
 | [cast.ente.io](https://cast.ente.io)         | Production | Push to `deploy/cast`                        |
 | [payments.ente.io](https://payments.ente.io) | Production | Push to `deploy/payments`                    |
 | [help.ente.io](https://help.ente.io)         | Production | Push to `main` + changes in `docs/`          |
-| [staff.ente.io](https://staff.ente.io)       | Production | Push to `main` + changes in `web/apps/staff` |
+| [staff.ente.sh](https://staff.ente.sh)       | Production | Push to `main` + changes in `web/apps/staff` |
 | [accounts.ente.sh](https://accounts.ente.sh) | Preview    | Nightly deploy of `main`                     |
 | [auth.ente.sh](https://auth.ente.sh)         | Preview    | Nightly deploy of `main`                     |
 | [cast.ente.sh](https://cast.ente.sh)         | Preview    | Nightly deploy of `main`                     |
