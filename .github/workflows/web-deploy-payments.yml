@@ -39,5 +39,5 @@ jobs:
                   apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
                   projectName: ente
                   branch: deploy/payments
-                  directory: web/apps/payments/out
+                  directory: web/apps/payments/dist
                   wranglerVersion: "3"

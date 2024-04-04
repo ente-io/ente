@@ -42,8 +42,8 @@ use a set of (development) Stripe keys which can be found in
 Add the following to `web/apps/payments/.env.local`:
 
 ```env
-NEXT_PUBLIC_ENTE_ENDPOINT = http://localhost:8080
-NEXT_PUBLIC_STRIPE_US_PUBLISHABLE_KEY = stripe_publishable_key
+VITE_ENTE_ENDPOINT = http://localhost:8080
+VITE_STRIPE_US_PUBLISHABLE_KEY = stripe_publishable_key
 ```
 
 Then start it locally
