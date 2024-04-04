@@ -64,13 +64,19 @@ class _PersonClustersState extends State<PersonClusters> {
                           width: 64,
                           height: 64,
                           child: files.isNotEmpty
-                              ? ClipOval(
+                              ? ClipRRect(
+                                  borderRadius: const BorderRadius.all(
+                                    Radius.elliptical(16, 12),
+                                  ),
                                   child: PersonFaceWidget(
                                     files.first,
                                     clusterID: clusterID,
                                   ),
                                 )
-                              : const ClipOval(
+                              : const ClipRRect(
+                                  borderRadius: BorderRadius.all(
+                                    Radius.elliptical(16, 12),
+                                  ),
                                   child: NoThumbnailWidget(
                                     addBorder: false,
                                   ),
