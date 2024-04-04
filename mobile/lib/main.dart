@@ -189,8 +189,8 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
   // Start workers asynchronously. No need to wait for them to start
   Computer.shared().turnOn(workersCount: 4).ignore();
   CryptoUtil.init();
-  await NetworkClient.instance.init();
   await Configuration.instance.init();
+  await NetworkClient.instance.init();
   await UserService.instance.init();
   await EntityService.instance.init();
   LocationService.instance.init(preferences);
