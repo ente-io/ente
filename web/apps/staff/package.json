@@ -10,7 +10,8 @@
     },
     "dependencies": {
         "react": "^18",
-        "react-dom": "^18"
+        "react-dom": "^18",
+        "yup": "^1.4"
     },
     "devDependencies": {
         "@/build-config": "*",
