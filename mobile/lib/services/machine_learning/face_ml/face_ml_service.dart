@@ -384,8 +384,8 @@ class FaceMlService {
         final fileIDToCreationTime =
             await FilesDB.instance.getFileIDToCreationTime();
 
-        const int bucketSize = 10000;
-        const int batchSize = 10000;
+        const int bucketSize = 20000;
+        const int batchSize = 20000;
         const int offsetIncrement = 7500;
         int offset = 0;
 
