@@ -11,6 +11,7 @@ import "package:photos/face/model/person.dart";
 import "package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart";
 import 'package:photos/services/machine_learning/face_ml/face_ml_service.dart';
 import 'package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart';
+import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 // import "package:photos/services/search_service.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
@@ -244,7 +245,7 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
             onTap: () async {
               try {
                 final List<PersonEntity> persons =
-                    await FaceMLDataDB.instance.getPersons();
+                    await PersonService.instance.getPersons();
                 final EnteWatch w = EnteWatch('feedback')..start();
                 for (final PersonEntity p in persons) {
                   await ClusterFeedbackService.instance

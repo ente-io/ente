@@ -5,6 +5,7 @@ import "package:photos/face/model/face.dart";
 import "package:photos/face/model/person.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart";
+import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/ui/components/buttons/chip_button_widget.dart";
 import "package:photos/ui/components/info_item_widget.dart";
 import "package:photos/ui/viewer/file_details/face_widget.dart";
@@ -66,8 +67,10 @@ class FacesItemWidget extends StatelessWidget {
       // TODO: add deduplication of faces of same person
       final faceIdsToClusterIds = await FaceMLDataDB.instance
           .getFaceIdsToClusterIds(faces.map((face) => face.faceID));
-      final (clusterIDToPerson, _) =
-          await FaceMLDataDB.instance.getClusterIdToPerson();
+      final Map<String, PersonEntity> persons =
+          await PersonService.instance.getPersonsMap();
+      final clusterIDToPerson =
+          await FaceMLDataDB.instance.getClusterIdToPerson(persons);
 
       final lastViewedClusterID = ClusterFeedbackService.lastViewedClusterID;
 

@@ -178,7 +178,7 @@ class _PersonActionSheetState extends State<PersonActionSheet> {
     return Flexible(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 24, 4, 0),
-        child: FutureBuilder<List<PersonEntity>>(
+        child: FutureBuilder<Iterable<PersonEntity>>(
           future: _getPersons(),
           builder: (context, snapshot) {
             if (snapshot.hasError) {
@@ -290,7 +290,7 @@ class _PersonActionSheetState extends State<PersonActionSheet> {
     }
   }
 
-  Future<List<PersonEntity>> _getPersons() async {
-    return FaceMLDataDB.instance.getPersons();
+  Future<Iterable<PersonEntity>> _getPersons() async {
+    return PersonService.instance.getPersons();
   }
 }

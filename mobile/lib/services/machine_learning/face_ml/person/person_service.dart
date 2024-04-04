@@ -28,6 +28,31 @@ class PersonService {
     _instance = PersonService(entityService, faceMLDataDB, prefs);
   }
 
+  Future<List<PersonEntity>> getPersons() async {
+    final entities = await entityService.getEntities(EntityType.person);
+    return entities
+        .map(
+          (e) => PersonEntity(e.id, PersonData.fromJson(json.decode(e.data))),
+        )
+        .toList();
+  }
+
+  Future<Map<String, PersonEntity>> getPersonsMap() async {
+    final entities = await entityService.getEntities(EntityType.person);
+    final Map<String, PersonEntity> map = {};
+    entities.forEach((e) {
+      final person =
+          PersonEntity(e.id, PersonData.fromJson(json.decode(e.data)));
+      map[person.remoteID] = person;
+    });
+    return map;
+  }
+
+  Future<Set<String>> personIDs() async {
+    final entities = await entityService.getEntities(EntityType.person);
+    return entities.map((e) => e.id).toSet();
+  }
+
   Future<PersonEntity> addPerson(String name, int clusterID) async {
     final faceIds = await faceMLDataDB.getFaceIDsForCluster(clusterID);
     final data = PersonData(

@@ -28,6 +28,7 @@ import "package:photos/models/search/search_constants.dart";
 import "package:photos/models/search/search_types.dart";
 import 'package:photos/services/collections_service.dart';
 import "package:photos/services/location_service.dart";
+import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import 'package:photos/services/machine_learning/semantic_search/semantic_search_service.dart';
 import "package:photos/states/location_screen_state.dart";
 import "package:photos/ui/viewer/location/add_location_sheet.dart";
@@ -739,8 +740,10 @@ class SearchService {
     debugPrint("getting faces");
     final Map<int, Set<int>> fileIdToClusterID =
         await FaceMLDataDB.instance.getFileIdToClusterIds();
-    final (clusterIDToPerson, personIdToPerson) =
-        await FaceMLDataDB.instance.getClusterIdToPerson();
+    final Map<String, PersonEntity> personIdToPerson =
+        await PersonService.instance.getPersonsMap();
+    final clusterIDToPerson =
+        await FaceMLDataDB.instance.getClusterIdToPerson(personIdToPerson);
 
     debugPrint("building result");
     final List<GenericSearchResult> facesResult = [];

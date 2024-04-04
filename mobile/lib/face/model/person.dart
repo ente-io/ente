@@ -52,6 +52,8 @@ class PersonData {
   List<ClusterInfo>? rejected = List<ClusterInfo>.empty();
   final String? birthDate;
 
+  bool hasAvatar() => avatarFaceId != null;
+
   PersonData({
     required this.name,
     this.assigned,
@@ -93,10 +95,14 @@ class PersonData {
     return PersonData(
       name: json['name'] as String,
       assigned: List<ClusterInfo>.from(
-        (json['assigned'] as List<dynamic>).map((e) => ClusterInfo.fromJson(e)),
+        (json['assigned'] as List<dynamic>?)
+                ?.map((e) => ClusterInfo.fromJson(e)) ??
+            List<ClusterInfo>.empty(),
       ),
       rejected: List<ClusterInfo>.from(
-        (json['rejected'] as List<dynamic>).map((e) => ClusterInfo.fromJson(e)),
+        (json['rejected'] as List<dynamic>?)
+                ?.map((e) => ClusterInfo.fromJson(e)) ??
+            List<ClusterInfo>.empty(),
       ),
       avatarFaceId: json['avatarFaceId'] as String?,
       isHidden: json['isHidden'] as bool? ?? false,
