@@ -215,7 +215,7 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
               unawaited(
                 Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (context) => PersonClusters(widget.person),
+                    builder: (context) => PersonClustersPage(widget.person),
                   ),
                 ),
               );
