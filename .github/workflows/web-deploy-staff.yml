@@ -1,9 +1,14 @@
-name: "Deploy (payments)"
+name: "Deploy (staff)"
 
 on:
+    # Run on every push to main that changes web/apps/staff/
     push:
-        # Run workflow on pushes to the deploy/payments
-        branches: [deploy/payments]
+        branches: [main]
+        paths:
+            - "web/apps/staff/**"
+            - ".github/workflows/web-deploy-staff.yml"
+    # Also allow manually running the workflow
+    workflow_dispatch:
 
 jobs:
     deploy:
@@ -29,15 +34,15 @@ jobs:
             - name: Install dependencies
               run: yarn install
 
-            - name: Build payments
-              run: yarn build:payments
+            - name: Build staff
+              run: yarn build:staff
 
-            - name: Publish payments
+            - name: Publish staff
               uses: cloudflare/pages-action@1
               with:
                   accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
                   apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
                   projectName: ente
-                  branch: deploy/payments
-                  directory: web/apps/payments/dist
+                  branch: deploy/staff
+                  directory: web/apps/staff/dist
                   wranglerVersion: "3"
