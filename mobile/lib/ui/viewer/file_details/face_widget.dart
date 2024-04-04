@@ -93,7 +93,7 @@ class FaceWidget extends StatelessWidget {
                         side: highlight
                             ? BorderSide(
                                 color: getEnteColorScheme(context).primary700,
-                                width: 2.0,
+                                width: 1.0,
                               )
                             : BorderSide.none,
                       ),
