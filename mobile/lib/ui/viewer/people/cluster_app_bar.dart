@@ -6,9 +6,7 @@ import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import "package:photos/db/files_db.dart";
-// import "package:photos/events/people_changed_event.dart";
 import 'package:photos/events/subscription_purchased_event.dart';
-// import "package:photos/face/db.dart";
 import "package:photos/face/model/person.dart";
 import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/selected_files.dart';
@@ -16,8 +14,7 @@ import 'package:photos/services/collections_service.dart';
 import "package:photos/services/machine_learning/face_ml/face_ml_result.dart";
 import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart";
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
-import "package:photos/ui/viewer/people/cluster_page.dart";
-// import "package:photos/utils/dialog_util.dart";
+import "package:photos/ui/viewer/people/cluster_breakup_page.dart";
 
 class ClusterAppBar extends StatefulWidget {
   final GalleryType type;
@@ -173,24 +170,31 @@ class _AppBarWidgetState extends State<ClusterAppBar> {
     final newClusterIDToFaceIDs =
         await ClusterFeedbackService.instance.breakUpCluster(widget.clusterID);
 
-    for (final cluster in newClusterIDToFaceIDs.entries) {
-      // ignore: unawaited_futures
-      final newClusterID = cluster.key;
-      final faceIDs = cluster.value;
-      final files = await FilesDB.instance
-          .getFilesFromIDs(faceIDs.map((e) => getFileIdFromFaceId(e)).toList());
-      unawaited(
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => ClusterPage(
-              files.values.toList(),
-              appendTitle:
-                  (newClusterID == -1) ? "(Analysis noise)" : "(Analysis)",
-              clusterID: newClusterID,
-            ),
-          ),
+    final allFileIDs = newClusterIDToFaceIDs.values
+        .expand((e) => e)
+        .map((e) => getFileIdFromFaceId(e))
+        .toList();
+
+    final fileIDtoFile = await FilesDB.instance.getFilesFromIDs(
+      allFileIDs,
+    );
+
+    final newClusterIDToFiles = newClusterIDToFaceIDs.map(
+      (key, value) => MapEntry(
+        key,
+        value
+            .map((faceId) => fileIDtoFile[getFileIdFromFaceId(faceId)]!)
+            .toList(),
+      ),
+    );
+
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => ClusterBreakupPage(
+          newClusterIDToFiles,
+          "(Analysis)",
         ),
-      );
-    }
+      ),
+    );
   }
 }
