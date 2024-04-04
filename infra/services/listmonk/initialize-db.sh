@@ -9,7 +9,6 @@ set -o xtrace
 
 docker pull listmonk/listmonk
 
-docker run --rm --name listmonk \
-    -p 9000:9000 \
+docker run -it --rm --name listmonk \
     -v /root/listmonk/config.toml:/listmonk/config.toml:ro \
     listmonk/listmonk ./listmonk --install

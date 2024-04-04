@@ -35,7 +35,7 @@ sudo mv listmonk.nginx.conf /root/nginx/conf.d
 > ```sh
 > scp services/listmonk/initialize-db.sh <instance>:
 >
-> sudo ./initialize-db.sh
+> sudo sh initialize-db.sh
 > rm initialize-db.sh
 > ```
 
