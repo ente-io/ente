@@ -29,21 +29,22 @@ and publish to [web.ente.io](https://web.ente.io).
 Here is a list of all the deployments, whether or not they are production
 deployments, and the action that triggers them:
 
-| URL                                          | Type       | Deployment action                           |
-| -------------------------------------------- | ---------- | ------------------------------------------- |
-| [web.ente.io](https://web.ente.io)           | Production | Push to `deploy/photos`                     |
-| [photos.ente.io](https://photos.ente.io)     | Production | Alias of [web.ente.io](https://web.ente.io) |
-| [auth.ente.io](https://auth.ente.io)         | Production | Push to `deploy/auth`                       |
-| [accounts.ente.io](https://accounts.ente.io) | Production | Push to `deploy/accounts`                   |
-| [cast.ente.io](https://cast.ente.io)         | Production | Push to `deploy/cast`                       |
-| [payments.ente.io](https://payments.ente.io) | Production | Push to `deploy/payments`                   |
-| [help.ente.io](https://help.ente.io)         | Production | Push to `main` + changes in `docs/`         |
-| [accounts.ente.sh](https://accounts.ente.sh) | Preview    | Nightly deploy of `main`                    |
-| [auth.ente.sh](https://auth.ente.sh)         | Preview    | Nightly deploy of `main`                    |
-| [cast.ente.sh](https://cast.ente.sh)         | Preview    | Nightly deploy of `main`                    |
-| [payments.ente.sh](https://payments.ente.sh) | Preview    | Nightly deploy of `main`                    |
-| [photos.ente.sh](https://photos.ente.sh)     | Preview    | Nightly deploy of `main`                    |
-| [preview.ente.sh](https://preview.ente.sh)   | Preview    | Manually triggered                          |
+| URL                                          | Type       | Deployment action                            |
+| -------------------------------------------- | ---------- | -------------------------------------------- |
+| [web.ente.io](https://web.ente.io)           | Production | Push to `deploy/photos`                      |
+| [photos.ente.io](https://photos.ente.io)     | Production | Alias of [web.ente.io](https://web.ente.io)  |
+| [auth.ente.io](https://auth.ente.io)         | Production | Push to `deploy/auth`                        |
+| [accounts.ente.io](https://accounts.ente.io) | Production | Push to `deploy/accounts`                    |
+| [cast.ente.io](https://cast.ente.io)         | Production | Push to `deploy/cast`                        |
+| [payments.ente.io](https://payments.ente.io) | Production | Push to `deploy/payments`                    |
+| [help.ente.io](https://help.ente.io)         | Production | Push to `main` + changes in `docs/`          |
+| [staff.ente.sh](https://staff.ente.sh)       | Production | Push to `main` + changes in `web/apps/staff` |
+| [accounts.ente.sh](https://accounts.ente.sh) | Preview    | Nightly deploy of `main`                     |
+| [auth.ente.sh](https://auth.ente.sh)         | Preview    | Nightly deploy of `main`                     |
+| [cast.ente.sh](https://cast.ente.sh)         | Preview    | Nightly deploy of `main`                     |
+| [payments.ente.sh](https://payments.ente.sh) | Preview    | Nightly deploy of `main`                     |
+| [photos.ente.sh](https://photos.ente.sh)     | Preview    | Nightly deploy of `main`                     |
+| [preview.ente.sh](https://preview.ente.sh)   | Preview    | Manually triggered                           |
 
 ### Other subdomains
 
@@ -54,8 +55,8 @@ Apart from this, there are also some other deployments:
     `albums.ente.io`, it redirects to the `/shared-albums` page (Enhancement:
     serve it as a separate app with a smaller bundle size).
 
--   `family.ente.io` is currently in a separate repositories (Enhancement: bring
-    them in here).
+-   `family.ente.io` is currently in a separate repository (Enhancement: bring
+    it in here).
 
 ### Preview deployments
 
