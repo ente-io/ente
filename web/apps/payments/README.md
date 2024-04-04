@@ -1,3 +1,5 @@
+# Payments
+
 Code that runs on `payments.ente.io`. It brokers between our services and
 Stripe's API for payments.
 
