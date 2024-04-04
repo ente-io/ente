@@ -5,7 +5,6 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/ente-io/museum/ente"
 	"github.com/ente-io/museum/pkg/external/listmonk"
 	"github.com/ente-io/museum/pkg/external/zoho"
 	"github.com/ente-io/stacktrace"
@@ -102,12 +101,18 @@ func (c *MailingListsController) Subscribe(email string) error {
 		//   any confirmations.
 		//
 		// https://www.zoho.com/campaigns/help/developers/contact-subscribe.html
-		return c.doListActionZoho("listsubscribe", email)
+		err := c.doListActionZoho("listsubscribe", email)
+		if err != nil {
+			return stacktrace.Propagate(err, "")
+		}
 	}
 	if !(c.shouldSkipListmonk()) {
-		return c.listmonkSubscribe(email)
+		err := c.listmonkSubscribe(email)
+		if err != nil {
+			return stacktrace.Propagate(err, "")
+		}
 	}
-	return stacktrace.Propagate(ente.ErrNotImplemented, "")
+	return nil
 }
 
 // Unsubscribe the given email address to our default Zoho Campaigns list
@@ -117,12 +122,18 @@ func (c *MailingListsController) Subscribe(email string) error {
 func (c *MailingListsController) Unsubscribe(email string) error {
 	if !(c.shouldSkipZoho()) {
 		// https://www.zoho.com/campaigns/help/developers/contact-unsubscribe.html
-		return c.doListActionZoho("listunsubscribe", email)
+		err := c.doListActionZoho("listunsubscribe", email)
+		if err != nil {
+			return stacktrace.Propagate(err, "")
+		}
 	}
 	if !(c.shouldSkipListmonk()) {
-		return c.listmonkUnsubscribe(email)
+		err := c.listmonkUnsubscribe(email)
+		if err != nil {
+			return stacktrace.Propagate(err, "")
+		}
 	}
-	return stacktrace.Propagate(ente.ErrNotImplemented, "")
+	return nil
 }
 
 // shouldSkipZoho() checks if the MailingListsController
