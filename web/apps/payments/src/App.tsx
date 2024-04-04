@@ -3,7 +3,7 @@ import { Container } from "./components/Container";
 import { parseAndHandleRequest } from "./services/billing-service";
 import S from "./utils/strings";
 
-const App: React.FC = () => {
+export const App: React.FC = () => {
     const [failed, setFailed] = React.useState(false);
 
     useEffect(() => {
@@ -14,7 +14,5 @@ const App: React.FC = () => {
 
     return <Container>{failed ? S.error_generic : <Spinner />}</Container>;
 };
-
-export default App;
 
 const Spinner: React.FC = () => <div className="loading-spinner"></div>;
