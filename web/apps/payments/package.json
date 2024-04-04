@@ -4,7 +4,6 @@
     "private": true,
     "dependencies": {
         "@/next": "*",
-        "@stripe/stripe-js": "^1.17.0",
-        "axios": "^1.6.7"
+        "@stripe/stripe-js": "^1.17.0"
     }
 }

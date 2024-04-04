@@ -1,7 +1,9 @@
 import { Container } from "components/Container";
 import React from "react";
-import constants from "utils/strings";
+import S from "utils/strings";
 
-export default function Home() {
-    return <Container>{constants.NOT_FOUND}</Container>;
-}
+const Page: React.FC = () => {
+    return <Container>{S.error_404}</Container>;
+};
+
+export default Page;

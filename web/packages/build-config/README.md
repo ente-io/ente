@@ -13,8 +13,8 @@ transpiled, it just exports static files that can be included verbatim.
 Too see what tsc is seeing (say when it is trying to type-check `@/utils`), use
 `yarn workspace @/utils tsc --showConfig`.
 
-Similarly, to verify what ESLint is trying to do, use `yarn workspace @/utils
-eslint --debug .`
+Similarly, to verify what ESLint is trying to do, use
+`yarn workspace @/utils eslint --debug .`
 
 If the issue is in VSCode, open the output window of the corresponding plugin,
 it might be telling us what's going wrong there. In particular, when changing

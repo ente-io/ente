@@ -1,42 +1,19 @@
 import { Container } from "components/Container";
 import { Spinner } from "components/Spinner";
-import * as React from "react";
-import { parseAndHandleRequest } from "services/billingService";
-import { CUSTOM_ERROR } from "utils/error";
-import constants from "utils/strings";
+import React, { useEffect } from "react";
+import { parseAndHandleRequest } from "services/billing-service";
+import S from "utils/strings";
 
-export default function Home() {
-    const [errorMessageView, setErrorMessageView] = React.useState(false);
-    const [loading, setLoading] = React.useState(false);
+const Page: React.FC = () => {
+    const [failed, setFailed] = React.useState(false);
 
-    React.useEffect(() => {
-        async function main() {
-            try {
-                setLoading(true);
-                await parseAndHandleRequest();
-            } catch (e: unknown) {
-                if (
-                    e instanceof Error &&
-                    e.message === CUSTOM_ERROR.DIRECT_OPEN_WITH_NO_QUERY_PARAMS
-                ) {
-                    window.location.href = "https://ente.io";
-                } else {
-                    setErrorMessageView(true);
-                }
-            }
-        }
-        // TODO: audit
-        // eslint-disable-next-line @typescript-eslint/no-floating-promises
-        main();
+    useEffect(() => {
+        parseAndHandleRequest().catch(() => {
+            setFailed(true);
+        });
     }, []);
 
-    return (
-        <Container>
-            {errorMessageView ? (
-                <div>{constants.SOMETHING_WENT_WRONG}</div>
-            ) : (
-                loading && <Spinner />
-            )}
-        </Container>
-    );
-}
+    return <Container>{failed ? S.error_generic : <Spinner />}</Container>;
+};
+
+export default Page;

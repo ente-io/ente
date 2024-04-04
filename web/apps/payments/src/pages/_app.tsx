@@ -1,18 +1,18 @@
 import type { AppProps } from "next/app";
 import Head from "next/head";
 import React from "react";
-import constants from "utils/strings";
+import S from "utils/strings";
 import "../styles/globals.css";
 
-function MyApp({ Component, pageProps }: AppProps) {
+const MyApp = ({ Component, pageProps }: AppProps): React.JSX.Element => {
     return (
         <>
             <Head>
-                <title>{constants.TITLE}</title>
+                <title>{S.title}</title>
             </Head>
             <Component {...pageProps} />
         </>
     );
-}
+};
 
 export default MyApp;
