@@ -292,6 +292,15 @@ const redirectToApp = (
     status: RedirectStatus,
     reason?: FailureReason,
 ) => {
+    // The desktop app passes "<our-origin>/desktop-redirect" as `redirectURL`.
+    // This is just a placeholder, we want to intercept this and instead
+    // redirect to the ente:// scheme protocol handler that is internally being
+    // used by the desktop app.
+    if (new URL(redirectURL).pathname == "/desktop-redirect") {
+        redirectToApp("ente://app/gallery", status, reason);
+        return;
+    }
+
     let url = `${redirectURL}?status=${status}`;
     if (reason) url = `${url}&reason=${reason}`;
     window.location.href = url;
