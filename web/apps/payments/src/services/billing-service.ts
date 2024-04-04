@@ -46,25 +46,24 @@ export const parseAndHandleRequest = async () => {
     }
 };
 
-const apiOrigin =
-    process.env.NEXT_PUBLIC_ENTE_ENDPOINT ?? "https://api.ente.io";
+const apiOrigin = import.meta.env.VITE_ENTE_ENDPOINT ?? "https://api.ente.io";
 
-type StripeAccountCountry = "IN" | "US";
+type StripeAccountCountry = "US" | "IN";
 
 const isStripeAccountCountry = (c: unknown): c is StripeAccountCountry =>
-    c == "IN" || c == "US";
+    c == "US" || c == "IN";
 
 const stripePublishableKey = (accountCountry: StripeAccountCountry) => {
     switch (accountCountry) {
-        case "IN":
-            return (
-                process.env.NEXT_PUBLIC_STRIPE_IN_PUBLISHABLE_KEY ??
-                "pk_live_51HAhqDK59oeucIMOiTI6MDDM2UWUbCAJXJCGsvjJhiO8nYJz38rQq5T4iyQLDMKxqEDUfU5Hopuj4U5U4dff23oT00fHvZeodC"
-            );
         case "US":
             return (
-                process.env.NEXT_PUBLIC_STRIPE_US_PUBLISHABLE_KEY ??
+                import.meta.env.VITE_STRIPE_US_PUBLISHABLE_KEY ??
                 "pk_live_51LZ9P4G1ITnQlpAnrP6pcS7NiuJo3SnJ7gibjJlMRatkrd2EY1zlMVTVQG5RkSpLPbsHQzFfnEtgHnk1PiylIFkk00tC0LWXwi"
+            );
+        case "IN":
+            return (
+                import.meta.env.VITE_STRIPE_IN_PUBLISHABLE_KEY ??
+                "pk_live_51HAhqDK59oeucIMOiTI6MDDM2UWUbCAJXJCGsvjJhiO8nYJz38rQq5T4iyQLDMKxqEDUfU5Hopuj4U5U4dff23oT00fHvZeodC"
             );
     }
 };

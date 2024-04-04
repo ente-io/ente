@@ -14,14 +14,14 @@
          * transpiler (Next.js) will ensure that these things hold.
          *
          * Unlike the other individual library components (say how "esnext"
-         * implies "esnext.*"), "dom.iterable" (the ability to iterate over DOM
-         * elements) is not a subset of "dom" and needs to be listed out
+         * implies "ESNext.*"), "DOM.Iterable" (the ability to iterate over DOM
+         * elements) is not a subset of "DOM" and needs to be listed out
          * explicitly.
          *
          * Note that we don't need to specify the `target` compilerOption, since
          * tsc isn't actually generating (emitting) the JavaScript.
          */
-        "lib": ["esnext", "dom", "dom.iterable"],
+        "lib": ["ESnext", "DOM", "DOM.Iterable"],
 
         /*
          * The module system to assume the generated JavaScript will use.
@@ -29,7 +29,7 @@
          * Since we're using a bundler, we should set this to "esnext"
          * https://www.typescriptlang.org/docs/handbook/modules/guides/choosing-compiler-options.html
          */
-        "module": "esnext",
+        "module": "ESNext",
 
         /*
          * Tell TypeScript how to lookup the file for a given import
