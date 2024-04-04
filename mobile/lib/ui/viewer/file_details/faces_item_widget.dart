@@ -9,23 +9,44 @@ import "package:photos/ui/components/buttons/chip_button_widget.dart";
 import "package:photos/ui/components/info_item_widget.dart";
 import "package:photos/ui/viewer/file_details/face_widget.dart";
 
-class FacesItemWidget extends StatelessWidget {
+class FacesItemWidget extends StatefulWidget {
   final EnteFile file;
   const FacesItemWidget(this.file, {super.key});
+
+  @override
+  State<FacesItemWidget> createState() => _FacesItemWidgetState();
+}
+
+class _FacesItemWidgetState extends State<FacesItemWidget> {
+  bool editMode = false;
+
+  @override
+  void initState() {
+    super.initState();
+    setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
     return InfoItemWidget(
       key: const ValueKey("Faces"),
       leadingIcon: Icons.face_retouching_natural_outlined,
-      subtitleSection: _faceWidgets(context, file),
+      subtitleSection: _faceWidgets(context, widget.file, editMode),
       hasChipButtons: true,
+      editOnTap: _toggleEditMode,
     );
+  }
+
+  void _toggleEditMode() {
+    setState(() {
+      editMode = !editMode;
+    });
   }
 
   Future<List<Widget>> _faceWidgets(
     BuildContext context,
     EnteFile file,
+    bool editMode,
   ) async {
     try {
       if (file.uploadedFileID == null) {
@@ -84,6 +105,7 @@ class FacesItemWidget extends StatelessWidget {
             clusterID: clusterID,
             person: person,
             highlight: highlight,
+            editMode: highlight ? editMode : false,
           ),
         );
       }

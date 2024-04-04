@@ -340,6 +340,12 @@ class ClusterFeedbackService {
     return;
   }
 
+  Future<void> addFilesToCluster(List<String> faceIDs, int clusterID) async {
+    await FaceMLDataDB.instance.addFacesToCluster(faceIDs, clusterID);
+    Bus.instance.fire(PeopleChangedEvent());
+    return;
+  }
+
   Future<bool> checkAndDoAutomaticMerges(Person p) async {
     final faceMlDb = FaceMLDataDB.instance;
     final allClusterIdsToCountMap = (await faceMlDb.clusterIdToFaceCount());
