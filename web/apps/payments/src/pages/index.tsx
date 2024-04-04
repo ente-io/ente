@@ -1,5 +1,4 @@
 import { Container } from "components/Container";
-import { Spinner } from "components/Spinner";
 import React, { useEffect } from "react";
 import { parseAndHandleRequest } from "services/billing-service";
 import S from "utils/strings";
@@ -17,3 +16,5 @@ const Page: React.FC = () => {
 };
 
 export default Page;
+
+const Spinner: React.FC = () => <div className="loading-spinner"></div>;
