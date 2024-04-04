@@ -12,7 +12,7 @@ import "package:photos/ui/viewer/actions/file_selection_actions_widget.dart";
 class BottomActionBarWidget extends StatelessWidget {
   final GalleryType galleryType;
   final Collection? collection;
-  final Person? person;
+  final PersonEntity? person;
   final int? clusterID;
   final SelectedFiles selectedFiles;
   final VoidCallback? onCancel;

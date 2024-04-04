@@ -14,7 +14,7 @@ import "package:photos/ui/viewer/people/cluster_page.dart";
 import "package:photos/ui/viewer/search/result/person_face_widget.dart";
 
 class PersonClusters extends StatefulWidget {
-  final Person person;
+  final PersonEntity person;
 
   const PersonClusters(
     this.person, {
@@ -31,7 +31,7 @@ class _PersonClustersState extends State<PersonClusters> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.person.attr.name),
+        title: Text(widget.person.data.name),
       ),
       body: FutureBuilder<Map<int, List<EnteFile>>>(
         future: SearchService.instance

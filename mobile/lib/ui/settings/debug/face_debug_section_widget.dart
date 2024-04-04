@@ -243,13 +243,13 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
             trailingIconIsMuted: true,
             onTap: () async {
               try {
-                final List<Person> persons =
+                final List<PersonEntity> persons =
                     await FaceMLDataDB.instance.getPersons();
                 final EnteWatch w = EnteWatch('feedback')..start();
-                for (final Person p in persons) {
+                for (final PersonEntity p in persons) {
                   await ClusterFeedbackService.instance
                       .getSuggestionsUsingMean(p);
-                  w.logAndReset('suggestion calculated for ${p.attr.name}');
+                  w.logAndReset('suggestion calculated for ${p.data.name}');
                 }
                 w.log("done with feedback");
                 showShortToast(context, "done avg");

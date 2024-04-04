@@ -27,7 +27,7 @@ class ClusterPage extends StatefulWidget {
   final bool enableGrouping;
   final String tagPrefix;
   final int clusterID;
-  final Person? personID;
+  final PersonEntity? personID;
   final String appendTitle;
 
   static const GalleryType appBarType = GalleryType.cluster;
@@ -137,7 +137,7 @@ class _ClusterPageState extends State<ClusterPage> {
                       context,
                       clusterID: widget.clusterID,
                     );
-                    if (result != null && result is Person) {
+                    if (result != null && result is PersonEntity) {
                       Navigator.pop(context);
                       // ignore: unawaited_futures
                       routeToPage(context, PeoplePage(person: result));

@@ -20,7 +20,7 @@ import "package:photos/ui/viewer/people/people_app_bar.dart";
 
 class PeoplePage extends StatefulWidget {
   final String tagPrefix;
-  final Person person;
+  final PersonEntity person;
 
   static const GalleryType appBarType = GalleryType.peopleTag;
   static const GalleryType overlayType = GalleryType.peopleTag;
@@ -86,13 +86,13 @@ class _PeoplePageState extends State<PeoplePage> {
 
   @override
   Widget build(BuildContext context) {
-    _logger.info("Building for ${widget.person.attr.name}");
+    _logger.info("Building for ${widget.person.data.name}");
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(50.0),
         child: PeopleAppBar(
           GalleryType.peopleTag,
-          widget.person.attr.name,
+          widget.person.data.name,
           _selectedFiles,
           widget.person,
         ),

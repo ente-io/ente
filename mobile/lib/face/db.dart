@@ -226,8 +226,8 @@ class FaceMLDataDB {
       final person = mapRowToPerson(maps.first);
       final List<int> fileId = [recentFileID];
       int? avatarFileId;
-      if (person.attr.avatarFaceId != null) {
-        avatarFileId = int.tryParse(person.attr.avatarFaceId!.split('-')[0]);
+      if (person.data.avatarFaceId != null) {
+        avatarFileId = int.tryParse(person.data.avatarFaceId!.split('-')[0]);
         if (avatarFileId != null) {
           fileId.add(avatarFileId);
         }
@@ -488,7 +488,7 @@ class FaceMLDataDB {
     await db.execute(fcClusterIDIndex);
   }
 
-  Future<void> insert(Person p, int cluserID) async {
+  Future<void> insert(PersonEntity p, int cluserID) async {
     debugPrint("inserting person");
     final db = await instance.database;
     await db.insert(
@@ -506,7 +506,7 @@ class FaceMLDataDB {
     );
   }
 
-  Future<void> updatePerson(Person p) async {
+  Future<void> updatePerson(PersonEntity p) async {
     final db = await instance.database;
     await db.update(
       personTable,
@@ -639,10 +639,11 @@ class FaceMLDataDB {
     return result;
   }
 
-  Future<(Map<int, Person>, Map<String, Person>)> getClusterIdToPerson() async {
+  Future<(Map<int, PersonEntity>, Map<String, PersonEntity>)>
+      getClusterIdToPerson() async {
     final db = await instance.database;
-    final List<Person> persons = await getPersons();
-    final Map<String, Person> personMap = {};
+    final List<PersonEntity> persons = await getPersons();
+    final Map<String, PersonEntity> personMap = {};
     for (final p in persons) {
       personMap[p.remoteID] = p;
     }
@@ -650,9 +651,9 @@ class FaceMLDataDB {
       'SELECT $personIdColumn, $cluserIDColumn FROM $clusterPersonTable',
     );
 
-    final Map<int, Person> result = {};
+    final Map<int, PersonEntity> result = {};
     for (final map in maps) {
-      final Person? p = personMap[map[personIdColumn] as String];
+      final PersonEntity? p = personMap[map[personIdColumn] as String];
       if (p != null) {
         result[map[cluserIDColumn] as int] = p;
       } else {
@@ -664,7 +665,7 @@ class FaceMLDataDB {
     return (result, personMap);
   }
 
-  Future<List<Person>> getPersons() async {
+  Future<List<PersonEntity>> getPersons() async {
     final db = await instance.database;
     final List<Map<String, dynamic>> maps = await db.query(
       personTable,
@@ -714,7 +715,10 @@ class FaceMLDataDB {
     await db.execute(createClusterSummaryTable);
   }
 
-  Future<void> removeFilesFromPerson(List<EnteFile> files, Person p) async {
+  Future<void> removeFilesFromPerson(
+    List<EnteFile> files,
+    PersonEntity p,
+  ) async {
     final db = await instance.database;
     final faceIdsResult = await db.rawQuery(
       'SELECT $fcFaceId FROM $faceClustersTable LEFT JOIN $clusterPersonTable '

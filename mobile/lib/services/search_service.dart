@@ -753,7 +753,7 @@ class SearchService {
       }
       final cluserIds = fileIdToClusterID[f.uploadedFileID ?? -1]!;
       for (final cluster in cluserIds) {
-        final Person? p = clusterIDToPerson[cluster];
+        final PersonEntity? p = clusterIDToPerson[cluster];
         if (p != null) {
           if (personIdToFiles.containsKey(p.remoteID)) {
             personIdToFiles[p.remoteID]!.add(f);
@@ -781,11 +781,11 @@ class SearchService {
       if (files.isEmpty) {
         continue;
       }
-      final Person p = personIdToPerson[personID]!;
+      final PersonEntity p = personIdToPerson[personID]!;
       facesResult.add(
         GenericSearchResult(
           ResultType.faces,
-          p.attr.name,
+          p.data.name,
           files,
           params: {
             kPersonParamID: personID,
@@ -795,7 +795,7 @@ class SearchService {
             routeToPage(
               ctx,
               PeoplePage(
-                tagPrefix: "${ResultType.faces.toString()}_${p.attr.name}",
+                tagPrefix: "${ResultType.faces.toString()}_${p.data.name}",
                 person: p,
               ),
             );
@@ -813,7 +813,7 @@ class SearchService {
       final files = clusterIdToFiles[clusterId]!;
       // final String clusterName = "ID:$clusterId,  ${files.length}";
       final String clusterName = "${files.length}";
-      final Person? p = clusterIDToPerson[clusterId];
+      final PersonEntity? p = clusterIDToPerson[clusterId];
       if (p != null) {
         throw Exception("Person should  be null");
       }

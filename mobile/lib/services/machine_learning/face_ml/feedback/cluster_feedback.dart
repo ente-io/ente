@@ -48,7 +48,7 @@ class ClusterFeedbackService {
 
   /// Returns a map of person's clusterID to map of closest clusterID to with disstance
   Future<Map<int, List<(int, double)>>> getSuggestionsUsingMean(
-    Person p, {
+    PersonEntity p, {
     double maxClusterDistance = 0.4,
   }) async {
     // Get all the cluster data
@@ -58,7 +58,7 @@ class ClusterFeedbackService {
     final ignoredClusters = await faceMlDb.getPersonIgnoredClusters(p.remoteID);
     final personClusters = await faceMlDb.getPersonClusterIDs(p.remoteID);
     dev.log(
-      'existing clusters for ${p.attr.name} are $personClusters',
+      'existing clusters for ${p.data.name} are $personClusters',
       name: "ClusterFeedbackService",
     );
 
@@ -81,7 +81,7 @@ class ClusterFeedbackService {
     // log suggestions
     for (final entry in suggestions.entries) {
       dev.log(
-        ' ${entry.value.length} suggestion for ${p.attr.name} for cluster ID ${entry.key} are  suggestions ${entry.value}}',
+        ' ${entry.value.length} suggestion for ${p.data.name} for cluster ID ${entry.key} are  suggestions ${entry.value}}',
         name: "ClusterFeedbackService",
       );
     }
@@ -93,7 +93,7 @@ class ClusterFeedbackService {
   /// 2. distance: the distance between the person's cluster and the suggestion
   /// 3. usedMean: whether the suggestion was found using the mean (true) or the median (false)
   Future<List<(int, double, bool)>> getSuggestionsUsingMedian(
-    Person p, {
+    PersonEntity p, {
     int sampleSize = 50,
     double maxMedianDistance = 0.65,
     double goodMedianDistance = 0.55,
@@ -107,7 +107,7 @@ class ClusterFeedbackService {
     final ignoredClusters = await faceMlDb.getPersonIgnoredClusters(p.remoteID);
     final personClusters = await faceMlDb.getPersonClusterIDs(p.remoteID);
     dev.log(
-      'existing clusters for ${p.attr.name} are $personClusters',
+      'existing clusters for ${p.data.name} are $personClusters',
       name: "getSuggestionsUsingMedian",
     );
 
@@ -267,11 +267,11 @@ class ClusterFeedbackService {
   /// 3. bool: whether the suggestion was found using the mean (true) or the median (false)
   /// 4. List<EnteFile>: the files in the cluster
   Future<List<ClusterSuggestion>> getSuggestionForPerson(
-    Person person, {
+    PersonEntity person, {
     bool extremeFilesFirst = true,
   }) async {
     _logger.info(
-      'getClusterFilesForPersonID ${kDebugMode ? person.attr.name : person.remoteID}',
+      'getClusterFilesForPersonID ${kDebugMode ? person.data.name : person.remoteID}',
     );
 
     try {
@@ -325,7 +325,7 @@ class ClusterFeedbackService {
     }
   }
 
-  Future<void> removeFilesFromPerson(List<EnteFile> files, Person p) {
+  Future<void> removeFilesFromPerson(List<EnteFile> files, PersonEntity p) {
     return FaceMLDataDB.instance.removeFilesFromPerson(files, p);
   }
 
@@ -333,13 +333,13 @@ class ClusterFeedbackService {
     return FaceMLDataDB.instance.removeFilesFromCluster(files, clusterID);
   }
 
-  Future<bool> checkAndDoAutomaticMerges(Person p) async {
+  Future<bool> checkAndDoAutomaticMerges(PersonEntity p) async {
     final faceMlDb = FaceMLDataDB.instance;
     final allClusterIdsToCountMap = (await faceMlDb.clusterIdToFaceCount());
     final ignoredClusters = await faceMlDb.getPersonIgnoredClusters(p.remoteID);
     final personClusters = await faceMlDb.getPersonClusterIDs(p.remoteID);
     dev.log(
-      'existing clusters for ${p.attr.name} are $personClusters',
+      'existing clusters for ${p.data.name} are $personClusters',
       name: "ClusterFeedbackService",
     );
 
@@ -361,7 +361,7 @@ class ClusterFeedbackService {
 
     if (suggestions.isEmpty) {
       dev.log(
-        'No automatic merge suggestions for ${p.attr.name}',
+        'No automatic merge suggestions for ${p.data.name}',
         name: "ClusterFeedbackService",
       );
       return false;
@@ -370,7 +370,7 @@ class ClusterFeedbackService {
     // log suggestions
     for (final entry in suggestions.entries) {
       dev.log(
-        ' ${entry.value.length} suggestion for ${p.attr.name} for cluster ID ${entry.key} are  suggestions ${entry.value}}',
+        ' ${entry.value.length} suggestion for ${p.data.name} for cluster ID ${entry.key} are  suggestions ${entry.value}}',
         name: "ClusterFeedbackService",
       );
     }
@@ -677,7 +677,7 @@ class ClusterFeedbackService {
   }
 
   Future<void> _sortSuggestionsOnDistanceToPerson(
-    Person person,
+    PersonEntity person,
     List<ClusterSuggestion> suggestions,
   ) async {
     if (suggestions.isEmpty) {

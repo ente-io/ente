@@ -24,7 +24,7 @@ class ClusterAppBar extends StatefulWidget {
   final String? title;
   final SelectedFiles selectedFiles;
   final int clusterID;
-  final Person? person;
+  final PersonEntity? person;
 
   const ClusterAppBar(
     this.type,

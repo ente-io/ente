@@ -45,7 +45,7 @@ class FileSelectionActionsWidget extends StatefulWidget {
   final Collection? collection;
   final DeviceCollection? deviceCollection;
   final SelectedFiles selectedFiles;
-  final Person? person;
+  final PersonEntity? person;
   final int? clusterID;
 
   const FileSelectionActionsWidget(
@@ -130,7 +130,7 @@ class _FileSelectionActionsWidgetState
       items.add(
         SelectionActionButton(
           icon: Icons.remove_circle_outline,
-          labelText: 'Not ${widget.person!.attr.name}?',
+          labelText: 'Not ${widget.person!.data.name}?',
           onTap: anyUploadedFiles ? _onNotpersonClicked : null,
         ),
       );
@@ -653,8 +653,8 @@ class _FileSelectionActionsWidgetState
 
   Future<void> _setPersonCover() async {
     final EnteFile file = widget.selectedFiles.files.first;
-    final Person newPerson = widget.person!.copyWith(
-      attr: widget.person!.attr
+    final PersonEntity newPerson = widget.person!.copyWith(
+      data: widget.person!.data
           .copyWith(avatarFaceId: file.uploadedFileID.toString()),
     );
     await FaceMLDataDB.instance.updatePerson(newPerson);
@@ -686,7 +686,7 @@ class _FileSelectionActionsWidgetState
           isInAlert: true,
         ),
       ],
-      title: "Remove these photos for ${widget.person!.attr.name}?",
+      title: "Remove these photos for ${widget.person!.data.name}?",
       actionSheetType: ActionSheetType.defaultActionSheet,
     );
     if (actionResult?.action != null) {

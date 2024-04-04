@@ -178,7 +178,7 @@ class _PersonActionSheetState extends State<PersonActionSheet> {
     return Flexible(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 24, 4, 0),
-        child: FutureBuilder<List<Person>>(
+        child: FutureBuilder<List<PersonEntity>>(
           future: _getPersons(),
           builder: (context, snapshot) {
             if (snapshot.hasError) {
@@ -186,11 +186,11 @@ class _PersonActionSheetState extends State<PersonActionSheet> {
               //Need to show an error on the UI here
               return const SizedBox.shrink();
             } else if (snapshot.hasData) {
-              final persons = snapshot.data as List<Person>;
+              final persons = snapshot.data as List<PersonEntity>;
               final searchResults = _searchQuery.isNotEmpty
                   ? persons
                       .where(
-                        (element) => element.attr.name
+                        (element) => element.data.name
                             .toLowerCase()
                             .contains(_searchQuery),
                       )
@@ -270,9 +270,9 @@ class _PersonActionSheetState extends State<PersonActionSheet> {
         }
         try {
           final String id = const Uuid().v4().toString();
-          final Person p = Person(
+          final PersonEntity p = PersonEntity(
             id,
-            PersonAttr(name: text, faces: <String>[]),
+            PersonData(name: text, assigned: <ClusterInfo>[]),
           );
           await FaceMLDataDB.instance.insert(p, clusterID);
           final bool extraPhotosFound = await ClusterFeedbackService.instance
@@ -295,7 +295,7 @@ class _PersonActionSheetState extends State<PersonActionSheet> {
     }
   }
 
-  Future<List<Person>> _getPersons() async {
+  Future<List<PersonEntity>> _getPersons() async {
     return FaceMLDataDB.instance.getPersons();
   }
 }

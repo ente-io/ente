@@ -15,7 +15,7 @@ import "package:photos/ui/viewer/people/cluster_page.dart";
 import "package:photos/ui/viewer/search/result/person_face_widget.dart";
 
 class PersonReviewClusterSuggestion extends StatefulWidget {
-  final Person person;
+  final PersonEntity person;
 
   const PersonReviewClusterSuggestion(
     this.person, {
@@ -55,7 +55,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
             if (snapshot.data!.isEmpty) {
               return Center(
                 child: Text(
-                  "No suggestions for ${widget.person.attr.name}",
+                  "No suggestions for ${widget.person.data.name}",
                   style: getEnteTextTheme(context).largeMuted,
                 ),
               );
@@ -160,8 +160,8 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
           ),
         Text(
           files.length > 1
-              ? "These photos belong to ${widget.person.attr.name}?"
-              : "This photo belongs to ${widget.person.attr.name}?",
+              ? "These photos belong to ${widget.person.data.name}?"
+              : "This photo belongs to ${widget.person.data.name}?",
           style: getEnteTextTheme(context).largeMuted,
         ),
         const SizedBox(height: 24),

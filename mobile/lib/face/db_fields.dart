@@ -50,6 +50,7 @@ const dropFaceClustersTable = 'DROP TABLE IF EXISTS $faceClustersTable';
 const personTable = 'person';
 const idColumn = 'id';
 const nameColumn = 'name';
+const enteUserIdColumn = 'ente_user_id';
 const personHiddenColumn = 'hidden';
 const clusterToFaceIdJson = 'clusterToFaceIds';
 const coverFaceIDColumn = 'cover_face_id';

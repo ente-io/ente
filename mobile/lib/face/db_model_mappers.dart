@@ -25,25 +25,26 @@ bool sqlIntToBool(int? value, {bool defaultValue = false}) {
   }
 }
 
-Map<String, dynamic> mapPersonToRow(Person p) {
+Map<String, dynamic> mapPersonToRow(PersonEntity p) {
   return {
     idColumn: p.remoteID,
-    nameColumn: p.attr.name,
-    personHiddenColumn: boolToSQLInt(p.attr.isHidden),
-    coverFaceIDColumn: p.attr.avatarFaceId,
-    clusterToFaceIdJson: jsonEncode(p.attr.faces.toList()),
+    nameColumn: p.data.name,
+    personHiddenColumn: boolToSQLInt(p.data.isHidden),
+    coverFaceIDColumn: p.data.avatarFaceId,
+    clusterToFaceIdJson:
+        p.data.assigned != null ? jsonEncode(p.data.assigned!.toList()) : '{}',
   };
 }
 
-Person mapRowToPerson(Map<String, dynamic> row) {
-  return Person(
+PersonEntity mapRowToPerson(Map<String, dynamic> row) {
+  return PersonEntity(
     row[idColumn] as String,
-    PersonAttr(
+    PersonData(
       name: row[nameColumn] as String,
       isHidden: sqlIntToBool(row[personHiddenColumn] as int),
       avatarFaceId: row[coverFaceIDColumn] as String?,
-      faces: (jsonDecode(row[clusterToFaceIdJson]) as List)
-          .map((e) => e.toString())
+      assigned: (json.decode(row[clusterToFaceIdJson] as String) as List)
+          .map((e) => ClusterInfo.fromJson(e as Map<String, dynamic>))
           .toList(),
     ),
   );

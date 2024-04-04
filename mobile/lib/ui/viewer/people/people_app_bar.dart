@@ -22,7 +22,7 @@ class PeopleAppBar extends StatefulWidget {
   final GalleryType type;
   final String? title;
   final SelectedFiles selectedFiles;
-  final Person person;
+  final PersonEntity person;
 
   const PeopleAppBar(
     this.type,
@@ -100,7 +100,7 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
       submitButtonLabel: S.of(context).done,
       hintText: S.of(context).enterAlbumName,
       alwaysShowSuccessState: true,
-      initialValue: widget.person.attr.name,
+      initialValue: widget.person.data.name,
       textCapitalization: TextCapitalization.words,
       onSubmit: (String text) async {
         // indicates user cancelled the rename request
@@ -110,7 +110,7 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
 
         try {
           final updatePerson = widget.person
-              .copyWith(attr: widget.person.attr.copyWith(name: text));
+              .copyWith(data: widget.person.data.copyWith(name: text));
           await FaceMLDataDB.instance.updatePerson(updatePerson);
           if (mounted) {
             _appBarTitle = text;

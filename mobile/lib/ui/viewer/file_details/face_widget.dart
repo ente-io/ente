@@ -20,7 +20,7 @@ import "package:photos/utils/thumbnail_util.dart";
 class FaceWidget extends StatelessWidget {
   final EnteFile file;
   final Face face;
-  final Person? person;
+  final PersonEntity? person;
   final int? clusterID;
   final bool highlight;
 
@@ -114,7 +114,7 @@ class FaceWidget extends StatelessWidget {
                   const SizedBox(height: 8),
                   if (person != null)
                     Text(
-                      person!.attr.name.trim(),
+                      person!.data.name.trim(),
                       style: Theme.of(context).textTheme.bodySmall,
                       overflow: TextOverflow.ellipsis,
                       maxLines: 1,
@@ -237,7 +237,7 @@ class FaceWidget extends StatelessWidget {
                 const SizedBox(height: 8),
                 if (person != null)
                   Text(
-                    person!.attr.name.trim(),
+                    person!.data.name.trim(),
                     style: Theme.of(context).textTheme.bodySmall,
                     overflow: TextOverflow.ellipsis,
                     maxLines: 1,

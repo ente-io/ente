@@ -2,7 +2,7 @@ import "package:flutter/material.dart";
 import "package:photos/face/model/person.dart";
 
 class PersonRowItem extends StatelessWidget {
-  final Person person;
+  final PersonEntity person;
   final VoidCallback onTap;
 
   const PersonRowItem({
@@ -15,9 +15,9 @@ class PersonRowItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       leading: CircleAvatar(
-        child: Text(person.attr.name.substring(0, 1)),
+        child: Text(person.data.name.substring(0, 1)),
       ),
-      title: Text(person.attr.name),
+      title: Text(person.data.name),
       onTap: onTap,
     );
   }

@@ -74,7 +74,7 @@ class FacesItemWidget extends StatelessWidget {
       final faceWidgets = <FaceWidget>[];
       for (final Face face in faces) {
         final int? clusterID = faceIdsToClusterIds[face.faceID];
-        final Person? person = clusterIDToPerson[clusterID];
+        final PersonEntity? person = clusterIDToPerson[clusterID];
         final highlight =
             (clusterID == lastViewedClusterID) && (person == null);
         faceWidgets.add(
