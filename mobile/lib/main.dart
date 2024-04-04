@@ -20,6 +20,7 @@ import 'package:photos/core/errors.dart';
 import 'package:photos/core/network/network.dart';
 import 'package:photos/db/upload_locks_db.dart';
 import 'package:photos/ente_theme_data.dart';
+import "package:photos/face/db.dart";
 import "package:photos/l10n/l10n.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/billing_service.dart';
@@ -32,6 +33,7 @@ import 'package:photos/services/local_file_update_service.dart';
 import 'package:photos/services/local_sync_service.dart';
 import "package:photos/services/location_service.dart";
 import 'package:photos/services/machine_learning/face_ml/face_ml_service.dart';
+import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import 'package:photos/services/machine_learning/file_ml/remote_fileml_service.dart';
 import "package:photos/services/machine_learning/machine_learning_controller.dart";
 import 'package:photos/services/machine_learning/semantic_search/semantic_search_service.dart';
@@ -238,6 +240,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     unawaited(FaceMlService.instance.init());
     FaceMlService.instance.listenIndexOnDiffSync();
   }
+  PersonService.init(EntityService.instance, FaceMLDataDB.instance, preferences);
 
   _logger.info("Initialization done");
 }

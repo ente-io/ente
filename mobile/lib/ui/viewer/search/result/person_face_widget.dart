@@ -17,12 +17,16 @@ class PersonFaceWidget extends StatelessWidget {
   final String? personId;
   final int? clusterID;
 
+  // PersonFaceWidget constructor checks that both personId and clusterID are not null
+  // and that the file is not null
   const PersonFaceWidget(
     this.file, {
     this.personId,
     this.clusterID,
     Key? key,
-  }) : super(key: key);
+  })  : assert(personId != null || clusterID != null,
+            "PersonFaceWidget requires either personId or clusterID to be non-null"),
+        super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +57,7 @@ class PersonFaceWidget extends StatelessWidget {
       );
     } else {
       return FutureBuilder<Face?>(
-        future: getFace(),
+        future: _getFace(),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             final Face face = snapshot.data!;
@@ -76,7 +80,7 @@ class PersonFaceWidget extends StatelessWidget {
     }
   }
 
-  Future<Face?> getFace() async {
+  Future<Face?> _getFace() async {
     return await FaceMLDataDB.instance.getCoverFaceForPerson(
       recentFileID: file.uploadedFileID!,
       personID: personId,
@@ -86,11 +90,7 @@ class PersonFaceWidget extends StatelessWidget {
 
   Future<Uint8List?> getFaceCrop() async {
     try {
-      final Face? face = await FaceMLDataDB.instance.getCoverFaceForPerson(
-        recentFileID: file.uploadedFileID!,
-        personID: personId,
-        clusterID: clusterID,
-      );
+      final Face? face = await _getFace();
       if (face == null) {
         debugPrint(
           "No cover face for person: $personId and cluster $clusterID and recentFile ${file.uploadedFileID}",

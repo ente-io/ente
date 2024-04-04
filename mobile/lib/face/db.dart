@@ -80,31 +80,28 @@ class FaceMLDataDB {
     }
   }
 
-  Future<void> updatePersonIDForFaceIDIFNotSet(
-    Map<String, int> faceIDToPersonID,
+  Future<void> updateClusterIdToFaceId(
+    Map<String, int> faceIDToClusterID,
   ) async {
     final db = await instance.database;
     const batchSize = 500;
-    final numBatches = (faceIDToPersonID.length / batchSize).ceil();
-
+    final numBatches = (faceIDToClusterID.length / batchSize).ceil();
     for (int i = 0; i < numBatches; i++) {
-      _logger.info('updatePersonIDForFaceIDIFNotSet Batch $i of $numBatches');
       final start = i * batchSize;
-      final end = min((i + 1) * batchSize, faceIDToPersonID.length);
-      final batch = faceIDToPersonID.entries.toList().sublist(start, end);
+      final end = min((i + 1) * batchSize, faceIDToClusterID.length);
+      final batch = faceIDToClusterID.entries.toList().sublist(start, end);
 
       final batchUpdate = db.batch();
 
       for (final entry in batch) {
         final faceID = entry.key;
-        final personID = entry.value;
+        final clusterID = entry.value;
         batchUpdate.insert(
           faceClustersTable,
-          {fcClusterID: personID, fcFaceId: faceID},
+          {fcClusterID: clusterID, fcFaceId: faceID},
           conflictAlgorithm: ConflictAlgorithm.replace,
         );
       }
-
       await batchUpdate.commit(noResult: true);
     }
   }
@@ -496,14 +493,7 @@ class FaceMLDataDB {
       mapPersonToRow(p),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
-    await db.insert(
-      clusterPersonTable,
-      {
-        personIdColumn: p.remoteID,
-        cluserIDColumn: cluserID,
-      },
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    await assignClusterToPerson(personID: p.remoteID, clusterID: cluserID);
   }
 
   Future<void> updatePerson(PersonEntity p) async {

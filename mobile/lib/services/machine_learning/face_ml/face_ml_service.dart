@@ -416,8 +416,7 @@ class FaceMlService {
             return;
           }
 
-          await FaceMLDataDB.instance
-              .updatePersonIDForFaceIDIFNotSet(faceIdToCluster);
+          await FaceMLDataDB.instance.updateClusterIdToFaceId(faceIdToCluster);
           offset += offsetIncrement;
         }
       } else {
@@ -456,8 +455,7 @@ class FaceMlService {
         _logger.info(
           'Updating ${faceIdToCluster.length} FaceIDs with clusterIDs in the DB',
         );
-        await FaceMLDataDB.instance
-            .updatePersonIDForFaceIDIFNotSet(faceIdToCluster);
+        await FaceMLDataDB.instance.updateClusterIdToFaceId(faceIdToCluster);
         _logger.info('Done updating FaceIDs with clusterIDs in the DB, in '
             '${DateTime.now().difference(clusterDoneTime).inSeconds} seconds');
       }

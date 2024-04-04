@@ -11,6 +11,7 @@ import "package:photos/face/db.dart";
 import "package:photos/face/model/person.dart";
 import "package:photos/generated/l10n.dart";
 import 'package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart';
+import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/common/loading_widget.dart';
@@ -23,7 +24,6 @@ import "package:photos/ui/viewer/people/new_person_item_widget.dart";
 import "package:photos/ui/viewer/people/person_row_item.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/toast_util.dart";
-import "package:uuid/uuid.dart";
 
 enum PersonActionType {
   assignPerson,
@@ -269,12 +269,8 @@ class _PersonActionSheetState extends State<PersonActionSheet> {
           return;
         }
         try {
-          final String id = const Uuid().v4().toString();
-          final PersonEntity p = PersonEntity(
-            id,
-            PersonData(name: text, assigned: <ClusterInfo>[]),
-          );
-          await FaceMLDataDB.instance.insert(p, clusterID);
+          final PersonEntity p =
+              await PersonService.instance.addPerson(text, clusterID);
           final bool extraPhotosFound = await ClusterFeedbackService.instance
               .checkAndDoAutomaticMerges(p);
           if (extraPhotosFound) {
@@ -282,7 +278,6 @@ class _PersonActionSheetState extends State<PersonActionSheet> {
           }
           Bus.instance.fire(PeopleChangedEvent());
           Navigator.pop(context, p);
-          log("inserted person");
         } catch (e, s) {
           Logger("_PersonActionSheetState")
               .severe("Failed to rename album", e, s);
