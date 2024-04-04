@@ -15,8 +15,8 @@ import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedba
 import "package:photos/ui/components/notification_widget.dart";
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
-import 'package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart';
 import "package:photos/ui/viewer/people/add_person_action_sheet.dart";
+import "package:photos/ui/viewer/people/cluster_app_bar.dart";
 import "package:photos/ui/viewer/people/people_page.dart";
 import "package:photos/ui/viewer/search/result/search_result_page.dart";
 import "package:photos/utils/navigation_util.dart";
@@ -28,6 +28,7 @@ class ClusterPage extends StatefulWidget {
   final String tagPrefix;
   final int clusterID;
   final Person? personID;
+  final String appendTitle;
 
   static const GalleryType appBarType = GalleryType.cluster;
   static const GalleryType overlayType = GalleryType.cluster;
@@ -38,6 +39,7 @@ class ClusterPage extends StatefulWidget {
     this.tagPrefix = "",
     required this.clusterID,
     this.personID,
+    this.appendTitle = "",
     Key? key,
   }) : super(key: key);
 
@@ -107,12 +109,11 @@ class _ClusterPageState extends State<ClusterPage> {
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(50.0),
-        child: GalleryAppBarWidget(
+        child: ClusterAppBar(
           SearchResultPage.appBarType,
-          widget.personID != null
-              ? widget.personID!.attr.name
-              : "${widget.searchResult.length} memories",
+          "${widget.searchResult.length} memories${widget.appendTitle}",
           _selectedFiles,
+          widget.clusterID,
         ),
       ),
       body: Column(

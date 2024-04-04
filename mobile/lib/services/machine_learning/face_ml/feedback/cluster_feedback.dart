@@ -390,7 +390,7 @@ class ClusterFeedbackService {
     return true;
   }
 
-  // TODO: iterate over this method and actually use it
+  // TODO: iterate over this method to find sweet spot
   Future<Map<int, List<String>>> breakUpCluster(
     int clusterID, {
     useDbscan = true,
@@ -398,6 +398,7 @@ class ClusterFeedbackService {
     final faceMlDb = FaceMLDataDB.instance;
 
     final faceIDs = await faceMlDb.getFaceIDsForCluster(clusterID);
+    final originalFaceIDsSet = faceIDs.toSet();
     final fileIDs = faceIDs.map((e) => getFileIdFromFaceId(e)).toList();
 
     final embeddings = await faceMlDb.getFaceEmbeddingMapForFile(fileIDs);
@@ -411,8 +412,8 @@ class ClusterFeedbackService {
       final dbscanClusters = await FaceClustering.instance.predictDbscan(
         embeddings,
         fileIDToCreationTime: fileIDToCreationTime,
-        eps: 0.25,
-        minPts: 4,
+        eps: 0.30,
+        minPts: 5,
       );
 
       if (dbscanClusters.isEmpty) {
@@ -459,6 +460,27 @@ class ClusterFeedbackService {
     _logger.info(
       'Broke up cluster $clusterID into $amountOfNewClusters clusters \n ${clusterIdToCount.toString()}',
     );
+
+    final clusterIdToDisplayNames = <int, List<String>>{};
+    if (kDebugMode) {
+      for (final entry in clusterIdToFaceIds.entries) {
+        final faceIDs = entry.value;
+        final fileIDs = faceIDs.map((e) => getFileIdFromFaceId(e)).toList();
+        final files = await FilesDB.instance.getFilesFromIDs(fileIDs);
+        final displayNames = files.values.map((e) => e.displayName).toList();
+        clusterIdToDisplayNames[entry.key] = displayNames;
+      }
+    }
+
+    final Set allClusteredFaceIDsSet = {};
+    for (final List<String> value in clusterIdToFaceIds.values) {
+      allClusteredFaceIDsSet.addAll(value);
+    }
+    final clusterIDToNoiseFaceID =
+        originalFaceIDsSet.difference(allClusteredFaceIDsSet);
+    if (clusterIDToNoiseFaceID.isNotEmpty) {
+      clusterIdToFaceIds[-1] = clusterIDToNoiseFaceID.toList();
+    }
 
     return clusterIdToFaceIds;
   }
