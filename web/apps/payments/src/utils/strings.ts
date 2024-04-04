@@ -7,7 +7,6 @@
  */
 const S = {
     error_generic: "Oops, something went wrong.",
-    error_404: "404 | This page could not be found.",
 };
 
 export default S;

@@ -4,6 +4,9 @@
      * The base configuration was generated using `yarn create vite`. This was
      * already almost the same as the `tsconfig-typecheck.json` we use
      * elsewhere, with one or two differences.
+     *
+     * For more details about the flags vite cares about, see
+     * https://vitejs.dev/guide/features.html#typescript-compiler-options
      */
     "compilerOptions": {
         "target": "ES2020",
