@@ -413,7 +413,7 @@ class ClusterFeedbackService {
         embeddings,
         fileIDToCreationTime: fileIDToCreationTime,
         eps: 0.30,
-        minPts: 5,
+        minPts: 8,
       );
 
       if (dbscanClusters.isEmpty) {
