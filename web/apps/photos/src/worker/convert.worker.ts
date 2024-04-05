@@ -16,7 +16,6 @@ Comlink.expose(DedicatedConvertWorker, self);
  * Both the input and output are blobs.
  */
 export const convertHEICToJPEG = async (heicBlob: Blob): Promise<Blob> => {
-    console.log("test")
     const filedata = await getUint8ArrayView(heicBlob);
     const result = await HeicConvert({ buffer: filedata, format: "JPEG" });
     const convertedFileData = new Uint8Array(result);
