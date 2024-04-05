@@ -214,32 +214,35 @@ class FaceClustering {
     }
 
     isRunning = true;
+    try {
+      // Clustering inside the isolate
+      _logger.info(
+        "Start clustering on ${input.length} embeddings inside computer isolate",
+      );
+      final stopwatchClustering = Stopwatch()..start();
+      // final Map<String, int> faceIdToCluster =
+      //     await _runLinearClusteringInComputer(input);
+      final Map<String, int> faceIdToCluster = await _runInIsolate(
+        (
+          ClusterOperation.linearIncrementalClustering,
+          {
+            'input': input,
+            'fileIDToCreationTime': fileIDToCreationTime,
+            'distanceThreshold': distanceThreshold,
+          }
+        ),
+      );
+      // return _runLinearClusteringInComputer(input);
+      _logger.info(
+        'Clustering executed in ${stopwatchClustering.elapsed.inSeconds} seconds',
+      );
 
-    // Clustering inside the isolate
-    _logger.info(
-      "Start clustering on ${input.length} embeddings inside computer isolate",
-    );
-    final stopwatchClustering = Stopwatch()..start();
-    // final Map<String, int> faceIdToCluster =
-    //     await _runLinearClusteringInComputer(input);
-    final Map<String, int> faceIdToCluster = await _runInIsolate(
-      (
-        ClusterOperation.linearIncrementalClustering,
-        {
-          'input': input,
-          'fileIDToCreationTime': fileIDToCreationTime,
-          'distanceThreshold': distanceThreshold,
-        }
-      ),
-    );
-    // return _runLinearClusteringInComputer(input);
-    _logger.info(
-      'Clustering executed in ${stopwatchClustering.elapsed.inSeconds} seconds',
-    );
-
-    isRunning = false;
-
-    return faceIdToCluster;
+      isRunning = false;
+      return faceIdToCluster;
+    } catch (e, stackTrace) {
+      isRunning = false;
+      rethrow;
+    }
   }
 
   Future<List<List<String>>> predictDbscan(
