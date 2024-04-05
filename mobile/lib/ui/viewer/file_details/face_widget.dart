@@ -55,10 +55,7 @@ class _FaceWidgetState extends State<FaceWidget> {
             final ImageProvider imageProvider = MemoryImage(snapshot.data!);
             return GestureDetector(
               onTap: () async {
-                if (widget.editMode) {
-                  _cornerIconPressed();
-                  return;
-                }
+                if (widget.editMode) return;
 
                 log(
                   "FaceWidget is tapped, with person ${widget.person} and clusterID ${widget.clusterID}",
