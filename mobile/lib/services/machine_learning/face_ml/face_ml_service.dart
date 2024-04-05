@@ -652,7 +652,7 @@ class FaceMlService {
                 .map(
                   (keypoint) => Landmark(
                     x: keypoint[0],
-                    y: keypoint[0],
+                    y: keypoint[1],
                   ),
                 )
                 .toList(),

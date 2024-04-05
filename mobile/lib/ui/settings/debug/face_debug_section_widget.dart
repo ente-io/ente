@@ -115,7 +115,9 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
                 .getTotalFaceCount(minFaceScore: 0.75);
             final faces78 = await FaceMLDataDB.instance
                 .getTotalFaceCount(minFaceScore: kMinHighQualityFaceScore);
-            showShortToast(context, "Faces75: $faces75, Faces78: $faces78");
+            final blurryFaceCount =
+                await FaceMLDataDB.instance.getBlurryFaceCount(15);
+            showShortToast(context, "$blurryFaceCount blurry faces");
           },
         ),
         // MenuItemWidget(
