@@ -1,4 +1,4 @@
-import { isDevBuild } from "@/utils/env";
+import { isDevBuild } from "@/next/env";
 import { logError } from "@ente/shared/sentry";
 import isElectron from "is-electron";
 import { WorkerSafeElectronService } from "../electron/service";

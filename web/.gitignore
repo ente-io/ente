@@ -10,6 +10,9 @@ node_modules/
 # Local env files
 .env*.local
 
+# Vite
+dist
+
 # Next.js
 .next/
 out/

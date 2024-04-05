@@ -1,9 +1,4 @@
-import { isDevBuild } from "@/utils/env";
-import {
-    getLSString,
-    removeLSString,
-    setLSString,
-} from "@/utils/local-storage";
+import { isDevBuild } from "@/next/env";
 import { logError } from "@/utils/logging";
 import { includes } from "@/utils/type-guards";
 import { getUserLocales } from "get-user-locale";
@@ -119,8 +114,8 @@ export const setupI18n = async () => {
  * If it finds a locale stored in the old format, it also updates the saved
  * value and returns it in the new format.
  */
-const savedLocaleStringMigratingIfNeeded = () => {
-    const ls = getLSString("locale");
+const savedLocaleStringMigratingIfNeeded = (): SupportedLocale | undefined => {
+    const ls = localStorage.getItem("locale");
 
     // An older version of our code had stored only the language code, not the
     // full locale. Migrate these to the new locale format. Luckily, all such
@@ -133,7 +128,7 @@ const savedLocaleStringMigratingIfNeeded = () => {
 
     if (!ls) {
         // Nothing found
-        return ls;
+        return undefined;
     }
 
     if (includes(supportedLocales, ls)) {
@@ -150,12 +145,12 @@ const savedLocaleStringMigratingIfNeeded = () => {
         // have happened, we're the only one setting it.
         logError("Failed to parse locale obtained from local storage", e);
         // Also remove the old key, it is not parseable by us anymore.
-        removeLSString("locale");
+        localStorage.removeItem("locale");
         return undefined;
     }
 
     const newValue = mapOldValue(value);
-    if (newValue) setLSString("locale", newValue);
+    if (newValue) localStorage.setItem("locale", newValue);
 
     return newValue;
 };
@@ -249,6 +244,6 @@ export const getLocaleInUse = (): SupportedLocale => {
  * preference that is stored in local storage.
  */
 export const setLocaleInUse = async (locale: SupportedLocale) => {
-    setLSString("locale", locale);
+    localStorage.setItem("locale", locale);
     return i18n.changeLanguage(locale);
 };

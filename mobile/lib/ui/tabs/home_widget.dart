@@ -80,7 +80,6 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   final _logger = Logger("HomeWidgetState");
   final _selectedFiles = SelectedFiles();
-  final GlobalKey shareButtonKey = GlobalKey();
 
   final PageController _pageController = PageController();
   int _selectedTabIndex = 0;
