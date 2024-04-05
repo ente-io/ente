@@ -7,11 +7,5 @@ import { useContext } from "react";
 export default function ChangeEmail() {
     const appContext = useContext(AppContext);
     const router = useRouter();
-    return (
-        <ChangeEmailPage
-            appContext={appContext}
-            router={router}
-            appName={APPS.PHOTOS}
-        />
-    );
+    return <ChangeEmailPage appContext={appContext} appName={APPS.PHOTOS} />;
 }

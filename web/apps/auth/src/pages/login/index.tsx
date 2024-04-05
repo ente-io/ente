@@ -7,11 +7,5 @@ import { useContext } from "react";
 export default function Login() {
     const appContext = useContext(AppContext);
     const router = useRouter();
-    return (
-        <LoginPage
-            appContext={appContext}
-            router={router}
-            appName={APPS.AUTH}
-        />
-    );
+    return <LoginPage appContext={appContext} appName={APPS.AUTH} />;
 }

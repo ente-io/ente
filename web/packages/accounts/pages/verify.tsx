@@ -26,15 +26,18 @@ import { clearKeys } from "@ente/shared/storage/sessionStorage";
 import { KeyAttributes, User } from "@ente/shared/user/types";
 import { Box, Typography } from "@mui/material";
 import { HttpStatusCode } from "axios";
+import { useRouter } from "next/router";
 import { putAttributes, sendOtt, verifyOtt } from "../api/user";
 import { PAGES } from "../constants/pages";
 import { configureSRP } from "../services/srp";
 import { logoutUser } from "../services/user";
 import { SRPSetupAttributes } from "../types/srp";
 
-export default function VerifyPage({ appContext, router, appName }: PageProps) {
+export default function VerifyPage({ appContext, appName }: PageProps) {
     const [email, setEmail] = useState("");
     const [resend, setResend] = useState(0);
+
+    const router = useRouter();
 
     useEffect(() => {
         const main = async () => {

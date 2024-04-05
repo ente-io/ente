@@ -1,6 +1,7 @@
 import { logError } from "@ente/shared/sentry";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import { User } from "@ente/shared/user/types";
+import { downloadUsingAnchor } from "@ente/shared/utils";
 import {
     FILE_TYPE,
     RAW_FORMATS,

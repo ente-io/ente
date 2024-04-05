@@ -7,11 +7,5 @@ import { useContext } from "react";
 export default function TwoFactorSetup() {
     const appContext = useContext(AppContext);
     const router = useRouter();
-    return (
-        <TwoFactorSetupPage
-            appContext={appContext}
-            router={router}
-            appName={APPS.AUTH}
-        />
-    );
+    return <TwoFactorSetupPage appContext={appContext} appName={APPS.AUTH} />;
 }

@@ -8,10 +8,6 @@ export default function TwoFactorRecover() {
     const appContext = useContext(AppContext);
     const router = useRouter();
     return (
-        <TwoFactorRecoverPage
-            appContext={appContext}
-            router={router}
-            appName={APPS.ACCOUNTS}
-        />
+        <TwoFactorRecoverPage appContext={appContext} appName={APPS.ACCOUNTS} />
     );
 }

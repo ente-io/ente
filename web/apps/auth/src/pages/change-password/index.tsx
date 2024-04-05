@@ -7,11 +7,5 @@ import { useContext } from "react";
 export default function ChangePassword() {
     const appContext = useContext(AppContext);
     const router = useRouter();
-    return (
-        <ChangePasswordPage
-            appContext={appContext}
-            router={router}
-            appName={APPS.AUTH}
-        />
-    );
+    return <ChangePasswordPage appContext={appContext} appName={APPS.AUTH} />;
 }

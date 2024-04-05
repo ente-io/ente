@@ -29,8 +29,9 @@ export function isPromise<T>(obj: T | Promise<T>): obj is Promise<T> {
 
 export async function retryAsyncFunction<T>(
     request: (abort?: () => void) => Promise<T>,
+    waitTimeBeforeNextTry?: number[],
 ): Promise<T> {
-    const waitTimeBeforeNextTry = [2000, 5000, 10000];
+    if (!waitTimeBeforeNextTry) waitTimeBeforeNextTry = [2000, 5000, 10000];
 
     for (
         let attemptNumber = 0;

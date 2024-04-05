@@ -7,11 +7,5 @@ import { useContext } from "react";
 export default function Verify() {
     const appContext = useContext(AppContext);
     const router = useRouter();
-    return (
-        <VerifyPage
-            appContext={appContext}
-            router={router}
-            appName={APPS.AUTH}
-        />
-    );
+    return <VerifyPage appContext={appContext} appName={APPS.AUTH} />;
 }

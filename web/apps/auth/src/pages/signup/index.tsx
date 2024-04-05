@@ -7,11 +7,5 @@ import { useContext } from "react";
 export default function Sigup() {
     const appContext = useContext(AppContext);
     const router = useRouter();
-    return (
-        <SignupPage
-            appContext={appContext}
-            router={router}
-            appName={APPS.AUTH}
-        />
-    );
+    return <SignupPage appContext={appContext} appName={APPS.AUTH} />;
 }

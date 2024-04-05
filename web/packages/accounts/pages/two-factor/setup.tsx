@@ -1,7 +1,4 @@
 import { enableTwoFactor, setupTwoFactor } from "@ente/accounts/api/user";
-import { t } from "i18next";
-import { useEffect, useState } from "react";
-
 import VerifyTwoFactor, {
     VerifyTwoFactorCallback,
 } from "@ente/accounts/components/two-factor/VerifyForm";
@@ -16,15 +13,20 @@ import { logError } from "@ente/shared/sentry";
 import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
 import { Box, CardContent, Typography } from "@mui/material";
 import Card from "@mui/material/Card";
+import { t } from "i18next";
+import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
 
 export enum SetupMode {
     QR_CODE,
     MANUAL_CODE,
 }
 
-export default function SetupTwoFactor({ router, appName }: PageProps) {
+export default function SetupTwoFactor({ appName }: PageProps) {
     const [twoFactorSecret, setTwoFactorSecret] =
         useState<TwoFactorSecret>(null);
+
+    const router = useRouter();
 
     useEffect(() => {
         if (twoFactorSecret) {

@@ -23,11 +23,7 @@ function ChangeEmailPage({ appName, appContext }: PageProps) {
         <VerticallyCentered>
             <FormPaper>
                 <FormPaperTitle>{t("CHANGE_EMAIL")}</FormPaperTitle>
-                <ChangeEmailForm
-                    router={router}
-                    appName={appName}
-                    appContext={appContext}
-                />
+                <ChangeEmailForm appName={appName} appContext={appContext} />
             </FormPaper>
         </VerticallyCentered>
     );

@@ -7,11 +7,5 @@ import { useContext } from "react";
 export default function Credential() {
     const appContext = useContext(AppContext);
     const router = useRouter();
-    return (
-        <CredentialPage
-            appContext={appContext}
-            router={router}
-            appName={APPS.PHOTOS}
-        />
-    );
+    return <CredentialPage appContext={appContext} appName={APPS.PHOTOS} />;
 }
