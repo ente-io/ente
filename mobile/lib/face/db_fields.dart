@@ -48,22 +48,6 @@ const dropFaceClustersTable = 'DROP TABLE IF EXISTS $faceClustersTable';
 
 // People Table Fields & Schema Queries
 const personTable = 'person';
-const idColumn = 'id';
-const nameColumn = 'name';
-const enteUserIdColumn = 'ente_user_id';
-const personHiddenColumn = 'hidden';
-const clusterToFaceIdJson = 'clusterToFaceIds';
-const coverFaceIDColumn = 'cover_face_id';
-
-const createPersonTable = '''CREATE TABLE IF NOT EXISTS $personTable (
-  $idColumn	TEXT NOT NULL UNIQUE,
-	$nameColumn	TEXT NOT NULL DEFAULT '',
-  $personHiddenColumn	INTEGER NOT NULL DEFAULT 0,
-  $clusterToFaceIdJson	TEXT NOT NULL DEFAULT '{}',
-  $coverFaceIDColumn	TEXT,
-	PRIMARY KEY($idColumn)
-  );
-  ''';
 
 const deletePersonTable = 'DROP TABLE IF EXISTS $personTable';
 //End People Table Fields & Schema Queries

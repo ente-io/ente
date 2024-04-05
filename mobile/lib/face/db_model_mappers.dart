@@ -3,7 +3,6 @@ import "dart:convert";
 import 'package:photos/face/db_fields.dart';
 import "package:photos/face/model/detection.dart";
 import "package:photos/face/model/face.dart";
-import "package:photos/face/model/person.dart";
 import "package:photos/generated/protos/ente/common/vector.pb.dart";
 import "package:photos/models/ml/ml_versions.dart";
 
@@ -23,31 +22,6 @@ bool sqlIntToBool(int? value, {bool defaultValue = false}) {
   } else {
     return true;
   }
-}
-
-Map<String, dynamic> mapPersonToRow(PersonEntity p) {
-  return {
-    idColumn: p.remoteID,
-    nameColumn: p.data.name,
-    personHiddenColumn: boolToSQLInt(p.data.isHidden),
-    coverFaceIDColumn: p.data.avatarFaceId,
-    clusterToFaceIdJson:
-        p.data.assigned != null ? jsonEncode(p.data.assigned!.toList()) : '{}',
-  };
-}
-
-PersonEntity mapRowToPerson(Map<String, dynamic> row) {
-  return PersonEntity(
-    row[idColumn] as String,
-    PersonData(
-      name: row[nameColumn] as String,
-      isHidden: sqlIntToBool(row[personHiddenColumn] as int),
-      avatarFaceId: row[coverFaceIDColumn] as String?,
-      assigned: (json.decode(row[clusterToFaceIdJson] as String) as List)
-          .map((e) => ClusterInfo.fromJson(e as Map<String, dynamic>))
-          .toList(),
-    ),
-  );
 }
 
 Map<String, dynamic> mapRemoteToFaceDB(Face face) {
