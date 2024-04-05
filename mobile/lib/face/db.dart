@@ -481,6 +481,16 @@ class FaceMLDataDB {
     return maps.first['count'] as int;
   }
 
+  Future<int> getBlurryFaceCount([
+    int blurThreshold = kLaplacianThreshold,
+  ]) async {
+    final db = await instance.database;
+    final List<Map<String, dynamic>> maps = await db.rawQuery(
+      'SELECT COUNT(*) as count FROM $facesTable WHERE $faceBlur <= $blurThreshold AND $faceScore > $kMinHighQualityFaceScore',
+    );
+    return maps.first['count'] as int;
+  }
+
   Future<void> resetClusterIDs() async {
     final db = await instance.database;
     await db.execute(dropFaceClustersTable);
@@ -726,7 +736,7 @@ class FaceMLDataDB {
     for (final enteFile in files) {
       fileIds.add(enteFile.uploadedFileID.toString());
     }
-    int maxClusterID = DateTime.now().millisecondsSinceEpoch;
+    int maxClusterID = DateTime.now().microsecondsSinceEpoch;
     final Map<String, int> faceIDToClusterID = {};
     for (final row in faceIdsResult) {
       final faceID = row[fcFaceId] as String;
@@ -752,7 +762,7 @@ class FaceMLDataDB {
     for (final enteFile in files) {
       fileIds.add(enteFile.uploadedFileID.toString());
     }
-    int maxClusterID = DateTime.now().millisecondsSinceEpoch;
+    int maxClusterID = DateTime.now().microsecondsSinceEpoch;
     final Map<String, int> faceIDToClusterID = {};
     for (final row in faceIdsResult) {
       final faceID = row[fcFaceId] as String;
@@ -761,6 +771,18 @@ class FaceMLDataDB {
         faceIDToClusterID[faceID] = maxClusterID;
       }
     }
+    await forceUpdateClusterIds(faceIDToClusterID);
+  }
+
+  Future<void> addFacesToCluster(
+    List<String> faceIDs,
+    int clusterID,
+  ) async {
+    final faceIDToClusterID = <String, int>{};
+    for (final faceID in faceIDs) {
+      faceIDToClusterID[faceID] = clusterID;
+    }
+
     await forceUpdateClusterIds(faceIDToClusterID);
   }
 }

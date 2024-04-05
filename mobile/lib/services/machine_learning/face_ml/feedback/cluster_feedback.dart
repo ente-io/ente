@@ -325,12 +325,25 @@ class ClusterFeedbackService {
     }
   }
 
-  Future<void> removeFilesFromPerson(List<EnteFile> files, Person p) {
-    return FaceMLDataDB.instance.removeFilesFromPerson(files, p);
+  Future<void> removeFilesFromPerson(List<EnteFile> files, Person p) async {
+    await FaceMLDataDB.instance.removeFilesFromPerson(files, p);
+    Bus.instance.fire(PeopleChangedEvent());
+    return;
   }
 
-  Future<void> removeFilesFromCluster(List<EnteFile> files, int clusterID) {
-    return FaceMLDataDB.instance.removeFilesFromCluster(files, clusterID);
+  Future<void> removeFilesFromCluster(
+    List<EnteFile> files,
+    int clusterID,
+  ) async {
+    await FaceMLDataDB.instance.removeFilesFromCluster(files, clusterID);
+    Bus.instance.fire(PeopleChangedEvent());
+    return;
+  }
+
+  Future<void> addFilesToCluster(List<String> faceIDs, int clusterID) async {
+    await FaceMLDataDB.instance.addFacesToCluster(faceIDs, clusterID);
+    Bus.instance.fire(PeopleChangedEvent());
+    return;
   }
 
   Future<bool> checkAndDoAutomaticMerges(Person p) async {
@@ -413,7 +426,7 @@ class ClusterFeedbackService {
         embeddings,
         fileIDToCreationTime: fileIDToCreationTime,
         eps: 0.30,
-        minPts: 5,
+        minPts: 8,
       );
 
       if (dbscanClusters.isEmpty) {
