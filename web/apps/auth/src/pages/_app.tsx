@@ -1,3 +1,4 @@
+import { CustomHead } from "@/next/components/Head";
 import { setupI18n } from "@/next/i18n";
 import {
     APPS,
@@ -28,7 +29,6 @@ import { CssBaseline, useMediaQuery } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
 import { t } from "i18next";
 import { AppProps } from "next/app";
-import Head from "next/head";
 import { useRouter } from "next/router";
 import { createContext, useEffect, useRef, useState } from "react";
 import LoadingBar from "react-top-loading-bar";
@@ -129,19 +129,13 @@ export default function App(props: AppProps) {
             content: t("UNKNOWN_ERROR"),
         });
 
+    const title = isI18nReady
+        ? t("TITLE", { context: APPS.AUTH })
+        : APP_TITLES.get(APPS.AUTH);
+
     return (
         <>
-            <Head>
-                <title>
-                    {isI18nReady
-                        ? t("TITLE", { context: APPS.AUTH })
-                        : APP_TITLES.get(APPS.AUTH)}
-                </title>
-                <meta
-                    name="viewport"
-                    content="width=device-width, initial-scale=1"
-                />
-            </Head>
+            <CustomHead {...{ title }} />
 
             <ThemeProvider theme={getTheme(themeColor, APPS.AUTH)}>
                 <CssBaseline enableColorScheme />
