@@ -8,7 +8,6 @@ import "package:modal_bottom_sheet/modal_bottom_sheet.dart";
 import 'package:photos/core/configuration.dart';
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/people_changed_event.dart";
-import "package:photos/face/db.dart";
 import "package:photos/face/model/person.dart";
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection/collection.dart';
@@ -22,6 +21,7 @@ import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/hidden_service.dart';
 import 'package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart';
+import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/actions/collection/collection_file_actions.dart';
@@ -657,7 +657,7 @@ class _FileSelectionActionsWidgetState
       data: widget.person!.data
           .copyWith(avatarFaceId: file.uploadedFileID.toString()),
     );
-    await FaceMLDataDB.instance.updatePerson(newPerson);
+    await PersonService.instance.updatePerson(newPerson);
     widget.selectedFiles.clearAll();
     if (mounted) {
       setState(() => {});

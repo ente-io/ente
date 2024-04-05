@@ -74,4 +74,12 @@ class PersonService {
     );
     return PersonEntity(result.id, data);
   }
+
+  Future<void> updatePerson(PersonEntity updatePerson) async {
+    await entityService.addOrUpdate(
+      EntityType.person,
+      json.encode(updatePerson.data.toJson()),
+      id: updatePerson.remoteID,
+    );
+  }
 }

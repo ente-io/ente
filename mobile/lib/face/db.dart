@@ -224,7 +224,7 @@ class FaceMLDataDB {
       final List<int> fileId = [recentFileID];
       int? avatarFileId;
       if (person.data.avatarFaceId != null) {
-        avatarFileId = int.tryParse(person.data.avatarFaceId!.split('-')[0]);
+        avatarFileId = int.tryParse(person.data.avatarFaceId!.split('_')[0]);
         if (avatarFileId != null) {
           fileId.add(avatarFileId);
         }
@@ -483,27 +483,6 @@ class FaceMLDataDB {
     await db.execute(dropFaceClustersTable);
     await db.execute(createFaceClustersTable);
     await db.execute(fcClusterIDIndex);
-  }
-
-  Future<void> insert(PersonEntity p, int cluserID) async {
-    debugPrint("inserting person");
-    final db = await instance.database;
-    await db.insert(
-      personTable,
-      mapPersonToRow(p),
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
-    await assignClusterToPerson(personID: p.remoteID, clusterID: cluserID);
-  }
-
-  Future<void> updatePerson(PersonEntity p) async {
-    final db = await instance.database;
-    await db.update(
-      personTable,
-      mapPersonToRow(p),
-      where: '$idColumn = ?',
-      whereArgs: [p.remoteID],
-    );
   }
 
   Future<void> assignClusterToPerson({

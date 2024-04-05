@@ -7,12 +7,12 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import "package:photos/events/people_changed_event.dart";
 import 'package:photos/events/subscription_purchased_event.dart';
-import "package:photos/face/db.dart";
 import "package:photos/face/model/person.dart";
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
+import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
 import "package:photos/ui/viewer/people/person_cluserts.dart";
 import "package:photos/ui/viewer/people/person_cluster_suggestion.dart";
@@ -111,7 +111,7 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
         try {
           final updatePerson = widget.person
               .copyWith(data: widget.person.data.copyWith(name: text));
-          await FaceMLDataDB.instance.updatePerson(updatePerson);
+          await PersonService.instance.updatePerson(updatePerson);
           if (mounted) {
             _appBarTitle = text;
             setState(() {});
