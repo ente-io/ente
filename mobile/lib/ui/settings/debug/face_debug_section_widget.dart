@@ -159,6 +159,7 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
+            await PersonService.instance.storeRemoteFeedback();
             await FaceMlService.instance
                 .clusterAllImages(clusterInBuckets: true);
             Bus.instance.fire(PeopleChangedEvent());
@@ -225,10 +226,15 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
                   "You will need to again re-index all the faces. You can drop feedback if you want to label again",
               firstButtonLabel: "Yes, confirm",
               firstButtonOnTap: () async {
-                await FaceMLDataDB.instance
-                    .dropClustersAndPersonTable(faces: true);
-                Bus.instance.fire(PeopleChangedEvent());
-                showShortToast(context, "Done");
+                try {
+                  await FaceMLDataDB.instance
+                      .dropClustersAndPersonTable(faces: true);
+                  Bus.instance.fire(PeopleChangedEvent());
+                  showShortToast(context, "Done");
+                } catch (e, s) {
+                  _logger.warning('drop feedback failed ', e, s);
+                  await showGenericErrorDialog(context: context, error: e);
+                }
               },
             );
           },

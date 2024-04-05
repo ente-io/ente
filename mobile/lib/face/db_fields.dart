@@ -36,8 +36,7 @@ const createFaceClustersTable = '''
 CREATE TABLE IF NOT EXISTS $faceClustersTable (
   $fcFaceId	TEXT NOT NULL,
   $fcClusterID INTEGER NOT NULL,
-  PRIMARY KEY($fcFaceId),
-  FOREIGN KEY($fcFaceId) REFERENCES $facesTable($faceIDColumn)
+  PRIMARY KEY($fcFaceId)
 );
 ''';
 // -- Creating a non-unique index on clusterID for query optimization

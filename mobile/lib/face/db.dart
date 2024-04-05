@@ -482,6 +482,24 @@ class FaceMLDataDB {
     );
   }
 
+  Future<void> bulkAssignClusterToPersonID(
+      Map<int, String> clusterToPersonID,) async {
+    final db = await instance.database;
+    final batch = db.batch();
+    for (final entry in clusterToPersonID.entries) {
+      final clusterID = entry.key;
+      final personID = entry.value;
+      batch.insert(
+        clusterPersonTable,
+        {
+          personIdColumn: personID,
+          cluserIDColumn: clusterID,
+        },
+      );
+    }
+    await batch.commit(noResult: true);
+  }
+
   Future<void> captureNotPersonFeedback({
     required String personID,
     required int clusterID,

@@ -737,117 +737,125 @@ class SearchService {
   }
 
   Future<List<GenericSearchResult>> getAllFace(int? limit) async {
-    debugPrint("getting faces");
-    final Map<int, Set<int>> fileIdToClusterID =
-        await FaceMLDataDB.instance.getFileIdToClusterIds();
-    final Map<String, PersonEntity> personIdToPerson =
-        await PersonService.instance.getPersonsMap();
-    final clusterIDToPersonID =
-        await FaceMLDataDB.instance.getClusterIDToPersonID();
+    try {
+      debugPrint("getting faces");
+      final Map<int, Set<int>> fileIdToClusterID =
+          await FaceMLDataDB.instance.getFileIdToClusterIds();
+      final Map<String, PersonEntity> personIdToPerson =
+          await PersonService.instance.getPersonsMap();
+      final clusterIDToPersonID =
+          await FaceMLDataDB.instance.getClusterIDToPersonID();
 
-    final List<GenericSearchResult> facesResult = [];
-    final Map<int, List<EnteFile>> clusterIdToFiles = {};
-    final Map<String, List<EnteFile>> personIdToFiles = {};
-    final allFiles = await getAllFiles();
-    for (final f in allFiles) {
-      if (!fileIdToClusterID.containsKey(f.uploadedFileID ?? -1)) {
-        continue;
-      }
-      final cluserIds = fileIdToClusterID[f.uploadedFileID ?? -1]!;
-      for (final cluster in cluserIds) {
-        final PersonEntity? p = personIdToPerson[clusterIDToPersonID[cluster] ?? ""];
-        if (p != null) {
-          if (personIdToFiles.containsKey(p.remoteID)) {
-            personIdToFiles[p.remoteID]!.add(f);
+      final List<GenericSearchResult> facesResult = [];
+      final Map<int, List<EnteFile>> clusterIdToFiles = {};
+      final Map<String, List<EnteFile>> personIdToFiles = {};
+      final allFiles = await getAllFiles();
+      for (final f in allFiles) {
+        if (!fileIdToClusterID.containsKey(f.uploadedFileID ?? -1)) {
+          continue;
+        }
+        final cluserIds = fileIdToClusterID[f.uploadedFileID ?? -1]!;
+        for (final cluster in cluserIds) {
+          final PersonEntity? p =
+              personIdToPerson[clusterIDToPersonID[cluster] ?? ""];
+          if (p != null) {
+            if (personIdToFiles.containsKey(p.remoteID)) {
+              personIdToFiles[p.remoteID]!.add(f);
+            } else {
+              personIdToFiles[p.remoteID] = [f];
+            }
           } else {
-            personIdToFiles[p.remoteID] = [f];
-          }
-        } else {
-          if (clusterIdToFiles.containsKey(cluster)) {
-            clusterIdToFiles[cluster]!.add(f);
-          } else {
-            clusterIdToFiles[cluster] = [f];
+            if (clusterIdToFiles.containsKey(cluster)) {
+              clusterIdToFiles[cluster]!.add(f);
+            } else {
+              clusterIdToFiles[cluster] = [f];
+            }
           }
         }
       }
-    }
-    // get sorted personId by files count
-    final sortedPersonIds = personIdToFiles.keys.toList()
-      ..sort(
-        (a, b) => personIdToFiles[b]!.length.compareTo(
-              personIdToFiles[a]!.length,
-            ),
-      );
-    for (final personID in sortedPersonIds) {
-      final files = personIdToFiles[personID]!;
-      if (files.isEmpty) {
-        continue;
-      }
-      final PersonEntity p = personIdToPerson[personID]!;
-      facesResult.add(
-        GenericSearchResult(
-          ResultType.faces,
-          p.data.name,
-          files,
-          params: {
-            kPersonParamID: personID,
-            kFileID: files.first.uploadedFileID,
-          },
-          onResultTap: (ctx) {
-            routeToPage(
-              ctx,
-              PeoplePage(
-                tagPrefix: "${ResultType.faces.toString()}_${p.data.name}",
-                person: p,
+      // get sorted personId by files count
+      final sortedPersonIds = personIdToFiles.keys.toList()
+        ..sort(
+          (a, b) => personIdToFiles[b]!.length.compareTo(
+                personIdToFiles[a]!.length,
               ),
-            );
-          },
-        ),
-      );
-    }
-    final sortedClusterIds = clusterIdToFiles.keys.toList()
-      ..sort(
-        (a, b) =>
-            clusterIdToFiles[b]!.length.compareTo(clusterIdToFiles[a]!.length),
-      );
-
-    for (final clusterId in sortedClusterIds) {
-      final files = clusterIdToFiles[clusterId]!;
-      // final String clusterName = "ID:$clusterId,  ${files.length}";
-      final String clusterName = "${files.length}";
-
-      if (clusterIDToPersonID[clusterId] != null) {
-        throw Exception("Cluster $clusterId should not have person id ${clusterIDToPersonID[clusterId]}");
+        );
+      for (final personID in sortedPersonIds) {
+        final files = personIdToFiles[personID]!;
+        if (files.isEmpty) {
+          continue;
+        }
+        final PersonEntity p = personIdToPerson[personID]!;
+        facesResult.add(
+          GenericSearchResult(
+            ResultType.faces,
+            p.data.name,
+            files,
+            params: {
+              kPersonParamID: personID,
+              kFileID: files.first.uploadedFileID,
+            },
+            onResultTap: (ctx) {
+              routeToPage(
+                ctx,
+                PeoplePage(
+                  tagPrefix: "${ResultType.faces.toString()}_${p.data.name}",
+                  person: p,
+                ),
+              );
+            },
+          ),
+        );
       }
-      if (files.length < 3) {
-        continue;
+      final sortedClusterIds = clusterIdToFiles.keys.toList()
+        ..sort(
+          (a, b) => clusterIdToFiles[b]!
+              .length
+              .compareTo(clusterIdToFiles[a]!.length),
+        );
+
+      for (final clusterId in sortedClusterIds) {
+        final files = clusterIdToFiles[clusterId]!;
+        // final String clusterName = "ID:$clusterId,  ${files.length}";
+        final String clusterName = "${files.length}";
+
+        if (clusterIDToPersonID[clusterId] != null) {
+          throw Exception(
+              "Cluster $clusterId should not have person id ${clusterIDToPersonID[clusterId]}");
+        }
+        if (files.length < 3) {
+          continue;
+        }
+        facesResult.add(
+          GenericSearchResult(
+            ResultType.faces,
+            clusterName,
+            files,
+            params: {
+              kClusterParamId: clusterId,
+              kFileID: files.first.uploadedFileID,
+            },
+            onResultTap: (ctx) {
+              routeToPage(
+                ctx,
+                ClusterPage(
+                  files,
+                  tagPrefix: "${ResultType.faces.toString()}_$clusterName",
+                  clusterID: clusterId,
+                ),
+              );
+            },
+          ),
+        );
       }
-      facesResult.add(
-        GenericSearchResult(
-          ResultType.faces,
-          clusterName,
-          files,
-          params: {
-            kClusterParamId: clusterId,
-            kFileID: files.first.uploadedFileID,
-          },
-          onResultTap: (ctx) {
-            routeToPage(
-              ctx,
-              ClusterPage(
-                files,
-                tagPrefix: "${ResultType.faces.toString()}_$clusterName",
-                clusterID: clusterId,
-              ),
-            );
-          },
-        ),
-      );
-    }
-    if (limit != null) {
-      return facesResult.sublist(0, min(limit, facesResult.length));
-    } else {
-      return facesResult;
+      if (limit != null) {
+        return facesResult.sublist(0, min(limit, facesResult.length));
+      } else {
+        return facesResult;
+      }
+    } catch (e, s) {
+      _logger.severe("Error in getAllFace", e, s);
+      rethrow;
     }
   }
 

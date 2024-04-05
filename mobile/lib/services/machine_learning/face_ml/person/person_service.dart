@@ -84,6 +84,24 @@ class PersonService {
     return PersonEntity(result.id, data);
   }
 
+  Future<void> storeRemoteFeedback() async {
+    final entities = await entityService.getEntities(EntityType.person);
+    entities.sort((a, b) => a.updatedAt.compareTo(b.updatedAt));
+    final Map<String, int> faceIdToClusterID = {};
+    final Map<int, String> clusterToPersonID = {};
+    for (var e in entities) {
+      final personData = PersonData.fromJson(json.decode(e.data));
+      for (var cluster in personData.assigned!) {
+        for (var faceId in cluster.faces) {
+          faceIdToClusterID[faceId] = cluster.id;
+        }
+        clusterToPersonID[cluster.id] = e.id;
+      }
+    }
+    await faceMLDataDB.updateClusterIdToFaceId(faceIdToClusterID);
+    await faceMLDataDB.bulkAssignClusterToPersonID(clusterToPersonID);
+  }
+
   Future<void> updatePerson(PersonEntity updatePerson) async {
     await entityService.addOrUpdate(
       EntityType.person,
