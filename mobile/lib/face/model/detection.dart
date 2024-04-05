@@ -43,6 +43,11 @@ class Detection {
     );
   }
 
+  // TODO: iterate on better area calculation, potentially using actual indexing image dimensions instead of file metadata
+  int getFaceArea(int imageWidth, int imageHeight) {
+    return (box.width * imageWidth * box.height * imageHeight).toInt();
+  }
+
   // TODO: iterate on better scoring logic, current is a placeholder
   int getVisibilityScore() {
     final double aspectRatio = box.width / box.height;

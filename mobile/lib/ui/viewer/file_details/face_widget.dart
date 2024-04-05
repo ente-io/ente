@@ -174,6 +174,12 @@ class _FaceWidgetState extends State<FaceWidget> {
                       style: Theme.of(context).textTheme.bodySmall,
                       maxLines: 1,
                     ),
+                  if (kDebugMode)
+                    Text(
+                      'A: ${widget.face.detection.getFaceArea(widget.file.width, widget.file.height)}',
+                      style: Theme.of(context).textTheme.bodySmall,
+                      maxLines: 1,
+                    ),
                   // if (kDebugMode)
                   //   if (highlight)
                   //     const Text(
