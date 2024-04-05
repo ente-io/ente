@@ -52,7 +52,6 @@ import {
 import { FileTypeInfo } from "types/upload";
 
 import { default as ElectronAPIs } from "@ente/shared/electron";
-import { downloadUsingAnchor } from "@ente/shared/utils";
 import { t } from "i18next";
 import imageProcessor from "services/imageProcessor";
 import { getFileExportPath, getUniqueFileExportName } from "utils/export";
@@ -866,7 +865,7 @@ export const copyFileToClipboard = async (fileUrl: string) => {
             clearTimeout(timeout);
         }
         timeout = setTimeout(
-            () => reject(Error(CustomError.WAIT_TIME_EXCEEDED)),
+            () => reject(new Error("Operation timed out")),
             WAIT_TIME_IMAGE_CONVERSION,
         );
     });

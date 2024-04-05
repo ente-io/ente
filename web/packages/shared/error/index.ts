@@ -40,7 +40,6 @@ export const CustomError = {
     INVALID_COLLECTION_OPERATION: "invalid collection operation",
     TO_MOVE_FILES_FROM_MULTIPLE_COLLECTIONS:
         "to move files from multiple collections",
-    WAIT_TIME_EXCEEDED: "operation wait time exceeded",
     REQUEST_CANCELLED: "request canceled",
     REQUEST_FAILED: "request failed",
     TOKEN_EXPIRED: "token expired",

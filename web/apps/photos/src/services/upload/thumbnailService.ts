@@ -152,7 +152,7 @@ export async function generateImageThumbnailUsingCanvas(
             }
         };
         timeout = setTimeout(
-            () => reject(Error(CustomError.WAIT_TIME_EXCEEDED)),
+            () => reject(new Error("Operation timed out")),
             WAIT_TIME_THUMBNAIL_GENERATION,
         );
     });
@@ -238,7 +238,7 @@ export async function generateVideoThumbnailUsingCanvas(
             }
         });
         timeout = setTimeout(
-            () => reject(Error(CustomError.WAIT_TIME_EXCEEDED)),
+            () => reject(new Error("Operation timed out")),
             WAIT_TIME_THUMBNAIL_GENERATION,
         );
     });

@@ -2,6 +2,7 @@ import { addLocalLog, addLogLine } from "@ente/shared/logging";
 import { logError } from "@ente/shared/sentry";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import { User } from "@ente/shared/user/types";
+import { sleep } from "@ente/shared/utils";
 import { FILE_TYPE } from "constants/file";
 import { getLocalCollections } from "services/collectionService";
 import downloadManager from "services/download";
@@ -19,7 +20,6 @@ import {
 } from "types/export";
 import { EnteFile } from "types/file";
 import { getNonEmptyPersonalCollections } from "utils/collection";
-import { sleep } from "utils/common";
 import {
     getCollectionExportPath,
     getCollectionIDFromFileUID,

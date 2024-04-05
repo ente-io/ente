@@ -24,6 +24,8 @@ import { PAGES } from "../constants/pages";
 import { generateSRPSetupAttributes } from "../services/srp";
 import { logoutUser } from "../services/user";
 
+import { APP_HOMES } from "@ente/shared/apps/constants";
+import { PageProps } from "@ente/shared/apps/types";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
@@ -33,7 +35,14 @@ import LinkButton from "@ente/shared/components/LinkButton";
 import VerifyMasterPasswordForm, {
     VerifyMasterPasswordFormProps,
 } from "@ente/shared/components/VerifyMasterPasswordForm";
+import ComlinkCryptoWorker from "@ente/shared/crypto";
+import { B64EncryptionResult } from "@ente/shared/crypto/types";
+import ElectronAPIs from "@ente/shared/electron";
+import { CustomError } from "@ente/shared/error";
+import { addLocalLog } from "@ente/shared/logging";
 import { getAccountsURL } from "@ente/shared/network/api";
+import { logError } from "@ente/shared/sentry";
+import InMemoryStore, { MS_KEYS } from "@ente/shared/storage/InMemoryStore";
 import {
     getToken,
     isFirstLogin,
@@ -41,29 +50,17 @@ import {
 } from "@ente/shared/storage/localStorage/helpers";
 import { KeyAttributes, User } from "@ente/shared/user/types";
 import isElectron from "is-electron";
+import { useRouter } from "next/router";
 import { getSRPAttributes } from "../api/srp";
 import { configureSRP, loginViaSRP } from "../services/srp";
 import { SRPAttributes } from "../types/srp";
-// import { APPS, getAppName } from '@ente/shared/apps';
-import { APP_HOMES } from "@ente/shared/apps/constants";
-import { PageProps } from "@ente/shared/apps/types";
-import ComlinkCryptoWorker from "@ente/shared/crypto";
-import { B64EncryptionResult } from "@ente/shared/crypto/types";
-import ElectronAPIs from "@ente/shared/electron";
-import { CustomError } from "@ente/shared/error";
-import { addLocalLog } from "@ente/shared/logging";
-import { logError } from "@ente/shared/sentry";
-import InMemoryStore, { MS_KEYS } from "@ente/shared/storage/InMemoryStore";
 
-export default function Credentials({
-    appContext,
-    router,
-    appName,
-}: PageProps) {
+export default function Credentials({ appContext, appName }: PageProps) {
     const [srpAttributes, setSrpAttributes] = useState<SRPAttributes>();
     const [keyAttributes, setKeyAttributes] = useState<KeyAttributes>();
     const [user, setUser] = useState<User>();
 
+    const router = useRouter();
     useEffect(() => {
         const main = async () => {
             const user: User = getData(LS_KEYS.USER);

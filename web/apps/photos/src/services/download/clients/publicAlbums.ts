@@ -4,7 +4,7 @@ import {
     getPublicCollectionFileURL,
     getPublicCollectionThumbnailURL,
 } from "@ente/shared/network/api";
-import { retryAsyncFunction } from "@ente/shared/promise";
+import { retryAsyncFunction } from "@ente/shared/utils";
 import { DownloadClient } from "services/download";
 import { EnteFile } from "types/file";
 

@@ -13,7 +13,6 @@ import InfoIcon from "@mui/icons-material/Info";
 import { Box, Typography } from "@mui/material";
 import { t } from "i18next";
 import _sodium from "libsodium-wrappers";
-import Image from "next/image";
 import { useEffect, useState } from "react";
 import {
     BeginPasskeyAuthenticationResponse,
@@ -297,7 +296,7 @@ const PasskeysFlow = () => {
                             {t("PASSKEY_FOLLOW_THE_STEPS_FROM_YOUR_BROWSER")}
                         </Typography>
                         <CenteredFlex marginTop="1rem">
-                            <Image
+                            <img
                                 alt="ente Logo Circular"
                                 height={150}
                                 width={150}
