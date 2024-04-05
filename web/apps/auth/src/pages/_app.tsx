@@ -139,7 +139,7 @@ export default function App(props: AppProps) {
                 </title>
                 <meta
                     name="viewport"
-                    content="initial-scale=1, width=device-width"
+                    content="width=device-width, initial-scale=1"
                 />
             </Head>
 
