@@ -1,3 +1,4 @@
+import "package:flutter/foundation.dart" show kDebugMode;
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:photos/face/db.dart";
@@ -68,8 +69,13 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
           ),
         ];
       }
-      if (faces.isEmpty ||
-          faces.every((face) => face.score < 0.75 || face.isBlurry)) {
+
+      // Remove faces with low scores and blurry faces
+      if (!kDebugMode) {
+        faces.removeWhere((face) => (face.isBlurry || face.score < 0.75));
+      }
+
+      if (faces.isEmpty) {
         return [
           const ChipButtonWidget(
             "No faces found",
@@ -80,9 +86,6 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
 
       // Sort the faces by score in descending order, so that the highest scoring face is first.
       faces.sort((Face a, Face b) => b.score.compareTo(a.score));
-
-      // Remove faces with low scores and blurry faces
-      faces.removeWhere((face) => (face.isBlurry || face.score < 0.75));
 
       // TODO: add deduplication of faces of same person
       final faceIdsToClusterIds = await FaceMLDataDB.instance

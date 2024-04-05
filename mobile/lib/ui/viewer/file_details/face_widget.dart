@@ -162,6 +162,12 @@ class _FaceWidgetState extends State<FaceWidget> {
                       style: Theme.of(context).textTheme.bodySmall,
                       maxLines: 1,
                     ),
+                  if (kDebugMode)
+                    Text(
+                      'B: ${widget.face.blur.toStringAsFixed(3)}',
+                      style: Theme.of(context).textTheme.bodySmall,
+                      maxLines: 1,
+                    ),
                   // if (kDebugMode)
                   //   if (highlight)
                   //     const Text(

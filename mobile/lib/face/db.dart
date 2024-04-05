@@ -481,6 +481,16 @@ class FaceMLDataDB {
     return maps.first['count'] as int;
   }
 
+  Future<int> getBlurryFaceCount([
+    int blurThreshold = kLaplacianThreshold,
+  ]) async {
+    final db = await instance.database;
+    final List<Map<String, dynamic>> maps = await db.rawQuery(
+      'SELECT COUNT(*) as count FROM $facesTable WHERE $faceBlur <= $blurThreshold AND $faceScore > $kMinHighQualityFaceScore',
+    );
+    return maps.first['count'] as int;
+  }
+
   Future<void> resetClusterIDs() async {
     final db = await instance.database;
     await db.execute(dropFaceClustersTable);
