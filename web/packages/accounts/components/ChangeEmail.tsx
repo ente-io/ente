@@ -10,10 +10,10 @@ import { sleep } from "@ente/shared/utils";
 import { Alert, Box, TextField } from "@mui/material";
 import { Formik, FormikHelpers } from "formik";
 import { t } from "i18next";
+import { useRouter } from "next/router";
 import { useRef, useState } from "react";
 import { Trans } from "react-i18next";
 import * as Yup from "yup";
-import { useRouter } from "next/router";
 
 interface formValues {
     email: string;

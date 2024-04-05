@@ -1,7 +1,7 @@
 import { APP_DOWNLOAD_URL } from "@ente/shared/constants/urls";
 import { CustomError } from "@ente/shared/error";
-import isElectron from "is-electron";
 import { isPromise } from "@ente/shared/utils";
+import isElectron from "is-electron";
 
 export function checkConnectivity() {
     if (navigator.onLine) {

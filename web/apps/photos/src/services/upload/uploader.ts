@@ -2,6 +2,7 @@ import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worke
 import { CustomError, handleUploadError } from "@ente/shared/error";
 import { addLocalLog, addLogLine } from "@ente/shared/logging";
 import { logError } from "@ente/shared/sentry";
+import { sleep } from "@ente/shared/utils";
 import { convertBytesToHumanReadable } from "@ente/shared/utils/size";
 import { Remote } from "comlink";
 import { MAX_FILE_SIZE_SUPPORTED, UPLOAD_RESULT } from "constants/upload";
@@ -15,7 +16,6 @@ import {
     Logger,
     UploadFile,
 } from "types/upload";
-import { sleep } from "@ente/shared/utils";
 import { findMatchingExistingFiles } from "utils/upload";
 import UIService from "./uiService";
 import uploadCancelService from "./uploadCancelService";

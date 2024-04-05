@@ -111,7 +111,7 @@ type AppContextType = {
 
 export const AppContext = createContext<AppContextType>(null);
 
-export default function App( { Component, pageProps }: AppProps) {
+export default function App({ Component, pageProps }: AppProps) {
     const router = useRouter();
     const [isI18nReady, setIsI18nReady] = useState<boolean>(false);
     const [loading, setLoading] = useState(false);
