@@ -39,7 +39,7 @@ class ClusterInfo {
   factory ClusterInfo.fromJson(Map<String, dynamic> json) {
     return ClusterInfo(
       id: json['id'] as int,
-      faces: Set<String>.from(json['faces'] as List<String>),
+      faces: (json['faces'] as List<dynamic>).map((e) => e as String).toSet(),
     );
   }
 }
@@ -92,18 +92,21 @@ class PersonData {
 
   // fromJson
   factory PersonData.fromJson(Map<String, dynamic> json) {
+    final assigned = (json['assigned'] == null || json['assigned'].length == 0)
+        ? <ClusterInfo>[]
+        : List<ClusterInfo>.from(
+            json['assigned'].map((x) => ClusterInfo.fromJson(x)),
+          );
+
+    final rejected = (json['rejected'] == null || json['rejected'].length == 0)
+        ? <ClusterInfo>[]
+        : List<ClusterInfo>.from(
+            json['rejected'].map((x) => ClusterInfo.fromJson(x)),
+          );
     return PersonData(
       name: json['name'] as String,
-      assigned: List<ClusterInfo>.from(
-        (json['assigned'] as List<dynamic>?)
-                ?.map((e) => ClusterInfo.fromJson(e)) ??
-            List<ClusterInfo>.empty(),
-      ),
-      rejected: List<ClusterInfo>.from(
-        (json['rejected'] as List<dynamic>?)
-                ?.map((e) => ClusterInfo.fromJson(e)) ??
-            List<ClusterInfo>.empty(),
-      ),
+      assigned: assigned,
+      rejected: rejected,
       avatarFaceId: json['avatarFaceId'] as String?,
       isHidden: json['isHidden'] as bool? ?? false,
       birthDate: json['birthDate'] as String?,
