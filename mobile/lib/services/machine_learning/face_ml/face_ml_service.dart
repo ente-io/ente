@@ -464,6 +464,34 @@ class FaceMlService {
     }
   }
 
+  bool shouldDiscardRemoteEmbedding(FileMl fileMl) {
+    if (fileMl.faceEmbedding.version < faceMlVersion) {
+      debugPrint("Discarding remote embedding for fileID ${fileMl.fileID} "
+          "because version is ${fileMl.faceEmbedding.version} and we need $faceMlVersion");
+      return true;
+    }
+    // are all landmarks equal?
+    bool allLandmarksEqual = true;
+    for (final face in fileMl.faceEmbedding.faces) {
+      if (face.detection.landmarks
+          .any((landmark) => landmark.x != landmark.y)) {
+        allLandmarksEqual = false;
+        break;
+      }
+    }
+    if (!allLandmarksEqual) {
+      debugPrint("Discarding remote embedding for fileID ${fileMl.fileID} "
+          "because landmarks are not equal");
+      return true;
+    }
+    if (fileMl.width == null || fileMl.height == null) {
+      debugPrint("Discarding remote embedding for fileID ${fileMl.fileID} "
+          "because width is null");
+      return true;
+    }
+    return false;
+  }
+
   /// Analyzes all the images in the database with the latest ml version and stores the results in the database.
   ///
   /// This function first checks if the image has already been analyzed with the lastest faceMlVersion and stored in the database. If so, it skips the image.
@@ -529,7 +557,7 @@ class FaceMlService {
           final List<Face> faces = [];
           final remoteFileIdToVersion = <int, int>{};
           for (FileMl fileMl in res.mlData.values) {
-            if (fileMl.faceEmbedding.version < faceMlVersion) continue;
+            if (shouldDiscardRemoteEmbedding(fileMl)) continue;
             if (fileMl.faceEmbedding.faces.isEmpty) {
               faces.add(
                 Face.empty(
