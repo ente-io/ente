@@ -12,7 +12,6 @@ const WORKER_POOL_SIZE = 2;
 const WAIT_TIME_BEFORE_NEXT_ATTEMPT_IN_MICROSECONDS = [100, 100];
 const WAIT_TIME_IN_MICROSECONDS = 30 * 1000;
 const BREATH_TIME_IN_MICROSECONDS = 1000;
-const CONVERT_FORMAT = "JPEG";
 
 class HEICConverter {
     private convertProcessor = new QueueProcessor<Blob>();
@@ -44,9 +43,8 @@ class HEICConverter {
                                     }, WAIT_TIME_IN_MICROSECONDS);
                                     const startTime = Date.now();
                                     const convertedHEIC =
-                                        await worker.convertHEIC(
+                                        await worker.convertHEICToJPEG(
                                             fileBlob,
-                                            CONVERT_FORMAT,
                                         );
                                     addLogLine(
                                         `originalFileSize:${convertBytesToHumanReadable(
