@@ -1,6 +1,16 @@
 import "package:photos/face/model/detection.dart";
 import 'package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart';
 
+// FileInfo contains the image width and height of the image the face was detected in.
+class FileInfo {
+  int? imageWidth;
+  int? imageHeight;
+  FileInfo({
+    this.imageWidth,
+    this.imageHeight,
+  });
+}
+
 class Face {
   final int fileID;
   final String faceID;
@@ -8,6 +18,7 @@ class Face {
   Detection detection;
   final double score;
   final double blur;
+  FileInfo? fileInfo;
 
   bool get isBlurry => blur < kLaplacianThreshold;
 
@@ -15,14 +26,24 @@ class Face {
 
   bool get isHighQuality => (!isBlurry) && hasHighScore;
 
+  int get visibility => detection.getVisibilityScore();
+
+  int area({int? w, int? h}) {
+    return detection.getFaceArea(
+      fileInfo?.imageWidth ?? w ?? 0,
+      fileInfo?.imageHeight ?? h ?? 0,
+    );
+  }
+
   Face(
     this.faceID,
     this.fileID,
     this.embedding,
     this.score,
     this.detection,
-    this.blur,
-  );
+    this.blur, {
+    this.fileInfo,
+  });
 
   factory Face.empty(int fileID, {bool error = false}) {
     return Face(

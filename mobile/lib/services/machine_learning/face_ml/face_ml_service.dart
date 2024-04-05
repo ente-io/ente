@@ -538,7 +538,13 @@ class FaceMlService {
                 ),
               );
             } else {
-              faces.addAll(fileMl.faceEmbedding.faces);
+              for (final f in fileMl.faceEmbedding.faces) {
+                f.fileInfo = FileInfo(
+                  imageHeight: fileMl.height,
+                  imageWidth: fileMl.width,
+                );
+                faces.add(f);
+              }
             }
             remoteFileIdToVersion[fileMl.fileID] = fileMl.faceEmbedding.version;
           }

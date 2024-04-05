@@ -272,12 +272,16 @@ class FaceMLDataDB {
     final List<Map<String, dynamic>> maps = await db.query(
       facesTable,
       columns: [
-        fileIDColumn,
         faceIDColumn,
-        faceDetectionColumn,
+        fileIDColumn,
         faceEmbeddingBlob,
         faceScore,
+        faceDetectionColumn,
         faceBlur,
+        imageHeight,
+        imageWidth,
+        faceArea,
+        faceVisibilityScore,
         mlVersionColumn,
       ],
       where: '$fileIDColumn = ?',

@@ -170,13 +170,13 @@ class _FaceWidgetState extends State<FaceWidget> {
                     ),
                   if (kDebugMode)
                     Text(
-                      'V: ${widget.face.detection.getVisibilityScore()}',
+                      'V: ${widget.face.visibility}',
                       style: Theme.of(context).textTheme.bodySmall,
                       maxLines: 1,
                     ),
                   if (kDebugMode)
                     Text(
-                      'A: ${widget.face.detection.getFaceArea(widget.file.width, widget.file.height)}',
+                      'A: ${widget.face.area()}',
                       style: Theme.of(context).textTheme.bodySmall,
                       maxLines: 1,
                     ),

@@ -35,6 +35,10 @@ Map<String, dynamic> mapRemoteToFaceDB(Face face) {
     faceScore: face.score,
     faceBlur: face.blur,
     mlVersionColumn: faceMlVersion,
+    faceArea: face.area(),
+    faceVisibilityScore: face.visibility,
+    imageWidth: face.fileInfo?.imageWidth ?? 0,
+    imageHeight: face.fileInfo?.imageHeight ?? 0,
   };
 }
 
@@ -46,5 +50,9 @@ Face mapRowToFace(Map<String, dynamic> row) {
     row[faceScore] as double,
     Detection.fromJson(json.decode(row[faceDetectionColumn] as String)),
     row[faceBlur] as double,
+    fileInfo: FileInfo(
+      imageWidth: row[imageWidth] as int,
+      imageHeight: row[imageHeight] as int,
+    ),
   );
 }
