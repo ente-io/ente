@@ -49,11 +49,11 @@ class PersonService {
   Future<Map<String, PersonEntity>> getPersonsMap() async {
     final entities = await entityService.getEntities(EntityType.person);
     final Map<String, PersonEntity> map = {};
-    entities.forEach((e) {
+    for (var e in entities) {
       final person =
           PersonEntity(e.id, PersonData.fromJson(json.decode(e.data)));
       map[person.remoteID] = person;
-    });
+    }
     return map;
   }
 

@@ -503,7 +503,7 @@ class FaceClustering {
       "[ClusterIsolate] ${DateTime.now()} Copied to isolate ${x.length} faces",
     );
 
-    DBSCAN dbscan = DBSCAN(
+    final DBSCAN dbscan = DBSCAN(
       epsilon: eps,
       minPoints: minPts,
       distanceMeasure: cosineDistForNormVectors,

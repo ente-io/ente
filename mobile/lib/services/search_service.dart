@@ -745,7 +745,6 @@ class SearchService {
     final clusterIDToPerson =
         await FaceMLDataDB.instance.getClusterIdToPerson(personIdToPerson);
 
-    debugPrint("building result");
     final List<GenericSearchResult> facesResult = [];
     final Map<int, List<EnteFile>> clusterIdToFiles = {};
     final Map<String, List<EnteFile>> personIdToFiles = {};

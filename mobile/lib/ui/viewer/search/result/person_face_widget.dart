@@ -26,8 +26,10 @@ class PersonFaceWidget extends StatelessWidget {
     this.personId,
     this.clusterID,
     Key? key,
-  })  : assert(personId != null || clusterID != null,
-            "PersonFaceWidget requires either personId or clusterID to be non-null"),
+  })  : assert(
+          personId != null || clusterID != null,
+          "PersonFaceWidget requires either personId or clusterID to be non-null",
+        ),
         super(key: key);
 
   @override
@@ -85,7 +87,7 @@ class PersonFaceWidget extends StatelessWidget {
   Future<Face?> _getFace() async {
     String? personAvatarFaceID;
     if (personId != null) {
-      PersonEntity? personEntity =
+      final PersonEntity? personEntity =
           await PersonService.instance.getPerson(personId!);
       if (personEntity != null) {
         personAvatarFaceID = personEntity.data.avatarFaceId;

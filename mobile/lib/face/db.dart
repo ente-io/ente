@@ -215,7 +215,7 @@ class FaceMLDataDB {
       final List<int> fileId = [recentFileID];
       int? avatarFileId;
       if (avatarFaceId != null) {
-        avatarFileId = int.tryParse(avatarFaceId!.split('_')[0]);
+        avatarFileId = int.tryParse(avatarFaceId.split('_')[0]);
         if (avatarFileId != null) {
           fileId.add(avatarFileId);
         }
