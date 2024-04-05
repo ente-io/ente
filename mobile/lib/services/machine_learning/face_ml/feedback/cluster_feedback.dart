@@ -326,7 +326,7 @@ class ClusterFeedbackService {
   }
 
   Future<void> removeFilesFromPerson(List<EnteFile> files, PersonEntity p) {
-    return FaceMLDataDB.instance.removeFilesFromPerson(files, p);
+    return FaceMLDataDB.instance.removeFilesFromPerson(files, p.remoteID);
   }
 
   Future<void> removeFilesFromCluster(List<EnteFile> files, int clusterID) {

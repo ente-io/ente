@@ -9,7 +9,6 @@ import 'package:path_provider/path_provider.dart';
 import 'package:photos/face/db_fields.dart';
 import "package:photos/face/db_model_mappers.dart";
 import "package:photos/face/model/face.dart";
-import "package:photos/face/model/person.dart";
 import "package:photos/models/file/file.dart";
 import 'package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart';
 import 'package:sqflite/sqflite.dart';
@@ -49,10 +48,10 @@ class FaceMLDataDB {
 
   Future _onCreate(Database db, int version) async {
     await db.execute(createFacesTable);
+    await db.execute(createFaceClustersTable);
     await db.execute(createClusterPersonTable);
     await db.execute(createClusterSummaryTable);
     await db.execute(createNotPersonFeedbackTable);
-    await db.execute(createFaceClustersTable);
     await db.execute(fcClusterIDIndex);
   }
 
@@ -416,7 +415,7 @@ class FaceMLDataDB {
   Future<Map<String, Uint8List>> getFaceEmbeddingMapForFile(
     List<int> fileIDs,
   ) async {
-    _logger.info('reading as float');
+    _logger.info('reading face embeddings for ${fileIDs.length} files');
     final db = await instance.database;
 
     // Define the batch size
@@ -448,6 +447,7 @@ class FaceMLDataDB {
       }
       offset += batchSize;
     }
+    _logger.info('done reading face embeddings for ${fileIDs.length} files');
     return result;
   }
 
@@ -591,24 +591,14 @@ class FaceMLDataDB {
     return result;
   }
 
-  Future<Map<int, PersonEntity>> getClusterIdToPerson(
-    Map<String, PersonEntity> personMap,
-  ) async {
+  Future<Map<int, String>> getClusterIDToPersonID() async {
     final db = await instance.database;
     final List<Map<String, dynamic>> maps = await db.rawQuery(
       'SELECT $personIdColumn, $cluserIDColumn FROM $clusterPersonTable',
     );
-
-    final Map<int, PersonEntity> result = {};
+    final Map<int, String> result = {};
     for (final map in maps) {
-      final PersonEntity? p = personMap[map[personIdColumn] as String];
-      if (p != null) {
-        result[map[cluserIDColumn] as int] = p;
-      } else {
-        _logger.warning(
-          'Person with id ${map[personIdColumn]} not found',
-        );
-      }
+      result[map[cluserIDColumn] as int] = map[personIdColumn] as String;
     }
     return result;
   }
@@ -648,14 +638,14 @@ class FaceMLDataDB {
 
   Future<void> removeFilesFromPerson(
     List<EnteFile> files,
-    PersonEntity p,
+    String personID,
   ) async {
     final db = await instance.database;
     final faceIdsResult = await db.rawQuery(
       'SELECT $fcFaceId FROM $faceClustersTable LEFT JOIN $clusterPersonTable '
       'ON $faceClustersTable.$fcClusterID = $clusterPersonTable.$cluserIDColumn '
       'WHERE $clusterPersonTable.$personIdColumn = ?',
-      [p.remoteID],
+      [personID],
     );
     final Set<String> fileIds = {};
     for (final enteFile in files) {

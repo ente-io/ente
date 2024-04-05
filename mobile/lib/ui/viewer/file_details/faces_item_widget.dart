@@ -70,14 +70,16 @@ class FacesItemWidget extends StatelessWidget {
       final Map<String, PersonEntity> persons =
           await PersonService.instance.getPersonsMap();
       final clusterIDToPerson =
-          await FaceMLDataDB.instance.getClusterIdToPerson(persons);
+          await FaceMLDataDB.instance.getClusterIDToPersonID();
 
       final lastViewedClusterID = ClusterFeedbackService.lastViewedClusterID;
 
       final faceWidgets = <FaceWidget>[];
       for (final Face face in faces) {
         final int? clusterID = faceIdsToClusterIds[face.faceID];
-        final PersonEntity? person = clusterIDToPerson[clusterID];
+        final PersonEntity? person = clusterIDToPerson[clusterID] != null
+            ? persons[clusterIDToPerson[clusterID]!]
+            : null;
         final highlight =
             (clusterID == lastViewedClusterID) && (person == null);
         faceWidgets.add(

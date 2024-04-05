@@ -742,8 +742,8 @@ class SearchService {
         await FaceMLDataDB.instance.getFileIdToClusterIds();
     final Map<String, PersonEntity> personIdToPerson =
         await PersonService.instance.getPersonsMap();
-    final clusterIDToPerson =
-        await FaceMLDataDB.instance.getClusterIdToPerson(personIdToPerson);
+    final clusterIDToPersonID =
+        await FaceMLDataDB.instance.getClusterIDToPersonID();
 
     final List<GenericSearchResult> facesResult = [];
     final Map<int, List<EnteFile>> clusterIdToFiles = {};
@@ -755,7 +755,7 @@ class SearchService {
       }
       final cluserIds = fileIdToClusterID[f.uploadedFileID ?? -1]!;
       for (final cluster in cluserIds) {
-        final PersonEntity? p = clusterIDToPerson[cluster];
+        final PersonEntity? p = personIdToPerson[clusterIDToPersonID[cluster] ?? ""];
         if (p != null) {
           if (personIdToFiles.containsKey(p.remoteID)) {
             personIdToFiles[p.remoteID]!.add(f);
@@ -815,9 +815,9 @@ class SearchService {
       final files = clusterIdToFiles[clusterId]!;
       // final String clusterName = "ID:$clusterId,  ${files.length}";
       final String clusterName = "${files.length}";
-      final PersonEntity? p = clusterIDToPerson[clusterId];
-      if (p != null) {
-        throw Exception("Person should  be null");
+
+      if (clusterIDToPersonID[clusterId] != null) {
+        throw Exception("Cluster $clusterId should not have person id ${clusterIDToPersonID[clusterId]}");
       }
       if (files.length < 3) {
         continue;
