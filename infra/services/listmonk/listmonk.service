@@ -12,7 +12,7 @@ ExecStartPre=-docker stop listmonk
 ExecStartPre=-docker rm listmonk
 ExecStartPre=-docker run --rm --name listmonk \
     -v /root/listmonk/config.toml:/listmonk/config.toml:ro \
-    listmonk/listmonk --upgrade --yes
+    listmonk/listmonk ./listmonk --upgrade --yes
 ExecStart=docker run --name listmonk \
     -p 9000:9000 \
     -v /root/listmonk/config.toml:/listmonk/config.toml:ro \
