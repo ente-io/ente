@@ -630,7 +630,8 @@ class FaceMLDataDB {
   }
 
   Future<Map<int, PersonEntity>> getClusterIdToPerson(
-      Map<String, PersonEntity> personMap,) async {
+    Map<String, PersonEntity> personMap,
+  ) async {
     final db = await instance.database;
     final List<Map<String, dynamic>> maps = await db.rawQuery(
       'SELECT $personIdColumn, $cluserIDColumn FROM $clusterPersonTable',
@@ -648,21 +649,6 @@ class FaceMLDataDB {
       }
     }
     return result;
-  }
-
-  Future<List<PersonEntity>> getPersons() async {
-    final db = await instance.database;
-    final List<Map<String, dynamic>> maps = await db.query(
-      personTable,
-      columns: [
-        idColumn,
-        nameColumn,
-        personHiddenColumn,
-        clusterToFaceIdJson,
-        coverFaceIDColumn,
-      ],
-    );
-    return maps.map((map) => mapRowToPerson(map)).toList();
   }
 
   /// WARNING: This will delete ALL data in the database! Only use this for debug/testing purposes!
