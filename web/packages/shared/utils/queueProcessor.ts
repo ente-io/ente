@@ -18,9 +18,7 @@ export interface CancellationStatus {
 
 export default class QueueProcessor<T> {
     private requestQueue: RequestQueueItem[] = [];
-
-    private requestInProcessing = 0;
-    private maxParallelProcesses = 1;
+    private isProcessingRequest = false;
 
     public queueUpRequest(
         request: (canceller?: RequestCanceller) => Promise<T>,
@@ -40,20 +38,17 @@ export default class QueueProcessor<T> {
                 isCanceled,
                 canceller,
             });
-            this.pollQueue();
+
+            this.processQueueIfNeeded();
         });
 
         return { promise, canceller };
     }
 
-    private async pollQueue() {
-        if (this.requestInProcessing < this.maxParallelProcesses) {
-            this.requestInProcessing++;
-            this.processQueue();
-        }
-    }
+    private async processQueueIfNeeded() {
+        if (this.isProcessingRequest) return;
+        this.isProcessingRequest = true;
 
-    private async processQueue() {
         while (this.requestQueue.length > 0) {
             const queueItem = this.requestQueue.shift();
             let response = null;
@@ -69,6 +64,7 @@ export default class QueueProcessor<T> {
                 }
             }
         }
-        this.requestInProcessing--;
+
+        this.isProcessingRequest = false;
     }
 }
