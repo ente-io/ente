@@ -2610,7 +2610,7 @@ fastq@^1.6.0:
   dependencies:
     reusify "^1.0.4"
 
-"ffmpeg-wasm@file:./apps/photos/thirdparty/ffmpeg-wasm":
+"ffmpeg-wasm@file:./apps/photos/thirdparty/ffmpeg-wasm", "ffmpeg-wasm@file:apps/photos/thirdparty/ffmpeg-wasm":
   version "0.10.1"
   dependencies:
     is-url "^1.2.4"
