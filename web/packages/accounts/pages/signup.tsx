@@ -5,10 +5,13 @@ import { PageProps } from "@ente/shared/apps/types";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
+import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 
-export default function SignUpPage({ router, appContext, appName }: PageProps) {
+export default function SignUpPage({ appContext, appName }: PageProps) {
     const [loading, setLoading] = useState(true);
+
+    const router = useRouter();
 
     useEffect(() => {
         const user = getData(LS_KEYS.USER);

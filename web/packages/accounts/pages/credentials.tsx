@@ -44,7 +44,6 @@ import isElectron from "is-electron";
 import { getSRPAttributes } from "../api/srp";
 import { configureSRP, loginViaSRP } from "../services/srp";
 import { SRPAttributes } from "../types/srp";
-// import { APPS, getAppName } from '@ente/shared/apps';
 import { APP_HOMES } from "@ente/shared/apps/constants";
 import { PageProps } from "@ente/shared/apps/types";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
@@ -54,16 +53,14 @@ import { CustomError } from "@ente/shared/error";
 import { addLocalLog } from "@ente/shared/logging";
 import { logError } from "@ente/shared/sentry";
 import InMemoryStore, { MS_KEYS } from "@ente/shared/storage/InMemoryStore";
+import { useRouter } from "next/router";
 
-export default function Credentials({
-    appContext,
-    router,
-    appName,
-}: PageProps) {
+export default function Credentials({ appContext, appName }: PageProps) {
     const [srpAttributes, setSrpAttributes] = useState<SRPAttributes>();
     const [keyAttributes, setKeyAttributes] = useState<KeyAttributes>();
     const [user, setUser] = useState<User>();
 
+    const router = useRouter();
     useEffect(() => {
         const main = async () => {
             const user: User = getData(LS_KEYS.USER);

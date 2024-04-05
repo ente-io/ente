@@ -23,12 +23,16 @@ import InMemoryStore, { MS_KEYS } from "@ente/shared/storage/InMemoryStore";
 import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
 import { SESSION_KEYS, getKey } from "@ente/shared/storage/sessionStorage";
 import { KeyAttributes, User } from "@ente/shared/user/types";
+import { useRouter } from "next/router";
+
 const bip39 = require("bip39");
 // mobile client library only supports english.
 bip39.setDefaultWordlist("english");
 
-export default function Recover({ appContext, router, appName }: PageProps) {
+export default function Recover({ appContext, appName }: PageProps) {
     const [keyAttributes, setKeyAttributes] = useState<KeyAttributes>();
+
+    const router = useRouter();
 
     useEffect(() => {
         const user: User = getData(LS_KEYS.USER);
