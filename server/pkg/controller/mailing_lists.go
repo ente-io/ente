@@ -3,6 +3,7 @@ package controller
 import (
 	"fmt"
 	"net/url"
+	"strconv"
 	"strings"
 
 	"github.com/ente-io/museum/pkg/external/listmonk"
@@ -221,25 +222,17 @@ func (c *MailingListsController) listmonkSubscribe(email string) error {
 
 // Unsubscribes an email address to a particular listmonk campaign mailing list
 func (c *MailingListsController) listmonkUnsubscribe(email string) error {
-	// Listmonk dosen't provide an endpoint for unsubscribing users
+	// Listmonk doesn't provide an endpoint for unsubscribing users
 	// from a particular list directly via their email
 	//
 	// Thus, fetching subscriberID through email address,
-	// and then calling endpoint to modify subscription in a list
+	// and then calling the endpoint to delete that user
 	id, err := listmonk.GetSubscriberID(c.listmonkCredentials.BaseURL+"/api/subscribers",
 		c.listmonkCredentials.Username, c.listmonkCredentials.Password, email)
 	if err != nil {
 		stacktrace.Propagate(err, "")
 	}
-	// API endpoint expects an array of subscriber id as parameter
-	subscriberID := []int{id}
 
-	data := map[string]interface{}{
-		"ids":             subscriberID,
-		"action":          "remove",
-		"target_list_ids": c.listmonkListIDs,
-	}
-
-	return listmonk.SendRequest("PUT", c.listmonkCredentials.BaseURL+"/api/subscribers/lists", data,
-		c.listmonkCredentials.Username, c.listmonkCredentials.Password)
+	return listmonk.SendRequest("DELETE", c.listmonkCredentials.BaseURL+"/api/subscribers/"+strconv.Itoa(id),
+		map[string]interface{}{}, c.listmonkCredentials.Username, c.listmonkCredentials.Password)
 }
