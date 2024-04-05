@@ -50,6 +50,10 @@ class EntityService {
     return await _db.getEntities(type);
   }
 
+  Future<LocalEntityData?> getEntity(EntityType type, String id) async {
+    return await _db.getEntity(type, id);
+  }
+
   Future<LocalEntityData> addOrUpdate(
     EntityType type,
     String plainText, {

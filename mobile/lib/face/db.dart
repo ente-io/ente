@@ -207,24 +207,16 @@ class FaceMLDataDB {
   Future<Face?> getCoverFaceForPerson({
     required int recentFileID,
     String? personID,
+    String? personAvatorFaceID,
     int? clusterID,
   }) async {
     // read person from db
     final db = await instance.database;
     if (personID != null) {
-      final List<Map<String, dynamic>> maps = await db.rawQuery(
-        'SELECT * FROM $personTable where $idColumn = ?',
-        [personID],
-      );
-      if (maps.isEmpty) {
-        throw Exception("Person with id $personID not found");
-      }
-
-      final person = mapRowToPerson(maps.first);
       final List<int> fileId = [recentFileID];
       int? avatarFileId;
-      if (person.data.avatarFaceId != null) {
-        avatarFileId = int.tryParse(person.data.avatarFaceId!.split('_')[0]);
+      if (personAvatorFaceID != null) {
+        avatarFileId = int.tryParse(personAvatorFaceID!.split('_')[0]);
         if (avatarFileId != null) {
           fileId.add(avatarFileId);
         }

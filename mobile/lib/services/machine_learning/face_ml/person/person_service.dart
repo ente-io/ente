@@ -37,6 +37,15 @@ class PersonService {
         .toList();
   }
 
+  Future<PersonEntity?> getPerson(String id) {
+    return entityService.getEntity(EntityType.person, id).then((e) {
+      if (e == null) {
+        return null;
+      }
+      return PersonEntity(e.id, PersonData.fromJson(json.decode(e.data)));
+    });
+  }
+
   Future<Map<String, PersonEntity>> getPersonsMap() async {
     final entities = await entityService.getEntities(EntityType.person);
     final Map<String, PersonEntity> map = {};

@@ -6,7 +6,9 @@ import 'package:flutter/widgets.dart';
 import "package:photos/db/files_db.dart";
 import "package:photos/face/db.dart";
 import "package:photos/face/model/face.dart";
+import "package:photos/face/model/person.dart";
 import 'package:photos/models/file/file.dart';
+import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 import "package:photos/ui/viewer/people/cropped_face_image_view.dart";
 import "package:photos/utils/face/face_box_crop.dart";
@@ -81,8 +83,17 @@ class PersonFaceWidget extends StatelessWidget {
   }
 
   Future<Face?> _getFace() async {
+    String? personAvatarFaceID;
+    if (personId != null) {
+      PersonEntity? personEntity =
+          await PersonService.instance.getPerson(personId!);
+      if (personEntity != null) {
+        personAvatarFaceID = personEntity.data.avatarFaceId;
+      }
+    }
     return await FaceMLDataDB.instance.getCoverFaceForPerson(
       recentFileID: file.uploadedFileID!,
+      personAvatorFaceID: personAvatarFaceID,
       personID: personId,
       clusterID: clusterID,
     );

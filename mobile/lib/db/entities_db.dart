@@ -62,4 +62,17 @@ extension EntitiesDB on FilesDB {
       return LocalEntityData.fromJson(maps[i]);
     });
   }
+
+  Future<LocalEntityData?> getEntity(EntityType type, String id) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      "entities",
+      where: "type = ? AND id = ?",
+      whereArgs: [type.typeToString(), id],
+    );
+    if (maps.isEmpty) {
+      return null;
+    }
+    return LocalEntityData.fromJson(maps.first);
+  }
 }
