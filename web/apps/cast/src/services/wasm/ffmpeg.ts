@@ -1,5 +1,5 @@
 import { addLogLine } from "@ente/shared/logging";
-import { promiseWithTimeout } from "@ente/shared/promise";
+import { promiseWithTimeout } from "@ente/shared/utils";
 import { logError } from "@ente/shared/sentry";
 import QueueProcessor from "@ente/shared/utils/queueProcessor";
 import { generateTempName } from "@ente/shared/utils/temp";

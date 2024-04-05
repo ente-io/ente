@@ -1,7 +1,7 @@
 import { logError } from "@ente/shared/sentry";
 import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
 import { EnteFile } from "types/file";
-import { sleep } from "utils/common";
+import { sleep } from "@ente/shared/utils";
 import {
     convertCollectionIDExportNameObjectToMap,
     convertFileIDExportNameObjectToMap,

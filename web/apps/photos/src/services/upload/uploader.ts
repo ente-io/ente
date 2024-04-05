@@ -15,7 +15,7 @@ import {
     Logger,
     UploadFile,
 } from "types/upload";
-import { sleep } from "utils/common";
+import { sleep } from "@ente/shared/utils";
 import { findMatchingExistingFiles } from "utils/upload";
 import UIService from "./uiService";
 import uploadCancelService from "./uploadCancelService";

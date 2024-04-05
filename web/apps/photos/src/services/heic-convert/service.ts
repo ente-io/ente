@@ -1,6 +1,6 @@
 import { CustomError } from "@ente/shared/error";
 import { addLogLine } from "@ente/shared/logging";
-import { retryAsyncFunction } from "@ente/shared/promise";
+import { retryAsyncFunction } from "@ente/shared/utils";
 import { logError } from "@ente/shared/sentry";
 import QueueProcessor from "@ente/shared/utils/queueProcessor";
 import { convertBytesToHumanReadable } from "@ente/shared/utils/size";

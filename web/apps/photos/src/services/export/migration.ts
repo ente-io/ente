@@ -19,7 +19,7 @@ import {
 } from "types/export";
 import { EnteFile } from "types/file";
 import { getNonEmptyPersonalCollections } from "utils/collection";
-import { sleep } from "utils/common";
+import { sleep } from "@ente/shared/utils";
 import {
     getCollectionExportPath,
     getCollectionIDFromFileUID,
