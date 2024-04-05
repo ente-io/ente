@@ -4,8 +4,7 @@ import 'package:ente_auth/services/user_service.dart';
 import 'package:ente_auth/ui/lifecycle_event_handler.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
-import 'package:pinput/pinput.dart';
+import 'package:pinput/pin_put/pin_put.dart';
 
 class TwoFactorAuthenticationPage extends StatefulWidget {
   final String sessionID;
@@ -20,6 +19,10 @@ class TwoFactorAuthenticationPage extends StatefulWidget {
 class _TwoFactorAuthenticationPageState
     extends State<TwoFactorAuthenticationPage> {
   final _pinController = TextEditingController();
+  final _pinPutDecoration = BoxDecoration(
+    border: Border.all(color: const Color.fromRGBO(45, 194, 98, 1.0)),
+    borderRadius: BorderRadius.circular(15.0),
+  );
   String _code = "";
   late LifecycleEventHandler _lifecycleEventHandler;
 
@@ -60,16 +63,6 @@ class _TwoFactorAuthenticationPageState
 
   Widget _getBody() {
     final l10n = context.l10n;
-    final pinPutDecoration = BoxDecoration(
-      border: Border.all(
-        color: Theme.of(context)
-            .inputDecorationTheme
-            .focusedBorder!
-            .borderSide
-            .color,
-      ),
-      borderRadius: BorderRadius.circular(15.0),
-    );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisAlignment: MainAxisAlignment.center,
@@ -86,31 +79,32 @@ class _TwoFactorAuthenticationPageState
         const Padding(padding: EdgeInsets.all(32)),
         Padding(
           padding: const EdgeInsets.fromLTRB(40, 0, 40, 0),
-          child: Pinput(
-            onSubmitted: (String code) {
+          child: PinPut(
+            fieldsCount: 6,
+            onSubmit: (String code) {
               _verifyTwoFactorCode(code);
             },
-            length: 6,
-            defaultPinTheme: const PinTheme(),
-            submittedPinTheme: PinTheme(
-              decoration: pinPutDecoration.copyWith(
-                borderRadius: BorderRadius.circular(20.0),
-              ),
-            ),
-            focusedPinTheme: PinTheme(
-              decoration: pinPutDecoration,
-            ),
-            followingPinTheme: PinTheme(
-              decoration: pinPutDecoration.copyWith(
-                borderRadius: BorderRadius.circular(5.0),
-              ),
-            ),
             onChanged: (String pin) {
               setState(() {
                 _code = pin;
               });
             },
             controller: _pinController,
+            submittedFieldDecoration: _pinPutDecoration.copyWith(
+              borderRadius: BorderRadius.circular(20.0),
+            ),
+            selectedFieldDecoration: _pinPutDecoration,
+            followingFieldDecoration: _pinPutDecoration.copyWith(
+              borderRadius: BorderRadius.circular(5.0),
+              border: Border.all(
+                color: const Color.fromRGBO(45, 194, 98, 0.5),
+              ),
+            ),
+            inputDecoration: const InputDecoration(
+              focusedBorder: InputBorder.none,
+              border: InputBorder.none,
+              counterText: '',
+            ),
             autofocus: true,
           ),
         ),
