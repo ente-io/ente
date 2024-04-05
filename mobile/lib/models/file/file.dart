@@ -233,7 +233,6 @@ class EnteFile {
   }
 
   String get downloadUrl {
-    return "http://localhost:8700/$uploadedFileID";
     final endpoint = Configuration.instance.getHttpEndpoint();
     if (endpoint != kDefaultProductionEndpoint ||
         FeatureFlagService.instance.disableCFWorker()) {
@@ -248,7 +247,6 @@ class EnteFile {
   }
 
   String get thumbnailUrl {
-    return "http://localhost:8700/thumb/$uploadedFileID";
     final endpoint = Configuration.instance.getHttpEndpoint();
     if (endpoint != kDefaultProductionEndpoint ||
         FeatureFlagService.instance.disableCFWorker()) {
