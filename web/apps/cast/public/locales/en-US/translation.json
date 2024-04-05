@@ -406,7 +406,6 @@
     "MALICIOUS_CONTENT": "Contains malicious content",
     "COPYRIGHT": "Infringes on the copyright of someone I am authorized to represent",
     "SHARED_USING": "Shared using ",
-    "ENTE_IO": "ente.io",
     "SHARING_REFERRAL_CODE": "Use code <strong>{{referralCode}}</strong> to get 10 GB free",
     "LIVE": "LIVE",
     "DISABLE_PASSWORD": "Disable password lock",
