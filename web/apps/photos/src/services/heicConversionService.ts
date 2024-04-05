@@ -1,5 +1,5 @@
 import { logError } from "@ente/shared/sentry";
-import WasmHEICConverterService from "./wasmHeicConverter/wasmHEICConverterService";
+import WasmHEICConverterService from "./heic-convert/service";
 
 class HeicConversionService {
     async convert(heicFileData: Blob): Promise<Blob> {

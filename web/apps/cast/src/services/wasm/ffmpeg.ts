@@ -15,7 +15,7 @@ const FFMPEG_EXECUTION_WAIT_TIME = 30 * 1000;
 export class WasmFFmpeg {
     private ffmpeg: FFmpeg;
     private ready: Promise<void> = null;
-    private ffmpegTaskQueue = new QueueProcessor<File>(1);
+    private ffmpegTaskQueue = new QueueProcessor<File>();
 
     constructor() {
         this.ffmpeg = createFFmpeg({
