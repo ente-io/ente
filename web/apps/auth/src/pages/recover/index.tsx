@@ -1,6 +1,5 @@
 import RecoverPage from "@ente/accounts/pages/recover";
 import { APPS } from "@ente/shared/apps/constants";
-import { useRouter } from "next/router";
 import { AppContext } from "pages/_app";
 import { useContext } from "react";
 
