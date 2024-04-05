@@ -353,14 +353,8 @@ class FaceClustering {
     // Make sure the first face has a clusterId
     final int totalFaces = sortedFaceInfos.length;
     // set current epoch time as clusterID
-    int clusterID = DateTime.now().millisecondsSinceEpoch;
-    if (sortedFaceInfos.isNotEmpty) {
-      if (sortedFaceInfos.first.clusterId == null) {
-        sortedFaceInfos.first.clusterId = clusterID;
-      } else {
-        clusterID = sortedFaceInfos.first.clusterId!;
-      }
-    } else {
+    int clusterID = DateTime.now().microsecondsSinceEpoch;
+    if (sortedFaceInfos.isEmpty) {
       return {};
     }
 

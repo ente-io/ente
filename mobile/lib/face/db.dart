@@ -736,7 +736,7 @@ class FaceMLDataDB {
     for (final enteFile in files) {
       fileIds.add(enteFile.uploadedFileID.toString());
     }
-    int maxClusterID = DateTime.now().millisecondsSinceEpoch;
+    int maxClusterID = DateTime.now().microsecondsSinceEpoch;
     final Map<String, int> faceIDToClusterID = {};
     for (final row in faceIdsResult) {
       final faceID = row[fcFaceId] as String;
@@ -762,7 +762,7 @@ class FaceMLDataDB {
     for (final enteFile in files) {
       fileIds.add(enteFile.uploadedFileID.toString());
     }
-    int maxClusterID = DateTime.now().millisecondsSinceEpoch;
+    int maxClusterID = DateTime.now().microsecondsSinceEpoch;
     final Map<String, int> faceIDToClusterID = {};
     for (final row in faceIdsResult) {
       final faceID = row[fcFaceId] as String;
