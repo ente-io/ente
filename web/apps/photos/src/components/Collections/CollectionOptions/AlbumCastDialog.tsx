@@ -6,7 +6,6 @@ import SingleInputForm, {
     SingleInputFormProps,
 } from "@ente/shared/components/SingleInputForm";
 import { boxSeal } from "@ente/shared/crypto/internal/libsodium";
-import { loadSender } from "@ente/shared/hooks/useCastSender";
 import { addLogLine } from "@ente/shared/logging";
 import castGateway from "@ente/shared/network/cast";
 import { logError } from "@ente/shared/sentry";
@@ -16,6 +15,7 @@ import { useEffect, useState } from "react";
 import { Trans } from "react-i18next";
 import { Collection } from "types/collection";
 import { v4 as uuidv4 } from "uuid";
+import { loadSender } from "../../../utils/useCastSender";
 
 interface Props {
     show: boolean;
