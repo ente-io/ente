@@ -25,11 +25,8 @@ export default class QueueProcessor<T> {
     private requestQueue: RequestQueueItem[] = [];
 
     private requestInProcessing = 0;
-
-    constructor(
-        private maxParallelProcesses: number,
-        private processingStrategy = PROCESSING_STRATEGY.FIFO,
-    ) {}
+    private maxParallelProcesses = 1;
+    private processingStrategy = PROCESSING_STRATEGY.FIFO;
 
     public queueUpRequest(
         request: (canceller?: RequestCanceller) => Promise<T>,

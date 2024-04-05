@@ -9,16 +9,13 @@ import { getDedicatedConvertWorker } from "utils/comlink/ComlinkConvertWorker";
 import { DedicatedConvertWorker } from "worker/convert.worker";
 
 const WORKER_POOL_SIZE = 2;
-const MAX_CONVERSION_IN_PARALLEL = 1;
 const WAIT_TIME_BEFORE_NEXT_ATTEMPT_IN_MICROSECONDS = [100, 100];
 const WAIT_TIME_IN_MICROSECONDS = 30 * 1000;
 const BREATH_TIME_IN_MICROSECONDS = 1000;
 const CONVERT_FORMAT = "JPEG";
 
 class HEICConverter {
-    private convertProcessor = new QueueProcessor<Blob>(
-        MAX_CONVERSION_IN_PARALLEL,
-    );
+    private convertProcessor = new QueueProcessor<Blob>();
     private workerPool: ComlinkWorker<typeof DedicatedConvertWorker>[] = [];
     private ready: Promise<void>;
 

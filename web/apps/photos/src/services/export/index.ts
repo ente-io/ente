@@ -78,7 +78,7 @@ class ExportService {
     private exportSettings: ExportSettings;
     private exportInProgress: RequestCanceller = null;
     private reRunNeeded = false;
-    private exportRecordUpdater = new QueueProcessor<ExportRecord>(1);
+    private exportRecordUpdater = new QueueProcessor<ExportRecord>();
     private fileReader: FileReader = null;
     private continuousExportEventHandler: () => void;
     private uiUpdater: ExportUIUpdaters = {
