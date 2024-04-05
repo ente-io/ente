@@ -821,7 +821,8 @@ class SearchService {
 
         if (clusterIDToPersonID[clusterId] != null) {
           throw Exception(
-              "Cluster $clusterId should not have person id ${clusterIDToPersonID[clusterId]}");
+            "Cluster $clusterId should not have person id ${clusterIDToPersonID[clusterId]}",
+          );
         }
         if (files.length < 3 && sortedClusterIds.length > 3) {
           continue;

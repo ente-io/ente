@@ -326,7 +326,9 @@ class ClusterFeedbackService {
   }
 
   Future<void> removeFilesFromPerson(
-      List<EnteFile> files, PersonEntity p) async {
+    List<EnteFile> files,
+    PersonEntity p,
+  ) async {
     await FaceMLDataDB.instance.removeFilesFromPerson(files, p.remoteID);
     Bus.instance.fire(PeopleChangedEvent());
   }
