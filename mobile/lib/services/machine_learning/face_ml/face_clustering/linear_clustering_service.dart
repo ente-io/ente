@@ -395,6 +395,12 @@ class FaceClustering {
         if (distance < closestDistance) {
           closestDistance = distance;
           closestIdx = j;
+          // if (distance < distanceThreshold) {
+          //   if (sortedFaceInfos[j].faceID.startsWith("14914702") ||
+          //       sortedFaceInfos[j].faceID.startsWith("15488756")) {
+          //     log('[XXX] faceIDs: ${sortedFaceInfos[j].faceID} and ${sortedFaceInfos[i].faceID} with distance $distance');
+          //   }
+          // }
         }
       }
 
@@ -408,10 +414,22 @@ class FaceClustering {
           sortedFaceInfos[closestIdx].clusterId = clusterID;
           newFaceIdToCluster[sortedFaceInfos[closestIdx].faceID] = clusterID;
         }
+        // if (sortedFaceInfos[i].faceID.startsWith("14914702") ||
+        //     sortedFaceInfos[i].faceID.startsWith("15488756")) {
+        //   log(
+        //     "[XXX]  [ClusterIsolate] ${DateTime.now()} Found similar face ${sortedFaceInfos[i].faceID} to ${sortedFaceInfos[closestIdx].faceID} with distance $closestDistance",
+        //   );
+        // }
         sortedFaceInfos[i].clusterId = sortedFaceInfos[closestIdx].clusterId;
         newFaceIdToCluster[sortedFaceInfos[i].faceID] =
             sortedFaceInfos[closestIdx].clusterId!;
       } else {
+        // if (sortedFaceInfos[i].faceID.startsWith("14914702") ||
+        //     sortedFaceInfos[i].faceID.startsWith("15488756")) {
+        //   log(
+        //     "[XXX]  [ClusterIsolate] ${DateTime.now()} Found new cluster $clusterID for face ${sortedFaceInfos[i].faceID}",
+        //   );
+        // }
         clusterID++;
         sortedFaceInfos[i].clusterId = clusterID;
         newFaceIdToCluster[sortedFaceInfos[i].faceID] = clusterID;
