@@ -206,7 +206,7 @@ class FaceMLDataDB {
   Future<Face?> getCoverFaceForPerson({
     required int recentFileID,
     String? personID,
-    String? personAvatorFaceID,
+    String? avatarFaceId,
     int? clusterID,
   }) async {
     // read person from db
@@ -214,8 +214,8 @@ class FaceMLDataDB {
     if (personID != null) {
       final List<int> fileId = [recentFileID];
       int? avatarFileId;
-      if (personAvatorFaceID != null) {
-        avatarFileId = int.tryParse(personAvatorFaceID!.split('_')[0]);
+      if (avatarFaceId != null) {
+        avatarFileId = int.tryParse(avatarFaceId!.split('_')[0]);
         if (avatarFileId != null) {
           fileId.add(avatarFileId);
         }
@@ -253,14 +253,6 @@ class FaceMLDataDB {
         whereArgs: [clusterID],
       );
       final List<Face>? faces = await getFacesForGivenFileID(recentFileID);
-
-      if (clusterID == 1711967560179) {
-        debugPrint("faces: $faces");
-        if (faces != null) {
-          debugPrint("faces: ${faces!.map((e) => e.faceID).toList()}");
-        }
-        debugPrint('faceMaps $faceMaps');
-      }
       if (faces != null) {
         for (final face in faces) {
           if (faceMaps

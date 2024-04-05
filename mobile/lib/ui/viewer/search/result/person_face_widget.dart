@@ -93,7 +93,7 @@ class PersonFaceWidget extends StatelessWidget {
     }
     return await FaceMLDataDB.instance.getCoverFaceForPerson(
       recentFileID: file.uploadedFileID!,
-      personAvatorFaceID: personAvatarFaceID,
+      avatarFaceId: personAvatarFaceID,
       personID: personId,
       clusterID: clusterID,
     );
