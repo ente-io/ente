@@ -85,6 +85,7 @@ class PersonService {
   }
 
   Future<void> storeRemoteFeedback() async {
+    await entityService.syncEntities();
     final entities = await entityService.getEntities(EntityType.person);
     entities.sort((a, b) => a.updatedAt.compareTo(b.updatedAt));
     final Map<String, int> faceIdToClusterID = {};
