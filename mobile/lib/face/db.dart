@@ -409,6 +409,9 @@ class FaceMLDataDB {
       }
       offset += batchSize;
     }
+    _logger.info(
+      'done reading face embeddings ${result.length}',
+    );
     return result;
   }
 
@@ -493,7 +496,8 @@ class FaceMLDataDB {
   }
 
   Future<void> bulkAssignClusterToPersonID(
-      Map<int, String> clusterToPersonID,) async {
+    Map<int, String> clusterToPersonID,
+  ) async {
     final db = await instance.database;
     final batch = db.batch();
     for (final entry in clusterToPersonID.entries) {
@@ -505,6 +509,7 @@ class FaceMLDataDB {
           personIdColumn: personID,
           cluserIDColumn: clusterID,
         },
+        conflictAlgorithm: ConflictAlgorithm.replace,
       );
     }
     await batch.commit(noResult: true);
