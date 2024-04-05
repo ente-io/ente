@@ -8543,6 +8543,16 @@ class S {
       args: [endpoint],
     );
   }
+
+  /// `Create collaborative link`
+  String get createCollaborativeLink {
+    return Intl.message(
+      'Create collaborative link',
+      name: 'createCollaborativeLink',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

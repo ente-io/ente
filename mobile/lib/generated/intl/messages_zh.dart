@@ -421,6 +421,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "createAccount": MessageLookupByLibrary.simpleMessage("创建账户"),
         "createAlbumActionHint":
             MessageLookupByLibrary.simpleMessage("长按选择照片，然后点击 + 创建相册"),
+        "createCollaborativeLink":
+            MessageLookupByLibrary.simpleMessage("Create collaborative link"),
         "createCollage": MessageLookupByLibrary.simpleMessage("创建拼贴"),
         "createNewAccount": MessageLookupByLibrary.simpleMessage("创建新账号"),
         "createOrSelectAlbum": MessageLookupByLibrary.simpleMessage("创建或选择相册"),

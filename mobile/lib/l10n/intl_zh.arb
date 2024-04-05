@@ -1203,5 +1203,6 @@
   "descriptions": "描述",
   "addViewers": "{count, plural, zero {添加查看者} one {添加查看者} other {添加查看者}}",
   "addCollaborators": "{count, plural, zero {添加协作者} one {添加协作者} other {添加协作者}}",
-  "longPressAnEmailToVerifyEndToEndEncryption": "长按电子邮件以验证端到端加密。"
+  "longPressAnEmailToVerifyEndToEndEncryption": "长按电子邮件以验证端到端加密。",
+  "createCollaborativeLink": "Create collaborative link"
 }
