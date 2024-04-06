@@ -159,4 +159,6 @@ We do offer a generous free trial for you to experience the product.
 
 ## Will I need to pay for Ente Auth after my Ente Photos free plan expires?
 
-No, you will not need to pay for Ente Auth after your Ente Photos free plan expires. Ente Auth is completely free to use, and the expiration of your Ente Photos free plan will not impact your ability to access or use Ente Auth.
+No, you will not need to pay for Ente Auth after your Ente Photos free plan
+expires. Ente Auth is completely free to use, and the expiration of your Ente
+Photos free plan will not impact your ability to access or use Ente Auth.

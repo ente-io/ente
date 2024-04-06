@@ -50,7 +50,6 @@ videos you have uploaded to Ente.
 
 </div>
 
-
 ### Sync continuously
 
 You can switch on the toggle to **Sync continuously** to eliminate manual
