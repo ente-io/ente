@@ -84,7 +84,7 @@ export default function ManageParticipant({
 
             buttonText = t("CONVERT_TO_VIEWER");
         } else if (newRole === "COLLABORATOR") {
-            contentText = t(`CHANGE_PERMISSIONS_TO_COLLABORATOR`, {
+            contentText = t("CHANGE_PERMISSIONS_TO_COLLABORATOR", {
                 selectedEmail: selectedEmail,
             });
             buttonText = t("CONVERT_TO_COLLABORATOR");

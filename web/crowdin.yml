@@ -1,5 +1,5 @@
 api_token_env: CROWDIN_PERSONAL_TOKEN
 
 files:
-    - source: /apps/photos/public/locales/en-US/translation.json
-      translation: /apps/photos/public/locales/%locale%/translation.json
+    - source: /packages/next/locales/en-US/translation.json
+      translation: /packages/next/locales/%locale%/translation.json
