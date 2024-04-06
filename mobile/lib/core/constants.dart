@@ -1,3 +1,5 @@
+import "package:photos/utils/crypto_util.dart";
+
 const int thumbnailSmallSize = 256;
 const int thumbnailQuality = 50;
 const int thumbnailLargeSize = 512;
@@ -44,6 +46,14 @@ class FFDefault {
   static const bool disableCFWorker = false;
   static const bool enablePasskey = false;
 }
+
+// this is the chunk size of the un-encrypted file which is read and encrypted before uploading it as a single part.
+const multipartPartSize = 20 * 1024 * 1024;
+
+const fileReaderChunkSize = encryptionChunkSize;
+
+final fileChunksCombinedForAUploadPart =
+    (multipartPartSize / fileReaderChunkSize).floor();
 
 const kDefaultProductionEndpoint = 'https://api.ente.io';
 
