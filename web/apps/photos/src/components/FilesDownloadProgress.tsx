@@ -136,7 +136,7 @@ export const FilesDownloadProgress: React.FC<FilesDownloadProgressProps> = ({
                         title: isFilesDownloadCompletedWithErrors(attributes)
                             ? t("DOWNLOAD_FAILED")
                             : isFilesDownloadCompleted(attributes)
-                              ? t(`DOWNLOAD_COMPLETE`)
+                              ? t("DOWNLOAD_COMPLETE")
                               : t("DOWNLOADING_COLLECTION", {
                                     name: attributes.folderName,
                                 }),
