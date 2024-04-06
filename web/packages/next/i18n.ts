@@ -3,7 +3,7 @@ import { logError } from "@/utils/logging";
 import { includes } from "@/utils/type-guards";
 import { getUserLocales } from "get-user-locale";
 import i18n from "i18next";
-import Backend from "i18next-http-backend";
+import resourcesToBackend from "i18next-resources-to-backend";
 import { initReactI18next } from "react-i18next";
 import { object, string } from "yup";
 
@@ -55,7 +55,15 @@ export const setupI18n = async () => {
     await i18n
         // i18next-http-backend: Asynchronously loads translations over HTTP
         // https://github.com/i18next/i18next-http-backend
-        .use(Backend)
+        // .use(Backend)
+        .use(
+            resourcesToBackend(
+                (language: string, namespace: string) =>
+                    import(
+                        `../../apps/photos/public/locales/${language}/${namespace}.json`
+                    ),
+            ),
+        )
         // react-i18next: React support
         // Pass the i18n instance to react-i18next.
         .use(initReactI18next)
