@@ -37,6 +37,7 @@ import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_download_util.dart';
 import 'package:photos/utils/file_uploader_util.dart';
 import "package:photos/utils/file_util.dart";
+import "package:photos/utils/multipart_upload_util.dart";
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tuple/tuple.dart';
 import "package:uuid/uuid.dart";
@@ -492,9 +493,17 @@ class FileUploader {
       final String thumbnailObjectKey =
           await _putFile(thumbnailUploadURL, encryptedThumbnailFile);
 
-      final fileUploadURL = await _getUploadURL();
-      final String fileObjectKey = await _putFile(fileUploadURL, encryptedFile);
+      final count = await calculatePartCount(
+        await encryptedFile.length(),
+      );
 
+      final fileUploadURLs = await getMultipartUploadURLs(count);
+      final fileObjectKey = fileUploadURLs.objectKey;
+
+      await putMultipartFile(fileUploadURLs, encryptedFile);
+
+      // final fileUploadURL = await _getUploadURL();
+      // fileObjectKey = await _putFile(fileUploadURL, encryptedFile);
       final metadata = await file.getMetadataForUpload(mediaUploadData);
       final encryptedMetadataResult = await CryptoUtil.encryptChaCha(
         utf8.encode(jsonEncode(metadata)) as Uint8List,
