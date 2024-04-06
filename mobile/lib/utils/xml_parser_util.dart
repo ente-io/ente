@@ -1,5 +1,6 @@
 // ignore_for_file: implementation_imports
 
+import "package:photos/utils/multipart_upload_util.dart";
 import "package:xml/src/xml/entities/named_entities.dart";
 import "package:xml/xml.dart";
 
@@ -23,17 +24,26 @@ void buildXml(XmlBuilder builder, dynamic node) {
     for (var item in node) {
       buildXml(builder, item);
     }
-  } else {
+  } else if (node is PartETag) {
     builder.element(
       "Part",
       nest: () {
-        builder.attribute(
+        builder.element(
           "PartNumber",
-          (node as MapEntry<int, String>).key + 1,
+          nest: () {
+            buildXml(builder, node.partNumber);
+          },
         );
-        builder.attribute("ETag", node.value);
+        builder.element(
+          "ETag",
+          nest: () {
+            buildXml(builder, node.eTag);
+          },
+        );
       },
     );
+  } else {
+    builder.text(node.toString());
   }
 }
 

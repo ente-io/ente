@@ -11,6 +11,13 @@ import "package:photos/utils/xml_parser_util.dart";
 final _enteDio = NetworkClient.instance.enteDio;
 final _dio = NetworkClient.instance.getDio();
 
+class PartETag {
+  final int partNumber;
+  final String eTag;
+
+  PartETag(this.partNumber, this.eTag);
+}
+
 class MultipartUploadURLs {
   final String objectKey;
   final List<String> partsURLs;
@@ -58,8 +65,6 @@ Future<void> putMultipartFile(
 ) async {
   // upload individual parts and get their etags
   final etags = await uploadParts(urls.partsURLs, encryptedFile);
-
-  print(etags);
 
   // complete the multipart upload
   await completeMultipartUpload(etags, urls.completeURL);
@@ -109,10 +114,15 @@ Future<void> completeMultipartUpload(
   String completeURL,
 ) async {
   final body = convertJs2Xml({
-    'CompleteMultipartUpload': partEtags.entries.toList(),
+    'CompleteMultipartUpload': partEtags.entries
+        .map(
+          (e) => PartETag(
+            e.key + 1,
+            e.value,
+          ),
+        )
+        .toList(),
   });
-
-  print(body);
 
   try {
     await _dio.post(
