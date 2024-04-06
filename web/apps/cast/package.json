@@ -9,8 +9,5 @@
         "@ente/shared": "*",
         "jszip": "3.10.1",
         "mime-types": "^2.1.35"
-    },
-    "devDependencies": {
-        "sass": "^1.69.5"
     }
 }

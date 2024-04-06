@@ -13,14 +13,7 @@ export default function App({ Component, pageProps }: AppProps) {
 
             <ThemeProvider theme={getTheme(THEME_COLOR.DARK, APPS.PHOTOS)}>
                 <CssBaseline enableColorScheme />
-
-                <main
-                    style={{
-                        display: "contents",
-                    }}
-                >
-                    <Component {...pageProps} />
-                </main>
+                <Component {...pageProps} />
             </ThemeProvider>
         </>
     );
