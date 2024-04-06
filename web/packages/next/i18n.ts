@@ -53,15 +53,18 @@ export const setupI18n = async () => {
 
     // https://www.i18next.com/overview/api
     await i18n
-        // i18next-http-backend: Asynchronously loads translations over HTTP
-        // https://github.com/i18next/i18next-http-backend
-        // .use(Backend)
+        // i18next-resources-to-backend: Use webpack to bundle translation, but
+        // still fetch them lazily using a dynamic import.
+        //
+        // The benefit of this is that, unlike the http backend that uses files
+        // from the public folder, these JSON files are content hash named and
+        // eminently cacheable.
+        //
+        // https://github.com/i18next/i18next-resources-to-backend
         .use(
             resourcesToBackend(
                 (language: string, namespace: string) =>
-                    import(
-                        `../../apps/photos/public/locales/${language}/${namespace}.json`
-                    ),
+                    import(`./locales/${language}/${namespace}.json`),
             ),
         )
         // react-i18next: React support
