@@ -1,4 +1,5 @@
-import { haveWindow, inElectron } from "@/next/env";
+import { haveWindow } from "@/next/env";
+import isElectron from "is-electron";
 import { addLogLine } from "@ente/shared/logging";
 import { logError } from "@ente/shared/sentry";
 import {
@@ -64,7 +65,7 @@ class MLIDbStorage {
     public _db: Promise<IDBPDatabase<MLDb>>;
 
     constructor() {
-        if (!haveWindow || !inElectron) {
+        if (!haveWindow() || !isElectron()) {
             return;
         }
 

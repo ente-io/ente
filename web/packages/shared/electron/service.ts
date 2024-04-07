@@ -17,7 +17,7 @@ class WorkerSafeElectronServiceImpl implements LimitedElectronAPIs {
         this.ready = this.init();
     }
     private async init() {
-        if (inWorker) {
+        if (inWorker()) {
             const workerSafeElectronClient =
                 wrap<typeof WorkerSafeElectronClient>(self);
 

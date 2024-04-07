@@ -234,4 +234,4 @@ export class LocalMLSyncContext implements MLSyncContext {
 }
 
 export const getConcurrency = () =>
-    haveWindow && Math.max(2, Math.ceil(navigator.hardwareConcurrency / 2));
+    haveWindow() && Math.max(2, Math.ceil(navigator.hardwareConcurrency / 2));

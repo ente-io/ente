@@ -16,7 +16,7 @@ class ComlinkSearchWorker {
 }
 
 export const getDedicatedSearchWorker = () => {
-    if (haveWindow) {
+    if (haveWindow()) {
         const cryptoComlinkWorker = new ComlinkWorker<
             typeof DedicatedSearchWorker
         >(

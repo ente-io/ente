@@ -16,7 +16,7 @@ class ComlinkConvertWorker {
 }
 
 export const getDedicatedConvertWorker = () => {
-    if (haveWindow) {
+    if (haveWindow()) {
         const cryptoComlinkWorker = new ComlinkWorker<
             typeof DedicatedConvertWorker
         >(
