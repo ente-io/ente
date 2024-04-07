@@ -1,8 +1,13 @@
 // ignore_for_file: implementation_imports
 
-import "package:photos/utils/multipart_upload_util.dart";
 import "package:xml/src/xml/entities/named_entities.dart";
 import "package:xml/xml.dart";
+
+// used for classes that can be converted to xml
+abstract class XmlParsableObject {
+  Map<String, dynamic> toMap();
+  String get elementName;
+}
 
 // for converting the response to xml
 String convertJs2Xml(Map<String, dynamic> json) {
@@ -15,6 +20,7 @@ String convertJs2Xml(Map<String, dynamic> json) {
       );
 }
 
+// for building the xml node tree recursively
 void buildXml(XmlBuilder builder, dynamic node) {
   if (node is Map<String, dynamic>) {
     node.forEach((key, value) {
@@ -24,22 +30,11 @@ void buildXml(XmlBuilder builder, dynamic node) {
     for (var item in node) {
       buildXml(builder, item);
     }
-  } else if (node is PartETag) {
+  } else if (node is XmlParsableObject) {
     builder.element(
-      "Part",
+      node.elementName,
       nest: () {
-        builder.element(
-          "PartNumber",
-          nest: () {
-            buildXml(builder, node.partNumber);
-          },
-        );
-        builder.element(
-          "ETag",
-          nest: () {
-            buildXml(builder, node.eTag);
-          },
-        );
+        buildXml(builder, node.toMap());
       },
     );
   } else {
@@ -47,6 +42,8 @@ void buildXml(XmlBuilder builder, dynamic node) {
   }
 }
 
+// for removing the &quot; from the xml string response.
+// couldn't find better way to do this
 XmlEntityMapping defaultMyEntityMapping = MyXmlDefaultEntityMapping.xml();
 
 class MyXmlDefaultEntityMapping extends XmlDefaultEntityMapping {
