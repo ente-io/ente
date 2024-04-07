@@ -1,15 +1,13 @@
+import { haveWindow } from "@/next/env";
 import { styled } from "@mui/material";
 import { useEffect, useRef } from "react";
-import { runningInBrowser } from "utils/common";
 import { MapButton } from "./MapButton";
 
 import { t } from "i18next";
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.webpack.css"; // Re-uses images from ~leaflet package
 import "leaflet/dist/leaflet.css";
-runningInBrowser() && require("leaflet-defaulticon-compatibility");
-const L = runningInBrowser()
-    ? (require("leaflet") as typeof import("leaflet"))
-    : null;
+haveWindow && require("leaflet-defaulticon-compatibility");
+const L = haveWindow ? (require("leaflet") as typeof import("leaflet")) : null;
 
 const LAYER_TILE_URL = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
 const LAYER_TILE_ATTRIBUTION =

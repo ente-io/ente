@@ -1,53 +1,12 @@
 import { APP_DOWNLOAD_URL } from "@ente/shared/constants/urls";
 import { CustomError } from "@ente/shared/error";
 import { isPromise } from "@ente/shared/utils";
-import isElectron from "is-electron";
 
 export function checkConnectivity() {
     if (navigator.onLine) {
         return true;
     }
     throw new Error(CustomError.NO_INTERNET_CONNECTION);
-}
-
-export function runningInBrowser() {
-    return typeof window !== "undefined";
-}
-
-export function runningInWorker() {
-    return typeof importScripts === "function";
-}
-
-export function runningInElectron() {
-    return isElectron();
-}
-
-export function runningInChrome(includeMobile: boolean) {
-    try {
-        const userAgentData = navigator["userAgentData"];
-        const chromeBrand = userAgentData?.brands?.filter(
-            (b) => b.brand === "Google Chrome" || b.brand === "Chromium",
-        )?.[0];
-        return chromeBrand && (includeMobile || userAgentData.mobile === false);
-    } catch (error) {
-        console.error("Error in runningInChrome: ", error);
-        return false;
-    }
-}
-
-export function offscreenCanvasSupported() {
-    return !(typeof OffscreenCanvas === "undefined");
-}
-
-export function webglSupported() {
-    try {
-        const canvas = document.createElement("canvas");
-        const gl = canvas.getContext("webgl");
-        return gl && gl instanceof WebGLRenderingContext;
-    } catch (error) {
-        console.error("Error in webglSupported: ", error);
-        return false;
-    }
 }
 
 export function downloadApp() {

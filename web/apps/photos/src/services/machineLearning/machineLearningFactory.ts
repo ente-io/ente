@@ -1,3 +1,4 @@
+import { haveWindow } from "@/next/env";
 import { getDedicatedCryptoWorker } from "@ente/shared/crypto";
 import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
 import { addLogLine } from "@ente/shared/logging";
@@ -24,7 +25,6 @@ import {
     SceneDetectionMethod,
     SceneDetectionService,
 } from "types/machineLearning";
-import { getConcurrency } from "utils/common/concurrency";
 import { logQueueStats } from "utils/machineLearning";
 import arcfaceAlignmentService from "./arcfaceAlignmentService";
 import arcfaceCropService from "./arcfaceCropService";
@@ -232,3 +232,6 @@ export class LocalMLSyncContext implements MLSyncContext {
         }
     }
 }
+
+export const getConcurrency = () =>
+    haveWindow && Math.max(2, Math.ceil(navigator.hardwareConcurrency / 2));

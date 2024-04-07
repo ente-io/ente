@@ -1,3 +1,4 @@
+import { haveWindow, inElectron } from "@/next/env";
 import { addLogLine } from "@ente/shared/logging";
 import { logError } from "@ente/shared/sentry";
 import {
@@ -23,7 +24,6 @@ import {
     Thing,
 } from "types/machineLearning";
 import { IndexStatus } from "types/machineLearning/ui";
-import { runningInBrowser, runningInElectron } from "utils/common";
 
 interface Config {}
 
@@ -64,7 +64,7 @@ class MLIDbStorage {
     public _db: Promise<IDBPDatabase<MLDb>>;
 
     constructor() {
-        if (!runningInBrowser() || !runningInElectron()) {
+        if (!haveWindow || !inElectron) {
             return;
         }
 
