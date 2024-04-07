@@ -497,13 +497,16 @@ class FileUploader {
         await encryptedFile.length(),
       );
 
-      final fileUploadURLs = await getMultipartUploadURLs(count);
-      final fileObjectKey = fileUploadURLs.objectKey;
+      String fileObjectKey;
 
-      await putMultipartFile(fileUploadURLs, encryptedFile);
+      if (count <= 1) {
+        final fileUploadURL = await _getUploadURL();
+        fileObjectKey = await _putFile(fileUploadURL, encryptedFile);
+      } else {
+        final fileUploadURLs = await getMultipartUploadURLs(count);
+        fileObjectKey = await putMultipartFile(fileUploadURLs, encryptedFile);
+      }
 
-      // final fileUploadURL = await _getUploadURL();
-      // fileObjectKey = await _putFile(fileUploadURL, encryptedFile);
       final metadata = await file.getMetadataForUpload(mediaUploadData);
       final encryptedMetadataResult = await CryptoUtil.encryptChaCha(
         utf8.encode(jsonEncode(metadata)) as Uint8List,
