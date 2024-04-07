@@ -13,12 +13,6 @@ export function downloadApp() {
     openLink(APP_DOWNLOAD_URL, true);
 }
 
-export function reverseString(title: string) {
-    return title
-        ?.split(" ")
-        .reduce((reversedString, currWord) => `${currWord} ${reversedString}`);
-}
-
 export function initiateEmail(email: string) {
     const a = document.createElement("a");
     a.href = "mailto:" + email;
@@ -33,6 +27,7 @@ export const preloadImage = (imgBasePath: string) => {
     }
     new Image().srcset = srcSet.join(",");
 };
+
 export function openLink(href: string, newTab?: boolean) {
     const a = document.createElement("a");
     a.href = href;

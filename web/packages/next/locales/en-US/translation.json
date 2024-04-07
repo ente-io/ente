@@ -168,6 +168,7 @@
     "UPDATE_PAYMENT_METHOD": "Update payment method",
     "MONTHLY": "Monthly",
     "YEARLY": "Yearly",
+    "update_subscription_title": "Confirm plan change",
     "UPDATE_SUBSCRIPTION_MESSAGE": "Are you sure you want to change your plan?",
     "UPDATE_SUBSCRIPTION": "Change plan",
     "CANCEL_SUBSCRIPTION": "Cancel subscription",
