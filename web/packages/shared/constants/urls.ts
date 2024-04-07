@@ -15,5 +15,3 @@ export const WEB_ROADMAP_URL = "https://github.com/ente-io/ente/discussions";
 
 export const DESKTOP_ROADMAP_URL =
     "https://github.com/ente-io/ente/discussions";
-
-export const CITIES_URL = "https://static.ente.io/world_cities.json";
