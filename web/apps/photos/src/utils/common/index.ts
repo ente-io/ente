@@ -1,9 +1,3 @@
-import { APP_DOWNLOAD_URL } from "@ente/shared/constants/urls";
-
-export function downloadApp() {
-    openLink(APP_DOWNLOAD_URL, true);
-}
-
 export function initiateEmail(email: string) {
     const a = document.createElement("a");
     a.href = "mailto:" + email;

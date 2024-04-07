@@ -1,16 +1,16 @@
-import { DialogBoxAttributes } from "@ente/shared/components/DialogBox/types";
-import AutoAwesomeOutlinedIcon from "@mui/icons-material/AutoAwesomeOutlined";
-import { t } from "i18next";
-import { downloadApp } from "utils/common";
-
 import { logoutUser } from "@ente/accounts/services/user";
+import { DialogBoxAttributes } from "@ente/shared/components/DialogBox/types";
 import ElectronAPIs from "@ente/shared/electron";
 import { AppUpdateInfo } from "@ente/shared/electron/types";
+import AutoAwesomeOutlinedIcon from "@mui/icons-material/AutoAwesomeOutlined";
 import InfoOutlined from "@mui/icons-material/InfoRounded";
 import { Link } from "@mui/material";
 import { OPEN_STREET_MAP_LINK } from "components/Sidebar/EnableMap";
+import { t } from "i18next";
 import { Trans } from "react-i18next";
 import { Subscription } from "types/billing";
+import { openLink } from "utils/common";
+
 export const getDownloadAppMessage = (): DialogBoxAttributes => {
     return {
         title: t("DOWNLOAD_APP"),
@@ -26,6 +26,8 @@ export const getDownloadAppMessage = (): DialogBoxAttributes => {
         },
     };
 };
+
+const downloadApp = () => openLink("https://ente.io/download/desktop", true);
 
 export const getTrashFilesMessage = (
     deleteFileHelper,

@@ -7,8 +7,6 @@ export const FACE_SEARCH_PRIVACY_POLICY_LINK =
 
 export const SUPPORT_EMAIL = "support@ente.io";
 
-export const APP_DOWNLOAD_URL = "https://ente.io/download/desktop";
-
 export const FEEDBACK_EMAIL = "feedback@ente.io";
 
 export const DELETE_ACCOUNT_EMAIL = "account-deletion@ente.io";
