@@ -80,7 +80,7 @@ class FaceMlService {
 
   bool isInitialized = false;
   bool isImageIndexRunning = false;
-  int kParallelism = 100;
+  int kParallelism = 15;
 
   Future<void> init({bool initializeImageMlIsolate = false}) async {
     return _initLock.synchronized(() async {
@@ -613,9 +613,6 @@ class FaceMlService {
           _logger.info(
             "indexAllImages() analyzed $fileAnalyzedCount images, cooldown for 1 minute",
           );
-          await Future.delayed(const Duration(minutes: 1), () {
-            _logger.info("indexAllImages() cooldown finished");
-          });
         }
       }
 
@@ -699,6 +696,10 @@ class FaceMlService {
               faceRes.detection.score,
               detection,
               faceRes.blurValue,
+              fileInfo: FileInfo(
+                imageHeight: result.faceDetectionImageSize!.height.truncate(),
+                imageWidth: result.faceDetectionImageSize!.width.truncate(),
+              ),
             ),
           );
         }
