@@ -1,15 +1,8 @@
-import { useContext, useEffect, useRef, useState } from "react";
-
-import { t } from "i18next";
-import { Trans } from "react-i18next";
-import { getLatestCollections } from "services/collectionService";
-
-import UploadProgress from "./UploadProgress";
-
 import ElectronAPIs from "@ente/shared/electron";
 import { CustomError } from "@ente/shared/error";
 import { addLogLine } from "@ente/shared/logging";
 import { logError } from "@ente/shared/sentry";
+import { isPromise } from "@ente/shared/utils";
 import DiscFullIcon from "@mui/icons-material/DiscFull";
 import UserNameInputDialog from "components/UserNameInputDialog";
 import {
@@ -18,10 +11,14 @@ import {
     UPLOAD_STAGES,
     UPLOAD_STRATEGY,
 } from "constants/upload";
+import { t } from "i18next";
 import isElectron from "is-electron";
 import { AppContext } from "pages/_app";
 import { GalleryContext } from "pages/gallery";
+import { useContext, useEffect, useRef, useState } from "react";
+import { Trans } from "react-i18next";
 import billingService from "services/billingService";
+import { getLatestCollections } from "services/collectionService";
 import ImportService from "services/importService";
 import {
     getPublicCollectionUID,
@@ -52,7 +49,7 @@ import {
     UploadFileNames,
 } from "types/upload/ui";
 import { getOrCreateAlbum } from "utils/collection";
-import { downloadApp, waitAndRun } from "utils/common";
+import { downloadApp } from "utils/common";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 import {
     getDownloadAppMessage,
@@ -65,6 +62,7 @@ import {
 } from "utils/upload";
 import { isCanvasBlocked } from "utils/upload/isCanvasBlocked";
 import { SetCollectionNamerAttributes } from "../Collections/CollectionNamer";
+import UploadProgress from "./UploadProgress";
 import UploadStrategyChoiceModal from "./UploadStrategyChoiceModal";
 import UploadTypeSelector from "./UploadTypeSelector";
 
@@ -843,4 +841,14 @@ export default function Uploader(props: Props) {
             />
         </>
     );
+}
+
+async function waitAndRun(
+    waitPromise: Promise<void>,
+    task: () => Promise<void>,
+) {
+    if (waitPromise && isPromise(waitPromise)) {
+        await waitPromise;
+    }
+    await task();
 }

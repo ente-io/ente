@@ -1,13 +1,4 @@
 import { APP_DOWNLOAD_URL } from "@ente/shared/constants/urls";
-import { CustomError } from "@ente/shared/error";
-import { isPromise } from "@ente/shared/utils";
-
-export function checkConnectivity() {
-    if (navigator.onLine) {
-        return true;
-    }
-    throw new Error(CustomError.NO_INTERNET_CONNECTION);
-}
 
 export function downloadApp() {
     openLink(APP_DOWNLOAD_URL, true);
@@ -38,16 +29,6 @@ export function openLink(href: string, newTab?: boolean) {
     a.click();
 }
 
-export async function waitAndRun(
-    waitPromise: Promise<void>,
-    task: () => Promise<void>,
-) {
-    if (waitPromise && isPromise(waitPromise)) {
-        await waitPromise;
-    }
-    await task();
-}
-
 export function isClipboardItemPresent() {
     return typeof ClipboardItem !== "undefined";
 }
@@ -59,11 +40,3 @@ export function batch<T>(arr: T[], batchSize: number): T[][] {
     }
     return batches;
 }
-
-export const mergeMaps = <K, V>(map1: Map<K, V>, map2: Map<K, V>) => {
-    const mergedMap = new Map<K, V>(map1);
-    map2.forEach((value, key) => {
-        mergedMap.set(key, value);
-    });
-    return mergedMap;
-};
