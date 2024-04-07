@@ -11,11 +11,22 @@ import "package:photos/utils/xml_parser_util.dart";
 final _enteDio = NetworkClient.instance.enteDio;
 final _dio = NetworkClient.instance.getDio();
 
-class PartETag {
+class PartETag extends XmlParsableObject {
   final int partNumber;
   final String eTag;
 
   PartETag(this.partNumber, this.eTag);
+
+  @override
+  String get elementName => "Part";
+
+  @override
+  Map<String, dynamic> toMap() {
+    return {
+      "PartNumber": partNumber,
+      "ETag": eTag,
+    };
+  }
 }
 
 class MultipartUploadURLs {
@@ -59,7 +70,7 @@ Future<MultipartUploadURLs> getMultipartUploadURLs(int count) async {
   }
 }
 
-Future<void> putMultipartFile(
+Future<String> putMultipartFile(
   MultipartUploadURLs urls,
   File encryptedFile,
 ) async {
@@ -68,6 +79,8 @@ Future<void> putMultipartFile(
 
   // complete the multipart upload
   await completeMultipartUpload(etags, urls.completeURL);
+
+  return urls.objectKey;
 }
 
 Future<Map<int, String>> uploadParts(
