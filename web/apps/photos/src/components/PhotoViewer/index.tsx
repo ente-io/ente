@@ -1,5 +1,4 @@
 import { logError } from "@ente/shared/sentry";
-import classnames from "classnames";
 import Photoswipe from "photoswipe";
 import PhotoswipeUIDefault from "photoswipe/dist/photoswipe-ui-default";
 import { useContext, useEffect, useMemo, useRef, useState } from "react";
@@ -84,7 +83,6 @@ interface Iprops {
     gettingData: (instance: any, index: number, item: EnteFile) => void;
     getConvertedItem: (instance: any, index: number, item: EnteFile) => void;
     id?: string;
-    className?: string;
     favItemIds: Set<number>;
     tempDeletedFileIds: Set<number>;
     setTempDeletedFileIds?: (value: Set<number>) => void;
@@ -724,13 +722,11 @@ function PhotoViewer(props: Iprops) {
 
     const scheduleUpdate = () => (needUpdate.current = true);
     const { id } = props;
-    let { className } = props;
-    className = classnames(["pswp", className]).trim();
     return (
         <>
             <div
                 id={id}
-                className={className}
+                className={"pswp"}
                 tabIndex={Number("-1")}
                 role="dialog"
                 aria-hidden="true"
