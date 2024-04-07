@@ -16,7 +16,6 @@ import isElectron from "is-electron";
 import { AppContext } from "pages/_app";
 import { GalleryContext } from "pages/gallery";
 import { useContext, useEffect, useRef, useState } from "react";
-import { Trans } from "react-i18next";
 import billingService from "services/billingService";
 import { getLatestCollections } from "services/collectionService";
 import ImportService from "services/importService";
@@ -49,7 +48,6 @@ import {
     UploadFileNames,
 } from "types/upload/ui";
 import { getOrCreateAlbum } from "utils/collection";
-import { downloadApp } from "utils/common";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 import {
     getDownloadAppMessage,
@@ -60,7 +58,6 @@ import {
     getImportSuggestion,
     groupFilesBasedOnParentFolder,
 } from "utils/upload";
-import { isCanvasBlocked } from "utils/upload/isCanvasBlocked";
 import { SetCollectionNamerAttributes } from "../Collections/CollectionNamer";
 import UploadProgress from "./UploadProgress";
 import UploadStrategyChoiceModal from "./UploadStrategyChoiceModal";
@@ -309,21 +306,6 @@ export default function Uploader(props: Props) {
                     // a user upload is already in progress
                     return;
                 }
-            }
-            if (isCanvasBlocked()) {
-                addLogLine("canvas blocked, blocking upload");
-                appContext.setDialogMessage({
-                    title: t("CANVAS_BLOCKED_TITLE"),
-
-                    content: <Trans i18nKey="CANVAS_BLOCKED_MESSAGE" />,
-                    close: { text: t("CLOSE") },
-                    proceed: {
-                        text: t("DOWNLOAD"),
-                        action: downloadApp,
-                        variant: "accent",
-                    },
-                });
-                return;
             }
             uploadRunning.current = true;
             props.closeUploadTypeSelector();

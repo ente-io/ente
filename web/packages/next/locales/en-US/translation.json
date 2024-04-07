@@ -422,8 +422,6 @@
     "ENTER_TWO_FACTOR_OTP": "Enter the 6-digit code from your authenticator app.",
     "CREATE_ACCOUNT": "Create account",
     "COPIED": "Copied",
-    "CANVAS_BLOCKED_TITLE": "Unable to generate thumbnail",
-    "CANVAS_BLOCKED_MESSAGE": "<p>It looks like your browser has disabled access to canvas, which is necessary to generate thumbnails for your photos </p> <p> Please enable access to your browser's canvas, or check out our desktop app</p>",
     "WATCH_FOLDERS": "Watch folders",
     "UPGRADE_NOW": "Upgrade now",
     "RENEW_NOW": "Renew now",
