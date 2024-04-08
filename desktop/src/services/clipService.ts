@@ -245,14 +245,14 @@ async function computeImageEmbedding_(
     inputFilePath: string,
 ): Promise<Float32Array> {
     if (!existsSync(inputFilePath)) {
-        throw Error(CustomErrors.INVALID_FILE_PATH);
+        throw new Error("Invalid file path");
     }
     if (model === Model.GGML_CLIP) {
         return await computeGGMLImageEmbedding(inputFilePath);
     } else if (model === Model.ONNX_CLIP) {
         return await computeONNXImageEmbedding(inputFilePath);
     } else {
-        throw Error(CustomErrors.INVALID_CLIP_MODEL(model));
+        throw new Error(`Invalid CLIP model ${model}`);
     }
 }
 

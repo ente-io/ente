@@ -153,7 +153,7 @@ function constructConvertCommand(
             },
         );
     } else {
-        throw Error(CustomErrors.INVALID_OS(process.platform));
+        throw new Error(`Unsupported OS ${process.platform}`);
     }
     return convertCmd;
 }
@@ -289,7 +289,7 @@ function constructThumbnailGenerationCommand(
                 return cmdPart;
             });
     } else {
-        throw Error(CustomErrors.INVALID_OS(process.platform));
+        throw new Error(`Unsupported OS ${process.platform}`);
     }
     return thumbnailGenerationCmd;
 }
