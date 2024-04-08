@@ -1,7 +1,7 @@
+import { getFileNameSize } from "@/next/file";
 import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
 import { CustomError } from "@ente/shared/error";
 import { addLogLine } from "@ente/shared/logging";
-import { getFileNameSize } from "@ente/shared/logging/web";
 import { logError } from "@ente/shared/sentry";
 import { Remote } from "comlink";
 import { FILE_READER_CHUNK_SIZE } from "constants/upload";

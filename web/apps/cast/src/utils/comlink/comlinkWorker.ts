@@ -1,5 +1,5 @@
-import { Remote, wrap } from "comlink";
 import log from "@/next/log";
+import { Remote, wrap } from "comlink";
 
 export class ComlinkWorker<T extends new () => InstanceType<T>> {
     public remote: Promise<Remote<InstanceType<T>>>;

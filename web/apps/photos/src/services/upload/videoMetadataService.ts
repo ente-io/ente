@@ -1,5 +1,5 @@
+import { getFileNameSize } from "@/next/file";
 import { addLogLine } from "@ente/shared/logging";
-import { getFileNameSize } from "@ente/shared/logging/web";
 import { logError } from "@ente/shared/sentry";
 import { NULL_EXTRACTED_METADATA } from "constants/upload";
 import * as ffmpegService from "services/ffmpeg/ffmpegService";

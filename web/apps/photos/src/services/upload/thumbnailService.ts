@@ -1,8 +1,7 @@
 import ElectronAPIs from "@/next/electron";
-import { convertBytesToHumanReadable } from "@/next/file";
+import { convertBytesToHumanReadable, getFileNameSize } from "@/next/file";
 import { CustomError } from "@ente/shared/error";
 import { addLogLine } from "@ente/shared/logging";
-import { getFileNameSize } from "@ente/shared/logging/web";
 import { logError } from "@ente/shared/sentry";
 import { FILE_TYPE } from "constants/file";
 import { BLACK_THUMBNAIL_BASE64 } from "constants/upload";

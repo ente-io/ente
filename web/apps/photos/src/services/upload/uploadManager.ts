@@ -24,10 +24,10 @@ import UIService from "./uiService";
 import UploadService from "./uploadService";
 import uploader from "./uploader";
 
+import { getFileNameSize } from "@/next/file";
 import { getDedicatedCryptoWorker } from "@ente/shared/crypto";
 import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
 import { addLogLine } from "@ente/shared/logging";
-import { getFileNameSize } from "@ente/shared/logging/web";
 import { ComlinkWorker } from "@ente/shared/worker/comlinkWorker";
 import { Remote } from "comlink";
 import { UPLOAD_RESULT, UPLOAD_STAGES } from "constants/upload";
