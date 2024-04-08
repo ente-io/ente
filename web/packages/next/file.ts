@@ -1,3 +1,9 @@
+import type { ElectronFile } from "./types/file";
+
+export function getFileNameSize(file: File | ElectronFile) {
+    return `${file.name}_${convertBytesToHumanReadable(file.size)}`;
+}
+
 export function convertBytesToHumanReadable(
     bytes: number,
     precision = 2,

@@ -1,5 +1,5 @@
+import { convertBytesToHumanReadable } from "@/next/file";
 import { FlexWrapper } from "@ente/shared/components/Container";
-import { convertBytesToHumanReadable } from "@ente/shared/utils/size";
 import { Box, styled } from "@mui/material";
 import {
     DATE_CONTAINER_HEIGHT,

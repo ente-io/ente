@@ -1,6 +1,6 @@
+import { convertBytesToHumanReadable } from "@/next/file";
 import { CustomError } from "@ente/shared/error";
 import { logError } from "@ente/shared/sentry";
-import { convertBytesToHumanReadable } from "@ente/shared/utils/size";
 import { FILE_TYPE } from "constants/file";
 import {
     KNOWN_NON_MEDIA_FORMATS,

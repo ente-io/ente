@@ -1,25 +1,7 @@
-import log from "electron-log";
-import util from "node:util";
-import { isDev } from "./util";
-
-/**
- * Initialize logging in the main process.
- *
- * This will set our underlying logger up to log to a file named `ente.log`,
- *
- * - on Linux at ~/.config/ente/logs/main.log
- * - on macOS at ~/Library/Logs/ente/main.log
- * - on Windows at %USERPROFILE%\AppData\Roaming\ente\logs\main.log
- *
- * On dev builds, it will also log to the console.
- */
-export const initLogging = () => {
-    log.transports.file.fileName = "ente.log";
-    log.transports.file.maxSize = 50 * 1024 * 1024; // 50 MB
-    log.transports.file.format = "[{y}-{m}-{d}T{h}:{i}:{s}{z}] {text}";
-
-    log.transports.console.level = false;
-};
+import isElectron from "is-electron";
+import ElectronAPIs from "./electron";
+import { isDevBuild } from "./env";
+import { persistLog } from "./log-web";
 
 /**
  * Write a {@link message} to the on-disk log.
@@ -28,7 +10,8 @@ export const initLogging = () => {
  * in the log that is saved on disk.
  */
 export const logToDisk = (message: string) => {
-    log.info(`[rndr] ${message}`);
+    if (isElectron()) ElectronAPIs.logToDisk(message);
+    else persistLog(message);
 };
 
 const logError = (message: string, e?: unknown) => {
@@ -51,20 +34,22 @@ const logError = (message: string, e?: unknown) => {
 };
 
 const logError_ = (message: string) => {
-    log.error(`[main] [error] ${message}`);
-    if (isDev) console.error(`[error] ${message}`);
+    const m = `[error] ${message}`;
+    if (isDevBuild) console.error(m);
+    logToDisk(m);
 };
 
-const logInfo = (...params: any[]) => {
+const logInfo = (...params: unknown[]) => {
     const message = params
-        .map((p) => (typeof p == "string" ? p : util.inspect(p)))
+        .map((p) => (typeof p == "string" ? p : JSON.stringify(p)))
         .join(" ");
-    log.info(`[main] ${message}`);
-    if (isDev) console.log(message);
+    const m = `[info] ${message}`;
+    if (isDevBuild) console.log(m);
+    logToDisk(m);
 };
 
-const logDebug = (param: () => any) => {
-    if (isDev) console.log(`[main] [debug] ${util.inspect(param())}`);
+const logDebug = (param: () => unknown) => {
+    if (isDevBuild) console.log("[debug]", param());
 };
 
 /**
@@ -73,7 +58,12 @@ const logDebug = (param: () => any) => {
  * This is an object that provides three functions to log at the corresponding
  * levels - error, info or debug.
  *
- * {@link initLogging} needs to be called once before using any of these.
+ * Whenever we need to save a log message to disk,
+ *
+ * - When running under electron these messages are saved to the log maintained
+ *   by the electron app we're running under.
+ *
+ * - Otherwise such messages are written to a ring buffer in local storage.
  */
 export default {
     /**
@@ -84,7 +74,7 @@ export default {
      * JavaScript any arbitrary value can be thrown).
      *
      * The log is written to disk. In development builds, the log is also
-     * printed to the main (Node.js) process console.
+     * printed to the browser console.
      */
     error: logError,
     /**
@@ -94,7 +84,7 @@ export default {
      * arbitrary number of arbitrary parameters that it then serializes.
      *
      * The log is written to disk. In development builds, the log is also
-     * printed to the main (Node.js) process console.
+     * printed to the browser console.
      */
     info: logInfo,
     /**
@@ -107,8 +97,8 @@ export default {
      * The function can return an arbitrary value which is serialized before
      * being logged.
      *
-     * This log is NOT written to disk. And it is printed to the main (Node.js)
-     * process console, but only on development builds.
+     * This log is NOT written to disk. And it is printed to the browser
+     * console, but only in development builds.
      */
     debug: logDebug,
 };

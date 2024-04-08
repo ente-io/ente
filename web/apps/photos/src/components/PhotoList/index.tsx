@@ -1,6 +1,6 @@
+import { convertBytesToHumanReadable } from "@/next/file";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import { formatDate, getDate, isSameDay } from "@ente/shared/time/format";
-import { convertBytesToHumanReadable } from "@ente/shared/utils/size";
 import { Box, Checkbox, Link, Typography, styled } from "@mui/material";
 import {
     DATE_CONTAINER_HEIGHT,

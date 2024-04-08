@@ -1,9 +1,10 @@
+import ElectronAPIs from "@/next/electron";
 import { inWorker, isDevBuild } from "@/next/env";
+import log from "@/next/log";
+import { logWeb } from "@/next/web";
 import { logError } from "@ente/shared/sentry";
 import isElectron from "is-electron";
-import ElectronAPIs from "@/next/electron";
 import { workerBridge } from "../worker/worker-bridge";
-import { formatLog, logWeb } from "./web";
 
 export const MAX_LOG_SIZE = 5 * 1024 * 1024; // 5MB
 export const MAX_LOG_LINES = 1000;
@@ -45,13 +46,4 @@ export function addLogLine(
     }
 }
 
-export const addLocalLog = (getLog: () => string) => {
-    if (isDevBuild) {
-        console.log(
-            formatLog({
-                logLine: getLog(),
-                timestamp: Date.now(),
-            }),
-        );
-    }
-};
+export const addLocalLog = log.debug;

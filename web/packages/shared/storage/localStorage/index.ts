@@ -14,13 +14,13 @@ export enum LS_KEYS {
     EXPORT = "export",
     THUMBNAIL_FIX_STATE = "thumbnailFixState",
     LIVE_PHOTO_INFO_SHOWN_COUNT = "livePhotoInfoShownCount",
-    LOGS = "logs",
+    // LOGS = "logs",
     USER_DETAILS = "userDetails",
     COLLECTION_SORT_BY = "collectionSortBy",
     THEME = "theme",
     WAIT_TIME = "waitTime",
     API_ENDPOINT = "apiEndpoint",
-    // Moved to the new wrapper @/utils/local-storage
+    // Moved to the new wrapper @/next/local-storage
     // LOCALE = 'locale',
     MAP_ENABLED = "mapEnabled",
     SRP_SETUP_ATTRIBUTES = "srpSetupAttributes",

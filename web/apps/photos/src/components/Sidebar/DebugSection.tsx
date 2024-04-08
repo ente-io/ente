@@ -4,8 +4,8 @@ import { useContext, useEffect, useState } from "react";
 import { Trans } from "react-i18next";
 
 import ElectronAPIs from "@/next/electron";
+import { savedLogs } from "@/next/log-web";
 import { addLogLine } from "@ente/shared/logging";
-import { getDebugLogs } from "@ente/shared/logging/web";
 import { downloadAsFile } from "@ente/shared/utils";
 import Typography from "@mui/material/Typography";
 import { EnteMenuItem } from "components/Menu/EnteMenuItem";
@@ -38,22 +38,17 @@ export default function DebugSection() {
             proceed: {
                 text: t("DOWNLOAD"),
                 variant: "accent",
-                action: downloadDebugLogs,
+                action: downloadLogs,
             },
             close: {
                 text: t("CANCEL"),
             },
         });
 
-    const downloadDebugLogs = () => {
-        addLogLine("exporting logs");
-        if (isElectron()) {
-            ElectronAPIs.openLogDirectory();
-        } else {
-            const logs = getDebugLogs();
-
-            downloadAsFile(`debug_logs_${Date.now()}.txt`, logs);
-        }
+    const downloadLogs = () => {
+        addLogLine("Downloading logs");
+        if (isElectron()) ElectronAPIs.openLogDirectory();
+        else downloadAsFile(`debug_logs_${Date.now()}.txt`, savedLogs());
     };
 
     return (

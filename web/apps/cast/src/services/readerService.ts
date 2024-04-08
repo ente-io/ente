@@ -1,5 +1,5 @@
+import { convertBytesToHumanReadable } from "@/next/file";
 import { logError } from "@ente/shared/sentry";
-import { convertBytesToHumanReadable } from "@ente/shared/utils/size";
 
 export async function getUint8ArrayView(file: Blob): Promise<Uint8Array> {
     try {

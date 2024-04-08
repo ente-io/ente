@@ -37,11 +37,11 @@ import {
 import { VISIBILITY_STATE } from "types/magicMetadata";
 import { isArchivedFile, updateMagicMetadata } from "utils/magicMetadata";
 
+import { convertBytesToHumanReadable } from "@/next/file";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { CustomError } from "@ente/shared/error";
 import { addLocalLog, addLogLine } from "@ente/shared/logging";
 import { isPlaybackPossible } from "@ente/shared/media/video-playback";
-import { convertBytesToHumanReadable } from "@ente/shared/utils/size";
 import isElectron from "is-electron";
 import { moveToHiddenCollection } from "services/collectionService";
 import {

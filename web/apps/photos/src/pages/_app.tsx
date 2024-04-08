@@ -1,6 +1,7 @@
 import { CustomHead } from "@/next/components/Head";
 import ElectronAPIs from "@/next/electron";
 import { setupI18n } from "@/next/i18n";
+import { logStartupBanner } from "@/next/log-web";
 import { AppUpdateInfo } from "@/next/types/ipc";
 import {
     APPS,
@@ -26,10 +27,6 @@ import { CustomError } from "@ente/shared/error";
 import { Events, eventBus } from "@ente/shared/events";
 import { useLocalState } from "@ente/shared/hooks/useLocalState";
 import { addLogLine } from "@ente/shared/logging";
-import {
-    clearLogsIfLocalStorageLimitExceeded,
-    logStartupBanner,
-} from "@ente/shared/logging/web";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { logError } from "@ente/shared/sentry";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
@@ -41,6 +38,7 @@ import {
 import { getTheme } from "@ente/shared/themes";
 import { THEME_COLOR } from "@ente/shared/themes/constants";
 import { SetTheme } from "@ente/shared/themes/types";
+import type { User } from "@ente/shared/user/types";
 import ArrowForward from "@mui/icons-material/ArrowForward";
 import { CssBaseline, useMediaQuery } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
@@ -149,15 +147,12 @@ export default function App({ Component, pageProps }: AppProps) {
     );
 
     useEffect(() => {
-        //setup i18n
         setupI18n().finally(() => setIsI18nReady(true));
-        // set client package name in headers
+        const userId = (getData(LS_KEYS.USER) as User)?.id;
+        logStartupBanner(APPS.PHOTOS, userId);
         HTTPService.setHeaders({
             "X-Client-Package": CLIENT_PACKAGE_NAMES.get(APPS.PHOTOS),
         });
-        // setup logging
-        clearLogsIfLocalStorageLimitExceeded();
-        logStartupBanner(APPS.PHOTOS);
     }, []);
 
     useEffect(() => {

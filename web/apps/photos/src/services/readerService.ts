@@ -1,5 +1,5 @@
+import { convertBytesToHumanReadable } from "@/next/file";
 import { logError } from "@ente/shared/sentry";
-import { convertBytesToHumanReadable } from "@ente/shared/utils/size";
 import { ElectronFile } from "types/upload";
 
 export async function getUint8ArrayView(
