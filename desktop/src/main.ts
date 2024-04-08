@@ -141,12 +141,12 @@ const deleteLegacyDiskCacheDirIfExists = async () => {
     }
 };
 
-function setupAppEventEmitter(mainWindow: BrowserWindow) {
-    // fire event when mainWindow is in foreground
-    mainWindow.on("focus", () => {
-        mainWindow.webContents.send("app-in-foreground");
-    });
-}
+const attachEventHandlers = (mainWindow: BrowserWindow) => {
+    // Let ipcRenderer know when mainWindow is in the foreground.
+    mainWindow.on("focus", () =>
+        mainWindow.webContents.send("app-in-foreground"),
+    );
+};
 
 const main = () => {
     const gotTheLock = app.requestSingleInstanceLock();
@@ -190,13 +190,13 @@ const main = () => {
         handleDownloads(mainWindow);
         handleExternalLinks(mainWindow);
         addAllowOriginHeader(mainWindow);
-        setupAppEventEmitter(mainWindow);
+        attachEventHandlers(mainWindow);
 
         try {
             deleteLegacyDiskCacheDirIfExists();
         } catch (e) {
             // Log but otherwise ignore errors during non-critical startup
-            // actions
+            // actions.
             log.error("Ignoring startup error", e);
         }
     });

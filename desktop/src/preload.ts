@@ -68,9 +68,7 @@ const fsExists = (path: string): Promise<boolean> =>
 
 const registerForegroundEventListener = (onForeground: () => void) => {
     ipcRenderer.removeAllListeners("app-in-foreground");
-    ipcRenderer.on("app-in-foreground", () => {
-        onForeground();
-    });
+    ipcRenderer.on("app-in-foreground", onForeground);
 };
 
 const clearElectronStore = () => {
