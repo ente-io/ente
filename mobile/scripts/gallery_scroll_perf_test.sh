@@ -3,7 +3,8 @@
 # Make sure to go through home_gallery_scroll_test.dart and 
 # fill in email and password.
 # Specify destination directory for the perf results in perf_driver.dart.
-
+# Specify the report_key of the test in perf_driver.dart. `report_key`` of
+# `traceAction`` in app_init_test.dart.
 
 export ENDPOINT="https://api.ente.io"
 

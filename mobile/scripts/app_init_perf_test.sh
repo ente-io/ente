@@ -2,7 +2,6 @@
 
 # Make sure to go through app_init_test.dart and 
 # fill in email and password.
-
 # Specify destination directory for the perf results in perf_driver.dart.
 # Specify the report_key of the test in perf_driver.dart. `report_key`` of
 # `traceAction`` in app_init_test.dart.
