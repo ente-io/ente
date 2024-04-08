@@ -1,13 +1,13 @@
 import ElectronAPIs from "@/next/electron";
 import { convertBytesToHumanReadable } from "@/next/file";
 import log from "@/next/log";
+import { workerBridge } from "@/next/worker/worker-bridge";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { CustomError } from "@ente/shared/error";
 import { isPlaybackPossible } from "@ente/shared/media/video-playback";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import { User } from "@ente/shared/user/types";
 import { downloadUsingAnchor } from "@ente/shared/utils";
-import { workerBridge } from "@ente/shared/worker/worker-bridge";
 import {
     FILE_TYPE,
     RAW_FORMATS,
@@ -489,10 +489,9 @@ const convertToJPEGInElectron = async (
     try {
         const startTime = Date.now();
         const inputFileData = new Uint8Array(await fileBlob.arrayBuffer());
-        const convertedFileData = await workerBridge.convertToJPEG(
-            inputFileData,
-            filename,
-        );
+        const convertedFileData = isElectron()
+            ? await ElectronAPIs.convertToJPEG(inputFileData, filename)
+            : await workerBridge.convertToJPEG(inputFileData, filename);
         log.info(
             `originalFileSize:${convertBytesToHumanReadable(
                 fileBlob?.size,

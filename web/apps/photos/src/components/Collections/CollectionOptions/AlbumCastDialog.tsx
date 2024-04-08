@@ -132,7 +132,7 @@ export default function AlbumCastDialog(props: Props) {
                 session
                     .sendMessage("urn:x-cast:pair-request", {})
                     .then(() => {
-                        log.debug("Message sent successfully");
+                        log.debug(() => "Message sent successfully");
                     })
                     .catch((e) => {
                         log.error("Error sending message", e);
