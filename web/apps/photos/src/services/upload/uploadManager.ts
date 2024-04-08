@@ -28,7 +28,7 @@ import { getFileNameSize } from "@/next/file";
 import { getDedicatedCryptoWorker } from "@ente/shared/crypto";
 import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
 import { addLogLine } from "@ente/shared/logging";
-import { ComlinkWorker } from "@ente/shared/worker/comlinkWorker";
+import { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { Remote } from "comlink";
 import { UPLOAD_RESULT, UPLOAD_STAGES } from "constants/upload";
 import isElectron from "is-electron";

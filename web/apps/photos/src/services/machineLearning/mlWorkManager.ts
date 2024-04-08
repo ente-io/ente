@@ -2,7 +2,7 @@ import { eventBus, Events } from "@ente/shared/events";
 import { addLogLine } from "@ente/shared/logging";
 import { logError } from "@ente/shared/sentry";
 import { getToken, getUserID } from "@ente/shared/storage/localStorage/helpers";
-import { ComlinkWorker } from "@ente/shared/worker/comlinkWorker";
+import { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { FILE_TYPE } from "constants/file";
 import debounce from "debounce";
 import PQueue from "p-queue";

@@ -1,4 +1,4 @@
-import { ComlinkWorker } from "@/next/worker/comlinkWorker";
+import { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { Remote } from "comlink";
 import { DedicatedCryptoWorker } from "./internal/crypto.worker";
 
