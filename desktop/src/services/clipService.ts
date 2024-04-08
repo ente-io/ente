@@ -2,7 +2,7 @@ import { app, net } from "electron/main";
 import { existsSync } from "fs";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { CustomErrors } from "../constants/errors";
+import { CustomErrors } from "../types/ipc";
 import { writeStream } from "../main/fs";
 import log from "../main/log";
 import { execAsync, isDev } from "../main/util";
