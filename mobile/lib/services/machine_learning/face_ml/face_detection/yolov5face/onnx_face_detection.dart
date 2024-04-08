@@ -9,6 +9,7 @@ import "package:computer/computer.dart";
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:onnxruntime/onnxruntime.dart';
+import "package:photos/face/model/dimension.dart";
 import 'package:photos/services/machine_learning/face_ml/face_detection/detection.dart';
 import 'package:photos/services/machine_learning/face_ml/face_detection/naive_non_max_suppression.dart';
 import 'package:photos/services/machine_learning/face_ml/face_detection/yolov5face/yolo_face_detection_exceptions.dart';
@@ -143,7 +144,7 @@ class YoloOnnxFaceDetection {
           case FaceDetectionOperation.yoloInferenceAndPostProcessing:
             final inputImageList = args['inputImageList'] as Float32List;
             final inputShape = args['inputShape'] as List<int>;
-            final newSize = args['newSize'] as Size;
+            final newSize = args['newSize'] as Dimensions;
             final sessionAddress = args['sessionAddress'] as int;
             final timeSentToIsolate = args['timeNow'] as DateTime;
             final delaySentToIsolate =
@@ -249,7 +250,7 @@ class YoloOnnxFaceDetection {
   }
 
   /// Detects faces in the given image data.
-  Future<(List<FaceDetectionRelative>, Size)> predict(
+  Future<(List<FaceDetectionRelative>, Dimensions)> predict(
     Uint8List imageData,
   ) async {
     assert(isInitialized);
@@ -314,7 +315,7 @@ class YoloOnnxFaceDetection {
   }
 
   /// Detects faces in the given image data.
-  static Future<(List<FaceDetectionRelative>, Size)> predictSync(
+  static Future<(List<FaceDetectionRelative>, Dimensions)> predictSync(
     ui.Image image,
     ByteData imageByteData,
     int sessionAddress,
@@ -384,7 +385,7 @@ class YoloOnnxFaceDetection {
   }
 
   /// Detects faces in the given image data.
-  Future<(List<FaceDetectionRelative>, Size)> predictInIsolate(
+  Future<(List<FaceDetectionRelative>, Dimensions)> predictInIsolate(
     Uint8List imageData,
   ) async {
     await ensureSpawnedIsolate();
@@ -446,7 +447,7 @@ class YoloOnnxFaceDetection {
     return (relativeDetections, originalSize);
   }
 
-  Future<(List<FaceDetectionRelative>, Size)> predictInComputer(
+  Future<(List<FaceDetectionRelative>, Dimensions)> predictInComputer(
     String imagePath,
   ) async {
     assert(isInitialized);
@@ -524,7 +525,7 @@ class YoloOnnxFaceDetection {
 
     final stopwatchDecoding = Stopwatch()..start();
     final List<Float32List> inputImageDataLists = [];
-    final List<(Size, Size)> originalAndNewSizeList = [];
+    final List<(Dimensions, Dimensions)> originalAndNewSizeList = [];
     int concatenatedImageInputsLength = 0;
     for (final imageData in imageDataList) {
       final (inputImageList, originalSize, newSize) =
@@ -624,9 +625,9 @@ class YoloOnnxFaceDetection {
     // Account for the fact that the aspect ratio was maintained
     for (final faceDetection in relativeDetections) {
       faceDetection.correctForMaintainedAspectRatio(
-        Size(
-          kInputWidth.toDouble(),
-          kInputHeight.toDouble(),
+        const Dimensions(
+          width: kInputWidth,
+          height: kInputHeight,
         ),
         originalAndNewSizeList[imageOutputToUse].$2,
       );
@@ -653,7 +654,7 @@ class YoloOnnxFaceDetection {
 
   static List<FaceDetectionRelative> _yoloPostProcessOutputs(
     List<OrtValue?>? outputs,
-    Size newSize,
+    Dimensions newSize,
   ) {
     // // Get output tensors
     final nestedResults =
@@ -684,9 +685,9 @@ class YoloOnnxFaceDetection {
     // Account for the fact that the aspect ratio was maintained
     for (final faceDetection in relativeDetections) {
       faceDetection.correctForMaintainedAspectRatio(
-        Size(
-          kInputWidth.toDouble(),
-          kInputHeight.toDouble(),
+        const Dimensions(
+          width: kInputWidth,
+          height: kInputHeight,
         ),
         newSize,
       );
@@ -735,7 +736,7 @@ class YoloOnnxFaceDetection {
   ) async {
     final inputImageList = args['inputImageList'] as Float32List;
     final inputShape = args['inputShape'] as List<int>;
-    final newSize = args['newSize'] as Size;
+    final newSize = args['newSize'] as Dimensions;
     final sessionAddress = args['sessionAddress'] as int;
     final timeSentToIsolate = args['timeNow'] as DateTime;
     final delaySentToIsolate =

@@ -17,6 +17,7 @@ import "dart:ui";
 import 'package:flutter/painting.dart' as paint show decodeImageFromList;
 import 'package:ml_linalg/linalg.dart';
 import "package:photos/face/model/box.dart";
+import "package:photos/face/model/dimension.dart";
 import 'package:photos/models/ml/ml_typedefs.dart';
 import 'package:photos/services/machine_learning/face_ml/face_alignment/alignment_result.dart';
 import 'package:photos/services/machine_learning/face_ml/face_alignment/similarity_transform.dart';
@@ -716,7 +717,8 @@ Future<(Num3DInputMatrix, Size, Size)> preprocessImageToMatrix(
   return (imageMatrix, originalSize, newSize);
 }
 
-Future<(Float32List, Size, Size)> preprocessImageToFloat32ChannelsFirst(
+Future<(Float32List, Dimensions, Dimensions)>
+    preprocessImageToFloat32ChannelsFirst(
   Image image,
   ByteData imgByteData, {
   required int normalization,
@@ -730,7 +732,7 @@ Future<(Float32List, Size, Size)> preprocessImageToFloat32ChannelsFirst(
       : normalization == 1
           ? normalizePixelRange1
           : normalizePixelNoRange;
-  final originalSize = Size(image.width.toDouble(), image.height.toDouble());
+  final originalSize = Dimensions(width: image.width, height: image.height);
 
   if (image.width == requiredWidth && image.height == requiredHeight) {
     return (
@@ -784,7 +786,7 @@ Future<(Float32List, Size, Size)> preprocessImageToFloat32ChannelsFirst(
   return (
     processedBytes,
     originalSize,
-    Size(scaledWidth.toDouble(), scaledHeight.toDouble())
+    Dimensions(width: scaledWidth, height: scaledHeight)
   );
 }
 

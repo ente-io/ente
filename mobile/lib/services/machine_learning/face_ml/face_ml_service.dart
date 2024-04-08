@@ -661,13 +661,13 @@ class FaceMlService {
           ),
         );
       } else {
-        if (result.faceDetectionImageSize == null ||
-            result.faceAlignmentImageSize == null) {
-          _logger.severe(
-              "faceDetectionImageSize or faceDetectionImageSize is null for image with "
-              "ID: ${enteFile.uploadedFileID}");
+        if (result.decodedImageSize.width == -1 ||
+            result.decodedImageSize.height == -1) {
+          _logger
+              .severe("decodedImageSize is not stored correctly for image with "
+                  "ID: ${enteFile.uploadedFileID}");
           _logger.info(
-            "Using aligned image size for image with ID: ${enteFile.uploadedFileID}. This size is ${result.faceAlignmentImageSize!.width}x${result.faceAlignmentImageSize!.height} compared to size of ${enteFile.width}x${enteFile.height} in the metadata",
+            "Using aligned image size for image with ID: ${enteFile.uploadedFileID}. This size is ${result.decodedImageSize.width}x${result.decodedImageSize.height} compared to size of ${enteFile.width}x${enteFile.height} in the metadata",
           );
         }
         for (int i = 0; i < result.faces.length; ++i) {
@@ -697,8 +697,8 @@ class FaceMlService {
               detection,
               faceRes.blurValue,
               fileInfo: FileInfo(
-                imageHeight: result.faceDetectionImageSize!.height.truncate(),
-                imageWidth: result.faceDetectionImageSize!.width.truncate(),
+                imageHeight: result.decodedImageSize.height,
+                imageWidth: result.decodedImageSize.width,
               ),
             ),
           );
@@ -714,8 +714,8 @@ class FaceMlService {
             result.mlVersion,
             error: result.errorOccured ? true : null,
           ),
-          height: result.faceDetectionImageSize!.height.truncate(),
-          width: result.faceDetectionImageSize!.width.truncate(),
+          height: result.decodedImageSize.height,
+          width: result.decodedImageSize.width,
         ),
       );
       await FaceMLDataDB.instance.bulkInsertFaces(faces);
@@ -1093,7 +1093,7 @@ class FaceMlService {
     FaceMlResultBuilder? resultBuilder,
   }) async {
     try {
-      final (alignedFaces, alignmentResults, _, blurValues, originalImageSize) =
+      final (alignedFaces, alignmentResults, _, blurValues, _) =
           await ImageMlIsolate.instance
               .preprocessMobileFaceNetOnnx(imagePath, faces);
 
@@ -1101,7 +1101,6 @@ class FaceMlService {
         resultBuilder.addAlignmentResults(
           alignmentResults,
           blurValues,
-          originalImageSize,
         );
       }
 
@@ -1128,7 +1127,7 @@ class FaceMlService {
   }) async {
     try {
       final stopwatch = Stopwatch()..start();
-      final (alignedFaces, alignmentResults, _, blurValues, originalImageSize) =
+      final (alignedFaces, alignmentResults, _, blurValues, _) =
           await preprocessToMobileFaceNetFloat32List(
         image,
         imageByteData,
@@ -1143,7 +1142,6 @@ class FaceMlService {
         resultBuilder.addAlignmentResults(
           alignmentResults,
           blurValues,
-          originalImageSize,
         );
       }
 

@@ -1,5 +1,6 @@
 import 'dart:math' show sqrt, pow;
-import 'dart:ui' show Size;
+
+import "package:photos/face/model/dimension.dart";
 
 abstract class Detection {
   final double score;
@@ -179,8 +180,8 @@ class FaceDetectionRelative extends Detection {
   }
 
   void correctForMaintainedAspectRatio(
-    Size originalSize,
-    Size newSize,
+    Dimensions originalSize,
+    Dimensions newSize,
   ) {
     // Return if both are the same size, meaning no scaling was done on both width and height
     if (originalSize == newSize) {

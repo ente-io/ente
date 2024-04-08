@@ -1,7 +1,8 @@
 import "dart:convert" show jsonEncode, jsonDecode;
 
-import "package:flutter/material.dart" show Size, debugPrint, immutable;
+import "package:flutter/material.dart" show debugPrint, immutable;
 import "package:logging/logging.dart";
+import "package:photos/face/model/dimension.dart";
 import "package:photos/models/file/file.dart";
 import 'package:photos/models/ml/ml_typedefs.dart';
 import "package:photos/models/ml/ml_versions.dart";
@@ -284,8 +285,7 @@ class FaceMlResult {
 
   final List<FaceResult> faces;
 
-  final Size? faceDetectionImageSize;
-  final Size? faceAlignmentImageSize;
+  final Dimensions decodedImageSize;
 
   final int mlVersion;
   final bool errorOccured;
@@ -319,8 +319,7 @@ class FaceMlResult {
     required this.mlVersion,
     required this.errorOccured,
     required this.onlyThumbnailUsed,
-    required this.faceDetectionImageSize,
-    this.faceAlignmentImageSize,
+    required this.decodedImageSize,
   });
 
   Map<String, dynamic> _toJson() => {
@@ -329,16 +328,10 @@ class FaceMlResult {
         'mlVersion': mlVersion,
         'errorOccured': errorOccured,
         'onlyThumbnailUsed': onlyThumbnailUsed,
-        if (faceDetectionImageSize != null)
-          'faceDetectionImageSize': {
-            'width': faceDetectionImageSize!.width,
-            'height': faceDetectionImageSize!.height,
-          },
-        if (faceAlignmentImageSize != null)
-          'faceAlignmentImageSize': {
-            'width': faceAlignmentImageSize!.width,
-            'height': faceAlignmentImageSize!.height,
-          },
+        'decodedImageSize': {
+          'width': decodedImageSize.width,
+          'height': decodedImageSize.height,
+        },
       };
 
   String toJsonString() => jsonEncode(_toJson());
@@ -352,18 +345,19 @@ class FaceMlResult {
       mlVersion: json['mlVersion'],
       errorOccured: json['errorOccured'] ?? false,
       onlyThumbnailUsed: json['onlyThumbnailUsed'] ?? false,
-      faceDetectionImageSize: json['faceDetectionImageSize'] == null
-          ? null
-          : Size(
-              json['faceDetectionImageSize']['width'],
-              json['faceDetectionImageSize']['height'],
-            ),
-      faceAlignmentImageSize: json['faceAlignmentImageSize'] == null
-          ? null
-          : Size(
-              json['faceAlignmentImageSize']['width'],
-              json['faceAlignmentImageSize']['height'],
-            ),
+      decodedImageSize: json['decodedImageSize'] != null
+          ? Dimensions(
+              width: json['decodedImageSize']['width'],
+              height: json['decodedImageSize']['height'],
+            )
+          : json['faceDetectionImageSize'] == null
+              ? const Dimensions(width: -1, height: -1)
+              : Dimensions(
+                  width: (json['faceDetectionImageSize']['width'] as double)
+                      .truncate(),
+                  height: (json['faceDetectionImageSize']['height'] as double)
+                      .truncate(),
+                ),
     );
   }
 
@@ -400,8 +394,7 @@ class FaceMlResultBuilder {
 
   List<FaceResultBuilder> faces = <FaceResultBuilder>[];
 
-  Size? faceDetectionImageSize;
-  Size? faceAlignmentImageSize;
+  Dimensions decodedImageSize;
 
   int mlVersion;
   bool errorOccured;
@@ -412,6 +405,7 @@ class FaceMlResultBuilder {
     this.mlVersion = faceMlVersion,
     this.errorOccured = false,
     this.onlyThumbnailUsed = false,
+    this.decodedImageSize = const Dimensions(width: -1, height: -1),
   });
 
   FaceMlResultBuilder.fromEnteFile(
@@ -419,6 +413,7 @@ class FaceMlResultBuilder {
     this.mlVersion = faceMlVersion,
     this.errorOccured = false,
     this.onlyThumbnailUsed = false,
+    this.decodedImageSize = const Dimensions(width: -1, height: -1),
   }) : fileId = file.uploadedFileID ?? -1;
 
   FaceMlResultBuilder.fromEnteFileID(
@@ -426,13 +421,14 @@ class FaceMlResultBuilder {
     this.mlVersion = faceMlVersion,
     this.errorOccured = false,
     this.onlyThumbnailUsed = false,
+    this.decodedImageSize = const Dimensions(width: -1, height: -1),
   }) : fileId = fileID;
 
   void addNewlyDetectedFaces(
     List<FaceDetectionRelative> faceDetections,
-    Size originalSize,
+    Dimensions originalSize,
   ) {
-    faceDetectionImageSize = originalSize;
+    decodedImageSize = originalSize;
     for (var i = 0; i < faceDetections.length; i++) {
       faces.add(
         FaceResultBuilder.fromFaceDetection(
@@ -446,7 +442,6 @@ class FaceMlResultBuilder {
   void addAlignmentResults(
     List<AlignmentResult> alignmentResults,
     List<double> blurValues,
-    Size imageSizeUsedForAlignment,
   ) {
     if (alignmentResults.length != faces.length) {
       throw Exception(
@@ -458,7 +453,6 @@ class FaceMlResultBuilder {
       faces[i].alignment = alignmentResults[i];
       faces[i].blurValue = blurValues[i];
     }
-    faceAlignmentImageSize = imageSizeUsedForAlignment;
   }
 
   void addEmbeddingsToExistingFaces(
@@ -485,8 +479,7 @@ class FaceMlResultBuilder {
       mlVersion: mlVersion,
       errorOccured: errorOccured,
       onlyThumbnailUsed: onlyThumbnailUsed,
-      faceDetectionImageSize: faceDetectionImageSize,
-      faceAlignmentImageSize: faceAlignmentImageSize,
+      decodedImageSize: decodedImageSize,
     );
   }
 

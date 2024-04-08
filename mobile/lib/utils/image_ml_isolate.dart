@@ -8,6 +8,7 @@ import "package:flutter/rendering.dart";
 import 'package:flutter_isolate/flutter_isolate.dart';
 import "package:logging/logging.dart";
 import "package:photos/face/model/box.dart";
+import "package:photos/face/model/dimension.dart";
 import 'package:photos/models/ml/ml_typedefs.dart';
 import 'package:photos/services/machine_learning/face_ml/face_alignment/alignment_result.dart';
 import 'package:photos/services/machine_learning/face_ml/face_detection/detection.dart';
@@ -343,7 +344,7 @@ class ImageMlIsolate {
   @Deprecated(
     "Old method, not needed since we now run the whole ML pipeline for faces in a single isolate",
   )
-  Future<(Float32List, Size, Size)> preprocessImageYoloOnnx(
+  Future<(Float32List, Dimensions, Dimensions)> preprocessImageYoloOnnx(
     Uint8List imageData, {
     required bool normalize,
     required int requiredWidth,
@@ -365,13 +366,13 @@ class ImageMlIsolate {
       ),
     );
     final inputs = results['inputs'] as Float32List;
-    final originalSize = Size(
-      results['originalWidth'] as double,
-      results['originalHeight'] as double,
+    final originalSize = Dimensions(
+      width:results['originalWidth'] as int,
+      height: results['originalHeight'] as int,
     );
-    final newSize = Size(
-      results['newWidth'] as double,
-      results['newHeight'] as double,
+    final newSize = Dimensions(
+      width: results['newWidth'] as int,
+      height: results['newHeight'] as int,
     );
     return (inputs, originalSize, newSize);
   }
