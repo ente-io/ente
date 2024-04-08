@@ -31,25 +31,7 @@ export const logToDisk = (message: string) => {
     log.info(`[rndr] ${message}`);
 };
 
-export const logError = logErrorSentry;
-
-/** Deprecated, but no alternative yet */
-export function logErrorSentry(
-    error: any,
-    msg: string,
-    info?: Record<string, unknown>,
-) {
-    logToDisk(
-        `error: ${error?.name} ${error?.message} ${
-            error?.stack
-        } msg: ${msg} info: ${JSON.stringify(info)}`,
-    );
-    if (isDev) {
-        console.log(error, { msg, info });
-    }
-}
-
-const logError1 = (message: string, e?: unknown) => {
+const logError = (message: string, e?: unknown) => {
     if (!e) {
         logError_(message);
         return;
@@ -103,7 +85,7 @@ export default {
      * The log is written to disk. In development builds, the log is also
      * printed to the (Node.js process') console.
      */
-    error: logError1,
+    error: logError,
     /**
      * Log a message.
      *
