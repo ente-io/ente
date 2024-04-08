@@ -1,9 +1,9 @@
 import { compareVersions } from "compare-versions";
 import { app, BrowserWindow } from "electron";
-import { default as ElectronLog, default as log } from "electron-log";
+import { default as electronLog } from "electron-log";
 import { autoUpdater } from "electron-updater";
 import { setIsAppQuitting, setIsUpdateAvailable } from "../main";
-import { logErrorSentry } from "../main/log";
+import log from "../main/log";
 import { AppUpdateInfo } from "../types/ipc";
 import {
     clearMuteUpdateNotificationVersion,
@@ -18,7 +18,7 @@ const FIVE_MIN_IN_MICROSECOND = 5 * 60 * 1000;
 const ONE_DAY_IN_MICROSECOND = 1 * 24 * 60 * 60 * 1000;
 
 export function setupAutoUpdater(mainWindow: BrowserWindow) {
-    autoUpdater.logger = log;
+    autoUpdater.logger = electronLog;
     autoUpdater.autoDownload = false;
     checkForUpdateAndNotify(mainWindow);
     setInterval(
@@ -33,49 +33,36 @@ export function forceCheckForUpdateAndNotify(mainWindow: BrowserWindow) {
         clearMuteUpdateNotificationVersion();
         checkForUpdateAndNotify(mainWindow);
     } catch (e) {
-        logErrorSentry(e, "forceCheckForUpdateAndNotify failed");
+        log.error("forceCheckForUpdateAndNotify failed", e);
     }
 }
 
 async function checkForUpdateAndNotify(mainWindow: BrowserWindow) {
     try {
-        log.debug("checkForUpdateAndNotify called");
-        const updateCheckResult = await autoUpdater.checkForUpdates();
-        log.debug("update version", updateCheckResult.updateInfo.version);
-        if (
-            compareVersions(
-                updateCheckResult.updateInfo.version,
-                app.getVersion(),
-            ) <= 0
-        ) {
-            log.debug("already at latest version");
+        log.debug(() => "checkForUpdateAndNotify");
+        const { updateInfo } = await autoUpdater.checkForUpdates();
+        log.debug(() => `Update version ${updateInfo.version}`);
+        if (compareVersions(updateInfo.version, app.getVersion()) <= 0) {
+            log.debug(() => "Skipping update, already at latest version");
             return;
         }
         const skipAppVersion = getSkipAppVersion();
-        if (
-            skipAppVersion &&
-            updateCheckResult.updateInfo.version === skipAppVersion
-        ) {
-            log.info(
-                "user chose to skip version ",
-                updateCheckResult.updateInfo.version,
-            );
+        if (skipAppVersion && updateInfo.version === skipAppVersion) {
+            log.info(`User chose to skip version ${updateInfo.version}`);
             return;
         }
 
         let timeout: NodeJS.Timeout;
-        log.debug("attempting auto update");
+        log.debug(() => "Attempting auto update");
         autoUpdater.downloadUpdate();
         const muteUpdateNotificationVersion =
             getMuteUpdateNotificationVersion();
         if (
             muteUpdateNotificationVersion &&
-            updateCheckResult.updateInfo.version ===
-                muteUpdateNotificationVersion
+            updateInfo.version === muteUpdateNotificationVersion
         ) {
             log.info(
-                "user chose to mute update notification for version ",
-                updateCheckResult.updateInfo.version,
+                `User has muted update notifications for version ${updateInfo.version}`,
             );
             return;
         }
@@ -84,28 +71,28 @@ async function checkForUpdateAndNotify(mainWindow: BrowserWindow) {
                 () =>
                     showUpdateDialog(mainWindow, {
                         autoUpdatable: true,
-                        version: updateCheckResult.updateInfo.version,
+                        version: updateInfo.version,
                     }),
                 FIVE_MIN_IN_MICROSECOND,
             );
         });
         autoUpdater.on("error", (error) => {
             clearTimeout(timeout);
-            logErrorSentry(error, "auto update failed");
+            log.error("Auto update failed", error);
             showUpdateDialog(mainWindow, {
                 autoUpdatable: false,
-                version: updateCheckResult.updateInfo.version,
+                version: updateInfo.version,
             });
         });
 
         setIsUpdateAvailable(true);
     } catch (e) {
-        logErrorSentry(e, "checkForUpdateAndNotify failed");
+        log.error("checkForUpdateAndNotify failed", e);
     }
 }
 
 export function updateAndRestart() {
-    ElectronLog.log("user quit the app");
+    log.info("user quit the app");
     setIsAppQuitting(true);
     autoUpdater.quitAndInstall();
 }

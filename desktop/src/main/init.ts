@@ -1,6 +1,5 @@
 import { app, BrowserWindow, nativeImage, Tray } from "electron";
 import { existsSync } from "node:fs";
-import os from "node:os";
 import path from "node:path";
 import { isAppQuitting, rendererURL } from "../main";
 import autoLauncher from "../services/autoLauncher";
@@ -77,8 +76,6 @@ export const createWindow = async () => {
     return mainWindow;
 };
 
-export async function handleUpdates(mainWindow: BrowserWindow) {}
-
 export const setupTrayItem = (mainWindow: BrowserWindow) => {
     const iconName = isPlatform("mac")
         ? "taskbar-icon-Template.png"
@@ -147,16 +144,6 @@ export async function handleDockIconHideOnAutoLaunch() {
     if (isPlatform("mac") && shouldHideDockIcon && wasAutoLaunched) {
         app.dock.hide();
     }
-}
-
-export function logStartupBanner() {
-    const version = isDev ? "dev" : app.getVersion();
-    log.info(`Hello from ente-photos-desktop ${version}`);
-
-    const platform = process.platform;
-    const osRelease = os.release();
-    const systemVersion = process.getSystemVersion();
-    log.info("Running on", { platform, osRelease, systemVersion });
 }
 
 function lowerCaseHeaders(responseHeaders: Record<string, string[]>) {

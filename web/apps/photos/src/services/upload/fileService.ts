@@ -1,5 +1,5 @@
+import { getFileNameSize } from "@/next/file";
 import { addLogLine } from "@ente/shared/logging";
-import { getFileNameSize } from "@ente/shared/logging/web";
 import { logError } from "@ente/shared/sentry";
 import { FILE_READER_CHUNK_SIZE, MULTIPART_PART_SIZE } from "constants/upload";
 import {

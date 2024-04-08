@@ -1,29 +1,5 @@
-import { useEffect, useState } from "react";
-
-import { t } from "i18next";
-
-import {
-    decryptAndStoreToken,
-    generateAndSaveIntermediateKeyAttributes,
-    generateLoginSubKey,
-    saveKeyInSessionStore,
-} from "@ente/shared/crypto/helpers";
-import {
-    LS_KEYS,
-    clearData,
-    getData,
-    setData,
-} from "@ente/shared/storage/localStorage";
-import {
-    SESSION_KEYS,
-    getKey,
-    removeKey,
-    setKey,
-} from "@ente/shared/storage/sessionStorage";
-import { PAGES } from "../constants/pages";
-import { generateSRPSetupAttributes } from "../services/srp";
-import { logoutUser } from "../services/user";
-
+import ElectronAPIs from "@/next/electron";
+import log from "@/next/log";
 import { APP_HOMES } from "@ente/shared/apps/constants";
 import { PageProps } from "@ente/shared/apps/types";
 import { VerticallyCentered } from "@ente/shared/components/Container";
@@ -36,23 +12,47 @@ import VerifyMasterPasswordForm, {
     VerifyMasterPasswordFormProps,
 } from "@ente/shared/components/VerifyMasterPasswordForm";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
+import {
+    decryptAndStoreToken,
+    generateAndSaveIntermediateKeyAttributes,
+    generateLoginSubKey,
+    saveKeyInSessionStore,
+} from "@ente/shared/crypto/helpers";
 import { B64EncryptionResult } from "@ente/shared/crypto/types";
-import ElectronAPIs from "@ente/shared/electron";
 import { CustomError } from "@ente/shared/error";
-import { addLocalLog } from "@ente/shared/logging";
 import { getAccountsURL } from "@ente/shared/network/api";
 import { logError } from "@ente/shared/sentry";
 import InMemoryStore, { MS_KEYS } from "@ente/shared/storage/InMemoryStore";
+import {
+    LS_KEYS,
+    clearData,
+    getData,
+    setData,
+} from "@ente/shared/storage/localStorage";
 import {
     getToken,
     isFirstLogin,
     setIsFirstLogin,
 } from "@ente/shared/storage/localStorage/helpers";
+import {
+    SESSION_KEYS,
+    getKey,
+    removeKey,
+    setKey,
+} from "@ente/shared/storage/sessionStorage";
 import { KeyAttributes, User } from "@ente/shared/user/types";
+import { t } from "i18next";
 import isElectron from "is-electron";
 import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
 import { getSRPAttributes } from "../api/srp";
-import { configureSRP, loginViaSRP } from "../services/srp";
+import { PAGES } from "../constants/pages";
+import {
+    configureSRP,
+    generateSRPSetupAttributes,
+    loginViaSRP,
+} from "../services/srp";
+import { logoutUser } from "../services/user";
 import { SRPAttributes } from "../types/srp";
 
 export default function Credentials({ appContext, appName }: PageProps) {
@@ -230,7 +230,7 @@ export default function Credentials({ appContext, appName }: PageProps) {
                         setData(LS_KEYS.SRP_ATTRIBUTES, srpAttributes);
                     }
                 }
-                addLocalLog(() => `userSRPSetupPending ${!srpAttributes}`);
+                log.debug(() => `userSRPSetupPending ${!srpAttributes}`);
                 if (!srpAttributes) {
                     const loginSubKey = await generateLoginSubKey(kek);
                     const srpSetupAttributes =

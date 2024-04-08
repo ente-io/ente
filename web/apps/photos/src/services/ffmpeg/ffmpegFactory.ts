@@ -1,4 +1,4 @@
-import ElectronAPIs from "@ente/shared/electron";
+import ElectronAPIs from "@/next/electron";
 import isElectron from "is-electron";
 import { ElectronFile } from "types/upload";
 import ComlinkFFmpegWorker from "utils/comlink/ComlinkFFmpegWorker";

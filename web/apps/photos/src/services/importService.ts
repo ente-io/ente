@@ -1,4 +1,4 @@
-import ElectronAPIs from "@ente/shared/electron";
+import ElectronAPIs from "@/next/electron";
 import { logError } from "@ente/shared/sentry";
 import { PICKED_UPLOAD_TYPE } from "constants/upload";
 import { Collection } from "types/collection";

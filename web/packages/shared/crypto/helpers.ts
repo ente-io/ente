@@ -1,3 +1,4 @@
+import ElectronAPIs from "@/next/electron";
 import { setRecoveryKey } from "@ente/accounts/api/user";
 import { logError } from "@ente/shared/sentry";
 import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
@@ -7,7 +8,6 @@ import { getActualKey } from "@ente/shared/user";
 import { KeyAttributes } from "@ente/shared/user/types";
 import isElectron from "is-electron";
 import ComlinkCryptoWorker from ".";
-import ElectronAPIs from "../electron";
 import { addLogLine } from "../logging";
 
 const LOGIN_SUB_KEY_LENGTH = 32;

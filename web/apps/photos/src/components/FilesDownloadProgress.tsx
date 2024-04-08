@@ -1,4 +1,4 @@
-import ElectronAPIs from "@ente/shared/electron";
+import ElectronAPIs from "@/next/electron";
 import Notification from "components/Notification";
 import { t } from "i18next";
 import isElectron from "is-electron";

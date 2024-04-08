@@ -1,3 +1,4 @@
+import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { logError } from "@ente/shared/sentry";
 import { FILE_TYPE, RAW_FORMATS } from "constants/file";
 import CastDownloadManager from "services/castDownloadManager";
@@ -9,7 +10,6 @@ import {
     FileMagicMetadata,
     FilePublicMagicMetadata,
 } from "types/file";
-import ComlinkCryptoWorker from "utils/comlink/ComlinkCryptoWorker";
 
 export function sortFiles(files: EnteFile[], sortAsc = false) {
     // sort based on the time of creation time of the file,

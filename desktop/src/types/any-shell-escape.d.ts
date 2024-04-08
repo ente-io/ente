@@ -19,6 +19,7 @@
  *     curl -v -H "Location;" -H "User-Agent: FooBar's so-called ""Browser""" "http://www.daveeddy.com/?name=dave&age=24"
 Which is suitable for being executed by the shell.
  */
+/* eslint-disable no-unused-vars */
 declare module "any-shell-escape" {
     declare const shellescape: (args: readonly string | string[]) => string;
     export default shellescape;

@@ -1,11 +1,9 @@
-import { Skeleton, styled } from "@mui/material";
-import { useEffect, useState } from "react";
-
-import { addLogLine } from "@ente/shared/logging";
-import { logError } from "@ente/shared/sentry";
+import log from "@/next/log";
 import { cached } from "@ente/shared/storage/cacheStorage/helpers";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import { User } from "@ente/shared/user/types";
+import { Skeleton, styled } from "@mui/material";
+import { useEffect, useState } from "react";
 import machineLearningService from "services/machineLearning/machineLearningService";
 import { imageBitmapToBlob } from "utils/image";
 
@@ -44,9 +42,9 @@ export function ImageCacheView(props: {
                         props.url,
                         async () => {
                             try {
-                                addLogLine(
-                                    "ImageCacheView: regenerate face crop",
-                                    props.faceID,
+                                log.debug(
+                                    () =>
+                                        `ImageCacheView: regenerate face crop for ${props.faceID}`,
                                 );
                                 return machineLearningService.regenerateFaceCrop(
                                     user.token,
@@ -54,9 +52,9 @@ export function ImageCacheView(props: {
                                     props.faceID,
                                 );
                             } catch (e) {
-                                logError(
-                                    e,
+                                log.error(
                                     "ImageCacheView: regenerate face crop failed",
+                                    e,
                                 );
                             }
                         },
@@ -65,7 +63,7 @@ export function ImageCacheView(props: {
 
                 !didCancel && setImageBlob(blob);
             } catch (e) {
-                logError(e, "ImageCacheView useEffect failed");
+                log.error("ImageCacheView useEffect failed", e);
             }
         }
         loadImage();

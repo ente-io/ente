@@ -1,10 +1,10 @@
+import { convertBytesToHumanReadable } from "@/next/file";
+import { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { CustomError } from "@ente/shared/error";
 import { addLogLine } from "@ente/shared/logging";
 import { logError } from "@ente/shared/sentry";
 import { retryAsyncFunction } from "@ente/shared/utils";
 import QueueProcessor from "@ente/shared/utils/queueProcessor";
-import { convertBytesToHumanReadable } from "@ente/shared/utils/size";
-import { ComlinkWorker } from "@ente/shared/worker/comlinkWorker";
 import { getDedicatedConvertWorker } from "utils/comlink/ComlinkConvertWorker";
 import { DedicatedConvertWorker } from "worker/convert.worker";
 

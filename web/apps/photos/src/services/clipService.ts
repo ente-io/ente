@@ -1,5 +1,5 @@
+import ElectronAPIs from "@/next/electron";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
-import ElectronAPIs from "@ente/shared/electron";
 import { CustomError } from "@ente/shared/error";
 import { Events, eventBus } from "@ente/shared/events";
 import { addLogLine } from "@ente/shared/logging";

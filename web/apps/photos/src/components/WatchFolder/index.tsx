@@ -6,8 +6,8 @@ import watchFolderService from "services/watchFolder/watchFolderService";
 import { WatchMapping } from "types/watchFolder";
 import { MappingList } from "./mappingList";
 
+import ElectronAPIs from "@/next/electron";
 import DialogTitleWithCloseButton from "@ente/shared/components/DialogBox/TitleWithCloseButton";
-import ElectronAPIs from "@ente/shared/electron";
 import UploadStrategyChoiceModal from "components/Upload/UploadStrategyChoiceModal";
 import { PICKED_UPLOAD_TYPE, UPLOAD_STRATEGY } from "constants/upload";
 import isElectron from "is-electron";

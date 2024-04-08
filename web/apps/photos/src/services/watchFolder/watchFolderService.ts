@@ -1,6 +1,5 @@
-import ElectronAPIs from "@ente/shared/electron";
-import { addLocalLog, addLogLine } from "@ente/shared/logging";
-import { logError } from "@ente/shared/sentry";
+import ElectronAPIs from "@/next/electron";
+import log from "@/next/log";
 import { UPLOAD_RESULT, UPLOAD_STRATEGY } from "constants/upload";
 import debounce from "debounce";
 import uploadManager from "services/upload/uploadManager";
@@ -66,7 +65,7 @@ class watchFolderService {
             this.setupWatcherFunctions();
             await this.getAndSyncDiffOfFiles();
         } catch (e) {
-            logError(e, "error while initializing watch service");
+            log.error("error while initializing watch service", e);
         }
     }
 
@@ -90,7 +89,7 @@ class watchFolderService {
                 this.trashDiffOfFiles(mapping, filesOnDisk);
             }
         } catch (e) {
-            logError(e, "error while getting and syncing diff of files");
+            log.error("error while getting and syncing diff of files", e);
         }
     }
 
@@ -193,7 +192,7 @@ class watchFolderService {
             );
             this.getAndSyncDiffOfFiles();
         } catch (e) {
-            logError(e, "error while adding watch mapping");
+            log.error("error while adding watch mapping", e);
         }
     }
 
@@ -201,7 +200,7 @@ class watchFolderService {
         try {
             await ElectronAPIs.removeWatchMapping(folderPath);
         } catch (e) {
-            logError(e, "error while removing watch mapping");
+            log.error("error while removing watch mapping", e);
         }
     }
 
@@ -209,7 +208,7 @@ class watchFolderService {
         try {
             return (await ElectronAPIs.getWatchMappings()) ?? [];
         } catch (e) {
-            logError(e, "error while getting watch mappings");
+            log.error("error while getting watch mappings", e);
             return [];
         }
     }
@@ -230,7 +229,7 @@ class watchFolderService {
             }
 
             const event = this.clubSameCollectionEvents();
-            addLogLine(
+            log.info(
                 `running event type:${event.type} collectionName:${event.collectionName} folderPath:${event.folderPath} , fileCount:${event.files?.length} pathsCount: ${event.paths?.length}`,
             );
             const mappings = await this.getWatchMappings();
@@ -240,12 +239,12 @@ class watchFolderService {
             if (!mapping) {
                 throw Error("no Mapping found for event");
             }
-            addLogLine(
+            log.info(
                 `mapping for event rootFolder: ${mapping.rootFolderName} folderPath: ${mapping.folderPath} uploadStrategy: ${mapping.uploadStrategy} syncedFilesCount: ${mapping.syncedFiles.length} ignoredFilesCount ${mapping.ignoredFiles.length}`,
             );
             if (event.type === "upload") {
                 event.files = getValidFilesToUpload(event.files, mapping);
-                addLogLine(`valid files count: ${event.files?.length}`);
+                log.info(`valid files count: ${event.files?.length}`);
                 if (event.files.length === 0) {
                     return;
                 }
@@ -262,7 +261,7 @@ class watchFolderService {
                 setTimeout(() => this.runNextEvent(), 0);
             }
         } catch (e) {
-            logError(e, "runNextEvent failed");
+            log.error("runNextEvent failed", e);
         }
     }
 
@@ -273,7 +272,7 @@ class watchFolderService {
             this.setCollectionName(this.currentEvent.collectionName);
             this.setElectronFiles(this.currentEvent.files);
         } catch (e) {
-            logError(e, "error while running next upload");
+            log.error("error while running next upload", e);
         }
     }
 
@@ -282,7 +281,7 @@ class watchFolderService {
         fileWithCollection: FileWithCollection,
         file: EncryptedEnteFile,
     ) {
-        addLocalLog(() => `onFileUpload called`);
+        log.debug(() => `onFileUpload called`);
         if (!this.isUploadRunning()) {
             return;
         }
@@ -338,7 +337,7 @@ class watchFolderService {
         collections: Collection[],
     ) {
         try {
-            addLocalLog(
+            log.debug(
                 () =>
                     `allFileUploadsDone,${JSON.stringify(
                         filesWithCollection,
@@ -348,8 +347,8 @@ class watchFolderService {
                 (collection) =>
                     collection.id === filesWithCollection[0].collectionID,
             );
-            addLocalLog(() => `got collection ${!!collection}`);
-            addLocalLog(
+            log.debug(() => `got collection ${!!collection}`);
+            log.debug(
                 () =>
                     `${this.isEventRunning} ${this.currentEvent.collectionName} ${collection?.name}`,
             );
@@ -371,8 +370,8 @@ class watchFolderService {
                 );
             }
 
-            addLocalLog(() => `syncedFiles ${JSON.stringify(syncedFiles)}`);
-            addLocalLog(() => `ignoredFiles ${JSON.stringify(ignoredFiles)}`);
+            log.debug(() => `syncedFiles ${JSON.stringify(syncedFiles)}`);
+            log.debug(() => `ignoredFiles ${JSON.stringify(ignoredFiles)}`);
 
             if (syncedFiles.length > 0) {
                 this.currentlySyncedMapping.syncedFiles = [
@@ -397,7 +396,7 @@ class watchFolderService {
 
             this.runPostUploadsAction();
         } catch (e) {
-            logError(e, "error while running all file uploads done");
+            log.error("error while running all file uploads done", e);
         }
     }
 
@@ -442,7 +441,7 @@ class watchFolderService {
                 };
                 syncedFiles.push(imageFile);
                 syncedFiles.push(videoFile);
-                addLocalLog(
+                log.debug(
                     () =>
                         `added image ${JSON.stringify(
                             imageFile,
@@ -456,7 +455,7 @@ class watchFolderService {
             ) {
                 ignoredFiles.push(imagePath);
                 ignoredFiles.push(videoPath);
-                addLocalLog(
+                log.debug(
                     () =>
                         `added image ${imagePath} and video file ${videoPath} to rejectedFiles`,
                 );
@@ -476,10 +475,10 @@ class watchFolderService {
                             .collectionID,
                 };
                 syncedFiles.push(file);
-                addLocalLog(() => `added file ${JSON.stringify(file)} `);
+                log.debug(() => `added file ${JSON.stringify(file)}`);
             } else if (this.unUploadableFilePaths.has(filePath)) {
                 ignoredFiles.push(filePath);
-                addLocalLog(() => `added file ${filePath} to rejectedFiles`);
+                log.debug(() => `added file ${filePath} to rejectedFiles`);
             }
             this.filePathToUploadedFileIDMap.delete(filePath);
         }
@@ -509,7 +508,7 @@ class watchFolderService {
                 this.currentlySyncedMapping.syncedFiles,
             );
         } catch (e) {
-            logError(e, "error while running next trash");
+            log.error("error while running next trash", e);
         }
     }
 
@@ -539,7 +538,7 @@ class watchFolderService {
             }
             this.syncWithRemote();
         } catch (e) {
-            logError(e, "error while trashing by IDs");
+            log.error("error while trashing by IDs", e);
         }
     }
 
@@ -581,7 +580,7 @@ class watchFolderService {
                 folderPath: mapping.folderPath,
             };
         } catch (e) {
-            logError(e, "error while getting collection name");
+            log.error("error while getting collection name", e);
         }
     }
 
@@ -599,7 +598,7 @@ class watchFolderService {
             const folderPath = await ElectronAPIs.selectDirectory();
             return folderPath;
         } catch (e) {
-            logError(e, "error while selecting folder");
+            log.error("error while selecting folder", e);
         }
     }
 
@@ -627,7 +626,7 @@ class watchFolderService {
             const isFolder = await ElectronAPIs.isFolder(folderPath);
             return isFolder;
         } catch (e) {
-            logError(e, "error while checking if folder exists");
+            log.error("error while checking if folder exists", e);
         }
     }
 
