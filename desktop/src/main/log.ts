@@ -15,7 +15,7 @@ import { isDev } from "./util";
  */
 export const initLogging = () => {
     log.transports.file.fileName = "ente.log";
-    log.transports.file.maxSize = 50 * 1024 * 1024; // 50MB;
+    log.transports.file.maxSize = 50 * 1024 * 1024; // 50 MB
     log.transports.file.format = "[{y}-{m}-{d}T{h}:{i}:{s}{z}] {text}";
 
     log.transports.console.level = false;
@@ -82,7 +82,7 @@ const logInfo = (...params: any[]) => {
 };
 
 const logDebug = (param: () => any) => {
-    if (isDev) console.log(`[debug] ${util.inspect(param())}`);
+    if (isDev) console.log(`[main] [debug] ${util.inspect(param())}`);
 };
 
 /**

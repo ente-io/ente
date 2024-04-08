@@ -3,7 +3,7 @@ import fs from "node:fs/promises";
 import path from "path";
 import { CustomErrors } from "../constants/errors";
 import { writeStream } from "../main/fs";
-import { logError, logErrorSentry } from "../main/log";
+import log from "../main/log";
 import { execAsync, isDev } from "../main/util";
 import { ElectronFile } from "../types/ipc";
 import { isPlatform } from "../utils/common/platform";
@@ -103,18 +103,21 @@ async function convertToJPEG_(
 
         return new Uint8Array(await fs.readFile(tempOutputFilePath));
     } catch (e) {
-        logErrorSentry(e, "failed to convert heic");
+        log.error("Failed to convert HEIC", e);
         throw e;
     } finally {
         try {
             await fs.rm(tempInputFilePath, { force: true });
         } catch (e) {
-            logErrorSentry(e, "failed to remove tempInputFile");
+            log.error(`Failed to remove tempInputFile ${tempInputFilePath}`, e);
         }
         try {
             await fs.rm(tempOutputFilePath, { force: true });
         } catch (e) {
-            logErrorSentry(e, "failed to remove tempOutputFile");
+            log.error(
+                `Failed to remove tempOutputFile ${tempOutputFilePath}`,
+                e,
+            );
         }
     }
 }
@@ -187,7 +190,7 @@ export async function generateImageThumbnail(
             try {
                 await deleteTempFile(inputFilePath);
             } catch (e) {
-                logError(e, "failed to deleteTempFile");
+                log.error(`Failed to deleteTempFile ${inputFilePath}`, e);
             }
         }
     }
@@ -217,13 +220,16 @@ async function generateImageThumbnail_(
         } while (thumbnail.length > maxSize && quality > MIN_QUALITY);
         return thumbnail;
     } catch (e) {
-        logErrorSentry(e, "generate image thumbnail failed");
+        log.error("Failed to generate image thumbnail", e);
         throw e;
     } finally {
         try {
             await fs.rm(tempOutputFilePath, { force: true });
         } catch (e) {
-            logErrorSentry(e, "failed to remove tempOutputFile");
+            log.error(
+                `Failed to remove tempOutputFile ${tempOutputFilePath}`,
+                e,
+            );
         }
     }
 }
