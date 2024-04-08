@@ -1,7 +1,7 @@
 import { inWorker, isDevBuild } from "@/next/env";
 import { logToDisk } from "@/next/log";
+import { workerBridge } from "@/next/worker/worker-bridge";
 import { logError } from "@ente/shared/sentry";
-import { workerBridge } from "../worker/worker-bridge";
 
 export function addLogLine(
     log: string | number | boolean,

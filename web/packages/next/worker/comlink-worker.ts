@@ -1,7 +1,6 @@
 import ElectronAPIs from "@/next/electron";
 import log, { logToDisk } from "@/next/log";
-import { Remote, expose, wrap } from "comlink";
-import { logError } from "../sentry";
+import { expose, wrap, type Remote } from "comlink";
 
 export class ComlinkWorker<T extends new () => InstanceType<T>> {
     public remote: Promise<Remote<InstanceType<T>>>;
@@ -12,11 +11,13 @@ export class ComlinkWorker<T extends new () => InstanceType<T>> {
         this.name = name;
         this.worker = worker;
 
-        this.worker.onerror = (errorEvent) => {
-            logError(Error(errorEvent.message), "Got error event from worker", {
-                errorEvent: JSON.stringify(errorEvent),
-                name: this.name,
-            });
+        this.worker.onerror = (ev) => {
+            log.error(
+                `Got error event from worker: ${JSON.stringify({
+                    errorEvent: JSON.stringify(ev),
+                    name: this.name,
+                })}`,
+            );
         };
         log.debug(() => `Initiated ${this.name}`);
         const comlink = wrap<T>(this.worker);
@@ -39,7 +40,7 @@ export class ComlinkWorker<T extends new () => InstanceType<T>> {
  * create.
  *
  * Inside the worker's code, this can be accessed by using the sibling
- * `workerBridge` object by importing `worker-bridge.ts`.
+ * `workerBridge` object after importing it from `worker-bridge.ts`.
  */
 const workerBridge = {
     logToDisk,

@@ -1,7 +1,9 @@
+import { inWorker } from "@/next/env";
 import isElectron from "is-electron";
 import ElectronAPIs from "./electron";
 import { isDevBuild } from "./env";
-import * as web from "./log-web";
+import { logToDisk as webLogToDisk } from "./log-web";
+import { workerBridge } from "./worker/worker-bridge";
 
 /**
  * Write a {@link message} to the on-disk log.
@@ -11,7 +13,19 @@ import * as web from "./log-web";
  */
 export const logToDisk = (message: string) => {
     if (isElectron()) ElectronAPIs.logToDisk(message);
-    else web.logToDisk(message);
+    else if (inWorker()) workerLogToDisk(message);
+    else webLogToDisk(message);
+};
+
+const workerLogToDisk = (message: string) => {
+    workerBridge.logToDisk(message).catch((e) => {
+        console.error(
+            "Failed to log a message from worker",
+            e,
+            "\nThe message was",
+            message,
+        );
+    });
 };
 
 const logError = (message: string, e?: unknown) => {
