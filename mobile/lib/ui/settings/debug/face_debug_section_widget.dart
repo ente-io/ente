@@ -220,6 +220,38 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
+            title: "Drop People to clusterMapping",
+          ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async {
+            await showChoiceDialog(
+              context,
+              title: "Are you sure?",
+              body:
+                  "This won't delete the people, but will remove the mapping of people to clusters",
+              firstButtonLabel: "Yes, confirm",
+              firstButtonOnTap: () async {
+                try {
+                  final List<PersonEntity> persons =
+                      await PersonService.instance.getPersons();
+                  for (final PersonEntity p in persons) {
+                    await PersonService.instance.deletePerson(p.remoteID);
+                  }
+                  Bus.instance.fire(PeopleChangedEvent());
+                  showShortToast(context, "Done");
+                } catch (e, s) {
+                  _logger.warning('peopleToPersonMapping remove failed ', e, s);
+                  await showGenericErrorDialog(context: context, error: e);
+                }
+              },
+            );
+          },
+        ),
+        sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
             title: "Drop embeddings & feedback",
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
