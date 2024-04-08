@@ -240,6 +240,7 @@ class FaceClustering {
       isRunning = false;
       return faceIdToCluster;
     } catch (e, stackTrace) {
+      _logger.severe('Error while running clustering', e, stackTrace);
       isRunning = false;
       rethrow;
     }
@@ -355,8 +356,7 @@ class FaceClustering {
 
     // Make sure the first face has a clusterId
     final int totalFaces = sortedFaceInfos.length;
-    // set current epoch time as clusterID
-    int clusterID = DateTime.now().microsecondsSinceEpoch;
+
     if (sortedFaceInfos.isEmpty) {
       return {};
     }
@@ -365,6 +365,13 @@ class FaceClustering {
     log(
       "[ClusterIsolate] ${DateTime.now()} Processing $totalFaces faces",
     );
+    // set current epoch time as clusterID
+    int clusterID = DateTime.now().microsecondsSinceEpoch;
+    if (facesWithClusterID.isEmpty) {
+      // assign a clusterID to the first face
+      sortedFaceInfos[0].clusterId = clusterID;
+      clusterID++;
+    }
     final Map<String, int> newFaceIdToCluster = {};
     final stopwatchClustering = Stopwatch()..start();
     for (int i = 1; i < totalFaces; i++) {
