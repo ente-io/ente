@@ -1,6 +1,5 @@
-import { WorkerSafeElectronClient } from "@ente/shared/electron/worker/client";
-import { addLocalLog } from "@ente/shared/logging";
-import { expose, Remote, wrap } from "comlink";
+import { addLocalLog, logToDisk } from "@ente/shared/logging";
+import { Remote, expose, wrap } from "comlink";
 import { logError } from "../sentry";
 
 export class ComlinkWorker<T extends new () => InstanceType<T>> {
@@ -21,7 +20,8 @@ export class ComlinkWorker<T extends new () => InstanceType<T>> {
         addLocalLog(() => `Initiated ${this.name}`);
         const comlink = wrap<T>(this.worker);
         this.remote = new comlink() as Promise<Remote<InstanceType<T>>>;
-        expose(WorkerSafeElectronClient, this.worker);
+        // expose(WorkerSafeElectronClient, this.worker);
+        expose(workerBridge, this.worker);
     }
 
     public getName() {
@@ -33,3 +33,16 @@ export class ComlinkWorker<T extends new () => InstanceType<T>> {
         addLocalLog(() => `Terminated ${this.name}`);
     }
 }
+
+/**
+ * A minimal set of utility functions that we expose to all workers that we
+ * create.
+ *
+ * Inside the worker's code, this can be accessed by
+ * `wrap<WorkerBridge>(self).foo`.
+ */
+const workerBridge = {
+    logToDisk,
+};
+
+export type WorkerBridge = typeof workerBridge;

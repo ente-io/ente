@@ -452,6 +452,7 @@ export async function getRenderableImage(fileName: string, imageBlob: Blob) {
                         imageBlob.size,
                     )}`,
                 );
+                throw new Error("bypass");
                 convertedImageBlob = await imageProcessor.convertToJPEG(
                     imageBlob,
                     fileName,
