@@ -1,4 +1,4 @@
-import { runningInWorker } from "@ente/shared/platform";
+import { inWorker } from "@/next/env";
 import * as Comlink from "comlink";
 import { wrap } from "comlink";
 import { ElectronAPIsType } from "./types";
@@ -17,7 +17,7 @@ class WorkerSafeElectronServiceImpl implements LimitedElectronAPIs {
         this.ready = this.init();
     }
     private async init() {
-        if (runningInWorker()) {
+        if (inWorker()) {
             const workerSafeElectronClient =
                 wrap<typeof WorkerSafeElectronClient>(self);
 

@@ -10,3 +10,28 @@
  *   all other commands.
  */
 export const isDevBuild = process.env.NODE_ENV === "development";
+
+/**
+ * `true` if we're running in the default global context (aka the main thread)
+ * of a web browser.
+ *
+ * In particular, this is `false` when we're running in a Web Worker,
+ * irrespecitve of whether the worker is running in a Node.js context or a web
+ * browser context.
+ *
+ * > We can be running in a browser context either if the user has the page open
+ *   in a web browser, or if we're the renderer process of an Electron app.
+ *
+ * Note that this cannot be a constant, otherwise it'll get inlined during SSR
+ * with the wrong value.
+ */
+export const haveWindow = () => typeof window !== "undefined";
+
+/**
+ * Return true if we are running in a [Web
+ * Worker](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API)
+ *
+ * Note that this cannot be a constant, otherwise it'll get inlined during SSR
+ * with the wrong value.
+ */
+export const inWorker = () => typeof importScripts === "function";

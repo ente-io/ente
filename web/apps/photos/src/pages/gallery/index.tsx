@@ -49,7 +49,7 @@ import {
     syncMapEnabled,
     validateKey,
 } from "services/userService";
-import { mergeMaps, preloadImage } from "utils/common";
+import { preloadImage } from "utils/common";
 import {
     FILE_OPS_TYPE,
     constructFileToCollectionMap,
@@ -135,7 +135,6 @@ import {
 import { Search, SearchResultSummary, UpdateSearch } from "types/search";
 import { FamilyData } from "types/user";
 import ComlinkSearchWorker from "utils/comlink/ComlinkSearchWorker";
-import { checkConnectivity } from "utils/common";
 import { isArchivedFile } from "utils/magicMetadata";
 import { getSessionExpiredMessage } from "utils/ui";
 import { getLocalFamilyData } from "utils/user/family";
@@ -680,13 +679,13 @@ export default function Gallery() {
     };
 
     const syncWithRemote = async (force = false, silent = false) => {
+        if (!navigator.onLine) return;
         if (syncInProgress.current && !force) {
             resync.current = { force, silent };
             return;
         }
         syncInProgress.current = true;
         try {
-            checkConnectivity();
             const token = getToken();
             if (!token) {
                 return;
@@ -718,8 +717,6 @@ export default function Gallery() {
                 case CustomError.KEY_MISSING:
                     clearKeys();
                     router.push(PAGES.CREDENTIALS);
-                    break;
-                case CustomError.NO_INTERNET_CONNECTION:
                     break;
                 default:
                     logError(e, "syncWithRemote failed");
@@ -1252,3 +1249,11 @@ function useEffectSingleThreaded(
         main(deps);
     }, deps);
 }
+
+const mergeMaps = <K, V>(map1: Map<K, V>, map2: Map<K, V>) => {
+    const mergedMap = new Map<K, V>(map1);
+    map2.forEach((value, key) => {
+        mergedMap.set(key, value);
+    });
+    return mergedMap;
+};
