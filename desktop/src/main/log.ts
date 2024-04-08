@@ -80,10 +80,11 @@ export default {
      * Log an error message with an optional associated error object.
      *
      * {@link e} is generally expected to be an `instanceof Error` but it can be
-     * any arbitrary object that we obtain, say, when in a try-catch handler.
+     * any arbitrary object that we obtain, say, when in a try-catch handler (in
+     * JavaScript any arbitrary value can be thrown).
      *
      * The log is written to disk. In development builds, the log is also
-     * printed to the (Node.js process') console.
+     * printed to the main (Node.js) process console.
      */
     error: logError,
     /**
@@ -93,7 +94,7 @@ export default {
      * arbitrary number of arbitrary parameters that it then serializes.
      *
      * The log is written to disk. In development builds, the log is also
-     * printed to the (Node.js process') console.
+     * printed to the main (Node.js) process console.
      */
     info: logInfo,
     /**
@@ -106,8 +107,8 @@ export default {
      * The function can return an arbitrary value which is serialied before
      * being logged.
      *
-     * This log is not written to disk. It is printed to the (Node.js process')
-     * console only on development builds.
+     * This log is not written to disk. It is printed to the main (Node.js)
+     * process console only on development builds.
      */
     debug: logDebug,
 };
