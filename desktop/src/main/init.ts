@@ -1,6 +1,5 @@
 import { app, BrowserWindow, nativeImage, Tray } from "electron";
 import { existsSync } from "node:fs";
-import os from "node:os";
 import path from "node:path";
 import { isAppQuitting, rendererURL } from "../main";
 import autoLauncher from "../services/autoLauncher";
@@ -76,8 +75,6 @@ export const createWindow = async () => {
 
     return mainWindow;
 };
-
-export async function handleUpdates(mainWindow: BrowserWindow) {}
 
 export const setupTrayItem = (mainWindow: BrowserWindow) => {
     const iconName = isPlatform("mac")

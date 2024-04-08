@@ -71,6 +71,7 @@ export interface WatchStoreType {
 }
 
 export enum FILE_PATH_TYPE {
+    /* eslint-disable no-unused-vars */
     FILES = "files",
     ZIPS = "zips",
 }
@@ -80,7 +81,6 @@ export interface AppUpdateInfo {
     version: string;
 }
 
-export enum Model {
-    GGML_CLIP = "ggml-clip",
-    ONNX_CLIP = "onnx-clip",
-}
+export type Model = "ggml-clip" | "onnx-clip";
+
+export const isModel = (s: unknown) => s == "ggml-clip" || s == "onnx-clip";

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * @file The preload script
  *
@@ -53,7 +54,7 @@ import type {
 const appVersion = (): Promise<string> => ipcRenderer.invoke("appVersion");
 
 const openDirectory = (dirPath: string): Promise<void> =>
-    ipcRenderer.invoke("openDirectory");
+    ipcRenderer.invoke("openDirectory", dirPath);
 
 const openLogDirectory = (): Promise<void> =>
     ipcRenderer.invoke("openLogDirectory");

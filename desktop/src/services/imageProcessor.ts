@@ -1,11 +1,10 @@
 import { existsSync } from "fs";
 import fs from "node:fs/promises";
 import path from "path";
-import { CustomErrors } from "../types/ipc";
 import { writeStream } from "../main/fs";
 import log from "../main/log";
 import { execAsync, isDev } from "../main/util";
-import { ElectronFile } from "../types/ipc";
+import { CustomErrors, ElectronFile } from "../types/ipc";
 import { isPlatform } from "../utils/common/platform";
 import { generateTempFilePath } from "../utils/temp";
 import { deleteTempFile } from "./ffmpeg";

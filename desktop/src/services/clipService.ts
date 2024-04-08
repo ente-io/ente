@@ -2,11 +2,10 @@ import { app, net } from "electron/main";
 import { existsSync } from "fs";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { CustomErrors } from "../types/ipc";
 import { writeStream } from "../main/fs";
 import log from "../main/log";
 import { execAsync, isDev } from "../main/util";
-import { Model } from "../types/ipc";
+import { CustomErrors, Model, isModel } from "../types/ipc";
 import Tokenizer from "../utils/clip-bpe-ts/mod";
 import { getPlatform } from "../utils/common/platform";
 import { generateTempFilePath } from "../utils/temp";
@@ -200,6 +199,8 @@ export const computeImageEmbedding = async (
     model: Model,
     imageData: Uint8Array,
 ): Promise<Float32Array> => {
+    if (!isModel(model)) throw new Error(`Invalid CLIP model ${model}`);
+
     let tempInputFilePath = null;
     try {
         tempInputFilePath = await generateTempFilePath("");
@@ -247,12 +248,11 @@ async function computeImageEmbedding_(
     if (!existsSync(inputFilePath)) {
         throw new Error("Invalid file path");
     }
-    if (model === Model.GGML_CLIP) {
-        return await computeGGMLImageEmbedding(inputFilePath);
-    } else if (model === Model.ONNX_CLIP) {
-        return await computeONNXImageEmbedding(inputFilePath);
-    } else {
-        throw new Error(`Invalid CLIP model ${model}`);
+    switch (model) {
+        case "ggml-clip":
+            return await computeGGMLImageEmbedding(inputFilePath);
+        case "onnx-clip":
+            return await computeONNXImageEmbedding(inputFilePath);
     }
 }
 
@@ -387,6 +387,8 @@ export async function computeTextEmbedding(
     model: Model,
     text: string,
 ): Promise<Float32Array> {
+    if (!isModel(model)) throw new Error(`Invalid CLIP model ${model}`);
+
     try {
         const embedding = computeTextEmbedding_(model, text);
         return embedding;
@@ -404,10 +406,11 @@ async function computeTextEmbedding_(
     model: Model,
     text: string,
 ): Promise<Float32Array> {
-    if (model === Model.GGML_CLIP) {
-        return await computeGGMLTextEmbedding(text);
-    } else {
-        return await computeONNXTextEmbedding(text);
+    switch (model) {
+        case "ggml-clip":
+            return await computeGGMLTextEmbedding(text);
+        case "onnx-clip":
+            return await computeONNXTextEmbedding(text);
     }
 }
 

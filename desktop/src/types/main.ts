@@ -18,6 +18,7 @@ export interface KeysStoreType {
     };
 }
 
+/* eslint-disable no-unused-vars */
 export const FILE_PATH_KEYS: {
     [k in FILE_PATH_TYPE]: keyof UploadStoreType;
 } = {

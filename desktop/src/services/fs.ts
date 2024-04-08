@@ -115,7 +115,9 @@ export const getZipFileStream = async (
     const inProgress = {
         current: false,
     };
+    // eslint-disable-next-line no-unused-vars
     let resolveObj: (value?: any) => void = null;
+    // eslint-disable-next-line no-unused-vars
     let rejectObj: (reason?: any) => void = null;
     stream.on("readable", () => {
         try {
