@@ -10,14 +10,6 @@
 
 import type { FSWatcher } from "chokidar";
 import { ipcMain } from "electron/main";
-import { clearElectronStore } from "../api/electronStore";
-import { getEncryptionKey, setEncryptionKey } from "../api/safeStorage";
-import {
-    getElectronFilesFromGoogleZip,
-    getPendingUploads,
-    setToUploadCollection,
-    setToUploadFiles,
-} from "../api/upload";
 import {
     appVersion,
     muteUpdateNotification,
@@ -34,6 +26,17 @@ import {
     convertToJPEG,
     generateImageThumbnail,
 } from "../services/imageProcessor";
+import {
+    clearElectronStore,
+    getEncryptionKey,
+    setEncryptionKey,
+} from "../services/store";
+import {
+    getElectronFilesFromGoogleZip,
+    getPendingUploads,
+    setToUploadCollection,
+    setToUploadFiles,
+} from "../services/upload";
 import {
     addWatchMapping,
     getWatchMappings,
