@@ -67,8 +67,6 @@ PODS:
     - Toast
   - local_auth_darwin (0.0.1):
     - Flutter
-  - local_auth_ios (0.0.1):
-    - Flutter
   - move_to_background (0.0.1):
     - Flutter
   - MTBBarcodeScanner (5.0.11)
@@ -99,8 +97,6 @@ PODS:
   - shared_preferences_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
-  - smart_auth (0.0.1):
-    - Flutter
   - sodium_libs (2.2.1):
     - Flutter
   - sqflite (0.0.3):
@@ -142,7 +138,6 @@ DEPENDENCIES:
   - flutter_secure_storage (from `.symlinks/plugins/flutter_secure_storage/ios`)
   - fluttertoast (from `.symlinks/plugins/fluttertoast/ios`)
   - local_auth_darwin (from `.symlinks/plugins/local_auth_darwin/darwin`)
-  - local_auth_ios (from `.symlinks/plugins/local_auth_ios/ios`)
   - move_to_background (from `.symlinks/plugins/move_to_background/ios`)
   - package_info_plus (from `.symlinks/plugins/package_info_plus/ios`)
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
@@ -151,7 +146,6 @@ DEPENDENCIES:
   - sentry_flutter (from `.symlinks/plugins/sentry_flutter/ios`)
   - share_plus (from `.symlinks/plugins/share_plus/ios`)
   - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
-  - smart_auth (from `.symlinks/plugins/smart_auth/ios`)
   - sodium_libs (from `.symlinks/plugins/sodium_libs/ios`)
   - sqflite (from `.symlinks/plugins/sqflite/darwin`)
   - sqlite3_flutter_libs (from `.symlinks/plugins/sqlite3_flutter_libs/ios`)
@@ -202,8 +196,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/fluttertoast/ios"
   local_auth_darwin:
     :path: ".symlinks/plugins/local_auth_darwin/darwin"
-  local_auth_ios:
-    :path: ".symlinks/plugins/local_auth_ios/ios"
   move_to_background:
     :path: ".symlinks/plugins/move_to_background/ios"
   package_info_plus:
@@ -220,8 +212,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/share_plus/ios"
   shared_preferences_foundation:
     :path: ".symlinks/plugins/shared_preferences_foundation/darwin"
-  smart_auth:
-    :path: ".symlinks/plugins/smart_auth/ios"
   sodium_libs:
     :path: ".symlinks/plugins/sodium_libs/ios"
   sqflite:
@@ -245,11 +235,10 @@ SPEC CHECKSUMS:
   flutter_inappwebview_ios: 97215cf7d4677db55df76782dbd2930c5e1c1ea0
   flutter_local_authentication: 1172a4dd88f6306dadce067454e2c4caf07977bb
   flutter_local_notifications: 4cde75091f6327eb8517fa068a0a5950212d2086
-  flutter_native_splash: 52501b97d1c0a5f898d687f1646226c1f93c56ef
+  flutter_native_splash: edf599c81f74d093a4daf8e17bd7a018854bc778
   flutter_secure_storage: 23fc622d89d073675f2eaa109381aefbcf5a49be
   fluttertoast: 31b00dabfa7fb7bacd9e7dbee580d7a2ff4bf265
   local_auth_darwin: c7e464000a6a89e952235699e32b329457608d98
-  local_auth_ios: 5046a18c018dd973247a0564496c8898dbb5adf9
   move_to_background: 39a5b79b26d577b0372cbe8a8c55e7aa9fcd3a2d
   MTBBarcodeScanner: f453b33c4b7dfe545d8c6484ed744d55671788cb
   OrderedSet: aaeb196f7fef5a9edf55d89760da9176ad40b93c
@@ -264,7 +253,6 @@ SPEC CHECKSUMS:
   SentryPrivate: d651efb234cf385ec9a1cdd3eff94b5e78a0e0fe
   share_plus: c3fef564749587fc939ef86ffb283ceac0baf9f5
   shared_preferences_foundation: b4c3b4cddf1c21f02770737f147a3f5da9d39695
-  smart_auth: 4bedbc118723912d0e45a07e8ab34039c19e04f2
   sodium_libs: 1faae17af662384acbd13e41867a0008cd2e2318
   sqflite: 673a0e54cc04b7d6dba8d24fb8095b31c3a99eec
   sqlite3: 73b7fc691fdc43277614250e04d183740cb15078
