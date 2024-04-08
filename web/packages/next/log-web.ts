@@ -33,7 +33,7 @@ const lsKey = "logs";
  *
  * This ring buffer is persisted in the browser's local storage.
  */
-export const persistLog = (message: string) => {
+export const logToDisk = (message: string) => {
     const maxCount = 1000;
     const log: LogEntry = { logLine: message, timestamp: Date.now() };
     try {

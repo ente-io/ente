@@ -1,21 +1,7 @@
-import ElectronAPIs from "@/next/electron";
 import { inWorker, isDevBuild } from "@/next/env";
-import log from "@/next/log";
-import { logWeb } from "@/next/web";
+import log, { logToDisk } from "@/next/log";
 import { logError } from "@ente/shared/sentry";
-import isElectron from "is-electron";
 import { workerBridge } from "../worker/worker-bridge";
-
-export const MAX_LOG_SIZE = 5 * 1024 * 1024; // 5MB
-export const MAX_LOG_LINES = 1000;
-
-export const logToDisk = (message: string) => {
-    if (isElectron()) {
-        ElectronAPIs.logToDisk(message);
-    } else {
-        logWeb(message);
-    }
-};
 
 export function addLogLine(
     log: string | number | boolean,

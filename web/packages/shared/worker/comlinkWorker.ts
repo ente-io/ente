@@ -1,4 +1,5 @@
-import { addLocalLog, logToDisk } from "@ente/shared/logging";
+import { logToDisk } from "@/next/log";
+import { addLocalLog } from "@ente/shared/logging";
 import { Remote, expose, wrap } from "comlink";
 import ElectronAPIs from "@/next/electron";
 import { logError } from "../sentry";

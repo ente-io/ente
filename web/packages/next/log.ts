@@ -1,7 +1,7 @@
 import isElectron from "is-electron";
 import ElectronAPIs from "./electron";
 import { isDevBuild } from "./env";
-import { persistLog } from "./log-web";
+import * as web from "./log-web";
 
 /**
  * Write a {@link message} to the on-disk log.
@@ -11,7 +11,7 @@ import { persistLog } from "./log-web";
  */
 export const logToDisk = (message: string) => {
     if (isElectron()) ElectronAPIs.logToDisk(message);
-    else persistLog(message);
+    else web.logToDisk(message);
 };
 
 const logError = (message: string, e?: unknown) => {
