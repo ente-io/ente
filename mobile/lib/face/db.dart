@@ -375,8 +375,11 @@ class FaceMLDataDB {
       where: '$personIdColumn = ?',
       whereArgs: [personID],
     );
-    await db.delete(notPersonFeedback,
-        where: '$personIdColumn = ?', whereArgs: [personID]);
+    await db.delete(
+      notPersonFeedback,
+      where: '$personIdColumn = ?',
+      whereArgs: [personID],
+    );
   }
 
   /// Returns a map of faceID to record of clusterId and faceEmbeddingBlob

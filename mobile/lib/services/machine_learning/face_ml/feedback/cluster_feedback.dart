@@ -411,7 +411,8 @@ class ClusterFeedbackService {
     useDbscan = false,
   }) async {
     _logger.info(
-        'breakUpCluster called for cluster $clusterID with dbscan $useDbscan');
+      'breakUpCluster called for cluster $clusterID with dbscan $useDbscan',
+    );
     final faceMlDb = FaceMLDataDB.instance;
 
     final faceIDs = await faceMlDb.getFaceIDsForCluster(clusterID);

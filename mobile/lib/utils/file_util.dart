@@ -279,7 +279,8 @@ Future<_LivePhoto?> _downloadLivePhoto(
       return _LivePhoto(imageFileCache, videoFileCache);
     } else {
       debugPrint(
-          "Warning: ${file.tag} either image ${imageFileCache == null} or video ${videoFileCache == null} is missing from remoteLive");
+        "Warning: ${file.tag} either image ${imageFileCache == null} or video ${videoFileCache == null} is missing from remoteLive",
+      );
       return null;
     }
   }).catchError((e) {
