@@ -1,5 +1,6 @@
 import { addLocalLog, logToDisk } from "@ente/shared/logging";
 import { Remote, expose, wrap } from "comlink";
+import ElectronAPIs from "../electron";
 import { logError } from "../sentry";
 
 export class ComlinkWorker<T extends new () => InstanceType<T>> {
@@ -20,7 +21,6 @@ export class ComlinkWorker<T extends new () => InstanceType<T>> {
         addLocalLog(() => `Initiated ${this.name}`);
         const comlink = wrap<T>(this.worker);
         this.remote = new comlink() as Promise<Remote<InstanceType<T>>>;
-        // expose(WorkerSafeElectronClient, this.worker);
         expose(workerBridge, this.worker);
     }
 
@@ -43,6 +43,8 @@ export class ComlinkWorker<T extends new () => InstanceType<T>> {
  */
 const workerBridge = {
     logToDisk,
+    convertToJPEG: (inputFileData: Uint8Array, filename: string) =>
+        ElectronAPIs.convertToJPEG(inputFileData, filename),
 };
 
 export type WorkerBridge = typeof workerBridge;

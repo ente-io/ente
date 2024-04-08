@@ -1,8 +1,8 @@
-import { inWorker, isDevBuild } from "@/next/env";
+import { isDevBuild } from "@/next/env";
 import { logError } from "@ente/shared/sentry";
 import {
-    getData,
     LS_KEYS,
+    getData,
     removeData,
     setData,
 } from "@ente/shared/storage/localStorage";
@@ -20,22 +20,13 @@ export interface Log {
     logLine: string;
 }
 
-export function logWeb(logLine2: string) {
-    const logLine = `${logLine2}`;
-    console.log("logWeb", logLine);
+export function logWeb(logLine: string) {
     try {
         const log: Log = { logLine, timestamp: Date.now() };
         const logs = getLogs();
         if (logs.length > MAX_LOG_LINES) {
             logs.slice(logs.length - MAX_LOG_LINES);
         }
-        console.log("inWorker", inWorker());
-        console.log("pushing", logLine);
-        console.log("length", logLine.length);
-        logs.push({
-            logLine: `length ${logLine.length}`,
-            timestamp: Date.now(),
-        });
         logs.push(log);
         setLogs(logs);
     } catch (e) {

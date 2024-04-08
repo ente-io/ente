@@ -1,3 +1,4 @@
+import ElectronAPIs from "@ente/shared/electron";
 import { CustomError } from "@ente/shared/error";
 import { addLogLine } from "@ente/shared/logging";
 import { getFileNameSize } from "@ente/shared/logging/web";
@@ -8,7 +9,6 @@ import { BLACK_THUMBNAIL_BASE64 } from "constants/upload";
 import isElectron from "is-electron";
 import * as FFmpegService from "services/ffmpeg/ffmpegService";
 import HeicConversionService from "services/heicConversionService";
-import imageProcessor from "services/imageProcessor";
 import { ElectronFile, FileTypeInfo } from "types/upload";
 import { isFileHEIC } from "utils/file";
 import { getUint8ArrayView } from "../readerService";
@@ -86,7 +86,7 @@ async function generateImageThumbnail(
 ) {
     if (isElectron()) {
         try {
-            return await imageProcessor.generateImageThumbnail(
+            return await generateImageThumbnailInElectron(
                 file,
                 MAX_THUMBNAIL_DIMENSION,
                 MAX_THUMBNAIL_SIZE,
@@ -98,6 +98,39 @@ async function generateImageThumbnail(
         return await generateImageThumbnailUsingCanvas(file, fileTypeInfo);
     }
 }
+
+const generateImageThumbnailInElectron = async (
+    inputFile: File | ElectronFile,
+    maxDimension: number,
+    maxSize: number,
+): Promise<Uint8Array> => {
+    try {
+        const startTime = Date.now();
+        const thumb = await ElectronAPIs.generateImageThumbnail(
+            inputFile,
+            maxDimension,
+            maxSize,
+        );
+        addLogLine(
+            `originalFileSize:${convertBytesToHumanReadable(
+                inputFile?.size,
+            )},thumbFileSize:${convertBytesToHumanReadable(
+                thumb?.length,
+            )},  native thumbnail generation time: ${
+                Date.now() - startTime
+            }ms `,
+        );
+        return thumb;
+    } catch (e) {
+        if (
+            e.message !==
+            CustomError.WINDOWS_NATIVE_IMAGE_PROCESSING_NOT_SUPPORTED
+        ) {
+            logError(e, "failed to generate image thumbnail natively");
+        }
+        throw e;
+    }
+};
 
 export async function generateImageThumbnailUsingCanvas(
     file: File | ElectronFile,
