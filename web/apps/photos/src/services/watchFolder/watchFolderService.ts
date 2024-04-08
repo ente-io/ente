@@ -1,4 +1,4 @@
-import ElectronAPIs from "@ente/shared/electron";
+import ElectronAPIs from "@/next/electron";
 import { addLocalLog, addLogLine } from "@ente/shared/logging";
 import { logError } from "@ente/shared/sentry";
 import { UPLOAD_RESULT, UPLOAD_STRATEGY } from "constants/upload";

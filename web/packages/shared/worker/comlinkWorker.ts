@@ -1,6 +1,6 @@
 import { addLocalLog, logToDisk } from "@ente/shared/logging";
 import { Remote, expose, wrap } from "comlink";
-import ElectronAPIs from "../electron";
+import ElectronAPIs from "@/next/electron";
 import { logError } from "../sentry";
 
 export class ComlinkWorker<T extends new () => InstanceType<T>> {

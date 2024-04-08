@@ -1,3 +1,8 @@
+export enum UPLOAD_STRATEGY {
+    SINGLE_COLLECTION,
+    COLLECTION_PER_FOLDER,
+}
+
 /*
  * ElectronFile is a custom interface that is used to represent
  * any file on disk as a File-like object in the Electron desktop app.
@@ -19,4 +24,26 @@ export interface ElectronFile {
 export interface DataStream {
     stream: ReadableStream<Uint8Array>;
     chunkCount: number;
+}
+
+export interface WatchMappingSyncedFile {
+    path: string;
+    uploadedFileID: number;
+    collectionID: number;
+}
+
+export interface WatchMapping {
+    rootFolderName: string;
+    folderPath: string;
+    uploadStrategy: UPLOAD_STRATEGY;
+    syncedFiles: WatchMappingSyncedFile[];
+    ignoredFiles: string[];
+}
+
+export interface EventQueueItem {
+    type: "upload" | "trash";
+    folderPath: string;
+    collectionName?: string;
+    paths?: string[];
+    files?: ElectronFile[];
 }

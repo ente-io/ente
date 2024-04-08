@@ -1,4 +1,4 @@
-import ElectronAPIs from "@ente/shared/electron";
+import ElectronAPIs from "@/next/electron";
 import { getFileNameSize } from "@ente/shared/logging/web";
 import { FILE_READER_CHUNK_SIZE, PICKED_UPLOAD_TYPE } from "constants/upload";
 import isElectron from "is-electron";

@@ -52,7 +52,7 @@ import {
 } from "services/fileService";
 import { FileTypeInfo } from "types/upload";
 
-import { default as ElectronAPIs } from "@ente/shared/electron";
+import ElectronAPIs from "@/next/electron";
 import { workerBridge } from "@ente/shared/worker/worker-bridge";
 import { t } from "i18next";
 import { getFileExportPath, getUniqueFileExportName } from "utils/export";

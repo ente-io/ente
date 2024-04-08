@@ -180,12 +180,12 @@ export const attachIPCHandlers = () => {
 
     ipcMain.handle(
         "saveStreamToDisk",
-        (_, path: string, fileStream: ReadableStream<any>) =>
+        (_, path: string, fileStream: ReadableStream) =>
             saveStreamToDisk(path, fileStream),
     );
 
-    ipcMain.handle("saveFileToDisk", (_, path: string, file: any) =>
-        saveFileToDisk(path, file),
+    ipcMain.handle("saveFileToDisk", (_, path: string, contents: string) =>
+        saveFileToDisk(path, contents),
     );
 
     ipcMain.handle("readTextFile", (_, path: string) => readTextFile(path));

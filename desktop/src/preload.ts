@@ -32,9 +32,9 @@
  * and when changing one of them, remember to see if the other two also need
  * changing:
  *
- * -    [renderer]  web/packages/shared/electron/types.ts     contains docs
- * -    [preload]   desktop/src/preload.ts                          ↕︎
- * -    [main]      desktop/src/main/ipc.ts                   contains impl
+ * -    [renderer]  web/packages/next/types/electron.ts      contains docs
+ * -    [preload]   desktop/src/preload.ts                         ↕︎
+ * -    [main]      desktop/src/main/ipc.ts                  contains impl
  */
 
 import { contextBridge, ipcRenderer } from "electron/renderer";
@@ -227,11 +227,11 @@ const checkExistsAndCreateDir = (dirPath: string): Promise<void> =>
 
 const saveStreamToDisk = (
     path: string,
-    fileStream: ReadableStream<any>,
+    fileStream: ReadableStream,
 ): Promise<void> => ipcRenderer.invoke("saveStreamToDisk", path, fileStream);
 
-const saveFileToDisk = (path: string, file: any): Promise<void> =>
-    ipcRenderer.invoke("saveFileToDisk", path, file);
+const saveFileToDisk = (path: string, contents: string): Promise<void> =>
+    ipcRenderer.invoke("saveFileToDisk", path, contents);
 
 const readTextFile = (path: string): Promise<string> =>
     ipcRenderer.invoke("readTextFile", path);

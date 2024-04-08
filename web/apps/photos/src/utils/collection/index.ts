@@ -1,4 +1,4 @@
-import ElectronAPIs from "@ente/shared/electron";
+import ElectronAPIs from "@/next/electron";
 import { CustomError } from "@ente/shared/error";
 import { addLogLine } from "@ente/shared/logging";
 import { getAlbumsURL } from "@ente/shared/network/api";

@@ -1,7 +1,7 @@
+import ElectronAPIs from "@/next/electron";
+import { AppUpdateInfo } from "@/next/types/ipc";
 import { logoutUser } from "@ente/accounts/services/user";
 import { DialogBoxAttributes } from "@ente/shared/components/DialogBox/types";
-import ElectronAPIs from "@ente/shared/electron";
-import { AppUpdateInfo } from "@ente/shared/electron/types";
 import AutoAwesomeOutlinedIcon from "@mui/icons-material/AutoAwesomeOutlined";
 import InfoOutlined from "@mui/icons-material/InfoRounded";
 import { Link } from "@mui/material";

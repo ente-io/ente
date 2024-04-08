@@ -3,7 +3,7 @@ import { AppContext } from "pages/_app";
 import { useContext, useEffect, useState } from "react";
 import { Trans } from "react-i18next";
 
-import ElectronAPIs from "@ente/shared/electron";
+import ElectronAPIs from "@/next/electron";
 import { addLogLine } from "@ente/shared/logging";
 import { getDebugLogs } from "@ente/shared/logging/web";
 import { downloadAsFile } from "@ente/shared/utils";

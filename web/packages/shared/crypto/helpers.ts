@@ -7,7 +7,7 @@ import { getActualKey } from "@ente/shared/user";
 import { KeyAttributes } from "@ente/shared/user/types";
 import isElectron from "is-electron";
 import ComlinkCryptoWorker from ".";
-import ElectronAPIs from "../electron";
+import ElectronAPIs from "@/next/electron";
 import { addLogLine } from "../logging";
 
 const LOGIN_SUB_KEY_LENGTH = 32;

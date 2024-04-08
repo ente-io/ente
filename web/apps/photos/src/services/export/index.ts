@@ -37,7 +37,7 @@ import {
 } from "utils/file";
 import { decodeLivePhoto } from "../livePhotoService";
 
-import ElectronAPIs from "@ente/shared/electron";
+import ElectronAPIs from "@/next/electron";
 import { CustomError } from "@ente/shared/error";
 import { Events, eventBus } from "@ente/shared/events";
 import { addLogLine } from "@ente/shared/logging";

@@ -1,4 +1,5 @@
 import { isDevBuild } from "@/next/env";
+import { ElectronFile } from "@/next/types/file";
 import { logError } from "@ente/shared/sentry";
 import {
     LS_KEYS,
@@ -8,7 +9,6 @@ import {
 } from "@ente/shared/storage/localStorage";
 import { addLogLine } from ".";
 import { formatDateTimeShort } from "../time/format";
-import { ElectronFile } from "../upload/types";
 import type { User } from "../user/types";
 import { convertBytesToHumanReadable } from "../utils/size";
 

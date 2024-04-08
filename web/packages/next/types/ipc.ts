@@ -3,8 +3,7 @@
 //
 // See [Note: types.ts <-> preload.ts <-> ipc.ts]
 
-import type { ElectronFile } from "@ente/shared/upload/types";
-import type { WatchMapping } from "@ente/shared/watchFolder/types";
+import type { ElectronFile, WatchMapping } from "./file";
 
 export interface AppUpdateInfo {
     autoUpdatable: boolean;
@@ -199,9 +198,9 @@ export interface ElectronAPIsType {
     checkExistsAndCreateDir: (dirPath: string) => Promise<void>;
     saveStreamToDisk: (
         path: string,
-        fileStream: ReadableStream<any>,
+        fileStream: ReadableStream,
     ) => Promise<void>;
-    saveFileToDisk: (path: string, file: any) => Promise<void>;
+    saveFileToDisk: (path: string, contents: string) => Promise<void>;
     readTextFile: (path: string) => Promise<string>;
     isFolder: (dirPath: string) => Promise<boolean>;
     moveFile: (oldPath: string, newPath: string) => Promise<void>;

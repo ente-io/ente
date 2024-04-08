@@ -1,3 +1,4 @@
+import ElectronAPIs from "@/next/electron";
 import Login from "@ente/accounts/components/Login";
 import SignUp from "@ente/accounts/components/SignUp";
 import { APPS } from "@ente/shared/apps/constants";
@@ -5,7 +6,6 @@ import { EnteLogo } from "@ente/shared/components/EnteLogo";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { saveKeyInSessionStore } from "@ente/shared/crypto/helpers";
-import ElectronAPIs from "@ente/shared/electron";
 import { getAlbumsURL } from "@ente/shared/network/api";
 import { logError } from "@ente/shared/sentry";
 import localForage from "@ente/shared/storage/localForage";

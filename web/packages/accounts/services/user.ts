@@ -1,4 +1,4 @@
-import ElectronAPIs from "@ente/shared/electron";
+import ElectronAPIs from "@/next/electron";
 import { Events, eventBus } from "@ente/shared/events";
 import { logError } from "@ente/shared/sentry";
 import InMemoryStore from "@ente/shared/storage/InMemoryStore";

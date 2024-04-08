@@ -89,9 +89,9 @@ import {
     splitNormalAndHiddenCollections,
 } from "utils/collection";
 
+import ElectronAPIs from "@/next/electron";
 import { APPS } from "@ente/shared/apps/constants";
 import { CenteredFlex } from "@ente/shared/components/Container";
-import ElectronAPIs from "@ente/shared/electron";
 import useFileInput from "@ente/shared/hooks/useFileInput";
 import useMemoSingleThreaded from "@ente/shared/hooks/useMemoSingleThreaded";
 import InMemoryStore, { MS_KEYS } from "@ente/shared/storage/InMemoryStore";

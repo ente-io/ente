@@ -1,7 +1,7 @@
 import { inWorker, isDevBuild } from "@/next/env";
 import { logError } from "@ente/shared/sentry";
 import isElectron from "is-electron";
-import ElectronAPIs from "../electron";
+import ElectronAPIs from "@/next/electron";
 import { workerBridge } from "../worker/worker-bridge";
 import { formatLog, logWeb } from "./web";
 

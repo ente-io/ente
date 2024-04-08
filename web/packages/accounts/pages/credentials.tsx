@@ -24,6 +24,7 @@ import { PAGES } from "../constants/pages";
 import { generateSRPSetupAttributes } from "../services/srp";
 import { logoutUser } from "../services/user";
 
+import ElectronAPIs from "@/next/electron";
 import { APP_HOMES } from "@ente/shared/apps/constants";
 import { PageProps } from "@ente/shared/apps/types";
 import { VerticallyCentered } from "@ente/shared/components/Container";
@@ -37,7 +38,6 @@ import VerifyMasterPasswordForm, {
 } from "@ente/shared/components/VerifyMasterPasswordForm";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { B64EncryptionResult } from "@ente/shared/crypto/types";
-import ElectronAPIs from "@ente/shared/electron";
 import { CustomError } from "@ente/shared/error";
 import { addLocalLog } from "@ente/shared/logging";
 import { getAccountsURL } from "@ente/shared/network/api";

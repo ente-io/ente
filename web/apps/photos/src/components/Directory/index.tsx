@@ -1,5 +1,5 @@
+import ElectronAPIs from "@/next/electron";
 import LinkButton from "@ente/shared/components/LinkButton";
-import ElectronAPIs from "@ente/shared/electron";
 import { logError } from "@ente/shared/sentry";
 import { Tooltip } from "@mui/material";
 import { styled } from "@mui/material/styles";

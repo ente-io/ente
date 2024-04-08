@@ -1,5 +1,7 @@
 import { CustomHead } from "@/next/components/Head";
+import ElectronAPIs from "@/next/electron";
 import { setupI18n } from "@/next/i18n";
+import { AppUpdateInfo } from "@/next/types/ipc";
 import {
     APPS,
     APP_TITLES,
@@ -20,8 +22,6 @@ import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { MessageContainer } from "@ente/shared/components/MessageContainer";
 import AppNavbar from "@ente/shared/components/Navbar/app";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
-import ElectronAPIs from "@ente/shared/electron";
-import { AppUpdateInfo } from "@ente/shared/electron/types";
 import { CustomError } from "@ente/shared/error";
 import { Events, eventBus } from "@ente/shared/events";
 import { useLocalState } from "@ente/shared/hooks/useLocalState";
