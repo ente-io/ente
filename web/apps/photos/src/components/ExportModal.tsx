@@ -1,11 +1,10 @@
+import log from "@/next/log";
 import {
     SpaceBetweenFlex,
     VerticallyCenteredFlex,
 } from "@ente/shared/components/Container";
 import DialogTitleWithCloseButton from "@ente/shared/components/DialogBox/TitleWithCloseButton";
 import { CustomError } from "@ente/shared/error";
-import { addLogLine } from "@ente/shared/logging";
-import { logError } from "@ente/shared/sentry";
 import {
     Box,
     Button,
@@ -68,7 +67,7 @@ export default function ExportModal(props: Props) {
             setContinuousExport(exportSettings?.continuousExport ?? false);
             void syncExportRecord(exportSettings?.folder);
         } catch (e) {
-            logError(e, "export on mount useEffect failed");
+            log.error("export on mount useEffect failed", e);
         }
     }, []);
 
@@ -123,7 +122,7 @@ export default function ExportModal(props: Props) {
             setPendingExports(pendingExports);
         } catch (e) {
             if (e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST) {
-                logError(e, "syncExportRecord failed");
+                log.error("syncExportRecord failed", e);
             }
         }
     };
@@ -135,12 +134,12 @@ export default function ExportModal(props: Props) {
     const handleChangeExportDirectoryClick = async () => {
         try {
             const newFolder = await exportService.changeExportDirectory();
-            addLogLine(`Export folder changed to ${newFolder}`);
+            log.info(`Export folder changed to ${newFolder}`);
             updateExportFolder(newFolder);
             void syncExportRecord(newFolder);
         } catch (e) {
             if (e.message !== CustomError.SELECT_FOLDER_ABORTED) {
-                logError(e, "handleChangeExportDirectoryClick failed");
+                log.error("handleChangeExportDirectoryClick failed", e);
             }
         }
     };
@@ -156,7 +155,7 @@ export default function ExportModal(props: Props) {
             }
             updateContinuousExport(newContinuousExport);
         } catch (e) {
-            logError(e, "onContinuousExportChange failed");
+            log.error("onContinuousExportChange failed", e);
         }
     };
 
@@ -166,7 +165,7 @@ export default function ExportModal(props: Props) {
             await exportService.scheduleExport();
         } catch (e) {
             if (e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST) {
-                logError(e, "scheduleExport failed");
+                log.error("scheduleExport failed", e);
             }
         }
     };

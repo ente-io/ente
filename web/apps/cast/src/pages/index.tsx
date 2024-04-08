@@ -1,6 +1,6 @@
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { boxSealOpen, toB64 } from "@ente/shared/crypto/internal/libsodium";
-import { addLogLine } from "@ente/shared/logging";
+import log from "@/next/log";
 import castGateway from "@ente/shared/network/cast";
 import LargeType from "components/LargeType";
 import _sodium from "libsodium-wrappers";
@@ -60,7 +60,7 @@ export default function PairingMode() {
             );
             context.start(options);
         } catch (e) {
-            addLogLine(e, "failed to create cast context");
+            log.error("failed to create cast context", e);
         }
         setIsCastReady(true);
         return () => {
