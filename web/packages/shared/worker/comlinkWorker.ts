@@ -21,7 +21,7 @@ export class ComlinkWorker<T extends new () => InstanceType<T>> {
         addLocalLog(() => `Initiated ${this.name}`);
         const comlink = wrap<T>(this.worker);
         this.remote = new comlink() as Promise<Remote<InstanceType<T>>>;
-        expose(workerBridge, this.worker);
+        expose(workerBridge, worker);
     }
 
     public getName() {
@@ -38,8 +38,8 @@ export class ComlinkWorker<T extends new () => InstanceType<T>> {
  * A minimal set of utility functions that we expose to all workers that we
  * create.
  *
- * Inside the worker's code, this can be accessed by
- * `wrap<WorkerBridge>(self).foo`.
+ * Inside the worker's code, this can be accessed by using the sibling
+ * `workerBridge` object by importing `worker-bridge.ts`.
  */
 const workerBridge = {
     logToDisk,

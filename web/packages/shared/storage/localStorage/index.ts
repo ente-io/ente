@@ -32,8 +32,7 @@ export enum LS_KEYS {
 
 export const setData = (key: LS_KEYS, value: object) => {
     if (typeof localStorage === "undefined") {
-        console.log("early return");
-        // return null;
+        return null;
     }
     localStorage.setItem(key, JSON.stringify(value));
 };

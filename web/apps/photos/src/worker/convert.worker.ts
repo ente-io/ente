@@ -1,4 +1,3 @@
-import { logError } from "@ente/shared/sentry";
 import * as Comlink from "comlink";
 import HeicConvert from "heic-convert";
 import { getUint8ArrayView } from "services/readerService";
@@ -17,8 +16,6 @@ Comlink.expose(DedicatedConvertWorker, self);
  * Both the input and output are blobs.
  */
 export const convertHEICToJPEG = async (heicBlob: Blob): Promise<Blob> => {
-    // throw new Error("test error");
-    logError(new Error("test error"), "test message");
     const filedata = await getUint8ArrayView(heicBlob);
     const result = await HeicConvert({ buffer: filedata, format: "JPEG" });
     const convertedFileData = new Uint8Array(result);

@@ -18,7 +18,6 @@ export const logError = async (
             }
             ${error?.stack}`);
     } else {
-        console.log("here");
         addLogLine(
             `error: ${error?.name} ${error?.message}
                 msg: ${msg} ${info ? `info: ${JSON.stringify(info)}` : ""}

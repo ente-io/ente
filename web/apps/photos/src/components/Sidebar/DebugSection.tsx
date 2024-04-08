@@ -47,7 +47,7 @@ export default function DebugSection() {
 
     const downloadDebugLogs = () => {
         addLogLine("exporting logs");
-        if (false && isElectron()) {
+        if (isElectron()) {
             ElectronAPIs.openLogDirectory();
         } else {
             const logs = getDebugLogs();
