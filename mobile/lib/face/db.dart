@@ -368,6 +368,17 @@ class FaceMLDataDB {
     await batch.commit(noResult: true);
   }
 
+  Future<void> removePerson(String personID) async {
+    final db = await instance.database;
+    await db.delete(
+      clusterPersonTable,
+      where: '$personIdColumn = ?',
+      whereArgs: [personID],
+    );
+    await db.delete(notPersonFeedback,
+        where: '$personIdColumn = ?', whereArgs: [personID]);
+  }
+
   /// Returns a map of faceID to record of clusterId and faceEmbeddingBlob
   ///
   /// Only selects faces with score greater than [minScore] and blur score greater than [minClarity]

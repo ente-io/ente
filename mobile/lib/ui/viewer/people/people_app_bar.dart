@@ -39,6 +39,7 @@ class PeopleAppBar extends StatefulWidget {
 enum PeoplPopupAction {
   rename,
   setCover,
+  remove,
   viewPhotos,
   confirmPhotos,
   hide,
@@ -164,18 +165,19 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
         //     ],
         //   ),
         // ),
-        // PopupMenuItem(
-        //   value: PeoplPopupAction.rename,
-        //   child: Row(
-        //     children: [
-        //       const Icon(Icons.visibility_off),
-        //       const Padding(
-        //         padding: EdgeInsets.all(8),
-        //       ),
-        //       Text(S.of(context).hide),
-        //     ],
-        //   ),
-        // ),
+
+        PopupMenuItem(
+          value: PeoplPopupAction.remove,
+          child: Row(
+            children: [
+              const Icon(Icons.remove_circle_outline),
+              const Padding(
+                padding: EdgeInsets.all(8),
+              ),
+              Text(S.of(context).remove),
+            ],
+          ),
+        ),
         const PopupMenuItem(
           value: PeoplPopupAction.viewPhotos,
           child: Row(
@@ -235,6 +237,8 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
               await setCoverPhoto(context);
             } else if (value == PeoplPopupAction.hide) {
               // ignore: unawaited_futures
+            } else if (value == PeoplPopupAction.remove) {
+              await PersonService.instance.deletePerson(widget.person.remoteID);
             }
           },
         ),

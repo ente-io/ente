@@ -1,5 +1,7 @@
 import "dart:convert";
 
+import "package:photos/core/event_bus.dart";
+import "package:photos/events/people_changed_event.dart";
 import "package:photos/face/db.dart";
 import "package:photos/face/model/person.dart";
 import "package:photos/models/api/entity/type.dart";
@@ -82,6 +84,29 @@ class PersonService {
       clusterID: clusterID,
     );
     return PersonEntity(result.id, data);
+  }
+
+  Future<void> deletePerson(String personID, {bool onlyMapping = true}) async {
+    if (onlyMapping) {
+      final PersonEntity? entity = await getPerson(personID);
+      if (entity == null) {
+        return;
+      }
+      final PersonEntity justName =
+          PersonEntity(personID, PersonData(name: entity.data.name));
+      await entityService.addOrUpdate(
+        EntityType.person,
+        json.encode(justName.data.toJson()),
+        id: personID,
+      );
+      await faceMLDataDB.removePerson(personID);
+    } else {
+      await entityService.deleteEntry(personID);
+      await faceMLDataDB.removePerson(personID);
+    }
+
+    // fire PeopleChangeEvent
+    Bus.instance.fire(PeopleChangedEvent());
   }
 
   Future<void> storeRemoteFeedback() async {
