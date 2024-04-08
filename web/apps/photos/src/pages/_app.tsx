@@ -1,4 +1,5 @@
-import { setupI18n } from "@/ui/i18n";
+import { CustomHead } from "@/next/components/Head";
+import { setupI18n } from "@/next/i18n";
 import {
     APPS,
     APP_TITLES,
@@ -48,7 +49,6 @@ import { REDIRECTS } from "constants/redirects";
 import { t } from "i18next";
 import isElectron from "is-electron";
 import { AppProps } from "next/app";
-import Head from "next/head";
 import { useRouter } from "next/router";
 import "photoswipe/dist/photoswipe.css";
 import { createContext, useEffect, useRef, useState } from "react";
@@ -111,8 +111,7 @@ type AppContextType = {
 
 export const AppContext = createContext<AppContextType>(null);
 
-export default function App(props: AppProps) {
-    const { Component, pageProps } = props;
+export default function App({ Component, pageProps }: AppProps) {
     const router = useRouter();
     const [isI18nReady, setIsI18nReady] = useState<boolean>(false);
     const [loading, setLoading] = useState(false);
@@ -378,19 +377,13 @@ export default function App(props: AppProps) {
             content: t("UNKNOWN_ERROR"),
         });
 
+    const title = isI18nReady
+        ? t("TITLE", { context: APPS.PHOTOS })
+        : APP_TITLES.get(APPS.PHOTOS);
+
     return (
         <>
-            <Head>
-                <title>
-                    {isI18nReady
-                        ? t("TITLE", { context: APPS.PHOTOS })
-                        : APP_TITLES.get(APPS.PHOTOS)}
-                </title>
-                <meta
-                    name="viewport"
-                    content="initial-scale=1, width=device-width"
-                />
-            </Head>
+            <CustomHead {...{ title }} />
 
             <ThemeProvider theme={getTheme(themeColor, APPS.PHOTOS)}>
                 <CssBaseline enableColorScheme />

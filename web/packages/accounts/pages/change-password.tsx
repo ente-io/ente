@@ -35,10 +35,13 @@ import FormPaperTitle from "@ente/shared/components/Form/FormPaper/Title";
 import LinkButton from "@ente/shared/components/LinkButton";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import InMemoryStore, { MS_KEYS } from "@ente/shared/storage/InMemoryStore";
+import { useRouter } from "next/router";
 
-export default function ChangePassword({ appName, router }: PageProps) {
+export default function ChangePassword({ appName }: PageProps) {
     const [token, setToken] = useState<string>();
     const [user, setUser] = useState<User>();
+
+    const router = useRouter();
 
     useEffect(() => {
         const user = getData(LS_KEYS.USER);

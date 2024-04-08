@@ -76,6 +76,9 @@ db:
     host: localhost
     port: 5432
     name: ente_db
+    # You might want to set this to "require" for production
+    # See https://www.postgresql.org/docs/current/libpq-ssl.html#LIBPQ-SSL-PROTECTION
+    sslmode: disable
     # These can be specified here, or alternatively provided via the environment
     # as ENTE_DB_USER and ENTE_DB_PASSWORD.
     user:
@@ -236,6 +239,14 @@ zoho:
     refresh-token:
     list-key:
     topic-ids:
+
+# Listmonk Campaigns config (optional)
+# Use case: Sending emails
+listmonk:
+    server-url:
+    username:
+    password:
+    list-ids:
 
 # Various low-level configuration options
 internal:

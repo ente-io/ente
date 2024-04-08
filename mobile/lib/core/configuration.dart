@@ -16,6 +16,7 @@ import 'package:photos/db/files_db.dart';
 import 'package:photos/db/memories_db.dart';
 import 'package:photos/db/trash_db.dart';
 import 'package:photos/db/upload_locks_db.dart';
+import "package:photos/events/endpoint_updated_event.dart";
 import 'package:photos/events/signed_in_event.dart';
 import 'package:photos/events/user_logged_out_event.dart';
 import 'package:photos/models/key_attributes.dart';
@@ -69,6 +70,7 @@ class Configuration {
   static const hasSelectedAllFoldersForBackupKey =
       "has_selected_all_folders_for_backup";
   static const anonymousUserIDKey = "anonymous_user_id";
+  static const endPointKey = "endpoint";
 
   final kTempFolderDeletionTimeBuffer = const Duration(hours: 6).inMicroseconds;
 
@@ -390,7 +392,12 @@ class Configuration {
   }
 
   String getHttpEndpoint() {
-    return endpoint;
+    return _preferences.getString(endPointKey) ?? endpoint;
+  }
+
+  Future<void> setHttpEndpoint(String endpoint) async {
+    await _preferences.setString(endPointKey, endpoint);
+    Bus.instance.fire(EndpointUpdatedEvent());
   }
 
   String? getToken() {

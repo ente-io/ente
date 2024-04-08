@@ -1,7 +1,7 @@
 import { logError } from "@ente/shared/sentry";
 import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
+import { sleep } from "@ente/shared/utils";
 import { EnteFile } from "types/file";
-import { sleep } from "utils/common";
 import {
     convertCollectionIDExportNameObjectToMap,
     convertFileIDExportNameObjectToMap,
@@ -78,7 +78,7 @@ class ExportService {
     private exportSettings: ExportSettings;
     private exportInProgress: RequestCanceller = null;
     private reRunNeeded = false;
-    private exportRecordUpdater = new QueueProcessor<ExportRecord>(1);
+    private exportRecordUpdater = new QueueProcessor<ExportRecord>();
     private fileReader: FileReader = null;
     private continuousExportEventHandler: () => void;
     private uiUpdater: ExportUIUpdaters = {

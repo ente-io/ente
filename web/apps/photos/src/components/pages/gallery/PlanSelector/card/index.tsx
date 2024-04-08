@@ -24,7 +24,6 @@ import {
     planForSubscription,
     updateSubscription,
 } from "utils/billing";
-import { reverseString } from "utils/common";
 import { getLocalUserDetails } from "utils/user";
 import { getTotalFamilyUsage, isPartOfFamily } from "utils/user/family";
 import FreeSubscriptionPlanSelectorCard from "./free";
@@ -130,9 +129,7 @@ function PlanSelectorCard(props: Props) {
             }
         } else if (hasStripeSubscription(subscription)) {
             appContext.setDialogMessage({
-                title: `${t("CONFIRM")} ${reverseString(
-                    t("UPDATE_SUBSCRIPTION"),
-                )}`,
+                title: t("update_subscription_title"),
                 content: t("UPDATE_SUBSCRIPTION_MESSAGE"),
                 proceed: {
                     text: t("UPDATE_SUBSCRIPTION"),

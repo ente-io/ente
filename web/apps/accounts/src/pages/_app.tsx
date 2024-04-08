@@ -1,4 +1,5 @@
-import { setupI18n } from "@/ui/i18n";
+import { CustomHead } from "@/next/components/Head";
+import { setupI18n } from "@/next/i18n";
 import { APPS, APP_TITLES } from "@ente/shared/apps/constants";
 import { Overlay } from "@ente/shared/components/Container";
 import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
@@ -15,8 +16,8 @@ import { getTheme } from "@ente/shared/themes";
 import { THEME_COLOR } from "@ente/shared/themes/constants";
 import { CssBaseline, useMediaQuery } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
+import { t } from "i18next";
 import { AppProps } from "next/app";
-import Head from "next/head";
 import { useRouter } from "next/router";
 import { createContext, useEffect, useState } from "react";
 import "styles/global.css";
@@ -29,7 +30,7 @@ interface AppContextProps {
 
 export const AppContext = createContext<AppContextProps>({} as AppContextProps);
 
-export default function App(props: AppProps) {
+export default function App({ Component, pageProps }: AppProps) {
     const [isI18nReady, setIsI18nReady] = useState<boolean>(false);
 
     const [showNavbar, setShowNavBar] = useState(false);
@@ -48,8 +49,6 @@ export default function App(props: AppProps) {
     const isMobile = useMediaQuery("(max-width:428px)");
 
     const router = useRouter();
-
-    const { Component, pageProps } = props;
 
     const [themeColor] = useLocalState(LS_KEYS.THEME, THEME_COLOR.DARK);
 
@@ -76,16 +75,13 @@ export default function App(props: AppProps) {
 
     const theme = getTheme(themeColor, APPS.PHOTOS);
 
-    // TODO: Localise APP_TITLES
+    const title = isI18nReady
+        ? t("TITLE", { context: APPS.ACCOUNTS })
+        : APP_TITLES.get(APPS.ACCOUNTS);
+
     return (
         <>
-            <Head>
-                <title>{APP_TITLES.get(APPS.ACCOUNTS)}</title>
-                <meta
-                    name="viewport"
-                    content="initial-scale=1, width=device-width"
-                />
-            </Head>
+            <CustomHead {...{ title }} />
 
             <ThemeProvider theme={theme}>
                 <CssBaseline enableColorScheme />

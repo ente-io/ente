@@ -1,10 +1,10 @@
 import { addLogLine } from "@ente/shared/logging";
 import { logError } from "@ente/shared/sentry";
+import { promiseWithTimeout } from "@ente/shared/utils";
 import QueueProcessor from "@ente/shared/utils/queueProcessor";
 import { generateTempName } from "@ente/shared/utils/temp";
 import { createFFmpeg, FFmpeg } from "ffmpeg-wasm";
 import { getUint8ArrayView } from "services/readerService";
-import { promiseWithTimeout } from "utils/common";
 
 const INPUT_PATH_PLACEHOLDER = "INPUT";
 const FFMPEG_PLACEHOLDER = "FFMPEG";
@@ -15,7 +15,7 @@ const FFMPEG_EXECUTION_WAIT_TIME = 30 * 1000;
 export class WasmFFmpeg {
     private ffmpeg: FFmpeg;
     private ready: Promise<void> = null;
-    private ffmpegTaskQueue = new QueueProcessor<File>(1);
+    private ffmpegTaskQueue = new QueueProcessor<File>();
 
     constructor() {
         this.ffmpeg = createFFmpeg({

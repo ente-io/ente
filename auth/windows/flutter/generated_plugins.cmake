@@ -13,7 +13,6 @@ list(APPEND FLUTTER_PLUGIN_LIST
   screen_retriever
   sentry_flutter
   share_plus
-  smart_auth
   sodium_libs
   sqlite3_flutter_libs
   tray_manager

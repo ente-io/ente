@@ -1,4 +1,3 @@
-import { CITIES_URL } from "@ente/shared/constants/urls";
 import { logError } from "@ente/shared/sentry";
 import { LocationTagData } from "types/entity";
 import { Location } from "types/upload";
@@ -22,7 +21,9 @@ class LocationSearchService {
             if (this.citiesPromise) {
                 return;
             }
-            this.citiesPromise = fetch(CITIES_URL).then((response) => {
+            this.citiesPromise = fetch(
+                "https://static.ente.io/world_cities.json",
+            ).then((response) => {
                 return response.json().then((data) => {
                     this.cities = data["data"];
                 });

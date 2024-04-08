@@ -49,7 +49,7 @@ import {
     syncMapEnabled,
     validateKey,
 } from "services/userService";
-import { mergeMaps, preloadImage } from "utils/common";
+import { preloadImage } from "utils/common";
 import {
     FILE_OPS_TYPE,
     constructFileToCollectionMap,
@@ -92,13 +92,13 @@ import {
 import { APPS } from "@ente/shared/apps/constants";
 import { CenteredFlex } from "@ente/shared/components/Container";
 import ElectronAPIs from "@ente/shared/electron";
-import useEffectSingleThreaded from "@ente/shared/hooks/useEffectSingleThreaded";
 import useFileInput from "@ente/shared/hooks/useFileInput";
 import useMemoSingleThreaded from "@ente/shared/hooks/useMemoSingleThreaded";
 import InMemoryStore, { MS_KEYS } from "@ente/shared/storage/InMemoryStore";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { User } from "@ente/shared/user/types";
+import { isPromise } from "@ente/shared/utils";
 import AuthenticateUserModal from "components/AuthenticateUserModal";
 import Collections from "components/Collections";
 import ExportModal from "components/ExportModal";
@@ -135,7 +135,6 @@ import {
 import { Search, SearchResultSummary, UpdateSearch } from "types/search";
 import { FamilyData } from "types/user";
 import ComlinkSearchWorker from "utils/comlink/ComlinkSearchWorker";
-import { checkConnectivity } from "utils/common";
 import { isArchivedFile } from "utils/magicMetadata";
 import { getSessionExpiredMessage } from "utils/ui";
 import { getLocalFamilyData } from "utils/user/family";
@@ -680,13 +679,13 @@ export default function Gallery() {
     };
 
     const syncWithRemote = async (force = false, silent = false) => {
+        if (!navigator.onLine) return;
         if (syncInProgress.current && !force) {
             resync.current = { force, silent };
             return;
         }
         syncInProgress.current = true;
         try {
-            checkConnectivity();
             const token = getToken();
             if (!token) {
                 return;
@@ -718,8 +717,6 @@ export default function Gallery() {
                 case CustomError.KEY_MISSING:
                     clearKeys();
                     router.push(PAGES.CREDENTIALS);
-                    break;
-                case CustomError.NO_INTERNET_CONNECTION:
                     break;
                 default:
                     logError(e, "syncWithRemote failed");
@@ -1221,3 +1218,42 @@ export default function Gallery() {
         </GalleryContext.Provider>
     );
 }
+
+// useEffectSingleThreaded is a useEffect that will only run one at a time, and will
+// caches the latest deps of requests that come in while it is running, and will
+// run that after the current run is complete.
+function useEffectSingleThreaded(
+    fn: (deps) => void | Promise<void>,
+    deps: any[],
+): void {
+    const updateInProgress = useRef(false);
+    const nextRequestDepsRef = useRef<any[]>(null);
+    useEffect(() => {
+        const main = async (deps) => {
+            if (updateInProgress.current) {
+                nextRequestDepsRef.current = deps;
+                return;
+            }
+            updateInProgress.current = true;
+            const result = fn(deps);
+            if (isPromise(result)) {
+                await result;
+            }
+            updateInProgress.current = false;
+            if (nextRequestDepsRef.current) {
+                const deps = nextRequestDepsRef.current;
+                nextRequestDepsRef.current = null;
+                setTimeout(() => main(deps), 0);
+            }
+        };
+        main(deps);
+    }, deps);
+}
+
+const mergeMaps = <K, V>(map1: Map<K, V>, map2: Map<K, V>) => {
+    const mergedMap = new Map<K, V>(map1);
+    map2.forEach((value, key) => {
+        mergedMap.set(key, value);
+    });
+    return mergedMap;
+};

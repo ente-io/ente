@@ -46,6 +46,12 @@ Or open the MinIO dashboard at <http://localhost:3201> (user: test/password: tes
 
 > [!NOTE]
 >
+> While we've provided a MinIO based Docker compose file to make it easy for
+> people to get started, if you're running it in production we recommend using
+> an external S3.
+
+> [!NOTE]
+>
 > If something seems amiss, ensure that Docker has read access to the parent
 > folder so that it can access credentials.yaml and other local files. On macOS,
 > you can do this by going to System Settings > Security & Privacy > Files and

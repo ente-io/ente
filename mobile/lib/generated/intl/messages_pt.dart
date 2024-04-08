@@ -499,6 +499,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Criar uma conta"),
         "createAlbumActionHint": MessageLookupByLibrary.simpleMessage(
             "Pressione e segure para selecionar fotos e clique em + para criar um álbum"),
+        "createCollaborativeLink":
+            MessageLookupByLibrary.simpleMessage("Create collaborative link"),
         "createCollage": MessageLookupByLibrary.simpleMessage("Criar colagem"),
         "createNewAccount":
             MessageLookupByLibrary.simpleMessage("Criar nova conta"),

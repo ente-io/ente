@@ -62,3 +62,12 @@ We can see this in the default configuration of nginx:
 This is a [handy tool](https://nginx-playground.wizardzines.com) to check the
 syntax of the configuration files. Alternatively, you can run `docker exec nginx
 nginx -t` on the instance to ask nginx to check the configuration.
+
+## Updating configuration
+
+Nginx configuration files can be changed without needing to restart anything.
+
+1. Update the configuration file at `/root/nginx/conf.d/museum.conf`
+2. Verify that there are no errors in the configuration by using `sudo docker
+   exec nginx nginx -t`.
+3. Ask nginx to reload the configuration `sudo systemctl reload nginx`.

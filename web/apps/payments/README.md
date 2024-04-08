@@ -1,3 +1,5 @@
+# Payments
+
 Code that runs on `payments.ente.io`. It brokers between our services and
 Stripe's API for payments.
 
@@ -5,9 +7,9 @@ Stripe's API for payments.
 
 There are three pieces that need to be connected to have a working local setup:
 
-- A client app
-- This web app
-- Museum
+-   A client app
+-   This web app
+-   Museum
 
 ### Client app
 
@@ -20,6 +22,7 @@ Add the following to `web/apps/photos/.env.local`:
 NEXT_PUBLIC_ENTE_ENDPOINT = http://localhost:8080
 NEXT_PUBLIC_ENTE_PAYMENTS_ENDPOINT = http://localhost:3001
 ```
+
 Then start it locally
 
 ```sh
@@ -35,15 +38,14 @@ This tells it to connect to the museum and payments app running on localhost.
 ### Payments app
 
 For this (payments) web app, configure it to connect to the local museum, and
-use a set of (development) Stripe keys which can be found in [Stripe's developer
-dashboard](https://dashboard.stripe.com).
+use a set of (development) Stripe keys which can be found in
+[Stripe's developer dashboard](https://dashboard.stripe.com).
 
-Add the following to
-`web/apps/payments/.env.local`
+Add the following to `web/apps/payments/.env.local`:
 
 ```env
-NEXT_PUBLIC_ENTE_ENDPOINT = http://localhost:8080
-NEXT_PUBLIC_STRIPE_US_PUBLISHABLE_KEY = stripe_publishable_key
+VITE_ENTE_ENDPOINT = http://localhost:8080
+VITE_STRIPE_US_PUBLISHABLE_KEY = stripe_publishable_key
 ```
 
 Then start it locally
@@ -59,8 +61,8 @@ yarn dev:payments
 
 2. Define this secret within your `musuem.yaml`
 
-3. Update the `whitelisted-redirect-urls` so that it supports redirecting to
-   the locally running payments app.
+3. Update the `whitelisted-redirect-urls` so that it supports redirecting to the
+   locally running payments app.
 
 Assuming that your local payments app is running on `localhost:3001`, your
 `server/museum.yaml` should look as follows.
@@ -70,7 +72,9 @@ stripe:
     us:
         key: stripe_dev_key
         webhook-secret: stripe_dev_webhook_secret
-    whitelisted-redirect-urls: ["http://localhost:3000/gallery", "http://192.168.1.2:3001/frameRedirect"]
+    whitelisted-redirect-urls:
+        - "http://localhost:3000/gallery"
+        - "http://192.168.1.2:3001/frameRedirect"
     path:
         success: ?status=success&session_id={CHECKOUT_SESSION_ID}
         cancel: ?status=fail&reason=canceled
@@ -81,7 +85,7 @@ Make sure you have test plans available for museum to use, by placing them in
 
 Finally, start museum, for example:
 
-```
+```sh
 docker compose up
 ```
 

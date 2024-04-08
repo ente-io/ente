@@ -1,0 +1,19 @@
+[Unit]
+Documentation=https://listmonk.app/docs/installation/
+Requires=docker.service
+After=docker.service
+
+[Install]
+WantedBy=multi-user.target
+
+[Service]
+ExecStartPre=docker pull listmonk/listmonk
+ExecStartPre=-docker stop listmonk
+ExecStartPre=-docker rm listmonk
+ExecStartPre=-docker run --rm --name listmonk \
+    -v /root/listmonk/config.toml:/listmonk/config.toml:ro \
+    listmonk/listmonk ./listmonk --upgrade --yes
+ExecStart=docker run --name listmonk \
+    -p 9000:9000 \
+    -v /root/listmonk/config.toml:/listmonk/config.toml:ro \
+    listmonk/listmonk

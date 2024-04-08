@@ -29,12 +29,16 @@ import {
     setJustSignedUp,
 } from "@ente/shared/storage/localStorage/helpers";
 import { KeyAttributes, User } from "@ente/shared/user/types";
+import { useRouter } from "next/router";
 
-export default function Generate({ router, appContext, appName }: PageProps) {
+export default function Generate({ appContext, appName }: PageProps) {
     const [token, setToken] = useState<string>();
     const [user, setUser] = useState<User>();
     const [recoverModalView, setRecoveryModalView] = useState(false);
     const [loading, setLoading] = useState(true);
+
+    const router = useRouter();
+
     useEffect(() => {
         const main = async () => {
             const key: string = getKey(SESSION_KEYS.ENCRYPTION_KEY);

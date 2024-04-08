@@ -23,6 +23,7 @@ import { ApiError } from "@ente/shared/error";
 import { Link } from "@mui/material";
 import { HttpStatusCode } from "axios";
 import { t } from "i18next";
+import { useRouter } from "next/router";
 import { Trans } from "react-i18next";
 
 const bip39 = require("bip39");
@@ -30,7 +31,6 @@ const bip39 = require("bip39");
 bip39.setDefaultWordlist("english");
 
 export default function Recover({
-    router,
     appContext,
     twoFactorType = TwoFactorType.TOTP,
 }: PageProps) {
@@ -39,6 +39,8 @@ export default function Recover({
     const [sessionID, setSessionID] = useState(null);
     const [doesHaveEncryptedRecoveryKey, setDoesHaveEncryptedRecoveryKey] =
         useState(false);
+
+    const router = useRouter();
 
     useEffect(() => {
         const user = getData(LS_KEYS.USER);

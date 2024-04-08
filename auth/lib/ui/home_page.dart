@@ -93,12 +93,22 @@ class _HomePageState extends State<HomePage> {
   void _applyFilteringAndRefresh() {
     if (_searchText.isNotEmpty && _showSearchBox) {
       final String val = _searchText.toLowerCase();
-      _filteredCodes = _codes
-          .where(
-            (element) => (element.account.toLowerCase().contains(val) ||
-                element.issuer.toLowerCase().contains(val)),
-          )
-          .toList();
+      // Prioritize issuer match above account for better UX while searching
+      // for a specific TOTP for email providers. Searching for "emailProvider" like (gmail, proton) should
+      // show the email provider first instead of other accounts where protonmail
+      // is the account name.
+      final List<Code> issuerMatch = [];
+      final List<Code> accountMatch = [];
+
+      for (final Code code in _codes) {
+        if (code.issuer.toLowerCase().contains(val)) {
+          issuerMatch.add(code);
+        } else if (code.account.toLowerCase().contains(val)) {
+          accountMatch.add(code);
+        }
+      }
+      _filteredCodes = issuerMatch;
+      _filteredCodes.addAll(accountMatch);
     } else {
       _filteredCodes = _codes;
     }

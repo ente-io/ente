@@ -1,6 +1,7 @@
 import { logError } from "@ente/shared/sentry";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import { User } from "@ente/shared/user/types";
+import { downloadUsingAnchor } from "@ente/shared/utils";
 import {
     FILE_TYPE,
     RAW_FORMATS,
@@ -52,9 +53,8 @@ import {
 import { FileTypeInfo } from "types/upload";
 
 import { default as ElectronAPIs } from "@ente/shared/electron";
-import { downloadUsingAnchor } from "@ente/shared/utils";
+import { workerBridge } from "@ente/shared/worker/worker-bridge";
 import { t } from "i18next";
-import imageProcessor from "services/imageProcessor";
 import { getFileExportPath, getUniqueFileExportName } from "utils/export";
 
 const WAIT_TIME_IMAGE_CONVERSION = 30 * 1000;
@@ -452,7 +452,7 @@ export async function getRenderableImage(fileName: string, imageBlob: Blob) {
                         imageBlob.size,
                     )}`,
                 );
-                convertedImageBlob = await imageProcessor.convertToJPEG(
+                convertedImageBlob = await convertToJPEGInElectron(
                     imageBlob,
                     fileName,
                 );
@@ -483,6 +483,36 @@ export async function getRenderableImage(fileName: string, imageBlob: Blob) {
         return null;
     }
 }
+
+const convertToJPEGInElectron = async (
+    fileBlob: Blob,
+    filename: string,
+): Promise<Blob> => {
+    try {
+        const startTime = Date.now();
+        const inputFileData = new Uint8Array(await fileBlob.arrayBuffer());
+        const convertedFileData = await workerBridge.convertToJPEG(
+            inputFileData,
+            filename,
+        );
+        addLogLine(
+            `originalFileSize:${convertBytesToHumanReadable(
+                fileBlob?.size,
+            )},convertedFileSize:${convertBytesToHumanReadable(
+                convertedFileData?.length,
+            )},  native conversion time: ${Date.now() - startTime}ms `,
+        );
+        return new Blob([convertedFileData]);
+    } catch (e) {
+        if (
+            e.message !==
+            CustomError.WINDOWS_NATIVE_IMAGE_PROCESSING_NOT_SUPPORTED
+        ) {
+            logError(e, "failed to convert to jpeg natively");
+        }
+        throw e;
+    }
+};
 
 export function isFileHEIC(exactType: string) {
     return (
@@ -866,7 +896,7 @@ export const copyFileToClipboard = async (fileUrl: string) => {
             clearTimeout(timeout);
         }
         timeout = setTimeout(
-            () => reject(Error(CustomError.WAIT_TIME_EXCEEDED)),
+            () => reject(new Error("Operation timed out")),
             WAIT_TIME_IMAGE_CONVERSION,
         );
     });

@@ -62,6 +62,8 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m13(provider) =>
       "Please contact us at support@ente.io to manage your ${provider} subscription.";
 
+  static String m69(endpoint) => "Connected to ${endpoint}";
+
   static String m14(count) =>
       "${Intl.plural(count, one: 'Delete ${count} item', other: 'Delete ${count} items')}";
 
@@ -488,6 +490,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "createAccount": MessageLookupByLibrary.simpleMessage("Create account"),
         "createAlbumActionHint": MessageLookupByLibrary.simpleMessage(
             "Long press to select photos and click + to create an album"),
+        "createCollaborativeLink":
+            MessageLookupByLibrary.simpleMessage("Create collaborative link"),
         "createCollage": MessageLookupByLibrary.simpleMessage("Create collage"),
         "createNewAccount":
             MessageLookupByLibrary.simpleMessage("Create new account"),
@@ -502,6 +506,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "currentUsageIs":
             MessageLookupByLibrary.simpleMessage("Current usage is "),
         "custom": MessageLookupByLibrary.simpleMessage("Custom"),
+        "customEndpoint": m69,
         "darkTheme": MessageLookupByLibrary.simpleMessage("Dark"),
         "dayToday": MessageLookupByLibrary.simpleMessage("Today"),
         "dayYesterday": MessageLookupByLibrary.simpleMessage("Yesterday"),
@@ -562,6 +567,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "details": MessageLookupByLibrary.simpleMessage("Details"),
         "devAccountChanged": MessageLookupByLibrary.simpleMessage(
             "The developer account we use to publish ente on App Store has changed. Because of this, you will need to login again.\n\nOur apologies for the inconvenience, but this was unavoidable."),
+        "developerSettings":
+            MessageLookupByLibrary.simpleMessage("Developer settings"),
+        "developerSettingsWarning": MessageLookupByLibrary.simpleMessage(
+            "Are you sure that you want to modify Developer settings?"),
         "deviceCodeHint":
             MessageLookupByLibrary.simpleMessage("Enter the code"),
         "deviceFilesAutoUploading": MessageLookupByLibrary.simpleMessage(
@@ -627,6 +636,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "encryption": MessageLookupByLibrary.simpleMessage("Encryption"),
         "encryptionKeys":
             MessageLookupByLibrary.simpleMessage("Encryption keys"),
+        "endpointUpdatedMessage": MessageLookupByLibrary.simpleMessage(
+            "Endpoint updated successfully"),
         "endtoendEncryptedByDefault": MessageLookupByLibrary.simpleMessage(
             "End-to-end encrypted by default"),
         "enteCanEncryptAndPreserveFilesOnlyIfYouGrant":
@@ -781,6 +792,10 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Install manually"),
         "invalidEmailAddress":
             MessageLookupByLibrary.simpleMessage("Invalid email address"),
+        "invalidEndpoint":
+            MessageLookupByLibrary.simpleMessage("Invalid endpoint"),
+        "invalidEndpointMessage": MessageLookupByLibrary.simpleMessage(
+            "Sorry, the endpoint you entered is invalid. Please enter a valid endpoint and try again."),
         "invalidKey": MessageLookupByLibrary.simpleMessage("Invalid key"),
         "invalidRecoveryKey": MessageLookupByLibrary.simpleMessage(
             "The recovery key you entered is not valid. Please make sure it contains 24 words, and check the spelling of each.\n\nIf you entered an older recovery code, make sure it is 64 characters long, and check each of them."),
@@ -1220,6 +1235,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "sendEmail": MessageLookupByLibrary.simpleMessage("Send email"),
         "sendInvite": MessageLookupByLibrary.simpleMessage("Send invite"),
         "sendLink": MessageLookupByLibrary.simpleMessage("Send link"),
+        "serverEndpoint":
+            MessageLookupByLibrary.simpleMessage("Server endpoint"),
         "sessionExpired":
             MessageLookupByLibrary.simpleMessage("Session expired"),
         "setAPassword": MessageLookupByLibrary.simpleMessage("Set a password"),
