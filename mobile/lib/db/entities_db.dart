@@ -9,7 +9,7 @@ extension EntitiesDB on FilesDB {
     List<LocalEntityData> data, {
     ConflictAlgorithm conflictAlgorithm = ConflictAlgorithm.replace,
   }) async {
-    debugPrint("Inserting missing PathIDToLocalIDMapping");
+    debugPrint("entitiesDB: upsertEntities ${data.length} entities");
     final db = await database;
     var batch = db.batch();
     int batchCounter = 0;
