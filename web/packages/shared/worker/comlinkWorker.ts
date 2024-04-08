@@ -1,7 +1,6 @@
-import { logToDisk } from "@/next/log";
-import { addLocalLog } from "@ente/shared/logging";
-import { Remote, expose, wrap } from "comlink";
 import ElectronAPIs from "@/next/electron";
+import log, { logToDisk } from "@/next/log";
+import { Remote, expose, wrap } from "comlink";
 import { logError } from "../sentry";
 
 export class ComlinkWorker<T extends new () => InstanceType<T>> {
@@ -19,7 +18,7 @@ export class ComlinkWorker<T extends new () => InstanceType<T>> {
                 name: this.name,
             });
         };
-        addLocalLog(() => `Initiated ${this.name}`);
+        log.debug(() => `Initiated ${this.name}`);
         const comlink = wrap<T>(this.worker);
         this.remote = new comlink() as Promise<Remote<InstanceType<T>>>;
         expose(workerBridge, worker);
@@ -31,7 +30,7 @@ export class ComlinkWorker<T extends new () => InstanceType<T>> {
 
     public terminate() {
         this.worker.terminate();
-        addLocalLog(() => `Terminated ${this.name}`);
+        log.debug(() => `Terminated ${this.name}`);
     }
 }
 

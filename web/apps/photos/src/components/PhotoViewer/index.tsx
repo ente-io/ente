@@ -16,9 +16,9 @@ import {
     isSupportedRawFormat,
 } from "utils/file";
 
+import log from "@/next/log";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
-import { addLocalLog } from "@ente/shared/logging";
 import AlbumOutlined from "@mui/icons-material/AlbumOutlined";
 import ChevronLeft from "@mui/icons-material/ChevronLeft";
 import ChevronRight from "@mui/icons-material/ChevronRight";
@@ -171,7 +171,7 @@ function PhotoViewer(props: Iprops) {
                 return;
             }
 
-            addLocalLog(() => "Event: " + event.key);
+            log.debug(() => "Event: " + event.key);
 
             switch (event.key) {
                 case "i":

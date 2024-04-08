@@ -1,7 +1,13 @@
-import { logError } from "@ente/shared/sentry";
+import ElectronAPIs from "@/next/electron";
+import { convertBytesToHumanReadable } from "@/next/file";
+import log from "@/next/log";
+import ComlinkCryptoWorker from "@ente/shared/crypto";
+import { CustomError } from "@ente/shared/error";
+import { isPlaybackPossible } from "@ente/shared/media/video-playback";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import { User } from "@ente/shared/user/types";
 import { downloadUsingAnchor } from "@ente/shared/utils";
+import { workerBridge } from "@ente/shared/worker/worker-bridge";
 import {
     FILE_TYPE,
     RAW_FORMATS,
@@ -11,11 +17,20 @@ import {
     TYPE_JPEG,
     TYPE_JPG,
 } from "constants/file";
+import { t } from "i18next";
+import isElectron from "is-electron";
+import { moveToHiddenCollection } from "services/collectionService";
 import DownloadManager, {
     LivePhotoSourceURL,
     SourceURLs,
 } from "services/download";
 import * as ffmpegService from "services/ffmpeg/ffmpegService";
+import {
+    deleteFromTrash,
+    trashFiles,
+    updateFileMagicMetadata,
+    updateFilePublicMagicMetadata,
+} from "services/fileService";
 import heicConversionService from "services/heicConversionService";
 import { decodeLivePhoto } from "services/livePhotoService";
 import { getFileType } from "services/typeDetectionService";
@@ -35,27 +50,9 @@ import {
     SetFilesDownloadProgressAttributesCreator,
 } from "types/gallery";
 import { VISIBILITY_STATE } from "types/magicMetadata";
-import { isArchivedFile, updateMagicMetadata } from "utils/magicMetadata";
-
-import { convertBytesToHumanReadable } from "@/next/file";
-import ComlinkCryptoWorker from "@ente/shared/crypto";
-import { CustomError } from "@ente/shared/error";
-import { addLocalLog, addLogLine } from "@ente/shared/logging";
-import { isPlaybackPossible } from "@ente/shared/media/video-playback";
-import isElectron from "is-electron";
-import { moveToHiddenCollection } from "services/collectionService";
-import {
-    deleteFromTrash,
-    trashFiles,
-    updateFileMagicMetadata,
-    updateFilePublicMagicMetadata,
-} from "services/fileService";
 import { FileTypeInfo } from "types/upload";
-
-import ElectronAPIs from "@/next/electron";
-import { workerBridge } from "@ente/shared/worker/worker-bridge";
-import { t } from "i18next";
 import { getFileExportPath, getUniqueFileExportName } from "utils/export";
+import { isArchivedFile, updateMagicMetadata } from "utils/magicMetadata";
 
 const WAIT_TIME_IMAGE_CONVERSION = 30 * 1000;
 
@@ -128,7 +125,7 @@ export async function downloadFile(file: EnteFile) {
             downloadUsingAnchor(tempURL, file.metadata.title);
         }
     } catch (e) {
-        logError(e, "failed to download file");
+        log.error("failed to download file", e);
         throw e;
     }
 }
@@ -244,7 +241,7 @@ export async function decryptFile(
             pubMagicMetadata: filePubMagicMetadata,
         };
     } catch (e) {
-        logError(e, "file decryption failed");
+        log.error("file decryption failed", e);
         throw e;
     }
 }
@@ -413,19 +410,17 @@ export async function getPlayableVideo(
             if (!forceConvert && !runOnWeb && !isElectron()) {
                 return null;
             }
-            addLogLine(
-                "video format not supported, converting it name:",
-                videoNameTitle,
+            log.info(
+                `video format not supported, converting it name: ${videoNameTitle}`,
             );
             const mp4ConvertedVideo = await ffmpegService.convertToMP4(
                 new File([videoBlob], videoNameTitle),
             );
-            addLogLine("video successfully converted", videoNameTitle);
+            log.info(`video successfully converted ${videoNameTitle}`);
             return new Blob([await mp4ConvertedVideo.arrayBuffer()]);
         }
     } catch (e) {
-        addLogLine("video conversion failed", videoNameTitle);
-        logError(e, "video conversion failed");
+        log.error("video conversion failed", e);
         return null;
     }
 }
@@ -435,7 +430,7 @@ export async function getRenderableImage(fileName: string, imageBlob: Blob) {
     try {
         const tempFile = new File([imageBlob], fileName);
         fileTypeInfo = await getFileType(tempFile);
-        addLocalLog(() => `file type info: ${JSON.stringify(fileTypeInfo)}`);
+        log.debug(() => `file type info: ${JSON.stringify(fileTypeInfo)}`);
         const { exactType } = fileTypeInfo;
         let convertedImageBlob: Blob;
         if (isRawFile(exactType)) {
@@ -447,7 +442,7 @@ export async function getRenderableImage(fileName: string, imageBlob: Blob) {
                 if (!isElectron()) {
                     throw Error(CustomError.NOT_AVAILABLE_ON_WEB);
                 }
-                addLogLine(
+                log.info(
                     `RawConverter called for ${fileName}-${convertBytesToHumanReadable(
                         imageBlob.size,
                     )}`,
@@ -456,20 +451,20 @@ export async function getRenderableImage(fileName: string, imageBlob: Blob) {
                     imageBlob,
                     fileName,
                 );
-                addLogLine(`${fileName} successfully converted`);
+                log.info(`${fileName} successfully converted`);
             } catch (e) {
                 try {
                     if (!isFileHEIC(exactType)) {
                         throw e;
                     }
-                    addLogLine(
+                    log.info(
                         `HEICConverter called for ${fileName}-${convertBytesToHumanReadable(
                             imageBlob.size,
                         )}`,
                     );
                     convertedImageBlob =
                         await heicConversionService.convert(imageBlob);
-                    addLogLine(`${fileName} successfully converted`);
+                    log.info(`${fileName} successfully converted`);
                 } catch (e) {
                     throw Error(CustomError.NON_PREVIEWABLE_FILE);
                 }
@@ -479,7 +474,10 @@ export async function getRenderableImage(fileName: string, imageBlob: Blob) {
             return imageBlob;
         }
     } catch (e) {
-        logError(e, "get Renderable Image failed", { fileTypeInfo });
+        log.error(
+            `Failed to get renderable image for ${JSON.stringify(fileTypeInfo)}`,
+            e,
+        );
         return null;
     }
 }
@@ -495,7 +493,7 @@ const convertToJPEGInElectron = async (
             inputFileData,
             filename,
         );
-        addLogLine(
+        log.info(
             `originalFileSize:${convertBytesToHumanReadable(
                 fileBlob?.size,
             )},convertedFileSize:${convertBytesToHumanReadable(
@@ -508,7 +506,7 @@ const convertToJPEGInElectron = async (
             e.message !==
             CustomError.WINDOWS_NATIVE_IMAGE_PROCESSING_NOT_SUPPORTED
         ) {
-            logError(e, "failed to convert to jpeg natively");
+            log.error("failed to convert to jpeg natively", e);
         }
         throw e;
     }
@@ -761,7 +759,7 @@ export async function downloadFiles(
             await downloadFile(file);
             progressBarUpdater?.increaseSuccess();
         } catch (e) {
-            logError(e, "download fail for file");
+            log.error("download fail for file", e);
             progressBarUpdater?.increaseFailed();
         }
     }
@@ -785,7 +783,7 @@ export async function downloadFilesDesktop(
             await downloadFileDesktop(fileReader, file, downloadPath);
             progressBarUpdater?.increaseSuccess();
         } catch (e) {
-            logError(e, "download fail for file");
+            log.error("download fail for file", e);
             progressBarUpdater?.increaseFailed();
         }
     }
@@ -890,7 +888,7 @@ export const copyFileToClipboard = async (fileUrl: string) => {
                 clearTimeout(timeout);
             };
         } catch (e) {
-            void logError(e, "failed to copy to clipboard");
+            log.error("failed to copy to clipboard", e);
             reject(e);
         } finally {
             clearTimeout(timeout);
@@ -905,7 +903,7 @@ export const copyFileToClipboard = async (fileUrl: string) => {
 
     await navigator.clipboard
         .write([new ClipboardItem({ "image/png": blobPromise })])
-        .catch((e) => logError(e, "failed to copy to clipboard"));
+        .catch((e) => log.error("failed to copy to clipboard", e));
 };
 
 export function getLatestVersionFiles(files: EnteFile[]) {

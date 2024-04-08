@@ -1,5 +1,5 @@
 import { inWorker, isDevBuild } from "@/next/env";
-import log, { logToDisk } from "@/next/log";
+import { logToDisk } from "@/next/log";
 import { logError } from "@ente/shared/sentry";
 import { workerBridge } from "../worker/worker-bridge";
 
@@ -31,5 +31,3 @@ export function addLogLine(
         // ignore
     }
 }
-
-export const addLocalLog = log.debug;

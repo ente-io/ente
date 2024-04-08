@@ -1,5 +1,5 @@
-import { addLocalLog } from "@ente/shared/logging";
 import { Remote, wrap } from "comlink";
+import log from "@/next/log";
 
 export class ComlinkWorker<T extends new () => InstanceType<T>> {
     public remote: Promise<Remote<InstanceType<T>>>;
@@ -13,13 +13,13 @@ export class ComlinkWorker<T extends new () => InstanceType<T>> {
         this.worker.onerror = (errorEvent) => {
             console.error("Got error event from worker", errorEvent);
         };
-        addLocalLog(() => `Initiated ${this.name}`);
+        log.debug(() => `Initiated ${this.name}`);
         const comlink = wrap<T>(this.worker);
         this.remote = new comlink() as Promise<Remote<InstanceType<T>>>;
     }
 
     public terminate() {
         this.worker.terminate();
-        addLocalLog(() => `Terminated ${this.name}`);
+        log.debug(() => `Terminated ${this.name}`);
     }
 }
