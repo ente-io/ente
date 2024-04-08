@@ -18,7 +18,7 @@ import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { useLocalState } from "@ente/shared/hooks/useLocalState";
 import {
     clearLogsIfLocalStorageLimitExceeded,
-    logStartupMessage,
+    logStartupBanner,
 } from "@ente/shared/logging/web";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { LS_KEYS } from "@ente/shared/storage/localStorage";
@@ -75,7 +75,7 @@ export default function App({ Component, pageProps }: AppProps) {
         });
         // setup logging
         clearLogsIfLocalStorageLimitExceeded();
-        logStartupMessage(APPS.AUTH);
+        logStartupBanner(APPS.AUTH);
     }, []);
 
     const setUserOnline = () => setOffline(false);

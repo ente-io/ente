@@ -70,14 +70,21 @@ export const clearLogsIfLocalStorageLimitExceeded = () => {
     }
 };
 
-export const logStartupMessage = async (appId: string) => {
+/**
+ * Log a standard startup banner.
+ *
+ * This helps us identify app starts and other environment details in the logs.
+ *
+ * @param appId An identifier of the app that is starting.
+ */
+export const logStartupBanner = async (appId: string) => {
     // TODO (MR): Remove the need to lowercase it, change the enum itself.
     const appIdL = appId.toLowerCase();
     const userID = (getData(LS_KEYS.USER) as User)?.id;
     const sha = process.env.GIT_SHA;
     const buildId = isDevBuild ? "dev " : sha ? `git ${sha} ` : "";
 
-    addLogLine(`ente-${appIdL}-web ${buildId}uid ${userID}`);
+    addLogLine(`Starting ente-${appIdL}-web ${buildId}uid ${userID}`);
 };
 
 function getLogs(): Log[] {

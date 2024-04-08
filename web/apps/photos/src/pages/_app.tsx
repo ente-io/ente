@@ -28,7 +28,7 @@ import { useLocalState } from "@ente/shared/hooks/useLocalState";
 import { addLogLine } from "@ente/shared/logging";
 import {
     clearLogsIfLocalStorageLimitExceeded,
-    logStartupMessage,
+    logStartupBanner,
 } from "@ente/shared/logging/web";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { logError } from "@ente/shared/sentry";
@@ -157,7 +157,7 @@ export default function App({ Component, pageProps }: AppProps) {
         });
         // setup logging
         clearLogsIfLocalStorageLimitExceeded();
-        logStartupMessage(APPS.PHOTOS);
+        logStartupBanner(APPS.PHOTOS);
     }, []);
 
     useEffect(() => {
