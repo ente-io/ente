@@ -1,11 +1,20 @@
-import { isDevBuild } from "@/next/env";
+import { inWorker, isDevBuild } from "@/next/env";
 import { logError } from "@ente/shared/sentry";
 import isElectron from "is-electron";
-import { WorkerSafeElectronService } from "../electron/service";
+import ElectronAPIs from "../electron";
+import { workerBridge } from "../worker/worker-bridge";
 import { formatLog, logWeb } from "./web";
 
 export const MAX_LOG_SIZE = 5 * 1024 * 1024; // 5MB
 export const MAX_LOG_LINES = 1000;
+
+export const logToDisk = (message: string) => {
+    if (isElectron()) {
+        ElectronAPIs.logToDisk(message);
+    } else {
+        logWeb(message);
+    }
+};
 
 export function addLogLine(
     log: string | number | boolean,
@@ -16,10 +25,19 @@ export function addLogLine(
         if (isDevBuild) {
             console.log(completeLog);
         }
-        if (isElectron()) {
-            WorkerSafeElectronService.logToDisk(completeLog);
+        if (inWorker()) {
+            workerBridge
+                .logToDisk(completeLog)
+                .catch((e) =>
+                    console.error(
+                        "Failed to log a message from worker",
+                        e,
+                        "\nThe message was",
+                        completeLog,
+                    ),
+                );
         } else {
-            logWeb(completeLog);
+            logToDisk(completeLog);
         }
     } catch (e) {
         logError(e, "failed to addLogLine", undefined, true);
