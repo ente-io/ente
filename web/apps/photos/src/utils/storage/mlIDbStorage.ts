@@ -1,5 +1,4 @@
 import { haveWindow } from "@/next/env";
-import isElectron from "is-electron";
 import { addLogLine } from "@ente/shared/logging";
 import { logError } from "@ente/shared/sentry";
 import {
@@ -16,6 +15,7 @@ import {
     deleteDB,
     openDB,
 } from "idb";
+import isElectron from "is-electron";
 import {
     Face,
     MLLibraryData,
