@@ -408,8 +408,10 @@ class ClusterFeedbackService {
   // TODO: iterate over this method to find sweet spot
   Future<Map<int, List<String>>> breakUpCluster(
     int clusterID, {
-    useDbscan = true,
+    useDbscan = false,
   }) async {
+    _logger.info(
+        'breakUpCluster called for cluster $clusterID with dbscan $useDbscan');
     final faceMlDb = FaceMLDataDB.instance;
 
     final faceIDs = await faceMlDb.getFaceIDsForCluster(clusterID);
@@ -450,11 +452,16 @@ class ClusterFeedbackService {
       final faceIdToCluster = await FaceClustering.instance.predictLinear(
         clusteringInput,
         fileIDToCreationTime: fileIDToCreationTime,
-        distanceThreshold: 0.15,
+        distanceThreshold: 0.275,
       );
 
       if (faceIdToCluster == null) {
+        _logger.info('No clusters found');
         return {};
+      } else {
+        _logger.info(
+          'Broke up cluster $clusterID into ${faceIdToCluster.values.toSet().length} clusters',
+        );
       }
 
       for (final entry in faceIdToCluster.entries) {
