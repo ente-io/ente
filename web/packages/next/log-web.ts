@@ -42,7 +42,7 @@ export const logToDisk = (message: string) => {
             logs.slice(logs.length - maxCount);
         }
         logs.push(log);
-        localStorage.setItem(lsKey, JSON.stringify(logs));
+        localStorage.setItem(lsKey, JSON.stringify({ logs }));
     } catch (e) {
         console.error("Failed to persist log", e);
         if (e instanceof Error && e.name === "QuotaExceededError") {
