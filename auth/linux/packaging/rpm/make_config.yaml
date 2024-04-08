@@ -9,7 +9,7 @@ url: https://github.com/ente-io/ente
 
 display_name: Auth
 
-dependencies:
+requires:
   - libsqlite3x
   - webkit2gtk-4.0
   - libsodium
