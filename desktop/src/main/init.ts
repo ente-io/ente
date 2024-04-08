@@ -149,21 +149,6 @@ export async function handleDockIconHideOnAutoLaunch() {
     }
 }
 
-/**
- * Log a standard startup banner.
- *
- * This helps us identify app starts and other environment details in the logs.
- */
-export const logStartupBanner = () => {
-    const version = isDev ? "dev" : app.getVersion();
-    log.info(`Starting ente-photos-desktop ${version}`);
-
-    const platform = process.platform;
-    const osRelease = os.release();
-    const systemVersion = process.getSystemVersion();
-    log.info("Running on", { platform, osRelease, systemVersion });
-};
-
 function lowerCaseHeaders(responseHeaders: Record<string, string[]>) {
     const headers: Record<string, string[]> = {};
     for (const key of Object.keys(responseHeaders)) {

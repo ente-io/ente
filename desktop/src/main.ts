@@ -12,6 +12,7 @@ import { app, BrowserWindow, Menu } from "electron/main";
 import serveNextAt from "next-electron-server";
 import { existsSync } from "node:fs";
 import fs from "node:fs/promises";
+import os from "node:os";
 import path from "node:path";
 import {
     addAllowOriginHeader,
@@ -19,7 +20,6 @@ import {
     handleDockIconHideOnAutoLaunch,
     handleDownloads,
     handleExternalLinks,
-    logStartupBanner,
     setupMacWindowOnDockIconClick,
     setupTrayItem,
 } from "./main/init";
@@ -70,6 +70,21 @@ export const rendererURL = "next://app";
  */
 const setupRendererServer = () => {
     serveNextAt(rendererURL);
+};
+
+/**
+ * Log a standard startup banner.
+ *
+ * This helps us identify app starts and other environment details in the logs.
+ */
+const logStartupBanner = () => {
+    const version = isDev ? "dev" : app.getVersion();
+    log.info(`Starting ente-photos-desktop ${version}`);
+
+    const platform = process.platform;
+    const osRelease = os.release();
+    const systemVersion = process.getSystemVersion();
+    log.info("Running on", { platform, osRelease, systemVersion });
 };
 
 function enableSharedArrayBufferSupport() {
@@ -144,6 +159,7 @@ const main = () => {
 
     initLogging();
     setupRendererServer();
+    logStartupBanner();
     handleDockIconHideOnAutoLaunch();
     increaseDiskCache();
     enableSharedArrayBufferSupport();
@@ -163,7 +179,6 @@ const main = () => {
     //
     // Note that some Electron APIs can only be used after this event occurs.
     app.on("ready", async () => {
-        logStartupBanner();
         mainWindow = await createWindow();
         const watcher = initWatcher(mainWindow);
         setupTrayItem(mainWindow);
