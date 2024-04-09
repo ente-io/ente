@@ -479,7 +479,7 @@ class FaceMlService {
         break;
       }
     }
-    if (!allLandmarksEqual) {
+    if (allLandmarksEqual) {
       debugPrint("Discarding remote embedding for fileID ${fileMl.fileID} "
           "because landmarks are not equal");
       return true;

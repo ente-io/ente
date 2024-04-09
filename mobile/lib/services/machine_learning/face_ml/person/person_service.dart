@@ -1,5 +1,7 @@
 import "dart:convert";
 
+import "package:flutter/foundation.dart";
+import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/people_changed_event.dart";
 import "package:photos/face/db.dart";
@@ -21,6 +23,8 @@ class PersonService {
     }
     return _instance!;
   }
+
+  late Logger logger = Logger("PersonService");
 
   static init(
     EntityService entityService,
@@ -158,13 +162,26 @@ class PersonService {
     final Map<int, String> clusterToPersonID = {};
     for (var e in entities) {
       final personData = PersonData.fromJson(json.decode(e.data));
+      int faceCount = 0;
       for (var cluster in personData.assigned!) {
+        faceCount += cluster.faces.length;
         for (var faceId in cluster.faces) {
+          if (faceIdToClusterID.containsKey(faceId)) {
+            throw Exception("Face $faceId is already assigned to a cluster");
+          }
           faceIdToClusterID[faceId] = cluster.id;
         }
         clusterToPersonID[cluster.id] = e.id;
       }
+      if(kDebugMode) {
+        logger.info(
+          "Person ${e.id} ${personData.name} has ${personData.assigned!
+              .length} clusters with $faceCount faces",
+        );
+      }
     }
+
+    logger.info("Storing feedback for ${faceIdToClusterID.length} faces");
     await faceMLDataDB.updateClusterIdToFaceId(faceIdToClusterID);
     await faceMLDataDB.bulkAssignClusterToPersonID(clusterToPersonID);
   }
