@@ -1,5 +1,6 @@
 import "dart:io";
 
+import "package:computer/computer.dart";
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart';
@@ -16,6 +17,7 @@ import 'package:photos/utils/file_uploader_util.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_migration/sqflite_migration.dart';
 import 'package:sqlite3/sqlite3.dart' as sqlite3;
+import 'package:sqlite_async/sqlite_async.dart' as sqlite_async;
 
 class FilesDB {
   /*
@@ -102,6 +104,7 @@ class FilesDB {
   // only have a single app-wide reference to the database
   static Future<Database>? _dbFuture;
   static Future<sqlite3.Database>? _ffiDBFuture;
+  static Future<sqlite_async.SqliteDatabase>? _sqliteAsyncDBFuture;
 
   Future<Database> get database async {
     // lazily instantiate the db the first time it is accessed
@@ -112,6 +115,11 @@ class FilesDB {
   Future<sqlite3.Database> get ffiDB async {
     _ffiDBFuture ??= _initFFIDatabase();
     return _ffiDBFuture!;
+  }
+
+  Future<sqlite_async.SqliteDatabase> get sqliteAsyncDB async {
+    _sqliteAsyncDBFuture ??= _initSqliteAsyncDatabase();
+    return _sqliteAsyncDBFuture!;
   }
 
   // this opens the database (and creates it if it doesn't exist)
@@ -129,6 +137,14 @@ class FilesDB {
     final String path = join(documentsDirectory.path, _databaseName);
     _logger.info("DB path " + path);
     return sqlite3.sqlite3.open(path);
+  }
+
+  Future<sqlite_async.SqliteDatabase> _initSqliteAsyncDatabase() async {
+    final Directory documentsDirectory =
+        await getApplicationDocumentsDirectory();
+    final String path = join(documentsDirectory.path, _databaseName);
+    _logger.info("DB path " + path);
+    return sqlite_async.SqliteDatabase(path: path);
   }
 
   // SQL code to create the database table
@@ -1450,6 +1466,14 @@ class FilesDB {
     return collectionIDsOfFile;
   }
 
+  List<EnteFile> convertToFilesForIsolate(Map args) {
+    final List<EnteFile> files = [];
+    for (final result in args["result"]) {
+      files.add(_getFileFromRow(result));
+    }
+    return files;
+  }
+
   List<EnteFile> convertToFiles(List<Map<String, dynamic>> results) {
     final List<EnteFile> files = [];
     for (final result in results) {
@@ -1576,10 +1600,14 @@ class FilesDB {
     Set<int> collectionsToIgnore, {
     bool dedupeByUploadId = true,
   }) async {
-    final db = await instance.database;
-    final List<Map<String, dynamic>> result =
-        await db.query(filesTable, orderBy: '$columnCreationTime DESC');
-    final List<EnteFile> files = convertToFiles(result);
+    final db = await instance.sqliteAsyncDB;
+
+    final result = await db.getAll(
+      'SELECT * FROM $filesTable ORDER BY $columnCreationTime DESC',
+    );
+    final List<EnteFile> files = await Computer.shared()
+        .compute(convertToFilesForIsolate, param: {"result": result});
+
     final List<EnteFile> deduplicatedFiles = await applyDBFilters(
       files,
       DBFilterOptions(
