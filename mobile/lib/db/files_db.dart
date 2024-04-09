@@ -621,23 +621,19 @@ class FilesDB {
 
   Future<FileLoadResult> getAllLocalAndUploadedFiles(
     int startTime,
-    int endTime,
-    int ownerID, {
+    int endTime, {
     int? limit,
     bool? asc,
     required DBFilterOptions filterOptions,
   }) async {
-    final db = await instance.database;
+    final db = await instance.sqliteAsyncDB;
     final order = (asc ?? false ? 'ASC' : 'DESC');
-    final results = await db.query(
-      filesTable,
-      where:
-          '$columnCreationTime >= ? AND $columnCreationTime <= ?  AND ($columnMMdVisibility IS NULL OR $columnMMdVisibility = ?)'
-          ' AND ($columnLocalID IS NOT NULL OR ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1))',
-      whereArgs: [startTime, endTime, visibleVisibility],
-      orderBy:
-          '$columnCreationTime ' + order + ', $columnModificationTime ' + order,
-      limit: limit,
+
+    final results = await db.getAll(
+      'SELECT * FROM $filesTable WHERE $columnCreationTime >= ? AND $columnCreationTime <= ?  AND ($columnMMdVisibility IS NULL OR $columnMMdVisibility = ?)'
+      ' AND ($columnLocalID IS NOT NULL OR ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1))'
+      ' ORDER BY $columnCreationTime $order, $columnModificationTime $order LIMIT ?',
+      [startTime, endTime, visibleVisibility, limit],
     );
     final files = convertToFiles(results);
     final List<EnteFile> filteredFiles =
