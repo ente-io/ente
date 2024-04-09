@@ -168,7 +168,7 @@
     "UPDATE_PAYMENT_METHOD": "更新付款方式",
     "MONTHLY": "每月",
     "YEARLY": "每年",
-    "update_subscription_title": "",
+    "update_subscription_title": "确认更改计划",
     "UPDATE_SUBSCRIPTION_MESSAGE": "您确定要更改您的计划吗？",
     "UPDATE_SUBSCRIPTION": "更改计划",
     "CANCEL_SUBSCRIPTION": "取消订阅",
