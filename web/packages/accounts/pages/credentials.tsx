@@ -1,4 +1,3 @@
-import ElectronAPIs from "@/next/electron";
 import log from "@/next/log";
 import { APP_HOMES } from "@ente/shared/apps/constants";
 import { PageProps } from "@ente/shared/apps/types";
@@ -41,7 +40,6 @@ import {
 } from "@ente/shared/storage/sessionStorage";
 import { KeyAttributes, User } from "@ente/shared/user/types";
 import { t } from "i18next";
-import isElectron from "is-electron";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { getSRPAttributes } from "../api/srp";
@@ -69,9 +67,10 @@ export default function Credentials({ appContext, appName }: PageProps) {
             }
             setUser(user);
             let key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
-            if (!key && isElectron()) {
+            const electron = globalThis.electron;
+            if (!key && electron) {
                 try {
-                    key = await ElectronAPIs.getEncryptionKey();
+                    key = await electron.getEncryptionKey();
                 } catch (e) {
                     log.error("getEncryptionKey failed", e);
                 }
