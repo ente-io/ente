@@ -38,9 +38,9 @@ export const getAllLocalEmbeddings = async () => {
     return embeddings;
 };
 
-export const getLocalEmbeddings = async (model: Model) => {
+export const getLocalEmbeddings = async () => {
     const embeddings = await getAllLocalEmbeddings();
-    return embeddings.filter((embedding) => embedding.model === model);
+    return embeddings.filter((embedding) => embedding.model === Model.ONNX_CLIP);
 };
 
 const getModelEmbeddingSyncTime = async (model: Model) => {
