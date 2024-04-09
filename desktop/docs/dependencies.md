@@ -111,11 +111,12 @@ watcher for the watch folders functionality.
 
 ### AI/ML
 
--   [onnxruntime-node](https://github.com/Microsoft/onnxruntime)
--   html-entities is used by the bundled clip-bpe-ts.
--   GGML binaries are bundled
--   We also use [jpeg-js](https://github.com/jpeg-js/jpeg-js#readme) for
-    conversion of all images to JPEG before processing.
+-   [onnxruntime-node](https://github.com/Microsoft/onnxruntime) is used for
+    natural language searches based on CLIP.
+-   html-entities is used by the bundled clip-bpe-ts tokenizer.
+-   [jpeg-js](https://github.com/jpeg-js/jpeg-js#readme) is used for decoding
+    JPEG data into raw RGB bytes before passing it to ONNX.
+-   GGML binaries are bundled.
 
 ## ZIP
 

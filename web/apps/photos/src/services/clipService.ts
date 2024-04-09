@@ -58,7 +58,7 @@ export interface ClipExtractionStatus {
  * Currently supported runtimes are:
  *
  * - [GGML](https://github.com/monatis/clip.cpp)
- * - [ONNX](https://onnx.ai)
+ * - [ONNX](https://onnxruntime.ai)
  *
  * Both these currently have one (and only one) associated model.
  */
