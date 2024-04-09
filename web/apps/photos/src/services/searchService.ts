@@ -22,7 +22,7 @@ import { getAllPeople } from "utils/machineLearning";
 import { getMLSyncConfig } from "utils/machineLearning/config";
 import { getFormattedDate } from "utils/search";
 import mlIDbStorage from "utils/storage/mlIDbStorage";
-import { ClipService, computeClipMatchScore } from "./clipService";
+import { clipService, computeClipMatchScore } from "./clip-service";
 import { getLocalEmbeddings } from "./embeddingService";
 import { getLatestEntities } from "./entityService";
 import locationSearchService, { City } from "./locationSearchService";
@@ -305,7 +305,7 @@ async function getThingSuggestion(searchPhrase: string): Promise<Suggestion[]> {
 
 async function getClipSuggestion(searchPhrase: string): Promise<Suggestion> {
     try {
-        if (!ClipService.isPlatformSupported()) {
+        if (!clipService.isPlatformSupported()) {
             return null;
         }
 
@@ -397,7 +397,7 @@ async function searchThing(searchPhrase: string) {
 
 async function searchClip(searchPhrase: string): Promise<ClipSearchScores> {
     const imageEmbeddings = await getLocalEmbeddings(Model.ONNX_CLIP);
-    const textEmbedding = await ClipService.getTextEmbedding(searchPhrase);
+    const textEmbedding = await clipService.getTextEmbedding(searchPhrase);
     const clipSearchResult = new Map<number, number>(
         (
             await Promise.all(

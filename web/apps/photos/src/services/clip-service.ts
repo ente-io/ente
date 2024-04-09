@@ -403,7 +403,7 @@ class ClipServiceImpl {
     };
 }
 
-export const ClipService = new ClipServiceImpl();
+export const clipService = new ClipServiceImpl();
 
 const getNonClipEmbeddingExtractedFiles = async (
     files: EnteFile[],

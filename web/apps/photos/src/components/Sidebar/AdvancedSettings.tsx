@@ -14,7 +14,7 @@ import { EnteMenuItem } from "components/Menu/EnteMenuItem";
 import { MenuItemGroup } from "components/Menu/MenuItemGroup";
 import isElectron from "is-electron";
 import { AppContext } from "pages/_app";
-import { ClipExtractionStatus, ClipService } from "services/clipService";
+import { ClipExtractionStatus, clipService } from "services/clip-service";
 import { formatNumber } from "utils/number/format";
 
 export default function AdvancedSettings({ open, onClose, onRootClose }) {
@@ -51,8 +51,8 @@ export default function AdvancedSettings({ open, onClose, onRootClose }) {
 
     useEffect(() => {
         const main = async () => {
-            setIndexingStatus(await ClipService.getIndexingStatus());
-            ClipService.setOnUpdateHandler(setIndexingStatus);
+            setIndexingStatus(await clipService.getIndexingStatus());
+            clipService.setOnUpdateHandler(setIndexingStatus);
         };
         main();
     }, []);
