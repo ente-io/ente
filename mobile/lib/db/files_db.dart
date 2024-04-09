@@ -573,31 +573,43 @@ class FilesDB {
     bool applyOwnerCheck = false,
   }) async {
     final stopWatch = EnteWatch('getAllPendingOrUploadedFiles')..start();
-    late String whereQuery;
-    late List<Object?>? whereArgs;
+    final order = (asc ?? false ? 'ASC' : 'DESC');
+
+    late String query;
+    late List<Object?>? args;
     if (applyOwnerCheck) {
-      whereQuery = '$columnCreationTime >= ? AND $columnCreationTime <= ? '
+      query =
+          'SELECT * FROM $filesTable WHERE $columnCreationTime >= ? AND $columnCreationTime <= ? '
           'AND ($columnOwnerID IS NULL OR $columnOwnerID = ?) '
           'AND ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1)'
-          ' AND $columnMMdVisibility = ?';
-      whereArgs = [startTime, endTime, ownerID, visibility];
+          ' AND $columnMMdVisibility = ? ORDER BY $columnCreationTime $order, $columnModificationTime $order';
+
+      args = [startTime, endTime, ownerID, visibility];
     } else {
-      whereQuery =
-          '$columnCreationTime >= ? AND $columnCreationTime <= ? AND ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1)'
-          ' AND $columnMMdVisibility = ?';
-      whereArgs = [startTime, endTime, visibility];
+      query =
+          'SELECT * FROM $filesTable WHERE $columnCreationTime >= ? AND $columnCreationTime <= ? '
+          'AND ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1)'
+          ' AND $columnMMdVisibility = ? ORDER BY $columnCreationTime $order, $columnModificationTime $order';
+      args = [startTime, endTime, visibility];
     }
 
-    final db = await instance.database;
-    final order = (asc ?? false ? 'ASC' : 'DESC');
-    final results = await db.query(
-      filesTable,
-      where: whereQuery,
-      whereArgs: whereArgs,
-      orderBy:
-          '$columnCreationTime ' + order + ', $columnModificationTime ' + order,
-      limit: limit,
+    if (limit != null) {
+      query += ' LIMIT ?';
+      args.add(limit);
+    }
+
+    _logger.info(
+      "--------------------------- getAllPendingOrUploadedFilesSqliteAsync with limit: $limit",
     );
+    final stopwatch = Stopwatch()..start();
+
+    final db = await instance.sqliteAsyncDB;
+    final results = await db.getAll(query, args);
+    _logger.info(
+      "------------------------getAllPendingOrUploadedFilesSqliteAsync query took ${stopwatch.elapsedMilliseconds} ms",
+    );
+    stopwatch.stop();
+    _logger.info("message");
     stopWatch.log('queryDone');
     final files = convertToFiles(results);
     stopWatch.log('convertDone');
@@ -1600,8 +1612,9 @@ class FilesDB {
     Set<int> collectionsToIgnore, {
     bool dedupeByUploadId = true,
   }) async {
+    final stopwatch = Stopwatch()..start();
+    _logger.info("-------------------- getAllFilesFromDB");
     final db = await instance.sqliteAsyncDB;
-
     final result = await db.getAll(
       'SELECT * FROM $filesTable ORDER BY $columnCreationTime DESC',
     );
@@ -1615,6 +1628,10 @@ class FilesDB {
         dedupeUploadID: dedupeByUploadId,
       ),
     );
+    _logger.info(
+      "---------------------------- getAllFilesFromDB took ${stopwatch.elapsedMilliseconds} ms",
+    );
+    stopwatch.stop();
     return deduplicatedFiles;
   }
 
