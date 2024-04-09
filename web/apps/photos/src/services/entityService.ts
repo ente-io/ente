@@ -1,5 +1,5 @@
+import log from "@/next/log";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
-import { addLogLine } from "@ente/shared/logging";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { getEndpoint } from "@ente/shared/network/api";
 import localForage from "@ente/shared/storage/localForage";
@@ -108,11 +108,11 @@ export const syncEntities = async () => {
 const syncEntity = async <T>(type: EntityType): Promise<Entity<T>> => {
     try {
         let entities = await getLocalEntity(type);
-        addLogLine(
+        log.info(
             `Syncing ${type} entities localEntitiesCount: ${entities.length}`,
         );
         let syncTime = await getEntityLastSyncTime(type);
-        addLogLine(`Syncing ${type} entities syncTime: ${syncTime}`);
+        log.info(`Syncing ${type} entities syncTime: ${syncTime}`);
         let response: EntitySyncDiffResponse;
         do {
             response = await getEntityDiff(type, syncTime);
@@ -156,7 +156,7 @@ const syncEntity = async <T>(type: EntityType): Promise<Entity<T>> => {
             }
             await localForage.setItem(ENTITY_TABLES[type], nonDeletedEntities);
             await localForage.setItem(ENTITY_SYNC_TIME_TABLES[type], syncTime);
-            addLogLine(
+            log.info(
                 `Syncing ${type} entities syncedEntitiesCount: ${nonDeletedEntities.length}`,
             );
         } while (response.diff.length === DIFF_LIMIT);

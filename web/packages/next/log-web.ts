@@ -1,5 +1,5 @@
 import { isDevBuild } from "@/next/env";
-import { addLogLine } from "@ente/shared/logging";
+import log from "@/next/log";
 
 /**
  * Log a standard startup banner.
@@ -15,7 +15,7 @@ export const logStartupBanner = (appId: string, userId?: number) => {
     const sha = process.env.GIT_SHA;
     const buildId = isDevBuild ? "dev " : sha ? `git ${sha} ` : "";
 
-    addLogLine(`Starting ente-${appIdL}-web ${buildId}uid ${userId ?? 0}`);
+    log.info(`Starting ente-${appIdL}-web ${buildId}uid ${userId ?? 0}`);
 };
 
 interface LogEntry {

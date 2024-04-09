@@ -5,7 +5,6 @@ import { getDedicatedCryptoWorker } from "@ente/shared/crypto";
 import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
 import { CustomError } from "@ente/shared/error";
 import { Events, eventBus } from "@ente/shared/events";
-import { addLogLine } from "@ente/shared/logging";
 import { Remote } from "comlink";
 import { UPLOAD_RESULT, UPLOAD_STAGES } from "constants/upload";
 import isElectron from "is-electron";
@@ -124,7 +123,7 @@ class UploadManager {
             this.uploadInProgress = true;
             await this.updateExistingFilesAndCollections(collections);
             this.uploaderName = uploaderName;
-            addLogLine(
+            log.info(
                 `received ${filesWithCollectionToUploadIn.length} files to upload`,
             );
             uiService.setFilenames(
@@ -137,8 +136,8 @@ class UploadManager {
             );
             const { metadataJSONFiles, mediaFiles } =
                 segregateMetadataAndMediaFiles(filesWithCollectionToUploadIn);
-            addLogLine(`has ${metadataJSONFiles.length} metadata json files`);
-            addLogLine(`has ${mediaFiles.length} media files`);
+            log.info(`has ${metadataJSONFiles.length} metadata json files`);
+            log.info(`has ${mediaFiles.length} media files`);
             if (metadataJSONFiles.length) {
                 UIService.setUploadStage(
                     UPLOAD_STAGES.READING_GOOGLE_METADATA_FILES,
@@ -150,11 +149,11 @@ class UploadManager {
                 );
             }
             if (mediaFiles.length) {
-                addLogLine(`clusterLivePhotoFiles started`);
+                log.info(`clusterLivePhotoFiles started`);
                 const analysedMediaFiles =
                     await UploadService.clusterLivePhotoFiles(mediaFiles);
-                addLogLine(`clusterLivePhotoFiles ended`);
-                addLogLine(
+                log.info(`clusterLivePhotoFiles ended`);
+                log.info(
                     `got live photos: ${
                         mediaFiles.length !== analysedMediaFiles.length
                     }`,
@@ -205,7 +204,7 @@ class UploadManager {
 
     private async parseMetadataJSONFiles(metadataFiles: FileWithCollection[]) {
         try {
-            addLogLine(`parseMetadataJSONFiles function executed `);
+            log.info(`parseMetadataJSONFiles function executed `);
 
             UIService.reset(metadataFiles.length);
 
@@ -214,7 +213,7 @@ class UploadManager {
                     if (uploadCancelService.isUploadCancelationRequested()) {
                         throw Error(CustomError.UPLOAD_CANCELLED);
                     }
-                    addLogLine(
+                    log.info(
                         `parsing metadata json file ${getFileNameSize(file)}`,
                     );
 
@@ -229,7 +228,7 @@ class UploadManager {
                         );
                         UIService.increaseFileUploaded();
                     }
-                    addLogLine(
+                    log.info(
                         `successfully parsed metadata json file ${getFileNameSize(
                             file,
                         )}`,
@@ -240,7 +239,7 @@ class UploadManager {
                     } else {
                         // and don't break for subsequent files just log and move on
                         log.error("parsing failed for a file", e);
-                        addLogLine(
+                        log.info(
                             `failed to parse metadata json file ${getFileNameSize(
                                 file,
                             )} error: ${e.message}`,
@@ -257,7 +256,7 @@ class UploadManager {
     }
 
     private async uploadMediaFiles(mediaFiles: FileWithCollection[]) {
-        addLogLine(`uploadMediaFiles called`);
+        log.info(`uploadMediaFiles called`);
         this.filesToBeUploaded = [...this.filesToBeUploaded, ...mediaFiles];
 
         if (isElectron()) {
@@ -321,7 +320,7 @@ class UploadManager {
     ) {
         try {
             let decryptedFile: EnteFile;
-            addLogLine(
+            log.info(
                 `post upload action -> fileUploadResult: ${fileUploadResult} uploadedFile present ${!!uploadedFile}`,
             );
             await this.updateElectronRemainingFiles(fileWithCollection);
@@ -397,7 +396,7 @@ class UploadManager {
     }
 
     public cancelRunningUpload() {
-        addLogLine("user cancelled running upload");
+        log.info("user cancelled running upload");
         UIService.setUploadStage(UPLOAD_STAGES.CANCELLING);
         uploadCancelService.requestUploadCancelation();
     }

@@ -8,7 +8,6 @@ import { getActualKey } from "@ente/shared/user";
 import { KeyAttributes } from "@ente/shared/user/types";
 import isElectron from "is-electron";
 import ComlinkCryptoWorker from ".";
-import { addLogLine } from "../logging";
 
 const LOGIN_SUB_KEY_LENGTH = 32;
 const LOGIN_SUB_KEY_ID = 1;
@@ -104,7 +103,6 @@ export const saveKeyInSessionStore = async (
     const sessionKeyAttributes =
         await cryptoWorker.generateKeyAndEncryptToB64(key);
     setKey(keyType, sessionKeyAttributes);
-    addLogLine("fromDesktop", fromDesktop);
     if (
         isElectron() &&
         !fromDesktop &&

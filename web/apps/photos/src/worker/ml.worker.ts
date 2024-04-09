@@ -1,4 +1,4 @@
-import { addLogLine } from "@ente/shared/logging";
+import log from "@/next/log";
 import { expose } from "comlink";
 import mlService from "services/machineLearning/machineLearningService";
 import { EnteFile } from "types/file";
@@ -6,7 +6,7 @@ import { MachineLearningWorker } from "types/machineLearning";
 
 export class DedicatedMLWorker implements MachineLearningWorker {
     constructor() {
-        addLogLine("DedicatedMLWorker constructor called");
+        log.info("DedicatedMLWorker constructor called");
     }
 
     public async closeLocalSyncContext() {

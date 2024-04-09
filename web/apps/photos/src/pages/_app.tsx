@@ -26,7 +26,6 @@ import AppNavbar from "@ente/shared/components/Navbar/app";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { Events, eventBus } from "@ente/shared/events";
 import { useLocalState } from "@ente/shared/hooks/useLocalState";
-import { addLogLine } from "@ente/shared/logging";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import {
@@ -213,10 +212,10 @@ export default function App({ Component, pageProps }: AppProps) {
         }
         const initExport = async () => {
             try {
-                addLogLine("init export");
+                log.info("init export");
                 const token = getToken();
                 if (!token) {
-                    addLogLine(
+                    log.info(
                         "User not logged in, not starting export continuous sync job",
                     );
                     return;
@@ -237,7 +236,7 @@ export default function App({ Component, pageProps }: AppProps) {
                     exportService.enableContinuousExport();
                 }
                 if (isExportInProgress(exportRecord.stage)) {
-                    addLogLine("export was in progress, resuming");
+                    log.info("export was in progress, resuming");
                     exportService.scheduleExport();
                 }
             } catch (e) {

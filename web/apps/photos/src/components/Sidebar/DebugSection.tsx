@@ -1,13 +1,12 @@
+import log from "@/next/log";
+import { savedLogs } from "@/next/log-web";
+import { downloadAsFile } from "@ente/shared/utils";
+import Typography from "@mui/material/Typography";
+import { EnteMenuItem } from "components/Menu/EnteMenuItem";
 import { t } from "i18next";
 import { AppContext } from "pages/_app";
 import { useContext, useEffect, useState } from "react";
 import { Trans } from "react-i18next";
-
-import { savedLogs } from "@/next/log-web";
-import { addLogLine } from "@ente/shared/logging";
-import { downloadAsFile } from "@ente/shared/utils";
-import Typography from "@mui/material/Typography";
-import { EnteMenuItem } from "components/Menu/EnteMenuItem";
 import { isInternalUser } from "utils/user";
 import { testUpload } from "../../../tests/upload.test";
 import {
@@ -40,7 +39,7 @@ export default function DebugSection() {
         });
 
     const downloadLogs = () => {
-        addLogLine("Downloading logs");
+        log.info("Downloading logs");
         if (electron) electron.openLogDirectory();
         else downloadAsFile(`debug_logs_${Date.now()}.txt`, savedLogs());
     };

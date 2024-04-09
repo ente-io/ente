@@ -1,7 +1,6 @@
 import ElectronAPIs from "@/next/electron";
 import log from "@/next/log";
 import { CustomError } from "@ente/shared/error";
-import { addLogLine } from "@ente/shared/logging";
 import { getAlbumsURL } from "@ente/shared/network/api";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import { getUnixTimeInMicroSecondsWithDelta } from "@ente/shared/time";
@@ -568,13 +567,13 @@ export const getOrCreateAlbum = async (
     }
     for (const collection of existingCollections) {
         if (isValidReplacementAlbum(collection, user, albumName)) {
-            addLogLine(
+            log.info(
                 `Found existing album ${albumName} with id ${collection.id}`,
             );
             return collection;
         }
     }
     const album = await createAlbum(albumName);
-    addLogLine(`Created new album ${albumName} with id ${album.id}`);
+    log.info(`Created new album ${albumName} with id ${album.id}`);
     return album;
 };

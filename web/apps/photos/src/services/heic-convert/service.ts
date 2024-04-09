@@ -2,7 +2,6 @@ import { convertBytesToHumanReadable } from "@/next/file";
 import log from "@/next/log";
 import { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { CustomError } from "@ente/shared/error";
-import { addLogLine } from "@ente/shared/logging";
 import { retryAsyncFunction } from "@ente/shared/utils";
 import QueueProcessor from "@ente/shared/utils/queueProcessor";
 import { getDedicatedConvertWorker } from "utils/comlink/ComlinkConvertWorker";
@@ -46,7 +45,7 @@ class HEICConverter {
                                         await worker.convertHEICToJPEG(
                                             fileBlob,
                                         );
-                                    addLogLine(
+                                    log.info(
                                         `originalFileSize:${convertBytesToHumanReadable(
                                             fileBlob?.size,
                                         )},convertedFileSize:${convertBytesToHumanReadable(

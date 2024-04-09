@@ -2,7 +2,6 @@ import log from "@/next/log";
 import { PHOTOS_PAGES } from "@ente/shared/constants/pages";
 import { CustomError } from "@ente/shared/error";
 import useMemoSingleThreaded from "@ente/shared/hooks/useMemoSingleThreaded";
-import { addLogLine } from "@ente/shared/logging";
 import { styled } from "@mui/material";
 import PhotoViewer from "components/PhotoViewer";
 import { TRASH_SECTION } from "constants/collection";
@@ -184,7 +183,7 @@ const PhotoFrame = ({
             const file = displayFiles[index];
             // this is to prevent outdated updateURL call from updating the wrong file
             if (file.id !== id) {
-                addLogLine(
+                log.info(
                     `[${id}]PhotoSwipe: updateURL: file id mismatch: ${file.id} !== ${id}`,
                 );
                 throw Error(CustomError.UPDATE_URL_FILE_ID_MISMATCH);
@@ -204,7 +203,7 @@ const PhotoFrame = ({
         const file = displayFiles[index];
         // this is to prevent outdate updateSrcURL call from updating the wrong file
         if (file.id !== id) {
-            addLogLine(
+            log.info(
                 `[${id}]PhotoSwipe: updateSrcURL: file id mismatch: ${file.id}`,
             );
             throw Error(CustomError.UPDATE_URL_FILE_ID_MISMATCH);
@@ -212,7 +211,7 @@ const PhotoFrame = ({
         if (file.isSourceLoaded && !forceUpdate) {
             throw Error(CustomError.URL_ALREADY_SET);
         } else if (file.conversionFailed) {
-            addLogLine(`[${id}]PhotoSwipe: updateSrcURL: conversion failed`);
+            log.info(`[${id}]PhotoSwipe: updateSrcURL: conversion failed`);
             throw Error(CustomError.FILE_CONVERSION_FAILED);
         }
 
@@ -308,7 +307,7 @@ const PhotoFrame = ({
         index: number,
         item: EnteFile,
     ) => {
-        addLogLine(
+        log.info(
             `[${
                 item.id
             }] getSlideData called for thumbnail:${!!item.msrc} sourceLoaded:${
@@ -319,17 +318,15 @@ const PhotoFrame = ({
         if (!item.msrc) {
             try {
                 if (thumbFetching[item.id]) {
-                    addLogLine(
-                        `[${item.id}] thumb download already in progress`,
-                    );
+                    log.info(`[${item.id}] thumb download already in progress`);
                     return;
                 }
-                addLogLine(`[${item.id}] doesn't have thumbnail`);
+                log.info(`[${item.id}] doesn't have thumbnail`);
                 thumbFetching[item.id] = true;
                 const url = await DownloadManager.getThumbnailForPreview(item);
                 try {
                     updateURL(index)(item.id, url);
-                    addLogLine(
+                    log.info(
                         `[${
                             item.id
                         }] calling invalidateCurrItems for thumbnail msrc :${!!item.msrc}`,
@@ -355,20 +352,20 @@ const PhotoFrame = ({
 
         if (item.isSourceLoaded || item.conversionFailed) {
             if (item.isSourceLoaded) {
-                addLogLine(`[${item.id}] source already loaded`);
+                log.info(`[${item.id}] source already loaded`);
             }
             if (item.conversionFailed) {
-                addLogLine(`[${item.id}] conversion failed`);
+                log.info(`[${item.id}] conversion failed`);
             }
             return;
         }
         if (fetching[item.id]) {
-            addLogLine(`[${item.id}] file download already in progress`);
+            log.info(`[${item.id}] file download already in progress`);
             return;
         }
 
         try {
-            addLogLine(`[${item.id}] new file src request`);
+            log.info(`[${item.id}] new file src request`);
             fetching[item.id] = true;
             const srcURLs = await DownloadManager.getFileForPreview(item);
             if (item.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
@@ -383,7 +380,7 @@ const PhotoFrame = ({
                 };
                 try {
                     await updateSrcURL(index, item.id, dummyImgSrcUrl);
-                    addLogLine(
+                    log.info(
                         `[${item.id}] calling invalidateCurrItems for live photo imgSrc, source loaded :${item.isSourceLoaded}`,
                     );
                     instance.invalidateCurrItems();
@@ -417,7 +414,7 @@ const PhotoFrame = ({
                         loadedLivePhotoSrcURL,
                         true,
                     );
-                    addLogLine(
+                    log.info(
                         `[${item.id}] calling invalidateCurrItems for live photo complete, source loaded :${item.isSourceLoaded}`,
                     );
                     instance.invalidateCurrItems();
@@ -435,7 +432,7 @@ const PhotoFrame = ({
             } else {
                 try {
                     await updateSrcURL(index, item.id, srcURLs);
-                    addLogLine(
+                    log.info(
                         `[${item.id}] calling invalidateCurrItems for src, source loaded :${item.isSourceLoaded}`,
                     );
                     instance.invalidateCurrItems();
@@ -478,7 +475,7 @@ const PhotoFrame = ({
         }
         try {
             updateURL(index)(item.id, item.msrc, true);
-            addLogLine(
+            log.info(
                 `[${
                     item.id
                 }] calling invalidateCurrItems for thumbnail msrc :${!!item.msrc}`,
@@ -497,7 +494,7 @@ const PhotoFrame = ({
             // ignore
         }
         try {
-            addLogLine(
+            log.info(
                 `[${item.id}] new file getConvertedVideo request- ${item.metadata.title}}`,
             );
             fetching[item.id] = true;
@@ -506,7 +503,7 @@ const PhotoFrame = ({
 
             try {
                 await updateSrcURL(index, item.id, srcURL, true);
-                addLogLine(
+                log.info(
                     `[${item.id}] calling invalidateCurrItems for src, source loaded :${item.isSourceLoaded}`,
                 );
                 instance.invalidateCurrItems();

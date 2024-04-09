@@ -1,7 +1,7 @@
+import log from "@/next/log";
 import { CacheStorageService } from ".";
 import { CACHES } from "./constants";
 import { LimitedCache } from "./types";
-import log from "@/next/log";
 
 export async function cached(
     cacheName: string,

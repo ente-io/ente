@@ -1,10 +1,9 @@
-import { addLogLine } from "@ente/shared/logging";
+import log from "@/next/log";
 import { promiseWithTimeout } from "@ente/shared/utils";
 import QueueProcessor from "@ente/shared/utils/queueProcessor";
 import { generateTempName } from "@ente/shared/utils/temp";
 import { createFFmpeg, FFmpeg } from "ffmpeg-wasm";
 import { getUint8ArrayView } from "services/readerService";
-import log from "@/next/log";
 
 const INPUT_PATH_PLACEHOLDER = "INPUT";
 const FFMPEG_PLACEHOLDER = "FFMPEG";
@@ -86,7 +85,7 @@ export class WasmFFmpeg {
                     return cmdPart;
                 }
             });
-            addLogLine(`${cmd}`);
+            log.info(`${cmd}`);
             await this.ffmpeg.run(...cmd);
             return new File(
                 [this.ffmpeg.FS("readFile", tempOutputFilePath)],

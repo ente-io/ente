@@ -1,4 +1,3 @@
-import { addLogLine } from "@ente/shared/logging";
 import { CacheStorageService } from "@ente/shared/storage/cacheStorage";
 import { CACHES } from "@ente/shared/storage/cacheStorage/constants";
 import { getBlobFromCache } from "@ente/shared/storage/cacheStorage/helpers";
@@ -105,7 +104,7 @@ export async function removeOldFaceCrops(
 }
 
 export async function removeFaceCropUrls(faceCropUrls: Array<string>) {
-    addLogLine("Removing face crop urls: ", JSON.stringify(faceCropUrls));
+    log.info("Removing face crop urls: ", JSON.stringify(faceCropUrls));
     const faceCropCache = await CacheStorageService.open(CACHES.FACE_CROPS);
     const urlRemovalPromises = faceCropUrls?.map((url) =>
         faceCropCache.delete(url),
@@ -132,7 +131,7 @@ export function extractFaceImageFromCrop(
         .shift(-imageBox.x, -imageBox.y)
         .rescale(scale)
         .round();
-    // addLogLine({ box, imageBox, faceCropImage, scale, scaledBox, scaledImageBox, shiftedBox });
+    // log.info({ box, imageBox, faceCropImage, scale, scaledBox, scaledImageBox, shiftedBox });
 
     const faceSizeDimentions: Dimensions = {
         width: faceSize,

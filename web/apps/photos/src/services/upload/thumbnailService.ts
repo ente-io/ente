@@ -2,7 +2,6 @@ import ElectronAPIs from "@/next/electron";
 import { convertBytesToHumanReadable, getFileNameSize } from "@/next/file";
 import log from "@/next/log";
 import { CustomError } from "@ente/shared/error";
-import { addLogLine } from "@ente/shared/logging";
 import { FILE_TYPE } from "constants/file";
 import { BLACK_THUMBNAIL_BASE64 } from "constants/upload";
 import isElectron from "is-electron";
@@ -104,7 +103,7 @@ const generateImageThumbnailInElectron = async (
             maxDimension,
             maxSize,
         );
-        addLogLine(
+        log.info(
             `originalFileSize:${convertBytesToHumanReadable(
                 inputFile?.size,
             )},thumbFileSize:${convertBytesToHumanReadable(
@@ -136,12 +135,12 @@ export async function generateImageThumbnailUsingCanvas(
     let timeout = null;
     const isHEIC = isFileHEIC(fileTypeInfo.exactType);
     if (isHEIC) {
-        addLogLine(`HEICConverter called for ${getFileNameSize(file)}`);
+        log.info(`HEICConverter called for ${getFileNameSize(file)}`);
         const convertedBlob = await HeicConversionService.convert(
             new Blob([await file.arrayBuffer()]),
         );
         file = new File([convertedBlob], file.name);
-        addLogLine(`${getFileNameSize(file)} successfully converted`);
+        log.info(`${getFileNameSize(file)} successfully converted`);
     }
     let image = new Image();
     imageURL = URL.createObjectURL(new Blob([await file.arrayBuffer()]));
@@ -192,17 +191,17 @@ async function generateVideoThumbnail(
 ) {
     let thumbnail: Uint8Array;
     try {
-        addLogLine(
+        log.info(
             `ffmpeg generateThumbnail called for ${getFileNameSize(file)}`,
         );
 
         const thumbnail = await FFmpegService.generateVideoThumbnail(file);
-        addLogLine(
+        log.info(
             `ffmpeg thumbnail successfully generated ${getFileNameSize(file)}`,
         );
         return await getUint8ArrayView(thumbnail);
     } catch (e) {
-        addLogLine(
+        log.info(
             `ffmpeg thumbnail generated failed  ${getFileNameSize(
                 file,
             )} error: ${e.message}`,

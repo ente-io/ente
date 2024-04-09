@@ -1,4 +1,3 @@
-import { addLogLine } from "@ente/shared/logging";
 import { Face, MLSyncContext, Person } from "types/machineLearning";
 import {
     findFirstIfSorted,
@@ -20,7 +19,7 @@ class PeopleService {
                 syncContext.faceClusteringService.method,
             )
         ) {
-            addLogLine(
+            log.info(
                 "[MLService] Skipping people index as already synced to latest version",
             );
             return;
@@ -84,7 +83,7 @@ class PeopleService {
             faces.forEach((face) => {
                 face.personId = person.id;
             });
-            // addLogLine("Creating person: ", person, faces);
+            // log.info("Creating person: ", person, faces);
         }
 
         await mlIDbStorage.updateFaces(allFacesMap);

@@ -1,6 +1,5 @@
 import { haveWindow } from "@/next/env";
 import log from "@/next/log";
-import { addLogLine } from "@ente/shared/logging";
 import {
     DEFAULT_ML_SEARCH_CONFIG,
     DEFAULT_ML_SYNC_CONFIG,
@@ -129,7 +128,7 @@ class MLIDbStorage {
                         .objectStore("configs")
                         .add(DEFAULT_ML_SEARCH_CONFIG, ML_SEARCH_CONFIG_NAME);
                 }
-                addLogLine(
+                log.info(
                     `Ml DB upgraded to version: ${newVersion} from version: ${oldVersion}`,
                 );
             },
@@ -139,7 +138,7 @@ class MLIDbStorage {
     public get db(): Promise<IDBPDatabase<MLDb>> {
         if (!this._db) {
             this._db = this.openDB();
-            addLogLine("Opening Ml DB");
+            log.info("Opening Ml DB");
         }
 
         return this._db;
@@ -149,7 +148,7 @@ class MLIDbStorage {
         const db = await this.db;
         db.close();
         await deleteDB(MLDATA_DB_NAME);
-        addLogLine("Cleared Ml DB");
+        log.info("Cleared Ml DB");
         this._db = undefined;
         await this.db;
     }
@@ -278,7 +277,7 @@ class MLIDbStorage {
                 mlFileData.faces &&
                 allFacesMap.set(mlFileData.fileId, mlFileData.faces),
         );
-        addLogLine("getAllFacesMap", Date.now() - startTime, "ms");
+        log.info("getAllFacesMap", Date.now() - startTime, "ms");
 
         return allFacesMap;
     }
@@ -297,7 +296,7 @@ class MLIDbStorage {
             cursor = await cursor.continue();
         }
         await tx.done;
-        addLogLine("updateFaces", Date.now() - startTime, "ms");
+        log.info("updateFaces", Date.now() - startTime, "ms");
     }
 
     public async getAllObjectsMap() {
@@ -310,7 +309,7 @@ class MLIDbStorage {
                 mlFileData.objects &&
                 allObjectsMap.set(mlFileData.fileId, mlFileData.objects),
         );
-        addLogLine("allObjectsMap", Date.now() - startTime, "ms");
+        log.info("allObjectsMap", Date.now() - startTime, "ms");
 
         return allObjectsMap;
     }

@@ -1,24 +1,21 @@
-import { sendOtt } from "@ente/accounts/api/user";
-import { isWeakPassword } from "@ente/accounts/utils";
-import { generateKeyAndSRPAttributes } from "@ente/accounts/utils/srp";
-import SubmitButton from "@ente/shared/components/SubmitButton";
-import {
-    generateAndSaveIntermediateKeyAttributes,
-    saveKeyInSessionStore,
-} from "@ente/shared/crypto/helpers";
-import { LS_KEYS, setData } from "@ente/shared/storage/localStorage";
-import { Formik, FormikHelpers } from "formik";
-import React, { useState } from "react";
-import * as Yup from "yup";
 import log from "@/next/log";
+import { sendOtt } from "@ente/accounts/api/user";
 import { PasswordStrengthHint } from "@ente/accounts/components/PasswordStrength";
 import { PAGES } from "@ente/accounts/constants/pages";
+import { isWeakPassword } from "@ente/accounts/utils";
+import { generateKeyAndSRPAttributes } from "@ente/accounts/utils/srp";
 import { APPS } from "@ente/shared/apps/constants";
 import { VerticallyCentered } from "@ente/shared/components//Container";
 import FormPaperFooter from "@ente/shared/components/Form/FormPaper/Footer";
 import FormPaperTitle from "@ente/shared/components/Form/FormPaper/Title";
 import ShowHidePassword from "@ente/shared/components/Form/ShowHidePassword";
 import LinkButton from "@ente/shared/components/LinkButton";
+import SubmitButton from "@ente/shared/components/SubmitButton";
+import {
+    generateAndSaveIntermediateKeyAttributes,
+    saveKeyInSessionStore,
+} from "@ente/shared/crypto/helpers";
+import { LS_KEYS, setData } from "@ente/shared/storage/localStorage";
 import {
     setJustSignedUp,
     setLocalReferralSource,
@@ -37,9 +34,12 @@ import {
     Tooltip,
     Typography,
 } from "@mui/material";
+import { Formik, FormikHelpers } from "formik";
 import { t } from "i18next";
 import { NextRouter } from "next/router";
+import React, { useState } from "react";
 import { Trans } from "react-i18next";
+import * as Yup from "yup";
 
 interface FormValues {
     email: string;

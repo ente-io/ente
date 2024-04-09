@@ -6,7 +6,6 @@ import {
     Versioned,
 } from "types/machineLearning";
 
-import { addLogLine } from "@ente/shared/logging";
 import * as SSDMobileNet from "@tensorflow-models/coco-ssd";
 import { OBJECT_DETECTION_IMAGE_SIZE } from "constants/mlConfig";
 import { resizeToSquare } from "utils/image";
@@ -28,7 +27,7 @@ class SSDMobileNetV2 implements ObjectDetectionService {
             base: "mobilenet_v2",
             modelUrl: "/models/ssdmobilenet/model.json",
         });
-        addLogLine("loaded ssdMobileNetV2Model", tf.getBackend());
+        log.info("loaded ssdMobileNetV2Model", tf.getBackend());
     }
 
     private async getSSDMobileNetV2Model() {

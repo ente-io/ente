@@ -1,6 +1,5 @@
 import log from "@/next/log";
 import { CustomError } from "@ente/shared/error";
-import { addLogLine } from "@ente/shared/logging";
 import * as chrono from "chrono-node";
 import { FILE_TYPE } from "constants/file";
 import { t } from "i18next";
@@ -382,7 +381,7 @@ async function searchLocationTag(searchPhrase: string): Promise<LocationTag[]> {
         locationTag.data.name.toLowerCase().includes(searchPhrase),
     );
     if (matchedLocationTags.length > 0) {
-        addLogLine(
+        log.info(
             `Found ${matchedLocationTags.length} location tags for search phrase`,
         );
     }

@@ -1,22 +1,20 @@
-import { EnteFile } from "types/file";
-import {
-    generateStreamFromArrayBuffer,
-    getRenderableFileURL,
-} from "utils/file";
-
 import log from "@/next/log";
 import { APPS } from "@ente/shared/apps/constants";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
 import { CustomError } from "@ente/shared/error";
 import { Events, eventBus } from "@ente/shared/events";
-import { addLogLine } from "@ente/shared/logging";
 import { CacheStorageService } from "@ente/shared/storage/cacheStorage";
 import { CACHES } from "@ente/shared/storage/cacheStorage/constants";
 import { LimitedCache } from "@ente/shared/storage/cacheStorage/types";
 import { Remote } from "comlink";
 import { FILE_TYPE } from "constants/file";
 import isElectron from "is-electron";
+import { EnteFile } from "types/file";
+import {
+    generateStreamFromArrayBuffer,
+    getRenderableFileURL,
+} from "utils/file";
 import { isInternalUser } from "utils/user";
 import { PhotosDownloadClient } from "./clients/photos";
 import { PublicAlbumsDownloadClient } from "./clients/publicAlbums";
@@ -80,7 +78,7 @@ class DownloadManagerImpl {
     ) {
         try {
             if (this.ready) {
-                addLogLine("DownloadManager already initialized");
+                log.info("DownloadManager already initialized");
                 return;
             }
             this.downloadClient = createDownloadClient(app, tokens, timeout);
@@ -97,7 +95,7 @@ class DownloadManagerImpl {
 
     private async logoutHandler() {
         try {
-            addLogLine("downloadManger logoutHandler started");
+            log.info("downloadManger logoutHandler started");
             this.ready = false;
             this.cryptoWorker = null;
             this.downloadClient = null;
@@ -106,7 +104,7 @@ class DownloadManagerImpl {
             this.thumbnailObjectURLPromises.clear();
             this.fileDownloadProgress.clear();
             this.progressUpdater = () => {};
-            addLogLine("downloadManager logoutHandler completed");
+            log.info("downloadManager logoutHandler completed");
         } catch (e) {
             log.error("downloadManager logoutHandler failed", e);
         }
@@ -300,7 +298,7 @@ class DownloadManagerImpl {
         file: EnteFile,
     ): Promise<ReadableStream<Uint8Array>> {
         try {
-            addLogLine(`download attempted for fileID:${file.id}`);
+            log.info(`download attempted for fileID:${file.id}`);
             const onDownloadProgress = this.trackDownloadProgress(
                 file.id,
                 file.info?.fileSize,

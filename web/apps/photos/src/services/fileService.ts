@@ -1,11 +1,9 @@
-import { getEndpoint } from "@ente/shared/network/api";
-import localForage from "@ente/shared/storage/localForage";
-
 import log from "@/next/log";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { Events, eventBus } from "@ente/shared/events";
-import { addLogLine } from "@ente/shared/logging";
 import HTTPService from "@ente/shared/network/HTTPService";
+import { getEndpoint } from "@ente/shared/network/api";
+import localForage from "@ente/shared/storage/localForage";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { REQUEST_BATCH_SIZE } from "constants/api";
 import { Collection } from "types/collection";
@@ -57,7 +55,7 @@ const setLocalFiles = async (type: "normal" | "hidden", files: EnteFile[]) => {
                 `failed to save files to indexedDB (storageEstimate was ${storageEstimate}`,
                 e1,
             );
-            addLogLine(`storage estimate ${JSON.stringify(storageEstimate)}`);
+            log.info(`storage estimate ${JSON.stringify(storageEstimate)}`);
         } catch (e2) {
             log.error("failed to save files to indexedDB", e1);
             log.error("failed to get storage stats", e2);

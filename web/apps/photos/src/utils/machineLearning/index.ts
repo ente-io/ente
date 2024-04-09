@@ -1,4 +1,3 @@
-import { addLogLine } from "@ente/shared/logging";
 import { CACHES } from "@ente/shared/storage/cacheStorage/constants";
 import { cached } from "@ente/shared/storage/cacheStorage/helpers";
 import * as tf from "@tensorflow/tfjs-core";
@@ -130,7 +129,7 @@ export function extractFaces(
             ];
         });
 
-        // addLogLine('boxes: ', boxes[0]);
+        // log.info('boxes: ', boxes[0]);
 
         const faceImagesTensor = tf.image.cropAndResize(
             reshapedImage,
@@ -356,14 +355,14 @@ export async function getOriginalImageBitmap(
     } else {
         fileBlob = await getOriginalConvertedFile(file, queue);
     }
-    addLogLine("[MLService] Got file: ", file.id.toString());
+    log.info("[MLService] Got file: ", file.id.toString());
 
     return getImageBlobBitmap(fileBlob);
 }
 
 export async function getThumbnailImageBitmap(file: EnteFile) {
     const thumb = await DownloadManager.getThumbnail(file);
-    addLogLine("[MLService] Got thumbnail: ", file.id.toString());
+    log.info("[MLService] Got thumbnail: ", file.id.toString());
 
     return getImageBlobBitmap(new Blob([thumb]));
 }
@@ -380,7 +379,7 @@ export async function getLocalFileImageBitmap(
 export async function getPeopleList(file: EnteFile): Promise<Array<Person>> {
     let startTime = Date.now();
     const mlFileData: MlFileData = await mlIDbStorage.getFile(file.id);
-    addLogLine(
+    log.info(
         "getPeopleList:mlFilesStore:getItem",
         Date.now() - startTime,
         "ms",
@@ -395,18 +394,18 @@ export async function getPeopleList(file: EnteFile): Promise<Array<Person>> {
     if (!peopleIds || peopleIds.length < 1) {
         return [];
     }
-    // addLogLine("peopleIds: ", peopleIds);
+    // log.info("peopleIds: ", peopleIds);
     startTime = Date.now();
     const peoplePromises = peopleIds.map(
         (p) => mlIDbStorage.getPerson(p) as Promise<Person>,
     );
     const peopleList = await Promise.all(peoplePromises);
-    addLogLine(
+    log.info(
         "getPeopleList:mlPeopleStore:getItems",
         Date.now() - startTime,
         "ms",
     );
-    // addLogLine("peopleList: ", peopleList);
+    // log.info("peopleList: ", peopleList);
 
     return peopleList;
 }
@@ -514,7 +513,7 @@ export function getNearestPointIndex(
         (a, b) => Math.abs(a.distance) - Math.abs(b.distance),
     );
 
-    // addLogLine('Nearest dist: ', nearest.distance, maxDistance);
+    // log.info('Nearest dist: ', nearest.distance, maxDistance);
     if (!maxDistance || nearest.distance <= maxDistance) {
         return nearest.index;
     }
@@ -522,11 +521,11 @@ export function getNearestPointIndex(
 
 export function logQueueStats(queue: PQueue, name: string) {
     queue.on("active", () =>
-        addLogLine(
+        log.info(
             `queuestats: ${name}: Active, Size: ${queue.size} Pending: ${queue.pending}`,
         ),
     );
-    queue.on("idle", () => addLogLine(`queuestats: ${name}: Idle`));
+    queue.on("idle", () => log.info(`queuestats: ${name}: Idle`));
     queue.on("error", (error) =>
         console.error(`queuestats: ${name}: Error, `, error),
     );

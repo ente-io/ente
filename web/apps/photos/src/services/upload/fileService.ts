@@ -1,7 +1,6 @@
 import { getFileNameSize } from "@/next/file";
 import log from "@/next/log";
 import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
-import { addLogLine } from "@ente/shared/logging";
 import { Remote } from "comlink";
 import { FILE_READER_CHUNK_SIZE, MULTIPART_PART_SIZE } from "constants/upload";
 import { EncryptedMagicMetadata } from "types/magicMetadata";
@@ -46,7 +45,7 @@ export async function readFile(
         rawFile,
         fileTypeInfo,
     );
-    addLogLine(`reading file data ${getFileNameSize(rawFile)} `);
+    log.info(`reading file data ${getFileNameSize(rawFile)} `);
     let filedata: Uint8Array | DataStream;
     if (!(rawFile instanceof File)) {
         if (rawFile.size > MULTIPART_PART_SIZE) {
@@ -63,7 +62,7 @@ export async function readFile(
         filedata = await getUint8ArrayView(rawFile);
     }
 
-    addLogLine(`read file data successfully ${getFileNameSize(rawFile)} `);
+    log.info(`read file data successfully ${getFileNameSize(rawFile)} `);
 
     return {
         filedata,
