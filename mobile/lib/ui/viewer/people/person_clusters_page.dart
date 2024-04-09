@@ -3,9 +3,9 @@ import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/people_changed_event.dart";
-import "package:photos/face/db.dart";
 import "package:photos/face/model/person.dart";
 import "package:photos/models/file/file.dart";
+import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/viewer/file/no_thumbnail_widget.dart";
@@ -99,14 +99,13 @@ class _PersonClustersPageState extends State<PersonClustersPage> {
                                 GestureDetector(
                                   onTap: () async {
                                     try {
-                                      final int result = await FaceMLDataDB
-                                          .instance
+                                      await PersonService.instance
                                           .removeClusterToPerson(
                                         personID: widget.person.remoteID,
                                         clusterID: clusterID,
                                       );
                                       _logger.info(
-                                        "Removed cluster $clusterID from person ${widget.person.remoteID}, result: $result",
+                                        "Removed cluster $clusterID from person ${widget.person.remoteID}",
                                       );
                                       Bus.instance.fire(PeopleChangedEvent());
                                       setState(() {});

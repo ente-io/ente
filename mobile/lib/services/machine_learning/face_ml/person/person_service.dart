@@ -109,6 +109,24 @@ class PersonService {
     );
   }
 
+  Future<void> removeClusterToPerson({
+    required String personID,
+    required int clusterID,
+  }) async {
+    final person = (await getPerson(personID))!;
+    final personData = person.data;
+    personData.assigned!.removeWhere((element) => element.id != clusterID);
+    await entityService.addOrUpdate(
+      EntityType.person,
+      json.encode(personData.toJson()),
+      id: personID,
+    );
+    await faceMLDataDB.removeClusterToPerson(
+      personID: personID,
+      clusterID: clusterID,
+    );
+  }
+
   Future<void> deletePerson(String personID, {bool onlyMapping = true}) async {
     if (onlyMapping) {
       final PersonEntity? entity = await getPerson(personID);
