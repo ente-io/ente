@@ -48,7 +48,7 @@ class FaceClustering {
   bool isSpawned = false;
   bool isRunning = false;
 
-  static const kRecommendedDistanceThreshold = 0.3;
+  static const kRecommendedDistanceThreshold = 0.24;
 
   // singleton pattern
   FaceClustering._privateConstructor();

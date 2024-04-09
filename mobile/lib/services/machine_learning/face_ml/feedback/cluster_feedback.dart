@@ -453,7 +453,7 @@ class ClusterFeedbackService {
       final faceIdToCluster = await FaceClustering.instance.predictLinear(
         clusteringInput,
         fileIDToCreationTime: fileIDToCreationTime,
-        distanceThreshold: 0.275,
+        distanceThreshold: 0.23,
       );
 
       if (faceIdToCluster == null) {
