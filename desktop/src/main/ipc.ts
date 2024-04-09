@@ -17,9 +17,9 @@ import {
     updateAndRestart,
 } from "../services/appUpdater";
 import {
-    computeImageEmbedding,
-    computeTextEmbedding,
-} from "../services/clipService";
+    clipImageEmbedding,
+    clipTextEmbedding,
+} from "../services/clip-service";
 import { runFFmpegCmd } from "../services/ffmpeg";
 import { getDirFiles } from "../services/fs";
 import {
@@ -44,12 +44,7 @@ import {
     updateWatchMappingIgnoredFiles,
     updateWatchMappingSyncedFiles,
 } from "../services/watch";
-import type {
-    ElectronFile,
-    FILE_PATH_TYPE,
-    Model,
-    WatchMapping,
-} from "../types/ipc";
+import type { ElectronFile, FILE_PATH_TYPE, WatchMapping } from "../types/ipc";
 import {
     selectDirectory,
     showUploadDirsDialog,
@@ -148,14 +143,12 @@ export const attachIPCHandlers = () => {
 
     // - ML
 
-    ipcMain.handle(
-        "computeImageEmbedding",
-        (_, model: Model, imageData: Uint8Array) =>
-            computeImageEmbedding(model, imageData),
+    ipcMain.handle("clipImageEmbedding", (_, jpegImageData: Uint8Array) =>
+        clipImageEmbedding(jpegImageData),
     );
 
-    ipcMain.handle("computeTextEmbedding", (_, model: Model, text: string) =>
-        computeTextEmbedding(model, text),
+    ipcMain.handle("clipTextEmbedding", (_, text: string) =>
+        clipTextEmbedding(text),
     );
 
     // - File selection

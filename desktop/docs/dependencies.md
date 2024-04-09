@@ -116,7 +116,6 @@ watcher for the watch folders functionality.
 -   html-entities is used by the bundled clip-bpe-ts tokenizer.
 -   [jpeg-js](https://github.com/jpeg-js/jpeg-js#readme) is used for decoding
     JPEG data into raw RGB bytes before passing it to ONNX.
--   GGML binaries are bundled.
 
 ## ZIP
 
