@@ -1466,7 +1466,7 @@ class FilesDB {
     return collectionIDsOfFile;
   }
 
-  List<EnteFile> convertToFilesIsolate(Map args) {
+  List<EnteFile> convertToFilesForIsolate(Map args) {
     final List<EnteFile> files = [];
     for (final result in args["result"]) {
       files.add(_getFileFromRow(result));
@@ -1606,7 +1606,7 @@ class FilesDB {
       'SELECT * FROM $filesTable ORDER BY $columnCreationTime DESC',
     );
     final List<EnteFile> files = await Computer.shared()
-        .compute(convertToFilesIsolate, param: {"result": result});
+        .compute(convertToFilesForIsolate, param: {"result": result});
 
     final List<EnteFile> deduplicatedFiles = await applyDBFilters(
       files,
