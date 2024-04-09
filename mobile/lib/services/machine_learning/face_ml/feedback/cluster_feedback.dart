@@ -14,6 +14,7 @@ import "package:photos/models/file/file.dart";
 import 'package:photos/services/machine_learning/face_ml/face_clustering/cosine_distance.dart';
 import "package:photos/services/machine_learning/face_ml/face_clustering/linear_clustering_service.dart";
 import "package:photos/services/machine_learning/face_ml/face_ml_result.dart";
+import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/search_service.dart";
 
 class ClusterSuggestion {
@@ -393,7 +394,7 @@ class ClusterFeedbackService {
     for (final suggestionsPerCluster in suggestions.values) {
       for (final suggestion in suggestionsPerCluster) {
         final clusterID = suggestion.$1;
-        await faceMlDb.assignClusterToPerson(
+        await PersonService.instance.assignClusterToPerson(
           personID: p.remoteID,
           clusterID: clusterID,
         );

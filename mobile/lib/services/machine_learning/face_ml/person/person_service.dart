@@ -86,6 +86,29 @@ class PersonService {
     return PersonEntity(result.id, data);
   }
 
+  Future<void> assignClusterToPerson({
+    required String personID,
+    required int clusterID,
+  }) async {
+    final person = (await getPerson(personID))!;
+    final personData = person.data;
+    final faceIds = await faceMLDataDB.getFaceIDsForCluster(clusterID);
+    final clusterInfo = ClusterInfo(
+      id: clusterID,
+      faces: faceIds.toSet(),
+    );
+    personData.assigned!.add(clusterInfo);
+    await entityService.addOrUpdate(
+      EntityType.person,
+      json.encode(personData.toJson()),
+      id: personID,
+    );
+    await faceMLDataDB.assignClusterToPerson(
+      personID: personID,
+      clusterID: clusterID,
+    );
+  }
+
   Future<void> deletePerson(String personID, {bool onlyMapping = true}) async {
     if (onlyMapping) {
       final PersonEntity? entity = await getPerson(personID);
