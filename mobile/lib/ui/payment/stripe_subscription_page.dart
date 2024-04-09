@@ -610,7 +610,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
             storage: _currentSubscription!.storage,
             price: _currentSubscription!.price,
             period: _currentSubscription!.period,
-            isActive: !_hasActiveSubscription,
+            isActive: _currentSubscription!.isValid(),
           ),
         ),
       ),
