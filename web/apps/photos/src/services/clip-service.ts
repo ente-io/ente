@@ -8,7 +8,7 @@ import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import { FILE_TYPE } from "constants/file";
 import isElectron from "is-electron";
 import PQueue from "p-queue";
-import { Embedding, Model } from "types/embedding";
+import { Embedding } from "types/embedding";
 import { EnteFile } from "types/file";
 import { getPersonalFiles } from "utils/file";
 import downloadManager from "./download";
@@ -339,12 +339,11 @@ class CLIPService {
         log.info(
             `putting clip embedding to server for file: ${file.metadata.title} fileID: ${file.id}`,
         );
-        const model = Model.ONNX_CLIP;
         await putEmbedding({
             fileID: file.id,
             encryptedEmbedding: encryptedEmbeddingData.encryptedData,
             decryptionHeader: encryptedEmbeddingData.decryptionHeader,
-            model,
+            model: "onnx-clip",
         });
     };
 
