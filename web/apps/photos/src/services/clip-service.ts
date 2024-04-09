@@ -1,5 +1,6 @@
 import { ensureElectron } from "@/next/electron";
 import log from "@/next/log";
+import type { Electron } from "@/next/types/ipc";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { CustomError } from "@ente/shared/error";
 import { Events, eventBus } from "@ente/shared/events";
@@ -64,6 +65,7 @@ export interface CLIPIndexingStatus {
  * itself, is the same across clients - web and mobile.
  */
 class CLIPService {
+    private electron: Electron;
     private embeddingExtractionInProgress: AbortController | null = null;
     private reRunNeeded = false;
     private indexingStatus: CLIPIndexingStatus = {
@@ -78,6 +80,7 @@ class CLIPService {
     private unsupportedPlatform = false;
 
     constructor() {
+        this.electron = ensureElectron();
         this.liveEmbeddingExtractionQueue = new PQueue({
             concurrency: 1,
         });
@@ -190,12 +193,12 @@ class CLIPService {
 
     getTextEmbedding = async (text: string): Promise<Float32Array> => {
         try {
-            return ensureElectron().computeTextEmbedding(Model.ONNX_CLIP, text);
+            return electron.clipTextEmbedding(text);
         } catch (e) {
             if (e?.message?.includes(CustomError.UNSUPPORTED_PLATFORM)) {
                 this.unsupportedPlatform = true;
             }
-            log.error("failed to compute text embedding", e);
+            log.error("Failed to compute CLIP text embedding", e);
             throw e;
         }
     };
@@ -318,11 +321,7 @@ class CLIPService {
         const file = await localFile
             .arrayBuffer()
             .then((buffer) => new Uint8Array(buffer));
-        const embedding = await ensureElectron().computeImageEmbedding(
-            Model.ONNX_CLIP,
-            file,
-        );
-        return embedding;
+        return await electron.clipImageEmbedding(file);
     };
 
     private encryptAndUploadEmbedding = async (
@@ -357,10 +356,7 @@ class CLIPService {
 
     private extractFileClipImageEmbedding = async (file: EnteFile) => {
         const thumb = await downloadManager.getThumbnail(file);
-        const embedding = await ensureElectron().computeImageEmbedding(
-            Model.ONNX_CLIP,
-            thumb,
-        );
+        const embedding = await ensureElectron().clipImageEmbedding(thumb);
         return embedding;
     };
 
