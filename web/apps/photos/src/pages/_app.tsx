@@ -1,5 +1,4 @@
 import { CustomHead } from "@/next/components/Head";
-import ElectronAPIs from "@/next/electron";
 import { setupI18n } from "@/next/i18n";
 import log from "@/next/log";
 import { logStartupBanner } from "@/next/log-web";
@@ -154,7 +153,8 @@ export default function App({ Component, pageProps }: AppProps) {
     }, []);
 
     useEffect(() => {
-        if (isElectron()) {
+        const electron = globalThis.electron;
+        if (electron) {
             const showUpdateDialog = (updateInfo: AppUpdateInfo) => {
                 if (updateInfo.autoUpdatable) {
                     setDialogMessage(
@@ -174,7 +174,7 @@ export default function App({ Component, pageProps }: AppProps) {
                     });
                 }
             };
-            ElectronAPIs.registerUpdateEventListener(showUpdateDialog);
+            electron.registerUpdateEventListener(showUpdateDialog);
         }
     }, []);
 

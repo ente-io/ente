@@ -489,8 +489,9 @@ const convertToJPEGInElectron = async (
     try {
         const startTime = Date.now();
         const inputFileData = new Uint8Array(await fileBlob.arrayBuffer());
-        const convertedFileData = isElectron()
-            ? await ElectronAPIs.convertToJPEG(inputFileData, filename)
+        const electron = globalThis.electron;
+        const convertedFileData = electron
+            ? await electron.convertToJPEG(inputFileData, filename)
             : await workerBridge.convertToJPEG(inputFileData, filename);
         log.info(
             `originalFileSize:${convertBytesToHumanReadable(
