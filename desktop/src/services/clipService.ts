@@ -1,3 +1,14 @@
+/**
+ * @file Compute CLIP embeddings
+ *
+ * @see `web/apps/photos/services/clip-service.ts` for more details. This file
+ * implements the Node.js implementation of the actual embedding computation. By
+ * doing it in the Node.js layer, we can use the binary ONNX runtimes which are
+ * 10-20x faster than the WASM based web ones.
+ *
+ * The embeddings are computed using ONNX runtime. The model itself is not
+ * shipped with the app but is downloaded on demand.
+ */
 import { app, net } from "electron/main";
 import { existsSync } from "fs";
 import fs from "node:fs/promises";
