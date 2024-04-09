@@ -172,10 +172,9 @@ const clipImageEmbedding_ = async (jpegFilePath: string) => {
     };
     const t2 = Date.now();
     const results = await imageSession.run(feeds);
-    log.info(
-        `onnx image embedding time: ${Date.now() - t1} ms (prep:${
-            t2 - t1
-        } ms, extraction: ${Date.now() - t2} ms)`,
+    log.debug(
+        () =>
+            `CLIP image embedding took ${Date.now() - t1} ms (prep: ${t2 - t1} ms, inference: ${Date.now() - t2} ms)`,
     );
     const imageEmbedding = results["output"].data; // Float32Array
     return normalizeEmbedding(imageEmbedding);
@@ -280,10 +279,9 @@ export const clipTextEmbedding = async (text: string) => {
     };
     const t2 = Date.now();
     const results = await imageSession.run(feeds);
-    log.info(
-        `onnx text embedding time: ${Date.now() - t1} ms (prep:${
-            t2 - t1
-        } ms, extraction: ${Date.now() - t2} ms)`,
+    log.debug(
+        () =>
+            `CLIP text embedding took ${Date.now() - t1} ms (prep: ${t2 - t1} ms, inference: ${Date.now() - t2} ms)`,
     );
     const textEmbedding = results["output"].data;
     return normalizeEmbedding(textEmbedding);
