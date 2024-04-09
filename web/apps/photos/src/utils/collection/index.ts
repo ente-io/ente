@@ -1,4 +1,3 @@
-import ElectronAPIs from "@/next/electron";
 import log from "@/next/log";
 import { CustomError } from "@ente/shared/error";
 import { getAlbumsURL } from "@ente/shared/network/api";
@@ -17,7 +16,6 @@ import {
     SYSTEM_COLLECTION_TYPES,
 } from "constants/collection";
 import { t } from "i18next";
-import isElectron from "is-electron";
 import {
     addToCollection,
     createAlbum,
@@ -152,8 +150,9 @@ export async function downloadCollectionFiles(
         return;
     }
     let downloadDirPath: string;
-    if (isElectron()) {
-        const selectedDir = await ElectronAPIs.selectDirectory();
+    const electron = globalThis.electron;
+    if (electron) {
+        const selectedDir = await electron.selectDirectory();
         if (!selectedDir) {
             return;
         }

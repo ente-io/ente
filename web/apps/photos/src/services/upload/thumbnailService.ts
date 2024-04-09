@@ -1,4 +1,4 @@
-import ElectronAPIs from "@/next/electron";
+import { ensureElectron } from "@/next/electron";
 import { convertBytesToHumanReadable, getFileNameSize } from "@/next/file";
 import log from "@/next/log";
 import { CustomError } from "@ente/shared/error";
@@ -98,7 +98,7 @@ const generateImageThumbnailInElectron = async (
 ): Promise<Uint8Array> => {
     try {
         const startTime = Date.now();
-        const thumb = await ElectronAPIs.generateImageThumbnail(
+        const thumb = await ensureElectron().generateImageThumbnail(
             inputFile,
             maxDimension,
             maxSize,

@@ -1,4 +1,4 @@
-import ElectronAPIs from "@/next/electron";
+import { ensureElectron } from "@/next/electron";
 import log from "@/next/log";
 import LinkButton from "@ente/shared/components/LinkButton";
 import { Tooltip } from "@mui/material";
@@ -19,7 +19,7 @@ const DirectoryPathContainer = styled(LinkButton)(
 export const DirectoryPath = ({ width, path }) => {
     const handleClick = async () => {
         try {
-            await ElectronAPIs.openDirectory(path);
+            await ensureElectron().openDirectory(path);
         } catch (e) {
             log.error("openDirectory failed", e);
         }

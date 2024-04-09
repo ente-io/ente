@@ -1,4 +1,4 @@
-import ElectronAPIs from "@/next/electron";
+import { ensureElectron } from "@/next/electron";
 import log from "@/next/log";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { CustomError } from "@ente/shared/error";
@@ -157,7 +157,7 @@ class ClipServiceImpl {
         model: Model = Model.ONNX_CLIP,
     ): Promise<Float32Array> => {
         try {
-            return ElectronAPIs.computeTextEmbedding(model, text);
+            return ensureElectron().computeTextEmbedding(model, text);
         } catch (e) {
             if (e?.message?.includes(CustomError.UNSUPPORTED_PLATFORM)) {
                 this.unsupportedPlatform = true;
@@ -304,7 +304,10 @@ class ClipServiceImpl {
         const file = await localFile
             .arrayBuffer()
             .then((buffer) => new Uint8Array(buffer));
-        const embedding = await ElectronAPIs.computeImageEmbedding(model, file);
+        const embedding = await ensureElectron().computeImageEmbedding(
+            model,
+            file,
+        );
         return embedding;
     };
 
@@ -344,7 +347,7 @@ class ClipServiceImpl {
         file: EnteFile,
     ) => {
         const thumb = await downloadManager.getThumbnail(file);
-        const embedding = await ElectronAPIs.computeImageEmbedding(
+        const embedding = await ensureElectron().computeImageEmbedding(
             model,
             thumb,
         );

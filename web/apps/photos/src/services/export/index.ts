@@ -57,7 +57,6 @@ import downloadManager from "../download";
 import { getAllLocalFiles } from "../fileService";
 import { decodeLivePhoto } from "../livePhotoService";
 import { migrateExport } from "./migration";
-import type { Electron } from "@/next/types/ipc";
 
 const EXPORT_RECORD_FILE_NAME = "export_status.json";
 
@@ -69,15 +68,6 @@ export const NULL_EXPORT_RECORD: ExportRecord = {
     stage: ExportStage.INIT,
     fileExportNames: {},
     collectionExportNames: {},
-};
-
-const electron = (): Electron => {
-    const et = globalThis.electron;
-    if (!et)
-        throw new Error(
-            "Attempting to use ExportService in an unsupported non-electron context",
-        );
-    return et;
 };
 
 class ExportService {
@@ -166,12 +156,12 @@ class ExportService {
 
     async changeExportDirectory() {
         try {
-            const newRootDir = await electron().selectDirectory();
+            const newRootDir = await ensureElectron().selectDirectory();
             if (!newRootDir) {
                 throw Error(CustomError.SELECT_FOLDER_ABORTED);
             }
             const newExportDir = `${newRootDir}/${ENTE_EXPORT_DIRECTORY}`;
-            await electron().checkExistsAndCreateDir(newExportDir);
+            await ensureElectron().checkExistsAndCreateDir(newExportDir);
             return newExportDir;
         } catch (e) {
             if (e.message !== CustomError.SELECT_FOLDER_ABORTED) {
@@ -521,7 +511,7 @@ class ExportService {
                         newCollectionExportName,
                     );
                     try {
-                        await electron().rename(
+                        await ensureElectron().rename(
                             oldCollectionExportPath,
                             newCollectionExportPath,
                         );
@@ -606,11 +596,13 @@ class ExportService {
                     );
                     try {
                         // delete the collection metadata folder
-                        await electron().deleteFolder(
+                        await ensureElectron().deleteFolder(
                             getMetadataFolderExportPath(collectionExportPath),
                         );
                         // delete the collection folder
-                        await electron().deleteFolder(collectionExportPath);
+                        await ensureElectron().deleteFolder(
+                            collectionExportPath,
+                        );
                     } catch (e) {
                         await this.addCollectionExportedRecord(
                             exportFolder,
@@ -693,10 +685,10 @@ class ExportService {
                         exportDir,
                         collectionExportName,
                     );
-                    await electron().checkExistsAndCreateDir(
+                    await ensureElectron().checkExistsAndCreateDir(
                         collectionExportPath,
                     );
-                    await electron().checkExistsAndCreateDir(
+                    await ensureElectron().checkExistsAndCreateDir(
                         getMetadataFolderExportPath(collectionExportPath),
                     );
                     await this.downloadAndSave(
@@ -776,7 +768,7 @@ class ExportService {
                                 `moving image file ${imageExportPath} to trash folder`,
                             );
                             if (await this.exists(imageExportPath)) {
-                                await electron().moveFile(
+                                await ensureElectron().moveFile(
                                     imageExportPath,
                                     await getTrashedFileExportPath(
                                         exportDir,
@@ -791,7 +783,7 @@ class ExportService {
                             if (
                                 await this.exists(imageMetadataFileExportPath)
                             ) {
-                                await electron().moveFile(
+                                await ensureElectron().moveFile(
                                     imageMetadataFileExportPath,
                                     await getTrashedFileExportPath(
                                         exportDir,
@@ -808,7 +800,7 @@ class ExportService {
                                 `moving video file ${videoExportPath} to trash folder`,
                             );
                             if (await this.exists(videoExportPath)) {
-                                await electron().moveFile(
+                                await ensureElectron().moveFile(
                                     videoExportPath,
                                     await getTrashedFileExportPath(
                                         exportDir,
@@ -821,7 +813,7 @@ class ExportService {
                             if (
                                 await this.exists(videoMetadataFileExportPath)
                             ) {
-                                await electron().moveFile(
+                                await ensureElectron().moveFile(
                                     videoMetadataFileExportPath,
                                     await getTrashedFileExportPath(
                                         exportDir,
@@ -843,7 +835,7 @@ class ExportService {
                                 `moving file ${fileExportPath} to ${trashedFilePath} trash folder`,
                             );
                             if (await this.exists(fileExportPath)) {
-                                await electron().moveFile(
+                                await ensureElectron().moveFile(
                                     fileExportPath,
                                     trashedFilePath,
                                 );
@@ -851,7 +843,7 @@ class ExportService {
                             const metadataFileExportPath =
                                 getMetadataFileExportPath(fileExportPath);
                             if (await this.exists(metadataFileExportPath)) {
-                                await electron().moveFile(
+                                await ensureElectron().moveFile(
                                     metadataFileExportPath,
                                     await getTrashedFileExportPath(
                                         exportDir,
@@ -990,7 +982,7 @@ class ExportService {
         try {
             const exportRecord = await this.getExportRecord(folder);
             const newRecord: ExportRecord = { ...exportRecord, ...newData };
-            await electron().saveFileToDisk(
+            await ensureElectron().saveFileToDisk(
                 `${folder}/${EXPORT_RECORD_FILE_NAME}`,
                 JSON.stringify(newRecord, null, 2),
             );
@@ -1012,7 +1004,7 @@ class ExportService {
                 return this.createEmptyExportRecord(exportRecordJSONPath);
             }
             const recordFile =
-                await electron().readTextFile(exportRecordJSONPath);
+                await ensureElectron().readTextFile(exportRecordJSONPath);
             try {
                 return JSON.parse(recordFile);
             } catch (e) {
@@ -1048,8 +1040,8 @@ class ExportService {
             exportFolder,
             collectionExportName,
         );
-        await electron().checkExistsAndCreateDir(collectionExportPath);
-        await electron().checkExistsAndCreateDir(
+        await ensureElectron().checkExistsAndCreateDir(collectionExportPath);
+        await ensureElectron().checkExistsAndCreateDir(
             getMetadataFolderExportPath(collectionExportPath),
         );
 
@@ -1096,7 +1088,7 @@ class ExportService {
                         fileExportName,
                         file,
                     );
-                    await electron().saveStreamToDisk(
+                    await ensureElectron().saveStreamToDisk(
                         getFileExportPath(collectionExportPath, fileExportName),
                         updatedFileStream,
                     );
@@ -1144,7 +1136,7 @@ class ExportService {
                 imageExportName,
                 file,
             );
-            await electron().saveStreamToDisk(
+            await ensureElectron().saveStreamToDisk(
                 getFileExportPath(collectionExportPath, imageExportName),
                 imageStream,
             );
@@ -1156,12 +1148,12 @@ class ExportService {
                 file,
             );
             try {
-                await electron().saveStreamToDisk(
+                await ensureElectron().saveStreamToDisk(
                     getFileExportPath(collectionExportPath, videoExportName),
                     videoStream,
                 );
             } catch (e) {
-                await electron().deleteFile(
+                await ensureElectron().deleteFile(
                     getFileExportPath(collectionExportPath, imageExportName),
                 );
                 throw e;
@@ -1177,7 +1169,7 @@ class ExportService {
         fileExportName: string,
         file: EnteFile,
     ) {
-        await electron().saveFileToDisk(
+        await ensureElectron().saveFileToDisk(
             getFileMetadataExportPath(collectionExportPath, fileExportName),
             getGoogleLikeMetadataFile(fileExportName, file),
         );
@@ -1188,15 +1180,15 @@ class ExportService {
     };
 
     exists = (path: string) => {
-        return electron().fs.exists(path);
+        return ensureElectron().fs.exists(path);
     };
 
     rename = (oldPath: string, newPath: string) => {
-        return electron().rename(oldPath, newPath);
+        return ensureElectron().rename(oldPath, newPath);
     };
 
     checkExistsAndCreateDir = (path: string) => {
-        return electron().checkExistsAndCreateDir(path);
+        return ensureElectron().checkExistsAndCreateDir(path);
     };
 
     exportFolderExists = async (exportFolder: string) => {
@@ -1218,7 +1210,7 @@ class ExportService {
 
     private createEmptyExportRecord = async (exportRecordJSONPath: string) => {
         const exportRecord: ExportRecord = NULL_EXPORT_RECORD;
-        await electron().saveFileToDisk(
+        await ensureElectron().saveFileToDisk(
             exportRecordJSONPath,
             JSON.stringify(exportRecord, null, 2),
         );
