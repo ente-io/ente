@@ -45,7 +45,6 @@ import type {
     AppUpdateInfo,
     ElectronFile,
     FILE_PATH_TYPE,
-    Model,
     WatchMapping,
 } from "./types/ipc";
 
@@ -141,17 +140,11 @@ const runFFmpegCmd = (
 
 // - ML
 
-const computeImageEmbedding = (
-    model: Model,
-    imageData: Uint8Array,
-): Promise<Float32Array> =>
-    ipcRenderer.invoke("computeImageEmbedding", model, imageData);
+const clipImageEmbedding = (jpegImageData: Uint8Array): Promise<Float32Array> =>
+    ipcRenderer.invoke("clipImageEmbedding", jpegImageData);
 
-const computeTextEmbedding = (
-    model: Model,
-    text: string,
-): Promise<Float32Array> =>
-    ipcRenderer.invoke("computeTextEmbedding", model, text);
+const clipTextEmbedding = (text: string): Promise<Float32Array> =>
+    ipcRenderer.invoke("clipTextEmbedding", text);
 
 // - File selection
 
@@ -332,8 +325,8 @@ contextBridge.exposeInMainWorld("electron", {
     runFFmpegCmd,
 
     // - ML
-    computeImageEmbedding,
-    computeTextEmbedding,
+    clipImageEmbedding,
+    clipTextEmbedding,
 
     // - File selection
     selectDirectory,

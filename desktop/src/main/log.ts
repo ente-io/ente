@@ -64,7 +64,10 @@ const logInfo = (...params: any[]) => {
 };
 
 const logDebug = (param: () => any) => {
-    if (isDev) console.log(`[debug] ${util.inspect(param())}`);
+    if (isDev) {
+        const p = param();
+        console.log(`[debug] ${typeof p == "string" ? p : util.inspect(p)}`);
+    }
 };
 
 /**

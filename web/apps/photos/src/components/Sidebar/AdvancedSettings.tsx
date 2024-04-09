@@ -14,7 +14,7 @@ import { EnteMenuItem } from "components/Menu/EnteMenuItem";
 import { MenuItemGroup } from "components/Menu/MenuItemGroup";
 import isElectron from "is-electron";
 import { AppContext } from "pages/_app";
-import { ClipExtractionStatus, ClipService } from "services/clipService";
+import { CLIPIndexingStatus, clipService } from "services/clip-service";
 import { formatNumber } from "utils/number/format";
 
 export default function AdvancedSettings({ open, onClose, onRootClose }) {
@@ -44,17 +44,15 @@ export default function AdvancedSettings({ open, onClose, onRootClose }) {
             log.error("toggleFasterUpload failed", e);
         }
     };
-    const [indexingStatus, setIndexingStatus] = useState<ClipExtractionStatus>({
+    const [indexingStatus, setIndexingStatus] = useState<CLIPIndexingStatus>({
         indexed: 0,
         pending: 0,
     });
 
     useEffect(() => {
-        const main = async () => {
-            setIndexingStatus(await ClipService.getIndexingStatus());
-            ClipService.setOnUpdateHandler(setIndexingStatus);
-        };
-        main();
+        clipService.setOnUpdateHandler(setIndexingStatus);
+        clipService.getIndexingStatus().then((st) => setIndexingStatus(st));
+        return () => clipService.setOnUpdateHandler(undefined);
     }, []);
 
     return (

@@ -10,11 +10,6 @@ export interface AppUpdateInfo {
     version: string;
 }
 
-export enum Model {
-    GGML_CLIP = "ggml-clip",
-    ONNX_CLIP = "onnx-clip",
-}
-
 export enum FILE_PATH_TYPE {
     FILES = "files",
     ZIPS = "zips",
@@ -147,12 +142,27 @@ export interface Electron {
 
     // - ML
 
-    computeImageEmbedding: (
-        model: Model,
-        imageData: Uint8Array,
-    ) => Promise<Float32Array>;
+    /**
+     * Compute and return a CLIP embedding of the given image.
+     *
+     * See: [Note: CLIP based magic search]
+     *
+     * @param jpegImageData The raw bytes of the image encoded as an JPEG.
+     *
+     * @returns A CLIP embedding.
+     */
+    clipImageEmbedding: (jpegImageData: Uint8Array) => Promise<Float32Array>;
 
-    computeTextEmbedding: (model: Model, text: string) => Promise<Float32Array>;
+    /**
+     * Compute and return a CLIP embedding of the given image.
+     *
+     * See: [Note: CLIP based magic search]
+     *
+     * @param text The string whose embedding we want to compute.
+     *
+     * @returns A CLIP embedding.
+     */
+    clipTextEmbedding: (text: string) => Promise<Float32Array>;
 
     // - File selection
     // TODO: Deprecated - use dialogs on the renderer process itself

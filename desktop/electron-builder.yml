@@ -19,7 +19,6 @@ mac:
         arch: [universal]
     category: public.app-category.photography
     hardenedRuntime: true
-    x64ArchFiles: Contents/Resources/ggmlclip-mac
 afterSign: electron-builder-notarize
 extraFiles:
     - from: build
