@@ -156,7 +156,7 @@ class UploadHttpClient {
                 );
                 if (!resp?.headers?.etag) {
                     const err = Error(CustomError.ETAG_MISSING);
-                    logError(err, "putFile in parts failed");
+                    log.error("putFile in parts failed", err);
                     throw err;
                 }
                 return resp;
@@ -188,7 +188,7 @@ class UploadHttpClient {
                 );
                 if (!resp?.data?.etag) {
                     const err = Error(CustomError.ETAG_MISSING);
-                    logError(err, "putFile in parts failed");
+                    log.error("putFile in parts failed", err);
                     throw err;
                 }
                 return resp;

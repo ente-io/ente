@@ -612,9 +612,10 @@ function PhotoViewer(props: Iprops) {
         } catch (e) {
             setExif({ key: file.src, value: null });
             const fileExtension = getFileExtension(file.metadata.title);
-            logError(e, "checkExifAvailable failed", {
-                extension: fileExtension,
-            });
+            log.error(
+                `checkExifAvailable failed for extension ${fileExtension}`,
+                e,
+            );
         }
     };
 

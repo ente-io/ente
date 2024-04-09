@@ -24,7 +24,6 @@ import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { MessageContainer } from "@ente/shared/components/MessageContainer";
 import AppNavbar from "@ente/shared/components/Navbar/app";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
-import { CustomError } from "@ente/shared/error";
 import { Events, eventBus } from "@ente/shared/events";
 import { useLocalState } from "@ente/shared/hooks/useLocalState";
 import { addLogLine } from "@ente/shared/logging";
@@ -268,9 +267,7 @@ export default function App({ Component, pageProps }: AppProps) {
                 const redirectAction = redirectMap.get(redirect);
                 window.location.href = await redirectAction();
             } else {
-                logError(CustomError.BAD_REQUEST, "invalid redirection", {
-                    redirect,
-                });
+                log.error(`invalid redirection ${redirect}`);
             }
         };
 

@@ -30,7 +30,7 @@ export async function generateThumbnail(
     fileTypeInfo: FileTypeInfo,
 ): Promise<{ thumbnail: Uint8Array; hasStaticThumbnail: boolean }> {
     try {
-        addLogLine(`generating thumbnail for ${getFileNameSize(file)}`);
+        log.info(`generating thumbnail for ${getFileNameSize(file)}`);
         let hasStaticThumbnail = false;
         let thumbnail: Uint8Array;
         try {
@@ -40,32 +40,26 @@ export async function generateThumbnail(
                 thumbnail = await generateVideoThumbnail(file, fileTypeInfo);
             }
             if (thumbnail.length > 1.5 * MAX_THUMBNAIL_SIZE) {
-                logError(
-                    Error("thumbnail_too_large"),
-                    "thumbnail greater than max limit",
-                    {
+                log.error(
+                    `thumbnail greater than max limit - ${JSON.stringify({
                         thumbnailSize: convertBytesToHumanReadable(
                             thumbnail.length,
                         ),
                         fileSize: convertBytesToHumanReadable(file.size),
                         fileType: fileTypeInfo.exactType,
-                    },
+                    })}`,
                 );
             }
             if (thumbnail.length === 0) {
                 throw Error("EMPTY THUMBNAIL");
             }
-            addLogLine(
+            log.info(
                 `thumbnail successfully generated ${getFileNameSize(file)}`,
             );
         } catch (e) {
-            logError(e, "uploading static thumbnail", {
-                fileFormat: fileTypeInfo.exactType,
-            });
-            addLogLine(
-                `thumbnail generation failed ${getFileNameSize(file)} error: ${
-                    e.message
-                }`,
+            log.error(
+                `thumbnail generation failed ${getFileNameSize(file)} with format ${fileTypeInfo.exactType}`,
+                e,
             );
             thumbnail = Uint8Array.from(atob(BLACK_THUMBNAIL_BASE64), (c) =>
                 c.charCodeAt(0),
@@ -213,9 +207,10 @@ async function generateVideoThumbnail(
                 file,
             )} error: ${e.message}`,
         );
-        logError(e, "failed to generate thumbnail using ffmpeg", {
-            fileFormat: fileTypeInfo.exactType,
-        });
+        log.error(
+            `failed to generate thumbnail using ffmpeg for format ${fileTypeInfo.exactType}`,
+            e,
+        );
         thumbnail = await generateVideoThumbnailUsingCanvas(file);
     }
     return thumbnail;
@@ -265,7 +260,7 @@ export async function generateVideoThumbnailUsingCanvas(
                 const err = Error(
                     `${CustomError.THUMBNAIL_GENERATION_FAILED} err: ${e}`,
                 );
-                logError(e, CustomError.THUMBNAIL_GENERATION_FAILED);
+                log.error(CustomError.THUMBNAIL_GENERATION_FAILED, e);
                 reject(err);
             }
         });

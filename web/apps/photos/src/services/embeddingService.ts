@@ -1,7 +1,6 @@
 import log from "@/next/log";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { CustomError } from "@ente/shared/error";
-import { addLogLine } from "@ente/shared/logging";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { getEndpoint } from "@ente/shared/network/api";
 import localForage from "@ente/shared/storage/localForage";
@@ -68,10 +67,10 @@ export const syncEmbeddings = async (models: Model[] = [Model.ONNX_CLIP]) => {
             fileIdToKeyMap.set(file.id, file.key);
         });
         await cleanupDeletedEmbeddings(allLocalFiles, allEmbeddings);
-        addLogLine(`Syncing embeddings localCount: ${allEmbeddings.length}`);
+        log.info(`Syncing embeddings localCount: ${allEmbeddings.length}`);
         for (const model of models) {
             let modelLastSinceTime = await getModelEmbeddingSyncTime(model);
-            addLogLine(
+            log.info(
                 `Syncing ${model} model's embeddings sinceTime: ${modelLastSinceTime}`,
             );
             let response: GetEmbeddingDiffResponse;
@@ -107,18 +106,13 @@ export const syncEmbeddings = async (models: Model[] = [Model.ONNX_CLIP]) => {
                                 embedding: decryptedData,
                             } as Embedding;
                         } catch (e) {
-                            let info: Record<string, unknown>;
+                            let hasHiddenAlbums = false;
                             if (e.message === CustomError.FILE_NOT_FOUND) {
-                                const hasHiddenAlbums =
-                                    hiddenAlbums?.length > 0;
-                                info = {
-                                    hasHiddenAlbums,
-                                };
+                                hasHiddenAlbums = hiddenAlbums?.length > 0;
                             }
-                            logError(
+                            log.error(
+                                `decryptEmbedding failed for file (hasHiddenAlbums: ${hasHiddenAlbums})`,
                                 e,
-                                "decryptEmbedding failed for file",
-                                info,
                             );
                         }
                     }),
@@ -132,7 +126,7 @@ export const syncEmbeddings = async (models: Model[] = [Model.ONNX_CLIP]) => {
                 }
                 await localForage.setItem(EMBEDDINGS_TABLE, allEmbeddings);
                 await setModelEmbeddingSyncTime(model, modelLastSinceTime);
-                addLogLine(
+                log.info(
                     `Syncing embeddings syncedEmbeddingsCount: ${allEmbeddings.length}`,
                 );
             } while (response.diff.length === DIFF_LIMIT);
@@ -205,7 +199,7 @@ export const cleanupDeletedEmbeddings = async (
         activeFileIds.has(embedding.fileID),
     );
     if (allLocalEmbeddings.length !== remainingEmbeddings.length) {
-        addLogLine(
+        log.info(
             `cleanupDeletedEmbeddings embeddingsCount: ${allLocalEmbeddings.length} remainingEmbeddingsCount: ${remainingEmbeddings.length}`,
         );
         await localForage.setItem(EMBEDDINGS_TABLE, remainingEmbeddings);

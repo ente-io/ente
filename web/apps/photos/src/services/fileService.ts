@@ -53,13 +53,14 @@ const setLocalFiles = async (type: "normal" | "hidden", files: EnteFile[]) => {
     } catch (e1) {
         try {
             const storageEstimate = await navigator.storage.estimate();
-            logError(e1, "failed to save files to indexedDB", {
-                storageEstimate,
-            });
+            log.error(
+                `failed to save files to indexedDB (storageEstimate was ${storageEstimate}`,
+                e1,
+            );
             addLogLine(`storage estimate ${JSON.stringify(storageEstimate)}`);
         } catch (e2) {
-            logError(e1, "failed to save files to indexedDB");
-            logError(e2, "failed to get storage stats");
+            log.error("failed to save files to indexedDB", e1);
+            log.error("failed to get storage stats", e2);
         }
         throw e1;
     }

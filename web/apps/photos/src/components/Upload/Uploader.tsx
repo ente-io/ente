@@ -544,9 +544,9 @@ export default function Uploader(props: Props) {
                     watchFolderService.resumePausedSync();
                 }
             }
-        } catch (err) {
-            logError(err, "failed to upload files");
-            showUserFacingError(err.message);
+        } catch (e) {
+            log.error("failed to upload files", e);
+            showUserFacingError(e.message);
             closeUploadProgress();
         } finally {
             postUploadAction();
@@ -565,9 +565,9 @@ export default function Uploader(props: Props) {
                 filesWithCollections.collections,
                 uploaderName,
             );
-        } catch (err) {
-            logError(err, "retry failed files failed");
-            showUserFacingError(err.message);
+        } catch (e) {
+            log.error("retry failed files failed", e);
+            showUserFacingError(e.message);
             closeUploadProgress();
         } finally {
             postUploadAction();

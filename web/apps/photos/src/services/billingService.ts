@@ -147,9 +147,9 @@ class billingService {
             const { subscription } = response.data;
             setData(LS_KEYS.SUBSCRIPTION, subscription);
             return subscription;
-        } catch (err) {
-            logError(err, "Error while verifying subscription");
-            throw err;
+        } catch (e) {
+            log.error("Error while verifying subscription", e);
+            throw e;
         }
     }
 

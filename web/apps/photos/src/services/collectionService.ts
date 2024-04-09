@@ -198,9 +198,10 @@ const getCollections = async (
                     try {
                         return await getCollectionWithSecrets(collection, key);
                     } catch (e) {
-                        logError(e, `decryption failed for collection`, {
-                            collectionID: collection.id,
-                        });
+                        log.error(
+                            `decryption failed for collection with ID ${collection.id}`,
+                            e,
+                        );
                         return collection;
                     }
                 },
@@ -1436,7 +1437,7 @@ export const constructUserIDToEmailMap = (
         });
         return userIDToEmailMap;
     } catch (e) {
-        logError("Error Mapping UserId to email:", e);
+        log.error("Error Mapping UserId to email:", e);
         return new Map<number, string>();
     }
 };

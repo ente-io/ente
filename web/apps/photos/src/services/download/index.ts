@@ -338,15 +338,9 @@ class DownloadManagerImpl {
                     return generateStreamFromArrayBuffer(decrypted);
                 } catch (e) {
                     if (e.message === CustomError.PROCESSING_FAILED) {
-                        logError(e, "Failed to process file", {
-                            fileID: file.id,
-                            fromMobile:
-                                !!file.metadata.localID ||
-                                !!file.metadata.deviceFolder ||
-                                !!file.metadata.version,
-                        });
-                        addLogLine(
-                            `Failed to process file with fileID:${file.id}, localID: ${file.metadata.localID}, version: ${file.metadata.version}, deviceFolder:${file.metadata.deviceFolder} with error: ${e.message}`,
+                        log.error(
+                            `Failed to process file with fileID:${file.id}, localID: ${file.metadata.localID}, version: ${file.metadata.version}, deviceFolder:${file.metadata.deviceFolder}`,
+                            e,
                         );
                     }
                     throw e;
@@ -430,22 +424,9 @@ class DownloadManagerImpl {
                                                     e.message ===
                                                     CustomError.PROCESSING_FAILED
                                                 ) {
-                                                    logError(
+                                                    log.error(
+                                                        `Failed to process file ${file.id} from localID: ${file.metadata.localID} version: ${file.metadata.version} deviceFolder:${file.metadata.deviceFolder}`,
                                                         e,
-                                                        "Failed to process file",
-                                                        {
-                                                            fileID: file.id,
-                                                            fromMobile:
-                                                                !!file.metadata
-                                                                    .localID ||
-                                                                !!file.metadata
-                                                                    .deviceFolder ||
-                                                                !!file.metadata
-                                                                    .version,
-                                                        },
-                                                    );
-                                                    addLogLine(
-                                                        `Failed to process file ${file.id} from localID: ${file.metadata.localID} version: ${file.metadata.version} deviceFolder:${file.metadata.deviceFolder} with error: ${e.message}`,
                                                     );
                                                 }
                                                 throw e;
@@ -471,22 +452,9 @@ class DownloadManagerImpl {
                                                     e.message ===
                                                     CustomError.PROCESSING_FAILED
                                                 ) {
-                                                    logError(
+                                                    log.error(
+                                                        `Failed to process file ${file.id} from localID: ${file.metadata.localID} version: ${file.metadata.version} deviceFolder:${file.metadata.deviceFolder}`,
                                                         e,
-                                                        "Failed to process file",
-                                                        {
-                                                            fileID: file.id,
-                                                            fromMobile:
-                                                                !!file.metadata
-                                                                    .localID ||
-                                                                !!file.metadata
-                                                                    .deviceFolder ||
-                                                                !!file.metadata
-                                                                    .version,
-                                                        },
-                                                    );
-                                                    addLogLine(
-                                                        `Failed to process file ${file.id} from localID: ${file.metadata.localID} version: ${file.metadata.version} deviceFolder:${file.metadata.deviceFolder} with error: ${e.message}`,
                                                     );
                                                 }
                                                 throw e;

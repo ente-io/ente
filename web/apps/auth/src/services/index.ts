@@ -35,10 +35,7 @@ export const getAuthCodes = async (): Promise<Code[]> => {
                             );
                         return Code.fromRawData(entity.id, decryptedCode);
                     } catch (e) {
-                        logError(
-                            Error("failed to parse code"),
-                            "codeId = " + entity.id,
-                        );
+                        log.error(`failed to parse codeId = ${entity.id}`);
                         return null;
                     }
                 }),

@@ -224,9 +224,9 @@ class ClipServiceImpl {
                     );
                 } catch (e) {
                     if (e?.message !== CustomError.REQUEST_CANCELLED) {
-                        logError(
-                            e,
+                        log.error(
                             "failed to extract clip embedding for file",
+                            e,
                         );
                     }
                     if (

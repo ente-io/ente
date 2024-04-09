@@ -65,17 +65,19 @@ class HEICConverter {
                         },
                     );
                     if (!convertedHEIC || convertedHEIC?.size === 0) {
-                        logError(
-                            Error(`converted heic fileSize is Zero`),
-                            "converted heic fileSize is Zero",
-                            {
-                                originalFileSize: convertBytesToHumanReadable(
-                                    fileBlob?.size ?? 0,
-                                ),
-                                convertedFileSize: convertBytesToHumanReadable(
-                                    convertedHEIC?.size ?? 0,
-                                ),
-                            },
+                        log.error(
+                            `converted heic fileSize is Zero - ${JSON.stringify(
+                                {
+                                    originalFileSize:
+                                        convertBytesToHumanReadable(
+                                            fileBlob?.size ?? 0,
+                                        ),
+                                    convertedFileSize:
+                                        convertBytesToHumanReadable(
+                                            convertedHEIC?.size ?? 0,
+                                        ),
+                                },
+                            )}`,
                         );
                     }
                     await new Promise((resolve) => {

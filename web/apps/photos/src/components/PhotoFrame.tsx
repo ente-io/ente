@@ -340,9 +340,9 @@ const PhotoFrame = ({
                     }
                 } catch (e) {
                     if (e.message !== CustomError.URL_ALREADY_SET) {
-                        logError(
-                            e,
+                        log.error(
                             "updating photoswipe after msrc url update failed",
+                            e,
                         );
                     }
                     // ignore
@@ -392,9 +392,9 @@ const PhotoFrame = ({
                     }
                 } catch (e) {
                     if (e.message !== CustomError.URL_ALREADY_SET) {
-                        logError(
-                            e,
+                        log.error(
                             "updating photoswipe after for live photo imgSrc update failed",
+                            e,
                         );
                     }
                 }
@@ -426,9 +426,9 @@ const PhotoFrame = ({
                     }
                 } catch (e) {
                     if (e.message !== CustomError.URL_ALREADY_SET) {
-                        logError(
-                            e,
+                        log.error(
                             "updating photoswipe for live photo complete update failed",
+                            e,
                         );
                     }
                 }
@@ -444,9 +444,9 @@ const PhotoFrame = ({
                     }
                 } catch (e) {
                     if (e.message !== CustomError.URL_ALREADY_SET) {
-                        logError(
-                            e,
+                        log.error(
                             "updating photoswipe after src url update failed",
+                            e,
                         );
                     }
                 }
@@ -467,15 +467,11 @@ const PhotoFrame = ({
             item.metadata.fileType !== FILE_TYPE.VIDEO &&
             item.metadata.fileType !== FILE_TYPE.LIVE_PHOTO
         ) {
-            logError(
-                new Error(),
-                "getConvertedVideo called for non video file",
-            );
+            log.error("getConvertedVideo called for non video file");
             return;
         }
         if (item.conversionFailed) {
-            logError(
-                new Error(),
+            log.error(
                 "getConvertedVideo called for file that conversion failed",
             );
             return;
@@ -519,9 +515,9 @@ const PhotoFrame = ({
                 }
             } catch (e) {
                 if (e.message !== CustomError.URL_ALREADY_SET) {
-                    logError(
-                        e,
+                    log.error(
                         "updating photoswipe after src url update failed",
+                        e,
                     );
                 }
                 throw e;

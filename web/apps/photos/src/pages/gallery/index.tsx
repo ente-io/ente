@@ -871,7 +871,7 @@ export default function Gallery() {
                 clearSelection();
                 await syncWithRemote(false, true);
             } catch (e) {
-                logError(e, "collection ops failed", { ops });
+                log.error(`collection ops (${ops}) failed`, e);
                 setDialogMessage({
                     title: t("ERROR"),
 
@@ -916,7 +916,7 @@ export default function Gallery() {
             clearSelection();
             await syncWithRemote(false, true);
         } catch (e) {
-            logError(e, "file ops failed", { ops });
+            log.error(`file ops (${ops}) failed`, e);
             setDialogMessage({
                 title: t("ERROR"),
 
@@ -935,7 +935,7 @@ export default function Gallery() {
                 const collection = await createAlbum(collectionName);
                 await collectionOpsHelper(ops)(collection);
             } catch (e) {
-                logError(e, "create and collection ops failed", { ops });
+                log.error(`create and collection ops (${ops}) failed`, e);
                 setDialogMessage({
                     title: t("ERROR"),
 

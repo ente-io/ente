@@ -265,15 +265,13 @@ function areFilesLivePhotoAssets(
         ) {
             return true;
         } else {
-            logError(
-                new Error(CustomError.TOO_LARGE_LIVE_PHOTO_ASSETS),
-                CustomError.TOO_LARGE_LIVE_PHOTO_ASSETS,
-                {
+            log.error(
+                `${CustomError.TOO_LARGE_LIVE_PHOTO_ASSETS} - ${JSON.stringify({
                     fileSizes: [
                         firstFileIdentifier.size,
                         secondFileIdentifier.size,
                     ],
-                },
+                })}`,
             );
         }
     }
