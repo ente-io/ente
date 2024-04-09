@@ -1,5 +1,4 @@
 export enum Model {
-    GGML_CLIP = "ggml-clip",
     ONNX_CLIP = "onnx-clip",
 }
 

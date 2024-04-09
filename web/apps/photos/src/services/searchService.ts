@@ -4,7 +4,6 @@ import * as chrono from "chrono-node";
 import { FILE_TYPE } from "constants/file";
 import { t } from "i18next";
 import { Collection } from "types/collection";
-import { Model } from "types/embedding";
 import { EntityType, LocationTag, LocationTagData } from "types/entity";
 import { EnteFile } from "types/file";
 import { Person, Thing } from "types/machineLearning";
@@ -396,7 +395,7 @@ async function searchThing(searchPhrase: string) {
 }
 
 async function searchClip(searchPhrase: string): Promise<ClipSearchScores> {
-    const imageEmbeddings = await getLocalEmbeddings(Model.ONNX_CLIP);
+    const imageEmbeddings = await getLocalEmbeddings();
     const textEmbedding = await clipService.getTextEmbedding(searchPhrase);
     const clipSearchResult = new Map<number, number>(
         (

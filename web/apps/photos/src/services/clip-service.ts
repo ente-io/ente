@@ -41,29 +41,29 @@ export interface CLIPIndexingStatus {
  * 3. Use cosine similarity to find the find the image (embedding) closest to
  *    the text (embedding).
  *
- * More details are in the blog post that describes the initial launch of this
- * feature using the GGML runtime:
- * https://ente.io/blog/image-search-with-clip-ggml/
+ * More details are in our [blog
+ * post](https://ente.io/blog/image-search-with-clip-ggml/) that describes the
+ * initial launch of this feature using the GGML runtime.
  *
- * Since the initial launch, we've added support for another runtime, ONNX.
+ * Since the initial launch, we've switched over to another runtime,
+ * [ONNX](https://onnxruntime.ai).
  *
- * Note that we don't train the neural network - we use one of the publicly
- * available pre-trained neural networks (which are wholly defined by their
- * connectivity and weights), and use one of the standard ML runtimes to load
- * these weights and instantiate a running network that we can use to compute
- * the embeddings. Theoretically, the same CLIP model can be loaded by different
- * frameworks / runtimes, but in practice each runtime has its own preferred
- * format, and there are also quantization tradeoffs. So for each runtime that
- * we support we download a distinct model (binary encoding of weights).
+ * Note that we don't train the neural network - we only use one of the publicly
+ * available pre-trained neural networks for inference. These neural networks
+ * are wholly defined by their connectivity and weights. ONNX, our ML runtimes,
+ * loads these weights and instantiates a running network that we can use to
+ * compute the embeddings.
  *
- * Currently supported runtimes are:
+ * Theoretically, the same CLIP model can be loaded by different frameworks /
+ * runtimes, but in practice each runtime has its own preferred format, and
+ * there are also quantization tradeoffs. So there is a specific model (a binary
+ * encoding of weights) tied to our current runtime that we use.
  *
- * - [GGML](https://github.com/monatis/clip.cpp)
- * - [ONNX](https://onnxruntime.ai)
- *
- * Both these currently have one (and only one) associated model.
+ * To ensure that the embeddings, for the most part, can be shared, whenever
+ * possible we try to ensure that all the preprocessing steps, and the model
+ * itself, is the same across clients - web and mobile.
  */
-class ClipService {
+class CLIPService {
     private embeddingExtractionInProgress: AbortController | null = null;
     private reRunNeeded = false;
     private indexingStatus: CLIPIndexingStatus = {
@@ -372,7 +372,7 @@ class ClipService {
     };
 }
 
-export const clipService = new ClipService();
+export const clipService = new CLIPService();
 
 const getNonClipEmbeddingExtractedFiles = async (
     files: EnteFile[],

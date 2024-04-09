@@ -10,12 +10,7 @@ export interface AppUpdateInfo {
     version: string;
 }
 
-export type CLIPModel = "ggml-clip" | "onnx-clip";
-
-export const isCLIPModel = (s: unknown) => s == "ggml-clip" || s == "onnx-clip";
-
 export enum Model {
-    GGML_CLIP = "ggml-clip",
     ONNX_CLIP = "onnx-clip",
 }
 
