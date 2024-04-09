@@ -1,6 +1,6 @@
 name: ente_auth
 description: ente two-factor authenticator
-version: 2.0.54+254
+version: 2.0.55+255
 publish_to: none
 
 environment:
