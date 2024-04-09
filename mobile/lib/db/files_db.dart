@@ -670,19 +670,18 @@ class FilesDB {
     bool? asc,
     int visibility = visibleVisibility,
   }) async {
-    final db = await instance.database;
+    final db = await instance.sqliteAsyncDB;
     final order = (asc ?? false ? 'ASC' : 'DESC');
-    const String whereClause =
-        '$columnCollectionID = ? AND $columnCreationTime >= ? AND $columnCreationTime <= ?';
-    final List<Object> whereArgs = [collectionID, startTime, endTime];
-
-    final results = await db.query(
-      filesTable,
-      where: whereClause,
-      whereArgs: whereArgs,
-      orderBy:
-          '$columnCreationTime ' + order + ', $columnModificationTime ' + order,
-      limit: limit,
+    String query =
+        'SELECT * FROM $filesTable WHERE $columnCollectionID = ? AND $columnCreationTime >= ? AND $columnCreationTime <= ? ORDER BY $columnCreationTime $order, $columnModificationTime $order';
+    final List<Object> args = [collectionID, startTime, endTime];
+    if (limit != null) {
+      query += ' LIMIT ?';
+      args.add(limit);
+    }
+    final results = await db.getAll(
+      query,
+      args,
     );
     final files = convertToFiles(results);
     return FileLoadResult(files, files.length == limit);
