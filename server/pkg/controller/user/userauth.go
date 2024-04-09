@@ -140,7 +140,7 @@ func (c *UserController) verifyEmailOtt(context *gin.Context, email string, ott 
 	if err != nil {
 		return stacktrace.Propagate(err, "")
 	}
-	wrongAttempt, err := c.UserAuthRepo.GetMaxWrongAttempts(emailHash)
+	wrongAttempt, err := c.UserAuthRepo.GetMaxWrongAttempts(emailHash, auth.GetApp(context))
 	if err != nil {
 		return stacktrace.Propagate(err, "")
 	}
@@ -166,12 +166,12 @@ func (c *UserController) verifyEmailOtt(context *gin.Context, email string, ott 
 		}
 	}
 	if !isValidOTT {
-		if err = c.UserAuthRepo.RecordWrongAttemptForActiveOtt(emailHash); err != nil {
+		if err = c.UserAuthRepo.RecordWrongAttemptForActiveOtt(emailHash, auth.GetApp(context)); err != nil {
 			log.WithError(err).Warn("Failed to track wrong attempt")
 		}
 		return stacktrace.Propagate(ente.ErrIncorrectOTT, "")
 	}
-	err = c.UserAuthRepo.RemoveOTT(emailHash, ott)
+	err = c.UserAuthRepo.RemoveOTT(emailHash, ott, auth.GetApp(context))
 	if err != nil {
 		return stacktrace.Propagate(err, "")
 	}
