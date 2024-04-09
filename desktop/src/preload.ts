@@ -307,7 +307,7 @@ const getDirFiles = (dirPath: string): Promise<ElectronFile[]> =>
 //
 // The copy itself is relatively fast, but the problem with transfering large
 // amounts of data is potentially running out of memory during the copy.
-contextBridge.exposeInMainWorld("ElectronAPIs", {
+contextBridge.exposeInMainWorld("electron", {
     // - General
     appVersion,
     openDirectory,

@@ -1,4 +1,3 @@
-import ElectronAPIs from "@/next/electron";
 import { CustomError } from "@ente/shared/error";
 import { addLogLine } from "@ente/shared/logging";
 import { logError } from "@ente/shared/sentry";
@@ -133,6 +132,8 @@ export default function Uploader(props: Props) {
     const uploaderNameRef = useRef<string>(null);
     const isDragAndDrop = useRef(false);
 
+    const electron = globalThis.electron;
+
     const closeUploadProgress = () => setUploadProgressView(false);
     const showUserNameInputDialog = () => setUserNameInputDialogView(true);
 
@@ -221,7 +222,7 @@ export default function Uploader(props: Props) {
             setWebFiles(props.webFileSelectorFiles);
         } else if (props.dragAndDropFiles?.length > 0) {
             isDragAndDrop.current = true;
-            if (isElectron()) {
+            if (electron) {
                 const main = async () => {
                     try {
                         addLogLine(`uploading dropped files from desktop app`);
@@ -230,7 +231,7 @@ export default function Uploader(props: Props) {
                         for (const file of props.dragAndDropFiles) {
                             if (file.name.endsWith(".zip")) {
                                 const zipFiles =
-                                    await ElectronAPIs.getElectronFilesFromGoogleZip(
+                                    await electron.getElectronFilesFromGoogleZip(
                                         (file as any).path,
                                     );
                                 addLogLine(
@@ -504,19 +505,19 @@ export default function Uploader(props: Props) {
             addLogLine("uploadFiles called");
             preUploadAction();
             if (
-                isElectron() &&
+                electron &&
                 !isPendingDesktopUpload.current &&
                 !watchFolderService.isUploadRunning()
             ) {
                 await ImportService.setToUploadCollection(collections);
                 if (zipPaths.current) {
-                    await ElectronAPIs.setToUploadFiles(
+                    await electron.setToUploadFiles(
                         PICKED_UPLOAD_TYPE.ZIPS,
                         zipPaths.current,
                     );
                     zipPaths.current = null;
                 }
-                await ElectronAPIs.setToUploadFiles(
+                await electron.setToUploadFiles(
                     PICKED_UPLOAD_TYPE.FILES,
                     filesWithCollectionToUploadIn.map(
                         ({ file }) => (file as ElectronFile).path,
@@ -701,15 +702,18 @@ export default function Uploader(props: Props) {
         }
     };
 
-    const handleDesktopUpload = async (type: PICKED_UPLOAD_TYPE) => {
+    const handleDesktopUpload = async (
+        type: PICKED_UPLOAD_TYPE,
+        electron: Electron,
+    ) => {
         let files: ElectronFile[];
         pickedUploadType.current = type;
         if (type === PICKED_UPLOAD_TYPE.FILES) {
-            files = await ElectronAPIs.showUploadFilesDialog();
+            files = await electron.showUploadFilesDialog();
         } else if (type === PICKED_UPLOAD_TYPE.FOLDERS) {
-            files = await ElectronAPIs.showUploadDirsDialog();
+            files = await electron.showUploadDirsDialog();
         } else {
-            const response = await ElectronAPIs.showUploadZipDialog();
+            const response = await electron.showUploadZipDialog();
             files = response.files;
             zipPaths.current = response.zipPaths;
         }
@@ -738,8 +742,8 @@ export default function Uploader(props: Props) {
     };
 
     const handleUpload = (type) => () => {
-        if (isElectron()) {
-            handleDesktopUpload(type);
+        if (electron) {
+            handleDesktopUpload(type, electron);
         } else {
             handleWebUpload(type);
         }

@@ -1,4 +1,3 @@
-import ElectronAPIs from "@/next/electron";
 import Login from "@ente/accounts/components/Login";
 import SignUp from "@ente/accounts/components/SignUp";
 import { APPS } from "@ente/shared/apps/constants";
@@ -14,7 +13,6 @@ import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { getKey, SESSION_KEYS } from "@ente/shared/storage/sessionStorage";
 import { Button, styled, Typography, TypographyProps } from "@mui/material";
 import { t } from "i18next";
-import isElectron from "is-electron";
 import { useRouter } from "next/router";
 import { CarouselProvider, DotGroup, Slide, Slider } from "pure-react-carousel";
 import "pure-react-carousel/dist/react-carousel.es.css";
@@ -132,9 +130,10 @@ export default function LandingPage() {
     const handleNormalRedirect = async () => {
         const user = getData(LS_KEYS.USER);
         let key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
-        if (!key && isElectron()) {
+        const electron = globalThis.electron;
+        if (!key && electron) {
             try {
-                key = await ElectronAPIs.getEncryptionKey();
+                key = await electron.getEncryptionKey();
             } catch (e) {
                 logError(e, "getEncryptionKey failed");
             }
