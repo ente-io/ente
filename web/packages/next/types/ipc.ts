@@ -10,6 +10,10 @@ export interface AppUpdateInfo {
     version: string;
 }
 
+export type CLIPModel = "ggml-clip" | "onnx-clip";
+
+export const isCLIPModel = (s: unknown) => s == "ggml-clip" || s == "onnx-clip";
+
 export enum Model {
     GGML_CLIP = "ggml-clip",
     ONNX_CLIP = "onnx-clip",
@@ -147,9 +151,19 @@ export interface Electron {
 
     // - ML
 
+    /**
+     * Compute and return a CLIP embedding of the given image.
+     *
+     * See: [Note: CLIP based magic search]
+     *
+     * @param model The CLIP model and ML runtime combination to use.
+     * @param jpegImageData The raw bytes of the image encoded as an JPEG.
+     *
+     * @returns A CLIP embedding.
+     */
     computeImageEmbedding: (
         model: Model,
-        imageData: Uint8Array,
+        jpegImageData: Uint8Array,
     ) => Promise<Float32Array>;
 
     computeTextEmbedding: (model: Model, text: string) => Promise<Float32Array>;
