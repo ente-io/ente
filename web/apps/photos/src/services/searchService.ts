@@ -1,11 +1,8 @@
-import * as chrono from "chrono-node";
-import { t } from "i18next";
-import { getAllPeople } from "utils/machineLearning";
-
+import log from "@/next/log";
 import { CustomError } from "@ente/shared/error";
-import { addLogLine } from "@ente/shared/logging";
-import { logError } from "@ente/shared/sentry";
+import * as chrono from "chrono-node";
 import { FILE_TYPE } from "constants/file";
+import { t } from "i18next";
 import { Collection } from "types/collection";
 import { Model } from "types/embedding";
 import { EntityType, LocationTag, LocationTagData } from "types/entity";
@@ -21,6 +18,7 @@ import {
 } from "types/search";
 import ComlinkSearchWorker from "utils/comlink/ComlinkSearchWorker";
 import { getUniqueFiles } from "utils/file";
+import { getAllPeople } from "utils/machineLearning";
 import { getMLSyncConfig } from "utils/machineLearning/config";
 import { getFormattedDate } from "utils/search";
 import mlIDbStorage from "utils/storage/mlIDbStorage";
@@ -64,7 +62,7 @@ export const getAutoCompleteSuggestions =
 
             return convertSuggestionsToOptions(suggestions);
         } catch (e) {
-            logError(e, "getAutoCompleteSuggestions failed");
+            log.error("getAutoCompleteSuggestions failed", e);
             return [];
         }
     };
@@ -159,7 +157,7 @@ function getYearSuggestion(searchPhrase: string): Suggestion[] {
                 ];
             }
         } catch (e) {
-            logError(e, "getYearSuggestion failed");
+            log.error("getYearSuggestion failed", e);
         }
     }
     return [];
@@ -175,7 +173,7 @@ export async function getAllPeopleSuggestion(): Promise<Array<Suggestion>> {
             hide: true,
         }));
     } catch (e) {
-        logError(e, "getAllPeopleSuggestion failed");
+        log.error("getAllPeopleSuggestion failed", e);
         return [];
     }
 }
@@ -205,7 +203,7 @@ export async function getIndexStatusSuggestion(): Promise<Suggestion> {
             hide: true,
         };
     } catch (e) {
-        logError(e, "getIndexStatusSuggestion failed");
+        log.error("getIndexStatusSuggestion failed", e);
     }
 }
 
@@ -319,7 +317,7 @@ async function getClipSuggestion(searchPhrase: string): Promise<Suggestion> {
         };
     } catch (e) {
         if (!e.message?.includes(CustomError.MODEL_DOWNLOAD_PENDING)) {
-            logError(e, "getClipSuggestion failed");
+            log.error("getClipSuggestion failed", e);
         }
         return null;
     }
@@ -383,7 +381,7 @@ async function searchLocationTag(searchPhrase: string): Promise<LocationTag[]> {
         locationTag.data.name.toLowerCase().includes(searchPhrase),
     );
     if (matchedLocationTags.length > 0) {
-        addLogLine(
+        log.info(
             `Found ${matchedLocationTags.length} location tags for search phrase`,
         );
     }

@@ -1,6 +1,6 @@
-import ElectronAPIs from "@/next/electron";
 import { convertBytesToHumanReadable } from "@/next/file";
 import log from "@/next/log";
+import type { Electron } from "@/next/types/ipc";
 import { workerBridge } from "@/next/worker/worker-bridge";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { CustomError } from "@ente/shared/error";
@@ -489,8 +489,9 @@ const convertToJPEGInElectron = async (
     try {
         const startTime = Date.now();
         const inputFileData = new Uint8Array(await fileBlob.arrayBuffer());
-        const convertedFileData = isElectron()
-            ? await ElectronAPIs.convertToJPEG(inputFileData, filename)
+        const electron = globalThis.electron;
+        const convertedFileData = electron
+            ? await electron.convertToJPEG(inputFileData, filename)
             : await workerBridge.convertToJPEG(inputFileData, filename);
         log.info(
             `originalFileSize:${convertBytesToHumanReadable(
@@ -688,8 +689,10 @@ export async function downloadFilesWithProgress(
         canceller,
     });
 
-    if (isElectron()) {
+    const electron = globalThis.electron;
+    if (electron) {
         await downloadFilesDesktop(
+            electron,
             files,
             { increaseSuccess, increaseFailed, isCancelled },
             downloadDirPath,
@@ -711,8 +714,9 @@ export async function downloadSelectedFiles(
         return;
     }
     let downloadDirPath: string;
-    if (isElectron()) {
-        downloadDirPath = await ElectronAPIs.selectDirectory();
+    const electron = globalThis.electron;
+    if (electron) {
+        downloadDirPath = await electron.selectDirectory();
         if (!downloadDirPath) {
             return;
         }
@@ -729,8 +733,9 @@ export async function downloadSingleFile(
     setFilesDownloadProgressAttributes: SetFilesDownloadProgressAttributes,
 ) {
     let downloadDirPath: string;
-    if (isElectron()) {
-        downloadDirPath = await ElectronAPIs.selectDirectory();
+    const electron = globalThis.electron;
+    if (electron) {
+        downloadDirPath = await electron.selectDirectory();
         if (!downloadDirPath) {
             return;
         }
@@ -764,7 +769,8 @@ export async function downloadFiles(
     }
 }
 
-export async function downloadFilesDesktop(
+async function downloadFilesDesktop(
+    electron: Electron,
     files: EnteFile[],
     progressBarUpdater: {
         increaseSuccess: () => void;
@@ -779,7 +785,7 @@ export async function downloadFilesDesktop(
             if (progressBarUpdater?.isCancelled()) {
                 return;
             }
-            await downloadFileDesktop(fileReader, file, downloadPath);
+            await downloadFileDesktop(electron, fileReader, file, downloadPath);
             progressBarUpdater?.increaseSuccess();
         } catch (e) {
             log.error("download fail for file", e);
@@ -788,7 +794,8 @@ export async function downloadFilesDesktop(
     }
 }
 
-export async function downloadFileDesktop(
+async function downloadFileDesktop(
+    electron: Electron,
     fileReader: FileReader,
     file: EnteFile,
     downloadPath: string,
@@ -810,7 +817,7 @@ export async function downloadFileDesktop(
             livePhoto.imageNameTitle,
         );
         const imageStream = generateStreamFromArrayBuffer(livePhoto.image);
-        await ElectronAPIs.saveStreamToDisk(
+        await electron.saveStreamToDisk(
             getFileExportPath(downloadPath, imageExportName),
             imageStream,
         );
@@ -820,12 +827,12 @@ export async function downloadFileDesktop(
                 livePhoto.videoNameTitle,
             );
             const videoStream = generateStreamFromArrayBuffer(livePhoto.video);
-            await ElectronAPIs.saveStreamToDisk(
+            await electron.saveStreamToDisk(
                 getFileExportPath(downloadPath, videoExportName),
                 videoStream,
             );
         } catch (e) {
-            await ElectronAPIs.deleteFile(
+            await electron.deleteFile(
                 getFileExportPath(downloadPath, imageExportName),
             );
             throw e;
@@ -835,7 +842,7 @@ export async function downloadFileDesktop(
             downloadPath,
             file.metadata.title,
         );
-        await ElectronAPIs.saveStreamToDisk(
+        await electron.saveStreamToDisk(
             getFileExportPath(downloadPath, fileExportName),
             updatedFileStream,
         );

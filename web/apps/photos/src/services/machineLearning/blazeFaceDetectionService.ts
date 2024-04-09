@@ -1,4 +1,4 @@
-import { addLogLine } from "@ente/shared/logging";
+import log from "@/next/log";
 import { GraphModel } from "@tensorflow/tfjs-converter";
 import * as tf from "@tensorflow/tfjs-core";
 import {
@@ -60,7 +60,7 @@ class BlazeFaceDetectionService implements FaceDetectionService {
             inputHeight: BLAZEFACE_INPUT_SIZE,
             inputWidth: BLAZEFACE_INPUT_SIZE,
         });
-        addLogLine(
+        log.info(
             "loaded blazeFaceModel: ",
             // await this.blazeFaceModel,
             // eslint-disable-next-line @typescript-eslint/await-thenable
@@ -121,20 +121,20 @@ class BlazeFaceDetectionService implements FaceDetectionService {
         let desiredDist = desiredRightEyeX - this.desiredLeftEye[0];
         desiredDist *= this.desiredFaceSize;
         const scale = desiredDist / dist;
-        // addLogLine("scale: ", scale);
+        // log.info("scale: ", scale);
 
         const eyesCenter = [];
         eyesCenter[0] = Math.floor((leftEye[0] + rightEye[0]) / 2);
         eyesCenter[1] = Math.floor((leftEye[1] + rightEye[1]) / 2);
-        // addLogLine("eyesCenter: ", eyesCenter);
+        // log.info("eyesCenter: ", eyesCenter);
 
         const faceWidth = this.desiredFaceSize / scale;
         const faceHeight = this.desiredFaceSize / scale;
-        // addLogLine("faceWidth: ", faceWidth, "faceHeight: ", faceHeight)
+        // log.info("faceWidth: ", faceWidth, "faceHeight: ", faceHeight)
 
         const tx = eyesCenter[0] - faceWidth * 0.5;
         const ty = eyesCenter[1] - faceHeight * this.desiredLeftEye[1];
-        // addLogLine("tx: ", tx, "ty: ", ty);
+        // log.info("tx: ", tx, "ty: ", ty);
 
         return new Box({
             left: tx,
@@ -155,7 +155,7 @@ class BlazeFaceDetectionService implements FaceDetectionService {
         const normalizedImage = tf.sub(tf.div(reshapedImage, 127.5), 1.0);
         // eslint-disable-next-line @typescript-eslint/await-thenable
         const results = await this.blazeFaceBackModel.predict(normalizedImage);
-        // addLogLine('onFacesDetected: ', results);
+        // log.info('onFacesDetected: ', results);
         return results;
     }
 
@@ -180,7 +180,7 @@ class BlazeFaceDetectionService implements FaceDetectionService {
         const inBox = newBox(0, 0, resized.width, resized.height);
         const toBox = newBox(0, 0, imageBitmap.width, imageBitmap.height);
         const transform = computeTransformToBox(inBox, toBox);
-        // addLogLine("1st pass: ", { transform });
+        // log.info("1st pass: ", { transform });
 
         const faceDetections: Array<FaceDetection> = faces?.map((f) => {
             const box = transformBox(normFaceBox(f), transform);
@@ -223,7 +223,7 @@ class BlazeFaceDetectionService implements FaceDetectionService {
             );
             let selected = pass2Detections?.[0];
             if (pass2Detections?.length > 1) {
-                // addLogLine('2nd pass >1 face', pass2Detections.length);
+                // log.info('2nd pass >1 face', pass2Detections.length);
                 selected = getNearestDetection(
                     pass1Detection,
                     pass2Detections,
@@ -234,7 +234,7 @@ class BlazeFaceDetectionService implements FaceDetectionService {
             // we might miss 1st pass face actually having score within threshold
             // it is ok as results will be consistent with 2nd pass only detections
             if (selected && selected.probability >= BLAZEFACE_SCORE_THRESHOLD) {
-                // addLogLine("pass2: ", { imageBox, paddedBox, transform, selected });
+                // log.info("pass2: ", { imageBox, paddedBox, transform, selected });
                 detections.push(selected);
             }
         }

@@ -1,8 +1,8 @@
 import { haveWindow } from "@/next/env";
+import log from "@/next/log";
 import { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { getDedicatedCryptoWorker } from "@ente/shared/crypto";
 import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
-import { addLogLine } from "@ente/shared/logging";
 import PQueue from "p-queue";
 import { EnteFile } from "types/file";
 import {
@@ -198,7 +198,7 @@ export class LocalMLSyncContext implements MLSyncContext {
 
         this.concurrency = concurrency || getConcurrency();
 
-        addLogLine("Using concurrency: ", this.concurrency);
+        log.info("Using concurrency: ", this.concurrency);
         // timeout is added on downloads
         // timeout on queue will keep the operation open till worker is terminated
         this.syncQueue = new PQueue({ concurrency: this.concurrency });

@@ -1,6 +1,6 @@
 import { CustomHead } from "@/next/components/Head";
-import ElectronAPIs from "@/next/electron";
 import { setupI18n } from "@/next/i18n";
+import log from "@/next/log";
 import { logStartupBanner } from "@/next/log-web";
 import { AppUpdateInfo } from "@/next/types/ipc";
 import {
@@ -23,12 +23,9 @@ import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { MessageContainer } from "@ente/shared/components/MessageContainer";
 import AppNavbar from "@ente/shared/components/Navbar/app";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
-import { CustomError } from "@ente/shared/error";
 import { Events, eventBus } from "@ente/shared/events";
 import { useLocalState } from "@ente/shared/hooks/useLocalState";
-import { addLogLine } from "@ente/shared/logging";
 import HTTPService from "@ente/shared/network/HTTPService";
-import { logError } from "@ente/shared/sentry";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import {
     getLocalMapEnabled,
@@ -156,7 +153,8 @@ export default function App({ Component, pageProps }: AppProps) {
     }, []);
 
     useEffect(() => {
-        if (isElectron()) {
+        const electron = globalThis.electron;
+        if (electron) {
             const showUpdateDialog = (updateInfo: AppUpdateInfo) => {
                 if (updateInfo.autoUpdatable) {
                     setDialogMessage(
@@ -176,7 +174,7 @@ export default function App({ Component, pageProps }: AppProps) {
                     });
                 }
             };
-            ElectronAPIs.registerUpdateEventListener(showUpdateDialog);
+            electron.registerUpdateEventListener(showUpdateDialog);
         }
     }, []);
 
@@ -190,7 +188,7 @@ export default function App({ Component, pageProps }: AppProps) {
                 setMlSearchEnabled(mlSearchConfig.enabled);
                 mlWorkManager.setMlSearchEnabled(mlSearchConfig.enabled);
             } catch (e) {
-                logError(e, "Error while loading mlSearchEnabled");
+                log.error("Error while loading mlSearchEnabled", e);
             }
         };
         loadMlSearchState();
@@ -200,7 +198,7 @@ export default function App({ Component, pageProps }: AppProps) {
                 mlWorkManager.setMlSearchEnabled(false);
             });
         } catch (e) {
-            logError(e, "Error while subscribing to logout event");
+            log.error("Error while subscribing to logout event", e);
         }
     }, []);
 
@@ -214,10 +212,10 @@ export default function App({ Component, pageProps }: AppProps) {
         }
         const initExport = async () => {
             try {
-                addLogLine("init export");
+                log.info("init export");
                 const token = getToken();
                 if (!token) {
-                    addLogLine(
+                    log.info(
                         "User not logged in, not starting export continuous sync job",
                     );
                     return;
@@ -238,11 +236,11 @@ export default function App({ Component, pageProps }: AppProps) {
                     exportService.enableContinuousExport();
                 }
                 if (isExportInProgress(exportRecord.stage)) {
-                    addLogLine("export was in progress, resuming");
+                    log.info("export was in progress, resuming");
                     exportService.scheduleExport();
                 }
             } catch (e) {
-                logError(e, "init export failed");
+                log.error("init export failed", e);
             }
         };
         initExport();
@@ -251,7 +249,7 @@ export default function App({ Component, pageProps }: AppProps) {
                 exportService.disableContinuousExport();
             });
         } catch (e) {
-            logError(e, "Error while subscribing to logout event");
+            log.error("Error while subscribing to logout event", e);
         }
     }, []);
 
@@ -268,9 +266,7 @@ export default function App({ Component, pageProps }: AppProps) {
                 const redirectAction = redirectMap.get(redirect);
                 window.location.href = await redirectAction();
             } else {
-                logError(CustomError.BAD_REQUEST, "invalid redirection", {
-                    redirect,
-                });
+                log.error(`invalid redirection ${redirect}`);
             }
         };
 
@@ -337,7 +333,7 @@ export default function App({ Component, pageProps }: AppProps) {
             setMlSearchEnabled(enabled);
             mlWorkManager.setMlSearchEnabled(enabled);
         } catch (e) {
-            logError(e, "Error while updating mlSearchEnabled");
+            log.error("Error while updating mlSearchEnabled", e);
         }
     };
 
@@ -347,7 +343,7 @@ export default function App({ Component, pageProps }: AppProps) {
             setLocalMapEnabled(enabled);
             setMapEnabled(enabled);
         } catch (e) {
-            logError(e, "Error while updating mapEnabled");
+            log.error("Error while updating mapEnabled", e);
         }
     };
 

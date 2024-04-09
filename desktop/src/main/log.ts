@@ -60,11 +60,11 @@ const logInfo = (...params: any[]) => {
         .map((p) => (typeof p == "string" ? p : util.inspect(p)))
         .join(" ");
     log.info(`[main] ${message}`);
-    if (isDev) console.log(message);
+    if (isDev) console.log(`[info] ${message}`);
 };
 
 const logDebug = (param: () => any) => {
-    if (isDev) console.log(`[main] [debug] ${util.inspect(param())}`);
+    if (isDev) console.log(`[debug] ${util.inspect(param())}`);
 };
 
 /**

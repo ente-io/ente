@@ -1,9 +1,8 @@
-import ElectronAPIs from "@/next/electron";
+import { ensureElectron } from "@/next/electron";
+import log from "@/next/log";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { CustomError } from "@ente/shared/error";
 import { Events, eventBus } from "@ente/shared/events";
-import { addLogLine } from "@ente/shared/logging";
-import { logError } from "@ente/shared/sentry";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import { FILE_TYPE } from "constants/file";
 import isElectron from "is-electron";
@@ -63,36 +62,36 @@ class ClipServiceImpl {
                 return;
             }
             if (this.onFileUploadedHandler) {
-                addLogLine("file upload listener already setup");
+                log.info("file upload listener already setup");
                 return;
             }
-            addLogLine("setting up file upload listener");
+            log.info("setting up file upload listener");
             this.onFileUploadedHandler = (args) => {
                 this.runLocalFileClipExtraction(args);
             };
             eventBus.on(Events.FILE_UPLOADED, this.onFileUploadedHandler, this);
-            addLogLine("setup file upload listener successfully");
+            log.info("setup file upload listener successfully");
         } catch (e) {
-            logError(e, "failed to setup clip service");
+            log.error("failed to setup clip service", e);
         }
     };
 
     removeOnFileUploadListener = async () => {
         try {
             if (!this.onFileUploadedHandler) {
-                addLogLine("file upload listener already removed");
+                log.info("file upload listener already removed");
                 return;
             }
-            addLogLine("removing file upload listener");
+            log.info("removing file upload listener");
             eventBus.removeListener(
                 Events.FILE_UPLOADED,
                 this.onFileUploadedHandler,
                 this,
             );
             this.onFileUploadedHandler = null;
-            addLogLine("removed file upload listener successfully");
+            log.info("removed file upload listener successfully");
         } catch (e) {
-            logError(e, "failed to remove clip service");
+            log.error("failed to remove clip service", e);
         }
     };
 
@@ -107,7 +106,7 @@ class ClipServiceImpl {
             }
             return this.clipExtractionStatus;
         } catch (e) {
-            logError(e, "failed to get clip indexing status");
+            log.error("failed to get clip indexing status", e);
         }
     };
 
@@ -121,13 +120,13 @@ class ClipServiceImpl {
     ) => {
         try {
             if (this.embeddingExtractionInProgress) {
-                addLogLine(
+                log.info(
                     "clip embedding extraction already in progress, scheduling re-run",
                 );
                 this.reRunNeeded = true;
                 return;
             } else {
-                addLogLine(
+                log.info(
                     "clip embedding extraction not in progress, starting clip embedding extraction",
                 );
             }
@@ -139,7 +138,7 @@ class ClipServiceImpl {
                 this.embeddingExtractionInProgress = null;
                 if (!canceller.signal.aborted && this.reRunNeeded) {
                     this.reRunNeeded = false;
-                    addLogLine("re-running clip embedding extraction");
+                    log.info("re-running clip embedding extraction");
                     setTimeout(
                         () => this.scheduleImageEmbeddingExtraction(),
                         0,
@@ -148,7 +147,7 @@ class ClipServiceImpl {
             }
         } catch (e) {
             if (e.message !== CustomError.REQUEST_CANCELLED) {
-                logError(e, "failed to schedule clip embedding extraction");
+                log.error("failed to schedule clip embedding extraction", e);
             }
         }
     };
@@ -158,12 +157,12 @@ class ClipServiceImpl {
         model: Model = Model.ONNX_CLIP,
     ): Promise<Float32Array> => {
         try {
-            return ElectronAPIs.computeTextEmbedding(model, text);
+            return ensureElectron().computeTextEmbedding(model, text);
         } catch (e) {
             if (e?.message?.includes(CustomError.UNSUPPORTED_PLATFORM)) {
                 this.unsupportedPlatform = true;
             }
-            logError(e, "failed to compute text embedding");
+            log.error("failed to compute text embedding", e);
             throw e;
         }
     };
@@ -174,7 +173,7 @@ class ClipServiceImpl {
     ) => {
         try {
             if (this.unsupportedPlatform) {
-                addLogLine(
+                log.info(
                     `skipping clip embedding extraction, platform unsupported`,
                 );
                 return;
@@ -194,15 +193,15 @@ class ClipServiceImpl {
                 pending: pendingFiles.length,
             });
             if (pendingFiles.length === 0) {
-                addLogLine("no clip embedding extraction needed, all done");
+                log.info("no clip embedding extraction needed, all done");
                 return;
             }
-            addLogLine(
+            log.info(
                 `starting clip embedding extraction for ${pendingFiles.length} files`,
             );
             for (const file of pendingFiles) {
                 try {
-                    addLogLine(
+                    log.info(
                         `extracting clip embedding for file: ${file.metadata.title} fileID: ${file.id}`,
                     );
                     if (canceller.signal.aborted) {
@@ -210,7 +209,7 @@ class ClipServiceImpl {
                     }
                     const embeddingData =
                         await this.extractFileClipImageEmbedding(model, file);
-                    addLogLine(
+                    log.info(
                         `successfully extracted clip embedding for file: ${file.metadata.title} fileID: ${file.id} embedding length: ${embeddingData?.length}`,
                     );
                     await this.encryptAndUploadEmbedding(
@@ -219,14 +218,14 @@ class ClipServiceImpl {
                         embeddingData,
                     );
                     this.onSuccessStatusUpdater();
-                    addLogLine(
+                    log.info(
                         `successfully put clip embedding to server for file: ${file.metadata.title} fileID: ${file.id}`,
                     );
                 } catch (e) {
                     if (e?.message !== CustomError.REQUEST_CANCELLED) {
-                        logError(
-                            e,
+                        log.error(
                             "failed to extract clip embedding for file",
+                            e,
                         );
                     }
                     if (
@@ -244,7 +243,7 @@ class ClipServiceImpl {
             }
         } catch (e) {
             if (e.message !== CustomError.REQUEST_CANCELLED) {
-                logError(e, "failed to extract clip embedding");
+                log.error("failed to extract clip embedding", e);
             }
             throw e;
         }
@@ -258,24 +257,24 @@ class ClipServiceImpl {
         model: Model = Model.ONNX_CLIP,
     ) {
         const { enteFile, localFile } = arg;
-        addLogLine(
+        log.info(
             `clip embedding extraction onFileUploadedHandler file: ${enteFile.metadata.title} fileID: ${enteFile.id}`,
             enteFile.id,
         );
         if (enteFile.metadata.fileType === FILE_TYPE.VIDEO) {
-            addLogLine(
+            log.info(
                 `skipping video file for clip embedding extraction file: ${enteFile.metadata.title} fileID: ${enteFile.id}`,
             );
             return;
         }
         const extension = enteFile.metadata.title.split(".").pop();
         if (!extension || !["jpg", "jpeg"].includes(extension)) {
-            addLogLine(
+            log.info(
                 `skipping non jpg file for clip embedding extraction file: ${enteFile.metadata.title} fileID: ${enteFile.id}`,
             );
             return;
         }
-        addLogLine(
+        log.info(
             `queuing up for local clip embedding extraction for file: ${enteFile.metadata.title} fileID: ${enteFile.id}`,
         );
         try {
@@ -290,11 +289,11 @@ class ClipServiceImpl {
                     embedding,
                 );
             });
-            addLogLine(
+            log.info(
                 `successfully extracted clip embedding for file: ${enteFile.metadata.title} fileID: ${enteFile.id}`,
             );
         } catch (e) {
-            logError(e, "Failed in ML onFileUploadedHandler");
+            log.error("Failed in ML onFileUploadedHandler", e);
         }
     }
 
@@ -305,7 +304,10 @@ class ClipServiceImpl {
         const file = await localFile
             .arrayBuffer()
             .then((buffer) => new Uint8Array(buffer));
-        const embedding = await ElectronAPIs.computeImageEmbedding(model, file);
+        const embedding = await ensureElectron().computeImageEmbedding(
+            model,
+            file,
+        );
         return embedding;
     };
 
@@ -322,7 +324,7 @@ class ClipServiceImpl {
         const comlinkCryptoWorker = await ComlinkCryptoWorker.getInstance();
         const { file: encryptedEmbeddingData } =
             await comlinkCryptoWorker.encryptEmbedding(embeddingData, file.key);
-        addLogLine(
+        log.info(
             `putting clip embedding to server for file: ${file.metadata.title} fileID: ${file.id}`,
         );
         await putEmbedding({
@@ -345,7 +347,7 @@ class ClipServiceImpl {
         file: EnteFile,
     ) => {
         const thumb = await downloadManager.getThumbnail(file);
-        const embedding = await ElectronAPIs.computeImageEmbedding(
+        const embedding = await ensureElectron().computeImageEmbedding(
             model,
             thumb,
         );

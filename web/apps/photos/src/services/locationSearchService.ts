@@ -1,4 +1,4 @@
-import { logError } from "@ente/shared/sentry";
+import log from "@/next/log";
 import { LocationTagData } from "types/entity";
 import { Location } from "types/upload";
 
@@ -30,7 +30,7 @@ class LocationSearchService {
             });
             await this.citiesPromise;
         } catch (e) {
-            logError(e, "LocationSearchService loadCities failed");
+            log.error("LocationSearchService loadCities failed", e);
             this.citiesPromise = null;
         }
     }
@@ -47,7 +47,7 @@ class LocationSearchService {
                     .startsWith(searchTerm.toLowerCase());
             });
         } catch (e) {
-            logError(e, "LocationSearchService searchCities failed");
+            log.error("LocationSearchService searchCities failed", e);
             throw e;
         }
     }

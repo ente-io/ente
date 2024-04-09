@@ -1,4 +1,4 @@
-import ElectronAPIs from "@/next/electron";
+import { ensureElectron } from "@/next/electron";
 import log, { logToDisk } from "@/next/log";
 import { expose, wrap, type Remote } from "comlink";
 
@@ -45,7 +45,7 @@ export class ComlinkWorker<T extends new () => InstanceType<T>> {
 const workerBridge = {
     logToDisk,
     convertToJPEG: (inputFileData: Uint8Array, filename: string) =>
-        ElectronAPIs.convertToJPEG(inputFileData, filename),
+        ensureElectron().convertToJPEG(inputFileData, filename),
 };
 
 export type WorkerBridge = typeof workerBridge;

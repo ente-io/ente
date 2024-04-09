@@ -1,4 +1,4 @@
-import { addLogLine } from "@ente/shared/logging";
+import log from "@/next/log";
 import * as tfjsConverter from "@tensorflow/tfjs-converter";
 import * as tf from "@tensorflow/tfjs-core";
 import { SCENE_DETECTION_IMAGE_SIZE } from "constants/mlConfig";
@@ -26,7 +26,7 @@ class ImageScene implements SceneDetectionService {
     }
 
     private async init() {
-        addLogLine(`[${this.workerID}]`, "ImageScene init called");
+        log.info(`[${this.workerID}]`, "ImageScene init called");
         if (this.model) {
             return;
         }
@@ -38,7 +38,7 @@ class ImageScene implements SceneDetectionService {
         this.model = await tfjsConverter.loadGraphModel(
             "/models/imagescene/model.json",
         );
-        addLogLine(
+        log.info(
             `[${this.workerID}]`,
             "loaded ImageScene model",
             tf.getBackend(),
@@ -52,10 +52,7 @@ class ImageScene implements SceneDetectionService {
     }
 
     private async getImageSceneModel() {
-        addLogLine(
-            `[${this.workerID}]`,
-            "ImageScene getImageSceneModel called",
-        );
+        log.info(`[${this.workerID}]`, "ImageScene getImageSceneModel called");
         if (!this.ready) {
             this.ready = this.init();
         }

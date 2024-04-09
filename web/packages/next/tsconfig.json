@@ -5,5 +5,5 @@
         "lib": ["ESnext", "DOM", "DOM.Iterable", "WebWorker"]
     },
     /* Typecheck all files with the given extensions (here or in subfolders) */
-    "include": ["**/*.ts", "**/*.tsx"]
+    "include": ["**/*.ts", "**/*.tsx", "**/*.d.ts", "global-electron.d.ts"]
 }

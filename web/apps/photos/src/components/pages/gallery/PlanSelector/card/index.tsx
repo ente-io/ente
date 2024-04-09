@@ -1,6 +1,6 @@
+import log from "@/next/log";
 import { SUPPORT_EMAIL } from "@ente/shared/constants/urls";
 import { useLocalState } from "@ente/shared/hooks/useLocalState";
-import { logError } from "@ente/shared/sentry";
 import { LS_KEYS } from "@ente/shared/storage/localStorage";
 import { Link, Stack } from "@mui/material";
 import { PLAN_PERIOD } from "constants/gallery";
@@ -92,7 +92,7 @@ function PlanSelectorCard(props: Props) {
                 }
                 setPlans(plans);
             } catch (e) {
-                logError(e, "plan selector modal open failed");
+                log.error("plan selector modal open failed", e);
                 props.closeModal();
                 appContext.setDialogMessage({
                     title: t("OPEN_PLAN_SELECTOR_MODAL_FAILED"),

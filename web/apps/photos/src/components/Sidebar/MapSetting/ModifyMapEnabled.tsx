@@ -1,4 +1,4 @@
-import { logError } from "@ente/shared/sentry";
+import log from "@/next/log";
 import { Box, DialogProps } from "@mui/material";
 import { EnteDrawer } from "components/EnteDrawer";
 import { AppContext } from "pages/_app";
@@ -14,7 +14,7 @@ const ModifyMapEnabled = ({ open, onClose, onRootClose, mapEnabled }) => {
             await updateMapEnabled(false);
             onClose();
         } catch (e) {
-            logError(e, "Disable Map failed");
+            log.error("Disable Map failed", e);
             somethingWentWrong();
         }
     };
@@ -24,7 +24,7 @@ const ModifyMapEnabled = ({ open, onClose, onRootClose, mapEnabled }) => {
             await updateMapEnabled(true);
             onClose();
         } catch (e) {
-            logError(e, "Enable Map failed");
+            log.error("Enable Map failed", e);
             somethingWentWrong();
         }
     };

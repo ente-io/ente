@@ -27,17 +27,19 @@ export enum PICKED_UPLOAD_TYPE {
 }
 
 /**
- * Extra APIs provided by the Node.js layer when our code is running in Electron
+ * Extra APIs provided by our Node.js layer when our code is running inside our
+ * desktop (Electron) app.
  *
  * This list is manually kept in sync with `desktop/src/preload.ts`. In case of
  * a mismatch, the types may lie. See also: [Note: types.ts <-> preload.ts <->
  * ipc.ts]
  *
  * These extra objects and functions will only be available when our code is
- * running as the renderer process in Electron. So something in the code path
- * should check for `isElectron() == true` before invoking these.
+ * running as the renderer process in Electron. These can be accessed by using
+ * the `electron` property of the window (See @{link globalElectron} for a
+ * systematic way of getting at that).
  */
-export interface ElectronAPIsType {
+export interface Electron {
     // - General
 
     /** Return the version of the desktop app. */

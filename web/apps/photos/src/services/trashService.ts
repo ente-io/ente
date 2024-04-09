@@ -1,16 +1,14 @@
+import log from "@/next/log";
+import HTTPService from "@ente/shared/network/HTTPService";
 import { getEndpoint } from "@ente/shared/network/api";
-import { logError } from "@ente/shared/sentry";
 import localForage from "@ente/shared/storage/localForage";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { Collection } from "types/collection";
-import { SetFiles } from "types/gallery";
-import { decryptFile, sortTrashFiles } from "utils/file";
-import { getCollection } from "./collectionService";
-
-import HTTPService from "@ente/shared/network/HTTPService";
 import { EnteFile } from "types/file";
+import { SetFiles } from "types/gallery";
 import { EncryptedTrashItem, Trash } from "types/trash";
-import { mergeMetadata } from "utils/file";
+import { decryptFile, mergeMetadata, sortTrashFiles } from "utils/file";
+import { getCollection } from "./collectionService";
 
 const TRASH = "file-trash";
 const TRASH_TIME = "trash-time";
@@ -135,7 +133,7 @@ export const updateTrash = async (
         } while (resp.data.hasMore);
         return updatedTrash;
     } catch (e) {
-        logError(e, "Get trash files failed");
+        log.error("Get trash files failed", e);
     }
     return currentTrash;
 };
@@ -170,7 +168,7 @@ export const emptyTrash = async () => {
             },
         );
     } catch (e) {
-        logError(e, "empty trash failed");
+        log.error("empty trash failed", e);
         throw e;
     }
 };

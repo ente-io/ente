@@ -1,4 +1,4 @@
-import { addLogLine } from "@ente/shared/logging";
+import log from "@/next/log";
 import {
     DetectedObject,
     MLSyncContext,
@@ -61,7 +61,7 @@ class ObjectService {
                 syncContext.config.sceneDetection.minScore,
             )),
         );
-        // addLogLine('3 TF Memory stats: ',JSON.stringify(tf.memory()));
+        // log.info('3 TF Memory stats: ',JSON.stringify(tf.memory()));
         // TODO: reenable faces filtering based on width
         const detectedObjects = objectDetections?.map((detection) => {
             return {
@@ -77,13 +77,13 @@ class ObjectService {
         // ?.filter((f) =>
         //     f.box.width > syncContext.config.faceDetection.minFaceSize
         // );
-        addLogLine(
+        log.info(
             `object detection time taken ${fileContext.enteFile.id}`,
             Date.now() - startTime,
             "ms",
         );
 
-        addLogLine("[MLService] Detected Objects: ", newMlFile.objects?.length);
+        log.info("[MLService] Detected Objects: ", newMlFile.objects?.length);
     }
 
     async getAllSyncedObjectsMap(syncContext: MLSyncContext) {
@@ -115,9 +115,9 @@ class ObjectService {
 
     async syncThingsIndex(syncContext: MLSyncContext) {
         const filesVersion = await mlIDbStorage.getIndexVersion("files");
-        addLogLine("things", await mlIDbStorage.getIndexVersion("things"));
+        log.info("things", await mlIDbStorage.getIndexVersion("things"));
         if (filesVersion <= (await mlIDbStorage.getIndexVersion("things"))) {
-            addLogLine(
+            log.info(
                 "[MLService] Skipping people index as already synced to latest version",
             );
             return;

@@ -1,4 +1,3 @@
-import ElectronAPIs from "@/next/electron";
 import log from "@/next/log";
 import { APP_HOMES } from "@ente/shared/apps/constants";
 import { PageProps } from "@ente/shared/apps/types";
@@ -21,7 +20,6 @@ import {
 import { B64EncryptionResult } from "@ente/shared/crypto/types";
 import { CustomError } from "@ente/shared/error";
 import { getAccountsURL } from "@ente/shared/network/api";
-import { logError } from "@ente/shared/sentry";
 import InMemoryStore, { MS_KEYS } from "@ente/shared/storage/InMemoryStore";
 import {
     LS_KEYS,
@@ -42,7 +40,6 @@ import {
 } from "@ente/shared/storage/sessionStorage";
 import { KeyAttributes, User } from "@ente/shared/user/types";
 import { t } from "i18next";
-import isElectron from "is-electron";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { getSRPAttributes } from "../api/srp";
@@ -70,11 +67,12 @@ export default function Credentials({ appContext, appName }: PageProps) {
             }
             setUser(user);
             let key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
-            if (!key && isElectron()) {
+            const electron = globalThis.electron;
+            if (!key && electron) {
                 try {
-                    key = await ElectronAPIs.getEncryptionKey();
+                    key = await electron.getEncryptionKey();
                 } catch (e) {
-                    logError(e, "getEncryptionKey failed");
+                    log.error("getEncryptionKey failed", e);
                 }
                 if (key) {
                     await saveKeyInSessionStore(
@@ -198,7 +196,7 @@ export default function Credentials({ appContext, appName }: PageProps) {
                 }
             } catch (e) {
                 if (e.message !== CustomError.TWO_FACTOR_ENABLED) {
-                    logError(e, "getKeyAttributes failed");
+                    log.error("getKeyAttributes failed", e);
                 }
                 throw e;
             }
@@ -238,13 +236,13 @@ export default function Credentials({ appContext, appName }: PageProps) {
                     await configureSRP(srpSetupAttributes);
                 }
             } catch (e) {
-                logError(e, "migrate to srp failed");
+                log.error("migrate to srp failed", e);
             }
             const redirectURL = InMemoryStore.get(MS_KEYS.REDIRECT_URL);
             InMemoryStore.delete(MS_KEYS.REDIRECT_URL);
             router.push(redirectURL ?? APP_HOMES.get(appName));
         } catch (e) {
-            logError(e, "useMasterPassword failed");
+            log.error("useMasterPassword failed", e);
         }
     };
 

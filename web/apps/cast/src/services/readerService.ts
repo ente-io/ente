@@ -1,13 +1,14 @@
 import { convertBytesToHumanReadable } from "@/next/file";
-import { logError } from "@ente/shared/sentry";
+import log from "@/next/log";
 
 export async function getUint8ArrayView(file: Blob): Promise<Uint8Array> {
     try {
         return new Uint8Array(await file.arrayBuffer());
     } catch (e) {
-        logError(e, "reading file blob failed", {
-            fileSize: convertBytesToHumanReadable(file.size),
-        });
+        log.error(
+            `Failed to read file blob of size ${convertBytesToHumanReadable(file.size)}`,
+            e,
+        );
         throw e;
     }
 }

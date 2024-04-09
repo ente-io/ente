@@ -1,5 +1,5 @@
 import { isDevBuild } from "@/next/env";
-import { logError } from "@/utils/logging";
+import log from "@/next/log";
 import { includes } from "@/utils/type-guards";
 import { getUserLocales } from "get-user-locale";
 import i18n from "i18next";
@@ -154,7 +154,7 @@ const savedLocaleStringMigratingIfNeeded = (): SupportedLocale | undefined => {
     } catch (e) {
         // Not a valid JSON, or not in the format we expected it. This shouldn't
         // have happened, we're the only one setting it.
-        logError("Failed to parse locale obtained from local storage", e);
+        log.error("Failed to parse locale obtained from local storage", e);
         // Also remove the old key, it is not parseable by us anymore.
         localStorage.removeItem("locale");
         return undefined;
@@ -241,7 +241,7 @@ export const getLocaleInUse = (): SupportedLocale => {
         return locale;
     } else {
         // This shouldn't have happened. Log an error to attract attention.
-        logError(
+        log.error(
             `Expected the i18next locale to be one of the supported values, but instead found ${locale}`,
         );
         return defaultLocale;

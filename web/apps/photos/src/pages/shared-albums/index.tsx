@@ -1,3 +1,4 @@
+import log from "@/next/log";
 import {
     CenteredFlex,
     SpaceBetweenFlex,
@@ -46,7 +47,6 @@ import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { ENTE_WEBSITE_LINK } from "@ente/shared/constants/urls";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import useFileInput from "@ente/shared/hooks/useFileInput";
-import { logError } from "@ente/shared/sentry";
 import AddPhotoAlternateOutlined from "@mui/icons-material/AddPhotoAlternateOutlined";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import MoreHoriz from "@mui/icons-material/MoreHoriz";
@@ -292,7 +292,7 @@ export default function PublicCollectionGallery() {
                 setFilesDownloadProgressAttributes,
             );
         } catch (e) {
-            logError(e, "failed to downloads shared album all files");
+            log.error("failed to downloads shared album all files", e);
         }
     };
 
@@ -417,7 +417,7 @@ export default function PublicCollectionGallery() {
                 setPublicCollection(null);
                 setPublicFiles(null);
             } else {
-                logError(e, "failed to sync public album with remote");
+                log.error("failed to sync public album with remote", e);
             }
         } finally {
             appContext.finishLoading();
@@ -441,7 +441,7 @@ export default function PublicCollectionGallery() {
                     publicUrl.memLimit,
                 );
             } catch (e) {
-                logError(e, "failed to derive key for verifyLinkPassword");
+                log.error("failed to derive key for verifyLinkPassword", e);
                 setFieldError(`${t("UNKNOWN_ERROR")} ${e.message}`);
                 return;
             }
@@ -468,7 +468,7 @@ export default function PublicCollectionGallery() {
             await syncWithRemote();
             appContext.finishLoading();
         } catch (e) {
-            logError(e, "failed to verifyLinkPassword");
+            log.error("failed to verifyLinkPassword", e);
             setFieldError(`${t("UNKNOWN_ERROR")} ${e.message}`);
         }
     };
@@ -528,7 +528,7 @@ export default function PublicCollectionGallery() {
             );
             clearSelection();
         } catch (e) {
-            logError(e, "failed to download selected files");
+            log.error("failed to download selected files", e);
         }
     };
 

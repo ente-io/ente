@@ -60,38 +60,11 @@ import {
     sortFiles,
 } from "utils/file";
 
-import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
-import { CustomError } from "@ente/shared/error";
-import { logError } from "@ente/shared/sentry";
-import CollectionNamer, {
-    CollectionNamerAttributes,
-} from "components/Collections/CollectionNamer";
-import Uploader from "components/Upload/Uploader";
-import PlanSelector from "components/pages/gallery/PlanSelector";
-import {
-    ALL_SECTION,
-    ARCHIVE_SECTION,
-    CollectionSummaryType,
-    DUMMY_UNCATEGORIZED_COLLECTION,
-    HIDDEN_ITEMS_SECTION,
-    TRASH_SECTION,
-} from "constants/collection";
-import { AppContext } from "pages/_app";
-import { getLocalTrashedFiles, syncTrash } from "services/trashService";
-import {
-    COLLECTION_OPS_TYPE,
-    constructCollectionNameMap,
-    getArchivedCollections,
-    getDefaultHiddenCollectionIDs,
-    getSelectedCollection,
-    handleCollectionOps,
-    hasNonSystemCollections,
-    splitNormalAndHiddenCollections,
-} from "utils/collection";
-
-import ElectronAPIs from "@/next/electron";
+import log from "@/next/log";
 import { APPS } from "@ente/shared/apps/constants";
 import { CenteredFlex } from "@ente/shared/components/Container";
+import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
+import { CustomError } from "@ente/shared/error";
 import useFileInput from "@ente/shared/hooks/useFileInput";
 import useMemoSingleThreaded from "@ente/shared/hooks/useMemoSingleThreaded";
 import InMemoryStore, { MS_KEYS } from "@ente/shared/storage/InMemoryStore";
@@ -101,6 +74,9 @@ import { User } from "@ente/shared/user/types";
 import { isPromise } from "@ente/shared/utils";
 import AuthenticateUserModal from "components/AuthenticateUserModal";
 import Collections from "components/Collections";
+import CollectionNamer, {
+    CollectionNamerAttributes,
+} from "components/Collections/CollectionNamer";
 import ExportModal from "components/ExportModal";
 import {
     FilesDownloadProgress,
@@ -112,16 +88,27 @@ import FixCreationTime, {
 import GalleryEmptyState from "components/GalleryEmptyState";
 import { ITEM_TYPE, TimeStampListItem } from "components/PhotoList";
 import SearchResultInfo from "components/Search/SearchResultInfo";
+import Uploader from "components/Upload/Uploader";
 import UploadInputs from "components/UploadSelectorInputs";
 import { GalleryNavbar } from "components/pages/gallery/Navbar";
+import PlanSelector from "components/pages/gallery/PlanSelector";
+import {
+    ALL_SECTION,
+    ARCHIVE_SECTION,
+    CollectionSummaryType,
+    DUMMY_UNCATEGORIZED_COLLECTION,
+    HIDDEN_ITEMS_SECTION,
+    TRASH_SECTION,
+} from "constants/collection";
 import { SYNC_INTERVAL_IN_MICROSECONDS } from "constants/gallery";
-import isElectron from "is-electron";
+import { AppContext } from "pages/_app";
 import { ClipService } from "services/clipService";
 import { constructUserIDToEmailMap } from "services/collectionService";
 import downloadManager from "services/download";
 import { syncEmbeddings } from "services/embeddingService";
 import { syncEntities } from "services/entityService";
 import locationSearchService from "services/locationSearchService";
+import { getLocalTrashedFiles, syncTrash } from "services/trashService";
 import uploadManager from "services/upload/uploadManager";
 import { Collection, CollectionSummaries } from "types/collection";
 import { EnteFile } from "types/file";
@@ -134,6 +121,16 @@ import {
 } from "types/gallery";
 import { Search, SearchResultSummary, UpdateSearch } from "types/search";
 import { FamilyData } from "types/user";
+import {
+    COLLECTION_OPS_TYPE,
+    constructCollectionNameMap,
+    getArchivedCollections,
+    getDefaultHiddenCollectionIDs,
+    getSelectedCollection,
+    handleCollectionOps,
+    hasNonSystemCollections,
+    splitNormalAndHiddenCollections,
+} from "utils/collection";
 import ComlinkSearchWorker from "utils/comlink/ComlinkSearchWorker";
 import { isArchivedFile } from "utils/magicMetadata";
 import { getSessionExpiredMessage } from "utils/ui";
@@ -321,6 +318,7 @@ export default function Gallery() {
             return;
         }
         preloadImage("/images/subscription-card-background");
+        const electron = globalThis.electron;
         const main = async () => {
             const valid = await validateKey();
             if (!valid) {
@@ -363,9 +361,9 @@ export default function Gallery() {
             syncInterval.current = setInterval(() => {
                 syncWithRemote(false, true);
             }, SYNC_INTERVAL_IN_MICROSECONDS);
-            if (isElectron()) {
+            if (electron) {
                 void ClipService.setupOnFileUploadListener();
-                ElectronAPIs.registerForegroundEventListener(() => {
+                electron.registerForegroundEventListener(() => {
                     syncWithRemote(false, true);
                 });
             }
@@ -373,8 +371,8 @@ export default function Gallery() {
         main();
         return () => {
             clearInterval(syncInterval.current);
-            if (isElectron()) {
-                ElectronAPIs.registerForegroundEventListener(() => {});
+            if (electron) {
+                electron.registerForegroundEventListener(() => {});
                 ClipService.removeOnFileUploadListener();
             }
         };
@@ -719,7 +717,7 @@ export default function Gallery() {
                     router.push(PAGES.CREDENTIALS);
                     break;
                 default:
-                    logError(e, "syncWithRemote failed");
+                    log.error("syncWithRemote failed", e);
             }
         } finally {
             setTempDeletedFileIds(new Set());
@@ -871,7 +869,7 @@ export default function Gallery() {
                 clearSelection();
                 await syncWithRemote(false, true);
             } catch (e) {
-                logError(e, "collection ops failed", { ops });
+                log.error(`collection ops (${ops}) failed`, e);
                 setDialogMessage({
                     title: t("ERROR"),
 
@@ -916,7 +914,7 @@ export default function Gallery() {
             clearSelection();
             await syncWithRemote(false, true);
         } catch (e) {
-            logError(e, "file ops failed", { ops });
+            log.error(`file ops (${ops}) failed`, e);
             setDialogMessage({
                 title: t("ERROR"),
 
@@ -935,7 +933,7 @@ export default function Gallery() {
                 const collection = await createAlbum(collectionName);
                 await collectionOpsHelper(ops)(collection);
             } catch (e) {
-                logError(e, "create and collection ops failed", { ops });
+                log.error(`create and collection ops (${ops}) failed`, e);
                 setDialogMessage({
                     title: t("ERROR"),
 

@@ -1,4 +1,4 @@
-import { addLogLine } from "@ente/shared/logging";
+import log from "@/next/log";
 import * as tf from "@tensorflow/tfjs-core";
 import { TFLiteModel } from "@tensorflow/tfjs-tflite";
 import { MOBILEFACENET_FACE_SIZE } from "constants/mlConfig";
@@ -37,7 +37,7 @@ class MobileFaceNetEmbeddingService implements FaceEmbeddingService {
             "/models/mobilefacenet/mobilefacenet.tflite",
         );
 
-        addLogLine("loaded mobileFaceNetModel: ", tf.getBackend());
+        log.info("loaded mobileFaceNetModel: ", tf.getBackend());
     }
 
     private async getMobileFaceNetModel() {

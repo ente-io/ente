@@ -1,6 +1,4 @@
 import { inWorker } from "@/next/env";
-import isElectron from "is-electron";
-import ElectronAPIs from "./electron";
 import { isDevBuild } from "./env";
 import { logToDisk as webLogToDisk } from "./log-web";
 import { workerBridge } from "./worker/worker-bridge";
@@ -12,7 +10,8 @@ import { workerBridge } from "./worker/worker-bridge";
  * in the log that is saved on disk.
  */
 export const logToDisk = (message: string) => {
-    if (isElectron()) ElectronAPIs.logToDisk(message);
+    const electron = globalThis.electron;
+    if (electron) electron.logToDisk(message);
     else if (inWorker()) workerLogToDisk(message);
     else webLogToDisk(message);
 };

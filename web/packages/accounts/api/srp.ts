@@ -1,3 +1,4 @@
+import log from "@/next/log";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { getEndpoint } from "@ente/shared/network/api";
 
@@ -14,7 +15,6 @@ import {
     UpdateSRPAndKeysResponse,
 } from "@ente/accounts/types/srp";
 import { ApiError, CustomError } from "@ente/shared/error";
-import { logError } from "@ente/shared/sentry";
 import { HttpStatusCode } from "axios";
 
 const ENDPOINT = getEndpoint();
@@ -28,7 +28,7 @@ export const getSRPAttributes = async (
         });
         return (resp.data as GetSRPAttributesResponse).attributes;
     } catch (e) {
-        logError(e, "failed to get SRP attributes");
+        log.error("failed to get SRP attributes", e);
         return null;
     }
 };
@@ -49,7 +49,7 @@ export const startSRPSetup = async (
 
         return resp.data as SetupSRPResponse;
     } catch (e) {
-        logError(e, "failed to post SRP attributes");
+        log.error("failed to post SRP attributes", e);
         throw e;
     }
 };
@@ -69,7 +69,7 @@ export const completeSRPSetup = async (
         );
         return resp.data as CompleteSRPSetupResponse;
     } catch (e) {
-        logError(e, "failed to complete SRP setup");
+        log.error("failed to complete SRP setup", e);
         throw e;
     }
 };
@@ -85,7 +85,7 @@ export const createSRPSession = async (srpUserID: string, srpA: string) => {
         );
         return resp.data as CreateSRPSessionResponse;
     } catch (e) {
-        logError(e, "createSRPSession failed");
+        log.error("createSRPSession failed", e);
         throw e;
     }
 };
@@ -107,7 +107,7 @@ export const verifySRPSession = async (
         );
         return resp.data as SRPVerificationResponse;
     } catch (e) {
-        logError(e, "verifySRPSession failed");
+        log.error("verifySRPSession failed", e);
         if (
             e instanceof ApiError &&
             e.httpStatusCode === HttpStatusCode.Unauthorized
@@ -134,7 +134,7 @@ export const updateSRPAndKeys = async (
         );
         return resp.data as UpdateSRPAndKeysResponse;
     } catch (e) {
-        logError(e, "updateSRPAndKeys failed");
+        log.error("updateSRPAndKeys failed", e);
         throw e;
     }
 };

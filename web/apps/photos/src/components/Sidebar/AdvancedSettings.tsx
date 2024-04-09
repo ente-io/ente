@@ -1,3 +1,4 @@
+import log from "@/next/log";
 import ChevronRight from "@mui/icons-material/ChevronRight";
 import ScienceIcon from "@mui/icons-material/Science";
 import { Box, DialogProps, Stack, Typography } from "@mui/material";
@@ -9,7 +10,6 @@ import { t } from "i18next";
 import { useContext, useEffect, useState } from "react";
 
 import { VerticallyCenteredFlex } from "@ente/shared/components/Container";
-import { logError } from "@ente/shared/sentry";
 import { EnteMenuItem } from "components/Menu/EnteMenuItem";
 import { MenuItemGroup } from "components/Menu/MenuItemGroup";
 import isElectron from "is-electron";
@@ -41,7 +41,7 @@ export default function AdvancedSettings({ open, onClose, onRootClose }) {
         try {
             appContext.setIsCFProxyDisabled(!appContext.isCFProxyDisabled);
         } catch (e) {
-            logError(e, "toggleFasterUpload failed");
+            log.error("toggleFasterUpload failed", e);
         }
     };
     const [indexingStatus, setIndexingStatus] = useState<ClipExtractionStatus>({
