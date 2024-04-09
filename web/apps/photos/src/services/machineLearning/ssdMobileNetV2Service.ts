@@ -1,3 +1,4 @@
+import log from "@/next/log";
 import * as tf from "@tensorflow/tfjs-core";
 import {
     ObjectDetection,

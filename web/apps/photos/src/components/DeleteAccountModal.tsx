@@ -1,3 +1,4 @@
+import log from "@/next/log";
 import { logoutUser } from "@ente/accounts/services/user";
 import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
 import EnteButton from "@ente/shared/components/EnteButton";

@@ -1,4 +1,5 @@
 import log from "@/next/log";
+import type { Electron } from "@/next/types/ipc";
 import { CustomError } from "@ente/shared/error";
 import { isPromise } from "@ente/shared/utils";
 import DiscFullIcon from "@mui/icons-material/DiscFull";

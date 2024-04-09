@@ -1,3 +1,4 @@
+import log from "@/next/log";
 import { JobConfig, JobResult, JobState } from "types/common/job";
 
 export class SimpleJob<R extends JobResult> {

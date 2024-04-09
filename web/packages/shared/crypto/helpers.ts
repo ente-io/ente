@@ -1,4 +1,3 @@
-import ElectronAPIs from "@/next/electron";
 import log from "@/next/log";
 import { setRecoveryKey } from "@ente/accounts/api/user";
 import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
@@ -6,7 +5,6 @@ import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { SESSION_KEYS, setKey } from "@ente/shared/storage/sessionStorage";
 import { getActualKey } from "@ente/shared/user";
 import { KeyAttributes } from "@ente/shared/user/types";
-import isElectron from "is-electron";
 import ComlinkCryptoWorker from ".";
 
 const LOGIN_SUB_KEY_LENGTH = 32;
@@ -103,12 +101,9 @@ export const saveKeyInSessionStore = async (
     const sessionKeyAttributes =
         await cryptoWorker.generateKeyAndEncryptToB64(key);
     setKey(keyType, sessionKeyAttributes);
-    if (
-        isElectron() &&
-        !fromDesktop &&
-        keyType === SESSION_KEYS.ENCRYPTION_KEY
-    ) {
-        ElectronAPIs.setEncryptionKey(key);
+    const electron = globalThis.electron;
+    if (electron && !fromDesktop && keyType === SESSION_KEYS.ENCRYPTION_KEY) {
+        electron.setEncryptionKey(key);
     }
 };
 

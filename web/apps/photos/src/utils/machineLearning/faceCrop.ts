@@ -1,3 +1,4 @@
+import log from "@/next/log";
 import { CacheStorageService } from "@ente/shared/storage/cacheStorage";
 import { CACHES } from "@ente/shared/storage/cacheStorage/constants";
 import { getBlobFromCache } from "@ente/shared/storage/cacheStorage/helpers";

@@ -1,3 +1,4 @@
+import log from "@/next/log";
 import {
     DetectedObject,
     MLSyncContext,

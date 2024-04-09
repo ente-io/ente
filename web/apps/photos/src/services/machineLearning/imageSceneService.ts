@@ -1,3 +1,4 @@
+import log from "@/next/log";
 import * as tfjsConverter from "@tensorflow/tfjs-converter";
 import * as tf from "@tensorflow/tfjs-core";
 import { SCENE_DETECTION_IMAGE_SIZE } from "constants/mlConfig";

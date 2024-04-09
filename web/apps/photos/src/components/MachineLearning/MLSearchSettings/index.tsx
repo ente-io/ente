@@ -1,3 +1,4 @@
+import log from "@/next/log";
 import { Box, DialogProps, Typography } from "@mui/material";
 import { EnteDrawer } from "components/EnteDrawer";
 import { t } from "i18next";

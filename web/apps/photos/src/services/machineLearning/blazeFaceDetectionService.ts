@@ -1,3 +1,4 @@
+import log from "@/next/log";
 import { GraphModel } from "@tensorflow/tfjs-converter";
 import * as tf from "@tensorflow/tfjs-core";
 import {

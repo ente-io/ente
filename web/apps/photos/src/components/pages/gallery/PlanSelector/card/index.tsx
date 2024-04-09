@@ -1,3 +1,4 @@
+import log from "@/next/log";
 import { SUPPORT_EMAIL } from "@ente/shared/constants/urls";
 import { useLocalState } from "@ente/shared/hooks/useLocalState";
 import { LS_KEYS } from "@ente/shared/storage/localStorage";

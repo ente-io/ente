@@ -1,3 +1,4 @@
+import log from "@/next/log";
 import Login from "@ente/accounts/components/Login";
 import SignUp from "@ente/accounts/components/SignUp";
 import { APPS } from "@ente/shared/apps/constants";

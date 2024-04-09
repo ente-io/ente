@@ -1,3 +1,4 @@
+import log from "@/next/log";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import PhotoOutlined from "@mui/icons-material/PhotoOutlined";
 import VideocamOutlined from "@mui/icons-material/VideocamOutlined";

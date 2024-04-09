@@ -1,3 +1,4 @@
+import log from "@/next/log";
 import RecoveryKey from "@ente/shared/components/RecoveryKey";
 import {
     ACCOUNTS_PAGES,

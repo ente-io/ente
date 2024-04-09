@@ -1,3 +1,4 @@
+import log from "@/next/log";
 import { Face, MLSyncContext, Person } from "types/machineLearning";
 import {
     findFirstIfSorted,
