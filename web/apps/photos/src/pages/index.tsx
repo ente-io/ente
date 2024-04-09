@@ -6,7 +6,6 @@ import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { saveKeyInSessionStore } from "@ente/shared/crypto/helpers";
 import { getAlbumsURL } from "@ente/shared/network/api";
-import { logError } from "@ente/shared/sentry";
 import localForage from "@ente/shared/storage/localForage";
 import { getData, LS_KEYS } from "@ente/shared/storage/localStorage";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
@@ -135,7 +134,7 @@ export default function LandingPage() {
             try {
                 key = await electron.getEncryptionKey();
             } catch (e) {
-                logError(e, "getEncryptionKey failed");
+                log.error("getEncryptionKey failed", e);
             }
             if (key) {
                 await saveKeyInSessionStore(
@@ -159,7 +158,7 @@ export default function LandingPage() {
         try {
             await localForage.ready();
         } catch (e) {
-            logError(e, "usage in incognito mode tried");
+            log.error("usage in incognito mode tried", e);
             appContext.setDialogMessage({
                 title: t("LOCAL_STORAGE_NOT_ACCESSIBLE"),
 

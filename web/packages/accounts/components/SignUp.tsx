@@ -10,7 +10,7 @@ import { LS_KEYS, setData } from "@ente/shared/storage/localStorage";
 import { Formik, FormikHelpers } from "formik";
 import React, { useState } from "react";
 import * as Yup from "yup";
-
+import log from "@/next/log";
 import { PasswordStrengthHint } from "@ente/accounts/components/PasswordStrength";
 import { PAGES } from "@ente/accounts/constants/pages";
 import { APPS } from "@ente/shared/apps/constants";
@@ -19,7 +19,6 @@ import FormPaperFooter from "@ente/shared/components/Form/FormPaper/Footer";
 import FormPaperTitle from "@ente/shared/components/Form/FormPaper/Title";
 import ShowHidePassword from "@ente/shared/components/Form/ShowHidePassword";
 import LinkButton from "@ente/shared/components/LinkButton";
-import { logError } from "@ente/shared/sentry";
 import {
     setJustSignedUp,
     setLocalReferralSource,
@@ -110,8 +109,8 @@ export default function SignUp({ router, appName, login }: SignUpProps) {
                 setFieldError("confirm", t("PASSWORD_GENERATION_FAILED"));
                 throw e;
             }
-        } catch (err) {
-            logError(err, "signup failed");
+        } catch (e) {
+            log.error("signup failed", e);
         }
         setLoading(false);
     };

@@ -1,7 +1,7 @@
+import log from "@/next/log";
 import { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { eventBus, Events } from "@ente/shared/events";
 import { addLogLine } from "@ente/shared/logging";
-import { logError } from "@ente/shared/sentry";
 import { getToken, getUserID } from "@ente/shared/storage/localStorage/helpers";
 import { FILE_TYPE } from "constants/file";
 import debounce from "debounce";
@@ -96,7 +96,7 @@ class MLWorkManager {
         try {
             this.startSyncJob();
         } catch (e) {
-            logError(e, "Failed in ML appStart Handler");
+            log.error("Failed in ML appStart Handler", e);
         }
     }
 
@@ -108,7 +108,7 @@ class MLWorkManager {
             await this.terminateLiveSyncWorker();
             await mlIDbStorage.clearMLDB();
         } catch (e) {
-            logError(e, "Failed in ML logout Handler");
+            log.error("Failed in ML logout Handler", e);
         }
     }
 
@@ -233,7 +233,7 @@ class MLWorkManager {
 
             return jobResult;
         } catch (e) {
-            logError(e, "Failed to run MLSync Job");
+            log.error("Failed to run MLSync Job", e);
         }
     }
 
@@ -256,7 +256,7 @@ class MLWorkManager {
             }
             this.mlSyncJob.start();
         } catch (e) {
-            logError(e, "Failed to start MLSync Job");
+            log.error("Failed to start MLSync Job", e);
         }
     }
 
@@ -266,7 +266,7 @@ class MLWorkManager {
             this.mlSyncJob?.stop();
             terminateWorker && this.terminateSyncJobWorker();
         } catch (e) {
-            logError(e, "Failed to stop MLSync Job");
+            log.error("Failed to stop MLSync Job", e);
         }
     }
 }

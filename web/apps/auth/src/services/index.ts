@@ -1,8 +1,8 @@
+import log from "@/next/log";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { ApiError, CustomError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { getEndpoint } from "@ente/shared/network/api";
-import { logError } from "@ente/shared/sentry";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { getActualKey } from "@ente/shared/user";
 import { HttpStatusCode } from "axios";
@@ -62,7 +62,7 @@ export const getAuthCodes = async (): Promise<Code[]> => {
         return filteredAuthCodes;
     } catch (e) {
         if (e.message !== CustomError.AUTH_KEY_NOT_FOUND) {
-            logError(e, "get authenticator entities failed");
+            log.error("get authenticator entities failed", e);
         }
         throw e;
     }
@@ -85,7 +85,7 @@ export const getAuthKey = async (): Promise<AuthKey> => {
         ) {
             throw Error(CustomError.AUTH_KEY_NOT_FOUND);
         } else {
-            logError(e, "Get key failed");
+            log.error("Get key failed", e);
             throw e;
         }
     }
@@ -109,7 +109,7 @@ export const getDiff = async (
         );
         return resp.data.diff;
     } catch (e) {
-        logError(e, "Get diff failed");
+        log.error("Get diff failed", e);
         throw e;
     }
 };

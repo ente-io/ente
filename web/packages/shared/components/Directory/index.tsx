@@ -1,6 +1,5 @@
 import ElectronAPIs from "@/next/electron";
 import LinkButton from "@ente/shared/components/LinkButton";
-import { logError } from "@ente/shared/sentry";
 import { Tooltip } from "@mui/material";
 import { styled } from "@mui/material/styles";
 
@@ -21,7 +20,7 @@ export const DirectoryPath = ({ width, path }) => {
         try {
             await ElectronAPIs.openDirectory(path);
         } catch (e) {
-            logError(e, "openDirectory failed");
+            log.error("openDirectory failed", e);
         }
     };
     return (

@@ -1,9 +1,9 @@
 import ElectronAPIs from "@/next/electron";
+import log from "@/next/log";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { CustomError } from "@ente/shared/error";
 import { Events, eventBus } from "@ente/shared/events";
 import { addLogLine } from "@ente/shared/logging";
-import { logError } from "@ente/shared/sentry";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import { FILE_TYPE } from "constants/file";
 import isElectron from "is-electron";
@@ -73,7 +73,7 @@ class ClipServiceImpl {
             eventBus.on(Events.FILE_UPLOADED, this.onFileUploadedHandler, this);
             addLogLine("setup file upload listener successfully");
         } catch (e) {
-            logError(e, "failed to setup clip service");
+            log.error("failed to setup clip service", e);
         }
     };
 
@@ -92,7 +92,7 @@ class ClipServiceImpl {
             this.onFileUploadedHandler = null;
             addLogLine("removed file upload listener successfully");
         } catch (e) {
-            logError(e, "failed to remove clip service");
+            log.error("failed to remove clip service", e);
         }
     };
 
@@ -107,7 +107,7 @@ class ClipServiceImpl {
             }
             return this.clipExtractionStatus;
         } catch (e) {
-            logError(e, "failed to get clip indexing status");
+            log.error("failed to get clip indexing status", e);
         }
     };
 
@@ -148,7 +148,7 @@ class ClipServiceImpl {
             }
         } catch (e) {
             if (e.message !== CustomError.REQUEST_CANCELLED) {
-                logError(e, "failed to schedule clip embedding extraction");
+                log.error("failed to schedule clip embedding extraction", e);
             }
         }
     };
@@ -163,7 +163,7 @@ class ClipServiceImpl {
             if (e?.message?.includes(CustomError.UNSUPPORTED_PLATFORM)) {
                 this.unsupportedPlatform = true;
             }
-            logError(e, "failed to compute text embedding");
+            log.error("failed to compute text embedding", e);
             throw e;
         }
     };
@@ -244,7 +244,7 @@ class ClipServiceImpl {
             }
         } catch (e) {
             if (e.message !== CustomError.REQUEST_CANCELLED) {
-                logError(e, "failed to extract clip embedding");
+                log.error("failed to extract clip embedding", e);
             }
             throw e;
         }
@@ -294,7 +294,7 @@ class ClipServiceImpl {
                 `successfully extracted clip embedding for file: ${enteFile.metadata.title} fileID: ${enteFile.id}`,
             );
         } catch (e) {
-            logError(e, "Failed in ML onFileUploadedHandler");
+            log.error("Failed in ML onFileUploadedHandler", e);
         }
     }
 

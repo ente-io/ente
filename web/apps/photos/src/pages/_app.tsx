@@ -1,6 +1,7 @@
 import { CustomHead } from "@/next/components/Head";
 import ElectronAPIs from "@/next/electron";
 import { setupI18n } from "@/next/i18n";
+import log from "@/next/log";
 import { logStartupBanner } from "@/next/log-web";
 import { AppUpdateInfo } from "@/next/types/ipc";
 import {
@@ -28,7 +29,6 @@ import { Events, eventBus } from "@ente/shared/events";
 import { useLocalState } from "@ente/shared/hooks/useLocalState";
 import { addLogLine } from "@ente/shared/logging";
 import HTTPService from "@ente/shared/network/HTTPService";
-import { logError } from "@ente/shared/sentry";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import {
     getLocalMapEnabled,
@@ -190,7 +190,7 @@ export default function App({ Component, pageProps }: AppProps) {
                 setMlSearchEnabled(mlSearchConfig.enabled);
                 mlWorkManager.setMlSearchEnabled(mlSearchConfig.enabled);
             } catch (e) {
-                logError(e, "Error while loading mlSearchEnabled");
+                log.error("Error while loading mlSearchEnabled", e);
             }
         };
         loadMlSearchState();
@@ -200,7 +200,7 @@ export default function App({ Component, pageProps }: AppProps) {
                 mlWorkManager.setMlSearchEnabled(false);
             });
         } catch (e) {
-            logError(e, "Error while subscribing to logout event");
+            log.error("Error while subscribing to logout event", e);
         }
     }, []);
 
@@ -242,7 +242,7 @@ export default function App({ Component, pageProps }: AppProps) {
                     exportService.scheduleExport();
                 }
             } catch (e) {
-                logError(e, "init export failed");
+                log.error("init export failed", e);
             }
         };
         initExport();
@@ -251,7 +251,7 @@ export default function App({ Component, pageProps }: AppProps) {
                 exportService.disableContinuousExport();
             });
         } catch (e) {
-            logError(e, "Error while subscribing to logout event");
+            log.error("Error while subscribing to logout event", e);
         }
     }, []);
 
@@ -337,7 +337,7 @@ export default function App({ Component, pageProps }: AppProps) {
             setMlSearchEnabled(enabled);
             mlWorkManager.setMlSearchEnabled(enabled);
         } catch (e) {
-            logError(e, "Error while updating mlSearchEnabled");
+            log.error("Error while updating mlSearchEnabled", e);
         }
     };
 
@@ -347,7 +347,7 @@ export default function App({ Component, pageProps }: AppProps) {
             setLocalMapEnabled(enabled);
             setMapEnabled(enabled);
         } catch (e) {
-            logError(e, "Error while updating mapEnabled");
+            log.error("Error while updating mapEnabled", e);
         }
     };
 

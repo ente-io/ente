@@ -1,4 +1,4 @@
-import { logError } from "@ente/shared/sentry";
+import log from "@/next/log";
 import { validateAndGetCreationUnixTimeInMicroSeconds } from "@ente/shared/time";
 import type { FixOption } from "components/FixCreationTime";
 import { FILE_TYPE } from "constants/file";
@@ -88,7 +88,7 @@ export async function updateCreationTimeWithExif(
                     updateExistingFilePubMetadata(file, updatedFile);
                 }
             } catch (e) {
-                logError(e, "failed to updated a CreationTime With Exif");
+                log.error("failed to updated a CreationTime With Exif", e);
                 completedWithError = true;
             } finally {
                 setProgressTracker({
@@ -98,7 +98,7 @@ export async function updateCreationTimeWithExif(
             }
         }
     } catch (e) {
-        logError(e, "update CreationTime With Exif failed");
+        log.error("update CreationTime With Exif failed", e);
         completedWithError = true;
     }
     return completedWithError;

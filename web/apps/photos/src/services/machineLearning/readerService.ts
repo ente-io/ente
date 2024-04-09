@@ -1,4 +1,4 @@
-import { logError } from "@ente/shared/sentry";
+import log from "@/next/log";
 import { FILE_TYPE } from "constants/file";
 import { MLSyncContext, MLSyncFileContext } from "types/machineLearning";
 import {
@@ -51,7 +51,7 @@ class ReaderService {
 
             return fileContext.imageBitmap;
         } catch (e) {
-            logError(e, "failed to create image bitmap");
+            log.error("failed to create image bitmap", e);
             throw e;
         }
     }

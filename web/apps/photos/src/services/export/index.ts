@@ -2,7 +2,6 @@ import log from "@/next/log";
 import type { Electron } from "@/next/types/ipc";
 import { CustomError } from "@ente/shared/error";
 import { Events, eventBus } from "@ente/shared/events";
-import { logError } from "@ente/shared/sentry";
 import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
 import { User } from "@ente/shared/user/types";
 import { sleep } from "@ente/shared/utils";
@@ -111,7 +110,7 @@ class ExportService {
             this.exportSettings = exportSettings;
             return exportSettings;
         } catch (e) {
-            logError(e, "getExportSettings failed");
+            log.error("getExportSettings failed", e);
             throw e;
         }
     }
@@ -123,7 +122,7 @@ class ExportService {
             this.exportSettings = newSettings;
             setData(LS_KEYS.EXPORT, newSettings);
         } catch (e) {
-            logError(e, "updateExportSettings failed");
+            log.error("updateExportSettings failed", e);
             throw e;
         }
     }
@@ -138,7 +137,7 @@ class ExportService {
             await migrateExport(exportDir, exportRecord, updateProgress);
             log.info("migration completed");
         } catch (e) {
-            logError(e, "migration failed");
+            log.error("migration failed", e);
             throw e;
         }
     }
@@ -178,7 +177,7 @@ class ExportService {
             return newExportDir;
         } catch (e) {
             if (e.message !== CustomError.SELECT_FOLDER_ABORTED) {
-                logError(e, "changeExportDirectory failed");
+                log.error("changeExportDirectory failed", e);
             }
             throw e;
         }
@@ -200,7 +199,7 @@ class ExportService {
                 this.continuousExportEventHandler,
             );
         } catch (e) {
-            logError(e, "failed to enableContinuousExport ");
+            log.error("failed to enableContinuousExport ", e);
             throw e;
         }
     }
@@ -218,7 +217,7 @@ class ExportService {
             );
             this.continuousExportEventHandler = null;
         } catch (e) {
-            logError(e, "failed to disableContinuousExport");
+            log.error("failed to disableContinuousExport", e);
             throw e;
         }
     }
@@ -248,7 +247,7 @@ class ExportService {
             );
             return unExportedFiles;
         } catch (e) {
-            logError(e, "getUpdateFileLists failed");
+            log.error("getUpdateFileLists failed", e);
             throw e;
         }
     };
@@ -280,7 +279,7 @@ class ExportService {
             const pendingExports = await this.getPendingExports(exportRecord);
             this.uiUpdater.setPendingExports(pendingExports);
         } catch (e) {
-            logError(e, "postExport failed");
+            log.error("postExport failed", e);
         }
     }
 
@@ -292,7 +291,7 @@ class ExportService {
             this.reRunNeeded = false;
             await this.postExport();
         } catch (e) {
-            logError(e, "stopRunningExport failed");
+            log.error("stopRunningExport failed", e);
         }
     }
 
@@ -341,7 +340,7 @@ class ExportService {
                 e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST &&
                 e.message !== CustomError.EXPORT_STOPPED
             ) {
-                logError(e, "scheduleExport failed");
+                log.error("scheduleExport failed", e);
             }
         }
     };
@@ -475,7 +474,7 @@ class ExportService {
                 e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST &&
                 e.message !== CustomError.EXPORT_STOPPED
             ) {
-                logError(e, "runExport failed");
+                log.error("runExport failed", e);
             }
             throw e;
         }
@@ -544,7 +543,7 @@ class ExportService {
                         `renaming collection with id ${collection.id} from ${oldCollectionExportName} to ${newCollectionExportName} successful`,
                     );
                 } catch (e) {
-                    logError(e, "collectionRenamer failed a collection");
+                    log.error("collectionRenamer failed a collection", e);
                     if (
                         e.message ===
                             CustomError.UPDATE_EXPORTED_RECORD_FAILED ||
@@ -561,7 +560,7 @@ class ExportService {
                 e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST &&
                 e.message !== CustomError.EXPORT_STOPPED
             ) {
-                logError(e, "collectionRenamer failed");
+                log.error("collectionRenamer failed", e);
             }
             throw e;
         }
@@ -626,7 +625,7 @@ class ExportService {
                         `removing collection with id ${collectionID} from export folder successful`,
                     );
                 } catch (e) {
-                    logError(e, "collectionRemover failed a collection");
+                    log.error("collectionRemover failed a collection", e);
                     if (
                         e.message ===
                             CustomError.UPDATE_EXPORTED_RECORD_FAILED ||
@@ -643,7 +642,7 @@ class ExportService {
                 e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST &&
                 e.message !== CustomError.EXPORT_STOPPED
             ) {
-                logError(e, "collectionRemover failed");
+                log.error("collectionRemover failed", e);
             }
             throw e;
         }
@@ -717,7 +716,7 @@ class ExportService {
                     );
                 } catch (e) {
                     incrementFailed();
-                    logError(e, "export failed for a file");
+                    log.error("export failed for a file", e);
                     if (
                         e.message ===
                             CustomError.UPDATE_EXPORTED_RECORD_FAILED ||
@@ -734,7 +733,7 @@ class ExportService {
                 e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST &&
                 e.message !== CustomError.EXPORT_STOPPED
             ) {
-                logError(e, "fileExporter failed");
+                log.error("fileExporter failed", e);
             }
             throw e;
         }
@@ -873,7 +872,7 @@ class ExportService {
                     }
                     log.info(`trashing file with id ${fileUID} successful`);
                 } catch (e) {
-                    logError(e, "trashing failed for a file");
+                    log.error("trashing failed for a file", e);
                     if (
                         e.message ===
                             CustomError.UPDATE_EXPORTED_RECORD_FAILED ||
@@ -890,7 +889,7 @@ class ExportService {
                 e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST &&
                 e.message !== CustomError.EXPORT_STOPPED
             ) {
-                logError(e, "fileTrasher failed");
+                log.error("fileTrasher failed", e);
             }
             throw e;
         }
@@ -913,7 +912,7 @@ class ExportService {
             await this.updateExportRecord(folder, exportRecord);
         } catch (e) {
             if (e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST) {
-                logError(e, "addFileExportedRecord failed");
+                log.error("addFileExportedRecord failed", e);
             }
             throw e;
         }
@@ -937,7 +936,7 @@ class ExportService {
             await this.updateExportRecord(folder, exportRecord);
         } catch (e) {
             if (e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST) {
-                logError(e, "addCollectionExportedRecord failed");
+                log.error("addCollectionExportedRecord failed", e);
             }
             throw e;
         }
@@ -956,7 +955,7 @@ class ExportService {
             await this.updateExportRecord(folder, exportRecord);
         } catch (e) {
             if (e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST) {
-                logError(e, "removeCollectionExportedRecord failed");
+                log.error("removeCollectionExportedRecord failed", e);
             }
             throw e;
         }
@@ -973,7 +972,7 @@ class ExportService {
             await this.updateExportRecord(folder, exportRecord);
         } catch (e) {
             if (e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST) {
-                logError(e, "removeFileExportedRecord failed");
+                log.error("removeFileExportedRecord failed", e);
             }
             throw e;
         }
@@ -1002,7 +1001,7 @@ class ExportService {
             if (e.message === CustomError.EXPORT_FOLDER_DOES_NOT_EXIST) {
                 throw e;
             }
-            logError(e, "error updating Export Record");
+            log.error("error updating Export Record", e);
             throw Error(CustomError.UPDATE_EXPORTED_RECORD_FAILED);
         }
     }
@@ -1030,7 +1029,7 @@ class ExportService {
                 return await this.getExportRecord(folder, false);
             }
             if (e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST) {
-                logError(e, "export Record JSON parsing failed");
+                log.error("export Record JSON parsing failed", e);
             }
             throw e;
         }
@@ -1109,7 +1108,7 @@ class ExportService {
                 }
             }
         } catch (e) {
-            logError(e, "download and save failed");
+            log.error("download and save failed", e);
             throw e;
         }
     }
@@ -1213,7 +1212,7 @@ class ExportService {
             }
         } catch (e) {
             if (e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST) {
-                logError(e, "verifyExportFolderExists failed");
+                log.error("verifyExportFolderExists failed", e);
             }
             throw e;
         }

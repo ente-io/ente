@@ -1,5 +1,5 @@
+import log from "@/next/log";
 import { ApiError } from "../error";
-import { logError } from "../sentry";
 import { getToken } from "../storage/localStorage/helpers";
 import HTTPService from "./HTTPService";
 import { getEndpoint } from "./api";
@@ -14,7 +14,7 @@ class CastGateway {
                 `${getEndpoint()}/cast/cast-data/${code}`,
             );
         } catch (e) {
-            logError(e, "failed to getCastData");
+            log.error("failed to getCastData", e);
             throw e;
         }
         return resp.data.encCastData;
@@ -32,7 +32,7 @@ class CastGateway {
                 },
             );
         } catch (e) {
-            logError(e, "removeAllTokens failed");
+            log.error("removeAllTokens failed", e);
             // swallow error
         }
     }
@@ -52,7 +52,7 @@ class CastGateway {
             if (e instanceof ApiError && e.httpStatusCode === 404) {
                 return "";
             }
-            logError(e, "failed to getPublicKey");
+            log.error("failed to getPublicKey", e);
             throw e;
         }
         return resp.data.publicKey;

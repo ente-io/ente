@@ -1,11 +1,11 @@
 import { getEndpoint } from "@ente/shared/network/api";
 import localForage from "@ente/shared/storage/localForage";
 
+import log from "@/next/log";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { Events, eventBus } from "@ente/shared/events";
 import { addLogLine } from "@ente/shared/logging";
 import HTTPService from "@ente/shared/network/HTTPService";
-import { logError } from "@ente/shared/sentry";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { REQUEST_BATCH_SIZE } from "constants/api";
 import { Collection } from "types/collection";
@@ -48,7 +48,7 @@ const setLocalFiles = async (type: "normal" | "hidden", files: EnteFile[]) => {
         try {
             eventBus.emit(Events.LOCAL_FILES_UPDATED);
         } catch (e) {
-            logError(e, "Error in localFileUpdated handlers");
+            log.error("Error in localFileUpdated handlers", e);
         }
     } catch (e1) {
         try {
@@ -151,7 +151,7 @@ export const getFiles = async (
         } while (resp.data.hasMore);
         return decryptedFiles;
     } catch (e) {
-        logError(e, "Get files failed");
+        log.error("Get files failed", e);
         throw e;
     }
 };
@@ -192,7 +192,7 @@ export const trashFiles = async (filesToTrash: EnteFile[]) => {
             );
         }
     } catch (e) {
-        logError(e, "trash file failed");
+        log.error("trash file failed", e);
         throw e;
     }
 };
@@ -216,7 +216,7 @@ export const deleteFromTrash = async (filesToDelete: number[]) => {
             );
         }
     } catch (e) {
-        logError(e, "deleteFromTrash failed");
+        log.error("deleteFromTrash failed", e);
         throw e;
     }
 };

@@ -1,6 +1,6 @@
+import log from "@/next/log";
 import { CustomError } from "@ente/shared/error";
 import { addLogLine } from "@ente/shared/logging";
-import { logError } from "@ente/shared/sentry";
 import { isPromise } from "@ente/shared/utils";
 import DiscFullIcon from "@mui/icons-material/DiscFull";
 import UserNameInputDialog from "components/UserNameInputDialog";
@@ -257,7 +257,7 @@ export default function Uploader(props: Props) {
                         );
                         setElectronFiles(electronFiles);
                     } catch (e) {
-                        logError(e, "failed to upload desktop dropped files");
+                        log.error("failed to upload desktop dropped files", e);
                         setWebFiles(props.dragAndDropFiles);
                     }
                 };
@@ -388,7 +388,7 @@ export default function Uploader(props: Props) {
                 uploaderName,
             );
         } catch (e) {
-            logError(e, "Failed to upload files to existing collections");
+            log.error("Failed to upload files to existing collections", e);
         }
     };
 
@@ -447,7 +447,7 @@ export default function Uploader(props: Props) {
                 }
             } catch (e) {
                 closeUploadProgress();
-                logError(e, "Failed to create album");
+                log.error("Failed to create album", e);
                 appContext.setDialogMessage({
                     title: t("ERROR"),
 
@@ -462,7 +462,7 @@ export default function Uploader(props: Props) {
             );
             toUploadFiles.current = null;
         } catch (e) {
-            logError(e, "Failed to upload files to new collections");
+            log.error("Failed to upload files to new collections", e);
         }
     };
 
@@ -698,7 +698,7 @@ export default function Uploader(props: Props) {
                 intent: CollectionSelectorIntent.upload,
             });
         } catch (e) {
-            logError(e, "handleCollectionCreationAndUpload failed");
+            log.error("handleCollectionCreationAndUpload failed", e);
         }
     };
 
@@ -771,7 +771,7 @@ export default function Uploader(props: Props) {
                 uploaderName,
             );
         } catch (e) {
-            logError(e, "public upload failed ");
+            log.error("public upload failed ", e);
         }
     };
 

@@ -1,5 +1,4 @@
 import { addLogLine } from "@ente/shared/logging";
-import { logError } from "@ente/shared/sentry";
 import { CACHES } from "@ente/shared/storage/cacheStorage/constants";
 import { styled } from "@mui/material";
 import { Legend } from "components/PhotoViewer/styledComponents/Legend";
@@ -130,7 +129,7 @@ export function AllPeopleList(props: AllPeopleListProps) {
                 }
                 !didCancel && setPeople(people);
             } catch (e) {
-                logError(e, "updateFaceImages failed");
+                log.error("updateFaceImages failed", e);
             }
         }
         updateFaceImages();

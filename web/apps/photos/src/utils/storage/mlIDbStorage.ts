@@ -1,6 +1,6 @@
 import { haveWindow } from "@/next/env";
+import log from "@/next/log";
 import { addLogLine } from "@ente/shared/logging";
-import { logError } from "@ente/shared/sentry";
 import {
     DEFAULT_ML_SEARCH_CONFIG,
     DEFAULT_ML_SYNC_CONFIG,
@@ -75,21 +75,18 @@ class MLIDbStorage {
     private openDB(): Promise<IDBPDatabase<MLDb>> {
         return openDB<MLDb>(MLDATA_DB_NAME, 3, {
             terminated: async () => {
-                console.error("ML Indexed DB terminated");
-                logError(new Error(), "ML Indexed DB terminated");
+                log.error("ML Indexed DB terminated");
                 this._db = undefined;
                 // TODO: remove if there is chance of this going into recursion in some case
                 await this.db;
             },
             blocked() {
                 // TODO: make sure we dont allow multiple tabs of app
-                console.error("ML Indexed DB blocked");
-                logError(new Error(), "ML Indexed DB blocked");
+                log.error("ML Indexed DB blocked");
             },
             blocking() {
                 // TODO: make sure we dont allow multiple tabs of app
-                console.error("ML Indexed DB blocking");
-                logError(new Error(), "ML Indexed DB blocking");
+                log.error("ML Indexed DB blocking");
             },
             async upgrade(db, oldVersion, newVersion, tx) {
                 if (oldVersion < 1) {

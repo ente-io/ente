@@ -21,7 +21,6 @@ import {
 import { B64EncryptionResult } from "@ente/shared/crypto/types";
 import { CustomError } from "@ente/shared/error";
 import { getAccountsURL } from "@ente/shared/network/api";
-import { logError } from "@ente/shared/sentry";
 import InMemoryStore, { MS_KEYS } from "@ente/shared/storage/InMemoryStore";
 import {
     LS_KEYS,
@@ -74,7 +73,7 @@ export default function Credentials({ appContext, appName }: PageProps) {
                 try {
                     key = await ElectronAPIs.getEncryptionKey();
                 } catch (e) {
-                    logError(e, "getEncryptionKey failed");
+                    log.error("getEncryptionKey failed", e);
                 }
                 if (key) {
                     await saveKeyInSessionStore(
@@ -198,7 +197,7 @@ export default function Credentials({ appContext, appName }: PageProps) {
                 }
             } catch (e) {
                 if (e.message !== CustomError.TWO_FACTOR_ENABLED) {
-                    logError(e, "getKeyAttributes failed");
+                    log.error("getKeyAttributes failed", e);
                 }
                 throw e;
             }
@@ -238,13 +237,13 @@ export default function Credentials({ appContext, appName }: PageProps) {
                     await configureSRP(srpSetupAttributes);
                 }
             } catch (e) {
-                logError(e, "migrate to srp failed");
+                log.error("migrate to srp failed", e);
             }
             const redirectURL = InMemoryStore.get(MS_KEYS.REDIRECT_URL);
             InMemoryStore.delete(MS_KEYS.REDIRECT_URL);
             router.push(redirectURL ?? APP_HOMES.get(appName));
         } catch (e) {
-            logError(e, "useMasterPassword failed");
+            log.error("useMasterPassword failed", e);
         }
     };
 

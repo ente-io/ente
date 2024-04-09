@@ -2,11 +2,11 @@ import { getFileNameSize } from "@/next/file";
 import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
 import { CustomError } from "@ente/shared/error";
 import { addLogLine } from "@ente/shared/logging";
-import { logError } from "@ente/shared/sentry";
 import { Remote } from "comlink";
 import { FILE_READER_CHUNK_SIZE } from "constants/upload";
 import { getElectronFileStream, getFileStream } from "services/readerService";
 import { DataStream, ElectronFile } from "types/upload";
+import log from "@/next/log";
 
 export async function getFileHash(
     worker: Remote<DedicatedCryptoWorker>,
@@ -43,7 +43,7 @@ export async function getFileHash(
         );
         return hash;
     } catch (e) {
-        logError(e, "getFileHash failed");
+        log.error("getFileHash failed", e);
         addLogLine(
             `file hashing failed ${getFileNameSize(file)} ,${e.message} `,
         );

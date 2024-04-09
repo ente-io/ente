@@ -1,9 +1,8 @@
-import { t } from "i18next";
-
+import log from "@/next/log";
 import { SetDialogBoxAttributes } from "@ente/shared/components/DialogBox/types";
-import { logError } from "@ente/shared/sentry";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import { REDIRECTS, getRedirectURL } from "constants/redirects";
+import { t } from "i18next";
 import { NextRouter } from "next/router";
 import billingService from "services/billingService";
 import { Plan, Subscription } from "types/billing";
@@ -261,8 +260,8 @@ export async function manageFamilyMethod(
         setLoading(true);
         const familyPortalRedirectURL = getRedirectURL(REDIRECTS.FAMILIES);
         openLink(familyPortalRedirectURL, true);
-    } catch (error) {
-        logError(error, "failed to redirect to family portal");
+    } catch (e) {
+        log.error("failed to redirect to family portal", e);
         setDialogMessage({
             title: t("ERROR"),
             content: t("UNKNOWN_ERROR"),
@@ -308,7 +307,7 @@ function handleFailureReason(
     setDialogMessage: SetDialogBoxAttributes,
     setLoading: SetLoading,
 ): void {
-    logError(Error(reason), "subscription purchase failed");
+    log.error(`subscription purchase failed: ${reason}`);
     switch (reason) {
         case FAILURE_REASON.CANCELED:
             setDialogMessage({

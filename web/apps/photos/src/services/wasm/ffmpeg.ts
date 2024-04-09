@@ -1,10 +1,10 @@
 import { addLogLine } from "@ente/shared/logging";
-import { logError } from "@ente/shared/sentry";
 import { promiseWithTimeout } from "@ente/shared/utils";
 import QueueProcessor from "@ente/shared/utils/queueProcessor";
 import { generateTempName } from "@ente/shared/utils/temp";
 import { createFFmpeg, FFmpeg } from "ffmpeg-wasm";
 import { getUint8ArrayView } from "services/readerService";
+import log from "@/next/log";
 
 const INPUT_PATH_PLACEHOLDER = "INPUT";
 const FFMPEG_PLACEHOLDER = "FFMPEG";
@@ -51,7 +51,7 @@ export class WasmFFmpeg {
         try {
             return await response.promise;
         } catch (e) {
-            logError(e, "ffmpeg run failed");
+            log.error("ffmpeg run failed", e);
             throw e;
         }
     }
@@ -96,12 +96,12 @@ export class WasmFFmpeg {
             try {
                 this.ffmpeg.FS("unlink", tempInputFilePath);
             } catch (e) {
-                logError(e, "unlink input file failed");
+                log.error("unlink input file failed", e);
             }
             try {
                 this.ffmpeg.FS("unlink", tempOutputFilePath);
             } catch (e) {
-                logError(e, "unlink output file failed");
+                log.error("unlink output file failed", e);
             }
         }
     }

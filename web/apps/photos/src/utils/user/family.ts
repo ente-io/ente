@@ -1,4 +1,3 @@
-import { logError } from "@ente/shared/sentry";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import { User } from "@ente/shared/user/types";
 import { FamilyData, FamilyMember } from "types/user";

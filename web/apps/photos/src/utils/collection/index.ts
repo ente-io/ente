@@ -1,8 +1,8 @@
 import ElectronAPIs from "@/next/electron";
+import log from "@/next/log";
 import { CustomError } from "@ente/shared/error";
 import { addLogLine } from "@ente/shared/logging";
 import { getAlbumsURL } from "@ente/shared/network/api";
-import { logError } from "@ente/shared/sentry";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import { getUnixTimeInMicroSecondsWithDelta } from "@ente/shared/time";
 import { User } from "@ente/shared/user/types";
@@ -119,7 +119,7 @@ export async function downloadCollectionHelper(
             setFilesDownloadProgressAttributes,
         );
     } catch (e) {
-        logError(e, "download collection failed ");
+        log.error("download collection failed ", e);
     }
 }
 
@@ -140,7 +140,7 @@ export async function downloadDefaultHiddenCollectionHelper(
             setFilesDownloadProgressAttributes,
         );
     } catch (e) {
-        logError(e, "download hidden files failed ");
+        log.error("download hidden files failed ", e);
     }
 }
 
@@ -272,7 +272,7 @@ export const changeCollectionVisibility = async (
             );
         }
     } catch (e) {
-        logError(e, "change collection visibility failed");
+        log.error("change collection visibility failed", e);
         throw e;
     }
 };
@@ -298,7 +298,7 @@ export const changeCollectionSortOrder = async (
             updatedPubMagicMetadata,
         );
     } catch (e) {
-        logError(e, "change collection sort order failed");
+        log.error("change collection sort order failed", e);
     }
 };
 
@@ -319,7 +319,7 @@ export const changeCollectionOrder = async (
 
         await updateCollectionMagicMetadata(collection, updatedMagicMetadata);
     } catch (e) {
-        logError(e, "change collection order failed");
+        log.error("change collection order failed", e);
     }
 };
 
@@ -339,7 +339,7 @@ export const changeCollectionSubType = async (
         );
         await updateCollectionMagicMetadata(collection, updatedMagicMetadata);
     } catch (e) {
-        logError(e, "change collection subType failed");
+        log.error("change collection subType failed", e);
         throw e;
     }
 };

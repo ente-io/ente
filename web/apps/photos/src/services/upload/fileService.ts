@@ -1,7 +1,10 @@
 import { getFileNameSize } from "@/next/file";
+import log from "@/next/log";
+import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
 import { addLogLine } from "@ente/shared/logging";
-import { logError } from "@ente/shared/sentry";
+import { Remote } from "comlink";
 import { FILE_READER_CHUNK_SIZE, MULTIPART_PART_SIZE } from "constants/upload";
+import { EncryptedMagicMetadata } from "types/magicMetadata";
 import {
     DataStream,
     ElectronFile,
@@ -13,10 +16,6 @@ import {
     ParsedMetadataJSON,
     ParsedMetadataJSONMap,
 } from "types/upload";
-
-import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
-import { Remote } from "comlink";
-import { EncryptedMagicMetadata } from "types/magicMetadata";
 import {
     getElectronFileStream,
     getFileStream,
@@ -152,7 +151,7 @@ export async function encryptFile(
         };
         return result;
     } catch (e) {
-        logError(e, "Error encrypting files");
+        log.error("Error encrypting files", e);
         throw e;
     }
 }

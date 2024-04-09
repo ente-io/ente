@@ -1,6 +1,5 @@
 import HTTPService from "@ente/shared/network/HTTPService";
 import { getEndpoint } from "@ente/shared/network/api";
-import { logError } from "@ente/shared/sentry";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { FILE_TYPE } from "constants/file";
 import { EnteFile } from "types/file";
@@ -64,7 +63,7 @@ export async function getDuplicates(
 
         return result;
     } catch (e) {
-        logError(e, "failed to get duplicate files");
+        log.error("failed to get duplicate files", e);
     }
 }
 
@@ -156,7 +155,7 @@ async function fetchDuplicateFileIDs() {
         );
         return (response.data as DuplicatesResponse).duplicates;
     } catch (e) {
-        logError(e, "failed to fetch duplicate file IDs");
+        log.error("failed to fetch duplicate file IDs", e);
     }
 }
 

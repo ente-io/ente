@@ -1,7 +1,6 @@
 import { APPS } from "@ente/shared/apps/constants";
 import { CustomError, parseUploadErrorCodes } from "@ente/shared/error";
 import { addLogLine } from "@ente/shared/logging";
-import { logError } from "@ente/shared/sentry";
 import "@tensorflow/tfjs-backend-cpu";
 import "@tensorflow/tfjs-backend-webgl";
 import * as tf from "@tensorflow/tfjs-core";
@@ -294,7 +293,7 @@ class MachineLearningService {
             syncContext.nSyncedFiles += 1;
             return mlFileData;
         } catch (e) {
-            logError(e, "ML syncFile failed");
+            log.error("ML syncFile failed", e);
             let error = e;
             console.error(
                 "Error in ml sync, fileId: ",
@@ -362,7 +361,7 @@ class MachineLearningService {
             newMlFile.lastErrorMessage = undefined;
             await this.persistMLFileData(syncContext, newMlFile);
         } catch (e) {
-            logError(e, "ml detection failed");
+            log.error("ml detection failed", e);
             newMlFile.mlVersion = oldMlFile.mlVersion;
             throw e;
         } finally {

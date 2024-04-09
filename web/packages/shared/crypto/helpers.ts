@@ -1,6 +1,6 @@
 import ElectronAPIs from "@/next/electron";
+import log from "@/next/log";
 import { setRecoveryKey } from "@ente/accounts/api/user";
-import { logError } from "@ente/shared/sentry";
 import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { SESSION_KEYS, setKey } from "@ente/shared/storage/sessionStorage";
@@ -146,7 +146,7 @@ export const getRecoveryKey = async () => {
         return recoveryKey;
     } catch (e) {
         console.log(e);
-        logError(e, "getRecoveryKey failed");
+        log.error("getRecoveryKey failed", e);
         throw e;
     }
 };

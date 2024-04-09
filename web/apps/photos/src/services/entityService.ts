@@ -2,7 +2,6 @@ import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { addLogLine } from "@ente/shared/logging";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { getEndpoint } from "@ente/shared/network/api";
-import { logError } from "@ente/shared/sentry";
 import localForage from "@ente/shared/storage/localForage";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { getActualKey } from "@ente/shared/user";
@@ -82,7 +81,7 @@ const getEntityKey = async (type: EntityType) => {
         localForage.setItem(ENTITY_KEY_TABLES[type], decryptedEntityKey);
         return decryptedEntityKey;
     } catch (e) {
-        logError(e, "Get entity key failed");
+        log.error("Get entity key failed", e);
         throw e;
     }
 };
@@ -92,7 +91,7 @@ export const getLatestEntities = async <T>(type: EntityType) => {
         await syncEntity<T>(type);
         return await getLocalEntity<T>(type);
     } catch (e) {
-        logError(e, "Sync entities failed");
+        log.error("Sync entities failed", e);
         throw e;
     }
 };
@@ -101,7 +100,7 @@ export const syncEntities = async () => {
     try {
         await syncEntity(EntityType.LOCATION_TAG);
     } catch (e) {
-        logError(e, "Sync entities failed");
+        log.error("Sync entities failed", e);
         throw e;
     }
 };
@@ -162,7 +161,7 @@ const syncEntity = async <T>(type: EntityType): Promise<Entity<T>> => {
             );
         } while (response.diff.length === DIFF_LIMIT);
     } catch (e) {
-        logError(e, "Sync entity failed");
+        log.error("Sync entity failed", e);
     }
 };
 
@@ -189,7 +188,7 @@ const getEntityDiff = async (
 
         return resp.data;
     } catch (e) {
-        logError(e, "Get entity diff failed");
+        log.error("Get entity diff failed", e);
         throw e;
     }
 };

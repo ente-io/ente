@@ -1,8 +1,8 @@
 import { convertBytesToHumanReadable } from "@/next/file";
+import log from "@/next/log";
 import { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { CustomError } from "@ente/shared/error";
 import { addLogLine } from "@ente/shared/logging";
-import { logError } from "@ente/shared/sentry";
 import { retryAsyncFunction } from "@ente/shared/utils";
 import QueueProcessor from "@ente/shared/utils/queueProcessor";
 import { getDedicatedConvertWorker } from "utils/comlink/ComlinkConvertWorker";
@@ -87,7 +87,7 @@ class HEICConverter {
                     this.workerPool.push(convertWorker);
                     return convertedHEIC;
                 } catch (e) {
-                    logError(e, "heic conversion failed");
+                    log.error("heic conversion failed", e);
                     convertWorker.terminate();
                     this.workerPool.push(getDedicatedConvertWorker());
                     throw e;

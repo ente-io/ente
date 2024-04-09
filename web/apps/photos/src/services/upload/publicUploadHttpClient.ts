@@ -1,7 +1,7 @@
+import log from "@/next/log";
 import { CustomError, handleUploadError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { getEndpoint } from "@ente/shared/network/api";
-import { logError } from "@ente/shared/sentry";
 import { EnteFile } from "types/file";
 import { MultipartUploadURLs, UploadFile, UploadURL } from "types/upload";
 import { retryHTTPCall } from "utils/upload/uploadRetrier";
@@ -39,7 +39,7 @@ class PublicUploadHttpClient {
             );
             return response.data;
         } catch (e) {
-            logError(e, "upload public File Failed");
+            log.error("upload public File Failed", e);
             throw e;
         }
     }
@@ -78,7 +78,7 @@ class PublicUploadHttpClient {
             }
             return this.uploadURLFetchInProgress;
         } catch (e) {
-            logError(e, "fetch public upload-url failed ");
+            log.error("fetch public upload-url failed ", e);
             throw e;
         }
     }
@@ -107,7 +107,7 @@ class PublicUploadHttpClient {
 
             return response.data["urls"];
         } catch (e) {
-            logError(e, "fetch public multipart-upload-url failed");
+            log.error("fetch public multipart-upload-url failed", e);
             throw e;
         }
     }

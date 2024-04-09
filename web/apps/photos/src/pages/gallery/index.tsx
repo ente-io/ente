@@ -60,9 +60,9 @@ import {
     sortFiles,
 } from "utils/file";
 
+import log from "@/next/log";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { CustomError } from "@ente/shared/error";
-import { logError } from "@ente/shared/sentry";
 import CollectionNamer, {
     CollectionNamerAttributes,
 } from "components/Collections/CollectionNamer";
@@ -719,7 +719,7 @@ export default function Gallery() {
                     router.push(PAGES.CREDENTIALS);
                     break;
                 default:
-                    logError(e, "syncWithRemote failed");
+                    log.error("syncWithRemote failed", e);
             }
         } finally {
             setTempDeletedFileIds(new Set());

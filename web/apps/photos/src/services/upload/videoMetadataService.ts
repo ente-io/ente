@@ -1,6 +1,6 @@
 import { getFileNameSize } from "@/next/file";
+import log from "@/next/log";
 import { addLogLine } from "@ente/shared/logging";
-import { logError } from "@ente/shared/sentry";
 import { NULL_EXTRACTED_METADATA } from "constants/upload";
 import * as ffmpegService from "services/ffmpeg/ffmpegService";
 import { ElectronFile } from "types/upload";
@@ -14,7 +14,7 @@ export async function getVideoMetadata(file: File | ElectronFile) {
             `videoMetadata successfully extracted ${getFileNameSize(file)}`,
         );
     } catch (e) {
-        logError(e, "failed to get video metadata");
+        log.error("failed to get video metadata", e);
         addLogLine(
             `videoMetadata extracted failed ${getFileNameSize(file)} ,${
                 e.message

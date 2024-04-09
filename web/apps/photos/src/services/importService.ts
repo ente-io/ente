@@ -1,5 +1,4 @@
 import ElectronAPIs from "@/next/electron";
-import { logError } from "@ente/shared/sentry";
 import { PICKED_UPLOAD_TYPE } from "constants/upload";
 import { Collection } from "types/collection";
 import { ElectronFile, FileWithCollection } from "types/upload";
@@ -20,7 +19,7 @@ class ImportService {
             if (e?.message?.includes("ENOENT: no such file or directory")) {
                 // ignore
             } else {
-                logError(e, "failed to getPendingUploads ");
+                log.error("failed to getPendingUploads ", e);
             }
             return { files: [], collectionName: null, type: null };
         }

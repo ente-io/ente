@@ -1,9 +1,9 @@
+import log from "@/next/log";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { CustomError } from "@ente/shared/error";
 import { addLogLine } from "@ente/shared/logging";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { getEndpoint } from "@ente/shared/network/api";
-import { logError } from "@ente/shared/sentry";
 import localForage from "@ente/shared/storage/localForage";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import {
@@ -138,7 +138,7 @@ export const syncEmbeddings = async (models: Model[] = [Model.ONNX_CLIP]) => {
             } while (response.diff.length === DIFF_LIMIT);
         }
     } catch (e) {
-        logError(e, "Sync embeddings failed");
+        log.error("Sync embeddings failed", e);
     }
 };
 
@@ -164,7 +164,7 @@ export const getEmbeddingsDiff = async (
         );
         return await response.data;
     } catch (e) {
-        logError(e, "get embeddings diff failed");
+        log.error("get embeddings diff failed", e);
         throw e;
     }
 };
@@ -187,7 +187,7 @@ export const putEmbedding = async (
         );
         return resp.data;
     } catch (e) {
-        logError(e, "put embedding failed");
+        log.error("put embedding failed", e);
         throw e;
     }
 };

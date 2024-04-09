@@ -1,5 +1,5 @@
+import log from "@/next/log";
 import { CustomError } from "@ente/shared/error";
-import { logError } from "@ente/shared/sentry";
 import { validateAndGetCreationUnixTimeInMicroSeconds } from "@ente/shared/time";
 import { EXIFLESS_FORMATS, NULL_LOCATION } from "constants/upload";
 import exifr from "exifr";
@@ -330,7 +330,7 @@ export async function updateFileCreationDateInEXIF(
         const exifInsertedFile = piexif.insert(exifBytes, imageDataURL);
         return dataURIToBlob(exifInsertedFile);
     } catch (e) {
-        logError(e, "updateFileModifyDateInEXIF failed");
+        log.error("updateFileModifyDateInEXIF failed", e);
         return fileBlob;
     }
 }

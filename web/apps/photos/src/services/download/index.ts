@@ -4,13 +4,13 @@ import {
     getRenderableFileURL,
 } from "utils/file";
 
+import log from "@/next/log";
 import { APPS } from "@ente/shared/apps/constants";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
 import { CustomError } from "@ente/shared/error";
 import { Events, eventBus } from "@ente/shared/events";
 import { addLogLine } from "@ente/shared/logging";
-import { logError } from "@ente/shared/sentry";
 import { CacheStorageService } from "@ente/shared/storage/cacheStorage";
 import { CACHES } from "@ente/shared/storage/cacheStorage/constants";
 import { LimitedCache } from "@ente/shared/storage/cacheStorage/types";
@@ -90,7 +90,7 @@ class DownloadManagerImpl {
             this.ready = true;
             eventBus.on(Events.LOGOUT, this.logoutHandler.bind(this), this);
         } catch (e) {
-            logError(e, "DownloadManager init failed");
+            log.error("DownloadManager init failed", e);
             throw e;
         }
     }
@@ -108,7 +108,7 @@ class DownloadManagerImpl {
             this.progressUpdater = () => {};
             addLogLine("downloadManager logoutHandler completed");
         } catch (e) {
-            logError(e, "downloadManager logoutHandler failed");
+            log.error("downloadManager logoutHandler failed", e);
         }
     }
 
@@ -138,7 +138,7 @@ class DownloadManagerImpl {
                 return new Uint8Array(await cacheResp.arrayBuffer());
             }
         } catch (e) {
-            logError(e, "failed to get cached thumbnail");
+            log.error("failed to get cached thumbnail", e);
             throw e;
         }
     }
@@ -153,7 +153,7 @@ class DownloadManagerImpl {
             );
             return cacheResp?.clone();
         } catch (e) {
-            logError(e, "failed to get cached file");
+            log.error("failed to get cached file", e);
             throw e;
         }
     }
@@ -185,12 +185,12 @@ class DownloadManagerImpl {
             this.thumbnailCache
                 ?.put(file.id.toString(), new Response(thumb))
                 .catch((e) => {
-                    logError(e, "thumb cache put failed");
+                    log.error("thumb cache put failed", e);
                     // TODO: handle storage full exception.
                 });
             return thumb;
         } catch (e) {
-            logError(e, "getThumbnail failed");
+            log.error("getThumbnail failed", e);
             throw e;
         }
     }
@@ -215,7 +215,7 @@ class DownloadManagerImpl {
             return thumb;
         } catch (e) {
             this.thumbnailObjectURLPromises.delete(file.id);
-            logError(e, "get DownloadManager preview Failed");
+            log.error("get DownloadManager preview Failed", e);
             throw e;
         }
     }
@@ -253,7 +253,7 @@ class DownloadManagerImpl {
             return fileURLs;
         } catch (e) {
             this.fileConversionPromises.delete(file.id);
-            logError(e, "download manager getFileForPreview Failed");
+            log.error("download manager getFileForPreview Failed", e);
             throw e;
         }
     };
@@ -291,7 +291,7 @@ class DownloadManagerImpl {
             }
         } catch (e) {
             this.fileObjectURLPromises.delete(file.id);
-            logError(e, "download manager getFile Failed");
+            log.error("download manager getFile Failed", e);
             throw e;
         }
     }
@@ -321,7 +321,7 @@ class DownloadManagerImpl {
                         this.diskFileCache
                             .put(file.id.toString(), encrypted.clone())
                             .catch((e) => {
-                                logError(e, "file cache put failed");
+                                log.error("file cache put failed", e);
                                 // TODO: handle storage full exception.
                             });
                     }
@@ -360,7 +360,7 @@ class DownloadManagerImpl {
                     this.diskFileCache
                         .put(file.id.toString(), resp.clone())
                         .catch((e) => {
-                            logError(e, "file cache put failed");
+                            log.error("file cache put failed", e);
                         });
                 }
             }
@@ -495,7 +495,10 @@ class DownloadManagerImpl {
                                         controller.close();
                                     }
                                 } catch (e) {
-                                    logError(e, "Failed to process file chunk");
+                                    log.error(
+                                        "Failed to process file chunk",
+                                        e,
+                                    );
                                     controller.error(e);
                                 }
                             });
@@ -503,14 +506,14 @@ class DownloadManagerImpl {
 
                         push();
                     } catch (e) {
-                        logError(e, "Failed to process file stream");
+                        log.error("Failed to process file stream", e);
                         controller.error(e);
                     }
                 },
             });
             return stream;
         } catch (e) {
-            logError(e, "Failed to download file");
+            log.error("Failed to download file", e);
             throw e;
         }
     }
@@ -549,7 +552,7 @@ async function openThumbnailCache() {
     try {
         return await CacheStorageService.open(CACHES.THUMBS);
     } catch (e) {
-        logError(e, "Failed to open thumbnail cache");
+        log.error("Failed to open thumbnail cache", e);
         if (isInternalUser()) {
             throw e;
         } else {
@@ -565,7 +568,7 @@ async function openDiskFileCache() {
         }
         return await CacheStorageService.open(CACHES.FILES);
     } catch (e) {
-        logError(e, "Failed to open file cache");
+        log.error("Failed to open file cache", e);
         if (isInternalUser()) {
             throw e;
         } else {

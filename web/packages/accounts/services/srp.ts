@@ -2,7 +2,6 @@ import log from "@/next/log";
 import { UserVerificationResponse } from "@ente/accounts/types/user";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { generateLoginSubKey } from "@ente/shared/crypto/helpers";
-import { logError } from "@ente/shared/sentry";
 import InMemoryStore, { MS_KEYS } from "@ente/shared/storage/InMemoryStore";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { SRP, SrpClient } from "fast-srp-hap";
@@ -131,7 +130,7 @@ export const loginViaSRP = async (
         log.debug(() => `srp server verify successful`);
         return rest;
     } catch (e) {
-        logError(e, "srp verify failed");
+        log.error("srp verify failed", e);
         throw e;
     }
 };

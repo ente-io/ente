@@ -1,8 +1,8 @@
+import log from "@/next/log";
 import { PHOTOS_PAGES } from "@ente/shared/constants/pages";
 import { CustomError } from "@ente/shared/error";
 import useMemoSingleThreaded from "@ente/shared/hooks/useMemoSingleThreaded";
 import { addLogLine } from "@ente/shared/logging";
-import { logError } from "@ente/shared/sentry";
 import { styled } from "@mui/material";
 import PhotoViewer from "components/PhotoViewer";
 import { TRASH_SECTION } from "constants/collection";
@@ -348,7 +348,7 @@ const PhotoFrame = ({
                     // ignore
                 }
             } catch (e) {
-                logError(e, "getSlideData failed get msrc url failed");
+                log.error("getSlideData failed get msrc url failed", e);
                 thumbFetching[item.id] = false;
             }
         }
@@ -452,7 +452,7 @@ const PhotoFrame = ({
                 }
             }
         } catch (e) {
-            logError(e, "getSlideData failed get src url failed");
+            log.error("getSlideData failed get src url failed", e);
             fetching[item.id] = false;
             // no-op
         }
@@ -493,7 +493,10 @@ const PhotoFrame = ({
             }
         } catch (e) {
             if (e.message !== CustomError.URL_ALREADY_SET) {
-                logError(e, "updating photoswipe after msrc url update failed");
+                log.error(
+                    "updating photoswipe after msrc url update failed",
+                    e,
+                );
             }
             // ignore
         }
@@ -524,7 +527,7 @@ const PhotoFrame = ({
                 throw e;
             }
         } catch (e) {
-            logError(e, "getConvertedVideo failed get src url failed");
+            log.error("getConvertedVideo failed get src url failed", e);
             fetching[item.id] = false;
             // no-op
         }

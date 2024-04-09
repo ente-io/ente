@@ -1,33 +1,10 @@
-import { CustomError } from "@ente/shared/error";
-import { Events, eventBus } from "@ente/shared/events";
-import { logError } from "@ente/shared/sentry";
-import { Collection } from "types/collection";
-import { EncryptedEnteFile, EnteFile } from "types/file";
-import { SetFiles } from "types/gallery";
-import {
-    FileWithCollection,
-    ParsedMetadataJSON,
-    ParsedMetadataJSONMap,
-    PublicUploadProps,
-} from "types/upload";
-import { decryptFile, getUserOwnedFiles, sortFiles } from "utils/file";
-import {
-    areFileWithCollectionsSame,
-    segregateMetadataAndMediaFiles,
-} from "utils/upload";
-import { getLocalFiles } from "../fileService";
-import {
-    getMetadataJSONMapKeyForJSON,
-    parseMetadataJSON,
-} from "./metadataService";
-import UIService from "./uiService";
-import UploadService from "./uploadService";
-import uploader from "./uploader";
-
 import { getFileNameSize } from "@/next/file";
+import log from "@/next/log";
 import { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { getDedicatedCryptoWorker } from "@ente/shared/crypto";
 import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
+import { CustomError } from "@ente/shared/error";
+import { Events, eventBus } from "@ente/shared/events";
 import { addLogLine } from "@ente/shared/logging";
 import { Remote } from "comlink";
 import { UPLOAD_RESULT, UPLOAD_STAGES } from "constants/upload";
@@ -39,9 +16,30 @@ import {
 } from "services/publicCollectionService";
 import { getDisableCFUploadProxyFlag } from "services/userService";
 import watchFolderService from "services/watchFolder/watchFolderService";
+import { Collection } from "types/collection";
+import { EncryptedEnteFile, EnteFile } from "types/file";
+import { SetFiles } from "types/gallery";
+import {
+    FileWithCollection,
+    ParsedMetadataJSON,
+    ParsedMetadataJSONMap,
+    PublicUploadProps,
+} from "types/upload";
 import { ProgressUpdater } from "types/upload/ui";
-import uiService from "./uiService";
+import { decryptFile, getUserOwnedFiles, sortFiles } from "utils/file";
+import {
+    areFileWithCollectionsSame,
+    segregateMetadataAndMediaFiles,
+} from "utils/upload";
+import { getLocalFiles } from "../fileService";
+import {
+    getMetadataJSONMapKeyForJSON,
+    parseMetadataJSON,
+} from "./metadataService";
+import { default as UIService, default as uiService } from "./uiService";
 import uploadCancelService from "./uploadCancelService";
+import UploadService from "./uploadService";
+import uploader from "./uploader";
 
 const MAX_CONCURRENT_UPLOADS = 4;
 
@@ -183,7 +181,7 @@ class UploadManager {
                     await ImportService.cancelRemainingUploads();
                 }
             } else {
-                logError(e, "uploading failed with error");
+                log.error("uploading failed with error", e);
                 throw e;
             }
         } finally {
@@ -200,7 +198,7 @@ class UploadManager {
                 return false;
             }
         } catch (e) {
-            logError(e, " failed to return shouldCloseProgressBar");
+            log.error(" failed to return shouldCloseProgressBar", e);
             return false;
         }
     }
@@ -241,7 +239,7 @@ class UploadManager {
                         throw e;
                     } else {
                         // and don't break for subsequent files just log and move on
-                        logError(e, "parsing failed for a file");
+                        log.error("parsing failed for a file", e);
                         addLogLine(
                             `failed to parse metadata json file ${getFileNameSize(
                                 file,
@@ -252,7 +250,7 @@ class UploadManager {
             }
         } catch (e) {
             if (e.message !== CustomError.UPLOAD_CANCELLED) {
-                logError(e, "error seeding MetadataMap");
+                log.error("error seeding MetadataMap", e);
             }
             throw e;
         }
@@ -368,7 +366,7 @@ class UploadManager {
                             fileWithCollection.livePhotoAssets.image,
                     });
                 } catch (e) {
-                    logError(e, "Error in fileUploaded handlers");
+                    log.error("Error in fileUploaded handlers", e);
                 }
                 this.updateExistingFiles(decryptedFile);
             }
@@ -379,7 +377,7 @@ class UploadManager {
             );
             return fileUploadResult;
         } catch (e) {
-            logError(e, "failed to do post file upload action");
+            log.error("failed to do post file upload action", e);
             return UPLOAD_RESULT.FAILED;
         }
     }

@@ -1,8 +1,9 @@
+import log from "@/next/log";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { getEndpoint } from "@ente/shared/network/api";
-import { logError } from "@ente/shared/sentry";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import _sodium from "libsodium-wrappers";
+
 const ENDPOINT = getEndpoint();
 
 export const getPasskeys = async () => {
@@ -16,7 +17,7 @@ export const getPasskeys = async () => {
         );
         return await response.data;
     } catch (e) {
-        logError(e, "get passkeys failed");
+        log.error("get passkeys failed", e);
         throw e;
     }
 };
@@ -33,7 +34,7 @@ export const renamePasskey = async (id: string, name: string) => {
         );
         return await response.data;
     } catch (e) {
-        logError(e, "rename passkey failed");
+        log.error("rename passkey failed", e);
         throw e;
     }
 };
@@ -50,7 +51,7 @@ export const deletePasskey = async (id: string) => {
         );
         return await response.data;
     } catch (e) {
-        logError(e, "delete passkey failed");
+        log.error("delete passkey failed", e);
         throw e;
     }
 };
@@ -68,7 +69,7 @@ export const getPasskeyRegistrationOptions = async () => {
         );
         return await response.data;
     } catch (e) {
-        logError(e, "get passkey registration options failed");
+        log.error("get passkey registration options failed", e);
         throw e;
     }
 };
@@ -116,7 +117,7 @@ export const finishPasskeyRegistration = async (
         );
         return await response.data;
     } catch (e) {
-        logError(e, "finish passkey registration failed");
+        log.error("finish passkey registration failed", e);
         throw e;
     }
 };
@@ -142,7 +143,7 @@ export const beginPasskeyAuthentication = async (
 
         return data.data;
     } catch (e) {
-        logError(e, "begin passkey authentication failed");
+        log.error("begin passkey authentication failed", e);
         throw e;
     }
 };
@@ -194,7 +195,7 @@ export const finishPasskeyAuthentication = async (
 
         return data.data;
     } catch (e) {
-        logError(e, "finish passkey authentication failed");
+        log.error("finish passkey authentication failed", e);
         throw e;
     }
 };

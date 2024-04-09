@@ -2,10 +2,10 @@ import { getEndpoint } from "@ente/shared/network/api";
 import localForage from "@ente/shared/storage/localForage";
 import { getData, LS_KEYS } from "@ente/shared/storage/localStorage";
 
+import log from "@/next/log";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { CustomError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
-import { logError } from "@ente/shared/sentry";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { getActualKey } from "@ente/shared/user";
 import { User } from "@ente/shared/user/types";
@@ -212,7 +212,7 @@ const getCollections = async (
         );
         return collections;
     } catch (e) {
-        logError(e, "getCollections failed");
+        log.error("getCollections failed", e);
         throw e;
     }
 };
@@ -340,7 +340,7 @@ export const getCollection = async (
         );
         return collectionWithSecrets;
     } catch (e) {
-        logError(e, "failed to get collection");
+        log.error("failed to get collection", e);
         throw e;
     }
 };
@@ -462,7 +462,7 @@ const createCollection = async (
         );
         return decryptedCreatedCollection;
     } catch (e) {
-        logError(e, "create collection failed");
+        log.error("create collection failed", e);
         throw e;
     }
 };
@@ -480,7 +480,7 @@ const postCollection = async (
         );
         return response.data.collection;
     } catch (e) {
-        logError(e, "post Collection failed ");
+        log.error("post Collection failed ", e);
     }
 };
 
@@ -496,7 +496,7 @@ export const addToFavorites = async (file: EnteFile) => {
         }
         await addToCollection(favCollection, [file]);
     } catch (e) {
-        logError(e, "failed to add to favorite");
+        log.error("failed to add to favorite", e);
     }
 };
 
@@ -508,7 +508,7 @@ export const removeFromFavorites = async (file: EnteFile) => {
         }
         await removeFromCollection(favCollection.id, [file]);
     } catch (e) {
-        logError(e, "remove from favorite failed");
+        log.error("remove from favorite failed", e);
     }
 };
 
@@ -537,7 +537,7 @@ export const addToCollection = async (
             );
         }
     } catch (e) {
-        logError(e, "Add to collection Failed ");
+        log.error("Add to collection Failed ", e);
         throw e;
     }
 };
@@ -567,7 +567,7 @@ export const restoreToCollection = async (
             );
         }
     } catch (e) {
-        logError(e, "restore to collection Failed ");
+        log.error("restore to collection Failed ", e);
         throw e;
     }
 };
@@ -598,7 +598,7 @@ export const moveToCollection = async (
             );
         }
     } catch (e) {
-        logError(e, "move to collection Failed ");
+        log.error("move to collection Failed ", e);
         throw e;
     }
 };
@@ -649,7 +649,7 @@ export const removeFromCollection = async (
             await removeUserFiles(collectionID, userFiles, allFiles);
         }
     } catch (e) {
-        logError(e, "remove from collection failed ");
+        log.error("remove from collection failed ", e);
         throw e;
     }
 };
@@ -715,7 +715,7 @@ export const removeUserFiles = async (
             leftFiles,
         );
     } catch (e) {
-        logError(e, "remove user files failed ");
+        log.error("remove user files failed ", e);
         throw e;
     }
 };
@@ -742,7 +742,7 @@ export const removeNonUserFiles = async (
             );
         }
     } catch (e) {
-        logError(e, "remove non user files failed ");
+        log.error("remove non user files failed ", e);
         throw e;
     }
 };
@@ -768,7 +768,7 @@ export const deleteCollection = async (
             { "X-Auth-Token": token },
         );
     } catch (e) {
-        logError(e, "delete collection failed ");
+        log.error("delete collection failed ", e);
         throw e;
     }
 };
@@ -784,7 +784,7 @@ export const leaveSharedAlbum = async (collectionID: number) => {
             { "X-Auth-Token": token },
         );
     } catch (e) {
-        logError(e, "leave shared album failed ");
+        log.error("leave shared album failed ", e);
         throw e;
     }
 };
@@ -976,7 +976,7 @@ export const shareCollection = async (
             },
         );
     } catch (e) {
-        logError(e, "share collection failed ");
+        log.error("share collection failed ", e);
         throw e;
     }
 };
@@ -1000,7 +1000,7 @@ export const unshareCollection = async (
             },
         );
     } catch (e) {
-        logError(e, "unshare collection failed ");
+        log.error("unshare collection failed ", e);
     }
 };
 
@@ -1023,7 +1023,7 @@ export const createShareableURL = async (collection: Collection) => {
         );
         return resp.data.result as PublicURL;
     } catch (e) {
-        logError(e, "createShareableURL failed ");
+        log.error("createShareableURL failed ", e);
         throw e;
     }
 };
@@ -1043,7 +1043,7 @@ export const deleteShareableURL = async (collection: Collection) => {
             },
         );
     } catch (e) {
-        logError(e, "deleteShareableURL failed ");
+        log.error("deleteShareableURL failed ", e);
         throw e;
     }
 };
@@ -1066,7 +1066,7 @@ export const updateShareableURL = async (
         );
         return res.data.result as PublicURL;
     } catch (e) {
-        logError(e, "updateShareableURL failed ");
+        log.error("updateShareableURL failed ", e);
         throw e;
     }
 };
@@ -1392,7 +1392,7 @@ export async function moveToHiddenCollection(files: EnteFile[]) {
             await moveToCollection(collectionID, hiddenCollection, files);
         }
     } catch (e) {
-        logError(e, "move to hidden collection failed ");
+        log.error("move to hidden collection failed ", e);
         throw e;
     }
 }
@@ -1411,7 +1411,7 @@ export async function unhideToCollection(
             await moveToCollection(collectionID, collection, files);
         }
     } catch (e) {
-        logError(e, "unhide to collection failed ");
+        log.error("unhide to collection failed ", e);
         throw e;
     }
 }

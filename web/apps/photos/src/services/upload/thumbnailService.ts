@@ -1,8 +1,8 @@
 import ElectronAPIs from "@/next/electron";
 import { convertBytesToHumanReadable, getFileNameSize } from "@/next/file";
+import log from "@/next/log";
 import { CustomError } from "@ente/shared/error";
 import { addLogLine } from "@ente/shared/logging";
-import { logError } from "@ente/shared/sentry";
 import { FILE_TYPE } from "constants/file";
 import { BLACK_THUMBNAIL_BASE64 } from "constants/upload";
 import isElectron from "is-electron";
@@ -74,7 +74,7 @@ export async function generateThumbnail(
         }
         return { thumbnail, hasStaticThumbnail };
     } catch (e) {
-        logError(e, "Error generating static thumbnail");
+        log.error("Error generating static thumbnail", e);
         throw e;
     }
 }
@@ -125,7 +125,7 @@ const generateImageThumbnailInElectron = async (
             e.message !==
             CustomError.WINDOWS_NATIVE_IMAGE_PROCESSING_NOT_SUPPORTED
         ) {
-            logError(e, "failed to generate image thumbnail natively");
+            log.error("failed to generate image thumbnail natively", e);
         }
         throw e;
     }

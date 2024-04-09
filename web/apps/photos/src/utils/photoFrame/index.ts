@@ -1,4 +1,4 @@
-import { logError } from "@ente/shared/sentry";
+import log from "@/next/log";
 import { FILE_TYPE } from "constants/file";
 import { LivePhotoSourceURL, SourceURLs } from "services/download";
 import { EnteFile } from "types/file";
@@ -94,10 +94,7 @@ export async function updateFileSrcProps(
     } else if (file.metadata.fileType === FILE_TYPE.IMAGE) {
         file.src = url as string;
     } else {
-        logError(
-            Error(`unknown file type - ${file.metadata.fileType}`),
-            "Unknown file type",
-        );
+        log.error(`unknown file type - ${file.metadata.fileType}`);
         file.src = url as string;
     }
 }
