@@ -16,5 +16,6 @@ ExecStart=docker run --name nginx \
     -v /root/nginx/cert.pem:/etc/ssl/certs/cert.pem:ro \
     -v /root/nginx/key.pem:/etc/ssl/private/key.pem:ro \
     -v /root/nginx/conf.d:/etc/nginx/conf.d:ro \
+    --log-opt max-size=1g \
     nginx
 ExecReload=docker exec nginx nginx -s reload

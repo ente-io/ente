@@ -5,11 +5,11 @@ import HTTPService from "@ente/shared/network/HTTPService";
 import { getEndpoint } from "@ente/shared/network/api";
 import localForage from "@ente/shared/storage/localForage";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
-import {
+import type {
     Embedding,
+    EmbeddingModel,
     EncryptedEmbedding,
     GetEmbeddingDiffResponse,
-    Model,
     PutEmbeddingRequest,
 } from "types/embedding";
 import { EnteFile } from "types/file";
@@ -38,12 +38,12 @@ export const getAllLocalEmbeddings = async () => {
     return embeddings;
 };
 
-export const getLocalEmbeddings = async (model: Model) => {
+export const getLocalEmbeddings = async () => {
     const embeddings = await getAllLocalEmbeddings();
-    return embeddings.filter((embedding) => embedding.model === model);
+    return embeddings.filter((embedding) => embedding.model === "onnx-clip");
 };
 
-const getModelEmbeddingSyncTime = async (model: Model) => {
+const getModelEmbeddingSyncTime = async (model: EmbeddingModel) => {
     return (
         (await localForage.getItem<number>(
             `${model}-${EMBEDDING_SYNC_TIME_TABLE}`,
@@ -51,11 +51,15 @@ const getModelEmbeddingSyncTime = async (model: Model) => {
     );
 };
 
-const setModelEmbeddingSyncTime = async (model: Model, time: number) => {
+const setModelEmbeddingSyncTime = async (
+    model: EmbeddingModel,
+    time: number,
+) => {
     await localForage.setItem(`${model}-${EMBEDDING_SYNC_TIME_TABLE}`, time);
 };
 
-export const syncEmbeddings = async (models: Model[] = [Model.ONNX_CLIP]) => {
+export const syncEmbeddings = async () => {
+    const models: EmbeddingModel[] = ["onnx-clip"];
     try {
         let allEmbeddings = await getAllLocalEmbeddings();
         const localFiles = await getAllLocalFiles();
@@ -138,7 +142,7 @@ export const syncEmbeddings = async (models: Model[] = [Model.ONNX_CLIP]) => {
 
 export const getEmbeddingsDiff = async (
     sinceTime: number,
-    model: Model,
+    model: EmbeddingModel,
 ): Promise<GetEmbeddingDiffResponse> => {
     try {
         const token = getToken();

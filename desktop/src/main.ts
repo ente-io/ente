@@ -27,7 +27,7 @@ import { attachFSWatchIPCHandlers, attachIPCHandlers } from "./main/ipc";
 import log, { initLogging } from "./main/log";
 import { createApplicationMenu } from "./main/menu";
 import { isDev } from "./main/util";
-import { setupAutoUpdater } from "./services/appUpdater";
+import { setupAutoUpdater } from "./services/app-update";
 import { initWatcher } from "./services/chokidar";
 
 let appIsQuitting = false;
@@ -142,9 +142,10 @@ const deleteLegacyDiskCacheDirIfExists = async () => {
 };
 
 const attachEventHandlers = (mainWindow: BrowserWindow) => {
-    // Let ipcRenderer know when mainWindow is in the foreground.
+    // Let ipcRenderer know when mainWindow is in the foreground so that it can
+    // in turn inform the renderer process.
     mainWindow.on("focus", () =>
-        mainWindow.webContents.send("app-in-foreground"),
+        mainWindow.webContents.send("mainWindowFocus"),
     );
 };
 

@@ -1,3 +1,4 @@
+import { ensureElectron } from "@/next/electron";
 import { AppUpdateInfo } from "@/next/types/ipc";
 import { logoutUser } from "@ente/accounts/services/user";
 import { DialogBoxAttributes } from "@ente/shared/components/DialogBox/types";
@@ -52,35 +53,34 @@ export const getTrashFileMessage = (deleteFileHelper): DialogBoxAttributes => ({
     close: { text: t("CANCEL") },
 });
 
-export const getUpdateReadyToInstallMessage = (
-    updateInfo: AppUpdateInfo,
-): DialogBoxAttributes => ({
+export const getUpdateReadyToInstallMessage = ({
+    version,
+}: AppUpdateInfo): DialogBoxAttributes => ({
     icon: <AutoAwesomeOutlinedIcon />,
     title: t("UPDATE_AVAILABLE"),
     content: t("UPDATE_INSTALLABLE_MESSAGE"),
     proceed: {
-        action: () => globalThis.electron?.updateAndRestart(),
+        action: () => ensureElectron().updateAndRestart(),
         text: t("INSTALL_NOW"),
         variant: "accent",
     },
     close: {
         text: t("INSTALL_ON_NEXT_LAUNCH"),
         variant: "secondary",
-        action: () =>
-            globalThis.electron?.muteUpdateNotification(updateInfo.version),
+        action: () => ensureElectron().updateOnNextRestart(version),
     },
 });
 
-export const getUpdateAvailableForDownloadMessage = (
-    updateInfo: AppUpdateInfo,
-): DialogBoxAttributes => ({
+export const getUpdateAvailableForDownloadMessage = ({
+    version,
+}: AppUpdateInfo): DialogBoxAttributes => ({
     icon: <AutoAwesomeOutlinedIcon />,
     title: t("UPDATE_AVAILABLE"),
     content: t("UPDATE_AVAILABLE_MESSAGE"),
     close: {
         text: t("IGNORE_THIS_VERSION"),
         variant: "secondary",
-        action: () => globalThis.electron?.skipAppUpdate(updateInfo.version),
+        action: () => ensureElectron().skipAppUpdate(version),
     },
     proceed: {
         action: downloadApp,

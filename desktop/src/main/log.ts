@@ -19,6 +19,16 @@ export const initLogging = () => {
     log.transports.file.format = "[{y}-{m}-{d}T{h}:{i}:{s}{z}] {text}";
 
     log.transports.console.level = false;
+
+    // Log unhandled errors and promise rejections.
+    log.errorHandler.startCatching({
+        onError: ({ error, errorName }) => {
+            logError(errorName, error);
+            // Prevent the default electron-log actions (e.g. showing a dialog)
+            // from getting triggered.
+            return false;
+        },
+    });
 };
 
 /**
@@ -64,7 +74,10 @@ const logInfo = (...params: any[]) => {
 };
 
 const logDebug = (param: () => any) => {
-    if (isDev) console.log(`[debug] ${util.inspect(param())}`);
+    if (isDev) {
+        const p = param();
+        console.log(`[debug] ${typeof p == "string" ? p : util.inspect(p)}`);
+    }
 };
 
 /**

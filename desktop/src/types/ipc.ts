@@ -80,7 +80,3 @@ export interface AppUpdateInfo {
     autoUpdatable: boolean;
     version: string;
 }
-
-export type Model = "ggml-clip" | "onnx-clip";
-
-export const isModel = (s: unknown) => s == "ggml-clip" || s == "onnx-clip";

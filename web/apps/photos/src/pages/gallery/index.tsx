@@ -102,7 +102,7 @@ import {
 } from "constants/collection";
 import { SYNC_INTERVAL_IN_MICROSECONDS } from "constants/gallery";
 import { AppContext } from "pages/_app";
-import { ClipService } from "services/clipService";
+import { clipService } from "services/clip-service";
 import { constructUserIDToEmailMap } from "services/collectionService";
 import downloadManager from "services/download";
 import { syncEmbeddings } from "services/embeddingService";
@@ -362,18 +362,16 @@ export default function Gallery() {
                 syncWithRemote(false, true);
             }, SYNC_INTERVAL_IN_MICROSECONDS);
             if (electron) {
-                void ClipService.setupOnFileUploadListener();
-                electron.registerForegroundEventListener(() => {
-                    syncWithRemote(false, true);
-                });
+                void clipService.setupOnFileUploadListener();
+                electron.onMainWindowFocus(() => syncWithRemote(false, true));
             }
         };
         main();
         return () => {
             clearInterval(syncInterval.current);
             if (electron) {
-                electron.registerForegroundEventListener(() => {});
-                ClipService.removeOnFileUploadListener();
+                electron.onMainWindowFocus(undefined);
+                clipService.removeOnFileUploadListener();
             }
         };
     }, []);
@@ -704,8 +702,8 @@ export default function Gallery() {
             await syncEntities();
             await syncMapEnabled();
             await syncEmbeddings();
-            if (ClipService.isPlatformSupported()) {
-                void ClipService.scheduleImageEmbeddingExtraction();
+            if (clipService.isPlatformSupported()) {
+                void clipService.scheduleImageEmbeddingExtraction();
             }
         } catch (e) {
             switch (e.message) {
