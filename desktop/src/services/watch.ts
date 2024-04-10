@@ -2,7 +2,6 @@ import type { FSWatcher } from "chokidar";
 import ElectronLog from "electron-log";
 import { watchStore } from "../stores/watch.store";
 import { WatchMapping, WatchStoreType } from "../types/ipc";
-import { isMappingPresent } from "../utils/watch";
 
 export const addWatchMapping = async (
     watcher: FSWatcher,
@@ -28,6 +27,13 @@ export const addWatchMapping = async (
 
     setWatchMappings(watchMappings);
 };
+
+function isMappingPresent(watchMappings: WatchMapping[], folderPath: string) {
+    const watchMapping = watchMappings?.find(
+        (mapping) => mapping.folderPath === folderPath,
+    );
+    return !!watchMapping;
+}
 
 export const removeWatchMapping = async (
     watcher: FSWatcher,
