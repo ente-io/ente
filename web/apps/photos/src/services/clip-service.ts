@@ -1,6 +1,5 @@
 import { ensureElectron } from "@/next/electron";
 import log from "@/next/log";
-import type { Electron } from "@/next/types/ipc";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { CustomError } from "@ente/shared/error";
 import { Events, eventBus } from "@ente/shared/events";
@@ -65,7 +64,6 @@ export interface CLIPIndexingStatus {
  * itself, is the same across clients - web and mobile.
  */
 class CLIPService {
-    private electron: Electron;
     private embeddingExtractionInProgress: AbortController | null = null;
     private reRunNeeded = false;
     private indexingStatus: CLIPIndexingStatus = {
@@ -80,7 +78,6 @@ class CLIPService {
     private unsupportedPlatform = false;
 
     constructor() {
-        this.electron = ensureElectron();
         this.liveEmbeddingExtractionQueue = new PQueue({
             concurrency: 1,
         });
@@ -193,7 +190,7 @@ class CLIPService {
 
     getTextEmbedding = async (text: string): Promise<Float32Array> => {
         try {
-            return electron.clipTextEmbedding(text);
+            return ensureElectron().clipTextEmbedding(text);
         } catch (e) {
             if (e?.message?.includes(CustomError.UNSUPPORTED_PLATFORM)) {
                 this.unsupportedPlatform = true;
@@ -321,7 +318,7 @@ class CLIPService {
         const file = await localFile
             .arrayBuffer()
             .then((buffer) => new Uint8Array(buffer));
-        return await electron.clipImageEmbedding(file);
+        return await ensureElectron().clipImageEmbedding(file);
     };
 
     private encryptAndUploadEmbedding = async (
