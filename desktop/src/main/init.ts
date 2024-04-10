@@ -94,7 +94,7 @@ export const setupTrayItem = (mainWindow: BrowserWindow) => {
     );
     const trayIcon = nativeImage.createFromPath(trayImgPath);
     const tray = new Tray(trayIcon);
-    tray.setToolTip("ente");
+    tray.setToolTip("Ente");
     tray.setContextMenu(createTrayContextMenu(mainWindow));
 };
 
