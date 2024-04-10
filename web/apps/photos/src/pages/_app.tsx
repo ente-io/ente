@@ -154,9 +154,7 @@ export default function App({ Component, pageProps }: AppProps) {
         HTTPService.setHeaders({
             "X-Client-Package": CLIENT_PACKAGE_NAMES.get(APPS.PHOTOS),
         });
-        return () => {
-            logUnhandledErrorsAndRejections(false);
-        };
+        return () => logUnhandledErrorsAndRejections(false);
     }, []);
 
     useEffect(() => {
