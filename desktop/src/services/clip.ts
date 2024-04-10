@@ -11,6 +11,7 @@
  */
 import { app, net } from "electron/main";
 import { existsSync } from "fs";
+import jpeg from "jpeg-js";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { writeStream } from "../main/fs";
@@ -19,7 +20,6 @@ import { CustomErrors } from "../types/ipc";
 import Tokenizer from "../utils/clip-bpe-ts/mod";
 import { generateTempFilePath } from "../utils/temp";
 import { deleteTempFile } from "./ffmpeg";
-const jpeg = require("jpeg-js");
 const ort = require("onnxruntime-node");
 
 const textModelName = "clip-text-vit-32-uint8.onnx";
