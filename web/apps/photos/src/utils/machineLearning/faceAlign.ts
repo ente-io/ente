@@ -3,11 +3,6 @@ import { Matrix, inverse } from "ml-matrix";
 import { getSimilarityTransformation } from "similarity-transformation";
 import { Dimensions } from "types/image";
 import { FaceAlignment, FaceDetection } from "types/machineLearning";
-import {
-    ARCFACE_LANDMARKS,
-    ARCFACE_LANDMARKS_FACE_SIZE,
-    ARC_FACE_5_LANDMARKS,
-} from "types/machineLearning/archface";
 import { cropWithRotation, transform } from "utils/image";
 import {
     computeRotation,
@@ -71,6 +66,23 @@ export function getFaceAlignmentUsingSimilarityTransform(
         rotation,
     };
 }
+
+const ARCFACE_LANDMARKS = [
+    [38.2946, 51.6963],
+    [73.5318, 51.5014],
+    [56.0252, 71.7366],
+    [56.1396, 92.2848],
+] as Array<[number, number]>;
+
+const ARCFACE_LANDMARKS_FACE_SIZE = 112;
+
+const ARC_FACE_5_LANDMARKS = [
+    [38.2946, 51.6963],
+    [73.5318, 51.5014],
+    [56.0252, 71.7366],
+    [41.5493, 92.3655],
+    [70.7299, 92.2041],
+] as Array<[number, number]>;
 
 export function getArcfaceAlignment(
     faceDetection: FaceDetection,
