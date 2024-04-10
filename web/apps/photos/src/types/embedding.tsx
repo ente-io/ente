@@ -5,7 +5,7 @@
  * embeddings on the server. However, we should be prepared to receive an
  * {@link EncryptedEmbedding} with a model value distinct from one of these.
  */
-export type EmbeddingModel = "onnx-clip";
+export type EmbeddingModel = "onnx-clip" |"file-ml-clip-face";
 
 export interface EncryptedEmbedding {
     fileID: number;
@@ -21,8 +21,9 @@ export interface Embedding
         EncryptedEmbedding,
         "encryptedEmbedding" | "decryptionHeader"
     > {
-    embedding: Float32Array;
+    embedding?: Float32Array;
 }
+
 
 export interface GetEmbeddingDiffResponse {
     diff: EncryptedEmbedding[];
