@@ -14,13 +14,13 @@ import { existsSync } from "fs";
 import jpeg from "jpeg-js";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { CustomErrors } from "../../types/ipc";
+import * as ort from "onnxruntime-node";
 import Tokenizer from "../../thirdparty/clip-bpe-ts/mod";
+import { CustomErrors } from "../../types/ipc";
 import { writeStream } from "../fs";
 import log from "../log";
 import { generateTempFilePath } from "../temp";
 import { deleteTempFile } from "./ffmpeg";
-const ort = require("onnxruntime-node");
 
 const textModelName = "clip-text-vit-32-uint8.onnx";
 const textModelByteSize = 64173509; // 61.2 MB
