@@ -26,56 +26,56 @@ export const forceCheckForAppUpdates = (mainWindow: BrowserWindow) => {
 };
 
 const checkForUpdatesAndNotify = async (mainWindow: BrowserWindow) => {
-    try {
-        const { updateInfo } = await autoUpdater.checkForUpdates();
-        const { version } = updateInfo;
-
-        log.debug(() => `Checking for updates found version ${version}`);
-
-        if (compareVersions(version, app.getVersion()) <= 0) {
-            log.debug(() => "Skipping update, already at latest version");
-            return;
-        }
-
-        if (version === userPreferencesStore.get("skipAppVersion")) {
-            log.info(`User chose to skip version ${version}`);
-            return;
-        }
-
-        const mutedVersion = userPreferencesStore.get(
-            "muteUpdateNotificationVersion",
-        );
-        if (version === mutedVersion) {
-            log.info(
-                `User has muted update notifications for version ${version}`,
-            );
-            return;
-        }
-
-        const showUpdateDialog = (updateInfo: AppUpdateInfo) =>
-            mainWindow.webContents.send("appUpdateAvailable", updateInfo);
-
-        log.debug(() => "Attempting auto update");
-        autoUpdater.downloadUpdate();
-
-        let timeout: NodeJS.Timeout;
-        const fiveMinutes = 5 * 60 * 1000;
-        autoUpdater.on("update-downloaded", () => {
-            timeout = setTimeout(
-                () => showUpdateDialog({ autoUpdatable: true, version }),
-                fiveMinutes,
-            );
-        });
-        autoUpdater.on("error", (error) => {
-            clearTimeout(timeout);
-            log.error("Auto update failed", error);
-            showUpdateDialog({ autoUpdatable: false, version });
-        });
-
-        setIsUpdateAvailable(true);
-    } catch (e) {
-        log.error("checkForUpdateAndNotify failed", e);
+    const updateCheckResult = await autoUpdater.checkForUpdates();
+    if (!updateCheckResult) {
+        log.error("Failed to check for updates");
+        return;
     }
+
+    const { version } = updateCheckResult.updateInfo;
+
+    log.debug(() => `Update check found version ${version}`);
+
+    if (compareVersions(version, app.getVersion()) <= 0) {
+        log.debug(() => "Skipping update, already at latest version");
+        return;
+    }
+
+    if (version === userPreferencesStore.get("skipAppVersion")) {
+        log.info(`User chose to skip version ${version}`);
+        return;
+    }
+
+    const mutedVersion = userPreferencesStore.get(
+        "muteUpdateNotificationVersion",
+    );
+    if (version === mutedVersion) {
+        log.info(`User has muted update notifications for version ${version}`);
+        return;
+    }
+
+    const showUpdateDialog = (updateInfo: AppUpdateInfo) =>
+        mainWindow.webContents.send("appUpdateAvailable", updateInfo);
+
+    log.debug(() => "Attempting auto update");
+    autoUpdater.downloadUpdate();
+
+    let timeout: NodeJS.Timeout;
+    const fiveMinutes = 5 * 60 * 1000;
+    autoUpdater.on("update-downloaded", () => {
+        timeout = setTimeout(
+            () => showUpdateDialog({ autoUpdatable: true, version }),
+            fiveMinutes,
+        );
+    });
+
+    autoUpdater.on("error", (error) => {
+        clearTimeout(timeout);
+        log.error("Auto update failed", error);
+        showUpdateDialog({ autoUpdatable: false, version });
+    });
+
+    setIsUpdateAvailable(true);
 };
 
 /**
