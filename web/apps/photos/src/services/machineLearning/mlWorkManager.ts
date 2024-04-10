@@ -30,7 +30,7 @@ class MLWorkManager {
 
     constructor() {
         this.liveSyncQueue = new PQueue({
-            concurrency: 1,
+            concurrency: 4,
             // TODO: temp, remove
             timeout: LIVE_SYNC_QUEUE_TIMEOUT_SEC * 1000,
             throwOnTimeout: true,

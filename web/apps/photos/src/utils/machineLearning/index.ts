@@ -17,6 +17,7 @@ import {
     DetectedFace,
     DetectedObject,
     Face,
+    FaceAlignment,
     FaceImageBlob,
     MlFileData,
     Person,
@@ -24,18 +25,11 @@ import {
     Versioned,
 } from "types/machineLearning";
 import { getRenderableImage } from "utils/file";
-import { imageBitmapToBlob } from "utils/image";
+import { clamp, imageBitmapToBlob, warpAffineFloat32List } from "utils/image";
 import mlIDbStorage from "utils/storage/mlIDbStorage";
 import { Box, Point } from "../../../thirdparty/face-api/classes";
-import {
-    getArcfaceAlignment,
-    ibExtractFaceImage,
-    ibExtractFaceImages,
-} from "./faceAlign";
-import {
-    getFaceCropBlobFromStorage,
-    ibExtractFaceImagesFromCrops,
-} from "./faceCrop";
+import { ibExtractFaceImage, ibExtractFaceImages } from "./faceAlign";
+import { getFaceCropBlobFromStorage } from "./faceCrop";
 
 export function f32Average(descriptors: Float32Array[]) {
     if (descriptors.length < 1) {
@@ -241,9 +235,10 @@ export async function extractFaceImages(
     faceSize: number,
     image?: ImageBitmap,
 ) {
-    if (faces.length === faces.filter((f) => f.crop).length) {
-        return ibExtractFaceImagesFromCrops(faces, faceSize);
-    } else if (image) {
+    // if (faces.length === faces.filter((f) => f.crop).length) {
+    // return ibExtractFaceImagesFromCrops(faces, faceSize);
+    // } else
+    if (image) {
         const faceAlignments = faces.map((f) => f.alignment);
         return ibExtractFaceImages(image, faceAlignments, faceSize);
     } else {
@@ -253,31 +248,68 @@ export async function extractFaceImages(
     }
 }
 
+export async function extractFaceImagesToFloat32(
+    faceAlignments: Array<FaceAlignment>,
+    faceSize: number,
+    image: ImageBitmap,
+): Promise<Float32Array> {
+    const faceData = new Float32Array(
+        faceAlignments.length * faceSize * faceSize * 3,
+    );
+    for (let i = 0; i < faceAlignments.length; i++) {
+        const alignedFace = faceAlignments[i];
+        const faceDataOffset = i * faceSize * faceSize * 3;
+        warpAffineFloat32List(
+            image,
+            alignedFace,
+            faceSize,
+            faceData,
+            faceDataOffset,
+        );
+    }
+    return faceData;
+}
+
 export function leftFillNum(num: number, length: number, padding: number) {
     return num.toString().padStart(length, padding.toString());
 }
 
-// TODO: same face can not be only based on this id,
-// this gives same id to faces whose arcface center lies in same box of 1% image grid
-// maximum distance for same id will be around √2%
-// will give same id in most of the cases, except for face centers lying near grid edges
-// faces with same id should be treated as same face, and diffrent id should be tested further
-// further test can rely on nearest face within certain threshold in same image
-// can also explore spatial index similar to Geohash for indexing, but overkill
-// for mostly single digit faces in one image
-// also check if this needs to be globally unique or unique for a user
 export function getFaceId(detectedFace: DetectedFace, imageDims: Dimensions) {
-    const arcFaceAlignedFace = getArcfaceAlignment(detectedFace.detection);
-    const imgDimPoint = new Point(imageDims.width, imageDims.height);
-    const gridPt = arcFaceAlignedFace.center
-        .mul(new Point(100, 100))
-        .div(imgDimPoint)
-        .floor()
-        .bound(0, 99);
-    const gridPaddedX = leftFillNum(gridPt.x, 2, 0);
-    const gridPaddedY = leftFillNum(gridPt.y, 2, 0);
+    const xMin = clamp(
+        detectedFace.detection.box.x / imageDims.width,
+        0.0,
+        0.999999,
+    )
+        .toFixed(5)
+        .substring(2);
+    const yMin = clamp(
+        detectedFace.detection.box.y / imageDims.height,
+        0.0,
+        0.999999,
+    )
+        .toFixed(5)
+        .substring(2);
+    const xMax = clamp(
+        (detectedFace.detection.box.x + detectedFace.detection.box.width) /
+            imageDims.width,
+        0.0,
+        0.999999,
+    )
+        .toFixed(5)
+        .substring(2);
+    const yMax = clamp(
+        (detectedFace.detection.box.y + detectedFace.detection.box.height) /
+            imageDims.height,
+        0.0,
+        0.999999,
+    )
+        .toFixed(5)
+        .substring(2);
 
-    return `${detectedFace.fileId}-${gridPaddedX}-${gridPaddedY}`;
+    const rawFaceID = `${xMin}_${yMin}_${xMax}_${yMax}`;
+    const faceID = `${detectedFace.fileId}_${rawFaceID}`;
+
+    return faceID;
 }
 
 export function getObjectId(

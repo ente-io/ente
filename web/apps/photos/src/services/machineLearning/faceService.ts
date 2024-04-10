@@ -8,7 +8,7 @@ import {
 import { imageBitmapToBlob } from "utils/image";
 import {
     areFaceIdsSame,
-    extractFaceImages,
+    extractFaceImagesToFloat32,
     getFaceId,
     getLocalFile,
     getOriginalImageBitmap,
@@ -49,8 +49,12 @@ class FaceService {
             syncContext,
             fileContext,
         );
+        const timerId = `faceDetection-${fileContext.enteFile.id}`;
+        console.time(timerId);
         const faceDetections =
             await syncContext.faceDetectionService.detectFaces(imageBitmap);
+        console.timeEnd(timerId);
+        console.log("faceDetections: ", faceDetections?.length);
         // log.info('3 TF Memory stats: ',JSON.stringify(tf.memory()));
         // TODO: reenable faces filtering based on width
         const detectedFaces = faceDetections?.map((detection) => {
@@ -104,7 +108,7 @@ class FaceService {
     async syncFileFaceAlignments(
         syncContext: MLSyncContext,
         fileContext: MLSyncFileContext,
-    ) {
+    ): Promise<Float32Array> {
         const { oldMlFile, newMlFile } = fileContext;
         if (
             !fileContext.newDetection &&
@@ -123,18 +127,37 @@ class FaceService {
 
         newMlFile.faceAlignmentMethod = syncContext.faceAlignmentService.method;
         fileContext.newAlignment = true;
+        const imageBitmap =
+            fileContext.imageBitmap ||
+            (await ReaderService.getImageBitmap(syncContext, fileContext));
+
+        // Execute the face alignment calculations
         for (const face of newMlFile.faces) {
             face.alignment = syncContext.faceAlignmentService.getFaceAlignment(
                 face.detection,
             );
         }
+        // Extract face images and convert to Float32Array
+        const faceAlignments = newMlFile.faces.map((f) => f.alignment);
+        const faceImages = await extractFaceImagesToFloat32(
+            faceAlignments,
+            syncContext.faceEmbeddingService.faceSize,
+            imageBitmap,
+        );
+        const blurValues =
+            syncContext.blurDetectionService.detectBlur(faceImages);
+        newMlFile.faces.forEach((f, i) => (f.blurValue = blurValues[i]));
+
+        imageBitmap.close();
         log.info("[MLService] alignedFaces: ", newMlFile.faces?.length);
         // log.info('4 TF Memory stats: ',JSON.stringify(tf.memory()));
+        return faceImages;
     }
 
     async syncFileFaceEmbeddings(
         syncContext: MLSyncContext,
         fileContext: MLSyncFileContext,
+        alignedFacesInput: Float32Array,
     ) {
         const { oldMlFile, newMlFile } = fileContext;
         if (
@@ -156,20 +179,41 @@ class FaceService {
         // TODO: when not storing face crops, image will be needed to extract faces
         // fileContext.imageBitmap ||
         //     (await this.getImageBitmap(syncContext, fileContext));
-        const faceImages = await extractFaceImages(
-            newMlFile.faces,
-            syncContext.faceEmbeddingService.faceSize,
-        );
 
         const embeddings =
             await syncContext.faceEmbeddingService.getFaceEmbeddings(
-                faceImages,
+                alignedFacesInput,
             );
-        faceImages.forEach((faceImage) => faceImage.close());
         newMlFile.faces.forEach((f, i) => (f.embedding = embeddings[i]));
 
         log.info("[MLService] facesWithEmbeddings: ", newMlFile.faces.length);
         // log.info('5 TF Memory stats: ',JSON.stringify(tf.memory()));
+    }
+
+    async syncFileFaceMakeRelativeDetections(
+        syncContext: MLSyncContext,
+        fileContext: MLSyncFileContext,
+    ) {
+        const { oldMlFile, newMlFile } = fileContext;
+        if (
+            !fileContext.newAlignment &&
+            !isDifferentOrOld(
+                oldMlFile?.faceEmbeddingMethod,
+                syncContext.faceEmbeddingService.method,
+            ) &&
+            areFaceIdsSame(newMlFile.faces, oldMlFile?.faces)
+        ) {
+            return;
+        }
+        for (let i = 0; i < newMlFile.faces.length; i++) {
+            const face = newMlFile.faces[i];
+            if (face.detection.box.x + face.detection.box.width < 2) continue; // Skip if somehow already relative
+            face.detection =
+                syncContext.faceDetectionService.getRelativeDetection(
+                    face.detection,
+                    newMlFile.imageDimensions,
+                );
+        }
     }
 
     async saveFaceCrop(

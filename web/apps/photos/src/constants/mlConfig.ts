@@ -12,7 +12,7 @@ export const DEFAULT_ML_SYNC_CONFIG: MLSyncConfig = {
     batchSize: 200,
     imageSource: "Original",
     faceDetection: {
-        method: "BlazeFace",
+        method: "YoloFace",
         minFaceSize: 32,
     },
     faceCrop: {
@@ -27,6 +27,10 @@ export const DEFAULT_ML_SYNC_CONFIG: MLSyncConfig = {
     },
     faceAlignment: {
         method: "ArcFace",
+    },
+    blurDetection: {
+        method: "Laplacian",
+        threshold: 15,
     },
     faceEmbedding: {
         method: "MobileFaceNet",
@@ -70,7 +74,7 @@ export const ML_SYNC_DOWNLOAD_TIMEOUT_MS = 300000;
 
 export const MAX_FACE_DISTANCE_PERCENT = Math.sqrt(2) / 100;
 
-export const MAX_ML_SYNC_ERROR_COUNT = 4;
+export const MAX_ML_SYNC_ERROR_COUNT = 1;
 
 export const TEXT_DETECTION_TIMEOUT_MS = [10000, 30000, 60000, 120000, 240000];
 
@@ -81,6 +85,7 @@ export const BLAZEFACE_SCORE_THRESHOLD = 0.75;
 export const BLAZEFACE_PASS1_SCORE_THRESHOLD = 0.4;
 export const BLAZEFACE_FACE_SIZE = 112;
 export const MOBILEFACENET_FACE_SIZE = 112;
+export const MOBILEFACENET_EMBEDDING_SIZE = 192;
 
 // scene detection model takes fixed-shaped (224x224) inputs
 // https://tfhub.dev/sayannath/lite-model/image-scene/1
