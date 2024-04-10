@@ -73,6 +73,22 @@ Future<MultipartUploadURLs> getMultipartUploadURLs(int count) async {
   }
 }
 
+Future<void> createTableEntry(
+  String localId,
+  String fileHash,
+  MultipartUploadURLs urls,
+  String encryptedFilePath,
+  int fileSize,
+) async {
+  await UploadLocksDB.instance.createTrackUploadsEntry(
+    localId,
+    fileHash,
+    urls,
+    encryptedFilePath,
+    fileSize,
+  );
+}
+
 Future<String> putExistingMultipartFile(
   File encryptedFile,
   String localId,
@@ -84,7 +100,7 @@ Future<String> putExistingMultipartFile(
   final etags = await uploadParts(urls, encryptedFile);
 
   // complete the multipart upload
-  await completeMultipartUpload(etags, urls.completeURL);
+  await completeMultipartUpload(urls.objectKey, etags, urls.completeURL);
 
   return urls.objectKey;
 }
@@ -97,7 +113,7 @@ Future<String> putMultipartFile(
   final etags = await uploadParts(urls, encryptedFile);
 
   // complete the multipart upload
-  await completeMultipartUpload(etags, urls.completeURL);
+  await completeMultipartUpload(urls.objectKey, etags, urls.completeURL);
 
   return urls.objectKey;
 }
@@ -141,12 +157,15 @@ Future<Map<int, String>> uploadParts(
     }
 
     etags[i] = eTag!;
+
+    await UploadLocksDB.instance.updatePartStatus(url.objectKey, i);
   }
 
   return etags;
 }
 
 Future<void> completeMultipartUpload(
+  String objectKey,
   Map<int, String> partEtags,
   String completeURL,
 ) async {
@@ -169,6 +188,7 @@ Future<void> completeMultipartUpload(
         contentType: "text/xml",
       ),
     );
+    await UploadLocksDB.instance.updateCompletionStatus(objectKey);
   } catch (e) {
     Logger("MultipartUpload").severe(e);
     rethrow;
