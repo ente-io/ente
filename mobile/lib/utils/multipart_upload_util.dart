@@ -6,6 +6,7 @@ import "package:dio/dio.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/core/network/network.dart";
+import "package:photos/db/upload_locks_db.dart";
 import "package:photos/utils/xml_parser_util.dart";
 
 final _enteDio = NetworkClient.instance.enteDio;
@@ -33,11 +34,13 @@ class MultipartUploadURLs {
   final String objectKey;
   final List<String> partsURLs;
   final String completeURL;
+  final List<bool>? partUploadStatus;
 
   MultipartUploadURLs({
     required this.objectKey,
     required this.partsURLs,
     required this.completeURL,
+    this.partUploadStatus,
   });
 
   factory MultipartUploadURLs.fromMap(Map<String, dynamic> map) {
@@ -70,12 +73,28 @@ Future<MultipartUploadURLs> getMultipartUploadURLs(int count) async {
   }
 }
 
+Future<String> putExistingMultipartFile(
+  File encryptedFile,
+  String localId,
+  String fileHash,
+) async {
+  final urls = await UploadLocksDB.instance.getCachedLinks(localId, fileHash);
+
+  // upload individual parts and get their etags
+  final etags = await uploadParts(urls, encryptedFile);
+
+  // complete the multipart upload
+  await completeMultipartUpload(etags, urls.completeURL);
+
+  return urls.objectKey;
+}
+
 Future<String> putMultipartFile(
   MultipartUploadURLs urls,
   File encryptedFile,
 ) async {
   // upload individual parts and get their etags
-  final etags = await uploadParts(urls.partsURLs, encryptedFile);
+  final etags = await uploadParts(urls, encryptedFile);
 
   // complete the multipart upload
   await completeMultipartUpload(etags, urls.completeURL);
@@ -84,13 +103,18 @@ Future<String> putMultipartFile(
 }
 
 Future<Map<int, String>> uploadParts(
-  List<String> partsURLs,
+  MultipartUploadURLs url,
   File encryptedFile,
 ) async {
+  final partsURLs = url.partsURLs;
+  final partUploadStatus = url.partUploadStatus;
   final partsLength = partsURLs.length;
   final etags = <int, String>{};
 
   for (int i = 0; i < partsLength; i++) {
+    if (partUploadStatus?[i] ?? false) {
+      continue;
+    }
     final partURL = partsURLs[i];
     final isLastPart = i == partsLength - 1;
     final fileSize = isLastPart
