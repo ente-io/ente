@@ -6,6 +6,7 @@ import "package:flutter/foundation.dart";
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' show join;
 import 'package:path_provider/path_provider.dart';
+import "package:photos/extensions/stop_watch.dart";
 import 'package:photos/face/db_fields.dart';
 import "package:photos/face/db_model_mappers.dart";
 import "package:photos/face/model/face.dart";
@@ -392,7 +393,8 @@ class FaceMLDataDB {
     int offset = 0,
     int batchSize = 10000,
   }) async {
-    _logger.info(
+    final EnteWatch w = EnteWatch("getFaceEmbeddingMap")..start();
+    w.logAndReset(
       'reading as float offset: $offset, maxFaces: $maxFaces, batchSize: $batchSize',
     );
     final db = await instance.database;
@@ -427,9 +429,7 @@ class FaceMLDataDB {
       }
       offset += batchSize;
     }
-    _logger.info(
-      'done reading face embeddings ${result.length}',
-    );
+    w.stopWithLog('done reading face embeddings ${result.length}');
     return result;
   }
 

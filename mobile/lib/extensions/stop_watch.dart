@@ -23,4 +23,9 @@ class EnteWatch extends Stopwatch {
     reset();
     previousElapsed = 0;
   }
+
+  void stopWithLog(String msg) {
+    log(msg);
+    stop();
+  }
 }
