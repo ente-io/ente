@@ -378,9 +378,6 @@ class FaceClustering {
       // Incremental clustering, so we can skip faces that already have a clusterId
       if (sortedFaceInfos[i].clusterId != null) {
         clusterID = max(clusterID, sortedFaceInfos[i].clusterId!);
-        if (i % 250 == 0) {
-          log("[ClusterIsolate] ${DateTime.now()} First $i faces already had a clusterID");
-        }
         continue;
       }
 
