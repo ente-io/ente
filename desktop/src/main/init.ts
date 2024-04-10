@@ -1,4 +1,4 @@
-import { app, BrowserWindow, nativeImage, Tray } from "electron";
+import { BrowserWindow, Tray, app, nativeImage, shell } from "electron";
 import { existsSync } from "node:fs";
 import path from "node:path";
 import { isAppQuitting, rendererURL } from "../main";
@@ -109,7 +109,7 @@ export function handleDownloads(mainWindow: BrowserWindow) {
 export function handleExternalLinks(mainWindow: BrowserWindow) {
     mainWindow.webContents.setWindowOpenHandler(({ url }) => {
         if (!url.startsWith(rendererURL)) {
-            require("electron").shell.openExternal(url);
+            shell.openExternal(url);
             return { action: "deny" };
         } else {
             return { action: "allow" };
