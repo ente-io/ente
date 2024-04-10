@@ -67,7 +67,10 @@ class EntityService {
     final String encryptedData =
         CryptoUtil.bin2base64(encryptedKeyData.encryptedData!);
     final String header = CryptoUtil.bin2base64(encryptedKeyData.header!);
-    debugPrint("Adding entity of type: " + type.typeToString());
+    debugPrint(
+      " ${id == null ? 'Adding' : 'Updating'} entity of type: " +
+          type.typeToString(),
+    );
     final EntityData data = id == null
         ? await _gateway.createEntity(type, encryptedData, header)
         : await _gateway.updateEntity(type, id, encryptedData, header);
