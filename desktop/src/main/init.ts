@@ -2,11 +2,11 @@ import { BrowserWindow, Tray, app, nativeImage, shell } from "electron";
 import { existsSync } from "node:fs";
 import path from "node:path";
 import { isAppQuitting, rendererURL } from "../main";
-import autoLauncher from "../services/autoLauncher";
-import { getHideDockIconPreference } from "../services/userPreference";
-import { isPlatform } from "../utils/common/platform";
 import log from "./log";
 import { createTrayContextMenu } from "./menu";
+import { isPlatform } from "./platform";
+import autoLauncher from "./services/autoLauncher";
+import { getHideDockIconPreference } from "./services/userPreference";
 import { isDev } from "./util";
 
 /**

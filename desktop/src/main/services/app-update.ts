@@ -2,10 +2,10 @@ import { compareVersions } from "compare-versions";
 import { app, BrowserWindow } from "electron";
 import { default as electronLog } from "electron-log";
 import { autoUpdater } from "electron-updater";
-import { setIsAppQuitting, setIsUpdateAvailable } from "../main";
-import log from "../main/log";
+import { setIsAppQuitting, setIsUpdateAvailable } from "../../main";
+import { AppUpdateInfo } from "../../types/ipc";
+import log from "../log";
 import { userPreferencesStore } from "../stores/user-preferences";
-import { AppUpdateInfo } from "../types/ipc";
 
 export const setupAutoUpdater = (mainWindow: BrowserWindow) => {
     autoUpdater.logger = electronLog;

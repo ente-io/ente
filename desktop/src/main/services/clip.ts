@@ -14,11 +14,11 @@ import { existsSync } from "fs";
 import jpeg from "jpeg-js";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { writeStream } from "../main/fs";
-import log from "../main/log";
-import { CustomErrors } from "../types/ipc";
-import Tokenizer from "../utils/clip-bpe-ts/mod";
-import { generateTempFilePath } from "../utils/temp";
+import { CustomErrors } from "../../types/ipc";
+import Tokenizer from "../../thirdparty/clip-bpe-ts/mod";
+import { writeStream } from "../fs";
+import log from "../log";
+import { generateTempFilePath } from "../temp";
 import { deleteTempFile } from "./ffmpeg";
 const ort = require("onnxruntime-node");
 

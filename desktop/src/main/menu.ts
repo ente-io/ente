@@ -6,12 +6,12 @@ import {
     shell,
 } from "electron";
 import { setIsAppQuitting } from "../main";
-import { forceCheckForAppUpdates } from "../services/app-update";
-import autoLauncher from "../services/autoLauncher";
+import { forceCheckForAppUpdates } from "./services/app-update";
+import autoLauncher from "./services/autoLauncher";
 import {
     getHideDockIconPreference,
     setHideDockIconPreference,
-} from "../services/userPreference";
+} from "./services/userPreference";
 import { openLogDirectory } from "./util";
 
 /** Create and return the entries in the app's main menu bar */

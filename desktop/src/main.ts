@@ -26,9 +26,9 @@ import {
 import { attachFSWatchIPCHandlers, attachIPCHandlers } from "./main/ipc";
 import log, { initLogging } from "./main/log";
 import { createApplicationMenu } from "./main/menu";
+import { setupAutoUpdater } from "./main/services/app-update";
+import { initWatcher } from "./main/services/chokidar";
 import { isDev } from "./main/util";
-import { setupAutoUpdater } from "./services/app-update";
-import { initWatcher } from "./services/chokidar";
 
 let appIsQuitting = false;
 
