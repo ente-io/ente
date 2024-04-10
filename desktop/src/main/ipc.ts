@@ -12,14 +12,11 @@ import type { FSWatcher } from "chokidar";
 import { ipcMain } from "electron/main";
 import {
     appVersion,
-    muteUpdateNotification,
     skipAppUpdate,
     updateAndRestart,
-} from "../services/appUpdater";
-import {
-    clipImageEmbedding,
-    clipTextEmbedding,
-} from "../services/clip";
+    updateOnNextRestart,
+} from "../services/app-update";
+import { clipImageEmbedding, clipTextEmbedding } from "../services/clip";
 import { runFFmpegCmd } from "../services/ffmpeg";
 import { getDirFiles } from "../services/fs";
 import {
@@ -108,13 +105,13 @@ export const attachIPCHandlers = () => {
 
     // - App update
 
-    ipcMain.on("update-and-restart", () => updateAndRestart());
+    ipcMain.on("updateAndRestart", () => updateAndRestart());
 
-    ipcMain.on("skip-app-update", (_, version) => skipAppUpdate(version));
-
-    ipcMain.on("mute-update-notification", (_, version) =>
-        muteUpdateNotification(version),
+    ipcMain.on("updateOnNextRestart", (_, version) =>
+        updateOnNextRestart(version),
     );
+
+    ipcMain.on("skipAppUpdate", (_, version) => skipAppUpdate(version));
 
     // - Conversion
 

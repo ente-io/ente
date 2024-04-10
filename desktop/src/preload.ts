@@ -70,37 +70,36 @@ const saveEncryptionKey = (encryptionKey: string): Promise<void> =>
     ipcRenderer.invoke("saveEncryptionKey", encryptionKey);
 
 const onMainWindowFocus = (cb?: () => void) => {
-    ipcRenderer.removeAllListeners("onMainWindowFocus");
-    if (cb) ipcRenderer.on("onMainWindowFocus", cb);
+    ipcRenderer.removeAllListeners("mainWindowFocus");
+    if (cb) ipcRenderer.on("mainWindowFocus", cb);
+};
+
+// - App update
+
+const onAppUpdateAvailable = (
+    cb?: ((updateInfo: AppUpdateInfo) => void) | undefined,
+) => {
+    ipcRenderer.removeAllListeners("appUpdateAvailable");
+    if (cb) {
+        ipcRenderer.on("appUpdateAvailable", (_, updateInfo: AppUpdateInfo) =>
+            cb(updateInfo),
+        );
+    }
+};
+
+const updateAndRestart = () => ipcRenderer.send("updateAndRestart");
+
+const updateOnNextRestart = (version: string) =>
+    ipcRenderer.send("updateOnNextRestart", version);
+
+const skipAppUpdate = (version: string) => {
+    ipcRenderer.send("skipAppUpdate", version);
 };
 
 const fsExists = (path: string): Promise<boolean> =>
     ipcRenderer.invoke("fsExists", path);
 
 // - AUDIT below this
-
-// - App update
-
-const registerUpdateEventListener = (
-    showUpdateDialog: (updateInfo: AppUpdateInfo) => void,
-) => {
-    ipcRenderer.removeAllListeners("show-update-dialog");
-    ipcRenderer.on("show-update-dialog", (_, updateInfo: AppUpdateInfo) => {
-        showUpdateDialog(updateInfo);
-    });
-};
-
-const updateAndRestart = () => {
-    ipcRenderer.send("update-and-restart");
-};
-
-const skipAppUpdate = (version: string) => {
-    ipcRenderer.send("skip-app-update", version);
-};
-
-const muteUpdateNotification = (version: string) => {
-    ipcRenderer.send("mute-update-notification", version);
-};
 
 // - Conversion
 
@@ -310,10 +309,10 @@ contextBridge.exposeInMainWorld("electron", {
     onMainWindowFocus,
 
     // - App update
+    onAppUpdateAvailable,
     updateAndRestart,
+    updateOnNextRestart,
     skipAppUpdate,
-    muteUpdateNotification,
-    registerUpdateEventListener,
 
     // - Conversion
     convertToJPEG,

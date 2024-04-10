@@ -154,28 +154,26 @@ export default function App({ Component, pageProps }: AppProps) {
 
     useEffect(() => {
         const electron = globalThis.electron;
-        if (electron) {
-            const showUpdateDialog = (updateInfo: AppUpdateInfo) => {
-                if (updateInfo.autoUpdatable) {
-                    setDialogMessage(
-                        getUpdateReadyToInstallMessage(updateInfo),
-                    );
-                } else {
-                    setNotificationAttributes({
-                        endIcon: <ArrowForward />,
-                        variant: "secondary",
-                        message: t("UPDATE_AVAILABLE"),
-                        onClick: () =>
-                            setDialogMessage(
-                                getUpdateAvailableForDownloadMessage(
-                                    updateInfo,
-                                ),
-                            ),
-                    });
-                }
-            };
-            electron.registerUpdateEventListener(showUpdateDialog);
-        }
+        if (!electron) return;
+
+        const showUpdateDialog = (updateInfo: AppUpdateInfo) => {
+            if (updateInfo.autoUpdatable) {
+                setDialogMessage(getUpdateReadyToInstallMessage(updateInfo));
+            } else {
+                setNotificationAttributes({
+                    endIcon: <ArrowForward />,
+                    variant: "secondary",
+                    message: t("UPDATE_AVAILABLE"),
+                    onClick: () =>
+                        setDialogMessage(
+                            getUpdateAvailableForDownloadMessage(updateInfo),
+                        ),
+                });
+            }
+        };
+        electron.onAppUpdateAvailable(showUpdateDialog);
+
+        return () => electron.onAppUpdateAvailable(undefined);
     }, []);
 
     useEffect(() => {

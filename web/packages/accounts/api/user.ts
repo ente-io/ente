@@ -1,4 +1,3 @@
-import log from "@/next/log";
 import {
     RecoveryKey,
     TwoFactorRecoveryResponse,
