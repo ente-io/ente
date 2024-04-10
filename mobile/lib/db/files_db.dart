@@ -628,12 +628,18 @@ class FilesDB {
   }) async {
     final db = await instance.sqliteAsyncDB;
     final order = (asc ?? false ? 'ASC' : 'DESC');
-
+    final args = [startTime, endTime, visibleVisibility];
+    String query =
+        'SELECT * FROM $filesTable WHERE $columnCreationTime >= ? AND $columnCreationTime <= ?  AND ($columnMMdVisibility IS NULL OR $columnMMdVisibility = ?)'
+        ' AND ($columnLocalID IS NOT NULL OR ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1))'
+        ' ORDER BY $columnCreationTime $order, $columnModificationTime $order';
+    if (limit != null) {
+      query += ' LIMIT ?';
+      args.add(limit);
+    }
     final results = await db.getAll(
-      'SELECT * FROM $filesTable WHERE $columnCreationTime >= ? AND $columnCreationTime <= ?  AND ($columnMMdVisibility IS NULL OR $columnMMdVisibility = ?)'
-      ' AND ($columnLocalID IS NOT NULL OR ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1))'
-      ' ORDER BY $columnCreationTime $order, $columnModificationTime $order LIMIT ?',
-      [startTime, endTime, visibleVisibility, limit],
+      query,
+      args,
     );
     final files = convertToFiles(results);
     final List<EnteFile> filteredFiles =
