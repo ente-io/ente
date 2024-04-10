@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
+import "package:photos/core/constants.dart";
 import "package:photos/utils/multipart_upload_util.dart";
 import 'package:sqflite/sqflite.dart';
 
@@ -31,12 +32,21 @@ class UploadLocksDB {
     columnPartSize: "part_size",
   );
 
+  static const _trackStatus = (
+    pending: "pending",
+    completed: "completed",
+  );
+
   static const _partsTable = (
     table: "upload_parts",
     columnObjectKey: "object_key",
     columnPartNumber: "part_number",
     columnPartUrl: "part_url",
     columnPartStatus: "part_status",
+  );
+  static const _partStatus = (
+    pending: "pending",
+    uploaded: "uploaded",
   );
 
   UploadLocksDB._privateConstructor();
@@ -209,5 +219,75 @@ class UploadLocksDB {
     );
 
     return urls;
+  }
+
+  Future<void> createTrackUploadsEntry(
+    String localId,
+    String fileHash,
+    MultipartUploadURLs urls,
+    String encryptedFilePath,
+    int fileSize,
+  ) async {
+    final db = await UploadLocksDB.instance.database;
+    final objectKey = urls.objectKey;
+
+    await db.insert(
+      _trackUploadTable.table,
+      {
+        _trackUploadTable.columnLocalID: localId,
+        _trackUploadTable.columnFileHash: fileHash,
+        _trackUploadTable.columnObjectKey: objectKey,
+        _trackUploadTable.columnCompleteUrl: urls.completeURL,
+        _trackUploadTable.columnEncryptedFilePath: encryptedFilePath,
+        _trackUploadTable.columnEncryptedFileSize: fileSize,
+        _trackUploadTable.columnCompletionStatus: _trackStatus.pending,
+        _trackUploadTable.columnPartSize: multipartPartSize,
+      },
+    );
+
+    final partsURLs = urls.partsURLs;
+    final partsLength = partsURLs.length;
+
+    for (int i = 0; i < partsLength; i++) {
+      await db.insert(
+        _partsTable.table,
+        {
+          _partsTable.columnObjectKey: objectKey,
+          _partsTable.columnPartNumber: i,
+          _partsTable.columnPartUrl: partsURLs[i],
+          _partsTable.columnPartStatus: _partStatus.pending,
+        },
+      );
+    }
+  }
+
+  Future<void> updatePartStatus(
+    String objectKey,
+    int partNumber,
+  ) async {
+    final db = await instance.database;
+    await db.update(
+      _partsTable.table,
+      {
+        _partsTable.columnPartStatus: _partStatus.uploaded,
+      },
+      where:
+          '${_partsTable.columnObjectKey} = ? AND ${_partsTable.columnPartNumber} = ?',
+      whereArgs: [objectKey, partNumber],
+    );
+  }
+
+  Future<void> updateCompletionStatus(
+    String objectKey,
+  ) async {
+    final db = await instance.database;
+    await db.update(
+      _trackUploadTable.table,
+      {
+        _trackUploadTable.columnCompletionStatus: _trackStatus.completed,
+      },
+      where: '${_trackUploadTable.columnObjectKey} = ?',
+      whereArgs: [objectKey],
+    );
   }
 }

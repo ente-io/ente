@@ -515,6 +515,14 @@ class FileUploader {
           );
         } else {
           final fileUploadURLs = await getMultipartUploadURLs(count);
+
+          await createTableEntry(
+            lockKey,
+            mediaUploadData.hashData!.fileHash!,
+            fileUploadURLs,
+            encryptedFilePath,
+            await encryptedFile.length(),
+          );
           fileObjectKey = await putMultipartFile(fileUploadURLs, encryptedFile);
         }
       }
