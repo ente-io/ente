@@ -69,9 +69,9 @@ const encryptionKey = (): Promise<string | undefined> =>
 const saveEncryptionKey = (encryptionKey: string): Promise<void> =>
     ipcRenderer.invoke("saveEncryptionKey", encryptionKey);
 
-const registerForegroundEventListener = (onForeground: () => void) => {
-    ipcRenderer.removeAllListeners("app-in-foreground");
-    ipcRenderer.on("app-in-foreground", onForeground);
+const onMainWindowFocus = (cb?: () => void) => {
+    ipcRenderer.removeAllListeners("onMainWindowFocus");
+    if (cb) ipcRenderer.on("onMainWindowFocus", cb);
 };
 
 const fsExists = (path: string): Promise<boolean> =>
@@ -307,7 +307,7 @@ contextBridge.exposeInMainWorld("electron", {
     clearStores,
     encryptionKey,
     saveEncryptionKey,
-    registerForegroundEventListener,
+    onMainWindowFocus,
 
     // - App update
     updateAndRestart,

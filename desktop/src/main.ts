@@ -142,9 +142,10 @@ const deleteLegacyDiskCacheDirIfExists = async () => {
 };
 
 const attachEventHandlers = (mainWindow: BrowserWindow) => {
-    // Let ipcRenderer know when mainWindow is in the foreground.
+    // Let ipcRenderer know when mainWindow is in the foreground so that it can
+    // in turn inform the renderer process.
     mainWindow.on("focus", () =>
-        mainWindow.webContents.send("app-in-foreground"),
+        mainWindow.webContents.send("onMainWindowFocus"),
     );
 };
 

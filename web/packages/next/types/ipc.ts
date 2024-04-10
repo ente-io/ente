@@ -85,7 +85,17 @@ export interface Electron {
      */
     saveEncryptionKey: (encryptionKey: string) => Promise<void>;
 
-    registerForegroundEventListener: (onForeground: () => void) => void;
+    /**
+     * Set or clear the callback {@link cb} to invoke whenever the app comes
+     * into the foreground. More precisely, the callback gets invoked when the
+     * main window gets focus.
+     *
+     * Note: Setting a callback clears any previous callbacks.
+     *
+     * @param cb The function to call when the main window gets focus. Pass
+     * `undefined` to clear the callback.
+     */
+    onMainWindowFocus: (cb?: () => void) => void;
 
     /**
      * A subset of filesystem access APIs.
