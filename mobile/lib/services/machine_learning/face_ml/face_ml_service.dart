@@ -470,9 +470,22 @@ class FaceMlService {
           "because version is ${fileMl.faceEmbedding.version} and we need $faceMlVersion");
       return true;
     }
+    if (fileMl.faceEmbedding.error ?? false) {
+      debugPrint("Discarding remote embedding for fileID ${fileMl.fileID} "
+          "because error is true");
+      return true;
+    }
     // are all landmarks equal?
     bool allLandmarksEqual = true;
+    if (fileMl.faceEmbedding.faces.isEmpty) {
+      debugPrint("No face for ${fileMl.fileID}");
+      allLandmarksEqual = false;
+    }
     for (final face in fileMl.faceEmbedding.faces) {
+      if (face.detection.landmarks.isEmpty) {
+        allLandmarksEqual = false;
+        break;
+      }
       if (face.detection.landmarks
           .any((landmark) => landmark.x != landmark.y)) {
         allLandmarksEqual = false;
@@ -482,6 +495,12 @@ class FaceMlService {
     if (allLandmarksEqual) {
       debugPrint("Discarding remote embedding for fileID ${fileMl.fileID} "
           "because landmarks are not equal");
+      debugPrint(
+        fileMl.faceEmbedding.faces
+            .map((e) => e.detection.landmarks)
+            .toList()
+            .toString(),
+      );
       return true;
     }
     if (fileMl.width == null || fileMl.height == null) {
