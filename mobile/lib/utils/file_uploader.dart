@@ -503,8 +503,20 @@ class FileUploader {
         final fileUploadURL = await _getUploadURL();
         fileObjectKey = await _putFile(fileUploadURL, encryptedFile);
       } else {
-        final fileUploadURLs = await getMultipartUploadURLs(count);
-        fileObjectKey = await putMultipartFile(fileUploadURLs, encryptedFile);
+        if (mediaUploadData.hashData?.fileHash != null &&
+            await _uploadLocks.doesExists(
+              lockKey,
+              mediaUploadData.hashData!.fileHash!,
+            )) {
+          fileObjectKey = await putExistingMultipartFile(
+            encryptedFile,
+            lockKey,
+            mediaUploadData.hashData!.fileHash!,
+          );
+        } else {
+          final fileUploadURLs = await getMultipartUploadURLs(count);
+          fileObjectKey = await putMultipartFile(fileUploadURLs, encryptedFile);
+        }
       }
 
       final metadata = await file.getMetadataForUpload(mediaUploadData);
