@@ -10,9 +10,7 @@ import "package:photos/face/db.dart";
 import "package:photos/face/model/person.dart";
 import "package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart";
 import 'package:photos/services/machine_learning/face_ml/face_ml_service.dart';
-import 'package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart';
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
-// import "package:photos/services/search_service.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/expandable_menu_item_widget.dart';
@@ -278,42 +276,6 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
             );
           },
         ),
-        if (kDebugMode) sectionOptionSpacing,
-        if (kDebugMode)
-          MenuItemWidget(
-            captionedTextWidget: const CaptionedTextWidget(
-              title: "Compute suggestions",
-            ),
-            pressedColor: getEnteColorScheme(context).fillFaint,
-            trailingIcon: Icons.chevron_right_outlined,
-            trailingIconIsMuted: true,
-            onTap: () async {
-              try {
-                final List<PersonEntity> persons =
-                    await PersonService.instance.getPersons();
-                final EnteWatch w = EnteWatch('feedback')..start();
-                for (final PersonEntity p in persons) {
-                  await ClusterFeedbackService.instance
-                      .getSuggestionsUsingMean(p);
-                  w.logAndReset('suggestion calculated for ${p.data.name}');
-                }
-                w.log("done with feedback");
-                showShortToast(context, "done avg");
-                // await FaceMLDataDB.instance.bulkInsertFaces([]);
-                // final EnteWatch watch = EnteWatch("face_time")..start();
-
-                // final results = await downloadZip();
-                // watch.logAndReset('downloaded and de-serialized');
-                // await FaceMLDataDB.instance.bulkInsertFaces(results);
-                // watch.logAndReset('inserted in to db');
-                // showShortToast(context, "Got ${results.length} results");
-              } catch (e, s) {
-                _logger.warning('download failed ', e, s);
-                await showGenericErrorDialog(context: context, error: e);
-              }
-              // _showKeyAttributesDialog(context);
-            },
-          ),
         if (kDebugMode) sectionOptionSpacing,
         if (kDebugMode)
           MenuItemWidget(
