@@ -1,6 +1,6 @@
-import { ComlinkWorker } from "@ente/shared/worker/comlinkWorker";
+import { haveWindow } from "@/next/env";
+import { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { Remote } from "comlink";
-import { runningInBrowser } from "utils/common";
 import { DedicatedSearchWorker } from "worker/search.worker";
 
 class ComlinkSearchWorker {
@@ -16,7 +16,7 @@ class ComlinkSearchWorker {
 }
 
 export const getDedicatedSearchWorker = () => {
-    if (runningInBrowser()) {
+    if (haveWindow()) {
         const cryptoComlinkWorker = new ComlinkWorker<
             typeof DedicatedSearchWorker
         >(

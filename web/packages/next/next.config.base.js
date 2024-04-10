@@ -45,19 +45,13 @@ const gitSHA = () => {
  * @type {import("next").NextConfig}
  */
 const nextConfig = {
-    /* generate a static export when we run `next build` */
+    // Generate a static export when we run `next build`.
     output: "export",
     compiler: {
         emotion: true,
     },
-    transpilePackages: [
-        "@/next",
-        "@/ui",
-        "@/utils",
-        "@mui/material",
-        "@mui/system",
-        "@mui/icons-material",
-    ],
+    // Use Next.js to transpile our internal packages before bundling them.
+    transpilePackages: ["@/next", "@/utils"],
 
     // Add environment variables to the JavaScript bundle. They will be
     // available as `process.env.VAR_NAME` to our code.

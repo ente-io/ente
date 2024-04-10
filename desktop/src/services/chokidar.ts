@@ -1,7 +1,7 @@
 import chokidar from "chokidar";
 import { BrowserWindow } from "electron";
 import path from "path";
-import { logError } from "../main/log";
+import log from "../main/log";
 import { getWatchMappings } from "../services/watch";
 import { getElectronFile } from "./fs";
 
@@ -38,7 +38,7 @@ export function initWatcher(mainWindow: BrowserWindow) {
             );
         })
         .on("error", (error) => {
-            logError(error, "error while watching files");
+            log.error("Error while watching files", error);
         });
 
     return watcher;

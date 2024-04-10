@@ -2,7 +2,6 @@ import { Dialog, DialogContent, Link } from "@mui/material";
 import { t } from "i18next";
 
 import { dialogCloseHandler } from "@ente/shared/components/DialogBox/TitleWithCloseButton";
-import { APP_DOWNLOAD_URL } from "@ente/shared/constants/urls";
 import { UPLOAD_RESULT, UPLOAD_STAGES } from "constants/upload";
 import UploadProgressContext from "contexts/uploadProgress";
 import { useContext, useEffect, useState } from "react";
@@ -84,7 +83,7 @@ export function UploadProgressDialog() {
                                         components={{
                                             a: (
                                                 <Link
-                                                    href={APP_DOWNLOAD_URL}
+                                                    href="https://ente.io/download/desktop"
                                                     target="_blank"
                                                 />
                                             ),

@@ -11,37 +11,59 @@ videos you have uploaded to Ente.
 1. Sign in to [our desktop app](https://ente.io/download/desktop), if you
    haven't done so already.
 
-2. Open the side bar, and select the option to **export data**.
+    ![Ente - Sign in to export data](sign-in.png)
+
+2. Open the side bar, and select the option to **Export Data**.
 
     ![Ente - Export data](export-1.png)
 
-3. Select the destination folder and click on **start**.
+3. Choose the destination folder by clicking on three dots icon.
 
-    ![Ente - Select destination folder and start](export-2.png)
+<div align="center">
 
-4. Wait for the export to get completed.
+![Ente - Select destination folder and start](export-2.png){width=400px}
 
-    ![Ente - Export in progress](export-3.png)
+</div>
 
-5. Later on if you wish to sync newer files that were uploaded since the last
-   time you exported, simply select **export data** again and click on
-   **resync**.
+4. Select the folder and then click on **Start**
 
-    ![Ente - Rexport](export-4.png)
+<div align="center">
+
+![Ente - Export in progress](export-3.png){width=400px}
+
+</div>
+
+5. Wait for the export to complete.
+
+<div align="center">
+
+![Ente - Rexport](export-4.png){width=400px}
+
+</div>
 
 6. In case your download gets interrupted, Ente will resume from where it left
-   off. Simply select **export data** again and click on **resync**.
+   off. Simply select **Export Data** again and click on **Resync**.
 
-7. **Sync continuously** : You can utilize Continuous Sync to eliminate manual
-   exports each time new photos are added to Ente. This feature automatically
-   detects new files and runs exports accordingly, It also ensures that exported
-   data reflects the latest album states with new files, moves, and deletions.
+<div align="center">
 
-    ![Ente - Continuous sync](continuous-sync.webp)
+![Ente - Rexport](export-5.png){width=400px}
+
+</div>
+
+### Sync continuously
+
+You can switch on the toggle to **Sync continuously** to eliminate manual
+exports each time new photos are added to Ente. This feature automatically
+detects new files and runs exports accordingly. It also ensures that exported
+data reflects the latest album states with new files, moves, and deletions.
+
+![Ente - Continuous sync](continuous-sync.webp)
+
+---
 
 If you run into any issues during your data export, please reach out to
 [support@ente.io](mailto:support@ente.io) and we will be happy to help you!
 
 Note that we also provide a [CLI
 tool](https://github.com/ente-io/ente/tree/main/cli#export) to export your data.
-Some more details are in this [FAQ entry](/photos/faq/export).
+Please find more details [here](/photos/faq/export).

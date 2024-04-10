@@ -1,8 +1,8 @@
+import { convertBytesToHumanReadable } from "@/next/file";
+import log from "@/next/log";
 import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
 import { CustomError, handleUploadError } from "@ente/shared/error";
-import { addLocalLog, addLogLine } from "@ente/shared/logging";
-import { logError } from "@ente/shared/sentry";
-import { convertBytesToHumanReadable } from "@ente/shared/utils/size";
+import { sleep } from "@ente/shared/utils";
 import { Remote } from "comlink";
 import { MAX_FILE_SIZE_SUPPORTED, UPLOAD_RESULT } from "constants/upload";
 import { addToCollection } from "services/collectionService";
@@ -15,7 +15,6 @@ import {
     Logger,
     UploadFile,
 } from "types/upload";
-import { sleep } from "utils/common";
 import { findMatchingExistingFiles } from "utils/upload";
 import UIService from "./uiService";
 import uploadCancelService from "./uploadCancelService";
@@ -40,7 +39,7 @@ export default async function uploader(
         fileWithCollection,
     )}_${convertBytesToHumanReadable(UploadService.getAssetSize(uploadAsset))}`;
 
-    addLogLine(`uploader called for  ${fileNameSize}`);
+    log.info(`uploader called for  ${fileNameSize}`);
     UIService.setFileProgress(localID, 0);
     await sleep(0);
     let fileTypeInfo: FileTypeInfo;
@@ -50,13 +49,13 @@ export default async function uploader(
         if (fileSize >= MAX_FILE_SIZE_SUPPORTED) {
             return { fileUploadResult: UPLOAD_RESULT.TOO_LARGE };
         }
-        addLogLine(`getting filetype for ${fileNameSize}`);
+        log.info(`getting filetype for ${fileNameSize}`);
         fileTypeInfo = await UploadService.getAssetFileType(uploadAsset);
-        addLogLine(
+        log.info(
             `got filetype for ${fileNameSize} - ${JSON.stringify(fileTypeInfo)}`,
         );
 
-        addLogLine(`extracting  metadata ${fileNameSize}`);
+        log.info(`extracting  metadata ${fileNameSize}`);
         const { metadata, publicMagicMetadata } =
             await UploadService.extractAssetMetadata(
                 worker,
@@ -69,7 +68,7 @@ export default async function uploader(
             existingFiles,
             metadata,
         );
-        addLocalLog(
+        log.debug(
             () =>
                 `matchedFileList: ${matchingExistingFiles
                     .map((f) => `${f.id}-${f.metadata.title}`)
@@ -78,13 +77,13 @@ export default async function uploader(
         if (matchingExistingFiles?.length) {
             const matchingExistingFilesCollectionIDs =
                 matchingExistingFiles.map((e) => e.collectionID);
-            addLocalLog(
+            log.debug(
                 () =>
                     `matched file collectionIDs:${matchingExistingFilesCollectionIDs}
                        and collectionID:${collection.id}`,
             );
             if (matchingExistingFilesCollectionIDs.includes(collection.id)) {
-                addLogLine(
+                log.info(
                     `file already present in the collection , skipped upload for  ${fileNameSize}`,
                 );
                 const sameCollectionMatchingExistingFile =
@@ -96,7 +95,7 @@ export default async function uploader(
                     uploadedFile: sameCollectionMatchingExistingFile,
                 };
             } else {
-                addLogLine(
+                log.info(
                     `same file in ${matchingExistingFilesCollectionIDs.length} collection found for  ${fileNameSize} ,adding symlink`,
                 );
                 // any of the matching file can used to add a symlink
@@ -112,7 +111,7 @@ export default async function uploader(
         if (uploadCancelService.isUploadCancelationRequested()) {
             throw Error(CustomError.UPLOAD_CANCELLED);
         }
-        addLogLine(`reading asset ${fileNameSize}`);
+        log.info(`reading asset ${fileNameSize}`);
 
         const file = await UploadService.readAsset(fileTypeInfo, uploadAsset);
 
@@ -137,7 +136,7 @@ export default async function uploader(
         if (uploadCancelService.isUploadCancelationRequested()) {
             throw Error(CustomError.UPLOAD_CANCELLED);
         }
-        addLogLine(`encryptAsset ${fileNameSize}`);
+        log.info(`encryptAsset ${fileNameSize}`);
         const encryptedFile = await UploadService.encryptAsset(
             worker,
             fileWithMetadata,
@@ -147,9 +146,9 @@ export default async function uploader(
         if (uploadCancelService.isUploadCancelationRequested()) {
             throw Error(CustomError.UPLOAD_CANCELLED);
         }
-        addLogLine(`uploadToBucket ${fileNameSize}`);
+        log.info(`uploadToBucket ${fileNameSize}`);
         const logger: Logger = (message: string) => {
-            addLogLine(message, `fileNameSize: ${fileNameSize}`);
+            log.info(message, `fileNameSize: ${fileNameSize}`);
         };
         const backupedFile: BackupedFile = await UploadService.uploadToBucket(
             logger,
@@ -161,11 +160,11 @@ export default async function uploader(
             backupedFile,
             encryptedFile.fileKey,
         );
-        addLogLine(`uploading file to server ${fileNameSize}`);
+        log.info(`uploading file to server ${fileNameSize}`);
 
         const uploadedFile = await UploadService.uploadFile(uploadFile);
 
-        addLogLine(`${fileNameSize} successfully uploaded`);
+        log.info(`${fileNameSize} successfully uploaded`);
 
         return {
             fileUploadResult: metadata.hasStaticThumbnail
@@ -174,15 +173,18 @@ export default async function uploader(
             uploadedFile: uploadedFile,
         };
     } catch (e) {
-        addLogLine(`upload failed for  ${fileNameSize} ,error: ${e.message}`);
+        log.info(`upload failed for  ${fileNameSize} ,error: ${e.message}`);
         if (
             e.message !== CustomError.UPLOAD_CANCELLED &&
             e.message !== CustomError.UNSUPPORTED_FILE_FORMAT
         ) {
-            logError(e, "file upload failed", {
-                fileFormat: fileTypeInfo?.exactType,
-                fileSize: convertBytesToHumanReadable(fileSize),
-            });
+            log.error(
+                `file upload failed - ${JSON.stringify({
+                    fileFormat: fileTypeInfo?.exactType,
+                    fileSize: convertBytesToHumanReadable(fileSize),
+                })}`,
+                e,
+            );
         }
         const error = handleUploadError(e);
         switch (error.message) {

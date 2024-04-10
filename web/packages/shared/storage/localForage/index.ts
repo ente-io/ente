@@ -1,8 +1,8 @@
-import { runningInBrowser } from "../../platform";
+import { haveWindow } from "@/next/env";
 
 import localForage from "localforage";
 
-if (runningInBrowser()) {
+if (haveWindow()) {
     localForage.config({
         name: "ente-files",
         version: 1.0,

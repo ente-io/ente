@@ -1,6 +1,4 @@
-import { t } from "i18next";
-import { useEffect, useState } from "react";
-
+import log from "@/next/log";
 import { sendOtt } from "@ente/accounts/api/user";
 import { PAGES } from "@ente/accounts/constants/pages";
 import { APP_HOMES } from "@ente/shared/apps/constants";
@@ -18,17 +16,22 @@ import {
     decryptAndStoreToken,
     saveKeyInSessionStore,
 } from "@ente/shared/crypto/helpers";
-import { logError } from "@ente/shared/sentry";
 import InMemoryStore, { MS_KEYS } from "@ente/shared/storage/InMemoryStore";
 import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
 import { SESSION_KEYS, getKey } from "@ente/shared/storage/sessionStorage";
 import { KeyAttributes, User } from "@ente/shared/user/types";
+import { t } from "i18next";
+import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
+
 const bip39 = require("bip39");
 // mobile client library only supports english.
 bip39.setDefaultWordlist("english");
 
-export default function Recover({ appContext, router, appName }: PageProps) {
+export default function Recover({ appContext, appName }: PageProps) {
     const [keyAttributes, setKeyAttributes] = useState<KeyAttributes>();
+
+    const router = useRouter();
 
     useEffect(() => {
         const user: User = getData(LS_KEYS.USER);
@@ -84,7 +87,7 @@ export default function Recover({ appContext, router, appName }: PageProps) {
             setData(LS_KEYS.SHOW_BACK_BUTTON, { value: false });
             router.push(PAGES.CHANGE_PASSWORD);
         } catch (e) {
-            logError(e, "password recovery failed");
+            log.error("password recovery failed", e);
             setFieldError(t("INCORRECT_RECOVERY_KEY"));
         }
     };

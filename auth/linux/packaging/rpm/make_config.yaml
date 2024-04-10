@@ -1,4 +1,4 @@
-icon: assets/icon/auth-icon.png
+icon: assets/icons/auth-icon.png
 summary: 2FA app with free end-to-end encrypted backup and sync
 group: Application/Utility
 vendor: Ente.io
@@ -9,7 +9,7 @@ url: https://github.com/ente-io/ente
 
 display_name: Auth
 
-dependencies:
+requires:
   - libsqlite3x
   - webkit2gtk-4.0
   - libsodium

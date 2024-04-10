@@ -136,23 +136,24 @@ func (c *UserController) SendEmailOTT(context *gin.Context, email string, client
 // verifyEmailOtt should be deprecated in favor of verifyEmailOttWithSession once clients are updated.
 func (c *UserController) verifyEmailOtt(context *gin.Context, email string, ott string) error {
 	ott = strings.TrimSpace(ott)
+	app := auth.GetApp(context)
 	emailHash, err := crypto.GetHash(email, c.HashingKey)
 	if err != nil {
 		return stacktrace.Propagate(err, "")
 	}
-	wrongAttempt, err := c.UserAuthRepo.GetMaxWrongAttempts(emailHash)
+	wrongAttempt, err := c.UserAuthRepo.GetMaxWrongAttempts(emailHash, app)
 	if err != nil {
 		return stacktrace.Propagate(err, "")
 	}
 
 	if wrongAttempt >= OTTWrongAttemptLimit {
-		msg := "Too many wrong attempts for ott verification"
+		msg := fmt.Sprintf("Too many wrong ott verification attemp for app %s", app)
 		go c.DiscordController.NotifyPotentialAbuse(msg)
 		return stacktrace.Propagate(ente.ErrTooManyBadRequest, "User needs to wait before active ott are expired")
 	}
 
-	otts, err := c.UserAuthRepo.GetValidOTTs(emailHash, auth.GetApp(context))
-	log.Info("Valid otts for " + emailHash + " are " + strings.Join(otts, ","))
+	otts, err := c.UserAuthRepo.GetValidOTTs(emailHash, app)
+	log.Infof("Valid ott (app: %s) for %s are %s", app, emailHash, strings.Join(otts, ","))
 	if err != nil {
 		return stacktrace.Propagate(err, "")
 	}
@@ -166,12 +167,12 @@ func (c *UserController) verifyEmailOtt(context *gin.Context, email string, ott 
 		}
 	}
 	if !isValidOTT {
-		if err = c.UserAuthRepo.RecordWrongAttemptForActiveOtt(emailHash); err != nil {
+		if err = c.UserAuthRepo.RecordWrongAttemptForActiveOtt(emailHash, app); err != nil {
 			log.WithError(err).Warn("Failed to track wrong attempt")
 		}
 		return stacktrace.Propagate(ente.ErrIncorrectOTT, "")
 	}
-	err = c.UserAuthRepo.RemoveOTT(emailHash, ott)
+	err = c.UserAuthRepo.RemoveOTT(emailHash, ott, app)
 	if err != nil {
 		return stacktrace.Propagate(err, "")
 	}

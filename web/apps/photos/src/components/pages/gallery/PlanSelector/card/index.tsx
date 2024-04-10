@@ -1,6 +1,6 @@
+import log from "@/next/log";
 import { SUPPORT_EMAIL } from "@ente/shared/constants/urls";
 import { useLocalState } from "@ente/shared/hooks/useLocalState";
-import { logError } from "@ente/shared/sentry";
 import { LS_KEYS } from "@ente/shared/storage/localStorage";
 import { Link, Stack } from "@mui/material";
 import { PLAN_PERIOD } from "constants/gallery";
@@ -24,7 +24,6 @@ import {
     planForSubscription,
     updateSubscription,
 } from "utils/billing";
-import { reverseString } from "utils/common";
 import { getLocalUserDetails } from "utils/user";
 import { getTotalFamilyUsage, isPartOfFamily } from "utils/user/family";
 import FreeSubscriptionPlanSelectorCard from "./free";
@@ -93,7 +92,7 @@ function PlanSelectorCard(props: Props) {
                 }
                 setPlans(plans);
             } catch (e) {
-                logError(e, "plan selector modal open failed");
+                log.error("plan selector modal open failed", e);
                 props.closeModal();
                 appContext.setDialogMessage({
                     title: t("OPEN_PLAN_SELECTOR_MODAL_FAILED"),
@@ -130,9 +129,7 @@ function PlanSelectorCard(props: Props) {
             }
         } else if (hasStripeSubscription(subscription)) {
             appContext.setDialogMessage({
-                title: `${t("CONFIRM")} ${reverseString(
-                    t("UPDATE_SUBSCRIPTION"),
-                )}`,
+                title: t("update_subscription_title"),
                 content: t("UPDATE_SUBSCRIPTION_MESSAGE"),
                 proceed: {
                     text: t("UPDATE_SUBSCRIPTION"),

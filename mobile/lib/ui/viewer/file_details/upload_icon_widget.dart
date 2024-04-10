@@ -125,6 +125,8 @@ class _UpdateIconWidgetState extends State<UploadIconWidget> {
                       .id;
                   await FilesDB.instance.insert(widget.file);
                 }
+                await RemoteSyncService.instance
+                    .whiteListVideoForUpload(widget.file);
                 RemoteSyncService.instance.sync().ignore();
                 if (mounted) {
                   setState(() {

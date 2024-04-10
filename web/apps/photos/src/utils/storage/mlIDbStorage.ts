@@ -1,5 +1,5 @@
-import { addLogLine } from "@ente/shared/logging";
-import { logError } from "@ente/shared/sentry";
+import { haveWindow } from "@/next/env";
+import log from "@/next/log";
 import {
     DEFAULT_ML_SEARCH_CONFIG,
     DEFAULT_ML_SYNC_CONFIG,
@@ -14,6 +14,7 @@ import {
     deleteDB,
     openDB,
 } from "idb";
+import isElectron from "is-electron";
 import {
     Face,
     MLLibraryData,
@@ -23,7 +24,6 @@ import {
     Thing,
 } from "types/machineLearning";
 import { IndexStatus } from "types/machineLearning/ui";
-import { runningInBrowser, runningInElectron } from "utils/common";
 
 interface Config {}
 
@@ -64,7 +64,7 @@ class MLIDbStorage {
     public _db: Promise<IDBPDatabase<MLDb>>;
 
     constructor() {
-        if (!runningInBrowser() || !runningInElectron()) {
+        if (!haveWindow() || !isElectron()) {
             return;
         }
 
@@ -74,21 +74,18 @@ class MLIDbStorage {
     private openDB(): Promise<IDBPDatabase<MLDb>> {
         return openDB<MLDb>(MLDATA_DB_NAME, 3, {
             terminated: async () => {
-                console.error("ML Indexed DB terminated");
-                logError(new Error(), "ML Indexed DB terminated");
+                log.error("ML Indexed DB terminated");
                 this._db = undefined;
                 // TODO: remove if there is chance of this going into recursion in some case
                 await this.db;
             },
             blocked() {
                 // TODO: make sure we dont allow multiple tabs of app
-                console.error("ML Indexed DB blocked");
-                logError(new Error(), "ML Indexed DB blocked");
+                log.error("ML Indexed DB blocked");
             },
             blocking() {
                 // TODO: make sure we dont allow multiple tabs of app
-                console.error("ML Indexed DB blocking");
-                logError(new Error(), "ML Indexed DB blocking");
+                log.error("ML Indexed DB blocking");
             },
             async upgrade(db, oldVersion, newVersion, tx) {
                 if (oldVersion < 1) {
@@ -131,7 +128,7 @@ class MLIDbStorage {
                         .objectStore("configs")
                         .add(DEFAULT_ML_SEARCH_CONFIG, ML_SEARCH_CONFIG_NAME);
                 }
-                addLogLine(
+                log.info(
                     `Ml DB upgraded to version: ${newVersion} from version: ${oldVersion}`,
                 );
             },
@@ -141,7 +138,7 @@ class MLIDbStorage {
     public get db(): Promise<IDBPDatabase<MLDb>> {
         if (!this._db) {
             this._db = this.openDB();
-            addLogLine("Opening Ml DB");
+            log.info("Opening Ml DB");
         }
 
         return this._db;
@@ -151,7 +148,7 @@ class MLIDbStorage {
         const db = await this.db;
         db.close();
         await deleteDB(MLDATA_DB_NAME);
-        addLogLine("Cleared Ml DB");
+        log.info("Cleared Ml DB");
         this._db = undefined;
         await this.db;
     }
@@ -280,7 +277,7 @@ class MLIDbStorage {
                 mlFileData.faces &&
                 allFacesMap.set(mlFileData.fileId, mlFileData.faces),
         );
-        addLogLine("getAllFacesMap", Date.now() - startTime, "ms");
+        log.info("getAllFacesMap", Date.now() - startTime, "ms");
 
         return allFacesMap;
     }
@@ -299,7 +296,7 @@ class MLIDbStorage {
             cursor = await cursor.continue();
         }
         await tx.done;
-        addLogLine("updateFaces", Date.now() - startTime, "ms");
+        log.info("updateFaces", Date.now() - startTime, "ms");
     }
 
     public async getAllObjectsMap() {
@@ -312,7 +309,7 @@ class MLIDbStorage {
                 mlFileData.objects &&
                 allObjectsMap.set(mlFileData.fileId, mlFileData.objects),
         );
-        addLogLine("allObjectsMap", Date.now() - startTime, "ms");
+        log.info("allObjectsMap", Date.now() - startTime, "ms");
 
         return allObjectsMap;
     }

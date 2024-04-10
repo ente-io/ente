@@ -499,6 +499,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Criar uma conta"),
         "createAlbumActionHint": MessageLookupByLibrary.simpleMessage(
             "Pressione e segure para selecionar fotos e clique em + para criar um álbum"),
+        "createCollaborativeLink":
+            MessageLookupByLibrary.simpleMessage("Create collaborative link"),
         "createCollage": MessageLookupByLibrary.simpleMessage("Criar colagem"),
         "createNewAccount":
             MessageLookupByLibrary.simpleMessage("Criar nova conta"),
@@ -766,6 +768,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Não rastreamos instalações do aplicativo. Seria útil se você nos contasse onde nos encontrou!"),
         "hearUsWhereTitle": MessageLookupByLibrary.simpleMessage(
             "Como você ouviu sobre o Ente? (opcional)"),
+        "help": MessageLookupByLibrary.simpleMessage("Ajuda"),
         "hidden": MessageLookupByLibrary.simpleMessage("Oculto"),
         "hide": MessageLookupByLibrary.simpleMessage("Ocultar"),
         "hiding": MessageLookupByLibrary.simpleMessage("Ocultando..."),
@@ -1011,6 +1014,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Detalhes de pagamento"),
         "paymentFailed":
             MessageLookupByLibrary.simpleMessage("Falha no pagamento"),
+        "paymentFailedMessage": MessageLookupByLibrary.simpleMessage(
+            "Infelizmente o seu pagamento falhou. Entre em contato com o suporte e nós ajudaremos você!"),
         "paymentFailedTalkToProvider": m37,
         "pendingItems": MessageLookupByLibrary.simpleMessage("Itens pendentes"),
         "pendingSync":

@@ -62,7 +62,7 @@ To bring up an additional museum node:
       sudo mkdir -p /root/museum/data/billing
       sudo mv *.json /root/museum/data/billing/
 
-* If not running behind Nginx, add the TLS credentials (otherwise add the to
+* If not running behind Nginx, add the TLS credentials (otherwise add them to
   Nginx)
 
       sudo tee /root/museum/credentials/tls.cert

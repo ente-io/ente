@@ -10,24 +10,13 @@
 
 import type { FSWatcher } from "chokidar";
 import { ipcMain } from "electron/main";
-import { clearElectronStore } from "../api/electronStore";
-import { getEncryptionKey, setEncryptionKey } from "../api/safeStorage";
-import {
-    getElectronFilesFromGoogleZip,
-    getPendingUploads,
-    setToUploadCollection,
-    setToUploadFiles,
-} from "../api/upload";
 import {
     appVersion,
-    muteUpdateNotification,
     skipAppUpdate,
     updateAndRestart,
-} from "../services/appUpdater";
-import {
-    computeImageEmbedding,
-    computeTextEmbedding,
-} from "../services/clipService";
+    updateOnNextRestart,
+} from "../services/app-update";
+import { clipImageEmbedding, clipTextEmbedding } from "../services/clip";
 import { runFFmpegCmd } from "../services/ffmpeg";
 import { getDirFiles } from "../services/fs";
 import {
@@ -35,18 +24,24 @@ import {
     generateImageThumbnail,
 } from "../services/imageProcessor";
 import {
+    clearStores,
+    encryptionKey,
+    saveEncryptionKey,
+} from "../services/store";
+import {
+    getElectronFilesFromGoogleZip,
+    getPendingUploads,
+    setToUploadCollection,
+    setToUploadFiles,
+} from "../services/upload";
+import {
     addWatchMapping,
     getWatchMappings,
     removeWatchMapping,
     updateWatchMappingIgnoredFiles,
     updateWatchMappingSyncedFiles,
 } from "../services/watch";
-import type {
-    ElectronFile,
-    FILE_PATH_TYPE,
-    Model,
-    WatchMapping,
-} from "../types/ipc";
+import type { ElectronFile, FILE_PATH_TYPE, WatchMapping } from "../types/ipc";
 import {
     selectDirectory,
     showUploadDirsDialog,
@@ -91,34 +86,32 @@ export const attachIPCHandlers = () => {
 
     // - General
 
-    ipcMain.handle("appVersion", (_) => appVersion());
+    ipcMain.handle("appVersion", () => appVersion());
 
     ipcMain.handle("openDirectory", (_, dirPath) => openDirectory(dirPath));
 
-    ipcMain.handle("openLogDirectory", (_) => openLogDirectory());
+    ipcMain.handle("openLogDirectory", () => openLogDirectory());
 
     // See [Note: Catching exception during .send/.on]
     ipcMain.on("logToDisk", (_, message) => logToDisk(message));
 
-    ipcMain.on("clear-electron-store", (_) => {
-        clearElectronStore();
-    });
+    ipcMain.on("clearStores", () => clearStores());
 
-    ipcMain.handle("setEncryptionKey", (_, encryptionKey) =>
-        setEncryptionKey(encryptionKey),
+    ipcMain.handle("saveEncryptionKey", (_, encryptionKey) =>
+        saveEncryptionKey(encryptionKey),
     );
 
-    ipcMain.handle("getEncryptionKey", (_) => getEncryptionKey());
+    ipcMain.handle("encryptionKey", () => encryptionKey());
 
     // - App update
 
-    ipcMain.on("update-and-restart", (_) => updateAndRestart());
+    ipcMain.on("updateAndRestart", () => updateAndRestart());
 
-    ipcMain.on("skip-app-update", (_, version) => skipAppUpdate(version));
-
-    ipcMain.on("mute-update-notification", (_, version) =>
-        muteUpdateNotification(version),
+    ipcMain.on("updateOnNextRestart", (_, version) =>
+        updateOnNextRestart(version),
     );
+
+    ipcMain.on("skipAppUpdate", (_, version) => skipAppUpdate(version));
 
     // - Conversion
 
@@ -145,25 +138,23 @@ export const attachIPCHandlers = () => {
 
     // - ML
 
-    ipcMain.handle(
-        "computeImageEmbedding",
-        (_, model: Model, imageData: Uint8Array) =>
-            computeImageEmbedding(model, imageData),
+    ipcMain.handle("clipImageEmbedding", (_, jpegImageData: Uint8Array) =>
+        clipImageEmbedding(jpegImageData),
     );
 
-    ipcMain.handle("computeTextEmbedding", (_, model: Model, text: string) =>
-        computeTextEmbedding(model, text),
+    ipcMain.handle("clipTextEmbedding", (_, text: string) =>
+        clipTextEmbedding(text),
     );
 
     // - File selection
 
-    ipcMain.handle("selectDirectory", (_) => selectDirectory());
+    ipcMain.handle("selectDirectory", () => selectDirectory());
 
-    ipcMain.handle("showUploadFilesDialog", (_) => showUploadFilesDialog());
+    ipcMain.handle("showUploadFilesDialog", () => showUploadFilesDialog());
 
-    ipcMain.handle("showUploadDirsDialog", (_) => showUploadDirsDialog());
+    ipcMain.handle("showUploadDirsDialog", () => showUploadDirsDialog());
 
-    ipcMain.handle("showUploadZipDialog", (_) => showUploadZipDialog());
+    ipcMain.handle("showUploadZipDialog", () => showUploadZipDialog());
 
     // - FS
 
@@ -177,12 +168,12 @@ export const attachIPCHandlers = () => {
 
     ipcMain.handle(
         "saveStreamToDisk",
-        (_, path: string, fileStream: ReadableStream<any>) =>
+        (_, path: string, fileStream: ReadableStream) =>
             saveStreamToDisk(path, fileStream),
     );
 
-    ipcMain.handle("saveFileToDisk", (_, path: string, file: any) =>
-        saveFileToDisk(path, file),
+    ipcMain.handle("saveFileToDisk", (_, path: string, contents: string) =>
+        saveFileToDisk(path, contents),
     );
 
     ipcMain.handle("readTextFile", (_, path: string) => readTextFile(path));
@@ -203,7 +194,7 @@ export const attachIPCHandlers = () => {
 
     // - Upload
 
-    ipcMain.handle("getPendingUploads", (_) => getPendingUploads());
+    ipcMain.handle("getPendingUploads", () => getPendingUploads());
 
     ipcMain.handle(
         "setToUploadFiles",
@@ -252,7 +243,7 @@ export const attachFSWatchIPCHandlers = (watcher: FSWatcher) => {
         removeWatchMapping(watcher, folderPath),
     );
 
-    ipcMain.handle("getWatchMappings", (_) => getWatchMappings());
+    ipcMain.handle("getWatchMappings", () => getWatchMappings());
 
     ipcMain.handle(
         "updateWatchMappingSyncedFiles",

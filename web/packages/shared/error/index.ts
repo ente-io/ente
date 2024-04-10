@@ -40,7 +40,6 @@ export const CustomError = {
     INVALID_COLLECTION_OPERATION: "invalid collection operation",
     TO_MOVE_FILES_FROM_MULTIPLE_COLLECTIONS:
         "to move files from multiple collections",
-    WAIT_TIME_EXCEEDED: "operation wait time exceeded",
     REQUEST_CANCELLED: "request canceled",
     REQUEST_FAILED: "request failed",
     TOKEN_EXPIRED: "token expired",
@@ -71,7 +70,6 @@ export const CustomError = {
     EXPORT_STOPPED: "export stopped",
     NO_EXPORT_FOLDER_SELECTED: "no export folder selected",
     EXPORT_FOLDER_DOES_NOT_EXIST: "export folder does not exist",
-    NO_INTERNET_CONNECTION: "no internet connection",
     AUTH_KEY_NOT_FOUND: "auth key not found",
     EXIF_DATA_NOT_FOUND: "exif data not found",
     SELECT_FOLDER_ABORTED: "select folder aborted",

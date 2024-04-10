@@ -1,8 +1,7 @@
+import log from "@/next/log";
+import { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { eventBus, Events } from "@ente/shared/events";
-import { addLogLine } from "@ente/shared/logging";
-import { logError } from "@ente/shared/sentry";
 import { getToken, getUserID } from "@ente/shared/storage/localStorage/helpers";
-import { ComlinkWorker } from "@ente/shared/worker/comlinkWorker";
 import { FILE_TYPE } from "constants/file";
 import debounce from "debounce";
 import PQueue from "p-queue";
@@ -51,7 +50,7 @@ class MLWorkManager {
 
     public async setMlSearchEnabled(enabled: boolean) {
         if (!this.mlSearchEnabled && enabled) {
-            addLogLine("Enabling MLWorkManager");
+            log.info("Enabling MLWorkManager");
             this.mlSearchEnabled = true;
 
             logQueueStats(this.liveSyncQueue, "livesync");
@@ -70,7 +69,7 @@ class MLWorkManager {
 
             await this.startSyncJob();
         } else if (this.mlSearchEnabled && !enabled) {
-            addLogLine("Disabling MLWorkManager");
+            log.info("Disabling MLWorkManager");
             this.mlSearchEnabled = false;
 
             this.liveSyncQueue.removeAllListeners();
@@ -92,23 +91,23 @@ class MLWorkManager {
 
     // Handlers
     private async appStartHandler() {
-        addLogLine("appStartHandler");
+        log.info("appStartHandler");
         try {
             this.startSyncJob();
         } catch (e) {
-            logError(e, "Failed in ML appStart Handler");
+            log.error("Failed in ML appStart Handler", e);
         }
     }
 
     private async logoutHandler() {
-        addLogLine("logoutHandler");
+        log.info("logoutHandler");
         try {
             this.stopSyncJob();
             this.mlSyncJob = undefined;
             await this.terminateLiveSyncWorker();
             await mlIDbStorage.clearMLDB();
         } catch (e) {
-            logError(e, "Failed in ML logout Handler");
+            log.error("Failed in ML logout Handler", e);
         }
     }
 
@@ -119,9 +118,9 @@ class MLWorkManager {
         if (!this.mlSearchEnabled) {
             return;
         }
-        addLogLine("fileUploadedHandler: ", arg.enteFile.id);
+        log.info("fileUploadedHandler: ", arg.enteFile.id);
         if (arg.enteFile.metadata.fileType !== FILE_TYPE.IMAGE) {
-            addLogLine("Skipping non image file for local file processing");
+            log.info("Skipping non image file for local file processing");
             return;
         }
         try {
@@ -134,7 +133,7 @@ class MLWorkManager {
     }
 
     private async localFilesUpdatedHandler() {
-        addLogLine("Local files updated");
+        log.info("Local files updated");
         this.startSyncJob();
     }
 
@@ -165,7 +164,7 @@ class MLWorkManager {
     }
 
     private async onLiveSyncIdle() {
-        addLogLine("Live sync idle");
+        log.info("Live sync idle");
         await this.terminateLiveSyncWorker();
         this.mlSearchEnabled && this.startSyncJob();
     }
@@ -206,7 +205,7 @@ class MLWorkManager {
             // TODO: skipping is not required if we are caching chunks through service worker
             // currently worker chunk itself is not loaded when network is not there
             if (!navigator.onLine) {
-                addLogLine(
+                log.info(
                     "Skipping ml-sync job run as not connected to internet.",
                 );
                 return {
@@ -227,25 +226,25 @@ class MLWorkManager {
                     !!mlSyncResult.error || mlSyncResult.nOutOfSyncFiles < 1,
                 mlSyncResult,
             };
-            addLogLine("ML Sync Job result: ", JSON.stringify(jobResult));
+            log.info("ML Sync Job result: ", JSON.stringify(jobResult));
 
             // TODO: redirect/refresh to gallery in case of session_expired, stop ml sync job
 
             return jobResult;
         } catch (e) {
-            logError(e, "Failed to run MLSync Job");
+            log.error("Failed to run MLSync Job", e);
         }
     }
 
     public async startSyncJob() {
         try {
-            addLogLine("MLWorkManager.startSyncJob");
+            log.info("MLWorkManager.startSyncJob");
             if (!this.mlSearchEnabled) {
-                addLogLine("ML Search disabled, not starting ml sync job");
+                log.info("ML Search disabled, not starting ml sync job");
                 return;
             }
             if (!getToken()) {
-                addLogLine("User not logged in, not starting ml sync job");
+                log.info("User not logged in, not starting ml sync job");
                 return;
             }
             const mlSyncJobConfig = await getMLSyncJobConfig();
@@ -256,17 +255,17 @@ class MLWorkManager {
             }
             this.mlSyncJob.start();
         } catch (e) {
-            logError(e, "Failed to start MLSync Job");
+            log.error("Failed to start MLSync Job", e);
         }
     }
 
     public stopSyncJob(terminateWorker: boolean = true) {
         try {
-            addLogLine("MLWorkManager.stopSyncJob");
+            log.info("MLWorkManager.stopSyncJob");
             this.mlSyncJob?.stop();
             terminateWorker && this.terminateSyncJobWorker();
         } catch (e) {
-            logError(e, "Failed to stop MLSync Job");
+            log.error("Failed to stop MLSync Job", e);
         }
     }
 }

@@ -15,10 +15,20 @@ import { isDev } from "./util";
  */
 export const initLogging = () => {
     log.transports.file.fileName = "ente.log";
-    log.transports.file.maxSize = 50 * 1024 * 1024; // 50MB;
+    log.transports.file.maxSize = 50 * 1024 * 1024; // 50 MB
     log.transports.file.format = "[{y}-{m}-{d}T{h}:{i}:{s}{z}] {text}";
 
     log.transports.console.level = false;
+
+    // Log unhandled errors and promise rejections.
+    log.errorHandler.startCatching({
+        onError: ({ error, errorName }) => {
+            logError(errorName, error);
+            // Prevent the default electron-log actions (e.g. showing a dialog)
+            // from getting triggered.
+            return false;
+        },
+    });
 };
 
 /**
@@ -31,25 +41,7 @@ export const logToDisk = (message: string) => {
     log.info(`[rndr] ${message}`);
 };
 
-export const logError = logErrorSentry;
-
-/** Deprecated, but no alternative yet */
-export function logErrorSentry(
-    error: any,
-    msg: string,
-    info?: Record<string, unknown>,
-) {
-    logToDisk(
-        `error: ${error?.name} ${error?.message} ${
-            error?.stack
-        } msg: ${msg} info: ${JSON.stringify(info)}`,
-    );
-    if (isDev) {
-        console.log(error, { msg, info });
-    }
-}
-
-const logError1 = (message: string, e?: unknown) => {
+const logError = (message: string, e?: unknown) => {
     if (!e) {
         logError_(message);
         return;
@@ -78,11 +70,14 @@ const logInfo = (...params: any[]) => {
         .map((p) => (typeof p == "string" ? p : util.inspect(p)))
         .join(" ");
     log.info(`[main] ${message}`);
-    if (isDev) console.log(message);
+    if (isDev) console.log(`[info] ${message}`);
 };
 
 const logDebug = (param: () => any) => {
-    if (isDev) console.log(`[debug] ${util.inspect(param())}`);
+    if (isDev) {
+        const p = param();
+        console.log(`[debug] ${typeof p == "string" ? p : util.inspect(p)}`);
+    }
 };
 
 /**
@@ -98,12 +93,13 @@ export default {
      * Log an error message with an optional associated error object.
      *
      * {@link e} is generally expected to be an `instanceof Error` but it can be
-     * any arbitrary object that we obtain, say, when in a try-catch handler.
+     * any arbitrary object that we obtain, say, when in a try-catch handler (in
+     * JavaScript any arbitrary value can be thrown).
      *
      * The log is written to disk. In development builds, the log is also
-     * printed to the (Node.js process') console.
+     * printed to the main (Node.js) process console.
      */
-    error: logError1,
+    error: logError,
     /**
      * Log a message.
      *
@@ -111,7 +107,7 @@ export default {
      * arbitrary number of arbitrary parameters that it then serializes.
      *
      * The log is written to disk. In development builds, the log is also
-     * printed to the (Node.js process') console.
+     * printed to the main (Node.js) process console.
      */
     info: logInfo,
     /**
@@ -121,11 +117,11 @@ export default {
      * function to call to get the log message instead of directly taking the
      * message. The provided function will only be called in development builds.
      *
-     * The function can return an arbitrary value which is serialied before
+     * The function can return an arbitrary value which is serialized before
      * being logged.
      *
-     * This log is not written to disk. It is printed to the (Node.js process')
-     * console only on development builds.
+     * This log is NOT written to disk. And it is printed to the main (Node.js)
+     * process console, but only on development builds.
      */
     debug: logDebug,
 };

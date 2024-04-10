@@ -1121,5 +1121,6 @@
   "descriptions": "Descriptions",
   "addViewers": "{count, plural, zero {Add viewer} one {Add viewer} other {Add viewers}}",
   "addCollaborators": "{count, plural, zero {Add collaborator} one {Add collaborator} other {Add collaborators}}",
-  "longPressAnEmailToVerifyEndToEndEncryption": "Long press an email to verify end to end encryption."
+  "longPressAnEmailToVerifyEndToEndEncryption": "Long press an email to verify end to end encryption.",
+  "createCollaborativeLink": "Create collaborative link"
 }

@@ -1,7 +1,7 @@
-import { setupI18n } from "@/ui/i18n";
-import { CacheProvider } from "@emotion/react";
+import { CustomHead } from "@/next/components/Head";
+import { setupI18n } from "@/next/i18n";
+import { logUnhandledErrorsAndRejections } from "@/next/log-web";
 import { APPS, APP_TITLES } from "@ente/shared/apps/constants";
-import { EnteAppProps } from "@ente/shared/apps/types";
 import { Overlay } from "@ente/shared/components/Container";
 import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
 import {
@@ -15,10 +15,10 @@ import HTTPService from "@ente/shared/network/HTTPService";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import { getTheme } from "@ente/shared/themes";
 import { THEME_COLOR } from "@ente/shared/themes/constants";
-import createEmotionCache from "@ente/shared/themes/createEmotionCache";
 import { CssBaseline, useMediaQuery } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
-import Head from "next/head";
+import { t } from "i18next";
+import { AppProps } from "next/app";
 import { useRouter } from "next/router";
 import { createContext, useEffect, useState } from "react";
 import "styles/global.css";
@@ -31,10 +31,7 @@ interface AppContextProps {
 
 export const AppContext = createContext<AppContextProps>({} as AppContextProps);
 
-// Client-side cache, shared for the whole session of the user in the browser.
-const clientSideEmotionCache = createEmotionCache();
-
-export default function App(props: EnteAppProps) {
+export default function App({ Component, pageProps }: AppProps) {
     const [isI18nReady, setIsI18nReady] = useState<boolean>(false);
 
     const [showNavbar, setShowNavBar] = useState(false);
@@ -54,16 +51,12 @@ export default function App(props: EnteAppProps) {
 
     const router = useRouter();
 
-    const {
-        Component,
-        emotionCache = clientSideEmotionCache,
-        pageProps,
-    } = props;
-
     const [themeColor] = useLocalState(LS_KEYS.THEME, THEME_COLOR.DARK);
 
     useEffect(() => {
         setupI18n().finally(() => setIsI18nReady(true));
+        logUnhandledErrorsAndRejections(true);
+        return () => logUnhandledErrorsAndRejections(false);
     }, []);
 
     const setupPackageName = () => {
@@ -85,16 +78,13 @@ export default function App(props: EnteAppProps) {
 
     const theme = getTheme(themeColor, APPS.PHOTOS);
 
-    // TODO: Localise APP_TITLES
+    const title = isI18nReady
+        ? t("TITLE", { context: APPS.ACCOUNTS })
+        : APP_TITLES.get(APPS.ACCOUNTS);
+
     return (
-        <CacheProvider value={emotionCache}>
-            <Head>
-                <title>{APP_TITLES.get(APPS.ACCOUNTS)}</title>
-                <meta
-                    name="viewport"
-                    content="initial-scale=1, width=device-width"
-                />
-            </Head>
+        <>
+            <CustomHead {...{ title }} />
 
             <ThemeProvider theme={theme}>
                 <CssBaseline enableColorScheme />
@@ -128,9 +118,9 @@ export default function App(props: EnteAppProps) {
                         </Overlay>
                     )}
                     {showNavbar && <AppNavbar isMobile={isMobile} />}
-                    <Component {...pageProps} />
+                    {isI18nReady && <Component {...pageProps} />}
                 </AppContext.Provider>
             </ThemeProvider>
-        </CacheProvider>
+        </>
     );
 }

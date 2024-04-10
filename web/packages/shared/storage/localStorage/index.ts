@@ -1,4 +1,4 @@
-import { logError } from "@ente/shared/sentry";
+import log from "@/next/log";
 
 export enum LS_KEYS {
     USER = "user",
@@ -14,13 +14,13 @@ export enum LS_KEYS {
     EXPORT = "export",
     THUMBNAIL_FIX_STATE = "thumbnailFixState",
     LIVE_PHOTO_INFO_SHOWN_COUNT = "livePhotoInfoShownCount",
-    LOGS = "logs",
+    // LOGS = "logs",
     USER_DETAILS = "userDetails",
     COLLECTION_SORT_BY = "collectionSortBy",
     THEME = "theme",
     WAIT_TIME = "waitTime",
     API_ENDPOINT = "apiEndpoint",
-    // Moved to the new wrapper @/utils/local-storage
+    // Moved to the new wrapper @/next/local-storage
     // LOCALE = 'locale',
     MAP_ENABLED = "mapEnabled",
     SRP_SETUP_ATTRIBUTES = "srpSetupAttributes",
@@ -57,7 +57,7 @@ export const getData = (key: LS_KEYS) => {
         const data = localStorage.getItem(key);
         return data && JSON.parse(data);
     } catch (e) {
-        logError(e, "Failed to Parse JSON for key " + key);
+        log.error(`Failed to Parse JSON for key ${key}`, e);
     }
 };
 

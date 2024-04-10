@@ -70,7 +70,7 @@ existing users will be grandfathered in.
 [<img height="42" src=".github/assets/app-store-badge.svg">](https://apps.apple.com/app/id6444121398)
 [<img height="42" src=".github/assets/play-store-badge.png">](https://play.google.com/store/apps/details?id=io.ente.auth)
 [<img height="42" src=".github/assets/f-droid-badge.png">](https://f-droid.org/packages/io.ente.auth/)
-[<img height="42" src=".github/assets/github-badge.png">](https://github.com/ente-io/ente/releases?q=tag%3Aauth-v2)
+[<img height="42" src=".github/assets/desktop-badge.png">](https://github.com/ente-io/ente/releases?q=tag%3Aauth-v2)
 [<img height="42" src=".github/assets/web-badge.svg">](https://auth.ente.io)
 
 </div>

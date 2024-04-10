@@ -85,7 +85,8 @@ jobs:
             - name: Install dependencies for desktop build
               run: |
                   sudo apt-get update -y
-                  sudo apt-get install -y libsecret-1-dev libsodium-dev libwebkit2gtk-4.0-dev libfuse2 ninja-build libgtk-3-dev dpkg-dev pkg-config rpm libsqlite3-dev locate appindicator3-0.1 libappindicator3-dev
+                  sudo apt-get install -y libsecret-1-dev libsodium-dev libwebkit2gtk-4.0-dev libfuse2 ninja-build libgtk-3-dev dpkg-dev pkg-config rpm libsqlite3-dev locate appindicator3-0.1 libappindicator3-dev libffi-dev libtiff5
+                  sudo updatedb --localpaths='/usr/lib/x86_64-linux-gnu'
 
             - name: Install appimagetool
               run: |
@@ -172,6 +173,9 @@ jobs:
 
             - name: Zip Windows EXE and DLLs
               run: tar.exe -a -c -f artifacts/ente-${{ github.ref_name }}-windows.zip ente-${{ github.ref_name }}-windows
+
+            - name: Generate checksums
+              run: sha256sum artifacts/ente-* > artifacts/sha256sum-windows
 
             - name: Create a draft GitHub release
               uses: ncipollo/release-action@v1
@@ -266,6 +270,9 @@ jobs:
                   APPLE_ID: ${{ secrets.APPLE_ID }}
                   APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
                   APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+
+            - name: Generate checksums
+              run: shasum -a 256 artifacts/ente-* > artifacts/sha256sum-macos
 
             - name: Create a draft GitHub release
               uses: ncipollo/release-action@v1

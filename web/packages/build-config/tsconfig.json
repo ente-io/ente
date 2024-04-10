@@ -1,0 +1,9 @@
+{
+    /* A minimal tsconfig so that we can run tsc on the build-config package
+       itself */
+    "compilerOptions": {
+        "noEmit": true,
+        "checkJs": true
+    },
+    "include": ["*.js"]
+}

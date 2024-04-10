@@ -1,17 +1,14 @@
+import DialogTitleWithCloseButton from "@ente/shared/components/DialogBox/TitleWithCloseButton";
 import { Button, Dialog, DialogContent, Stack } from "@mui/material";
+import UploadStrategyChoiceModal from "components/Upload/UploadStrategyChoiceModal";
+import { PICKED_UPLOAD_TYPE, UPLOAD_STRATEGY } from "constants/upload";
 import { t } from "i18next";
 import { AppContext } from "pages/_app";
 import { useContext, useEffect, useState } from "react";
 import watchFolderService from "services/watchFolder/watchFolderService";
 import { WatchMapping } from "types/watchFolder";
-import { MappingList } from "./mappingList";
-
-import DialogTitleWithCloseButton from "@ente/shared/components/DialogBox/TitleWithCloseButton";
-import ElectronAPIs from "@ente/shared/electron";
-import UploadStrategyChoiceModal from "components/Upload/UploadStrategyChoiceModal";
-import { PICKED_UPLOAD_TYPE, UPLOAD_STRATEGY } from "constants/upload";
-import isElectron from "is-electron";
 import { getImportSuggestion } from "utils/upload";
+import { MappingList } from "./mappingList";
 
 interface Iprops {
     open: boolean;
@@ -24,10 +21,10 @@ export default function WatchFolder({ open, onClose }: Iprops) {
     const [choiceModalOpen, setChoiceModalOpen] = useState(false);
     const appContext = useContext(AppContext);
 
+    const electron = globalThis.electron;
+
     useEffect(() => {
-        if (!isElectron()) {
-            return;
-        }
+        if (!electron) return;
         watchFolderService.getWatchMappings().then((m) => setMappings(m));
     }, []);
 
@@ -52,8 +49,10 @@ export default function WatchFolder({ open, onClose }: Iprops) {
     };
 
     const addFolderForWatching = async (path: string) => {
+        if (!electron) return;
+
         setInputFolderPath(path);
-        const files = await ElectronAPIs.getDirFiles(path);
+        const files = await electron.getDirFiles(path);
         const analysisResult = getImportSuggestion(
             PICKED_UPLOAD_TYPE.FOLDERS,
             files,

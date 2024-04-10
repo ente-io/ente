@@ -1,10 +1,13 @@
+import { haveWindow } from "@/next/env";
+import log from "@/next/log";
+import { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { getDedicatedCryptoWorker } from "@ente/shared/crypto";
 import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
-import { addLogLine } from "@ente/shared/logging";
-import { ComlinkWorker } from "@ente/shared/worker/comlinkWorker";
 import PQueue from "p-queue";
 import { EnteFile } from "types/file";
 import {
+    BlurDetectionMethod,
+    BlurDetectionService,
     ClusteringMethod,
     ClusteringService,
     Face,
@@ -24,23 +27,23 @@ import {
     SceneDetectionMethod,
     SceneDetectionService,
 } from "types/machineLearning";
-import { getConcurrency } from "utils/common/concurrency";
 import { logQueueStats } from "utils/machineLearning";
 import arcfaceAlignmentService from "./arcfaceAlignmentService";
 import arcfaceCropService from "./arcfaceCropService";
-import blazeFaceDetectionService from "./blazeFaceDetectionService";
 import dbscanClusteringService from "./dbscanClusteringService";
 import hdbscanClusteringService from "./hdbscanClusteringService";
 import imageSceneService from "./imageSceneService";
+import laplacianBlurDetectionService from "./laplacianBlurDetectionService";
 import mobileFaceNetEmbeddingService from "./mobileFaceNetEmbeddingService";
 import ssdMobileNetV2Service from "./ssdMobileNetV2Service";
+import yoloFaceDetectionService from "./yoloFaceDetectionService";
 
 export class MLFactory {
     public static getFaceDetectionService(
         method: FaceDetectionMethod,
     ): FaceDetectionService {
-        if (method === "BlazeFace") {
-            return blazeFaceDetectionService;
+        if (method === "YoloFace") {
+            return yoloFaceDetectionService;
         }
 
         throw Error("Unknon face detection method: " + method);
@@ -82,6 +85,16 @@ export class MLFactory {
         }
 
         throw Error("Unknon face alignment method: " + method);
+    }
+
+    public static getBlurDetectionService(
+        method: BlurDetectionMethod,
+    ): BlurDetectionService {
+        if (method === "Laplacian") {
+            return laplacianBlurDetectionService;
+        }
+
+        throw Error("Unknon blur detection method: " + method);
     }
 
     public static getFaceEmbeddingService(
@@ -131,6 +144,7 @@ export class LocalMLSyncContext implements MLSyncContext {
     public faceDetectionService: FaceDetectionService;
     public faceCropService: FaceCropService;
     public faceAlignmentService: FaceAlignmentService;
+    public blurDetectionService: BlurDetectionService;
     public faceEmbeddingService: FaceEmbeddingService;
     public faceClusteringService: ClusteringService;
     public objectDetectionService: ObjectDetectionService;
@@ -178,6 +192,9 @@ export class LocalMLSyncContext implements MLSyncContext {
         this.faceAlignmentService = MLFactory.getFaceAlignmentService(
             this.config.faceAlignment.method,
         );
+        this.blurDetectionService = MLFactory.getBlurDetectionService(
+            this.config.blurDetection.method,
+        );
         this.faceEmbeddingService = MLFactory.getFaceEmbeddingService(
             this.config.faceEmbedding.method,
         );
@@ -196,9 +213,9 @@ export class LocalMLSyncContext implements MLSyncContext {
         this.nSyncedFiles = 0;
         this.nSyncedFaces = 0;
 
-        this.concurrency = concurrency || getConcurrency();
+        this.concurrency = concurrency ?? getConcurrency();
 
-        addLogLine("Using concurrency: ", this.concurrency);
+        log.info("Using concurrency: ", this.concurrency);
         // timeout is added on downloads
         // timeout on queue will keep the operation open till worker is terminated
         this.syncQueue = new PQueue({ concurrency: this.concurrency });
@@ -212,6 +229,7 @@ export class LocalMLSyncContext implements MLSyncContext {
 
     public async getEnteWorker(id: number): Promise<any> {
         const wid = id % this.enteWorkers.length;
+        console.log("getEnteWorker: ", id, wid);
         if (!this.enteWorkers[wid]) {
             this.comlinkCryptoWorker[wid] = getDedicatedCryptoWorker();
             this.enteWorkers[wid] = await this.comlinkCryptoWorker[wid].remote;
@@ -232,3 +250,6 @@ export class LocalMLSyncContext implements MLSyncContext {
         }
     }
 }
+
+export const getConcurrency = () =>
+    haveWindow() && Math.max(2, Math.ceil(navigator.hardwareConcurrency / 2));

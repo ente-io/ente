@@ -12,6 +12,7 @@ on:
                     - "accounts"
                     - "auth"
                     - "cast"
+                    - "payments"
                     - "photos"
 
 jobs:
@@ -33,7 +34,7 @@ jobs:
               with:
                   node-version: 20
                   cache: "yarn"
-                  cache-dependency-path: "docs/yarn.lock"
+                  cache-dependency-path: "web/yarn.lock"
 
             - name: Install dependencies
               run: yarn install

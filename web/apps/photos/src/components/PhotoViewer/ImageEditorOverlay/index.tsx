@@ -1,3 +1,4 @@
+import log from "@/next/log";
 import {
     Backdrop,
     Box,
@@ -23,7 +24,6 @@ import {
     HorizontalFlex,
 } from "@ente/shared/components/Container";
 import EnteButton from "@ente/shared/components/EnteButton";
-import { logError } from "@ente/shared/sentry";
 import { downloadUsingAnchor } from "@ente/shared/utils";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import CloseIcon from "@mui/icons-material/Close";
@@ -275,7 +275,7 @@ const ImageEditorOverlay = (props: IProps) => {
                     invert !== FILTER_DEFAULT_VALUES.invert,
             );
         } catch (e) {
-            logError(e, "Error applying filters");
+            log.error("Error applying filters", e);
         }
     }, [brightness, contrast, blur, saturation, invert, canvasRef, fileURL]);
 
@@ -329,7 +329,7 @@ const ImageEditorOverlay = (props: IProps) => {
                 });
             }
         } catch (e) {
-            logError(e, "Error applying filters");
+            log.error("Error applying filters", e);
             throw e;
         }
     };
@@ -422,7 +422,7 @@ const ImageEditorOverlay = (props: IProps) => {
                 };
             });
         } catch (e) {
-            logError(e, "Error loading canvas");
+            log.error("Error loading canvas", e);
         }
     };
 
@@ -447,7 +447,7 @@ const ImageEditorOverlay = (props: IProps) => {
                 canvas.toBlob(resolve, mimeType);
             });
         } catch (e) {
-            logError(e, "Error exporting canvas to blob");
+            log.error("Error exporting canvas to blob", e);
             throw e;
         }
     };
@@ -492,7 +492,7 @@ const ImageEditorOverlay = (props: IProps) => {
             );
             downloadUsingAnchor(tempImgURL, editedFile.name);
         } catch (e) {
-            logError(e, "Error downloading edited photo");
+            log.error("Error downloading edited photo", e);
         }
     };
 
@@ -520,7 +520,7 @@ const ImageEditorOverlay = (props: IProps) => {
             props.onClose();
             props.closePhotoViewer();
         } catch (e) {
-            logError(e, "Error saving copy to ente");
+            log.error("Error saving copy to ente", e);
         }
     };
     return (

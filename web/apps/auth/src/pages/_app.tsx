@@ -1,7 +1,14 @@
-import AppNavbar from "@ente/shared/components/Navbar/app";
-import { t } from "i18next";
-import { createContext, useEffect, useRef, useState } from "react";
-
+import { CustomHead } from "@/next/components/Head";
+import { setupI18n } from "@/next/i18n";
+import {
+    logStartupBanner,
+    logUnhandledErrorsAndRejections,
+} from "@/next/log-web";
+import {
+    APPS,
+    APP_TITLES,
+    CLIENT_PACKAGE_NAMES,
+} from "@ente/shared/apps/constants";
 import { Overlay } from "@ente/shared/components/Container";
 import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
 import {
@@ -10,32 +17,22 @@ import {
 } from "@ente/shared/components/DialogBoxV2/types";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { MessageContainer } from "@ente/shared/components/MessageContainer";
-import {
-    clearLogsIfLocalStorageLimitExceeded,
-    logStartupMessage,
-} from "@ente/shared/logging/web";
-import HTTPService from "@ente/shared/network/HTTPService";
-import { LS_KEYS } from "@ente/shared/storage/localStorage";
-import { CssBaseline, useMediaQuery } from "@mui/material";
-import { ThemeProvider } from "@mui/material/styles";
-import Head from "next/head";
-import { useRouter } from "next/router";
-import LoadingBar from "react-top-loading-bar";
-
-import { setupI18n } from "@/ui/i18n";
-import { CacheProvider } from "@emotion/react";
-import {
-    APP_TITLES,
-    APPS,
-    CLIENT_PACKAGE_NAMES,
-} from "@ente/shared/apps/constants";
-import { EnteAppProps } from "@ente/shared/apps/types";
+import AppNavbar from "@ente/shared/components/Navbar/app";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { useLocalState } from "@ente/shared/hooks/useLocalState";
+import HTTPService from "@ente/shared/network/HTTPService";
+import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import { getTheme } from "@ente/shared/themes";
 import { THEME_COLOR } from "@ente/shared/themes/constants";
-import createEmotionCache from "@ente/shared/themes/createEmotionCache";
 import { SetTheme } from "@ente/shared/themes/types";
+import type { User } from "@ente/shared/user/types";
+import { CssBaseline, useMediaQuery } from "@mui/material";
+import { ThemeProvider } from "@mui/material/styles";
+import { t } from "i18next";
+import { AppProps } from "next/app";
+import { useRouter } from "next/router";
+import { createContext, useEffect, useRef, useState } from "react";
+import LoadingBar from "react-top-loading-bar";
 import "../../public/css/global.css";
 
 type AppContextType = {
@@ -51,15 +48,7 @@ type AppContextType = {
 
 export const AppContext = createContext<AppContextType>(null);
 
-// Client-side cache, shared for the whole session of the user in the browser.
-const clientSideEmotionCache = createEmotionCache();
-
-export default function App(props: EnteAppProps) {
-    const {
-        Component,
-        emotionCache = clientSideEmotionCache,
-        pageProps,
-    } = props;
+export default function App({ Component, pageProps }: AppProps) {
     const router = useRouter();
     const [isI18nReady, setIsI18nReady] = useState<boolean>(false);
     const [loading, setLoading] = useState(false);
@@ -79,15 +68,14 @@ export default function App(props: EnteAppProps) {
     );
 
     useEffect(() => {
-        //setup i18n
         setupI18n().finally(() => setIsI18nReady(true));
-        // set client package name in headers
+        const userId = (getData(LS_KEYS.USER) as User)?.id;
+        logStartupBanner(APPS.AUTH, userId);
+        logUnhandledErrorsAndRejections(true);
         HTTPService.setHeaders({
             "X-Client-Package": CLIENT_PACKAGE_NAMES.get(APPS.AUTH),
         });
-        // setup logging
-        clearLogsIfLocalStorageLimitExceeded();
-        logStartupMessage(APPS.AUTH);
+        return () => logUnhandledErrorsAndRejections(false);
     }, []);
 
     const setUserOnline = () => setOffline(false);
@@ -140,19 +128,13 @@ export default function App(props: EnteAppProps) {
             content: t("UNKNOWN_ERROR"),
         });
 
+    const title = isI18nReady
+        ? t("TITLE", { context: APPS.AUTH })
+        : APP_TITLES.get(APPS.AUTH);
+
     return (
-        <CacheProvider value={emotionCache}>
-            <Head>
-                <title>
-                    {isI18nReady
-                        ? t("TITLE", { context: APPS.AUTH })
-                        : APP_TITLES.get(APPS.AUTH)}
-                </title>
-                <meta
-                    name="viewport"
-                    content="initial-scale=1, width=device-width"
-                />
-            </Head>
+        <>
+            <CustomHead {...{ title }} />
 
             <ThemeProvider theme={getTheme(themeColor, APPS.AUTH)}>
                 <CssBaseline enableColorScheme />
@@ -195,9 +177,11 @@ export default function App(props: EnteAppProps) {
                             <EnteSpinner />
                         </Overlay>
                     )}
-                    <Component setLoading={setLoading} {...pageProps} />
+                    {isI18nReady && (
+                        <Component setLoading={setLoading} {...pageProps} />
+                    )}
                 </AppContext.Provider>
             </ThemeProvider>
-        </CacheProvider>
+        </>
     );
 }
