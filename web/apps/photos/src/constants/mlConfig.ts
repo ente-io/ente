@@ -13,7 +13,6 @@ export const DEFAULT_ML_SYNC_CONFIG: MLSyncConfig = {
     imageSource: "Original",
     faceDetection: {
         method: "YoloFace",
-        minFaceSize: 32,
     },
     faceCrop: {
         enabled: true,

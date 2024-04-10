@@ -201,7 +201,6 @@ export interface MlFileData {
 
 export interface FaceDetectionConfig {
     method: FaceDetectionMethod;
-    minFaceSize: number;
 }
 
 export interface ObjectDetectionConfig {
