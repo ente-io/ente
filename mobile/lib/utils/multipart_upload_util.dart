@@ -1,12 +1,14 @@
 // ignore_for_file: implementation_imports
 
 import "dart:io";
+import "dart:typed_data";
 
 import "package:dio/dio.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/core/network/network.dart";
 import "package:photos/db/upload_locks_db.dart";
+import "package:photos/utils/crypto_util.dart";
 import "package:photos/utils/xml_parser_util.dart";
 
 final _enteDio = NetworkClient.instance.enteDio;
@@ -79,6 +81,7 @@ Future<void> createTableEntry(
   MultipartUploadURLs urls,
   String encryptedFilePath,
   int fileSize,
+  Uint8List fileKey,
 ) async {
   await UploadLocksDB.instance.createTrackUploadsEntry(
     localId,
@@ -86,6 +89,7 @@ Future<void> createTableEntry(
     urls,
     encryptedFilePath,
     fileSize,
+    CryptoUtil.bin2base64(fileKey),
   );
 }
 

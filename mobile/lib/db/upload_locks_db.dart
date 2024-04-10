@@ -62,10 +62,14 @@ class UploadLocksDB {
     final Directory documentsDirectory =
         await getApplicationDocumentsDirectory();
     final String path = join(documentsDirectory.path, _databaseName);
+
     return await openDatabase(
       path,
       version: _databaseVersion,
       onCreate: _onCreate,
+      onOpen: (db) async {
+        await _createTrackUploadsTable(db);
+      },
     );
   }
 
@@ -79,10 +83,25 @@ class UploadLocksDB {
                 )
                 ''',
     );
+    await _createTrackUploadsTable(db);
+  }
+
+  Future _createTrackUploadsTable(Database db) async {
+    if ((await db.query(
+      'sqlite_master',
+      where: 'name = ?',
+      whereArgs: [
+        _trackUploadTable.table,
+      ],
+    ))
+        .isNotEmpty) {
+      return;
+    }
+
     await db.execute(
       '''
                 CREATE TABLE ${_trackUploadTable.table} (
-                  ${_trackUploadTable.columnID} TEXT PRIMARY KEY NOT NULL,
+                  ${_trackUploadTable.columnID} INTEGER PRIMARY KEY,
                   ${_trackUploadTable.columnLocalID} TEXT NOT NULL,
                   ${_trackUploadTable.columnFileHash} TEXT NOT NULL UNIQUE,
                   ${_trackUploadTable.columnEncryptedFilePath} TEXT NOT NULL,
@@ -170,7 +189,12 @@ class UploadLocksDB {
   // For multipart download tracking
   Future<bool> doesExists(String localId, String hash) async {
     final db = await instance.database;
-    final rows = await db.query(_trackUploadTable.table);
+    final rows = await db.query(
+      _trackUploadTable.table,
+      where:
+          '${_trackUploadTable.columnLocalID} = ? AND ${_trackUploadTable.columnFileHash} = ?',
+    );
+
     return rows.isNotEmpty;
   }
 
@@ -227,6 +251,7 @@ class UploadLocksDB {
     MultipartUploadURLs urls,
     String encryptedFilePath,
     int fileSize,
+    String fileKey,
   ) async {
     final db = await UploadLocksDB.instance.database;
     final objectKey = urls.objectKey;
@@ -240,6 +265,7 @@ class UploadLocksDB {
         _trackUploadTable.columnCompleteUrl: urls.completeURL,
         _trackUploadTable.columnEncryptedFilePath: encryptedFilePath,
         _trackUploadTable.columnEncryptedFileSize: fileSize,
+        _trackUploadTable.columnFileKey: fileKey,
         _trackUploadTable.columnCompletionStatus: _trackStatus.pending,
         _trackUploadTable.columnPartSize: multipartPartSize,
       },
