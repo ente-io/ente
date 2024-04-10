@@ -111,6 +111,7 @@ class PersonService {
       personID: personID,
       clusterID: clusterID,
     );
+    personData.logStats();
   }
 
   Future<void> removeClusterToPerson({
@@ -129,6 +130,7 @@ class PersonService {
       personID: personID,
       clusterID: clusterID,
     );
+    personData.logStats();
   }
 
   Future<void> deletePerson(String personID, {bool onlyMapping = true}) async {
@@ -145,6 +147,7 @@ class PersonService {
         id: personID,
       );
       await faceMLDataDB.removePerson(personID);
+      justName.data.logStats();
     } else {
       await entityService.deleteEntry(personID);
       await faceMLDataDB.removePerson(personID);
@@ -173,10 +176,9 @@ class PersonService {
         }
         clusterToPersonID[cluster.id] = e.id;
       }
-      if(kDebugMode) {
+      if (kDebugMode) {
         logger.info(
-          "Person ${e.id} ${personData.name} has ${personData.assigned!
-              .length} clusters with $faceCount faces",
+          "Person ${e.id} ${personData.name} has ${personData.assigned!.length} clusters with $faceCount faces",
         );
       }
     }
@@ -186,11 +188,33 @@ class PersonService {
     await faceMLDataDB.bulkAssignClusterToPersonID(clusterToPersonID);
   }
 
-  Future<void> updatePerson(PersonEntity updatePerson) async {
+  Future<void> updateAttributes(
+    String id, {
+    String? name,
+    String? avatarFaceId,
+    bool? isHidden,
+    int? version,
+    String? birthDate,
+  }) async {
+    final person = (await getPerson(id))!;
+    final updatedPerson = person.copyWith(
+      data: person.data.copyWith(
+        name: name,
+        avatarFaceId: avatarFaceId,
+        isHidden: isHidden,
+        version: version,
+        birthDate: birthDate,
+      ),
+    );
+    await _updatePerson(updatedPerson);
+  }
+
+  Future<void> _updatePerson(PersonEntity updatePerson) async {
     await entityService.addOrUpdate(
       EntityType.person,
       json.encode(updatePerson.data.toJson()),
       id: updatePerson.remoteID,
     );
+    updatePerson.data.logStats();
   }
 }

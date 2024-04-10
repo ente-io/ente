@@ -653,11 +653,10 @@ class _FileSelectionActionsWidgetState
 
   Future<void> _setPersonCover() async {
     final EnteFile file = widget.selectedFiles.files.first;
-    final PersonEntity newPerson = widget.person!.copyWith(
-      data: widget.person!.data
-          .copyWith(avatarFaceId: file.uploadedFileID.toString()),
+    await PersonService.instance.updateAttributes(
+      widget.person!.remoteID,
+      avatarFaceId: file.uploadedFileID.toString(),
     );
-    await PersonService.instance.updatePerson(newPerson);
     widget.selectedFiles.clearAll();
     if (mounted) {
       setState(() => {});

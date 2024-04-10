@@ -1,6 +1,8 @@
 // PersonEntity represents information about a Person in the context of FaceClustering that is stored.
 // On the remote server, the PersonEntity is stored as {Entity} with type person.
 // On the device, this information is stored as [LocalEntityData] with type person.
+import "package:flutter/foundation.dart";
+
 class PersonEntity {
   final String remoteID;
   final PersonData data;
@@ -78,6 +80,25 @@ class PersonData {
       isHidden: isHidden ?? this.isHidden,
       birthDate: birthDate ?? this.birthDate,
     );
+  }
+
+  void logStats() {
+    if (kDebugMode == false) return;
+    // log number of assigned and rejected clusters and total number of faces in each cluster
+    final StringBuffer sb = StringBuffer();
+    sb.writeln('Person: $name');
+    int assignedCount = 0;
+    for (final a in (assigned ?? <ClusterInfo>[])) {
+      assignedCount += a.faces.length;
+    }
+    sb.writeln('Assigned: ${assigned?.length} withFaces $assignedCount');
+    sb.writeln('Rejected: ${rejected?.length}');
+    if (assigned != null) {
+      for (var cluster in assigned!) {
+        sb.writeln('Cluster: ${cluster.id} - ${cluster.faces.length}');
+      }
+    }
+    debugPrint(sb.toString());
   }
 
   // toJson

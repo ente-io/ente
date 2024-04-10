@@ -110,9 +110,8 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
         }
 
         try {
-          final updatePerson = widget.person
-              .copyWith(data: widget.person.data.copyWith(name: text));
-          await PersonService.instance.updatePerson(updatePerson);
+          await PersonService.instance
+              .updateAttributes(widget.person.remoteID, name: text);
           if (mounted) {
             _appBarTitle = text;
             setState(() {});
