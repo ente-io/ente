@@ -494,10 +494,10 @@ class FaceMlService {
     }
     if (allLandmarksEqual) {
       debugPrint("Discarding remote embedding for fileID ${fileMl.fileID} "
-          "because landmarks are not equal");
+          "because landmarks are equal");
       debugPrint(
         fileMl.faceEmbedding.faces
-            .map((e) => e.detection.landmarks)
+            .map((e) => e.detection.landmarks.toString())
             .toList()
             .toString(),
       );

@@ -1,5 +1,5 @@
-/// Landmark coordinate data. 
-/// 
+/// Landmark coordinate data.
+///
 /// WARNING: All coordinates are relative to the image size, so in the range [0, 1]!
 class Landmark {
   double x;
@@ -24,5 +24,10 @@ class Landmark {
           ? (json['y'] as int).toDouble()
           : json['y'] as double),
     );
+  }
+
+  @override
+  toString() {
+    return '(x: ${x.toStringAsFixed(4)}, y: ${y.toStringAsFixed(4)})';
   }
 }
