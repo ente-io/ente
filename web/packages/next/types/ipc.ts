@@ -71,9 +71,19 @@ export interface Electron {
      */
     clearStores: () => void;
 
-    setEncryptionKey: (encryptionKey: string) => Promise<void>;
+    /**
+     * Return the previously saved encryption key from persintent safe storage.
+     *
+     * If no such key is found, return `undefined`.
+     *
+     * @see {@link saveEncryptionKey}.
+     */
+    encryptionKey: () => Promise<string | undefined>;
 
-    getEncryptionKey: () => Promise<string>;
+    /**
+     * Save the given {@link encryptionKey} into persistent safe storage.
+     */
+    saveEncryptionKey: (encryptionKey: string) => Promise<void>;
 
     registerForegroundEventListener: (onForeground: () => void) => void;
 

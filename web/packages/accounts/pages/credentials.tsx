@@ -70,9 +70,9 @@ export default function Credentials({ appContext, appName }: PageProps) {
             const electron = globalThis.electron;
             if (!key && electron) {
                 try {
-                    key = await electron.getEncryptionKey();
+                    key = await electron.encryptionKey();
                 } catch (e) {
-                    log.error("getEncryptionKey failed", e);
+                    log.error("Failed to get encryption key from electron", e);
                 }
                 if (key) {
                     await saveKeyInSessionStore(

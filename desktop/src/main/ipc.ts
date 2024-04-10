@@ -28,8 +28,8 @@ import {
 } from "../services/imageProcessor";
 import {
     clearStores,
-    getEncryptionKey,
-    setEncryptionKey,
+    encryptionKey,
+    saveEncryptionKey,
 } from "../services/store";
 import {
     getElectronFilesFromGoogleZip,
@@ -100,11 +100,11 @@ export const attachIPCHandlers = () => {
 
     ipcMain.on("clearStores", () => clearStores());
 
-    ipcMain.handle("setEncryptionKey", (_, encryptionKey) =>
-        setEncryptionKey(encryptionKey),
+    ipcMain.handle("saveEncryptionKey", (_, encryptionKey) =>
+        saveEncryptionKey(encryptionKey),
     );
 
-    ipcMain.handle("getEncryptionKey", () => getEncryptionKey());
+    ipcMain.handle("encryptionKey", () => encryptionKey());
 
     // - App update
 

@@ -63,11 +63,11 @@ const openLogDirectory = (): Promise<void> =>
 
 const clearStores = () => ipcRenderer.send("clearStores");
 
-const setEncryptionKey = (encryptionKey: string): Promise<void> =>
-    ipcRenderer.invoke("setEncryptionKey", encryptionKey);
+const encryptionKey = (): Promise<string | undefined> =>
+    ipcRenderer.invoke("encryptionKey");
 
-const getEncryptionKey = (): Promise<string> =>
-    ipcRenderer.invoke("getEncryptionKey");
+const saveEncryptionKey = (encryptionKey: string): Promise<void> =>
+    ipcRenderer.invoke("saveEncryptionKey", encryptionKey);
 
 const registerForegroundEventListener = (onForeground: () => void) => {
     ipcRenderer.removeAllListeners("app-in-foreground");
@@ -305,8 +305,8 @@ contextBridge.exposeInMainWorld("electron", {
     openDirectory,
     openLogDirectory,
     clearStores,
-    getEncryptionKey,
-    setEncryptionKey,
+    encryptionKey,
+    saveEncryptionKey,
     registerForegroundEventListener,
 
     // - App update
