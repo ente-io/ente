@@ -598,17 +598,8 @@ class FilesDB {
       args.add(limit);
     }
 
-    _logger.info(
-      "--------------------------- getAllPendingOrUploadedFilesSqliteAsync with limit: $limit",
-    );
-    final stopwatch = Stopwatch()..start();
-
     final db = await instance.sqliteAsyncDB;
     final results = await db.getAll(query, args);
-    _logger.info(
-      "------------------------getAllPendingOrUploadedFilesSqliteAsync query took ${stopwatch.elapsedMilliseconds} ms",
-    );
-    stopwatch.stop();
     _logger.info("message");
     stopWatch.log('queryDone');
     final files = convertToFiles(results);
@@ -1613,8 +1604,6 @@ class FilesDB {
     Set<int> collectionsToIgnore, {
     bool dedupeByUploadId = true,
   }) async {
-    final stopwatch = Stopwatch()..start();
-    _logger.info("-------------------- getAllFilesFromDB");
     final db = await instance.sqliteAsyncDB;
     final result = await db.getAll(
       'SELECT * FROM $filesTable ORDER BY $columnCreationTime DESC',
@@ -1629,10 +1618,6 @@ class FilesDB {
         dedupeUploadID: dedupeByUploadId,
       ),
     );
-    _logger.info(
-      "---------------------------- getAllFilesFromDB took ${stopwatch.elapsedMilliseconds} ms",
-    );
-    stopwatch.stop();
     return deduplicatedFiles;
   }
 
