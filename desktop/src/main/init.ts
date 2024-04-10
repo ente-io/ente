@@ -77,16 +77,24 @@ export const createWindow = async () => {
 };
 
 export const setupTrayItem = (mainWindow: BrowserWindow) => {
-    const iconName = isPlatform("mac")
-        ? "taskbar-icon-Template.png"
-        : "taskbar-icon.png";
+    // There are a total of 6 files corresponding to this tray icon.
+    //
+    // On macOS, use template images (filename needs to end with "Template.ext")
+    // https://www.electronjs.org/docs/latest/api/native-image#template-image-macos
+    //
+    // And for each (template or otherwise), there are 3 "retina" variants
+    // https://www.electronjs.org/docs/latest/api/native-image#high-resolution-image
+    const iconName =
+        process.platform == "darwin"
+            ? "taskbar-icon-Template.png"
+            : "taskbar-icon.png";
     const trayImgPath = path.join(
         isDev ? "build" : process.resourcesPath,
         iconName,
     );
     const trayIcon = nativeImage.createFromPath(trayImgPath);
     const tray = new Tray(trayIcon);
-    tray.setToolTip("ente");
+    tray.setToolTip("Ente Photos");
     tray.setContextMenu(createTrayContextMenu(mainWindow));
 };
 

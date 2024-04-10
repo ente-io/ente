@@ -53,7 +53,7 @@ export const createApplicationMenu = async (mainWindow: BrowserWindow) => {
 
     return Menu.buildFromTemplate([
         {
-            label: "ente",
+            label: "Ente Photos",
             submenu: [
                 ...macOSOnly([
                     {
@@ -155,7 +155,7 @@ export const createApplicationMenu = async (mainWindow: BrowserWindow) => {
                     { type: "separator" },
                     { label: "Bring All to Front", role: "front" },
                     { type: "separator" },
-                    { label: "Ente", role: "window" },
+                    { label: "Ente Photos", role: "window" },
                 ]),
             ],
         },
