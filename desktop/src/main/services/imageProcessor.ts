@@ -1,12 +1,12 @@
 import { existsSync } from "fs";
 import fs from "node:fs/promises";
 import path from "path";
-import { writeStream } from "../main/fs";
-import log from "../main/log";
-import { execAsync, isDev } from "../main/util";
-import { CustomErrors, ElectronFile } from "../types/ipc";
-import { isPlatform } from "../utils/common/platform";
-import { generateTempFilePath } from "../utils/temp";
+import { CustomErrors, ElectronFile } from "../../types/ipc";
+import { writeStream } from "../fs";
+import log from "../log";
+import { isPlatform } from "../platform";
+import { generateTempFilePath } from "../temp";
+import { execAsync, isDev } from "../util";
 import { deleteTempFile } from "./ffmpeg";
 
 const IMAGE_MAGICK_PLACEHOLDER = "IMAGE_MAGICK";

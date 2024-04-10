@@ -1,5 +1,5 @@
 import Store, { Schema } from "electron-store";
-import type { SafeStorageStoreType } from "../types/main";
+import type { SafeStorageStoreType } from "../../types/main";
 
 const safeStorageSchema: Schema<SafeStorageStoreType> = {
     encryptionKey: {

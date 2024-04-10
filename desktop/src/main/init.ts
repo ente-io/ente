@@ -1,12 +1,12 @@
-import { app, BrowserWindow, nativeImage, Tray } from "electron";
+import { BrowserWindow, Tray, app, nativeImage, shell } from "electron";
 import { existsSync } from "node:fs";
 import path from "node:path";
 import { isAppQuitting, rendererURL } from "../main";
-import autoLauncher from "../services/autoLauncher";
-import { getHideDockIconPreference } from "../services/userPreference";
-import { isPlatform } from "../utils/common/platform";
 import log from "./log";
 import { createTrayContextMenu } from "./menu";
+import { isPlatform } from "./platform";
+import autoLauncher from "./services/autoLauncher";
+import { getHideDockIconPreference } from "./services/userPreference";
 import { isDev } from "./util";
 
 /**
@@ -109,7 +109,7 @@ export function handleDownloads(mainWindow: BrowserWindow) {
 export function handleExternalLinks(mainWindow: BrowserWindow) {
     mainWindow.webContents.setWindowOpenHandler(({ url }) => {
         if (!url.startsWith(rendererURL)) {
-            require("electron").shell.openExternal(url);
+            shell.openExternal(url);
             return { action: "deny" };
         } else {
             return { action: "allow" };

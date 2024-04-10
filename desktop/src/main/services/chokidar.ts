@@ -1,9 +1,9 @@
 import chokidar from "chokidar";
 import { BrowserWindow } from "electron";
 import path from "path";
-import log from "../main/log";
-import { getWatchMappings } from "../services/watch";
+import log from "../log";
 import { getElectronFile } from "./fs";
+import { getWatchMappings } from "./watch";
 
 /**
  * Convert a file system {@link filePath} that uses the local system specific
