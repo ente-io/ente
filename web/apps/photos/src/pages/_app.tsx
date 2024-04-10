@@ -1,7 +1,10 @@
 import { CustomHead } from "@/next/components/Head";
 import { setupI18n } from "@/next/i18n";
 import log from "@/next/log";
-import { logStartupBanner } from "@/next/log-web";
+import {
+    logStartupBanner,
+    logUnhandledErrorsAndRejections,
+} from "@/next/log-web";
 import { AppUpdateInfo } from "@/next/types/ipc";
 import {
     APPS,
@@ -147,9 +150,13 @@ export default function App({ Component, pageProps }: AppProps) {
         setupI18n().finally(() => setIsI18nReady(true));
         const userId = (getData(LS_KEYS.USER) as User)?.id;
         logStartupBanner(APPS.PHOTOS, userId);
+        logUnhandledErrorsAndRejections(true);
         HTTPService.setHeaders({
             "X-Client-Package": CLIENT_PACKAGE_NAMES.get(APPS.PHOTOS),
         });
+        return () => {
+            logUnhandledErrorsAndRejections(false);
+        };
     }, []);
 
     useEffect(() => {
