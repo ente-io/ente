@@ -1,4 +1,4 @@
-import { logError } from "@ente/shared/sentry";
+import log from "@/next/log";
 import { Box, DialogProps, Typography } from "@mui/material";
 import { EnteDrawer } from "components/EnteDrawer";
 import { t } from "i18next";
@@ -41,7 +41,7 @@ const MLSearchSettings = ({ open, onClose, onRootClose }) => {
                 updateMlSearchEnabled(true);
             }
         } catch (e) {
-            logError(e, "Enable ML search failed");
+            log.error("Enable ML search failed", e);
             somethingWentWrong();
         }
     };
@@ -54,7 +54,7 @@ const MLSearchSettings = ({ open, onClose, onRootClose }) => {
             closeEnableFaceSearch();
             finishLoading();
         } catch (e) {
-            logError(e, "Enable face search failed");
+            log.error("Enable face search failed", e);
             somethingWentWrong();
         }
     };
@@ -64,7 +64,7 @@ const MLSearchSettings = ({ open, onClose, onRootClose }) => {
             await updateMlSearchEnabled(false);
             onClose();
         } catch (e) {
-            logError(e, "Disable ML search failed");
+            log.error("Disable ML search failed", e);
             somethingWentWrong();
         }
     };
@@ -76,7 +76,7 @@ const MLSearchSettings = ({ open, onClose, onRootClose }) => {
             await disableMlSearch();
             finishLoading();
         } catch (e) {
-            logError(e, "Disable face search failed");
+            log.error("Disable face search failed", e);
             somethingWentWrong();
         }
     };

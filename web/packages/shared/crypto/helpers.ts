@@ -1,14 +1,11 @@
+import log from "@/next/log";
 import { setRecoveryKey } from "@ente/accounts/api/user";
-import { logError } from "@ente/shared/sentry";
 import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { SESSION_KEYS, setKey } from "@ente/shared/storage/sessionStorage";
 import { getActualKey } from "@ente/shared/user";
 import { KeyAttributes } from "@ente/shared/user/types";
-import isElectron from "is-electron";
 import ComlinkCryptoWorker from ".";
-import ElectronAPIs from "../electron";
-import { addLogLine } from "../logging";
 
 const LOGIN_SUB_KEY_LENGTH = 32;
 const LOGIN_SUB_KEY_ID = 1;
@@ -104,13 +101,9 @@ export const saveKeyInSessionStore = async (
     const sessionKeyAttributes =
         await cryptoWorker.generateKeyAndEncryptToB64(key);
     setKey(keyType, sessionKeyAttributes);
-    addLogLine("fromDesktop", fromDesktop);
-    if (
-        isElectron() &&
-        !fromDesktop &&
-        keyType === SESSION_KEYS.ENCRYPTION_KEY
-    ) {
-        ElectronAPIs.setEncryptionKey(key);
+    const electron = globalThis.electron;
+    if (electron && !fromDesktop && keyType === SESSION_KEYS.ENCRYPTION_KEY) {
+        electron.setEncryptionKey(key);
     }
 };
 
@@ -146,7 +139,7 @@ export const getRecoveryKey = async () => {
         return recoveryKey;
     } catch (e) {
         console.log(e);
-        logError(e, "getRecoveryKey failed");
+        log.error("getRecoveryKey failed", e);
         throw e;
     }
 };

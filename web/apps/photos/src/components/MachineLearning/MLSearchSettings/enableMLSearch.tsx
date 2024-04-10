@@ -1,4 +1,3 @@
-import { ML_BLOG_LINK } from "@ente/shared/constants/urls";
 import { Box, Button, Stack, Typography } from "@mui/material";
 import Titlebar from "components/Titlebar";
 import { t } from "i18next";
@@ -10,6 +9,9 @@ export default function EnableMLSearch({
     enableMlSearch,
     onRootClose,
 }) {
+    const showDetails = () =>
+        openLink("https://ente.io/blog/desktop-ml-beta", true);
+
     return (
         <Stack spacing={"4px"} py={"12px"}>
             <Titlebar
@@ -33,9 +35,9 @@ export default function EnableMLSearch({
                         {t("ENABLE")}
                     </Button>
                     <Button
-                        color={"secondary"}
+                        color="secondary"
                         size="large"
-                        onClick={() => openLink(ML_BLOG_LINK, true)}
+                        onClick={showDetails}
                     >
                         {t("ML_MORE_DETAILS")}
                     </Button>

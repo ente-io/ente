@@ -1,4 +1,5 @@
-import { logError } from "@ente/shared/sentry";
+import log from "@/next/log";
+import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { FILE_TYPE, RAW_FORMATS } from "constants/file";
 import CastDownloadManager from "services/castDownloadManager";
 import { decodeLivePhoto } from "services/livePhotoService";
@@ -9,7 +10,6 @@ import {
     FileMagicMetadata,
     FilePublicMagicMetadata,
 } from "types/file";
-import ComlinkCryptoWorker from "utils/comlink/ComlinkCryptoWorker";
 
 export function sortFiles(files: EnteFile[], sortAsc = false) {
     // sort based on the time of creation time of the file,
@@ -80,7 +80,7 @@ export async function decryptFile(
             pubMagicMetadata: filePubMagicMetadata,
         };
     } catch (e) {
-        logError(e, "file decryption failed");
+        log.error("file decryption failed", e);
         throw e;
     }
 }
@@ -160,6 +160,6 @@ export const getPreviewableImage = async (
         fileBlob = new Blob([fileBlob], { type: fileType.mimeType });
         return fileBlob;
     } catch (e) {
-        logError(e, "failed to download file");
+        log.error("failed to download file", e);
     }
 };

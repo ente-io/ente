@@ -1,5 +1,5 @@
+import log from "@/next/log";
 import { FlexWrapper } from "@ente/shared/components/Container";
-import { logError } from "@ente/shared/sentry";
 import { formatDate, formatTime } from "@ente/shared/time/format";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import EnteDateTimePicker from "components/EnteDateTimePicker";
@@ -44,7 +44,7 @@ export function RenderCreationTime({
                 scheduleUpdate();
             }
         } catch (e) {
-            logError(e, "failed to update creationTime");
+            log.error("failed to update creationTime", e);
         } finally {
             closeEditMode();
             setLoading(false);

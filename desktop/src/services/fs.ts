@@ -2,7 +2,7 @@ import StreamZip from "node-stream-zip";
 import { existsSync } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { logError } from "../main/log";
+import log from "../main/log";
 import { ElectronFile } from "../types/ipc";
 
 const FILE_STREAM_CHUNK_SIZE: number = 4 * 1024 * 1024;
@@ -115,7 +115,9 @@ export const getZipFileStream = async (
     const inProgress = {
         current: false,
     };
+    // eslint-disable-next-line no-unused-vars
     let resolveObj: (value?: any) => void = null;
+    // eslint-disable-next-line no-unused-vars
     let rejectObj: (reason?: any) => void = null;
     stream.on("readable", () => {
         try {
@@ -179,7 +181,7 @@ export const getZipFileStream = async (
                     controller.close();
                 }
             } catch (e) {
-                logError(e, "readableStream pull failed");
+                log.error("Failed to pull from readableStream", e);
                 controller.close();
             }
         },

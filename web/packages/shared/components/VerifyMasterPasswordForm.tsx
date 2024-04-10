@@ -1,14 +1,12 @@
-import { logError } from "@ente/shared/sentry";
-import SingleInputForm, {
-    SingleInputFormProps,
-} from "../components/SingleInputForm";
-
-import { CustomError } from "../error";
-
+import log from "@/next/log";
 import { SRPAttributes } from "@ente/accounts/types/srp";
 import { ButtonProps, Input } from "@mui/material";
 import { t } from "i18next";
+import SingleInputForm, {
+    SingleInputFormProps,
+} from "../components/SingleInputForm";
 import ComlinkCryptoWorker from "../crypto";
+import { CustomError } from "../error";
 import { KeyAttributes, User } from "../user/types";
 
 export interface VerifyMasterPasswordFormProps {
@@ -59,7 +57,7 @@ export default function VerifyMasterPasswordForm({
                     );
                 }
             } catch (e) {
-                logError(e, "failed to derive key");
+                log.error("failed to derive key", e);
                 throw Error(CustomError.WEAK_DEVICE);
             }
             if (!keyAttributes && typeof getKeyAttributes === "function") {
@@ -76,7 +74,7 @@ export default function VerifyMasterPasswordForm({
                 );
                 callback(key, kek, keyAttributes, passphrase);
             } catch (e) {
-                logError(e, "user entered a wrong password");
+                log.error("user entered a wrong password", e);
                 throw Error(CustomError.INCORRECT_PASSWORD);
             }
         } catch (e) {
@@ -85,7 +83,7 @@ export default function VerifyMasterPasswordForm({
                     // two factor enabled, user has been redirected to two factor page
                     return;
                 }
-                logError(e, "failed to verify passphrase");
+                log.error("failed to verify passphrase", e);
                 switch (e.message) {
                     case CustomError.WEAK_DEVICE:
                         setFieldError(t("WEAK_DEVICE"));

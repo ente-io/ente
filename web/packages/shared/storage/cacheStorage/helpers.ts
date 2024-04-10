@@ -1,4 +1,4 @@
-import { logError } from "@ente/shared/sentry";
+import log from "@/next/log";
 import { CacheStorageService } from ".";
 import { CACHES } from "./constants";
 import { LimitedCache } from "./types";
@@ -50,6 +50,6 @@ export async function deleteAllCache() {
         await CacheStorageService.delete(CACHES.FACE_CROPS);
         await CacheStorageService.delete(CACHES.FILES);
     } catch (e) {
-        logError(e, "deleteAllCache failed"); // log and ignore
+        log.error("deleteAllCache failed", e); // log and ignore
     }
 }

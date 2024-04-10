@@ -61,15 +61,15 @@ Electron process. This allows us to directly use the output produced by
 
 ### Others
 
-* [any-shell-escape](https://github.com/boazy/any-shell-escape) is for
-  escaping shell commands before we execute them (e.g. say when invoking the
-  embedded ffmpeg CLI).
+-   [any-shell-escape](https://github.com/boazy/any-shell-escape) is for
+    escaping shell commands before we execute them (e.g. say when invoking the
+    embedded ffmpeg CLI).
 
-* [auto-launch](https://github.com/Teamwork/node-auto-launch) is for
-  automatically starting our app on login, if the user so wishes.
+-   [auto-launch](https://github.com/Teamwork/node-auto-launch) is for
+    automatically starting our app on login, if the user so wishes.
 
-* [electron-store](https://github.com/sindresorhus/electron-store) is used for
-  persisting user preferences and other arbitrary data.
+-   [electron-store](https://github.com/sindresorhus/electron-store) is used for
+    persisting user preferences and other arbitrary data.
 
 ## Dev
 
@@ -79,12 +79,12 @@ are similar to that in the web code.
 
 Some extra ones specific to the code here are:
 
-* [concurrently](https://github.com/open-cli-tools/concurrently) for spawning
-  parallel tasks when we do `yarn dev`.
+-   [concurrently](https://github.com/open-cli-tools/concurrently) for spawning
+    parallel tasks when we do `yarn dev`.
 
-* [shx](https://github.com/shelljs/shx) for providing a portable way to use Unix
-  commands in our `package.json` scripts. This allows us to use the same
-  commands (like `ln`) across different platforms like Linux and Windows.
+-   [shx](https://github.com/shelljs/shx) for providing a portable way to use
+    Unix commands in our `package.json` scripts. This allows us to use the same
+    commands (like `ln`) across different platforms like Linux and Windows.
 
 ## Functionality
 
@@ -111,11 +111,11 @@ watcher for the watch folders functionality.
 
 ### AI/ML
 
-* [onnxruntime-node](https://github.com/Microsoft/onnxruntime)
-* html-entities is used by the bundled clip-bpe-ts.
-* GGML binaries are bundled
-* We also use [jpeg-js](https://github.com/jpeg-js/jpeg-js#readme) for
-  conversion of all images to JPEG before processing.
+-   [onnxruntime-node](https://github.com/Microsoft/onnxruntime) is used for
+    natural language searches based on CLIP.
+-   html-entities is used by the bundled clip-bpe-ts tokenizer.
+-   [jpeg-js](https://github.com/jpeg-js/jpeg-js#readme) is used for decoding
+    JPEG data into raw RGB bytes before passing it to ONNX.
 
 ## ZIP
 

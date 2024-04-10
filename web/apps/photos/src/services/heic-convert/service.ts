@@ -1,10 +1,9 @@
+import { convertBytesToHumanReadable } from "@/next/file";
+import log from "@/next/log";
+import { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { CustomError } from "@ente/shared/error";
-import { addLogLine } from "@ente/shared/logging";
-import { retryAsyncFunction } from "@ente/shared/promise";
-import { logError } from "@ente/shared/sentry";
+import { retryAsyncFunction } from "@ente/shared/utils";
 import QueueProcessor from "@ente/shared/utils/queueProcessor";
-import { convertBytesToHumanReadable } from "@ente/shared/utils/size";
-import { ComlinkWorker } from "@ente/shared/worker/comlinkWorker";
 import { getDedicatedConvertWorker } from "utils/comlink/ComlinkConvertWorker";
 import { DedicatedConvertWorker } from "worker/convert.worker";
 
@@ -46,7 +45,7 @@ class HEICConverter {
                                         await worker.convertHEICToJPEG(
                                             fileBlob,
                                         );
-                                    addLogLine(
+                                    log.info(
                                         `originalFileSize:${convertBytesToHumanReadable(
                                             fileBlob?.size,
                                         )},convertedFileSize:${convertBytesToHumanReadable(
@@ -65,17 +64,19 @@ class HEICConverter {
                         },
                     );
                     if (!convertedHEIC || convertedHEIC?.size === 0) {
-                        logError(
-                            Error(`converted heic fileSize is Zero`),
-                            "converted heic fileSize is Zero",
-                            {
-                                originalFileSize: convertBytesToHumanReadable(
-                                    fileBlob?.size ?? 0,
-                                ),
-                                convertedFileSize: convertBytesToHumanReadable(
-                                    convertedHEIC?.size ?? 0,
-                                ),
-                            },
+                        log.error(
+                            `converted heic fileSize is Zero - ${JSON.stringify(
+                                {
+                                    originalFileSize:
+                                        convertBytesToHumanReadable(
+                                            fileBlob?.size ?? 0,
+                                        ),
+                                    convertedFileSize:
+                                        convertBytesToHumanReadable(
+                                            convertedHEIC?.size ?? 0,
+                                        ),
+                                },
+                            )}`,
                         );
                     }
                     await new Promise((resolve) => {
@@ -87,7 +88,7 @@ class HEICConverter {
                     this.workerPool.push(convertWorker);
                     return convertedHEIC;
                 } catch (e) {
-                    logError(e, "heic conversion failed");
+                    log.error("heic conversion failed", e);
                     convertWorker.terminate();
                     this.workerPool.push(getDedicatedConvertWorker());
                     throw e;

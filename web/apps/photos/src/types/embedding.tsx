@@ -1,11 +1,16 @@
-export enum Model {
-    GGML_CLIP = "ggml-clip",
-    ONNX_CLIP = "onnx-clip",
-}
+/**
+ * The embeddings models that we support.
+ *
+ * This is an exhaustive set of values we pass when PUT-ting encrypted
+ * embeddings on the server. However, we should be prepared to receive an
+ * {@link EncryptedEmbedding} with a model value distinct from one of these.
+ */
+export type EmbeddingModel = "onnx-clip";
 
 export interface EncryptedEmbedding {
     fileID: number;
-    model: Model;
+    /** @see {@link EmbeddingModel} */
+    model: string;
     encryptedEmbedding: string;
     decryptionHeader: string;
     updatedAt: number;
@@ -25,7 +30,7 @@ export interface GetEmbeddingDiffResponse {
 
 export interface PutEmbeddingRequest {
     fileID: number;
-    model: Model;
+    model: EmbeddingModel;
     encryptedEmbedding: string;
     decryptionHeader: string;
 }

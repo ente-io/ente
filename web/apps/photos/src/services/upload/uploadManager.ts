@@ -1,34 +1,10 @@
-import { CustomError } from "@ente/shared/error";
-import { Events, eventBus } from "@ente/shared/events";
-import { logError } from "@ente/shared/sentry";
-import { Collection } from "types/collection";
-import { EncryptedEnteFile, EnteFile } from "types/file";
-import { SetFiles } from "types/gallery";
-import {
-    FileWithCollection,
-    ParsedMetadataJSON,
-    ParsedMetadataJSONMap,
-    PublicUploadProps,
-} from "types/upload";
-import { decryptFile, getUserOwnedFiles, sortFiles } from "utils/file";
-import {
-    areFileWithCollectionsSame,
-    segregateMetadataAndMediaFiles,
-} from "utils/upload";
-import { getLocalFiles } from "../fileService";
-import {
-    getMetadataJSONMapKeyForJSON,
-    parseMetadataJSON,
-} from "./metadataService";
-import UIService from "./uiService";
-import UploadService from "./uploadService";
-import uploader from "./uploader";
-
+import { getFileNameSize } from "@/next/file";
+import log from "@/next/log";
+import { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { getDedicatedCryptoWorker } from "@ente/shared/crypto";
 import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
-import { addLogLine } from "@ente/shared/logging";
-import { getFileNameSize } from "@ente/shared/logging/web";
-import { ComlinkWorker } from "@ente/shared/worker/comlinkWorker";
+import { CustomError } from "@ente/shared/error";
+import { Events, eventBus } from "@ente/shared/events";
 import { Remote } from "comlink";
 import { UPLOAD_RESULT, UPLOAD_STAGES } from "constants/upload";
 import isElectron from "is-electron";
@@ -39,9 +15,30 @@ import {
 } from "services/publicCollectionService";
 import { getDisableCFUploadProxyFlag } from "services/userService";
 import watchFolderService from "services/watchFolder/watchFolderService";
+import { Collection } from "types/collection";
+import { EncryptedEnteFile, EnteFile } from "types/file";
+import { SetFiles } from "types/gallery";
+import {
+    FileWithCollection,
+    ParsedMetadataJSON,
+    ParsedMetadataJSONMap,
+    PublicUploadProps,
+} from "types/upload";
 import { ProgressUpdater } from "types/upload/ui";
-import uiService from "./uiService";
+import { decryptFile, getUserOwnedFiles, sortFiles } from "utils/file";
+import {
+    areFileWithCollectionsSame,
+    segregateMetadataAndMediaFiles,
+} from "utils/upload";
+import { getLocalFiles } from "../fileService";
+import {
+    getMetadataJSONMapKeyForJSON,
+    parseMetadataJSON,
+} from "./metadataService";
+import { default as UIService, default as uiService } from "./uiService";
 import uploadCancelService from "./uploadCancelService";
+import UploadService from "./uploadService";
+import uploader from "./uploader";
 
 const MAX_CONCURRENT_UPLOADS = 4;
 
@@ -126,7 +123,7 @@ class UploadManager {
             this.uploadInProgress = true;
             await this.updateExistingFilesAndCollections(collections);
             this.uploaderName = uploaderName;
-            addLogLine(
+            log.info(
                 `received ${filesWithCollectionToUploadIn.length} files to upload`,
             );
             uiService.setFilenames(
@@ -139,8 +136,8 @@ class UploadManager {
             );
             const { metadataJSONFiles, mediaFiles } =
                 segregateMetadataAndMediaFiles(filesWithCollectionToUploadIn);
-            addLogLine(`has ${metadataJSONFiles.length} metadata json files`);
-            addLogLine(`has ${mediaFiles.length} media files`);
+            log.info(`has ${metadataJSONFiles.length} metadata json files`);
+            log.info(`has ${mediaFiles.length} media files`);
             if (metadataJSONFiles.length) {
                 UIService.setUploadStage(
                     UPLOAD_STAGES.READING_GOOGLE_METADATA_FILES,
@@ -152,11 +149,11 @@ class UploadManager {
                 );
             }
             if (mediaFiles.length) {
-                addLogLine(`clusterLivePhotoFiles started`);
+                log.info(`clusterLivePhotoFiles started`);
                 const analysedMediaFiles =
                     await UploadService.clusterLivePhotoFiles(mediaFiles);
-                addLogLine(`clusterLivePhotoFiles ended`);
-                addLogLine(
+                log.info(`clusterLivePhotoFiles ended`);
+                log.info(
                     `got live photos: ${
                         mediaFiles.length !== analysedMediaFiles.length
                     }`,
@@ -183,7 +180,7 @@ class UploadManager {
                     await ImportService.cancelRemainingUploads();
                 }
             } else {
-                logError(e, "uploading failed with error");
+                log.error("uploading failed with error", e);
                 throw e;
             }
         } finally {
@@ -200,14 +197,14 @@ class UploadManager {
                 return false;
             }
         } catch (e) {
-            logError(e, " failed to return shouldCloseProgressBar");
+            log.error(" failed to return shouldCloseProgressBar", e);
             return false;
         }
     }
 
     private async parseMetadataJSONFiles(metadataFiles: FileWithCollection[]) {
         try {
-            addLogLine(`parseMetadataJSONFiles function executed `);
+            log.info(`parseMetadataJSONFiles function executed `);
 
             UIService.reset(metadataFiles.length);
 
@@ -216,7 +213,7 @@ class UploadManager {
                     if (uploadCancelService.isUploadCancelationRequested()) {
                         throw Error(CustomError.UPLOAD_CANCELLED);
                     }
-                    addLogLine(
+                    log.info(
                         `parsing metadata json file ${getFileNameSize(file)}`,
                     );
 
@@ -231,7 +228,7 @@ class UploadManager {
                         );
                         UIService.increaseFileUploaded();
                     }
-                    addLogLine(
+                    log.info(
                         `successfully parsed metadata json file ${getFileNameSize(
                             file,
                         )}`,
@@ -241,8 +238,8 @@ class UploadManager {
                         throw e;
                     } else {
                         // and don't break for subsequent files just log and move on
-                        logError(e, "parsing failed for a file");
-                        addLogLine(
+                        log.error("parsing failed for a file", e);
+                        log.info(
                             `failed to parse metadata json file ${getFileNameSize(
                                 file,
                             )} error: ${e.message}`,
@@ -252,14 +249,14 @@ class UploadManager {
             }
         } catch (e) {
             if (e.message !== CustomError.UPLOAD_CANCELLED) {
-                logError(e, "error seeding MetadataMap");
+                log.error("error seeding MetadataMap", e);
             }
             throw e;
         }
     }
 
     private async uploadMediaFiles(mediaFiles: FileWithCollection[]) {
-        addLogLine(`uploadMediaFiles called`);
+        log.info(`uploadMediaFiles called`);
         this.filesToBeUploaded = [...this.filesToBeUploaded, ...mediaFiles];
 
         if (isElectron()) {
@@ -323,7 +320,7 @@ class UploadManager {
     ) {
         try {
             let decryptedFile: EnteFile;
-            addLogLine(
+            log.info(
                 `post upload action -> fileUploadResult: ${fileUploadResult} uploadedFile present ${!!uploadedFile}`,
             );
             await this.updateElectronRemainingFiles(fileWithCollection);
@@ -368,7 +365,7 @@ class UploadManager {
                             fileWithCollection.livePhotoAssets.image,
                     });
                 } catch (e) {
-                    logError(e, "Error in fileUploaded handlers");
+                    log.error("Error in fileUploaded handlers", e);
                 }
                 this.updateExistingFiles(decryptedFile);
             }
@@ -379,7 +376,7 @@ class UploadManager {
             );
             return fileUploadResult;
         } catch (e) {
-            logError(e, "failed to do post file upload action");
+            log.error("failed to do post file upload action", e);
             return UPLOAD_RESULT.FAILED;
         }
     }
@@ -399,7 +396,7 @@ class UploadManager {
     }
 
     public cancelRunningUpload() {
-        addLogLine("user cancelled running upload");
+        log.info("user cancelled running upload");
         UIService.setUploadStage(UPLOAD_STAGES.CANCELLING);
         uploadCancelService.requestUploadCancelation();
     }

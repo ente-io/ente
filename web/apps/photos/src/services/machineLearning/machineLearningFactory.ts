@@ -1,7 +1,8 @@
+import { haveWindow } from "@/next/env";
+import log from "@/next/log";
+import { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { getDedicatedCryptoWorker } from "@ente/shared/crypto";
 import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
-import { addLogLine } from "@ente/shared/logging";
-import { ComlinkWorker } from "@ente/shared/worker/comlinkWorker";
 import PQueue from "p-queue";
 import { EnteFile } from "types/file";
 import {
@@ -24,7 +25,6 @@ import {
     SceneDetectionMethod,
     SceneDetectionService,
 } from "types/machineLearning";
-import { getConcurrency } from "utils/common/concurrency";
 import { logQueueStats } from "utils/machineLearning";
 import arcfaceAlignmentService from "./arcfaceAlignmentService";
 import arcfaceCropService from "./arcfaceCropService";
@@ -198,7 +198,7 @@ export class LocalMLSyncContext implements MLSyncContext {
 
         this.concurrency = concurrency || getConcurrency();
 
-        addLogLine("Using concurrency: ", this.concurrency);
+        log.info("Using concurrency: ", this.concurrency);
         // timeout is added on downloads
         // timeout on queue will keep the operation open till worker is terminated
         this.syncQueue = new PQueue({ concurrency: this.concurrency });
@@ -232,3 +232,6 @@ export class LocalMLSyncContext implements MLSyncContext {
         }
     }
 }
+
+export const getConcurrency = () =>
+    haveWindow() && Math.max(2, Math.ceil(navigator.hardwareConcurrency / 2));

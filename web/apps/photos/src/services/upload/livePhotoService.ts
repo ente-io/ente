@@ -1,6 +1,6 @@
+import log from "@/next/log";
 import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
 import { CustomError } from "@ente/shared/error";
-import { logError } from "@ente/shared/sentry";
 import { Remote } from "comlink";
 import { FILE_TYPE } from "constants/file";
 import { LIVE_PHOTO_ASSET_SIZE_LIMIT } from "constants/upload";
@@ -213,7 +213,7 @@ export async function clusterLivePhotoFiles(mediaFiles: FileWithCollection[]) {
         if (e.message === CustomError.UPLOAD_CANCELLED) {
             throw e;
         } else {
-            logError(e, "failed to cluster live photo");
+            log.error("failed to cluster live photo", e);
             throw e;
         }
     }
@@ -265,15 +265,13 @@ function areFilesLivePhotoAssets(
         ) {
             return true;
         } else {
-            logError(
-                new Error(CustomError.TOO_LARGE_LIVE_PHOTO_ASSETS),
-                CustomError.TOO_LARGE_LIVE_PHOTO_ASSETS,
-                {
+            log.error(
+                `${CustomError.TOO_LARGE_LIVE_PHOTO_ASSETS} - ${JSON.stringify({
                     fileSizes: [
                         firstFileIdentifier.size,
                         secondFileIdentifier.size,
                     ],
-                },
+                })}`,
             );
         }
     }

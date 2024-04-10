@@ -1,6 +1,4 @@
-import { t } from "i18next";
-import { useEffect, useState } from "react";
-
+import log from "@/next/log";
 import { putAttributes } from "@ente/accounts/api/user";
 import { configureSRP } from "@ente/accounts/services/srp";
 import { logoutUser } from "@ente/accounts/services/user";
@@ -11,6 +9,8 @@ import {
 } from "@ente/shared/crypto/helpers";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import { SESSION_KEYS, getKey } from "@ente/shared/storage/sessionStorage";
+import { t } from "i18next";
+import { useEffect, useState } from "react";
 
 import SetPasswordForm from "@ente/accounts/components/SetPasswordForm";
 import { PAGES } from "@ente/accounts/constants/pages";
@@ -23,18 +23,21 @@ import FormPaperFooter from "@ente/shared/components/Form/FormPaper/Footer";
 import FormTitle from "@ente/shared/components/Form/FormPaper/Title";
 import LinkButton from "@ente/shared/components/LinkButton";
 import RecoveryKey from "@ente/shared/components/RecoveryKey";
-import { logError } from "@ente/shared/sentry";
 import {
     justSignedUp,
     setJustSignedUp,
 } from "@ente/shared/storage/localStorage/helpers";
 import { KeyAttributes, User } from "@ente/shared/user/types";
+import { useRouter } from "next/router";
 
-export default function Generate({ router, appContext, appName }: PageProps) {
+export default function Generate({ appContext, appName }: PageProps) {
     const [token, setToken] = useState<string>();
     const [user, setUser] = useState<User>();
     const [recoverModalView, setRecoveryModalView] = useState(false);
     const [loading, setLoading] = useState(true);
+
+    const router = useRouter();
+
     useEffect(() => {
         const main = async () => {
             const key: string = getKey(SESSION_KEYS.ENCRYPTION_KEY);
@@ -79,7 +82,7 @@ export default function Generate({ router, appContext, appName }: PageProps) {
             setJustSignedUp(true);
             setRecoveryModalView(true);
         } catch (e) {
-            logError(e, "failed to generate password");
+            log.error("failed to generate password", e);
             setFieldError("passphrase", t("PASSWORD_GENERATION_FAILED"));
         }
     };

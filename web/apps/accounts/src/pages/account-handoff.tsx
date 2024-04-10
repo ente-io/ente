@@ -1,8 +1,8 @@
+import log from "@/next/log";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { ACCOUNTS_PAGES } from "@ente/shared/constants/pages";
 import HTTPService from "@ente/shared/network/HTTPService";
-import { logError } from "@ente/shared/sentry";
 import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
@@ -16,7 +16,7 @@ const AccountHandoff = () => {
 
             router.push(ACCOUNTS_PAGES.PASSKEYS);
         } catch (e) {
-            logError(e, "Failed to deserialize and set passed user data");
+            log.error("Failed to deserialize and set passed user data", e);
             router.push(ACCOUNTS_PAGES.LOGIN);
         }
     };

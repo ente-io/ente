@@ -1,13 +1,13 @@
+import log from "@/next/log";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { boxSealOpen, toB64 } from "@ente/shared/crypto/internal/libsodium";
-import { useCastReceiver } from "@ente/shared/hooks/useCastReceiver";
-import { addLogLine } from "@ente/shared/logging";
 import castGateway from "@ente/shared/network/cast";
 import LargeType from "components/LargeType";
 import _sodium from "libsodium-wrappers";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { storeCastData } from "services/cast/castService";
+import { useCastReceiver } from "../utils/useCastReceiver";
 
 // Function to generate cryptographically secure digits
 const generateSecureData = (length: number): Uint8Array => {
@@ -60,7 +60,7 @@ export default function PairingMode() {
             );
             context.start(options);
         } catch (e) {
-            addLogLine(e, "failed to create cast context");
+            log.error("failed to create cast context", e);
         }
         setIsCastReady(true);
         return () => {

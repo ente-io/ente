@@ -1,16 +1,15 @@
+import { AppUpdateInfo } from "@/next/types/ipc";
+import { logoutUser } from "@ente/accounts/services/user";
 import { DialogBoxAttributes } from "@ente/shared/components/DialogBox/types";
 import AutoAwesomeOutlinedIcon from "@mui/icons-material/AutoAwesomeOutlined";
-import { t } from "i18next";
-import { downloadApp } from "utils/common";
-
-import { logoutUser } from "@ente/accounts/services/user";
-import ElectronAPIs from "@ente/shared/electron";
-import { AppUpdateInfo } from "@ente/shared/electron/types";
 import InfoOutlined from "@mui/icons-material/InfoRounded";
 import { Link } from "@mui/material";
 import { OPEN_STREET_MAP_LINK } from "components/Sidebar/EnableMap";
+import { t } from "i18next";
 import { Trans } from "react-i18next";
 import { Subscription } from "types/billing";
+import { openLink } from "utils/common";
+
 export const getDownloadAppMessage = (): DialogBoxAttributes => {
     return {
         title: t("DOWNLOAD_APP"),
@@ -26,6 +25,8 @@ export const getDownloadAppMessage = (): DialogBoxAttributes => {
         },
     };
 };
+
+const downloadApp = () => openLink("https://ente.io/download/desktop", true);
 
 export const getTrashFilesMessage = (
     deleteFileHelper,
@@ -58,14 +59,15 @@ export const getUpdateReadyToInstallMessage = (
     title: t("UPDATE_AVAILABLE"),
     content: t("UPDATE_INSTALLABLE_MESSAGE"),
     proceed: {
-        action: () => ElectronAPIs.updateAndRestart(),
+        action: () => globalThis.electron?.updateAndRestart(),
         text: t("INSTALL_NOW"),
         variant: "accent",
     },
     close: {
         text: t("INSTALL_ON_NEXT_LAUNCH"),
         variant: "secondary",
-        action: () => ElectronAPIs.muteUpdateNotification(updateInfo.version),
+        action: () =>
+            globalThis.electron?.muteUpdateNotification(updateInfo.version),
     },
 });
 
@@ -78,7 +80,7 @@ export const getUpdateAvailableForDownloadMessage = (
     close: {
         text: t("IGNORE_THIS_VERSION"),
         variant: "secondary",
-        action: () => ElectronAPIs.skipAppUpdate(updateInfo.version),
+        action: () => globalThis.electron?.skipAppUpdate(updateInfo.version),
     },
     proceed: {
         action: downloadApp,

@@ -1,16 +1,15 @@
+import log from "@/next/log";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { CustomError } from "@ente/shared/error";
-import { addLogLine } from "@ente/shared/logging";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { getEndpoint } from "@ente/shared/network/api";
-import { logError } from "@ente/shared/sentry";
 import localForage from "@ente/shared/storage/localForage";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
-import {
+import type {
     Embedding,
+    EmbeddingModel,
     EncryptedEmbedding,
     GetEmbeddingDiffResponse,
-    Model,
     PutEmbeddingRequest,
 } from "types/embedding";
 import { EnteFile } from "types/file";
@@ -39,12 +38,12 @@ export const getAllLocalEmbeddings = async () => {
     return embeddings;
 };
 
-export const getLocalEmbeddings = async (model: Model) => {
+export const getLocalEmbeddings = async () => {
     const embeddings = await getAllLocalEmbeddings();
-    return embeddings.filter((embedding) => embedding.model === model);
+    return embeddings.filter((embedding) => embedding.model === "onnx-clip");
 };
 
-const getModelEmbeddingSyncTime = async (model: Model) => {
+const getModelEmbeddingSyncTime = async (model: EmbeddingModel) => {
     return (
         (await localForage.getItem<number>(
             `${model}-${EMBEDDING_SYNC_TIME_TABLE}`,
@@ -52,11 +51,15 @@ const getModelEmbeddingSyncTime = async (model: Model) => {
     );
 };
 
-const setModelEmbeddingSyncTime = async (model: Model, time: number) => {
+const setModelEmbeddingSyncTime = async (
+    model: EmbeddingModel,
+    time: number,
+) => {
     await localForage.setItem(`${model}-${EMBEDDING_SYNC_TIME_TABLE}`, time);
 };
 
-export const syncEmbeddings = async (models: Model[] = [Model.ONNX_CLIP]) => {
+export const syncEmbeddings = async () => {
+    const models: EmbeddingModel[] = ["onnx-clip"];
     try {
         let allEmbeddings = await getAllLocalEmbeddings();
         const localFiles = await getAllLocalFiles();
@@ -68,10 +71,10 @@ export const syncEmbeddings = async (models: Model[] = [Model.ONNX_CLIP]) => {
             fileIdToKeyMap.set(file.id, file.key);
         });
         await cleanupDeletedEmbeddings(allLocalFiles, allEmbeddings);
-        addLogLine(`Syncing embeddings localCount: ${allEmbeddings.length}`);
+        log.info(`Syncing embeddings localCount: ${allEmbeddings.length}`);
         for (const model of models) {
             let modelLastSinceTime = await getModelEmbeddingSyncTime(model);
-            addLogLine(
+            log.info(
                 `Syncing ${model} model's embeddings sinceTime: ${modelLastSinceTime}`,
             );
             let response: GetEmbeddingDiffResponse;
@@ -107,18 +110,13 @@ export const syncEmbeddings = async (models: Model[] = [Model.ONNX_CLIP]) => {
                                 embedding: decryptedData,
                             } as Embedding;
                         } catch (e) {
-                            let info: Record<string, unknown>;
+                            let hasHiddenAlbums = false;
                             if (e.message === CustomError.FILE_NOT_FOUND) {
-                                const hasHiddenAlbums =
-                                    hiddenAlbums?.length > 0;
-                                info = {
-                                    hasHiddenAlbums,
-                                };
+                                hasHiddenAlbums = hiddenAlbums?.length > 0;
                             }
-                            logError(
+                            log.error(
+                                `decryptEmbedding failed for file (hasHiddenAlbums: ${hasHiddenAlbums})`,
                                 e,
-                                "decryptEmbedding failed for file",
-                                info,
                             );
                         }
                     }),
@@ -132,19 +130,19 @@ export const syncEmbeddings = async (models: Model[] = [Model.ONNX_CLIP]) => {
                 }
                 await localForage.setItem(EMBEDDINGS_TABLE, allEmbeddings);
                 await setModelEmbeddingSyncTime(model, modelLastSinceTime);
-                addLogLine(
+                log.info(
                     `Syncing embeddings syncedEmbeddingsCount: ${allEmbeddings.length}`,
                 );
             } while (response.diff.length === DIFF_LIMIT);
         }
     } catch (e) {
-        logError(e, "Sync embeddings failed");
+        log.error("Sync embeddings failed", e);
     }
 };
 
 export const getEmbeddingsDiff = async (
     sinceTime: number,
-    model: Model,
+    model: EmbeddingModel,
 ): Promise<GetEmbeddingDiffResponse> => {
     try {
         const token = getToken();
@@ -164,7 +162,7 @@ export const getEmbeddingsDiff = async (
         );
         return await response.data;
     } catch (e) {
-        logError(e, "get embeddings diff failed");
+        log.error("get embeddings diff failed", e);
         throw e;
     }
 };
@@ -187,7 +185,7 @@ export const putEmbedding = async (
         );
         return resp.data;
     } catch (e) {
-        logError(e, "put embedding failed");
+        log.error("put embedding failed", e);
         throw e;
     }
 };
@@ -205,7 +203,7 @@ export const cleanupDeletedEmbeddings = async (
         activeFileIds.has(embedding.fileID),
     );
     if (allLocalEmbeddings.length !== remainingEmbeddings.length) {
-        addLogLine(
+        log.info(
             `cleanupDeletedEmbeddings embeddingsCount: ${allLocalEmbeddings.length} remainingEmbeddingsCount: ${remainingEmbeddings.length}`,
         );
         await localForage.setItem(EMBEDDINGS_TABLE, remainingEmbeddings);

@@ -1,5 +1,5 @@
+import log from "@/next/log";
 import { CustomError } from "@ente/shared/error";
-import { logError } from "@ente/shared/sentry";
 import { validateAndGetCreationUnixTimeInMicroSeconds } from "@ente/shared/time";
 import { EXIFLESS_FORMATS, NULL_LOCATION } from "constants/upload";
 import exifr from "exifr";
@@ -67,13 +67,15 @@ export async function getParsedExifData(
         return parseExifData(filteredExifData);
     } catch (e) {
         if (e.message === EXIFR_UNSUPPORTED_FILE_FORMAT_MESSAGE) {
-            logError(e, "exif library unsupported format", {
-                fileType: fileTypeInfo.exactType,
-            });
+            log.error(
+                `exif library unsupported format ${fileTypeInfo.exactType}`,
+                e,
+            );
         } else {
-            logError(e, "get parsed exif data failed", {
-                fileType: fileTypeInfo.exactType,
-            });
+            log.error(
+                `get parsed exif data failed for file type ${fileTypeInfo.exactType}`,
+                e,
+            );
             throw e;
         }
     }
@@ -128,13 +130,13 @@ function parseExifData(exifData: RawEXIFData): ParsedEXIFData {
             parsedExif.imageWidth = ImageWidth;
             parsedExif.imageHeight = ImageHeight;
         } else {
-            logError(
-                new Error("ImageWidth or ImageHeight is not a number"),
-                "Image dimension parsing failed",
-                {
-                    ImageWidth,
-                    ImageHeight,
-                },
+            log.error(
+                `Image dimension parsing failed - ImageWidth or ImageHeight is not a number ${JSON.stringify(
+                    {
+                        ImageWidth,
+                        ImageHeight,
+                    },
+                )}`,
             );
         }
     } else if (ExifImageWidth && ExifImageHeight) {
@@ -145,13 +147,13 @@ function parseExifData(exifData: RawEXIFData): ParsedEXIFData {
             parsedExif.imageWidth = ExifImageWidth;
             parsedExif.imageHeight = ExifImageHeight;
         } else {
-            logError(
-                new Error("ExifImageWidth or ExifImageHeight is not a number"),
-                "Image dimension parsing failed",
-                {
-                    ExifImageWidth,
-                    ExifImageHeight,
-                },
+            log.error(
+                `Image dimension parsing failed - ExifImageWidth or ExifImageHeight is not a number ${JSON.stringify(
+                    {
+                        ExifImageWidth,
+                        ExifImageHeight,
+                    },
+                )}`,
             );
         }
     } else if (PixelXDimension && PixelYDimension) {
@@ -162,13 +164,13 @@ function parseExifData(exifData: RawEXIFData): ParsedEXIFData {
             parsedExif.imageWidth = PixelXDimension;
             parsedExif.imageHeight = PixelYDimension;
         } else {
-            logError(
-                new Error("PixelXDimension or PixelYDimension is not a number"),
-                "Image dimension parsing failed",
-                {
-                    PixelXDimension,
-                    PixelYDimension,
-                },
+            log.error(
+                `Image dimension parsing failed - PixelXDimension or PixelYDimension is not a number ${JSON.stringify(
+                    {
+                        PixelXDimension,
+                        PixelYDimension,
+                    },
+                )}`,
             );
         }
     }
@@ -229,9 +231,7 @@ function parseEXIFDate(dateTimeString: string) {
         }
         return date;
     } catch (e) {
-        logError(e, "parseEXIFDate failed", {
-            dateTimeString,
-        });
+        log.error(`Failed to parseEXIFDate ${dateTimeString}`, e);
         return null;
     }
 }
@@ -265,12 +265,15 @@ export function parseEXIFLocation(
         );
         return { latitude, longitude };
     } catch (e) {
-        logError(e, "parseEXIFLocation failed", {
-            gpsLatitude,
-            gpsLatitudeRef,
-            gpsLongitude,
-            gpsLongitudeRef,
-        });
+        log.error(
+            `Failed to parseEXIFLocation ${JSON.stringify({
+                gpsLatitude,
+                gpsLatitudeRef,
+                gpsLongitude,
+                gpsLongitudeRef,
+            })}`,
+            e,
+        );
         return NULL_LOCATION;
     }
 }
@@ -330,7 +333,7 @@ export async function updateFileCreationDateInEXIF(
         const exifInsertedFile = piexif.insert(exifBytes, imageDataURL);
         return dataURIToBlob(exifInsertedFile);
     } catch (e) {
-        logError(e, "updateFileModifyDateInEXIF failed");
+        log.error("updateFileModifyDateInEXIF failed", e);
         return fileBlob;
     }
 }

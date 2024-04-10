@@ -1,8 +1,8 @@
+import log from "@/next/log";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { CustomError, parseSharingErrorCodes } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { getEndpoint } from "@ente/shared/network/api";
-import { logError } from "@ente/shared/sentry";
 import localForage from "@ente/shared/storage/localForage";
 import { Collection, CollectionPublicMagicMetadata } from "types/collection";
 import { EncryptedEnteFile, EnteFile } from "types/file";
@@ -223,14 +223,14 @@ export const syncPublicFiles = async (
             setPublicFiles([...sortFiles(mergeMetadata(files), sortAsc)]);
         } catch (e) {
             const parsedError = parseSharingErrorCodes(e);
-            logError(e, "failed to sync shared collection files");
+            log.error("failed to sync shared collection files", e);
             if (parsedError.message === CustomError.TOKEN_EXPIRED) {
                 throw e;
             }
         }
         return [...sortFiles(mergeMetadata(files), sortAsc)];
     } catch (e) {
-        logError(e, "failed to get local  or sync shared collection files");
+        log.error("failed to get local  or sync shared collection files", e);
         throw e;
     }
 };
@@ -294,7 +294,7 @@ const getPublicFiles = async (
         } while (resp.data.hasMore);
         return decryptedFiles;
     } catch (e) {
-        logError(e, "Get public  files failed");
+        log.error("Get public  files failed", e);
         throw e;
     }
 };
@@ -347,7 +347,7 @@ export const getPublicCollection = async (
         await saveReferralCode(referralCode);
         return [collection, referralCode];
     } catch (e) {
-        logError(e, "failed to get public collection");
+        log.error("failed to get public collection", e);
         throw e;
     }
 };
@@ -366,7 +366,7 @@ export const verifyPublicCollectionPassword = async (
         const jwtToken = resp.data.jwtToken;
         return jwtToken;
     } catch (e) {
-        logError(e, "failed to verify public collection password");
+        log.error("failed to verify public collection password", e);
         throw e;
     }
 };

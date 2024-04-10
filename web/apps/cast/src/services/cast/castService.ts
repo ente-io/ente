@@ -1,10 +1,9 @@
+import log from "@/next/log";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { CustomError, parseSharingErrorCodes } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { getEndpoint } from "@ente/shared/network/api";
-import { logError } from "@ente/shared/sentry";
 import localForage from "@ente/shared/storage/localForage";
-
 import { Collection, CollectionPublicMagicMetadata } from "types/collection";
 import { EncryptedEnteFile, EnteFile } from "types/file";
 import { decryptFile, mergeMetadata, sortFiles } from "utils/file";
@@ -150,14 +149,14 @@ export const syncPublicFiles = async (
             setPublicFiles([...sortFiles(mergeMetadata(files), sortAsc)]);
         } catch (e) {
             const parsedError = parseSharingErrorCodes(e);
-            logError(e, "failed to sync shared collection files");
+            log.error("failed to sync shared collection files", e);
             if (parsedError.message === CustomError.TOKEN_EXPIRED) {
                 throw e;
             }
         }
         return [...sortFiles(mergeMetadata(files), sortAsc)];
     } catch (e) {
-        logError(e, "failed to get local  or sync shared collection files");
+        log.error("failed to get local  or sync shared collection files", e);
         throw e;
     }
 };
@@ -217,7 +216,7 @@ const fetchFiles = async (
         } while (resp.data.hasMore);
         return decryptedFiles;
     } catch (e) {
-        logError(e, "Get cast files failed");
+        log.error("Get cast files failed", e);
         throw e;
     }
 };
@@ -264,7 +263,7 @@ export const getCastCollection = async (
         await saveCollection(collection);
         return collection;
     } catch (e) {
-        logError(e, "failed to get cast collection");
+        log.error("failed to get cast collection", e);
         throw e;
     }
 };

@@ -1,7 +1,7 @@
+import log from "@/next/log";
 import { Overlay } from "@ente/shared/components/Container";
 import { CustomError } from "@ente/shared/error";
 import useLongPress from "@ente/shared/hooks/useLongPress";
-import { logError } from "@ente/shared/sentry";
 import { formatDateRelative } from "@ente/shared/time/format";
 import AlbumOutlined from "@mui/icons-material/AlbumOutlined";
 import PlayCircleOutlineOutlinedIcon from "@mui/icons-material/PlayCircleOutlineOutlined";
@@ -271,7 +271,7 @@ export default function PreviewCard(props: IProps) {
                 updateURL(file.id, url);
             } catch (e) {
                 if (e.message !== CustomError.URL_ALREADY_SET) {
-                    logError(e, "preview card useEffect failed");
+                    log.error("preview card useEffect failed", e);
                 }
                 // no-op
             }

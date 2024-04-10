@@ -2,10 +2,6 @@ import { t } from "i18next";
 import { useContext } from "react";
 
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
-import {
-    DESKTOP_ROADMAP_URL,
-    WEB_ROADMAP_URL,
-} from "@ente/shared/constants/urls";
 import { Typography } from "@mui/material";
 import { EnteMenuItem } from "components/Menu/EnteMenuItem";
 import { NoStyleAnchor } from "components/pages/sharedAlbum/GoToEnte";
@@ -20,17 +16,12 @@ export default function HelpSection() {
     const { setDialogMessage } = useContext(AppContext);
     const { openExportModal } = useContext(GalleryContext);
 
-    async function openRoadmap() {
-        let roadmapURL: string;
-        if (isElectron()) {
-            roadmapURL = DESKTOP_ROADMAP_URL;
-        } else {
-            roadmapURL = WEB_ROADMAP_URL;
-        }
-        openLink(roadmapURL, true);
-    }
+    const openRoadmap = () =>
+        openLink("https://github.com/ente-io/ente/discussions", true);
 
-    function handleExportOpen() {
+    const contactSupport = () => openLink("mailto:support@ente.io", true);
+
+    function openExport() {
         if (isElectron()) {
             openExportModal();
         } else {
@@ -46,7 +37,7 @@ export default function HelpSection() {
                 variant="secondary"
             />
             <EnteMenuItem
-                onClick={() => openLink("mailto:support@ente.io", true)}
+                onClick={contactSupport}
                 labelComponent={
                     <NoStyleAnchor href="mailto:support@ente.io">
                         <Typography fontWeight={"bold"}>
@@ -57,7 +48,7 @@ export default function HelpSection() {
                 variant="secondary"
             />
             <EnteMenuItem
-                onClick={handleExportOpen}
+                onClick={openExport}
                 label={t("EXPORT")}
                 endIcon={
                     exportService.isExportInProgress() && (

@@ -30,7 +30,7 @@ interface AppContextProps {
 
 export const AppContext = createContext<AppContextProps>({} as AppContextProps);
 
-export default function App(props: AppProps) {
+export default function App({ Component, pageProps }: AppProps) {
     const [isI18nReady, setIsI18nReady] = useState<boolean>(false);
 
     const [showNavbar, setShowNavBar] = useState(false);
@@ -49,8 +49,6 @@ export default function App(props: AppProps) {
     const isMobile = useMediaQuery("(max-width:428px)");
 
     const router = useRouter();
-
-    const { Component, pageProps } = props;
 
     const [themeColor] = useLocalState(LS_KEYS.THEME, THEME_COLOR.DARK);
 

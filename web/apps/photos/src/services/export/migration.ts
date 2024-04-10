@@ -1,7 +1,7 @@
-import { addLocalLog, addLogLine } from "@ente/shared/logging";
-import { logError } from "@ente/shared/sentry";
+import log from "@/next/log";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import { User } from "@ente/shared/user/types";
+import { sleep } from "@ente/shared/utils";
 import { FILE_TYPE } from "constants/file";
 import { getLocalCollections } from "services/collectionService";
 import downloadManager from "services/download";
@@ -19,7 +19,6 @@ import {
 } from "types/export";
 import { EnteFile } from "types/file";
 import { getNonEmptyPersonalCollections } from "utils/collection";
-import { sleep } from "utils/common";
 import {
     getCollectionExportPath,
     getCollectionIDFromFileUID,
@@ -52,25 +51,25 @@ export async function migrateExport(
     updateProgress: (progress: ExportProgress) => void,
 ) {
     try {
-        addLogLine(`current export version: ${exportRecord.version}`);
+        log.info(`current export version: ${exportRecord.version}`);
         if (exportRecord.version === 0) {
-            addLogLine("migrating export to version 1");
+            log.info("migrating export to version 1");
             await migrationV0ToV1(exportDir, exportRecord as ExportRecordV0);
             exportRecord = await exportService.updateExportRecord(exportDir, {
                 version: 1,
             });
-            addLogLine("migration to version 1 complete");
+            log.info("migration to version 1 complete");
         }
         if (exportRecord.version === 1) {
-            addLogLine("migrating export to version 2");
+            log.info("migrating export to version 2");
             await migrationV1ToV2(exportRecord as ExportRecordV1, exportDir);
             exportRecord = await exportService.updateExportRecord(exportDir, {
                 version: 2,
             });
-            addLogLine("migration to version 2 complete");
+            log.info("migration to version 2 complete");
         }
         if (exportRecord.version === 2) {
-            addLogLine("migrating export to version 3");
+            log.info("migrating export to version 3");
             await migrationV2ToV3(
                 exportDir,
                 exportRecord as ExportRecordV2,
@@ -79,28 +78,28 @@ export async function migrateExport(
             exportRecord = await exportService.updateExportRecord(exportDir, {
                 version: 3,
             });
-            addLogLine("migration to version 3 complete");
+            log.info("migration to version 3 complete");
         }
 
         if (exportRecord.version === 3) {
-            addLogLine("migrating export to version 4");
+            log.info("migrating export to version 4");
             await migrationV3ToV4(exportDir, exportRecord as ExportRecord);
             exportRecord = await exportService.updateExportRecord(exportDir, {
                 version: 4,
             });
-            addLogLine("migration to version 4 complete");
+            log.info("migration to version 4 complete");
         }
         if (exportRecord.version === 4) {
-            addLogLine("migrating export to version 5");
+            log.info("migrating export to version 5");
             await migrationV4ToV5(exportDir, exportRecord as ExportRecord);
             exportRecord = await exportService.updateExportRecord(exportDir, {
                 version: 5,
             });
-            addLogLine("migration to version 5 complete");
+            log.info("migration to version 5 complete");
         }
-        addLogLine(`Record at latest version`);
+        log.info(`Record at latest version`);
     } catch (e) {
-        logError(e, "export record migration failed");
+        log.error("export record migration failed", e);
         throw e;
     }
 }
@@ -321,9 +320,8 @@ async function getFileExportNamesFromExportedFiles(
     if (!exportedFiles.length) {
         return;
     }
-    addLogLine(
-        "updating exported files to exported file paths property",
-        `got ${exportedFiles.length} files`,
+    log.info(
+        `updating exported files to exported file paths property, got ${exportedFiles.length} files`,
     );
     let exportedFileNames: FileExportNames;
     const usedFilePaths = new Map<string, Set<string>>();
@@ -334,7 +332,7 @@ async function getFileExportNamesFromExportedFiles(
     for (const file of exportedFiles) {
         await sleep(0);
         const collectionPath = exportedCollectionPaths.get(file.collectionID);
-        addLocalLog(
+        log.debug(
             () =>
                 `collection path for ${file.collectionID} is ${collectionPath}`,
         );
@@ -367,7 +365,7 @@ async function getFileExportNamesFromExportedFiles(
                 usedFilePaths,
             );
         }
-        addLocalLog(
+        log.debug(
             () =>
                 `file export name for ${file.metadata.title} is ${fileExportName}`,
         );
@@ -419,7 +417,7 @@ async function addCollectionExportedRecordV1(
 
         await exportService.updateExportRecord(folder, exportRecord);
     } catch (e) {
-        logError(e, "addCollectionExportedRecord failed");
+        log.error("addCollectionExportedRecord failed", e);
         throw e;
     }
 }

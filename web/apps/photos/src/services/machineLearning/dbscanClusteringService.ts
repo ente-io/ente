@@ -22,7 +22,7 @@ class DbscanClusteringService implements ClusteringService {
         input: ClusteringInput,
         config: ClusteringConfig,
     ): Promise<HdbscanResults> {
-        // addLogLine('Clustering input: ', input);
+        // log.info('Clustering input: ', input);
         const dbscan = new DBSCAN();
         const clusters = dbscan.run(
             input,

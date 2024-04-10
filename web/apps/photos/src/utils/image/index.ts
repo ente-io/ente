@@ -80,7 +80,7 @@ export function cropWithRotation(
         }
     }
 
-    // addLogLine({ imageBitmap, box, outputSize });
+    // log.info({ imageBitmap, box, outputSize });
 
     const offscreen = new OffscreenCanvas(outputSize.width, outputSize.height);
     const offscreenCtx = offscreen.getContext("2d");

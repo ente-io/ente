@@ -61,7 +61,7 @@ export function getFaceAlignmentUsingSimilarityTransform(
         simTransform.rotation.get(0, 1),
         simTransform.rotation.get(0, 0),
     );
-    // addLogLine({ affineMatrix, meanTranslation, centerMat, center, toMean: simTransform.toMean, fromMean: simTransform.fromMean, size });
+    // log.info({ affineMatrix, meanTranslation, centerMat, center, toMean: simTransform.toMean, fromMean: simTransform.fromMean, size });
 
     return {
         affineMatrix,
@@ -169,7 +169,7 @@ export function ibExtractFaceImageUsingTransform(
     const scaledMatrix = new Matrix(alignment.affineMatrix)
         .mul(faceSize)
         .to2DArray();
-    // addLogLine("scaledMatrix: ", scaledMatrix);
+    // log.info("scaledMatrix: ", scaledMatrix);
     return transform(image, scaledMatrix, faceSize, faceSize);
 }
 
@@ -230,7 +230,7 @@ export function getRotatedFaceImage(
     padding: number = 1.5,
 ): tf.Tensor4D {
     const paddedBox = enlargeBox(faceDetection.box, padding);
-    // addLogLine("paddedBox", paddedBox);
+    // log.info("paddedBox", paddedBox);
     const landmarkPoints = faceDetection.landmarks;
 
     return tf.tidy(() => {
@@ -245,15 +245,15 @@ export function getRotatedFaceImage(
             foreheadCenter,
         ); // landmarkPoints[BLAZEFACE_NOSE_INDEX]
         // angle = computeRotation(leftEye, rightEye);
-        // addLogLine('angle: ', angle);
+        // log.info('angle: ', angle);
 
         const faceCenter = getBoxCenter(faceDetection.box);
-        // addLogLine('faceCenter: ', faceCenter);
+        // log.info('faceCenter: ', faceCenter);
         const faceCenterNormalized: [number, number] = [
             faceCenter.x / tf4dFloat32Image.shape[2],
             faceCenter.y / tf4dFloat32Image.shape[1],
         ];
-        // addLogLine('faceCenterNormalized: ', faceCenterNormalized);
+        // log.info('faceCenterNormalized: ', faceCenterNormalized);
 
         let rotatedImage = tf4dFloat32Image;
         if (angle !== 0) {
