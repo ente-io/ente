@@ -522,6 +522,7 @@ class FileUploader {
             fileUploadURLs,
             encryptedFilePath,
             await encryptedFile.length(),
+            fileAttributes.key!,
           );
           fileObjectKey = await putMultipartFile(fileUploadURLs, encryptedFile);
         }
