@@ -103,7 +103,7 @@ export const saveKeyInSessionStore = async (
     setKey(keyType, sessionKeyAttributes);
     const electron = globalThis.electron;
     if (electron && !fromDesktop && keyType === SESSION_KEYS.ENCRYPTION_KEY) {
-        electron.setEncryptionKey(key);
+        electron.saveEncryptionKey(key);
     }
 };
 

@@ -363,16 +363,14 @@ export default function Gallery() {
             }, SYNC_INTERVAL_IN_MICROSECONDS);
             if (electron) {
                 void clipService.setupOnFileUploadListener();
-                electron.registerForegroundEventListener(() => {
-                    syncWithRemote(false, true);
-                });
+                electron.onMainWindowFocus(() => syncWithRemote(false, true));
             }
         };
         main();
         return () => {
             clearInterval(syncInterval.current);
             if (electron) {
-                electron.registerForegroundEventListener(() => {});
+                electron.onMainWindowFocus(undefined);
                 clipService.removeOnFileUploadListener();
             }
         };
