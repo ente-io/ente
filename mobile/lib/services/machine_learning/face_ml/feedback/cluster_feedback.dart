@@ -47,221 +47,6 @@ class ClusterFeedbackService {
     lastViewedClusterID = -1;
   }
 
-  /// Returns a map of person's clusterID to map of closest clusterID to with disstance
-  Future<Map<int, List<(int, double)>>> getSuggestionsUsingMean(
-    PersonEntity p, {
-    double maxClusterDistance = 0.4,
-  }) async {
-    // Get all the cluster data
-    final faceMlDb = FaceMLDataDB.instance;
-
-    final allClusterIdsToCountMap = (await faceMlDb.clusterIdToFaceCount());
-    final ignoredClusters = await faceMlDb.getPersonIgnoredClusters(p.remoteID);
-    final personClusters = await faceMlDb.getPersonClusterIDs(p.remoteID);
-    dev.log(
-      'existing clusters for ${p.data.name} are $personClusters',
-      name: "ClusterFeedbackService",
-    );
-
-    // Get and update the cluster summary to get the avg (centroid) and count
-    final EnteWatch watch = EnteWatch("ClusterFeedbackService")..start();
-    final Map<int, List<double>> clusterAvg = await _getUpdateClusterAvg(
-      allClusterIdsToCountMap,
-      ignoredClusters,
-    );
-    watch.log('computed avg for ${clusterAvg.length} clusters');
-
-    // Find the actual closest clusters for the person
-    final Map<int, List<(int, double)>> suggestions = _calcSuggestionsMean(
-      clusterAvg,
-      personClusters,
-      ignoredClusters,
-      maxClusterDistance,
-    );
-
-    // log suggestions
-    for (final entry in suggestions.entries) {
-      dev.log(
-        ' ${entry.value.length} suggestion for ${p.data.name} for cluster ID ${entry.key} are  suggestions ${entry.value}}',
-        name: "ClusterFeedbackService",
-      );
-    }
-    return suggestions;
-  }
-
-  /// Returns a list of suggestions. For each suggestion we return a record consisting of the following elements:
-  /// 1. clusterID: the ID of the cluster
-  /// 2. distance: the distance between the person's cluster and the suggestion
-  /// 3. usedMean: whether the suggestion was found using the mean (true) or the median (false)
-  Future<List<(int, double, bool)>> getSuggestionsUsingMedian(
-    PersonEntity p, {
-    int sampleSize = 50,
-    double maxMedianDistance = 0.65,
-    double goodMedianDistance = 0.55,
-    double maxMeanDistance = 0.65,
-    double goodMeanDistance = 0.4,
-  }) async {
-    // Get all the cluster data
-    final faceMlDb = FaceMLDataDB.instance;
-    // final Map<int, List<(int, double)>> suggestions = {};
-    final allClusterIdsToCountMap = (await faceMlDb.clusterIdToFaceCount());
-    final ignoredClusters = await faceMlDb.getPersonIgnoredClusters(p.remoteID);
-    final personClusters = await faceMlDb.getPersonClusterIDs(p.remoteID);
-    dev.log(
-      'existing clusters for ${p.data.name} are $personClusters',
-      name: "getSuggestionsUsingMedian",
-    );
-
-    // Get and update the cluster summary to get the avg (centroid) and count
-    final EnteWatch watch = EnteWatch("ClusterFeedbackService")..start();
-    final Map<int, List<double>> clusterAvg = await _getUpdateClusterAvg(
-      allClusterIdsToCountMap,
-      ignoredClusters,
-    );
-    watch.log('computed avg for ${clusterAvg.length} clusters');
-
-    // Find the other cluster candidates based on the mean
-    final Map<int, List<(int, double)>> suggestionsMean = _calcSuggestionsMean(
-      clusterAvg,
-      personClusters,
-      ignoredClusters,
-      goodMeanDistance,
-    );
-    if (suggestionsMean.isNotEmpty) {
-      final List<(int, double)> suggestClusterIds = [];
-      for (final List<(int, double)> suggestion in suggestionsMean.values) {
-        suggestClusterIds.addAll(suggestion);
-      }
-      suggestClusterIds.sort(
-        (a, b) => allClusterIdsToCountMap[b.$1]!
-            .compareTo(allClusterIdsToCountMap[a.$1]!),
-      );
-      final suggestClusterIdsSizes = suggestClusterIds
-          .map((e) => allClusterIdsToCountMap[e.$1]!)
-          .toList(growable: false);
-      final suggestClusterIdsDistances =
-          suggestClusterIds.map((e) => e.$2).toList(growable: false);
-      _logger.info(
-        "Already found good suggestions using mean: $suggestClusterIds, with sizes $suggestClusterIdsSizes and distances $suggestClusterIdsDistances",
-      );
-      return suggestClusterIds
-          .map((e) => (e.$1, e.$2, true))
-          .toList(growable: false);
-    }
-
-    // Find the other cluster candidates based on the median
-    final Map<int, List<(int, double)>> moreSuggestionsMean =
-        _calcSuggestionsMean(
-      clusterAvg,
-      personClusters,
-      ignoredClusters,
-      maxMeanDistance,
-    );
-    if (moreSuggestionsMean.isEmpty) {
-      _logger
-          .info("No suggestions found using mean, even with higher threshold");
-      return [];
-    }
-
-    final List<(int, double)> temp = [];
-    for (final List<(int, double)> suggestion in moreSuggestionsMean.values) {
-      temp.addAll(suggestion);
-    }
-    temp.sort((a, b) => a.$2.compareTo(b.$2));
-    final otherClusterIdsCandidates = temp
-        .map(
-          (e) => e.$1,
-        )
-        .toList(growable: false);
-    _logger.info(
-      "Found potential suggestions from loose mean for median test: $otherClusterIdsCandidates",
-    );
-
-    watch.logAndReset("Starting median test");
-    // Take the embeddings from the person's clusters in one big list and sample from it
-    final List<Uint8List> personEmbeddingsProto = [];
-    for (final clusterID in personClusters) {
-      final Iterable<Uint8List> embedings =
-          await FaceMLDataDB.instance.getFaceEmbeddingsForCluster(clusterID);
-      personEmbeddingsProto.addAll(embedings);
-    }
-    final List<Uint8List> sampledEmbeddingsProto =
-        _randomSampleWithoutReplacement(
-      personEmbeddingsProto,
-      sampleSize,
-    );
-    final List<List<double>> sampledEmbeddings = sampledEmbeddingsProto
-        .map((embedding) => EVector.fromBuffer(embedding).values)
-        .toList(growable: false);
-
-    // Find the actual closest clusters for the person using median
-    final List<(int, double)> suggestionsMedian = [];
-    final List<(int, double)> greatSuggestionsMedian = [];
-    double minMedianDistance = maxMedianDistance;
-    for (final otherClusterId in otherClusterIdsCandidates) {
-      final Iterable<Uint8List> otherEmbeddingsProto =
-          await FaceMLDataDB.instance.getFaceEmbeddingsForCluster(
-        otherClusterId,
-      );
-      final sampledOtherEmbeddingsProto = _randomSampleWithoutReplacement(
-        otherEmbeddingsProto,
-        sampleSize,
-      );
-      final List<List<double>> sampledOtherEmbeddings =
-          sampledOtherEmbeddingsProto
-              .map((embedding) => EVector.fromBuffer(embedding).values)
-              .toList(growable: false);
-
-      // Calculate distances and find the median
-      final List<double> distances = [];
-      for (final otherEmbedding in sampledOtherEmbeddings) {
-        for (final embedding in sampledEmbeddings) {
-          distances.add(cosineDistForNormVectors(embedding, otherEmbedding));
-        }
-      }
-      distances.sort();
-      final double medianDistance = distances[distances.length ~/ 2];
-      if (medianDistance < minMedianDistance) {
-        suggestionsMedian.add((otherClusterId, medianDistance));
-        minMedianDistance = medianDistance;
-        if (medianDistance < goodMedianDistance) {
-          greatSuggestionsMedian.add((otherClusterId, medianDistance));
-          break;
-        }
-      }
-    }
-    watch.log("Finished median test");
-    if (suggestionsMedian.isEmpty) {
-      _logger.info("No suggestions found using median");
-      return [];
-    } else {
-      _logger.info("Found suggestions using median: $suggestionsMedian");
-    }
-
-    final List<(int, double, bool)> finalSuggestionsMedian = suggestionsMedian
-        .map(((e) => (e.$1, e.$2, false)))
-        .toList(growable: false)
-        .reversed
-        .toList(growable: false);
-
-    if (greatSuggestionsMedian.isNotEmpty) {
-      _logger.info(
-        "Found great suggestion using median: $greatSuggestionsMedian",
-      );
-      // // Return the largest size cluster by using allClusterIdsToCountMap
-      // final List<int> greatSuggestionsMedianClusterIds =
-      //     greatSuggestionsMedian.map((e) => e.$1).toList(growable: false);
-      // greatSuggestionsMedianClusterIds.sort(
-      //   (a, b) =>
-      //       allClusterIdsToCountMap[b]!.compareTo(allClusterIdsToCountMap[a]!),
-      // );
-
-      // return [greatSuggestionsMedian.last.$1, ...finalSuggestionsMedian];
-    }
-
-    return finalSuggestionsMedian;
-  }
-
   /// Returns a list of cluster suggestions for a person. Each suggestion is a tuple of the following elements:
   /// 1. clusterID: the ID of the cluster
   /// 2. distance: the distance between the person's cluster and the suggestion
@@ -278,7 +63,7 @@ class ClusterFeedbackService {
     try {
       // Get the suggestions for the person using centroids and median
       final List<(int, double, bool)> suggestClusterIds =
-          await getSuggestionsUsingMedian(person);
+          await _getSuggestionsUsingMedian(person);
 
       // Get the files for the suggestions
       final Map<int, Set<int>> fileIdToClusterID =
@@ -507,6 +292,221 @@ class ClusterFeedbackService {
     }
 
     return clusterIdToFaceIds;
+  }
+
+  /// Returns a map of person's clusterID to map of closest clusterID to with disstance
+  Future<Map<int, List<(int, double)>>> getSuggestionsUsingMean(
+    PersonEntity p, {
+    double maxClusterDistance = 0.4,
+  }) async {
+    // Get all the cluster data
+    final faceMlDb = FaceMLDataDB.instance;
+
+    final allClusterIdsToCountMap = (await faceMlDb.clusterIdToFaceCount());
+    final ignoredClusters = await faceMlDb.getPersonIgnoredClusters(p.remoteID);
+    final personClusters = await faceMlDb.getPersonClusterIDs(p.remoteID);
+    dev.log(
+      'existing clusters for ${p.data.name} are $personClusters',
+      name: "ClusterFeedbackService",
+    );
+
+    // Get and update the cluster summary to get the avg (centroid) and count
+    final EnteWatch watch = EnteWatch("ClusterFeedbackService")..start();
+    final Map<int, List<double>> clusterAvg = await _getUpdateClusterAvg(
+      allClusterIdsToCountMap,
+      ignoredClusters,
+    );
+    watch.log('computed avg for ${clusterAvg.length} clusters');
+
+    // Find the actual closest clusters for the person
+    final Map<int, List<(int, double)>> suggestions = _calcSuggestionsMean(
+      clusterAvg,
+      personClusters,
+      ignoredClusters,
+      maxClusterDistance,
+    );
+
+    // log suggestions
+    for (final entry in suggestions.entries) {
+      dev.log(
+        ' ${entry.value.length} suggestion for ${p.data.name} for cluster ID ${entry.key} are  suggestions ${entry.value}}',
+        name: "ClusterFeedbackService",
+      );
+    }
+    return suggestions;
+  }
+
+  /// Returns a list of suggestions. For each suggestion we return a record consisting of the following elements:
+  /// 1. clusterID: the ID of the cluster
+  /// 2. distance: the distance between the person's cluster and the suggestion
+  /// 3. usedMean: whether the suggestion was found using the mean (true) or the median (false)
+  Future<List<(int, double, bool)>> _getSuggestionsUsingMedian(
+    PersonEntity p, {
+    int sampleSize = 50,
+    double maxMedianDistance = 0.65,
+    double goodMedianDistance = 0.55,
+    double maxMeanDistance = 0.65,
+    double goodMeanDistance = 0.4,
+  }) async {
+    // Get all the cluster data
+    final faceMlDb = FaceMLDataDB.instance;
+    // final Map<int, List<(int, double)>> suggestions = {};
+    final allClusterIdsToCountMap = (await faceMlDb.clusterIdToFaceCount());
+    final ignoredClusters = await faceMlDb.getPersonIgnoredClusters(p.remoteID);
+    final personClusters = await faceMlDb.getPersonClusterIDs(p.remoteID);
+    dev.log(
+      'existing clusters for ${p.data.name} are $personClusters',
+      name: "getSuggestionsUsingMedian",
+    );
+
+    // Get and update the cluster summary to get the avg (centroid) and count
+    final EnteWatch watch = EnteWatch("ClusterFeedbackService")..start();
+    final Map<int, List<double>> clusterAvg = await _getUpdateClusterAvg(
+      allClusterIdsToCountMap,
+      ignoredClusters,
+    );
+    watch.log('computed avg for ${clusterAvg.length} clusters');
+
+    // Find the other cluster candidates based on the mean
+    final Map<int, List<(int, double)>> suggestionsMean = _calcSuggestionsMean(
+      clusterAvg,
+      personClusters,
+      ignoredClusters,
+      goodMeanDistance,
+    );
+    if (suggestionsMean.isNotEmpty) {
+      final List<(int, double)> suggestClusterIds = [];
+      for (final List<(int, double)> suggestion in suggestionsMean.values) {
+        suggestClusterIds.addAll(suggestion);
+      }
+      suggestClusterIds.sort(
+        (a, b) => allClusterIdsToCountMap[b.$1]!
+            .compareTo(allClusterIdsToCountMap[a.$1]!),
+      );
+      final suggestClusterIdsSizes = suggestClusterIds
+          .map((e) => allClusterIdsToCountMap[e.$1]!)
+          .toList(growable: false);
+      final suggestClusterIdsDistances =
+          suggestClusterIds.map((e) => e.$2).toList(growable: false);
+      _logger.info(
+        "Already found good suggestions using mean: $suggestClusterIds, with sizes $suggestClusterIdsSizes and distances $suggestClusterIdsDistances",
+      );
+      return suggestClusterIds
+          .map((e) => (e.$1, e.$2, true))
+          .toList(growable: false);
+    }
+
+    // Find the other cluster candidates based on the median
+    final Map<int, List<(int, double)>> moreSuggestionsMean =
+        _calcSuggestionsMean(
+      clusterAvg,
+      personClusters,
+      ignoredClusters,
+      maxMeanDistance,
+    );
+    if (moreSuggestionsMean.isEmpty) {
+      _logger
+          .info("No suggestions found using mean, even with higher threshold");
+      return [];
+    }
+
+    final List<(int, double)> temp = [];
+    for (final List<(int, double)> suggestion in moreSuggestionsMean.values) {
+      temp.addAll(suggestion);
+    }
+    temp.sort((a, b) => a.$2.compareTo(b.$2));
+    final otherClusterIdsCandidates = temp
+        .map(
+          (e) => e.$1,
+        )
+        .toList(growable: false);
+    _logger.info(
+      "Found potential suggestions from loose mean for median test: $otherClusterIdsCandidates",
+    );
+
+    watch.logAndReset("Starting median test");
+    // Take the embeddings from the person's clusters in one big list and sample from it
+    final List<Uint8List> personEmbeddingsProto = [];
+    for (final clusterID in personClusters) {
+      final Iterable<Uint8List> embedings =
+          await FaceMLDataDB.instance.getFaceEmbeddingsForCluster(clusterID);
+      personEmbeddingsProto.addAll(embedings);
+    }
+    final List<Uint8List> sampledEmbeddingsProto =
+        _randomSampleWithoutReplacement(
+      personEmbeddingsProto,
+      sampleSize,
+    );
+    final List<List<double>> sampledEmbeddings = sampledEmbeddingsProto
+        .map((embedding) => EVector.fromBuffer(embedding).values)
+        .toList(growable: false);
+
+    // Find the actual closest clusters for the person using median
+    final List<(int, double)> suggestionsMedian = [];
+    final List<(int, double)> greatSuggestionsMedian = [];
+    double minMedianDistance = maxMedianDistance;
+    for (final otherClusterId in otherClusterIdsCandidates) {
+      final Iterable<Uint8List> otherEmbeddingsProto =
+          await FaceMLDataDB.instance.getFaceEmbeddingsForCluster(
+        otherClusterId,
+      );
+      final sampledOtherEmbeddingsProto = _randomSampleWithoutReplacement(
+        otherEmbeddingsProto,
+        sampleSize,
+      );
+      final List<List<double>> sampledOtherEmbeddings =
+          sampledOtherEmbeddingsProto
+              .map((embedding) => EVector.fromBuffer(embedding).values)
+              .toList(growable: false);
+
+      // Calculate distances and find the median
+      final List<double> distances = [];
+      for (final otherEmbedding in sampledOtherEmbeddings) {
+        for (final embedding in sampledEmbeddings) {
+          distances.add(cosineDistForNormVectors(embedding, otherEmbedding));
+        }
+      }
+      distances.sort();
+      final double medianDistance = distances[distances.length ~/ 2];
+      if (medianDistance < minMedianDistance) {
+        suggestionsMedian.add((otherClusterId, medianDistance));
+        minMedianDistance = medianDistance;
+        if (medianDistance < goodMedianDistance) {
+          greatSuggestionsMedian.add((otherClusterId, medianDistance));
+          break;
+        }
+      }
+    }
+    watch.log("Finished median test");
+    if (suggestionsMedian.isEmpty) {
+      _logger.info("No suggestions found using median");
+      return [];
+    } else {
+      _logger.info("Found suggestions using median: $suggestionsMedian");
+    }
+
+    final List<(int, double, bool)> finalSuggestionsMedian = suggestionsMedian
+        .map(((e) => (e.$1, e.$2, false)))
+        .toList(growable: false)
+        .reversed
+        .toList(growable: false);
+
+    if (greatSuggestionsMedian.isNotEmpty) {
+      _logger.info(
+        "Found great suggestion using median: $greatSuggestionsMedian",
+      );
+      // // Return the largest size cluster by using allClusterIdsToCountMap
+      // final List<int> greatSuggestionsMedianClusterIds =
+      //     greatSuggestionsMedian.map((e) => e.$1).toList(growable: false);
+      // greatSuggestionsMedianClusterIds.sort(
+      //   (a, b) =>
+      //       allClusterIdsToCountMap[b]!.compareTo(allClusterIdsToCountMap[a]!),
+      // );
+
+      // return [greatSuggestionsMedian.last.$1, ...finalSuggestionsMedian];
+    }
+
+    return finalSuggestionsMedian;
   }
 
   Future<Map<int, List<double>>> _getUpdateClusterAvg(
