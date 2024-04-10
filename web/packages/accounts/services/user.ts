@@ -11,49 +11,44 @@ import { PAGES } from "../constants/pages";
 
 export const logoutUser = async () => {
     try {
-        try {
-            await _logout();
-        } catch (e) {
-            // ignore
-        }
-        try {
-            InMemoryStore.clear();
-        } catch (e) {
-            // ignore
-            log.error("clear InMemoryStore failed", e);
-        }
-        try {
-            clearKeys();
-        } catch (e) {
-            log.error("clearKeys failed", e);
-        }
-        try {
-            clearData();
-        } catch (e) {
-            log.error("clearData failed", e);
-        }
-        try {
-            await deleteAllCache();
-        } catch (e) {
-            log.error("deleteAllCache failed", e);
-        }
-        try {
-            await clearFiles();
-        } catch (e) {
-            log.error("clearFiles failed", e);
-        }
-        try {
-            globalThis.electron?.clearElectronStore();
-        } catch (e) {
-            log.error("clearElectronStore failed", e);
-        }
-        try {
-            eventBus.emit(Events.LOGOUT);
-        } catch (e) {
-            log.error("Error in logout handlers", e);
-        }
-        router.push(PAGES.ROOT);
+        await _logout();
     } catch (e) {
-        log.error("logoutUser failed", e);
+        log.error("Ignoring error during POST /users/logout", e);
     }
+    try {
+        InMemoryStore.clear();
+    } catch (e) {
+        log.error("Ignoring error when clearing in-memory store", e);
+    }
+    try {
+        clearKeys();
+    } catch (e) {
+        log.error("Ignoring error when clearing keys", e);
+    }
+    try {
+        clearData();
+    } catch (e) {
+        log.error("Ignoring error when clearing data", e);
+    }
+    try {
+        await deleteAllCache();
+    } catch (e) {
+        log.error("Ignoring error when clearing caches", e);
+    }
+    try {
+        await clearFiles();
+    } catch (e) {
+        log.error("Ignoring error when clearing files", e);
+    }
+    try {
+        globalThis.electron?.clearStores();
+    } catch (e) {
+        log.error("Ignoring error when clearing electron stores", e);
+    }
+    try {
+        eventBus.emit(Events.LOGOUT);
+    } catch (e) {
+        log.error("Ignoring error in event-bus logout handlers", e);
+    }
+    router.push(PAGES.ROOT);
 };

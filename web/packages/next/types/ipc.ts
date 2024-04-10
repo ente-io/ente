@@ -41,6 +41,15 @@ export interface Electron {
     appVersion: () => Promise<string>;
 
     /**
+     * Log the given {@link message} to the on-disk log file maintained by the
+     * desktop app.
+     *
+     * Note: Unlike the other functions exposed over the Electron bridge,
+     * logToDisk is fire-and-forget and does not return a promise.
+     */
+    logToDisk: (message: string) => void;
+
+    /**
      * Open the given {@link dirPath} in the system's folder viewer.
      *
      * For example, on macOS this'll open {@link dirPath} in Finder.
@@ -55,13 +64,18 @@ export interface Electron {
     openLogDirectory: () => Promise<void>;
 
     /**
-     * Log the given {@link message} to the on-disk log file maintained by the
-     * desktop app.
+     * Clear any stored data.
      *
-     * Note: Unlike the other functions exposed over the Electron bridge,
-     * logToDisk is fire-and-forget and does not return a promise.
+     * This is a coarse single shot cleanup, meant for use in clearing any
+     * Electron side state during logout.
      */
-    logToDisk: (message: string) => void;
+    clearStores: () => void;
+
+    setEncryptionKey: (encryptionKey: string) => Promise<void>;
+
+    getEncryptionKey: () => Promise<string>;
+
+    registerForegroundEventListener: (onForeground: () => void) => void;
 
     /**
      * A subset of filesystem access APIs.
@@ -97,16 +111,6 @@ export interface Electron {
      * runtime. For such functions, find an efficient alternative or refactor
      * the dataflow.
      */
-
-    // - General
-
-    registerForegroundEventListener: (onForeground: () => void) => void;
-
-    clearElectronStore: () => void;
-
-    setEncryptionKey: (encryptionKey: string) => Promise<void>;
-
-    getEncryptionKey: () => Promise<string>;
 
     // - App update
 

@@ -52,34 +52,32 @@ import type {
 
 const appVersion = (): Promise<string> => ipcRenderer.invoke("appVersion");
 
+const logToDisk = (message: string): void =>
+    ipcRenderer.send("logToDisk", message);
+
 const openDirectory = (dirPath: string): Promise<void> =>
     ipcRenderer.invoke("openDirectory", dirPath);
 
 const openLogDirectory = (): Promise<void> =>
     ipcRenderer.invoke("openLogDirectory");
 
-const logToDisk = (message: string): void =>
-    ipcRenderer.send("logToDisk", message);
-
-const fsExists = (path: string): Promise<boolean> =>
-    ipcRenderer.invoke("fsExists", path);
-
-// - AUDIT below this
-
-const registerForegroundEventListener = (onForeground: () => void) => {
-    ipcRenderer.removeAllListeners("app-in-foreground");
-    ipcRenderer.on("app-in-foreground", onForeground);
-};
-
-const clearElectronStore = () => {
-    ipcRenderer.send("clear-electron-store");
-};
+const clearStores = () => ipcRenderer.send("clearStores");
 
 const setEncryptionKey = (encryptionKey: string): Promise<void> =>
     ipcRenderer.invoke("setEncryptionKey", encryptionKey);
 
 const getEncryptionKey = (): Promise<string> =>
     ipcRenderer.invoke("getEncryptionKey");
+
+const registerForegroundEventListener = (onForeground: () => void) => {
+    ipcRenderer.removeAllListeners("app-in-foreground");
+    ipcRenderer.on("app-in-foreground", onForeground);
+};
+
+const fsExists = (path: string): Promise<boolean> =>
+    ipcRenderer.invoke("fsExists", path);
+
+// - AUDIT below this
 
 // - App update
 
@@ -303,15 +301,13 @@ const getDirFiles = (dirPath: string): Promise<ElectronFile[]> =>
 contextBridge.exposeInMainWorld("electron", {
     // - General
     appVersion,
+    logToDisk,
     openDirectory,
-    registerForegroundEventListener,
-    clearElectronStore,
+    openLogDirectory,
+    clearStores,
     getEncryptionKey,
     setEncryptionKey,
-
-    // - Logging
-    openLogDirectory,
-    logToDisk,
+    registerForegroundEventListener,
 
     // - App update
     updateAndRestart,

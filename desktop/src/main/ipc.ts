@@ -27,7 +27,7 @@ import {
     generateImageThumbnail,
 } from "../services/imageProcessor";
 import {
-    clearElectronStore,
+    clearStores,
     getEncryptionKey,
     setEncryptionKey,
 } from "../services/store";
@@ -98,9 +98,7 @@ export const attachIPCHandlers = () => {
     // See [Note: Catching exception during .send/.on]
     ipcMain.on("logToDisk", (_, message) => logToDisk(message));
 
-    ipcMain.on("clear-electron-store", () => {
-        clearElectronStore();
-    });
+    ipcMain.on("clearStores", () => clearStores());
 
     ipcMain.handle("setEncryptionKey", (_, encryptionKey) =>
         setEncryptionKey(encryptionKey),

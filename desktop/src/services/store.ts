@@ -4,7 +4,7 @@ import { safeStorageStore } from "../stores/safeStorage.store";
 import { uploadStatusStore } from "../stores/upload.store";
 import { watchStore } from "../stores/watch.store";
 
-export const clearElectronStore = () => {
+export const clearStores = () => {
     uploadStatusStore.clear();
     keysStore.clear();
     safeStorageStore.clear();

@@ -62,7 +62,6 @@ export const _logout = async () => {
         ) {
             return;
         }
-        log.error("/users/logout failed", e);
         throw e;
     }
 };
