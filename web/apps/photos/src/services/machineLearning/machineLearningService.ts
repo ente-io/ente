@@ -1,12 +1,13 @@
 import log from "@/next/log";
 import { APPS } from "@ente/shared/apps/constants";
-import { CustomError, parseUploadErrorCodes } from "@ente/shared/error";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
+import { CustomError, parseUploadErrorCodes } from "@ente/shared/error";
 import "@tensorflow/tfjs-backend-cpu";
 import "@tensorflow/tfjs-backend-webgl";
 import * as tf from "@tensorflow/tfjs-core";
 import { MAX_ML_SYNC_ERROR_COUNT } from "constants/mlConfig";
 import downloadManager from "services/download";
+import { putEmbedding } from "services/embeddingService";
 import { getLocalFiles } from "services/fileService";
 import { EnteFile } from "types/file";
 import {
@@ -16,14 +17,13 @@ import {
     MlFileData,
 } from "types/machineLearning";
 import { getMLSyncConfig } from "utils/machineLearning/config";
+import { LocalFileMlDataToServerFileMl } from "utils/machineLearning/mldataMappers";
 import mlIDbStorage from "utils/storage/mlIDbStorage";
 import FaceService from "./faceService";
 import { MLFactory } from "./machineLearningFactory";
 import ObjectService from "./objectService";
 import PeopleService from "./peopleService";
 import ReaderService from "./readerService";
-import { LocalFileMlDataToServerFileMl } from "utils/machineLearning/mldataMappers";
-import { putEmbedding } from "services/embeddingService";
 
 class MachineLearningService {
     private initialized = false;
@@ -165,7 +165,7 @@ class MachineLearningService {
 
         log.info("syncLocalFiles", Date.now() - startTime, "ms");
     }
-    
+
     private async getOutOfSyncFiles(syncContext: MLSyncContext) {
         const startTime = Date.now();
         const fileIds = await mlIDbStorage.getFileIds(
@@ -213,19 +213,18 @@ class MachineLearningService {
         // existingFiles.sort(
         //     (a, b) => b.metadata.creationTime - a.metadata.creationTime
         // );
-        console.time('getUniqueOutOfSyncFiles');
+        console.time("getUniqueOutOfSyncFiles");
         syncContext.outOfSyncFiles = await this.getUniqueOutOfSyncFilesNoIdx(
             syncContext,
-            [...existingFilesMap.values()]
+            [...existingFilesMap.values()],
         );
-        log.info('getUniqueOutOfSyncFiles');
+        log.info("getUniqueOutOfSyncFiles");
         log.info(
-            'Got unique outOfSyncFiles: ',
+            "Got unique outOfSyncFiles: ",
             syncContext.outOfSyncFiles.length,
-            'for batchSize: ',
-            syncContext.config.batchSize
+            "for batchSize: ",
+            syncContext.config.batchSize,
         );
-
     }
 
     private async syncFiles(syncContext: MLSyncContext) {
@@ -441,9 +440,9 @@ class MachineLearningService {
     }
 
     private async persistOnServer(mlFileData: MlFileData, enteFile: EnteFile) {
-        const serverMl = LocalFileMlDataToServerFileMl(mlFileData)
-            log.info(mlFileData);
-        
+        const serverMl = LocalFileMlDataToServerFileMl(mlFileData);
+        log.info(mlFileData);
+
         const comlinkCryptoWorker = await ComlinkCryptoWorker.getInstance();
         const { file: encryptedEmbeddingData } =
             await comlinkCryptoWorker.encryptMetadata(serverMl, enteFile.key);

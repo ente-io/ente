@@ -13,11 +13,14 @@ import type {
     PutEmbeddingRequest,
 } from "types/embedding";
 import { EnteFile } from "types/file";
-import { getLatestVersionEmbeddings,getLatestVersionFileEmbeddings } from "utils/embedding";
+import {
+    getLatestVersionEmbeddings,
+    getLatestVersionFileEmbeddings,
+} from "utils/embedding";
+import { FileML } from "utils/machineLearning/mldataMappers";
 import { getLocalCollections } from "./collectionService";
 import { getAllLocalFiles } from "./fileService";
 import { getLocalTrashedFiles } from "./trashService";
-import { FileML } from "utils/machineLearning/mldataMappers";
 
 const ENDPOINT = getEndpoint();
 
@@ -154,7 +157,7 @@ export const syncEmbeddings = async () => {
 export const syncFileEmbeddings = async () => {
     const models: EmbeddingModel[] = ["file-ml-clip-face"];
     try {
-        let allEmbeddings :FileML[] = await getFileMLEmbeddings();
+        let allEmbeddings: FileML[] = await getFileMLEmbeddings();
         const localFiles = await getAllLocalFiles();
         const hiddenAlbums = await getLocalCollections("hidden");
         const localTrashFiles = await getLocalTrashedFiles();
@@ -179,7 +182,6 @@ export const syncFileEmbeddings = async () => {
                 const newEmbeddings = await Promise.all(
                     response.diff.map(async (embedding) => {
                         try {
-                          
                             const worker =
                                 await ComlinkCryptoWorker.getInstance();
                             const fileKey = fileIdToKeyMap.get(
@@ -196,7 +198,7 @@ export const syncFileEmbeddings = async () => {
 
                             return {
                                 ...decryptedData,
-                                updatedAt: embedding.updatedAt
+                                updatedAt: embedding.updatedAt,
                             } as unknown as FileML;
                         } catch (e) {
                             let hasHiddenAlbums = false;
@@ -228,7 +230,6 @@ export const syncFileEmbeddings = async () => {
         log.error("Sync embeddings failed", e);
     }
 };
-
 
 export const getEmbeddingsDiff = async (
     sinceTime: number,
@@ -263,7 +264,7 @@ export const putEmbedding = async (
     try {
         const token = getToken();
         if (!token) {
-            log.info('putEmbedding failed: token not found');
+            log.info("putEmbedding failed: token not found");
             throw Error(CustomError.TOKEN_MISSING);
         }
         const resp = await HTTPService.put(

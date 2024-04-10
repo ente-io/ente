@@ -1,4 +1,9 @@
-import { Face, FaceDetection, Landmark, MlFileData } from "types/machineLearning";
+import {
+    Face,
+    FaceDetection,
+    Landmark,
+    MlFileData,
+} from "types/machineLearning";
 import { ClipEmbedding } from "types/machineLearning/data/clip";
 
 export interface FileML extends ServerFileMl {
@@ -11,7 +16,6 @@ class ServerFileMl {
     public width?: number;
     public faceEmbedding: ServerFaceEmbeddings;
     public clipEmbedding?: ClipEmbedding;
-
 
     public constructor(
         fileID: number,
@@ -154,12 +158,14 @@ class ServerFaceBox {
     }
 }
 
-
 export function LocalFileMlDataToServerFileMl(
     localFileMlData: MlFileData,
 ): ServerFileMl {
-    if(localFileMlData.errorCount > 0 && localFileMlData.lastErrorMessage !== undefined) {
-        return null
+    if (
+        localFileMlData.errorCount > 0 &&
+        localFileMlData.lastErrorMessage !== undefined
+    ) {
+        return null;
     }
     const imageDimensions = localFileMlData.imageDimensions;
     const fileInfo = new ServerFileInfo(
@@ -176,22 +182,15 @@ export function LocalFileMlDataToServerFileMl(
         const detection: FaceDetection = face.detection;
         const box = detection.box;
         const landmarks = detection.landmarks;
-        const newBox = new ServerFaceBox(
-            box.x,
-            box.y,
-            box.width,
-            box.height,
-        );
+        const newBox = new ServerFaceBox(box.x, box.y, box.width, box.height);
         const newLandmarks: Landmark[] = [];
         for (let j = 0; j < landmarks.length; j++) {
-            newLandmarks.push(
-                 {
-                    x: landmarks[j].x,
-                    y: landmarks[j].y,
-                 } as Landmark,
-                );
+            newLandmarks.push({
+                x: landmarks[j].x,
+                y: landmarks[j].y,
+            } as Landmark);
         }
-        
+
         const newFaceObject = new ServerFace(
             localFileMlData.fileId,
             faceID,
@@ -203,7 +202,11 @@ export function LocalFileMlDataToServerFileMl(
         );
         faces.push(newFaceObject);
     }
-    const faceEmbeddings = new ServerFaceEmbeddings(faces, 1,localFileMlData.lastErrorMessage);
+    const faceEmbeddings = new ServerFaceEmbeddings(
+        faces,
+        1,
+        localFileMlData.lastErrorMessage,
+    );
     return new ServerFileMl(
         localFileMlData.fileId,
         faceEmbeddings,
@@ -212,7 +215,6 @@ export function LocalFileMlDataToServerFileMl(
         imageDimensions.width,
     );
 }
-
 
 // // Not sure if this actually works
 // export function ServerFileMlToLocalFileMlData(
