@@ -1,11 +1,13 @@
 import log from "@/next/log";
 import { APPS } from "@ente/shared/apps/constants";
+import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { CustomError, parseUploadErrorCodes } from "@ente/shared/error";
 import "@tensorflow/tfjs-backend-cpu";
 import "@tensorflow/tfjs-backend-webgl";
 import * as tf from "@tensorflow/tfjs-core";
 import { MAX_ML_SYNC_ERROR_COUNT } from "constants/mlConfig";
 import downloadManager from "services/download";
+import { putEmbedding } from "services/embeddingService";
 import { getLocalFiles } from "services/fileService";
 import { EnteFile } from "types/file";
 import {
@@ -15,6 +17,7 @@ import {
     MlFileData,
 } from "types/machineLearning";
 import { getMLSyncConfig } from "utils/machineLearning/config";
+import { LocalFileMlDataToServerFileMl } from "utils/machineLearning/mldataMappers";
 import mlIDbStorage from "utils/storage/mlIDbStorage";
 import FaceService from "./faceService";
 import { MLFactory } from "./machineLearningFactory";
@@ -215,13 +218,13 @@ class MachineLearningService {
             syncContext,
             [...existingFilesMap.values()],
         );
-        // addLogLine("getUniqueOutOfSyncFiles");
-        // addLogLine(
-        //     "Got unique outOfSyncFiles: ",
-        //     syncContext.outOfSyncFiles.length,
-        //     "for batchSize: ",
-        //     syncContext.config.batchSize,
-        // );
+        log.info("getUniqueOutOfSyncFiles");
+        log.info(
+            "Got unique outOfSyncFiles: ",
+            syncContext.outOfSyncFiles.length,
+            "for batchSize: ",
+            syncContext.config.batchSize,
+        );
     }
 
     private async syncFiles(syncContext: MLSyncContext) {
@@ -415,6 +418,7 @@ class MachineLearningService {
             ]);
             newMlFile.errorCount = 0;
             newMlFile.lastErrorMessage = undefined;
+            await this.persistOnServer(newMlFile, enteFile);
             await this.persistMLFileData(syncContext, newMlFile);
         } catch (e) {
             log.error("ml detection failed", e);
@@ -433,6 +437,25 @@ class MachineLearningService {
         }
 
         return newMlFile;
+    }
+
+    private async persistOnServer(mlFileData: MlFileData, enteFile: EnteFile) {
+        const serverMl = LocalFileMlDataToServerFileMl(mlFileData);
+        log.info(mlFileData);
+
+        const comlinkCryptoWorker = await ComlinkCryptoWorker.getInstance();
+        const { file: encryptedEmbeddingData } =
+            await comlinkCryptoWorker.encryptMetadata(serverMl, enteFile.key);
+        log.info(
+            `putEmbedding embedding to server for file: ${enteFile.metadata.title} fileID: ${enteFile.id}`,
+        );
+        const res = await putEmbedding({
+            fileID: enteFile.id,
+            encryptedEmbedding: encryptedEmbeddingData.encryptedData,
+            decryptionHeader: encryptedEmbeddingData.decryptionHeader,
+            model: "file-ml-clip-face",
+        });
+        log.info("putEmbedding response: ", res);
     }
 
     public async init() {
