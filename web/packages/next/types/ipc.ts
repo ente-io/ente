@@ -72,7 +72,7 @@ export interface Electron {
     clearStores: () => void;
 
     /**
-     * Return the previously saved encryption key from persintent safe storage.
+     * Return the previously saved encryption key from persistent safe storage.
      *
      * If no such key is found, return `undefined`.
      *

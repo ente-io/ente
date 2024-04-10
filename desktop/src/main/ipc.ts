@@ -19,7 +19,7 @@ import {
 import {
     clipImageEmbedding,
     clipTextEmbedding,
-} from "../services/clip-service";
+} from "../services/clip";
 import { runFFmpegCmd } from "../services/ffmpeg";
 import { getDirFiles } from "../services/fs";
 import {
