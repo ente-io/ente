@@ -46,8 +46,6 @@ export type Search = {
     collection?: number;
     files?: number[];
     person?: Person;
-    thing?: Thing;
-    text?: WordGroup;
     fileType?: FILE_TYPE;
     clip?: ClipSearchScores;
 };
