@@ -139,7 +139,17 @@ export const sidebar = [
         text: "Auth",
         items: [
             { text: "Introduction", link: "/auth/" },
-            { text: "FAQ", link: "/auth/faq/" },
+            {
+                text: "FAQ",
+                collapsed: true,
+                items: [
+                    { text: "General", link: "/auth/faq/" },
+                    {
+                        text: "Enteception",
+                        link: "/auth/faq/enteception/",
+                    },
+                ],
+            },
             {
                 text: "Migration",
                 collapsed: true,
