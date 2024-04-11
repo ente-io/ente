@@ -210,10 +210,11 @@ class _RequestPasswordVerificationPageState
                     },
                   ),
                 ),
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 18),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 18),
                   child: Divider(
                     thickness: 1,
+                    color: getEnteColorScheme(context).strokeFaint,
                   ),
                 ),
               ],
