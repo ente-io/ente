@@ -139,5 +139,6 @@ export const faceEmbedding = async (input: Float32Array) => {
     const feeds = { img_inputs: inputTensor };
     const results = await session.run(feeds);
     log.debug(() => `onnx/yolo face embedding took ${Date.now() - t} ms`);
-    return results.embeddings["cpuData"]; // as Float32Array;
+    // TODO: What's with this type?
+    return (results.embeddings as unknown as any)["cpuData"]; // as Float32Array;
 };
