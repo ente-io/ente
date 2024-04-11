@@ -53,15 +53,4 @@ export const DEFAULT_ML_SEARCH_CONFIG: MLSearchConfig = {
     enabled: false,
 };
 
-export const ML_SYNC_DOWNLOAD_TIMEOUT_MS = 300000;
-
-export const MAX_FACE_DISTANCE_PERCENT = Math.sqrt(2) / 100;
-
 export const MAX_ML_SYNC_ERROR_COUNT = 1;
-
-export const TEXT_DETECTION_TIMEOUT_MS = [10000, 30000, 60000, 120000, 240000];
-
-export const MOBILEFACENET_FACE_SIZE = 112;
-export const MOBILEFACENET_EMBEDDING_SIZE = 192;
-
-export const BATCHES_BEFORE_SYNCING_INDEX = 5;

@@ -1,5 +1,4 @@
 import { ensureElectron } from "@/next/electron";
-import { MAX_FACE_DISTANCE_PERCENT } from "constants/mlConfig";
 import { euclidean } from "hdbscan";
 import {
     Matrix,
@@ -36,7 +35,8 @@ class YoloFaceDetectionService implements FaceDetectionService {
     public async detectFaces(
         imageBitmap: ImageBitmap,
     ): Promise<Array<FaceDetection>> {
-        const maxFaceDistance = imageBitmap.width * MAX_FACE_DISTANCE_PERCENT;
+        const maxFaceDistancePercent = Math.sqrt(2) / 100;
+        const maxFaceDistance = imageBitmap.width * maxFaceDistancePercent;
         const preprocessResult =
             this.preprocessImageBitmapToFloat32ChannelsFirst(
                 imageBitmap,

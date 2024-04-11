@@ -287,9 +287,8 @@ export interface FaceAlignmentService {
 export interface FaceEmbeddingService {
     method: Versioned<FaceEmbeddingMethod>;
     faceSize: number;
-    // init(): Promise<void>;
+
     getFaceEmbeddings(faceImages: Float32Array): Promise<Array<FaceEmbedding>>;
-    dispose(): Promise<void>;
 }
 
 export interface BlurDetectionService {
