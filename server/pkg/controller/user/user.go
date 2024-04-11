@@ -368,7 +368,15 @@ func (c *UserController) HandleAccountRecovery(ctx *gin.Context, req ente.Recove
 		return stacktrace.Propagate(err, "")
 	}
 	err = c.UserRepo.UpdateEmail(req.UserID, encryptedEmail, emailHash)
-	return stacktrace.Propagate(err, "failed to update email")
+	if err != nil {
+		return stacktrace.Propagate(err, "failed to update email")
+	}
+	err = c.DataCleanupRepo.RemoveScheduledDelete(ctx, req.UserID)
+	if err != nil {
+		logrus.WithError(err).Error("failed to remove scheduled delete")
+		return stacktrace.Propagate(err, "")
+	}
+	return stacktrace.Propagate(err, "")
 }
 
 func (c *UserController) attachFreeSubscription(userID int64) (ente.Subscription, error) {
