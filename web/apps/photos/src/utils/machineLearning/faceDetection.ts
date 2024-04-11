@@ -35,6 +35,18 @@ export function getDetectionCenter(detection: FaceDetection) {
     return center.div({ x: 4, y: 4 });
 }
 
+/**
+ * Finds the nearest face detection from a list of detections to a specified detection.
+ *
+ * This function calculates the center of each detection and then finds the detection whose center is nearest to the center of the specified detection.
+ * If a maximum distance is specified, only detections within that distance are considered.
+ *
+ * @param toDetection - The face detection to find the nearest detection to.
+ * @param fromDetections - An array of face detections to search in.
+ * @param maxDistance - The maximum distance between the centers of the two detections for a detection to be considered. If not specified, all detections are considered.
+ *
+ * @returns The nearest face detection from the list, or `undefined` if no detection is within the maximum distance.
+ */
 export function getNearestDetection(
     toDetection: FaceDetection,
     fromDetections: Array<FaceDetection>,
@@ -47,7 +59,18 @@ export function getNearestDetection(
     return nearestIndex >= 0 && fromDetections[nearestIndex];
 }
 
-// TODO: can also be done through tf.image.nonMaxSuppression
+/**
+ * Removes duplicate face detections from an array of detections.
+ *
+ * This function sorts the detections by their probability in descending order, then iterates over them.
+ * For each detection, it calculates the Euclidean distance to all other detections.
+ * If the distance is less than or equal to the specified threshold (`withinDistance`), the other detection is considered a duplicate and is removed.
+ *
+ * @param detections - An array of face detections to remove duplicates from.
+ * @param withinDistance - The maximum Euclidean distance between two detections for them to be considered duplicates.
+ *
+ * @returns An array of face detections with duplicates removed.
+ */
 export function removeDuplicateDetections(
     detections: Array<FaceDetection>,
     withinDistance: number,

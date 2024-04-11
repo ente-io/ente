@@ -332,8 +332,10 @@ function searchCollection(
 }
 
 function searchFilesByName(searchPhrase: string, files: EnteFile[]) {
-    return files.filter((file) =>
-        file.metadata.title.toLowerCase().includes(searchPhrase),
+    return files.filter(
+        (file) =>
+            file.id.toString().includes(searchPhrase) ||
+            file.metadata.title.toLowerCase().includes(searchPhrase),
     );
 }
 

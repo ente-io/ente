@@ -1,11 +1,11 @@
 import pathToFfmpeg from "ffmpeg-static";
 import { existsSync } from "node:fs";
 import fs from "node:fs/promises";
-import { writeStream } from "../main/fs";
-import log from "../main/log";
-import { execAsync } from "../main/util";
-import { ElectronFile } from "../types/ipc";
-import { generateTempFilePath, getTempDirPath } from "../utils/temp";
+import { ElectronFile } from "../../types/ipc";
+import { writeStream } from "../fs";
+import log from "../log";
+import { generateTempFilePath, getTempDirPath } from "../temp";
+import { execAsync } from "../util";
 
 const INPUT_PATH_PLACEHOLDER = "INPUT";
 const FFMPEG_PLACEHOLDER = "FFMPEG";

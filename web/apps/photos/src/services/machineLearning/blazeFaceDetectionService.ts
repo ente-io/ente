@@ -51,6 +51,11 @@ class BlazeFaceDetectionService implements FaceDetectionService {
         this.desiredFaceSize = desiredFaceSize;
     }
 
+    public getRelativeDetection(): FaceDetection {
+        // TODO(MR): onnx-yolo
+        throw new Error();
+    }
+
     private async init() {
         this.blazeFaceModel = blazeFaceLoad({
             maxFaces: BLAZEFACE_MAX_FACES,

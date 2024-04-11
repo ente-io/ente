@@ -1,4 +1,5 @@
 import * as tf from "@tensorflow/tfjs-core";
+
 import { DebugInfo } from "hdbscan";
 import PQueue from "p-queue";
 import { EnteFile } from "types/file";
@@ -13,6 +14,14 @@ export interface MLSyncResult {
     nFaceNoise: number;
     tsne?: any;
     error?: Error;
+}
+
+export interface DebugFace {
+    fileId: string;
+    // face: FaceApiResult;
+    face: AlignedFace;
+    embedding: FaceEmbedding;
+    faceImage: FaceImage;
 }
 
 export declare type FaceImage = Array<Array<Array<number>>>;
@@ -50,7 +59,10 @@ export declare type Landmark = Point;
 
 export declare type ImageType = "Original" | "Preview";
 
-export declare type FaceDetectionMethod = "BlazeFace" | "FaceApiSSD";
+export declare type FaceDetectionMethod =
+    | "BlazeFace"
+    | "FaceApiSSD"
+    | "YoloFace";
 
 export declare type ObjectDetectionMethod = "SSDMobileNetV2";
 
@@ -64,6 +76,8 @@ export declare type FaceAlignmentMethod =
     | "RotatedFaceApiDlib";
 
 export declare type FaceEmbeddingMethod = "MobileFaceNet" | "FaceApiDlib";
+
+export declare type BlurDetectionMethod = "Laplacian";
 
 export declare type ClusteringMethod = "Hdbscan" | "Dbscan";
 
@@ -120,6 +134,7 @@ export interface FaceAlignment {
 
 export interface AlignedFace extends CroppedFace {
     alignment?: FaceAlignment;
+    blurValue?: number;
 }
 
 export declare type FaceEmbedding = Float32Array;
@@ -186,7 +201,6 @@ export interface MlFileData {
 
 export interface FaceDetectionConfig {
     method: FaceDetectionMethod;
-    minFaceSize: number;
 }
 
 export interface ObjectDetectionConfig {
@@ -215,6 +229,11 @@ export interface FaceAlignmentConfig {
     method: FaceAlignmentMethod;
 }
 
+export interface BlurDetectionConfig {
+    method: BlurDetectionMethod;
+    threshold: number;
+}
+
 export interface FaceEmbeddingConfig {
     method: FaceEmbeddingMethod;
     faceSize: number;
@@ -241,6 +260,7 @@ export interface MLSyncConfig {
     faceDetection: FaceDetectionConfig;
     faceCrop: FaceCropConfig;
     faceAlignment: FaceAlignmentConfig;
+    blurDetection: BlurDetectionConfig;
     faceEmbedding: FaceEmbeddingConfig;
     faceClustering: FaceClusteringConfig;
     objectDetection: ObjectDetectionConfig;
@@ -263,6 +283,7 @@ export interface MLSyncContext {
     faceCropService: FaceCropService;
     faceAlignmentService: FaceAlignmentService;
     faceEmbeddingService: FaceEmbeddingService;
+    blurDetectionService: BlurDetectionService;
     faceClusteringService: ClusteringService;
     objectDetectionService: ObjectDetectionService;
     sceneDetectionService: SceneDetectionService;
@@ -312,6 +333,10 @@ export interface FaceDetectionService {
     method: Versioned<FaceDetectionMethod>;
     // init(): Promise<void>;
     detectFaces(image: ImageBitmap): Promise<Array<FaceDetection>>;
+    getRelativeDetection(
+        faceDetection: FaceDetection,
+        imageDimensions: Dimensions,
+    ): FaceDetection;
     dispose(): Promise<void>;
 }
 
@@ -354,10 +379,13 @@ export interface FaceEmbeddingService {
     method: Versioned<FaceEmbeddingMethod>;
     faceSize: number;
     // init(): Promise<void>;
-    getFaceEmbeddings(
-        faceImages: Array<ImageBitmap>,
-    ): Promise<Array<FaceEmbedding>>;
+    getFaceEmbeddings(faceImages: Float32Array): Promise<Array<FaceEmbedding>>;
     dispose(): Promise<void>;
+}
+
+export interface BlurDetectionService {
+    method: Versioned<BlurDetectionMethod>;
+    detectBlur(alignedFaces: Float32Array): number[];
 }
 
 export interface ClusteringService {
@@ -396,18 +424,3 @@ export interface MachineLearningWorker {
 
     close(): void;
 }
-
-// export class TFImageBitmap {
-//     imageBitmap: ImageBitmap;
-//     tfImage: tf.Tensor3D;
-
-//     constructor(imageBitmap: ImageBitmap, tfImage: tf.Tensor3D) {
-//         this.imageBitmap = imageBitmap;
-//         this.tfImage = tfImage;
-//     }
-
-//     async dispose() {
-//         this.tfImage && (await tf.dispose(this.tfImage));
-//         this.imageBitmap && this.imageBitmap.close();
-//     }
-// }

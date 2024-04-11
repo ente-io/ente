@@ -2,8 +2,8 @@ import StreamZip from "node-stream-zip";
 import { existsSync } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
-import log from "../main/log";
-import { ElectronFile } from "../types/ipc";
+import { ElectronFile } from "../../types/ipc";
+import log from "../log";
 
 const FILE_STREAM_CHUNK_SIZE: number = 4 * 1024 * 1024;
 
