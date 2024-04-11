@@ -928,10 +928,10 @@ packages:
     dependency: "direct dev"
     description:
       name: freezed
-      sha256: "91bce569d4805ea5bad6619a3e8690df8ad062a235165af4c0c5d928dda15eaf"
+      sha256: a434911f643466d78462625df76fd9eb13e57348ff43fe1f77bbe909522c67a1
       url: "https://pub.dev"
     source: hosted
-    version: "2.5.1"
+    version: "2.5.2"
   freezed_annotation:
     dependency: "direct main"
     description:
@@ -1093,10 +1093,10 @@ packages:
     dependency: transitive
     description:
       name: in_app_purchase_android
-      sha256: "6863bf74335ccbd80829e8c3d16176f90794f0f8593a4505a7ab79d17334a0bf"
+      sha256: b9d4ecf70c51ab46222502c050b1535f6249caf9d768c4abd856ea16a18a882d
       url: "https://pub.dev"
     source: hosted
-    version: "0.3.3"
+    version: "0.3.3+1"
   in_app_purchase_platform_interface:
     dependency: transitive
     description:
@@ -1410,11 +1410,10 @@ packages:
     dependency: "direct main"
     description:
       name: ml_linalg
-      sha256: "36b658c6619c4e1b47f8e2edd100308fd75a5b71d1e6359d8be0cbe06214b441"
+      sha256: "304cb8a2a172f2303226d672d0b6f18dbfe558e2db49d27c8aa9f3e15475c0cd"
       url: "https://pub.dev"
     source: hosted
-    version: "13.11.31"
-    version: "1.0.5"
+    version: "13.12.2"
   modal_bottom_sheet:
     dependency: "direct main"
     description:
