@@ -10,8 +10,8 @@ import "package:photos/services/remote_assets_service.dart";
 import "package:photos/utils/image_ml_isolate.dart";
 import "package:synchronized/synchronized.dart";
 
-/// This class is responsible for running the face embedding model on ONNX runtime, and can be accessed through the singleton instance [FaceEmbeddingOnnx.instance].
-class FaceEmbeddingOnnx {
+/// This class is responsible for running the face embedding model on ONNX runtime, and can be accessed through the singleton instance [FaceEmbeddingService.instance].
+class FaceEmbeddingService {
   static const kModelBucketEndpoint = "https://models.ente.io/";
   static const kRemoteBucketModelPath = "mobilefacenet_opset15.onnx";
   static const modelRemotePath = kModelBucketEndpoint + kRemoteBucketModelPath;
@@ -31,7 +31,7 @@ class FaceEmbeddingOnnx {
   final _computerLock = Lock();
 
   // singleton pattern
-  FaceEmbeddingOnnx._privateConstructor();
+  FaceEmbeddingService._privateConstructor();
 
   /// Use this instance to access the FaceEmbedding service. Make sure to call `init()` before using it.
   /// e.g. `await FaceEmbedding.instance.init();`
@@ -39,8 +39,8 @@ class FaceEmbeddingOnnx {
   /// Then you can use `predict()` to get the embedding of a face, so `FaceEmbedding.instance.predict(imageData)`
   ///
   /// config options: faceEmbeddingEnte
-  static final instance = FaceEmbeddingOnnx._privateConstructor();
-  factory FaceEmbeddingOnnx() => instance;
+  static final instance = FaceEmbeddingService._privateConstructor();
+  factory FaceEmbeddingService() => instance;
 
   /// Check if the interpreter is initialized, if not initialize it with `loadModel()`
   Future<void> init() async {
