@@ -125,8 +125,11 @@ class SemanticSearchService {
       return;
     }
     _isSyncing = true;
-    await EmbeddingStore.instance.pullEmbeddings(_currentModel);
-    await _backFill();
+    final fetchCompleted =
+        await EmbeddingStore.instance.pullEmbeddings(_currentModel);
+    if (fetchCompleted) {
+      await _backFill();
+    }
     _isSyncing = false;
   }
 

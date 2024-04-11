@@ -27,25 +27,33 @@ class EmbeddingStore {
 
   late SharedPreferences _preferences;
 
-  Completer<void>? _syncStatus;
+  Completer<bool>? _remoteSyncStatus;
 
   Future<void> init() async {
     _preferences = await SharedPreferences.getInstance();
   }
 
-  Future<void> pullEmbeddings(Model model) async {
-    if (_syncStatus != null) {
-      return _syncStatus!.future;
+  Future<bool> pullEmbeddings(Model model) async {
+    if (_remoteSyncStatus != null) {
+      return _remoteSyncStatus!.future;
     }
-    _syncStatus = Completer();
-    var remoteEmbeddings = await _getRemoteEmbeddings(model);
-    await _storeRemoteEmbeddings(remoteEmbeddings.embeddings);
-    while (remoteEmbeddings.hasMore) {
-      remoteEmbeddings = await _getRemoteEmbeddings(model);
+    _remoteSyncStatus = Completer();
+    try {
+      var remoteEmbeddings = await _getRemoteEmbeddings(model);
       await _storeRemoteEmbeddings(remoteEmbeddings.embeddings);
+      while (remoteEmbeddings.hasMore) {
+        remoteEmbeddings = await _getRemoteEmbeddings(model);
+        await _storeRemoteEmbeddings(remoteEmbeddings.embeddings);
+      }
+      _remoteSyncStatus!.complete(true);
+      _remoteSyncStatus = null;
+      return true;
+    } catch (e, s) {
+      _logger.severe("failed to fetch from remote", e, s);
+      _remoteSyncStatus!.complete(false);
+      _remoteSyncStatus = null;
+      return false;
     }
-    _syncStatus!.complete();
-    _syncStatus = null;
   }
 
   Future<void> pushEmbeddings() async {
@@ -117,7 +125,9 @@ class EmbeddingStore {
     final remoteEmbeddings = <RemoteEmbedding>[];
     try {
       final sinceTime = _preferences.getInt(kEmbeddingsSyncTimeKey) ?? 0;
-      _logger.info("Fetching embeddings since $sinceTime");
+      _logger.info(
+        "Fetching embeddings since $sinceTime (${DateTime.fromMicrosecondsSinceEpoch(sinceTime)})",
+      );
       final response = await _dio.get(
         "/embeddings/diff",
         queryParameters: {
