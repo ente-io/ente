@@ -13,16 +13,6 @@ export interface MLSyncResult {
     error?: Error;
 }
 
-export interface DebugFace {
-    fileId: string;
-    // face: FaceApiResult;
-    face: AlignedFace;
-    embedding: FaceEmbedding;
-    faceImage: FaceImage;
-}
-
-export declare type FaceImage = Array<Array<Array<number>>>;
-
 export declare type FaceDescriptor = Float32Array;
 
 export declare type Cluster = Array<number>;
