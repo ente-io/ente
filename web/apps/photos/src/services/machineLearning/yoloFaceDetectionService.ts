@@ -1,3 +1,4 @@
+import { workerBridge } from "@/next/worker/worker-bridge";
 import { euclidean } from "hdbscan";
 import {
     Matrix,
@@ -20,7 +21,6 @@ import {
 } from "utils/image";
 import { newBox } from "utils/machineLearning";
 import { Box, Point } from "../../../thirdparty/face-api/classes";
-import { workerBridge } from "@/next/worker/worker-bridge";
 
 class YoloFaceDetectionService implements FaceDetectionService {
     public method: Versioned<FaceDetectionMethod>;

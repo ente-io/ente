@@ -79,20 +79,6 @@ const faceEmbeddingSession = async () => {
 };
 
 export const detectFaces = async (input: Float32Array) => {
-    // console.log("start ort");
-    // this.onnxInferenceSession = await ort.InferenceSession.create(
-    //     "/models/yoloface/yolov5s_face_640_640_dynamic.onnx",
-    // );
-    // const data = new Float32Array(1 * 3 * 640 * 640);
-    // const inputTensor = new ort.Tensor("float32", data, [1, 3, 640, 640]);
-    // // TODO(MR): onnx-yolo
-    // // const feeds: Record<string, ort.Tensor> = {};
-    // const feeds: Record<string, any> = {};
-    // const name = this.onnxInferenceSession.inputNames[0];
-    // feeds[name] = inputTensor;
-    // await this.onnxInferenceSession.run(feeds);
-    // console.log("start end");
-
     const session = await faceDetectionSession();
     const t = Date.now();
     const feeds = {
@@ -104,28 +90,6 @@ export const detectFaces = async (input: Float32Array) => {
 };
 
 export const faceEmbedding = async (input: Float32Array) => {
-    // console.log("start ort mobilefacenet");
-    // this.onnxInferenceSession = await ort.InferenceSession.create(
-    //     "/models/mobilefacenet/mobilefacenet_opset15.onnx",
-    // );
-    // const faceBatchSize = 1;
-    // const data = new Float32Array(
-    //     faceBatchSize * 3 * this.faceSize * this.faceSize,
-    // );
-    // const inputTensor = new ort.Tensor("float32", data, [
-    //     faceBatchSize,
-    //     this.faceSize,
-    //     this.faceSize,
-    //     3,
-    // ]);
-    // // TODO(MR): onnx-yolo
-    // // const feeds: Record<string, ort.Tensor> = {};
-    // const feeds: Record<string, any> = {};
-    // const name = this.onnxInferenceSession.inputNames[0];
-    // feeds[name] = inputTensor;
-    // await this.onnxInferenceSession.run(feeds);
-    // console.log("start end mobilefacenet");
-
     // Dimension of each face (alias)
     const mobileFaceNetFaceSize = 112;
     // Smaller alias
@@ -139,6 +103,6 @@ export const faceEmbedding = async (input: Float32Array) => {
     const feeds = { img_inputs: inputTensor };
     const results = await session.run(feeds);
     log.debug(() => `onnx/yolo face embedding took ${Date.now() - t} ms`);
-    // TODO: What's with this type?
+    // TODO: What's with this type? It works in practice, but double check.
     return (results.embeddings as unknown as any)["cpuData"]; // as Float32Array;
 };
