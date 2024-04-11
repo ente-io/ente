@@ -1,5 +1,4 @@
-import { CacheStorageService } from "@ente/shared/storage/cacheStorage";
-import { CACHES } from "@ente/shared/storage/cacheStorage/constants";
+import { CACHES, CacheStorageService } from "@ente/shared/storage/cache";
 import { BlobOptions } from "types/image";
 import {
     FaceAlignment,

@@ -1,5 +1,5 @@
 import log from "@/next/log";
-import { CACHES } from "@ente/shared/storage/cacheStorage/constants";
+import { CACHES } from "@ente/shared/storage/cache";
 import { styled } from "@mui/material";
 import { Legend } from "components/PhotoViewer/styledComponents/Legend";
 import { t } from "i18next";

@@ -1,5 +1,5 @@
 import log from "@/next/log";
-import { cached } from "@ente/shared/storage/cacheStorage/helpers";
+import { cached } from "@ente/shared/storage/cache";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import { User } from "@ente/shared/user/types";
 import { Skeleton, styled } from "@mui/material";

@@ -4,9 +4,11 @@ import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
 import { CustomError } from "@ente/shared/error";
 import { Events, eventBus } from "@ente/shared/events";
-import { CacheStorageService } from "@ente/shared/storage/cacheStorage";
-import { CACHES } from "@ente/shared/storage/cacheStorage/constants";
-import { LimitedCache } from "@ente/shared/storage/cacheStorage/types";
+import {
+    CACHES,
+    CacheStorageService,
+    type LimitedCache,
+} from "@ente/shared/storage/cache";
 import { Remote } from "comlink";
 import { FILE_TYPE } from "constants/file";
 import isElectron from "is-electron";
