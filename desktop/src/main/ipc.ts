@@ -36,13 +36,14 @@ import {
     updateAndRestart,
     updateOnNextRestart,
 } from "./services/app-update";
-import { clipImageEmbedding, clipTextEmbedding } from "./services/ml-clip";
 import { runFFmpegCmd } from "./services/ffmpeg";
 import { getDirFiles } from "./services/fs";
 import {
     convertToJPEG,
     generateImageThumbnail,
 } from "./services/imageProcessor";
+import { clipImageEmbedding, clipTextEmbedding } from "./services/ml-clip";
+import { detectFaces, faceEmbedding } from "./services/ml-face";
 import {
     clearStores,
     encryptionKey,
@@ -144,6 +145,14 @@ export const attachIPCHandlers = () => {
 
     ipcMain.handle("clipTextEmbedding", (_, text: string) =>
         clipTextEmbedding(text),
+    );
+
+    ipcMain.handle("detectFaces", (_, imageData: Uint8Array) =>
+        detectFaces(imageData),
+    );
+
+    ipcMain.handle("faceEmbedding", (_, input: Float32Array) =>
+        faceEmbedding(input),
     );
 
     // - File selection

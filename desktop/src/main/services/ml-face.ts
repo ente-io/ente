@@ -78,6 +78,16 @@ const faceEmbeddingSession = async () => {
     return _faceEmbeddingSession;
 };
 
+export const detectFaces = async (inputImage: Uint8Array) => {
+    throw new Error("test");
+};
+
+export const faceEmbedding = async (input: Float32Array) => {
+    throw new Error("test");
+};
+
+/*
+
 private async initOnnx() {
     console.log("start ort");
     this.onnxInferenceSession = await ort.InferenceSession.create(
@@ -100,7 +110,7 @@ private async getOnnxInferenceSession() {
     }
     return this.onnxInferenceSession;
 }
-
+*/
 
 // export const clipImageEmbedding = async (jpegImageData: Uint8Array) => {
 //     const tempFilePath = await generateTempFilePath("");
