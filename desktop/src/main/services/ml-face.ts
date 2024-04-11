@@ -47,6 +47,36 @@ const faceDetectionSession = async () => {
     return _faceDetectionSession;
 };
 
+let activeFaceEmbeddingModelDownload: Promise<string> | undefined;
+
+const faceEmbeddingModelPathDownloadingIfNeeded = async () => {
+    try {
+        if (activeFaceEmbeddingModelDownload) {
+            log.info("Waiting for face embedding model download to finish");
+            await activeFaceEmbeddingModelDownload;
+        } else {
+            activeFaceEmbeddingModelDownload = modelPathDownloadingIfNeeded(
+                faceEmbeddingModelName,
+                faceEmbeddingModelByteSize,
+            );
+            return await activeFaceEmbeddingModelDownload;
+        }
+    } finally {
+        activeFaceEmbeddingModelDownload = undefined;
+    }
+};
+
+let _faceEmbeddingSession: Promise<ort.InferenceSession> | undefined;
+
+const faceEmbeddingSession = async () => {
+    if (!_faceEmbeddingSession) {
+        _faceEmbeddingSession =
+            faceEmbeddingModelPathDownloadingIfNeeded().then((modelPath) =>
+                createInferenceSession(modelPath),
+            );
+    }
+    return _faceEmbeddingSession;
+};
 
 // export const clipImageEmbedding = async (jpegImageData: Uint8Array) => {
 //     const tempFilePath = await generateTempFilePath("");
