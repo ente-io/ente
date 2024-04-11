@@ -1,4 +1,3 @@
-import { ensureElectron } from "@/next/electron";
 import { euclidean } from "hdbscan";
 import {
     Matrix,
@@ -21,6 +20,7 @@ import {
 } from "utils/image";
 import { newBox } from "utils/machineLearning";
 import { Box, Point } from "../../../thirdparty/face-api/classes";
+import { workerBridge } from "@/next/worker/worker-bridge";
 
 class YoloFaceDetectionService implements FaceDetectionService {
     public method: Versioned<FaceDetectionMethod>;
@@ -45,7 +45,7 @@ class YoloFaceDetectionService implements FaceDetectionService {
             );
         const data = preprocessResult.data;
         const resized = preprocessResult.newSize;
-        const outputData = await ensureElectron().detectFaces(data);
+        const outputData = await workerBridge.detectFaces(data);
         const faces = this.getFacesFromYoloOutput(
             outputData as Float32Array,
             0.7,

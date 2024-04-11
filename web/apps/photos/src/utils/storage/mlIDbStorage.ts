@@ -124,6 +124,7 @@ class MLIDbStorage {
                         .add(DEFAULT_ML_SEARCH_CONFIG, ML_SEARCH_CONFIG_NAME);
                 }
                 if (oldVersion < 4) {
+                    // TODO(MR): This loses the user's settings.
                     db.deleteObjectStore("configs");
                     db.createObjectStore("configs");
 

@@ -1,4 +1,4 @@
-import { ensureElectron } from "@/next/electron";
+import { workerBridge } from "@/next/worker/worker-bridge";
 import {
     FaceEmbedding,
     FaceEmbeddingMethod,
@@ -23,7 +23,7 @@ class MobileFaceNetEmbeddingService implements FaceEmbeddingService {
     public async getFaceEmbeddings(
         faceData: Float32Array,
     ): Promise<Array<FaceEmbedding>> {
-        const outputData = await ensureElectron().faceEmbedding(faceData);
+        const outputData = await workerBridge.faceEmbedding(faceData);
 
         const embeddingSize = 192;
         const embeddings = new Array<FaceEmbedding>(

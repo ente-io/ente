@@ -46,6 +46,9 @@ const workerBridge = {
     logToDisk,
     convertToJPEG: (inputFileData: Uint8Array, filename: string) =>
         ensureElectron().convertToJPEG(inputFileData, filename),
+    detectFaces: (input: Float32Array) => ensureElectron().detectFaces(input),
+    faceEmbedding: (input: Float32Array) =>
+        ensureElectron().faceEmbedding(input),
 };
 
 export type WorkerBridge = typeof workerBridge;
