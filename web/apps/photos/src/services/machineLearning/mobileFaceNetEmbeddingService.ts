@@ -1,11 +1,7 @@
-import log from "@/next/log";
-import * as tf from "@tensorflow/tfjs-core";
 import {
     MOBILEFACENET_EMBEDDING_SIZE,
     MOBILEFACENET_FACE_SIZE,
 } from "constants/mlConfig";
-// import { TFLiteModel } from "@tensorflow/tfjs-tflite";
-// import PQueue from "p-queue";
 import {
     FaceEmbedding,
     FaceEmbeddingMethod,
@@ -18,12 +14,6 @@ import {
 // import { env } from "onnxruntime-web";
 const ort: any = {};
 
-import {
-    clamp,
-    getPixelBilinear,
-    normalizePixelBetweenMinus1And1,
-} from "utils/image";
-
 // TODO(MR): onnx-yolo
 // env.wasm.wasmPaths = "/js/onnx/";
 class MobileFaceNetEmbeddingService implements FaceEmbeddingService {
@@ -33,12 +23,12 @@ class MobileFaceNetEmbeddingService implements FaceEmbeddingService {
     public method: Versioned<FaceEmbeddingMethod>;
     public faceSize: number;
 
-    public constructor(faceSize: number = MOBILEFACENET_FACE_SIZE) {
+    public constructor() {
         this.method = {
             value: "MobileFaceNet",
             version: 2,
         };
-        this.faceSize = faceSize;
+        this.faceSize = MOBILEFACENET_FACE_SIZE;
         // TODO: set timeout
     }
 
@@ -71,85 +61,6 @@ class MobileFaceNetEmbeddingService implements FaceEmbeddingService {
             await this.initOnnx();
         }
         return this.onnxInferenceSession;
-    }
-
-    private preprocessImageBitmapToFloat32(
-        imageBitmap: ImageBitmap,
-        requiredWidth: number = this.faceSize,
-        requiredHeight: number = this.faceSize,
-        maintainAspectRatio: boolean = true,
-        normFunction: (
-            pixelValue: number,
-        ) => number = normalizePixelBetweenMinus1And1,
-    ) {
-        // Create an OffscreenCanvas and set its size
-        const offscreenCanvas = new OffscreenCanvas(
-            imageBitmap.width,
-            imageBitmap.height,
-        );
-        const ctx = offscreenCanvas.getContext("2d");
-        ctx.drawImage(imageBitmap, 0, 0, imageBitmap.width, imageBitmap.height);
-        const imageData = ctx.getImageData(
-            0,
-            0,
-            imageBitmap.width,
-            imageBitmap.height,
-        );
-        const pixelData = imageData.data;
-
-        let scaleW = requiredWidth / imageBitmap.width;
-        let scaleH = requiredHeight / imageBitmap.height;
-        if (maintainAspectRatio) {
-            const scale = Math.min(
-                requiredWidth / imageBitmap.width,
-                requiredHeight / imageBitmap.height,
-            );
-            scaleW = scale;
-            scaleH = scale;
-        }
-        const scaledWidth = clamp(
-            Math.round(imageBitmap.width * scaleW),
-            0,
-            requiredWidth,
-        );
-        const scaledHeight = clamp(
-            Math.round(imageBitmap.height * scaleH),
-            0,
-            requiredHeight,
-        );
-
-        const processedImage = new Float32Array(
-            1 * requiredWidth * requiredHeight * 3,
-        );
-        log.info("loaded mobileFaceNetModel: ", tf.getBackend());
-
-        // Populate the Float32Array with normalized pixel values
-        for (let h = 0; h < requiredHeight; h++) {
-            for (let w = 0; w < requiredWidth; w++) {
-                let pixel: {
-                    r: number;
-                    g: number;
-                    b: number;
-                };
-                if (w >= scaledWidth || h >= scaledHeight) {
-                    pixel = { r: 114, g: 114, b: 114 };
-                } else {
-                    pixel = getPixelBilinear(
-                        w / scaleW,
-                        h / scaleH,
-                        pixelData,
-                        imageBitmap.width,
-                        imageBitmap.height,
-                    );
-                }
-                const pixelIndex = 3 * (h * requiredWidth + w);
-                processedImage[pixelIndex] = normFunction(pixel.r);
-                processedImage[pixelIndex + 1] = normFunction(pixel.g);
-                processedImage[pixelIndex + 2] = normFunction(pixel.b);
-            }
-        }
-
-        return processedImage;
     }
 
     public async getFaceEmbeddings(

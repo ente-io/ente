@@ -5,17 +5,25 @@ import { getToken, getUserID } from "@ente/shared/storage/localStorage/helpers";
 import { FILE_TYPE } from "constants/file";
 import debounce from "debounce";
 import PQueue from "p-queue";
+import { JobResult } from "types/common/job";
 import { EnteFile } from "types/file";
+import { MLSyncResult } from "types/machineLearning";
 import { getDedicatedMLWorker } from "utils/comlink/ComlinkMLWorker";
+import { SimpleJob } from "utils/common/job";
 import { logQueueStats } from "utils/machineLearning";
 import { getMLSyncJobConfig } from "utils/machineLearning/config";
 import mlIDbStorage from "utils/storage/mlIDbStorage";
 import { DedicatedMLWorker } from "worker/ml.worker";
-import { MLSyncJob, MLSyncJobResult } from "./mlSyncJob";
 
 const LIVE_SYNC_IDLE_DEBOUNCE_SEC = 30;
 const LIVE_SYNC_QUEUE_TIMEOUT_SEC = 300;
 const LOCAL_FILES_UPDATED_DEBOUNCE_SEC = 30;
+
+export interface MLSyncJobResult extends JobResult {
+    mlSyncResult: MLSyncResult;
+}
+
+export class MLSyncJob extends SimpleJob<MLSyncJobResult> {}
 
 class MLWorkManager {
     private mlSyncJob: MLSyncJob;

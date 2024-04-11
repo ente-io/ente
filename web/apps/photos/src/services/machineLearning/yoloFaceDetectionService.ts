@@ -1,7 +1,11 @@
+import { MAX_FACE_DISTANCE_PERCENT } from "constants/mlConfig";
 import {
-    BLAZEFACE_FACE_SIZE,
-    MAX_FACE_DISTANCE_PERCENT,
-} from "constants/mlConfig";
+    Matrix,
+    applyToPoint,
+    compose,
+    scale,
+    translate,
+} from "transformation-matrix";
 import { Dimensions } from "types/image";
 import {
     FaceDetection,
@@ -15,12 +19,6 @@ import {
     normalizePixelBetween0And1,
 } from "utils/image";
 import { newBox } from "utils/machineLearning";
-import { removeDuplicateDetections } from "utils/machineLearning/faceDetection";
-import {
-    computeTransformToBox,
-    transformBox,
-    transformPoints,
-} from "utils/machineLearning/transform";
 import { Box, Point } from "../../../thirdparty/face-api/classes";
 
 // TODO(MR): onnx-yolo
@@ -35,14 +33,12 @@ class YoloFaceDetectionService implements FaceDetectionService {
     // private onnxInferenceSession?: ort.InferenceSession;
     private onnxInferenceSession?: any;
     public method: Versioned<FaceDetectionMethod>;
-    private desiredFaceSize;
 
-    public constructor(desiredFaceSize: number = BLAZEFACE_FACE_SIZE) {
+    public constructor() {
         this.method = {
             value: "YoloFace",
             version: 1,
         };
-        this.desiredFaceSize = desiredFaceSize;
     }
 
     private async initOnnx() {
@@ -329,3 +325,97 @@ class YoloFaceDetectionService implements FaceDetectionService {
 }
 
 export default new YoloFaceDetectionService();
+
+import { euclidean } from "hdbscan";
+
+/**
+ * Removes duplicate face detections from an array of detections.
+ *
+ * This function sorts the detections by their probability in descending order, then iterates over them.
+ * For each detection, it calculates the Euclidean distance to all other detections.
+ * If the distance is less than or equal to the specified threshold (`withinDistance`), the other detection is considered a duplicate and is removed.
+ *
+ * @param detections - An array of face detections to remove duplicates from.
+ * @param withinDistance - The maximum Euclidean distance between two detections for them to be considered duplicates.
+ *
+ * @returns An array of face detections with duplicates removed.
+ */
+function removeDuplicateDetections(
+    detections: Array<FaceDetection>,
+    withinDistance: number,
+) {
+    // console.time('removeDuplicates');
+    detections.sort((a, b) => b.probability - a.probability);
+    const isSelected = new Map<number, boolean>();
+    for (let i = 0; i < detections.length; i++) {
+        if (isSelected.get(i) === false) {
+            continue;
+        }
+        isSelected.set(i, true);
+        for (let j = i + 1; j < detections.length; j++) {
+            if (isSelected.get(j) === false) {
+                continue;
+            }
+            const centeri = getDetectionCenter(detections[i]);
+            const centerj = getDetectionCenter(detections[j]);
+            const dist = euclidean(
+                [centeri.x, centeri.y],
+                [centerj.x, centerj.y],
+            );
+            if (dist <= withinDistance) {
+                isSelected.set(j, false);
+            }
+        }
+    }
+
+    const uniques: Array<FaceDetection> = [];
+    for (let i = 0; i < detections.length; i++) {
+        isSelected.get(i) && uniques.push(detections[i]);
+    }
+    // console.timeEnd('removeDuplicates');
+    return uniques;
+}
+
+function getDetectionCenter(detection: FaceDetection) {
+    const center = new Point(0, 0);
+    // TODO: first 4 landmarks is applicable to blazeface only
+    // this needs to consider eyes, nose and mouth landmarks to take center
+    detection.landmarks?.slice(0, 4).forEach((p) => {
+        center.x += p.x;
+        center.y += p.y;
+    });
+
+    return center.div({ x: 4, y: 4 });
+}
+
+function computeTransformToBox(inBox: Box, toBox: Box): Matrix {
+    return compose(
+        translate(toBox.x, toBox.y),
+        scale(toBox.width / inBox.width, toBox.height / inBox.height),
+    );
+}
+
+function transformPoint(point: Point, transform: Matrix) {
+    const txdPoint = applyToPoint(transform, point);
+    return new Point(txdPoint.x, txdPoint.y);
+}
+
+function transformPoints(points: Point[], transform: Matrix) {
+    return points?.map((p) => transformPoint(p, transform));
+}
+
+function transformBox(box: Box, transform: Matrix) {
+    const topLeft = transformPoint(box.topLeft, transform);
+    const bottomRight = transformPoint(box.bottomRight, transform);
+
+    return newBoxFromPoints(topLeft.x, topLeft.y, bottomRight.x, bottomRight.y);
+}
+
+function newBoxFromPoints(
+    left: number,
+    top: number,
+    right: number,
+    bottom: number,
+) {
+    return new Box({ left, top, right, bottom });
+}
