@@ -52,57 +52,54 @@ import type {
 
 const appVersion = (): Promise<string> => ipcRenderer.invoke("appVersion");
 
+const logToDisk = (message: string): void =>
+    ipcRenderer.send("logToDisk", message);
+
 const openDirectory = (dirPath: string): Promise<void> =>
     ipcRenderer.invoke("openDirectory", dirPath);
 
 const openLogDirectory = (): Promise<void> =>
     ipcRenderer.invoke("openLogDirectory");
 
-const logToDisk = (message: string): void =>
-    ipcRenderer.send("logToDisk", message);
+const clearStores = () => ipcRenderer.send("clearStores");
+
+const encryptionKey = (): Promise<string | undefined> =>
+    ipcRenderer.invoke("encryptionKey");
+
+const saveEncryptionKey = (encryptionKey: string): Promise<void> =>
+    ipcRenderer.invoke("saveEncryptionKey", encryptionKey);
+
+const onMainWindowFocus = (cb?: () => void) => {
+    ipcRenderer.removeAllListeners("mainWindowFocus");
+    if (cb) ipcRenderer.on("mainWindowFocus", cb);
+};
+
+// - App update
+
+const onAppUpdateAvailable = (
+    cb?: ((updateInfo: AppUpdateInfo) => void) | undefined,
+) => {
+    ipcRenderer.removeAllListeners("appUpdateAvailable");
+    if (cb) {
+        ipcRenderer.on("appUpdateAvailable", (_, updateInfo: AppUpdateInfo) =>
+            cb(updateInfo),
+        );
+    }
+};
+
+const updateAndRestart = () => ipcRenderer.send("updateAndRestart");
+
+const updateOnNextRestart = (version: string) =>
+    ipcRenderer.send("updateOnNextRestart", version);
+
+const skipAppUpdate = (version: string) => {
+    ipcRenderer.send("skipAppUpdate", version);
+};
 
 const fsExists = (path: string): Promise<boolean> =>
     ipcRenderer.invoke("fsExists", path);
 
 // - AUDIT below this
-
-const registerForegroundEventListener = (onForeground: () => void) => {
-    ipcRenderer.removeAllListeners("app-in-foreground");
-    ipcRenderer.on("app-in-foreground", onForeground);
-};
-
-const clearElectronStore = () => {
-    ipcRenderer.send("clear-electron-store");
-};
-
-const setEncryptionKey = (encryptionKey: string): Promise<void> =>
-    ipcRenderer.invoke("setEncryptionKey", encryptionKey);
-
-const getEncryptionKey = (): Promise<string> =>
-    ipcRenderer.invoke("getEncryptionKey");
-
-// - App update
-
-const registerUpdateEventListener = (
-    showUpdateDialog: (updateInfo: AppUpdateInfo) => void,
-) => {
-    ipcRenderer.removeAllListeners("show-update-dialog");
-    ipcRenderer.on("show-update-dialog", (_, updateInfo: AppUpdateInfo) => {
-        showUpdateDialog(updateInfo);
-    });
-};
-
-const updateAndRestart = () => {
-    ipcRenderer.send("update-and-restart");
-};
-
-const skipAppUpdate = (version: string) => {
-    ipcRenderer.send("skip-app-update", version);
-};
-
-const muteUpdateNotification = (version: string) => {
-    ipcRenderer.send("mute-update-notification", version);
-};
 
 // - Conversion
 
@@ -303,21 +300,19 @@ const getDirFiles = (dirPath: string): Promise<ElectronFile[]> =>
 contextBridge.exposeInMainWorld("electron", {
     // - General
     appVersion,
-    openDirectory,
-    registerForegroundEventListener,
-    clearElectronStore,
-    getEncryptionKey,
-    setEncryptionKey,
-
-    // - Logging
-    openLogDirectory,
     logToDisk,
+    openDirectory,
+    openLogDirectory,
+    clearStores,
+    encryptionKey,
+    saveEncryptionKey,
+    onMainWindowFocus,
 
     // - App update
+    onAppUpdateAvailable,
     updateAndRestart,
+    updateOnNextRestart,
     skipAppUpdate,
-    muteUpdateNotification,
-    registerUpdateEventListener,
 
     // - Conversion
     convertToJPEG,

@@ -37,8 +37,21 @@ export enum PICKED_UPLOAD_TYPE {
 export interface Electron {
     // - General
 
-    /** Return the version of the desktop app. */
+    /**
+     * Return the version of the desktop app.
+     *
+     * The return value is of the form `v1.2.3`.
+     */
     appVersion: () => Promise<string>;
+
+    /**
+     * Log the given {@link message} to the on-disk log file maintained by the
+     * desktop app.
+     *
+     * Note: Unlike the other functions exposed over the Electron bridge,
+     * logToDisk is fire-and-forget and does not return a promise.
+     */
+    logToDisk: (message: string) => void;
 
     /**
      * Open the given {@link dirPath} in the system's folder viewer.
@@ -55,13 +68,75 @@ export interface Electron {
     openLogDirectory: () => Promise<void>;
 
     /**
-     * Log the given {@link message} to the on-disk log file maintained by the
-     * desktop app.
+     * Clear any stored data.
      *
-     * Note: Unlike the other functions exposed over the Electron bridge,
-     * logToDisk is fire-and-forget and does not return a promise.
+     * This is a coarse single shot cleanup, meant for use in clearing any
+     * Electron side state during logout.
      */
-    logToDisk: (message: string) => void;
+    clearStores: () => void;
+
+    /**
+     * Return the previously saved encryption key from persistent safe storage.
+     *
+     * If no such key is found, return `undefined`.
+     *
+     * @see {@link saveEncryptionKey}.
+     */
+    encryptionKey: () => Promise<string | undefined>;
+
+    /**
+     * Save the given {@link encryptionKey} into persistent safe storage.
+     */
+    saveEncryptionKey: (encryptionKey: string) => Promise<void>;
+
+    /**
+     * Set or clear the callback {@link cb} to invoke whenever the app comes
+     * into the foreground. More precisely, the callback gets invoked when the
+     * main window gets focus.
+     *
+     * Note: Setting a callback clears any previous callbacks.
+     *
+     * @param cb The function to call when the main window gets focus. Pass
+     * `undefined` to clear the callback.
+     */
+    onMainWindowFocus: (cb?: () => void) => void;
+
+    // - App update
+
+    /**
+     * Set or clear the callback {@link cb} to invoke whenever a new
+     * (actionable) app update is available. This allows the Node.js layer to
+     * ask the renderer to show an "Update available" dialog to the user.
+     *
+     * Note: Setting a callback clears any previous callbacks.
+     */
+    onAppUpdateAvailable: (
+        cb?: ((updateInfo: AppUpdateInfo) => void) | undefined,
+    ) => void;
+
+    /**
+     * Restart the app to apply the latest available update.
+     *
+     * This is expected to be called in response to {@link onAppUpdateAvailable}
+     * if the user so wishes.
+     */
+    updateAndRestart: () => void;
+
+    /**
+     * Mute update notifications for the given {@link version}. This allows us
+     * to implement the "Install on next launch" functionality in response to
+     * the {@link onAppUpdateAvailable} event.
+     */
+    updateOnNextRestart: (version: string) => void;
+
+    /**
+     * Skip the app update with the given {@link version}.
+     *
+     * This is expected to be called in response to {@link onAppUpdateAvailable}
+     * if the user so wishes. It will remember this {@link version} as having
+     * been marked as skipped so that we don't prompt the user again.
+     */
+    skipAppUpdate: (version: string) => void;
 
     /**
      * A subset of filesystem access APIs.
@@ -97,28 +172,6 @@ export interface Electron {
      * runtime. For such functions, find an efficient alternative or refactor
      * the dataflow.
      */
-
-    // - General
-
-    registerForegroundEventListener: (onForeground: () => void) => void;
-
-    clearElectronStore: () => void;
-
-    setEncryptionKey: (encryptionKey: string) => Promise<void>;
-
-    getEncryptionKey: () => Promise<string>;
-
-    // - App update
-
-    updateAndRestart: () => void;
-
-    skipAppUpdate: (version: string) => void;
-
-    muteUpdateNotification: (version: string) => void;
-
-    registerUpdateEventListener: (
-        showUpdateDialog: (updateInfo: AppUpdateInfo) => void,
-    ) => void;
 
     // - Conversion
 

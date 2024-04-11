@@ -1,10 +1,9 @@
 import StreamZip from "node-stream-zip";
 import path from "path";
-import { getElectronFile } from "../services/fs";
+import { ElectronFile, FILE_PATH_TYPE } from "../../types/ipc";
+import { FILE_PATH_KEYS } from "../../types/main";
 import { uploadStatusStore } from "../stores/upload.store";
-import { ElectronFile, FILE_PATH_TYPE } from "../types/ipc";
-import { FILE_PATH_KEYS } from "../types/main";
-import { getValidPaths, getZipFileStream } from "./fs";
+import { getElectronFile, getValidPaths, getZipFileStream } from "./fs";
 
 export const getPendingUploads = async () => {
     const filePaths = getSavedFilePaths(FILE_PATH_TYPE.FILES);

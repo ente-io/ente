@@ -6,6 +6,7 @@ import { FaceAlignment, FaceDetection } from "types/machineLearning";
 import {
     ARCFACE_LANDMARKS,
     ARCFACE_LANDMARKS_FACE_SIZE,
+    ARC_FACE_5_LANDMARKS,
 } from "types/machineLearning/archface";
 import { cropWithRotation, transform } from "utils/image";
 import {
@@ -21,7 +22,7 @@ import { Box, Point } from "../../../thirdparty/face-api/classes";
 export function normalizeLandmarks(
     landmarks: Array<[number, number]>,
     faceSize: number,
-) {
+): Array<[number, number]> {
     return landmarks.map((landmark) =>
         landmark.map((p) => p / faceSize),
     ) as Array<[number, number]>;
@@ -74,9 +75,13 @@ export function getFaceAlignmentUsingSimilarityTransform(
 export function getArcfaceAlignment(
     faceDetection: FaceDetection,
 ): FaceAlignment {
+    const landmarkCount = faceDetection.landmarks.length;
     return getFaceAlignmentUsingSimilarityTransform(
         faceDetection,
-        normalizeLandmarks(ARCFACE_LANDMARKS, ARCFACE_LANDMARKS_FACE_SIZE),
+        normalizeLandmarks(
+            landmarkCount === 5 ? ARC_FACE_5_LANDMARKS : ARCFACE_LANDMARKS,
+            ARCFACE_LANDMARKS_FACE_SIZE,
+        ),
     );
 }
 
@@ -161,6 +166,7 @@ export function ibExtractFaceImage(
     );
 }
 
+// Used in MLDebugViewOnly
 export function ibExtractFaceImageUsingTransform(
     image: ImageBitmap,
     alignment: FaceAlignment,
@@ -181,42 +187,6 @@ export function ibExtractFaceImages(
     return alignments.map((alignment) =>
         ibExtractFaceImage(image, alignment, faceSize),
     );
-}
-
-export function extractArcfaceAlignedFaceImage(
-    image: tf.Tensor4D,
-    faceDetection: FaceDetection,
-    faceSize: number,
-): tf.Tensor4D {
-    const alignment = getFaceAlignmentUsingSimilarityTransform(
-        faceDetection,
-        ARCFACE_LANDMARKS,
-    );
-
-    return extractFaceImage(image, alignment, faceSize);
-}
-
-export function extractArcfaceAlignedFaceImages(
-    image: tf.Tensor3D | tf.Tensor4D,
-    faceDetections: Array<FaceDetection>,
-    faceSize: number,
-): tf.Tensor4D {
-    return tf.tidy(() => {
-        const tf4dFloat32Image = toTensor4D(image, "float32");
-        const faceImages = new Array<tf.Tensor3D>(faceDetections.length);
-        for (let i = 0; i < faceDetections.length; i++) {
-            faceImages[i] = tf.squeeze(
-                extractArcfaceAlignedFaceImage(
-                    tf4dFloat32Image,
-                    faceDetections[i],
-                    faceSize,
-                ),
-                [0],
-            );
-        }
-
-        return tf.stack(faceImages) as tf.Tensor4D;
-    });
 }
 
 const BLAZEFACE_LEFT_EYE_INDEX = 0;

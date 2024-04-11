@@ -10,40 +10,6 @@
 
 import type { FSWatcher } from "chokidar";
 import { ipcMain } from "electron/main";
-import {
-    appVersion,
-    muteUpdateNotification,
-    skipAppUpdate,
-    updateAndRestart,
-} from "../services/appUpdater";
-import {
-    clipImageEmbedding,
-    clipTextEmbedding,
-} from "../services/clip-service";
-import { runFFmpegCmd } from "../services/ffmpeg";
-import { getDirFiles } from "../services/fs";
-import {
-    convertToJPEG,
-    generateImageThumbnail,
-} from "../services/imageProcessor";
-import {
-    clearElectronStore,
-    getEncryptionKey,
-    setEncryptionKey,
-} from "../services/store";
-import {
-    getElectronFilesFromGoogleZip,
-    getPendingUploads,
-    setToUploadCollection,
-    setToUploadFiles,
-} from "../services/upload";
-import {
-    addWatchMapping,
-    getWatchMappings,
-    removeWatchMapping,
-    updateWatchMappingIgnoredFiles,
-    updateWatchMappingSyncedFiles,
-} from "../services/watch";
 import type { ElectronFile, FILE_PATH_TYPE, WatchMapping } from "../types/ipc";
 import {
     selectDirectory,
@@ -64,6 +30,37 @@ import {
     saveStreamToDisk,
 } from "./fs";
 import { logToDisk } from "./log";
+import {
+    appVersion,
+    skipAppUpdate,
+    updateAndRestart,
+    updateOnNextRestart,
+} from "./services/app-update";
+import { clipImageEmbedding, clipTextEmbedding } from "./services/clip";
+import { runFFmpegCmd } from "./services/ffmpeg";
+import { getDirFiles } from "./services/fs";
+import {
+    convertToJPEG,
+    generateImageThumbnail,
+} from "./services/imageProcessor";
+import {
+    clearStores,
+    encryptionKey,
+    saveEncryptionKey,
+} from "./services/store";
+import {
+    getElectronFilesFromGoogleZip,
+    getPendingUploads,
+    setToUploadCollection,
+    setToUploadFiles,
+} from "./services/upload";
+import {
+    addWatchMapping,
+    getWatchMappings,
+    removeWatchMapping,
+    updateWatchMappingIgnoredFiles,
+    updateWatchMappingSyncedFiles,
+} from "./services/watch";
 import { openDirectory, openLogDirectory } from "./util";
 
 /**
@@ -98,25 +95,23 @@ export const attachIPCHandlers = () => {
     // See [Note: Catching exception during .send/.on]
     ipcMain.on("logToDisk", (_, message) => logToDisk(message));
 
-    ipcMain.on("clear-electron-store", () => {
-        clearElectronStore();
-    });
+    ipcMain.on("clearStores", () => clearStores());
 
-    ipcMain.handle("setEncryptionKey", (_, encryptionKey) =>
-        setEncryptionKey(encryptionKey),
+    ipcMain.handle("saveEncryptionKey", (_, encryptionKey) =>
+        saveEncryptionKey(encryptionKey),
     );
 
-    ipcMain.handle("getEncryptionKey", () => getEncryptionKey());
+    ipcMain.handle("encryptionKey", () => encryptionKey());
 
     // - App update
 
-    ipcMain.on("update-and-restart", () => updateAndRestart());
+    ipcMain.on("updateAndRestart", () => updateAndRestart());
 
-    ipcMain.on("skip-app-update", (_, version) => skipAppUpdate(version));
-
-    ipcMain.on("mute-update-notification", (_, version) =>
-        muteUpdateNotification(version),
+    ipcMain.on("updateOnNextRestart", (_, version) =>
+        updateOnNextRestart(version),
     );
+
+    ipcMain.on("skipAppUpdate", (_, version) => skipAppUpdate(version));
 
     // - Conversion
 

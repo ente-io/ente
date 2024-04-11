@@ -1,12 +1,12 @@
-import { app, BrowserWindow, nativeImage, Tray } from "electron";
+import { BrowserWindow, Tray, app, nativeImage, shell } from "electron";
 import { existsSync } from "node:fs";
 import path from "node:path";
 import { isAppQuitting, rendererURL } from "../main";
-import autoLauncher from "../services/autoLauncher";
-import { getHideDockIconPreference } from "../services/userPreference";
-import { isPlatform } from "../utils/common/platform";
 import log from "./log";
 import { createTrayContextMenu } from "./menu";
+import { isPlatform } from "./platform";
+import autoLauncher from "./services/autoLauncher";
+import { getHideDockIconPreference } from "./services/userPreference";
 import { isDev } from "./util";
 
 /**
@@ -77,16 +77,24 @@ export const createWindow = async () => {
 };
 
 export const setupTrayItem = (mainWindow: BrowserWindow) => {
-    const iconName = isPlatform("mac")
-        ? "taskbar-icon-Template.png"
-        : "taskbar-icon.png";
+    // There are a total of 6 files corresponding to this tray icon.
+    //
+    // On macOS, use template images (filename needs to end with "Template.ext")
+    // https://www.electronjs.org/docs/latest/api/native-image#template-image-macos
+    //
+    // And for each (template or otherwise), there are 3 "retina" variants
+    // https://www.electronjs.org/docs/latest/api/native-image#high-resolution-image
+    const iconName =
+        process.platform == "darwin"
+            ? "taskbar-icon-Template.png"
+            : "taskbar-icon.png";
     const trayImgPath = path.join(
         isDev ? "build" : process.resourcesPath,
         iconName,
     );
     const trayIcon = nativeImage.createFromPath(trayImgPath);
     const tray = new Tray(trayIcon);
-    tray.setToolTip("ente");
+    tray.setToolTip("Ente Photos");
     tray.setContextMenu(createTrayContextMenu(mainWindow));
 };
 
@@ -101,7 +109,7 @@ export function handleDownloads(mainWindow: BrowserWindow) {
 export function handleExternalLinks(mainWindow: BrowserWindow) {
     mainWindow.webContents.setWindowOpenHandler(({ url }) => {
         if (!url.startsWith(rendererURL)) {
-            require("electron").shell.openExternal(url);
+            shell.openExternal(url);
             return { action: "deny" };
         } else {
             return { action: "allow" };

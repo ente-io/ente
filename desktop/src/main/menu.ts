@@ -6,12 +6,12 @@ import {
     shell,
 } from "electron";
 import { setIsAppQuitting } from "../main";
-import { forceCheckForUpdateAndNotify } from "../services/appUpdater";
-import autoLauncher from "../services/autoLauncher";
+import { forceCheckForAppUpdates } from "./services/app-update";
+import autoLauncher from "./services/autoLauncher";
 import {
     getHideDockIconPreference,
     setHideDockIconPreference,
-} from "../services/userPreference";
+} from "./services/userPreference";
 import { openLogDirectory } from "./util";
 
 /** Create and return the entries in the app's main menu bar */
@@ -26,8 +26,7 @@ export const createApplicationMenu = async (mainWindow: BrowserWindow) => {
     const macOSOnly = (options: MenuItemConstructorOptions[]) =>
         process.platform == "darwin" ? options : [];
 
-    const handleCheckForUpdates = () =>
-        forceCheckForUpdateAndNotify(mainWindow);
+    const handleCheckForUpdates = () => forceCheckForAppUpdates(mainWindow);
 
     const handleViewChangelog = () =>
         shell.openExternal(
@@ -54,7 +53,7 @@ export const createApplicationMenu = async (mainWindow: BrowserWindow) => {
 
     return Menu.buildFromTemplate([
         {
-            label: "ente",
+            label: "Ente Photos",
             submenu: [
                 ...macOSOnly([
                     {
@@ -156,7 +155,7 @@ export const createApplicationMenu = async (mainWindow: BrowserWindow) => {
                     { type: "separator" },
                     { label: "Bring All to Front", role: "front" },
                     { type: "separator" },
-                    { label: "Ente", role: "window" },
+                    { label: "Ente Photos", role: "window" },
                 ]),
             ],
         },

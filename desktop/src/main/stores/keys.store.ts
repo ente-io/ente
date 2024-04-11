@@ -1,5 +1,5 @@
 import Store, { Schema } from "electron-store";
-import type { KeysStoreType } from "../types/main";
+import type { KeysStoreType } from "../../types/main";
 
 const keysStoreSchema: Schema<KeysStoreType> = {
     AnonymizeUserID: {

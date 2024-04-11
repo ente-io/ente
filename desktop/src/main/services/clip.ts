@@ -11,16 +11,16 @@
  */
 import { app, net } from "electron/main";
 import { existsSync } from "fs";
+import jpeg from "jpeg-js";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { writeStream } from "../main/fs";
-import log from "../main/log";
-import { CustomErrors } from "../types/ipc";
-import Tokenizer from "../utils/clip-bpe-ts/mod";
-import { generateTempFilePath } from "../utils/temp";
+import * as ort from "onnxruntime-node";
+import Tokenizer from "../../thirdparty/clip-bpe-ts/mod";
+import { CustomErrors } from "../../types/ipc";
+import { writeStream } from "../fs";
+import log from "../log";
+import { generateTempFilePath } from "../temp";
 import { deleteTempFile } from "./ffmpeg";
-const jpeg = require("jpeg-js");
-const ort = require("onnxruntime-node");
 
 const textModelName = "clip-text-vit-32-uint8.onnx";
 const textModelByteSize = 64173509; // 61.2 MB

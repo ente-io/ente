@@ -18,6 +18,33 @@ export const logStartupBanner = (appId: string, userId?: number) => {
     log.info(`Starting ente-${appIdL}-web ${buildId}uid ${userId ?? 0}`);
 };
 
+/**
+ * Attach handlers to log any unhandled exceptions and promise rejections.
+ *
+ * @param attach If true, attach handlers, and if false, remove them. This
+ * allows us to use this in a React hook that cleans up after itself.
+ */
+export const logUnhandledErrorsAndRejections = (attach: boolean) => {
+    const handleError = (event: ErrorEvent) => {
+        log.error("Unhandled error", event.error);
+    };
+
+    const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
+        log.error("Unhandled promise rejection", event.reason);
+    };
+
+    if (attach) {
+        window.addEventListener("error", handleError);
+        window.addEventListener("unhandledrejection", handleUnhandledRejection);
+    } else {
+        window.removeEventListener("error", handleError);
+        window.removeEventListener(
+            "unhandledrejection",
+            handleUnhandledRejection,
+        );
+    }
+};
+
 interface LogEntry {
     timestamp: number;
     logLine: string;

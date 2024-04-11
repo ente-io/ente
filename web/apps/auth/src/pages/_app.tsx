@@ -1,6 +1,9 @@
 import { CustomHead } from "@/next/components/Head";
 import { setupI18n } from "@/next/i18n";
-import { logStartupBanner } from "@/next/log-web";
+import {
+    logStartupBanner,
+    logUnhandledErrorsAndRejections,
+} from "@/next/log-web";
 import {
     APPS,
     APP_TITLES,
@@ -68,9 +71,11 @@ export default function App({ Component, pageProps }: AppProps) {
         setupI18n().finally(() => setIsI18nReady(true));
         const userId = (getData(LS_KEYS.USER) as User)?.id;
         logStartupBanner(APPS.AUTH, userId);
+        logUnhandledErrorsAndRejections(true);
         HTTPService.setHeaders({
             "X-Client-Package": CLIENT_PACKAGE_NAMES.get(APPS.AUTH),
         });
+        return () => logUnhandledErrorsAndRejections(false);
     }, []);
 
     const setUserOnline = () => setOffline(false);
