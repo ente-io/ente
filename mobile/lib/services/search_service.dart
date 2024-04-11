@@ -1,7 +1,6 @@
 import "dart:math";
 
 import "package:flutter/cupertino.dart";
-import "package:flutter/foundation.dart";
 import "package:intl/intl.dart";
 import 'package:logging/logging.dart';
 import "package:photos/core/constants.dart";
@@ -840,12 +839,7 @@ class SearchService {
       _logger.severe("Error occurred during magic search", e, s);
       return searchResults;
     }
-    if (files.isNotEmpty) {
-      if (kDebugMode) {
-        debugPrint(
-          "getMagicSearchResults ($query) results: ${files.length} for $resultForQuery ",
-        );
-      }
+    if (files.isNotEmpty && resultForQuery == query) {
       searchResults.add(GenericSearchResult(ResultType.magic, query, files));
     }
     return searchResults;

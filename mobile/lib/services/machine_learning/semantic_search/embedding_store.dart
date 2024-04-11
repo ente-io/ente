@@ -49,7 +49,7 @@ class EmbeddingStore {
       _remoteSyncStatus = null;
       return true;
     } catch (e, s) {
-      _logger.severe("failed to fetch from remote", e, s);
+      _logger.severe("failed to fetch & store remote embeddings", e, s);
       _remoteSyncStatus!.complete(false);
       _remoteSyncStatus = null;
       return false;
@@ -125,9 +125,7 @@ class EmbeddingStore {
     final remoteEmbeddings = <RemoteEmbedding>[];
     try {
       final sinceTime = _preferences.getInt(kEmbeddingsSyncTimeKey) ?? 0;
-      _logger.info(
-        "Fetching embeddings since $sinceTime (${DateTime.fromMicrosecondsSinceEpoch(sinceTime)})",
-      );
+      _logger.info("Fetching embeddings since $sinceTime");
       final response = await _dio.get(
         "/embeddings/diff",
         queryParameters: {
@@ -142,7 +140,8 @@ class EmbeddingStore {
         remoteEmbeddings.add(embedding);
       }
     } catch (e, s) {
-      _logger.severe(e, s);
+      _logger.warning("Fetching embeddings failed", e, s);
+      rethrow;
     }
 
     _logger.info("${remoteEmbeddings.length} embeddings fetched");
