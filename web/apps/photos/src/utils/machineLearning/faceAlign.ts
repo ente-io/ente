@@ -131,25 +131,6 @@ export function extractFaceImage(
     });
 }
 
-export function tfExtractFaceImages(
-    image: tf.Tensor3D | tf.Tensor4D,
-    alignments: Array<FaceAlignment>,
-    faceSize: number,
-): tf.Tensor4D {
-    return tf.tidy(() => {
-        const tf4dFloat32Image = toTensor4D(image, "float32");
-        const faceImages = new Array<tf.Tensor3D>(alignments.length);
-        for (let i = 0; i < alignments.length; i++) {
-            faceImages[i] = tf.squeeze(
-                extractFaceImage(tf4dFloat32Image, alignments[i], faceSize),
-                [0],
-            );
-        }
-
-        return tf.stack(faceImages) as tf.Tensor4D;
-    });
-}
-
 export function getAlignedFaceBox(alignment: FaceAlignment) {
     return new Box({
         x: alignment.center.x - alignment.size / 2,
@@ -199,60 +180,4 @@ export function ibExtractFaceImages(
     return alignments.map((alignment) =>
         ibExtractFaceImage(image, alignment, faceSize),
     );
-}
-
-const BLAZEFACE_LEFT_EYE_INDEX = 0;
-const BLAZEFACE_RIGHT_EYE_INDEX = 1;
-// const BLAZEFACE_NOSE_INDEX = 2;
-const BLAZEFACE_MOUTH_INDEX = 3;
-
-export function getRotatedFaceImage(
-    image: tf.Tensor3D | tf.Tensor4D,
-    faceDetection: FaceDetection,
-    padding: number = 1.5,
-): tf.Tensor4D {
-    const paddedBox = enlargeBox(faceDetection.box, padding);
-    // log.info("paddedBox", paddedBox);
-    const landmarkPoints = faceDetection.landmarks;
-
-    return tf.tidy(() => {
-        const tf4dFloat32Image = toTensor4D(image, "float32");
-        let angle = 0;
-        const leftEye = landmarkPoints[BLAZEFACE_LEFT_EYE_INDEX];
-        const rightEye = landmarkPoints[BLAZEFACE_RIGHT_EYE_INDEX];
-        const foreheadCenter = getBoxCenterPt(leftEye, rightEye);
-
-        angle = computeRotation(
-            landmarkPoints[BLAZEFACE_MOUTH_INDEX],
-            foreheadCenter,
-        ); // landmarkPoints[BLAZEFACE_NOSE_INDEX]
-        // angle = computeRotation(leftEye, rightEye);
-        // log.info('angle: ', angle);
-
-        const faceCenter = getBoxCenter(faceDetection.box);
-        // log.info('faceCenter: ', faceCenter);
-        const faceCenterNormalized: [number, number] = [
-            faceCenter.x / tf4dFloat32Image.shape[2],
-            faceCenter.y / tf4dFloat32Image.shape[1],
-        ];
-        // log.info('faceCenterNormalized: ', faceCenterNormalized);
-
-        let rotatedImage = tf4dFloat32Image;
-        if (angle !== 0) {
-            rotatedImage = tf.image.rotateWithOffset(
-                tf4dFloat32Image,
-                angle,
-                0,
-                faceCenterNormalized,
-            );
-        }
-
-        const faceImageTensor = extractFaces(
-            rotatedImage,
-            [paddedBox],
-            paddedBox.width > 224 ? 448 : 224,
-        );
-        return faceImageTensor;
-        // return tf.gather(faceImageTensor, 0);
-    });
 }

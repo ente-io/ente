@@ -1,7 +1,6 @@
 import log from "@/next/log";
 import { CACHES } from "@ente/shared/storage/cacheStorage/constants";
 import { cached } from "@ente/shared/storage/cacheStorage/helpers";
-import * as tf from "@tensorflow/tfjs-core";
 import { NormalizedFace } from "blazeface-back";
 import { FILE_TYPE } from "constants/file";
 import { BLAZEFACE_FACE_SIZE } from "constants/mlConfig";
@@ -50,89 +49,6 @@ export function f32Average(descriptors: Float32Array[]) {
     }
 
     return avg;
-}
-
-export function isTensor(tensor: any, dim: number) {
-    return tensor instanceof tf.Tensor && tensor.shape.length === dim;
-}
-
-export function isTensor1D(tensor: any): tensor is tf.Tensor1D {
-    return isTensor(tensor, 1);
-}
-
-export function isTensor2D(tensor: any): tensor is tf.Tensor2D {
-    return isTensor(tensor, 2);
-}
-
-export function isTensor3D(tensor: any): tensor is tf.Tensor3D {
-    return isTensor(tensor, 3);
-}
-
-export function isTensor4D(tensor: any): tensor is tf.Tensor4D {
-    return isTensor(tensor, 4);
-}
-
-export function toTensor4D(
-    image: tf.Tensor3D | tf.Tensor4D,
-    dtype?: tf.DataType,
-) {
-    return tf.tidy(() => {
-        let reshapedImage: tf.Tensor4D;
-        if (isTensor3D(image)) {
-            reshapedImage = tf.expandDims(image, 0);
-        } else if (isTensor4D(image)) {
-            reshapedImage = image;
-        } else {
-            throw Error("toTensor4D only supports Tensor3D and Tensor4D input");
-        }
-        if (dtype) {
-            reshapedImage = tf.cast(reshapedImage, dtype);
-        }
-
-        return reshapedImage;
-    });
-}
-
-export function imageBitmapsToTensor4D(imageBitmaps: Array<ImageBitmap>) {
-    return tf.tidy(() => {
-        const tfImages = imageBitmaps.map((ib) => tf.browser.fromPixels(ib));
-        return tf.stack(tfImages) as tf.Tensor4D;
-    });
-}
-
-export function extractFaces(
-    image: tf.Tensor3D | tf.Tensor4D,
-    facebBoxes: Array<Box>,
-    faceSize: number,
-) {
-    return tf.tidy(() => {
-        const reshapedImage = toTensor4D(image, "float32");
-
-        const boxes = facebBoxes.map((box) => {
-            const normalized = box.rescale({
-                width: 1 / reshapedImage.shape[2],
-                height: 1 / reshapedImage.shape[1],
-            });
-
-            return [
-                normalized.top,
-                normalized.left,
-                normalized.bottom,
-                normalized.right,
-            ];
-        });
-
-        // log.info('boxes: ', boxes[0]);
-
-        const faceImagesTensor = tf.image.cropAndResize(
-            reshapedImage,
-            boxes,
-            tf.fill([boxes.length], 0, "int32"),
-            [faceSize, faceSize],
-        );
-
-        return faceImagesTensor;
-    });
 }
 
 export function newBox(x: number, y: number, width: number, height: number) {
@@ -304,24 +220,9 @@ export function getFaceId(detectedFace: DetectedFace, imageDims: Dimensions) {
     return faceID;
 }
 
-export async function getTFImage(blob): Promise<tf.Tensor3D> {
-    const imageBitmap = await createImageBitmap(blob);
-    const tfImage = tf.browser.fromPixels(imageBitmap);
-    imageBitmap.close();
-
-    return tfImage;
-}
-
 export async function getImageBlobBitmap(blob: Blob): Promise<ImageBitmap> {
     return await createImageBitmap(blob);
 }
-
-// export async function getTFImageUsingJpegJS(blob: Blob): Promise<TFImageBitmap> {
-//     const imageData = jpegjs.decode(await blob.arrayBuffer());
-//     const tfImage = tf.browser.fromPixels(imageData);
-
-//     return new TFImageBitmap(undefined, tfImage);
-// }
 
 async function getOriginalFile(file: EnteFile, queue?: PQueue) {
     let fileStream;
