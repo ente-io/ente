@@ -134,17 +134,6 @@ export interface Person {
     displayImageUrl?: string;
 }
 
-export interface ObjectDetection {
-    bbox: [number, number, number, number];
-    class: string;
-    score: number;
-}
-
-export interface WordGroup {
-    word: string;
-    files: Array<number>;
-}
-
 export interface MlFileData {
     fileId: number;
     faces?: Face[];

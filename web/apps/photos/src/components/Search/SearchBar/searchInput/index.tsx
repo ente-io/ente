@@ -17,7 +17,7 @@ import {
 import { Collection } from "types/collection";
 import { LocationTagData } from "types/entity";
 import { EnteFile } from "types/file";
-import { Person, Thing, WordGroup } from "types/machineLearning";
+import { Person } from "types/machineLearning";
 import {
     ClipSearchScores,
     DateValue,
@@ -145,12 +145,6 @@ export default function SearchInput(props: Iprops) {
                 break;
             case SuggestionType.PERSON:
                 search = { person: selectedOption.value as Person };
-                break;
-            case SuggestionType.THING:
-                search = { thing: selectedOption.value as Thing };
-                break;
-            case SuggestionType.TEXT:
-                search = { text: selectedOption.value as WordGroup };
                 break;
             case SuggestionType.FILE_TYPE:
                 search = { fileType: selectedOption.value as FILE_TYPE };
