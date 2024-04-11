@@ -45,6 +45,7 @@ dependencies:
   cross_file: ^0.3.3
   crypto: ^3.0.2
   cupertino_icons: ^1.0.0
+  dart_ui_isolate: ^1.1.1
   defer_pointer: ^0.0.2
   device_info_plus: ^9.0.3
   dio: ^4.0.6
@@ -77,7 +78,6 @@ dependencies:
   flutter_email_sender: ^5.2.0
   flutter_image_compress: ^1.1.0
   flutter_inappwebview: ^5.8.0
-  flutter_isolate: ^2.0.4
   flutter_launcher_icons: ^0.13.1
   flutter_local_notifications: ^12.0.4
   flutter_localizations:
@@ -176,7 +176,7 @@ dependencies:
 
 dependency_overrides:
   connectivity_plus: ^4.0.0
-  
+
   #Remove this after  upgrading to flutter v3.19x
   #Build fails when resolving to latest version of ffi on flutter v3.16.x
   ffi: 2.1.0
