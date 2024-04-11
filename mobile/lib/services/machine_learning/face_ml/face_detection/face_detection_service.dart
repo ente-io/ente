@@ -11,9 +11,9 @@ import 'package:logging/logging.dart';
 import 'package:onnxruntime/onnxruntime.dart';
 import "package:photos/face/model/dimension.dart";
 import 'package:photos/services/machine_learning/face_ml/face_detection/detection.dart';
+import 'package:photos/services/machine_learning/face_ml/face_detection/face_detection_exceptions.dart';
 import 'package:photos/services/machine_learning/face_ml/face_detection/naive_non_max_suppression.dart';
-import 'package:photos/services/machine_learning/face_ml/face_detection/yolov5face/yolo_face_detection_exceptions.dart';
-import 'package:photos/services/machine_learning/face_ml/face_detection/yolov5face/yolo_filter_extract_detections.dart';
+import 'package:photos/services/machine_learning/face_ml/face_detection/yolo_filter_extract_detections.dart';
 import "package:photos/services/remote_assets_service.dart";
 import "package:photos/utils/image_ml_isolate.dart";
 import "package:photos/utils/image_ml_util.dart";
@@ -21,22 +21,26 @@ import "package:synchronized/synchronized.dart";
 
 enum FaceDetectionOperation { yoloInferenceAndPostProcessing }
 
-class YoloOnnxFaceDetection {
+/// This class is responsible for running the face detection model (YOLOv5Face) on ONNX runtime, and can be accessed through the singleton instance [FaceDetectionService.instance].
+class FaceDetectionService {
   static final _logger = Logger('YOLOFaceDetectionService');
 
   final _computer = Computer.shared();
 
   int sessionAddress = 0;
 
-  static const kModelBucketEndpoint = "https://models.ente.io/";
-  static const kRemoteBucketModelPath = "yolov5s_face_640_640_dynamic.onnx";
+  static const String kModelBucketEndpoint = "https://models.ente.io/";
+  static const String kRemoteBucketModelPath =
+      "yolov5s_face_640_640_dynamic.onnx";
   // static const kRemoteBucketModelPath = "yolov5n_face_640_640.onnx";
-  static const modelRemotePath = kModelBucketEndpoint + kRemoteBucketModelPath;
+  static const String modelRemotePath =
+      kModelBucketEndpoint + kRemoteBucketModelPath;
 
-  static const kInputWidth = 640;
-  static const kInputHeight = 640;
-  static const kIouThreshold = 0.4;
-  static const kMinScoreSigmoidThreshold = 0.7;
+  static const int kInputWidth = 640;
+  static const int kInputHeight = 640;
+  static const double kIouThreshold = 0.4;
+  static const double kMinScoreSigmoidThreshold = 0.7;
+  static const int kNumKeypoints = 5;
 
   bool isInitialized = false;
 
@@ -55,7 +59,7 @@ class YoloOnnxFaceDetection {
   bool isRunning = false;
 
   // singleton pattern
-  YoloOnnxFaceDetection._privateConstructor();
+  FaceDetectionService._privateConstructor();
 
   /// Use this instance to access the FaceDetection service. Make sure to call `init()` before using it.
   /// e.g. `await FaceDetection.instance.init();`
@@ -63,9 +67,9 @@ class YoloOnnxFaceDetection {
   /// Then you can use `predict()` to get the bounding boxes of the faces, so `FaceDetection.instance.predict(imageData)`
   ///
   /// config options: yoloV5FaceN //
-  static final instance = YoloOnnxFaceDetection._privateConstructor();
+  static final instance = FaceDetectionService._privateConstructor();
 
-  factory YoloOnnxFaceDetection() => instance;
+  factory FaceDetectionService() => instance;
 
   /// Check if the interpreter is initialized, if not initialize it with `loadModel()`
   Future<void> init() async {
@@ -178,7 +182,7 @@ class YoloOnnxFaceDetection {
               dev.log(
                 '[YOLOFaceDetectionService] Error while running inference: $e \n $s',
               );
-              throw YOLOInterpreterRunException();
+              throw YOLOFaceInterpreterRunException();
             }
             stopwatchInterpreter.stop();
             dev.log(
@@ -297,7 +301,7 @@ class YoloOnnxFaceDetection {
       // runOptions.release();
     } catch (e, s) {
       _logger.severe('Error while running inference: $e \n $s');
-      throw YOLOInterpreterRunException();
+      throw YOLOFaceInterpreterRunException();
     }
     stopwatchInterpreter.stop();
     _logger.info(
@@ -367,7 +371,7 @@ class YoloOnnxFaceDetection {
       // runOptions.release();
     } catch (e, s) {
       _logger.severe('Error while running inference: $e \n $s');
-      throw YOLOInterpreterRunException();
+      throw YOLOFaceInterpreterRunException();
     }
     stopwatchInterpreter.stop();
     _logger.info(
@@ -585,7 +589,7 @@ class YoloOnnxFaceDetection {
       runOptions.release();
     } catch (e, s) {
       _logger.severe('Error while running inference: $e \n $s');
-      throw YOLOInterpreterRunException();
+      throw YOLOFaceInterpreterRunException();
     }
     stopwatchInterpreter.stop();
     _logger.info(
@@ -770,7 +774,7 @@ class YoloOnnxFaceDetection {
       dev.log(
         '[YOLOFaceDetectionService] Error while running inference: $e \n $s',
       );
-      throw YOLOInterpreterRunException();
+      throw YOLOFaceInterpreterRunException();
     }
     stopwatchInterpreter.stop();
     dev.log(

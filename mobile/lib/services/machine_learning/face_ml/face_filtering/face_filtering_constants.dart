@@ -1,4 +1,4 @@
-import 'package:photos/services/machine_learning/face_ml/face_detection/yolov5face/onnx_face_detection.dart';
+import 'package:photos/services/machine_learning/face_ml/face_detection/face_detection_service.dart';
 
 /// Blur detection threshold
 const kLaplacianThreshold = 15;
@@ -10,4 +10,4 @@ const kLapacianDefault = 10000.0;
 const kMinHighQualityFaceScore = 0.80;
 
 /// The minimum score for a face to be detected, regardless of quality. Use [kMinHighQualityFaceScore] for high quality faces.
-const kMinFaceDetectionScore = YoloOnnxFaceDetection.kMinScoreSigmoidThreshold;
+const kMinFaceDetectionScore = FaceDetectionService.kMinScoreSigmoidThreshold;
