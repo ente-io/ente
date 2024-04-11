@@ -1,20 +1,39 @@
 import { Matrix } from "ml-matrix";
 import { getSimilarityTransformation } from "similarity-transformation";
-import { Dimensions } from "types/image";
 import { FaceAlignment, FaceDetection } from "types/machineLearning";
-import { cropWithRotation, transform } from "utils/image";
-import { Box, Point } from "../../../thirdparty/face-api/classes";
+import { Point } from "../../../thirdparty/face-api/classes";
 
-export function normalizeLandmarks(
-    landmarks: Array<[number, number]>,
-    faceSize: number,
-): Array<[number, number]> {
-    return landmarks.map((landmark) =>
-        landmark.map((p) => p / faceSize),
-    ) as Array<[number, number]>;
+const ARCFACE_LANDMARKS = [
+    [38.2946, 51.6963],
+    [73.5318, 51.5014],
+    [56.0252, 71.7366],
+    [56.1396, 92.2848],
+] as Array<[number, number]>;
+
+const ARCFACE_LANDMARKS_FACE_SIZE = 112;
+
+const ARC_FACE_5_LANDMARKS = [
+    [38.2946, 51.6963],
+    [73.5318, 51.5014],
+    [56.0252, 71.7366],
+    [41.5493, 92.3655],
+    [70.7299, 92.2041],
+] as Array<[number, number]>;
+
+export function getArcfaceAlignment(
+    faceDetection: FaceDetection,
+): FaceAlignment {
+    const landmarkCount = faceDetection.landmarks.length;
+    return getFaceAlignmentUsingSimilarityTransform(
+        faceDetection,
+        normalizeLandmarks(
+            landmarkCount === 5 ? ARC_FACE_5_LANDMARKS : ARCFACE_LANDMARKS,
+            ARCFACE_LANDMARKS_FACE_SIZE,
+        ),
+    );
 }
 
-export function getFaceAlignmentUsingSimilarityTransform(
+function getFaceAlignmentUsingSimilarityTransform(
     faceDetection: FaceDetection,
     alignedLandmarks: Array<[number, number]>,
     // alignmentMethod: Versioned<FaceAlignmentMethod>
@@ -58,83 +77,11 @@ export function getFaceAlignmentUsingSimilarityTransform(
     };
 }
 
-const ARCFACE_LANDMARKS = [
-    [38.2946, 51.6963],
-    [73.5318, 51.5014],
-    [56.0252, 71.7366],
-    [56.1396, 92.2848],
-] as Array<[number, number]>;
-
-const ARCFACE_LANDMARKS_FACE_SIZE = 112;
-
-const ARC_FACE_5_LANDMARKS = [
-    [38.2946, 51.6963],
-    [73.5318, 51.5014],
-    [56.0252, 71.7366],
-    [41.5493, 92.3655],
-    [70.7299, 92.2041],
-] as Array<[number, number]>;
-
-export function getArcfaceAlignment(
-    faceDetection: FaceDetection,
-): FaceAlignment {
-    const landmarkCount = faceDetection.landmarks.length;
-    return getFaceAlignmentUsingSimilarityTransform(
-        faceDetection,
-        normalizeLandmarks(
-            landmarkCount === 5 ? ARC_FACE_5_LANDMARKS : ARCFACE_LANDMARKS,
-            ARCFACE_LANDMARKS_FACE_SIZE,
-        ),
-    );
-}
-
-export function getAlignedFaceBox(alignment: FaceAlignment) {
-    return new Box({
-        x: alignment.center.x - alignment.size / 2,
-        y: alignment.center.y - alignment.size / 2,
-        width: alignment.size,
-        height: alignment.size,
-    }).round();
-}
-
-export function ibExtractFaceImage(
-    image: ImageBitmap,
-    alignment: FaceAlignment,
+function normalizeLandmarks(
+    landmarks: Array<[number, number]>,
     faceSize: number,
-): ImageBitmap {
-    const box = getAlignedFaceBox(alignment);
-    const faceSizeDimentions: Dimensions = {
-        width: faceSize,
-        height: faceSize,
-    };
-    return cropWithRotation(
-        image,
-        box,
-        alignment.rotation,
-        faceSizeDimentions,
-        faceSizeDimentions,
-    );
-}
-
-// Used in MLDebugViewOnly
-export function ibExtractFaceImageUsingTransform(
-    image: ImageBitmap,
-    alignment: FaceAlignment,
-    faceSize: number,
-): ImageBitmap {
-    const scaledMatrix = new Matrix(alignment.affineMatrix)
-        .mul(faceSize)
-        .to2DArray();
-    // log.info("scaledMatrix: ", scaledMatrix);
-    return transform(image, scaledMatrix, faceSize, faceSize);
-}
-
-export function ibExtractFaceImages(
-    image: ImageBitmap,
-    alignments: Array<FaceAlignment>,
-    faceSize: number,
-): Array<ImageBitmap> {
-    return alignments.map((alignment) =>
-        ibExtractFaceImage(image, alignment, faceSize),
-    );
+): Array<[number, number]> {
+    return landmarks.map((landmark) =>
+        landmark.map((p) => p / faceSize),
+    ) as Array<[number, number]>;
 }

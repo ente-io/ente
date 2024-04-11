@@ -25,15 +25,6 @@ export function newBox(x: number, y: number, width: number, height: number) {
     return new Box({ x, y, width, height });
 }
 
-export function newBoxFromPoints(
-    left: number,
-    top: number,
-    right: number,
-    bottom: number,
-) {
-    return new Box({ left, top, right, bottom });
-}
-
 export function getBoxCenterPt(topLeft: Point, bottomRight: Point): Point {
     return topLeft.add(bottomRight.sub(topLeft).div(new Point(2, 2)));
 }

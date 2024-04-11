@@ -1,4 +1,11 @@
 import { MAX_FACE_DISTANCE_PERCENT } from "constants/mlConfig";
+import {
+    Matrix,
+    applyToPoint,
+    compose,
+    scale,
+    translate,
+} from "transformation-matrix";
 import { Dimensions } from "types/image";
 import {
     FaceDetection,
@@ -12,11 +19,6 @@ import {
     normalizePixelBetween0And1,
 } from "utils/image";
 import { newBox } from "utils/machineLearning";
-import {
-    computeTransformToBox,
-    transformBox,
-    transformPoints,
-} from "utils/machineLearning/transform";
 import { Box, Point } from "../../../thirdparty/face-api/classes";
 
 // TODO(MR): onnx-yolo
@@ -384,4 +386,36 @@ function getDetectionCenter(detection: FaceDetection) {
     });
 
     return center.div({ x: 4, y: 4 });
+}
+
+function computeTransformToBox(inBox: Box, toBox: Box): Matrix {
+    return compose(
+        translate(toBox.x, toBox.y),
+        scale(toBox.width / inBox.width, toBox.height / inBox.height),
+    );
+}
+
+function transformPoint(point: Point, transform: Matrix) {
+    const txdPoint = applyToPoint(transform, point);
+    return new Point(txdPoint.x, txdPoint.y);
+}
+
+function transformPoints(points: Point[], transform: Matrix) {
+    return points?.map((p) => transformPoint(p, transform));
+}
+
+function transformBox(box: Box, transform: Matrix) {
+    const topLeft = transformPoint(box.topLeft, transform);
+    const bottomRight = transformPoint(box.bottomRight, transform);
+
+    return newBoxFromPoints(topLeft.x, topLeft.y, bottomRight.x, bottomRight.y);
+}
+
+function newBoxFromPoints(
+    left: number,
+    top: number,
+    right: number,
+    bottom: number,
+) {
+    return new Box({ left, top, right, bottom });
 }

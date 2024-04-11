@@ -10,7 +10,6 @@ import {
 import { cropWithRotation, imageBitmapToBlob } from "utils/image";
 import { enlargeBox } from ".";
 import { Box } from "../../../thirdparty/face-api/classes";
-import { getAlignedFaceBox } from "./faceAlign";
 
 export function getFaceCrop(
     imageBitmap: ImageBitmap,
@@ -29,6 +28,15 @@ export function getFaceCrop(
         image: faceImageBitmap,
         imageBox: paddedBox,
     };
+}
+
+function getAlignedFaceBox(alignment: FaceAlignment) {
+    return new Box({
+        x: alignment.center.x - alignment.size / 2,
+        y: alignment.center.y - alignment.size / 2,
+        width: alignment.size,
+        height: alignment.size,
+    }).round();
 }
 
 export async function storeFaceCrop(
