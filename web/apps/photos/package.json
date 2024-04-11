@@ -11,7 +11,6 @@
         "@mui/x-date-pickers": "^5.0.0-alpha.6",
         "@stripe/stripe-js": "^1.13.2",
         "bip39": "^3.0.4",
-        "blazeface-back": "^0.0.9",
         "bs58": "^5.0.0",
         "chrono-node": "^2.2.6",
         "date-fns": "^2",

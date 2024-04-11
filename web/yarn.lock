@@ -1559,11 +1559,6 @@ bip39@^3.0.4:
   dependencies:
     "@noble/hashes" "^1.2.0"
 
-blazeface-back@^0.0.9:
-  version "0.0.9"
-  resolved "https://registry.yarnpkg.com/blazeface-back/-/blazeface-back-0.0.9.tgz#a8a26a0022950eb21136693f2fca3c52315ad2a4"
-  integrity sha512-t0i5V117j074d7d7mlLaRq9n/bYchXcSEgpWVbGGloV68A6Jn22t4SNoEC3t+MOsU8H+eXoDv2/6+JsqActM1g==
-
 brace-expansion@^1.1.7:
   version "1.1.11"
   resolved "https://registry.yarnpkg.com/brace-expansion/-/brace-expansion-1.1.11.tgz#3c7fcbf529d87226f3d2f52b966ff5271eb441dd"
