@@ -55,7 +55,7 @@ class FaceService {
             await syncContext.faceDetectionService.detectFaces(imageBitmap);
         console.timeEnd(timerId);
         console.log("faceDetections: ", faceDetections?.length);
-        // log.info('3 TF Memory stats: ',JSON.stringify(tf.memory()));
+
         // TODO: reenable faces filtering based on width
         const detectedFaces = faceDetections?.map((detection) => {
             return {
@@ -150,7 +150,7 @@ class FaceService {
 
         imageBitmap.close();
         log.info("[MLService] alignedFaces: ", newMlFile.faces?.length);
-        // log.info('4 TF Memory stats: ',JSON.stringify(tf.memory()));
+
         return faceImages;
     }
 
@@ -187,7 +187,6 @@ class FaceService {
         newMlFile.faces.forEach((f, i) => (f.embedding = embeddings[i]));
 
         log.info("[MLService] facesWithEmbeddings: ", newMlFile.faces.length);
-        // log.info('5 TF Memory stats: ',JSON.stringify(tf.memory()));
     }
 
     async syncFileFaceMakeRelativeDetections(

@@ -2,7 +2,7 @@
  * @file Various face recognition related tasks.
  *
  * - Face detection with the YOLO model.
- * - Face embedding with the mobilefacenet model.
+ * - Face embedding with the MobileFaceNet model.
  *
  * The runtime used is ONNX.
  */
@@ -99,51 +99,10 @@ export const detectFaces = async (input: Float32Array) => {
         input: new ort.Tensor("float32", input, [1, 3, 640, 640]),
     };
     const results = await session.run(feeds);
-    log.debug(() => `onnx/yolo inference took ${Date.now() - t} ms`);
+    log.debug(() => `onnx/yolo face detection took ${Date.now() - t} ms`);
     return results["output"].data;
 };
 
 export const faceEmbedding = async (input: Float32Array) => {
     throw new Error("test");
 };
-
-/*
-
-private async initOnnx() {
-}
-
-private async getOnnxInferenceSession() {
-    if (!this.onnxInferenceSession) {
-        await this.initOnnx();
-    }
-    return this.onnxInferenceSession;
-}
-*/
-
-// export const clipImageEmbedding = async (jpegImageData: Uint8Array) => {
-//     const tempFilePath = await generateTempFilePath("");
-//     const imageStream = new Response(jpegImageData.buffer).body;
-//     await writeStream(tempFilePath, imageStream);
-//     try {
-//         return await clipImageEmbedding_(tempFilePath);
-//     } finally {
-//         await deleteTempFile(tempFilePath);
-//     }
-// };
-
-// const clipImageEmbedding_ = async (jpegFilePath: string) => {
-//     const imageSession = await onnxImageSession();
-//     const t1 = Date.now();
-//     const rgbData = await getRGBData(jpegFilePath);
-//     const feeds = {
-//         input: new ort.Tensor("float32", rgbData, [1, 3, 224, 224]),
-//     };
-//     const t2 = Date.now();
-//     const results = await imageSession.run(feeds);
-//     log.debug(
-//         () =>
-//             `CLIP image embedding took ${Date.now() - t1} ms (prep: ${t2 - t1} ms, inference: ${Date.now() - t2} ms)`,
-//     );
-//     const imageEmbedding = results["output"].data; // Float32Array
-//     return normalizeEmbedding(imageEmbedding);
-// };
