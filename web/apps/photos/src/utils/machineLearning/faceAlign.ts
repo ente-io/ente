@@ -1,17 +1,8 @@
-import * as tf from "@tensorflow/tfjs-core";
-import { Matrix, inverse } from "ml-matrix";
+import { Matrix } from "ml-matrix";
 import { getSimilarityTransformation } from "similarity-transformation";
 import { Dimensions } from "types/image";
 import { FaceAlignment, FaceDetection } from "types/machineLearning";
 import { cropWithRotation, transform } from "utils/image";
-import {
-    computeRotation,
-    enlargeBox,
-    extractFaces,
-    getBoxCenter,
-    getBoxCenterPt,
-    toTensor4D,
-} from ".";
 import { Box, Point } from "../../../thirdparty/face-api/classes";
 
 export function normalizeLandmarks(
@@ -95,40 +86,6 @@ export function getArcfaceAlignment(
             ARCFACE_LANDMARKS_FACE_SIZE,
         ),
     );
-}
-
-export function extractFaceImage(
-    image: tf.Tensor4D,
-    alignment: FaceAlignment,
-    faceSize: number,
-) {
-    const affineMat = new Matrix(alignment.affineMatrix);
-
-    const I = inverse(affineMat);
-
-    return tf.tidy(() => {
-        const projection = tf.tensor2d([
-            [
-                I.get(0, 0),
-                I.get(0, 1),
-                I.get(0, 2),
-                I.get(1, 0),
-                I.get(1, 1),
-                I.get(1, 2),
-                0,
-                0,
-            ],
-        ]);
-        const faceImage = tf.image.transform(
-            image,
-            projection,
-            "bilinear",
-            "constant",
-            0,
-            [faceSize, faceSize],
-        );
-        return faceImage;
-    });
 }
 
 export function getAlignedFaceBox(alignment: FaceAlignment) {
