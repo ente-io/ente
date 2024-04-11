@@ -45,16 +45,13 @@ export declare type Landmark = Point;
 
 export declare type ImageType = "Original" | "Preview";
 
-export declare type FaceDetectionMethod = "FaceApiSSD" | "YoloFace";
+export declare type FaceDetectionMethod = "YoloFace";
 
 export declare type FaceCropMethod = "ArcFace";
 
-export declare type FaceAlignmentMethod =
-    | "ArcFace"
-    | "FaceApiDlib"
-    | "RotatedFaceApiDlib";
+export declare type FaceAlignmentMethod = "ArcFace";
 
-export declare type FaceEmbeddingMethod = "MobileFaceNet" | "FaceApiDlib";
+export declare type FaceEmbeddingMethod = "MobileFaceNet";
 
 export declare type BlurDetectionMethod = "Laplacian";
 

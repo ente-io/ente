@@ -124,6 +124,9 @@ class MLIDbStorage {
                         .add(DEFAULT_ML_SEARCH_CONFIG, ML_SEARCH_CONFIG_NAME);
                 }
                 if (oldVersion < 4) {
+                    db.deleteObjectStore("configs");
+                    db.createObjectStore("configs");
+
                     db.deleteObjectStore("things");
                 }
 
