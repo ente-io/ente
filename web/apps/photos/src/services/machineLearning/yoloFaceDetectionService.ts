@@ -156,43 +156,6 @@ class YoloFaceDetectionService implements FaceDetectionService {
         };
     }
 
-    /**
-     * @deprecated The method should not be used
-     */
-    private imageBitmapToTensorData(imageBitmap) {
-        // Create an OffscreenCanvas and set its size
-        const offscreenCanvas = new OffscreenCanvas(
-            imageBitmap.width,
-            imageBitmap.height,
-        );
-        const ctx = offscreenCanvas.getContext("2d");
-        ctx.drawImage(imageBitmap, 0, 0, imageBitmap.width, imageBitmap.height);
-        const imageData = ctx.getImageData(
-            0,
-            0,
-            imageBitmap.width,
-            imageBitmap.height,
-        );
-        const pixelData = imageData.data;
-        const data = new Float32Array(
-            1 * 3 * imageBitmap.width * imageBitmap.height,
-        );
-        // Populate the Float32Array with normalized pixel values
-        for (let i = 0; i < pixelData.length; i += 4) {
-            // Normalize pixel values to the range [0, 1]
-            data[i / 4] = pixelData[i] / 255.0; // Red channel
-            data[i / 4 + imageBitmap.width * imageBitmap.height] =
-                pixelData[i + 1] / 255.0; // Green channel
-            data[i / 4 + 2 * imageBitmap.width * imageBitmap.height] =
-                pixelData[i + 2] / 255.0; // Blue channel
-        }
-
-        return {
-            data: data,
-            shape: [1, 3, imageBitmap.width, imageBitmap.height],
-        };
-    }
-
     // The rowOutput is a Float32Array of shape [25200, 16], where each row represents a bounding box.
     private getFacesFromYoloOutput(
         rowOutput: Float32Array,
