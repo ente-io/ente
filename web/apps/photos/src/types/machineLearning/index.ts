@@ -265,7 +265,6 @@ export interface MLSyncContext {
     faceEmbeddingService: FaceEmbeddingService;
     blurDetectionService: BlurDetectionService;
     faceClusteringService: ClusteringService;
-    objectDetectionService: ObjectDetectionService;
     sceneDetectionService: SceneDetectionService;
 
     localFilesMap: Map<number, EnteFile>;
@@ -273,7 +272,6 @@ export interface MLSyncContext {
     nSyncedFiles: number;
     nSyncedFaces: number;
     allSyncedFacesMap?: Map<number, Array<Face>>;
-    allSyncedObjectsMap?: Map<number, Array<RealWorldObject>>;
     tsne?: any;
 
     error?: Error;

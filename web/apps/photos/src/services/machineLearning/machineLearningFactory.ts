@@ -22,8 +22,6 @@ import {
     MLLibraryData,
     MLSyncConfig,
     MLSyncContext,
-    ObjectDetectionMethod,
-    ObjectDetectionService,
     SceneDetectionMethod,
     SceneDetectionService,
 } from "types/machineLearning";
@@ -35,7 +33,6 @@ import hdbscanClusteringService from "./hdbscanClusteringService";
 import imageSceneService from "./imageSceneService";
 import laplacianBlurDetectionService from "./laplacianBlurDetectionService";
 import mobileFaceNetEmbeddingService from "./mobileFaceNetEmbeddingService";
-import ssdMobileNetV2Service from "./ssdMobileNetV2Service";
 import yoloFaceDetectionService from "./yoloFaceDetectionService";
 
 export class MLFactory {
@@ -47,16 +44,6 @@ export class MLFactory {
         }
 
         throw Error("Unknon face detection method: " + method);
-    }
-
-    public static getObjectDetectionService(
-        method: ObjectDetectionMethod,
-    ): ObjectDetectionService {
-        if (method === "SSDMobileNetV2") {
-            return ssdMobileNetV2Service;
-        }
-
-        throw Error("Unknown object detection method: " + method);
     }
 
     public static getSceneDetectionService(
@@ -147,7 +134,6 @@ export class LocalMLSyncContext implements MLSyncContext {
     public blurDetectionService: BlurDetectionService;
     public faceEmbeddingService: FaceEmbeddingService;
     public faceClusteringService: ClusteringService;
-    public objectDetectionService: ObjectDetectionService;
     public sceneDetectionService: SceneDetectionService;
 
     public localFilesMap: Map<number, EnteFile>;
@@ -202,9 +188,6 @@ export class LocalMLSyncContext implements MLSyncContext {
             this.config.faceClustering.method,
         );
 
-        this.objectDetectionService = MLFactory.getObjectDetectionService(
-            this.config.objectDetection.method,
-        );
         this.sceneDetectionService = MLFactory.getSceneDetectionService(
             this.config.sceneDetection.method,
         );
