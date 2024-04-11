@@ -225,11 +225,21 @@ class FaceService {
             face.detection,
             syncContext.config.faceCrop,
         );
-        face.crop = await storeFaceCrop(
-            face.id,
-            faceCrop,
-            syncContext.config.faceCrop.blobOptions,
-        );
+        try {
+            face.crop = await storeFaceCrop(
+                face.id,
+                faceCrop,
+                syncContext.config.faceCrop.blobOptions,
+            );
+        } catch (e) {
+            // TODO(MR): Temporarily ignoring errors about failing cache puts
+            // when using a custom scheme in Electron. Needs an alternative
+            // approach, perhaps OPFS.
+            console.error(
+                "Ignoring error when caching face crop, the face crop will not be available",
+                e,
+            );
+        }
         const blob = await imageBitmapToBlob(faceCrop.image);
         faceCrop.image.close();
         return blob;
