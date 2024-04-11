@@ -10,6 +10,7 @@ import "package:photos/services/remote_assets_service.dart";
 import "package:photos/utils/image_ml_isolate.dart";
 import "package:synchronized/synchronized.dart";
 
+/// This class is responsible for running the face embedding model on ONNX runtime, and can be accessed through the singleton instance [FaceEmbeddingOnnx.instance].
 class FaceEmbeddingOnnx {
   static const kModelBucketEndpoint = "https://models.ente.io/";
   static const kRemoteBucketModelPath = "mobilefacenet_opset15.onnx";
@@ -17,6 +18,8 @@ class FaceEmbeddingOnnx {
 
   static const int kInputSize = 112;
   static const int kEmbeddingSize = 192;
+  static const int kNumChannels = 3;
+  static const bool kPreWhiten = false;
 
   static final _logger = Logger('FaceEmbeddingOnnx');
 
