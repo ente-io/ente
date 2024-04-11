@@ -1,7 +1,6 @@
 import log from "@/next/log";
 import { CACHES } from "@ente/shared/storage/cacheStorage/constants";
 import { cached } from "@ente/shared/storage/cacheStorage/helpers";
-import { NormalizedFace } from "blazeface-back";
 import { FILE_TYPE } from "constants/file";
 import { BLAZEFACE_FACE_SIZE } from "constants/mlConfig";
 import { euclidean } from "hdbscan";
@@ -62,15 +61,6 @@ export function newBoxFromPoints(
     bottom: number,
 ) {
     return new Box({ left, top, right, bottom });
-}
-
-export function normFaceBox(face: NormalizedFace) {
-    return newBoxFromPoints(
-        face.topLeft[0],
-        face.topLeft[1],
-        face.bottomRight[0],
-        face.bottomRight[1],
-    );
 }
 
 export function getBoxCenterPt(topLeft: Point, bottomRight: Point): Point {

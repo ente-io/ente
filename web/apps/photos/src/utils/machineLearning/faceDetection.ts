@@ -1,27 +1,6 @@
 import { euclidean } from "hdbscan";
 import { FaceDetection } from "types/machineLearning";
-import { getNearestPointIndex, newBox } from ".";
-import { Box, Point } from "../../../thirdparty/face-api/classes";
-import {
-    computeTransformToBox,
-    transformBox,
-    transformPoints,
-} from "./transform";
-
-export function transformPaddedToImage(
-    detection: FaceDetection,
-    faceImage: ImageBitmap,
-    imageBox: Box,
-    paddedBox: Box,
-) {
-    const inBox = newBox(0, 0, faceImage.width, faceImage.height);
-    imageBox.x = paddedBox.x;
-    imageBox.y = paddedBox.y;
-    const transform = computeTransformToBox(inBox, imageBox);
-
-    detection.box = transformBox(detection.box, transform);
-    detection.landmarks = transformPoints(detection.landmarks, transform);
-}
+import { Point } from "../../../thirdparty/face-api/classes";
 
 export function getDetectionCenter(detection: FaceDetection) {
     const center = new Point(0, 0);
@@ -33,30 +12,6 @@ export function getDetectionCenter(detection: FaceDetection) {
     });
 
     return center.div({ x: 4, y: 4 });
-}
-
-/**
- * Finds the nearest face detection from a list of detections to a specified detection.
- *
- * This function calculates the center of each detection and then finds the detection whose center is nearest to the center of the specified detection.
- * If a maximum distance is specified, only detections within that distance are considered.
- *
- * @param toDetection - The face detection to find the nearest detection to.
- * @param fromDetections - An array of face detections to search in.
- * @param maxDistance - The maximum distance between the centers of the two detections for a detection to be considered. If not specified, all detections are considered.
- *
- * @returns The nearest face detection from the list, or `undefined` if no detection is within the maximum distance.
- */
-export function getNearestDetection(
-    toDetection: FaceDetection,
-    fromDetections: Array<FaceDetection>,
-    maxDistance?: number,
-) {
-    const toCenter = getDetectionCenter(toDetection);
-    const centers = fromDetections.map((d) => getDetectionCenter(d));
-    const nearestIndex = getNearestPointIndex(toCenter, centers, maxDistance);
-
-    return nearestIndex >= 0 && fromDetections[nearestIndex];
 }
 
 /**
