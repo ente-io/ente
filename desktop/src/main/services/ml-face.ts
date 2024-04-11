@@ -78,8 +78,29 @@ const faceEmbeddingSession = async () => {
     return _faceEmbeddingSession;
 };
 
-export const detectFaces = async (inputImage: Uint8Array) => {
-    throw new Error("test");
+export const detectFaces = async (input: Float32Array) => {
+    // console.log("start ort");
+    // this.onnxInferenceSession = await ort.InferenceSession.create(
+    //     "/models/yoloface/yolov5s_face_640_640_dynamic.onnx",
+    // );
+    // const data = new Float32Array(1 * 3 * 640 * 640);
+    // const inputTensor = new ort.Tensor("float32", data, [1, 3, 640, 640]);
+    // // TODO(MR): onnx-yolo
+    // // const feeds: Record<string, ort.Tensor> = {};
+    // const feeds: Record<string, any> = {};
+    // const name = this.onnxInferenceSession.inputNames[0];
+    // feeds[name] = inputTensor;
+    // await this.onnxInferenceSession.run(feeds);
+    // console.log("start end");
+
+    const session = await faceDetectionSession();
+    const t = Date.now();
+    const feeds = {
+        input: new ort.Tensor("float32", input, [1, 3, 640, 640]),
+    };
+    const results = await session.run(feeds);
+    log.debug(() => `onnx/yolo inference took ${Date.now() - t} ms`);
+    return results["output"].data;
 };
 
 export const faceEmbedding = async (input: Float32Array) => {
@@ -89,19 +110,6 @@ export const faceEmbedding = async (input: Float32Array) => {
 /*
 
 private async initOnnx() {
-    console.log("start ort");
-    this.onnxInferenceSession = await ort.InferenceSession.create(
-        "/models/yoloface/yolov5s_face_640_640_dynamic.onnx",
-    );
-    const data = new Float32Array(1 * 3 * 640 * 640);
-    const inputTensor = new ort.Tensor("float32", data, [1, 3, 640, 640]);
-    // TODO(MR): onnx-yolo
-    // const feeds: Record<string, ort.Tensor> = {};
-    const feeds: Record<string, any> = {};
-    const name = this.onnxInferenceSession.inputNames[0];
-    feeds[name] = inputTensor;
-    await this.onnxInferenceSession.run(feeds);
-    console.log("start end");
 }
 
 private async getOnnxInferenceSession() {

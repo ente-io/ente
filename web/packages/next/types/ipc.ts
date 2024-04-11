@@ -221,16 +221,15 @@ export interface Electron {
      * Detect faces in the given image using YOLO.
      *
      * Both the input and output are opaque binary data whose internal structure
-     * is model (YOLO) and our implementation specific. That said, specifically
-     * the {@link inputImage} a particular bitmap encoding of an image.
+     * is specific to our implementation and the model (YOLO) we use.
      */
-    detectFaces: (inputImage: Uint8Array) => Promise<Float32Array>;
+    detectFaces: (input: Float32Array) => Promise<Float32Array>;
 
     /**
-     * Return a mobilefacenet embedding for the given face data.
+     * Return a MobileFaceNet embedding for the given face data.
      *
      * Both the input and output are opaque binary data whose internal structure
-     * is model (mobilefacenet) and our implementation specific.
+     * is specific to our implementation and the model (MobileFaceNet) we use.
      */
     faceEmbedding: (input: Float32Array) => Promise<Float32Array>;
 

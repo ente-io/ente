@@ -147,8 +147,8 @@ export const attachIPCHandlers = () => {
         clipTextEmbedding(text),
     );
 
-    ipcMain.handle("detectFaces", (_, imageData: Uint8Array) =>
-        detectFaces(imageData),
+    ipcMain.handle("detectFaces", (_, input: Float32Array) =>
+        detectFaces(input),
     );
 
     ipcMain.handle("faceEmbedding", (_, input: Float32Array) =>

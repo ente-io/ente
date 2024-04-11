@@ -1,3 +1,4 @@
+import { ensureElectron } from "@/next/electron";
 import { MAX_FACE_DISTANCE_PERCENT } from "constants/mlConfig";
 import { euclidean } from "hdbscan";
 import {
@@ -44,14 +45,7 @@ class YoloFaceDetectionService implements FaceDetectionService {
             );
         const data = preprocessResult.data;
         const resized = preprocessResult.newSize;
-        const inputTensor = new ort.Tensor("float32", data, [1, 3, 640, 640]);
-        // TODO(MR): onnx-yolo
-        // const feeds: Record<string, ort.Tensor> = {};
-        const feeds: Record<string, any> = {};
-        feeds["input"] = inputTensor;
-        const inferenceSession = await this.getOnnxInferenceSession();
-        const runout = await inferenceSession.run(feeds);
-        const outputData = runout.output.data;
+        const outputData = await ensureElectron().detectFaces(data);
         const faces = this.getFacesFromYoloOutput(
             outputData as Float32Array,
             0.7,
