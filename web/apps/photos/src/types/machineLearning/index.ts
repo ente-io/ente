@@ -22,7 +22,6 @@ export interface DebugFace {
 }
 
 export declare type FaceImage = Array<Array<Array<number>>>;
-export declare type FaceImageBlob = Blob;
 
 export declare type FaceDescriptor = Float32Array;
 

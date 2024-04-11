@@ -2,7 +2,6 @@ import log from "@/next/log";
 import { CACHES } from "@ente/shared/storage/cacheStorage/constants";
 import { cached } from "@ente/shared/storage/cacheStorage/helpers";
 import { FILE_TYPE } from "constants/file";
-import { euclidean } from "hdbscan";
 import PQueue from "p-queue";
 import DownloadManager from "services/download";
 import { getLocalFiles } from "services/fileService";
@@ -10,11 +9,9 @@ import { decodeLivePhoto } from "services/livePhotoService";
 import { EnteFile } from "types/file";
 import { Dimensions } from "types/image";
 import {
-    AlignedFace,
     DetectedFace,
     Face,
     FaceAlignment,
-    FaceImageBlob,
     MlFileData,
     Person,
     Versioned,
@@ -23,31 +20,6 @@ import { getRenderableImage } from "utils/file";
 import { clamp, warpAffineFloat32List } from "utils/image";
 import mlIDbStorage from "utils/storage/mlIDbStorage";
 import { Box, Point } from "../../../thirdparty/face-api/classes";
-import { ibExtractFaceImages } from "./faceAlign";
-import { getFaceCropBlobFromStorage } from "./faceCrop";
-
-export function f32Average(descriptors: Float32Array[]) {
-    if (descriptors.length < 1) {
-        throw Error("f32Average: input size 0");
-    }
-
-    if (descriptors.length === 1) {
-        return descriptors[0];
-    }
-
-    const f32Size = descriptors[0].length;
-    const avg = new Float32Array(f32Size);
-
-    for (let index = 0; index < f32Size; index++) {
-        avg[index] = descriptors[0][index];
-        for (let desc = 1; desc < descriptors.length; desc++) {
-            avg[index] = avg[index] + descriptors[desc][index];
-        }
-        avg[index] = avg[index] / descriptors.length;
-    }
-
-    return avg;
-}
 
 export function newBox(x: number, y: number, width: number, height: number) {
     return new Box({ x, y, width, height });
@@ -83,16 +55,6 @@ export function enlargeBox(box: Box, factor: number = 1.5) {
     });
 }
 
-export function normalizeRadians(angle: number) {
-    return angle - 2 * Math.PI * Math.floor((angle + Math.PI) / (2 * Math.PI));
-}
-
-export function computeRotation(point1: Point, point2: Point) {
-    const radians =
-        Math.PI / 2 - Math.atan2(-(point2.y - point1.y), point2.x - point1.x);
-    return normalizeRadians(radians);
-}
-
 export function getAllFacesFromMap(allFacesMap: Map<number, Array<Face>>) {
     const allFaces = [...allFacesMap.values()].flat();
 
@@ -102,24 +64,6 @@ export function getAllFacesFromMap(allFacesMap: Map<number, Array<Face>>) {
 export async function getLocalFile(fileId: number) {
     const localFiles = await getLocalFiles();
     return localFiles.find((f) => f.id === fileId);
-}
-
-export async function extractFaceImages(
-    faces: Array<AlignedFace>,
-    faceSize: number,
-    image?: ImageBitmap,
-) {
-    // if (faces.length === faces.filter((f) => f.crop).length) {
-    // return ibExtractFaceImagesFromCrops(faces, faceSize);
-    // } else
-    if (image) {
-        const faceAlignments = faces.map((f) => f.alignment);
-        return ibExtractFaceImages(image, faceAlignments, faceSize);
-    } else {
-        throw Error(
-            "Either face crops or image is required to extract face images",
-        );
-    }
 }
 
 export async function extractFaceImagesToFloat32(
@@ -142,10 +86,6 @@ export async function extractFaceImagesToFloat32(
         );
     }
     return faceData;
-}
-
-export function leftFillNum(num: number, length: number, padding: number) {
-    return num.toString().padStart(length, padding.toString());
 }
 
 export function getFaceId(detectedFace: DetectedFace, imageDims: Dimensions) {
@@ -292,21 +232,6 @@ export async function getUnidentifiedFaces(
     );
 }
 
-export async function getFaceCropBlobs(
-    faces: Array<Face>,
-): Promise<Array<FaceImageBlob>> {
-    const faceCrops = faces
-        .map((f) => f.crop)
-        .filter((faceCrop) => faceCrop !== null && faceCrop !== undefined);
-
-    return (
-        faceCrops &&
-        Promise.all(
-            faceCrops.map((faceCrop) => getFaceCropBlobFromStorage(faceCrop)),
-        )
-    );
-}
-
 export async function getAllPeople(limit: number = undefined) {
     let people: Array<Person> = await mlIDbStorage.getAllPeople();
     // await mlPeopleStore.iterate<Person, void>((person) => {
@@ -368,27 +293,6 @@ export function areFaceIdsSame(ofFaces: Array<Face>, toFaces: Array<Face>) {
         ofFaces?.map((f) => f.id),
         toFaces?.map((f) => f.id),
     );
-}
-
-export function getNearestPointIndex(
-    toPoint: Point,
-    fromPoints: Array<Point>,
-    maxDistance?: number,
-) {
-    const dists = fromPoints.map((point, i) => ({
-        index: i,
-        point: point,
-        distance: euclidean([point.x, point.y], [toPoint.x, toPoint.y]),
-    }));
-    const nearest = findFirstIfSorted(
-        dists,
-        (a, b) => Math.abs(a.distance) - Math.abs(b.distance),
-    );
-
-    // log.info('Nearest dist: ', nearest.distance, maxDistance);
-    if (!maxDistance || nearest.distance <= maxDistance) {
-        return nearest.index;
-    }
 }
 
 export function logQueueStats(queue: PQueue, name: string) {
