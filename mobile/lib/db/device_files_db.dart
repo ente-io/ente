@@ -181,6 +181,7 @@ extension DeviceFiles on FilesDB {
       final Set<String> existingPathIds = await getDevicePathIDs();
       for (Tuple2<AssetPathEntity, String> tup in devicePathInfo) {
         final AssetPathEntity pathEntity = tup.item1;
+        final assetCount = await pathEntity.assetCountAsync;
         final String localID = tup.item2;
         final bool shouldUpdate = existingPathIds.contains(pathEntity.id);
         if (shouldUpdate) {
@@ -190,11 +191,11 @@ extension DeviceFiles on FilesDB {
             [
               pathEntity.name,
               localID,
-              pathEntity.assetCount,
+              assetCount,
               pathEntity.id,
               pathEntity.name,
               localID,
-              pathEntity.assetCount,
+              assetCount,
             ],
           );
           if (rowUpdated > 0) {
@@ -208,7 +209,7 @@ extension DeviceFiles on FilesDB {
             {
               "id": pathEntity.id,
               "name": pathEntity.name,
-              "count": pathEntity.assetCount,
+              "count": assetCount,
               "cover_id": localID,
               "should_backup": shouldBackup ? _sqlBoolTrue : _sqlBoolFalse,
             },

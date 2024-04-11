@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
 import "package:photos/generated/l10n.dart";
+import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/account/password_entry_page.dart';
 import 'package:photos/ui/common/dynamic_fab.dart';
 import 'package:photos/utils/dialog_util.dart';
@@ -123,10 +124,11 @@ class _RecoveryPageState extends State<RecoveryPage> {
                     },
                   ),
                 ),
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 18),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 18),
                   child: Divider(
                     thickness: 1,
+                    color: getEnteColorScheme(context).strokeFaint,
                   ),
                 ),
                 Row(

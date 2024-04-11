@@ -25,8 +25,8 @@ class _ToggleSwitchWidgetState extends State<ToggleSwitchWidget> {
 
   @override
   void initState() {
-    toggleValue = widget.value.call();
     super.initState();
+    toggleValue = widget.value.call();
   }
 
   @override
@@ -50,8 +50,13 @@ class _ToggleSwitchWidgetState extends State<ToggleSwitchWidget> {
           child: FittedBox(
             fit: BoxFit.contain,
             child: Switch.adaptive(
-              activeColor: enteColorScheme.primary400,
-              inactiveTrackColor: enteColorScheme.fillMuted,
+              inactiveTrackColor: Colors.transparent,
+              activeTrackColor: enteColorScheme.primary500,
+              activeColor: Colors.white,
+              inactiveThumbColor: enteColorScheme.primary500,
+              trackOutlineColor: MaterialStateColor.resolveWith(
+                (states) => enteColorScheme.primary500,
+              ),
               materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
               value: toggleValue ?? false,
               onChanged: (negationOfToggleValue) async {

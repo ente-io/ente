@@ -1,35 +1,37 @@
-import 'dart:io';
-import "dart:math" show min, max, sqrt;
-// import 'dart:math' as math show min, max;
-import 'dart:typed_data' show Uint8List;
+import "dart:io" show File;
+import 'dart:math' as math show max, min, sqrt;
+import 'dart:typed_data' show Float32List;
 
-import "package:flutter/foundation.dart";
-import "package:logging/logging.dart";
-import 'package:photos/models/ml/ml_typedefs.dart';
+import 'package:computer/computer.dart';
+import 'package:logging/logging.dart';
+import 'package:onnxruntime/onnxruntime.dart';
 import 'package:photos/services/machine_learning/face_ml/face_detection/detection.dart';
-import 'package:photos/services/machine_learning/face_ml/face_embedding/face_embedding_exceptions.dart';
-import 'package:photos/services/machine_learning/face_ml/face_embedding/face_embedding_options.dart';
-import 'package:photos/services/machine_learning/face_ml/face_embedding/mobilefacenet_model_config.dart';
-import 'package:photos/utils/image_ml_isolate.dart';
-import 'package:photos/utils/image_ml_util.dart';
-import 'package:tflite_flutter/tflite_flutter.dart';
+import "package:photos/services/remote_assets_service.dart";
+import "package:photos/utils/image_ml_isolate.dart";
+import "package:synchronized/synchronized.dart";
 
-/// This class is responsible for running the MobileFaceNet model, and can be accessed through the singleton `FaceEmbedding.instance`.
-class FaceEmbedding {
-  Interpreter? _interpreter;
-  IsolateInterpreter? _isolateInterpreter;
-  int get getAddress => _interpreter!.address;
+/// This class is responsible for running the face embedding model (MobileFaceNet) on ONNX runtime, and can be accessed through the singleton instance [FaceEmbeddingService.instance].
+class FaceEmbeddingService {
+  static const kModelBucketEndpoint = "https://models.ente.io/";
+  static const kRemoteBucketModelPath = "mobilefacenet_opset15.onnx";
+  static const modelRemotePath = kModelBucketEndpoint + kRemoteBucketModelPath;
 
-  final outputShapes = <List<int>>[];
-  final outputTypes = <TensorType>[];
+  static const int kInputSize = 112;
+  static const int kEmbeddingSize = 192;
+  static const int kNumChannels = 3;
+  static const bool kPreWhiten = false;
 
-  final _logger = Logger("FaceEmbeddingService");
+  static final _logger = Logger('FaceEmbeddingOnnx');
 
-  final MobileFaceNetModelConfig config;
-  final FaceEmbeddingOptions embeddingOptions;
+  bool isInitialized = false;
+  int sessionAddress = 0;
+
+  final _computer = Computer.shared();
+
+  final _computerLock = Lock();
+
   // singleton pattern
-  FaceEmbedding._privateConstructor({required this.config})
-      : embeddingOptions = config.faceEmbeddingOptions;
+  FaceEmbeddingService._privateConstructor();
 
   /// Use this instance to access the FaceEmbedding service. Make sure to call `init()` before using it.
   /// e.g. `await FaceEmbedding.instance.init();`
@@ -37,243 +39,211 @@ class FaceEmbedding {
   /// Then you can use `predict()` to get the embedding of a face, so `FaceEmbedding.instance.predict(imageData)`
   ///
   /// config options: faceEmbeddingEnte
-  static final instance =
-      FaceEmbedding._privateConstructor(config: faceEmbeddingEnte);
-  factory FaceEmbedding() => instance;
+  static final instance = FaceEmbeddingService._privateConstructor();
+  factory FaceEmbeddingService() => instance;
 
   /// Check if the interpreter is initialized, if not initialize it with `loadModel()`
   Future<void> init() async {
-    if (_interpreter == null || _isolateInterpreter == null) {
-      await _loadModel();
+    if (!isInitialized) {
+      _logger.info('init is called');
+      final model =
+          await RemoteAssetsService.instance.getAsset(modelRemotePath);
+      final startTime = DateTime.now();
+      // Doing this from main isolate since `rootBundle` cannot be accessed outside it
+      sessionAddress = await _computer.compute(
+        _loadModel,
+        param: {
+          "modelPath": model.path,
+        },
+      );
+      final endTime = DateTime.now();
+      _logger.info(
+        "Face embedding model loaded, took: ${(endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch).toString()}ms",
+      );
+      if (sessionAddress != -1) {
+        isInitialized = true;
+      }
     }
   }
 
-  Future<void> dispose() async {
-    _logger.info('dispose() is called');
+  Future<void> release() async {
+    if (isInitialized) {
+      await _computer
+          .compute(_releaseModel, param: {'address': sessionAddress});
+      isInitialized = false;
+      sessionAddress = 0;
+    }
+  }
+
+  static Future<int> _loadModel(Map args) async {
+    final sessionOptions = OrtSessionOptions()
+      ..setInterOpNumThreads(1)
+      ..setIntraOpNumThreads(1)
+      ..setSessionGraphOptimizationLevel(GraphOptimizationLevel.ortEnableAll);
+    try {
+      // _logger.info('Loading face embedding model');
+      final session =
+          OrtSession.fromFile(File(args["modelPath"]), sessionOptions);
+      // _logger.info('Face embedding model loaded');
+      return session.address;
+    } catch (e, _) {
+      // _logger.severe('Face embedding model not loaded', e, s);
+    }
+    return -1;
+  }
+
+  static Future<void> _releaseModel(Map args) async {
+    final address = args['address'] as int;
+    if (address == 0) {
+      return;
+    }
+    final session = OrtSession.fromAddress(address);
+    session.release();
+    return;
+  }
+
+  Future<(List<double>, bool, double)> predictFromImageDataInComputer(
+    String imagePath,
+    FaceDetectionRelative face,
+  ) async {
+    assert(sessionAddress != 0 && sessionAddress != -1 && isInitialized);
 
     try {
-      _interpreter?.close();
-      _interpreter = null;
-      await _isolateInterpreter?.close();
-      _isolateInterpreter = null;
+      final stopwatchDecoding = Stopwatch()..start();
+      final (inputImageList, _, isBlur, blurValue, _) =
+          await ImageMlIsolate.instance.preprocessMobileFaceNetOnnx(
+        imagePath,
+        [face],
+      );
+      stopwatchDecoding.stop();
+      _logger.info(
+        'MobileFaceNet image decoding and preprocessing is finished, in ${stopwatchDecoding.elapsedMilliseconds}ms',
+      );
+
+      final stopwatch = Stopwatch()..start();
+      _logger.info('MobileFaceNet interpreter.run is called');
+      final embedding = await _computer.compute(
+        inferFromMap,
+        param: {
+          'input': inputImageList,
+          'address': sessionAddress,
+          'inputSize': kInputSize,
+        },
+        taskName: 'createFaceEmbedding',
+      ) as List<double>;
+      stopwatch.stop();
+      _logger.info(
+        'MobileFaceNet interpreter.run is finished, in ${stopwatch.elapsedMilliseconds}ms',
+      );
+
+      _logger.info(
+        'MobileFaceNet results (only first few numbers): embedding ${embedding.sublist(0, 5)}',
+      );
+      _logger.info(
+        'Mean of embedding: ${embedding.reduce((a, b) => a + b) / embedding.length}',
+      );
+      _logger.info(
+        'Max of embedding: ${embedding.reduce(math.max)}',
+      );
+      _logger.info(
+        'Min of embedding: ${embedding.reduce(math.min)}',
+      );
+
+      return (embedding, isBlur[0], blurValue[0]);
     } catch (e) {
-      _logger.severe('Error while closing interpreter: $e');
+      _logger.info('MobileFaceNet Error while running inference: $e');
       rethrow;
     }
   }
 
-  /// WARNING: This function only works for one face at a time. it's better to use [predict], which can handle both single and multiple faces.
-  Future<List<double>> predictSingle(
-    Uint8List imageData,
-    FaceDetectionRelative face,
-  ) async {
-    assert(_interpreter != null && _isolateInterpreter != null);
+  Future<List<List<double>>> predictInComputer(Float32List input) async {
+    assert(sessionAddress != 0 && sessionAddress != -1 && isInitialized);
+    return await _computerLock.synchronized(() async {
+      try {
+        final stopwatch = Stopwatch()..start();
+        _logger.info('MobileFaceNet interpreter.run is called');
+        final embeddings = await _computer.compute(
+          inferFromMap,
+          param: {
+            'input': input,
+            'address': sessionAddress,
+            'inputSize': kInputSize,
+          },
+          taskName: 'createFaceEmbedding',
+        ) as List<List<double>>;
+        stopwatch.stop();
+        _logger.info(
+          'MobileFaceNet interpreter.run is finished, in ${stopwatch.elapsedMilliseconds}ms',
+        );
 
-    final stopwatch = Stopwatch()..start();
-
-    // Image decoding and preprocessing
-    List<List<List<List<num>>>> input;
-    List output;
-    try {
-      final stopwatchDecoding = Stopwatch()..start();
-      final (inputImageMatrix, _, _, _, _) =
-          await ImageMlIsolate.instance.preprocessMobileFaceNet(
-        imageData,
-        [face],
-      );
-      input = inputImageMatrix;
-      stopwatchDecoding.stop();
-      _logger.info(
-        'Image decoding and preprocessing is finished, in ${stopwatchDecoding.elapsedMilliseconds}ms',
-      );
-
-      output = createEmptyOutputMatrix(outputShapes[0]);
-    } catch (e) {
-      _logger.severe('Error while decoding and preprocessing image: $e');
-      throw MobileFaceNetImagePreprocessingException();
-    }
-
-    _logger.info('interpreter.run is called');
-    // Run inference
-    try {
-      await _isolateInterpreter!.run(input, output);
-      // _interpreter!.run(input, output);
-      // ignore: avoid_catches_without_on_clauses
-    } catch (e) {
-      _logger.severe('Error while running inference: $e');
-      throw MobileFaceNetInterpreterRunException();
-    }
-    _logger.info('interpreter.run is finished');
-
-    // Get output tensors
-    final embedding = output[0] as List<double>;
-
-    // Normalize the embedding
-    final norm = sqrt(embedding.map((e) => e * e).reduce((a, b) => a + b));
-    for (int i = 0; i < embedding.length; i++) {
-      embedding[i] /= norm;
-    }
-
-    stopwatch.stop();
-    _logger.info(
-      'predict() executed in ${stopwatch.elapsedMilliseconds}ms',
-    );
-
-    // _logger.info(
-    //   'results (only first few numbers): embedding ${embedding.sublist(0, 5)}',
-    // );
-    // _logger.info(
-    //   'Mean of embedding: ${embedding.reduce((a, b) => a + b) / embedding.length}',
-    // );
-    // _logger.info(
-    //   'Max of embedding: ${embedding.reduce(math.max)}',
-    // );
-    // _logger.info(
-    //   'Min of embedding: ${embedding.reduce(math.min)}',
-    // );
-
-    return embedding;
+        return embeddings;
+      } catch (e) {
+        _logger.info('MobileFaceNet Error while running inference: $e');
+        rethrow;
+      }
+    });
   }
 
-  Future<List<List<double>>> predict(
-    List<Num3DInputMatrix> inputImageMatrix,
+  static Future<List<List<double>>> predictSync(
+    Float32List input,
+    int sessionAddress,
   ) async {
-    assert(_interpreter != null && _isolateInterpreter != null);
-
-    final stopwatch = Stopwatch()..start();
-
-    _checkPreprocessedInput(inputImageMatrix); // [inputHeight, inputWidth, 3]
-    final input = [inputImageMatrix];
-    // await encodeAndSaveData(inputImageMatrix, 'input_mobilefacenet');
-
-    final output = <int, Object>{};
-    final outputShape = outputShapes[0];
-    outputShape[0] = inputImageMatrix.length;
-    output[0] = createEmptyOutputMatrix(outputShape);
-    // for (int i = 0; i < faces.length; i++) {
-    //   output[i] = createEmptyOutputMatrix(outputShapes[0]);
-    // }
-
-    _logger.info('interpreter.run is called');
-    // Run inference
-    final stopwatchInterpreter = Stopwatch()..start();
+    assert(sessionAddress != 0 && sessionAddress != -1);
     try {
-      await _isolateInterpreter!.runForMultipleInputs(input, output);
-      // _interpreter!.runForMultipleInputs(input, output);
-      // ignore: avoid_catches_without_on_clauses
+      final stopwatch = Stopwatch()..start();
+      _logger.info('MobileFaceNet interpreter.run is called');
+      final embeddings = await infer(
+        input,
+        sessionAddress,
+        kInputSize,
+      );
+      stopwatch.stop();
+      _logger.info(
+        'MobileFaceNet interpreter.run is finished, in ${stopwatch.elapsedMilliseconds}ms',
+      );
+
+      return embeddings;
     } catch (e) {
-      _logger.severe('Error while running inference: $e');
-      throw MobileFaceNetInterpreterRunException();
+      _logger.info('MobileFaceNet Error while running inference: $e');
+      rethrow;
     }
-    stopwatchInterpreter.stop();
-    _logger.info(
-      'interpreter.run is finished, in ${stopwatchInterpreter.elapsedMilliseconds}ms',
+  }
+
+  static Future<List<List<double>>> inferFromMap(Map args) async {
+    final inputImageList = args['input'] as Float32List;
+    final address = args['address'] as int;
+    final inputSize = args['inputSize'] as int;
+    return await infer(inputImageList, address, inputSize);
+  }
+
+  static Future<List<List<double>>> infer(
+    Float32List inputImageList,
+    int address,
+    int inputSize,
+  ) async {
+    final runOptions = OrtRunOptions();
+    final int numberOfFaces =
+        inputImageList.length ~/ (inputSize * inputSize * 3);
+    final inputOrt = OrtValueTensor.createTensorWithDataList(
+      inputImageList,
+      [numberOfFaces, inputSize, inputSize, 3],
     );
-    // _logger.info('output: $output');
+    final inputs = {'img_inputs': inputOrt};
+    final session = OrtSession.fromAddress(address);
+    final List<OrtValue?> outputs = session.run(runOptions, inputs);
+    final embeddings = outputs[0]?.value as List<List<double>>;
 
-    // Get output tensors
-    final embeddings = <List<double>>[];
-    final outerEmbedding = output[0]! as Iterable<dynamic>;
-    for (int i = 0; i < inputImageMatrix.length; i++) {
-      final embedding = List<double>.from(outerEmbedding.toList()[i]);
-      // _logger.info("The $i-th embedding: $embedding");
-      embeddings.add(embedding);
-    }
-    // await encodeAndSaveData(embeddings, 'output_mobilefacenet');
-
-    // Normalize the embedding
-    for (int i = 0; i < embeddings.length; i++) {
-      final embedding = embeddings[i];
-      final norm = sqrt(embedding.map((e) => e * e).reduce((a, b) => a + b));
-      for (int j = 0; j < embedding.length; j++) {
-        embedding[j] /= norm;
+    for (final embedding in embeddings) {
+      double normalization = 0;
+      for (int i = 0; i < kEmbeddingSize; i++) {
+        normalization += embedding[i] * embedding[i];
+      }
+      final double sqrtNormalization = math.sqrt(normalization);
+      for (int i = 0; i < kEmbeddingSize; i++) {
+        embedding[i] = embedding[i] / sqrtNormalization;
       }
     }
-
-    stopwatch.stop();
-    _logger.info(
-      'predictBatch() executed in ${stopwatch.elapsedMilliseconds}ms',
-    );
 
     return embeddings;
-  }
-
-  Future<void> _loadModel() async {
-    _logger.info('loadModel is called');
-
-    try {
-      final interpreterOptions = InterpreterOptions();
-
-      // Android Delegates
-      // TODO: Make sure this works on both platforms: Android and iOS
-      if (Platform.isAndroid) {
-        // Use GPU Delegate (GPU). WARNING: It doesn't work on emulator
-        // if (!kDebugMode) {
-        //   interpreterOptions.addDelegate(GpuDelegateV2());
-        // }
-        // Use XNNPACK Delegate (CPU)
-        interpreterOptions.addDelegate(XNNPackDelegate());
-      }
-
-      // iOS Delegates
-      if (Platform.isIOS) {
-        // Use Metal Delegate (GPU)
-        interpreterOptions.addDelegate(GpuDelegate());
-      }
-
-      // Load model from assets
-      _interpreter ??= await Interpreter.fromAsset(
-        config.modelPath,
-        options: interpreterOptions,
-      );
-      _isolateInterpreter ??=
-          await IsolateInterpreter.create(address: _interpreter!.address);
-
-      _logger.info('Interpreter created from asset: ${config.modelPath}');
-
-      // Get tensor input shape [1, 112, 112, 3]
-      final inputTensors = _interpreter!.getInputTensors().first;
-      _logger.info('Input Tensors: $inputTensors');
-      // Get tensour output shape [1, 192]
-      final outputTensors = _interpreter!.getOutputTensors();
-      final outputTensor = outputTensors.first;
-      _logger.info('Output Tensors: $outputTensor');
-
-      for (var tensor in outputTensors) {
-        outputShapes.add(tensor.shape);
-        outputTypes.add(tensor.type);
-      }
-      _logger.info('outputShapes: $outputShapes');
-      _logger.info('loadModel is finished');
-      // ignore: avoid_catches_without_on_clauses
-    } catch (e) {
-      _logger.severe('Error while creating interpreter: $e');
-      throw MobileFaceNetInterpreterInitializationException();
-    }
-  }
-
-  void _checkPreprocessedInput(
-    List<Num3DInputMatrix> inputMatrix,
-  ) {
-    final embeddingOptions = config.faceEmbeddingOptions;
-
-    if (inputMatrix.isEmpty) {
-      // Check if the input is empty
-      throw MobileFaceNetEmptyInput();
-    }
-
-    // Check if the input is the correct size
-    if (inputMatrix[0].length != embeddingOptions.inputHeight ||
-        inputMatrix[0][0].length != embeddingOptions.inputWidth) {
-      throw MobileFaceNetWrongInputSize();
-    }
-
-    final flattened = inputMatrix[0].expand((i) => i).expand((i) => i);
-    final minValue = flattened.reduce(min);
-    final maxValue = flattened.reduce(max);
-
-    if (minValue < -1 || maxValue > 1) {
-      throw MobileFaceNetWrongInputRange();
-    }
   }
 }

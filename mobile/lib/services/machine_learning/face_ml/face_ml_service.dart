@@ -28,10 +28,10 @@ import "package:photos/models/file/file_type.dart";
 import "package:photos/models/ml/ml_versions.dart";
 import 'package:photos/services/machine_learning/face_ml/face_clustering/linear_clustering_service.dart';
 import 'package:photos/services/machine_learning/face_ml/face_detection/detection.dart';
-import 'package:photos/services/machine_learning/face_ml/face_detection/yolov5face/onnx_face_detection.dart';
-import 'package:photos/services/machine_learning/face_ml/face_detection/yolov5face/yolo_face_detection_exceptions.dart';
+import 'package:photos/services/machine_learning/face_ml/face_detection/face_detection_exceptions.dart';
+import 'package:photos/services/machine_learning/face_ml/face_detection/face_detection_service.dart';
 import 'package:photos/services/machine_learning/face_ml/face_embedding/face_embedding_exceptions.dart';
-import 'package:photos/services/machine_learning/face_ml/face_embedding/onnx_face_embedding.dart';
+import 'package:photos/services/machine_learning/face_ml/face_embedding/face_embedding_service.dart';
 import 'package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart';
 import 'package:photos/services/machine_learning/face_ml/face_ml_exceptions.dart';
 import 'package:photos/services/machine_learning/face_ml/face_ml_result.dart';
@@ -90,7 +90,7 @@ class FaceMlService {
       _logger.info("init called");
       await _computer.compute(initOrtEnv);
       try {
-        await YoloOnnxFaceDetection.instance.init();
+        await FaceDetectionService.instance.init();
       } catch (e, s) {
         _logger.severe("Could not initialize yolo onnx", e, s);
       }
@@ -102,7 +102,7 @@ class FaceMlService {
         }
       }
       try {
-        await FaceEmbeddingOnnx.instance.init();
+        await FaceEmbeddingService.instance.init();
       } catch (e, s) {
         _logger.severe("Could not initialize mobilefacenet", e, s);
       }
@@ -142,7 +142,7 @@ class FaceMlService {
         return;
       }
       try {
-        await YoloOnnxFaceDetection.instance.release();
+        await FaceDetectionService.instance.release();
       } catch (e, s) {
         _logger.severe("Could not dispose yolo onnx", e, s);
       }
@@ -152,7 +152,7 @@ class FaceMlService {
         _logger.severe("Could not dispose image ml isolate", e, s);
       }
       try {
-        await FaceEmbeddingOnnx.instance.release();
+        await FaceEmbeddingService.instance.release();
       } catch (e, s) {
         _logger.severe("Could not dispose mobilefacenet", e, s);
       }
@@ -894,8 +894,9 @@ class FaceMlService {
             "enteFileID": enteFile.uploadedFileID ?? -1,
             "filePath": filePath,
             "faceDetectionAddress":
-                YoloOnnxFaceDetection.instance.sessionAddress,
-            "faceEmbeddingAddress": FaceEmbeddingOnnx.instance.sessionAddress,
+                FaceDetectionService.instance.sessionAddress,
+            "faceEmbeddingAddress":
+                FaceEmbeddingService.instance.sessionAddress,
           }
         ),
       ) as String?;
@@ -1042,7 +1043,7 @@ class FaceMlService {
     try {
       // Get the bounding boxes of the faces
       final (List<FaceDetectionRelative> faces, dataSize) =
-          await YoloOnnxFaceDetection.instance.predictInComputer(imagePath);
+          await FaceDetectionService.instance.predictInComputer(imagePath);
 
       // Add detected faces to the resultBuilder
       if (resultBuilder != null) {
@@ -1050,9 +1051,9 @@ class FaceMlService {
       }
 
       return faces;
-    } on YOLOInterpreterInitializationException {
+    } on YOLOFaceInterpreterInitializationException {
       throw CouldNotInitializeFaceDetector();
-    } on YOLOInterpreterRunException {
+    } on YOLOFaceInterpreterRunException {
       throw CouldNotRunFaceDetector();
     } catch (e) {
       _logger.severe('Face detection failed: $e');
@@ -1076,7 +1077,7 @@ class FaceMlService {
     try {
       // Get the bounding boxes of the faces
       final (List<FaceDetectionRelative> faces, dataSize) =
-          await YoloOnnxFaceDetection.predictSync(
+          await FaceDetectionService.predictSync(
         image,
         imageByteData,
         interpreterAddress,
@@ -1088,9 +1089,9 @@ class FaceMlService {
       }
 
       return faces;
-    } on YOLOInterpreterInitializationException {
+    } on YOLOFaceInterpreterInitializationException {
       throw CouldNotInitializeFaceDetector();
-    } on YOLOInterpreterRunException {
+    } on YOLOFaceInterpreterRunException {
       throw CouldNotRunFaceDetector();
     } catch (e) {
       dev.log('[SEVERE] Face detection failed: $e');
@@ -1185,7 +1186,7 @@ class FaceMlService {
     try {
       // Get the embedding of the faces
       final List<List<double>> embeddings =
-          await FaceEmbeddingOnnx.instance.predictInComputer(facesList);
+          await FaceEmbeddingService.instance.predictInComputer(facesList);
 
       // Add the embeddings to the resultBuilder
       if (resultBuilder != null) {
@@ -1218,7 +1219,7 @@ class FaceMlService {
     try {
       // Get the embedding of the faces
       final List<List<double>> embeddings =
-          await FaceEmbeddingOnnx.predictSync(facesList, interpreterAddress);
+          await FaceEmbeddingService.predictSync(facesList, interpreterAddress);
 
       // Add the embeddings to the resultBuilder
       if (resultBuilder != null) {
