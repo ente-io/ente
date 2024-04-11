@@ -49,9 +49,10 @@ class SemanticSearchService {
   bool _hasInitialized = false;
   bool _isComputingEmbeddings = false;
   bool _isSyncing = false;
-  Future<List<EnteFile>>? _ongoingRequest;
   List<Embedding> _cachedEmbeddings = <Embedding>[];
-  PendingQuery? _nextQuery;
+  Future<(String, List<EnteFile>)>? _searchScreenRequest;
+  String? _latestPendingQuery;
+
   Completer<void> _mlController = Completer<void>();
 
   get hasInitialized => _hasInitialized;
@@ -133,9 +134,6 @@ class SemanticSearchService {
     _isSyncing = false;
   }
 
-  Future<(String, List<EnteFile>)>? _searchScreenRequest;
-  String? _lastQuery;
-
   // searchScreenQuery should only be used for the user initiate query on the search screen.
   // If there are multiple call tho this method, then for all the calls, the result will be the same as the last query.
   Future<(String, List<EnteFile>)> searchScreenQuery(String query) async {
@@ -145,7 +143,7 @@ class SemanticSearchService {
     }
     // If there's an ongoing request, just update the last query and return its future.
     if (_searchScreenRequest != null) {
-      _lastQuery = query;
+      _latestPendingQuery = query;
       return _searchScreenRequest!;
     } else {
       // No ongoing request, start a new search.
@@ -153,45 +151,15 @@ class SemanticSearchService {
         // Search completed, reset the ongoing request.
         _searchScreenRequest = null;
         // If there was a new query during the last search, start a new search with the last query.
-        if (_lastQuery != null) {
-          final String newQuery = _lastQuery!;
-          _lastQuery = null; // Reset last query.
-          return searchScreenQuery(
-            newQuery,
-          ); // Recursively call search with the latest query.
+        if (_latestPendingQuery != null) {
+          final String newQuery = _latestPendingQuery!;
+          _latestPendingQuery = null; // Reset last query.
+          // Recursively call search with the latest query.
+          return searchScreenQuery(newQuery);
         }
         return (query, result);
       });
       return _searchScreenRequest!;
-    }
-  }
-
-  Future<List<EnteFile>> search(String query) async {
-    if (!LocalSettings.instance.hasEnabledMagicSearch() ||
-        !_frameworkInitialization.isCompleted) {
-      return [];
-    }
-    if (_ongoingRequest == null) {
-      _ongoingRequest = _getMatchingFiles(query).then((result) {
-        _ongoingRequest = null;
-        if (_nextQuery != null) {
-          final next = _nextQuery;
-          _nextQuery = null;
-          search(next!.query).then((nextResult) {
-            next.completer.complete(nextResult);
-          });
-        }
-
-        return result;
-      });
-      return _ongoingRequest!;
-    } else {
-      // If there's an ongoing request, create or replace the nextCompleter.
-      _logger.info("Queuing query $query");
-      await _nextQuery?.completer.future
-          .timeout(const Duration(seconds: 0)); // Cancels the previous future.
-      _nextQuery = PendingQuery(query, Completer<List<EnteFile>>());
-      return _nextQuery!.completer.future;
     }
   }
 
@@ -465,13 +433,6 @@ class QueryResult {
   final double score;
 
   QueryResult(this.id, this.score);
-}
-
-class PendingQuery {
-  final String query;
-  final Completer<List<EnteFile>> completer;
-
-  PendingQuery(this.query, this.completer);
 }
 
 class IndexStatus {
