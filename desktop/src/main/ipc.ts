@@ -36,7 +36,7 @@ import {
     updateAndRestart,
     updateOnNextRestart,
 } from "./services/app-update";
-import { clipImageEmbedding, clipTextEmbedding } from "./services/clip";
+import { clipImageEmbedding, clipTextEmbedding } from "./services/ml-clip";
 import { runFFmpegCmd } from "./services/ffmpeg";
 import { getDirFiles } from "./services/fs";
 import {
