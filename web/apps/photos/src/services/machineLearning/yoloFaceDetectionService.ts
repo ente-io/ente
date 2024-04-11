@@ -1,7 +1,4 @@
-import {
-    BLAZEFACE_FACE_SIZE,
-    MAX_FACE_DISTANCE_PERCENT,
-} from "constants/mlConfig";
+import { MAX_FACE_DISTANCE_PERCENT } from "constants/mlConfig";
 import { Dimensions } from "types/image";
 import {
     FaceDetection,
@@ -35,14 +32,12 @@ class YoloFaceDetectionService implements FaceDetectionService {
     // private onnxInferenceSession?: ort.InferenceSession;
     private onnxInferenceSession?: any;
     public method: Versioned<FaceDetectionMethod>;
-    private desiredFaceSize;
 
-    public constructor(desiredFaceSize: number = BLAZEFACE_FACE_SIZE) {
+    public constructor() {
         this.method = {
             value: "YoloFace",
             version: 1,
         };
-        this.desiredFaceSize = desiredFaceSize;
     }
 
     private async initOnnx() {

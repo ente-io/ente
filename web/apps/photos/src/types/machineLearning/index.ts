@@ -1,5 +1,3 @@
-import * as tf from "@tensorflow/tfjs-core";
-
 import { DebugInfo } from "hdbscan";
 import PQueue from "p-queue";
 import { EnteFile } from "types/file";
@@ -12,7 +10,6 @@ export interface MLSyncResult {
     nSyncedFaces: number;
     nFaceClusters: number;
     nFaceNoise: number;
-    tsne?: any;
     error?: Error;
 }
 
@@ -226,9 +223,6 @@ export interface MLSyncConfig {
     blurDetection: BlurDetectionConfig;
     faceEmbedding: FaceEmbeddingConfig;
     faceClustering: FaceClusteringConfig;
-    objectDetection: ObjectDetectionConfig;
-    sceneDetection: SceneDetectionConfig;
-    tsne?: TSNEConfig;
     mlVersion: number;
 }
 
@@ -254,7 +248,6 @@ export interface MLSyncContext {
     nSyncedFiles: number;
     nSyncedFaces: number;
     allSyncedFacesMap?: Map<number, Array<Face>>;
-    tsne?: any;
 
     error?: Error;
 

@@ -61,7 +61,6 @@ class MachineLearningService {
                     .length,
             nFaceNoise:
                 syncContext.mlLibraryData?.faceClusteringResults?.noise.length,
-            tsne: syncContext.tsne,
             error: syncContext.error,
         };
         // log.info('[MLService] sync results: ', mlSyncResult);

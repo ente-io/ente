@@ -127,7 +127,6 @@ export class LocalMLSyncContext implements MLSyncContext {
     public nSyncedFiles: number;
     public nSyncedFaces: number;
     public allSyncedFacesMap?: Map<number, Array<Face>>;
-    public tsne?: any;
 
     public error?: Error;
 

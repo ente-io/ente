@@ -2,7 +2,6 @@ import log from "@/next/log";
 import { CACHES } from "@ente/shared/storage/cacheStorage/constants";
 import { cached } from "@ente/shared/storage/cacheStorage/helpers";
 import { FILE_TYPE } from "constants/file";
-import { BLAZEFACE_FACE_SIZE } from "constants/mlConfig";
 import { euclidean } from "hdbscan";
 import PQueue from "p-queue";
 import DownloadManager from "services/download";
@@ -21,10 +20,10 @@ import {
     Versioned,
 } from "types/machineLearning";
 import { getRenderableImage } from "utils/file";
-import { clamp, imageBitmapToBlob, warpAffineFloat32List } from "utils/image";
+import { clamp, warpAffineFloat32List } from "utils/image";
 import mlIDbStorage from "utils/storage/mlIDbStorage";
 import { Box, Point } from "../../../thirdparty/face-api/classes";
-import { ibExtractFaceImage, ibExtractFaceImages } from "./faceAlign";
+import { ibExtractFaceImages } from "./faceAlign";
 import { getFaceCropBlobFromStorage } from "./faceCrop";
 
 export function f32Average(descriptors: Float32Array[]) {
@@ -103,29 +102,6 @@ export function getAllFacesFromMap(allFacesMap: Map<number, Array<Face>>) {
 export async function getLocalFile(fileId: number) {
     const localFiles = await getLocalFiles();
     return localFiles.find((f) => f.id === fileId);
-}
-
-export async function getFaceImage(
-    face: AlignedFace,
-    token: string,
-    faceSize: number = BLAZEFACE_FACE_SIZE,
-    file?: EnteFile,
-): Promise<FaceImageBlob> {
-    if (!file) {
-        file = await getLocalFile(face.fileId);
-    }
-
-    const imageBitmap = await getOriginalImageBitmap(file);
-    const faceImageBitmap = ibExtractFaceImage(
-        imageBitmap,
-        face.alignment,
-        faceSize,
-    );
-    const faceImage = imageBitmapToBlob(faceImageBitmap);
-    faceImageBitmap.close();
-    imageBitmap.close();
-
-    return faceImage;
 }
 
 export async function extractFaceImages(
