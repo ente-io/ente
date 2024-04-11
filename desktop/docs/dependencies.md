@@ -1,8 +1,8 @@
 # Dependencies
 
-* [Electron](#electron)
-* [Dev dependencies](#dev)
-* [Functionality](#functionality)
+-   [Electron](#electron)
+-   [Dev dependencies](#dev)
+-   [Functionality](#functionality)
 
 ## Electron
 
@@ -114,8 +114,8 @@ available on the host machine, and is not bundled with our app.
 AI/ML runtime. It powers both natural language searches (using CLIP) and face
 detection (using YOLO).
 
-[jpeg-js](https://github.com/jpeg-js/jpeg-js#readme) is used for decoding
-JPEG data into raw RGB bytes before passing it to ONNX.
+[jpeg-js](https://github.com/jpeg-js/jpeg-js#readme) is used for decoding JPEG
+data into raw RGB bytes before passing it to ONNX.
 
 html-entities is used by the bundled clip-bpe-ts tokenizer for CLIP.
 

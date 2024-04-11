@@ -1,19 +1,13 @@
 /**
- * @file Compute CLIP embeddings
+ * @file Compute CLIP embeddings for images and text.
  *
- * @see `web/apps/photos/src/services/clip-service.ts` for more details. This
- * file implements the Node.js implementation of the actual embedding
- * computation. By doing it in the Node.js layer, we can use the binary ONNX
- * runtimes which are 10-20x faster than the WASM based web ones.
+ * The embeddings are computed using ONNX runtime, with CLIP as the model.
  *
- * The embeddings are computed using ONNX runtime. The model itself is not
- * shipped with the app but is downloaded on demand.
+ * @see `web/apps/photos/src/services/clip-service.ts` for more details.
  */
-import { app, net } from "electron/main";
 import { existsSync } from "fs";
 import jpeg from "jpeg-js";
 import fs from "node:fs/promises";
-import path from "node:path";
 import * as ort from "onnxruntime-node";
 import Tokenizer from "../../thirdparty/clip-bpe-ts/mod";
 import { CustomErrors } from "../../types/ipc";
@@ -21,6 +15,12 @@ import { writeStream } from "../fs";
 import log from "../log";
 import { generateTempFilePath } from "../temp";
 import { deleteTempFile } from "./ffmpeg";
+import {
+    createInferenceSession,
+    downloadModel,
+    modelPathDownloadingIfNeeded,
+    modelSavePath,
+} from "./ml";
 
 const textModelName = "clip-text-vit-32-uint8.onnx";
 const textModelByteSize = 64173509; // 61.2 MB
@@ -28,55 +28,20 @@ const textModelByteSize = 64173509; // 61.2 MB
 const imageModelName = "clip-image-vit-32-float32.onnx";
 const imageModelByteSize = 351468764; // 335.2 MB
 
-/** Return the path where the given {@link modelName} is meant to be saved */
-const modelSavePath = (modelName: string) =>
-    path.join(app.getPath("userData"), "models", modelName);
-
-const downloadModel = async (saveLocation: string, name: string) => {
-    // `mkdir -p` the directory where we want to save the model.
-    const saveDir = path.dirname(saveLocation);
-    await fs.mkdir(saveDir, { recursive: true });
-    // Download
-    log.info(`Downloading CLIP model from ${name}`);
-    const url = `https://models.ente.io/${name}`;
-    const res = await net.fetch(url);
-    if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
-    // Save
-    await writeStream(saveLocation, res.body);
-    log.info(`Downloaded CLIP model ${name}`);
-};
-
-let activeImageModelDownload: Promise<void> | undefined;
+let activeImageModelDownload: Promise<string> | undefined;
 
 const imageModelPathDownloadingIfNeeded = async () => {
     try {
-        const modelPath = modelSavePath(imageModelName);
         if (activeImageModelDownload) {
             log.info("Waiting for CLIP image model download to finish");
             await activeImageModelDownload;
         } else {
-            if (!existsSync(modelPath)) {
-                log.info("CLIP image model not found, downloading");
-                activeImageModelDownload = downloadModel(
-                    modelPath,
-                    imageModelName,
-                );
-                await activeImageModelDownload;
-            } else {
-                const localFileSize = (await fs.stat(modelPath)).size;
-                if (localFileSize !== imageModelByteSize) {
-                    log.error(
-                        `CLIP image model size ${localFileSize} does not match the expected size, downloading again`,
-                    );
-                    activeImageModelDownload = downloadModel(
-                        modelPath,
-                        imageModelName,
-                    );
-                    await activeImageModelDownload;
-                }
-            }
+            activeImageModelDownload = modelPathDownloadingIfNeeded(
+                imageModelName,
+                imageModelByteSize,
+            );
+            return await activeImageModelDownload;
         }
-        return modelPath;
     } finally {
         activeImageModelDownload = undefined;
     }
@@ -84,6 +49,8 @@ const imageModelPathDownloadingIfNeeded = async () => {
 
 let textModelDownloadInProgress = false;
 
+/* TODO(MR): use the generic method. Then we can remove the exports for the
+   internal details functions that we use here */
 const textModelPathDownloadingIfNeeded = async () => {
     if (textModelDownloadInProgress)
         throw Error(CustomErrors.MODEL_DOWNLOAD_PENDING);
@@ -121,13 +88,6 @@ const textModelPathDownloadingIfNeeded = async () => {
     }
 
     return modelPath;
-};
-
-const createInferenceSession = async (modelPath: string) => {
-    return await ort.InferenceSession.create(modelPath, {
-        intraOpNumThreads: 1,
-        enableCpuMemArena: false,
-    });
 };
 
 let imageSessionPromise: Promise<any> | undefined;
@@ -174,7 +134,7 @@ const clipImageEmbedding_ = async (jpegFilePath: string) => {
     const results = await imageSession.run(feeds);
     log.debug(
         () =>
-            `CLIP image embedding took ${Date.now() - t1} ms (prep: ${t2 - t1} ms, inference: ${Date.now() - t2} ms)`,
+            `onnx/clip image embedding took ${Date.now() - t1} ms (prep: ${t2 - t1} ms, inference: ${Date.now() - t2} ms)`,
     );
     const imageEmbedding = results["output"].data; // Float32Array
     return normalizeEmbedding(imageEmbedding);
@@ -281,7 +241,7 @@ export const clipTextEmbedding = async (text: string) => {
     const results = await imageSession.run(feeds);
     log.debug(
         () =>
-            `CLIP text embedding took ${Date.now() - t1} ms (prep: ${t2 - t1} ms, inference: ${Date.now() - t2} ms)`,
+            `onnx/clip text embedding took ${Date.now() - t1} ms (prep: ${t2 - t1} ms, inference: ${Date.now() - t2} ms)`,
     );
     const textEmbedding = results["output"].data;
     return normalizeEmbedding(textEmbedding);

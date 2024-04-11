@@ -45,16 +45,13 @@ export declare type Landmark = Point;
 
 export declare type ImageType = "Original" | "Preview";
 
-export declare type FaceDetectionMethod = "FaceApiSSD" | "YoloFace";
+export declare type FaceDetectionMethod = "YoloFace";
 
 export declare type FaceCropMethod = "ArcFace";
 
-export declare type FaceAlignmentMethod =
-    | "ArcFace"
-    | "FaceApiDlib"
-    | "RotatedFaceApiDlib";
+export declare type FaceAlignmentMethod = "ArcFace";
 
-export declare type FaceEmbeddingMethod = "MobileFaceNet" | "FaceApiDlib";
+export declare type FaceEmbeddingMethod = "MobileFaceNet";
 
 export declare type BlurDetectionMethod = "Laplacian";
 
@@ -261,13 +258,12 @@ export declare type MLIndex = "files" | "people";
 
 export interface FaceDetectionService {
     method: Versioned<FaceDetectionMethod>;
-    // init(): Promise<void>;
+
     detectFaces(image: ImageBitmap): Promise<Array<FaceDetection>>;
     getRelativeDetection(
         faceDetection: FaceDetection,
         imageDimensions: Dimensions,
     ): FaceDetection;
-    dispose(): Promise<void>;
 }
 
 export interface FaceCropService {
@@ -288,9 +284,8 @@ export interface FaceAlignmentService {
 export interface FaceEmbeddingService {
     method: Versioned<FaceEmbeddingMethod>;
     faceSize: number;
-    // init(): Promise<void>;
+
     getFaceEmbeddings(faceImages: Float32Array): Promise<Array<FaceEmbedding>>;
-    dispose(): Promise<void>;
 }
 
 export interface BlurDetectionService {

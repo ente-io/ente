@@ -1,4 +1,5 @@
-import { MAX_FACE_DISTANCE_PERCENT } from "constants/mlConfig";
+import { workerBridge } from "@/next/worker/worker-bridge";
+import { euclidean } from "hdbscan";
 import {
     Matrix,
     applyToPoint,
@@ -21,17 +22,7 @@ import {
 import { newBox } from "utils/machineLearning";
 import { Box, Point } from "../../../thirdparty/face-api/classes";
 
-// TODO(MR): onnx-yolo
-// import * as ort from "onnxruntime-web";
-// import { env } from "onnxruntime-web";
-const ort: any = {};
-
-// TODO(MR): onnx-yolo
-// env.wasm.wasmPaths = "/js/onnx/";
 class YoloFaceDetectionService implements FaceDetectionService {
-    // TODO(MR): onnx-yolo
-    // private onnxInferenceSession?: ort.InferenceSession;
-    private onnxInferenceSession?: any;
     public method: Versioned<FaceDetectionMethod>;
 
     public constructor() {
@@ -41,27 +32,38 @@ class YoloFaceDetectionService implements FaceDetectionService {
         };
     }
 
-    private async initOnnx() {
-        console.log("start ort");
-        this.onnxInferenceSession = await ort.InferenceSession.create(
-            "/models/yoloface/yolov5s_face_640_640_dynamic.onnx",
+    public async detectFaces(
+        imageBitmap: ImageBitmap,
+    ): Promise<Array<FaceDetection>> {
+        const maxFaceDistancePercent = Math.sqrt(2) / 100;
+        const maxFaceDistance = imageBitmap.width * maxFaceDistancePercent;
+        const preprocessResult =
+            this.preprocessImageBitmapToFloat32ChannelsFirst(
+                imageBitmap,
+                640,
+                640,
+            );
+        const data = preprocessResult.data;
+        const resized = preprocessResult.newSize;
+        const outputData = await workerBridge.detectFaces(data);
+        const faces = this.getFacesFromYoloOutput(
+            outputData as Float32Array,
+            0.7,
         );
-        const data = new Float32Array(1 * 3 * 640 * 640);
-        const inputTensor = new ort.Tensor("float32", data, [1, 3, 640, 640]);
-        // TODO(MR): onnx-yolo
-        // const feeds: Record<string, ort.Tensor> = {};
-        const feeds: Record<string, any> = {};
-        const name = this.onnxInferenceSession.inputNames[0];
-        feeds[name] = inputTensor;
-        await this.onnxInferenceSession.run(feeds);
-        console.log("start end");
-    }
-
-    private async getOnnxInferenceSession() {
-        if (!this.onnxInferenceSession) {
-            await this.initOnnx();
-        }
-        return this.onnxInferenceSession;
+        const inBox = newBox(0, 0, resized.width, resized.height);
+        const toBox = newBox(0, 0, imageBitmap.width, imageBitmap.height);
+        const transform = computeTransformToBox(inBox, toBox);
+        const faceDetections: Array<FaceDetection> = faces?.map((f) => {
+            const box = transformBox(f.box, transform);
+            const normLandmarks = f.landmarks;
+            const landmarks = transformPoints(normLandmarks, transform);
+            return {
+                box,
+                landmarks,
+                probability: f.probability as number,
+            } as FaceDetection;
+        });
+        return removeDuplicateDetections(faceDetections, maxFaceDistance);
     }
 
     private preprocessImageBitmapToFloat32ChannelsFirst(
@@ -156,43 +158,6 @@ class YoloFaceDetectionService implements FaceDetectionService {
         };
     }
 
-    /**
-     * @deprecated The method should not be used
-     */
-    private imageBitmapToTensorData(imageBitmap) {
-        // Create an OffscreenCanvas and set its size
-        const offscreenCanvas = new OffscreenCanvas(
-            imageBitmap.width,
-            imageBitmap.height,
-        );
-        const ctx = offscreenCanvas.getContext("2d");
-        ctx.drawImage(imageBitmap, 0, 0, imageBitmap.width, imageBitmap.height);
-        const imageData = ctx.getImageData(
-            0,
-            0,
-            imageBitmap.width,
-            imageBitmap.height,
-        );
-        const pixelData = imageData.data;
-        const data = new Float32Array(
-            1 * 3 * imageBitmap.width * imageBitmap.height,
-        );
-        // Populate the Float32Array with normalized pixel values
-        for (let i = 0; i < pixelData.length; i += 4) {
-            // Normalize pixel values to the range [0, 1]
-            data[i / 4] = pixelData[i] / 255.0; // Red channel
-            data[i / 4 + imageBitmap.width * imageBitmap.height] =
-                pixelData[i + 1] / 255.0; // Green channel
-            data[i / 4 + 2 * imageBitmap.width * imageBitmap.height] =
-                pixelData[i + 2] / 255.0; // Blue channel
-        }
-
-        return {
-            data: data,
-            shape: [1, 3, imageBitmap.width, imageBitmap.height],
-        };
-    }
-
     // The rowOutput is a Float32Array of shape [25200, 16], where each row represents a bounding box.
     private getFacesFromYoloOutput(
         rowOutput: Float32Array,
@@ -270,63 +235,9 @@ class YoloFaceDetectionService implements FaceDetectionService {
             probability: faceDetection.probability,
         };
     }
-
-    private async estimateOnnx(imageBitmap: ImageBitmap) {
-        const maxFaceDistance = imageBitmap.width * MAX_FACE_DISTANCE_PERCENT;
-        const preprocessResult =
-            this.preprocessImageBitmapToFloat32ChannelsFirst(
-                imageBitmap,
-                640,
-                640,
-            );
-        const data = preprocessResult.data;
-        const resized = preprocessResult.newSize;
-        const inputTensor = new ort.Tensor("float32", data, [1, 3, 640, 640]);
-        // TODO(MR): onnx-yolo
-        // const feeds: Record<string, ort.Tensor> = {};
-        const feeds: Record<string, any> = {};
-        feeds["input"] = inputTensor;
-        const inferenceSession = await this.getOnnxInferenceSession();
-        const runout = await inferenceSession.run(feeds);
-        const outputData = runout.output.data;
-        const faces = this.getFacesFromYoloOutput(
-            outputData as Float32Array,
-            0.7,
-        );
-        const inBox = newBox(0, 0, resized.width, resized.height);
-        const toBox = newBox(0, 0, imageBitmap.width, imageBitmap.height);
-        const transform = computeTransformToBox(inBox, toBox);
-        const faceDetections: Array<FaceDetection> = faces?.map((f) => {
-            const box = transformBox(f.box, transform);
-            const normLandmarks = f.landmarks;
-            const landmarks = transformPoints(normLandmarks, transform);
-            return {
-                box,
-                landmarks,
-                probability: f.probability as number,
-            } as FaceDetection;
-        });
-        return removeDuplicateDetections(faceDetections, maxFaceDistance);
-    }
-
-    public async detectFaces(
-        imageBitmap: ImageBitmap,
-    ): Promise<Array<FaceDetection>> {
-        // measure time taken
-        const facesFromOnnx = await this.estimateOnnx(imageBitmap);
-        return facesFromOnnx;
-    }
-
-    public async dispose() {
-        const inferenceSession = await this.getOnnxInferenceSession();
-        inferenceSession?.release();
-        this.onnxInferenceSession = undefined;
-    }
 }
 
 export default new YoloFaceDetectionService();
-
-import { euclidean } from "hdbscan";
 
 /**
  * Removes duplicate face detections from an array of detections.
