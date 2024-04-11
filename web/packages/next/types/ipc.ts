@@ -196,7 +196,7 @@ export interface Electron {
     // - ML
 
     /**
-     * Compute and return a CLIP embedding of the given image.
+     * Return a CLIP embedding of the given image.
      *
      * See: [Note: CLIP based magic search]
      *
@@ -207,7 +207,7 @@ export interface Electron {
     clipImageEmbedding: (jpegImageData: Uint8Array) => Promise<Float32Array>;
 
     /**
-     * Compute and return a CLIP embedding of the given image.
+     * Return a CLIP embedding of the given image.
      *
      * See: [Note: CLIP based magic search]
      *
@@ -216,6 +216,23 @@ export interface Electron {
      * @returns A CLIP embedding.
      */
     clipTextEmbedding: (text: string) => Promise<Float32Array>;
+
+    /**
+     * Detect faces in the given image using YOLO.
+     *
+     * Both the input and output are opaque binary data whose internal structure
+     * is model (YOLO) and our implementation specific. That said, specifically
+     * the {@link inputImage} a particular bitmap encoding of an image.
+     */
+    detectFaces: (inputImage: Uint8Array) => Promise<Float32Array>;
+
+    /**
+     * Return a mobilefacenet embedding for the given face data.
+     *
+     * Both the input and output are opaque binary data whose internal structure
+     * is model (mobilefacenet) and our implementation specific.
+     */
+    faceEmbedding: (input: Float32Array) => Promise<Float32Array>;
 
     // - File selection
     // TODO: Deprecated - use dialogs on the renderer process itself

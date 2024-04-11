@@ -203,9 +203,6 @@ export class LocalMLSyncContext implements MLSyncContext {
     }
 
     public async dispose() {
-        // await this.faceDetectionService.dispose();
-        // await this.faceEmbeddingService.dispose();
-
         this.localFilesMap = undefined;
         await this.syncQueue.onIdle();
         this.syncQueue.removeAllListeners();

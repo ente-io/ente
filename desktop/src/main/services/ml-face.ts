@@ -78,6 +78,30 @@ const faceEmbeddingSession = async () => {
     return _faceEmbeddingSession;
 };
 
+private async initOnnx() {
+    console.log("start ort");
+    this.onnxInferenceSession = await ort.InferenceSession.create(
+        "/models/yoloface/yolov5s_face_640_640_dynamic.onnx",
+    );
+    const data = new Float32Array(1 * 3 * 640 * 640);
+    const inputTensor = new ort.Tensor("float32", data, [1, 3, 640, 640]);
+    // TODO(MR): onnx-yolo
+    // const feeds: Record<string, ort.Tensor> = {};
+    const feeds: Record<string, any> = {};
+    const name = this.onnxInferenceSession.inputNames[0];
+    feeds[name] = inputTensor;
+    await this.onnxInferenceSession.run(feeds);
+    console.log("start end");
+}
+
+private async getOnnxInferenceSession() {
+    if (!this.onnxInferenceSession) {
+        await this.initOnnx();
+    }
+    return this.onnxInferenceSession;
+}
+
+
 // export const clipImageEmbedding = async (jpegImageData: Uint8Array) => {
 //     const tempFilePath = await generateTempFilePath("");
 //     const imageStream = new Response(jpegImageData.buffer).body;

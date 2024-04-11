@@ -96,12 +96,6 @@ class MobileFaceNetEmbeddingService implements FaceEmbeddingService {
         }
         return embeddings;
     }
-
-    public async dispose() {
-        const inferenceSession = await this.getOnnxInferenceSession();
-        inferenceSession?.release();
-        this.onnxInferenceSession = undefined;
-    }
 }
 
 export default new MobileFaceNetEmbeddingService();
