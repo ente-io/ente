@@ -35,6 +35,19 @@ export class ComlinkWorker<T extends new () => InstanceType<T>> {
     }
 }
 
+// TODO(MR): Temporary method to forward auth tokens to workers
+const getAuthToken = () => {
+    // LS_KEYS.USER
+    const userJSONString = localStorage.getItem("user");
+    if (!userJSONString) return undefined;
+    const json: unknown = JSON.parse(userJSONString);
+    if (!json || typeof json != "object" || !("token" in json))
+        return undefined;
+    const token = json.token;
+    if (typeof token != "string") return undefined;
+    return token;
+};
+
 /**
  * A minimal set of utility functions that we expose to all workers that we
  * create.
@@ -44,6 +57,7 @@ export class ComlinkWorker<T extends new () => InstanceType<T>> {
  */
 const workerBridge = {
     logToDisk,
+    getAuthToken,
     convertToJPEG: (inputFileData: Uint8Array, filename: string) =>
         ensureElectron().convertToJPEG(inputFileData, filename),
     detectFaces: (input: Float32Array) => ensureElectron().detectFaces(input),
