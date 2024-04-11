@@ -34,7 +34,6 @@ export interface Suggestion {
         | number[]
         | Person
         | IndexStatus
-        | Thing
         | WordGroup
         | LocationTagData
         | City
