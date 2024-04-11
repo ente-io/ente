@@ -133,6 +133,39 @@ class SemanticSearchService {
     _isSyncing = false;
   }
 
+  Future<(String, List<EnteFile>)>? _searchScreenRequest;
+  String? _lastQuery;
+
+  // searchScreenQuery should only be used for the user initiate query on the search screen.
+  // If there are multiple call tho this method, then for all the calls, the result will be the same as the last query.
+  Future<(String, List<EnteFile>)> searchScreenQuery(String query) async {
+    if (!LocalSettings.instance.hasEnabledMagicSearch() ||
+        !_frameworkInitialization.isCompleted) {
+      return (query, <EnteFile>[]);
+    }
+    // If there's an ongoing request, just update the last query and return its future.
+    if (_searchScreenRequest != null) {
+      _lastQuery = query;
+      return _searchScreenRequest!;
+    } else {
+      // No ongoing request, start a new search.
+      _searchScreenRequest = _getMatchingFiles(query).then((result) {
+        // Search completed, reset the ongoing request.
+        _searchScreenRequest = null;
+        // If there was a new query during the last search, start a new search with the last query.
+        if (_lastQuery != null) {
+          final String newQuery = _lastQuery!;
+          _lastQuery = null; // Reset last query.
+          return searchScreenQuery(
+            newQuery,
+          ); // Recursively call search with the latest query.
+        }
+        return (query, result);
+      });
+      return _searchScreenRequest!;
+    }
+  }
+
   Future<List<EnteFile>> search(String query) async {
     if (!LocalSettings.instance.hasEnabledMagicSearch() ||
         !_frameworkInitialization.isCompleted) {

@@ -1,6 +1,7 @@
 import "dart:math";
 
 import "package:flutter/cupertino.dart";
+import "package:flutter/foundation.dart";
 import "package:intl/intl.dart";
 import 'package:logging/logging.dart';
 import "package:photos/core/constants.dart";
@@ -830,8 +831,21 @@ class SearchService {
     String query,
   ) async {
     final List<GenericSearchResult> searchResults = [];
-    final files = await SemanticSearchService.instance.search(query);
+    late List<EnteFile> files;
+    late String resultForQuery;
+    try {
+      (resultForQuery, files) =
+          await SemanticSearchService.instance.searchScreenQuery(query);
+    } catch (e, s) {
+      _logger.severe("Error occurred during magic search", e, s);
+      return searchResults;
+    }
     if (files.isNotEmpty) {
+      if (kDebugMode) {
+        debugPrint(
+          "getMagicSearchResults ($query) results: ${files.length} for $resultForQuery ",
+        );
+      }
       searchResults.add(GenericSearchResult(ResultType.magic, query, files));
     }
     return searchResults;
