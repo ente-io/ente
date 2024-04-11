@@ -15,14 +15,7 @@ import {
     openDB,
 } from "idb";
 import isElectron from "is-electron";
-import {
-    Face,
-    MLLibraryData,
-    MlFileData,
-    Person,
-    RealWorldObject,
-    Thing,
-} from "types/machineLearning";
+import { Face, MLLibraryData, MlFileData, Person } from "types/machineLearning";
 import { IndexStatus } from "types/machineLearning/ui";
 
 interface Config {}
@@ -42,9 +35,11 @@ interface MLDb extends DBSchema {
         key: number;
         value: Person;
     };
+    // Unused, we only retain this is the schema so that we can delete it during
+    // migration.
     things: {
         key: number;
-        value: Thing;
+        value: unknown;
     };
     versions: {
         key: string;
@@ -72,7 +67,7 @@ class MLIDbStorage {
     }
 
     private openDB(): Promise<IDBPDatabase<MLDb>> {
-        return openDB<MLDb>(MLDATA_DB_NAME, 3, {
+        return openDB<MLDb>(MLDATA_DB_NAME, 4, {
             terminated: async () => {
                 log.error("ML Indexed DB terminated");
                 this._db = undefined;
@@ -128,6 +123,10 @@ class MLIDbStorage {
                         .objectStore("configs")
                         .add(DEFAULT_ML_SEARCH_CONFIG, ML_SEARCH_CONFIG_NAME);
                 }
+                if (oldVersion < 4) {
+                    db.deleteObjectStore("things");
+                }
+
                 log.info(
                     `Ml DB upgraded to version: ${newVersion} from version: ${oldVersion}`,
                 );
@@ -299,21 +298,6 @@ class MLIDbStorage {
         log.info("updateFaces", Date.now() - startTime, "ms");
     }
 
-    public async getAllObjectsMap() {
-        const startTime = Date.now();
-        const db = await this.db;
-        const allFiles = await db.getAll("files");
-        const allObjectsMap = new Map<number, Array<RealWorldObject>>();
-        allFiles.forEach(
-            (mlFileData) =>
-                mlFileData.objects &&
-                allObjectsMap.set(mlFileData.fileId, mlFileData.objects),
-        );
-        log.info("allObjectsMap", Date.now() - startTime, "ms");
-
-        return allObjectsMap;
-    }
-
     public async getPerson(id: number) {
         const db = await this.db;
         return db.get("people", id);
@@ -332,20 +316,6 @@ class MLIDbStorage {
     public async clearAllPeople() {
         const db = await this.db;
         return db.clear("people");
-    }
-
-    public async getAllThings() {
-        const db = await this.db;
-        return db.getAll("things");
-    }
-    public async putThing(thing: Thing) {
-        const db = await this.db;
-        return db.put("things", thing);
-    }
-
-    public async clearAllThings() {
-        const db = await this.db;
-        return db.clear("things");
     }
 
     public async getIndexVersion(index: string) {

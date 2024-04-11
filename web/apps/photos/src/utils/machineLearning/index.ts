@@ -15,13 +15,11 @@ import { Dimensions } from "types/image";
 import {
     AlignedFace,
     DetectedFace,
-    DetectedObject,
     Face,
     FaceAlignment,
     FaceImageBlob,
     MlFileData,
     Person,
-    RealWorldObject,
     Versioned,
 } from "types/machineLearning";
 import { getRenderableImage } from "utils/file";
@@ -196,12 +194,6 @@ export function getAllFacesFromMap(allFacesMap: Map<number, Array<Face>>) {
     return allFaces;
 }
 
-export function getAllObjectsFromMap(
-    allObjectsMap: Map<number, Array<RealWorldObject>>,
-) {
-    return [...allObjectsMap.values()].flat();
-}
-
 export async function getLocalFile(fileId: number) {
     const localFiles = await getLocalFiles();
     return localFiles.find((f) => f.id === fileId);
@@ -310,26 +302,6 @@ export function getFaceId(detectedFace: DetectedFace, imageDims: Dimensions) {
     const faceID = `${detectedFace.fileId}_${rawFaceID}`;
 
     return faceID;
-}
-
-export function getObjectId(
-    detectedObject: DetectedObject,
-    imageDims: Dimensions,
-) {
-    const imgDimPoint = new Point(imageDims.width, imageDims.height);
-    const objectCenterPoint = new Point(
-        detectedObject.detection.bbox[2] / 2,
-        detectedObject.detection.bbox[3] / 2,
-    );
-    const gridPt = objectCenterPoint
-        .mul(new Point(100, 100))
-        .div(imgDimPoint)
-        .floor()
-        .bound(0, 99);
-    const gridPaddedX = leftFillNum(gridPt.x, 2, 0);
-    const gridPaddedY = leftFillNum(gridPt.y, 2, 0);
-
-    return `${detectedObject.fileID}-${gridPaddedX}-${gridPaddedY}`;
 }
 
 export async function getTFImage(blob): Promise<tf.Tensor3D> {

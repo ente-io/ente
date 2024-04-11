@@ -10,7 +10,6 @@ import TextSnippetOutlined from "@mui/icons-material/TextSnippetOutlined";
 import { Box, DialogProps, Link, Stack, styled } from "@mui/material";
 import { Chip } from "components/Chip";
 import { EnteDrawer } from "components/EnteDrawer";
-import { ObjectLabelList } from "components/MachineLearning/ObjectList";
 import {
     PhotoPeopleList,
     UnidentifiedFaces,
@@ -341,10 +340,6 @@ export function FileInfo({
                             updateMLDataIndex={updateMLDataIndex}
                         />
                         <UnidentifiedFaces
-                            file={file}
-                            updateMLDataIndex={updateMLDataIndex}
-                        />
-                        <ObjectLabelList
                             file={file}
                             updateMLDataIndex={updateMLDataIndex}
                         />

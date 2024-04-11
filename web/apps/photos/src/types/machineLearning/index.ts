@@ -161,22 +161,6 @@ export interface ObjectDetection {
     score: number;
 }
 
-export interface DetectedObject {
-    fileID: number;
-    detection: ObjectDetection;
-}
-
-export interface RealWorldObject extends DetectedObject {
-    id: string;
-    className: string;
-}
-
-export interface Thing {
-    id: number;
-    name: string;
-    files: Array<number>;
-}
-
 export interface WordGroup {
     word: string;
     files: Array<number>;
@@ -185,7 +169,6 @@ export interface WordGroup {
 export interface MlFileData {
     fileId: number;
     faces?: Face[];
-    objects?: RealWorldObject[];
     imageSource?: ImageType;
     imageDimensions?: Dimensions;
     faceDetectionMethod?: Versioned<FaceDetectionMethod>;
