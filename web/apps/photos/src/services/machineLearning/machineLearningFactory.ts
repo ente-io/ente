@@ -121,7 +121,6 @@ export class LocalMLSyncContext implements MLSyncContext {
     public blurDetectionService: BlurDetectionService;
     public faceEmbeddingService: FaceEmbeddingService;
     public faceClusteringService: ClusteringService;
-    public sceneDetectionService: SceneDetectionService;
 
     public localFilesMap: Map<number, EnteFile>;
     public outOfSyncFiles: EnteFile[];
@@ -173,10 +172,6 @@ export class LocalMLSyncContext implements MLSyncContext {
         );
         this.faceClusteringService = MLFactory.getClusteringService(
             this.config.faceClustering.method,
-        );
-
-        this.sceneDetectionService = MLFactory.getSceneDetectionService(
-            this.config.sceneDetection.method,
         );
 
         this.outOfSyncFiles = [];

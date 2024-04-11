@@ -22,8 +22,6 @@ import PeopleService from "./peopleService";
 import ReaderService from "./readerService";
 
 class MachineLearningService {
-    private initialized = false;
-
     private localSyncContext: Promise<MLSyncContext>;
     private syncContext: Promise<MLSyncContext>;
 
@@ -300,7 +298,7 @@ class MachineLearningService {
                     throw error;
             }
 
-            await this.persistMLFileSyncError(syncContext, enteFile, error);
+            await this.persistMLFileSyncError(enteFile, error);
             syncContext.nSyncedFiles += 1;
         }
     }
@@ -337,7 +335,7 @@ class MachineLearningService {
             newMlFile.errorCount = 0;
             newMlFile.lastErrorMessage = undefined;
             await this.persistOnServer(newMlFile, enteFile);
-            await this.persistMLFileData(syncContext, newMlFile);
+            await mlIDbStorage.putFile(newMlFile);
         } catch (e) {
             log.error("ml detection failed", e);
             newMlFile.mlVersion = oldMlFile.mlVersion;
@@ -368,38 +366,11 @@ class MachineLearningService {
         log.info("putEmbedding response: ", res);
     }
 
-    public async init() {
-        if (this.initialized) {
-            return;
-        }
-
-        await tf.ready();
-
-        log.info("01 TF Memory stats: ", JSON.stringify(tf.memory()));
-
-        this.initialized = true;
-    }
-
-    public async dispose() {
-        this.initialized = false;
-    }
-
     private async getMLFileData(fileId: number) {
         return mlIDbStorage.getFile(fileId);
     }
 
-    private async persistMLFileData(
-        syncContext: MLSyncContext,
-        mlFileData: MlFileData,
-    ) {
-        mlIDbStorage.putFile(mlFileData);
-    }
-
-    private async persistMLFileSyncError(
-        syncContext: MLSyncContext,
-        enteFile: EnteFile,
-        e: Error,
-    ) {
+    private async persistMLFileSyncError(enteFile: EnteFile, e: Error) {
         try {
             await mlIDbStorage.upsertFileInTx(enteFile.id, (mlFileData) => {
                 if (!mlFileData) {
@@ -431,8 +402,6 @@ class MachineLearningService {
         await this.getMLLibraryData(syncContext);
 
         await PeopleService.syncPeopleIndex(syncContext);
-
-        await ObjectService.syncThingsIndex(syncContext);
 
         await this.persistMLLibraryData(syncContext);
     }
