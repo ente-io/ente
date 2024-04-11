@@ -61,10 +61,6 @@ export declare type ImageType = "Original" | "Preview";
 
 export declare type FaceDetectionMethod = "FaceApiSSD" | "YoloFace";
 
-export declare type ObjectDetectionMethod = "SSDMobileNetV2";
-
-export declare type SceneDetectionMethod = "ImageScene";
-
 export declare type FaceCropMethod = "ArcFace";
 
 export declare type FaceAlignmentMethod =
@@ -172,8 +168,6 @@ export interface MlFileData {
     faceCropMethod?: Versioned<FaceCropMethod>;
     faceAlignmentMethod?: Versioned<FaceAlignmentMethod>;
     faceEmbeddingMethod?: Versioned<FaceEmbeddingMethod>;
-    objectDetectionMethod?: Versioned<ObjectDetectionMethod>;
-    sceneDetectionMethod?: Versioned<SceneDetectionMethod>;
     mlVersion: number;
     errorCount: number;
     lastErrorMessage?: string;
@@ -181,17 +175,6 @@ export interface MlFileData {
 
 export interface FaceDetectionConfig {
     method: FaceDetectionMethod;
-}
-
-export interface ObjectDetectionConfig {
-    method: ObjectDetectionMethod;
-    maxNumBoxes: number;
-    minScore: number;
-}
-
-export interface SceneDetectionConfig {
-    method: SceneDetectionMethod;
-    minScore: number;
 }
 
 export interface FaceCropConfig {
@@ -265,7 +248,6 @@ export interface MLSyncContext {
     faceEmbeddingService: FaceEmbeddingService;
     blurDetectionService: BlurDetectionService;
     faceClusteringService: ClusteringService;
-    sceneDetectionService: SceneDetectionService;
 
     localFilesMap: Map<number, EnteFile>;
     outOfSyncFiles: EnteFile[];
@@ -292,7 +274,6 @@ export interface MLSyncFileContext {
     oldMlFile?: MlFileData;
     newMlFile?: MlFileData;
 
-    tfImage?: tf.Tensor3D;
     imageBitmap?: ImageBitmap;
 
     newDetection?: boolean;
@@ -316,26 +297,6 @@ export interface FaceDetectionService {
         imageDimensions: Dimensions,
     ): FaceDetection;
     dispose(): Promise<void>;
-}
-
-export interface ObjectDetectionService {
-    method: Versioned<ObjectDetectionMethod>;
-    // init(): Promise<void>;
-    detectObjects(
-        image: ImageBitmap,
-        maxNumBoxes: number,
-        minScore: number,
-    ): Promise<ObjectDetection[]>;
-    dispose(): Promise<void>;
-}
-
-export interface SceneDetectionService {
-    method: Versioned<SceneDetectionMethod>;
-    // init(): Promise<void>;
-    detectScenes(
-        image: ImageBitmap,
-        minScore: number,
-    ): Promise<ObjectDetection[]>;
 }
 
 export interface FaceCropService {

@@ -22,15 +22,12 @@ import {
     MLLibraryData,
     MLSyncConfig,
     MLSyncContext,
-    SceneDetectionMethod,
-    SceneDetectionService,
 } from "types/machineLearning";
 import { logQueueStats } from "utils/machineLearning";
 import arcfaceAlignmentService from "./arcfaceAlignmentService";
 import arcfaceCropService from "./arcfaceCropService";
 import dbscanClusteringService from "./dbscanClusteringService";
 import hdbscanClusteringService from "./hdbscanClusteringService";
-import imageSceneService from "./imageSceneService";
 import laplacianBlurDetectionService from "./laplacianBlurDetectionService";
 import mobileFaceNetEmbeddingService from "./mobileFaceNetEmbeddingService";
 import yoloFaceDetectionService from "./yoloFaceDetectionService";
@@ -44,16 +41,6 @@ export class MLFactory {
         }
 
         throw Error("Unknon face detection method: " + method);
-    }
-
-    public static getSceneDetectionService(
-        method: SceneDetectionMethod,
-    ): SceneDetectionService {
-        if (method === "ImageScene") {
-            return imageSceneService;
-        }
-
-        throw Error("Unknown scene detection method: " + method);
     }
 
     public static getFaceCropService(method: FaceCropMethod) {
