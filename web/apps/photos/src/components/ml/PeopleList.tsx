@@ -8,11 +8,7 @@ import React, { useEffect, useState } from "react";
 import machineLearningService from "services/machineLearning/machineLearningService";
 import { EnteFile } from "types/file";
 import { Face, Person } from "types/machineLearning";
-import {
-    getAllPeople,
-    getPeopleList,
-    getUnidentifiedFaces,
-} from "utils/machineLearning";
+import { getPeopleList, getUnidentifiedFaces } from "utils/machineLearning";
 
 const FaceChipContainer = styled("div")`
     display: flex;
@@ -66,7 +62,7 @@ export const PeopleList = React.memo((props: PeopleListProps) => {
                 >
                     <FaceCropImageView
                         url={person.displayImageUrl}
-                        faceID={person.displayFaceId}
+                        faceId={person.displayFaceId}
                     />
                 </FaceChip>
             ))}
@@ -111,36 +107,6 @@ export function PhotoPeopleList(props: PhotoPeopleListProps) {
     );
 }
 
-export interface AllPeopleListProps extends PeopleListPropsBase {
-    limit?: number;
-}
-
-export function AllPeopleList(props: AllPeopleListProps) {
-    const [people, setPeople] = useState<Array<Person>>([]);
-
-    useEffect(() => {
-        let didCancel = false;
-
-        async function updateFaceImages() {
-            try {
-                let people = await getAllPeople();
-                if (props.limit) {
-                    people = people.slice(0, props.limit);
-                }
-                !didCancel && setPeople(people);
-            } catch (e) {
-                log.error("updateFaceImages failed", e);
-            }
-        }
-        updateFaceImages();
-        return () => {
-            didCancel = true;
-        };
-    }, [props.limit]);
-
-    return <PeopleList people={people} onSelect={props.onSelect}></PeopleList>;
-}
-
 export function UnidentifiedFaces(props: {
     file: EnteFile;
     updateMLDataIndex: number;
@@ -174,7 +140,7 @@ export function UnidentifiedFaces(props: {
                     faces.map((face, index) => (
                         <FaceChip key={index}>
                             <FaceCropImageView
-                                faceID={face.id}
+                                faceId={face.id}
                                 url={face.crop?.imageUrl}
                             />
                         </FaceChip>
@@ -186,12 +152,12 @@ export function UnidentifiedFaces(props: {
 
 interface FaceCropImageViewProps {
     url: string;
-    faceID: string;
+    faceId: string;
 }
 
 const FaceCropImageView: React.FC<FaceCropImageViewProps> = ({
     url,
-    faceID,
+    faceId,
 }) => {
     const [objectURL, setObjectURL] = useState<string | undefined>();
 
@@ -208,12 +174,12 @@ const FaceCropImageView: React.FC<FaceCropImageViewProps> = ({
                     try {
                         log.debug(
                             () =>
-                                `ImageCacheView: regenerate face crop for ${faceID}`,
+                                `ImageCacheView: regenerate face crop for ${faceId}`,
                         );
                         return machineLearningService.regenerateFaceCrop(
                             user.token,
                             user.id,
-                            faceID,
+                            faceId,
                         );
                     } catch (e) {
                         log.error(
@@ -234,7 +200,7 @@ const FaceCropImageView: React.FC<FaceCropImageViewProps> = ({
             didCancel = true;
             if (objectURL) URL.revokeObjectURL(objectURL);
         };
-    }, [url, faceID]);
+    }, [url, faceId]);
 
     return objectURL ? (
         <img src={objectURL} />
