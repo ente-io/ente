@@ -420,11 +420,15 @@ class FaceMlService {
           offset += offsetIncrement;
         }
       } else {
+        final int totalFaces = await FaceMLDataDB.instance
+            .getTotalFaceCount(minFaceScore: minFaceScore);
+
         // Read all the embeddings from the database, in a map from faceID to embedding
         final clusterStartTime = DateTime.now();
         final faceIdToEmbedding =
             await FaceMLDataDB.instance.getFaceEmbeddingMap(
           minScore: minFaceScore,
+          maxFaces: totalFaces,
         );
         final gotFaceEmbeddingsTime = DateTime.now();
         _logger.info(
