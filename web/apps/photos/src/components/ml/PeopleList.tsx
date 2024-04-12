@@ -1,7 +1,6 @@
+import { ensureLocalUser } from "@/next/local-user";
 import log from "@/next/log";
 import { cached } from "@ente/shared/storage/cache";
-import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
-import { User } from "@ente/shared/user/types";
 import { Skeleton, styled } from "@mui/material";
 import { Legend } from "components/PhotoViewer/styledComponents/Legend";
 import { t } from "i18next";
@@ -190,7 +189,7 @@ interface FaceCropImageViewProps {
     faceID: string;
 }
 
-export const FaceCropImageView: React.FC<FaceCropImageViewProps> = ({
+const FaceCropImageView: React.FC<FaceCropImageViewProps> = ({
     url,
     faceID,
 }) => {
@@ -200,11 +199,11 @@ export const FaceCropImageView: React.FC<FaceCropImageViewProps> = ({
         let didCancel = false;
 
         async function loadImage() {
-            const user: User = getData(LS_KEYS.USER);
             let blob: Blob;
-            if (!url || !user) {
+            if (!url) {
                 blob = undefined;
             } else {
+                const user = await ensureLocalUser();
                 blob = await cached("face-crops", url, async () => {
                     try {
                         log.debug(
@@ -226,7 +225,7 @@ export const FaceCropImageView: React.FC<FaceCropImageViewProps> = ({
             }
 
             if (didCancel) return;
-            setObjectURL(URL.createObjectURL(blob));
+            setObjectURL(blob ? URL.createObjectURL(blob) : undefined);
         }
 
         loadImage();
