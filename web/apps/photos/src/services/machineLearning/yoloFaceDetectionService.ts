@@ -1,7 +1,12 @@
+import { workerBridge } from "@/next/worker/worker-bridge";
+import { euclidean } from "hdbscan";
 import {
-    BLAZEFACE_FACE_SIZE,
-    MAX_FACE_DISTANCE_PERCENT,
-} from "constants/mlConfig";
+    Matrix,
+    applyToPoint,
+    compose,
+    scale,
+    translate,
+} from "transformation-matrix";
 import { Dimensions } from "types/image";
 import {
     FaceDetection,
@@ -15,57 +20,50 @@ import {
     normalizePixelBetween0And1,
 } from "utils/image";
 import { newBox } from "utils/machineLearning";
-import { removeDuplicateDetections } from "utils/machineLearning/faceDetection";
-import {
-    computeTransformToBox,
-    transformBox,
-    transformPoints,
-} from "utils/machineLearning/transform";
 import { Box, Point } from "../../../thirdparty/face-api/classes";
 
-// TODO(MR): onnx-yolo
-// import * as ort from "onnxruntime-web";
-// import { env } from "onnxruntime-web";
-const ort: any = {};
-
-// TODO(MR): onnx-yolo
-// env.wasm.wasmPaths = "/js/onnx/";
 class YoloFaceDetectionService implements FaceDetectionService {
-    // TODO(MR): onnx-yolo
-    // private onnxInferenceSession?: ort.InferenceSession;
-    private onnxInferenceSession?: any;
     public method: Versioned<FaceDetectionMethod>;
-    private desiredFaceSize;
 
-    public constructor(desiredFaceSize: number = BLAZEFACE_FACE_SIZE) {
+    public constructor() {
         this.method = {
             value: "YoloFace",
             version: 1,
         };
-        this.desiredFaceSize = desiredFaceSize;
     }
 
-    private async initOnnx() {
-        console.log("start ort");
-        this.onnxInferenceSession = await ort.InferenceSession.create(
-            "/models/yoloface/yolov5s_face_640_640_dynamic.onnx",
+    public async detectFaces(
+        imageBitmap: ImageBitmap,
+    ): Promise<Array<FaceDetection>> {
+        const maxFaceDistancePercent = Math.sqrt(2) / 100;
+        const maxFaceDistance = imageBitmap.width * maxFaceDistancePercent;
+        const preprocessResult =
+            this.preprocessImageBitmapToFloat32ChannelsFirst(
+                imageBitmap,
+                640,
+                640,
+            );
+        const data = preprocessResult.data;
+        const resized = preprocessResult.newSize;
+        const outputData = await workerBridge.detectFaces(data);
+        const faces = this.getFacesFromYoloOutput(
+            outputData as Float32Array,
+            0.7,
         );
-        const data = new Float32Array(1 * 3 * 640 * 640);
-        const inputTensor = new ort.Tensor("float32", data, [1, 3, 640, 640]);
-        // TODO(MR): onnx-yolo
-        // const feeds: Record<string, ort.Tensor> = {};
-        const feeds: Record<string, any> = {};
-        const name = this.onnxInferenceSession.inputNames[0];
-        feeds[name] = inputTensor;
-        await this.onnxInferenceSession.run(feeds);
-        console.log("start end");
-    }
-
-    private async getOnnxInferenceSession() {
-        if (!this.onnxInferenceSession) {
-            await this.initOnnx();
-        }
-        return this.onnxInferenceSession;
+        const inBox = newBox(0, 0, resized.width, resized.height);
+        const toBox = newBox(0, 0, imageBitmap.width, imageBitmap.height);
+        const transform = computeTransformToBox(inBox, toBox);
+        const faceDetections: Array<FaceDetection> = faces?.map((f) => {
+            const box = transformBox(f.box, transform);
+            const normLandmarks = f.landmarks;
+            const landmarks = transformPoints(normLandmarks, transform);
+            return {
+                box,
+                landmarks,
+                probability: f.probability as number,
+            } as FaceDetection;
+        });
+        return removeDuplicateDetections(faceDetections, maxFaceDistance);
     }
 
     private preprocessImageBitmapToFloat32ChannelsFirst(
@@ -160,43 +158,6 @@ class YoloFaceDetectionService implements FaceDetectionService {
         };
     }
 
-    /**
-     * @deprecated The method should not be used
-     */
-    private imageBitmapToTensorData(imageBitmap) {
-        // Create an OffscreenCanvas and set its size
-        const offscreenCanvas = new OffscreenCanvas(
-            imageBitmap.width,
-            imageBitmap.height,
-        );
-        const ctx = offscreenCanvas.getContext("2d");
-        ctx.drawImage(imageBitmap, 0, 0, imageBitmap.width, imageBitmap.height);
-        const imageData = ctx.getImageData(
-            0,
-            0,
-            imageBitmap.width,
-            imageBitmap.height,
-        );
-        const pixelData = imageData.data;
-        const data = new Float32Array(
-            1 * 3 * imageBitmap.width * imageBitmap.height,
-        );
-        // Populate the Float32Array with normalized pixel values
-        for (let i = 0; i < pixelData.length; i += 4) {
-            // Normalize pixel values to the range [0, 1]
-            data[i / 4] = pixelData[i] / 255.0; // Red channel
-            data[i / 4 + imageBitmap.width * imageBitmap.height] =
-                pixelData[i + 1] / 255.0; // Green channel
-            data[i / 4 + 2 * imageBitmap.width * imageBitmap.height] =
-                pixelData[i + 2] / 255.0; // Blue channel
-        }
-
-        return {
-            data: data,
-            shape: [1, 3, imageBitmap.width, imageBitmap.height],
-        };
-    }
-
     // The rowOutput is a Float32Array of shape [25200, 16], where each row represents a bounding box.
     private getFacesFromYoloOutput(
         rowOutput: Float32Array,
@@ -274,58 +235,98 @@ class YoloFaceDetectionService implements FaceDetectionService {
             probability: faceDetection.probability,
         };
     }
-
-    private async estimateOnnx(imageBitmap: ImageBitmap) {
-        const maxFaceDistance = imageBitmap.width * MAX_FACE_DISTANCE_PERCENT;
-        const preprocessResult =
-            this.preprocessImageBitmapToFloat32ChannelsFirst(
-                imageBitmap,
-                640,
-                640,
-            );
-        const data = preprocessResult.data;
-        const resized = preprocessResult.newSize;
-        const inputTensor = new ort.Tensor("float32", data, [1, 3, 640, 640]);
-        // TODO(MR): onnx-yolo
-        // const feeds: Record<string, ort.Tensor> = {};
-        const feeds: Record<string, any> = {};
-        feeds["input"] = inputTensor;
-        const inferenceSession = await this.getOnnxInferenceSession();
-        const runout = await inferenceSession.run(feeds);
-        const outputData = runout.output.data;
-        const faces = this.getFacesFromYoloOutput(
-            outputData as Float32Array,
-            0.7,
-        );
-        const inBox = newBox(0, 0, resized.width, resized.height);
-        const toBox = newBox(0, 0, imageBitmap.width, imageBitmap.height);
-        const transform = computeTransformToBox(inBox, toBox);
-        const faceDetections: Array<FaceDetection> = faces?.map((f) => {
-            const box = transformBox(f.box, transform);
-            const normLandmarks = f.landmarks;
-            const landmarks = transformPoints(normLandmarks, transform);
-            return {
-                box,
-                landmarks,
-                probability: f.probability as number,
-            } as FaceDetection;
-        });
-        return removeDuplicateDetections(faceDetections, maxFaceDistance);
-    }
-
-    public async detectFaces(
-        imageBitmap: ImageBitmap,
-    ): Promise<Array<FaceDetection>> {
-        // measure time taken
-        const facesFromOnnx = await this.estimateOnnx(imageBitmap);
-        return facesFromOnnx;
-    }
-
-    public async dispose() {
-        const inferenceSession = await this.getOnnxInferenceSession();
-        inferenceSession?.release();
-        this.onnxInferenceSession = undefined;
-    }
 }
 
 export default new YoloFaceDetectionService();
+
+/**
+ * Removes duplicate face detections from an array of detections.
+ *
+ * This function sorts the detections by their probability in descending order, then iterates over them.
+ * For each detection, it calculates the Euclidean distance to all other detections.
+ * If the distance is less than or equal to the specified threshold (`withinDistance`), the other detection is considered a duplicate and is removed.
+ *
+ * @param detections - An array of face detections to remove duplicates from.
+ * @param withinDistance - The maximum Euclidean distance between two detections for them to be considered duplicates.
+ *
+ * @returns An array of face detections with duplicates removed.
+ */
+function removeDuplicateDetections(
+    detections: Array<FaceDetection>,
+    withinDistance: number,
+) {
+    // console.time('removeDuplicates');
+    detections.sort((a, b) => b.probability - a.probability);
+    const isSelected = new Map<number, boolean>();
+    for (let i = 0; i < detections.length; i++) {
+        if (isSelected.get(i) === false) {
+            continue;
+        }
+        isSelected.set(i, true);
+        for (let j = i + 1; j < detections.length; j++) {
+            if (isSelected.get(j) === false) {
+                continue;
+            }
+            const centeri = getDetectionCenter(detections[i]);
+            const centerj = getDetectionCenter(detections[j]);
+            const dist = euclidean(
+                [centeri.x, centeri.y],
+                [centerj.x, centerj.y],
+            );
+            if (dist <= withinDistance) {
+                isSelected.set(j, false);
+            }
+        }
+    }
+
+    const uniques: Array<FaceDetection> = [];
+    for (let i = 0; i < detections.length; i++) {
+        isSelected.get(i) && uniques.push(detections[i]);
+    }
+    // console.timeEnd('removeDuplicates');
+    return uniques;
+}
+
+function getDetectionCenter(detection: FaceDetection) {
+    const center = new Point(0, 0);
+    // TODO: first 4 landmarks is applicable to blazeface only
+    // this needs to consider eyes, nose and mouth landmarks to take center
+    detection.landmarks?.slice(0, 4).forEach((p) => {
+        center.x += p.x;
+        center.y += p.y;
+    });
+
+    return center.div({ x: 4, y: 4 });
+}
+
+function computeTransformToBox(inBox: Box, toBox: Box): Matrix {
+    return compose(
+        translate(toBox.x, toBox.y),
+        scale(toBox.width / inBox.width, toBox.height / inBox.height),
+    );
+}
+
+function transformPoint(point: Point, transform: Matrix) {
+    const txdPoint = applyToPoint(transform, point);
+    return new Point(txdPoint.x, txdPoint.y);
+}
+
+function transformPoints(points: Point[], transform: Matrix) {
+    return points?.map((p) => transformPoint(p, transform));
+}
+
+function transformBox(box: Box, transform: Matrix) {
+    const topLeft = transformPoint(box.topLeft, transform);
+    const bottomRight = transformPoint(box.bottomRight, transform);
+
+    return newBoxFromPoints(topLeft.x, topLeft.y, bottomRight.x, bottomRight.y);
+}
+
+function newBoxFromPoints(
+    left: number,
+    top: number,
+    right: number,
+    bottom: number,
+) {
+    return new Box({ left, top, right, bottom });
+}

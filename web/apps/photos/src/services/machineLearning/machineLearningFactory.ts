@@ -22,20 +22,14 @@ import {
     MLLibraryData,
     MLSyncConfig,
     MLSyncContext,
-    ObjectDetectionMethod,
-    ObjectDetectionService,
-    SceneDetectionMethod,
-    SceneDetectionService,
 } from "types/machineLearning";
 import { logQueueStats } from "utils/machineLearning";
 import arcfaceAlignmentService from "./arcfaceAlignmentService";
 import arcfaceCropService from "./arcfaceCropService";
 import dbscanClusteringService from "./dbscanClusteringService";
 import hdbscanClusteringService from "./hdbscanClusteringService";
-import imageSceneService from "./imageSceneService";
 import laplacianBlurDetectionService from "./laplacianBlurDetectionService";
 import mobileFaceNetEmbeddingService from "./mobileFaceNetEmbeddingService";
-import ssdMobileNetV2Service from "./ssdMobileNetV2Service";
 import yoloFaceDetectionService from "./yoloFaceDetectionService";
 
 export class MLFactory {
@@ -47,26 +41,6 @@ export class MLFactory {
         }
 
         throw Error("Unknon face detection method: " + method);
-    }
-
-    public static getObjectDetectionService(
-        method: ObjectDetectionMethod,
-    ): ObjectDetectionService {
-        if (method === "SSDMobileNetV2") {
-            return ssdMobileNetV2Service;
-        }
-
-        throw Error("Unknown object detection method: " + method);
-    }
-
-    public static getSceneDetectionService(
-        method: SceneDetectionMethod,
-    ): SceneDetectionService {
-        if (method === "ImageScene") {
-            return imageSceneService;
-        }
-
-        throw Error("Unknown scene detection method: " + method);
     }
 
     public static getFaceCropService(method: FaceCropMethod) {
@@ -147,15 +121,12 @@ export class LocalMLSyncContext implements MLSyncContext {
     public blurDetectionService: BlurDetectionService;
     public faceEmbeddingService: FaceEmbeddingService;
     public faceClusteringService: ClusteringService;
-    public objectDetectionService: ObjectDetectionService;
-    public sceneDetectionService: SceneDetectionService;
 
     public localFilesMap: Map<number, EnteFile>;
     public outOfSyncFiles: EnteFile[];
     public nSyncedFiles: number;
     public nSyncedFaces: number;
     public allSyncedFacesMap?: Map<number, Array<Face>>;
-    public tsne?: any;
 
     public error?: Error;
 
@@ -202,13 +173,6 @@ export class LocalMLSyncContext implements MLSyncContext {
             this.config.faceClustering.method,
         );
 
-        this.objectDetectionService = MLFactory.getObjectDetectionService(
-            this.config.objectDetection.method,
-        );
-        this.sceneDetectionService = MLFactory.getSceneDetectionService(
-            this.config.sceneDetection.method,
-        );
-
         this.outOfSyncFiles = [];
         this.nSyncedFiles = 0;
         this.nSyncedFaces = 0;
@@ -239,9 +203,6 @@ export class LocalMLSyncContext implements MLSyncContext {
     }
 
     public async dispose() {
-        // await this.faceDetectionService.dispose();
-        // await this.faceEmbeddingService.dispose();
-
         this.localFilesMap = undefined;
         await this.syncQueue.onIdle();
         this.syncQueue.removeAllListeners();

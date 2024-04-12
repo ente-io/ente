@@ -1,5 +1,3 @@
-import * as tf from "@tensorflow/tfjs-core";
-
 import { DebugInfo } from "hdbscan";
 import PQueue from "p-queue";
 import { EnteFile } from "types/file";
@@ -12,20 +10,8 @@ export interface MLSyncResult {
     nSyncedFaces: number;
     nFaceClusters: number;
     nFaceNoise: number;
-    tsne?: any;
     error?: Error;
 }
-
-export interface DebugFace {
-    fileId: string;
-    // face: FaceApiResult;
-    face: AlignedFace;
-    embedding: FaceEmbedding;
-    faceImage: FaceImage;
-}
-
-export declare type FaceImage = Array<Array<Array<number>>>;
-export declare type FaceImageBlob = Blob;
 
 export declare type FaceDescriptor = Float32Array;
 
@@ -59,23 +45,13 @@ export declare type Landmark = Point;
 
 export declare type ImageType = "Original" | "Preview";
 
-export declare type FaceDetectionMethod =
-    | "BlazeFace"
-    | "FaceApiSSD"
-    | "YoloFace";
-
-export declare type ObjectDetectionMethod = "SSDMobileNetV2";
-
-export declare type SceneDetectionMethod = "ImageScene";
+export declare type FaceDetectionMethod = "YoloFace";
 
 export declare type FaceCropMethod = "ArcFace";
 
-export declare type FaceAlignmentMethod =
-    | "ArcFace"
-    | "FaceApiDlib"
-    | "RotatedFaceApiDlib";
+export declare type FaceAlignmentMethod = "ArcFace";
 
-export declare type FaceEmbeddingMethod = "MobileFaceNet" | "FaceApiDlib";
+export declare type FaceEmbeddingMethod = "MobileFaceNet";
 
 export declare type BlurDetectionMethod = "Laplacian";
 
@@ -155,45 +131,15 @@ export interface Person {
     displayImageUrl?: string;
 }
 
-export interface ObjectDetection {
-    bbox: [number, number, number, number];
-    class: string;
-    score: number;
-}
-
-export interface DetectedObject {
-    fileID: number;
-    detection: ObjectDetection;
-}
-
-export interface RealWorldObject extends DetectedObject {
-    id: string;
-    className: string;
-}
-
-export interface Thing {
-    id: number;
-    name: string;
-    files: Array<number>;
-}
-
-export interface WordGroup {
-    word: string;
-    files: Array<number>;
-}
-
 export interface MlFileData {
     fileId: number;
     faces?: Face[];
-    objects?: RealWorldObject[];
     imageSource?: ImageType;
     imageDimensions?: Dimensions;
     faceDetectionMethod?: Versioned<FaceDetectionMethod>;
     faceCropMethod?: Versioned<FaceCropMethod>;
     faceAlignmentMethod?: Versioned<FaceAlignmentMethod>;
     faceEmbeddingMethod?: Versioned<FaceEmbeddingMethod>;
-    objectDetectionMethod?: Versioned<ObjectDetectionMethod>;
-    sceneDetectionMethod?: Versioned<SceneDetectionMethod>;
     mlVersion: number;
     errorCount: number;
     lastErrorMessage?: string;
@@ -201,17 +147,6 @@ export interface MlFileData {
 
 export interface FaceDetectionConfig {
     method: FaceDetectionMethod;
-}
-
-export interface ObjectDetectionConfig {
-    method: ObjectDetectionMethod;
-    maxNumBoxes: number;
-    minScore: number;
-}
-
-export interface SceneDetectionConfig {
-    method: SceneDetectionMethod;
-    minScore: number;
 }
 
 export interface FaceCropConfig {
@@ -263,9 +198,6 @@ export interface MLSyncConfig {
     blurDetection: BlurDetectionConfig;
     faceEmbedding: FaceEmbeddingConfig;
     faceClustering: FaceClusteringConfig;
-    objectDetection: ObjectDetectionConfig;
-    sceneDetection: SceneDetectionConfig;
-    tsne?: TSNEConfig;
     mlVersion: number;
 }
 
@@ -285,16 +217,12 @@ export interface MLSyncContext {
     faceEmbeddingService: FaceEmbeddingService;
     blurDetectionService: BlurDetectionService;
     faceClusteringService: ClusteringService;
-    objectDetectionService: ObjectDetectionService;
-    sceneDetectionService: SceneDetectionService;
 
     localFilesMap: Map<number, EnteFile>;
     outOfSyncFiles: EnteFile[];
     nSyncedFiles: number;
     nSyncedFaces: number;
     allSyncedFacesMap?: Map<number, Array<Face>>;
-    allSyncedObjectsMap?: Map<number, Array<RealWorldObject>>;
-    tsne?: any;
 
     error?: Error;
 
@@ -314,7 +242,6 @@ export interface MLSyncFileContext {
     oldMlFile?: MlFileData;
     newMlFile?: MlFileData;
 
-    tfImage?: tf.Tensor3D;
     imageBitmap?: ImageBitmap;
 
     newDetection?: boolean;
@@ -331,33 +258,12 @@ export declare type MLIndex = "files" | "people";
 
 export interface FaceDetectionService {
     method: Versioned<FaceDetectionMethod>;
-    // init(): Promise<void>;
+
     detectFaces(image: ImageBitmap): Promise<Array<FaceDetection>>;
     getRelativeDetection(
         faceDetection: FaceDetection,
         imageDimensions: Dimensions,
     ): FaceDetection;
-    dispose(): Promise<void>;
-}
-
-export interface ObjectDetectionService {
-    method: Versioned<ObjectDetectionMethod>;
-    // init(): Promise<void>;
-    detectObjects(
-        image: ImageBitmap,
-        maxNumBoxes: number,
-        minScore: number,
-    ): Promise<ObjectDetection[]>;
-    dispose(): Promise<void>;
-}
-
-export interface SceneDetectionService {
-    method: Versioned<SceneDetectionMethod>;
-    // init(): Promise<void>;
-    detectScenes(
-        image: ImageBitmap,
-        minScore: number,
-    ): Promise<ObjectDetection[]>;
 }
 
 export interface FaceCropService {
@@ -378,9 +284,8 @@ export interface FaceAlignmentService {
 export interface FaceEmbeddingService {
     method: Versioned<FaceEmbeddingMethod>;
     faceSize: number;
-    // init(): Promise<void>;
+
     getFaceEmbeddings(faceImages: Float32Array): Promise<Array<FaceEmbedding>>;
-    dispose(): Promise<void>;
 }
 
 export interface BlurDetectionService {

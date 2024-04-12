@@ -1,4 +1,4 @@
-import { isValidNumber } from '../utils';
+import { isValidNumber } from './Box';
 
 export interface IDimensions {
   width: number

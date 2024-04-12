@@ -1,4 +1,3 @@
-import { isDimensions, isValidNumber } from '../utils';
 import { IBoundingBox } from './BoundingBox';
 import { IDimensions } from './Dimensions';
 import { Point } from './Point';
@@ -172,4 +171,12 @@ export class Box<BoxType = any> implements IBoundingBox, IRect {
       bottom: this.bottom + (region.bottom * this.height)
     }).toSquare().round()
   }
+}
+
+export function isValidNumber(num: any) {
+  return !!num && num !== Infinity && num !== -Infinity && !isNaN(num) || num === 0
+}
+
+export function isDimensions(obj: any): boolean {
+    return obj && obj.width && obj.height
 }

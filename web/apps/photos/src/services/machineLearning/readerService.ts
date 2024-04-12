@@ -16,7 +16,6 @@ class ReaderService {
             if (fileContext.imageBitmap) {
                 return fileContext.imageBitmap;
             }
-            // log.info('1 TF Memory stats: ',JSON.stringify(tf.memory()));
             if (fileContext.localFile) {
                 if (
                     fileContext.enteFile.metadata.fileType !== FILE_TYPE.IMAGE
@@ -47,7 +46,6 @@ class ReaderService {
             fileContext.newMlFile.imageSource = syncContext.config.imageSource;
             const { width, height } = fileContext.imageBitmap;
             fileContext.newMlFile.imageDimensions = { width, height };
-            // log.info('2 TF Memory stats: ',JSON.stringify(tf.memory()));
 
             return fileContext.imageBitmap;
         } catch (e) {
