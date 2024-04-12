@@ -97,7 +97,21 @@ const openWebCache = async (name: CacheName) => {
 
 /** An implementation of {@link EnteCache} using OPFS */
 const openOPFSCacheWeb = async (name: CacheName) => {
+    // While all major browsers support OPFS now, their implementations still
+    // have various quirks. However, we don't need to handle all possible cases
+    // and can just instead use the APIs and guarantees Chromium provides since
+    // this code will only run in our Electron app (which'll use Chromium as the
+    // renderer).
+    //
+    // So for our purpose, this can serve as the docs for what's available:
+    // https://web.dev/articles/origin-private-file-system
     const cache = await caches.open(name);
+
+    const root = await navigator.storage.getDirectory();
+    const _caches = await root.getDirectoryHandle("cache", { create: true });
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const _cache = await _caches.getDirectoryHandle(name, { create: true });
+
     return {
         match: (key: string) => {
             return cache.match(key);
@@ -141,6 +155,14 @@ export async function cached(
  *
  * Meant for use during logout, to reset the state of the user's account.
  */
-export const clearCaches = async () => {
+export const clearCaches = async () =>
+    globalThis.electron ? clearOPFSCaches() : clearWebCaches();
+
+export const clearWebCaches = async () => {
     await Promise.all(cacheNames.map((name) => caches.delete(name)));
+};
+
+export const clearOPFSCaches = async () => {
+    const root = await navigator.storage.getDirectory();
+    await root.removeEntry("cache", { recursive: true });
 };
