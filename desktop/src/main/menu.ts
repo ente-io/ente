@@ -5,13 +5,10 @@ import {
     MenuItemConstructorOptions,
     shell,
 } from "electron";
-import { setIsAppQuitting } from "../main";
+import { allowWindowClose } from "../main";
 import { forceCheckForAppUpdates } from "./services/app-update";
 import autoLauncher from "./services/autoLauncher";
-import {
-    getHideDockIconPreference,
-    setHideDockIconPreference,
-} from "./services/userPreference";
+import { userPreferences } from "./stores/user-preferences";
 import { openLogDirectory } from "./util";
 
 /** Create and return the entries in the app's main menu bar */
@@ -21,7 +18,7 @@ export const createApplicationMenu = async (mainWindow: BrowserWindow) => {
     // Whenever the menu is redrawn the current value of these variables is used
     // to set the checked state for the various settings checkboxes.
     let isAutoLaunchEnabled = await autoLauncher.isEnabled();
-    let shouldHideDockIcon = getHideDockIconPreference();
+    let shouldHideDockIcon = userPreferences.get("hideDockIcon");
 
     const macOSOnly = (options: MenuItemConstructorOptions[]) =>
         process.platform == "darwin" ? options : [];
@@ -39,7 +36,9 @@ export const createApplicationMenu = async (mainWindow: BrowserWindow) => {
     };
 
     const toggleHideDockIcon = () => {
-        setHideDockIconPreference(!shouldHideDockIcon);
+        // Persist
+        userPreferences.set("hideDockIcon", !shouldHideDockIcon);
+        // And update the in-memory state
         shouldHideDockIcon = !shouldHideDockIcon;
     };
 
@@ -196,7 +195,7 @@ export const createTrayContextMenu = (mainWindow: BrowserWindow) => {
     };
 
     const handleClose = () => {
-        setIsAppQuitting(true);
+        allowWindowClose();
         app.quit();
     };
 

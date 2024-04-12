@@ -4,9 +4,10 @@ import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
 import { CustomError } from "@ente/shared/error";
 import { Events, eventBus } from "@ente/shared/events";
-import { CacheStorageService } from "@ente/shared/storage/cacheStorage";
-import { CACHES } from "@ente/shared/storage/cacheStorage/constants";
-import { LimitedCache } from "@ente/shared/storage/cacheStorage/types";
+import {
+    CacheStorageService,
+    type LimitedCache,
+} from "@ente/shared/storage/cache";
 import { Remote } from "comlink";
 import { FILE_TYPE } from "constants/file";
 import isElectron from "is-electron";
@@ -516,7 +517,7 @@ export default DownloadManager;
 
 async function openThumbnailCache() {
     try {
-        return await CacheStorageService.open(CACHES.THUMBS);
+        return await CacheStorageService.open("thumbs");
     } catch (e) {
         log.error("Failed to open thumbnail cache", e);
         if (isInternalUser()) {
@@ -532,7 +533,7 @@ async function openDiskFileCache() {
         if (!isElectron()) {
             throw Error(CustomError.NOT_AVAILABLE_ON_WEB);
         }
-        return await CacheStorageService.open(CACHES.FILES);
+        return await CacheStorageService.open("files");
     } catch (e) {
         log.error("Failed to open file cache", e);
         if (isInternalUser()) {

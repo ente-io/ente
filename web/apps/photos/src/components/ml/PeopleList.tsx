@@ -1,17 +1,14 @@
+import { ensureLocalUser } from "@/next/local-user";
 import log from "@/next/log";
-import { CACHES } from "@ente/shared/storage/cacheStorage/constants";
-import { styled } from "@mui/material";
+import { cached } from "@ente/shared/storage/cache";
+import { Skeleton, styled } from "@mui/material";
 import { Legend } from "components/PhotoViewer/styledComponents/Legend";
 import { t } from "i18next";
 import React, { useEffect, useState } from "react";
+import machineLearningService from "services/machineLearning/machineLearningService";
 import { EnteFile } from "types/file";
 import { Face, Person } from "types/machineLearning";
-import {
-    getAllPeople,
-    getPeopleList,
-    getUnidentifiedFaces,
-} from "utils/machineLearning";
-import { ImageCacheView } from "./ImageViews";
+import { getPeopleList, getUnidentifiedFaces } from "utils/machineLearning";
 
 const FaceChipContainer = styled("div")`
     display: flex;
@@ -63,10 +60,9 @@ export const PeopleList = React.memo((props: PeopleListProps) => {
                         props.onSelect && props.onSelect(person, index)
                     }
                 >
-                    <ImageCacheView
+                    <FaceCropImageView
                         url={person.displayImageUrl}
-                        cacheName={CACHES.FACE_CROPS}
-                        faceID={person.displayFaceId}
+                        faceId={person.displayFaceId}
                     />
                 </FaceChip>
             ))}
@@ -111,36 +107,6 @@ export function PhotoPeopleList(props: PhotoPeopleListProps) {
     );
 }
 
-export interface AllPeopleListProps extends PeopleListPropsBase {
-    limit?: number;
-}
-
-export function AllPeopleList(props: AllPeopleListProps) {
-    const [people, setPeople] = useState<Array<Person>>([]);
-
-    useEffect(() => {
-        let didCancel = false;
-
-        async function updateFaceImages() {
-            try {
-                let people = await getAllPeople();
-                if (props.limit) {
-                    people = people.slice(0, props.limit);
-                }
-                !didCancel && setPeople(people);
-            } catch (e) {
-                log.error("updateFaceImages failed", e);
-            }
-        }
-        updateFaceImages();
-        return () => {
-            didCancel = true;
-        };
-    }, [props.limit]);
-
-    return <PeopleList people={people} onSelect={props.onSelect}></PeopleList>;
-}
-
 export function UnidentifiedFaces(props: {
     file: EnteFile;
     updateMLDataIndex: number;
@@ -173,10 +139,9 @@ export function UnidentifiedFaces(props: {
                 {faces &&
                     faces.map((face, index) => (
                         <FaceChip key={index}>
-                            <ImageCacheView
-                                faceID={face.id}
+                            <FaceCropImageView
+                                faceId={face.id}
                                 url={face.crop?.imageUrl}
-                                cacheName={CACHES.FACE_CROPS}
                             />
                         </FaceChip>
                     ))}
@@ -184,3 +149,62 @@ export function UnidentifiedFaces(props: {
         </>
     );
 }
+
+interface FaceCropImageViewProps {
+    url: string;
+    faceId: string;
+}
+
+const FaceCropImageView: React.FC<FaceCropImageViewProps> = ({
+    url,
+    faceId,
+}) => {
+    const [objectURL, setObjectURL] = useState<string | undefined>();
+
+    useEffect(() => {
+        let didCancel = false;
+
+        async function loadImage() {
+            let blob: Blob;
+            if (!url) {
+                blob = undefined;
+            } else {
+                const user = await ensureLocalUser();
+                blob = await cached("face-crops", url, async () => {
+                    try {
+                        log.debug(
+                            () =>
+                                `ImageCacheView: regenerate face crop for ${faceId}`,
+                        );
+                        return machineLearningService.regenerateFaceCrop(
+                            user.token,
+                            user.id,
+                            faceId,
+                        );
+                    } catch (e) {
+                        log.error(
+                            "ImageCacheView: regenerate face crop failed",
+                            e,
+                        );
+                    }
+                });
+            }
+
+            if (didCancel) return;
+            setObjectURL(blob ? URL.createObjectURL(blob) : undefined);
+        }
+
+        loadImage();
+
+        return () => {
+            didCancel = true;
+            if (objectURL) URL.revokeObjectURL(objectURL);
+        };
+    }, [url, faceId]);
+
+    return objectURL ? (
+        <img src={objectURL} />
+    ) : (
+        <Skeleton variant="circular" height={120} width={120} />
+    );
+};

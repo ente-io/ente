@@ -8,7 +8,8 @@
  *
  * https://www.electronjs.org/docs/latest/tutorial/process-model#the-main-process
  */
-import { app, BrowserWindow, Menu } from "electron/main";
+import { nativeImage } from "electron";
+import { app, BrowserWindow, Menu, Tray } from "electron/main";
 import serveNextAt from "next-electron-server";
 import { existsSync } from "node:fs";
 import fs from "node:fs/promises";
@@ -16,44 +17,46 @@ import os from "node:os";
 import path from "node:path";
 import {
     addAllowOriginHeader,
-    createWindow,
-    handleDockIconHideOnAutoLaunch,
     handleDownloads,
     handleExternalLinks,
-    setupMacWindowOnDockIconClick,
-    setupTrayItem,
 } from "./main/init";
 import { attachFSWatchIPCHandlers, attachIPCHandlers } from "./main/ipc";
 import log, { initLogging } from "./main/log";
-import { createApplicationMenu } from "./main/menu";
+import { createApplicationMenu, createTrayContextMenu } from "./main/menu";
 import { setupAutoUpdater } from "./main/services/app-update";
+import autoLauncher from "./main/services/autoLauncher";
 import { initWatcher } from "./main/services/chokidar";
+import { userPreferences } from "./main/stores/user-preferences";
 import { isDev } from "./main/util";
-
-let appIsQuitting = false;
-
-let updateIsAvailable = false;
-
-export const isAppQuitting = (): boolean => {
-    return appIsQuitting;
-};
-
-export const setIsAppQuitting = (value: boolean): void => {
-    appIsQuitting = value;
-};
-
-export const isUpdateAvailable = (): boolean => {
-    return updateIsAvailable;
-};
-
-export const setIsUpdateAvailable = (value: boolean): void => {
-    updateIsAvailable = value;
-};
 
 /**
  * The URL where the renderer HTML is being served from.
  */
 export const rendererURL = "next://app";
+
+/**
+ * We want to hide our window instead of closing it when the user presses the
+ * cross button on the window.
+ *
+ * > This is because there is 1. a perceptible initial window creation time for
+ * > our app, and 2. because the long running processes like export and watch
+ * > folders are tied to the lifetime of the window and otherwise won't run in
+ * > the background.
+ *
+ * Intercepting the window close event and using that to instead hide it is
+ * easy, however that prevents the actual app quit to stop working (since the
+ * window never gets closed).
+ *
+ * So to achieve our original goal (hide window instead of closing) without
+ * disabling expected app quits, we keep a flag, and we turn it on when we're
+ * part of the quit sequence. When this flag is on, we bypass the code that
+ * prevents the window from being closed.
+ */
+let shouldAllowWindowClose = false;
+
+export const allowWindowClose = (): void => {
+    shouldAllowWindowClose = true;
+};
 
 /**
  * next-electron-server allows up to directly use the output of `next build` in
@@ -68,9 +71,7 @@ export const rendererURL = "next://app";
  * For more details, see this comparison:
  * https://github.com/HaNdTriX/next-electron-server/issues/5
  */
-const setupRendererServer = () => {
-    serveNextAt(rendererURL);
-};
+const setupRendererServer = () => serveNextAt(rendererURL);
 
 /**
  * Log a standard startup banner.
@@ -87,29 +88,126 @@ const logStartupBanner = () => {
     log.info("Running on", { platform, osRelease, systemVersion });
 };
 
-function enableSharedArrayBufferSupport() {
-    app.commandLine.appendSwitch("enable-features", "SharedArrayBuffer");
-}
-
 /**
  * [Note: Increased disk cache for the desktop app]
  *
  * Set the "disk-cache-size" command line flag to ask the Chromium process to
  * use a larger size for the caches that it keeps on disk. This allows us to use
- * the same web-native caching mechanism on both the web and the desktop app,
- * just ask the embedded Chromium to be a bit more generous in disk usage when
+ * the web based caching mechanisms on both the web and the desktop app, just
+ * ask the embedded Chromium to be a bit more generous in disk usage when
  * running as the desktop app.
  *
- * The size we provide is in bytes. We set it to a large value, 5 GB (5 * 1024 *
- * 1024 * 1024 = 5368709120)
+ * The size we provide is in bytes.
  * https://www.electronjs.org/docs/latest/api/command-line-switches#--disk-cache-sizesize
  *
  * Note that increasing the disk cache size does not guarantee that Chromium
  * will respect in verbatim, it uses its own heuristics atop this hint.
  * https://superuser.com/questions/378991/what-is-chrome-default-cache-size-limit/1577693#1577693
  */
-const increaseDiskCache = () => {
-    app.commandLine.appendSwitch("disk-cache-size", "5368709120");
+const increaseDiskCache = () =>
+    app.commandLine.appendSwitch(
+        "disk-cache-size",
+        `${5 * 1024 * 1024 * 1024}`, // 5 GB
+    );
+
+/**
+ * Create an return the {@link BrowserWindow} that will form our app's UI.
+ *
+ * This window will show the HTML served from {@link rendererURL}.
+ */
+const createMainWindow = async () => {
+    // Create the main window. This'll show our web content.
+    const window = new BrowserWindow({
+        webPreferences: {
+            preload: path.join(app.getAppPath(), "preload.js"),
+            sandbox: true,
+        },
+        // The color to show in the window until the web content gets loaded.
+        // See: https://www.electronjs.org/docs/latest/api/browser-window#setting-the-backgroundcolor-property
+        backgroundColor: "black",
+        // We'll show it conditionally depending on `wasAutoLaunched` later.
+        show: false,
+    });
+
+    const wasAutoLaunched = await autoLauncher.wasAutoLaunched();
+    if (wasAutoLaunched) {
+        // Don't automatically show the app's window if we were auto-launched.
+        // On macOS, also hide the dock icon on macOS.
+        if (process.platform == "darwin") app.dock.hide();
+    } else {
+        // Show our window (maximizing it) otherwise.
+        window.maximize();
+    }
+
+    window.loadURL(rendererURL);
+
+    // Open the DevTools automatically when running in dev mode
+    if (isDev) window.webContents.openDevTools();
+
+    window.webContents.on("render-process-gone", (_, details) => {
+        log.error(`render-process-gone: ${details}`);
+        window.webContents.reload();
+    });
+
+    window.webContents.on("unresponsive", () => {
+        log.error(
+            "Main window's webContents are unresponsive, will restart the renderer process",
+        );
+        window.webContents.forcefullyCrashRenderer();
+    });
+
+    window.on("close", (event) => {
+        if (!shouldAllowWindowClose) {
+            event.preventDefault();
+            window.hide();
+        }
+        return false;
+    });
+
+    window.on("hide", () => {
+        // On macOS, when hiding the window also hide the app's icon in the dock
+        // if the user has selected the Settings > Hide dock icon checkbox.
+        if (process.platform == "darwin" && userPreferences.get("hideDockIcon"))
+            app.dock.hide();
+    });
+
+    window.on("show", () => {
+        if (process.platform == "darwin") app.dock.show();
+    });
+
+    // Let ipcRenderer know when mainWindow is in the foreground so that it can
+    // in turn inform the renderer process.
+    window.on("focus", () => window.webContents.send("mainWindowFocus"));
+
+    return window;
+};
+
+/**
+ * Add an icon for our app in the system tray.
+ *
+ * For example, these are the small icons that appear on the top right of the
+ * screen in the main menu bar on macOS.
+ */
+const setupTrayItem = (mainWindow: BrowserWindow) => {
+    // There are a total of 6 files corresponding to this tray icon.
+    //
+    // On macOS, use template images (filename needs to end with "Template.ext")
+    // https://www.electronjs.org/docs/latest/api/native-image#template-image-macos
+    //
+    // And for each (template or otherwise), there are 3 "retina" variants
+    // https://www.electronjs.org/docs/latest/api/native-image#high-resolution-image
+    const iconName =
+        process.platform == "darwin"
+            ? "taskbar-icon-Template.png"
+            : "taskbar-icon.png";
+    const trayImgPath = path.join(
+        isDev ? "build" : process.resourcesPath,
+        iconName,
+    );
+    const trayIcon = nativeImage.createFromPath(trayImgPath);
+    const tray = new Tray(trayIcon);
+    tray.setToolTip("Ente Photos");
+    tray.setContextMenu(createTrayContextMenu(mainWindow));
 };
 
 /**
@@ -141,14 +239,6 @@ const deleteLegacyDiskCacheDirIfExists = async () => {
     }
 };
 
-const attachEventHandlers = (mainWindow: BrowserWindow) => {
-    // Let ipcRenderer know when mainWindow is in the foreground so that it can
-    // in turn inform the renderer process.
-    mainWindow.on("focus", () =>
-        mainWindow.webContents.send("mainWindowFocus"),
-    );
-};
-
 const main = () => {
     const gotTheLock = app.requestSingleInstanceLock();
     if (!gotTheLock) {
@@ -156,22 +246,18 @@ const main = () => {
         return;
     }
 
-    let mainWindow: BrowserWindow;
+    let mainWindow: BrowserWindow | undefined;
 
     initLogging();
     setupRendererServer();
     logStartupBanner();
-    handleDockIconHideOnAutoLaunch();
     increaseDiskCache();
-    enableSharedArrayBufferSupport();
 
     app.on("second-instance", () => {
         // Someone tried to run a second instance, we should focus our window.
         if (mainWindow) {
             mainWindow.show();
-            if (mainWindow.isMinimized()) {
-                mainWindow.restore();
-            }
+            if (mainWindow.isMinimized()) mainWindow.restore();
             mainWindow.focus();
         }
     });
@@ -180,10 +266,9 @@ const main = () => {
     //
     // Note that some Electron APIs can only be used after this event occurs.
     app.on("ready", async () => {
-        mainWindow = await createWindow();
+        mainWindow = await createMainWindow();
         const watcher = initWatcher(mainWindow);
         setupTrayItem(mainWindow);
-        setupMacWindowOnDockIconClick();
         Menu.setApplicationMenu(await createApplicationMenu(mainWindow));
         attachIPCHandlers();
         attachFSWatchIPCHandlers(watcher);
@@ -191,7 +276,6 @@ const main = () => {
         handleDownloads(mainWindow);
         handleExternalLinks(mainWindow);
         addAllowOriginHeader(mainWindow);
-        attachEventHandlers(mainWindow);
 
         try {
             deleteLegacyDiskCacheDirIfExists();
@@ -202,7 +286,11 @@ const main = () => {
         }
     });
 
-    app.on("before-quit", () => setIsAppQuitting(true));
+    // This is a macOS only event. Show our window when the user activates the
+    // app, e.g. by clicking on its dock icon.
+    app.on("activate", () => mainWindow?.show());
+
+    app.on("before-quit", allowWindowClose);
 };
 
 main();

@@ -2,10 +2,10 @@ import { compareVersions } from "compare-versions";
 import { app, BrowserWindow } from "electron";
 import { default as electronLog } from "electron-log";
 import { autoUpdater } from "electron-updater";
-import { setIsAppQuitting, setIsUpdateAvailable } from "../../main";
+import { allowWindowClose } from "../../main";
 import { AppUpdateInfo } from "../../types/ipc";
 import log from "../log";
-import { userPreferencesStore } from "../stores/user-preferences";
+import { userPreferences } from "../stores/user-preferences";
 
 export const setupAutoUpdater = (mainWindow: BrowserWindow) => {
     autoUpdater.logger = electronLog;
@@ -20,8 +20,8 @@ export const setupAutoUpdater = (mainWindow: BrowserWindow) => {
  * Check for app update check ignoring any previously saved skips / mutes.
  */
 export const forceCheckForAppUpdates = (mainWindow: BrowserWindow) => {
-    userPreferencesStore.delete("skipAppVersion");
-    userPreferencesStore.delete("muteUpdateNotificationVersion");
+    userPreferences.delete("skipAppVersion");
+    userPreferences.delete("muteUpdateNotificationVersion");
     checkForUpdatesAndNotify(mainWindow);
 };
 
@@ -41,14 +41,12 @@ const checkForUpdatesAndNotify = async (mainWindow: BrowserWindow) => {
         return;
     }
 
-    if (version === userPreferencesStore.get("skipAppVersion")) {
+    if (version === userPreferences.get("skipAppVersion")) {
         log.info(`User chose to skip version ${version}`);
         return;
     }
 
-    const mutedVersion = userPreferencesStore.get(
-        "muteUpdateNotificationVersion",
-    );
+    const mutedVersion = userPreferences.get("muteUpdateNotificationVersion");
     if (version === mutedVersion) {
         log.info(`User has muted update notifications for version ${version}`);
         return;
@@ -74,8 +72,6 @@ const checkForUpdatesAndNotify = async (mainWindow: BrowserWindow) => {
         log.error("Auto update failed", error);
         showUpdateDialog({ autoUpdatable: false, version });
     });
-
-    setIsUpdateAvailable(true);
 };
 
 /**
@@ -87,12 +83,12 @@ export const appVersion = () => `v${app.getVersion()}`;
 
 export const updateAndRestart = () => {
     log.info("Restarting the app to apply update");
-    setIsAppQuitting(true);
+    allowWindowClose();
     autoUpdater.quitAndInstall();
 };
 
 export const updateOnNextRestart = (version: string) =>
-    userPreferencesStore.set("muteUpdateNotificationVersion", version);
+    userPreferences.set("muteUpdateNotificationVersion", version);
 
 export const skipAppUpdate = (version: string) =>
-    userPreferencesStore.set("skipAppVersion", version);
+    userPreferences.set("skipAppVersion", version);

@@ -18,7 +18,7 @@ const userPreferencesSchema: Schema<UserPreferencesSchema> = {
     },
 };
 
-export const userPreferencesStore = new Store({
+export const userPreferences = new Store({
     name: "userPreferences",
     schema: userPreferencesSchema,
 });
