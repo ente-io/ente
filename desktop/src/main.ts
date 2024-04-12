@@ -100,12 +100,11 @@ const logStartupBanner = () => {
  * will respect in verbatim, it uses its own heuristics atop this hint.
  * https://superuser.com/questions/378991/what-is-chrome-default-cache-size-limit/1577693#1577693
  */
-const increaseDiskCache = () => {
+const increaseDiskCache = () =>
     app.commandLine.appendSwitch(
         "disk-cache-size",
         `${5 * 1024 * 1024 * 1024}`, // 5 GB
     );
-};
 
 /**
  * Create an return the {@link BrowserWindow} that will form our app's UI.
@@ -117,6 +116,7 @@ const createMainWindow = async () => {
     const window = new BrowserWindow({
         webPreferences: {
             preload: path.join(app.getAppPath(), "preload.js"),
+            sandbox: true,
         },
         // The color to show in the window until the web content gets loaded.
         // See: https://www.electronjs.org/docs/latest/api/browser-window#setting-the-backgroundcolor-property
