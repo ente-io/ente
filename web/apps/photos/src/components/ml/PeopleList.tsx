@@ -1,8 +1,12 @@
 import log from "@/next/log";
-import { styled } from "@mui/material";
+import { cached } from "@ente/shared/storage/cache";
+import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
+import { User } from "@ente/shared/user/types";
+import { Skeleton, styled } from "@mui/material";
 import { Legend } from "components/PhotoViewer/styledComponents/Legend";
 import { t } from "i18next";
 import React, { useEffect, useState } from "react";
+import machineLearningService from "services/machineLearning/machineLearningService";
 import { EnteFile } from "types/file";
 import { Face, Person } from "types/machineLearning";
 import {
@@ -10,7 +14,6 @@ import {
     getPeopleList,
     getUnidentifiedFaces,
 } from "utils/machineLearning";
-import { FaceCropImageView } from "./FaceCropImageView";
 
 const FaceChipContainer = styled("div")`
     display: flex;
@@ -181,3 +184,62 @@ export function UnidentifiedFaces(props: {
         </>
     );
 }
+
+interface FaceCropImageViewProps {
+    url: string;
+    faceID: string;
+}
+
+export const FaceCropImageView: React.FC<FaceCropImageViewProps> = ({
+    url,
+    faceID,
+}) => {
+    const [objectURL, setObjectURL] = useState<string | undefined>();
+
+    useEffect(() => {
+        let didCancel = false;
+
+        async function loadImage() {
+            const user: User = getData(LS_KEYS.USER);
+            let blob: Blob;
+            if (!url || !user) {
+                blob = undefined;
+            } else {
+                blob = await cached("face-crops", url, async () => {
+                    try {
+                        log.debug(
+                            () =>
+                                `ImageCacheView: regenerate face crop for ${faceID}`,
+                        );
+                        return machineLearningService.regenerateFaceCrop(
+                            user.token,
+                            user.id,
+                            faceID,
+                        );
+                    } catch (e) {
+                        log.error(
+                            "ImageCacheView: regenerate face crop failed",
+                            e,
+                        );
+                    }
+                });
+            }
+
+            if (didCancel) return;
+            setObjectURL(URL.createObjectURL(blob));
+        }
+
+        loadImage();
+
+        return () => {
+            didCancel = true;
+            if (objectURL) URL.revokeObjectURL(objectURL);
+        };
+    }, [url, faceID]);
+
+    return objectURL ? (
+        <img src={objectURL} />
+    ) : (
+        <Skeleton variant="circular" height={120} width={120} />
+    );
+};
