@@ -31,22 +31,12 @@ import { isDev } from "./main/util";
 
 let appIsQuitting = false;
 
-let updateIsAvailable = false;
-
 export const isAppQuitting = (): boolean => {
     return appIsQuitting;
 };
 
 export const setIsAppQuitting = (value: boolean): void => {
     appIsQuitting = value;
-};
-
-export const isUpdateAvailable = (): boolean => {
-    return updateIsAvailable;
-};
-
-export const setIsUpdateAvailable = (value: boolean): void => {
-    updateIsAvailable = value;
 };
 
 /**

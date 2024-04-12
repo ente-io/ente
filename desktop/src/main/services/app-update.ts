@@ -2,7 +2,7 @@ import { compareVersions } from "compare-versions";
 import { app, BrowserWindow } from "electron";
 import { default as electronLog } from "electron-log";
 import { autoUpdater } from "electron-updater";
-import { setIsAppQuitting, setIsUpdateAvailable } from "../../main";
+import { setIsAppQuitting } from "../../main";
 import { AppUpdateInfo } from "../../types/ipc";
 import log from "../log";
 import { userPreferences } from "../stores/user-preferences";
@@ -72,8 +72,6 @@ const checkForUpdatesAndNotify = async (mainWindow: BrowserWindow) => {
         log.error("Auto update failed", error);
         showUpdateDialog({ autoUpdatable: false, version });
     });
-
-    setIsUpdateAvailable(true);
 };
 
 /**
