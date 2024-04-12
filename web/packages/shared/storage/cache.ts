@@ -76,7 +76,27 @@ export interface EnteCache {
  * {@link CacheName} which group related data and allow us to use the same key
  * across namespaces.
  */
-const openCache = async (name: CacheName) => {
+const openCache = async (name: CacheName) =>
+    globalThis.electron ? openWebCache(name) : openOPFSCacheWeb(name);
+
+/** An implementation of {@link EnteCache} using Web Cache APIs */
+const openWebCache = async (name: CacheName) => {
+    const cache = await caches.open(name);
+    return {
+        match: (key) => {
+            return cache.match(key);
+        },
+        put: (key: string, data: Response) => {
+            return cache.put(key, data);
+        },
+        delete: (key: string) => {
+            return cache.delete(key);
+        },
+    };
+};
+
+/** An implementation of {@link EnteCache} using OPFS */
+const openOPFSCacheWeb = async (name: CacheName) => {
     const cache = await caches.open(name);
     return {
         match: (key) => {
