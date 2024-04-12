@@ -103,7 +103,7 @@ class UploadLocksDB {
                 CREATE TABLE ${_trackUploadTable.table} (
                   ${_trackUploadTable.columnID} INTEGER PRIMARY KEY,
                   ${_trackUploadTable.columnLocalID} TEXT NOT NULL,
-                  ${_trackUploadTable.columnFileHash} TEXT NOT NULL UNIQUE,
+                  ${_trackUploadTable.columnFileHash} TEXT NOT NULL,
                   ${_trackUploadTable.columnEncryptedFilePath} TEXT NOT NULL,
                   ${_trackUploadTable.columnEncryptedFileSize} INTEGER NOT NULL,
                   ${_trackUploadTable.columnFileKey} TEXT NOT NULL,
@@ -117,10 +117,11 @@ class UploadLocksDB {
     await db.execute(
       '''
                 CREATE TABLE ${_partsTable.table} (
-                  ${_partsTable.columnObjectKey} TEXT PRIMARY KEY NOT NULL REFERENCES ${_trackUploadTable.table}(${_trackUploadTable.columnObjectKey}) ON DELETE CASCADE,
+                  ${_partsTable.columnObjectKey} TEXT NOT NULL REFERENCES ${_trackUploadTable.table}(${_trackUploadTable.columnObjectKey}) ON DELETE CASCADE,
                   ${_partsTable.columnPartNumber} INTEGER NOT NULL,
                   ${_partsTable.columnPartUrl} TEXT NOT NULL,
-                  ${_partsTable.columnPartStatus} TEXT NOT NULL
+                  ${_partsTable.columnPartStatus} TEXT NOT NULL,
+                  PRIMARY KEY (${_partsTable.columnObjectKey}, ${_partsTable.columnPartNumber})
                 )
                 ''',
     );
@@ -193,6 +194,7 @@ class UploadLocksDB {
       _trackUploadTable.table,
       where:
           '${_trackUploadTable.columnLocalID} = ? AND ${_trackUploadTable.columnFileHash} = ?',
+      whereArgs: [localId, hash],
     );
 
     return rows.isNotEmpty;
