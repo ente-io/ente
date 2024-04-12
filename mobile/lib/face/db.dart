@@ -62,7 +62,7 @@ class FaceMLDataDB {
     final String databaseDirectory =
         join(documentsDirectory.path, _databaseName);
     _logger.info("Opening sqlite_async access: DB path " + databaseDirectory);
-    return sqlite_async.SqliteDatabase(path: databaseDirectory);
+    return sqlite_async.SqliteDatabase(path: databaseDirectory, maxReaders: 1);
   }
 
   Future _onCreate(Database db, int version) async {
