@@ -76,7 +76,7 @@ export interface EnteCache {
  * {@link CacheName} which group related data and allow us to use the same key
  * across namespaces.
  */
-const openCache = async (name: CacheName) =>
+export const openCache = async (name: CacheName) =>
     globalThis.electron ? openWebCache(name) : openOPFSCacheWeb(name);
 
 /** An implementation of {@link EnteCache} using Web Cache APIs */
@@ -111,14 +111,12 @@ const openOPFSCacheWeb = async (name: CacheName) => {
     };
 };
 
-export const CacheStorageService = { open: openCache };
-
 export async function cached(
     cacheName: CacheName,
     id: string,
     get: () => Promise<Blob>,
 ): Promise<Blob> {
-    const cache = await CacheStorageService.open(cacheName);
+    const cache = await openCache(cacheName);
     const cacheResponse = await cache.match(id);
 
     let result: Blob;

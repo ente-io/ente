@@ -1,4 +1,4 @@
-import { CacheStorageService } from "@/next/cache";
+import { openCache } from "@/next/cache";
 import { BlobOptions } from "types/image";
 import {
     FaceAlignment,
@@ -54,7 +54,7 @@ async function storeFaceCropForBlob(
 ) {
     const faceCropUrl = `/${faceId}`;
     const faceCropResponse = new Response(faceCropBlob);
-    const faceCropCache = await CacheStorageService.open("face-crops");
+    const faceCropCache = await openCache("face-crops");
     await faceCropCache.put(faceCropUrl, faceCropResponse);
     return {
         imageUrl: faceCropUrl,

@@ -1,4 +1,4 @@
-import { CacheStorageService, type EnteCache } from "@/next/cache";
+import { openCache, type EnteCache } from "@/next/cache";
 import log from "@/next/log";
 import { APPS } from "@ente/shared/apps/constants";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
@@ -513,7 +513,7 @@ export default DownloadManager;
 
 async function openThumbnailCache() {
     try {
-        return await CacheStorageService.open("thumbs");
+        return await openCache("thumbs");
     } catch (e) {
         log.error("Failed to open thumbnail cache", e);
         if (isInternalUser()) {
@@ -529,7 +529,7 @@ async function openDiskFileCache() {
         if (!isElectron()) {
             throw Error(CustomError.NOT_AVAILABLE_ON_WEB);
         }
-        return await CacheStorageService.open("files");
+        return await openCache("files");
     } catch (e) {
         log.error("Failed to open file cache", e);
         if (isInternalUser()) {
