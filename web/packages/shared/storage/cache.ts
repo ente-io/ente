@@ -8,10 +8,6 @@ const cacheNames = [
 /** Namespaces into which our caches data is divided */
 export type CacheName = (typeof cacheNames)[number];
 
-interface LimitedCacheStorage {
-    open: (cacheName: string) => Promise<LimitedCache>;
-}
-
 export interface LimitedCache {
     match: (
         key: string,
@@ -21,34 +17,22 @@ export interface LimitedCache {
     delete: (key: string) => Promise<boolean>;
 }
 
-class cacheStorageFactory {
-    getCacheStorage(): LimitedCacheStorage {
-        return {
-            async open(cacheName) {
-                const cache = await caches.open(cacheName);
-                return {
-                    match: (key) => {
-                        // options are not supported in the browser
-                        return cache.match(key);
-                    },
-                    put: cache.put.bind(cache),
-                    delete: cache.delete.bind(cache),
-                };
-            },
-        };
-    }
-}
-
-export const CacheStorageFactory = new cacheStorageFactory();
-
-async function openCache(cacheName: string) {
-    return await CacheStorageFactory.getCacheStorage().open(cacheName);
-}
+const openCache = async (name: CacheName) => {
+    const cache = await caches.open(name);
+    return {
+        match: (key) => {
+            // options are not supported in the browser
+            return cache.match(key);
+        },
+        put: cache.put.bind(cache),
+        delete: cache.delete.bind(cache),
+    };
+};
 
 export const CacheStorageService = { open: openCache };
 
 export async function cached(
-    cacheName: string,
+    cacheName: CacheName,
     id: string,
     get: () => Promise<Blob>,
 ): Promise<Blob> {
