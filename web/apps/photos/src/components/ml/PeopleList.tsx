@@ -1,6 +1,6 @@
+import { cached } from "@/next/cache";
 import { ensureLocalUser } from "@/next/local-user";
 import log from "@/next/log";
-import { cached } from "@ente/shared/storage/cache";
 import { Skeleton, styled } from "@mui/material";
 import { Legend } from "components/PhotoViewer/styledComponents/Legend";
 import { t } from "i18next";

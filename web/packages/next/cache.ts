@@ -83,7 +83,7 @@ const openCache = async (name: CacheName) =>
 const openWebCache = async (name: CacheName) => {
     const cache = await caches.open(name);
     return {
-        match: (key) => {
+        match: (key: string) => {
             return cache.match(key);
         },
         put: (key: string, data: Response) => {
@@ -99,7 +99,7 @@ const openWebCache = async (name: CacheName) => {
 const openOPFSCacheWeb = async (name: CacheName) => {
     const cache = await caches.open(name);
     return {
-        match: (key) => {
+        match: (key: string) => {
             return cache.match(key);
         },
         put: (key: string, data: Response) => {

@@ -1,5 +1,5 @@
+import { cached } from "@/next/cache";
 import log from "@/next/log";
-import { cached } from "@ente/shared/storage/cache";
 import { FILE_TYPE } from "constants/file";
 import PQueue from "p-queue";
 import DownloadManager from "services/download";

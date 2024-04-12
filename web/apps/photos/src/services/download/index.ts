@@ -1,13 +1,10 @@
+import { CacheStorageService, type EnteCache } from "@/next/cache";
 import log from "@/next/log";
 import { APPS } from "@ente/shared/apps/constants";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
 import { CustomError } from "@ente/shared/error";
 import { Events, eventBus } from "@ente/shared/events";
-import {
-    CacheStorageService,
-    type EnteCache,
-} from "@ente/shared/storage/cache";
 import { Remote } from "comlink";
 import { FILE_TYPE } from "constants/file";
 import isElectron from "is-electron";
