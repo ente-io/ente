@@ -148,7 +148,6 @@ class DownloadManagerImpl {
             }
             const cacheResp: Response = await this.diskFileCache?.match(
                 file.id.toString(),
-                { sizeInBytes: file.info?.fileSize },
             );
             return cacheResp?.clone();
         } catch (e) {
