@@ -417,7 +417,7 @@
   "pendingItems": "待处理项目",
   "clearIndexes": "清空索引",
   "selectFoldersForBackup": "选择要备份的文件夹",
-  "selectedFoldersWillBeEncryptedAndBackedUp": "所选文件夹将被加密和备份",
+  "selectedFoldersWillBeEncryptedAndBackedUp": "所选文件夹将被加密并备份",
   "unselectAll": "取消全部选择",
   "selectAll": "全选",
   "skip": "跳过",
