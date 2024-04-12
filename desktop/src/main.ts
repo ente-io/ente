@@ -87,10 +87,6 @@ const logStartupBanner = () => {
     log.info("Running on", { platform, osRelease, systemVersion });
 };
 
-function enableSharedArrayBufferSupport() {
-    app.commandLine.appendSwitch("enable-features", "SharedArrayBuffer");
-}
-
 /**
  * [Note: Increased disk cache for the desktop app]
  *
