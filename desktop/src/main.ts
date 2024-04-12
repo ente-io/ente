@@ -8,7 +8,8 @@
  *
  * https://www.electronjs.org/docs/latest/tutorial/process-model#the-main-process
  */
-import { app, BrowserWindow, Menu } from "electron/main";
+import { nativeImage } from "electron";
+import { app, BrowserWindow, Menu, Tray } from "electron/main";
 import serveNextAt from "next-electron-server";
 import { existsSync } from "node:fs";
 import fs from "node:fs/promises";
@@ -24,7 +25,7 @@ import {
 } from "./main/init";
 import { attachFSWatchIPCHandlers, attachIPCHandlers } from "./main/ipc";
 import log, { initLogging } from "./main/log";
-import { createApplicationMenu } from "./main/menu";
+import { createApplicationMenu, createTrayContextMenu } from "./main/menu";
 import { setupAutoUpdater } from "./main/services/app-update";
 import autoLauncher from "./main/services/autoLauncher";
 import { initWatcher } from "./main/services/chokidar";
@@ -119,6 +120,93 @@ const hideDockIconIfNeeded = async () => {
     const shouldHideDockIcon = userPreferences.get("hideDockIcon");
     const wasAutoLaunched = await autoLauncher.wasAutoLaunched();
     if (shouldHideDockIcon && wasAutoLaunched) app.dock.hide();
+};
+
+/**
+ * Create an return the {@link BrowserWindow} that will form our app's UI.
+ *
+ * This window will show the HTML served from {@link rendererURL}.
+ */
+export const createMainWindow = async () => {
+    // Create the main window. This'll show our web content.
+    const window = new BrowserWindow({
+        webPreferences: {
+            preload: path.join(app.getAppPath(), "preload.js"),
+        },
+        // The color to show in the window until the web content gets loaded.
+        // See: https://www.electronjs.org/docs/latest/api/browser-window#setting-the-backgroundcolor-property
+        backgroundColor: "black",
+        // We'll show it conditionally depending on `wasAutoLaunched` later.
+        show: false,
+    });
+
+    const wasAutoLaunched = await autoLauncher.wasAutoLaunched();
+    if (wasAutoLaunched) {
+        // Keep the macOS dock icon hidden if we were auto launched.
+        if (process.platform == "darwin") app.dock.hide();
+    } else {
+        // Show our window (maximizing it) if this is not an auto-launch on
+        // login.
+        window.maximize();
+    }
+
+    window.loadURL(rendererURL);
+
+    // Open the DevTools automatically when running in dev mode
+    if (isDev) window.webContents.openDevTools();
+
+    window.webContents.on("render-process-gone", (_, details) => {
+        log.error(`render-process-gone: ${details}`);
+        window.webContents.reload();
+    });
+
+    window.webContents.on("unresponsive", () => {
+        log.error("webContents unresponsive");
+        window.webContents.forcefullyCrashRenderer();
+    });
+
+    window.on("close", function (event) {
+        if (!isAppQuitting()) {
+            event.preventDefault();
+            window.hide();
+        }
+        return false;
+    });
+
+    window.on("hide", () => {
+        // On macOS, when hiding the window also hide the app's icon in the dock
+        // if the user has selected the Settings > Hide dock icon checkbox.
+        if (process.platform == "darwin" && userPreferences.get("hideDockIcon"))
+            app.dock.hide();
+    });
+
+    window.on("show", () => {
+        if (process.platform == "darwin") app.dock.show();
+    });
+
+    return window;
+};
+
+const setupTrayItem = (mainWindow: BrowserWindow) => {
+    // There are a total of 6 files corresponding to this tray icon.
+    //
+    // On macOS, use template images (filename needs to end with "Template.ext")
+    // https://www.electronjs.org/docs/latest/api/native-image#template-image-macos
+    //
+    // And for each (template or otherwise), there are 3 "retina" variants
+    // https://www.electronjs.org/docs/latest/api/native-image#high-resolution-image
+    const iconName =
+        process.platform == "darwin"
+            ? "taskbar-icon-Template.png"
+            : "taskbar-icon.png";
+    const trayImgPath = path.join(
+        isDev ? "build" : process.resourcesPath,
+        iconName,
+    );
+    const trayIcon = nativeImage.createFromPath(trayImgPath);
+    const tray = new Tray(trayIcon);
+    tray.setToolTip("Ente Photos");
+    tray.setContextMenu(createTrayContextMenu(mainWindow));
 };
 
 /**
