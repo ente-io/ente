@@ -5,7 +5,6 @@ import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worke
 import { CustomError } from "@ente/shared/error";
 import { Events, eventBus } from "@ente/shared/events";
 import {
-    CACHES,
     CacheStorageService,
     type LimitedCache,
 } from "@ente/shared/storage/cache";
@@ -518,7 +517,7 @@ export default DownloadManager;
 
 async function openThumbnailCache() {
     try {
-        return await CacheStorageService.open(CACHES.THUMBS);
+        return await CacheStorageService.open("thumbs");
     } catch (e) {
         log.error("Failed to open thumbnail cache", e);
         if (isInternalUser()) {
@@ -534,7 +533,7 @@ async function openDiskFileCache() {
         if (!isElectron()) {
             throw Error(CustomError.NOT_AVAILABLE_ON_WEB);
         }
-        return await CacheStorageService.open(CACHES.FILES);
+        return await CacheStorageService.open("files");
     } catch (e) {
         log.error("Failed to open file cache", e);
         if (isInternalUser()) {

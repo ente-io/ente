@@ -1,5 +1,4 @@
 import log from "@/next/log";
-import { CACHES } from "@ente/shared/storage/cache";
 import { styled } from "@mui/material";
 import { Legend } from "components/PhotoViewer/styledComponents/Legend";
 import { t } from "i18next";
@@ -65,7 +64,7 @@ export const PeopleList = React.memo((props: PeopleListProps) => {
                 >
                     <ImageCacheView
                         url={person.displayImageUrl}
-                        cacheName={CACHES.FACE_CROPS}
+                        cacheName="face-crops"
                         faceID={person.displayFaceId}
                     />
                 </FaceChip>
@@ -176,7 +175,7 @@ export function UnidentifiedFaces(props: {
                             <ImageCacheView
                                 faceID={face.id}
                                 url={face.crop?.imageUrl}
-                                cacheName={CACHES.FACE_CROPS}
+                                cacheName="face-crops"
                             />
                         </FaceChip>
                     ))}

@@ -1,9 +1,12 @@
-export enum CACHES {
-    THUMBS = "thumbs",
-    FACE_CROPS = "face-crops",
+const cacheNames = [
+    "thumbs",
+    "face-crops",
     // Desktop app only
-    FILES = "files",
-}
+    "files",
+] as const;
+
+/** Namespaces into which our caches data is divided */
+export type CacheName = (typeof cacheNames)[number];
 
 interface LimitedCacheStorage {
     open: (cacheName: string) => Promise<LimitedCache>;
@@ -75,9 +78,5 @@ export async function cached(
  * Meant for use during logout, to reset the state of the user's account.
  */
 export const clearCaches = async () => {
-    await Promise.all([
-        caches.delete(CACHES.THUMBS),
-        caches.delete(CACHES.FACE_CROPS),
-        caches.delete(CACHES.FILES),
-    ]);
+    await Promise.all(cacheNames.map((name) => caches.delete(name)));
 };

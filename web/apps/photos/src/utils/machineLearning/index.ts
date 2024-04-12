@@ -1,5 +1,5 @@
 import log from "@/next/log";
-import { CACHES, cached } from "@ente/shared/storage/cache";
+import { cached } from "@ente/shared/storage/cache";
 import { FILE_TYPE } from "constants/file";
 import PQueue from "p-queue";
 import DownloadManager from "services/download";
@@ -151,7 +151,7 @@ export async function getOriginalImageBitmap(
     let fileBlob;
 
     if (useCache) {
-        fileBlob = await cached(CACHES.FILES, file.id.toString(), () => {
+        fileBlob = await cached("files", file.id.toString(), () => {
             return getOriginalConvertedFile(file, queue);
         });
     } else {
