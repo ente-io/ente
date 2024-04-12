@@ -96,12 +96,11 @@ function enableSharedArrayBufferSupport() {
  *
  * Set the "disk-cache-size" command line flag to ask the Chromium process to
  * use a larger size for the caches that it keeps on disk. This allows us to use
- * the same web-native caching mechanism on both the web and the desktop app,
- * just ask the embedded Chromium to be a bit more generous in disk usage when
+ * the web based caching mechanisms on both the web and the desktop app, just
+ * ask the embedded Chromium to be a bit more generous in disk usage when
  * running as the desktop app.
  *
- * The size we provide is in bytes. We set it to a large value, 5 GB (5 * 1024 *
- * 1024 * 1024 = 5368709120)
+ * The size we provide is in bytes.
  * https://www.electronjs.org/docs/latest/api/command-line-switches#--disk-cache-sizesize
  *
  * Note that increasing the disk cache size does not guarantee that Chromium
@@ -109,7 +108,10 @@ function enableSharedArrayBufferSupport() {
  * https://superuser.com/questions/378991/what-is-chrome-default-cache-size-limit/1577693#1577693
  */
 const increaseDiskCache = () => {
-    app.commandLine.appendSwitch("disk-cache-size", "5368709120");
+    app.commandLine.appendSwitch(
+        "disk-cache-size",
+        `${5 * 1024 * 1024 * 1024}`, // 5 GB
+    );
 };
 
 /**
