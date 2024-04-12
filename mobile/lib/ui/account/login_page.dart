@@ -237,7 +237,7 @@ class _LoginPageState extends State<LoginPage> {
     if (_emailIsValid) {
       _emailInputFieldColor = const Color.fromRGBO(45, 194, 98, 0.2);
     } else {
-      _emailInputFieldColor = null;
+      _emailInputFieldColor = getEnteColorScheme(context).fillFaint;
     }
   }
 }

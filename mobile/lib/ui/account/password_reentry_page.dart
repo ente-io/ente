@@ -222,6 +222,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                     decoration: InputDecoration(
                       hintText: S.of(context).enterYourPassword,
                       filled: true,
+                      fillColor: getEnteColorScheme(context).fillFaint,
                       contentPadding: const EdgeInsets.all(20),
                       border: UnderlineInputBorder(
                         borderSide: BorderSide.none,
