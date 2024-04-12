@@ -57,14 +57,14 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
     return Column(
       children: [
         MenuItemWidget(
-          captionedTextWidget: FutureBuilder<Map<int, int>>(
-            future: FaceMLDataDB.instance.getIndexedFileIds(),
+          captionedTextWidget: FutureBuilder<int>(
+            future: FaceMLDataDB.instance.getIndexedFileCount(),
             builder: (context, snapshot) {
               if (snapshot.hasData) {
                 return CaptionedTextWidget(
                   title: LocalSettings.instance.isFaceIndexingEnabled
-                      ? "Disable indexing (${snapshot.data!.length})"
-                      : "Enable indexing (${snapshot.data!.length})",
+                      ? "Disable indexing (${snapshot.data!})"
+                      : "Enable indexing (${snapshot.data!})",
                 );
               }
               return const SizedBox.shrink();
@@ -92,8 +92,8 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
           },
         ),
         MenuItemWidget(
-          captionedTextWidget: FutureBuilder<Map<int, int>>(
-            future: FaceMLDataDB.instance.getIndexedFileIds(),
+          captionedTextWidget: FutureBuilder<int>(
+            future: FaceMLDataDB.instance.getIndexedFileCount(),
             builder: (context, snapshot) {
               if (snapshot.hasData) {
                 return CaptionedTextWidget(
@@ -306,12 +306,12 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
         if (kDebugMode) sectionOptionSpacing,
         if (kDebugMode)
           MenuItemWidget(
-            captionedTextWidget: FutureBuilder<Map<int, int>>(
-              future: FaceMLDataDB.instance.getIndexedFileIds(),
+            captionedTextWidget: FutureBuilder<int>(
+              future: FaceMLDataDB.instance.getIndexedFileCount(),
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
                   return CaptionedTextWidget(
-                    title: "Read embeddings for ${snapshot.data!.length} files",
+                    title: "Read embeddings for ${snapshot.data!} files",
                   );
                 }
                 return const CaptionedTextWidget(

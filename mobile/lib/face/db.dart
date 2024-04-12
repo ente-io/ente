@@ -136,6 +136,14 @@ class FaceMLDataDB {
     return result;
   }
 
+  Future<int> getIndexedFileCount() async {
+    final db = await instance.sqliteAsyncDB;
+    final List<Map<String, dynamic>> maps = await db.getAll(
+      'SELECT COUNT(DISTINCT $fileIDColumn) as count FROM $facesTable',
+    );
+    return maps.first['count'] as int;
+  }
+
   Future<Map<int, int>> clusterIdToFaceCount() async {
     final db = await instance.database;
     final List<Map<String, dynamic>> maps = await db.rawQuery(
