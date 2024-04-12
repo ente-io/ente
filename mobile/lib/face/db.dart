@@ -498,8 +498,8 @@ class FaceMLDataDB {
   Future<int> getTotalFaceCount({
     double minFaceScore = kMinHighQualityFaceScore,
   }) async {
-    final db = await instance.database;
-    final List<Map<String, dynamic>> maps = await db.rawQuery(
+    final db = await instance.sqliteAsyncDB;
+    final List<Map<String, dynamic>> maps = await db.getAll(
       'SELECT COUNT(*) as count FROM $facesTable WHERE $faceScore > $minFaceScore AND $faceBlur > $kLaplacianThreshold',
     );
     return maps.first['count'] as int;
