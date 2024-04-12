@@ -29,20 +29,32 @@ import { initWatcher } from "./main/services/chokidar";
 import { userPreferences } from "./main/stores/user-preferences";
 import { isDev } from "./main/util";
 
-let appIsQuitting = false;
-
-export const isAppQuitting = (): boolean => {
-    return appIsQuitting;
-};
-
-export const setIsAppQuitting = (value: boolean): void => {
-    appIsQuitting = value;
-};
-
 /**
  * The URL where the renderer HTML is being served from.
  */
 export const rendererURL = "next://app";
+
+/**
+ * We want to hide our window instead of closing it when the user presses the
+ * cross button on the window (this is because there is 1. a perceptible initial
+ * window creation time for our app, and 2. because the long running processes
+ * like export and watch folders are tied to the lifetime of the window and
+ * otherwise won't run in the background.
+ *
+ * Intercepting the window close event and using that to instead hide it is
+ * easy, however that prevents the actual app quit to stop working (since the
+ * window never gets closed).
+ *
+ * So to achieve our original goal (hide window instead of closing) without
+ * disabling expected app quits, we keep this `allowWindowClose` flag. It is off
+ * by default, but in the cases where we *do* want the app to quit, we set it to
+ * true beforehand before calling the actual process that'll do the quitting.
+ */
+let allowWindowClose = false;
+
+export const setIsAppQuitting = (value: boolean): void => {
+    allowWindowClose = value;
+};
 
 /**
  * next-electron-server allows up to directly use the output of `next build` in
@@ -143,7 +155,7 @@ const createMainWindow = async () => {
     });
 
     window.on("close", function (event) {
-        if (!isAppQuitting()) {
+        if (!allowWindowClose) {
             event.preventDefault();
             window.hide();
         }
