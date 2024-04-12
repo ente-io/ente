@@ -146,7 +146,7 @@ Future<Map<int, String>> uploadParts(
       partURL,
       data: encryptedFile.openRead(
         i * multipartPartSize,
-        isLastPart ? null : (i + 1) * multipartPartSize - 1,
+        isLastPart ? null : (i + 1) * multipartPartSize,
       ),
       options: Options(
         headers: {

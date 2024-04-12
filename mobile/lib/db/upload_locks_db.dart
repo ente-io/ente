@@ -236,10 +236,8 @@ class UploadLocksDB {
       final partNumber = part[_partsTable.columnPartNumber] as int;
       final partUrl = part[_partsTable.columnPartUrl] as String;
       final partStatus = part[_partsTable.columnPartStatus] as String;
-      if (partStatus == "uploaded") {
-        partsURLs[partNumber] = partUrl;
-        partUploadStatus.add(partStatus == "uploaded");
-      }
+      partsURLs[partNumber] = partUrl;
+      partUploadStatus.add(partStatus == "uploaded");
     }
     final urls = MultipartUploadURLs(
       objectKey: objectKey,
@@ -290,6 +288,18 @@ class UploadLocksDB {
           _partsTable.columnPartStatus: _partStatus.pending,
         },
       );
+    }
+
+    // print all database entries
+    final trackUploads = await db.query(_trackUploadTable.table);
+    final parts = await db.query(_partsTable.table);
+    print("Track Uploads:");
+    for (final trackUpload in trackUploads) {
+      print(trackUpload);
+    }
+    print("Parts:");
+    for (final part in parts) {
+      print(part);
     }
   }
 
