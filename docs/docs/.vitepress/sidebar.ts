@@ -181,6 +181,10 @@ export const sidebar = [
                         link: "/self-hosting/guides/custom-server/",
                     },
                     {
+                        text: "Hosting the web app",
+                        link: "/self-hosting/guides/web-app",
+                    },
+                    {
                         text: "Administering your server",
                         link: "/self-hosting/guides/admin",
                     },
