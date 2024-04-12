@@ -109,18 +109,6 @@ const increaseDiskCache = () => {
 };
 
 /**
- * Hide the dock icon on macOS if the user wants it hidden and we were
- * auto-launched on login.
- */
-const hideDockIconIfNeeded = async () => {
-    if (process.platform != "darwin") return;
-
-    const shouldHideDockIcon = userPreferences.get("hideDockIcon");
-    const wasAutoLaunched = await autoLauncher.wasAutoLaunched();
-    if (shouldHideDockIcon && wasAutoLaunched) app.dock.hide();
-};
-
-/**
  * Create an return the {@link BrowserWindow} that will form our app's UI.
  *
  * This window will show the HTML served from {@link rendererURL}.
@@ -140,11 +128,11 @@ const createMainWindow = async () => {
 
     const wasAutoLaunched = await autoLauncher.wasAutoLaunched();
     if (wasAutoLaunched) {
-        // Keep the macOS dock icon hidden if we were auto launched.
+        // Don't automatically show the app's window if we were auto-launched.
+        // On macOS, also hide the dock icon on macOS.
         if (process.platform == "darwin") app.dock.hide();
     } else {
-        // Show our window (maximizing it) if this is not an auto-launch on
-        // login.
+        // Show our window (maximizing it) otherwise.
         window.maximize();
     }
 
@@ -159,7 +147,9 @@ const createMainWindow = async () => {
     });
 
     window.webContents.on("unresponsive", () => {
-        log.error("webContents unresponsive");
+        log.error(
+            "Main window's webContents are unresponsive, will restart the renderer process",
+        );
         window.webContents.forcefullyCrashRenderer();
     });
 
@@ -181,6 +171,10 @@ const createMainWindow = async () => {
     window.on("show", () => {
         if (process.platform == "darwin") app.dock.show();
     });
+
+    // Let ipcRenderer know when mainWindow is in the foreground so that it can
+    // in turn inform the renderer process.
+    window.on("focus", () => window.webContents.send("mainWindowFocus"));
 
     return window;
 };
@@ -242,14 +236,6 @@ const deleteLegacyDiskCacheDirIfExists = async () => {
     }
 };
 
-const attachEventHandlers = (mainWindow: BrowserWindow) => {
-    // Let ipcRenderer know when mainWindow is in the foreground so that it can
-    // in turn inform the renderer process.
-    mainWindow.on("focus", () =>
-        mainWindow.webContents.send("mainWindowFocus"),
-    );
-};
-
 const main = () => {
     const gotTheLock = app.requestSingleInstanceLock();
     if (!gotTheLock) {
@@ -262,7 +248,6 @@ const main = () => {
     initLogging();
     setupRendererServer();
     logStartupBanner();
-    hideDockIconIfNeeded();
     increaseDiskCache();
 
     app.on("second-instance", () => {
@@ -289,7 +274,6 @@ const main = () => {
         handleDownloads(mainWindow);
         handleExternalLinks(mainWindow);
         addAllowOriginHeader(mainWindow);
-        attachEventHandlers(mainWindow);
 
         try {
             deleteLegacyDiskCacheDirIfExists();
