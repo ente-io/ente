@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/people_changed_event.dart";
-import "package:photos/extensions/stop_watch.dart";
 import "package:photos/face/db.dart";
 import "package:photos/face/model/person.dart";
 import "package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart";
@@ -333,13 +332,25 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
             trailingIcon: Icons.chevron_right_outlined,
             trailingIconIsMuted: true,
             onTap: () async {
-              final EnteWatch watch = EnteWatch("read_embeddings")..start();
-              final result = await FaceMLDataDB.instance.getFaceEmbeddingMap();
-              watch.logAndReset('read embeddings ${result.length} ');
-              showShortToast(
-                context,
-                "Read ${result.length} face embeddings in ${watch.elapsed.inSeconds} secs",
-              );
+              final int totalFaces =
+                  await FaceMLDataDB.instance.getTotalFaceCount();
+              _logger.info('start reading embeddings for $totalFaces faces');
+              final time = DateTime.now();
+              try {
+                final result = await FaceMLDataDB.instance
+                    .getFaceEmbeddingMap(maxFaces: totalFaces);
+                final endTime = DateTime.now();
+                _logger.info(
+                  'Read embeddings of ${result.length} faces in ${time.difference(endTime).inSeconds} secs',
+                );
+                showShortToast(
+                  context,
+                  "Read embeddings of ${result.length} faces in ${time.difference(endTime).inSeconds} secs",
+                );
+              } catch (e, s) {
+                _logger.warning('read embeddings failed ', e, s);
+                await showGenericErrorDialog(context: context, error: e);
+              }
             },
           ),
       ],
