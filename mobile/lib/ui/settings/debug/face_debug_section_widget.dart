@@ -5,10 +5,8 @@ import 'package:flutter/material.dart';
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/people_changed_event.dart";
-import "package:photos/extensions/stop_watch.dart";
 import "package:photos/face/db.dart";
 import "package:photos/face/model/person.dart";
-import "package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart";
 import 'package:photos/services/machine_learning/face_ml/face_ml_service.dart';
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import 'package:photos/theme/ente_theme.dart';
@@ -65,7 +63,7 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
               if (snapshot.hasData) {
                 return CaptionedTextWidget(
                   title: LocalSettings.instance.isFaceIndexingEnabled
-                      ? "Disable Indexing (${snapshot.data!.length})"
+                      ? "Disable indexing (${snapshot.data!.length})"
                       : "Enable indexing (${snapshot.data!.length})",
                 );
               }
@@ -94,12 +92,14 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
           },
         ),
         MenuItemWidget(
-          captionedTextWidget: FutureBuilder<int>(
-            future: FaceMLDataDB.instance.getTotalFaceCount(),
+          captionedTextWidget: FutureBuilder<Map<int, int>>(
+            future: FaceMLDataDB.instance.getIndexedFileIds(),
             builder: (context, snapshot) {
               if (snapshot.hasData) {
                 return CaptionedTextWidget(
-                  title: "${snapshot.data!} high quality faces",
+                  title: LocalSettings.instance.isFaceIndexingEnabled
+                      ? "Disable indexing (no fetch) (${snapshot.data!.length})"
+                      : "Enable indexing (${snapshot.data!.length})",
                 );
               }
               return const SizedBox.shrink();
@@ -109,15 +109,50 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
-            final faces75 = await FaceMLDataDB.instance
-                .getTotalFaceCount(minFaceScore: 0.75);
-            final faces78 = await FaceMLDataDB.instance
-                .getTotalFaceCount(minFaceScore: kMinHighQualityFaceScore);
-            final blurryFaceCount =
-                await FaceMLDataDB.instance.getBlurryFaceCount(15);
-            showShortToast(context, "$blurryFaceCount blurry faces");
+            try {
+              final isEnabled =
+                  await LocalSettings.instance.toggleFaceIndexing();
+              if (isEnabled) {
+                FaceMlService.instance
+                    .indexAllImages(withFetching: false)
+                    .ignore();
+              } else {
+                FaceMlService.instance.pauseIndexing();
+              }
+              if (mounted) {
+                setState(() {});
+              }
+            } catch (e, s) {
+              _logger.warning('indexing failed ', e, s);
+              await showGenericErrorDialog(context: context, error: e);
+            }
           },
         ),
+        // MenuItemWidget(
+        //   captionedTextWidget: FutureBuilder<int>(
+        //     future: FaceMLDataDB.instance.getTotalFaceCount(),
+        //     builder: (context, snapshot) {
+        //       if (snapshot.hasData) {
+        //         return CaptionedTextWidget(
+        //           title: "${snapshot.data!} high quality faces",
+        //         );
+        //       }
+        //       return const SizedBox.shrink();
+        //     },
+        //   ),
+        //   pressedColor: getEnteColorScheme(context).fillFaint,
+        //   trailingIcon: Icons.chevron_right_outlined,
+        //   trailingIconIsMuted: true,
+        //   onTap: () async {
+        //     final faces75 = await FaceMLDataDB.instance
+        //         .getTotalFaceCount(minFaceScore: 0.75);
+        //     final faces78 = await FaceMLDataDB.instance
+        //         .getTotalFaceCount(minFaceScore: kMinHighQualityFaceScore);
+        //     final blurryFaceCount =
+        //         await FaceMLDataDB.instance.getBlurryFaceCount(15);
+        //     showShortToast(context, "$blurryFaceCount blurry faces");
+        //   },
+        // ),
         // MenuItemWidget(
         //   captionedTextWidget: const CaptionedTextWidget(
         //     title: "Analyze file ID 25728869",
@@ -296,13 +331,25 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
             trailingIcon: Icons.chevron_right_outlined,
             trailingIconIsMuted: true,
             onTap: () async {
-              final EnteWatch watch = EnteWatch("read_embeddings")..start();
-              final result = await FaceMLDataDB.instance.getFaceEmbeddingMap();
-              watch.logAndReset('read embeddings ${result.length} ');
-              showShortToast(
-                context,
-                "Read ${result.length} face embeddings in ${watch.elapsed.inSeconds} secs",
-              );
+              final int totalFaces =
+                  await FaceMLDataDB.instance.getTotalFaceCount();
+              _logger.info('start reading embeddings for $totalFaces faces');
+              final time = DateTime.now();
+              try {
+                final result = await FaceMLDataDB.instance
+                    .getFaceEmbeddingMap(maxFaces: totalFaces);
+                final endTime = DateTime.now();
+                _logger.info(
+                  'Read embeddings of ${result.length} faces in ${time.difference(endTime).inSeconds} secs',
+                );
+                showShortToast(
+                  context,
+                  "Read embeddings of ${result.length} faces in ${time.difference(endTime).inSeconds} secs",
+                );
+              } catch (e, s) {
+                _logger.warning('read embeddings failed ', e, s);
+                await showGenericErrorDialog(context: context, error: e);
+              }
             },
           ),
       ],

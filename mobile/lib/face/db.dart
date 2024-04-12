@@ -1,4 +1,5 @@
 import 'dart:async';
+import "dart:io" show Directory;
 import "dart:math";
 
 import "package:collection/collection.dart";
@@ -13,6 +14,7 @@ import "package:photos/face/model/face.dart";
 import "package:photos/models/file/file.dart";
 import 'package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:sqlite_async/sqlite_async.dart' as sqlite_async;
 
 /// Stores all data for the ML-related features. The database can be accessed by `MlDataDB.instance.database`.
 ///
@@ -29,11 +31,18 @@ class FaceMLDataDB {
 
   static final FaceMLDataDB instance = FaceMLDataDB._privateConstructor();
 
+  // only have a single app-wide reference to the database
   static Future<Database>? _dbFuture;
+  static Future<sqlite_async.SqliteDatabase>? _sqliteAsyncDBFuture;
 
   Future<Database> get database async {
     _dbFuture ??= _initDatabase();
     return _dbFuture!;
+  }
+
+  Future<sqlite_async.SqliteDatabase> get sqliteAsyncDB async {
+    _sqliteAsyncDBFuture ??= _initSqliteAsyncDatabase();
+    return _sqliteAsyncDBFuture!;
   }
 
   Future<Database> _initDatabase() async {
@@ -45,6 +54,15 @@ class FaceMLDataDB {
       version: _databaseVersion,
       onCreate: _onCreate,
     );
+  }
+
+  Future<sqlite_async.SqliteDatabase> _initSqliteAsyncDatabase() async {
+    final Directory documentsDirectory =
+        await getApplicationDocumentsDirectory();
+    final String databaseDirectory =
+        join(documentsDirectory.path, _databaseName);
+    _logger.info("Opening sqlite_async access: DB path " + databaseDirectory);
+    return sqlite_async.SqliteDatabase(path: databaseDirectory, maxReaders: 1);
   }
 
   Future _onCreate(Database db, int version) async {
@@ -107,8 +125,8 @@ class FaceMLDataDB {
 
   /// Returns a map of fileID to the indexed ML version
   Future<Map<int, int>> getIndexedFileIds() async {
-    final db = await instance.database;
-    final List<Map<String, dynamic>> maps = await db.rawQuery(
+    final db = await instance.sqliteAsyncDB;
+    final List<Map<String, dynamic>> maps = await db.getAll(
       'SELECT $fileIDColumn, $mlVersionColumn FROM $facesTable',
     );
     final Map<int, int> result = {};
@@ -398,18 +416,22 @@ class FaceMLDataDB {
     w.logAndReset(
       'reading as float offset: $offset, maxFaces: $maxFaces, batchSize: $batchSize',
     );
-    final db = await instance.database;
+    final db = await instance.sqliteAsyncDB;
 
     final Map<String, (int?, Uint8List)> result = {};
     while (true) {
       // Query a batch of rows
-      final List<Map<String, dynamic>> maps = await db.query(
-        facesTable,
-        columns: [faceIDColumn, faceEmbeddingBlob],
-        where: '$faceScore > $minScore and $faceBlur > $minClarity',
-        limit: batchSize,
-        offset: offset,
-        orderBy: '$faceIDColumn DESC',
+      final List<Map<String, dynamic>> maps = await db.getAll(
+        'SELECT $faceIDColumn, $faceEmbeddingBlob FROM $facesTable'
+        ' WHERE $faceScore > $minScore AND $faceBlur > $minClarity'
+        ' ORDER BY $faceIDColumn'
+        ' DESC LIMIT $batchSize OFFSET $offset',
+        // facesTable,
+        // columns: [faceIDColumn, faceEmbeddingBlob],
+        // where: '$faceScore > $minScore and $faceBlur > $minClarity',
+        // limit: batchSize,
+        // offset: offset,
+        // orderBy: '$faceIDColumn DESC',
       );
       // Break the loop if no more rows
       if (maps.isEmpty) {
@@ -476,8 +498,8 @@ class FaceMLDataDB {
   Future<int> getTotalFaceCount({
     double minFaceScore = kMinHighQualityFaceScore,
   }) async {
-    final db = await instance.database;
-    final List<Map<String, dynamic>> maps = await db.rawQuery(
+    final db = await instance.sqliteAsyncDB;
+    final List<Map<String, dynamic>> maps = await db.getAll(
       'SELECT COUNT(*) as count FROM $facesTable WHERE $faceScore > $minFaceScore AND $faceBlur > $kLaplacianThreshold',
     );
     return maps.first['count'] as int;
