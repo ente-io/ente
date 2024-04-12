@@ -27,25 +27,33 @@ class EmbeddingStore {
 
   late SharedPreferences _preferences;
 
-  Completer<void>? _syncStatus;
+  Completer<bool>? _remoteSyncStatus;
 
   Future<void> init() async {
     _preferences = await SharedPreferences.getInstance();
   }
 
-  Future<void> pullEmbeddings(Model model) async {
-    if (_syncStatus != null) {
-      return _syncStatus!.future;
+  Future<bool> pullEmbeddings(Model model) async {
+    if (_remoteSyncStatus != null) {
+      return _remoteSyncStatus!.future;
     }
-    _syncStatus = Completer();
-    var remoteEmbeddings = await _getRemoteEmbeddings(model);
-    await _storeRemoteEmbeddings(remoteEmbeddings.embeddings);
-    while (remoteEmbeddings.hasMore) {
-      remoteEmbeddings = await _getRemoteEmbeddings(model);
+    _remoteSyncStatus = Completer();
+    try {
+      var remoteEmbeddings = await _getRemoteEmbeddings(model);
       await _storeRemoteEmbeddings(remoteEmbeddings.embeddings);
+      while (remoteEmbeddings.hasMore) {
+        remoteEmbeddings = await _getRemoteEmbeddings(model);
+        await _storeRemoteEmbeddings(remoteEmbeddings.embeddings);
+      }
+      _remoteSyncStatus!.complete(true);
+      _remoteSyncStatus = null;
+      return true;
+    } catch (e, s) {
+      _logger.severe("failed to fetch & store remote embeddings", e, s);
+      _remoteSyncStatus!.complete(false);
+      _remoteSyncStatus = null;
+      return false;
     }
-    _syncStatus!.complete();
-    _syncStatus = null;
   }
 
   Future<void> pushEmbeddings() async {
@@ -132,7 +140,8 @@ class EmbeddingStore {
         remoteEmbeddings.add(embedding);
       }
     } catch (e, s) {
-      _logger.severe(e, s);
+      _logger.warning("Fetching embeddings failed", e, s);
+      rethrow;
     }
 
     _logger.info("${remoteEmbeddings.length} embeddings fetched");

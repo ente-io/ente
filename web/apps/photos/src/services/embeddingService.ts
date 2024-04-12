@@ -1,4 +1,6 @@
+import { inWorker } from "@/next/env";
 import log from "@/next/log";
+import { workerBridge } from "@/next/worker/worker-bridge";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { CustomError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
@@ -262,7 +264,9 @@ export const putEmbedding = async (
     putEmbeddingReq: PutEmbeddingRequest,
 ): Promise<EncryptedEmbedding> => {
     try {
-        const token = getToken();
+        const token = inWorker()
+            ? await workerBridge.getAuthToken()
+            : getToken();
         if (!token) {
             log.info("putEmbedding failed: token not found");
             throw Error(CustomError.TOKEN_MISSING);
