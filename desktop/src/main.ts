@@ -17,11 +17,9 @@ import os from "node:os";
 import path from "node:path";
 import {
     addAllowOriginHeader,
-    createWindow,
     handleDownloads,
     handleExternalLinks,
     setupMacWindowOnDockIconClick,
-    setupTrayItem,
 } from "./main/init";
 import { attachFSWatchIPCHandlers, attachIPCHandlers } from "./main/ipc";
 import log, { initLogging } from "./main/log";
@@ -127,7 +125,7 @@ const hideDockIconIfNeeded = async () => {
  *
  * This window will show the HTML served from {@link rendererURL}.
  */
-export const createMainWindow = async () => {
+const createMainWindow = async () => {
     // Create the main window. This'll show our web content.
     const window = new BrowserWindow({
         webPreferences: {
@@ -187,6 +185,12 @@ export const createMainWindow = async () => {
     return window;
 };
 
+/**
+ * Add an icon for our app in the system tray.
+ *
+ * For example, these are the small icons that appear on the top right of the
+ * screen in the main menu bar on macOS.
+ */
 const setupTrayItem = (mainWindow: BrowserWindow) => {
     // There are a total of 6 files corresponding to this tray icon.
     //
@@ -274,7 +278,7 @@ const main = () => {
     //
     // Note that some Electron APIs can only be used after this event occurs.
     app.on("ready", async () => {
-        mainWindow = await createWindow();
+        mainWindow = await createMainWindow();
         const watcher = initWatcher(mainWindow);
         setupTrayItem(mainWindow);
         setupMacWindowOnDockIconClick();

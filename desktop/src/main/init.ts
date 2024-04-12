@@ -1,12 +1,7 @@
-import { BrowserWindow, Tray, app, nativeImage, shell } from "electron";
+import { BrowserWindow, app, shell } from "electron";
 import { existsSync } from "node:fs";
 import path from "node:path";
-import { isAppQuitting, rendererURL } from "../main";
-import log from "./log";
-import { createTrayContextMenu } from "./menu";
-import autoLauncher from "./services/autoLauncher";
-import { isDev } from "./util";
-
+import { rendererURL } from "../main";
 
 export function handleDownloads(mainWindow: BrowserWindow) {
     mainWindow.webContents.session.on("will-download", (_, item) => {
