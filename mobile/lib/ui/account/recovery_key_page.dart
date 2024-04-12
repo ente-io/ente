@@ -11,7 +11,7 @@ import 'package:photos/ente_theme_data.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/ui/common/gradient_button.dart';
 import 'package:photos/utils/toast_util.dart';
-import 'package:share_plus/share_plus.dart';
+import "package:share_plus/share_plus.dart";
 import 'package:step_progress_indicator/step_progress_indicator.dart';
 
 class RecoveryKeyPage extends StatefulWidget {
@@ -248,7 +248,8 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
       await _recoveryKeyFile.delete();
     }
     _recoveryKeyFile.writeAsStringSync(recoveryKey);
-    await Share.shareFiles([_recoveryKeyFile.path]);
+
+    await Share.shareXFiles([XFile(_recoveryKeyFile.path)]);
     Future.delayed(const Duration(milliseconds: 500), () {
       if (mounted) {
         setState(() {
