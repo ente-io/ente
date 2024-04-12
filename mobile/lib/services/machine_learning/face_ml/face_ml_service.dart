@@ -557,13 +557,14 @@ class FaceMlService {
       outerLoop:
       for (final chunk in chunks) {
         final futures = <Future<bool>>[];
-        final List<int> fileIds = [];
-        // Try to find embeddings on the remote server
-        for (final f in chunk) {
-          fileIds.add(f.uploadedFileID!);
-        }
+
         if (LocalSettings.instance.remoteFetchEnabled) {
           try {
+            final List<int> fileIds = [];
+            // Try to find embeddings on the remote server
+            for (final f in chunk) {
+              fileIds.add(f.uploadedFileID!);
+            }
             final EnteWatch? w = kDebugMode ? EnteWatch("face_em_fetch") : null;
             w?.start();
             w?.log('starting remote fetch for ${fileIds.length} files');
