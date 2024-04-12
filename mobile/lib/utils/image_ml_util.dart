@@ -36,7 +36,9 @@ Color readPixelColor(
 ) {
   if (x < 0 || x >= image.width || y < 0 || y >= image.height) {
     // throw ArgumentError('Invalid pixel coordinates.');
-    log('[WARNING] `readPixelColor`: Invalid pixel coordinates, out of bounds');
+    if (y != -1) {
+      log('[WARNING] `readPixelColor`: Invalid pixel coordinates, out of bounds');
+    }
     return const Color.fromARGB(0, 0, 0, 0);
   }
   assert(byteData.lengthInBytes == 4 * image.width * image.height);
