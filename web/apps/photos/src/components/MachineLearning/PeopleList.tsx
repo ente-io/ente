@@ -10,7 +10,7 @@ import {
     getPeopleList,
     getUnidentifiedFaces,
 } from "utils/machineLearning";
-import { FaceCropImageView } from "./ImageViews";
+import { FaceCropImageView } from "./FaceCropImageView";
 
 const FaceChipContainer = styled("div")`
     display: flex;
