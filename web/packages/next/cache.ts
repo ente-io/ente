@@ -114,12 +114,31 @@ const openOPFSCacheWeb = async (name: CacheName) => {
 
     return {
         match: (key: string) => {
+            // try {
+            //     const fileHandle = _cache.getFileHandle(key);
+            //     const file = await fileHandle.getFile();
+            // } catch (e) {
+            //     if (e instanceof DOMException && e.name == "NotFoundError")
+            //         return undefined;
+            //     throw e;
+            // }
             return cache.match(key);
         },
-        put: (key: string, data: Response) => {
-            return cache.put(key, data);
+        put: async (key: string, data: Response) => {
+            // const fileHandle = await _cache.getFileHandle(key, { create: true })
+            // await fileHandle.write(data);
+            // await fileHandle.close();
+            await cache.put(key, data);
         },
         delete: (key: string) => {
+            // try {
+            //     await _cache.removeEntry(key);
+            //     return true;
+            // } catch (e) {
+            //     if (e instanceof DOMException && e.name == "NotFoundError")
+            //         return false;
+            //     throw e;
+            // }
             return cache.delete(key);
         },
     };
