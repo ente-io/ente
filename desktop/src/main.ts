@@ -19,7 +19,6 @@ import {
     addAllowOriginHeader,
     handleDownloads,
     handleExternalLinks,
-    setupMacWindowOnDockIconClick,
 } from "./main/init";
 import { attachFSWatchIPCHandlers, attachIPCHandlers } from "./main/ipc";
 import log, { initLogging } from "./main/log";
@@ -243,7 +242,7 @@ const main = () => {
         return;
     }
 
-    let mainWindow: BrowserWindow;
+    let mainWindow: BrowserWindow | undefined;
 
     initLogging();
     setupRendererServer();
@@ -266,7 +265,6 @@ const main = () => {
         mainWindow = await createMainWindow();
         const watcher = initWatcher(mainWindow);
         setupTrayItem(mainWindow);
-        setupMacWindowOnDockIconClick();
         Menu.setApplicationMenu(await createApplicationMenu(mainWindow));
         attachIPCHandlers();
         attachFSWatchIPCHandlers(watcher);
@@ -283,6 +281,10 @@ const main = () => {
             log.error("Ignoring startup error", e);
         }
     });
+
+    // This is a macOS only event. Show our window when the user activates the
+    // app, e.g. by clicking on its dock icon.
+    app.on("activate", () => mainWindow?.show());
 
     app.on("before-quit", () => setIsAppQuitting(true));
 };

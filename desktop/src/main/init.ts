@@ -42,14 +42,6 @@ export function getUniqueSavePath(filename: string, directory: string): string {
     return uniqueFileSavePath;
 }
 
-export function setupMacWindowOnDockIconClick() {
-    app.on("activate", function () {
-        const windows = BrowserWindow.getAllWindows();
-        // we allow only one window
-        windows[0].show();
-    });
-}
-
 function lowerCaseHeaders(responseHeaders: Record<string, string[]>) {
     const headers: Record<string, string[]> = {};
     for (const key of Object.keys(responseHeaders)) {
