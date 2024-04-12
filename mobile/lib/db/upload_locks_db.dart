@@ -98,6 +98,10 @@ class UploadLocksDB {
       return;
     }
 
+    // drop
+    // await db.execute('DROP TABLE IF EXISTS ${_trackUploadTable.table}');
+    // await db.execute('DROP TABLE IF EXISTS ${_partsTable.table}');
+
     await db.execute(
       '''
                 CREATE TABLE ${_trackUploadTable.table} (

@@ -131,7 +131,7 @@ dependencies:
   path_provider: ^2.1.1
   pedantic: ^1.9.2
   permission_handler: ^11.0.1
-  photo_manager: ^2.8.1
+  photo_manager: ^3.0.0
   photo_view: ^0.14.0
   pinput: ^1.2.2
   pointycastle: ^3.7.3
@@ -195,8 +195,8 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   freezed: ^2.3.2
-  integration_test:
-    sdk: flutter
+  # integration_test:
+  #   sdk: flutter
   isar_generator: ^3.1.0+1
   json_serializable: ^6.6.1
   test: ^1.22.0

@@ -132,7 +132,8 @@ Future<Map<int, String>> uploadParts(
   final etags = <int, String>{};
 
   for (int i = 0; i < partsLength; i++) {
-    if (partUploadStatus?[i] ?? false) {
+    if (i < (partUploadStatus?.length ?? 0) &&
+        (partUploadStatus?[i] ?? false)) {
       continue;
     }
     final partURL = partsURLs[i];
@@ -145,7 +146,7 @@ Future<Map<int, String>> uploadParts(
       partURL,
       data: encryptedFile.openRead(
         i * multipartPartSize,
-        isLastPart ? null : multipartPartSize,
+        isLastPart ? null : (i + 1) * multipartPartSize - 1,
       ),
       options: Options(
         headers: {
