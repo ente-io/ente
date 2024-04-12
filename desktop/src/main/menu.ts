@@ -5,7 +5,7 @@ import {
     MenuItemConstructorOptions,
     shell,
 } from "electron";
-import { setIsAppQuitting } from "../main";
+import { allowWindowClose } from "../main";
 import { forceCheckForAppUpdates } from "./services/app-update";
 import autoLauncher from "./services/autoLauncher";
 import { userPreferences } from "./stores/user-preferences";
@@ -195,7 +195,7 @@ export const createTrayContextMenu = (mainWindow: BrowserWindow) => {
     };
 
     const handleClose = () => {
-        setIsAppQuitting(true);
+        allowWindowClose();
         app.quit();
     };
 

@@ -36,24 +36,26 @@ export const rendererURL = "next://app";
 
 /**
  * We want to hide our window instead of closing it when the user presses the
- * cross button on the window (this is because there is 1. a perceptible initial
- * window creation time for our app, and 2. because the long running processes
- * like export and watch folders are tied to the lifetime of the window and
- * otherwise won't run in the background.
+ * cross button on the window.
+ *
+ * > This is because there is 1. a perceptible initial window creation time for
+ * > our app, and 2. because the long running processes like export and watch
+ * > folders are tied to the lifetime of the window and otherwise won't run in
+ * > the background.
  *
  * Intercepting the window close event and using that to instead hide it is
  * easy, however that prevents the actual app quit to stop working (since the
  * window never gets closed).
  *
  * So to achieve our original goal (hide window instead of closing) without
- * disabling expected app quits, we keep this `allowWindowClose` flag. It is off
- * by default, but in the cases where we *do* want the app to quit, we set it to
- * true beforehand before calling the actual process that'll do the quitting.
+ * disabling expected app quits, we keep a flag, and we turn it on when we're
+ * part of the quit sequence. When this flag is on, we bypass the code that
+ * prevents the window from being closed.
  */
-let allowWindowClose = false;
+let shouldAllowWindowClose = false;
 
-export const setIsAppQuitting = (value: boolean): void => {
-    allowWindowClose = value;
+export const allowWindowClose = (): void => {
+    shouldAllowWindowClose = true;
 };
 
 /**
@@ -154,8 +156,8 @@ const createMainWindow = async () => {
         window.webContents.forcefullyCrashRenderer();
     });
 
-    window.on("close", function (event) {
-        if (!allowWindowClose) {
+    window.on("close", (event) => {
+        if (!shouldAllowWindowClose) {
             event.preventDefault();
             window.hide();
         }
@@ -288,7 +290,7 @@ const main = () => {
     // app, e.g. by clicking on its dock icon.
     app.on("activate", () => mainWindow?.show());
 
-    app.on("before-quit", () => setIsAppQuitting(true));
+    app.on("before-quit", allowWindowClose);
 };
 
 main();

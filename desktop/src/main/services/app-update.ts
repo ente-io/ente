@@ -2,7 +2,7 @@ import { compareVersions } from "compare-versions";
 import { app, BrowserWindow } from "electron";
 import { default as electronLog } from "electron-log";
 import { autoUpdater } from "electron-updater";
-import { setIsAppQuitting } from "../../main";
+import { allowWindowClose } from "../../main";
 import { AppUpdateInfo } from "../../types/ipc";
 import log from "../log";
 import { userPreferences } from "../stores/user-preferences";
@@ -83,7 +83,7 @@ export const appVersion = () => `v${app.getVersion()}`;
 
 export const updateAndRestart = () => {
     log.info("Restarting the app to apply update");
-    setIsAppQuitting(true);
+    allowWindowClose();
     autoUpdater.quitAndInstall();
 };
 
