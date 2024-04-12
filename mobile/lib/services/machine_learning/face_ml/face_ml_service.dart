@@ -360,14 +360,6 @@ class FaceMlService {
     _inactivityTimer?.cancel();
   }
 
-  Future<void> indexAndClusterAllImages() async {
-    // Run the analysis on all images to make sure everything is analyzed
-    await indexAllImages();
-
-    // Cluster all the images
-    await clusterAllImages();
-  }
-
   Future<void> clusterAllImages({
     double minFaceScore = kMinHighQualityFaceScore,
     bool clusterInBuckets = false,
@@ -634,13 +626,6 @@ class FaceMlService {
           (previousValue, element) => previousValue + (element ? 1 : 0),
         );
         fileAnalyzedCount += sumFutures;
-
-        // TODO: remove this cooldown later. Cooldown of one minute every 400 images
-        if (fileAnalyzedCount > 400 && fileAnalyzedCount % 400 < kParallelism) {
-          _logger.info(
-            "indexAllImages() analyzed $fileAnalyzedCount images, cooldown for 1 minute",
-          );
-        }
       }
 
       stopwatch.stop();
