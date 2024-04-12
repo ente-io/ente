@@ -103,6 +103,8 @@ const logStartupBanner = () => {
  * Note that increasing the disk cache size does not guarantee that Chromium
  * will respect in verbatim, it uses its own heuristics atop this hint.
  * https://superuser.com/questions/378991/what-is-chrome-default-cache-size-limit/1577693#1577693
+ *
+ * See also: [Note: Caching files].
  */
 const increaseDiskCache = () =>
     app.commandLine.appendSwitch(

@@ -6,7 +6,7 @@ import { CustomError } from "@ente/shared/error";
 import { Events, eventBus } from "@ente/shared/events";
 import {
     CacheStorageService,
-    type LimitedCache,
+    type EnteCache,
 } from "@ente/shared/storage/cache";
 import { Remote } from "comlink";
 import { FILE_TYPE } from "constants/file";
@@ -59,9 +59,9 @@ export interface DownloadClient {
 class DownloadManagerImpl {
     private ready: boolean = false;
     private downloadClient: DownloadClient;
-    private thumbnailCache?: LimitedCache;
+    private thumbnailCache?: EnteCache;
     // disk cache is only available on electron
-    private diskFileCache?: LimitedCache;
+    private diskFileCache?: EnteCache;
     private cryptoWorker: Remote<DedicatedCryptoWorker>;
 
     private fileObjectURLPromises = new Map<number, Promise<SourceURLs>>();
