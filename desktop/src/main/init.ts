@@ -4,10 +4,11 @@ import path from "node:path";
 import { isAppQuitting, rendererURL } from "../main";
 import log from "./log";
 import { createTrayContextMenu } from "./menu";
-import { isPlatform } from "./platform";
 import autoLauncher from "./services/autoLauncher";
 import { getHideDockIconPreference } from "./services/userPreference";
 import { isDev } from "./util";
+
+
 
 /**
  * Create an return the {@link BrowserWindow} that will form our app's UI.
@@ -143,15 +144,6 @@ export function setupMacWindowOnDockIconClick() {
         // we allow only one window
         windows[0].show();
     });
-}
-
-export async function handleDockIconHideOnAutoLaunch() {
-    const shouldHideDockIcon = getHideDockIconPreference();
-    const wasAutoLaunched = await autoLauncher.wasAutoLaunched();
-
-    if (isPlatform("mac") && shouldHideDockIcon && wasAutoLaunched) {
-        app.dock.hide();
-    }
 }
 
 function lowerCaseHeaders(responseHeaders: Record<string, string[]>) {

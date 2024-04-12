@@ -17,7 +17,6 @@ import path from "node:path";
 import {
     addAllowOriginHeader,
     createWindow,
-    handleDockIconHideOnAutoLaunch,
     handleDownloads,
     handleExternalLinks,
     setupMacWindowOnDockIconClick,
@@ -27,7 +26,9 @@ import { attachFSWatchIPCHandlers, attachIPCHandlers } from "./main/ipc";
 import log, { initLogging } from "./main/log";
 import { createApplicationMenu } from "./main/menu";
 import { setupAutoUpdater } from "./main/services/app-update";
+import autoLauncher from "./main/services/autoLauncher";
 import { initWatcher } from "./main/services/chokidar";
+import { userPreferences } from "./main/stores/user-preferences";
 import { isDev } from "./main/util";
 
 let appIsQuitting = false;
@@ -110,6 +111,15 @@ const increaseDiskCache = () => {
     );
 };
 
+const hideDockIconIfNeeded = async () => {
+    const shouldHideDockIcon = userPreferences.get("hideDockIcon");
+    const wasAutoLaunched = await autoLauncher.wasAutoLaunched();
+
+    if (process.platform == "darwin" && shouldHideDockIcon && wasAutoLaunched) {
+        app.dock.hide();
+    }
+};
+
 /**
  * Older versions of our app used to maintain a cache dir using the main
  * process. This has been deprecated in favor of using a normal web cache.
@@ -159,9 +169,8 @@ const main = () => {
     initLogging();
     setupRendererServer();
     logStartupBanner();
-    handleDockIconHideOnAutoLaunch();
+    hideDockIconIfNeeded();
     increaseDiskCache();
-    enableSharedArrayBufferSupport();
 
     app.on("second-instance", () => {
         // Someone tried to run a second instance, we should focus our window.
