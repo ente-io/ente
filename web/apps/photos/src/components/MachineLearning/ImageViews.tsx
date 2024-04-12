@@ -1,31 +1,20 @@
 import log from "@/next/log";
 import { cached } from "@ente/shared/storage/cache";
-import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
+import { getData, LS_KEYS } from "@ente/shared/storage/localStorage";
 import { User } from "@ente/shared/user/types";
-import { Skeleton, styled } from "@mui/material";
+import { Skeleton } from "@mui/material";
 import { useEffect, useState } from "react";
 import machineLearningService from "services/machineLearning/machineLearningService";
-import { imageBitmapToBlob } from "utils/image";
 
-export const FaceCropsRow = styled("div")`
-    & > img {
-        width: 256px;
-        height: 256px;
-    }
-`;
-
-export const FaceImagesRow = styled("div")`
-    & > img {
-        width: 112px;
-        height: 112px;
-    }
-`;
-
-export function ImageCacheView(props: {
+interface FaceCropImageViewProps {
     url: string;
-    cacheName: string;
     faceID: string;
-}) {
+}
+
+export const FaceCropImageView: React.FC<FaceCropImageViewProps> = ({
+    url,
+    faceID,
+}) => {
     const [imageBlob, setImageBlob] = useState<Blob>();
 
     useEffect(() => {
@@ -34,31 +23,27 @@ export function ImageCacheView(props: {
             try {
                 const user: User = getData(LS_KEYS.USER);
                 let blob: Blob;
-                if (!props.url || !props.cacheName || !user) {
+                if (!url || !user) {
                     blob = undefined;
                 } else {
-                    blob = await cached(
-                        props.cacheName,
-                        props.url,
-                        async () => {
-                            try {
-                                log.debug(
-                                    () =>
-                                        `ImageCacheView: regenerate face crop for ${props.faceID}`,
-                                );
-                                return machineLearningService.regenerateFaceCrop(
-                                    user.token,
-                                    user.id,
-                                    props.faceID,
-                                );
-                            } catch (e) {
-                                log.error(
-                                    "ImageCacheView: regenerate face crop failed",
-                                    e,
-                                );
-                            }
-                        },
-                    );
+                    blob = await cached("face-crops", url, async () => {
+                        try {
+                            log.debug(
+                                () =>
+                                    `ImageCacheView: regenerate face crop for ${faceID}`,
+                            );
+                            return machineLearningService.regenerateFaceCrop(
+                                user.token,
+                                user.id,
+                                faceID,
+                            );
+                        } catch (e) {
+                            log.error(
+                                "ImageCacheView: regenerate face crop failed",
+                                e,
+                            );
+                        }
+                    });
                 }
 
                 !didCancel && setImageBlob(blob);
@@ -70,40 +55,12 @@ export function ImageCacheView(props: {
         return () => {
             didCancel = true;
         };
-    }, [props.url, props.cacheName]);
+    }, [url, faceID]);
 
-    return (
-        <>
-            <ImageBlobView blob={imageBlob}></ImageBlobView>
-        </>
-    );
-}
+    return <ImageBlobView blob={imageBlob}></ImageBlobView>;
+};
 
-export function ImageBitmapView(props: { image: ImageBitmap }) {
-    const [imageBlob, setImageBlob] = useState<Blob>();
-
-    useEffect(() => {
-        let didCancel = false;
-
-        async function loadImage() {
-            const blob = props.image && (await imageBitmapToBlob(props.image));
-            !didCancel && setImageBlob(blob);
-        }
-
-        loadImage();
-        return () => {
-            didCancel = true;
-        };
-    }, [props.image]);
-
-    return (
-        <>
-            <ImageBlobView blob={imageBlob}></ImageBlobView>
-        </>
-    );
-}
-
-export function ImageBlobView(props: { blob: Blob }) {
+const ImageBlobView = (props: { blob: Blob }) => {
     const [imgUrl, setImgUrl] = useState<string>();
 
     useEffect(() => {
@@ -123,4 +80,4 @@ export function ImageBlobView(props: { blob: Blob }) {
     ) : (
         <Skeleton variant="circular" height={120} width={120} />
     );
-}
+};

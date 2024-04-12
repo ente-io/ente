@@ -10,7 +10,7 @@ import {
     getPeopleList,
     getUnidentifiedFaces,
 } from "utils/machineLearning";
-import { ImageCacheView } from "./ImageViews";
+import { FaceCropImageView } from "./ImageViews";
 
 const FaceChipContainer = styled("div")`
     display: flex;
@@ -62,9 +62,8 @@ export const PeopleList = React.memo((props: PeopleListProps) => {
                         props.onSelect && props.onSelect(person, index)
                     }
                 >
-                    <ImageCacheView
+                    <FaceCropImageView
                         url={person.displayImageUrl}
-                        cacheName="face-crops"
                         faceID={person.displayFaceId}
                     />
                 </FaceChip>
@@ -172,10 +171,9 @@ export function UnidentifiedFaces(props: {
                 {faces &&
                     faces.map((face, index) => (
                         <FaceChip key={index}>
-                            <ImageCacheView
+                            <FaceCropImageView
                                 faceID={face.id}
                                 url={face.crop?.imageUrl}
-                                cacheName="face-crops"
                             />
                         </FaceChip>
                     ))}
