@@ -510,7 +510,7 @@ class FaceMlService {
   /// Analyzes all the images in the database with the latest ml version and stores the results in the database.
   ///
   /// This function first checks if the image has already been analyzed with the lastest faceMlVersion and stored in the database. If so, it skips the image.
-  Future<void> indexAllImages({withFetching = true}) async {
+  Future<void> indexAllImages() async {
     if (isImageIndexRunning) {
       _logger.warning("indexAllImages is already running, skipping");
       return;
@@ -562,7 +562,7 @@ class FaceMlService {
         for (final f in chunk) {
           fileIds.add(f.uploadedFileID!);
         }
-        if (withFetching) {
+        if (LocalSettings.instance.remoteFetchEnabled) {
           try {
             final EnteWatch? w = kDebugMode ? EnteWatch("face_em_fetch") : null;
             w?.start();

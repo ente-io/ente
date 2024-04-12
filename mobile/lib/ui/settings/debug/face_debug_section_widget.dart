@@ -97,9 +97,9 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
             builder: (context, snapshot) {
               if (snapshot.hasData) {
                 return CaptionedTextWidget(
-                  title: LocalSettings.instance.isFaceIndexingEnabled
-                      ? "Disable indexing (no fetch) (${snapshot.data!.length})"
-                      : "Enable indexing (${snapshot.data!.length})",
+                  title: LocalSettings.instance.remoteFetchEnabled
+                      ? "Remote fetch Enabled"
+                      : "Remote fetch Disabled",
                 );
               }
               return const SizedBox.shrink();
@@ -110,15 +110,7 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
           trailingIconIsMuted: true,
           onTap: () async {
             try {
-              final isEnabled =
-                  await LocalSettings.instance.toggleFaceIndexing();
-              if (isEnabled) {
-                FaceMlService.instance
-                    .indexAllImages(withFetching: false)
-                    .ignore();
-              } else {
-                FaceMlService.instance.pauseIndexing();
-              }
+              await LocalSettings.instance.toggleRemoteFetch();
               if (mounted) {
                 setState(() {});
               }

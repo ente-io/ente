@@ -84,6 +84,14 @@ class LocalSettings {
     return isFaceIndexingEnabled;
   }
 
+  //#region todo:(NG) remove this section, only needed for internal testing to see
+  // if the OS stops the app during indexing
+  bool get remoteFetchEnabled => _prefs.getBool("remoteFetchEnabled") ?? false;
+  Future<void> toggleRemoteFetch() async {
+    await _prefs.setBool("remoteFetchEnabled", !remoteFetchEnabled);
+  }
+  //#endregion
+
   /// toggleFaceClustering toggles the face clustering setting and returns the new value
   Future<bool> toggleFaceClustering() async {
     await _prefs.setBool(kEnableFaceClustering, !isFaceClusteringEnabled);
