@@ -207,6 +207,10 @@ export const sidebar = [
                         text: "Verification code",
                         link: "/self-hosting/faq/otp",
                     },
+                    {
+                        text: "Shared albums",
+                        link: "/self-hosting/faq/sharing",
+                    },
                 ],
             },
             {
