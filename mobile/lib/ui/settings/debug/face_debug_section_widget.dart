@@ -65,7 +65,7 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
               if (snapshot.hasData) {
                 return CaptionedTextWidget(
                   title: LocalSettings.instance.isFaceIndexingEnabled
-                      ? "Disable Indexing (${snapshot.data!.length})"
+                      ? "Disable indexing (${snapshot.data!.length})"
                       : "Enable indexing (${snapshot.data!.length})",
                 );
               }
@@ -81,6 +81,43 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
                   await LocalSettings.instance.toggleFaceIndexing();
               if (isEnabled) {
                 FaceMlService.instance.indexAllImages().ignore();
+              } else {
+                FaceMlService.instance.pauseIndexing();
+              }
+              if (mounted) {
+                setState(() {});
+              }
+            } catch (e, s) {
+              _logger.warning('indexing failed ', e, s);
+              await showGenericErrorDialog(context: context, error: e);
+            }
+          },
+        ),
+        MenuItemWidget(
+          captionedTextWidget: FutureBuilder<Map<int, int>>(
+            future: FaceMLDataDB.instance.getIndexedFileIds(),
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                return CaptionedTextWidget(
+                  title: LocalSettings.instance.isFaceIndexingEnabled
+                      ? "Disable indexing (no fetch) (${snapshot.data!.length})"
+                      : "Enable indexing (${snapshot.data!.length})",
+                );
+              }
+              return const SizedBox.shrink();
+            },
+          ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async {
+            try {
+              final isEnabled =
+                  await LocalSettings.instance.toggleFaceIndexing();
+              if (isEnabled) {
+                FaceMlService.instance
+                    .indexAllImages(withFetching: false)
+                    .ignore();
               } else {
                 FaceMlService.instance.pauseIndexing();
               }

@@ -514,7 +514,7 @@ class FaceMlService {
   /// Analyzes all the images in the database with the latest ml version and stores the results in the database.
   ///
   /// This function first checks if the image has already been analyzed with the lastest faceMlVersion and stored in the database. If so, it skips the image.
-  Future<void> indexAllImages() async {
+  Future<void> indexAllImages({withFetching = true}) async {
     if (isImageIndexRunning) {
       _logger.warning("indexAllImages is already running, skipping");
       return;
@@ -566,44 +566,48 @@ class FaceMlService {
         for (final f in chunk) {
           fileIds.add(f.uploadedFileID!);
         }
-        try {
-          final EnteWatch? w = kDebugMode ? EnteWatch("face_em_fetch") : null;
-          w?.start();
-          w?.log('starting remote fetch for ${fileIds.length} files');
-          final res =
-              await RemoteFileMLService.instance.getFilessEmbedding(fileIds);
-          w?.logAndReset('fetched ${res.mlData.length} embeddings');
-          final List<Face> faces = [];
-          final remoteFileIdToVersion = <int, int>{};
-          for (FileMl fileMl in res.mlData.values) {
-            if (shouldDiscardRemoteEmbedding(fileMl)) continue;
-            if (fileMl.faceEmbedding.faces.isEmpty) {
-              faces.add(
-                Face.empty(
-                  fileMl.fileID,
-                  error: (fileMl.faceEmbedding.error ?? false),
-                ),
-              );
-            } else {
-              for (final f in fileMl.faceEmbedding.faces) {
-                f.fileInfo = FileInfo(
-                  imageHeight: fileMl.height,
-                  imageWidth: fileMl.width,
+        if (withFetching) {
+          try {
+            final EnteWatch? w = kDebugMode ? EnteWatch("face_em_fetch") : null;
+            w?.start();
+            w?.log('starting remote fetch for ${fileIds.length} files');
+            final res =
+                await RemoteFileMLService.instance.getFilessEmbedding(fileIds);
+            w?.logAndReset('fetched ${res.mlData.length} embeddings');
+            final List<Face> faces = [];
+            final remoteFileIdToVersion = <int, int>{};
+            for (FileMl fileMl in res.mlData.values) {
+              if (shouldDiscardRemoteEmbedding(fileMl)) continue;
+              if (fileMl.faceEmbedding.faces.isEmpty) {
+                faces.add(
+                  Face.empty(
+                    fileMl.fileID,
+                    error: (fileMl.faceEmbedding.error ?? false),
+                  ),
                 );
-                faces.add(f);
+              } else {
+                for (final f in fileMl.faceEmbedding.faces) {
+                  f.fileInfo = FileInfo(
+                    imageHeight: fileMl.height,
+                    imageWidth: fileMl.width,
+                  );
+                  faces.add(f);
+                }
               }
+              remoteFileIdToVersion[fileMl.fileID] =
+                  fileMl.faceEmbedding.version;
             }
-            remoteFileIdToVersion[fileMl.fileID] = fileMl.faceEmbedding.version;
+            await FaceMLDataDB.instance.bulkInsertFaces(faces);
+            w?.logAndReset('stored embeddings');
+            for (final entry in remoteFileIdToVersion.entries) {
+              alreadyIndexedFiles[entry.key] = entry.value;
+            }
+            _logger
+                .info('already indexed files ${remoteFileIdToVersion.length}');
+          } catch (e, s) {
+            _logger.severe("err while getting files embeddings", e, s);
+            rethrow;
           }
-          await FaceMLDataDB.instance.bulkInsertFaces(faces);
-          w?.logAndReset('stored embeddings');
-          for (final entry in remoteFileIdToVersion.entries) {
-            alreadyIndexedFiles[entry.key] = entry.value;
-          }
-          _logger.info('already indexed files ${remoteFileIdToVersion.length}');
-        } catch (e, s) {
-          _logger.severe("err while getting files embeddings", e, s);
-          rethrow;
         }
 
         for (final enteFile in chunk) {
