@@ -77,7 +77,7 @@ export interface EnteCache {
  * across namespaces.
  */
 export const openCache = async (name: CacheName) =>
-    globalThis.electron ? openWebCache(name) : openOPFSCacheWeb(name);
+    globalThis.electron ? openOPFSCacheWeb(name) : openWebCache(name);
 
 /** An implementation of {@link EnteCache} using Web Cache APIs */
 const openWebCache = async (name: CacheName) => {
