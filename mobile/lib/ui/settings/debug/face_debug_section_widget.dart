@@ -7,7 +7,6 @@ import "package:photos/core/event_bus.dart";
 import "package:photos/events/people_changed_event.dart";
 import "package:photos/face/db.dart";
 import "package:photos/face/model/person.dart";
-import "package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart";
 import 'package:photos/services/machine_learning/face_ml/face_ml_service.dart';
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import 'package:photos/theme/ente_theme.dart';
@@ -129,31 +128,31 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
             }
           },
         ),
-        MenuItemWidget(
-          captionedTextWidget: FutureBuilder<int>(
-            future: FaceMLDataDB.instance.getTotalFaceCount(),
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                return CaptionedTextWidget(
-                  title: "${snapshot.data!} high quality faces",
-                );
-              }
-              return const SizedBox.shrink();
-            },
-          ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
-          trailingIcon: Icons.chevron_right_outlined,
-          trailingIconIsMuted: true,
-          onTap: () async {
-            final faces75 = await FaceMLDataDB.instance
-                .getTotalFaceCount(minFaceScore: 0.75);
-            final faces78 = await FaceMLDataDB.instance
-                .getTotalFaceCount(minFaceScore: kMinHighQualityFaceScore);
-            final blurryFaceCount =
-                await FaceMLDataDB.instance.getBlurryFaceCount(15);
-            showShortToast(context, "$blurryFaceCount blurry faces");
-          },
-        ),
+        // MenuItemWidget(
+        //   captionedTextWidget: FutureBuilder<int>(
+        //     future: FaceMLDataDB.instance.getTotalFaceCount(),
+        //     builder: (context, snapshot) {
+        //       if (snapshot.hasData) {
+        //         return CaptionedTextWidget(
+        //           title: "${snapshot.data!} high quality faces",
+        //         );
+        //       }
+        //       return const SizedBox.shrink();
+        //     },
+        //   ),
+        //   pressedColor: getEnteColorScheme(context).fillFaint,
+        //   trailingIcon: Icons.chevron_right_outlined,
+        //   trailingIconIsMuted: true,
+        //   onTap: () async {
+        //     final faces75 = await FaceMLDataDB.instance
+        //         .getTotalFaceCount(minFaceScore: 0.75);
+        //     final faces78 = await FaceMLDataDB.instance
+        //         .getTotalFaceCount(minFaceScore: kMinHighQualityFaceScore);
+        //     final blurryFaceCount =
+        //         await FaceMLDataDB.instance.getBlurryFaceCount(15);
+        //     showShortToast(context, "$blurryFaceCount blurry faces");
+        //   },
+        // ),
         // MenuItemWidget(
         //   captionedTextWidget: const CaptionedTextWidget(
         //     title: "Analyze file ID 25728869",
