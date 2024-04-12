@@ -14,9 +14,9 @@ PODS:
     - FirebaseCore (= 10.18.0)
   - Firebase/Messaging (10.18.0):
     - Firebase/CoreOnly
-    - FirebaseMessaging (~> 10.18.0)
-  - firebase_core (2.24.2):
-    - Firebase/CoreOnly (= 10.18.0)
+    - FirebaseMessaging (~> 10.22.0)
+  - firebase_core (2.29.0):
+    - Firebase/CoreOnly (= 10.22.0)
     - Flutter
   - firebase_messaging (14.7.10):
     - Firebase/Messaging (= 10.18.0)
@@ -388,19 +388,19 @@ SPEC CHECKSUMS:
   connectivity_plus: 53efb943fc2882c8512d84c45707bcabc4c36076
   device_info_plus: c6fb39579d0f423935b0c9ce7ee2f44b71b9fce6
   file_saver: 503e386464dbe118f630e17b4c2e1190fa0cf808
-  Firebase: 414ad272f8d02dfbf12662a9d43f4bba9bec2a06
-  firebase_core: 0af4a2b24f62071f9bf283691c0ee41556dcb3f5
-  firebase_messaging: 90e8a6db84b6e1e876cebce4f30f01dc495e7014
-  FirebaseCore: 2322423314d92f946219c8791674d2f3345b598f
-  FirebaseCoreInternal: 43c1788eaeee9d1b97caaa751af567ce11010d00
-  FirebaseInstallations: 390ea1d10a4d02b20c965cbfd527ee9b3b412acb
-  FirebaseMessaging: 9bc34a98d2e0237e1b121915120d4d48ddcf301e
+  Firebase: 797fd7297b7e1be954432743a0b3f90038e45a71
+  firebase_core: aaadbddb3cb2ee3792b9804f9dbb63e5f6f7b55c
+  firebase_messaging: e65050bf9b187511d80ea3a4de7cf5573d2c7543
+  FirebaseCore: 0326ec9b05fbed8f8716cddbf0e36894a13837f7
+  FirebaseCoreInternal: bcb5acffd4ea05e12a783ecf835f2210ce3dc6af
+  FirebaseInstallations: 8f581fca6478a50705d2bd2abd66d306e0f5736e
+  FirebaseMessaging: 9f71037fd9db3376a4caa54e5a3949d1027b4b6e
   fk_user_agent: 1f47ec39291e8372b1d692b50084b0d54103c545
   Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
   flutter_email_sender: 02d7443217d8c41483223627972bfdc09f74276b
   flutter_image_compress: 5a5e9aee05b6553048b8df1c3bc456d0afaac433
   flutter_inappwebview: 3d32228f1304635e7c028b0d4252937730bbc6cf
-  flutter_local_notifications: 0c0b1ae97e741e1521e4c1629a459d04b9aec743
+  flutter_local_notifications: 4cde75091f6327eb8517fa068a0a5950212d2086
   flutter_native_splash: 52501b97d1c0a5f898d687f1646226c1f93c56ef
   flutter_secure_storage: 23fc622d89d073675f2eaa109381aefbcf5a49be
   flutter_sodium: c84426b4de738514b5b66cfdeb8a06634e72fe0b
@@ -436,10 +436,10 @@ SPEC CHECKSUMS:
   screen_brightness_ios: 715ca807df953bf676d339f11464e438143ee625
   SDWebImage: a3ba0b8faac7228c3c8eadd1a55c9c9fe5e16457
   SDWebImageWebPCoder: c94f09adbca681822edad9e532ac752db713eabf
-  Sentry: 8984a4ffb2b9bd2894d74fb36e6f5833865bc18e
-  sentry_flutter: c87a0556eeb6cbf7f9f924d30e878bdedf22d364
-  SentryPrivate: 2f0c9ba4c3fc993f70eab6ca95673509561e0085
-  share_plus: 056a1e8ac890df3e33cb503afffaf1e9b4fbae68
+  Sentry: ebc12276bd17613a114ab359074096b6b3725203
+  sentry_flutter: 88ebea3f595b0bc16acc5bedacafe6d60c12dcd5
+  SentryPrivate: d651efb234cf385ec9a1cdd3eff94b5e78a0e0fe
+  share_plus: 8875f4f2500512ea181eef553c3e27dba5135aad
   shared_preferences_foundation: b4c3b4cddf1c21f02770737f147a3f5da9d39695
   sqflite: 673a0e54cc04b7d6dba8d24fb8095b31c3a99eec
   sqlite3: 73b7fc691fdc43277614250e04d183740cb15078
