@@ -125,8 +125,8 @@ class FaceMLDataDB {
 
   /// Returns a map of fileID to the indexed ML version
   Future<Map<int, int>> getIndexedFileIds() async {
-    final db = await instance.database;
-    final List<Map<String, dynamic>> maps = await db.rawQuery(
+    final db = await instance.sqliteAsyncDB;
+    final List<Map<String, dynamic>> maps = await db.getAll(
       'SELECT $fileIDColumn, $mlVersionColumn FROM $facesTable',
     );
     final Map<int, int> result = {};
