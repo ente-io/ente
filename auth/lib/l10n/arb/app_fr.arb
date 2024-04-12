@@ -1,5 +1,6 @@
 {
   "account": "Compte",
+  "unlock": "Déverrouiller",
   "recoveryKey": "Clé de récupération",
   "counterAppBarTitle": "Compteur",
   "@counterAppBarTitle": {
@@ -77,15 +78,17 @@
   "data": "Données",
   "importCodes": "Importer les codes",
   "importTypePlainText": "Texte brut",
-  "importTypeEnteEncrypted": "ente Exportation chiffrée",
   "passwordForDecryptingExport": "Mot de passe pour déchiffrer l'exportation",
   "passwordEmptyError": "Le mot de passe ne peut pas être vide",
   "importFromApp": "Importer des codes depuis {appName}",
   "importGoogleAuthGuide": "Exportez vos comptes depuis Google Authenticator vers un code QR en utilisant l'option \"Transférer des comptes\". Ensuite, en utilisant un autre appareil, scannez le code QR.\n\nAstuce : Vous pouvez utiliser la webcam de votre ordinateur portable pour prendre une photo du code QR.",
   "importSelectJsonFile": "Sélectionnez un fichier JSON",
-  "importEnteEncGuide": "Sélectionnez le fichier JSON chiffré exporté à partir de ente",
+  "importSelectAppExport": "Sélectionnez le fichier d'exportation {appName}",
   "importRaivoGuide": "Utilisez l'option \"Exporter les OTPs vers l'archive Zip\" dans les paramètres de Raivo.\n\nExtrayez le fichier zip et importez le fichier JSON.",
+  "importBitwardenGuide": "Utilisez l'option « Exporter le coffre » dans les outils Bitwarden et importez le fichier JSON non chiffré.",
   "importAegisGuide": "Utilisez l'option \"Exporter le coffre-fort\" dans les paramètres d'Aegis.\n\nSi votre coffre-fort est crypté, vous devrez saisir le mot de passe du coffre-fort pour déchiffrer le coffre-fort.",
+  "import2FasGuide": "Utilisez l'option \"Paramètres->Sauvegarde -Export\" dans 2FAS.\n\nSi votre sauvegarde est chiffrée, vous devrez entrer le mot de passe pour déchiffrer la sauvegarde",
+  "importLastpassGuide": "Utilisez l'option \"Transférer des comptes\" dans les paramètres de l'authentificateur Lastpass et appuyez sur \"Exporter des comptes vers un fichier\". Importez le JSON téléchargé.",
   "exportCodes": "Exporter les codes",
   "importLabel": "Importer",
   "importInstruction": "Veuillez sélectionner un fichier qui contient une liste de vos codes dans le format suivant",
@@ -97,6 +100,8 @@
   "authToViewYourRecoveryKey": "Veuillez vous authentifier pour afficher votre clé de récupération",
   "authToChangeYourEmail": "Veuillez vous authentifier pour modifier votre adresse e-mail",
   "authToChangeYourPassword": "Veuillez vous authentifier pour modifier votre mot de passe",
+  "authToViewSecrets": "Veuillez vous authentifier pour voir vos souvenirs",
+  "authToInitiateSignIn": "Veuillez vous authentifier pour ouvrir une session de sauvegarde.",
   "ok": "Ok",
   "cancel": "Annuler",
   "yes": "Oui",
@@ -108,22 +113,18 @@
   "copied": "Copié",
   "pleaseTryAgain": "Veuillez réessayer",
   "existingUser": "Utilisateur existant",
-  "newUser": "Nouveau sur ente",
   "delete": "Supprimer",
   "enterYourPasswordHint": "Saisir votre mot de passe",
   "forgotPassword": "Mot de passe oublié",
   "oops": "Oups",
   "suggestFeatures": "Suggérer des fonctionnalités",
   "faq": "FAQ",
-  "faq_q_1": "À quel point ente Auth est-il sécurisé ?",
-  "faq_a_1": "Tous les codes que vous sauvegardez via ente sont chiffrés de bout en bout. Cela signifie que vous seul pouvez accéder à vos codes. Nos applications sont open source et notre cryptographie a fait l'objet d'un audit externe.",
   "faq_q_2": "Puis-je accéder à mes codes sur mon ordinateur ?",
   "faq_a_2": "Vous pouvez accéder à vos codes sur le web via auth.ente.io.",
   "faq_q_3": "Comment puis-je supprimer des codes ?",
   "faq_a_3": "Vous pouvez supprimer un code en glissant vers la gauche.",
   "faq_q_4": "Comment puis-je soutenir le projet ?",
   "faq_a_4": "Vous pouvez soutenir le développement de ce projet en vous abonnant à notre application Photos, ente.io.",
-  "faq_q_5": "Comment puis-je activer le verrouillage FaceID sur ente Auth",
   "faq_a_5": "Vous pouvez activer le verrouillage FaceID dans Paramètres → Sécurité → Écran de verrouillage.",
   "somethingWentWrongMessage": "Quelque chose s'est mal passé, veuillez recommencer",
   "leaveFamily": "Quitter le plan familial",
@@ -137,6 +138,8 @@
   "enterCodeHint": "Saisir le code à 6 caractères de votre appli d'authentification",
   "lostDeviceTitle": "Appareil perdu ?",
   "twoFactorAuthTitle": "Authentification à deux facteurs",
+  "passkeyAuthTitle": "Vérification du code d'accès",
+  "verifyPasskey": "Vérifier le code d'accès",
   "recoverAccount": "Récupérer un compte",
   "enterRecoveryKeyHint": "Saisissez votre clé de récupération",
   "recover": "Restaurer",
@@ -190,6 +193,10 @@
   "recoveryKeySaveDescription": "Nous ne stockons pas cette clé, veuillez enregistrer cette clé de 24 mots dans un endroit sûr.",
   "doThisLater": "Plus tard",
   "saveKey": "Enregistrer la clé",
+  "save": "Sauvegarder",
+  "send": "Envoyer",
+  "saveOrSendDescription": "Voulez-vous enregistrer ceci sur votre stockage (dossier Téléchargements par défaut) ou l'envoyer à d'autres applications ?",
+  "saveOnlyDescription": "Voulez-vous enregistrer ceci sur votre stockage (dossier Téléchargements par défaut) ?",
   "back": "Retour",
   "createAccount": "Créer un compte",
   "passwordStrength": "Force du mot de passe : {passwordStrengthValue}",
@@ -329,6 +336,7 @@
   "offlineModeWarning": "Vous avez choisi de procéder sans sauvegarde. Veuillez prendre des sauvegardes manuelles pour vous assurer que vos codes sont sûrs.",
   "showLargeIcons": "Afficher les grandes icônes",
   "shouldHideCode": "Cacher les codes",
+  "doubleTapToViewHiddenCode": "Vous pouvez appuyer deux fois sur une entrée pour afficher le code",
   "focusOnSearchBar": "Cibler le champ de recherche au démarrage de l'application",
   "confirmUpdatingkey": "Êtes-vous sûr de vouloir mettre à jour la clé secrète ?",
   "minimizeAppOnCopy": "Réduire l'application après la copie",
@@ -336,5 +344,75 @@
   "deleteCodeAuthMessage": "Authentification requise pour supprimer le code",
   "showQRAuthMessage": "Authentification requise pour afficher le code QR",
   "confirmAccountDeleteTitle": "Confirmer la suppression du compte",
-  "confirmAccountDeleteMessage": "Ce compte peut être lié à d'autres applications ente.\n\nVos données seront bientôt effacées de toutes les applications et votre compte sera définitivement supprimé."
+  "androidBiometricHint": "Vérifier l’identité",
+  "@androidBiometricHint": {
+    "description": "Hint message advising the user how to authenticate with biometrics. It is used on Android side. Maximum 60 characters."
+  },
+  "androidBiometricNotRecognized": "Non reconnu. Veuillez réessayer.",
+  "@androidBiometricNotRecognized": {
+    "description": "Message to let the user know that authentication was failed. It is used on Android side. Maximum 60 characters."
+  },
+  "androidBiometricSuccess": "Parfait",
+  "@androidBiometricSuccess": {
+    "description": "Message to let the user know that authentication was successful. It is used on Android side. Maximum 60 characters."
+  },
+  "androidCancelButton": "Annuler",
+  "@androidCancelButton": {
+    "description": "Message showed on a button that the user can click to leave the current dialog. It is used on Android side. Maximum 30 characters."
+  },
+  "androidSignInTitle": "Authentification requise",
+  "@androidSignInTitle": {
+    "description": "Message showed as a title in a dialog which indicates the user that they need to scan biometric to continue. It is used on Android side. Maximum 60 characters."
+  },
+  "androidBiometricRequiredTitle": "Empreinte digitale requise",
+  "@androidBiometricRequiredTitle": {
+    "description": "Message showed as a title in a dialog which indicates the user has not set up biometric authentication on their device. It is used on Android side. Maximum 60 characters."
+  },
+  "androidDeviceCredentialsRequiredTitle": "Identifiants de l'appareil requis",
+  "@androidDeviceCredentialsRequiredTitle": {
+    "description": "Message showed as a title in a dialog which indicates the user has not set up credentials authentication on their device. It is used on Android side. Maximum 60 characters."
+  },
+  "androidDeviceCredentialsSetupDescription": "Identifiants de l'appareil requis",
+  "@androidDeviceCredentialsSetupDescription": {
+    "description": "Message advising the user to go to the settings and configure device credentials on their device. It shows in a dialog on Android side."
+  },
+  "goToSettings": "Allez dans les paramètres",
+  "@goToSettings": {
+    "description": "Message showed on a button that the user can click to go to settings pages from the current dialog. It is used on both Android and iOS side. Maximum 30 characters."
+  },
+  "androidGoToSettingsDescription": "L'authentification biométrique n'est pas configurée sur votre appareil. Allez dans 'Paramètres > Sécurité' pour l'ajouter.",
+  "@androidGoToSettingsDescription": {
+    "description": "Message advising the user to go to the settings and configure biometric on their device. It shows in a dialog on Android side."
+  },
+  "iOSLockOut": "L'authentification biométrique est désactivée. Veuillez verrouiller et déverrouiller votre écran pour l'activer.",
+  "@iOSLockOut": {
+    "description": "Message advising the user to re-enable biometrics on their device. It shows in a dialog on iOS side."
+  },
+  "iOSGoToSettingsDescription": "L'authentification biométrique n'est pas configurée sur votre appareil. Veuillez activer Touch ID ou Face ID sur votre téléphone.",
+  "@iOSGoToSettingsDescription": {
+    "description": "Message advising the user to go to the settings and configure Biometrics for their device. It shows in a dialog on iOS side."
+  },
+  "iOSOkButton": "Ok",
+  "@iOSOkButton": {
+    "description": "Message showed on a button that the user can click to leave the current dialog. It is used on iOS side. Maximum 30 characters."
+  },
+  "noInternetConnection": "Aucune connexion internet",
+  "pleaseCheckYourInternetConnectionAndTryAgain": "Veuillez vérifier votre connexion internet puis réessayer.",
+  "signOutFromOtherDevices": "Déconnexion des autres appareils",
+  "signOutOtherBody": "Si vous pensez que quelqu'un connaît peut-être votre mot de passe, vous pouvez forcer tous les autres appareils utilisant votre compte à se déconnecter.",
+  "signOutOtherDevices": "Déconnecter les autres appareils",
+  "doNotSignOut": "Ne pas se déconnecter",
+  "hearUsWhereTitle": "Comment avez-vous entendu parler de Ente? (facultatif)",
+  "hearUsExplanation": "Nous ne suivons pas les installations d'applications. Il serait utile que vous nous disiez comment vous nous avez trouvés !",
+  "recoveryKeySaved": "Clé de récupération enregistrée dans le dossier Téléchargements !",
+  "waitingForBrowserRequest": "En attente de la requête du navigateur...",
+  "waitingForVerification": "En attente de vérification...",
+  "passkey": "Code d'accès",
+  "developerSettingsWarning": "Êtes-vous sûr de vouloir modifier les paramètres du développeur ?",
+  "developerSettings": "Paramètres du développeur",
+  "serverEndpoint": "Point de terminaison serveur",
+  "invalidEndpoint": "Point de terminaison non valide",
+  "invalidEndpointMessage": "Désolé, le point de terminaison que vous avez entré n'est pas valide. Veuillez en entrer un valide puis réessayez.",
+  "endpointUpdatedMessage": "Point de terminaison mis à jour avec succès",
+  "customEndpoint": "Connecté à {endpoint}"
 }
