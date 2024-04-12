@@ -5,10 +5,7 @@ import { isAppQuitting, rendererURL } from "../main";
 import log from "./log";
 import { createTrayContextMenu } from "./menu";
 import autoLauncher from "./services/autoLauncher";
-import { getHideDockIconPreference } from "./services/userPreference";
 import { isDev } from "./util";
-
-
 
 /**
  * Create an return the {@link BrowserWindow} that will form our app's UI.

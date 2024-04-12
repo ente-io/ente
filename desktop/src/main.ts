@@ -69,9 +69,7 @@ export const rendererURL = "next://app";
  * For more details, see this comparison:
  * https://github.com/HaNdTriX/next-electron-server/issues/5
  */
-const setupRendererServer = () => {
-    serveNextAt(rendererURL);
-};
+const setupRendererServer = () => serveNextAt(rendererURL);
 
 /**
  * Log a standard startup banner.
@@ -111,13 +109,16 @@ const increaseDiskCache = () => {
     );
 };
 
+/**
+ * Hide the dock icon on macOS if the user wants it hidden and we were
+ * auto-launched on login.
+ */
 const hideDockIconIfNeeded = async () => {
+    if (process.platform != "darwin") return;
+
     const shouldHideDockIcon = userPreferences.get("hideDockIcon");
     const wasAutoLaunched = await autoLauncher.wasAutoLaunched();
-
-    if (process.platform == "darwin" && shouldHideDockIcon && wasAutoLaunched) {
-        app.dock.hide();
-    }
+    if (shouldHideDockIcon && wasAutoLaunched) app.dock.hide();
 };
 
 /**
@@ -176,9 +177,7 @@ const main = () => {
         // Someone tried to run a second instance, we should focus our window.
         if (mainWindow) {
             mainWindow.show();
-            if (mainWindow.isMinimized()) {
-                mainWindow.restore();
-            }
+            if (mainWindow.isMinimized()) mainWindow.restore();
             mainWindow.focus();
         }
     });
