@@ -6,10 +6,7 @@ export enum CACHES {
 }
 
 interface LimitedCacheStorage {
-    open: (
-        cacheName: string,
-        cacheLimitInBytes?: number,
-    ) => Promise<LimitedCache>;
+    open: (cacheName: string) => Promise<LimitedCache>;
     delete: (cacheName: string) => Promise<boolean>;
 }
 
@@ -43,11 +40,8 @@ class cacheStorageFactory {
 
 export const CacheStorageFactory = new cacheStorageFactory();
 
-async function openCache(cacheName: string, cacheLimit?: number) {
-    return await CacheStorageFactory.getCacheStorage().open(
-        cacheName,
-        cacheLimit,
-    );
+async function openCache(cacheName: string) {
+    return await CacheStorageFactory.getCacheStorage().open(cacheName);
 }
 async function deleteCache(cacheName: string) {
     return await CacheStorageFactory.getCacheStorage().delete(cacheName);
