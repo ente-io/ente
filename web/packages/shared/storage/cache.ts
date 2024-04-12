@@ -7,7 +7,6 @@ export enum CACHES {
 
 interface LimitedCacheStorage {
     open: (cacheName: string) => Promise<LimitedCache>;
-    delete: (cacheName: string) => Promise<boolean>;
 }
 
 export interface LimitedCache {
@@ -33,7 +32,6 @@ class cacheStorageFactory {
                     delete: cache.delete.bind(cache),
                 };
             },
-            delete: caches.delete.bind(caches),
         };
     }
 }
@@ -43,11 +41,8 @@ export const CacheStorageFactory = new cacheStorageFactory();
 async function openCache(cacheName: string) {
     return await CacheStorageFactory.getCacheStorage().open(cacheName);
 }
-async function deleteCache(cacheName: string) {
-    return await CacheStorageFactory.getCacheStorage().delete(cacheName);
-}
 
-export const CacheStorageService = { open: openCache, delete: deleteCache };
+export const CacheStorageService = { open: openCache };
 
 export async function cached(
     cacheName: string,
@@ -80,7 +75,9 @@ export async function cached(
  * Meant for use during logout, to reset the state of the user's account.
  */
 export const clearCaches = async () => {
-    await CacheStorageService.delete(CACHES.THUMBS);
-    await CacheStorageService.delete(CACHES.FACE_CROPS);
-    await CacheStorageService.delete(CACHES.FILES);
+    await Promise.all([
+        caches.delete(CACHES.THUMBS),
+        caches.delete(CACHES.FACE_CROPS),
+        caches.delete(CACHES.FILES),
+    ]);
 };
