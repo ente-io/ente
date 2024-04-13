@@ -1385,7 +1385,6 @@ export async function moveToHiddenCollection(files: EnteFile[]) {
             hiddenCollection = await createHiddenCollection();
         }
         const groupiedFiles = groupFilesBasedOnCollectionID(files);
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         for (const [collectionID, files] of groupiedFiles.entries()) {
             if (collectionID === hiddenCollection.id) {
                 continue;
@@ -1404,7 +1403,6 @@ export async function unhideToCollection(
 ) {
     try {
         const groupiedFiles = groupFilesBasedOnCollectionID(files);
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         for (const [collectionID, files] of groupiedFiles.entries()) {
             if (collectionID === collection.id) {
                 continue;
