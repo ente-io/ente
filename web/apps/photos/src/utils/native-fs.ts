@@ -27,7 +27,7 @@ export const sanitizeFilename = (s: string) =>
  * requires permissionless access to the native filesystem to find a new
  * filename that doesn't conflict with any existing items).
  *
- * See also: {@link santizedUniqueFileName}
+ * See also: {@link safeDirectoryName}
  */
 export const safeDirectoryName = async (
     directoryPath: string,
