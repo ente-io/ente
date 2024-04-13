@@ -104,10 +104,12 @@ class FaceClustering {
             final fileIDToCreationTime =
                 args['fileIDToCreationTime'] as Map<int, int>?;
             final distanceThreshold = args['distanceThreshold'] as double;
+            final offset = args['offset'] as int?;
             final result = FaceClustering._runLinearClustering(
               input,
               fileIDToCreationTime: fileIDToCreationTime,
               distanceThreshold: distanceThreshold,
+              offset: offset,
             );
             sendPort.send(result);
             break;
@@ -201,6 +203,7 @@ class FaceClustering {
     Map<String, (int?, Uint8List)> input, {
     Map<int, int>? fileIDToCreationTime,
     double distanceThreshold = kRecommendedDistanceThreshold,
+    int? offset,
   }) async {
     if (input.isEmpty) {
       _logger.warning(
@@ -229,6 +232,7 @@ class FaceClustering {
             'input': input,
             'fileIDToCreationTime': fileIDToCreationTime,
             'distanceThreshold': distanceThreshold,
+            'offset': offset,
           }
         ),
       );
@@ -299,6 +303,7 @@ class FaceClustering {
     Map<String, (int?, Uint8List)> x, {
     Map<int, int>? fileIDToCreationTime,
     double distanceThreshold = kRecommendedDistanceThreshold,
+    int? offset,
   }) {
     log(
       "[ClusterIsolate] ${DateTime.now()} Copied to isolate ${x.length} faces",
@@ -363,7 +368,7 @@ class FaceClustering {
 
     // Start actual clustering
     log(
-      "[ClusterIsolate] ${DateTime.now()} Processing $totalFaces faces",
+      "[ClusterIsolate] ${DateTime.now()} Processing $totalFaces faces in total in this round ${offset != null ? "on top of ${offset + facesWithClusterID.length} earlier processed faces" : ""}",
     );
     // set current epoch time as clusterID
     int clusterID = DateTime.now().microsecondsSinceEpoch;
@@ -384,7 +389,7 @@ class FaceClustering {
       int closestIdx = -1;
       double closestDistance = double.infinity;
       if (i % 250 == 0) {
-        log("[ClusterIsolate] ${DateTime.now()} Processing $i faces");
+        log("[ClusterIsolate] ${DateTime.now()} Processed ${offset != null ? i + offset : i} faces");
       }
       for (int j = i - 1; j >= 0; j--) {
         late double distance;

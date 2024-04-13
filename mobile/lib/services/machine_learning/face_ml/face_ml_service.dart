@@ -380,6 +380,7 @@ class FaceMlService {
         const int batchSize = 20000;
         const int offsetIncrement = 7500;
         int offset = 0;
+        int bucket = 1;
 
         while (true) {
           final faceIdToEmbeddingBucket =
@@ -402,6 +403,7 @@ class FaceMlService {
           final faceIdToCluster = await FaceClustering.instance.predictLinear(
             faceIdToEmbeddingBucket,
             fileIDToCreationTime: fileIDToCreationTime,
+            offset: offset,
           );
           if (faceIdToCluster == null) {
             _logger.warning("faceIdToCluster is null");
@@ -409,7 +411,11 @@ class FaceMlService {
           }
 
           await FaceMLDataDB.instance.updateClusterIdToFaceId(faceIdToCluster);
+          _logger.info(
+            'Done with clustering ${offset + faceIdToEmbeddingBucket.length} embeddings (${(100 * (offset + faceIdToEmbeddingBucket.length) / totalFaces).toStringAsFixed(0)}%) in bucket $bucket, offset: $offset',
+          );
           offset += offsetIncrement;
+          bucket++;
         }
       } else {
         final int totalFaces = await FaceMLDataDB.instance
