@@ -91,39 +91,38 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
     unawaited(HomeWidgetService.instance.initHomeWidget());
 
     final thumbnail = await CollectionsService.instance.getCover(collection);
-    unawaited(
-      () async {
-        await routeToPage(
-          context,
-          CollectionPage(
-            CollectionWithThumbnail(
-              collection,
-              thumbnail,
-            ),
-          ),
-        );
 
-        final previousGeneratedId =
-            await hw.HomeWidget.getWidgetData<int>("home_widget_last_img");
-        if (previousGeneratedId == null) return;
+    final previousGeneratedId =
+        await hw.HomeWidget.getWidgetData<int>("home_widget_last_img");
+    final res = previousGeneratedId != null
+        ? await FilesDB.instance.getFile(
+            previousGeneratedId,
+          )
+        : null;
 
-        final res = await FilesDB.instance.getFile(
-          previousGeneratedId,
-        );
+    routeToPage(
+      context,
+      CollectionPage(
+        CollectionWithThumbnail(
+          collection,
+          thumbnail,
+        ),
+      ),
+    ).ignore();
 
-        if (res == null) return;
+    if (previousGeneratedId == null) return;
 
-        final page = DetailPage(
-          DetailPageConfiguration(
-            List.unmodifiable([res]),
-            null,
-            0,
-            "collection",
-          ),
-        );
-        await routeToPage(context, page, forceCustomPageRoute: true);
-      }(),
+    if (res == null) return;
+
+    final page = DetailPage(
+      DetailPageConfiguration(
+        List.unmodifiable([res]),
+        null,
+        0,
+        "collection",
+      ),
     );
+    routeToPage(context, page, forceCustomPageRoute: true).ignore();
   }
 
   setLocale(Locale newLocale) {
