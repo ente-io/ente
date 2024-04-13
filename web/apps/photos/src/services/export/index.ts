@@ -483,11 +483,7 @@ class ExportService {
                     await this.verifyExportFolderExists(exportFolder);
                     const oldCollectionExportName =
                         collectionIDExportNameMap.get(collection.id);
-                    const oldCollectionExportPath = getCollectionExportPath(
-                        exportFolder,
-                        oldCollectionExportName,
-                    );
-
+                    const oldCollectionExportPath = `${exportFolder}/${oldCollectionExportName}`;
                     const newCollectionExportName =
                         await getUniqueCollectionExportName(
                             exportFolder,
@@ -496,11 +492,7 @@ class ExportService {
                     log.info(
                         `renaming collection with id ${collection.id} from ${oldCollectionExportName} to ${newCollectionExportName}`,
                     );
-                    const newCollectionExportPath = getCollectionExportPath(
-                        exportFolder,
-                        newCollectionExportName,
-                    );
-
+                    const newCollectionExportPath = `${exportFolder}/${newCollectionExportName}`;
                     await this.addCollectionExportedRecord(
                         exportFolder,
                         collection.id,
@@ -586,10 +578,7 @@ class ExportService {
                             "collection is not empty, can't remove",
                         );
                     }
-                    const collectionExportPath = getCollectionExportPath(
-                        exportFolder,
-                        collectionExportName,
-                    );
+                    const collectionExportPath = `${exportFolder}/${collectionExportName}`;
                     await this.removeCollectionExportedRecord(
                         exportFolder,
                         collectionID,
@@ -681,10 +670,7 @@ class ExportService {
                             collectionExportName,
                         );
                     }
-                    const collectionExportPath = getCollectionExportPath(
-                        exportDir,
-                        collectionExportName,
-                    );
+                    const collectionExportPath = `${exportDir}/${collectionExportName}`;
                     await ensureElectron().checkExistsAndCreateDir(
                         collectionExportPath,
                     );
@@ -749,10 +735,10 @@ class ExportService {
                 try {
                     const fileExportName = fileIDExportNameMap.get(fileUID);
                     const collectionID = getCollectionIDFromFileUID(fileUID);
-                    const collectionExportPath = getCollectionExportPath(
-                        exportDir,
-                        collectionIDExportNameMap.get(collectionID),
-                    );
+                    const collectionExportName =
+                        collectionIDExportNameMap.get(collectionID);
+                    const collectionExportPath = `${exportDir}/${collectionExportName}`;
+
                     await this.removeFileExportedRecord(exportDir, fileUID);
                     try {
                         if (isLivePhotoExportName(fileExportName)) {
@@ -1036,10 +1022,7 @@ class ExportService {
             exportFolder,
             collectionName,
         );
-        const collectionExportPath = getCollectionExportPath(
-            exportFolder,
-            collectionExportName,
-        );
+        const collectionExportPath = `${exportFolder}/${collectionExportName}`;
         await ensureElectron().checkExistsAndCreateDir(collectionExportPath);
         await ensureElectron().checkExistsAndCreateDir(
             getMetadataFolderExportPath(collectionExportPath),
@@ -1217,9 +1200,5 @@ class ExportService {
         return exportRecord;
     };
 }
-export default new ExportService();
 
-const getCollectionExportPath = (
-    exportFolder: string,
-    collectionExportName: string,
-) => `${exportFolder}/${collectionExportName}`;
+export default new ExportService();
