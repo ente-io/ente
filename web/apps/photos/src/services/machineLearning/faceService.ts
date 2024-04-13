@@ -1,4 +1,5 @@
-import { addLogLine } from "@ente/shared/logging";
+import { openCache } from "@/next/blob-cache";
+import log from "@/next/log";
 import {
     DetectedFace,
     Face,
@@ -8,13 +9,12 @@ import {
 import { imageBitmapToBlob } from "utils/image";
 import {
     areFaceIdsSame,
-    extractFaceImages,
+    extractFaceImagesToFloat32,
     getFaceId,
     getLocalFile,
     getOriginalImageBitmap,
     isDifferentOrOld,
 } from "utils/machineLearning";
-import { storeFaceCrop } from "utils/machineLearning/faceCrop";
 import mlIDbStorage from "utils/storage/mlIDbStorage";
 import ReaderService from "./readerService";
 
@@ -49,9 +49,13 @@ class FaceService {
             syncContext,
             fileContext,
         );
+        const timerId = `faceDetection-${fileContext.enteFile.id}`;
+        console.time(timerId);
         const faceDetections =
             await syncContext.faceDetectionService.detectFaces(imageBitmap);
-        // addLogLine('3 TF Memory stats: ',JSON.stringify(tf.memory()));
+        console.timeEnd(timerId);
+        console.log("faceDetections: ", faceDetections?.length);
+
         // TODO: reenable faces filtering based on width
         const detectedFaces = faceDetections?.map((detection) => {
             return {
@@ -66,7 +70,7 @@ class FaceService {
         // ?.filter((f) =>
         //     f.box.width > syncContext.config.faceDetection.minFaceSize
         // );
-        addLogLine("[MLService] Detected Faces: ", newMlFile.faces?.length);
+        log.info("[MLService] Detected Faces: ", newMlFile.faces?.length);
     }
 
     async syncFileFaceCrops(
@@ -104,7 +108,7 @@ class FaceService {
     async syncFileFaceAlignments(
         syncContext: MLSyncContext,
         fileContext: MLSyncFileContext,
-    ) {
+    ): Promise<Float32Array> {
         const { oldMlFile, newMlFile } = fileContext;
         if (
             !fileContext.newDetection &&
@@ -123,18 +127,37 @@ class FaceService {
 
         newMlFile.faceAlignmentMethod = syncContext.faceAlignmentService.method;
         fileContext.newAlignment = true;
+        const imageBitmap =
+            fileContext.imageBitmap ||
+            (await ReaderService.getImageBitmap(syncContext, fileContext));
+
+        // Execute the face alignment calculations
         for (const face of newMlFile.faces) {
             face.alignment = syncContext.faceAlignmentService.getFaceAlignment(
                 face.detection,
             );
         }
-        addLogLine("[MLService] alignedFaces: ", newMlFile.faces?.length);
-        // addLogLine('4 TF Memory stats: ',JSON.stringify(tf.memory()));
+        // Extract face images and convert to Float32Array
+        const faceAlignments = newMlFile.faces.map((f) => f.alignment);
+        const faceImages = await extractFaceImagesToFloat32(
+            faceAlignments,
+            syncContext.faceEmbeddingService.faceSize,
+            imageBitmap,
+        );
+        const blurValues =
+            syncContext.blurDetectionService.detectBlur(faceImages);
+        newMlFile.faces.forEach((f, i) => (f.blurValue = blurValues[i]));
+
+        imageBitmap.close();
+        log.info("[MLService] alignedFaces: ", newMlFile.faces?.length);
+
+        return faceImages;
     }
 
     async syncFileFaceEmbeddings(
         syncContext: MLSyncContext,
         fileContext: MLSyncFileContext,
+        alignedFacesInput: Float32Array,
     ) {
         const { oldMlFile, newMlFile } = fileContext;
         if (
@@ -156,20 +179,40 @@ class FaceService {
         // TODO: when not storing face crops, image will be needed to extract faces
         // fileContext.imageBitmap ||
         //     (await this.getImageBitmap(syncContext, fileContext));
-        const faceImages = await extractFaceImages(
-            newMlFile.faces,
-            syncContext.faceEmbeddingService.faceSize,
-        );
 
         const embeddings =
             await syncContext.faceEmbeddingService.getFaceEmbeddings(
-                faceImages,
+                alignedFacesInput,
             );
-        faceImages.forEach((faceImage) => faceImage.close());
         newMlFile.faces.forEach((f, i) => (f.embedding = embeddings[i]));
 
-        addLogLine("[MLService] facesWithEmbeddings: ", newMlFile.faces.length);
-        // addLogLine('5 TF Memory stats: ',JSON.stringify(tf.memory()));
+        log.info("[MLService] facesWithEmbeddings: ", newMlFile.faces.length);
+    }
+
+    async syncFileFaceMakeRelativeDetections(
+        syncContext: MLSyncContext,
+        fileContext: MLSyncFileContext,
+    ) {
+        const { oldMlFile, newMlFile } = fileContext;
+        if (
+            !fileContext.newAlignment &&
+            !isDifferentOrOld(
+                oldMlFile?.faceEmbeddingMethod,
+                syncContext.faceEmbeddingService.method,
+            ) &&
+            areFaceIdsSame(newMlFile.faces, oldMlFile?.faces)
+        ) {
+            return;
+        }
+        for (let i = 0; i < newMlFile.faces.length; i++) {
+            const face = newMlFile.faces[i];
+            if (face.detection.box.x + face.detection.box.width < 2) continue; // Skip if somehow already relative
+            face.detection =
+                syncContext.faceDetectionService.getRelativeDetection(
+                    face.detection,
+                    newMlFile.imageDimensions,
+                );
+        }
     }
 
     async saveFaceCrop(
@@ -182,13 +225,15 @@ class FaceService {
             face.detection,
             syncContext.config.faceCrop,
         );
-        face.crop = await storeFaceCrop(
-            face.id,
-            faceCrop,
-            syncContext.config.faceCrop.blobOptions,
-        );
-        const blob = await imageBitmapToBlob(faceCrop.image);
+
+        const blobOptions = syncContext.config.faceCrop.blobOptions;
+        const blob = await imageBitmapToBlob(faceCrop.image, blobOptions);
+
+        const cache = await openCache("face-crops");
+        await cache.put(face.id, blob);
+
         faceCrop.image.close();
+
         return blob;
     }
 
@@ -210,14 +255,14 @@ class FaceService {
         const clusteringConfig = syncContext.config.faceClustering;
 
         if (!allFaces || allFaces.length < clusteringConfig.minInputSize) {
-            addLogLine(
+            log.info(
                 "[MLService] Too few faces to cluster, not running clustering: ",
                 allFaces.length,
             );
             return;
         }
 
-        addLogLine("Running clustering allFaces: ", allFaces.length);
+        log.info("Running clustering allFaces: ", allFaces.length);
         syncContext.mlLibraryData.faceClusteringResults =
             await syncContext.faceClusteringService.cluster(
                 allFaces.map((f) => Array.from(f.embedding)),
@@ -225,7 +270,7 @@ class FaceService {
             );
         syncContext.mlLibraryData.faceClusteringMethod =
             syncContext.faceClusteringService.method;
-        addLogLine(
+        log.info(
             "[MLService] Got face clustering results: ",
             JSON.stringify(syncContext.mlLibraryData.faceClusteringResults),
         );

@@ -1,5 +1,5 @@
-import ElectronAPIs from "@ente/shared/electron";
-import { logError } from "@ente/shared/sentry";
+import { ensureElectron } from "@/next/electron";
+import log from "@/next/log";
 import { PICKED_UPLOAD_TYPE } from "constants/upload";
 import { Collection } from "types/collection";
 import { ElectronFile, FileWithCollection } from "types/upload";
@@ -14,13 +14,13 @@ class ImportService {
     async getPendingUploads(): Promise<PendingUploads> {
         try {
             const pendingUploads =
-                (await ElectronAPIs.getPendingUploads()) as PendingUploads;
+                (await ensureElectron().getPendingUploads()) as PendingUploads;
             return pendingUploads;
         } catch (e) {
             if (e?.message?.includes("ENOENT: no such file or directory")) {
                 // ignore
             } else {
-                logError(e, "failed to getPendingUploads ");
+                log.error("failed to getPendingUploads ", e);
             }
             return { files: [], collectionName: null, type: null };
         }
@@ -40,7 +40,7 @@ class ImportService {
         if (collections.length === 1) {
             collectionName = collections[0].name;
         }
-        await ElectronAPIs.setToUploadCollection(collectionName);
+        await ensureElectron().setToUploadCollection(collectionName);
     }
 
     async updatePendingUploads(files: FileWithCollection[]) {
@@ -57,16 +57,17 @@ class ImportService {
                 filePaths.push((fileWithCollection.file as ElectronFile).path);
             }
         }
-        await ElectronAPIs.setToUploadFiles(
+        await ensureElectron().setToUploadFiles(
             PICKED_UPLOAD_TYPE.FILES,
             filePaths,
         );
     }
 
     async cancelRemainingUploads() {
-        await ElectronAPIs.setToUploadCollection(null);
-        await ElectronAPIs.setToUploadFiles(PICKED_UPLOAD_TYPE.ZIPS, []);
-        await ElectronAPIs.setToUploadFiles(PICKED_UPLOAD_TYPE.FILES, []);
+        const electron = ensureElectron();
+        await electron.setToUploadCollection(null);
+        await electron.setToUploadFiles(PICKED_UPLOAD_TYPE.ZIPS, []);
+        await electron.setToUploadFiles(PICKED_UPLOAD_TYPE.FILES, []);
     }
 }
 

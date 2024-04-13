@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"github.com/ente-io/museum/ente"
 
 	model "github.com/ente-io/museum/ente/authenticator"
 	"github.com/ente-io/stacktrace"
@@ -43,7 +44,10 @@ func (r *Repository) Get(ctx context.Context, userID int64, id uuid.UUID) (model
 	)
 	err := row.Scan(&res.ID, &res.UserID, &res.EncryptedData, &res.Header, &res.IsDeleted, &res.CreatedAt, &res.UpdatedAt)
 	if err != nil {
-		return model.Entity{}, stacktrace.Propagate(err, "failed to getTotpEntry")
+		if errors.Is(err, sql.ErrNoRows) {
+			return model.Entity{}, &ente.ErrNotFoundError
+		}
+		return model.Entity{}, stacktrace.Propagate(err, "failed to auth entity with id=%s", id)
 	}
 	return res, nil
 }
@@ -70,6 +74,16 @@ func (r *Repository) Update(ctx context.Context, userID int64, req model.UpdateE
 		return stacktrace.Propagate(err, "")
 	}
 	if affected != 1 {
+		dbEntity, dbEntityErr := r.Get(ctx, userID, req.ID)
+		if dbEntityErr != nil {
+			return stacktrace.Propagate(dbEntityErr, fmt.Sprintf("failed to get entity for update with id=%s", req.ID))
+		}
+		if dbEntity.IsDeleted {
+			return stacktrace.Propagate(ente.NewBadRequestWithMessage("entity is already deleted"), "")
+		} else if *dbEntity.EncryptedData == req.EncryptedData && *dbEntity.Header == req.Header {
+			logrus.WithField("id", req.ID).Info("entity is already updated")
+			return nil
+		}
 		return stacktrace.Propagate(errors.New("exactly one row should be updated"), "")
 	}
 	return nil

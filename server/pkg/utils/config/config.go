@@ -103,12 +103,13 @@ func doesFileExist(path string) (bool, error) {
 
 func GetPGInfo() string {
 	return fmt.Sprintf("host=%s port=%d user=%s "+
-		"password=%s dbname=%s sslmode=disable",
+		"password=%s dbname=%s sslmode=%s",
 		viper.GetString("db.host"),
 		viper.GetInt("db.port"),
 		viper.GetString("db.user"),
 		viper.GetString("db.password"),
-		viper.GetString("db.name"))
+		viper.GetString("db.name"),
+		viper.GetString("db.sslmode"))
 }
 
 func IsLocalEnvironment() bool {

@@ -1,5 +1,6 @@
 import "dart:io";
 
+import "package:computer/computer.dart";
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart';
@@ -16,6 +17,7 @@ import 'package:photos/utils/file_uploader_util.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_migration/sqflite_migration.dart';
 import 'package:sqlite3/sqlite3.dart' as sqlite3;
+import 'package:sqlite_async/sqlite_async.dart' as sqlite_async;
 
 class FilesDB {
   /*
@@ -102,6 +104,7 @@ class FilesDB {
   // only have a single app-wide reference to the database
   static Future<Database>? _dbFuture;
   static Future<sqlite3.Database>? _ffiDBFuture;
+  static Future<sqlite_async.SqliteDatabase>? _sqliteAsyncDBFuture;
 
   Future<Database> get database async {
     // lazily instantiate the db the first time it is accessed
@@ -112,6 +115,11 @@ class FilesDB {
   Future<sqlite3.Database> get ffiDB async {
     _ffiDBFuture ??= _initFFIDatabase();
     return _ffiDBFuture!;
+  }
+
+  Future<sqlite_async.SqliteDatabase> get sqliteAsyncDB async {
+    _sqliteAsyncDBFuture ??= _initSqliteAsyncDatabase();
+    return _sqliteAsyncDBFuture!;
   }
 
   // this opens the database (and creates it if it doesn't exist)
@@ -129,6 +137,14 @@ class FilesDB {
     final String path = join(documentsDirectory.path, _databaseName);
     _logger.info("DB path " + path);
     return sqlite3.sqlite3.open(path);
+  }
+
+  Future<sqlite_async.SqliteDatabase> _initSqliteAsyncDatabase() async {
+    final Directory documentsDirectory =
+        await getApplicationDocumentsDirectory();
+    final String path = join(documentsDirectory.path, _databaseName);
+    _logger.info("DB path " + path);
+    return sqlite_async.SqliteDatabase(path: path);
   }
 
   // SQL code to create the database table
@@ -557,31 +573,34 @@ class FilesDB {
     bool applyOwnerCheck = false,
   }) async {
     final stopWatch = EnteWatch('getAllPendingOrUploadedFiles')..start();
-    late String whereQuery;
-    late List<Object?>? whereArgs;
+    final order = (asc ?? false ? 'ASC' : 'DESC');
+
+    late String query;
+    late List<Object?>? args;
     if (applyOwnerCheck) {
-      whereQuery = '$columnCreationTime >= ? AND $columnCreationTime <= ? '
+      query =
+          'SELECT * FROM $filesTable WHERE $columnCreationTime >= ? AND $columnCreationTime <= ? '
           'AND ($columnOwnerID IS NULL OR $columnOwnerID = ?) '
           'AND ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1)'
-          ' AND $columnMMdVisibility = ?';
-      whereArgs = [startTime, endTime, ownerID, visibility];
+          ' AND $columnMMdVisibility = ? ORDER BY $columnCreationTime $order, $columnModificationTime $order';
+
+      args = [startTime, endTime, ownerID, visibility];
     } else {
-      whereQuery =
-          '$columnCreationTime >= ? AND $columnCreationTime <= ? AND ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1)'
-          ' AND $columnMMdVisibility = ?';
-      whereArgs = [startTime, endTime, visibility];
+      query =
+          'SELECT * FROM $filesTable WHERE $columnCreationTime >= ? AND $columnCreationTime <= ? '
+          'AND ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1)'
+          ' AND $columnMMdVisibility = ? ORDER BY $columnCreationTime $order, $columnModificationTime $order';
+      args = [startTime, endTime, visibility];
     }
 
-    final db = await instance.database;
-    final order = (asc ?? false ? 'ASC' : 'DESC');
-    final results = await db.query(
-      filesTable,
-      where: whereQuery,
-      whereArgs: whereArgs,
-      orderBy:
-          '$columnCreationTime ' + order + ', $columnModificationTime ' + order,
-      limit: limit,
-    );
+    if (limit != null) {
+      query += ' LIMIT ?';
+      args.add(limit);
+    }
+
+    final db = await instance.sqliteAsyncDB;
+    final results = await db.getAll(query, args);
+    _logger.info("message");
     stopWatch.log('queryDone');
     final files = convertToFiles(results);
     stopWatch.log('convertDone');
@@ -593,23 +612,25 @@ class FilesDB {
 
   Future<FileLoadResult> getAllLocalAndUploadedFiles(
     int startTime,
-    int endTime,
-    int ownerID, {
+    int endTime, {
     int? limit,
     bool? asc,
     required DBFilterOptions filterOptions,
   }) async {
-    final db = await instance.database;
+    final db = await instance.sqliteAsyncDB;
     final order = (asc ?? false ? 'ASC' : 'DESC');
-    final results = await db.query(
-      filesTable,
-      where:
-          '$columnCreationTime >= ? AND $columnCreationTime <= ?  AND ($columnMMdVisibility IS NULL OR $columnMMdVisibility = ?)'
-          ' AND ($columnLocalID IS NOT NULL OR ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1))',
-      whereArgs: [startTime, endTime, visibleVisibility],
-      orderBy:
-          '$columnCreationTime ' + order + ', $columnModificationTime ' + order,
-      limit: limit,
+    final args = [startTime, endTime, visibleVisibility];
+    String query =
+        'SELECT * FROM $filesTable WHERE $columnCreationTime >= ? AND $columnCreationTime <= ?  AND ($columnMMdVisibility IS NULL OR $columnMMdVisibility = ?)'
+        ' AND ($columnLocalID IS NOT NULL OR ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1))'
+        ' ORDER BY $columnCreationTime $order, $columnModificationTime $order';
+    if (limit != null) {
+      query += ' LIMIT ?';
+      args.add(limit);
+    }
+    final results = await db.getAll(
+      query,
+      args,
     );
     final files = convertToFiles(results);
     final List<EnteFile> filteredFiles =
@@ -642,19 +663,18 @@ class FilesDB {
     bool? asc,
     int visibility = visibleVisibility,
   }) async {
-    final db = await instance.database;
+    final db = await instance.sqliteAsyncDB;
     final order = (asc ?? false ? 'ASC' : 'DESC');
-    const String whereClause =
-        '$columnCollectionID = ? AND $columnCreationTime >= ? AND $columnCreationTime <= ?';
-    final List<Object> whereArgs = [collectionID, startTime, endTime];
-
-    final results = await db.query(
-      filesTable,
-      where: whereClause,
-      whereArgs: whereArgs,
-      orderBy:
-          '$columnCreationTime ' + order + ', $columnModificationTime ' + order,
-      limit: limit,
+    String query =
+        'SELECT * FROM $filesTable WHERE $columnCollectionID = ? AND $columnCreationTime >= ? AND $columnCreationTime <= ? ORDER BY $columnCreationTime $order, $columnModificationTime $order';
+    final List<Object> args = [collectionID, startTime, endTime];
+    if (limit != null) {
+      query += ' LIMIT ?';
+      args.add(limit);
+    }
+    final results = await db.getAll(
+      query,
+      args,
     );
     final files = convertToFiles(results);
     return FileLoadResult(files, files.length == limit);
@@ -1450,6 +1470,14 @@ class FilesDB {
     return collectionIDsOfFile;
   }
 
+  List<EnteFile> convertToFilesForIsolate(Map args) {
+    final List<EnteFile> files = [];
+    for (final result in args["result"]) {
+      files.add(_getFileFromRow(result));
+    }
+    return files;
+  }
+
   List<EnteFile> convertToFiles(List<Map<String, dynamic>> results) {
     final List<EnteFile> files = [];
     for (final result in results) {
@@ -1576,10 +1604,13 @@ class FilesDB {
     Set<int> collectionsToIgnore, {
     bool dedupeByUploadId = true,
   }) async {
-    final db = await instance.database;
-    final List<Map<String, dynamic>> result =
-        await db.query(filesTable, orderBy: '$columnCreationTime DESC');
-    final List<EnteFile> files = convertToFiles(result);
+    final db = await instance.sqliteAsyncDB;
+    final result = await db.getAll(
+      'SELECT * FROM $filesTable ORDER BY $columnCreationTime DESC',
+    );
+    final List<EnteFile> files = await Computer.shared()
+        .compute(convertToFilesForIsolate, param: {"result": result});
+
     final List<EnteFile> deduplicatedFiles = await applyDBFilters(
       files,
       DBFilterOptions(

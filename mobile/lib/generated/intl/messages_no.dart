@@ -44,6 +44,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "confirmDeletePrompt": MessageLookupByLibrary.simpleMessage(
             "Ja, jeg ønsker å slette denne kontoen og all dataen dens permanent."),
         "contacts": MessageLookupByLibrary.simpleMessage("Contacts"),
+        "createCollaborativeLink":
+            MessageLookupByLibrary.simpleMessage("Create collaborative link"),
         "deleteAccount": MessageLookupByLibrary.simpleMessage("Slett konto"),
         "deleteAccountFeedbackPrompt": MessageLookupByLibrary.simpleMessage(
             "Vi er lei oss for at du forlater oss. Gi oss gjerne en tilbakemelding så vi kan forbedre oss."),

@@ -1,28 +1,28 @@
-import { VerticallyCentered } from "@ente/shared/components/Container";
-import SingleInputForm, {
-    SingleInputFormProps,
-} from "@ente/shared/components/SingleInputForm";
-import { logError } from "@ente/shared/sentry";
-import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
-import { useEffect, useState } from "react";
-
+import log from "@/next/log";
 import { recoverTwoFactor, removeTwoFactor } from "@ente/accounts/api/user";
 import { PAGES } from "@ente/accounts/constants/pages";
 import { TwoFactorType } from "@ente/accounts/constants/twofactor";
 import { logoutUser } from "@ente/accounts/services/user";
 import { PageProps } from "@ente/shared/apps/types";
+import { VerticallyCentered } from "@ente/shared/components/Container";
 import { DialogBoxAttributesV2 } from "@ente/shared/components/DialogBoxV2/types";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
 import FormPaperFooter from "@ente/shared/components/Form/FormPaper/Footer";
 import FormPaperTitle from "@ente/shared/components/Form/FormPaper/Title";
 import LinkButton from "@ente/shared/components/LinkButton";
+import SingleInputForm, {
+    SingleInputFormProps,
+} from "@ente/shared/components/SingleInputForm";
 import { SUPPORT_EMAIL } from "@ente/shared/constants/urls";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { B64EncryptionResult } from "@ente/shared/crypto/types";
 import { ApiError } from "@ente/shared/error";
+import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
 import { Link } from "@mui/material";
 import { HttpStatusCode } from "axios";
 import { t } from "i18next";
+import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
 import { Trans } from "react-i18next";
 
 const bip39 = require("bip39");
@@ -30,7 +30,6 @@ const bip39 = require("bip39");
 bip39.setDefaultWordlist("english");
 
 export default function Recover({
-    router,
     appContext,
     twoFactorType = TwoFactorType.TOTP,
 }: PageProps) {
@@ -39,6 +38,8 @@ export default function Recover({
     const [sessionID, setSessionID] = useState(null);
     const [doesHaveEncryptedRecoveryKey, setDoesHaveEncryptedRecoveryKey] =
         useState(false);
+
+    const router = useRouter();
 
     useEffect(() => {
         const user = getData(LS_KEYS.USER);
@@ -78,7 +79,7 @@ export default function Recover({
                 ) {
                     logoutUser();
                 } else {
-                    logError(e, "two factor recovery page setup failed");
+                    log.error("two factor recovery page setup failed", e);
                     setDoesHaveEncryptedRecoveryKey(false);
                     showContactSupportDialog({
                         text: t("GO_BACK"),
@@ -130,7 +131,7 @@ export default function Recover({
             setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes);
             router.push(PAGES.CREDENTIALS);
         } catch (e) {
-            logError(e, "two factor recovery failed");
+            log.error("two factor recovery failed", e);
             setFieldError(t("INCORRECT_RECOVERY_KEY"));
         }
     };

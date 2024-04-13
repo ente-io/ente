@@ -1,6 +1,5 @@
+import log from "@/next/log";
 import { CustomError } from "@ente/shared/error";
-import { logError } from "@ente/shared/sentry";
-import { convertBytesToHumanReadable } from "@ente/shared/utils/size";
 import { FILE_TYPE } from "constants/file";
 import {
     KNOWN_NON_MEDIA_FORMATS,
@@ -42,7 +41,6 @@ export async function getFileType(receivedFile: File): Promise<FileTypeInfo> {
         };
     } catch (e) {
         const fileFormat = getFileExtension(receivedFile.name);
-        const fileSize = convertBytesToHumanReadable(receivedFile.size);
         const whiteListedFormat = WHITELISTED_FILE_FORMATS.find(
             (a) => a.exactType === fileFormat,
         );
@@ -53,16 +51,10 @@ export async function getFileType(receivedFile: File): Promise<FileTypeInfo> {
             throw Error(CustomError.UNSUPPORTED_FILE_FORMAT);
         }
         if (e.message === CustomError.NON_MEDIA_FILE) {
-            logError(e, "unsupported file format", {
-                fileFormat,
-                fileSize,
-            });
+            log.error(`unsupported file format ${fileFormat}`, e);
             throw Error(CustomError.UNSUPPORTED_FILE_FORMAT);
         }
-        logError(e, "type detection failed", {
-            fileFormat,
-            fileSize,
-        });
+        log.error(`type detection failed for format ${fileFormat}`, e);
         throw Error(CustomError.TYPE_DETECTION_FAILED(fileFormat));
     }
 }

@@ -1,3 +1,4 @@
+import log from "@/next/log";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
 import EnteButton from "@ente/shared/components/EnteButton";
@@ -6,16 +7,14 @@ import SingleInputForm, {
     SingleInputFormProps,
 } from "@ente/shared/components/SingleInputForm";
 import { boxSeal } from "@ente/shared/crypto/internal/libsodium";
-import { loadSender } from "@ente/shared/hooks/useCastSender";
-import { addLogLine } from "@ente/shared/logging";
 import castGateway from "@ente/shared/network/cast";
-import { logError } from "@ente/shared/sentry";
 import { Link, Typography } from "@mui/material";
 import { t } from "i18next";
 import { useEffect, useState } from "react";
 import { Trans } from "react-i18next";
 import { Collection } from "types/collection";
 import { v4 as uuidv4 } from "uuid";
+import { loadSender } from "../../../utils/useCastSender";
 
 interface Props {
     show: boolean;
@@ -105,7 +104,7 @@ export default function AlbumCastDialog(props: Props) {
                     await instance.requestSession();
                 } catch (e) {
                     setView("auto-cast-error");
-                    logError(e, "Error requesting session");
+                    log.error("Error requesting session", e);
                     return;
                 }
                 const session = instance.getCurrentSession();
@@ -124,7 +123,7 @@ export default function AlbumCastDialog(props: Props) {
                                 })
                                 .catch((e) => {
                                     setView("auto-cast-error");
-                                    logError(e, "Error casting to TV");
+                                    log.error("Error casting to TV", e);
                                 });
                         }
                     },
@@ -133,10 +132,10 @@ export default function AlbumCastDialog(props: Props) {
                 session
                     .sendMessage("urn:x-cast:pair-request", {})
                     .then(() => {
-                        addLogLine("Message sent successfully");
+                        log.debug(() => "Message sent successfully");
                     })
-                    .catch((error) => {
-                        logError(error, "Error sending message");
+                    .catch((e) => {
+                        log.error("Error sending message", e);
                     });
             });
         }

@@ -11,7 +11,7 @@
         "build-main:quick": "tsc && electron-builder --dir --config.compression=store --config.mac.identity=null",
         "build-renderer": "cd ../web && yarn install && yarn build:photos && cd ../desktop && shx rm -f out && shx ln -sf ../web/apps/photos/out out",
         "build:quick": "yarn build-renderer && yarn build-main:quick",
-        "dev": "concurrently --names 'main,rndr' \"yarn dev-main\" \"yarn dev-renderer\"",
+        "dev": "concurrently --kill-others --success first --names 'main,rndr' \"yarn dev-main\" \"yarn dev-renderer\"",
         "dev-main": "tsc && electron app/main.js",
         "dev-renderer": "cd ../web && yarn install && yarn dev:photos",
         "postinstall": "electron-builder install-app-deps",

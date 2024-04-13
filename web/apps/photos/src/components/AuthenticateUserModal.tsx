@@ -1,14 +1,14 @@
-import { useContext, useEffect, useState } from "react";
-
+import log from "@/next/log";
 import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
 import VerifyMasterPasswordForm, {
     VerifyMasterPasswordFormProps,
 } from "@ente/shared/components/VerifyMasterPasswordForm";
-import { logError } from "@ente/shared/sentry";
-import { getData, LS_KEYS } from "@ente/shared/storage/localStorage";
+import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import { KeyAttributes, User } from "@ente/shared/user/types";
 import { t } from "i18next";
 import { AppContext } from "pages/_app";
+import { useContext, useEffect, useState } from "react";
+
 interface Iprops {
     open: boolean;
     onClose: () => void;
@@ -51,7 +51,7 @@ export default function AuthenticateUserModal({
                     setKeyAttributes(keyAttributes);
                 }
             } catch (e) {
-                logError(e, "AuthenticateUserModal initialization failed");
+                log.error("AuthenticateUserModal initialization failed", e);
                 onClose();
                 somethingWentWrong();
             }

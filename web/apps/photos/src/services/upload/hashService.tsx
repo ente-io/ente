@@ -1,8 +1,7 @@
+import { getFileNameSize } from "@/next/file";
+import log from "@/next/log";
 import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
 import { CustomError } from "@ente/shared/error";
-import { addLogLine } from "@ente/shared/logging";
-import { getFileNameSize } from "@ente/shared/logging/web";
-import { logError } from "@ente/shared/sentry";
 import { Remote } from "comlink";
 import { FILE_READER_CHUNK_SIZE } from "constants/upload";
 import { getElectronFileStream, getFileStream } from "services/readerService";
@@ -13,7 +12,7 @@ export async function getFileHash(
     file: File | ElectronFile,
 ) {
     try {
-        addLogLine(`getFileHash called for ${getFileNameSize(file)}`);
+        log.info(`getFileHash called for ${getFileNameSize(file)}`);
         let filedata: DataStream;
         if (file instanceof File) {
             filedata = getFileStream(file, FILE_READER_CHUNK_SIZE);
@@ -38,14 +37,12 @@ export async function getFileHash(
             throw Error(CustomError.CHUNK_MORE_THAN_EXPECTED);
         }
         const hash = await worker.completeChunkHashing(hashState);
-        addLogLine(
+        log.info(
             `file hashing completed successfully ${getFileNameSize(file)}`,
         );
         return hash;
     } catch (e) {
-        logError(e, "getFileHash failed");
-        addLogLine(
-            `file hashing failed ${getFileNameSize(file)} ,${e.message} `,
-        );
+        log.error("getFileHash failed", e);
+        log.info(`file hashing failed ${getFileNameSize(file)} ,${e.message} `);
     }
 }

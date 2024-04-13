@@ -1,6 +1,3 @@
-import HTTPService from "@ente/shared/network/HTTPService";
-import { getEndpoint } from "@ente/shared/network/api";
-
 import {
     RecoveryKey,
     TwoFactorRecoveryResponse,
@@ -11,7 +8,8 @@ import {
 import { APPS, OTT_CLIENTS } from "@ente/shared/apps/constants";
 import { B64EncryptionResult } from "@ente/shared/crypto/types";
 import { ApiError, CustomError } from "@ente/shared/error";
-import { logError } from "@ente/shared/sentry";
+import HTTPService from "@ente/shared/network/HTTPService";
+import { getEndpoint } from "@ente/shared/network/api";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { KeyAttributes } from "@ente/shared/user/types";
 import { HttpStatusCode } from "axios";
@@ -63,7 +61,6 @@ export const _logout = async () => {
         ) {
             return;
         }
-        logError(e, "/users/logout failed");
         throw e;
     }
 };

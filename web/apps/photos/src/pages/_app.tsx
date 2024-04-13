@@ -1,4 +1,11 @@
-import { setupI18n } from "@/ui/i18n";
+import { CustomHead } from "@/next/components/Head";
+import { setupI18n } from "@/next/i18n";
+import log from "@/next/log";
+import {
+    logStartupBanner,
+    logUnhandledErrorsAndRejections,
+} from "@/next/log-web";
+import { AppUpdateInfo } from "@/next/types/ipc";
 import {
     APPS,
     APP_TITLES,
@@ -19,18 +26,9 @@ import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { MessageContainer } from "@ente/shared/components/MessageContainer";
 import AppNavbar from "@ente/shared/components/Navbar/app";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
-import ElectronAPIs from "@ente/shared/electron";
-import { AppUpdateInfo } from "@ente/shared/electron/types";
-import { CustomError } from "@ente/shared/error";
 import { Events, eventBus } from "@ente/shared/events";
 import { useLocalState } from "@ente/shared/hooks/useLocalState";
-import { addLogLine } from "@ente/shared/logging";
-import {
-    clearLogsIfLocalStorageLimitExceeded,
-    logStartupMessage,
-} from "@ente/shared/logging/web";
 import HTTPService from "@ente/shared/network/HTTPService";
-import { logError } from "@ente/shared/sentry";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import {
     getLocalMapEnabled,
@@ -40,6 +38,7 @@ import {
 import { getTheme } from "@ente/shared/themes";
 import { THEME_COLOR } from "@ente/shared/themes/constants";
 import { SetTheme } from "@ente/shared/themes/types";
+import type { User } from "@ente/shared/user/types";
 import ArrowForward from "@mui/icons-material/ArrowForward";
 import { CssBaseline, useMediaQuery } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
@@ -48,7 +47,6 @@ import { REDIRECTS } from "constants/redirects";
 import { t } from "i18next";
 import isElectron from "is-electron";
 import { AppProps } from "next/app";
-import Head from "next/head";
 import { useRouter } from "next/router";
 import "photoswipe/dist/photoswipe.css";
 import { createContext, useEffect, useRef, useState } from "react";
@@ -111,8 +109,7 @@ type AppContextType = {
 
 export const AppContext = createContext<AppContextType>(null);
 
-export default function App(props: AppProps) {
-    const { Component, pageProps } = props;
+export default function App({ Component, pageProps }: AppProps) {
     const router = useRouter();
     const [isI18nReady, setIsI18nReady] = useState<boolean>(false);
     const [loading, setLoading] = useState(false);
@@ -150,40 +147,38 @@ export default function App(props: AppProps) {
     );
 
     useEffect(() => {
-        //setup i18n
         setupI18n().finally(() => setIsI18nReady(true));
-        // set client package name in headers
+        const userId = (getData(LS_KEYS.USER) as User)?.id;
+        logStartupBanner(APPS.PHOTOS, userId);
+        logUnhandledErrorsAndRejections(true);
         HTTPService.setHeaders({
             "X-Client-Package": CLIENT_PACKAGE_NAMES.get(APPS.PHOTOS),
         });
-        // setup logging
-        clearLogsIfLocalStorageLimitExceeded();
-        logStartupMessage(APPS.PHOTOS);
+        return () => logUnhandledErrorsAndRejections(false);
     }, []);
 
     useEffect(() => {
-        if (isElectron()) {
-            const showUpdateDialog = (updateInfo: AppUpdateInfo) => {
-                if (updateInfo.autoUpdatable) {
-                    setDialogMessage(
-                        getUpdateReadyToInstallMessage(updateInfo),
-                    );
-                } else {
-                    setNotificationAttributes({
-                        endIcon: <ArrowForward />,
-                        variant: "secondary",
-                        message: t("UPDATE_AVAILABLE"),
-                        onClick: () =>
-                            setDialogMessage(
-                                getUpdateAvailableForDownloadMessage(
-                                    updateInfo,
-                                ),
-                            ),
-                    });
-                }
-            };
-            ElectronAPIs.registerUpdateEventListener(showUpdateDialog);
-        }
+        const electron = globalThis.electron;
+        if (!electron) return;
+
+        const showUpdateDialog = (updateInfo: AppUpdateInfo) => {
+            if (updateInfo.autoUpdatable) {
+                setDialogMessage(getUpdateReadyToInstallMessage(updateInfo));
+            } else {
+                setNotificationAttributes({
+                    endIcon: <ArrowForward />,
+                    variant: "secondary",
+                    message: t("UPDATE_AVAILABLE"),
+                    onClick: () =>
+                        setDialogMessage(
+                            getUpdateAvailableForDownloadMessage(updateInfo),
+                        ),
+                });
+            }
+        };
+        electron.onAppUpdateAvailable(showUpdateDialog);
+
+        return () => electron.onAppUpdateAvailable(undefined);
     }, []);
 
     useEffect(() => {
@@ -196,7 +191,7 @@ export default function App(props: AppProps) {
                 setMlSearchEnabled(mlSearchConfig.enabled);
                 mlWorkManager.setMlSearchEnabled(mlSearchConfig.enabled);
             } catch (e) {
-                logError(e, "Error while loading mlSearchEnabled");
+                log.error("Error while loading mlSearchEnabled", e);
             }
         };
         loadMlSearchState();
@@ -206,7 +201,7 @@ export default function App(props: AppProps) {
                 mlWorkManager.setMlSearchEnabled(false);
             });
         } catch (e) {
-            logError(e, "Error while subscribing to logout event");
+            log.error("Error while subscribing to logout event", e);
         }
     }, []);
 
@@ -220,10 +215,10 @@ export default function App(props: AppProps) {
         }
         const initExport = async () => {
             try {
-                addLogLine("init export");
+                log.info("init export");
                 const token = getToken();
                 if (!token) {
-                    addLogLine(
+                    log.info(
                         "User not logged in, not starting export continuous sync job",
                     );
                     return;
@@ -244,11 +239,11 @@ export default function App(props: AppProps) {
                     exportService.enableContinuousExport();
                 }
                 if (isExportInProgress(exportRecord.stage)) {
-                    addLogLine("export was in progress, resuming");
+                    log.info("export was in progress, resuming");
                     exportService.scheduleExport();
                 }
             } catch (e) {
-                logError(e, "init export failed");
+                log.error("init export failed", e);
             }
         };
         initExport();
@@ -257,7 +252,7 @@ export default function App(props: AppProps) {
                 exportService.disableContinuousExport();
             });
         } catch (e) {
-            logError(e, "Error while subscribing to logout event");
+            log.error("Error while subscribing to logout event", e);
         }
     }, []);
 
@@ -274,9 +269,7 @@ export default function App(props: AppProps) {
                 const redirectAction = redirectMap.get(redirect);
                 window.location.href = await redirectAction();
             } else {
-                logError(CustomError.BAD_REQUEST, "invalid redirection", {
-                    redirect,
-                });
+                log.error(`invalid redirection ${redirect}`);
             }
         };
 
@@ -343,7 +336,7 @@ export default function App(props: AppProps) {
             setMlSearchEnabled(enabled);
             mlWorkManager.setMlSearchEnabled(enabled);
         } catch (e) {
-            logError(e, "Error while updating mlSearchEnabled");
+            log.error("Error while updating mlSearchEnabled", e);
         }
     };
 
@@ -353,7 +346,7 @@ export default function App(props: AppProps) {
             setLocalMapEnabled(enabled);
             setMapEnabled(enabled);
         } catch (e) {
-            logError(e, "Error while updating mapEnabled");
+            log.error("Error while updating mapEnabled", e);
         }
     };
 
@@ -378,19 +371,13 @@ export default function App(props: AppProps) {
             content: t("UNKNOWN_ERROR"),
         });
 
+    const title = isI18nReady
+        ? t("TITLE", { context: APPS.PHOTOS })
+        : APP_TITLES.get(APPS.PHOTOS);
+
     return (
         <>
-            <Head>
-                <title>
-                    {isI18nReady
-                        ? t("TITLE", { context: APPS.PHOTOS })
-                        : APP_TITLES.get(APPS.PHOTOS)}
-                </title>
-                <meta
-                    name="viewport"
-                    content="initial-scale=1, width=device-width"
-                />
-            </Head>
+            <CustomHead {...{ title }} />
 
             <ThemeProvider theme={getTheme(themeColor, APPS.PHOTOS)}>
                 <CssBaseline enableColorScheme />

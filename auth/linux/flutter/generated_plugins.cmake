@@ -10,7 +10,6 @@ list(APPEND FLUTTER_PLUGIN_LIST
   gtk
   screen_retriever
   sentry_flutter
-  smart_auth
   sodium_libs
   sqlite3_flutter_libs
   tray_manager

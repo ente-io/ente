@@ -108,6 +108,7 @@ class GalleryState extends State<Gallery> {
 
   @override
   void initState() {
+    super.initState();
     _logTag =
         "Gallery_${widget.tagPrefix}${kDebugMode ? "_" + widget.albumName! : ""}";
     _logger = Logger(_logTag);
@@ -172,7 +173,6 @@ class GalleryState extends State<Gallery> {
         _setFilesAndReload(result.files);
       }
     });
-    super.initState();
   }
 
   void _setFilesAndReload(List<EnteFile> files) {

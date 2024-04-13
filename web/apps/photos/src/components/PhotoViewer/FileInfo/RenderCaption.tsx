@@ -1,5 +1,5 @@
+import log from "@/next/log";
 import { FlexWrapper } from "@ente/shared/components/Container";
-import { logError } from "@ente/shared/sentry";
 import Close from "@mui/icons-material/Close";
 import Done from "@mui/icons-material/Done";
 import { Box, IconButton, TextField } from "@mui/material";
@@ -48,7 +48,7 @@ export function RenderCaption({
                 scheduleUpdate();
             }
         } catch (e) {
-            logError(e, "failed to update caption");
+            log.error("failed to update caption", e);
         }
     };
 

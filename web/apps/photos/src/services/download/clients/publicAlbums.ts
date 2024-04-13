@@ -4,7 +4,7 @@ import {
     getPublicCollectionFileURL,
     getPublicCollectionThumbnailURL,
 } from "@ente/shared/network/api";
-import { retryAsyncFunction } from "@ente/shared/promise";
+import { retryAsyncFunction } from "@ente/shared/utils";
 import { DownloadClient } from "services/download";
 import { EnteFile } from "types/file";
 
@@ -18,10 +18,6 @@ export class PublicAlbumsDownloadClient implements DownloadClient {
     updateTokens(token: string, passwordToken: string) {
         this.token = token;
         this.passwordToken = passwordToken;
-    }
-
-    updateTimeout(timeout: number) {
-        this.timeout = timeout;
     }
 
     downloadThumbnail = async (file: EnteFile) => {

@@ -1,4 +1,4 @@
-import { DataStream } from "@ente/shared/upload/types";
+import { DataStream } from "@/next/types/file";
 
 export interface LocalFileAttributes<
     T extends string | Uint8Array | DataStream,

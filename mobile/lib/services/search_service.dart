@@ -830,8 +830,16 @@ class SearchService {
     String query,
   ) async {
     final List<GenericSearchResult> searchResults = [];
-    final files = await SemanticSearchService.instance.search(query);
-    if (files.isNotEmpty) {
+    late List<EnteFile> files;
+    late String resultForQuery;
+    try {
+      (resultForQuery, files) =
+          await SemanticSearchService.instance.searchScreenQuery(query);
+    } catch (e, s) {
+      _logger.severe("Error occurred during magic search", e, s);
+      return searchResults;
+    }
+    if (files.isNotEmpty && resultForQuery == query) {
       searchResults.add(GenericSearchResult(ResultType.magic, query, files));
     }
     return searchResults;

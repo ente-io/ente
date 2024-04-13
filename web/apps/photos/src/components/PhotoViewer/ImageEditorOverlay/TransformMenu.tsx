@@ -1,4 +1,4 @@
-import { logError } from "@ente/shared/sentry";
+import log from "@/next/log";
 import Crop169Icon from "@mui/icons-material/Crop169";
 import Crop32Icon from "@mui/icons-material/Crop32";
 import CropSquareIcon from "@mui/icons-material/CropSquare";
@@ -172,10 +172,13 @@ const TransformMenu = () => {
                 setCanvasLoading(false);
                 setTransformationPerformed(true);
             } catch (e) {
-                logError(e, "crop handler failed", {
-                    widthRatio,
-                    heightRatio,
-                });
+                log.error(
+                    `crop handler failed - ${JSON.stringify({
+                        widthRatio,
+                        heightRatio,
+                    })}`,
+                    e,
+                );
             }
         };
     const createRotationHandler = (rotation: "left" | "right") => () => {
@@ -189,9 +192,7 @@ const TransformMenu = () => {
             setCanvasLoading(false);
             setTransformationPerformed(true);
         } catch (e) {
-            logError(e, "rotation handler failed", {
-                rotation,
-            });
+            log.error(`rotation handler (${rotation}) failed`, e);
         }
     };
 
@@ -204,9 +205,7 @@ const TransformMenu = () => {
                 setCanvasLoading(false);
                 setTransformationPerformed(true);
             } catch (e) {
-                logError(e, "flip handler failed", {
-                    direction,
-                });
+                log.error(`flip handler ${direction} failed`, e);
             }
         };
 

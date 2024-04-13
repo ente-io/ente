@@ -97,7 +97,7 @@ Overall, there are [three approaches](RUNNING.md) you can take:
 * Run without Docker
 
 Everything that you might needed to run museum is all in here, since this is the
-setup we ourselves use in production.
+code we ourselves use in production.
 
 > [!TIP]
 >

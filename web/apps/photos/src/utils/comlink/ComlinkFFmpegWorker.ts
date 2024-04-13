@@ -1,4 +1,4 @@
-import { ComlinkWorker } from "@ente/shared/worker/comlinkWorker";
+import { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { Remote } from "comlink";
 import { DedicatedFFmpegWorker } from "worker/ffmpeg.worker";
 

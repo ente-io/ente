@@ -1,4 +1,9 @@
-import { setupI18n } from "@/ui/i18n";
+import { CustomHead } from "@/next/components/Head";
+import { setupI18n } from "@/next/i18n";
+import {
+    logStartupBanner,
+    logUnhandledErrorsAndRejections,
+} from "@/next/log-web";
 import {
     APPS,
     APP_TITLES,
@@ -15,20 +20,16 @@ import { MessageContainer } from "@ente/shared/components/MessageContainer";
 import AppNavbar from "@ente/shared/components/Navbar/app";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { useLocalState } from "@ente/shared/hooks/useLocalState";
-import {
-    clearLogsIfLocalStorageLimitExceeded,
-    logStartupMessage,
-} from "@ente/shared/logging/web";
 import HTTPService from "@ente/shared/network/HTTPService";
-import { LS_KEYS } from "@ente/shared/storage/localStorage";
+import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import { getTheme } from "@ente/shared/themes";
 import { THEME_COLOR } from "@ente/shared/themes/constants";
 import { SetTheme } from "@ente/shared/themes/types";
+import type { User } from "@ente/shared/user/types";
 import { CssBaseline, useMediaQuery } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
 import { t } from "i18next";
 import { AppProps } from "next/app";
-import Head from "next/head";
 import { useRouter } from "next/router";
 import { createContext, useEffect, useRef, useState } from "react";
 import LoadingBar from "react-top-loading-bar";
@@ -47,8 +48,7 @@ type AppContextType = {
 
 export const AppContext = createContext<AppContextType>(null);
 
-export default function App(props: AppProps) {
-    const { Component, pageProps } = props;
+export default function App({ Component, pageProps }: AppProps) {
     const router = useRouter();
     const [isI18nReady, setIsI18nReady] = useState<boolean>(false);
     const [loading, setLoading] = useState(false);
@@ -68,15 +68,14 @@ export default function App(props: AppProps) {
     );
 
     useEffect(() => {
-        //setup i18n
         setupI18n().finally(() => setIsI18nReady(true));
-        // set client package name in headers
+        const userId = (getData(LS_KEYS.USER) as User)?.id;
+        logStartupBanner(APPS.AUTH, userId);
+        logUnhandledErrorsAndRejections(true);
         HTTPService.setHeaders({
             "X-Client-Package": CLIENT_PACKAGE_NAMES.get(APPS.AUTH),
         });
-        // setup logging
-        clearLogsIfLocalStorageLimitExceeded();
-        logStartupMessage(APPS.AUTH);
+        return () => logUnhandledErrorsAndRejections(false);
     }, []);
 
     const setUserOnline = () => setOffline(false);
@@ -129,19 +128,13 @@ export default function App(props: AppProps) {
             content: t("UNKNOWN_ERROR"),
         });
 
+    const title = isI18nReady
+        ? t("TITLE", { context: APPS.AUTH })
+        : APP_TITLES.get(APPS.AUTH);
+
     return (
         <>
-            <Head>
-                <title>
-                    {isI18nReady
-                        ? t("TITLE", { context: APPS.AUTH })
-                        : APP_TITLES.get(APPS.AUTH)}
-                </title>
-                <meta
-                    name="viewport"
-                    content="initial-scale=1, width=device-width"
-                />
-            </Head>
+            <CustomHead {...{ title }} />
 
             <ThemeProvider theme={getTheme(themeColor, APPS.AUTH)}>
                 <CssBaseline enableColorScheme />
