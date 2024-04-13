@@ -164,7 +164,7 @@ class _FaceWidgetState extends State<FaceWidget> {
                     ),
                   if (kDebugMode)
                     Text(
-                      'B: ${widget.face.blur.toStringAsFixed(3)}',
+                      'B: ${widget.face.blur.toStringAsFixed(0)}',
                       style: Theme.of(context).textTheme.bodySmall,
                       maxLines: 1,
                     ),
