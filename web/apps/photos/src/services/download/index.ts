@@ -135,21 +135,6 @@ class DownloadManagerImpl {
         this.progressUpdater = progressUpdater;
     }
 
-    private async getCachedFile(file: EnteFile): Promise<Response> {
-        const fileCache = this.fileCache;
-        if (!fileCache) return null;
-
-        try {
-            const cacheResp: Response = await fileCache.match(
-                file.id.toString(),
-            );
-            return cacheResp?.clone();
-        } catch (e) {
-            log.error("failed to get cached file", e);
-            throw e;
-        }
-    }
-
     private downloadThumb = async (file: EnteFile) => {
         const encrypted = await this.downloadClient.downloadThumbnail(file);
         const decrypted = await this.cryptoWorker.decryptThumbnail(
@@ -169,7 +154,7 @@ class DownloadManagerImpl {
         if (localOnly) return null;
 
         const thumb = await this.downloadThumb(file);
-        this.thumbnailCache?.put2(key, new Blob([thumb]));
+        this.thumbnailCache?.put(key, new Blob([thumb]));
         return thumb;
     }
 
@@ -292,10 +277,7 @@ class DownloadManagerImpl {
                     onDownloadProgress,
                 );
                 encryptedArrayBuffer = array.buffer;
-                this.fileCache?.put2(
-                    cacheKey,
-                    new Blob([encryptedArrayBuffer]),
-                );
+                this.fileCache?.put(cacheKey, new Blob([encryptedArrayBuffer]));
             }
             this.clearDownloadProgress(file.id);
             try {
@@ -321,7 +303,7 @@ class DownloadManagerImpl {
         if (cachedBlob) res = new Response(cachedBlob);
         else {
             res = await this.downloadClient.downloadFileStream(file);
-            this?.fileCache.put2(cacheKey, await res.blob());
+            this?.fileCache.put(cacheKey, await res.blob());
         }
         const reader = res.body.getReader();
 

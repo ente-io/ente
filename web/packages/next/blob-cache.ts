@@ -58,12 +58,10 @@ export interface BlobCache {
      * Get the data corresponding to {@link key} (if found) from the cache.
      */
     get: (key: string) => Promise<Blob | undefined>;
-    match: (key: string) => Promise<Response | undefined>;
     /**
      * Add the given {@link key}-value ({@link blob}) pair to the cache.
      */
-    put2: (key: string, blob: Blob) => Promise<void>;
-    put: (key: string, data: Response) => Promise<void>;
+    put: (key: string, blob: Blob) => Promise<void>;
     /**
      * Delete the blob corresponding to the given {@link key}.
      *
@@ -133,13 +131,7 @@ const openWebCache = async (name: BlobCacheNamespace) => {
             console.log("found cache hit", key, res);
             return await res?.blob();
         },
-        match: (key: string) => {
-            return cache.match(key);
-        },
-        put2: (key: string, blob: Blob) => cache.put(key, new Response(blob)),
-        put: (key: string, data: Response) => {
-            return cache.put(key, data);
-        },
+        put: (key: string, blob: Blob) => cache.put(key, new Response(blob)),
         delete: (key: string) => cache.delete(key),
     };
 };
@@ -154,17 +146,16 @@ const openOPFSCacheWeb = async (name: BlobCacheNamespace) => {
     //
     // So for our purpose, these can serve as the doc for what's available:
     // https://web.dev/articles/origin-private-file-system
-    const cache = await caches.open(name);
 
     const root = await navigator.storage.getDirectory();
-    const _caches = await root.getDirectoryHandle("cache", { create: true });
+    const caches = await root.getDirectoryHandle("cache", { create: true });
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const _cache = await _caches.getDirectoryHandle(name, { create: true });
+    const cache = await caches.getDirectoryHandle(name, { create: true });
 
     return {
         get: async (key: string) => {
             try {
-                const fileHandle = await _cache.getFileHandle(key);
+                const fileHandle = await cache.getFileHandle(key);
                 return await fileHandle.getFile();
             } catch (e) {
                 if (e instanceof DOMException && e.name == "NotFoundError")
@@ -172,23 +163,17 @@ const openOPFSCacheWeb = async (name: BlobCacheNamespace) => {
                 throw e;
             }
         },
-        match: (key: string) => {
-            return cache.match(key);
-        },
-        put2: async (key: string, blob: Blob) => {
-            const fileHandle = await _cache.getFileHandle(key, {
+        put: async (key: string, blob: Blob) => {
+            const fileHandle = await cache.getFileHandle(key, {
                 create: true,
             });
             const writable = await fileHandle.createWritable();
             await writable.write(blob);
             await writable.close();
         },
-        put: async (key: string, data: Response) => {
-            await cache.put(key, data);
-        },
         delete: async (key: string) => {
             try {
-                await _cache.removeEntry(key);
+                await cache.removeEntry(key);
                 return true;
             } catch (e) {
                 if (e instanceof DOMException && e.name == "NotFoundError")
@@ -214,7 +199,7 @@ export const cachedOrNew = async (
     if (cachedBlob) return cachedBlob;
 
     const blob = await get();
-    await cache.put2(key, blob);
+    await cache.put(key, blob);
     return blob;
 };
 

@@ -53,9 +53,8 @@ async function storeFaceCropForBlob(
     faceCropBlob: Blob,
 ) {
     const faceCropUrl = `/${faceId}`;
-    const faceCropResponse = new Response(faceCropBlob);
     const faceCropCache = await openCache("face-crops");
-    await faceCropCache.put(faceCropUrl, faceCropResponse);
+    await faceCropCache.put(faceCropUrl, faceCropBlob);
     return {
         imageUrl: faceCropUrl,
         imageBox: imageBox,
