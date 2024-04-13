@@ -250,10 +250,8 @@ async function migrateFiles(
             newFileSaveName,
         );
 
-        const newFileMetadataSavePath = getFileMetadataSavePath(
-            collectionIDPathMap.get(file.collectionID),
-            newFileSaveName,
-        );
+        const newFileMetadataSavePath = `${collectionIDPathMap.get(file.collectionID)}/${exportMetadataDirectoryName}/${newFileSaveName}.json`;
+
         if (!(await exportService.exists(oldFileSavePath))) {
             continue;
         }
@@ -501,12 +499,6 @@ const getExportedFiles = (
 
 const oldSanitizeName = (name: string) =>
     name.replaceAll("/", "_").replaceAll(" ", "_");
-
-const getFileMetadataSavePath = (
-    collectionFolderPath: string,
-    fileSaveName: string,
-) =>
-    `${collectionFolderPath}/${exportMetadataDirectoryName}/${fileSaveName}.json`;
 
 const getFileSavePath = (collectionFolderPath: string, fileSaveName: string) =>
     `${collectionFolderPath}/${fileSaveName}`;
