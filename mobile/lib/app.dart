@@ -10,6 +10,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:home_widget/home_widget.dart' as hw;
 import 'package:logging/logging.dart';
 import 'package:media_extension/media_extension_action_types.dart';
+import "package:photos/db/files_db.dart";
 import 'package:photos/ente_theme_data.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
@@ -22,6 +23,7 @@ import "package:photos/services/machine_learning/machine_learning_controller.dar
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/ui/tabs/home_widget.dart';
 import "package:photos/ui/viewer/actions/file_viewer.dart";
+import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/utils/intent_util.dart";
 import "package:photos/utils/navigation_util.dart";
@@ -90,15 +92,37 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
 
     final thumbnail = await CollectionsService.instance.getCover(collection);
     unawaited(
-      routeToPage(
-        context,
-        CollectionPage(
-          CollectionWithThumbnail(
-            collection,
-            thumbnail,
+      () async {
+        await routeToPage(
+          context,
+          CollectionPage(
+            CollectionWithThumbnail(
+              collection,
+              thumbnail,
+            ),
           ),
-        ),
-      ),
+        );
+
+        final previousGeneratedId =
+            await hw.HomeWidget.getWidgetData<int>("home_widget_last_img");
+        if (previousGeneratedId == null) return;
+
+        final res = await FilesDB.instance.getFile(
+          previousGeneratedId,
+        );
+
+        if (res == null) return;
+
+        final page = DetailPage(
+          DetailPageConfiguration(
+            List.unmodifiable([res]),
+            null,
+            0,
+            "collection",
+          ),
+        );
+        await routeToPage(context, page, forceCustomPageRoute: true);
+      }(),
     );
   }
 
