@@ -316,14 +316,16 @@ class DownloadManagerImpl {
             }
         }
 
-        let resp: Response = await this.getCachedFile(file);
-        if (!resp) {
-            resp = await this.downloadClient.downloadFileStream(file);
-            this?.fileCache.put(cacheKey, resp.clone());
+        const cachedBlob = await this.fileCache?.get(cacheKey);
+        let res: Response;
+        if (cachedBlob) res = new Response(cachedBlob);
+        else {
+            res = await this.downloadClient.downloadFileStream(file);
+            this?.fileCache.put2(cacheKey, await res.blob());
         }
-        const reader = resp.body.getReader();
+        const reader = res.body.getReader();
 
-        const contentLength = +resp.headers.get("Content-Length") ?? 0;
+        const contentLength = +res.headers.get("Content-Length") ?? 0;
         let downloadedBytes = 0;
 
         const stream = new ReadableStream({
