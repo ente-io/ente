@@ -108,6 +108,8 @@ export const openCache = async (
  *
  *     URL.createObjectURL(blob)
  *
+ * Also note that a File is a Blob!
+ *
  * Refs:
  * - https://github.com/yigitunallar/arraybuffer-vs-blob
  * - https://stackoverflow.com/questions/11821096/what-is-the-difference-between-an-arraybuffer-and-a-blob
@@ -118,9 +120,8 @@ const openWebCache = async (name: BlobCacheNamespace) => {
     const cache = await caches.open(name);
     return {
         get: async (key: string) => {
-            // return cache.match(key);
-            const _ = await cache.match(key);
-            return undefined;
+            const res = await cache.match(key);
+            return await res?.blob();
         },
         match: (key: string) => {
             return cache.match(key);
@@ -153,18 +154,16 @@ const openOPFSCacheWeb = async (name: BlobCacheNamespace) => {
 
     return {
         get: async (key: string) => {
-            const _ = await cache.match(key);
-            return undefined;
+            try {
+                const fileHandle = await _cache.getFileHandle(key);
+                return await fileHandle.getFile();
+            } catch (e) {
+                if (e instanceof DOMException && e.name == "NotFoundError")
+                    return undefined;
+                throw e;
+            }
         },
         match: (key: string) => {
-            // try {
-            //     const fileHandle = _cache.getFileHandle(key);
-            //     const file = await fileHandle.getFile();
-            // } catch (e) {
-            //     if (e instanceof DOMException && e.name == "NotFoundError")
-            //         return undefined;
-            //     throw e;
-            // }
             return cache.match(key);
         },
         put: async (key: string, data: Response) => {
