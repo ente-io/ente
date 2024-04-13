@@ -42,6 +42,7 @@ import {
     getUnExportedFiles,
     getUniqueCollectionExportName,
     getUniqueFileExportName,
+    isExportInProgress,
     isLivePhotoExportName,
     parseLivePhotoExportName,
 } from "utils/export";
@@ -1191,4 +1192,27 @@ class ExportService {
     };
 }
 
-export default new ExportService();
+const exportService = new ExportService();
+
+export default exportService;
+
+/**
+ * If there are any in-progress exports, or if continuous exports are enabled,
+ * resume them.
+ */
+export const resumeExportsIfNeeded = async () => {
+    const exportSettings = exportService.getExportSettings();
+    if (!(await exportService.exportFolderExists(exportSettings?.folder))) {
+        return;
+    }
+    const exportRecord = await exportService.getExportRecord(
+        exportSettings.folder,
+    );
+    if (exportSettings.continuousExport) {
+        exportService.enableContinuousExport();
+    }
+    if (isExportInProgress(exportRecord.stage)) {
+        log.debug(() => "Resuming in-progress export");
+        exportService.scheduleExport();
+    }
+};
