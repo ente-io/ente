@@ -190,11 +190,11 @@ extension DeviceFiles on FilesDB {
             [
               pathEntity.name,
               localID,
-              pathEntity.assetCount,
+              await pathEntity.assetCountAsync,
               pathEntity.id,
               pathEntity.name,
               localID,
-              pathEntity.assetCount,
+              await pathEntity.assetCountAsync,
             ],
           );
           if (rowUpdated > 0) {
@@ -208,7 +208,7 @@ extension DeviceFiles on FilesDB {
             {
               "id": pathEntity.id,
               "name": pathEntity.name,
-              "count": pathEntity.assetCount,
+              "count": await pathEntity.assetCountAsync,
               "cover_id": localID,
               "should_backup": shouldBackup ? _sqlBoolTrue : _sqlBoolFalse,
             },
@@ -339,7 +339,7 @@ extension DeviceFiles on FilesDB {
     int ownerID,
   ) async {
     final db = await database;
-    const String rawQuery = ''' 
+    const String rawQuery = '''
     SELECT ${FilesDB.columnLocalID}, ${FilesDB.columnUploadedFileID}, 
     ${FilesDB.columnFileSize} 
     FROM ${FilesDB.filesTable}
