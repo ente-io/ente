@@ -26,7 +26,11 @@ import {
     getPersonalFiles,
     mergeMetadata,
 } from "utils/file";
-import { sanitizeFilename } from "utils/native-fs";
+import {
+    safeDirectoryName,
+    safeFileName,
+    sanitizeFilename,
+} from "utils/native-fs";
 import {
     exportMetadataDirectoryName,
     getCollectionIDFromFileUID,
@@ -199,7 +203,7 @@ async function migrateCollectionFolders(
             collection.id,
             collection.name,
         );
-        const newCollectionExportPath = await getUniqueCollectionFolderPath(
+        const newCollectionExportPath = await safeDirectoryName(
             exportDir,
             collection.name,
         );
@@ -236,7 +240,7 @@ async function migrateFiles(
             collectionIDPathMap.get(file.collectionID),
             file,
         );
-        const newFileSaveName = await getUniqueFileSaveName(
+        const newFileSaveName = await safeFileName(
             collectionIDPathMap.get(file.collectionID),
             file.metadata.title,
         );
@@ -497,45 +501,6 @@ const getExportedFiles = (
 
 const oldSanitizeName = (name: string) =>
     name.replaceAll("/", "_").replaceAll(" ", "_");
-
-const getUniqueCollectionFolderPath = async (
-    dir: string,
-    collectionName: string,
-): Promise<string> => {
-    let collectionFolderPath = `${dir}/${sanitizeFilename(collectionName)}`;
-    let count = 1;
-    while (await exportService.exists(collectionFolderPath)) {
-        collectionFolderPath = `${dir}/${sanitizeFilename(
-            collectionName,
-        )}(${count})`;
-        count++;
-    }
-    return collectionFolderPath;
-};
-
-const getUniqueFileSaveName = async (
-    collectionPath: string,
-    filename: string,
-) => {
-    let fileSaveName = sanitizeFilename(filename);
-    let count = 1;
-    while (
-        await exportService.exists(
-            getFileSavePath(collectionPath, fileSaveName),
-        )
-    ) {
-        const filenameParts = splitFilenameAndExtension(
-            sanitizeFilename(filename),
-        );
-        if (filenameParts[1]) {
-            fileSaveName = `${filenameParts[0]}(${count}).${filenameParts[1]}`;
-        } else {
-            fileSaveName = `${filenameParts[0]}(${count})`;
-        }
-        count++;
-    }
-    return fileSaveName;
-};
 
 const getFileMetadataSavePath = (
     collectionFolderPath: string,
