@@ -390,6 +390,9 @@ class FaceMlService {
             batchSize: batchSize,
           );
           if (faceIdToEmbeddingBucket.isEmpty) {
+            _logger.warning(
+              'faceIdToEmbeddingBucket is empty, this should ideally not happen as it should have stopped earlier. offset: $offset, totalFaces: $totalFaces',
+            );
             break;
           }
           if (offset > totalFaces) {
@@ -414,6 +417,10 @@ class FaceMlService {
           _logger.info(
             'Done with clustering ${offset + faceIdToEmbeddingBucket.length} embeddings (${(100 * (offset + faceIdToEmbeddingBucket.length) / totalFaces).toStringAsFixed(0)}%) in bucket $bucket, offset: $offset',
           );
+          if (offset + bucketSize >= totalFaces) {
+            _logger.info('All faces clustered');
+            break;
+          }
           offset += offsetIncrement;
           bucket++;
         }
