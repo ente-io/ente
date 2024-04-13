@@ -152,7 +152,7 @@ dependencies:
   sqflite_migration: ^0.3.0
   sqlite3: ^2.1.0
   sqlite3_flutter_libs: ^0.5.20
-  sqlite_async: ^0.5.2
+  sqlite_async: ^0.6.1
   step_progress_indicator: ^1.0.2
   styled_text: ^7.0.0
   syncfusion_flutter_core: ^19.2.49
