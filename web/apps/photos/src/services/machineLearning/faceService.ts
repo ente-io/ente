@@ -1,3 +1,4 @@
+import { openCache } from "@/next/blob-cache";
 import log from "@/next/log";
 import {
     DetectedFace,
@@ -14,7 +15,6 @@ import {
     getOriginalImageBitmap,
     isDifferentOrOld,
 } from "utils/machineLearning";
-import { storeFaceCrop } from "utils/machineLearning/faceCrop";
 import mlIDbStorage from "utils/storage/mlIDbStorage";
 import ReaderService from "./readerService";
 
@@ -225,23 +225,15 @@ class FaceService {
             face.detection,
             syncContext.config.faceCrop,
         );
-        try {
-            face.crop = await storeFaceCrop(
-                face.id,
-                faceCrop,
-                syncContext.config.faceCrop.blobOptions,
-            );
-        } catch (e) {
-            // TODO(MR): Temporarily ignoring errors about failing cache puts
-            // when using a custom scheme in Electron. Needs an alternative
-            // approach, perhaps OPFS.
-            console.error(
-                "Ignoring error when caching face crop, the face crop will not be available",
-                e,
-            );
-        }
-        const blob = await imageBitmapToBlob(faceCrop.image);
+
+        const blobOptions = syncContext.config.faceCrop.blobOptions;
+        const blob = await imageBitmapToBlob(faceCrop.image, blobOptions);
+
+        const cache = await openCache("face-crops");
+        await cache.put(face.id, blob);
+
         faceCrop.image.close();
+
         return blob;
     }
 

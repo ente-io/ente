@@ -440,7 +440,7 @@ export async function getRenderableImage(fileName: string, imageBlob: Blob) {
                 }
 
                 if (!isElectron()) {
-                    throw Error(CustomError.NOT_AVAILABLE_ON_WEB);
+                    throw new Error("not available on web");
                 }
                 log.info(
                     `RawConverter called for ${fileName}-${convertBytesToHumanReadable(

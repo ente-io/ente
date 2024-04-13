@@ -1,7 +1,7 @@
+import { clearCaches } from "@/next/blob-cache";
 import log from "@/next/log";
 import { Events, eventBus } from "@ente/shared/events";
 import InMemoryStore from "@ente/shared/storage/InMemoryStore";
-import { clearCaches } from "@ente/shared/storage/cache";
 import { clearFiles } from "@ente/shared/storage/localForage/helpers";
 import { clearData } from "@ente/shared/storage/localStorage";
 import { clearKeys } from "@ente/shared/storage/sessionStorage";
