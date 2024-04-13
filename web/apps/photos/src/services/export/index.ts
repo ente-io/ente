@@ -34,7 +34,7 @@ import {
     mergeMetadata,
     splitFilenameAndExtension,
 } from "utils/file";
-import { safeDirectoryName, sanitizedUniqueFileName } from "utils/native-fs";
+import { safeDirectoryName, safeFileName } from "utils/native-fs";
 import { getAllLocalCollections } from "../collectionService";
 import downloadManager from "../download";
 import { getAllLocalFiles } from "../fileService";
@@ -1057,7 +1057,7 @@ class ExportService {
                     file,
                 );
             } else {
-                const fileExportName = await sanitizedUniqueFileName(
+                const fileExportName = await safeFileName(
                     collectionExportPath,
                     file.metadata.title,
                 );
@@ -1096,11 +1096,11 @@ class ExportService {
     ) {
         const fileBlob = await new Response(fileStream).blob();
         const livePhoto = await decodeLivePhoto(file, fileBlob);
-        const imageExportName = await sanitizedUniqueFileName(
+        const imageExportName = await safeFileName(
             collectionExportPath,
             livePhoto.imageNameTitle,
         );
-        const videoExportName = await sanitizedUniqueFileName(
+        const videoExportName = await safeFileName(
             collectionExportPath,
             livePhoto.videoNameTitle,
         );

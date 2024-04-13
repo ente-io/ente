@@ -1,7 +1,10 @@
 import { ensureElectron } from "@/next/electron";
+import { nameAndExtension } from "@/next/file";
 import sanitize from "sanitize-filename";
-import { exportTrashDirectoryName } from "services/export";
-import { splitFilenameAndExtension } from "utils/file";
+import {
+    exportMetadataDirectoryName,
+    exportTrashDirectoryName,
+} from "services/export";
 
 /**
  * Sanitize string for use as file or directory name.
@@ -14,8 +17,8 @@ export const sanitizeFilename = (s: string) =>
     sanitize(s, { replacement: "_" });
 
 /**
- * Return a new unique directory name based on {@link name} that is not the same
- * as any existing directory in the given {@link directoryPath}.
+ * Return a new sanitized and unique directory name based on {@link name} that
+ * is not the same as any existing item in the given {@link directoryPath}.
  *
  * We also ensure we don't return names which might collide with our own special
  * directories.
@@ -30,11 +33,16 @@ export const safeDirectoryName = async (
     directoryPath: string,
     name: string,
 ): Promise<string> => {
+    const specialDirectoryNames = [
+        exportTrashDirectoryName,
+        exportMetadataDirectoryName,
+    ];
+
     let result = sanitizeFilename(name);
     let count = 1;
     while (
         (await exists(`${directoryPath}/${result}`)) ||
-        result == exportTrashDirectoryName
+        specialDirectoryNames.includes(result)
     ) {
         result = `${sanitizeFilename(name)}(${count})`;
         count++;
@@ -43,28 +51,22 @@ export const safeDirectoryName = async (
 };
 
 /**
- * Return a new unique file name based on {@link name} that is not the same as
- * any existing directory in the given {@link directoryPath}.
+ * Return a new sanitized and unique file name based on {@link name} that is not
+ * the same as any existing item in the given {@link directoryPath}.
  *
  * This function only works when we are running inside an electron app.
  * @see {@link safeDirectoryName}.
  */
-export const sanitizedUniqueFileName = async (
-    directoryPath: string,
-    name: string,
-) => {
-    let fileExportName = sanitizeFilename(name);
+export const safeFileName = async (directoryPath: string, name: string) => {
+    let result = sanitizeFilename(name);
     let count = 1;
-    while (await exists(`${directoryPath}/${fileExportName}`)) {
-        const filenameParts = splitFilenameAndExtension(sanitizeFilename(name));
-        if (filenameParts[1]) {
-            fileExportName = `${filenameParts[0]}(${count}).${filenameParts[1]}`;
-        } else {
-            fileExportName = `${filenameParts[0]}(${count})`;
-        }
+    while (await exists(`${directoryPath}/${result}`)) {
+        const [fn, ext] = nameAndExtension(sanitizeFilename(name));
+        if (ext) result = `${fn}(${count}).${ext}`;
+        else result = `${fn}(${count})`;
         count++;
     }
-    return fileExportName;
+    return result;
 };
 
 const exists = (path: string) => ensureElectron().fs.exists(path);

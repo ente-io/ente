@@ -52,7 +52,7 @@ import {
 import { VISIBILITY_STATE } from "types/magicMetadata";
 import { FileTypeInfo } from "types/upload";
 import { isArchivedFile, updateMagicMetadata } from "utils/magicMetadata";
-import { sanitizedUniqueFileName } from "utils/native-fs";
+import { safeFileName } from "utils/native-fs";
 
 const WAIT_TIME_IMAGE_CONVERSION = 30 * 1000;
 
@@ -812,7 +812,7 @@ async function downloadFileDesktop(
     if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
         const fileBlob = await new Response(updatedFileStream).blob();
         const livePhoto = await decodeLivePhoto(file, fileBlob);
-        const imageExportName = await sanitizedUniqueFileName(
+        const imageExportName = await safeFileName(
             downloadPath,
             livePhoto.imageNameTitle,
         );
@@ -822,7 +822,7 @@ async function downloadFileDesktop(
             imageStream,
         );
         try {
-            const videoExportName = await sanitizedUniqueFileName(
+            const videoExportName = await safeFileName(
                 downloadPath,
                 livePhoto.videoNameTitle,
             );
@@ -836,7 +836,7 @@ async function downloadFileDesktop(
             throw e;
         }
     } else {
-        const fileExportName = await sanitizedUniqueFileName(
+        const fileExportName = await safeFileName(
             downloadPath,
             file.metadata.title,
         );
