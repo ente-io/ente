@@ -1,9 +1,13 @@
+import { openCache } from "@/next/blob-cache";
 import log from "@/next/log";
+import type { BlobOptions } from "types/image";
 import {
     DetectedFace,
     Face,
     MLSyncContext,
     MLSyncFileContext,
+    type FaceCrop,
+    type StoredFaceCrop,
 } from "types/machineLearning";
 import { imageBitmapToBlob } from "utils/image";
 import {
@@ -14,7 +18,6 @@ import {
     getOriginalImageBitmap,
     isDifferentOrOld,
 } from "utils/machineLearning";
-import { storeFaceCrop } from "utils/machineLearning/faceCrop";
 import mlIDbStorage from "utils/storage/mlIDbStorage";
 import ReaderService from "./readerService";
 
@@ -225,21 +228,13 @@ class FaceService {
             face.detection,
             syncContext.config.faceCrop,
         );
-        try {
-            face.crop = await storeFaceCrop(
-                face.id,
-                faceCrop,
-                syncContext.config.faceCrop.blobOptions,
-            );
-        } catch (e) {
-            // TODO(MR): Temporarily ignoring errors about failing cache puts
-            // when using a custom scheme in Electron. Needs an alternative
-            // approach, perhaps OPFS.
-            console.error(
-                "Ignoring error when caching face crop, the face crop will not be available",
-                e,
-            );
-        }
+
+        face.crop = await storeFaceCrop(
+            face.id,
+            faceCrop,
+            syncContext.config.faceCrop.blobOptions,
+        );
+
         const blob = await imageBitmapToBlob(faceCrop.image);
         faceCrop.image.close();
         return blob;
@@ -310,3 +305,18 @@ class FaceService {
 }
 
 export default new FaceService();
+
+const storeFaceCrop = async (
+    faceId: string,
+    faceCrop: FaceCrop,
+    blobOptions: BlobOptions,
+): Promise<StoredFaceCrop> => {
+    const faceCropBlob = await imageBitmapToBlob(faceCrop.image, blobOptions);
+    const faceCropUrl = `/${faceId}`;
+    const faceCropCache = await openCache("face-crops");
+    await faceCropCache.put(faceCropUrl, faceCropBlob);
+    return {
+        imageUrl: faceCropUrl,
+        imageBox: faceCrop.imageBox,
+    };
+};

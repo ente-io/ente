@@ -1,12 +1,5 @@
-import { openCache } from "@/next/blob-cache";
-import { BlobOptions } from "types/image";
-import {
-    FaceAlignment,
-    FaceCrop,
-    FaceCropConfig,
-    StoredFaceCrop,
-} from "types/machineLearning";
-import { cropWithRotation, imageBitmapToBlob } from "utils/image";
+import { FaceAlignment, FaceCrop, FaceCropConfig } from "types/machineLearning";
+import { cropWithRotation } from "utils/image";
 import { enlargeBox } from ".";
 import { Box } from "../../../thirdparty/face-api/classes";
 
@@ -31,20 +24,5 @@ export function getFaceCrop(
     return {
         image: faceImageBitmap,
         imageBox: paddedBox,
-    };
-}
-
-export async function storeFaceCrop(
-    faceId: string,
-    faceCrop: FaceCrop,
-    blobOptions: BlobOptions,
-): Promise<StoredFaceCrop> {
-    const faceCropBlob = await imageBitmapToBlob(faceCrop.image, blobOptions);
-    const faceCropUrl = `/${faceId}`;
-    const faceCropCache = await openCache("face-crops");
-    await faceCropCache.put(faceCropUrl, faceCropBlob);
-    return {
-        imageUrl: faceCropUrl,
-        imageBox: faceCrop.imageBox,
     };
 }
