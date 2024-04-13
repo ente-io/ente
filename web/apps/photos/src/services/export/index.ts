@@ -36,8 +36,8 @@ import {
 } from "utils/file";
 import {
     ENTE_TRASH_FOLDER,
-    getUniqueCollectionExportName,
-    getUniqueFileExportName,
+    sanitizedUniqueFileName,
+    santizedUniqueDirectoryName,
 } from "utils/native-fs";
 import { getAllLocalCollections } from "../collectionService";
 import downloadManager from "../download";
@@ -485,7 +485,7 @@ class ExportService {
                         collectionIDExportNameMap.get(collection.id);
                     const oldCollectionExportPath = `${exportFolder}/${oldCollectionExportName}`;
                     const newCollectionExportName =
-                        await getUniqueCollectionExportName(
+                        await santizedUniqueDirectoryName(
                             exportFolder,
                             getCollectionUserFacingName(collection),
                         );
@@ -1009,7 +1009,7 @@ class ExportService {
     ) {
         await this.verifyExportFolderExists(exportFolder);
         const collectionName = collectionIDNameMap.get(collectionID);
-        const collectionExportName = await getUniqueCollectionExportName(
+        const collectionExportName = await santizedUniqueDirectoryName(
             exportFolder,
             collectionName,
         );
@@ -1047,7 +1047,7 @@ class ExportService {
                     file,
                 );
             } else {
-                const fileExportName = await getUniqueFileExportName(
+                const fileExportName = await sanitizedUniqueFileName(
                     collectionExportPath,
                     file.metadata.title,
                 );
@@ -1086,11 +1086,11 @@ class ExportService {
     ) {
         const fileBlob = await new Response(fileStream).blob();
         const livePhoto = await decodeLivePhoto(file, fileBlob);
-        const imageExportName = await getUniqueFileExportName(
+        const imageExportName = await sanitizedUniqueFileName(
             collectionExportPath,
             livePhoto.imageNameTitle,
         );
-        const videoExportName = await getUniqueFileExportName(
+        const videoExportName = await sanitizedUniqueFileName(
             collectionExportPath,
             livePhoto.videoNameTitle,
         );

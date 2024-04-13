@@ -80,7 +80,7 @@ export interface Electron {
      *
      * If no such key is found, return `undefined`.
      *
-     * @see {@link saveEncryptionKey}.
+     * See also: {@link saveEncryptionKey}.
      */
     encryptionKey: () => Promise<string | undefined>;
 
