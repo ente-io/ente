@@ -1,4 +1,3 @@
-import { cached } from "@/next/blob-cache";
 import log from "@/next/log";
 import { FILE_TYPE } from "constants/file";
 import PQueue from "p-queue";
@@ -143,22 +142,9 @@ async function getOriginalConvertedFile(file: EnteFile, queue?: PQueue) {
     }
 }
 
-export async function getOriginalImageBitmap(
-    file: EnteFile,
-    queue?: PQueue,
-    useCache: boolean = false,
-) {
-    let fileBlob;
-
-    if (useCache) {
-        fileBlob = await cached("files", file.id.toString(), () => {
-            return getOriginalConvertedFile(file, queue);
-        });
-    } else {
-        fileBlob = await getOriginalConvertedFile(file, queue);
-    }
+export async function getOriginalImageBitmap(file: EnteFile, queue?: PQueue) {
+    const fileBlob = await getOriginalConvertedFile(file, queue);
     log.info("[MLService] Got file: ", file.id.toString());
-
     return getImageBlobBitmap(fileBlob);
 }
 
