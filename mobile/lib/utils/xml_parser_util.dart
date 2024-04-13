@@ -1,6 +1,5 @@
 // ignore_for_file: implementation_imports
 
-import "package:xml/src/xml/entities/named_entities.dart";
 import "package:xml/xml.dart";
 
 // used for classes that can be converted to xml
