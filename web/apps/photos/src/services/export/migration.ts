@@ -232,25 +232,23 @@ async function migrateFiles(
     collectionIDPathMap: Map<number, string>,
 ) {
     for (const file of files) {
-        const oldFileSavePath = getOldFileSavePath(
-            collectionIDPathMap.get(file.collectionID),
-            file,
-        );
+        const collectionPath = collectionIDPathMap.get(file.collectionID);
+        const oldFileSavePath = getOldFileSavePath(collectionPath, file);
         const oldFileMetadataSavePath = getOldFileMetadataSavePath(
-            collectionIDPathMap.get(file.collectionID),
+            collectionPath,
             file,
         );
         const newFileSaveName = await safeFileName(
-            collectionIDPathMap.get(file.collectionID),
+            collectionPath,
             file.metadata.title,
         );
 
         const newFileSavePath = getFileSavePath(
-            collectionIDPathMap.get(file.collectionID),
+            collectionPath,
             newFileSaveName,
         );
 
-        const newFileMetadataSavePath = `${collectionIDPathMap.get(file.collectionID)}/${exportMetadataDirectoryName}/${newFileSaveName}.json`;
+        const newFileMetadataSavePath = `${collectionPath}/${exportMetadataDirectoryName}/${newFileSaveName}.json`;
 
         if (!(await exportService.exists(oldFileSavePath))) {
             continue;
