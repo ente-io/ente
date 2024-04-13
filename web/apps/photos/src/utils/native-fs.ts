@@ -1,3 +1,11 @@
+/**
+ * @file Native filesystem access using custom Node.js functionality provided by
+ * our desktop app.
+ *
+ * Precondition: Unless mentioned otherwise, the functions in these file only
+ * work when we are running in our desktop app.
+ */
+
 import { ensureElectron } from "@/next/electron";
 import { nameAndExtension } from "@/next/file";
 import sanitize from "sanitize-filename";
@@ -69,4 +77,8 @@ export const safeFileName = async (directoryPath: string, name: string) => {
     return result;
 };
 
-const exists = (path: string) => ensureElectron().fs.exists(path);
+/**
+ * Return true if an item exists an the given {@link path} on the user's local
+ * filesystem.
+ */
+export const exists = (path: string) => ensureElectron().fs.exists(path);
