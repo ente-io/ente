@@ -1110,7 +1110,7 @@ class ExportService {
                 file,
             );
             await ensureElectron().saveStreamToDisk(
-                getFileExportPath(collectionExportPath, imageExportName),
+                `${collectionExportPath}/${imageExportName}`,
                 imageStream,
             );
 
@@ -1122,12 +1122,12 @@ class ExportService {
             );
             try {
                 await ensureElectron().saveStreamToDisk(
-                    getFileExportPath(collectionExportPath, videoExportName),
+                    `${collectionExportPath}/${videoExportName}`,
                     videoStream,
                 );
             } catch (e) {
                 await ensureElectron().deleteFile(
-                    getFileExportPath(collectionExportPath, imageExportName),
+                    `${collectionExportPath}/${imageExportName}`,
                 );
                 throw e;
             }
@@ -1192,8 +1192,3 @@ class ExportService {
 }
 
 export default new ExportService();
-
-export const getFileExportPath = (
-    collectionExportPath: string,
-    fileExportName: string,
-) => `${collectionExportPath}/${fileExportName}`;
