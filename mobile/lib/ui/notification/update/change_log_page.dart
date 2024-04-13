@@ -122,7 +122,7 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
     final List<ChangeLogEntry> items = [];
     items.addAll([
       ChangeLogEntry(
-        "Improved Performance for Large Galleries",
+        "Improved Performance for Large Galleries ✨",
         'We\'ve made significant improvements to how quickly galleries load and'
             ' with less stutter, especially for those with a lot of photos and videos.',
       ),
