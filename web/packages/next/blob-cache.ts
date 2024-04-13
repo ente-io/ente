@@ -60,11 +60,12 @@ export interface BlobCache {
     get: (key: string) => Promise<Blob | undefined>;
     match: (key: string) => Promise<Response | undefined>;
     /**
-     * Add the given {@link key}-value ({@link data}) pair to the cache.
+     * Add the given {@link key}-value ({@link blob}) pair to the cache.
      */
+    put2: (key: string, blob: Blob) => Promise<void>;
     put: (key: string, data: Response) => Promise<void>;
     /**
-     * Delete the data corresponding to the given {@link key}.
+     * Delete the blob corresponding to the given {@link key}.
      *
      * The returned promise resolves to `true` if a cache entry was found,
      * otherwise it resolves to `false`.
@@ -125,11 +126,13 @@ const openWebCache = async (name: BlobCacheNamespace) => {
     return {
         get: async (key: string) => {
             const res = await cache.match(key);
+            console.log("found cache hit", key, res);
             return await res?.blob();
         },
         match: (key: string) => {
             return cache.match(key);
         },
+        put2: (key: string, blob: Blob) => cache.put(key, new Response(blob)),
         put: (key: string, data: Response) => {
             return cache.put(key, data);
         },
@@ -170,10 +173,15 @@ const openOPFSCacheWeb = async (name: BlobCacheNamespace) => {
         match: (key: string) => {
             return cache.match(key);
         },
+        put2: async (key: string, blob: Blob) => {
+            const fileHandle = await _cache.getFileHandle(key, {
+                create: true,
+            });
+            const writable = await fileHandle.createWritable();
+            await writable.write(blob);
+            await writable.close();
+        },
         put: async (key: string, data: Response) => {
-            // const fileHandle = await _cache.getFileHandle(key, { create: true })
-            // await fileHandle.write(data);
-            // await fileHandle.close();
             await cache.put(key, data);
         },
         delete: (key: string) => {
@@ -196,23 +204,12 @@ export async function cached(
     get: () => Promise<Blob>,
 ): Promise<Blob> {
     const cache = await openCache(cacheName);
-    const cacheResponse = await cache.match(id);
+    const cachedBlob = await cache.get(id);
+    if (cachedBlob) return cachedBlob;
 
-    let result: Blob;
-    if (cacheResponse) {
-        result = await cacheResponse.blob();
-    } else {
-        result = await get();
-
-        try {
-            await cache.put(id, new Response(result));
-        } catch (e) {
-            // TODO: handle storage full exception.
-            console.error("Error while storing file to cache: ", id);
-        }
-    }
-
-    return result;
+    const blob = await get();
+    await cache.put2(id, blob);
+    return blob;
 }
 
 /**

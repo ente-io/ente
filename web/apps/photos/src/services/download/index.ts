@@ -128,20 +128,6 @@ class DownloadManagerImpl {
         this.progressUpdater = progressUpdater;
     }
 
-    private async getCachedThumbnail(fileID: number) {
-        try {
-            const cacheResp: Response = await this.thumbnailCache?.match(
-                fileID.toString(),
-            );
-
-            if (cacheResp) {
-                return new Uint8Array(await cacheResp.arrayBuffer());
-            }
-        } catch (e) {
-            log.error("failed to get cached thumbnail", e);
-            throw e;
-        }
-    }
     private async getCachedFile(file: EnteFile): Promise<Response> {
         const fileCache = this.fileCache;
         if (!fileCache) return null;
