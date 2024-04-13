@@ -227,21 +227,18 @@ class FaceService {
         );
 
         const blobOptions = syncContext.config.faceCrop.blobOptions;
+        const blob = await imageBitmapToBlob(faceCrop.image, blobOptions);
 
-        const faceCropBlob = await imageBitmapToBlob(
-            faceCrop.image,
-            blobOptions,
-        );
         const faceCropUrl = `/${face.id}`;
         const faceCropCache = await openCache("face-crops");
-        await faceCropCache.put(faceCropUrl, faceCropBlob);
+        await faceCropCache.put(faceCropUrl, blob);
         face.crop = {
             imageUrl: faceCropUrl,
             imageBox: faceCrop.imageBox,
         };
 
-        const blob = await imageBitmapToBlob(faceCrop.image);
         faceCrop.image.close();
+
         return blob;
     }
 
