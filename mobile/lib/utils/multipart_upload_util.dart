@@ -135,7 +135,7 @@ Future<void> completeMultipartUpload(
           ),
         )
         .toList(),
-  });
+  }).replaceAll('"', '').replaceAll('&quot;', '');
 
   try {
     await _dio.post(
