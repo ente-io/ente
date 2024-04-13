@@ -745,10 +745,7 @@ class ExportService {
                                 image: imageExportName,
                                 video: videoExportName,
                             } = parseLivePhotoExportName(fileExportName);
-                            const imageExportPath = getFileExportPath(
-                                collectionExportPath,
-                                imageExportName,
-                            );
+                            const imageExportPath = `${collectionExportPath}/${imageExportName}`;
                             log.info(
                                 `moving image file ${imageExportPath} to trash folder`,
                             );
@@ -777,10 +774,7 @@ class ExportService {
                                 );
                             }
 
-                            const videoExportPath = getFileExportPath(
-                                collectionExportPath,
-                                videoExportName,
-                            );
+                            const videoExportPath = `${collectionExportPath}/${videoExportName}`;
                             log.info(
                                 `moving video file ${videoExportPath} to trash folder`,
                             );
@@ -807,10 +801,7 @@ class ExportService {
                                 );
                             }
                         } else {
-                            const fileExportPath = getFileExportPath(
-                                collectionExportPath,
-                                fileExportName,
-                            );
+                            const fileExportPath = `${collectionExportPath}/${fileExportName}`;
                             const trashedFilePath =
                                 await getTrashedFileExportPath(
                                     exportDir,
@@ -1071,7 +1062,7 @@ class ExportService {
                         file,
                     );
                     await ensureElectron().saveStreamToDisk(
-                        getFileExportPath(collectionExportPath, fileExportName),
+                        `${collectionExportPath}/${fileExportName}`,
                         updatedFileStream,
                     );
                 } catch (e) {
