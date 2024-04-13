@@ -44,19 +44,11 @@ export async function storeFaceCrop(
     blobOptions: BlobOptions,
 ): Promise<StoredFaceCrop> {
     const faceCropBlob = await imageBitmapToBlob(faceCrop.image, blobOptions);
-    return storeFaceCropForBlob(faceId, faceCrop.imageBox, faceCropBlob);
-}
-
-async function storeFaceCropForBlob(
-    faceId: string,
-    imageBox: Box,
-    faceCropBlob: Blob,
-) {
     const faceCropUrl = `/${faceId}`;
     const faceCropCache = await openCache("face-crops");
     await faceCropCache.put(faceCropUrl, faceCropBlob);
     return {
         imageUrl: faceCropUrl,
-        imageBox: imageBox,
+        imageBox: faceCrop.imageBox,
     };
 }

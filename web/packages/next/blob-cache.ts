@@ -128,7 +128,6 @@ const openWebCache = async (name: BlobCacheNamespace) => {
     return {
         get: async (key: string) => {
             const res = await cache.match(key);
-            console.log("found cache hit", key, res);
             return await res?.blob();
         },
         put: (key: string, blob: Blob) => cache.put(key, new Response(blob)),
