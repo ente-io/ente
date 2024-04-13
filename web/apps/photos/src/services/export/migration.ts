@@ -513,9 +513,6 @@ const getUniqueCollectionFolderPath = async (
     return collectionFolderPath;
 };
 
-export const getMetadataFolderPath = (collectionFolderPath: string) =>
-    `${collectionFolderPath}/${exportMetadataDirectoryName}`;
-
 const getUniqueFileSaveName = async (
     collectionPath: string,
     filename: string,
