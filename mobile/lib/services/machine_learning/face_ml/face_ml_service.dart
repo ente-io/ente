@@ -367,11 +367,10 @@ class FaceMlService {
     _logger.info("`clusterAllImages()` called");
 
     try {
+      // Get a sense of the total number of faces in the database
+      final int totalFaces = await FaceMLDataDB.instance
+          .getTotalFaceCount(minFaceScore: minFaceScore);
       if (clusterInBuckets) {
-        // Get a sense of the total number of faces in the database
-        final int totalFaces = await FaceMLDataDB.instance
-            .getTotalFaceCount(minFaceScore: minFaceScore);
-
         // read the creation times from Files DB, in a map from fileID to creation time
         final fileIDToCreationTime =
             await FilesDB.instance.getFileIDToCreationTime();
@@ -419,9 +418,6 @@ class FaceMlService {
           bucket++;
         }
       } else {
-        final int totalFaces = await FaceMLDataDB.instance
-            .getTotalFaceCount(minFaceScore: minFaceScore);
-
         // Read all the embeddings from the database, in a map from faceID to embedding
         final clusterStartTime = DateTime.now();
         final faceIdToEmbedding =
@@ -463,6 +459,7 @@ class FaceMlService {
         _logger.info('Done updating FaceIDs with clusterIDs in the DB, in '
             '${DateTime.now().difference(clusterDoneTime).inSeconds} seconds');
       }
+      _logger.info('clusterAllImages() finished');
     } catch (e, s) {
       _logger.severe("`clusterAllImages` failed", e, s);
     }

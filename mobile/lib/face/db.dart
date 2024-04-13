@@ -513,6 +513,22 @@ class FaceMLDataDB {
     return maps.first['count'] as int;
   }
 
+  Future<double> getClusteredToTotalFacesRatio() async {
+    final db = await instance.sqliteAsyncDB;
+
+    final List<Map<String, dynamic>> totalFacesMaps = await db.getAll(
+      'SELECT COUNT(*) as count FROM $facesTable WHERE $faceScore > $kMinHighQualityFaceScore AND $faceBlur > $kLaplacianThreshold',
+    );
+    final int totalFaces = totalFacesMaps.first['count'] as int;
+
+    final List<Map<String, dynamic>> clusteredFacesMaps = await db.getAll(
+      'SELECT COUNT(DISTINCT $fcFaceId) as count FROM $faceClustersTable',
+    );
+    final int clusteredFaces = clusteredFacesMaps.first['count'] as int;
+
+    return clusteredFaces / totalFaces;
+  }
+
   Future<int> getBlurryFaceCount([
     int blurThreshold = kLaplacianThreshold,
   ]) async {
