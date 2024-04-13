@@ -362,7 +362,7 @@ class FaceMlService {
 
   Future<void> clusterAllImages({
     double minFaceScore = kMinHighQualityFaceScore,
-    bool clusterInBuckets = false,
+    bool clusterInBuckets = true,
   }) async {
     _logger.info("`clusterAllImages()` called");
 
