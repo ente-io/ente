@@ -29,18 +29,18 @@ class _LoginPageState extends State<LoginPage> {
   final Logger _logger = Logger('_LoginPageState');
 
   @override
-  void initState() {
+  void didChangeDependencies() {
+    super.didChangeDependencies();
     if ((_config.getEmail() ?? '').isNotEmpty) {
       updateEmail(_config.getEmail()!);
     } else if (kDebugMode) {
       updateEmail(const String.fromEnvironment("email"));
     }
-    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    final isKeypadOpen = MediaQuery.of(context).viewInsets.bottom > 100;
+    final isKeypadOpen = MediaQuery.viewInsetsOf(context).bottom > 100;
 
     FloatingActionButtonLocation? fabLocation() {
       if (isKeypadOpen) {
