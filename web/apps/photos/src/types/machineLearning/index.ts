@@ -90,7 +90,7 @@ export interface FaceCrop {
 }
 
 export interface StoredFaceCrop {
-    imageUrl: string;
+    cacheKey: string;
     imageBox: Box;
 }
 
@@ -128,7 +128,7 @@ export interface Person {
     name?: string;
     files: Array<number>;
     displayFaceId?: string;
-    displayImageUrl?: string;
+    faceCropCacheKey?: string;
 }
 
 export interface MlFileData {

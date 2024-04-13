@@ -229,13 +229,8 @@ class FaceService {
         const blobOptions = syncContext.config.faceCrop.blobOptions;
         const blob = await imageBitmapToBlob(faceCrop.image, blobOptions);
 
-        const faceCropUrl = `/${face.id}`;
-        const faceCropCache = await openCache("face-crops");
-        await faceCropCache.put(faceCropUrl, blob);
-        face.crop = {
-            imageUrl: faceCropUrl,
-            imageBox: faceCrop.imageBox,
-        };
+        const cache = await openCache("face-crops");
+        await cache.put(face.id, blob);
 
         faceCrop.image.close();
 

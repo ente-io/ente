@@ -61,8 +61,8 @@ export const PeopleList = React.memo((props: PeopleListProps) => {
                     }
                 >
                     <FaceCropImageView
-                        url={person.displayImageUrl}
                         faceId={person.displayFaceId}
+                        cacheKey={person.faceCropCacheKey}
                     />
                 </FaceChip>
             ))}
@@ -141,7 +141,7 @@ export function UnidentifiedFaces(props: {
                         <FaceChip key={index}>
                             <FaceCropImageView
                                 faceId={face.id}
-                                url={face.crop?.imageUrl}
+                                cacheKey={face.crop?.cacheKey}
                             />
                         </FaceChip>
                     ))}
@@ -151,13 +151,13 @@ export function UnidentifiedFaces(props: {
 }
 
 interface FaceCropImageViewProps {
-    url: string;
     faceId: string;
+    cacheKey?: string;
 }
 
 const FaceCropImageView: React.FC<FaceCropImageViewProps> = ({
-    url,
     faceId,
+    cacheKey,
 }) => {
     const [objectURL, setObjectURL] = useState<string | undefined>();
 
@@ -165,22 +165,18 @@ const FaceCropImageView: React.FC<FaceCropImageViewProps> = ({
         let didCancel = false;
 
         async function loadImage() {
-            let blob: Blob;
-            if (!url) {
-                blob = undefined;
-            } else {
-                blob = await cachedOrNew("face-crops", url, async () => {
-                    const user = await ensureLocalUser();
-                    return machineLearningService.regenerateFaceCrop(
-                        user.token,
-                        user.id,
-                        faceId,
-                    );
-                });
-            }
-
-            if (didCancel) return;
-            setObjectURL(blob ? URL.createObjectURL(blob) : undefined);
+            const blob = cacheKey
+                ? await cachedOrNew("face-crops", cacheKey, async () => {
+                      const user = await ensureLocalUser();
+                      return machineLearningService.regenerateFaceCrop(
+                          user.token,
+                          user.id,
+                          faceId,
+                      );
+                  })
+                : undefined;
+            if (!didCancel)
+                setObjectURL(blob ? URL.createObjectURL(blob) : undefined);
         }
 
         loadImage();
@@ -189,7 +185,7 @@ const FaceCropImageView: React.FC<FaceCropImageViewProps> = ({
             didCancel = true;
             if (objectURL) URL.revokeObjectURL(objectURL);
         };
-    }, [url, faceId]);
+    }, [faceId, cacheKey]);
 
     return objectURL ? (
         <img src={objectURL} />
