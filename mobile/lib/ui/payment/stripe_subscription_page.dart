@@ -537,21 +537,6 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
   }
 
   Widget _showSubscriptionToggle() {
-    Widget planText(String title, bool reduceOpacity) {
-      return Padding(
-        padding: const EdgeInsets.only(left: 4, right: 4),
-        child: Text(
-          title,
-          style: TextStyle(
-            color: Theme.of(context)
-                .colorScheme
-                .onSurface
-                .withOpacity(reduceOpacity ? 0.5 : 1.0),
-          ),
-        ),
-      );
-    }
-
     return Container(
       padding: const EdgeInsets.only(left: 8, right: 8, top: 2, bottom: 2),
       margin: const EdgeInsets.only(bottom: 6),
@@ -561,18 +546,29 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                planText(S.of(context).monthly, _showYearlyPlan),
-                Switch(
-                  value: _showYearlyPlan,
-                  activeColor: Colors.white,
-                  inactiveThumbColor: Colors.white,
-                  activeTrackColor: getEnteColorScheme(context).strokeMuted,
-                  onChanged: (value) async {
-                    _showYearlyPlan = value;
-                    await _filterStripeForUI();
+                SegmentedButton(
+                  style: SegmentedButton.styleFrom(
+                    selectedBackgroundColor:
+                        getEnteColorScheme(context).fillMuted,
+                    selectedForegroundColor:
+                        getEnteColorScheme(context).textBase,
+                  ),
+                  segments: <ButtonSegment<bool>>[
+                    ButtonSegment(
+                      label: Text(S.of(context).monthly),
+                      value: false,
+                    ),
+                    ButtonSegment(
+                      label: Text(S.of(context).yearly),
+                      value: true,
+                    ),
+                  ],
+                  selected: {_showYearlyPlan},
+                  onSelectionChanged: (p0) {
+                    _showYearlyPlan = p0.first;
+                    _filterStripeForUI();
                   },
                 ),
-                planText(S.of(context).yearly, !_showYearlyPlan),
               ],
             ),
           ),
