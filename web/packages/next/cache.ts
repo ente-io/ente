@@ -82,6 +82,35 @@ export interface EnteCache {
 export const openCache = async (name: CacheName): Promise<EnteCache> =>
     isElectron() ? openOPFSCacheWeb(name) : openWebCache(name);
 
+/**
+ * [Note: ArrayBuffer vs Blob vs Uint8Array]
+ *
+ * ArrayBuffers are in memory, while blobs are unreified, and can directly point
+ * to on disk objects too.
+ *
+ * If we are just passing data around without necessarily needing to manipulate
+ * it, and we already have a blob, it's best to just pass that blob. Further,
+ * blobs also retains the file's encoding information , and are thus a layer
+ * above array buffers which are just raw byte sequences.
+ *
+ * ArrayBuffers are not directly manipulatable, which is where some sort of a
+ * typed array or a data view comes into the picture. The typed `Uint8Array` is
+ * a common way.
+ *
+ * To convert from ArrayBuffer to Uint8Array,
+ *
+ *     new Uint8Array(arrayBuffer)
+ *
+ * Blobs are immutable, but a usual scenario is storing an entire file in a
+ * blob, and when the need comes to display it, we can obtain a URL for it using
+ *
+ *     URL.createObjectURL(blob)
+ *
+ * Refs:
+ * - https://github.com/yigitunallar/arraybuffer-vs-blob
+ * - https://stackoverflow.com/questions/11821096/what-is-the-difference-between-an-arraybuffer-and-a-blob
+ */
+
 /** An implementation of {@link EnteCache} using Web Cache APIs */
 const openWebCache = async (name: CacheName) => {
     const cache = await caches.open(name);
