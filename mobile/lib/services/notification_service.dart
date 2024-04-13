@@ -23,9 +23,8 @@ class NotificationService {
   Future<void> init(
     void Function(
       NotificationResponse notificationResponse,
-    )
-        onNotificationTapped,
-        SharedPreferences preferences,
+    ) onNotificationTapped,
+    SharedPreferences preferences,
   ) async {
     _preferences = preferences;
     const androidSettings = AndroidInitializationSettings('notification_icon');
@@ -72,7 +71,7 @@ class NotificationService {
       result = await _notificationsPlugin
           .resolvePlatformSpecificImplementation<
               AndroidFlutterLocalNotificationsPlugin>()
-          ?.requestPermission();
+          ?.requestNotificationsPermission();
     }
     if (result != null) {
       await _preferences.setBool(keyGrantedNotificationPermission, result);
