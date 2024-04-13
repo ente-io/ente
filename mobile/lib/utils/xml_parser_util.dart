@@ -16,7 +16,6 @@ String convertJs2Xml(Map<String, dynamic> json) {
   return builder.buildDocument().toXmlString(
         pretty: true,
         indent: '    ',
-        entityMapping: defaultMyEntityMapping,
       );
 }
 
