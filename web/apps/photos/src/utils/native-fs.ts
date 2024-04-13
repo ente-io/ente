@@ -1,44 +1,84 @@
+/**
+ * @file Native filesystem access using custom Node.js functionality provided by
+ * our desktop app.
+ *
+ * Precondition: Unless mentioned otherwise, the functions in these file only
+ * work when we are running in our desktop app.
+ */
+
+import { ensureElectron } from "@/next/electron";
+import { nameAndExtension } from "@/next/file";
 import sanitize from "sanitize-filename";
-import exportService from "services/export";
-import { splitFilenameAndExtension } from "utils/file";
+import {
+    exportMetadataDirectoryName,
+    exportTrashDirectoryName,
+} from "services/export";
 
-export const ENTE_TRASH_FOLDER = "Trash";
+/**
+ * Sanitize string for use as file or directory name.
+ *
+ * Return a string suitable for use as a file or directory name by replacing
+ * directory separators and invalid characters in the input string {@link s}
+ * with "_".
+ */
+export const sanitizeFilename = (s: string) =>
+    sanitize(s, { replacement: "_" });
 
-export const sanitizeName = (name: string) =>
-    sanitize(name, { replacement: "_" });
-
-export const getUniqueCollectionExportName = async (
-    dir: string,
-    collectionName: string,
+/**
+ * Return a new sanitized and unique directory name based on {@link name} that
+ * is not the same as any existing item in the given {@link directoryPath}.
+ *
+ * We also ensure we don't return names which might collide with our own special
+ * directories.
+ *
+ * This function only works when we are running inside an electron app (since it
+ * requires permissionless access to the native filesystem to find a new
+ * filename that doesn't conflict with any existing items).
+ *
+ * See also: {@link safeDirectoryName}
+ */
+export const safeDirectoryName = async (
+    directoryPath: string,
+    name: string,
 ): Promise<string> => {
-    let collectionExportName = sanitizeName(collectionName);
+    const specialDirectoryNames = [
+        exportTrashDirectoryName,
+        exportMetadataDirectoryName,
+    ];
+
+    let result = sanitizeFilename(name);
     let count = 1;
     while (
-        (await exportService.exists(`${dir}/${collectionExportName}`)) ||
-        collectionExportName === ENTE_TRASH_FOLDER
+        (await exists(`${directoryPath}/${result}`)) ||
+        specialDirectoryNames.includes(result)
     ) {
-        collectionExportName = `${sanitizeName(collectionName)}(${count})`;
+        result = `${sanitizeFilename(name)}(${count})`;
         count++;
     }
-    return collectionExportName;
+    return result;
 };
 
-export const getUniqueFileExportName = async (
-    collectionExportPath: string,
-    filename: string,
-) => {
-    let fileExportName = sanitizeName(filename);
+/**
+ * Return a new sanitized and unique file name based on {@link name} that is not
+ * the same as any existing item in the given {@link directoryPath}.
+ *
+ * This function only works when we are running inside an electron app.
+ * @see {@link safeDirectoryName}.
+ */
+export const safeFileName = async (directoryPath: string, name: string) => {
+    let result = sanitizeFilename(name);
     let count = 1;
-    while (
-        await exportService.exists(`${collectionExportPath}/${fileExportName}`)
-    ) {
-        const filenameParts = splitFilenameAndExtension(sanitizeName(filename));
-        if (filenameParts[1]) {
-            fileExportName = `${filenameParts[0]}(${count}).${filenameParts[1]}`;
-        } else {
-            fileExportName = `${filenameParts[0]}(${count})`;
-        }
+    while (await exists(`${directoryPath}/${result}`)) {
+        const [fn, ext] = nameAndExtension(sanitizeFilename(name));
+        if (ext) result = `${fn}(${count}).${ext}`;
+        else result = `${fn}(${count})`;
         count++;
     }
-    return fileExportName;
+    return result;
 };
+
+/**
+ * Return true if an item exists an the given {@link path} on the user's local
+ * filesystem.
+ */
+export const exists = (path: string) => ensureElectron().fs.exists(path);
