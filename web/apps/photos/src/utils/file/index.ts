@@ -51,8 +51,8 @@ import {
 } from "types/gallery";
 import { VISIBILITY_STATE } from "types/magicMetadata";
 import { FileTypeInfo } from "types/upload";
-import { getUniqueFileExportName } from "utils/export";
 import { isArchivedFile, updateMagicMetadata } from "utils/magicMetadata";
+import { getUniqueFileExportName } from "utils/native-fs";
 
 const WAIT_TIME_IMAGE_CONVERSION = 30 * 1000;
 

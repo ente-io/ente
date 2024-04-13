@@ -42,9 +42,9 @@ import {
 import { EnteFile } from "types/file";
 import { SetFilesDownloadProgressAttributes } from "types/gallery";
 import { SUB_TYPE, VISIBILITY_STATE } from "types/magicMetadata";
-import { getUniqueCollectionExportName } from "utils/export";
 import { downloadFilesWithProgress } from "utils/file";
 import { isArchivedCollection, updateMagicMetadata } from "utils/magicMetadata";
+import { getUniqueCollectionExportName } from "utils/native-fs";
 
 export enum COLLECTION_OPS_TYPE {
     ADD,

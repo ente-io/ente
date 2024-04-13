@@ -21,19 +21,19 @@ import {
 } from "types/export";
 import { EnteFile } from "types/file";
 import { getNonEmptyPersonalCollections } from "utils/collection";
-import {
-    getCollectionIDFromFileUID,
-    getExportRecordFileUID,
-    getLivePhotoExportName,
-    getMetadataFolderExportPath,
-    sanitizeName,
-} from "utils/export";
 import { splitFilenameAndExtension } from "utils/ffmpeg";
 import {
     getIDBasedSortedFiles,
     getPersonalFiles,
     mergeMetadata,
 } from "utils/file";
+import { sanitizeName } from "utils/native-fs";
+import {
+    getCollectionIDFromFileUID,
+    getExportRecordFileUID,
+    getLivePhotoExportName,
+    getMetadataFolderExportPath,
+} from ".";
 import exportService from "./index";
 
 export async function migrateExport(

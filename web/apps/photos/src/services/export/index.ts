@@ -3,55 +3,43 @@ import log from "@/next/log";
 import { CustomError } from "@ente/shared/error";
 import { Events, eventBus } from "@ente/shared/events";
 import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
+import { formatDateTimeShort } from "@ente/shared/time/format";
 import { User } from "@ente/shared/user/types";
 import { sleep } from "@ente/shared/utils";
 import QueueProcessor, {
     CancellationStatus,
     RequestCanceller,
 } from "@ente/shared/utils/queueProcessor";
-import { ExportStage } from "constants/export";
+import { ENTE_METADATA_FOLDER, ExportStage } from "constants/export";
 import { FILE_TYPE } from "constants/file";
 import { Collection } from "types/collection";
 import {
+    CollectionExportNames,
     ExportProgress,
     ExportRecord,
     ExportSettings,
     ExportUIUpdaters,
+    FileExportNames,
 } from "types/export";
 import { EnteFile } from "types/file";
+import { Metadata } from "types/upload";
 import {
     constructCollectionNameMap,
     getCollectionUserFacingName,
     getNonEmptyPersonalCollections,
 } from "utils/collection";
 import {
-    convertCollectionIDExportNameObjectToMap,
-    convertFileIDExportNameObjectToMap,
-    getCollectionExportedFiles,
-    getCollectionIDFromFileUID,
-    getDeletedExportedCollections,
-    getDeletedExportedFiles,
-    getExportRecordFileUID,
-    getFileMetadataExportPath,
-    getGoogleLikeMetadataFile,
-    getLivePhotoExportName,
-    getMetadataFileExportPath,
-    getMetadataFolderExportPath,
-    getRenamedExportedCollections,
-    getTrashedFileExportPath,
-    getUnExportedFiles,
-    getUniqueCollectionExportName,
-    getUniqueFileExportName,
-    isExportInProgress,
-    isLivePhotoExportName,
-    parseLivePhotoExportName,
-} from "utils/export";
-import {
     generateStreamFromArrayBuffer,
     getPersonalFiles,
     getUpdatedEXIFFileForDownload,
     mergeMetadata,
+    splitFilenameAndExtension,
 } from "utils/file";
+import {
+    ENTE_TRASH_FOLDER,
+    getUniqueCollectionExportName,
+    getUniqueFileExportName,
+} from "utils/native-fs";
 import { getAllLocalCollections } from "../collectionService";
 import downloadManager from "../download";
 import { getAllLocalFiles } from "../fileService";
@@ -1216,3 +1204,236 @@ export const resumeExportsIfNeeded = async () => {
         exportService.scheduleExport();
     }
 };
+
+export const getExportRecordFileUID = (file: EnteFile) =>
+    `${file.id}_${file.collectionID}_${file.updationTime}`;
+
+export const getCollectionIDFromFileUID = (fileUID: string) =>
+    Number(fileUID.split("_")[1]);
+
+const convertCollectionIDExportNameObjectToMap = (
+    collectionExportNames: CollectionExportNames,
+): Map<number, string> => {
+    return new Map<number, string>(
+        Object.entries(collectionExportNames ?? {}).map((e) => {
+            return [Number(e[0]), String(e[1])];
+        }),
+    );
+};
+
+const convertFileIDExportNameObjectToMap = (
+    fileExportNames: FileExportNames,
+): Map<string, string> => {
+    return new Map<string, string>(
+        Object.entries(fileExportNames ?? {}).map((e) => {
+            return [String(e[0]), String(e[1])];
+        }),
+    );
+};
+
+const getRenamedExportedCollections = (
+    collections: Collection[],
+    exportRecord: ExportRecord,
+) => {
+    if (!exportRecord?.collectionExportNames) {
+        return [];
+    }
+    const collectionIDExportNameMap = convertCollectionIDExportNameObjectToMap(
+        exportRecord.collectionExportNames,
+    );
+    const renamedCollections = collections.filter((collection) => {
+        if (collectionIDExportNameMap.has(collection.id)) {
+            const currentExportName = collectionIDExportNameMap.get(
+                collection.id,
+            );
+
+            const collectionExportName =
+                getCollectionUserFacingName(collection);
+
+            if (currentExportName === collectionExportName) {
+                return false;
+            }
+            const hasNumberedSuffix = currentExportName.match(/\(\d+\)$/);
+            const currentExportNameWithoutNumberedSuffix = hasNumberedSuffix
+                ? currentExportName.replace(/\(\d+\)$/, "")
+                : currentExportName;
+
+            return (
+                collectionExportName !== currentExportNameWithoutNumberedSuffix
+            );
+        }
+        return false;
+    });
+    return renamedCollections;
+};
+
+const getDeletedExportedCollections = (
+    collections: Collection[],
+    exportRecord: ExportRecord,
+) => {
+    if (!exportRecord?.collectionExportNames) {
+        return [];
+    }
+    const presentCollections = new Set(
+        collections.map((collection) => collection.id),
+    );
+    const deletedExportedCollections = Object.keys(
+        exportRecord?.collectionExportNames,
+    )
+        .map(Number)
+        .filter((collectionID) => {
+            if (!presentCollections.has(collectionID)) {
+                return true;
+            }
+            return false;
+        });
+    return deletedExportedCollections;
+};
+
+const getUnExportedFiles = (
+    allFiles: EnteFile[],
+    exportRecord: ExportRecord,
+) => {
+    if (!exportRecord?.fileExportNames) {
+        return allFiles;
+    }
+    const exportedFiles = new Set(Object.keys(exportRecord?.fileExportNames));
+    const unExportedFiles = allFiles.filter((file) => {
+        if (!exportedFiles.has(getExportRecordFileUID(file))) {
+            return true;
+        }
+        return false;
+    });
+    return unExportedFiles;
+};
+
+const getDeletedExportedFiles = (
+    allFiles: EnteFile[],
+    exportRecord: ExportRecord,
+): string[] => {
+    if (!exportRecord?.fileExportNames) {
+        return [];
+    }
+    const presentFileUIDs = new Set(
+        allFiles?.map((file) => getExportRecordFileUID(file)),
+    );
+    const deletedExportedFiles = Object.keys(
+        exportRecord?.fileExportNames,
+    ).filter((fileUID) => {
+        if (!presentFileUIDs.has(fileUID)) {
+            return true;
+        }
+        return false;
+    });
+    return deletedExportedFiles;
+};
+
+const getCollectionExportedFiles = (
+    exportRecord: ExportRecord,
+    collectionID: number,
+): string[] => {
+    if (!exportRecord?.fileExportNames) {
+        return [];
+    }
+    const collectionExportedFiles = Object.keys(
+        exportRecord?.fileExportNames,
+    ).filter((fileUID) => {
+        const fileCollectionID = Number(fileUID.split("_")[1]);
+        if (fileCollectionID === collectionID) {
+            return true;
+        } else {
+            return false;
+        }
+    });
+    return collectionExportedFiles;
+};
+
+const getGoogleLikeMetadataFile = (fileExportName: string, file: EnteFile) => {
+    const metadata: Metadata = file.metadata;
+    const creationTime = Math.floor(metadata.creationTime / 1000000);
+    const modificationTime = Math.floor(
+        (metadata.modificationTime ?? metadata.creationTime) / 1000000,
+    );
+    const captionValue: string = file?.pubMagicMetadata?.data?.caption;
+    return JSON.stringify(
+        {
+            title: fileExportName,
+            caption: captionValue,
+            creationTime: {
+                timestamp: creationTime,
+                formatted: formatDateTimeShort(creationTime * 1000),
+            },
+            modificationTime: {
+                timestamp: modificationTime,
+                formatted: formatDateTimeShort(modificationTime * 1000),
+            },
+            geoData: {
+                latitude: metadata.latitude,
+                longitude: metadata.longitude,
+            },
+        },
+        null,
+        2,
+    );
+};
+
+export const getMetadataFolderExportPath = (collectionExportPath: string) =>
+    `${collectionExportPath}/${ENTE_METADATA_FOLDER}`;
+
+const getFileMetadataExportPath = (
+    collectionExportPath: string,
+    fileExportName: string,
+) => `${collectionExportPath}/${ENTE_METADATA_FOLDER}/${fileExportName}.json`;
+
+const getTrashedFileExportPath = async (exportDir: string, path: string) => {
+    const fileRelativePath = path.replace(`${exportDir}/`, "");
+    let trashedFilePath = `${exportDir}/${ENTE_TRASH_FOLDER}/${fileRelativePath}`;
+    let count = 1;
+    while (await exportService.exists(trashedFilePath)) {
+        const trashedFilePathParts = splitFilenameAndExtension(trashedFilePath);
+        if (trashedFilePathParts[1]) {
+            trashedFilePath = `${trashedFilePathParts[0]}(${count}).${trashedFilePathParts[1]}`;
+        } else {
+            trashedFilePath = `${trashedFilePathParts[0]}(${count})`;
+        }
+        count++;
+    }
+    return trashedFilePath;
+};
+
+// if filepath is /home/user/Ente/Export/Collection1/1.jpg
+// then metadata path is /home/user/Ente/Export/Collection1/ENTE_METADATA_FOLDER/1.jpg.json
+const getMetadataFileExportPath = (filePath: string) => {
+    // extract filename and collection folder path
+    const filename = filePath.split("/").pop();
+    const collectionExportPath = filePath.replace(`/${filename}`, "");
+    return `${collectionExportPath}/${ENTE_METADATA_FOLDER}/${filename}.json`;
+};
+
+export const getLivePhotoExportName = (
+    imageExportName: string,
+    videoExportName: string,
+) =>
+    JSON.stringify({
+        image: imageExportName,
+        video: videoExportName,
+    });
+
+export const isLivePhotoExportName = (exportName: string) => {
+    try {
+        JSON.parse(exportName);
+        return true;
+    } catch (e) {
+        return false;
+    }
+};
+
+const parseLivePhotoExportName = (
+    livePhotoExportName: string,
+): { image: string; video: string } => {
+    const { image, video } = JSON.parse(livePhotoExportName);
+    return { image, video };
+};
+
+const isExportInProgress = (exportStage: ExportStage) =>
+    exportStage > ExportStage.INIT && exportStage < ExportStage.FINISHED;
