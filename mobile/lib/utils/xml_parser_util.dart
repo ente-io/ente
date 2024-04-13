@@ -36,6 +36,6 @@ void buildXml(XmlBuilder builder, dynamic node) {
       },
     );
   } else {
-    builder.text(node is String ? node : node.toString());
+    builder.text(node.toString());
   }
 }
