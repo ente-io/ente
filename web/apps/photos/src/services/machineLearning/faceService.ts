@@ -1,13 +1,10 @@
 import { openCache } from "@/next/blob-cache";
 import log from "@/next/log";
-import type { BlobOptions } from "types/image";
 import {
     DetectedFace,
     Face,
     MLSyncContext,
     MLSyncFileContext,
-    type FaceCrop,
-    type StoredFaceCrop,
 } from "types/machineLearning";
 import { imageBitmapToBlob } from "utils/image";
 import {
@@ -229,11 +226,19 @@ class FaceService {
             syncContext.config.faceCrop,
         );
 
-        face.crop = await storeFaceCrop(
-            face.id,
-            faceCrop,
-            syncContext.config.faceCrop.blobOptions,
+        const blobOptions = syncContext.config.faceCrop.blobOptions;
+
+        const faceCropBlob = await imageBitmapToBlob(
+            faceCrop.image,
+            blobOptions,
         );
+        const faceCropUrl = `/${face.id}`;
+        const faceCropCache = await openCache("face-crops");
+        await faceCropCache.put(faceCropUrl, faceCropBlob);
+        face.crop = {
+            imageUrl: faceCropUrl,
+            imageBox: faceCrop.imageBox,
+        };
 
         const blob = await imageBitmapToBlob(faceCrop.image);
         faceCrop.image.close();
@@ -305,18 +310,3 @@ class FaceService {
 }
 
 export default new FaceService();
-
-const storeFaceCrop = async (
-    faceId: string,
-    faceCrop: FaceCrop,
-    blobOptions: BlobOptions,
-): Promise<StoredFaceCrop> => {
-    const faceCropBlob = await imageBitmapToBlob(faceCrop.image, blobOptions);
-    const faceCropUrl = `/${faceId}`;
-    const faceCropCache = await openCache("face-crops");
-    await faceCropCache.put(faceCropUrl, faceCropBlob);
-    return {
-        imageUrl: faceCropUrl,
-        imageBox: faceCrop.imageBox,
-    };
-};
