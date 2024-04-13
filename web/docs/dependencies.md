@@ -121,3 +121,10 @@ set of defaults for bundling our app into a static export which we can then
 deploy to our webserver. In addition, the Next.js page router is convenient.
 Apart from this, while we use a few tidbits from Next.js here and there, overall
 our apps are regular React SPAs, and are not particularly tied to Next.
+
+### Vite
+
+For some of our newer code, we have started to use [Vite](https://vitejs.dev).
+It is more lower level than Next, but the bells and whistles it doesn't have are
+the bells and whistles (and the accompanying complexity) that we don't need in
+some cases.
