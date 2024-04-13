@@ -235,29 +235,21 @@ async function migrateFiles(
         const collectionPath = collectionIDPathMap.get(file.collectionID);
         const metadataPath = `${collectionPath}/${exportMetadataDirectoryName}`;
 
-        const oldFileSavePath = getOldFileSavePath(collectionPath, file);
-        const oldFileMetadataSavePath = `${metadataPath}/${file.id}_${oldSanitizeName(file.metadata.title)}.json`;
+        const oldFileName = `${file.id}_${oldSanitizeName(file.metadata.title)}`;
+        const oldFilePath = `${collectionPath}/${oldFileName}`;
+        const oldFileMetadataPath = `${metadataPath}/${oldFileName}.json`;
 
-        const newFileSaveName = await safeFileName(
+        const newFileName = await safeFileName(
             collectionPath,
             file.metadata.title,
         );
+        const newFilePath = `${collectionPath}/${newFileName}`;
+        const newFileMetadataPath = `${metadataPath}/${newFileName}.json`;
 
-        const newFileSavePath = getFileSavePath(
-            collectionPath,
-            newFileSaveName,
-        );
+        if (!(await exportService.exists(oldFilePath))) continue;
 
-        const newFileMetadataSavePath = `${metadataPath}/${newFileSaveName}.json`;
-
-        if (!(await exportService.exists(oldFileSavePath))) {
-            continue;
-        }
-        await exportService.rename(oldFileSavePath, newFileSavePath);
-        await exportService.rename(
-            oldFileMetadataSavePath,
-            newFileMetadataSavePath,
-        );
+        await exportService.rename(oldFilePath, newFilePath);
+        await exportService.rename(oldFileMetadataPath, newFileMetadataPath);
     }
 }
 
@@ -506,11 +498,6 @@ const getOldCollectionFolderPath = (
     collectionID: number,
     collectionName: string,
 ) => `${dir}/${collectionID}_${oldSanitizeName(collectionName)}`;
-
-const getOldFileSavePath = (collectionFolderPath: string, file: EnteFile) =>
-    `${collectionFolderPath}/${file.id}_${oldSanitizeName(
-        file.metadata.title,
-    )}`;
 
 const getUniqueFileExportNameForMigration = (
     collectionPath: string,
