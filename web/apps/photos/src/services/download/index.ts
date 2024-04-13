@@ -163,7 +163,7 @@ class DownloadManagerImpl {
     async getThumbnail(file: EnteFile, localOnly = false) {
         this.ensureInitialized();
 
-        const key = `${file.id}`;
+        const key = file.id.toString();
         const cached = await this.thumbnailCache.get(key);
         if (cached) return new Uint8Array(await cached.arrayBuffer());
         if (localOnly) return null;
@@ -281,27 +281,21 @@ class DownloadManagerImpl {
                 file.metadata.fileType === FILE_TYPE.IMAGE ||
                 file.metadata.fileType === FILE_TYPE.LIVE_PHOTO
             ) {
-                let encrypted = await this.getCachedFile(file);
-                if (!encrypted) {
-                    encrypted = new Response(
-                        await this.downloadClient.downloadFile(
-                            file,
-                            onDownloadProgress,
-                        ),
+                const key = file.id.toString();
+                const cachedBlob = await this.fileCache?.get(key);
+                let encryptedArrayBuffer = await cachedBlob?.arrayBuffer();
+                if (!encryptedArrayBuffer) {
+                    const array = await this.downloadClient.downloadFile(
+                        file,
+                        onDownloadProgress,
                     );
-                    if (this.fileCache) {
-                        this.fileCache
-                            .put(file.id.toString(), encrypted.clone())
-                            .catch((e) => {
-                                log.error("file cache put failed", e);
-                                // TODO: handle storage full exception.
-                            });
-                    }
+                    encryptedArrayBuffer = array.buffer;
+                    this.fileCache?.put2(key, new Blob([encryptedArrayBuffer]));
                 }
                 this.clearDownloadProgress(file.id);
                 try {
                     const decrypted = await this.cryptoWorker.decryptFile(
-                        new Uint8Array(await encrypted.arrayBuffer()),
+                        new Uint8Array(encryptedArrayBuffer),
                         await this.cryptoWorker.fromB64(
                             file.file.decryptionHeader,
                         ),
