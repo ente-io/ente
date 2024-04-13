@@ -136,9 +136,7 @@ const openWebCache = async (name: BlobCacheNamespace) => {
         put: (key: string, data: Response) => {
             return cache.put(key, data);
         },
-        delete: (key: string) => {
-            return cache.delete(key);
-        },
+        delete: (key: string) => cache.delete(key),
     };
 };
 
@@ -184,16 +182,15 @@ const openOPFSCacheWeb = async (name: BlobCacheNamespace) => {
         put: async (key: string, data: Response) => {
             await cache.put(key, data);
         },
-        delete: (key: string) => {
-            // try {
-            //     await _cache.removeEntry(key);
-            //     return true;
-            // } catch (e) {
-            //     if (e instanceof DOMException && e.name == "NotFoundError")
-            //         return false;
-            //     throw e;
-            // }
-            return cache.delete(key);
+        delete: async (key: string) => {
+            try {
+                await _cache.removeEntry(key);
+                return true;
+            } catch (e) {
+                if (e instanceof DOMException && e.name == "NotFoundError")
+                    return false;
+                throw e;
+            }
         },
     };
 };
