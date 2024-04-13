@@ -13,6 +13,7 @@ import "package:photos/utils/xml_parser_util.dart";
 
 final _enteDio = NetworkClient.instance.enteDio;
 final _dio = NetworkClient.instance.getDio();
+final _uploadLocksDb = UploadLocksDB.instance;
 
 class PartETag extends XmlParsableObject {
   final int partNumber;
@@ -37,12 +38,14 @@ class MultipartUploadURLs {
   final List<String> partsURLs;
   final String completeURL;
   final List<bool>? partUploadStatus;
+  final Map<int, String>? partETags;
 
   MultipartUploadURLs({
     required this.objectKey,
     required this.partsURLs,
     required this.completeURL,
     this.partUploadStatus,
+    this.partETags,
   });
 
   factory MultipartUploadURLs.fromMap(Map<String, dynamic> map) {
@@ -83,7 +86,7 @@ Future<void> createTableEntry(
   int fileSize,
   Uint8List fileKey,
 ) async {
-  await UploadLocksDB.instance.createTrackUploadsEntry(
+  await _uploadLocksDb.createTrackUploadsEntry(
     localId,
     fileHash,
     urls,
@@ -98,13 +101,19 @@ Future<String> putExistingMultipartFile(
   String localId,
   String fileHash,
 ) async {
-  final urls = await UploadLocksDB.instance.getCachedLinks(localId, fileHash);
+  final (urls, status) = await _uploadLocksDb.getCachedLinks(localId, fileHash);
 
-  // upload individual parts and get their etags
-  final etags = await uploadParts(urls, encryptedFile);
+  Map<int, String> etags = urls.partETags ?? {};
 
-  // complete the multipart upload
-  await completeMultipartUpload(urls.objectKey, etags, urls.completeURL);
+  if (status == UploadLocksDB.trackStatus.pending) {
+    // upload individual parts and get their etags
+    etags = await uploadParts(urls, encryptedFile);
+  }
+
+  if (status != UploadLocksDB.trackStatus.completed) {
+    // complete the multipart upload
+    await completeMultipartUpload(urls.objectKey, etags, urls.completeURL);
+  }
 
   return urls.objectKey;
 }
@@ -129,7 +138,7 @@ Future<Map<int, String>> uploadParts(
   final partsURLs = url.partsURLs;
   final partUploadStatus = url.partUploadStatus;
   final partsLength = partsURLs.length;
-  final etags = <int, String>{};
+  final etags = url.partETags ?? <int, String>{};
 
   for (int i = 0; i < partsLength; i++) {
     if (i < (partUploadStatus?.length ?? 0) &&
@@ -163,8 +172,12 @@ Future<Map<int, String>> uploadParts(
 
     etags[i] = eTag!;
 
-    await UploadLocksDB.instance.updatePartStatus(url.objectKey, i);
+    await _uploadLocksDb.updatePartStatus(url.objectKey, i, eTag);
   }
+  await _uploadLocksDb.updateTrackUploadStatus(
+    url.objectKey,
+    UploadLocksDB.trackStatus.uploaded,
+  );
 
   return etags;
 }
@@ -193,7 +206,10 @@ Future<void> completeMultipartUpload(
         contentType: "text/xml",
       ),
     );
-    await UploadLocksDB.instance.updateCompletionStatus(objectKey);
+    await _uploadLocksDb.updateTrackUploadStatus(
+      objectKey,
+      UploadLocksDB.trackStatus.completed,
+    );
   } catch (e) {
     Logger("MultipartUpload").severe(e);
     rethrow;

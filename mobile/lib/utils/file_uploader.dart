@@ -612,6 +612,8 @@ class FileUploader {
         }
         await FilesDB.instance.update(remoteFile);
       }
+      await UploadLocksDB.instance.deleteCompletedRecord(lockKey);
+
       if (!_isBackground) {
         Bus.instance.fire(
           LocalPhotosUpdatedEvent(

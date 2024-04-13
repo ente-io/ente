@@ -28,13 +28,8 @@ class UploadLocksDB {
     columnFileKey: "file_key",
     columnObjectKey: "object_key",
     columnCompleteUrl: "complete_url",
-    columnCompletionStatus: "completion_status",
+    columnStatus: "status",
     columnPartSize: "part_size",
-  );
-
-  static const _trackStatus = (
-    pending: "pending",
-    completed: "completed",
   );
 
   static const _partsTable = (
@@ -42,7 +37,13 @@ class UploadLocksDB {
     columnObjectKey: "object_key",
     columnPartNumber: "part_number",
     columnPartUrl: "part_url",
+    columnPartETag: "part_etag",
     columnPartStatus: "part_status",
+  );
+  static const trackStatus = (
+    pending: "pending",
+    uploaded: "uploaded",
+    completed: "completed",
   );
   static const _partStatus = (
     pending: "pending",
@@ -98,10 +99,6 @@ class UploadLocksDB {
       return;
     }
 
-    // drop
-    // await db.execute('DROP TABLE IF EXISTS ${_trackUploadTable.table}');
-    // await db.execute('DROP TABLE IF EXISTS ${_partsTable.table}');
-
     await db.execute(
       '''
                 CREATE TABLE ${_trackUploadTable.table} (
@@ -113,7 +110,7 @@ class UploadLocksDB {
                   ${_trackUploadTable.columnFileKey} TEXT NOT NULL,
                   ${_trackUploadTable.columnObjectKey} TEXT NOT NULL,
                   ${_trackUploadTable.columnCompleteUrl} TEXT NOT NULL,
-                  ${_trackUploadTable.columnCompletionStatus} TEXT NOT NULL,
+                  ${_trackUploadTable.columnStatus} TEXT DEFAULT '${trackStatus.pending}' NOT NULL,
                   ${_trackUploadTable.columnPartSize} INTEGER NOT NULL
                 )
                 ''',
@@ -124,6 +121,7 @@ class UploadLocksDB {
                   ${_partsTable.columnObjectKey} TEXT NOT NULL REFERENCES ${_trackUploadTable.table}(${_trackUploadTable.columnObjectKey}) ON DELETE CASCADE,
                   ${_partsTable.columnPartNumber} INTEGER NOT NULL,
                   ${_partsTable.columnPartUrl} TEXT NOT NULL,
+                  ${_partsTable.columnPartETag} TEXT,
                   ${_partsTable.columnPartStatus} TEXT NOT NULL,
                   PRIMARY KEY (${_partsTable.columnObjectKey}, ${_partsTable.columnPartNumber})
                 )
@@ -204,7 +202,7 @@ class UploadLocksDB {
     return rows.isNotEmpty;
   }
 
-  Future<MultipartUploadURLs> getCachedLinks(
+  Future<(MultipartUploadURLs, String)> getCachedLinks(
     String localId,
     String fileHash,
   ) async {
@@ -231,12 +229,16 @@ class UploadLocksDB {
       partsStatus.length,
       (index) => "",
     );
+    final Map<int, String> partETags = {};
 
     for (final part in partsStatus) {
       final partNumber = part[_partsTable.columnPartNumber] as int;
       final partUrl = part[_partsTable.columnPartUrl] as String;
       final partStatus = part[_partsTable.columnPartStatus] as String;
       partsURLs[partNumber] = partUrl;
+      if (part[_partsTable.columnPartETag] != null) {
+        partETags[partNumber] = part[_partsTable.columnPartETag] as String;
+      }
       partUploadStatus.add(partStatus == "uploaded");
     }
     final urls = MultipartUploadURLs(
@@ -244,9 +246,10 @@ class UploadLocksDB {
       completeURL: row[_trackUploadTable.columnCompleteUrl] as String,
       partsURLs: partsURLs,
       partUploadStatus: partUploadStatus,
+      partETags: partETags,
     );
 
-    return urls;
+    return (urls, row[_trackUploadTable.columnStatus] as String);
   }
 
   Future<void> createTrackUploadsEntry(
@@ -270,7 +273,6 @@ class UploadLocksDB {
         _trackUploadTable.columnEncryptedFilePath: encryptedFilePath,
         _trackUploadTable.columnEncryptedFileSize: fileSize,
         _trackUploadTable.columnFileKey: fileKey,
-        _trackUploadTable.columnCompletionStatus: _trackStatus.pending,
         _trackUploadTable.columnPartSize: multipartPartSize,
       },
     );
@@ -289,29 +291,19 @@ class UploadLocksDB {
         },
       );
     }
-
-    // print all database entries
-    final trackUploads = await db.query(_trackUploadTable.table);
-    final parts = await db.query(_partsTable.table);
-    print("Track Uploads:");
-    for (final trackUpload in trackUploads) {
-      print(trackUpload);
-    }
-    print("Parts:");
-    for (final part in parts) {
-      print(part);
-    }
   }
 
   Future<void> updatePartStatus(
     String objectKey,
     int partNumber,
+    String etag,
   ) async {
     final db = await instance.database;
     await db.update(
       _partsTable.table,
       {
         _partsTable.columnPartStatus: _partStatus.uploaded,
+        _partsTable.columnPartETag: etag,
       },
       where:
           '${_partsTable.columnObjectKey} = ? AND ${_partsTable.columnPartNumber} = ?',
@@ -319,17 +311,29 @@ class UploadLocksDB {
     );
   }
 
-  Future<void> updateCompletionStatus(
+  Future<void> updateTrackUploadStatus(
     String objectKey,
+    String status,
   ) async {
     final db = await instance.database;
     await db.update(
       _trackUploadTable.table,
       {
-        _trackUploadTable.columnCompletionStatus: _trackStatus.completed,
+        _trackUploadTable.columnStatus: status,
       },
       where: '${_trackUploadTable.columnObjectKey} = ?',
       whereArgs: [objectKey],
+    );
+  }
+
+  Future<int> deleteCompletedRecord(
+    String localId,
+  ) async {
+    final db = await instance.database;
+    return await db.delete(
+      _trackUploadTable.table,
+      where: '${_trackUploadTable.columnLocalID} = ?',
+      whereArgs: [localId],
     );
   }
 }

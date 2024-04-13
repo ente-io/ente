@@ -1,6 +1,5 @@
 // ignore_for_file: implementation_imports
 
-import "package:xml/src/xml/entities/named_entities.dart";
 import "package:xml/xml.dart";
 
 // used for classes that can be converted to xml
@@ -16,7 +15,6 @@ String convertJs2Xml(Map<String, dynamic> json) {
   return builder.buildDocument().toXmlString(
         pretty: true,
         indent: '    ',
-        entityMapping: defaultMyEntityMapping,
       );
 }
 
@@ -38,6 +36,6 @@ void buildXml(XmlBuilder builder, dynamic node) {
       },
     );
   } else {
-    builder.text(node.toString());
+    builder.text(node is String ? node : node.toString());
   }
 }
