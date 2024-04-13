@@ -36,7 +36,7 @@ class FaceClusteringService {
   final _logger = Logger("FaceLinearClustering");
 
   Timer? _inactivityTimer;
-  final Duration _inactivityDuration = const Duration(seconds: 90);
+  final Duration _inactivityDuration = const Duration(minutes: 3);
   int _activeTasks = 0;
 
   final _initLock = Lock();
