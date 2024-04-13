@@ -40,7 +40,6 @@ export type OnDownloadProgress = (event: {
 
 export interface DownloadClient {
     updateTokens: (token: string, passwordToken?: string) => void;
-    updateTimeout: (timeout: number) => void;
     downloadThumbnail: (
         file: EnteFile,
         timeout?: number,
@@ -77,13 +76,12 @@ class DownloadManagerImpl {
     async init(
         app: APPS,
         tokens?: { token: string; passwordToken?: string } | { token: string },
-        timeout?: number,
     ) {
         if (this.ready) {
             log.info("DownloadManager already initialized");
             return;
         }
-        this.downloadClient = createDownloadClient(app, tokens, timeout);
+        this.downloadClient = createDownloadClient(app, tokens);
         try {
             this.thumbnailCache = await openCache("thumbs");
         } catch (e) {
@@ -125,10 +123,6 @@ class DownloadManagerImpl {
 
     updateCryptoWorker(cryptoWorker: Remote<DedicatedCryptoWorker>) {
         this.cryptoWorker = cryptoWorker;
-    }
-
-    updateTimeout(timeout: number) {
-        this.downloadClient.updateTimeout(timeout);
     }
 
     setProgressUpdater(progressUpdater: (value: Map<number, number>) => void) {
@@ -525,11 +519,8 @@ export default DownloadManager;
 function createDownloadClient(
     app: APPS,
     tokens?: { token: string; passwordToken?: string } | { token: string },
-    timeout?: number,
 ): DownloadClient {
-    if (!timeout) {
-        timeout = 300000; // 5 minute
-    }
+    const timeout = 300000; // 5 minute
     if (app === APPS.ALBUMS) {
         if (!tokens) {
             tokens = { token: undefined, passwordToken: undefined };
