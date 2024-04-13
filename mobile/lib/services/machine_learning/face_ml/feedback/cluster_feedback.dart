@@ -194,7 +194,7 @@ class ClusterFeedbackService {
   // TODO: iterate over this method to find sweet spot
   Future<Map<int, List<String>>> breakUpCluster(
     int clusterID, {
-    useDbscan = false,
+    bool useDbscan = false,
   }) async {
     _logger.info(
       'breakUpCluster called for cluster $clusterID with dbscan $useDbscan',
