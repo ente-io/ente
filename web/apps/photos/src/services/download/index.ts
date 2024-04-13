@@ -154,30 +154,20 @@ class DownloadManagerImpl {
     };
 
     async getThumbnail(file: EnteFile, localOnly = false) {
-        try {
-            if (!this.ready) {
-                throw Error(CustomError.DOWNLOAD_MANAGER_NOT_READY);
-            }
-            const cachedThumb = await this.thumbnailCache.get(`${file.id}`);
-            if (cachedThumb) {
-                return new Uint8Array(await cachedThumb.arrayBuffer());
-            }
-            if (localOnly) {
-                return null;
-            }
-            const thumb = await this.downloadThumb(file);
-
-            this.thumbnailCache
-                ?.put(file.id.toString(), new Response(thumb))
-                .catch((e) => {
-                    log.error("thumb cache put failed", e);
-                    // TODO: handle storage full exception.
-                });
-            return thumb;
-        } catch (e) {
-            log.error("getThumbnail failed", e);
-            throw e;
+        if (!this.ready) {
+            throw Error(CustomError.DOWNLOAD_MANAGER_NOT_READY);
         }
+        const key = `${file.id}`;
+        const cachedThumb = await this.thumbnailCache.get(key);
+        if (cachedThumb) {
+            return new Uint8Array(await cachedThumb.arrayBuffer());
+        }
+        if (localOnly) {
+            return null;
+        }
+        const thumb = await this.downloadThumb(file);
+        this.thumbnailCache?.put2(key, new Blob([thumb]));
+        return thumb;
     }
 
     async getThumbnailForPreview(file: EnteFile, localOnly = false) {

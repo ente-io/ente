@@ -115,6 +115,10 @@ export const openCache = async (
  *
  *     await blob.arrayBuffer()
  *
+ * To convert from an ArrayBuffer or Uint8Array to Blob
+ *
+ *     new Blob([arrayBuffer, andOrAnyArray, andOrstring])
+ *
  * Refs:
  * - https://github.com/yigitunallar/arraybuffer-vs-blob
  * - https://stackoverflow.com/questions/11821096/what-is-the-difference-between-an-arraybuffer-and-a-blob
