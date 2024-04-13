@@ -1,3 +1,5 @@
+import isElectron from "is-electron";
+
 const cacheNames = [
     "thumbs",
     "face-crops",
@@ -77,7 +79,7 @@ export interface EnteCache {
  * across namespaces.
  */
 export const openCache = async (name: CacheName) =>
-    globalThis.electron ? openOPFSCacheWeb(name) : openWebCache(name);
+    isElectron() ? openOPFSCacheWeb(name) : openWebCache(name);
 
 /** An implementation of {@link EnteCache} using Web Cache APIs */
 const openWebCache = async (name: CacheName) => {
@@ -103,7 +105,7 @@ const openOPFSCacheWeb = async (name: CacheName) => {
     // this code will only run in our Electron app (which'll use Chromium as the
     // renderer).
     //
-    // So for our purpose, this can serve as the docs for what's available:
+    // So for our purpose, these can serve as the doc for what's available:
     // https://web.dev/articles/origin-private-file-system
     const cache = await caches.open(name);
 
@@ -175,7 +177,7 @@ export async function cached(
  * Meant for use during logout, to reset the state of the user's account.
  */
 export const clearCaches = async () =>
-    globalThis.electron ? clearOPFSCaches() : clearWebCaches();
+    isElectron() ? clearOPFSCaches() : clearWebCaches();
 
 export const clearWebCaches = async () => {
     await Promise.all(cacheNames.map((name) => caches.delete(name)));

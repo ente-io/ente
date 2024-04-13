@@ -13,7 +13,6 @@ import {
     generateStreamFromArrayBuffer,
     getRenderableFileURL,
 } from "utils/file";
-import { isInternalUser } from "utils/user";
 import { PhotosDownloadClient } from "./clients/photos";
 import { PublicAlbumsDownloadClient } from "./clients/publicAlbums";
 
@@ -56,9 +55,15 @@ export interface DownloadClient {
 class DownloadManagerImpl {
     private ready: boolean = false;
     private downloadClient: DownloadClient;
+    /** Local cache for thumbnails. Might not be available. */
     private thumbnailCache?: EnteCache;
+    /**
+     * Local cache for the files themselves.
+     *
+     * Only available when we're running in the desktop app.
+     */
     // disk cache is only available on electron
-    private diskFileCache?: EnteCache;
+    private fileCache?: EnteCache;
     private cryptoWorker: Remote<DedicatedCryptoWorker>;
 
     private fileObjectURLPromises = new Map<number, Promise<SourceURLs>>();
@@ -74,21 +79,27 @@ class DownloadManagerImpl {
         tokens?: { token: string; passwordToken?: string } | { token: string },
         timeout?: number,
     ) {
-        try {
-            if (this.ready) {
-                log.info("DownloadManager already initialized");
-                return;
-            }
-            this.downloadClient = createDownloadClient(app, tokens, timeout);
-            this.thumbnailCache = await openThumbnailCache();
-            this.diskFileCache = isElectron() && (await openDiskFileCache());
-            this.cryptoWorker = await ComlinkCryptoWorker.getInstance();
-            this.ready = true;
-            eventBus.on(Events.LOGOUT, this.logoutHandler.bind(this), this);
-        } catch (e) {
-            log.error("DownloadManager init failed", e);
-            throw e;
+        if (this.ready) {
+            log.info("DownloadManager already initialized");
+            return;
         }
+        this.downloadClient = createDownloadClient(app, tokens, timeout);
+        try {
+            this.thumbnailCache = await openCache("thumbs");
+        } catch (e) {
+            log.error(
+                "Failed to open thumbnail cache, will continue without it",
+                e,
+            );
+        }
+        try {
+            if (isElectron()) this.fileCache = await openCache("files");
+        } catch (e) {
+            log.error("Failed to open file cache, will continue without it", e);
+        }
+        this.cryptoWorker = await ComlinkCryptoWorker.getInstance();
+        this.ready = true;
+        eventBus.on(Events.LOGOUT, this.logoutHandler.bind(this), this);
     }
 
     private async logoutHandler() {
@@ -139,11 +150,11 @@ class DownloadManagerImpl {
         }
     }
     private async getCachedFile(file: EnteFile): Promise<Response> {
+        const fileCache = this.fileCache;
+        if (!fileCache) return null;
+
         try {
-            if (!this.diskFileCache) {
-                return null;
-            }
-            const cacheResp: Response = await this.diskFileCache?.match(
+            const cacheResp: Response = await fileCache.match(
                 file.id.toString(),
             );
             return cacheResp?.clone();
@@ -312,8 +323,8 @@ class DownloadManagerImpl {
                             onDownloadProgress,
                         ),
                     );
-                    if (this.diskFileCache) {
-                        this.diskFileCache
+                    if (this.fileCache) {
+                        this.fileCache
                             .put(file.id.toString(), encrypted.clone())
                             .catch((e) => {
                                 log.error("file cache put failed", e);
@@ -345,8 +356,8 @@ class DownloadManagerImpl {
             let resp: Response = await this.getCachedFile(file);
             if (!resp) {
                 resp = await this.downloadClient.downloadFileStream(file);
-                if (this.diskFileCache) {
-                    this.diskFileCache
+                if (this.fileCache) {
+                    this.fileCache
                         .put(file.id.toString(), resp.clone())
                         .catch((e) => {
                             log.error("file cache put failed", e);
@@ -510,35 +521,6 @@ class DownloadManagerImpl {
 const DownloadManager = new DownloadManagerImpl();
 
 export default DownloadManager;
-
-async function openThumbnailCache() {
-    try {
-        return await openCache("thumbs");
-    } catch (e) {
-        log.error("Failed to open thumbnail cache", e);
-        if (isInternalUser()) {
-            throw e;
-        } else {
-            return null;
-        }
-    }
-}
-
-async function openDiskFileCache() {
-    try {
-        if (!isElectron()) {
-            throw Error(CustomError.NOT_AVAILABLE_ON_WEB);
-        }
-        return await openCache("files");
-    } catch (e) {
-        log.error("Failed to open file cache", e);
-        if (isInternalUser()) {
-            throw e;
-        } else {
-            return null;
-        }
-    }
-}
 
 function createDownloadClient(
     app: APPS,
