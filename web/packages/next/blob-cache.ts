@@ -110,6 +110,10 @@ export const openCache = async (
  *
  * Also note that a File is a Blob!
  *
+ * To convert from a Blob to ArrayBuffer
+ *
+ *     await blob.arrayBuffer()
+ *
  * Refs:
  * - https://github.com/yigitunallar/arraybuffer-vs-blob
  * - https://stackoverflow.com/questions/11821096/what-is-the-difference-between-an-arraybuffer-and-a-blob

@@ -172,9 +172,9 @@ class DownloadManagerImpl {
             if (!this.ready) {
                 throw Error(CustomError.DOWNLOAD_MANAGER_NOT_READY);
             }
-            const cachedThumb = await this.getCachedThumbnail(file.id);
+            const cachedThumb = await this.thumbnailCache.get(`${file.id}`);
             if (cachedThumb) {
-                return cachedThumb;
+                return new Uint8Array(await cachedThumb.arrayBuffer());
             }
             if (localOnly) {
                 return null;
