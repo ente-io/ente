@@ -2,7 +2,6 @@ import log from "@/next/log";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import { User } from "@ente/shared/user/types";
 import { sleep } from "@ente/shared/utils";
-import { ENTE_METADATA_FOLDER } from "constants/export";
 import { FILE_TYPE } from "constants/file";
 import { getLocalCollections } from "services/collectionService";
 import downloadManager from "services/download";
@@ -29,6 +28,7 @@ import {
 } from "utils/file";
 import { sanitizeName } from "utils/native-fs";
 import {
+    ENTE_METADATA_FOLDER,
     getCollectionIDFromFileUID,
     getExportRecordFileUID,
     getLivePhotoExportName,

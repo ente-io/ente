@@ -10,7 +10,6 @@ import QueueProcessor, {
     CancellationStatus,
     RequestCanceller,
 } from "@ente/shared/utils/queueProcessor";
-import { ENTE_METADATA_FOLDER, ExportStage } from "constants/export";
 import { FILE_TYPE } from "constants/file";
 import { Collection } from "types/collection";
 import {
@@ -49,6 +48,19 @@ import { migrateExport } from "./migration";
 const EXPORT_RECORD_FILE_NAME = "export_status.json";
 
 export const ENTE_EXPORT_DIRECTORY = "ente Photos";
+
+export const ENTE_METADATA_FOLDER = "metadata";
+
+export enum ExportStage {
+    INIT = 0,
+    MIGRATION = 1,
+    STARTING = 2,
+    EXPORTING_FILES = 3,
+    TRASHING_DELETED_FILES = 4,
+    RENAMING_COLLECTION_FOLDERS = 5,
+    TRASHING_DELETED_COLLECTIONS = 6,
+    FINISHED = 7,
+}
 
 export const NULL_EXPORT_RECORD: ExportRecord = {
     version: 3,
