@@ -1,11 +1,13 @@
+import { ensureElectron } from "@/next/electron";
 import sanitize from "sanitize-filename";
-import exportService from "services/export";
 import { splitFilenameAndExtension } from "utils/file";
 
 export const ENTE_TRASH_FOLDER = "Trash";
 
 export const sanitizeName = (name: string) =>
     sanitize(name, { replacement: "_" });
+
+const exists = (path: string) => ensureElectron().fs.exists(path);
 
 export const getUniqueCollectionExportName = async (
     dir: string,
@@ -14,7 +16,7 @@ export const getUniqueCollectionExportName = async (
     let collectionExportName = sanitizeName(collectionName);
     let count = 1;
     while (
-        (await exportService.exists(`${dir}/${collectionExportName}`)) ||
+        (await exists(`${dir}/${collectionExportName}`)) ||
         collectionExportName === ENTE_TRASH_FOLDER
     ) {
         collectionExportName = `${sanitizeName(collectionName)}(${count})`;
@@ -29,9 +31,7 @@ export const getUniqueFileExportName = async (
 ) => {
     let fileExportName = sanitizeName(filename);
     let count = 1;
-    while (
-        await exportService.exists(`${collectionExportPath}/${fileExportName}`)
-    ) {
+    while (await exists(`${collectionExportPath}/${fileExportName}`)) {
         const filenameParts = splitFilenameAndExtension(sanitizeName(filename));
         if (filenameParts[1]) {
             fileExportName = `${filenameParts[0]}(${count}).${filenameParts[1]}`;
