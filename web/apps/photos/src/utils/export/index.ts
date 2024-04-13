@@ -1,3 +1,6 @@
+import { formatDateTimeShort } from "@ente/shared/time/format";
+import { ENTE_METADATA_FOLDER, ExportStage } from "constants/export";
+import sanitize from "sanitize-filename";
 import exportService from "services/export";
 import { Collection } from "types/collection";
 import {
@@ -5,19 +8,12 @@ import {
     ExportRecord,
     FileExportNames,
 } from "types/export";
-
 import { EnteFile } from "types/file";
-
-import { formatDateTimeShort } from "@ente/shared/time/format";
-import {
-    ENTE_METADATA_FOLDER,
-    ENTE_TRASH_FOLDER,
-    ExportStage,
-} from "constants/export";
-import sanitize from "sanitize-filename";
 import { Metadata } from "types/upload";
 import { getCollectionUserFacingName } from "utils/collection";
 import { splitFilenameAndExtension } from "utils/file";
+
+export const ENTE_TRASH_FOLDER = "Trash";
 
 export const getExportRecordFileUID = (file: EnteFile) =>
     `${file.id}_${file.collectionID}_${file.updationTime}`;
