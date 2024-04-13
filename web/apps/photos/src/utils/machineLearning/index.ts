@@ -1,4 +1,4 @@
-import { cached } from "@/next/cache";
+import { cached } from "@/next/blob-cache";
 import log from "@/next/log";
 import { FILE_TYPE } from "constants/file";
 import PQueue from "p-queue";

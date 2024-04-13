@@ -1,6 +1,6 @@
 import isElectron from "is-electron";
 
-const cacheNames = [
+const blobCacheNames = [
     "thumbs",
     "face-crops",
     // Desktop app only
@@ -8,15 +8,15 @@ const cacheNames = [
 ] as const;
 
 /**
- * Namespaces into which our caches data is divided
+ * Namespaces into which our blob caches are divided
  *
  * Note that namespaces are just arbitrary (but predefined) strings to split the
  * cached data into "folders", so to speak.
  * */
-export type CacheName = (typeof cacheNames)[number];
+export type BlobCacheNamespace = (typeof blobCacheNames)[number];
 
 /**
- * A namespaced cache.
+ * A namespaced blob cache.
  *
  * This cache is suitable for storing large amounts of data (entire files).
  *
@@ -53,11 +53,11 @@ export type CacheName = (typeof cacheNames)[number];
  *
  * See also: [Note: Increased disk cache for the desktop app].
  */
-export interface EnteCache {
+export interface BlobCache {
     /**
      * Get the data corresponding to {@link key} (if found) from the cache.
      */
-    get: (key: string) => Promise<Uint8Array | undefined>;
+    get: (key: string) => Promise<Blob | undefined>;
     match: (key: string) => Promise<Response | undefined>;
     /**
      * Add the given {@link key}-value ({@link data}) pair to the cache.
@@ -73,13 +73,15 @@ export interface EnteCache {
 }
 
 /**
- * Return the {@link EnteCache} corresponding to the given {@link name}.
+ * Return the {@link BlobCache} corresponding to the given {@link name}.
  *
  * @param name One of the arbitrary but predefined namespaces of type
- * {@link CacheName} which group related data and allow us to use the same key
- * across namespaces.
+ * {@link BlobCacheNamespace} which group related data and allow us to use the
+ * same key across namespaces.
  */
-export const openCache = async (name: CacheName): Promise<EnteCache> =>
+export const openCache = async (
+    name: BlobCacheNamespace,
+): Promise<BlobCache> =>
     isElectron() ? openOPFSCacheWeb(name) : openWebCache(name);
 
 /**
@@ -111,8 +113,8 @@ export const openCache = async (name: CacheName): Promise<EnteCache> =>
  * - https://stackoverflow.com/questions/11821096/what-is-the-difference-between-an-arraybuffer-and-a-blob
  */
 
-/** An implementation of {@link EnteCache} using Web Cache APIs */
-const openWebCache = async (name: CacheName) => {
+/** An implementation of {@link BlobCache} using Web Cache APIs */
+const openWebCache = async (name: BlobCacheNamespace) => {
     const cache = await caches.open(name);
     return {
         get: async (key: string) => {
@@ -132,8 +134,8 @@ const openWebCache = async (name: CacheName) => {
     };
 };
 
-/** An implementation of {@link EnteCache} using OPFS */
-const openOPFSCacheWeb = async (name: CacheName) => {
+/** An implementation of {@link BlobCache} using OPFS */
+const openOPFSCacheWeb = async (name: BlobCacheNamespace) => {
     // While all major browsers support OPFS now, their implementations still
     // have various quirks. However, we don't need to handle all possible cases
     // and can just instead use the APIs and guarantees Chromium provides since
@@ -186,7 +188,7 @@ const openOPFSCacheWeb = async (name: CacheName) => {
 };
 
 export async function cached(
-    cacheName: CacheName,
+    cacheName: BlobCacheNamespace,
     id: string,
     get: () => Promise<Blob>,
 ): Promise<Blob> {
@@ -219,7 +221,7 @@ export const clearCaches = async () =>
     isElectron() ? clearOPFSCaches() : clearWebCaches();
 
 export const clearWebCaches = async () => {
-    await Promise.all(cacheNames.map((name) => caches.delete(name)));
+    await Promise.all(blobCacheNames.map((name) => caches.delete(name)));
 };
 
 export const clearOPFSCaches = async () => {

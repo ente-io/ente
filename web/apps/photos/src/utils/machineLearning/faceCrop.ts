@@ -1,4 +1,4 @@
-import { openCache } from "@/next/cache";
+import { openCache } from "@/next/blob-cache";
 import { BlobOptions } from "types/image";
 import {
     FaceAlignment,

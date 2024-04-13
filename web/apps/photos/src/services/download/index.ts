@@ -1,4 +1,4 @@
-import { openCache, type EnteCache } from "@/next/cache";
+import { openCache, type BlobCache } from "@/next/blob-cache";
 import log from "@/next/log";
 import { APPS } from "@ente/shared/apps/constants";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
@@ -55,13 +55,13 @@ class DownloadManagerImpl {
     private ready: boolean = false;
     private downloadClient: DownloadClient;
     /** Local cache for thumbnails. Might not be available. */
-    private thumbnailCache?: EnteCache;
+    private thumbnailCache?: BlobCache;
     /**
      * Local cache for the files themselves.
      *
      * Only available when we're running in the desktop app.
      */
-    private fileCache?: EnteCache;
+    private fileCache?: BlobCache;
     private cryptoWorker: Remote<DedicatedCryptoWorker>;
 
     private fileObjectURLPromises = new Map<number, Promise<SourceURLs>>();
