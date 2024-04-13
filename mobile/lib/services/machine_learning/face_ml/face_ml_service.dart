@@ -26,7 +26,7 @@ import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
 import "package:photos/models/ml/ml_versions.dart";
-import 'package:photos/services/machine_learning/face_ml/face_clustering/linear_clustering_service.dart';
+import 'package:photos/services/machine_learning/face_ml/face_clustering/face_clustering_service.dart';
 import 'package:photos/services/machine_learning/face_ml/face_detection/detection.dart';
 import 'package:photos/services/machine_learning/face_ml/face_detection/face_detection_exceptions.dart';
 import 'package:photos/services/machine_learning/face_ml/face_detection/face_detection_service.dart';
@@ -400,7 +400,8 @@ class FaceMlService {
             break;
           }
 
-          final faceIdToCluster = await FaceClustering.instance.predictLinear(
+          final faceIdToCluster =
+              await FaceClusteringService.instance.predictLinear(
             faceIdToEmbeddingBucket,
             fileIDToCreationTime: fileIDToCreationTime,
             offset: offset,
@@ -440,7 +441,8 @@ class FaceMlService {
             '${DateTime.now().difference(gotFaceEmbeddingsTime).inMilliseconds} ms');
 
         // Cluster the embeddings using the linear clustering algorithm, returning a map from faceID to clusterID
-        final faceIdToCluster = await FaceClustering.instance.predictLinear(
+        final faceIdToCluster =
+            await FaceClusteringService.instance.predictLinear(
           faceIdToEmbedding,
           fileIDToCreationTime: fileIDToCreationTime,
         );

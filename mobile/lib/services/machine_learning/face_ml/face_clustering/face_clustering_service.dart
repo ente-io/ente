@@ -32,7 +32,7 @@ class FaceInfo {
 
 enum ClusterOperation { linearIncrementalClustering, dbscanClustering }
 
-class FaceClustering {
+class FaceClusteringService {
   final _logger = Logger("FaceLinearClustering");
 
   Timer? _inactivityTimer;
@@ -51,12 +51,12 @@ class FaceClustering {
   static const kRecommendedDistanceThreshold = 0.24;
 
   // singleton pattern
-  FaceClustering._privateConstructor();
+  FaceClusteringService._privateConstructor();
 
   /// Use this instance to access the FaceClustering service.
   /// e.g. `FaceLinearClustering.instance.predict(dataset)`
-  static final instance = FaceClustering._privateConstructor();
-  factory FaceClustering() => instance;
+  static final instance = FaceClusteringService._privateConstructor();
+  factory FaceClusteringService() => instance;
 
   Future<void> init() async {
     return _initLock.synchronized(() async {
@@ -105,7 +105,7 @@ class FaceClustering {
                 args['fileIDToCreationTime'] as Map<int, int>?;
             final distanceThreshold = args['distanceThreshold'] as double;
             final offset = args['offset'] as int?;
-            final result = FaceClustering._runLinearClustering(
+            final result = FaceClusteringService._runLinearClustering(
               input,
               fileIDToCreationTime: fileIDToCreationTime,
               distanceThreshold: distanceThreshold,
@@ -119,7 +119,7 @@ class FaceClustering {
                 args['fileIDToCreationTime'] as Map<int, int>?;
             final eps = args['eps'] as double;
             final minPts = args['minPts'] as int;
-            final result = FaceClustering._runDbscanClustering(
+            final result = FaceClusteringService._runDbscanClustering(
               input,
               fileIDToCreationTime: fileIDToCreationTime,
               eps: eps,
@@ -454,7 +454,7 @@ class FaceClustering {
     );
 
     // analyze the results
-    FaceClustering._analyzeClusterResults(sortedFaceInfos);
+    FaceClusteringService._analyzeClusterResults(sortedFaceInfos);
 
     return newFaceIdToCluster;
   }

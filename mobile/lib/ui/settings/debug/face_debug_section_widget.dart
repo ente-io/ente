@@ -179,8 +179,16 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
         //   },
         // ),
         MenuItemWidget(
-          captionedTextWidget: const CaptionedTextWidget(
-            title: "Run Clustering",
+          captionedTextWidget: FutureBuilder<int>(
+            future: FaceMLDataDB.instance.getTotalFaceCount(),
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                return CaptionedTextWidget(
+                  title: "Run clustering (${snapshot.data!} faces)",
+                );
+              }
+              return const SizedBox.shrink();
+            },
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,

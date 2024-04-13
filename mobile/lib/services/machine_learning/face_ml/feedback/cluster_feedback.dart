@@ -12,7 +12,7 @@ import "package:photos/face/model/person.dart";
 import "package:photos/generated/protos/ente/common/vector.pb.dart";
 import "package:photos/models/file/file.dart";
 import 'package:photos/services/machine_learning/face_ml/face_clustering/cosine_distance.dart';
-import "package:photos/services/machine_learning/face_ml/face_clustering/linear_clustering_service.dart";
+import "package:photos/services/machine_learning/face_ml/face_clustering/face_clustering_service.dart";
 import "package:photos/services/machine_learning/face_ml/face_ml_result.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/search_service.dart";
@@ -213,7 +213,7 @@ class ClusterFeedbackService {
 
     final Map<int, List<String>> clusterIdToFaceIds = {};
     if (useDbscan) {
-      final dbscanClusters = await FaceClustering.instance.predictDbscan(
+      final dbscanClusters = await FaceClusteringService.instance.predictDbscan(
         embeddings,
         fileIDToCreationTime: fileIDToCreationTime,
         eps: 0.30,
@@ -236,7 +236,8 @@ class ClusterFeedbackService {
         return MapEntry(key, (null, value));
       });
 
-      final faceIdToCluster = await FaceClustering.instance.predictLinear(
+      final faceIdToCluster =
+          await FaceClusteringService.instance.predictLinear(
         clusteringInput,
         fileIDToCreationTime: fileIDToCreationTime,
         distanceThreshold: 0.23,
