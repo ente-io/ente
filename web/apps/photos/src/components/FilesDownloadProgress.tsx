@@ -1,7 +1,5 @@
-import ElectronAPIs from "@ente/shared/electron";
 import Notification from "components/Notification";
 import { t } from "i18next";
-import isElectron from "is-electron";
 import { AppContext } from "pages/_app";
 import { GalleryContext } from "pages/gallery";
 import { useContext } from "react";
@@ -101,8 +99,9 @@ export const FilesDownloadProgress: React.FC<FilesDownloadProgressProps> = ({
 
     const handleOnClick = (id: number) => () => {
         const attributes = attributesList.find((attr) => attr.id === id);
-        if (isElectron()) {
-            ElectronAPIs.openDirectory(attributes.downloadDirPath);
+        const electron = globalThis.electron;
+        if (electron) {
+            electron.openDirectory(attributes.downloadDirPath);
         } else {
             if (attributes.isHidden) {
                 galleryContext.openHiddenSection(() => {
@@ -136,7 +135,7 @@ export const FilesDownloadProgress: React.FC<FilesDownloadProgressProps> = ({
                         title: isFilesDownloadCompletedWithErrors(attributes)
                             ? t("DOWNLOAD_FAILED")
                             : isFilesDownloadCompleted(attributes)
-                              ? t(`DOWNLOAD_COMPLETE`)
+                              ? t("DOWNLOAD_COMPLETE")
                               : t("DOWNLOADING_COLLECTION", {
                                     name: attributes.folderName,
                                 }),

@@ -1,7 +1,6 @@
+import { convertBytesToHumanReadable } from "@/next/file";
 import { FlexWrapper } from "@ente/shared/components/Container";
-import { ENTE_WEBSITE_LINK } from "@ente/shared/constants/urls";
 import { formatDate, getDate, isSameDay } from "@ente/shared/time/format";
-import { convertBytesToHumanReadable } from "@ente/shared/utils/size";
 import { Box, Checkbox, Link, Typography, styled } from "@mui/material";
 import {
     DATE_CONTAINER_HEIGHT,
@@ -583,8 +582,8 @@ export function PhotoList({
                     <Box width={"100%"}>
                         <Typography variant="small" display={"block"}>
                             {t("SHARED_USING")}{" "}
-                            <Link target="_blank" href={ENTE_WEBSITE_LINK}>
-                                {t("ENTE_IO")}
+                            <Link target="_blank" href={"https://ente.io"}>
+                                ente.io
                             </Link>
                         </Typography>
                         {publicCollectionGalleryContext.referralCode ? (

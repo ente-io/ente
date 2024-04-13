@@ -1,29 +1,6 @@
-import { useEffect, useState } from "react";
-
-import { t } from "i18next";
-
-import {
-    decryptAndStoreToken,
-    generateAndSaveIntermediateKeyAttributes,
-    generateLoginSubKey,
-    saveKeyInSessionStore,
-} from "@ente/shared/crypto/helpers";
-import {
-    LS_KEYS,
-    clearData,
-    getData,
-    setData,
-} from "@ente/shared/storage/localStorage";
-import {
-    SESSION_KEYS,
-    getKey,
-    removeKey,
-    setKey,
-} from "@ente/shared/storage/sessionStorage";
-import { PAGES } from "../constants/pages";
-import { generateSRPSetupAttributes } from "../services/srp";
-import { logoutUser } from "../services/user";
-
+import log from "@/next/log";
+import { APP_HOMES } from "@ente/shared/apps/constants";
+import { PageProps } from "@ente/shared/apps/types";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
@@ -33,37 +10,54 @@ import LinkButton from "@ente/shared/components/LinkButton";
 import VerifyMasterPasswordForm, {
     VerifyMasterPasswordFormProps,
 } from "@ente/shared/components/VerifyMasterPasswordForm";
+import ComlinkCryptoWorker from "@ente/shared/crypto";
+import {
+    decryptAndStoreToken,
+    generateAndSaveIntermediateKeyAttributes,
+    generateLoginSubKey,
+    saveKeyInSessionStore,
+} from "@ente/shared/crypto/helpers";
+import { B64EncryptionResult } from "@ente/shared/crypto/types";
+import { CustomError } from "@ente/shared/error";
 import { getAccountsURL } from "@ente/shared/network/api";
+import InMemoryStore, { MS_KEYS } from "@ente/shared/storage/InMemoryStore";
+import {
+    LS_KEYS,
+    clearData,
+    getData,
+    setData,
+} from "@ente/shared/storage/localStorage";
 import {
     getToken,
     isFirstLogin,
     setIsFirstLogin,
 } from "@ente/shared/storage/localStorage/helpers";
+import {
+    SESSION_KEYS,
+    getKey,
+    removeKey,
+    setKey,
+} from "@ente/shared/storage/sessionStorage";
 import { KeyAttributes, User } from "@ente/shared/user/types";
-import isElectron from "is-electron";
+import { t } from "i18next";
+import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
 import { getSRPAttributes } from "../api/srp";
-import { configureSRP, loginViaSRP } from "../services/srp";
+import { PAGES } from "../constants/pages";
+import {
+    configureSRP,
+    generateSRPSetupAttributes,
+    loginViaSRP,
+} from "../services/srp";
+import { logoutUser } from "../services/user";
 import { SRPAttributes } from "../types/srp";
-// import { APPS, getAppName } from '@ente/shared/apps';
-import { APP_HOMES } from "@ente/shared/apps/constants";
-import { PageProps } from "@ente/shared/apps/types";
-import ComlinkCryptoWorker from "@ente/shared/crypto";
-import { B64EncryptionResult } from "@ente/shared/crypto/types";
-import ElectronAPIs from "@ente/shared/electron";
-import { CustomError } from "@ente/shared/error";
-import { addLocalLog } from "@ente/shared/logging";
-import { logError } from "@ente/shared/sentry";
-import InMemoryStore, { MS_KEYS } from "@ente/shared/storage/InMemoryStore";
 
-export default function Credentials({
-    appContext,
-    router,
-    appName,
-}: PageProps) {
+export default function Credentials({ appContext, appName }: PageProps) {
     const [srpAttributes, setSrpAttributes] = useState<SRPAttributes>();
     const [keyAttributes, setKeyAttributes] = useState<KeyAttributes>();
     const [user, setUser] = useState<User>();
 
+    const router = useRouter();
     useEffect(() => {
         const main = async () => {
             const user: User = getData(LS_KEYS.USER);
@@ -73,11 +67,12 @@ export default function Credentials({
             }
             setUser(user);
             let key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
-            if (!key && isElectron()) {
+            const electron = globalThis.electron;
+            if (!key && electron) {
                 try {
-                    key = await ElectronAPIs.getEncryptionKey();
+                    key = await electron.encryptionKey();
                 } catch (e) {
-                    logError(e, "getEncryptionKey failed");
+                    log.error("Failed to get encryption key from electron", e);
                 }
                 if (key) {
                     await saveKeyInSessionStore(
@@ -201,7 +196,7 @@ export default function Credentials({
                 }
             } catch (e) {
                 if (e.message !== CustomError.TWO_FACTOR_ENABLED) {
-                    logError(e, "getKeyAttributes failed");
+                    log.error("getKeyAttributes failed", e);
                 }
                 throw e;
             }
@@ -233,7 +228,7 @@ export default function Credentials({
                         setData(LS_KEYS.SRP_ATTRIBUTES, srpAttributes);
                     }
                 }
-                addLocalLog(() => `userSRPSetupPending ${!srpAttributes}`);
+                log.debug(() => `userSRPSetupPending ${!srpAttributes}`);
                 if (!srpAttributes) {
                     const loginSubKey = await generateLoginSubKey(kek);
                     const srpSetupAttributes =
@@ -241,13 +236,13 @@ export default function Credentials({
                     await configureSRP(srpSetupAttributes);
                 }
             } catch (e) {
-                logError(e, "migrate to srp failed");
+                log.error("migrate to srp failed", e);
             }
             const redirectURL = InMemoryStore.get(MS_KEYS.REDIRECT_URL);
             InMemoryStore.delete(MS_KEYS.REDIRECT_URL);
             router.push(redirectURL ?? APP_HOMES.get(appName));
         } catch (e) {
-            logError(e, "useMasterPassword failed");
+            log.error("useMasterPassword failed", e);
         }
     };
 

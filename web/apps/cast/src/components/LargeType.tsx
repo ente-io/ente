@@ -1,3 +1,5 @@
+import { styled } from "@mui/material";
+
 const colourPool = [
     "#87CEFA", // Light Blue
     "#90EE90", // Light Green
@@ -23,44 +25,41 @@ const colourPool = [
 
 export default function LargeType({ chars }: { chars: string[] }) {
     return (
-        <table
-            style={{
-                fontSize: "4rem",
-                fontWeight: "bold",
-                fontFamily: "monospace",
-                display: "flex",
-                position: "relative",
-            }}
-        >
+        <Container style={{}}>
             {chars.map((char, i) => (
-                <tr
+                <span
                     key={i}
                     style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
-                        padding: "0.5rem",
                         // alternating background
                         backgroundColor: i % 2 === 0 ? "#2e2e2e" : "#5e5e5e",
+                        // varying colors
+                        color: colourPool[i % colourPool.length],
                     }}
                 >
-                    <span
-                        style={{
-                            color: colourPool[i % colourPool.length],
-                            lineHeight: 1.2,
-                        }}
-                    >
-                        {char}
-                    </span>
-                    <span
-                        style={{
-                            fontSize: "1rem",
-                        }}
-                    >
-                        {i + 1}
-                    </span>
-                </tr>
+                    {char}
+                </span>
             ))}
-        </table>
+        </Container>
     );
 }
+
+const Container = styled("div")`
+    font-size: 4rem;
+    font-weight: bold;
+    font-family: monospace;
+
+    line-height: 1.2;
+
+    /*
+     * -  We want them to be spans so that when the text is copy pasted, there
+     *    is no extra whitespace inserted.
+     *
+     * -  But we also want them to have a block level padding.
+     *
+     * To achieve both these goals, make them inline-blocks
+     */
+    span {
+        display: inline-block;
+        padding: 0.5rem;
+    }
+`;

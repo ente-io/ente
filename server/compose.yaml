@@ -17,6 +17,7 @@ services:
       - custom-logs:/var/logs
       - ./museum.yaml:/museum.yaml:ro
       - ./scripts/compose/credentials.yaml:/credentials.yaml:ro
+      - ./data:/data:ro
     networks:
       - internal
 

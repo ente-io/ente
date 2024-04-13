@@ -1,7 +1,6 @@
 import pathToFfmpeg from "ffmpeg-static";
 import { existsSync } from "node:fs";
 import fs from "node:fs/promises";
-import { CustomErrors } from "../constants/errors";
 import { writeStream } from "../main/fs";
 import log from "../main/log";
 import { execAsync } from "../main/util";
@@ -146,7 +145,7 @@ const promiseWithTimeout = async <T>(
     } = { current: null };
     const rejectOnTimeout = new Promise<null>((_, reject) => {
         timeoutRef.current = setTimeout(
-            () => reject(Error(CustomErrors.WAIT_TIME_EXCEEDED)),
+            () => reject(new Error("Operation timed out")),
             timeout,
         );
     });

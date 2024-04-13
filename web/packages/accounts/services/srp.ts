@@ -1,14 +1,10 @@
-import { SRP, SrpClient } from "fast-srp-hap";
-
-import { SRPAttributes, SRPSetupAttributes } from "../types/srp";
-
+import log from "@/next/log";
 import { UserVerificationResponse } from "@ente/accounts/types/user";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { generateLoginSubKey } from "@ente/shared/crypto/helpers";
-import { addLocalLog } from "@ente/shared/logging";
-import { logError } from "@ente/shared/sentry";
 import InMemoryStore, { MS_KEYS } from "@ente/shared/storage/InMemoryStore";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
+import { SRP, SrpClient } from "fast-srp-hap";
 import { v4 as uuidv4 } from "uuid";
 import {
     completeSRPSetup,
@@ -16,6 +12,7 @@ import {
     startSRPSetup,
     verifySRPSession,
 } from "../api/srp";
+import { SRPAttributes, SRPSetupAttributes } from "../types/srp";
 import { convertBase64ToBuffer, convertBufferToBase64 } from "../utils";
 
 const SRP_PARAMS = SRP.params["4096"];
@@ -42,7 +39,7 @@ export const configureSRP = async ({
 
         const srpA = convertBufferToBase64(srpClient.computeA());
 
-        addLocalLog(() => `srp a: ${srpA}`);
+        log.debug(() => `srp a: ${srpA}`);
         const token = getToken();
         const { setupID, srpB } = await startSRPSetup(token, {
             srpA,
@@ -62,7 +59,7 @@ export const configureSRP = async ({
 
         srpClient.checkM2(convertBase64ToBuffer(srpM2));
     } catch (e) {
-        logError(e, "srp configure failed");
+        log.error("Failed to configure SRP", e);
         throw e;
     } finally {
         InMemoryStore.set(MS_KEYS.SRP_CONFIGURE_IN_PROGRESS, false);
@@ -87,22 +84,18 @@ export const generateSRPSetupAttributes = async (
 
     const srpVerifier = convertBufferToBase64(srpVerifierBuffer);
 
-    addLocalLog(
-        () => `SRP setup attributes generated',
-        ${JSON.stringify({
-            srpSalt,
-            srpUserID,
-            srpVerifier,
-            loginSubKey,
-        })}`,
-    );
-
-    return {
+    const result = {
         srpUserID,
         srpSalt,
         srpVerifier,
         loginSubKey,
     };
+
+    log.debug(
+        () => `SRP setup attributes generated: ${JSON.stringify(result)}`,
+    );
+
+    return result;
 };
 
 export const loginViaSRP = async (
@@ -124,20 +117,20 @@ export const loginViaSRP = async (
         srpClient.setB(convertBase64ToBuffer(srpB));
 
         const m1 = srpClient.computeM1();
-        addLocalLog(() => `srp m1: ${convertBufferToBase64(m1)}`);
+        log.debug(() => `srp m1: ${convertBufferToBase64(m1)}`);
         const { srpM2, ...rest } = await verifySRPSession(
             sessionID,
             srpAttributes.srpUserID,
             convertBufferToBase64(m1),
         );
-        addLocalLog(() => `srp verify session successful,srpM2: ${srpM2}`);
+        log.debug(() => `srp verify session successful,srpM2: ${srpM2}`);
 
         srpClient.checkM2(convertBase64ToBuffer(srpM2));
 
-        addLocalLog(() => `srp server verify successful`);
+        log.debug(() => `srp server verify successful`);
         return rest;
     } catch (e) {
-        logError(e, "srp verify failed");
+        log.error("srp verify failed", e);
         throw e;
     }
 };

@@ -1,8 +1,8 @@
+import log from "@/next/log";
 import { logoutUser } from "@ente/accounts/services/user";
 import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
 import EnteButton from "@ente/shared/components/EnteButton";
 import { DELETE_ACCOUNT_EMAIL } from "@ente/shared/constants/urls";
-import { logError } from "@ente/shared/sentry";
 import { Button, Link, Stack } from "@mui/material";
 import { Formik, FormikHelpers } from "formik";
 import { t } from "i18next";
@@ -92,7 +92,7 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
                 askToMailForDeletion();
             }
         } catch (e) {
-            logError(e, "Error while initiating account deletion");
+            log.error("Error while initiating account deletion", e);
             somethingWentWrong();
         } finally {
             setLoading(false);
@@ -147,7 +147,7 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
             await deleteAccount(decryptedChallenge, reason, feedback);
             logoutUser();
         } catch (e) {
-            logError(e, "solveChallengeAndDeleteAccount failed");
+            log.error("solveChallengeAndDeleteAccount failed", e);
             somethingWentWrong();
         } finally {
             setLoading(false);

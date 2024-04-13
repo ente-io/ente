@@ -1,3 +1,4 @@
+import log from "@/next/log";
 import { APPS, CLIENT_PACKAGE_NAMES } from "@ente/shared/apps/constants";
 import {
     CenteredFlex,
@@ -7,13 +8,11 @@ import EnteButton from "@ente/shared/components/EnteButton";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
 import HTTPService from "@ente/shared/network/HTTPService";
-import { logError } from "@ente/shared/sentry";
 import { LS_KEYS, setData } from "@ente/shared/storage/localStorage";
 import InfoIcon from "@mui/icons-material/Info";
 import { Box, Typography } from "@mui/material";
 import { t } from "i18next";
 import _sodium from "libsodium-wrappers";
-import Image from "next/image";
 import { useEffect, useState } from "react";
 import {
     BeginPasskeyAuthenticationResponse,
@@ -74,7 +73,7 @@ const PasskeysFlow = () => {
         try {
             beginData = await beginAuthentication(passkeySessionID);
         } catch (e) {
-            logError(e, "Couldn't begin passkey authentication");
+            log.error("Couldn't begin passkey authentication", e);
             setErrored(true);
             return;
         } finally {
@@ -90,7 +89,7 @@ const PasskeysFlow = () => {
             try {
                 credential = await getCredential(beginData.options.publicKey);
             } catch (e) {
-                logError(e, "Couldn't get credential");
+                log.error("Couldn't get credential", e);
                 continue;
             } finally {
                 tries++;
@@ -118,7 +117,7 @@ const PasskeysFlow = () => {
                 beginData.ceremonySessionID,
             );
         } catch (e) {
-            logError(e, "Couldn't finish passkey authentication");
+            log.error("Couldn't finish passkey authentication", e);
             setErrored(true);
             setLoading(false);
             return;
@@ -297,7 +296,7 @@ const PasskeysFlow = () => {
                             {t("PASSKEY_FOLLOW_THE_STEPS_FROM_YOUR_BROWSER")}
                         </Typography>
                         <CenteredFlex marginTop="1rem">
-                            <Image
+                            <img
                                 alt="ente Logo Circular"
                                 height={150}
                                 width={150}

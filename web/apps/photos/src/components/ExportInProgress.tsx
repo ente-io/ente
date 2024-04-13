@@ -7,11 +7,11 @@ import {
     Button,
     DialogActions,
     DialogContent,
+    LinearProgress,
     styled,
 } from "@mui/material";
 import { ExportStage } from "constants/export";
 import { t } from "i18next";
-import { ProgressBar } from "react-bootstrap";
 import { Trans } from "react-i18next";
 import { ExportProgress } from "types/export";
 
@@ -69,21 +69,19 @@ export default function ExportInProgress(props: Props) {
                         )}
                     </Box>
                     <FlexWrapper px={1}>
-                        <ProgressBar
-                            style={{ width: "100%" }}
-                            now={
-                                showIndeterminateProgress()
-                                    ? 100
-                                    : Math.round(
-                                          ((props.exportProgress.success +
-                                              props.exportProgress.failed) *
-                                              100) /
-                                              props.exportProgress.total,
-                                      )
-                            }
-                            animated
-                            variant="upload-progress-bar"
-                        />
+                        {showIndeterminateProgress() ? (
+                            <LinearProgress />
+                        ) : (
+                            <LinearProgress
+                                variant="determinate"
+                                value={Math.round(
+                                    ((props.exportProgress.success +
+                                        props.exportProgress.failed) *
+                                        100) /
+                                        props.exportProgress.total,
+                                )}
+                            />
+                        )}
                     </FlexWrapper>
                 </VerticallyCentered>
             </DialogContent>

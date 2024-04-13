@@ -3,7 +3,6 @@ import {
     LocalFileAttributes,
 } from "@ente/shared/crypto/types";
 import { FILE_TYPE } from "constants/file";
-import { Collection } from "types/collection";
 import {
     FilePublicMagicMetadata,
     FilePublicMagicMetadataProps,
@@ -39,24 +38,6 @@ export interface Metadata {
     deviceFolder?: string;
 }
 
-export interface Location {
-    latitude: number;
-    longitude: number;
-}
-
-export interface ParsedMetadataJSON {
-    creationTime: number;
-    modificationTime: number;
-    latitude: number;
-    longitude: number;
-}
-
-export interface MultipartUploadURLs {
-    objectKey: string;
-    partURLs: string[];
-    completeURL: string;
-}
-
 export interface FileTypeInfo {
     fileType: FILE_TYPE;
     exactType: string;
@@ -64,43 +45,6 @@ export interface FileTypeInfo {
     imageType?: string;
     videoType?: string;
 }
-
-/*
- * ElectronFile is a custom interface that is used to represent
- * any file on disk as a File-like object in the Electron desktop app.
- *
- * This was added to support the auto-resuming of failed uploads
- * which needed absolute paths to the files which the
- * normal File interface does not provide.
- */
-export interface ElectronFile {
-    name: string;
-    path: string;
-    size: number;
-    lastModified: number;
-    stream: () => Promise<ReadableStream<Uint8Array>>;
-    blob: () => Promise<Blob>;
-    arrayBuffer: () => Promise<Uint8Array>;
-}
-
-export interface UploadAsset {
-    isLivePhoto?: boolean;
-    file?: File | ElectronFile;
-    livePhotoAssets?: LivePhotoAssets;
-    isElectron?: boolean;
-}
-export interface LivePhotoAssets {
-    image: globalThis.File | ElectronFile;
-    video: globalThis.File | ElectronFile;
-}
-
-export interface FileWithCollection extends UploadAsset {
-    localID: number;
-    collection?: Collection;
-    collectionID?: number;
-}
-
-export type ParsedMetadataJSONMap = Map<string, ParsedMetadataJSON>;
 
 export interface UploadURL {
     url: string;

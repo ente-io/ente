@@ -1,14 +1,12 @@
+import { ensureElectron } from "@/next/electron";
+import { convertBytesToHumanReadable, getFileNameSize } from "@/next/file";
+import log from "@/next/log";
 import { CustomError } from "@ente/shared/error";
-import { addLogLine } from "@ente/shared/logging";
-import { getFileNameSize } from "@ente/shared/logging/web";
-import { logError } from "@ente/shared/sentry";
-import { convertBytesToHumanReadable } from "@ente/shared/utils/size";
 import { FILE_TYPE } from "constants/file";
 import { BLACK_THUMBNAIL_BASE64 } from "constants/upload";
 import isElectron from "is-electron";
 import * as FFmpegService from "services/ffmpeg/ffmpegService";
 import HeicConversionService from "services/heicConversionService";
-import imageProcessor from "services/imageProcessor";
 import { ElectronFile, FileTypeInfo } from "types/upload";
 import { isFileHEIC } from "utils/file";
 import { getUint8ArrayView } from "../readerService";
@@ -31,7 +29,7 @@ export async function generateThumbnail(
     fileTypeInfo: FileTypeInfo,
 ): Promise<{ thumbnail: Uint8Array; hasStaticThumbnail: boolean }> {
     try {
-        addLogLine(`generating thumbnail for ${getFileNameSize(file)}`);
+        log.info(`generating thumbnail for ${getFileNameSize(file)}`);
         let hasStaticThumbnail = false;
         let thumbnail: Uint8Array;
         try {
@@ -41,32 +39,26 @@ export async function generateThumbnail(
                 thumbnail = await generateVideoThumbnail(file, fileTypeInfo);
             }
             if (thumbnail.length > 1.5 * MAX_THUMBNAIL_SIZE) {
-                logError(
-                    Error("thumbnail_too_large"),
-                    "thumbnail greater than max limit",
-                    {
+                log.error(
+                    `thumbnail greater than max limit - ${JSON.stringify({
                         thumbnailSize: convertBytesToHumanReadable(
                             thumbnail.length,
                         ),
                         fileSize: convertBytesToHumanReadable(file.size),
                         fileType: fileTypeInfo.exactType,
-                    },
+                    })}`,
                 );
             }
             if (thumbnail.length === 0) {
                 throw Error("EMPTY THUMBNAIL");
             }
-            addLogLine(
+            log.info(
                 `thumbnail successfully generated ${getFileNameSize(file)}`,
             );
         } catch (e) {
-            logError(e, "uploading static thumbnail", {
-                fileFormat: fileTypeInfo.exactType,
-            });
-            addLogLine(
-                `thumbnail generation failed ${getFileNameSize(file)} error: ${
-                    e.message
-                }`,
+            log.error(
+                `thumbnail generation failed ${getFileNameSize(file)} with format ${fileTypeInfo.exactType}`,
+                e,
             );
             thumbnail = Uint8Array.from(atob(BLACK_THUMBNAIL_BASE64), (c) =>
                 c.charCodeAt(0),
@@ -75,7 +67,7 @@ export async function generateThumbnail(
         }
         return { thumbnail, hasStaticThumbnail };
     } catch (e) {
-        logError(e, "Error generating static thumbnail");
+        log.error("Error generating static thumbnail", e);
         throw e;
     }
 }
@@ -86,7 +78,7 @@ async function generateImageThumbnail(
 ) {
     if (isElectron()) {
         try {
-            return await imageProcessor.generateImageThumbnail(
+            return await generateImageThumbnailInElectron(
                 file,
                 MAX_THUMBNAIL_DIMENSION,
                 MAX_THUMBNAIL_SIZE,
@@ -99,6 +91,39 @@ async function generateImageThumbnail(
     }
 }
 
+const generateImageThumbnailInElectron = async (
+    inputFile: File | ElectronFile,
+    maxDimension: number,
+    maxSize: number,
+): Promise<Uint8Array> => {
+    try {
+        const startTime = Date.now();
+        const thumb = await ensureElectron().generateImageThumbnail(
+            inputFile,
+            maxDimension,
+            maxSize,
+        );
+        log.info(
+            `originalFileSize:${convertBytesToHumanReadable(
+                inputFile?.size,
+            )},thumbFileSize:${convertBytesToHumanReadable(
+                thumb?.length,
+            )},  native thumbnail generation time: ${
+                Date.now() - startTime
+            }ms `,
+        );
+        return thumb;
+    } catch (e) {
+        if (
+            e.message !==
+            CustomError.WINDOWS_NATIVE_IMAGE_PROCESSING_NOT_SUPPORTED
+        ) {
+            log.error("failed to generate image thumbnail natively", e);
+        }
+        throw e;
+    }
+};
+
 export async function generateImageThumbnailUsingCanvas(
     file: File | ElectronFile,
     fileTypeInfo: FileTypeInfo,
@@ -110,12 +135,12 @@ export async function generateImageThumbnailUsingCanvas(
     let timeout = null;
     const isHEIC = isFileHEIC(fileTypeInfo.exactType);
     if (isHEIC) {
-        addLogLine(`HEICConverter called for ${getFileNameSize(file)}`);
+        log.info(`HEICConverter called for ${getFileNameSize(file)}`);
         const convertedBlob = await HeicConversionService.convert(
             new Blob([await file.arrayBuffer()]),
         );
         file = new File([convertedBlob], file.name);
-        addLogLine(`${getFileNameSize(file)} successfully converted`);
+        log.info(`${getFileNameSize(file)} successfully converted`);
     }
     let image = new Image();
     imageURL = URL.createObjectURL(new Blob([await file.arrayBuffer()]));
@@ -152,7 +177,7 @@ export async function generateImageThumbnailUsingCanvas(
             }
         };
         timeout = setTimeout(
-            () => reject(Error(CustomError.WAIT_TIME_EXCEEDED)),
+            () => reject(new Error("Operation timed out")),
             WAIT_TIME_THUMBNAIL_GENERATION,
         );
     });
@@ -166,24 +191,25 @@ async function generateVideoThumbnail(
 ) {
     let thumbnail: Uint8Array;
     try {
-        addLogLine(
+        log.info(
             `ffmpeg generateThumbnail called for ${getFileNameSize(file)}`,
         );
 
         const thumbnail = await FFmpegService.generateVideoThumbnail(file);
-        addLogLine(
+        log.info(
             `ffmpeg thumbnail successfully generated ${getFileNameSize(file)}`,
         );
         return await getUint8ArrayView(thumbnail);
     } catch (e) {
-        addLogLine(
+        log.info(
             `ffmpeg thumbnail generated failed  ${getFileNameSize(
                 file,
             )} error: ${e.message}`,
         );
-        logError(e, "failed to generate thumbnail using ffmpeg", {
-            fileFormat: fileTypeInfo.exactType,
-        });
+        log.error(
+            `failed to generate thumbnail using ffmpeg for format ${fileTypeInfo.exactType}`,
+            e,
+        );
         thumbnail = await generateVideoThumbnailUsingCanvas(file);
     }
     return thumbnail;
@@ -233,12 +259,12 @@ export async function generateVideoThumbnailUsingCanvas(
                 const err = Error(
                     `${CustomError.THUMBNAIL_GENERATION_FAILED} err: ${e}`,
                 );
-                logError(e, CustomError.THUMBNAIL_GENERATION_FAILED);
+                log.error(CustomError.THUMBNAIL_GENERATION_FAILED, e);
                 reject(err);
             }
         });
         timeout = setTimeout(
-            () => reject(Error(CustomError.WAIT_TIME_EXCEEDED)),
+            () => reject(new Error("Operation timed out")),
             WAIT_TIME_THUMBNAIL_GENERATION,
         );
     });

@@ -52,6 +52,15 @@ class RemoteSyncService {
   bool _isExistingSyncSilent = false;
 
   static const kHasSyncedArchiveKey = "has_synced_archive";
+  /* This setting is used to maintain a list of local IDs for videos that the user has manually
+ marked for upload, even if the global video upload setting is currently disabled.
+ When the global video upload setting is disabled, we typically ignore all video uploads. However, for videos that have been added to this list, we
+ want to still allow them to be uploaded, despite the global setting being disabled.
+
+ This allows users to queue up videos for upload, and have them successfully upload
+ even if they later toggle the global video upload setting to disabled.
+   */
+  static const _ignoreBackUpSettingsForIDs_ = "ignoreBackUpSettingsForIDs";
   final String _isFirstRemoteSyncDone = "isFirstRemoteSyncDone";
 
   // 28 Sept, 2021 9:03:20 AM IST
@@ -170,7 +179,8 @@ class RemoteSyncService {
           e is NoActiveSubscriptionError ||
           e is WiFiUnavailableError ||
           e is StorageLimitExceededError ||
-          e is SyncStopRequestedError) {
+          e is SyncStopRequestedError ||
+          e is NoMediaLocationAccessError) {
         _logger.warning("Error executing remote sync", e, s);
         rethrow;
       } else {
@@ -186,6 +196,18 @@ class RemoteSyncService {
 
   bool isFirstRemoteSyncDone() {
     return _prefs.containsKey(_isFirstRemoteSyncDone);
+  }
+
+  Future<bool> whiteListVideoForUpload(EnteFile file) async {
+    if (file.fileType == FileType.video &&
+        !_config.shouldBackupVideos() &&
+        file.localID != null) {
+      final List<String> whitelistedIDs =
+          _prefs.getStringList(_ignoreBackUpSettingsForIDs_) ?? <String>[];
+      whitelistedIDs.add(file.localID!);
+      return _prefs.setStringList(_ignoreBackUpSettingsForIDs_, whitelistedIDs);
+    }
+    return false;
   }
 
   Future<void> _pullDiff() async {
@@ -523,8 +545,13 @@ class RemoteSyncService {
     final List<EnteFile> filesToBeUploaded = [];
     int ignoredForUpload = 0;
     int skippedVideos = 0;
+    final whitelistedIDs =
+        (_prefs.getStringList(_ignoreBackUpSettingsForIDs_) ?? <String>[])
+            .toSet();
     for (var file in originalFiles) {
-      if (shouldRemoveVideos && file.fileType == FileType.video) {
+      if (shouldRemoveVideos &&
+          (file.fileType == FileType.video &&
+              !whitelistedIDs.contains(file.localID))) {
         skippedVideos++;
         continue;
       }
@@ -555,6 +582,7 @@ class RemoteSyncService {
     final int toBeUploaded = filesToBeUploaded.length + updatedFileIDs.length;
     if (toBeUploaded > 0) {
       Bus.instance.fire(SyncStatusUpdate(SyncStatus.preparingForUpload));
+      await _uploader.verifyMediaLocationAccess();
       await _uploader.checkNetworkForUpload();
       // verify if files upload is allowed based on their subscription plan and
       // storage limit. To avoid creating new endpoint, we are using

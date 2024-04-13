@@ -9,6 +9,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
+import "package:permission_handler/permission_handler.dart";
 import 'package:photos/core/configuration.dart';
 import "package:photos/core/constants.dart";
 import 'package:photos/core/errors.dart';
@@ -360,6 +361,15 @@ class FileUploader {
     }
     if (!canUploadUnderCurrentNetworkConditions) {
       throw WiFiUnavailableError();
+    }
+  }
+
+  Future<void> verifyMediaLocationAccess() async {
+    if (Platform.isAndroid) {
+      final bool hasPermission = await Permission.accessMediaLocation.isGranted;
+      if (!hasPermission) {
+        throw NoMediaLocationAccessError();
+      }
     }
   }
 

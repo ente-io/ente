@@ -18,11 +18,6 @@ configure the endpoint the app should be connecting to.
 
 ![Setting a custom server on the onboarding screen](custom-server.png)
 
-> [!IMPORTANT]
->
-> This is only supported by the Ente Auth app currently. We'll add this same
-> functionality to the Ente Photos app soon.
-
 ## CLI
 
 > [!NOTE]

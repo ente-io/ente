@@ -1,4 +1,4 @@
-import { logError } from "@ente/shared/sentry";
+import log from "@/next/log";
 import {
     FFMPEG_PLACEHOLDER,
     INPUT_PATH_PLACEHOLDER,
@@ -40,7 +40,7 @@ export async function generateVideoThumbnail(
             seekTime--;
         }
     } catch (e) {
-        logError(e, "ffmpeg generateVideoThumbnail failed");
+        log.error("ffmpeg generateVideoThumbnail failed", e);
         throw e;
     }
 }
@@ -72,7 +72,7 @@ export async function extractVideoMetadata(file: File | ElectronFile) {
             new Uint8Array(await metadata.arrayBuffer()),
         );
     } catch (e) {
-        logError(e, "ffmpeg extractVideoMetadata failed");
+        log.error("ffmpeg extractVideoMetadata failed", e);
         throw e;
     }
 }
@@ -94,7 +94,7 @@ export async function convertToMP4(file: File | ElectronFile) {
             true,
         );
     } catch (e) {
-        logError(e, "ffmpeg convertToMP4 failed");
+        log.error("ffmpeg convertToMP4 failed", e);
         throw e;
     }
 }

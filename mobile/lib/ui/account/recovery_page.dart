@@ -103,6 +103,7 @@ class _RecoveryPageState extends State<RecoveryPage> {
                   child: TextFormField(
                     decoration: InputDecoration(
                       filled: true,
+                      fillColor: getEnteColorScheme(context).fillFaint,
                       hintText: S.of(context).enterYourRecoveryKey,
                       contentPadding: const EdgeInsets.all(20),
                       border: UnderlineInputBorder(

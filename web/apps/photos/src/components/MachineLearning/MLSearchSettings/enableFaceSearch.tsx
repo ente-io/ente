@@ -1,4 +1,3 @@
-import { FACE_SEARCH_PRIVACY_POLICY_LINK } from "@ente/shared/constants/urls";
 import {
     Button,
     Checkbox,
@@ -60,8 +59,8 @@ export default function EnableFaceSearch({
                             components={{
                                 a: (
                                     <Link
-                                        target={"_blank"}
-                                        href={FACE_SEARCH_PRIVACY_POLICY_LINK}
+                                        target="_blank"
+                                        href="https://ente.io/privacy#8-biometric-information-privacy-policy"
                                         underline="always"
                                         sx={{
                                             color: "inherit",

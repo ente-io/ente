@@ -18,6 +18,10 @@ type File struct {
 	Info               *FileInfo      `json:"info,omitempty"`
 }
 
+func (f File) IsRemovedFromAlbum() bool {
+	return f.IsDeleted || f.File.EncryptedData == "-"
+}
+
 // FileInfo has information about storage used by the file & it's metadata(future)
 type FileInfo struct {
 	FileSize      int64 `json:"fileSize,omitempty"`

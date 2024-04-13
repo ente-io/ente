@@ -34,7 +34,7 @@ jobs:
               with:
                   node-version: 20
                   cache: "yarn"
-                  cache-dependency-path: "docs/yarn.lock"
+                  cache-dependency-path: "web/yarn.lock"
 
             - name: Install dependencies
               run: yarn install
@@ -76,6 +76,19 @@ jobs:
                   projectName: ente
                   branch: n-cast
                   directory: web/apps/cast/out
+                  wranglerVersion: "3"
+
+            - name: Build payments
+              run: yarn build:payments
+
+            - name: Publish payments
+              uses: cloudflare/pages-action@1
+              with:
+                  accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+                  apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+                  projectName: ente
+                  branch: n-payments
+                  directory: web/apps/payments/dist
                   wranglerVersion: "3"
 
             - name: Build photos

@@ -1,4 +1,4 @@
-import { logError } from "@ente/shared/sentry";
+import log from "@/next/log";
 import { styled } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { GalleryContext } from "pages/gallery";
@@ -47,7 +47,7 @@ const Avatar: React.FC<AvatarProps> = ({ file, email, opacity }) => {
                 // getting email from in-memory id-email map
                 const email = userIDToEmailMap.get(file.ownerID);
                 if (!email) {
-                    logError(Error(), "email not found in userIDToEmailMap");
+                    log.error("email not found in userIDToEmailMap");
                     return;
                 }
                 const colorIndex =
@@ -58,8 +58,7 @@ const Avatar: React.FC<AvatarProps> = ({ file, email, opacity }) => {
             } else if (file.ownerID === user.id) {
                 const uploaderName = file.pubMagicMetadata.data.uploaderName;
                 if (!uploaderName) {
-                    logError(
-                        Error(),
+                    log.error(
                         "uploaderName not found in file.pubMagicMetadata.data",
                     );
                     return;
@@ -67,8 +66,8 @@ const Avatar: React.FC<AvatarProps> = ({ file, email, opacity }) => {
                 setUserLetter(uploaderName[0].toUpperCase());
                 setColorCode(PUBLIC_COLLECTED_FILES_AVATAR_COLOR_CODE);
             }
-        } catch (err) {
-            logError(err, "AvatarIcon.tsx - useLayoutEffect file failed");
+        } catch (e) {
+            log.error("AvatarIcon.tsx - useLayoutEffect file failed", e);
         }
     }, [file]);
 
@@ -87,15 +86,15 @@ const Avatar: React.FC<AvatarProps> = ({ file, email, opacity }) => {
                 (key) => userIDToEmailMap.get(key) === email,
             );
             if (!id) {
-                logError(Error(), `ID not found for email: ${email}`);
+                log.error(`ID not found for email: ${email}`);
                 return;
             }
             const colorIndex = id % theme.colors.avatarColors.length;
             const colorCode = theme.colors.avatarColors[colorIndex];
             setUserLetter(email[0].toUpperCase());
             setColorCode(colorCode);
-        } catch (err) {
-            logError(err, "AvatarIcon.tsx - useLayoutEffect email failed");
+        } catch (e) {
+            log.error("AvatarIcon.tsx - useLayoutEffect email failed", e);
         }
     }, [email]);
 

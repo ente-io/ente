@@ -1,10 +1,15 @@
+import log from "@/next/log";
+import { CACHES } from "@ente/shared/storage/cacheStorage/constants";
+import { cached } from "@ente/shared/storage/cacheStorage/helpers";
 import * as tf from "@tensorflow/tfjs-core";
 import { NormalizedFace } from "blazeface-back";
+import { FILE_TYPE } from "constants/file";
 import { BLAZEFACE_FACE_SIZE } from "constants/mlConfig";
 import { euclidean } from "hdbscan";
 import PQueue from "p-queue";
 import DownloadManager from "services/download";
 import { getLocalFiles } from "services/fileService";
+import { decodeLivePhoto } from "services/livePhotoService";
 import { EnteFile } from "types/file";
 import { Dimensions } from "types/image";
 import {
@@ -12,31 +17,19 @@ import {
     DetectedFace,
     DetectedObject,
     Face,
+    FaceAlignment,
     FaceImageBlob,
     MlFileData,
     Person,
     RealWorldObject,
     Versioned,
 } from "types/machineLearning";
-// import { mlFilesStore, mlPeopleStore } from 'utils/storage/mlStorage';
-import { addLogLine } from "@ente/shared/logging";
-import { CACHES } from "@ente/shared/storage/cacheStorage/constants";
-import { cached } from "@ente/shared/storage/cacheStorage/helpers";
-import { FILE_TYPE } from "constants/file";
-import { decodeLivePhoto } from "services/livePhotoService";
 import { getRenderableImage } from "utils/file";
-import { imageBitmapToBlob } from "utils/image";
+import { clamp, imageBitmapToBlob, warpAffineFloat32List } from "utils/image";
 import mlIDbStorage from "utils/storage/mlIDbStorage";
 import { Box, Point } from "../../../thirdparty/face-api/classes";
-import {
-    getArcfaceAlignment,
-    ibExtractFaceImage,
-    ibExtractFaceImages,
-} from "./faceAlign";
-import {
-    getFaceCropBlobFromStorage,
-    ibExtractFaceImagesFromCrops,
-} from "./faceCrop";
+import { ibExtractFaceImage, ibExtractFaceImages } from "./faceAlign";
+import { getFaceCropBlobFromStorage } from "./faceCrop";
 
 export function f32Average(descriptors: Float32Array[]) {
     if (descriptors.length < 1) {
@@ -131,7 +124,7 @@ export function extractFaces(
             ];
         });
 
-        // addLogLine('boxes: ', boxes[0]);
+        // log.info('boxes: ', boxes[0]);
 
         const faceImagesTensor = tf.image.cropAndResize(
             reshapedImage,
@@ -242,9 +235,10 @@ export async function extractFaceImages(
     faceSize: number,
     image?: ImageBitmap,
 ) {
-    if (faces.length === faces.filter((f) => f.crop).length) {
-        return ibExtractFaceImagesFromCrops(faces, faceSize);
-    } else if (image) {
+    // if (faces.length === faces.filter((f) => f.crop).length) {
+    // return ibExtractFaceImagesFromCrops(faces, faceSize);
+    // } else
+    if (image) {
         const faceAlignments = faces.map((f) => f.alignment);
         return ibExtractFaceImages(image, faceAlignments, faceSize);
     } else {
@@ -254,31 +248,68 @@ export async function extractFaceImages(
     }
 }
 
+export async function extractFaceImagesToFloat32(
+    faceAlignments: Array<FaceAlignment>,
+    faceSize: number,
+    image: ImageBitmap,
+): Promise<Float32Array> {
+    const faceData = new Float32Array(
+        faceAlignments.length * faceSize * faceSize * 3,
+    );
+    for (let i = 0; i < faceAlignments.length; i++) {
+        const alignedFace = faceAlignments[i];
+        const faceDataOffset = i * faceSize * faceSize * 3;
+        warpAffineFloat32List(
+            image,
+            alignedFace,
+            faceSize,
+            faceData,
+            faceDataOffset,
+        );
+    }
+    return faceData;
+}
+
 export function leftFillNum(num: number, length: number, padding: number) {
     return num.toString().padStart(length, padding.toString());
 }
 
-// TODO: same face can not be only based on this id,
-// this gives same id to faces whose arcface center lies in same box of 1% image grid
-// maximum distance for same id will be around √2%
-// will give same id in most of the cases, except for face centers lying near grid edges
-// faces with same id should be treated as same face, and diffrent id should be tested further
-// further test can rely on nearest face within certain threshold in same image
-// can also explore spatial index similar to Geohash for indexing, but overkill
-// for mostly single digit faces in one image
-// also check if this needs to be globally unique or unique for a user
 export function getFaceId(detectedFace: DetectedFace, imageDims: Dimensions) {
-    const arcFaceAlignedFace = getArcfaceAlignment(detectedFace.detection);
-    const imgDimPoint = new Point(imageDims.width, imageDims.height);
-    const gridPt = arcFaceAlignedFace.center
-        .mul(new Point(100, 100))
-        .div(imgDimPoint)
-        .floor()
-        .bound(0, 99);
-    const gridPaddedX = leftFillNum(gridPt.x, 2, 0);
-    const gridPaddedY = leftFillNum(gridPt.y, 2, 0);
+    const xMin = clamp(
+        detectedFace.detection.box.x / imageDims.width,
+        0.0,
+        0.999999,
+    )
+        .toFixed(5)
+        .substring(2);
+    const yMin = clamp(
+        detectedFace.detection.box.y / imageDims.height,
+        0.0,
+        0.999999,
+    )
+        .toFixed(5)
+        .substring(2);
+    const xMax = clamp(
+        (detectedFace.detection.box.x + detectedFace.detection.box.width) /
+            imageDims.width,
+        0.0,
+        0.999999,
+    )
+        .toFixed(5)
+        .substring(2);
+    const yMax = clamp(
+        (detectedFace.detection.box.y + detectedFace.detection.box.height) /
+            imageDims.height,
+        0.0,
+        0.999999,
+    )
+        .toFixed(5)
+        .substring(2);
 
-    return `${detectedFace.fileId}-${gridPaddedX}-${gridPaddedY}`;
+    const rawFaceID = `${xMin}_${yMin}_${xMax}_${yMax}`;
+    const faceID = `${detectedFace.fileId}_${rawFaceID}`;
+
+    return faceID;
 }
 
 export function getObjectId(
@@ -357,14 +388,14 @@ export async function getOriginalImageBitmap(
     } else {
         fileBlob = await getOriginalConvertedFile(file, queue);
     }
-    addLogLine("[MLService] Got file: ", file.id.toString());
+    log.info("[MLService] Got file: ", file.id.toString());
 
     return getImageBlobBitmap(fileBlob);
 }
 
 export async function getThumbnailImageBitmap(file: EnteFile) {
     const thumb = await DownloadManager.getThumbnail(file);
-    addLogLine("[MLService] Got thumbnail: ", file.id.toString());
+    log.info("[MLService] Got thumbnail: ", file.id.toString());
 
     return getImageBlobBitmap(new Blob([thumb]));
 }
@@ -381,7 +412,7 @@ export async function getLocalFileImageBitmap(
 export async function getPeopleList(file: EnteFile): Promise<Array<Person>> {
     let startTime = Date.now();
     const mlFileData: MlFileData = await mlIDbStorage.getFile(file.id);
-    addLogLine(
+    log.info(
         "getPeopleList:mlFilesStore:getItem",
         Date.now() - startTime,
         "ms",
@@ -396,18 +427,18 @@ export async function getPeopleList(file: EnteFile): Promise<Array<Person>> {
     if (!peopleIds || peopleIds.length < 1) {
         return [];
     }
-    // addLogLine("peopleIds: ", peopleIds);
+    // log.info("peopleIds: ", peopleIds);
     startTime = Date.now();
     const peoplePromises = peopleIds.map(
         (p) => mlIDbStorage.getPerson(p) as Promise<Person>,
     );
     const peopleList = await Promise.all(peoplePromises);
-    addLogLine(
+    log.info(
         "getPeopleList:mlPeopleStore:getItems",
         Date.now() - startTime,
         "ms",
     );
-    // addLogLine("peopleList: ", peopleList);
+    // log.info("peopleList: ", peopleList);
 
     return peopleList;
 }
@@ -515,7 +546,7 @@ export function getNearestPointIndex(
         (a, b) => Math.abs(a.distance) - Math.abs(b.distance),
     );
 
-    // addLogLine('Nearest dist: ', nearest.distance, maxDistance);
+    // log.info('Nearest dist: ', nearest.distance, maxDistance);
     if (!maxDistance || nearest.distance <= maxDistance) {
         return nearest.index;
     }
@@ -523,11 +554,11 @@ export function getNearestPointIndex(
 
 export function logQueueStats(queue: PQueue, name: string) {
     queue.on("active", () =>
-        addLogLine(
+        log.info(
             `queuestats: ${name}: Active, Size: ${queue.size} Pending: ${queue.pending}`,
         ),
     );
-    queue.on("idle", () => addLogLine(`queuestats: ${name}: Idle`));
+    queue.on("idle", () => log.info(`queuestats: ${name}: Idle`));
     queue.on("error", (error) =>
         console.error(`queuestats: ${name}: Error, `, error),
     );

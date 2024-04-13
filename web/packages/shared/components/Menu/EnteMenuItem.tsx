@@ -12,18 +12,11 @@ import {
 import React from "react";
 import { CaptionedText } from "../CaptionedText";
 import PublicShareSwitch from "../Collections/CollectionShare/publicShare/switch";
-import ChangeDirectoryOption from "../Directory/changeOption";
 
 interface Iprops {
     onClick: () => void;
     color?: ButtonProps["color"];
-    variant?:
-        | "primary"
-        | "captioned"
-        | "toggle"
-        | "secondary"
-        | "mini"
-        | "path";
+    variant?: "primary" | "captioned" | "toggle" | "secondary" | "mini";
     fontWeight?: TypographyProps["fontWeight"];
     startIcon?: React.ReactNode;
     endIcon?: React.ReactNode;
@@ -49,14 +42,14 @@ export function EnteMenuItem({
     disabled = false,
 }: Iprops) {
     const handleButtonClick = () => {
-        if (variant === "path" || variant === "toggle") {
+        if (variant === "toggle") {
             return;
         }
         onClick();
     };
 
     const handleIconClick = () => {
-        if (variant !== "path" && variant !== "toggle") {
+        if (variant !== "toggle") {
             return;
         }
         onClick();
@@ -114,11 +107,6 @@ export function EnteMenuItem({
                         <PublicShareSwitch
                             checked={checked}
                             onClick={handleIconClick}
-                        />
-                    )}
-                    {variant === "path" && (
-                        <ChangeDirectoryOption
-                            changeExportDirectory={handleIconClick}
                         />
                     )}
                 </VerticallyCenteredFlex>

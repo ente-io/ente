@@ -1,6 +1,6 @@
 ## @/next
 
-Like [@/ui](../ui/README.md), but for things that require Next.
+A base UI layer package for sharing code between our Next.js apps.
 
 ### Packaging
 

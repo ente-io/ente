@@ -1,5 +1,4 @@
-import { addLogLine } from "@ente/shared/logging";
-import { logError } from "@ente/shared/sentry";
+import log from "@/next/log";
 import { CACHES } from "@ente/shared/storage/cacheStorage/constants";
 import { styled } from "@mui/material";
 import { Legend } from "components/PhotoViewer/styledComponents/Legend";
@@ -87,11 +86,11 @@ export function PhotoPeopleList(props: PhotoPeopleListProps) {
         let didCancel = false;
 
         async function updateFaceImages() {
-            addLogLine("calling getPeopleList");
+            log.info("calling getPeopleList");
             const startTime = Date.now();
             const people = await getPeopleList(props.file);
-            addLogLine("getPeopleList", Date.now() - startTime, "ms");
-            addLogLine("getPeopleList done, didCancel: ", didCancel);
+            log.info(`getPeopleList ${Date.now() - startTime} ms`);
+            log.info(`getPeopleList done, didCancel: ${didCancel}`);
             !didCancel && setPeople(people);
         }
 
@@ -130,7 +129,7 @@ export function AllPeopleList(props: AllPeopleListProps) {
                 }
                 !didCancel && setPeople(people);
             } catch (e) {
-                logError(e, "updateFaceImages failed");
+                log.error("updateFaceImages failed", e);
             }
         }
         updateFaceImages();

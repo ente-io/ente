@@ -1,5 +1,4 @@
-import { addLogLine } from "@ente/shared/logging";
-import { logError } from "@ente/shared/sentry";
+import log from "@/next/log";
 import { ElectronFile } from "types/upload";
 import { EventQueueItem } from "types/watchFolder";
 import watchFolderService from "./watchFolderService";
@@ -22,11 +21,11 @@ export async function diskFileAddedCallback(file: ElectronFile) {
             files: [file],
         };
         watchFolderService.pushEvent(event);
-        addLogLine(
+        log.info(
             `added (upload) to event queue, collectionName:${event.collectionName} folderPath:${event.folderPath}, filesCount: ${event.files.length}`,
         );
     } catch (e) {
-        logError(e, "error while calling diskFileAddedCallback");
+        log.error("error while calling diskFileAddedCallback", e);
     }
 }
 
@@ -48,11 +47,11 @@ export async function diskFileRemovedCallback(filePath: string) {
             paths: [filePath],
         };
         watchFolderService.pushEvent(event);
-        addLogLine(
+        log.info(
             `added (trash) to event queue collectionName:${event.collectionName} folderPath:${event.folderPath} , pathsCount: ${event.paths.length}`,
         );
     } catch (e) {
-        logError(e, "error while calling diskFileRemovedCallback");
+        log.error("error while calling diskFileRemovedCallback", e);
     }
 }
 
@@ -63,12 +62,12 @@ export async function diskFolderRemovedCallback(folderPath: string) {
             (mapping) => mapping.folderPath === folderPath,
         );
         if (!mapping) {
-            addLogLine(`folder not found in mappings, ${folderPath}`);
+            log.info(`folder not found in mappings, ${folderPath}`);
             throw Error(`Watch mapping not found`);
         }
         watchFolderService.pushTrashedDir(folderPath);
-        addLogLine(`added trashedDir, ${folderPath}`);
+        log.info(`added trashedDir, ${folderPath}`);
     } catch (e) {
-        logError(e, "error while calling diskFolderRemovedCallback");
+        log.error("error while calling diskFolderRemovedCallback", e);
     }
 }

@@ -503,6 +503,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Konto erstellen"),
         "createAlbumActionHint": MessageLookupByLibrary.simpleMessage(
             "Drücke lange um Fotos auszuwählen und klicke + um ein Album zu erstellen"),
+        "createCollaborativeLink":
+            MessageLookupByLibrary.simpleMessage("Create collaborative link"),
         "createCollage":
             MessageLookupByLibrary.simpleMessage("Collage erstellen"),
         "createNewAccount":

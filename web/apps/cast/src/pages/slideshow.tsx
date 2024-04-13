@@ -1,4 +1,4 @@
-import { logError } from "@ente/shared/sentry";
+import log from "@/next/log";
 import PairedSuccessfullyOverlay from "components/PairedSuccessfullyOverlay";
 import Theatre from "components/Theatre";
 import { FILE_TYPE } from "constants/file";
@@ -54,17 +54,7 @@ export default function Slideshow() {
                 );
             }
         } catch (e) {
-            logError(e, "error during sync");
-            router.push("/");
-        }
-    };
-
-    const init = async () => {
-        try {
-            const castToken = window.localStorage.getItem("castToken");
-            setCastToken(castToken);
-        } catch (e) {
-            logError(e, "error during sync");
+            log.error("error during sync", e);
             router.push("/");
         }
     };
@@ -73,7 +63,8 @@ export default function Slideshow() {
         if (castToken) {
             const intervalId = setInterval(() => {
                 syncCastFiles(castToken);
-            }, 5000);
+            }, 10000);
+            syncCastFiles(castToken);
 
             return () => clearInterval(intervalId);
         }
@@ -105,7 +96,20 @@ export default function Slideshow() {
     const router = useRouter();
 
     useEffect(() => {
-        init();
+        try {
+            const castToken = window.localStorage.getItem("castToken");
+            // Wait 2 seconds to ensure the green tick and the confirmation
+            // message remains visible for at least 2 seconds before we start
+            // the slideshow.
+            const timeoutId = setTimeout(() => {
+                setCastToken(castToken);
+            }, 2000);
+
+            return () => clearTimeout(timeoutId);
+        } catch (e) {
+            log.error("error during sync", e);
+            router.push("/");
+        }
     }, []);
 
     useEffect(() => {

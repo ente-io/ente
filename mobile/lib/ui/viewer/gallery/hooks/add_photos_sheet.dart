@@ -2,6 +2,7 @@ import "dart:math";
 
 import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
+import "package:flutter_animate/flutter_animate.dart";
 import "package:modal_bottom_sheet/modal_bottom_sheet.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/db/files_db.dart";
@@ -15,12 +16,14 @@ import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/actions/collection/collection_file_actions.dart";
 import "package:photos/ui/actions/collection/collection_sharing_actions.dart";
+import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/components/bottom_of_title_bar_widget.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/components/title_bar_title_widget.dart";
 import "package:photos/ui/viewer/gallery/gallery.dart";
 import "package:photos/utils/dialog_util.dart";
+import "package:photos/utils/photo_manager_util.dart";
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 
 Future<dynamic> showAddPhotosSheet(
@@ -90,33 +93,9 @@ class AddPhotosPhotoWidget extends StatelessWidget {
                           showCloseButton: true,
                         ),
                         Expanded(
-                          child: Gallery(
-                            inSelectionMode: true,
-                            asyncLoader: (
-                              creationStartTime,
-                              creationEndTime, {
-                              limit,
-                              asc,
-                            }) {
-                              return FilesDB.instance
-                                  .getAllPendingOrUploadedFiles(
-                                creationStartTime,
-                                creationEndTime,
-                                Configuration.instance.getUserID()!,
-                                limit: limit,
-                                asc: asc,
-                                filterOptions: DBFilterOptions(
-                                  hideIgnoredForUpload: true,
-                                  dedupeUploadID: true,
-                                  ignoredCollectionIDs: hiddenCollectionIDs,
-                                ),
-                                applyOwnerCheck: true,
-                              );
-                            },
-                            tagPrefix: "pick_add_photos_gallery",
+                          child: DelayedGallery(
+                            hiddenCollectionIDs: hiddenCollectionIDs,
                             selectedFiles: selectedFiles,
-                            showSelectAllByDefault: true,
-                            sortAsyncFn: () => false,
                           ),
                         ),
                       ],
@@ -203,7 +182,7 @@ class AddPhotosPhotoWidget extends StatelessWidget {
       }
     } catch (e) {
       if (e is StateError) {
-        final PermissionState ps = await PhotoManager.requestPermissionExtend();
+        final PermissionState ps = await requestPhotoMangerPermissions();
         if (ps != PermissionState.authorized && ps != PermissionState.limited) {
           await showChoiceDialog(
             context,
@@ -223,6 +202,74 @@ class AddPhotosPhotoWidget extends StatelessWidget {
           );
         }
       }
+    }
+  }
+}
+
+class DelayedGallery extends StatefulWidget {
+  const DelayedGallery({
+    super.key,
+    required this.hiddenCollectionIDs,
+    required this.selectedFiles,
+  });
+
+  final Set<int> hiddenCollectionIDs;
+  final SelectedFiles selectedFiles;
+
+  @override
+  State<DelayedGallery> createState() => _DelayedGalleryState();
+}
+
+class _DelayedGalleryState extends State<DelayedGallery> {
+  bool _showGallery = false;
+
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (mounted) {
+        setState(() {
+          _showGallery = true;
+        });
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_showGallery) {
+      return Gallery(
+        inSelectionMode: true,
+        asyncLoader: (
+          creationStartTime,
+          creationEndTime, {
+          limit,
+          asc,
+        }) {
+          return FilesDB.instance.getAllPendingOrUploadedFiles(
+            creationStartTime,
+            creationEndTime,
+            Configuration.instance.getUserID()!,
+            limit: limit,
+            asc: asc,
+            filterOptions: DBFilterOptions(
+              hideIgnoredForUpload: true,
+              dedupeUploadID: true,
+              ignoredCollectionIDs: widget.hiddenCollectionIDs,
+            ),
+            applyOwnerCheck: true,
+          );
+        },
+        tagPrefix: "pick_add_photos_gallery",
+        selectedFiles: widget.selectedFiles,
+        showSelectAllByDefault: true,
+        sortAsyncFn: () => false,
+      ).animate().fadeIn(
+            duration: const Duration(milliseconds: 175),
+            curve: Curves.easeOutCirc,
+          );
+    } else {
+      return const EnteLoadingWidget();
     }
   }
 }

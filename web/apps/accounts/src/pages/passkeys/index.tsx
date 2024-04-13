@@ -1,8 +1,8 @@
+import log from "@/next/log";
 import { CenteredFlex } from "@ente/shared/components/Container";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
 import SingleInputForm from "@ente/shared/components/SingleInputForm";
 import { ACCOUNTS_PAGES } from "@ente/shared/constants/pages";
-import { logError } from "@ente/shared/sentry";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { Box, Typography } from "@mui/material";
 import { t } from "i18next";
@@ -104,7 +104,7 @@ const Passkeys = () => {
         try {
             newCredential = await navigator.credentials.create(options);
         } catch (e) {
-            logError(e, "Error creating credential");
+            log.error("Error creating credential", e);
             setFieldError("Failed to create credential");
             return;
         }

@@ -6,7 +6,7 @@ import {
     shell,
 } from "electron";
 import { setIsAppQuitting } from "../main";
-import { forceCheckForUpdateAndNotify } from "../services/appUpdater";
+import { forceCheckForAppUpdates } from "../services/app-update";
 import autoLauncher from "../services/autoLauncher";
 import {
     getHideDockIconPreference,
@@ -26,8 +26,7 @@ export const createApplicationMenu = async (mainWindow: BrowserWindow) => {
     const macOSOnly = (options: MenuItemConstructorOptions[]) =>
         process.platform == "darwin" ? options : [];
 
-    const handleCheckForUpdates = () =>
-        forceCheckForUpdateAndNotify(mainWindow);
+    const handleCheckForUpdates = () => forceCheckForAppUpdates(mainWindow);
 
     const handleViewChangelog = () =>
         shell.openExternal(

@@ -10,6 +10,7 @@ import 'package:photos/ui/components/buttons/icon_button_widget.dart';
 import "package:photos/ui/settings/backup/backup_folder_selection_page.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/navigation_util.dart";
+import "package:photos/utils/photo_manager_util.dart";
 
 class HomeHeaderWidget extends StatefulWidget {
   final Widget centerWidget;
@@ -48,7 +49,7 @@ class _HomeHeaderWidgetState extends State<HomeHeaderWidget> {
           onTap: () async {
             try {
               final PermissionState state =
-                  await PhotoManager.requestPermissionExtend();
+                  await requestPhotoMangerPermissions();
               await LocalSyncService.instance.onUpdatePermission(state);
             } on Exception catch (e) {
               Logger("HomeHeaderWidget").severe(

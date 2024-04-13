@@ -1,6 +1,6 @@
+import log from "@/next/log";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { getEndpoint, getPaymentsURL } from "@ente/shared/network/api";
-import { logError } from "@ente/shared/sentry";
 import {
     LS_KEYS,
     removeData,
@@ -40,7 +40,7 @@ class billingService {
             const { plans } = response.data;
             return plans;
         } catch (e) {
-            logError(e, "failed to get plans");
+            log.error("failed to get plans", e);
         }
     }
 
@@ -56,7 +56,7 @@ class billingService {
             const { subscription } = response.data;
             setData(LS_KEYS.SUBSCRIPTION, subscription);
         } catch (e) {
-            logError(e, "failed to get user's subscription details");
+            log.error("failed to get user's subscription details", e);
         }
     }
 
@@ -69,7 +69,7 @@ class billingService {
                 PaymentActionType.Buy,
             );
         } catch (e) {
-            logError(e, "unable to buy subscription");
+            log.error("unable to buy subscription", e);
             throw e;
         }
     }
@@ -83,7 +83,7 @@ class billingService {
                 PaymentActionType.Update,
             );
         } catch (e) {
-            logError(e, "subscription update failed");
+            log.error("subscription update failed", e);
             throw e;
         }
     }
@@ -101,7 +101,7 @@ class billingService {
             const { subscription } = response.data;
             setData(LS_KEYS.SUBSCRIPTION, subscription);
         } catch (e) {
-            logError(e, "subscription cancel failed");
+            log.error("subscription cancel failed", e);
             throw e;
         }
     }
@@ -119,7 +119,7 @@ class billingService {
             const { subscription } = response.data;
             setData(LS_KEYS.SUBSCRIPTION, subscription);
         } catch (e) {
-            logError(e, "failed to activate subscription");
+            log.error("failed to activate subscription", e);
             throw e;
         }
     }
@@ -147,9 +147,9 @@ class billingService {
             const { subscription } = response.data;
             setData(LS_KEYS.SUBSCRIPTION, subscription);
             return subscription;
-        } catch (err) {
-            logError(err, "Error while verifying subscription");
-            throw err;
+        } catch (e) {
+            log.error("Error while verifying subscription", e);
+            throw e;
         }
     }
 
@@ -163,7 +163,7 @@ class billingService {
             });
             removeData(LS_KEYS.FAMILY_DATA);
         } catch (e) {
-            logError(e, "/family/leave failed");
+            log.error("/family/leave failed", e);
             throw e;
         }
     }
@@ -177,7 +177,7 @@ class billingService {
             const redirectURL = this.getRedirectURL();
             window.location.href = `${getPaymentsURL()}?productID=${productID}&paymentToken=${paymentToken}&action=${action}&redirectURL=${redirectURL}`;
         } catch (e) {
-            logError(e, "unable to get payments url");
+            log.error("unable to get payments url", e);
             throw e;
         }
     }
@@ -194,7 +194,7 @@ class billingService {
             );
             window.location.href = response.data.url;
         } catch (e) {
-            logError(e, "unable to get customer portal url");
+            log.error("unable to get customer portal url", e);
             throw e;
         }
     }

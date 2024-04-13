@@ -122,19 +122,6 @@ const AuthenticatorCodesPage = () => {
                 <AuthFooter />
                 <div style={{ marginBottom: "4rem" }} />
             </div>
-            <style jsx>{`
-                @media (min-width: 800px) {
-                    .row {
-                        display: flex;
-                        flex-wrap: wrap;
-                        justify-content: center;
-                    }
-                    .col {
-                        flex: 0 0 50%;
-                        max-width: 50%;
-                    }
-                }
-            `}</style>
         </>
     );
 };

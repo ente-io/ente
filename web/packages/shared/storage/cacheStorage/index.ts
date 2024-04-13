@@ -1,4 +1,4 @@
-import { logError } from "@ente/shared/sentry";
+import log from "@/next/log";
 import { CacheStorageFactory } from "./factory";
 
 const SecurityError = "SecurityError";
@@ -15,7 +15,7 @@ async function openCache(cacheName: string, cacheLimit?: number) {
             // no-op
         } else {
             // log and ignore, we don't want to break the caller flow, when cache is not available
-            logError(e, "openCache failed");
+            log.error("openCache failed", e);
         }
     }
 }
@@ -28,7 +28,7 @@ async function deleteCache(cacheName: string) {
             // no-op
         } else {
             // log and ignore, we don't want to break the caller flow, when cache is not available
-            logError(e, "deleteCache failed");
+            log.error("deleteCache failed", e);
         }
     }
 }

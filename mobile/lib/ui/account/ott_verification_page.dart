@@ -171,6 +171,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
                     borderSide: BorderSide.none,
                     borderRadius: BorderRadius.circular(6),
                   ),
+                  fillColor: getEnteColorScheme(context).fillFaint,
                 ),
                 controller: _verificationCodeController,
                 autofocus: false,

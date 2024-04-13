@@ -5,7 +5,7 @@ on:
         branches: [main]
         paths:
             # Run workflow when web's en-US/translation.json is changed
-            - "web/apps/photos/public/locales/en-US/translation.json"
+            - "web/packages/next/locales/en-US/translation.json"
             # Or the workflow itself is changed
             - ".github/workflows/web-crowdin.yml"
     schedule:

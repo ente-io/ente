@@ -1,6 +1,6 @@
+import log from "@/next/log";
 import { CustomError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
-import { logError } from "@ente/shared/sentry";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 
 export const isPasskeyRecoveryEnabled = async () => {
@@ -21,7 +21,7 @@ export const isPasskeyRecoveryEnabled = async () => {
 
         return resp.data["isPasskeyRecoveryEnabled"] as boolean;
     } catch (e) {
-        logError(e, "failed to get passkey recovery status");
+        log.error("failed to get passkey recovery status", e);
         throw e;
     }
 };
@@ -50,7 +50,7 @@ export const configurePasskeyRecovery = async (
             throw Error(CustomError.REQUEST_FAILED);
         }
     } catch (e) {
-        logError(e, "failed to configure passkey recovery");
+        log.error("failed to configure passkey recovery", e);
         throw e;
     }
 };

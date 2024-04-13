@@ -9,6 +9,6 @@
         "eslint": "^8",
         "eslint-config-next": "latest",
         "eslint-config-prettier": "latest",
-        "eslint-plugin-react": "latest"
+        "eslint-plugin-react": "^7.34"
     }
 }
