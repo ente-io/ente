@@ -200,9 +200,7 @@ export const getUniqueCollectionExportName = async (
     let collectionExportName = sanitizeName(collectionName);
     let count = 1;
     while (
-        (await exportService.exists(
-            getCollectionExportPath(dir, collectionExportName),
-        )) ||
+        (await exportService.exists(`${dir}/${collectionExportName}`)) ||
         collectionExportName === ENTE_TRASH_FOLDER
     ) {
         collectionExportName = `${sanitizeName(collectionName)}(${count})`;
@@ -240,11 +238,6 @@ export const getFileMetadataExportPath = (
     collectionExportPath: string,
     fileExportName: string,
 ) => `${collectionExportPath}/${ENTE_METADATA_FOLDER}/${fileExportName}.json`;
-
-export const getCollectionExportPath = (
-    exportFolder: string,
-    collectionExportName: string,
-) => `${exportFolder}/${collectionExportName}`;
 
 export const getFileExportPath = (
     collectionExportPath: string,

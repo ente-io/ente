@@ -22,7 +22,6 @@ import {
 import { EnteFile } from "types/file";
 import { getNonEmptyPersonalCollections } from "utils/collection";
 import {
-    getCollectionExportPath,
     getCollectionIDFromFileUID,
     getExportRecordFileUID,
     getLivePhotoExportName,
@@ -433,7 +432,7 @@ async function removeCollectionExportMissingMetadataFolder(
         if (
             await exportService.exists(
                 getMetadataFolderExportPath(
-                    getCollectionExportPath(exportDir, collectionExportName),
+                    `${exportDir}/${collectionExportName}`,
                 ),
             )
         ) {

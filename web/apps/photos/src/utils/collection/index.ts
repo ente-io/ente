@@ -42,10 +42,7 @@ import {
 import { EnteFile } from "types/file";
 import { SetFilesDownloadProgressAttributes } from "types/gallery";
 import { SUB_TYPE, VISIBILITY_STATE } from "types/magicMetadata";
-import {
-    getCollectionExportPath,
-    getUniqueCollectionExportName,
-} from "utils/export";
+import { getUniqueCollectionExportName } from "utils/export";
 import { downloadFilesWithProgress } from "utils/file";
 import { isArchivedCollection, updateMagicMetadata } from "utils/magicMetadata";
 
@@ -176,10 +173,7 @@ async function createCollectionDownloadFolder(
         downloadDirPath,
         collectionName,
     );
-    const collectionDownloadPath = getCollectionExportPath(
-        downloadDirPath,
-        collectionDownloadName,
-    );
+    const collectionDownloadPath = `${downloadDirPath}/${collectionDownloadName}`;
     await exportService.checkExistsAndCreateDir(collectionDownloadPath);
     return collectionDownloadPath;
 }

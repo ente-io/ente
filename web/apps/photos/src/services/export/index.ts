@@ -27,7 +27,6 @@ import {
 import {
     convertCollectionIDExportNameObjectToMap,
     convertFileIDExportNameObjectToMap,
-    getCollectionExportPath,
     getCollectionExportedFiles,
     getCollectionIDFromFileUID,
     getDeletedExportedCollections,
@@ -1219,3 +1218,8 @@ class ExportService {
     };
 }
 export default new ExportService();
+
+const getCollectionExportPath = (
+    exportFolder: string,
+    collectionExportName: string,
+) => `${exportFolder}/${collectionExportName}`;
