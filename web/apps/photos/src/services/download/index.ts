@@ -61,7 +61,6 @@ class DownloadManagerImpl {
      *
      * Only available when we're running in the desktop app.
      */
-    // disk cache is only available on electron
     private fileCache?: EnteCache;
     private cryptoWorker: Remote<DedicatedCryptoWorker>;
 

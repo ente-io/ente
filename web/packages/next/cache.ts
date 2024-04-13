@@ -57,7 +57,8 @@ export interface EnteCache {
     /**
      * Get the data corresponding to {@link key} (if found) from the cache.
      */
-    match: (key: string) => Promise<Response>;
+    get: (key: string) => Promise<Uint8Array | undefined>;
+    match: (key: string) => Promise<Response | undefined>;
     /**
      * Add the given {@link key}-value ({@link data}) pair to the cache.
      */
@@ -78,13 +79,18 @@ export interface EnteCache {
  * {@link CacheName} which group related data and allow us to use the same key
  * across namespaces.
  */
-export const openCache = async (name: CacheName) =>
+export const openCache = async (name: CacheName): Promise<EnteCache> =>
     isElectron() ? openOPFSCacheWeb(name) : openWebCache(name);
 
 /** An implementation of {@link EnteCache} using Web Cache APIs */
 const openWebCache = async (name: CacheName) => {
     const cache = await caches.open(name);
     return {
+        get: async (key: string) => {
+            // return cache.match(key);
+            const _ = await cache.match(key);
+            return undefined;
+        },
         match: (key: string) => {
             return cache.match(key);
         },
@@ -115,6 +121,10 @@ const openOPFSCacheWeb = async (name: CacheName) => {
     const _cache = await _caches.getDirectoryHandle(name, { create: true });
 
     return {
+        get: async (key: string) => {
+            const _ = await cache.match(key);
+            return undefined;
+        },
         match: (key: string) => {
             // try {
             //     const fileHandle = _cache.getFileHandle(key);
