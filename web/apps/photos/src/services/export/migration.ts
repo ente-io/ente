@@ -233,11 +233,11 @@ async function migrateFiles(
 ) {
     for (const file of files) {
         const collectionPath = collectionIDPathMap.get(file.collectionID);
+        const metadataPath = `${collectionPath}/${exportMetadataDirectoryName}`;
+
         const oldFileSavePath = getOldFileSavePath(collectionPath, file);
-        const oldFileMetadataSavePath = getOldFileMetadataSavePath(
-            collectionPath,
-            file,
-        );
+        const oldFileMetadataSavePath = `${metadataPath}/${file.id}_${oldSanitizeName(file.metadata.title)}.json`;
+
         const newFileSaveName = await safeFileName(
             collectionPath,
             file.metadata.title,
@@ -248,7 +248,7 @@ async function migrateFiles(
             newFileSaveName,
         );
 
-        const newFileMetadataSavePath = `${collectionPath}/${exportMetadataDirectoryName}/${newFileSaveName}.json`;
+        const newFileMetadataSavePath = `${metadataPath}/${newFileSaveName}.json`;
 
         if (!(await exportService.exists(oldFileSavePath))) {
             continue;
@@ -511,14 +511,6 @@ const getOldFileSavePath = (collectionFolderPath: string, file: EnteFile) =>
     `${collectionFolderPath}/${file.id}_${oldSanitizeName(
         file.metadata.title,
     )}`;
-
-const getOldFileMetadataSavePath = (
-    collectionFolderPath: string,
-    file: EnteFile,
-) =>
-    `${collectionFolderPath}/${exportMetadataDirectoryName}/${
-        file.id
-    }_${oldSanitizeName(file.metadata.title)}.json`;
 
 const getUniqueFileExportNameForMigration = (
     collectionPath: string,
