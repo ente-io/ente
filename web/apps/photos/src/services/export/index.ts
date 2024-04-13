@@ -48,7 +48,7 @@ const exportRecordFileName = "export_status.json";
  * Name of the top level directory which we create underneath the selected
  * directory when the user starts an export to the filesystem.
  */
-const exportDirectoryName = "ente Photos";
+const exportDirectoryName = "Ente Photos";
 
 /**
  * Name of the directory in which we put our metadata when exporting to the
