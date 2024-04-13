@@ -83,6 +83,34 @@ class MLIDbStorage {
                 log.error("ML Indexed DB blocking");
             },
             async upgrade(db, oldVersion, newVersion, tx) {
+                let wasMLSearchEnabled = false;
+                try {
+                    const s: unknown = await tx
+                        .objectStore("configs")
+                        .getKey(ML_SEARCH_CONFIG_NAME);
+                    if (typeof s == "string") {
+                        const json = JSON.parse(s);
+                        if (
+                            json &&
+                            typeof json == "object" &&
+                            "enabled" in json
+                        ) {
+                            const enabled = json.enabled;
+                            if (typeof enabled == "boolean") {
+                                wasMLSearchEnabled = enabled;
+                            }
+                        }
+                    }
+                } catch (e) {
+                    log.error(
+                        "Ignoring error while trying to determine ML search status during migration",
+                        e,
+                    );
+                }
+                log.info(
+                    `Old database had wasMLSearchEnabled = ${wasMLSearchEnabled}`,
+                );
+
                 if (oldVersion < 1) {
                     const filesStore = db.createObjectStore("files", {
                         keyPath: "fileId",
