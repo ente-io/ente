@@ -26,7 +26,7 @@ import {
     getPersonalFiles,
     mergeMetadata,
 } from "utils/file";
-import { sanitizeName } from "utils/native-fs";
+import { sanitizeFilename } from "utils/native-fs";
 import {
     ENTE_METADATA_FOLDER,
     getCollectionIDFromFileUID,
@@ -502,10 +502,10 @@ const getUniqueCollectionFolderPath = async (
     dir: string,
     collectionName: string,
 ): Promise<string> => {
-    let collectionFolderPath = `${dir}/${sanitizeName(collectionName)}`;
+    let collectionFolderPath = `${dir}/${sanitizeFilename(collectionName)}`;
     let count = 1;
     while (await exportService.exists(collectionFolderPath)) {
-        collectionFolderPath = `${dir}/${sanitizeName(
+        collectionFolderPath = `${dir}/${sanitizeFilename(
             collectionName,
         )}(${count})`;
         count++;
@@ -520,14 +520,16 @@ const getUniqueFileSaveName = async (
     collectionPath: string,
     filename: string,
 ) => {
-    let fileSaveName = sanitizeName(filename);
+    let fileSaveName = sanitizeFilename(filename);
     let count = 1;
     while (
         await exportService.exists(
             getFileSavePath(collectionPath, fileSaveName),
         )
     ) {
-        const filenameParts = splitFilenameAndExtension(sanitizeName(filename));
+        const filenameParts = splitFilenameAndExtension(
+            sanitizeFilename(filename),
+        );
         if (filenameParts[1]) {
             fileSaveName = `${filenameParts[0]}(${count}).${filenameParts[1]}`;
         } else {
@@ -570,14 +572,16 @@ const getUniqueFileExportNameForMigration = (
     filename: string,
     usedFilePaths: Map<string, Set<string>>,
 ) => {
-    let fileExportName = sanitizeName(filename);
+    let fileExportName = sanitizeFilename(filename);
     let count = 1;
     while (
         usedFilePaths
             .get(collectionPath)
             ?.has(getFileSavePath(collectionPath, fileExportName))
     ) {
-        const filenameParts = splitFilenameAndExtension(sanitizeName(filename));
+        const filenameParts = splitFilenameAndExtension(
+            sanitizeFilename(filename),
+        );
         if (filenameParts[1]) {
             fileExportName = `${filenameParts[0]}(${count}).${filenameParts[1]}`;
         } else {

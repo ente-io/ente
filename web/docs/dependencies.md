@@ -130,3 +130,10 @@ For some of our newer code, we have started to use [Vite](https://vitejs.dev).
 It is more lower level than Next, but the bells and whistles it doesn't have are
 the bells and whistles (and the accompanying complexity) that we don't need in
 some cases.
+
+## Photos
+
+### Misc
+
+-   "sanitize-filename" is for converting arbitrary strings into strings that
+    are suitable for being used as filenames.
