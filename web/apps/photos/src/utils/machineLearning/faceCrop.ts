@@ -15,9 +15,14 @@ export function getFaceCrop(
     alignment: FaceAlignment,
     config: FaceCropConfig,
 ): FaceCrop {
-    const box = getAlignedFaceBox(alignment);
+    const alignmentBox = new Box({
+        x: alignment.center.x - alignment.size / 2,
+        y: alignment.center.y - alignment.size / 2,
+        width: alignment.size,
+        height: alignment.size,
+    }).round();
     const scaleForPadding = 1 + config.padding * 2;
-    const paddedBox = enlargeBox(box, scaleForPadding).round();
+    const paddedBox = enlargeBox(alignmentBox, scaleForPadding).round();
     const faceImageBitmap = cropWithRotation(imageBitmap, paddedBox, 0, {
         width: config.maxSize,
         height: config.maxSize,
@@ -27,15 +32,6 @@ export function getFaceCrop(
         image: faceImageBitmap,
         imageBox: paddedBox,
     };
-}
-
-function getAlignedFaceBox(alignment: FaceAlignment) {
-    return new Box({
-        x: alignment.center.x - alignment.size / 2,
-        y: alignment.center.y - alignment.size / 2,
-        width: alignment.size,
-        height: alignment.size,
-    }).round();
 }
 
 export async function storeFaceCrop(
