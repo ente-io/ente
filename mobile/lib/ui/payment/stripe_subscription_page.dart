@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import "package:flutter/cupertino.dart";
 import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
 import "package:logging/logging.dart";
@@ -543,33 +544,43 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
       child: Column(
         children: [
           RepaintBoundary(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                SegmentedButton(
-                  style: SegmentedButton.styleFrom(
-                    selectedBackgroundColor:
-                        getEnteColorScheme(context).fillMuted,
-                    selectedForegroundColor:
-                        getEnteColorScheme(context).textBase,
+            child: SizedBox(
+              width: 250,
+              child: Row(
+                mainAxisSize: MainAxisSize.max,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Expanded(
+                    child: SegmentedButton(
+                      style: SegmentedButton.styleFrom(
+                        selectedBackgroundColor:
+                            getEnteColorScheme(context).fillMuted,
+                        selectedForegroundColor:
+                            getEnteColorScheme(context).textBase,
+                        side: BorderSide(
+                          color: getEnteColorScheme(context).strokeMuted,
+                          width: 1,
+                        ),
+                      ),
+                      segments: <ButtonSegment<bool>>[
+                        ButtonSegment(
+                          label: Text(S.of(context).monthly),
+                          value: false,
+                        ),
+                        ButtonSegment(
+                          label: Text(S.of(context).yearly),
+                          value: true,
+                        ),
+                      ],
+                      selected: {_showYearlyPlan},
+                      onSelectionChanged: (p0) {
+                        _showYearlyPlan = p0.first;
+                        _filterStripeForUI();
+                      },
+                    ),
                   ),
-                  segments: <ButtonSegment<bool>>[
-                    ButtonSegment(
-                      label: Text(S.of(context).monthly),
-                      value: false,
-                    ),
-                    ButtonSegment(
-                      label: Text(S.of(context).yearly),
-                      value: true,
-                    ),
-                  ],
-                  selected: {_showYearlyPlan},
-                  onSelectionChanged: (p0) {
-                    _showYearlyPlan = p0.first;
-                    _filterStripeForUI();
-                  },
-                ),
-              ],
+                ],
+              ),
             ),
           ),
           _isFreePlanUser() && !UpdateService.instance.isPlayStoreFlavor()
