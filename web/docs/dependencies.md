@@ -17,6 +17,8 @@ package:
 -   "eslint-plugin-react-hooks", "eslint-plugin-react-namespace-import" - Some
     React specific ESLint rules and configurations that are used by the
     workspaces that have React code.
+-   "eslint-plugin-react-refresh" - A plugin to ensure that React components are
+    exported in a way that they can be HMR-ed.
 -   "prettier-plugin-organize-imports" - A Prettier plugin to sort imports.
 -   "prettier-plugin-packagejson" - A Prettier plugin to also prettify
     `package.json`.
