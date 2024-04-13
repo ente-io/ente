@@ -32,7 +32,6 @@ import {
     getDeletedExportedCollections,
     getDeletedExportedFiles,
     getExportRecordFileUID,
-    getFileExportPath,
     getFileMetadataExportPath,
     getGoogleLikeMetadataFile,
     getLivePhotoExportName,
@@ -1202,3 +1201,8 @@ class ExportService {
 }
 
 export default new ExportService();
+
+export const getFileExportPath = (
+    collectionExportPath: string,
+    fileExportName: string,
+) => `${collectionExportPath}/${fileExportName}`;

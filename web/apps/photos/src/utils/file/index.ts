@@ -51,7 +51,7 @@ import {
 } from "types/gallery";
 import { VISIBILITY_STATE } from "types/magicMetadata";
 import { FileTypeInfo } from "types/upload";
-import { getFileExportPath, getUniqueFileExportName } from "utils/export";
+import { getUniqueFileExportName } from "utils/export";
 import { isArchivedFile, updateMagicMetadata } from "utils/magicMetadata";
 
 const WAIT_TIME_IMAGE_CONVERSION = 30 * 1000;
@@ -818,7 +818,7 @@ async function downloadFileDesktop(
         );
         const imageStream = generateStreamFromArrayBuffer(livePhoto.image);
         await electron.saveStreamToDisk(
-            getFileExportPath(downloadPath, imageExportName),
+            `${downloadPath}/${imageExportName}`,
             imageStream,
         );
         try {
@@ -828,13 +828,11 @@ async function downloadFileDesktop(
             );
             const videoStream = generateStreamFromArrayBuffer(livePhoto.video);
             await electron.saveStreamToDisk(
-                getFileExportPath(downloadPath, videoExportName),
+                `${downloadPath}/${videoExportName}`,
                 videoStream,
             );
         } catch (e) {
-            await electron.deleteFile(
-                getFileExportPath(downloadPath, imageExportName),
-            );
+            await electron.deleteFile(`${downloadPath}/${imageExportName}`);
             throw e;
         }
     } else {
@@ -843,7 +841,7 @@ async function downloadFileDesktop(
             file.metadata.title,
         );
         await electron.saveStreamToDisk(
-            getFileExportPath(downloadPath, fileExportName),
+            `${downloadPath}/${fileExportName}`,
             updatedFileStream,
         );
     }

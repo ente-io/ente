@@ -219,9 +219,7 @@ export const getUniqueFileExportName = async (
     let fileExportName = sanitizeName(filename);
     let count = 1;
     while (
-        await exportService.exists(
-            getFileExportPath(collectionExportPath, fileExportName),
-        )
+        await exportService.exists(`${collectionExportPath}/${fileExportName}`)
     ) {
         const filenameParts = splitFilenameAndExtension(sanitizeName(filename));
         if (filenameParts[1]) {
@@ -238,11 +236,6 @@ export const getFileMetadataExportPath = (
     collectionExportPath: string,
     fileExportName: string,
 ) => `${collectionExportPath}/${ENTE_METADATA_FOLDER}/${fileExportName}.json`;
-
-export const getFileExportPath = (
-    collectionExportPath: string,
-    fileExportName: string,
-) => `${collectionExportPath}/${fileExportName}`;
 
 export const getTrashedFileExportPath = async (
     exportDir: string,
