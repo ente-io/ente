@@ -78,7 +78,7 @@ dependencies:
   flutter_image_compress: ^1.1.0
   flutter_inappwebview: ^5.8.0
   flutter_launcher_icons: ^0.13.1
-  flutter_local_notifications: ^12.0.4
+  flutter_local_notifications: ^17.0.0
   flutter_localizations:
     sdk: flutter
   flutter_map: ^5.0.0
@@ -141,7 +141,7 @@ dependencies:
   scrollable_positioned_list: ^0.3.5
   sentry: ^7.9.0
   sentry_flutter: ^7.9.0
-  share_plus: ^4.0.10
+  share_plus: ^7.2.2
   shared_preferences: ^2.0.5
   sqflite: ^2.3.0
   sqflite_migration: ^0.3.0
@@ -195,8 +195,8 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   freezed: ^2.3.2
-  # integration_test:
-  #   sdk: flutter
+  integration_test:
+    sdk: flutter
   isar_generator: ^3.1.0+1
   json_serializable: ^6.6.1
   test: ^1.22.0
