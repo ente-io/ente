@@ -1,4 +1,3 @@
-import { cached } from "@/next/blob-cache";
 import { ensureLocalUser } from "@/next/local-user";
 import log from "@/next/log";
 import { Skeleton, styled } from "@mui/material";
@@ -169,24 +168,13 @@ const FaceCropImageView: React.FC<FaceCropImageViewProps> = ({
             if (!url) {
                 blob = undefined;
             } else {
-                const user = await ensureLocalUser();
-                blob = await cached("face-crops", url, async () => {
-                    try {
-                        log.debug(
-                            () =>
-                                `ImageCacheView: regenerate face crop for ${faceId}`,
-                        );
-                        return machineLearningService.regenerateFaceCrop(
-                            user.token,
-                            user.id,
-                            faceId,
-                        );
-                    } catch (e) {
-                        log.error(
-                            "ImageCacheView: regenerate face crop failed",
-                            e,
-                        );
-                    }
+                blob = await cachedOrNew("face-crops", url, async () => {
+                    const user = await ensureLocalUser();
+                    return machineLearningService.regenerateFaceCrop(
+                        user.token,
+                        user.id,
+                        faceId,
+                    );
                 });
             }
 

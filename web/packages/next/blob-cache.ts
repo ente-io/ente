@@ -198,19 +198,24 @@ const openOPFSCacheWeb = async (name: BlobCacheNamespace) => {
     };
 };
 
-export async function cached(
+/**
+ * Return a cached blob for {@link key} in {@link cacheName}. If the blob is not
+ * found in the cache, recreate/fetch it using {@link get}, cache it, and then
+ * return it.
+ */
+export const cachedOrNew = async (
     cacheName: BlobCacheNamespace,
-    id: string,
+    key: string,
     get: () => Promise<Blob>,
-): Promise<Blob> {
+): Promise<Blob> => {
     const cache = await openCache(cacheName);
-    const cachedBlob = await cache.get(id);
+    const cachedBlob = await cache.get(key);
     if (cachedBlob) return cachedBlob;
 
     const blob = await get();
-    await cache.put2(id, blob);
+    await cache.put2(key, blob);
     return blob;
-}
+};
 
 /**
  * Delete all cached data.
