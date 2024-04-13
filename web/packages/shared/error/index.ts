@@ -86,7 +86,6 @@ export const CustomError = {
     UNSUPPORTED_PLATFORM: "Unsupported platform",
     MODEL_DOWNLOAD_PENDING:
         "Model download pending, skipping clip search request",
-    DOWNLOAD_MANAGER_NOT_READY: "Download manager not initialized",
     UPDATE_URL_FILE_ID_MISMATCH: "update url file id mismatch",
     URL_ALREADY_SET: "url already set",
     FILE_CONVERSION_FAILED: "file conversion failed",

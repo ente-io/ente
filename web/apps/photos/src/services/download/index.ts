@@ -99,6 +99,13 @@ class DownloadManagerImpl {
         eventBus.on(Events.LOGOUT, this.logoutHandler.bind(this), this);
     }
 
+    private ensureInitialized() {
+        if (!this.ready)
+            throw new Error(
+                "Attempting to use an uninitialized download manager",
+            );
+    }
+
     private async logoutHandler() {
         try {
             log.info("downloadManger logoutHandler started");
@@ -154,27 +161,21 @@ class DownloadManagerImpl {
     };
 
     async getThumbnail(file: EnteFile, localOnly = false) {
-        if (!this.ready) {
-            throw Error(CustomError.DOWNLOAD_MANAGER_NOT_READY);
-        }
+        this.ensureInitialized();
+
         const key = `${file.id}`;
-        const cachedThumb = await this.thumbnailCache.get(key);
-        if (cachedThumb) {
-            return new Uint8Array(await cachedThumb.arrayBuffer());
-        }
-        if (localOnly) {
-            return null;
-        }
+        const cached = await this.thumbnailCache.get(key);
+        if (cached) return new Uint8Array(await cached.arrayBuffer());
+        if (localOnly) return null;
+
         const thumb = await this.downloadThumb(file);
         this.thumbnailCache?.put2(key, new Blob([thumb]));
         return thumb;
     }
 
     async getThumbnailForPreview(file: EnteFile, localOnly = false) {
+        this.ensureInitialized();
         try {
-            if (!this.ready) {
-                throw Error(CustomError.DOWNLOAD_MANAGER_NOT_READY);
-            }
             if (!this.thumbnailObjectURLPromises.has(file.id)) {
                 const thumbPromise = this.getThumbnail(file, localOnly);
                 const thumbURLPromise = thumbPromise.then(
@@ -199,10 +200,8 @@ class DownloadManagerImpl {
         file: EnteFile,
         forceConvert = false,
     ): Promise<SourceURLs> => {
+        this.ensureInitialized();
         try {
-            if (!this.ready) {
-                throw Error(CustomError.DOWNLOAD_MANAGER_NOT_READY);
-            }
             const getFileForPreviewPromise = async () => {
                 const fileBlob = await new Response(
                     await this.getFile(file, true),
@@ -237,10 +236,8 @@ class DownloadManagerImpl {
         file: EnteFile,
         cacheInMemory = false,
     ): Promise<ReadableStream<Uint8Array>> {
+        this.ensureInitialized();
         try {
-            if (!this.ready) {
-                throw Error(CustomError.DOWNLOAD_MANAGER_NOT_READY);
-            }
             const getFilePromise = async (): Promise<SourceURLs> => {
                 const fileStream = await this.downloadFile(file);
                 const fileBlob = await new Response(fileStream).blob();
