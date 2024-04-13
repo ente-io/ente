@@ -273,7 +273,7 @@ class UploadLocksDB {
         _trackUploadTable.columnEncryptedFilePath: encryptedFilePath,
         _trackUploadTable.columnEncryptedFileSize: fileSize,
         _trackUploadTable.columnFileKey: fileKey,
-        _trackUploadTable.columnPartSize: multipartPartSize,
+        _trackUploadTable.columnPartSize: multipartPartSizeForUpload,
       },
     );
 

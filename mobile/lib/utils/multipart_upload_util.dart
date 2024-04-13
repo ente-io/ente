@@ -58,7 +58,7 @@ class MultipartUploadURLs {
 }
 
 Future<int> calculatePartCount(int fileSize) async {
-  final partCount = (fileSize / multipartPartSize).ceil();
+  final partCount = (fileSize / multipartPartSizeForUpload).ceil();
   return partCount;
 }
 
@@ -148,14 +148,14 @@ Future<Map<int, String>> uploadParts(
     final partURL = partsURLs[i];
     final isLastPart = i == partsLength - 1;
     final fileSize = isLastPart
-        ? encryptedFile.lengthSync() % multipartPartSize
-        : multipartPartSize;
+        ? encryptedFile.lengthSync() % multipartPartSizeForUpload
+        : multipartPartSizeForUpload;
 
     final response = await _dio.put(
       partURL,
       data: encryptedFile.openRead(
-        i * multipartPartSize,
-        isLastPart ? null : (i + 1) * multipartPartSize,
+        i * multipartPartSizeForUpload,
+        isLastPart ? null : (i + 1) * multipartPartSizeForUpload,
       ),
       options: Options(
         headers: {

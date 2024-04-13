@@ -1,3 +1,5 @@
+import "package:photos/services/feature_flag_service.dart";
+
 const int thumbnailSmallSize = 256;
 const int thumbnailQuality = 50;
 const int thumbnailLargeSize = 512;
@@ -47,6 +49,14 @@ class FFDefault {
 
 // this is the chunk size of the un-encrypted file which is read and encrypted before uploading it as a single part.
 const multipartPartSize = 20 * 1024 * 1024;
+const multipartPartSizeInternal = 8 * 1024 * 1024;
+
+int get multipartPartSizeForUpload {
+  if (FeatureFlagService.instance.isInternalUserOrDebugBuild()) {
+    return multipartPartSizeInternal;
+  }
+  return multipartPartSize;
+}
 
 const kDefaultProductionEndpoint = 'https://api.ente.io';
 
