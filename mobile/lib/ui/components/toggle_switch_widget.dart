@@ -63,11 +63,11 @@ class _ToggleSwitchWidgetState extends State<ToggleSwitchWidget> {
                     ),
                     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     value: toggleValue ?? false,
-                    onChanged: onChanged,
+                    onChanged: _onChanged,
                   )
                 : CupertinoSwitch(
                     value: toggleValue ?? false,
-                    onChanged: onChanged,
+                    onChanged: _onChanged,
                   ),
           ),
         ),
@@ -105,7 +105,7 @@ class _ToggleSwitchWidgetState extends State<ToggleSwitchWidget> {
     }
   }
 
-  Future<void> onChanged(bool negationOfToggleValue) async {
+  Future<void> _onChanged(bool negationOfToggleValue) async {
     setState(() {
       toggleValue = negationOfToggleValue;
       //start showing inProgress statu icons if toggle takes more than debounce time
