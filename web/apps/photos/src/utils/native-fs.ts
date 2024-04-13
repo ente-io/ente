@@ -1,8 +1,7 @@
 import { ensureElectron } from "@/next/electron";
 import sanitize from "sanitize-filename";
+import { exportTrashDirectoryName } from "services/export";
 import { splitFilenameAndExtension } from "utils/file";
-
-export const ENTE_TRASH_FOLDER = "Trash";
 
 /**
  * Sanitize string for use as file or directory name.
@@ -18,13 +17,16 @@ export const sanitizeFilename = (s: string) =>
  * Return a new unique directory name based on {@link name} that is not the same
  * as any existing directory in the given {@link directoryPath}.
  *
+ * We also ensure we don't return names which might collide with our own special
+ * directories.
+ *
  * This function only works when we are running inside an electron app (since it
  * requires permissionless access to the native filesystem to find a new
  * filename that doesn't conflict with any existing items).
  *
  * See also: {@link santizedUniqueFileName}
  */
-export const santizedUniqueDirectoryName = async (
+export const safeDirectoryName = async (
     directoryPath: string,
     name: string,
 ): Promise<string> => {
@@ -32,7 +34,7 @@ export const santizedUniqueDirectoryName = async (
     let count = 1;
     while (
         (await exists(`${directoryPath}/${result}`)) ||
-        result === ENTE_TRASH_FOLDER
+        result == exportTrashDirectoryName
     ) {
         result = `${sanitizeFilename(name)}(${count})`;
         count++;
@@ -45,7 +47,7 @@ export const santizedUniqueDirectoryName = async (
  * any existing directory in the given {@link directoryPath}.
  *
  * This function only works when we are running inside an electron app.
- * @see {@link santizedUniqueDirectoryName}.
+ * @see {@link safeDirectoryName}.
  */
 export const sanitizedUniqueFileName = async (
     directoryPath: string,

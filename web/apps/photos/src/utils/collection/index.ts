@@ -44,7 +44,7 @@ import { SetFilesDownloadProgressAttributes } from "types/gallery";
 import { SUB_TYPE, VISIBILITY_STATE } from "types/magicMetadata";
 import { downloadFilesWithProgress } from "utils/file";
 import { isArchivedCollection, updateMagicMetadata } from "utils/magicMetadata";
-import { santizedUniqueDirectoryName } from "utils/native-fs";
+import { safeDirectoryName } from "utils/native-fs";
 
 export enum COLLECTION_OPS_TYPE {
     ADD,
@@ -169,7 +169,7 @@ async function createCollectionDownloadFolder(
     downloadDirPath: string,
     collectionName: string,
 ) {
-    const collectionDownloadName = await santizedUniqueDirectoryName(
+    const collectionDownloadName = await safeDirectoryName(
         downloadDirPath,
         collectionName,
     );

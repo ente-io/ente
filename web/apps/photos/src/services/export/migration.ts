@@ -28,7 +28,7 @@ import {
 } from "utils/file";
 import { sanitizeFilename } from "utils/native-fs";
 import {
-    ENTE_METADATA_FOLDER,
+    exportMetadataDirectoryName,
     getCollectionIDFromFileUID,
     getExportRecordFileUID,
     getLivePhotoExportName,
@@ -514,7 +514,7 @@ const getUniqueCollectionFolderPath = async (
 };
 
 export const getMetadataFolderPath = (collectionFolderPath: string) =>
-    `${collectionFolderPath}/${ENTE_METADATA_FOLDER}`;
+    `${collectionFolderPath}/${exportMetadataDirectoryName}`;
 
 const getUniqueFileSaveName = async (
     collectionPath: string,
@@ -543,7 +543,8 @@ const getUniqueFileSaveName = async (
 const getFileMetadataSavePath = (
     collectionFolderPath: string,
     fileSaveName: string,
-) => `${collectionFolderPath}/${ENTE_METADATA_FOLDER}/${fileSaveName}.json`;
+) =>
+    `${collectionFolderPath}/${exportMetadataDirectoryName}/${fileSaveName}.json`;
 
 const getFileSavePath = (collectionFolderPath: string, fileSaveName: string) =>
     `${collectionFolderPath}/${fileSaveName}`;
@@ -563,7 +564,7 @@ const getOldFileMetadataSavePath = (
     collectionFolderPath: string,
     file: EnteFile,
 ) =>
-    `${collectionFolderPath}/${ENTE_METADATA_FOLDER}/${
+    `${collectionFolderPath}/${exportMetadataDirectoryName}/${
         file.id
     }_${oldSanitizeName(file.metadata.title)}.json`;
 
