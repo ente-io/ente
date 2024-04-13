@@ -51,6 +51,7 @@ class _HomePageState extends State<HomePage> {
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
   final TextEditingController _textController = TextEditingController();
+  final FocusNode searchInputFocusNode = FocusNode();
   bool _showSearchBox = false;
   String _searchText = "";
   List<Code> _codes = [];
@@ -80,6 +81,17 @@ class _HomePageState extends State<HomePage> {
       setState(() {});
     });
     _showSearchBox = PreferenceService.instance.shouldAutoFocusOnSearchBar();
+    if (_showSearchBox) {
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) {
+          // https://github.com/flutter/flutter/issues/20706#issuecomment-646328652
+          FocusScope.of(context).unfocus();
+          Timer(const Duration(milliseconds: 1), () {
+            FocusScope.of(context).requestFocus(searchInputFocusNode);
+          });
+        },
+      );
+    }
   }
 
   void _loadCodes() {
@@ -192,6 +204,7 @@ class _HomePageState extends State<HomePage> {
           title: !_showSearchBox
               ? const Text('Ente Auth')
               : TextField(
+                  focusNode: searchInputFocusNode,
                   autofocus: _searchText.isEmpty,
                   controller: _textController,
                   onChanged: (val) {

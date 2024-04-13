@@ -1,3 +1,4 @@
+import { openCache } from "@/next/blob-cache";
 import log from "@/next/log";
 import {
     DetectedFace,
@@ -14,7 +15,6 @@ import {
     getOriginalImageBitmap,
     isDifferentOrOld,
 } from "utils/machineLearning";
-import { storeFaceCrop } from "utils/machineLearning/faceCrop";
 import mlIDbStorage from "utils/storage/mlIDbStorage";
 import ReaderService from "./readerService";
 
@@ -55,7 +55,7 @@ class FaceService {
             await syncContext.faceDetectionService.detectFaces(imageBitmap);
         console.timeEnd(timerId);
         console.log("faceDetections: ", faceDetections?.length);
-        // log.info('3 TF Memory stats: ',JSON.stringify(tf.memory()));
+
         // TODO: reenable faces filtering based on width
         const detectedFaces = faceDetections?.map((detection) => {
             return {
@@ -150,7 +150,7 @@ class FaceService {
 
         imageBitmap.close();
         log.info("[MLService] alignedFaces: ", newMlFile.faces?.length);
-        // log.info('4 TF Memory stats: ',JSON.stringify(tf.memory()));
+
         return faceImages;
     }
 
@@ -187,7 +187,6 @@ class FaceService {
         newMlFile.faces.forEach((f, i) => (f.embedding = embeddings[i]));
 
         log.info("[MLService] facesWithEmbeddings: ", newMlFile.faces.length);
-        // log.info('5 TF Memory stats: ',JSON.stringify(tf.memory()));
     }
 
     async syncFileFaceMakeRelativeDetections(
@@ -226,13 +225,15 @@ class FaceService {
             face.detection,
             syncContext.config.faceCrop,
         );
-        face.crop = await storeFaceCrop(
-            face.id,
-            faceCrop,
-            syncContext.config.faceCrop.blobOptions,
-        );
-        const blob = await imageBitmapToBlob(faceCrop.image);
+
+        const blobOptions = syncContext.config.faceCrop.blobOptions;
+        const blob = await imageBitmapToBlob(faceCrop.image, blobOptions);
+
+        const cache = await openCache("face-crops");
+        await cache.put(face.id, blob);
+
         faceCrop.image.close();
+
         return blob;
     }
 

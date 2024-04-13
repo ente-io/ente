@@ -15,14 +15,7 @@ import {
     openDB,
 } from "idb";
 import isElectron from "is-electron";
-import {
-    Face,
-    MLLibraryData,
-    MlFileData,
-    Person,
-    RealWorldObject,
-    Thing,
-} from "types/machineLearning";
+import { Face, MLLibraryData, MlFileData, Person } from "types/machineLearning";
 import { IndexStatus } from "types/machineLearning/ui";
 
 interface Config {}
@@ -42,9 +35,11 @@ interface MLDb extends DBSchema {
         key: number;
         value: Person;
     };
+    // Unused, we only retain this is the schema so that we can delete it during
+    // migration.
     things: {
         key: number;
-        value: Thing;
+        value: unknown;
     };
     versions: {
         key: string;
@@ -72,7 +67,7 @@ class MLIDbStorage {
     }
 
     private openDB(): Promise<IDBPDatabase<MLDb>> {
-        return openDB<MLDb>(MLDATA_DB_NAME, 3, {
+        return openDB<MLDb>(MLDATA_DB_NAME, 4, {
             terminated: async () => {
                 log.error("ML Indexed DB terminated");
                 this._db = undefined;
@@ -88,6 +83,29 @@ class MLIDbStorage {
                 log.error("ML Indexed DB blocking");
             },
             async upgrade(db, oldVersion, newVersion, tx) {
+                let wasMLSearchEnabled = false;
+                try {
+                    const searchConfig: unknown = await tx
+                        .objectStore("configs")
+                        .get(ML_SEARCH_CONFIG_NAME);
+                    if (
+                        searchConfig &&
+                        typeof searchConfig == "object" &&
+                        "enabled" in searchConfig &&
+                        typeof searchConfig.enabled == "boolean"
+                    ) {
+                        wasMLSearchEnabled = searchConfig.enabled;
+                    }
+                } catch (e) {
+                    log.info(
+                        "Ignoring likely harmless error while trying to determine ML search status during migration",
+                        e,
+                    );
+                }
+                log.info(
+                    `Previous ML database v${oldVersion} had ML search ${wasMLSearchEnabled ? "enabled" : "disabled"}`,
+                );
+
                 if (oldVersion < 1) {
                     const filesStore = db.createObjectStore("files", {
                         keyPath: "fileId",
@@ -128,8 +146,29 @@ class MLIDbStorage {
                         .objectStore("configs")
                         .add(DEFAULT_ML_SEARCH_CONFIG, ML_SEARCH_CONFIG_NAME);
                 }
+                if (oldVersion < 4) {
+                    try {
+                        await tx
+                            .objectStore("configs")
+                            .delete(ML_SEARCH_CONFIG_NAME);
+
+                        await tx
+                            .objectStore("configs")
+                            .add(
+                                { enabled: wasMLSearchEnabled },
+                                ML_SEARCH_CONFIG_NAME,
+                            );
+
+                        db.deleteObjectStore("things");
+                    } catch {
+                        // TODO: ignore for now as we finalize the new version
+                        // the shipped implementation should have a more
+                        // deterministic migration.
+                    }
+                }
+
                 log.info(
-                    `Ml DB upgraded to version: ${newVersion} from version: ${oldVersion}`,
+                    `ML DB upgraded from version ${oldVersion} to version ${newVersion}`,
                 );
             },
         });
@@ -299,21 +338,6 @@ class MLIDbStorage {
         log.info("updateFaces", Date.now() - startTime, "ms");
     }
 
-    public async getAllObjectsMap() {
-        const startTime = Date.now();
-        const db = await this.db;
-        const allFiles = await db.getAll("files");
-        const allObjectsMap = new Map<number, Array<RealWorldObject>>();
-        allFiles.forEach(
-            (mlFileData) =>
-                mlFileData.objects &&
-                allObjectsMap.set(mlFileData.fileId, mlFileData.objects),
-        );
-        log.info("allObjectsMap", Date.now() - startTime, "ms");
-
-        return allObjectsMap;
-    }
-
     public async getPerson(id: number) {
         const db = await this.db;
         return db.get("people", id);
@@ -332,20 +356,6 @@ class MLIDbStorage {
     public async clearAllPeople() {
         const db = await this.db;
         return db.clear("people");
-    }
-
-    public async getAllThings() {
-        const db = await this.db;
-        return db.getAll("things");
-    }
-    public async putThing(thing: Thing) {
-        const db = await this.db;
-        return db.put("things", thing);
-    }
-
-    public async clearAllThings() {
-        const db = await this.db;
-        return db.clear("things");
     }
 
     public async getIndexVersion(index: string) {

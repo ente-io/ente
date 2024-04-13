@@ -10,37 +10,6 @@
 
 import type { FSWatcher } from "chokidar";
 import { ipcMain } from "electron/main";
-import {
-    appVersion,
-    skipAppUpdate,
-    updateAndRestart,
-    updateOnNextRestart,
-} from "../services/app-update";
-import { clipImageEmbedding, clipTextEmbedding } from "../services/clip";
-import { runFFmpegCmd } from "../services/ffmpeg";
-import { getDirFiles } from "../services/fs";
-import {
-    convertToJPEG,
-    generateImageThumbnail,
-} from "../services/imageProcessor";
-import {
-    clearStores,
-    encryptionKey,
-    saveEncryptionKey,
-} from "../services/store";
-import {
-    getElectronFilesFromGoogleZip,
-    getPendingUploads,
-    setToUploadCollection,
-    setToUploadFiles,
-} from "../services/upload";
-import {
-    addWatchMapping,
-    getWatchMappings,
-    removeWatchMapping,
-    updateWatchMappingIgnoredFiles,
-    updateWatchMappingSyncedFiles,
-} from "../services/watch";
 import type { ElectronFile, FILE_PATH_TYPE, WatchMapping } from "../types/ipc";
 import {
     selectDirectory,
@@ -61,6 +30,38 @@ import {
     saveStreamToDisk,
 } from "./fs";
 import { logToDisk } from "./log";
+import {
+    appVersion,
+    skipAppUpdate,
+    updateAndRestart,
+    updateOnNextRestart,
+} from "./services/app-update";
+import { runFFmpegCmd } from "./services/ffmpeg";
+import { getDirFiles } from "./services/fs";
+import {
+    convertToJPEG,
+    generateImageThumbnail,
+} from "./services/imageProcessor";
+import { clipImageEmbedding, clipTextEmbedding } from "./services/ml-clip";
+import { detectFaces, faceEmbedding } from "./services/ml-face";
+import {
+    clearStores,
+    encryptionKey,
+    saveEncryptionKey,
+} from "./services/store";
+import {
+    getElectronFilesFromGoogleZip,
+    getPendingUploads,
+    setToUploadCollection,
+    setToUploadFiles,
+} from "./services/upload";
+import {
+    addWatchMapping,
+    getWatchMappings,
+    removeWatchMapping,
+    updateWatchMappingIgnoredFiles,
+    updateWatchMappingSyncedFiles,
+} from "./services/watch";
 import { openDirectory, openLogDirectory } from "./util";
 
 /**
@@ -144,6 +145,14 @@ export const attachIPCHandlers = () => {
 
     ipcMain.handle("clipTextEmbedding", (_, text: string) =>
         clipTextEmbedding(text),
+    );
+
+    ipcMain.handle("detectFaces", (_, input: Float32Array) =>
+        detectFaces(input),
+    );
+
+    ipcMain.handle("faceEmbedding", (_, input: Float32Array) =>
+        faceEmbedding(input),
     );
 
     // - File selection

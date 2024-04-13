@@ -1,6 +1,7 @@
 import { ensureElectron } from "@/next/electron";
 import log, { logToDisk } from "@/next/log";
 import { expose, wrap, type Remote } from "comlink";
+import { ensureLocalUser } from "../local-user";
 
 export class ComlinkWorker<T extends new () => InstanceType<T>> {
     public remote: Promise<Remote<InstanceType<T>>>;
@@ -36,16 +37,24 @@ export class ComlinkWorker<T extends new () => InstanceType<T>> {
 }
 
 /**
- * A minimal set of utility functions that we expose to all workers that we
- * create.
+ * A set of utility functions that we expose to all workers that we create.
  *
  * Inside the worker's code, this can be accessed by using the sibling
  * `workerBridge` object after importing it from `worker-bridge.ts`.
+ *
+ * Not all workers need access to all these functions, and this can indeed be
+ * done in a more fine-grained, per-worker, manner if needed.
  */
 const workerBridge = {
+    // Needed: generally (presumably)
     logToDisk,
+    // Needed by ML worker
+    getAuthToken: () => ensureLocalUser().then((user) => user.token),
     convertToJPEG: (inputFileData: Uint8Array, filename: string) =>
         ensureElectron().convertToJPEG(inputFileData, filename),
+    detectFaces: (input: Float32Array) => ensureElectron().detectFaces(input),
+    faceEmbedding: (input: Float32Array) =>
+        ensureElectron().faceEmbedding(input),
 };
 
 export type WorkerBridge = typeof workerBridge;

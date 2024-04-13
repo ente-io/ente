@@ -6,7 +6,7 @@ import { t } from "i18next";
 import { Collection } from "types/collection";
 import { EntityType, LocationTag, LocationTagData } from "types/entity";
 import { EnteFile } from "types/file";
-import { Person, Thing } from "types/machineLearning";
+import { Person } from "types/machineLearning";
 import {
     ClipSearchScores,
     DateValue,
@@ -25,7 +25,6 @@ import { clipService, computeClipMatchScore } from "./clip-service";
 import { getLocalEmbeddings } from "./embeddingService";
 import { getLatestEntities } from "./entityService";
 import locationSearchService, { City } from "./locationSearchService";
-import ObjectService from "./machineLearning/objectService";
 
 const DIGITS = new Set(["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]);
 
@@ -56,7 +55,6 @@ export const getAutoCompleteSuggestions =
                 getFileNameSuggestion(searchPhrase, files),
                 getFileCaptionSuggestion(searchPhrase, files),
                 ...(await getLocationSuggestions(searchPhrase)),
-                ...(await getThingSuggestion(searchPhrase)),
             ].filter((suggestion) => !!suggestion);
 
             return convertSuggestionsToOptions(suggestions);
@@ -289,19 +287,6 @@ async function getLocationSuggestions(searchPhrase: string) {
     return [...locationTagSuggestions, ...citySearchSuggestions];
 }
 
-async function getThingSuggestion(searchPhrase: string): Promise<Suggestion[]> {
-    const thingResults = await searchThing(searchPhrase);
-
-    return thingResults.map(
-        (searchResult) =>
-            ({
-                type: SuggestionType.THING,
-                value: searchResult,
-                label: searchResult.name,
-            }) as Suggestion,
-    );
-}
-
 async function getClipSuggestion(searchPhrase: string): Promise<Suggestion> {
     try {
         if (!clipService.isPlatformSupported()) {
@@ -389,13 +374,6 @@ async function searchLocationTag(searchPhrase: string): Promise<LocationTag[]> {
     return matchedLocationTags;
 }
 
-async function searchThing(searchPhrase: string) {
-    const things = await ObjectService.getAllThings();
-    return things.filter((thing) =>
-        thing.name.toLocaleLowerCase().includes(searchPhrase),
-    );
-}
-
 async function searchClip(searchPhrase: string): Promise<ClipSearchScores> {
     const imageEmbeddings = await getLocalEmbeddings();
     const textEmbedding = await clipService.getTextEmbedding(searchPhrase);
@@ -445,10 +423,9 @@ function convertSuggestionToSearchQuery(option: Suggestion): Search {
         case SuggestionType.PERSON:
             return { person: option.value as Person };
 
-        case SuggestionType.THING:
-            return { thing: option.value as Thing };
         case SuggestionType.FILE_TYPE:
             return { fileType: option.value as FILE_TYPE };
+
         case SuggestionType.CLIP:
             return { clip: option.value as ClipSearchScores };
     }

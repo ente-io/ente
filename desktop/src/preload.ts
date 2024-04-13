@@ -143,6 +143,12 @@ const clipImageEmbedding = (jpegImageData: Uint8Array): Promise<Float32Array> =>
 const clipTextEmbedding = (text: string): Promise<Float32Array> =>
     ipcRenderer.invoke("clipTextEmbedding", text);
 
+const detectFaces = (input: Float32Array): Promise<Float32Array> =>
+    ipcRenderer.invoke("detectFaces", input);
+
+const faceEmbedding = (input: Float32Array): Promise<Float32Array> =>
+    ipcRenderer.invoke("faceEmbedding", input);
+
 // - File selection
 
 // TODO: Deprecated - use dialogs on the renderer process itself
@@ -322,6 +328,8 @@ contextBridge.exposeInMainWorld("electron", {
     // - ML
     clipImageEmbedding,
     clipTextEmbedding,
+    detectFaces,
+    faceEmbedding,
 
     // - File selection
     selectDirectory,

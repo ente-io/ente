@@ -80,3 +80,10 @@ and is never sent to our servers.
 
 Please note that only users on the paid plan are allowed to share albums. The
 receiver just needs a free Ente account.
+
+## Has the Ente Photos app been audited by a credible source?
+
+Yes, Ente Photos has undergone a thorough security audit conducted by Cure53, in
+collaboration with Symbolic Software. Cure53 is a prominent German cybersecurity
+firm, while Symbolic Software specializes in applied cryptography. Please find
+the full report here: https://ente.io/blog/cryptography-audit/

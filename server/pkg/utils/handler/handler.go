@@ -30,6 +30,7 @@ func Error(c *gin.Context, err error) {
 	//    echo "GET /ping HTTP/1.0\r\nContent-Length: 300\r\n\r\n" | nc localhost 8080
 	if errors.Is(err, ente.ErrStorageLimitExceeded) ||
 		errors.Is(err, ente.ErrNoActiveSubscription) ||
+		errors.Is(err, ente.ErrInvalidPassword) ||
 		errors.Is(err, io.ErrUnexpectedEOF) ||
 		errors.Is(err, syscall.EPIPE) ||
 		errors.Is(err, syscall.ECONNRESET) {

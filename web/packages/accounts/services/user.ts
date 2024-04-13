@@ -1,7 +1,7 @@
+import { clearCaches } from "@/next/blob-cache";
 import log from "@/next/log";
 import { Events, eventBus } from "@ente/shared/events";
 import InMemoryStore from "@ente/shared/storage/InMemoryStore";
-import { deleteAllCache } from "@ente/shared/storage/cacheStorage/helpers";
 import { clearFiles } from "@ente/shared/storage/localForage/helpers";
 import { clearData } from "@ente/shared/storage/localStorage";
 import { clearKeys } from "@ente/shared/storage/sessionStorage";
@@ -31,7 +31,7 @@ export const logoutUser = async () => {
         log.error("Ignoring error when clearing data", e);
     }
     try {
-        await deleteAllCache();
+        await clearCaches();
     } catch (e) {
         log.error("Ignoring error when clearing caches", e);
     }

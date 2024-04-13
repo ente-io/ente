@@ -1,4 +1,4 @@
-import { ExportStage } from "constants/export";
+import type { ExportStage } from "services/export";
 import { EnteFile } from "types/file";
 
 export interface ExportProgress {

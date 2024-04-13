@@ -27,7 +27,7 @@
         "dev:payments": "yarn workspace payments dev",
         "dev:photos": "yarn workspace photos next dev",
         "dev:staff": "yarn workspace staff dev",
-        "lint": "yarn prettier --check . && yarn workspaces run eslint --report-unused-disable-directives",
+        "lint": "yarn prettier --check . && yarn workspaces run eslint --report-unused-disable-directives .",
         "lint-fix": "yarn prettier --write . && yarn workspaces run eslint --fix .",
         "preview": "yarn preview:photos",
         "preview:accounts": "yarn build:accounts && python3 -m http.server -d apps/accounts/out 3001",

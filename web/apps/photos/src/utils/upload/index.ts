@@ -1,4 +1,3 @@
-import { ENTE_METADATA_FOLDER } from "constants/export";
 import { FILE_TYPE } from "constants/file";
 import {
     A_SEC_IN_MICROSECONDS,
@@ -6,6 +5,7 @@ import {
     PICKED_UPLOAD_TYPE,
 } from "constants/upload";
 import isElectron from "is-electron";
+import { ENTE_METADATA_FOLDER } from "services/export";
 import { EnteFile } from "types/file";
 import {
     ElectronFile,

@@ -50,7 +50,7 @@ export class SimpleJob<R extends JobResult> {
 
         try {
             const jobResult = await this.runCallback();
-            if (jobResult.shouldBackoff) {
+            if (jobResult && jobResult.shouldBackoff) {
                 this.intervalSec = Math.min(
                     this.config.maxItervalSec,
                     this.intervalSec * this.config.backoffMultiplier,

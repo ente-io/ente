@@ -2,6 +2,8 @@ package user
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"github.com/ente-io/museum/ente"
 	"github.com/ente-io/museum/pkg/utils/auth"
 	"github.com/ente-io/stacktrace"
@@ -88,7 +90,11 @@ func (c *UserController) UpdateSrpAndKeyAttributes(context *gin.Context,
 func (c *UserController) GetSRPAttributes(context *gin.Context, email string) (*ente.GetSRPAttributesResponse, error) {
 	userID, err := c.UserRepo.GetUserIDWithEmail(email)
 	if err != nil {
-		return nil, stacktrace.Propagate(err, "user does not exist")
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, stacktrace.Propagate(ente.ErrNotFound, "user does not exist")
+		} else {
+			return nil, stacktrace.Propagate(err, "failed to get user")
+		}
 	}
 	srpAttributes, err := c.UserAuthRepo.GetSRPAttributes(userID)
 	if err != nil {

@@ -52,7 +52,7 @@ func (c *Controller) PaymentUpgradeOrDowngradeCron() {
 		return
 	}
 	if len(bonusPenaltyCandidates) > 0 {
-		logger.WithField("count", len(bonusPenaltyCandidates)).Error("candidates found for downgrade penalty")
 		// todo: implement downgrade penalty
+		logger.WithField("count", len(bonusPenaltyCandidates)).Warn("candidates found for downgrade penalty")
 	}
 }

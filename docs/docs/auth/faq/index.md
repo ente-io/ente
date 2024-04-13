@@ -31,3 +31,22 @@ You can enable FaceID lock under Settings → Security → Lockscreen.
 ### Why does the desktop and mobile app displays different code?
 
 Please verify that the time on both your mobile and desktop is same.
+
+### Does ente Authenticator require an account?
+
+Answer: No, ente Authenticator does not require an account. You can choose to
+use the app without backups if you prefer.
+
+### Can I use the Ente 2FA app on multiple devices and sync them?
+
+Yes, you can download the Ente app on multiple devices and sync the codes,
+end-to-end encrypted.
+
+### What does it mean when I receive a message saying my current device is not powerful enough to verify my password?
+
+This means that the parameters that were used to derive your master-key on your
+original device, are incompatible with your current device (likely because it's
+less powerful).
+
+If you recover your account via your current device and reset the password, it
+will re-generate a key that will be compatible on both devices.

@@ -57,14 +57,6 @@ function isSearchedFile(file: EnteFile, search: Search) {
     if (search?.person) {
         return search.person.files.indexOf(file.id) !== -1;
     }
-
-    if (search?.thing) {
-        return search.thing.files.indexOf(file.id) !== -1;
-    }
-
-    if (search?.text) {
-        return search.text.files.indexOf(file.id) !== -1;
-    }
     if (typeof search?.fileType !== "undefined") {
         return search.fileType === file.metadata.fileType;
     }
