@@ -15,34 +15,25 @@ import {
     ExportRecordV0,
     ExportRecordV1,
     ExportRecordV2,
+    ExportedCollectionPaths,
     FileExportNames,
 } from "types/export";
 import { EnteFile } from "types/file";
 import { getNonEmptyPersonalCollections } from "utils/collection";
-import {
-    getCollectionExportPath,
-    getCollectionIDFromFileUID,
-    getExportRecordFileUID,
-    getLivePhotoExportName,
-    getMetadataFolderExportPath,
-} from "utils/export";
-import {
-    convertCollectionIDFolderPathObjectToMap,
-    getExportedFiles,
-    getFileMetadataSavePath,
-    getFileSavePath,
-    getOldCollectionFolderPath,
-    getOldFileMetadataSavePath,
-    getOldFileSavePath,
-    getUniqueCollectionFolderPath,
-    getUniqueFileExportNameForMigration,
-    getUniqueFileSaveName,
-} from "utils/export/migration";
+import { splitFilenameAndExtension } from "utils/ffmpeg";
 import {
     getIDBasedSortedFiles,
     getPersonalFiles,
     mergeMetadata,
 } from "utils/file";
+import { sanitizeName } from "utils/native-fs";
+import {
+    ENTE_METADATA_FOLDER,
+    getCollectionIDFromFileUID,
+    getExportRecordFileUID,
+    getLivePhotoExportName,
+    getMetadataFolderExportPath,
+} from ".";
 import exportService from "./index";
 
 export async function migrateExport(
@@ -441,7 +432,7 @@ async function removeCollectionExportMissingMetadataFolder(
         if (
             await exportService.exists(
                 getMetadataFolderExportPath(
-                    getCollectionExportPath(exportDir, collectionExportName),
+                    `${exportDir}/${collectionExportName}`,
                 ),
             )
         ) {
@@ -475,3 +466,130 @@ async function removeCollectionExportMissingMetadataFolder(
     };
     await exportService.updateExportRecord(exportDir, updatedExportRecord);
 }
+
+const convertCollectionIDFolderPathObjectToMap = (
+    exportedCollectionPaths: ExportedCollectionPaths,
+): Map<number, string> => {
+    return new Map<number, string>(
+        Object.entries(exportedCollectionPaths ?? {}).map((e) => {
+            return [Number(e[0]), String(e[1])];
+        }),
+    );
+};
+
+const getExportedFiles = (
+    allFiles: EnteFile[],
+    exportRecord: ExportRecordV0 | ExportRecordV1 | ExportRecordV2,
+) => {
+    if (!exportRecord?.exportedFiles) {
+        return [];
+    }
+    const exportedFileIds = new Set(exportRecord?.exportedFiles);
+    const exportedFiles = allFiles.filter((file) => {
+        if (exportedFileIds.has(getExportRecordFileUID(file))) {
+            return true;
+        } else {
+            return false;
+        }
+    });
+    return exportedFiles;
+};
+
+const oldSanitizeName = (name: string) =>
+    name.replaceAll("/", "_").replaceAll(" ", "_");
+
+const getUniqueCollectionFolderPath = async (
+    dir: string,
+    collectionName: string,
+): Promise<string> => {
+    let collectionFolderPath = `${dir}/${sanitizeName(collectionName)}`;
+    let count = 1;
+    while (await exportService.exists(collectionFolderPath)) {
+        collectionFolderPath = `${dir}/${sanitizeName(
+            collectionName,
+        )}(${count})`;
+        count++;
+    }
+    return collectionFolderPath;
+};
+
+export const getMetadataFolderPath = (collectionFolderPath: string) =>
+    `${collectionFolderPath}/${ENTE_METADATA_FOLDER}`;
+
+const getUniqueFileSaveName = async (
+    collectionPath: string,
+    filename: string,
+) => {
+    let fileSaveName = sanitizeName(filename);
+    let count = 1;
+    while (
+        await exportService.exists(
+            getFileSavePath(collectionPath, fileSaveName),
+        )
+    ) {
+        const filenameParts = splitFilenameAndExtension(sanitizeName(filename));
+        if (filenameParts[1]) {
+            fileSaveName = `${filenameParts[0]}(${count}).${filenameParts[1]}`;
+        } else {
+            fileSaveName = `${filenameParts[0]}(${count})`;
+        }
+        count++;
+    }
+    return fileSaveName;
+};
+
+const getFileMetadataSavePath = (
+    collectionFolderPath: string,
+    fileSaveName: string,
+) => `${collectionFolderPath}/${ENTE_METADATA_FOLDER}/${fileSaveName}.json`;
+
+const getFileSavePath = (collectionFolderPath: string, fileSaveName: string) =>
+    `${collectionFolderPath}/${fileSaveName}`;
+
+const getOldCollectionFolderPath = (
+    dir: string,
+    collectionID: number,
+    collectionName: string,
+) => `${dir}/${collectionID}_${oldSanitizeName(collectionName)}`;
+
+const getOldFileSavePath = (collectionFolderPath: string, file: EnteFile) =>
+    `${collectionFolderPath}/${file.id}_${oldSanitizeName(
+        file.metadata.title,
+    )}`;
+
+const getOldFileMetadataSavePath = (
+    collectionFolderPath: string,
+    file: EnteFile,
+) =>
+    `${collectionFolderPath}/${ENTE_METADATA_FOLDER}/${
+        file.id
+    }_${oldSanitizeName(file.metadata.title)}.json`;
+
+const getUniqueFileExportNameForMigration = (
+    collectionPath: string,
+    filename: string,
+    usedFilePaths: Map<string, Set<string>>,
+) => {
+    let fileExportName = sanitizeName(filename);
+    let count = 1;
+    while (
+        usedFilePaths
+            .get(collectionPath)
+            ?.has(getFileSavePath(collectionPath, fileExportName))
+    ) {
+        const filenameParts = splitFilenameAndExtension(sanitizeName(filename));
+        if (filenameParts[1]) {
+            fileExportName = `${filenameParts[0]}(${count}).${filenameParts[1]}`;
+        } else {
+            fileExportName = `${filenameParts[0]}(${count})`;
+        }
+        count++;
+    }
+    if (!usedFilePaths.has(collectionPath)) {
+        usedFilePaths.set(collectionPath, new Set());
+    }
+    usedFilePaths
+        .get(collectionPath)
+        .add(getFileSavePath(collectionPath, fileExportName));
+    return fileExportName;
+};

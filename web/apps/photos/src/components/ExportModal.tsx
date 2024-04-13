@@ -14,12 +14,11 @@ import {
     Switch,
     Typography,
 } from "@mui/material";
-import { ExportStage } from "constants/export";
 import { t } from "i18next";
 import isElectron from "is-electron";
 import { AppContext } from "pages/_app";
 import { useContext, useEffect, useState } from "react";
-import exportService from "services/export";
+import exportService, { ExportStage } from "services/export";
 import { ExportProgress, ExportSettings } from "types/export";
 import { EnteFile } from "types/file";
 import { getExportDirectoryDoesNotExistMessage } from "utils/ui";
