@@ -1,7 +1,6 @@
 import { haveWindow } from "@/next/env";
 import log from "@/next/log";
 import {
-    DEFAULT_ML_SEARCH_CONFIG,
     DEFAULT_ML_SYNC_CONFIG,
     DEFAULT_ML_SYNC_JOB_CONFIG,
     MAX_ML_SYNC_ERROR_COUNT,
@@ -85,21 +84,16 @@ class MLIDbStorage {
             async upgrade(db, oldVersion, newVersion, tx) {
                 let wasMLSearchEnabled = false;
                 try {
-                    const s: unknown = await tx
+                    const searchConfig: unknown = await tx
                         .objectStore("configs")
-                        .getKey(ML_SEARCH_CONFIG_NAME);
-                    if (typeof s == "string") {
-                        const json = JSON.parse(s);
-                        if (
-                            json &&
-                            typeof json == "object" &&
-                            "enabled" in json
-                        ) {
-                            const enabled = json.enabled;
-                            if (typeof enabled == "boolean") {
-                                wasMLSearchEnabled = enabled;
-                            }
-                        }
+                        .get(ML_SEARCH_CONFIG_NAME);
+                    if (
+                        searchConfig &&
+                        typeof searchConfig == "object" &&
+                        "enabled" in searchConfig &&
+                        typeof searchConfig.enabled == "boolean"
+                    ) {
+                        wasMLSearchEnabled = searchConfig.enabled;
                     }
                 } catch (e) {
                     log.error(
@@ -108,10 +102,22 @@ class MLIDbStorage {
                     );
                 }
                 log.info(
-                    `Old database had wasMLSearchEnabled = ${wasMLSearchEnabled}`,
+                    `Previous ML database v${oldVersion} had ML search ${wasMLSearchEnabled ? "enabled" : "disabled"}`,
                 );
 
-                if (oldVersion < 1) {
+                // If the user is migrating from a pre-v4 version, delete
+                // everything and recreate. The only thing that we migrate in
+                // such cases is whether or not the ML search was enabled.
+                if (oldVersion < 4) {
+                    // Delete everything in the IndexedDB
+                    db.deleteObjectStore("files");
+                    db.deleteObjectStore("people");
+                    db.deleteObjectStore("things");
+                    db.deleteObjectStore("versions");
+                    db.deleteObjectStore("library");
+                    db.deleteObjectStore("configs");
+
+                    // Recreate
                     const filesStore = db.createObjectStore("files", {
                         keyPath: "fileId",
                     });
@@ -124,16 +130,14 @@ class MLIDbStorage {
                         keyPath: "id",
                     });
 
-                    db.createObjectStore("things", {
-                        keyPath: "id",
-                    });
+                    // db.createObjectStore("things", {
+                    // keyPath: "id",
+                    // });
 
                     db.createObjectStore("versions");
 
                     db.createObjectStore("library");
-                }
-                if (oldVersion < 2) {
-                    // TODO: update configs if version is updated in defaults
+
                     db.createObjectStore("configs");
 
                     await tx
@@ -142,26 +146,22 @@ class MLIDbStorage {
                             DEFAULT_ML_SYNC_JOB_CONFIG,
                             ML_SYNC_JOB_CONFIG_NAME,
                         );
+
                     await tx
                         .objectStore("configs")
                         .add(DEFAULT_ML_SYNC_CONFIG, ML_SYNC_CONFIG_NAME);
-                }
-                if (oldVersion < 3) {
+
                     await tx
                         .objectStore("configs")
-                        .add(DEFAULT_ML_SEARCH_CONFIG, ML_SEARCH_CONFIG_NAME);
-                }
-                if (oldVersion < 4) {
-                    // TODO(MR): This loses the user's settings.
-                    db.deleteObjectStore("configs");
-                    db.createObjectStore("configs");
+                        .add(
+                            { enabled: wasMLSearchEnabled },
+                            ML_SEARCH_CONFIG_NAME,
+                        );
 
-                    db.deleteObjectStore("things");
+                    log.info(
+                        `Ml DB upgraded to version: ${newVersion} from version: ${oldVersion}`,
+                    );
                 }
-
-                log.info(
-                    `Ml DB upgraded to version: ${newVersion} from version: ${oldVersion}`,
-                );
             },
         });
     }

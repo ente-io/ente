@@ -210,11 +210,11 @@ export const cachedOrNew = async (
 export const clearCaches = async () =>
     isElectron() ? clearOPFSCaches() : clearWebCaches();
 
-export const clearWebCaches = async () => {
+const clearWebCaches = async () => {
     await Promise.all(blobCacheNames.map((name) => caches.delete(name)));
 };
 
-export const clearOPFSCaches = async () => {
+const clearOPFSCaches = async () => {
     const root = await navigator.storage.getDirectory();
     await root.removeEntry("cache", { recursive: true });
 };
