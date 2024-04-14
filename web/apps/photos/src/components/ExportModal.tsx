@@ -85,13 +85,6 @@ export default function ExportModal(props: Props) {
         setExportFolder(newFolder);
     };
 
-    const updateContinuousExport = (updatedContinuousExport: boolean) => {
-        exportService.updateExportSettings({
-            continuousExport: updatedContinuousExport,
-        });
-        setContinuousExport(updatedContinuousExport);
-    };
-
     // ======================
     // HELPER FUNCTIONS
     // =======================
@@ -153,7 +146,10 @@ export default function ExportModal(props: Props) {
         } else {
             exportService.disableContinuousExport();
         }
-        updateContinuousExport(newContinuousExport);
+        exportService.updateExportSettings({
+            continuousExport: newContinuousExport,
+        });
+        setContinuousExport(newContinuousExport);
     };
 
     const startExport = async () => {
