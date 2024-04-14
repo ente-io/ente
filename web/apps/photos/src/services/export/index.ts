@@ -755,41 +755,19 @@ class ExportService {
                     await this.removeFileExportedRecord(exportDir, fileUID);
                     try {
                         if (isLivePhotoExportName(fileExportName)) {
-                            const {
-                                image: imageExportName,
-                                video: videoExportName,
-                            } = parseLivePhotoExportName(fileExportName);
-                            const imageExportPath = `${collectionExportPath}/${imageExportName}`;
-                            log.info(
-                                `moving image file ${imageExportPath} to trash folder`,
-                            );
-                            if (await fs.exists(imageExportPath)) {
-                                await electron.moveFile(
-                                    imageExportPath,
-                                    await getTrashedFileExportPath(
-                                        exportDir,
-                                        imageExportPath,
-                                    ),
-                                );
-                            }
-
-                            const imageMetadataFileExportPath =
-                                getMetadataFileExportPath(imageExportPath);
-
-                            if (await fs.exists(imageMetadataFileExportPath)) {
-                                await electron.moveFile(
-                                    imageMetadataFileExportPath,
-                                    await getTrashedFileExportPath(
-                                        exportDir,
-                                        imageMetadataFileExportPath,
-                                    ),
-                                );
-                            }
+                            const { image, video } =
+                                parseLivePhotoExportName(fileExportName);
 
                             await moveToTrash(
                                 exportDir,
                                 collectionExportName,
-                                videoExportName,
+                                image,
+                            );
+
+                            await moveToTrash(
+                                exportDir,
+                                collectionExportName,
+                                video,
                             );
                         } else {
                             const fileExportPath = `${collectionExportPath}/${fileExportName}`;
