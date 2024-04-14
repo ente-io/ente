@@ -101,8 +101,9 @@ export default function ExportModal(props: Props) {
             appContext.setDialogMessage(
                 getExportDirectoryDoesNotExistMessage(),
             );
-            throw Error(CustomError.EXPORT_FOLDER_DOES_NOT_EXIST);
+            return false;
         }
+        return true;
     };
 
     const syncExportRecord = async (exportFolder: string): Promise<void> => {
@@ -144,8 +145,8 @@ export default function ExportModal(props: Props) {
     };
 
     const toggleContinuousExport = async () => {
+        if (!(await verifyExportFolderExists())) return;
         try {
-            await verifyExportFolderExists();
             const newContinuousExport = !continuousExport;
             if (newContinuousExport) {
                 exportService.enableContinuousExport();
@@ -159,13 +160,11 @@ export default function ExportModal(props: Props) {
     };
 
     const startExport = async () => {
+        if (!(await verifyExportFolderExists())) return;
         try {
-            await verifyExportFolderExists();
             await exportService.scheduleExport();
         } catch (e) {
-            if (e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST) {
-                log.error("scheduleExport failed", e);
-            }
+            log.error("scheduleExport failed", e);
         }
     };
 
