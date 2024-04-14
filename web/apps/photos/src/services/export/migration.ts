@@ -189,33 +189,29 @@ async function migrationV4ToV5(exportDir: string, exportRecord: ExportRecord) {
     await removeCollectionExportMissingMetadataFolder(exportDir, exportRecord);
 }
 
-/*
-    This updates the folder name of already exported folders from the earlier format of
-    `collectionID_collectionName` to newer `collectionName(numbered)` format
-*/
-async function migrateCollectionFolders(
+/**
+ * Update the folder name of already exported folders from the earlier format of
+ * `collectionID_collectionName` to newer `collectionName(numbered)` format.
+ */
+const migrateCollectionFolders = async (
     collections: Collection[],
     exportDir: string,
     collectionIDPathMap: Map<number, string>,
-) {
+) => {
     const fs = ensureElectron().fs;
     for (const collection of collections) {
-        const oldCollectionExportPath = `${exportDir}/${collection.id}_${oldSanitizeName(collection.name)}`;
-        const newCollectionExportPath = await safeDirectoryName(
+        const oldPath = `${exportDir}/${collection.id}_${oldSanitizeName(collection.name)}`;
+        const newPath = await safeDirectoryName(
             exportDir,
             collection.name,
             fs.exists,
         );
-        collectionIDPathMap.set(collection.id, newCollectionExportPath);
-        if (!(await fs.exists(oldCollectionExportPath))) continue;
-        await fs.rename(oldCollectionExportPath, newCollectionExportPath);
-        await addCollectionExportedRecordV1(
-            exportDir,
-            collection.id,
-            newCollectionExportPath,
-        );
+        collectionIDPathMap.set(collection.id, newPath);
+        if (!(await fs.exists(oldPath))) continue;
+        await fs.rename(oldPath, newPath);
+        await addCollectionExportedRecordV1(exportDir, collection.id, newPath);
     }
-}
+};
 
 /*
     This updates the file name of already exported files from the earlier format of
