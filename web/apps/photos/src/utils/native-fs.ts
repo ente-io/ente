@@ -81,4 +81,4 @@ export const safeFileName = async (directoryPath: string, name: string) => {
  * Return true if an item exists an the given {@link path} on the user's local
  * filesystem.
  */
-export const exists = (path: string) => ensureElectron().fs.exists(path);
+const exists = (path: string) => ensureElectron().fs.exists(path);

@@ -1,3 +1,4 @@
+import { ensureElectron } from "@/next/electron";
 import log from "@/next/log";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import { User } from "@ente/shared/user/types";
@@ -197,6 +198,7 @@ async function migrateCollectionFolders(
     exportDir: string,
     collectionIDPathMap: Map<number, string>,
 ) {
+    const fs = ensureElectron().fs;
     for (const collection of collections) {
         const oldCollectionExportPath = getOldCollectionFolderPath(
             exportDir,
@@ -208,13 +210,8 @@ async function migrateCollectionFolders(
             collection.name,
         );
         collectionIDPathMap.set(collection.id, newCollectionExportPath);
-        if (!(await exportService.exists(oldCollectionExportPath))) {
-            continue;
-        }
-        await exportService.rename(
-            oldCollectionExportPath,
-            newCollectionExportPath,
-        );
+        if (!(await fs.exists(oldCollectionExportPath))) continue;
+        await fs.rename(oldCollectionExportPath, newCollectionExportPath);
         await addCollectionExportedRecordV1(
             exportDir,
             collection.id,
