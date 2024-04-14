@@ -733,6 +733,8 @@ class ExportService {
         removedFileUIDs: string[],
         isCanceled: CancellationStatus,
     ): Promise<void> {
+        const electron = ensureElectron();
+        const fs = electron.fs;
         try {
             const exportRecord = await this.getExportRecord(exportDir);
             const fileIDExportNameMap = convertFileIDExportNameObjectToMap(
@@ -762,8 +764,8 @@ class ExportService {
                             log.info(
                                 `moving image file ${imageExportPath} to trash folder`,
                             );
-                            if (await this.exists(imageExportPath)) {
-                                await ensureElectron().moveFile(
+                            if (await fs.exists(imageExportPath)) {
+                                await electron.moveFile(
                                     imageExportPath,
                                     await getTrashedFileExportPath(
                                         exportDir,
@@ -775,10 +777,8 @@ class ExportService {
                             const imageMetadataFileExportPath =
                                 getMetadataFileExportPath(imageExportPath);
 
-                            if (
-                                await this.exists(imageMetadataFileExportPath)
-                            ) {
-                                await ensureElectron().moveFile(
+                            if (await fs.exists(imageMetadataFileExportPath)) {
+                                await electron.moveFile(
                                     imageMetadataFileExportPath,
                                     await getTrashedFileExportPath(
                                         exportDir,
@@ -791,8 +791,8 @@ class ExportService {
                             log.info(
                                 `moving video file ${videoExportPath} to trash folder`,
                             );
-                            if (await this.exists(videoExportPath)) {
-                                await ensureElectron().moveFile(
+                            if (await fs.exists(videoExportPath)) {
+                                await electron.moveFile(
                                     videoExportPath,
                                     await getTrashedFileExportPath(
                                         exportDir,
@@ -802,10 +802,8 @@ class ExportService {
                             }
                             const videoMetadataFileExportPath =
                                 getMetadataFileExportPath(videoExportPath);
-                            if (
-                                await this.exists(videoMetadataFileExportPath)
-                            ) {
-                                await ensureElectron().moveFile(
+                            if (await fs.exists(videoMetadataFileExportPath)) {
+                                await electron.moveFile(
                                     videoMetadataFileExportPath,
                                     await getTrashedFileExportPath(
                                         exportDir,
@@ -823,16 +821,16 @@ class ExportService {
                             log.info(
                                 `moving file ${fileExportPath} to ${trashedFilePath} trash folder`,
                             );
-                            if (await this.exists(fileExportPath)) {
-                                await ensureElectron().moveFile(
+                            if (await fs.exists(fileExportPath)) {
+                                await electron.moveFile(
                                     fileExportPath,
                                     trashedFilePath,
                                 );
                             }
                             const metadataFileExportPath =
                                 getMetadataFileExportPath(fileExportPath);
-                            if (await this.exists(metadataFileExportPath)) {
-                                await ensureElectron().moveFile(
+                            if (await fs.exists(metadataFileExportPath)) {
+                                await electron.moveFile(
                                     metadataFileExportPath,
                                     await getTrashedFileExportPath(
                                         exportDir,
@@ -986,14 +984,16 @@ class ExportService {
     }
 
     async getExportRecord(folder: string, retry = true): Promise<ExportRecord> {
+        const electron = ensureElectron();
+        const fs = electron.fs;
         try {
             await this.verifyExportFolderExists(folder);
             const exportRecordJSONPath = `${folder}/${exportRecordFileName}`;
-            if (!(await this.exists(exportRecordJSONPath))) {
+            if (!(await fs.exists(exportRecordJSONPath))) {
                 return this.createEmptyExportRecord(exportRecordJSONPath);
             }
             const recordFile =
-                await ensureElectron().readTextFile(exportRecordJSONPath);
+                await electron.readTextFile(exportRecordJSONPath);
             try {
                 return JSON.parse(recordFile);
             } catch (e) {
@@ -1172,10 +1172,6 @@ class ExportService {
         return this.exportInProgress;
     };
 
-    exists = (path: string) => {
-        return ensureElectron().fs.exists(path);
-    };
-
     rename = (oldPath: string, newPath: string) => {
         return ensureElectron().fs.rename(oldPath, newPath);
     };
@@ -1185,7 +1181,7 @@ class ExportService {
     };
 
     exportFolderExists = async (exportFolder: string) => {
-        return exportFolder && (await this.exists(exportFolder));
+        return exportFolder && (await ensureElectron().fs.exists(exportFolder));
     };
 
     private verifyExportFolderExists = async (exportFolder: string) => {
@@ -1421,7 +1417,7 @@ const getTrashedFileExportPath = async (exportDir: string, path: string) => {
     const fileRelativePath = path.replace(`${exportDir}/`, "");
     let trashedFilePath = `${exportDir}/${exportTrashDirectoryName}/${fileRelativePath}`;
     let count = 1;
-    while (await exportService.exists(trashedFilePath)) {
+    while (await ensureElectron().fs.exists(trashedFilePath)) {
         const trashedFilePathParts = splitFilenameAndExtension(trashedFilePath);
         if (trashedFilePathParts[1]) {
             trashedFilePath = `${trashedFilePathParts[0]}(${count}).${trashedFilePathParts[1]}`;
