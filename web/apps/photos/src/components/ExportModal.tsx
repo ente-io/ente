@@ -18,7 +18,10 @@ import { t } from "i18next";
 import isElectron from "is-electron";
 import { AppContext } from "pages/_app";
 import { useContext, useEffect, useState } from "react";
-import exportService, { ExportStage } from "services/export";
+import exportService, {
+    ExportStage,
+    selectAndPrepareExportDirectory,
+} from "services/export";
 import { ExportProgress, ExportSettings } from "types/export";
 import { EnteFile } from "types/file";
 import { getExportDirectoryDoesNotExistMessage } from "utils/ui";
@@ -117,17 +120,13 @@ export default function ExportModal(props: Props) {
     // =============
 
     const handleChangeExportDirectoryClick = async () => {
-        try {
-            const newFolder = await exportService.changeExportDirectory();
-            log.info(`Export folder changed to ${newFolder}`);
-            exportService.updateExportSettings({ folder: newFolder });
-            setExportFolder(newFolder);
-            void syncExportRecord(newFolder);
-        } catch (e) {
-            if (e.message !== CustomError.SELECT_FOLDER_ABORTED) {
-                log.error("handleChangeExportDirectoryClick failed", e);
-            }
-        }
+        const newFolder = await selectAndPrepareExportDirectory();
+        if (!newFolder) return;
+
+        log.info(`Export folder changed to ${newFolder}`);
+        exportService.updateExportSettings({ folder: newFolder });
+        setExportFolder(newFolder);
+        await syncExportRecord(newFolder);
     };
 
     const toggleContinuousExport = async () => {

@@ -165,24 +165,6 @@ class ExportService {
         this.uiUpdater.setLastExportTime(exportTime);
     }
 
-    async changeExportDirectory() {
-        const electron = ensureElectron();
-        try {
-            const newRootDir = await electron.selectDirectory();
-            if (!newRootDir) {
-                throw Error(CustomError.SELECT_FOLDER_ABORTED);
-            }
-            const newExportDir = `${newRootDir}/${exportDirectoryName}`;
-            await electron.fs.mkdirIfNeeded(newExportDir);
-            return newExportDir;
-        } catch (e) {
-            if (e.message !== CustomError.SELECT_FOLDER_ABORTED) {
-                log.error("changeExportDirectory failed", e);
-            }
-            throw e;
-        }
-    }
-
     enableContinuousExport() {
         try {
             if (this.continuousExportEventHandler) {
@@ -1156,6 +1138,24 @@ export const resumeExportsIfNeeded = async () => {
         log.debug(() => "Resuming in-progress export");
         exportService.scheduleExport();
     }
+};
+
+/**
+ * Prompt the user to select a directory and create an export directory in it.
+ *
+ * If the user cancels the selection, return undefined.
+ */
+export const selectAndPrepareExportDirectory = async (): Promise<
+    string | undefined
+> => {
+    const electron = ensureElectron();
+
+    const rootDir = await electron.selectDirectory();
+    if (!rootDir) return undefined;
+
+    const exportDir = `${rootDir}/${exportDirectoryName}`;
+    await electron.fs.mkdirIfNeeded(exportDir);
+    return exportDir;
 };
 
 export const getExportRecordFileUID = (file: EnteFile) =>
