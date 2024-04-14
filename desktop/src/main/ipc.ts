@@ -19,7 +19,7 @@ import {
 } from "./dialogs";
 import {
     deleteFile,
-    deleteFolder,
+    fsRmdir,
     fsExists,
     fsMkdirIfNeeded,
     fsRename,
@@ -195,7 +195,7 @@ export const attachIPCHandlers = () => {
         moveFile(oldPath, newPath),
     );
 
-    ipcMain.handle("deleteFolder", (_, path: string) => deleteFolder(path));
+    ipcMain.handle("fsRmdir", (_, path: string) => fsRmdir(path));
 
     ipcMain.handle("deleteFile", (_, path: string) => deleteFile(path));
 

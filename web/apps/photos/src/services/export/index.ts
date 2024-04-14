@@ -564,6 +564,7 @@ class ExportService {
         exportFolder: string,
         isCanceled: CancellationStatus,
     ) {
+        const fs = ensureElectron().fs;
         try {
             const exportRecord = await this.getExportRecord(exportFolder);
             const collectionIDPathMap =
@@ -598,11 +599,11 @@ class ExportService {
                     );
                     try {
                         // delete the collection metadata folder
-                        await ensureElectron().deleteFolder(
+                        await fs.rmdir(
                             getMetadataFolderExportPath(collectionExportPath),
                         );
                         // delete the collection folder
-                        await ensureElectron().deleteFolder(
+                        await fs.rmdir(
                             collectionExportPath,
                         );
                     } catch (e) {

@@ -14,6 +14,8 @@ export const fsRename = (oldPath: string, newPath: string) =>
 export const fsMkdirIfNeeded = (dirPath: string) =>
     fs.mkdir(dirPath, { recursive: true });
 
+export const fsRmdir = (path: string) => fs.rmdir(path);
+
 /**
  * Write a (web) ReadableStream to a file at the given {@link filePath}.
  *
@@ -104,11 +106,6 @@ export const isFolder = async (dirPath: string) => {
     if (!existsSync(dirPath)) return false;
     const stats = await fs.stat(dirPath);
     return stats.isDirectory();
-};
-
-export const deleteFolder = async (folderPath: string) => {
-    // rm -rf it
-    await fs.rmdir(folderPath);
 };
 
 export const deleteFile = async (filePath: string) => {

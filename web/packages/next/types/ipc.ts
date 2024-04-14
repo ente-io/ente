@@ -163,7 +163,7 @@ export interface Electron {
         exists: (path: string) => Promise<boolean>;
 
         /**
-         * mkdir -p
+         * Equivalent of `mkdir -p`.
          *
          * Create a directory at the given path if it does not already exist.
          * Any parent directories in the path that don't already exist will also
@@ -174,6 +174,13 @@ export interface Electron {
 
         /** Rename {@link oldPath} to {@link newPath} */
         rename: (oldPath: string, newPath: string) => Promise<void>;
+
+        /**
+         * Equivalent of `rmdir`.
+         *
+         * Delete the directory at the {@link path} if it is empty.
+         */
+        rmdir: (path: string) => Promise<void>;
     };
 
     /*
@@ -294,7 +301,6 @@ export interface Electron {
     readTextFile: (path: string) => Promise<string>;
     isFolder: (dirPath: string) => Promise<boolean>;
     moveFile: (oldPath: string, newPath: string) => Promise<void>;
-    deleteFolder: (path: string) => Promise<void>;
     deleteFile: (path: string) => Promise<void>;
 
     // - Upload
