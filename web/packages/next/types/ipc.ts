@@ -307,7 +307,6 @@ export interface Electron {
     saveFileToDisk: (path: string, contents: string) => Promise<void>;
     readTextFile: (path: string) => Promise<string>;
     isFolder: (dirPath: string) => Promise<boolean>;
-    moveFile: (oldPath: string, newPath: string) => Promise<void>;
 
     // - Upload
 

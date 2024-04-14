@@ -3,7 +3,6 @@
  */
 import { createWriteStream, existsSync } from "node:fs";
 import fs from "node:fs/promises";
-import path from "node:path";
 import { Readable } from "node:stream";
 
 export const fsExists = (path: string) => existsSync(path);
@@ -90,16 +89,6 @@ export const saveFileToDisk = (path: string, contents: string) =>
 
 export const readTextFile = async (filePath: string) =>
     fs.readFile(filePath, "utf-8");
-
-export const moveFile = async (sourcePath: string, destinationPath: string) => {
-    if (existsSync(destinationPath)) {
-        throw new Error("Destination file already exists");
-    }
-    // check if destination folder exists
-    const destinationFolder = path.dirname(destinationPath);
-    await fs.mkdir(destinationFolder, { recursive: true });
-    await fs.rename(sourcePath, destinationPath);
-};
 
 export const isFolder = async (dirPath: string) => {
     if (!existsSync(dirPath)) return false;
