@@ -8,6 +8,16 @@ import { Readable } from "node:stream";
 
 export const fsExists = (path: string) => existsSync(path);
 
+export const fsRename = (oldPath: string, newPath: string) =>
+    fs.rename(oldPath, newPath);
+
+export const fsMkdirIfNeeded = (dirPath: string) =>
+    fs.mkdir(dirPath, { recursive: true });
+
+export const fsRmdir = (path: string) => fs.rmdir(path);
+
+export const fsRm = (path: string) => fs.rm(path);
+
 /**
  * Write a (web) ReadableStream to a file at the given {@link filePath}.
  *
@@ -73,9 +83,6 @@ const writeNodeStream = async (
 
 /* TODO: Audit below this  */
 
-export const checkExistsAndCreateDir = (dirPath: string) =>
-    fs.mkdir(dirPath, { recursive: true });
-
 export const saveStreamToDisk = writeStream;
 
 export const saveFileToDisk = (path: string, contents: string) =>
@@ -85,9 +92,6 @@ export const readTextFile = async (filePath: string) =>
     fs.readFile(filePath, "utf-8");
 
 export const moveFile = async (sourcePath: string, destinationPath: string) => {
-    if (!existsSync(sourcePath)) {
-        throw new Error("File does not exist");
-    }
     if (existsSync(destinationPath)) {
         throw new Error("Destination file already exists");
     }
@@ -101,33 +105,4 @@ export const isFolder = async (dirPath: string) => {
     if (!existsSync(dirPath)) return false;
     const stats = await fs.stat(dirPath);
     return stats.isDirectory();
-};
-
-export const deleteFolder = async (folderPath: string) => {
-    // Ensure it is folder
-    if (!isFolder(folderPath)) return;
-
-    // Ensure folder is empty
-    const files = await fs.readdir(folderPath);
-    if (files.length > 0) throw new Error("Folder is not empty");
-
-    // rm -rf it
-    await fs.rmdir(folderPath);
-};
-
-export const rename = async (oldPath: string, newPath: string) => {
-    if (!existsSync(oldPath)) throw new Error("Path does not exist");
-    await fs.rename(oldPath, newPath);
-};
-
-export const deleteFile = async (filePath: string) => {
-    // Ensure it exists
-    if (!existsSync(filePath)) return;
-
-    // And is a file
-    const stat = await fs.stat(filePath);
-    if (!stat.isFile()) throw new Error("Path is not a file");
-
-    // rm it
-    return fs.rm(filePath);
 };

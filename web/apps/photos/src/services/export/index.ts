@@ -166,13 +166,14 @@ class ExportService {
     }
 
     async changeExportDirectory() {
+        const electron = ensureElectron();
         try {
-            const newRootDir = await ensureElectron().selectDirectory();
+            const newRootDir = await electron.selectDirectory();
             if (!newRootDir) {
                 throw Error(CustomError.SELECT_FOLDER_ABORTED);
             }
             const newExportDir = `${newRootDir}/${exportDirectoryName}`;
-            await ensureElectron().checkExistsAndCreateDir(newExportDir);
+            await electron.fs.mkdirIfNeeded(newExportDir);
             return newExportDir;
         } catch (e) {
             if (e.message !== CustomError.SELECT_FOLDER_ABORTED) {
@@ -485,6 +486,7 @@ class ExportService {
         renamedCollections: Collection[],
         isCanceled: CancellationStatus,
     ) {
+        const fs = ensureElectron().fs;
         try {
             for (const collection of renamedCollections) {
                 try {
@@ -498,6 +500,7 @@ class ExportService {
                     const newCollectionExportName = await safeDirectoryName(
                         exportFolder,
                         getCollectionUserFacingName(collection),
+                        fs.exists,
                     );
                     log.info(
                         `renaming collection with id ${collection.id} from ${oldCollectionExportName} to ${newCollectionExportName}`,
@@ -513,7 +516,7 @@ class ExportService {
                         newCollectionExportName,
                     );
                     try {
-                        await ensureElectron().rename(
+                        await fs.rename(
                             oldCollectionExportPath,
                             newCollectionExportPath,
                         );
@@ -561,6 +564,7 @@ class ExportService {
         exportFolder: string,
         isCanceled: CancellationStatus,
     ) {
+        const fs = ensureElectron().fs;
         try {
             const exportRecord = await this.getExportRecord(exportFolder);
             const collectionIDPathMap =
@@ -595,13 +599,11 @@ class ExportService {
                     );
                     try {
                         // delete the collection metadata folder
-                        await ensureElectron().deleteFolder(
+                        await fs.rmdir(
                             getMetadataFolderExportPath(collectionExportPath),
                         );
                         // delete the collection folder
-                        await ensureElectron().deleteFolder(
-                            collectionExportPath,
-                        );
+                        await fs.rmdir(collectionExportPath);
                     } catch (e) {
                         await this.addCollectionExportedRecord(
                             exportFolder,
@@ -646,6 +648,7 @@ class ExportService {
         incrementFailed: () => void,
         isCanceled: CancellationStatus,
     ): Promise<void> {
+        const fs = ensureElectron().fs;
         try {
             for (const file of files) {
                 log.info(
@@ -681,10 +684,8 @@ class ExportService {
                         );
                     }
                     const collectionExportPath = `${exportDir}/${collectionExportName}`;
-                    await ensureElectron().checkExistsAndCreateDir(
-                        collectionExportPath,
-                    );
-                    await ensureElectron().checkExistsAndCreateDir(
+                    await fs.mkdirIfNeeded(collectionExportPath);
+                    await fs.mkdirIfNeeded(
                         getMetadataFolderExportPath(collectionExportPath),
                     );
                     await this.downloadAndSave(
@@ -731,6 +732,8 @@ class ExportService {
         removedFileUIDs: string[],
         isCanceled: CancellationStatus,
     ): Promise<void> {
+        const electron = ensureElectron();
+        const fs = electron.fs;
         try {
             const exportRecord = await this.getExportRecord(exportDir);
             const fileIDExportNameMap = convertFileIDExportNameObjectToMap(
@@ -760,8 +763,8 @@ class ExportService {
                             log.info(
                                 `moving image file ${imageExportPath} to trash folder`,
                             );
-                            if (await this.exists(imageExportPath)) {
-                                await ensureElectron().moveFile(
+                            if (await fs.exists(imageExportPath)) {
+                                await electron.moveFile(
                                     imageExportPath,
                                     await getTrashedFileExportPath(
                                         exportDir,
@@ -773,10 +776,8 @@ class ExportService {
                             const imageMetadataFileExportPath =
                                 getMetadataFileExportPath(imageExportPath);
 
-                            if (
-                                await this.exists(imageMetadataFileExportPath)
-                            ) {
-                                await ensureElectron().moveFile(
+                            if (await fs.exists(imageMetadataFileExportPath)) {
+                                await electron.moveFile(
                                     imageMetadataFileExportPath,
                                     await getTrashedFileExportPath(
                                         exportDir,
@@ -786,31 +787,7 @@ class ExportService {
                             }
 
                             const videoExportPath = `${collectionExportPath}/${videoExportName}`;
-                            log.info(
-                                `moving video file ${videoExportPath} to trash folder`,
-                            );
-                            if (await this.exists(videoExportPath)) {
-                                await ensureElectron().moveFile(
-                                    videoExportPath,
-                                    await getTrashedFileExportPath(
-                                        exportDir,
-                                        videoExportPath,
-                                    ),
-                                );
-                            }
-                            const videoMetadataFileExportPath =
-                                getMetadataFileExportPath(videoExportPath);
-                            if (
-                                await this.exists(videoMetadataFileExportPath)
-                            ) {
-                                await ensureElectron().moveFile(
-                                    videoMetadataFileExportPath,
-                                    await getTrashedFileExportPath(
-                                        exportDir,
-                                        videoMetadataFileExportPath,
-                                    ),
-                                );
-                            }
+                            await moveToTrash(exportDir, videoExportPath);
                         } else {
                             const fileExportPath = `${collectionExportPath}/${fileExportName}`;
                             const trashedFilePath =
@@ -821,16 +798,16 @@ class ExportService {
                             log.info(
                                 `moving file ${fileExportPath} to ${trashedFilePath} trash folder`,
                             );
-                            if (await this.exists(fileExportPath)) {
-                                await ensureElectron().moveFile(
+                            if (await fs.exists(fileExportPath)) {
+                                await electron.moveFile(
                                     fileExportPath,
                                     trashedFilePath,
                                 );
                             }
                             const metadataFileExportPath =
                                 getMetadataFileExportPath(fileExportPath);
-                            if (await this.exists(metadataFileExportPath)) {
-                                await ensureElectron().moveFile(
+                            if (await fs.exists(metadataFileExportPath)) {
+                                await electron.moveFile(
                                     metadataFileExportPath,
                                     await getTrashedFileExportPath(
                                         exportDir,
@@ -984,14 +961,16 @@ class ExportService {
     }
 
     async getExportRecord(folder: string, retry = true): Promise<ExportRecord> {
+        const electron = ensureElectron();
+        const fs = electron.fs;
         try {
             await this.verifyExportFolderExists(folder);
             const exportRecordJSONPath = `${folder}/${exportRecordFileName}`;
-            if (!(await this.exists(exportRecordJSONPath))) {
+            if (!(await fs.exists(exportRecordJSONPath))) {
                 return this.createEmptyExportRecord(exportRecordJSONPath);
             }
             const recordFile =
-                await ensureElectron().readTextFile(exportRecordJSONPath);
+                await electron.readTextFile(exportRecordJSONPath);
             try {
                 return JSON.parse(recordFile);
             } catch (e) {
@@ -1017,15 +996,17 @@ class ExportService {
         collectionID: number,
         collectionIDNameMap: Map<number, string>,
     ) {
+        const fs = ensureElectron().fs;
         await this.verifyExportFolderExists(exportFolder);
         const collectionName = collectionIDNameMap.get(collectionID);
         const collectionExportName = await safeDirectoryName(
             exportFolder,
             collectionName,
+            fs.exists,
         );
         const collectionExportPath = `${exportFolder}/${collectionExportName}`;
-        await ensureElectron().checkExistsAndCreateDir(collectionExportPath);
-        await ensureElectron().checkExistsAndCreateDir(
+        await fs.mkdirIfNeeded(collectionExportPath);
+        await fs.mkdirIfNeeded(
             getMetadataFolderExportPath(collectionExportPath),
         );
 
@@ -1037,6 +1018,7 @@ class ExportService {
         collectionExportPath: string,
         file: EnteFile,
     ): Promise<void> {
+        const electron = ensureElectron();
         try {
             const fileUID = getExportRecordFileUID(file);
             const originalFileStream = await downloadManager.getFile(file);
@@ -1060,6 +1042,7 @@ class ExportService {
                 const fileExportName = await safeFileName(
                     collectionExportPath,
                     file.metadata.title,
+                    electron.fs.exists,
                 );
                 await this.addFileExportedRecord(
                     exportDir,
@@ -1072,7 +1055,7 @@ class ExportService {
                         fileExportName,
                         file,
                     );
-                    await ensureElectron().saveStreamToDisk(
+                    await electron.saveStreamToDisk(
                         `${collectionExportPath}/${fileExportName}`,
                         updatedFileStream,
                     );
@@ -1094,15 +1077,18 @@ class ExportService {
         fileStream: ReadableStream<any>,
         file: EnteFile,
     ) {
+        const electron = ensureElectron();
         const fileBlob = await new Response(fileStream).blob();
         const livePhoto = await decodeLivePhoto(file, fileBlob);
         const imageExportName = await safeFileName(
             collectionExportPath,
             livePhoto.imageNameTitle,
+            electron.fs.exists,
         );
         const videoExportName = await safeFileName(
             collectionExportPath,
             livePhoto.videoNameTitle,
+            electron.fs.exists,
         );
         const livePhotoExportName = getLivePhotoExportName(
             imageExportName,
@@ -1120,7 +1106,7 @@ class ExportService {
                 imageExportName,
                 file,
             );
-            await ensureElectron().saveStreamToDisk(
+            await electron.saveStreamToDisk(
                 `${collectionExportPath}/${imageExportName}`,
                 imageStream,
             );
@@ -1132,12 +1118,12 @@ class ExportService {
                 file,
             );
             try {
-                await ensureElectron().saveStreamToDisk(
+                await electron.saveStreamToDisk(
                     `${collectionExportPath}/${videoExportName}`,
                     videoStream,
                 );
             } catch (e) {
-                await ensureElectron().deleteFile(
+                await electron.fs.rm(
                     `${collectionExportPath}/${imageExportName}`,
                 );
                 throw e;
@@ -1163,20 +1149,8 @@ class ExportService {
         return this.exportInProgress;
     };
 
-    exists = (path: string) => {
-        return ensureElectron().fs.exists(path);
-    };
-
-    rename = (oldPath: string, newPath: string) => {
-        return ensureElectron().rename(oldPath, newPath);
-    };
-
-    checkExistsAndCreateDir = (path: string) => {
-        return ensureElectron().checkExistsAndCreateDir(path);
-    };
-
     exportFolderExists = async (exportFolder: string) => {
-        return exportFolder && (await this.exists(exportFolder));
+        return exportFolder && (await ensureElectron().fs.exists(exportFolder));
     };
 
     private verifyExportFolderExists = async (exportFolder: string) => {
@@ -1412,7 +1386,7 @@ const getTrashedFileExportPath = async (exportDir: string, path: string) => {
     const fileRelativePath = path.replace(`${exportDir}/`, "");
     let trashedFilePath = `${exportDir}/${exportTrashDirectoryName}/${fileRelativePath}`;
     let count = 1;
-    while (await exportService.exists(trashedFilePath)) {
+    while (await ensureElectron().fs.exists(trashedFilePath)) {
         const trashedFilePathParts = splitFilenameAndExtension(trashedFilePath);
         if (trashedFilePathParts[1]) {
             trashedFilePath = `${trashedFilePathParts[0]}(${count}).${trashedFilePathParts[1]}`;
@@ -1460,3 +1434,25 @@ const parseLivePhotoExportName = (
 
 const isExportInProgress = (exportStage: ExportStage) =>
     exportStage > ExportStage.INIT && exportStage < ExportStage.FINISHED;
+
+const moveToTrash = async (exportDir: string, videoExportPath: string) => {
+    const fs = ensureElectron().fs;
+    log.info(`moving video file ${videoExportPath} to trash folder`);
+    if (await fs.exists(videoExportPath)) {
+        await electron.moveFile(
+            videoExportPath,
+            await getTrashedFileExportPath(exportDir, videoExportPath),
+        );
+    }
+    const videoMetadataFileExportPath =
+        getMetadataFileExportPath(videoExportPath);
+    if (await fs.exists(videoMetadataFileExportPath)) {
+        await electron.moveFile(
+            videoMetadataFileExportPath,
+            await getTrashedFileExportPath(
+                exportDir,
+                videoMetadataFileExportPath,
+            ),
+        );
+    }
+};

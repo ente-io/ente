@@ -1,12 +1,10 @@
 /**
- * @file Native filesystem access using custom Node.js functionality provided by
- * our desktop app.
+ * @file Utilities for native filesystem access.
  *
- * Precondition: Unless mentioned otherwise, the functions in these file only
- * work when we are running in our desktop app.
+ * While they don't have any direct dependencies to our desktop app, they were
+ * written for use by the code that runs in our desktop app.
  */
 
-import { ensureElectron } from "@/next/electron";
 import { nameAndExtension } from "@/next/file";
 import sanitize from "sanitize-filename";
 import {
@@ -31,15 +29,15 @@ export const sanitizeFilename = (s: string) =>
  * We also ensure we don't return names which might collide with our own special
  * directories.
  *
- * This function only works when we are running inside an electron app (since it
- * requires permissionless access to the native filesystem to find a new
- * filename that doesn't conflict with any existing items).
+ * @param exists A function to check if an item already exists at the given
+ * path. Usually, you'd pass `fs.exists` from {@link Electron}.
  *
- * See also: {@link safeDirectoryName}
+ * See also: {@link safeFileame}
  */
 export const safeDirectoryName = async (
     directoryPath: string,
     name: string,
+    exists: (path: string) => Promise<boolean>,
 ): Promise<string> => {
     const specialDirectoryNames = [
         exportTrashDirectoryName,
@@ -62,10 +60,13 @@ export const safeDirectoryName = async (
  * Return a new sanitized and unique file name based on {@link name} that is not
  * the same as any existing item in the given {@link directoryPath}.
  *
- * This function only works when we are running inside an electron app.
- * @see {@link safeDirectoryName}.
+ * This is a sibling of {@link safeDirectoryName} for use with file names.
  */
-export const safeFileName = async (directoryPath: string, name: string) => {
+export const safeFileName = async (
+    directoryPath: string,
+    name: string,
+    exists: (path: string) => Promise<boolean>,
+) => {
     let result = sanitizeFilename(name);
     let count = 1;
     while (await exists(`${directoryPath}/${result}`)) {
@@ -76,9 +77,3 @@ export const safeFileName = async (directoryPath: string, name: string) => {
     }
     return result;
 };
-
-/**
- * Return true if an item exists an the given {@link path} on the user's local
- * filesystem.
- */
-export const exists = (path: string) => ensureElectron().fs.exists(path);

@@ -155,15 +155,39 @@ export interface Electron {
      * or watching some folders for changes and syncing them automatically.
      *
      * Towards this end, this fs object provides some generic file system access
-     * functions that are needed for such features. In addition, there are other
-     * feature specific methods too in the top level electron object.
+     * functions that are needed for such features (in some cases, there are
+     * other feature specific methods too in the top level electron object).
      */
     fs: {
-        /**
-         * Return true if there is a file or directory at the given
-         * {@link path}.
-         */
+        /** Return true if there is an item at the given {@link path}. */
         exists: (path: string) => Promise<boolean>;
+
+        /**
+         * Equivalent of `mkdir -p`.
+         *
+         * Create a directory at the given path if it does not already exist.
+         * Any parent directories in the path that don't already exist will also
+         * be created recursively, i.e. this command is analogous to an running
+         * `mkdir -p`.
+         */
+        mkdirIfNeeded: (dirPath: string) => Promise<void>;
+
+        /** Rename {@link oldPath} to {@link newPath} */
+        rename: (oldPath: string, newPath: string) => Promise<void>;
+
+        /**
+         * Equivalent of `rmdir`.
+         *
+         * Delete the directory at the {@link path} if it is empty.
+         */
+        rmdir: (path: string) => Promise<void>;
+
+        /**
+         * Equivalent of `rm`.
+         *
+         * Delete the file at {@link path}.
+         */
+        rm: (path: string) => Promise<void>;
     };
 
     /*
@@ -276,7 +300,6 @@ export interface Electron {
     ) => Promise<void>;
 
     // - FS legacy
-    checkExistsAndCreateDir: (dirPath: string) => Promise<void>;
     saveStreamToDisk: (
         path: string,
         fileStream: ReadableStream,
@@ -285,9 +308,6 @@ export interface Electron {
     readTextFile: (path: string) => Promise<string>;
     isFolder: (dirPath: string) => Promise<boolean>;
     moveFile: (oldPath: string, newPath: string) => Promise<void>;
-    deleteFolder: (path: string) => Promise<void>;
-    deleteFile: (path: string) => Promise<void>;
-    rename: (oldPath: string, newPath: string) => Promise<void>;
 
     // - Upload
 

@@ -1,3 +1,4 @@
+import { ensureElectron } from "@/next/electron";
 import log from "@/next/log";
 import { CustomError } from "@ente/shared/error";
 import { getAlbumsURL } from "@ente/shared/network/api";
@@ -30,7 +31,6 @@ import {
     updatePublicCollectionMagicMetadata,
     updateSharedCollectionMagicMetadata,
 } from "services/collectionService";
-import exportService from "services/export";
 import { getAllLocalFiles, getLocalFiles } from "services/fileService";
 import {
     COLLECTION_ROLE,
@@ -169,12 +169,14 @@ async function createCollectionDownloadFolder(
     downloadDirPath: string,
     collectionName: string,
 ) {
+    const fs = ensureElectron().fs;
     const collectionDownloadName = await safeDirectoryName(
         downloadDirPath,
         collectionName,
+        fs.exists,
     );
     const collectionDownloadPath = `${downloadDirPath}/${collectionDownloadName}`;
-    await exportService.checkExistsAndCreateDir(collectionDownloadPath);
+    await fs.mkdirIfNeeded(collectionDownloadPath);
     return collectionDownloadPath;
 }
 

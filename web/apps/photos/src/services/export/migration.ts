@@ -1,3 +1,4 @@
+import { ensureElectron } from "@/next/electron";
 import log from "@/next/log";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import { User } from "@ente/shared/user/types";
@@ -188,40 +189,29 @@ async function migrationV4ToV5(exportDir: string, exportRecord: ExportRecord) {
     await removeCollectionExportMissingMetadataFolder(exportDir, exportRecord);
 }
 
-/*
-    This updates the folder name of already exported folders from the earlier format of
-    `collectionID_collectionName` to newer `collectionName(numbered)` format
-*/
-async function migrateCollectionFolders(
+/**
+ * Update the folder name of already exported folders from the earlier format of
+ * `collectionID_collectionName` to newer `collectionName(numbered)` format.
+ */
+const migrateCollectionFolders = async (
     collections: Collection[],
     exportDir: string,
     collectionIDPathMap: Map<number, string>,
-) {
+) => {
+    const fs = ensureElectron().fs;
     for (const collection of collections) {
-        const oldCollectionExportPath = getOldCollectionFolderPath(
-            exportDir,
-            collection.id,
-            collection.name,
-        );
-        const newCollectionExportPath = await safeDirectoryName(
+        const oldPath = `${exportDir}/${collection.id}_${oldSanitizeName(collection.name)}`;
+        const newPath = await safeDirectoryName(
             exportDir,
             collection.name,
+            fs.exists,
         );
-        collectionIDPathMap.set(collection.id, newCollectionExportPath);
-        if (!(await exportService.exists(oldCollectionExportPath))) {
-            continue;
-        }
-        await exportService.rename(
-            oldCollectionExportPath,
-            newCollectionExportPath,
-        );
-        await addCollectionExportedRecordV1(
-            exportDir,
-            collection.id,
-            newCollectionExportPath,
-        );
+        collectionIDPathMap.set(collection.id, newPath);
+        if (!(await fs.exists(oldPath))) continue;
+        await fs.rename(oldPath, newPath);
+        await addCollectionExportedRecordV1(exportDir, collection.id, newPath);
     }
-}
+};
 
 /*
     This updates the file name of already exported files from the earlier format of
@@ -231,6 +221,7 @@ async function migrateFiles(
     files: EnteFile[],
     collectionIDPathMap: Map<number, string>,
 ) {
+    const fs = ensureElectron().fs;
     for (const file of files) {
         const collectionPath = collectionIDPathMap.get(file.collectionID);
         const metadataPath = `${collectionPath}/${exportMetadataDirectoryName}`;
@@ -242,14 +233,15 @@ async function migrateFiles(
         const newFileName = await safeFileName(
             collectionPath,
             file.metadata.title,
+            fs.exists,
         );
         const newFilePath = `${collectionPath}/${newFileName}`;
         const newFileMetadataPath = `${metadataPath}/${newFileName}.json`;
 
-        if (!(await exportService.exists(oldFilePath))) continue;
+        if (!(await fs.exists(oldFilePath))) continue;
 
-        await exportService.rename(oldFilePath, newFilePath);
-        await exportService.rename(oldFileMetadataPath, newFileMetadataPath);
+        await fs.rename(oldFilePath, newFilePath);
+        await fs.rename(oldFileMetadataPath, newFileMetadataPath);
     }
 }
 
@@ -409,6 +401,7 @@ async function removeCollectionExportMissingMetadataFolder(
     exportDir: string,
     exportRecord: ExportRecord,
 ) {
+    const fs = ensureElectron().fs;
     if (!exportRecord?.collectionExportNames) {
         return;
     }
@@ -422,7 +415,7 @@ async function removeCollectionExportMissingMetadataFolder(
         collectionExportName,
     ] of properlyExportedCollectionsAll) {
         if (
-            await exportService.exists(
+            await fs.exists(
                 getMetadataFolderExportPath(
                     `${exportDir}/${collectionExportName}`,
                 ),
@@ -492,12 +485,6 @@ const oldSanitizeName = (name: string) =>
 
 const getFileSavePath = (collectionFolderPath: string, fileSaveName: string) =>
     `${collectionFolderPath}/${fileSaveName}`;
-
-const getOldCollectionFolderPath = (
-    dir: string,
-    collectionID: number,
-    collectionName: string,
-) => `${dir}/${collectionID}_${oldSanitizeName(collectionName)}`;
 
 const getUniqueFileExportNameForMigration = (
     collectionPath: string,

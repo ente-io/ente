@@ -99,6 +99,12 @@ const skipAppUpdate = (version: string) => {
 const fsExists = (path: string): Promise<boolean> =>
     ipcRenderer.invoke("fsExists", path);
 
+const fsMkdirIfNeeded = (dirPath: string): Promise<void> =>
+    ipcRenderer.invoke("fsMkdirIfNeeded", dirPath);
+
+const fsRename = (oldPath: string, newPath: string): Promise<void> =>
+    ipcRenderer.invoke("fsRename", oldPath, newPath);
+
 // - AUDIT below this
 
 // - Conversion
@@ -218,9 +224,6 @@ const updateWatchMappingIgnoredFiles = (
 
 // - FS Legacy
 
-const checkExistsAndCreateDir = (dirPath: string): Promise<void> =>
-    ipcRenderer.invoke("checkExistsAndCreateDir", dirPath);
-
 const saveStreamToDisk = (
     path: string,
     fileStream: ReadableStream,
@@ -238,14 +241,10 @@ const isFolder = (dirPath: string): Promise<boolean> =>
 const moveFile = (oldPath: string, newPath: string): Promise<void> =>
     ipcRenderer.invoke("moveFile", oldPath, newPath);
 
-const deleteFolder = (path: string): Promise<void> =>
-    ipcRenderer.invoke("deleteFolder", path);
+const fsRmdir = (path: string): Promise<void> =>
+    ipcRenderer.invoke("fsRmdir", path);
 
-const deleteFile = (path: string): Promise<void> =>
-    ipcRenderer.invoke("deleteFile", path);
-
-const rename = (oldPath: string, newPath: string): Promise<void> =>
-    ipcRenderer.invoke("rename", oldPath, newPath);
+const fsRm = (path: string): Promise<void> => ipcRenderer.invoke("fsRm", path);
 
 // - Upload
 
@@ -348,19 +347,19 @@ contextBridge.exposeInMainWorld("electron", {
     // - FS
     fs: {
         exists: fsExists,
+        rename: fsRename,
+        mkdirIfNeeded: fsMkdirIfNeeded,
+        rmdir: fsRmdir,
+        rm: fsRm,
     },
 
     // - FS legacy
     // TODO: Move these into fs + document + rename if needed
-    checkExistsAndCreateDir,
     saveStreamToDisk,
     saveFileToDisk,
     readTextFile,
     isFolder,
     moveFile,
-    deleteFolder,
-    deleteFile,
-    rename,
 
     // - Upload
 
