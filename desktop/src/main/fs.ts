@@ -92,9 +92,6 @@ export const readTextFile = async (filePath: string) =>
     fs.readFile(filePath, "utf-8");
 
 export const moveFile = async (sourcePath: string, destinationPath: string) => {
-    if (!existsSync(sourcePath)) {
-        throw new Error("File does not exist");
-    }
     if (existsSync(destinationPath)) {
         throw new Error("Destination file already exists");
     }
