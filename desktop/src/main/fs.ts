@@ -11,6 +11,9 @@ export const fsExists = (path: string) => existsSync(path);
 export const fsRename = (oldPath: string, newPath: string) =>
     fs.rename(oldPath, newPath);
 
+export const fsMkdirIfNeeded = (dirPath: string) =>
+    fs.mkdir(dirPath, { recursive: true });
+
 /**
  * Write a (web) ReadableStream to a file at the given {@link filePath}.
  *
@@ -75,9 +78,6 @@ const writeNodeStream = async (
 };
 
 /* TODO: Audit below this  */
-
-export const checkExistsAndCreateDir = (dirPath: string) =>
-    fs.mkdir(dirPath, { recursive: true });
 
 export const saveStreamToDisk = writeStream;
 

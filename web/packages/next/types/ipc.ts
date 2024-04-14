@@ -161,6 +161,17 @@ export interface Electron {
     fs: {
         /** Return true if there is an item at the given {@link path}. */
         exists: (path: string) => Promise<boolean>;
+
+        /**
+         * mkdir -p
+         *
+         * Create a directory at the given path if it does not already exist.
+         * Any parent directories in the path that don't already exist will also
+         * be created recursively, i.e. this command is analogous to an running
+         * `mkdir -p`.
+         */
+        mkdirIfNeeded: (dirPath: string) => Promise<void>;
+
         /** Rename {@link oldPath} to {@link newPath} */
         rename: (oldPath: string, newPath: string) => Promise<void>;
     };
@@ -275,7 +286,6 @@ export interface Electron {
     ) => Promise<void>;
 
     // - FS legacy
-    checkExistsAndCreateDir: (dirPath: string) => Promise<void>;
     saveStreamToDisk: (
         path: string,
         fileStream: ReadableStream,

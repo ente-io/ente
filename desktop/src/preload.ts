@@ -99,6 +99,9 @@ const skipAppUpdate = (version: string) => {
 const fsExists = (path: string): Promise<boolean> =>
     ipcRenderer.invoke("fsExists", path);
 
+const fsMkdirIfNeeded = (dirPath: string): Promise<void> =>
+    ipcRenderer.invoke("fsMkdirIfNeeded", dirPath);
+
 const fsRename = (oldPath: string, newPath: string): Promise<void> =>
     ipcRenderer.invoke("fsRename", oldPath, newPath);
 
@@ -220,9 +223,6 @@ const updateWatchMappingIgnoredFiles = (
     ipcRenderer.invoke("updateWatchMappingIgnoredFiles", folderPath, files);
 
 // - FS Legacy
-
-const checkExistsAndCreateDir = (dirPath: string): Promise<void> =>
-    ipcRenderer.invoke("checkExistsAndCreateDir", dirPath);
 
 const saveStreamToDisk = (
     path: string,
@@ -349,11 +349,11 @@ contextBridge.exposeInMainWorld("electron", {
     fs: {
         exists: fsExists,
         rename: fsRename,
+        mkdirIfNeeded: fsMkdirIfNeeded,
     },
 
     // - FS legacy
     // TODO: Move these into fs + document + rename if needed
-    checkExistsAndCreateDir,
     saveStreamToDisk,
     saveFileToDisk,
     readTextFile,

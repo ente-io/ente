@@ -166,13 +166,14 @@ class ExportService {
     }
 
     async changeExportDirectory() {
+        const electron = ensureElectron();
         try {
-            const newRootDir = await ensureElectron().selectDirectory();
+            const newRootDir = await electron.selectDirectory();
             if (!newRootDir) {
                 throw Error(CustomError.SELECT_FOLDER_ABORTED);
             }
             const newExportDir = `${newRootDir}/${exportDirectoryName}`;
-            await ensureElectron().checkExistsAndCreateDir(newExportDir);
+            await electron.fs.mkdirIfNeeded(newExportDir);
             return newExportDir;
         } catch (e) {
             if (e.message !== CustomError.SELECT_FOLDER_ABORTED) {
@@ -648,6 +649,7 @@ class ExportService {
         incrementFailed: () => void,
         isCanceled: CancellationStatus,
     ): Promise<void> {
+        const fs = ensureElectron().fs;
         try {
             for (const file of files) {
                 log.info(
@@ -683,10 +685,8 @@ class ExportService {
                         );
                     }
                     const collectionExportPath = `${exportDir}/${collectionExportName}`;
-                    await ensureElectron().checkExistsAndCreateDir(
-                        collectionExportPath,
-                    );
-                    await ensureElectron().checkExistsAndCreateDir(
+                    await fs.mkdirIfNeeded(collectionExportPath);
+                    await fs.mkdirIfNeeded(
                         getMetadataFolderExportPath(collectionExportPath),
                     );
                     await this.downloadAndSave(
@@ -1019,17 +1019,17 @@ class ExportService {
         collectionID: number,
         collectionIDNameMap: Map<number, string>,
     ) {
-        const electron = ensureElectron();
+        const fs = ensureElectron().fs;
         await this.verifyExportFolderExists(exportFolder);
         const collectionName = collectionIDNameMap.get(collectionID);
         const collectionExportName = await safeDirectoryName(
             exportFolder,
             collectionName,
-            electron.fs.exists,
+            fs.exists,
         );
         const collectionExportPath = `${exportFolder}/${collectionExportName}`;
-        await electron.checkExistsAndCreateDir(collectionExportPath);
-        await electron.checkExistsAndCreateDir(
+        await fs.mkdirIfNeeded(collectionExportPath);
+        await fs.mkdirIfNeeded(
             getMetadataFolderExportPath(collectionExportPath),
         );
 
@@ -1170,14 +1170,6 @@ class ExportService {
 
     isExportInProgress = () => {
         return this.exportInProgress;
-    };
-
-    rename = (oldPath: string, newPath: string) => {
-        return ensureElectron().fs.rename(oldPath, newPath);
-    };
-
-    checkExistsAndCreateDir = (path: string) => {
-        return ensureElectron().checkExistsAndCreateDir(path);
     };
 
     exportFolderExists = async (exportFolder: string) => {

@@ -18,10 +18,10 @@ import {
     showUploadZipDialog,
 } from "./dialogs";
 import {
-    checkExistsAndCreateDir,
     deleteFile,
     deleteFolder,
     fsExists,
+    fsMkdirIfNeeded,
     fsRename,
     isFolder,
     moveFile,
@@ -173,11 +173,9 @@ export const attachIPCHandlers = () => {
         fsRename(oldPath, newPath),
     );
 
-    // - FS Legacy
+    ipcMain.handle("fsMkdirIfNeeded", (_, dirPath) => fsMkdirIfNeeded(dirPath));
 
-    ipcMain.handle("checkExistsAndCreateDir", (_, dirPath) =>
-        checkExistsAndCreateDir(dirPath),
-    );
+    // - FS Legacy
 
     ipcMain.handle(
         "saveStreamToDisk",
