@@ -32,7 +32,6 @@ import {
     getPersonalFiles,
     getUpdatedEXIFFileForDownload,
     mergeMetadata,
-    splitFilenameAndExtension,
 } from "utils/file";
 import { safeDirectoryName, safeFileName } from "utils/native-fs";
 import { getAllLocalCollections } from "../collectionService";
@@ -1333,36 +1332,13 @@ const getGoogleLikeMetadataFile = (fileExportName: string, file: EnteFile) => {
 export const getMetadataFolderExportPath = (collectionExportPath: string) =>
     `${collectionExportPath}/${exportMetadataDirectoryName}`;
 
+// if filepath is /home/user/Ente/Export/Collection1/1.jpg
+// then metadata path is /home/user/Ente/Export/Collection1/ENTE_METADATA_FOLDER/1.jpg.json
 const getFileMetadataExportPath = (
     collectionExportPath: string,
     fileExportName: string,
 ) =>
     `${collectionExportPath}/${exportMetadataDirectoryName}/${fileExportName}.json`;
-
-const getTrashedFileExportPath = async (exportDir: string, path: string) => {
-    const fileRelativePath = path.replace(`${exportDir}/`, "");
-    let trashedFilePath = `${exportDir}/${exportTrashDirectoryName}/${fileRelativePath}`;
-    let count = 1;
-    while (await ensureElectron().fs.exists(trashedFilePath)) {
-        const trashedFilePathParts = splitFilenameAndExtension(trashedFilePath);
-        if (trashedFilePathParts[1]) {
-            trashedFilePath = `${trashedFilePathParts[0]}(${count}).${trashedFilePathParts[1]}`;
-        } else {
-            trashedFilePath = `${trashedFilePathParts[0]}(${count})`;
-        }
-        count++;
-    }
-    return trashedFilePath;
-};
-
-// if filepath is /home/user/Ente/Export/Collection1/1.jpg
-// then metadata path is /home/user/Ente/Export/Collection1/ENTE_METADATA_FOLDER/1.jpg.json
-const getMetadataFileExportPath = (filePath: string) => {
-    // extract filename and collection folder path
-    const filename = filePath.split("/").pop();
-    const collectionExportPath = filePath.replace(`/${filename}`, "");
-    return `${collectionExportPath}/${exportMetadataDirectoryName}/${filename}.json`;
-};
 
 export const getLivePhotoExportName = (
     imageExportName: string,
