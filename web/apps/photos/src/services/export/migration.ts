@@ -246,10 +246,10 @@ async function migrateFiles(
         const newFilePath = `${collectionPath}/${newFileName}`;
         const newFileMetadataPath = `${metadataPath}/${newFileName}.json`;
 
-        if (!(await exportService.exists(oldFilePath))) continue;
+        if (!(await fs.exists(oldFilePath))) continue;
 
-        await exportService.rename(oldFilePath, newFilePath);
-        await exportService.rename(oldFileMetadataPath, newFileMetadataPath);
+        await fs.rename(oldFilePath, newFilePath);
+        await fs.rename(oldFileMetadataPath, newFileMetadataPath);
     }
 }
 
@@ -409,6 +409,7 @@ async function removeCollectionExportMissingMetadataFolder(
     exportDir: string,
     exportRecord: ExportRecord,
 ) {
+    const fs = ensureElectron().fs;
     if (!exportRecord?.collectionExportNames) {
         return;
     }
@@ -422,7 +423,7 @@ async function removeCollectionExportMissingMetadataFolder(
         collectionExportName,
     ] of properlyExportedCollectionsAll) {
         if (
-            await exportService.exists(
+            await fs.exists(
                 getMetadataFolderExportPath(
                     `${exportDir}/${collectionExportName}`,
                 ),

@@ -1141,12 +1141,12 @@ class ExportService {
                 file,
             );
             try {
-                await ensureElectron().saveStreamToDisk(
+                await electron.saveStreamToDisk(
                     `${collectionExportPath}/${videoExportName}`,
                     videoStream,
                 );
             } catch (e) {
-                await ensureElectron().deleteFile(
+                await electron.deleteFile(
                     `${collectionExportPath}/${imageExportName}`,
                 );
                 throw e;
