@@ -107,9 +107,6 @@ export const isFolder = async (dirPath: string) => {
 };
 
 export const deleteFolder = async (folderPath: string) => {
-    // Ensure it is folder
-    if (!isFolder(folderPath)) return;
-
     // Ensure folder is empty
     const files = await fs.readdir(folderPath);
     if (files.length > 0) throw new Error("Folder is not empty");
