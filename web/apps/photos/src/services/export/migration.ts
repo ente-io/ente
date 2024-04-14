@@ -200,11 +200,7 @@ async function migrateCollectionFolders(
 ) {
     const fs = ensureElectron().fs;
     for (const collection of collections) {
-        const oldCollectionExportPath = getOldCollectionFolderPath(
-            exportDir,
-            collection.id,
-            collection.name,
-        );
+        const oldCollectionExportPath = `${exportDir}/${collection.id}_${oldSanitizeName(collection.name)}`;
         const newCollectionExportPath = await safeDirectoryName(
             exportDir,
             collection.name,
@@ -493,12 +489,6 @@ const oldSanitizeName = (name: string) =>
 
 const getFileSavePath = (collectionFolderPath: string, fileSaveName: string) =>
     `${collectionFolderPath}/${fileSaveName}`;
-
-const getOldCollectionFolderPath = (
-    dir: string,
-    collectionID: number,
-    collectionName: string,
-) => `${dir}/${collectionID}_${oldSanitizeName(collectionName)}`;
 
 const getUniqueFileExportNameForMigration = (
     collectionPath: string,
