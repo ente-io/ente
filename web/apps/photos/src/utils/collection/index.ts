@@ -1,3 +1,4 @@
+import { ensureElectron } from "@/next/electron";
 import log from "@/next/log";
 import { CustomError } from "@ente/shared/error";
 import { getAlbumsURL } from "@ente/shared/network/api";
@@ -172,6 +173,7 @@ async function createCollectionDownloadFolder(
     const collectionDownloadName = await safeDirectoryName(
         downloadDirPath,
         collectionName,
+        ensureElectron().fs.exists,
     );
     const collectionDownloadPath = `${downloadDirPath}/${collectionDownloadName}`;
     await exportService.checkExistsAndCreateDir(collectionDownloadPath);

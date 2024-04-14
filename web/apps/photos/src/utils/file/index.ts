@@ -815,6 +815,7 @@ async function downloadFileDesktop(
         const imageExportName = await safeFileName(
             downloadPath,
             livePhoto.imageNameTitle,
+            electron.fs.exists,
         );
         const imageStream = generateStreamFromArrayBuffer(livePhoto.image);
         await electron.saveStreamToDisk(
@@ -825,6 +826,7 @@ async function downloadFileDesktop(
             const videoExportName = await safeFileName(
                 downloadPath,
                 livePhoto.videoNameTitle,
+                electron.fs.exists,
             );
             const videoStream = generateStreamFromArrayBuffer(livePhoto.video);
             await electron.saveStreamToDisk(
@@ -839,6 +841,7 @@ async function downloadFileDesktop(
         const fileExportName = await safeFileName(
             downloadPath,
             file.metadata.title,
+            electron.fs.exists,
         );
         await electron.saveStreamToDisk(
             `${downloadPath}/${fileExportName}`,

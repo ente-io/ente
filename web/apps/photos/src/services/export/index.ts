@@ -485,6 +485,7 @@ class ExportService {
         renamedCollections: Collection[],
         isCanceled: CancellationStatus,
     ) {
+        const fs = ensureElectron().fs;
         try {
             for (const collection of renamedCollections) {
                 try {
@@ -498,6 +499,7 @@ class ExportService {
                     const newCollectionExportName = await safeDirectoryName(
                         exportFolder,
                         getCollectionUserFacingName(collection),
+                        fs.exists,
                     );
                     log.info(
                         `renaming collection with id ${collection.id} from ${oldCollectionExportName} to ${newCollectionExportName}`,
@@ -513,7 +515,7 @@ class ExportService {
                         newCollectionExportName,
                     );
                     try {
-                        await ensureElectron().fs.rename(
+                        await fs.rename(
                             oldCollectionExportPath,
                             newCollectionExportPath,
                         );
@@ -1017,15 +1019,17 @@ class ExportService {
         collectionID: number,
         collectionIDNameMap: Map<number, string>,
     ) {
+        const electron = ensureElectron();
         await this.verifyExportFolderExists(exportFolder);
         const collectionName = collectionIDNameMap.get(collectionID);
         const collectionExportName = await safeDirectoryName(
             exportFolder,
             collectionName,
+            electron.fs.exists,
         );
         const collectionExportPath = `${exportFolder}/${collectionExportName}`;
-        await ensureElectron().checkExistsAndCreateDir(collectionExportPath);
-        await ensureElectron().checkExistsAndCreateDir(
+        await electron.checkExistsAndCreateDir(collectionExportPath);
+        await electron.checkExistsAndCreateDir(
             getMetadataFolderExportPath(collectionExportPath),
         );
 
@@ -1037,6 +1041,7 @@ class ExportService {
         collectionExportPath: string,
         file: EnteFile,
     ): Promise<void> {
+        const electron = ensureElectron();
         try {
             const fileUID = getExportRecordFileUID(file);
             const originalFileStream = await downloadManager.getFile(file);
@@ -1060,6 +1065,7 @@ class ExportService {
                 const fileExportName = await safeFileName(
                     collectionExportPath,
                     file.metadata.title,
+                    electron.fs.exists,
                 );
                 await this.addFileExportedRecord(
                     exportDir,
@@ -1072,7 +1078,7 @@ class ExportService {
                         fileExportName,
                         file,
                     );
-                    await ensureElectron().saveStreamToDisk(
+                    await electron.saveStreamToDisk(
                         `${collectionExportPath}/${fileExportName}`,
                         updatedFileStream,
                     );
@@ -1094,15 +1100,18 @@ class ExportService {
         fileStream: ReadableStream<any>,
         file: EnteFile,
     ) {
+        const electron = ensureElectron();
         const fileBlob = await new Response(fileStream).blob();
         const livePhoto = await decodeLivePhoto(file, fileBlob);
         const imageExportName = await safeFileName(
             collectionExportPath,
             livePhoto.imageNameTitle,
+            electron.fs.exists,
         );
         const videoExportName = await safeFileName(
             collectionExportPath,
             livePhoto.videoNameTitle,
+            electron.fs.exists,
         );
         const livePhotoExportName = getLivePhotoExportName(
             imageExportName,
@@ -1120,7 +1129,7 @@ class ExportService {
                 imageExportName,
                 file,
             );
-            await ensureElectron().saveStreamToDisk(
+            await electron.saveStreamToDisk(
                 `${collectionExportPath}/${imageExportName}`,
                 imageStream,
             );

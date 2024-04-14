@@ -208,6 +208,7 @@ async function migrateCollectionFolders(
         const newCollectionExportPath = await safeDirectoryName(
             exportDir,
             collection.name,
+            fs.exists,
         );
         collectionIDPathMap.set(collection.id, newCollectionExportPath);
         if (!(await fs.exists(oldCollectionExportPath))) continue;
@@ -228,6 +229,7 @@ async function migrateFiles(
     files: EnteFile[],
     collectionIDPathMap: Map<number, string>,
 ) {
+    const fs = ensureElectron().fs;
     for (const file of files) {
         const collectionPath = collectionIDPathMap.get(file.collectionID);
         const metadataPath = `${collectionPath}/${exportMetadataDirectoryName}`;
@@ -239,6 +241,7 @@ async function migrateFiles(
         const newFileName = await safeFileName(
             collectionPath,
             file.metadata.title,
+            fs.exists,
         );
         const newFilePath = `${collectionPath}/${newFileName}`;
         const newFileMetadataPath = `${metadataPath}/${newFileName}.json`;
