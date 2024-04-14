@@ -22,10 +22,10 @@ import {
     deleteFile,
     deleteFolder,
     fsExists,
+    fsRename,
     isFolder,
     moveFile,
     readTextFile,
-    rename,
     saveFileToDisk,
     saveStreamToDisk,
 } from "./fs";
@@ -169,6 +169,10 @@ export const attachIPCHandlers = () => {
 
     ipcMain.handle("fsExists", (_, path) => fsExists(path));
 
+    ipcMain.handle("fsRename", (_, oldPath: string, newPath: string) =>
+        fsRename(oldPath, newPath),
+    );
+
     // - FS Legacy
 
     ipcMain.handle("checkExistsAndCreateDir", (_, dirPath) =>
@@ -196,10 +200,6 @@ export const attachIPCHandlers = () => {
     ipcMain.handle("deleteFolder", (_, path: string) => deleteFolder(path));
 
     ipcMain.handle("deleteFile", (_, path: string) => deleteFile(path));
-
-    ipcMain.handle("rename", (_, oldPath: string, newPath: string) =>
-        rename(oldPath, newPath),
-    );
 
     // - Upload
 

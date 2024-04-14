@@ -99,6 +99,9 @@ const skipAppUpdate = (version: string) => {
 const fsExists = (path: string): Promise<boolean> =>
     ipcRenderer.invoke("fsExists", path);
 
+const fsRename = (oldPath: string, newPath: string): Promise<void> =>
+    ipcRenderer.invoke("fsRename", oldPath, newPath);
+
 // - AUDIT below this
 
 // - Conversion
@@ -244,9 +247,6 @@ const deleteFolder = (path: string): Promise<void> =>
 const deleteFile = (path: string): Promise<void> =>
     ipcRenderer.invoke("deleteFile", path);
 
-const rename = (oldPath: string, newPath: string): Promise<void> =>
-    ipcRenderer.invoke("rename", oldPath, newPath);
-
 // - Upload
 
 const getPendingUploads = (): Promise<{
@@ -348,6 +348,7 @@ contextBridge.exposeInMainWorld("electron", {
     // - FS
     fs: {
         exists: fsExists,
+        rename: fsRename,
     },
 
     // - FS legacy
@@ -360,7 +361,6 @@ contextBridge.exposeInMainWorld("electron", {
     moveFile,
     deleteFolder,
     deleteFile,
-    rename,
 
     // - Upload
 

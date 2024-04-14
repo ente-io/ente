@@ -155,15 +155,14 @@ export interface Electron {
      * or watching some folders for changes and syncing them automatically.
      *
      * Towards this end, this fs object provides some generic file system access
-     * functions that are needed for such features. In addition, there are other
-     * feature specific methods too in the top level electron object.
+     * functions that are needed for such features (in some cases, there are
+     * other feature specific methods too in the top level electron object).
      */
     fs: {
-        /**
-         * Return true if there is a file or directory at the given
-         * {@link path}.
-         */
+        /** Return true if there is an item at the given {@link path}. */
         exists: (path: string) => Promise<boolean>;
+        /** Rename {@link oldPath} to {@link newPath} */
+        rename: (oldPath: string, newPath: string) => Promise<void>;
     };
 
     /*
@@ -287,7 +286,6 @@ export interface Electron {
     moveFile: (oldPath: string, newPath: string) => Promise<void>;
     deleteFolder: (path: string) => Promise<void>;
     deleteFile: (path: string) => Promise<void>;
-    rename: (oldPath: string, newPath: string) => Promise<void>;
 
     // - Upload
 

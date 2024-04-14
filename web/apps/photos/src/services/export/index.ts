@@ -513,7 +513,7 @@ class ExportService {
                         newCollectionExportName,
                     );
                     try {
-                        await ensureElectron().rename(
+                        await ensureElectron().fs.rename(
                             oldCollectionExportPath,
                             newCollectionExportPath,
                         );
@@ -1168,7 +1168,7 @@ class ExportService {
     };
 
     rename = (oldPath: string, newPath: string) => {
-        return ensureElectron().rename(oldPath, newPath);
+        return ensureElectron().fs.rename(oldPath, newPath);
     };
 
     checkExistsAndCreateDir = (path: string) => {

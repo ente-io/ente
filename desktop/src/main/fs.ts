@@ -8,6 +8,9 @@ import { Readable } from "node:stream";
 
 export const fsExists = (path: string) => existsSync(path);
 
+export const fsRename = (oldPath: string, newPath: string) =>
+    fs.rename(oldPath, newPath);
+
 /**
  * Write a (web) ReadableStream to a file at the given {@link filePath}.
  *
@@ -113,11 +116,6 @@ export const deleteFolder = async (folderPath: string) => {
 
     // rm -rf it
     await fs.rmdir(folderPath);
-};
-
-export const rename = async (oldPath: string, newPath: string) => {
-    if (!existsSync(oldPath)) throw new Error("Path does not exist");
-    await fs.rename(oldPath, newPath);
 };
 
 export const deleteFile = async (filePath: string) => {
