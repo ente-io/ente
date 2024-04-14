@@ -146,26 +146,20 @@ export default function ExportModal(props: Props) {
 
     const toggleContinuousExport = async () => {
         if (!(await verifyExportFolderExists())) return;
-        try {
-            const newContinuousExport = !continuousExport;
-            if (newContinuousExport) {
-                exportService.enableContinuousExport();
-            } else {
-                exportService.disableContinuousExport();
-            }
-            updateContinuousExport(newContinuousExport);
-        } catch (e) {
-            log.error("onContinuousExportChange failed", e);
+
+        const newContinuousExport = !continuousExport;
+        if (newContinuousExport) {
+            exportService.enableContinuousExport();
+        } else {
+            exportService.disableContinuousExport();
         }
+        updateContinuousExport(newContinuousExport);
     };
 
     const startExport = async () => {
         if (!(await verifyExportFolderExists())) return;
-        try {
-            await exportService.scheduleExport();
-        } catch (e) {
-            log.error("scheduleExport failed", e);
-        }
+
+        await exportService.scheduleExport();
     };
 
     const stopExport = () => {
