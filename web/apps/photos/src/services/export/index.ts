@@ -603,9 +603,7 @@ class ExportService {
                             getMetadataFolderExportPath(collectionExportPath),
                         );
                         // delete the collection folder
-                        await fs.rmdir(
-                            collectionExportPath,
-                        );
+                        await fs.rmdir(collectionExportPath);
                     } catch (e) {
                         await this.addCollectionExportedRecord(
                             exportFolder,
@@ -789,29 +787,7 @@ class ExportService {
                             }
 
                             const videoExportPath = `${collectionExportPath}/${videoExportName}`;
-                            log.info(
-                                `moving video file ${videoExportPath} to trash folder`,
-                            );
-                            if (await fs.exists(videoExportPath)) {
-                                await electron.moveFile(
-                                    videoExportPath,
-                                    await getTrashedFileExportPath(
-                                        exportDir,
-                                        videoExportPath,
-                                    ),
-                                );
-                            }
-                            const videoMetadataFileExportPath =
-                                getMetadataFileExportPath(videoExportPath);
-                            if (await fs.exists(videoMetadataFileExportPath)) {
-                                await electron.moveFile(
-                                    videoMetadataFileExportPath,
-                                    await getTrashedFileExportPath(
-                                        exportDir,
-                                        videoMetadataFileExportPath,
-                                    ),
-                                );
-                            }
+                            await moveToTrash(exportDir, videoExportPath);
                         } else {
                             const fileExportPath = `${collectionExportPath}/${fileExportName}`;
                             const trashedFilePath =
@@ -1458,3 +1434,25 @@ const parseLivePhotoExportName = (
 
 const isExportInProgress = (exportStage: ExportStage) =>
     exportStage > ExportStage.INIT && exportStage < ExportStage.FINISHED;
+
+const moveToTrash = async (exportDir: string, videoExportPath: string) => {
+    const fs = ensureElectron().fs;
+    log.info(`moving video file ${videoExportPath} to trash folder`);
+    if (await fs.exists(videoExportPath)) {
+        await electron.moveFile(
+            videoExportPath,
+            await getTrashedFileExportPath(exportDir, videoExportPath),
+        );
+    }
+    const videoMetadataFileExportPath =
+        getMetadataFileExportPath(videoExportPath);
+    if (await fs.exists(videoMetadataFileExportPath)) {
+        await electron.moveFile(
+            videoMetadataFileExportPath,
+            await getTrashedFileExportPath(
+                exportDir,
+                videoMetadataFileExportPath,
+            ),
+        );
+    }
+};
