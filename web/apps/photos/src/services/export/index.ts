@@ -732,8 +732,6 @@ class ExportService {
         removedFileUIDs: string[],
         isCanceled: CancellationStatus,
     ): Promise<void> {
-        const electron = ensureElectron();
-        const fs = electron.fs;
         try {
             const exportRecord = await this.getExportRecord(exportDir);
             const fileIDExportNameMap = convertFileIDExportNameObjectToMap(
@@ -750,7 +748,6 @@ class ExportService {
                     const collectionID = getCollectionIDFromFileUID(fileUID);
                     const collectionExportName =
                         collectionIDExportNameMap.get(collectionID);
-                    const collectionExportPath = `${exportDir}/${collectionExportName}`;
 
                     await this.removeFileExportedRecord(exportDir, fileUID);
                     try {
@@ -770,32 +767,11 @@ class ExportService {
                                 video,
                             );
                         } else {
-                            const fileExportPath = `${collectionExportPath}/${fileExportName}`;
-                            const trashedFilePath =
-                                await getTrashedFileExportPath(
-                                    exportDir,
-                                    fileExportPath,
-                                );
-                            log.info(
-                                `moving file ${fileExportPath} to ${trashedFilePath} trash folder`,
+                            await moveToTrash(
+                                exportDir,
+                                collectionExportName,
+                                fileExportName,
                             );
-                            if (await fs.exists(fileExportPath)) {
-                                await electron.moveFile(
-                                    fileExportPath,
-                                    trashedFilePath,
-                                );
-                            }
-                            const metadataFileExportPath =
-                                getMetadataFileExportPath(fileExportPath);
-                            if (await fs.exists(metadataFileExportPath)) {
-                                await electron.moveFile(
-                                    metadataFileExportPath,
-                                    await getTrashedFileExportPath(
-                                        exportDir,
-                                        metadataFileExportPath,
-                                    ),
-                                );
-                            }
                         }
                     } catch (e) {
                         await this.addFileExportedRecord(
@@ -805,7 +781,7 @@ class ExportService {
                         );
                         throw e;
                     }
-                    log.info(`trashing file with id ${fileUID} successful`);
+                    log.info(`Moved file id ${fileUID} to Trash`);
                 } catch (e) {
                     log.error("trashing failed for a file", e);
                     if (
