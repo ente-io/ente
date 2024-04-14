@@ -16,6 +16,8 @@ export const fsMkdirIfNeeded = (dirPath: string) =>
 
 export const fsRmdir = (path: string) => fs.rmdir(path);
 
+export const fsRm = (path: string) => fs.rm(path);
+
 /**
  * Write a (web) ReadableStream to a file at the given {@link filePath}.
  *
@@ -106,16 +108,4 @@ export const isFolder = async (dirPath: string) => {
     if (!existsSync(dirPath)) return false;
     const stats = await fs.stat(dirPath);
     return stats.isDirectory();
-};
-
-export const deleteFile = async (filePath: string) => {
-    // Ensure it exists
-    if (!existsSync(filePath)) return;
-
-    // And is a file
-    const stat = await fs.stat(filePath);
-    if (!stat.isFile()) throw new Error("Path is not a file");
-
-    // rm it
-    return fs.rm(filePath);
 };

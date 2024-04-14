@@ -834,7 +834,7 @@ async function downloadFileDesktop(
                 videoStream,
             );
         } catch (e) {
-            await electron.deleteFile(`${downloadPath}/${imageExportName}`);
+            await electron.fs.rm(`${downloadPath}/${imageExportName}`);
             throw e;
         }
     } else {

@@ -18,7 +18,7 @@ import {
     showUploadZipDialog,
 } from "./dialogs";
 import {
-    deleteFile,
+    fsRm,
     fsRmdir,
     fsExists,
     fsMkdirIfNeeded,
@@ -175,6 +175,10 @@ export const attachIPCHandlers = () => {
 
     ipcMain.handle("fsMkdirIfNeeded", (_, dirPath) => fsMkdirIfNeeded(dirPath));
 
+    ipcMain.handle("fsRmdir", (_, path: string) => fsRmdir(path));
+
+    ipcMain.handle("fsRm", (_, path: string) => fsRm(path));
+
     // - FS Legacy
 
     ipcMain.handle(
@@ -194,10 +198,6 @@ export const attachIPCHandlers = () => {
     ipcMain.handle("moveFile", (_, oldPath: string, newPath: string) =>
         moveFile(oldPath, newPath),
     );
-
-    ipcMain.handle("fsRmdir", (_, path: string) => fsRmdir(path));
-
-    ipcMain.handle("deleteFile", (_, path: string) => deleteFile(path));
 
     // - Upload
 

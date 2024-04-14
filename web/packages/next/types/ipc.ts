@@ -181,6 +181,13 @@ export interface Electron {
          * Delete the directory at the {@link path} if it is empty.
          */
         rmdir: (path: string) => Promise<void>;
+
+        /**
+         * Equivalent of `rm`.
+         *
+         * Delete the file at {@link path}.
+         */
+        rm: (path: string) => Promise<void>;
     };
 
     /*
@@ -301,7 +308,6 @@ export interface Electron {
     readTextFile: (path: string) => Promise<string>;
     isFolder: (dirPath: string) => Promise<boolean>;
     moveFile: (oldPath: string, newPath: string) => Promise<void>;
-    deleteFile: (path: string) => Promise<void>;
 
     // - Upload
 

@@ -1147,7 +1147,7 @@ class ExportService {
                     videoStream,
                 );
             } catch (e) {
-                await electron.deleteFile(
+                await electron.fs.rm(
                     `${collectionExportPath}/${imageExportName}`,
                 );
                 throw e;

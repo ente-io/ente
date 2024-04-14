@@ -244,8 +244,7 @@ const moveFile = (oldPath: string, newPath: string): Promise<void> =>
 const fsRmdir = (path: string): Promise<void> =>
     ipcRenderer.invoke("fsRmdir", path);
 
-const deleteFile = (path: string): Promise<void> =>
-    ipcRenderer.invoke("deleteFile", path);
+const fsRm = (path: string): Promise<void> => ipcRenderer.invoke("fsRm", path);
 
 // - Upload
 
@@ -351,6 +350,7 @@ contextBridge.exposeInMainWorld("electron", {
         rename: fsRename,
         mkdirIfNeeded: fsMkdirIfNeeded,
         rmdir: fsRmdir,
+        rm: fsRm,
     },
 
     // - FS legacy
@@ -360,7 +360,6 @@ contextBridge.exposeInMainWorld("electron", {
     readTextFile,
     isFolder,
     moveFile,
-    deleteFile,
 
     // - Upload
 
