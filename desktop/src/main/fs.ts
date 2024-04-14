@@ -107,10 +107,6 @@ export const isFolder = async (dirPath: string) => {
 };
 
 export const deleteFolder = async (folderPath: string) => {
-    // Ensure folder is empty
-    const files = await fs.readdir(folderPath);
-    if (files.length > 0) throw new Error("Folder is not empty");
-
     // rm -rf it
     await fs.rmdir(folderPath);
 };
