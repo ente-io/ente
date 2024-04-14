@@ -18,13 +18,12 @@ import {
     showUploadZipDialog,
 } from "./dialogs";
 import {
-    fsRm,
-    fsRmdir,
     fsExists,
     fsMkdirIfNeeded,
     fsRename,
+    fsRm,
+    fsRmdir,
     isFolder,
-    moveFile,
     readTextFile,
     saveFileToDisk,
     saveStreamToDisk,
@@ -194,10 +193,6 @@ export const attachIPCHandlers = () => {
     ipcMain.handle("readTextFile", (_, path: string) => readTextFile(path));
 
     ipcMain.handle("isFolder", (_, dirPath: string) => isFolder(dirPath));
-
-    ipcMain.handle("moveFile", (_, oldPath: string, newPath: string) =>
-        moveFile(oldPath, newPath),
-    );
 
     // - Upload
 

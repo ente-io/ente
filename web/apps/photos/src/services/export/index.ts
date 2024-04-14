@@ -32,7 +32,6 @@ import {
     getPersonalFiles,
     getUpdatedEXIFFileForDownload,
     mergeMetadata,
-    splitFilenameAndExtension,
 } from "utils/file";
 import { safeDirectoryName, safeFileName } from "utils/native-fs";
 import { getAllLocalCollections } from "../collectionService";
@@ -163,24 +162,6 @@ class ExportService {
             lastAttemptTimestamp: exportTime,
         });
         this.uiUpdater.setLastExportTime(exportTime);
-    }
-
-    async changeExportDirectory() {
-        const electron = ensureElectron();
-        try {
-            const newRootDir = await electron.selectDirectory();
-            if (!newRootDir) {
-                throw Error(CustomError.SELECT_FOLDER_ABORTED);
-            }
-            const newExportDir = `${newRootDir}/${exportDirectoryName}`;
-            await electron.fs.mkdirIfNeeded(newExportDir);
-            return newExportDir;
-        } catch (e) {
-            if (e.message !== CustomError.SELECT_FOLDER_ABORTED) {
-                log.error("changeExportDirectory failed", e);
-            }
-            throw e;
-        }
     }
 
     enableContinuousExport() {
@@ -732,8 +713,6 @@ class ExportService {
         removedFileUIDs: string[],
         isCanceled: CancellationStatus,
     ): Promise<void> {
-        const electron = ensureElectron();
-        const fs = electron.fs;
         try {
             const exportRecord = await this.getExportRecord(exportDir);
             const fileIDExportNameMap = convertFileIDExportNameObjectToMap(
@@ -750,71 +729,30 @@ class ExportService {
                     const collectionID = getCollectionIDFromFileUID(fileUID);
                     const collectionExportName =
                         collectionIDExportNameMap.get(collectionID);
-                    const collectionExportPath = `${exportDir}/${collectionExportName}`;
 
                     await this.removeFileExportedRecord(exportDir, fileUID);
                     try {
                         if (isLivePhotoExportName(fileExportName)) {
-                            const {
-                                image: imageExportName,
-                                video: videoExportName,
-                            } = parseLivePhotoExportName(fileExportName);
-                            const imageExportPath = `${collectionExportPath}/${imageExportName}`;
-                            log.info(
-                                `moving image file ${imageExportPath} to trash folder`,
+                            const { image, video } =
+                                parseLivePhotoExportName(fileExportName);
+
+                            await moveToTrash(
+                                exportDir,
+                                collectionExportName,
+                                image,
                             );
-                            if (await fs.exists(imageExportPath)) {
-                                await electron.moveFile(
-                                    imageExportPath,
-                                    await getTrashedFileExportPath(
-                                        exportDir,
-                                        imageExportPath,
-                                    ),
-                                );
-                            }
 
-                            const imageMetadataFileExportPath =
-                                getMetadataFileExportPath(imageExportPath);
-
-                            if (await fs.exists(imageMetadataFileExportPath)) {
-                                await electron.moveFile(
-                                    imageMetadataFileExportPath,
-                                    await getTrashedFileExportPath(
-                                        exportDir,
-                                        imageMetadataFileExportPath,
-                                    ),
-                                );
-                            }
-
-                            const videoExportPath = `${collectionExportPath}/${videoExportName}`;
-                            await moveToTrash(exportDir, videoExportPath);
+                            await moveToTrash(
+                                exportDir,
+                                collectionExportName,
+                                video,
+                            );
                         } else {
-                            const fileExportPath = `${collectionExportPath}/${fileExportName}`;
-                            const trashedFilePath =
-                                await getTrashedFileExportPath(
-                                    exportDir,
-                                    fileExportPath,
-                                );
-                            log.info(
-                                `moving file ${fileExportPath} to ${trashedFilePath} trash folder`,
+                            await moveToTrash(
+                                exportDir,
+                                collectionExportName,
+                                fileExportName,
                             );
-                            if (await fs.exists(fileExportPath)) {
-                                await electron.moveFile(
-                                    fileExportPath,
-                                    trashedFilePath,
-                                );
-                            }
-                            const metadataFileExportPath =
-                                getMetadataFileExportPath(fileExportPath);
-                            if (await fs.exists(metadataFileExportPath)) {
-                                await electron.moveFile(
-                                    metadataFileExportPath,
-                                    await getTrashedFileExportPath(
-                                        exportDir,
-                                        metadataFileExportPath,
-                                    ),
-                                );
-                            }
                         }
                     } catch (e) {
                         await this.addFileExportedRecord(
@@ -824,7 +762,7 @@ class ExportService {
                         );
                         throw e;
                     }
-                    log.info(`trashing file with id ${fileUID} successful`);
+                    log.info(`Moved file id ${fileUID} to Trash`);
                 } catch (e) {
                     log.error("trashing failed for a file", e);
                     if (
@@ -1201,6 +1139,24 @@ export const resumeExportsIfNeeded = async () => {
     }
 };
 
+/**
+ * Prompt the user to select a directory and create an export directory in it.
+ *
+ * If the user cancels the selection, return undefined.
+ */
+export const selectAndPrepareExportDirectory = async (): Promise<
+    string | undefined
+> => {
+    const electron = ensureElectron();
+
+    const rootDir = await electron.selectDirectory();
+    if (!rootDir) return undefined;
+
+    const exportDir = `${rootDir}/${exportDirectoryName}`;
+    await electron.fs.mkdirIfNeeded(exportDir);
+    return exportDir;
+};
+
 export const getExportRecordFileUID = (file: EnteFile) =>
     `${file.id}_${file.collectionID}_${file.updationTime}`;
 
@@ -1376,36 +1332,13 @@ const getGoogleLikeMetadataFile = (fileExportName: string, file: EnteFile) => {
 export const getMetadataFolderExportPath = (collectionExportPath: string) =>
     `${collectionExportPath}/${exportMetadataDirectoryName}`;
 
+// if filepath is /home/user/Ente/Export/Collection1/1.jpg
+// then metadata path is /home/user/Ente/Export/Collection1/ENTE_METADATA_FOLDER/1.jpg.json
 const getFileMetadataExportPath = (
     collectionExportPath: string,
     fileExportName: string,
 ) =>
     `${collectionExportPath}/${exportMetadataDirectoryName}/${fileExportName}.json`;
-
-const getTrashedFileExportPath = async (exportDir: string, path: string) => {
-    const fileRelativePath = path.replace(`${exportDir}/`, "");
-    let trashedFilePath = `${exportDir}/${exportTrashDirectoryName}/${fileRelativePath}`;
-    let count = 1;
-    while (await ensureElectron().fs.exists(trashedFilePath)) {
-        const trashedFilePathParts = splitFilenameAndExtension(trashedFilePath);
-        if (trashedFilePathParts[1]) {
-            trashedFilePath = `${trashedFilePathParts[0]}(${count}).${trashedFilePathParts[1]}`;
-        } else {
-            trashedFilePath = `${trashedFilePathParts[0]}(${count})`;
-        }
-        count++;
-    }
-    return trashedFilePath;
-};
-
-// if filepath is /home/user/Ente/Export/Collection1/1.jpg
-// then metadata path is /home/user/Ente/Export/Collection1/ENTE_METADATA_FOLDER/1.jpg.json
-const getMetadataFileExportPath = (filePath: string) => {
-    // extract filename and collection folder path
-    const filename = filePath.split("/").pop();
-    const collectionExportPath = filePath.replace(`/${filename}`, "");
-    return `${collectionExportPath}/${exportMetadataDirectoryName}/${filename}.json`;
-};
 
 export const getLivePhotoExportName = (
     imageExportName: string,
@@ -1435,24 +1368,42 @@ const parseLivePhotoExportName = (
 const isExportInProgress = (exportStage: ExportStage) =>
     exportStage > ExportStage.INIT && exportStage < ExportStage.FINISHED;
 
-const moveToTrash = async (exportDir: string, videoExportPath: string) => {
+/**
+ * Move {@link fileName} in {@link collectionName} to Trash.
+ *
+ * Also move its associated metadata JSON to Trash.
+ *
+ * @param exportDir The root directory on the user's filesystem where we are
+ * exporting to.
+ * */
+const moveToTrash = async (
+    exportDir: string,
+    collectionName: string,
+    fileName: string,
+) => {
     const fs = ensureElectron().fs;
-    log.info(`moving video file ${videoExportPath} to trash folder`);
-    if (await fs.exists(videoExportPath)) {
-        await electron.moveFile(
-            videoExportPath,
-            await getTrashedFileExportPath(exportDir, videoExportPath),
-        );
+
+    const filePath = `${exportDir}/${collectionName}/${fileName}`;
+    const trashDir = `${exportDir}/${exportTrashDirectoryName}/${collectionName}`;
+    const metadataFileName = `${fileName}.json`;
+    const metadataFilePath = `${exportDir}/${collectionName}/${exportMetadataDirectoryName}/${metadataFileName}`;
+    const metadataTrashDir = `${exportDir}/${exportTrashDirectoryName}/${collectionName}/${exportMetadataDirectoryName}`;
+
+    log.info(`Moving file ${filePath} and its metadata to trash folder`);
+
+    if (await fs.exists(filePath)) {
+        await fs.mkdirIfNeeded(trashDir);
+        const trashFilePath = await safeFileName(trashDir, fileName, fs.exists);
+        await fs.rename(filePath, trashFilePath);
     }
-    const videoMetadataFileExportPath =
-        getMetadataFileExportPath(videoExportPath);
-    if (await fs.exists(videoMetadataFileExportPath)) {
-        await electron.moveFile(
-            videoMetadataFileExportPath,
-            await getTrashedFileExportPath(
-                exportDir,
-                videoMetadataFileExportPath,
-            ),
+
+    if (await fs.exists(metadataFilePath)) {
+        await fs.mkdirIfNeeded(metadataTrashDir);
+        const metadataTrashFilePath = await safeFileName(
+            metadataTrashDir,
+            metadataFileName,
+            fs.exists,
         );
+        await fs.rename(filePath, metadataTrashFilePath);
     }
 };

@@ -18,7 +18,10 @@ import { t } from "i18next";
 import isElectron from "is-electron";
 import { AppContext } from "pages/_app";
 import { useContext, useEffect, useState } from "react";
-import exportService, { ExportStage } from "services/export";
+import exportService, {
+    ExportStage,
+    selectAndPrepareExportDirectory,
+} from "services/export";
 import { ExportProgress, ExportSettings } from "types/export";
 import { EnteFile } from "types/file";
 import { getExportDirectoryDoesNotExistMessage } from "utils/ui";
@@ -77,21 +80,6 @@ export default function ExportModal(props: Props) {
         void syncExportRecord(exportFolder);
     }, [props.show]);
 
-    // =============
-    // STATE UPDATERS
-    // ==============
-    const updateExportFolder = (newFolder: string) => {
-        exportService.updateExportSettings({ folder: newFolder });
-        setExportFolder(newFolder);
-    };
-
-    const updateContinuousExport = (updatedContinuousExport: boolean) => {
-        exportService.updateExportSettings({
-            continuousExport: updatedContinuousExport,
-        });
-        setContinuousExport(updatedContinuousExport);
-    };
-
     // ======================
     // HELPER FUNCTIONS
     // =======================
@@ -101,8 +89,9 @@ export default function ExportModal(props: Props) {
             appContext.setDialogMessage(
                 getExportDirectoryDoesNotExistMessage(),
             );
-            throw Error(CustomError.EXPORT_FOLDER_DOES_NOT_EXIST);
+            return false;
         }
+        return true;
     };
 
     const syncExportRecord = async (exportFolder: string): Promise<void> => {
@@ -131,42 +120,34 @@ export default function ExportModal(props: Props) {
     // =============
 
     const handleChangeExportDirectoryClick = async () => {
-        try {
-            const newFolder = await exportService.changeExportDirectory();
-            log.info(`Export folder changed to ${newFolder}`);
-            updateExportFolder(newFolder);
-            void syncExportRecord(newFolder);
-        } catch (e) {
-            if (e.message !== CustomError.SELECT_FOLDER_ABORTED) {
-                log.error("handleChangeExportDirectoryClick failed", e);
-            }
-        }
+        const newFolder = await selectAndPrepareExportDirectory();
+        if (!newFolder) return;
+
+        log.info(`Export folder changed to ${newFolder}`);
+        exportService.updateExportSettings({ folder: newFolder });
+        setExportFolder(newFolder);
+        await syncExportRecord(newFolder);
     };
 
     const toggleContinuousExport = async () => {
-        try {
-            await verifyExportFolderExists();
-            const newContinuousExport = !continuousExport;
-            if (newContinuousExport) {
-                exportService.enableContinuousExport();
-            } else {
-                exportService.disableContinuousExport();
-            }
-            updateContinuousExport(newContinuousExport);
-        } catch (e) {
-            log.error("onContinuousExportChange failed", e);
+        if (!(await verifyExportFolderExists())) return;
+
+        const newContinuousExport = !continuousExport;
+        if (newContinuousExport) {
+            exportService.enableContinuousExport();
+        } else {
+            exportService.disableContinuousExport();
         }
+        exportService.updateExportSettings({
+            continuousExport: newContinuousExport,
+        });
+        setContinuousExport(newContinuousExport);
     };
 
     const startExport = async () => {
-        try {
-            await verifyExportFolderExists();
-            await exportService.scheduleExport();
-        } catch (e) {
-            if (e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST) {
-                log.error("scheduleExport failed", e);
-            }
-        }
+        if (!(await verifyExportFolderExists())) return;
+
+        await exportService.scheduleExport();
     };
 
     const stopExport = () => {

@@ -1,3 +1,4 @@
+import { nameAndExtension } from "@/next/file";
 import log from "@/next/log";
 import { CustomError } from "@ente/shared/error";
 import { FILE_TYPE } from "constants/file";
@@ -7,7 +8,6 @@ import {
 } from "constants/upload";
 import FileType from "file-type";
 import { FileTypeInfo } from "types/upload";
-import { getFileExtension } from "utils/file";
 import { getUint8ArrayView } from "./readerService";
 
 const TYPE_VIDEO = "video";
@@ -40,7 +40,8 @@ export async function getFileType(receivedFile: File): Promise<FileTypeInfo> {
             mimeType: typeResult.mime,
         };
     } catch (e) {
-        const fileFormat = getFileExtension(receivedFile.name);
+        const ne = nameAndExtension(receivedFile.name);
+        const fileFormat = ne[1].toLowerCase();
         const whiteListedFormat = WHITELISTED_FILE_FORMATS.find(
             (a) => a.exactType === fileFormat,
         );
