@@ -134,9 +134,11 @@ abstract class MLFramework {
   }
 
   Future<bool> _canDownload() async {
-    final connectivityResult = await (Connectivity().checkConnectivity());
-    return connectivityResult != ConnectivityResult.mobile ||
-        shouldDownloadOverMobileData;
+    final List<ConnectivityResult> connections =
+        await (Connectivity().checkConnectivity());
+    final bool isConnectedToMobile =
+        connections.contains(ConnectivityResult.mobile);
+    return !isConnectedToMobile || shouldDownloadOverMobileData;
   }
 }
 
