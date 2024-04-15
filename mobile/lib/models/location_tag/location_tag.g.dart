@@ -6,8 +6,8 @@ part of 'location_tag.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$_LocationTag _$$_LocationTagFromJson(Map<String, dynamic> json) =>
-    _$_LocationTag(
+_$LocationTagImpl _$$LocationTagImplFromJson(Map<String, dynamic> json) =>
+    _$LocationTagImpl(
       name: json['name'] as String,
       radius: (json['radius'] as num).toDouble(),
       aSquare: (json['aSquare'] as num).toDouble(),
@@ -16,7 +16,7 @@ _$_LocationTag _$$_LocationTagFromJson(Map<String, dynamic> json) =>
           Location.fromJson(json['centerPoint'] as Map<String, dynamic>),
     );
 
-Map<String, dynamic> _$$_LocationTagToJson(_$_LocationTag instance) =>
+Map<String, dynamic> _$$LocationTagImplToJson(_$LocationTagImpl instance) =>
     <String, dynamic>{
       'name': instance.name,
       'radius': instance.radius,
