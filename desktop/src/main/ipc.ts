@@ -26,7 +26,6 @@ import {
     fsRmdir,
     fsWriteFile,
     isFolder,
-    saveStreamToDisk,
 } from "./fs";
 import { logToDisk } from "./log";
 import {
@@ -185,12 +184,6 @@ export const attachIPCHandlers = () => {
     ipcMain.handle("showUploadZipDialog", () => showUploadZipDialog());
 
     // - FS Legacy
-
-    ipcMain.handle(
-        "saveStreamToDisk",
-        (_, path: string, fileStream: ReadableStream) =>
-            saveStreamToDisk(path, fileStream),
-    );
 
     ipcMain.handle("isFolder", (_, dirPath: string) => isFolder(dirPath));
 

@@ -30,12 +30,14 @@ export const registerStreamProtocol = () => {
     protocol.handle("stream", async (request: Request) => {
         const url = request.url;
         const { host, pathname } = new URL(url);
+        // Convert e.g. "%20" to spaces.
+        const path = decodeURIComponent(pathname);
         switch (host) {
-            /* stream://write//path/to/file */
-            /*          -host/pathname----- */
+            /* stream://write/path/to/file */
+            /*          host-pathname----- */
             case "write":
                 try {
-                    await writeStream(pathname, request.body);
+                    await writeStream(path, request.body);
                     return new Response("", { status: 200 });
                 } catch (e) {
                     log.error(`Failed to write stream for ${url}`, e);

@@ -311,10 +311,6 @@ export interface Electron {
     ) => Promise<void>;
 
     // - FS legacy
-    saveStreamToDisk: (
-        path: string,
-        fileStream: ReadableStream,
-    ) => Promise<void>;
     isFolder: (dirPath: string) => Promise<boolean>;
 
     // - Upload
