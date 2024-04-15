@@ -20,12 +20,12 @@ import {
 import {
     fsExists,
     fsMkdirIfNeeded,
+    fsReadTextFile,
     fsRename,
     fsRm,
     fsRmdir,
+    fsWriteFile,
     isFolder,
-    readTextFile,
-    saveFileToDisk,
     saveStreamToDisk,
 } from "./fs";
 import { logToDisk } from "./log";
@@ -113,6 +113,26 @@ export const attachIPCHandlers = () => {
 
     ipcMain.on("skipAppUpdate", (_, version) => skipAppUpdate(version));
 
+    // - FS
+
+    ipcMain.handle("fsExists", (_, path) => fsExists(path));
+
+    ipcMain.handle("fsRename", (_, oldPath: string, newPath: string) =>
+        fsRename(oldPath, newPath),
+    );
+
+    ipcMain.handle("fsMkdirIfNeeded", (_, dirPath) => fsMkdirIfNeeded(dirPath));
+
+    ipcMain.handle("fsRmdir", (_, path: string) => fsRmdir(path));
+
+    ipcMain.handle("fsRm", (_, path: string) => fsRm(path));
+
+    ipcMain.handle("fsReadTextFile", (_, path: string) => fsReadTextFile(path));
+
+    ipcMain.handle("fsWriteFile", (_, path: string, contents: string) =>
+        fsWriteFile(path, contents),
+    );
+
     // - Conversion
 
     ipcMain.handle("convertToJPEG", (_, fileData, filename) =>
@@ -164,20 +184,6 @@ export const attachIPCHandlers = () => {
 
     ipcMain.handle("showUploadZipDialog", () => showUploadZipDialog());
 
-    // - FS
-
-    ipcMain.handle("fsExists", (_, path) => fsExists(path));
-
-    ipcMain.handle("fsRename", (_, oldPath: string, newPath: string) =>
-        fsRename(oldPath, newPath),
-    );
-
-    ipcMain.handle("fsMkdirIfNeeded", (_, dirPath) => fsMkdirIfNeeded(dirPath));
-
-    ipcMain.handle("fsRmdir", (_, path: string) => fsRmdir(path));
-
-    ipcMain.handle("fsRm", (_, path: string) => fsRm(path));
-
     // - FS Legacy
 
     ipcMain.handle(
@@ -185,12 +191,6 @@ export const attachIPCHandlers = () => {
         (_, path: string, fileStream: ReadableStream) =>
             saveStreamToDisk(path, fileStream),
     );
-
-    ipcMain.handle("saveFileToDisk", (_, path: string, contents: string) =>
-        saveFileToDisk(path, contents),
-    );
-
-    ipcMain.handle("readTextFile", (_, path: string) => readTextFile(path));
 
     ipcMain.handle("isFolder", (_, dirPath: string) => isFolder(dirPath));
 

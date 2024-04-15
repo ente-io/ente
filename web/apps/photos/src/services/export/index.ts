@@ -1,4 +1,5 @@
 import { ensureElectron } from "@/next/electron";
+import { isDevBuild } from "@/next/env";
 import log from "@/next/log";
 import { CustomError } from "@ente/shared/error";
 import { Events, eventBus } from "@ente/shared/events";
@@ -884,7 +885,7 @@ class ExportService {
         try {
             const exportRecord = await this.getExportRecord(folder);
             const newRecord: ExportRecord = { ...exportRecord, ...newData };
-            await ensureElectron().saveFileToDisk(
+            await ensureElectron().fs.writeFile(
                 `${folder}/${exportRecordFileName}`,
                 JSON.stringify(newRecord, null, 2),
             );
@@ -907,8 +908,7 @@ class ExportService {
             if (!(await fs.exists(exportRecordJSONPath))) {
                 return this.createEmptyExportRecord(exportRecordJSONPath);
             }
-            const recordFile =
-                await electron.readTextFile(exportRecordJSONPath);
+            const recordFile = await fs.readTextFile(exportRecordJSONPath);
             try {
                 return JSON.parse(recordFile);
             } catch (e) {
@@ -993,6 +993,46 @@ class ExportService {
                         fileExportName,
                         file,
                     );
+                    // TODO(MR): Productionalize
+                    if (isDevBuild) {
+                        const testStream = new ReadableStream({
+                            async start(controller) {
+                                await sleep(1000);
+                                controller.enqueue("This ");
+                                await sleep(1000);
+                                controller.enqueue("is ");
+                                await sleep(1000);
+                                controller.enqueue("a ");
+                                await sleep(1000);
+                                controller.enqueue("test");
+                                controller.close();
+                            },
+                        }).pipeThrough(new TextEncoderStream());
+                        console.log({ a: "will send req", updatedFileStream });
+                        // The duplex parameter needs to be set to 'half' when
+                        // streaming requests.
+                        //
+                        // Currently browsers, and specifically in our case,
+                        // since this code runs only within our desktop
+                        // (Electron) app, Chromium, don't support 'full' duplex
+                        // mode (i.e. streaming both the request and the
+                        // response).
+                        //
+                        // https://developer.chrome.com/docs/capabilities/web-apis/fetch-streaming-requests
+                        //
+                        // In another twist, the TypeScript libdom.d.ts does not
+                        // include the "duplex" parameter, so we need to cast to
+                        // get TypeScript to let this code through. e.g. see
+                        // https://github.com/node-fetch/node-fetch/issues/1769
+                        const req = new Request("stream://write/tmp/foo.txt", {
+                            method: "POST",
+                            // body: updatedFileStream,
+                            body: testStream,
+                            duplex: "half",
+                        } as unknown as RequestInit);
+                        const res = await fetch(req);
+                        console.log({ a: "got res", res });
+                    }
                     await electron.saveStreamToDisk(
                         `${collectionExportPath}/${fileExportName}`,
                         updatedFileStream,
@@ -1077,7 +1117,7 @@ class ExportService {
         fileExportName: string,
         file: EnteFile,
     ) {
-        await ensureElectron().saveFileToDisk(
+        await ensureElectron().fs.writeFile(
             getFileMetadataExportPath(collectionExportPath, fileExportName),
             getGoogleLikeMetadataFile(fileExportName, file),
         );
@@ -1106,7 +1146,7 @@ class ExportService {
 
     private createEmptyExportRecord = async (exportRecordJSONPath: string) => {
         const exportRecord: ExportRecord = NULL_EXPORT_RECORD;
-        await ensureElectron().saveFileToDisk(
+        await ensureElectron().fs.writeFile(
             exportRecordJSONPath,
             JSON.stringify(exportRecord, null, 2),
         );

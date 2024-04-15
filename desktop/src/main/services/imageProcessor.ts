@@ -2,7 +2,7 @@ import { existsSync } from "fs";
 import fs from "node:fs/promises";
 import path from "path";
 import { CustomErrors, ElectronFile } from "../../types/ipc";
-import { writeStream } from "../fs";
+import { writeStream } from "../stream";
 import log from "../log";
 import { isPlatform } from "../platform";
 import { generateTempFilePath } from "../temp";
