@@ -31,8 +31,8 @@ export const registerStreamProtocol = () => {
         const url = request.url;
         const { host, pathname } = new URL(url);
         switch (host) {
-            /* stream://write//path/to/file */
-            /*          -host/pathname----- */
+            /* stream://write/path/to/file */
+            /*          host-pathname----- */
             case "write":
                 try {
                     await writeStream(pathname, request.body);
