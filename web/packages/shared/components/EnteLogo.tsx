@@ -3,6 +3,7 @@ import { styled } from "@mui/material";
 const LogoImage = styled("img")`
     margin: 3px 0;
     pointer-events: none;
+    vertical-align: middle;
 `;
 
 export function EnteLogo(props) {

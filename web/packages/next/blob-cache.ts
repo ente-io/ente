@@ -148,7 +148,6 @@ const openOPFSCacheWeb = async (name: BlobCacheNamespace) => {
 
     const root = await navigator.storage.getDirectory();
     const caches = await root.getDirectoryHandle("cache", { create: true });
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const cache = await caches.getDirectoryHandle(name, { create: true });
 
     return {

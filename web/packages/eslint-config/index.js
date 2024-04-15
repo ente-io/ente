@@ -24,6 +24,7 @@ module.exports = {
         "max-len": "off",
         "new-cap": "off",
         "no-invalid-this": "off",
+        "no-throw-literal": "error",
         // TODO(MR): We want this off anyway, for now forcing it here
         eqeqeq: "off",
         "object-curly-spacing": ["error", "always"],

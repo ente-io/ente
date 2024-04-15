@@ -10,6 +10,7 @@ import 'package:photos/events/sync_status_update_event.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/services/user_remote_flag_service.dart';
+import "package:photos/theme/ente_theme.dart";
 import 'package:photos/theme/text_style.dart';
 import 'package:photos/ui/account/verify_recovery_page.dart';
 import 'package:photos/ui/components/home_header_widget.dart';
@@ -93,8 +94,9 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
               : const Text("ente", style: brandStyleMedium),
         ),
         _showErrorBanner
-            ? const Divider(
+            ? Divider(
                 height: 8,
+                color: getEnteColorScheme(context).strokeFaint,
               )
             : const SizedBox.shrink(),
         _showErrorBanner

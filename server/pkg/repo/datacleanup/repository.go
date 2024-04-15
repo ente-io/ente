@@ -3,7 +3,7 @@ package datacleanup
 import (
 	"context"
 	"database/sql"
-
+	"fmt"
 	entity "github.com/ente-io/museum/ente/data_cleanup"
 	"github.com/ente-io/museum/pkg/utils/time"
 	"github.com/ente-io/stacktrace"
@@ -17,6 +17,21 @@ type Repository struct {
 func (r *Repository) Insert(ctx context.Context, userID int64) error {
 	_, err := r.DB.ExecContext(ctx, `INSERT INTO data_cleanup(user_id) VALUES ($1)`, userID)
 	return stacktrace.Propagate(err, "failed to insert")
+}
+
+func (r *Repository) RemoveScheduledDelete(ctx context.Context, userID int64) error {
+	res, execErr := r.DB.ExecContext(ctx, `DELETE from data_cleanup where user_id= $1 and stage = $2`, userID, entity.Scheduled)
+	if execErr != nil {
+		return execErr
+	}
+	affected, affErr := res.RowsAffected()
+	if affErr != nil {
+		return affErr
+	}
+	if affected != 1 {
+		return fmt.Errorf("only one row should have been affected, got %d", affected)
+	}
+	return nil
 }
 
 func (r *Repository) GetItemsPendingCompletion(ctx context.Context, limit int) ([]*entity.DataCleanup, error) {

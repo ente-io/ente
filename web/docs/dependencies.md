@@ -17,6 +17,8 @@ package:
 -   "eslint-plugin-react-hooks", "eslint-plugin-react-namespace-import" - Some
     React specific ESLint rules and configurations that are used by the
     workspaces that have React code.
+-   "eslint-plugin-react-refresh" - A plugin to ensure that React components are
+    exported in a way that they can be HMR-ed.
 -   "prettier-plugin-organize-imports" - A Prettier plugin to sort imports.
 -   "prettier-plugin-packagejson" - A Prettier plugin to also prettify
     `package.json`.
@@ -128,3 +130,10 @@ For some of our newer code, we have started to use [Vite](https://vitejs.dev).
 It is more lower level than Next, but the bells and whistles it doesn't have are
 the bells and whistles (and the accompanying complexity) that we don't need in
 some cases.
+
+## Photos
+
+### Misc
+
+-   "sanitize-filename" is for converting arbitrary strings into strings that
+    are suitable for being used as filenames.

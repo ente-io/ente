@@ -1,16 +1,5 @@
-buildscript {
-    ext.kotlin_version = '1.8.21'
-    repositories {
-        google()
-        jcenter()
-    }
-
-    ext.appCompatVersion = '1.1.0' // for background_fetch
-
-    dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath 'com.android.tools.build:gradle:7.1.2' // for background_fetch
-    }
+ext {
+    appCompatVersion = '1.1.0' // for background_fetch
 }
 
 allprojects {

@@ -97,20 +97,6 @@ export function getFileExtensionWithDot(filename: string) {
     else return filename.slice(lastDotPosition);
 }
 
-export function splitFilenameAndExtension(filename: string): [string, string] {
-    const lastDotPosition = filename.lastIndexOf(".");
-    if (lastDotPosition === -1) return [filename, null];
-    else
-        return [
-            filename.slice(0, lastDotPosition),
-            filename.slice(lastDotPosition + 1),
-        ];
-}
-
-export function getFileExtension(filename: string) {
-    return splitFilenameAndExtension(filename)[1]?.toLocaleLowerCase();
-}
-
 export function generateStreamFromArrayBuffer(data: Uint8Array) {
     return new ReadableStream({
         async start(controller: ReadableStreamDefaultController) {

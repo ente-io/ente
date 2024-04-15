@@ -52,7 +52,7 @@ import "photoswipe/dist/photoswipe.css";
 import { createContext, useEffect, useRef, useState } from "react";
 import LoadingBar from "react-top-loading-bar";
 import DownloadManager from "services/download";
-import exportService from "services/export";
+import exportService, { resumeExportsIfNeeded } from "services/export";
 import mlWorkManager from "services/machineLearning/mlWorkManager";
 import {
     getFamilyPortalRedirectURL,
@@ -64,7 +64,6 @@ import {
     NotificationAttributes,
     SetNotificationAttributes,
 } from "types/Notification";
-import { isExportInProgress } from "utils/export";
 import {
     getMLSearchConfig,
     updateMLSearchConfig,
@@ -214,37 +213,10 @@ export default function App({ Component, pageProps }: AppProps) {
             return;
         }
         const initExport = async () => {
-            try {
-                log.info("init export");
-                const token = getToken();
-                if (!token) {
-                    log.info(
-                        "User not logged in, not starting export continuous sync job",
-                    );
-                    return;
-                }
-                await DownloadManager.init(APPS.PHOTOS, { token });
-                const exportSettings = exportService.getExportSettings();
-                if (
-                    !(await exportService.exportFolderExists(
-                        exportSettings?.folder,
-                    ))
-                ) {
-                    return;
-                }
-                const exportRecord = await exportService.getExportRecord(
-                    exportSettings.folder,
-                );
-                if (exportSettings.continuousExport) {
-                    exportService.enableContinuousExport();
-                }
-                if (isExportInProgress(exportRecord.stage)) {
-                    log.info("export was in progress, resuming");
-                    exportService.scheduleExport();
-                }
-            } catch (e) {
-                log.error("init export failed", e);
-            }
+            const token = getToken();
+            if (!token) return;
+            await DownloadManager.init(APPS.PHOTOS, { token });
+            await resumeExportsIfNeeded();
         };
         initExport();
         try {
