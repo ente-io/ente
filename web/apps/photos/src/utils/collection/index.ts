@@ -1,7 +1,6 @@
 import { ensureElectron } from "@/next/electron";
 import log from "@/next/log";
 import { CustomError } from "@ente/shared/error";
-import { getAlbumsURL } from "@ente/shared/network/api";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import { getUnixTimeInMicroSecondsWithDelta } from "@ente/shared/time";
 import { User } from "@ente/shared/user/types";
@@ -189,11 +188,6 @@ export function appendCollectionKeyToShareURL(
     }
 
     const sharableURL = new URL(url);
-    const albumsURL = new URL(getAlbumsURL());
-
-    sharableURL.protocol = albumsURL.protocol;
-    sharableURL.host = albumsURL.host;
-    sharableURL.pathname = albumsURL.pathname;
 
     const bytes = Buffer.from(collectionKey, "base64");
     sharableURL.hash = bs58.encode(bytes);
