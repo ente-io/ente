@@ -15,7 +15,7 @@ import { existsSync } from "fs";
 import fs from "node:fs/promises";
 import path from "node:path";
 import * as ort from "onnxruntime-node";
-import { writeStream } from "../fs";
+import { writeStream } from "../stream";
 import log from "../log";
 
 /**

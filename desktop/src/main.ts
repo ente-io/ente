@@ -27,6 +27,7 @@ import { setupAutoUpdater } from "./main/services/app-update";
 import autoLauncher from "./main/services/autoLauncher";
 import { initWatcher } from "./main/services/chokidar";
 import { userPreferences } from "./main/stores/user-preferences";
+import { registerStreamProtocol } from "./main/stream";
 import { isDev } from "./main/util";
 
 /**
@@ -91,24 +92,26 @@ const setupRendererServer = () => serveNextAt(rendererURL);
 /**
  * Register privileged schemes.
  *
- * We have two priviliged schemes:
+ * We have two privileged schemes:
  *
  * 1. "ente", used for serving our web app (@see {@link setupRendererServer}).
  *
  * 2. "stream", used for streaming IPC (@see {@link registerStreamProtocol}).
  *
  * Both of these need some privileges, however, the documentation for Electron's
- * registerSchemesAsPrivileged says:
+ * [registerSchemesAsPrivileged](https://www.electronjs.org/docs/latest/api/protocol)
+ * says:
  *
  * > This method ... can be called only once.
- * >
- * > https://www.electronjs.org/docs/latest/api/protocol#protocolisprotocolregisteredscheme-deprecated
  *
- * The library we use for the "ente" scheme already calls it once when we invoke
- * {@link setupRendererServer}. Luckily, in practice it seems that the last call
- * wins, and we don't need to modify the next-electron-server to prevent it from
- * calling registerSchemesAsPrivileged. Instead, both schemes get registered
- * fine, but we do need to repeat what next-electron-server had done.
+ * The library we use for the "ente" scheme, next-electron-server, already calls
+ * it once when we invoke {@link setupRendererServer}.
+ *
+ * In practice calling it multiple times just causes the values to be
+ * overwritten, and the last call wins. So we don't need to modify
+ * next-electron-server to prevent it from calling registerSchemesAsPrivileged.
+ * Instead, we (a) repeat what next-electron-server had done here, and (b)
+ * ensure that we're called after {@link setupRendererServer}.
  */
 const registerPrivilegedSchemes = () => {
     protocol.registerSchemesAsPrivileged([
@@ -265,32 +268,6 @@ const setupTrayItem = (mainWindow: BrowserWindow) => {
 };
 
 /**
- * Register a protocol handler that we use for streaming large files between the
- * main process (node) and the renderer process (browser) layer.
- *
- * [Note: IPC streams]
- *
- * When running without node integration, there is no direct way to pass streams
- * across IPC. And passing the entire contents of the file is not feasible for
- * large video files because of the memory pressure the copying would entail.
- *
- * As an alternative, we register a custom protocol handler that can provided a
- * bi-directional stream. The renderer can stream data to the node side by
- * streaming the request. The node side can stream to the renderer side by
- * streaming the response.
- *
- * See also: [Note: Transferring large amount of data over IPC]
- *
- * Depends on: {@link registerPrivilegedSchemes}
- */
-const registerStreamProtocol = () => {
-    protocol.handle("stream", (request: Request) => {
-        log.info({ e: "Got incoming stream", request });
-        return new Response("", { status: 200 });
-    });
-};
-
-/**
  * Older versions of our app used to maintain a cache dir using the main
  * process. This has been deprecated in favor of using a normal web cache.
  *
@@ -349,16 +326,15 @@ const main = () => {
     // Note that some Electron APIs can only be used after this event occurs.
     app.on("ready", async () => {
         mainWindow = await createMainWindow();
-        const watcher = initWatcher(mainWindow);
-        setupTrayItem(mainWindow);
         Menu.setApplicationMenu(await createApplicationMenu(mainWindow));
+        setupTrayItem(mainWindow);
         attachIPCHandlers();
-        attachFSWatchIPCHandlers(watcher);
+        attachFSWatchIPCHandlers(initWatcher(mainWindow));
+        registerStreamProtocol();
         if (!isDev) setupAutoUpdater(mainWindow);
         handleDownloads(mainWindow);
         handleExternalLinks(mainWindow);
         addAllowOriginHeader(mainWindow);
-        registerStreamProtocol();
 
         try {
             deleteLegacyDiskCacheDirIfExists();
