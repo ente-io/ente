@@ -56,8 +56,11 @@ export default function SearchInput(props: Iprops) {
     const [value, setValue] = useState<SearchOption>(null);
     const appContext = useContext(AppContext);
     const handleChange = (value: SearchOption) => {
-        setValue(value);
-        setQuery(value.label);
+        if (value) {
+            setValue(value);
+            setQuery(value.label);
+        }
+
         blur();
     };
     const handleInputChange = (value: string, actionMeta: InputActionMeta) => {
