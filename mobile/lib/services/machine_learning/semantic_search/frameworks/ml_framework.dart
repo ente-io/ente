@@ -4,7 +4,6 @@ import "dart:io";
 import "package:connectivity_plus/connectivity_plus.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/errors.dart";
-
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/event.dart";
 import "package:photos/services/remote_assets_service.dart";
@@ -23,7 +22,7 @@ abstract class MLFramework {
   MLFramework(this.shouldDownloadOverMobileData) {
     Connectivity()
         .onConnectivityChanged
-        .listen((ConnectivityResult result) async {
+        .listen((List<ConnectivityResult> result) async {
       _logger.info("Connectivity changed to $result");
       if (_state == InitializationState.waitingForNetwork &&
           await _canDownload()) {
