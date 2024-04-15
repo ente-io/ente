@@ -3,7 +3,6 @@
  */
 import { existsSync } from "node:fs";
 import fs from "node:fs/promises";
-import { writeStream } from "./stream";
 
 export const fsExists = (path: string) => existsSync(path);
 
@@ -24,8 +23,6 @@ export const fsWriteFile = (path: string, contents: string) =>
     fs.writeFile(path, contents);
 
 /* TODO: Audit below this  */
-
-export const saveStreamToDisk = writeStream;
 
 export const isFolder = async (dirPath: string) => {
     if (!existsSync(dirPath)) return false;

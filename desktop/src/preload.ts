@@ -237,11 +237,6 @@ const updateWatchMappingIgnoredFiles = (
 
 // - FS Legacy
 
-const saveStreamToDisk = (
-    path: string,
-    fileStream: ReadableStream,
-): Promise<void> => ipcRenderer.invoke("saveStreamToDisk", path, fileStream);
-
 const isFolder = (dirPath: string): Promise<boolean> =>
     ipcRenderer.invoke("isFolder", dirPath);
 
@@ -357,7 +352,6 @@ contextBridge.exposeInMainWorld("electron", {
 
     // - FS legacy
     // TODO: Move these into fs + document + rename if needed
-    saveStreamToDisk,
     isFolder,
 
     // - Upload
