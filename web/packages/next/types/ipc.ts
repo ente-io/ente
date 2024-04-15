@@ -189,16 +189,16 @@ export interface Electron {
          */
         rm: (path: string) => Promise<void>;
 
+        /** Read the string contents of a file at {@link path}. */
+        readTextFile: (path: string) => Promise<string>;
+
         /**
          * Write a string to a file, replacing the file if it already exists.
          *
          * @param path The path of the file.
          * @param contents The string contents to write.
          */
-        writeTextFile: (path: string, contents: string) => Promise<void>;
-
-        /** Read the string contents of a file at {@link path}. */
-        readTextFile: (path: string) => Promise<string>;
+        writeFile: (path: string, contents: string) => Promise<void>;
     };
 
     /*

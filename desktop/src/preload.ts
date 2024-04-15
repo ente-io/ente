@@ -115,8 +115,8 @@ const fsRm = (path: string): Promise<void> => ipcRenderer.invoke("fsRm", path);
 const fsReadTextFile = (path: string): Promise<string> =>
     ipcRenderer.invoke("fsReadTextFile", path);
 
-const fsWriteTextFile = (path: string, contents: string): Promise<void> =>
-    ipcRenderer.invoke("fsWriteTextFile", path, contents);
+const fsWriteFile = (path: string, contents: string): Promise<void> =>
+    ipcRenderer.invoke("fsWriteFile", path, contents);
 
 // - AUDIT below this
 
@@ -326,7 +326,7 @@ contextBridge.exposeInMainWorld("electron", {
         rmdir: fsRmdir,
         rm: fsRm,
         readTextFile: fsReadTextFile,
-        writeTextFile: fsWriteTextFile,
+        writeFile: fsWriteFile,
     },
 
     // - Conversion

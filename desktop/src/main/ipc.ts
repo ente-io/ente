@@ -24,7 +24,7 @@ import {
     fsRename,
     fsRm,
     fsRmdir,
-    fsWriteTextFile,
+    fsWriteFile,
     isFolder,
     saveStreamToDisk,
 } from "./fs";
@@ -129,8 +129,8 @@ export const attachIPCHandlers = () => {
 
     ipcMain.handle("fsReadTextFile", (_, path: string) => fsReadTextFile(path));
 
-    ipcMain.handle("fsWriteTextFile", (_, path: string, contents: string) =>
-        fsWriteTextFile(path, contents),
+    ipcMain.handle("fsWriteFile", (_, path: string, contents: string) =>
+        fsWriteFile(path, contents),
     );
 
     // - Conversion

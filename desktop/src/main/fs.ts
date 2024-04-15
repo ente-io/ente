@@ -20,7 +20,7 @@ export const fsRm = (path: string) => fs.rm(path);
 export const fsReadTextFile = async (filePath: string) =>
     fs.readFile(filePath, "utf-8");
 
-export const fsWriteTextFile = (path: string, contents: string) =>
+export const fsWriteFile = (path: string, contents: string) =>
     fs.writeFile(path, contents);
 
 /**
