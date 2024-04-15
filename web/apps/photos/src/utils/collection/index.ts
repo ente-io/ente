@@ -1,6 +1,6 @@
+import { ensureElectron } from "@/next/electron";
 import log from "@/next/log";
 import { CustomError } from "@ente/shared/error";
-import { getAlbumsURL } from "@ente/shared/network/api";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import { getUnixTimeInMicroSecondsWithDelta } from "@ente/shared/time";
 import { User } from "@ente/shared/user/types";
@@ -30,7 +30,6 @@ import {
     updatePublicCollectionMagicMetadata,
     updateSharedCollectionMagicMetadata,
 } from "services/collectionService";
-import exportService from "services/export";
 import { getAllLocalFiles, getLocalFiles } from "services/fileService";
 import {
     COLLECTION_ROLE,
@@ -44,7 +43,7 @@ import { SetFilesDownloadProgressAttributes } from "types/gallery";
 import { SUB_TYPE, VISIBILITY_STATE } from "types/magicMetadata";
 import { downloadFilesWithProgress } from "utils/file";
 import { isArchivedCollection, updateMagicMetadata } from "utils/magicMetadata";
-import { getUniqueCollectionExportName } from "utils/native-fs";
+import { safeDirectoryName } from "utils/native-fs";
 
 export enum COLLECTION_OPS_TYPE {
     ADD,
@@ -169,12 +168,14 @@ async function createCollectionDownloadFolder(
     downloadDirPath: string,
     collectionName: string,
 ) {
-    const collectionDownloadName = await getUniqueCollectionExportName(
+    const fs = ensureElectron().fs;
+    const collectionDownloadName = await safeDirectoryName(
         downloadDirPath,
         collectionName,
+        fs.exists,
     );
     const collectionDownloadPath = `${downloadDirPath}/${collectionDownloadName}`;
-    await exportService.checkExistsAndCreateDir(collectionDownloadPath);
+    await fs.mkdirIfNeeded(collectionDownloadPath);
     return collectionDownloadPath;
 }
 
@@ -187,11 +188,6 @@ export function appendCollectionKeyToShareURL(
     }
 
     const sharableURL = new URL(url);
-    const albumsURL = new URL(getAlbumsURL());
-
-    sharableURL.protocol = albumsURL.protocol;
-    sharableURL.host = albumsURL.host;
-    sharableURL.pathname = albumsURL.pathname;
 
     const bytes = Buffer.from(collectionKey, "base64");
     sharableURL.hash = bs58.encode(bytes);

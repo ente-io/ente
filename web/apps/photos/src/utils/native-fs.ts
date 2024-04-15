@@ -1,44 +1,79 @@
+/**
+ * @file Utilities for native filesystem access.
+ *
+ * While they don't have any direct dependencies to our desktop app, they were
+ * written for use by the code that runs in our desktop app.
+ */
+
+import { nameAndExtension } from "@/next/file";
 import sanitize from "sanitize-filename";
-import exportService from "services/export";
-import { splitFilenameAndExtension } from "utils/file";
+import {
+    exportMetadataDirectoryName,
+    exportTrashDirectoryName,
+} from "services/export";
 
-export const ENTE_TRASH_FOLDER = "Trash";
+/**
+ * Sanitize string for use as file or directory name.
+ *
+ * Return a string suitable for use as a file or directory name by replacing
+ * directory separators and invalid characters in the input string {@link s}
+ * with "_".
+ */
+export const sanitizeFilename = (s: string) =>
+    sanitize(s, { replacement: "_" });
 
-export const sanitizeName = (name: string) =>
-    sanitize(name, { replacement: "_" });
-
-export const getUniqueCollectionExportName = async (
-    dir: string,
-    collectionName: string,
+/**
+ * Return a new sanitized and unique directory name based on {@link name} that
+ * is not the same as any existing item in the given {@link directoryPath}.
+ *
+ * We also ensure we don't return names which might collide with our own special
+ * directories.
+ *
+ * @param exists A function to check if an item already exists at the given
+ * path. Usually, you'd pass `fs.exists` from {@link Electron}.
+ *
+ * See also: {@link safeFileame}
+ */
+export const safeDirectoryName = async (
+    directoryPath: string,
+    name: string,
+    exists: (path: string) => Promise<boolean>,
 ): Promise<string> => {
-    let collectionExportName = sanitizeName(collectionName);
+    const specialDirectoryNames = [
+        exportTrashDirectoryName,
+        exportMetadataDirectoryName,
+    ];
+
+    let result = sanitizeFilename(name);
     let count = 1;
     while (
-        (await exportService.exists(`${dir}/${collectionExportName}`)) ||
-        collectionExportName === ENTE_TRASH_FOLDER
+        (await exists(`${directoryPath}/${result}`)) ||
+        specialDirectoryNames.includes(result)
     ) {
-        collectionExportName = `${sanitizeName(collectionName)}(${count})`;
+        result = `${sanitizeFilename(name)}(${count})`;
         count++;
     }
-    return collectionExportName;
+    return result;
 };
 
-export const getUniqueFileExportName = async (
-    collectionExportPath: string,
-    filename: string,
+/**
+ * Return a new sanitized and unique file name based on {@link name} that is not
+ * the same as any existing item in the given {@link directoryPath}.
+ *
+ * This is a sibling of {@link safeDirectoryName} for use with file names.
+ */
+export const safeFileName = async (
+    directoryPath: string,
+    name: string,
+    exists: (path: string) => Promise<boolean>,
 ) => {
-    let fileExportName = sanitizeName(filename);
+    let result = sanitizeFilename(name);
     let count = 1;
-    while (
-        await exportService.exists(`${collectionExportPath}/${fileExportName}`)
-    ) {
-        const filenameParts = splitFilenameAndExtension(sanitizeName(filename));
-        if (filenameParts[1]) {
-            fileExportName = `${filenameParts[0]}(${count}).${filenameParts[1]}`;
-        } else {
-            fileExportName = `${filenameParts[0]}(${count})`;
-        }
+    while (await exists(`${directoryPath}/${result}`)) {
+        const [fn, ext] = nameAndExtension(sanitizeFilename(name));
+        if (ext) result = `${fn}(${count}).${ext}`;
+        else result = `${fn}(${count})`;
         count++;
     }
-    return fileExportName;
+    return result;
 };

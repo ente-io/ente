@@ -1,3 +1,4 @@
+import { ensureElectron } from "@/next/electron";
 import log from "@/next/log";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import { User } from "@ente/shared/user/types";
@@ -26,9 +27,13 @@ import {
     getPersonalFiles,
     mergeMetadata,
 } from "utils/file";
-import { sanitizeName } from "utils/native-fs";
 import {
-    ENTE_METADATA_FOLDER,
+    safeDirectoryName,
+    safeFileName,
+    sanitizeFilename,
+} from "utils/native-fs";
+import {
+    exportMetadataDirectoryName,
     getCollectionIDFromFileUID,
     getExportRecordFileUID,
     getLivePhotoExportName,
@@ -184,40 +189,29 @@ async function migrationV4ToV5(exportDir: string, exportRecord: ExportRecord) {
     await removeCollectionExportMissingMetadataFolder(exportDir, exportRecord);
 }
 
-/*
-    This updates the folder name of already exported folders from the earlier format of
-    `collectionID_collectionName` to newer `collectionName(numbered)` format
-*/
-async function migrateCollectionFolders(
+/**
+ * Update the folder name of already exported folders from the earlier format of
+ * `collectionID_collectionName` to newer `collectionName(numbered)` format.
+ */
+const migrateCollectionFolders = async (
     collections: Collection[],
     exportDir: string,
     collectionIDPathMap: Map<number, string>,
-) {
+) => {
+    const fs = ensureElectron().fs;
     for (const collection of collections) {
-        const oldCollectionExportPath = getOldCollectionFolderPath(
-            exportDir,
-            collection.id,
-            collection.name,
-        );
-        const newCollectionExportPath = await getUniqueCollectionFolderPath(
+        const oldPath = `${exportDir}/${collection.id}_${oldSanitizeName(collection.name)}`;
+        const newPath = await safeDirectoryName(
             exportDir,
             collection.name,
+            fs.exists,
         );
-        collectionIDPathMap.set(collection.id, newCollectionExportPath);
-        if (!(await exportService.exists(oldCollectionExportPath))) {
-            continue;
-        }
-        await exportService.rename(
-            oldCollectionExportPath,
-            newCollectionExportPath,
-        );
-        await addCollectionExportedRecordV1(
-            exportDir,
-            collection.id,
-            newCollectionExportPath,
-        );
+        collectionIDPathMap.set(collection.id, newPath);
+        if (!(await fs.exists(oldPath))) continue;
+        await fs.rename(oldPath, newPath);
+        await addCollectionExportedRecordV1(exportDir, collection.id, newPath);
     }
-}
+};
 
 /*
     This updates the file name of already exported files from the earlier format of
@@ -227,37 +221,27 @@ async function migrateFiles(
     files: EnteFile[],
     collectionIDPathMap: Map<number, string>,
 ) {
+    const fs = ensureElectron().fs;
     for (const file of files) {
-        const oldFileSavePath = getOldFileSavePath(
-            collectionIDPathMap.get(file.collectionID),
-            file,
-        );
-        const oldFileMetadataSavePath = getOldFileMetadataSavePath(
-            collectionIDPathMap.get(file.collectionID),
-            file,
-        );
-        const newFileSaveName = await getUniqueFileSaveName(
-            collectionIDPathMap.get(file.collectionID),
+        const collectionPath = collectionIDPathMap.get(file.collectionID);
+        const metadataPath = `${collectionPath}/${exportMetadataDirectoryName}`;
+
+        const oldFileName = `${file.id}_${oldSanitizeName(file.metadata.title)}`;
+        const oldFilePath = `${collectionPath}/${oldFileName}`;
+        const oldFileMetadataPath = `${metadataPath}/${oldFileName}.json`;
+
+        const newFileName = await safeFileName(
+            collectionPath,
             file.metadata.title,
+            fs.exists,
         );
+        const newFilePath = `${collectionPath}/${newFileName}`;
+        const newFileMetadataPath = `${metadataPath}/${newFileName}.json`;
 
-        const newFileSavePath = getFileSavePath(
-            collectionIDPathMap.get(file.collectionID),
-            newFileSaveName,
-        );
+        if (!(await fs.exists(oldFilePath))) continue;
 
-        const newFileMetadataSavePath = getFileMetadataSavePath(
-            collectionIDPathMap.get(file.collectionID),
-            newFileSaveName,
-        );
-        if (!(await exportService.exists(oldFileSavePath))) {
-            continue;
-        }
-        await exportService.rename(oldFileSavePath, newFileSavePath);
-        await exportService.rename(
-            oldFileMetadataSavePath,
-            newFileMetadataSavePath,
-        );
+        await fs.rename(oldFilePath, newFilePath);
+        await fs.rename(oldFileMetadataPath, newFileMetadataPath);
     }
 }
 
@@ -417,6 +401,7 @@ async function removeCollectionExportMissingMetadataFolder(
     exportDir: string,
     exportRecord: ExportRecord,
 ) {
+    const fs = ensureElectron().fs;
     if (!exportRecord?.collectionExportNames) {
         return;
     }
@@ -430,7 +415,7 @@ async function removeCollectionExportMissingMetadataFolder(
         collectionExportName,
     ] of properlyExportedCollectionsAll) {
         if (
-            await exportService.exists(
+            await fs.exists(
                 getMetadataFolderExportPath(
                     `${exportDir}/${collectionExportName}`,
                 ),
@@ -498,86 +483,24 @@ const getExportedFiles = (
 const oldSanitizeName = (name: string) =>
     name.replaceAll("/", "_").replaceAll(" ", "_");
 
-const getUniqueCollectionFolderPath = async (
-    dir: string,
-    collectionName: string,
-): Promise<string> => {
-    let collectionFolderPath = `${dir}/${sanitizeName(collectionName)}`;
-    let count = 1;
-    while (await exportService.exists(collectionFolderPath)) {
-        collectionFolderPath = `${dir}/${sanitizeName(
-            collectionName,
-        )}(${count})`;
-        count++;
-    }
-    return collectionFolderPath;
-};
-
-export const getMetadataFolderPath = (collectionFolderPath: string) =>
-    `${collectionFolderPath}/${ENTE_METADATA_FOLDER}`;
-
-const getUniqueFileSaveName = async (
-    collectionPath: string,
-    filename: string,
-) => {
-    let fileSaveName = sanitizeName(filename);
-    let count = 1;
-    while (
-        await exportService.exists(
-            getFileSavePath(collectionPath, fileSaveName),
-        )
-    ) {
-        const filenameParts = splitFilenameAndExtension(sanitizeName(filename));
-        if (filenameParts[1]) {
-            fileSaveName = `${filenameParts[0]}(${count}).${filenameParts[1]}`;
-        } else {
-            fileSaveName = `${filenameParts[0]}(${count})`;
-        }
-        count++;
-    }
-    return fileSaveName;
-};
-
-const getFileMetadataSavePath = (
-    collectionFolderPath: string,
-    fileSaveName: string,
-) => `${collectionFolderPath}/${ENTE_METADATA_FOLDER}/${fileSaveName}.json`;
-
 const getFileSavePath = (collectionFolderPath: string, fileSaveName: string) =>
     `${collectionFolderPath}/${fileSaveName}`;
-
-const getOldCollectionFolderPath = (
-    dir: string,
-    collectionID: number,
-    collectionName: string,
-) => `${dir}/${collectionID}_${oldSanitizeName(collectionName)}`;
-
-const getOldFileSavePath = (collectionFolderPath: string, file: EnteFile) =>
-    `${collectionFolderPath}/${file.id}_${oldSanitizeName(
-        file.metadata.title,
-    )}`;
-
-const getOldFileMetadataSavePath = (
-    collectionFolderPath: string,
-    file: EnteFile,
-) =>
-    `${collectionFolderPath}/${ENTE_METADATA_FOLDER}/${
-        file.id
-    }_${oldSanitizeName(file.metadata.title)}.json`;
 
 const getUniqueFileExportNameForMigration = (
     collectionPath: string,
     filename: string,
     usedFilePaths: Map<string, Set<string>>,
 ) => {
-    let fileExportName = sanitizeName(filename);
+    let fileExportName = sanitizeFilename(filename);
     let count = 1;
     while (
         usedFilePaths
             .get(collectionPath)
             ?.has(getFileSavePath(collectionPath, fileExportName))
     ) {
-        const filenameParts = splitFilenameAndExtension(sanitizeName(filename));
+        const filenameParts = splitFilenameAndExtension(
+            sanitizeFilename(filename),
+        );
         if (filenameParts[1]) {
             fileExportName = `${filenameParts[0]}(${count}).${filenameParts[1]}`;
         } else {
