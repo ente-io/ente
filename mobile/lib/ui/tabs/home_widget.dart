@@ -325,6 +325,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                   constraints: const BoxConstraints(maxWidth: 430),
                   child: Drawer(
                     width: double.infinity,
+                    shape: const RoundedRectangleBorder(),
                     child: _settingsPage,
                   ),
                 )
