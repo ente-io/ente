@@ -1026,7 +1026,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "selectedFilesAreNotOnEnte":
             MessageLookupByLibrary.simpleMessage("所选文件不在 Ente 上"),
         "selectedFoldersWillBeEncryptedAndBackedUp":
-            MessageLookupByLibrary.simpleMessage("所选文件夹将被加密和备份"),
+            MessageLookupByLibrary.simpleMessage("所选文件夹将被加密并备份"),
         "selectedItemsWillBeDeletedFromAllAlbumsAndMoved":
             MessageLookupByLibrary.simpleMessage("所选项目将从所有相册中删除并移动到回收站。"),
         "selectedPhotos": m46,

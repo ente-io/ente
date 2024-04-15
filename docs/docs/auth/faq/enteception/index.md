@@ -12,7 +12,7 @@ There are multiple answers, none of which are better or worse, they just depend
 on your situation and risk tolerance.
 
 If you are using the same account for both Ente Photos and Ente Auth and have
-enabled 2FA from the ente Photos app, we recommend that you ensure you store
+enabled 2FA from the Ente Photos app, we recommend that you ensure you store
 your recovery key in a safe place (writing it down on a paper is a good idea).
 This key can be used to bypass Ente 2FA in case you are locked out.
 

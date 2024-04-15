@@ -2,7 +2,6 @@ import { Shadow, ThemeColorsOptions } from "@mui/material";
 import { Components } from "@mui/material/styles/components";
 import { TypographyOptions } from "@mui/material/styles/createTypography";
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const getComponents = (
     colors: ThemeColorsOptions,
     typography: TypographyOptions,

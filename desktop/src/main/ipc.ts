@@ -18,14 +18,13 @@ import {
     showUploadZipDialog,
 } from "./dialogs";
 import {
-    checkExistsAndCreateDir,
-    deleteFile,
-    deleteFolder,
     fsExists,
+    fsMkdirIfNeeded,
+    fsRename,
+    fsRm,
+    fsRmdir,
     isFolder,
-    moveFile,
     readTextFile,
-    rename,
     saveFileToDisk,
     saveStreamToDisk,
 } from "./fs";
@@ -169,11 +168,17 @@ export const attachIPCHandlers = () => {
 
     ipcMain.handle("fsExists", (_, path) => fsExists(path));
 
-    // - FS Legacy
-
-    ipcMain.handle("checkExistsAndCreateDir", (_, dirPath) =>
-        checkExistsAndCreateDir(dirPath),
+    ipcMain.handle("fsRename", (_, oldPath: string, newPath: string) =>
+        fsRename(oldPath, newPath),
     );
+
+    ipcMain.handle("fsMkdirIfNeeded", (_, dirPath) => fsMkdirIfNeeded(dirPath));
+
+    ipcMain.handle("fsRmdir", (_, path: string) => fsRmdir(path));
+
+    ipcMain.handle("fsRm", (_, path: string) => fsRm(path));
+
+    // - FS Legacy
 
     ipcMain.handle(
         "saveStreamToDisk",
@@ -188,18 +193,6 @@ export const attachIPCHandlers = () => {
     ipcMain.handle("readTextFile", (_, path: string) => readTextFile(path));
 
     ipcMain.handle("isFolder", (_, dirPath: string) => isFolder(dirPath));
-
-    ipcMain.handle("moveFile", (_, oldPath: string, newPath: string) =>
-        moveFile(oldPath, newPath),
-    );
-
-    ipcMain.handle("deleteFolder", (_, path: string) => deleteFolder(path));
-
-    ipcMain.handle("deleteFile", (_, path: string) => deleteFile(path));
-
-    ipcMain.handle("rename", (_, oldPath: string, newPath: string) =>
-        rename(oldPath, newPath),
-    );
 
     // - Upload
 

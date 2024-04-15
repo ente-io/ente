@@ -216,7 +216,7 @@ pct.access_token, pct.valid_till, pct.device_limit, pct.created_at, pct.updated_
 			if _, ok := addPublicUrlMap[pctToken.String]; !ok {
 				addPublicUrlMap[pctToken.String] = true
 				url := ente.PublicURL{
-					URL:             fmt.Sprintf(BaseShareURL, pctToken.String),
+					URL:             repo.PublicCollectionRepo.GetAlbumUrl(pctToken.String),
 					DeviceLimit:     int(pctDeviceLimit.Int32),
 					ValidTill:       pctValidTill.Int64,
 					EnableDownload:  pctEnableDownload.Bool,
