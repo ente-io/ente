@@ -41,3 +41,19 @@ NEXT_PUBLIC_ENTE_ENDPOINT=http://localhost:8080 \
     NEXT_PUBLIC_ENTE_ALBUMS_ENDPOINT=http://localhost:3002 \
     yarn dev:albums
 ```
+
+If you also want to change the prefix (the origin) in the generated public
+links, to use your custom albums endpoint in the generated public link instead
+of albums.ente.io, set `apps.public-albums` property in museum's configuration
+
+For example, when running using the starter docker compose file, you can do this
+by creating a `museum.yaml` and defining the following configuration there:
+
+```yaml
+apps:
+    public-albums: http://localhost:3002
+```
+
+(For more details, see
+[local.yaml](https://github.com/ente-io/ente/blob/main/server/configurations/local.yaml)
+in the server's source code).
