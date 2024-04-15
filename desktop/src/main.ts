@@ -59,6 +59,21 @@ export const allowWindowClose = (): void => {
 };
 
 /**
+ * Log a standard startup banner.
+ *
+ * This helps us identify app starts and other environment details in the logs.
+ */
+const logStartupBanner = () => {
+    const version = isDev ? "dev" : app.getVersion();
+    log.info(`Starting ente-photos-desktop ${version}`);
+
+    const platform = process.platform;
+    const osRelease = os.release();
+    const systemVersion = process.getSystemVersion();
+    log.info("Running on", { platform, osRelease, systemVersion });
+};
+
+/**
  * next-electron-server allows up to directly use the output of `next build` in
  * production mode and `next dev` in development mode, whilst keeping the rest
  * of our code the same.
@@ -74,18 +89,53 @@ export const allowWindowClose = (): void => {
 const setupRendererServer = () => serveNextAt(rendererURL);
 
 /**
- * Log a standard startup banner.
+ * Register privileged schemes.
  *
- * This helps us identify app starts and other environment details in the logs.
+ * We have two priviliged schemes:
+ *
+ * 1. "ente", used for serving our web app (@see {@link setupRendererServer}).
+ *
+ * 2. "stream", used for streaming IPC (@see {@link registerStreamProtocol}).
+ *
+ * Both of these need some privileges, however, the documentation for Electron's
+ * registerSchemesAsPrivileged says:
+ *
+ * > This method ... can be called only once.
+ * >
+ * > https://www.electronjs.org/docs/latest/api/protocol#protocolisprotocolregisteredscheme-deprecated
+ *
+ * The library we use for the "ente" scheme already calls it once when we invoke
+ * {@link setupRendererServer}. Luckily, in practice it seems that the last call
+ * wins, and we don't need to modify the next-electron-server to prevent it from
+ * calling registerSchemesAsPrivileged. Instead, both schemes get registered
+ * fine, but we do need to repeat what next-electron-server had done.
  */
-const logStartupBanner = () => {
-    const version = isDev ? "dev" : app.getVersion();
-    log.info(`Starting ente-photos-desktop ${version}`);
-
-    const platform = process.platform;
-    const osRelease = os.release();
-    const systemVersion = process.getSystemVersion();
-    log.info("Running on", { platform, osRelease, systemVersion });
+const registerPrivilegedSchemes = () => {
+    protocol.registerSchemesAsPrivileged([
+        {
+            scheme: "ente",
+            privileges: {
+                standard: true,
+                secure: true,
+                allowServiceWorkers: true,
+                supportFetchAPI: true,
+                corsEnabled: true,
+            },
+        },
+        {
+            scheme: "stream",
+            privileges: {
+                // standard: true,
+                // secure: true,
+                // supportFetchAPI: true,
+                standard: true,
+                secure: true,
+                allowServiceWorkers: true,
+                supportFetchAPI: true,
+                corsEnabled: true,
+            },
+        },
+    ]);
 };
 
 /**
@@ -228,6 +278,8 @@ const setupTrayItem = (mainWindow: BrowserWindow) => {
  * streaming the response.
  *
  * See also: [Note: Transferring large amount of data over IPC]
+ *
+ * Depends on: {@link registerPrivilegedSchemes}
  */
 const registerStreamProtocol = () => {
     protocol.handle("stream", (request: Request) => {
@@ -275,8 +327,10 @@ const main = () => {
     let mainWindow: BrowserWindow | undefined;
 
     initLogging();
-    setupRendererServer();
     logStartupBanner();
+    // The order of the next two calls is important
+    setupRendererServer();
+    registerPrivilegedSchemes();
     increaseDiskCache();
 
     app.on("second-instance", () => {
