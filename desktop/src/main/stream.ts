@@ -27,9 +27,26 @@ import log from "./log";
  * Depends on {@link registerPrivilegedSchemes}.
  */
 export const registerStreamProtocol = () => {
-    protocol.handle("stream", (request: Request) => {
-        log.info({ e: "Got incoming stream", request });
-        return new Response("", { status: 200 });
+    protocol.handle("stream", async (request: Request) => {
+        const url = request.url;
+        const { host, pathname } = new URL(url);
+        switch (host) {
+            /* stream://write//path/to/file */
+            /*          -host/pathname----- */
+            case "write":
+                try {
+                    await writeStream(pathname, request.body);
+                    return new Response("", { status: 200 });
+                } catch (e) {
+                    log.error(`Failed to write stream for ${url}`, e);
+                    return new Response(
+                        `Failed to write stream: ${e.message}`,
+                        { status: 500 },
+                    );
+                }
+            default:
+                return new Response("", { status: 404 });
+        }
     });
 };
 
