@@ -11,7 +11,7 @@ class UploadLocksDB {
   static const _databaseName = "ente.upload_locks.db";
   static const _databaseVersion = 1;
 
-  static const _table = (
+  static const _uploadLocksTable = (
     table: "upload_locks",
     columnID: "id",
     columnOwner: "owner",
@@ -77,10 +77,10 @@ class UploadLocksDB {
   Future _onCreate(Database db, int version) async {
     await db.execute(
       '''
-                CREATE TABLE ${_table.table} (
-                  ${_table.columnID} TEXT PRIMARY KEY NOT NULL,
-                  ${_table.columnOwner} TEXT NOT NULL,
-                 ${_table.columnTime} TEXT NOT NULL
+                CREATE TABLE ${_uploadLocksTable.table} (
+                  ${_uploadLocksTable.columnID} TEXT PRIMARY KEY NOT NULL,
+                  ${_uploadLocksTable.columnOwner} TEXT NOT NULL,
+                 ${_uploadLocksTable.columnTime} TEXT NOT NULL
                 )
                 ''',
     );
@@ -131,22 +131,19 @@ class UploadLocksDB {
 
   Future<void> clearTable() async {
     final db = await instance.database;
-    await db.delete(_table.table);
-  }
-
-  Future<void> clearTrackTable() async {
-    final db = await instance.database;
+    await db.delete(_uploadLocksTable.table);
     await db.delete(_trackUploadTable.table);
+    await db.delete(_partsTable.table);
   }
 
   Future<void> acquireLock(String id, String owner, int time) async {
     final db = await instance.database;
     final row = <String, dynamic>{};
-    row[_table.columnID] = id;
-    row[_table.columnOwner] = owner;
-    row[_table.columnTime] = time;
+    row[_uploadLocksTable.columnID] = id;
+    row[_uploadLocksTable.columnOwner] = owner;
+    row[_uploadLocksTable.columnTime] = time;
     await db.insert(
-      _table.table,
+      _uploadLocksTable.table,
       row,
       conflictAlgorithm: ConflictAlgorithm.fail,
     );
@@ -155,8 +152,9 @@ class UploadLocksDB {
   Future<bool> isLocked(String id, String owner) async {
     final db = await instance.database;
     final rows = await db.query(
-      _table.table,
-      where: '${_table.columnID} = ? AND ${_table.columnOwner} = ?',
+      _uploadLocksTable.table,
+      where:
+          '${_uploadLocksTable.columnID} = ? AND ${_uploadLocksTable.columnOwner} = ?',
       whereArgs: [id, owner],
     );
     return rows.length == 1;
@@ -165,8 +163,9 @@ class UploadLocksDB {
   Future<int> releaseLock(String id, String owner) async {
     final db = await instance.database;
     return db.delete(
-      _table.table,
-      where: '${_table.columnID} = ? AND ${_table.columnOwner} = ?',
+      _uploadLocksTable.table,
+      where:
+          '${_uploadLocksTable.columnID} = ? AND ${_uploadLocksTable.columnOwner} = ?',
       whereArgs: [id, owner],
     );
   }
@@ -174,8 +173,9 @@ class UploadLocksDB {
   Future<int> releaseLocksAcquiredByOwnerBefore(String owner, int time) async {
     final db = await instance.database;
     return db.delete(
-      _table.table,
-      where: '${_table.columnOwner} = ? AND ${_table.columnTime} < ?',
+      _uploadLocksTable.table,
+      where:
+          '${_uploadLocksTable.columnOwner} = ? AND ${_uploadLocksTable.columnTime} < ?',
       whereArgs: [owner, time],
     );
   }
@@ -183,8 +183,8 @@ class UploadLocksDB {
   Future<int> releaseAllLocksAcquiredBefore(int time) async {
     final db = await instance.database;
     return db.delete(
-      _table.table,
-      where: '${_table.columnTime} < ?',
+      _uploadLocksTable.table,
+      where: '${_uploadLocksTable.columnTime} < ?',
       whereArgs: [time],
     );
   }
