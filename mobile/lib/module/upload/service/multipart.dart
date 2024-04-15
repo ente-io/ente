@@ -78,12 +78,12 @@ class MultiPartUploader {
 
     if (status == UploadLocksDB.trackStatus.pending) {
       // upload individual parts and get their etags
-      etags = await uploadParts(urls, encryptedFile);
+      etags = await _uploadParts(urls, encryptedFile);
     }
 
     if (status != UploadLocksDB.trackStatus.completed) {
       // complete the multipart upload
-      await completeMultipartUpload(urls.objectKey, etags, urls.completeURL);
+      await _completeMultipartUpload(urls.objectKey, etags, urls.completeURL);
     }
 
     return urls.objectKey;
@@ -94,15 +94,15 @@ class MultiPartUploader {
     File encryptedFile,
   ) async {
     // upload individual parts and get their etags
-    final etags = await uploadParts(urls, encryptedFile);
+    final etags = await _uploadParts(urls, encryptedFile);
 
     // complete the multipart upload
-    await completeMultipartUpload(urls.objectKey, etags, urls.completeURL);
+    await _completeMultipartUpload(urls.objectKey, etags, urls.completeURL);
 
     return urls.objectKey;
   }
 
-  Future<Map<int, String>> uploadParts(
+  Future<Map<int, String>> _uploadParts(
     MultipartUploadURLs url,
     File encryptedFile,
   ) async {
@@ -153,7 +153,7 @@ class MultiPartUploader {
     return etags;
   }
 
-  Future<void> completeMultipartUpload(
+  Future<void> _completeMultipartUpload(
     String objectKey,
     Map<int, String> partEtags,
     String completeURL,
