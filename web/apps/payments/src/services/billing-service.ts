@@ -11,7 +11,9 @@ import { loadStripe } from "@stripe/stripe-js";
 export const parseAndHandleRequest = async () => {
     // See: [Note: Intercept payments redirection to desktop app]
     if (window.location.pathname == "/desktop-redirect") {
-        window.location.href = "ente://app";
+        const desktopRedirectURL = new URL("ente://app/gallery");
+        desktopRedirectURL.search = new URL(window.location.href).search;
+        window.location.href = desktopRedirectURL.href;
         return;
     }
 
