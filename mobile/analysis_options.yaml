@@ -22,6 +22,7 @@ linter:
     - use_key_in_widget_constructors
     - cancel_subscriptions
 
+
     - avoid_empty_else
     - exhaustive_cases
 
@@ -59,6 +60,7 @@ analyzer:
     prefer_final_locals: warning
     unnecessary_const: error
     cancel_subscriptions: error
+    unrelated_type_equality_checks: error
 
 
     unawaited_futures: warning # convert to warning after fixing existing issues
