@@ -80,7 +80,7 @@ func (c *PublicCollectionController) CreateAccessToken(ctx context.Context, req 
 		}
 	}
 	response := ente.PublicURL{
-		URL:             fmt.Sprintf(repo.BaseShareURL, accessToken),
+		URL:             c.PublicCollectionRepo.GetAlbumUrl(accessToken),
 		ValidTill:       req.ValidTill,
 		DeviceLimit:     req.DeviceLimit,
 		EnableDownload:  true,
@@ -151,7 +151,7 @@ func (c *PublicCollectionController) UpdateSharedUrl(ctx context.Context, req en
 		return ente.PublicURL{}, stacktrace.Propagate(err, "")
 	}
 	return ente.PublicURL{
-		URL:             fmt.Sprintf(repo.BaseShareURL, publicCollectionToken.Token),
+		URL:             c.PublicCollectionRepo.GetAlbumUrl(publicCollectionToken.Token),
 		DeviceLimit:     publicCollectionToken.DeviceLimit,
 		ValidTill:       publicCollectionToken.ValidTill,
 		EnableDownload:  publicCollectionToken.EnableDownload,

@@ -16,7 +16,23 @@ const BaseShareURL = "https://albums.ente.io?t=%s"
 // PublicCollectionRepository defines the methods for inserting, updating and
 // retrieving entities related to public collections
 type PublicCollectionRepository struct {
-	DB *sql.DB
+	DB        *sql.DB
+	albumHost string
+}
+
+// NewPublicCollectionRepository ..
+func NewPublicCollectionRepository(db *sql.DB, albumHost string) *PublicCollectionRepository {
+	if albumHost == "" {
+		panic("albumHost can not be empty")
+	}
+	return &PublicCollectionRepository{
+		DB:        db,
+		albumHost: albumHost,
+	}
+}
+
+func (pcr *PublicCollectionRepository) GetAlbumUrl(token string) string {
+	return fmt.Sprintf("%s?t=%s", pcr.albumHost, token)
 }
 
 func (pcr *PublicCollectionRepository) Insert(ctx context.Context,
@@ -59,7 +75,7 @@ func (pcr *PublicCollectionRepository) GetCollectionToActivePublicURLMap(ctx con
 		if err = rows.Scan(&collectionID, &accessToken, &publicUrl.ValidTill, &publicUrl.DeviceLimit, &publicUrl.EnableDownload, &publicUrl.EnableCollect, &nonce, &memLimit, &opsLimit); err != nil {
 			return nil, stacktrace.Propagate(err, "")
 		}
-		publicUrl.URL = fmt.Sprintf(BaseShareURL, accessToken)
+		publicUrl.URL = pcr.GetAlbumUrl(accessToken)
 		if nonce != nil {
 			publicUrl.Nonce = nonce
 			publicUrl.MemLimit = memLimit
