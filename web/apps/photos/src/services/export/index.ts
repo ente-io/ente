@@ -995,6 +995,19 @@ class ExportService {
                     );
                     // TODO(MR): Productionalize
                     if (isDevBuild) {
+                        const testStream = new ReadableStream({
+                            async start(controller) {
+                                await sleep(1000);
+                                controller.enqueue("This ");
+                                await sleep(1000);
+                                controller.enqueue("is ");
+                                await sleep(1000);
+                                controller.enqueue("a ");
+                                await sleep(1000);
+                                controller.enqueue("test");
+                                controller.close();
+                            },
+                        }).pipeThrough(new TextEncoderStream());
                         console.log({ a: "will send req", updatedFileStream });
                         // The duplex parameter needs to be set to 'half' when
                         // streaming requests.
@@ -1011,9 +1024,10 @@ class ExportService {
                         // include the "duplex" parameter, so we need to cast to
                         // get TypeScript to let this code through. e.g. see
                         // https://github.com/node-fetch/node-fetch/issues/1769
-                        const req = new Request("stream://foo", {
+                        const req = new Request("stream://write/tmp/foo.txt", {
                             method: "POST",
-                            body: updatedFileStream,
+                            // body: updatedFileStream,
+                            body: testStream,
                             duplex: "half",
                         } as unknown as RequestInit);
                         const res = await fetch(req);
