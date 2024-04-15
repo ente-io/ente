@@ -251,6 +251,7 @@ class _LoginPasswordVerificationPageState
                         borderSide: BorderSide.none,
                         borderRadius: BorderRadius.circular(6),
                       ),
+                      fillColor: getEnteColorScheme(context).fillFaint,
                       suffixIcon: _passwordInFocus
                           ? IconButton(
                               icon: Icon(
@@ -282,10 +283,11 @@ class _LoginPasswordVerificationPageState
                     },
                   ),
                 ),
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 18),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 18),
                   child: Divider(
                     thickness: 1,
+                    color: getEnteColorScheme(context).strokeFaint,
                   ),
                 ),
                 Padding(

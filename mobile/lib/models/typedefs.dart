@@ -18,3 +18,4 @@ typedef VoidCallbackParamSearchResutlsStream = void Function(
 typedef FutureVoidCallback = Future<void> Function();
 typedef FutureOrVoidCallback = FutureOr<void> Function();
 typedef FutureVoidCallbackParamStr = Future<void> Function(String);
+typedef FutureVoidCallbackParamBool = Future<void> Function(bool);

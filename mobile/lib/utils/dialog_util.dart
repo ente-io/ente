@@ -291,7 +291,6 @@ ProgressDialog createProgressDialog(
     context,
     type: ProgressDialogType.normal,
     isDismissible: isDismissible,
-    barrierColor: Colors.black12,
   );
   dialog.style(
     message: message,

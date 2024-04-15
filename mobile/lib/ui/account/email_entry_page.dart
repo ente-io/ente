@@ -148,7 +148,9 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                     style: Theme.of(context).textTheme.titleMedium,
                     autofillHints: const [AutofillHints.email],
                     decoration: InputDecoration(
-                      fillColor: _emailIsValid ? _validFieldValueColor : null,
+                      fillColor: _emailIsValid
+                          ? _validFieldValueColor
+                          : getEnteColorScheme(context).fillFaint,
                       filled: true,
                       hintText: S.of(context).email,
                       contentPadding: const EdgeInsets.symmetric(
@@ -195,8 +197,9 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                     enableSuggestions: true,
                     autofillHints: const [AutofillHints.newPassword],
                     decoration: InputDecoration(
-                      fillColor:
-                          _passwordIsValid ? _validFieldValueColor : null,
+                      fillColor: _passwordIsValid
+                          ? _validFieldValueColor
+                          : getEnteColorScheme(context).fillFaint,
                       filled: true,
                       hintText: S.of(context).password,
                       contentPadding: const EdgeInsets.symmetric(
@@ -265,7 +268,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                     decoration: InputDecoration(
                       fillColor: _passwordsMatch && _passwordIsValid
                           ? _validFieldValueColor
-                          : null,
+                          : getEnteColorScheme(context).fillFaint,
                       filled: true,
                       hintText: S.of(context).confirmPassword,
                       contentPadding: const EdgeInsets.symmetric(
@@ -343,7 +346,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                   child: TextFormField(
                     style: Theme.of(context).textTheme.titleMedium,
                     decoration: InputDecoration(
-                      fillColor: null,
+                      fillColor: getEnteColorScheme(context).fillFaint,
                       filled: true,
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 16,
@@ -375,7 +378,10 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                     textInputAction: TextInputAction.next,
                   ),
                 ),
-                const Divider(thickness: 1),
+                Divider(
+                  thickness: 1,
+                  color: getEnteColorScheme(context).strokeFaint,
+                ),
                 const SizedBox(height: 12),
                 _getAgreement(),
                 const SizedBox(height: 40),

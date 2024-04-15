@@ -10,6 +10,7 @@ import 'package:photos/events/user_logged_out_event.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/services/collections_service.dart';
+import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/collections/button/archived_button.dart";
 import "package:photos/ui/collections/button/hidden_button.dart";
 import "package:photos/ui/collections/button/trash_button.dart";
@@ -184,7 +185,11 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
                 ),
               )
             : const SliverToBoxAdapter(child: SizedBox.shrink()),
-        const SliverToBoxAdapter(child: Divider()),
+        SliverToBoxAdapter(
+          child: Divider(
+            color: getEnteColorScheme(context).strokeFaint,
+          ),
+        ),
         const SliverToBoxAdapter(child: SizedBox(height: 12)),
         SliverToBoxAdapter(
           child: Padding(
