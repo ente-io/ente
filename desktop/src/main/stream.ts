@@ -37,7 +37,16 @@ export const registerStreamProtocol = () => {
             /*          host-pathname----- */
             case "write":
                 try {
-                    await writeStream(path, request.body);
+                    // await writeStream(path, request.body);
+                    console.log("starting stream");
+                    let c = 0;
+                    for await (const p of request.body as any) {
+                        if (c == 327680) console.log(p);
+                        fs.appendFile(path, p);
+                        c += p.length;
+                    }
+                    console.log("ending stream");
+
                     return new Response("", { status: 200 });
                 } catch (e) {
                     log.error(`Failed to write stream for ${url}`, e);
