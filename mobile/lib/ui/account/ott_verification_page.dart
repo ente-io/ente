@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/services/user_service.dart';
+import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/common/dynamic_fab.dart';
 import 'package:step_progress_indicator/step_progress_indicator.dart';
 import "package:styled_text/styled_text.dart";
@@ -16,7 +17,7 @@ class OTTVerificationPage extends StatefulWidget {
     this.email, {
     this.isChangeEmail = false,
     this.isCreateAccountScreen = false,
-        this.isResetPasswordScreen = false,
+    this.isResetPasswordScreen = false,
     Key? key,
   }) : super(key: key);
 
@@ -78,9 +79,11 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
               _verificationCodeController.text,
             );
           } else {
-            UserService.instance
-                .verifyEmail(context, _verificationCodeController.text,
-              isResettingPasswordScreen: widget.isResetPasswordScreen,);
+            UserService.instance.verifyEmail(
+              context,
+              _verificationCodeController.text,
+              isResettingPasswordScreen: widget.isResetPasswordScreen,
+            );
           }
           FocusScope.of(context).unfocus();
         },
@@ -130,21 +133,21 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
                             },
                           ),
                         ),
-                        widget.isResetPasswordScreen ?
-                          Text(
-                            S.of(context).toResetVerifyEmail,
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleMedium!
-                                .copyWith(fontSize: 14),
-                          ):
-                        Text(
-                          S.of(context).checkInboxAndSpamFolder,
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleMedium!
-                              .copyWith(fontSize: 14),
-                        ),
+                        widget.isResetPasswordScreen
+                            ? Text(
+                                S.of(context).toResetVerifyEmail,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleMedium!
+                                    .copyWith(fontSize: 14),
+                              )
+                            : Text(
+                                S.of(context).checkInboxAndSpamFolder,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleMedium!
+                                    .copyWith(fontSize: 14),
+                              ),
                       ],
                     ),
                   ),
@@ -168,6 +171,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
                     borderSide: BorderSide.none,
                     borderRadius: BorderRadius.circular(6),
                   ),
+                  fillColor: getEnteColorScheme(context).fillFaint,
                 ),
                 controller: _verificationCodeController,
                 autofocus: false,
@@ -178,8 +182,9 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
                 },
               ),
             ),
-            const Divider(
+            Divider(
               thickness: 1,
+              color: getEnteColorScheme(context).strokeFaint,
             ),
             Padding(
               padding: const EdgeInsets.all(20),

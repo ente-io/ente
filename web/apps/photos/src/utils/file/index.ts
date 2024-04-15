@@ -51,8 +51,8 @@ import {
 } from "types/gallery";
 import { VISIBILITY_STATE } from "types/magicMetadata";
 import { FileTypeInfo } from "types/upload";
-import { getFileExportPath, getUniqueFileExportName } from "utils/export";
 import { isArchivedFile, updateMagicMetadata } from "utils/magicMetadata";
+import { safeFileName } from "utils/native-fs";
 
 const WAIT_TIME_IMAGE_CONVERSION = 30 * 1000;
 
@@ -812,38 +812,39 @@ async function downloadFileDesktop(
     if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
         const fileBlob = await new Response(updatedFileStream).blob();
         const livePhoto = await decodeLivePhoto(file, fileBlob);
-        const imageExportName = await getUniqueFileExportName(
+        const imageExportName = await safeFileName(
             downloadPath,
             livePhoto.imageNameTitle,
+            electron.fs.exists,
         );
         const imageStream = generateStreamFromArrayBuffer(livePhoto.image);
         await electron.saveStreamToDisk(
-            getFileExportPath(downloadPath, imageExportName),
+            `${downloadPath}/${imageExportName}`,
             imageStream,
         );
         try {
-            const videoExportName = await getUniqueFileExportName(
+            const videoExportName = await safeFileName(
                 downloadPath,
                 livePhoto.videoNameTitle,
+                electron.fs.exists,
             );
             const videoStream = generateStreamFromArrayBuffer(livePhoto.video);
             await electron.saveStreamToDisk(
-                getFileExportPath(downloadPath, videoExportName),
+                `${downloadPath}/${videoExportName}`,
                 videoStream,
             );
         } catch (e) {
-            await electron.deleteFile(
-                getFileExportPath(downloadPath, imageExportName),
-            );
+            await electron.fs.rm(`${downloadPath}/${imageExportName}`);
             throw e;
         }
     } else {
-        const fileExportName = await getUniqueFileExportName(
+        const fileExportName = await safeFileName(
             downloadPath,
             file.metadata.title,
+            electron.fs.exists,
         );
         await electron.saveStreamToDisk(
-            getFileExportPath(downloadPath, fileExportName),
+            `${downloadPath}/${fileExportName}`,
             updatedFileStream,
         );
     }

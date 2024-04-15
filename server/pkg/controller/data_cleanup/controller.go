@@ -190,8 +190,17 @@ func (c *DeleteUserCleanupController) storageCheck(ctx context.Context, item *en
 }
 
 func (c *DeleteUserCleanupController) isDeleted(item *entity.DataCleanup) error {
-	_, err := c.UserRepo.Get(item.UserID)
+	u, err := c.UserRepo.Get(item.UserID)
 	if err == nil {
+		// user is not deleted, double check by verifying email is not empty
+		if u.Email != "" {
+			// todo: remove this logic after next deployment. This is to only handle cases
+			// where we have not removed scheduled delete entry for account post recovery.
+			remErr := c.Repo.RemoveScheduledDelete(context.Background(), item.UserID)
+			if remErr != nil {
+				return stacktrace.Propagate(remErr, "failed to remove scheduled delete entry")
+			}
+		}
 		return stacktrace.Propagate(ente.NewBadRequestWithMessage("User ID is linked to undeleted account"), "")
 	}
 	if !errors.Is(err, ente.ErrUserDeleted) {

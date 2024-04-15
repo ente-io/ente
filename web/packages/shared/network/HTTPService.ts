@@ -125,7 +125,6 @@ class HTTPService {
     /**
      * Returns axios interceptors.
      */
-    // eslint-disable-next-line class-methods-use-this
     public getInterceptors() {
         return axios.interceptors;
     }
@@ -137,7 +136,6 @@ class HTTPService {
      * over what was sent in config.
      */
     public async request(config: AxiosRequestConfig, customConfig?: any) {
-        // eslint-disable-next-line no-param-reassign
         config.headers = {
             ...this.headers,
             ...config.headers,

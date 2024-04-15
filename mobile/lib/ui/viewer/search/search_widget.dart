@@ -142,6 +142,7 @@ class SearchWidgetState extends State<SearchWidget> {
                       //TODO: Extract string
                       hintText: "Search",
                       filled: true,
+                      fillColor: getEnteColorScheme(context).fillFaint,
                       border: const UnderlineInputBorder(
                         borderSide: BorderSide.none,
                       ),

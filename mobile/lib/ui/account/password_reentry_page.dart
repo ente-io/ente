@@ -9,6 +9,7 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/services/user_service.dart";
+import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/account/recovery_page.dart';
 import 'package:photos/ui/common/dynamic_fab.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
@@ -221,6 +222,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                     decoration: InputDecoration(
                       hintText: S.of(context).enterYourPassword,
                       filled: true,
+                      fillColor: getEnteColorScheme(context).fillFaint,
                       contentPadding: const EdgeInsets.all(20),
                       border: UnderlineInputBorder(
                         borderSide: BorderSide.none,
@@ -257,10 +259,11 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                     },
                   ),
                 ),
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 18),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 18),
                   child: Divider(
                     thickness: 1,
+                    color: getEnteColorScheme(context).strokeFaint,
                   ),
                 ),
                 Padding(
