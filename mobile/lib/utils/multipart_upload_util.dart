@@ -6,6 +6,7 @@ import "package:dio/dio.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/core/network/network.dart";
+import "package:photos/services/feature_flag_service.dart";
 import "package:photos/utils/xml_parser_util.dart";
 
 final _enteDio = NetworkClient.instance.enteDio;
@@ -56,6 +57,10 @@ Future<int> calculatePartCount(int fileSize) async {
 
 Future<MultipartUploadURLs> getMultipartUploadURLs(int count) async {
   try {
+    assert(
+      FeatureFlagService.instance.isInternalUserOrDebugBuild(),
+      "Multipart upload should not be enabled for external users.",
+    );
     final response = await _enteDio.get(
       "/files/multipart-upload-urls",
       queryParameters: {
