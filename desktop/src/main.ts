@@ -9,7 +9,7 @@
  * https://www.electronjs.org/docs/latest/tutorial/process-model#the-main-process
  */
 import { nativeImage } from "electron";
-import { app, BrowserWindow, Menu, Tray } from "electron/main";
+import { app, BrowserWindow, Menu, protocol, Tray } from "electron/main";
 import serveNextAt from "next-electron-server";
 import { existsSync } from "node:fs";
 import fs from "node:fs/promises";
@@ -229,7 +229,12 @@ const setupTrayItem = (mainWindow: BrowserWindow) => {
  *
  * See also: [Note: Transferring large amount of data over IPC]
  */
-const registerStreamProtocol = () => {};
+const registerStreamProtocol = () => {
+    protocol.handle("stream", (request: Request) => {
+        log.info({ e: "Got incoming stream", request });
+        return new Response("", { status: 200 });
+    });
+};
 
 /**
  * Older versions of our app used to maintain a cache dir using the main

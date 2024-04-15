@@ -1,4 +1,5 @@
 import { ensureElectron } from "@/next/electron";
+import { isDevBuild } from "@/next/env";
 import log from "@/next/log";
 import { CustomError } from "@ente/shared/error";
 import { Events, eventBus } from "@ente/shared/events";
@@ -992,6 +993,16 @@ class ExportService {
                         fileExportName,
                         file,
                     );
+                    // TODO(MR): Productionalize
+                    if (isDevBuild) {
+                        console.log({ a: "will send req", updatedFileStream });
+                        const req = new Request("stream://foo", {
+                            method: "POST",
+                            body: updatedFileStream,
+                        });
+                        const res = await fetch(req);
+                        console.log({ a: "got res", res });
+                    }
                     await electron.saveStreamToDisk(
                         `${collectionExportPath}/${fileExportName}`,
                         updatedFileStream,
