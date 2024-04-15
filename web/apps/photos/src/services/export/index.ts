@@ -884,7 +884,7 @@ class ExportService {
         try {
             const exportRecord = await this.getExportRecord(folder);
             const newRecord: ExportRecord = { ...exportRecord, ...newData };
-            await ensureElectron().saveFileToDisk(
+            await ensureElectron().fs.writeTextFile(
                 `${folder}/${exportRecordFileName}`,
                 JSON.stringify(newRecord, null, 2),
             );
@@ -907,8 +907,7 @@ class ExportService {
             if (!(await fs.exists(exportRecordJSONPath))) {
                 return this.createEmptyExportRecord(exportRecordJSONPath);
             }
-            const recordFile =
-                await electron.readTextFile(exportRecordJSONPath);
+            const recordFile = await fs.readTextFile(exportRecordJSONPath);
             try {
                 return JSON.parse(recordFile);
             } catch (e) {
@@ -1077,7 +1076,7 @@ class ExportService {
         fileExportName: string,
         file: EnteFile,
     ) {
-        await ensureElectron().saveFileToDisk(
+        await ensureElectron().fs.writeTextFile(
             getFileMetadataExportPath(collectionExportPath, fileExportName),
             getGoogleLikeMetadataFile(fileExportName, file),
         );
@@ -1106,7 +1105,7 @@ class ExportService {
 
     private createEmptyExportRecord = async (exportRecordJSONPath: string) => {
         const exportRecord: ExportRecord = NULL_EXPORT_RECORD;
-        await ensureElectron().saveFileToDisk(
+        await ensureElectron().fs.writeTextFile(
             exportRecordJSONPath,
             JSON.stringify(exportRecord, null, 2),
         );

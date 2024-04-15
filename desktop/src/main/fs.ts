@@ -17,6 +17,12 @@ export const fsRmdir = (path: string) => fs.rmdir(path);
 
 export const fsRm = (path: string) => fs.rm(path);
 
+export const fsReadTextFile = async (filePath: string) =>
+    fs.readFile(filePath, "utf-8");
+
+export const fsWriteTextFile = (path: string, contents: string) =>
+    fs.writeFile(path, contents);
+
 /**
  * Write a (web) ReadableStream to a file at the given {@link filePath}.
  *
@@ -83,12 +89,6 @@ const writeNodeStream = async (
 /* TODO: Audit below this  */
 
 export const saveStreamToDisk = writeStream;
-
-export const saveFileToDisk = (path: string, contents: string) =>
-    fs.writeFile(path, contents);
-
-export const readTextFile = async (filePath: string) =>
-    fs.readFile(filePath, "utf-8");
 
 export const isFolder = async (dirPath: string) => {
     if (!existsSync(dirPath)) return false;
