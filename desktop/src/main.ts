@@ -32,7 +32,7 @@ import { isDev } from "./main/util";
 /**
  * The URL where the renderer HTML is being served from.
  */
-export const rendererURL = "next://app";
+export const rendererURL = "ente://app";
 
 /**
  * We want to hide our window instead of closing it when the user presses the
@@ -63,7 +63,7 @@ export const allowWindowClose = (): void => {
  * production mode and `next dev` in development mode, whilst keeping the rest
  * of our code the same.
  *
- * It uses protocol handlers to serve files from the "next://app" protocol
+ * It uses protocol handlers to serve files from the "ente://" protocol.
  *
  * - In development this is proxied to http://localhost:3000
  * - In production it serves files from the `/out` directory
