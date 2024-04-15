@@ -300,7 +300,8 @@ const getDirFiles = (dirPath: string): Promise<ElectronFile[]> =>
 //   https://www.electronjs.org/docs/latest/api/context-bridge#methods
 //
 // The copy itself is relatively fast, but the problem with transfering large
-// amounts of data is potentially running out of memory during the copy.
+// amounts of data is potentially running out of memory during the copy. For an
+// alternative, see [Note: IPC streams].
 contextBridge.exposeInMainWorld("electron", {
     // - General
     appVersion,
