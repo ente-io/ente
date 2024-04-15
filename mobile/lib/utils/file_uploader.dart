@@ -28,6 +28,7 @@ import 'package:photos/models/file/file_type.dart';
 import "package:photos/models/metadata/file_magic.dart";
 import 'package:photos/models/upload_url.dart';
 import "package:photos/models/user_details.dart";
+import "package:photos/module/upload/service/multipart.dart";
 import 'package:photos/services/collections_service.dart';
 import "package:photos/services/feature_flag_service.dart";
 import "package:photos/services/file_magic_service.dart";
@@ -38,7 +39,6 @@ import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_download_util.dart';
 import 'package:photos/utils/file_uploader_util.dart';
 import "package:photos/utils/file_util.dart";
-import "package:photos/utils/multipart_upload_util.dart";
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tuple/tuple.dart';
 import "package:uuid/uuid.dart";
@@ -80,6 +80,7 @@ class FileUploader {
   // cases, we don't want to clear the stale upload files. See #removeStaleFiles
   // as it can result in clearing files which are still being force uploaded.
   bool _hasInitiatedForceUpload = false;
+  late MultiPartUploader _multiPartUploader;
 
   FileUploader._privateConstructor() {
     Bus.instance.on<SubscriptionPurchasedEvent>().listen((event) {
@@ -115,6 +116,12 @@ class FileUploader {
       // ignore: unawaited_futures
       _pollBackgroundUploadStatus();
     }
+    _multiPartUploader = MultiPartUploader(
+      _enteDio,
+      _dio,
+      UploadLocksDB.instance,
+      FeatureFlagService.instance,
+    );
     Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
       if (event.type == EventType.deletedFromDevice ||
           event.type == EventType.deletedFromEverywhere) {
@@ -497,7 +504,7 @@ class FileUploader {
       // Calculate the number of parts for the file. Multiple part upload
       // is only enabled for internal users and debug builds till it's battle tested.
       final count = FeatureFlagService.instance.isInternalUserOrDebugBuild()
-          ? await calculatePartCount(
+          ? await _multiPartUploader.calculatePartCount(
               await encryptedFile.length(),
             )
           : 1;
@@ -513,15 +520,15 @@ class FileUploader {
               lockKey,
               mediaUploadData.hashData!.fileHash!,
             )) {
-          fileObjectKey = await putExistingMultipartFile(
+          fileObjectKey = await _multiPartUploader.putExistingMultipartFile(
             encryptedFile,
             lockKey,
             mediaUploadData.hashData!.fileHash!,
           );
         } else {
-          final fileUploadURLs = await getMultipartUploadURLs(count);
-
-          await createTableEntry(
+          final fileUploadURLs =
+              await _multiPartUploader.getMultipartUploadURLs(count);
+          await _multiPartUploader.createTableEntry(
             lockKey,
             mediaUploadData.hashData!.fileHash!,
             fileUploadURLs,
@@ -529,7 +536,10 @@ class FileUploader {
             await encryptedFile.length(),
             fileAttributes.key!,
           );
-          fileObjectKey = await putMultipartFile(fileUploadURLs, encryptedFile);
+          fileObjectKey = await _multiPartUploader.putMultipartFile(
+            fileUploadURLs,
+            encryptedFile,
+          );
         }
       }
 

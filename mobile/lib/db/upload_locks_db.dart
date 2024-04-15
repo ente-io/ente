@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import "package:photos/core/constants.dart";
-import "package:photos/utils/multipart_upload_util.dart";
+import "package:photos/module/upload/model/multipart.dart";
 import 'package:sqflite/sqflite.dart';
 
 class UploadLocksDB {
