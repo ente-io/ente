@@ -1,5 +1,4 @@
 import { ensureElectron } from "@/next/electron";
-import { isDevBuild } from "@/next/env";
 import log from "@/next/log";
 import { CustomError } from "@ente/shared/error";
 import { Events, eventBus } from "@ente/shared/events";
@@ -35,6 +34,7 @@ import {
     mergeMetadata,
 } from "utils/file";
 import { safeDirectoryName, safeFileName } from "utils/native-fs";
+import { writeStream } from "utils/native-stream";
 import { getAllLocalCollections } from "../collectionService";
 import downloadManager from "../download";
 import { getAllLocalFiles } from "../fileService";
@@ -993,47 +993,7 @@ class ExportService {
                         fileExportName,
                         file,
                     );
-                    // TODO(MR): Productionalize
-                    if (isDevBuild) {
-                        const testStream = new ReadableStream({
-                            async start(controller) {
-                                await sleep(1000);
-                                controller.enqueue("This ");
-                                await sleep(1000);
-                                controller.enqueue("is ");
-                                await sleep(1000);
-                                controller.enqueue("a ");
-                                await sleep(1000);
-                                controller.enqueue("test");
-                                controller.close();
-                            },
-                        }).pipeThrough(new TextEncoderStream());
-                        console.log({ a: "will send req", updatedFileStream });
-                        // The duplex parameter needs to be set to 'half' when
-                        // streaming requests.
-                        //
-                        // Currently browsers, and specifically in our case,
-                        // since this code runs only within our desktop
-                        // (Electron) app, Chromium, don't support 'full' duplex
-                        // mode (i.e. streaming both the request and the
-                        // response).
-                        //
-                        // https://developer.chrome.com/docs/capabilities/web-apis/fetch-streaming-requests
-                        //
-                        // In another twist, the TypeScript libdom.d.ts does not
-                        // include the "duplex" parameter, so we need to cast to
-                        // get TypeScript to let this code through. e.g. see
-                        // https://github.com/node-fetch/node-fetch/issues/1769
-                        const req = new Request("stream://write/tmp/foo.txt", {
-                            method: "POST",
-                            // body: updatedFileStream,
-                            body: testStream,
-                            duplex: "half",
-                        } as unknown as RequestInit);
-                        const res = await fetch(req);
-                        console.log({ a: "got res", res });
-                    }
-                    await electron.saveStreamToDisk(
+                    await writeStream(
                         `${collectionExportPath}/${fileExportName}`,
                         updatedFileStream,
                     );
@@ -1084,7 +1044,7 @@ class ExportService {
                 imageExportName,
                 file,
             );
-            await electron.saveStreamToDisk(
+            await writeStream(
                 `${collectionExportPath}/${imageExportName}`,
                 imageStream,
             );
@@ -1096,7 +1056,7 @@ class ExportService {
                 file,
             );
             try {
-                await electron.saveStreamToDisk(
+                await writeStream(
                     `${collectionExportPath}/${videoExportName}`,
                     videoStream,
                 );
