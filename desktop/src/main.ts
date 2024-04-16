@@ -132,12 +132,43 @@ const registerPrivilegedSchemes = () => {
                 // TODO(MR): Remove the commented bits if we don't end up
                 // needing them by the time the IPC refactoring is done.
 
-                // Prevent the insecure origin issues when fetching this
+                // standard: true,
+                // // Prevent the insecure origin issues when fetching this
                 // secure: true,
-                // Allow the web fetch API in the renderer to use this scheme.
-                supportFetchAPI: true,
-                // Allow it to be used with video tags.
+                // // Allow the web fetch API in the renderer to use this scheme.
+                // supportFetchAPI: true,
+                // // Allow it to be used with video tags.
                 // stream: true,
+                standard: true,
+                /**
+                 * Default false.
+                 */
+                secure: true,
+                /**
+                 * Default false.
+                 */
+                bypassCSP: true,
+                /**
+                 * Default false.
+                 */
+                allowServiceWorkers: true,
+                /**
+                 * Default false.
+                 */
+                supportFetchAPI: true,
+                /**
+                 * Default false.
+                 */
+                corsEnabled: true,
+                /**
+                 * Default false.
+                 */
+                stream: true,
+                /**
+                 * Enable V8 code cache for the scheme, only works when `standard` is also set to
+                 * true. Default false.
+                 */
+                codeCache: true,
             },
         },
     ]);

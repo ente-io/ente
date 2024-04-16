@@ -15,6 +15,10 @@
  * @param stream The stream which should be written into the file.
  *  */
 export const writeStream = async (path: string, stream: ReadableStream) => {
+    writeStream_1("/tmp/1.txt", testStream());
+};
+
+export const writeStream_1 = async (path: string, stream: ReadableStream) => {
     // return writeStreamOneShot(path, stream)
 
     // The duplex parameter needs to be set to 'half' when streaming requests.
@@ -26,7 +30,10 @@ export const writeStream = async (path: string, stream: ReadableStream) => {
     const req = new Request(`stream://write${path}`, {
         // GET can't have a body
         method: "POST",
-        headers: { "Content-Type": "application/octet-stream" },
+        headers: {
+            "Content-Type": "application/octet-stream",
+            "Content-Length": "1128608",
+        },
         body: stream,
         // @ts-expect-error TypeScript's libdom.d.ts does not include the
         // "duplex" parameter, e.g. see
@@ -38,6 +45,38 @@ export const writeStream = async (path: string, stream: ReadableStream) => {
         throw new Error(
             `Failed to write stream to ${path}: HTTP ${res.status}`,
         );
+};
+
+const testStream = () => {
+    return new ReadableStream({
+        async start(controller) {
+            const send = (count: number, char: string) =>
+                controller.enqueue(
+                    new TextEncoder().encode(Array(count).fill(char).join("")),
+                );
+
+            send(65536, "1");
+            send(65536, "2");
+            send(65536, "3");
+            send(65536, "4");
+            send(65536, "5");
+            send(65536, "6");
+            send(65536, "7");
+            send(65536, "8");
+            send(65536, "9");
+            send(65536, "1");
+            send(65536, "2");
+            send(65536, "3");
+            send(65536, "4");
+            send(65536, "5");
+            send(65536, "6");
+            send(65536, "7");
+            send(65536, "8");
+            send(14496, "9");
+
+            controller.close();
+        },
+    });
 };
 
 export const writeStreamOneShot = async (
