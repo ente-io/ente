@@ -1137,6 +1137,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "scanThisBarcodeWithnyourAuthenticatorApp":
             MessageLookupByLibrary.simpleMessage(
                 "Scansione questo codice QR\ncon la tua app di autenticazione"),
+        "search": MessageLookupByLibrary.simpleMessage("Search"),
         "searchByAlbumNameHint":
             MessageLookupByLibrary.simpleMessage("Nome album"),
         "searchByExamples": MessageLookupByLibrary.simpleMessage(
