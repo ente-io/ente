@@ -159,6 +159,9 @@ class SearchWidgetState extends State<SearchWidget> {
                         minHeight: 44,
                         minWidth: 44,
                       ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        vertical: 8,
+                      ),
                       prefixIcon: Hero(
                         tag: "search_icon",
                         child: Icon(
@@ -166,6 +169,7 @@ class SearchWidgetState extends State<SearchWidget> {
                           color: colorScheme.strokeFaint,
                         ),
                       ),
+
                       /*Using valueListenableBuilder inside a stateful widget because this widget is only rebuild when
                       setState is called when deboucncing is over and the spinner needs to be shown while debouncing */
                       suffixIcon: ValueListenableBuilder(
