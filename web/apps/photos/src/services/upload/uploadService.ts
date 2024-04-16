@@ -1,7 +1,7 @@
+import log from "@/next/log";
 import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
 import { B64EncryptionResult } from "@ente/shared/crypto/types";
 import { CustomError, handleUploadError } from "@ente/shared/error";
-import { logError } from "@ente/shared/sentry";
 import { Remote } from "comlink";
 import { Collection } from "types/collection";
 import { FilePublicMagicMetadataProps } from "types/file";
@@ -231,7 +231,7 @@ class UploadService {
             return backupedFile;
         } catch (e) {
             if (e.message !== CustomError.UPLOAD_CANCELLED) {
-                logError(e, "error uploading to bucket");
+                log.error("error uploading to bucket", e);
             }
             throw e;
         }
@@ -264,7 +264,7 @@ class UploadService {
             await this.fetchUploadURLs();
             // checking for any subscription related errors
         } catch (e) {
-            logError(e, "prefetch uploadURL failed");
+            log.error("prefetch uploadURL failed", e);
             handleUploadError(e);
         }
     }

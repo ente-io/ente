@@ -71,11 +71,22 @@ http:
     # By default, this is false, and museum will bind to 8080 without TLS.
     # use-tls: true
 
+# Specify the base endpoints for various apps
+apps:
+    # Default is https://albums.ente.io
+    #
+    # If you're running a self hosted instance and wish to serve public links,
+    # set this to the URL where your albums web app is running.
+    public-albums:
+
 # Database connection parameters
 db:
     host: localhost
     port: 5432
     name: ente_db
+    # You might want to set this to "require" for production
+    # See https://www.postgresql.org/docs/current/libpq-ssl.html#LIBPQ-SSL-PROTECTION
+    sslmode: disable
     # These can be specified here, or alternatively provided via the environment
     # as ENTE_DB_USER and ENTE_DB_PASSWORD.
     user:
@@ -236,6 +247,14 @@ zoho:
     refresh-token:
     list-key:
     topic-ids:
+
+# Listmonk Campaigns config (optional)
+# Use case: Sending emails
+listmonk:
+    server-url:
+    username:
+    password:
+    list-ids:
 
 # Various low-level configuration options
 internal:

@@ -1,4 +1,4 @@
-import { logError } from "@ente/shared/sentry";
+import log from "@/next/log";
 import BlockIcon from "@mui/icons-material/Block";
 import DoneIcon from "@mui/icons-material/Done";
 import ModeEditIcon from "@mui/icons-material/ModeEdit";
@@ -63,8 +63,7 @@ export default function ManageParticipant({
             selectedParticipant.role = newRole;
             await galleryContext.syncWithRemote(false, true);
         } catch (e) {
-            const errorMessage = handleSharingErrors(e);
-            logError(e, errorMessage);
+            log.error(handleSharingErrors(e), e);
         }
     };
 
@@ -84,7 +83,7 @@ export default function ManageParticipant({
 
             buttonText = t("CONVERT_TO_VIEWER");
         } else if (newRole === "COLLABORATOR") {
-            contentText = t(`CHANGE_PERMISSIONS_TO_COLLABORATOR`, {
+            contentText = t("CHANGE_PERMISSIONS_TO_COLLABORATOR", {
                 selectedEmail: selectedEmail,
             });
             buttonText = t("CONVERT_TO_COLLABORATOR");

@@ -7,11 +7,6 @@ module.exports = {
         // "plugin:@typescript-eslint/strict-type-checked",
         // "plugin:@typescript-eslint/stylistic-type-checked",
     ],
-    /* Temporarily disable some rules
-       Enhancement: Remove me */
-    rules: {
-        "no-unused-vars": "off",
-    },
     /* Temporarily add a global
        Enhancement: Remove me */
     globals: {

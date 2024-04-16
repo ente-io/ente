@@ -500,6 +500,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Account aanmaken"),
         "createAlbumActionHint": MessageLookupByLibrary.simpleMessage(
             "Lang indrukken om foto\'s te selecteren en klik + om een album te maken"),
+        "createCollaborativeLink":
+            MessageLookupByLibrary.simpleMessage("Create collaborative link"),
         "createCollage": MessageLookupByLibrary.simpleMessage("Creëer collage"),
         "createNewAccount":
             MessageLookupByLibrary.simpleMessage("Nieuw account aanmaken"),
@@ -1204,6 +1206,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "scanThisBarcodeWithnyourAuthenticatorApp":
             MessageLookupByLibrary.simpleMessage(
                 "Scan deze barcode met\nje authenticator app"),
+        "search": MessageLookupByLibrary.simpleMessage("Search"),
         "searchAlbumsEmptySection":
             MessageLookupByLibrary.simpleMessage("Albums"),
         "searchByAlbumNameHint":

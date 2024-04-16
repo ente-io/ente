@@ -59,7 +59,10 @@ See [docs/](docs/README.md) for how to edit these documents.
 
 ## Code contributions
 
-If you'd like to contribute code, it is best to start small.
+Code is a small aspect of community, and the ways mentioned above are more
+important in helping us. But if you'd _really_ like to contribute code, it is
+best to start small. Consider some well-scoped changes, say like adding more
+[custom icons to auth](auth/docs/adding-icons.md).
 
 Each of the individual product/platform specific directories in this repository
 have instructions on setting up a dev environment and making changes. The issues

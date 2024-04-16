@@ -86,7 +86,6 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   late Function() _selectedFilesListener;
   String? _appBarTitle;
   late CollectionActions collectionActions;
-  final GlobalKey shareButtonKey = GlobalKey();
   bool isQuickLink = false;
   late bool isInternalUser;
   late GalleryType galleryType;

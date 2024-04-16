@@ -2,7 +2,7 @@ import { FILE_TYPE } from "constants/file";
 import { City } from "services/locationSearchService";
 import { LocationTagData } from "types/entity";
 import { EnteFile } from "types/file";
-import { Person, Thing, WordGroup } from "types/machineLearning";
+import { Person } from "types/machineLearning";
 import { IndexStatus } from "types/machineLearning/ui";
 
 export enum SuggestionType {
@@ -12,8 +12,6 @@ export enum SuggestionType {
     FILE_NAME = "FILE_NAME",
     PERSON = "PERSON",
     INDEX_STATUS = "INDEX_STATUS",
-    THING = "THING",
-    TEXT = "TEXT",
     FILE_CAPTION = "FILE_CAPTION",
     FILE_TYPE = "FILE_TYPE",
     CLIP = "CLIP",
@@ -34,8 +32,6 @@ export interface Suggestion {
         | number[]
         | Person
         | IndexStatus
-        | Thing
-        | WordGroup
         | LocationTagData
         | City
         | FILE_TYPE
@@ -50,8 +46,6 @@ export type Search = {
     collection?: number;
     files?: number[];
     person?: Person;
-    thing?: Thing;
-    text?: WordGroup;
     fileType?: FILE_TYPE;
     clip?: ClipSearchScores;
 };

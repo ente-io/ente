@@ -1,16 +1,12 @@
-import * as chrono from "chrono-node";
-import { t } from "i18next";
-import { getAllPeople } from "utils/machineLearning";
-
+import log from "@/next/log";
 import { CustomError } from "@ente/shared/error";
-import { addLogLine } from "@ente/shared/logging";
-import { logError } from "@ente/shared/sentry";
+import * as chrono from "chrono-node";
 import { FILE_TYPE } from "constants/file";
+import { t } from "i18next";
 import { Collection } from "types/collection";
-import { Model } from "types/embedding";
 import { EntityType, LocationTag, LocationTagData } from "types/entity";
 import { EnteFile } from "types/file";
-import { Person, Thing } from "types/machineLearning";
+import { Person } from "types/machineLearning";
 import {
     ClipSearchScores,
     DateValue,
@@ -21,14 +17,14 @@ import {
 } from "types/search";
 import ComlinkSearchWorker from "utils/comlink/ComlinkSearchWorker";
 import { getUniqueFiles } from "utils/file";
+import { getAllPeople } from "utils/machineLearning";
 import { getMLSyncConfig } from "utils/machineLearning/config";
 import { getFormattedDate } from "utils/search";
 import mlIDbStorage from "utils/storage/mlIDbStorage";
-import { ClipService, computeClipMatchScore } from "./clipService";
+import { clipService, computeClipMatchScore } from "./clip-service";
 import { getLocalEmbeddings } from "./embeddingService";
 import { getLatestEntities } from "./entityService";
 import locationSearchService, { City } from "./locationSearchService";
-import ObjectService from "./machineLearning/objectService";
 
 const DIGITS = new Set(["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]);
 
@@ -59,12 +55,11 @@ export const getAutoCompleteSuggestions =
                 getFileNameSuggestion(searchPhrase, files),
                 getFileCaptionSuggestion(searchPhrase, files),
                 ...(await getLocationSuggestions(searchPhrase)),
-                ...(await getThingSuggestion(searchPhrase)),
             ].filter((suggestion) => !!suggestion);
 
             return convertSuggestionsToOptions(suggestions);
         } catch (e) {
-            logError(e, "getAutoCompleteSuggestions failed");
+            log.error("getAutoCompleteSuggestions failed", e);
             return [];
         }
     };
@@ -159,7 +154,7 @@ function getYearSuggestion(searchPhrase: string): Suggestion[] {
                 ];
             }
         } catch (e) {
-            logError(e, "getYearSuggestion failed");
+            log.error("getYearSuggestion failed", e);
         }
     }
     return [];
@@ -175,7 +170,7 @@ export async function getAllPeopleSuggestion(): Promise<Array<Suggestion>> {
             hide: true,
         }));
     } catch (e) {
-        logError(e, "getAllPeopleSuggestion failed");
+        log.error("getAllPeopleSuggestion failed", e);
         return [];
     }
 }
@@ -205,7 +200,7 @@ export async function getIndexStatusSuggestion(): Promise<Suggestion> {
             hide: true,
         };
     } catch (e) {
-        logError(e, "getIndexStatusSuggestion failed");
+        log.error("getIndexStatusSuggestion failed", e);
     }
 }
 
@@ -292,22 +287,9 @@ async function getLocationSuggestions(searchPhrase: string) {
     return [...locationTagSuggestions, ...citySearchSuggestions];
 }
 
-async function getThingSuggestion(searchPhrase: string): Promise<Suggestion[]> {
-    const thingResults = await searchThing(searchPhrase);
-
-    return thingResults.map(
-        (searchResult) =>
-            ({
-                type: SuggestionType.THING,
-                value: searchResult,
-                label: searchResult.name,
-            }) as Suggestion,
-    );
-}
-
 async function getClipSuggestion(searchPhrase: string): Promise<Suggestion> {
     try {
-        if (!ClipService.isPlatformSupported()) {
+        if (!clipService.isPlatformSupported()) {
             return null;
         }
 
@@ -319,7 +301,7 @@ async function getClipSuggestion(searchPhrase: string): Promise<Suggestion> {
         };
     } catch (e) {
         if (!e.message?.includes(CustomError.MODEL_DOWNLOAD_PENDING)) {
-            logError(e, "getClipSuggestion failed");
+            log.error("getClipSuggestion failed", e);
         }
         return null;
     }
@@ -335,8 +317,10 @@ function searchCollection(
 }
 
 function searchFilesByName(searchPhrase: string, files: EnteFile[]) {
-    return files.filter((file) =>
-        file.metadata.title.toLowerCase().includes(searchPhrase),
+    return files.filter(
+        (file) =>
+            file.id.toString().includes(searchPhrase) ||
+            file.metadata.title.toLowerCase().includes(searchPhrase),
     );
 }
 
@@ -383,23 +367,16 @@ async function searchLocationTag(searchPhrase: string): Promise<LocationTag[]> {
         locationTag.data.name.toLowerCase().includes(searchPhrase),
     );
     if (matchedLocationTags.length > 0) {
-        addLogLine(
+        log.info(
             `Found ${matchedLocationTags.length} location tags for search phrase`,
         );
     }
     return matchedLocationTags;
 }
 
-async function searchThing(searchPhrase: string) {
-    const things = await ObjectService.getAllThings();
-    return things.filter((thing) =>
-        thing.name.toLocaleLowerCase().includes(searchPhrase),
-    );
-}
-
 async function searchClip(searchPhrase: string): Promise<ClipSearchScores> {
-    const imageEmbeddings = await getLocalEmbeddings(Model.ONNX_CLIP);
-    const textEmbedding = await ClipService.getTextEmbedding(searchPhrase);
+    const imageEmbeddings = await getLocalEmbeddings();
+    const textEmbedding = await clipService.getTextEmbedding(searchPhrase);
     const clipSearchResult = new Map<number, number>(
         (
             await Promise.all(
@@ -446,10 +423,9 @@ function convertSuggestionToSearchQuery(option: Suggestion): Search {
         case SuggestionType.PERSON:
             return { person: option.value as Person };
 
-        case SuggestionType.THING:
-            return { thing: option.value as Thing };
         case SuggestionType.FILE_TYPE:
             return { fileType: option.value as FILE_TYPE };
+
         case SuggestionType.CLIP:
             return { clip: option.value as ClipSearchScores };
     }

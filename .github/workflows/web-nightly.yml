@@ -34,7 +34,7 @@ jobs:
               with:
                   node-version: 20
                   cache: "yarn"
-                  cache-dependency-path: "docs/yarn.lock"
+                  cache-dependency-path: "web/yarn.lock"
 
             - name: Install dependencies
               run: yarn install
@@ -88,7 +88,7 @@ jobs:
                   apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
                   projectName: ente
                   branch: n-payments
-                  directory: web/apps/payments/out
+                  directory: web/apps/payments/dist
                   wranglerVersion: "3"
 
             - name: Build photos

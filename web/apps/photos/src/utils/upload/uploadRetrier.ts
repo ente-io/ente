@@ -1,4 +1,4 @@
-import { sleep } from "utils/common";
+import { sleep } from "@ente/shared/utils";
 
 const retrySleepTimeInMilliSeconds = [2000, 5000, 10000];
 

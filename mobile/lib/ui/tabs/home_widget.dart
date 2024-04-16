@@ -80,7 +80,6 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   final _logger = Logger("HomeWidgetState");
   final _selectedFiles = SelectedFiles();
-  final GlobalKey shareButtonKey = GlobalKey();
 
   final PageController _pageController = PageController();
   int _selectedTabIndex = 0;
@@ -285,7 +284,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   void _initMediaShareSubscription() {
     // For sharing images coming from outside the app while the app is in the memory
     _intentDataStreamSubscription =
-        ReceiveSharingIntent.getMediaStream().listen(
+        ReceiveSharingIntent.instance.getMediaStream().listen(
       (List<SharedMediaFile> value) {
         setState(() {
           _shouldRenderCreateCollectionSheet = true;
@@ -297,7 +296,9 @@ class _HomeWidgetState extends State<HomeWidget> {
       },
     );
     // For sharing images coming from outside the app while the app is closed
-    ReceiveSharingIntent.getInitialMedia().then((List<SharedMediaFile> value) {
+    ReceiveSharingIntent.instance
+        .getInitialMedia()
+        .then((List<SharedMediaFile> value) {
       if (mounted) {
         setState(() {
           _sharedFiles = value;
@@ -324,6 +325,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                   constraints: const BoxConstraints(maxWidth: 430),
                   child: Drawer(
                     width: double.infinity,
+                    shape: const RoundedRectangleBorder(),
                     child: _settingsPage,
                   ),
                 )
@@ -381,7 +383,7 @@ class _HomeWidgetState extends State<HomeWidget> {
       //So to stop showing multiple CreateCollectionSheets, this flag
       //needs to be set to false the first time it is rendered.
       _shouldRenderCreateCollectionSheet = false;
-      ReceiveSharingIntent.reset();
+      ReceiveSharingIntent.instance.reset();
       Future.delayed(const Duration(milliseconds: 10), () {
         showCollectionActionSheet(
           context,

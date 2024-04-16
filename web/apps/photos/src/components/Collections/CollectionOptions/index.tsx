@@ -1,6 +1,6 @@
+import log from "@/next/log";
 import { HorizontalFlex } from "@ente/shared/components/Container";
 import OverflowMenu from "@ente/shared/components/OverflowMenu/menu";
-import { logError } from "@ente/shared/sentry";
 import MoreHoriz from "@mui/icons-material/MoreHoriz";
 import { Box } from "@mui/material";
 import {
@@ -161,22 +161,15 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
             case CollectionActions.SHOW_ALBUM_CAST_DIALOG:
                 callback = showCastAlbumDialog;
                 break;
-
             default:
-                logError(
-                    Error("invalid collection action "),
-                    "handleCollectionAction failed",
-                );
-                {
-                    action;
-                }
+                log.error(`invalid collection action ${action}`);
         }
         return async (...args: any) => {
             try {
                 loader && startLoading();
                 await callback(...args);
             } catch (e) {
-                logError(e, "collection action failed", { action });
+                log.error(`collection action ${action} failed`, e);
                 setDialogMessage({
                     title: t("ERROR"),
                     content: t("UNKNOWN_ERROR"),

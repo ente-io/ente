@@ -98,13 +98,13 @@ class _CodeWidgetState extends State<CodeWidget> {
                     onSelected: () => _onShowQrPressed(null),
                   ),
                   MenuItem(
-                    label: 'Edit',
+                    label: l10n.edit,
                     icon: Icons.edit,
                     onSelected: () => _onEditPressed(null),
                   ),
                   const MenuDivider(),
                   MenuItem(
-                    label: 'Delete',
+                    label: l10n.delete,
                     value: "Delete",
                     icon: Icons.delete,
                     onSelected: () => _onDeletePressed(null),

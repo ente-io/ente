@@ -45,19 +45,13 @@ const gitSHA = () => {
  * @type {import("next").NextConfig}
  */
 const nextConfig = {
-    /* generate a static export when we run `next build` */
+    // Generate a static export when we run `next build`.
     output: "export",
     compiler: {
         emotion: true,
     },
-    transpilePackages: [
-        "@/next",
-        "@/ui",
-        "@/utils",
-        "@mui/material",
-        "@mui/system",
-        "@mui/icons-material",
-    ],
+    // Use Next.js to transpile our internal packages before bundling them.
+    transpilePackages: ["@/next", "@/utils"],
 
     // Add environment variables to the JavaScript bundle. They will be
     // available as `process.env.VAR_NAME` to our code.
@@ -65,11 +59,21 @@ const nextConfig = {
         GIT_SHA: gitSHA(),
     },
 
-    // https://dev.to/marcinwosinek/how-to-add-resolve-fallback-to-webpack-5-in-nextjs-10-i6j
+    // Customize the webpack configuration used by Next.js
     webpack: (config, { isServer }) => {
+        // https://dev.to/marcinwosinek/how-to-add-resolve-fallback-to-webpack-5-in-nextjs-10-i6j
         if (!isServer) {
             config.resolve.fallback.fs = false;
         }
+
+        // Suppress the warning "Critical dependency: require function is used
+        // in a way in which dependencies cannot be statically extracted" when
+        // import heic-convert.
+        //
+        // Upstream issue, which currently doesn't have a workaround.
+        // https://github.com/catdad-experiments/libheif-js/issues/23
+        config.ignoreWarnings = [{ module: /libheif-js/ }];
+
         return config;
     },
 };

@@ -9,6 +9,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
+import "package:permission_handler/permission_handler.dart";
 import 'package:photos/core/configuration.dart';
 import "package:photos/core/constants.dart";
 import 'package:photos/core/errors.dart';
@@ -28,6 +29,7 @@ import "package:photos/models/metadata/file_magic.dart";
 import 'package:photos/models/upload_url.dart';
 import "package:photos/models/user_details.dart";
 import 'package:photos/services/collections_service.dart';
+import "package:photos/services/feature_flag_service.dart";
 import "package:photos/services/file_magic_service.dart";
 import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/services/sync_service.dart';
@@ -36,6 +38,7 @@ import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_download_util.dart';
 import 'package:photos/utils/file_uploader_util.dart';
 import "package:photos/utils/file_util.dart";
+import "package:photos/utils/multipart_upload_util.dart";
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tuple/tuple.dart';
 import "package:uuid/uuid.dart";
@@ -352,14 +355,24 @@ class FileUploader {
     if (isForceUpload) {
       return;
     }
-    final connectivityResult = await (Connectivity().checkConnectivity());
+    final List<ConnectivityResult> connections =
+        await (Connectivity().checkConnectivity());
     bool canUploadUnderCurrentNetworkConditions = true;
-    if (connectivityResult == ConnectivityResult.mobile) {
+    if (connections.any((element) => element == ConnectivityResult.mobile)) {
       canUploadUnderCurrentNetworkConditions =
           Configuration.instance.shouldBackupOverMobileData();
     }
     if (!canUploadUnderCurrentNetworkConditions) {
       throw WiFiUnavailableError();
+    }
+  }
+
+  Future<void> verifyMediaLocationAccess() async {
+    if (Platform.isAndroid) {
+      final bool hasPermission = await Permission.accessMediaLocation.isGranted;
+      if (!hasPermission) {
+        throw NoMediaLocationAccessError();
+      }
     }
   }
 
@@ -482,8 +495,23 @@ class FileUploader {
       final String thumbnailObjectKey =
           await _putFile(thumbnailUploadURL, encryptedThumbnailFile);
 
-      final fileUploadURL = await _getUploadURL();
-      final String fileObjectKey = await _putFile(fileUploadURL, encryptedFile);
+      // Calculate the number of parts for the file. Multiple part upload
+      // is only enabled for internal users and debug builds till it's battle tested.
+      final count = FeatureFlagService.instance.isInternalUserOrDebugBuild()
+          ? await calculatePartCount(
+              await encryptedFile.length(),
+            )
+          : 1;
+
+      late String fileObjectKey;
+
+      if (count <= 1) {
+        final fileUploadURL = await _getUploadURL();
+        fileObjectKey = await _putFile(fileUploadURL, encryptedFile);
+      } else {
+        final fileUploadURLs = await getMultipartUploadURLs(count);
+        fileObjectKey = await putMultipartFile(fileUploadURLs, encryptedFile);
+      }
 
       final metadata = await file.getMetadataForUpload(mediaUploadData);
       final encryptedMetadataResult = await CryptoUtil.encryptChaCha(

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * @file The preload script
  *
@@ -31,9 +32,9 @@
  * and when changing one of them, remember to see if the other two also need
  * changing:
  *
- * -    [renderer]  web/packages/shared/electron/types.ts     contains docs
- * -    [preload]   desktop/src/preload.ts                          ↕︎
- * -    [main]      desktop/src/main/ipc.ts                   contains impl
+ * -    [renderer]  web/packages/next/types/electron.ts      contains docs
+ * -    [preload]   desktop/src/preload.ts                         ↕︎
+ * -    [main]      desktop/src/main/ipc.ts                  contains impl
  */
 
 import { contextBridge, ipcRenderer } from "electron/renderer";
@@ -44,67 +45,80 @@ import type {
     AppUpdateInfo,
     ElectronFile,
     FILE_PATH_TYPE,
-    Model,
-    WatchMapping,
+    FolderWatch,
 } from "./types/ipc";
 
 // - General
 
 const appVersion = (): Promise<string> => ipcRenderer.invoke("appVersion");
 
+const logToDisk = (message: string): void =>
+    ipcRenderer.send("logToDisk", message);
+
 const openDirectory = (dirPath: string): Promise<void> =>
-    ipcRenderer.invoke("openDirectory");
+    ipcRenderer.invoke("openDirectory", dirPath);
 
 const openLogDirectory = (): Promise<void> =>
     ipcRenderer.invoke("openLogDirectory");
 
-const logToDisk = (message: string): void =>
-    ipcRenderer.send("logToDisk", message);
+const clearStores = () => ipcRenderer.send("clearStores");
+
+const encryptionKey = (): Promise<string | undefined> =>
+    ipcRenderer.invoke("encryptionKey");
+
+const saveEncryptionKey = (encryptionKey: string): Promise<void> =>
+    ipcRenderer.invoke("saveEncryptionKey", encryptionKey);
+
+const onMainWindowFocus = (cb?: () => void) => {
+    ipcRenderer.removeAllListeners("mainWindowFocus");
+    if (cb) ipcRenderer.on("mainWindowFocus", cb);
+};
+
+// - App update
+
+const onAppUpdateAvailable = (
+    cb?: ((updateInfo: AppUpdateInfo) => void) | undefined,
+) => {
+    ipcRenderer.removeAllListeners("appUpdateAvailable");
+    if (cb) {
+        ipcRenderer.on("appUpdateAvailable", (_, updateInfo: AppUpdateInfo) =>
+            cb(updateInfo),
+        );
+    }
+};
+
+const updateAndRestart = () => ipcRenderer.send("updateAndRestart");
+
+const updateOnNextRestart = (version: string) =>
+    ipcRenderer.send("updateOnNextRestart", version);
+
+const skipAppUpdate = (version: string) => {
+    ipcRenderer.send("skipAppUpdate", version);
+};
+
+// - FS
 
 const fsExists = (path: string): Promise<boolean> =>
     ipcRenderer.invoke("fsExists", path);
 
+const fsMkdirIfNeeded = (dirPath: string): Promise<void> =>
+    ipcRenderer.invoke("fsMkdirIfNeeded", dirPath);
+
+const fsRename = (oldPath: string, newPath: string): Promise<void> =>
+    ipcRenderer.invoke("fsRename", oldPath, newPath);
+
+const fsRmdir = (path: string): Promise<void> =>
+    ipcRenderer.invoke("fsRmdir", path);
+
+const fsRm = (path: string): Promise<void> => ipcRenderer.invoke("fsRm", path);
+
+const fsReadTextFile = (path: string): Promise<string> =>
+    ipcRenderer.invoke("fsReadTextFile", path);
+
+const fsWriteFile = (path: string, contents: string): Promise<void> =>
+    ipcRenderer.invoke("fsWriteFile", path, contents);
+
 // - AUDIT below this
-
-const registerForegroundEventListener = (onForeground: () => void) => {
-    ipcRenderer.removeAllListeners("app-in-foreground");
-    ipcRenderer.on("app-in-foreground", () => {
-        onForeground();
-    });
-};
-
-const clearElectronStore = () => {
-    ipcRenderer.send("clear-electron-store");
-};
-
-const setEncryptionKey = (encryptionKey: string): Promise<void> =>
-    ipcRenderer.invoke("setEncryptionKey", encryptionKey);
-
-const getEncryptionKey = (): Promise<string> =>
-    ipcRenderer.invoke("getEncryptionKey");
-
-// - App update
-
-const registerUpdateEventListener = (
-    showUpdateDialog: (updateInfo: AppUpdateInfo) => void,
-) => {
-    ipcRenderer.removeAllListeners("show-update-dialog");
-    ipcRenderer.on("show-update-dialog", (_, updateInfo: AppUpdateInfo) => {
-        showUpdateDialog(updateInfo);
-    });
-};
-
-const updateAndRestart = () => {
-    ipcRenderer.send("update-and-restart");
-};
-
-const skipAppUpdate = (version: string) => {
-    ipcRenderer.send("skip-app-update", version);
-};
-
-const muteUpdateNotification = (version: string) => {
-    ipcRenderer.send("mute-update-notification", version);
-};
 
 // - Conversion
 
@@ -142,17 +156,17 @@ const runFFmpegCmd = (
 
 // - ML
 
-const computeImageEmbedding = (
-    model: Model,
-    imageData: Uint8Array,
-): Promise<Float32Array> =>
-    ipcRenderer.invoke("computeImageEmbedding", model, imageData);
+const clipImageEmbedding = (jpegImageData: Uint8Array): Promise<Float32Array> =>
+    ipcRenderer.invoke("clipImageEmbedding", jpegImageData);
 
-const computeTextEmbedding = (
-    model: Model,
-    text: string,
-): Promise<Float32Array> =>
-    ipcRenderer.invoke("computeTextEmbedding", model, text);
+const clipTextEmbedding = (text: string): Promise<Float32Array> =>
+    ipcRenderer.invoke("clipTextEmbedding", text);
+
+const detectFaces = (input: Float32Array): Promise<Float32Array> =>
+    ipcRenderer.invoke("detectFaces", input);
+
+const faceEmbedding = (input: Float32Array): Promise<Float32Array> =>
+    ipcRenderer.invoke("faceEmbedding", input);
 
 // - File selection
 
@@ -206,51 +220,25 @@ const addWatchMapping = (
 const removeWatchMapping = (folderPath: string): Promise<void> =>
     ipcRenderer.invoke("removeWatchMapping", folderPath);
 
-const getWatchMappings = (): Promise<WatchMapping[]> =>
+const getWatchMappings = (): Promise<FolderWatch[]> =>
     ipcRenderer.invoke("getWatchMappings");
 
 const updateWatchMappingSyncedFiles = (
     folderPath: string,
-    files: WatchMapping["syncedFiles"],
+    files: FolderWatch["syncedFiles"],
 ): Promise<void> =>
     ipcRenderer.invoke("updateWatchMappingSyncedFiles", folderPath, files);
 
 const updateWatchMappingIgnoredFiles = (
     folderPath: string,
-    files: WatchMapping["ignoredFiles"],
+    files: FolderWatch["ignoredFiles"],
 ): Promise<void> =>
     ipcRenderer.invoke("updateWatchMappingIgnoredFiles", folderPath, files);
 
 // - FS Legacy
 
-const checkExistsAndCreateDir = (dirPath: string): Promise<void> =>
-    ipcRenderer.invoke("checkExistsAndCreateDir", dirPath);
-
-const saveStreamToDisk = (
-    path: string,
-    fileStream: ReadableStream<any>,
-): Promise<void> => ipcRenderer.invoke("saveStreamToDisk", path, fileStream);
-
-const saveFileToDisk = (path: string, file: any): Promise<void> =>
-    ipcRenderer.invoke("saveFileToDisk", path, file);
-
-const readTextFile = (path: string): Promise<string> =>
-    ipcRenderer.invoke("readTextFile", path);
-
 const isFolder = (dirPath: string): Promise<boolean> =>
     ipcRenderer.invoke("isFolder", dirPath);
-
-const moveFile = (oldPath: string, newPath: string): Promise<void> =>
-    ipcRenderer.invoke("moveFile", oldPath, newPath);
-
-const deleteFolder = (path: string): Promise<void> =>
-    ipcRenderer.invoke("deleteFolder", path);
-
-const deleteFile = (path: string): Promise<void> =>
-    ipcRenderer.invoke("deleteFile", path);
-
-const rename = (oldPath: string, newPath: string): Promise<void> =>
-    ipcRenderer.invoke("rename", oldPath, newPath);
 
 // - Upload
 
@@ -307,25 +295,35 @@ const getDirFiles = (dirPath: string): Promise<ElectronFile[]> =>
 //   https://www.electronjs.org/docs/latest/api/context-bridge#methods
 //
 // The copy itself is relatively fast, but the problem with transfering large
-// amounts of data is potentially running out of memory during the copy.
-contextBridge.exposeInMainWorld("ElectronAPIs", {
+// amounts of data is potentially running out of memory during the copy. For an
+// alternative, see [Note: IPC streams].
+contextBridge.exposeInMainWorld("electron", {
     // - General
     appVersion,
-    openDirectory,
-    registerForegroundEventListener,
-    clearElectronStore,
-    getEncryptionKey,
-    setEncryptionKey,
-
-    // - Logging
-    openLogDirectory,
     logToDisk,
+    openDirectory,
+    openLogDirectory,
+    clearStores,
+    encryptionKey,
+    saveEncryptionKey,
+    onMainWindowFocus,
 
     // - App update
+    onAppUpdateAvailable,
     updateAndRestart,
+    updateOnNextRestart,
     skipAppUpdate,
-    muteUpdateNotification,
-    registerUpdateEventListener,
+
+    // - FS
+    fs: {
+        exists: fsExists,
+        rename: fsRename,
+        mkdirIfNeeded: fsMkdirIfNeeded,
+        rmdir: fsRmdir,
+        rm: fsRm,
+        readTextFile: fsReadTextFile,
+        writeFile: fsWriteFile,
+    },
 
     // - Conversion
     convertToJPEG,
@@ -333,8 +331,10 @@ contextBridge.exposeInMainWorld("ElectronAPIs", {
     runFFmpegCmd,
 
     // - ML
-    computeImageEmbedding,
-    computeTextEmbedding,
+    clipImageEmbedding,
+    clipTextEmbedding,
+    detectFaces,
+    faceEmbedding,
 
     // - File selection
     selectDirectory,
@@ -350,22 +350,9 @@ contextBridge.exposeInMainWorld("ElectronAPIs", {
     updateWatchMappingSyncedFiles,
     updateWatchMappingIgnoredFiles,
 
-    // - FS
-    fs: {
-        exists: fsExists,
-    },
-
     // - FS legacy
     // TODO: Move these into fs + document + rename if needed
-    checkExistsAndCreateDir,
-    saveStreamToDisk,
-    saveFileToDisk,
-    readTextFile,
     isFolder,
-    moveFile,
-    deleteFolder,
-    deleteFile,
-    rename,
 
     // - Upload
 

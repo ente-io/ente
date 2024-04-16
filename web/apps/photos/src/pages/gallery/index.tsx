@@ -49,7 +49,7 @@ import {
     syncMapEnabled,
     validateKey,
 } from "services/userService";
-import { mergeMaps, preloadImage } from "utils/common";
+import { preloadImage } from "utils/common";
 import {
     FILE_OPS_TYPE,
     constructFileToCollectionMap,
@@ -60,47 +60,23 @@ import {
     sortFiles,
 } from "utils/file";
 
-import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
-import { CustomError } from "@ente/shared/error";
-import { logError } from "@ente/shared/sentry";
-import CollectionNamer, {
-    CollectionNamerAttributes,
-} from "components/Collections/CollectionNamer";
-import Uploader from "components/Upload/Uploader";
-import PlanSelector from "components/pages/gallery/PlanSelector";
-import {
-    ALL_SECTION,
-    ARCHIVE_SECTION,
-    CollectionSummaryType,
-    DUMMY_UNCATEGORIZED_COLLECTION,
-    HIDDEN_ITEMS_SECTION,
-    TRASH_SECTION,
-} from "constants/collection";
-import { AppContext } from "pages/_app";
-import { getLocalTrashedFiles, syncTrash } from "services/trashService";
-import {
-    COLLECTION_OPS_TYPE,
-    constructCollectionNameMap,
-    getArchivedCollections,
-    getDefaultHiddenCollectionIDs,
-    getSelectedCollection,
-    handleCollectionOps,
-    hasNonSystemCollections,
-    splitNormalAndHiddenCollections,
-} from "utils/collection";
-
+import log from "@/next/log";
 import { APPS } from "@ente/shared/apps/constants";
 import { CenteredFlex } from "@ente/shared/components/Container";
-import ElectronAPIs from "@ente/shared/electron";
-import useEffectSingleThreaded from "@ente/shared/hooks/useEffectSingleThreaded";
+import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
+import { CustomError } from "@ente/shared/error";
 import useFileInput from "@ente/shared/hooks/useFileInput";
 import useMemoSingleThreaded from "@ente/shared/hooks/useMemoSingleThreaded";
 import InMemoryStore, { MS_KEYS } from "@ente/shared/storage/InMemoryStore";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { User } from "@ente/shared/user/types";
+import { isPromise } from "@ente/shared/utils";
 import AuthenticateUserModal from "components/AuthenticateUserModal";
 import Collections from "components/Collections";
+import CollectionNamer, {
+    CollectionNamerAttributes,
+} from "components/Collections/CollectionNamer";
 import ExportModal from "components/ExportModal";
 import {
     FilesDownloadProgress,
@@ -112,16 +88,27 @@ import FixCreationTime, {
 import GalleryEmptyState from "components/GalleryEmptyState";
 import { ITEM_TYPE, TimeStampListItem } from "components/PhotoList";
 import SearchResultInfo from "components/Search/SearchResultInfo";
+import Uploader from "components/Upload/Uploader";
 import UploadInputs from "components/UploadSelectorInputs";
 import { GalleryNavbar } from "components/pages/gallery/Navbar";
+import PlanSelector from "components/pages/gallery/PlanSelector";
+import {
+    ALL_SECTION,
+    ARCHIVE_SECTION,
+    CollectionSummaryType,
+    DUMMY_UNCATEGORIZED_COLLECTION,
+    HIDDEN_ITEMS_SECTION,
+    TRASH_SECTION,
+} from "constants/collection";
 import { SYNC_INTERVAL_IN_MICROSECONDS } from "constants/gallery";
-import isElectron from "is-electron";
-import { ClipService } from "services/clipService";
+import { AppContext } from "pages/_app";
+import { clipService } from "services/clip-service";
 import { constructUserIDToEmailMap } from "services/collectionService";
 import downloadManager from "services/download";
-import { syncEmbeddings } from "services/embeddingService";
+import { syncEmbeddings, syncFileEmbeddings } from "services/embeddingService";
 import { syncEntities } from "services/entityService";
 import locationSearchService from "services/locationSearchService";
+import { getLocalTrashedFiles, syncTrash } from "services/trashService";
 import uploadManager from "services/upload/uploadManager";
 import { Collection, CollectionSummaries } from "types/collection";
 import { EnteFile } from "types/file";
@@ -134,8 +121,17 @@ import {
 } from "types/gallery";
 import { Search, SearchResultSummary, UpdateSearch } from "types/search";
 import { FamilyData } from "types/user";
+import {
+    COLLECTION_OPS_TYPE,
+    constructCollectionNameMap,
+    getArchivedCollections,
+    getDefaultHiddenCollectionIDs,
+    getSelectedCollection,
+    handleCollectionOps,
+    hasNonSystemCollections,
+    splitNormalAndHiddenCollections,
+} from "utils/collection";
 import ComlinkSearchWorker from "utils/comlink/ComlinkSearchWorker";
-import { checkConnectivity } from "utils/common";
 import { isArchivedFile } from "utils/magicMetadata";
 import { getSessionExpiredMessage } from "utils/ui";
 import { getLocalFamilyData } from "utils/user/family";
@@ -322,6 +318,7 @@ export default function Gallery() {
             return;
         }
         preloadImage("/images/subscription-card-background");
+        const electron = globalThis.electron;
         const main = async () => {
             const valid = await validateKey();
             if (!valid) {
@@ -364,19 +361,17 @@ export default function Gallery() {
             syncInterval.current = setInterval(() => {
                 syncWithRemote(false, true);
             }, SYNC_INTERVAL_IN_MICROSECONDS);
-            if (isElectron()) {
-                void ClipService.setupOnFileUploadListener();
-                ElectronAPIs.registerForegroundEventListener(() => {
-                    syncWithRemote(false, true);
-                });
+            if (electron) {
+                void clipService.setupOnFileUploadListener();
+                electron.onMainWindowFocus(() => syncWithRemote(false, true));
             }
         };
         main();
         return () => {
             clearInterval(syncInterval.current);
-            if (isElectron()) {
-                ElectronAPIs.registerForegroundEventListener(() => {});
-                ClipService.removeOnFileUploadListener();
+            if (electron) {
+                electron.onMainWindowFocus(undefined);
+                clipService.removeOnFileUploadListener();
             }
         };
     }, []);
@@ -680,13 +675,13 @@ export default function Gallery() {
     };
 
     const syncWithRemote = async (force = false, silent = false) => {
+        if (!navigator.onLine) return;
         if (syncInProgress.current && !force) {
             resync.current = { force, silent };
             return;
         }
         syncInProgress.current = true;
         try {
-            checkConnectivity();
             const token = getToken();
             if (!token) {
                 return;
@@ -707,8 +702,12 @@ export default function Gallery() {
             await syncEntities();
             await syncMapEnabled();
             await syncEmbeddings();
-            if (ClipService.isPlatformSupported()) {
-                void ClipService.scheduleImageEmbeddingExtraction();
+            const electron = globalThis.electron;
+            if (electron) {
+                await syncFileEmbeddings();
+            }
+            if (clipService.isPlatformSupported()) {
+                void clipService.scheduleImageEmbeddingExtraction();
             }
         } catch (e) {
             switch (e.message) {
@@ -719,10 +718,8 @@ export default function Gallery() {
                     clearKeys();
                     router.push(PAGES.CREDENTIALS);
                     break;
-                case CustomError.NO_INTERNET_CONNECTION:
-                    break;
                 default:
-                    logError(e, "syncWithRemote failed");
+                    log.error("syncWithRemote failed", e);
             }
         } finally {
             setTempDeletedFileIds(new Set());
@@ -874,7 +871,7 @@ export default function Gallery() {
                 clearSelection();
                 await syncWithRemote(false, true);
             } catch (e) {
-                logError(e, "collection ops failed", { ops });
+                log.error(`collection ops (${ops}) failed`, e);
                 setDialogMessage({
                     title: t("ERROR"),
 
@@ -919,7 +916,7 @@ export default function Gallery() {
             clearSelection();
             await syncWithRemote(false, true);
         } catch (e) {
-            logError(e, "file ops failed", { ops });
+            log.error(`file ops (${ops}) failed`, e);
             setDialogMessage({
                 title: t("ERROR"),
 
@@ -938,7 +935,7 @@ export default function Gallery() {
                 const collection = await createAlbum(collectionName);
                 await collectionOpsHelper(ops)(collection);
             } catch (e) {
-                logError(e, "create and collection ops failed", { ops });
+                log.error(`create and collection ops (${ops}) failed`, e);
                 setDialogMessage({
                     title: t("ERROR"),
 
@@ -1221,3 +1218,42 @@ export default function Gallery() {
         </GalleryContext.Provider>
     );
 }
+
+// useEffectSingleThreaded is a useEffect that will only run one at a time, and will
+// caches the latest deps of requests that come in while it is running, and will
+// run that after the current run is complete.
+function useEffectSingleThreaded(
+    fn: (deps) => void | Promise<void>,
+    deps: any[],
+): void {
+    const updateInProgress = useRef(false);
+    const nextRequestDepsRef = useRef<any[]>(null);
+    useEffect(() => {
+        const main = async (deps) => {
+            if (updateInProgress.current) {
+                nextRequestDepsRef.current = deps;
+                return;
+            }
+            updateInProgress.current = true;
+            const result = fn(deps);
+            if (isPromise(result)) {
+                await result;
+            }
+            updateInProgress.current = false;
+            if (nextRequestDepsRef.current) {
+                const deps = nextRequestDepsRef.current;
+                nextRequestDepsRef.current = null;
+                setTimeout(() => main(deps), 0);
+            }
+        };
+        main(deps);
+    }, deps);
+}
+
+const mergeMaps = <K, V>(map1: Map<K, V>, map2: Map<K, V>) => {
+    const mergedMap = new Map<K, V>(map1);
+    map2.forEach((value, key) => {
+        mergedMap.set(key, value);
+    });
+    return mergedMap;
+};

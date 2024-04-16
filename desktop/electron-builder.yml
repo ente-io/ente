@@ -1,5 +1,15 @@
 appId: io.ente.bhari-frame
 artifactName: ${productName}-${version}-${arch}.${ext}
+files:
+    - app/**/*
+    - out
+extraFiles:
+    - from: build
+      to: resources
+win:
+    target:
+        - target: nsis
+          arch: [x64, arm64]
 nsis:
     deleteAppDataOnUninstall: true
 linux:
@@ -19,11 +29,4 @@ mac:
         arch: [universal]
     category: public.app-category.photography
     hardenedRuntime: true
-    x64ArchFiles: Contents/Resources/ggmlclip-mac
 afterSign: electron-builder-notarize
-extraFiles:
-    - from: build
-      to: resources
-files:
-    - app/**/*
-    - out

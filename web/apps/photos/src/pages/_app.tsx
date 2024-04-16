@@ -1,15 +1,16 @@
-import AppNavbar from "@ente/shared/components/Navbar/app";
-import { t } from "i18next";
-import { createContext, useEffect, useRef, useState } from "react";
-
-import { setupI18n } from "@/ui/i18n";
-import { CacheProvider } from "@emotion/react";
+import { CustomHead } from "@/next/components/Head";
+import { setupI18n } from "@/next/i18n";
+import log from "@/next/log";
 import {
-    APP_TITLES,
+    logStartupBanner,
+    logUnhandledErrorsAndRejections,
+} from "@/next/log-web";
+import { AppUpdateInfo } from "@/next/types/ipc";
+import {
     APPS,
+    APP_TITLES,
     CLIENT_PACKAGE_NAMES,
 } from "@ente/shared/apps/constants";
-import { EnteAppProps } from "@ente/shared/apps/types";
 import { Overlay } from "@ente/shared/components/Container";
 import DialogBox from "@ente/shared/components/DialogBox";
 import {
@@ -23,20 +24,12 @@ import {
 } from "@ente/shared/components/DialogBoxV2/types";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { MessageContainer } from "@ente/shared/components/MessageContainer";
+import AppNavbar from "@ente/shared/components/Navbar/app";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
-import ElectronAPIs from "@ente/shared/electron";
-import { AppUpdateInfo } from "@ente/shared/electron/types";
-import { CustomError } from "@ente/shared/error";
-import { eventBus, Events } from "@ente/shared/events";
+import { Events, eventBus } from "@ente/shared/events";
 import { useLocalState } from "@ente/shared/hooks/useLocalState";
-import { addLogLine } from "@ente/shared/logging";
-import {
-    clearLogsIfLocalStorageLimitExceeded,
-    logStartupMessage,
-} from "@ente/shared/logging/web";
 import HTTPService from "@ente/shared/network/HTTPService";
-import { logError } from "@ente/shared/sentry";
-import { getData, LS_KEYS } from "@ente/shared/storage/localStorage";
+import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import {
     getLocalMapEnabled,
     getToken,
@@ -44,21 +37,22 @@ import {
 } from "@ente/shared/storage/localStorage/helpers";
 import { getTheme } from "@ente/shared/themes";
 import { THEME_COLOR } from "@ente/shared/themes/constants";
-import createEmotionCache from "@ente/shared/themes/createEmotionCache";
 import { SetTheme } from "@ente/shared/themes/types";
+import type { User } from "@ente/shared/user/types";
 import ArrowForward from "@mui/icons-material/ArrowForward";
 import { CssBaseline, useMediaQuery } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
-import "bootstrap/dist/css/bootstrap.min.css";
 import Notification from "components/Notification";
 import { REDIRECTS } from "constants/redirects";
+import { t } from "i18next";
 import isElectron from "is-electron";
-import Head from "next/head";
+import { AppProps } from "next/app";
 import { useRouter } from "next/router";
 import "photoswipe/dist/photoswipe.css";
+import { createContext, useEffect, useRef, useState } from "react";
 import LoadingBar from "react-top-loading-bar";
 import DownloadManager from "services/download";
-import exportService from "services/export";
+import exportService, { resumeExportsIfNeeded } from "services/export";
 import mlWorkManager from "services/machineLearning/mlWorkManager";
 import {
     getFamilyPortalRedirectURL,
@@ -70,7 +64,6 @@ import {
     NotificationAttributes,
     SetNotificationAttributes,
 } from "types/Notification";
-import { isExportInProgress } from "utils/export";
 import {
     getMLSearchConfig,
     updateMLSearchConfig,
@@ -115,15 +108,7 @@ type AppContextType = {
 
 export const AppContext = createContext<AppContextType>(null);
 
-// Client-side cache, shared for the whole session of the user in the browser.
-const clientSideEmotionCache = createEmotionCache();
-
-export default function App(props: EnteAppProps) {
-    const {
-        Component,
-        emotionCache = clientSideEmotionCache,
-        pageProps,
-    } = props;
+export default function App({ Component, pageProps }: AppProps) {
     const router = useRouter();
     const [isI18nReady, setIsI18nReady] = useState<boolean>(false);
     const [loading, setLoading] = useState(false);
@@ -161,40 +146,38 @@ export default function App(props: EnteAppProps) {
     );
 
     useEffect(() => {
-        //setup i18n
         setupI18n().finally(() => setIsI18nReady(true));
-        // set client package name in headers
+        const userId = (getData(LS_KEYS.USER) as User)?.id;
+        logStartupBanner(APPS.PHOTOS, userId);
+        logUnhandledErrorsAndRejections(true);
         HTTPService.setHeaders({
             "X-Client-Package": CLIENT_PACKAGE_NAMES.get(APPS.PHOTOS),
         });
-        // setup logging
-        clearLogsIfLocalStorageLimitExceeded();
-        logStartupMessage(APPS.PHOTOS);
+        return () => logUnhandledErrorsAndRejections(false);
     }, []);
 
     useEffect(() => {
-        if (isElectron()) {
-            const showUpdateDialog = (updateInfo: AppUpdateInfo) => {
-                if (updateInfo.autoUpdatable) {
-                    setDialogMessage(
-                        getUpdateReadyToInstallMessage(updateInfo),
-                    );
-                } else {
-                    setNotificationAttributes({
-                        endIcon: <ArrowForward />,
-                        variant: "secondary",
-                        message: t("UPDATE_AVAILABLE"),
-                        onClick: () =>
-                            setDialogMessage(
-                                getUpdateAvailableForDownloadMessage(
-                                    updateInfo,
-                                ),
-                            ),
-                    });
-                }
-            };
-            ElectronAPIs.registerUpdateEventListener(showUpdateDialog);
-        }
+        const electron = globalThis.electron;
+        if (!electron) return;
+
+        const showUpdateDialog = (updateInfo: AppUpdateInfo) => {
+            if (updateInfo.autoUpdatable) {
+                setDialogMessage(getUpdateReadyToInstallMessage(updateInfo));
+            } else {
+                setNotificationAttributes({
+                    endIcon: <ArrowForward />,
+                    variant: "secondary",
+                    message: t("UPDATE_AVAILABLE"),
+                    onClick: () =>
+                        setDialogMessage(
+                            getUpdateAvailableForDownloadMessage(updateInfo),
+                        ),
+                });
+            }
+        };
+        electron.onAppUpdateAvailable(showUpdateDialog);
+
+        return () => electron.onAppUpdateAvailable(undefined);
     }, []);
 
     useEffect(() => {
@@ -207,7 +190,7 @@ export default function App(props: EnteAppProps) {
                 setMlSearchEnabled(mlSearchConfig.enabled);
                 mlWorkManager.setMlSearchEnabled(mlSearchConfig.enabled);
             } catch (e) {
-                logError(e, "Error while loading mlSearchEnabled");
+                log.error("Error while loading mlSearchEnabled", e);
             }
         };
         loadMlSearchState();
@@ -217,7 +200,7 @@ export default function App(props: EnteAppProps) {
                 mlWorkManager.setMlSearchEnabled(false);
             });
         } catch (e) {
-            logError(e, "Error while subscribing to logout event");
+            log.error("Error while subscribing to logout event", e);
         }
     }, []);
 
@@ -230,37 +213,10 @@ export default function App(props: EnteAppProps) {
             return;
         }
         const initExport = async () => {
-            try {
-                addLogLine("init export");
-                const token = getToken();
-                if (!token) {
-                    addLogLine(
-                        "User not logged in, not starting export continuous sync job",
-                    );
-                    return;
-                }
-                await DownloadManager.init(APPS.PHOTOS, { token });
-                const exportSettings = exportService.getExportSettings();
-                if (
-                    !(await exportService.exportFolderExists(
-                        exportSettings?.folder,
-                    ))
-                ) {
-                    return;
-                }
-                const exportRecord = await exportService.getExportRecord(
-                    exportSettings.folder,
-                );
-                if (exportSettings.continuousExport) {
-                    exportService.enableContinuousExport();
-                }
-                if (isExportInProgress(exportRecord.stage)) {
-                    addLogLine("export was in progress, resuming");
-                    exportService.scheduleExport();
-                }
-            } catch (e) {
-                logError(e, "init export failed");
-            }
+            const token = getToken();
+            if (!token) return;
+            await DownloadManager.init(APPS.PHOTOS, { token });
+            await resumeExportsIfNeeded();
         };
         initExport();
         try {
@@ -268,7 +224,7 @@ export default function App(props: EnteAppProps) {
                 exportService.disableContinuousExport();
             });
         } catch (e) {
-            logError(e, "Error while subscribing to logout event");
+            log.error("Error while subscribing to logout event", e);
         }
     }, []);
 
@@ -285,9 +241,7 @@ export default function App(props: EnteAppProps) {
                 const redirectAction = redirectMap.get(redirect);
                 window.location.href = await redirectAction();
             } else {
-                logError(CustomError.BAD_REQUEST, "invalid redirection", {
-                    redirect,
-                });
+                log.error(`invalid redirection ${redirect}`);
             }
         };
 
@@ -354,7 +308,7 @@ export default function App(props: EnteAppProps) {
             setMlSearchEnabled(enabled);
             mlWorkManager.setMlSearchEnabled(enabled);
         } catch (e) {
-            logError(e, "Error while updating mlSearchEnabled");
+            log.error("Error while updating mlSearchEnabled", e);
         }
     };
 
@@ -364,7 +318,7 @@ export default function App(props: EnteAppProps) {
             setLocalMapEnabled(enabled);
             setMapEnabled(enabled);
         } catch (e) {
-            logError(e, "Error while updating mapEnabled");
+            log.error("Error while updating mapEnabled", e);
         }
     };
 
@@ -389,19 +343,13 @@ export default function App(props: EnteAppProps) {
             content: t("UNKNOWN_ERROR"),
         });
 
+    const title = isI18nReady
+        ? t("TITLE", { context: APPS.PHOTOS })
+        : APP_TITLES.get(APPS.PHOTOS);
+
     return (
-        <CacheProvider value={emotionCache}>
-            <Head>
-                <title>
-                    {isI18nReady
-                        ? t("TITLE", { context: APPS.PHOTOS })
-                        : APP_TITLES.get(APPS.PHOTOS)}
-                </title>
-                <meta
-                    name="viewport"
-                    content="initial-scale=1, width=device-width"
-                />
-            </Head>
+        <>
+            <CustomHead {...{ title }} />
 
             <ThemeProvider theme={getTheme(themeColor, APPS.PHOTOS)}>
                 <CssBaseline enableColorScheme />
@@ -491,6 +439,6 @@ export default function App(props: EnteAppProps) {
                     )}
                 </AppContext.Provider>
             </ThemeProvider>
-        </CacheProvider>
+        </>
     );
 }

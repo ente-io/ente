@@ -1,5 +1,4 @@
-import { logError } from "@ente/shared/sentry";
-import classnames from "classnames";
+import log from "@/next/log";
 import Photoswipe from "photoswipe";
 import PhotoswipeUIDefault from "photoswipe/dist/photoswipe-ui-default";
 import { useContext, useEffect, useMemo, useRef, useState } from "react";
@@ -19,7 +18,6 @@ import {
 
 import { FlexWrapper } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
-import { addLocalLog } from "@ente/shared/logging";
 import AlbumOutlined from "@mui/icons-material/AlbumOutlined";
 import ChevronLeft from "@mui/icons-material/ChevronLeft";
 import ChevronRight from "@mui/icons-material/ChevronRight";
@@ -84,7 +82,6 @@ interface Iprops {
     gettingData: (instance: any, index: number, item: EnteFile) => void;
     getConvertedItem: (instance: any, index: number, item: EnteFile) => void;
     id?: string;
-    className?: string;
     favItemIds: Set<number>;
     tempDeletedFileIds: Set<number>;
     setTempDeletedFileIds?: (value: Set<number>) => void;
@@ -173,7 +170,7 @@ function PhotoViewer(props: Iprops) {
                 return;
             }
 
-            addLocalLog(() => "Event: " + event.key);
+            log.debug(() => "Event: " + event.key);
 
             switch (event.key) {
                 case "i":
@@ -498,7 +495,7 @@ function PhotoViewer(props: Iprops) {
             }
             needUpdate.current = true;
         } catch (e) {
-            logError(e, "onFavClick failed");
+            log.error("onFavClick failed", e);
         }
     };
 
@@ -513,7 +510,7 @@ function PhotoViewer(props: Iprops) {
             updateItems(props.items.filter((item) => item.id !== file.id));
             needUpdate.current = true;
         } catch (e) {
-            logError(e, "trashFile failed");
+            log.error("trashFile failed", e);
         }
     };
 
@@ -564,7 +561,7 @@ function PhotoViewer(props: Iprops) {
                 }
             }
         } catch (e) {
-            logError(e, "updateItems failed");
+            log.error("updateItems failed", e);
         }
     };
 
@@ -575,7 +572,7 @@ function PhotoViewer(props: Iprops) {
                 photoSwipe.updateSize(true);
             }
         } catch (e) {
-            logError(e, "refreshPhotoswipe failed");
+            log.error("refreshPhotoswipe failed", e);
         }
     };
 
@@ -615,9 +612,10 @@ function PhotoViewer(props: Iprops) {
         } catch (e) {
             setExif({ key: file.src, value: null });
             const fileExtension = getFileExtension(file.metadata.title);
-            logError(e, "checkExifAvailable failed", {
-                extension: fileExtension,
-            });
+            log.error(
+                `checkExifAvailable failed for extension ${fileExtension}`,
+                e,
+            );
         }
     };
 
@@ -724,13 +722,11 @@ function PhotoViewer(props: Iprops) {
 
     const scheduleUpdate = () => (needUpdate.current = true);
     const { id } = props;
-    let { className } = props;
-    className = classnames(["pswp", className]).trim();
     return (
         <>
             <div
                 id={id}
-                className={className}
+                className={"pswp"}
                 tabIndex={Number("-1")}
                 role="dialog"
                 aria-hidden="true"

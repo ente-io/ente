@@ -11,33 +11,25 @@ import { Box, DialogProps, Link, Stack, styled } from "@mui/material";
 import { Chip } from "components/Chip";
 import { EnteDrawer } from "components/EnteDrawer";
 import Titlebar from "components/Titlebar";
+import { PhotoPeopleList, UnidentifiedFaces } from "components/ml/PeopleList";
 import LinkButton from "components/pages/gallery/LinkButton";
+import { t } from "i18next";
+import { AppContext } from "pages/_app";
+import { GalleryContext } from "pages/gallery";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { getEXIFLocation } from "services/upload/exifService";
 import { EnteFile } from "types/file";
+import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
+import {
+    getMapDisableConfirmationDialog,
+    getMapEnableConfirmationDialog,
+} from "utils/ui";
 import { ExifData } from "./ExifData";
 import InfoItem from "./InfoItem";
 import MapBox from "./MapBox";
 import { RenderCaption } from "./RenderCaption";
 import { RenderCreationTime } from "./RenderCreationTime";
 import { RenderFileName } from "./RenderFileName";
-
-import {
-    PhotoPeopleList,
-    UnidentifiedFaces,
-} from "components/MachineLearning/PeopleList";
-
-import { ObjectLabelList } from "components/MachineLearning/ObjectList";
-
-// import MLServiceFileInfoButton from 'components/MachineLearning/MLServiceFileInfoButton';
-import { t } from "i18next";
-import { AppContext } from "pages/_app";
-import { GalleryContext } from "pages/gallery";
-import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
-import {
-    getMapDisableConfirmationDialog,
-    getMapEnableConfirmationDialog,
-} from "utils/ui";
 
 export const FileInfoSidebar = styled((props: DialogProps) => (
     <EnteDrawer {...props} anchor="right" />
@@ -348,18 +340,6 @@ export function FileInfo({
                             file={file}
                             updateMLDataIndex={updateMLDataIndex}
                         />
-                        <ObjectLabelList
-                            file={file}
-                            updateMLDataIndex={updateMLDataIndex}
-                        />
-
-                        {/* <Box pt={1}>
-                            <MLServiceFileInfoButton
-                                file={file}
-                                updateMLDataIndex={updateMLDataIndex}
-                                setUpdateMLDataIndex={setUpdateMLDataIndex}
-                            />
-                        </Box> */}
                     </>
                 )}
             </Stack>

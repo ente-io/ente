@@ -51,6 +51,7 @@ class _HomePageState extends State<HomePage> {
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
   final TextEditingController _textController = TextEditingController();
+  final FocusNode searchInputFocusNode = FocusNode();
   bool _showSearchBox = false;
   String _searchText = "";
   List<Code> _codes = [];
@@ -80,6 +81,17 @@ class _HomePageState extends State<HomePage> {
       setState(() {});
     });
     _showSearchBox = PreferenceService.instance.shouldAutoFocusOnSearchBar();
+    if (_showSearchBox) {
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) {
+          // https://github.com/flutter/flutter/issues/20706#issuecomment-646328652
+          FocusScope.of(context).unfocus();
+          Timer(const Duration(milliseconds: 1), () {
+            FocusScope.of(context).requestFocus(searchInputFocusNode);
+          });
+        },
+      );
+    }
   }
 
   void _loadCodes() {
@@ -93,12 +105,22 @@ class _HomePageState extends State<HomePage> {
   void _applyFilteringAndRefresh() {
     if (_searchText.isNotEmpty && _showSearchBox) {
       final String val = _searchText.toLowerCase();
-      _filteredCodes = _codes
-          .where(
-            (element) => (element.account.toLowerCase().contains(val) ||
-                element.issuer.toLowerCase().contains(val)),
-          )
-          .toList();
+      // Prioritize issuer match above account for better UX while searching
+      // for a specific TOTP for email providers. Searching for "emailProvider" like (gmail, proton) should
+      // show the email provider first instead of other accounts where protonmail
+      // is the account name.
+      final List<Code> issuerMatch = [];
+      final List<Code> accountMatch = [];
+
+      for (final Code code in _codes) {
+        if (code.issuer.toLowerCase().contains(val)) {
+          issuerMatch.add(code);
+        } else if (code.account.toLowerCase().contains(val)) {
+          accountMatch.add(code);
+        }
+      }
+      _filteredCodes = issuerMatch;
+      _filteredCodes.addAll(accountMatch);
     } else {
       _filteredCodes = _codes;
     }
@@ -182,6 +204,7 @@ class _HomePageState extends State<HomePage> {
           title: !_showSearchBox
               ? const Text('Ente Auth')
               : TextField(
+                  focusNode: searchInputFocusNode,
                   autofocus: _searchText.isEmpty,
                   controller: _textController,
                   onChanged: (val) {

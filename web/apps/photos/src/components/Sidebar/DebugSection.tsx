@@ -1,15 +1,12 @@
+import log from "@/next/log";
+import { savedLogs } from "@/next/log-web";
+import { downloadAsFile } from "@ente/shared/utils";
+import Typography from "@mui/material/Typography";
+import { EnteMenuItem } from "components/Menu/EnteMenuItem";
 import { t } from "i18next";
 import { AppContext } from "pages/_app";
 import { useContext, useEffect, useState } from "react";
 import { Trans } from "react-i18next";
-
-import ElectronAPIs from "@ente/shared/electron";
-import { addLogLine } from "@ente/shared/logging";
-import { getDebugLogs } from "@ente/shared/logging/web";
-import { downloadAsFile } from "@ente/shared/utils";
-import Typography from "@mui/material/Typography";
-import { EnteMenuItem } from "components/Menu/EnteMenuItem";
-import isElectron from "is-electron";
 import { isInternalUser } from "utils/user";
 import { testUpload } from "../../../tests/upload.test";
 import {
@@ -19,16 +16,12 @@ import {
 
 export default function DebugSection() {
     const appContext = useContext(AppContext);
-    const [appVersion, setAppVersion] = useState<string>(null);
+    const [appVersion, setAppVersion] = useState<string | undefined>();
+
+    const electron = globalThis.electron;
 
     useEffect(() => {
-        const main = async () => {
-            if (isElectron()) {
-                const appVersion = await ElectronAPIs.appVersion();
-                setAppVersion(appVersion);
-            }
-        };
-        main();
+        electron?.appVersion().then((v) => setAppVersion(v));
     });
 
     const confirmLogDownload = () =>
@@ -38,22 +31,17 @@ export default function DebugSection() {
             proceed: {
                 text: t("DOWNLOAD"),
                 variant: "accent",
-                action: downloadDebugLogs,
+                action: downloadLogs,
             },
             close: {
                 text: t("CANCEL"),
             },
         });
 
-    const downloadDebugLogs = () => {
-        addLogLine("exporting logs");
-        if (isElectron()) {
-            ElectronAPIs.openLogDirectory();
-        } else {
-            const logs = getDebugLogs();
-
-            downloadAsFile(`debug_logs_${Date.now()}.txt`, logs);
-        }
+    const downloadLogs = () => {
+        log.info("Downloading logs");
+        if (electron) electron.openLogDirectory();
+        else downloadAsFile(`debug_logs_${Date.now()}.txt`, savedLogs());
     };
 
     return (

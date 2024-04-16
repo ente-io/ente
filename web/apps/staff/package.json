@@ -1,0 +1,23 @@
+{
+    "name": "staff",
+    "version": "0.0.0",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "build": "tsc && vite build",
+        "dev": "vite",
+        "preview": "vite preview"
+    },
+    "dependencies": {
+        "react": "^18",
+        "react-dom": "^18",
+        "yup": "^1.4"
+    },
+    "devDependencies": {
+        "@/build-config": "*",
+        "@types/react": "^18",
+        "@types/react-dom": "^18",
+        "@vitejs/plugin-react": "^4.2",
+        "vite": "^5.2"
+    }
+}

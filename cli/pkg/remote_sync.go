@@ -87,16 +87,16 @@ func (c *ClICtrl) fetchRemoteFiles(ctx context.Context) error {
 				if file.UpdationTime > maxUpdated {
 					maxUpdated = file.UpdationTime
 				}
-				if isFirstSync && file.IsDeleted {
+				if isFirstSync && file.IsRemovedFromAlbum() {
 					// on first sync, no need to sync delete markers
 					continue
 				}
-				albumEntry := model.AlbumFileEntry{AlbumID: album.ID, FileID: file.ID, IsDeleted: file.IsDeleted, SyncedLocally: false}
+				albumEntry := model.AlbumFileEntry{AlbumID: album.ID, FileID: file.ID, IsDeleted: file.IsRemovedFromAlbum(), SyncedLocally: false}
 				putErr := c.UpsertAlbumEntry(ctx, &albumEntry)
 				if putErr != nil {
 					return putErr
 				}
-				if file.IsDeleted {
+				if file.IsRemovedFromAlbum() {
 					continue
 				}
 				photoFile, err := mapper.MapApiFileToPhotoFile(ctx, album, file, c.KeyHolder)

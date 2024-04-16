@@ -63,6 +63,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "contacts": MessageLookupByLibrary.simpleMessage("Contacts"),
         "continueLabel": MessageLookupByLibrary.simpleMessage("Kontynuuj"),
         "createAccount": MessageLookupByLibrary.simpleMessage("Stwórz konto"),
+        "createCollaborativeLink":
+            MessageLookupByLibrary.simpleMessage("Create collaborative link"),
         "createNewAccount":
             MessageLookupByLibrary.simpleMessage("Stwórz nowe konto"),
         "decrypting":
@@ -169,6 +171,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "resetPasswordTitle":
             MessageLookupByLibrary.simpleMessage("Zresetuj hasło"),
         "saveKey": MessageLookupByLibrary.simpleMessage("Zapisz klucz"),
+        "search": MessageLookupByLibrary.simpleMessage("Search"),
         "selectALocation":
             MessageLookupByLibrary.simpleMessage("Select a location"),
         "selectALocationFirst":

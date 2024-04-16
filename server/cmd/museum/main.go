@@ -163,7 +163,7 @@ func main() {
 		ObjectCopiesRepo: objectCopiesRepo, UsageRepo: usageRepo}
 	familyRepo := &repo.FamilyRepository{DB: db}
 	trashRepo := &repo.TrashRepository{DB: db, ObjectRepo: objectRepo, FileRepo: fileRepo, QueueRepo: queueRepo}
-	publicCollectionRepo := &repo.PublicCollectionRepository{DB: db}
+	publicCollectionRepo := repo.NewPublicCollectionRepository(db, viper.GetString("apps.public-albums"))
 	collectionRepo := &repo.CollectionRepository{DB: db, FileRepo: fileRepo, PublicCollectionRepo: publicCollectionRepo,
 		TrashRepo: trashRepo, SecretEncryptionKey: secretEncryptionKeyBytes, QueueRepo: queueRepo, LatencyLogger: latencyLogger}
 	pushRepo := &repo.PushTokenRepository{DB: db}

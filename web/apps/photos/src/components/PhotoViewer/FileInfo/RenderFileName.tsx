@@ -1,5 +1,5 @@
+import log from "@/next/log";
 import { FlexWrapper } from "@ente/shared/components/Container";
-import { logError } from "@ente/shared/sentry";
 import PhotoOutlined from "@mui/icons-material/PhotoOutlined";
 import VideocamOutlined from "@mui/icons-material/VideocamOutlined";
 import Box from "@mui/material/Box";
@@ -86,7 +86,7 @@ export function RenderFileName({
                 scheduleUpdate();
             }
         } catch (e) {
-            logError(e, "failed to update file name");
+            log.error("failed to update file name", e);
             throw e;
         }
     };

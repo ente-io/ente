@@ -20,6 +20,7 @@ import 'package:photos/services/app_lifecycle_service.dart';
 import "package:photos/services/ignored_files_service.dart";
 import 'package:photos/services/local/local_sync_util.dart';
 import "package:photos/utils/debouncer.dart";
+import "package:photos/utils/photo_manager_util.dart";
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:tuple/tuple.dart';
@@ -61,7 +62,7 @@ class LocalSyncService {
       return;
     }
     if (Platform.isAndroid && AppLifecycleService.instance.isForeground) {
-      final permissionState = await PhotoManager.requestPermissionExtend();
+      final permissionState = await requestPhotoMangerPermissions();
       if (permissionState != PermissionState.authorized) {
         _logger.severe(
           "sync requested with invalid permission",
@@ -211,6 +212,11 @@ class LocalSyncService {
         file.deviceFolder == null ||
         file.title == null) {
       _logger.warning('Invalid file received for ignoring: $file');
+      return;
+    }
+    if (Platform.isIOS && error.reason == InvalidReason.sourceFileMissing) {
+      // ignoreSourceFileMissing error on iOS as the file fetch from iCloud might have failed,
+      // but the file might be available later
       return;
     }
     final ignored = IgnoredFile(

@@ -1,20 +1,20 @@
+import log from "@/next/log";
 import ChevronRight from "@mui/icons-material/ChevronRight";
 import ScienceIcon from "@mui/icons-material/Science";
 import { Box, DialogProps, Stack, Typography } from "@mui/material";
 import { EnteDrawer } from "components/EnteDrawer";
-import MLSearchSettings from "components/MachineLearning/MLSearchSettings";
 import MenuSectionTitle from "components/Menu/MenuSectionTitle";
 import Titlebar from "components/Titlebar";
+import { MLSearchSettings } from "components/ml/MLSearchSettings";
 import { t } from "i18next";
 import { useContext, useEffect, useState } from "react";
 
 import { VerticallyCenteredFlex } from "@ente/shared/components/Container";
-import { logError } from "@ente/shared/sentry";
 import { EnteMenuItem } from "components/Menu/EnteMenuItem";
 import { MenuItemGroup } from "components/Menu/MenuItemGroup";
 import isElectron from "is-electron";
 import { AppContext } from "pages/_app";
-import { ClipExtractionStatus, ClipService } from "services/clipService";
+import { CLIPIndexingStatus, clipService } from "services/clip-service";
 import { formatNumber } from "utils/number/format";
 
 export default function AdvancedSettings({ open, onClose, onRootClose }) {
@@ -41,20 +41,18 @@ export default function AdvancedSettings({ open, onClose, onRootClose }) {
         try {
             appContext.setIsCFProxyDisabled(!appContext.isCFProxyDisabled);
         } catch (e) {
-            logError(e, "toggleFasterUpload failed");
+            log.error("toggleFasterUpload failed", e);
         }
     };
-    const [indexingStatus, setIndexingStatus] = useState<ClipExtractionStatus>({
+    const [indexingStatus, setIndexingStatus] = useState<CLIPIndexingStatus>({
         indexed: 0,
         pending: 0,
     });
 
     useEffect(() => {
-        const main = async () => {
-            setIndexingStatus(await ClipService.getIndexingStatus());
-            ClipService.setOnUpdateHandler(setIndexingStatus);
-        };
-        main();
+        clipService.setOnUpdateHandler(setIndexingStatus);
+        clipService.getIndexingStatus().then((st) => setIndexingStatus(st));
+        return () => clipService.setOnUpdateHandler(undefined);
     }, []);
 
     return (

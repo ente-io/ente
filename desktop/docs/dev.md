@@ -31,7 +31,7 @@ are built against `electron`'s packaged `node` version. We use
 to rebuild those modules automatically after each `yarn install` by invoking it
 in as the `postinstall` step in our package.json.
 
-### lint and lint-fix
+### lint, lint-fix
 
 Use `yarn lint` to check that your code formatting is as expected, and that
 there are no linter errors. Use `yarn lint-fix` to try and automatically fix the

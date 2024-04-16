@@ -1,7 +1,7 @@
+import log from "@/next/log";
 import { CustomError, handleUploadError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { getEndpoint, getUploadEndpoint } from "@ente/shared/network/api";
-import { logError } from "@ente/shared/sentry";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { EnteFile } from "types/file";
 import { MultipartUploadURLs, UploadFile, UploadURL } from "types/upload";
@@ -30,7 +30,7 @@ class UploadHttpClient {
             );
             return response.data;
         } catch (e) {
-            logError(e, "upload Files Failed");
+            log.error("upload Files Failed", e);
             throw e;
         }
     }
@@ -60,7 +60,7 @@ class UploadHttpClient {
             }
             return this.uploadURLFetchInProgress;
         } catch (e) {
-            logError(e, "fetch upload-url failed ");
+            log.error("fetch upload-url failed ", e);
             throw e;
         }
     }
@@ -83,7 +83,7 @@ class UploadHttpClient {
 
             return response.data["urls"];
         } catch (e) {
-            logError(e, "fetch multipart-upload-url failed");
+            log.error("fetch multipart-upload-url failed", e);
             throw e;
         }
     }
@@ -108,7 +108,7 @@ class UploadHttpClient {
             return fileUploadURL.objectKey;
         } catch (e) {
             if (e.message !== CustomError.UPLOAD_CANCELLED) {
-                logError(e, "putFile to dataStore failed ");
+                log.error("putFile to dataStore failed ", e);
             }
             throw e;
         }
@@ -134,7 +134,7 @@ class UploadHttpClient {
             return fileUploadURL.objectKey;
         } catch (e) {
             if (e.message !== CustomError.UPLOAD_CANCELLED) {
-                logError(e, "putFile to dataStore failed ");
+                log.error("putFile to dataStore failed ", e);
             }
             throw e;
         }
@@ -156,7 +156,7 @@ class UploadHttpClient {
                 );
                 if (!resp?.headers?.etag) {
                     const err = Error(CustomError.ETAG_MISSING);
-                    logError(err, "putFile in parts failed");
+                    log.error("putFile in parts failed", err);
                     throw err;
                 }
                 return resp;
@@ -164,7 +164,7 @@ class UploadHttpClient {
             return response.headers.etag as string;
         } catch (e) {
             if (e.message !== CustomError.UPLOAD_CANCELLED) {
-                logError(e, "put filePart failed");
+                log.error("put filePart failed", e);
             }
             throw e;
         }
@@ -188,7 +188,7 @@ class UploadHttpClient {
                 );
                 if (!resp?.data?.etag) {
                     const err = Error(CustomError.ETAG_MISSING);
-                    logError(err, "putFile in parts failed");
+                    log.error("putFile in parts failed", err);
                     throw err;
                 }
                 return resp;
@@ -196,7 +196,7 @@ class UploadHttpClient {
             return response.data.etag as string;
         } catch (e) {
             if (e.message !== CustomError.UPLOAD_CANCELLED) {
-                logError(e, "put filePart failed");
+                log.error("put filePart failed", e);
             }
             throw e;
         }
@@ -210,7 +210,7 @@ class UploadHttpClient {
                 }),
             );
         } catch (e) {
-            logError(e, "put file in parts failed");
+            log.error("put file in parts failed", e);
             throw e;
         }
     }
@@ -229,7 +229,7 @@ class UploadHttpClient {
                 ),
             );
         } catch (e) {
-            logError(e, "put file in parts failed");
+            log.error("put file in parts failed", e);
             throw e;
         }
     }

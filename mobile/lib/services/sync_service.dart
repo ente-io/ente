@@ -45,7 +45,9 @@ class SyncService {
       sync();
     });
 
-    Connectivity().onConnectivityChanged.listen((ConnectivityResult result) {
+    Connectivity()
+        .onConnectivityChanged
+        .listen((List<ConnectivityResult> result) {
       _logger.info("Connectivity change detected " + result.toString());
       if (Configuration.instance.hasConfiguredAccount()) {
         sync();
@@ -120,6 +122,14 @@ class SyncService {
     } on UnauthorizedError {
       _logger.info("Logging user out");
       Bus.instance.fire(TriggerLogoutEvent());
+    } on NoMediaLocationAccessError {
+      _logger.severe("Not uploading due to no media location access");
+      Bus.instance.fire(
+        SyncStatusUpdate(
+          SyncStatus.error,
+          error: NoMediaLocationAccessError(),
+        ),
+      );
     } catch (e) {
       if (e is DioError) {
         if (e.type == DioErrorType.connectTimeout ||

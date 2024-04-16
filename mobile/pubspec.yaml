@@ -12,7 +12,7 @@ description: ente photos application
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 
-version: 0.8.72+592
+version: 0.8.82+602
 publish_to: none
 
 environment:
@@ -36,11 +36,7 @@ dependencies:
   collection: # dart
   computer:
     git: "https://github.com/ente-io/computer.git"
-  connectivity_plus:
-    git:
-      url: https://github.com/ente-io/plus_plugins.git
-      ref: check_mobile_first
-      path: packages/connectivity_plus/connectivity_plus/
+  connectivity_plus: ^6.0.2
   cross_file: ^0.3.3
   crypto: ^3.0.2
   cupertino_icons: ^1.0.0
@@ -59,7 +55,6 @@ dependencies:
   extended_image: ^8.1.1
   fade_indexed_stack: ^0.2.2
   fast_base58: ^0.2.1
-
   figma_squircle: ^0.5.3
   file_saver:
     # Use forked version till this PR is merged: https://github.com/incrediblezayed/file_saver/pull/87
@@ -78,7 +73,7 @@ dependencies:
   flutter_image_compress: ^1.1.0
   flutter_inappwebview: ^5.8.0
   flutter_launcher_icons: ^0.13.1
-  flutter_local_notifications: ^12.0.4
+  flutter_local_notifications: ^17.0.0
   flutter_localizations:
     sdk: flutter
   flutter_map: ^5.0.0
@@ -89,12 +84,9 @@ dependencies:
   flutter_sodium: ^0.2.0
   flutter_staggered_grid_view: ^0.6.2
   fluttertoast: ^8.0.6
-  freezed_annotation: ^2.2.0
+  freezed_annotation: ^2.4.1
   google_nav_bar: ^5.0.5
-  home_widget:
-    git:
-      url: https://github.com/ente-io/FlutterHomeWidget
-      ref: main
+  home_widget: ^0.5.0
   html_unescape: ^2.0.0
   http: ^1.1.0
   image: ^4.0.17
@@ -133,22 +125,24 @@ dependencies:
   path: #dart
   path_provider: ^2.1.1
   pedantic: ^1.9.2
-  photo_manager: ^2.8.1
+  permission_handler: ^11.0.1
+  photo_manager: ^3.0.0
   photo_view: ^0.14.0
   pinput: ^1.2.2
   pointycastle: ^3.7.3
   provider: ^6.0.0
   quiver: ^3.0.1
-  receive_sharing_intent: ^1.6.7
+  receive_sharing_intent: ^1.7.0
   scrollable_positioned_list: ^0.3.5
   sentry: ^7.9.0
   sentry_flutter: ^7.9.0
-  share_plus: ^4.0.10
+  share_plus: 7.2.2
   shared_preferences: ^2.0.5
   sqflite: ^2.3.0
   sqflite_migration: ^0.3.0
   sqlite3: ^2.1.0
-  sqlite3_flutter_libs: ^0.5.19+1
+  sqlite3_flutter_libs: ^0.5.20
+  sqlite_async: ^0.6.1
   step_progress_indicator: ^1.0.2
   styled_text: ^7.0.0
   syncfusion_flutter_core: ^19.2.49
@@ -173,12 +167,12 @@ dependencies:
   wallpaper_manager_flutter: ^0.0.2
   wechat_assets_picker: ^8.6.3
   widgets_to_image: ^0.0.2
+  xml: ^6.3.0
 
 dependency_overrides:
-  # current fork of tfite_flutter_helper depends on ffi: ^1.x.x
-  # but we need ffi: ^2.0.1 for newer packages. The original tfite_flutter_helper
-  #
-  ffi: ^2.1.0
+  # Remove this after removing dependency from flutter_sodium.
+  # Newer flutter packages depends on ffi > 2.0.0 while flutter_sodium depends on ffi < 2.0.0
+  ffi: 2.1.0
   video_player:
     git:
       url: https://github.com/ente-io/packages.git
@@ -194,7 +188,7 @@ dev_dependencies:
   flutter_lints: ^2.0.1
   flutter_test:
     sdk: flutter
-  freezed: ^2.3.2
+  freezed: ^2.5.2
   integration_test:
     sdk: flutter
   isar_generator: ^3.1.0+1

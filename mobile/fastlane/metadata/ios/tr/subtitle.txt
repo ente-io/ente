@@ -1,0 +1,1 @@
+Şifrelenmiş depolama sistemi

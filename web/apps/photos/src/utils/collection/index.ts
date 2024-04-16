@@ -1,8 +1,6 @@
-import ElectronAPIs from "@ente/shared/electron";
+import { ensureElectron } from "@/next/electron";
+import log from "@/next/log";
 import { CustomError } from "@ente/shared/error";
-import { addLogLine } from "@ente/shared/logging";
-import { getAlbumsURL } from "@ente/shared/network/api";
-import { logError } from "@ente/shared/sentry";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import { getUnixTimeInMicroSecondsWithDelta } from "@ente/shared/time";
 import { User } from "@ente/shared/user/types";
@@ -18,7 +16,6 @@ import {
     SYSTEM_COLLECTION_TYPES,
 } from "constants/collection";
 import { t } from "i18next";
-import isElectron from "is-electron";
 import {
     addToCollection,
     createAlbum,
@@ -33,7 +30,6 @@ import {
     updatePublicCollectionMagicMetadata,
     updateSharedCollectionMagicMetadata,
 } from "services/collectionService";
-import exportService from "services/export";
 import { getAllLocalFiles, getLocalFiles } from "services/fileService";
 import {
     COLLECTION_ROLE,
@@ -45,12 +41,9 @@ import {
 import { EnteFile } from "types/file";
 import { SetFilesDownloadProgressAttributes } from "types/gallery";
 import { SUB_TYPE, VISIBILITY_STATE } from "types/magicMetadata";
-import {
-    getCollectionExportPath,
-    getUniqueCollectionExportName,
-} from "utils/export";
 import { downloadFilesWithProgress } from "utils/file";
 import { isArchivedCollection, updateMagicMetadata } from "utils/magicMetadata";
+import { safeDirectoryName } from "utils/native-fs";
 
 export enum COLLECTION_OPS_TYPE {
     ADD,
@@ -119,7 +112,7 @@ export async function downloadCollectionHelper(
             setFilesDownloadProgressAttributes,
         );
     } catch (e) {
-        logError(e, "download collection failed ");
+        log.error("download collection failed ", e);
     }
 }
 
@@ -140,7 +133,7 @@ export async function downloadDefaultHiddenCollectionHelper(
             setFilesDownloadProgressAttributes,
         );
     } catch (e) {
-        logError(e, "download hidden files failed ");
+        log.error("download hidden files failed ", e);
     }
 }
 
@@ -153,8 +146,9 @@ export async function downloadCollectionFiles(
         return;
     }
     let downloadDirPath: string;
-    if (isElectron()) {
-        const selectedDir = await ElectronAPIs.selectDirectory();
+    const electron = globalThis.electron;
+    if (electron) {
+        const selectedDir = await electron.selectDirectory();
         if (!selectedDir) {
             return;
         }
@@ -174,15 +168,14 @@ async function createCollectionDownloadFolder(
     downloadDirPath: string,
     collectionName: string,
 ) {
-    const collectionDownloadName = await getUniqueCollectionExportName(
+    const fs = ensureElectron().fs;
+    const collectionDownloadName = await safeDirectoryName(
         downloadDirPath,
         collectionName,
+        fs.exists,
     );
-    const collectionDownloadPath = getCollectionExportPath(
-        downloadDirPath,
-        collectionDownloadName,
-    );
-    await exportService.checkExistsAndCreateDir(collectionDownloadPath);
+    const collectionDownloadPath = `${downloadDirPath}/${collectionDownloadName}`;
+    await fs.mkdirIfNeeded(collectionDownloadPath);
     return collectionDownloadPath;
 }
 
@@ -195,11 +188,6 @@ export function appendCollectionKeyToShareURL(
     }
 
     const sharableURL = new URL(url);
-    const albumsURL = new URL(getAlbumsURL());
-
-    sharableURL.protocol = albumsURL.protocol;
-    sharableURL.host = albumsURL.host;
-    sharableURL.pathname = albumsURL.pathname;
 
     const bytes = Buffer.from(collectionKey, "base64");
     sharableURL.hash = bs58.encode(bytes);
@@ -272,7 +260,7 @@ export const changeCollectionVisibility = async (
             );
         }
     } catch (e) {
-        logError(e, "change collection visibility failed");
+        log.error("change collection visibility failed", e);
         throw e;
     }
 };
@@ -298,7 +286,7 @@ export const changeCollectionSortOrder = async (
             updatedPubMagicMetadata,
         );
     } catch (e) {
-        logError(e, "change collection sort order failed");
+        log.error("change collection sort order failed", e);
     }
 };
 
@@ -319,7 +307,7 @@ export const changeCollectionOrder = async (
 
         await updateCollectionMagicMetadata(collection, updatedMagicMetadata);
     } catch (e) {
-        logError(e, "change collection order failed");
+        log.error("change collection order failed", e);
     }
 };
 
@@ -339,7 +327,7 @@ export const changeCollectionSubType = async (
         );
         await updateCollectionMagicMetadata(collection, updatedMagicMetadata);
     } catch (e) {
-        logError(e, "change collection subType failed");
+        log.error("change collection subType failed", e);
         throw e;
     }
 };
@@ -568,13 +556,13 @@ export const getOrCreateAlbum = async (
     }
     for (const collection of existingCollections) {
         if (isValidReplacementAlbum(collection, user, albumName)) {
-            addLogLine(
+            log.info(
                 `Found existing album ${albumName} with id ${collection.id}`,
             );
             return collection;
         }
     }
     const album = await createAlbum(albumName);
-    addLogLine(`Created new album ${albumName} with id ${album.id}`);
+    log.info(`Created new album ${albumName} with id ${album.id}`);
     return album;
 };

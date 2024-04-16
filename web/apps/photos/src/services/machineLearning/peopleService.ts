@@ -1,4 +1,4 @@
-import { addLogLine } from "@ente/shared/logging";
+import log from "@/next/log";
 import { Face, MLSyncContext, Person } from "types/machineLearning";
 import {
     findFirstIfSorted,
@@ -20,7 +20,7 @@ class PeopleService {
                 syncContext.faceClusteringService.method,
             )
         ) {
-            addLogLine(
+            log.info(
                 "[MLService] Skipping people index as already synced to latest version",
             );
             return;
@@ -62,7 +62,7 @@ class PeopleService {
                 (a, b) => b.detection.probability - a.detection.probability,
             );
 
-            if (personFace && !personFace.crop?.imageUrl) {
+            if (personFace && !personFace.crop?.cacheKey) {
                 const file = await getLocalFile(personFace.fileId);
                 const imageBitmap = await getOriginalImageBitmap(file);
                 await FaceService.saveFaceCrop(
@@ -76,7 +76,7 @@ class PeopleService {
                 id: index,
                 files: faces.map((f) => f.fileId),
                 displayFaceId: personFace?.id,
-                displayImageUrl: personFace?.crop?.imageUrl,
+                faceCropCacheKey: personFace?.crop?.cacheKey,
             };
 
             await mlIDbStorage.putPerson(person);
@@ -84,7 +84,7 @@ class PeopleService {
             faces.forEach((face) => {
                 face.personId = person.id;
             });
-            // addLogLine("Creating person: ", person, faces);
+            // log.info("Creating person: ", person, faces);
         }
 
         await mlIDbStorage.updateFaces(allFacesMap);

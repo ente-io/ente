@@ -1,5 +1,9 @@
 # Dependencies
 
+-   [Electron](#electron)
+-   [Dev dependencies](#dev)
+-   [Functionality](#functionality)
+
 ## Electron
 
 [Electron](https://www.electronjs.org) is a cross-platform (Linux, Windows,
@@ -61,34 +65,34 @@ Electron process. This allows us to directly use the output produced by
 
 ### Others
 
-* [any-shell-escape](https://github.com/boazy/any-shell-escape) is for
-  escaping shell commands before we execute them (e.g. say when invoking the
-  embedded ffmpeg CLI).
+-   [any-shell-escape](https://github.com/boazy/any-shell-escape) is for
+    escaping shell commands before we execute them (e.g. say when invoking the
+    embedded ffmpeg CLI).
 
-* [auto-launch](https://github.com/Teamwork/node-auto-launch) is for
-  automatically starting our app on login, if the user so wishes.
+-   [auto-launch](https://github.com/Teamwork/node-auto-launch) is for
+    automatically starting our app on login, if the user so wishes.
 
-* [electron-store](https://github.com/sindresorhus/electron-store) is used for
-  persisting user preferences and other arbitrary data.
+-   [electron-store](https://github.com/sindresorhus/electron-store) is used for
+    persisting user preferences and other arbitrary data.
 
 ## Dev
 
-See [web/docs/dependencies#DX](../../web/docs/dependencies.md#dev) for the
+See [web/docs/dependencies#dev](../../web/docs/dependencies.md#dev) for the
 general development experience related dependencies like TypeScript etc, which
 are similar to that in the web code.
 
 Some extra ones specific to the code here are:
 
-* [concurrently](https://github.com/open-cli-tools/concurrently) for spawning
-  parallel tasks when we do `yarn dev`.
+-   [concurrently](https://github.com/open-cli-tools/concurrently) for spawning
+    parallel tasks when we do `yarn dev`.
 
-* [shx](https://github.com/shelljs/shx) for providing a portable way to use Unix
-  commands in our `package.json` scripts. This allows us to use the same
-  commands (like `ln`) across different platforms like Linux and Windows.
+-   [shx](https://github.com/shelljs/shx) for providing a portable way to use
+    Unix commands in our `package.json` scripts. This allows us to use the same
+    commands (like `ln`) across different platforms like Linux and Windows.
 
 ## Functionality
 
-### Conversion
+### Format conversion
 
 The main tool we use is for arbitrary conversions is FFMPEG. To bundle a
 (platform specific) static binary of ffmpeg with our app, we use
@@ -104,20 +108,23 @@ resources (`build`) folder. This is used for thumbnail generation on Linux.
 On macOS, we use the `sips` CLI tool for conversion, but that is already
 available on the host machine, and is not bundled with our app.
 
+### AI/ML
+
+[onnxruntime-node](https://github.com/Microsoft/onnxruntime) is used as the
+AI/ML runtime. It powers both natural language searches (using CLIP) and face
+detection (using YOLO).
+
+[jpeg-js](https://github.com/jpeg-js/jpeg-js#readme) is used for decoding JPEG
+data into raw RGB bytes before passing it to ONNX.
+
+html-entities is used by the bundled clip-bpe-ts tokenizer for CLIP.
+
 ### Watch Folders
 
 [chokidar](https://github.com/paulmillr/chokidar) is used as a file system
 watcher for the watch folders functionality.
 
-### AI/ML
-
-* [onnxruntime-node](https://github.com/Microsoft/onnxruntime)
-* html-entities is used by the bundled clip-bpe-ts.
-* GGML binaries are bundled
-* We also use [jpeg-js](https://github.com/jpeg-js/jpeg-js#readme) for
-  conversion of all images to JPEG before processing.
-
-## ZIP
+### ZIP
 
 [node-stream-zip](https://github.com/antelle/node-stream-zip) is used for
 reading of large ZIP files (e.g. during imports of Google Takeout ZIPs).

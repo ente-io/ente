@@ -1,7 +1,7 @@
 import { CustomError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { getFileURL, getThumbnailURL } from "@ente/shared/network/api";
-import { retryAsyncFunction } from "@ente/shared/promise";
+import { retryAsyncFunction } from "@ente/shared/utils";
 import { DownloadClient } from "services/download";
 import { EnteFile } from "types/file";
 
@@ -10,12 +10,9 @@ export class PhotosDownloadClient implements DownloadClient {
         private token: string,
         private timeout: number,
     ) {}
+
     updateTokens(token: string) {
         this.token = token;
-    }
-
-    updateTimeout(timeout: number) {
-        this.timeout = timeout;
     }
 
     async downloadThumbnail(file: EnteFile): Promise<Uint8Array> {

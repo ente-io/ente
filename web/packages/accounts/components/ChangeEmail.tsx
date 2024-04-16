@@ -10,6 +10,7 @@ import { sleep } from "@ente/shared/utils";
 import { Alert, Box, TextField } from "@mui/material";
 import { Formik, FormikHelpers } from "formik";
 import { t } from "i18next";
+import { useRouter } from "next/router";
 import { useRef, useState } from "react";
 import { Trans } from "react-i18next";
 import * as Yup from "yup";
@@ -19,13 +20,15 @@ interface formValues {
     ott?: string;
 }
 
-function ChangeEmailForm({ appName, router }: PageProps) {
+function ChangeEmailForm({ appName }: PageProps) {
     const [loading, setLoading] = useState(false);
     const [ottInputVisible, setShowOttInputVisibility] = useState(false);
     const ottInputRef = useRef(null);
     const [email, setEmail] = useState(null);
     const [showMessage, setShowMessage] = useState(false);
     const [success, setSuccess] = useState(false);
+
+    const router = useRouter();
 
     const requestOTT = async (
         { email }: formValues,

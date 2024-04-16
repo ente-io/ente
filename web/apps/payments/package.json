@@ -2,10 +2,22 @@
     "name": "payments",
     "version": "0.0.0",
     "private": true,
+    "type": "module",
+    "scripts": {
+        "build": "tsc && vite build",
+        "dev": "vite --port 3001",
+        "preview": "vite preview --port 3001"
+    },
     "dependencies": {
-        "@/next": "*",
         "@stripe/stripe-js": "^1.17.0",
-        "axios": "^1.6.7",
-        "bootstrap": "4.6.0"
+        "react": "^18",
+        "react-dom": "^18"
+    },
+    "devDependencies": {
+        "@/build-config": "*",
+        "@types/react": "^18",
+        "@types/react-dom": "^18",
+        "@vitejs/plugin-react": "^4.2",
+        "vite": "^5.2"
     }
 }

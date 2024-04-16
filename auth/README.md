@@ -31,14 +31,16 @@ You can alternatively install the build from PlayStore or F-Droid.
   <img height="59" src="../.github/assets/app-store-badge.svg">
 </a>
 
+### Desktop
+
+You can [**download**](https://github.com/ente-io/ente/releases?q=tag%3Aauth-v2)
+a native desktop app from this repository's GitHub releases. The desktop app
+works on Windows, Linux and macOS.
+
 ### Web
 
 You can view your 2FA codes at [auth.ente.io](https://auth.ente.io). For adding
-or managing your secrets, please use our mobile app.
-
-### Desktop
-
-A native desktop app is coming soon!
+or managing your secrets, please use our mobile or desktop app.
 
 ## 🧑‍💻 Build from source
 

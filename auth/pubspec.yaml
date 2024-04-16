@@ -1,6 +1,6 @@
 name: ente_auth
 description: ente two-factor authenticator
-version: 2.0.50+250
+version: 2.0.55+255
 publish_to: none
 
 environment:
@@ -75,7 +75,7 @@ dependencies:
   password_strength: ^0.2.0
   path: ^1.8.3
   path_provider: ^2.0.11
-  pinput: ^3.0.1
+  pinput: ^1.2.2
   pointycastle: ^3.7.3
   privacy_screen: ^0.0.6
   protobuf: ^3.0.0

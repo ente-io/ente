@@ -1,0 +1,1 @@
+ente è un'applicazione di archiviazione foto e video crittografata end-to-end

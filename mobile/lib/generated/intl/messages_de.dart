@@ -503,6 +503,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Konto erstellen"),
         "createAlbumActionHint": MessageLookupByLibrary.simpleMessage(
             "Drücke lange um Fotos auszuwählen und klicke + um ein Album zu erstellen"),
+        "createCollaborativeLink":
+            MessageLookupByLibrary.simpleMessage("Create collaborative link"),
         "createCollage":
             MessageLookupByLibrary.simpleMessage("Collage erstellen"),
         "createNewAccount":
@@ -1211,6 +1213,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "scanThisBarcodeWithnyourAuthenticatorApp":
             MessageLookupByLibrary.simpleMessage(
                 "Scanne diesen Code mit \ndeiner Authentifizierungs-App"),
+        "search": MessageLookupByLibrary.simpleMessage("Search"),
         "searchAlbumsEmptySection":
             MessageLookupByLibrary.simpleMessage("Alben"),
         "searchByAlbumNameHint":

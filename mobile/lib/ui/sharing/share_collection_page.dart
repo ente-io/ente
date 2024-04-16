@@ -260,15 +260,15 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
           height: 24,
         ),
         MenuSectionTitle(
-          title: S.of(context).collaborativeLink,
+          title: S.of(context).collectPhotos,
           iconData: Icons.public,
         ),
         MenuItemWidget(
           captionedTextWidget: CaptionedTextWidget(
-            title: S.of(context).collectPhotos,
+            title: S.of(context).createCollaborativeLink,
             makeTextBold: true,
           ),
-          leadingIcon: Icons.download_sharp,
+          leadingIcon: Icons.people_alt_outlined,
           menuItemColor: getEnteColorScheme(context).fillFaint,
           showOnlyLoadingState: true,
           onTap: () async {

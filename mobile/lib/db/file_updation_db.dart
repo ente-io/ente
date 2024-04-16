@@ -15,6 +15,7 @@ class FileUpdationDB {
   static const columnLocalID = 'local_id';
   static const columnReason = 'reason';
   static const livePhotoCheck = 'livePhotoCheck';
+  static const androidMissingGPS = 'androidMissingGPS';
 
   static const modificationTimeUpdated = 'modificationTimeUpdated';
 

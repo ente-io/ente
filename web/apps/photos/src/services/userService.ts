@@ -1,10 +1,10 @@
+import log from "@/next/log";
 import { putAttributes } from "@ente/accounts/api/user";
 import { logoutUser } from "@ente/accounts/services/user";
 import { getRecoveryKey } from "@ente/shared/crypto/helpers";
 import { ApiError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { getEndpoint, getFamilyPortalURL } from "@ente/shared/network/api";
-import { logError } from "@ente/shared/sentry";
 import localForage from "@ente/shared/storage/localForage";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import {
@@ -63,7 +63,7 @@ export const getFamiliesToken = async () => {
         );
         return resp.data["familiesToken"];
     } catch (e) {
-        logError(e, "failed to get family token");
+        log.error("failed to get family token", e);
         throw e;
     }
 };
@@ -81,7 +81,7 @@ export const getAccountsToken = async () => {
         );
         return resp.data["accountsToken"];
     } catch (e) {
-        logError(e, "failed to get accounts token");
+        log.error("failed to get accounts token", e);
         throw e;
     }
 };
@@ -99,7 +99,7 @@ export const getRoadmapRedirectURL = async () => {
         );
         return resp.data["url"];
     } catch (e) {
-        logError(e, "failed to get roadmap url");
+        log.error("failed to get roadmap url", e);
         throw e;
     }
 };
@@ -128,15 +128,15 @@ export const isTokenValid = async (token: string) => {
                         getData(LS_KEYS.ORIGINAL_KEY_ATTRIBUTES),
                     );
                 } catch (e) {
-                    logError(e, "put attribute failed");
+                    log.error("put attribute failed", e);
                 }
             }
         } catch (e) {
-            logError(e, "hasSetKeys not set in session validity response");
+            log.error("hasSetKeys not set in session validity response", e);
         }
         return true;
     } catch (e) {
-        logError(e, "session-validity api call failed");
+        log.error("session-validity api call failed", e);
         if (
             e instanceof ApiError &&
             e.httpStatusCode === HttpStatusCode.Unauthorized
@@ -172,7 +172,7 @@ export const getUserDetailsV2 = async (): Promise<UserDetails> => {
         );
         return resp.data;
     } catch (e) {
-        logError(e, "failed to get user details v2");
+        log.error("failed to get user details v2", e);
         throw e;
     }
 };
@@ -185,7 +185,7 @@ export const getFamilyPortalRedirectURL = async () => {
             window.location.origin
         }/gallery`;
     } catch (e) {
-        logError(e, "unable to generate to family portal URL");
+        log.error("unable to generate to family portal URL", e);
         throw e;
     }
 };
@@ -203,7 +203,7 @@ export const getAccountDeleteChallenge = async () => {
         );
         return resp.data as DeleteChallengeResponse;
     } catch (e) {
-        logError(e, "failed to get account delete challenge");
+        log.error("failed to get account delete challenge", e);
         throw e;
     }
 };
@@ -228,7 +228,7 @@ export const deleteAccount = async (
             },
         );
     } catch (e) {
-        logError(e, "deleteAccount api call failed");
+        log.error("deleteAccount api call failed", e);
         throw e;
     }
 };
@@ -262,7 +262,7 @@ export const getFaceSearchEnabledStatus = async () => {
             );
         return resp.data.value === "true";
     } catch (e) {
-        logError(e, "failed to get face search enabled status");
+        log.error("failed to get face search enabled status", e);
         throw e;
     }
 };
@@ -282,7 +282,7 @@ export const updateFaceSearchEnabledStatus = async (newStatus: boolean) => {
             },
         );
     } catch (e) {
-        logError(e, "failed to update face search enabled status");
+        log.error("failed to update face search enabled status", e);
         throw e;
     }
 };
@@ -292,7 +292,7 @@ export const syncMapEnabled = async () => {
         const status = await getMapEnabledStatus();
         setLocalMapEnabled(status);
     } catch (e) {
-        logError(e, "failed to sync map enabled status");
+        log.error("failed to sync map enabled status", e);
         throw e;
     }
 };
@@ -313,7 +313,7 @@ export const getMapEnabledStatus = async () => {
             );
         return resp.data.value === "true";
     } catch (e) {
-        logError(e, "failed to get map enabled status");
+        log.error("failed to get map enabled status", e);
         throw e;
     }
 };
@@ -333,7 +333,7 @@ export const updateMapEnabledStatus = async (newStatus: boolean) => {
             },
         );
     } catch (e) {
-        logError(e, "failed to update map enabled status");
+        log.error("failed to update map enabled status", e);
         throw e;
     }
 };
@@ -363,7 +363,7 @@ export async function getDisableCFUploadProxyFlag(): Promise<boolean> {
         ).json() as GetFeatureFlagResponse;
         return featureFlags.disableCFUploadProxy;
     } catch (e) {
-        logError(e, "failed to get feature flags");
+        log.error("failed to get feature flags", e);
         return false;
     }
 }

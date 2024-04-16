@@ -46,7 +46,6 @@ class _AppState extends State<App> with WindowListener, TrayListener {
 
   Future<void> initWindowManager() async {
     windowManager.addListener(this);
-    await windowManager.setPreventClose(true);
   }
 
   Future<void> initTrayManager() async {
@@ -155,11 +154,6 @@ class _AppState extends State<App> with WindowListener, TrayListener {
   }
 
   @override
-  void onWindowClose() async {
-    await windowManager.hide();
-  }
-
-  @override
   void onWindowResize() {
     WindowListenerService.instance.onWindowResize().ignore();
   }
@@ -187,11 +181,16 @@ class _AppState extends State<App> with WindowListener, TrayListener {
 
   @override
   void onTrayMenuItemClick(MenuItem menuItem) {
-    if (menuItem.key == 'show_window') {
-      windowManager.show();
-    } else if (menuItem.key == 'exit_app') {
-      windowManager.setPreventClose(false);
-      windowManager.close();
+    switch (menuItem.key) {
+      case 'hide_window':
+        windowManager.hide();
+        break;
+      case 'show_window':
+        windowManager.show();
+        break;
+      case 'exit_app':
+        windowManager.close();
+        break;
     }
   }
 }

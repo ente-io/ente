@@ -1,3 +1,4 @@
+import log from "@/next/log";
 import { APPS } from "@ente/shared/apps/constants";
 import FormPaperFooter from "@ente/shared/components/Form/FormPaper/Footer";
 import FormPaperTitle from "@ente/shared/components/Form/FormPaper/Title";
@@ -5,7 +6,6 @@ import LinkButton from "@ente/shared/components/LinkButton";
 import SingleInputForm, {
     SingleInputFormProps,
 } from "@ente/shared/components/SingleInputForm";
-import { addLocalLog } from "@ente/shared/logging";
 import { LS_KEYS, setData } from "@ente/shared/storage/localStorage";
 import { Input } from "@mui/material";
 import { t } from "i18next";
@@ -29,9 +29,7 @@ export default function Login(props: LoginProps) {
         try {
             setData(LS_KEYS.USER, { email });
             const srpAttributes = await getSRPAttributes(email);
-            addLocalLog(
-                () => ` srpAttributes: ${JSON.stringify(srpAttributes)}`,
-            );
+            log.debug(() => ` srpAttributes: ${JSON.stringify(srpAttributes)}`);
             if (!srpAttributes || srpAttributes.isEmailMFAEnabled) {
                 await sendOtt(props.appName, email);
                 router.push(PAGES.VERIFY);

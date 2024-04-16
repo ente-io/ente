@@ -1,15 +1,14 @@
-import { t } from "i18next";
-import { useContext, useState } from "react";
-
-// import FixLargeThumbnails from 'components/FixLargeThumbnail';
+import log from "@/next/log";
 import RecoveryKey from "@ente/shared/components/RecoveryKey";
 import {
     ACCOUNTS_PAGES,
     PHOTOS_PAGES as PAGES,
 } from "@ente/shared/constants/pages";
 import TwoFactorModal from "components/TwoFactor/Modal";
+import { t } from "i18next";
 import { useRouter } from "next/router";
 import { AppContext } from "pages/_app";
+import { useContext, useState } from "react";
 // import mlIDbStorage from 'utils/storage/mlIDbStorage';
 import {
     configurePasskeyRecovery,
@@ -23,10 +22,9 @@ import {
     generateEncryptionKey,
 } from "@ente/shared/crypto/internal/libsodium";
 import { getAccountsURL } from "@ente/shared/network/api";
-import { logError } from "@ente/shared/sentry";
 import { THEME_COLOR } from "@ente/shared/themes/constants";
 import { EnteMenuItem } from "components/Menu/EnteMenuItem";
-import WatchFolder from "components/WatchFolder";
+import { WatchFolder } from "components/WatchFolder";
 import isElectron from "is-electron";
 import { getAccountsToken } from "services/userService";
 import { getDownloadAppMessage } from "utils/ui";
@@ -111,7 +109,7 @@ export default function UtilitySection({ closeSidebar }) {
                 )}&token=${accountsToken}`,
             );
         } catch (e) {
-            logError(e, "failed to redirect to accounts page");
+            log.error("failed to redirect to accounts page", e);
         }
     };
 
