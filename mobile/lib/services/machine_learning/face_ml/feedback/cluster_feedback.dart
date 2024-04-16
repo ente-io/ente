@@ -295,6 +295,38 @@ class ClusterFeedbackService {
     return clusterIdToFaceIds;
   }
 
+  /// WARNING: this method is purely for debugging purposes, never use in production
+  Future<void> createFakeClustersByBlurValue() async {
+    try {
+      // Delete old clusters
+      await FaceMLDataDB.instance.resetClusterIDs();
+      await FaceMLDataDB.instance.dropClustersAndPersonTable();
+      final List<PersonEntity> persons =
+          await PersonService.instance.getPersons();
+      for (final PersonEntity p in persons) {
+        await PersonService.instance.deletePerson(p.remoteID);
+      }
+
+      // Create new fake clusters based on blur value. One for values between 0 and 10, one for 10-20, etc till 200
+      final int startClusterID = DateTime.now().microsecondsSinceEpoch;
+      final faceIDsToBlurValues =
+          await FaceMLDataDB.instance.getFaceIDsToBlurValues(200);
+      final faceIdToCluster = <String, int>{};
+      for (final entry in faceIDsToBlurValues.entries) {
+        final faceID = entry.key;
+        final blurValue = entry.value;
+        final newClusterID = startClusterID + blurValue ~/ 10;
+        faceIdToCluster[faceID] = newClusterID;
+      }
+      await FaceMLDataDB.instance.updateClusterIdToFaceId(faceIdToCluster);
+
+      Bus.instance.fire(PeopleChangedEvent());
+    } catch (e, s) {
+      _logger.severe("Error in createFakeClustersByBlurValue", e, s);
+      rethrow;
+    }
+  }
+
   Future<void> debugLogClusterBlurValues(
     int clusterID, {
     int? clusterSize,

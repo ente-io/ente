@@ -364,6 +364,20 @@ class FaceMLDataDB {
     return maps.map((e) => e[faceBlur] as double).toSet();
   }
 
+  Future<Map<String, double>> getFaceIDsToBlurValues(
+    int maxBlurValue,
+  ) async {
+    final db = await instance.sqliteAsyncDB;
+    final List<Map<String, dynamic>> maps = await db.getAll(
+      'SELECT $faceIDColumn, $faceBlur FROM $facesTable WHERE $faceBlur < $maxBlurValue AND $faceBlur > 1 ORDER BY $faceBlur ASC',
+    );
+    final Map<String, double> result = {};
+    for (final map in maps) {
+      result[map[faceIDColumn] as String] = map[faceBlur] as double;
+    }
+    return result;
+  }
+
   Future<Map<String, int?>> getFaceIdsToClusterIds(
     Iterable<String> faceIds,
   ) async {
