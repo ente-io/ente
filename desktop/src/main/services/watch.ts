@@ -1,6 +1,6 @@
 import type { FSWatcher } from "chokidar";
 import ElectronLog from "electron-log";
-import { WatchMapping, WatchStoreType } from "../../types/ipc";
+import { FolderWatch, WatchStoreType } from "../../types/ipc";
 import { watchStore } from "../stores/watch.store";
 
 export const addWatchMapping = async (
@@ -28,7 +28,7 @@ export const addWatchMapping = async (
     setWatchMappings(watchMappings);
 };
 
-function isMappingPresent(watchMappings: WatchMapping[], folderPath: string) {
+function isMappingPresent(watchMappings: FolderWatch[], folderPath: string) {
     const watchMapping = watchMappings?.find(
         (mapping) => mapping.folderPath === folderPath,
     );
@@ -59,7 +59,7 @@ export const removeWatchMapping = async (
 
 export function updateWatchMappingSyncedFiles(
     folderPath: string,
-    files: WatchMapping["syncedFiles"],
+    files: FolderWatch["syncedFiles"],
 ): void {
     const watchMappings = getWatchMappings();
     const watchMapping = watchMappings.find(
@@ -76,7 +76,7 @@ export function updateWatchMappingSyncedFiles(
 
 export function updateWatchMappingIgnoredFiles(
     folderPath: string,
-    files: WatchMapping["ignoredFiles"],
+    files: FolderWatch["ignoredFiles"],
 ): void {
     const watchMappings = getWatchMappings();
     const watchMapping = watchMappings.find(
