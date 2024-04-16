@@ -363,9 +363,10 @@ class FileUploader {
     if (isForceUpload) {
       return;
     }
-    final connectivityResult = await (Connectivity().checkConnectivity());
+    final List<ConnectivityResult> connections =
+        await (Connectivity().checkConnectivity());
     bool canUploadUnderCurrentNetworkConditions = true;
-    if (connectivityResult == ConnectivityResult.mobile) {
+    if (connections.any((element) => element == ConnectivityResult.mobile)) {
       canUploadUnderCurrentNetworkConditions =
           Configuration.instance.shouldBackupOverMobileData();
     }

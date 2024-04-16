@@ -34,6 +34,7 @@ import {
     mergeMetadata,
 } from "utils/file";
 import { safeDirectoryName, safeFileName } from "utils/native-fs";
+import { writeStream } from "utils/native-stream";
 import { getAllLocalCollections } from "../collectionService";
 import downloadManager from "../download";
 import { getAllLocalFiles } from "../fileService";
@@ -884,7 +885,7 @@ class ExportService {
         try {
             const exportRecord = await this.getExportRecord(folder);
             const newRecord: ExportRecord = { ...exportRecord, ...newData };
-            await ensureElectron().saveFileToDisk(
+            await ensureElectron().fs.writeFile(
                 `${folder}/${exportRecordFileName}`,
                 JSON.stringify(newRecord, null, 2),
             );
@@ -907,8 +908,7 @@ class ExportService {
             if (!(await fs.exists(exportRecordJSONPath))) {
                 return this.createEmptyExportRecord(exportRecordJSONPath);
             }
-            const recordFile =
-                await electron.readTextFile(exportRecordJSONPath);
+            const recordFile = await fs.readTextFile(exportRecordJSONPath);
             try {
                 return JSON.parse(recordFile);
             } catch (e) {
@@ -993,7 +993,7 @@ class ExportService {
                         fileExportName,
                         file,
                     );
-                    await electron.saveStreamToDisk(
+                    await writeStream(
                         `${collectionExportPath}/${fileExportName}`,
                         updatedFileStream,
                     );
@@ -1044,7 +1044,7 @@ class ExportService {
                 imageExportName,
                 file,
             );
-            await electron.saveStreamToDisk(
+            await writeStream(
                 `${collectionExportPath}/${imageExportName}`,
                 imageStream,
             );
@@ -1056,7 +1056,7 @@ class ExportService {
                 file,
             );
             try {
-                await electron.saveStreamToDisk(
+                await writeStream(
                     `${collectionExportPath}/${videoExportName}`,
                     videoStream,
                 );
@@ -1077,7 +1077,7 @@ class ExportService {
         fileExportName: string,
         file: EnteFile,
     ) {
-        await ensureElectron().saveFileToDisk(
+        await ensureElectron().fs.writeFile(
             getFileMetadataExportPath(collectionExportPath, fileExportName),
             getGoogleLikeMetadataFile(fileExportName, file),
         );
@@ -1106,7 +1106,7 @@ class ExportService {
 
     private createEmptyExportRecord = async (exportRecordJSONPath: string) => {
         const exportRecord: ExportRecord = NULL_EXPORT_RECORD;
-        await ensureElectron().saveFileToDisk(
+        await ensureElectron().fs.writeFile(
             exportRecordJSONPath,
             JSON.stringify(exportRecord, null, 2),
         );

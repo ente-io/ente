@@ -24,7 +24,7 @@ import {
     savePublicCollectionUploaderName,
 } from "services/publicCollectionService";
 import uploadManager from "services/upload/uploadManager";
-import watchFolderService from "services/watchFolder/watchFolderService";
+import watchFolderService from "services/watch";
 import { NotificationAttributes } from "types/Notification";
 import { Collection } from "types/collection";
 import {

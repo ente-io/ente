@@ -53,6 +53,7 @@ import { VISIBILITY_STATE } from "types/magicMetadata";
 import { FileTypeInfo } from "types/upload";
 import { isArchivedFile, updateMagicMetadata } from "utils/magicMetadata";
 import { safeFileName } from "utils/native-fs";
+import { writeStream } from "utils/native-stream";
 
 const WAIT_TIME_IMAGE_CONVERSION = 30 * 1000;
 
@@ -798,55 +799,47 @@ async function downloadFileDesktop(
     electron: Electron,
     fileReader: FileReader,
     file: EnteFile,
-    downloadPath: string,
+    downloadDir: string,
 ) {
-    const fileStream = (await DownloadManager.getFile(
+    const fs = electron.fs;
+    const stream = (await DownloadManager.getFile(
         file,
     )) as ReadableStream<Uint8Array>;
-    const updatedFileStream = await getUpdatedEXIFFileForDownload(
+    const updatedStream = await getUpdatedEXIFFileForDownload(
         fileReader,
         file,
-        fileStream,
+        stream,
     );
 
     if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
-        const fileBlob = await new Response(updatedFileStream).blob();
+        const fileBlob = await new Response(updatedStream).blob();
         const livePhoto = await decodeLivePhoto(file, fileBlob);
         const imageExportName = await safeFileName(
-            downloadPath,
+            downloadDir,
             livePhoto.imageNameTitle,
-            electron.fs.exists,
+            fs.exists,
         );
         const imageStream = generateStreamFromArrayBuffer(livePhoto.image);
-        await electron.saveStreamToDisk(
-            `${downloadPath}/${imageExportName}`,
-            imageStream,
-        );
+        await writeStream(`${downloadDir}/${imageExportName}`, imageStream);
         try {
             const videoExportName = await safeFileName(
-                downloadPath,
+                downloadDir,
                 livePhoto.videoNameTitle,
-                electron.fs.exists,
+                fs.exists,
             );
             const videoStream = generateStreamFromArrayBuffer(livePhoto.video);
-            await electron.saveStreamToDisk(
-                `${downloadPath}/${videoExportName}`,
-                videoStream,
-            );
+            await writeStream(`${downloadDir}/${videoExportName}`, videoStream);
         } catch (e) {
-            await electron.fs.rm(`${downloadPath}/${imageExportName}`);
+            await fs.rm(`${downloadDir}/${imageExportName}`);
             throw e;
         }
     } else {
         const fileExportName = await safeFileName(
-            downloadPath,
+            downloadDir,
             file.metadata.title,
-            electron.fs.exists,
+            fs.exists,
         );
-        await electron.saveStreamToDisk(
-            `${downloadPath}/${fileExportName}`,
-            updatedFileStream,
-        );
+        await writeStream(`${downloadDir}/${fileExportName}`, updatedStream);
     }
 }
 

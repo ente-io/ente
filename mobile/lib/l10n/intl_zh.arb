@@ -1211,5 +1211,6 @@
   "invalidEndpointMessage": "抱歉，您输入的端点无效。请输入有效的端点，然后重试。",
   "endpointUpdatedMessage": "端点更新成功",
   "customEndpoint": "已连接至 {endpoint}",
-  "createCollaborativeLink": "创建协作链接"
+  "createCollaborativeLink": "创建协作链接",
+  "search": "Search"
 }

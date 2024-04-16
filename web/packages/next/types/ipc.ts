@@ -3,7 +3,7 @@
 //
 // See [Note: types.ts <-> preload.ts <-> ipc.ts]
 
-import type { ElectronFile, WatchMapping } from "./file";
+import type { ElectronFile } from "./file";
 
 export interface AppUpdateInfo {
     autoUpdatable: boolean;
@@ -188,6 +188,17 @@ export interface Electron {
          * Delete the file at {@link path}.
          */
         rm: (path: string) => Promise<void>;
+
+        /** Read the string contents of a file at {@link path}. */
+        readTextFile: (path: string) => Promise<string>;
+
+        /**
+         * Write a string to a file, replacing the file if it already exists.
+         *
+         * @param path The path of the file.
+         * @param contents The string contents to write.
+         */
+        writeFile: (path: string, contents: string) => Promise<void>;
     };
 
     /*
@@ -287,25 +298,19 @@ export interface Electron {
 
     removeWatchMapping: (folderPath: string) => Promise<void>;
 
-    getWatchMappings: () => Promise<WatchMapping[]>;
+    getWatchMappings: () => Promise<FolderWatch[]>;
 
     updateWatchMappingSyncedFiles: (
         folderPath: string,
-        files: WatchMapping["syncedFiles"],
+        files: FolderWatch["syncedFiles"],
     ) => Promise<void>;
 
     updateWatchMappingIgnoredFiles: (
         folderPath: string,
-        files: WatchMapping["ignoredFiles"],
+        files: FolderWatch["ignoredFiles"],
     ) => Promise<void>;
 
     // - FS legacy
-    saveStreamToDisk: (
-        path: string,
-        fileStream: ReadableStream,
-    ) => Promise<void>;
-    saveFileToDisk: (path: string, contents: string) => Promise<void>;
-    readTextFile: (path: string) => Promise<string>;
     isFolder: (dirPath: string) => Promise<boolean>;
 
     // - Upload
@@ -326,4 +331,31 @@ export interface Electron {
     ) => Promise<ElectronFile[]>;
     setToUploadCollection: (collectionName: string) => Promise<void>;
     getDirFiles: (dirPath: string) => Promise<ElectronFile[]>;
+}
+
+/**
+ * A top level folder that was selected by the user for watching.
+ *
+ * The user can set up multiple such watches. Each of these can in turn be
+ * syncing multiple on disk folders to one or more (dependening on the
+ * {@link uploadStrategy}) Ente albums.
+ *
+ * This type is passed across the IPC boundary. It is persisted on the Node.js
+ * side.
+ */
+export interface FolderWatch {
+    rootFolderName: string;
+    uploadStrategy: number;
+    folderPath: string;
+    syncedFiles: FolderWatchSyncedFile[];
+    ignoredFiles: string[];
+}
+
+/**
+ * An on-disk file that was synced as part of a folder watch.
+ */
+export interface FolderWatchSyncedFile {
+    path: string;
+    uploadedFileID: number;
+    collectionID: number;
 }
