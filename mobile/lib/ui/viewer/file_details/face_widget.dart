@@ -9,6 +9,7 @@ import "package:photos/face/db.dart";
 import "package:photos/face/model/face.dart";
 import "package:photos/face/model/person.dart";
 import 'package:photos/models/file/file.dart';
+import "package:photos/services/machine_learning/face_ml/face_detection/detection.dart";
 import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -165,6 +166,12 @@ class _FaceWidgetState extends State<FaceWidget> {
                   if (kDebugMode)
                     Text(
                       'B: ${widget.face.blur.toStringAsFixed(0)}',
+                      style: Theme.of(context).textTheme.bodySmall,
+                      maxLines: 1,
+                    ),
+                  if (kDebugMode)
+                    Text(
+                      'D: ${widget.face.detection.getFaceDirection().toDirectionString()}',
                       style: Theme.of(context).textTheme.bodySmall,
                       maxLines: 1,
                     ),

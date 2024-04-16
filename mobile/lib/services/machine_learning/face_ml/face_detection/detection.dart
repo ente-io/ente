@@ -8,11 +8,11 @@ extension FaceDirectionExtension on FaceDirection {
   String toDirectionString() {
     switch (this) {
       case FaceDirection.left:
-        return 'L';
+        return 'Left';
       case FaceDirection.right:
-        return 'R';
+        return 'Right';
       case FaceDirection.straight:
-        return 'S';
+        return 'Straigt';
       default:
         throw Exception('Unknown FaceDirection');
     }
