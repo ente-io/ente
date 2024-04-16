@@ -3,12 +3,9 @@ PODS:
     - Flutter
   - battery_info (0.0.1):
     - Flutter
-  - bonsoir_darwin (3.0.0):
-    - Flutter
-    - FlutterMacOS
   - connectivity_plus (0.0.1):
     - Flutter
-    - ReachabilitySwift
+    - FlutterMacOS
   - device_info_plus (0.0.1):
     - Flutter
   - file_saver (0.0.1):
@@ -171,7 +168,6 @@ PODS:
     - Flutter
     - FlutterMacOS
   - PromisesObjC (2.4.0)
-  - ReachabilitySwift (5.2.1)
   - receive_sharing_intent (1.6.8):
     - Flutter
   - screen_brightness_ios (0.1.0):
@@ -231,8 +227,7 @@ PODS:
 DEPENDENCIES:
   - background_fetch (from `.symlinks/plugins/background_fetch/ios`)
   - battery_info (from `.symlinks/plugins/battery_info/ios`)
-  - bonsoir_darwin (from `.symlinks/plugins/bonsoir_darwin/darwin`)
-  - connectivity_plus (from `.symlinks/plugins/connectivity_plus/ios`)
+  - connectivity_plus (from `.symlinks/plugins/connectivity_plus/darwin`)
   - device_info_plus (from `.symlinks/plugins/device_info_plus/ios`)
   - file_saver (from `.symlinks/plugins/file_saver/ios`)
   - firebase_core (from `.symlinks/plugins/firebase_core/ios`)
@@ -296,7 +291,6 @@ SPEC REPOS:
     - onnxruntime-objc
     - OrderedSet
     - PromisesObjC
-    - ReachabilitySwift
     - SDWebImage
     - SDWebImageWebPCoder
     - Sentry
@@ -309,10 +303,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/background_fetch/ios"
   battery_info:
     :path: ".symlinks/plugins/battery_info/ios"
-  bonsoir_darwin:
-    :path: ".symlinks/plugins/bonsoir_darwin/darwin"
   connectivity_plus:
-    :path: ".symlinks/plugins/connectivity_plus/ios"
+    :path: ".symlinks/plugins/connectivity_plus/darwin"
   device_info_plus:
     :path: ".symlinks/plugins/device_info_plus/ios"
   file_saver:
@@ -409,8 +401,7 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   background_fetch: 2319bf7e18237b4b269430b7f14d177c0df09c5a
   battery_info: 09f5c9ee65394f2291c8c6227bedff345b8a730c
-  bonsoir_darwin: 127bdc632fdc154ae2f277a4d5c86a6212bc75be
-  connectivity_plus: 07c49e96d7fc92bc9920617b83238c4d178b446a
+  connectivity_plus: ddd7f30999e1faaef5967c23d5b6d503d10434db
   device_info_plus: c6fb39579d0f423935b0c9ce7ee2f44b71b9fce6
   file_saver: 503e386464dbe118f630e17b4c2e1190fa0cf808
   Firebase: 797fd7297b7e1be954432743a0b3f90038e45a71
@@ -458,7 +449,6 @@ SPEC CHECKSUMS:
   permission_handler_apple: 9878588469a2b0d0fc1e048d9f43605f92e6cec2
   photo_manager: 4f6810b7dfc4feb03b461ac1a70dacf91fba7604
   PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
-  ReachabilitySwift: 5ae15e16814b5f9ef568963fb2c87aeb49158c66
   receive_sharing_intent: 6837b01768e567fe8562182397bf43d63d8c6437
   screen_brightness_ios: 715ca807df953bf676d339f11464e438143ee625
   SDWebImage: 40b0b4053e36c660a764958bff99eed16610acbb

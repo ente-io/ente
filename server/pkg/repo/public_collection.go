@@ -23,7 +23,7 @@ type PublicCollectionRepository struct {
 // NewPublicCollectionRepository ..
 func NewPublicCollectionRepository(db *sql.DB, albumHost string) *PublicCollectionRepository {
 	if albumHost == "" {
-		panic("albumHost can not be empty")
+		albumHost = "https://albums.ente.io"
 	}
 	return &PublicCollectionRepository{
 		DB:        db,

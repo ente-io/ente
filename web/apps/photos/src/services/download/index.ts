@@ -7,7 +7,6 @@ import { CustomError } from "@ente/shared/error";
 import { Events, eventBus } from "@ente/shared/events";
 import { Remote } from "comlink";
 import { FILE_TYPE } from "constants/file";
-import isElectron from "is-electron";
 import { EnteFile } from "types/file";
 import {
     generateStreamFromArrayBuffer,
@@ -89,11 +88,12 @@ class DownloadManagerImpl {
                 e,
             );
         }
-        try {
-            if (isElectron()) this.fileCache = await openCache("files");
-        } catch (e) {
-            log.error("Failed to open file cache, will continue without it", e);
-        }
+        // TODO (MR): Revisit full file caching cf disk space usage
+        // try {
+        //     if (isElectron()) this.fileCache = await openCache("files");
+        // } catch (e) {
+        //     log.error("Failed to open file cache, will continue without it", e);
+        // }
         this.cryptoWorker = await ComlinkCryptoWorker.getInstance();
         this.ready = true;
         eventBus.on(Events.LOGOUT, this.logoutHandler.bind(this), this);

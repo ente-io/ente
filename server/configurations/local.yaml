@@ -73,8 +73,11 @@ http:
 
 # Specify the base endpoints for various apps
 apps:
-    public-albums: "https://albums.ente.io"
-
+    # Default is https://albums.ente.io
+    #
+    # If you're running a self hosted instance and wish to serve public links,
+    # set this to the URL where your albums web app is running.
+    public-albums:
 
 # Database connection parameters
 db:

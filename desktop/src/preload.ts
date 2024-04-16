@@ -96,6 +96,8 @@ const skipAppUpdate = (version: string) => {
     ipcRenderer.send("skipAppUpdate", version);
 };
 
+// - FS
+
 const fsExists = (path: string): Promise<boolean> =>
     ipcRenderer.invoke("fsExists", path);
 
@@ -109,6 +111,12 @@ const fsRmdir = (path: string): Promise<void> =>
     ipcRenderer.invoke("fsRmdir", path);
 
 const fsRm = (path: string): Promise<void> => ipcRenderer.invoke("fsRm", path);
+
+const fsReadTextFile = (path: string): Promise<string> =>
+    ipcRenderer.invoke("fsReadTextFile", path);
+
+const fsWriteFile = (path: string, contents: string): Promise<void> =>
+    ipcRenderer.invoke("fsWriteFile", path, contents);
 
 // - AUDIT below this
 
@@ -229,17 +237,6 @@ const updateWatchMappingIgnoredFiles = (
 
 // - FS Legacy
 
-const saveStreamToDisk = (
-    path: string,
-    fileStream: ReadableStream,
-): Promise<void> => ipcRenderer.invoke("saveStreamToDisk", path, fileStream);
-
-const saveFileToDisk = (path: string, contents: string): Promise<void> =>
-    ipcRenderer.invoke("saveFileToDisk", path, contents);
-
-const readTextFile = (path: string): Promise<string> =>
-    ipcRenderer.invoke("readTextFile", path);
-
 const isFolder = (dirPath: string): Promise<boolean> =>
     ipcRenderer.invoke("isFolder", dirPath);
 
@@ -298,7 +295,8 @@ const getDirFiles = (dirPath: string): Promise<ElectronFile[]> =>
 //   https://www.electronjs.org/docs/latest/api/context-bridge#methods
 //
 // The copy itself is relatively fast, but the problem with transfering large
-// amounts of data is potentially running out of memory during the copy.
+// amounts of data is potentially running out of memory during the copy. For an
+// alternative, see [Note: IPC streams].
 contextBridge.exposeInMainWorld("electron", {
     // - General
     appVersion,
@@ -315,6 +313,17 @@ contextBridge.exposeInMainWorld("electron", {
     updateAndRestart,
     updateOnNextRestart,
     skipAppUpdate,
+
+    // - FS
+    fs: {
+        exists: fsExists,
+        rename: fsRename,
+        mkdirIfNeeded: fsMkdirIfNeeded,
+        rmdir: fsRmdir,
+        rm: fsRm,
+        readTextFile: fsReadTextFile,
+        writeFile: fsWriteFile,
+    },
 
     // - Conversion
     convertToJPEG,
@@ -341,20 +350,8 @@ contextBridge.exposeInMainWorld("electron", {
     updateWatchMappingSyncedFiles,
     updateWatchMappingIgnoredFiles,
 
-    // - FS
-    fs: {
-        exists: fsExists,
-        rename: fsRename,
-        mkdirIfNeeded: fsMkdirIfNeeded,
-        rmdir: fsRmdir,
-        rm: fsRm,
-    },
-
     // - FS legacy
     // TODO: Move these into fs + document + rename if needed
-    saveStreamToDisk,
-    saveFileToDisk,
-    readTextFile,
     isFolder,
 
     // - Upload

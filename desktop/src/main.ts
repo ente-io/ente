@@ -9,7 +9,7 @@
  * https://www.electronjs.org/docs/latest/tutorial/process-model#the-main-process
  */
 import { nativeImage } from "electron";
-import { app, BrowserWindow, Menu, Tray } from "electron/main";
+import { app, BrowserWindow, Menu, protocol, Tray } from "electron/main";
 import serveNextAt from "next-electron-server";
 import { existsSync } from "node:fs";
 import fs from "node:fs/promises";
@@ -27,12 +27,13 @@ import { setupAutoUpdater } from "./main/services/app-update";
 import autoLauncher from "./main/services/autoLauncher";
 import { initWatcher } from "./main/services/chokidar";
 import { userPreferences } from "./main/stores/user-preferences";
+import { registerStreamProtocol } from "./main/stream";
 import { isDev } from "./main/util";
 
 /**
  * The URL where the renderer HTML is being served from.
  */
-export const rendererURL = "next://app";
+export const rendererURL = "ente://app";
 
 /**
  * We want to hide our window instead of closing it when the user presses the
@@ -59,21 +60,6 @@ export const allowWindowClose = (): void => {
 };
 
 /**
- * next-electron-server allows up to directly use the output of `next build` in
- * production mode and `next dev` in development mode, whilst keeping the rest
- * of our code the same.
- *
- * It uses protocol handlers to serve files from the "next://app" protocol
- *
- * - In development this is proxied to http://localhost:3000
- * - In production it serves files from the `/out` directory
- *
- * For more details, see this comparison:
- * https://github.com/HaNdTriX/next-electron-server/issues/5
- */
-const setupRendererServer = () => serveNextAt(rendererURL);
-
-/**
  * Log a standard startup banner.
  *
  * This helps us identify app starts and other environment details in the logs.
@@ -86,6 +72,75 @@ const logStartupBanner = () => {
     const osRelease = os.release();
     const systemVersion = process.getSystemVersion();
     log.info("Running on", { platform, osRelease, systemVersion });
+};
+
+/**
+ * next-electron-server allows up to directly use the output of `next build` in
+ * production mode and `next dev` in development mode, whilst keeping the rest
+ * of our code the same.
+ *
+ * It uses protocol handlers to serve files from the "ente://" protocol.
+ *
+ * - In development this is proxied to http://localhost:3000
+ * - In production it serves files from the `/out` directory
+ *
+ * For more details, see this comparison:
+ * https://github.com/HaNdTriX/next-electron-server/issues/5
+ */
+const setupRendererServer = () => serveNextAt(rendererURL);
+
+/**
+ * Register privileged schemes.
+ *
+ * We have two privileged schemes:
+ *
+ * 1. "ente", used for serving our web app (@see {@link setupRendererServer}).
+ *
+ * 2. "stream", used for streaming IPC (@see {@link registerStreamProtocol}).
+ *
+ * Both of these need some privileges, however, the documentation for Electron's
+ * [registerSchemesAsPrivileged](https://www.electronjs.org/docs/latest/api/protocol)
+ * says:
+ *
+ * > This method ... can be called only once.
+ *
+ * The library we use for the "ente" scheme, next-electron-server, already calls
+ * it once when we invoke {@link setupRendererServer}.
+ *
+ * In practice calling it multiple times just causes the values to be
+ * overwritten, and the last call wins. So we don't need to modify
+ * next-electron-server to prevent it from calling registerSchemesAsPrivileged.
+ * Instead, we (a) repeat what next-electron-server had done here, and (b)
+ * ensure that we're called after {@link setupRendererServer}.
+ */
+const registerPrivilegedSchemes = () => {
+    protocol.registerSchemesAsPrivileged([
+        {
+            // Taken verbatim from next-electron-server's code (index.js)
+            scheme: "ente",
+            privileges: {
+                standard: true,
+                secure: true,
+                allowServiceWorkers: true,
+                supportFetchAPI: true,
+                corsEnabled: true,
+            },
+        },
+        {
+            scheme: "stream",
+            privileges: {
+                // TODO(MR): Remove the commented bits if we don't end up
+                // needing them by the time the IPC refactoring is done.
+
+                // Prevent the insecure origin issues when fetching this
+                // secure: true,
+                // Allow the web fetch API in the renderer to use this scheme.
+                supportFetchAPI: true,
+                // Allow it to be used with video tags.
+                // stream: true,
+            },
+        },
+    ]);
 };
 
 /**
@@ -251,8 +306,10 @@ const main = () => {
     let mainWindow: BrowserWindow | undefined;
 
     initLogging();
-    setupRendererServer();
     logStartupBanner();
+    // The order of the next two calls is important
+    setupRendererServer();
+    registerPrivilegedSchemes();
     increaseDiskCache();
 
     app.on("second-instance", () => {
@@ -269,11 +326,11 @@ const main = () => {
     // Note that some Electron APIs can only be used after this event occurs.
     app.on("ready", async () => {
         mainWindow = await createMainWindow();
-        const watcher = initWatcher(mainWindow);
-        setupTrayItem(mainWindow);
         Menu.setApplicationMenu(await createApplicationMenu(mainWindow));
+        setupTrayItem(mainWindow);
         attachIPCHandlers();
-        attachFSWatchIPCHandlers(watcher);
+        attachFSWatchIPCHandlers(initWatcher(mainWindow));
+        registerStreamProtocol();
         if (!isDev) setupAutoUpdater(mainWindow);
         handleDownloads(mainWindow);
         handleExternalLinks(mainWindow);
