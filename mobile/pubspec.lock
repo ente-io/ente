@@ -209,6 +209,15 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.1"
+  cast:
+    dependency: "direct main"
+    description:
+      path: "."
+      ref: multicast_version
+      resolved-ref: "1f39cd4d6efa9363e77b2439f0317bae0c92dda1"
+      url: "https://github.com/guyluz11/flutter_cast.git"
+    source: git
+    version: "2.0.9"
   characters:
     dependency: transitive
     description:
@@ -1416,6 +1425,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.2"
+  multicast_dns:
+    dependency: transitive
+    description:
+      name: multicast_dns
+      sha256: "316cc47a958d4bd3c67bd238fe8b44fdfb6133bad89cb191c0c3bd3edb14e296"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.3.2+6"
   nested:
     dependency: transitive
     description:
@@ -1729,6 +1746,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.0"
+  protobuf:
+    dependency: transitive
+    description:
+      name: protobuf
+      sha256: "68645b24e0716782e58948f8467fd42a880f255096a821f9e7d0ec625b00c84d"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.1.0"
   provider:
     dependency: "direct main"
     description:

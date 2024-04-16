@@ -27,6 +27,10 @@ dependencies:
   battery_info: ^1.1.1
   bip39: ^1.0.6
   cached_network_image: ^3.0.0
+  cast:
+    git:
+      url: https://github.com/guyluz11/flutter_cast.git
+      ref: multicast_version
   chewie:
     git:
       url: https://github.com/ente-io/chewie.git
