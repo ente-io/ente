@@ -12,7 +12,7 @@ extension FaceDirectionExtension on FaceDirection {
       case FaceDirection.right:
         return 'Right';
       case FaceDirection.straight:
-        return 'Straigt';
+        return 'Straight';
       default:
         throw Exception('Unknown FaceDirection');
     }

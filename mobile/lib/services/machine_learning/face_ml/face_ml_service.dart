@@ -204,8 +204,10 @@ class FaceMlService {
       try {
         switch (function) {
           case FaceMlOperation.analyzeImage:
+            final time = DateTime.now();
             final FaceMlResult result =
                 await FaceMlService.analyzeImageSync(args);
+            dev.log("`analyzeImageSync` function executed in ${DateTime.now().difference(time).inMilliseconds} ms");
             sendPort.send(result.toJsonString());
             break;
         }
