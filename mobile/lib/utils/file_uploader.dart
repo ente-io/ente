@@ -39,7 +39,6 @@ import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_download_util.dart';
 import 'package:photos/utils/file_uploader_util.dart';
 import "package:photos/utils/file_util.dart";
-import "package:photos/utils/multipart_upload_util.dart";
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tuple/tuple.dart';
 import "package:uuid/uuid.dart";
