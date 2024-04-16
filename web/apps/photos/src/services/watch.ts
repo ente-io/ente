@@ -13,8 +13,8 @@ import {
 } from "types/watchFolder";
 import { groupFilesBasedOnCollectionID } from "utils/file";
 import { isSystemFile } from "utils/upload";
-import { removeFromCollection } from "../collectionService";
-import { getLocalFiles } from "../fileService";
+import { removeFromCollection } from "./collectionService";
+import { getLocalFiles } from "./fileService";
 
 class WatchFolderService {
     private eventQueue: EventQueueItem[] = [];
