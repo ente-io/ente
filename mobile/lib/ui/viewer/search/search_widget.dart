@@ -130,13 +130,11 @@ class SearchWidgetState extends State<SearchWidget> {
                 color: colorScheme.backgroundBase,
                 child: Container(
                   color: colorScheme.fillFaint,
-                  child: TextFormField(
+                  child: TextField(
                     controller: textController,
                     focusNode: focusNode,
                     style: Theme.of(context).textTheme.titleMedium,
                     // Below parameters are to disable auto-suggestion
-                    enableSuggestions: false,
-                    autocorrect: false,
                     // Above parameters are to disable auto-suggestion
                     decoration: InputDecoration(
                       //TODO: Extract string
