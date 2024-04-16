@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math' as math;
 
+import "package:cast/device.dart";
+import "package:cast/discovery_service.dart";
 import "package:flutter/cupertino.dart";
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
@@ -576,6 +578,9 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         ),
       );
     }
+    if (widget.collection != null) {
+      actions.add(castWidget(context));
+    }
     if (items.isNotEmpty) {
       actions.add(
         PopupMenuButton(
@@ -641,6 +646,39 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
 
     return actions;
   }
+
+  Widget castWidget(BuildContext context) {
+    return FutureBuilder<List<CastDevice>>(
+      future: CastDiscoveryService().search(),
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return Center(
+            child: Text(
+              'Error: ${snapshot.error.toString()}',
+            ),
+          );
+        } else if (!snapshot.hasData) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+
+        if (snapshot.data!.isEmpty) {
+          return const Text('No device');
+        }
+
+        return Column(
+          children: snapshot.data!.map((device) {
+            return  Text(device.name);
+
+          }).toList(),
+        );
+      },
+    );
+  }
+
+  Future<void> _connectToYourApp(
+      BuildContext contect, CastDevice device,) async {}
 
   Future<void> onCleanUncategorizedClick(BuildContext buildContext) async {
     final actionResult = await showChoiceActionSheet(
