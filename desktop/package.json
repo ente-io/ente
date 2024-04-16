@@ -39,7 +39,7 @@
         "@typescript-eslint/eslint-plugin": "^7",
         "@typescript-eslint/parser": "^7",
         "concurrently": "^8",
-        "electron": "^29",
+        "electron": "30.0.0-beta.8",
         "electron-builder": "^24",
         "electron-builder-notarize": "^1.5",
         "eslint": "^8",
