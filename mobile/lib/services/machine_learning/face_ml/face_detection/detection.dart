@@ -1,6 +1,23 @@
-import 'dart:math' show sqrt, pow;
+import 'dart:math' show max, min, pow, sqrt;
 
 import "package:photos/face/model/dimension.dart";
+
+enum FaceDirection { left, right, straight }
+
+extension FaceDirectionExtension on FaceDirection {
+  String toDirectionString() {
+    switch (this) {
+      case FaceDirection.left:
+        return 'L';
+      case FaceDirection.right:
+        return 'R';
+      case FaceDirection.straight:
+        return 'S';
+      default:
+        throw Exception('Unknown FaceDirection');
+    }
+  }
+}
 
 abstract class Detection {
   final double score;
@@ -426,6 +443,37 @@ class FaceDetectionAbsolute extends Detection {
 
   /// The height of the bounding box of the face detection, in number of pixels, range [0, imageHeight].
   double get height => yMaxBox - yMinBox;
+
+  FaceDirection getFaceDirection() {
+    final double eyeDistanceX = (rightEye[0] - leftEye[0]).abs();
+    final double eyeDistanceY = (rightEye[1] - leftEye[1]).abs();
+    final double mouthDistanceY = (rightMouth[1] - leftMouth[1]).abs();
+
+    final bool faceIsUpright =
+        (max(leftEye[1], rightEye[1]) + 0.5 * eyeDistanceY < nose[1]) &&
+            (nose[1] + 0.5 * mouthDistanceY < min(leftMouth[1], rightMouth[1]));
+
+    final bool noseStickingOutLeft = (nose[0] < min(leftEye[0], rightEye[0])) &&
+        (nose[0] < min(leftMouth[0], rightMouth[0]));
+    final bool noseStickingOutRight =
+        (nose[0] > max(leftEye[0], rightEye[0])) &&
+            (nose[0] > max(leftMouth[0], rightMouth[0]));
+
+    final bool noseCloseToLeftEye =
+        (nose[0] - leftEye[0]).abs() < 0.2 * eyeDistanceX;
+    final bool noseCloseToRightEye =
+        (nose[0] - rightEye[0]).abs() < 0.2 * eyeDistanceX;
+
+    // if (faceIsUpright && (noseStickingOutLeft || noseCloseToLeftEye)) {
+    if (noseStickingOutLeft || (faceIsUpright && noseCloseToLeftEye)) {
+      return FaceDirection.left;
+      // } else if (faceIsUpright && (noseStickingOutRight || noseCloseToRightEye)) {
+    } else if (noseStickingOutRight || (faceIsUpright && noseCloseToRightEye)) {
+      return FaceDirection.right;
+    }
+
+    return FaceDirection.straight;
+  }
 }
 
 List<FaceDetectionAbsolute> relativeToAbsoluteDetections({
