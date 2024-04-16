@@ -1,3 +1,8 @@
+/**
+ * @file Interface with the Node.js layer of our desktop app to provide the
+ * watch folders functionality.
+ */
+
 import { ensureElectron } from "@/next/electron";
 import log from "@/next/log";
 import { UPLOAD_RESULT, UPLOAD_STRATEGY } from "constants/upload";
@@ -12,17 +17,11 @@ import {
     WatchMappingSyncedFile,
 } from "types/watchFolder";
 import { groupFilesBasedOnCollectionID } from "utils/file";
-import { getValidFilesToUpload } from "utils/watch";
-import { removeFromCollection } from "../collectionService";
-import { getLocalFiles } from "../fileService";
-import { getParentFolderName } from "./utils";
-import {
-    diskFileAddedCallback,
-    diskFileRemovedCallback,
-    diskFolderRemovedCallback,
-} from "./watchFolderEventHandlers";
+import { isSystemFile } from "utils/upload";
+import { removeFromCollection } from "./collectionService";
+import { getLocalFiles } from "./fileService";
 
-class watchFolderService {
+class WatchFolderService {
     private eventQueue: EventQueueItem[] = [];
     private currentEvent: EventQueueItem;
     private currentlySyncedMapping: WatchMapping;
@@ -196,12 +195,9 @@ class watchFolderService {
         }
     }
 
-    async removeWatchMapping(folderPath: string) {
-        try {
-            await ensureElectron().removeWatchMapping(folderPath);
-        } catch (e) {
-            log.error("error while removing watch mapping", e);
-        }
+    async mappingsAfterRemovingFolder(folderPath: string) {
+        await ensureElectron().removeWatchMapping(folderPath);
+        return await this.getWatchMappings();
     }
 
     async getWatchMappings(): Promise<WatchMapping[]> {
@@ -641,4 +637,104 @@ class watchFolderService {
     }
 }
 
-export default new watchFolderService();
+const watchFolderService = new WatchFolderService();
+
+export default watchFolderService;
+
+const getParentFolderName = (filePath: string) => {
+    const folderPath = filePath.substring(0, filePath.lastIndexOf("/"));
+    const folderName = folderPath.substring(folderPath.lastIndexOf("/") + 1);
+    return folderName;
+};
+
+async function diskFileAddedCallback(file: ElectronFile) {
+    try {
+        const collectionNameAndFolderPath =
+            await watchFolderService.getCollectionNameAndFolderPath(file.path);
+
+        if (!collectionNameAndFolderPath) {
+            return;
+        }
+
+        const { collectionName, folderPath } = collectionNameAndFolderPath;
+
+        const event: EventQueueItem = {
+            type: "upload",
+            collectionName,
+            folderPath,
+            files: [file],
+        };
+        watchFolderService.pushEvent(event);
+        log.info(
+            `added (upload) to event queue, collectionName:${event.collectionName} folderPath:${event.folderPath}, filesCount: ${event.files.length}`,
+        );
+    } catch (e) {
+        log.error("error while calling diskFileAddedCallback", e);
+    }
+}
+
+async function diskFileRemovedCallback(filePath: string) {
+    try {
+        const collectionNameAndFolderPath =
+            await watchFolderService.getCollectionNameAndFolderPath(filePath);
+
+        if (!collectionNameAndFolderPath) {
+            return;
+        }
+
+        const { collectionName, folderPath } = collectionNameAndFolderPath;
+
+        const event: EventQueueItem = {
+            type: "trash",
+            collectionName,
+            folderPath,
+            paths: [filePath],
+        };
+        watchFolderService.pushEvent(event);
+        log.info(
+            `added (trash) to event queue collectionName:${event.collectionName} folderPath:${event.folderPath} , pathsCount: ${event.paths.length}`,
+        );
+    } catch (e) {
+        log.error("error while calling diskFileRemovedCallback", e);
+    }
+}
+
+async function diskFolderRemovedCallback(folderPath: string) {
+    try {
+        const mappings = await watchFolderService.getWatchMappings();
+        const mapping = mappings.find(
+            (mapping) => mapping.folderPath === folderPath,
+        );
+        if (!mapping) {
+            log.info(`folder not found in mappings, ${folderPath}`);
+            throw Error(`Watch mapping not found`);
+        }
+        watchFolderService.pushTrashedDir(folderPath);
+        log.info(`added trashedDir, ${folderPath}`);
+    } catch (e) {
+        log.error("error while calling diskFolderRemovedCallback", e);
+    }
+}
+
+export function getValidFilesToUpload(
+    files: ElectronFile[],
+    mapping: WatchMapping,
+) {
+    const uniqueFilePaths = new Set<string>();
+    return files.filter((file) => {
+        if (!isSystemFile(file) && !isSyncedOrIgnoredFile(file, mapping)) {
+            if (!uniqueFilePaths.has(file.path)) {
+                uniqueFilePaths.add(file.path);
+                return true;
+            }
+        }
+        return false;
+    });
+}
+
+function isSyncedOrIgnoredFile(file: ElectronFile, mapping: WatchMapping) {
+    return (
+        mapping.ignoredFiles.includes(file.path) ||
+        mapping.syncedFiles.find((f) => f.path === file.path)
+    );
+}

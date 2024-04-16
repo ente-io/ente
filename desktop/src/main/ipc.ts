@@ -10,7 +10,7 @@
 
 import type { FSWatcher } from "chokidar";
 import { ipcMain } from "electron/main";
-import type { ElectronFile, FILE_PATH_TYPE, WatchMapping } from "../types/ipc";
+import type { ElectronFile, FILE_PATH_TYPE, FolderWatch } from "../types/ipc";
 import {
     selectDirectory,
     showUploadDirsDialog,
@@ -242,13 +242,13 @@ export const attachFSWatchIPCHandlers = (watcher: FSWatcher) => {
 
     ipcMain.handle(
         "updateWatchMappingSyncedFiles",
-        (_, folderPath: string, files: WatchMapping["syncedFiles"]) =>
+        (_, folderPath: string, files: FolderWatch["syncedFiles"]) =>
             updateWatchMappingSyncedFiles(folderPath, files),
     );
 
     ipcMain.handle(
         "updateWatchMappingIgnoredFiles",
-        (_, folderPath: string, files: WatchMapping["ignoredFiles"]) =>
+        (_, folderPath: string, files: FolderWatch["ignoredFiles"]) =>
             updateWatchMappingIgnoredFiles(folderPath, files),
     );
 };

@@ -26,20 +26,6 @@ export interface DataStream {
     chunkCount: number;
 }
 
-export interface WatchMappingSyncedFile {
-    path: string;
-    uploadedFileID: number;
-    collectionID: number;
-}
-
-export interface WatchMapping {
-    rootFolderName: string;
-    folderPath: string;
-    uploadStrategy: UPLOAD_STRATEGY;
-    syncedFiles: WatchMappingSyncedFile[];
-    ignoredFiles: string[];
-}
-
 export interface EventQueueItem {
     type: "upload" | "trash";
     folderPath: string;

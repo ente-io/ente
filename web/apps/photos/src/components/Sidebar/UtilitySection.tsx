@@ -24,7 +24,7 @@ import {
 import { getAccountsURL } from "@ente/shared/network/api";
 import { THEME_COLOR } from "@ente/shared/themes/constants";
 import { EnteMenuItem } from "components/Menu/EnteMenuItem";
-import WatchFolder from "components/WatchFolder";
+import { WatchFolder } from "components/WatchFolder";
 import isElectron from "is-electron";
 import { getAccountsToken } from "services/userService";
 import { getDownloadAppMessage } from "utils/ui";

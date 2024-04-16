@@ -14,7 +14,7 @@ import {
     getPublicCollectionUID,
 } from "services/publicCollectionService";
 import { getDisableCFUploadProxyFlag } from "services/userService";
-import watchFolderService from "services/watchFolder/watchFolderService";
+import watchFolderService from "services/watch";
 import { Collection } from "types/collection";
 import { EncryptedEnteFile, EnteFile } from "types/file";
 import { SetFiles } from "types/gallery";

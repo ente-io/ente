@@ -45,7 +45,7 @@ import type {
     AppUpdateInfo,
     ElectronFile,
     FILE_PATH_TYPE,
-    WatchMapping,
+    FolderWatch,
 } from "./types/ipc";
 
 // - General
@@ -220,18 +220,18 @@ const addWatchMapping = (
 const removeWatchMapping = (folderPath: string): Promise<void> =>
     ipcRenderer.invoke("removeWatchMapping", folderPath);
 
-const getWatchMappings = (): Promise<WatchMapping[]> =>
+const getWatchMappings = (): Promise<FolderWatch[]> =>
     ipcRenderer.invoke("getWatchMappings");
 
 const updateWatchMappingSyncedFiles = (
     folderPath: string,
-    files: WatchMapping["syncedFiles"],
+    files: FolderWatch["syncedFiles"],
 ): Promise<void> =>
     ipcRenderer.invoke("updateWatchMappingSyncedFiles", folderPath, files);
 
 const updateWatchMappingIgnoredFiles = (
     folderPath: string,
-    files: WatchMapping["ignoredFiles"],
+    files: FolderWatch["ignoredFiles"],
 ): Promise<void> =>
     ipcRenderer.invoke("updateWatchMappingIgnoredFiles", folderPath, files);
 

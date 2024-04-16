@@ -5,6 +5,20 @@
  * See [Note: types.ts <-> preload.ts <-> ipc.ts]
  */
 
+export interface FolderWatch {
+    rootFolderName: string;
+    uploadStrategy: number;
+    folderPath: string;
+    syncedFiles: FolderWatchSyncedFile[];
+    ignoredFiles: string[];
+}
+
+export interface FolderWatchSyncedFile {
+    path: string;
+    uploadedFileID: number;
+    collectionID: number;
+}
+
 /**
  * Errors that have special semantics on the web side.
  *
@@ -52,22 +66,8 @@ export interface ElectronFile {
     arrayBuffer: () => Promise<Uint8Array>;
 }
 
-interface WatchMappingSyncedFile {
-    path: string;
-    uploadedFileID: number;
-    collectionID: number;
-}
-
-export interface WatchMapping {
-    rootFolderName: string;
-    uploadStrategy: number;
-    folderPath: string;
-    syncedFiles: WatchMappingSyncedFile[];
-    ignoredFiles: string[];
-}
-
 export interface WatchStoreType {
-    mappings: WatchMapping[];
+    mappings: FolderWatch[];
 }
 
 export enum FILE_PATH_TYPE {
