@@ -15,13 +15,8 @@ import { groupFilesBasedOnCollectionID } from "utils/file";
 import { getValidFilesToUpload } from "utils/watch";
 import { removeFromCollection } from "../collectionService";
 import { getLocalFiles } from "../fileService";
-import {
-    diskFileAddedCallback,
-    diskFileRemovedCallback,
-    diskFolderRemovedCallback,
-} from "./watchFolderEventHandlers";
 
-class watchFolderService {
+class WatchFolderService {
     private eventQueue: EventQueueItem[] = [];
     private currentEvent: EventQueueItem;
     private currentlySyncedMapping: WatchMapping;
@@ -640,10 +635,81 @@ class watchFolderService {
     }
 }
 
-export default new watchFolderService();
+const watchFolderService = new WatchFolderService();
 
-export const getParentFolderName = (filePath: string) => {
+export default watchFolderService;
+
+const getParentFolderName = (filePath: string) => {
     const folderPath = filePath.substring(0, filePath.lastIndexOf("/"));
     const folderName = folderPath.substring(folderPath.lastIndexOf("/") + 1);
     return folderName;
 };
+
+async function diskFileAddedCallback(file: ElectronFile) {
+    try {
+        const collectionNameAndFolderPath =
+            await watchFolderService.getCollectionNameAndFolderPath(file.path);
+
+        if (!collectionNameAndFolderPath) {
+            return;
+        }
+
+        const { collectionName, folderPath } = collectionNameAndFolderPath;
+
+        const event: EventQueueItem = {
+            type: "upload",
+            collectionName,
+            folderPath,
+            files: [file],
+        };
+        watchFolderService.pushEvent(event);
+        log.info(
+            `added (upload) to event queue, collectionName:${event.collectionName} folderPath:${event.folderPath}, filesCount: ${event.files.length}`,
+        );
+    } catch (e) {
+        log.error("error while calling diskFileAddedCallback", e);
+    }
+}
+
+async function diskFileRemovedCallback(filePath: string) {
+    try {
+        const collectionNameAndFolderPath =
+            await watchFolderService.getCollectionNameAndFolderPath(filePath);
+
+        if (!collectionNameAndFolderPath) {
+            return;
+        }
+
+        const { collectionName, folderPath } = collectionNameAndFolderPath;
+
+        const event: EventQueueItem = {
+            type: "trash",
+            collectionName,
+            folderPath,
+            paths: [filePath],
+        };
+        watchFolderService.pushEvent(event);
+        log.info(
+            `added (trash) to event queue collectionName:${event.collectionName} folderPath:${event.folderPath} , pathsCount: ${event.paths.length}`,
+        );
+    } catch (e) {
+        log.error("error while calling diskFileRemovedCallback", e);
+    }
+}
+
+async function diskFolderRemovedCallback(folderPath: string) {
+    try {
+        const mappings = await watchFolderService.getWatchMappings();
+        const mapping = mappings.find(
+            (mapping) => mapping.folderPath === folderPath,
+        );
+        if (!mapping) {
+            log.info(`folder not found in mappings, ${folderPath}`);
+            throw Error(`Watch mapping not found`);
+        }
+        watchFolderService.pushTrashedDir(folderPath);
+        log.info(`added trashedDir, ${folderPath}`);
+    } catch (e) {
+        log.error("error while calling diskFolderRemovedCallback", e);
+    }
+}
