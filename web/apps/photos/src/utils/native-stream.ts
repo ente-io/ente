@@ -15,6 +15,11 @@
  * @param stream The stream which should be written into the file.
  *  */
 export const writeStream = async (path: string, stream: ReadableStream) => {
+
+    const response = new Response(stream);
+    const blob = await response.blob();
+    // const ReadableStream()
+
     // The duplex parameter needs to be set to 'half' when streaming requests.
     //
     // Currently browsers, and specifically in our case, since this code runs
@@ -24,11 +29,11 @@ export const writeStream = async (path: string, stream: ReadableStream) => {
     const req = new Request(`stream://write${path}`, {
         // GET can't have a body
         method: "POST",
-        body: stream,
-        // @ts-expect-error TypeScript's libdom.d.ts does not include the
+        body: blob,
+        // @ts-expect-erroXXX TypeScript's libdom.d.ts does not include the
         // "duplex" parameter, e.g. see
         // https://github.com/node-fetch/node-fetch/issues/1769.
-        duplex: "half",
+        // duplex: "half",
     });
     const res = await fetch(req);
     if (!res.ok)
