@@ -40,15 +40,6 @@ class UploadLocksDB {
     columnPartETag: "part_etag",
     columnPartStatus: "part_status",
   );
-  static const trackStatus = (
-    pending: "pending",
-    uploaded: "uploaded",
-    completed: "completed",
-  );
-  static const _partStatus = (
-    pending: "pending",
-    uploaded: "uploaded",
-  );
 
   UploadLocksDB._privateConstructor();
   static final UploadLocksDB instance = UploadLocksDB._privateConstructor();
@@ -110,7 +101,7 @@ class UploadLocksDB {
                   ${_trackUploadTable.columnFileKey} TEXT NOT NULL,
                   ${_trackUploadTable.columnObjectKey} TEXT NOT NULL,
                   ${_trackUploadTable.columnCompleteUrl} TEXT NOT NULL,
-                  ${_trackUploadTable.columnStatus} TEXT DEFAULT '${trackStatus.pending}' NOT NULL,
+                  ${_trackUploadTable.columnStatus} TEXT DEFAULT '${MultipartStatus.pending.name}' NOT NULL,
                   ${_trackUploadTable.columnPartSize} INTEGER NOT NULL
                 )
                 ''',
@@ -202,7 +193,7 @@ class UploadLocksDB {
     return rows.isNotEmpty;
   }
 
-  Future<(MultipartUploadURLs, String)> getCachedLinks(
+  Future<MultipartInfo> getCachedLinks(
     String localId,
     String fileHash,
   ) async {
@@ -245,11 +236,16 @@ class UploadLocksDB {
       objectKey: objectKey,
       completeURL: row[_trackUploadTable.columnCompleteUrl] as String,
       partsURLs: partsURLs,
-      partUploadStatus: partUploadStatus,
-      partETags: partETags,
     );
 
-    return (urls, row[_trackUploadTable.columnStatus] as String);
+    return MultipartInfo(
+      urls: urls,
+      status: MultipartStatus.values
+          .byName(row[_trackUploadTable.columnStatus] as String),
+      partUploadStatus: partUploadStatus,
+      partETags: partETags,
+      partSize: row[_trackUploadTable.columnPartSize] as int,
+    );
   }
 
   Future<void> createTrackUploadsEntry(
@@ -287,7 +283,7 @@ class UploadLocksDB {
           _partsTable.columnObjectKey: objectKey,
           _partsTable.columnPartNumber: i,
           _partsTable.columnPartUrl: partsURLs[i],
-          _partsTable.columnPartStatus: _partStatus.pending,
+          _partsTable.columnPartStatus: PartStatus.pending.name,
         },
       );
     }
@@ -302,7 +298,7 @@ class UploadLocksDB {
     await db.update(
       _partsTable.table,
       {
-        _partsTable.columnPartStatus: _partStatus.uploaded,
+        _partsTable.columnPartStatus: PartStatus.uploaded.name,
         _partsTable.columnPartETag: etag,
       },
       where:
@@ -313,7 +309,7 @@ class UploadLocksDB {
 
   Future<void> updateTrackUploadStatus(
     String objectKey,
-    String status,
+    MultipartStatus status,
   ) async {
     final db = await instance.database;
     await db.update(

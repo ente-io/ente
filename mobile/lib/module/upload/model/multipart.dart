@@ -18,19 +18,42 @@ class PartETag extends XmlParsableObject {
   }
 }
 
+enum MultipartStatus {
+  pending,
+  uploaded,
+  completed,
+}
+
+enum PartStatus {
+  pending,
+  uploaded,
+}
+
+class MultipartInfo {
+  final List<bool>? partUploadStatus;
+  final Map<int, String>? partETags;
+  final int? partSize;
+  final MultipartUploadURLs urls;
+  final MultipartStatus status;
+
+  MultipartInfo({
+    this.partUploadStatus,
+    this.partETags,
+    this.partSize,
+    this.status = MultipartStatus.pending,
+    required this.urls,
+  });
+}
+
 class MultipartUploadURLs {
   final String objectKey;
   final List<String> partsURLs;
   final String completeURL;
-  final List<bool>? partUploadStatus;
-  final Map<int, String>? partETags;
 
   MultipartUploadURLs({
     required this.objectKey,
     required this.partsURLs,
     required this.completeURL,
-    this.partUploadStatus,
-    this.partETags,
   });
 
   factory MultipartUploadURLs.fromMap(Map<String, dynamic> map) {

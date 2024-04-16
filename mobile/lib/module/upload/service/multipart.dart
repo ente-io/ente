@@ -22,7 +22,7 @@ class MultiPartUploader {
     this._s3Dio,
     this._db,
     this._featureFlagService,
-  ) {}
+  );
 
   Future<int> calculatePartCount(int fileSize) async {
     final partCount = (fileSize / multipartPartSizeForUpload).ceil();
@@ -72,21 +72,25 @@ class MultiPartUploader {
     String localId,
     String fileHash,
   ) async {
-    final (urls, status) = await _db.getCachedLinks(localId, fileHash);
+    final multipartInfo = await _db.getCachedLinks(localId, fileHash);
 
-    Map<int, String> etags = urls.partETags ?? {};
+    Map<int, String> etags = multipartInfo.partETags ?? {};
 
-    if (status == UploadLocksDB.trackStatus.pending) {
+    if (multipartInfo.status == MultipartStatus.pending) {
       // upload individual parts and get their etags
-      etags = await _uploadParts(urls, encryptedFile);
+      etags = await _uploadParts(multipartInfo, encryptedFile);
     }
 
-    if (status != UploadLocksDB.trackStatus.completed) {
+    if (multipartInfo.status != MultipartStatus.completed) {
       // complete the multipart upload
-      await _completeMultipartUpload(urls.objectKey, etags, urls.completeURL);
+      await _completeMultipartUpload(
+        multipartInfo.urls.objectKey,
+        etags,
+        multipartInfo.urls.completeURL,
+      );
     }
 
-    return urls.objectKey;
+    return multipartInfo.urls.objectKey;
   }
 
   Future<String> putMultipartFile(
@@ -94,7 +98,10 @@ class MultiPartUploader {
     File encryptedFile,
   ) async {
     // upload individual parts and get their etags
-    final etags = await _uploadParts(urls, encryptedFile);
+    final etags = await _uploadParts(
+      MultipartInfo(urls: urls),
+      encryptedFile,
+    );
 
     // complete the multipart upload
     await _completeMultipartUpload(urls.objectKey, etags, urls.completeURL);
@@ -103,30 +110,30 @@ class MultiPartUploader {
   }
 
   Future<Map<int, String>> _uploadParts(
-    MultipartUploadURLs url,
+    MultipartInfo partInfo,
     File encryptedFile,
   ) async {
-    final partsURLs = url.partsURLs;
-    final partUploadStatus = url.partUploadStatus;
+    final partsURLs = partInfo.urls.partsURLs;
+    final partUploadStatus = partInfo.partUploadStatus;
     final partsLength = partsURLs.length;
-    final etags = url.partETags ?? <int, String>{};
+    final etags = partInfo.partETags ?? <int, String>{};
 
     for (int i = 0; i < partsLength; i++) {
       if (i < (partUploadStatus?.length ?? 0) &&
           (partUploadStatus?[i] ?? false)) {
         continue;
       }
+      final partSize = partInfo.partSize ?? multipartPartSizeForUpload;
       final partURL = partsURLs[i];
       final isLastPart = i == partsLength - 1;
-      final fileSize = isLastPart
-          ? encryptedFile.lengthSync() % multipartPartSizeForUpload
-          : multipartPartSizeForUpload;
+      final fileSize =
+          isLastPart ? encryptedFile.lengthSync() % partSize : partSize;
 
       final response = await _s3Dio.put(
         partURL,
         data: encryptedFile.openRead(
-          i * multipartPartSizeForUpload,
-          isLastPart ? null : (i + 1) * multipartPartSizeForUpload,
+          i * partSize,
+          isLastPart ? null : (i + 1) * partSize,
         ),
         options: Options(
           headers: {
@@ -143,11 +150,11 @@ class MultiPartUploader {
 
       etags[i] = eTag!;
 
-      await _db.updatePartStatus(url.objectKey, i, eTag);
+      await _db.updatePartStatus(partInfo.urls.objectKey, i, eTag);
     }
     await _db.updateTrackUploadStatus(
-      url.objectKey,
-      UploadLocksDB.trackStatus.uploaded,
+      partInfo.urls.objectKey,
+      MultipartStatus.uploaded,
     );
 
     return etags;
@@ -179,7 +186,7 @@ class MultiPartUploader {
       );
       await _db.updateTrackUploadStatus(
         objectKey,
-        UploadLocksDB.trackStatus.completed,
+        MultipartStatus.completed,
       );
     } catch (e) {
       Logger("MultipartUpload").severe(e);
