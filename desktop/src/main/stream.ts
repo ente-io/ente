@@ -39,11 +39,19 @@ export const registerStreamProtocol = () => {
                 try {
                     // await writeStream(path, request.body);
                     console.log("starting stream");
-                    let c = 0;
-                    for await (const p of request.body as any) {
-                        if (c == 327680) console.log(p);
-                        fs.appendFile(path, p);
-                        c += p.length;
+                    // let c = 0;
+                    // for await (const p of request.body as any) {
+                    //     if (c == 327680) console.log(p);
+                    //     fs.appendFile(path, p);
+                    //     c += p.length;
+                    // }
+                    const reader = request.body.getReader();
+                    // eslint-disable-next-line no-constant-condition
+                    while (true) {
+                        const { value, done } = await reader.read();
+                        if (done) break;
+                        console.log(`Received ${value.length} bytes`);
+                        fs.appendFile(path, value);
                     }
                     console.log("ending stream");
 
