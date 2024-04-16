@@ -1,15 +1,15 @@
-import { SlideshowContext } from "pages/slideshow";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
-export default function PhotoAuditorium({
-    url,
-    nextSlideUrl,
-}: {
+interface PhotoAuditoriumProps {
     url: string;
     nextSlideUrl: string;
-}) {
-    const { showNextSlide } = useContext(SlideshowContext);
-
+    showNextSlide: () => void;
+}
+export const PhotoAuditorium: React.FC<PhotoAuditoriumProps> = ({
+    url,
+    nextSlideUrl,
+    showNextSlide,
+}) => {
     const [showPreloadedNextSlide, setShowPreloadedNextSlide] = useState(false);
     const [nextSlidePrerendered, setNextSlidePrerendered] = useState(false);
     const [prerenderTime, setPrerenderTime] = useState<number | null>(null);
@@ -92,4 +92,4 @@ export default function PhotoAuditorium({
             </div>
         </div>
     );
-}
+};

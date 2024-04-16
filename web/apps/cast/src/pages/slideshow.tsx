@@ -1,9 +1,9 @@
 import log from "@/next/log";
 import PairedSuccessfullyOverlay from "components/PairedSuccessfullyOverlay";
-import PhotoAuditorium from "components/PhotoAuditorium";
+import { PhotoAuditorium } from "components/PhotoAuditorium";
 import { FILE_TYPE } from "constants/file";
 import { useRouter } from "next/router";
-import { createContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
     getCastCollection,
     getLocalFiles,
@@ -12,10 +12,6 @@ import {
 import { Collection } from "types/collection";
 import { EnteFile } from "types/file";
 import { getPreviewableImage, isRawFileFromFileName } from "utils/file";
-
-export const SlideshowContext = createContext<{
-    showNextSlide: () => void;
-}>(null);
 
 const renderableFileURLCache = new Map<number, string>();
 
@@ -28,6 +24,7 @@ export default function Slideshow() {
     const [collectionFiles, setCollectionFiles] = useState<EnteFile[]>([]);
     const [currentFileId, setCurrentFileId] = useState<number | undefined>();
     const [currentFileURL, setCurrentFileURL] = useState<string | undefined>();
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [nextFileURL, setNextFileURL] = useState<string | undefined>();
 
     const router = useRouter();
@@ -156,15 +153,13 @@ export default function Slideshow() {
         setNextFileURL(nextNextURL);
     };
 
+    if (loading) return <PairedSuccessfullyOverlay />;
+
     return (
-        <>
-            <SlideshowContext.Provider value={{ showNextSlide }}>
-                <PhotoAuditorium
-                    url={currentFileURL}
-                    nextSlideUrl={currentFileURL}
-                />
-            </SlideshowContext.Provider>
-            {loading && <PairedSuccessfullyOverlay />}
-        </>
+        <PhotoAuditorium
+            url={currentFileURL}
+            nextSlideUrl={currentFileURL}
+            showNextSlide={showNextSlide}
+        />
     );
 }
