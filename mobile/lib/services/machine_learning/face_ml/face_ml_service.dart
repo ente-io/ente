@@ -204,83 +204,9 @@ class FaceMlService {
       try {
         switch (function) {
           case FaceMlOperation.analyzeImage:
-            final int enteFileID = args["enteFileID"] as int;
-            final String imagePath = args["filePath"] as String;
-            final int faceDetectionAddress =
-                args["faceDetectionAddress"] as int;
-            final int faceEmbeddingAddress =
-                args["faceEmbeddingAddress"] as int;
-
-            final resultBuilder =
-                FaceMlResultBuilder.fromEnteFileID(enteFileID);
-
-            dev.log(
-              "Start analyzing image with uploadedFileID: $enteFileID inside the isolate",
-            );
-            final stopwatchTotal = Stopwatch()..start();
-            final stopwatch = Stopwatch()..start();
-
-            // Decode the image once to use for both face detection and alignment
-            final imageData = await File(imagePath).readAsBytes();
-            final image = await decodeImageFromData(imageData);
-            final ByteData imgByteData = await getByteDataFromImage(image);
-            dev.log('Reading and decoding image took '
-                '${stopwatch.elapsedMilliseconds} ms');
-            stopwatch.reset();
-
-            // Get the faces
-            final List<FaceDetectionRelative> faceDetectionResult =
-                await FaceMlService.detectFacesSync(
-              image,
-              imgByteData,
-              faceDetectionAddress,
-              resultBuilder: resultBuilder,
-            );
-
-            dev.log(
-                "${faceDetectionResult.length} faces detected with scores ${faceDetectionResult.map((e) => e.score).toList()}: completed `detectFacesSync` function, in "
-                "${stopwatch.elapsedMilliseconds} ms");
-
-            // If no faces were detected, return a result with no faces. Otherwise, continue.
-            if (faceDetectionResult.isEmpty) {
-              dev.log(
-                  "No faceDetectionResult, Completed analyzing image with uploadedFileID $enteFileID, in "
-                  "${stopwatch.elapsedMilliseconds} ms");
-              sendPort.send(resultBuilder.buildNoFaceDetected().toJsonString());
-              break;
-            }
-
-            stopwatch.reset();
-            // Align the faces
-            final Float32List faceAlignmentResult =
-                await FaceMlService.alignFacesSync(
-              image,
-              imgByteData,
-              faceDetectionResult,
-              resultBuilder: resultBuilder,
-            );
-
-            dev.log("Completed `alignFacesSync` function, in "
-                "${stopwatch.elapsedMilliseconds} ms");
-
-            stopwatch.reset();
-            // Get the embeddings of the faces
-            final embeddings = await FaceMlService.embedFacesSync(
-              faceAlignmentResult,
-              faceEmbeddingAddress,
-              resultBuilder: resultBuilder,
-            );
-
-            dev.log("Completed `embedFacesSync` function, in "
-                "${stopwatch.elapsedMilliseconds} ms");
-
-            stopwatch.stop();
-            stopwatchTotal.stop();
-            dev.log("Finished Analyze image (${embeddings.length} faces) with "
-                "uploadedFileID $enteFileID, in "
-                "${stopwatchTotal.elapsedMilliseconds} ms");
-
-            sendPort.send(resultBuilder.build().toJsonString());
+            final FaceMlResult result =
+                await FaceMlService.analyzeImageSync(args);
+            sendPort.send(result.toJsonString());
             break;
         }
       } catch (e, stackTrace) {
@@ -875,6 +801,7 @@ class FaceMlService {
     }
   }
 
+  /// Analyzes the given image data by running the full pipeline for faces, using [analyzeImageSync] in the isolate.
   Future<FaceMlResult?> analyzeImageInSingleIsolate(EnteFile enteFile) async {
     _checkEnteFileForID(enteFile);
     await ensureInitialized();
@@ -929,6 +856,87 @@ class FaceMlService {
     );
 
     return result;
+  }
+
+  static Future<FaceMlResult> analyzeImageSync(Map args) async {
+    try {
+      final int enteFileID = args["enteFileID"] as int;
+      final String imagePath = args["filePath"] as String;
+      final int faceDetectionAddress = args["faceDetectionAddress"] as int;
+      final int faceEmbeddingAddress = args["faceEmbeddingAddress"] as int;
+
+      final resultBuilder = FaceMlResultBuilder.fromEnteFileID(enteFileID);
+
+      dev.log(
+        "Start analyzing image with uploadedFileID: $enteFileID inside the isolate",
+      );
+      final stopwatchTotal = Stopwatch()..start();
+      final stopwatch = Stopwatch()..start();
+
+      // Decode the image once to use for both face detection and alignment
+      final imageData = await File(imagePath).readAsBytes();
+      final image = await decodeImageFromData(imageData);
+      final ByteData imgByteData = await getByteDataFromImage(image);
+      dev.log('Reading and decoding image took '
+          '${stopwatch.elapsedMilliseconds} ms');
+      stopwatch.reset();
+
+      // Get the faces
+      final List<FaceDetectionRelative> faceDetectionResult =
+          await FaceMlService.detectFacesSync(
+        image,
+        imgByteData,
+        faceDetectionAddress,
+        resultBuilder: resultBuilder,
+      );
+
+      dev.log(
+          "${faceDetectionResult.length} faces detected with scores ${faceDetectionResult.map((e) => e.score).toList()}: completed `detectFacesSync` function, in "
+          "${stopwatch.elapsedMilliseconds} ms");
+
+      // If no faces were detected, return a result with no faces. Otherwise, continue.
+      if (faceDetectionResult.isEmpty) {
+        dev.log(
+            "No faceDetectionResult, Completed analyzing image with uploadedFileID $enteFileID, in "
+            "${stopwatch.elapsedMilliseconds} ms");
+        return resultBuilder.buildNoFaceDetected();
+      }
+
+      stopwatch.reset();
+      // Align the faces
+      final Float32List faceAlignmentResult =
+          await FaceMlService.alignFacesSync(
+        image,
+        imgByteData,
+        faceDetectionResult,
+        resultBuilder: resultBuilder,
+      );
+
+      dev.log("Completed `alignFacesSync` function, in "
+          "${stopwatch.elapsedMilliseconds} ms");
+
+      stopwatch.reset();
+      // Get the embeddings of the faces
+      final embeddings = await FaceMlService.embedFacesSync(
+        faceAlignmentResult,
+        faceEmbeddingAddress,
+        resultBuilder: resultBuilder,
+      );
+
+      dev.log("Completed `embedFacesSync` function, in "
+          "${stopwatch.elapsedMilliseconds} ms");
+
+      stopwatch.stop();
+      stopwatchTotal.stop();
+      dev.log("Finished Analyze image (${embeddings.length} faces) with "
+          "uploadedFileID $enteFileID, in "
+          "${stopwatchTotal.elapsedMilliseconds} ms");
+
+      return resultBuilder.build();
+    } catch (e, s) {
+      dev.log("Could not analyze image: \n e: $e \n s: $s");
+      rethrow;
+    }
   }
 
   Future<String?> _getImagePathForML(
