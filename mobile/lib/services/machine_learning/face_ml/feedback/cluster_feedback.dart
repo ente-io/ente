@@ -295,6 +295,30 @@ class ClusterFeedbackService {
     return clusterIdToFaceIds;
   }
 
+  Future<void> debugLogClusterBlurValues(
+    int clusterID, {
+    int? clusterSize,
+  }) async {
+    final List<double> blurValues = await FaceMLDataDB.instance
+        .getBlurValuesForCluster(clusterID)
+        .then((value) => value.toList());
+
+    // Round the blur values to integers
+    final blurValuesIntegers =
+        blurValues.map((value) => value.round()).toList();
+
+    // Sort the blur values in ascending order
+    blurValuesIntegers.sort();
+
+    // Log the sorted blur values
+
+    _logger.info(
+      "Blur values for cluster $clusterID${clusterSize != null ? ' with $clusterSize photos' : ''}: $blurValuesIntegers",
+    );
+
+    return;
+  }
+
   /// Returns a map of person's clusterID to map of closest clusterID to with disstance
   Future<Map<int, List<(int, double)>>> getSuggestionsUsingMean(
     PersonEntity p, {

@@ -1,5 +1,6 @@
 import "dart:async";
 
+import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
 import "package:flutter_animate/flutter_animate.dart";
 import 'package:photos/core/event_bus.dart';
@@ -69,6 +70,12 @@ class _ClusterPageState extends State<ClusterPage> {
         setState(() {});
       }
     });
+    kDebugMode
+        ? ClusterFeedbackService.instance.debugLogClusterBlurValues(
+            widget.clusterID,
+            clusterSize: files.length,
+          )
+        : null;
   }
 
   @override

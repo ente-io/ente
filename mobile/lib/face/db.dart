@@ -344,6 +344,26 @@ class FaceMLDataDB {
     return maps.map((e) => e[fcFaceId] as String).toSet();
   }
 
+  Future<Iterable<double>> getBlurValuesForCluster(int clusterID) async {
+    final db = await instance.sqliteAsyncDB;
+    const String query = '''
+        SELECT $facesTable.$faceBlur 
+        FROM $facesTable 
+        JOIN $faceClustersTable ON $facesTable.$faceIDColumn = $faceClustersTable.$fcFaceId 
+        WHERE $faceClustersTable.$fcClusterID = ?
+      ''';
+    // const String query2 = '''
+    //     SELECT $faceBlur
+    //     FROM $facesTable
+    //     WHERE $faceIDColumn IN (SELECT $fcFaceId FROM $faceClustersTable WHERE $fcClusterID = ?)
+    //   ''';
+    final List<Map<String, dynamic>> maps = await db.getAll(
+      query,
+      [clusterID],
+    );
+    return maps.map((e) => e[faceBlur] as double).toSet();
+  }
+
   Future<Map<String, int?>> getFaceIdsToClusterIds(
     Iterable<String> faceIds,
   ) async {
