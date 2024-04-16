@@ -15,8 +15,8 @@ import { existsSync } from "fs";
 import fs from "node:fs/promises";
 import path from "node:path";
 import * as ort from "onnxruntime-node";
-import { writeStream } from "../stream";
 import log from "../log";
+import { writeStream } from "../stream";
 
 /**
  * Download the model named {@link modelName} if we don't already have it.
