@@ -1,7 +1,5 @@
-import { addLogLine } from "@ente/shared/logging";
-import { logError } from "@ente/shared/sentry";
+import log from "@/next/log";
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
-
 import { ApiError, CustomError, isApiErrorResponse } from "../error";
 
 interface IHTTPHeaders {
@@ -28,14 +26,17 @@ class HTTPService {
                     // that falls out of the range of 2xx
                     if (isApiErrorResponse(response.data)) {
                         const responseData = response.data;
-                        logError(error, "HTTP Service Error", {
-                            url: config.url,
-                            method: config.method,
-                            xRequestId: response.headers["x-request-id"],
-                            httpStatus: response.status,
-                            errMessage: responseData.message,
-                            errCode: responseData.code,
-                        });
+                        log.error(
+                            `HTTP Service Error - ${JSON.stringify({
+                                url: config.url,
+                                method: config.method,
+                                xRequestId: response.headers["x-request-id"],
+                                httpStatus: response.status,
+                                errMessage: responseData.message,
+                                errCode: responseData.code,
+                            })}`,
+                            error,
+                        );
                         apiError = new ApiError(
                             responseData.message,
                             responseData.code,
@@ -56,30 +57,30 @@ class HTTPService {
                             );
                         }
                     }
-                    logError(apiError, "HTTP Service Error", {
-                        url: config.url,
-                        method: config.method,
-                        cfRay: response.headers["cf-ray"],
-                        xRequestId: response.headers["x-request-id"],
-                        httpStatus: response.status,
-                    });
+                    log.error(
+                        `HTTP Service Error - ${JSON.stringify({
+                            url: config.url,
+                            method: config.method,
+                            cfRay: response.headers["cf-ray"],
+                            xRequestId: response.headers["x-request-id"],
+                            httpStatus: response.status,
+                        })}`,
+                        apiError,
+                    );
                     throw apiError;
                 } else if (error.request) {
                     // The request was made but no response was received
                     // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
                     // http.ClientRequest in node.js
-                    addLogLine(
-                        "request failed- no response",
-                        `url: ${config.url}`,
-                        `method: ${config.method}`,
+                    log.info(
+                        `request failed - no response (${config.method} ${config.url}`,
                     );
                     return Promise.reject(error);
                 } else {
-                    // Something happened in setting up the request that triggered an Error
-                    addLogLine(
-                        "request failed- axios error",
-                        `url: ${config.url}`,
-                        `method: ${config.method}`,
+                    // Something happened in setting up the request that
+                    // triggered an Error
+                    log.info(
+                        `request failed - axios error (${config.method} ${config.url}`,
                     );
                     return Promise.reject(error);
                 }
@@ -124,7 +125,6 @@ class HTTPService {
     /**
      * Returns axios interceptors.
      */
-    // eslint-disable-next-line class-methods-use-this
     public getInterceptors() {
         return axios.interceptors;
     }
@@ -136,7 +136,6 @@ class HTTPService {
      * over what was sent in config.
      */
     public async request(config: AxiosRequestConfig, customConfig?: any) {
-        // eslint-disable-next-line no-param-reassign
         config.headers = {
             ...this.headers,
             ...config.headers,

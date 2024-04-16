@@ -10,12 +10,8 @@ import TextSnippetOutlined from "@mui/icons-material/TextSnippetOutlined";
 import { Box, DialogProps, Link, Stack, styled } from "@mui/material";
 import { Chip } from "components/Chip";
 import { EnteDrawer } from "components/EnteDrawer";
-import { ObjectLabelList } from "components/MachineLearning/ObjectList";
-import {
-    PhotoPeopleList,
-    UnidentifiedFaces,
-} from "components/MachineLearning/PeopleList";
 import Titlebar from "components/Titlebar";
+import { PhotoPeopleList, UnidentifiedFaces } from "components/ml/PeopleList";
 import LinkButton from "components/pages/gallery/LinkButton";
 import { t } from "i18next";
 import { AppContext } from "pages/_app";
@@ -341,10 +337,6 @@ export function FileInfo({
                             updateMLDataIndex={updateMLDataIndex}
                         />
                         <UnidentifiedFaces
-                            file={file}
-                            updateMLDataIndex={updateMLDataIndex}
-                        />
-                        <ObjectLabelList
                             file={file}
                             updateMLDataIndex={updateMLDataIndex}
                         />

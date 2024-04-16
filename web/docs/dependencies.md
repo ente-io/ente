@@ -17,6 +17,8 @@ package:
 -   "eslint-plugin-react-hooks", "eslint-plugin-react-namespace-import" - Some
     React specific ESLint rules and configurations that are used by the
     workspaces that have React code.
+-   "eslint-plugin-react-refresh" - A plugin to ensure that React components are
+    exported in a way that they can be HMR-ed.
 -   "prettier-plugin-organize-imports" - A Prettier plugin to sort imports.
 -   "prettier-plugin-packagejson" - A Prettier plugin to also prettify
     `package.json`.
@@ -121,3 +123,17 @@ set of defaults for bundling our app into a static export which we can then
 deploy to our webserver. In addition, the Next.js page router is convenient.
 Apart from this, while we use a few tidbits from Next.js here and there, overall
 our apps are regular React SPAs, and are not particularly tied to Next.
+
+### Vite
+
+For some of our newer code, we have started to use [Vite](https://vitejs.dev).
+It is more lower level than Next, but the bells and whistles it doesn't have are
+the bells and whistles (and the accompanying complexity) that we don't need in
+some cases.
+
+## Photos
+
+### Misc
+
+-   "sanitize-filename" is for converting arbitrary strings into strings that
+    are suitable for being used as filenames.

@@ -20,10 +20,6 @@ export class PublicAlbumsDownloadClient implements DownloadClient {
         this.passwordToken = passwordToken;
     }
 
-    updateTimeout(timeout: number) {
-        this.timeout = timeout;
-    }
-
     downloadThumbnail = async (file: EnteFile) => {
         if (!this.token) {
             throw Error(CustomError.TOKEN_MISSING);

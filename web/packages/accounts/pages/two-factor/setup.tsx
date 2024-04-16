@@ -1,3 +1,4 @@
+import log from "@/next/log";
 import { enableTwoFactor, setupTwoFactor } from "@ente/accounts/api/user";
 import VerifyTwoFactor, {
     VerifyTwoFactorCallback,
@@ -9,7 +10,6 @@ import { PageProps } from "@ente/shared/apps/types";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import LinkButton from "@ente/shared/components/LinkButton";
 import { encryptWithRecoveryKey } from "@ente/shared/crypto/helpers";
-import { logError } from "@ente/shared/sentry";
 import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
 import { Box, CardContent, Typography } from "@mui/material";
 import Card from "@mui/material/Card";
@@ -37,7 +37,7 @@ export default function SetupTwoFactor({ appName }: PageProps) {
                 const twoFactorSecret = await setupTwoFactor();
                 setTwoFactorSecret(twoFactorSecret);
             } catch (e) {
-                logError(e, "failed to get two factor setup code");
+                log.error("failed to get two factor setup code", e);
             }
         };
         main();

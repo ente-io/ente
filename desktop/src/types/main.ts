@@ -18,6 +18,7 @@ export interface KeysStoreType {
     };
 }
 
+/* eslint-disable no-unused-vars */
 export const FILE_PATH_KEYS: {
     [k in FILE_PATH_TYPE]: keyof UploadStoreType;
 } = {
@@ -27,10 +28,4 @@ export const FILE_PATH_KEYS: {
 
 export interface SafeStorageStoreType {
     encryptionKey: string;
-}
-
-export interface UserPreferencesType {
-    hideDockIcon: boolean;
-    skipAppVersion: string;
-    muteUpdateNotificationVersion: string;
 }

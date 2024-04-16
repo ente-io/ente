@@ -24,18 +24,32 @@ and subsequently increase the
 [storage and account validity](https://github.com/ente-io/ente/blob/main/cli/docs/generated/ente_admin_update-subscription.md)
 using the CLI.
 
-For the admin actions, you can create `server/museum.yaml`, and whitelist add
-the admin userID `internal.admins`. See
-[local.yaml](https://github.com/ente-io/ente/blob/main/server/configurations/local.yaml#L211C1-L232C1)
+For security purposes, we need to whitelist the user IDs that can perform admin
+actions on the server. To do this,
+
+-   Create a `museum.yaml` in the directory where you're starting museum from.
+    For example, if you're running using `docker compose up`, then this file
+    should be in the same directory as `compose.yaml` (generally,
+    `server/museum.yaml`).
+
+    > Docker might've created an empty `museum.yaml` _directory_ on your machine
+    > previously. If so, delete that empty directory and create a new file named
+    > `museum.yaml`.
+
+-   In this `museum.yaml` we can add overrides over the default configuration.
+
+For whitelisting the admin userIDs we need to define an `internal.admins`. See
+the "internal" section in
+[local.yaml](https://github.com/ente-io/ente/blob/main/server/configurations/local.yaml)
 in the server source code for details about how to define this.
 
-```yaml
-....
-internal:
-  admins:
-    # - 1580559962386440
+Here is an example. Suppose we wanted to whitelist a user with ID
+`1580559962386440`, we can create the following `museum.yaml`
 
-....
+```yaml
+internal:
+    admins:
+        - 1580559962386440
 ```
 
 You can use

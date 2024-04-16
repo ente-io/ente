@@ -10,9 +10,9 @@ import {
     LinearProgress,
     styled,
 } from "@mui/material";
-import { ExportStage } from "constants/export";
 import { t } from "i18next";
 import { Trans } from "react-i18next";
+import { ExportStage } from "services/export";
 import { ExportProgress } from "types/export";
 
 export const ComfySpan = styled("span")`

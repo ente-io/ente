@@ -1,3 +1,4 @@
+import log from "@/next/log";
 import RecoveryKey from "@ente/shared/components/RecoveryKey";
 import {
     ACCOUNTS_PAGES,
@@ -21,7 +22,6 @@ import {
     generateEncryptionKey,
 } from "@ente/shared/crypto/internal/libsodium";
 import { getAccountsURL } from "@ente/shared/network/api";
-import { logError } from "@ente/shared/sentry";
 import { THEME_COLOR } from "@ente/shared/themes/constants";
 import { EnteMenuItem } from "components/Menu/EnteMenuItem";
 import WatchFolder from "components/WatchFolder";
@@ -109,7 +109,7 @@ export default function UtilitySection({ closeSidebar }) {
                 )}&token=${accountsToken}`,
             );
         } catch (e) {
-            logError(e, "failed to redirect to accounts page");
+            log.error("failed to redirect to accounts page", e);
         }
     };
 

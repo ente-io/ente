@@ -1,3 +1,4 @@
+import log from "@/next/log";
 import Login from "@ente/accounts/components/Login";
 import SignUp from "@ente/accounts/components/SignUp";
 import { APPS } from "@ente/shared/apps/constants";
@@ -5,16 +6,13 @@ import { EnteLogo } from "@ente/shared/components/EnteLogo";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { saveKeyInSessionStore } from "@ente/shared/crypto/helpers";
-import ElectronAPIs from "@ente/shared/electron";
 import { getAlbumsURL } from "@ente/shared/network/api";
-import { logError } from "@ente/shared/sentry";
 import localForage from "@ente/shared/storage/localForage";
 import { getData, LS_KEYS } from "@ente/shared/storage/localStorage";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { getKey, SESSION_KEYS } from "@ente/shared/storage/sessionStorage";
 import { Button, styled, Typography, TypographyProps } from "@mui/material";
 import { t } from "i18next";
-import isElectron from "is-electron";
 import { useRouter } from "next/router";
 import { CarouselProvider, DotGroup, Slide, Slider } from "pure-react-carousel";
 import "pure-react-carousel/dist/react-carousel.es.css";
@@ -132,11 +130,12 @@ export default function LandingPage() {
     const handleNormalRedirect = async () => {
         const user = getData(LS_KEYS.USER);
         let key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
-        if (!key && isElectron()) {
+        const electron = globalThis.electron;
+        if (!key && electron) {
             try {
-                key = await ElectronAPIs.getEncryptionKey();
+                key = await electron.encryptionKey();
             } catch (e) {
-                logError(e, "getEncryptionKey failed");
+                log.error("Failed to get encryption key from electron", e);
             }
             if (key) {
                 await saveKeyInSessionStore(
@@ -160,7 +159,7 @@ export default function LandingPage() {
         try {
             await localForage.ready();
         } catch (e) {
-            logError(e, "usage in incognito mode tried");
+            log.error("usage in incognito mode tried", e);
             appContext.setDialogMessage({
                 title: t("LOCAL_STORAGE_NOT_ACCESSIBLE"),
 

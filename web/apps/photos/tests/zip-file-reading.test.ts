@@ -1,7 +1,5 @@
-import ElectronAPIs from "@ente/shared/electron";
-import { getFileNameSize } from "@ente/shared/logging/web";
+import { getFileNameSize } from "@/next/file";
 import { FILE_READER_CHUNK_SIZE, PICKED_UPLOAD_TYPE } from "constants/upload";
-import isElectron from "is-electron";
 import { getElectronFileStream, getFileStream } from "services/readerService";
 import { DataStream } from "types/upload";
 import { getImportSuggestion } from "utils/upload";
@@ -12,7 +10,8 @@ import { getImportSuggestion } from "utils/upload";
 // sizes starting from 1M to 20M.
 export const testZipFileReading = async () => {
     try {
-        if (!isElectron()) {
+        const electron = globalThis.electron;
+        if (!electron) {
             console.log("testZipFileReading Check is for desktop only");
             return;
         }
@@ -21,7 +20,7 @@ export const testZipFileReading = async () => {
                 "upload test failed NEXT_PUBLIC_FILE_READING_TEST_ZIP_PATH missing",
             );
         }
-        const files = await ElectronAPIs.getElectronFilesFromGoogleZip(
+        const files = await electron.getElectronFilesFromGoogleZip(
             process.env.NEXT_PUBLIC_FILE_READING_TEST_ZIP_PATH,
         );
         if (!files?.length) {
@@ -81,7 +80,8 @@ export const testZipFileReading = async () => {
 // at the root.
 export const testZipWithRootFileReadingTest = async () => {
     try {
-        if (!isElectron()) {
+        const electron = globalThis.electron;
+        if (!electron) {
             console.log("testZipFileReading Check is for desktop only");
             return;
         }
@@ -90,7 +90,7 @@ export const testZipWithRootFileReadingTest = async () => {
                 "upload test failed NEXT_PUBLIC_ZIP_WITH_ROOT_FILE_PATH missing",
             );
         }
-        const files = await ElectronAPIs.getElectronFilesFromGoogleZip(
+        const files = await electron.getElectronFilesFromGoogleZip(
             process.env.NEXT_PUBLIC_ZIP_WITH_ROOT_FILE_PATH,
         );
 

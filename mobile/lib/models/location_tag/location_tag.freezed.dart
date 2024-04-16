@@ -12,7 +12,7 @@ part of 'location_tag.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#custom-getters-and-methods');
+    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
 LocationTag _$LocationTagFromJson(Map<String, dynamic> json) {
   return _LocationTag.fromJson(json);
@@ -101,11 +101,11 @@ class _$LocationTagCopyWithImpl<$Res, $Val extends LocationTag>
 }
 
 /// @nodoc
-abstract class _$$_LocationTagCopyWith<$Res>
+abstract class _$$LocationTagImplCopyWith<$Res>
     implements $LocationTagCopyWith<$Res> {
-  factory _$$_LocationTagCopyWith(
-          _$_LocationTag value, $Res Function(_$_LocationTag) then) =
-      __$$_LocationTagCopyWithImpl<$Res>;
+  factory _$$LocationTagImplCopyWith(
+          _$LocationTagImpl value, $Res Function(_$LocationTagImpl) then) =
+      __$$LocationTagImplCopyWithImpl<$Res>;
   @override
   @useResult
   $Res call(
@@ -120,11 +120,11 @@ abstract class _$$_LocationTagCopyWith<$Res>
 }
 
 /// @nodoc
-class __$$_LocationTagCopyWithImpl<$Res>
-    extends _$LocationTagCopyWithImpl<$Res, _$_LocationTag>
-    implements _$$_LocationTagCopyWith<$Res> {
-  __$$_LocationTagCopyWithImpl(
-      _$_LocationTag _value, $Res Function(_$_LocationTag) _then)
+class __$$LocationTagImplCopyWithImpl<$Res>
+    extends _$LocationTagCopyWithImpl<$Res, _$LocationTagImpl>
+    implements _$$LocationTagImplCopyWith<$Res> {
+  __$$LocationTagImplCopyWithImpl(
+      _$LocationTagImpl _value, $Res Function(_$LocationTagImpl) _then)
       : super(_value, _then);
 
   @pragma('vm:prefer-inline')
@@ -136,7 +136,7 @@ class __$$_LocationTagCopyWithImpl<$Res>
     Object? bSquare = null,
     Object? centerPoint = null,
   }) {
-    return _then(_$_LocationTag(
+    return _then(_$LocationTagImpl(
       name: null == name
           ? _value.name
           : name // ignore: cast_nullable_to_non_nullable
@@ -163,8 +163,8 @@ class __$$_LocationTagCopyWithImpl<$Res>
 
 /// @nodoc
 @JsonSerializable()
-class _$_LocationTag extends _LocationTag {
-  const _$_LocationTag(
+class _$LocationTagImpl extends _LocationTag {
+  const _$LocationTagImpl(
       {required this.name,
       required this.radius,
       required this.aSquare,
@@ -172,8 +172,8 @@ class _$_LocationTag extends _LocationTag {
       required this.centerPoint})
       : super._();
 
-  factory _$_LocationTag.fromJson(Map<String, dynamic> json) =>
-      _$$_LocationTagFromJson(json);
+  factory _$LocationTagImpl.fromJson(Map<String, dynamic> json) =>
+      _$$LocationTagImplFromJson(json);
 
   @override
   final String name;
@@ -192,10 +192,10 @@ class _$_LocationTag extends _LocationTag {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$_LocationTag &&
+            other is _$LocationTagImpl &&
             (identical(other.name, name) || other.name == name) &&
             (identical(other.radius, radius) || other.radius == radius) &&
             (identical(other.aSquare, aSquare) || other.aSquare == aSquare) &&
@@ -212,12 +212,12 @@ class _$_LocationTag extends _LocationTag {
   @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
-  _$$_LocationTagCopyWith<_$_LocationTag> get copyWith =>
-      __$$_LocationTagCopyWithImpl<_$_LocationTag>(this, _$identity);
+  _$$LocationTagImplCopyWith<_$LocationTagImpl> get copyWith =>
+      __$$LocationTagImplCopyWithImpl<_$LocationTagImpl>(this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$_LocationTagToJson(
+    return _$$LocationTagImplToJson(
       this,
     );
   }
@@ -229,11 +229,11 @@ abstract class _LocationTag extends LocationTag {
       required final double radius,
       required final double aSquare,
       required final double bSquare,
-      required final Location centerPoint}) = _$_LocationTag;
+      required final Location centerPoint}) = _$LocationTagImpl;
   const _LocationTag._() : super._();
 
   factory _LocationTag.fromJson(Map<String, dynamic> json) =
-      _$_LocationTag.fromJson;
+      _$LocationTagImpl.fromJson;
 
   @override
   String get name;
@@ -247,6 +247,6 @@ abstract class _LocationTag extends LocationTag {
   Location get centerPoint;
   @override
   @JsonKey(ignore: true)
-  _$$_LocationTagCopyWith<_$_LocationTag> get copyWith =>
+  _$$LocationTagImplCopyWith<_$LocationTagImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

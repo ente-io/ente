@@ -1,4 +1,4 @@
-import { logError } from "@ente/shared/sentry";
+import log from "@/next/log";
 import { FILE_TYPE } from "constants/file";
 import { MLSyncContext, MLSyncFileContext } from "types/machineLearning";
 import {
@@ -16,7 +16,6 @@ class ReaderService {
             if (fileContext.imageBitmap) {
                 return fileContext.imageBitmap;
             }
-            // addLogLine('1 TF Memory stats: ',JSON.stringify(tf.memory()));
             if (fileContext.localFile) {
                 if (
                     fileContext.enteFile.metadata.fileType !== FILE_TYPE.IMAGE
@@ -47,11 +46,10 @@ class ReaderService {
             fileContext.newMlFile.imageSource = syncContext.config.imageSource;
             const { width, height } = fileContext.imageBitmap;
             fileContext.newMlFile.imageDimensions = { width, height };
-            // addLogLine('2 TF Memory stats: ',JSON.stringify(tf.memory()));
 
             return fileContext.imageBitmap;
         } catch (e) {
-            logError(e, "failed to create image bitmap");
+            log.error("failed to create image bitmap", e);
             throw e;
         }
     }

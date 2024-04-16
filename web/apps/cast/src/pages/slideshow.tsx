@@ -1,4 +1,4 @@
-import { logError } from "@ente/shared/sentry";
+import log from "@/next/log";
 import PairedSuccessfullyOverlay from "components/PairedSuccessfullyOverlay";
 import Theatre from "components/Theatre";
 import { FILE_TYPE } from "constants/file";
@@ -54,7 +54,7 @@ export default function Slideshow() {
                 );
             }
         } catch (e) {
-            logError(e, "error during sync");
+            log.error("error during sync", e);
             router.push("/");
         }
     };
@@ -107,7 +107,7 @@ export default function Slideshow() {
 
             return () => clearTimeout(timeoutId);
         } catch (e) {
-            logError(e, "error during sync");
+            log.error("error during sync", e);
             router.push("/");
         }
     }, []);

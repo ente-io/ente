@@ -122,14 +122,18 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
     final List<ChangeLogEntry> items = [];
     items.addAll([
       ChangeLogEntry(
-        "Share an Album to Multiple Contacts at Once",
-        'Adding multiple viewers and collaborators just got easier!\n'
-            '\nYou can now select multiple contacts and add all of them at once.',
+        "Improved Performance for Large Galleries ✨",
+        'We\'ve made significant improvements to how quickly galleries load and'
+            ' with less stutter, especially for those with a lot of photos and videos.',
       ),
       ChangeLogEntry(
-        "Bug Fixes and Performance Improvements",
-        'Many a bugs were squashed in this release and have improved performance on app start.\n'
-            '\nIf you run into any bugs, please write to team@ente.io, or let us know on Discord! 🙏',
+        "Enhanced Functionality for Video Backups",
+        'Even if video backups are disabled, you can now manually upload individual videos.',
+      ),
+      ChangeLogEntry(
+        "Bug Fixes",
+        'Many a bugs were squashed in this release.\n'
+            '\nIf you run into any, please write to team@ente.io, or let us know on Discord! 🙏',
       ),
     ]);
 

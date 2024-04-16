@@ -1,4 +1,4 @@
-import { logError } from "@ente/shared/sentry";
+import log from "@/next/log";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import { User } from "@ente/shared/user/types";
 import { FamilyData, FamilyMember } from "types/user";
@@ -29,11 +29,8 @@ export function getFamilyPlanAdmin(familyData: FamilyData): FamilyMember {
     if (isPartOfFamily(familyData)) {
         return familyData.members.find((x) => x.isAdmin);
     } else {
-        logError(
-            Error(
-                "verify user is part of family plan before calling this method",
-            ),
-            "invalid getFamilyPlanAdmin call",
+        log.error(
+            "invalid getFamilyPlanAdmin call - verify user is part of family plan before calling this method",
         );
     }
 }

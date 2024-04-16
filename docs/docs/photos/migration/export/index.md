@@ -50,7 +50,6 @@ videos you have uploaded to Ente.
 
 </div>
 
-
 ### Sync continuously
 
 You can switch on the toggle to **Sync continuously** to eliminate manual
@@ -65,6 +64,6 @@ data reflects the latest album states with new files, moves, and deletions.
 If you run into any issues during your data export, please reach out to
 [support@ente.io](mailto:support@ente.io) and we will be happy to help you!
 
-Note that we also provide a [CLI
-tool](https://github.com/ente-io/ente/tree/main/cli#export) to export your data.
-Please find more details [here](/photos/faq/export).
+Note that we also provide a
+[CLI tool](https://github.com/ente-io/ente/tree/main/cli#export) to export your
+data. Please find more details [here](/photos/faq/export).

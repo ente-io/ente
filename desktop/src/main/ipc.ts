@@ -10,43 +10,7 @@
 
 import type { FSWatcher } from "chokidar";
 import { ipcMain } from "electron/main";
-import { clearElectronStore } from "../api/electronStore";
-import { getEncryptionKey, setEncryptionKey } from "../api/safeStorage";
-import {
-    getElectronFilesFromGoogleZip,
-    getPendingUploads,
-    setToUploadCollection,
-    setToUploadFiles,
-} from "../api/upload";
-import {
-    appVersion,
-    muteUpdateNotification,
-    skipAppUpdate,
-    updateAndRestart,
-} from "../services/appUpdater";
-import {
-    computeImageEmbedding,
-    computeTextEmbedding,
-} from "../services/clipService";
-import { runFFmpegCmd } from "../services/ffmpeg";
-import { getDirFiles } from "../services/fs";
-import {
-    convertToJPEG,
-    generateImageThumbnail,
-} from "../services/imageProcessor";
-import {
-    addWatchMapping,
-    getWatchMappings,
-    removeWatchMapping,
-    updateWatchMappingIgnoredFiles,
-    updateWatchMappingSyncedFiles,
-} from "../services/watch";
-import type {
-    ElectronFile,
-    FILE_PATH_TYPE,
-    Model,
-    WatchMapping,
-} from "../types/ipc";
+import type { ElectronFile, FILE_PATH_TYPE, WatchMapping } from "../types/ipc";
 import {
     selectDirectory,
     showUploadDirsDialog,
@@ -54,18 +18,49 @@ import {
     showUploadZipDialog,
 } from "./dialogs";
 import {
-    checkExistsAndCreateDir,
-    deleteFile,
-    deleteFolder,
     fsExists,
+    fsMkdirIfNeeded,
+    fsRename,
+    fsRm,
+    fsRmdir,
     isFolder,
-    moveFile,
     readTextFile,
-    rename,
     saveFileToDisk,
     saveStreamToDisk,
 } from "./fs";
 import { logToDisk } from "./log";
+import {
+    appVersion,
+    skipAppUpdate,
+    updateAndRestart,
+    updateOnNextRestart,
+} from "./services/app-update";
+import { runFFmpegCmd } from "./services/ffmpeg";
+import { getDirFiles } from "./services/fs";
+import {
+    convertToJPEG,
+    generateImageThumbnail,
+} from "./services/imageProcessor";
+import { clipImageEmbedding, clipTextEmbedding } from "./services/ml-clip";
+import { detectFaces, faceEmbedding } from "./services/ml-face";
+import {
+    clearStores,
+    encryptionKey,
+    saveEncryptionKey,
+} from "./services/store";
+import {
+    getElectronFilesFromGoogleZip,
+    getPendingUploads,
+    setToUploadCollection,
+    setToUploadFiles,
+} from "./services/upload";
+import {
+    addWatchMapping,
+    getWatchMappings,
+    removeWatchMapping,
+    updateWatchMappingIgnoredFiles,
+    updateWatchMappingSyncedFiles,
+} from "./services/watch";
 import { openDirectory, openLogDirectory } from "./util";
 
 /**
@@ -91,34 +86,32 @@ export const attachIPCHandlers = () => {
 
     // - General
 
-    ipcMain.handle("appVersion", (_) => appVersion());
+    ipcMain.handle("appVersion", () => appVersion());
 
     ipcMain.handle("openDirectory", (_, dirPath) => openDirectory(dirPath));
 
-    ipcMain.handle("openLogDirectory", (_) => openLogDirectory());
+    ipcMain.handle("openLogDirectory", () => openLogDirectory());
 
     // See [Note: Catching exception during .send/.on]
     ipcMain.on("logToDisk", (_, message) => logToDisk(message));
 
-    ipcMain.on("clear-electron-store", (_) => {
-        clearElectronStore();
-    });
+    ipcMain.on("clearStores", () => clearStores());
 
-    ipcMain.handle("setEncryptionKey", (_, encryptionKey) =>
-        setEncryptionKey(encryptionKey),
+    ipcMain.handle("saveEncryptionKey", (_, encryptionKey) =>
+        saveEncryptionKey(encryptionKey),
     );
 
-    ipcMain.handle("getEncryptionKey", (_) => getEncryptionKey());
+    ipcMain.handle("encryptionKey", () => encryptionKey());
 
     // - App update
 
-    ipcMain.on("update-and-restart", (_) => updateAndRestart());
+    ipcMain.on("updateAndRestart", () => updateAndRestart());
 
-    ipcMain.on("skip-app-update", (_, version) => skipAppUpdate(version));
-
-    ipcMain.on("mute-update-notification", (_, version) =>
-        muteUpdateNotification(version),
+    ipcMain.on("updateOnNextRestart", (_, version) =>
+        updateOnNextRestart(version),
     );
+
+    ipcMain.on("skipAppUpdate", (_, version) => skipAppUpdate(version));
 
     // - Conversion
 
@@ -145,65 +138,65 @@ export const attachIPCHandlers = () => {
 
     // - ML
 
-    ipcMain.handle(
-        "computeImageEmbedding",
-        (_, model: Model, imageData: Uint8Array) =>
-            computeImageEmbedding(model, imageData),
+    ipcMain.handle("clipImageEmbedding", (_, jpegImageData: Uint8Array) =>
+        clipImageEmbedding(jpegImageData),
     );
 
-    ipcMain.handle("computeTextEmbedding", (_, model: Model, text: string) =>
-        computeTextEmbedding(model, text),
+    ipcMain.handle("clipTextEmbedding", (_, text: string) =>
+        clipTextEmbedding(text),
+    );
+
+    ipcMain.handle("detectFaces", (_, input: Float32Array) =>
+        detectFaces(input),
+    );
+
+    ipcMain.handle("faceEmbedding", (_, input: Float32Array) =>
+        faceEmbedding(input),
     );
 
     // - File selection
 
-    ipcMain.handle("selectDirectory", (_) => selectDirectory());
+    ipcMain.handle("selectDirectory", () => selectDirectory());
 
-    ipcMain.handle("showUploadFilesDialog", (_) => showUploadFilesDialog());
+    ipcMain.handle("showUploadFilesDialog", () => showUploadFilesDialog());
 
-    ipcMain.handle("showUploadDirsDialog", (_) => showUploadDirsDialog());
+    ipcMain.handle("showUploadDirsDialog", () => showUploadDirsDialog());
 
-    ipcMain.handle("showUploadZipDialog", (_) => showUploadZipDialog());
+    ipcMain.handle("showUploadZipDialog", () => showUploadZipDialog());
 
     // - FS
 
     ipcMain.handle("fsExists", (_, path) => fsExists(path));
 
-    // - FS Legacy
-
-    ipcMain.handle("checkExistsAndCreateDir", (_, dirPath) =>
-        checkExistsAndCreateDir(dirPath),
+    ipcMain.handle("fsRename", (_, oldPath: string, newPath: string) =>
+        fsRename(oldPath, newPath),
     );
+
+    ipcMain.handle("fsMkdirIfNeeded", (_, dirPath) => fsMkdirIfNeeded(dirPath));
+
+    ipcMain.handle("fsRmdir", (_, path: string) => fsRmdir(path));
+
+    ipcMain.handle("fsRm", (_, path: string) => fsRm(path));
+
+    // - FS Legacy
 
     ipcMain.handle(
         "saveStreamToDisk",
-        (_, path: string, fileStream: ReadableStream<any>) =>
+        (_, path: string, fileStream: ReadableStream) =>
             saveStreamToDisk(path, fileStream),
     );
 
-    ipcMain.handle("saveFileToDisk", (_, path: string, file: any) =>
-        saveFileToDisk(path, file),
+    ipcMain.handle("saveFileToDisk", (_, path: string, contents: string) =>
+        saveFileToDisk(path, contents),
     );
 
     ipcMain.handle("readTextFile", (_, path: string) => readTextFile(path));
 
     ipcMain.handle("isFolder", (_, dirPath: string) => isFolder(dirPath));
 
-    ipcMain.handle("moveFile", (_, oldPath: string, newPath: string) =>
-        moveFile(oldPath, newPath),
-    );
-
-    ipcMain.handle("deleteFolder", (_, path: string) => deleteFolder(path));
-
-    ipcMain.handle("deleteFile", (_, path: string) => deleteFile(path));
-
-    ipcMain.handle("rename", (_, oldPath: string, newPath: string) =>
-        rename(oldPath, newPath),
-    );
-
     // - Upload
 
-    ipcMain.handle("getPendingUploads", (_) => getPendingUploads());
+    ipcMain.handle("getPendingUploads", () => getPendingUploads());
 
     ipcMain.handle(
         "setToUploadFiles",
@@ -252,7 +245,7 @@ export const attachFSWatchIPCHandlers = (watcher: FSWatcher) => {
         removeWatchMapping(watcher, folderPath),
     );
 
-    ipcMain.handle("getWatchMappings", (_) => getWatchMappings());
+    ipcMain.handle("getWatchMappings", () => getWatchMappings());
 
     ipcMain.handle(
         "updateWatchMappingSyncedFiles",

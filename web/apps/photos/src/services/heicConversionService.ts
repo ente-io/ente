@@ -1,4 +1,4 @@
-import { logError } from "@ente/shared/sentry";
+import log from "@/next/log";
 import WasmHEICConverterService from "./heic-convert/service";
 
 class HeicConversionService {
@@ -6,7 +6,7 @@ class HeicConversionService {
         try {
             return await WasmHEICConverterService.convert(heicFileData);
         } catch (e) {
-            logError(e, "failed to convert heic file");
+            log.error("failed to convert heic file", e);
             throw e;
         }
     }

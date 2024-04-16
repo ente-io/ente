@@ -290,10 +290,10 @@ class S {
     );
   }
 
-  /// `ente <i>needs permission to</i> preserve your photos`
+  /// `Ente <i>needs permission to</i> preserve your photos`
   String get entePhotosPerm {
     return Intl.message(
-      'ente <i>needs permission to</i> preserve your photos',
+      'Ente <i>needs permission to</i> preserve your photos',
       name: 'entePhotosPerm',
       desc: '',
       args: [],
@@ -1743,10 +1743,10 @@ class S {
     );
   }
 
-  /// `Create a link to allow people to add and view photos in your shared album without needing an ente app or account. Great for collecting event photos.`
+  /// `Create a link to allow people to add and view photos in your shared album without needing an Ente app or account. Great for collecting event photos.`
   String get collabLinkSectionDescription {
     return Intl.message(
-      'Create a link to allow people to add and view photos in your shared album without needing an ente app or account. Great for collecting event photos.',
+      'Create a link to allow people to add and view photos in your shared album without needing an Ente app or account. Great for collecting event photos.',
       name: 'collabLinkSectionDescription',
       desc: '',
       args: [],
@@ -1773,10 +1773,10 @@ class S {
     );
   }
 
-  /// `Share with non-ente users`
+  /// `Share with non-Ente users`
   String get shareWithNonenteUsers {
     return Intl.message(
-      'Share with non-ente users',
+      'Share with non-Ente users',
       name: 'shareWithNonenteUsers',
       desc: '',
       args: [],
@@ -1843,10 +1843,10 @@ class S {
     );
   }
 
-  /// `Create shared and collaborative albums with other ente users, including users on free plans.`
+  /// `Create shared and collaborative albums with other Ente users, including users on free plans.`
   String get sharedAlbumSectionDescription {
     return Intl.message(
-      'Create shared and collaborative albums with other ente users, including users on free plans.',
+      'Create shared and collaborative albums with other Ente users, including users on free plans.',
       name: 'sharedAlbumSectionDescription',
       desc: '',
       args: [],
@@ -1926,10 +1926,10 @@ class S {
     );
   }
 
-  /// `{email} does not have an ente account.\n\nSend them an invite to share photos.`
+  /// `{email} does not have an Ente account.\n\nSend them an invite to share photos.`
   String emailNoEnteAccount(Object email) {
     return Intl.message(
-      '$email does not have an ente account.\n\nSend them an invite to share photos.',
+      '$email does not have an Ente account.\n\nSend them an invite to share photos.',
       name: 'emailNoEnteAccount',
       desc: '',
       args: [email],
@@ -1976,10 +1976,10 @@ class S {
     );
   }
 
-  /// `Download ente so we can easily share original quality photos and videos\n\nhttps://ente.io`
+  /// `Download Ente so we can easily share original quality photos and videos\n\nhttps://ente.io`
   String get shareTextRecommendUsingEnte {
     return Intl.message(
-      'Download ente so we can easily share original quality photos and videos\n\nhttps://ente.io',
+      'Download Ente so we can easily share original quality photos and videos\n\nhttps://ente.io',
       name: 'shareTextRecommendUsingEnte',
       desc: '',
       args: [],
@@ -2116,11 +2116,11 @@ class S {
     );
   }
 
-  /// `ente referral code: {referralCode} \n\nApply it in Settings → General → Referrals to get {referralStorageInGB} GB free after you signup for a paid plan\n\nhttps://ente.io`
+  /// `Ente referral code: {referralCode} \n\nApply it in Settings → General → Referrals to get {referralStorageInGB} GB free after you signup for a paid plan\n\nhttps://ente.io`
   String shareTextReferralCode(
       Object referralCode, Object referralStorageInGB) {
     return Intl.message(
-      'ente referral code: $referralCode \n\nApply it in Settings → General → Referrals to get $referralStorageInGB GB free after you signup for a paid plan\n\nhttps://ente.io',
+      'Ente referral code: $referralCode \n\nApply it in Settings → General → Referrals to get $referralStorageInGB GB free after you signup for a paid plan\n\nhttps://ente.io',
       name: 'shareTextReferralCode',
       desc: '',
       args: [referralCode, referralStorageInGB],
@@ -2532,10 +2532,10 @@ class S {
     );
   }
 
-  /// `Invite to ente`
+  /// `Invite to Ente`
   String get inviteToEnte {
     return Intl.message(
-      'Invite to ente',
+      'Invite to Ente',
       name: 'inviteToEnte',
       desc: '',
       args: [],
@@ -2692,20 +2692,20 @@ class S {
     );
   }
 
-  /// `This {fileType} is in both ente and your device.`
+  /// `This {fileType} is in both Ente and your device.`
   String singleFileInBothLocalAndRemote(Object fileType) {
     return Intl.message(
-      'This $fileType is in both ente and your device.',
+      'This $fileType is in both Ente and your device.',
       name: 'singleFileInBothLocalAndRemote',
       desc: '',
       args: [fileType],
     );
   }
 
-  /// `This {fileType} will be deleted from ente.`
+  /// `This {fileType} will be deleted from Ente.`
   String singleFileInRemoteOnly(Object fileType) {
     return Intl.message(
-      'This $fileType will be deleted from ente.',
+      'This $fileType will be deleted from Ente.',
       name: 'singleFileInRemoteOnly',
       desc: '',
       args: [fileType],
@@ -2722,10 +2722,10 @@ class S {
     );
   }
 
-  /// `Delete from ente`
+  /// `Delete from Ente`
   String get deleteFromEnte {
     return Intl.message(
-      'Delete from ente',
+      'Delete from Ente',
       name: 'deleteFromEnte',
       desc: '',
       args: [],
@@ -3102,10 +3102,10 @@ class S {
     );
   }
 
-  /// `Disable the device screen lock when ente is in the foreground and there is a backup in progress. This is normally not needed, but may help big uploads and initial imports of large libraries complete faster.`
+  /// `Disable the device screen lock when Ente is in the foreground and there is a backup in progress. This is normally not needed, but may help big uploads and initial imports of large libraries complete faster.`
   String get deviceLockExplanation {
     return Intl.message(
-      'Disable the device screen lock when ente is in the foreground and there is a backup in progress. This is normally not needed, but may help big uploads and initial imports of large libraries complete faster.',
+      'Disable the device screen lock when Ente is in the foreground and there is a backup in progress. This is normally not needed, but may help big uploads and initial imports of large libraries complete faster.',
       name: 'deviceLockExplanation',
       desc: '',
       args: [],
@@ -3302,10 +3302,10 @@ class S {
     );
   }
 
-  /// `A new version of ente is available.`
+  /// `A new version of Ente is available.`
   String get aNewVersionOfEnteIsAvailable {
     return Intl.message(
-      'A new version of ente is available.',
+      'A new version of Ente is available.',
       name: 'aNewVersionOfEnteIsAvailable',
       desc: '',
       args: [],
@@ -3954,10 +3954,10 @@ class S {
     );
   }
 
-  /// `ente preserves your memories, so they're always available to you, even if you lose your device.`
+  /// `Ente preserves your memories, so they're always available to you, even if you lose your device.`
   String get enteSubscriptionPitch {
     return Intl.message(
-      'ente preserves your memories, so they\'re always available to you, even if you lose your device.',
+      'Ente preserves your memories, so they\'re always available to you, even if you lose your device.',
       name: 'enteSubscriptionPitch',
       desc: '',
       args: [],
@@ -3979,7 +3979,7 @@ class S {
     return Intl.message(
       'Current usage is ',
       name: 'currentUsageIs',
-      desc: 'This text is followed by storage usaged',
+      desc: 'This text is followed by storage usage',
       args: [],
     );
   }
@@ -4365,10 +4365,10 @@ class S {
     );
   }
 
-  /// `Your {id} is already linked to another ente account.\nIf you would like to use your {id} with this account, please contact our support''`
+  /// `Your {id} is already linked to another Ente account.\nIf you would like to use your {id} with this account, please contact our support''`
   String subAlreadyLinkedErrMessage(Object id) {
     return Intl.message(
-      'Your $id is already linked to another ente account.\nIf you would like to use your $id with this account, please contact our support\'\'',
+      'Your $id is already linked to another Ente account.\nIf you would like to use your $id with this account, please contact our support\'\'',
       name: 'subAlreadyLinkedErrMessage',
       desc: '',
       args: [id],
@@ -4715,10 +4715,10 @@ class S {
     );
   }
 
-  /// `New to ente`
+  /// `New to Ente`
   String get newToEnte {
     return Intl.message(
-      'New to ente',
+      'New to Ente',
       name: 'newToEnte',
       desc: '',
       args: [],
@@ -4735,10 +4735,10 @@ class S {
     );
   }
 
-  /// `The developer account we use to publish ente on App Store has changed. Because of this, you will need to login again.\n\nOur apologies for the inconvenience, but this was unavoidable.`
+  /// `The developer account we use to publish Ente on App Store has changed. Because of this, you will need to login again.\n\nOur apologies for the inconvenience, but this was unavoidable.`
   String get devAccountChanged {
     return Intl.message(
-      'The developer account we use to publish ente on App Store has changed. Because of this, you will need to login again.\n\nOur apologies for the inconvenience, but this was unavoidable.',
+      'The developer account we use to publish Ente on App Store has changed. Because of this, you will need to login again.\n\nOur apologies for the inconvenience, but this was unavoidable.',
       name: 'devAccountChanged',
       desc: '',
       args: [],
@@ -4806,10 +4806,10 @@ class S {
     );
   }
 
-  /// `ente can encrypt and preserve files only if you grant access to them`
+  /// `Ente can encrypt and preserve files only if you grant access to them`
   String get enteCanEncryptAndPreserveFilesOnlyIfYouGrant {
     return Intl.message(
-      'ente can encrypt and preserve files only if you grant access to them',
+      'Ente can encrypt and preserve files only if you grant access to them',
       name: 'enteCanEncryptAndPreserveFilesOnlyIfYouGrant',
       desc: '',
       args: [],
@@ -4856,10 +4856,10 @@ class S {
     );
   }
 
-  /// `Use public links for people not on ente`
+  /// `Use public links for people not on Ente`
   String get usePublicLinksForPeopleNotOnEnte {
     return Intl.message(
-      'Use public links for people not on ente',
+      'Use public links for people not on Ente',
       name: 'usePublicLinksForPeopleNotOnEnte',
       desc: '',
       args: [],
@@ -4931,7 +4931,7 @@ class S {
     return Intl.message(
       'On <branding>ente</branding>',
       name: 'onEnte',
-      desc: 'The text displayed above albums backed up to ente',
+      desc: 'The text displayed above albums backed up to Ente',
       args: [],
     );
   }
@@ -5177,10 +5177,10 @@ class S {
     );
   }
 
-  /// `Add to ente`
+  /// `Add to Ente`
   String get addToEnte {
     return Intl.message(
-      'Add to ente',
+      'Add to Ente',
       name: 'addToEnte',
       desc: '',
       args: [],
@@ -5655,10 +5655,10 @@ class S {
     );
   }
 
-  /// `Some files in this album are ignored from upload because they had previously been deleted from ente.`
+  /// `Some files in this album are ignored from upload because they had previously been deleted from Ente.`
   String get ignoredFolderUploadReason {
     return Intl.message(
-      'Some files in this album are ignored from upload because they had previously been deleted from ente.',
+      'Some files in this album are ignored from upload because they had previously been deleted from Ente.',
       name: 'ignoredFolderUploadReason',
       desc: '',
       args: [],
@@ -5675,20 +5675,20 @@ class S {
     );
   }
 
-  /// `Files added to this device album will automatically get uploaded to ente.`
+  /// `Files added to this device album will automatically get uploaded to Ente.`
   String get deviceFilesAutoUploading {
     return Intl.message(
-      'Files added to this device album will automatically get uploaded to ente.',
+      'Files added to this device album will automatically get uploaded to Ente.',
       name: 'deviceFilesAutoUploading',
       desc: '',
       args: [],
     );
   }
 
-  /// `Turn on backup to automatically upload files added to this device folder to ente.`
+  /// `Turn on backup to automatically upload files added to this device folder to Ente.`
   String get turnOnBackupForAutoUpload {
     return Intl.message(
-      'Turn on backup to automatically upload files added to this device folder to ente.',
+      'Turn on backup to automatically upload files added to this device folder to Ente.',
       name: 'turnOnBackupForAutoUpload',
       desc: '',
       args: [],
@@ -6149,10 +6149,10 @@ class S {
     );
   }
 
-  /// `You can still access {count, plural, one {it} other {them}} on ente as long as you have an active subscription`
+  /// `You can still access {count, plural, one {it} other {them}} on Ente as long as you have an active subscription`
   String freeUpAccessPostDelete(int count) {
     return Intl.message(
-      'You can still access ${Intl.plural(count, one: 'it', other: 'them')} on ente as long as you have an active subscription',
+      'You can still access ${Intl.plural(count, one: 'it', other: 'them')} on Ente as long as you have an active subscription',
       name: 'freeUpAccessPostDelete',
       desc: '',
       args: [count],
@@ -6469,10 +6469,10 @@ class S {
     );
   }
 
-  /// `Selected files are not on ente`
+  /// `Selected files are not on Ente`
   String get selectedFilesAreNotOnEnte {
     return Intl.message(
-      'Selected files are not on ente',
+      'Selected files are not on Ente',
       name: 'selectedFilesAreNotOnEnte',
       desc: '',
       args: [],
@@ -6559,10 +6559,10 @@ class S {
     );
   }
 
-  /// `Some items are in both ente and your device.`
+  /// `Some items are in both Ente and your device.`
   String get someItemsAreInBothEnteAndYourDevice {
     return Intl.message(
-      'Some items are in both ente and your device.',
+      'Some items are in both Ente and your device.',
       name: 'someItemsAreInBothEnteAndYourDevice',
       desc: '',
       args: [],
@@ -7472,10 +7472,10 @@ class S {
     );
   }
 
-  /// `Add 5 family members to your existing plan without paying extra.\n\nEach member gets their own private space, and cannot see each other's files unless they're shared.\n\nFamily plans are available to customers who have a paid ente subscription.\n\nSubscribe now to get started!`
+  /// `Add 5 family members to your existing plan without paying extra.\n\nEach member gets their own private space, and cannot see each other's files unless they're shared.\n\nFamily plans are available to customers who have a paid Ente subscription.\n\nSubscribe now to get started!`
   String get familyPlanOverview {
     return Intl.message(
-      'Add 5 family members to your existing plan without paying extra.\n\nEach member gets their own private space, and cannot see each other\'s files unless they\'re shared.\n\nFamily plans are available to customers who have a paid ente subscription.\n\nSubscribe now to get started!',
+      'Add 5 family members to your existing plan without paying extra.\n\nEach member gets their own private space, and cannot see each other\'s files unless they\'re shared.\n\nFamily plans are available to customers who have a paid Ente subscription.\n\nSubscribe now to get started!',
       name: 'familyPlanOverview',
       desc: '',
       args: [],
@@ -7845,10 +7845,10 @@ class S {
     );
   }
 
-  /// `Invite your friends to ente`
+  /// `Invite your friends to Ente`
   String get inviteYourFriendsToEnte {
     return Intl.message(
-      'Invite your friends to ente',
+      'Invite your friends to Ente',
       name: 'inviteYourFriendsToEnte',
       desc: '',
       args: [],
@@ -7945,10 +7945,10 @@ class S {
     );
   }
 
-  /// `This account is linked to other ente apps, if you use any. Your uploaded data, across all ente apps, will be scheduled for deletion, and your account will be permanently deleted.`
+  /// `This account is linked to other Ente apps, if you use any. Your uploaded data, across all Ente apps, will be scheduled for deletion, and your account will be permanently deleted.`
   String get deleteConfirmDialogBody {
     return Intl.message(
-      'This account is linked to other ente apps, if you use any. Your uploaded data, across all ente apps, will be scheduled for deletion, and your account will be permanently deleted.',
+      'This account is linked to other Ente apps, if you use any. Your uploaded data, across all Ente apps, will be scheduled for deletion, and your account will be permanently deleted.',
       name: 'deleteConfirmDialogBody',
       desc: '',
       args: [],

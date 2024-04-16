@@ -71,6 +71,11 @@ http:
     # By default, this is false, and museum will bind to 8080 without TLS.
     # use-tls: true
 
+# Specify the base endpoints for various apps
+apps:
+    public-albums: "https://albums.ente.io"
+
+
 # Database connection parameters
 db:
     host: localhost

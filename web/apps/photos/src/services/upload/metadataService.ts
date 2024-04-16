@@ -1,5 +1,5 @@
+import log from "@/next/log";
 import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
-import { logError } from "@ente/shared/sentry";
 import {
     parseDateFromFusedDateString,
     tryToParseDateTime,
@@ -109,7 +109,7 @@ export async function getImageMetadata(
             height: exifData?.imageHeight ?? null,
         };
     } catch (e) {
-        logError(e, "getExifData failed");
+        log.error("getExifData failed", e);
     }
     return imageMetadata;
 }
@@ -206,7 +206,7 @@ export async function parseMetadataJSON(receivedFile: File | ElectronFile) {
         }
         return parsedMetadataJSON;
     } catch (e) {
-        logError(e, "parseMetadataJSON failed");
+        log.error("parseMetadataJSON failed", e);
         // ignore
     }
 }
@@ -237,7 +237,7 @@ export function extractDateFromFileName(filename: string): number {
         }
         return validateAndGetCreationUnixTimeInMicroSeconds(parsedDate);
     } catch (e) {
-        logError(e, "failed to extract date From FileName ");
+        log.error("failed to extract date From FileName ", e);
         return null;
     }
 }
@@ -250,7 +250,7 @@ function convertSignalNameToFusedDateString(filename: string) {
 const EDITED_FILE_SUFFIX = "-edited";
 
 /*
-    Get the original file name for edited file to associate it to original file's metadataJSON file 
+    Get the original file name for edited file to associate it to original file's metadataJSON file
     as edited file doesn't have their own metadata file
 */
 function getFileOriginalName(fileName: string) {

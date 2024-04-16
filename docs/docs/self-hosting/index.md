@@ -26,8 +26,8 @@ docker compose up --build
 
 > [!TIP]
 >
-> You can also use a pre-built Docker image from `ghcr.io/ente-io/server` ([More
-> info](https://github.com/ente-io/ente/blob/main/server/docs/docker.md))
+> You can also use a pre-built Docker image from `ghcr.io/ente-io/server`
+> ([More info](https://github.com/ente-io/ente/blob/main/server/docs/docker.md))
 
 Then in a separate terminal, you can run (e.g) the web client
 

@@ -133,134 +133,135 @@ class FileAppBarState extends State<FileAppBar> {
         ),
       );
     }
-    actions.add(
-      PopupMenuButton(
-        itemBuilder: (context) {
-          final List<PopupMenuItem> items = [];
-          if (widget.file.isRemoteFile) {
-            items.add(
-              PopupMenuItem(
-                value: 1,
-                child: Row(
-                  children: [
-                    Icon(
-                      Platform.isAndroid
-                          ? Icons.download
-                          : CupertinoIcons.cloud_download,
-                      color: Theme.of(context).iconTheme.color,
-                    ),
-                    const Padding(
-                      padding: EdgeInsets.all(8),
-                    ),
-                    Text(S.of(context).download),
-                  ],
-                ),
+
+    final List<PopupMenuItem> items = [];
+    if (widget.file.isRemoteFile) {
+      items.add(
+        PopupMenuItem(
+          value: 1,
+          child: Row(
+            children: [
+              Icon(
+                Platform.isAndroid
+                    ? Icons.download
+                    : CupertinoIcons.cloud_download,
+                color: Theme.of(context).iconTheme.color,
               ),
-            );
-          }
-          // options for files owned by the user
-          if (isOwnedByUser && !isFileHidden && isFileUploaded) {
-            final bool isArchived =
-                widget.file.magicMetadata.visibility == archiveVisibility;
-            items.add(
-              PopupMenuItem(
-                value: 2,
-                child: Row(
-                  children: [
-                    Icon(
-                      isArchived ? Icons.unarchive : Icons.archive_outlined,
-                      color: Theme.of(context).iconTheme.color,
-                    ),
-                    const Padding(
-                      padding: EdgeInsets.all(8),
-                    ),
-                    Text(
-                      isArchived
-                          ? S.of(context).unarchive
-                          : S.of(context).archive,
-                    ),
-                  ],
-                ),
+              const Padding(
+                padding: EdgeInsets.all(8),
               ),
-            );
-          }
-          if ((widget.file.fileType == FileType.image ||
-                  widget.file.fileType == FileType.livePhoto) &&
-              Platform.isAndroid) {
-            items.add(
-              PopupMenuItem(
-                value: 3,
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.wallpaper_outlined,
-                      color: Theme.of(context).iconTheme.color,
-                    ),
-                    const Padding(
-                      padding: EdgeInsets.all(8),
-                    ),
-                    Text(S.of(context).setAs),
-                  ],
-                ),
+              Text(S.of(context).download),
+            ],
+          ),
+        ),
+      );
+    }
+    // options for files owned by the user
+    if (isOwnedByUser && !isFileHidden && isFileUploaded) {
+      final bool isArchived =
+          widget.file.magicMetadata.visibility == archiveVisibility;
+      items.add(
+        PopupMenuItem(
+          value: 2,
+          child: Row(
+            children: [
+              Icon(
+                isArchived ? Icons.unarchive : Icons.archive_outlined,
+                color: Theme.of(context).iconTheme.color,
               ),
-            );
-          }
-          if (isOwnedByUser && widget.file.isUploaded) {
-            if (!isFileHidden) {
-              items.add(
-                PopupMenuItem(
-                  value: 4,
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.visibility_off,
-                        color: Theme.of(context).iconTheme.color,
-                      ),
-                      const Padding(
-                        padding: EdgeInsets.all(8),
-                      ),
-                      Text(S.of(context).hide),
-                    ],
-                  ),
+              const Padding(
+                padding: EdgeInsets.all(8),
+              ),
+              Text(
+                isArchived ? S.of(context).unarchive : S.of(context).archive,
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+    if ((widget.file.fileType == FileType.image ||
+            widget.file.fileType == FileType.livePhoto) &&
+        Platform.isAndroid) {
+      items.add(
+        PopupMenuItem(
+          value: 3,
+          child: Row(
+            children: [
+              Icon(
+                Icons.wallpaper_outlined,
+                color: Theme.of(context).iconTheme.color,
+              ),
+              const Padding(
+                padding: EdgeInsets.all(8),
+              ),
+              Text(S.of(context).setAs),
+            ],
+          ),
+        ),
+      );
+    }
+    if (isOwnedByUser && widget.file.isUploaded) {
+      if (!isFileHidden) {
+        items.add(
+          PopupMenuItem(
+            value: 4,
+            child: Row(
+              children: [
+                Icon(
+                  Icons.visibility_off,
+                  color: Theme.of(context).iconTheme.color,
                 ),
-              );
-            } else {
-              items.add(
-                PopupMenuItem(
-                  value: 5,
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.visibility,
-                        color: Theme.of(context).iconTheme.color,
-                      ),
-                      const Padding(
-                        padding: EdgeInsets.all(8),
-                      ),
-                      Text(S.of(context).unhide),
-                    ],
-                  ),
+                const Padding(
+                  padding: EdgeInsets.all(8),
                 ),
-              );
+                Text(S.of(context).hide),
+              ],
+            ),
+          ),
+        );
+      } else {
+        items.add(
+          PopupMenuItem(
+            value: 5,
+            child: Row(
+              children: [
+                Icon(
+                  Icons.visibility,
+                  color: Theme.of(context).iconTheme.color,
+                ),
+                const Padding(
+                  padding: EdgeInsets.all(8),
+                ),
+                Text(S.of(context).unhide),
+              ],
+            ),
+          ),
+        );
+      }
+    }
+    if (items.isNotEmpty) {
+      actions.add(
+        PopupMenuButton(
+          itemBuilder: (context) {
+            return items;
+          },
+          onSelected: (dynamic value) async {
+            if (value == 1) {
+              await _download(widget.file);
+            } else if (value == 2) {
+              await _toggleFileArchiveStatus(widget.file);
+            } else if (value == 3) {
+              await _setAs(widget.file);
+            } else if (value == 4) {
+              await _handleHideRequest(context);
+            } else if (value == 5) {
+              await _handleUnHideRequest(context);
             }
-          }
-          return items;
-        },
-        onSelected: (dynamic value) async {
-          if (value == 1) {
-            await _download(widget.file);
-          } else if (value == 2) {
-            await _toggleFileArchiveStatus(widget.file);
-          } else if (value == 3) {
-            await _setAs(widget.file);
-          } else if (value == 4) {
-            await _handleHideRequest(context);
-          } else if (value == 5) {
-            await _handleUnHideRequest(context);
-          }
-        },
-      ),
-    );
+          },
+        ),
+      );
+    }
     return AppBar(
       iconTheme:
           const IconThemeData(color: Colors.white), //same for both themes

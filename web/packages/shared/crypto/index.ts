@@ -1,5 +1,5 @@
+import { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { Remote } from "comlink";
-import { ComlinkWorker } from "../worker/comlinkWorker";
 import { DedicatedCryptoWorker } from "./internal/crypto.worker";
 
 class ComlinkCryptoWorker {

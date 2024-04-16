@@ -15,6 +15,7 @@ import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/divider_widget.dart';
 import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
 import 'package:photos/ui/components/menu_section_description_widget.dart';
+import "package:photos/ui/components/toggle_switch_widget.dart";
 import 'package:photos/ui/sharing/pickers/device_limit_picker_page.dart';
 import 'package:photos/ui/sharing/pickers/link_expiry_picker_page.dart';
 import 'package:photos/utils/crypto_util.dart';
@@ -78,14 +79,12 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     ),
                     alignCaptionedTextToLeft: true,
                     menuItemColor: getEnteColorScheme(context).fillFaint,
-                    trailingWidget: Switch.adaptive(
-                      value: widget.collection!.publicURLs?.firstOrNull
-                              ?.enableCollect ??
-                          false,
-                      onChanged: (value) async {
+                    trailingWidget: ToggleSwitchWidget(
+                      value: () => isCollectEnabled,
+                      onChanged: () async {
                         await _updateUrlSettings(
                           context,
-                          {'enableCollect': value},
+                          {'enableCollect': !isCollectEnabled},
                         );
                       },
                     ),
@@ -168,14 +167,14 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     isBottomBorderRadiusRemoved: true,
                     isTopBorderRadiusRemoved: true,
                     menuItemColor: getEnteColorScheme(context).fillFaint,
-                    trailingWidget: Switch.adaptive(
-                      value: isDownloadEnabled,
-                      onChanged: (value) async {
+                    trailingWidget: ToggleSwitchWidget(
+                      value: () => isDownloadEnabled,
+                      onChanged: () async {
                         await _updateUrlSettings(
                           context,
-                          {'enableDownload': value},
+                          {'enableDownload': !isDownloadEnabled},
                         );
-                        if (!value) {
+                        if (!isDownloadEnabled) {
                           // ignore: unawaited_futures
                           showErrorDialog(
                             context,
@@ -198,10 +197,10 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     alignCaptionedTextToLeft: true,
                     isTopBorderRadiusRemoved: true,
                     menuItemColor: getEnteColorScheme(context).fillFaint,
-                    trailingWidget: Switch.adaptive(
-                      value: isPasswordEnabled,
-                      onChanged: (enablePassword) async {
-                        if (enablePassword) {
+                    trailingWidget: ToggleSwitchWidget(
+                      value: () => isPasswordEnabled,
+                      onChanged: () async {
+                        if (!isPasswordEnabled) {
                           // ignore: unawaited_futures
                           showTextInputDialog(
                             context,

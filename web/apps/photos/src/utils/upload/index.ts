@@ -1,4 +1,3 @@
-import { ENTE_METADATA_FOLDER } from "constants/export";
 import { FILE_TYPE } from "constants/file";
 import {
     A_SEC_IN_MICROSECONDS,
@@ -6,6 +5,7 @@ import {
     PICKED_UPLOAD_TYPE,
 } from "constants/upload";
 import isElectron from "is-electron";
+import { exportMetadataDirectoryName } from "services/export";
 import { EnteFile } from "types/file";
 import {
     ElectronFile,
@@ -175,7 +175,7 @@ export function groupFilesBasedOnParentFolder(
         // For Eg,For FileList  -> [a/x.png, a/metadata/x.png.json]
         // they will both we grouped into the collection "a"
         // This is cluster the metadata json files in the same collection as the file it is for
-        if (folderPath.endsWith(ENTE_METADATA_FOLDER)) {
+        if (folderPath.endsWith(exportMetadataDirectoryName)) {
             folderPath = folderPath.substring(0, folderPath.lastIndexOf("/"));
         }
         const folderName = folderPath.substring(

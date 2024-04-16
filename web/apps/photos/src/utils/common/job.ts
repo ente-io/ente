@@ -1,4 +1,4 @@
-import { addLogLine } from "@ente/shared/logging";
+import log from "@/next/log";
 import { JobConfig, JobResult, JobState } from "types/common/job";
 
 export class SimpleJob<R extends JobResult> {
@@ -27,7 +27,7 @@ export class SimpleJob<R extends JobResult> {
         if (this.state !== "Running") {
             this.scheduleNext();
         } else {
-            addLogLine("Job already running, not scheduling");
+            log.info("Job already running, not scheduling");
         }
     }
 
@@ -41,7 +41,7 @@ export class SimpleJob<R extends JobResult> {
             this.intervalSec * 1000,
         );
         this.state = "Scheduled";
-        addLogLine("Scheduled next job after: ", this.intervalSec);
+        log.info("Scheduled next job after: ", this.intervalSec);
     }
 
     async run() {
@@ -50,7 +50,7 @@ export class SimpleJob<R extends JobResult> {
 
         try {
             const jobResult = await this.runCallback();
-            if (jobResult.shouldBackoff) {
+            if (jobResult && jobResult.shouldBackoff) {
                 this.intervalSec = Math.min(
                     this.config.maxItervalSec,
                     this.intervalSec * this.config.backoffMultiplier,
@@ -58,7 +58,7 @@ export class SimpleJob<R extends JobResult> {
             } else {
                 this.resetInterval();
             }
-            addLogLine("Job completed");
+            log.info("Job completed");
         } catch (e) {
             console.error("Error while running Job: ", e);
         } finally {
@@ -77,6 +77,6 @@ export class SimpleJob<R extends JobResult> {
         clearTimeout(this.nextTimeoutId);
         this.nextTimeoutId = undefined;
         this.state = "NotScheduled";
-        addLogLine("Cleared next job");
+        log.info("Cleared next job");
     }
 }

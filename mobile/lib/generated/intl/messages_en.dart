@@ -85,7 +85,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m20(newEmail) => "Email changed to ${newEmail}";
 
   static String m21(email) =>
-      "${email} does not have an ente account.\n\nSend them an invite to share photos.";
+      "${email} does not have an Ente account.\n\nSend them an invite to share photos.";
 
   static String m22(count, formattedNumber) =>
       "${Intl.plural(count, one: '1 file', other: '${formattedNumber} files')} on this device have been backed up safely";
@@ -102,7 +102,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m26(endDate) => "Free trial valid till ${endDate}";
 
   static String m27(count) =>
-      "You can still access ${Intl.plural(count, one: 'it', other: 'them')} on ente as long as you have an active subscription";
+      "You can still access ${Intl.plural(count, one: 'it', other: 'them')} on Ente as long as you have an active subscription";
 
   static String m28(sizeInMBorGB) => "Free up ${sizeInMBorGB}";
 
@@ -163,7 +163,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Hey, can you confirm that this is your ente.io verification ID: ${verificationID}";
 
   static String m50(referralCode, referralStorageInGB) =>
-      "ente referral code: ${referralCode} \n\nApply it in Settings → General → Referrals to get ${referralStorageInGB} GB free after you signup for a paid plan\n\nhttps://ente.io";
+      "Ente referral code: ${referralCode} \n\nApply it in Settings → General → Referrals to get ${referralStorageInGB} GB free after you signup for a paid plan\n\nhttps://ente.io";
 
   static String m51(numberOfPeople) =>
       "${Intl.plural(numberOfPeople, zero: 'Share with specific people', one: 'Shared with 1 person', other: 'Shared with ${numberOfPeople} people')}";
@@ -174,9 +174,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "This ${fileType} will be deleted from your device.";
 
   static String m54(fileType) =>
-      "This ${fileType} is in both ente and your device.";
+      "This ${fileType} is in both Ente and your device.";
 
-  static String m55(fileType) => "This ${fileType} will be deleted from ente.";
+  static String m55(fileType) => "This ${fileType} will be deleted from Ente.";
 
   static String m56(storageAmountInGB) => "${storageAmountInGB} GB";
 
@@ -185,7 +185,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "${usedAmount} ${usedStorageUnit} of ${totalAmount} ${totalStorageUnit} used";
 
   static String m58(id) =>
-      "Your ${id} is already linked to another ente account.\nIf you would like to use your ${id} with this account, please contact our support\'\'";
+      "Your ${id} is already linked to another Ente account.\nIf you would like to use your ${id} with this account, please contact our support\'\'";
 
   static String m59(endDate) =>
       "Your subscription will be cancelled on ${endDate}";
@@ -216,7 +216,7 @@ class MessageLookup extends MessageLookupByLibrary {
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
         "aNewVersionOfEnteIsAvailable": MessageLookupByLibrary.simpleMessage(
-            "A new version of ente is available."),
+            "A new version of Ente is available."),
         "about": MessageLookupByLibrary.simpleMessage("About"),
         "account": MessageLookupByLibrary.simpleMessage("Account"),
         "accountWelcomeBack":
@@ -243,7 +243,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "addPhotos": MessageLookupByLibrary.simpleMessage("Add photos"),
         "addSelected": MessageLookupByLibrary.simpleMessage("Add selected"),
         "addToAlbum": MessageLookupByLibrary.simpleMessage("Add to album"),
-        "addToEnte": MessageLookupByLibrary.simpleMessage("Add to ente"),
+        "addToEnte": MessageLookupByLibrary.simpleMessage("Add to Ente"),
         "addToHiddenAlbum":
             MessageLookupByLibrary.simpleMessage("Add to hidden album"),
         "addViewer": MessageLookupByLibrary.simpleMessage("Add viewer"),
@@ -430,7 +430,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "codeUsedByYou":
             MessageLookupByLibrary.simpleMessage("Code used by you"),
         "collabLinkSectionDescription": MessageLookupByLibrary.simpleMessage(
-            "Create a link to allow people to add and view photos in your shared album without needing an ente app or account. Great for collecting event photos."),
+            "Create a link to allow people to add and view photos in your shared album without needing an Ente app or account. Great for collecting event photos."),
         "collaborativeLink":
             MessageLookupByLibrary.simpleMessage("Collaborative link"),
         "collaborativeLinkCreatedFor": m11,
@@ -528,7 +528,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "This will delete all empty albums. This is useful when you want to reduce the clutter in your album list."),
         "deleteAll": MessageLookupByLibrary.simpleMessage("Delete All"),
         "deleteConfirmDialogBody": MessageLookupByLibrary.simpleMessage(
-            "This account is linked to other ente apps, if you use any. Your uploaded data, across all ente apps, will be scheduled for deletion, and your account will be permanently deleted."),
+            "This account is linked to other Ente apps, if you use any. Your uploaded data, across all Ente apps, will be scheduled for deletion, and your account will be permanently deleted."),
         "deleteEmailRequest": MessageLookupByLibrary.simpleMessage(
             "Please send an email to <warning>account-deletion@ente.io</warning> from your registered email address."),
         "deleteEmptyAlbums":
@@ -540,7 +540,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "deleteFromDevice":
             MessageLookupByLibrary.simpleMessage("Delete from device"),
         "deleteFromEnte":
-            MessageLookupByLibrary.simpleMessage("Delete from ente"),
+            MessageLookupByLibrary.simpleMessage("Delete from Ente"),
         "deleteItemCount": m14,
         "deleteLocation":
             MessageLookupByLibrary.simpleMessage("Delete location"),
@@ -566,7 +566,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Designed to outlive"),
         "details": MessageLookupByLibrary.simpleMessage("Details"),
         "devAccountChanged": MessageLookupByLibrary.simpleMessage(
-            "The developer account we use to publish ente on App Store has changed. Because of this, you will need to login again.\n\nOur apologies for the inconvenience, but this was unavoidable."),
+            "The developer account we use to publish Ente on App Store has changed. Because of this, you will need to login again.\n\nOur apologies for the inconvenience, but this was unavoidable."),
         "developerSettings":
             MessageLookupByLibrary.simpleMessage("Developer settings"),
         "developerSettingsWarning": MessageLookupByLibrary.simpleMessage(
@@ -574,9 +574,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "deviceCodeHint":
             MessageLookupByLibrary.simpleMessage("Enter the code"),
         "deviceFilesAutoUploading": MessageLookupByLibrary.simpleMessage(
-            "Files added to this device album will automatically get uploaded to ente."),
+            "Files added to this device album will automatically get uploaded to Ente."),
         "deviceLockExplanation": MessageLookupByLibrary.simpleMessage(
-            "Disable the device screen lock when ente is in the foreground and there is a backup in progress. This is normally not needed, but may help big uploads and initial imports of large libraries complete faster."),
+            "Disable the device screen lock when Ente is in the foreground and there is a backup in progress. This is normally not needed, but may help big uploads and initial imports of large libraries complete faster."),
         "deviceNotFound":
             MessageLookupByLibrary.simpleMessage("Device not found"),
         "didYouKnow": MessageLookupByLibrary.simpleMessage("Did you know?"),
@@ -642,11 +642,11 @@ class MessageLookup extends MessageLookupByLibrary {
             "End-to-end encrypted by default"),
         "enteCanEncryptAndPreserveFilesOnlyIfYouGrant":
             MessageLookupByLibrary.simpleMessage(
-                "ente can encrypt and preserve files only if you grant access to them"),
+                "Ente can encrypt and preserve files only if you grant access to them"),
         "entePhotosPerm": MessageLookupByLibrary.simpleMessage(
-            "ente <i>needs permission to</i> preserve your photos"),
+            "Ente <i>needs permission to</i> preserve your photos"),
         "enteSubscriptionPitch": MessageLookupByLibrary.simpleMessage(
-            "ente preserves your memories, so they\'re always available to you, even if you lose your device."),
+            "Ente preserves your memories, so they\'re always available to you, even if you lose your device."),
         "enteSubscriptionShareWithFamily": MessageLookupByLibrary.simpleMessage(
             "Your family can be added to your plan as well."),
         "enterAlbumName":
@@ -702,7 +702,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "failedToVerifyPaymentStatus": MessageLookupByLibrary.simpleMessage(
             "Failed to verify payment status"),
         "familyPlanOverview": MessageLookupByLibrary.simpleMessage(
-            "Add 5 family members to your existing plan without paying extra.\n\nEach member gets their own private space, and cannot see each other\'s files unless they\'re shared.\n\nFamily plans are available to customers who have a paid ente subscription.\n\nSubscribe now to get started!"),
+            "Add 5 family members to your existing plan without paying extra.\n\nEach member gets their own private space, and cannot see each other\'s files unless they\'re shared.\n\nFamily plans are available to customers who have a paid Ente subscription.\n\nSubscribe now to get started!"),
         "familyPlanPortalTitle": MessageLookupByLibrary.simpleMessage("Family"),
         "familyPlans": MessageLookupByLibrary.simpleMessage("Family plans"),
         "faq": MessageLookupByLibrary.simpleMessage("FAQ"),
@@ -774,7 +774,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "iOSOkButton": MessageLookupByLibrary.simpleMessage("OK"),
         "ignoreUpdate": MessageLookupByLibrary.simpleMessage("Ignore"),
         "ignoredFolderUploadReason": MessageLookupByLibrary.simpleMessage(
-            "Some files in this album are ignored from upload because they had previously been deleted from ente."),
+            "Some files in this album are ignored from upload because they had previously been deleted from Ente."),
         "importing": MessageLookupByLibrary.simpleMessage("Importing...."),
         "incorrectCode": MessageLookupByLibrary.simpleMessage("Incorrect code"),
         "incorrectPasswordTitle":
@@ -800,11 +800,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "invalidRecoveryKey": MessageLookupByLibrary.simpleMessage(
             "The recovery key you entered is not valid. Please make sure it contains 24 words, and check the spelling of each.\n\nIf you entered an older recovery code, make sure it is 64 characters long, and check each of them."),
         "invite": MessageLookupByLibrary.simpleMessage("Invite"),
-        "inviteToEnte": MessageLookupByLibrary.simpleMessage("Invite to ente"),
+        "inviteToEnte": MessageLookupByLibrary.simpleMessage("Invite to Ente"),
         "inviteYourFriends":
             MessageLookupByLibrary.simpleMessage("Invite your friends"),
         "inviteYourFriendsToEnte":
-            MessageLookupByLibrary.simpleMessage("Invite your friends to ente"),
+            MessageLookupByLibrary.simpleMessage("Invite your friends to Ente"),
         "itLooksLikeSomethingWentWrongPleaseRetryAfterSome":
             MessageLookupByLibrary.simpleMessage(
                 "It looks like something went wrong. Please retry after some time. If the error persists, please contact our support team."),
@@ -931,7 +931,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Unable to connect to Ente, please check your network settings and contact support if the error persists."),
         "never": MessageLookupByLibrary.simpleMessage("Never"),
         "newAlbum": MessageLookupByLibrary.simpleMessage("New album"),
-        "newToEnte": MessageLookupByLibrary.simpleMessage("New to ente"),
+        "newToEnte": MessageLookupByLibrary.simpleMessage("New to Ente"),
         "newest": MessageLookupByLibrary.simpleMessage("Newest"),
         "no": MessageLookupByLibrary.simpleMessage("No"),
         "noAlbumsSharedByYouYet":
@@ -1222,7 +1222,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "selectYourPlan":
             MessageLookupByLibrary.simpleMessage("Select your plan"),
         "selectedFilesAreNotOnEnte": MessageLookupByLibrary.simpleMessage(
-            "Selected files are not on ente"),
+            "Selected files are not on Ente"),
         "selectedFoldersWillBeEncryptedAndBackedUp":
             MessageLookupByLibrary.simpleMessage(
                 "Selected folders will be encrypted and backed up"),
@@ -1259,15 +1259,15 @@ class MessageLookup extends MessageLookupByLibrary {
             "Share only with the people you want"),
         "shareTextConfirmOthersVerificationID": m49,
         "shareTextRecommendUsingEnte": MessageLookupByLibrary.simpleMessage(
-            "Download ente so we can easily share original quality photos and videos\n\nhttps://ente.io"),
+            "Download Ente so we can easily share original quality photos and videos\n\nhttps://ente.io"),
         "shareTextReferralCode": m50,
         "shareWithNonenteUsers":
-            MessageLookupByLibrary.simpleMessage("Share with non-ente users"),
+            MessageLookupByLibrary.simpleMessage("Share with non-Ente users"),
         "shareWithPeopleSectionTitle": m51,
         "shareYourFirstAlbum":
             MessageLookupByLibrary.simpleMessage("Share your first album"),
         "sharedAlbumSectionDescription": MessageLookupByLibrary.simpleMessage(
-            "Create shared and collaborative albums with other ente users, including users on free plans."),
+            "Create shared and collaborative albums with other Ente users, including users on free plans."),
         "sharedByMe": MessageLookupByLibrary.simpleMessage("Shared by me"),
         "sharedByYou": MessageLookupByLibrary.simpleMessage("Shared by you"),
         "sharedPhotoNotifications":
@@ -1297,7 +1297,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "social": MessageLookupByLibrary.simpleMessage("Social"),
         "someItemsAreInBothEnteAndYourDevice":
             MessageLookupByLibrary.simpleMessage(
-                "Some items are in both ente and your device."),
+                "Some items are in both Ente and your device."),
         "someOfTheFilesYouAreTryingToDeleteAre":
             MessageLookupByLibrary.simpleMessage(
                 "Some of the files you are trying to delete are only available on your device and cannot be recovered if deleted"),
@@ -1414,7 +1414,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "trashDaysLeft": m63,
         "tryAgain": MessageLookupByLibrary.simpleMessage("Try again"),
         "turnOnBackupForAutoUpload": MessageLookupByLibrary.simpleMessage(
-            "Turn on backup to automatically upload files added to this device folder to ente."),
+            "Turn on backup to automatically upload files added to this device folder to Ente."),
         "twitter": MessageLookupByLibrary.simpleMessage("Twitter"),
         "twoMonthsFreeOnYearlyPlans": MessageLookupByLibrary.simpleMessage(
             "2 months free on yearly plans"),
@@ -1457,7 +1457,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Usable storage is limited by your current plan. Excess claimed storage will automatically become usable when you upgrade your plan."),
         "usePublicLinksForPeopleNotOnEnte":
             MessageLookupByLibrary.simpleMessage(
-                "Use public links for people not on ente"),
+                "Use public links for people not on Ente"),
         "useRecoveryKey":
             MessageLookupByLibrary.simpleMessage("Use recovery key"),
         "useSelectedPhoto":
