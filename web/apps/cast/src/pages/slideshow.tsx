@@ -20,7 +20,7 @@ export default function Slideshow() {
     const [castToken, setCastToken] = useState<string>("");
     const [castCollection, setCastCollection] = useState<
         Collection | undefined
-    >(undefined);
+    >();
     const [collectionFiles, setCollectionFiles] = useState<EnteFile[]>([]);
     const [currentFileId, setCurrentFileId] = useState<number | undefined>();
     const [currentFileURL, setCurrentFileURL] = useState<string | undefined>();
@@ -67,23 +67,12 @@ export default function Slideshow() {
 
     const isFileEligibleForCast = (file: EnteFile) => {
         const fileType = file.metadata.fileType;
-        if (fileType !== FILE_TYPE.IMAGE && fileType !== FILE_TYPE.LIVE_PHOTO) {
+        if (fileType !== FILE_TYPE.IMAGE && fileType !== FILE_TYPE.LIVE_PHOTO)
             return false;
-        }
 
-        const fileSizeLimit = 100 * 1024 * 1024;
+        if (file.info.fileSize > 100 * 1024 * 1024) return false;
 
-        if (file.info.fileSize > fileSizeLimit) {
-            return false;
-        }
-
-        const name = file.metadata.title;
-
-        if (fileType === FILE_TYPE.IMAGE) {
-            if (isRawFileFromFileName(name)) {
-                return false;
-            }
-        }
+        if (isRawFileFromFileName(file.metadata.title)) return false;
 
         return true;
     };
