@@ -1,6 +1,6 @@
 import log from "@/next/log";
 import PairedSuccessfullyOverlay from "components/PairedSuccessfullyOverlay";
-import Theatre from "components/Theatre";
+import PhotoAuditorium from "components/PhotoAuditorium";
 import { FILE_TYPE } from "constants/file";
 import { useRouter } from "next/router";
 import { createContext, useEffect, useState } from "react";
@@ -171,17 +171,9 @@ export default function Slideshow() {
     return (
         <>
             <SlideshowContext.Provider value={{ showNextSlide }}>
-                <Theatre
-                    file1={{
-                        fileName: currentFile?.metadata.title,
-                        fileURL: renderableFileURL,
-                        type: currentFile?.metadata.fileType,
-                    }}
-                    file2={{
-                        fileName: nextFile?.metadata.title,
-                        fileURL: renderableFileURL,
-                        type: nextFile?.metadata.fileType,
-                    }}
+                <PhotoAuditorium
+                    url={renderableFileURL}
+                    nextSlideUrl={renderableFileURL}
                 />
             </SlideshowContext.Provider>
             {loading && <PairedSuccessfullyOverlay />}
