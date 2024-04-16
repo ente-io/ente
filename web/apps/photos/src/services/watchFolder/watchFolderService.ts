@@ -15,7 +15,6 @@ import { groupFilesBasedOnCollectionID } from "utils/file";
 import { getValidFilesToUpload } from "utils/watch";
 import { removeFromCollection } from "../collectionService";
 import { getLocalFiles } from "../fileService";
-import { getParentFolderName } from "./utils";
 import {
     diskFileAddedCallback,
     diskFileRemovedCallback,
@@ -642,3 +641,9 @@ class watchFolderService {
 }
 
 export default new watchFolderService();
+
+export const getParentFolderName = (filePath: string) => {
+    const folderPath = filePath.substring(0, filePath.lastIndexOf("/"));
+    const folderName = folderPath.substring(folderPath.lastIndexOf("/") + 1);
+    return folderName;
+};
