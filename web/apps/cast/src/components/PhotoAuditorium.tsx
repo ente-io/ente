@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 interface PhotoAuditoriumProps {
     url: string;
@@ -10,41 +10,15 @@ export const PhotoAuditorium: React.FC<PhotoAuditoriumProps> = ({
     nextSlideUrl,
     showNextSlide,
 }) => {
-    const [showPreloadedNextSlide, setShowPreloadedNextSlide] = useState(false);
-    const [nextSlidePrerendered, setNextSlidePrerendered] = useState(false);
-    const [prerenderTime, setPrerenderTime] = useState<number | null>(null);
-
     useEffect(() => {
-        let timeout: NodeJS.Timeout;
-        let timeout2: NodeJS.Timeout;
-
-        if (nextSlidePrerendered) {
-            const elapsedTime = prerenderTime ? Date.now() - prerenderTime : 0;
-            const delayTime = Math.max(10000 - elapsedTime, 0);
-
-            if (elapsedTime >= 10000) {
-                setShowPreloadedNextSlide(true);
-            } else {
-                timeout = setTimeout(() => {
-                    setShowPreloadedNextSlide(true);
-                }, delayTime);
-            }
-
-            if (showNextSlide) {
-                timeout2 = setTimeout(() => {
-                    showNextSlide();
-                    setNextSlidePrerendered(false);
-                    setPrerenderTime(null);
-                    setShowPreloadedNextSlide(false);
-                }, delayTime);
-            }
-        }
+        const timeoutId = window.setTimeout(() => {
+            showNextSlide();
+        }, 10000);
 
         return () => {
-            if (timeout) clearTimeout(timeout);
-            if (timeout2) clearTimeout(timeout2);
+            if (timeoutId) clearTimeout(timeoutId);
         };
-    }, [nextSlidePrerendered, showNextSlide, prerenderTime]);
+    }, [showNextSlide]);
 
     return (
         <div
@@ -70,23 +44,18 @@ export const PhotoAuditorium: React.FC<PhotoAuditoriumProps> = ({
                 }}
             >
                 <img
-                    src={url}
-                    style={{
-                        maxWidth: "100%",
-                        maxHeight: "100%",
-                        display: showPreloadedNextSlide ? "none" : "block",
-                    }}
-                />
-                <img
                     src={nextSlideUrl}
                     style={{
                         maxWidth: "100%",
                         maxHeight: "100%",
-                        display: showPreloadedNextSlide ? "block" : "none",
+                        display: "none",
                     }}
-                    onLoad={() => {
-                        setNextSlidePrerendered(true);
-                        setPrerenderTime(Date.now());
+                />
+                <img
+                    src={url}
+                    style={{
+                        maxWidth: "100%",
+                        maxHeight: "100%",
                     }}
                 />
             </div>

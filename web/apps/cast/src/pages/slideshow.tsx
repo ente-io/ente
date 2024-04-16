@@ -24,7 +24,6 @@ export default function Slideshow() {
     const [collectionFiles, setCollectionFiles] = useState<EnteFile[]>([]);
     const [currentFileId, setCurrentFileId] = useState<number | undefined>();
     const [currentFileURL, setCurrentFileURL] = useState<string | undefined>();
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [nextFileURL, setNextFileURL] = useState<string | undefined>();
 
     const router = useRouter();
@@ -158,7 +157,7 @@ export default function Slideshow() {
     return (
         <PhotoAuditorium
             url={currentFileURL}
-            nextSlideUrl={currentFileURL}
+            nextSlideUrl={nextFileURL}
             showNextSlide={showNextSlide}
         />
     );
