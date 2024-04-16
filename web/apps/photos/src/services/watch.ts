@@ -1,3 +1,8 @@
+/**
+ * @file Interface with the Node.js layer of our desktop app to provide the
+ * watch folders functionality.
+ */
+
 import { ensureElectron } from "@/next/electron";
 import log from "@/next/log";
 import { UPLOAD_RESULT, UPLOAD_STRATEGY } from "constants/upload";
@@ -190,12 +195,9 @@ class WatchFolderService {
         }
     }
 
-    async removeWatchMapping(folderPath: string) {
-        try {
-            await ensureElectron().removeWatchMapping(folderPath);
-        } catch (e) {
-            log.error("error while removing watch mapping", e);
-        }
+    async mappingsAfterRemovingFolder(folderPath: string) {
+        await ensureElectron().removeWatchMapping(folderPath);
+        return await this.getWatchMappings();
     }
 
     async getWatchMappings(): Promise<WatchMapping[]> {

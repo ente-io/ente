@@ -111,9 +111,10 @@ export const WatchFolder: React.FC<WatchFolderProps> = ({ open, onClose }) => {
         setMappings(await watchFolderService.getWatchMappings());
     };
 
-    const handleRemoveWatchMapping = async (mapping: WatchMapping) => {
-        await watchFolderService.removeWatchMapping(mapping.folderPath);
-        setMappings(await watchFolderService.getWatchMappings());
+    const handleRemoveWatchMapping = (mapping: WatchMapping) => {
+        watchFolderService
+            .mappingsAfterRemovingFolder(mapping.folderPath)
+            .then((ms) => setMappings(ms));
     };
 
     const closeChoiceModal = () => setChoiceModalOpen(false);
