@@ -16,6 +16,7 @@ abstract class Detection {
   String toString();
 }
 
+@Deprecated('Old method only used in other deprecated methods')
 extension BBoxExtension on List<double> {
   void roundBoxToDouble() {
     final widthRounded = (this[2] - this[0]).roundToDouble();
