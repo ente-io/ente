@@ -2,8 +2,8 @@ import pathToFfmpeg from "ffmpeg-static";
 import { existsSync } from "node:fs";
 import fs from "node:fs/promises";
 import { ElectronFile } from "../../types/ipc";
-import { writeStream } from "../stream";
 import log from "../log";
+import { writeStream } from "../stream";
 import { generateTempFilePath, getTempDirPath } from "../temp";
 import { execAsync } from "../util";
 

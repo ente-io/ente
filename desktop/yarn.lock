@@ -1214,10 +1214,10 @@ electron-updater@^6.1:
     semver "^7.3.8"
     tiny-typed-emitter "^2.1.0"
 
-electron@30.0.0-beta.8:
-  version "30.0.0-beta.8"
-  resolved "https://registry.yarnpkg.com/electron/-/electron-30.0.0-beta.8.tgz#c4430b9cb662ec147709deaededefe6d7dcc0522"
-  integrity sha512-G2IMMxUVJopiskD5G5iCQh71u1Emp+Q7nS1bWRU/9sK8bKwW1qtyBb3qoq0X9bd7y0LuKUb79AOr3Ix+J6EKaQ==
+electron@^29:
+  version "29.3.0"
+  resolved "https://registry.yarnpkg.com/electron/-/electron-29.3.0.tgz#8e65cb08e9c0952c66d3196e1b5c811c43b8c5b0"
+  integrity sha512-ZxFKm0/v48GSoBuO3DdnMlCYXefEUKUHLMsKxyXY4nZGgzbBKpF/X8haZa2paNj23CLfsCKBOtfc2vsEQiOOsA==
   dependencies:
     "@electron/get" "^2.0.0"
     "@types/node" "^20.9.0"

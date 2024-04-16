@@ -37,24 +37,7 @@ export const registerStreamProtocol = () => {
             /*          host-pathname----- */
             case "write":
                 try {
-                    // await writeStream(path, request.body);
-                    console.log("starting stream");
-                    // let c = 0;
-                    // for await (const p of request.body as any) {
-                    //     if (c == 327680) console.log(p);
-                    //     fs.appendFile(path, p);
-                    //     c += p.length;
-                    // }
-                    const reader = request.body.getReader();
-                    // eslint-disable-next-line no-constant-condition
-                    while (true) {
-                        const { value, done } = await reader.read();
-                        if (done) break;
-                        console.log(`Received ${value.length} bytes`);
-                        fs.appendFile(path, value);
-                    }
-                    console.log("ending stream");
-
+                    await writeStream(path, request.body);
                     return new Response("", { status: 200 });
                 } catch (e) {
                     log.error(`Failed to write stream for ${url}`, e);
