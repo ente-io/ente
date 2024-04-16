@@ -20,18 +20,17 @@ export const SlideshowContext = createContext<{
 const renderableFileURLCache = new Map<number, string>();
 
 export default function Slideshow() {
-    const [collectionFiles, setCollectionFiles] = useState<EnteFile[]>([]);
-
-    const [currentFile, setCurrentFile] = useState<EnteFile | undefined>(
-        undefined,
-    );
-    const [nextFile, setNextFile] = useState<EnteFile | undefined>(undefined);
-
     const [loading, setLoading] = useState(true);
     const [castToken, setCastToken] = useState<string>("");
     const [castCollection, setCastCollection] = useState<
         Collection | undefined
     >(undefined);
+    const [collectionFiles, setCollectionFiles] = useState<EnteFile[]>([]);
+    const [currentFileId, setCurrentFileId] = useState<number | undefined>();
+    const [currentFileURL, setCurrentFileURL] = useState<string | undefined>();
+    const [nextFileURL, setNextFileURL] = useState<string | undefined>();
+
+    const router = useRouter();
 
     const syncCastFiles = async (token: string) => {
         try {
@@ -93,8 +92,6 @@ export default function Slideshow() {
         return true;
     };
 
-    const router = useRouter();
-
     useEffect(() => {
         try {
             const castToken = window.localStorage.getItem("castToken");
@@ -117,9 +114,9 @@ export default function Slideshow() {
         showNextSlide();
     }, [collectionFiles]);
 
-    const showNextSlide = () => {
+    const showNextSlide = async () => {
         const currentIndex = collectionFiles.findIndex(
-            (file) => file.id === currentFile?.id,
+            (file) => file.id === currentFileId,
         );
 
         const nextIndex = (currentIndex + 1) % collectionFiles.length;
@@ -128,62 +125,43 @@ export default function Slideshow() {
         const nextFile = collectionFiles[nextIndex];
         const nextNextFile = collectionFiles[nextNextIndex];
 
-        setCurrentFile(nextFile);
-        setNextFile(nextNextFile);
-        precacheRenderableFileURL(nextNextFile);
-    };
+        let nextURL = renderableFileURLCache.get(nextFile.id);
+        let nextNextURL = renderableFileURLCache.get(nextNextFile.id);
 
-    const [renderableFileURL, setRenderableFileURL] = useState<string>("");
-
-    const getRenderableFileURL = async () => {
-        if (!currentFile) return;
-
-        const cacheValue = renderableFileURLCache.get(currentFile.id);
-        if (cacheValue) {
-            setRenderableFileURL(cacheValue);
-            setLoading(false);
-            return;
+        if (!nextURL) {
+            try {
+                const blob = await getPreviewableImage(nextFile, castToken);
+                const url = URL.createObjectURL(blob);
+                renderableFileURLCache.set(nextFile.id, url);
+                nextURL = url;
+            } catch (e) {
+                return;
+            }
         }
 
-        try {
-            const blob = await getPreviewableImage(
-                currentFile as EnteFile,
-                castToken,
-            );
-
-            const url = URL.createObjectURL(blob);
-
-            renderableFileURLCache.set(currentFile?.id, url);
-
-            setRenderableFileURL(url);
-        } catch (e) {
-            return;
-        } finally {
-            setLoading(false);
+        if (!nextNextURL) {
+            try {
+                const blob = await getPreviewableImage(nextNextFile, castToken);
+                const url = URL.createObjectURL(blob);
+                renderableFileURLCache.set(nextNextFile.id, url);
+                nextNextURL = url;
+            } catch (e) {
+                return;
+            }
         }
-    };
 
-    const precacheRenderableFileURL = async (file: EnteFile) => {
-        if (renderableFileURLCache.get(file.id)) return;
-        try {
-            const blob = await getPreviewableImage(file as EnteFile, castToken);
-            const url = URL.createObjectURL(blob);
-            renderableFileURLCache.set(file?.id, url);
-        } catch (e) {
-            return;
-        }
+        setLoading(false);
+        setCurrentFileId(nextFile.id);
+        setCurrentFileURL(nextURL);
+        setNextFileURL(nextNextURL);
     };
-
-    useEffect(() => {
-        getRenderableFileURL();
-    }, [currentFile]);
 
     return (
         <>
             <SlideshowContext.Provider value={{ showNextSlide }}>
                 <PhotoAuditorium
-                    url={renderableFileURL}
-                    nextSlideUrl={renderableFileURL}
+                    url={currentFileURL}
+                    nextSlideUrl={currentFileURL}
                 />
             </SlideshowContext.Provider>
             {loading && <PairedSuccessfullyOverlay />}
