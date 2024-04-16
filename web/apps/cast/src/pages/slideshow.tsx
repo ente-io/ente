@@ -130,6 +130,7 @@ export default function Slideshow() {
 
         setCurrentFile(nextFile);
         setNextFile(nextNextFile);
+        precacheRenderableFileURL(nextNextFile);
     };
 
     const [renderableFileURL, setRenderableFileURL] = useState<string>("");
@@ -162,21 +163,12 @@ export default function Slideshow() {
         }
     };
 
-    const precacheNextRenderableFileURL = async () => {
-        if (!nextFile) return;
-
-        const cacheValue = renderableFileURLCache.get(nextFile.id);
-        if (cacheValue) return;
-
+    const precacheRenderableFileURL = async (file: EnteFile) => {
+        if (renderableFileURLCache.get(file.id)) return;
         try {
-            const blob = await getPreviewableImage(
-                nextFile as EnteFile,
-                castToken,
-            );
-
+            const blob = await getPreviewableImage(file as EnteFile, castToken);
             const url = URL.createObjectURL(blob);
-
-            renderableFileURLCache.set(nextFile?.id, url);
+            renderableFileURLCache.set(file?.id, url);
         } catch (e) {
             return;
         }
@@ -185,10 +177,6 @@ export default function Slideshow() {
     useEffect(() => {
         getRenderableFileURL();
     }, [currentFile]);
-
-    useEffect(() => {
-        precacheNextRenderableFileURL();
-    }, [nextFile]);
 
     return (
         <>
