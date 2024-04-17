@@ -801,21 +801,22 @@ async function downloadFileDesktop(
 
     if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
         const fileBlob = await new Response(updatedStream).blob();
-        const livePhoto = await decodeLivePhoto(file.metadata.title, fileBlob);
+        const { imageFileName, imageData, videoFileName, videoData } =
+            await decodeLivePhoto(file.metadata.title, fileBlob);
         const imageExportName = await safeFileName(
             downloadDir,
-            livePhoto.imageNameTitle,
+            imageFileName,
             fs.exists,
         );
-        const imageStream = generateStreamFromArrayBuffer(livePhoto.image);
+        const imageStream = generateStreamFromArrayBuffer(imageData);
         await writeStream(`${downloadDir}/${imageExportName}`, imageStream);
         try {
             const videoExportName = await safeFileName(
                 downloadDir,
-                livePhoto.videoNameTitle,
+                videoFileName,
                 fs.exists,
             );
-            const videoStream = generateStreamFromArrayBuffer(livePhoto.video);
+            const videoStream = generateStreamFromArrayBuffer(videoData);
             await writeStream(`${downloadDir}/${videoExportName}`, videoStream);
         } catch (e) {
             await fs.rm(`${downloadDir}/${imageExportName}`);
