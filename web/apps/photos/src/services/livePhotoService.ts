@@ -34,16 +34,6 @@ export const decodeLivePhoto = async (file: EnteFile, zipBlob: Blob) => {
     return livePhoto;
 };
 
-/**
- * Return a binary serialized representation of a live photo.
- *
- * This function takes the (in-memory) image and video data from the
- * {@link livePhoto} object, writes them to a zip file (using the respective
- * filenames), and returns the {@link Uint8Array} that represent the bytes of
- * this zip file.
- *
- * @param livePhoto The in-mem photo to serialized.
- */
 export const encodeLivePhoto = async (livePhoto: LivePhoto) => {
     const zip = new JSZip();
     zip.file(
