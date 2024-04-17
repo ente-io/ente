@@ -70,25 +70,20 @@ class WatchFolderService {
 
     async getAndSyncDiffOfFiles() {
         try {
-            let mappings = await this.getWatchMappings();
-
-            if (!mappings?.length) {
+            const watchesAndFiles =
+                await ensureElectron().folderWatchesAndFilesTherein();
+            if (!watchesAndFiles) {
                 return;
             }
 
-            mappings = await this.filterOutDeletedMappings(mappings);
-
             this.eventQueue = [];
 
-            for (const mapping of mappings) {
-                const filesOnDisk: ElectronFile[] =
-                    await ensureElectron().getDirFiles(mapping.folderPath);
-
-                this.uploadDiffOfFiles(mapping, filesOnDisk);
-                this.trashDiffOfFiles(mapping, filesOnDisk);
+            for (const [mapping, files] of watchesAndFiles) {
+                this.uploadDiffOfFiles(mapping, files);
+                this.trashDiffOfFiles(mapping, files);
             }
         } catch (e) {
-            log.error("error while getting and syncing diff of files", e);
+            log.error("Ignoring error while syncing watched folders", e);
         }
     }
 
@@ -142,23 +137,6 @@ class WatchFolderService {
                 this.pushEvent(event);
             }
         }
-    }
-
-    private async filterOutDeletedMappings(
-        mappings: WatchMapping[],
-    ): Promise<WatchMapping[]> {
-        const notDeletedMappings = [];
-        for (const mapping of mappings) {
-            const mappingExists = await ensureElectron().isFolder(
-                mapping.folderPath,
-            );
-            if (!mappingExists) {
-                ensureElectron().removeWatchMapping(mapping.folderPath);
-            } else {
-                notDeletedMappings.push(mapping);
-            }
-        }
-        return notDeletedMappings;
     }
 
     pushEvent(event: EventQueueItem) {

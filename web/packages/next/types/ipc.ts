@@ -284,6 +284,17 @@ export interface Electron {
 
     // - Watch
 
+    /**
+     * Get the latest state of the watched folders.
+     *
+     * We persist the folder watches that the user has setup. This function goes
+     * through that list, prunes any folders that don't exist on disk anymore,
+     * and for each, also returns a list of files that exist in that folder.
+     */
+    folderWatchesAndFilesTherein: () => Promise<
+        [watch: FolderWatch, files: ElectronFile[]][]
+    >;
+
     registerWatcherFunctions: (
         addFile: (file: ElectronFile) => Promise<void>,
         removeFile: (path: string) => Promise<void>,

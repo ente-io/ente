@@ -55,6 +55,7 @@ import {
 } from "./services/upload";
 import {
     addWatchMapping,
+    folderWatchesAndFilesTherein,
     getWatchMappings,
     removeWatchMapping,
     updateWatchMappingIgnoredFiles,
@@ -236,6 +237,10 @@ export const attachFSWatchIPCHandlers = (watcher: FSWatcher) => {
 
     ipcMain.handle("removeWatchMapping", (_, folderPath: string) =>
         removeWatchMapping(watcher, folderPath),
+    );
+
+    ipcMain.handle("folderWatchesAndFilesTherein", () =>
+        folderWatchesAndFilesTherein(watcher),
     );
 
     ipcMain.handle("getWatchMappings", () => getWatchMappings());

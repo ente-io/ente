@@ -220,6 +220,10 @@ const addWatchMapping = (
 const removeWatchMapping = (folderPath: string): Promise<void> =>
     ipcRenderer.invoke("removeWatchMapping", folderPath);
 
+const folderWatchesAndFilesTherein = (): Promise<
+    [watch: FolderWatch, files: ElectronFile[]][]
+> => ipcRenderer.invoke("folderWatchesAndFilesTherein");
+
 const getWatchMappings = (): Promise<FolderWatch[]> =>
     ipcRenderer.invoke("getWatchMappings");
 
@@ -343,6 +347,7 @@ contextBridge.exposeInMainWorld("electron", {
     showUploadZipDialog,
 
     // - Watch
+    folderWatchesAndFilesTherein,
     registerWatcherFunctions,
     addWatchMapping,
     removeWatchMapping,

@@ -1,7 +1,13 @@
 import type { FSWatcher } from "chokidar";
 import ElectronLog from "electron-log";
-import { FolderWatch, WatchStoreType } from "../../types/ipc";
+import {
+    FolderWatch,
+    WatchStoreType,
+    type ElectronFile,
+} from "../../types/ipc";
+import { isFolder } from "../fs";
 import { watchStore } from "../stores/watch.store";
+import { getDirFiles } from "./fs";
 
 export const addWatchMapping = async (
     watcher: FSWatcher,
@@ -99,3 +105,26 @@ export function getWatchMappings() {
 function setWatchMappings(watchMappings: WatchStoreType["mappings"]) {
     watchStore.set("mappings", watchMappings);
 }
+
+export const folderWatchesAndFilesTherein = async (
+    watcher: FSWatcher,
+): Promise<[watch: FolderWatch, files: ElectronFile[]][]> => {
+    const mappings = await getWatchMappings();
+
+    const activeMappings = [];
+    for (const mapping of mappings) {
+        const mappingExists = await isFolder(mapping.folderPath);
+        if (!mappingExists) {
+            await removeWatchMapping(watcher, mapping.folderPath);
+        } else {
+            activeMappings.push(mapping);
+        }
+    }
+
+    return Promise.all(
+        activeMappings.map(async (mapping) => [
+            mapping,
+            await getDirFiles(mapping.folderPath),
+        ]),
+    );
+};
