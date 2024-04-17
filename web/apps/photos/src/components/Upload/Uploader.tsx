@@ -1,5 +1,5 @@
 import log from "@/next/log";
-import type { Electron } from "@/next/types/ipc";
+import type { CollectionMapping, Electron } from "@/next/types/ipc";
 import { CustomError } from "@ente/shared/error";
 import { isPromise } from "@ente/shared/utils";
 import DiscFullIcon from "@mui/icons-material/DiscFull";
@@ -8,7 +8,6 @@ import {
     DEFAULT_IMPORT_SUGGESTION,
     PICKED_UPLOAD_TYPE,
     UPLOAD_STAGES,
-    type CollectionMapping,
 } from "constants/upload";
 import { t } from "i18next";
 import isElectron from "is-electron";
@@ -24,7 +23,7 @@ import {
     savePublicCollectionUploaderName,
 } from "services/publicCollectionService";
 import uploadManager from "services/upload/uploadManager";
-import watchFolderService from "services/watch";
+import watcher from "services/watch";
 import { NotificationAttributes } from "types/Notification";
 import { Collection } from "types/collection";
 import {
@@ -183,7 +182,7 @@ export default function Uploader(props: Props) {
                     resumeDesktopUpload(type, electronFiles, collectionName);
                 },
             );
-            watchFolderService.init(
+            watcher.init(
                 setElectronFiles,
                 setCollectionName,
                 props.syncWithRemote,
@@ -291,18 +290,16 @@ export default function Uploader(props: Props) {
                 }`,
             );
             if (uploadManager.isUploadRunning()) {
-                if (watchFolderService.isUploadRunning()) {
+                if (watcher.isUploadRunning()) {
+                    // Pause watch folder sync on user upload
                     log.info(
-                        "watchFolder upload was running, pausing it to run user upload",
+                        "Folder watcher was uploading, pausing it to first run user upload",
                     );
-                    // pause watch folder service on user upload
-                    watchFolderService.pauseRunningSync();
+                    watcher.pauseRunningSync();
                 } else {
                     log.info(
-                        "an upload is already running, rejecting new upload request",
+                        "Ignoring new upload request because an upload is already running",
                     );
-                    // no-op
-                    // a user upload is already in progress
                     return;
                 }
             }
@@ -330,7 +327,7 @@ export default function Uploader(props: Props) {
 
             const importSuggestion = getImportSuggestion(
                 pickedUploadType.current,
-                toUploadFiles.current,
+                toUploadFiles.current.map((file) => file["path"]),
             );
             setImportSuggestion(importSuggestion);
 
@@ -505,7 +502,7 @@ export default function Uploader(props: Props) {
             if (
                 electron &&
                 !isPendingDesktopUpload.current &&
-                !watchFolderService.isUploadRunning()
+                !watcher.isUploadRunning()
             ) {
                 await ImportService.setToUploadCollection(collections);
                 if (zipPaths.current) {
@@ -532,14 +529,14 @@ export default function Uploader(props: Props) {
                 closeUploadProgress();
             }
             if (isElectron()) {
-                if (watchFolderService.isUploadRunning()) {
-                    await watchFolderService.allFileUploadsDone(
+                if (watcher.isUploadRunning()) {
+                    await watcher.allFileUploadsDone(
                         filesWithCollectionToUploadIn,
                         collections,
                     );
-                } else if (watchFolderService.isSyncPaused()) {
+                } else if (watcher.isSyncPaused()) {
                     // resume the service after user upload is done
-                    watchFolderService.resumePausedSync();
+                    watcher.resumePausedSync();
                 }
             }
         } catch (e) {
@@ -652,13 +649,13 @@ export default function Uploader(props: Props) {
                     log.info(
                         `pending upload - strategy - "multiple collections" `,
                     );
-                    uploadFilesToNewCollections("leaf");
+                    uploadFilesToNewCollections("parent");
                 }
                 return;
             }
             if (isElectron() && pickedUploadType === PICKED_UPLOAD_TYPE.ZIPS) {
                 log.info("uploading zip files");
-                uploadFilesToNewCollections("leaf");
+                uploadFilesToNewCollections("parent");
                 return;
             }
             if (isFirstUpload && !importSuggestion.rootFolderName) {
@@ -777,7 +774,7 @@ export default function Uploader(props: Props) {
             );
             return;
         }
-        uploadFilesToNewCollections("leaf");
+        uploadFilesToNewCollections("parent");
     };
 
     const didSelectCollectionMapping = (mapping: CollectionMapping) => {

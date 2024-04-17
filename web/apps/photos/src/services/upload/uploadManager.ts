@@ -14,7 +14,7 @@ import {
     getPublicCollectionUID,
 } from "services/publicCollectionService";
 import { getDisableCFUploadProxyFlag } from "services/userService";
-import watchFolderService from "services/watch";
+import watcher from "services/watch";
 import { Collection } from "types/collection";
 import { EncryptedEnteFile, EnteFile } from "types/file";
 import { SetFiles } from "types/gallery";
@@ -387,7 +387,7 @@ class UploadManager {
         uploadedFile: EncryptedEnteFile,
     ) {
         if (isElectron()) {
-            await watchFolderService.onFileUpload(
+            await watcher.onFileUpload(
                 fileUploadResult,
                 fileWithCollection,
                 uploadedFile,
@@ -436,7 +436,7 @@ class UploadManager {
     }
 
     public shouldAllowNewUpload = () => {
-        return !this.uploadInProgress || watchFolderService.isUploadRunning();
+        return !this.uploadInProgress || watcher.isUploadRunning();
     };
 }
 

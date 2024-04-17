@@ -6,7 +6,11 @@
 import { ensureElectron } from "@/next/electron";
 import { nameAndExtension } from "@/next/file";
 import log from "@/next/log";
-import type { CollectionMapping, FolderWatch, FolderWatchSyncedFile } from "@/next/types/ipc";
+import type {
+    CollectionMapping,
+    FolderWatch,
+    FolderWatchSyncedFile,
+} from "@/next/types/ipc";
 import { UPLOAD_RESULT } from "constants/upload";
 import debounce from "debounce";
 import uploadManager from "services/upload/uploadManager";
@@ -19,43 +23,24 @@ import { removeFromCollection } from "./collectionService";
 import { getLocalFiles } from "./fileService";
 
 /**
- * A file system watch event encapsulates a change that has occurred on disk
- * that needs us to take some action within Ente to synchronize with the user's
- * Ente collections.
+ * Watch for file system folders and automatically update the corresponding Ente
+ * collections.
  *
- * Events get added in two ways:
- *
- * - When the app starts, it reads the current state of files on disk and
- *   compares that with its last known state to determine what all events it
- *   missed. This is easier than it sounds as we have only two events: add and
- *   remove.
- *
- * - When the app is running, it gets live notifications from our file system
- *   watcher (from the Node.js layer) about changes that have happened on disk,
- *   which the app then enqueues onto the event queue if they pertain to the
- *   files we're interested in.
+ * This class relies on APIs exposed over the Electron IPC layer, and thus only
+ * works when we're running inside our desktop app.
  */
-interface WatchEvent {
-    /** The action to take */
-    action: "upload" | "trash";
-    /** The path of the root folder corresponding to the {@link FolderWatch}. */
-    folderPath: string;
-    /** The name of the Ente collection the file belongs to. */
-    collectionName?: string;
-    /** The absolute path to the file under consideration. */
-    filePath: string;
-}
-
-class WatchFolderService {
+class FolderWatcher {
     private eventQueue: WatchEvent[] = [];
     private currentEvent: WatchEvent;
     private currentlySyncedMapping: FolderWatch;
     private trashingDirQueue: string[] = [];
     private isEventRunning: boolean = false;
-    private uploadRunning: boolean = false;
+    /** `true` if we are currently uploading */
+    private uploadRunning = false;
+    /** `true` if we are temporarily paused to let a user upload go through */
+    private isPaused = false;
     private filePathToUploadedFileIDMap = new Map<string, EncryptedEnteFile>();
     private unUploadableFilePaths = new Set<string>();
-    private isPaused = false;
     private setElectronFiles: (files: ElectronFile[]) => void;
     private setCollectionName: (collectionName: string) => void;
     private syncWithRemote: () => void;
@@ -66,31 +51,53 @@ class WatchFolderService {
         this.debouncedRunNextEvent = debounce(() => this.runNextEvent(), 1000);
     }
 
+    /** `true` if we are currently using the uploader */
     isUploadRunning() {
         return this.uploadRunning;
     }
 
+    /** `true` if syncing has been temporarily paused */
     isSyncPaused() {
         return this.isPaused;
     }
 
+    /**
+     * Temporarily pause syncing and cancel any running uploads.
+     *
+     * This frees up the uploader for handling user initated uploads.
+     */
+    pauseRunningSync() {
+        this.isPaused = true;
+        uploadManager.cancelRunningUpload();
+    }
+
+    /**
+     * Resume from a temporary pause, resyncing from disk.
+     *
+     * Sibling of {@link pauseRunningSync}.
+     */
+    resumePausedSync() {
+        this.isPaused = false;
+        this.syncWithDisk();
+    }
+
+    /**
+     * Initialize the watcher.
+     *
+     * This is only called when we're running in the context of our desktop app.
+     */
     async init(
         setElectronFiles: (files: ElectronFile[]) => void,
         setCollectionName: (collectionName: string) => void,
         syncWithRemote: () => void,
         setWatchFolderServiceIsRunning: (isRunning: boolean) => void,
     ) {
-        try {
-            this.setElectronFiles = setElectronFiles;
-            this.setCollectionName = setCollectionName;
-            this.syncWithRemote = syncWithRemote;
-            this.setWatchFolderServiceIsRunning =
-                setWatchFolderServiceIsRunning;
-            this.setupWatcherFunctions();
-            await this.syncWithDisk();
-        } catch (e) {
-            log.error("error while initializing watch service", e);
-        }
+        this.setElectronFiles = setElectronFiles;
+        this.setCollectionName = setCollectionName;
+        this.syncWithRemote = syncWithRemote;
+        this.setWatchFolderServiceIsRunning = setWatchFolderServiceIsRunning;
+        this.setupWatcherFunctions();
+        await this.syncWithDisk();
     }
 
     /**
@@ -99,44 +106,6 @@ class WatchFolderService {
      */
     isSyncingWatch(watch: FolderWatch) {
         return this.currentEvent?.folderPath === watch.folderPath;
-    }
-
-    private async syncWithDisk() {
-        try {
-            const electron = ensureElectron();
-            const mappings = await electron.getWatchMappings();
-            if (!mappings) return;
-
-            this.eventQueue = [];
-            const { events, deletedFolderPaths } = await deduceEvents(mappings);
-            log.info(`Folder watch deduced ${events.length} events`);
-            this.eventQueue = this.eventQueue.concat(events);
-
-            for (const path of deletedFolderPaths)
-                electron.removeWatchMapping(path);
-
-            this.debouncedRunNextEvent();
-        } catch (e) {
-            log.error("Ignoring error while syncing watched folders", e);
-        }
-    }
-
-    private pushEvent(event: WatchEvent) {
-        this.eventQueue.push(event);
-        log.info("Folder watch event", event);
-        this.debouncedRunNextEvent();
-    }
-
-    async pushTrashedDir(path: string) {
-        this.trashingDirQueue.push(path);
-    }
-
-    private setupWatcherFunctions() {
-        ensureElectron().registerWatcherFunctions(
-            diskFileAddedCallback,
-            diskFileRemovedCallback,
-            diskFolderRemovedCallback,
-        );
     }
 
     /**
@@ -172,6 +141,44 @@ class WatchFolderService {
             log.error("error while getting watch mappings", e);
             return [];
         }
+    }
+
+    private async syncWithDisk() {
+        try {
+            const electron = ensureElectron();
+            const mappings = await electron.getWatchMappings();
+            if (!mappings) return;
+
+            this.eventQueue = [];
+            const { events, deletedFolderPaths } = await deduceEvents(mappings);
+            log.info(`Folder watch deduced ${events.length} events`);
+            this.eventQueue = this.eventQueue.concat(events);
+
+            for (const path of deletedFolderPaths)
+                electron.removeWatchMapping(path);
+
+            this.debouncedRunNextEvent();
+        } catch (e) {
+            log.error("Ignoring error while syncing watched folders", e);
+        }
+    }
+
+    pushEvent(event: WatchEvent) {
+        this.eventQueue.push(event);
+        log.info("Folder watch event", event);
+        this.debouncedRunNextEvent();
+    }
+
+    async pushTrashedDir(path: string) {
+        this.trashingDirQueue.push(path);
+    }
+
+    private setupWatcherFunctions() {
+        ensureElectron().registerWatcherFunctions(
+            diskFileAddedCallback,
+            diskFileRemovedCallback,
+            diskFolderRemovedCallback,
+        );
     }
 
     private setIsEventRunning(isEventRunning: boolean) {
@@ -542,15 +549,6 @@ class WatchFolderService {
         }
     }
 
-    async selectFolder(): Promise<string> {
-        try {
-            const folderPath = await ensureElectron().selectDirectory();
-            return folderPath;
-        } catch (e) {
-            log.error("error while selecting folder", e);
-        }
-    }
-
     // Batches all the files to be uploaded (or trashed) from the
     // event queue of same collection as the next event
     private clubSameCollectionEvents(): EventQueueItem {
@@ -569,33 +567,44 @@ class WatchFolderService {
         }
         return event;
     }
-
-    async isFolder(folderPath: string) {
-        try {
-            return await ensureElectron().fs.isDir(folderPath);
-        } catch (e) {
-            log.error("error while checking if folder exists", e);
-        }
-    }
-
-    pauseRunningSync() {
-        this.isPaused = true;
-        uploadManager.cancelRunningUpload();
-    }
-
-    resumePausedSync() {
-        this.isPaused = false;
-        this.syncWithDisk();
-    }
 }
 
-const watchFolderService = new WatchFolderService();
+/** The singleton instance of the {@link FolderWatcher}. */
+const watcher = new FolderWatcher();
 
-export default watchFolderService;
+export default watcher;
+
+/**
+ * A file system watch event encapsulates a change that has occurred on disk
+ * that needs us to take some action within Ente to synchronize with the user's
+ * Ente collections.
+ *
+ * Events get added in two ways:
+ *
+ * - When the app starts, it reads the current state of files on disk and
+ *   compares that with its last known state to determine what all events it
+ *   missed. This is easier than it sounds as we have only two events: add and
+ *   remove.
+ *
+ * - When the app is running, it gets live notifications from our file system
+ *   watcher (from the Node.js layer) about changes that have happened on disk,
+ *   which the app then enqueues onto the event queue if they pertain to the
+ *   files we're interested in.
+ */
+interface WatchEvent {
+    /** The action to take */
+    action: "upload" | "trash";
+    /** The path of the root folder corresponding to the {@link FolderWatch}. */
+    folderPath: string;
+    /** The name of the Ente collection the file belongs to. */
+    collectionName?: string;
+    /** The absolute path to the file under consideration. */
+    filePath: string;
+}
 
 async function diskFileAddedCallback(file: ElectronFile) {
     const collectionNameAndFolderPath =
-        await watchFolderService.getCollectionNameAndFolderPath(file.path);
+        await watcher.getCollectionNameAndFolderPath(file.path);
 
     if (!collectionNameAndFolderPath) {
         return;
@@ -609,12 +618,12 @@ async function diskFileAddedCallback(file: ElectronFile) {
         folderPath,
         path: file.path,
     };
-    watchFolderService.pushEvent(event);
+    watcher.pushEvent(event);
 }
 
 async function diskFileRemovedCallback(filePath: string) {
     const collectionNameAndFolderPath =
-        await watchFolderService.getCollectionNameAndFolderPath(filePath);
+        await watcher.getCollectionNameAndFolderPath(filePath);
 
     if (!collectionNameAndFolderPath) {
         return;
@@ -628,12 +637,12 @@ async function diskFileRemovedCallback(filePath: string) {
         folderPath,
         path: filePath,
     };
-    watchFolderService.pushEvent(event);
+    watcher.pushEvent(event);
 }
 
 async function diskFolderRemovedCallback(folderPath: string) {
     try {
-        const mappings = await watchFolderService.getWatchMappings();
+        const mappings = await watcher.getWatchMappings();
         const mapping = mappings.find(
             (mapping) => mapping.folderPath === folderPath,
         );
@@ -641,7 +650,7 @@ async function diskFolderRemovedCallback(folderPath: string) {
             log.info(`folder not found in mappings, ${folderPath}`);
             throw Error(`Watch mapping not found`);
         }
-        watchFolderService.pushTrashedDir(folderPath);
+        watcher.pushTrashedDir(folderPath);
         log.info(`added trashedDir, ${folderPath}`);
     } catch (e) {
         log.error("error while calling diskFolderRemovedCallback", e);

@@ -76,19 +76,19 @@ export const WatchFolder: React.FC<WatchFolderProps> = ({ open, onClose }) => {
         for (let i = 0; i < folders.length; i++) {
             const folder: any = folders[i];
             const path = (folder.path as string).replace(/\\/g, "/");
-            if (await watcher.isFolder(path)) {
+            if (await ensureElectron().fs.isDir(path)) {
                 await selectCollectionMappingAndAddWatch(path);
             }
         }
     };
 
     const selectCollectionMappingAndAddWatch = async (path: string) => {
-        const files = await ensureElectron().getDirFiles(path);
-        const analysisResult = getImportSuggestion(
+        const filePaths = await ensureElectron().watch.findFiles(path);
+        const { hasNestedFolders } = getImportSuggestion(
             PICKED_UPLOAD_TYPE.FOLDERS,
-            files,
+            filePaths,
         );
-        if (analysisResult.hasNestedFolders) {
+        if (hasNestedFolders) {
             setSavedFolderPath(path);
             setChoiceModalOpen(true);
         } else {
@@ -102,9 +102,9 @@ export const WatchFolder: React.FC<WatchFolderProps> = ({ open, onClose }) => {
     };
 
     const addNewWatch = async () => {
-        const folderPath = await watcher.selectFolder();
-        if (folderPath) {
-            await selectCollectionMappingAndAddWatch(folderPath);
+        const dirPath = await ensureElectron().selectDirectory();
+        if (dirPath) {
+            await selectCollectionMappingAndAddWatch(dirPath);
         }
     };
 
