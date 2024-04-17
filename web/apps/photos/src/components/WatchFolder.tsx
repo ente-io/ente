@@ -28,8 +28,8 @@ import { PICKED_UPLOAD_TYPE, UPLOAD_STRATEGY } from "constants/upload";
 import { t } from "i18next";
 import { AppContext } from "pages/_app";
 import React, { useContext, useEffect, useState } from "react";
-import watchFolderService from "services/watch";
-import { WatchMapping } from "types/watchFolder";
+import watcher from "services/watch";
+import { WatchMapping as FolderWatch } from "types/watchFolder";
 import { getImportSuggestion } from "utils/upload";
 
 interface WatchFolderProps {
@@ -38,7 +38,7 @@ interface WatchFolderProps {
 }
 
 export const WatchFolder: React.FC<WatchFolderProps> = ({ open, onClose }) => {
-    const [mappings, setMappings] = useState<WatchMapping[]>([]);
+    const [mappings, setMappings] = useState<FolderWatch[]>([]);
     const [inputFolderPath, setInputFolderPath] = useState("");
     const [choiceModalOpen, setChoiceModalOpen] = useState(false);
     const appContext = useContext(AppContext);
@@ -47,7 +47,7 @@ export const WatchFolder: React.FC<WatchFolderProps> = ({ open, onClose }) => {
 
     useEffect(() => {
         if (!electron) return;
-        watchFolderService.getWatchMappings().then((m) => setMappings(m));
+        watcher.getWatchMappings().then((m) => setMappings(m));
     }, []);
 
     useEffect(() => {
@@ -64,7 +64,7 @@ export const WatchFolder: React.FC<WatchFolderProps> = ({ open, onClose }) => {
         for (let i = 0; i < folders.length; i++) {
             const folder: any = folders[i];
             const path = (folder.path as string).replace(/\\/g, "/");
-            if (await watchFolderService.isFolder(path)) {
+            if (await watcher.isFolder(path)) {
                 await addFolderForWatching(path);
             }
         }
@@ -91,7 +91,7 @@ export const WatchFolder: React.FC<WatchFolderProps> = ({ open, onClose }) => {
     };
 
     const handleFolderSelection = async () => {
-        const folderPath = await watchFolderService.selectFolder();
+        const folderPath = await watcher.selectFolder();
         if (folderPath) {
             await addFolderForWatching(folderPath);
         }
@@ -102,19 +102,18 @@ export const WatchFolder: React.FC<WatchFolderProps> = ({ open, onClose }) => {
         folderPath?: string,
     ) => {
         folderPath = folderPath || inputFolderPath;
-        await watchFolderService.addWatchMapping(
+        await watcher.addWatchMapping(
             folderPath.substring(folderPath.lastIndexOf("/") + 1),
             folderPath,
             uploadStrategy,
         );
         setInputFolderPath("");
-        setMappings(await watchFolderService.getWatchMappings());
+        setMappings(await watcher.getWatchMappings());
     };
 
-    const handleRemoveWatchMapping = (mapping: WatchMapping) => {
-        watchFolderService
-            .mappingsAfterRemovingFolder(mapping.folderPath)
-            .then((ms) => setMappings(ms));
+    const stopWatching = async (watch: FolderWatch) => {
+        await watcher.removeWatchForFolderPath(watch.folderPath);
+        setMappings(await watcher.getWatchMappings());
     };
 
     const closeChoiceModal = () => setChoiceModalOpen(false);
@@ -144,9 +143,9 @@ export const WatchFolder: React.FC<WatchFolderProps> = ({ open, onClose }) => {
                 </DialogTitleWithCloseButton>
                 <DialogContent sx={{ flex: 1 }}>
                     <Stack spacing={1} p={1.5} height={"100%"}>
-                        <MappingList
-                            mappings={mappings}
-                            handleRemoveWatchMapping={handleRemoveWatchMapping}
+                        <WatchList
+                            watches={mappings}
+                            stopWatching={stopWatching}
                         />
                         <Button
                             fullWidth
@@ -174,7 +173,30 @@ export const WatchFolder: React.FC<WatchFolderProps> = ({ open, onClose }) => {
     );
 };
 
-const MappingsContainer = styled(Box)(() => ({
+interface WatchList {
+    watches: FolderWatch[];
+    stopWatching: (watch: FolderWatch) => void;
+}
+
+const WatchList: React.FC<WatchList> = ({ watches, stopWatching }) => {
+    return watches.length === 0 ? (
+        <NoWatches />
+    ) : (
+        <WatchesContainer>
+            {watches.map((mapping) => {
+                return (
+                    <WatchEntry
+                        key={mapping.rootFolderName}
+                        watch={mapping}
+                        stopWatching={stopWatching}
+                    />
+                );
+            })}
+        </WatchesContainer>
+    );
+};
+
+const WatchesContainer = styled(Box)(() => ({
     height: "278px",
     overflow: "auto",
     "&::-webkit-scrollbar": {
@@ -182,45 +204,7 @@ const MappingsContainer = styled(Box)(() => ({
     },
 }));
 
-const NoMappingsContainer = styled(VerticallyCentered)({
-    textAlign: "left",
-    alignItems: "flex-start",
-    marginBottom: "32px",
-});
-
-const EntryContainer = styled(Box)({
-    marginLeft: "12px",
-    marginRight: "6px",
-    marginBottom: "12px",
-});
-
-interface MappingListProps {
-    mappings: WatchMapping[];
-    handleRemoveWatchMapping: (value: WatchMapping) => void;
-}
-
-const MappingList: React.FC<MappingListProps> = ({
-    mappings,
-    handleRemoveWatchMapping,
-}) => {
-    return mappings.length === 0 ? (
-        <NoMappingsContent />
-    ) : (
-        <MappingsContainer>
-            {mappings.map((mapping) => {
-                return (
-                    <MappingEntry
-                        key={mapping.rootFolderName}
-                        mapping={mapping}
-                        handleRemoveMapping={handleRemoveWatchMapping}
-                    />
-                );
-            })}
-        </MappingsContainer>
-    );
-};
-
-const NoMappingsContent: React.FC = () => {
+const NoWatches: React.FC = () => {
     return (
         <NoMappingsContainer>
             <Stack spacing={1}>
@@ -247,6 +231,12 @@ const NoMappingsContent: React.FC = () => {
     );
 };
 
+const NoMappingsContainer = styled(VerticallyCentered)({
+    textAlign: "left",
+    alignItems: "flex-start",
+    marginBottom: "32px",
+});
+
 const CheckmarkIcon: React.FC = () => {
     return (
         <CheckIcon
@@ -254,27 +244,19 @@ const CheckmarkIcon: React.FC = () => {
             sx={{
                 display: "inline",
                 fontSize: "15px",
-
                 color: (theme) => theme.palette.secondary.main,
             }}
         />
     );
 };
 
-interface MappingEntryProps {
-    mapping: WatchMapping;
-    handleRemoveMapping: (mapping: WatchMapping) => void;
+interface WatchEntryProps {
+    watch: FolderWatch;
+    stopWatching: (watch: FolderWatch) => void;
 }
 
-const MappingEntry: React.FC<MappingEntryProps> = ({
-    mapping,
-    handleRemoveMapping,
-}) => {
+const WatchEntry: React.FC<WatchEntryProps> = ({ watch, stopWatching }) => {
     const appContext = React.useContext(AppContext);
-
-    const stopWatching = () => {
-        handleRemoveMapping(mapping);
-    };
 
     const confirmStopWatching = () => {
         appContext.setDialogMessage({
@@ -285,7 +267,7 @@ const MappingEntry: React.FC<MappingEntryProps> = ({
                 variant: "secondary",
             },
             proceed: {
-                action: stopWatching,
+                action: () => stopWatching(watch),
                 text: t("YES_STOP"),
                 variant: "critical",
             },
@@ -295,8 +277,7 @@ const MappingEntry: React.FC<MappingEntryProps> = ({
     return (
         <SpaceBetweenFlex>
             <HorizontalFlex>
-                {mapping &&
-                mapping.uploadStrategy === UPLOAD_STRATEGY.SINGLE_COLLECTION ? (
+                {watch.uploadStrategy === UPLOAD_STRATEGY.SINGLE_COLLECTION ? (
                     <Tooltip title={t("UPLOADED_TO_SINGLE_COLLECTION")}>
                         <FolderOpenIcon />
                     </Tooltip>
@@ -306,41 +287,43 @@ const MappingEntry: React.FC<MappingEntryProps> = ({
                     </Tooltip>
                 )}
                 <EntryContainer>
-                    <EntryHeading mapping={mapping} />
+                    <EntryHeading watch={watch} />
                     <Typography color="text.muted" variant="small">
-                        {mapping.folderPath}
+                        {watch.folderPath}
                     </Typography>
                 </EntryContainer>
             </HorizontalFlex>
-            <MappingEntryOptions confirmStopWatching={confirmStopWatching} />
+            <EntryOptions {...{ confirmStopWatching }} />
         </SpaceBetweenFlex>
     );
 };
 
+const EntryContainer = styled(Box)({
+    marginLeft: "12px",
+    marginRight: "6px",
+    marginBottom: "12px",
+});
+
 interface EntryHeadingProps {
-    mapping: WatchMapping;
+    watch: FolderWatch;
 }
 
-const EntryHeading: React.FC<EntryHeadingProps> = ({ mapping }) => {
+const EntryHeading: React.FC<EntryHeadingProps> = ({ watch }) => {
     const appContext = useContext(AppContext);
     return (
         <FlexWrapper gap={1}>
-            <Typography>{mapping.rootFolderName}</Typography>
+            <Typography>{watch.rootFolderName}</Typography>
             {appContext.isFolderSyncRunning &&
-                watchFolderService.isMappingSyncInProgress(mapping) && (
-                    <CircularProgress size={12} />
-                )}
+                watcher.isSyncingWatch(watch) && <CircularProgress size={12} />}
         </FlexWrapper>
     );
 };
 
-interface MappingEntryOptionsProps {
+interface EntryOptionsProps {
     confirmStopWatching: () => void;
 }
 
-const MappingEntryOptions: React.FC<MappingEntryOptionsProps> = ({
-    confirmStopWatching,
-}) => {
+const EntryOptions: React.FC<EntryOptionsProps> = ({ confirmStopWatching }) => {
     return (
         <OverflowMenu
             menuPaperProps={{

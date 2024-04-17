@@ -13,7 +13,7 @@ import uploadManager from "services/upload/uploadManager";
 import { Collection } from "types/collection";
 import { EncryptedEnteFile } from "types/file";
 import { ElectronFile, FileWithCollection } from "types/upload";
-import { WatchMapping, WatchMappingSyncedFile } from "types/watchFolder";
+import { WatchMappingSyncedFile } from "types/watchFolder";
 import { groupFilesBasedOnCollectionID } from "utils/file";
 import { isSystemFile } from "utils/upload";
 import { removeFromCollection } from "./collectionService";
@@ -50,7 +50,7 @@ interface WatchEvent {
 class WatchFolderService {
     private eventQueue: WatchEvent[] = [];
     private currentEvent: WatchEvent;
-    private currentlySyncedMapping: WatchMapping;
+    private currentlySyncedMapping: FolderWatch;
     private trashingDirQueue: string[] = [];
     private isEventRunning: boolean = false;
     private uploadRunning: boolean = false;
@@ -94,6 +94,14 @@ class WatchFolderService {
         }
     }
 
+    /**
+     * Return true if we are currently processing an event for the given
+     * {@link watch}
+     */
+    isSyncingWatch(watch: FolderWatch) {
+        return this.currentEvent?.folderPath === watch.folderPath;
+    }
+
     private async syncWithDisk() {
         try {
             const electron = ensureElectron();
@@ -102,7 +110,8 @@ class WatchFolderService {
 
             this.eventQueue = [];
             const { events, deletedFolderPaths } = await deduceEvents(mappings);
-            this.eventQueue = [...this.eventQueue, ...events];
+            log.info(`Folder watch deduced ${events.length} events`);
+            this.eventQueue = this.eventQueue.concat(events);
 
             for (const path of deletedFolderPaths)
                 electron.removeWatchMapping(path);
@@ -113,13 +122,9 @@ class WatchFolderService {
         }
     }
 
-    isMappingSyncInProgress(mapping: WatchMapping) {
-        return this.currentEvent?.folderPath === mapping.folderPath;
-    }
-
     private pushEvent(event: WatchEvent) {
         this.eventQueue.push(event);
-        log.info("Watch event", event);
+        log.info("Folder watch event", event);
         this.debouncedRunNextEvent();
     }
 
@@ -152,12 +157,15 @@ class WatchFolderService {
         }
     }
 
-    async mappingsAfterRemovingFolder(folderPath: string) {
+    /**
+     * Remove the folder watch corresponding to the given root
+     * {@link folderPath}.
+     */
+    async removeWatchForFolderPath(folderPath: string) {
         await ensureElectron().removeWatchMapping(folderPath);
-        return await this.getWatchMappings();
     }
 
-    async getWatchMappings(): Promise<WatchMapping[]> {
+    async getWatchMappings(): Promise<FolderWatch[]> {
         try {
             return (await ensureElectron().getWatchMappings()) ?? [];
         } catch (e) {
@@ -312,8 +320,8 @@ class WatchFolderService {
                 return;
             }
 
-            const syncedFiles: WatchMapping["syncedFiles"] = [];
-            const ignoredFiles: WatchMapping["ignoredFiles"] = [];
+            const syncedFiles: FolderWatch["syncedFiles"] = [];
+            const ignoredFiles: FolderWatch["ignoredFiles"] = [];
 
             for (const fileWithCollection of filesWithCollection) {
                 this.handleUploadedFile(
@@ -361,8 +369,8 @@ class WatchFolderService {
 
     private handleUploadedFile(
         fileWithCollection: FileWithCollection,
-        syncedFiles: WatchMapping["syncedFiles"],
-        ignoredFiles: WatchMapping["ignoredFiles"],
+        syncedFiles: FolderWatch["syncedFiles"],
+        ignoredFiles: FolderWatch["ignoredFiles"],
     ) {
         if (fileWithCollection.isLivePhoto) {
             const imagePath = (
@@ -465,7 +473,7 @@ class WatchFolderService {
         }
     }
 
-    private async trashByIDs(toTrashFiles: WatchMapping["syncedFiles"]) {
+    private async trashByIDs(toTrashFiles: FolderWatch["syncedFiles"]) {
         try {
             const files = await getLocalFiles();
             const toTrashFilesMap = new Map<number, WatchMappingSyncedFile>();
@@ -526,7 +534,7 @@ class WatchFolderService {
             }
 
             return {
-                collectionName: getCollectionNameForMapping(mapping, filePath),
+                collectionName: collectionNameForPath(filePath, mapping),
                 folderPath: mapping.folderPath,
             };
         } catch (e) {
@@ -642,7 +650,7 @@ async function diskFolderRemovedCallback(folderPath: string) {
 
 export function getValidFilesToUpload(
     files: ElectronFile[],
-    mapping: WatchMapping,
+    mapping: FolderWatch,
 ) {
     const uniqueFilePaths = new Set<string>();
     return files.filter((file) => {
@@ -656,7 +664,7 @@ export function getValidFilesToUpload(
     });
 }
 
-function isSyncedOrIgnoredFile(file: ElectronFile, mapping: WatchMapping) {
+function isSyncedOrIgnoredFile(file: ElectronFile, mapping: FolderWatch) {
     return (
         mapping.ignoredFiles.includes(file.path) ||
         mapping.syncedFiles.find((f) => f.path === file.path)
@@ -671,24 +679,26 @@ function isSyncedOrIgnoredFile(file: ElectronFile, mapping: WatchMapping) {
  * longer any no corresponding directory on disk.
  */
 const deduceEvents = async (
-    mappings: FolderWatch[],
+    watches: FolderWatch[],
 ): Promise<{
     events: WatchEvent[];
     deletedFolderPaths: string[];
 }> => {
-    const activeMappings = [];
+    const electron = ensureElectron();
+
+    const activeWatches = [];
     const deletedFolderPaths: string[] = [];
 
-    for (const mapping of mappings) {
-        const valid = await electron.fs.isDir(mapping.folderPath);
-        if (!valid) deletedFolderPaths.push(mapping.folderPath);
-        else activeMappings.push(mapping);
+    for (const watch of watches) {
+        const valid = await electron.fs.isDir(watch.folderPath);
+        if (!valid) deletedFolderPaths.push(watch.folderPath);
+        else activeWatches.push(watch);
     }
 
     const events: WatchEvent[] = [];
 
-    for (const mapping of activeMappings) {
-        const folderPath = mapping.folderPath;
+    for (const watch of activeWatches) {
+        const folderPath = watch.folderPath;
 
         const paths = (await electron.watch.findFiles(folderPath))
             // Filter out hidden files (files whose names begins with a dot)
@@ -696,27 +706,27 @@ const deduceEvents = async (
 
         // Files that are on disk but not yet synced.
         const pathsToUpload = paths.filter(
-            (path) => !isSyncedOrIgnoredPath(path, mapping),
+            (path) => !isSyncedOrIgnoredPath(path, watch),
         );
 
         for (const path of pathsToUpload)
             events.push({
                 action: "upload",
-                collectionName: getCollectionNameForMapping(mapping, path),
                 folderPath,
+                collectionName: collectionNameForPath(path, watch),
                 filePath: path,
             });
 
         // Synced files that are no longer on disk
-        const pathsToRemove = mapping.syncedFiles.filter(
+        const pathsToRemove = watch.syncedFiles.filter(
             (file) => !paths.includes(file.path),
         );
 
         for (const path of pathsToRemove)
             events.push({
-                type: "trash",
-                collectionName: getCollectionNameForMapping(mapping, path),
-                folderPath: mapping.folderPath,
+                action: "trash",
+                folderPath,
+                collectionName: collectionNameForPath(path, watch),
                 filePath: path,
             });
     }
@@ -724,21 +734,14 @@ const deduceEvents = async (
     return { events, deletedFolderPaths };
 };
 
-function isSyncedOrIgnoredPath(path: string, mapping: WatchMapping) {
-    return (
-        mapping.ignoredFiles.includes(path) ||
-        mapping.syncedFiles.find((f) => f.path === path)
-    );
-}
+const isSyncedOrIgnoredPath = (path: string, watch: FolderWatch) =>
+    watch.ignoredFiles.includes(path) ||
+    watch.syncedFiles.find((f) => f.path === path);
 
-const getCollectionNameForMapping = (
-    mapping: WatchMapping,
-    filePath: string,
-) => {
-    return mapping.uploadStrategy === UPLOAD_STRATEGY.COLLECTION_PER_FOLDER
+const collectionNameForPath = (filePath: string, watch: FolderWatch) =>
+    watch.uploadStrategy === UPLOAD_STRATEGY.COLLECTION_PER_FOLDER
         ? parentDirectoryName(filePath)
-        : mapping.rootFolderName;
-};
+        : watch.rootFolderName;
 
 const parentDirectoryName = (filePath: string) => {
     const components = filePath.split("/");
