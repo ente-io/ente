@@ -100,31 +100,11 @@ class FaceClusteringService {
       try {
         switch (function) {
           case ClusterOperation.linearIncrementalClustering:
-            final input = args['input'] as Map<String, (int?, Uint8List)>;
-            final fileIDToCreationTime =
-                args['fileIDToCreationTime'] as Map<int, int>?;
-            final distanceThreshold = args['distanceThreshold'] as double;
-            final offset = args['offset'] as int?;
-            final result = FaceClusteringService._runLinearClustering(
-              input,
-              fileIDToCreationTime: fileIDToCreationTime,
-              distanceThreshold: distanceThreshold,
-              offset: offset,
-            );
+            final result = FaceClusteringService._runLinearClustering(args);
             sendPort.send(result);
             break;
           case ClusterOperation.dbscanClustering:
-            final input = args['input'] as Map<String, Uint8List>;
-            final fileIDToCreationTime =
-                args['fileIDToCreationTime'] as Map<int, int>?;
-            final eps = args['eps'] as double;
-            final minPts = args['minPts'] as int;
-            final result = FaceClusteringService._runDbscanClustering(
-              input,
-              fileIDToCreationTime: fileIDToCreationTime,
-              eps: eps,
-              minPts: minPts,
-            );
+            final result = FaceClusteringService._runDbscanClustering(args);
             sendPort.send(result);
             break;
         }
@@ -194,7 +174,7 @@ class FaceClusteringService {
     _inactivityTimer?.cancel();
   }
 
-  /// Runs the clustering algorithm on the given [input], in an isolate.
+  /// Runs the clustering algorithm [_runLinearClustering] on the given [input], in an isolate.
   ///
   /// Returns the clustering result, which is a list of clusters, where each cluster is a list of indices of the dataset.
   ///
@@ -299,19 +279,19 @@ class FaceClusteringService {
     return clusterFaceIDs;
   }
 
-  static Map<String, int> _runLinearClustering(
-    Map<String, (int?, Uint8List)> x, {
-    Map<int, int>? fileIDToCreationTime,
-    double distanceThreshold = kRecommendedDistanceThreshold,
-    int? offset,
-  }) {
+  static Map<String, int> _runLinearClustering(Map args) {
+    final input = args['input'] as Map<String, (int?, Uint8List)>;
+    final fileIDToCreationTime = args['fileIDToCreationTime'] as Map<int, int>?;
+    final distanceThreshold = args['distanceThreshold'] as double;
+    final offset = args['offset'] as int?;
+
     log(
-      "[ClusterIsolate] ${DateTime.now()} Copied to isolate ${x.length} faces",
+      "[ClusterIsolate] ${DateTime.now()} Copied to isolate ${input.length} faces",
     );
 
     // Organize everything into a list of FaceInfo objects
     final List<FaceInfo> faceInfos = [];
-    for (final entry in x.entries) {
+    for (final entry in input.entries) {
       faceInfos.add(
         FaceInfo(
           faceID: entry.key,
@@ -517,14 +497,14 @@ class FaceClusteringService {
     );
   }
 
-  static List<List<String>> _runDbscanClustering(
-    Map<String, Uint8List> x, {
-    Map<int, int>? fileIDToCreationTime,
-    double eps = 0.3,
-    int minPts = 5,
-  }) {
+  static List<List<String>> _runDbscanClustering(Map args) {
+    final input = args['input'] as Map<String, Uint8List>;
+    final fileIDToCreationTime = args['fileIDToCreationTime'] as Map<int, int>?;
+    final eps = args['eps'] as double;
+    final minPts = args['minPts'] as int;
+
     log(
-      "[ClusterIsolate] ${DateTime.now()} Copied to isolate ${x.length} faces",
+      "[ClusterIsolate] ${DateTime.now()} Copied to isolate ${input.length} faces",
     );
 
     final DBSCAN dbscan = DBSCAN(
@@ -535,7 +515,7 @@ class FaceClusteringService {
 
     // Organize everything into a list of FaceInfo objects
     final List<FaceInfo> faceInfos = [];
-    for (final entry in x.entries) {
+    for (final entry in input.entries) {
       faceInfos.add(
         FaceInfo(
           faceID: entry.key,
