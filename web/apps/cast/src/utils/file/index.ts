@@ -85,18 +85,6 @@ export async function decryptFile(
     }
 }
 
-export function getFileNameWithoutExtension(filename: string) {
-    const lastDotPosition = filename.lastIndexOf(".");
-    if (lastDotPosition === -1) return filename;
-    else return filename.slice(0, lastDotPosition);
-}
-
-export function getFileExtensionWithDot(filename: string) {
-    const lastDotPosition = filename.lastIndexOf(".");
-    if (lastDotPosition === -1) return "";
-    else return filename.slice(lastDotPosition);
-}
-
 export function generateStreamFromArrayBuffer(data: Uint8Array) {
     return new ReadableStream({
         async start(controller: ReadableStreamDefaultController) {
