@@ -12,7 +12,7 @@ class BlurDetectionService {
 
   Future<(bool, double)> predictIsBlurGrayLaplacian(
     List<List<int>> grayImage, {
-    int threshold = kLaplacianThreshold,
+    int threshold = kLaplacianHardThreshold,
     FaceDirection faceDirection = FaceDirection.straight,
   }) async {
     final List<List<int>> laplacian =

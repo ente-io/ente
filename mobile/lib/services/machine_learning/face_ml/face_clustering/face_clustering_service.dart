@@ -9,12 +9,16 @@ import "package:ml_linalg/dtype.dart";
 import "package:ml_linalg/vector.dart";
 import "package:photos/generated/protos/ente/common/vector.pb.dart";
 import 'package:photos/services/machine_learning/face_ml/face_clustering/cosine_distance.dart';
+import "package:photos/services/machine_learning/face_ml/face_clustering/face_info_for_clustering.dart";
+import "package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart";
 import "package:photos/services/machine_learning/face_ml/face_ml_result.dart";
 import "package:simple_cluster/simple_cluster.dart";
 import "package:synchronized/synchronized.dart";
 
 class FaceInfo {
   final String faceID;
+  final double? faceScore;
+  final double? blurValue;
   final List<double>? embedding;
   final Vector? vEmbedding;
   int? clusterId;
@@ -23,6 +27,8 @@ class FaceInfo {
   int? fileCreationTime;
   FaceInfo({
     required this.faceID,
+    this.faceScore,
+    this.blurValue,
     this.embedding,
     this.vEmbedding,
     this.clusterId,
@@ -49,6 +55,7 @@ class FaceClusteringService {
   bool isRunning = false;
 
   static const kRecommendedDistanceThreshold = 0.24;
+  static const kConservativeDistanceThreshold = 0.06;
 
   // singleton pattern
   FaceClusteringService._privateConstructor();
@@ -180,9 +187,11 @@ class FaceClusteringService {
   ///
   /// WARNING: Make sure to always input data in the same ordering, otherwise the clustering can less less deterministic.
   Future<Map<String, int>?> predictLinear(
-    Map<String, (int?, Uint8List)> input, {
+    Set<FaceInfoForClustering> input, {
     Map<int, int>? fileIDToCreationTime,
     double distanceThreshold = kRecommendedDistanceThreshold,
+    double conservativeDistanceThreshold = kConservativeDistanceThreshold,
+    bool useDynamicThreshold = true,
     int? offset,
   }) async {
     if (input.isEmpty) {
@@ -212,6 +221,8 @@ class FaceClusteringService {
             'input': input,
             'fileIDToCreationTime': fileIDToCreationTime,
             'distanceThreshold': distanceThreshold,
+            'conservativeDistanceThreshold': conservativeDistanceThreshold,
+            'useDynamicThreshold': useDynamicThreshold,
             'offset': offset,
           }
         ),
@@ -280,9 +291,13 @@ class FaceClusteringService {
   }
 
   static Map<String, int> _runLinearClustering(Map args) {
-    final input = args['input'] as Map<String, (int?, Uint8List)>;
+    // final input = args['input'] as Map<String, (int?, Uint8List)>;
+    final input = args['input'] as Set<FaceInfoForClustering>;
     final fileIDToCreationTime = args['fileIDToCreationTime'] as Map<int, int>?;
     final distanceThreshold = args['distanceThreshold'] as double;
+    final conservativeDistanceThreshold =
+        args['conservativeDistanceThreshold'] as double;
+    final useDynamicThreshold = args['useDynamicThreshold'] as bool;
     final offset = args['offset'] as int?;
 
     log(
@@ -291,17 +306,19 @@ class FaceClusteringService {
 
     // Organize everything into a list of FaceInfo objects
     final List<FaceInfo> faceInfos = [];
-    for (final entry in input.entries) {
+    for (final face in input) {
       faceInfos.add(
         FaceInfo(
-          faceID: entry.key,
+          faceID: face.faceID,
+          faceScore: face.faceScore,
+          blurValue: face.blurValue,
           vEmbedding: Vector.fromList(
-            EVector.fromBuffer(entry.value.$2).values,
+            EVector.fromBuffer(face.embeddingBytes).values,
             dtype: DType.float32,
           ),
-          clusterId: entry.value.$1,
+          clusterId: face.clusterId,
           fileCreationTime:
-              fileIDToCreationTime?[getFileIdFromFaceId(entry.key)],
+              fileIDToCreationTime?[getFileIdFromFaceId(face.faceID)],
         ),
       );
     }
@@ -341,6 +358,7 @@ class FaceClusteringService {
 
     // Make sure the first face has a clusterId
     final int totalFaces = sortedFaceInfos.length;
+    int dynamicThresholdCount = 0;
 
     if (sortedFaceInfos.isEmpty) {
       return {};
@@ -368,6 +386,17 @@ class FaceClusteringService {
 
       int closestIdx = -1;
       double closestDistance = double.infinity;
+      late double thresholdValue;
+      if (useDynamicThreshold) {
+        final bool badFace =
+            (sortedFaceInfos[i].faceScore! < kMinHighQualityFaceScore ||
+                sortedFaceInfos[i].blurValue! < kLaplacianSoftThreshold);
+        thresholdValue =
+            badFace ? conservativeDistanceThreshold : distanceThreshold;
+        if (badFace) dynamicThresholdCount++;
+      } else {
+        thresholdValue = distanceThreshold;
+      }
       if (i % 250 == 0) {
         log("[ClusterIsolate] ${DateTime.now()} Processed ${offset != null ? i + offset : i} faces");
       }
@@ -396,7 +425,7 @@ class FaceClusteringService {
         }
       }
 
-      if (closestDistance < distanceThreshold) {
+      if (closestDistance < thresholdValue) {
         if (sortedFaceInfos[closestIdx].clusterId == null) {
           // Ideally this should never happen, but just in case log it
           log(
@@ -432,6 +461,11 @@ class FaceClusteringService {
     log(
       ' [ClusterIsolate] ${DateTime.now()} Clustering for ${sortedFaceInfos.length} embeddings executed in ${stopwatchClustering.elapsedMilliseconds}ms',
     );
+    if (useDynamicThreshold) {
+      log(
+        "[ClusterIsolate] ${DateTime.now()} Dynamic thresholding: $dynamicThresholdCount faces had a low face score or high blur value",
+      );
+    }
 
     // analyze the results
     FaceClusteringService._analyzeClusterResults(sortedFaceInfos);

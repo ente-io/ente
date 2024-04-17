@@ -504,7 +504,7 @@ class FaceResult {
   final int fileId;
   final String faceId;
 
-  bool get isBlurry => blurValue < kLaplacianThreshold;
+  bool get isBlurry => blurValue < kLaplacianHardThreshold;
 
   const FaceResult({
     required this.detection,
@@ -545,7 +545,7 @@ class FaceResultBuilder {
   int fileId = -1;
   String faceId = '';
 
-  bool get isBlurry => blurValue < kLaplacianThreshold;
+  bool get isBlurry => blurValue < kLaplacianHardThreshold;
 
   FaceResultBuilder({
     required this.fileId,

@@ -20,7 +20,7 @@ class Face {
   final double blur;
   FileInfo? fileInfo;
 
-  bool get isBlurry => blur < kLaplacianThreshold;
+  bool get isBlurry => blur < kLaplacianHardThreshold;
 
   bool get hasHighScore => score > kMinHighQualityFaceScore;
 

@@ -310,14 +310,14 @@ class FaceMlService {
         int bucket = 1;
 
         while (true) {
-          final faceIdToEmbeddingBucket =
-              await FaceMLDataDB.instance.getFaceEmbeddingMap(
+          final faceInfoForClustering =
+              await FaceMLDataDB.instance.getFaceInfoForClustering(
             minScore: minFaceScore,
             maxFaces: bucketSize,
             offset: offset,
             batchSize: batchSize,
           );
-          if (faceIdToEmbeddingBucket.isEmpty) {
+          if (faceInfoForClustering.isEmpty) {
             _logger.warning(
               'faceIdToEmbeddingBucket is empty, this should ideally not happen as it should have stopped earlier. offset: $offset, totalFaces: $totalFaces',
             );
@@ -332,7 +332,7 @@ class FaceMlService {
 
           final faceIdToCluster =
               await FaceClusteringService.instance.predictLinear(
-            faceIdToEmbeddingBucket,
+            faceInfoForClustering,
             fileIDToCreationTime: fileIDToCreationTime,
             offset: offset,
           );
@@ -343,7 +343,7 @@ class FaceMlService {
 
           await FaceMLDataDB.instance.updateClusterIdToFaceId(faceIdToCluster);
           _logger.info(
-            'Done with clustering ${offset + faceIdToEmbeddingBucket.length} embeddings (${(100 * (offset + faceIdToEmbeddingBucket.length) / totalFaces).toStringAsFixed(0)}%) in bucket $bucket, offset: $offset',
+            'Done with clustering ${offset + faceInfoForClustering.length} embeddings (${(100 * (offset + faceInfoForClustering.length) / totalFaces).toStringAsFixed(0)}%) in bucket $bucket, offset: $offset',
           );
           if (offset + bucketSize >= totalFaces) {
             _logger.info('All faces clustered');
@@ -355,14 +355,14 @@ class FaceMlService {
       } else {
         // Read all the embeddings from the database, in a map from faceID to embedding
         final clusterStartTime = DateTime.now();
-        final faceIdToEmbedding =
-            await FaceMLDataDB.instance.getFaceEmbeddingMap(
+        final faceInfoForClustering =
+            await FaceMLDataDB.instance.getFaceInfoForClustering(
           minScore: minFaceScore,
           maxFaces: totalFaces,
         );
         final gotFaceEmbeddingsTime = DateTime.now();
         _logger.info(
-          'read embeddings ${faceIdToEmbedding.length} in ${gotFaceEmbeddingsTime.difference(clusterStartTime).inMilliseconds} ms',
+          'read embeddings ${faceInfoForClustering.length} in ${gotFaceEmbeddingsTime.difference(clusterStartTime).inMilliseconds} ms',
         );
 
         // Read the creation times from Files DB, in a map from fileID to creation time
@@ -374,7 +374,7 @@ class FaceMlService {
         // Cluster the embeddings using the linear clustering algorithm, returning a map from faceID to clusterID
         final faceIdToCluster =
             await FaceClusteringService.instance.predictLinear(
-          faceIdToEmbedding,
+          faceInfoForClustering,
           fileIDToCreationTime: fileIDToCreationTime,
         );
         if (faceIdToCluster == null) {
@@ -383,7 +383,7 @@ class FaceMlService {
         }
         final clusterDoneTime = DateTime.now();
         _logger.info(
-          'done with clustering ${faceIdToEmbedding.length} in ${clusterDoneTime.difference(clusterStartTime).inSeconds} seconds ',
+          'done with clustering ${faceInfoForClustering.length} in ${clusterDoneTime.difference(clusterStartTime).inSeconds} seconds ',
         );
 
         // Store the updated clusterIDs in the database

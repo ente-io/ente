@@ -12,6 +12,7 @@ import 'package:photos/face/db_fields.dart';
 import "package:photos/face/db_model_mappers.dart";
 import "package:photos/face/model/face.dart";
 import "package:photos/models/file/file.dart";
+import "package:photos/services/machine_learning/face_ml/face_clustering/face_info_for_clustering.dart";
 import 'package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqlite_async/sqlite_async.dart' as sqlite_async;
@@ -444,12 +445,63 @@ class FaceMLDataDB {
     );
   }
 
+  Future<Set<FaceInfoForClustering>> getFaceInfoForClustering({
+    double minScore = kMinHighQualityFaceScore,
+    int minClarity = kLaplacianHardThreshold,
+    int maxFaces = 20000,
+    int offset = 0,
+    int batchSize = 10000,
+  }) async {
+    final EnteWatch w = EnteWatch("getFaceEmbeddingMap")..start();
+    w.logAndReset(
+      'reading as float offset: $offset, maxFaces: $maxFaces, batchSize: $batchSize',
+    );
+    final db = await instance.sqliteAsyncDB;
+
+    final Set<FaceInfoForClustering> result = {};
+    while (true) {
+      // Query a batch of rows
+      final List<Map<String, dynamic>> maps = await db.getAll(
+        'SELECT $faceIDColumn, $faceEmbeddingBlob, $faceScore, $faceBlur FROM $facesTable'
+        ' WHERE $faceScore > $minScore AND $faceBlur > $minClarity'
+        ' ORDER BY $faceIDColumn'
+        ' DESC LIMIT $batchSize OFFSET $offset',
+      );
+      // Break the loop if no more rows
+      if (maps.isEmpty) {
+        break;
+      }
+      final List<String> faceIds = [];
+      for (final map in maps) {
+        faceIds.add(map[faceIDColumn] as String);
+      }
+      final faceIdToClusterId = await getFaceIdsToClusterIds(faceIds);
+      for (final map in maps) {
+        final faceID = map[faceIDColumn] as String;
+        final faceInfo = FaceInfoForClustering(
+          faceID: faceID,
+          clusterId: faceIdToClusterId[faceID],
+          embeddingBytes: map[faceEmbeddingBlob] as Uint8List,
+          faceScore: map[faceScore] as double,
+          blurValue: map[faceBlur] as double,
+        );
+        result.add(faceInfo);
+      }
+      if (result.length >= maxFaces) {
+        break;
+      }
+      offset += batchSize;
+    }
+    w.stopWithLog('done reading face embeddings ${result.length}');
+    return result;
+  }
+
   /// Returns a map of faceID to record of clusterId and faceEmbeddingBlob
   ///
   /// Only selects faces with score greater than [minScore] and blur score greater than [minClarity]
   Future<Map<String, (int?, Uint8List)>> getFaceEmbeddingMap({
     double minScore = kMinHighQualityFaceScore,
-    int minClarity = kLaplacianThreshold,
+    int minClarity = kLaplacianHardThreshold,
     int maxFaces = 20000,
     int offset = 0,
     int batchSize = 10000,
@@ -515,7 +567,7 @@ class FaceMLDataDB {
         facesTable,
         columns: [faceIDColumn, faceEmbeddingBlob],
         where:
-            '$faceScore > $kMinHighQualityFaceScore AND $faceBlur > $kLaplacianThreshold AND $fileIDColumn IN (${fileIDs.join(",")})',
+            '$faceScore > $kMinHighQualityFaceScore AND $faceBlur > $kLaplacianHardThreshold AND $fileIDColumn IN (${fileIDs.join(",")})',
         limit: batchSize,
         offset: offset,
         orderBy: '$faceIDColumn DESC',
@@ -542,7 +594,7 @@ class FaceMLDataDB {
   }) async {
     final db = await instance.sqliteAsyncDB;
     final List<Map<String, dynamic>> maps = await db.getAll(
-      'SELECT COUNT(*) as count FROM $facesTable WHERE $faceScore > $minFaceScore AND $faceBlur > $kLaplacianThreshold',
+      'SELECT COUNT(*) as count FROM $facesTable WHERE $faceScore > $minFaceScore AND $faceBlur > $kLaplacianHardThreshold',
     );
     return maps.first['count'] as int;
   }
@@ -551,7 +603,7 @@ class FaceMLDataDB {
     final db = await instance.sqliteAsyncDB;
 
     final List<Map<String, dynamic>> totalFacesMaps = await db.getAll(
-      'SELECT COUNT(*) as count FROM $facesTable WHERE $faceScore > $kMinHighQualityFaceScore AND $faceBlur > $kLaplacianThreshold',
+      'SELECT COUNT(*) as count FROM $facesTable WHERE $faceScore > $kMinHighQualityFaceScore AND $faceBlur > $kLaplacianHardThreshold',
     );
     final int totalFaces = totalFacesMaps.first['count'] as int;
 
@@ -564,7 +616,7 @@ class FaceMLDataDB {
   }
 
   Future<int> getBlurryFaceCount([
-    int blurThreshold = kLaplacianThreshold,
+    int blurThreshold = kLaplacianHardThreshold,
   ]) async {
     final db = await instance.database;
     final List<Map<String, dynamic>> maps = await db.rawQuery(

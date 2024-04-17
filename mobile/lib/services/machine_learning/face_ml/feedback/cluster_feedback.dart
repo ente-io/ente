@@ -13,6 +13,8 @@ import "package:photos/generated/protos/ente/common/vector.pb.dart";
 import "package:photos/models/file/file.dart";
 import 'package:photos/services/machine_learning/face_ml/face_clustering/cosine_distance.dart';
 import "package:photos/services/machine_learning/face_ml/face_clustering/face_clustering_service.dart";
+import "package:photos/services/machine_learning/face_ml/face_clustering/face_info_for_clustering.dart";
+import "package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart";
 import "package:photos/services/machine_learning/face_ml/face_ml_result.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/search_service.dart";
@@ -233,14 +235,23 @@ class ClusterFeedbackService {
       }
     } else {
       final clusteringInput = embeddings.map((key, value) {
-        return MapEntry(key, (null, value));
-      });
+        return MapEntry(
+          key,
+          FaceInfoForClustering(
+            faceID: key,
+            embeddingBytes: value,
+            faceScore: kMinHighQualityFaceScore + 0.01,
+            blurValue: kLapacianDefault,
+          ),
+        );
+      }).values.toSet();
 
       final faceIdToCluster =
           await FaceClusteringService.instance.predictLinear(
         clusteringInput,
         fileIDToCreationTime: fileIDToCreationTime,
         distanceThreshold: 0.23,
+        useDynamicThreshold: false,
       );
 
       if (faceIdToCluster == null) {
