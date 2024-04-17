@@ -205,18 +205,6 @@ export interface Electron {
          * directory.
          */
         isDir: (dirPath: string) => Promise<boolean>;
-
-        /**
-         * Return a list of the file names of the files in the given directory.
-         *
-         * Note:
-         *
-         * - This is not recursive, it will only return the names of direct
-         *   children.
-         *
-         * - It will return only the names of files, not directories.
-         */
-        listFiles: (dirPath: string) => Promise<string[]>;
     };
 
     /*
@@ -303,15 +291,32 @@ export interface Electron {
     // - Watch
 
     /**
-     * Get the latest state of the watched folders.
+     * Functions tailored for the folder watch functionality
      *
-     * We persist the folder watches that the user has setup. This function goes
-     * through that list, prunes any folders that don't exist on disk anymore,
-     * and for each, also returns a list of files that exist in that folder.
+     * [Note: Folder vs Directory in the context of FolderWatch-es]
+     *
+     * A note on terminology: The word "folder" is used to the top level root
+     * folder for which a {@link FolderWatch} has been added. This folder is
+     * also in 1-1 correspondence to be a directory on the user's disk. It can
+     * have other, nested directories too (which may or may not be getting
+     * mapped to separate Ente collections), but we'll not refer to these nested
+     * directories as folders - only the root of the tree, which the user
+     * dragged/dropped or selected to set up the folder watch, will be referred
+     * to as a folder when naming things.
      */
-    folderWatchesAndFilesTherein: () => Promise<
-        [watch: FolderWatch, files: ElectronFile[]][]
-    >;
+    watch: {
+        /**
+         * Return the paths of all the files under the given folder.
+         *
+         * This function walks the directory tree starting at {@link folderPath}
+         * and returns a list of the absolute paths of all the files that exist
+         * therein. It will recursively traverse into nested directories, and
+         * return the absolute paths of the files there too.
+         *
+         * The returned paths are guaranteed to use POSIX separators ('/').
+         */
+        findFiles: (folderPath: string) => Promise<string[]>;
+    };
 
     registerWatcherFunctions: (
         addFile: (file: ElectronFile) => Promise<void>,
@@ -326,6 +331,15 @@ export interface Electron {
     ) => Promise<void>;
 
     removeWatchMapping: (folderPath: string) => Promise<void>;
+
+    /**
+     * TODO(MR): Outdated description
+     * Get the latest state of the watched folders.
+     *
+     * We persist the folder watches that the user has setup. This function goes
+     * through that list, prunes any folders that don't exist on disk anymore,
+     * and for each, also returns a list of files that exist in that folder.
+     */
 
     getWatchMappings: () => Promise<FolderWatch[]>;
 

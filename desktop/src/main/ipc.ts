@@ -20,7 +20,6 @@ import {
 import {
     fsExists,
     fsIsDir,
-    fsListFiles,
     fsMkdirIfNeeded,
     fsReadTextFile,
     fsRename,
@@ -56,6 +55,7 @@ import {
 } from "./services/upload";
 import {
     addWatchMapping,
+    findFiles,
     getWatchMappings,
     removeWatchMapping,
     updateWatchMappingIgnoredFiles,
@@ -134,8 +134,6 @@ export const attachIPCHandlers = () => {
     );
 
     ipcMain.handle("fsIsDir", (_, dirPath: string) => fsIsDir(dirPath));
-
-    ipcMain.handle("fsListFiles", (_, dirPath: string) => fsListFiles(dirPath));
 
     // - Conversion
 
@@ -218,6 +216,10 @@ export const attachIPCHandlers = () => {
  */
 export const attachFSWatchIPCHandlers = (watcher: FSWatcher) => {
     // - Watch
+
+    ipcMain.handle("findFiles", (_, folderPath: string) =>
+        findFiles(folderPath),
+    );
 
     ipcMain.handle(
         "addWatchMapping",

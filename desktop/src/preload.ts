@@ -121,9 +121,6 @@ const fsWriteFile = (path: string, contents: string): Promise<void> =>
 const fsIsDir = (dirPath: string): Promise<boolean> =>
     ipcRenderer.invoke("fsIsDir", dirPath);
 
-const fsListFiles = (dirPath: string): Promise<string[]> =>
-    ipcRenderer.invoke("fsListFiles", dirPath);
-
 // - AUDIT below this
 
 // - Conversion
@@ -193,6 +190,9 @@ const showUploadZipDialog = (): Promise<{
 }> => ipcRenderer.invoke("showUploadZipDialog");
 
 // - Watch
+
+const findFiles = (folderPath: string): Promise<string[]> =>
+    ipcRenderer.invoke("findFiles", folderPath);
 
 const registerWatcherFunctions = (
     addFile: (file: ElectronFile) => Promise<void>,
@@ -325,7 +325,6 @@ contextBridge.exposeInMainWorld("electron", {
         readTextFile: fsReadTextFile,
         writeFile: fsWriteFile,
         isDir: fsIsDir,
-        listFiles: fsListFiles,
     },
 
     // - Conversion
@@ -346,6 +345,9 @@ contextBridge.exposeInMainWorld("electron", {
     showUploadZipDialog,
 
     // - Watch
+    watch: {
+        findFiles,
+    },
     registerWatcherFunctions,
     addWatchMapping,
     removeWatchMapping,

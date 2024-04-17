@@ -4,6 +4,7 @@
  */
 
 import { ensureElectron } from "@/next/electron";
+import { nameAndExtension } from "@/next/file";
 import log from "@/next/log";
 import type { FolderWatch } from "@/next/types/ipc";
 import { UPLOAD_RESULT, UPLOAD_STRATEGY } from "constants/upload";
@@ -19,15 +20,15 @@ import { removeFromCollection } from "./collectionService";
 import { getLocalFiles } from "./fileService";
 
 /**
- * A file system event encapsulates a change that has occurred on disk that
- * needs us to take some action within Ente to synchronize with the user's
- * (Ente) albums.
+ * A file system watch event encapsulates a change that has occurred on disk
+ * that needs us to take some action within Ente to synchronize with the user's
+ * Ente collections.
  *
  * Events get added in two ways:
  *
  * - When the app starts, it reads the current state of files on disk and
  *   compares that with its last known state to determine what all events it
- *   missed. This is easier than it sounds as we have only two events, add and
+ *   missed. This is easier than it sounds as we have only two events: add and
  *   remove.
  *
  * - When the app is running, it gets live notifications from our file system
@@ -35,20 +36,20 @@ import { getLocalFiles } from "./fileService";
  *   which the app then enqueues onto the event queue if they pertain to the
  *   files we're interested in.
  */
-interface FSEvent {
+interface WatchEvent {
     /** The action to take */
     action: "upload" | "trash";
     /** The path of the root folder corresponding to the {@link FolderWatch}. */
     folderPath: string;
-    /** If applicable, the name of the (Ente) collection the file belongs to. */
+    /** The name of the Ente collection the file belongs to. */
     collectionName?: string;
     /** The absolute path to the file under consideration. */
     filePath: string;
 }
 
 class WatchFolderService {
-    private eventQueue: FSEvent[] = [];
-    private currentEvent: FSEvent;
+    private eventQueue: WatchEvent[] = [];
+    private currentEvent: WatchEvent;
     private currentlySyncedMapping: WatchMapping;
     private trashingDirQueue: string[] = [];
     private isEventRunning: boolean = false;
@@ -87,26 +88,26 @@ class WatchFolderService {
             this.setWatchFolderServiceIsRunning =
                 setWatchFolderServiceIsRunning;
             this.setupWatcherFunctions();
-            await this.getAndSyncDiffOfFiles();
+            await this.syncWithDisk();
         } catch (e) {
             log.error("error while initializing watch service", e);
         }
     }
 
-    async getAndSyncDiffOfFiles() {
+    private async syncWithDisk() {
         try {
             const electron = ensureElectron();
             const mappings = await electron.getWatchMappings();
             if (!mappings) return;
 
             this.eventQueue = [];
-            const { events, nonExistentFolderPaths } =
-                await syncWithDisk(mappings);
+            const { events, deletedFolderPaths } = await deduceEvents(mappings);
             this.eventQueue = [...this.eventQueue, ...events];
-            this.debouncedRunNextEvent();
 
-            for (const path of nonExistentFolderPaths)
+            for (const path of deletedFolderPaths)
                 electron.removeWatchMapping(path);
+
+            this.debouncedRunNextEvent();
         } catch (e) {
             log.error("Ignoring error while syncing watched folders", e);
         }
@@ -116,9 +117,9 @@ class WatchFolderService {
         return this.currentEvent?.folderPath === mapping.folderPath;
     }
 
-    pushEvent(event: EventQueueItem) {
+    private pushEvent(event: WatchEvent) {
         this.eventQueue.push(event);
-        log.info("FS event", event);
+        log.info("Watch event", event);
         this.debouncedRunNextEvent();
     }
 
@@ -145,7 +146,7 @@ class WatchFolderService {
                 folderPath,
                 uploadStrategy,
             );
-            this.getAndSyncDiffOfFiles();
+            this.syncWithDisk();
         } catch (e) {
             log.error("error while adding watch mapping", e);
         }
@@ -576,19 +577,13 @@ class WatchFolderService {
 
     resumePausedSync() {
         this.isPaused = false;
-        this.getAndSyncDiffOfFiles();
+        this.syncWithDisk();
     }
 }
 
 const watchFolderService = new WatchFolderService();
 
 export default watchFolderService;
-
-const getParentFolderName = (filePath: string) => {
-    const folderPath = filePath.substring(0, filePath.lastIndexOf("/"));
-    const folderName = folderPath.substring(folderPath.lastIndexOf("/") + 1);
-    return folderName;
-};
 
 async function diskFileAddedCallback(file: ElectronFile) {
     const collectionNameAndFolderPath =
@@ -669,37 +664,35 @@ function isSyncedOrIgnoredFile(file: ElectronFile, mapping: WatchMapping) {
 }
 
 /**
- * Determine which events we need to process to synchronize the watched albums
- * with the corresponding on disk folders.
+ * Determine which events we need to process to synchronize the watched on-disk
+ * folders to their corresponding collections.
  *
- * Also return a list of previously created folder watches for this there is no
- * longer any no corresponding folder on disk.
+ * Also return a list of previously created folder watches for which there is no
+ * longer any no corresponding directory on disk.
  */
-const syncWithDisk = async (
+const deduceEvents = async (
     mappings: FolderWatch[],
 ): Promise<{
-    events: EventQueueItem[];
-    nonExistentFolderPaths: string[];
+    events: WatchEvent[];
+    deletedFolderPaths: string[];
 }> => {
     const activeMappings = [];
-    const nonExistentFolderPaths: string[] = [];
+    const deletedFolderPaths: string[] = [];
 
     for (const mapping of mappings) {
         const valid = await electron.fs.isDir(mapping.folderPath);
-        if (!valid) nonExistentFolderPaths.push(mapping.folderPath);
+        if (!valid) deletedFolderPaths.push(mapping.folderPath);
         else activeMappings.push(mapping);
     }
 
-    const events: EventQueueItem[] = [];
+    const events: WatchEvent[] = [];
 
     for (const mapping of activeMappings) {
         const folderPath = mapping.folderPath;
 
-        const paths = (await electron.fs.listFiles(folderPath))
+        const paths = (await electron.watch.findFiles(folderPath))
             // Filter out hidden files (files whose names begins with a dot)
-            .filter((n) => !n.startsWith("."))
-            // Prepend folderPath to get the full path
-            .map((f) => `${folderPath}/${f}`);
+            .filter((path) => !nameAndExtension(path)[0].startsWith("."));
 
         // Files that are on disk but not yet synced.
         const pathsToUpload = paths.filter(
@@ -708,7 +701,7 @@ const syncWithDisk = async (
 
         for (const path of pathsToUpload)
             events.push({
-                type: "upload",
+                action: "upload",
                 collectionName: getCollectionNameForMapping(mapping, path),
                 folderPath,
                 filePath: path,
@@ -728,7 +721,7 @@ const syncWithDisk = async (
             });
     }
 
-    return { events, nonExistentFolderPaths };
+    return { events, deletedFolderPaths };
 };
 
 function isSyncedOrIgnoredPath(path: string, mapping: WatchMapping) {
@@ -743,6 +736,16 @@ const getCollectionNameForMapping = (
     filePath: string,
 ) => {
     return mapping.uploadStrategy === UPLOAD_STRATEGY.COLLECTION_PER_FOLDER
-        ? getParentFolderName(filePath)
+        ? parentDirectoryName(filePath)
         : mapping.rootFolderName;
+};
+
+const parentDirectoryName = (filePath: string) => {
+    const components = filePath.split("/");
+    const parentName = components[components.length - 2];
+    if (!parentName)
+        throw new Error(
+            `Unexpected file path without a parent folder: ${filePath}`,
+        );
+    return parentName;
 };
