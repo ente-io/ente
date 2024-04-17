@@ -103,6 +103,13 @@ type AddFilesRequest struct {
 	Files        []CollectionFileItem `json:"files" binding:"required"`
 }
 
+// CopyFileSyncRequest is request object for creating copy of Files, and those copy to the destination collection
+type CopyFileSyncRequest struct {
+	SrcCollectionID int64                `json:"srcCollectionID" binding:"required"`
+	DstCollection   int64                `json:"dstCollectionID" binding:"required"`
+	Files           []CollectionFileItem `json:"files" binding:"required"`
+}
+
 // RemoveFilesRequest represents a request to remove files from a collection
 type RemoveFilesRequest struct {
 	CollectionID int64 `json:"collectionID" binding:"required"`
