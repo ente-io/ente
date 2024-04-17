@@ -38,7 +38,7 @@ import { writeStream } from "utils/native-stream";
 import { getAllLocalCollections } from "../collectionService";
 import downloadManager from "../download";
 import { getAllLocalFiles } from "../fileService";
-import { decodeLivePhoto } from "../livePhotoService";
+import { decodeLivePhoto } from "@/media/live-photo";
 import { migrateExport } from "./migration";
 
 /** Name of the JSON file in which we keep the state of the export. */
@@ -1017,7 +1017,7 @@ class ExportService {
     ) {
         const electron = ensureElectron();
         const fileBlob = await new Response(fileStream).blob();
-        const livePhoto = await decodeLivePhoto(file, fileBlob);
+        const livePhoto = await decodeLivePhoto(file.metadata.title, fileBlob);
         const imageExportName = await safeFileName(
             collectionExportPath,
             livePhoto.imageNameTitle,

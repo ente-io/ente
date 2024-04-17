@@ -1,3 +1,4 @@
+import { decodeLivePhoto } from "@/media/live-photo";
 import { ensureElectron } from "@/next/electron";
 import log from "@/next/log";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
@@ -7,7 +8,6 @@ import { FILE_TYPE } from "constants/file";
 import { getLocalCollections } from "services/collectionService";
 import downloadManager from "services/download";
 import { getAllLocalFiles } from "services/fileService";
-import { decodeLivePhoto } from "services/livePhotoService";
 import { Collection } from "types/collection";
 import {
     CollectionExportNames,
@@ -318,7 +318,10 @@ async function getFileExportNamesFromExportedFiles(
         if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
             const fileStream = await downloadManager.getFile(file);
             const fileBlob = await new Response(fileStream).blob();
-            const livePhoto = await decodeLivePhoto(file, fileBlob);
+            const livePhoto = await decodeLivePhoto(
+                file.metadata.title,
+                fileBlob,
+            );
             const imageExportName = getUniqueFileExportNameForMigration(
                 collectionPath,
                 livePhoto.imageNameTitle,
