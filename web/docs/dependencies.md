@@ -110,7 +110,7 @@ with Next.js.
 
 For more details, see [translations.md](translations.md).
 
-## Meta Frameworks
+## Meta frameworks
 
 ### Next.js
 
@@ -131,7 +131,12 @@ It is more lower level than Next, but the bells and whistles it doesn't have are
 the bells and whistles (and the accompanying complexity) that we don't need in
 some cases.
 
-## Photos
+## Media
+
+- "jszip" is used for reading zip files in JavaScript. Live photos are zip files
+  under the hood.
+
+## Photos app specific
 
 ### Misc
 
