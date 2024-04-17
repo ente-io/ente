@@ -19,13 +19,13 @@ import {
 } from "./dialogs";
 import {
     fsExists,
+    fsIsDir,
     fsMkdirIfNeeded,
     fsReadTextFile,
     fsRename,
     fsRm,
     fsRmdir,
     fsWriteFile,
-    isFolder,
 } from "./fs";
 import { logToDisk } from "./log";
 import {
@@ -55,7 +55,6 @@ import {
 } from "./services/upload";
 import {
     addWatchMapping,
-    folderWatchesAndFilesTherein,
     getWatchMappings,
     removeWatchMapping,
     updateWatchMappingIgnoredFiles,
@@ -133,6 +132,8 @@ export const attachIPCHandlers = () => {
         fsWriteFile(path, contents),
     );
 
+    ipcMain.handle("fsIsDir", (_, dirPath: string) => fsIsDir(dirPath));
+
     // - Conversion
 
     ipcMain.handle("convertToJPEG", (_, fileData, filename) =>
@@ -184,10 +185,6 @@ export const attachIPCHandlers = () => {
 
     ipcMain.handle("showUploadZipDialog", () => showUploadZipDialog());
 
-    // - FS Legacy
-
-    ipcMain.handle("isFolder", (_, dirPath: string) => isFolder(dirPath));
-
     // - Upload
 
     ipcMain.handle("getPendingUploads", () => getPendingUploads());
@@ -237,10 +234,6 @@ export const attachFSWatchIPCHandlers = (watcher: FSWatcher) => {
 
     ipcMain.handle("removeWatchMapping", (_, folderPath: string) =>
         removeWatchMapping(watcher, folderPath),
-    );
-
-    ipcMain.handle("folderWatchesAndFilesTherein", () =>
-        folderWatchesAndFilesTherein(watcher),
     );
 
     ipcMain.handle("getWatchMappings", () => getWatchMappings());

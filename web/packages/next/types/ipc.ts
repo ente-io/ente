@@ -199,6 +199,12 @@ export interface Electron {
          * @param contents The string contents to write.
          */
         writeFile: (path: string, contents: string) => Promise<void>;
+
+        /**
+         * Return true if there is an item at {@link dirPath}, and it is as
+         * directory.
+         */
+        isDir: (dirPath: string) => Promise<boolean>;
     };
 
     /*
@@ -320,9 +326,6 @@ export interface Electron {
         folderPath: string,
         files: FolderWatch["ignoredFiles"],
     ) => Promise<void>;
-
-    // - FS legacy
-    isFolder: (dirPath: string) => Promise<boolean>;
 
     // - Upload
 

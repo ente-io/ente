@@ -118,6 +118,9 @@ const fsReadTextFile = (path: string): Promise<string> =>
 const fsWriteFile = (path: string, contents: string): Promise<void> =>
     ipcRenderer.invoke("fsWriteFile", path, contents);
 
+const fsIsDir = (dirPath: string): Promise<boolean> =>
+    ipcRenderer.invoke("fsIsDir", dirPath);
+
 // - AUDIT below this
 
 // - Conversion
@@ -220,10 +223,6 @@ const addWatchMapping = (
 const removeWatchMapping = (folderPath: string): Promise<void> =>
     ipcRenderer.invoke("removeWatchMapping", folderPath);
 
-const folderWatchesAndFilesTherein = (): Promise<
-    [watch: FolderWatch, files: ElectronFile[]][]
-> => ipcRenderer.invoke("folderWatchesAndFilesTherein");
-
 const getWatchMappings = (): Promise<FolderWatch[]> =>
     ipcRenderer.invoke("getWatchMappings");
 
@@ -238,11 +237,6 @@ const updateWatchMappingIgnoredFiles = (
     files: FolderWatch["ignoredFiles"],
 ): Promise<void> =>
     ipcRenderer.invoke("updateWatchMappingIgnoredFiles", folderPath, files);
-
-// - FS Legacy
-
-const isFolder = (dirPath: string): Promise<boolean> =>
-    ipcRenderer.invoke("isFolder", dirPath);
 
 // - Upload
 
@@ -327,6 +321,7 @@ contextBridge.exposeInMainWorld("electron", {
         rm: fsRm,
         readTextFile: fsReadTextFile,
         writeFile: fsWriteFile,
+        isDir: fsIsDir,
     },
 
     // - Conversion
@@ -347,17 +342,12 @@ contextBridge.exposeInMainWorld("electron", {
     showUploadZipDialog,
 
     // - Watch
-    folderWatchesAndFilesTherein,
     registerWatcherFunctions,
     addWatchMapping,
     removeWatchMapping,
     getWatchMappings,
     updateWatchMappingSyncedFiles,
     updateWatchMappingIgnoredFiles,
-
-    // - FS legacy
-    // TODO: Move these into fs + document + rename if needed
-    isFolder,
 
     // - Upload
 

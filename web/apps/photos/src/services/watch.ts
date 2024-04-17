@@ -538,8 +538,7 @@ class WatchFolderService {
 
     async isFolder(folderPath: string) {
         try {
-            const isFolder = await ensureElectron().isFolder(folderPath);
-            return isFolder;
+            return await ensureElectron().fs.isDir(folderPath);
         } catch (e) {
             log.error("error while checking if folder exists", e);
         }
@@ -675,8 +674,8 @@ const syncWithDisk = async (
     const nonExistentFolderPaths: string[] = [];
 
     for (const mapping of mappings) {
-        const active = await electron.isFolder(mapping.folderPath);
-        if (!active) nonExistentFolderPaths.push(mapping.folderPath);
+        const valid = await electron.fs.isDir(mapping.folderPath);
+        if (!valid) nonExistentFolderPaths.push(mapping.folderPath);
         else activeMappings.push(mapping);
     }
 
