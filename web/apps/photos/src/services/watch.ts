@@ -12,19 +12,43 @@ import uploadManager from "services/upload/uploadManager";
 import { Collection } from "types/collection";
 import { EncryptedEnteFile } from "types/file";
 import { ElectronFile, FileWithCollection } from "types/upload";
-import {
-    EventQueueItem,
-    WatchMapping,
-    WatchMappingSyncedFile,
-} from "types/watchFolder";
+import { WatchMapping, WatchMappingSyncedFile } from "types/watchFolder";
 import { groupFilesBasedOnCollectionID } from "utils/file";
 import { isSystemFile } from "utils/upload";
 import { removeFromCollection } from "./collectionService";
 import { getLocalFiles } from "./fileService";
 
+/**
+ * A file system event encapsulates a change that has occurred on disk that
+ * needs us to take some action within Ente to synchronize with the user's
+ * (Ente) albums.
+ *
+ * Events get added in two ways:
+ *
+ * - When the app starts, it reads the current state of files on disk and
+ *   compares that with its last known state to determine what all events it
+ *   missed. This is easier than it sounds as we have only two events, add and
+ *   remove.
+ *
+ * - When the app is running, it gets live notifications from our file system
+ *   watcher (from the Node.js layer) about changes that have happened on disk,
+ *   which the app then enqueues onto the event queue if they pertain to the
+ *   files we're interested in.
+ */
+interface FSEvent {
+    /** The action to take */
+    action: "upload" | "trash";
+    /** The path of the root folder corresponding to the {@link FolderWatch}. */
+    folderPath: string;
+    /** If applicable, the name of the (Ente) collection the file belongs to. */
+    collectionName?: string;
+    /** The absolute path to the file under consideration. */
+    filePath: string;
+}
+
 class WatchFolderService {
-    private eventQueue: EventQueueItem[] = [];
-    private currentEvent: EventQueueItem;
+    private eventQueue: FSEvent[] = [];
+    private currentEvent: FSEvent;
     private currentlySyncedMapping: WatchMapping;
     private trashingDirQueue: string[] = [];
     private isEventRunning: boolean = false;
@@ -94,6 +118,7 @@ class WatchFolderService {
 
     pushEvent(event: EventQueueItem) {
         this.eventQueue.push(event);
+        log.info("FS event", event);
         this.debouncedRunNextEvent();
     }
 
@@ -566,55 +591,41 @@ const getParentFolderName = (filePath: string) => {
 };
 
 async function diskFileAddedCallback(file: ElectronFile) {
-    try {
-        const collectionNameAndFolderPath =
-            await watchFolderService.getCollectionNameAndFolderPath(file.path);
+    const collectionNameAndFolderPath =
+        await watchFolderService.getCollectionNameAndFolderPath(file.path);
 
-        if (!collectionNameAndFolderPath) {
-            return;
-        }
-
-        const { collectionName, folderPath } = collectionNameAndFolderPath;
-
-        const event: EventQueueItem = {
-            type: "upload",
-            collectionName,
-            folderPath,
-            files: [file],
-        };
-        watchFolderService.pushEvent(event);
-        log.info(
-            `added (upload) to event queue, collectionName:${event.collectionName} folderPath:${event.folderPath}, filesCount: ${event.files.length}`,
-        );
-    } catch (e) {
-        log.error("error while calling diskFileAddedCallback", e);
+    if (!collectionNameAndFolderPath) {
+        return;
     }
+
+    const { collectionName, folderPath } = collectionNameAndFolderPath;
+
+    const event: EventQueueItem = {
+        type: "upload",
+        collectionName,
+        folderPath,
+        path: file.path,
+    };
+    watchFolderService.pushEvent(event);
 }
 
 async function diskFileRemovedCallback(filePath: string) {
-    try {
-        const collectionNameAndFolderPath =
-            await watchFolderService.getCollectionNameAndFolderPath(filePath);
+    const collectionNameAndFolderPath =
+        await watchFolderService.getCollectionNameAndFolderPath(filePath);
 
-        if (!collectionNameAndFolderPath) {
-            return;
-        }
-
-        const { collectionName, folderPath } = collectionNameAndFolderPath;
-
-        const event: EventQueueItem = {
-            type: "trash",
-            collectionName,
-            folderPath,
-            paths: [filePath],
-        };
-        watchFolderService.pushEvent(event);
-        log.info(
-            `added (trash) to event queue collectionName:${event.collectionName} folderPath:${event.folderPath} , pathsCount: ${event.paths.length}`,
-        );
-    } catch (e) {
-        log.error("error while calling diskFileRemovedCallback", e);
+    if (!collectionNameAndFolderPath) {
+        return;
     }
+
+    const { collectionName, folderPath } = collectionNameAndFolderPath;
+
+    const event: EventQueueItem = {
+        type: "trash",
+        collectionName,
+        folderPath,
+        path: filePath,
+    };
+    watchFolderService.pushEvent(event);
 }
 
 async function diskFolderRemovedCallback(folderPath: string) {
@@ -682,33 +693,50 @@ const syncWithDisk = async (
     const events: EventQueueItem[] = [];
 
     for (const mapping of activeMappings) {
-        const files = await electron.getDirFiles(mapping.folderPath);
+        const folderPath = mapping.folderPath;
 
-        const filesToUpload = getValidFilesToUpload(files, mapping);
+        const paths = (await electron.fs.listFiles(folderPath))
+            // Filter out hidden files (files whose names begins with a dot)
+            .filter((n) => !n.startsWith("."))
+            // Prepend folderPath to get the full path
+            .map((f) => `${folderPath}/${f}`);
 
-        for (const file of filesToUpload)
+        // Files that are on disk but not yet synced.
+        const pathsToUpload = paths.filter(
+            (path) => !isSyncedOrIgnoredPath(path, mapping),
+        );
+
+        for (const path of pathsToUpload)
             events.push({
                 type: "upload",
-                collectionName: getCollectionNameForMapping(mapping, file.path),
-                folderPath: mapping.folderPath,
-                files: [file],
+                collectionName: getCollectionNameForMapping(mapping, path),
+                folderPath,
+                filePath: path,
             });
 
-        const filesToRemove = mapping.syncedFiles.filter((file) => {
-            return !files.find((f) => f.path === file.path);
-        });
+        // Synced files that are no longer on disk
+        const pathsToRemove = mapping.syncedFiles.filter(
+            (file) => !paths.includes(file.path),
+        );
 
-        for (const file of filesToRemove)
+        for (const path of pathsToRemove)
             events.push({
                 type: "trash",
-                collectionName: getCollectionNameForMapping(mapping, file.path),
+                collectionName: getCollectionNameForMapping(mapping, path),
                 folderPath: mapping.folderPath,
-                paths: [file.path],
+                filePath: path,
             });
     }
 
     return { events, nonExistentFolderPaths };
 };
+
+function isSyncedOrIgnoredPath(path: string, mapping: WatchMapping) {
+    return (
+        mapping.ignoredFiles.includes(path) ||
+        mapping.syncedFiles.find((f) => f.path === path)
+    );
+}
 
 const getCollectionNameForMapping = (
     mapping: WatchMapping,

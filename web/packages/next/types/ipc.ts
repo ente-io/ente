@@ -207,7 +207,7 @@ export interface Electron {
         isDir: (dirPath: string) => Promise<boolean>;
 
         /**
-         * Return a list of the names of the files in the given directory.
+         * Return a list of the file names of the files in the given directory.
          *
          * Note:
          *
@@ -216,7 +216,7 @@ export interface Electron {
          *
          * - It will return only the names of files, not directories.
          */
-        lsFiles: (dirPath: string) => Promise<string>;
+        listFiles: (dirPath: string) => Promise<string[]>;
     };
 
     /*

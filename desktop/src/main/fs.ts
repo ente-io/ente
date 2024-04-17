@@ -27,8 +27,3 @@ export const fsIsDir = async (dirPath: string) => {
     const stat = await fs.stat(dirPath);
     return stat.isDirectory();
 };
-
-export const fsLsFiles = async (dirPath: string) =>
-    (await fs.readdir(dirPath, { withFileTypes: true }))
-        .filter((e) => e.isFile())
-        .map((e) => e.name);
