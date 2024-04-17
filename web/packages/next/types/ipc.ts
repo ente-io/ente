@@ -205,6 +205,18 @@ export interface Electron {
          * directory.
          */
         isDir: (dirPath: string) => Promise<boolean>;
+
+        /**
+         * Return a list of the names of the files in the given directory.
+         *
+         * Note:
+         *
+         * - This is not recursive, it will only return the names of direct
+         *   children.
+         *
+         * - It will return only the names of files, not directories.
+         */
+        lsFiles: (dirPath: string) => Promise<string>;
     };
 
     /*

@@ -121,6 +121,9 @@ const fsWriteFile = (path: string, contents: string): Promise<void> =>
 const fsIsDir = (dirPath: string): Promise<boolean> =>
     ipcRenderer.invoke("fsIsDir", dirPath);
 
+const fsLsFiles = (dirPath: string): Promise<boolean> =>
+    ipcRenderer.invoke("fsLsFiles", dirPath);
+
 // - AUDIT below this
 
 // - Conversion
@@ -322,6 +325,7 @@ contextBridge.exposeInMainWorld("electron", {
         readTextFile: fsReadTextFile,
         writeFile: fsWriteFile,
         isDir: fsIsDir,
+        lsFiles: fsLsFiles,
     },
 
     // - Conversion

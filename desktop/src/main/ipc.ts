@@ -20,6 +20,7 @@ import {
 import {
     fsExists,
     fsIsDir,
+    fsLsFiles,
     fsMkdirIfNeeded,
     fsReadTextFile,
     fsRename,
@@ -133,6 +134,8 @@ export const attachIPCHandlers = () => {
     );
 
     ipcMain.handle("fsIsDir", (_, dirPath: string) => fsIsDir(dirPath));
+
+    ipcMain.handle("fsLsFiles", (_, dirPath: string) => fsLsFiles(dirPath));
 
     // - Conversion
 
