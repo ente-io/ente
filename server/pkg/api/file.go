@@ -1,6 +1,7 @@
 package api
 
 import (
+	"github.com/ente-io/museum/pkg/controller/file_copy"
 	"net/http"
 	"os"
 	"strconv"
@@ -20,7 +21,8 @@ import (
 
 // FileHandler exposes request handlers for all encrypted file related requests
 type FileHandler struct {
-	Controller *controller.FileController
+	Controller   *controller.FileController
+	FileCopyCtrl *file_copy.FileCopyController
 }
 
 // DefaultMaxBatchSize is the default maximum API batch size unless specified otherwise
@@ -51,6 +53,21 @@ func (h *FileHandler) CreateOrUpdate(c *gin.Context) {
 		return
 	}
 	response, err := h.Controller.Update(c, userID, file, enteApp)
+	if err != nil {
+		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
+	c.JSON(http.StatusOK, response)
+}
+
+// CopyFiles copies files that are owned by another user
+func (h *FileHandler) CopyFiles(c *gin.Context) {
+	var req ente.CopyFileSyncRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
+	response, err := h.FileCopyCtrl.CopyFiles(c, req)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
