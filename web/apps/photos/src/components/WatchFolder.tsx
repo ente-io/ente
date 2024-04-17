@@ -1,3 +1,4 @@
+import { ensureElectron } from "@/next/electron";
 import {
     FlexWrapper,
     HorizontalFlex,
@@ -37,17 +38,21 @@ interface WatchFolderProps {
     onClose: () => void;
 }
 
+/**
+ * View the state of and manage folder watches.
+ *
+ * This is the screen that controls that "watch folder" feature in the app.
+ */
 export const WatchFolder: React.FC<WatchFolderProps> = ({ open, onClose }) => {
-    const [mappings, setMappings] = useState<FolderWatch[]>([]);
-    const [inputFolderPath, setInputFolderPath] = useState("");
+    const [watches, setWatches] = useState<FolderWatch[] | undefined>();
+    const [inputFolderPath, setInputFolderPath] = useState<
+        string | undefined
+    >();
     const [choiceModalOpen, setChoiceModalOpen] = useState(false);
     const appContext = useContext(AppContext);
 
-    const electron = globalThis.electron;
-
     useEffect(() => {
-        if (!electron) return;
-        watcher.getWatchMappings().then((m) => setMappings(m));
+        watcher.getWatchMappings().then((ws) => setWatches(ws));
     }, []);
 
     useEffect(() => {
@@ -71,10 +76,8 @@ export const WatchFolder: React.FC<WatchFolderProps> = ({ open, onClose }) => {
     };
 
     const addFolderForWatching = async (path: string) => {
-        if (!electron) return;
-
         setInputFolderPath(path);
-        const files = await electron.getDirFiles(path);
+        const files = await ensureElectron().getDirFiles(path);
         const analysisResult = getImportSuggestion(
             PICKED_UPLOAD_TYPE.FOLDERS,
             files,
@@ -83,17 +86,6 @@ export const WatchFolder: React.FC<WatchFolderProps> = ({ open, onClose }) => {
             setChoiceModalOpen(true);
         } else {
             handleAddWatchMapping(UPLOAD_STRATEGY.SINGLE_COLLECTION, path);
-        }
-    };
-
-    const handleAddFolderClick = async () => {
-        await handleFolderSelection();
-    };
-
-    const handleFolderSelection = async () => {
-        const folderPath = await watcher.selectFolder();
-        if (folderPath) {
-            await addFolderForWatching(folderPath);
         }
     };
 
@@ -108,12 +100,19 @@ export const WatchFolder: React.FC<WatchFolderProps> = ({ open, onClose }) => {
             uploadStrategy,
         );
         setInputFolderPath("");
-        setMappings(await watcher.getWatchMappings());
+        setWatches(await watcher.getWatchMappings());
     };
 
-    const stopWatching = async (watch: FolderWatch) => {
+    const addWatch = async () => {
+        const folderPath = await watcher.selectFolder();
+        if (folderPath) {
+            await addFolderForWatching(folderPath);
+        }
+    };
+
+    const removeWatch = async (watch: FolderWatch) => {
         await watcher.removeWatchForFolderPath(watch.folderPath);
-        setMappings(await watcher.getWatchMappings());
+        setWatches(await watcher.getWatchMappings());
     };
 
     const closeChoiceModal = () => setChoiceModalOpen(false);
@@ -143,15 +142,8 @@ export const WatchFolder: React.FC<WatchFolderProps> = ({ open, onClose }) => {
                 </DialogTitleWithCloseButton>
                 <DialogContent sx={{ flex: 1 }}>
                     <Stack spacing={1} p={1.5} height={"100%"}>
-                        <WatchList
-                            watches={mappings}
-                            stopWatching={stopWatching}
-                        />
-                        <Button
-                            fullWidth
-                            color="accent"
-                            onClick={handleAddFolderClick}
-                        >
+                        <WatchList {...{ watches, removeWatch }} />
+                        <Button fullWidth color="accent" onClick={addWatch}>
                             <span>+</span>
                             <span
                                 style={{
@@ -175,10 +167,10 @@ export const WatchFolder: React.FC<WatchFolderProps> = ({ open, onClose }) => {
 
 interface WatchList {
     watches: FolderWatch[];
-    stopWatching: (watch: FolderWatch) => void;
+    removeWatch: (watch: FolderWatch) => void;
 }
 
-const WatchList: React.FC<WatchList> = ({ watches, stopWatching }) => {
+const WatchList: React.FC<WatchList> = ({ watches, removeWatch }) => {
     return watches.length === 0 ? (
         <NoWatches />
     ) : (
@@ -188,7 +180,7 @@ const WatchList: React.FC<WatchList> = ({ watches, stopWatching }) => {
                     <WatchEntry
                         key={mapping.rootFolderName}
                         watch={mapping}
-                        stopWatching={stopWatching}
+                        removeWatch={removeWatch}
                     />
                 );
             })}
@@ -252,10 +244,10 @@ const CheckmarkIcon: React.FC = () => {
 
 interface WatchEntryProps {
     watch: FolderWatch;
-    stopWatching: (watch: FolderWatch) => void;
+    removeWatch: (watch: FolderWatch) => void;
 }
 
-const WatchEntry: React.FC<WatchEntryProps> = ({ watch, stopWatching }) => {
+const WatchEntry: React.FC<WatchEntryProps> = ({ watch, removeWatch }) => {
     const appContext = React.useContext(AppContext);
 
     const confirmStopWatching = () => {
@@ -267,7 +259,7 @@ const WatchEntry: React.FC<WatchEntryProps> = ({ watch, stopWatching }) => {
                 variant: "secondary",
             },
             proceed: {
-                action: () => stopWatching(watch),
+                action: () => removeWatch(watch),
                 text: t("YES_STOP"),
                 variant: "critical",
             },
