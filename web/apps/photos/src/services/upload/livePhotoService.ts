@@ -4,7 +4,7 @@ import { CustomError } from "@ente/shared/error";
 import { Remote } from "comlink";
 import { FILE_TYPE } from "constants/file";
 import { LIVE_PHOTO_ASSET_SIZE_LIMIT } from "constants/upload";
-import { encodeLivePhoto } from "services/livePhotoService";
+import { encodeLivePhoto } from "@/media/live-photo";
 import { getFileType } from "services/typeDetectionService";
 import {
     ElectronFile,
