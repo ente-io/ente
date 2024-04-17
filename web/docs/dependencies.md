@@ -133,8 +133,8 @@ some cases.
 
 ## Media
 
-- "jszip" is used for reading zip files in JavaScript. Live photos are zip files
-  under the hood.
+-   "jszip" is used for reading zip files in JavaScript. Live photos are zip
+    files under the hood.
 
 ## Photos app specific
 
