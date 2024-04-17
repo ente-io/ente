@@ -26,7 +26,7 @@ import {
     Typography,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import UploadStrategyChoiceModal from "components/Upload/UploadStrategyChoiceModal";
+import { CollectionMappingChoiceModal } from "components/Upload/CollectionMappingChoiceModal";
 import { PICKED_UPLOAD_TYPE } from "constants/upload";
 import { t } from "i18next";
 import { AppContext } from "pages/_app";
@@ -149,11 +149,10 @@ export const WatchFolder: React.FC<WatchFolderProps> = ({ open, onClose }) => {
                     </Stack>
                 </DialogContent>
             </Dialog>
-            <UploadStrategyChoiceModal
+            <CollectionMappingChoiceModal
                 open={choiceModalOpen}
                 onClose={closeChoiceModal}
-                uploadToSingleCollection={() => addWatchWithMapping("root")}
-                uploadToMultipleCollection={() => addWatchWithMapping("parent")}
+                didSelect={addWatchWithMapping}
             />
         </>
     );
@@ -263,7 +262,7 @@ const WatchEntry: React.FC<WatchEntryProps> = ({ watch, removeWatch }) => {
     return (
         <SpaceBetweenFlex>
             <HorizontalFlex>
-                {watch.uploadStrategy === "root" ? (
+                {watch.collectionMapping === "root" ? (
                     <Tooltip title={t("UPLOADED_TO_SINGLE_COLLECTION")}>
                         <FolderOpenIcon />
                     </Tooltip>

@@ -58,8 +58,8 @@ import {
     groupFilesBasedOnParentFolder,
 } from "utils/upload";
 import { SetCollectionNamerAttributes } from "../Collections/CollectionNamer";
+import { CollectionMappingChoiceModal } from "./CollectionMappingChoiceModal";
 import UploadProgress from "./UploadProgress";
-import UploadStrategyChoiceModal from "./UploadStrategyChoiceModal";
 import UploadTypeSelector from "./UploadTypeSelector";
 
 const FIRST_ALBUM_NAME = "My First Album";
@@ -780,13 +780,23 @@ export default function Uploader(props: Props) {
         uploadFilesToNewCollections("leaf");
     };
 
+    const didSelectCollectionMapping = (mapping: CollectionMapping) => {
+        switch (mapping) {
+            case "root":
+                handleUploadToSingleCollection();
+                break;
+            case "parent":
+                handleUploadToMultipleCollections();
+                break;
+        }
+    };
+
     return (
         <>
-            <UploadStrategyChoiceModal
+            <CollectionMappingChoiceModal
                 open={choiceModalView}
                 onClose={handleChoiceModalClose}
-                uploadToSingleCollection={handleUploadToSingleCollection}
-                uploadToMultipleCollection={handleUploadToMultipleCollections}
+                didSelect={didSelectCollectionMapping}
             />
             <UploadTypeSelector
                 show={props.uploadTypeSelectorView}

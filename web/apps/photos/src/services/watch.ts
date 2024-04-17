@@ -7,7 +7,7 @@ import { ensureElectron } from "@/next/electron";
 import { nameAndExtension } from "@/next/file";
 import log from "@/next/log";
 import type { CollectionMapping, FolderWatch } from "@/next/types/ipc";
-import { UPLOAD_RESULT, UPLOAD_STRATEGY } from "constants/upload";
+import { UPLOAD_RESULT } from "constants/upload";
 import debounce from "debounce";
 import uploadManager from "services/upload/uploadManager";
 import { Collection } from "types/collection";
@@ -202,7 +202,7 @@ class WatchFolderService {
                 throw Error("no Mapping found for event");
             }
             log.info(
-                `mapping for event rootFolder: ${mapping.rootFolderName} folderPath: ${mapping.folderPath} uploadStrategy: ${mapping.uploadStrategy} syncedFilesCount: ${mapping.syncedFiles.length} ignoredFilesCount ${mapping.ignoredFiles.length}`,
+                `mapping for event rootFolder: ${mapping.rootFolderName} folderPath: ${mapping.folderPath} colelctionMapping: ${mapping.collectionMapping} syncedFilesCount: ${mapping.syncedFiles.length} ignoredFilesCount ${mapping.ignoredFiles.length}`,
             );
             if (event.type === "upload") {
                 event.files = getValidFilesToUpload(event.files, mapping);
@@ -740,9 +740,9 @@ const isSyncedOrIgnoredPath = (path: string, watch: FolderWatch) =>
     watch.syncedFiles.find((f) => f.path === path);
 
 const collectionNameForPath = (filePath: string, watch: FolderWatch) =>
-    watch.uploadStrategy === UPLOAD_STRATEGY.COLLECTION_PER_FOLDER
-        ? parentDirectoryName(filePath)
-        : watch.rootFolderName;
+    watch.collectionMapping == "root"
+        ? watch.rootFolderName
+        : parentDirectoryName(filePath);
 
 const parentDirectoryName = (filePath: string) => {
     const components = filePath.split("/");

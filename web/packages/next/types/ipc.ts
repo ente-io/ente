@@ -385,12 +385,21 @@ export interface Electron {
  */
 export interface FolderWatch {
     rootFolderName: string;
-    uploadStrategy: number;
+    /**
+     * Specify if nested files should all be mapped to the same single root
+     * collection, or if there should be a collection per directory that has
+     * files. @see {@link CollectionMapping}.
+     */
+    collectionMapping: CollectionMapping;
     folderPath: string;
     syncedFiles: FolderWatchSyncedFile[];
     ignoredFiles: string[];
 }
 
+/**
+ * The ways in which we can map nested files to collections when uploading or
+ * watching directories from the user's local file system.
+ */
 export type CollectionMapping =
     /** Map everything to a single collection corresponding to the root directory */
     | "root"
