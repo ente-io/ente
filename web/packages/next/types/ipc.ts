@@ -377,8 +377,8 @@ export interface Electron {
  * A top level folder that was selected by the user for watching.
  *
  * The user can set up multiple such watches. Each of these can in turn be
- * syncing multiple on disk folders to one or more (dependening on the
- * {@link uploadStrategy}) Ente albums.
+ * syncing multiple on disk folders to one or more Ente collections (depending
+ * on the value of {@link collectionMapping}).
  *
  * This type is passed across the IPC boundary. It is persisted on the Node.js
  * side.
@@ -390,6 +390,12 @@ export interface FolderWatch {
     syncedFiles: FolderWatchSyncedFile[];
     ignoredFiles: string[];
 }
+
+export type CollectionMapping =
+    /** Map everything to a single collection corresponding to the root directory */
+    | "root"
+    /** Map each file to a collection named after its parent directory */
+    | "parent";
 
 /**
  * An on-disk file that was synced as part of a folder watch.

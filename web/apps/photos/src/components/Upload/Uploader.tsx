@@ -8,7 +8,7 @@ import {
     DEFAULT_IMPORT_SUGGESTION,
     PICKED_UPLOAD_TYPE,
     UPLOAD_STAGES,
-    UPLOAD_STRATEGY,
+    type CollectionMapping,
 } from "constants/upload";
 import { t } from "i18next";
 import isElectron from "is-electron";
@@ -391,7 +391,7 @@ export default function Uploader(props: Props) {
     };
 
     const uploadFilesToNewCollections = async (
-        strategy: UPLOAD_STRATEGY,
+        strategy: CollectionMapping,
         collectionName?: string,
     ) => {
         try {
@@ -405,7 +405,7 @@ export default function Uploader(props: Props) {
                 string,
                 (File | ElectronFile)[]
             >();
-            if (strategy === UPLOAD_STRATEGY.SINGLE_COLLECTION) {
+            if (strategy == "root") {
                 collectionNameToFilesMap.set(
                     collectionName,
                     toUploadFiles.current,
@@ -605,10 +605,7 @@ export default function Uploader(props: Props) {
     }
 
     const uploadToSingleNewCollection = (collectionName: string) => {
-        uploadFilesToNewCollections(
-            UPLOAD_STRATEGY.SINGLE_COLLECTION,
-            collectionName,
-        );
+        uploadFilesToNewCollections("root", collectionName);
     };
 
     const showCollectionCreateModal = (suggestedName: string) => {
@@ -647,7 +644,7 @@ export default function Uploader(props: Props) {
                         `upload pending files to collection - ${pendingDesktopUploadCollectionName.current}`,
                     );
                     uploadFilesToNewCollections(
-                        UPLOAD_STRATEGY.SINGLE_COLLECTION,
+                        "root",
                         pendingDesktopUploadCollectionName.current,
                     );
                     pendingDesktopUploadCollectionName.current = null;
@@ -655,17 +652,13 @@ export default function Uploader(props: Props) {
                     log.info(
                         `pending upload - strategy - "multiple collections" `,
                     );
-                    uploadFilesToNewCollections(
-                        UPLOAD_STRATEGY.COLLECTION_PER_FOLDER,
-                    );
+                    uploadFilesToNewCollections("leaf");
                 }
                 return;
             }
             if (isElectron() && pickedUploadType === PICKED_UPLOAD_TYPE.ZIPS) {
                 log.info("uploading zip files");
-                uploadFilesToNewCollections(
-                    UPLOAD_STRATEGY.COLLECTION_PER_FOLDER,
-                );
+                uploadFilesToNewCollections("leaf");
                 return;
             }
             if (isFirstUpload && !importSuggestion.rootFolderName) {
@@ -784,7 +777,7 @@ export default function Uploader(props: Props) {
             );
             return;
         }
-        uploadFilesToNewCollections(UPLOAD_STRATEGY.COLLECTION_PER_FOLDER);
+        uploadFilesToNewCollections("leaf");
     };
 
     return (

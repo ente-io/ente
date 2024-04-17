@@ -6,7 +6,7 @@
 import { ensureElectron } from "@/next/electron";
 import { nameAndExtension } from "@/next/file";
 import log from "@/next/log";
-import type { FolderWatch } from "@/next/types/ipc";
+import type { CollectionMapping, FolderWatch } from "@/next/types/ipc";
 import { UPLOAD_RESULT, UPLOAD_STRATEGY } from "constants/upload";
 import debounce from "debounce";
 import uploadManager from "services/upload/uploadManager";
@@ -140,21 +140,22 @@ class WatchFolderService {
         );
     }
 
-    async addWatchMapping(
-        rootFolderName: string,
-        folderPath: string,
-        uploadStrategy: UPLOAD_STRATEGY,
-    ) {
-        try {
-            await ensureElectron().addWatchMapping(
-                rootFolderName,
-                folderPath,
-                uploadStrategy,
-            );
-            this.syncWithDisk();
-        } catch (e) {
-            log.error("error while adding watch mapping", e);
-        }
+    /**
+     * Add a new folder watch for the given root {@link folderPath}
+     *
+     * @param mapping The {@link CollectionMapping} to use to decide which
+     * collection do files belonging to nested directories go to.
+     */
+    async addWatch(folderPath: string, mapping: CollectionMapping) {
+        const rootFolderName = folderPath.substring(
+            folderPath.lastIndexOf("/") + 1,
+        );
+        await ensureElectron().addWatchMapping(
+            rootFolderName,
+            folderPath,
+            mapping,
+        );
+        this.syncWithDisk();
     }
 
     /**

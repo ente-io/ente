@@ -1,5 +1,6 @@
 import { ensureElectron } from "@/next/electron";
-import { FolderWatch } from "@/next/types/ipc";
+import type { CollectionMapping, FolderWatch } from "@/next/types/ipc";
+import { ensure } from "@/utils/ensure";
 import {
     FlexWrapper,
     HorizontalFlex,
@@ -26,7 +27,7 @@ import {
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import UploadStrategyChoiceModal from "components/Upload/UploadStrategyChoiceModal";
-import { PICKED_UPLOAD_TYPE, UPLOAD_STRATEGY } from "constants/upload";
+import { PICKED_UPLOAD_TYPE } from "constants/upload";
 import { t } from "i18next";
 import { AppContext } from "pages/_app";
 import React, { useContext, useEffect, useState } from "react";
@@ -44,11 +45,17 @@ interface WatchFolderProps {
  * This is the screen that controls that "watch folder" feature in the app.
  */
 export const WatchFolder: React.FC<WatchFolderProps> = ({ open, onClose }) => {
+    // The folders we are watching
     const [watches, setWatches] = useState<FolderWatch[] | undefined>();
-    const [inputFolderPath, setInputFolderPath] = useState<
+    // Temporarily stash the folder path while we show a choice dialog to the
+    // user to select the collection mapping.
+    const [savedFolderPath, setSavedFolderPath] = useState<
         string | undefined
     >();
+    // True when we're showing the choice dialog to ask the user to set the
+    // collection mapping.
     const [choiceModalOpen, setChoiceModalOpen] = useState(false);
+
     const appContext = useContext(AppContext);
 
     useEffect(() => {
@@ -70,43 +77,34 @@ export const WatchFolder: React.FC<WatchFolderProps> = ({ open, onClose }) => {
             const folder: any = folders[i];
             const path = (folder.path as string).replace(/\\/g, "/");
             if (await watcher.isFolder(path)) {
-                await addFolderForWatching(path);
+                await selectCollectionMappingAndAddWatch(path);
             }
         }
     };
 
-    const addFolderForWatching = async (path: string) => {
-        setInputFolderPath(path);
+    const selectCollectionMappingAndAddWatch = async (path: string) => {
         const files = await ensureElectron().getDirFiles(path);
         const analysisResult = getImportSuggestion(
             PICKED_UPLOAD_TYPE.FOLDERS,
             files,
         );
         if (analysisResult.hasNestedFolders) {
+            setSavedFolderPath(path);
             setChoiceModalOpen(true);
         } else {
-            addWatchWithStrategy(UPLOAD_STRATEGY.SINGLE_COLLECTION, path);
+            addWatch(path, "root");
         }
     };
 
-    const addWatchWithStrategy = async (
-        uploadStrategy: UPLOAD_STRATEGY,
-        folderPath?: string,
-    ) => {
-        folderPath = folderPath || inputFolderPath;
-        await watcher.addWatchMapping(
-            folderPath.substring(folderPath.lastIndexOf("/") + 1),
-            folderPath,
-            uploadStrategy,
-        );
-        setInputFolderPath("");
+    const addWatch = async (folderPath: string, mapping: CollectionMapping) => {
+        await watcher.addWatch(folderPath, mapping);
         setWatches(await watcher.getWatchMappings());
     };
 
-    const addWatch = async () => {
+    const addNewWatch = async () => {
         const folderPath = await watcher.selectFolder();
         if (folderPath) {
-            await addFolderForWatching(folderPath);
+            await selectCollectionMappingAndAddWatch(folderPath);
         }
     };
 
@@ -117,14 +115,10 @@ export const WatchFolder: React.FC<WatchFolderProps> = ({ open, onClose }) => {
 
     const closeChoiceModal = () => setChoiceModalOpen(false);
 
-    const uploadToSingleCollection = () => {
+    const addWatchWithMapping = (mapping: CollectionMapping) => {
         closeChoiceModal();
-        addWatchWithStrategy(UPLOAD_STRATEGY.SINGLE_COLLECTION);
-    };
-
-    const uploadToMultipleCollection = () => {
-        closeChoiceModal();
-        addWatchWithStrategy(UPLOAD_STRATEGY.COLLECTION_PER_FOLDER);
+        setSavedFolderPath(undefined);
+        addWatch(ensure(savedFolderPath), mapping);
     };
 
     return (
@@ -143,7 +137,7 @@ export const WatchFolder: React.FC<WatchFolderProps> = ({ open, onClose }) => {
                 <DialogContent sx={{ flex: 1 }}>
                     <Stack spacing={1} p={1.5} height={"100%"}>
                         <WatchList {...{ watches, removeWatch }} />
-                        <Button fullWidth color="accent" onClick={addWatch}>
+                        <Button fullWidth color="accent" onClick={addNewWatch}>
                             <span>+</span>
                             <span
                                 style={{
@@ -158,8 +152,8 @@ export const WatchFolder: React.FC<WatchFolderProps> = ({ open, onClose }) => {
             <UploadStrategyChoiceModal
                 open={choiceModalOpen}
                 onClose={closeChoiceModal}
-                uploadToSingleCollection={uploadToSingleCollection}
-                uploadToMultipleCollection={uploadToMultipleCollection}
+                uploadToSingleCollection={() => addWatchWithMapping("root")}
+                uploadToMultipleCollection={() => addWatchWithMapping("parent")}
             />
         </>
     );
@@ -269,7 +263,7 @@ const WatchEntry: React.FC<WatchEntryProps> = ({ watch, removeWatch }) => {
     return (
         <SpaceBetweenFlex>
             <HorizontalFlex>
-                {watch.uploadStrategy === UPLOAD_STRATEGY.SINGLE_COLLECTION ? (
+                {watch.uploadStrategy === "root" ? (
                     <Tooltip title={t("UPLOADED_TO_SINGLE_COLLECTION")}>
                         <FolderOpenIcon />
                     </Tooltip>
