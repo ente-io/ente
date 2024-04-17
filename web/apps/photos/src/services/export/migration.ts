@@ -21,11 +21,11 @@ import {
 } from "types/export";
 import { EnteFile } from "types/file";
 import { getNonEmptyPersonalCollections } from "utils/collection";
-import { splitFilenameAndExtension } from "utils/ffmpeg";
 import {
     getIDBasedSortedFiles,
     getPersonalFiles,
     mergeMetadata,
+    splitFilenameAndExtension,
 } from "utils/file";
 import {
     safeDirectoryName,
