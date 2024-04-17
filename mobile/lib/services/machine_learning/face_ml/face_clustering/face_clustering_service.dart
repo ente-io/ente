@@ -19,6 +19,7 @@ class FaceInfo {
   final String faceID;
   final double? faceScore;
   final double? blurValue;
+  final bool? badFace;
   final List<double>? embedding;
   final Vector? vEmbedding;
   int? clusterId;
@@ -29,6 +30,7 @@ class FaceInfo {
     required this.faceID,
     this.faceScore,
     this.blurValue,
+    this.badFace,
     this.embedding,
     this.vEmbedding,
     this.clusterId,
@@ -312,6 +314,8 @@ class FaceClusteringService {
           faceID: face.faceID,
           faceScore: face.faceScore,
           blurValue: face.blurValue,
+          badFace: face.faceScore < kMinHighQualityFaceScore ||
+              face.blurValue < kLaplacianSoftThreshold,
           vEmbedding: Vector.fromList(
             EVector.fromBuffer(face.embeddingBytes).values,
             dtype: DType.float32,
@@ -388,12 +392,10 @@ class FaceClusteringService {
       double closestDistance = double.infinity;
       late double thresholdValue;
       if (useDynamicThreshold) {
-        final bool badFace =
-            (sortedFaceInfos[i].faceScore! < kMinHighQualityFaceScore ||
-                sortedFaceInfos[i].blurValue! < kLaplacianSoftThreshold);
-        thresholdValue =
-            badFace ? conservativeDistanceThreshold : distanceThreshold;
-        if (badFace) dynamicThresholdCount++;
+        thresholdValue = sortedFaceInfos[i].badFace!
+            ? conservativeDistanceThreshold
+            : distanceThreshold;
+        if (sortedFaceInfos[i].badFace!) dynamicThresholdCount++;
       } else {
         thresholdValue = distanceThreshold;
       }
@@ -414,6 +416,10 @@ class FaceClusteringService {
           );
         }
         if (distance < closestDistance) {
+          if (sortedFaceInfos[j].badFace! &&
+              distance > conservativeDistanceThreshold) {
+            continue;
+          }
           closestDistance = distance;
           closestIdx = j;
           // if (distance < distanceThreshold) {
