@@ -6,14 +6,13 @@
 import { ensureElectron } from "@/next/electron";
 import { nameAndExtension } from "@/next/file";
 import log from "@/next/log";
-import type { CollectionMapping, FolderWatch } from "@/next/types/ipc";
+import type { CollectionMapping, FolderWatch, FolderWatchSyncedFile } from "@/next/types/ipc";
 import { UPLOAD_RESULT } from "constants/upload";
 import debounce from "debounce";
 import uploadManager from "services/upload/uploadManager";
 import { Collection } from "types/collection";
 import { EncryptedEnteFile } from "types/file";
 import { ElectronFile, FileWithCollection } from "types/upload";
-import { WatchMappingSyncedFile } from "types/watchFolder";
 import { groupFilesBasedOnCollectionID } from "utils/file";
 import { isSystemFile } from "utils/upload";
 import { removeFromCollection } from "./collectionService";
@@ -477,7 +476,7 @@ class WatchFolderService {
     private async trashByIDs(toTrashFiles: FolderWatch["syncedFiles"]) {
         try {
             const files = await getLocalFiles();
-            const toTrashFilesMap = new Map<number, WatchMappingSyncedFile>();
+            const toTrashFilesMap = new Map<number, FolderWatchSyncedFile>();
             for (const file of toTrashFiles) {
                 toTrashFilesMap.set(file.uploadedFileID, file);
             }
