@@ -1,3 +1,4 @@
+import { decodeLivePhoto } from "@/media/live-photo";
 import { ensureElectron } from "@/next/electron";
 import log from "@/next/log";
 import { CustomError } from "@ente/shared/error";
@@ -38,7 +39,6 @@ import { writeStream } from "utils/native-stream";
 import { getAllLocalCollections } from "../collectionService";
 import downloadManager from "../download";
 import { getAllLocalFiles } from "../fileService";
-import { decodeLivePhoto } from "../livePhotoService";
 import { migrateExport } from "./migration";
 
 /** Name of the JSON file in which we keep the state of the export. */
@@ -1015,18 +1015,18 @@ class ExportService {
         fileStream: ReadableStream<any>,
         file: EnteFile,
     ) {
-        const electron = ensureElectron();
+        const fs = ensureElectron().fs;
         const fileBlob = await new Response(fileStream).blob();
-        const livePhoto = await decodeLivePhoto(file, fileBlob);
+        const livePhoto = await decodeLivePhoto(file.metadata.title, fileBlob);
         const imageExportName = await safeFileName(
             collectionExportPath,
-            livePhoto.imageNameTitle,
-            electron.fs.exists,
+            livePhoto.imageFileName,
+            fs.exists,
         );
         const videoExportName = await safeFileName(
             collectionExportPath,
-            livePhoto.videoNameTitle,
-            electron.fs.exists,
+            livePhoto.videoFileName,
+            fs.exists,
         );
         const livePhotoExportName = getLivePhotoExportName(
             imageExportName,
@@ -1038,7 +1038,9 @@ class ExportService {
             livePhotoExportName,
         );
         try {
-            const imageStream = generateStreamFromArrayBuffer(livePhoto.image);
+            const imageStream = generateStreamFromArrayBuffer(
+                livePhoto.imageData,
+            );
             await this.saveMetadataFile(
                 collectionExportPath,
                 imageExportName,
@@ -1049,7 +1051,9 @@ class ExportService {
                 imageStream,
             );
 
-            const videoStream = generateStreamFromArrayBuffer(livePhoto.video);
+            const videoStream = generateStreamFromArrayBuffer(
+                livePhoto.videoData,
+            );
             await this.saveMetadataFile(
                 collectionExportPath,
                 videoExportName,
@@ -1061,9 +1065,7 @@ class ExportService {
                     videoStream,
                 );
             } catch (e) {
-                await electron.fs.rm(
-                    `${collectionExportPath}/${imageExportName}`,
-                );
+                await fs.rm(`${collectionExportPath}/${imageExportName}`);
                 throw e;
             }
         } catch (e) {
