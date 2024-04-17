@@ -24,6 +24,11 @@ export function isDataStream(object: any): object is DataStream {
 export type Logger = (message: string) => void;
 
 export interface Metadata {
+    /**
+     * The file name.
+     *
+     * See: [Note: File name for local EnteFile objects]
+     */
     title: string;
     creationTime: number;
     modificationTime: number;

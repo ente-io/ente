@@ -1,3 +1,4 @@
+import { decodeLivePhoto } from "@/media/live-photo";
 import { convertBytesToHumanReadable } from "@/next/file";
 import log from "@/next/log";
 import type { Electron } from "@/next/types/ipc";
@@ -32,7 +33,6 @@ import {
     updateFilePublicMagicMetadata,
 } from "services/fileService";
 import heicConversionService from "services/heicConversionService";
-import { decodeLivePhoto } from "services/livePhotoService";
 import { getFileType } from "services/typeDetectionService";
 import { updateFileCreationDateInEXIF } from "services/upload/exifService";
 import {
@@ -97,7 +97,10 @@ export async function downloadFile(file: EnteFile) {
             await DownloadManager.getFile(file),
         ).blob();
         if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
-            const livePhoto = await decodeLivePhoto(file, fileBlob);
+            const livePhoto = await decodeLivePhoto(
+                file.metadata.title,
+                fileBlob,
+            );
             const image = new File([livePhoto.image], livePhoto.imageNameTitle);
             const imageType = await getFileType(image);
             const tempImageURL = URL.createObjectURL(
@@ -355,7 +358,7 @@ async function getRenderableLivePhotoURL(
     fileBlob: Blob,
     forceConvert: boolean,
 ): Promise<LivePhotoSourceURL> {
-    const livePhoto = await decodeLivePhoto(file, fileBlob);
+    const livePhoto = await decodeLivePhoto(file.metadata.title, fileBlob);
 
     const getRenderableLivePhotoImageURL = async () => {
         try {
@@ -813,7 +816,7 @@ async function downloadFileDesktop(
 
     if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
         const fileBlob = await new Response(updatedStream).blob();
-        const livePhoto = await decodeLivePhoto(file, fileBlob);
+        const livePhoto = await decodeLivePhoto(file.metadata.title, fileBlob);
         const imageExportName = await safeFileName(
             downloadDir,
             livePhoto.imageNameTitle,
