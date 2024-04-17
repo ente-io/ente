@@ -5,6 +5,7 @@
 
 import { ensureElectron } from "@/next/electron";
 import log from "@/next/log";
+import type { FolderWatch } from "@/next/types/ipc";
 import { UPLOAD_RESULT, UPLOAD_STRATEGY } from "constants/upload";
 import debounce from "debounce";
 import uploadManager from "services/upload/uploadManager";
@@ -70,18 +71,18 @@ class WatchFolderService {
 
     async getAndSyncDiffOfFiles() {
         try {
-            const watchesAndFiles =
-                await ensureElectron().folderWatchesAndFilesTherein();
-            if (!watchesAndFiles) {
-                return;
-            }
+            const electron = ensureElectron();
+            const mappings = await electron.getWatchMappings();
+            if (!mappings) return;
 
             this.eventQueue = [];
+            const { events, nonExistentFolderPaths } =
+                await syncWithDisk(mappings);
+            this.eventQueue = [...this.eventQueue, ...events];
+            this.debouncedRunNextEvent();
 
-            for (const [mapping, files] of watchesAndFiles) {
-                this.uploadDiffOfFiles(mapping, files);
-                this.trashDiffOfFiles(mapping, files);
-            }
+            for (const path of nonExistentFolderPaths)
+                electron.removeWatchMapping(path);
         } catch (e) {
             log.error("Ignoring error while syncing watched folders", e);
         }
@@ -89,54 +90,6 @@ class WatchFolderService {
 
     isMappingSyncInProgress(mapping: WatchMapping) {
         return this.currentEvent?.folderPath === mapping.folderPath;
-    }
-
-    private uploadDiffOfFiles(
-        mapping: WatchMapping,
-        filesOnDisk: ElectronFile[],
-    ) {
-        const filesToUpload = getValidFilesToUpload(filesOnDisk, mapping);
-
-        if (filesToUpload.length > 0) {
-            for (const file of filesToUpload) {
-                const event: EventQueueItem = {
-                    type: "upload",
-                    collectionName: this.getCollectionNameForMapping(
-                        mapping,
-                        file.path,
-                    ),
-                    folderPath: mapping.folderPath,
-                    files: [file],
-                };
-                this.pushEvent(event);
-            }
-        }
-    }
-
-    private trashDiffOfFiles(
-        mapping: WatchMapping,
-        filesOnDisk: ElectronFile[],
-    ) {
-        const filesToRemove = mapping.syncedFiles.filter((file) => {
-            return !filesOnDisk.find(
-                (electronFile) => electronFile.path === file.path,
-            );
-        });
-
-        if (filesToRemove.length > 0) {
-            for (const file of filesToRemove) {
-                const event: EventQueueItem = {
-                    type: "trash",
-                    collectionName: this.getCollectionNameForMapping(
-                        mapping,
-                        file.path,
-                    ),
-                    folderPath: mapping.folderPath,
-                    paths: [file.path],
-                };
-                this.pushEvent(event);
-            }
-        }
     }
 
     pushEvent(event: EventQueueItem) {
@@ -547,24 +500,12 @@ class WatchFolderService {
             }
 
             return {
-                collectionName: this.getCollectionNameForMapping(
-                    mapping,
-                    filePath,
-                ),
+                collectionName: getCollectionNameForMapping(mapping, filePath),
                 folderPath: mapping.folderPath,
             };
         } catch (e) {
             log.error("error while getting collection name", e);
         }
-    }
-
-    private getCollectionNameForMapping(
-        mapping: WatchMapping,
-        filePath: string,
-    ) {
-        return mapping.uploadStrategy === UPLOAD_STRATEGY.COLLECTION_PER_FOLDER
-            ? getParentFolderName(filePath)
-            : mapping.rootFolderName;
     }
 
     async selectFolder(): Promise<string> {
@@ -716,3 +657,65 @@ function isSyncedOrIgnoredFile(file: ElectronFile, mapping: WatchMapping) {
         mapping.syncedFiles.find((f) => f.path === file.path)
     );
 }
+
+/**
+ * Determine which events we need to process to synchronize the watched albums
+ * with the corresponding on disk folders.
+ *
+ * Also return a list of previously created folder watches for this there is no
+ * longer any no corresponding folder on disk.
+ */
+const syncWithDisk = async (
+    mappings: FolderWatch[],
+): Promise<{
+    events: EventQueueItem[];
+    nonExistentFolderPaths: string[];
+}> => {
+    const activeMappings = [];
+    const nonExistentFolderPaths: string[] = [];
+
+    for (const mapping of mappings) {
+        const active = await electron.isFolder(mapping.folderPath);
+        if (!active) nonExistentFolderPaths.push(mapping.folderPath);
+        else activeMappings.push(mapping);
+    }
+
+    const events: EventQueueItem[] = [];
+
+    for (const mapping of activeMappings) {
+        const files = await electron.getDirFiles(mapping.folderPath);
+
+        const filesToUpload = getValidFilesToUpload(files, mapping);
+
+        for (const file of filesToUpload)
+            events.push({
+                type: "upload",
+                collectionName: getCollectionNameForMapping(mapping, file.path),
+                folderPath: mapping.folderPath,
+                files: [file],
+            });
+
+        const filesToRemove = mapping.syncedFiles.filter((file) => {
+            return !files.find((f) => f.path === file.path);
+        });
+
+        for (const file of filesToRemove)
+            events.push({
+                type: "trash",
+                collectionName: getCollectionNameForMapping(mapping, file.path),
+                folderPath: mapping.folderPath,
+                paths: [file.path],
+            });
+    }
+
+    return { events, nonExistentFolderPaths };
+};
+
+const getCollectionNameForMapping = (
+    mapping: WatchMapping,
+    filePath: string,
+) => {
+    return mapping.uploadStrategy === UPLOAD_STRATEGY.COLLECTION_PER_FOLDER
+        ? getParentFolderName(filePath)
+        : mapping.rootFolderName;
+};
