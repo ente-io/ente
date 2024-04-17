@@ -1,11 +1,14 @@
 import { fileNameFromComponents, nameAndExtension } from "@/next/file";
 import JSZip from "jszip";
 
-class LivePhoto {
-    image: Uint8Array;
-    video: Uint8Array;
-    imageNameTitle: string;
-    videoNameTitle: string;
+/**
+ * An in-memory representation of a live photo.
+ */
+interface LivePhoto {
+    imageFileName: string;
+    imageData: Uint8Array;
+    videoFileName: string;
+    videoData: Uint8Array;
 }
 
 /**
@@ -23,23 +26,39 @@ class LivePhoto {
  * @param zipBlob A blob contained the zipped data (i.e. the binary serialized
  * live photo).
  */
-export const decodeLivePhoto = async (fileName: string, zipBlob: Blob) => {
+export const decodeLivePhoto = async (
+    fileName: string,
+    zipBlob: Blob,
+): Promise<LivePhoto> => {
+    let imageFileName, videoFileName: string | undefined;
+    let imageData, videoData: Uint8Array | undefined;
+
     const [name] = nameAndExtension(fileName);
     const zip = await JSZip.loadAsync(zipBlob, { createFolders: true });
 
-    const livePhoto = new LivePhoto();
     for (const zipFileName in zip.files) {
         if (zipFileName.startsWith("image")) {
             const [, imageExt] = nameAndExtension(zipFileName);
-            livePhoto.imageNameTitle = fileNameFromComponents([name, imageExt]);
-            livePhoto.image = await zip.files[zipFileName].async("uint8array");
+            imageFileName = fileNameFromComponents([name, imageExt]);
+            imageData = await zip.files[zipFileName]?.async("uint8array");
         } else if (zipFileName.startsWith("video")) {
             const [, videoExt] = nameAndExtension(zipFileName);
-            livePhoto.videoNameTitle = fileNameFromComponents([name, videoExt]);
-            livePhoto.video = await zip.files[zipFileName].async("uint8array");
+            videoFileName = fileNameFromComponents([name, videoExt]);
+            videoData = await zip.files[zipFileName]?.async("uint8array");
         }
     }
-    return livePhoto;
+
+    if (!imageFileName || !imageData)
+        throw new Error(
+            `Decoded live photo ${fileName} does not have an image`,
+        );
+
+    if (!videoFileName || !videoData)
+        throw new Error(
+            `Decoded live photo ${fileName} does not have an image`,
+        );
+
+    return { imageFileName, imageData, videoFileName, videoData };
 };
 
 /**
@@ -52,12 +71,17 @@ export const decodeLivePhoto = async (fileName: string, zipBlob: Blob) => {
  *
  * @param livePhoto The in-mem photo to serialized.
  */
-export const encodeLivePhoto = async (livePhoto: LivePhoto) => {
-    const [, imageExt] = nameAndExtension(livePhoto.imageNameTitle);
-    const [, videoExt] = nameAndExtension(livePhoto.videoNameTitle);
+export const encodeLivePhoto = async ({
+    imageFileName,
+    imageData,
+    videoFileName,
+    videoData,
+}: LivePhoto) => {
+    const [, imageExt] = nameAndExtension(imageFileName);
+    const [, videoExt] = nameAndExtension(videoFileName);
 
     const zip = new JSZip();
-    zip.file(fileNameFromComponents(["image", imageExt]), livePhoto.image);
-    zip.file(fileNameFromComponents(["video", videoExt]), livePhoto.video);
+    zip.file(fileNameFromComponents(["image", imageExt]), imageData);
+    zip.file(fileNameFromComponents(["video", videoExt]), videoData);
     return await zip.generateAsync({ type: "uint8array" });
 };

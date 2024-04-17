@@ -137,11 +137,11 @@ export const getPreviewableImage = async (
             await CastDownloadManager.downloadFile(castToken, file),
         ).blob();
         if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
-            const livePhoto = await decodeLivePhoto(
+            const { imageData } = await decodeLivePhoto(
                 file.metadata.title,
                 fileBlob,
             );
-            fileBlob = new Blob([livePhoto.image]);
+            fileBlob = new Blob([imageData]);
         }
         const fileType = await getFileType(
             new File([fileBlob], file.metadata.title),

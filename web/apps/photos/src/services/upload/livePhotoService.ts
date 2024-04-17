@@ -101,16 +101,16 @@ export async function readLivePhoto(
         },
     );
 
-    const image = await getUint8ArrayView(livePhotoAssets.image);
+    const imageData = await getUint8ArrayView(livePhotoAssets.image);
 
-    const video = await getUint8ArrayView(livePhotoAssets.video);
+    const videoData = await getUint8ArrayView(livePhotoAssets.video);
 
     return {
         filedata: await encodeLivePhoto({
-            image,
-            video,
-            imageNameTitle: livePhotoAssets.image.name,
-            videoNameTitle: livePhotoAssets.video.name,
+            imageFileName: livePhotoAssets.image.name,
+            imageData,
+            videoFileName: livePhotoAssets.video.name,
+            videoData,
         }),
         thumbnail,
         hasStaticThumbnail,

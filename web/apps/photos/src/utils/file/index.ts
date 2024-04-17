@@ -97,22 +97,20 @@ export async function downloadFile(file: EnteFile) {
             await DownloadManager.getFile(file),
         ).blob();
         if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
-            const livePhoto = await decodeLivePhoto(
-                file.metadata.title,
-                fileBlob,
-            );
-            const image = new File([livePhoto.image], livePhoto.imageNameTitle);
+            const { imageFileName, imageData, videoFileName, videoData } =
+                await decodeLivePhoto(file.metadata.title, fileBlob);
+            const image = new File([imageData], imageFileName);
             const imageType = await getFileType(image);
             const tempImageURL = URL.createObjectURL(
-                new Blob([livePhoto.image], { type: imageType.mimeType }),
+                new Blob([imageData], { type: imageType.mimeType }),
             );
-            const video = new File([livePhoto.video], livePhoto.videoNameTitle);
+            const video = new File([videoData], videoFileName);
             const videoType = await getFileType(video);
             const tempVideoURL = URL.createObjectURL(
-                new Blob([livePhoto.video], { type: videoType.mimeType }),
+                new Blob([videoData], { type: videoType.mimeType }),
             );
-            downloadUsingAnchor(tempImageURL, livePhoto.imageNameTitle);
-            downloadUsingAnchor(tempVideoURL, livePhoto.videoNameTitle);
+            downloadUsingAnchor(tempImageURL, imageFileName);
+            downloadUsingAnchor(tempVideoURL, videoFileName);
         } else {
             const fileType = await getFileType(
                 new File([fileBlob], file.metadata.title),
@@ -350,9 +348,9 @@ async function getRenderableLivePhotoURL(
 
     const getRenderableLivePhotoImageURL = async () => {
         try {
-            const imageBlob = new Blob([livePhoto.image]);
+            const imageBlob = new Blob([livePhoto.imageData]);
             const convertedImageBlob = await getRenderableImage(
-                livePhoto.imageNameTitle,
+                livePhoto.imageFileName,
                 imageBlob,
             );
 
@@ -365,10 +363,9 @@ async function getRenderableLivePhotoURL(
 
     const getRenderableLivePhotoVideoURL = async () => {
         try {
-            const videoBlob = new Blob([livePhoto.video]);
-
+            const videoBlob = new Blob([livePhoto.videoData]);
             const convertedVideoBlob = await getPlayableVideo(
-                livePhoto.videoNameTitle,
+                livePhoto.videoFileName,
                 videoBlob,
                 forceConvert,
                 true,

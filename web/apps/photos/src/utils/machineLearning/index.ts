@@ -134,11 +134,11 @@ async function getOriginalConvertedFile(file: EnteFile, queue?: PQueue) {
     if (file.metadata.fileType === FILE_TYPE.IMAGE) {
         return await getRenderableImage(file.metadata.title, fileBlob);
     } else {
-        const livePhoto = await decodeLivePhoto(file.metadata.title, fileBlob);
-        return await getRenderableImage(
-            livePhoto.imageNameTitle,
-            new Blob([livePhoto.image]),
+        const { imageFileName, imageData } = await decodeLivePhoto(
+            file.metadata.title,
+            fileBlob,
         );
+        return await getRenderableImage(imageFileName, new Blob([imageData]));
     }
 }
 

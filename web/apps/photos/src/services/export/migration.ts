@@ -318,18 +318,18 @@ async function getFileExportNamesFromExportedFiles(
         if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
             const fileStream = await downloadManager.getFile(file);
             const fileBlob = await new Response(fileStream).blob();
-            const livePhoto = await decodeLivePhoto(
+            const { imageFileName, videoFileName } = await decodeLivePhoto(
                 file.metadata.title,
                 fileBlob,
             );
             const imageExportName = getUniqueFileExportNameForMigration(
                 collectionPath,
-                livePhoto.imageNameTitle,
+                imageFileName,
                 usedFilePaths,
             );
             const videoExportName = getUniqueFileExportNameForMigration(
                 collectionPath,
-                livePhoto.videoNameTitle,
+                videoFileName,
                 usedFilePaths,
             );
             fileExportName = getLivePhotoExportName(
