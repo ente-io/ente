@@ -1,4 +1,5 @@
 import { ensureElectron } from "@/next/electron";
+import { FolderWatch } from "@/next/types/ipc";
 import {
     FlexWrapper,
     HorizontalFlex,
@@ -30,7 +31,6 @@ import { t } from "i18next";
 import { AppContext } from "pages/_app";
 import React, { useContext, useEffect, useState } from "react";
 import watcher from "services/watch";
-import { WatchMapping as FolderWatch } from "types/watchFolder";
 import { getImportSuggestion } from "utils/upload";
 
 interface WatchFolderProps {
@@ -85,11 +85,11 @@ export const WatchFolder: React.FC<WatchFolderProps> = ({ open, onClose }) => {
         if (analysisResult.hasNestedFolders) {
             setChoiceModalOpen(true);
         } else {
-            handleAddWatchMapping(UPLOAD_STRATEGY.SINGLE_COLLECTION, path);
+            addWatchWithStrategy(UPLOAD_STRATEGY.SINGLE_COLLECTION, path);
         }
     };
 
-    const handleAddWatchMapping = async (
+    const addWatchWithStrategy = async (
         uploadStrategy: UPLOAD_STRATEGY,
         folderPath?: string,
     ) => {
@@ -119,12 +119,12 @@ export const WatchFolder: React.FC<WatchFolderProps> = ({ open, onClose }) => {
 
     const uploadToSingleCollection = () => {
         closeChoiceModal();
-        handleAddWatchMapping(UPLOAD_STRATEGY.SINGLE_COLLECTION);
+        addWatchWithStrategy(UPLOAD_STRATEGY.SINGLE_COLLECTION);
     };
 
     const uploadToMultipleCollection = () => {
         closeChoiceModal();
-        handleAddWatchMapping(UPLOAD_STRATEGY.COLLECTION_PER_FOLDER);
+        addWatchWithStrategy(UPLOAD_STRATEGY.COLLECTION_PER_FOLDER);
     };
 
     return (
@@ -175,11 +175,11 @@ const WatchList: React.FC<WatchList> = ({ watches, removeWatch }) => {
         <NoWatches />
     ) : (
         <WatchesContainer>
-            {watches.map((mapping) => {
+            {watches.map((watch) => {
                 return (
                     <WatchEntry
-                        key={mapping.rootFolderName}
-                        watch={mapping}
+                        key={watch.rootFolderName}
+                        watch={watch}
                         removeWatch={removeWatch}
                     />
                 );
@@ -198,7 +198,7 @@ const WatchesContainer = styled(Box)(() => ({
 
 const NoWatches: React.FC = () => {
     return (
-        <NoMappingsContainer>
+        <NoWatchesContainer>
             <Stack spacing={1}>
                 <Typography variant="large" fontWeight={"bold"}>
                     {t("NO_FOLDERS_ADDED")}
@@ -219,11 +219,11 @@ const NoWatches: React.FC = () => {
                     </FlexWrapper>
                 </Typography>
             </Stack>
-        </NoMappingsContainer>
+        </NoWatchesContainer>
     );
 };
 
-const NoMappingsContainer = styled(VerticallyCentered)({
+const NoWatchesContainer = styled(VerticallyCentered)({
     textAlign: "left",
     alignItems: "flex-start",
     marginBottom: "32px",
