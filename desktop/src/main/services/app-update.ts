@@ -1,7 +1,7 @@
 import { compareVersions } from "compare-versions";
-import { app, BrowserWindow } from "electron";
 import { default as electronLog } from "electron-log";
 import { autoUpdater } from "electron-updater";
+import { app, BrowserWindow } from "electron/main";
 import { allowWindowClose } from "../../main";
 import { AppUpdate } from "../../types/ipc";
 import log from "../log";

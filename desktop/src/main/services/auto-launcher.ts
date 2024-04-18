@@ -1,5 +1,5 @@
 import AutoLaunch from "auto-launch";
-import { app } from "electron";
+import { app } from "electron/main";
 
 class AutoLauncher {
     /**

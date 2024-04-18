@@ -1,5 +1,5 @@
 import chokidar from "chokidar";
-import { BrowserWindow } from "electron";
+import { BrowserWindow } from "electron/main";
 import path from "path";
 import log from "../log";
 import { getElectronFile } from "./fs";
