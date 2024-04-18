@@ -478,11 +478,10 @@ class FilesDB {
   }
 
   Future<EnteFile?> getFile(int generatedID) async {
-    final db = await instance.database;
-    final results = await db.query(
-      filesTable,
-      where: '$columnGeneratedID = ?',
-      whereArgs: [generatedID],
+    final db = await instance.ffiDB;
+    final results = db.select(
+      'SELECT * FROM $filesTable WHERE $columnGeneratedID = ?',
+      [generatedID],
     );
     if (results.isEmpty) {
       return null;
@@ -491,11 +490,10 @@ class FilesDB {
   }
 
   Future<EnteFile?> getUploadedFile(int uploadedID, int collectionID) async {
-    final db = await instance.database;
-    final results = await db.query(
-      filesTable,
-      where: '$columnUploadedFileID = ? AND $columnCollectionID = ?',
-      whereArgs: [
+    final db = await instance.ffiDB;
+    final results = db.select(
+      'SELECT * FROM $filesTable WHERE $columnUploadedFileID = ? AND $columnCollectionID = ?',
+      [
         uploadedID,
         collectionID,
       ],
@@ -506,29 +504,12 @@ class FilesDB {
     return convertToFiles(results)[0];
   }
 
-  Future<EnteFile?> getAnyUploadedFile(int uploadedID) async {
-    final db = await instance.database;
-    final results = await db.query(
-      filesTable,
-      where: '$columnUploadedFileID = ?',
-      whereArgs: [
-        uploadedID,
-      ],
-    );
-    if (results.isEmpty) {
-      return null;
-    }
-    return convertToFiles(results)[0];
-  }
-
   Future<Set<int>> getUploadedFileIDs(int collectionID) async {
-    final db = await instance.database;
-    final results = await db.query(
-      filesTable,
-      columns: [columnUploadedFileID],
-      where:
-          '$columnCollectionID = ? AND ($columnUploadedFileID IS NOT NULL AND $columnUploadedFileID IS NOT -1)',
-      whereArgs: [
+    final db = await instance.ffiDB;
+    final results = db.select(
+      'SELECT $columnUploadedFileID FROM $filesTable'
+      ' WHERE $columnCollectionID = ? AND ($columnUploadedFileID IS NOT NULL AND $columnUploadedFileID IS NOT -1)',
+      [
         collectionID,
       ],
     );
@@ -540,12 +521,10 @@ class FilesDB {
   }
 
   Future<BackedUpFileIDs> getBackedUpIDs() async {
-    final db = await instance.database;
-    final results = await db.query(
-      filesTable,
-      columns: [columnLocalID, columnUploadedFileID, columnFileSize],
-      where:
-          '$columnLocalID IS NOT NULL AND ($columnUploadedFileID IS NOT NULL AND $columnUploadedFileID IS NOT -1)',
+    final db = await instance.sqliteAsyncDB;
+    final results = await db.getAll(
+      'SELECT $columnLocalID, $columnUploadedFileID, $columnFileSize FROM $filesTable'
+      ' WHERE $columnLocalID IS NOT NULL AND ($columnUploadedFileID IS NOT NULL AND $columnUploadedFileID IS NOT -1)',
     );
     final Set<String> localIDs = <String>{};
     final Set<int> uploadedIDs = <int>{};
