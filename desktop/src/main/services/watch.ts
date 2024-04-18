@@ -100,6 +100,8 @@ export const watchAdd = async (
     setFolderWatches(watches);
 
     watcher.add(folderPath);
+
+    return watches;
 };
 
 export const watchRemove = async (watcher: FSWatcher, folderPath: string) => {
@@ -114,39 +116,33 @@ export const watchRemove = async (watcher: FSWatcher, folderPath: string) => {
     return filtered;
 };
 
-export function updateWatchMappingSyncedFiles(
+export const watchUpdateSyncedFiles = (
+    syncedFiles: FolderWatch["syncedFiles"],
     folderPath: string,
-    files: FolderWatch["syncedFiles"],
-): void {
-    const watchMappings = getWatchMappings();
-    const watchMapping = watchMappings.find(
-        (mapping) => mapping.folderPath === folderPath,
+) => {
+    setFolderWatches(
+        folderWatches().map((watch) => {
+            if (watch.folderPath == folderPath) {
+                watch.syncedFiles = syncedFiles;
+            }
+            return watch;
+        }),
     );
+};
 
-    if (!watchMapping) {
-        throw Error(`Watch mapping not found`);
-    }
-
-    watchMapping.syncedFiles = files;
-    setWatchMappings(watchMappings);
-}
-
-export function updateWatchMappingIgnoredFiles(
+export const watchUpdateIgnoredFiles = (
+    ignoredFiles: FolderWatch["ignoredFiles"],
     folderPath: string,
-    files: FolderWatch["ignoredFiles"],
-): void {
-    const watchMappings = getWatchMappings();
-    const watchMapping = watchMappings.find(
-        (mapping) => mapping.folderPath === folderPath,
+) => {
+    setFolderWatches(
+        folderWatches().map((watch) => {
+            if (watch.folderPath == folderPath) {
+                watch.ignoredFiles = ignoredFiles;
+            }
+            return watch;
+        }),
     );
-
-    if (!watchMapping) {
-        throw Error(`Watch mapping not found`);
-    }
-
-    watchMapping.ignoredFiles = files;
-    setWatchMappings(watchMappings);
-}
+};
 
 export const watchFindFiles = async (dirPath: string) => {
     const items = await fs.readdir(dirPath, { withFileTypes: true });

@@ -59,12 +59,12 @@ import {
     setPendingUploadFiles,
 } from "./services/upload";
 import {
-    updateWatchMappingIgnoredFiles,
-    updateWatchMappingSyncedFiles,
     watchAdd,
     watchFindFiles,
     watchGet,
     watchRemove,
+    watchUpdateIgnoredFiles,
+    watchUpdateSyncedFiles,
 } from "./services/watch";
 import { openDirectory, openLogDirectory } from "./util";
 
@@ -236,19 +236,19 @@ export const attachFSWatchIPCHandlers = (watcher: FSWatcher) => {
         watchRemove(watcher, folderPath),
     );
 
+    ipcMain.handle(
+        "watchUpdateSyncedFiles",
+        (_, syncedFiles: FolderWatch["syncedFiles"], folderPath: string) =>
+            watchUpdateSyncedFiles(syncedFiles, folderPath),
+    );
+
+    ipcMain.handle(
+        "watchUpdateIgnoredFiles",
+        (_, ignoredFiles: FolderWatch["ignoredFiles"], folderPath: string) =>
+            watchUpdateIgnoredFiles(ignoredFiles, folderPath),
+    );
+
     ipcMain.handle("watchFindFiles", (_, folderPath: string) =>
         watchFindFiles(folderPath),
-    );
-
-    ipcMain.handle(
-        "updateWatchMappingSyncedFiles",
-        (_, folderPath: string, files: FolderWatch["syncedFiles"]) =>
-            updateWatchMappingSyncedFiles(folderPath, files),
-    );
-
-    ipcMain.handle(
-        "updateWatchMappingIgnoredFiles",
-        (_, folderPath: string, files: FolderWatch["ignoredFiles"]) =>
-            updateWatchMappingIgnoredFiles(folderPath, files),
     );
 };

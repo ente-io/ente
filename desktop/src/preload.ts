@@ -192,16 +192,28 @@ const showUploadZipDialog = (): Promise<{
 
 // - Watch
 
+const watchGet = (): Promise<FolderWatch[]> => ipcRenderer.invoke("watchGet");
+
 const watchAdd = (
     folderPath: string,
     collectionMapping: CollectionMapping,
-): Promise<void> =>
+): Promise<FolderWatch[]> =>
     ipcRenderer.invoke("watchAdd", folderPath, collectionMapping);
 
-const watchRemove = (folderPath: string): Promise<void> =>
+const watchRemove = (folderPath: string): Promise<FolderWatch[]> =>
     ipcRenderer.invoke("watchRemove", folderPath);
 
-const watchGet = (): Promise<FolderWatch[]> => ipcRenderer.invoke("watchGet");
+const watchUpdateSyncedFiles = (
+    syncedFiles: FolderWatch["syncedFiles"],
+    folderPath: string,
+): Promise<void> =>
+    ipcRenderer.invoke("watchUpdateSyncedFiles", syncedFiles, folderPath);
+
+const watchUpdateIgnoredFiles = (
+    ignoredFiles: FolderWatch["ignoredFiles"],
+    folderPath: string,
+): Promise<void> =>
+    ipcRenderer.invoke("watchUpdateIgnoredFiles", ignoredFiles, folderPath);
 
 const watchOnAddFile = (f: (path: string, watch: FolderWatch) => void) => {
     ipcRenderer.removeAllListeners("watchAddFile");
@@ -226,18 +238,6 @@ const watchOnRemoveDir = (f: (path: string, watch: FolderWatch) => void) => {
 
 const watchFindFiles = (folderPath: string): Promise<string[]> =>
     ipcRenderer.invoke("watchFindFiles", folderPath);
-
-const updateWatchMappingSyncedFiles = (
-    folderPath: string,
-    files: FolderWatch["syncedFiles"],
-): Promise<void> =>
-    ipcRenderer.invoke("updateWatchMappingSyncedFiles", folderPath, files);
-
-const updateWatchMappingIgnoredFiles = (
-    folderPath: string,
-    files: FolderWatch["ignoredFiles"],
-): Promise<void> =>
-    ipcRenderer.invoke("updateWatchMappingIgnoredFiles", folderPath, files);
 
 // - Upload
 
@@ -361,9 +361,9 @@ contextBridge.exposeInMainWorld("electron", {
         onRemoveFile: watchOnRemoveFile,
         onRemoveDir: watchOnRemoveDir,
         findFiles: watchFindFiles,
+        updateSyncedFiles: watchUpdateSyncedFiles,
+        updateIgnoredFiles: watchUpdateIgnoredFiles,
     },
-    updateWatchMappingSyncedFiles,
-    updateWatchMappingIgnoredFiles,
 
     // - Upload
 

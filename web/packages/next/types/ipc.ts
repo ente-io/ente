@@ -308,19 +308,41 @@ export interface Electron {
          *
          * @param collectionMapping Determines how nested directories (if any)
          * get mapped to Ente collections.
+         *
+         * @returns The updated list of watches.
          */
         add: (
             folderPath: string,
             collectionMapping: CollectionMapping,
-        ) => Promise<void>;
+        ) => Promise<FolderWatch[]>;
 
         /**
          * Remove the pre-existing watch for the given {@link folderPath}.
          *
          * Persist this removal, and also stop listening for file system events
          * that happen within the {@link folderPath}.
+         *
+         * @returns The updated list of watches.
          */
-        remove: (folderPath: string) => Promise<void>;
+        remove: (folderPath: string) => Promise<FolderWatch[]>;
+
+        /**
+         * Update the list of synced files for the folder watch associated
+         * with the given {@link folderPath}.
+         */
+        updateSyncedFiles: (
+            syncedFiles: FolderWatch["syncedFiles"],
+            folderPath: string,
+        ) => Promise<void>;
+
+        /**
+         * Update the list of ignored file paths for the folder watch
+         * associated with the given {@link folderPath}.
+         */
+        updateIgnoredFiles: (
+            ignoredFiles: FolderWatch["ignoredFiles"],
+            folderPath: string,
+        ) => Promise<void>;
 
         /**
          * Register the function to invoke when a file is added in one of the
@@ -367,16 +389,6 @@ export interface Electron {
          */
         findFiles: (folderPath: string) => Promise<string[]>;
     };
-
-    updateWatchMappingSyncedFiles: (
-        folderPath: string,
-        files: FolderWatch["syncedFiles"],
-    ) => Promise<void>;
-
-    updateWatchMappingIgnoredFiles: (
-        folderPath: string,
-        files: FolderWatch["ignoredFiles"],
-    ) => Promise<void>;
 
     // - Upload
 
