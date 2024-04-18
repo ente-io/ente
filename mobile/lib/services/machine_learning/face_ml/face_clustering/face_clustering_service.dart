@@ -111,7 +111,7 @@ class FaceClusteringService {
       try {
         switch (function) {
           case ClusterOperation.linearIncrementalClustering:
-            final result = FaceClusteringService._runLinearClustering(args);
+            final result = FaceClusteringService.runLinearClustering(args);
             sendPort.send(result);
             break;
           case ClusterOperation.dbscanClustering:
@@ -185,7 +185,7 @@ class FaceClusteringService {
     _inactivityTimer?.cancel();
   }
 
-  /// Runs the clustering algorithm [_runLinearClustering] on the given [input], in an isolate.
+  /// Runs the clustering algorithm [runLinearClustering] on the given [input], in an isolate.
   ///
   /// Returns the clustering result, which is a list of clusters, where each cluster is a list of indices of the dataset.
   ///
@@ -245,6 +245,65 @@ class FaceClusteringService {
     }
   }
 
+  /// Runs the clustering algorithm [runLinearClustering] on the given [input], in computer, without any dynamic thresholding
+  Future<Map<String, int>?> predictLinearComputer(
+    Map<String, Uint8List> input, {
+    Map<int, int>? fileIDToCreationTime,
+    double distanceThreshold = kRecommendedDistanceThreshold,
+  }) async {
+    if (input.isEmpty) {
+      _logger.warning(
+        "Linear Clustering dataset of embeddings is empty, returning empty list.",
+      );
+      return {};
+    }
+
+    // Clustering inside the isolate
+    _logger.info(
+      "Start Linear clustering on ${input.length} embeddings inside computer isolate",
+    );
+
+    try {
+      final clusteringInput = input
+          .map((key, value) {
+            return MapEntry(
+              key,
+              FaceInfoForClustering(
+                faceID: key,
+                embeddingBytes: value,
+                faceScore: kMinHighQualityFaceScore + 0.01,
+                blurValue: kLapacianDefault,
+              ),
+            );
+          })
+          .values
+          .toSet();
+      final startTime = DateTime.now();
+      final faceIdToCluster = await _computer.compute(
+        runLinearClustering,
+        param: {
+          "input": clusteringInput,
+          "fileIDToCreationTime": fileIDToCreationTime,
+          "distanceThreshold": distanceThreshold,
+          "conservativeDistanceThreshold": distanceThreshold,
+          "useDynamicThreshold": false,
+        },
+        taskName: "createImageEmbedding",
+      ) as Map<String, int>;
+      final endTime = DateTime.now();
+      _logger.info(
+        "Linear Clustering took: ${endTime.difference(startTime).inMilliseconds}ms",
+      );
+      return faceIdToCluster;
+    } catch (e, s) {
+      _logger.severe(e, s);
+      rethrow;
+    }
+  }
+
+  /// Runs the clustering algorithm [runCompleteClustering] on the given [input], in computer.
+  ///
+  /// WARNING: Only use on small datasets, as it is not optimized for large datasets.
   Future<Map<String, int>> predictCompleteComputer(
     Map<String, Uint8List> input, {
     Map<int, int>? fileIDToCreationTime,
@@ -280,6 +339,41 @@ class FaceClusteringService {
         "Complete Clustering took: ${endTime.difference(startTime).inMilliseconds}ms",
       );
       return faceIdToCluster;
+    } catch (e, s) {
+      _logger.severe(e, s);
+      rethrow;
+    }
+  }
+
+  Future<Map<String, int>?> predictWithinClusterComputer(
+    Map<String, Uint8List> input, {
+    Map<int, int>? fileIDToCreationTime,
+    double distanceThreshold = kRecommendedDistanceThreshold,
+  }) async {
+    _logger.info(
+      '`predictWithinClusterComputer` called with ${input.length} faces and distance threshold $distanceThreshold',
+    );
+    try {
+      if (input.length < 100) {
+        final mergeThreshold = distanceThreshold + 0.06;
+        _logger.info(
+          'Running complete clustering on ${input.length} faces with distance threshold $mergeThreshold',
+        );
+        return predictCompleteComputer(
+          input,
+          fileIDToCreationTime: fileIDToCreationTime,
+          mergeThreshold: mergeThreshold,
+        );
+      } else {
+        _logger.info(
+          'Running linear clustering on ${input.length} faces with distance threshold $distanceThreshold',
+        );
+        return predictLinearComputer(
+          input,
+          fileIDToCreationTime: fileIDToCreationTime,
+          distanceThreshold: distanceThreshold,
+        );
+      }
     } catch (e, s) {
       _logger.severe(e, s);
       rethrow;
@@ -335,7 +429,7 @@ class FaceClusteringService {
     return clusterFaceIDs;
   }
 
-  static Map<String, int> _runLinearClustering(Map args) {
+  static Map<String, int> runLinearClustering(Map args) {
     // final input = args['input'] as Map<String, (int?, Uint8List)>;
     final input = args['input'] as Set<FaceInfoForClustering>;
     final fileIDToCreationTime = args['fileIDToCreationTime'] as Map<int, int>?;

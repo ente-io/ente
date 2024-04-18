@@ -234,33 +234,11 @@ class ClusterFeedbackService {
         maxClusterID++;
       }
     } else {
-      // final clusteringInput = embeddings
-      //     .map((key, value) {
-      //       return MapEntry(
-      //         key,
-      //         FaceInfoForClustering(
-      //           faceID: key,
-      //           embeddingBytes: value,
-      //           faceScore: kMinHighQualityFaceScore + 0.01,
-      //           blurValue: kLapacianDefault,
-      //         ),
-      //       );
-      //     })
-      //     .values
-      //     .toSet();
-      // final faceIdToCluster =
-      //     await FaceClusteringService.instance.predictLinear(
-      //   clusteringInput,
-      //   fileIDToCreationTime: fileIDToCreationTime,
-      //   distanceThreshold: 0.23,
-      //   useDynamicThreshold: false,
-      // );
       final faceIdToCluster =
-          await FaceClusteringService.instance.predictCompleteComputer(
+          await FaceClusteringService.instance.predictWithinClusterComputer(
         embeddings,
         fileIDToCreationTime: fileIDToCreationTime,
-        distanceThreshold: 0.30,
-        mergeThreshold: 0.30,
+        distanceThreshold: 0.22,
       );
 
       if (faceIdToCluster == null || faceIdToCluster.isEmpty) {
