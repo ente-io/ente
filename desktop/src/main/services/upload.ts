@@ -1,11 +1,18 @@
 import StreamZip from "node-stream-zip";
 import path from "path";
-import { ElectronFile, FILE_PATH_TYPE } from "../../types/ipc";
+import {
+    ElectronFile,
+    FILE_PATH_TYPE,
+    type PendingUploads,
+} from "../../types/ipc";
 import { FILE_PATH_KEYS } from "../../types/main";
-import { uploadStatusStore } from "../stores/upload-status";
+import {
+    uploadStatusStore,
+    type UploadStatusStore,
+} from "../stores/upload-status";
 import { getElectronFile, getValidPaths, getZipFileStream } from "./fs";
 
-export const getPendingUploads = async () => {
+export const pendingUploads = async () => {
     const filePaths = getSavedFilePaths(FILE_PATH_TYPE.FILES);
     const zipPaths = getSavedFilePaths(FILE_PATH_TYPE.ZIPS);
     const collectionName = uploadStatusStore.get("collectionName");
@@ -70,20 +77,26 @@ export async function getZipEntryAsElectronFile(
     };
 }
 
-export const setToUploadFiles = (type: FILE_PATH_TYPE, filePaths: string[]) => {
-    const key = FILE_PATH_KEYS[type];
-    if (filePaths) {
-        uploadStatusStore.set(key, filePaths);
-    } else {
-        uploadStatusStore.delete(key);
-    }
+export const setPendingUploadCollection = (collectionName: string) => {
+    if (collectionName) uploadStatusStore.set("collectionName", collectionName);
+    else uploadStatusStore.delete("collectionName");
 };
 
-export const setToUploadCollection = (collectionName: string) => {
-    if (collectionName) {
-        uploadStatusStore.set("collectionName", collectionName);
-    } else {
-        uploadStatusStore.delete("collectionName");
+export const setPendingUploadFiles = (
+    type: PendingUploads["type"],
+    filePaths: string[],
+) => {
+    const key = storeKey(type);
+    if (filePaths) uploadStatusStore.set(key, filePaths);
+    else uploadStatusStore.delete(key);
+};
+
+const storeKey = (type: PendingUploads["type"]): keyof UploadStatusStore => {
+    switch (type) {
+        case "zips":
+            return "zipPaths";
+        case "files":
+            return "filePaths";
     }
 };
 

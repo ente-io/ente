@@ -19,6 +19,14 @@ export interface FolderWatchSyncedFile {
     collectionID: number;
 }
 
+export interface PendingUploads {
+    /** The collection to which we're uploading */
+    collectionName: string;
+    /* The upload can be either of a Google Takeout zip, or regular files */
+    type: "files" | "zips";
+    files: ElectronFile[];
+}
+
 /**
  * Errors that have special semantics on the web side.
  *

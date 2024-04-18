@@ -10,7 +10,7 @@
 
 import type { FSWatcher } from "chokidar";
 import { ipcMain } from "electron/main";
-import type { ElectronFile, FILE_PATH_TYPE, FolderWatch } from "../types/ipc";
+import type { ElectronFile, FolderWatch, PendingUploads } from "../types/ipc";
 import {
     selectDirectory,
     showUploadDirsDialog,
@@ -49,9 +49,8 @@ import {
 } from "./services/store";
 import {
     getElectronFilesFromGoogleZip,
-    getPendingUploads,
-    setToUploadCollection,
-    setToUploadFiles,
+    setPendingUploadCollection,
+    setPendingUploadFiles,
 } from "./services/upload";
 import {
     addWatchMapping,
@@ -188,20 +187,22 @@ export const attachIPCHandlers = () => {
 
     // - Upload
 
-    ipcMain.handle("getPendingUploads", () => getPendingUploads());
+    ipcMain.handle("pendingUploads", () => pendingUploads());
+
+    ipcMain.handle("setPendingUploadCollection", (_, collectionName: string) =>
+        setPendingUploadCollection(collectionName),
+    );
 
     ipcMain.handle(
-        "setToUploadFiles",
-        (_, type: FILE_PATH_TYPE, filePaths: string[]) =>
-            setToUploadFiles(type, filePaths),
+        "setPendingUploadFiles",
+        (_, type: PendingUploads["type"], filePaths: string[]) =>
+            setPendingUploadFiles(type, filePaths),
     );
+
+    // -
 
     ipcMain.handle("getElectronFilesFromGoogleZip", (_, filePath: string) =>
         getElectronFilesFromGoogleZip(filePath),
-    );
-
-    ipcMain.handle("setToUploadCollection", (_, collectionName: string) =>
-        setToUploadCollection(collectionName),
     );
 
     ipcMain.handle("getDirFiles", (_, dirPath: string) => getDirFiles(dirPath));

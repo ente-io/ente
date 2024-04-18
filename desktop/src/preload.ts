@@ -44,8 +44,8 @@ import { contextBridge, ipcRenderer } from "electron/renderer";
 import type {
     AppUpdateInfo,
     ElectronFile,
-    FILE_PATH_TYPE,
     FolderWatch,
+    PendingUploads,
 } from "./types/ipc";
 
 // - General
@@ -243,24 +243,24 @@ const updateWatchMappingIgnoredFiles = (
 
 // - Upload
 
-const getPendingUploads = (): Promise<{
-    files: ElectronFile[];
-    collectionName: string;
-    type: string;
-}> => ipcRenderer.invoke("getPendingUploads");
+const pendingUploads = (): Promise<PendingUploads | undefined> =>
+    ipcRenderer.invoke("pendingUploads");
 
-const setToUploadFiles = (
-    type: FILE_PATH_TYPE,
+const setPendingUploadCollection = (collectionName: string): Promise<void> =>
+    ipcRenderer.invoke("setPendingUploadCollection", collectionName);
+
+const setPendingUploadFiles = (
+    type: PendingUploads["type"],
     filePaths: string[],
-): Promise<void> => ipcRenderer.invoke("setToUploadFiles", type, filePaths);
+): Promise<void> =>
+    ipcRenderer.invoke("setPendingUploadFiles", type, filePaths);
+
+// -
 
 const getElectronFilesFromGoogleZip = (
     filePath: string,
 ): Promise<ElectronFile[]> =>
     ipcRenderer.invoke("getElectronFilesFromGoogleZip", filePath);
-
-const setToUploadCollection = (collectionName: string): Promise<void> =>
-    ipcRenderer.invoke("setToUploadCollection", collectionName);
 
 const getDirFiles = (dirPath: string): Promise<ElectronFile[]> =>
     ipcRenderer.invoke("getDirFiles", dirPath);
@@ -300,6 +300,7 @@ const getDirFiles = (dirPath: string): Promise<ElectronFile[]> =>
 // alternative, see [Note: IPC streams].
 contextBridge.exposeInMainWorld("electron", {
     // - General
+
     appVersion,
     logToDisk,
     openDirectory,
@@ -310,12 +311,14 @@ contextBridge.exposeInMainWorld("electron", {
     onMainWindowFocus,
 
     // - App update
+
     onAppUpdateAvailable,
     updateAndRestart,
     updateOnNextRestart,
     skipAppUpdate,
 
     // - FS
+
     fs: {
         exists: fsExists,
         rename: fsRename,
@@ -328,23 +331,27 @@ contextBridge.exposeInMainWorld("electron", {
     },
 
     // - Conversion
+
     convertToJPEG,
     generateImageThumbnail,
     runFFmpegCmd,
 
     // - ML
+
     clipImageEmbedding,
     clipTextEmbedding,
     detectFaces,
     faceEmbedding,
 
     // - File selection
+
     selectDirectory,
     showUploadFilesDialog,
     showUploadDirsDialog,
     showUploadZipDialog,
 
     // - Watch
+
     watch: {
         findFiles,
     },
@@ -357,9 +364,12 @@ contextBridge.exposeInMainWorld("electron", {
 
     // - Upload
 
-    getPendingUploads,
-    setToUploadFiles,
+    pendingUploads,
+    setPendingUploadCollection,
+    setPendingUploadFiles,
+
+    // -
+
     getElectronFilesFromGoogleZip,
-    setToUploadCollection,
     getDirFiles,
 });

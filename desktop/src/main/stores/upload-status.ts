@@ -1,6 +1,6 @@
 import Store, { Schema } from "electron-store";
 
-interface UploadStatusStore {
+export interface UploadStatusStore {
     filePaths: string[];
     zipPaths: string[];
     collectionName: string;
