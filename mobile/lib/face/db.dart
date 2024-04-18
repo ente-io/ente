@@ -410,14 +410,14 @@ class FaceMLDataDB {
   }
 
   Future<void> forceUpdateClusterIds(
-    Map<String, int> faceIDToPersonID,
+    Map<String, int> faceIDToClusterID,
   ) async {
     final db = await instance.database;
 
     // Start a batch
     final batch = db.batch();
 
-    for (final map in faceIDToPersonID.entries) {
+    for (final map in faceIDToClusterID.entries) {
       final faceID = map.key;
       final clusterID = map.value;
       batch.insert(
