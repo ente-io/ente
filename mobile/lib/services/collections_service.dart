@@ -1148,7 +1148,14 @@ class CollectionsService {
     return collection;
   }
 
-  Future<void> addToCollection(int collectionID, List<EnteFile> files) async {
+  Future<void> addOrCopyToCollection(
+    int collectionID,
+    List<EnteFile> files,
+  ) async {
+    return _addToCollection(collectionID, files);
+  }
+
+  Future<void> _addToCollection(int collectionID, List<EnteFile> files) async {
     final containsUploadedFile = files.any((e) => e.isUploaded);
     if (containsUploadedFile) {
       final existingFileIDsInCollection =

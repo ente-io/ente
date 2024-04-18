@@ -137,7 +137,7 @@ class FavoritesService {
       await _filesDB.insert(file);
       Bus.instance.fire(CollectionUpdatedEvent(collectionID, files, "addTFav"));
     } else {
-      await _collectionsService.addToCollection(collectionID, files);
+      await _collectionsService.addOrCopyToCollection(collectionID, files);
     }
     _updateFavoriteFilesCache(files, favFlag: true);
     RemoteSyncService.instance.sync(silently: true).ignore();
@@ -157,7 +157,7 @@ class FavoritesService {
     }
     final collectionID = await _getOrCreateFavoriteCollectionID();
     if (favFlag) {
-      await _collectionsService.addToCollection(collectionID, files);
+      await _collectionsService.addOrCopyToCollection(collectionID, files);
     } else {
       final Collection? favCollection = await _getFavoritesCollection();
       await _collectionActions.moveFilesFromCurrentCollection(
