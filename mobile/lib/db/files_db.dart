@@ -757,7 +757,7 @@ class FilesDB {
     if (durations.isEmpty) {
       return <EnteFile>[];
     }
-    final db = await instance.database;
+    final db = await instance.sqliteAsyncDB;
     String whereClause = "( ";
     for (int index = 0; index < durations.length; index++) {
       whereClause += "($columnCreationTime >= " +
@@ -772,11 +772,12 @@ class FilesDB {
       }
     }
     whereClause += ")";
-    final results = await db.query(
-      filesTable,
-      where: whereClause,
-      orderBy: '$columnCreationTime ' + order,
+    final query =
+        'SELECT * FROM $filesTable WHERE $whereClause ORDER BY $columnCreationTime $order';
+    final results = await db.getAll(
+      query,
     );
+
     final files = convertToFiles(results);
     return applyDBFilters(
       files,
