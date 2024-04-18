@@ -224,7 +224,7 @@ export const attachIPCHandlers = () => {
 export const attachFSWatchIPCHandlers = (watcher: FSWatcher) => {
     // - Watch
 
-    ipcMain.handle("watchGet", () => watchGet());
+    ipcMain.handle("watchGet", () => watchGet(watcher));
 
     ipcMain.handle(
         "watchAdd",

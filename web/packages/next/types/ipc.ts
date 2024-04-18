@@ -290,12 +290,12 @@ export interface Electron {
      */
     watch: {
         /**
-         * Return the list of folder watches.
+         * Return the list of folder watches, pruning non-existing directories.
          *
          * The list of folder paths (and auxillary details) is persisted in the
-         * Node.js layer. When we invoke this method, the Node.js goes through
-         * the list, permanently removes any watches whose on-disk directory has
-         * is no longer present, and returns this pruned list of watches.
+         * Node.js layer. The implementation of this function goes through the
+         * list, permanently removes any watches whose on-disk directory is no
+         * longer present, and returns this pruned list of watches.
          */
         get: () => Promise<FolderWatch[]>;
 

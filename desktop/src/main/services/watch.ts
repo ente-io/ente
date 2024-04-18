@@ -3,6 +3,7 @@ import { BrowserWindow } from "electron/main";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { FolderWatch, type CollectionMapping } from "../../types/ipc";
+import { fsIsDir } from "../fs";
 import log from "../log";
 import { watchStore } from "../stores/watch";
 
@@ -52,77 +53,65 @@ const eventData = (path: string): [string, FolderWatch] => {
 const posixPath = (filePath: string) =>
     filePath.split(path.sep).join(path.posix.sep);
 
-export const watchGet = () => {
-    return folderWatches();
+export const watchGet = (watcher: FSWatcher) => {
+    const [valid, deleted] = folderWatches().reduce(
+        ([valid, deleted], watch) => {
+            (fsIsDir(watch.folderPath) ? valid : deleted).push(watch);
+            return [valid, deleted];
+        },
+        [[], []],
+    );
+    if (deleted.length) {
+        for (const watch of deleted) watchRemove(watcher, watch.folderPath);
+        setFolderWatches(valid);
+    }
+    return valid;
 };
 
-const folderWatches = () => {
-    let watches = watchStore.get("mappings") ?? [];
+const folderWatches = (): FolderWatch[] => watchStore.get("mappings") ?? [];
 
-    // Previous versions of the store used to store an integer to indicate the
-    // collection mapping, migrate these to the new schema if we see them still.
-    let needsUpdate = false;
-    watches = watches.map((watch) => {
-        const cm = watch.collectionMapping;
-        if (cm != "root" && cm != "parent") {
-            const uploadStrategy = watch.uploadStrategy;
-            const collectionMapping = uploadStrategy == 1 ? "parent" : "root";
-            needsUpdate = true;
-            return { ...watch, collectionMapping }
-        }
-    })
-    if (watches.length && watches)
-    return mappings;
-};
-
+const setFolderWatches = (watches: FolderWatch[]) =>
+    watchStore.set("mappings", watches);
 
 export const watchAdd = async (
     watcher: FSWatcher,
     folderPath: string,
     collectionMapping: CollectionMapping,
 ) => {
-    const watchMappings = getWatchMappings();
-    if (isMappingPresent(watchMappings, folderPath)) {
-        throw new Error(`Watch mapping already exists`);
-    }
+    const watches = folderWatches();
 
-    watcher.add(folderPath);
+    if (!fsIsDir(folderPath))
+        throw new Error(
+            `Attempting to add a folder watch for a folder path ${folderPath} that is not an existing directory`,
+        );
 
-    watchMappings.push({
-        rootFolderName,
-        uploadStrategy,
+    if (watches.find((watch) => watch.folderPath == folderPath))
+        throw new Error(
+            `A folder watch with the given folder path ${folderPath} already exists`,
+        );
+
+    watches.push({
         folderPath,
+        collectionMapping,
         syncedFiles: [],
         ignoredFiles: [],
     });
 
-    setWatchMappings(watchMappings);
+    setFolderWatches(watches);
+
+    watcher.add(folderPath);
 };
 
-function isMappingPresent(watchMappings: FolderWatch[], folderPath: string) {
-    const watchMapping = watchMappings?.find(
-        (mapping) => mapping.folderPath === folderPath,
-    );
-    return !!watchMapping;
-}
-
 export const watchRemove = async (watcher: FSWatcher, folderPath: string) => {
-    let watchMappings = getWatchMappings();
-    const watchMapping = watchMappings.find(
-        (mapping) => mapping.folderPath === folderPath,
-    );
-
-    if (!watchMapping) {
-        throw new Error(`Watch mapping does not exist`);
-    }
-
-    watcher.unwatch(watchMapping.folderPath);
-
-    watchMappings = watchMappings.filter(
-        (mapping) => mapping.folderPath !== watchMapping.folderPath,
-    );
-
-    setWatchMappings(watchMappings);
+    const watches = folderWatches();
+    const filtered = watches.filter((watch) => watch.folderPath != folderPath);
+    if (watches.length == filtered.length)
+        throw new Error(
+            `Attempting to remove a non-existing folder watch for folder path ${folderPath}`,
+        );
+    setFolderWatches(filtered);
+    watcher.unwatch(folderPath);
+    return filtered;
 };
 
 export function updateWatchMappingSyncedFiles(
@@ -157,11 +146,6 @@ export function updateWatchMappingIgnoredFiles(
 
     watchMapping.ignoredFiles = files;
     setWatchMappings(watchMappings);
-}
-
-
-function setWatchMappings(watchMappings: WatchStoreType["mappings"]) {
-    watchStore.set("mappings", watchMappings);
 }
 
 export const watchFindFiles = async (dirPath: string) => {

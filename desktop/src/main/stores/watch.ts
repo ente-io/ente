@@ -8,7 +8,9 @@ interface WatchStore {
 
 type FolderWatchWithLegacyFields = FolderWatch & {
     /** @deprecated Only retained for migration, do not use in other code */
-    uploadStrategy: number;
+    rootFolderName?: string;
+    /** @deprecated Only retained for migration, do not use in other code */
+    uploadStrategy?: number;
 };
 
 const watchStoreSchema: Schema<WatchStore> = {
@@ -56,6 +58,10 @@ export const migrateLegacyWatchStoreIfNeeded = () => {
         let collectionMapping = watch.collectionMapping;
         if (!collectionMapping) {
             collectionMapping = watch.uploadStrategy == 1 ? "parent" : "root";
+            needsUpdate = true;
+        }
+        if (watch.rootFolderName) {
+            delete watch.rootFolderName;
             needsUpdate = true;
         }
         return { ...watch, collectionMapping };

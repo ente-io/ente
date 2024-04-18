@@ -11,8 +11,6 @@ export interface AppUpdate {
 }
 
 export interface FolderWatch {
-    // TODO(MR): Is this needed?
-    rootFolderName: string;
     collectionMapping: CollectionMapping;
     folderPath: string;
     syncedFiles: FolderWatchSyncedFile[];
