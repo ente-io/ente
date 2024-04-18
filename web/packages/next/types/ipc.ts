@@ -407,13 +407,15 @@ export interface FolderWatch {
 }
 
 /**
- * The ways in which we can map nested files to collections when uploading or
- * watching directories from the user's local file system.
+ * The ways in which directories are mapped to collection.
+ *
+ * This comes into play when we have nested directories that we are trying to
+ * upload or watch on the user's local file system.
  */
 export type CollectionMapping =
-    /** Map everything to a single collection corresponding to the root directory */
+    /** All files go into a single collection named after the root directory. */
     | "root"
-    /** Map each file to a collection named after its parent directory */
+    /** Each file goes to a collection named after its parent directory. */
     | "parent";
 
 /**
