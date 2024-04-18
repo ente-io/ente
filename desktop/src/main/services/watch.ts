@@ -1,9 +1,58 @@
-import type { FSWatcher } from "chokidar";
-import ElectronLog from "electron-log";
+import chokidar, { type FSWatcher } from "chokidar";
+import { BrowserWindow } from "electron/main";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { FolderWatch, WatchStoreType } from "../../types/ipc";
+import { FolderWatch } from "../../types/ipc";
+import log from "../log";
 import { watchStore } from "../stores/watch";
+import { getElectronFile } from "./fs";
+
+/**
+ * Create and return a new file system watcher.
+ *
+ * Internally this uses the watcher from the chokidar package.
+ *
+ * @param mainWindow The window handle is used to notify the renderer process of
+ * pertinent file system events.
+ */
+export const createWatcher = (mainWindow: BrowserWindow) => {
+    const mappings = getWatchMappings();
+    const folderPaths = mappings.map((mapping) => {
+        return mapping.folderPath;
+    });
+
+    const watcher = chokidar.watch(folderPaths, {
+        awaitWriteFinish: true,
+    });
+    watcher
+        .on("add", async (path) => {
+            mainWindow.webContents.send(
+                "watch-add",
+                await getElectronFile(normalizeToPOSIX(path)),
+            );
+        })
+        .on("unlink", (path) => {
+            mainWindow.webContents.send("watch-unlink", normalizeToPOSIX(path));
+        })
+        .on("unlinkDir", (path) => {
+            mainWindow.webContents.send(
+                "watch-unlink-dir",
+                normalizeToPOSIX(path),
+            );
+        })
+        .on("error", (error) => {
+            log.error("Error while watching files", error);
+        });
+
+    return watcher;
+};
+
+/**
+ * Convert a file system {@link filePath} that uses the local system specific
+ * path separators into a path that uses POSIX file separators.
+ */
+const normalizeToPOSIX = (filePath: string) =>
+    filePath.split(path.sep).join(path.posix.sep);
 
 export const findFiles = async (dirPath: string) => {
     const items = await fs.readdir(dirPath, { withFileTypes: true });
@@ -25,7 +74,7 @@ export const addWatchMapping = async (
     folderPath: string,
     uploadStrategy: number,
 ) => {
-    ElectronLog.log(`Adding watch mapping: ${folderPath}`);
+    log.info(`Adding watch mapping: ${folderPath}`);
     const watchMappings = getWatchMappings();
     if (isMappingPresent(watchMappings, folderPath)) {
         throw new Error(`Watch mapping already exists`);
