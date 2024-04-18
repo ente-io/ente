@@ -42,7 +42,7 @@ import { contextBridge, ipcRenderer } from "electron/renderer";
 // While we can't import other code, we can import types since they're just
 // needed when compiling and will not be needed / looked around for at runtime.
 import type {
-    AppUpdateInfo,
+    AppUpdate,
     ElectronFile,
     FolderWatch,
     PendingUploads,
@@ -77,12 +77,12 @@ const onMainWindowFocus = (cb?: () => void) => {
 // - App update
 
 const onAppUpdateAvailable = (
-    cb?: ((updateInfo: AppUpdateInfo) => void) | undefined,
+    cb?: ((update: AppUpdate) => void) | undefined,
 ) => {
     ipcRenderer.removeAllListeners("appUpdateAvailable");
     if (cb) {
-        ipcRenderer.on("appUpdateAvailable", (_, updateInfo: AppUpdateInfo) =>
-            cb(updateInfo),
+        ipcRenderer.on("appUpdateAvailable", (_, update: AppUpdate) =>
+            cb(update),
         );
     }
 };

@@ -5,6 +5,11 @@
  * See [Note: types.ts <-> preload.ts <-> ipc.ts]
  */
 
+export interface AppUpdate {
+    autoUpdatable: boolean;
+    version: string;
+}
+
 export interface FolderWatch {
     rootFolderName: string;
     uploadStrategy: number;
@@ -20,9 +25,7 @@ export interface FolderWatchSyncedFile {
 }
 
 export interface PendingUploads {
-    /** The collection to which we're uploading */
     collectionName: string;
-    /* The upload can be either of a Google Takeout zip, or regular files */
     type: "files" | "zips";
     files: ElectronFile[];
 }
@@ -72,15 +75,4 @@ export interface ElectronFile {
     stream: () => Promise<ReadableStream<Uint8Array>>;
     blob: () => Promise<Blob>;
     arrayBuffer: () => Promise<Uint8Array>;
-}
-
-export enum FILE_PATH_TYPE {
-    /* eslint-disable no-unused-vars */
-    FILES = "files",
-    ZIPS = "zips",
-}
-
-export interface AppUpdateInfo {
-    autoUpdatable: boolean;
-    version: string;
 }

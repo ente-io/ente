@@ -5,11 +5,6 @@
 
 import type { ElectronFile } from "./file";
 
-export interface AppUpdateInfo {
-    autoUpdatable: boolean;
-    version: string;
-}
-
 /**
  * Extra APIs provided by our Node.js layer when our code is running inside our
  * desktop (Electron) app.
@@ -100,7 +95,7 @@ export interface Electron {
      * Note: Setting a callback clears any previous callbacks.
      */
     onAppUpdateAvailable: (
-        cb?: ((updateInfo: AppUpdateInfo) => void) | undefined,
+        cb?: ((update: AppUpdate) => void) | undefined,
     ) => void;
 
     /**
@@ -376,6 +371,16 @@ export interface Electron {
         filePath: string,
     ) => Promise<ElectronFile[]>;
     getDirFiles: (dirPath: string) => Promise<ElectronFile[]>;
+}
+
+/**
+ * Data passed across the IPC bridge when an app update is available.
+ */
+export interface AppUpdate {
+    /** `true` if the user automatically update to this (new) version */
+    autoUpdatable: boolean;
+    /** The new version that is available */
+    version: string;
 }
 
 /**
