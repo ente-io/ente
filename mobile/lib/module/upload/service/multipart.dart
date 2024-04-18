@@ -31,21 +31,21 @@ class MultiPartUploader {
     String fileHash,
     int collectionID,
   ) async {
-    final collection =
-        CollectionsService.instance.getCollectionByID(collectionID);
-    if (collection == null) {
-      throw Exception("Collection not found");
-    }
+    final collectionKey =
+        CollectionsService.instance.getCollectionKey(collectionID);
     final result =
         await _db.getFileEncryptionData(localId, fileHash, collectionID);
     final encryptedFileKey = CryptoUtil.base642bin(result.encryptedFileKey);
     final fileNonce = CryptoUtil.base642bin(result.fileNonce);
 
-    final key = CryptoUtil.base642bin(collection.encryptedKey);
     final encryptKeyNonce = CryptoUtil.base642bin(result.keyNonce);
 
     return EncryptionResult(
-      key: CryptoUtil.decryptSync(encryptedFileKey, key, encryptKeyNonce),
+      key: CryptoUtil.decryptSync(
+        encryptedFileKey,
+        collectionKey,
+        encryptKeyNonce,
+      ),
       nonce: fileNonce,
     );
   }
@@ -96,15 +96,12 @@ class MultiPartUploader {
     Uint8List fileKey,
     Uint8List fileNonce,
   ) async {
-    final collection =
-        CollectionsService.instance.getCollectionByID(collectionID);
-    if (collection == null) {
-      throw Exception("Collection not found");
-    }
+    final collectionKey =
+        CollectionsService.instance.getCollectionKey(collectionID);
 
     final encryptedResult = CryptoUtil.encryptSync(
       fileKey,
-      CryptoUtil.base642bin(collection.encryptedKey),
+      collectionKey,
     );
 
     await _db.createTrackUploadsEntry(
