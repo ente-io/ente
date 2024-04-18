@@ -67,11 +67,8 @@ const IMAGE_MAGICK_THUMBNAIL_GENERATE_COMMAND_TEMPLATE = [
     OUTPUT_PATH_PLACEHOLDER,
 ];
 
-function getImageMagickStaticPath() {
-    return isDev
-        ? "resources/image-magick"
-        : path.join(process.resourcesPath, "image-magick");
-}
+const imageMagickStaticPath = () =>
+    path.join(isDev ? "build" : process.resourcesPath, "image-magick");
 
 export async function convertToJPEG(
     fileData: Uint8Array,
@@ -140,7 +137,7 @@ function constructConvertCommand(
         convertCmd = IMAGEMAGICK_HEIC_CONVERT_COMMAND_TEMPLATE.map(
             (cmdPart) => {
                 if (cmdPart === IMAGE_MAGICK_PLACEHOLDER) {
-                    return getImageMagickStaticPath();
+                    return imageMagickStaticPath();
                 }
                 if (cmdPart === INPUT_PATH_PLACEHOLDER) {
                     return tempInputFilePath;
@@ -262,7 +259,7 @@ function constructThumbnailGenerationCommand(
         thumbnailGenerationCmd =
             IMAGE_MAGICK_THUMBNAIL_GENERATE_COMMAND_TEMPLATE.map((cmdPart) => {
                 if (cmdPart === IMAGE_MAGICK_PLACEHOLDER) {
-                    return getImageMagickStaticPath();
+                    return imageMagickStaticPath();
                 }
                 if (cmdPart === INPUT_PATH_PLACEHOLDER) {
                     return inputFilePath;
