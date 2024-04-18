@@ -4,6 +4,7 @@
  */
 
 import { ensureElectron } from "@/next/electron";
+import { basename, dirname } from "@/next/file";
 import log from "@/next/log";
 import type {
     CollectionMapping,
@@ -751,12 +752,4 @@ const collectionNameForPath = (filePath: string, watch: FolderWatch) =>
         ? watch.rootFolderName
         : parentDirectoryName(filePath);
 
-const parentDirectoryName = (filePath: string) => {
-    const components = filePath.split("/");
-    const parentName = components[components.length - 2];
-    if (!parentName)
-        throw new Error(
-            `Unexpected file path without a parent folder: ${filePath}`,
-        );
-    return parentName;
-};
+const parentDirectoryName = (path: string) => basename(dirname(path));
