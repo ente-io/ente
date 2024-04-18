@@ -27,6 +27,7 @@ import { setupAutoUpdater } from "./main/services/app-update";
 import autoLauncher from "./main/services/auto-launcher";
 import { createWatcher } from "./main/services/watch";
 import { userPreferences } from "./main/stores/user-preferences";
+import { migrateLegacyWatchStoreIfNeeded } from "./main/stores/watch";
 import { registerStreamProtocol } from "./main/stream";
 import { isDev } from "./main/util";
 
@@ -324,6 +325,7 @@ const main = () => {
     setupRendererServer();
     registerPrivilegedSchemes();
     increaseDiskCache();
+    migrateLegacyWatchStoreIfNeeded();
 
     app.on("second-instance", () => {
         // Someone tried to run a second instance, we should focus our window.

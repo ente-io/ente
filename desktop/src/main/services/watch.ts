@@ -56,6 +56,26 @@ export const watchGet = () => {
     return folderWatches();
 };
 
+const folderWatches = () => {
+    let watches = watchStore.get("mappings") ?? [];
+
+    // Previous versions of the store used to store an integer to indicate the
+    // collection mapping, migrate these to the new schema if we see them still.
+    let needsUpdate = false;
+    watches = watches.map((watch) => {
+        const cm = watch.collectionMapping;
+        if (cm != "root" && cm != "parent") {
+            const uploadStrategy = watch.uploadStrategy;
+            const collectionMapping = uploadStrategy == 1 ? "parent" : "root";
+            needsUpdate = true;
+            return { ...watch, collectionMapping }
+        }
+    })
+    if (watches.length && watches)
+    return mappings;
+};
+
+
 export const watchAdd = async (
     watcher: FSWatcher,
     folderPath: string,
@@ -139,10 +159,6 @@ export function updateWatchMappingIgnoredFiles(
     setWatchMappings(watchMappings);
 }
 
-const folderWatches = () => {
-    const mappings = watchStore.get("mappings") ?? [];
-    return mappings;
-};
 
 function setWatchMappings(watchMappings: WatchStoreType["mappings"]) {
     watchStore.set("mappings", watchMappings);
