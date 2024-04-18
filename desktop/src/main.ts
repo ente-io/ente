@@ -24,7 +24,7 @@ import { attachFSWatchIPCHandlers, attachIPCHandlers } from "./main/ipc";
 import log, { initLogging } from "./main/log";
 import { createApplicationMenu, createTrayContextMenu } from "./main/menu";
 import { setupAutoUpdater } from "./main/services/app-update";
-import autoLauncher from "./main/services/autoLauncher";
+import autoLauncher from "./main/services/auto-launcher";
 import { initWatcher } from "./main/services/chokidar";
 import { userPreferences } from "./main/stores/user-preferences";
 import { registerStreamProtocol } from "./main/stream";

@@ -1,22 +1,6 @@
 import { FILE_PATH_TYPE } from "./ipc";
 
-export interface AutoLauncherClient {
-    isEnabled: () => Promise<boolean>;
-    toggleAutoLaunch: () => Promise<void>;
-    wasAutoLaunched: () => Promise<boolean>;
-}
 
-export interface UploadStoreType {
-    filePaths: string[];
-    zipPaths: string[];
-    collectionName: string;
-}
-
-export interface KeysStoreType {
-    AnonymizeUserID: {
-        id: string;
-    };
-}
 
 /* eslint-disable no-unused-vars */
 export const FILE_PATH_KEYS: {
@@ -26,6 +10,3 @@ export const FILE_PATH_KEYS: {
     [FILE_PATH_TYPE.FILES]: "filePaths",
 };
 
-export interface SafeStorageStoreType {
-    encryptionKey: string;
-}

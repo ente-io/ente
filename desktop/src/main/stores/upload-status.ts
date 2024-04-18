@@ -1,7 +1,12 @@
 import Store, { Schema } from "electron-store";
-import type { UploadStoreType } from "../../types/main";
 
-const uploadStoreSchema: Schema<UploadStoreType> = {
+interface UploadStatusStore {
+    filePaths: string[];
+    zipPaths: string[];
+    collectionName: string;
+}
+
+const uploadStatusSchema: Schema<UploadStatusStore> = {
     filePaths: {
         type: "array",
         items: {
@@ -21,5 +26,5 @@ const uploadStoreSchema: Schema<UploadStoreType> = {
 
 export const uploadStatusStore = new Store({
     name: "upload-status",
-    schema: uploadStoreSchema,
+    schema: uploadStatusSchema,
 });
