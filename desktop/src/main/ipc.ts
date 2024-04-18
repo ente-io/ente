@@ -49,6 +49,7 @@ import {
 } from "./services/store";
 import {
     getElectronFilesFromGoogleZip,
+    pendingUploads,
     setPendingUploadCollection,
     setPendingUploadFiles,
 } from "./services/upload";

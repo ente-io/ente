@@ -1,26 +1,23 @@
 import StreamZip from "node-stream-zip";
+import { existsSync } from "original-fs";
 import path from "path";
-import {
-    ElectronFile,
-    FILE_PATH_TYPE,
-    type PendingUploads,
-} from "../../types/ipc";
-import { FILE_PATH_KEYS } from "../../types/main";
+import { ElectronFile, type PendingUploads } from "../../types/ipc";
 import {
     uploadStatusStore,
     type UploadStatusStore,
 } from "../stores/upload-status";
-import { getElectronFile, getValidPaths, getZipFileStream } from "./fs";
+import { getElectronFile, getZipFileStream } from "./fs";
 
 export const pendingUploads = async () => {
-    const filePaths = getSavedFilePaths(FILE_PATH_TYPE.FILES);
-    const zipPaths = getSavedFilePaths(FILE_PATH_TYPE.ZIPS);
     const collectionName = uploadStatusStore.get("collectionName");
+    const filePaths = validSavedPaths("files");
+    const zipPaths = validSavedPaths("zips");
 
     let files: ElectronFile[] = [];
-    let type: FILE_PATH_TYPE;
+    let type: PendingUploads["type"];
+
     if (zipPaths.length) {
-        type = FILE_PATH_TYPE.ZIPS;
+        type = "zips";
         for (const zipPath of zipPaths) {
             files = [
                 ...files,
@@ -30,9 +27,10 @@ export const pendingUploads = async () => {
         const pendingFilePaths = new Set(filePaths);
         files = files.filter((file) => pendingFilePaths.has(file.path));
     } else if (filePaths.length) {
-        type = FILE_PATH_TYPE.FILES;
+        type = "files";
         files = await Promise.all(filePaths.map(getElectronFile));
     }
+
     return {
         files,
         collectionName,
@@ -40,42 +38,13 @@ export const pendingUploads = async () => {
     };
 };
 
-export const getSavedFilePaths = (type: FILE_PATH_TYPE) => {
-    const paths =
-        getValidPaths(
-            uploadStatusStore.get(FILE_PATH_KEYS[type]) as string[],
-        ) ?? [];
-
-    setToUploadFiles(type, paths);
+export const validSavedPaths = (type: PendingUploads["type"]) => {
+    const key = storeKey(type);
+    const savedPaths = (uploadStatusStore.get(key) as string[]) ?? [];
+    const paths = savedPaths.filter((p) => existsSync(p));
+    uploadStatusStore.set(key, paths);
     return paths;
 };
-
-export async function getZipEntryAsElectronFile(
-    zipName: string,
-    zip: StreamZip.StreamZipAsync,
-    entry: StreamZip.ZipEntry,
-): Promise<ElectronFile> {
-    return {
-        path: path
-            .join(zipName, entry.name)
-            .split(path.sep)
-            .join(path.posix.sep),
-        name: path.basename(entry.name),
-        size: entry.size,
-        lastModified: entry.time,
-        stream: async () => {
-            return await getZipFileStream(zip, entry.name);
-        },
-        blob: async () => {
-            const buffer = await zip.entryData(entry.name);
-            return new Blob([new Uint8Array(buffer)]);
-        },
-        arrayBuffer: async () => {
-            const buffer = await zip.entryData(entry.name);
-            return new Uint8Array(buffer);
-        },
-    };
-}
 
 export const setPendingUploadCollection = (collectionName: string) => {
     if (collectionName) uploadStatusStore.set("collectionName", collectionName);
@@ -118,3 +87,30 @@ export const getElectronFilesFromGoogleZip = async (filePath: string) => {
 
     return files;
 };
+
+export async function getZipEntryAsElectronFile(
+    zipName: string,
+    zip: StreamZip.StreamZipAsync,
+    entry: StreamZip.ZipEntry,
+): Promise<ElectronFile> {
+    return {
+        path: path
+            .join(zipName, entry.name)
+            .split(path.sep)
+            .join(path.posix.sep),
+        name: path.basename(entry.name),
+        size: entry.size,
+        lastModified: entry.time,
+        stream: async () => {
+            return await getZipFileStream(zip, entry.name);
+        },
+        blob: async () => {
+            const buffer = await zip.entryData(entry.name);
+            return new Blob([new Uint8Array(buffer)]);
+        },
+        arrayBuffer: async () => {
+            const buffer = await zip.entryData(entry.name);
+            return new Uint8Array(buffer);
+        },
+    };
+}
