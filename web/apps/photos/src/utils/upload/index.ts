@@ -1,4 +1,4 @@
-import { directoryNameFromPOSIXPath } from "@/next/file";
+import { directoryNameFromPOSIXPath, fileNameFromPOSIXPath } from "@/next/file";
 import { FILE_TYPE } from "constants/file";
 import {
     A_SEC_IN_MICROSECONDS,
@@ -219,3 +219,11 @@ export function filterOutSystemFiles(files: File[] | ElectronFile[]) {
 export function isSystemFile(file: File | ElectronFile) {
     return file.name.startsWith(".");
 }
+
+/**
+ * Return true if the file at the given {@link path} is hidden.
+ *
+ * Hidden files are those whose names begin with a "." (dot).
+ */
+export const isHiddenFile = (path: string) =>
+    fileNameFromPOSIXPath(path).startsWith(".");

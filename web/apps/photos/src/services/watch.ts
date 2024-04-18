@@ -4,7 +4,6 @@
  */
 
 import { ensureElectron } from "@/next/electron";
-import { nameAndExtension } from "@/next/file";
 import log from "@/next/log";
 import type {
     CollectionMapping,
@@ -18,7 +17,7 @@ import { Collection } from "types/collection";
 import { EncryptedEnteFile } from "types/file";
 import { ElectronFile, FileWithCollection } from "types/upload";
 import { groupFilesBasedOnCollectionID } from "utils/file";
-import { isSystemFile } from "utils/upload";
+import { isHiddenFile, isSystemFile } from "utils/upload";
 import { removeFromCollection } from "./collectionService";
 import { getLocalFiles } from "./fileService";
 
@@ -711,7 +710,7 @@ const deduceEvents = async (
 
         const paths = (await electron.watch.findFiles(folderPath))
             // Filter out hidden files (files whose names begins with a dot)
-            .filter((path) => !nameAndExtension(path)[0].startsWith("."));
+            .filter((path) => !isHiddenFile(path));
 
         // Files that are on disk but not yet synced.
         const pathsToUpload = paths.filter(
