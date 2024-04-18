@@ -660,13 +660,12 @@ class FilesDB {
   }
 
   Future<List<EnteFile>> getAllFilesCollection(int collectionID) async {
-    final db = await instance.database;
+    final db = await instance.sqliteAsyncDB;
     const String whereClause = '$columnCollectionID = ?';
     final List<Object> whereArgs = [collectionID];
-    final results = await db.query(
-      filesTable,
-      where: whereClause,
-      whereArgs: whereArgs,
+    final results = await db.getAll(
+      'SELECT * FROM $filesTable WHERE $whereClause',
+      whereArgs,
     );
     final files = convertToFiles(results);
     return files;
@@ -676,14 +675,13 @@ class FilesDB {
     int collectionID,
     int addedTime,
   ) async {
-    final db = await instance.database;
+    final db = await instance.sqliteAsyncDB;
     const String whereClause =
         '$columnCollectionID = ? AND $columnAddedTime > ?';
     final List<Object> whereArgs = [collectionID, addedTime];
-    final results = await db.query(
-      filesTable,
-      where: whereClause,
-      whereArgs: whereArgs,
+    final results = await db.getAll(
+      'SELECT * FROM $filesTable WHERE $whereClause',
+      whereArgs,
     );
     final files = convertToFiles(results);
     return files;
@@ -705,20 +703,22 @@ class FilesDB {
       inParam += "'" + id.toString() + "',";
     }
     inParam = inParam.substring(0, inParam.length - 1);
-    final db = await instance.database;
+    final db = await instance.sqliteAsyncDB;
     final order = (asc ?? false ? 'ASC' : 'DESC');
     final String whereClause =
         '$columnCollectionID  IN ($inParam) AND $columnCreationTime >= ? AND '
         '$columnCreationTime <= ? AND $columnOwnerID = ?';
     final List<Object> whereArgs = [startTime, endTime, userID];
 
-    final results = await db.query(
-      filesTable,
-      where: whereClause,
-      whereArgs: whereArgs,
-      orderBy:
-          '$columnCreationTime ' + order + ', $columnModificationTime ' + order,
-      limit: limit,
+    String query = 'SELECT * FROM $filesTable WHERE $whereClause ORDER BY '
+        '$columnCreationTime $order, $columnModificationTime $order';
+    if (limit != null) {
+      query += ' LIMIT ?';
+      whereArgs.add(limit);
+    }
+    final results = await db.getAll(
+      query,
+      whereArgs,
     );
     final files = convertToFiles(results);
     final dedupeResult =
