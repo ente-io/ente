@@ -11,12 +11,14 @@ export interface AppUpdate {
 }
 
 export interface FolderWatch {
+    // TODO(MR): Is this needed
     rootFolderName: string;
-    uploadStrategy: number;
+    collectionMapping: CollectionMapping;
     folderPath: string;
     syncedFiles: FolderWatchSyncedFile[];
     ignoredFiles: string[];
 }
+export type CollectionMapping = "root" | "parent";
 
 export interface FolderWatchSyncedFile {
     path: string;

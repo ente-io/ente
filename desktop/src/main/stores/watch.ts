@@ -1,44 +1,34 @@
 import Store, { Schema } from "electron-store";
 import { type FolderWatch } from "../../types/ipc";
 
-interface WatchStoreSchema {
+interface WatchStore {
     mappings: FolderWatch[];
 }
 
-const watchStoreSchema: Schema<WatchStoreType> = {
+const watchStoreSchema: Schema<WatchStore> = {
     mappings: {
         type: "array",
         items: {
             type: "object",
             properties: {
-                rootFolderName: {
-                    type: "string",
-                },
-                uploadStrategy: {
-                    type: "number",
-                },
-                folderPath: {
-                    type: "string",
-                },
+                rootFolderName: { type: "string" },
+                collectionMapping: { type: "string" },
+                uploadStrategy: { type: "number" },
+                folderPath: { type: "string" },
                 syncedFiles: {
                     type: "array",
                     items: {
                         type: "object",
                         properties: {
-                            path: {
-                                type: "string",
-                            },
-                            id: {
-                                type: "number",
-                            },
+                            path: { type: "string" },
+                            uploadedFileID: { type: "string" },
+                            collectionID: { type: "string" },
                         },
                     },
                 },
                 ignoredFiles: {
                     type: "array",
-                    items: {
-                        type: "string",
-                    },
+                    items: { type: "string" },
                 },
             },
         },
