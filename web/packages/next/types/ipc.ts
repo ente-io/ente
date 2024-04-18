@@ -288,7 +288,7 @@ export interface Electron {
      * dragged/dropped or selected to set up the folder watch, will be referred
      * to as a folder when naming things.
      */
-    watcher: {
+    watch: {
         /**
          * Return the paths of all the files under the given folder.
          *
@@ -343,9 +343,7 @@ export interface Electron {
          *
          * The path is guaranteed to use POSIX separators ('/').
          */
-        onAddFile: (
-            f: (path: string, watch: FolderWatch) => void,
-        ) => Promise<void>;
+        onAddFile: (f: (path: string, watch: FolderWatch) => void) => void;
 
         /**
          * Register the function to invoke when a file is removed in one of the
@@ -356,9 +354,7 @@ export interface Electron {
          *
          * The path is guaranteed to use POSIX separators ('/').
          */
-        onRemoveFile: (
-            f: (path: string, watch: FolderWatch) => void,
-        ) => Promise<void>;
+        onRemoveFile: (f: (path: string, watch: FolderWatch) => void) => void;
 
         /**
          * Register the function to invoke when a directory is removed in one of
@@ -369,29 +365,8 @@ export interface Electron {
          *
          * The path is guaranteed to use POSIX separators ('/').
          */
-        onRemoveDir: (
-            f: (path: string, watch: FolderWatch) => void,
-        ) => Promise<void>;
+        onRemoveDir: (f: (path: string, watch: FolderWatch) => void) => void;
     };
-
-    registerWatcherFunctions: (
-        addFile: (file: ElectronFile) => Promise<void>,
-        removeFile: (path: string) => Promise<void>,
-        removeFolder: (folderPath: string) => Promise<void>,
-    ) => void;
-
-    removeWatchMapping: (folderPath: string) => Promise<void>;
-
-    /**
-     * TODO(MR): Outdated description
-     * Get the latest state of the watched folders.
-     *
-     * We persist the folder watches that the user has setup. This function goes
-     * through that list, prunes any folders that don't exist on disk anymore,
-     * and for each, also returns a list of files that exist in that folder.
-     */
-
-    getWatchMappings: () => Promise<FolderWatch[]>;
 
     updateWatchMappingSyncedFiles: (
         folderPath: string,

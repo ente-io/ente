@@ -40,9 +40,10 @@
 import { contextBridge, ipcRenderer } from "electron/renderer";
 
 // While we can't import other code, we can import types since they're just
-// needed when compiling and will not be needed / looked around for at runtime.
+// needed when compiling and will not be needed or looked around for at runtime.
 import type {
     AppUpdate,
+    CollectionMapping,
     ElectronFile,
     FolderWatch,
     PendingUploads,
@@ -191,43 +192,40 @@ const showUploadZipDialog = (): Promise<{
 
 // - Watch
 
-const findFiles = (folderPath: string): Promise<string[]> =>
-    ipcRenderer.invoke("findFiles", folderPath);
+const watchFindFiles = (folderPath: string): Promise<string[]> =>
+    ipcRenderer.invoke("watchFindFiles", folderPath);
 
-const registerWatcherFunctions = (
-    addFile: (file: ElectronFile) => Promise<void>,
-    removeFile: (path: string) => Promise<void>,
-    removeFolder: (folderPath: string) => Promise<void>,
-) => {
-    ipcRenderer.removeAllListeners("watch-add");
-    ipcRenderer.removeAllListeners("watch-unlink");
-    ipcRenderer.removeAllListeners("watch-unlink-dir");
-    ipcRenderer.on("watch-add", (_, file: ElectronFile) => addFile(file));
-    ipcRenderer.on("watch-unlink", (_, filePath: string) =>
-        removeFile(filePath),
-    );
-    ipcRenderer.on("watch-unlink-dir", (_, folderPath: string) =>
-        removeFolder(folderPath),
+const watchAdd = (
+    folderPath: string,
+    collectionMapping: CollectionMapping,
+): Promise<void> =>
+    ipcRenderer.invoke("watchAdd", folderPath, collectionMapping);
+
+const watchRemove = (folderPath: string): Promise<void> =>
+    ipcRenderer.invoke("watchRemove", folderPath);
+
+const watchGet = (): Promise<FolderWatch[]> => ipcRenderer.invoke("watchGet");
+
+const watchOnAddFile = (f: (path: string, watch: FolderWatch) => void) => {
+    ipcRenderer.removeAllListeners("watchAddFile");
+    ipcRenderer.on("watchAddFile", (_, path: string, watch: FolderWatch) =>
+        f(path, watch),
     );
 };
 
-const addWatchMapping = (
-    collectionName: string,
-    folderPath: string,
-    uploadStrategy: number,
-): Promise<void> =>
-    ipcRenderer.invoke(
-        "addWatchMapping",
-        collectionName,
-        folderPath,
-        uploadStrategy,
+const watchOnRemoveFile = (f: (path: string, watch: FolderWatch) => void) => {
+    ipcRenderer.removeAllListeners("watchRemoveFile");
+    ipcRenderer.on("watchRemoveFile", (_, path: string, watch: FolderWatch) =>
+        f(path, watch),
     );
+};
 
-const removeWatchMapping = (folderPath: string): Promise<void> =>
-    ipcRenderer.invoke("removeWatchMapping", folderPath);
-
-const getWatchMappings = (): Promise<FolderWatch[]> =>
-    ipcRenderer.invoke("getWatchMappings");
+const watchOnRemoveDir = (f: (path: string, watch: FolderWatch) => void) => {
+    ipcRenderer.removeAllListeners("watchRemoveDir");
+    ipcRenderer.on("watchRemoveDir", (_, path: string, watch: FolderWatch) =>
+        f(path, watch),
+    );
+};
 
 const updateWatchMappingSyncedFiles = (
     folderPath: string,
@@ -265,6 +263,7 @@ const getElectronFilesFromGoogleZip = (
 const getDirFiles = (dirPath: string): Promise<ElectronFile[]> =>
     ipcRenderer.invoke("getDirFiles", dirPath);
 
+//
 // These objects exposed here will become available to the JS code in our
 // renderer (the web/ code) as `window.ElectronAPIs.*`
 //
@@ -296,8 +295,10 @@ const getDirFiles = (dirPath: string): Promise<ElectronFile[]> =>
 //   https://www.electronjs.org/docs/latest/api/context-bridge#methods
 //
 // The copy itself is relatively fast, but the problem with transfering large
-// amounts of data is potentially running out of memory during the copy. For an
-// alternative, see [Note: IPC streams].
+// amounts of data is potentially running out of memory during the copy.
+//
+// For an alternative, see [Note: IPC streams].
+//
 contextBridge.exposeInMainWorld("electron", {
     // - General
 
@@ -353,12 +354,14 @@ contextBridge.exposeInMainWorld("electron", {
     // - Watch
 
     watch: {
-        findFiles,
+        findFiles: watchFindFiles,
+        add: watchAdd,
+        remove: watchRemove,
+        get: watchGet,
+        onAddFile: watchOnAddFile,
+        onRemoveFile: watchOnRemoveFile,
+        onRemoveDir: watchOnRemoveDir,
     },
-    registerWatcherFunctions,
-    addWatchMapping,
-    removeWatchMapping,
-    getWatchMappings,
     updateWatchMappingSyncedFiles,
     updateWatchMappingIgnoredFiles,
 

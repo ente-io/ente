@@ -25,9 +25,9 @@ export const createWatcher = (mainWindow: BrowserWindow) => {
     });
 
     watcher
-        .on("add", send("addFile"))
-        .on("unlink", send("removeFile"))
-        .on("unlinkDir", send("removeDir"))
+        .on("add", send("watchAddFile"))
+        .on("unlink", send("watchRemoveFile"))
+        .on("unlinkDir", send("watchRemoveDir"))
         .on("error", (error) => log.error("Error while watching files", error));
 
     return watcher;

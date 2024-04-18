@@ -115,7 +115,7 @@ class FolderWatcher {
      * collection do files belonging to nested directories go to.
      */
     async addWatch(folderPath: string, mapping: CollectionMapping) {
-        await ensureElectron().watcher.add(folderPath, mapping);
+        await ensureElectron().watch.add(folderPath, mapping);
         this.syncWithDisk();
     }
 
@@ -706,7 +706,7 @@ const deduceEvents = async (
     for (const watch of activeWatches) {
         const folderPath = watch.folderPath;
 
-        const paths = (await electron.watcher.findFiles(folderPath))
+        const paths = (await electron.watch.findFiles(folderPath))
             // Filter out hidden files (files whose names begins with a dot)
             .filter((path) => !isHiddenFile(path));
 
