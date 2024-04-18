@@ -17,7 +17,7 @@ import { GalleryContext } from "pages/gallery";
 import { useContext, useEffect, useRef, useState } from "react";
 import billingService from "services/billingService";
 import { getLatestCollections } from "services/collectionService";
-import ImportService from "services/importService";
+import { setToUploadCollection } from "services/pending-uploads";
 import {
     getPublicCollectionUID,
     getPublicCollectionUploaderName,
@@ -513,17 +513,17 @@ export default function Uploader(props: Props) {
                 !isPendingDesktopUpload.current &&
                 !watcher.isUploadRunning()
             ) {
-                await ImportService.setToUploadCollection(collections);
+                await setToUploadCollection(collections);
                 // TODO (MR): What happens when we have both?
                 if (zipPaths.current) {
-                    await electron.setToUploadFiles(
-                        PICKED_UPLOAD_TYPE.ZIPS,
+                    await electron.setPendingUploadFiles(
+                        "zips",
                         zipPaths.current,
                     );
                     zipPaths.current = null;
                 }
-                await electron.setToUploadFiles(
-                    PICKED_UPLOAD_TYPE.FILES,
+                await electron.setPendingUploadFiles(
+                    "files",
                     filesWithCollectionToUploadIn.map(
                         ({ file }) => (file as ElectronFile).path,
                     ),
