@@ -96,7 +96,7 @@ class FolderWatcher {
         this.setCollectionName = setCollectionName;
         this.syncWithRemote = syncWithRemote;
         this.setWatchFolderServiceIsRunning = setWatchFolderServiceIsRunning;
-        this.setupWatcherFunctions();
+        this.registerListeners();
         await this.syncWithDisk();
     }
 
@@ -115,7 +115,7 @@ class FolderWatcher {
      * collection do files belonging to nested directories go to.
      */
     async addWatch(folderPath: string, mapping: CollectionMapping) {
-        await ensureElectron().watch.add(folderPath, mapping);
+        await ensureElectron().watcher.add(folderPath, mapping);
         this.syncWithDisk();
     }
 
@@ -165,8 +165,14 @@ class FolderWatcher {
         this.trashingDirQueue.push(path);
     }
 
-    private setupWatcherFunctions() {
-        ensureElectron().registerWatcherFunctions(
+    private registerListeners() {
+        const watch = ensureElectron().watcher;
+
+        // [Note: File renames during folder watch]
+        //
+        // Renames come as two file system events - an `onAddFile` + an
+        // `onRemoveFile` - in an arbitrary order.
+        watch.onAddFile(
             diskFileAddedCallback,
             diskFileRemovedCallback,
             diskFolderRemovedCallback,
@@ -594,9 +600,9 @@ interface WatchEvent {
     filePath: string;
 }
 
-async function diskFileAddedCallback(file: ElectronFile) {
+const onAddFile = async (path: string) => {
     const collectionNameAndFolderPath =
-        await watcher.getCollectionNameAndFolderPath(file.path);
+        await watcher.getCollectionNameAndFolderPath(path);
 
     if (!collectionNameAndFolderPath) {
         return;
@@ -604,13 +610,12 @@ async function diskFileAddedCallback(file: ElectronFile) {
 
     const { collectionName, folderPath } = collectionNameAndFolderPath;
 
-    const event: EventQueueItem = {
-        type: "upload",
+    watcher.pushEvent({
+        action: "upload",
         collectionName,
         folderPath,
         path: file.path,
-    };
-    watcher.pushEvent(event);
+    });
 }
 
 async function diskFileRemovedCallback(filePath: string) {
@@ -701,7 +706,7 @@ const deduceEvents = async (
     for (const watch of activeWatches) {
         const folderPath = watch.folderPath;
 
-        const paths = (await electron.watch.findFiles(folderPath))
+        const paths = (await electron.watcher.findFiles(folderPath))
             // Filter out hidden files (files whose names begins with a dot)
             .filter((path) => !isHiddenFile(path));
 
@@ -741,7 +746,7 @@ const isSyncedOrIgnoredPath = (path: string, watch: FolderWatch) =>
 
 const collectionNameForPath = (filePath: string, watch: FolderWatch) =>
     watch.collectionMapping == "root"
-        ? watch.rootFolderName
+        ? dirname(watch.folderPath)
         : parentDirectoryName(filePath);
 
 const parentDirectoryName = (path: string) => basename(dirname(path));

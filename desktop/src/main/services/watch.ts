@@ -5,7 +5,6 @@ import path from "node:path";
 import { FolderWatch } from "../../types/ipc";
 import log from "../log";
 import { watchStore } from "../stores/watch";
-import { getElectronFile } from "./fs";
 
 /**
  * Create and return a new file system watcher.
@@ -16,42 +15,41 @@ import { getElectronFile } from "./fs";
  * pertinent file system events.
  */
 export const createWatcher = (mainWindow: BrowserWindow) => {
-    const mappings = getWatchMappings();
-    const folderPaths = mappings.map((mapping) => {
-        return mapping.folderPath;
-    });
+    const send = (eventName: string) => (path: string) =>
+        mainWindow.webContents.send(eventName, ...eventData(path));
+
+    const folderPaths = folderWatches().map((watch) => watch.folderPath);
 
     const watcher = chokidar.watch(folderPaths, {
         awaitWriteFinish: true,
     });
+
     watcher
-        .on("add", async (path) => {
-            mainWindow.webContents.send(
-                "watch-add",
-                await getElectronFile(normalizeToPOSIX(path)),
-            );
-        })
-        .on("unlink", (path) => {
-            mainWindow.webContents.send("watch-unlink", normalizeToPOSIX(path));
-        })
-        .on("unlinkDir", (path) => {
-            mainWindow.webContents.send(
-                "watch-unlink-dir",
-                normalizeToPOSIX(path),
-            );
-        })
-        .on("error", (error) => {
-            log.error("Error while watching files", error);
-        });
+        .on("add", send("addFile"))
+        .on("unlink", send("removeFile"))
+        .on("unlinkDir", send("removeDir"))
+        .on("error", (error) => log.error("Error while watching files", error));
 
     return watcher;
+};
+
+const eventData = (path: string): [string, FolderWatch] => {
+    path = posixPath(path);
+
+    const watch = folderWatches().find((watch) =>
+        path.startsWith(watch.folderPath + "/"),
+    );
+
+    if (!watch) throw new Error(`No folder watch was found for path ${path}`);
+
+    return [path, watch];
 };
 
 /**
  * Convert a file system {@link filePath} that uses the local system specific
  * path separators into a path that uses POSIX file separators.
  */
-const normalizeToPOSIX = (filePath: string) =>
+const posixPath = (filePath: string) =>
     filePath.split(path.sep).join(path.posix.sep);
 
 export const findFiles = async (dirPath: string) => {
@@ -156,10 +154,10 @@ export function updateWatchMappingIgnoredFiles(
     setWatchMappings(watchMappings);
 }
 
-export function getWatchMappings() {
+export const folderWatches = () => {
     const mappings = watchStore.get("mappings") ?? [];
     return mappings;
-}
+};
 
 function setWatchMappings(watchMappings: WatchStoreType["mappings"]) {
     watchStore.set("mappings", watchMappings);

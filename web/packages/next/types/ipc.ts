@@ -275,7 +275,7 @@ export interface Electron {
     // - Watch
 
     /**
-     * Functions tailored for the folder watch functionality
+     * Interface with the file system watcher running in our Node.js layer.
      *
      * [Note: Folder vs Directory in the context of FolderWatch-es]
      *
@@ -288,7 +288,7 @@ export interface Electron {
      * dragged/dropped or selected to set up the folder watch, will be referred
      * to as a folder when naming things.
      */
-    watch: {
+    watcher: {
         /**
          * Return the paths of all the files under the given folder.
          *
@@ -333,6 +333,45 @@ export interface Electron {
          * is no longer present, and returns this pruned list of watches.
          */
         get: () => Promise<FolderWatch[]>;
+
+        /**
+         * Register the function to invoke when a file is added in one of the
+         * folders we are watching.
+         *
+         * The callback function is passed the path to the file that was added,
+         * and the folder watch it was associated with.
+         *
+         * The path is guaranteed to use POSIX separators ('/').
+         */
+        onAddFile: (
+            f: (path: string, watch: FolderWatch) => void,
+        ) => Promise<void>;
+
+        /**
+         * Register the function to invoke when a file is removed in one of the
+         * folders we are watching.
+         *
+         * The callback function is passed the path to the file that was
+         * removed, and the folder watch it was associated with.
+         *
+         * The path is guaranteed to use POSIX separators ('/').
+         */
+        onRemoveFile: (
+            f: (path: string, watch: FolderWatch) => void,
+        ) => Promise<void>;
+
+        /**
+         * Register the function to invoke when a directory is removed in one of
+         * the folders we are watching.
+         *
+         * The callback function is passed the path to the directory that was
+         * removed, and the folder watch it was associated with.
+         *
+         * The path is guaranteed to use POSIX separators ('/').
+         */
+        onRemoveDir: (
+            f: (path: string, watch: FolderWatch) => void,
+        ) => Promise<void>;
     };
 
     registerWatcherFunctions: (
