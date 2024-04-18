@@ -296,6 +296,21 @@ const deleteLegacyDiskCacheDirIfExists = async () => {
     }
 };
 
+/**
+ * Older versions of our app used to keep a keys.json. It is not needed anymore,
+ * remove it if it exists.
+ *
+ * This code was added March 2024, and can be removed after some time once most
+ * people have upgraded to newer versions.
+ */
+const deleteLegacyKeysStoreIfExists = async () => {
+    const keysStore = path.join(app.getPath("userData"), "keys.json");
+    if (existsSync(keysStore)) {
+        log.info(`Removing legacy keys store at ${keysStore}`);
+        await fs.rm(keysStore);
+    }
+};
+
 const main = () => {
     const gotTheLock = app.requestSingleInstanceLock();
     if (!gotTheLock) {
@@ -338,6 +353,7 @@ const main = () => {
 
         try {
             deleteLegacyDiskCacheDirIfExists();
+            deleteLegacyKeysStoreIfExists();
         } catch (e) {
             // Log but otherwise ignore errors during non-critical startup
             // actions.
