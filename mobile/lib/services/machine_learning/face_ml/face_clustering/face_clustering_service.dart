@@ -732,12 +732,12 @@ class FaceClusteringService {
     final Map<String, int> newFaceIdToCluster = {};
     final stopwatchClustering = Stopwatch()..start();
     for (int i = 0; i < totalFaces; i++) {
+      if ((i + 1) % 250 == 0) {
+        log("[CompleteClustering] ${DateTime.now()} Processed ${i + 1} faces");
+      }
       if (faceInfos[i].clusterId != null) continue;
       int closestIdx = -1;
       double closestDistance = double.infinity;
-      if (i + 1 % 250 == 0) {
-        log("[CompleteClustering] ${DateTime.now()} Processed ${i - 1} faces");
-      }
       for (int j = 0; j < totalFaces; j++) {
         if (i == j) continue;
         final double distance =
