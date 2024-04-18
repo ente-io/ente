@@ -52,57 +52,68 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
     if (initPaymentUrl == null) {
       return const EnteLoadingWidget();
     }
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(S.of(context).subscription),
-      ),
-      body: Column(
-        children: <Widget>[
-          (progress != 1.0)
-              ? LinearProgressIndicator(value: progress)
-              : const SizedBox.shrink(),
-          Expanded(
-            child: InAppWebView(
-              initialUrlRequest: URLRequest(url: initPaymentUrl),
-              onProgressChanged:
-                  (InAppWebViewController controller, int progress) {
-                setState(() {
-                  this.progress = progress / 100;
-                });
-              },
-              initialOptions: InAppWebViewGroupOptions(
-                crossPlatform: InAppWebViewOptions(
-                  useShouldOverrideUrlLoading: true,
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) async {
+        if (didPop) return;
+        final shouldPop = await _buildPageExitWidget(context);
+        if (shouldPop) {
+          Navigator.of(context).pop();
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(S.of(context).subscription),
+        ),
+        body: Column(
+          children: <Widget>[
+            (progress != 1.0)
+                ? LinearProgressIndicator(value: progress)
+                : const SizedBox.shrink(),
+            Expanded(
+              child: InAppWebView(
+                initialUrlRequest: URLRequest(url: initPaymentUrl),
+                onProgressChanged:
+                    (InAppWebViewController controller, int progress) {
+                  setState(() {
+                    this.progress = progress / 100;
+                  });
+                },
+                initialOptions: InAppWebViewGroupOptions(
+                  crossPlatform: InAppWebViewOptions(
+                    useShouldOverrideUrlLoading: true,
+                  ),
                 ),
+                shouldOverrideUrlLoading: (controller, navigationAction) async {
+                  final loadingUri = navigationAction.request.url;
+                  _logger.info("Loading url $loadingUri");
+                  // handle the payment response
+                  if (_isPaymentActionComplete(loadingUri)) {
+                    await _handlePaymentResponse(loadingUri!);
+                    return NavigationActionPolicy.CANCEL;
+                  }
+                  return NavigationActionPolicy.ALLOW;
+                },
+                onConsoleMessage: (controller, consoleMessage) {
+                  _logger.info("onConsoleMessage $consoleMessage");
+                },
+                onLoadStart: (controller, navigationAction) async {
+                  _logger.info("onLoadStart $navigationAction");
+                },
+                onLoadError: (controller, navigationAction, code, msg) async {
+                  _logger.severe("onLoadError $navigationAction $code $msg");
+                },
+                onLoadHttpError:
+                    (controller, navigationAction, code, msg) async {
+                  _logger.info("onHttpError with $code and msg = $msg");
+                },
+                onLoadStop: (controller, navigationAction) async {
+                  _logger.info("onLoadStop $navigationAction");
+                },
               ),
-              shouldOverrideUrlLoading: (controller, navigationAction) async {
-                final loadingUri = navigationAction.request.url;
-                _logger.info("Loading url $loadingUri");
-                // handle the payment response
-                if (_isPaymentActionComplete(loadingUri)) {
-                  await _handlePaymentResponse(loadingUri!);
-                  return NavigationActionPolicy.CANCEL;
-                }
-                return NavigationActionPolicy.ALLOW;
-              },
-              onConsoleMessage: (controller, consoleMessage) {
-                _logger.info("onConsoleMessage $consoleMessage");
-              },
-              onLoadStart: (controller, navigationAction) async {
-                _logger.info("onLoadStart $navigationAction");
-              },
-              onLoadError: (controller, navigationAction, code, msg) async {
-                _logger.severe("onLoadError $navigationAction $code $msg");
-              },
-              onLoadHttpError: (controller, navigationAction, code, msg) async {
-                _logger.info("onHttpError with $code and msg = $msg");
-              },
-              onLoadStop: (controller, navigationAction) async {
-                _logger.info("onLoadStop $navigationAction");
-              },
             ),
-          ),
-        ].whereNotNull().toList(),
+          ].whereNotNull().toList(),
+        ),
       ),
     );
   }
@@ -125,6 +136,40 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
     } else {
       return Uri.https(tryParse!.authority, tryParse.path, queryParameters);
     }
+  }
+
+  // show dialog to handle accidental back press.
+  Future<bool> _buildPageExitWidget(BuildContext context) async {
+    final result = await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(S.of(context).areYouSureYouWantToExit),
+        actions: <Widget>[
+          TextButton(
+            child: Text(
+              S.of(context).yes,
+              style: const TextStyle(
+                color: Colors.redAccent,
+              ),
+            ),
+            onPressed: () => Navigator.of(context).pop(true),
+          ),
+          TextButton(
+            child: Text(
+              S.of(context).no,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.greenAlternative,
+              ),
+            ),
+            onPressed: () => Navigator.of(context).pop(false),
+          ),
+        ],
+      ),
+    );
+    if (result != null) {
+      return result;
+    }
+    return false;
   }
 
   bool _isPaymentActionComplete(Uri? loadingUri) {
