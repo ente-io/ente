@@ -335,12 +335,11 @@ class FaceMLDataDB {
   }
 
   Future<Iterable<String>> getFaceIDsForCluster(int clusterID) async {
-    final db = await instance.database;
-    final List<Map<String, dynamic>> maps = await db.query(
-      faceClustersTable,
-      columns: [fcFaceId],
-      where: '$fcClusterID = ?',
-      whereArgs: [clusterID],
+    final db = await instance.sqliteAsyncDB;
+    final List<Map<String, dynamic>> maps = await db.getAll(
+      'SELECT $fcFaceId FROM $faceClustersTable '
+      'WHERE $faceClustersTable.$fcClusterID = ?',
+      [clusterID],
     );
     return maps.map((e) => e[fcFaceId] as String).toSet();
   }
