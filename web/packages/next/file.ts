@@ -17,8 +17,12 @@ type FileNameComponents = [name: string, extension: string | undefined];
  */
 export const nameAndExtension = (fileName: string): FileNameComponents => {
     const i = fileName.lastIndexOf(".");
+    // No extension
     if (i == -1) return [fileName, undefined];
-    else return [fileName.slice(0, i), fileName.slice(i + 1)];
+    // A hidden file without an extension, e.g. ".gitignore"
+    if (i == 0) return [fileName, undefined];
+    // Both components present, just omit the dot.
+    return [fileName.slice(0, i), fileName.slice(i + 1)];
 };
 
 /**
