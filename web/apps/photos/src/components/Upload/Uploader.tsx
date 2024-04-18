@@ -1,3 +1,4 @@
+import { ensureElectron } from "@/next/electron";
 import log from "@/next/log";
 import type { CollectionMapping, Electron } from "@/next/types/ipc";
 import { CustomError } from "@ente/shared/error";
@@ -176,12 +177,20 @@ export default function Uploader(props: Props) {
         }
 
         if (isElectron()) {
-            ImportService.getPendingUploads().then(
-                ({ files: electronFiles, collectionName, type }) => {
-                    log.info(`found pending desktop upload, resuming uploads`);
-                    resumeDesktopUpload(type, electronFiles, collectionName);
-                },
-            );
+            ensureElectron()
+                .pendingUploads()
+                .then((pending) => {
+                    if (pending) {
+                        log.info("Resuming pending desktop upload", pending);
+                        resumeDesktopUpload(
+                            pending.type == "files"
+                                ? PICKED_UPLOAD_TYPE.FILES
+                                : PICKED_UPLOAD_TYPE.ZIPS,
+                            pending.files,
+                            pending.collectionName,
+                        );
+                    }
+                });
             watcher.init(
                 setElectronFiles,
                 setCollectionName,
@@ -505,6 +514,7 @@ export default function Uploader(props: Props) {
                 !watcher.isUploadRunning()
             ) {
                 await ImportService.setToUploadCollection(collections);
+                // TODO (MR): What happens when we have both?
                 if (zipPaths.current) {
                     await electron.setToUploadFiles(
                         PICKED_UPLOAD_TYPE.ZIPS,

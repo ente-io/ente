@@ -10,17 +10,6 @@ export interface AppUpdateInfo {
     version: string;
 }
 
-export enum FILE_PATH_TYPE {
-    FILES = "files",
-    ZIPS = "zips",
-}
-
-export enum PICKED_UPLOAD_TYPE {
-    FILES = "files",
-    FOLDERS = "folders",
-    ZIPS = "zips",
-}
-
 /**
  * Extra APIs provided by our Node.js layer when our code is running inside our
  * desktop (Electron) app.
@@ -355,21 +344,37 @@ export interface Electron {
 
     // - Upload
 
-    getPendingUploads: () => Promise<{
-        files: ElectronFile[];
-        collectionName: string;
-        type: string;
-    }>;
-    setToUploadFiles: (
-        /** TODO(MR): This is the actual type */
-        // type: FILE_PATH_TYPE,
-        type: PICKED_UPLOAD_TYPE,
+    /**
+     * Return any pending uploads that were previously enqueued but haven't yet
+     * been completed.
+     *
+     * The state of pending uploads is persisted in the Node.js layer.
+     *
+     * Note that we might have both outstanding zip and regular file uploads at
+     * the same time. In such cases, the zip file ones get precedence.
+     */
+    pendingUploads: () => Promise<PendingUploads | undefined>;
+
+    /**
+     * Set or clear the name of the collection where the pending upload is
+     * directed to.
+     */
+    setPendingUploadCollection: (collectionName: string) => Promise<void>;
+
+    /**
+     * Update the list of files (of {@link type}) associated with the pending
+     * upload.
+     */
+    setPendingUploadFiles: (
+        type: PendingUploads["type"],
         filePaths: string[],
     ) => Promise<void>;
+
+    // -
+
     getElectronFilesFromGoogleZip: (
         filePath: string,
     ) => Promise<ElectronFile[]>;
-    setToUploadCollection: (collectionName: string) => Promise<void>;
     getDirFiles: (dirPath: string) => Promise<ElectronFile[]>;
 }
 
@@ -413,4 +418,17 @@ export interface FolderWatchSyncedFile {
     path: string;
     uploadedFileID: number;
     collectionID: number;
+}
+
+/**
+ * When the user starts an upload, we remember the files they'd selected or drag
+ * and dropped so that we can resume (if needed) when the app restarts after
+ * being stopped in the middle of the uploads.
+ */
+export interface PendingUploads {
+    /** The collection to which we're uploading */
+    collectionName: string;
+    /* The upload can be either of a Google Takeout zip, or regular files */
+    type: "files" | "zips";
+    files: ElectronFile[];
 }
