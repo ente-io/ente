@@ -5,6 +5,7 @@ import "package:dio/dio.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/db/upload_locks_db.dart";
+import "package:photos/models/encryption_result.dart";
 import "package:photos/module/upload/model/multipart.dart";
 import "package:photos/module/upload/model/xml.dart";
 import "package:photos/services/feature_flag_service.dart";
@@ -23,6 +24,13 @@ class MultiPartUploader {
     this._db,
     this._featureFlagService,
   );
+
+  Future<EncryptionResult> getEncryptionResult(
+    String localId,
+    String fileHash,
+  ) {
+    return _db.getFileEncryptionData(localId, fileHash);
+  }
 
   Future<int> calculatePartCount(int fileSize) async {
     final partCount = (fileSize / multipartPartSizeForUpload).ceil();
@@ -56,6 +64,7 @@ class MultiPartUploader {
     String encryptedFilePath,
     int fileSize,
     Uint8List fileKey,
+    Uint8List fileNonce,
   ) async {
     await _db.createTrackUploadsEntry(
       localId,
@@ -64,6 +73,7 @@ class MultiPartUploader {
       encryptedFilePath,
       fileSize,
       CryptoUtil.bin2base64(fileKey),
+      CryptoUtil.bin2base64(fileNonce),
     );
   }
 
@@ -118,12 +128,17 @@ class MultiPartUploader {
     final partsLength = partsURLs.length;
     final etags = partInfo.partETags ?? <int, String>{};
 
-    for (int i = 0; i < partsLength; i++) {
-      if (i < (partUploadStatus?.length ?? 0) &&
-          (partUploadStatus?[i] ?? false)) {
-        continue;
-      }
-      final partSize = partInfo.partSize ?? multipartPartSizeForUpload;
+    int i = 0;
+    final partSize = partInfo.partSize ?? multipartPartSizeForUpload;
+
+    // Go to the first part that is not uploaded
+    while (i < (partUploadStatus?.length ?? 0) &&
+        (partUploadStatus?[i] ?? false)) {
+      i++;
+    }
+
+    // Start parts upload
+    while (i < partsLength) {
       final partURL = partsURLs[i];
       final isLastPart = i == partsLength - 1;
       final fileSize =
@@ -151,7 +166,9 @@ class MultiPartUploader {
       etags[i] = eTag!;
 
       await _db.updatePartStatus(partInfo.urls.objectKey, i, eTag);
+      i++;
     }
+
     await _db.updateTrackUploadStatus(
       partInfo.urls.objectKey,
       MultipartStatus.uploaded,

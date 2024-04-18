@@ -4,12 +4,14 @@ import 'dart:io';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import "package:photos/core/constants.dart";
+import "package:photos/models/encryption_result.dart";
 import "package:photos/module/upload/model/multipart.dart";
+import "package:photos/utils/crypto_util.dart";
 import 'package:sqflite/sqflite.dart';
+import "package:sqflite_migration/sqflite_migration.dart";
 
 class UploadLocksDB {
   static const _databaseName = "ente.upload_locks.db";
-  static const _databaseVersion = 1;
 
   static const _uploadLocksTable = (
     table: "upload_locks",
@@ -26,6 +28,7 @@ class UploadLocksDB {
     columnEncryptedFilePath: "encrypted_file_path",
     columnEncryptedFileSize: "encrypted_file_size",
     columnFileKey: "file_key",
+    columnFileNonce: "file_nonce",
     columnObjectKey: "object_key",
     columnCompleteUrl: "complete_url",
     columnStatus: "status",
@@ -39,6 +42,19 @@ class UploadLocksDB {
     columnPartUrl: "part_url",
     columnPartETag: "part_etag",
     columnPartStatus: "part_status",
+  );
+
+  static final initializationScript = [
+    ..._createUploadLocksTable(),
+  ];
+
+  static final migrationScripts = [
+    ..._createTrackUploadsTable(),
+  ];
+
+  final dbConfig = MigrationConfig(
+    initializationScript: initializationScript,
+    migrationScripts: migrationScripts,
   );
 
   UploadLocksDB._privateConstructor();
@@ -55,18 +71,11 @@ class UploadLocksDB {
         await getApplicationDocumentsDirectory();
     final String path = join(documentsDirectory.path, _databaseName);
 
-    return await openDatabase(
-      path,
-      version: _databaseVersion,
-      onCreate: _onCreate,
-      onOpen: (db) async {
-        await _createTrackUploadsTable(db);
-      },
-    );
+    return await openDatabaseWithMigration(path, dbConfig);
   }
 
-  Future _onCreate(Database db, int version) async {
-    await db.execute(
+  static List<String> _createUploadLocksTable() {
+    return [
       '''
                 CREATE TABLE ${_uploadLocksTable.table} (
                   ${_uploadLocksTable.columnID} TEXT PRIMARY KEY NOT NULL,
@@ -74,23 +83,11 @@ class UploadLocksDB {
                  ${_uploadLocksTable.columnTime} TEXT NOT NULL
                 )
                 ''',
-    );
-    await _createTrackUploadsTable(db);
+    ];
   }
 
-  Future _createTrackUploadsTable(Database db) async {
-    if ((await db.query(
-      'sqlite_master',
-      where: 'name = ?',
-      whereArgs: [
-        _trackUploadTable.table,
-      ],
-    ))
-        .isNotEmpty) {
-      return;
-    }
-
-    await db.execute(
+  static List<String> _createTrackUploadsTable() {
+    return [
       '''
                 CREATE TABLE ${_trackUploadTable.table} (
                   ${_trackUploadTable.columnID} INTEGER PRIMARY KEY,
@@ -99,14 +96,13 @@ class UploadLocksDB {
                   ${_trackUploadTable.columnEncryptedFilePath} TEXT NOT NULL,
                   ${_trackUploadTable.columnEncryptedFileSize} INTEGER NOT NULL,
                   ${_trackUploadTable.columnFileKey} TEXT NOT NULL,
+                  ${_trackUploadTable.columnFileNonce} TEXT NOT NULL,
                   ${_trackUploadTable.columnObjectKey} TEXT NOT NULL,
                   ${_trackUploadTable.columnCompleteUrl} TEXT NOT NULL,
                   ${_trackUploadTable.columnStatus} TEXT DEFAULT '${MultipartStatus.pending.name}' NOT NULL,
                   ${_trackUploadTable.columnPartSize} INTEGER NOT NULL
                 )
                 ''',
-    );
-    await db.execute(
       '''
                 CREATE TABLE ${_partsTable.table} (
                   ${_partsTable.columnObjectKey} TEXT NOT NULL REFERENCES ${_trackUploadTable.table}(${_trackUploadTable.columnObjectKey}) ON DELETE CASCADE,
@@ -117,7 +113,7 @@ class UploadLocksDB {
                   PRIMARY KEY (${_partsTable.columnObjectKey}, ${_partsTable.columnPartNumber})
                 )
                 ''',
-    );
+    ];
   }
 
   Future<void> clearTable() async {
@@ -193,6 +189,33 @@ class UploadLocksDB {
     return rows.isNotEmpty;
   }
 
+  Future<EncryptionResult> getFileEncryptionData(
+    String localId,
+    String fileHash,
+  ) async {
+    final db = await instance.database;
+
+    final rows = await db.query(
+      _trackUploadTable.table,
+      where:
+          '${_trackUploadTable.columnLocalID} = ? AND ${_trackUploadTable.columnFileHash} = ?',
+      whereArgs: [localId, fileHash],
+    );
+
+    if (rows.isEmpty) {
+      throw Exception("No cached links found for $localId and $fileHash");
+    }
+    final row = rows.first;
+
+    return EncryptionResult(
+      key:
+          CryptoUtil.base642bin(row[_trackUploadTable.columnFileKey] as String),
+      header: CryptoUtil.base642bin(
+        row[_trackUploadTable.columnFileNonce] as String,
+      ),
+    );
+  }
+
   Future<MultipartInfo> getCachedLinks(
     String localId,
     String fileHash,
@@ -255,6 +278,7 @@ class UploadLocksDB {
     String encryptedFilePath,
     int fileSize,
     String fileKey,
+    String fileNonce,
   ) async {
     final db = await UploadLocksDB.instance.database;
     final objectKey = urls.objectKey;
@@ -269,6 +293,7 @@ class UploadLocksDB {
         _trackUploadTable.columnEncryptedFilePath: encryptedFilePath,
         _trackUploadTable.columnEncryptedFileSize: fileSize,
         _trackUploadTable.columnFileKey: fileKey,
+        _trackUploadTable.columnFileNonce: fileNonce,
         _trackUploadTable.columnPartSize: multipartPartSizeForUpload,
       },
     );
@@ -315,14 +340,14 @@ class UploadLocksDB {
     await db.update(
       _trackUploadTable.table,
       {
-        _trackUploadTable.columnStatus: status,
+        _trackUploadTable.columnStatus: status.name,
       },
       where: '${_trackUploadTable.columnObjectKey} = ?',
       whereArgs: [objectKey],
     );
   }
 
-  Future<int> deleteCompletedRecord(
+  Future<int> deleteMultipartTrack(
     String localId,
   ) async {
     final db = await instance.database;

@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:math';
+import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
@@ -41,7 +41,6 @@ import 'package:photos/utils/file_uploader_util.dart';
 import "package:photos/utils/file_util.dart";
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tuple/tuple.dart';
-import "package:uuid/uuid.dart";
 
 class FileUploader {
   static const kMaximumConcurrentUploads = 4;
@@ -424,12 +423,19 @@ class FileUploader {
     }
 
     final tempDirectory = Configuration.instance.getTempDirectory();
-    final String uniqueID = const Uuid().v4().toString();
+    MediaUploadData? mediaUploadData;
+    mediaUploadData = await getUploadDataFromEnteFile(file);
+
+    final String uniqueID = lockKey +
+        "_" +
+        mediaUploadData.hashData!.fileHash!
+            .replaceAll('+', '')
+            .replaceAll('/', '');
+
     final encryptedFilePath =
         '$tempDirectory$kUploadTempPrefix${uniqueID}_file.encrypted';
     final encryptedThumbnailPath =
         '$tempDirectory$kUploadTempPrefix${uniqueID}_thumb.encrypted';
-    MediaUploadData? mediaUploadData;
     var uploadCompleted = false;
     // This flag is used to decide whether to clear the iOS origin file cache
     // or not.
@@ -443,13 +449,25 @@ class FileUploader {
         '${isUpdatedFile ? 're-upload' : 'upload'} of ${file.toString()}',
       );
 
-      mediaUploadData = await getUploadDataFromEnteFile(file);
+      var multipartEntryExists = mediaUploadData.hashData?.fileHash != null &&
+          await _uploadLocks.doesExists(
+            lockKey,
+            mediaUploadData.hashData!.fileHash!,
+          );
 
       Uint8List? key;
+      EncryptionResult? multipartEncryptionResult;
       if (isUpdatedFile) {
         key = getFileKey(file);
       } else {
-        key = null;
+        multipartEncryptionResult = multipartEntryExists
+            ? await _multiPartUploader.getEncryptionResult(
+                lockKey,
+                mediaUploadData.hashData!.fileHash!,
+              )
+            : null;
+        key = multipartEncryptionResult?.key;
+
         // check if the file is already uploaded and can be mapped to existing
         // uploaded file. If map is found, it also returns the corresponding
         // mapped or update file entry.
@@ -468,16 +486,30 @@ class FileUploader {
         }
       }
 
-      if (File(encryptedFilePath).existsSync()) {
+      final encryptedFileExists = File(encryptedFilePath).existsSync();
+
+      // If the multipart entry exists but the encrypted file doesn't, it means
+      // that we'll have to reupload as the nonce is lost
+      if (multipartEntryExists) {
+        if (!encryptedFileExists) {
+          await _uploadLocks.deleteMultipartTrack(lockKey);
+          multipartEntryExists = false;
+          multipartEncryptionResult = null;
+        }
+      } else if (encryptedFileExists) {
+        // otherwise just delete the file for singlepart upload
         await File(encryptedFilePath).delete();
       }
       await _checkIfWithinStorageLimit(mediaUploadData.sourceFile!);
       final encryptedFile = File(encryptedFilePath);
-      final EncryptionResult fileAttributes = await CryptoUtil.encryptFile(
-        mediaUploadData.sourceFile!.path,
-        encryptedFilePath,
-        key: key,
-      );
+
+      final EncryptionResult fileAttributes = multipartEncryptionResult ??
+          await CryptoUtil.encryptFile(
+            mediaUploadData.sourceFile!.path,
+            encryptedFilePath,
+            key: key,
+          );
+
       late final Uint8List? thumbnailData;
       if (mediaUploadData.thumbnail == null &&
           file.fileType == FileType.video) {
@@ -516,11 +548,7 @@ class FileUploader {
         final fileUploadURL = await _getUploadURL();
         fileObjectKey = await _putFile(fileUploadURL, encryptedFile);
       } else {
-        if (mediaUploadData.hashData?.fileHash != null &&
-            await _uploadLocks.doesExists(
-              lockKey,
-              mediaUploadData.hashData!.fileHash!,
-            )) {
+        if (multipartEntryExists) {
           fileObjectKey = await _multiPartUploader.putExistingMultipartFile(
             encryptedFile,
             lockKey,
@@ -536,6 +564,7 @@ class FileUploader {
             encryptedFilePath,
             await encryptedFile.length(),
             fileAttributes.key!,
+            fileAttributes.header!,
           );
           fileObjectKey = await _multiPartUploader.putMultipartFile(
             fileUploadURLs,
@@ -546,7 +575,7 @@ class FileUploader {
 
       final metadata = await file.getMetadataForUpload(mediaUploadData);
       final encryptedMetadataResult = await CryptoUtil.encryptChaCha(
-        utf8.encode(jsonEncode(metadata)) as Uint8List,
+        utf8.encode(jsonEncode(metadata)),
         fileAttributes.key!,
       );
       final fileDecryptionHeader =
@@ -628,7 +657,7 @@ class FileUploader {
         }
         await FilesDB.instance.update(remoteFile);
       }
-      await UploadLocksDB.instance.deleteCompletedRecord(lockKey);
+      await UploadLocksDB.instance.deleteMultipartTrack(lockKey);
 
       if (!_isBackground) {
         Bus.instance.fire(
@@ -1051,7 +1080,7 @@ class FileUploader {
     if (_uploadURLs.isEmpty) {
       // the queue is empty, fetch at least for one file to handle force uploads
       // that are not in the queue. This is to also avoid
-      await fetchUploadURLs(max(_queue.length, 1));
+      await fetchUploadURLs(math.max(_queue.length, 1));
     }
     try {
       return _uploadURLs.removeFirst();
@@ -1073,7 +1102,7 @@ class FileUploader {
         final response = await _enteDio.get(
           "/files/upload-urls",
           queryParameters: {
-            "count": min(42, fileCount * 2), // m4gic number
+            "count": math.min(42, fileCount * 2), // m4gic number
           },
         );
         final urls = (response.data["urls"] as List)
