@@ -3,9 +3,9 @@ import 'dart:io';
 
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
-import "package:photos/core/constants.dart";
 import "package:photos/models/encryption_result.dart";
 import "package:photos/module/upload/model/multipart.dart";
+import "package:photos/module/upload/service/multipart.dart";
 import "package:photos/utils/crypto_util.dart";
 import 'package:sqflite/sqflite.dart';
 import "package:sqflite_migration/sqflite_migration.dart";
@@ -294,7 +294,7 @@ class UploadLocksDB {
         _trackUploadTable.columnEncryptedFileSize: fileSize,
         _trackUploadTable.columnFileKey: fileKey,
         _trackUploadTable.columnFileNonce: fileNonce,
-        _trackUploadTable.columnPartSize: multipartPartSizeForUpload,
+        _trackUploadTable.columnPartSize: MultiPartUploader.multipartPartSizeForUpload,
       },
     );
 

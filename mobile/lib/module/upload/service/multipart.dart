@@ -32,6 +32,13 @@ class MultiPartUploader {
     return _db.getFileEncryptionData(localId, fileHash);
   }
 
+  static int get multipartPartSizeForUpload {
+    if (FeatureFlagService.instance.isInternalUserOrDebugBuild()) {
+      return multipartPartSizeInternal;
+    }
+    return multipartPartSize;
+  }
+
   Future<int> calculatePartCount(int fileSize) async {
     final partCount = (fileSize / multipartPartSizeForUpload).ceil();
     return partCount;
