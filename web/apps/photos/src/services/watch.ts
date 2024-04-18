@@ -115,9 +115,7 @@ class FolderWatcher {
      * collection do files belonging to nested directories go to.
      */
     async addWatch(folderPath: string, mapping: CollectionMapping) {
-        const rootFolderName = folderPath.substring(
-            folderPath.lastIndexOf("/") + 1,
-        );
+        const rootFolderName = basename(folderPath)
         await ensureElectron().addWatchMapping(
             rootFolderName,
             folderPath,

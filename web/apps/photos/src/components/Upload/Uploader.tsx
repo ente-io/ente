@@ -5,11 +5,7 @@ import { CustomError } from "@ente/shared/error";
 import { isPromise } from "@ente/shared/utils";
 import DiscFullIcon from "@mui/icons-material/DiscFull";
 import UserNameInputDialog from "components/UserNameInputDialog";
-import {
-    DEFAULT_IMPORT_SUGGESTION,
-    PICKED_UPLOAD_TYPE,
-    UPLOAD_STAGES,
-} from "constants/upload";
+import { PICKED_UPLOAD_TYPE, UPLOAD_STAGES } from "constants/upload";
 import { t } from "i18next";
 import isElectron from "is-electron";
 import { AppContext } from "pages/_app";
@@ -35,11 +31,7 @@ import {
     SetLoading,
     UploadTypeSelectorIntent,
 } from "types/gallery";
-import {
-    ElectronFile,
-    FileWithCollection,
-    ImportSuggestion,
-} from "types/upload";
+import { ElectronFile, FileWithCollection } from "types/upload";
 import {
     InProgressUpload,
     SegregatedFinishedUploads,
@@ -53,9 +45,11 @@ import {
     getRootLevelFileWithFolderNotAllowMessage,
 } from "utils/ui";
 import {
+    DEFAULT_IMPORT_SUGGESTION,
     filterOutSystemFiles,
     getImportSuggestion,
     groupFilesBasedOnParentFolder,
+    type ImportSuggestion,
 } from "utils/upload";
 import { SetCollectionNamerAttributes } from "../Collections/CollectionNamer";
 import { CollectionMappingChoiceModal } from "./CollectionMappingChoiceModal";

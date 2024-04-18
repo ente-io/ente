@@ -1,19 +1,10 @@
 import { basename, dirname } from "@/next/file";
 import { FILE_TYPE } from "constants/file";
-import {
-    A_SEC_IN_MICROSECONDS,
-    DEFAULT_IMPORT_SUGGESTION,
-    PICKED_UPLOAD_TYPE,
-} from "constants/upload";
+import { A_SEC_IN_MICROSECONDS, PICKED_UPLOAD_TYPE } from "constants/upload";
 import isElectron from "is-electron";
 import { exportMetadataDirectoryName } from "services/export";
 import { EnteFile } from "types/file";
-import {
-    ElectronFile,
-    FileWithCollection,
-    ImportSuggestion,
-    Metadata,
-} from "types/upload";
+import { ElectronFile, FileWithCollection, Metadata } from "types/upload";
 
 const TYPE_JSON = "json";
 const DEDUPE_COLLECTION = new Set(["icloud library", "icloudlibrary"]);
@@ -119,6 +110,19 @@ export function areFileWithCollectionsSame(
  */
 export const areAllInSameDirectory = (paths: string[]) =>
     new Set(paths.map(dirname)).size == 1;
+
+// This is used to prompt the user the make upload strategy choice
+export interface ImportSuggestion {
+    rootFolderName: string;
+    hasNestedFolders: boolean;
+    hasRootLevelFileWithFolder: boolean;
+}
+
+export const DEFAULT_IMPORT_SUGGESTION: ImportSuggestion = {
+    rootFolderName: "",
+    hasNestedFolders: false,
+    hasRootLevelFileWithFolder: false,
+};
 
 export function getImportSuggestion(
     uploadType: PICKED_UPLOAD_TYPE,

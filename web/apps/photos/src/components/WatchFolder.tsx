@@ -1,4 +1,5 @@
 import { ensureElectron } from "@/next/electron";
+import { basename } from "@/next/file";
 import type { CollectionMapping, FolderWatch } from "@/next/types/ipc";
 import { ensure } from "@/utils/ensure";
 import {
@@ -166,7 +167,7 @@ const WatchList: React.FC<WatchList> = ({ watches, removeWatch }) => {
             {watches.map((watch) => {
                 return (
                     <WatchEntry
-                        key={watch.rootFolderName}
+                        key={watch.folderPath}
                         watch={watch}
                         removeWatch={removeWatch}
                     />
@@ -292,7 +293,7 @@ const EntryHeading: React.FC<EntryHeadingProps> = ({ watch }) => {
     const appContext = useContext(AppContext);
     return (
         <FlexWrapper gap={1}>
-            <Typography>{watch.rootFolderName}</Typography>
+            <Typography>{basename(watch.folderPath)}</Typography>
             {appContext.isFolderSyncRunning &&
                 watcher.isSyncingWatch(watch) && <CircularProgress size={12} />}
         </FlexWrapper>

@@ -300,6 +300,21 @@ export interface Electron {
          * The returned paths are guaranteed to use POSIX separators ('/').
          */
         findFiles: (folderPath: string) => Promise<string[]>;
+
+        /**
+         * Add a new folder watch for the given {@link folderPath}.
+         *
+         * This adds a new entry in the list of watches (persisting them on
+         * disk), and also starts immediately observing for file system events
+         * that happen within {@link folderPath}.
+         *
+         * @param collectionMapping Determines how nested directories (if any)
+         * get mapped to Ente collections.
+         */
+        add: (
+            folderPath: string,
+            collectionMapping: CollectionMapping,
+        ) => Promise<void>;
     };
 
     registerWatcherFunctions: (
@@ -394,6 +409,12 @@ export interface AppUpdate {
  * side.
  */
 export interface FolderWatch {
+    /**
+     * Name of the root folder.
+     *
+     * This is just `basename(folderPath)`, but is retained as a precomputed
+     * property for convenience instead of needing to recompute it every time.
+     */
     rootFolderName: string;
     /**
      * Specify if nested files should all be mapped to the same single root
@@ -401,8 +422,17 @@ export interface FolderWatch {
      * files. @see {@link CollectionMapping}.
      */
     collectionMapping: CollectionMapping;
+    /**
+     * The path to the (root) folder we are watching.
+     */
     folderPath: string;
+    /**
+     * Files that have already been uploaded.
+     */
     syncedFiles: FolderWatchSyncedFile[];
+    /**
+     * Files (paths) that should be ignored when uploading.
+     */
     ignoredFiles: string[];
 }
 
