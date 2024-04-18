@@ -115,18 +115,12 @@ class FolderWatcher {
      * collection do files belonging to nested directories go to.
      */
     async addWatch(folderPath: string, mapping: CollectionMapping) {
-        const rootFolderName = basename(folderPath)
-        await ensureElectron().addWatchMapping(
-            rootFolderName,
-            folderPath,
-            mapping,
-        );
+        await ensureElectron().watch.add(folderPath, mapping);
         this.syncWithDisk();
     }
 
     /**
-     * Remove the folder watch corresponding to the given root
-     * {@link folderPath}.
+     * Remove the folder watch for the given root {@link folderPath}.
      */
     async removeWatchForFolderPath(folderPath: string) {
         await ensureElectron().removeWatchMapping(folderPath);

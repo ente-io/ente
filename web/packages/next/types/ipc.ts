@@ -315,6 +315,24 @@ export interface Electron {
             folderPath: string,
             collectionMapping: CollectionMapping,
         ) => Promise<void>;
+
+        /**
+         * Remove the pre-existing watch for the given {@link folderPath}.
+         *
+         * Persist this removal, and also stop listening for file system events
+         * that happen within the {@link folderPath}.
+         */
+        remove: (folderPath: string) => Promise<void>;
+
+        /**
+         * Return the list of folder watches.
+         *
+         * The list of folder paths (and auxillary details) is persisted in the
+         * Node.js layer. When we invoke this method, the Node.js goes through
+         * the list, permanently removes any watches whose on-disk directory has
+         * is no longer present, and returns this pruned list of watches.
+         */
+        get: () => Promise<FolderWatch[]>;
     };
 
     registerWatcherFunctions: (
@@ -322,12 +340,6 @@ export interface Electron {
         removeFile: (path: string) => Promise<void>,
         removeFolder: (folderPath: string) => Promise<void>,
     ) => void;
-
-    addWatchMapping: (
-        collectionName: string,
-        folderPath: string,
-        uploadStrategy: number,
-    ) => Promise<void>;
 
     removeWatchMapping: (folderPath: string) => Promise<void>;
 
@@ -409,13 +421,6 @@ export interface AppUpdate {
  * side.
  */
 export interface FolderWatch {
-    /**
-     * Name of the root folder.
-     *
-     * This is just `basename(folderPath)`, but is retained as a precomputed
-     * property for convenience instead of needing to recompute it every time.
-     */
-    rootFolderName: string;
     /**
      * Specify if nested files should all be mapped to the same single root
      * collection, or if there should be a collection per directory that has
