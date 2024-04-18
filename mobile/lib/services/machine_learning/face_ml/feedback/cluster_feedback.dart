@@ -256,7 +256,7 @@ class ClusterFeedbackService {
       //   useDynamicThreshold: false,
       // );
       final faceIdToCluster =
-          await FaceClusteringService.instance.predictComplete(
+          await FaceClusteringService.instance.predictCompleteComputer(
         embeddings,
         fileIDToCreationTime: fileIDToCreationTime,
         distanceThreshold: 0.30,

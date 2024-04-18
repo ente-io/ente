@@ -245,7 +245,7 @@ class FaceClusteringService {
     }
   }
 
-  Future<Map<String, int>> predictComplete(
+  Future<Map<String, int>> predictCompleteComputer(
     Map<String, Uint8List> input, {
     Map<int, int>? fileIDToCreationTime,
     double distanceThreshold = kRecommendedDistanceThreshold,
