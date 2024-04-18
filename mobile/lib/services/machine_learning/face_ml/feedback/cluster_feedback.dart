@@ -13,6 +13,8 @@ import "package:photos/generated/protos/ente/common/vector.pb.dart";
 import "package:photos/models/file/file.dart";
 import 'package:photos/services/machine_learning/face_ml/face_clustering/cosine_distance.dart';
 import "package:photos/services/machine_learning/face_ml/face_clustering/face_clustering_service.dart";
+// import "package:photos/services/machine_learning/face_ml/face_clustering/face_info_for_clustering.dart";
+// import "package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart";
 import "package:photos/services/machine_learning/face_ml/face_ml_result.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/search_service.dart";
@@ -232,14 +234,36 @@ class ClusterFeedbackService {
         maxClusterID++;
       }
     } else {
+      // final clusteringInput = embeddings
+      //     .map((key, value) {
+      //       return MapEntry(
+      //         key,
+      //         FaceInfoForClustering(
+      //           faceID: key,
+      //           embeddingBytes: value,
+      //           faceScore: kMinHighQualityFaceScore + 0.01,
+      //           blurValue: kLapacianDefault,
+      //         ),
+      //       );
+      //     })
+      //     .values
+      //     .toSet();
+      // final faceIdToCluster =
+      //     await FaceClusteringService.instance.predictLinear(
+      //   clusteringInput,
+      //   fileIDToCreationTime: fileIDToCreationTime,
+      //   distanceThreshold: 0.23,
+      //   useDynamicThreshold: false,
+      // );
       final faceIdToCluster =
           await FaceClusteringService.instance.predictComplete(
         embeddings,
         fileIDToCreationTime: fileIDToCreationTime,
         distanceThreshold: 0.30,
+        mergeThreshold: 0.30,
       );
 
-      if (faceIdToCluster.isEmpty) {
+      if (faceIdToCluster == null || faceIdToCluster.isEmpty) {
         _logger.info('No clusters found');
         return {};
       } else {
