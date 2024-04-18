@@ -3,7 +3,7 @@ import ElectronLog from "electron-log";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { FolderWatch, WatchStoreType } from "../../types/ipc";
-import { watchStore } from "../stores/watch.store";
+import { watchStore } from "../stores/watch";
 
 export const findFiles = async (dirPath: string) => {
     const items = await fs.readdir(dirPath, { withFileTypes: true });

@@ -66,10 +66,6 @@ export interface ElectronFile {
     arrayBuffer: () => Promise<Uint8Array>;
 }
 
-export interface WatchStoreType {
-    mappings: FolderWatch[];
-}
-
 export enum FILE_PATH_TYPE {
     /* eslint-disable no-unused-vars */
     FILES = "files",

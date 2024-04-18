@@ -1,5 +1,9 @@
 import Store, { Schema } from "electron-store";
-import { WatchStoreType } from "../../types/ipc";
+import { type FolderWatch } from "../../types/ipc";
+
+interface WatchStoreSchema {
+    mappings: FolderWatch[];
+}
 
 const watchStoreSchema: Schema<WatchStoreType> = {
     mappings: {
