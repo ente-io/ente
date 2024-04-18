@@ -34,19 +34,35 @@ export const fileNameFromComponents = (components: FileNameComponents) =>
     components.filter((x) => !!x).join(".");
 
 /**
- * Extract the fileName from the given path.
+ * Return the file name portion from the given {@link path}.
+ *
+ * This tries to emulate the UNIX `basename` command. In particular, any
+ * trailing slashes on the path are trimmed, so this function can be used to get
+ * the name of the directory too.
+ *
+ * The path is assumed to use POSIX separators ("/").
  */
-export const fileNameFromPOSIXPath = (path: string) => {
+export const basename = (path: string) => {
     const pathComponents = path.split("/");
-    return pathComponents[pathComponents.length - 1] ?? path;
+    for (let i = pathComponents.length - 1; i >= 0; i--)
+        if (pathComponents[i] !== "") return pathComponents[i];
+    return path;
 };
 
 /**
- * Extract the directory path (leading up to the item) from the given path.
+ * Return the directory portion from the given {@link path}.
+ *
+ * This tries to emulate the UNIX `dirname` command. In particular, any trailing
+ * slashes on the path are trimmed, so this function can be used to get the path
+ * leading up to a directory too.
+ *
+ * The path is assumed to use POSIX separators ("/").
  */
-export const directoryNameFromPOSIXPath = (path: string) => {
+export const dirname = (path: string) => {
     const pathComponents = path.split("/");
-    pathComponents.pop();
+    while (pathComponents.pop() == "") {
+        /* no-op */
+    }
     return pathComponents.join("/");
 };
 

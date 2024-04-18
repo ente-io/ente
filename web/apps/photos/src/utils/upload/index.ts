@@ -1,4 +1,4 @@
-import { directoryNameFromPOSIXPath, fileNameFromPOSIXPath } from "@/next/file";
+import { basename, dirname } from "@/next/file";
 import { FILE_TYPE } from "constants/file";
 import {
     A_SEC_IN_MICROSECONDS,
@@ -118,7 +118,7 @@ export function areFileWithCollectionsSame(
  * Empty list of paths is considered to be in the same directory.
  */
 export const areAllInSameDirectory = (paths: string[]) =>
-    new Set(paths.map(directoryNameFromPOSIXPath)).size == 1;
+    new Set(paths.map(dirname)).size == 1;
 
 export function getImportSuggestion(
     uploadType: PICKED_UPLOAD_TYPE,
@@ -225,5 +225,4 @@ export function isSystemFile(file: File | ElectronFile) {
  *
  * Hidden files are those whose names begin with a "." (dot).
  */
-export const isHiddenFile = (path: string) =>
-    fileNameFromPOSIXPath(path).startsWith(".");
+export const isHiddenFile = (path: string) => basename(path).startsWith(".");
