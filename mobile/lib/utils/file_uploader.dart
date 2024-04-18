@@ -427,10 +427,22 @@ class FileUploader {
     MediaUploadData? mediaUploadData;
     mediaUploadData = await getUploadDataFromEnteFile(file);
 
+    var multipartEntryExists = mediaUploadData.hashData?.fileHash != null &&
+        await _uploadLocks.doesExists(
+          lockKey,
+          mediaUploadData.hashData!.fileHash!,
+          collectionID,
+        );
+
     final String uniqueID = const Uuid().v4().toString();
 
-    final encryptedFilePath =
-        '$tempDirectory$kUploadTempPrefix${uniqueID}_file.encrypted';
+    final encryptedFilePath = multipartEntryExists
+        ? await _uploadLocks.getEncryptedPath(
+            lockKey,
+            mediaUploadData.hashData!.fileHash!,
+            collectionID,
+          )
+        : '$tempDirectory$kUploadTempPrefix${uniqueID}_file.encrypted';
     final encryptedThumbnailPath =
         '$tempDirectory$kUploadTempPrefix${uniqueID}_thumb.encrypted';
     var uploadCompleted = false;
@@ -445,13 +457,6 @@ class FileUploader {
         'starting ${forcedUpload ? 'forced' : ''} '
         '${isUpdatedFile ? 're-upload' : 'upload'} of ${file.toString()}',
       );
-
-      var multipartEntryExists = mediaUploadData.hashData?.fileHash != null &&
-          await _uploadLocks.doesExists(
-            lockKey,
-            mediaUploadData.hashData!.fileHash!,
-            collectionID,
-          );
 
       Uint8List? key;
       EncryptionResult? multipartEncryptionResult;
@@ -535,8 +540,8 @@ class FileUploader {
 
       // Calculate the number of parts for the file.
       final count = await _multiPartUploader.calculatePartCount(
-              await encryptedFile.length(),
-            );
+        await encryptedFile.length(),
+      );
 
       late String fileObjectKey;
 

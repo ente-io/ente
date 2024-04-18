@@ -395,4 +395,25 @@ class UploadLocksDB {
           now - createdAt > 7 * 24 * 60 * 60 * 1000;
     });
   }
+
+  Future<String> getEncryptedPath(
+    String localId,
+    String fileHash,
+    int collectionID,
+  ) {
+    return instance.database.then((db) async {
+      final rows = await db.query(
+        _trackUploadTable.table,
+        where: '${_trackUploadTable.columnLocalID} = ?'
+            ' AND ${_trackUploadTable.columnFileHash} = ?'
+            ' AND ${_trackUploadTable.columnCollectionID} = ?',
+        whereArgs: [localId, fileHash, collectionID],
+      );
+      if (rows.isEmpty) {
+        throw Exception("No cached links found for $localId and $fileHash");
+      }
+      final row = rows.first;
+      return row[_trackUploadTable.columnEncryptedFilePath] as String;
+    });
+  }
 }
