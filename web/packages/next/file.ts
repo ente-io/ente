@@ -29,6 +29,23 @@ export const nameAndExtension = (fileName: string): FileNameComponents => {
 export const fileNameFromComponents = (components: FileNameComponents) =>
     components.filter((x) => !!x).join(".");
 
+/**
+ * Extract the fileName from the given path.
+ */
+export const fileNameFromPOSIXPath = (path: string) => {
+    const pathComponents = path.split("/");
+    return pathComponents[pathComponents.length - 1] ?? path;
+};
+
+/**
+ * Extract the directory path (leading up to the item) from the given path.
+ */
+export const directoryNameFromPOSIXPath = (path: string) => {
+    const pathComponents = path.split("/");
+    pathComponents.pop();
+    return pathComponents.join("/");
+};
+
 export function getFileNameSize(file: File | ElectronFile) {
     return `${file.name}_${convertBytesToHumanReadable(file.size)}`;
 }
