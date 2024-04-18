@@ -8,6 +8,7 @@ import "package:photos/db/upload_locks_db.dart";
 import "package:photos/models/encryption_result.dart";
 import "package:photos/module/upload/model/multipart.dart";
 import "package:photos/module/upload/model/xml.dart";
+import "package:photos/services/collections_service.dart";
 import "package:photos/services/feature_flag_service.dart";
 import "package:photos/utils/crypto_util.dart";
 
@@ -28,8 +29,25 @@ class MultiPartUploader {
   Future<EncryptionResult> getEncryptionResult(
     String localId,
     String fileHash,
-  ) {
-    return _db.getFileEncryptionData(localId, fileHash);
+    int collectionID,
+  ) async {
+    final collection =
+        CollectionsService.instance.getCollectionByID(collectionID);
+    if (collection == null) {
+      throw Exception("Collection not found");
+    }
+    final result =
+        await _db.getFileEncryptionData(localId, fileHash, collectionID);
+    final encryptedFileKey = CryptoUtil.base642bin(result.encryptedFileKey);
+    final fileNonce = CryptoUtil.base642bin(result.fileNonce);
+
+    final key = CryptoUtil.base642bin(collection.encryptedKey);
+    final encryptKeyNonce = CryptoUtil.base642bin(result.keyNonce);
+
+    return EncryptionResult(
+      key: CryptoUtil.decryptSync(encryptedFileKey, key, encryptKeyNonce),
+      nonce: fileNonce,
+    );
   }
 
   static int get multipartPartSizeForUpload {
@@ -40,6 +58,10 @@ class MultiPartUploader {
   }
 
   Future<int> calculatePartCount(int fileSize) async {
+    // Multipart upload is only enabled for internal users
+    // and debug builds till it's battle tested.
+    if (!FeatureFlagService.instance.isInternalUserOrDebugBuild()) return 1;
+
     final partCount = (fileSize / multipartPartSizeForUpload).ceil();
     return partCount;
   }
@@ -67,20 +89,34 @@ class MultiPartUploader {
   Future<void> createTableEntry(
     String localId,
     String fileHash,
+    int collectionID,
     MultipartUploadURLs urls,
     String encryptedFilePath,
     int fileSize,
     Uint8List fileKey,
     Uint8List fileNonce,
   ) async {
+    final collection =
+        CollectionsService.instance.getCollectionByID(collectionID);
+    if (collection == null) {
+      throw Exception("Collection not found");
+    }
+
+    final encryptedResult = CryptoUtil.encryptSync(
+      fileKey,
+      CryptoUtil.base642bin(collection.encryptedKey),
+    );
+
     await _db.createTrackUploadsEntry(
       localId,
       fileHash,
+      collectionID,
       urls,
       encryptedFilePath,
       fileSize,
-      CryptoUtil.bin2base64(fileKey),
+      CryptoUtil.bin2base64(encryptedResult.key!),
       CryptoUtil.bin2base64(fileNonce),
+      CryptoUtil.bin2base64(encryptedResult.nonce!),
     );
   }
 
@@ -88,8 +124,10 @@ class MultiPartUploader {
     File encryptedFile,
     String localId,
     String fileHash,
+    int collectionID,
   ) async {
-    final multipartInfo = await _db.getCachedLinks(localId, fileHash);
+    final multipartInfo =
+        await _db.getCachedLinks(localId, fileHash, collectionID);
 
     Map<int, String> etags = multipartInfo.partETags ?? {};
 

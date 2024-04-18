@@ -41,6 +41,7 @@ import 'package:photos/utils/file_uploader_util.dart';
 import "package:photos/utils/file_util.dart";
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tuple/tuple.dart';
+import "package:uuid/uuid.dart";
 
 class FileUploader {
   static const kMaximumConcurrentUploads = 4;
@@ -426,11 +427,7 @@ class FileUploader {
     MediaUploadData? mediaUploadData;
     mediaUploadData = await getUploadDataFromEnteFile(file);
 
-    final String uniqueID = lockKey +
-        "_" +
-        mediaUploadData.hashData!.fileHash!
-            .replaceAll('+', '')
-            .replaceAll('/', '');
+    final String uniqueID = const Uuid().v4().toString();
 
     final encryptedFilePath =
         '$tempDirectory$kUploadTempPrefix${uniqueID}_file.encrypted';
@@ -453,6 +450,7 @@ class FileUploader {
           await _uploadLocks.doesExists(
             lockKey,
             mediaUploadData.hashData!.fileHash!,
+            collectionID,
           );
 
       Uint8List? key;
@@ -464,6 +462,7 @@ class FileUploader {
             ? await _multiPartUploader.getEncryptionResult(
                 lockKey,
                 mediaUploadData.hashData!.fileHash!,
+                collectionID,
               )
             : null;
         key = multipartEncryptionResult?.key;
@@ -534,13 +533,10 @@ class FileUploader {
       final String thumbnailObjectKey =
           await _putFile(thumbnailUploadURL, encryptedThumbnailFile);
 
-      // Calculate the number of parts for the file. Multiple part upload
-      // is only enabled for internal users and debug builds till it's battle tested.
-      final count = FeatureFlagService.instance.isInternalUserOrDebugBuild()
-          ? await _multiPartUploader.calculatePartCount(
+      // Calculate the number of parts for the file.
+      final count = await _multiPartUploader.calculatePartCount(
               await encryptedFile.length(),
-            )
-          : 1;
+            );
 
       late String fileObjectKey;
 
@@ -553,6 +549,7 @@ class FileUploader {
             encryptedFile,
             lockKey,
             mediaUploadData.hashData!.fileHash!,
+            collectionID,
           );
         } else {
           final fileUploadURLs =
@@ -560,6 +557,7 @@ class FileUploader {
           await _multiPartUploader.createTableEntry(
             lockKey,
             mediaUploadData.hashData!.fileHash!,
+            collectionID,
             fileUploadURLs,
             encryptedFilePath,
             await encryptedFile.length(),

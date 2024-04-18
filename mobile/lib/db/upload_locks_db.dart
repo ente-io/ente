@@ -3,10 +3,8 @@ import 'dart:io';
 
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
-import "package:photos/models/encryption_result.dart";
 import "package:photos/module/upload/model/multipart.dart";
 import "package:photos/module/upload/service/multipart.dart";
-import "package:photos/utils/crypto_util.dart";
 import 'package:sqflite/sqflite.dart';
 import "package:sqflite_migration/sqflite_migration.dart";
 
@@ -25,14 +23,18 @@ class UploadLocksDB {
     columnID: "id",
     columnLocalID: "local_id",
     columnFileHash: "file_hash",
+    columnCollectionID: "collection_id",
     columnEncryptedFilePath: "encrypted_file_path",
     columnEncryptedFileSize: "encrypted_file_size",
-    columnFileKey: "file_key",
-    columnFileNonce: "file_nonce",
+    columnEncryptedFileKey: "encrypted_file_key",
+    columnFileEncryptionNonce: "file_encryption_nonce",
+    columnKeyEncryptionNonce: "key_encryption_nonce",
     columnObjectKey: "object_key",
     columnCompleteUrl: "complete_url",
     columnStatus: "status",
     columnPartSize: "part_size",
+    columnLastAttemptedAt: "last_attempted_at",
+    columnCreatedAt: "created_at",
   );
 
   static const _partsTable = (
@@ -93,14 +95,18 @@ class UploadLocksDB {
                   ${_trackUploadTable.columnID} INTEGER PRIMARY KEY,
                   ${_trackUploadTable.columnLocalID} TEXT NOT NULL,
                   ${_trackUploadTable.columnFileHash} TEXT NOT NULL,
+                  ${_trackUploadTable.columnCollectionID} INTEGER NOT NULL,
                   ${_trackUploadTable.columnEncryptedFilePath} TEXT NOT NULL,
                   ${_trackUploadTable.columnEncryptedFileSize} INTEGER NOT NULL,
-                  ${_trackUploadTable.columnFileKey} TEXT NOT NULL,
-                  ${_trackUploadTable.columnFileNonce} TEXT NOT NULL,
+                  ${_trackUploadTable.columnEncryptedFileKey} TEXT NOT NULL,
+                  ${_trackUploadTable.columnFileEncryptionNonce} TEXT NOT NULL,
+                  ${_trackUploadTable.columnKeyEncryptionNonce} TEXT NOT NULL,
                   ${_trackUploadTable.columnObjectKey} TEXT NOT NULL,
                   ${_trackUploadTable.columnCompleteUrl} TEXT NOT NULL,
                   ${_trackUploadTable.columnStatus} TEXT DEFAULT '${MultipartStatus.pending.name}' NOT NULL,
-                  ${_trackUploadTable.columnPartSize} INTEGER NOT NULL
+                  ${_trackUploadTable.columnPartSize} INTEGER NOT NULL,
+                  ${_trackUploadTable.columnLastAttemptedAt} INTEGER,
+                  ${_trackUploadTable.columnCreatedAt} INTEGER DEFAULT CURRENT_TIMESTAMP NOT NULL,
                 )
                 ''',
       '''
@@ -177,29 +183,33 @@ class UploadLocksDB {
   }
 
   // For multipart download tracking
-  Future<bool> doesExists(String localId, String hash) async {
+  Future<bool> doesExists(String localId, String hash, int collectionID) async {
     final db = await instance.database;
     final rows = await db.query(
       _trackUploadTable.table,
-      where:
-          '${_trackUploadTable.columnLocalID} = ? AND ${_trackUploadTable.columnFileHash} = ?',
-      whereArgs: [localId, hash],
+      where: '${_trackUploadTable.columnLocalID} = ?'
+          ' AND ${_trackUploadTable.columnFileHash} = ?'
+          ' AND ${_trackUploadTable.columnCollectionID} = ?',
+      whereArgs: [localId, hash, collectionID],
     );
 
     return rows.isNotEmpty;
   }
 
-  Future<EncryptionResult> getFileEncryptionData(
+  Future<({String encryptedFileKey, String fileNonce, String keyNonce})>
+      getFileEncryptionData(
     String localId,
     String fileHash,
+    int collectionID,
   ) async {
     final db = await instance.database;
 
     final rows = await db.query(
       _trackUploadTable.table,
-      where:
-          '${_trackUploadTable.columnLocalID} = ? AND ${_trackUploadTable.columnFileHash} = ?',
-      whereArgs: [localId, fileHash],
+      where: '${_trackUploadTable.columnLocalID} = ?'
+          ' AND ${_trackUploadTable.columnFileHash} = ?'
+          ' AND ${_trackUploadTable.columnCollectionID} = ?',
+      whereArgs: [localId, fileHash, collectionID],
     );
 
     if (rows.isEmpty) {
@@ -207,25 +217,25 @@ class UploadLocksDB {
     }
     final row = rows.first;
 
-    return EncryptionResult(
-      key:
-          CryptoUtil.base642bin(row[_trackUploadTable.columnFileKey] as String),
-      header: CryptoUtil.base642bin(
-        row[_trackUploadTable.columnFileNonce] as String,
-      ),
+    return (
+      encryptedFileKey: row[_trackUploadTable.columnEncryptedFileKey] as String,
+      fileNonce: row[_trackUploadTable.columnFileEncryptionNonce] as String,
+      keyNonce: row[_trackUploadTable.columnKeyEncryptionNonce] as String,
     );
   }
 
   Future<MultipartInfo> getCachedLinks(
     String localId,
     String fileHash,
+    int collectionID,
   ) async {
     final db = await instance.database;
     final rows = await db.query(
       _trackUploadTable.table,
-      where:
-          '${_trackUploadTable.columnLocalID} = ? AND ${_trackUploadTable.columnFileHash} = ?',
-      whereArgs: [localId, fileHash],
+      where: '${_trackUploadTable.columnLocalID} = ?'
+          ' AND ${_trackUploadTable.columnFileHash} = ?'
+          ' AND ${_trackUploadTable.columnCollectionID} = ?',
+      whereArgs: [localId, fileHash, collectionID],
     );
     if (rows.isEmpty) {
       throw Exception("No cached links found for $localId and $fileHash");
@@ -274,11 +284,13 @@ class UploadLocksDB {
   Future<void> createTrackUploadsEntry(
     String localId,
     String fileHash,
+    int collectionID,
     MultipartUploadURLs urls,
     String encryptedFilePath,
     int fileSize,
     String fileKey,
     String fileNonce,
+    String keyNonce,
   ) async {
     final db = await UploadLocksDB.instance.database;
     final objectKey = urls.objectKey;
@@ -288,13 +300,16 @@ class UploadLocksDB {
       {
         _trackUploadTable.columnLocalID: localId,
         _trackUploadTable.columnFileHash: fileHash,
+        _trackUploadTable.columnCollectionID: collectionID,
         _trackUploadTable.columnObjectKey: objectKey,
         _trackUploadTable.columnCompleteUrl: urls.completeURL,
         _trackUploadTable.columnEncryptedFilePath: encryptedFilePath,
         _trackUploadTable.columnEncryptedFileSize: fileSize,
-        _trackUploadTable.columnFileKey: fileKey,
-        _trackUploadTable.columnFileNonce: fileNonce,
-        _trackUploadTable.columnPartSize: MultiPartUploader.multipartPartSizeForUpload,
+        _trackUploadTable.columnEncryptedFileKey: fileKey,
+        _trackUploadTable.columnFileEncryptionNonce: fileNonce,
+        _trackUploadTable.columnKeyEncryptionNonce: keyNonce,
+        _trackUploadTable.columnPartSize:
+            MultiPartUploader.multipartPartSizeForUpload,
       },
     );
 
@@ -356,5 +371,28 @@ class UploadLocksDB {
       where: '${_trackUploadTable.columnLocalID} = ?',
       whereArgs: [localId],
     );
+  }
+
+  Future<bool> isEncryptedPathSafeToDelete(String encryptedPath) {
+    // If lastAttemptedAt exceeds 3 days or createdAt exceeds 7 days
+    final db = instance.database;
+    return db.then((db) async {
+      final rows = await db.query(
+        _trackUploadTable.table,
+        where: '${_trackUploadTable.columnEncryptedFilePath} = ?',
+        whereArgs: [encryptedPath],
+      );
+      if (rows.isEmpty) {
+        return true;
+      }
+      final row = rows.first;
+      final lastAttemptedAt =
+          row[_trackUploadTable.columnLastAttemptedAt] as int?;
+      final createdAt = row[_trackUploadTable.columnCreatedAt] as int;
+      final now = DateTime.now().millisecondsSinceEpoch;
+      return (lastAttemptedAt == null ||
+              now - lastAttemptedAt > 3 * 24 * 60 * 60 * 1000) &&
+          now - createdAt > 7 * 24 * 60 * 60 * 1000;
+    });
   }
 }
