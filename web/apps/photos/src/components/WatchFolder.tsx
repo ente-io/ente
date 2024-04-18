@@ -92,10 +92,8 @@ export const WatchFolder: React.FC<WatchFolderProps> = ({ open, onClose }) => {
         }
     };
 
-    const addWatch = async (folderPath: string, mapping: CollectionMapping) => {
-        await watcher.addWatch(folderPath, mapping);
-        setWatches(await watcher.getWatchMappings());
-    };
+    const addWatch = (folderPath: string, mapping: CollectionMapping) =>
+        watcher.addWatch(folderPath, mapping).then((ws) => setWatches(ws));
 
     const addNewWatch = async () => {
         const dirPath = await ensureElectron().selectDirectory();
@@ -104,10 +102,8 @@ export const WatchFolder: React.FC<WatchFolderProps> = ({ open, onClose }) => {
         }
     };
 
-    const removeWatch = async (watch: FolderWatch) => {
-        await watcher.removeWatchForFolderPath(watch.folderPath);
-        setWatches(await watcher.getWatchMappings());
-    };
+    const removeWatch = async (watch: FolderWatch) =>
+        watcher.removeWatch(watch.folderPath).then((ws) => setWatches(ws));
 
     const closeChoiceModal = () => setChoiceModalOpen(false);
 

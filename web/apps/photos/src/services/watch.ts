@@ -113,17 +113,22 @@ class FolderWatcher {
      *
      * @param mapping The {@link CollectionMapping} to use to decide which
      * collection do files belonging to nested directories go to.
+     *
+     * @returns The updated list of watches.
      */
     async addWatch(folderPath: string, mapping: CollectionMapping) {
-        await ensureElectron().watch.add(folderPath, mapping);
+        const watches = await ensureElectron().watch.add(folderPath, mapping);
         this.syncWithDisk();
+        return watches;
     }
 
     /**
      * Remove the folder watch for the given root {@link folderPath}.
+     *
+     * @returns The updated list of watches.
      */
-    async removeWatchForFolderPath(folderPath: string) {
-        await ensureElectron().removeWatchMapping(folderPath);
+    async removeWatch(folderPath: string) {
+        return await ensureElectron().watch.remove(folderPath);
     }
 
     async getWatchMappings(): Promise<FolderWatch[]> {
@@ -616,7 +621,7 @@ const onAddFile = async (path: string) => {
         folderPath,
         path: file.path,
     });
-}
+};
 
 async function diskFileRemovedCallback(filePath: string) {
     const collectionNameAndFolderPath =
