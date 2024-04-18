@@ -192,9 +192,6 @@ const showUploadZipDialog = (): Promise<{
 
 // - Watch
 
-const watchFindFiles = (folderPath: string): Promise<string[]> =>
-    ipcRenderer.invoke("watchFindFiles", folderPath);
-
 const watchAdd = (
     folderPath: string,
     collectionMapping: CollectionMapping,
@@ -226,6 +223,9 @@ const watchOnRemoveDir = (f: (path: string, watch: FolderWatch) => void) => {
         f(path, watch),
     );
 };
+
+const watchFindFiles = (folderPath: string): Promise<string[]> =>
+    ipcRenderer.invoke("watchFindFiles", folderPath);
 
 const updateWatchMappingSyncedFiles = (
     folderPath: string,
@@ -354,13 +354,13 @@ contextBridge.exposeInMainWorld("electron", {
     // - Watch
 
     watch: {
-        findFiles: watchFindFiles,
+        get: watchGet,
         add: watchAdd,
         remove: watchRemove,
-        get: watchGet,
         onAddFile: watchOnAddFile,
         onRemoveFile: watchOnRemoveFile,
         onRemoveDir: watchOnRemoveDir,
+        findFiles: watchFindFiles,
     },
     updateWatchMappingSyncedFiles,
     updateWatchMappingIgnoredFiles,

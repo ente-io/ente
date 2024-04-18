@@ -10,7 +10,12 @@
 
 import type { FSWatcher } from "chokidar";
 import { ipcMain } from "electron/main";
-import type { ElectronFile, FolderWatch, PendingUploads } from "../types/ipc";
+import type {
+    CollectionMapping,
+    ElectronFile,
+    FolderWatch,
+    PendingUploads,
+} from "../types/ipc";
 import {
     selectDirectory,
     showUploadDirsDialog,
@@ -54,12 +59,12 @@ import {
     setPendingUploadFiles,
 } from "./services/upload";
 import {
-    addWatchMapping,
-    findFiles,
-    getWatchMappings,
-    removeWatchMapping,
     updateWatchMappingIgnoredFiles,
     updateWatchMappingSyncedFiles,
+    watchAdd,
+    watchFindFiles,
+    watchGet,
+    watchRemove,
 } from "./services/watch";
 import { openDirectory, openLogDirectory } from "./util";
 
@@ -214,36 +219,26 @@ export const attachIPCHandlers = () => {
  * watch folder functionality.
  *
  * It gets passed a {@link FSWatcher} instance which it can then forward to the
- * actual handlers.
+ * actual handlers if they need access to it to do their thing.
  */
 export const attachFSWatchIPCHandlers = (watcher: FSWatcher) => {
     // - Watch
 
-    ipcMain.handle("findFiles", (_, folderPath: string) =>
-        findFiles(folderPath),
-    );
+    ipcMain.handle("watchGet", () => watchGet());
 
     ipcMain.handle(
-        "addWatchMapping",
-        (
-            _,
-            collectionName: string,
-            folderPath: string,
-            uploadStrategy: number,
-        ) =>
-            addWatchMapping(
-                watcher,
-                collectionName,
-                folderPath,
-                uploadStrategy,
-            ),
+        "watchAdd",
+        (_, folderPath: string, collectionMapping: CollectionMapping) =>
+            watchAdd(watcher, folderPath, collectionMapping),
     );
 
-    ipcMain.handle("removeWatchMapping", (_, folderPath: string) =>
-        removeWatchMapping(watcher, folderPath),
+    ipcMain.handle("watchRemove", (_, folderPath: string) =>
+        watchRemove(watcher, folderPath),
     );
 
-    ipcMain.handle("getWatchMappings", () => getWatchMappings());
+    ipcMain.handle("watchFindFiles", (_, folderPath: string) =>
+        watchFindFiles(folderPath),
+    );
 
     ipcMain.handle(
         "updateWatchMappingSyncedFiles",

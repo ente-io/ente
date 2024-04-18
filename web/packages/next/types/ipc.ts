@@ -290,16 +290,14 @@ export interface Electron {
      */
     watch: {
         /**
-         * Return the paths of all the files under the given folder.
+         * Return the list of folder watches.
          *
-         * This function walks the directory tree starting at {@link folderPath}
-         * and returns a list of the absolute paths of all the files that exist
-         * therein. It will recursively traverse into nested directories, and
-         * return the absolute paths of the files there too.
-         *
-         * The returned paths are guaranteed to use POSIX separators ('/').
+         * The list of folder paths (and auxillary details) is persisted in the
+         * Node.js layer. When we invoke this method, the Node.js goes through
+         * the list, permanently removes any watches whose on-disk directory has
+         * is no longer present, and returns this pruned list of watches.
          */
-        findFiles: (folderPath: string) => Promise<string[]>;
+        get: () => Promise<FolderWatch[]>;
 
         /**
          * Add a new folder watch for the given {@link folderPath}.
@@ -323,16 +321,6 @@ export interface Electron {
          * that happen within the {@link folderPath}.
          */
         remove: (folderPath: string) => Promise<void>;
-
-        /**
-         * Return the list of folder watches.
-         *
-         * The list of folder paths (and auxillary details) is persisted in the
-         * Node.js layer. When we invoke this method, the Node.js goes through
-         * the list, permanently removes any watches whose on-disk directory has
-         * is no longer present, and returns this pruned list of watches.
-         */
-        get: () => Promise<FolderWatch[]>;
 
         /**
          * Register the function to invoke when a file is added in one of the
@@ -366,6 +354,18 @@ export interface Electron {
          * The path is guaranteed to use POSIX separators ('/').
          */
         onRemoveDir: (f: (path: string, watch: FolderWatch) => void) => void;
+
+        /**
+         * Return the paths of all the files under the given folder.
+         *
+         * This function walks the directory tree starting at {@link folderPath}
+         * and returns a list of the absolute paths of all the files that exist
+         * therein. It will recursively traverse into nested directories, and
+         * return the absolute paths of the files there too.
+         *
+         * The returned paths are guaranteed to use POSIX separators ('/').
+         */
+        findFiles: (folderPath: string) => Promise<string[]>;
     };
 
     updateWatchMappingSyncedFiles: (

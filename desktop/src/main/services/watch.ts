@@ -2,7 +2,7 @@ import chokidar, { type FSWatcher } from "chokidar";
 import { BrowserWindow } from "electron/main";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { FolderWatch } from "../../types/ipc";
+import { FolderWatch, type CollectionMapping } from "../../types/ipc";
 import log from "../log";
 import { watchStore } from "../stores/watch";
 
@@ -52,27 +52,15 @@ const eventData = (path: string): [string, FolderWatch] => {
 const posixPath = (filePath: string) =>
     filePath.split(path.sep).join(path.posix.sep);
 
-export const findFiles = async (dirPath: string) => {
-    const items = await fs.readdir(dirPath, { withFileTypes: true });
-    let paths: string[] = [];
-    for (const item of items) {
-        const itemPath = path.posix.join(dirPath, item.name);
-        if (item.isFile()) {
-            paths.push(itemPath);
-        } else if (item.isDirectory()) {
-            paths = [...paths, ...(await findFiles(itemPath))];
-        }
-    }
-    return paths;
+export const watchGet = () => {
+    return folderWatches();
 };
 
-export const addWatchMapping = async (
+export const watchAdd = async (
     watcher: FSWatcher,
-    rootFolderName: string,
     folderPath: string,
-    uploadStrategy: number,
+    collectionMapping: CollectionMapping,
 ) => {
-    log.info(`Adding watch mapping: ${folderPath}`);
     const watchMappings = getWatchMappings();
     if (isMappingPresent(watchMappings, folderPath)) {
         throw new Error(`Watch mapping already exists`);
@@ -98,10 +86,7 @@ function isMappingPresent(watchMappings: FolderWatch[], folderPath: string) {
     return !!watchMapping;
 }
 
-export const removeWatchMapping = async (
-    watcher: FSWatcher,
-    folderPath: string,
-) => {
+export const watchRemove = async (watcher: FSWatcher, folderPath: string) => {
     let watchMappings = getWatchMappings();
     const watchMapping = watchMappings.find(
         (mapping) => mapping.folderPath === folderPath,
@@ -154,7 +139,7 @@ export function updateWatchMappingIgnoredFiles(
     setWatchMappings(watchMappings);
 }
 
-export const folderWatches = () => {
+const folderWatches = () => {
     const mappings = watchStore.get("mappings") ?? [];
     return mappings;
 };
@@ -162,3 +147,17 @@ export const folderWatches = () => {
 function setWatchMappings(watchMappings: WatchStoreType["mappings"]) {
     watchStore.set("mappings", watchMappings);
 }
+
+export const watchFindFiles = async (dirPath: string) => {
+    const items = await fs.readdir(dirPath, { withFileTypes: true });
+    let paths: string[] = [];
+    for (const item of items) {
+        const itemPath = path.posix.join(dirPath, item.name);
+        if (item.isFile()) {
+            paths.push(itemPath);
+        } else if (item.isDirectory()) {
+            paths = [...paths, ...(await watchFindFiles(itemPath))];
+        }
+    }
+    return paths;
+};
