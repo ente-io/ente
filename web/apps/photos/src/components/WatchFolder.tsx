@@ -27,12 +27,11 @@ import {
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { CollectionMappingChoiceModal } from "components/Upload/CollectionMappingChoiceModal";
-import { PICKED_UPLOAD_TYPE } from "constants/upload";
 import { t } from "i18next";
 import { AppContext } from "pages/_app";
 import React, { useContext, useEffect, useState } from "react";
 import watcher from "services/watch";
-import { getImportSuggestion } from "utils/upload";
+import { areAllInSameDirectory } from "utils/upload";
 
 interface WatchFolderProps {
     open: boolean;
@@ -84,15 +83,11 @@ export const WatchFolder: React.FC<WatchFolderProps> = ({ open, onClose }) => {
 
     const selectCollectionMappingAndAddWatch = async (path: string) => {
         const filePaths = await ensureElectron().watch.findFiles(path);
-        const { hasNestedFolders } = getImportSuggestion(
-            PICKED_UPLOAD_TYPE.FOLDERS,
-            filePaths,
-        );
-        if (hasNestedFolders) {
+        if (areAllInSameDirectory(filePaths)) {
+            addWatch(path, "root");
+        } else {
             setSavedFolderPath(path);
             setChoiceModalOpen(true);
-        } else {
-            addWatch(path, "root");
         }
     };
 

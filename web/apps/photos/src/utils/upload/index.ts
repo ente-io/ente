@@ -1,3 +1,4 @@
+import { directoryNameFromPOSIXPath } from "@/next/file";
 import { FILE_TYPE } from "constants/file";
 import {
     A_SEC_IN_MICROSECONDS,
@@ -113,46 +114,11 @@ export function areFileWithCollectionsSame(
 /**
  * Return true if all the paths in the given list are items that belong to the
  * same (arbitrary) directory.
+ *
+ * Empty list of paths is considered to be in the same directory.
  */
-export const areInSameDirectory = (
-    uploadType: PICKED_UPLOAD_TYPE,
-    toUploadFiles: File[] | ElectronFile[],
-): ImportSuggestion {
-    if (isElectron() && uploadType === PICKED_UPLOAD_TYPE.FILES) {
-        return DEFAULT_IMPORT_SUGGESTION;
-    }
-
-    const paths: string[] = toUploadFiles.map((file) => file["path"]);
-    const getCharCount = (str: string) => (str.match(/\//g) ?? []).length;
-    paths.sort((path1, path2) => getCharCount(path1) - getCharCount(path2));
-    const firstPath = paths[0];
-    const lastPath = paths[paths.length - 1];
-
-    const L = firstPath.length;
-    let i = 0;
-    const firstFileFolder = firstPath.substring(0, firstPath.lastIndexOf("/"));
-    const lastFileFolder = lastPath.substring(0, lastPath.lastIndexOf("/"));
-
-    while (i < L && firstPath.charAt(i) === lastPath.charAt(i)) i++;
-    let commonPathPrefix = firstPath.substring(0, i);
-
-    if (commonPathPrefix) {
-        commonPathPrefix = commonPathPrefix.substring(
-            0,
-            commonPathPrefix.lastIndexOf("/"),
-        );
-        if (commonPathPrefix) {
-            commonPathPrefix = commonPathPrefix.substring(
-                commonPathPrefix.lastIndexOf("/") + 1,
-            );
-        }
-    }
-    return {
-        rootFolderName: commonPathPrefix || null,
-        hasNestedFolders: firstFileFolder !== lastFileFolder,
-        hasRootLevelFileWithFolder: firstFileFolder === "",
-    };
-}
+export const areAllInSameDirectory = (paths: string[]) =>
+    new Set(paths.map(directoryNameFromPOSIXPath)).size == 1;
 
 export function getImportSuggestion(
     uploadType: PICKED_UPLOAD_TYPE,
