@@ -1325,8 +1325,8 @@ class FilesDB {
   }
 
   Future<Map<int,int>> getFileIDToCreationTime() async {
-    final db = await instance.database;
-    final rows = await db.rawQuery(
+    final db = await instance.sqliteAsyncDB;
+    final rows = await db.getAll(
       '''
       SELECT $columnUploadedFileID, $columnCreationTime
       FROM $filesTable
