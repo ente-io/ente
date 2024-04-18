@@ -117,17 +117,90 @@ class ClusterFeedbackService {
     List<EnteFile> files,
     PersonEntity p,
   ) async {
-    await FaceMLDataDB.instance.removeFilesFromPerson(files, p.remoteID);
-    Bus.instance.fire(PeopleChangedEvent());
+    try {
+      // Get the relevant faces to be removed
+      final faceIDs = await FaceMLDataDB.instance
+          .getFaceIDsForPerson(p.remoteID)
+          .then((iterable) => iterable.toList());
+      faceIDs.retainWhere((faceID) {
+        final fileID = getFileIdFromFaceId(faceID);
+        return files.any((file) => file.uploadedFileID == fileID);
+      });
+      final embeddings =
+          await FaceMLDataDB.instance.getFaceEmbeddingMapForFaces(faceIDs);
+
+      final fileIDToCreationTime =
+          await FilesDB.instance.getFileIDToCreationTime();
+
+      // Re-cluster within the deleted faces
+      final newFaceIdToClusterID =
+          await FaceClusteringService.instance.predictWithinClusterComputer(
+        embeddings,
+        fileIDToCreationTime: fileIDToCreationTime,
+        distanceThreshold: 0.20,
+      );
+      if (newFaceIdToClusterID == null || newFaceIdToClusterID.isEmpty) {
+        return;
+      }
+
+      // Update the deleted faces
+      await FaceMLDataDB.instance.forceUpdateClusterIds(newFaceIdToClusterID);
+
+      // Make sure the deleted faces don't get suggested in the future
+      final notClusterIdToPersonId = <int, String>{};
+      for (final clusterId in newFaceIdToClusterID.values.toSet()) {
+        notClusterIdToPersonId[clusterId] = p.remoteID;
+      }
+      await FaceMLDataDB.instance
+          .bulkCaptureNotPersonFeedback(notClusterIdToPersonId);
+
+      Bus.instance.fire(PeopleChangedEvent());
+      return;
+    } catch (e, s) {
+      _logger.severe("Error in removeFilesFromPerson", e, s);
+      rethrow;
+    }
   }
 
   Future<void> removeFilesFromCluster(
     List<EnteFile> files,
     int clusterID,
   ) async {
-    await FaceMLDataDB.instance.removeFilesFromCluster(files, clusterID);
-    Bus.instance.fire(PeopleChangedEvent());
-    return;
+    try {
+      // Get the relevant faces to be removed
+      final faceIDs = await FaceMLDataDB.instance
+          .getFaceIDsForCluster(clusterID)
+          .then((iterable) => iterable.toList());
+      faceIDs.retainWhere((faceID) {
+        final fileID = getFileIdFromFaceId(faceID);
+        return files.any((file) => file.uploadedFileID == fileID);
+      });
+      final embeddings =
+          await FaceMLDataDB.instance.getFaceEmbeddingMapForFaces(faceIDs);
+
+      final fileIDToCreationTime =
+          await FilesDB.instance.getFileIDToCreationTime();
+
+      // Re-cluster within the deleted faces
+      final newFaceIdToClusterID =
+          await FaceClusteringService.instance.predictWithinClusterComputer(
+        embeddings,
+        fileIDToCreationTime: fileIDToCreationTime,
+        distanceThreshold: 0.20,
+      );
+      if (newFaceIdToClusterID == null || newFaceIdToClusterID.isEmpty) {
+        return;
+      }
+
+      // Update the deleted faces
+      await FaceMLDataDB.instance.forceUpdateClusterIds(newFaceIdToClusterID);
+
+      Bus.instance.fire(PeopleChangedEvent());
+      return;
+    } catch (e, s) {
+      _logger.severe("Error in removeFilesFromCluster", e, s);
+      rethrow;
+    }
   }
 
   Future<void> addFilesToCluster(List<String> faceIDs, int clusterID) async {
@@ -205,10 +278,8 @@ class ClusterFeedbackService {
 
     final faceIDs = await faceMlDb.getFaceIDsForCluster(clusterID);
     final originalFaceIDsSet = faceIDs.toSet();
-    final fileIDs = faceIDs.map((e) => getFileIdFromFaceId(e)).toList();
 
-    final embeddings = await faceMlDb.getFaceEmbeddingMapForFile(fileIDs);
-    embeddings.removeWhere((key, value) => !faceIDs.contains(key));
+    final embeddings = await faceMlDb.getFaceEmbeddingMapForFaces(faceIDs);
 
     final fileIDToCreationTime =
         await FilesDB.instance.getFileIDToCreationTime();

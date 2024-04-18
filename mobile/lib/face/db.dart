@@ -344,6 +344,17 @@ class FaceMLDataDB {
     return maps.map((e) => e[fcFaceId] as String).toSet();
   }
 
+  Future<Iterable<String>> getFaceIDsForPerson(String personID) async {
+    final db = await instance.sqliteAsyncDB;
+    final faceIdsResult = await db.getAll(
+      'SELECT $fcFaceId FROM $faceClustersTable LEFT JOIN $clusterPersonTable '
+      'ON $faceClustersTable.$fcClusterID = $clusterPersonTable.$clusterIDColumn '
+      'WHERE $clusterPersonTable.$personIdColumn = ?',
+      [personID],
+    );
+    return faceIdsResult.map((e) => e[fcFaceId] as String).toSet();
+  }
+
   Future<Iterable<double>> getBlurValuesForCluster(int clusterID) async {
     final db = await instance.sqliteAsyncDB;
     const String query = '''
@@ -588,6 +599,44 @@ class FaceMLDataDB {
     return result;
   }
 
+  Future<Map<String, Uint8List>> getFaceEmbeddingMapForFaces(
+    Iterable<String> faceIDs,
+  ) async {
+    _logger.info('reading face embeddings for ${faceIDs.length} faces');
+    final db = await instance.sqliteAsyncDB;
+
+    // Define the batch size
+    const batchSize = 10000;
+    int offset = 0;
+
+    final Map<String, Uint8List> result = {};
+    while (true) {
+      // Query a batch of rows
+      final String query = '''
+        SELECT $faceIDColumn, $faceEmbeddingBlob 
+        FROM $facesTable 
+        WHERE $faceIDColumn IN (${faceIDs.map((id) => "'$id'").join(",")}) 
+        ORDER BY $faceIDColumn DESC 
+        LIMIT $batchSize OFFSET $offset         
+      ''';
+      final List<Map<String, dynamic>> maps = await db.getAll(query);
+      // Break the loop if no more rows
+      if (maps.isEmpty) {
+        break;
+      }
+      for (final map in maps) {
+        final faceID = map[faceIDColumn] as String;
+        result[faceID] = map[faceEmbeddingBlob] as Uint8List;
+      }
+      if (result.length > 10000) {
+        break;
+      }
+      offset += batchSize;
+    }
+    _logger.info('done reading face embeddings for ${faceIDs.length} faces');
+    return result;
+  }
+
   Future<int> getTotalFaceCount({
     double minFaceScore = kMinHighQualityFaceScore,
   }) async {
@@ -677,6 +726,26 @@ class FaceMLDataDB {
         clusterIDColumn: clusterID,
       },
     );
+  }
+
+  Future<void> bulkCaptureNotPersonFeedback(
+    Map<int, String> clusterToPersonID,
+  ) async {
+    final db = await instance.database;
+    final batch = db.batch();
+    for (final entry in clusterToPersonID.entries) {
+      final clusterID = entry.key;
+      final personID = entry.value;
+      batch.insert(
+        notPersonFeedback,
+        {
+          personIdColumn: personID,
+          clusterIDColumn: clusterID,
+        },
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+    }
+    await batch.commit(noResult: true);
   }
 
   Future<int> removeClusterToPerson({
