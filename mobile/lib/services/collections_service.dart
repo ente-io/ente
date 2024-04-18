@@ -1149,10 +1149,7 @@ class CollectionsService {
   }
 
   Future<void> addToCollection(int collectionID, List<EnteFile> files) async {
-    final containsUploadedFile = files.firstWhereOrNull(
-          (element) => element.uploadedFileID != null,
-        ) !=
-        null;
+    final containsUploadedFile = files.any((e) => e.isUploaded);
     if (containsUploadedFile) {
       final existingFileIDsInCollection =
           await FilesDB.instance.getUploadedFileIDs(collectionID);
@@ -1258,6 +1255,63 @@ class CollectionsService {
         );
       } catch (e) {
         _logger.warning('failed to add files to collection', e);
+        rethrow;
+      }
+    }
+  }
+
+  Future<void> copyToCollection(int collectionID, List<EnteFile> files) async {
+    final containsUploadedFile = files.firstWhereOrNull(
+          (element) => element.uploadedFileID != null,
+        ) !=
+        null;
+    if (containsUploadedFile) {
+      final existingFileIDsInCollection =
+          await FilesDB.instance.getUploadedFileIDs(collectionID);
+      files.removeWhere(
+        (element) =>
+            element.uploadedFileID != null &&
+            existingFileIDsInCollection.contains(element.uploadedFileID),
+      );
+    }
+    if (files.isEmpty || !containsUploadedFile) {
+      _logger.info("nothing to add to the collection");
+      return;
+    }
+
+    final params = <String, dynamic>{};
+    params["collectionID"] = collectionID;
+    final batchedFiles = files.chunks(batchSize);
+    for (final batch in batchedFiles) {
+      params["files"] = [];
+      for (final file in batch) {
+        final fileKey = getFileKey(file);
+        file.generatedID =
+            null; // So that a new entry is created in the FilesDB
+        file.collectionID = collectionID;
+        final encryptedKeyData =
+            CryptoUtil.encryptSync(fileKey, getCollectionKey(collectionID));
+        file.encryptedKey =
+            CryptoUtil.bin2base64(encryptedKeyData.encryptedData!);
+        file.keyDecryptionNonce =
+            CryptoUtil.bin2base64(encryptedKeyData.nonce!);
+        params["files"].add(
+          CollectionFileItem(
+            file.uploadedFileID!,
+            file.encryptedKey!,
+            file.keyDecryptionNonce!,
+          ).toMap(),
+        );
+      }
+
+      try {
+        await _enteDio.post(
+          "/collections/add-files",
+          data: params,
+        );
+        await _filesDB.insertMultiple(batch);
+        Bus.instance.fire(CollectionUpdatedEvent(collectionID, batch, "addTo"));
+      } catch (e) {
         rethrow;
       }
     }
