@@ -25,7 +25,7 @@ import log, { initLogging } from "./main/log";
 import { createApplicationMenu, createTrayContextMenu } from "./main/menu";
 import { setupAutoUpdater } from "./main/services/app-update";
 import autoLauncher from "./main/services/auto-launcher";
-import { initWatcher } from "./main/services/watch";
+import { createWatcher } from "./main/services/watch";
 import { userPreferences } from "./main/stores/user-preferences";
 import { registerStreamProtocol } from "./main/stream";
 import { isDev } from "./main/util";
@@ -196,8 +196,6 @@ const createMainWindow = async () => {
         window.maximize();
     }
 
-    window.loadURL(rendererURL);
-
     // Open the DevTools automatically when running in dev mode
     if (isDev) window.webContents.openDevTools();
 
@@ -340,16 +338,22 @@ const main = () => {
     //
     // Note that some Electron APIs can only be used after this event occurs.
     app.on("ready", async () => {
+        // Create window and prepare for renderer
         mainWindow = await createMainWindow();
-        Menu.setApplicationMenu(await createApplicationMenu(mainWindow));
-        setupTrayItem(mainWindow);
         attachIPCHandlers();
-        attachFSWatchIPCHandlers(initWatcher(mainWindow));
+        attachFSWatchIPCHandlers(createWatcher(mainWindow));
         registerStreamProtocol();
-        if (!isDev) setupAutoUpdater(mainWindow);
         handleDownloads(mainWindow);
         handleExternalLinks(mainWindow);
         addAllowOriginHeader(mainWindow);
+
+        // Start loading the renderer
+        mainWindow.loadURL(rendererURL);
+
+        // Continue on with the rest of the startup sequence
+        Menu.setApplicationMenu(await createApplicationMenu(mainWindow));
+        setupTrayItem(mainWindow);
+        if (!isDev) setupAutoUpdater(mainWindow);
 
         try {
             deleteLegacyDiskCacheDirIfExists();
