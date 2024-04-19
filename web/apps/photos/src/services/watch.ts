@@ -39,8 +39,16 @@ class FolderWatcher {
     private currentEvent: WatchEvent;
     // TODO(MR): dedup if possible
     private isEventRunning: boolean = false;
+    /**
+     * If the file system directory corresponding to the (root) folder path of a
+     * folder watch is deleted on disk, we note down that in this queue so that
+     * we can ignore any file system events that come for it next.
+     *
+     * TODO (MR): is this really even coming into play? the mappings are
+     * pre-checked first.
+     */
+    private deletedFolderPaths: string[] = [];
     private currentlySyncedMapping: FolderWatch;
-    private trashingDirQueue: string[] = [];
     private filePathToUploadedFileIDMap = new Map<string, EncryptedEnteFile>();
     private unUploadableFilePaths = new Set<string>();
     private setElectronFiles: (files: ElectronFile[]) => void;
@@ -139,12 +147,11 @@ class FolderWatcher {
 
     private async syncWithDisk() {
         try {
-            const electron = ensureElectron();
-            const mappings = await electron.getWatchMappings();
-            if (!mappings) return;
+            const watches = await this.getWatches();
+            if (!watches) return;
 
             this.eventQueue = [];
-            const { events } = await deduceEvents(mappings);
+            const events = await deduceEvents(watches);
             log.info(`Folder watch deduced ${events.length} events`);
             this.eventQueue = this.eventQueue.concat(events);
 
@@ -160,22 +167,40 @@ class FolderWatcher {
         this.debouncedRunNextEvent();
     }
 
-    async pushTrashedDir(path: string) {
-        this.trashingDirQueue.push(path);
-    }
-
     private registerListeners() {
-        const watch = ensureElectron().watcher;
+        const watch = ensureElectron().watch;
 
         // [Note: File renames during folder watch]
         //
         // Renames come as two file system events - an `onAddFile` + an
         // `onRemoveFile` - in an arbitrary order.
-        watch.onAddFile(
-            diskFileAddedCallback,
-            diskFileRemovedCallback,
-            diskFolderRemovedCallback,
-        );
+
+        watch.onAddFile((path: string, watch: FolderWatch) => {
+            this.pushEvent({
+                action: "upload",
+                collectionName: collectionNameForPath(path, watch),
+                folderPath: watch.folderPath,
+                filePath: path,
+            });
+        });
+
+        watch.onRemoveFile((path: string, watch: FolderWatch) => {
+            this.pushEvent({
+                action: "trash",
+                collectionName: collectionNameForPath(path, watch),
+                folderPath: watch.folderPath,
+                filePath: path,
+            });
+        });
+
+        watch.onRemoveDir((path: string, watch: FolderWatch) => {
+            if (path == watch.folderPath) {
+                log.info(
+                    `Received file system delete event for a watched folder at ${path}`,
+                );
+                this.deletedFolderPaths.push(path);
+            }
+        });
     }
 
     private async runNextEvent() {
@@ -446,7 +471,7 @@ class FolderWatcher {
 
     private async processTrashEvent() {
         try {
-            if (this.checkAndIgnoreIfFileEventsFromTrashedDir()) {
+            if (this.pruneFileEventsFromDeletedFolderPaths()) {
                 return;
             }
 
@@ -502,19 +527,14 @@ class FolderWatcher {
         }
     }
 
-    private checkAndIgnoreIfFileEventsFromTrashedDir() {
-        if (this.trashingDirQueue.length !== 0) {
-            this.ignoreFileEventsFromTrashedDir(this.trashingDirQueue[0]);
-            this.trashingDirQueue.shift();
-            return true;
-        }
-        return false;
-    }
+    private pruneFileEventsFromDeletedFolderPaths() {
+        const deletedFolderPath = this.deletedFolderPaths.shift();
+        if (!deletedFolderPath) return false;
 
-    private ignoreFileEventsFromTrashedDir(trashingDir: string) {
-        this.eventQueue = this.eventQueue.filter((event) =>
-            event.paths.every((path) => !path.startsWith(trashingDir)),
+        this.eventQueue = this.eventQueue.filter(
+            (event) => !event.filePath.startsWith(deletedFolderPath),
         );
+        return true;
     }
 
     async getCollectionNameAndFolderPath(filePath: string) {
@@ -592,60 +612,6 @@ interface WatchEvent {
     collectionName?: string;
     /** The absolute path to the file under consideration. */
     filePath: string;
-}
-
-const onAddFile = async (path: string) => {
-    const collectionNameAndFolderPath =
-        await watcher.getCollectionNameAndFolderPath(path);
-
-    if (!collectionNameAndFolderPath) {
-        return;
-    }
-
-    const { collectionName, folderPath } = collectionNameAndFolderPath;
-
-    watcher.pushEvent({
-        action: "upload",
-        collectionName,
-        folderPath,
-        path: file.path,
-    });
-};
-
-async function diskFileRemovedCallback(filePath: string) {
-    const collectionNameAndFolderPath =
-        await watcher.getCollectionNameAndFolderPath(filePath);
-
-    if (!collectionNameAndFolderPath) {
-        return;
-    }
-
-    const { collectionName, folderPath } = collectionNameAndFolderPath;
-
-    const event: EventQueueItem = {
-        type: "trash",
-        collectionName,
-        folderPath,
-        path: filePath,
-    };
-    watcher.pushEvent(event);
-}
-
-async function diskFolderRemovedCallback(folderPath: string) {
-    try {
-        const mappings = await watcher.getWatchMappings();
-        const mapping = mappings.find(
-            (mapping) => mapping.folderPath === folderPath,
-        );
-        if (!mapping) {
-            log.info(`folder not found in mappings, ${folderPath}`);
-            throw Error(`Watch mapping not found`);
-        }
-        watcher.pushTrashedDir(folderPath);
-        log.info(`added trashedDir, ${folderPath}`);
-    } catch (e) {
-        log.error("error while calling diskFolderRemovedCallback", e);
-    }
 }
 
 export function getValidFilesToUpload(
