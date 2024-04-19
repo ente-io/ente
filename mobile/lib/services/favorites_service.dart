@@ -187,9 +187,12 @@ class FavoritesService {
     _updateFavoriteFilesCache(files, favFlag: favFlag);
   }
 
-  Future<void> removeFromFavorites(BuildContext context, EnteFile file) async {
-    final fileID = file.uploadedFileID;
-    if (fileID == null) {
+  Future<void> removeFromFavorites(
+    BuildContext context,
+    EnteFile file,
+  ) async {
+    final inUploadID = file.uploadedFileID;
+    if (inUploadID == null) {
       // Do nothing, ignore
     } else {
       final Collection? favCollection = await _getFavoritesCollection();
@@ -207,7 +210,7 @@ class FavoritesService {
       }
       if (file.collectionID != favCollection!.id) {
         final EnteFile? favFile = await FilesDB.instance.getUploadedFile(
-          fileID,
+          file.uploadedFileID!,
           favCollection.id,
         );
         if (favFile != null) {

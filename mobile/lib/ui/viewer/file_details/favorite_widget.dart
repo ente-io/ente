@@ -63,7 +63,7 @@ class _FavoriteWidgetState extends State<FavoriteWidget> {
                     try {
                       await FavoritesService.instance.addToFavorites(
                         context,
-                        widget.file,
+                        widget.file.copyWith(),
                       );
                     } catch (e, s) {
                       _logger.severe(e, s);
@@ -74,7 +74,7 @@ class _FavoriteWidgetState extends State<FavoriteWidget> {
                   } else {
                     try {
                       await FavoritesService.instance
-                          .removeFromFavorites(context, widget.file);
+                          .removeFromFavorites(context, widget.file.copyWith());
                     } catch (e, s) {
                       _logger.severe(e, s);
                       hasError = true;
