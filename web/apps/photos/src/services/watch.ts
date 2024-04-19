@@ -17,11 +17,7 @@ import debounce from "debounce";
 import uploadManager from "services/upload/uploadManager";
 import { Collection } from "types/collection";
 import { EncryptedEnteFile } from "types/file";
-import {
-    ElectronFile,
-    FileWithCollection,
-    type FileWithCollection2,
-} from "types/upload";
+import { type FileWithCollection2 } from "types/upload";
 import { groupFilesBasedOnCollectionID } from "utils/file";
 import { isHiddenFile } from "utils/upload";
 import { removeFromCollection } from "./collectionService";
@@ -49,7 +45,16 @@ class FolderWatcher {
     private uploadRunning = false;
     /** `true` if we are temporarily paused to let a user upload go through. */
     private isPaused = false;
-    private filePathToUploadedFileIDMap = new Map<string, EncryptedEnteFile>();
+    /**
+     * A map from file paths to an Ente file for files that were uploaded (or
+     * symlinked) as part of the most recent upload attempt.
+     */
+    private uploadedFileForPath = new Map<string, EncryptedEnteFile>();
+    /**
+     * A set of file paths that could not be uploaded in the most recent upload
+     * attempt. These are the uploads that failed due to a permanent error that
+     * a retry will not fix.
+     */
     private unUploadableFilePaths = new Set<string>();
 
     /**
@@ -317,9 +322,11 @@ class FolderWatcher {
      */
     async onFileUpload(
         fileUploadResult: UPLOAD_RESULT,
-        fileWithCollection: FileWithCollection,
+        fileWithCollection: FileWithCollection2,
         file: EncryptedEnteFile,
     ) {
+        // The files we get here will have fileWithCollection.file as a string,
+        // not as a File or a ElectronFile
         if (
             [
                 UPLOAD_RESULT.ADDED_SYMLINK,
@@ -329,19 +336,17 @@ class FolderWatcher {
             ].includes(fileUploadResult)
         ) {
             if (fileWithCollection.isLivePhoto) {
-                this.filePathToUploadedFileIDMap.set(
-                    (fileWithCollection.livePhotoAssets.image as ElectronFile)
-                        .path,
+                this.uploadedFileForPath.set(
+                    ensureString(fileWithCollection.livePhotoAssets.image),
                     file,
                 );
-                this.filePathToUploadedFileIDMap.set(
-                    (fileWithCollection.livePhotoAssets.video as ElectronFile)
-                        .path,
+                this.uploadedFileForPath.set(
+                    ensureString(fileWithCollection.livePhotoAssets.video),
                     file,
                 );
             } else {
-                this.filePathToUploadedFileIDMap.set(
-                    (fileWithCollection.file as ElectronFile).path,
+                this.uploadedFileForPath.set(
+                    ensureString(fileWithCollection.file),
                     file,
                 );
             }
@@ -352,16 +357,14 @@ class FolderWatcher {
         ) {
             if (fileWithCollection.isLivePhoto) {
                 this.unUploadableFilePaths.add(
-                    (fileWithCollection.livePhotoAssets.image as ElectronFile)
-                        .path,
+                    ensureString(fileWithCollection.livePhotoAssets.image),
                 );
                 this.unUploadableFilePaths.add(
-                    (fileWithCollection.livePhotoAssets.video as ElectronFile)
-                        .path,
+                    ensureString(fileWithCollection.livePhotoAssets.video),
                 );
             } else {
                 this.unUploadableFilePaths.add(
-                    (fileWithCollection.file as ElectronFile).path,
+                    ensureString(fileWithCollection.file),
                 );
             }
         }
@@ -422,6 +425,7 @@ class FolderWatcher {
         const syncedFiles: FolderWatch["syncedFiles"] = [];
         const ignoredFiles: FolderWatch["ignoredFiles"] = [];
 
+
         for (const fileWithCollection of filesWithCollection) {
             if (fileWithCollection.isLivePhoto) {
                 const imagePath = ensureString(
@@ -431,36 +435,22 @@ class FolderWatcher {
                     fileWithCollection.livePhotoAssets.video,
                 );
 
-                if (
-                    this.filePathToUploadedFileIDMap.has(imagePath) &&
-                    this.filePathToUploadedFileIDMap.has(videoPath)
-                ) {
-                    const imageFile = {
+                const imageFile = this.uploadedFileForPath.get(imagePath);
+                const videoFile = this.uploadedFileForPath.get(videoPath);
+
+                if (imageFile && videoFile) {
+                    syncedFiles.push({
                         path: imagePath,
-                        uploadedFileID:
-                            this.filePathToUploadedFileIDMap.get(imagePath).id,
-                        collectionID:
-                            this.filePathToUploadedFileIDMap.get(imagePath)
-                                .collectionID,
-                    };
-                    const videoFile = {
+                        uploadedFileID: imageFile.id,
+                        collectionID: imageFile.collectionID,
+                    });
+                    syncedFiles.push({
                         path: videoPath,
-                        uploadedFileID:
-                            this.filePathToUploadedFileIDMap.get(videoPath).id,
-                        collectionID:
-                            this.filePathToUploadedFileIDMap.get(videoPath)
-                                .collectionID,
-                    };
-                    syncedFiles.push(imageFile);
-                    syncedFiles.push(videoFile);
-                    log.debug(
-                        () =>
-                            `added image ${JSON.stringify(
-                                imageFile,
-                            )} and video file ${JSON.stringify(
-                                videoFile,
-                            )} to uploadedFiles`,
-                    );
+                        uploadedFileID: videoFile.id,
+                        collectionID: videoFile.collectionID,
+                    });
+                    this.uploadedFileForPath.delete(imagePath);
+                    this.uploadedFileForPath.delete(videoPath);
                 } else if (
                     this.unUploadableFilePaths.has(imagePath) &&
                     this.unUploadableFilePaths.has(videoPath)
@@ -469,30 +459,26 @@ class FolderWatcher {
                     ignoredFiles.push(videoPath);
                     log.debug(
                         () =>
-                            `added image ${imagePath} and video file ${videoPath} to rejectedFiles`,
+                            `Permanently ignoring live photo parts (${imagePath}, ${videoPath})`,
                     );
+                    this.unUploadableFilePaths.delete(imagePath);
+                    this.unUploadableFilePaths.delete(videoPath);
                 }
-                this.filePathToUploadedFileIDMap.delete(imagePath);
-                this.filePathToUploadedFileIDMap.delete(videoPath);
             } else {
-                const filePath = ensureString(fileWithCollection.file);
-
-                if (this.filePathToUploadedFileIDMap.has(filePath)) {
-                    const file = {
-                        path: filePath,
-                        uploadedFileID:
-                            this.filePathToUploadedFileIDMap.get(filePath).id,
-                        collectionID:
-                            this.filePathToUploadedFileIDMap.get(filePath)
-                                .collectionID,
-                    };
-                    syncedFiles.push(file);
-                    log.debug(() => `added file ${JSON.stringify(file)}`);
-                } else if (this.unUploadableFilePaths.has(filePath)) {
-                    ignoredFiles.push(filePath);
-                    log.debug(() => `added file ${filePath} to rejectedFiles`);
+                const path = ensureString(fileWithCollection.file);
+                const file = this.uploadedFileForPath.get(path);
+                if (file) {
+                    syncedFiles.push({
+                        path: path,
+                        uploadedFileID: file.id,
+                        collectionID: file.collectionID,
+                    });
+                    this.uploadedFileForPath.delete(path);
+                } else if (this.unUploadableFilePaths.has(path)) {
+                    ignoredFiles.push(path);
+                    log.debug(() => `Permanently ignoring file at ${path}`);
+                    this.unUploadableFilePaths.delete(path);
                 }
-                this.filePathToUploadedFileIDMap.delete(filePath);
             }
         }
 

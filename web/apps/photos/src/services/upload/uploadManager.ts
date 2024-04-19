@@ -51,9 +51,9 @@ class UploadManager {
         ComlinkWorker<typeof DedicatedCryptoWorker>
     >(MAX_CONCURRENT_UPLOADS);
     private parsedMetadataJSONMap: ParsedMetadataJSONMap;
-    private filesToBeUploaded: FileWithCollection[];
-    private remainingFiles: FileWithCollection[] = [];
-    private failedFiles: FileWithCollection[];
+    private filesToBeUploaded: FileWithCollection2[];
+    private remainingFiles: FileWithCollection2[] = [];
+    private failedFiles: FileWithCollection2[];
     private existingFiles: EnteFile[];
     private setFiles: SetFiles;
     private collections: Map<number, Collection>;
@@ -155,7 +155,7 @@ class UploadManager {
             if (mediaFiles.length) {
                 log.info(`clusterLivePhotoFiles started`);
                 const analysedMediaFiles =
-                    await UploadService.clusterLivePhotoFiles(mediaFiles);
+                    await clusterLivePhotoFiles(mediaFiles);
                 log.info(`clusterLivePhotoFiles ended`);
                 log.info(
                     `got live photos: ${
@@ -341,7 +341,7 @@ class UploadManager {
         }
     }
 
-    private async uploadMediaFiles(mediaFiles: FileWithCollection[]) {
+    private async uploadMediaFiles(mediaFiles: FileWithCollection2[]) {
         log.info(`uploadMediaFiles called`);
         this.filesToBeUploaded = [...this.filesToBeUploaded, ...mediaFiles];
 
@@ -402,7 +402,7 @@ class UploadManager {
     async postUploadTask(
         fileUploadResult: UPLOAD_RESULT,
         uploadedFile: EncryptedEnteFile | EnteFile | null,
-        fileWithCollection: FileWithCollection,
+        fileWithCollection: FileWithCollection2,
     ) {
         try {
             let decryptedFile: EnteFile;
@@ -469,7 +469,7 @@ class UploadManager {
 
     private async watchFolderCallback(
         fileUploadResult: UPLOAD_RESULT,
-        fileWithCollection: FileWithCollection,
+        fileWithCollection: FileWithCollection2,
         uploadedFile: EncryptedEnteFile,
     ) {
         if (isElectron()) {

@@ -45,6 +45,7 @@ import {
     UploadFile,
     UploadURL,
     isDataStream,
+    type FileWithCollection2,
     type UploadAsset2,
 } from "types/upload";
 import {
@@ -533,7 +534,7 @@ interface UploadResponse {
 export async function uploader(
     worker: Remote<DedicatedCryptoWorker>,
     existingFiles: EnteFile[],
-    fileWithCollection: FileWithCollection,
+    fileWithCollection: FileWithCollection2,
     uploaderName: string,
 ): Promise<UploadResponse> {
     const { collection, localID, ...uploadAsset } = fileWithCollection;
