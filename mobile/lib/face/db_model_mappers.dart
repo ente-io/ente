@@ -34,6 +34,7 @@ Map<String, dynamic> mapRemoteToFaceDB(Face face) {
     ).writeToBuffer(),
     faceScore: face.score,
     faceBlur: face.blur,
+    isSideways: face.detection.faceIsSideways() ? 1 : 0,
     mlVersionColumn: faceMlVersion,
     imageWidth: face.fileInfo?.imageWidth ?? 0,
     imageHeight: face.fileInfo?.imageHeight ?? 0,

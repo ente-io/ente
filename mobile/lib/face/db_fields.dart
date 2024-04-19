@@ -8,6 +8,7 @@ const faceDetectionColumn = 'detection';
 const faceEmbeddingBlob = 'eBlob';
 const faceScore = 'score';
 const faceBlur = 'blur';
+const isSideways = 'is_sideways';
 const imageWidth = 'width';
 const imageHeight = 'height';
 const faceClusterId = 'cluster_id';
@@ -20,6 +21,7 @@ const createFacesTable = '''CREATE TABLE IF NOT EXISTS $facesTable (
   $faceEmbeddingBlob BLOB NOT NULL,
   $faceScore  REAL NOT NULL,
   $faceBlur REAL NOT NULL DEFAULT $kLapacianDefault,
+  $isSideways	INTEGER NOT NULL DEFAULT 0,
   $imageHeight	INTEGER NOT NULL DEFAULT 0,
   $imageWidth	INTEGER NOT NULL DEFAULT 0,
   $mlVersionColumn	INTEGER NOT NULL DEFAULT -1,

@@ -1,5 +1,4 @@
 import 'dart:async';
-import "dart:convert" show json;
 import "dart:io" show Directory;
 import "dart:math";
 
@@ -11,7 +10,6 @@ import 'package:path_provider/path_provider.dart';
 import "package:photos/extensions/stop_watch.dart";
 import 'package:photos/face/db_fields.dart';
 import "package:photos/face/db_model_mappers.dart";
-import "package:photos/face/model/detection.dart";
 import "package:photos/face/model/face.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/services/machine_learning/face_ml/face_clustering/face_info_for_clustering.dart";
@@ -455,31 +453,6 @@ class FaceMLDataDB {
     );
   }
 
-  // TODO: remove this method and replace by correct logic during indexing
-  Future<Map<String, bool>> getFaceIdsToIsSidewaysFaceTEMP() async {
-    final db = await instance.sqliteAsyncDB;
-    final List<Map<String, dynamic>> maps = await db.getAll(
-      'SELECT $faceIDColumn, $faceDetectionColumn FROM $facesTable',
-    );
-
-    final time = DateTime.now();
-    final Map<String, bool> result = {};
-    for (final map in maps) {
-      final faceID = map[faceIDColumn] as String;
-      final detection =
-          Detection.fromJson(json.decode(map[faceDetectionColumn] as String));
-      result[faceID] = detection.faceIsSideways();
-    }
-    _logger.info(
-      'decoding detections and calculating face sideways bools took ${DateTime.now().difference(time).inMilliseconds} ms',
-    );
-    final double sidewaysRatio =
-        result.values.where((e) => e).length / result.length;
-    _logger.info('sideways face ratio: $sidewaysRatio');
-
-    return result;
-  }
-
   Future<Set<FaceInfoForClustering>> getFaceInfoForClustering({
     double minScore = kMinimumQualityFaceScore,
     int minClarity = kLaplacianHardThreshold,
@@ -493,14 +466,11 @@ class FaceMLDataDB {
     );
     final db = await instance.sqliteAsyncDB;
 
-    final Map<String, bool> faceIdsToIsSideways =
-        await getFaceIdsToIsSidewaysFaceTEMP();
-
     final Set<FaceInfoForClustering> result = {};
     while (true) {
       // Query a batch of rows
       final List<Map<String, dynamic>> maps = await db.getAll(
-        'SELECT $faceIDColumn, $faceEmbeddingBlob, $faceScore, $faceBlur FROM $facesTable'
+        'SELECT $faceIDColumn, $faceEmbeddingBlob, $faceScore, $faceBlur, $isSideways FROM $facesTable'
         ' WHERE $faceScore > $minScore AND $faceBlur > $minClarity'
         ' ORDER BY $faceIDColumn'
         ' DESC LIMIT $batchSize OFFSET $offset',
@@ -522,7 +492,7 @@ class FaceMLDataDB {
           embeddingBytes: map[faceEmbeddingBlob] as Uint8List,
           faceScore: map[faceScore] as double,
           blurValue: map[faceBlur] as double,
-          isSideways: faceIdsToIsSideways[faceID] ?? false,
+          isSideways: (map[isSideways] as int) == 1,
         );
         result.add(faceInfo);
       }
