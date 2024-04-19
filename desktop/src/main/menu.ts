@@ -7,7 +7,7 @@ import {
 } from "electron";
 import { allowWindowClose } from "../main";
 import { forceCheckForAppUpdates } from "./services/app-update";
-import autoLauncher from "./services/autoLauncher";
+import autoLauncher from "./services/auto-launcher";
 import { userPreferences } from "./stores/user-preferences";
 import { openLogDirectory } from "./util";
 

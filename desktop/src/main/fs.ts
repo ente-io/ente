@@ -22,10 +22,8 @@ export const fsReadTextFile = async (filePath: string) =>
 export const fsWriteFile = (path: string, contents: string) =>
     fs.writeFile(path, contents);
 
-/* TODO: Audit below this  */
-
-export const isFolder = async (dirPath: string) => {
+export const fsIsDir = async (dirPath: string) => {
     if (!existsSync(dirPath)) return false;
-    const stats = await fs.stat(dirPath);
-    return stats.isDirectory();
+    const stat = await fs.stat(dirPath);
+    return stat.isDirectory();
 };

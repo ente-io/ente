@@ -8,13 +8,16 @@ import { Events, eventBus } from "@ente/shared/events";
 import { Remote } from "comlink";
 import { UPLOAD_RESULT, UPLOAD_STAGES } from "constants/upload";
 import isElectron from "is-electron";
-import ImportService from "services/importService";
+import {
+    cancelRemainingUploads,
+    updatePendingUploads,
+} from "services/pending-uploads";
 import {
     getLocalPublicFiles,
     getPublicCollectionUID,
 } from "services/publicCollectionService";
 import { getDisableCFUploadProxyFlag } from "services/userService";
-import watchFolderService from "services/watch";
+import watcher from "services/watch";
 import { Collection } from "types/collection";
 import { EncryptedEnteFile, EnteFile } from "types/file";
 import { SetFiles } from "types/gallery";
@@ -177,7 +180,7 @@ class UploadManager {
             if (e.message === CustomError.UPLOAD_CANCELLED) {
                 if (isElectron()) {
                     this.remainingFiles = [];
-                    await ImportService.cancelRemainingUploads();
+                    await cancelRemainingUploads();
                 }
             } else {
                 log.error("uploading failed with error", e);
@@ -387,11 +390,13 @@ class UploadManager {
         uploadedFile: EncryptedEnteFile,
     ) {
         if (isElectron()) {
-            await watchFolderService.onFileUpload(
-                fileUploadResult,
-                fileWithCollection,
-                uploadedFile,
-            );
+            if (watcher.isUploadRunning()) {
+                await watcher.onFileUpload(
+                    fileUploadResult,
+                    fileWithCollection,
+                    uploadedFile,
+                );
+            }
         }
     }
 
@@ -431,12 +436,12 @@ class UploadManager {
             this.remainingFiles = this.remainingFiles.filter(
                 (file) => !areFileWithCollectionsSame(file, fileWithCollection),
             );
-            await ImportService.updatePendingUploads(this.remainingFiles);
+            await updatePendingUploads(this.remainingFiles);
         }
     }
 
     public shouldAllowNewUpload = () => {
-        return !this.uploadInProgress || watchFolderService.isUploadRunning();
+        return !this.uploadInProgress || watcher.isUploadRunning();
     };
 }
 

@@ -1,10 +1,10 @@
+import { encodeLivePhoto } from "@/media/live-photo";
 import log from "@/next/log";
 import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
 import { CustomError } from "@ente/shared/error";
 import { Remote } from "comlink";
 import { FILE_TYPE } from "constants/file";
 import { LIVE_PHOTO_ASSET_SIZE_LIMIT } from "constants/upload";
-import { encodeLivePhoto } from "services/livePhotoService";
 import { getFileType } from "services/typeDetectionService";
 import {
     ElectronFile,
@@ -14,12 +14,6 @@ import {
     LivePhotoAssets,
     ParsedMetadataJSONMap,
 } from "types/upload";
-import {
-    getFileExtensionWithDot,
-    getFileNameWithoutExtension,
-    isImageOrVideo,
-    splitFilenameAndExtension,
-} from "utils/file";
 import { getFileTypeFromExtensionForLivePhotoClustering } from "utils/file/livePhoto";
 import { getUint8ArrayView } from "../readerService";
 import { extractFileMetadata } from "./fileService";
@@ -107,16 +101,16 @@ export async function readLivePhoto(
         },
     );
 
-    const image = await getUint8ArrayView(livePhotoAssets.image);
+    const imageData = await getUint8ArrayView(livePhotoAssets.image);
 
-    const video = await getUint8ArrayView(livePhotoAssets.video);
+    const videoData = await getUint8ArrayView(livePhotoAssets.video);
 
     return {
         filedata: await encodeLivePhoto({
-            image,
-            video,
-            imageNameTitle: livePhotoAssets.image.name,
-            videoNameTitle: livePhotoAssets.video.name,
+            imageFileName: livePhotoAssets.image.name,
+            imageData,
+            videoFileName: livePhotoAssets.video.name,
+            videoData,
         }),
         thumbnail,
         hasStaticThumbnail,
@@ -304,3 +298,28 @@ function removePotentialLivePhotoSuffix(
         return filenameWithoutExtension;
     }
 }
+
+function getFileNameWithoutExtension(filename: string) {
+    const lastDotPosition = filename.lastIndexOf(".");
+    if (lastDotPosition === -1) return filename;
+    else return filename.slice(0, lastDotPosition);
+}
+
+function getFileExtensionWithDot(filename: string) {
+    const lastDotPosition = filename.lastIndexOf(".");
+    if (lastDotPosition === -1) return "";
+    else return filename.slice(lastDotPosition);
+}
+
+function splitFilenameAndExtension(filename: string): [string, string] {
+    const lastDotPosition = filename.lastIndexOf(".");
+    if (lastDotPosition === -1) return [filename, null];
+    else
+        return [
+            filename.slice(0, lastDotPosition),
+            filename.slice(lastDotPosition + 1),
+        ];
+}
+
+const isImageOrVideo = (fileType: FILE_TYPE) =>
+    [FILE_TYPE.IMAGE, FILE_TYPE.VIDEO].includes(fileType);

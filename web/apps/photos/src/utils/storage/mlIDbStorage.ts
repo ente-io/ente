@@ -97,10 +97,8 @@ class MLIDbStorage {
                         wasMLSearchEnabled = searchConfig.enabled;
                     }
                 } catch (e) {
-                    log.info(
-                        "Ignoring likely harmless error while trying to determine ML search status during migration",
-                        e,
-                    );
+                    // The configs store might not exist (e.g. during logout).
+                    // Ignore.
                 }
                 log.info(
                     `Previous ML database v${oldVersion} had ML search ${wasMLSearchEnabled ? "enabled" : "disabled"}`,

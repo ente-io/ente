@@ -1,5 +1,5 @@
 import { ensureElectron } from "@/next/electron";
-import { AppUpdateInfo } from "@/next/types/ipc";
+import { AppUpdate } from "@/next/types/ipc";
 import { logoutUser } from "@ente/accounts/services/user";
 import { DialogBoxAttributes } from "@ente/shared/components/DialogBox/types";
 import AutoAwesomeOutlinedIcon from "@mui/icons-material/AutoAwesomeOutlined";
@@ -55,7 +55,7 @@ export const getTrashFileMessage = (deleteFileHelper): DialogBoxAttributes => ({
 
 export const getUpdateReadyToInstallMessage = ({
     version,
-}: AppUpdateInfo): DialogBoxAttributes => ({
+}: AppUpdate): DialogBoxAttributes => ({
     icon: <AutoAwesomeOutlinedIcon />,
     title: t("UPDATE_AVAILABLE"),
     content: t("UPDATE_INSTALLABLE_MESSAGE"),
@@ -73,7 +73,7 @@ export const getUpdateReadyToInstallMessage = ({
 
 export const getUpdateAvailableForDownloadMessage = ({
     version,
-}: AppUpdateInfo): DialogBoxAttributes => ({
+}: AppUpdate): DialogBoxAttributes => ({
     icon: <AutoAwesomeOutlinedIcon />,
     title: t("UPDATE_AVAILABLE"),
     content: t("UPDATE_AVAILABLE_MESSAGE"),
