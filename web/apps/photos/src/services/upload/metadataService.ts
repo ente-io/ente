@@ -1,4 +1,5 @@
 import { encodeLivePhoto } from "@/media/live-photo";
+import { ensureElectron } from "@/next/electron";
 import { basename, getFileNameSize } from "@/next/file";
 import log from "@/next/log";
 import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
@@ -168,65 +169,77 @@ export const getMetadataJSONMapKeyForFile = (
     return `${collectionID}-${getFileOriginalName(fileName)}`;
 };
 
-export async function parseMetadataJSON(receivedFile: File | ElectronFile) {
+export async function parseMetadataJSON(
+    receivedFile: File | ElectronFile | string,
+) {
     try {
-        if (!(receivedFile instanceof File)) {
-            receivedFile = new File(
-                [await receivedFile.blob()],
-                receivedFile.name,
-            );
+        let text: string;
+        if (typeof receivedFile == "string") {
+            text = await ensureElectron().fs.readTextFile(receivedFile);
+        } else {
+            if (!(receivedFile instanceof File)) {
+                receivedFile = new File(
+                    [await receivedFile.blob()],
+                    receivedFile.name,
+                );
+            }
+            text = await receivedFile.text();
         }
-        const metadataJSON: object = JSON.parse(await receivedFile.text());
 
-        const parsedMetadataJSON: ParsedMetadataJSON =
-            NULL_PARSED_METADATA_JSON;
-        if (!metadataJSON) {
-            return;
-        }
-
-        if (
-            metadataJSON["photoTakenTime"] &&
-            metadataJSON["photoTakenTime"]["timestamp"]
-        ) {
-            parsedMetadataJSON.creationTime =
-                metadataJSON["photoTakenTime"]["timestamp"] * 1000000;
-        } else if (
-            metadataJSON["creationTime"] &&
-            metadataJSON["creationTime"]["timestamp"]
-        ) {
-            parsedMetadataJSON.creationTime =
-                metadataJSON["creationTime"]["timestamp"] * 1000000;
-        }
-        if (
-            metadataJSON["modificationTime"] &&
-            metadataJSON["modificationTime"]["timestamp"]
-        ) {
-            parsedMetadataJSON.modificationTime =
-                metadataJSON["modificationTime"]["timestamp"] * 1000000;
-        }
-        let locationData: Location = NULL_LOCATION;
-        if (
-            metadataJSON["geoData"] &&
-            (metadataJSON["geoData"]["latitude"] !== 0.0 ||
-                metadataJSON["geoData"]["longitude"] !== 0.0)
-        ) {
-            locationData = metadataJSON["geoData"];
-        } else if (
-            metadataJSON["geoDataExif"] &&
-            (metadataJSON["geoDataExif"]["latitude"] !== 0.0 ||
-                metadataJSON["geoDataExif"]["longitude"] !== 0.0)
-        ) {
-            locationData = metadataJSON["geoDataExif"];
-        }
-        if (locationData !== null) {
-            parsedMetadataJSON.latitude = locationData.latitude;
-            parsedMetadataJSON.longitude = locationData.longitude;
-        }
-        return parsedMetadataJSON;
+        return parseMetadataJSONText(text);
     } catch (e) {
         log.error("parseMetadataJSON failed", e);
         // ignore
     }
+}
+
+export async function parseMetadataJSONText(text: string) {
+    const metadataJSON: object = JSON.parse(text);
+
+    const parsedMetadataJSON: ParsedMetadataJSON = NULL_PARSED_METADATA_JSON;
+    if (!metadataJSON) {
+        return;
+    }
+
+    if (
+        metadataJSON["photoTakenTime"] &&
+        metadataJSON["photoTakenTime"]["timestamp"]
+    ) {
+        parsedMetadataJSON.creationTime =
+            metadataJSON["photoTakenTime"]["timestamp"] * 1000000;
+    } else if (
+        metadataJSON["creationTime"] &&
+        metadataJSON["creationTime"]["timestamp"]
+    ) {
+        parsedMetadataJSON.creationTime =
+            metadataJSON["creationTime"]["timestamp"] * 1000000;
+    }
+    if (
+        metadataJSON["modificationTime"] &&
+        metadataJSON["modificationTime"]["timestamp"]
+    ) {
+        parsedMetadataJSON.modificationTime =
+            metadataJSON["modificationTime"]["timestamp"] * 1000000;
+    }
+    let locationData: Location = NULL_LOCATION;
+    if (
+        metadataJSON["geoData"] &&
+        (metadataJSON["geoData"]["latitude"] !== 0.0 ||
+            metadataJSON["geoData"]["longitude"] !== 0.0)
+    ) {
+        locationData = metadataJSON["geoData"];
+    } else if (
+        metadataJSON["geoDataExif"] &&
+        (metadataJSON["geoDataExif"]["latitude"] !== 0.0 ||
+            metadataJSON["geoDataExif"]["longitude"] !== 0.0)
+    ) {
+        locationData = metadataJSON["geoDataExif"];
+    }
+    if (locationData !== null) {
+        parsedMetadataJSON.latitude = locationData.latitude;
+        parsedMetadataJSON.longitude = locationData.longitude;
+    }
+    return parsedMetadataJSON;
 }
 
 // tries to extract date from file name if available else returns null

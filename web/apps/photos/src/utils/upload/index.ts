@@ -4,7 +4,12 @@ import { A_SEC_IN_MICROSECONDS, PICKED_UPLOAD_TYPE } from "constants/upload";
 import isElectron from "is-electron";
 import { exportMetadataDirectoryName } from "services/export";
 import { EnteFile } from "types/file";
-import { ElectronFile, FileWithCollection, Metadata } from "types/upload";
+import {
+    ElectronFile,
+    FileWithCollection,
+    Metadata,
+    type FileWithCollection2,
+} from "types/upload";
 
 const TYPE_JSON = "json";
 const DEDUPE_COLLECTION = new Set(["icloud library", "icloudlibrary"]);
@@ -87,6 +92,23 @@ export function segregateMetadataAndMediaFiles(
     filesWithCollectionToUpload.forEach((fileWithCollection) => {
         const file = fileWithCollection.file;
         if (file.name.toLowerCase().endsWith(TYPE_JSON)) {
+            metadataJSONFiles.push(fileWithCollection);
+        } else {
+            mediaFiles.push(fileWithCollection);
+        }
+    });
+    return { mediaFiles, metadataJSONFiles };
+}
+
+export function segregateMetadataAndMediaFiles2(
+    filesWithCollectionToUpload: FileWithCollection2[],
+) {
+    const metadataJSONFiles: FileWithCollection2[] = [];
+    const mediaFiles: FileWithCollection2[] = [];
+    filesWithCollectionToUpload.forEach((fileWithCollection) => {
+        const file = fileWithCollection.file;
+        const s = typeof file == "string" ? file : file.name;
+        if (s.toLowerCase().endsWith(TYPE_JSON)) {
             metadataJSONFiles.push(fileWithCollection);
         } else {
             mediaFiles.push(fileWithCollection);

@@ -1,4 +1,3 @@
-import { getFileNameSize } from "@/next/file";
 import log from "@/next/log";
 import { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { getDedicatedCryptoWorker } from "@ente/shared/crypto";
@@ -33,6 +32,7 @@ import { decryptFile, getUserOwnedFiles, sortFiles } from "utils/file";
 import {
     areFileWithCollectionsSame,
     segregateMetadataAndMediaFiles,
+    segregateMetadataAndMediaFiles2,
 } from "utils/upload";
 import { getLocalFiles } from "../fileService";
 import {
@@ -41,7 +41,7 @@ import {
 } from "./metadataService";
 import { default as UIService, default as uiService } from "./uiService";
 import uploadCancelService from "./uploadCancelService";
-import UploadService, { uploader } from "./uploadService";
+import UploadService, { getFileName, uploader } from "./uploadService";
 
 const MAX_CONCURRENT_UPLOADS = 4;
 
@@ -229,7 +229,7 @@ class UploadManager {
                 ),
             );
             const { metadataJSONFiles, mediaFiles } =
-                segregateMetadataAndMediaFiles(filesWithCollectionToUploadIn);
+                segregateMetadataAndMediaFiles2(filesWithCollectionToUploadIn);
             log.info(`has ${metadataJSONFiles.length} metadata json files`);
             log.info(`has ${mediaFiles.length} media files`);
             if (metadataJSONFiles.length) {
@@ -296,37 +296,30 @@ class UploadManager {
         }
     }
 
-    private async parseMetadataJSONFiles(metadataFiles: FileWithCollection[]) {
+    private async parseMetadataJSONFiles(metadataFiles: FileWithCollection2[]) {
         try {
             log.info(`parseMetadataJSONFiles function executed `);
 
             UIService.reset(metadataFiles.length);
 
             for (const { file, collectionID } of metadataFiles) {
+                const name = getFileName(file);
                 try {
                     if (uploadCancelService.isUploadCancelationRequested()) {
                         throw Error(CustomError.UPLOAD_CANCELLED);
                     }
-                    log.info(
-                        `parsing metadata json file ${getFileNameSize(file)}`,
-                    );
+
+                    log.info(`parsing metadata json file ${name}`);
 
                     const parsedMetadataJSON = await parseMetadataJSON(file);
                     if (parsedMetadataJSON) {
                         this.parsedMetadataJSONMap.set(
-                            getMetadataJSONMapKeyForJSON(
-                                collectionID,
-                                file.name,
-                            ),
+                            getMetadataJSONMapKeyForJSON(collectionID, name),
                             parsedMetadataJSON && { ...parsedMetadataJSON },
                         );
                         UIService.increaseFileUploaded();
                     }
-                    log.info(
-                        `successfully parsed metadata json file ${getFileNameSize(
-                            file,
-                        )}`,
-                    );
+                    log.info(`successfully parsed metadata json file ${name}`);
                 } catch (e) {
                     if (e.message === CustomError.UPLOAD_CANCELLED) {
                         throw e;
@@ -334,9 +327,7 @@ class UploadManager {
                         // and don't break for subsequent files just log and move on
                         log.error("parsing failed for a file", e);
                         log.info(
-                            `failed to parse metadata json file ${getFileNameSize(
-                                file,
-                            )} error: ${e.message}`,
+                            `failed to parse metadata json file ${name} error: ${e.message}`,
                         );
                     }
                 }

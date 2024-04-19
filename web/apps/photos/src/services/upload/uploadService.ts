@@ -135,7 +135,7 @@ class UploadService {
     getAssetName({ isLivePhoto, file, livePhotoAssets }: UploadAsset2) {
         return isLivePhoto
             ? getLivePhotoName(livePhotoAssets)
-            : getFilename(file);
+            : getFileName(file);
     }
 
     getAssetFileType({ isLivePhoto, file, livePhotoAssets }: UploadAsset) {
@@ -366,7 +366,7 @@ function getFileSize(file: File | ElectronFile) {
     return file.size;
 }
 
-const getFilename = (file: File | ElectronFile | string) =>
+export const getFileName = (file: File | ElectronFile | string) =>
     typeof file == "string" ? basename(file) : file.name;
 
 async function readFile(
