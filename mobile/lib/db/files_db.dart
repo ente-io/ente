@@ -521,7 +521,7 @@ class FilesDB {
   }
 
   Future<(Set<int>, Map<String, int>)> getUploadAndHash(
-      int collectionID) async {
+      int collectionID,) async {
     final db = await instance.database;
     final results = await db.query(
       filesTable,

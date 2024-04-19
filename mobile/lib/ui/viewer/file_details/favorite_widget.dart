@@ -69,7 +69,9 @@ class _FavoriteWidgetState extends State<FavoriteWidget> {
                       _logger.severe(e, s);
                       hasError = true;
                       showToast(
-                          context, S.of(context).sorryCouldNotAddToFavorites);
+                        context,
+                        S.of(context).sorryCouldNotAddToFavorites,
+                      );
                     }
                   } else {
                     try {
@@ -91,7 +93,8 @@ class _FavoriteWidgetState extends State<FavoriteWidget> {
                 },
                 likeBuilder: (isLiked) {
                   debugPrint(
-                      "File Upload ID ${widget.file.uploadedFileID} & collection ${widget.file.collectionID}");
+                    "File Upload ID ${widget.file.uploadedFileID} & collection ${widget.file.collectionID}",
+                  );
                   return Icon(
                     isLiked
                         ? Icons.favorite_rounded
