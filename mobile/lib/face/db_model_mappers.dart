@@ -35,8 +35,6 @@ Map<String, dynamic> mapRemoteToFaceDB(Face face) {
     faceScore: face.score,
     faceBlur: face.blur,
     mlVersionColumn: faceMlVersion,
-    faceArea: face.area(),
-    faceVisibilityScore: face.visibility,
     imageWidth: face.fileInfo?.imageWidth ?? 0,
     imageHeight: face.fileInfo?.imageHeight ?? 0,
   };

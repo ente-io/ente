@@ -311,8 +311,6 @@ class FaceMLDataDB {
         faceBlur,
         imageHeight,
         imageWidth,
-        faceArea,
-        faceVisibilityScore,
         mlVersionColumn,
       ],
       where: '$fileIDColumn = ?',

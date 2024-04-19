@@ -8,8 +8,6 @@ const faceDetectionColumn = 'detection';
 const faceEmbeddingBlob = 'eBlob';
 const faceScore = 'score';
 const faceBlur = 'blur';
-const faceArea = 'area';
-const faceVisibilityScore = 'visibility';
 const imageWidth = 'width';
 const imageHeight = 'height';
 const faceClusterId = 'cluster_id';
@@ -24,8 +22,6 @@ const createFacesTable = '''CREATE TABLE IF NOT EXISTS $facesTable (
   $faceBlur REAL NOT NULL DEFAULT $kLapacianDefault,
   $imageHeight	INTEGER NOT NULL DEFAULT 0,
   $imageWidth	INTEGER NOT NULL DEFAULT 0,
-  $faceArea	INTEGER NOT NULL DEFAULT 0,
-  $faceVisibilityScore	INTEGER NOT NULL DEFAULT -1,
   $mlVersionColumn	INTEGER NOT NULL DEFAULT -1,
   PRIMARY KEY($fileIDColumn, $faceIDColumn)
   );
