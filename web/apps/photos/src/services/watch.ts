@@ -236,8 +236,8 @@ class FolderWatcher {
         }
 
         if (event.action === "upload") {
-            const pathsToUpload = pathsThatNeedUpload(event.filePaths, watch);
-            if (pathsToUpload.length == 0) {
+            const paths = pathsToUpload(event.filePaths, watch);
+            if (paths.length == 0) {
                 skip("none of the files need uploading");
                 return;
             }
@@ -250,36 +250,34 @@ class FolderWatcher {
 
             const collectionName = event.collectionName;
             log.info(
-                `Folder watch requested upload of ${pathsToUpload.length} files to collection ${collectionName}`,
+                `Folder watch requested upload of ${paths.length} files to collection ${collectionName}`,
             );
 
-            this.upload(collectionName, pathsToUpload);
+            this.upload(collectionName, paths);
         } else {
             if (this.pruneFileEventsFromDeletedFolderPaths()) {
                 skip("event was from a deleted folder path");
                 return;
             }
 
-            const { paths } = this.currentEvent;
-            const filePathsToRemove = new Set(paths);
+            const paths = pathsToRemove(event.filePaths, watch);
 
-            const files = this.currentlySyncedMapping.syncedFiles.filter(
-                (file) => filePathsToRemove.has(file.path),
+            this.activeWatch = watch;
+
+            await this.trashByIDs(paths);
+
+            const prunedSyncedFiles = watch.syncedFiles.filter(
+                ({ path }) => !event.filePaths.includes(path),
             );
 
-            await this.trashByIDs(files);
-
-            this.currentlySyncedMapping.syncedFiles =
-                this.currentlySyncedMapping.syncedFiles.filter(
-                    (file) => !filePathsToRemove.has(file.path),
-                );
-            await ensureElectron().updateWatchMappingSyncedFiles(
-                this.currentlySyncedMapping.folderPath,
-                this.currentlySyncedMapping.syncedFiles,
+            await ensureElectron().watch.updateSyncedFiles(
+                prunedSyncedFiles,
+                watch.folderPath,
             );
 
-            this.isEventRunning = false;
-            setTimeout(() => this.runNextEvent(), 0);
+            this.activeWatch = undefined;
+
+            this.debouncedRunNextEvent();
         }
     }
 
@@ -635,36 +633,29 @@ type ClubbedWatchEvent = Omit<WatchEvent, "filePath"> & {
  */
 const deduceEvents = async (watches: FolderWatch[]): Promise<WatchEvent[]> => {
     const electron = ensureElectron();
-
     const events: WatchEvent[] = [];
 
     for (const watch of watches) {
         const folderPath = watch.folderPath;
 
-        const paths = await electron.watch.findFiles(folderPath);
+        const filePaths = await electron.watch.findFiles(folderPath);
 
         // Files that are on disk but not yet synced.
-        const pathsToUpload = pathsThatNeedUpload(paths, watch);
-
-        for (const path of pathsToUpload)
+        for (const filePath of pathsToUpload(filePaths, watch))
             events.push({
                 action: "upload",
                 folderPath,
-                collectionName: collectionNameForPath(path, watch),
-                filePath: path,
+                collectionName: collectionNameForPath(filePath, watch),
+                filePath,
             });
 
         // Previously synced files that are no longer on disk.
-        const pathsToRemove = watch.syncedFiles
-            .map((f) => f.path)
-            .filter((path) => !paths.includes(path));
-
-        for (const path of pathsToRemove)
+        for (const filePath of pathsToRemove(filePaths, watch))
             events.push({
                 action: "trash",
                 folderPath,
-                collectionName: collectionNameForPath(path, watch),
-                filePath: path,
+                collectionName: collectionNameForPath(filePath, watch),
+                filePath,
             });
     }
 
@@ -672,23 +663,33 @@ const deduceEvents = async (watches: FolderWatch[]): Promise<WatchEvent[]> => {
 };
 
 /**
- * Remove hidden files and previously synced or ignored from {@link filePaths},
- * returning the list of filtered paths that need to be uploaded.
+ * Filter out hidden files and previously synced or ignored paths from
+ * {@link paths} to get the list of paths that need to be uploaded to the Ente
+ * collection.
  */
-const pathsThatNeedUpload = (filePaths: string[], watch: FolderWatch) =>
-    filePaths
+const pathsToUpload = (paths: string[], watch: FolderWatch) =>
+    paths
         // Filter out hidden files (files whose names begins with a dot)
         .filter((path) => !isHiddenFile(path))
         // Files that are on disk but not yet synced or ignored.
         .filter((path) => !isSyncedOrIgnoredPath(path, watch));
 
+/**
+ * Return the paths to previously synced files that are no longer on disk and so
+ * must be removed from the Ente collection.
+ */
+const pathsToRemove = (paths: string[], watch: FolderWatch) =>
+    watch.syncedFiles
+        .map((f) => f.path)
+        .filter((path) => !paths.includes(path));
+
 const isSyncedOrIgnoredPath = (path: string, watch: FolderWatch) =>
     watch.ignoredFiles.includes(path) ||
     watch.syncedFiles.find((f) => f.path === path);
 
-const collectionNameForPath = (filePath: string, watch: FolderWatch) =>
+const collectionNameForPath = (path: string, watch: FolderWatch) =>
     watch.collectionMapping == "root"
         ? dirname(watch.folderPath)
-        : parentDirectoryName(filePath);
+        : parentDirectoryName(path);
 
 const parentDirectoryName = (path: string) => basename(dirname(path));
