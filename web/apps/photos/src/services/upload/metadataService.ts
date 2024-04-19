@@ -26,13 +26,13 @@ import {
     ElectronFile,
     ExtractMetadataResult,
     FileTypeInfo,
-    FileWithCollection,
     LivePhotoAssets,
     Location,
     Metadata,
     ParsedExtractedMetadata,
     ParsedMetadataJSON,
     ParsedMetadataJSONMap,
+    type FileWithCollection2,
     type LivePhotoAssets2,
 } from "types/upload";
 import { getFileTypeFromExtensionForLivePhotoClustering } from "utils/file/livePhoto";
@@ -40,7 +40,7 @@ import { getUint8ArrayView } from "../readerService";
 import { getEXIFLocation, getEXIFTime, getParsedExifData } from "./exifService";
 import { generateThumbnail } from "./thumbnailService";
 import uploadCancelService from "./uploadCancelService";
-import { extractFileMetadata } from "./uploadService";
+import { extractFileMetadata, getFileName } from "./uploadService";
 
 const NULL_PARSED_METADATA_JSON: ParsedMetadataJSON = {
     creationTime: null,
@@ -419,15 +419,17 @@ export async function readLivePhoto(
     };
 }
 
-export async function clusterLivePhotoFiles(mediaFiles: FileWithCollection[]) {
+export async function clusterLivePhotoFiles(mediaFiles: FileWithCollection2[]) {
     try {
-        const analysedMediaFiles: FileWithCollection[] = [];
+        const analysedMediaFiles: FileWithCollection2[] = [];
         mediaFiles
             .sort((firstMediaFile, secondMediaFile) =>
                 splitFilenameAndExtension(
-                    firstMediaFile.file.name,
+                    getFileName(firstMediaFile.file),
                 )[0].localeCompare(
-                    splitFilenameAndExtension(secondMediaFile.file.name)[0],
+                    splitFilenameAndExtension(
+                        getFileName(secondMediaFile.file),
+                    )[0],
                 ),
             )
             .sort(
@@ -443,22 +445,22 @@ export async function clusterLivePhotoFiles(mediaFiles: FileWithCollection[]) {
             const secondMediaFile = mediaFiles[index + 1];
             const firstFileType =
                 getFileTypeFromExtensionForLivePhotoClustering(
-                    firstMediaFile.file.name,
+                    getFileName(firstMediaFile.file),
                 );
             const secondFileType =
                 getFileTypeFromExtensionForLivePhotoClustering(
-                    secondMediaFile.file.name,
+                    getFileName(secondMediaFile.file),
                 );
             const firstFileIdentifier: LivePhotoIdentifier = {
                 collectionID: firstMediaFile.collectionID,
                 fileType: firstFileType,
-                name: firstMediaFile.file.name,
+                name: getFileName(firstMediaFile.file),
                 size: firstMediaFile.file.size,
             };
             const secondFileIdentifier: LivePhotoIdentifier = {
                 collectionID: secondMediaFile.collectionID,
                 fileType: secondFileType,
-                name: secondMediaFile.file.name,
+                name: getFileName(secondMediaFile.file),
                 size: secondMediaFile.file.size,
             };
             if (
@@ -467,8 +469,8 @@ export async function clusterLivePhotoFiles(mediaFiles: FileWithCollection[]) {
                     secondFileIdentifier,
                 )
             ) {
-                let imageFile: File | ElectronFile;
-                let videoFile: File | ElectronFile;
+                let imageFile: File | ElectronFile | string;
+                let videoFile: File | ElectronFile | string;
                 if (
                     firstFileType === FILE_TYPE.IMAGE &&
                     secondFileType === FILE_TYPE.VIDEO

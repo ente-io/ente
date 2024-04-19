@@ -36,6 +36,7 @@ import {
 } from "utils/upload";
 import { getLocalFiles } from "../fileService";
 import {
+    clusterLivePhotoFiles,
     getMetadataJSONMapKeyForJSON,
     parseMetadataJSON,
 } from "./metadataService";
@@ -245,7 +246,7 @@ class UploadManager {
             if (mediaFiles.length) {
                 log.info(`clusterLivePhotoFiles started`);
                 const analysedMediaFiles =
-                    await UploadService.clusterLivePhotoFiles(mediaFiles);
+                    await clusterLivePhotoFiles(mediaFiles);
                 log.info(`clusterLivePhotoFiles ended`);
                 log.info(
                     `got live photos: ${

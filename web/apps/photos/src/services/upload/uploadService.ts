@@ -176,10 +176,6 @@ class UploadService {
               );
     }
 
-    clusterLivePhotoFiles(mediaFiles: FileWithCollection[]) {
-        return clusterLivePhotoFiles(mediaFiles);
-    }
-
     constructPublicMagicMetadata(
         publicMagicMetadataProps: FilePublicMagicMetadataProps,
     ) {
