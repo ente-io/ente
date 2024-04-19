@@ -29,8 +29,8 @@ const watchStoreSchema: Schema<WatchStore> = {
                         type: "object",
                         properties: {
                             path: { type: "string" },
-                            uploadedFileID: { type: "string" },
-                            collectionID: { type: "string" },
+                            uploadedFileID: { type: "number" },
+                            collectionID: { type: "number" },
                         },
                     },
                 },
