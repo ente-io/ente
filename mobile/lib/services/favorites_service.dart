@@ -24,6 +24,7 @@ class FavoritesService {
   late FilesDB _filesDB;
   int? _cachedFavoritesCollectionID;
   final Set<int> _cachedFavUploadedIDs = {};
+  final Set<String> _cachedFavFileHases = {};
   final Set<String> _cachedPendingLocalIDs = {};
   late StreamSubscription<CollectionUpdatedEvent>
       _collectionUpdatesSubscription;
@@ -60,9 +61,12 @@ class FavoritesService {
   Future<void> _warmUpCache() async {
     final favCollection = await _getFavoritesCollection();
     if (favCollection != null) {
-      final uploadedIDs =
-          await FilesDB.instance.getUploadedFileIDs(favCollection.id);
+      Set<int> uploadedIDs;
+      Set<String> fileHashes;
+      (uploadedIDs, fileHashes) =
+          await FilesDB.instance.getUploadAndHash(favCollection.id);
       _cachedFavUploadedIDs.addAll(uploadedIDs);
+      _cachedFavFileHases.addAll(fileHashes);
     }
   }
 
@@ -87,6 +91,9 @@ class FavoritesService {
       return false;
     }
     if (file.uploadedFileID != null) {
+      if (file.ownerID != _config.getUserID() && file.hash != null) {
+        return _cachedFavFileHases.contains(file.hash!);
+      }
       return _cachedFavUploadedIDs.contains(file.uploadedFileID);
     } else if (file.localID != null) {
       return _cachedPendingLocalIDs.contains(file.localID);
@@ -99,6 +106,9 @@ class FavoritesService {
     if (collection == null || file.uploadedFileID == null) {
       return false;
     }
+    if (file.ownerID != _config.getUserID() && file.hash != null) {
+      return _cachedFavFileHases.contains(file.hash!);
+    }
     return _filesDB.doesFileExistInCollection(
       file.uploadedFileID!,
       collection.id,
@@ -110,10 +120,14 @@ class FavoritesService {
     required bool favFlag,
   }) {
     final Set<int> updatedIDs = {};
+    final Set<String> hashes = {};
     final Set<String> localIDs = {};
     for (var file in files) {
       if (file.uploadedFileID != null) {
         updatedIDs.add(file.uploadedFileID!);
+        if (file.hash != null) {
+          hashes.add(file.hash!);
+        }
       } else if (file.localID != null || file.localID != "") {
         /* Note: Favorite un-uploaded files
         For such files, as we don't have uploaded IDs yet, we will cache
@@ -124,8 +138,10 @@ class FavoritesService {
     }
     if (favFlag) {
       _cachedFavUploadedIDs.addAll(updatedIDs);
+      _cachedFavFileHases.addAll(hashes);
     } else {
       _cachedFavUploadedIDs.removeAll(updatedIDs);
+      _cachedFavFileHases.removeAll(hashes);
     }
   }
 

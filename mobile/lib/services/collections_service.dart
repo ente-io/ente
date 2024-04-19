@@ -1610,10 +1610,13 @@ class CollectionsService {
       for (final file in batch) {
         params["fileIDs"].add(file.uploadedFileID);
       }
-      await _enteDio.post(
+      final resp = await _enteDio.post(
         "/collections/v3/remove-files",
         data: params,
       );
+      if (resp.statusCode != 200) {
+        throw Exception("Failed to remove files from collection");
+      }
 
       await _filesDB.removeFromCollection(collectionID, params["fileIDs"]);
       Bus.instance
