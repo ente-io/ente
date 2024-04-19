@@ -1,3 +1,4 @@
+import { getFileNameSize } from "@/next/file";
 import log from "@/next/log";
 import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
 import {
@@ -8,6 +9,7 @@ import {
 import { Remote } from "comlink";
 import { FILE_TYPE } from "constants/file";
 import { NULL_EXTRACTED_METADATA, NULL_LOCATION } from "constants/upload";
+import * as ffmpegService from "services/ffmpeg/ffmpegService";
 import { FilePublicMagicMetadataProps } from "types/file";
 import {
     ElectronFile,
@@ -21,7 +23,6 @@ import {
 import { splitFilenameAndExtension } from "utils/file";
 import { getEXIFLocation, getEXIFTime, getParsedExifData } from "./exifService";
 import { getFileHash } from "./hashService";
-import { getVideoMetadata } from "./videoMetadataService";
 
 const NULL_PARSED_METADATA_JSON: ParsedMetadataJSON = {
     creationTime: null,
@@ -271,4 +272,24 @@ function getFileOriginalName(fileName: string) {
         originalName += "." + extension;
     }
     return originalName;
+}
+
+async function getVideoMetadata(file: File | ElectronFile) {
+    let videoMetadata = NULL_EXTRACTED_METADATA;
+    try {
+        log.info(`getVideoMetadata called for ${getFileNameSize(file)}`);
+        videoMetadata = await ffmpegService.extractVideoMetadata(file);
+        log.info(
+            `videoMetadata successfully extracted ${getFileNameSize(file)}`,
+        );
+    } catch (e) {
+        log.error("failed to get video metadata", e);
+        log.info(
+            `videoMetadata extracted failed ${getFileNameSize(file)} ,${
+                e.message
+            } `,
+        );
+    }
+
+    return videoMetadata;
 }
