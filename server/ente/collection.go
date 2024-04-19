@@ -103,11 +103,23 @@ type AddFilesRequest struct {
 	Files        []CollectionFileItem `json:"files" binding:"required"`
 }
 
-// CopyFileSyncRequest is request object for creating copy of Files, and those copy to the destination collection
+// CopyFileSyncRequest is request object for creating copy of CollectionFileItems, and those copy to the destination collection
 type CopyFileSyncRequest struct {
-	SrcCollectionID int64                `json:"srcCollectionID" binding:"required"`
-	DstCollection   int64                `json:"dstCollectionID" binding:"required"`
-	Files           []CollectionFileItem `json:"files" binding:"required"`
+	SrcCollectionID     int64                `json:"srcCollectionID" binding:"required"`
+	DstCollection       int64                `json:"dstCollectionID" binding:"required"`
+	CollectionFileItems []CollectionFileItem `json:"files" binding:"required"`
+}
+
+type CopyResponse struct {
+	OldToNewFileIDMap map[int64]int64 `json:"oldToNewFileIDMap"`
+}
+
+func (cfr CopyFileSyncRequest) FileIDs() []int64 {
+	fileIDs := make([]int64, 0, len(cfr.CollectionFileItems))
+	for _, file := range cfr.CollectionFileItems {
+		fileIDs = append(fileIDs, file.ID)
+	}
+	return fileIDs
 }
 
 // RemoveFilesRequest represents a request to remove files from a collection

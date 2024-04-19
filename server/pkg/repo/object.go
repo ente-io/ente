@@ -44,6 +44,15 @@ func (repo *ObjectRepository) MarkObjectReplicated(objectKey string, datacenter 
 	return result.RowsAffected()
 }
 
+func (repo *ObjectRepository) GetObjectsForFileIDs(fileIDs []int64) ([]ente.S3ObjectKey, error) {
+	rows, err := repo.DB.Query(`SELECT file_id, o_type, object_key, size FROM object_keys 
+		WHERE file_id = ANY($1) AND is_deleted=false`, pq.Array(fileIDs))
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
+	return convertRowsToObjectKeys(rows)
+}
+
 // GetObject returns the ente.S3ObjectKey key for a file id and type
 func (repo *ObjectRepository) GetObject(fileID int64, objType ente.ObjectType) (ente.S3ObjectKey, error) {
 	// todo: handling of deleted objects

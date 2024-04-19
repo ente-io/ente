@@ -481,8 +481,8 @@ func (c *CollectionController) IsCopyAllowed(ctx *gin.Context, actorUserID int64
 		return stacktrace.Propagate(err, "failed to ownership of the dstCollection access")
 	}
 	// verify that all FileIDs exists in the srcCollection
-	fileIDs := make([]int64, len(req.Files))
-	for idx, file := range req.Files {
+	fileIDs := make([]int64, len(req.CollectionFileItems))
+	for idx, file := range req.CollectionFileItems {
 		fileIDs[idx] = file.ID
 	}
 	if err := c.CollectionRepo.VerifyAllFileIDsExistsInCollection(ctx, req.SrcCollectionID, fileIDs); err != nil {
