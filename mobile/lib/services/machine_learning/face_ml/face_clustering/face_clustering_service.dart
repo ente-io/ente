@@ -454,6 +454,8 @@ class FaceClusteringService {
           blurValue: face.blurValue,
           badFace: face.faceScore < kMinimumQualityFaceScore ||
               face.blurValue < kLaplacianSoftThreshold ||
+              (face.blurValue < kLaplacianVerySoftThreshold &&
+                  face.faceScore < kMediumQualityFaceScore) ||
               face.isSideways,
           vEmbedding: Vector.fromList(
             EVector.fromBuffer(face.embeddingBytes).values,
