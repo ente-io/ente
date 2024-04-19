@@ -107,7 +107,7 @@ class MemoriesService extends ChangeNotifier {
     }
     final ignoredCollections =
         CollectionsService.instance.archivedOrHiddenCollectionIds();
-    final files = await _filesDB.getFilesCreatedWithinDurationsSync(
+    final files = await _filesDB.getFilesCreatedWithinDurations(
       durations,
       ignoredCollections,
       visibility: visibleVisibility,

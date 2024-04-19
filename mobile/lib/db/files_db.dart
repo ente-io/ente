@@ -106,6 +106,7 @@ class FilesDB {
   static Future<sqlite3.Database>? _ffiDBFuture;
   static Future<sqlite_async.SqliteDatabase>? _sqliteAsyncDBFuture;
 
+  @Deprecated("Use ffiDB instead (sqlite_async)")
   Future<Database> get database async {
     // lazily instantiate the db the first time it is accessed
     _dbFuture ??= _initDatabase();
@@ -478,8 +479,8 @@ class FilesDB {
   }
 
   Future<EnteFile?> getFile(int generatedID) async {
-    final db = await instance.ffiDB;
-    final results = db.select(
+    final db = await instance.sqliteAsyncDB;
+    final results = await db.getAll(
       'SELECT * FROM $filesTable WHERE $columnGeneratedID = ?',
       [generatedID],
     );
@@ -490,8 +491,8 @@ class FilesDB {
   }
 
   Future<EnteFile?> getUploadedFile(int uploadedID, int collectionID) async {
-    final db = await instance.ffiDB;
-    final results = db.select(
+    final db = await instance.sqliteAsyncDB;
+    final results = await db.getAll(
       'SELECT * FROM $filesTable WHERE $columnUploadedFileID = ? AND $columnCollectionID = ?',
       [
         uploadedID,
@@ -505,8 +506,8 @@ class FilesDB {
   }
 
   Future<Set<int>> getUploadedFileIDs(int collectionID) async {
-    final db = await instance.ffiDB;
-    final results = db.select(
+    final db = await instance.sqliteAsyncDB;
+    final results = await db.getAll(
       'SELECT $columnUploadedFileID FROM $filesTable'
       ' WHERE $columnCollectionID = ? AND ($columnUploadedFileID IS NOT NULL AND $columnUploadedFileID IS NOT -1)',
       [
@@ -755,41 +756,6 @@ class FilesDB {
         'SELECT * FROM $filesTable WHERE $whereClause ORDER BY $columnCreationTime $order';
     final results = await db.getAll(
       query,
-    );
-
-    final files = convertToFiles(results);
-    return applyDBFilters(
-      files,
-      DBFilterOptions(ignoredCollectionIDs: ignoredCollectionIDs),
-    );
-  }
-
-  Future<List<EnteFile>> getFilesCreatedWithinDurationsSync(
-    List<List<int>> durations,
-    Set<int> ignoredCollectionIDs, {
-    int? visibility,
-    String order = 'ASC',
-  }) async {
-    if (durations.isEmpty) {
-      return <EnteFile>[];
-    }
-    final db = await instance.ffiDB;
-    String whereClause = "( ";
-    for (int index = 0; index < durations.length; index++) {
-      whereClause += "($columnCreationTime >= " +
-          durations[index][0].toString() +
-          " AND $columnCreationTime < " +
-          durations[index][1].toString() +
-          ")";
-      if (index != durations.length - 1) {
-        whereClause += " OR ";
-      } else if (visibility != null) {
-        whereClause += ' AND $columnMMdVisibility = $visibility';
-      }
-    }
-    whereClause += ")";
-    final results = db.select(
-      'select * from $filesTable where $whereClause order by $columnCreationTime $order',
     );
     final files = convertToFiles(results);
     return applyDBFilters(
