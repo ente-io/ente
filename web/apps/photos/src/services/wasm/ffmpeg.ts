@@ -1,5 +1,5 @@
 import log from "@/next/log";
-import { promiseWithTimeout } from "@ente/shared/utils";
+import { withTimeout } from "@ente/shared/utils";
 import QueueProcessor from "@ente/shared/utils/queueProcessor";
 import { generateTempName } from "@ente/shared/utils/temp";
 import { createFFmpeg, FFmpeg } from "ffmpeg-wasm";
@@ -41,7 +41,7 @@ export class WasmFFmpeg {
             if (dontTimeout) {
                 return this.execute(cmd, inputFile, outputFileName);
             } else {
-                return promiseWithTimeout<File>(
+                return withTimeout<File>(
                     this.execute(cmd, inputFile, outputFileName),
                     FFMPEG_EXECUTION_WAIT_TIME,
                 );

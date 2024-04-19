@@ -3,7 +3,7 @@ import { ensureElectron } from "@/next/electron";
 import log from "@/next/log";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import { User } from "@ente/shared/user/types";
-import { sleep } from "@ente/shared/utils";
+import { wait } from "@ente/shared/utils";
 import { FILE_TYPE } from "constants/file";
 import { getLocalCollections } from "services/collectionService";
 import downloadManager from "services/download";
@@ -305,7 +305,7 @@ async function getFileExportNamesFromExportedFiles(
     );
     let success = 0;
     for (const file of exportedFiles) {
-        await sleep(0);
+        await wait(0);
         const collectionPath = exportedCollectionPaths.get(file.collectionID);
         log.debug(
             () =>

@@ -6,7 +6,7 @@ import FormPaperFooter from "@ente/shared/components/Form/FormPaper/Footer";
 import LinkButton from "@ente/shared/components/LinkButton";
 import SubmitButton from "@ente/shared/components/SubmitButton";
 import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
-import { sleep } from "@ente/shared/utils";
+import { wait } from "@ente/shared/utils";
 import { Alert, Box, TextField } from "@mui/material";
 import { Formik, FormikHelpers } from "formik";
 import { t } from "i18next";
@@ -59,7 +59,7 @@ function ChangeEmailForm({ appName }: PageProps) {
             setData(LS_KEYS.USER, { ...getData(LS_KEYS.USER), email });
             setLoading(false);
             setSuccess(true);
-            await sleep(1000);
+            await wait(1000);
             goToApp();
         } catch (e) {
             setLoading(false);

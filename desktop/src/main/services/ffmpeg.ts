@@ -91,11 +91,8 @@ export async function runFFmpegCmd_(
             }
         });
 
-        if (dontTimeout) {
-            await execAsync(cmd);
-        } else {
-            await promiseWithTimeout(execAsync(cmd), 30 * 1000);
-        }
+        if (dontTimeout) await execAsync(cmd);
+        else await withTimeout(execAsync(cmd), 30 * 1000);
 
         if (!existsSync(tempOutputFilePath)) {
             throw new Error("ffmpeg output file not found");
@@ -136,26 +133,22 @@ export async function deleteTempFile(tempFilePath: string) {
     await fs.rm(tempFilePath, { force: true });
 }
 
-const promiseWithTimeout = async <T>(
-    request: Promise<T>,
-    timeout: number,
-): Promise<T> => {
-    const timeoutRef: {
-        current: NodeJS.Timeout;
-    } = { current: null };
-    const rejectOnTimeout = new Promise<null>((_, reject) => {
-        timeoutRef.current = setTimeout(
+/**
+ * Await the given {@link promise} for {@link timeoutMS} milliseconds. If it
+ * does not resolve within {@link timeoutMS}, then reject with a timeout error.
+ */
+export const withTimeout = async <T>(promise: Promise<T>, ms: number) => {
+    let timeoutId: ReturnType<typeof setTimeout>;
+    const rejectOnTimeout = new Promise<T>((_, reject) => {
+        timeoutId = setTimeout(
             () => reject(new Error("Operation timed out")),
-            timeout,
+            ms,
         );
     });
-    const requestWithTimeOutCancellation = async () => {
-        const resp = await request;
-        clearTimeout(timeoutRef.current);
-        return resp;
+    const promiseAndCancelTimeout = async () => {
+        const result = await promise;
+        clearTimeout(timeoutId);
+        return result;
     };
-    return await Promise.race([
-        requestWithTimeOutCancellation(),
-        rejectOnTimeout,
-    ]);
+    return Promise.race([promiseAndCancelTimeout(), rejectOnTimeout]);
 };

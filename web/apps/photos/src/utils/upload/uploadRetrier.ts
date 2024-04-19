@@ -1,4 +1,4 @@
-import { sleep } from "@ente/shared/utils";
+import { wait } from "@ente/shared/utils";
 
 const retrySleepTimeInMilliSeconds = [2000, 5000, 10000];
 
@@ -18,7 +18,7 @@ export async function retryHTTPCall(
                 checkForBreakingError(e);
             }
             if (attemptNumber < retrySleepTimeInMilliSeconds.length) {
-                await sleep(retrySleepTimeInMilliSeconds[attemptNumber]);
+                await wait(retrySleepTimeInMilliSeconds[attemptNumber]);
                 return await retrier(func, attemptNumber + 1);
             } else {
                 throw e;

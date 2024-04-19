@@ -10,7 +10,7 @@ import {
     EncryptionResult,
 } from "@ente/shared/crypto/types";
 import { CustomError, handleUploadError } from "@ente/shared/error";
-import { sleep } from "@ente/shared/utils";
+import { wait } from "@ente/shared/utils";
 import { Remote } from "comlink";
 import {
     FILE_READER_CHUNK_SIZE,
@@ -405,7 +405,7 @@ export async function extractFileMetadata(
     fileTypeInfo: FileTypeInfo,
     rawFile: File | ElectronFile | string,
 ): Promise<ExtractMetadataResult> {
-    const rawFileName = getFileName(rawFile)
+    const rawFileName = getFileName(rawFile);
     let key = getMetadataJSONMapKeyForFile(collectionID, rawFileName);
     let googleMetadata: ParsedMetadataJSON = parsedMetadataJSONMap.get(key);
 
@@ -543,7 +543,7 @@ export async function uploader(
 
     log.info(`uploader called for  ${fileNameSize}`);
     UIService.setFileProgress(localID, 0);
-    await sleep(0);
+    await wait(0);
     let fileTypeInfo: FileTypeInfo;
     let fileSize: number;
     try {
