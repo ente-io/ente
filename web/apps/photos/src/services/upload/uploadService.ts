@@ -1,4 +1,4 @@
-import { getFileNameSize } from "@/next/file";
+import { convertBytesToHumanReadable, getFileNameSize } from "@/next/file";
 import log from "@/next/log";
 import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
 import {
@@ -6,10 +6,18 @@ import {
     EncryptionResult,
 } from "@ente/shared/crypto/types";
 import { CustomError, handleUploadError } from "@ente/shared/error";
+import { sleep } from "@ente/shared/utils";
 import { Remote } from "comlink";
-import { FILE_READER_CHUNK_SIZE, MULTIPART_PART_SIZE } from "constants/upload";
+import {
+    FILE_READER_CHUNK_SIZE,
+    MAX_FILE_SIZE_SUPPORTED,
+    MULTIPART_PART_SIZE,
+    UPLOAD_RESULT,
+} from "constants/upload";
+import { addToCollection } from "services/collectionService";
 import { Collection } from "types/collection";
 import {
+    EnteFile,
     FilePublicMagicMetadata,
     FilePublicMagicMetadataProps,
 } from "types/file";
@@ -38,6 +46,7 @@ import {
     getNonEmptyMagicMetadataProps,
     updateMagicMetadata,
 } from "utils/magicMetadata";
+import { findMatchingExistingFiles } from "utils/upload";
 import {
     getElectronFileStream,
     getFileStream,
@@ -62,6 +71,7 @@ import { uploadStreamUsingMultipart } from "./multiPartUploadService";
 import publicUploadHttpClient from "./publicUploadHttpClient";
 import { generateThumbnail } from "./thumbnailService";
 import UIService from "./uiService";
+import uploadCancelService from "./uploadCancelService";
 import UploadHttpClient from "./uploadHttpClient";
 
 /** Upload files to cloud storage */
@@ -331,7 +341,10 @@ class UploadService {
     }
 }
 
-export default new UploadService();
+/** The singleton instance of {@link UploadService}. */
+const uploadService = new UploadService();
+
+export default uploadService;
 
 export async function constructPublicMagicMetadata(
     publicMagicMetadataProps: FilePublicMagicMetadataProps,
@@ -512,4 +525,184 @@ async function encryptFileStream(
             encryptedData: { stream: encryptedFileStream, chunkCount },
         },
     };
+}
+
+interface UploadResponse {
+    fileUploadResult: UPLOAD_RESULT;
+    uploadedFile?: EnteFile;
+}
+
+export async function uploader(
+    worker: Remote<DedicatedCryptoWorker>,
+    existingFiles: EnteFile[],
+    fileWithCollection: FileWithCollection,
+    uploaderName: string,
+): Promise<UploadResponse> {
+    const { collection, localID, ...uploadAsset } = fileWithCollection;
+    const fileNameSize = `${uploadService.getAssetName(
+        fileWithCollection,
+    )}_${convertBytesToHumanReadable(uploadService.getAssetSize(uploadAsset))}`;
+
+    log.info(`uploader called for  ${fileNameSize}`);
+    UIService.setFileProgress(localID, 0);
+    await sleep(0);
+    let fileTypeInfo: FileTypeInfo;
+    let fileSize: number;
+    try {
+        fileSize = uploadService.getAssetSize(uploadAsset);
+        if (fileSize >= MAX_FILE_SIZE_SUPPORTED) {
+            return { fileUploadResult: UPLOAD_RESULT.TOO_LARGE };
+        }
+        log.info(`getting filetype for ${fileNameSize}`);
+        fileTypeInfo = await uploadService.getAssetFileType(uploadAsset);
+        log.info(
+            `got filetype for ${fileNameSize} - ${JSON.stringify(fileTypeInfo)}`,
+        );
+
+        log.info(`extracting  metadata ${fileNameSize}`);
+        const { metadata, publicMagicMetadata } =
+            await uploadService.extractAssetMetadata(
+                worker,
+                uploadAsset,
+                collection.id,
+                fileTypeInfo,
+            );
+
+        const matchingExistingFiles = findMatchingExistingFiles(
+            existingFiles,
+            metadata,
+        );
+        log.debug(
+            () =>
+                `matchedFileList: ${matchingExistingFiles
+                    .map((f) => `${f.id}-${f.metadata.title}`)
+                    .join(",")}`,
+        );
+        if (matchingExistingFiles?.length) {
+            const matchingExistingFilesCollectionIDs =
+                matchingExistingFiles.map((e) => e.collectionID);
+            log.debug(
+                () =>
+                    `matched file collectionIDs:${matchingExistingFilesCollectionIDs}
+                       and collectionID:${collection.id}`,
+            );
+            if (matchingExistingFilesCollectionIDs.includes(collection.id)) {
+                log.info(
+                    `file already present in the collection , skipped upload for  ${fileNameSize}`,
+                );
+                const sameCollectionMatchingExistingFile =
+                    matchingExistingFiles.find(
+                        (f) => f.collectionID === collection.id,
+                    );
+                return {
+                    fileUploadResult: UPLOAD_RESULT.ALREADY_UPLOADED,
+                    uploadedFile: sameCollectionMatchingExistingFile,
+                };
+            } else {
+                log.info(
+                    `same file in ${matchingExistingFilesCollectionIDs.length} collection found for  ${fileNameSize} ,adding symlink`,
+                );
+                // any of the matching file can used to add a symlink
+                const resultFile = Object.assign({}, matchingExistingFiles[0]);
+                resultFile.collectionID = collection.id;
+                await addToCollection(collection, [resultFile]);
+                return {
+                    fileUploadResult: UPLOAD_RESULT.ADDED_SYMLINK,
+                    uploadedFile: resultFile,
+                };
+            }
+        }
+        if (uploadCancelService.isUploadCancelationRequested()) {
+            throw Error(CustomError.UPLOAD_CANCELLED);
+        }
+        log.info(`reading asset ${fileNameSize}`);
+
+        const file = await uploadService.readAsset(fileTypeInfo, uploadAsset);
+
+        if (file.hasStaticThumbnail) {
+            metadata.hasStaticThumbnail = true;
+        }
+
+        const pubMagicMetadata =
+            await uploadService.constructPublicMagicMetadata({
+                ...publicMagicMetadata,
+                uploaderName,
+            });
+
+        const fileWithMetadata: FileWithMetadata = {
+            localID,
+            filedata: file.filedata,
+            thumbnail: file.thumbnail,
+            metadata,
+            pubMagicMetadata,
+        };
+
+        if (uploadCancelService.isUploadCancelationRequested()) {
+            throw Error(CustomError.UPLOAD_CANCELLED);
+        }
+        log.info(`encryptAsset ${fileNameSize}`);
+        const encryptedFile = await uploadService.encryptAsset(
+            worker,
+            fileWithMetadata,
+            collection.key,
+        );
+
+        if (uploadCancelService.isUploadCancelationRequested()) {
+            throw Error(CustomError.UPLOAD_CANCELLED);
+        }
+        log.info(`uploadToBucket ${fileNameSize}`);
+        const logger: Logger = (message: string) => {
+            log.info(message, `fileNameSize: ${fileNameSize}`);
+        };
+        const backupedFile: BackupedFile = await uploadService.uploadToBucket(
+            logger,
+            encryptedFile.file,
+        );
+
+        const uploadFile: UploadFile = uploadService.getUploadFile(
+            collection,
+            backupedFile,
+            encryptedFile.fileKey,
+        );
+        log.info(`uploading file to server ${fileNameSize}`);
+
+        const uploadedFile = await uploadService.uploadFile(uploadFile);
+
+        log.info(`${fileNameSize} successfully uploaded`);
+
+        return {
+            fileUploadResult: metadata.hasStaticThumbnail
+                ? UPLOAD_RESULT.UPLOADED_WITH_STATIC_THUMBNAIL
+                : UPLOAD_RESULT.UPLOADED,
+            uploadedFile: uploadedFile,
+        };
+    } catch (e) {
+        log.info(`upload failed for  ${fileNameSize} ,error: ${e.message}`);
+        if (
+            e.message !== CustomError.UPLOAD_CANCELLED &&
+            e.message !== CustomError.UNSUPPORTED_FILE_FORMAT
+        ) {
+            log.error(
+                `file upload failed - ${JSON.stringify({
+                    fileFormat: fileTypeInfo?.exactType,
+                    fileSize: convertBytesToHumanReadable(fileSize),
+                })}`,
+                e,
+            );
+        }
+        const error = handleUploadError(e);
+        switch (error.message) {
+            case CustomError.ETAG_MISSING:
+                return { fileUploadResult: UPLOAD_RESULT.BLOCKED };
+            case CustomError.UNSUPPORTED_FILE_FORMAT:
+                return { fileUploadResult: UPLOAD_RESULT.UNSUPPORTED };
+            case CustomError.FILE_TOO_LARGE:
+                return {
+                    fileUploadResult:
+                        UPLOAD_RESULT.LARGER_THAN_AVAILABLE_STORAGE,
+                };
+            default:
+                return { fileUploadResult: UPLOAD_RESULT.FAILED };
+        }
+    }
 }

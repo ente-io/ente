@@ -529,7 +529,7 @@ class FolderWatcher {
     }
 }
 
-/** The singleton instance of the {@link FolderWatcher}. */
+/** The singleton instance of {@link FolderWatcher}. */
 const watcher = new FolderWatcher();
 
 export default watcher;

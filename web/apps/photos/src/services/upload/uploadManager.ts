@@ -40,8 +40,7 @@ import {
 } from "./metadataService";
 import { default as UIService, default as uiService } from "./uiService";
 import uploadCancelService from "./uploadCancelService";
-import UploadService from "./uploadService";
-import uploader from "./uploader";
+import UploadService, { uploader } from "./uploadService";
 
 const MAX_CONCURRENT_UPLOADS = 4;
 
