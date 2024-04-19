@@ -80,7 +80,7 @@ class LaplacianBlurDetectionService implements BlurDetectionService {
 
         // Create a new matrix with extra padding
         const paddedImage: number[][] = Array.from(
-            { length: paddedNumRows},
+            { length: paddedNumRows },
             () => new Array(paddedNumCols).fill(0),
         );
 

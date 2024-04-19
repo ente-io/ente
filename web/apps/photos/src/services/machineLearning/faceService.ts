@@ -144,8 +144,10 @@ class FaceService {
             syncContext.faceEmbeddingService.faceSize,
             imageBitmap,
         );
-        const blurValues =
-            syncContext.blurDetectionService.detectBlur(faceImages, newMlFile.faces);
+        const blurValues = syncContext.blurDetectionService.detectBlur(
+            faceImages,
+            newMlFile.faces,
+        );
         newMlFile.faces.forEach((f, i) => (f.blurValue = blurValues[i]));
 
         imageBitmap.close();
