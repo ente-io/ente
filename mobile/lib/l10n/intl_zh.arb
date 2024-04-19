@@ -1212,5 +1212,5 @@
   "endpointUpdatedMessage": "端点更新成功",
   "customEndpoint": "已连接至 {endpoint}",
   "createCollaborativeLink": "创建协作链接",
-  "search": "Search"
+  "search": "搜索"
 }
