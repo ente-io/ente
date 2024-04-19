@@ -290,7 +290,7 @@ export interface FaceEmbeddingService {
 
 export interface BlurDetectionService {
     method: Versioned<BlurDetectionMethod>;
-    detectBlur(alignedFaces: Float32Array): number[];
+    detectBlur(alignedFaces: Float32Array, faces: Face[]): number[];
 }
 
 export interface ClusteringService {
