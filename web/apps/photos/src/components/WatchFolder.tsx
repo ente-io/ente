@@ -286,12 +286,10 @@ interface EntryHeadingProps {
 }
 
 const EntryHeading: React.FC<EntryHeadingProps> = ({ watch }) => {
-    const appContext = useContext(AppContext);
     return (
         <FlexWrapper gap={1}>
             <Typography>{basename(watch.folderPath)}</Typography>
-            {appContext.isFolderSyncRunning &&
-                watcher.isSyncingWatch(watch) && <CircularProgress size={12} />}
+            {watcher.isSyncingWatch(watch) && <CircularProgress size={12} />}
         </FlexWrapper>
     );
 };

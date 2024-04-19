@@ -189,7 +189,6 @@ export default function Uploader(props: Props) {
                 setElectronFiles,
                 setCollectionName,
                 props.syncWithRemote,
-                appContext.setIsFolderSyncRunning,
             );
         }
     }, [

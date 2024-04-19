@@ -30,21 +30,22 @@ import { getLocalFiles } from "./fileService";
  * works when we're running inside our desktop app.
  */
 class FolderWatcher {
-    private eventQueue: WatchEvent[] = [];
-    private currentEvent: WatchEvent;
-    private currentlySyncedMapping: FolderWatch;
-    private trashingDirQueue: string[] = [];
-    private isEventRunning: boolean = false;
     /** `true` if we are currently uploading */
     private uploadRunning = false;
     /** `true` if we are temporarily paused to let a user upload go through */
     private isPaused = false;
+    /** Pending file system events that we need to process */
+    private eventQueue: WatchEvent[] = [];
+    private currentEvent: WatchEvent;
+    // TODO(MR): dedup if possible
+    private isEventRunning: boolean = false;
+    private currentlySyncedMapping: FolderWatch;
+    private trashingDirQueue: string[] = [];
     private filePathToUploadedFileIDMap = new Map<string, EncryptedEnteFile>();
     private unUploadableFilePaths = new Set<string>();
     private setElectronFiles: (files: ElectronFile[]) => void;
     private setCollectionName: (collectionName: string) => void;
     private syncWithRemote: () => void;
-    private setWatchFolderServiceIsRunning: (isRunning: boolean) => void;
     private debouncedRunNextEvent: () => void;
 
     constructor() {
@@ -105,7 +106,10 @@ class FolderWatcher {
      * {@link watch}
      */
     isSyncingWatch(watch: FolderWatch) {
-        return this.currentEvent?.folderPath === watch.folderPath;
+        return (
+            this.isEventRunning &&
+            this.currentEvent?.folderPath == watch.folderPath
+        );
     }
 
     /**
@@ -184,11 +188,6 @@ class FolderWatcher {
         );
     }
 
-    private setIsEventRunning(isEventRunning: boolean) {
-        this.isEventRunning = isEventRunning;
-        this.setWatchFolderServiceIsRunning(isEventRunning);
-    }
-
     private async runNextEvent() {
         try {
             if (
@@ -223,12 +222,12 @@ class FolderWatcher {
             this.currentEvent = event;
             this.currentlySyncedMapping = mapping;
 
-            this.setIsEventRunning(true);
+            this.isEventRunning = true;
             if (event.type === "upload") {
                 this.processUploadEvent();
             } else {
                 await this.processTrashEvent();
-                this.setIsEventRunning(false);
+                this.isEventRunning = false;
                 setTimeout(() => this.runNextEvent(), 0);
             }
         } catch (e) {
@@ -372,7 +371,7 @@ class FolderWatcher {
     }
 
     private runPostUploadsAction() {
-        this.setIsEventRunning(false);
+        this.isEventRunning = false;
         this.uploadRunning = false;
         this.runNextEvent();
     }

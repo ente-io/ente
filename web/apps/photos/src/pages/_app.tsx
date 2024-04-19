@@ -91,8 +91,6 @@ type AppContextType = {
     closeMessageDialog: () => void;
     setDialogMessage: SetDialogBoxAttributes;
     setNotificationAttributes: SetNotificationAttributes;
-    isFolderSyncRunning: boolean;
-    setIsFolderSyncRunning: (isRunning: boolean) => void;
     watchFolderView: boolean;
     setWatchFolderView: (isOpen: boolean) => void;
     watchFolderFiles: FileList;
@@ -128,7 +126,6 @@ export default function App({ Component, pageProps }: AppProps) {
     useState<DialogBoxAttributes>(null);
     const [messageDialogView, setMessageDialogView] = useState(false);
     const [dialogBoxV2View, setDialogBoxV2View] = useState(false);
-    const [isFolderSyncRunning, setIsFolderSyncRunning] = useState(false);
     const [watchFolderView, setWatchFolderView] = useState(false);
     const [watchFolderFiles, setWatchFolderFiles] = useState<FileList>(null);
     const isMobile = useMediaQuery("(max-width:428px)");
@@ -403,8 +400,6 @@ export default function App({ Component, pageProps }: AppProps) {
                         finishLoading,
                         closeMessageDialog,
                         setDialogMessage,
-                        isFolderSyncRunning,
-                        setIsFolderSyncRunning,
                         watchFolderView,
                         setWatchFolderView,
                         watchFolderFiles,
