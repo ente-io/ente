@@ -126,13 +126,12 @@ export const DEFAULT_IMPORT_SUGGESTION: ImportSuggestion = {
 
 export function getImportSuggestion(
     uploadType: PICKED_UPLOAD_TYPE,
-    toUploadFiles: File[] | ElectronFile[],
+    paths: string[],
 ): ImportSuggestion {
     if (isElectron() && uploadType === PICKED_UPLOAD_TYPE.FILES) {
         return DEFAULT_IMPORT_SUGGESTION;
     }
 
-    const paths: string[] = toUploadFiles.map((file) => file["path"]);
     const getCharCount = (str: string) => (str.match(/\//g) ?? []).length;
     paths.sort((path1, path2) => getCharCount(path1) - getCharCount(path2));
     const firstPath = paths[0];
