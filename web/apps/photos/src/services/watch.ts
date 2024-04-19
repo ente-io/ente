@@ -38,8 +38,6 @@ class FolderWatcher {
      * If the file system directory corresponding to the (root) folder path of a
      * folder watch is deleted on disk, we note down that in this queue so that
      * we can ignore any file system events that come for it next.
-     *
-     * TODO: is this really needed? the mappings are pre-checked first.
      */
     private deletedFolderPaths: string[] = [];
     /** `true` if we are using the uploader. */
@@ -57,11 +55,12 @@ class FolderWatcher {
      */
     private upload: (collectionName: string, filePaths: string[]) => void;
     /**
-     * A function to call when we want to sync with the backend.
+     * A function to call when we want to sync with the backend. It will
+     * initiate the sync but will not await its completion.
      *
      * This is passed as a param to {@link init}.
      */
-    private syncWithRemote: () => void;
+    private requestSyncWithRemote: () => void;
 
     /** A helper function that debounces invocations of {@link runNextEvent}. */
     private debouncedRunNextEvent: () => void;
@@ -80,20 +79,20 @@ class FolderWatcher {
      */
     init(
         upload: (collectionName: string, filePaths: string[]) => void,
-        syncWithRemote: () => void,
+        requestSyncWithRemote: () => void,
     ) {
         this.upload = upload;
-        this.syncWithRemote = syncWithRemote;
+        this.requestSyncWithRemote = requestSyncWithRemote;
         this.registerListeners();
         this.syncWithDisk();
     }
 
-    /** `true` if we are currently using the uploader */
+    /** Return `true` if we are currently using the uploader. */
     isUploadRunning() {
         return this.uploadRunning;
     }
 
-    /** `true` if syncing has been temporarily paused */
+    /** Return `true` if syncing has been temporarily paused. */
     isSyncPaused() {
         return this.isPaused;
     }
@@ -500,41 +499,37 @@ class FolderWatcher {
         this.eventQueue = this.eventQueue.filter(
             (event) => !event.filePath.startsWith(deletedFolderPath),
         );
+
         return true;
     }
 
     private async moveToTrash(syncedFiles: FolderWatch["syncedFiles"]) {
-        try {
-            const files = await getLocalFiles();
-            const toTrashFilesMap = new Map<number, FolderWatchSyncedFile>();
-            for (const file of syncedFiles) {
-                toTrashFilesMap.set(file.uploadedFileID, file);
-            }
-            const filesToTrash = files.filter((file) => {
-                if (toTrashFilesMap.has(file.id)) {
-                    const fileToTrash = toTrashFilesMap.get(file.id);
-                    if (fileToTrash.collectionID === file.collectionID) {
-                        return true;
-                    }
-                }
-            });
-            const groupFilesByCollectionId =
-                groupFilesBasedOnCollectionID(filesToTrash);
+        const syncedFileForID = new Map<number, FolderWatchSyncedFile>();
+        for (const file of syncedFiles)
+            syncedFileForID.set(file.uploadedFileID, file);
 
-            for (const [
-                collectionID,
-                filesToTrash,
-            ] of groupFilesByCollectionId.entries()) {
-                await removeFromCollection(collectionID, filesToTrash);
+        const files = await getLocalFiles();
+        const filesToTrash = files.filter((file) => {
+            const correspondingSyncedFile = syncedFileForID.get(file.id);
+            if (
+                correspondingSyncedFile &&
+                correspondingSyncedFile.collectionID == file.collectionID
+            ) {
+                return true;
             }
-            this.syncWithRemote();
-        } catch (e) {
-            log.error("error while trashing by IDs", e);
+            return false;
+        });
+
+        const filesByCollectionID = groupFilesBasedOnCollectionID(filesToTrash);
+        for (const [id, files] of filesByCollectionID.entries()) {
+            await removeFromCollection(id, files);
         }
+
+        this.requestSyncWithRemote();
     }
 }
 
-/** The singleton instance of the {@link FolderWatcher}. */
+/** The singleton instance of {@link FolderWatcher}. */
 const watcher = new FolderWatcher();
 
 export default watcher;
