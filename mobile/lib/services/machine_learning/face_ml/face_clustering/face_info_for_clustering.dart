@@ -1,4 +1,3 @@
-
 import "dart:typed_data" show Uint8List;
 
 class FaceInfoForClustering {
@@ -7,6 +6,7 @@ class FaceInfoForClustering {
   final Uint8List embeddingBytes;
   final double faceScore;
   final double blurValue;
+  final bool isSideways;
 
   FaceInfoForClustering({
     required this.faceID,
@@ -14,5 +14,6 @@ class FaceInfoForClustering {
     required this.embeddingBytes,
     required this.faceScore,
     required this.blurValue,
+    this.isSideways = false,
   });
 }

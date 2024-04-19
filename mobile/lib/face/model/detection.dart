@@ -22,7 +22,7 @@ class Detection {
 
   bool get isEmpty => box.width == 0 && box.height == 0 && landmarks.isEmpty;
 
-  // emoty box
+  // empty box
   Detection.empty()
       : box = FaceBox(
           xMin: 0,
@@ -94,6 +94,9 @@ class Detection {
   }
 
   FaceDirection getFaceDirection() {
+    if (isEmpty) {
+      return FaceDirection.straight;
+    }
     final leftEye = [landmarks[0].x, landmarks[0].y];
     final rightEye = [landmarks[1].x, landmarks[1].y];
     final nose = [landmarks[2].x, landmarks[2].y];
@@ -131,6 +134,9 @@ class Detection {
   }
 
   bool faceIsSideways() {
+    if (isEmpty) {
+      return false;
+    }
     final leftEye = [landmarks[0].x, landmarks[0].y];
     final rightEye = [landmarks[1].x, landmarks[1].y];
     final nose = [landmarks[2].x, landmarks[2].y];

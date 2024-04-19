@@ -452,7 +452,8 @@ class FaceClusteringService {
           faceScore: face.faceScore,
           blurValue: face.blurValue,
           badFace: face.faceScore < kMinHighQualityFaceScore ||
-              face.blurValue < kLaplacianSoftThreshold,
+              face.blurValue < kLaplacianSoftThreshold ||
+              face.isSideways,
           vEmbedding: Vector.fromList(
             EVector.fromBuffer(face.embeddingBytes).values,
             dtype: DType.float32,
@@ -606,7 +607,7 @@ class FaceClusteringService {
     );
     if (useDynamicThreshold) {
       log(
-        "[ClusterIsolate] ${DateTime.now()} Dynamic thresholding: $dynamicThresholdCount faces had a low face score or high blur value",
+        "[ClusterIsolate] ${DateTime.now()} Dynamic thresholding: $dynamicThresholdCount faces had a low face score or low blur clarity",
       );
     }
 
