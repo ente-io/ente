@@ -67,7 +67,7 @@ class FileAppBarState extends State<FileAppBar> {
   Widget build(BuildContext context) {
     _logger.fine("building app bar ${widget.file.generatedID?.toString()}");
 
-    //When the widgt is initialized, the actions are not available.
+    //When the widget is initialized, the actions are not available.
     //Cannot call _getActions() in initState.
     if (_actions.isEmpty) {
       _getActions();
