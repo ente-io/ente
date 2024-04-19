@@ -132,16 +132,16 @@ export async function downloadFile(file: EnteFile) {
     }
 }
 
-export function groupFilesBasedOnCollectionID(files: EnteFile[]) {
-    const collectionWiseFiles = new Map<number, EnteFile[]>();
+/** Segment the given {@link files} into lists indexed by their collection ID */
+export const groupFilesBasedOnCollectionID = (files: EnteFile[]) => {
+    const result = new Map<number, EnteFile[]>();
     for (const file of files) {
-        if (!collectionWiseFiles.has(file.collectionID)) {
-            collectionWiseFiles.set(file.collectionID, []);
-        }
-        collectionWiseFiles.get(file.collectionID).push(file);
+        const id = file.collectionID;
+        if (!result.has(id)) result.set(id, []);
+        result.get(id).push(file);
     }
-    return collectionWiseFiles;
-}
+    return result;
+};
 
 function getSelectedFileIds(selectedFiles: SelectedState) {
     const filesIDs: number[] = [];
