@@ -13,13 +13,14 @@ import { GalleryContext } from "pages/gallery";
 import { useContext, useEffect, useRef, useState } from "react";
 import billingService from "services/billingService";
 import { getLatestCollections } from "services/collectionService";
-import { setToUploadCollection } from "services/pending-uploads";
 import {
     getPublicCollectionUID,
     getPublicCollectionUploaderName,
     savePublicCollectionUploaderName,
 } from "services/publicCollectionService";
-import uploadManager from "services/upload/uploadManager";
+import uploadManager, {
+    setToUploadCollection,
+} from "services/upload/uploadManager";
 import watcher from "services/watch";
 import { NotificationAttributes } from "types/Notification";
 import { Collection } from "types/collection";
@@ -31,7 +32,11 @@ import {
     SetLoading,
     UploadTypeSelectorIntent,
 } from "types/gallery";
-import { ElectronFile, FileWithCollection, type FileWithCollection2 } from "types/upload";
+import {
+    ElectronFile,
+    FileWithCollection,
+    type FileWithCollection2,
+} from "types/upload";
 import {
     InProgressUpload,
     SegregatedFinishedUploads,
