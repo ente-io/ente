@@ -16,10 +16,10 @@ import {
 } from "types/upload";
 import { getFileTypeFromExtensionForLivePhotoClustering } from "utils/file/livePhoto";
 import { getUint8ArrayView } from "../readerService";
-import { extractFileMetadata } from "./fileService";
 import { getFileHash } from "./hashService";
 import { generateThumbnail } from "./thumbnailService";
 import uploadCancelService from "./uploadCancelService";
+import { extractFileMetadata } from "./uploadService";
 
 interface LivePhotoIdentifier {
     collectionID: number;

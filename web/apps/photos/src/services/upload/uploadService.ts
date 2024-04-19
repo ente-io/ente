@@ -1,17 +1,26 @@
+import { getFileNameSize } from "@/next/file";
 import log from "@/next/log";
 import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
-import { B64EncryptionResult } from "@ente/shared/crypto/types";
+import {
+    B64EncryptionResult,
+    EncryptionResult,
+} from "@ente/shared/crypto/types";
 import { CustomError, handleUploadError } from "@ente/shared/error";
 import { Remote } from "comlink";
+import { FILE_READER_CHUNK_SIZE, MULTIPART_PART_SIZE } from "constants/upload";
 import { Collection } from "types/collection";
 import {
     FilePublicMagicMetadata,
     FilePublicMagicMetadataProps,
 } from "types/file";
+import { EncryptedMagicMetadata } from "types/magicMetadata";
 import {
     BackupedFile,
+    DataStream,
+    ElectronFile,
     EncryptedFile,
     ExtractMetadataResult,
+    FileInMemory,
     FileTypeInfo,
     FileWithCollection,
     FileWithMetadata,
@@ -29,14 +38,12 @@ import {
     getNonEmptyMagicMetadataProps,
     updateMagicMetadata,
 } from "utils/magicMetadata";
-import { getFileType } from "../typeDetectionService";
 import {
-    encryptFile,
-    extractFileMetadata,
-    getFileSize,
-    getFilename,
-    readFile,
-} from "./fileService";
+    getElectronFileStream,
+    getFileStream,
+    getUint8ArrayView,
+} from "../readerService";
+import { getFileType } from "../typeDetectionService";
 import {
     clusterLivePhotoFiles,
     extractLivePhotoMetadata,
@@ -45,8 +52,15 @@ import {
     getLivePhotoSize,
     readLivePhoto,
 } from "./livePhotoService";
+import {
+    MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT,
+    extractMetadata,
+    getClippedMetadataJSONMapKeyForFile,
+    getMetadataJSONMapKeyForFile,
+} from "./metadataService";
 import { uploadStreamUsingMultipart } from "./multiPartUploadService";
 import publicUploadHttpClient from "./publicUploadHttpClient";
+import { generateThumbnail } from "./thumbnailService";
 import UIService from "./uiService";
 import UploadHttpClient from "./uploadHttpClient";
 
@@ -330,4 +344,172 @@ export async function constructPublicMagicMetadata(
         return null;
     }
     return await updateMagicMetadata(publicMagicMetadataProps);
+}
+
+function getFileSize(file: File | ElectronFile) {
+    return file.size;
+}
+
+function getFilename(file: File | ElectronFile) {
+    return file.name;
+}
+
+async function readFile(
+    fileTypeInfo: FileTypeInfo,
+    rawFile: File | ElectronFile,
+): Promise<FileInMemory> {
+    const { thumbnail, hasStaticThumbnail } = await generateThumbnail(
+        rawFile,
+        fileTypeInfo,
+    );
+    log.info(`reading file data ${getFileNameSize(rawFile)} `);
+    let filedata: Uint8Array | DataStream;
+    if (!(rawFile instanceof File)) {
+        if (rawFile.size > MULTIPART_PART_SIZE) {
+            filedata = await getElectronFileStream(
+                rawFile,
+                FILE_READER_CHUNK_SIZE,
+            );
+        } else {
+            filedata = await getUint8ArrayView(rawFile);
+        }
+    } else if (rawFile.size > MULTIPART_PART_SIZE) {
+        filedata = getFileStream(rawFile, FILE_READER_CHUNK_SIZE);
+    } else {
+        filedata = await getUint8ArrayView(rawFile);
+    }
+
+    log.info(`read file data successfully ${getFileNameSize(rawFile)} `);
+
+    return {
+        filedata,
+        thumbnail,
+        hasStaticThumbnail,
+    };
+}
+
+export async function extractFileMetadata(
+    worker: Remote<DedicatedCryptoWorker>,
+    parsedMetadataJSONMap: ParsedMetadataJSONMap,
+    collectionID: number,
+    fileTypeInfo: FileTypeInfo,
+    rawFile: File | ElectronFile,
+): Promise<ExtractMetadataResult> {
+    let key = getMetadataJSONMapKeyForFile(collectionID, rawFile.name);
+    let googleMetadata: ParsedMetadataJSON = parsedMetadataJSONMap.get(key);
+
+    if (!googleMetadata && key.length > MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT) {
+        key = getClippedMetadataJSONMapKeyForFile(collectionID, rawFile.name);
+        googleMetadata = parsedMetadataJSONMap.get(key);
+    }
+
+    const { metadata, publicMagicMetadata } = await extractMetadata(
+        worker,
+        rawFile,
+        fileTypeInfo,
+    );
+
+    for (const [key, value] of Object.entries(googleMetadata ?? {})) {
+        if (!value) {
+            continue;
+        }
+        metadata[key] = value;
+    }
+    return { metadata, publicMagicMetadata };
+}
+
+async function encryptFile(
+    worker: Remote<DedicatedCryptoWorker>,
+    file: FileWithMetadata,
+    encryptionKey: string,
+): Promise<EncryptedFile> {
+    try {
+        const { key: fileKey, file: encryptedFiledata } = await encryptFiledata(
+            worker,
+            file.filedata,
+        );
+
+        const { file: encryptedThumbnail } = await worker.encryptThumbnail(
+            file.thumbnail,
+            fileKey,
+        );
+        const { file: encryptedMetadata } = await worker.encryptMetadata(
+            file.metadata,
+            fileKey,
+        );
+
+        let encryptedPubMagicMetadata: EncryptedMagicMetadata;
+        if (file.pubMagicMetadata) {
+            const { file: encryptedPubMagicMetadataData } =
+                await worker.encryptMetadata(
+                    file.pubMagicMetadata.data,
+                    fileKey,
+                );
+            encryptedPubMagicMetadata = {
+                version: file.pubMagicMetadata.version,
+                count: file.pubMagicMetadata.count,
+                data: encryptedPubMagicMetadataData.encryptedData,
+                header: encryptedPubMagicMetadataData.decryptionHeader,
+            };
+        }
+
+        const encryptedKey = await worker.encryptToB64(fileKey, encryptionKey);
+
+        const result: EncryptedFile = {
+            file: {
+                file: encryptedFiledata,
+                thumbnail: encryptedThumbnail,
+                metadata: encryptedMetadata,
+                pubMagicMetadata: encryptedPubMagicMetadata,
+                localID: file.localID,
+            },
+            fileKey: encryptedKey,
+        };
+        return result;
+    } catch (e) {
+        log.error("Error encrypting files", e);
+        throw e;
+    }
+}
+
+async function encryptFiledata(
+    worker: Remote<DedicatedCryptoWorker>,
+    filedata: Uint8Array | DataStream,
+): Promise<EncryptionResult<Uint8Array | DataStream>> {
+    return isDataStream(filedata)
+        ? await encryptFileStream(worker, filedata)
+        : await worker.encryptFile(filedata);
+}
+
+async function encryptFileStream(
+    worker: Remote<DedicatedCryptoWorker>,
+    fileData: DataStream,
+) {
+    const { stream, chunkCount } = fileData;
+    const fileStreamReader = stream.getReader();
+    const { key, decryptionHeader, pushState } =
+        await worker.initChunkEncryption();
+    const ref = { pullCount: 1 };
+    const encryptedFileStream = new ReadableStream({
+        async pull(controller) {
+            const { value } = await fileStreamReader.read();
+            const encryptedFileChunk = await worker.encryptFileChunk(
+                value,
+                pushState,
+                ref.pullCount === chunkCount,
+            );
+            controller.enqueue(encryptedFileChunk);
+            if (ref.pullCount === chunkCount) {
+                controller.close();
+            }
+            ref.pullCount++;
+        },
+    });
+    return {
+        key,
+        file: {
+            decryptionHeader,
+            encryptedData: { stream: encryptedFileStream, chunkCount },
+        },
+    };
 }
