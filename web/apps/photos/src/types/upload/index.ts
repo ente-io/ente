@@ -92,8 +92,8 @@ export interface UploadAsset {
     isLivePhoto?: boolean;
     file?: File | ElectronFile;
     livePhotoAssets?: LivePhotoAssets;
-    isElectron?: boolean;
 }
+
 export interface LivePhotoAssets {
     image: globalThis.File | ElectronFile;
     video: globalThis.File | ElectronFile;
