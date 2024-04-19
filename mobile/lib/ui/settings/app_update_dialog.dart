@@ -83,8 +83,8 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
     );
     final shouldForceUpdate =
         UpdateService.instance.shouldForceUpdate(widget.latestVersionInfo!);
-    return WillPopScope(
-      onWillPop: () async => !shouldForceUpdate,
+    return PopScope(
+      canPop: !shouldForceUpdate,
       child: AlertDialog(
         key: const ValueKey("updateAppDialog"),
         title: Column(
