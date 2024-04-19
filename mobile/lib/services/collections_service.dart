@@ -1170,6 +1170,13 @@ class CollectionsService {
       _logger.info("nothing to add to the collection");
       return;
     }
+    final anyFileOwnedByOther =
+        files.any((e) => e.ownerID != null && e.ownerID != _config.getUserID());
+    if (anyFileOwnedByOther) {
+      throw ArgumentError(
+        'Cannot add files owned by other users, they should be copied',
+      );
+    }
 
     final params = <String, dynamic>{};
     params["collectionID"] = collectionID;
