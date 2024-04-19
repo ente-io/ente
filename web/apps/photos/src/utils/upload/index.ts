@@ -204,7 +204,8 @@ export function groupFilesBasedOnParentFolder(
         if (!collectionNameToFilesMap.has(folderName)) {
             collectionNameToFilesMap.set(folderName, []);
         }
-        collectionNameToFilesMap.get(folderName).push(file);
+        // TODO: Remove the cast
+        collectionNameToFilesMap.get(folderName).push(file as any);
     }
     return collectionNameToFilesMap;
 }
