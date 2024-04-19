@@ -391,15 +391,7 @@ class FolderWatcher {
         );
 
         const { syncedFiles, ignoredFiles } =
-            this.parseAllFileUploadsDone(filesWithCollection);
-
-        log.debug(() =>
-            JSON.stringify({
-                f: "watch/allFileUploadsDone",
-                syncedFiles,
-                ignoredFiles,
-            }),
-        );
+            this.deduceSyncedAndIgnored(filesWithCollection);
 
         if (syncedFiles.length > 0)
             await electron.watch.updateSyncedFiles(
@@ -419,12 +411,24 @@ class FolderWatcher {
         this.debouncedRunNextEvent();
     }
 
-    private parseAllFileUploadsDone(
-        filesWithCollection: FileWithCollection2[],
-    ) {
+    private deduceSyncedAndIgnored(filesWithCollection: FileWithCollection2[]) {
         const syncedFiles: FolderWatch["syncedFiles"] = [];
         const ignoredFiles: FolderWatch["ignoredFiles"] = [];
 
+        const markSynced = (file: EncryptedEnteFile, path: string) => {
+            syncedFiles.push({
+                path,
+                uploadedFileID: file.id,
+                collectionID: file.collectionID,
+            });
+            this.uploadedFileForPath.delete(path);
+        };
+
+        const markIgnored = (path: string) => {
+            log.debug(() => `Permanently ignoring file at ${path}`);
+            ignoredFiles.push(path);
+            this.unUploadableFilePaths.delete(path);
+        };
 
         for (const fileWithCollection of filesWithCollection) {
             if (fileWithCollection.isLivePhoto) {
@@ -439,45 +443,22 @@ class FolderWatcher {
                 const videoFile = this.uploadedFileForPath.get(videoPath);
 
                 if (imageFile && videoFile) {
-                    syncedFiles.push({
-                        path: imagePath,
-                        uploadedFileID: imageFile.id,
-                        collectionID: imageFile.collectionID,
-                    });
-                    syncedFiles.push({
-                        path: videoPath,
-                        uploadedFileID: videoFile.id,
-                        collectionID: videoFile.collectionID,
-                    });
-                    this.uploadedFileForPath.delete(imagePath);
-                    this.uploadedFileForPath.delete(videoPath);
+                    markSynced(imageFile, imagePath);
+                    markSynced(videoFile, videoPath);
                 } else if (
                     this.unUploadableFilePaths.has(imagePath) &&
                     this.unUploadableFilePaths.has(videoPath)
                 ) {
-                    ignoredFiles.push(imagePath);
-                    ignoredFiles.push(videoPath);
-                    log.debug(
-                        () =>
-                            `Permanently ignoring live photo parts (${imagePath}, ${videoPath})`,
-                    );
-                    this.unUploadableFilePaths.delete(imagePath);
-                    this.unUploadableFilePaths.delete(videoPath);
+                    markIgnored(imagePath);
+                    markIgnored(videoPath);
                 }
             } else {
                 const path = ensureString(fileWithCollection.file);
                 const file = this.uploadedFileForPath.get(path);
                 if (file) {
-                    syncedFiles.push({
-                        path: path,
-                        uploadedFileID: file.id,
-                        collectionID: file.collectionID,
-                    });
-                    this.uploadedFileForPath.delete(path);
+                    markSynced(file, path);
                 } else if (this.unUploadableFilePaths.has(path)) {
-                    ignoredFiles.push(path);
-                    log.debug(() => `Permanently ignoring file at ${path}`);
-                    this.unUploadableFilePaths.delete(path);
+                    markIgnored(path);
                 }
             }
         }
