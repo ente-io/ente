@@ -377,7 +377,7 @@ func (repo *CollectionRepository) DoesFileExistInCollections(fileID int64, cIDs 
 // VerifyAllFileIDsExistsInCollection returns error if the fileIDs don't exist in the collection
 func (repo *CollectionRepository) VerifyAllFileIDsExistsInCollection(ctx context.Context, cID int64, fileIDs []int64) error {
 	fileIdMap := make(map[int64]bool)
-	rows, err := repo.DB.QueryContext(ctx, `SELECT file_id FROM collection_files WHERE collection_id = $1 AND is_deleted = $2 AND file_id = ALL ($3)`,
+	rows, err := repo.DB.QueryContext(ctx, `SELECT file_id FROM collection_files WHERE collection_id = $1 AND is_deleted = $2 AND file_id = ANY ($3)`,
 		cID, false, pq.Array(fileIDs))
 	if err != nil {
 		return stacktrace.Propagate(err, "")
