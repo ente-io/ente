@@ -129,4 +129,29 @@ class Detection {
 
     return FaceDirection.straight;
   }
+
+  bool faceIsSideways() {
+    final leftEye = [landmarks[0].x, landmarks[0].y];
+    final rightEye = [landmarks[1].x, landmarks[1].y];
+    final nose = [landmarks[2].x, landmarks[2].y];
+    final leftMouth = [landmarks[3].x, landmarks[3].y];
+    final rightMouth = [landmarks[4].x, landmarks[4].y];
+
+    final double eyeDistanceX = (rightEye[0] - leftEye[0]).abs();
+    final double eyeDistanceY = (rightEye[1] - leftEye[1]).abs();
+    final double mouthDistanceY = (rightMouth[1] - leftMouth[1]).abs();
+
+    final bool faceIsUpright =
+        (max(leftEye[1], rightEye[1]) + 0.5 * eyeDistanceY < nose[1]) &&
+            (nose[1] + 0.5 * mouthDistanceY < min(leftMouth[1], rightMouth[1]));
+
+    final bool noseStickingOutLeft =
+        (nose[0] < min(leftEye[0], rightEye[0]) - 0.5 * eyeDistanceX) &&
+            (nose[0] < min(leftMouth[0], rightMouth[0]));
+    final bool noseStickingOutRight =
+        (nose[0] > max(leftEye[0], rightEye[0]) - 0.5 * eyeDistanceX) &&
+            (nose[0] > max(leftMouth[0], rightMouth[0]));
+
+    return faceIsUpright && (noseStickingOutLeft || noseStickingOutRight);
+  }
 }

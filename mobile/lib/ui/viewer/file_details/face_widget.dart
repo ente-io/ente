@@ -177,6 +177,12 @@ class _FaceWidgetState extends State<FaceWidget> {
                     ),
                   if (kDebugMode)
                     Text(
+                      'Sideways: ${widget.face.detection.faceIsSideways().toString()}',
+                      style: Theme.of(context).textTheme.bodySmall,
+                      maxLines: 1,
+                    ),
+                  if (kDebugMode)
+                    Text(
                       'V: ${widget.face.visibility}',
                       style: Theme.of(context).textTheme.bodySmall,
                       maxLines: 1,
