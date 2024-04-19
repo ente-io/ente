@@ -1,5 +1,5 @@
 import { encodeLivePhoto } from "@/media/live-photo";
-import { getFileNameSize } from "@/next/file";
+import { basename, getFileNameSize } from "@/next/file";
 import log from "@/next/log";
 import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
 import { CustomError } from "@ente/shared/error";
@@ -32,6 +32,7 @@ import {
     ParsedExtractedMetadata,
     ParsedMetadataJSON,
     ParsedMetadataJSONMap,
+    type LivePhotoAssets2,
 } from "types/upload";
 import { getFileTypeFromExtensionForLivePhotoClustering } from "utils/file/livePhoto";
 import { getUint8ArrayView } from "../readerService";
@@ -374,9 +375,8 @@ export function getLivePhotoSize(livePhotoAssets: LivePhotoAssets) {
     return livePhotoAssets.image.size + livePhotoAssets.video.size;
 }
 
-export function getLivePhotoName(livePhotoAssets: LivePhotoAssets) {
-    return livePhotoAssets.image.name;
-}
+export const getLivePhotoName = ({ image }: LivePhotoAssets2) =>
+    typeof image == "string" ? basename(image) : image.name;
 
 export async function readLivePhoto(
     fileTypeInfo: FileTypeInfo,

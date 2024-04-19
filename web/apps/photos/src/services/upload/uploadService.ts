@@ -1,4 +1,8 @@
-import { convertBytesToHumanReadable, getFileNameSize } from "@/next/file";
+import {
+    basename,
+    convertBytesToHumanReadable,
+    getFileNameSize,
+} from "@/next/file";
 import log from "@/next/log";
 import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
 import {
@@ -41,6 +45,7 @@ import {
     UploadFile,
     UploadURL,
     isDataStream,
+    type UploadAsset2,
 } from "types/upload";
 import {
     getNonEmptyMagicMetadataProps,
@@ -128,6 +133,12 @@ class UploadService {
     }
 
     getAssetName({ isLivePhoto, file, livePhotoAssets }: UploadAsset) {
+        return isLivePhoto
+            ? getLivePhotoName(livePhotoAssets)
+            : getFilename(file);
+    }
+
+    getAssetName2({ isLivePhoto, file, livePhotoAssets }: UploadAsset2) {
         return isLivePhoto
             ? getLivePhotoName(livePhotoAssets)
             : getFilename(file);
@@ -361,9 +372,8 @@ function getFileSize(file: File | ElectronFile) {
     return file.size;
 }
 
-function getFilename(file: File | ElectronFile) {
-    return file.name;
-}
+const getFilename = (file: File | ElectronFile | string) =>
+    typeof file == "string" ? basename(file) : file.name;
 
 async function readFile(
     fileTypeInfo: FileTypeInfo,
