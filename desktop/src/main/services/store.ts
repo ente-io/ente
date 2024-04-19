@@ -1,12 +1,15 @@
 import { safeStorage } from "electron/main";
-import { keysStore } from "../stores/keys.store";
-import { safeStorageStore } from "../stores/safeStorage.store";
-import { uploadStatusStore } from "../stores/upload.store";
-import { watchStore } from "../stores/watch.store";
+import { safeStorageStore } from "../stores/safe-storage";
+import { uploadStatusStore } from "../stores/upload-status";
+import { watchStore } from "../stores/watch";
 
+/**
+ * Clear all stores except user preferences.
+ *
+ * This is useful to reset state when the user logs out.
+ */
 export const clearStores = () => {
     uploadStatusStore.clear();
-    keysStore.clear();
     safeStorageStore.clear();
     watchStore.clear();
 };

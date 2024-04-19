@@ -24,9 +24,10 @@ import { attachFSWatchIPCHandlers, attachIPCHandlers } from "./main/ipc";
 import log, { initLogging } from "./main/log";
 import { createApplicationMenu, createTrayContextMenu } from "./main/menu";
 import { setupAutoUpdater } from "./main/services/app-update";
-import autoLauncher from "./main/services/autoLauncher";
-import { initWatcher } from "./main/services/chokidar";
+import autoLauncher from "./main/services/auto-launcher";
+import { createWatcher } from "./main/services/watch";
 import { userPreferences } from "./main/stores/user-preferences";
+import { migrateLegacyWatchStoreIfNeeded } from "./main/stores/watch";
 import { registerStreamProtocol } from "./main/stream";
 import { isDev } from "./main/util";
 
@@ -196,8 +197,6 @@ const createMainWindow = async () => {
         window.maximize();
     }
 
-    window.loadURL(rendererURL);
-
     // Open the DevTools automatically when running in dev mode
     if (isDev) window.webContents.openDevTools();
 
@@ -296,6 +295,21 @@ const deleteLegacyDiskCacheDirIfExists = async () => {
     }
 };
 
+/**
+ * Older versions of our app used to keep a keys.json. It is not needed anymore,
+ * remove it if it exists.
+ *
+ * This code was added March 2024, and can be removed after some time once most
+ * people have upgraded to newer versions.
+ */
+const deleteLegacyKeysStoreIfExists = async () => {
+    const keysStore = path.join(app.getPath("userData"), "keys.json");
+    if (existsSync(keysStore)) {
+        log.info(`Removing legacy keys store at ${keysStore}`);
+        await fs.rm(keysStore);
+    }
+};
+
 const main = () => {
     const gotTheLock = app.requestSingleInstanceLock();
     if (!gotTheLock) {
@@ -311,6 +325,7 @@ const main = () => {
     setupRendererServer();
     registerPrivilegedSchemes();
     increaseDiskCache();
+    migrateLegacyWatchStoreIfNeeded();
 
     app.on("second-instance", () => {
         // Someone tried to run a second instance, we should focus our window.
@@ -325,19 +340,26 @@ const main = () => {
     //
     // Note that some Electron APIs can only be used after this event occurs.
     app.on("ready", async () => {
+        // Create window and prepare for renderer
         mainWindow = await createMainWindow();
-        Menu.setApplicationMenu(await createApplicationMenu(mainWindow));
-        setupTrayItem(mainWindow);
         attachIPCHandlers();
-        attachFSWatchIPCHandlers(initWatcher(mainWindow));
+        attachFSWatchIPCHandlers(createWatcher(mainWindow));
         registerStreamProtocol();
-        if (!isDev) setupAutoUpdater(mainWindow);
         handleDownloads(mainWindow);
         handleExternalLinks(mainWindow);
         addAllowOriginHeader(mainWindow);
 
+        // Start loading the renderer
+        mainWindow.loadURL(rendererURL);
+
+        // Continue on with the rest of the startup sequence
+        Menu.setApplicationMenu(await createApplicationMenu(mainWindow));
+        setupTrayItem(mainWindow);
+        if (!isDev) setupAutoUpdater(mainWindow);
+
         try {
             deleteLegacyDiskCacheDirIfExists();
+            deleteLegacyKeysStoreIfExists();
         } catch (e) {
             // Log but otherwise ignore errors during non-critical startup
             // actions.

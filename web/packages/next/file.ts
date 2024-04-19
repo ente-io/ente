@@ -17,8 +17,12 @@ type FileNameComponents = [name: string, extension: string | undefined];
  */
 export const nameAndExtension = (fileName: string): FileNameComponents => {
     const i = fileName.lastIndexOf(".");
+    // No extension
     if (i == -1) return [fileName, undefined];
-    else return [fileName.slice(0, i), fileName.slice(i + 1)];
+    // A hidden file without an extension, e.g. ".gitignore"
+    if (i == 0) return [fileName, undefined];
+    // Both components present, just omit the dot.
+    return [fileName.slice(0, i), fileName.slice(i + 1)];
 };
 
 /**
@@ -28,6 +32,39 @@ export const nameAndExtension = (fileName: string): FileNameComponents => {
  */
 export const fileNameFromComponents = (components: FileNameComponents) =>
     components.filter((x) => !!x).join(".");
+
+/**
+ * Return the file name portion from the given {@link path}.
+ *
+ * This tries to emulate the UNIX `basename` command. In particular, any
+ * trailing slashes on the path are trimmed, so this function can be used to get
+ * the name of the directory too.
+ *
+ * The path is assumed to use POSIX separators ("/").
+ */
+export const basename = (path: string) => {
+    const pathComponents = path.split("/");
+    for (let i = pathComponents.length - 1; i >= 0; i--)
+        if (pathComponents[i] !== "") return pathComponents[i];
+    return path;
+};
+
+/**
+ * Return the directory portion from the given {@link path}.
+ *
+ * This tries to emulate the UNIX `dirname` command. In particular, any trailing
+ * slashes on the path are trimmed, so this function can be used to get the path
+ * leading up to a directory too.
+ *
+ * The path is assumed to use POSIX separators ("/").
+ */
+export const dirname = (path: string) => {
+    const pathComponents = path.split("/");
+    while (pathComponents.pop() == "") {
+        /* no-op */
+    }
+    return pathComponents.join("/");
+};
 
 export function getFileNameSize(file: File | ElectronFile) {
     return `${file.name}_${convertBytesToHumanReadable(file.size)}`;

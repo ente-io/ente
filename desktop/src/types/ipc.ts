@@ -5,18 +5,30 @@
  * See [Note: types.ts <-> preload.ts <-> ipc.ts]
  */
 
+export interface AppUpdate {
+    autoUpdatable: boolean;
+    version: string;
+}
+
 export interface FolderWatch {
-    rootFolderName: string;
-    uploadStrategy: number;
+    collectionMapping: CollectionMapping;
     folderPath: string;
     syncedFiles: FolderWatchSyncedFile[];
     ignoredFiles: string[];
 }
 
+export type CollectionMapping = "root" | "parent";
+
 export interface FolderWatchSyncedFile {
     path: string;
     uploadedFileID: number;
     collectionID: number;
+}
+
+export interface PendingUploads {
+    collectionName: string;
+    type: "files" | "zips";
+    files: ElectronFile[];
 }
 
 /**
@@ -64,19 +76,4 @@ export interface ElectronFile {
     stream: () => Promise<ReadableStream<Uint8Array>>;
     blob: () => Promise<Blob>;
     arrayBuffer: () => Promise<Uint8Array>;
-}
-
-export interface WatchStoreType {
-    mappings: FolderWatch[];
-}
-
-export enum FILE_PATH_TYPE {
-    /* eslint-disable no-unused-vars */
-    FILES = "files",
-    ZIPS = "zips",
-}
-
-export interface AppUpdateInfo {
-    autoUpdatable: boolean;
-    version: string;
 }
