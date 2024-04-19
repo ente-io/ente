@@ -27,4 +27,5 @@ enum EventType {
   unhide,
   coverChanged,
   peopleChanged,
+  peopleClusterChanged,
 }

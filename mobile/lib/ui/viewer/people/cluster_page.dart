@@ -69,6 +69,13 @@ class _ClusterPageState extends State<ClusterPage> {
         }
         setState(() {});
       }
+      if (event.type == EventType.peopleClusterChanged &&
+          (event.source == widget.clusterID.toString())) {
+        for (var updatedFile in event.updatedFiles) {
+          files.remove(updatedFile);
+        }
+        setState(() {});
+      }
     });
     kDebugMode
         ? ClusterFeedbackService.instance.debugLogClusterBlurValues(
@@ -107,6 +114,7 @@ class _ClusterPageState extends State<ClusterPage> {
         EventType.deletedFromRemote,
         EventType.deletedFromEverywhere,
         EventType.hide,
+        EventType.peopleClusterChanged,
       },
       tagPrefix: widget.tagPrefix + widget.tagPrefix,
       selectedFiles: _selectedFiles,
@@ -118,9 +126,10 @@ class _ClusterPageState extends State<ClusterPage> {
         preferredSize: const Size.fromHeight(50.0),
         child: ClusterAppBar(
           SearchResultPage.appBarType,
-          "${widget.searchResult.length} memories${widget.appendTitle}",
+          "${files.length} memories${widget.appendTitle}",
           _selectedFiles,
           widget.clusterID,
+          key: ValueKey(files.length),
         ),
       ),
       body: Column(

@@ -5,6 +5,8 @@ import "package:flutter/foundation.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
+import "package:photos/events/files_updated_event.dart";
+import "package:photos/events/local_photos_updated_event.dart";
 import "package:photos/events/people_changed_event.dart";
 import "package:photos/extensions/stop_watch.dart";
 import "package:photos/face/db.dart";
@@ -13,8 +15,6 @@ import "package:photos/generated/protos/ente/common/vector.pb.dart";
 import "package:photos/models/file/file.dart";
 import 'package:photos/services/machine_learning/face_ml/face_clustering/cosine_distance.dart';
 import "package:photos/services/machine_learning/face_ml/face_clustering/face_clustering_service.dart";
-// import "package:photos/services/machine_learning/face_ml/face_clustering/face_info_for_clustering.dart";
-// import "package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart";
 import "package:photos/services/machine_learning/face_ml/face_ml_result.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/search_service.dart";
@@ -196,6 +196,13 @@ class ClusterFeedbackService {
       await FaceMLDataDB.instance.forceUpdateClusterIds(newFaceIdToClusterID);
 
       Bus.instance.fire(PeopleChangedEvent());
+      Bus.instance.fire(
+        LocalPhotosUpdatedEvent(
+          files,
+          type: EventType.peopleClusterChanged,
+          source: "$clusterID",
+        ),
+      );
       return;
     } catch (e, s) {
       _logger.severe("Error in removeFilesFromCluster", e, s);
