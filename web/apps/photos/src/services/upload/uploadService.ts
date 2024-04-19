@@ -54,18 +54,16 @@ import {
 } from "../readerService";
 import { getFileType } from "../typeDetectionService";
 import {
+    MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT,
     clusterLivePhotoFiles,
     extractLivePhotoMetadata,
+    extractMetadata,
+    getClippedMetadataJSONMapKeyForFile,
     getLivePhotoFileType,
     getLivePhotoName,
     getLivePhotoSize,
-    readLivePhoto,
-} from "./livePhotoService";
-import {
-    MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT,
-    extractMetadata,
-    getClippedMetadataJSONMapKeyForFile,
     getMetadataJSONMapKeyForFile,
+    readLivePhoto,
 } from "./metadataService";
 import { uploadStreamUsingMultipart } from "./multiPartUploadService";
 import publicUploadHttpClient from "./publicUploadHttpClient";
