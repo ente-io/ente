@@ -34,7 +34,6 @@ import {
     ExtractMetadataResult,
     FileInMemory,
     FileTypeInfo,
-    FileWithCollection,
     FileWithMetadata,
     Logger,
     ParsedMetadataJSON,
@@ -61,7 +60,6 @@ import {
 import { getFileType } from "../typeDetectionService";
 import {
     MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT,
-    clusterLivePhotoFiles,
     extractLivePhotoMetadata,
     extractMetadata,
     getClippedMetadataJSONMapKeyForFile,
@@ -156,7 +154,7 @@ class UploadService {
 
     async extractAssetMetadata(
         worker: Remote<DedicatedCryptoWorker>,
-        { isLivePhoto, file, livePhotoAssets }: UploadAsset,
+        { isLivePhoto, file, livePhotoAssets }: UploadAsset2,
         collectionID: number,
         fileTypeInfo: FileTypeInfo,
     ): Promise<ExtractMetadataResult> {
@@ -405,13 +403,14 @@ export async function extractFileMetadata(
     parsedMetadataJSONMap: ParsedMetadataJSONMap,
     collectionID: number,
     fileTypeInfo: FileTypeInfo,
-    rawFile: File | ElectronFile,
+    rawFile: File | ElectronFile | string,
 ): Promise<ExtractMetadataResult> {
-    let key = getMetadataJSONMapKeyForFile(collectionID, rawFile.name);
+    const rawFileName = getFileName(rawFile)
+    let key = getMetadataJSONMapKeyForFile(collectionID, rawFileName);
     let googleMetadata: ParsedMetadataJSON = parsedMetadataJSONMap.get(key);
 
     if (!googleMetadata && key.length > MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT) {
-        key = getClippedMetadataJSONMapKeyForFile(collectionID, rawFile.name);
+        key = getClippedMetadataJSONMapKeyForFile(collectionID, rawFileName);
         googleMetadata = parsedMetadataJSONMap.get(key);
     }
 

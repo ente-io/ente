@@ -354,7 +354,7 @@ export async function extractLivePhotoMetadata(
     parsedMetadataJSONMap: ParsedMetadataJSONMap,
     collectionID: number,
     fileTypeInfo: FileTypeInfo,
-    livePhotoAssets: LivePhotoAssets,
+    livePhotoAssets: LivePhotoAssets2,
 ): Promise<ExtractMetadataResult> {
     const imageFileTypeInfo: FileTypeInfo = {
         fileType: FILE_TYPE.IMAGE,
