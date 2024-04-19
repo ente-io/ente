@@ -4,7 +4,10 @@ import { B64EncryptionResult } from "@ente/shared/crypto/types";
 import { CustomError, handleUploadError } from "@ente/shared/error";
 import { Remote } from "comlink";
 import { Collection } from "types/collection";
-import { FilePublicMagicMetadataProps } from "types/file";
+import {
+    FilePublicMagicMetadata,
+    FilePublicMagicMetadataProps,
+} from "types/file";
 import {
     BackupedFile,
     EncryptedFile,
@@ -22,6 +25,10 @@ import {
     UploadURL,
     isDataStream,
 } from "types/upload";
+import {
+    getNonEmptyMagicMetadataProps,
+    updateMagicMetadata,
+} from "utils/magicMetadata";
 import { getFileType } from "../typeDetectionService";
 import {
     encryptFile,
@@ -38,12 +45,12 @@ import {
     getLivePhotoSize,
     readLivePhoto,
 } from "./livePhotoService";
-import { constructPublicMagicMetadata } from "./magicMetadataService";
 import { uploadStreamUsingMultipart } from "./multiPartUploadService";
 import publicUploadHttpClient from "./publicUploadHttpClient";
 import UIService from "./uiService";
 import UploadHttpClient from "./uploadHttpClient";
 
+/** Upload files to cloud storage */
 class UploadService {
     private uploadURLs: UploadURL[] = [];
     private parsedMetadataJSONMap: ParsedMetadataJSONMap = new Map<
@@ -311,3 +318,16 @@ class UploadService {
 }
 
 export default new UploadService();
+
+export async function constructPublicMagicMetadata(
+    publicMagicMetadataProps: FilePublicMagicMetadataProps,
+): Promise<FilePublicMagicMetadata> {
+    const nonEmptyPublicMagicMetadataProps = getNonEmptyMagicMetadataProps(
+        publicMagicMetadataProps,
+    );
+
+    if (Object.values(nonEmptyPublicMagicMetadataProps)?.length === 0) {
+        return null;
+    }
+    return await updateMagicMetadata(publicMagicMetadataProps);
+}
