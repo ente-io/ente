@@ -539,7 +539,8 @@ class FilesDB {
     return ids;
   }
 
-  Future<(Set<int>, Set<String>)> getUploadAndHash(int collectionID) async {
+  Future<(Set<int>, Map<String, int>)> getUploadAndHash(
+      int collectionID) async {
     final db = await instance.database;
     final results = await db.query(
       filesTable,
@@ -551,11 +552,12 @@ class FilesDB {
       ],
     );
     final ids = <int>{};
-    final hash = <String>{};
+    final hash = <String, int>{};
     for (final result in results) {
       ids.add(result[columnUploadedFileID] as int);
       if (result[columnHash] != null) {
-        hash.add(result[columnHash] as String);
+        hash[result[columnHash] as String] =
+            result[columnUploadedFileID] as int;
       }
     }
     return (ids, hash);

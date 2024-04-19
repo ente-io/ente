@@ -24,7 +24,7 @@ class FavoritesService {
   late FilesDB _filesDB;
   int? _cachedFavoritesCollectionID;
   final Set<int> _cachedFavUploadedIDs = {};
-  final Set<String> _cachedFavFileHases = {};
+  final Map<String, int> _cachedFavFileHases = {};
   final Set<String> _cachedPendingLocalIDs = {};
   late StreamSubscription<CollectionUpdatedEvent>
       _collectionUpdatesSubscription;
@@ -62,7 +62,7 @@ class FavoritesService {
     final favCollection = await _getFavoritesCollection();
     if (favCollection != null) {
       Set<int> uploadedIDs;
-      Set<String> fileHashes;
+      Map<String, int> fileHashes;
       (uploadedIDs, fileHashes) =
           await FilesDB.instance.getUploadAndHash(favCollection.id);
       _cachedFavUploadedIDs.addAll(uploadedIDs);
@@ -92,7 +92,7 @@ class FavoritesService {
     }
     if (file.uploadedFileID != null) {
       if (file.ownerID != _config.getUserID() && file.hash != null) {
-        return _cachedFavFileHases.contains(file.hash!);
+        return _cachedFavFileHases.containsKey(file.hash!);
       }
       return _cachedFavUploadedIDs.contains(file.uploadedFileID);
     } else if (file.localID != null) {
@@ -107,7 +107,7 @@ class FavoritesService {
       return false;
     }
     if (file.ownerID != _config.getUserID() && file.hash != null) {
-      return _cachedFavFileHases.contains(file.hash!);
+      return _cachedFavFileHases.containsKey(file.hash!);
     }
     return _filesDB.doesFileExistInCollection(
       file.uploadedFileID!,
@@ -120,13 +120,13 @@ class FavoritesService {
     required bool favFlag,
   }) {
     final Set<int> updatedIDs = {};
-    final Set<String> hashes = {};
+    final Map<String, int> hashes = {};
     final Set<String> localIDs = {};
     for (var file in files) {
       if (file.uploadedFileID != null) {
         updatedIDs.add(file.uploadedFileID!);
         if (file.hash != null) {
-          hashes.add(file.hash!);
+          hashes[file.hash!] = file.uploadedFileID!;
         }
       } else if (file.localID != null || file.localID != "") {
         /* Note: Favorite un-uploaded files
@@ -141,7 +141,9 @@ class FavoritesService {
       _cachedFavFileHases.addAll(hashes);
     } else {
       _cachedFavUploadedIDs.removeAll(updatedIDs);
-      _cachedFavFileHases.removeAll(hashes);
+      for (var hash in hashes.keys) {
+        _cachedFavFileHases.remove(hash);
+      }
     }
   }
 
@@ -169,7 +171,7 @@ class FavoritesService {
       throw AssertionError("Can only favorite uploaded items");
     }
     if (files.any((f) => f.ownerID != currentUserID)) {
-      throw AssertionError("Can not favortie files owned by others");
+      throw AssertionError("Can not favorite files owned by others");
     }
     final collectionID = await _getOrCreateFavoriteCollectionID();
     if (favFlag) {
@@ -193,6 +195,16 @@ class FavoritesService {
       final Collection? favCollection = await _getFavoritesCollection();
       // The file might be part of another collection. For unfav, we need to
       // move file from the fav collection to the .
+      if (file.ownerID != _config.getUserID() &&
+          _cachedFavFileHases.containsKey(file.hash!)) {
+        final EnteFile? favFile = await FilesDB.instance.getUploadedFile(
+          _cachedFavFileHases[file.hash!]!,
+          favCollection!.id,
+        );
+        if (favFile != null) {
+          file = favFile;
+        }
+      }
       if (file.collectionID != favCollection!.id) {
         final EnteFile? favFile = await FilesDB.instance.getUploadedFile(
           fileID,
