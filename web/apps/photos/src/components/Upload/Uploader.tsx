@@ -131,12 +131,6 @@ export default function Uploader(props: Props) {
     const closeUploadProgress = () => setUploadProgressView(false);
     const showUserNameInputDialog = () => setUserNameInputDialogView(true);
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const setCollectionName = (collectionName: string) => {
-        isPendingDesktopUpload.current = true;
-        pendingDesktopUploadCollectionName.current = collectionName;
-    };
-
     const handleChoiceModalClose = () => {
         setChoiceModalView(false);
         uploadRunning.current = false;
@@ -186,13 +180,26 @@ export default function Uploader(props: Props) {
                         );
                     }
                 });
-            /* TODO(MR): This is the connection point, implement
-            watcher.init(
-                setElectronFiles,
-                setCollectionName,
-                props.syncWithRemote,
-            );
-            */
+
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const upload = (collectionName: string, filePaths: string[]) => {
+                isPendingDesktopUpload.current = true;
+                pendingDesktopUploadCollectionName.current = collectionName;
+
+                // TODO (MR):
+                // setElectronFiles(filePaths);
+            };
+
+            const requestSyncWithRemote = () => {
+                props.syncWithRemote().catch((e) => {
+                    log.error(
+                        "Ignoring error when syncing trash changes with remote",
+                        e,
+                    );
+                });
+            };
+
+            watcher.init(upload, requestSyncWithRemote);
         }
     }, [
         publicCollectionGalleryContext.accessedThroughSharedURL,
