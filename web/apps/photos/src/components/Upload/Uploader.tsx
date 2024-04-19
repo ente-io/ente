@@ -436,7 +436,7 @@ export default function Uploader(props: Props) {
             const collections: Collection[] = [];
             let collectionNameToFilesMap = new Map<
                 string,
-                (File | ElectronFile)[]
+                File[] | ElectronFile[] | string[]
             >();
             if (strategy == "root") {
                 collectionNameToFilesMap.set(

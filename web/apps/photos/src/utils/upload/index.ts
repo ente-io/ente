@@ -176,11 +176,15 @@ export function getImportSuggestion(
 // b => [e,f,g],
 // c => [h, i]]
 export function groupFilesBasedOnParentFolder(
-    toUploadFiles: File[] | ElectronFile[],
+    toUploadFiles: File[] | ElectronFile[] | string[],
 ) {
-    const collectionNameToFilesMap = new Map<string, (File | ElectronFile)[]>();
+    const collectionNameToFilesMap = new Map<
+        string,
+        File[] | ElectronFile[] | string[]
+    >();
     for (const file of toUploadFiles) {
-        const filePath = file["path"] as string;
+        const filePath =
+            typeof file == "string" ? file : (file["path"] as string);
 
         let folderPath = filePath.substring(0, filePath.lastIndexOf("/"));
         // If the parent folder of a file is "metadata"
