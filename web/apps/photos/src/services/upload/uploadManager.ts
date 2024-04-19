@@ -390,11 +390,13 @@ class UploadManager {
         uploadedFile: EncryptedEnteFile,
     ) {
         if (isElectron()) {
-            await watcher.onFileUpload(
-                fileUploadResult,
-                fileWithCollection,
-                uploadedFile,
-            );
+            if (watcher.isUploadRunning()) {
+                await watcher.onFileUpload(
+                    fileUploadResult,
+                    fileWithCollection,
+                    uploadedFile,
+                );
+            }
         }
     }
 

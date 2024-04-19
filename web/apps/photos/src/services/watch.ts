@@ -260,18 +260,22 @@ class FolderWatcher {
                 return;
             }
 
-            const paths = pathsToRemove(event.filePaths, watch);
+            const [removed, rest] = watch.syncedFiles.reduce(
+                ([removed, rest], { path }) => {
+                    (event.filePaths.includes(path) ? rest : removed).push(
+                        watch,
+                    );
+                    return [removed, rest];
+                },
+                [[], []],
+            );
 
             this.activeWatch = watch;
 
-            await this.trashByIDs(paths);
-
-            const prunedSyncedFiles = watch.syncedFiles.filter(
-                ({ path }) => !event.filePaths.includes(path),
-            );
+            await this.moveToTrash(removed);
 
             await ensureElectron().watch.updateSyncedFiles(
-                prunedSyncedFiles,
+                rest,
                 watch.folderPath,
             );
 
@@ -304,17 +308,14 @@ class FolderWatcher {
     }
 
     /**
-     * Callback invoked by the uploader whenever a file is uploaded.
+     * Callback invoked by the uploader whenever a file we requested to
+     * {@link upload} gets uploaded.
      */
     async onFileUpload(
         fileUploadResult: UPLOAD_RESULT,
         fileWithCollection: FileWithCollection,
         file: EncryptedEnteFile,
     ) {
-        log.debug(() => `onFileUpload called`);
-        if (!this.isUploadRunning()) {
-            return;
-        }
         if (
             [
                 UPLOAD_RESULT.ADDED_SYMLINK,
@@ -363,165 +364,150 @@ class FolderWatcher {
     }
 
     /**
-     * Callback invoked by the uploader whenever a set of file uploads finishes.
+     * Callback invoked by the uploader whenever all the files we requested to
+     * {@link upload} get uploaded.
      */
     async allFileUploadsDone(
         filesWithCollection: FileWithCollection[],
         collections: Collection[],
     ) {
-        try {
-            log.debug(
-                () =>
-                    `allFileUploadsDone,${JSON.stringify(
-                        filesWithCollection,
-                    )} ${JSON.stringify(collections)}`,
+        const electron = ensureElectron();
+        const watch = this.activeWatch;
+
+        log.debug(() =>
+            JSON.stringify({
+                f: "watch/allFileUploadsDone",
+                filesWithCollection,
+                collections,
+                watch,
+            }),
+        );
+
+        const { syncedFiles, ignoredFiles } =
+            this.parseAllFileUploadsDone(filesWithCollection);
+
+        log.debug(() =>
+            JSON.stringify({
+                f: "watch/allFileUploadsDone",
+                syncedFiles,
+                ignoredFiles,
+            }),
+        );
+
+        if (syncedFiles.length > 0)
+            await electron.watch.updateSyncedFiles(
+                watch.syncedFiles.concat(syncedFiles),
+                watch.folderPath,
             );
-            const collection = collections.find(
-                (collection) =>
-                    collection.id === filesWithCollection[0].collectionID,
+
+        if (ignoredFiles.length > 0)
+            await electron.watch.updateIgnoredFiles(
+                watch.ignoredFiles.concat(ignoredFiles),
+                watch.folderPath,
             );
-            log.debug(() => `got collection ${!!collection}`);
-            log.debug(
-                () =>
-                    `${this.isEventRunning} ${this.currentEvent.collectionName} ${collection?.name}`,
-            );
-            if (
-                !this.isEventRunning ||
-                this.currentEvent.collectionName !== collection?.name
-            ) {
-                return;
-            }
 
-            const syncedFiles: FolderWatch["syncedFiles"] = [];
-            const ignoredFiles: FolderWatch["ignoredFiles"] = [];
-
-            for (const fileWithCollection of filesWithCollection) {
-                this.handleUploadedFile(
-                    fileWithCollection,
-                    syncedFiles,
-                    ignoredFiles,
-                );
-            }
-
-            log.debug(() => `syncedFiles ${JSON.stringify(syncedFiles)}`);
-            log.debug(() => `ignoredFiles ${JSON.stringify(ignoredFiles)}`);
-
-            if (syncedFiles.length > 0) {
-                this.currentlySyncedMapping.syncedFiles = [
-                    ...this.currentlySyncedMapping.syncedFiles,
-                    ...syncedFiles,
-                ];
-                await ensureElectron().updateWatchMappingSyncedFiles(
-                    this.currentlySyncedMapping.folderPath,
-                    this.currentlySyncedMapping.syncedFiles,
-                );
-            }
-            if (ignoredFiles.length > 0) {
-                this.currentlySyncedMapping.ignoredFiles = [
-                    ...this.currentlySyncedMapping.ignoredFiles,
-                    ...ignoredFiles,
-                ];
-                await ensureElectron().updateWatchMappingIgnoredFiles(
-                    this.currentlySyncedMapping.folderPath,
-                    this.currentlySyncedMapping.ignoredFiles,
-                );
-            }
-
-            this.runPostUploadsAction();
-        } catch (e) {
-            log.error("error while running all file uploads done", e);
-        }
-    }
-
-    private runPostUploadsAction() {
-        this.isEventRunning = false;
+        this.activeWatch = undefined;
         this.uploadRunning = false;
-        this.runNextEvent();
+
+        this.debouncedRunNextEvent();
     }
 
-    private handleUploadedFile(
-        fileWithCollection: FileWithCollection,
-        syncedFiles: FolderWatch["syncedFiles"],
-        ignoredFiles: FolderWatch["ignoredFiles"],
-    ) {
-        if (fileWithCollection.isLivePhoto) {
-            const imagePath = (
-                fileWithCollection.livePhotoAssets.image as ElectronFile
-            ).path;
-            const videoPath = (
-                fileWithCollection.livePhotoAssets.video as ElectronFile
-            ).path;
+    private parseAllFileUploadsDone(filesWithCollection: FileWithCollection[]) {
+        const syncedFiles: FolderWatch["syncedFiles"] = [];
+        const ignoredFiles: FolderWatch["ignoredFiles"] = [];
 
-            if (
-                this.filePathToUploadedFileIDMap.has(imagePath) &&
-                this.filePathToUploadedFileIDMap.has(videoPath)
-            ) {
-                const imageFile = {
-                    path: imagePath,
-                    uploadedFileID:
-                        this.filePathToUploadedFileIDMap.get(imagePath).id,
-                    collectionID:
-                        this.filePathToUploadedFileIDMap.get(imagePath)
-                            .collectionID,
-                };
-                const videoFile = {
-                    path: videoPath,
-                    uploadedFileID:
-                        this.filePathToUploadedFileIDMap.get(videoPath).id,
-                    collectionID:
-                        this.filePathToUploadedFileIDMap.get(videoPath)
-                            .collectionID,
-                };
-                syncedFiles.push(imageFile);
-                syncedFiles.push(videoFile);
-                log.debug(
-                    () =>
-                        `added image ${JSON.stringify(
-                            imageFile,
-                        )} and video file ${JSON.stringify(
-                            videoFile,
-                        )} to uploadedFiles`,
-                );
-            } else if (
-                this.unUploadableFilePaths.has(imagePath) &&
-                this.unUploadableFilePaths.has(videoPath)
-            ) {
-                ignoredFiles.push(imagePath);
-                ignoredFiles.push(videoPath);
-                log.debug(
-                    () =>
-                        `added image ${imagePath} and video file ${videoPath} to rejectedFiles`,
-                );
-            }
-            this.filePathToUploadedFileIDMap.delete(imagePath);
-            this.filePathToUploadedFileIDMap.delete(videoPath);
-        } else {
-            const filePath = (fileWithCollection.file as ElectronFile).path;
+        for (const fileWithCollection of filesWithCollection) {
+            if (fileWithCollection.isLivePhoto) {
+                const imagePath = (
+                    fileWithCollection.livePhotoAssets.image as ElectronFile
+                ).path;
+                const videoPath = (
+                    fileWithCollection.livePhotoAssets.video as ElectronFile
+                ).path;
 
-            if (this.filePathToUploadedFileIDMap.has(filePath)) {
-                const file = {
-                    path: filePath,
-                    uploadedFileID:
-                        this.filePathToUploadedFileIDMap.get(filePath).id,
-                    collectionID:
-                        this.filePathToUploadedFileIDMap.get(filePath)
-                            .collectionID,
-                };
-                syncedFiles.push(file);
-                log.debug(() => `added file ${JSON.stringify(file)}`);
-            } else if (this.unUploadableFilePaths.has(filePath)) {
-                ignoredFiles.push(filePath);
-                log.debug(() => `added file ${filePath} to rejectedFiles`);
+                if (
+                    this.filePathToUploadedFileIDMap.has(imagePath) &&
+                    this.filePathToUploadedFileIDMap.has(videoPath)
+                ) {
+                    const imageFile = {
+                        path: imagePath,
+                        uploadedFileID:
+                            this.filePathToUploadedFileIDMap.get(imagePath).id,
+                        collectionID:
+                            this.filePathToUploadedFileIDMap.get(imagePath)
+                                .collectionID,
+                    };
+                    const videoFile = {
+                        path: videoPath,
+                        uploadedFileID:
+                            this.filePathToUploadedFileIDMap.get(videoPath).id,
+                        collectionID:
+                            this.filePathToUploadedFileIDMap.get(videoPath)
+                                .collectionID,
+                    };
+                    syncedFiles.push(imageFile);
+                    syncedFiles.push(videoFile);
+                    log.debug(
+                        () =>
+                            `added image ${JSON.stringify(
+                                imageFile,
+                            )} and video file ${JSON.stringify(
+                                videoFile,
+                            )} to uploadedFiles`,
+                    );
+                } else if (
+                    this.unUploadableFilePaths.has(imagePath) &&
+                    this.unUploadableFilePaths.has(videoPath)
+                ) {
+                    ignoredFiles.push(imagePath);
+                    ignoredFiles.push(videoPath);
+                    log.debug(
+                        () =>
+                            `added image ${imagePath} and video file ${videoPath} to rejectedFiles`,
+                    );
+                }
+                this.filePathToUploadedFileIDMap.delete(imagePath);
+                this.filePathToUploadedFileIDMap.delete(videoPath);
+            } else {
+                const filePath = (fileWithCollection.file as ElectronFile).path;
+
+                if (this.filePathToUploadedFileIDMap.has(filePath)) {
+                    const file = {
+                        path: filePath,
+                        uploadedFileID:
+                            this.filePathToUploadedFileIDMap.get(filePath).id,
+                        collectionID:
+                            this.filePathToUploadedFileIDMap.get(filePath)
+                                .collectionID,
+                    };
+                    syncedFiles.push(file);
+                    log.debug(() => `added file ${JSON.stringify(file)}`);
+                } else if (this.unUploadableFilePaths.has(filePath)) {
+                    ignoredFiles.push(filePath);
+                    log.debug(() => `added file ${filePath} to rejectedFiles`);
+                }
+                this.filePathToUploadedFileIDMap.delete(filePath);
             }
-            this.filePathToUploadedFileIDMap.delete(filePath);
         }
+
+        return { syncedFiles, ignoredFiles };
     }
 
-    private async trashByIDs(toTrashFiles: FolderWatch["syncedFiles"]) {
+    private pruneFileEventsFromDeletedFolderPaths() {
+        const deletedFolderPath = this.deletedFolderPaths.shift();
+        if (!deletedFolderPath) return false;
+
+        this.eventQueue = this.eventQueue.filter(
+            (event) => !event.filePath.startsWith(deletedFolderPath),
+        );
+        return true;
+    }
+
+    private async moveToTrash(syncedFiles: FolderWatch["syncedFiles"]) {
         try {
             const files = await getLocalFiles();
             const toTrashFilesMap = new Map<number, FolderWatchSyncedFile>();
-            for (const file of toTrashFiles) {
+            for (const file of syncedFiles) {
                 toTrashFilesMap.set(file.uploadedFileID, file);
             }
             const filesToTrash = files.filter((file) => {
@@ -544,40 +530,6 @@ class FolderWatcher {
             this.syncWithRemote();
         } catch (e) {
             log.error("error while trashing by IDs", e);
-        }
-    }
-
-    private pruneFileEventsFromDeletedFolderPaths() {
-        const deletedFolderPath = this.deletedFolderPaths.shift();
-        if (!deletedFolderPath) return false;
-
-        this.eventQueue = this.eventQueue.filter(
-            (event) => !event.filePath.startsWith(deletedFolderPath),
-        );
-        return true;
-    }
-
-    async getCollectionNameAndFolderPath(filePath: string) {
-        try {
-            const mappings = await this.getWatchMappings();
-
-            const mapping = mappings.find(
-                (mapping) =>
-                    filePath.length > mapping.folderPath.length &&
-                    filePath.startsWith(mapping.folderPath) &&
-                    filePath[mapping.folderPath.length] === "/",
-            );
-
-            if (!mapping) {
-                throw Error(`no mapping found`);
-            }
-
-            return {
-                collectionName: collectionNameForPath(filePath, mapping),
-                folderPath: mapping.folderPath,
-            };
-        } catch (e) {
-            log.error("error while getting collection name", e);
         }
     }
 }
