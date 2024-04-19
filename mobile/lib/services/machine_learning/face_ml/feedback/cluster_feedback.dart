@@ -5,8 +5,8 @@ import "package:flutter/foundation.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
-import "package:photos/events/files_updated_event.dart";
-import "package:photos/events/local_photos_updated_event.dart";
+// import "package:photos/events/files_updated_event.dart";
+// import "package:photos/events/local_photos_updated_event.dart";
 import "package:photos/events/people_changed_event.dart";
 import "package:photos/extensions/stop_watch.dart";
 import "package:photos/face/db.dart";
@@ -195,14 +195,20 @@ class ClusterFeedbackService {
       // Update the deleted faces
       await FaceMLDataDB.instance.forceUpdateClusterIds(newFaceIdToClusterID);
 
-      Bus.instance.fire(PeopleChangedEvent());
       Bus.instance.fire(
-        LocalPhotosUpdatedEvent(
-          files,
-          type: EventType.peopleClusterChanged,
+        PeopleChangedEvent(
+          relevantFiles: files,
+          type: PeopleEventType.removedFilesFromCluster,
           source: "$clusterID",
         ),
       );
+      // Bus.instance.fire(
+      //   LocalPhotosUpdatedEvent(
+      //     files,
+      //     type: EventType.peopleClusterChanged,
+      //     source: "$clusterID",
+      //   ),
+      // );
       return;
     } catch (e, s) {
       _logger.severe("Error in removeFilesFromCluster", e, s);

@@ -6,6 +6,7 @@ import "package:flutter_animate/flutter_animate.dart";
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
+import "package:photos/events/people_changed_event.dart";
 import "package:photos/face/model/person.dart";
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/file/file.dart';
@@ -52,6 +53,7 @@ class _ClusterPageState extends State<ClusterPage> {
   final _selectedFiles = SelectedFiles();
   late final List<EnteFile> files;
   late final StreamSubscription<LocalPhotosUpdatedEvent> _filesUpdatedEvent;
+  late final StreamSubscription<PeopleChangedEvent> _peopleChangedEvent;
 
   @override
   void initState() {
@@ -69,9 +71,11 @@ class _ClusterPageState extends State<ClusterPage> {
         }
         setState(() {});
       }
-      if (event.type == EventType.peopleClusterChanged &&
+    });
+    _peopleChangedEvent = Bus.instance.on<PeopleChangedEvent>().listen((event) {
+      if (event.type == PeopleEventType.removedFilesFromCluster &&
           (event.source == widget.clusterID.toString())) {
-        for (var updatedFile in event.updatedFiles) {
+        for (var updatedFile in event.relevantFiles!) {
           files.remove(updatedFile);
         }
         setState(() {});
@@ -88,6 +92,7 @@ class _ClusterPageState extends State<ClusterPage> {
   @override
   void dispose() {
     _filesUpdatedEvent.cancel();
+    _peopleChangedEvent.cancel();
     super.dispose();
   }
 
@@ -110,6 +115,7 @@ class _ClusterPageState extends State<ClusterPage> {
         );
       },
       reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
+      forceReloadEvents: [Bus.instance.on<PeopleChangedEvent>()],
       removalEventTypes: const {
         EventType.deletedFromRemote,
         EventType.deletedFromEverywhere,
