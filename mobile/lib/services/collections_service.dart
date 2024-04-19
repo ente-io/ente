@@ -1390,7 +1390,11 @@ class CollectionsService {
     for (final EnteFile file in othersFile) {
       if (hashToUserFile.containsKey(file.hash ?? '')) {
         final userFile = hashToUserFile[file.hash]!;
-        filesToAdd.add(userFile);
+        if (userFile.fileType == file.fileType) {
+          filesToAdd.add(userFile);
+        } else {
+          filesToCopy.add(file);
+        }
       } else {
         filesToCopy.add(file);
       }
