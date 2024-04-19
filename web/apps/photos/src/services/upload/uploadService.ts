@@ -132,13 +132,7 @@ class UploadService {
             : getFileSize(file);
     }
 
-    getAssetName({ isLivePhoto, file, livePhotoAssets }: UploadAsset) {
-        return isLivePhoto
-            ? getLivePhotoName(livePhotoAssets)
-            : getFilename(file);
-    }
-
-    getAssetName2({ isLivePhoto, file, livePhotoAssets }: UploadAsset2) {
+    getAssetName({ isLivePhoto, file, livePhotoAssets }: UploadAsset2) {
         return isLivePhoto
             ? getLivePhotoName(livePhotoAssets)
             : getFilename(file);
