@@ -16,7 +16,6 @@ import "package:photos/services/filter/db_filters.dart";
 import 'package:photos/utils/file_uploader_util.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_migration/sqflite_migration.dart';
-import 'package:sqlite3/sqlite3.dart' as sqlite3;
 import 'package:sqlite_async/sqlite_async.dart' as sqlite_async;
 
 class FilesDB {
@@ -103,19 +102,13 @@ class FilesDB {
 
   // only have a single app-wide reference to the database
   static Future<Database>? _dbFuture;
-  static Future<sqlite3.Database>? _ffiDBFuture;
   static Future<sqlite_async.SqliteDatabase>? _sqliteAsyncDBFuture;
 
-  @Deprecated("Use ffiDB instead (sqlite_async)")
+  @Deprecated("Use sqliteAsyncDB instead (sqlite_async)")
   Future<Database> get database async {
     // lazily instantiate the db the first time it is accessed
     _dbFuture ??= _initDatabase();
     return _dbFuture!;
-  }
-
-  Future<sqlite3.Database> get ffiDB async {
-    _ffiDBFuture ??= _initFFIDatabase();
-    return _ffiDBFuture!;
   }
 
   Future<sqlite_async.SqliteDatabase> get sqliteAsyncDB async {
@@ -130,14 +123,6 @@ class FilesDB {
     final String path = join(documentsDirectory.path, _databaseName);
     _logger.info("DB path " + path);
     return await openDatabaseWithMigration(path, dbConfig);
-  }
-
-  Future<sqlite3.Database> _initFFIDatabase() async {
-    final Directory documentsDirectory =
-        await getApplicationDocumentsDirectory();
-    final String path = join(documentsDirectory.path, _databaseName);
-    _logger.info("DB path " + path);
-    return sqlite3.sqlite3.open(path);
   }
 
   Future<sqlite_async.SqliteDatabase> _initSqliteAsyncDatabase() async {
