@@ -50,8 +50,6 @@ export interface PendingUploads {
 export const CustomErrors = {
     WINDOWS_NATIVE_IMAGE_PROCESSING_NOT_SUPPORTED:
         "Windows native image processing is not supported",
-    UNSUPPORTED_PLATFORM: (platform: string, arch: string) =>
-        `Unsupported platform - ${platform} ${arch}`,
     MODEL_DOWNLOAD_PENDING:
         "Model download pending, skipping clip search request",
 };

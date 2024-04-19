@@ -200,6 +200,14 @@ export interface Electron {
 
     // - Conversion
 
+    /**
+     * Try to convert an arbitrary image into JPEG.
+     *
+     * The behaviour is OS dependent.
+     * @param fileData
+     * @param filename
+     * @returns
+     */
     convertToJPEG: (
         fileData: Uint8Array,
         filename: string,
