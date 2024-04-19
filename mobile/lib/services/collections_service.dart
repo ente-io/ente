@@ -1161,9 +1161,21 @@ class CollectionsService {
       await _addToCollection(dstCollectionID, splitResult.ownedByCurrentUser);
     }
     if (splitResult.ownedByOtherUsers.isNotEmpty) {
+      late final List<EnteFile> filesToCopy;
+      late final List<EnteFile> filesToAdd;
+      (filesToAdd, filesToCopy) = (await _splitFilesToAddAndCopy(
+        splitResult.ownedByOtherUsers,
+      ));
+
+      if (filesToAdd.isNotEmpty) {
+        _logger.info(
+          "found existing ${filesToAdd.length} files with same hash, adding symlinks",
+        );
+        await _addToCollection(dstCollectionID, filesToAdd);
+      }
       // group files by collectionID
       final Map<int, List<EnteFile>> filesByCollection = {};
-      for (final file in splitResult.ownedByOtherUsers) {
+      for (final file in filesToCopy) {
         if (filesByCollection.containsKey(file.collectionID!)) {
           filesByCollection[file.collectionID!]!.add(file);
         } else {
@@ -1363,6 +1375,27 @@ class CollectionsService {
         rethrow;
       }
     }
+  }
+
+  Future<(List<EnteFile>, List<EnteFile>)> _splitFilesToAddAndCopy(
+    List<EnteFile> othersFile,
+  ) async {
+    final hashToUserFile =
+        await _filesDB.getUserOwnedFilesWithSameHashForGivenListOfFiles(
+      othersFile,
+      _config.getUserID()!,
+    );
+    final List<EnteFile> filesToCopy = [];
+    final List<EnteFile> filesToAdd = [];
+    for (final EnteFile file in othersFile) {
+      if (hashToUserFile.containsKey(file.hash ?? '')) {
+        final userFile = hashToUserFile[file.hash]!;
+        filesToAdd.add(userFile);
+      } else {
+        filesToCopy.add(file);
+      }
+    }
+    return (filesToAdd, filesToCopy);
   }
 
   void _validateCopyInput(

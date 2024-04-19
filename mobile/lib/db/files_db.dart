@@ -521,7 +521,8 @@ class FilesDB {
   }
 
   Future<(Set<int>, Map<String, int>)> getUploadAndHash(
-      int collectionID,) async {
+    int collectionID,
+  ) async {
     final db = await instance.database;
     final results = await db.query(
       filesTable,
@@ -1043,6 +1044,29 @@ class FilesDB {
     );
 
     return convertToFiles(rows);
+  }
+
+  Future<Map<String, EnteFile>>
+      getUserOwnedFilesWithSameHashForGivenListOfFiles(
+    List<EnteFile> files,
+    int userID,
+  ) async {
+    final db = await sqliteAsyncDB;
+    final List<String> hashes = [];
+    for (final file in files) {
+      if (file.hash != null && file.hash != '') {
+        hashes.add(file.hash!);
+      }
+    }
+    if (hashes.isEmpty) {
+      return {};
+    }
+    final inParam = hashes.map((e) => "'$e'").join(',');
+    final rows = await db.execute('''
+      SELECT * FROM $filesTable WHERE $columnHash IN ($inParam) AND $columnOwnerID = $userID;
+      ''');
+    final matchedFiles = convertToFiles(rows);
+    return Map.fromIterable(matchedFiles, key: (e) => e.hash);
   }
 
   Future<List<EnteFile>> getUploadedFilesWithHashes(
