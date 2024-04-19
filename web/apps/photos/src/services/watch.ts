@@ -561,23 +561,26 @@ class FolderWatcher {
         }
     }
 
-    // Batches all the files to be uploaded (or trashed) from the
-    // event queue of same collection as the next event
-    private clubSameCollectionEvents(): EventQueueItem {
+    /**
+     * Batch the next run of events with the same action, collection and folder
+     * path into a single clubbed event that contains the list of all effected
+     * file paths from the individual events.
+     */
+    private dequeueClubbedEvent(): ClubbedWatchEvent | undefined {
         const event = this.eventQueue.shift();
+        if (!event) return undefined;
+
+        const filePaths = [event.filePath];
         while (
             this.eventQueue.length > 0 &&
-            event.collectionName === this.eventQueue[0].collectionName &&
-            event.type === this.eventQueue[0].type
+            event.action === this.eventQueue[0].action &&
+            event.folderPath === this.eventQueue[0].folderPath &&
+            event.collectionName === this.eventQueue[0].collectionName
         ) {
-            if (event.type === "trash") {
-                event.paths = [...event.paths, ...this.eventQueue[0].paths];
-            } else {
-                event.files = [...event.files, ...this.eventQueue[0].files];
-            }
+            filePaths.push(this.eventQueue[0].filePath);
             this.eventQueue.shift();
         }
-        return event;
+        return { ...event, filePaths };
     }
 }
 
@@ -613,6 +616,18 @@ interface WatchEvent {
     /** The absolute path to the file under consideration. */
     filePath: string;
 }
+
+/**
+ * A composite of multiple {@link WatchEvent}s that only differ in their
+ * {@link filePath}.
+ *
+ * When processing events, we combine a run of events with the same
+ * {@link action}, {@link folderPath} and {@link collectionName}. This allows us
+ * to process all the affected {@link filePaths} in one shot.
+ */
+type ClubbedWatchEvent = Omit<WatchEvent, "filePath"> & {
+    filePaths: string[];
+};
 
 export function getValidFilesToUpload(
     files: ElectronFile[],
