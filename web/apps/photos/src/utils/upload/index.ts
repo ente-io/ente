@@ -205,12 +205,19 @@ export function groupFilesBasedOnParentFolder(
     return collectionNameToFilesMap;
 }
 
-export function filterOutSystemFiles(files: File[] | ElectronFile[]) {
+export function filterOutSystemFiles(
+    files: File[] | ElectronFile[] | string[] | undefined | null,
+) {
+    if (!files) return files;
+
     if (files[0] instanceof File) {
         const browserFiles = files as File[];
         return browserFiles.filter((file) => {
             return !isSystemFile(file);
         });
+    } else if (typeof files[0] == "string") {
+        const filePaths = files as string[];
+        return filePaths.filter((path) => !isHiddenFile(path));
     } else {
         const electronFiles = files as ElectronFile[];
         return electronFiles.filter((file) => {

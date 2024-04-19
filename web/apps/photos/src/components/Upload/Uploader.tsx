@@ -112,11 +112,28 @@ export default function Uploader(props: Props) {
     const [importSuggestion, setImportSuggestion] = useState<ImportSuggestion>(
         DEFAULT_IMPORT_SUGGESTION,
     );
+    /**
+     * Paths of file to upload that we've received over the IPC bridge from the
+     * code running in the Node.js layer of our desktop app.
+     */
+    const [desktopFilePaths, setDesktopFilePaths] = useState<
+        string[] | undefined
+    >();
     const [electronFiles, setElectronFiles] = useState<ElectronFile[]>(null);
     const [webFiles, setWebFiles] = useState([]);
 
-    const toUploadFiles = useRef<File[] | ElectronFile[]>(null);
+    const toUploadFiles = useRef<
+        File[] | ElectronFile[] | string[] | undefined | null
+    >(null);
+    /**
+     * If true, then the next upload we'll be processing was initiated by our
+     * desktop app.
+     */
     const isPendingDesktopUpload = useRef(false);
+    /**
+     * If set, this will be the name of the collection that our desktop app
+     * wishes for us to upload into.
+     */
     const pendingDesktopUploadCollectionName = useRef<string>("");
     // This is set when the user choses a type to upload from the upload type selector dialog
     const pickedUploadType = useRef<PICKED_UPLOAD_TYPE>(null);
@@ -181,13 +198,10 @@ export default function Uploader(props: Props) {
                     }
                 });
 
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const upload = (collectionName: string, filePaths: string[]) => {
                 isPendingDesktopUpload.current = true;
                 pendingDesktopUploadCollectionName.current = collectionName;
-
-                // TODO (MR):
-                // setElectronFiles(filePaths);
+                setDesktopFilePaths(filePaths);
             };
 
             const requestSyncWithRemote = () => {
@@ -284,18 +298,22 @@ export default function Uploader(props: Props) {
 
     useEffect(() => {
         if (
+            desktopFilePaths?.length > 0 ||
             electronFiles?.length > 0 ||
             webFiles?.length > 0 ||
             appContext.sharedFiles?.length > 0
         ) {
             log.info(
-                `upload request type:${
-                    electronFiles?.length > 0
-                        ? "electronFiles"
-                        : webFiles?.length > 0
-                          ? "webFiles"
-                          : "sharedFiles"
+                `upload request type: ${
+                    desktopFilePaths?.length > 0
+                        ? "desktopFilePaths"
+                        : electronFiles?.length > 0
+                          ? "electronFiles"
+                          : webFiles?.length > 0
+                            ? "webFiles"
+                            : "sharedFiles"
                 } count ${
+                    desktopFilePaths?.length ??
                     electronFiles?.length ??
                     webFiles?.length ??
                     appContext?.sharedFiles.length
@@ -326,9 +344,13 @@ export default function Uploader(props: Props) {
                 toUploadFiles.current = appContext.sharedFiles;
                 appContext.resetSharedFiles();
             } else if (electronFiles?.length > 0) {
-                // File selection from desktop app
+                // File selection from desktop app - deprecated
                 toUploadFiles.current = electronFiles;
                 setElectronFiles([]);
+            } else if (desktopFilePaths && desktopFilePaths.length > 0) {
+                // File selection from our desktop app
+                toUploadFiles.current = desktopFilePaths;
+                setDesktopFilePaths(undefined);
             }
 
             toUploadFiles.current = filterOutSystemFiles(toUploadFiles.current);
@@ -339,7 +361,9 @@ export default function Uploader(props: Props) {
 
             const importSuggestion = getImportSuggestion(
                 pickedUploadType.current,
-                toUploadFiles.current.map((file) => file["path"]),
+                toUploadFiles.current.map((file) =>
+                    typeof file == "string" ? file : file["path"],
+                ),
             );
             setImportSuggestion(importSuggestion);
 
@@ -352,7 +376,7 @@ export default function Uploader(props: Props) {
             pickedUploadType.current = null;
             props.setLoading(false);
         }
-    }, [webFiles, appContext.sharedFiles, electronFiles]);
+    }, [webFiles, appContext.sharedFiles, electronFiles, desktopFilePaths]);
 
     const resumeDesktopUpload = async (
         type: PICKED_UPLOAD_TYPE,
@@ -636,7 +660,7 @@ export default function Uploader(props: Props) {
         try {
             if (accessedThroughSharedURL) {
                 log.info(
-                    `uploading files to pulbic collection - ${props.uploadCollection.name}  - ${props.uploadCollection.id}`,
+                    `uploading files to public collection - ${props.uploadCollection.name}  - ${props.uploadCollection.id}`,
                 );
                 const uploaderName = await getPublicCollectionUploaderName(
                     getPublicCollectionUID(
