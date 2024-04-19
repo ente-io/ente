@@ -545,22 +545,26 @@ export const setToUploadCollection = async (collections: Collection[]) => {
     await ensureElectron().setPendingUploadCollection(collectionName);
 };
 
-export const updatePendingUploads = async (files: FileWithCollection[]) => {
-    const filePaths = [];
-    for (const fileWithCollection of files) {
-        if (fileWithCollection.isLivePhoto) {
-            filePaths.push(
-                (fileWithCollection.livePhotoAssets.image as ElectronFile).path,
-                (fileWithCollection.livePhotoAssets.video as ElectronFile).path,
-            );
-        } else {
-            filePaths.push((fileWithCollection.file as ElectronFile).path);
-        }
-    }
-    await ensureElectron().setPendingUploadFiles("files", filePaths);
+const updatePendingUploads = async (files: FileWithCollection2[]) => {
+    const paths = files
+        .map((file) =>
+            file.isLivePhoto
+                ? [file.livePhotoAssets.image, file.livePhotoAssets.video]
+                : [file.file],
+        )
+        .flat()
+        .map((f) => getFilePathElectron(f));
+    await ensureElectron().setPendingUploadFiles("files", paths);
 };
 
-export const cancelRemainingUploads = async () => {
+/**
+ * NOTE: a stop gap measure, only meant to be called by code that is running in
+ * the context of a desktop app initiated upload
+ */
+export const getFilePathElectron = (file: File | ElectronFile | string) =>
+    typeof file == "string" ? file : (file as ElectronFile).path;
+
+const cancelRemainingUploads = async () => {
     const electron = ensureElectron();
     await electron.setPendingUploadCollection(undefined);
     await electron.setPendingUploadFiles("zips", []);
