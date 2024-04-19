@@ -59,7 +59,7 @@ export const WatchFolder: React.FC<WatchFolderProps> = ({ open, onClose }) => {
     const appContext = useContext(AppContext);
 
     useEffect(() => {
-        watcher.getWatchMappings().then((ws) => setWatches(ws));
+        watcher.getWatches().then((ws) => setWatches(ws));
     }, []);
 
     useEffect(() => {
@@ -286,10 +286,14 @@ interface EntryHeadingProps {
 }
 
 const EntryHeading: React.FC<EntryHeadingProps> = ({ watch }) => {
+    const folderPath = watch.folderPath;
+
     return (
         <FlexWrapper gap={1}>
-            <Typography>{basename(watch.folderPath)}</Typography>
-            {watcher.isSyncingWatch(watch) && <CircularProgress size={12} />}
+            <Typography>{basename(folderPath)}</Typography>
+            {watcher.isSyncingFolder(folderPath) && (
+                <CircularProgress size={12} />
+            )}
         </FlexWrapper>
     );
 };

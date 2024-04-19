@@ -52,6 +52,23 @@ class FolderWatcher {
         this.debouncedRunNextEvent = debounce(() => this.runNextEvent(), 1000);
     }
 
+    /**
+     * Initialize the watcher.
+     *
+     * This is only called when we're running in the context of our desktop app.
+     */
+    async init(
+        setElectronFiles: (files: ElectronFile[]) => void,
+        setCollectionName: (collectionName: string) => void,
+        syncWithRemote: () => void,
+    ) {
+        this.setElectronFiles = setElectronFiles;
+        this.setCollectionName = setCollectionName;
+        this.syncWithRemote = syncWithRemote;
+        this.registerListeners();
+        await this.syncWithDisk();
+    }
+
     /** `true` if we are currently using the uploader */
     isUploadRunning() {
         return this.uploadRunning;
@@ -82,33 +99,18 @@ class FolderWatcher {
         this.syncWithDisk();
     }
 
-    /**
-     * Initialize the watcher.
-     *
-     * This is only called when we're running in the context of our desktop app.
-     */
-    async init(
-        setElectronFiles: (files: ElectronFile[]) => void,
-        setCollectionName: (collectionName: string) => void,
-        syncWithRemote: () => void,
-        setWatchFolderServiceIsRunning: (isRunning: boolean) => void,
-    ) {
-        this.setElectronFiles = setElectronFiles;
-        this.setCollectionName = setCollectionName;
-        this.syncWithRemote = syncWithRemote;
-        this.setWatchFolderServiceIsRunning = setWatchFolderServiceIsRunning;
-        this.registerListeners();
-        await this.syncWithDisk();
+    /** Return the list of folders we are watching for changes. */
+    async getWatches(): Promise<FolderWatch[]> {
+        return await ensureElectron().watch.get();
     }
 
     /**
-     * Return true if we are currently processing an event for the given
-     * {@link watch}
+     * Return true if we are currently syncing files that belong to the given
+     * {@link folderPath}.
      */
-    isSyncingWatch(watch: FolderWatch) {
+    isSyncingFolder(folderPath: string) {
         return (
-            this.isEventRunning &&
-            this.currentEvent?.folderPath == watch.folderPath
+            this.isEventRunning && this.currentEvent?.folderPath == folderPath
         );
     }
 
@@ -135,15 +137,6 @@ class FolderWatcher {
         return await ensureElectron().watch.remove(folderPath);
     }
 
-    async getWatchMappings(): Promise<FolderWatch[]> {
-        try {
-            return (await ensureElectron().getWatchMappings()) ?? [];
-        } catch (e) {
-            log.error("error while getting watch mappings", e);
-            return [];
-        }
-    }
-
     private async syncWithDisk() {
         try {
             const electron = ensureElectron();
@@ -151,12 +144,9 @@ class FolderWatcher {
             if (!mappings) return;
 
             this.eventQueue = [];
-            const { events, deletedFolderPaths } = await deduceEvents(mappings);
+            const { events } = await deduceEvents(mappings);
             log.info(`Folder watch deduced ${events.length} events`);
             this.eventQueue = this.eventQueue.concat(events);
-
-            for (const path of deletedFolderPaths)
-                electron.removeWatchMapping(path);
 
             this.debouncedRunNextEvent();
         } catch (e) {
@@ -684,30 +674,13 @@ function isSyncedOrIgnoredFile(file: ElectronFile, mapping: FolderWatch) {
 /**
  * Determine which events we need to process to synchronize the watched on-disk
  * folders to their corresponding collections.
- *
- * Also return a list of previously created folder watches for which there is no
- * longer any no corresponding directory on disk.
  */
-const deduceEvents = async (
-    watches: FolderWatch[],
-): Promise<{
-    events: WatchEvent[];
-    deletedFolderPaths: string[];
-}> => {
+const deduceEvents = async (watches: FolderWatch[]): Promise<WatchEvent[]> => {
     const electron = ensureElectron();
-
-    const activeWatches = [];
-    const deletedFolderPaths: string[] = [];
-
-    for (const watch of watches) {
-        const valid = await electron.fs.isDir(watch.folderPath);
-        if (!valid) deletedFolderPaths.push(watch.folderPath);
-        else activeWatches.push(watch);
-    }
 
     const events: WatchEvent[] = [];
 
-    for (const watch of activeWatches) {
+    for (const watch of watches) {
         const folderPath = watch.folderPath;
 
         const paths = (await electron.watch.findFiles(folderPath))
@@ -727,10 +700,10 @@ const deduceEvents = async (
                 filePath: path,
             });
 
-        // Synced files that are no longer on disk
-        const pathsToRemove = watch.syncedFiles.filter(
-            (file) => !paths.includes(file.path),
-        );
+        // Previously synced files that are no longer on disk.
+        const pathsToRemove = watch.syncedFiles
+            .map((f) => f.path)
+            .filter((path) => !paths.includes(path));
 
         for (const path of pathsToRemove)
             events.push({
@@ -741,7 +714,7 @@ const deduceEvents = async (
             });
     }
 
-    return { events, deletedFolderPaths };
+    return events;
 };
 
 const isSyncedOrIgnoredPath = (path: string, watch: FolderWatch) =>
