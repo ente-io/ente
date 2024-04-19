@@ -2,9 +2,10 @@ import "dart:async";
 import "dart:developer";
 import "dart:isolate";
 import "dart:math" show max;
-import "dart:typed_data";
+import "dart:typed_data" show Uint8List;
 
 import "package:computer/computer.dart";
+import "package:flutter/foundation.dart" show kDebugMode;
 import "package:logging/logging.dart";
 import "package:ml_linalg/dtype.dart";
 import "package:ml_linalg/vector.dart";
@@ -618,6 +619,7 @@ class FaceClusteringService {
   }
 
   static void _analyzeClusterResults(List<FaceInfo> sortedFaceInfos) {
+    if (!kDebugMode) return;
     final stopwatch = Stopwatch()..start();
 
     final Map<String, int> faceIdToCluster = {};
