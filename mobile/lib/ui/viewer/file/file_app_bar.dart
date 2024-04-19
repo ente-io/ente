@@ -117,7 +117,7 @@ class FileAppBarState extends State<FileAppBar> {
       );
     }
     // only show fav option for files owned by the user
-    if (isOwnedByUser && !isFileHidden && isFileUploaded) {
+    if (!isFileHidden && isFileUploaded) {
       actions.add(
         Padding(
           padding: const EdgeInsets.all(8),

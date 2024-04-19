@@ -28,6 +28,7 @@ import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/collection/collection_file_item.dart';
 import 'package:photos/models/collection/collection_items.dart';
 import 'package:photos/models/file/file.dart';
+import "package:photos/models/files_split.dart";
 import "package:photos/models/metadata/collection_magic.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
 import "package:photos/services/favorites_service.dart";
@@ -1149,10 +1150,36 @@ class CollectionsService {
   }
 
   Future<void> addOrCopyToCollection(
-    int collectionID,
+    int dstCollectionID,
     List<EnteFile> files,
   ) async {
-    return _addToCollection(collectionID, files);
+    final splitResult = FilesSplit.split(files, _config.getUserID()!);
+    if (splitResult.pendingUploads.isNotEmpty) {
+      throw ArgumentError('File should be already uploaded');
+    }
+    if (splitResult.ownedByCurrentUser.isNotEmpty) {
+      await _addToCollection(dstCollectionID, splitResult.ownedByCurrentUser);
+    }
+    if (splitResult.ownedByOtherUsers.isNotEmpty) {
+      // group files by collectionID
+      final Map<int, List<EnteFile>> filesByCollection = {};
+      for (final file in splitResult.ownedByOtherUsers) {
+        if (filesByCollection.containsKey(file.collectionID!)) {
+          filesByCollection[file.collectionID!]!.add(file);
+        } else {
+          filesByCollection[file.collectionID!] = [file];
+        }
+      }
+      for (final entry in filesByCollection.entries) {
+        final srcCollectionID = entry.key;
+        final files = entry.value;
+        await _copyToCollection(
+          files,
+          dstCollectionID: dstCollectionID,
+          srcCollectionID: srcCollectionID,
+        );
+      }
+    }
   }
 
   Future<void> _addToCollection(int collectionID, List<EnteFile> files) async {
@@ -1274,37 +1301,22 @@ class CollectionsService {
     }
   }
 
-  Future<void> copyToCollection(int collectionID, List<EnteFile> files) async {
-    final containsUploadedFile = files.firstWhereOrNull(
-          (element) => element.uploadedFileID != null,
-        ) !=
-        null;
-    if (containsUploadedFile) {
-      final existingFileIDsInCollection =
-          await FilesDB.instance.getUploadedFileIDs(collectionID);
-      files.removeWhere(
-        (element) =>
-            element.uploadedFileID != null &&
-            existingFileIDsInCollection.contains(element.uploadedFileID),
-      );
-    }
-    if (files.isEmpty || !containsUploadedFile) {
-      _logger.info("nothing to add to the collection");
-      return;
-    }
-
-    final params = <String, dynamic>{};
-    params["collectionID"] = collectionID;
+  Future<void> _copyToCollection(
+    List<EnteFile> files, {
+    required int dstCollectionID,
+    required int srcCollectionID,
+  }) async {
+    _validateCopyInput(dstCollectionID, srcCollectionID, files);
     final batchedFiles = files.chunks(batchSize);
+    final params = <String, dynamic>{};
+    params["dstCollectionID"] = dstCollectionID;
+    params["srcCollectionID"] = srcCollectionID;
     for (final batch in batchedFiles) {
       params["files"] = [];
       for (final file in batch) {
         final fileKey = getFileKey(file);
-        file.generatedID =
-            null; // So that a new entry is created in the FilesDB
-        file.collectionID = collectionID;
         final encryptedKeyData =
-            CryptoUtil.encryptSync(fileKey, getCollectionKey(collectionID));
+            CryptoUtil.encryptSync(fileKey, getCollectionKey(dstCollectionID));
         file.encryptedKey =
             CryptoUtil.bin2base64(encryptedKeyData.encryptedData!);
         file.keyDecryptionNonce =
@@ -1319,14 +1331,60 @@ class CollectionsService {
       }
 
       try {
-        await _enteDio.post(
-          "/collections/add-files",
+        final res = await _enteDio.post(
+          "/files/copy",
           data: params,
         );
+        final oldToCopiedFileIDMap = Map<int, int>.from(
+          (res.data["oldToNewFileIDMap"] as Map<String, dynamic>).map(
+            (key, value) => MapEntry(int.parse(key), value as int),
+          ),
+        );
+        for (final file in batch) {
+          final int uploadIDForOriginalFIle = file.uploadedFileID!;
+          if (oldToCopiedFileIDMap.containsKey(uploadIDForOriginalFIle)) {
+            file.generatedID = null;
+            file.collectionID = dstCollectionID;
+            file.uploadedFileID = oldToCopiedFileIDMap[uploadIDForOriginalFIle];
+            oldToCopiedFileIDMap.remove(uploadIDForOriginalFIle);
+          } else {
+            throw Exception("Failed to copy file ${file.uploadedFileID}");
+          }
+        }
+        if (oldToCopiedFileIDMap.isNotEmpty) {
+          throw Exception(
+            "Failed to map following uploadKey ${oldToCopiedFileIDMap.keys}",
+          );
+        }
         await _filesDB.insertMultiple(batch);
-        Bus.instance.fire(CollectionUpdatedEvent(collectionID, batch, "addTo"));
+        Bus.instance
+            .fire(CollectionUpdatedEvent(dstCollectionID, batch, "copiedTo"));
       } catch (e) {
         rethrow;
+      }
+    }
+  }
+
+  void _validateCopyInput(
+      int destCollectionID, int srcCollectionID, List<EnteFile> files) {
+    final dstCollection = _collectionIDToCollections[destCollectionID];
+    final srcCollection = _collectionIDToCollections[srcCollectionID];
+    if (dstCollection == null || !dstCollection.isOwner(_config.getUserID()!)) {
+      throw ArgumentError(
+        'Destination collection not found ${dstCollection == null} or not owned by user ',
+      );
+    }
+    if (srcCollection == null) {
+      throw ArgumentError('Source collection not found');
+    }
+    // verify that all fileIds belong to srcCollection and isn't owned by current user
+    for (final f in files) {
+      if (f.collectionID != srcCollectionID ||
+          f.ownerID == _config.getUserID()) {
+        _logger.warning(
+          'file $f does not belong to srcCollection $srcCollection or is owned by current user ${f.ownerID}',
+        );
+        throw ArgumentError('');
       }
     }
   }
