@@ -511,7 +511,7 @@ class UploadManager {
     }
 
     private async updateElectronRemainingFiles(
-        fileWithCollection: FileWithCollection,
+        fileWithCollection: FileWithCollection2,
     ) {
         if (isElectron()) {
             this.remainingFiles = this.remainingFiles.filter(

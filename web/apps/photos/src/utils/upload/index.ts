@@ -118,8 +118,8 @@ export function segregateMetadataAndMediaFiles2(
 }
 
 export function areFileWithCollectionsSame(
-    firstFile: FileWithCollection,
-    secondFile: FileWithCollection,
+    firstFile: FileWithCollection2,
+    secondFile: FileWithCollection2,
 ): boolean {
     return firstFile.localID === secondFile.localID;
 }
