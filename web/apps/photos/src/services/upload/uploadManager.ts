@@ -26,6 +26,7 @@ import {
     ParsedMetadataJSON,
     ParsedMetadataJSONMap,
     PublicUploadProps,
+    type FileWithCollection2,
 } from "types/upload";
 import { ProgressUpdater } from "types/upload/ui";
 import { decryptFile, getUserOwnedFiles, sortFiles } from "utils/file";
@@ -115,6 +116,97 @@ class UploadManager {
 
     public async queueFilesForUpload(
         filesWithCollectionToUploadIn: FileWithCollection[],
+        collections: Collection[],
+        uploaderName?: string,
+    ) {
+        try {
+            if (this.uploadInProgress) {
+                throw Error("can't run multiple uploads at once");
+            }
+            this.uploadInProgress = true;
+            await this.updateExistingFilesAndCollections(collections);
+            this.uploaderName = uploaderName;
+            log.info(
+                `received ${filesWithCollectionToUploadIn.length} files to upload`,
+            );
+            uiService.setFilenames(
+                new Map<number, string>(
+                    filesWithCollectionToUploadIn.map((mediaFile) => [
+                        mediaFile.localID,
+                        UploadService.getAssetName(mediaFile),
+                    ]),
+                ),
+            );
+            const { metadataJSONFiles, mediaFiles } =
+                segregateMetadataAndMediaFiles(filesWithCollectionToUploadIn);
+            log.info(`has ${metadataJSONFiles.length} metadata json files`);
+            log.info(`has ${mediaFiles.length} media files`);
+            if (metadataJSONFiles.length) {
+                UIService.setUploadStage(
+                    UPLOAD_STAGES.READING_GOOGLE_METADATA_FILES,
+                );
+                await this.parseMetadataJSONFiles(metadataJSONFiles);
+
+                UploadService.setParsedMetadataJSONMap(
+                    this.parsedMetadataJSONMap,
+                );
+            }
+            if (mediaFiles.length) {
+                log.info(`clusterLivePhotoFiles started`);
+                const analysedMediaFiles =
+                    await UploadService.clusterLivePhotoFiles(mediaFiles);
+                log.info(`clusterLivePhotoFiles ended`);
+                log.info(
+                    `got live photos: ${
+                        mediaFiles.length !== analysedMediaFiles.length
+                    }`,
+                );
+                uiService.setFilenames(
+                    new Map<number, string>(
+                        analysedMediaFiles.map((mediaFile) => [
+                            mediaFile.localID,
+                            UploadService.getAssetName(mediaFile),
+                        ]),
+                    ),
+                );
+
+                UIService.setHasLivePhoto(
+                    mediaFiles.length !== analysedMediaFiles.length,
+                );
+
+                await this.uploadMediaFiles(analysedMediaFiles);
+            }
+        } catch (e) {
+            if (e.message === CustomError.UPLOAD_CANCELLED) {
+                if (isElectron()) {
+                    this.remainingFiles = [];
+                    await cancelRemainingUploads();
+                }
+            } else {
+                log.error("uploading failed with error", e);
+                throw e;
+            }
+        } finally {
+            UIService.setUploadStage(UPLOAD_STAGES.FINISH);
+            for (let i = 0; i < MAX_CONCURRENT_UPLOADS; i++) {
+                this.cryptoWorkers[i]?.terminate();
+            }
+            this.uploadInProgress = false;
+        }
+        try {
+            if (!UIService.hasFilesInResultList()) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (e) {
+            log.error(" failed to return shouldCloseProgressBar", e);
+            return false;
+        }
+    }
+
+    public async queueFilesForUpload2(
+        filesWithCollectionToUploadIn: FileWithCollection2[],
         collections: Collection[],
         uploaderName?: string,
     ) {

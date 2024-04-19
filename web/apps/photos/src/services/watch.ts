@@ -11,12 +11,17 @@ import type {
     FolderWatch,
     FolderWatchSyncedFile,
 } from "@/next/types/ipc";
+import { ensureString } from "@/utils/ensure";
 import { UPLOAD_RESULT } from "constants/upload";
 import debounce from "debounce";
 import uploadManager from "services/upload/uploadManager";
 import { Collection } from "types/collection";
 import { EncryptedEnteFile } from "types/file";
-import { ElectronFile, FileWithCollection } from "types/upload";
+import {
+    ElectronFile,
+    FileWithCollection,
+    type FileWithCollection2,
+} from "types/upload";
 import { groupFilesBasedOnCollectionID } from "utils/file";
 import { isHiddenFile } from "utils/upload";
 import { removeFromCollection } from "./collectionService";
@@ -367,7 +372,7 @@ class FolderWatcher {
      * {@link upload} get uploaded.
      */
     async allFileUploadsDone(
-        filesWithCollection: FileWithCollection[],
+        filesWithCollection: FileWithCollection2[],
         collections: Collection[],
     ) {
         const electron = ensureElectron();
@@ -411,18 +416,20 @@ class FolderWatcher {
         this.debouncedRunNextEvent();
     }
 
-    private parseAllFileUploadsDone(filesWithCollection: FileWithCollection[]) {
+    private parseAllFileUploadsDone(
+        filesWithCollection: FileWithCollection2[],
+    ) {
         const syncedFiles: FolderWatch["syncedFiles"] = [];
         const ignoredFiles: FolderWatch["ignoredFiles"] = [];
 
         for (const fileWithCollection of filesWithCollection) {
             if (fileWithCollection.isLivePhoto) {
-                const imagePath = (
-                    fileWithCollection.livePhotoAssets.image as ElectronFile
-                ).path;
-                const videoPath = (
-                    fileWithCollection.livePhotoAssets.video as ElectronFile
-                ).path;
+                const imagePath = ensureString(
+                    fileWithCollection.livePhotoAssets.image,
+                );
+                const videoPath = ensureString(
+                    fileWithCollection.livePhotoAssets.video,
+                );
 
                 if (
                     this.filePathToUploadedFileIDMap.has(imagePath) &&
@@ -468,7 +475,7 @@ class FolderWatcher {
                 this.filePathToUploadedFileIDMap.delete(imagePath);
                 this.filePathToUploadedFileIDMap.delete(videoPath);
             } else {
-                const filePath = (fileWithCollection.file as ElectronFile).path;
+                const filePath = ensureString(fileWithCollection.file);
 
                 if (this.filePathToUploadedFileIDMap.has(filePath)) {
                     const file = {
