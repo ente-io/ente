@@ -1366,7 +1366,10 @@ class CollectionsService {
   }
 
   void _validateCopyInput(
-      int destCollectionID, int srcCollectionID, List<EnteFile> files) {
+    int destCollectionID,
+    int srcCollectionID,
+    List<EnteFile> files,
+  ) {
     final dstCollection = _collectionIDToCollections[destCollectionID];
     final srcCollection = _collectionIDToCollections[srcCollectionID];
     if (dstCollection == null || !dstCollection.isOwner(_config.getUserID()!)) {
