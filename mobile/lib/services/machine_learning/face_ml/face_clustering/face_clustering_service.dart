@@ -271,7 +271,7 @@ class FaceClusteringService {
               FaceInfoForClustering(
                 faceID: key,
                 embeddingBytes: value,
-                faceScore: kMinHighQualityFaceScore + 0.01,
+                faceScore: kMinimumQualityFaceScore + 0.01,
                 blurValue: kLapacianDefault,
               ),
             );
@@ -451,7 +451,7 @@ class FaceClusteringService {
           faceID: face.faceID,
           faceScore: face.faceScore,
           blurValue: face.blurValue,
-          badFace: face.faceScore < kMinHighQualityFaceScore ||
+          badFace: face.faceScore < kMinimumQualityFaceScore ||
               face.blurValue < kLaplacianSoftThreshold ||
               face.isSideways,
           vEmbedding: Vector.fromList(

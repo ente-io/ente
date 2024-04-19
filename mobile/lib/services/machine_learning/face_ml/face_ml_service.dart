@@ -207,7 +207,9 @@ class FaceMlService {
             final time = DateTime.now();
             final FaceMlResult result =
                 await FaceMlService.analyzeImageSync(args);
-            dev.log("`analyzeImageSync` function executed in ${DateTime.now().difference(time).inMilliseconds} ms");
+            dev.log(
+              "`analyzeImageSync` function executed in ${DateTime.now().difference(time).inMilliseconds} ms",
+            );
             sendPort.send(result.toJsonString());
             break;
         }
@@ -289,7 +291,7 @@ class FaceMlService {
   }
 
   Future<void> clusterAllImages({
-    double minFaceScore = kMinHighQualityFaceScore,
+    double minFaceScore = kMinimumQualityFaceScore,
     bool clusterInBuckets = true,
   }) async {
     _logger.info("`clusterAllImages()` called");

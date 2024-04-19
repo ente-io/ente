@@ -261,7 +261,7 @@ class FaceMLDataDB {
       final List<Map<String, dynamic>> faceMaps = await db.rawQuery(
         'SELECT * FROM $facesTable where '
         '$faceIDColumn in (SELECT $fcFaceId from $faceClustersTable where  $fcClusterID IN (${clusterIDs.join(",")}))'
-        'AND $fileIDColumn in (${fileId.join(",")}) AND $faceScore > $kMinHighQualityFaceScore ORDER BY $faceScore DESC',
+        'AND $fileIDColumn in (${fileId.join(",")}) AND $faceScore > $kMinimumQualityFaceScore ORDER BY $faceScore DESC',
       );
       if (faceMaps.isNotEmpty) {
         if (avatarFileId != null) {
@@ -483,7 +483,7 @@ class FaceMLDataDB {
   }
 
   Future<Set<FaceInfoForClustering>> getFaceInfoForClustering({
-    double minScore = kMinHighQualityFaceScore,
+    double minScore = kMinimumQualityFaceScore,
     int minClarity = kLaplacianHardThreshold,
     int maxFaces = 20000,
     int offset = 0,
@@ -541,7 +541,7 @@ class FaceMLDataDB {
   ///
   /// Only selects faces with score greater than [minScore] and blur score greater than [minClarity]
   Future<Map<String, (int?, Uint8List)>> getFaceEmbeddingMap({
-    double minScore = kMinHighQualityFaceScore,
+    double minScore = kMinimumQualityFaceScore,
     int minClarity = kLaplacianHardThreshold,
     int maxFaces = 20000,
     int offset = 0,
@@ -608,7 +608,7 @@ class FaceMLDataDB {
         facesTable,
         columns: [faceIDColumn, faceEmbeddingBlob],
         where:
-            '$faceScore > $kMinHighQualityFaceScore AND $faceBlur > $kLaplacianHardThreshold AND $fileIDColumn IN (${fileIDs.join(",")})',
+            '$faceScore > $kMinimumQualityFaceScore AND $faceBlur > $kLaplacianHardThreshold AND $fileIDColumn IN (${fileIDs.join(",")})',
         limit: batchSize,
         offset: offset,
         orderBy: '$faceIDColumn DESC',
@@ -669,7 +669,7 @@ class FaceMLDataDB {
   }
 
   Future<int> getTotalFaceCount({
-    double minFaceScore = kMinHighQualityFaceScore,
+    double minFaceScore = kMinimumQualityFaceScore,
   }) async {
     final db = await instance.sqliteAsyncDB;
     final List<Map<String, dynamic>> maps = await db.getAll(
@@ -682,7 +682,7 @@ class FaceMLDataDB {
     final db = await instance.sqliteAsyncDB;
 
     final List<Map<String, dynamic>> totalFacesMaps = await db.getAll(
-      'SELECT COUNT(*) as count FROM $facesTable WHERE $faceScore > $kMinHighQualityFaceScore AND $faceBlur > $kLaplacianHardThreshold',
+      'SELECT COUNT(*) as count FROM $facesTable WHERE $faceScore > $kMinimumQualityFaceScore AND $faceBlur > $kLaplacianHardThreshold',
     );
     final int totalFaces = totalFacesMaps.first['count'] as int;
 
@@ -699,7 +699,7 @@ class FaceMLDataDB {
   ]) async {
     final db = await instance.database;
     final List<Map<String, dynamic>> maps = await db.rawQuery(
-      'SELECT COUNT(*) as count FROM $facesTable WHERE $faceBlur <= $blurThreshold AND $faceScore > $kMinHighQualityFaceScore',
+      'SELECT COUNT(*) as count FROM $facesTable WHERE $faceBlur <= $blurThreshold AND $faceScore > $kMinimumQualityFaceScore',
     );
     return maps.first['count'] as int;
   }
