@@ -131,6 +131,7 @@ export default function Uploader(props: Props) {
     const closeUploadProgress = () => setUploadProgressView(false);
     const showUserNameInputDialog = () => setUserNameInputDialogView(true);
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const setCollectionName = (collectionName: string) => {
         isPendingDesktopUpload.current = true;
         pendingDesktopUploadCollectionName.current = collectionName;
@@ -185,11 +186,13 @@ export default function Uploader(props: Props) {
                         );
                     }
                 });
+            /* TODO(MR): This is the connection point, implement
             watcher.init(
                 setElectronFiles,
                 setCollectionName,
                 props.syncWithRemote,
             );
+            */
         }
     }, [
         publicCollectionGalleryContext.accessedThroughSharedURL,
