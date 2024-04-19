@@ -5,6 +5,7 @@ import "package:flutter/scheduler.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/clear_and_unfocus_search_bar_event.dart";
 import "package:photos/events/tab_changed_event.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/models/search/index_of_indexed_stack.dart";
 import "package:photos/models/search/search_result.dart";
 import "package:photos/services/search_service.dart";
@@ -130,17 +131,14 @@ class SearchWidgetState extends State<SearchWidget> {
                 color: colorScheme.backgroundBase,
                 child: Container(
                   color: colorScheme.fillFaint,
-                  child: TextFormField(
+                  child: TextField(
                     controller: textController,
                     focusNode: focusNode,
                     style: Theme.of(context).textTheme.titleMedium,
                     // Below parameters are to disable auto-suggestion
-                    enableSuggestions: false,
-                    autocorrect: false,
                     // Above parameters are to disable auto-suggestion
                     decoration: InputDecoration(
-                      //TODO: Extract string
-                      hintText: "Search",
+                      hintText: S.of(context).search,
                       filled: true,
                       fillColor: getEnteColorScheme(context).fillFaint,
                       border: const UnderlineInputBorder(
@@ -161,6 +159,9 @@ class SearchWidgetState extends State<SearchWidget> {
                         minHeight: 44,
                         minWidth: 44,
                       ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        vertical: 8,
+                      ),
                       prefixIcon: Hero(
                         tag: "search_icon",
                         child: Icon(
@@ -168,6 +169,7 @@ class SearchWidgetState extends State<SearchWidget> {
                           color: colorScheme.strokeFaint,
                         ),
                       ),
+
                       /*Using valueListenableBuilder inside a stateful widget because this widget is only rebuild when
                       setState is called when deboucncing is over and the spinner needs to be shown while debouncing */
                       suffixIcon: ValueListenableBuilder(

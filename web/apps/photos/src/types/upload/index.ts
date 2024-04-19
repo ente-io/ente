@@ -24,6 +24,11 @@ export function isDataStream(object: any): object is DataStream {
 export type Logger = (message: string) => void;
 
 export interface Metadata {
+    /**
+     * The file name.
+     *
+     * See: [Note: File name for local EnteFile objects]
+     */
     title: string;
     creationTime: number;
     modificationTime: number;
@@ -149,13 +154,6 @@ export interface ParsedExtractedMetadata {
     creationTime: number;
     width: number;
     height: number;
-}
-
-// This is used to prompt the user the make upload strategy choice
-export interface ImportSuggestion {
-    rootFolderName: string;
-    hasNestedFolders: boolean;
-    hasRootLevelFileWithFolder: boolean;
 }
 
 export interface PublicUploadProps {

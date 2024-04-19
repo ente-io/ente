@@ -171,6 +171,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "resetPasswordTitle":
             MessageLookupByLibrary.simpleMessage("Zresetuj hasło"),
         "saveKey": MessageLookupByLibrary.simpleMessage("Zapisz klucz"),
+        "search": MessageLookupByLibrary.simpleMessage("Search"),
         "selectALocation":
             MessageLookupByLibrary.simpleMessage("Select a location"),
         "selectALocationFirst":

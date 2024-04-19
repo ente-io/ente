@@ -77,6 +77,7 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Modify your query, or try searching for"),
         "moveToHiddenAlbum":
             MessageLookupByLibrary.simpleMessage("Move to hidden album"),
+        "search": MessageLookupByLibrary.simpleMessage("Search"),
         "selectALocation":
             MessageLookupByLibrary.simpleMessage("Select a location"),
         "selectALocationFirst":

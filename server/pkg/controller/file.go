@@ -59,25 +59,41 @@ const (
 	DeletedObjectQueueLock = "deleted_objects_queue_lock"
 )
 
-// Create adds an entry for a file in the respective tables
-func (c *FileController) Create(ctx context.Context, userID int64, file ente.File, userAgent string, app ente.App) (ente.File, error) {
+func (c *FileController) validateFileCreateOrUpdateReq(userID int64, file ente.File) error {
 	objectPathPrefix := strconv.FormatInt(userID, 10) + "/"
 	if !strings.HasPrefix(file.File.ObjectKey, objectPathPrefix) || !strings.HasPrefix(file.Thumbnail.ObjectKey, objectPathPrefix) {
-		return file, stacktrace.Propagate(ente.ErrBadRequest, "Incorrect object key reported")
+		return stacktrace.Propagate(ente.ErrBadRequest, "Incorrect object key reported")
+	}
+	if file.EncryptedKey == "" || file.KeyDecryptionNonce == "" {
+		return stacktrace.Propagate(ente.ErrBadRequest, "EncryptedKey and KeyDecryptionNonce are required")
+	}
+	if file.File.DecryptionHeader == "" || file.Thumbnail.DecryptionHeader == "" {
+		return stacktrace.Propagate(ente.ErrBadRequest, "DecryptionHeader for file & thumb is required")
+	}
+	if file.UpdationTime == 0 {
+		return stacktrace.Propagate(ente.ErrBadRequest, "UpdationTime is required")
 	}
 	collection, err := c.CollectionRepo.Get(file.CollectionID)
 	if err != nil {
-		return file, stacktrace.Propagate(err, "")
+		return stacktrace.Propagate(err, "")
 	}
 	// Verify that user owns the collection.
 	// Warning: Do not remove this check
 	if collection.Owner.ID != userID || file.OwnerID != userID {
-		return file, stacktrace.Propagate(ente.ErrPermissionDenied, "")
+		return stacktrace.Propagate(ente.ErrPermissionDenied, "")
 	}
 	if collection.IsDeleted {
-		return file, stacktrace.Propagate(ente.ErrNotFound, "collection has been deleted")
+		return stacktrace.Propagate(ente.ErrNotFound, "collection has been deleted")
 	}
+	return nil
+}
 
+// Create adds an entry for a file in the respective tables
+func (c *FileController) Create(ctx context.Context, userID int64, file ente.File, userAgent string, app ente.App) (ente.File, error) {
+	err := c.validateFileCreateOrUpdateReq(userID, file)
+	if err != nil {
+		return file, stacktrace.Propagate(err, "")
+	}
 	hotDC := c.S3Config.GetHotDataCenter()
 	// sizeOf will do also HEAD check to ensure that the object exists in the
 	// current hot DC
@@ -115,7 +131,7 @@ func (c *FileController) Create(ctx context.Context, userID int64, file ente.Fil
 
 	// all iz well
 	var usage int64
-	file, usage, err = c.FileRepo.Create(file, fileSize, thumbnailSize, fileSize+thumbnailSize, collection.Owner.ID, app)
+	file, usage, err = c.FileRepo.Create(file, fileSize, thumbnailSize, fileSize+thumbnailSize, userID, app)
 	if err != nil {
 		if err == ente.ErrDuplicateFileObjectFound || err == ente.ErrDuplicateThumbnailObjectFound {
 			var existing ente.File
@@ -144,9 +160,9 @@ func (c *FileController) Create(ctx context.Context, userID int64, file ente.Fil
 // Update verifies permissions and updates the specified file
 func (c *FileController) Update(ctx context.Context, userID int64, file ente.File, app ente.App) (ente.UpdateFileResponse, error) {
 	var response ente.UpdateFileResponse
-	objectPathPrefix := strconv.FormatInt(userID, 10) + "/"
-	if !strings.HasPrefix(file.File.ObjectKey, objectPathPrefix) || !strings.HasPrefix(file.Thumbnail.ObjectKey, objectPathPrefix) {
-		return response, stacktrace.Propagate(ente.ErrBadRequest, "Incorrect object key reported")
+	err := c.validateFileCreateOrUpdateReq(userID, file)
+	if err != nil {
+		return response, stacktrace.Propagate(err, "")
 	}
 	ownerID, err := c.FileRepo.GetOwnerID(file.ID)
 	if err != nil {

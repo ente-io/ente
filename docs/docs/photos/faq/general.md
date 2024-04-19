@@ -110,10 +110,10 @@ or "dog playing at the beach".
 Check the sections within the upload progress bar for "Failed Uploads," "Ignored
 Uploads," and "Unsuccessful Uploads."
 
-## How do i keep NAS and Ente photos synced?
+## How do I keep NAS and Ente photos synced?
 
 Please try using our CLI to pull data into your NAS
-https://github.com/ente-io/ente/tree/main/cli#readme .
+https://github.com/ente-io/ente/tree/main/cli#readme.
 
 ## Is there a way to view all albums on the map view?
 
