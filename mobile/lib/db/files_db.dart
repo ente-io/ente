@@ -106,6 +106,7 @@ class FilesDB {
   static Future<sqlite3.Database>? _ffiDBFuture;
   static Future<sqlite_async.SqliteDatabase>? _sqliteAsyncDBFuture;
 
+  @Deprecated("Use ffiDB instead (sqlite_async)")
   Future<Database> get database async {
     // lazily instantiate the db the first time it is accessed
     _dbFuture ??= _initDatabase();
