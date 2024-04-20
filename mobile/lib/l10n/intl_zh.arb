@@ -417,7 +417,7 @@
   "pendingItems": "待处理项目",
   "clearIndexes": "清空索引",
   "selectFoldersForBackup": "选择要备份的文件夹",
-  "selectedFoldersWillBeEncryptedAndBackedUp": "所选文件夹将被加密和备份",
+  "selectedFoldersWillBeEncryptedAndBackedUp": "所选文件夹将被加密并备份",
   "unselectAll": "取消全部选择",
   "selectAll": "全选",
   "skip": "跳过",
@@ -1211,5 +1211,6 @@
   "invalidEndpointMessage": "抱歉，您输入的端点无效。请输入有效的端点，然后重试。",
   "endpointUpdatedMessage": "端点更新成功",
   "customEndpoint": "已连接至 {endpoint}",
-  "createCollaborativeLink": "创建协作链接"
+  "createCollaborativeLink": "创建协作链接",
+  "search": "搜索"
 }

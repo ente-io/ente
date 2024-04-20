@@ -45,7 +45,9 @@ class SyncService {
       sync();
     });
 
-    Connectivity().onConnectivityChanged.listen((ConnectivityResult result) {
+    Connectivity()
+        .onConnectivityChanged
+        .listen((List<ConnectivityResult> result) {
       _logger.info("Connectivity change detected " + result.toString());
       if (Configuration.instance.hasConfiguredAccount()) {
         sync();

@@ -62,7 +62,7 @@ class PeopleService {
                 (a, b) => b.detection.probability - a.detection.probability,
             );
 
-            if (personFace && !personFace.crop?.imageUrl) {
+            if (personFace && !personFace.crop?.cacheKey) {
                 const file = await getLocalFile(personFace.fileId);
                 const imageBitmap = await getOriginalImageBitmap(file);
                 await FaceService.saveFaceCrop(
@@ -76,7 +76,7 @@ class PeopleService {
                 id: index,
                 files: faces.map((f) => f.fileId),
                 displayFaceId: personFace?.id,
-                displayImageUrl: personFace?.crop?.imageUrl,
+                faceCropCacheKey: personFace?.crop?.cacheKey,
             };
 
             await mlIDbStorage.putPerson(person);

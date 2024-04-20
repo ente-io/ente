@@ -12,6 +12,7 @@ import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/models/key_gen_result.dart";
 import 'package:photos/services/user_service.dart';
+import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/account/recovery_key_page.dart';
 import 'package:photos/ui/common/dynamic_fab.dart';
 import 'package:photos/ui/common/web_page.dart';
@@ -218,8 +219,9 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                   child: TextFormField(
                     autofillHints: const [AutofillHints.newPassword],
                     decoration: InputDecoration(
-                      fillColor:
-                          _isPasswordValid ? _validFieldValueColor : null,
+                      fillColor: _isPasswordValid
+                          ? _validFieldValueColor
+                          : getEnteColorScheme(context).fillFaint,
                       filled: true,
                       hintText: S.of(context).password,
                       contentPadding: const EdgeInsets.all(20),
@@ -282,7 +284,9 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                     autofillHints: const [AutofillHints.newPassword],
                     onEditingComplete: () => TextInput.finishAutofillContext(),
                     decoration: InputDecoration(
-                      fillColor: _passwordsMatch ? _validFieldValueColor : null,
+                      fillColor: _passwordsMatch
+                          ? _validFieldValueColor
+                          : getEnteColorScheme(context).fillFaint,
                       filled: true,
                       hintText: S.of(context).confirmPassword,
                       contentPadding: const EdgeInsets.symmetric(

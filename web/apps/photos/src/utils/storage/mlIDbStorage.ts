@@ -83,6 +83,27 @@ class MLIDbStorage {
                 log.error("ML Indexed DB blocking");
             },
             async upgrade(db, oldVersion, newVersion, tx) {
+                let wasMLSearchEnabled = false;
+                try {
+                    const searchConfig: unknown = await tx
+                        .objectStore("configs")
+                        .get(ML_SEARCH_CONFIG_NAME);
+                    if (
+                        searchConfig &&
+                        typeof searchConfig == "object" &&
+                        "enabled" in searchConfig &&
+                        typeof searchConfig.enabled == "boolean"
+                    ) {
+                        wasMLSearchEnabled = searchConfig.enabled;
+                    }
+                } catch (e) {
+                    // The configs store might not exist (e.g. during logout).
+                    // Ignore.
+                }
+                log.info(
+                    `Previous ML database v${oldVersion} had ML search ${wasMLSearchEnabled ? "enabled" : "disabled"}`,
+                );
+
                 if (oldVersion < 1) {
                     const filesStore = db.createObjectStore("files", {
                         keyPath: "fileId",
@@ -124,15 +145,28 @@ class MLIDbStorage {
                         .add(DEFAULT_ML_SEARCH_CONFIG, ML_SEARCH_CONFIG_NAME);
                 }
                 if (oldVersion < 4) {
-                    // TODO(MR): This loses the user's settings.
-                    db.deleteObjectStore("configs");
-                    db.createObjectStore("configs");
+                    try {
+                        await tx
+                            .objectStore("configs")
+                            .delete(ML_SEARCH_CONFIG_NAME);
 
-                    db.deleteObjectStore("things");
+                        await tx
+                            .objectStore("configs")
+                            .add(
+                                { enabled: wasMLSearchEnabled },
+                                ML_SEARCH_CONFIG_NAME,
+                            );
+
+                        db.deleteObjectStore("things");
+                    } catch {
+                        // TODO: ignore for now as we finalize the new version
+                        // the shipped implementation should have a more
+                        // deterministic migration.
+                    }
                 }
 
                 log.info(
-                    `Ml DB upgraded to version: ${newVersion} from version: ${oldVersion}`,
+                    `ML DB upgraded from version ${oldVersion} to version ${newVersion}`,
                 );
             },
         });

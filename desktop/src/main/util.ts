@@ -57,6 +57,13 @@ export const openDirectory = async (dirPath: string) => {
 };
 
 /**
+ * Open the app's log directory in the system's folder viewer.
+ *
+ * @see {@link openDirectory}
+ */
+export const openLogDirectory = () => openDirectory(logDirectoryPath());
+
+/**
  * Return the path where the logs for the app are saved.
  *
  * [Note: Electron app paths]
@@ -72,10 +79,3 @@ export const openDirectory = async (dirPath: string) => {
  *
  */
 const logDirectoryPath = () => app.getPath("logs");
-
-/**
- * Open the app's log directory in the system's folder viewer.
- *
- * @see {@link openDirectory}
- */
-export const openLogDirectory = () => openDirectory(logDirectoryPath());

@@ -11,6 +11,7 @@ import "package:photos/generated/l10n.dart";
 import 'package:photos/services/local_authentication_service.dart';
 import 'package:photos/services/user_remote_flag_service.dart';
 import 'package:photos/services/user_service.dart';
+import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/account/recovery_key_page.dart';
 import 'package:photos/ui/common/gradient_button.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
@@ -162,6 +163,7 @@ class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
                       TextFormField(
                         decoration: InputDecoration(
                           filled: true,
+                          fillColor: getEnteColorScheme(context).fillFaint,
                           hintText: S.of(context).enterYourRecoveryKey,
                           contentPadding: const EdgeInsets.all(20),
                           border: UnderlineInputBorder(

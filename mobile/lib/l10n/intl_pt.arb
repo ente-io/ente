@@ -1212,5 +1212,6 @@
   "invalidEndpointMessage": "Desculpe, o endpoint que você inseriu é inválido. Por favor, insira um endpoint válido e tente novamente.",
   "endpointUpdatedMessage": "Endpoint atualizado com sucesso",
   "customEndpoint": "Conectado a {endpoint}",
-  "createCollaborativeLink": "Criar link colaborativo"
+  "createCollaborativeLink": "Criar link colaborativo",
+  "search": "Pesquisar"
 }

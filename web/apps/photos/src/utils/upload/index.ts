@@ -1,18 +1,10 @@
-import { ENTE_METADATA_FOLDER } from "constants/export";
+import { basename, dirname } from "@/next/file";
 import { FILE_TYPE } from "constants/file";
-import {
-    A_SEC_IN_MICROSECONDS,
-    DEFAULT_IMPORT_SUGGESTION,
-    PICKED_UPLOAD_TYPE,
-} from "constants/upload";
+import { A_SEC_IN_MICROSECONDS, PICKED_UPLOAD_TYPE } from "constants/upload";
 import isElectron from "is-electron";
+import { exportMetadataDirectoryName } from "services/export";
 import { EnteFile } from "types/file";
-import {
-    ElectronFile,
-    FileWithCollection,
-    ImportSuggestion,
-    Metadata,
-} from "types/upload";
+import { ElectronFile, FileWithCollection, Metadata } from "types/upload";
 
 const TYPE_JSON = "json";
 const DEDUPE_COLLECTION = new Set(["icloud library", "icloudlibrary"]);
@@ -110,15 +102,36 @@ export function areFileWithCollectionsSame(
     return firstFile.localID === secondFile.localID;
 }
 
+/**
+ * Return true if all the paths in the given list are items that belong to the
+ * same (arbitrary) directory.
+ *
+ * Empty list of paths is considered to be in the same directory.
+ */
+export const areAllInSameDirectory = (paths: string[]) =>
+    new Set(paths.map(dirname)).size == 1;
+
+// This is used to prompt the user the make upload strategy choice
+export interface ImportSuggestion {
+    rootFolderName: string;
+    hasNestedFolders: boolean;
+    hasRootLevelFileWithFolder: boolean;
+}
+
+export const DEFAULT_IMPORT_SUGGESTION: ImportSuggestion = {
+    rootFolderName: "",
+    hasNestedFolders: false,
+    hasRootLevelFileWithFolder: false,
+};
+
 export function getImportSuggestion(
     uploadType: PICKED_UPLOAD_TYPE,
-    toUploadFiles: File[] | ElectronFile[],
+    paths: string[],
 ): ImportSuggestion {
     if (isElectron() && uploadType === PICKED_UPLOAD_TYPE.FILES) {
         return DEFAULT_IMPORT_SUGGESTION;
     }
 
-    const paths: string[] = toUploadFiles.map((file) => file["path"]);
     const getCharCount = (str: string) => (str.match(/\//g) ?? []).length;
     paths.sort((path1, path2) => getCharCount(path1) - getCharCount(path2));
     const firstPath = paths[0];
@@ -175,7 +188,7 @@ export function groupFilesBasedOnParentFolder(
         // For Eg,For FileList  -> [a/x.png, a/metadata/x.png.json]
         // they will both we grouped into the collection "a"
         // This is cluster the metadata json files in the same collection as the file it is for
-        if (folderPath.endsWith(ENTE_METADATA_FOLDER)) {
+        if (folderPath.endsWith(exportMetadataDirectoryName)) {
             folderPath = folderPath.substring(0, folderPath.lastIndexOf("/"));
         }
         const folderName = folderPath.substring(
@@ -209,3 +222,10 @@ export function filterOutSystemFiles(files: File[] | ElectronFile[]) {
 export function isSystemFile(file: File | ElectronFile) {
     return file.name.startsWith(".");
 }
+
+/**
+ * Return true if the file at the given {@link path} is hidden.
+ *
+ * Hidden files are those whose names begin with a "." (dot).
+ */
+export const isHiddenFile = (path: string) => basename(path).startsWith(".");

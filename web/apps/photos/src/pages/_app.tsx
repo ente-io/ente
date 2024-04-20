@@ -5,7 +5,7 @@ import {
     logStartupBanner,
     logUnhandledErrorsAndRejections,
 } from "@/next/log-web";
-import { AppUpdateInfo } from "@/next/types/ipc";
+import { AppUpdate } from "@/next/types/ipc";
 import {
     APPS,
     APP_TITLES,
@@ -52,7 +52,7 @@ import "photoswipe/dist/photoswipe.css";
 import { createContext, useEffect, useRef, useState } from "react";
 import LoadingBar from "react-top-loading-bar";
 import DownloadManager from "services/download";
-import exportService from "services/export";
+import exportService, { resumeExportsIfNeeded } from "services/export";
 import mlWorkManager from "services/machineLearning/mlWorkManager";
 import {
     getFamilyPortalRedirectURL,
@@ -64,7 +64,6 @@ import {
     NotificationAttributes,
     SetNotificationAttributes,
 } from "types/Notification";
-import { isExportInProgress } from "utils/export";
 import {
     getMLSearchConfig,
     updateMLSearchConfig,
@@ -92,8 +91,6 @@ type AppContextType = {
     closeMessageDialog: () => void;
     setDialogMessage: SetDialogBoxAttributes;
     setNotificationAttributes: SetNotificationAttributes;
-    isFolderSyncRunning: boolean;
-    setIsFolderSyncRunning: (isRunning: boolean) => void;
     watchFolderView: boolean;
     setWatchFolderView: (isOpen: boolean) => void;
     watchFolderFiles: FileList;
@@ -129,7 +126,6 @@ export default function App({ Component, pageProps }: AppProps) {
     useState<DialogBoxAttributes>(null);
     const [messageDialogView, setMessageDialogView] = useState(false);
     const [dialogBoxV2View, setDialogBoxV2View] = useState(false);
-    const [isFolderSyncRunning, setIsFolderSyncRunning] = useState(false);
     const [watchFolderView, setWatchFolderView] = useState(false);
     const [watchFolderFiles, setWatchFolderFiles] = useState<FileList>(null);
     const isMobile = useMediaQuery("(max-width:428px)");
@@ -161,9 +157,9 @@ export default function App({ Component, pageProps }: AppProps) {
         const electron = globalThis.electron;
         if (!electron) return;
 
-        const showUpdateDialog = (updateInfo: AppUpdateInfo) => {
-            if (updateInfo.autoUpdatable) {
-                setDialogMessage(getUpdateReadyToInstallMessage(updateInfo));
+        const showUpdateDialog = (update: AppUpdate) => {
+            if (update.autoUpdatable) {
+                setDialogMessage(getUpdateReadyToInstallMessage(update));
             } else {
                 setNotificationAttributes({
                     endIcon: <ArrowForward />,
@@ -171,7 +167,7 @@ export default function App({ Component, pageProps }: AppProps) {
                     message: t("UPDATE_AVAILABLE"),
                     onClick: () =>
                         setDialogMessage(
-                            getUpdateAvailableForDownloadMessage(updateInfo),
+                            getUpdateAvailableForDownloadMessage(update),
                         ),
                 });
             }
@@ -214,37 +210,10 @@ export default function App({ Component, pageProps }: AppProps) {
             return;
         }
         const initExport = async () => {
-            try {
-                log.info("init export");
-                const token = getToken();
-                if (!token) {
-                    log.info(
-                        "User not logged in, not starting export continuous sync job",
-                    );
-                    return;
-                }
-                await DownloadManager.init(APPS.PHOTOS, { token });
-                const exportSettings = exportService.getExportSettings();
-                if (
-                    !(await exportService.exportFolderExists(
-                        exportSettings?.folder,
-                    ))
-                ) {
-                    return;
-                }
-                const exportRecord = await exportService.getExportRecord(
-                    exportSettings.folder,
-                );
-                if (exportSettings.continuousExport) {
-                    exportService.enableContinuousExport();
-                }
-                if (isExportInProgress(exportRecord.stage)) {
-                    log.info("export was in progress, resuming");
-                    exportService.scheduleExport();
-                }
-            } catch (e) {
-                log.error("init export failed", e);
-            }
+            const token = getToken();
+            if (!token) return;
+            await DownloadManager.init(APPS.PHOTOS, { token });
+            await resumeExportsIfNeeded();
         };
         initExport();
         try {
@@ -431,8 +400,6 @@ export default function App({ Component, pageProps }: AppProps) {
                         finishLoading,
                         closeMessageDialog,
                         setDialogMessage,
-                        isFolderSyncRunning,
-                        setIsFolderSyncRunning,
                         watchFolderView,
                         setWatchFolderView,
                         watchFolderFiles,

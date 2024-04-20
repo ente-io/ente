@@ -315,7 +315,23 @@ class _HomeWidgetState extends State<HomeWidget> {
     final enableDrawer = LocalSyncService.instance.hasCompletedFirstImport();
     final action = AppLifecycleService.instance.mediaExtensionAction.action;
     return UserDetailsStateWidget(
-      child: WillPopScope(
+      child: PopScope(
+        canPop: false,
+        onPopInvoked: (didPop) async {
+          if (didPop) return;
+          if (_selectedTabIndex == 0) {
+            if (isSettingsOpen) {
+              Navigator.pop(context);
+            } else if (Platform.isAndroid && action == IntentAction.main) {
+              unawaited(MoveToBackground.moveTaskToBack());
+            } else {
+              Navigator.pop(context);
+            }
+          } else {
+            Bus.instance
+                .fire(TabChangedEvent(0, TabChangedEventSource.backButton));
+          }
+        },
         child: Scaffold(
           drawerScrimColor: getEnteColorScheme(context).strokeFainter,
           drawerEnableOpenDragGesture: false,
@@ -325,6 +341,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                   constraints: const BoxConstraints(maxWidth: 430),
                   child: Drawer(
                     width: double.infinity,
+                    shape: const RoundedRectangleBorder(),
                     child: _settingsPage,
                   ),
                 )
@@ -340,24 +357,6 @@ class _HomeWidgetState extends State<HomeWidget> {
           ),
           resizeToAvoidBottomInset: false,
         ),
-        onWillPop: () async {
-          if (_selectedTabIndex == 0) {
-            if (isSettingsOpen) {
-              Navigator.pop(context);
-              return false;
-            }
-            if (Platform.isAndroid && action == IntentAction.main) {
-              unawaited(MoveToBackground.moveTaskToBack());
-              return false;
-            } else {
-              return true;
-            }
-          } else {
-            Bus.instance
-                .fire(TabChangedEvent(0, TabChangedEventSource.backButton));
-            return false;
-          }
-        },
       ),
     );
   }

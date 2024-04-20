@@ -251,6 +251,7 @@ class _LoginPasswordVerificationPageState
                         borderSide: BorderSide.none,
                         borderRadius: BorderRadius.circular(6),
                       ),
+                      fillColor: getEnteColorScheme(context).fillFaint,
                       suffixIcon: _passwordInFocus
                           ? IconButton(
                               icon: Icon(

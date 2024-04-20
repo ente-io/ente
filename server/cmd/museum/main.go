@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	b64 "encoding/base64"
 	"fmt"
+	"github.com/ente-io/museum/pkg/controller/file_copy"
 	"net/http"
 	"os"
 	"os/signal"
@@ -163,7 +164,7 @@ func main() {
 		ObjectCopiesRepo: objectCopiesRepo, UsageRepo: usageRepo}
 	familyRepo := &repo.FamilyRepository{DB: db}
 	trashRepo := &repo.TrashRepository{DB: db, ObjectRepo: objectRepo, FileRepo: fileRepo, QueueRepo: queueRepo}
-	publicCollectionRepo := &repo.PublicCollectionRepository{DB: db}
+	publicCollectionRepo := repo.NewPublicCollectionRepository(db, viper.GetString("apps.public-albums"))
 	collectionRepo := &repo.CollectionRepository{DB: db, FileRepo: fileRepo, PublicCollectionRepo: publicCollectionRepo,
 		TrashRepo: trashRepo, SecretEncryptionKey: secretEncryptionKeyBytes, QueueRepo: queueRepo, LatencyLogger: latencyLogger}
 	pushRepo := &repo.PushTokenRepository{DB: db}
@@ -389,9 +390,17 @@ func main() {
 		timeout.WithHandler(healthCheckHandler.PingDBStats),
 		timeout.WithResponse(timeOutResponse),
 	))
+	fileCopyCtrl := &file_copy.FileCopyController{
+		FileController: fileController,
+		CollectionCtrl: collectionController,
+		S3Config:       s3Config,
+		ObjectRepo:     objectRepo,
+		FileRepo:       fileRepo,
+	}
 
 	fileHandler := &api.FileHandler{
-		Controller: fileController,
+		Controller:   fileController,
+		FileCopyCtrl: fileCopyCtrl,
 	}
 	privateAPI.GET("/files/upload-urls", fileHandler.GetUploadURLs)
 	privateAPI.GET("/files/multipart-upload-urls", fileHandler.GetMultipartUploadURLs)
@@ -400,6 +409,7 @@ func main() {
 	privateAPI.GET("/files/preview/:fileID", fileHandler.GetThumbnail)
 	privateAPI.GET("/files/preview/v2/:fileID", fileHandler.GetThumbnail)
 	privateAPI.POST("/files", fileHandler.CreateOrUpdate)
+	privateAPI.POST("/files/copy", fileHandler.CopyFiles)
 	privateAPI.PUT("/files/update", fileHandler.Update)
 	privateAPI.POST("/files/trash", fileHandler.Trash)
 	privateAPI.POST("/files/size", fileHandler.GetSize)

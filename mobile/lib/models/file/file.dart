@@ -85,13 +85,24 @@ class EnteFile {
 
   static int parseFileCreationTime(String? fileTitle, AssetEntity asset) {
     int creationTime = asset.createDateTime.microsecondsSinceEpoch;
+    final int modificationTime = asset.modifiedDateTime.microsecondsSinceEpoch;
     if (creationTime >= jan011981Time) {
       // assuming that fileSystem is returning correct creationTime.
       // During upload, this might get overridden with exif Creation time
+      // When the assetModifiedTime is less than creationTime, than just use
+      // that as creationTime. This is to handle cases where file might be
+      // copied to the fileSystem from somewhere else See #https://superuser.com/a/1091147
+      if (modificationTime >= jan011981Time &&
+          modificationTime < creationTime) {
+        _logger.info(
+          'LocalID: ${asset.id} modification time is less than creation time. Using modification time as creation time',
+        );
+        creationTime = modificationTime;
+      }
       return creationTime;
     } else {
-      if (asset.modifiedDateTime.microsecondsSinceEpoch >= jan011981Time) {
-        creationTime = asset.modifiedDateTime.microsecondsSinceEpoch;
+      if (modificationTime >= jan011981Time) {
+        creationTime = modificationTime;
       } else {
         creationTime = DateTime.now().toUtc().microsecondsSinceEpoch;
       }
@@ -106,7 +117,6 @@ class EnteFile {
         // ignore
       }
     }
-
     return creationTime;
   }
 

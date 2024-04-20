@@ -10,12 +10,9 @@ export class PhotosDownloadClient implements DownloadClient {
         private token: string,
         private timeout: number,
     ) {}
+
     updateTokens(token: string) {
         this.token = token;
-    }
-
-    updateTimeout(timeout: number) {
-        this.timeout = timeout;
     }
 
     async downloadThumbnail(file: EnteFile): Promise<Uint8Array> {

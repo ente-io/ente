@@ -1,21 +1,17 @@
+import { openCache, type BlobCache } from "@/next/blob-cache";
 import log from "@/next/log";
 import { APPS } from "@ente/shared/apps/constants";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
 import { CustomError } from "@ente/shared/error";
 import { Events, eventBus } from "@ente/shared/events";
-import { CacheStorageService } from "@ente/shared/storage/cacheStorage";
-import { CACHES } from "@ente/shared/storage/cacheStorage/constants";
-import { LimitedCache } from "@ente/shared/storage/cacheStorage/types";
 import { Remote } from "comlink";
 import { FILE_TYPE } from "constants/file";
-import isElectron from "is-electron";
 import { EnteFile } from "types/file";
 import {
     generateStreamFromArrayBuffer,
     getRenderableFileURL,
 } from "utils/file";
-import { isInternalUser } from "utils/user";
 import { PhotosDownloadClient } from "./clients/photos";
 import { PublicAlbumsDownloadClient } from "./clients/publicAlbums";
 
@@ -43,7 +39,6 @@ export type OnDownloadProgress = (event: {
 
 export interface DownloadClient {
     updateTokens: (token: string, passwordToken?: string) => void;
-    updateTimeout: (timeout: number) => void;
     downloadThumbnail: (
         file: EnteFile,
         timeout?: number,
@@ -58,9 +53,14 @@ export interface DownloadClient {
 class DownloadManagerImpl {
     private ready: boolean = false;
     private downloadClient: DownloadClient;
-    private thumbnailCache?: LimitedCache;
-    // disk cache is only available on electron
-    private diskFileCache?: LimitedCache;
+    /** Local cache for thumbnails. Might not be available. */
+    private thumbnailCache?: BlobCache;
+    /**
+     * Local cache for the files themselves.
+     *
+     * Only available when we're running in the desktop app.
+     */
+    private fileCache?: BlobCache;
     private cryptoWorker: Remote<DedicatedCryptoWorker>;
 
     private fileObjectURLPromises = new Map<number, Promise<SourceURLs>>();
@@ -74,23 +74,36 @@ class DownloadManagerImpl {
     async init(
         app: APPS,
         tokens?: { token: string; passwordToken?: string } | { token: string },
-        timeout?: number,
     ) {
-        try {
-            if (this.ready) {
-                log.info("DownloadManager already initialized");
-                return;
-            }
-            this.downloadClient = createDownloadClient(app, tokens, timeout);
-            this.thumbnailCache = await openThumbnailCache();
-            this.diskFileCache = isElectron() && (await openDiskFileCache());
-            this.cryptoWorker = await ComlinkCryptoWorker.getInstance();
-            this.ready = true;
-            eventBus.on(Events.LOGOUT, this.logoutHandler.bind(this), this);
-        } catch (e) {
-            log.error("DownloadManager init failed", e);
-            throw e;
+        if (this.ready) {
+            log.info("DownloadManager already initialized");
+            return;
         }
+        this.downloadClient = createDownloadClient(app, tokens);
+        try {
+            this.thumbnailCache = await openCache("thumbs");
+        } catch (e) {
+            log.error(
+                "Failed to open thumbnail cache, will continue without it",
+                e,
+            );
+        }
+        // TODO (MR): Revisit full file caching cf disk space usage
+        // try {
+        //     if (isElectron()) this.fileCache = await openCache("files");
+        // } catch (e) {
+        //     log.error("Failed to open file cache, will continue without it", e);
+        // }
+        this.cryptoWorker = await ComlinkCryptoWorker.getInstance();
+        this.ready = true;
+        eventBus.on(Events.LOGOUT, this.logoutHandler.bind(this), this);
+    }
+
+    private ensureInitialized() {
+        if (!this.ready)
+            throw new Error(
+                "Attempting to use an uninitialized download manager",
+            );
     }
 
     private async logoutHandler() {
@@ -118,42 +131,8 @@ class DownloadManagerImpl {
         this.cryptoWorker = cryptoWorker;
     }
 
-    updateTimeout(timeout: number) {
-        this.downloadClient.updateTimeout(timeout);
-    }
-
     setProgressUpdater(progressUpdater: (value: Map<number, number>) => void) {
         this.progressUpdater = progressUpdater;
-    }
-
-    private async getCachedThumbnail(fileID: number) {
-        try {
-            const cacheResp: Response = await this.thumbnailCache?.match(
-                fileID.toString(),
-            );
-
-            if (cacheResp) {
-                return new Uint8Array(await cacheResp.arrayBuffer());
-            }
-        } catch (e) {
-            log.error("failed to get cached thumbnail", e);
-            throw e;
-        }
-    }
-    private async getCachedFile(file: EnteFile): Promise<Response> {
-        try {
-            if (!this.diskFileCache) {
-                return null;
-            }
-            const cacheResp: Response = await this.diskFileCache?.match(
-                file.id.toString(),
-                { sizeInBytes: file.info?.fileSize },
-            );
-            return cacheResp?.clone();
-        } catch (e) {
-            log.error("failed to get cached file", e);
-            throw e;
-        }
     }
 
     private downloadThumb = async (file: EnteFile) => {
@@ -167,37 +146,21 @@ class DownloadManagerImpl {
     };
 
     async getThumbnail(file: EnteFile, localOnly = false) {
-        try {
-            if (!this.ready) {
-                throw Error(CustomError.DOWNLOAD_MANAGER_NOT_READY);
-            }
-            const cachedThumb = await this.getCachedThumbnail(file.id);
-            if (cachedThumb) {
-                return cachedThumb;
-            }
-            if (localOnly) {
-                return null;
-            }
-            const thumb = await this.downloadThumb(file);
+        this.ensureInitialized();
 
-            this.thumbnailCache
-                ?.put(file.id.toString(), new Response(thumb))
-                .catch((e) => {
-                    log.error("thumb cache put failed", e);
-                    // TODO: handle storage full exception.
-                });
-            return thumb;
-        } catch (e) {
-            log.error("getThumbnail failed", e);
-            throw e;
-        }
+        const key = file.id.toString();
+        const cached = await this.thumbnailCache.get(key);
+        if (cached) return new Uint8Array(await cached.arrayBuffer());
+        if (localOnly) return null;
+
+        const thumb = await this.downloadThumb(file);
+        this.thumbnailCache?.put(key, new Blob([thumb]));
+        return thumb;
     }
 
     async getThumbnailForPreview(file: EnteFile, localOnly = false) {
+        this.ensureInitialized();
         try {
-            if (!this.ready) {
-                throw Error(CustomError.DOWNLOAD_MANAGER_NOT_READY);
-            }
             if (!this.thumbnailObjectURLPromises.has(file.id)) {
                 const thumbPromise = this.getThumbnail(file, localOnly);
                 const thumbURLPromise = thumbPromise.then(
@@ -222,10 +185,8 @@ class DownloadManagerImpl {
         file: EnteFile,
         forceConvert = false,
     ): Promise<SourceURLs> => {
+        this.ensureInitialized();
         try {
-            if (!this.ready) {
-                throw Error(CustomError.DOWNLOAD_MANAGER_NOT_READY);
-            }
             const getFileForPreviewPromise = async () => {
                 const fileBlob = await new Response(
                     await this.getFile(file, true),
@@ -260,10 +221,8 @@ class DownloadManagerImpl {
         file: EnteFile,
         cacheInMemory = false,
     ): Promise<ReadableStream<Uint8Array>> {
+        this.ensureInitialized();
         try {
-            if (!this.ready) {
-                throw Error(CustomError.DOWNLOAD_MANAGER_NOT_READY);
-            }
             const getFilePromise = async (): Promise<SourceURLs> => {
                 const fileStream = await this.downloadFile(file);
                 const fileBlob = await new Response(fileStream).blob();
@@ -297,191 +256,166 @@ class DownloadManagerImpl {
     private async downloadFile(
         file: EnteFile,
     ): Promise<ReadableStream<Uint8Array>> {
-        try {
-            log.info(`download attempted for fileID:${file.id}`);
-            const onDownloadProgress = this.trackDownloadProgress(
-                file.id,
-                file.info?.fileSize,
-            );
-            if (
-                file.metadata.fileType === FILE_TYPE.IMAGE ||
-                file.metadata.fileType === FILE_TYPE.LIVE_PHOTO
-            ) {
-                let encrypted = await this.getCachedFile(file);
-                if (!encrypted) {
-                    encrypted = new Response(
-                        await this.downloadClient.downloadFile(
-                            file,
-                            onDownloadProgress,
-                        ),
-                    );
-                    if (this.diskFileCache) {
-                        this.diskFileCache
-                            .put(file.id.toString(), encrypted.clone())
-                            .catch((e) => {
-                                log.error("file cache put failed", e);
-                                // TODO: handle storage full exception.
-                            });
-                    }
-                }
-                this.clearDownloadProgress(file.id);
-                try {
-                    const decrypted = await this.cryptoWorker.decryptFile(
-                        new Uint8Array(await encrypted.arrayBuffer()),
-                        await this.cryptoWorker.fromB64(
-                            file.file.decryptionHeader,
-                        ),
-                        file.key,
-                    );
-                    return generateStreamFromArrayBuffer(decrypted);
-                } catch (e) {
-                    if (e.message === CustomError.PROCESSING_FAILED) {
-                        log.error(
-                            `Failed to process file with fileID:${file.id}, localID: ${file.metadata.localID}, version: ${file.metadata.version}, deviceFolder:${file.metadata.deviceFolder}`,
-                            e,
-                        );
-                    }
-                    throw e;
-                }
+        log.info(`download attempted for file id ${file.id}`);
+
+        const onDownloadProgress = this.trackDownloadProgress(
+            file.id,
+            file.info?.fileSize,
+        );
+
+        const cacheKey = file.id.toString();
+
+        if (
+            file.metadata.fileType === FILE_TYPE.IMAGE ||
+            file.metadata.fileType === FILE_TYPE.LIVE_PHOTO
+        ) {
+            const cachedBlob = await this.fileCache?.get(cacheKey);
+            let encryptedArrayBuffer = await cachedBlob?.arrayBuffer();
+            if (!encryptedArrayBuffer) {
+                const array = await this.downloadClient.downloadFile(
+                    file,
+                    onDownloadProgress,
+                );
+                encryptedArrayBuffer = array.buffer;
+                this.fileCache?.put(cacheKey, new Blob([encryptedArrayBuffer]));
             }
-
-            let resp: Response = await this.getCachedFile(file);
-            if (!resp) {
-                resp = await this.downloadClient.downloadFileStream(file);
-                if (this.diskFileCache) {
-                    this.diskFileCache
-                        .put(file.id.toString(), resp.clone())
-                        .catch((e) => {
-                            log.error("file cache put failed", e);
-                        });
+            this.clearDownloadProgress(file.id);
+            try {
+                const decrypted = await this.cryptoWorker.decryptFile(
+                    new Uint8Array(encryptedArrayBuffer),
+                    await this.cryptoWorker.fromB64(file.file.decryptionHeader),
+                    file.key,
+                );
+                return generateStreamFromArrayBuffer(decrypted);
+            } catch (e) {
+                if (e.message === CustomError.PROCESSING_FAILED) {
+                    log.error(
+                        `Failed to process file with fileID:${file.id}, localID: ${file.metadata.localID}, version: ${file.metadata.version}, deviceFolder:${file.metadata.deviceFolder}`,
+                        e,
+                    );
                 }
+                throw e;
             }
-            const reader = resp.body.getReader();
-
-            const contentLength = +resp.headers.get("Content-Length") ?? 0;
-            let downloadedBytes = 0;
-
-            const stream = new ReadableStream({
-                start: async (controller) => {
-                    try {
-                        const decryptionHeader =
-                            await this.cryptoWorker.fromB64(
-                                file.file.decryptionHeader,
-                            );
-                        const fileKey = await this.cryptoWorker.fromB64(
-                            file.key,
-                        );
-                        const { pullState, decryptionChunkSize } =
-                            await this.cryptoWorker.initChunkDecryption(
-                                decryptionHeader,
-                                fileKey,
-                            );
-                        let data = new Uint8Array();
-                        // The following function handles each data chunk
-                        const push = () => {
-                            // "done" is a Boolean and value a "Uint8Array"
-                            reader.read().then(async ({ done, value }) => {
-                                try {
-                                    // Is there more data to read?
-                                    if (!done) {
-                                        downloadedBytes += value.byteLength;
-                                        onDownloadProgress({
-                                            loaded: downloadedBytes,
-                                            total: contentLength,
-                                        });
-                                        const buffer = new Uint8Array(
-                                            data.byteLength + value.byteLength,
-                                        );
-                                        buffer.set(new Uint8Array(data), 0);
-                                        buffer.set(
-                                            new Uint8Array(value),
-                                            data.byteLength,
-                                        );
-                                        if (
-                                            buffer.length > decryptionChunkSize
-                                        ) {
-                                            const fileData = buffer.slice(
-                                                0,
-                                                decryptionChunkSize,
-                                            );
-                                            try {
-                                                const { decryptedData } =
-                                                    await this.cryptoWorker.decryptFileChunk(
-                                                        fileData,
-                                                        pullState,
-                                                    );
-                                                controller.enqueue(
-                                                    decryptedData,
-                                                );
-                                                data =
-                                                    buffer.slice(
-                                                        decryptionChunkSize,
-                                                    );
-                                            } catch (e) {
-                                                if (
-                                                    e.message ===
-                                                    CustomError.PROCESSING_FAILED
-                                                ) {
-                                                    log.error(
-                                                        `Failed to process file ${file.id} from localID: ${file.metadata.localID} version: ${file.metadata.version} deviceFolder:${file.metadata.deviceFolder}`,
-                                                        e,
-                                                    );
-                                                }
-                                                throw e;
-                                            }
-                                        } else {
-                                            data = buffer;
-                                        }
-                                        push();
-                                    } else {
-                                        if (data) {
-                                            try {
-                                                const { decryptedData } =
-                                                    await this.cryptoWorker.decryptFileChunk(
-                                                        data,
-                                                        pullState,
-                                                    );
-                                                controller.enqueue(
-                                                    decryptedData,
-                                                );
-                                                data = null;
-                                            } catch (e) {
-                                                if (
-                                                    e.message ===
-                                                    CustomError.PROCESSING_FAILED
-                                                ) {
-                                                    log.error(
-                                                        `Failed to process file ${file.id} from localID: ${file.metadata.localID} version: ${file.metadata.version} deviceFolder:${file.metadata.deviceFolder}`,
-                                                        e,
-                                                    );
-                                                }
-                                                throw e;
-                                            }
-                                        }
-                                        controller.close();
-                                    }
-                                } catch (e) {
-                                    log.error(
-                                        "Failed to process file chunk",
-                                        e,
-                                    );
-                                    controller.error(e);
-                                }
-                            });
-                        };
-
-                        push();
-                    } catch (e) {
-                        log.error("Failed to process file stream", e);
-                        controller.error(e);
-                    }
-                },
-            });
-            return stream;
-        } catch (e) {
-            log.error("Failed to download file", e);
-            throw e;
         }
+
+        const cachedBlob = await this.fileCache?.get(cacheKey);
+        let res: Response;
+        if (cachedBlob) res = new Response(cachedBlob);
+        else {
+            res = await this.downloadClient.downloadFileStream(file);
+            this?.fileCache.put(cacheKey, await res.blob());
+        }
+        const reader = res.body.getReader();
+
+        const contentLength = +res.headers.get("Content-Length") ?? 0;
+        let downloadedBytes = 0;
+
+        const stream = new ReadableStream({
+            start: async (controller) => {
+                try {
+                    const decryptionHeader = await this.cryptoWorker.fromB64(
+                        file.file.decryptionHeader,
+                    );
+                    const fileKey = await this.cryptoWorker.fromB64(file.key);
+                    const { pullState, decryptionChunkSize } =
+                        await this.cryptoWorker.initChunkDecryption(
+                            decryptionHeader,
+                            fileKey,
+                        );
+                    let data = new Uint8Array();
+                    // The following function handles each data chunk
+                    const push = () => {
+                        // "done" is a Boolean and value a "Uint8Array"
+                        reader.read().then(async ({ done, value }) => {
+                            try {
+                                // Is there more data to read?
+                                if (!done) {
+                                    downloadedBytes += value.byteLength;
+                                    onDownloadProgress({
+                                        loaded: downloadedBytes,
+                                        total: contentLength,
+                                    });
+                                    const buffer = new Uint8Array(
+                                        data.byteLength + value.byteLength,
+                                    );
+                                    buffer.set(new Uint8Array(data), 0);
+                                    buffer.set(
+                                        new Uint8Array(value),
+                                        data.byteLength,
+                                    );
+                                    if (buffer.length > decryptionChunkSize) {
+                                        const fileData = buffer.slice(
+                                            0,
+                                            decryptionChunkSize,
+                                        );
+                                        try {
+                                            const { decryptedData } =
+                                                await this.cryptoWorker.decryptFileChunk(
+                                                    fileData,
+                                                    pullState,
+                                                );
+                                            controller.enqueue(decryptedData);
+                                            data =
+                                                buffer.slice(
+                                                    decryptionChunkSize,
+                                                );
+                                        } catch (e) {
+                                            if (
+                                                e.message ===
+                                                CustomError.PROCESSING_FAILED
+                                            ) {
+                                                log.error(
+                                                    `Failed to process file ${file.id} from localID: ${file.metadata.localID} version: ${file.metadata.version} deviceFolder:${file.metadata.deviceFolder}`,
+                                                    e,
+                                                );
+                                            }
+                                            throw e;
+                                        }
+                                    } else {
+                                        data = buffer;
+                                    }
+                                    push();
+                                } else {
+                                    if (data) {
+                                        try {
+                                            const { decryptedData } =
+                                                await this.cryptoWorker.decryptFileChunk(
+                                                    data,
+                                                    pullState,
+                                                );
+                                            controller.enqueue(decryptedData);
+                                            data = null;
+                                        } catch (e) {
+                                            if (
+                                                e.message ===
+                                                CustomError.PROCESSING_FAILED
+                                            ) {
+                                                log.error(
+                                                    `Failed to process file ${file.id} from localID: ${file.metadata.localID} version: ${file.metadata.version} deviceFolder:${file.metadata.deviceFolder}`,
+                                                    e,
+                                                );
+                                            }
+                                            throw e;
+                                        }
+                                    }
+                                    controller.close();
+                                }
+                            } catch (e) {
+                                log.error("Failed to process file chunk", e);
+                                controller.error(e);
+                            }
+                        });
+                    };
+
+                    push();
+                } catch (e) {
+                    log.error("Failed to process file stream", e);
+                    controller.error(e);
+                }
+            },
+        });
+
+        return stream;
     }
 
     trackDownloadProgress = (fileID: number, fileSize: number) => {
@@ -514,43 +448,11 @@ const DownloadManager = new DownloadManagerImpl();
 
 export default DownloadManager;
 
-async function openThumbnailCache() {
-    try {
-        return await CacheStorageService.open(CACHES.THUMBS);
-    } catch (e) {
-        log.error("Failed to open thumbnail cache", e);
-        if (isInternalUser()) {
-            throw e;
-        } else {
-            return null;
-        }
-    }
-}
-
-async function openDiskFileCache() {
-    try {
-        if (!isElectron()) {
-            throw Error(CustomError.NOT_AVAILABLE_ON_WEB);
-        }
-        return await CacheStorageService.open(CACHES.FILES);
-    } catch (e) {
-        log.error("Failed to open file cache", e);
-        if (isInternalUser()) {
-            throw e;
-        } else {
-            return null;
-        }
-    }
-}
-
 function createDownloadClient(
     app: APPS,
     tokens?: { token: string; passwordToken?: string } | { token: string },
-    timeout?: number,
 ): DownloadClient {
-    if (!timeout) {
-        timeout = 300000; // 5 minute
-    }
+    const timeout = 300000; // 5 minute
     if (app === APPS.ALBUMS) {
         if (!tokens) {
             tokens = { token: undefined, passwordToken: undefined };

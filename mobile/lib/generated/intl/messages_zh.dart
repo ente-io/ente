@@ -988,6 +988,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "scanCode": MessageLookupByLibrary.simpleMessage("扫描二维码/条码"),
         "scanThisBarcodeWithnyourAuthenticatorApp":
             MessageLookupByLibrary.simpleMessage("用您的身份验证器应用\n扫描此条码"),
+        "search": MessageLookupByLibrary.simpleMessage("搜索"),
         "searchAlbumsEmptySection": MessageLookupByLibrary.simpleMessage("相册"),
         "searchByAlbumNameHint": MessageLookupByLibrary.simpleMessage("相册名称"),
         "searchByExamples": MessageLookupByLibrary.simpleMessage(
@@ -1026,7 +1027,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "selectedFilesAreNotOnEnte":
             MessageLookupByLibrary.simpleMessage("所选文件不在 Ente 上"),
         "selectedFoldersWillBeEncryptedAndBackedUp":
-            MessageLookupByLibrary.simpleMessage("所选文件夹将被加密和备份"),
+            MessageLookupByLibrary.simpleMessage("所选文件夹将被加密并备份"),
         "selectedItemsWillBeDeletedFromAllAlbumsAndMoved":
             MessageLookupByLibrary.simpleMessage("所选项目将从所有相册中删除并移动到回收站。"),
         "selectedPhotos": m46,

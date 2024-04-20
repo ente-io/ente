@@ -340,7 +340,7 @@ extension DeviceFiles on FilesDB {
     int ownerID,
   ) async {
     final db = await database;
-    const String rawQuery = ''' 
+    const String rawQuery = '''
     SELECT ${FilesDB.columnLocalID}, ${FilesDB.columnUploadedFileID}, 
     ${FilesDB.columnFileSize} 
     FROM ${FilesDB.filesTable}

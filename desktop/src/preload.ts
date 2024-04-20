@@ -40,12 +40,13 @@
 import { contextBridge, ipcRenderer } from "electron/renderer";
 
 // While we can't import other code, we can import types since they're just
-// needed when compiling and will not be needed / looked around for at runtime.
+// needed when compiling and will not be needed or looked around for at runtime.
 import type {
-    AppUpdateInfo,
+    AppUpdate,
+    CollectionMapping,
     ElectronFile,
-    FILE_PATH_TYPE,
-    WatchMapping,
+    FolderWatch,
+    PendingUploads,
 } from "./types/ipc";
 
 // - General
@@ -77,12 +78,12 @@ const onMainWindowFocus = (cb?: () => void) => {
 // - App update
 
 const onAppUpdateAvailable = (
-    cb?: ((updateInfo: AppUpdateInfo) => void) | undefined,
+    cb?: ((update: AppUpdate) => void) | undefined,
 ) => {
     ipcRenderer.removeAllListeners("appUpdateAvailable");
     if (cb) {
-        ipcRenderer.on("appUpdateAvailable", (_, updateInfo: AppUpdateInfo) =>
-            cb(updateInfo),
+        ipcRenderer.on("appUpdateAvailable", (_, update: AppUpdate) =>
+            cb(update),
         );
     }
 };
@@ -96,8 +97,30 @@ const skipAppUpdate = (version: string) => {
     ipcRenderer.send("skipAppUpdate", version);
 };
 
+// - FS
+
 const fsExists = (path: string): Promise<boolean> =>
     ipcRenderer.invoke("fsExists", path);
+
+const fsMkdirIfNeeded = (dirPath: string): Promise<void> =>
+    ipcRenderer.invoke("fsMkdirIfNeeded", dirPath);
+
+const fsRename = (oldPath: string, newPath: string): Promise<void> =>
+    ipcRenderer.invoke("fsRename", oldPath, newPath);
+
+const fsRmdir = (path: string): Promise<void> =>
+    ipcRenderer.invoke("fsRmdir", path);
+
+const fsRm = (path: string): Promise<void> => ipcRenderer.invoke("fsRm", path);
+
+const fsReadTextFile = (path: string): Promise<string> =>
+    ipcRenderer.invoke("fsReadTextFile", path);
+
+const fsWriteFile = (path: string, contents: string): Promise<void> =>
+    ipcRenderer.invoke("fsWriteFile", path, contents);
+
+const fsIsDir = (dirPath: string): Promise<boolean> =>
+    ipcRenderer.invoke("fsIsDir", dirPath);
 
 // - AUDIT below this
 
@@ -169,108 +192,78 @@ const showUploadZipDialog = (): Promise<{
 
 // - Watch
 
-const registerWatcherFunctions = (
-    addFile: (file: ElectronFile) => Promise<void>,
-    removeFile: (path: string) => Promise<void>,
-    removeFolder: (folderPath: string) => Promise<void>,
-) => {
-    ipcRenderer.removeAllListeners("watch-add");
-    ipcRenderer.removeAllListeners("watch-unlink");
-    ipcRenderer.removeAllListeners("watch-unlink-dir");
-    ipcRenderer.on("watch-add", (_, file: ElectronFile) => addFile(file));
-    ipcRenderer.on("watch-unlink", (_, filePath: string) =>
-        removeFile(filePath),
-    );
-    ipcRenderer.on("watch-unlink-dir", (_, folderPath: string) =>
-        removeFolder(folderPath),
+const watchGet = (): Promise<FolderWatch[]> => ipcRenderer.invoke("watchGet");
+
+const watchAdd = (
+    folderPath: string,
+    collectionMapping: CollectionMapping,
+): Promise<FolderWatch[]> =>
+    ipcRenderer.invoke("watchAdd", folderPath, collectionMapping);
+
+const watchRemove = (folderPath: string): Promise<FolderWatch[]> =>
+    ipcRenderer.invoke("watchRemove", folderPath);
+
+const watchUpdateSyncedFiles = (
+    syncedFiles: FolderWatch["syncedFiles"],
+    folderPath: string,
+): Promise<void> =>
+    ipcRenderer.invoke("watchUpdateSyncedFiles", syncedFiles, folderPath);
+
+const watchUpdateIgnoredFiles = (
+    ignoredFiles: FolderWatch["ignoredFiles"],
+    folderPath: string,
+): Promise<void> =>
+    ipcRenderer.invoke("watchUpdateIgnoredFiles", ignoredFiles, folderPath);
+
+const watchOnAddFile = (f: (path: string, watch: FolderWatch) => void) => {
+    ipcRenderer.removeAllListeners("watchAddFile");
+    ipcRenderer.on("watchAddFile", (_, path: string, watch: FolderWatch) =>
+        f(path, watch),
     );
 };
 
-const addWatchMapping = (
-    collectionName: string,
-    folderPath: string,
-    uploadStrategy: number,
-): Promise<void> =>
-    ipcRenderer.invoke(
-        "addWatchMapping",
-        collectionName,
-        folderPath,
-        uploadStrategy,
+const watchOnRemoveFile = (f: (path: string, watch: FolderWatch) => void) => {
+    ipcRenderer.removeAllListeners("watchRemoveFile");
+    ipcRenderer.on("watchRemoveFile", (_, path: string, watch: FolderWatch) =>
+        f(path, watch),
     );
+};
 
-const removeWatchMapping = (folderPath: string): Promise<void> =>
-    ipcRenderer.invoke("removeWatchMapping", folderPath);
+const watchOnRemoveDir = (f: (path: string, watch: FolderWatch) => void) => {
+    ipcRenderer.removeAllListeners("watchRemoveDir");
+    ipcRenderer.on("watchRemoveDir", (_, path: string, watch: FolderWatch) =>
+        f(path, watch),
+    );
+};
 
-const getWatchMappings = (): Promise<WatchMapping[]> =>
-    ipcRenderer.invoke("getWatchMappings");
-
-const updateWatchMappingSyncedFiles = (
-    folderPath: string,
-    files: WatchMapping["syncedFiles"],
-): Promise<void> =>
-    ipcRenderer.invoke("updateWatchMappingSyncedFiles", folderPath, files);
-
-const updateWatchMappingIgnoredFiles = (
-    folderPath: string,
-    files: WatchMapping["ignoredFiles"],
-): Promise<void> =>
-    ipcRenderer.invoke("updateWatchMappingIgnoredFiles", folderPath, files);
-
-// - FS Legacy
-
-const checkExistsAndCreateDir = (dirPath: string): Promise<void> =>
-    ipcRenderer.invoke("checkExistsAndCreateDir", dirPath);
-
-const saveStreamToDisk = (
-    path: string,
-    fileStream: ReadableStream,
-): Promise<void> => ipcRenderer.invoke("saveStreamToDisk", path, fileStream);
-
-const saveFileToDisk = (path: string, contents: string): Promise<void> =>
-    ipcRenderer.invoke("saveFileToDisk", path, contents);
-
-const readTextFile = (path: string): Promise<string> =>
-    ipcRenderer.invoke("readTextFile", path);
-
-const isFolder = (dirPath: string): Promise<boolean> =>
-    ipcRenderer.invoke("isFolder", dirPath);
-
-const moveFile = (oldPath: string, newPath: string): Promise<void> =>
-    ipcRenderer.invoke("moveFile", oldPath, newPath);
-
-const deleteFolder = (path: string): Promise<void> =>
-    ipcRenderer.invoke("deleteFolder", path);
-
-const deleteFile = (path: string): Promise<void> =>
-    ipcRenderer.invoke("deleteFile", path);
-
-const rename = (oldPath: string, newPath: string): Promise<void> =>
-    ipcRenderer.invoke("rename", oldPath, newPath);
+const watchFindFiles = (folderPath: string): Promise<string[]> =>
+    ipcRenderer.invoke("watchFindFiles", folderPath);
 
 // - Upload
 
-const getPendingUploads = (): Promise<{
-    files: ElectronFile[];
-    collectionName: string;
-    type: string;
-}> => ipcRenderer.invoke("getPendingUploads");
+const pendingUploads = (): Promise<PendingUploads | undefined> =>
+    ipcRenderer.invoke("pendingUploads");
 
-const setToUploadFiles = (
-    type: FILE_PATH_TYPE,
+const setPendingUploadCollection = (collectionName: string): Promise<void> =>
+    ipcRenderer.invoke("setPendingUploadCollection", collectionName);
+
+const setPendingUploadFiles = (
+    type: PendingUploads["type"],
     filePaths: string[],
-): Promise<void> => ipcRenderer.invoke("setToUploadFiles", type, filePaths);
+): Promise<void> =>
+    ipcRenderer.invoke("setPendingUploadFiles", type, filePaths);
+
+// -
 
 const getElectronFilesFromGoogleZip = (
     filePath: string,
 ): Promise<ElectronFile[]> =>
     ipcRenderer.invoke("getElectronFilesFromGoogleZip", filePath);
 
-const setToUploadCollection = (collectionName: string): Promise<void> =>
-    ipcRenderer.invoke("setToUploadCollection", collectionName);
-
 const getDirFiles = (dirPath: string): Promise<ElectronFile[]> =>
     ipcRenderer.invoke("getDirFiles", dirPath);
 
+//
 // These objects exposed here will become available to the JS code in our
 // renderer (the web/ code) as `window.ElectronAPIs.*`
 //
@@ -303,8 +296,12 @@ const getDirFiles = (dirPath: string): Promise<ElectronFile[]> =>
 //
 // The copy itself is relatively fast, but the problem with transfering large
 // amounts of data is potentially running out of memory during the copy.
+//
+// For an alternative, see [Note: IPC streams].
+//
 contextBridge.exposeInMainWorld("electron", {
     // - General
+
     appVersion,
     logToDisk,
     openDirectory,
@@ -315,58 +312,67 @@ contextBridge.exposeInMainWorld("electron", {
     onMainWindowFocus,
 
     // - App update
+
     onAppUpdateAvailable,
     updateAndRestart,
     updateOnNextRestart,
     skipAppUpdate,
 
+    // - FS
+
+    fs: {
+        exists: fsExists,
+        rename: fsRename,
+        mkdirIfNeeded: fsMkdirIfNeeded,
+        rmdir: fsRmdir,
+        rm: fsRm,
+        readTextFile: fsReadTextFile,
+        writeFile: fsWriteFile,
+        isDir: fsIsDir,
+    },
+
     // - Conversion
+
     convertToJPEG,
     generateImageThumbnail,
     runFFmpegCmd,
 
     // - ML
+
     clipImageEmbedding,
     clipTextEmbedding,
     detectFaces,
     faceEmbedding,
 
     // - File selection
+
     selectDirectory,
     showUploadFilesDialog,
     showUploadDirsDialog,
     showUploadZipDialog,
 
     // - Watch
-    registerWatcherFunctions,
-    addWatchMapping,
-    removeWatchMapping,
-    getWatchMappings,
-    updateWatchMappingSyncedFiles,
-    updateWatchMappingIgnoredFiles,
 
-    // - FS
-    fs: {
-        exists: fsExists,
+    watch: {
+        get: watchGet,
+        add: watchAdd,
+        remove: watchRemove,
+        onAddFile: watchOnAddFile,
+        onRemoveFile: watchOnRemoveFile,
+        onRemoveDir: watchOnRemoveDir,
+        findFiles: watchFindFiles,
+        updateSyncedFiles: watchUpdateSyncedFiles,
+        updateIgnoredFiles: watchUpdateIgnoredFiles,
     },
-
-    // - FS legacy
-    // TODO: Move these into fs + document + rename if needed
-    checkExistsAndCreateDir,
-    saveStreamToDisk,
-    saveFileToDisk,
-    readTextFile,
-    isFolder,
-    moveFile,
-    deleteFolder,
-    deleteFile,
-    rename,
 
     // - Upload
 
-    getPendingUploads,
-    setToUploadFiles,
+    pendingUploads,
+    setPendingUploadCollection,
+    setPendingUploadFiles,
+
+    // -
+
     getElectronFilesFromGoogleZip,
-    setToUploadCollection,
     getDirFiles,
 });

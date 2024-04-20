@@ -3,23 +3,7 @@
 //
 // See [Note: types.ts <-> preload.ts <-> ipc.ts]
 
-import type { ElectronFile, WatchMapping } from "./file";
-
-export interface AppUpdateInfo {
-    autoUpdatable: boolean;
-    version: string;
-}
-
-export enum FILE_PATH_TYPE {
-    FILES = "files",
-    ZIPS = "zips",
-}
-
-export enum PICKED_UPLOAD_TYPE {
-    FILES = "files",
-    FOLDERS = "folders",
-    ZIPS = "zips",
-}
+import type { ElectronFile } from "./file";
 
 /**
  * Extra APIs provided by our Node.js layer when our code is running inside our
@@ -80,7 +64,7 @@ export interface Electron {
      *
      * If no such key is found, return `undefined`.
      *
-     * @see {@link saveEncryptionKey}.
+     * See also: {@link saveEncryptionKey}.
      */
     encryptionKey: () => Promise<string | undefined>;
 
@@ -111,7 +95,7 @@ export interface Electron {
      * Note: Setting a callback clears any previous callbacks.
      */
     onAppUpdateAvailable: (
-        cb?: ((updateInfo: AppUpdateInfo) => void) | undefined,
+        cb?: ((update: AppUpdate) => void) | undefined,
     ) => void;
 
     /**
@@ -155,15 +139,56 @@ export interface Electron {
      * or watching some folders for changes and syncing them automatically.
      *
      * Towards this end, this fs object provides some generic file system access
-     * functions that are needed for such features. In addition, there are other
-     * feature specific methods too in the top level electron object.
+     * functions that are needed for such features (in some cases, there are
+     * other feature specific methods too in the top level electron object).
      */
     fs: {
-        /**
-         * Return true if there is a file or directory at the given
-         * {@link path}.
-         */
+        /** Return true if there is an item at the given {@link path}. */
         exists: (path: string) => Promise<boolean>;
+
+        /**
+         * Equivalent of `mkdir -p`.
+         *
+         * Create a directory at the given path if it does not already exist.
+         * Any parent directories in the path that don't already exist will also
+         * be created recursively, i.e. this command is analogous to an running
+         * `mkdir -p`.
+         */
+        mkdirIfNeeded: (dirPath: string) => Promise<void>;
+
+        /** Rename {@link oldPath} to {@link newPath} */
+        rename: (oldPath: string, newPath: string) => Promise<void>;
+
+        /**
+         * Equivalent of `rmdir`.
+         *
+         * Delete the directory at the {@link path} if it is empty.
+         */
+        rmdir: (path: string) => Promise<void>;
+
+        /**
+         * Equivalent of `rm`.
+         *
+         * Delete the file at {@link path}.
+         */
+        rm: (path: string) => Promise<void>;
+
+        /** Read the string contents of a file at {@link path}. */
+        readTextFile: (path: string) => Promise<string>;
+
+        /**
+         * Write a string to a file, replacing the file if it already exists.
+         *
+         * @param path The path of the file.
+         * @param contents The string contents to write.
+         */
+        writeFile: (path: string, contents: string) => Promise<void>;
+
+        /**
+         * Return true if there is an item at {@link dirPath}, and it is as
+         * directory.
+         */
+        isDir: (dirPath: string) => Promise<boolean>;
     };
 
     /*
@@ -249,62 +274,229 @@ export interface Electron {
 
     // - Watch
 
-    registerWatcherFunctions: (
-        addFile: (file: ElectronFile) => Promise<void>,
-        removeFile: (path: string) => Promise<void>,
-        removeFolder: (folderPath: string) => Promise<void>,
-    ) => void;
+    /**
+     * Interface with the file system watcher running in our Node.js layer.
+     *
+     * [Note: Folder vs Directory in the context of FolderWatch-es]
+     *
+     * A note on terminology: The word "folder" is used to the top level root
+     * folder for which a {@link FolderWatch} has been added. This folder is
+     * also in 1-1 correspondence to be a directory on the user's disk. It can
+     * have other, nested directories too (which may or may not be getting
+     * mapped to separate Ente collections), but we'll not refer to these nested
+     * directories as folders - only the root of the tree, which the user
+     * dragged/dropped or selected to set up the folder watch, will be referred
+     * to as a folder when naming things.
+     */
+    watch: {
+        /**
+         * Return the list of folder watches, pruning non-existing directories.
+         *
+         * The list of folder paths (and auxillary details) is persisted in the
+         * Node.js layer. The implementation of this function goes through the
+         * list, permanently removes any watches whose on-disk directory is no
+         * longer present, and returns this pruned list of watches.
+         */
+        get: () => Promise<FolderWatch[]>;
 
-    addWatchMapping: (
-        collectionName: string,
-        folderPath: string,
-        uploadStrategy: number,
-    ) => Promise<void>;
+        /**
+         * Add a new folder watch for the given {@link folderPath}.
+         *
+         * This adds a new entry in the list of watches (persisting them on
+         * disk), and also starts immediately observing for file system events
+         * that happen within {@link folderPath}.
+         *
+         * @param collectionMapping Determines how nested directories (if any)
+         * get mapped to Ente collections.
+         *
+         * @returns The updated list of watches.
+         */
+        add: (
+            folderPath: string,
+            collectionMapping: CollectionMapping,
+        ) => Promise<FolderWatch[]>;
 
-    removeWatchMapping: (folderPath: string) => Promise<void>;
+        /**
+         * Remove the pre-existing watch for the given {@link folderPath}.
+         *
+         * Persist this removal, and also stop listening for file system events
+         * that happen within the {@link folderPath}.
+         *
+         * @returns The updated list of watches.
+         */
+        remove: (folderPath: string) => Promise<FolderWatch[]>;
 
-    getWatchMappings: () => Promise<WatchMapping[]>;
+        /**
+         * Update the list of synced files for the folder watch associated
+         * with the given {@link folderPath}.
+         */
+        updateSyncedFiles: (
+            syncedFiles: FolderWatch["syncedFiles"],
+            folderPath: string,
+        ) => Promise<void>;
 
-    updateWatchMappingSyncedFiles: (
-        folderPath: string,
-        files: WatchMapping["syncedFiles"],
-    ) => Promise<void>;
+        /**
+         * Update the list of ignored file paths for the folder watch
+         * associated with the given {@link folderPath}.
+         */
+        updateIgnoredFiles: (
+            ignoredFiles: FolderWatch["ignoredFiles"],
+            folderPath: string,
+        ) => Promise<void>;
 
-    updateWatchMappingIgnoredFiles: (
-        folderPath: string,
-        files: WatchMapping["ignoredFiles"],
-    ) => Promise<void>;
+        /**
+         * Register the function to invoke when a file is added in one of the
+         * folders we are watching.
+         *
+         * The callback function is passed the path to the file that was added,
+         * and the folder watch it was associated with.
+         *
+         * The path is guaranteed to use POSIX separators ('/').
+         */
+        onAddFile: (f: (path: string, watch: FolderWatch) => void) => void;
 
-    // - FS legacy
-    checkExistsAndCreateDir: (dirPath: string) => Promise<void>;
-    saveStreamToDisk: (
-        path: string,
-        fileStream: ReadableStream,
-    ) => Promise<void>;
-    saveFileToDisk: (path: string, contents: string) => Promise<void>;
-    readTextFile: (path: string) => Promise<string>;
-    isFolder: (dirPath: string) => Promise<boolean>;
-    moveFile: (oldPath: string, newPath: string) => Promise<void>;
-    deleteFolder: (path: string) => Promise<void>;
-    deleteFile: (path: string) => Promise<void>;
-    rename: (oldPath: string, newPath: string) => Promise<void>;
+        /**
+         * Register the function to invoke when a file is removed in one of the
+         * folders we are watching.
+         *
+         * The callback function is passed the path to the file that was
+         * removed, and the folder watch it was associated with.
+         *
+         * The path is guaranteed to use POSIX separators ('/').
+         */
+        onRemoveFile: (f: (path: string, watch: FolderWatch) => void) => void;
+
+        /**
+         * Register the function to invoke when a directory is removed in one of
+         * the folders we are watching.
+         *
+         * The callback function is passed the path to the directory that was
+         * removed, and the folder watch it was associated with.
+         *
+         * The path is guaranteed to use POSIX separators ('/').
+         */
+        onRemoveDir: (f: (path: string, watch: FolderWatch) => void) => void;
+
+        /**
+         * Return the paths of all the files under the given folder.
+         *
+         * This function walks the directory tree starting at {@link folderPath}
+         * and returns a list of the absolute paths of all the files that exist
+         * therein. It will recursively traverse into nested directories, and
+         * return the absolute paths of the files there too.
+         *
+         * The returned paths are guaranteed to use POSIX separators ('/').
+         */
+        findFiles: (folderPath: string) => Promise<string[]>;
+    };
 
     // - Upload
 
-    getPendingUploads: () => Promise<{
-        files: ElectronFile[];
-        collectionName: string;
-        type: string;
-    }>;
-    setToUploadFiles: (
-        /** TODO(MR): This is the actual type */
-        // type: FILE_PATH_TYPE,
-        type: PICKED_UPLOAD_TYPE,
+    /**
+     * Return any pending uploads that were previously enqueued but haven't yet
+     * been completed.
+     *
+     * The state of pending uploads is persisted in the Node.js layer.
+     *
+     * Note that we might have both outstanding zip and regular file uploads at
+     * the same time. In such cases, the zip file ones get precedence.
+     */
+    pendingUploads: () => Promise<PendingUploads | undefined>;
+
+    /**
+     * Set or clear the name of the collection where the pending upload is
+     * directed to.
+     */
+    setPendingUploadCollection: (collectionName: string) => Promise<void>;
+
+    /**
+     * Update the list of files (of {@link type}) associated with the pending
+     * upload.
+     */
+    setPendingUploadFiles: (
+        type: PendingUploads["type"],
         filePaths: string[],
     ) => Promise<void>;
+
+    // -
+
     getElectronFilesFromGoogleZip: (
         filePath: string,
     ) => Promise<ElectronFile[]>;
-    setToUploadCollection: (collectionName: string) => Promise<void>;
     getDirFiles: (dirPath: string) => Promise<ElectronFile[]>;
+}
+
+/**
+ * Data passed across the IPC bridge when an app update is available.
+ */
+export interface AppUpdate {
+    /** `true` if the user automatically update to this (new) version */
+    autoUpdatable: boolean;
+    /** The new version that is available */
+    version: string;
+}
+
+/**
+ * A top level folder that was selected by the user for watching.
+ *
+ * The user can set up multiple such watches. Each of these can in turn be
+ * syncing multiple on disk folders to one or more Ente collections (depending
+ * on the value of {@link collectionMapping}).
+ *
+ * This type is passed across the IPC boundary. It is persisted on the Node.js
+ * side.
+ */
+export interface FolderWatch {
+    /**
+     * Specify if nested files should all be mapped to the same single root
+     * collection, or if there should be a collection per directory that has
+     * files. @see {@link CollectionMapping}.
+     */
+    collectionMapping: CollectionMapping;
+    /**
+     * The path to the (root) folder we are watching.
+     */
+    folderPath: string;
+    /**
+     * Files that have already been uploaded.
+     */
+    syncedFiles: FolderWatchSyncedFile[];
+    /**
+     * Files (paths) that should be ignored when uploading.
+     */
+    ignoredFiles: string[];
+}
+
+/**
+ * The ways in which directories are mapped to collection.
+ *
+ * This comes into play when we have nested directories that we are trying to
+ * upload or watch on the user's local file system.
+ */
+export type CollectionMapping =
+    /** All files go into a single collection named after the root directory. */
+    | "root"
+    /** Each file goes to a collection named after its parent directory. */
+    | "parent";
+
+/**
+ * An on-disk file that was synced as part of a folder watch.
+ */
+export interface FolderWatchSyncedFile {
+    path: string;
+    uploadedFileID: number;
+    collectionID: number;
+}
+
+/**
+ * When the user starts an upload, we remember the files they'd selected or drag
+ * and dropped so that we can resume (if needed) when the app restarts after
+ * being stopped in the middle of the uploads.
+ */
+export interface PendingUploads {
+    /** The collection to which we're uploading */
+    collectionName: string;
+    /* The upload can be either of a Google Takeout zip, or regular files */
+    type: "files" | "zips";
+    files: ElectronFile[];
 }

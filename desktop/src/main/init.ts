@@ -1,102 +1,7 @@
-import { BrowserWindow, Tray, app, nativeImage, shell } from "electron";
+import { BrowserWindow, app, shell } from "electron";
 import { existsSync } from "node:fs";
 import path from "node:path";
-import { isAppQuitting, rendererURL } from "../main";
-import log from "./log";
-import { createTrayContextMenu } from "./menu";
-import { isPlatform } from "./platform";
-import autoLauncher from "./services/autoLauncher";
-import { getHideDockIconPreference } from "./services/userPreference";
-import { isDev } from "./util";
-
-/**
- * Create an return the {@link BrowserWindow} that will form our app's UI.
- *
- * This window will show the HTML served from {@link rendererURL}.
- */
-export const createWindow = async () => {
-    // Create the main window. This'll show our web content.
-    const mainWindow = new BrowserWindow({
-        webPreferences: {
-            preload: path.join(app.getAppPath(), "preload.js"),
-        },
-        // The color to show in the window until the web content gets loaded.
-        // See: https://www.electronjs.org/docs/latest/api/browser-window#setting-the-backgroundcolor-property
-        backgroundColor: "black",
-        // We'll show it conditionally depending on `wasAutoLaunched` later.
-        show: false,
-    });
-
-    const wasAutoLaunched = await autoLauncher.wasAutoLaunched();
-    if (wasAutoLaunched) {
-        // Keep the macOS dock icon hidden if we were auto launched.
-        if (process.platform == "darwin") app.dock.hide();
-    } else {
-        // Show our window (maximizing it) if this is not an auto-launch on
-        // login.
-        mainWindow.maximize();
-    }
-
-    mainWindow.loadURL(rendererURL);
-
-    // Open the DevTools automatically when running in dev mode
-    if (isDev) mainWindow.webContents.openDevTools();
-
-    mainWindow.webContents.on("render-process-gone", (_, details) => {
-        log.error(`render-process-gone: ${details}`);
-        mainWindow.webContents.reload();
-    });
-
-    mainWindow.webContents.on("unresponsive", () => {
-        log.error("webContents unresponsive");
-        mainWindow.webContents.forcefullyCrashRenderer();
-    });
-
-    mainWindow.on("close", function (event) {
-        if (!isAppQuitting()) {
-            event.preventDefault();
-            mainWindow.hide();
-        }
-        return false;
-    });
-
-    mainWindow.on("hide", () => {
-        // On macOS, also hide the app's icon in the dock if the user has
-        // selected the Settings > Hide dock icon checkbox.
-        const shouldHideDockIcon = getHideDockIconPreference();
-        if (process.platform == "darwin" && shouldHideDockIcon) {
-            app.dock.hide();
-        }
-    });
-
-    mainWindow.on("show", () => {
-        if (process.platform == "darwin") app.dock.show();
-    });
-
-    return mainWindow;
-};
-
-export const setupTrayItem = (mainWindow: BrowserWindow) => {
-    // There are a total of 6 files corresponding to this tray icon.
-    //
-    // On macOS, use template images (filename needs to end with "Template.ext")
-    // https://www.electronjs.org/docs/latest/api/native-image#template-image-macos
-    //
-    // And for each (template or otherwise), there are 3 "retina" variants
-    // https://www.electronjs.org/docs/latest/api/native-image#high-resolution-image
-    const iconName =
-        process.platform == "darwin"
-            ? "taskbar-icon-Template.png"
-            : "taskbar-icon.png";
-    const trayImgPath = path.join(
-        isDev ? "build" : process.resourcesPath,
-        iconName,
-    );
-    const trayIcon = nativeImage.createFromPath(trayImgPath);
-    const tray = new Tray(trayIcon);
-    tray.setToolTip("Ente Photos");
-    tray.setContextMenu(createTrayContextMenu(mainWindow));
-};
+import { rendererURL } from "../main";
 
 export function handleDownloads(mainWindow: BrowserWindow) {
     mainWindow.webContents.session.on("will-download", (_, item) => {
@@ -135,23 +40,6 @@ export function getUniqueSavePath(filename: string, directory: string): string {
         uniqueFileSavePath = path.join(directory, fileNameWithNumberedSuffix);
     }
     return uniqueFileSavePath;
-}
-
-export function setupMacWindowOnDockIconClick() {
-    app.on("activate", function () {
-        const windows = BrowserWindow.getAllWindows();
-        // we allow only one window
-        windows[0].show();
-    });
-}
-
-export async function handleDockIconHideOnAutoLaunch() {
-    const shouldHideDockIcon = getHideDockIconPreference();
-    const wasAutoLaunched = await autoLauncher.wasAutoLaunched();
-
-    if (isPlatform("mac") && shouldHideDockIcon && wasAutoLaunched) {
-        app.dock.hide();
-    }
 }
 
 function lowerCaseHeaders(responseHeaders: Record<string, string[]>) {

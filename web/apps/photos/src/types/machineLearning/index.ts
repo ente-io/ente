@@ -90,7 +90,7 @@ export interface FaceCrop {
 }
 
 export interface StoredFaceCrop {
-    imageUrl: string;
+    cacheKey: string;
     imageBox: Box;
 }
 
@@ -128,7 +128,7 @@ export interface Person {
     name?: string;
     files: Array<number>;
     displayFaceId?: string;
-    displayImageUrl?: string;
+    faceCropCacheKey?: string;
 }
 
 export interface MlFileData {
@@ -290,7 +290,7 @@ export interface FaceEmbeddingService {
 
 export interface BlurDetectionService {
     method: Versioned<BlurDetectionMethod>;
-    detectBlur(alignedFaces: Float32Array): number[];
+    detectBlur(alignedFaces: Float32Array, faces: Face[]): number[];
 }
 
 export interface ClusteringService {

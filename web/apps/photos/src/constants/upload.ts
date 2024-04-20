@@ -1,11 +1,6 @@
 import { ENCRYPTION_CHUNK_SIZE } from "@ente/shared/crypto/constants";
 import { FILE_TYPE } from "constants/file";
-import {
-    FileTypeInfo,
-    ImportSuggestion,
-    Location,
-    ParsedExtractedMetadata,
-} from "types/upload";
+import { FileTypeInfo, Location, ParsedExtractedMetadata } from "types/upload";
 
 // list of format that were missed by type-detection for some files.
 export const WHITELISTED_FILE_FORMATS: FileTypeInfo[] = [
@@ -110,12 +105,6 @@ export const NULL_EXTRACTED_METADATA: ParsedExtractedMetadata = {
 };
 
 export const A_SEC_IN_MICROSECONDS = 1e6;
-
-export const DEFAULT_IMPORT_SUGGESTION: ImportSuggestion = {
-    rootFolderName: "",
-    hasNestedFolders: false,
-    hasRootLevelFileWithFolder: false,
-};
 
 export const BLACK_THUMBNAIL_BASE64 =
     "/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAEBAQEBAQEB" +

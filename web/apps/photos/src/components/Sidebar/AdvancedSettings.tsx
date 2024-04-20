@@ -3,9 +3,9 @@ import ChevronRight from "@mui/icons-material/ChevronRight";
 import ScienceIcon from "@mui/icons-material/Science";
 import { Box, DialogProps, Stack, Typography } from "@mui/material";
 import { EnteDrawer } from "components/EnteDrawer";
-import MLSearchSettings from "components/MachineLearning/MLSearchSettings";
 import MenuSectionTitle from "components/Menu/MenuSectionTitle";
 import Titlebar from "components/Titlebar";
+import { MLSearchSettings } from "components/ml/MLSearchSettings";
 import { t } from "i18next";
 import { useContext, useEffect, useState } from "react";
 

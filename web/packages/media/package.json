@@ -1,0 +1,9 @@
+{
+    "name": "@/media",
+    "version": "0.0.0",
+    "private": true,
+    "dependencies": {
+        "@/next": "*",
+        "jszip": "^3.10"
+    }
+}

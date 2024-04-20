@@ -174,6 +174,7 @@ class _RequestPasswordVerificationPageState
                     decoration: InputDecoration(
                       hintText: context.l10n.enterYourPassword,
                       filled: true,
+                      fillColor: getEnteColorScheme(context).fillFaint,
                       contentPadding: const EdgeInsets.all(20),
                       border: UnderlineInputBorder(
                         borderSide: BorderSide.none,

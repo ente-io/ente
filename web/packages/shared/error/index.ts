@@ -74,7 +74,6 @@ export const CustomError = {
     EXIF_DATA_NOT_FOUND: "exif data not found",
     SELECT_FOLDER_ABORTED: "select folder aborted",
     NON_MEDIA_FILE: "non media file",
-    NOT_AVAILABLE_ON_WEB: "not available on web",
     UNSUPPORTED_RAW_FORMAT: "unsupported raw format",
     NON_PREVIEWABLE_FILE: "non previewable file",
     PROCESSING_FAILED: "processing failed",
@@ -87,7 +86,6 @@ export const CustomError = {
     UNSUPPORTED_PLATFORM: "Unsupported platform",
     MODEL_DOWNLOAD_PENDING:
         "Model download pending, skipping clip search request",
-    DOWNLOAD_MANAGER_NOT_READY: "Download manager not initialized",
     UPDATE_URL_FILE_ID_MISMATCH: "update url file id mismatch",
     URL_ALREADY_SET: "url already set",
     FILE_CONVERSION_FAILED: "file conversion failed",

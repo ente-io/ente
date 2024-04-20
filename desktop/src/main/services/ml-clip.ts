@@ -11,8 +11,8 @@ import fs from "node:fs/promises";
 import * as ort from "onnxruntime-node";
 import Tokenizer from "../../thirdparty/clip-bpe-ts/mod";
 import { CustomErrors } from "../../types/ipc";
-import { writeStream } from "../fs";
 import log from "../log";
+import { writeStream } from "../stream";
 import { generateTempFilePath } from "../temp";
 import { deleteTempFile } from "./ffmpeg";
 import {

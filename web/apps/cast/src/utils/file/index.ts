@@ -1,8 +1,8 @@
+import { decodeLivePhoto } from "@/media/live-photo";
 import log from "@/next/log";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { FILE_TYPE, RAW_FORMATS } from "constants/file";
 import CastDownloadManager from "services/castDownloadManager";
-import { decodeLivePhoto } from "services/livePhotoService";
 import { getFileType } from "services/typeDetectionService";
 import {
     EncryptedEnteFile,
@@ -85,32 +85,6 @@ export async function decryptFile(
     }
 }
 
-export function getFileNameWithoutExtension(filename: string) {
-    const lastDotPosition = filename.lastIndexOf(".");
-    if (lastDotPosition === -1) return filename;
-    else return filename.slice(0, lastDotPosition);
-}
-
-export function getFileExtensionWithDot(filename: string) {
-    const lastDotPosition = filename.lastIndexOf(".");
-    if (lastDotPosition === -1) return "";
-    else return filename.slice(lastDotPosition);
-}
-
-export function splitFilenameAndExtension(filename: string): [string, string] {
-    const lastDotPosition = filename.lastIndexOf(".");
-    if (lastDotPosition === -1) return [filename, null];
-    else
-        return [
-            filename.slice(0, lastDotPosition),
-            filename.slice(lastDotPosition + 1),
-        ];
-}
-
-export function getFileExtension(filename: string) {
-    return splitFilenameAndExtension(filename)[1]?.toLocaleLowerCase();
-}
-
 export function generateStreamFromArrayBuffer(data: Uint8Array) {
     return new ReadableStream({
         async start(controller: ReadableStreamDefaultController) {
@@ -129,6 +103,18 @@ export function isRawFileFromFileName(fileName: string) {
     return false;
 }
 
+/**
+ * [Note: File name for local EnteFile objects]
+ *
+ * The title property in a file's metadata is the original file's name. The
+ * metadata of a file cannot be edited. So if later on the file's name is
+ * changed, then the edit is stored in the `editedName` property of the public
+ * metadata of the file.
+ *
+ * This function merges these edits onto the file object that we use locally.
+ * Effectively, post this step, the file's metadata.title can be used in lieu of
+ * its filename.
+ */
 export function mergeMetadata(files: EnteFile[]): EnteFile[] {
     return files.map((file) => {
         if (file.pubMagicMetadata?.data.editedTime) {
@@ -151,8 +137,11 @@ export const getPreviewableImage = async (
             await CastDownloadManager.downloadFile(castToken, file),
         ).blob();
         if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
-            const livePhoto = await decodeLivePhoto(file, fileBlob);
-            fileBlob = new Blob([livePhoto.image]);
+            const { imageData } = await decodeLivePhoto(
+                file.metadata.title,
+                fileBlob,
+            );
+            fileBlob = new Blob([imageData]);
         }
         const fileType = await getFileType(
             new File([fileBlob], file.metadata.title),

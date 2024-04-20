@@ -1,3 +1,4 @@
+import { decodeLivePhoto } from "@/media/live-photo";
 import { convertBytesToHumanReadable } from "@/next/file";
 import log from "@/next/log";
 import type { Electron } from "@/next/types/ipc";
@@ -32,7 +33,6 @@ import {
     updateFilePublicMagicMetadata,
 } from "services/fileService";
 import heicConversionService from "services/heicConversionService";
-import { decodeLivePhoto } from "services/livePhotoService";
 import { getFileType } from "services/typeDetectionService";
 import { updateFileCreationDateInEXIF } from "services/upload/exifService";
 import {
@@ -51,8 +51,9 @@ import {
 } from "types/gallery";
 import { VISIBILITY_STATE } from "types/magicMetadata";
 import { FileTypeInfo } from "types/upload";
-import { getFileExportPath, getUniqueFileExportName } from "utils/export";
 import { isArchivedFile, updateMagicMetadata } from "utils/magicMetadata";
+import { safeFileName } from "utils/native-fs";
+import { writeStream } from "utils/native-stream";
 
 const WAIT_TIME_IMAGE_CONVERSION = 30 * 1000;
 
@@ -96,19 +97,20 @@ export async function downloadFile(file: EnteFile) {
             await DownloadManager.getFile(file),
         ).blob();
         if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
-            const livePhoto = await decodeLivePhoto(file, fileBlob);
-            const image = new File([livePhoto.image], livePhoto.imageNameTitle);
+            const { imageFileName, imageData, videoFileName, videoData } =
+                await decodeLivePhoto(file.metadata.title, fileBlob);
+            const image = new File([imageData], imageFileName);
             const imageType = await getFileType(image);
             const tempImageURL = URL.createObjectURL(
-                new Blob([livePhoto.image], { type: imageType.mimeType }),
+                new Blob([imageData], { type: imageType.mimeType }),
             );
-            const video = new File([livePhoto.video], livePhoto.videoNameTitle);
+            const video = new File([videoData], videoFileName);
             const videoType = await getFileType(video);
             const tempVideoURL = URL.createObjectURL(
-                new Blob([livePhoto.video], { type: videoType.mimeType }),
+                new Blob([videoData], { type: videoType.mimeType }),
             );
-            downloadUsingAnchor(tempImageURL, livePhoto.imageNameTitle);
-            downloadUsingAnchor(tempVideoURL, livePhoto.videoNameTitle);
+            downloadUsingAnchor(tempImageURL, imageFileName);
+            downloadUsingAnchor(tempVideoURL, videoFileName);
         } else {
             const fileType = await getFileType(
                 new File([fileBlob], file.metadata.title),
@@ -130,16 +132,16 @@ export async function downloadFile(file: EnteFile) {
     }
 }
 
-export function groupFilesBasedOnCollectionID(files: EnteFile[]) {
-    const collectionWiseFiles = new Map<number, EnteFile[]>();
+/** Segment the given {@link files} into lists indexed by their collection ID */
+export const groupFilesBasedOnCollectionID = (files: EnteFile[]) => {
+    const result = new Map<number, EnteFile[]>();
     for (const file of files) {
-        if (!collectionWiseFiles.has(file.collectionID)) {
-            collectionWiseFiles.set(file.collectionID, []);
-        }
-        collectionWiseFiles.get(file.collectionID).push(file);
+        const id = file.collectionID;
+        if (!result.has(id)) result.set(id, []);
+        result.get(id).push(file);
     }
-    return collectionWiseFiles;
-}
+    return result;
+};
 
 function getSelectedFileIds(selectedFiles: SelectedState) {
     const filesIDs: number[] = [];
@@ -246,18 +248,6 @@ export async function decryptFile(
     }
 }
 
-export function getFileNameWithoutExtension(filename: string) {
-    const lastDotPosition = filename.lastIndexOf(".");
-    if (lastDotPosition === -1) return filename;
-    else return filename.slice(0, lastDotPosition);
-}
-
-export function getFileExtensionWithDot(filename: string) {
-    const lastDotPosition = filename.lastIndexOf(".");
-    if (lastDotPosition === -1) return "";
-    else return filename.slice(lastDotPosition);
-}
-
 export function splitFilenameAndExtension(filename: string): [string, string] {
     const lastDotPosition = filename.lastIndexOf(".");
     if (lastDotPosition === -1) return [filename, null];
@@ -354,13 +344,13 @@ async function getRenderableLivePhotoURL(
     fileBlob: Blob,
     forceConvert: boolean,
 ): Promise<LivePhotoSourceURL> {
-    const livePhoto = await decodeLivePhoto(file, fileBlob);
+    const livePhoto = await decodeLivePhoto(file.metadata.title, fileBlob);
 
     const getRenderableLivePhotoImageURL = async () => {
         try {
-            const imageBlob = new Blob([livePhoto.image]);
+            const imageBlob = new Blob([livePhoto.imageData]);
             const convertedImageBlob = await getRenderableImage(
-                livePhoto.imageNameTitle,
+                livePhoto.imageFileName,
                 imageBlob,
             );
 
@@ -373,10 +363,9 @@ async function getRenderableLivePhotoURL(
 
     const getRenderableLivePhotoVideoURL = async () => {
         try {
-            const videoBlob = new Blob([livePhoto.video]);
-
+            const videoBlob = new Blob([livePhoto.videoData]);
             const convertedVideoBlob = await getPlayableVideo(
-                livePhoto.videoNameTitle,
+                livePhoto.videoFileName,
                 videoBlob,
                 forceConvert,
                 true,
@@ -440,7 +429,7 @@ export async function getRenderableImage(fileName: string, imageBlob: Blob) {
                 }
 
                 if (!isElectron()) {
-                    throw Error(CustomError.NOT_AVAILABLE_ON_WEB);
+                    throw new Error("not available on web");
                 }
                 log.info(
                     `RawConverter called for ${fileName}-${convertBytesToHumanReadable(
@@ -798,54 +787,48 @@ async function downloadFileDesktop(
     electron: Electron,
     fileReader: FileReader,
     file: EnteFile,
-    downloadPath: string,
+    downloadDir: string,
 ) {
-    const fileStream = (await DownloadManager.getFile(
+    const fs = electron.fs;
+    const stream = (await DownloadManager.getFile(
         file,
     )) as ReadableStream<Uint8Array>;
-    const updatedFileStream = await getUpdatedEXIFFileForDownload(
+    const updatedStream = await getUpdatedEXIFFileForDownload(
         fileReader,
         file,
-        fileStream,
+        stream,
     );
 
     if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
-        const fileBlob = await new Response(updatedFileStream).blob();
-        const livePhoto = await decodeLivePhoto(file, fileBlob);
-        const imageExportName = await getUniqueFileExportName(
-            downloadPath,
-            livePhoto.imageNameTitle,
+        const fileBlob = await new Response(updatedStream).blob();
+        const { imageFileName, imageData, videoFileName, videoData } =
+            await decodeLivePhoto(file.metadata.title, fileBlob);
+        const imageExportName = await safeFileName(
+            downloadDir,
+            imageFileName,
+            fs.exists,
         );
-        const imageStream = generateStreamFromArrayBuffer(livePhoto.image);
-        await electron.saveStreamToDisk(
-            getFileExportPath(downloadPath, imageExportName),
-            imageStream,
-        );
+        const imageStream = generateStreamFromArrayBuffer(imageData);
+        await writeStream(`${downloadDir}/${imageExportName}`, imageStream);
         try {
-            const videoExportName = await getUniqueFileExportName(
-                downloadPath,
-                livePhoto.videoNameTitle,
+            const videoExportName = await safeFileName(
+                downloadDir,
+                videoFileName,
+                fs.exists,
             );
-            const videoStream = generateStreamFromArrayBuffer(livePhoto.video);
-            await electron.saveStreamToDisk(
-                getFileExportPath(downloadPath, videoExportName),
-                videoStream,
-            );
+            const videoStream = generateStreamFromArrayBuffer(videoData);
+            await writeStream(`${downloadDir}/${videoExportName}`, videoStream);
         } catch (e) {
-            await electron.deleteFile(
-                getFileExportPath(downloadPath, imageExportName),
-            );
+            await fs.rm(`${downloadDir}/${imageExportName}`);
             throw e;
         }
     } else {
-        const fileExportName = await getUniqueFileExportName(
-            downloadPath,
+        const fileExportName = await safeFileName(
+            downloadDir,
             file.metadata.title,
+            fs.exists,
         );
-        await electron.saveStreamToDisk(
-            getFileExportPath(downloadPath, fileExportName),
-            updatedFileStream,
-        );
+        await writeStream(`${downloadDir}/${fileExportName}`, updatedStream);
     }
 }
 

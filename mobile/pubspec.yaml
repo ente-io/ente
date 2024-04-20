@@ -12,7 +12,7 @@ description: ente photos application
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 
-version: 0.8.78+598
+version: 0.8.84+604
 publish_to: none
 
 environment:
@@ -27,7 +27,6 @@ dependencies:
   battery_info: ^1.1.1
   bip39: ^1.0.6
   cached_network_image: ^3.0.0
-  cast: ^2.0.0
   chewie:
     git:
       url: https://github.com/ente-io/chewie.git
@@ -37,11 +36,7 @@ dependencies:
   collection: # dart
   computer:
     git: "https://github.com/ente-io/computer.git"
-  connectivity_plus:
-    git:
-      url: https://github.com/ente-io/plus_plugins.git
-      ref: check_mobile_first
-      path: packages/connectivity_plus/connectivity_plus/
+  connectivity_plus: ^6.0.2
   cross_file: ^0.3.3
   crypto: ^3.0.2
   cupertino_icons: ^1.0.0
@@ -90,7 +85,7 @@ dependencies:
   flutter_sodium: ^0.2.0
   flutter_staggered_grid_view: ^0.6.2
   fluttertoast: ^8.0.6
-  freezed_annotation: ^2.2.0
+  freezed_annotation: ^2.4.1
   google_nav_bar: ^5.0.5
   home_widget: ^0.5.0
   html_unescape: ^2.0.0
@@ -150,7 +145,6 @@ dependencies:
   simple_cluster: ^0.3.0
   sqflite: ^2.3.0
   sqflite_migration: ^0.3.0
-  sqlite3: ^2.1.0
   sqlite3_flutter_libs: ^0.5.20
   sqlite_async: ^0.6.1
   step_progress_indicator: ^1.0.2
@@ -173,12 +167,11 @@ dependencies:
   wallpaper_manager_flutter: ^0.0.2
   wechat_assets_picker: ^8.6.3
   widgets_to_image: ^0.0.2
+  xml: ^6.3.0
 
 dependency_overrides:
-  connectivity_plus: ^4.0.0
-
-  #Remove this after  upgrading to flutter v3.19x
-  #Build fails when resolving to latest version of ffi on flutter v3.16.x
+  # Remove this after removing dependency from flutter_sodium.
+  # Newer flutter packages depends on ffi > 2.0.0 while flutter_sodium depends on ffi < 2.0.0
   ffi: 2.1.0
   video_player:
     git:
@@ -195,7 +188,7 @@ dev_dependencies:
   flutter_lints: ^2.0.1
   flutter_test:
     sdk: flutter
-  freezed: ^2.3.2
+  freezed: ^2.5.2
   integration_test:
     sdk: flutter
   isar_generator: ^3.1.0+1
