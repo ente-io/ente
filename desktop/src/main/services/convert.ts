@@ -1,3 +1,5 @@
+/** @file Image conversions */
+
 import { existsSync } from "fs";
 import fs from "node:fs/promises";
 import path from "path";
@@ -6,6 +8,62 @@ import log from "../log";
 import { writeStream } from "../stream";
 import { execAsync, isDev } from "../utils-electron";
 import { deleteTempFile, makeTempFilePath } from "../utils-temp";
+
+export const convertToJPEG = async (
+    fileName: string,
+    imageData: Uint8Array,
+): Promise<Uint8Array> => {
+    const inputFilePath = await makeTempFilePath(fileName);
+    const outputFilePath = await makeTempFilePath("output.jpeg");
+
+    // Construct the command first, it may throw on NotAvailable on win32.
+    const command = convertToJPEGCommand(inputFilePath, outputFilePath);
+
+    try {
+        await fs.writeFile(inputFilePath, imageData);
+        await execAsync(command);
+        return new Uint8Array(await fs.readFile(outputFilePath));
+    } finally {
+        try {
+            deleteTempFile(outputFilePath);
+            deleteTempFile(inputFilePath);
+        } catch (e) {
+            log.error("Ignoring error when cleaning up temp files", e);
+        }
+    }
+};
+
+const convertToJPEGCommand = (
+    inputFilePath: string,
+    outputFilePath: string,
+) => {
+    switch (process.platform) {
+        case "darwin":
+            return [
+                "sips",
+                "-s",
+                "format",
+                "jpeg",
+                inputFilePath,
+                "--out",
+                outputFilePath,
+            ];
+        case "linux":
+            return [
+                imageMagickPath(),
+                inputFilePath,
+                "-quality",
+                "100%",
+                outputFilePath,
+            ];
+        default: // "win32"
+            throw new Error(CustomErrorMessage.NotAvailable);
+    }
+};
+
+/** Path to the Linux image-magick executable bundled with our app */
+const imageMagickPath = () =>
+    path.join(isDev ? "build" : process.resourcesPath, "image-magick");
 
 const IMAGE_MAGICK_PLACEHOLDER = "IMAGE_MAGICK";
 const MAX_DIMENSION_PLACEHOLDER = "MAX_DIMENSION";
@@ -16,16 +74,6 @@ const QUALITY_PLACEHOLDER = "QUALITY";
 
 const MAX_QUALITY = 70;
 const MIN_QUALITY = 50;
-
-const SIPS_HEIC_CONVERT_COMMAND_TEMPLATE = [
-    "sips",
-    "-s",
-    "format",
-    "jpeg",
-    INPUT_PATH_PLACEHOLDER,
-    "--out",
-    OUTPUT_PATH_PLACEHOLDER,
-];
 
 const SIPS_THUMBNAIL_GENERATE_COMMAND_TEMPLATE = [
     "sips",
@@ -39,14 +87,6 @@ const SIPS_THUMBNAIL_GENERATE_COMMAND_TEMPLATE = [
     MAX_DIMENSION_PLACEHOLDER,
     INPUT_PATH_PLACEHOLDER,
     "--out",
-    OUTPUT_PATH_PLACEHOLDER,
-];
-
-const IMAGEMAGICK_HEIC_CONVERT_COMMAND_TEMPLATE = [
-    IMAGE_MAGICK_PLACEHOLDER,
-    INPUT_PATH_PLACEHOLDER,
-    "-quality",
-    "100%",
     OUTPUT_PATH_PLACEHOLDER,
 ];
 
@@ -64,85 +104,6 @@ const IMAGE_MAGICK_THUMBNAIL_GENERATE_COMMAND_TEMPLATE = [
     QUALITY_PLACEHOLDER,
     OUTPUT_PATH_PLACEHOLDER,
 ];
-
-const imageMagickStaticPath = () =>
-    path.join(isDev ? "build" : process.resourcesPath, "image-magick");
-
-export const convertToJPEG = async (
-    fileName: string,
-    imageData: Uint8Array,
-): Promise<Uint8Array> => {
-    if (process.platform == "win32")
-        throw new Error(CustomErrorMessage.NotAvailable);
-
-    let tempInputFilePath: string;
-    let tempOutputFilePath: string;
-    try {
-        tempInputFilePath = await makeTempFilePath(fileName);
-        tempOutputFilePath = await makeTempFilePath("output.jpeg");
-
-        await fs.writeFile(tempInputFilePath, imageData);
-
-        await execAsync(
-            constructConvertCommand(tempInputFilePath, tempOutputFilePath),
-        );
-
-        return new Uint8Array(await fs.readFile(tempOutputFilePath));
-    } catch (e) {
-        log.error("Failed to convert HEIC", e);
-        throw e;
-    } finally {
-        try {
-            await fs.rm(tempInputFilePath, { force: true });
-        } catch (e) {
-            log.error(`Failed to remove tempInputFile ${tempInputFilePath}`, e);
-        }
-        try {
-            await fs.rm(tempOutputFilePath, { force: true });
-        } catch (e) {
-            log.error(
-                `Failed to remove tempOutputFile ${tempOutputFilePath}`,
-                e,
-            );
-        }
-    }
-};
-
-function constructConvertCommand(
-    tempInputFilePath: string,
-    tempOutputFilePath: string,
-) {
-    let convertCmd: string[];
-    if (process.platform == "darwin") {
-        convertCmd = SIPS_HEIC_CONVERT_COMMAND_TEMPLATE.map((cmdPart) => {
-            if (cmdPart === INPUT_PATH_PLACEHOLDER) {
-                return tempInputFilePath;
-            }
-            if (cmdPart === OUTPUT_PATH_PLACEHOLDER) {
-                return tempOutputFilePath;
-            }
-            return cmdPart;
-        });
-    } else if (process.platform == "linux") {
-        convertCmd = IMAGEMAGICK_HEIC_CONVERT_COMMAND_TEMPLATE.map(
-            (cmdPart) => {
-                if (cmdPart === IMAGE_MAGICK_PLACEHOLDER) {
-                    return imageMagickStaticPath();
-                }
-                if (cmdPart === INPUT_PATH_PLACEHOLDER) {
-                    return tempInputFilePath;
-                }
-                if (cmdPart === OUTPUT_PATH_PLACEHOLDER) {
-                    return tempOutputFilePath;
-                }
-                return cmdPart;
-            },
-        );
-    } else {
-        throw new Error(`Unsupported OS ${process.platform}`);
-    }
-    return convertCmd;
-}
 
 export async function generateImageThumbnail(
     inputFile: File | ElectronFile,
@@ -248,7 +209,7 @@ function constructThumbnailGenerationCommand(
         thumbnailGenerationCmd =
             IMAGE_MAGICK_THUMBNAIL_GENERATE_COMMAND_TEMPLATE.map((cmdPart) => {
                 if (cmdPart === IMAGE_MAGICK_PLACEHOLDER) {
-                    return imageMagickStaticPath();
+                    return imageMagickPath();
                 }
                 if (cmdPart === INPUT_PATH_PLACEHOLDER) {
                     return inputFilePath;
