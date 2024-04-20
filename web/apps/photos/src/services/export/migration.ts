@@ -1,3 +1,4 @@
+import { decodeLivePhoto } from "@/media/live-photo";
 import { ensureElectron } from "@/next/electron";
 import log from "@/next/log";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
@@ -7,7 +8,6 @@ import { FILE_TYPE } from "constants/file";
 import { getLocalCollections } from "services/collectionService";
 import downloadManager from "services/download";
 import { getAllLocalFiles } from "services/fileService";
-import { decodeLivePhoto } from "services/livePhotoService";
 import { Collection } from "types/collection";
 import {
     CollectionExportNames,
@@ -21,11 +21,11 @@ import {
 } from "types/export";
 import { EnteFile } from "types/file";
 import { getNonEmptyPersonalCollections } from "utils/collection";
-import { splitFilenameAndExtension } from "utils/ffmpeg";
 import {
     getIDBasedSortedFiles,
     getPersonalFiles,
     mergeMetadata,
+    splitFilenameAndExtension,
 } from "utils/file";
 import {
     safeDirectoryName,
@@ -318,15 +318,18 @@ async function getFileExportNamesFromExportedFiles(
         if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
             const fileStream = await downloadManager.getFile(file);
             const fileBlob = await new Response(fileStream).blob();
-            const livePhoto = await decodeLivePhoto(file, fileBlob);
+            const { imageFileName, videoFileName } = await decodeLivePhoto(
+                file.metadata.title,
+                fileBlob,
+            );
             const imageExportName = getUniqueFileExportNameForMigration(
                 collectionPath,
-                livePhoto.imageNameTitle,
+                imageFileName,
                 usedFilePaths,
             );
             const videoExportName = getUniqueFileExportNameForMigration(
                 collectionPath,
-                livePhoto.videoNameTitle,
+                videoFileName,
                 usedFilePaths,
             );
             fileExportName = getLivePhotoExportName(

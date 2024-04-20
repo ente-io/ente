@@ -2,9 +2,8 @@ import { existsSync } from "fs";
 import fs from "node:fs/promises";
 import path from "path";
 import { CustomErrors, ElectronFile } from "../../types/ipc";
-import { writeStream } from "../fs";
 import log from "../log";
-import { isPlatform } from "../platform";
+import { writeStream } from "../stream";
 import { generateTempFilePath } from "../temp";
 import { execAsync, isDev } from "../util";
 import { deleteTempFile } from "./ffmpeg";
@@ -67,19 +66,15 @@ const IMAGE_MAGICK_THUMBNAIL_GENERATE_COMMAND_TEMPLATE = [
     OUTPUT_PATH_PLACEHOLDER,
 ];
 
-function getImageMagickStaticPath() {
-    return isDev
-        ? "resources/image-magick"
-        : path.join(process.resourcesPath, "image-magick");
-}
+const imageMagickStaticPath = () =>
+    path.join(isDev ? "build" : process.resourcesPath, "image-magick");
 
 export async function convertToJPEG(
     fileData: Uint8Array,
     filename: string,
 ): Promise<Uint8Array> {
-    if (isPlatform("windows")) {
+    if (process.platform == "win32")
         throw Error(CustomErrors.WINDOWS_NATIVE_IMAGE_PROCESSING_NOT_SUPPORTED);
-    }
     const convertedFileData = await convertToJPEG_(fileData, filename);
     return convertedFileData;
 }
@@ -126,7 +121,7 @@ function constructConvertCommand(
     tempOutputFilePath: string,
 ) {
     let convertCmd: string[];
-    if (isPlatform("mac")) {
+    if (process.platform == "darwin") {
         convertCmd = SIPS_HEIC_CONVERT_COMMAND_TEMPLATE.map((cmdPart) => {
             if (cmdPart === INPUT_PATH_PLACEHOLDER) {
                 return tempInputFilePath;
@@ -136,11 +131,11 @@ function constructConvertCommand(
             }
             return cmdPart;
         });
-    } else if (isPlatform("linux")) {
+    } else if (process.platform == "linux") {
         convertCmd = IMAGEMAGICK_HEIC_CONVERT_COMMAND_TEMPLATE.map(
             (cmdPart) => {
                 if (cmdPart === IMAGE_MAGICK_PLACEHOLDER) {
-                    return getImageMagickStaticPath();
+                    return imageMagickStaticPath();
                 }
                 if (cmdPart === INPUT_PATH_PLACEHOLDER) {
                     return tempInputFilePath;
@@ -165,11 +160,10 @@ export async function generateImageThumbnail(
     let inputFilePath = null;
     let createdTempInputFile = null;
     try {
-        if (isPlatform("windows")) {
+        if (process.platform == "win32")
             throw Error(
                 CustomErrors.WINDOWS_NATIVE_IMAGE_PROCESSING_NOT_SUPPORTED,
             );
-        }
         if (!existsSync(inputFile.path)) {
             const tempFilePath = await generateTempFilePath(inputFile.name);
             await writeStream(tempFilePath, await inputFile.stream());
@@ -240,7 +234,7 @@ function constructThumbnailGenerationCommand(
     quality: number,
 ) {
     let thumbnailGenerationCmd: string[];
-    if (isPlatform("mac")) {
+    if (process.platform == "darwin") {
         thumbnailGenerationCmd = SIPS_THUMBNAIL_GENERATE_COMMAND_TEMPLATE.map(
             (cmdPart) => {
                 if (cmdPart === INPUT_PATH_PLACEHOLDER) {
@@ -258,11 +252,11 @@ function constructThumbnailGenerationCommand(
                 return cmdPart;
             },
         );
-    } else if (isPlatform("linux")) {
+    } else if (process.platform == "linux") {
         thumbnailGenerationCmd =
             IMAGE_MAGICK_THUMBNAIL_GENERATE_COMMAND_TEMPLATE.map((cmdPart) => {
                 if (cmdPart === IMAGE_MAGICK_PLACEHOLDER) {
-                    return getImageMagickStaticPath();
+                    return imageMagickStaticPath();
                 }
                 if (cmdPart === INPUT_PATH_PLACEHOLDER) {
                     return inputFilePath;

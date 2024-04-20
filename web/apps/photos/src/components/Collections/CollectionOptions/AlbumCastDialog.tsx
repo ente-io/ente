@@ -50,7 +50,7 @@ export default function AlbumCastDialog(props: Props) {
         setFieldError,
     ) => {
         try {
-            await doCast(value);
+            await doCast(value.trim());
             props.onHide();
         } catch (e) {
             const error = e as Error;

@@ -1,7 +1,11 @@
-export async function sleep(time: number) {
-    await new Promise((resolve) => {
-        setTimeout(() => resolve(null), time);
-    });
+/**
+ * Wait for {@link ms} milliseconds
+ *
+ * This function is a promisified `setTimeout`. It returns a promise that
+ * resolves after {@link ms} milliseconds.
+ */
+export async function sleep(ms: number) {
+    await new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 export function downloadAsFile(filename: string, content: string) {

@@ -9,6 +9,14 @@ import { loadStripe } from "@stripe/stripe-js";
  * redirect to the client or to some fallback URL.
  */
 export const parseAndHandleRequest = async () => {
+    // See: [Note: Intercept payments redirection to desktop app]
+    if (window.location.pathname == "/desktop-redirect") {
+        const desktopRedirectURL = new URL("ente://app/gallery");
+        desktopRedirectURL.search = new URL(window.location.href).search;
+        window.location.href = desktopRedirectURL.href;
+        return;
+    }
+
     try {
         const urlParams = new URLSearchParams(window.location.search);
         const productID = urlParams.get("productID");
@@ -291,6 +299,8 @@ const redirectToApp = (
     status: RedirectStatus,
     reason?: FailureReason,
 ) => {
+    // [Note: Intercept payments redirection to desktop app]
+    //
     // The desktop app passes "<our-origin>/desktop-redirect" as `redirectURL`.
     // This is just a placeholder, we want to intercept this and instead
     // redirect to the ente:// scheme protocol handler that is internally being

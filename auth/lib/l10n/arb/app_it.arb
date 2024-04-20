@@ -190,6 +190,7 @@
   "recoveryKeySaveDescription": "Non memorizziamo questa chiave, per favore salva questa chiave di 24 parole in un posto sicuro.",
   "doThisLater": "Fallo più tardi",
   "saveKey": "Salva chiave",
+  "save": "Salva",
   "back": "Indietro",
   "createAccount": "Crea account",
   "passwordStrength": "Forza password: {passwordStrengthValue}",
@@ -396,5 +397,6 @@
   "signOutOtherDevices": "Esci dagli altri dispositivi",
   "doNotSignOut": "Non uscire",
   "hearUsWhereTitle": "Dove hai sentito parlare di Ente? (opzionale)",
-  "hearUsExplanation": "Non teniamo traccia delle installazioni dell'app. Sarebbe utile se ci dicessi dove ci hai trovato!"
+  "hearUsExplanation": "Non teniamo traccia delle installazioni dell'app. Sarebbe utile se ci dicessi dove ci hai trovato!",
+  "passkey": "Passkey"
 }
