@@ -69,7 +69,6 @@ import {
     getLivePhotoName,
     getLivePhotoSize,
     getMetadataJSONMapKeyForFile,
-    readLivePhoto,
 } from "./metadataService";
 import { uploadStreamUsingMultipart } from "./multiPartUploadService";
 import publicUploadHttpClient from "./publicUploadHttpClient";
