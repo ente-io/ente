@@ -18,34 +18,17 @@ import { deleteTempFile } from "./ffmpeg";
 import {
     createInferenceSession,
     downloadModel,
-    modelPathDownloadingIfNeeded,
+    makeCachedInferenceSession,
     modelSavePath,
 } from "./ml";
 
 const textModelName = "clip-text-vit-32-uint8.onnx";
 const textModelByteSize = 64173509; // 61.2 MB
 
-const imageModelName = "clip-image-vit-32-float32.onnx";
-const imageModelByteSize = 351468764; // 335.2 MB
-
-let activeImageModelDownload: Promise<string> | undefined;
-
-const imageModelPathDownloadingIfNeeded = async () => {
-    try {
-        if (activeImageModelDownload) {
-            log.info("Waiting for CLIP image model download to finish");
-            await activeImageModelDownload;
-        } else {
-            activeImageModelDownload = modelPathDownloadingIfNeeded(
-                imageModelName,
-                imageModelByteSize,
-            );
-            return await activeImageModelDownload;
-        }
-    } finally {
-        activeImageModelDownload = undefined;
-    }
-};
+const cachedCLIPImageSession = makeCachedInferenceSession(
+    "clip-image-vit-32-float32.onnx",
+    351468764 /* 335.2 MB */,
+);
 
 let textModelDownloadInProgress = false;
 
@@ -90,18 +73,6 @@ const textModelPathDownloadingIfNeeded = async () => {
     return modelPath;
 };
 
-let imageSessionPromise: Promise<any> | undefined;
-
-const onnxImageSession = async () => {
-    if (!imageSessionPromise) {
-        imageSessionPromise = (async () => {
-            const modelPath = await imageModelPathDownloadingIfNeeded();
-            return createInferenceSession(modelPath);
-        })();
-    }
-    return imageSessionPromise;
-};
-
 let _textSession: any = null;
 
 const onnxTextSession = async () => {
@@ -124,7 +95,7 @@ export const clipImageEmbedding = async (jpegImageData: Uint8Array) => {
 };
 
 const clipImageEmbedding_ = async (jpegFilePath: string) => {
-    const session = await onnxImageSession();
+    const session = await cachedCLIPImageSession();
     const t1 = Date.now();
     const rgbData = await getRGBData(jpegFilePath);
     const feeds = {
@@ -136,7 +107,8 @@ const clipImageEmbedding_ = async (jpegFilePath: string) => {
         () =>
             `onnx/clip image embedding took ${Date.now() - t1} ms (prep: ${t2 - t1} ms, inference: ${Date.now() - t2} ms)`,
     );
-    const imageEmbedding = results["output"].data; // Float32Array
+    /* Need these model specific casts to type the result */
+    const imageEmbedding = results["output"].data as Float32Array;
     return normalizeEmbedding(imageEmbedding);
 };
 
