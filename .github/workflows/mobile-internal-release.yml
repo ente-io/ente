@@ -1,10 +1,7 @@
 name: "Internal Release - Photos"
 
 on:
-    push:
-        branches: [main]
-        paths:
-            - "mobile/**"
+    workflow_dispatch: # Allow manually running the action
 
 env:
     FLUTTER_VERSION: "3.19.5"
