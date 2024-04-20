@@ -279,21 +279,6 @@ const getDirFiles = (dirPath: string): Promise<ElectronFile[]> =>
  *
  * ---
  *
- * [Note: Custom errors across Electron/Renderer boundary]
- *
- * If we need to identify errors thrown by the main process when invoked from
- * the renderer process, we can only use the `message` field because:
- *
- * > Errors thrown throw `handle` in the main process are not transparent as
- * > they are serialized and only the `message` property from the original error
- * > is provided to the renderer process.
- * >
- * > - https://www.electronjs.org/docs/latest/tutorial/ipc
- * >
- * > Ref: https://github.com/electron/electron/issues/24427
- *
- * ---
- *
  * [Note: Transferring large amount of data over IPC]
  *
  * Electron's IPC implementation uses the HTML standard Structured Clone

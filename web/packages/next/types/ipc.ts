@@ -448,6 +448,26 @@ export interface Electron {
 }
 
 /**
+ * Errors that have special semantics on the web side.
+ *
+ * [Note: Custom errors across Electron/Renderer boundary]
+ *
+ * If we need to identify errors thrown by the main process when invoked from
+ * the renderer process, we can only use the `message` field because:
+ *
+ * > Errors thrown throw `handle` in the main process are not transparent as
+ * > they are serialized and only the `message` property from the original error
+ * > is provided to the renderer process.
+ * >
+ * > - https://www.electronjs.org/docs/latest/tutorial/ipc
+ * >
+ * > Ref: https://github.com/electron/electron/issues/24427
+ */
+export const CustomErrorMessage = {
+    NotAvailable: "This feature in not available on the current OS/arch",
+};
+
+/**
  * Data passed across the IPC bridge when an app update is available.
  */
 export interface AppUpdate {

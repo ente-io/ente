@@ -5,7 +5,6 @@ import type { Electron } from "@/next/types/ipc";
 import { workerBridge } from "@/next/worker/worker-bridge";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { CustomError } from "@ente/shared/error";
-import { isPlaybackPossible } from "@ente/shared/media/video-playback";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import { User } from "@ente/shared/user/types";
 import { downloadUsingAnchor } from "@ente/shared/utils";
@@ -21,11 +20,7 @@ import {
 import { t } from "i18next";
 import isElectron from "is-electron";
 import { moveToHiddenCollection } from "services/collectionService";
-import DownloadManager, {
-    LivePhotoSourceURL,
-    SourceURLs,
-} from "services/download";
-import * as ffmpegService from "services/ffmpeg/ffmpegService";
+import DownloadManager from "services/download";
 import {
     deleteFromTrash,
     trashFiles,
@@ -269,149 +264,6 @@ export function generateStreamFromArrayBuffer(data: Uint8Array) {
             controller.close();
         },
     });
-}
-
-export async function getRenderableFileURL(
-    file: EnteFile,
-    fileBlob: Blob,
-    originalFileURL: string,
-    forceConvert: boolean,
-): Promise<SourceURLs> {
-    let srcURLs: SourceURLs["url"];
-    switch (file.metadata.fileType) {
-        case FILE_TYPE.IMAGE: {
-            const convertedBlob = await getRenderableImage(
-                file.metadata.title,
-                fileBlob,
-            );
-            const convertedURL = getFileObjectURL(
-                originalFileURL,
-                fileBlob,
-                convertedBlob,
-            );
-            srcURLs = convertedURL;
-            break;
-        }
-        case FILE_TYPE.LIVE_PHOTO: {
-            srcURLs = await getRenderableLivePhotoURL(
-                file,
-                fileBlob,
-                forceConvert,
-            );
-            break;
-        }
-        case FILE_TYPE.VIDEO: {
-            const convertedBlob = await getPlayableVideo(
-                file.metadata.title,
-                fileBlob,
-                forceConvert,
-            );
-            const convertedURL = getFileObjectURL(
-                originalFileURL,
-                fileBlob,
-                convertedBlob,
-            );
-            srcURLs = convertedURL;
-            break;
-        }
-        default: {
-            srcURLs = originalFileURL;
-            break;
-        }
-    }
-
-    let isOriginal: boolean;
-    if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
-        isOriginal = false;
-    } else {
-        isOriginal = (srcURLs as string) === (originalFileURL as string);
-    }
-
-    return {
-        url: srcURLs,
-        isOriginal,
-        isRenderable:
-            file.metadata.fileType !== FILE_TYPE.LIVE_PHOTO && !!srcURLs,
-        type:
-            file.metadata.fileType === FILE_TYPE.LIVE_PHOTO
-                ? "livePhoto"
-                : "normal",
-    };
-}
-
-async function getRenderableLivePhotoURL(
-    file: EnteFile,
-    fileBlob: Blob,
-    forceConvert: boolean,
-): Promise<LivePhotoSourceURL> {
-    const livePhoto = await decodeLivePhoto(file.metadata.title, fileBlob);
-
-    const getRenderableLivePhotoImageURL = async () => {
-        try {
-            const imageBlob = new Blob([livePhoto.imageData]);
-            const convertedImageBlob = await getRenderableImage(
-                livePhoto.imageFileName,
-                imageBlob,
-            );
-
-            return URL.createObjectURL(convertedImageBlob);
-        } catch (e) {
-            //ignore and return null
-            return null;
-        }
-    };
-
-    const getRenderableLivePhotoVideoURL = async () => {
-        try {
-            const videoBlob = new Blob([livePhoto.videoData]);
-            const convertedVideoBlob = await getPlayableVideo(
-                livePhoto.videoFileName,
-                videoBlob,
-                forceConvert,
-                true,
-            );
-            return URL.createObjectURL(convertedVideoBlob);
-        } catch (e) {
-            //ignore and return null
-            return null;
-        }
-    };
-
-    return {
-        image: getRenderableLivePhotoImageURL,
-        video: getRenderableLivePhotoVideoURL,
-    };
-}
-
-export async function getPlayableVideo(
-    videoNameTitle: string,
-    videoBlob: Blob,
-    forceConvert = false,
-    runOnWeb = false,
-) {
-    try {
-        const isPlayable = await isPlaybackPossible(
-            URL.createObjectURL(videoBlob),
-        );
-        if (isPlayable && !forceConvert) {
-            return videoBlob;
-        } else {
-            if (!forceConvert && !runOnWeb && !isElectron()) {
-                return null;
-            }
-            log.info(
-                `video format not supported, converting it name: ${videoNameTitle}`,
-            );
-            const mp4ConvertedVideo = await ffmpegService.convertToMP4(
-                new File([videoBlob], videoNameTitle),
-            );
-            log.info(`video successfully converted ${videoNameTitle}`);
-            return new Blob([await mp4ConvertedVideo.arrayBuffer()]);
-        }
-    } catch (e) {
-        log.error("video conversion failed", e);
-        return null;
-    }
 }
 
 export async function getRenderableImage(fileName: string, imageBlob: Blob) {
@@ -1060,17 +912,4 @@ const fixTimeHelper = async (
     }) => void,
 ) => {
     setFixCreationTimeAttributes({ files: selectedFiles });
-};
-
-const getFileObjectURL = (
-    originalFileURL: string,
-    originalBlob: Blob,
-    convertedBlob: Blob,
-) => {
-    const convertedURL = convertedBlob
-        ? convertedBlob === originalBlob
-            ? originalFileURL
-            : URL.createObjectURL(convertedBlob)
-        : null;
-    return convertedURL;
 };

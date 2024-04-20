@@ -32,11 +32,13 @@ export interface PendingUploads {
 }
 
 /**
- * Errors that have special semantics on the web side.
+ * See: [Note: Custom errors across Electron/Renderer boundary]
+ *
+ * Note: this is not a type, and cannot be used in preload.js; it is only meant
+ * for use in the main process code.
  */
-export const CustomErrors = {
-    WINDOWS_NATIVE_IMAGE_PROCESSING_NOT_SUPPORTED:
-        "Windows native image processing is not supported",
+export const CustomErrorMessage = {
+    NotAvailable: "This feature in not available on the current OS/arch",
 };
 
 /**
