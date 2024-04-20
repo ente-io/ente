@@ -1177,9 +1177,9 @@ class CollectionsService {
       final Map<int, List<EnteFile>> filesByCollection = {};
       for (final file in filesToCopy) {
         if (filesByCollection.containsKey(file.collectionID!)) {
-          filesByCollection[file.collectionID!]!.add(file);
+          filesByCollection[file.collectionID!]!.add(file.copyWith());
         } else {
-          filesByCollection[file.collectionID!] = [file];
+          filesByCollection[file.collectionID!] = [file.copyWith()];
         }
       }
       for (final entry in filesByCollection.entries) {
@@ -1325,19 +1325,22 @@ class CollectionsService {
     params["srcCollectionID"] = srcCollectionID;
     for (final batch in batchedFiles) {
       params["files"] = [];
-      for (final file in batch) {
-        final fileKey = getFileKey(file);
+      for (final batchFile in batch) {
+        final fileKey = getFileKey(batchFile);
+        _logger.info(
+          "srcCollection : $srcCollectionID  file: ${batchFile.uploadedFileID}  key: ${CryptoUtil.bin2base64(fileKey)} ",
+        );
         final encryptedKeyData =
             CryptoUtil.encryptSync(fileKey, getCollectionKey(dstCollectionID));
-        file.encryptedKey =
+        batchFile.encryptedKey =
             CryptoUtil.bin2base64(encryptedKeyData.encryptedData!);
-        file.keyDecryptionNonce =
+        batchFile.keyDecryptionNonce =
             CryptoUtil.bin2base64(encryptedKeyData.nonce!);
         params["files"].add(
           CollectionFileItem(
-            file.uploadedFileID!,
-            file.encryptedKey!,
-            file.keyDecryptionNonce!,
+            batchFile.uploadedFileID!,
+            batchFile.encryptedKey!,
+            batchFile.keyDecryptionNonce!,
           ).toMap(),
         );
       }
@@ -1358,6 +1361,7 @@ class CollectionsService {
             file.generatedID = null;
             file.collectionID = dstCollectionID;
             file.uploadedFileID = oldToCopiedFileIDMap[uploadIDForOriginalFIle];
+            file.ownerID = _config.getUserID();
             oldToCopiedFileIDMap.remove(uploadIDForOriginalFIle);
           } else {
             throw Exception("Failed to copy file ${file.uploadedFileID}");
