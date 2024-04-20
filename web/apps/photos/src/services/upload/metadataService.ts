@@ -11,12 +11,7 @@ import {
 } from "@ente/shared/time";
 import { Remote } from "comlink";
 import { FILE_TYPE } from "constants/file";
-import {
-    FILE_READER_CHUNK_SIZE,
-    LIVE_PHOTO_ASSET_SIZE_LIMIT,
-    NULL_EXTRACTED_METADATA,
-    NULL_LOCATION,
-} from "constants/upload";
+import { FILE_READER_CHUNK_SIZE, NULL_LOCATION } from "constants/upload";
 import * as ffmpegService from "services/ffmpeg/ffmpegService";
 import { getElectronFileStream, getFileStream } from "services/readerService";
 import { getFileType } from "services/typeDetectionService";
@@ -67,6 +62,13 @@ const EXIF_TAGS_NEEDED = [
 ];
 
 export const MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT = 46;
+
+export const NULL_EXTRACTED_METADATA: ParsedExtractedMetadata = {
+    location: NULL_LOCATION,
+    creationTime: null,
+    width: null,
+    height: null,
+};
 
 export async function extractMetadata(
     worker: Remote<DedicatedCryptoWorker>,
@@ -554,6 +556,8 @@ function areFilesLivePhotoAssets(
         areNotSameFileType &&
         firstFileNameWithoutSuffix === secondFileNameWithoutSuffix
     ) {
+        const LIVE_PHOTO_ASSET_SIZE_LIMIT = 20 * 1024 * 1024; // 20MB
+
         // checks size of live Photo assets are less than allowed limit
         // I did that based on the assumption that live photo assets ideally would not be larger than LIVE_PHOTO_ASSET_SIZE_LIMIT
         // also zipping library doesn't support stream as a input

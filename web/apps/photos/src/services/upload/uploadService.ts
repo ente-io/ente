@@ -14,7 +14,6 @@ import { wait } from "@ente/shared/utils";
 import { Remote } from "comlink";
 import {
     FILE_READER_CHUNK_SIZE,
-    MAX_FILE_SIZE_SUPPORTED,
     MULTIPART_PART_SIZE,
     UPLOAD_RESULT,
 } from "constants/upload";
@@ -547,8 +546,10 @@ export async function uploader(
     let fileTypeInfo: FileTypeInfo;
     let fileSize: number;
     try {
+        const maxFileSize = 4 * 1024 * 1024 * 1024; // 4 GB
+
         fileSize = uploadService.getAssetSize(uploadAsset);
-        if (fileSize >= MAX_FILE_SIZE_SUPPORTED) {
+        if (fileSize >= maxFileSize) {
             return { fileUploadResult: UPLOAD_RESULT.TOO_LARGE };
         }
         log.info(`getting filetype for ${fileNameSize}`);

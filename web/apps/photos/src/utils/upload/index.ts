@@ -1,6 +1,6 @@
 import { basename, dirname } from "@/next/file";
 import { FILE_TYPE } from "constants/file";
-import { A_SEC_IN_MICROSECONDS, PICKED_UPLOAD_TYPE } from "constants/upload";
+import { PICKED_UPLOAD_TYPE } from "constants/upload";
 import isElectron from "is-electron";
 import { exportMetadataDirectoryName } from "services/export";
 import { EnteFile } from "types/file";
@@ -45,12 +45,13 @@ export function areFilesSame(
          * precision of file times to prevent timing attacks and fingerprinting.
          * Context: https://developer.mozilla.org/en-US/docs/Web/API/File/lastModified#reduced_time_precision
          */
+        const oneSecond = 1e6;
         if (
             existingFile.fileType === newFile.fileType &&
             Math.abs(existingFile.creationTime - newFile.creationTime) <
-                A_SEC_IN_MICROSECONDS &&
+                oneSecond &&
             Math.abs(existingFile.modificationTime - newFile.modificationTime) <
-                A_SEC_IN_MICROSECONDS &&
+                oneSecond &&
             existingFile.title === newFile.title
         ) {
             return true;
