@@ -10,6 +10,7 @@ import HeicConversionService from "services/heicConversionService";
 import { ElectronFile, FileTypeInfo } from "types/upload";
 import { isFileHEIC } from "utils/file";
 import { getUint8ArrayView } from "../readerService";
+import { getFileName } from "./uploadService";
 
 /** Maximum width or height of the generated thumbnail */
 const maxThumbnailDimension = 720;
@@ -21,53 +22,41 @@ const MAX_QUALITY = 0.7;
 
 const WAIT_TIME_THUMBNAIL_GENERATION = 30 * 1000;
 
-export async function generateThumbnail(
+/**
+ * Generate a JPEG thumbnail for the given {@link file}.
+ *
+ * The thumbnail has a smaller file size so that is quick to load. But more
+ * importantly, it uses a universal file format (JPEG in our case) so that the
+ * thumbnail itself can be opened in all clients, even those like the web client
+ * itself that might not yet have support for more exotic formats.
+ */
+export const generateThumbnail = async (
     file: File | ElectronFile,
     fileTypeInfo: FileTypeInfo,
-): Promise<{ thumbnail: Uint8Array; hasStaticThumbnail: boolean }> {
+): Promise<{ thumbnail: Uint8Array; hasStaticThumbnail: boolean }> => {
     try {
-        log.info(`generating thumbnail for ${getFileNameSize(file)}`);
-        let hasStaticThumbnail = false;
-        let thumbnail: Uint8Array;
-        try {
-            if (fileTypeInfo.fileType === FILE_TYPE.IMAGE) {
-                thumbnail = await generateImageThumbnail(file, fileTypeInfo);
-            } else {
-                thumbnail = await generateVideoThumbnail(file, fileTypeInfo);
-            }
-            if (thumbnail.length > 1.5 * maxThumbnailSize) {
-                log.error(
-                    `thumbnail greater than max limit - ${JSON.stringify({
-                        thumbnailSize: convertBytesToHumanReadable(
-                            thumbnail.length,
-                        ),
-                        fileSize: convertBytesToHumanReadable(file.size),
-                        fileType: fileTypeInfo.exactType,
-                    })}`,
-                );
-            }
-            if (thumbnail.length === 0) {
-                throw Error("EMPTY THUMBNAIL");
-            }
-            log.info(
-                `thumbnail successfully generated ${getFileNameSize(file)}`,
-            );
-        } catch (e) {
-            log.error(
-                `thumbnail generation failed ${getFileNameSize(file)} with format ${fileTypeInfo.exactType}`,
-                e,
-            );
-            thumbnail = Uint8Array.from(atob(BLACK_THUMBNAIL_BASE64), (c) =>
-                c.charCodeAt(0),
-            );
-            hasStaticThumbnail = true;
-        }
-        return { thumbnail, hasStaticThumbnail };
+        const thumbnail =
+            fileTypeInfo.fileType === FILE_TYPE.IMAGE
+                ? await generateImageThumbnail(file, fileTypeInfo)
+                : await generateVideoThumbnail(file, fileTypeInfo);
+
+        if (thumbnail.length == 0) throw new Error("Empty thumbnail");
+        log.debug(() => `Generated thumbnail for ${getFileName(file)}`);
+        return { thumbnail, hasStaticThumbnail: false };
     } catch (e) {
-        log.error("Error generating static thumbnail", e);
-        throw e;
+        log.error(
+            `Failed to generate thumbnail for ${getFileName(file)} with format ${fileTypeInfo.exactType}`,
+            e,
+        );
+        return { thumbnail: fallbackThumbnail(), hasStaticThumbnail: true };
     }
-}
+};
+
+/**
+ * A fallback, black, thumbnail to use in cases where thumbnail generation fails
+ */
+const fallbackThumbnail = () =>
+    Uint8Array.from(atob(BLACK_THUMBNAIL_BASE64), (c) => c.charCodeAt(0));
 
 async function generateImageThumbnail(
     file: File | ElectronFile,
