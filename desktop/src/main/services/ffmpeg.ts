@@ -4,9 +4,9 @@ import fs from "node:fs/promises";
 import { ElectronFile } from "../../types/ipc";
 import log from "../log";
 import { writeStream } from "../stream";
-import { generateTempFilePath, getTempDirPath } from "../temp";
 import { withTimeout } from "../utils";
 import { execAsync } from "../utils-electron";
+import { deleteTempFile, generateTempFilePath } from "../utils-temp";
 
 const INPUT_PATH_PLACEHOLDER = "INPUT";
 const FFMPEG_PLACEHOLDER = "FFMPEG";
@@ -120,16 +120,3 @@ const ffmpegBinaryPath = () => {
     // https://github.com/eugeneware/ffmpeg-static/issues/16
     return pathToFfmpeg.replace("app.asar", "app.asar.unpacked");
 };
-
-export async function writeTempFile(fileStream: Uint8Array, fileName: string) {
-    const tempFilePath = await generateTempFilePath(fileName);
-    await fs.writeFile(tempFilePath, fileStream);
-    return tempFilePath;
-}
-
-export async function deleteTempFile(tempFilePath: string) {
-    const tempDirPath = await getTempDirPath();
-    if (!tempFilePath.startsWith(tempDirPath))
-        log.error("Attempting to delete a non-temp file ${tempFilePath}");
-    await fs.rm(tempFilePath, { force: true });
-}

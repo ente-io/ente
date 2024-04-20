@@ -1,5 +1,4 @@
 import { decodeLivePhoto } from "@/media/live-photo";
-import { convertBytesToHumanReadable } from "@/next/file";
 import log from "@/next/log";
 import { CustomErrorMessage, type Electron } from "@/next/types/ipc";
 import { workerBridge } from "@/next/worker/worker-bridge";
@@ -68,7 +67,7 @@ class ModuleState {
      *
      * Note the double negative when it is used.
      */
-    isElectronJPEGConversionNotAvailable = false;
+    isNativeJPEGConversionNotAvailable = false;
 }
 
 const moduleState = new ModuleState();
@@ -282,7 +281,10 @@ export const getRenderableImage = async (fileName: string, imageBlob: Blob) => {
     try {
         const tempFile = new File([imageBlob], fileName);
         fileTypeInfo = await getFileType(tempFile);
-        log.debug(() => `Obtaining renderable image for ${JSON.stringify(fileTypeInfo)}`);
+        log.debug(
+            () =>
+                `Obtaining renderable image for ${JSON.stringify(fileTypeInfo)}`,
+        );
         const { exactType } = fileTypeInfo;
 
         if (!isRawFile(exactType)) {
@@ -292,18 +294,15 @@ export const getRenderableImage = async (fileName: string, imageBlob: Blob) => {
 
         let jpegBlob: Blob | undefined;
 
-        const available = !moduleState.isElectronJPEGConversionNotAvailable;
+        const available = !moduleState.isNativeJPEGConversionNotAvailable;
         if (isElectron() && available && isSupportedRawFormat(exactType)) {
             // If we're running in our desktop app, see if our Node.js layer can
             // convert this into a JPEG using native tools for us.
             try {
-                jpegBlob = await tryConvertToJPEGInElectron(
-                    imageBlob,
-                    fileName,
-                );
+                jpegBlob = await nativeConvertToJPEG(fileName, imageBlob);
             } catch (e) {
                 if (e.message == CustomErrorMessage.NotAvailable) {
-                    moduleState.isElectronJPEGConversionNotAvailable = true;
+                    moduleState.isNativeJPEGConversionNotAvailable = true;
                 } else {
                     log.error("Native conversion to JPEG failed", e);
                     throw e;
@@ -326,27 +325,18 @@ export const getRenderableImage = async (fileName: string, imageBlob: Blob) => {
     }
 };
 
-const tryConvertToJPEGInElectron = async (
-    fileBlob: Blob,
-    filename: string,
-): Promise<Blob | undefined> => {
+const nativeConvertToJPEG = async (fileName: string, imageBlob: Blob) => {
     const startTime = Date.now();
-    const inputFileData = new Uint8Array(await fileBlob.arrayBuffer());
+    const imageData = new Uint8Array(await imageBlob.arrayBuffer());
     const electron = globalThis.electron;
     // If we're running in a worker, we need to reroute the request back to
     // the main thread since workers don't have access to the `window` (and
     // thus, to the `window.electron`) object.
-    const convertedFileData = electron
-        ? await electron.convertToJPEG(inputFileData, filename)
-        : await workerBridge.convertToJPEG(inputFileData, filename);
-    log.info(
-        `originalFileSize:${convertBytesToHumanReadable(
-            fileBlob?.size,
-        )},convertedFileSize:${convertBytesToHumanReadable(
-            convertedFileData?.length,
-        )},  native conversion time: ${Date.now() - startTime}ms `,
-    );
-    return new Blob([convertedFileData]);
+    const jpegData = electron
+        ? await electron.convertToJPEG(fileName, imageData)
+        : await workerBridge.convertToJPEG(fileName, imageData);
+    log.info(`Native JPEG conversion took ${Date.now() - startTime} ms`);
+    return new Blob([jpegData]);
 };
 
 export function isFileHEIC(exactType: string) {

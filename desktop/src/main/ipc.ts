@@ -44,8 +44,11 @@ import { getDirFiles } from "./services/fs";
 import {
     convertToJPEG,
     generateImageThumbnail,
-} from "./services/imageProcessor";
-import { clipImageEmbedding, clipTextEmbeddingIfAvailable } from "./services/ml-clip";
+} from "./services/convert";
+import {
+    clipImageEmbedding,
+    clipTextEmbeddingIfAvailable,
+} from "./services/ml-clip";
 import { detectFaces, faceEmbedding } from "./services/ml-face";
 import {
     clearStores,
@@ -142,8 +145,8 @@ export const attachIPCHandlers = () => {
 
     // - Conversion
 
-    ipcMain.handle("convertToJPEG", (_, fileData, filename) =>
-        convertToJPEG(fileData, filename),
+    ipcMain.handle("convertToJPEG", (_, fileName, imageData) =>
+        convertToJPEG(fileName, imageData),
     );
 
     ipcMain.handle(

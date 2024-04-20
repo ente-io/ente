@@ -127,10 +127,10 @@ const fsIsDir = (dirPath: string): Promise<boolean> =>
 // - Conversion
 
 const convertToJPEG = (
-    fileData: Uint8Array,
-    filename: string,
+    fileName: string,
+    imageData: Uint8Array,
 ): Promise<Uint8Array> =>
-    ipcRenderer.invoke("convertToJPEG", fileData, filename);
+    ipcRenderer.invoke("convertToJPEG", fileName, imageData);
 
 const generateImageThumbnail = (
     inputFile: File | ElectronFile,

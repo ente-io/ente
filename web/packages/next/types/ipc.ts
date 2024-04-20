@@ -191,26 +191,26 @@ export interface Electron {
         isDir: (dirPath: string) => Promise<boolean>;
     };
 
-    /*
-     * TODO: AUDIT below this - Some of the types we use below are not copyable
-     * across process boundaries, and such functions will (expectedly) fail at
-     * runtime. For such functions, find an efficient alternative or refactor
-     * the dataflow.
-     */
-
     // - Conversion
 
     /**
-     * Try to convert an arbitrary image into JPEG.
+     * Try to convert an arbitrary image into JPEG using native layer tools.
      *
-     * The behaviour is OS dependent.
-     * @param fileData
-     * @param filename
-     * @returns
+     * The behaviour is OS dependent. On macOS we use the `sips` utility, and on
+     * some Linux architectures we use an ImageMagick binary bundled with our
+     * desktop app.
+     *
+     * In other cases (primarily Windows), where native JPEG conversion is not
+     * yet possible, this method will throw an error with the
+     * {@link CustomErrorMessage.NotAvailable} message..
+     *
+     * @param fileName The name of the file whose data we're being given.
+     * @param imageData The raw image data (the contents of the image file).
+     * @returns JPEG data.
      */
     convertToJPEG: (
-        fileData: Uint8Array,
-        filename: string,
+        fileName: string,
+        imageData: Uint8Array,
     ) => Promise<Uint8Array>;
 
     generateImageThumbnail: (
@@ -438,6 +438,13 @@ export interface Electron {
         type: PendingUploads["type"],
         filePaths: string[],
     ) => Promise<void>;
+
+    /*
+     * TODO: AUDIT below this - Some of the types we use below are not copyable
+     * across process boundaries, and such functions will (expectedly) fail at
+     * runtime. For such functions, find an efficient alternative or refactor
+     * the dataflow.
+     */
 
     // -
 

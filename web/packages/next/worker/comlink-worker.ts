@@ -43,15 +43,16 @@ export class ComlinkWorker<T extends new () => InstanceType<T>> {
  * `workerBridge` object after importing it from `worker-bridge.ts`.
  *
  * Not all workers need access to all these functions, and this can indeed be
- * done in a more fine-grained, per-worker, manner if needed.
+ * done in a more fine-grained, per-worker, manner if needed. For now, since it
+ * is a motley bunch, we just inject them all.
  */
 const workerBridge = {
     // Needed: generally (presumably)
     logToDisk,
     // Needed by ML worker
     getAuthToken: () => ensureLocalUser().then((user) => user.token),
-    convertToJPEG: (inputFileData: Uint8Array, filename: string) =>
-        ensureElectron().convertToJPEG(inputFileData, filename),
+    convertToJPEG: (fileName: string, imageData: Uint8Array) =>
+        ensureElectron().convertToJPEG(fileName, imageData),
     detectFaces: (input: Float32Array) => ensureElectron().detectFaces(input),
     faceEmbedding: (input: Float32Array) =>
         ensureElectron().faceEmbedding(input),

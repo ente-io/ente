@@ -1,12 +1,11 @@
 import { existsSync } from "fs";
 import fs from "node:fs/promises";
 import path from "path";
-import { CustomErrors, ElectronFile } from "../../types/ipc";
+import { CustomErrorMessage, ElectronFile } from "../../types/ipc";
 import log from "../log";
 import { writeStream } from "../stream";
-import { generateTempFilePath } from "../temp";
+import { deleteTempFile, generateTempFilePath } from "../temp";
 import { execAsync, isDev } from "../utils-electron";
-import { deleteTempFile } from "./ffmpeg";
 
 const IMAGE_MAGICK_PLACEHOLDER = "IMAGE_MAGICK";
 const MAX_DIMENSION_PLACEHOLDER = "MAX_DIMENSION";
@@ -69,27 +68,20 @@ const IMAGE_MAGICK_THUMBNAIL_GENERATE_COMMAND_TEMPLATE = [
 const imageMagickStaticPath = () =>
     path.join(isDev ? "build" : process.resourcesPath, "image-magick");
 
-export async function convertToJPEG(
-    fileData: Uint8Array,
-    filename: string,
-): Promise<Uint8Array> {
+export const convertToJPEG = async (
+    fileName: string,
+    imageData: Uint8Array,
+): Promise<Uint8Array> => {
     if (process.platform == "win32")
-        throw Error(CustomErrors.WINDOWS_NATIVE_IMAGE_PROCESSING_NOT_SUPPORTED);
-    const convertedFileData = await convertToJPEG_(fileData, filename);
-    return convertedFileData;
-}
+        throw new Error(CustomErrorMessage.NotAvailable);
 
-async function convertToJPEG_(
-    fileData: Uint8Array,
-    filename: string,
-): Promise<Uint8Array> {
     let tempInputFilePath: string;
     let tempOutputFilePath: string;
     try {
-        tempInputFilePath = await generateTempFilePath(filename);
+        tempInputFilePath = await generateTempFilePath(fileName);
         tempOutputFilePath = await generateTempFilePath("output.jpeg");
 
-        await fs.writeFile(tempInputFilePath, fileData);
+        await fs.writeFile(tempInputFilePath, imageData);
 
         await execAsync(
             constructConvertCommand(tempInputFilePath, tempOutputFilePath),
@@ -114,7 +106,7 @@ async function convertToJPEG_(
             );
         }
     }
-}
+};
 
 function constructConvertCommand(
     tempInputFilePath: string,
