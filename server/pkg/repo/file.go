@@ -612,6 +612,24 @@ func (repo *FileRepository) GetFileAttributesFromObjectKey(objectKey string) (en
 	return file, nil
 }
 
+func (repo *FileRepository) GetFileAttributesForCopy(fileIDs []int64) ([]ente.File, error) {
+	result := make([]ente.File, 0)
+	rows, err := repo.DB.Query(`SELECT file_id, owner_id, file_decryption_header, thumbnail_decryption_header, metadata_decryption_header, encrypted_metadata, pub_magic_metadata FROM files WHERE file_id = ANY($1)`, pq.Array(fileIDs))
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var file ente.File
+		err := rows.Scan(&file.ID, &file.OwnerID, &file.File.DecryptionHeader, &file.Thumbnail.DecryptionHeader, &file.Metadata.DecryptionHeader, &file.Metadata.EncryptedData, &file.PubicMagicMetadata)
+		if err != nil {
+			return nil, stacktrace.Propagate(err, "")
+		}
+		result = append(result, file)
+	}
+	return result, nil
+}
+
 // GetUsage  gets the Storage usage of a user
 // Deprecated: GetUsage is deprecated, use UsageRepository.GetUsage
 func (repo *FileRepository) GetUsage(userID int64) (int64, error) {
