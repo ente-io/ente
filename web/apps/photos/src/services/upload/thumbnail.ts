@@ -4,7 +4,7 @@ import { CustomErrorMessage, type Electron } from "@/next/types/ipc";
 import { CustomError } from "@ente/shared/error";
 import { FILE_TYPE } from "constants/file";
 import { BLACK_THUMBNAIL_BASE64 } from "constants/upload";
-import * as FFmpegService from "services/ffmpeg/ffmpegService";
+import * as FFmpegService from "services/ffmpeg";
 import HeicConversionService from "services/heicConversionService";
 import { ElectronFile, FileTypeInfo } from "types/upload";
 import { isFileHEIC } from "utils/file";

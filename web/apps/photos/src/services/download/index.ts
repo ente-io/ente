@@ -10,7 +10,7 @@ import { isPlaybackPossible } from "@ente/shared/media/video-playback";
 import { Remote } from "comlink";
 import { FILE_TYPE } from "constants/file";
 import isElectron from "is-electron";
-import * as ffmpegService from "services/ffmpeg/ffmpegService";
+import * as ffmpegService from "services/ffmpeg";
 import { EnteFile } from "types/file";
 import { generateStreamFromArrayBuffer, getRenderableImage } from "utils/file";
 import { PhotosDownloadClient } from "./clients/photos";

@@ -11,7 +11,7 @@ import {
 import { Remote } from "comlink";
 import { FILE_TYPE } from "constants/file";
 import { FILE_READER_CHUNK_SIZE, NULL_LOCATION } from "constants/upload";
-import * as ffmpegService from "services/ffmpeg/ffmpegService";
+import * as ffmpegService from "services/ffmpeg";
 import { getElectronFileStream, getFileStream } from "services/readerService";
 import { getFileType } from "services/typeDetectionService";
 import { FilePublicMagicMetadataProps } from "types/file";

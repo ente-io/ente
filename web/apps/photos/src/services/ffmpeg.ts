@@ -5,8 +5,8 @@ import {
     OUTPUT_PATH_PLACEHOLDER,
 } from "constants/ffmpeg";
 import { ElectronFile } from "types/upload";
+import ComlinkFFmpegWorker from "utils/comlink/ComlinkFFmpegWorker";
 import { parseFFmpegExtractedMetadata } from "utils/ffmpeg";
-import ffmpegFactory from "./ffmpegFactory";
 
 export async function generateVideoThumbnail(
     file: File | ElectronFile,
@@ -98,3 +98,38 @@ export async function convertToMP4(file: File | ElectronFile) {
         throw e;
     }
 }
+
+interface IFFmpeg {
+    run: (
+        cmd: string[],
+        inputFile: File | ElectronFile,
+        outputFilename: string,
+        dontTimeout?: boolean,
+    ) => Promise<File | ElectronFile>;
+}
+
+class FFmpegFactory {
+    private client: IFFmpeg;
+    async getFFmpegClient() {
+        if (!this.client) {
+            const electron = globalThis.electron;
+            if (electron) {
+                this.client = {
+                    run(cmd, inputFile, outputFilename, dontTimeout) {
+                        return electron.runFFmpegCmd(
+                            cmd,
+                            inputFile,
+                            outputFilename,
+                            dontTimeout,
+                        );
+                    },
+                };
+            } else {
+                this.client = await ComlinkFFmpegWorker.getInstance();
+            }
+        }
+        return this.client;
+    }
+}
+
+const ffmpegFactory = new FFmpegFactory();
