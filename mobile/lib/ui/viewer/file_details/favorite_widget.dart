@@ -44,7 +44,8 @@ class _FavoriteWidgetState extends State<FavoriteWidget> {
         final bool isLiked = snapshot.data ?? false;
         return _isLoading
             ? const EnteLoadingWidget(
-                size: 12,
+                size: 14,
+                padding: 2,
               ) // Add this line
             : LikeButton(
                 size: 24,
