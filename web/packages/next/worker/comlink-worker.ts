@@ -12,22 +12,15 @@ export class ComlinkWorker<T extends new () => InstanceType<T>> {
         this.name = name;
         this.worker = worker;
 
-        this.worker.onerror = (ev) => {
+        worker.onerror = (event) => {
             log.error(
-                `Got error event from worker: ${JSON.stringify({
-                    errorEvent: JSON.stringify(ev),
-                    name: this.name,
-                })}`,
+                `Got error event from worker: ${JSON.stringify({ event, name })}`,
             );
         };
-        log.debug(() => `Initiated ${this.name}`);
-        const comlink = wrap<T>(this.worker);
+        log.debug(() => `Initiated web worker ${name}`);
+        const comlink = wrap<T>(worker);
         this.remote = new comlink() as Promise<Remote<InstanceType<T>>>;
         expose(workerBridge, worker);
-    }
-
-    public getName() {
-        return this.name;
     }
 
     public terminate() {
