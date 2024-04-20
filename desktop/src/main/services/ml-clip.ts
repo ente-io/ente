@@ -124,14 +124,14 @@ export const clipImageEmbedding = async (jpegImageData: Uint8Array) => {
 };
 
 const clipImageEmbedding_ = async (jpegFilePath: string) => {
-    const imageSession = await onnxImageSession();
+    const session = await onnxImageSession();
     const t1 = Date.now();
     const rgbData = await getRGBData(jpegFilePath);
     const feeds = {
         input: new ort.Tensor("float32", rgbData, [1, 3, 224, 224]),
     };
     const t2 = Date.now();
-    const results = await imageSession.run(feeds);
+    const results = await session.run(feeds);
     log.debug(
         () =>
             `onnx/clip image embedding took ${Date.now() - t1} ms (prep: ${t2 - t1} ms, inference: ${Date.now() - t2} ms)`,
@@ -230,7 +230,7 @@ const getTokenizer = () => {
 };
 
 export const clipTextEmbedding = async (text: string) => {
-    const imageSession = await onnxTextSession();
+    const session = await onnxTextSession();
     const t1 = Date.now();
     const tokenizer = getTokenizer();
     const tokenizedText = Int32Array.from(tokenizer.encodeForCLIP(text));
@@ -238,7 +238,7 @@ export const clipTextEmbedding = async (text: string) => {
         input: new ort.Tensor("int32", tokenizedText, [1, 77]),
     };
     const t2 = Date.now();
-    const results = await imageSession.run(feeds);
+    const results = await session.run(feeds);
     log.debug(
         () =>
             `onnx/clip text embedding took ${Date.now() - t1} ms (prep: ${t2 - t1} ms, inference: ${Date.now() - t2} ms)`,
