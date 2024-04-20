@@ -66,7 +66,7 @@ func (fc *FileCopyController) CopyFiles(c *gin.Context, req ente.CopyFileSyncReq
 	}
 	fileIDs := req.FileIDs()
 	fileToCollectionFileMap := make(map[int64]*ente.CollectionFileItem, len(req.CollectionFileItems))
-	for i, _ := range req.CollectionFileItems {
+	for i := range req.CollectionFileItems {
 		item := &req.CollectionFileItems[i]
 		fileToCollectionFileMap[item.ID] = item
 	}
@@ -116,7 +116,7 @@ func (fc *FileCopyController) CopyFiles(c *gin.Context, req ente.CopyFileSyncReq
 		}
 	}
 	fileCopyList := make([]fileCopyInternal, 0, len(existingFilesToCopy))
-	for i, _ := range existingFilesToCopy {
+	for i := range existingFilesToCopy {
 		file := existingFilesToCopy[i]
 		collectionItem := fileToCollectionFileMap[file.ID]
 		if collectionItem.ID != file.ID {
