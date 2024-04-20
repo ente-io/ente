@@ -6,7 +6,7 @@ import { workerBridge } from "@/next/worker/worker-bridge";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import { User } from "@ente/shared/user/types";
-import { downloadUsingAnchor } from "@ente/shared/utils";
+import { downloadUsingAnchor, withTimeout } from "@ente/shared/utils";
 import {
     FILE_TYPE,
     RAW_FORMATS,
@@ -48,8 +48,6 @@ import { FileTypeInfo } from "types/upload";
 import { isArchivedFile, updateMagicMetadata } from "utils/magicMetadata";
 import { safeFileName } from "utils/native-fs";
 import { writeStream } from "utils/native-stream";
-
-const WAIT_TIME_IMAGE_CONVERSION = 30 * 1000;
 
 export enum FILE_OPS_TYPE {
     DOWNLOAD,
@@ -709,7 +707,6 @@ export const copyFileToClipboard = async (fileUrl: string) => {
     const image = new Image();
 
     const blobPromise = new Promise<Blob>((resolve, reject) => {
-        let timeout: NodeJS.Timeout = null;
         try {
             image.setAttribute("src", fileUrl);
             image.onload = () => {
@@ -723,26 +720,17 @@ export const copyFileToClipboard = async (fileUrl: string) => {
                     "image/png",
                     1,
                 );
-
-                clearTimeout(timeout);
             };
         } catch (e) {
-            log.error("failed to copy to clipboard", e);
+            log.error("Failed to copy to clipboard", e);
             reject(e);
-        } finally {
-            clearTimeout(timeout);
         }
-        timeout = setTimeout(
-            () => reject(new Error("Operation timed out")),
-            WAIT_TIME_IMAGE_CONVERSION,
-        );
     });
 
-    const { ClipboardItem } = window;
+    const blob = await withTimeout(blobPromise, 30 * 1000);
 
-    await navigator.clipboard
-        .write([new ClipboardItem({ "image/png": blobPromise })])
-        .catch((e) => log.error("failed to copy to clipboard", e));
+    const { ClipboardItem } = window;
+    await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
 };
 
 export function getLatestVersionFiles(files: EnteFile[]) {
