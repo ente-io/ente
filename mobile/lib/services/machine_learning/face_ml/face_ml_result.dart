@@ -1,6 +1,6 @@
 import "dart:convert" show jsonEncode, jsonDecode;
 
-import "package:flutter/material.dart" show debugPrint, immutable;
+import "package:flutter/material.dart" show immutable;
 import "package:logging/logging.dart";
 import "package:photos/face/model/dimension.dart";
 import "package:photos/models/file/file.dart";
