@@ -37,7 +37,7 @@ const randomPrefix = (length: number) => {
  *
  * Use {@link deleteTempFile} to remove this file when you're done.
  */
-export const generateTempFilePath = async (formatSuffix: string) => {
+export const makeTempFilePath = async (formatSuffix: string) => {
     const tempDir = await enteTempDirPath();
     let result: string;
     do {
@@ -54,7 +54,7 @@ export const generateTempFilePath = async (formatSuffix: string) => {
  * directory. This acts as an additional safety check.
  *
  * @param tempFilePath The path to the temporary file to delete. This path
- * should've been previously created using {@link generateTempFilePath}.
+ * should've been previously created using {@link makeTempFilePath}.
  */
 export const deleteTempFile = async (tempFilePath: string) => {
     const tempDir = await enteTempDirPath();

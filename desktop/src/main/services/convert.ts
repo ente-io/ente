@@ -4,8 +4,8 @@ import path from "path";
 import { CustomErrorMessage, ElectronFile } from "../../types/ipc";
 import log from "../log";
 import { writeStream } from "../stream";
-import { deleteTempFile, generateTempFilePath } from "../temp";
 import { execAsync, isDev } from "../utils-electron";
+import { deleteTempFile, makeTempFilePath } from "../utils-temp";
 
 const IMAGE_MAGICK_PLACEHOLDER = "IMAGE_MAGICK";
 const MAX_DIMENSION_PLACEHOLDER = "MAX_DIMENSION";
@@ -78,8 +78,8 @@ export const convertToJPEG = async (
     let tempInputFilePath: string;
     let tempOutputFilePath: string;
     try {
-        tempInputFilePath = await generateTempFilePath(fileName);
-        tempOutputFilePath = await generateTempFilePath("output.jpeg");
+        tempInputFilePath = await makeTempFilePath(fileName);
+        tempOutputFilePath = await makeTempFilePath("output.jpeg");
 
         await fs.writeFile(tempInputFilePath, imageData);
 
@@ -157,7 +157,7 @@ export async function generateImageThumbnail(
                 CustomErrors.WINDOWS_NATIVE_IMAGE_PROCESSING_NOT_SUPPORTED,
             );
         if (!existsSync(inputFile.path)) {
-            const tempFilePath = await generateTempFilePath(inputFile.name);
+            const tempFilePath = await makeTempFilePath(inputFile.name);
             await writeStream(tempFilePath, await inputFile.stream());
             inputFilePath = tempFilePath;
             createdTempInputFile = true;
@@ -189,7 +189,7 @@ async function generateImageThumbnail_(
     let tempOutputFilePath: string;
     let quality = MAX_QUALITY;
     try {
-        tempOutputFilePath = await generateTempFilePath("thumb.jpeg");
+        tempOutputFilePath = await makeTempFilePath("thumb.jpeg");
         let thumbnail: Uint8Array;
         do {
             await execAsync(

@@ -11,7 +11,7 @@ import * as ort from "onnxruntime-node";
 import Tokenizer from "../../thirdparty/clip-bpe-ts/mod";
 import log from "../log";
 import { writeStream } from "../stream";
-import { deleteTempFile, generateTempFilePath } from "../utils-temp";
+import { deleteTempFile, makeTempFilePath } from "../utils-temp";
 import { makeCachedInferenceSession } from "./ml";
 
 const cachedCLIPImageSession = makeCachedInferenceSession(
@@ -20,7 +20,7 @@ const cachedCLIPImageSession = makeCachedInferenceSession(
 );
 
 export const clipImageEmbedding = async (jpegImageData: Uint8Array) => {
-    const tempFilePath = await generateTempFilePath("");
+    const tempFilePath = await makeTempFilePath("");
     const imageStream = new Response(jpegImageData.buffer).body;
     await writeStream(tempFilePath, imageStream);
     try {

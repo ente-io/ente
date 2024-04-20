@@ -6,7 +6,7 @@ import log from "../log";
 import { writeStream } from "../stream";
 import { withTimeout } from "../utils";
 import { execAsync } from "../utils-electron";
-import { deleteTempFile, generateTempFilePath } from "../utils-temp";
+import { deleteTempFile, makeTempFilePath } from "../utils-temp";
 
 const INPUT_PATH_PLACEHOLDER = "INPUT";
 const FFMPEG_PLACEHOLDER = "FFMPEG";
@@ -49,7 +49,7 @@ export async function runFFmpegCmd(
     let createdTempInputFile = null;
     try {
         if (!existsSync(inputFile.path)) {
-            const tempFilePath = await generateTempFilePath(inputFile.name);
+            const tempFilePath = await makeTempFilePath(inputFile.name);
             await writeStream(tempFilePath, await inputFile.stream());
             inputFilePath = tempFilePath;
             createdTempInputFile = true;
@@ -78,7 +78,7 @@ export async function runFFmpegCmd_(
 ) {
     let tempOutputFilePath: string;
     try {
-        tempOutputFilePath = await generateTempFilePath(outputFileName);
+        tempOutputFilePath = await makeTempFilePath(outputFileName);
 
         cmd = cmd.map((cmdPart) => {
             if (cmdPart === FFMPEG_PLACEHOLDER) {
