@@ -234,7 +234,7 @@ class FaceClusteringService {
       );
       // return _runLinearClusteringInComputer(input);
       _logger.info(
-        'Clustering executed in ${stopwatchClustering.elapsed.inSeconds} seconds',
+        'predictLinear Clustering executed in ${stopwatchClustering.elapsed.inSeconds} seconds',
       );
 
       isRunning = false;
@@ -493,12 +493,13 @@ class FaceClusteringService {
         facesWithClusterID.add(faceInfo);
       }
     }
+    final alreadyClusteredCount = facesWithClusterID.length;
     final sortedFaceInfos = <FaceInfo>[];
     sortedFaceInfos.addAll(facesWithClusterID);
     sortedFaceInfos.addAll(facesWithoutClusterID);
 
     log(
-      "[ClusterIsolate] ${DateTime.now()} Clustering ${facesWithoutClusterID.length} new faces without clusterId, and ${facesWithClusterID.length} faces with clusterId",
+      "[ClusterIsolate] ${DateTime.now()} Clustering ${facesWithoutClusterID.length} new faces without clusterId, and $alreadyClusteredCount faces with clusterId",
     );
 
     // Make sure the first face has a clusterId
@@ -520,7 +521,6 @@ class FaceClusteringService {
       sortedFaceInfos[0].clusterId = clusterID;
       clusterID++;
     }
-    final Map<String, int> newFaceIdToCluster = {};
     final stopwatchClustering = Stopwatch()..start();
     for (int i = 1; i < totalFaces; i++) {
       // Incremental clustering, so we can skip faces that already have a clusterId
@@ -563,12 +563,6 @@ class FaceClusteringService {
           }
           closestDistance = distance;
           closestIdx = j;
-          // if (distance < distanceThreshold) {
-          //   if (sortedFaceInfos[j].faceID.startsWith("14914702") ||
-          //       sortedFaceInfos[j].faceID.startsWith("15488756")) {
-          //     log('[XXX] faceIDs: ${sortedFaceInfos[j].faceID} and ${sortedFaceInfos[i].faceID} with distance $distance');
-          //   }
-          // }
         }
       }
 
@@ -580,28 +574,18 @@ class FaceClusteringService {
           );
           clusterID++;
           sortedFaceInfos[closestIdx].clusterId = clusterID;
-          newFaceIdToCluster[sortedFaceInfos[closestIdx].faceID] = clusterID;
         }
-        // if (sortedFaceInfos[i].faceID.startsWith("14914702") ||
-        //     sortedFaceInfos[i].faceID.startsWith("15488756")) {
-        //   log(
-        //     "[XXX]  [ClusterIsolate] ${DateTime.now()} Found similar face ${sortedFaceInfos[i].faceID} to ${sortedFaceInfos[closestIdx].faceID} with distance $closestDistance",
-        //   );
-        // }
         sortedFaceInfos[i].clusterId = sortedFaceInfos[closestIdx].clusterId;
-        newFaceIdToCluster[sortedFaceInfos[i].faceID] =
-            sortedFaceInfos[closestIdx].clusterId!;
       } else {
-        // if (sortedFaceInfos[i].faceID.startsWith("14914702") ||
-        //     sortedFaceInfos[i].faceID.startsWith("15488756")) {
-        //   log(
-        //     "[XXX]  [ClusterIsolate] ${DateTime.now()} Found new cluster $clusterID for face ${sortedFaceInfos[i].faceID}",
-        //   );
-        // }
         clusterID++;
         sortedFaceInfos[i].clusterId = clusterID;
-        newFaceIdToCluster[sortedFaceInfos[i].faceID] = clusterID;
       }
+    }
+
+    // Finally, assign the new clusterId to the faces
+    final Map<String, int> newFaceIdToCluster = {};
+    for (final faceInfo in sortedFaceInfos.sublist(alreadyClusteredCount)) {
+      newFaceIdToCluster[faceInfo.faceID] = faceInfo.clusterId!;
     }
 
     stopwatchClustering.stop();
