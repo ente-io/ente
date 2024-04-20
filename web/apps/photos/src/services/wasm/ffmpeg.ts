@@ -1,3 +1,4 @@
+import { nameAndExtension } from "@/next/file";
 import log from "@/next/log";
 import { withTimeout } from "@ente/shared/utils";
 import QueueProcessor from "@ente/shared/utils/queueProcessor";
@@ -7,7 +8,7 @@ import {
     INPUT_PATH_PLACEHOLDER,
     OUTPUT_PATH_PLACEHOLDER,
 } from "constants/ffmpeg";
-import { createFFmpeg, FFmpeg } from "ffmpeg-wasm";
+import { FFmpeg, createFFmpeg } from "ffmpeg-wasm";
 import { getUint8ArrayView } from "services/readerService";
 
 const FFMPEG_EXECUTION_WAIT_TIME = 30 * 1000;
@@ -65,7 +66,7 @@ export class WasmFFmpeg {
         let tempOutputFilePath: string;
         try {
             await this.ready;
-            const extension = getFileExtension(inputFile.name);
+            const [, extension] = nameAndExtension(inputFile.name);
             const tempNameSuffix = extension ? `input.${extension}` : "input";
             tempInputFilePath = `${generateTempName(10, tempNameSuffix)}`;
             this.ffmpeg.FS(
@@ -104,13 +105,5 @@ export class WasmFFmpeg {
                 log.error("unlink output file failed", e);
             }
         }
-    }
-}
-
-function getFileExtension(filename: string) {
-    const lastDotPosition = filename.lastIndexOf(".");
-    if (lastDotPosition === -1) return null;
-    else {
-        return filename.slice(lastDotPosition + 1);
     }
 }
