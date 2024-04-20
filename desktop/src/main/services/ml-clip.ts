@@ -22,12 +22,14 @@ import {
     modelSavePath,
 } from "./ml";
 
-const textModelName = "clip-text-vit-32-uint8.onnx";
-const textModelByteSize = 64173509; // 61.2 MB
-
 const cachedCLIPImageSession = makeCachedInferenceSession(
     "clip-image-vit-32-float32.onnx",
     351468764 /* 335.2 MB */,
+);
+
+const cachedCLIPTextSession = makeCachedInferenceSession(
+    "clip-text-vit-32-uint8.onnx",
+    64173509 /* 61.2 MB */,
 );
 
 let textModelDownloadInProgress = false;
@@ -202,7 +204,13 @@ const getTokenizer = () => {
 };
 
 export const clipTextEmbedding = async (text: string) => {
-    const session = await onnxTextSession();
+    const session = await Promise.race([
+        cachedCLIPTextSession(),
+        new Promise<"downloading-model">((resolve) =>
+            setTimeout(() => resolve("downloading-model"), 100),
+        ),
+    ]);
+    await onnxTextSession();
     const t1 = Date.now();
     const tokenizer = getTokenizer();
     const tokenizedText = Int32Array.from(tokenizer.encodeForCLIP(text));

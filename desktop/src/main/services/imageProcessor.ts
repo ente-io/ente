@@ -5,7 +5,7 @@ import { CustomErrors, ElectronFile } from "../../types/ipc";
 import log from "../log";
 import { writeStream } from "../stream";
 import { generateTempFilePath } from "../temp";
-import { execAsync, isDev } from "../util";
+import { execAsync, isDev } from "../utils-electron";
 import { deleteTempFile } from "./ffmpeg";
 
 const IMAGE_MAGICK_PLACEHOLDER = "IMAGE_MAGICK";

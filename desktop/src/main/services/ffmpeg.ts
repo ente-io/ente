@@ -5,7 +5,8 @@ import { ElectronFile } from "../../types/ipc";
 import log from "../log";
 import { writeStream } from "../stream";
 import { generateTempFilePath, getTempDirPath } from "../temp";
-import { execAsync } from "../util";
+import { withTimeout } from "../utils";
+import { execAsync } from "../utils-electron";
 
 const INPUT_PATH_PLACEHOLDER = "INPUT";
 const FFMPEG_PLACEHOLDER = "FFMPEG";
@@ -132,23 +133,3 @@ export async function deleteTempFile(tempFilePath: string) {
         log.error("Attempting to delete a non-temp file ${tempFilePath}");
     await fs.rm(tempFilePath, { force: true });
 }
-
-/**
- * Await the given {@link promise} for {@link timeoutMS} milliseconds. If it
- * does not resolve within {@link timeoutMS}, then reject with a timeout error.
- */
-export const withTimeout = async <T>(promise: Promise<T>, ms: number) => {
-    let timeoutId: ReturnType<typeof setTimeout>;
-    const rejectOnTimeout = new Promise<T>((_, reject) => {
-        timeoutId = setTimeout(
-            () => reject(new Error("Operation timed out")),
-            ms,
-        );
-    });
-    const promiseAndCancelTimeout = async () => {
-        const result = await promise;
-        clearTimeout(timeoutId);
-        return result;
-    };
-    return Promise.race([promiseAndCancelTimeout(), rejectOnTimeout]);
-};

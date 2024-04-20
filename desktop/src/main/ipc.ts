@@ -66,7 +66,7 @@ import {
     watchUpdateIgnoredFiles,
     watchUpdateSyncedFiles,
 } from "./services/watch";
-import { openDirectory, openLogDirectory } from "./util";
+import { openDirectory, openLogDirectory } from "./utils-electron";
 
 /**
  * Listen for IPC events sent/invoked by the renderer process, and route them to
