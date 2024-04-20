@@ -17,6 +17,8 @@ import (
 	"time"
 )
 
+const ()
+
 type FileCopyController struct {
 	S3Config       *s3config.S3Config
 	FileController *controller.FileController
