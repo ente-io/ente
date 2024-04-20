@@ -282,7 +282,7 @@ export const getRenderableImage = async (fileName: string, imageBlob: Blob) => {
     try {
         const tempFile = new File([imageBlob], fileName);
         fileTypeInfo = await getFileType(tempFile);
-        log.debug(() => `file type info: ${JSON.stringify(fileTypeInfo)}`);
+        log.debug(() => `Obtaining renderable image for ${JSON.stringify(fileTypeInfo)}`);
         const { exactType } = fileTypeInfo;
 
         if (!isRawFile(exactType)) {
