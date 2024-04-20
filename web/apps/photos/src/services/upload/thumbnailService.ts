@@ -124,7 +124,7 @@ const generateImageThumbnailInElectron = async (
     }
 };
 
-export async function generateImageThumbnailUsingCanvas(
+async function generateImageThumbnailUsingCanvas(
     file: File | ElectronFile,
     fileTypeInfo: FileTypeInfo,
 ) {
@@ -215,9 +215,7 @@ async function generateVideoThumbnail(
     return thumbnail;
 }
 
-export async function generateVideoThumbnailUsingCanvas(
-    file: File | ElectronFile,
-) {
+async function generateVideoThumbnailUsingCanvas(file: File | ElectronFile) {
     const canvas = document.createElement("canvas");
     const canvasCTX = canvas.getContext("2d");
 
