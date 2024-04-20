@@ -205,6 +205,8 @@ const createMainWindow = async () => {
         window.webContents.reload();
     });
 
+    // "The unresponsive event is fired when Chromium detects that your
+    //  webContents is not responding to input messages for > 30 seconds."
     window.webContents.on("unresponsive", () => {
         log.error(
             "Main window's webContents are unresponsive, will restart the renderer process",
