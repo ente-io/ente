@@ -11,18 +11,15 @@ import { ElectronFile, FileTypeInfo } from "types/upload";
 import { isFileHEIC } from "utils/file";
 import { getUint8ArrayView } from "../readerService";
 
-const MAX_THUMBNAIL_DIMENSION = 720;
+/** Maximum width or height of the generated thumbnail */
+const maxThumbnailDimension = 720;
+/** Maximum size (in bytes) of the generated thumbnail */
+const maxThumbnailSize = 100 * 1024; // 100 KB
 const MIN_COMPRESSION_PERCENTAGE_SIZE_DIFF = 10;
-const MAX_THUMBNAIL_SIZE = 100 * 1024;
 const MIN_QUALITY = 0.5;
 const MAX_QUALITY = 0.7;
 
 const WAIT_TIME_THUMBNAIL_GENERATION = 30 * 1000;
-
-interface Dimension {
-    width: number;
-    height: number;
-}
 
 export async function generateThumbnail(
     file: File | ElectronFile,
@@ -38,7 +35,7 @@ export async function generateThumbnail(
             } else {
                 thumbnail = await generateVideoThumbnail(file, fileTypeInfo);
             }
-            if (thumbnail.length > 1.5 * MAX_THUMBNAIL_SIZE) {
+            if (thumbnail.length > 1.5 * maxThumbnailSize) {
                 log.error(
                     `thumbnail greater than max limit - ${JSON.stringify({
                         thumbnailSize: convertBytesToHumanReadable(
@@ -80,8 +77,8 @@ async function generateImageThumbnail(
         try {
             return await generateImageThumbnailInElectron(
                 file,
-                MAX_THUMBNAIL_DIMENSION,
-                MAX_THUMBNAIL_SIZE,
+                maxThumbnailDimension,
+                maxThumbnailSize,
             );
         } catch (e) {
             return await generateImageThumbnailUsingCanvas(file, fileTypeInfo);
@@ -149,23 +146,14 @@ async function generateImageThumbnailUsingCanvas(
         image.onload = () => {
             try {
                 URL.revokeObjectURL(imageURL);
-                const imageDimension = {
-                    width: image.width,
-                    height: image.height,
-                };
-                const thumbnailDimension = calculateThumbnailDimension(
-                    imageDimension,
-                    MAX_THUMBNAIL_DIMENSION,
+                const { width, height } = scaledThumbnailDimensions(
+                    image.width,
+                    image.height,
+                    maxThumbnailDimension,
                 );
-                canvas.width = thumbnailDimension.width;
-                canvas.height = thumbnailDimension.height;
-                canvasCTX.drawImage(
-                    image,
-                    0,
-                    0,
-                    thumbnailDimension.width,
-                    thumbnailDimension.height,
-                );
+                canvas.width = width;
+                canvas.height = height;
+                canvasCTX.drawImage(image, 0, 0, width, height);
                 image = null;
                 clearTimeout(timeout);
                 resolve(null);
@@ -233,23 +221,14 @@ async function generateVideoThumbnailUsingCanvas(file: File | ElectronFile) {
                 if (!video) {
                     throw Error("video load failed");
                 }
-                const videoDimension = {
-                    width: video.videoWidth,
-                    height: video.videoHeight,
-                };
-                const thumbnailDimension = calculateThumbnailDimension(
-                    videoDimension,
-                    MAX_THUMBNAIL_DIMENSION,
+                const { width, height } = scaledThumbnailDimensions(
+                    video.videoWidth,
+                    video.videoHeight,
+                    maxThumbnailDimension,
                 );
-                canvas.width = thumbnailDimension.width;
-                canvas.height = thumbnailDimension.height;
-                canvasCTX.drawImage(
-                    video,
-                    0,
-                    0,
-                    thumbnailDimension.width,
-                    thumbnailDimension.height,
-                );
+                canvas.width = width;
+                canvas.height = height;
+                canvasCTX.drawImage(video, 0, 0, width, height);
                 video = null;
                 clearTimeout(timeout);
                 resolve(null);
@@ -292,7 +271,7 @@ async function getCompressedThumbnailBlobFromCanvas(canvas: HTMLCanvasElement) {
         quality -= 0.1;
     } while (
         quality >= MIN_QUALITY &&
-        thumbnailBlob.size > MAX_THUMBNAIL_SIZE &&
+        thumbnailBlob.size > maxThumbnailSize &&
         percentageSizeDiff(thumbnailBlob.size, prevSize) >=
             MIN_COMPRESSION_PERCENTAGE_SIZE_DIFF
     );
@@ -307,24 +286,30 @@ function percentageSizeDiff(
     return ((oldThumbnailSize - newThumbnailSize) * 100) / oldThumbnailSize;
 }
 
-// method to calculate new size of image for limiting it to maximum width and height, maintaining aspect ratio
-// returns {0,0} for invalid inputs
-function calculateThumbnailDimension(
-    originalDimension: Dimension,
+/**
+ * Compute the size of the thumbnail to create for an image with the given
+ * {@link width} and {@link height}.
+ *
+ * This function calculates a new size of an image for limiting it to maximum
+ * width and height (both specified by {@link maxDimension}), while maintaining
+ * aspect ratio.
+ *
+ * It returns `{0, 0}` for invalid inputs.
+ */
+const scaledThumbnailDimensions = (
+    width: number,
+    height: number,
     maxDimension: number,
-): Dimension {
-    if (originalDimension.height === 0 || originalDimension.width === 0) {
-        return { width: 0, height: 0 };
-    }
-    const widthScaleFactor = maxDimension / originalDimension.width;
-    const heightScaleFactor = maxDimension / originalDimension.height;
+): { width: number; height: number } => {
+    if (width === 0 || height === 0) return { width: 0, height: 0 };
+    const widthScaleFactor = maxDimension / width;
+    const heightScaleFactor = maxDimension / height;
     const scaleFactor = Math.min(widthScaleFactor, heightScaleFactor);
-    const thumbnailDimension = {
-        width: Math.round(originalDimension.width * scaleFactor),
-        height: Math.round(originalDimension.height * scaleFactor),
+    const thumbnailDimensions = {
+        width: Math.round(width * scaleFactor),
+        height: Math.round(height * scaleFactor),
     };
-    if (thumbnailDimension.width === 0 || thumbnailDimension.height === 0) {
+    if (thumbnailDimensions.width === 0 || thumbnailDimensions.height === 0)
         return { width: 0, height: 0 };
-    }
-    return thumbnailDimension;
-}
+    return thumbnailDimensions;
+};
