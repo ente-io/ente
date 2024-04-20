@@ -829,10 +829,14 @@ class FaceMLDataDB {
   }
 
   /// Returns a map of clusterID to (avg embedding, count)
-  Future<Map<int, (Uint8List, int)>> clusterSummaryAll() async {
-    final db = await instance.database;
+  Future<Map<int, (Uint8List, int)>> getAllClusterSummary([
+    int? minClusterSize,
+  ]) async {
+    final db = await instance.sqliteAsyncDB;
     final Map<int, (Uint8List, int)> result = {};
-    final rows = await db.rawQuery('SELECT * from $clusterSummaryTable');
+    final rows = await db.getAll(
+      'SELECT * FROM $clusterSummaryTable${minClusterSize != null ? ' WHERE $countColumn >= $minClusterSize' : ''}',
+    );
     for (final r in rows) {
       final id = r[clusterIDColumn] as int;
       final avg = r[avgColumn] as Uint8List;

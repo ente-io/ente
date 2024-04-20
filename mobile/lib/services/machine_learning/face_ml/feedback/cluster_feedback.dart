@@ -661,7 +661,7 @@ class ClusterFeedbackService {
     );
 
     final Map<int, (Uint8List, int)> clusterToSummary =
-        await faceMlDb.clusterSummaryAll();
+        await faceMlDb.getAllClusterSummary();
     final Map<int, (Uint8List, int)> updatesForClusterSummary = {};
 
     final Map<int, List<double>> clusterAvg = {};
@@ -852,7 +852,7 @@ class ClusterFeedbackService {
 
     // Get the cluster averages for the person's clusters and the suggestions' clusters
     final Map<int, (Uint8List, int)> clusterToSummary =
-        await faceMlDb.clusterSummaryAll();
+        await faceMlDb.getAllClusterSummary();
 
     // Calculate the avg embedding of the person
     final personClusters = await faceMlDb.getPersonClusterIDs(person.remoteID);
