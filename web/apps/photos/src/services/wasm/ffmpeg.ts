@@ -2,12 +2,13 @@ import log from "@/next/log";
 import { withTimeout } from "@ente/shared/utils";
 import QueueProcessor from "@ente/shared/utils/queueProcessor";
 import { generateTempName } from "@ente/shared/utils/temp";
+import {
+    FFMPEG_PLACEHOLDER,
+    INPUT_PATH_PLACEHOLDER,
+    OUTPUT_PATH_PLACEHOLDER,
+} from "constants/ffmpeg";
 import { createFFmpeg, FFmpeg } from "ffmpeg-wasm";
 import { getUint8ArrayView } from "services/readerService";
-
-const INPUT_PATH_PLACEHOLDER = "INPUT";
-const FFMPEG_PLACEHOLDER = "FFMPEG";
-const OUTPUT_PATH_PLACEHOLDER = "OUTPUT";
 
 const FFMPEG_EXECUTION_WAIT_TIME = 30 * 1000;
 

@@ -1,15 +1,13 @@
 import log from "@/next/log";
+import { validateAndGetCreationUnixTimeInMicroSeconds } from "@ente/shared/time";
 import {
     FFMPEG_PLACEHOLDER,
     INPUT_PATH_PLACEHOLDER,
     OUTPUT_PATH_PLACEHOLDER,
 } from "constants/ffmpeg";
-import { ElectronFile } from "types/upload";
-import ComlinkFFmpegWorker from "utils/comlink/ComlinkFFmpegWorker";
-
-import { validateAndGetCreationUnixTimeInMicroSeconds } from "@ente/shared/time";
 import { NULL_LOCATION } from "constants/upload";
-import { ParsedExtractedMetadata } from "types/upload";
+import { ElectronFile, ParsedExtractedMetadata } from "types/upload";
+import ComlinkFFmpegWorker from "utils/comlink/ComlinkFFmpegWorker";
 
 /** Called during upload */
 export async function generateVideoThumbnail(
