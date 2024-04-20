@@ -1,10 +1,9 @@
 import { decodeLivePhoto } from "@/media/live-photo";
 import { convertBytesToHumanReadable } from "@/next/file";
 import log from "@/next/log";
-import type { Electron } from "@/next/types/ipc";
+import { CustomErrorMessage, type Electron } from "@/next/types/ipc";
 import { workerBridge } from "@/next/worker/worker-bridge";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
-import { CustomError } from "@ente/shared/error";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import { User } from "@ente/shared/user/types";
 import { downloadUsingAnchor } from "@ente/shared/utils";
@@ -61,6 +60,12 @@ export enum FILE_OPS_TYPE {
     TRASH,
     DELETE_PERMANENTLY,
 }
+
+class ModuleState {
+    isElectronJPEGConversionNotAvailable = false;
+}
+
+const moduleState = new ModuleState();
 
 export async function getUpdatedEXIFFileForDownload(
     fileReader: FileReader,
@@ -281,10 +286,23 @@ export const getRenderableImage = async (fileName: string, imageBlob: Blob) => {
 
         let jpegBlob: Blob | undefined;
 
-        if (isElectron() && isSupportedRawFormat(exactType)) {
+        const available = !moduleState.isElectronJPEGConversionNotAvailable;
+        if (isElectron() && available && isSupportedRawFormat(exactType)) {
             // If we're running in our desktop app, see if our Node.js layer can
-            // convert this into a JPEG for us.
-            jpegBlob = await tryConvertToJPEGInElectron(imageBlob, fileName);
+            // convert this into a JPEG using native tools for us.
+            try {
+                jpegBlob = await tryConvertToJPEGInElectron(
+                    imageBlob,
+                    fileName,
+                );
+            } catch (e) {
+                if (e.message == CustomErrorMessage.NotAvailable) {
+                    moduleState.isElectronJPEGConversionNotAvailable = true;
+                } else {
+                    log.error("Native conversion to JPEG failed", e);
+                    throw e;
+                }
+            }
         }
 
         if (!jpegBlob && isFileHEIC(exactType)) {
@@ -306,33 +324,23 @@ const tryConvertToJPEGInElectron = async (
     fileBlob: Blob,
     filename: string,
 ): Promise<Blob | undefined> => {
-    try {
-        const startTime = Date.now();
-        const inputFileData = new Uint8Array(await fileBlob.arrayBuffer());
-        const electron = globalThis.electron;
-        // If we're running in a worker, we need to reroute the request back to
-        // the main thread since workers don't have access to the `window` (and
-        // thus, to the `window.electron`) object.
-        const convertedFileData = electron
-            ? await electron.convertToJPEG(inputFileData, filename)
-            : await workerBridge.convertToJPEG(inputFileData, filename);
-        log.info(
-            `originalFileSize:${convertBytesToHumanReadable(
-                fileBlob?.size,
-            )},convertedFileSize:${convertBytesToHumanReadable(
-                convertedFileData?.length,
-            )},  native conversion time: ${Date.now() - startTime}ms `,
-        );
-        return new Blob([convertedFileData]);
-    } catch (e) {
-        if (
-            e.message !==
-            CustomError.WINDOWS_NATIVE_IMAGE_PROCESSING_NOT_SUPPORTED
-        ) {
-            log.error("failed to convert to jpeg natively", e);
-        }
-        throw e;
-    }
+    const startTime = Date.now();
+    const inputFileData = new Uint8Array(await fileBlob.arrayBuffer());
+    const electron = globalThis.electron;
+    // If we're running in a worker, we need to reroute the request back to
+    // the main thread since workers don't have access to the `window` (and
+    // thus, to the `window.electron`) object.
+    const convertedFileData = electron
+        ? await electron.convertToJPEG(inputFileData, filename)
+        : await workerBridge.convertToJPEG(inputFileData, filename);
+    log.info(
+        `originalFileSize:${convertBytesToHumanReadable(
+            fileBlob?.size,
+        )},convertedFileSize:${convertBytesToHumanReadable(
+            convertedFileData?.length,
+        )},  native conversion time: ${Date.now() - startTime}ms `,
+    );
+    return new Blob([convertedFileData]);
 };
 
 export function isFileHEIC(exactType: string) {
