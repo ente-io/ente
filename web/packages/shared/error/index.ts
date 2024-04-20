@@ -74,8 +74,6 @@ export const CustomError = {
     EXIF_DATA_NOT_FOUND: "exif data not found",
     SELECT_FOLDER_ABORTED: "select folder aborted",
     NON_MEDIA_FILE: "non media file",
-    UNSUPPORTED_RAW_FORMAT: "unsupported raw format",
-    NON_PREVIEWABLE_FILE: "non previewable file",
     PROCESSING_FAILED: "processing failed",
     EXPORT_RECORD_JSON_PARSING_FAILED: "export record json parsing failed",
     TWO_FACTOR_ENABLED: "two factor enabled",

@@ -266,71 +266,53 @@ export function generateStreamFromArrayBuffer(data: Uint8Array) {
     });
 }
 
-export async function getRenderableImage(fileName: string, imageBlob: Blob) {
+export const getRenderableImage = async (fileName: string, imageBlob: Blob) => {
     let fileTypeInfo: FileTypeInfo;
     try {
         const tempFile = new File([imageBlob], fileName);
         fileTypeInfo = await getFileType(tempFile);
         log.debug(() => `file type info: ${JSON.stringify(fileTypeInfo)}`);
         const { exactType } = fileTypeInfo;
-        let convertedImageBlob: Blob;
-        if (isRawFile(exactType)) {
-            try {
-                if (!isSupportedRawFormat(exactType)) {
-                    throw Error(CustomError.UNSUPPORTED_RAW_FORMAT);
-                }
 
-                if (!isElectron()) {
-                    throw new Error("not available on web");
-                }
-                log.info(
-                    `RawConverter called for ${fileName}-${convertBytesToHumanReadable(
-                        imageBlob.size,
-                    )}`,
-                );
-                convertedImageBlob = await convertToJPEGInElectron(
-                    imageBlob,
-                    fileName,
-                );
-                log.info(`${fileName} successfully converted`);
-            } catch (e) {
-                try {
-                    if (!isFileHEIC(exactType)) {
-                        throw e;
-                    }
-                    log.info(
-                        `HEICConverter called for ${fileName}-${convertBytesToHumanReadable(
-                            imageBlob.size,
-                        )}`,
-                    );
-                    convertedImageBlob =
-                        await heicConversionService.convert(imageBlob);
-                    log.info(`${fileName} successfully converted`);
-                } catch (e) {
-                    throw Error(CustomError.NON_PREVIEWABLE_FILE);
-                }
-            }
-            return convertedImageBlob;
-        } else {
+        if (!isRawFile(exactType)) {
+            // Not something we know how to handle yet, give back the original.
             return imageBlob;
         }
+
+        let jpegBlob: Blob | undefined;
+
+        if (isElectron() && isSupportedRawFormat(exactType)) {
+            // If we're running in our desktop app, see if our Node.js layer can
+            // convert this into a JPEG for us.
+            jpegBlob = await tryConvertToJPEGInElectron(imageBlob, fileName);
+        }
+
+        if (!jpegBlob && isFileHEIC(exactType)) {
+            // If it is an HEIC file, use our web HEIC converter.
+            jpegBlob = await heicConversionService.convert(imageBlob);
+        }
+
+        return jpegBlob;
     } catch (e) {
         log.error(
-            `Failed to get renderable image for ${JSON.stringify(fileTypeInfo)}`,
+            `Failed to get renderable image for ${JSON.stringify(fileTypeInfo ?? fileName)}`,
             e,
         );
-        return null;
+        return undefined;
     }
-}
+};
 
-const convertToJPEGInElectron = async (
+const tryConvertToJPEGInElectron = async (
     fileBlob: Blob,
     filename: string,
-): Promise<Blob> => {
+): Promise<Blob | undefined> => {
     try {
         const startTime = Date.now();
         const inputFileData = new Uint8Array(await fileBlob.arrayBuffer());
         const electron = globalThis.electron;
+        // If we're running in a worker, we need to reroute the request back to
+        // the main thread since workers don't have access to the `window` (and
+        // thus, to the `window.electron`) object.
         const convertedFileData = electron
             ? await electron.convertToJPEG(inputFileData, filename)
             : await workerBridge.convertToJPEG(inputFileData, filename);
