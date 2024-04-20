@@ -12,6 +12,7 @@ import (
 	"github.com/gin-contrib/requestid"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
+	"golang.org/x/sync/errgroup"
 	"sync"
 	"time"
 )
@@ -166,12 +167,14 @@ func (fc *FileCopyController) createCopy(c *gin.Context, fcInternal fileCopyInte
 	// using HotS3Client copy the File and Thumbnail
 	s3Client := fc.S3Config.GetHotS3Client()
 	hotBucket := fc.S3Config.GetHotBucket()
-	err := copyS3Object(s3Client, hotBucket, fcInternal.FileCopyReq)
-	if err != nil {
-		return nil, err
-	}
-	err = copyS3Object(s3Client, hotBucket, fcInternal.ThumbCopyReq)
-	if err != nil {
+	g := new(errgroup.Group)
+	g.Go(func() error {
+		return copyS3Object(s3Client, hotBucket, fcInternal.FileCopyReq)
+	})
+	g.Go(func() error {
+		return copyS3Object(s3Client, hotBucket, fcInternal.ThumbCopyReq)
+	})
+	if err := g.Wait(); err != nil {
 		return nil, err
 	}
 	file := fcInternal.newFile(userID)
