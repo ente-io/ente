@@ -1,10 +1,12 @@
 import "dart:async";
 
+import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
 import "package:flutter_animate/flutter_animate.dart";
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
+import "package:photos/events/people_changed_event.dart";
 import "package:photos/face/model/person.dart";
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/file/file.dart';
@@ -51,6 +53,7 @@ class _ClusterPageState extends State<ClusterPage> {
   final _selectedFiles = SelectedFiles();
   late final List<EnteFile> files;
   late final StreamSubscription<LocalPhotosUpdatedEvent> _filesUpdatedEvent;
+  late final StreamSubscription<PeopleChangedEvent> _peopleChangedEvent;
 
   @override
   void initState() {
@@ -69,11 +72,27 @@ class _ClusterPageState extends State<ClusterPage> {
         setState(() {});
       }
     });
+    _peopleChangedEvent = Bus.instance.on<PeopleChangedEvent>().listen((event) {
+      if (event.type == PeopleEventType.removedFilesFromCluster &&
+          (event.source == widget.clusterID.toString())) {
+        for (var updatedFile in event.relevantFiles!) {
+          files.remove(updatedFile);
+        }
+        setState(() {});
+      }
+    });
+    kDebugMode
+        ? ClusterFeedbackService.instance.debugLogClusterBlurValues(
+            widget.clusterID,
+            clusterSize: files.length,
+          )
+        : null;
   }
 
   @override
   void dispose() {
     _filesUpdatedEvent.cancel();
+    _peopleChangedEvent.cancel();
     super.dispose();
   }
 
@@ -96,10 +115,12 @@ class _ClusterPageState extends State<ClusterPage> {
         );
       },
       reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
+      forceReloadEvents: [Bus.instance.on<PeopleChangedEvent>()],
       removalEventTypes: const {
         EventType.deletedFromRemote,
         EventType.deletedFromEverywhere,
         EventType.hide,
+        EventType.peopleClusterChanged,
       },
       tagPrefix: widget.tagPrefix + widget.tagPrefix,
       selectedFiles: _selectedFiles,
@@ -111,9 +132,10 @@ class _ClusterPageState extends State<ClusterPage> {
         preferredSize: const Size.fromHeight(50.0),
         child: ClusterAppBar(
           SearchResultPage.appBarType,
-          "${widget.searchResult.length} memories${widget.appendTitle}",
+          "${files.length} memories${widget.appendTitle}",
           _selectedFiles,
           widget.clusterID,
+          key: ValueKey(files.length),
         ),
       ),
       body: Column(

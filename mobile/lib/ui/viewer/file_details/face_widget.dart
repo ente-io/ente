@@ -9,6 +9,7 @@ import "package:photos/face/db.dart";
 import "package:photos/face/model/face.dart";
 import "package:photos/face/model/person.dart";
 import 'package:photos/models/file/file.dart';
+import "package:photos/services/machine_learning/face_ml/face_detection/detection.dart";
 import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -47,7 +48,7 @@ class _FaceWidgetState extends State<FaceWidget> {
 
   @override
   Widget build(BuildContext context) {
-    if (Platform.isIOS || Platform.isAndroid) {
+    if (Platform.isIOS) {
       return FutureBuilder<Uint8List?>(
         future: getFaceCrop(),
         builder: (context, snapshot) {
@@ -164,19 +165,19 @@ class _FaceWidgetState extends State<FaceWidget> {
                     ),
                   if (kDebugMode)
                     Text(
-                      'B: ${widget.face.blur.toStringAsFixed(3)}',
+                      'B: ${widget.face.blur.toStringAsFixed(0)}',
                       style: Theme.of(context).textTheme.bodySmall,
                       maxLines: 1,
                     ),
                   if (kDebugMode)
                     Text(
-                      'V: ${widget.face.visibility}',
+                      'D: ${widget.face.detection.getFaceDirection().toDirectionString()}',
                       style: Theme.of(context).textTheme.bodySmall,
                       maxLines: 1,
                     ),
                   if (kDebugMode)
                     Text(
-                      'A: ${widget.face.area()}',
+                      'Sideways: ${widget.face.detection.faceIsSideways().toString()}',
                       style: Theme.of(context).textTheme.bodySmall,
                       maxLines: 1,
                     ),
@@ -300,6 +301,24 @@ class _FaceWidgetState extends State<FaceWidget> {
                 if (kDebugMode)
                   Text(
                     'S: ${widget.face.score.toStringAsFixed(3)}',
+                    style: Theme.of(context).textTheme.bodySmall,
+                    maxLines: 1,
+                  ),
+                if (kDebugMode)
+                  Text(
+                    'B: ${widget.face.blur.toStringAsFixed(0)}',
+                    style: Theme.of(context).textTheme.bodySmall,
+                    maxLines: 1,
+                  ),
+                if (kDebugMode)
+                  Text(
+                    'D: ${widget.face.detection.getFaceDirection().toDirectionString()}',
+                    style: Theme.of(context).textTheme.bodySmall,
+                    maxLines: 1,
+                  ),
+                if (kDebugMode)
+                  Text(
+                    'Sideways: ${widget.face.detection.faceIsSideways().toString()}',
                     style: Theme.of(context).textTheme.bodySmall,
                     maxLines: 1,
                   ),

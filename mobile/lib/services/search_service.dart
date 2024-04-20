@@ -824,7 +824,7 @@ class SearchService {
             "Cluster $clusterId should not have person id ${clusterIDToPersonID[clusterId]}",
           );
         }
-        if (files.length < 3 && sortedClusterIds.length > 3) {
+        if (files.length < 20 && sortedClusterIds.length > 3) {
           continue;
         }
         facesResult.add(

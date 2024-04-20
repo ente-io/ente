@@ -8,8 +8,7 @@ const faceDetectionColumn = 'detection';
 const faceEmbeddingBlob = 'eBlob';
 const faceScore = 'score';
 const faceBlur = 'blur';
-const faceArea = 'area';
-const faceVisibilityScore = 'visibility';
+const isSideways = 'is_sideways';
 const imageWidth = 'width';
 const imageHeight = 'height';
 const faceClusterId = 'cluster_id';
@@ -22,10 +21,9 @@ const createFacesTable = '''CREATE TABLE IF NOT EXISTS $facesTable (
   $faceEmbeddingBlob BLOB NOT NULL,
   $faceScore  REAL NOT NULL,
   $faceBlur REAL NOT NULL DEFAULT $kLapacianDefault,
+  $isSideways	INTEGER NOT NULL DEFAULT 0,
   $imageHeight	INTEGER NOT NULL DEFAULT 0,
   $imageWidth	INTEGER NOT NULL DEFAULT 0,
-  $faceArea	INTEGER NOT NULL DEFAULT 0,
-  $faceVisibilityScore	INTEGER NOT NULL DEFAULT -1,
   $mlVersionColumn	INTEGER NOT NULL DEFAULT -1,
   PRIMARY KEY($fileIDColumn, $faceIDColumn)
   );
@@ -62,13 +60,13 @@ const deletePersonTable = 'DROP TABLE IF EXISTS $personTable';
 // Clusters Table Fields & Schema Queries
 const clusterPersonTable = 'cluster_person';
 const personIdColumn = 'person_id';
-const cluserIDColumn = 'cluster_id';
+const clusterIDColumn = 'cluster_id';
 
 const createClusterPersonTable = '''
 CREATE TABLE IF NOT EXISTS $clusterPersonTable (
   $personIdColumn	TEXT NOT NULL,
-  $cluserIDColumn	INTEGER NOT NULL,
-  PRIMARY KEY($personIdColumn, $cluserIDColumn)
+  $clusterIDColumn	INTEGER NOT NULL,
+  PRIMARY KEY($personIdColumn, $clusterIDColumn)
 );
 ''';
 const dropClusterPersonTable = 'DROP TABLE IF EXISTS $clusterPersonTable';
@@ -80,10 +78,10 @@ const avgColumn = 'avg';
 const countColumn = 'count';
 const createClusterSummaryTable = '''
 CREATE TABLE IF NOT EXISTS $clusterSummaryTable (
-  $cluserIDColumn	INTEGER NOT NULL,
+  $clusterIDColumn	INTEGER NOT NULL,
   $avgColumn BLOB NOT NULL,
   $countColumn INTEGER NOT NULL,
-  PRIMARY KEY($cluserIDColumn)
+  PRIMARY KEY($clusterIDColumn)
 );
 ''';
 
@@ -97,7 +95,7 @@ const notPersonFeedback = 'not_person_feedback';
 const createNotPersonFeedbackTable = '''
 CREATE TABLE IF NOT EXISTS $notPersonFeedback (
   $personIdColumn	TEXT NOT NULL,
-  $cluserIDColumn	INTEGER NOT NULL
+  $clusterIDColumn	INTEGER NOT NULL
 );
 ''';
 const dropNotPersonFeedbackTable = 'DROP TABLE IF EXISTS $notPersonFeedback';

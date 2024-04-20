@@ -5,6 +5,8 @@ import "package:flutter/foundation.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
+// import "package:photos/events/files_updated_event.dart";
+// import "package:photos/events/local_photos_updated_event.dart";
 import "package:photos/events/people_changed_event.dart";
 import "package:photos/extensions/stop_watch.dart";
 import "package:photos/face/db.dart";
@@ -115,17 +117,103 @@ class ClusterFeedbackService {
     List<EnteFile> files,
     PersonEntity p,
   ) async {
-    await FaceMLDataDB.instance.removeFilesFromPerson(files, p.remoteID);
-    Bus.instance.fire(PeopleChangedEvent());
+    try {
+      // Get the relevant faces to be removed
+      final faceIDs = await FaceMLDataDB.instance
+          .getFaceIDsForPerson(p.remoteID)
+          .then((iterable) => iterable.toList());
+      faceIDs.retainWhere((faceID) {
+        final fileID = getFileIdFromFaceId(faceID);
+        return files.any((file) => file.uploadedFileID == fileID);
+      });
+      final embeddings =
+          await FaceMLDataDB.instance.getFaceEmbeddingMapForFaces(faceIDs);
+
+      final fileIDToCreationTime =
+          await FilesDB.instance.getFileIDToCreationTime();
+
+      // Re-cluster within the deleted faces
+      final newFaceIdToClusterID =
+          await FaceClusteringService.instance.predictWithinClusterComputer(
+        embeddings,
+        fileIDToCreationTime: fileIDToCreationTime,
+        distanceThreshold: 0.20,
+      );
+      if (newFaceIdToClusterID == null || newFaceIdToClusterID.isEmpty) {
+        return;
+      }
+
+      // Update the deleted faces
+      await FaceMLDataDB.instance.forceUpdateClusterIds(newFaceIdToClusterID);
+
+      // Make sure the deleted faces don't get suggested in the future
+      final notClusterIdToPersonId = <int, String>{};
+      for (final clusterId in newFaceIdToClusterID.values.toSet()) {
+        notClusterIdToPersonId[clusterId] = p.remoteID;
+      }
+      await FaceMLDataDB.instance
+          .bulkCaptureNotPersonFeedback(notClusterIdToPersonId);
+
+      Bus.instance.fire(PeopleChangedEvent());
+      return;
+    } catch (e, s) {
+      _logger.severe("Error in removeFilesFromPerson", e, s);
+      rethrow;
+    }
   }
 
   Future<void> removeFilesFromCluster(
     List<EnteFile> files,
     int clusterID,
   ) async {
-    await FaceMLDataDB.instance.removeFilesFromCluster(files, clusterID);
-    Bus.instance.fire(PeopleChangedEvent());
-    return;
+    try {
+      // Get the relevant faces to be removed
+      final faceIDs = await FaceMLDataDB.instance
+          .getFaceIDsForCluster(clusterID)
+          .then((iterable) => iterable.toList());
+      faceIDs.retainWhere((faceID) {
+        final fileID = getFileIdFromFaceId(faceID);
+        return files.any((file) => file.uploadedFileID == fileID);
+      });
+      final embeddings =
+          await FaceMLDataDB.instance.getFaceEmbeddingMapForFaces(faceIDs);
+
+      final fileIDToCreationTime =
+          await FilesDB.instance.getFileIDToCreationTime();
+
+      // Re-cluster within the deleted faces
+      final newFaceIdToClusterID =
+          await FaceClusteringService.instance.predictWithinClusterComputer(
+        embeddings,
+        fileIDToCreationTime: fileIDToCreationTime,
+        distanceThreshold: 0.20,
+      );
+      if (newFaceIdToClusterID == null || newFaceIdToClusterID.isEmpty) {
+        return;
+      }
+
+      // Update the deleted faces
+      await FaceMLDataDB.instance.forceUpdateClusterIds(newFaceIdToClusterID);
+
+      Bus.instance.fire(
+        PeopleChangedEvent(
+          relevantFiles: files,
+          type: PeopleEventType.removedFilesFromCluster,
+          source: "$clusterID",
+        ),
+      );
+      // Bus.instance.fire(
+      //   LocalPhotosUpdatedEvent(
+      //     files,
+      //     type: EventType.peopleClusterChanged,
+      //     source: "$clusterID",
+      //   ),
+      // );
+      return;
+    } catch (e, s) {
+      _logger.severe("Error in removeFilesFromCluster", e, s);
+      rethrow;
+    }
   }
 
   Future<void> addFilesToCluster(List<String> faceIDs, int clusterID) async {
@@ -194,7 +282,7 @@ class ClusterFeedbackService {
   // TODO: iterate over this method to find sweet spot
   Future<Map<int, List<String>>> breakUpCluster(
     int clusterID, {
-    useDbscan = false,
+    bool useDbscan = false,
   }) async {
     _logger.info(
       'breakUpCluster called for cluster $clusterID with dbscan $useDbscan',
@@ -203,10 +291,8 @@ class ClusterFeedbackService {
 
     final faceIDs = await faceMlDb.getFaceIDsForCluster(clusterID);
     final originalFaceIDsSet = faceIDs.toSet();
-    final fileIDs = faceIDs.map((e) => getFileIdFromFaceId(e)).toList();
 
-    final embeddings = await faceMlDb.getFaceEmbeddingMapForFile(fileIDs);
-    embeddings.removeWhere((key, value) => !faceIDs.contains(key));
+    final embeddings = await faceMlDb.getFaceEmbeddingMapForFaces(faceIDs);
 
     final fileIDToCreationTime =
         await FilesDB.instance.getFileIDToCreationTime();
@@ -232,18 +318,14 @@ class ClusterFeedbackService {
         maxClusterID++;
       }
     } else {
-      final clusteringInput = embeddings.map((key, value) {
-        return MapEntry(key, (null, value));
-      });
-
       final faceIdToCluster =
-          await FaceClusteringService.instance.predictLinear(
-        clusteringInput,
+          await FaceClusteringService.instance.predictWithinClusterComputer(
+        embeddings,
         fileIDToCreationTime: fileIDToCreationTime,
-        distanceThreshold: 0.23,
+        distanceThreshold: 0.22,
       );
 
-      if (faceIdToCluster == null) {
+      if (faceIdToCluster == null || faceIdToCluster.isEmpty) {
         _logger.info('No clusters found');
         return {};
       } else {
@@ -293,6 +375,62 @@ class ClusterFeedbackService {
     }
 
     return clusterIdToFaceIds;
+  }
+
+  /// WARNING: this method is purely for debugging purposes, never use in production
+  Future<void> createFakeClustersByBlurValue() async {
+    try {
+      // Delete old clusters
+      await FaceMLDataDB.instance.resetClusterIDs();
+      await FaceMLDataDB.instance.dropClustersAndPersonTable();
+      final List<PersonEntity> persons =
+          await PersonService.instance.getPersons();
+      for (final PersonEntity p in persons) {
+        await PersonService.instance.deletePerson(p.remoteID);
+      }
+
+      // Create new fake clusters based on blur value. One for values between 0 and 10, one for 10-20, etc till 200
+      final int startClusterID = DateTime.now().microsecondsSinceEpoch;
+      final faceIDsToBlurValues =
+          await FaceMLDataDB.instance.getFaceIDsToBlurValues(200);
+      final faceIdToCluster = <String, int>{};
+      for (final entry in faceIDsToBlurValues.entries) {
+        final faceID = entry.key;
+        final blurValue = entry.value;
+        final newClusterID = startClusterID + blurValue ~/ 10;
+        faceIdToCluster[faceID] = newClusterID;
+      }
+      await FaceMLDataDB.instance.updateClusterIdToFaceId(faceIdToCluster);
+
+      Bus.instance.fire(PeopleChangedEvent());
+    } catch (e, s) {
+      _logger.severe("Error in createFakeClustersByBlurValue", e, s);
+      rethrow;
+    }
+  }
+
+  Future<void> debugLogClusterBlurValues(
+    int clusterID, {
+    int? clusterSize,
+  }) async {
+    final List<double> blurValues = await FaceMLDataDB.instance
+        .getBlurValuesForCluster(clusterID)
+        .then((value) => value.toList());
+
+    // Round the blur values to integers
+    final blurValuesIntegers =
+        blurValues.map((value) => value.round()).toList();
+
+    // Sort the blur values in ascending order
+    blurValuesIntegers.sort();
+
+    // Log the sorted blur values
+
+    _logger.info(
+      "Blur values for cluster $clusterID${clusterSize != null ? ' with $clusterSize photos' : ''}: $blurValuesIntegers",
+    );
+
+    return;
   }
 
   /// Returns a map of person's clusterID to map of closest clusterID to with disstance
@@ -523,7 +661,7 @@ class ClusterFeedbackService {
     );
 
     final Map<int, (Uint8List, int)> clusterToSummary =
-        await faceMlDb.clusterSummaryAll();
+        await faceMlDb.getAllClusterSummary();
     final Map<int, (Uint8List, int)> updatesForClusterSummary = {};
 
     final Map<int, List<double>> clusterAvg = {};
@@ -714,7 +852,7 @@ class ClusterFeedbackService {
 
     // Get the cluster averages for the person's clusters and the suggestions' clusters
     final Map<int, (Uint8List, int)> clusterToSummary =
-        await faceMlDb.clusterSummaryAll();
+        await faceMlDb.getAllClusterSummary();
 
     // Calculate the avg embedding of the person
     final personClusters = await faceMlDb.getPersonClusterIDs(person.remoteID);
