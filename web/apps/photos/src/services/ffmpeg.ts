@@ -8,6 +8,7 @@ import { ElectronFile } from "types/upload";
 import ComlinkFFmpegWorker from "utils/comlink/ComlinkFFmpegWorker";
 import { parseFFmpegExtractedMetadata } from "utils/ffmpeg";
 
+/** Called during upload */
 export async function generateVideoThumbnail(
     file: File | ElectronFile,
 ): Promise<File | ElectronFile> {
@@ -45,6 +46,7 @@ export async function generateVideoThumbnail(
     }
 }
 
+/** Called during upload */
 export async function extractVideoMetadata(file: File | ElectronFile) {
     try {
         const ffmpegClient = await ffmpegFactory.getFFmpegClient();
@@ -77,7 +79,8 @@ export async function extractVideoMetadata(file: File | ElectronFile) {
     }
 }
 
-export async function convertToMP4(file: File | ElectronFile) {
+/** Called when viewing a file */
+export async function convertToMP4(file: File) {
     try {
         const ffmpegClient = await ffmpegFactory.getFFmpegClient();
         return await ffmpegClient.run(
