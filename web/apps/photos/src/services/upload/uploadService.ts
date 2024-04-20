@@ -1,3 +1,4 @@
+import { encodeLivePhoto } from "@/media/live-photo";
 import {
     basename,
     convertBytesToHumanReadable,
@@ -12,6 +13,7 @@ import {
 import { CustomError, handleUploadError } from "@ente/shared/error";
 import { wait } from "@ente/shared/utils";
 import { Remote } from "comlink";
+import { FILE_TYPE } from "constants/file";
 import {
     FILE_READER_CHUNK_SIZE,
     MULTIPART_PART_SIZE,
@@ -44,6 +46,7 @@ import {
     UploadURL,
     isDataStream,
     type FileWithCollection2,
+    type LivePhotoAssets,
     type UploadAsset2,
 } from "types/upload";
 import {
@@ -392,6 +395,34 @@ async function readFile(
 
     return {
         filedata,
+        thumbnail,
+        hasStaticThumbnail,
+    };
+}
+
+async function readLivePhoto(
+    fileTypeInfo: FileTypeInfo,
+    livePhotoAssets: LivePhotoAssets,
+) {
+    const { thumbnail, hasStaticThumbnail } = await generateThumbnail(
+        livePhotoAssets.image,
+        {
+            exactType: fileTypeInfo.imageType,
+            fileType: FILE_TYPE.IMAGE,
+        },
+    );
+
+    const imageData = await getUint8ArrayView(livePhotoAssets.image);
+
+    const videoData = await getUint8ArrayView(livePhotoAssets.video);
+
+    return {
+        filedata: await encodeLivePhoto({
+            imageFileName: livePhotoAssets.image.name,
+            imageData,
+            videoFileName: livePhotoAssets.video.name,
+            videoData,
+        }),
         thumbnail,
         hasStaticThumbnail,
     };

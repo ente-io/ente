@@ -1,4 +1,3 @@
-import { encodeLivePhoto } from "@/media/live-photo";
 import { ensureElectron } from "@/next/electron";
 import { basename, getFileNameSize } from "@/next/file";
 import log from "@/next/log";
@@ -31,9 +30,7 @@ import {
     type LivePhotoAssets2,
 } from "types/upload";
 import { getFileTypeFromExtensionForLivePhotoClustering } from "utils/file/livePhoto";
-import { getUint8ArrayView } from "../readerService";
 import { getEXIFLocation, getEXIFTime, getParsedExifData } from "./exifService";
-import { generateThumbnail } from "./thumbnailService";
 import uploadCancelService from "./uploadCancelService";
 import { extractFileMetadata, getFileName } from "./uploadService";
 
@@ -392,34 +389,6 @@ export function getLivePhotoSize(livePhotoAssets: LivePhotoAssets) {
 
 export const getLivePhotoName = ({ image }: LivePhotoAssets2) =>
     typeof image == "string" ? basename(image) : image.name;
-
-export async function readLivePhoto(
-    fileTypeInfo: FileTypeInfo,
-    livePhotoAssets: LivePhotoAssets,
-) {
-    const { thumbnail, hasStaticThumbnail } = await generateThumbnail(
-        livePhotoAssets.image,
-        {
-            exactType: fileTypeInfo.imageType,
-            fileType: FILE_TYPE.IMAGE,
-        },
-    );
-
-    const imageData = await getUint8ArrayView(livePhotoAssets.image);
-
-    const videoData = await getUint8ArrayView(livePhotoAssets.video);
-
-    return {
-        filedata: await encodeLivePhoto({
-            imageFileName: livePhotoAssets.image.name,
-            imageData,
-            videoFileName: livePhotoAssets.video.name,
-            videoData,
-        }),
-        thumbnail,
-        hasStaticThumbnail,
-    };
-}
 
 export async function clusterLivePhotoFiles(mediaFiles: FileWithCollection2[]) {
     try {
