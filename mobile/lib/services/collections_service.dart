@@ -1323,7 +1323,7 @@ class CollectionsService {
     required int srcCollectionID,
   }) async {
     _validateCopyInput(dstCollectionID, srcCollectionID, files);
-    final batchedFiles = files.chunks(batchSize);
+    final batchedFiles = files.chunks(batchSizeCopy);
     final params = <String, dynamic>{};
     params["dstCollectionID"] = dstCollectionID;
     params["srcCollectionID"] = srcCollectionID;
