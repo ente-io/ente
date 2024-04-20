@@ -1,19 +1,6 @@
 import { haveWindow } from "@/next/env";
 import { ComlinkWorker } from "@/next/worker/comlink-worker";
-import { Remote } from "comlink";
-import { DedicatedConvertWorker } from "worker/convert.worker";
-
-class ComlinkConvertWorker {
-    private comlinkWorkerInstance: Remote<DedicatedConvertWorker>;
-
-    async getInstance() {
-        if (!this.comlinkWorkerInstance) {
-            this.comlinkWorkerInstance =
-                await getDedicatedConvertWorker().remote;
-        }
-        return this.comlinkWorkerInstance;
-    }
-}
+import { type DedicatedConvertWorker } from "worker/convert.worker";
 
 export const getDedicatedConvertWorker = () => {
     if (haveWindow()) {
@@ -26,5 +13,3 @@ export const getDedicatedConvertWorker = () => {
         return cryptoComlinkWorker;
     }
 };
-
-export default new ComlinkConvertWorker();
