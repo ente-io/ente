@@ -240,7 +240,18 @@ export interface Electron {
     clipImageEmbedding: (jpegImageData: Uint8Array) => Promise<Float32Array>;
 
     /**
-     * Return a CLIP embedding of the given image.
+     * Return a CLIP embedding of the given image if we already have the model
+     * downloaded and prepped. If the model is not available return `undefined`.
+     *
+     * This differs from the other sibling ML functions in that it doesn't wait
+     * for the model download to finish. It does trigger a model download, but
+     * then immediately returns `undefined`. At some future point, when the
+     * model downloaded finishes, calls to this function will start returning
+     * the result we seek.
+     *
+     * The reason for doing it in this asymmetric way is because CLIP text
+     * embeddings are used as part of deducing user initiated search results,
+     * and we don't want to block that interaction on a large network request.
      *
      * See: [Note: CLIP based magic search]
      *
@@ -248,7 +259,9 @@ export interface Electron {
      *
      * @returns A CLIP embedding.
      */
-    clipTextEmbedding: (text: string) => Promise<Float32Array>;
+    clipTextEmbeddingIfAvailable: (
+        text: string,
+    ) => Promise<Float32Array | undefined>;
 
     /**
      * Detect faces in the given image using YOLO.

@@ -1,5 +1,5 @@
 /**
- * @file AI/ML related functionality.
+ * @file AI/ML related functionality, generic layer.
  *
  * @see also `ml-clip.ts`, `ml-face.ts`.
  *
@@ -92,10 +92,10 @@ const modelPathDownloadingIfNeeded = async (
 };
 
 /** Return the path where the given {@link modelName} is meant to be saved */
-export const modelSavePath = (modelName: string) =>
+const modelSavePath = (modelName: string) =>
     path.join(app.getPath("userData"), "models", modelName);
 
-export const downloadModel = async (saveLocation: string, name: string) => {
+const downloadModel = async (saveLocation: string, name: string) => {
     // `mkdir -p` the directory where we want to save the model.
     const saveDir = path.dirname(saveLocation);
     await fs.mkdir(saveDir, { recursive: true });
@@ -112,7 +112,7 @@ export const downloadModel = async (saveLocation: string, name: string) => {
 /**
  * Crete an ONNX {@link InferenceSession} with some defaults.
  */
-export const createInferenceSession = async (modelPath: string) => {
+const createInferenceSession = async (modelPath: string) => {
     return await ort.InferenceSession.create(modelPath, {
         // Restrict the number of threads to 1
         intraOpNumThreads: 1,

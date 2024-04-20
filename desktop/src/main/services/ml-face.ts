@@ -15,11 +15,6 @@ const cachedFaceDetectionSession = makeCachedInferenceSession(
     30762872 /* 29.3 MB */,
 );
 
-const cachedFaceEmbeddingSession = makeCachedInferenceSession(
-    "mobilefacenet_opset15.onnx",
-    5286998 /* 5 MB */,
-);
-
 export const detectFaces = async (input: Float32Array) => {
     const session = await cachedFaceDetectionSession();
     const t = Date.now();
@@ -30,6 +25,11 @@ export const detectFaces = async (input: Float32Array) => {
     log.debug(() => `onnx/yolo face detection took ${Date.now() - t} ms`);
     return results["output"].data;
 };
+
+const cachedFaceEmbeddingSession = makeCachedInferenceSession(
+    "mobilefacenet_opset15.onnx",
+    5286998 /* 5 MB */,
+);
 
 export const faceEmbedding = async (input: Float32Array) => {
     // Dimension of each face (alias)

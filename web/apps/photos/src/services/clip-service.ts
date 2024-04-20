@@ -184,8 +184,8 @@ class CLIPService {
         }
     };
 
-    getTextEmbedding = async (text: string) => {
-        return ensureElectron().clipTextEmbedding(text);
+    getTextEmbeddingIfAvailable = async (text: string) => {
+        return ensureElectron().clipTextEmbeddingIfAvailable(text);
     };
 
     private runClipEmbeddingExtraction = async (canceller: AbortController) => {

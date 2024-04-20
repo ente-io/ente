@@ -84,8 +84,6 @@ export const CustomError = {
     ServerError: "server error",
     FILE_NOT_FOUND: "file not found",
     UNSUPPORTED_PLATFORM: "Unsupported platform",
-    MODEL_DOWNLOAD_PENDING:
-        "Model download pending, skipping clip search request",
     UPDATE_URL_FILE_ID_MISMATCH: "update url file id mismatch",
     URL_ALREADY_SET: "url already set",
     FILE_CONVERSION_FAILED: "file conversion failed",

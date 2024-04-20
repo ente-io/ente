@@ -45,7 +45,7 @@ import {
     convertToJPEG,
     generateImageThumbnail,
 } from "./services/imageProcessor";
-import { clipImageEmbedding, clipTextEmbedding } from "./services/ml-clip";
+import { clipImageEmbedding, clipTextEmbeddingIfAvailable } from "./services/ml-clip";
 import { detectFaces, faceEmbedding } from "./services/ml-face";
 import {
     clearStores,
@@ -169,8 +169,8 @@ export const attachIPCHandlers = () => {
         clipImageEmbedding(jpegImageData),
     );
 
-    ipcMain.handle("clipTextEmbedding", (_, text: string) =>
-        clipTextEmbedding(text),
+    ipcMain.handle("clipTextEmbeddingIfAvailable", (_, text: string) =>
+        clipTextEmbeddingIfAvailable(text),
     );
 
     ipcMain.handle("detectFaces", (_, input: Float32Array) =>

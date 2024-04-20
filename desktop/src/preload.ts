@@ -163,8 +163,10 @@ const runFFmpegCmd = (
 const clipImageEmbedding = (jpegImageData: Uint8Array): Promise<Float32Array> =>
     ipcRenderer.invoke("clipImageEmbedding", jpegImageData);
 
-const clipTextEmbedding = (text: string): Promise<Float32Array> =>
-    ipcRenderer.invoke("clipTextEmbedding", text);
+const clipTextEmbeddingIfAvailable = (
+    text: string,
+): Promise<Float32Array | undefined> =>
+    ipcRenderer.invoke("clipTextEmbeddingIfAvailable", text);
 
 const detectFaces = (input: Float32Array): Promise<Float32Array> =>
     ipcRenderer.invoke("detectFaces", input);
@@ -263,42 +265,61 @@ const getElectronFilesFromGoogleZip = (
 const getDirFiles = (dirPath: string): Promise<ElectronFile[]> =>
     ipcRenderer.invoke("getDirFiles", dirPath);
 
-//
-// These objects exposed here will become available to the JS code in our
-// renderer (the web/ code) as `window.ElectronAPIs.*`
-//
-// There are a few related concepts at play here, and it might be worthwhile to
-// read their (excellent) documentation to get an understanding;
-//`
-// - ContextIsolation:
-//   https://www.electronjs.org/docs/latest/tutorial/context-isolation
-//
-// - IPC https://www.electronjs.org/docs/latest/tutorial/ipc
-//
-// [Note: Transferring large amount of data over IPC]
-//
-// Electron's IPC implementation uses the HTML standard Structured Clone
-// Algorithm to serialize objects passed between processes.
-// https://www.electronjs.org/docs/latest/tutorial/ipc#object-serialization
-//
-// In particular, ArrayBuffer is eligible for structured cloning.
-// https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Structured_clone_algorithm
-//
-// Also, ArrayBuffer is "transferable", which means it is a zero-copy operation
-// operation when it happens across threads.
-// https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Transferable_objects
-//
-// In our case though, we're not dealing with threads but separate processes. So
-// the ArrayBuffer will be copied:
-// > "parameters, errors and return values are **copied** when they're sent over
-//   the bridge".
-//   https://www.electronjs.org/docs/latest/api/context-bridge#methods
-//
-// The copy itself is relatively fast, but the problem with transfering large
-// amounts of data is potentially running out of memory during the copy.
-//
-// For an alternative, see [Note: IPC streams].
-//
+/**
+ * These objects exposed here will become available to the JS code in our
+ * renderer (the web/ code) as `window.ElectronAPIs.*`
+ *
+ * There are a few related concepts at play here, and it might be worthwhile to
+ * read their (excellent) documentation to get an understanding;
+ *`
+ * - ContextIsolation:
+ *   https://www.electronjs.org/docs/latest/tutorial/context-isolation
+ *
+ * - IPC https://www.electronjs.org/docs/latest/tutorial/ipc
+ *
+ * ---
+ *
+ * [Note: Custom errors across Electron/Renderer boundary]
+ *
+ * If we need to identify errors thrown by the main process when invoked from
+ * the renderer process, we can only use the `message` field because:
+ *
+ * > Errors thrown throw `handle` in the main process are not transparent as
+ * > they are serialized and only the `message` property from the original error
+ * > is provided to the renderer process.
+ * >
+ * > - https://www.electronjs.org/docs/latest/tutorial/ipc
+ * >
+ * > Ref: https://github.com/electron/electron/issues/24427
+ *
+ * ---
+ *
+ * [Note: Transferring large amount of data over IPC]
+ *
+ * Electron's IPC implementation uses the HTML standard Structured Clone
+ * Algorithm to serialize objects passed between processes.
+ * https://www.electronjs.org/docs/latest/tutorial/ipc#object-serialization
+ *
+ * In particular, ArrayBuffer is eligible for structured cloning.
+ * https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Structured_clone_algorithm
+ *
+ * Also, ArrayBuffer is "transferable", which means it is a zero-copy operation
+ * operation when it happens across threads.
+ * https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Transferable_objects
+ *
+ * In our case though, we're not dealing with threads but separate processes. So
+ * the ArrayBuffer will be copied:
+ *
+ * > "parameters, errors and return values are **copied** when they're sent over
+ * > the bridge".
+ * >
+ * > https://www.electronjs.org/docs/latest/api/context-bridge#methods
+ *
+ * The copy itself is relatively fast, but the problem with transfering large
+ * amounts of data is potentially running out of memory during the copy.
+ *
+ * For an alternative, see [Note: IPC streams].
+ */
 contextBridge.exposeInMainWorld("electron", {
     // - General
 
@@ -340,7 +361,7 @@ contextBridge.exposeInMainWorld("electron", {
     // - ML
 
     clipImageEmbedding,
-    clipTextEmbedding,
+    clipTextEmbeddingIfAvailable,
     detectFaces,
     faceEmbedding,
 
