@@ -300,6 +300,10 @@ class FaceMlService {
       // Get a sense of the total number of faces in the database
       final int totalFaces = await FaceMLDataDB.instance
           .getTotalFaceCount(minFaceScore: minFaceScore);
+
+      // Get the current cluster statistics
+      final Map<int, (Uint8List, int)> oldClusterSummaries =
+          await FaceMLDataDB.instance.getAllClusterSummary();
       if (clusterInBuckets) {
         // read the creation times from Files DB, in a map from fileID to creation time
         final fileIDToCreationTime =
@@ -332,18 +336,22 @@ class FaceMlService {
             break;
           }
 
-          final faceIdToCluster =
+          final clusteringResult =
               await FaceClusteringService.instance.predictLinear(
             faceInfoForClustering,
             fileIDToCreationTime: fileIDToCreationTime,
             offset: offset,
+            oldClusterSummaries: oldClusterSummaries,
           );
-          if (faceIdToCluster == null) {
+          if (clusteringResult == null) {
             _logger.warning("faceIdToCluster is null");
             return;
           }
 
-          await FaceMLDataDB.instance.updateClusterIdToFaceId(faceIdToCluster);
+          await FaceMLDataDB.instance
+              .updateClusterIdToFaceId(clusteringResult.newFaceIdToCluster);
+          await FaceMLDataDB.instance
+              .clusterSummaryUpdate(clusteringResult.newClusterSummaries!);
           _logger.info(
             'Done with clustering ${offset + faceInfoForClustering.length} embeddings (${(100 * (offset + faceInfoForClustering.length) / totalFaces).toStringAsFixed(0)}%) in bucket $bucket, offset: $offset',
           );
@@ -374,12 +382,13 @@ class FaceMlService {
             '${DateTime.now().difference(gotFaceEmbeddingsTime).inMilliseconds} ms');
 
         // Cluster the embeddings using the linear clustering algorithm, returning a map from faceID to clusterID
-        final faceIdToCluster =
+        final clusteringResult =
             await FaceClusteringService.instance.predictLinear(
           faceInfoForClustering,
           fileIDToCreationTime: fileIDToCreationTime,
+          oldClusterSummaries: oldClusterSummaries,
         );
-        if (faceIdToCluster == null) {
+        if (clusteringResult == null) {
           _logger.warning("faceIdToCluster is null");
           return;
         }
@@ -390,9 +399,12 @@ class FaceMlService {
 
         // Store the updated clusterIDs in the database
         _logger.info(
-          'Updating ${faceIdToCluster.length} FaceIDs with clusterIDs in the DB',
+          'Updating ${clusteringResult.newFaceIdToCluster.length} FaceIDs with clusterIDs in the DB',
         );
-        await FaceMLDataDB.instance.updateClusterIdToFaceId(faceIdToCluster);
+        await FaceMLDataDB.instance
+            .updateClusterIdToFaceId(clusteringResult.newFaceIdToCluster);
+        await FaceMLDataDB.instance
+            .clusterSummaryUpdate(clusteringResult.newClusterSummaries!);
         _logger.info('Done updating FaceIDs with clusterIDs in the DB, in '
             '${DateTime.now().difference(clusterDoneTime).inSeconds} seconds');
       }
