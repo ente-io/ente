@@ -14,10 +14,9 @@ export async function generateVideoThumbnail(
 ): Promise<File | ElectronFile> {
     try {
         let seekTime = 1;
-        const ffmpegClient = await ffmpegFactory.getFFmpegClient();
         while (seekTime >= 0) {
             try {
-                return await ffmpegClient.run(
+                return await ffmpegExec(
                     [
                         FFMPEG_PLACEHOLDER,
                         "-i",
@@ -49,12 +48,11 @@ export async function generateVideoThumbnail(
 /** Called during upload */
 export async function extractVideoMetadata(file: File | ElectronFile) {
     try {
-        const ffmpegClient = await ffmpegFactory.getFFmpegClient();
         // https://stackoverflow.com/questions/9464617/retrieving-and-saving-media-metadata-using-ffmpeg
         // -c [short for codex] copy[(stream_specifier)[ffmpeg.org/ffmpeg.html#Stream-specifiers]] => copies all the stream without re-encoding
         // -map_metadata [http://ffmpeg.org/ffmpeg.html#Advanced-options search for map_metadata] => copies all stream metadata to the out
         // -f ffmetadata [https://ffmpeg.org/ffmpeg-formats.html#Metadata-1] => dump metadata from media files into a simple UTF-8-encoded INI-like text file
-        const metadata = await ffmpegClient.run(
+        const metadata = await ffmpegExec(
             [
                 FFMPEG_PLACEHOLDER,
                 "-i",
@@ -82,8 +80,7 @@ export async function extractVideoMetadata(file: File | ElectronFile) {
 /** Called when viewing a file */
 export async function convertToMP4(file: File) {
     try {
-        const ffmpegClient = await ffmpegFactory.getFFmpegClient();
-        return await ffmpegClient.run(
+        return await ffmpegExec(
             [
                 FFMPEG_PLACEHOLDER,
                 "-i",
@@ -102,37 +99,33 @@ export async function convertToMP4(file: File) {
     }
 }
 
-interface IFFmpeg {
-    run: (
-        cmd: string[],
-        inputFile: File | ElectronFile,
-        outputFilename: string,
-        dontTimeout?: boolean,
-    ) => Promise<File | ElectronFile>;
-}
-
-class FFmpegFactory {
-    private client: IFFmpeg;
-    async getFFmpegClient() {
-        if (!this.client) {
-            const electron = globalThis.electron;
-            if (electron) {
-                this.client = {
-                    run(cmd, inputFile, outputFilename, dontTimeout) {
-                        return electron.runFFmpegCmd(
-                            cmd,
-                            inputFile,
-                            outputFilename,
-                            dontTimeout,
-                        );
-                    },
-                };
-            } else {
-                this.client = await ComlinkFFmpegWorker.getInstance();
-            }
-        }
-        return this.client;
+/**
+ * Run the given FFMPEG command.
+ *
+ * If we're running in the context of our desktop app, use the FFMPEG binary we
+ * bundle with our desktop app to run the command. Otherwise fallback to the
+ * WASM ffmpeg we link to from our web app.
+ *
+ * As a rough ballpark, the native FFMPEG integration in the desktop app is
+ * 10-20x faster than the WASM one currently. See: [Note: FFMPEG in Electron].
+ */
+const ffmpegExec = async (
+    cmd: string[],
+    inputFile: File | ElectronFile,
+    outputFilename: string,
+    dontTimeout?: boolean,
+): Promise<File | ElectronFile> => {
+    const electron = globalThis.electron;
+    if (electron) {
+        return electron.runFFmpegCmd(
+            cmd,
+            inputFile,
+            outputFilename,
+            dontTimeout,
+        );
+    } else {
+        return ComlinkFFmpegWorker.getInstance().then((worker) =>
+            worker.run(cmd, inputFile, outputFilename, dontTimeout),
+        );
     }
-}
-
-const ffmpegFactory = new FFmpegFactory();
+};
