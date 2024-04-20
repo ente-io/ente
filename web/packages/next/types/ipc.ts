@@ -197,22 +197,39 @@ export interface Electron {
      * Try to convert an arbitrary image into JPEG using native layer tools.
      *
      * The behaviour is OS dependent. On macOS we use the `sips` utility, and on
-     * some Linux architectures we use an ImageMagick binary bundled with our
-     * desktop app.
+     * some Linux architectures we use an ImageMagick executable bundled with
+     * our desktop app.
      *
      * In other cases (primarily Windows), where native JPEG conversion is not
-     * yet possible, this method will throw an error with the
-     * {@link CustomErrorMessage.NotAvailable} message..
+     * yet possible, this function will throw an error with the
+     * {@link CustomErrorMessage.NotAvailable} message.
      *
      * @param fileName The name of the file whose data we're being given.
      * @param imageData The raw image data (the contents of the image file).
-     * @returns JPEG data.
+     * @returns JPEG data of the converted image.
      */
     convertToJPEG: (
         fileName: string,
         imageData: Uint8Array,
     ) => Promise<Uint8Array>;
 
+    /**
+     * Generate a JPEG thumbnail for the given image.
+     *
+     * The behaviour is OS dependent. On macOS we use the `sips` utility, and on
+     * some Linux architectures we use an ImageMagick executable bundled with
+     * our desktop app.
+     *
+     * In other cases (primarily Windows), where native thumbnail generation is
+     * not yet possible, this function will throw an error with the
+     * {@link CustomErrorMessage.NotAvailable} message.
+     *
+     * @param inputFile The file whose thumbnail we want.
+     * @param maxDimension The maximum width or height of the generated
+     * thumbnail.
+     * @param maxSize Maximum size (in bytes) of the generated thumbnail.
+     * @returns JPEG data of the generated thumbnail.
+     */
     generateImageThumbnail: (
         inputFile: File | ElectronFile,
         maxDimension: number,
