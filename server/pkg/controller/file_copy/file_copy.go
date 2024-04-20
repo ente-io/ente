@@ -12,6 +12,7 @@ import (
 	"github.com/gin-contrib/requestid"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
+	"sync"
 	"time"
 )
 
@@ -133,12 +134,29 @@ func (fc *FileCopyController) CopyFiles(c *gin.Context, req ente.CopyFileSyncReq
 		fileCopyList = append(fileCopyList, fileCopy)
 	}
 	oldToNewFileIDMap := make(map[int64]int64)
+	var wg sync.WaitGroup
+	errChan := make(chan error, len(fileCopyList))
+
 	for _, fileCopy := range fileCopyList {
-		newFile, err := fc.createCopy(c, fileCopy, userID, app)
-		if err != nil {
-			return nil, err
-		}
-		oldToNewFileIDMap[fileCopy.SourceFile.ID] = newFile.ID
+		wg.Add(1)
+		go func(fileCopy fileCopyInternal) {
+			defer wg.Done()
+			newFile, err := fc.createCopy(c, fileCopy, userID, app)
+			if err != nil {
+				errChan <- err
+				return
+			}
+			oldToNewFileIDMap[fileCopy.SourceFile.ID] = newFile.ID
+		}(fileCopy)
+	}
+
+	// Wait for all goroutines to finish
+	wg.Wait()
+
+	// Close the error channel and check if there were any errors
+	close(errChan)
+	if err, ok := <-errChan; ok {
+		return nil, err
 	}
 	return &ente.CopyResponse{OldToNewFileIDMap: oldToNewFileIDMap}, nil
 }
