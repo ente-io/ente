@@ -73,7 +73,7 @@ import {
 } from "./metadataService";
 import { uploadStreamUsingMultipart } from "./multiPartUploadService";
 import publicUploadHttpClient from "./publicUploadHttpClient";
-import { generateThumbnail } from "./thumbnailService";
+import { generateThumbnail } from "./thumbnail";
 import UIService from "./uiService";
 import uploadCancelService from "./uploadCancelService";
 import UploadHttpClient from "./uploadHttpClient";
