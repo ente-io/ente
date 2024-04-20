@@ -66,8 +66,9 @@ func (fc *FileCopyController) CopyFiles(c *gin.Context, req ente.CopyFileSyncReq
 	}
 	fileIDs := req.FileIDs()
 	fileToCollectionFileMap := make(map[int64]*ente.CollectionFileItem, len(req.CollectionFileItems))
-	for _, collectionFileItem := range req.CollectionFileItems {
-		fileToCollectionFileMap[collectionFileItem.ID] = &collectionFileItem
+	for i, _ := range req.CollectionFileItems {
+		item := &req.CollectionFileItems[i]
+		fileToCollectionFileMap[item.ID] = item
 	}
 	s3ObjectsToCopy, err := fc.ObjectRepo.GetObjectsForFileIDs(fileIDs)
 	if err != nil {
@@ -115,7 +116,12 @@ func (fc *FileCopyController) CopyFiles(c *gin.Context, req ente.CopyFileSyncReq
 		}
 	}
 	fileCopyList := make([]fileCopyInternal, 0, len(existingFilesToCopy))
-	for _, file := range existingFilesToCopy {
+	for i, _ := range existingFilesToCopy {
+		file := existingFilesToCopy[i]
+		collectionItem := fileToCollectionFileMap[file.ID]
+		if collectionItem.ID != file.ID {
+			return nil, ente.NewInternalError(fmt.Sprintf("expected collectionItem.ID %d, got %d", file.ID, collectionItem.ID))
+		}
 		fileCopy := fileCopyInternal{
 			SourceFile:            file,
 			DestCollectionID:      req.DstCollection,
