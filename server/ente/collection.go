@@ -114,14 +114,6 @@ type CopyResponse struct {
 	OldToNewFileIDMap map[int64]int64 `json:"oldToNewFileIDMap"`
 }
 
-func (cfr CopyFileSyncRequest) FileIDs() []int64 {
-	fileIDs := make([]int64, 0, len(cfr.CollectionFileItems))
-	for _, file := range cfr.CollectionFileItems {
-		fileIDs = append(fileIDs, file.ID)
-	}
-	return fileIDs
-}
-
 // RemoveFilesRequest represents a request to remove files from a collection
 type RemoveFilesRequest struct {
 	CollectionID int64 `json:"collectionID" binding:"required"`

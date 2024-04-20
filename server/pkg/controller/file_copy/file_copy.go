@@ -65,11 +65,12 @@ func (fc *FileCopyController) CopyFiles(c *gin.Context, req ente.CopyFileSyncReq
 	if err != nil {
 		return nil, err
 	}
-	fileIDs := req.FileIDs()
+	fileIDs := make([]int64, 0, len(req.CollectionFileItems))
 	fileToCollectionFileMap := make(map[int64]*ente.CollectionFileItem, len(req.CollectionFileItems))
 	for i := range req.CollectionFileItems {
 		item := &req.CollectionFileItems[i]
 		fileToCollectionFileMap[item.ID] = item
+		fileIDs = append(fileIDs, item.ID)
 	}
 	s3ObjectsToCopy, err := fc.ObjectRepo.GetObjectsForFileIDs(fileIDs)
 	if err != nil {
