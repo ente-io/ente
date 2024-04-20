@@ -1,10 +1,9 @@
-import { ensureElectron } from "@/next/electron";
-import { convertBytesToHumanReadable, getFileNameSize } from "@/next/file";
+import { getFileNameSize } from "@/next/file";
 import log from "@/next/log";
+import { CustomErrorMessage, type Electron } from "@/next/types/ipc";
 import { CustomError } from "@ente/shared/error";
 import { FILE_TYPE } from "constants/file";
 import { BLACK_THUMBNAIL_BASE64 } from "constants/upload";
-import isElectron from "is-electron";
 import * as FFmpegService from "services/ffmpeg/ffmpegService";
 import HeicConversionService from "services/heicConversionService";
 import { ElectronFile, FileTypeInfo } from "types/upload";
@@ -22,6 +21,30 @@ const MAX_QUALITY = 0.7;
 
 const WAIT_TIME_THUMBNAIL_GENERATION = 30 * 1000;
 
+class ModuleState {
+    /**
+     * This will be set to true if we get an error from the Node.js side of our
+     * desktop app telling us that native JPEG conversion is not available for
+     * the current OS/arch combination. That way, we can stop pestering it again
+     * and again (saving an IPC round-trip).
+     *
+     * Note the double negative when it is used.
+     */
+    isNativeThumbnailCreationNotAvailable = false;
+}
+
+const moduleState = new ModuleState();
+
+interface GeneratedThumbnail {
+    /** The JPEG data of the generated thumbnail */
+    thumbnail: Uint8Array;
+    /**
+     * `true` if this is a fallback (all black) thumbnail we're returning since
+     * thumbnail generation failed for some reason.
+     */
+    hasStaticThumbnail: boolean;
+}
+
 /**
  * Generate a JPEG thumbnail for the given {@link file}.
  *
@@ -33,7 +56,7 @@ const WAIT_TIME_THUMBNAIL_GENERATION = 30 * 1000;
 export const generateThumbnail = async (
     file: File | ElectronFile,
     fileTypeInfo: FileTypeInfo,
-): Promise<{ thumbnail: Uint8Array; hasStaticThumbnail: boolean }> => {
+): Promise<GeneratedThumbnail> => {
     try {
         const thumbnail =
             fileTypeInfo.fileType === FILE_TYPE.IMAGE
@@ -53,61 +76,55 @@ export const generateThumbnail = async (
 };
 
 /**
- * A fallback, black, thumbnail to use in cases where thumbnail generation fails
+ * A fallback, black, thumbnail for use in cases where thumbnail generation
+ * fails.
  */
 const fallbackThumbnail = () =>
     Uint8Array.from(atob(BLACK_THUMBNAIL_BASE64), (c) => c.charCodeAt(0));
 
-async function generateImageThumbnail(
+const generateImageThumbnail = async (
     file: File | ElectronFile,
     fileTypeInfo: FileTypeInfo,
-) {
-    if (isElectron()) {
+) => {
+    let jpegData: Uint8Array | undefined;
+
+    const electron = globalThis.electron;
+    const available = !moduleState.isNativeThumbnailCreationNotAvailable;
+    if (electron && available) {
+        // If we're running in our desktop app, try to make the thumbnail using
+        // the native tools available there-in, it'll be faster than doing it on
+        // the web layer.
         try {
-            return await generateImageThumbnailInElectron(
-                file,
-                maxThumbnailDimension,
-                maxThumbnailSize,
-            );
+            jpegData = await generateImageThumbnailInElectron(electron, file);
         } catch (e) {
-            return await generateImageThumbnailUsingCanvas(file, fileTypeInfo);
+            if (e.message == CustomErrorMessage.NotAvailable) {
+                moduleState.isNativeThumbnailCreationNotAvailable = true;
+            } else {
+                log.error("Native thumbnail creation failed", e);
+            }
         }
-    } else {
-        return await generateImageThumbnailUsingCanvas(file, fileTypeInfo);
     }
-}
+
+    if (!jpegData) {
+        jpegData = await generateImageThumbnailUsingCanvas(file, fileTypeInfo);
+    }
+    return jpegData;
+};
 
 const generateImageThumbnailInElectron = async (
+    electron: Electron,
     inputFile: File | ElectronFile,
-    maxDimension: number,
-    maxSize: number,
 ): Promise<Uint8Array> => {
-    try {
-        const startTime = Date.now();
-        const thumb = await ensureElectron().generateImageThumbnail(
-            inputFile,
-            maxDimension,
-            maxSize,
-        );
-        log.info(
-            `originalFileSize:${convertBytesToHumanReadable(
-                inputFile?.size,
-            )},thumbFileSize:${convertBytesToHumanReadable(
-                thumb?.length,
-            )},  native thumbnail generation time: ${
-                Date.now() - startTime
-            }ms `,
-        );
-        return thumb;
-    } catch (e) {
-        if (
-            e.message !==
-            CustomError.WINDOWS_NATIVE_IMAGE_PROCESSING_NOT_SUPPORTED
-        ) {
-            log.error("failed to generate image thumbnail natively", e);
-        }
-        throw e;
-    }
+    const startTime = Date.now();
+    const jpegData = await electron.generateImageThumbnail(
+        inputFile,
+        maxThumbnailDimension,
+        maxThumbnailSize,
+    );
+    log.debug(
+        () => `Native thumbnail generation took ${Date.now() - startTime} ms`,
+    );
+    return jpegData;
 };
 
 async function generateImageThumbnailUsingCanvas(

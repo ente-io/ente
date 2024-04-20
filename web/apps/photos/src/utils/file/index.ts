@@ -305,7 +305,6 @@ export const getRenderableImage = async (fileName: string, imageBlob: Blob) => {
                     moduleState.isNativeJPEGConversionNotAvailable = true;
                 } else {
                     log.error("Native conversion to JPEG failed", e);
-                    throw e;
                 }
             }
         }
@@ -335,7 +334,7 @@ const nativeConvertToJPEG = async (fileName: string, imageBlob: Blob) => {
     const jpegData = electron
         ? await electron.convertToJPEG(fileName, imageData)
         : await workerBridge.convertToJPEG(fileName, imageData);
-    log.info(`Native JPEG conversion took ${Date.now() - startTime} ms`);
+    log.debug(() => `Native JPEG conversion took ${Date.now() - startTime} ms`);
     return new Blob([jpegData]);
 };
 
