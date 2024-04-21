@@ -138,7 +138,7 @@ async function generateImageThumbnailUsingCanvas(
     let timeout = null;
 
     if (isFileHEIC(fileTypeInfo.exactType)) {
-        log.debug(() => `Pre-converting ${getFileName(file)} to HEIC`);
+        log.debug(() => `Pre-converting ${getFileName(file)} to JPEG`);
         const jpegBlob = await heicToJPEG(new Blob([await file.arrayBuffer()]));
         file = new File([jpegBlob], file.name);
     }

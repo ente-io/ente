@@ -1,4 +1,3 @@
-import { haveWindow } from "@/next/env";
 import { convertBytesToHumanReadable } from "@/next/file";
 import log from "@/next/log";
 import { ComlinkWorker } from "@/next/worker/comlink-worker";
@@ -26,19 +25,17 @@ const BREATH_TIME_IN_MICROSECONDS = 1000;
 class HEICConverter {
     private convertProcessor = new QueueProcessor<Blob>();
     private workerPool: ComlinkWorker<typeof DedicatedHEICConvertWorker>[] = [];
-    private ready: Promise<void>;
 
-    constructor() {
-        this.ready = this.init();
-    }
-    private async init() {
+    private initIfNeeded() {
+        if (this.workerPool.length > 0) return;
         this.workerPool = [];
-        for (let i = 0; i < WORKER_POOL_SIZE; i++) {
-            this.workerPool.push(getDedicatedConvertWorker());
-        }
+        for (let i = 0; i < WORKER_POOL_SIZE; i++)
+            this.workerPool.push(createWorker());
     }
+
     async convert(fileBlob: Blob): Promise<Blob> {
-        await this.ready;
+        this.initIfNeeded();
+
         const response = this.convertProcessor.queueUpRequest(() =>
             retryAsyncFunction<Blob>(async () => {
                 const convertWorker = this.workerPool.shift();
@@ -99,11 +96,12 @@ class HEICConverter {
                 } catch (e) {
                     log.error("heic conversion failed", e);
                     convertWorker.terminate();
-                    this.workerPool.push(getDedicatedConvertWorker());
+                    this.workerPool.push(createWorker());
                     throw e;
                 }
             }, WAIT_TIME_BEFORE_NEXT_ATTEMPT_IN_MICROSECONDS),
         );
+
         try {
             return await response.promise;
         } catch (e) {
@@ -119,16 +117,8 @@ class HEICConverter {
 /** The singleton instance of {@link HEICConverter}. */
 const converter = new HEICConverter();
 
-export const getDedicatedConvertWorker = () => {
-    if (haveWindow()) {
-        const cryptoComlinkWorker = new ComlinkWorker<
-            typeof DedicatedHEICConvertWorker
-        >(
-            "heic-convert-worker",
-            new Worker(
-                new URL("worker/heic-convert.worker.ts", import.meta.url),
-            ),
-        );
-        return cryptoComlinkWorker;
-    }
-};
+const createWorker = () =>
+    new ComlinkWorker<typeof DedicatedHEICConvertWorker>(
+        "heic-convert-worker",
+        new Worker(new URL("worker/heic-convert.worker.ts", import.meta.url)),
+    );
