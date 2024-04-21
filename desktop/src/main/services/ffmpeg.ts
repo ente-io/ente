@@ -1,23 +1,19 @@
 import pathToFfmpeg from "ffmpeg-static";
-import { existsSync } from "node:fs";
 import fs from "node:fs/promises";
-import { ElectronFile } from "../../types/ipc";
-import log from "../log";
-import { writeStream } from "../stream";
 import { withTimeout } from "../utils";
 import { execAsync } from "../utils-electron";
 import { deleteTempFile, makeTempFilePath } from "../utils-temp";
 
-const INPUT_PATH_PLACEHOLDER = "INPUT";
-const FFMPEG_PLACEHOLDER = "FFMPEG";
-const OUTPUT_PATH_PLACEHOLDER = "OUTPUT";
+const ffmpegPathPlaceholder = "FFMPEG";
+const inputPathPlaceholder = "INPUT";
+const outputPathPlaceholder = "OUTPUT";
 
 /**
  * Run a ffmpeg command
  *
- * [Note: FFMPEG in Electron]
+ * [Note: ffmpeg in Electron]
  *
- * There is a wasm build of FFMPEG, but that is currently 10-20 times slower
+ * There is a wasm build of ffmpeg, but that is currently 10-20 times slower
  * that the native build. That is slow enough to be unusable for our purposes.
  * https://ffmpegwasm.netlify.app/docs/performance
  *
@@ -37,76 +33,65 @@ const OUTPUT_PATH_PLACEHOLDER = "OUTPUT";
  *     $ file ente.app/Contents/Frameworks/Electron\ Framework.framework/Versions/Current/Libraries/libffmpeg.dylib
  *     .../libffmpeg.dylib: Mach-O 64-bit dynamically linked shared library arm64
  *
- * I'm not sure if our code is supposed to be able to use it, and how.
+ * But I'm not sure if our code is supposed to be able to use it, and how.
  */
-export async function runFFmpegCmd(
-    cmd: string[],
-    inputFile: File | ElectronFile,
+export const ffmpegExec = async (
+    command: string[],
+    inputDataOrPath: Uint8Array | string,
     outputFileName: string,
-    dontTimeout?: boolean,
-) {
-    let inputFilePath = null;
-    let createdTempInputFile = null;
+    timeoutMS: number,
+): Promise<Uint8Array> => {
+    // TODO (MR): This currently copies files for both input and output. This
+    // needs to be tested extremely large video files when invoked downstream of
+    // `convertToMP4` in the web code.
+
+    let inputFilePath: string;
+    let isInputFileTemporary: boolean;
+    if (typeof inputDataOrPath == "string") {
+        inputFilePath = inputDataOrPath;
+        isInputFileTemporary = false;
+    } else {
+        inputFilePath = await makeTempFilePath("input" /* arbitrary */);
+        isInputFileTemporary = true;
+        await fs.writeFile(inputFilePath, inputDataOrPath);
+    }
+
+    let outputFilePath: string | undefined;
     try {
-        if (!existsSync(inputFile.path)) {
-            const tempFilePath = await makeTempFilePath(inputFile.name);
-            await writeStream(tempFilePath, await inputFile.stream());
-            inputFilePath = tempFilePath;
-            createdTempInputFile = true;
-        } else {
-            inputFilePath = inputFile.path;
-        }
-        const outputFileData = await runFFmpegCmd_(
-            cmd,
+        outputFilePath = await makeTempFilePath(outputFileName);
+
+        const cmd = substitutePlaceholders(
+            command,
             inputFilePath,
-            outputFileName,
-            dontTimeout,
+            outputFilePath,
         );
-        return new File([outputFileData], outputFileName);
-    } finally {
-        if (createdTempInputFile) {
-            await deleteTempFile(inputFilePath);
-        }
-    }
-}
 
-export async function runFFmpegCmd_(
-    cmd: string[],
+        if (timeoutMS) await withTimeout(execAsync(cmd), 30 * 1000);
+        else await execAsync(cmd);
+
+        return fs.readFile(outputFilePath);
+    } finally {
+        if (isInputFileTemporary) await deleteTempFile(inputFilePath);
+        if (outputFilePath) await deleteTempFile(outputFilePath);
+    }
+};
+
+const substitutePlaceholders = (
+    command: string[],
     inputFilePath: string,
-    outputFileName: string,
-    dontTimeout = false,
-) {
-    let tempOutputFilePath: string;
-    try {
-        tempOutputFilePath = await makeTempFilePath(outputFileName);
-
-        cmd = cmd.map((cmdPart) => {
-            if (cmdPart === FFMPEG_PLACEHOLDER) {
-                return ffmpegBinaryPath();
-            } else if (cmdPart === INPUT_PATH_PLACEHOLDER) {
-                return inputFilePath;
-            } else if (cmdPart === OUTPUT_PATH_PLACEHOLDER) {
-                return tempOutputFilePath;
-            } else {
-                return cmdPart;
-            }
-        });
-
-        if (dontTimeout) await execAsync(cmd);
-        else await withTimeout(execAsync(cmd), 30 * 1000);
-
-        if (!existsSync(tempOutputFilePath)) {
-            throw new Error("ffmpeg output file not found");
+    outputFilePath: string,
+) =>
+    command.map((segment) => {
+        if (segment == ffmpegPathPlaceholder) {
+            return ffmpegBinaryPath();
+        } else if (segment == inputPathPlaceholder) {
+            return inputFilePath;
+        } else if (segment == outputPathPlaceholder) {
+            return outputFilePath;
+        } else {
+            return segment;
         }
-        const outputFile = await fs.readFile(tempOutputFilePath);
-        return new Uint8Array(outputFile);
-    } catch (e) {
-        log.error("FFMPEG command failed", e);
-        throw e;
-    } finally {
-        await deleteTempFile(tempOutputFilePath);
-    }
-}
+    });
 
 /**
  * Return the path to the `ffmpeg` binary.

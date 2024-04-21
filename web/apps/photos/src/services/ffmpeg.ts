@@ -151,14 +151,14 @@ export async function convertToMP4(file: File) {
 }
 
 /**
- * Run the given FFMPEG command.
+ * Run the given ffmpeg command.
  *
- * If we're running in the context of our desktop app, use the FFMPEG binary we
+ * If we're running in the context of our desktop app, use the ffmpeg binary we
  * bundle with our desktop app to run the command. Otherwise fallback to using
- * the WASM ffmpeg we link to from our web app in a web worker.
+ * the wasm ffmpeg we link to from our web app in a web worker.
  *
- * As a rough ballpark, the native FFMPEG integration in the desktop app is
- * 10-20x faster than the WASM one currently. See: [Note: FFMPEG in Electron].
+ * As a rough ballpark, the native ffmpeg integration in the desktop app is
+ * 10-20x faster than the wasm one currently. See: [Note: ffmpeg in Electron].
  */
 const ffmpegExec = async (
     cmd: string[],

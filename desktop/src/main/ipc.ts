@@ -12,7 +12,6 @@ import type { FSWatcher } from "chokidar";
 import { ipcMain } from "electron/main";
 import type {
     CollectionMapping,
-    ElectronFile,
     FolderWatch,
     PendingUploads,
 } from "../types/ipc";
@@ -39,12 +38,9 @@ import {
     updateAndRestart,
     updateOnNextRestart,
 } from "./services/app-update";
-import { runFFmpegCmd } from "./services/ffmpeg";
+import { convertToJPEG, generateImageThumbnail } from "./services/convert";
+import { ffmpegExec } from "./services/ffmpeg";
 import { getDirFiles } from "./services/fs";
-import {
-    convertToJPEG,
-    generateImageThumbnail,
-} from "./services/convert";
 import {
     clipImageEmbedding,
     clipTextEmbeddingIfAvailable,
@@ -156,14 +152,14 @@ export const attachIPCHandlers = () => {
     );
 
     ipcMain.handle(
-        "runFFmpegCmd",
+        "ffmpegExec",
         (
             _,
-            cmd: string[],
-            inputFile: File | ElectronFile,
+            command: string[],
+            inputDataOrPath: Uint8Array | string,
             outputFileName: string,
-            dontTimeout?: boolean,
-        ) => runFFmpegCmd(cmd, inputFile, outputFileName, dontTimeout),
+            timeoutMS: number,
+        ) => ffmpegExec(command, inputDataOrPath, outputFileName, timeoutMS),
     );
 
     // - ML

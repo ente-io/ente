@@ -20,10 +20,10 @@ export class DedicatedFFmpegWorker {
     }
 
     /**
-     * Execute a FFMPEG {@link command}.
+     * Execute a ffmpeg {@link command}.
      *
      * This is a sibling of {@link ffmpegExec} in ipc.ts exposed by the desktop
-     * app. See [Note: FFMPEG in Electron].
+     * app. See [Note: ffmpeg in Electron].
      */
     run(cmd, inputFile, outputFileName, timeoutMS) {
         return this.wasmFFmpeg.run(cmd, inputFile, outputFileName, timeoutMS);

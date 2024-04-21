@@ -237,12 +237,12 @@ export interface Electron {
     ) => Promise<Uint8Array>;
 
     /**
-     * Execute a FFMPEG {@link command}.
+     * Execute a ffmpeg {@link command}.
      *
-     * This executes the command using the FFMPEG executable we bundle with our
-     * desktop app. There is also a FFMPEG WASM implementation that we use when
+     * This executes the command using the ffmpeg executable we bundle with our
+     * desktop app. There is also a ffmpeg wasm implementation that we use when
      * running on the web, it also has a sibling function with the same
-     * parameters. See [Note: FFMPEG in Electron].
+     * parameters. See [Note: ffmpeg in Electron].
      *
      * @param command An array of strings, each representing one positional
      * parameter in the command to execute. Placeholders for the input, output
@@ -253,14 +253,14 @@ export interface Electron {
      * @param inputDataOrPath The bytes of the input file, or the path to the
      * input file on the user's local disk. In both cases, the data gets
      * serialized to a temporary file, and then that path gets substituted in
-     * the FFMPEG {@link command} by {@link inputPathPlaceholder}.
+     * the ffmpeg {@link command} by {@link inputPathPlaceholder}.
      *
-     * @param outputFileName The name of the file we instruct FFMPEG to produce
+     * @param outputFileName The name of the file we instruct ffmpeg to produce
      * when giving it the given {@link command}. The contents of this file get
      * returned as the result.
      *
-     * @param timeoutMS If non-zero, then throw a timeout error if the FFMPEG
-     * command takes more than the given number of milliseconds.
+     * @param timeoutMS If non-zero, then abort and throw a timeout error if the
+     * ffmpeg command takes more than the given number of milliseconds.
      *
      * @returns The contents of the output file produced by the ffmpeg command
      * at {@link outputFileName}.
@@ -270,7 +270,7 @@ export interface Electron {
         inputDataOrPath: Uint8Array | string,
         outputFileName: string,
         timeoutMS: number,
-    ) => Promise<File>;
+    ) => Promise<Uint8Array>;
 
     // - ML
 

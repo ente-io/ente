@@ -122,8 +122,6 @@ const fsWriteFile = (path: string, contents: string): Promise<void> =>
 const fsIsDir = (dirPath: string): Promise<boolean> =>
     ipcRenderer.invoke("fsIsDir", dirPath);
 
-// - AUDIT below this
-
 // - Conversion
 
 const convertToJPEG = (
@@ -144,18 +142,18 @@ const generateImageThumbnail = (
         maxSize,
     );
 
-const runFFmpegCmd = (
-    cmd: string[],
-    inputFile: File | ElectronFile,
+const ffmpegExec = (
+    command: string[],
+    inputDataOrPath: Uint8Array | string,
     outputFileName: string,
-    dontTimeout?: boolean,
-): Promise<File> =>
+    timeoutMS: number,
+): Promise<Uint8Array> =>
     ipcRenderer.invoke(
-        "runFFmpegCmd",
-        cmd,
-        inputFile,
+        "ffmpegExec",
+        command,
+        inputDataOrPath,
         outputFileName,
-        dontTimeout,
+        timeoutMS,
     );
 
 // - ML
@@ -255,6 +253,7 @@ const setPendingUploadFiles = (
 ): Promise<void> =>
     ipcRenderer.invoke("setPendingUploadFiles", type, filePaths);
 
+// - TODO: AUDIT below this
 // -
 
 const getElectronFilesFromGoogleZip = (
@@ -341,7 +340,7 @@ contextBridge.exposeInMainWorld("electron", {
 
     convertToJPEG,
     generateImageThumbnail,
-    runFFmpegCmd,
+    ffmpegExec,
 
     // - ML
 
