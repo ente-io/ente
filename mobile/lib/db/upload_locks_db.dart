@@ -224,6 +224,29 @@ class UploadLocksDB {
     );
   }
 
+  Future<void> updateLastAttempted(
+    String localId,
+    String fileHash,
+    int collectionID,
+  ) async {
+    final db = await instance.database;
+    await db.update(
+      _trackUploadTable.table,
+      {
+        _trackUploadTable.columnLastAttemptedAt:
+            DateTime.now().millisecondsSinceEpoch,
+      },
+      where: '${_trackUploadTable.columnLocalID} = ?'
+          ' AND ${_trackUploadTable.columnFileHash} = ?'
+          ' AND ${_trackUploadTable.columnCollectionID} = ?',
+      whereArgs: [
+        localId,
+        fileHash,
+        collectionID,
+      ],
+    );
+  }
+
   Future<MultipartInfo> getCachedLinks(
     String localId,
     String fileHash,
@@ -310,6 +333,8 @@ class UploadLocksDB {
         _trackUploadTable.columnKeyEncryptionNonce: keyNonce,
         _trackUploadTable.columnPartSize:
             MultiPartUploader.multipartPartSizeForUpload,
+        _trackUploadTable.columnLastAttemptedAt:
+            DateTime.now().millisecondsSinceEpoch,
       },
     );
 

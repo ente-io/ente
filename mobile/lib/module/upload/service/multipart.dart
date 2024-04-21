@@ -125,6 +125,7 @@ class MultiPartUploader {
   ) async {
     final multipartInfo =
         await _db.getCachedLinks(localId, fileHash, collectionID);
+    await _db.updateLastAttempted(localId, fileHash, collectionID);
 
     Map<int, String> etags = multipartInfo.partETags ?? {};
 
