@@ -51,14 +51,28 @@ export default function PairingMode() {
             return;
         }
         const context = cast.framework.CastReceiverContext.getInstance();
+        context.setLoggerLevel(cast.framework.LoggerLevel.DEBUG);
+        const castDebugLogger = cast.debug.CastDebugLogger.getInstance();
+        castDebugLogger.setEnabled(true);
 
         try {
             const options = new cast.framework.CastReceiverOptions();
+            options.maxInactivity = 3600;
+            context.addEventListener(
+                cast.framework.system.EventType.ERROR,
+                (event) => {
+                    castDebugLogger.info(
+                        "Context Error - ",
+                        JSON.stringify(event),
+                    );
+                },
+            );
             options.customNamespaces = Object.assign({});
             options.customNamespaces["urn:x-cast:pair-request"] =
                 cast.framework.system.MessageType.JSON;
 
             options.disableIdleTimeout = true;
+            context.set;
 
             context.addCustomMessageListener(
                 "urn:x-cast:pair-request",
@@ -81,8 +95,9 @@ export default function PairingMode() {
         senderId: string;
         data: any;
     }) => {
-        console.log("recvcived pair request");
+        console.log("received message", message);
         try {
+            console.log("sending pair request response message");
             cast.framework.CastReceiverContext.getInstance().sendCustomMessage(
                 "urn:x-cast:pair-request",
                 message.senderId,
@@ -90,6 +105,7 @@ export default function PairingMode() {
                     code: digits.join(""),
                 },
             );
+            console.log("sent pair request response message");
         } catch (e) {
             console.log("failed to pair request response message", e);
             log.error("failed to send message", e);
