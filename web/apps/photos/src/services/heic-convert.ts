@@ -5,7 +5,7 @@ import { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { CustomError } from "@ente/shared/error";
 import { retryAsyncFunction } from "@ente/shared/utils";
 import QueueProcessor from "@ente/shared/utils/queueProcessor";
-import { type DedicatedConvertWorker } from "worker/convert.worker";
+import { type DedicatedHEICConvertWorker } from "worker/heic-convert.worker";
 
 /**
  * Convert a HEIC image to a JPEG.
@@ -25,7 +25,7 @@ const BREATH_TIME_IN_MICROSECONDS = 1000;
 
 class HEICConverter {
     private convertProcessor = new QueueProcessor<Blob>();
-    private workerPool: ComlinkWorker<typeof DedicatedConvertWorker>[] = [];
+    private workerPool: ComlinkWorker<typeof DedicatedHEICConvertWorker>[] = [];
     private ready: Promise<void>;
 
     constructor() {
@@ -53,9 +53,7 @@ class HEICConverter {
                                     }, WAIT_TIME_IN_MICROSECONDS);
                                     const startTime = Date.now();
                                     const convertedHEIC =
-                                        await worker.convertHEICToJPEG(
-                                            fileBlob,
-                                        );
+                                        await worker.heicToJPEG(fileBlob);
                                     log.info(
                                         `originalFileSize:${convertBytesToHumanReadable(
                                             fileBlob?.size,
@@ -124,10 +122,12 @@ const converter = new HEICConverter();
 export const getDedicatedConvertWorker = () => {
     if (haveWindow()) {
         const cryptoComlinkWorker = new ComlinkWorker<
-            typeof DedicatedConvertWorker
+            typeof DedicatedHEICConvertWorker
         >(
-            "ente-convert-worker",
-            new Worker(new URL("worker/convert.worker.ts", import.meta.url)),
+            "heic-convert-worker",
+            new Worker(
+                new URL("worker/heic-convert.worker.ts", import.meta.url),
+            ),
         );
         return cryptoComlinkWorker;
     }
