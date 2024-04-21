@@ -105,8 +105,8 @@ class UploadLocksDB {
                   ${_trackUploadTable.columnCompleteUrl} TEXT NOT NULL,
                   ${_trackUploadTable.columnStatus} TEXT DEFAULT '${MultipartStatus.pending.name}' NOT NULL,
                   ${_trackUploadTable.columnPartSize} INTEGER NOT NULL,
-                  ${_trackUploadTable.columnLastAttemptedAt} INTEGER,
-                  ${_trackUploadTable.columnCreatedAt} INTEGER DEFAULT CURRENT_TIMESTAMP NOT NULL,
+                  ${_trackUploadTable.columnLastAttemptedAt} INTEGER NOT NULL,
+                  ${_trackUploadTable.columnCreatedAt} INTEGER DEFAULT CURRENT_TIMESTAMP NOT NULL
                 )
                 ''',
       '''
