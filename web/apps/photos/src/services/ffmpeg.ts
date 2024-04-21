@@ -1,5 +1,7 @@
 import log from "@/next/log";
+import { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { validateAndGetCreationUnixTimeInMicroSeconds } from "@ente/shared/time";
+import { Remote } from "comlink";
 import {
     FFMPEG_PLACEHOLDER,
     INPUT_PATH_PLACEHOLDER,
@@ -7,7 +9,7 @@ import {
 } from "constants/ffmpeg";
 import { NULL_LOCATION } from "constants/upload";
 import { ElectronFile, ParsedExtractedMetadata } from "types/upload";
-import ComlinkFFmpegWorker from "utils/comlink/ComlinkFFmpegWorker";
+import { type DedicatedFFmpegWorker } from "worker/ffmpeg.worker";
 
 /** Called during upload */
 export async function generateVideoThumbnail(
@@ -168,8 +170,8 @@ export async function convertToMP4(file: File) {
  * Run the given FFMPEG command.
  *
  * If we're running in the context of our desktop app, use the FFMPEG binary we
- * bundle with our desktop app to run the command. Otherwise fallback to the
- * WASM ffmpeg we link to from our web app.
+ * bundle with our desktop app to run the command. Otherwise fallback to using
+ * the WASM ffmpeg we link to from our web app in a web worker.
  *
  * As a rough ballpark, the native FFMPEG integration in the desktop app is
  * 10-20x faster than the WASM one currently. See: [Note: FFMPEG in Electron].
@@ -189,8 +191,33 @@ const ffmpegExec = async (
             dontTimeout,
         );
     } else {
-        return ComlinkFFmpegWorker.getInstance().then((worker) =>
-            worker.run(cmd, inputFile, outputFilename, dontTimeout),
-        );
+        return workerFactory
+            .instance()
+            .then((worker) =>
+                worker.run(cmd, inputFile, outputFilename, dontTimeout),
+            );
     }
 };
+
+/** Lazily create a singleton instance of our worker */
+class WorkerFactory {
+    private _worker: ComlinkWorker<typeof DedicatedFFmpegWorker>;
+    private _instance: Promise<Remote<DedicatedFFmpegWorker>>;
+
+    async instance() {
+        if (!this._instance) {
+            const worker = createWorker();
+            this._worker = worker;
+            this._instance = worker.remote;
+        }
+        return this._instance;
+    }
+}
+
+const workerFactory = new WorkerFactory();
+
+const createWorker = () =>
+    new ComlinkWorker<typeof DedicatedFFmpegWorker>(
+        "ffmpeg-worker",
+        new Worker(new URL("worker/ffmpeg.worker.ts", import.meta.url)),
+    );
