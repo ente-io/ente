@@ -93,9 +93,10 @@ export default function PairingMode() {
         }
 
         return () => {
+            console.log("stopping cast context");
             context.stop();
         };
-    }, [cast, isCastReady]);
+    }, [cast]);
 
     const messageReceiveHandler = (message: {
         type: string;
