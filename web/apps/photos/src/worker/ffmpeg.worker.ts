@@ -3,29 +3,34 @@ import log from "@/next/log";
 import { withTimeout } from "@ente/shared/utils";
 import QueueProcessor from "@ente/shared/utils/queueProcessor";
 import { generateTempName } from "@ente/shared/utils/temp";
-import * as Comlink from "comlink";
+import { expose } from "comlink";
 import {
-    FFMPEG_PLACEHOLDER,
-    INPUT_PATH_PLACEHOLDER,
-    OUTPUT_PATH_PLACEHOLDER,
+    ffmpegPathPlaceholder,
+    inputPathPlaceholder,
+    outputPathPlaceholder,
 } from "constants/ffmpeg";
 import { FFmpeg, createFFmpeg } from "ffmpeg-wasm";
 import { getUint8ArrayView } from "services/readerService";
 
 export class DedicatedFFmpegWorker {
-    wasmFFmpeg: WasmFFmpeg;
+    private wasmFFmpeg: WasmFFmpeg;
+
     constructor() {
         this.wasmFFmpeg = new WasmFFmpeg();
     }
 
-    run(cmd, inputFile, outputFileName, dontTimeout) {
-        return this.wasmFFmpeg.run(cmd, inputFile, outputFileName, dontTimeout);
+    /**
+     * Execute a FFMPEG {@link command}.
+     *
+     * This is a sibling of {@link ffmpegExec} in ipc.ts exposed by the desktop
+     * app. See [Note: FFMPEG in Electron].
+     */
+    run(cmd, inputFile, outputFileName, timeoutMS) {
+        return this.wasmFFmpeg.run(cmd, inputFile, outputFileName, timeoutMS);
     }
 }
 
-Comlink.expose(DedicatedFFmpegWorker, self);
-
-const FFMPEG_EXECUTION_WAIT_TIME = 30 * 1000;
+expose(DedicatedFFmpegWorker, self);
 
 export class WasmFFmpeg {
     private ffmpeg: FFmpeg;
@@ -51,24 +56,13 @@ export class WasmFFmpeg {
         cmd: string[],
         inputFile: File,
         outputFileName: string,
-        dontTimeout = false,
+        timeoutMS,
     ) {
-        const response = this.ffmpegTaskQueue.queueUpRequest(() => {
-            if (dontTimeout) {
-                return this.execute(cmd, inputFile, outputFileName);
-            } else {
-                return withTimeout<File>(
-                    this.execute(cmd, inputFile, outputFileName),
-                    FFMPEG_EXECUTION_WAIT_TIME,
-                );
-            }
-        });
-        try {
-            return await response.promise;
-        } catch (e) {
-            log.error("ffmpeg run failed", e);
-            throw e;
-        }
+        const exec = () => this.execute(cmd, inputFile, outputFileName);
+        const request = this.ffmpegTaskQueue.queueUpRequest(() =>
+            timeoutMS ? withTimeout<File>(exec(), timeoutMS) : exec(),
+        );
+        return await request.promise;
     }
 
     private async execute(
@@ -91,11 +85,11 @@ export class WasmFFmpeg {
             tempOutputFilePath = `${generateTempName(10, outputFileName)}`;
 
             cmd = cmd.map((cmdPart) => {
-                if (cmdPart === FFMPEG_PLACEHOLDER) {
+                if (cmdPart === ffmpegPathPlaceholder) {
                     return "";
-                } else if (cmdPart === INPUT_PATH_PLACEHOLDER) {
+                } else if (cmdPart === inputPathPlaceholder) {
                     return tempInputFilePath;
-                } else if (cmdPart === OUTPUT_PATH_PLACEHOLDER) {
+                } else if (cmdPart === outputPathPlaceholder) {
                     return tempOutputFilePath;
                 } else {
                     return cmdPart;

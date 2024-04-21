@@ -236,11 +236,40 @@ export interface Electron {
         maxSize: number,
     ) => Promise<Uint8Array>;
 
-    runFFmpegCmd: (
-        cmd: string[],
-        inputFile: File | ElectronFile,
+    /**
+     * Execute a FFMPEG {@link command}.
+     *
+     * This executes the command using the FFMPEG executable we bundle with our
+     * desktop app. There is also a FFMPEG WASM implementation that we use when
+     * running on the web, it also has a sibling function with the same
+     * parameters. See [Note: FFMPEG in Electron].
+     *
+     * @param command An array of strings, each representing one positional
+     * parameter in the command to execute. Placeholders for the input, output
+     * and ffmpeg's own path are replaced before executing the command
+     * (respectively {@link inputPathPlaceholder},
+     * {@link outputPathPlaceholder}, {@link ffmpegPathPlaceholder}).
+     *
+     * @param inputDataOrPath The bytes of the input file, or the path to the
+     * input file on the user's local disk. In both cases, the data gets
+     * serialized to a temporary file, and then that path gets substituted in
+     * the FFMPEG {@link command} by {@link inputPathPlaceholder}.
+     *
+     * @param outputFileName The name of the file we instruct FFMPEG to produce
+     * when giving it the given {@link command}. The contents of this file get
+     * returned as the result.
+     *
+     * @param timeoutMS If non-zero, then throw a timeout error if the FFMPEG
+     * command takes more than the given number of milliseconds.
+     *
+     * @returns The contents of the output file produced by the ffmpeg command
+     * at {@link outputFileName}.
+     */
+    ffmpegExec: (
+        command: string[],
+        inputDataOrPath: Uint8Array | string,
         outputFileName: string,
-        dontTimeout?: boolean,
+        timeoutMS: number,
     ) => Promise<File>;
 
     // - ML

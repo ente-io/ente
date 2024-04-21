@@ -2,9 +2,9 @@ import { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { validateAndGetCreationUnixTimeInMicroSeconds } from "@ente/shared/time";
 import { Remote } from "comlink";
 import {
-    FFMPEG_PLACEHOLDER,
-    INPUT_PATH_PLACEHOLDER,
-    OUTPUT_PATH_PLACEHOLDER,
+    ffmpegPathPlaceholder,
+    inputPathPlaceholder,
+    outputPathPlaceholder,
 } from "constants/ffmpeg";
 import { NULL_LOCATION } from "constants/upload";
 import { ElectronFile, ParsedExtractedMetadata } from "types/upload";
@@ -19,16 +19,16 @@ export async function generateVideoThumbnail(
         try {
             return await ffmpegExec(
                 [
-                    FFMPEG_PLACEHOLDER,
+                    ffmpegPathPlaceholder,
                     "-i",
-                    INPUT_PATH_PLACEHOLDER,
+                    inputPathPlaceholder,
                     "-ss",
                     `00:00:0${seekTime}`,
                     "-vframes",
                     "1",
                     "-vf",
                     "scale=-1:720",
-                    OUTPUT_PATH_PLACEHOLDER,
+                    outputPathPlaceholder,
                 ],
                 file,
                 "thumb.jpeg",
@@ -50,16 +50,16 @@ export async function extractVideoMetadata(file: File | ElectronFile) {
     // -f ffmetadata [https://ffmpeg.org/ffmpeg-formats.html#Metadata-1] => dump metadata from media files into a simple UTF-8-encoded INI-like text file
     const metadata = await ffmpegExec(
         [
-            FFMPEG_PLACEHOLDER,
+            ffmpegPathPlaceholder,
             "-i",
-            INPUT_PATH_PLACEHOLDER,
+            inputPathPlaceholder,
             "-c",
             "copy",
             "-map_metadata",
             "0",
             "-f",
             "ffmetadata",
-            OUTPUT_PATH_PLACEHOLDER,
+            outputPathPlaceholder,
         ],
         file,
         `metadata.txt`,
@@ -137,16 +137,16 @@ function parseCreationTime(creationTime: string) {
 export async function convertToMP4(file: File) {
     return await ffmpegExec(
         [
-            FFMPEG_PLACEHOLDER,
+            ffmpegPathPlaceholder,
             "-i",
-            INPUT_PATH_PLACEHOLDER,
+            inputPathPlaceholder,
             "-preset",
             "ultrafast",
-            OUTPUT_PATH_PLACEHOLDER,
+            outputPathPlaceholder,
         ],
         file,
         "output.mp4",
-        true,
+        30 * 1000,
     );
 }
 
@@ -164,21 +164,16 @@ const ffmpegExec = async (
     cmd: string[],
     inputFile: File | ElectronFile,
     outputFilename: string,
-    dontTimeout?: boolean,
+    timeoutMS: number = 0,
 ): Promise<File | ElectronFile> => {
     const electron = globalThis.electron;
     if (electron) {
-        return electron.runFFmpegCmd(
-            cmd,
-            inputFile,
-            outputFilename,
-            dontTimeout,
-        );
+        return electron.runFFmpegCmd(cmd, inputFile, outputFilename, timeoutMS);
     } else {
         return workerFactory
             .instance()
             .then((worker) =>
-                worker.run(cmd, inputFile, outputFilename, dontTimeout),
+                worker.run(cmd, inputFile, outputFilename, timeoutMS),
             );
     }
 };
