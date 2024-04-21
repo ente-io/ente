@@ -25,7 +25,7 @@ import {
     updateFileMagicMetadata,
     updateFilePublicMagicMetadata,
 } from "services/fileService";
-import heicConversionService from "services/heicConversionService";
+import heicConversionService from "services/heic-convert";
 import { getFileType } from "services/typeDetectionService";
 import { updateFileCreationDateInEXIF } from "services/upload/exifService";
 import {

@@ -5,7 +5,7 @@ import { CustomError } from "@ente/shared/error";
 import { FILE_TYPE } from "constants/file";
 import { BLACK_THUMBNAIL_BASE64 } from "constants/upload";
 import * as FFmpegService from "services/ffmpeg";
-import HeicConversionService from "services/heicConversionService";
+import HeicConversionService from "services/heic-convert";
 import { ElectronFile, FileTypeInfo } from "types/upload";
 import { isFileHEIC } from "utils/file";
 import { getUint8ArrayView } from "../readerService";
