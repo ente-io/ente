@@ -30,7 +30,7 @@ class HEICConverter {
         if (this.workerPool.length > 0) return;
         this.workerPool = [];
         for (let i = 0; i < WORKER_POOL_SIZE; i++)
-            this.workerPool.push(createWorker());
+            this.workerPool.push(createComlinkWorker());
     }
 
     async convert(fileBlob: Blob): Promise<Blob> {
@@ -96,7 +96,7 @@ class HEICConverter {
                 } catch (e) {
                     log.error("heic conversion failed", e);
                     convertWorker.terminate();
-                    this.workerPool.push(createWorker());
+                    this.workerPool.push(createComlinkWorker());
                     throw e;
                 }
             }, WAIT_TIME_BEFORE_NEXT_ATTEMPT_IN_MICROSECONDS),
@@ -117,7 +117,7 @@ class HEICConverter {
 /** The singleton instance of {@link HEICConverter}. */
 const converter = new HEICConverter();
 
-const createWorker = () =>
+const createComlinkWorker = () =>
     new ComlinkWorker<typeof DedicatedHEICConvertWorker>(
         "heic-convert-worker",
         new Worker(new URL("worker/heic-convert.worker.ts", import.meta.url)),

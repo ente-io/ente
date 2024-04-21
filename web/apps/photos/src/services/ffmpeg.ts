@@ -201,14 +201,14 @@ const ffmpegExec = async (
 
 /** Lazily create a singleton instance of our worker */
 class WorkerFactory {
-    private _worker: ComlinkWorker<typeof DedicatedFFmpegWorker>;
+    private _comlinkWorker: ComlinkWorker<typeof DedicatedFFmpegWorker>;
     private _instance: Promise<Remote<DedicatedFFmpegWorker>>;
 
     async instance() {
         if (!this._instance) {
-            const worker = createWorker();
-            this._worker = worker;
-            this._instance = worker.remote;
+            const comlinkWorker = createComlinkWorker();
+            this._comlinkWorker = comlinkWorker;
+            this._instance = comlinkWorker.remote;
         }
         return this._instance;
     }
@@ -216,7 +216,7 @@ class WorkerFactory {
 
 const workerFactory = new WorkerFactory();
 
-const createWorker = () =>
+const createComlinkWorker = () =>
     new ComlinkWorker<typeof DedicatedFFmpegWorker>(
         "ffmpeg-worker",
         new Worker(new URL("worker/ffmpeg.worker.ts", import.meta.url)),
