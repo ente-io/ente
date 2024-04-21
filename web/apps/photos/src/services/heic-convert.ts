@@ -7,16 +7,16 @@ import { retryAsyncFunction } from "@ente/shared/utils";
 import QueueProcessor from "@ente/shared/utils/queueProcessor";
 import { type DedicatedConvertWorker } from "worker/convert.worker";
 
-class HeicConversionService {
-    async convert(heicFileData: Blob): Promise<Blob> {
-        try {
-            return await WasmHEICConverterService.convert(heicFileData);
-        } catch (e) {
-            log.error("failed to convert heic file", e);
-            throw e;
-        }
-    }
-}
+/**
+ * Convert a HEIC image to a JPEG.
+ *
+ * Behind the scenes, it uses a web worker pool to do the conversion using a
+ * WASM HEIC conversion package.
+ *
+ * @param heicBlob The HEIC blob to convert.
+ * @returns The JPEG blob.
+ */
+export const heicToJPEG = (heicBlob: Blob) => converter.convert(heicBlob);
 
 const WORKER_POOL_SIZE = 2;
 const WAIT_TIME_BEFORE_NEXT_ATTEMPT_IN_MICROSECONDS = [100, 100];
@@ -118,8 +118,8 @@ class HEICConverter {
     }
 }
 
-const WasmHEICConverterService = new HEICConverter();
-export default new HeicConversionService();
+/** The singleton instance of {@link HEICConverter}. */
+const converter = new HEICConverter();
 
 export const getDedicatedConvertWorker = () => {
     if (haveWindow()) {

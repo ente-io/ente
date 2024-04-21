@@ -5,7 +5,7 @@ import { CustomError } from "@ente/shared/error";
 import { FILE_TYPE } from "constants/file";
 import { BLACK_THUMBNAIL_BASE64 } from "constants/upload";
 import * as FFmpegService from "services/ffmpeg";
-import HeicConversionService from "services/heic-convert";
+import { heicToJPEG } from "services/heic-convert";
 import { ElectronFile, FileTypeInfo } from "types/upload";
 import { isFileHEIC } from "utils/file";
 import { getUint8ArrayView } from "../readerService";
@@ -136,15 +136,13 @@ async function generateImageThumbnailUsingCanvas(
 
     let imageURL = null;
     let timeout = null;
-    const isHEIC = isFileHEIC(fileTypeInfo.exactType);
-    if (isHEIC) {
-        log.info(`HEICConverter called for ${getFileNameSize(file)}`);
-        const convertedBlob = await HeicConversionService.convert(
-            new Blob([await file.arrayBuffer()]),
-        );
-        file = new File([convertedBlob], file.name);
-        log.info(`${getFileNameSize(file)} successfully converted`);
+
+    if (isFileHEIC(fileTypeInfo.exactType)) {
+        log.debug(() => `Pre-converting ${getFileName(file)} to HEIC`);
+        const jpegBlob = await heicToJPEG(new Blob([await file.arrayBuffer()]));
+        file = new File([jpegBlob], file.name);
     }
+
     let image = new Image();
     imageURL = URL.createObjectURL(new Blob([await file.arrayBuffer()]));
     await new Promise((resolve, reject) => {

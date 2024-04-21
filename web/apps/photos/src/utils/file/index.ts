@@ -25,7 +25,7 @@ import {
     updateFileMagicMetadata,
     updateFilePublicMagicMetadata,
 } from "services/fileService";
-import heicConversionService from "services/heic-convert";
+import { heicToJPEG } from "services/heic-convert";
 import { getFileType } from "services/typeDetectionService";
 import { updateFileCreationDateInEXIF } from "services/upload/exifService";
 import {
@@ -311,7 +311,7 @@ export const getRenderableImage = async (fileName: string, imageBlob: Blob) => {
 
         if (!jpegBlob && isFileHEIC(exactType)) {
             // If it is an HEIC file, use our web HEIC converter.
-            jpegBlob = await heicConversionService.convert(imageBlob);
+            jpegBlob = await heicToJPEG(imageBlob);
         }
 
         return jpegBlob;
