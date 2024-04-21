@@ -53,11 +53,18 @@ export default function PairingMode() {
         const context = cast.framework.CastReceiverContext.getInstance();
         context.setLoggerLevel(cast.framework.LoggerLevel.DEBUG);
         const castDebugLogger = cast.debug.CastDebugLogger.getInstance();
-        castDebugLogger.setEnabled(true);
-
         try {
             const options = new cast.framework.CastReceiverOptions();
             options.maxInactivity = 3600;
+            context.addEventListener(
+                cast.framework.system.EventType.READY,
+                () => {
+                    if (!castDebugLogger.debugOverlayElement_) {
+                        // Enable debug logger and show a 'DEBUG MODE' overlay at top left corner.
+                        castDebugLogger.setEnabled(true);
+                    }
+                },
+            );
             context.addEventListener(
                 cast.framework.system.EventType.ERROR,
                 (event) => {
