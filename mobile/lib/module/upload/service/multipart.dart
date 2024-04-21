@@ -46,7 +46,7 @@ class MultiPartUploader {
         collectionKey,
         encryptKeyNonce,
       ),
-      nonce: fileNonce,
+      header: fileNonce,
     );
   }
 
@@ -111,7 +111,7 @@ class MultiPartUploader {
       urls,
       encryptedFilePath,
       fileSize,
-      CryptoUtil.bin2base64(encryptedResult.key!),
+      CryptoUtil.bin2base64(encryptedResult.encryptedData!),
       CryptoUtil.bin2base64(fileNonce),
       CryptoUtil.bin2base64(encryptedResult.nonce!),
     );
