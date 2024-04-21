@@ -42,8 +42,14 @@ export default function PairingMode() {
     }, []);
 
     useEffect(() => {
-        if (!cast) return;
-        if (isCastReady) return;
+        if (!cast) {
+            console.log("cast not ready");
+            return;
+        }
+        if (isCastReady) {
+            console.log("cast already ready");
+            return;
+        }
         const context = cast.framework.CastReceiverContext.getInstance();
 
         try {
@@ -59,10 +65,12 @@ export default function PairingMode() {
                 messageReceiveHandler,
             );
             context.start(options);
+            setIsCastReady(true);
         } catch (e) {
+            console.log("failed to create cast context", e);
             log.error("failed to create cast context", e);
         }
-        setIsCastReady(true);
+
         return () => {
             context.stop();
         };
@@ -73,21 +81,33 @@ export default function PairingMode() {
         senderId: string;
         data: any;
     }) => {
-        cast.framework.CastReceiverContext.getInstance().sendCustomMessage(
-            "urn:x-cast:pair-request",
-            message.senderId,
-            {
-                code: digits.join(""),
-            },
-        );
+        console.log("recvcived pair request");
+        try {
+            cast.framework.CastReceiverContext.getInstance().sendCustomMessage(
+                "urn:x-cast:pair-request",
+                message.senderId,
+                {
+                    code: digits.join(""),
+                },
+            );
+        } catch (e) {
+            console.log("failed to pair request response message", e);
+            log.error("failed to send message", e);
+        }
     };
 
     const init = async () => {
-        const data = generateSecureData(6);
-        setDigits(convertDataToDecimalString(data).split(""));
-        const keypair = await generateKeyPair();
-        setPublicKeyB64(await toB64(keypair.publicKey));
-        setPrivateKeyB64(await toB64(keypair.privateKey));
+        try {
+            const data = generateSecureData(6);
+            setDigits(convertDataToDecimalString(data).split(""));
+            const keypair = await generateKeyPair();
+            setPublicKeyB64(await toB64(keypair.publicKey));
+            setPrivateKeyB64(await toB64(keypair.privateKey));
+        } catch (e) {
+            console.log("failed to generate keypair", e);
+            log.error("failed to generate keypair", e);
+            throw e;
+        }
     };
 
     const generateKeyPair = async () => {
