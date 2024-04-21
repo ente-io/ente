@@ -201,13 +201,11 @@ const ffmpegExec = async (
 
 /** Lazily create a singleton instance of our worker */
 class WorkerFactory {
-    private _comlinkWorker: ComlinkWorker<typeof DedicatedFFmpegWorker>;
     private _instance: Promise<Remote<DedicatedFFmpegWorker>>;
 
     async instance() {
         if (!this._instance) {
             const comlinkWorker = createComlinkWorker();
-            this._comlinkWorker = comlinkWorker;
             this._instance = comlinkWorker.remote;
         }
         return this._instance;
