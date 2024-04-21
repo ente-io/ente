@@ -38,7 +38,7 @@ const load = (() => {
 
 export const useCastReceiver = () => {
     const [receiver, setReceiver] = useState<Receiver | null>({
-        cast: null
+        cast: null,
     });
 
     useEffect(() => {
