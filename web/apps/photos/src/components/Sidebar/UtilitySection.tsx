@@ -206,7 +206,12 @@ export default function UtilitySection({ closeSidebar }) {
                 closeSidebar={closeSidebar}
                 setLoading={startLoading}
             />
-            <WatchFolder open={watchFolderView} onClose={closeWatchFolder} />
+            {isElectron() && (
+                <WatchFolder
+                    open={watchFolderView}
+                    onClose={closeWatchFolder}
+                />
+            )}
             <Preferences
                 open={preferencesView}
                 onClose={closePreferencesOptions}

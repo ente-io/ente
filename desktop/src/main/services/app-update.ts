@@ -1,9 +1,9 @@
 import { compareVersions } from "compare-versions";
-import { app, BrowserWindow } from "electron";
 import { default as electronLog } from "electron-log";
 import { autoUpdater } from "electron-updater";
+import { app, BrowserWindow } from "electron/main";
 import { allowWindowClose } from "../../main";
-import { AppUpdateInfo } from "../../types/ipc";
+import { AppUpdate } from "../../types/ipc";
 import log from "../log";
 import { userPreferences } from "../stores/user-preferences";
 
@@ -52,8 +52,8 @@ const checkForUpdatesAndNotify = async (mainWindow: BrowserWindow) => {
         return;
     }
 
-    const showUpdateDialog = (updateInfo: AppUpdateInfo) =>
-        mainWindow.webContents.send("appUpdateAvailable", updateInfo);
+    const showUpdateDialog = (update: AppUpdate) =>
+        mainWindow.webContents.send("appUpdateAvailable", update);
 
     log.debug(() => "Attempting auto update");
     autoUpdater.downloadUpdate();

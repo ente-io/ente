@@ -96,7 +96,7 @@ export const testZipWithRootFileReadingTest = async () => {
 
         const importSuggestion = getImportSuggestion(
             PICKED_UPLOAD_TYPE.ZIPS,
-            files,
+            files.map((file) => file["path"]),
         );
         if (!importSuggestion.rootFolderName) {
             throw Error(

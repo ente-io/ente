@@ -52,8 +52,15 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
     if (initPaymentUrl == null) {
       return const EnteLoadingWidget();
     }
-    return WillPopScope(
-      onWillPop: (() async => _buildPageExitWidget(context)),
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) async {
+        if (didPop) return;
+        final shouldPop = await _buildPageExitWidget(context);
+        if (shouldPop) {
+          Navigator.of(context).pop();
+        }
+      },
       child: Scaffold(
         appBar: AppBar(
           title: Text(S.of(context).subscription),

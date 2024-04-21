@@ -15,6 +15,7 @@ import 'package:photos/models/gallery_type.dart';
 import "package:photos/models/metadata/common_keys.dart";
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
+import "package:photos/services/feature_flag_service.dart";
 import 'package:photos/services/hidden_service.dart';
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -59,6 +60,7 @@ class _FileSelectionActionsWidgetState
   late FilesSplit split;
   late CollectionActions collectionActions;
   late bool isCollectionOwner;
+  bool _isInternalUser = false;
 
   // _cachedCollectionForSharedLink is primarily used to avoid creating duplicate
   // links if user keeps on creating Create link button after selecting
@@ -69,6 +71,7 @@ class _FileSelectionActionsWidgetState
   @override
   void initState() {
     currentUserID = Configuration.instance.getUserID()!;
+
     split = FilesSplit.split(<EnteFile>[], currentUserID);
     widget.selectedFiles.addListener(_selectFileChangeListener);
     collectionActions = CollectionActions(CollectionsService.instance);
@@ -95,6 +98,7 @@ class _FileSelectionActionsWidgetState
 
   @override
   Widget build(BuildContext context) {
+    _isInternalUser = FeatureFlagService.instance.isInternalUserOrDebugBuild();
     final ownedFilesCount = split.ownedByCurrentUser.length;
     final ownedAndPendingUploadFilesCount =
         ownedFilesCount + split.pendingUploads.length;
@@ -140,13 +144,14 @@ class _FileSelectionActionsWidgetState
 
     final showUploadIcon = widget.type == GalleryType.localFolder &&
         split.ownedByCurrentUser.isEmpty;
-    if (widget.type.showAddToAlbum()) {
+    if (widget.type.showAddToAlbum() ||
+        (_isInternalUser && widget.type == GalleryType.sharedCollection)) {
       if (showUploadIcon) {
         items.add(
           SelectionActionButton(
             icon: Icons.cloud_upload_outlined,
             labelText: S.of(context).addToEnte,
-            onTap: anyOwnedFiles ? _addToAlbum : null,
+            onTap: (anyOwnedFiles || _isInternalUser) ? _addToAlbum : null,
           ),
         );
       } else {
@@ -154,8 +159,8 @@ class _FileSelectionActionsWidgetState
           SelectionActionButton(
             icon: Icons.add_outlined,
             labelText: S.of(context).addToAlbum,
-            onTap: anyOwnedFiles ? _addToAlbum : null,
-            shouldShow: ownedAndPendingUploadFilesCount > 0,
+            onTap: (anyOwnedFiles || _isInternalUser) ? _addToAlbum : null,
+            shouldShow: ownedAndPendingUploadFilesCount > 0 || _isInternalUser,
           ),
         );
       }
@@ -434,7 +439,7 @@ class _FileSelectionActionsWidgetState
   }
 
   Future<void> _addToAlbum() async {
-    if (split.ownedByOtherUsers.isNotEmpty) {
+    if (split.ownedByOtherUsers.isNotEmpty && !_isInternalUser) {
       widget.selectedFiles
           .unSelectAll(split.ownedByOtherUsers.toSet(), skipNotify: true);
     }

@@ -1,0 +1,5 @@
+{
+    "extends": "@/build-config/tsconfig-typecheck.json",
+    /* Typecheck all files with the given extensions (here or in subfolders) */
+    "include": ["**/*.ts", "**/*.tsx"]
+}

@@ -59,9 +59,9 @@ class _RecoveryPageState extends State<RecoveryPage> {
             Navigator.of(context).pushReplacement(
               MaterialPageRoute(
                 builder: (BuildContext context) {
-                  return WillPopScope(
-                    onWillPop: () async => false,
-                    child: const PasswordEntryPage(
+                  return const PopScope(
+                    canPop: false,
+                    child: PasswordEntryPage(
                       mode: PasswordEntryMode.reset,
                     ),
                   );

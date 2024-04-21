@@ -27,8 +27,9 @@ class DiffFetcher {
       final bool hasMore = response.data["hasMore"] as bool;
       final startTime = DateTime.now();
       late Set<int> existingUploadIDs;
-      if(diff.isNotEmpty) {
-        existingUploadIDs = await FilesDB.instance.getUploadedFileIDs(collectionID);
+      if (diff.isNotEmpty) {
+        existingUploadIDs =
+            await FilesDB.instance.getUploadedFileIDs(collectionID);
       }
       final deletedFiles = <EnteFile>[];
       final updatedFiles = <EnteFile>[];
@@ -96,8 +97,7 @@ class DiffFetcher {
         updatedFiles.add(file);
       }
       _logger.info('[Collection-$collectionID] parsed ${diff.length} '
-          'diff items ( ${updatedFiles.length} updated) in ${DateTime.now()
-          .difference(startTime).inMilliseconds}ms');
+          'diff items ( ${updatedFiles.length} updated) in ${DateTime.now().difference(startTime).inMilliseconds}ms');
       return Diff(updatedFiles, deletedFiles, hasMore, latestUpdatedAtTime);
     } catch (e, s) {
       _logger.severe(e, s);

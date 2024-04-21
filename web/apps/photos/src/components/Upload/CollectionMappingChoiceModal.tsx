@@ -1,3 +1,4 @@
+import type { CollectionMapping } from "@/next/types/ipc";
 import {
     CenteredFlex,
     SpaceBetweenFlex,
@@ -8,23 +9,19 @@ import DialogTitleWithCloseButton, {
 import { Button, Dialog, DialogContent, Typography } from "@mui/material";
 import { t } from "i18next";
 
-interface Props {
-    uploadToMultipleCollection: () => void;
+interface CollectionMappingChoiceModalProps {
     open: boolean;
     onClose: () => void;
-    uploadToSingleCollection: () => void;
+    didSelect: (mapping: CollectionMapping) => void;
 }
-function UploadStrategyChoiceModal({
-    uploadToMultipleCollection,
-    uploadToSingleCollection,
-    ...props
-}: Props) {
-    const handleClose = dialogCloseHandler({
-        onClose: props.onClose,
-    });
+
+export const CollectionMappingChoiceModal: React.FC<
+    CollectionMappingChoiceModalProps
+> = ({ open, onClose, didSelect }) => {
+    const handleClose = dialogCloseHandler({ onClose });
 
     return (
-        <Dialog open={props.open} onClose={handleClose}>
+        <Dialog open={open} onClose={handleClose}>
             <DialogTitleWithCloseButton onClose={handleClose}>
                 {t("MULTI_FOLDER_UPLOAD")}
             </DialogTitleWithCloseButton>
@@ -39,8 +36,8 @@ function UploadStrategyChoiceModal({
                         size="medium"
                         color="accent"
                         onClick={() => {
-                            props.onClose();
-                            uploadToSingleCollection();
+                            onClose();
+                            didSelect("root");
                         }}
                     >
                         {t("UPLOAD_STRATEGY_SINGLE_COLLECTION")}
@@ -52,8 +49,8 @@ function UploadStrategyChoiceModal({
                         size="medium"
                         color="accent"
                         onClick={() => {
-                            props.onClose();
-                            uploadToMultipleCollection();
+                            onClose();
+                            didSelect("parent");
                         }}
                     >
                         {t("UPLOAD_STRATEGY_COLLECTION_PER_FOLDER")}
@@ -62,5 +59,4 @@ function UploadStrategyChoiceModal({
             </DialogContent>
         </Dialog>
     );
-}
-export default UploadStrategyChoiceModal;
+};

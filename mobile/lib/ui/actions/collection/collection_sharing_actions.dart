@@ -140,7 +140,7 @@ class CollectionActions {
         req,
       );
       logger.finest("adding files to share to new album");
-      await collectionsService.addToCollection(collection.id, files);
+      await collectionsService.addOrCopyToCollection(collection.id, files);
       logger.finest("creating public link for the newly created album");
       await CollectionsService.instance.createShareUrl(collection);
       await dialog.hide();

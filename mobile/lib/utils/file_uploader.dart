@@ -29,7 +29,6 @@ import "package:photos/models/metadata/file_magic.dart";
 import 'package:photos/models/upload_url.dart';
 import "package:photos/models/user_details.dart";
 import 'package:photos/services/collections_service.dart';
-import "package:photos/services/feature_flag_service.dart";
 import "package:photos/services/file_magic_service.dart";
 import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/services/sync_service.dart';
@@ -172,7 +171,7 @@ class FileUploader {
       );
 
       return CollectionsService.instance
-          .addToCollection(collectionID, [uploadedFile]).then((aVoid) {
+          .addOrCopyToCollection(collectionID, [uploadedFile]).then((aVoid) {
         return uploadedFile;
       });
     });
@@ -497,7 +496,7 @@ class FileUploader {
 
       // Calculate the number of parts for the file. Multiple part upload
       // is only enabled for internal users and debug builds till it's battle tested.
-      final count = FeatureFlagService.instance.isInternalUserOrDebugBuild()
+      final count = kDebugMode
           ? await calculatePartCount(
               await encryptedFile.length(),
             )

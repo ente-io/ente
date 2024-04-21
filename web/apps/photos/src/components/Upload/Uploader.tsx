@@ -1,15 +1,11 @@
+import { ensureElectron } from "@/next/electron";
 import log from "@/next/log";
-import type { Electron } from "@/next/types/ipc";
+import type { CollectionMapping, Electron } from "@/next/types/ipc";
 import { CustomError } from "@ente/shared/error";
 import { isPromise } from "@ente/shared/utils";
 import DiscFullIcon from "@mui/icons-material/DiscFull";
 import UserNameInputDialog from "components/UserNameInputDialog";
-import {
-    DEFAULT_IMPORT_SUGGESTION,
-    PICKED_UPLOAD_TYPE,
-    UPLOAD_STAGES,
-    UPLOAD_STRATEGY,
-} from "constants/upload";
+import { PICKED_UPLOAD_TYPE, UPLOAD_STAGES } from "constants/upload";
 import { t } from "i18next";
 import isElectron from "is-electron";
 import { AppContext } from "pages/_app";
@@ -17,14 +13,14 @@ import { GalleryContext } from "pages/gallery";
 import { useContext, useEffect, useRef, useState } from "react";
 import billingService from "services/billingService";
 import { getLatestCollections } from "services/collectionService";
-import ImportService from "services/importService";
+import { setToUploadCollection } from "services/pending-uploads";
 import {
     getPublicCollectionUID,
     getPublicCollectionUploaderName,
     savePublicCollectionUploaderName,
 } from "services/publicCollectionService";
 import uploadManager from "services/upload/uploadManager";
-import watchFolderService from "services/watch";
+import watcher from "services/watch";
 import { NotificationAttributes } from "types/Notification";
 import { Collection } from "types/collection";
 import {
@@ -35,11 +31,7 @@ import {
     SetLoading,
     UploadTypeSelectorIntent,
 } from "types/gallery";
-import {
-    ElectronFile,
-    FileWithCollection,
-    ImportSuggestion,
-} from "types/upload";
+import { ElectronFile, FileWithCollection } from "types/upload";
 import {
     InProgressUpload,
     SegregatedFinishedUploads,
@@ -53,13 +45,15 @@ import {
     getRootLevelFileWithFolderNotAllowMessage,
 } from "utils/ui";
 import {
+    DEFAULT_IMPORT_SUGGESTION,
     filterOutSystemFiles,
     getImportSuggestion,
     groupFilesBasedOnParentFolder,
+    type ImportSuggestion,
 } from "utils/upload";
 import { SetCollectionNamerAttributes } from "../Collections/CollectionNamer";
+import { CollectionMappingChoiceModal } from "./CollectionMappingChoiceModal";
 import UploadProgress from "./UploadProgress";
-import UploadStrategyChoiceModal from "./UploadStrategyChoiceModal";
 import UploadTypeSelector from "./UploadTypeSelector";
 
 const FIRST_ALBUM_NAME = "My First Album";
@@ -137,11 +131,6 @@ export default function Uploader(props: Props) {
     const closeUploadProgress = () => setUploadProgressView(false);
     const showUserNameInputDialog = () => setUserNameInputDialogView(true);
 
-    const setCollectionName = (collectionName: string) => {
-        isPendingDesktopUpload.current = true;
-        pendingDesktopUploadCollectionName.current = collectionName;
-    };
-
     const handleChoiceModalClose = () => {
         setChoiceModalView(false);
         uploadRunning.current = false;
@@ -177,18 +166,40 @@ export default function Uploader(props: Props) {
         }
 
         if (isElectron()) {
-            ImportService.getPendingUploads().then(
-                ({ files: electronFiles, collectionName, type }) => {
-                    log.info(`found pending desktop upload, resuming uploads`);
-                    resumeDesktopUpload(type, electronFiles, collectionName);
-                },
-            );
-            watchFolderService.init(
-                setElectronFiles,
-                setCollectionName,
-                props.syncWithRemote,
-                appContext.setIsFolderSyncRunning,
-            );
+            ensureElectron()
+                .pendingUploads()
+                .then((pending) => {
+                    if (pending) {
+                        log.info("Resuming pending desktop upload", pending);
+                        resumeDesktopUpload(
+                            pending.type == "files"
+                                ? PICKED_UPLOAD_TYPE.FILES
+                                : PICKED_UPLOAD_TYPE.ZIPS,
+                            pending.files,
+                            pending.collectionName,
+                        );
+                    }
+                });
+
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const upload = (collectionName: string, filePaths: string[]) => {
+                isPendingDesktopUpload.current = true;
+                pendingDesktopUploadCollectionName.current = collectionName;
+
+                // TODO (MR):
+                // setElectronFiles(filePaths);
+            };
+
+            const requestSyncWithRemote = () => {
+                props.syncWithRemote().catch((e) => {
+                    log.error(
+                        "Ignoring error when syncing trash changes with remote",
+                        e,
+                    );
+                });
+            };
+
+            watcher.init(upload, requestSyncWithRemote);
         }
     }, [
         publicCollectionGalleryContext.accessedThroughSharedURL,
@@ -291,18 +302,16 @@ export default function Uploader(props: Props) {
                 }`,
             );
             if (uploadManager.isUploadRunning()) {
-                if (watchFolderService.isUploadRunning()) {
+                if (watcher.isUploadRunning()) {
+                    // Pause watch folder sync on user upload
                     log.info(
-                        "watchFolder upload was running, pausing it to run user upload",
+                        "Folder watcher was uploading, pausing it to first run user upload",
                     );
-                    // pause watch folder service on user upload
-                    watchFolderService.pauseRunningSync();
+                    watcher.pauseRunningSync();
                 } else {
                     log.info(
-                        "an upload is already running, rejecting new upload request",
+                        "Ignoring new upload request because an upload is already running",
                     );
-                    // no-op
-                    // a user upload is already in progress
                     return;
                 }
             }
@@ -330,7 +339,7 @@ export default function Uploader(props: Props) {
 
             const importSuggestion = getImportSuggestion(
                 pickedUploadType.current,
-                toUploadFiles.current,
+                toUploadFiles.current.map((file) => file["path"]),
             );
             setImportSuggestion(importSuggestion);
 
@@ -391,7 +400,7 @@ export default function Uploader(props: Props) {
     };
 
     const uploadFilesToNewCollections = async (
-        strategy: UPLOAD_STRATEGY,
+        strategy: CollectionMapping,
         collectionName?: string,
     ) => {
         try {
@@ -405,7 +414,7 @@ export default function Uploader(props: Props) {
                 string,
                 (File | ElectronFile)[]
             >();
-            if (strategy === UPLOAD_STRATEGY.SINGLE_COLLECTION) {
+            if (strategy == "root") {
                 collectionNameToFilesMap.set(
                     collectionName,
                     toUploadFiles.current,
@@ -505,18 +514,19 @@ export default function Uploader(props: Props) {
             if (
                 electron &&
                 !isPendingDesktopUpload.current &&
-                !watchFolderService.isUploadRunning()
+                !watcher.isUploadRunning()
             ) {
-                await ImportService.setToUploadCollection(collections);
+                await setToUploadCollection(collections);
+                // TODO (MR): What happens when we have both?
                 if (zipPaths.current) {
-                    await electron.setToUploadFiles(
-                        PICKED_UPLOAD_TYPE.ZIPS,
+                    await electron.setPendingUploadFiles(
+                        "zips",
                         zipPaths.current,
                     );
                     zipPaths.current = null;
                 }
-                await electron.setToUploadFiles(
-                    PICKED_UPLOAD_TYPE.FILES,
+                await electron.setPendingUploadFiles(
+                    "files",
                     filesWithCollectionToUploadIn.map(
                         ({ file }) => (file as ElectronFile).path,
                     ),
@@ -532,14 +542,14 @@ export default function Uploader(props: Props) {
                 closeUploadProgress();
             }
             if (isElectron()) {
-                if (watchFolderService.isUploadRunning()) {
-                    await watchFolderService.allFileUploadsDone(
+                if (watcher.isUploadRunning()) {
+                    await watcher.allFileUploadsDone(
                         filesWithCollectionToUploadIn,
                         collections,
                     );
-                } else if (watchFolderService.isSyncPaused()) {
+                } else if (watcher.isSyncPaused()) {
                     // resume the service after user upload is done
-                    watchFolderService.resumePausedSync();
+                    watcher.resumePausedSync();
                 }
             }
         } catch (e) {
@@ -605,10 +615,7 @@ export default function Uploader(props: Props) {
     }
 
     const uploadToSingleNewCollection = (collectionName: string) => {
-        uploadFilesToNewCollections(
-            UPLOAD_STRATEGY.SINGLE_COLLECTION,
-            collectionName,
-        );
+        uploadFilesToNewCollections("root", collectionName);
     };
 
     const showCollectionCreateModal = (suggestedName: string) => {
@@ -647,7 +654,7 @@ export default function Uploader(props: Props) {
                         `upload pending files to collection - ${pendingDesktopUploadCollectionName.current}`,
                     );
                     uploadFilesToNewCollections(
-                        UPLOAD_STRATEGY.SINGLE_COLLECTION,
+                        "root",
                         pendingDesktopUploadCollectionName.current,
                     );
                     pendingDesktopUploadCollectionName.current = null;
@@ -655,17 +662,13 @@ export default function Uploader(props: Props) {
                     log.info(
                         `pending upload - strategy - "multiple collections" `,
                     );
-                    uploadFilesToNewCollections(
-                        UPLOAD_STRATEGY.COLLECTION_PER_FOLDER,
-                    );
+                    uploadFilesToNewCollections("parent");
                 }
                 return;
             }
             if (isElectron() && pickedUploadType === PICKED_UPLOAD_TYPE.ZIPS) {
                 log.info("uploading zip files");
-                uploadFilesToNewCollections(
-                    UPLOAD_STRATEGY.COLLECTION_PER_FOLDER,
-                );
+                uploadFilesToNewCollections("parent");
                 return;
             }
             if (isFirstUpload && !importSuggestion.rootFolderName) {
@@ -784,16 +787,26 @@ export default function Uploader(props: Props) {
             );
             return;
         }
-        uploadFilesToNewCollections(UPLOAD_STRATEGY.COLLECTION_PER_FOLDER);
+        uploadFilesToNewCollections("parent");
+    };
+
+    const didSelectCollectionMapping = (mapping: CollectionMapping) => {
+        switch (mapping) {
+            case "root":
+                handleUploadToSingleCollection();
+                break;
+            case "parent":
+                handleUploadToMultipleCollections();
+                break;
+        }
     };
 
     return (
         <>
-            <UploadStrategyChoiceModal
+            <CollectionMappingChoiceModal
                 open={choiceModalView}
                 onClose={handleChoiceModalClose}
-                uploadToSingleCollection={handleUploadToSingleCollection}
-                uploadToMultipleCollection={handleUploadToMultipleCollections}
+                didSelect={didSelectCollectionMapping}
             />
             <UploadTypeSelector
                 show={props.uploadTypeSelectorView}

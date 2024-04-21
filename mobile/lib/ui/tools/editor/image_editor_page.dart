@@ -63,14 +63,14 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) async {
         if (_hasBeenEdited()) {
           await _showExitConfirmationDialog(context);
         } else {
           replacePage(context, DetailPage(widget.detailPageConfig));
         }
-        return false;
       },
       child: Scaffold(
         appBar: AppBar(
