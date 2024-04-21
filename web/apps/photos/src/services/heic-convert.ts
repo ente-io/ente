@@ -1,11 +1,11 @@
+import { haveWindow } from "@/next/env";
 import { convertBytesToHumanReadable } from "@/next/file";
 import log from "@/next/log";
 import { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { CustomError } from "@ente/shared/error";
 import { retryAsyncFunction } from "@ente/shared/utils";
 import QueueProcessor from "@ente/shared/utils/queueProcessor";
-import { getDedicatedConvertWorker } from "utils/comlink/ComlinkConvertWorker";
-import { DedicatedConvertWorker } from "worker/convert.worker";
+import { type DedicatedConvertWorker } from "worker/convert.worker";
 
 class HeicConversionService {
     async convert(heicFileData: Blob): Promise<Blob> {
@@ -120,3 +120,15 @@ class HEICConverter {
 
 const WasmHEICConverterService = new HEICConverter();
 export default new HeicConversionService();
+
+export const getDedicatedConvertWorker = () => {
+    if (haveWindow()) {
+        const cryptoComlinkWorker = new ComlinkWorker<
+            typeof DedicatedConvertWorker
+        >(
+            "ente-convert-worker",
+            new Worker(new URL("worker/convert.worker.ts", import.meta.url)),
+        );
+        return cryptoComlinkWorker;
+    }
+};
