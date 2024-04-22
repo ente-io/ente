@@ -5,6 +5,7 @@ import {
     getFileNameSize,
 } from "@/next/file";
 import log from "@/next/log";
+import { ElectronFile } from "@/next/types/file";
 import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
 import {
     B64EncryptionResult,
@@ -30,7 +31,6 @@ import { EncryptedMagicMetadata } from "types/magicMetadata";
 import {
     BackupedFile,
     DataStream,
-    ElectronFile,
     EncryptedFile,
     ExtractMetadataResult,
     FileInMemory,

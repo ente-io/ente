@@ -1,4 +1,5 @@
 import log from "@/next/log";
+import { ElectronFile } from "@/next/types/file";
 import { CustomError } from "@ente/shared/error";
 import { FILE_TYPE } from "constants/file";
 import {
@@ -6,7 +7,7 @@ import {
     WHITELISTED_FILE_FORMATS,
 } from "constants/upload";
 import FileType, { FileTypeResult } from "file-type";
-import { ElectronFile, FileTypeInfo } from "types/upload";
+import { FileTypeInfo } from "types/upload";
 import { getFileExtension } from "utils/file";
 import { getUint8ArrayView } from "./readerService";
 

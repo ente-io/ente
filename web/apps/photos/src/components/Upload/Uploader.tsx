@@ -1,5 +1,6 @@
 import { ensureElectron } from "@/next/electron";
 import log from "@/next/log";
+import { ElectronFile } from "@/next/types/file";
 import type { CollectionMapping, Electron } from "@/next/types/ipc";
 import { CustomError } from "@ente/shared/error";
 import { isPromise } from "@ente/shared/utils";
@@ -32,11 +33,7 @@ import {
     SetLoading,
     UploadTypeSelectorIntent,
 } from "types/gallery";
-import {
-    ElectronFile,
-    FileWithCollection,
-    type FileWithCollection2,
-} from "types/upload";
+import { FileWithCollection, type FileWithCollection2 } from "types/upload";
 import {
     InProgressUpload,
     SegregatedFinishedUploads,

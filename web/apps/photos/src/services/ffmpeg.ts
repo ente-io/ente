@@ -1,3 +1,4 @@
+import { ElectronFile } from "@/next/types/file";
 import { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { validateAndGetCreationUnixTimeInMicroSeconds } from "@ente/shared/time";
 import { Remote } from "comlink";
@@ -7,7 +8,7 @@ import {
     outputPathPlaceholder,
 } from "constants/ffmpeg";
 import { NULL_LOCATION } from "constants/upload";
-import { ElectronFile, ParsedExtractedMetadata } from "types/upload";
+import { ParsedExtractedMetadata } from "types/upload";
 import { type DedicatedFFmpegWorker } from "worker/ffmpeg.worker";
 
 /** Called during upload */
@@ -30,7 +31,8 @@ export async function generateVideoThumbnail(
                     "scale=-1:720",
                     outputPathPlaceholder,
                 ],
-                file,
+                /* TODO(MR): ElectronFile changes */
+                fileOrPath as File | ElectronFile,
                 "thumb.jpeg",
             );
         } catch (e) {
@@ -168,17 +170,23 @@ const ffmpegExec = async (
 ): Promise<File | ElectronFile> => {
     const electron = globalThis.electron;
     if (electron || false) {
-        return electron.ffmpegExec(
-            command,
-            inputDataOrPath,
-            outputFileName,
-            timeoutMS
-        )
+        // return electron.ffmpegExec(
+        //     command,
+        //     /* TODO(MR): ElectronFile changes */
+        //     inputFile as unknown as string,
+        //     outputFileName,
+        //     timeoutMS,
+        // );
     } else {
         return workerFactory
             .instance()
             .then((worker) =>
-                worker.execute(command, inputFile, outputFileName, timeoutMS),
+                worker.execute(
+                    command,
+                    /* TODO(MR): ElectronFile changes */ inputFile as File,
+                    outputFileName,
+                    timeoutMS,
+                ),
             );
     }
 };

@@ -1,6 +1,7 @@
 import { ensureElectron } from "@/next/electron";
 import { basename, getFileNameSize } from "@/next/file";
 import log from "@/next/log";
+import { ElectronFile } from "@/next/types/file";
 import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
 import { CustomError } from "@ente/shared/error";
 import {
@@ -17,7 +18,6 @@ import { getFileType } from "services/typeDetectionService";
 import { FilePublicMagicMetadataProps } from "types/file";
 import {
     DataStream,
-    ElectronFile,
     ExtractMetadataResult,
     FileTypeInfo,
     LivePhotoAssets,

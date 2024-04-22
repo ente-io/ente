@@ -1,6 +1,6 @@
 import { convertBytesToHumanReadable } from "@/next/file";
 import log from "@/next/log";
-import { ElectronFile } from "types/upload";
+import { ElectronFile } from "@/next/types/file";
 
 export async function getUint8ArrayView(
     file: Blob | ElectronFile,

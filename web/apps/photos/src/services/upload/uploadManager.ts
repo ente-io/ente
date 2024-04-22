@@ -1,5 +1,6 @@
 import { ensureElectron } from "@/next/electron";
 import log from "@/next/log";
+import { ElectronFile } from "@/next/types/file";
 import { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { getDedicatedCryptoWorker } from "@ente/shared/crypto";
 import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
@@ -18,7 +19,6 @@ import { Collection } from "types/collection";
 import { EncryptedEnteFile, EnteFile } from "types/file";
 import { SetFiles } from "types/gallery";
 import {
-    ElectronFile,
     FileWithCollection,
     ParsedMetadataJSON,
     ParsedMetadataJSONMap,
