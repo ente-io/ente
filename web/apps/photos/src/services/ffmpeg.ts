@@ -1,4 +1,4 @@
-import { ElectronFile, type DesktopFilePath } from "@/next/types/file";
+import { ElectronFile } from "@/next/types/file";
 import { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { validateAndGetCreationUnixTimeInMicroSeconds } from "@ente/shared/time";
 import { Remote } from "comlink";
@@ -17,12 +17,10 @@ import { type DedicatedFFmpegWorker } from "worker/ffmpeg.worker";
  * This function is called during upload, when we need to generate thumbnails
  * for the new files that the user is adding.
  *
- * @param fileOrPath The input video file or a path to it.
- * @returns JPEG data for the generated thumbnail.
+ * @param blob The input video blob.
+ * @returns JPEG data of the generated thumbnail.
  */
-export const generateVideoThumbnail = async (
-    fileOrPath: File | DesktopFilePath,
-): Promise<Uint8Array> => {
+export const generateVideoThumbnail = async (blob: Blob) => {
     const thumbnailAtTime = (seekTime: number) =>
         ffmpegExec(
             [
@@ -37,7 +35,7 @@ export const generateVideoThumbnail = async (
                 "scale=-1:720",
                 outputPathPlaceholder,
             ],
-            fileOrPath,
+            blob,
             "thumb.jpeg",
         );
 
@@ -171,20 +169,19 @@ export async function convertToMP4(file: File) {
  */
 const ffmpegExec = async (
     command: string[],
-    fileOrPath: File | DesktopFilePath,
+    blob: Blob,
     outputFileName: string,
     timeoutMs: number = 0,
 ): Promise<Uint8Array> => {
-    if (fileOrPath instanceof File) {
+    const electron = globalThis.electron;
+    if (electron)
+        return electron.ffmpegExec(command, blob, outputFileName, timeoutMs);
+    else
         return workerFactory
             .lazy()
             .then((worker) =>
-                worker.exec(command, fileOrPath, outputFileName, timeoutMs),
+                worker.exec(command, blob, outputFileName, timeoutMs),
             );
-    } else {
-        const { path, electron } = fileOrPath;
-        return electron.ffmpegExec(command, path, outputFileName, timeoutMs);
-    }
 };
 
 const ffmpegExec2 = async (

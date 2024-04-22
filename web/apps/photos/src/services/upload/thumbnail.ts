@@ -1,5 +1,4 @@
 import log from "@/next/log";
-import { ElectronFile } from "@/next/types/file";
 import { CustomErrorMessage, type Electron } from "@/next/types/ipc";
 import { withTimeout } from "@ente/shared/utils";
 import { FILE_TYPE } from "constants/file";
@@ -84,16 +83,11 @@ const generateImageThumbnail = async (
     blob: Blob,
     fileTypeInfo: FileTypeInfo,
 ) => {
-    let jpegData: Uint8Array | undefined;
-
     const electron = globalThis.electron;
     const available = !moduleState.isNativeThumbnailCreationNotAvailable;
     if (electron && available) {
-        // If we're running in our desktop app, try to make the thumbnail using
-        // the native tools available there-in, it'll be faster than doing it on
-        // the web layer.
         try {
-            jpegData = await generateImageThumbnailInElectron(electron, file);
+            return await generateImageThumbnailInElectron(electron, file);
         } catch (e) {
             if (e.message == CustomErrorMessage.NotAvailable) {
                 moduleState.isNativeThumbnailCreationNotAvailable = true;
@@ -103,15 +97,12 @@ const generateImageThumbnail = async (
         }
     }
 
-    if (!jpegData) {
-        jpegData = await generateImageThumbnailUsingCanvas(blob, fileTypeInfo);
-    }
-    return jpegData;
+    return await generateImageThumbnailUsingCanvas(blob, fileTypeInfo);
 };
 
 const generateImageThumbnailInElectron = async (
     electron: Electron,
-    inputFile: File | ElectronFile,
+    blob: Blob,
 ): Promise<Uint8Array> => {
     const startTime = Date.now();
     const jpegData = await electron.generateImageThumbnail(
@@ -255,7 +246,7 @@ const compressedJPEGData = async (canvas: HTMLCanvasElement) => {
         percentageSizeDiff(blob.size, prevSize) >= 10
     );
 
-    return blob;
+    return new Uint8Array(await blob.arrayBuffer());
 };
 
 const percentageSizeDiff = (

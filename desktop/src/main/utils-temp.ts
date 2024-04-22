@@ -13,17 +13,14 @@ const enteTempDirPath = async () => {
     return result;
 };
 
-const randomPrefix = (length: number) => {
-    const CHARACTERS =
+/** Generate a random string suitable for being used as a file name prefix */
+const randomPrefix = () => {
+    const alphabet =
         "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
     let result = "";
-    const charactersLength = CHARACTERS.length;
-    for (let i = 0; i < length; i++) {
-        result += CHARACTERS.charAt(
-            Math.floor(Math.random() * charactersLength),
-        );
-    }
+    for (let i = 0; i < 10; i++)
+        result += alphabet[Math.floor(Math.random() * alphabet.length)];
     return result;
 };
 
@@ -41,7 +38,7 @@ export const makeTempFilePath = async (formatSuffix: string) => {
     const tempDir = await enteTempDirPath();
     let result: string;
     do {
-        result = path.join(tempDir, randomPrefix(10) + "-" + formatSuffix);
+        result = path.join(tempDir, randomPrefix() + "-" + formatSuffix);
     } while (existsSync(result));
     return result;
 };

@@ -1,8 +1,6 @@
-import { nameAndExtension } from "@/next/file";
 import log from "@/next/log";
 import { withTimeout } from "@ente/shared/utils";
 import QueueProcessor from "@ente/shared/utils/queueProcessor";
-import { generateTempName } from "@ente/shared/utils/temp";
 import { expose } from "comlink";
 import {
     ffmpegPathPlaceholder,
@@ -23,21 +21,15 @@ export class DedicatedFFmpegWorker {
     }
 
     /**
-     * Execute a FFmpeg {@link command}.
+     * Execute a FFmpeg {@link command} on {@link blob}.
      *
-     * This is a sibling of {@link ffmpegExec} in ipc.ts exposed by the desktop
-     * app. See [Note: FFmpeg in Electron].
+     * This is a sibling of {@link ffmpegExec} exposed by the desktop app in
+     * `ipc.ts`. See [Note: FFmpeg in Electron].
      */
-    async exec(
-        command: string[],
-        inputFile: File,
-        outputFileName: string,
-        timeoutMs,
-    ): Promise<Uint8Array> {
+    async exec(command: string[], blob: Blob, timeoutMs): Promise<Uint8Array> {
         if (!this.ffmpeg.isLoaded()) await this.ffmpeg.load();
 
-        const go = () =>
-            ffmpegExec(this.ffmpeg, command, inputFile, outputFileName);
+        const go = () => ffmpegExec(this.ffmpeg, command, blob);
 
         const request = this.ffmpegTaskQueue.queueUpRequest(() =>
             timeoutMs ? withTimeout(go(), timeoutMs) : go(),
@@ -49,46 +41,44 @@ export class DedicatedFFmpegWorker {
 
 expose(DedicatedFFmpegWorker, self);
 
-const ffmpegExec = async (
-    ffmpeg: FFmpeg,
-    command: string[],
-    inputFile: File,
-    outputFileName: string,
-) => {
-    const [, extension] = nameAndExtension(inputFile.name);
-    const tempNameSuffix = extension ? `input.${extension}` : "input";
-    const tempInputFilePath = `${generateTempName(10, tempNameSuffix)}`;
-    const tempOutputFilePath = `${generateTempName(10, outputFileName)}`;
+const ffmpegExec = async (ffmpeg: FFmpeg, command: string[], blob: Blob) => {
+    const inputPath = `${randomPrefix()}.in`;
+    const outputPath = `${randomPrefix()}.out`;
 
-    const cmd = substitutePlaceholders(
-        command,
-        tempInputFilePath,
-        tempOutputFilePath,
-    );
+    const cmd = substitutePlaceholders(command, inputPath, outputPath);
+
+    const inputData = new Uint8Array(await blob.arrayBuffer());
 
     try {
-        ffmpeg.FS(
-            "writeFile",
-            tempInputFilePath,
-            new Uint8Array(await inputFile.arrayBuffer()),
-        );
+        ffmpeg.FS("writeFile", inputPath, inputData);
 
         log.info(`Running FFmpeg (wasm) command ${cmd}`);
         await ffmpeg.run(...cmd);
 
-        return ffmpeg.FS("readFile", tempOutputFilePath);
+        return ffmpeg.FS("readFile", outputPath);
     } finally {
         try {
-            ffmpeg.FS("unlink", tempInputFilePath);
+            ffmpeg.FS("unlink", inputPath);
         } catch (e) {
-            log.error("Failed to remove input ${tempInputFilePath}", e);
+            log.error(`Failed to remove input ${inputPath}`, e);
         }
         try {
-            ffmpeg.FS("unlink", tempOutputFilePath);
+            ffmpeg.FS("unlink", outputPath);
         } catch (e) {
-            log.error("Failed to remove output ${tempOutputFilePath}", e);
+            log.error(`Failed to remove output ${outputPath}`, e);
         }
     }
+};
+
+/** Generate a random string suitable for being used as a file name prefix */
+const randomPrefix = () => {
+    const alphabet =
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+    let result = "";
+    for (let i = 0; i < 10; i++)
+        result += alphabet[Math.floor(Math.random() * alphabet.length)];
+    return result;
 };
 
 const substitutePlaceholders = (
