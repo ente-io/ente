@@ -59,15 +59,12 @@ export const generateThumbnail = async (
         const thumbnail =
             fileTypeInfo.fileType === FILE_TYPE.IMAGE
                 ? await generateImageThumbnail(blob, fileTypeInfo)
-                : await generateVideoThumbnail(blob, fileTypeInfo);
+                : await generateVideoThumbnail(blob);
 
         if (thumbnail.length == 0) throw new Error("Empty thumbnail");
         return { thumbnail, hasStaticThumbnail: false };
     } catch (e) {
-        log.error(
-            `Failed to generate thumbnail for format ${fileTypeInfo.exactType}`,
-            e,
-        );
+        log.error(`Failed to generate ${fileTypeInfo.exactType} thumbnail`, e);
         return { thumbnail: fallbackThumbnail(), hasStaticThumbnail: true };
     }
 };

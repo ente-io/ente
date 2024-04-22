@@ -44,8 +44,8 @@ const workerBridge = {
     logToDisk,
     // Needed by ML worker
     getAuthToken: () => ensureLocalUser().then((user) => user.token),
-    convertToJPEG: (fileName: string, imageData: Uint8Array) =>
-        ensureElectron().convertToJPEG(fileName, imageData),
+    convertToJPEG: (imageData: Uint8Array) =>
+        ensureElectron().convertToJPEG(imageData),
     detectFaces: (input: Float32Array) => ensureElectron().detectFaces(input),
     faceEmbedding: (input: Float32Array) =>
         ensureElectron().faceEmbedding(input),

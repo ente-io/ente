@@ -204,14 +204,10 @@ export interface Electron {
      * yet possible, this function will throw an error with the
      * {@link CustomErrorMessage.NotAvailable} message.
      *
-     * @param fileName The name of the file whose data we're being given.
      * @param imageData The raw image data (the contents of the image file).
      * @returns JPEG data of the converted image.
      */
-    convertToJPEG: (
-        fileName: string,
-        imageData: Uint8Array,
-    ) => Promise<Uint8Array>;
+    convertToJPEG: (imageData: Uint8Array) => Promise<Uint8Array>;
 
     /**
      * Generate a JPEG thumbnail for the given image.
@@ -224,14 +220,16 @@ export interface Electron {
      * not yet possible, this function will throw an error with the
      * {@link CustomErrorMessage.NotAvailable} message.
      *
-     * @param inputFile The file whose thumbnail we want.
+     * @param dataOrPath The data-of or path-to the image whose thumbnail we
+     * want.
      * @param maxDimension The maximum width or height of the generated
      * thumbnail.
      * @param maxSize Maximum size (in bytes) of the generated thumbnail.
+     *
      * @returns JPEG data of the generated thumbnail.
      */
     generateImageThumbnail: (
-        inputFile: File | ElectronFile,
+        dataOrPath: Uint8Array | string,
         maxDimension: number,
         maxSize: number,
     ) => Promise<Uint8Array>;

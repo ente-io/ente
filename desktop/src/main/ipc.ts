@@ -141,14 +141,18 @@ export const attachIPCHandlers = () => {
 
     // - Conversion
 
-    ipcMain.handle("convertToJPEG", (_, fileName, imageData) =>
-        convertToJPEG(fileName, imageData),
+    ipcMain.handle("convertToJPEG", (_, imageData: Uint8Array) =>
+        convertToJPEG(imageData),
     );
 
     ipcMain.handle(
         "generateImageThumbnail",
-        (_, inputFile, maxDimension, maxSize) =>
-            generateImageThumbnail(inputFile, maxDimension, maxSize),
+        (
+            _,
+            dataOrPath: Uint8Array | string,
+            maxDimension: number,
+            maxSize: number,
+        ) => generateImageThumbnail(dataOrPath, maxDimension, maxSize),
     );
 
     ipcMain.handle(

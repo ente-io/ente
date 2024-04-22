@@ -292,14 +292,12 @@ export const getRenderableImage = async (fileName: string, imageBlob: Blob) => {
             return imageBlob;
         }
 
-        let jpegBlob: Blob | undefined;
-
         const available = !moduleState.isNativeJPEGConversionNotAvailable;
         if (isElectron() && available && isSupportedRawFormat(exactType)) {
             // If we're running in our desktop app, see if our Node.js layer can
             // convert this into a JPEG using native tools for us.
             try {
-                jpegBlob = await nativeConvertToJPEG(fileName, imageBlob);
+                return await nativeConvertToJPEG(imageBlob);
             } catch (e) {
                 if (e.message == CustomErrorMessage.NotAvailable) {
                     moduleState.isNativeJPEGConversionNotAvailable = true;
@@ -309,12 +307,12 @@ export const getRenderableImage = async (fileName: string, imageBlob: Blob) => {
             }
         }
 
-        if (!jpegBlob && isFileHEIC(exactType)) {
+        if (!isFileHEIC(exactType)) {
             // If it is an HEIC file, use our web HEIC converter.
-            jpegBlob = await heicToJPEG(imageBlob);
+            return await heicToJPEG(imageBlob);
         }
 
-        return jpegBlob;
+        return undefined;
     } catch (e) {
         log.error(
             `Failed to get renderable image for ${JSON.stringify(fileTypeInfo ?? fileName)}`,
@@ -324,7 +322,7 @@ export const getRenderableImage = async (fileName: string, imageBlob: Blob) => {
     }
 };
 
-const nativeConvertToJPEG = async (fileName: string, imageBlob: Blob) => {
+const nativeConvertToJPEG = async (imageBlob: Blob) => {
     const startTime = Date.now();
     const imageData = new Uint8Array(await imageBlob.arrayBuffer());
     const electron = globalThis.electron;
@@ -332,8 +330,8 @@ const nativeConvertToJPEG = async (fileName: string, imageBlob: Blob) => {
     // the main thread since workers don't have access to the `window` (and
     // thus, to the `window.electron`) object.
     const jpegData = electron
-        ? await electron.convertToJPEG(fileName, imageData)
-        : await workerBridge.convertToJPEG(fileName, imageData);
+        ? await electron.convertToJPEG(imageData)
+        : await workerBridge.convertToJPEG(imageData);
     log.debug(() => `Native JPEG conversion took ${Date.now() - startTime} ms`);
     return new Blob([jpegData]);
 };

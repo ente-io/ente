@@ -3,20 +3,17 @@
 import { existsSync } from "fs";
 import fs from "node:fs/promises";
 import path from "path";
-import { CustomErrorMessage, ElectronFile } from "../../types/ipc";
+import { CustomErrorMessage } from "../../types/ipc";
 import log from "../log";
 import { writeStream } from "../stream";
 import { execAsync, isDev } from "../utils-electron";
 import { deleteTempFile, makeTempFilePath } from "../utils-temp";
 
-export const convertToJPEG = async (
-    fileName: string,
-    imageData: Uint8Array,
-): Promise<Uint8Array> => {
-    const inputFilePath = await makeTempFilePath(fileName);
+export const convertToJPEG = async (imageData: Uint8Array) => {
+    const inputFilePath = await makeTempFilePath();
     const outputFilePath = await makeTempFilePath(".jpeg");
 
-    // Construct the command first, it may throw on NotAvailable on win32.
+    // Construct the command first, it may throw NotAvailable on win32.
     const command = convertToJPEGCommand(inputFilePath, outputFilePath);
 
     try {
@@ -106,10 +103,28 @@ const IMAGE_MAGICK_THUMBNAIL_GENERATE_COMMAND_TEMPLATE = [
 ];
 
 export async function generateImageThumbnail(
-    inputFile: File | ElectronFile,
+    dataOrPath: Uint8Array | string,
     maxDimension: number,
     maxSize: number,
 ): Promise<Uint8Array> {
+    const inputFilePath = await makeTempFilePath(fileName);
+    const outputFilePath = await makeTempFilePath(".jpeg");
+
+    // Construct the command first, it may throw NotAvailable on win32.
+    const command = convertToJPEGCommand(inputFilePath, outputFilePath);
+
+    try {
+        await fs.writeFile(inputFilePath, imageData);
+        await execAsync(command);
+        return new Uint8Array(await fs.readFile(outputFilePath));
+    } finally {
+        try {
+            deleteTempFile(outputFilePath);
+            deleteTempFile(inputFilePath);
+        } catch (e) {
+            log.error("Ignoring error when cleaning up temp files", e);
+        }
+    }
     let inputFilePath = null;
     let createdTempInputFile = null;
     try {
