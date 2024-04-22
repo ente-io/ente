@@ -90,10 +90,11 @@ func (c *FileController) validateFileCreateOrUpdateReq(userID int64, file ente.F
 		if collection.IsDeleted {
 			return stacktrace.Propagate(ente.ErrNotFound, "collection has been deleted")
 		}
+		if file.OwnerID != userID {
+			return stacktrace.Propagate(ente.ErrPermissionDenied, "file ownerID doesn't match with userID")
+		}
 	}
-	if file.OwnerID != userID {
-		return stacktrace.Propagate(ente.ErrPermissionDenied, "file ownerID doesn't match with userID")
-	}
+
 	return nil
 }
 
