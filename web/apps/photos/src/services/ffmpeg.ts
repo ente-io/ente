@@ -1,4 +1,4 @@
-import { ElectronFile } from "@/next/types/file";
+import { ElectronFile, type DesktopFilePath } from "@/next/types/file";
 import { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { validateAndGetCreationUnixTimeInMicroSeconds } from "@ente/shared/time";
 import { Remote } from "comlink";
@@ -11,38 +11,42 @@ import { NULL_LOCATION } from "constants/upload";
 import { ParsedExtractedMetadata } from "types/upload";
 import { type DedicatedFFmpegWorker } from "worker/ffmpeg.worker";
 
-/** Called during upload */
-export async function generateVideoThumbnail(
-    fileOrPath: File | ElectronFile | string,
-): Promise<File | ElectronFile> {
-    let seekTime = 1;
-    while (seekTime >= 0) {
-        try {
-            return await ffmpegExec(
-                [
-                    ffmpegPathPlaceholder,
-                    "-i",
-                    inputPathPlaceholder,
-                    "-ss",
-                    `00:00:0${seekTime}`,
-                    "-vframes",
-                    "1",
-                    "-vf",
-                    "scale=-1:720",
-                    outputPathPlaceholder,
-                ],
-                /* TODO(MR): ElectronFile changes */
-                fileOrPath as File | ElectronFile,
-                "thumb.jpeg",
-            );
-        } catch (e) {
-            if (seekTime === 0) {
-                throw e;
-            }
-        }
-        seekTime--;
+/**
+ * Generate a thumbnail of the given video using FFmpeg.
+ *
+ * This function is called during upload, when we need to generate thumbnails
+ * for the new files that the user is adding.
+ *
+ * @param fileOrPath The input video file or a path to it.
+ * @returns JPEG data for the generated thumbnail.
+ */
+export const generateVideoThumbnail = async (
+    fileOrPath: File | DesktopFilePath,
+): Promise<Uint8Array> => {
+    const thumbnailAtTime = (seekTime: number) =>
+        ffmpegExec(
+            [
+                ffmpegPathPlaceholder,
+                "-i",
+                inputPathPlaceholder,
+                "-ss",
+                `00:00:0${seekTime}`,
+                "-vframes",
+                "1",
+                "-vf",
+                "scale=-1:720",
+                outputPathPlaceholder,
+            ],
+            fileOrPath,
+            "thumb.jpeg",
+        );
+
+    try {
+        return await thumbnailAtTime(1);
+    } catch (e) {
+        return await thumbnailAtTime(0);
     }
-}
+};
 
 /** Called during upload */
 export async function extractVideoMetadata(file: File | ElectronFile) {
@@ -50,7 +54,7 @@ export async function extractVideoMetadata(file: File | ElectronFile) {
     // -c [short for codex] copy[(stream_specifier)[ffmpeg.org/ffmpeg.html#Stream-specifiers]] => copies all the stream without re-encoding
     // -map_metadata [http://ffmpeg.org/ffmpeg.html#Advanced-options search for map_metadata] => copies all stream metadata to the out
     // -f ffmetadata [https://ffmpeg.org/ffmpeg-formats.html#Metadata-1] => dump metadata from media files into a simple UTF-8-encoded INI-like text file
-    const metadata = await ffmpegExec(
+    const metadata = await ffmpegExec2(
         [
             ffmpegPathPlaceholder,
             "-i",
@@ -137,7 +141,7 @@ function parseCreationTime(creationTime: string) {
 
 /** Called when viewing a file */
 export async function convertToMP4(file: File) {
-    return await ffmpegExec(
+    return await ffmpegExec2(
         [
             ffmpegPathPlaceholder,
             "-i",
@@ -153,16 +157,34 @@ export async function convertToMP4(file: File) {
 }
 
 /**
- * Run the given ffmpeg command.
+ * Run the given FFmpeg command.
  *
- * If we're running in the context of our desktop app, use the ffmpeg binary we
+ * If we're running in the context of our desktop app, use the FFmpeg binary we
  * bundle with our desktop app to run the command. Otherwise fallback to using
- * the wasm ffmpeg we link to from our web app in a web worker.
+ * the wasm FFmpeg we link to from our web app in a web worker.
  *
- * As a rough ballpark, the native ffmpeg integration in the desktop app is
- * 10-20x faster than the wasm one currently. See: [Note: ffmpeg in Electron].
+ * As a rough ballpark, the native FFmpeg integration in the desktop app is
+ * 10-20x faster than the wasm one currently. See: [Note: FFmpeg in Electron].
  */
 const ffmpegExec = async (
+    command: string[],
+    fileOrPath: File | DesktopFilePath,
+    outputFileName: string,
+    timeoutMs: number = 0,
+): Promise<Uint8Array> => {
+    if (fileOrPath instanceof File) {
+        return workerFactory
+            .lazy()
+            .then((worker) =>
+                worker.exec(command, fileOrPath, outputFileName, timeoutMs),
+            );
+    } else {
+        const { path, electron } = fileOrPath;
+        return electron.ffmpegExec(command, path, outputFileName, timeoutMs);
+    }
+};
+
+const ffmpegExec2 = async (
     command: string[],
     inputFile: File | ElectronFile,
     outputFileName: string,
@@ -179,7 +201,7 @@ const ffmpegExec = async (
         // );
     } else {
         return workerFactory
-            .instance()
+            .lazy()
             .then((worker) =>
                 worker.execute(
                     command,
@@ -193,14 +215,11 @@ const ffmpegExec = async (
 
 /** Lazily create a singleton instance of our worker */
 class WorkerFactory {
-    private _instance: Promise<Remote<DedicatedFFmpegWorker>>;
+    private instance: Promise<Remote<DedicatedFFmpegWorker>>;
 
-    async instance() {
-        if (!this._instance) {
-            const comlinkWorker = createComlinkWorker();
-            this._instance = comlinkWorker.remote;
-        }
-        return this._instance;
+    async lazy() {
+        if (!this.instance) this.instance = createComlinkWorker().remote;
+        return this.instance;
     }
 }
 

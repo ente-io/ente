@@ -10,11 +10,10 @@ import {
     outputPathPlaceholder,
 } from "constants/ffmpeg";
 import { FFmpeg, createFFmpeg } from "ffmpeg-wasm";
-import { getUint8ArrayView } from "services/readerService";
 
 export class DedicatedFFmpegWorker {
     private ffmpeg: FFmpeg;
-    private ffmpegTaskQueue = new QueueProcessor<File>();
+    private ffmpegTaskQueue = new QueueProcessor<Uint8Array>();
 
     constructor() {
         this.ffmpeg = createFFmpeg({
@@ -24,24 +23,24 @@ export class DedicatedFFmpegWorker {
     }
 
     /**
-     * Execute a ffmpeg {@link command}.
+     * Execute a FFmpeg {@link command}.
      *
      * This is a sibling of {@link ffmpegExec} in ipc.ts exposed by the desktop
-     * app. See [Note: ffmpeg in Electron].
+     * app. See [Note: FFmpeg in Electron].
      */
-    async execute(
+    async exec(
         command: string[],
         inputFile: File,
         outputFileName: string,
-        timeoutMS,
-    ) {
+        timeoutMs,
+    ): Promise<Uint8Array> {
         if (!this.ffmpeg.isLoaded()) await this.ffmpeg.load();
 
-        const exec = () =>
+        const go = () =>
             ffmpegExec(this.ffmpeg, command, inputFile, outputFileName);
 
         const request = this.ffmpegTaskQueue.queueUpRequest(() =>
-            timeoutMS ? withTimeout<File>(exec(), timeoutMS) : exec(),
+            timeoutMs ? withTimeout(go(), timeoutMs) : go(),
         );
 
         return await request.promise;
@@ -71,16 +70,13 @@ const ffmpegExec = async (
         ffmpeg.FS(
             "writeFile",
             tempInputFilePath,
-            await getUint8ArrayView(inputFile),
+            new Uint8Array(await inputFile.arrayBuffer()),
         );
 
-        log.info(`Running ffmpeg (wasm) command ${cmd}`);
+        log.info(`Running FFmpeg (wasm) command ${cmd}`);
         await ffmpeg.run(...cmd);
 
-        return new File(
-            [ffmpeg.FS("readFile", tempOutputFilePath)],
-            outputFileName,
-        );
+        return ffmpeg.FS("readFile", tempOutputFilePath);
     } finally {
         try {
             ffmpeg.FS("unlink", tempInputFilePath);

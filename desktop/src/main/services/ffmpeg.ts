@@ -9,22 +9,22 @@ const inputPathPlaceholder = "INPUT";
 const outputPathPlaceholder = "OUTPUT";
 
 /**
- * Run a ffmpeg command
+ * Run a FFmpeg command
  *
- * [Note: ffmpeg in Electron]
+ * [Note: FFmpeg in Electron]
  *
- * There is a wasm build of ffmpeg, but that is currently 10-20 times slower
+ * There is a wasm build of FFmpeg, but that is currently 10-20 times slower
  * that the native build. That is slow enough to be unusable for our purposes.
  * https://ffmpegwasm.netlify.app/docs/performance
  *
- * So the alternative is to bundle a ffmpeg binary with our app. e.g.
+ * So the alternative is to bundle a FFmpeg executable binary with our app. e.g.
  *
  *     yarn add fluent-ffmpeg ffmpeg-static ffprobe-static
  *
  * (we only use ffmpeg-static, the rest are mentioned for completeness' sake).
  *
- * Interestingly, Electron already bundles an ffmpeg library (it comes from the
- * ffmpeg fork maintained by Chromium).
+ * Interestingly, Electron already bundles an binary FFmpeg library (it comes
+ * from the ffmpeg fork maintained by Chromium).
  * https://chromium.googlesource.com/chromium/third_party/ffmpeg
  * https://stackoverflow.com/questions/53963672/what-version-of-ffmpeg-is-bundled-inside-electron
  *
@@ -96,7 +96,7 @@ const substitutePlaceholders = (
 /**
  * Return the path to the `ffmpeg` binary.
  *
- * At runtime, the ffmpeg binary is present in a path like (macOS example):
+ * At runtime, the FFmpeg binary is present in a path like (macOS example):
  * `ente.app/Contents/Resources/app.asar.unpacked/node_modules/ffmpeg-static/ffmpeg`
  */
 const ffmpegBinaryPath = () => {
