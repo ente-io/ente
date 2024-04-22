@@ -1,9 +1,11 @@
 import pathToFfmpeg from "ffmpeg-static";
 import fs from "node:fs/promises";
+import log from "../log";
 import { withTimeout } from "../utils";
 import { execAsync } from "../utils-electron";
 import { deleteTempFile, makeTempFilePath } from "../utils-temp";
 
+/* Duplicated in the web app's code (used by the WASM FFmpeg implementation). */
 const ffmpegPathPlaceholder = "FFMPEG";
 const inputPathPlaceholder = "INPUT";
 const outputPathPlaceholder = "OUTPUT";
@@ -50,15 +52,13 @@ export const ffmpegExec = async (
         inputFilePath = dataOrPath;
         isInputFileTemporary = false;
     } else {
-        inputFilePath = await makeTempFilePath(".in");
+        inputFilePath = await makeTempFilePath();
         isInputFileTemporary = true;
         await fs.writeFile(inputFilePath, dataOrPath);
     }
 
-    let outputFilePath: string | undefined;
+    const outputFilePath = await makeTempFilePath();
     try {
-        outputFilePath = await makeTempFilePath(".out");
-
         const cmd = substitutePlaceholders(
             command,
             inputFilePath,
@@ -70,8 +70,12 @@ export const ffmpegExec = async (
 
         return fs.readFile(outputFilePath);
     } finally {
-        if (isInputFileTemporary) await deleteTempFile(inputFilePath);
-        if (outputFilePath) await deleteTempFile(outputFilePath);
+        try {
+            if (isInputFileTemporary) await deleteTempFile(inputFilePath);
+            await deleteTempFile(outputFilePath);
+        } catch (e) {
+            log.error("Ignoring error when cleaning up temp files", e);
+        }
     }
 };
 

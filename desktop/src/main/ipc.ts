@@ -38,7 +38,7 @@ import {
     updateAndRestart,
     updateOnNextRestart,
 } from "./services/app-update";
-import { convertToJPEG, generateImageThumbnail } from "./services/convert";
+import { convertToJPEG, generateImageThumbnail } from "./services/image";
 import { ffmpegExec } from "./services/ffmpeg";
 import { getDirFiles } from "./services/fs";
 import {
