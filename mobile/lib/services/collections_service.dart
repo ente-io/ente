@@ -189,6 +189,23 @@ class CollectionsService {
     return result;
   }
 
+  bool allowUpload(int collectionID) {
+    final Collection? c = _collectionIDToCollections[collectionID];
+    if (c == null) {
+      _logger.info('discardUpload: collectionMissing $collectionID');
+      return false;
+    }
+    if (c.isDeleted) {
+      _logger.info('discardUpload: collectionDeleted $collectionID');
+      return false;
+    }
+    if (!c.isOwner(_config.getUserID()!)) {
+      _logger.info('discardUpload: notOwner $collectionID');
+      return false;
+    }
+    return true;
+  }
+
   Future<List<Collection>> getArchivedCollection() async {
     final allCollections = getCollectionsForUI();
     return allCollections
