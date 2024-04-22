@@ -4,6 +4,8 @@ import 'dart:math' as math;
 
 import "package:cast/device.dart";
 import "package:cast/discovery_service.dart";
+import "package:cast/session.dart";
+import "package:cast/session_manager.dart";
 import "package:flutter/cupertino.dart";
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
@@ -669,8 +671,16 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
 
         return Column(
           children: snapshot.data!.map((device) {
-            return  Text(device.name);
-
+            return GestureDetector(
+              onTap: () async {
+                try {
+                  await _connectToYourApp(context, device);
+                } catch (e) {
+                  showGenericErrorDialog(context: context, error: e).ignore();
+                }
+              },
+              child: Text( device.name),
+            );
           }).toList(),
         );
       },
@@ -678,7 +688,37 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   }
 
   Future<void> _connectToYourApp(
-      BuildContext contect, CastDevice device,) async {}
+    BuildContext context,
+    CastDevice object,
+  ) async {
+    final session = await CastSessionManager().startSession(object);
+
+    session.stateStream.listen((state) {
+      if (state == CastSessionState.connected) {
+        const snackBar = SnackBar(content: Text('Connected'));
+        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+
+        _sendPairingRequestToTV(session);
+      }
+    });
+
+    session.messageStream.listen((message) {
+      print('receive message: $message');
+    });
+
+    session.sendMessage(CastSession.kNamespaceReceiver, {
+      'type': 'LAUNCH',
+      'appId': 'F5BCEC64', // set the appId of your app here
+    });
+
+    _sendPairingRequestToTV(session);
+  }
+
+  void _sendPairingRequestToTV(CastSession session) {
+    print('_sendMessageToYourApp');
+
+    session.sendMessage('urn:x-cast:pair-request', {});
+  }
 
   Future<void> onCleanUncategorizedClick(BuildContext buildContext) async {
     final actionResult = await showChoiceActionSheet(
