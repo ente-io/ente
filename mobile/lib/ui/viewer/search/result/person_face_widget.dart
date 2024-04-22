@@ -1,5 +1,5 @@
 import "dart:developer";
-import "dart:io";
+// import "dart:io";
 import "dart:typed_data";
 
 import 'package:flutter/widgets.dart';
@@ -10,6 +10,7 @@ import "package:photos/face/model/person.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
+import "package:photos/ui/viewer/file_details/face_widget.dart";
 import "package:photos/ui/viewer/people/cropped_face_image_view.dart";
 import "package:photos/utils/face/face_box_crop.dart";
 import "package:photos/utils/thumbnail_util.dart";
@@ -34,7 +35,7 @@ class PersonFaceWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (Platform.isIOS || Platform.isAndroid) {
+    if (useGeneratedFaceCrops) {
       return FutureBuilder<Uint8List?>(
         future: getFaceCrop(),
         builder: (context, snapshot) {
