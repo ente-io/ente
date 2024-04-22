@@ -304,7 +304,7 @@ class DownloadManagerImpl {
         if (cachedBlob) res = new Response(cachedBlob);
         else {
             res = await this.downloadClient.downloadFileStream(file);
-            this?.fileCache.put(cacheKey, await res.blob());
+            this.fileCache?.put(cacheKey, await res.blob());
         }
         const reader = res.body.getReader();
 
