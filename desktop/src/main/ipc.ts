@@ -38,9 +38,9 @@ import {
     updateAndRestart,
     updateOnNextRestart,
 } from "./services/app-update";
-import { convertToJPEG, generateImageThumbnail } from "./services/image";
 import { ffmpegExec } from "./services/ffmpeg";
 import { getDirFiles } from "./services/fs";
+import { convertToJPEG, generateImageThumbnail } from "./services/image";
 import {
     clipImageEmbedding,
     clipTextEmbeddingIfAvailable,
@@ -147,12 +147,8 @@ export const attachIPCHandlers = () => {
 
     ipcMain.handle(
         "generateImageThumbnail",
-        (
-            _,
-            dataOrPath: Uint8Array | string,
-            maxDimension: number,
-            maxSize: number,
-        ) => generateImageThumbnail(dataOrPath, maxDimension, maxSize),
+        (_, imageData: Uint8Array, maxDimension: number, maxSize: number) =>
+            generateImageThumbnail(imageData, maxDimension, maxSize),
     );
 
     ipcMain.handle(

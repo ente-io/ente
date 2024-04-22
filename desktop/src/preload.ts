@@ -128,13 +128,13 @@ const convertToJPEG = (imageData: Uint8Array): Promise<Uint8Array> =>
     ipcRenderer.invoke("convertToJPEG", imageData);
 
 const generateImageThumbnail = (
-    dataOrPath: Uint8Array | string,
+    imageData: Uint8Array,
     maxDimension: number,
     maxSize: number,
 ): Promise<Uint8Array> =>
     ipcRenderer.invoke(
         "generateImageThumbnail",
-        dataOrPath,
+        imageData,
         maxDimension,
         maxSize,
     );

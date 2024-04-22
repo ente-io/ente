@@ -20,8 +20,8 @@ export const convertToJPEG = async (imageData: Uint8Array) => {
         return new Uint8Array(await fs.readFile(outputFilePath));
     } finally {
         try {
-            deleteTempFile(inputFilePath);
-            deleteTempFile(outputFilePath);
+            await deleteTempFile(inputFilePath);
+            await deleteTempFile(outputFilePath);
         } catch (e) {
             log.error("Ignoring error when cleaning up temp files", e);
         }
@@ -63,20 +63,11 @@ const imageMagickPath = () =>
     path.join(isDev ? "build" : process.resourcesPath, "image-magick");
 
 export const generateImageThumbnail = async (
-    dataOrPath: Uint8Array | string,
+    imageData: Uint8Array,
     maxDimension: number,
     maxSize: number,
 ): Promise<Uint8Array> => {
-    let inputFilePath: string;
-    let isInputFileTemporary: boolean;
-    if (typeof dataOrPath == "string") {
-        inputFilePath = dataOrPath;
-        isInputFileTemporary = false;
-    } else {
-        inputFilePath = await makeTempFilePath();
-        isInputFileTemporary = true;
-    }
-
+    const inputFilePath = await makeTempFilePath();
     const outputFilePath = await makeTempFilePath(".jpeg");
 
     // Construct the command first, it may throw NotAvailable on win32.
@@ -89,8 +80,8 @@ export const generateImageThumbnail = async (
     );
 
     try {
-        if (dataOrPath instanceof Uint8Array)
-            await fs.writeFile(inputFilePath, dataOrPath);
+        if (imageData instanceof Uint8Array)
+            await fs.writeFile(inputFilePath, imageData);
 
         let thumbnail: Uint8Array;
         do {
@@ -107,8 +98,8 @@ export const generateImageThumbnail = async (
         return thumbnail;
     } finally {
         try {
-            if (isInputFileTemporary) await deleteTempFile(inputFilePath);
-            deleteTempFile(outputFilePath);
+            await deleteTempFile(inputFilePath);
+            await deleteTempFile(outputFilePath);
         } catch (e) {
             log.error("Ignoring error when cleaning up temp files", e);
         }

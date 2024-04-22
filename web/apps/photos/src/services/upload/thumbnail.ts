@@ -84,7 +84,7 @@ const generateImageThumbnail = async (
     const available = !moduleState.isNativeThumbnailCreationNotAvailable;
     if (electron && available) {
         try {
-            return await generateImageThumbnailInElectron(electron, file);
+            return await generateImageThumbnailInElectron(electron, blob);
         } catch (e) {
             if (e.message == CustomErrorMessage.NotAvailable) {
                 moduleState.isNativeThumbnailCreationNotAvailable = true;
@@ -102,8 +102,9 @@ const generateImageThumbnailInElectron = async (
     blob: Blob,
 ): Promise<Uint8Array> => {
     const startTime = Date.now();
+    const data = new Uint8Array(await blob.arrayBuffer());
     const jpegData = await electron.generateImageThumbnail(
-        inputFile,
+        data,
         maxThumbnailDimension,
         maxThumbnailSize,
     );
