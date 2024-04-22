@@ -26,6 +26,7 @@ import {
     ParsedExtractedMetadata,
     ParsedMetadataJSON,
     ParsedMetadataJSONMap,
+    type FileWithCollection,
     type FileWithCollection2,
     type LivePhotoAssets2,
 } from "types/upload";
@@ -369,7 +370,11 @@ export async function extractLivePhotoMetadata(
         imageFileTypeInfo,
         livePhotoAssets.image,
     );
-    const videoHash = await getFileHash(worker, livePhotoAssets.video);
+    const videoHash = await getFileHash(
+        worker,
+        /* TODO(MR): ElectronFile changes */
+        livePhotoAssets.video as File | ElectronFile,
+    );
     return {
         metadata: {
             ...imageMetadata,
@@ -426,13 +431,15 @@ export async function clusterLivePhotoFiles(mediaFiles: FileWithCollection2[]) {
                 collectionID: firstMediaFile.collectionID,
                 fileType: firstFileType,
                 name: getFileName(firstMediaFile.file),
-                size: firstMediaFile.file.size,
+                /* TODO(MR): ElectronFile changes */
+                size: (firstMediaFile as FileWithCollection).file.size,
             };
             const secondFileIdentifier: LivePhotoIdentifier = {
                 collectionID: secondMediaFile.collectionID,
                 fileType: secondFileType,
                 name: getFileName(secondMediaFile.file),
-                size: secondMediaFile.file.size,
+                /* TODO(MR): ElectronFile changes */
+                size: (secondMediaFile as FileWithCollection).file.size,
             };
             if (
                 areFilesLivePhotoAssets(

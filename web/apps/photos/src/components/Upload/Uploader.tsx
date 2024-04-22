@@ -672,7 +672,8 @@ export default function Uploader(props: Props) {
             const uploaderName = uploadManager.getUploaderName();
             await preUploadAction();
             await uploadManager.queueFilesForUpload(
-                filesWithCollections.files,
+                /* TODO(MR): ElectronFile changes */
+                filesWithCollections.files as FileWithCollection[],
                 filesWithCollections.collections,
                 uploaderName,
             );

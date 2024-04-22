@@ -294,7 +294,7 @@ async function getClipSuggestion(
     }
 
     const clipResults = await searchClip(searchPhrase);
-    if (!clipResults) return clipResults;
+    if (!clipResults) return undefined;
     return {
         type: SuggestionType.CLIP,
         value: clipResults,

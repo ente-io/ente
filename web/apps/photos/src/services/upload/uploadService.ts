@@ -445,7 +445,8 @@ export async function extractFileMetadata(
 
     const { metadata, publicMagicMetadata } = await extractMetadata(
         worker,
-        rawFile,
+        /* TODO(MR): ElectronFile changes */
+        rawFile as File | ElectronFile,
         fileTypeInfo,
     );
 
@@ -565,7 +566,9 @@ export async function uploader(
     fileWithCollection: FileWithCollection2,
     uploaderName: string,
 ): Promise<UploadResponse> {
-    const { collection, localID, ...uploadAsset } = fileWithCollection;
+    const { collection, localID, ...uploadAsset2 } = fileWithCollection;
+    /* TODO(MR): ElectronFile changes */
+    const uploadAsset = uploadAsset2 as UploadAsset;
     const fileNameSize = `${uploadService.getAssetName(
         fileWithCollection,
     )}_${convertBytesToHumanReadable(uploadService.getAssetSize(uploadAsset))}`;

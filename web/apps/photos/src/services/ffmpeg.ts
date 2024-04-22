@@ -167,8 +167,9 @@ const ffmpegExec = async (
     timeoutMS: number = 0,
 ): Promise<File | ElectronFile> => {
     const electron = globalThis.electron;
-    if (electron) {
-        return electron.runFFmpegCmd(cmd, inputFile, outputFilename, timeoutMS);
+    if (electron || false) {
+        /* TODO(MR): ElectronFile changes */
+        // return electron.runFFmpegCmd(cmd, inputFile, outputFilename, timeoutMS);
     } else {
         return workerFactory
             .instance()
