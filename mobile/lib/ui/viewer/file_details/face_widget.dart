@@ -48,7 +48,7 @@ class _FaceWidgetState extends State<FaceWidget> {
 
   @override
   Widget build(BuildContext context) {
-    if (Platform.isIOS) {
+    if (Platform.isAndroid) {
       return FutureBuilder<Uint8List?>(
         future: getFaceCrop(),
         builder: (context, snapshot) {
@@ -280,13 +280,9 @@ class _FaceWidgetState extends State<FaceWidget> {
                   child: ClipRRect(
                     borderRadius:
                         const BorderRadius.all(Radius.elliptical(16, 12)),
-                    child: SizedBox(
-                      width: 60,
-                      height: 60,
-                      child: CroppedFaceImageView(
-                        enteFile: widget.file,
-                        face: widget.face,
-                      ),
+                    child: CroppedFaceImageView(
+                      enteFile: widget.file,
+                      face: widget.face,
                     ),
                   ),
                 ),

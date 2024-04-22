@@ -51,7 +51,7 @@ class CroppedFaceImageView extends StatelessWidget {
               final double relativeFaceCenterY =
                   faceBox.yMin + faceBox.height / 2;
 
-              const double desiredFaceHeightRelativeToWidget = 1 / 2;
+              const double desiredFaceHeightRelativeToWidget = 7 / 10;
               final double scale =
                   (1 / faceBox.height) * desiredFaceHeightRelativeToWidget;
 
@@ -68,7 +68,7 @@ class CroppedFaceImageView extends StatelessWidget {
               double offsetY =
                   (widgetCenterY - relativeFaceCenterY * viewHeight) * scale;
 
-              if (imageAspectRatio > widgetAspectRatio) {
+              if (imageAspectRatio < widgetAspectRatio) {
                 // Landscape Image: Adjust offsetX more conservatively
                 offsetX = offsetX * imageToWidgetRatio;
               } else {
@@ -110,7 +110,7 @@ class CroppedFaceImageView extends StatelessWidget {
     }
 
     final imageData = await ioFile.readAsBytes();
-    final image = Image.memory(imageData, fit: BoxFit.cover);
+    final image = Image.memory(imageData, fit: BoxFit.contain);
 
     return image;
   }
