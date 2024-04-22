@@ -19,11 +19,18 @@ type Controller struct {
 
 // InsertOrUpdate the key's value
 func (c *Controller) InsertOrUpdate(ctx *gin.Context, request ente.UpdateKeyValueRequest) error {
-	if err := _validateRequest(request); err != nil {
+	if err := _validateRequest(request.Key, request.Value, false); err != nil {
 		return err
 	}
 	userID := auth.GetUserID(ctx.Request.Header)
 	return c.Repo.InsertOrUpdate(ctx, userID, request.Key, request.Value)
+}
+
+func (c *Controller) AdminInsertOrUpdate(ctx *gin.Context, request ente.AdminUpdateKeyValueRequest) error {
+	if err := _validateRequest(request.Key, request.Value, true); err != nil {
+		return err
+	}
+	return c.Repo.InsertOrUpdate(ctx, request.UserID, request.Key, request.Value)
 }
 
 func (c *Controller) Get(ctx *gin.Context, req ente.GetValueRequest) (*ente.GetValueResponse, error) {
@@ -63,18 +70,25 @@ func (c *Controller) GetFeatureFlags(ctx *gin.Context) (*ente.FeatureFlagRespons
 			response.FaceSearchEnabled = value == "true"
 		case ente.PassKeyEnabled:
 			response.PassKeyEnabled = value == "true"
+		case ente.IsInternalUser:
+			response.InternalUser = value == "true"
+		case ente.IsBetaUser:
+			response.BetaUser = value == "true"
 		}
 	}
 	return response, nil
 }
 
-func _validateRequest(request ente.UpdateKeyValueRequest) error {
-	flag := ente.FlagKey(request.Key)
-	if !flag.UserEditable() {
-		return stacktrace.Propagate(ente.NewBadRequestWithMessage(fmt.Sprintf("key %s is not user editable", request.Key)), "key not user editable")
+func _validateRequest(key, value string, byAdmin bool) error {
+	flag := ente.FlagKey(key)
+	if !flag.UserEditable() && !byAdmin {
+		return stacktrace.Propagate(ente.NewBadRequestWithMessage(fmt.Sprintf("key %s is not user editable", key)), "key not user editable")
 	}
-	if flag.IsBoolType() && request.Value != "true" && request.Value != "false" {
-		return stacktrace.Propagate(ente.NewBadRequestWithMessage(fmt.Sprintf("value %s is not allowed", request.Value)), "value not allowed")
+	if byAdmin && !flag.IsAdminEditable() {
+		return stacktrace.Propagate(ente.NewBadRequestWithMessage(fmt.Sprintf("key %s is not admin editable", key)), "key not admin editable")
+	}
+	if flag.IsBoolType() && value != "true" && value != "false" {
+		return stacktrace.Propagate(ente.NewBadRequestWithMessage(fmt.Sprintf("value %s is not allowed", value)), "value not allowed")
 	}
 	return nil
 }

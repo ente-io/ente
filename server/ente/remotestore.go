@@ -14,6 +14,12 @@ type UpdateKeyValueRequest struct {
 	Value string `json:"value" binding:"required"`
 }
 
+type AdminUpdateKeyValueRequest struct {
+	UserID int64  `json:"userID" binding:"required"`
+	Key    string `json:"key" binding:"required"`
+	Value  string `json:"value" binding:"required"`
+}
+
 type FeatureFlagResponse struct {
 	EnableStripe bool `json:"enableStripe"`
 	// If true, the mobile client will stop using CF worker to download files
@@ -33,6 +39,8 @@ const (
 	MapEnabled          FlagKey = "mapEnabled"
 	FaceSearchEnabled   FlagKey = "faceSearchEnabled"
 	PassKeyEnabled      FlagKey = "passKeyEnabled"
+	IsInternalUser      FlagKey = "internalUser"
+	IsBetaUser          FlagKey = "betaUser"
 )
 
 func (k FlagKey) String() string {
@@ -49,9 +57,20 @@ func (k FlagKey) UserEditable() bool {
 	}
 }
 
+func (k FlagKey) IsAdminEditable() bool {
+	switch k {
+	case RecoveryKeyVerified, MapEnabled, FaceSearchEnabled:
+		return false
+	case IsInternalUser, IsBetaUser, PassKeyEnabled:
+		return true
+	default:
+		return true
+	}
+}
+
 func (k FlagKey) IsBoolType() bool {
 	switch k {
-	case RecoveryKeyVerified, MapEnabled, FaceSearchEnabled, PassKeyEnabled:
+	case RecoveryKeyVerified, MapEnabled, FaceSearchEnabled, PassKeyEnabled, IsInternalUser, IsBetaUser:
 		return true
 	default:
 		return false
