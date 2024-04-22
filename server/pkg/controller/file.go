@@ -64,8 +64,11 @@ func (c *FileController) validateFileCreateOrUpdateReq(userID int64, file ente.F
 	if !strings.HasPrefix(file.File.ObjectKey, objectPathPrefix) || !strings.HasPrefix(file.Thumbnail.ObjectKey, objectPathPrefix) {
 		return stacktrace.Propagate(ente.ErrBadRequest, "Incorrect object key reported")
 	}
-	if file.EncryptedKey == "" || file.KeyDecryptionNonce == "" {
-		return stacktrace.Propagate(ente.ErrBadRequest, "EncryptedKey and KeyDecryptionNonce are required")
+	// Check for attributes for fileCreation. We don't send key details on update
+	if file.ID == 0 {
+		if file.EncryptedKey == "" || file.KeyDecryptionNonce == "" {
+			return stacktrace.Propagate(ente.ErrBadRequest, "EncryptedKey and KeyDecryptionNonce are required")
+		}
 	}
 	if file.File.DecryptionHeader == "" || file.Thumbnail.DecryptionHeader == "" {
 		return stacktrace.Propagate(ente.ErrBadRequest, "DecryptionHeader for file & thumb is required")
