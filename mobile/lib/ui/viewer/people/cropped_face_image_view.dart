@@ -76,8 +76,8 @@ class CroppedFaceImageView extends StatelessWidget {
                 offsetY = offsetY / imageToWidgetRatio;
               }
 
-              return ClipRect(
-                clipBehavior: Clip.antiAlias,
+              return ClipRRect(
+                borderRadius: const BorderRadius.all(Radius.elliptical(16, 12)),
                 child: Transform.translate(
                   offset: Offset(
                     offsetX,
