@@ -22,7 +22,6 @@ export function isApiErrorResponse(object: any): object is ApiErrorResponse {
 }
 
 export const CustomError = {
-    THUMBNAIL_GENERATION_FAILED: "thumbnail generation failed",
     VIDEO_PLAYBACK_FAILED: "video playback failed",
     ETAG_MISSING: "no header/etag present in response body",
     KEY_MISSING: "encrypted key missing from localStorage",

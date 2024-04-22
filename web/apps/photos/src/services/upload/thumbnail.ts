@@ -1,7 +1,9 @@
+import { fopLabel } from "@/next/file";
 import log from "@/next/log";
 import { ElectronFile, type DesktopFilePath } from "@/next/types/file";
 import { CustomErrorMessage, type Electron } from "@/next/types/ipc";
 import { CustomError } from "@ente/shared/error";
+import { withTimeout } from "@ente/shared/utils";
 import { FILE_TYPE } from "constants/file";
 import { BLACK_THUMBNAIL_BASE64 } from "constants/upload";
 import * as FFmpegService from "services/ffmpeg";
@@ -9,16 +11,11 @@ import { heicToJPEG } from "services/heic-convert";
 import { FileTypeInfo } from "types/upload";
 import { isFileHEIC } from "utils/file";
 import { getUint8ArrayView } from "../readerService";
-import { getFileName } from "./uploadService";
-import { fopLabel } from "@/next/file";
 
 /** Maximum width or height of the generated thumbnail */
 const maxThumbnailDimension = 720;
 /** Maximum size (in bytes) of the generated thumbnail */
 const maxThumbnailSize = 100 * 1024; // 100 KB
-const MIN_COMPRESSION_PERCENTAGE_SIZE_DIFF = 10;
-const MIN_QUALITY = 0.5;
-const MAX_QUALITY = 0.7;
 
 const WAIT_TIME_THUMBNAIL_GENERATION = 30 * 1000;
 
@@ -47,29 +44,34 @@ interface GeneratedThumbnail {
 }
 
 /**
- * Generate a JPEG thumbnail for the given {@link file}.
+ * Generate a JPEG thumbnail for the given image or video data.
  *
  * The thumbnail has a smaller file size so that is quick to load. But more
  * importantly, it uses a universal file format (JPEG in our case) so that the
  * thumbnail itself can be opened in all clients, even those like the web client
  * itself that might not yet have support for more exotic formats.
+ *
+ * @param blob The data (blob) of the file whose thumbnail we want to generate.
+ * @param fileTypeInfo The type of the file whose {@link blob} we were given.
+ *
+ * @return {@link GeneratedThumbnail}, a thin wrapper for the raw JPEG bytes of
+ * the generated thumbnail.
  */
 export const generateThumbnail = async (
-    file: File | ElectronFile,
+    blob: Blob,
     fileTypeInfo: FileTypeInfo,
 ): Promise<GeneratedThumbnail> => {
     try {
         const thumbnail =
             fileTypeInfo.fileType === FILE_TYPE.IMAGE
-                ? await generateImageThumbnail(file, fileTypeInfo)
-                : await generateVideoThumbnail(file, fileTypeInfo);
+                ? await generateImageThumbnail(blob, fileTypeInfo)
+                : await generateVideoThumbnail(blob, fileTypeInfo);
 
         if (thumbnail.length == 0) throw new Error("Empty thumbnail");
-        log.debug(() => `Generated thumbnail for ${getFileName(file)}`);
         return { thumbnail, hasStaticThumbnail: false };
     } catch (e) {
         log.error(
-            `Failed to generate thumbnail for ${getFileName(file)} with format ${fileTypeInfo.exactType}`,
+            `Failed to generate thumbnail for format ${fileTypeInfo.exactType}`,
             e,
         );
         return { thumbnail: fallbackThumbnail(), hasStaticThumbnail: true };
@@ -84,7 +86,7 @@ const fallbackThumbnail = () =>
     Uint8Array.from(atob(BLACK_THUMBNAIL_BASE64), (c) => c.charCodeAt(0));
 
 const generateImageThumbnail = async (
-    file: File | ElectronFile,
+    blob: Blob,
     fileTypeInfo: FileTypeInfo,
 ) => {
     let jpegData: Uint8Array | undefined;
@@ -107,7 +109,7 @@ const generateImageThumbnail = async (
     }
 
     if (!jpegData) {
-        jpegData = await generateImageThumbnailUsingCanvas(file, fileTypeInfo);
+        jpegData = await generateImageThumbnailUsingCanvas(blob, fileTypeInfo);
     }
     return jpegData;
 };
@@ -128,55 +130,45 @@ const generateImageThumbnailInElectron = async (
     return jpegData;
 };
 
-async function generateImageThumbnailUsingCanvas(
-    file: File | ElectronFile,
+const generateImageThumbnailUsingCanvas = async (
+    blob: Blob,
     fileTypeInfo: FileTypeInfo,
-) {
-    const canvas = document.createElement("canvas");
-    const canvasCTX = canvas.getContext("2d");
-
-    let imageURL = null;
-    let timeout = null;
-
+) => {
     if (isFileHEIC(fileTypeInfo.exactType)) {
-        log.debug(() => `Pre-converting ${getFileName(file)} to JPEG`);
-        const jpegBlob = await heicToJPEG(new Blob([await file.arrayBuffer()]));
-        file = new File([jpegBlob], file.name);
+        log.debug(() => `Pre-converting ${fileTypeInfo.exactType} to JPEG`);
+        blob = await heicToJPEG(blob);
     }
 
-    let image = new Image();
-    imageURL = URL.createObjectURL(new Blob([await file.arrayBuffer()]));
-    await new Promise((resolve, reject) => {
-        image.setAttribute("src", imageURL);
-        image.onload = () => {
-            try {
-                URL.revokeObjectURL(imageURL);
-                const { width, height } = scaledThumbnailDimensions(
-                    image.width,
-                    image.height,
-                    maxThumbnailDimension,
-                );
-                canvas.width = width;
-                canvas.height = height;
-                canvasCTX.drawImage(image, 0, 0, width, height);
-                image = null;
-                clearTimeout(timeout);
-                resolve(null);
-            } catch (e) {
-                const err = new Error(CustomError.THUMBNAIL_GENERATION_FAILED, {
-                    cause: e,
-                });
-                reject(err);
-            }
-        };
-        timeout = setTimeout(
-            () => reject(new Error("Operation timed out")),
-            WAIT_TIME_THUMBNAIL_GENERATION,
-        );
-    });
-    const thumbnailBlob = await getCompressedThumbnailBlobFromCanvas(canvas);
-    return await getUint8ArrayView(thumbnailBlob);
-}
+    const canvas = document.createElement("canvas");
+    const canvasCtx = canvas.getContext("2d");
+
+    const imageURL = URL.createObjectURL(blob);
+    await withTimeout(
+        new Promise((resolve, reject) => {
+            const image = new Image();
+            image.setAttribute("src", imageURL);
+            image.onload = () => {
+                try {
+                    URL.revokeObjectURL(imageURL);
+                    const { width, height } = scaledThumbnailDimensions(
+                        image.width,
+                        image.height,
+                        maxThumbnailDimension,
+                    );
+                    canvas.width = width;
+                    canvas.height = height;
+                    canvasCtx.drawImage(image, 0, 0, width, height);
+                    resolve(undefined);
+                } catch (e) {
+                    reject(e);
+                }
+            };
+        }),
+        30 * 1000,
+    );
+
+    return await compressedJPEGData(canvas);
+};
 
 const generateVideoThumbnail = async (fileOrPath: File | DesktopFilePath) => {
     try {
@@ -188,7 +180,7 @@ const generateVideoThumbnail = async (fileOrPath: File | DesktopFilePath) => {
         );
         // If we're on the web, try falling back to using the canvas instead.
         if (fileOrPath instanceof File) {
-            log.info()
+            log.info();
         }
 
         return await generateVideoThumbnailUsingCanvas(file);
@@ -242,42 +234,30 @@ async function generateVideoThumbnailUsingCanvas(file: File | ElectronFile) {
     return await getUint8ArrayView(thumbnailBlob);
 }
 
-async function getCompressedThumbnailBlobFromCanvas(canvas: HTMLCanvasElement) {
-    let thumbnailBlob: Blob = null;
+const compressedJPEGData = async (canvas: HTMLCanvasElement) => {
+    let blob: Blob;
     let prevSize = Number.MAX_SAFE_INTEGER;
-    let quality = MAX_QUALITY;
+    let quality = 0.7;
 
     do {
-        if (thumbnailBlob) {
-            prevSize = thumbnailBlob.size;
-        }
-        thumbnailBlob = await new Promise((resolve) => {
-            canvas.toBlob(
-                function (blob) {
-                    resolve(blob);
-                },
-                "image/jpeg",
-                quality,
-            );
+        if (blob) prevSize = blob.size;
+        blob = await new Promise((resolve) => {
+            canvas.toBlob((blob) => resolve(blob), "image/jpeg", quality);
         });
-        thumbnailBlob = thumbnailBlob ?? new Blob([]);
         quality -= 0.1;
     } while (
-        quality >= MIN_QUALITY &&
-        thumbnailBlob.size > maxThumbnailSize &&
-        percentageSizeDiff(thumbnailBlob.size, prevSize) >=
-            MIN_COMPRESSION_PERCENTAGE_SIZE_DIFF
+        quality >= 0.5 &&
+        blob.size > maxThumbnailSize &&
+        percentageSizeDiff(blob.size, prevSize) >= 10
     );
 
-    return thumbnailBlob;
-}
+    return blob;
+};
 
-function percentageSizeDiff(
+const percentageSizeDiff = (
     newThumbnailSize: number,
     oldThumbnailSize: number,
-) {
-    return ((oldThumbnailSize - newThumbnailSize) * 100) / oldThumbnailSize;
-}
+) => ((oldThumbnailSize - newThumbnailSize) * 100) / oldThumbnailSize;
 
 /**
  * Compute the size of the thumbnail to create for an image with the given

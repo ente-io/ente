@@ -690,14 +690,14 @@ export const getUserOwnedFiles = (files: EnteFile[]) => {
 };
 
 // doesn't work on firefox
-export const copyFileToClipboard = async (fileUrl: string) => {
+export const copyFileToClipboard = async (fileURL: string) => {
     const canvas = document.createElement("canvas");
     const canvasCTX = canvas.getContext("2d");
     const image = new Image();
 
     const blobPromise = new Promise<Blob>((resolve, reject) => {
         try {
-            image.setAttribute("src", fileUrl);
+            image.setAttribute("src", fileURL);
             image.onload = () => {
                 canvas.width = image.width;
                 canvas.height = image.height;
