@@ -42,8 +42,11 @@ export const generateVideoThumbnail = async (
         );
 
     try {
+        // Try generating thumbnail at seekTime 1 second.
         return await thumbnailAtTime(1);
     } catch (e) {
+        // If that fails, try again at the beginning. If even this throws, let
+        // it fail.
         return await thumbnailAtTime(0);
     }
 };

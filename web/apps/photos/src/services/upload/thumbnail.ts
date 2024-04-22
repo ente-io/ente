@@ -1,6 +1,5 @@
-import { getFileNameSize } from "@/next/file";
 import log from "@/next/log";
-import { ElectronFile } from "@/next/types/file";
+import { ElectronFile, type DesktopFilePath } from "@/next/types/file";
 import { CustomErrorMessage, type Electron } from "@/next/types/ipc";
 import { CustomError } from "@ente/shared/error";
 import { FILE_TYPE } from "constants/file";
@@ -11,6 +10,7 @@ import { FileTypeInfo } from "types/upload";
 import { isFileHEIC } from "utils/file";
 import { getUint8ArrayView } from "../readerService";
 import { getFileName } from "./uploadService";
+import { fopLabel } from "@/next/file";
 
 /** Maximum width or height of the generated thumbnail */
 const maxThumbnailDimension = 720;
@@ -178,35 +178,23 @@ async function generateImageThumbnailUsingCanvas(
     return await getUint8ArrayView(thumbnailBlob);
 }
 
-async function generateVideoThumbnail(
-    file: File | ElectronFile,
-    fileTypeInfo: FileTypeInfo,
-) {
-    let thumbnail: Uint8Array;
+const generateVideoThumbnail = async (fileOrPath: File | DesktopFilePath) => {
     try {
-        log.info(
-            `ffmpeg generateThumbnail called for ${getFileNameSize(file)}`,
-        );
-
-        const thumbnail = await FFmpegService.generateVideoThumbnail(file);
-        log.info(
-            `ffmpeg thumbnail successfully generated ${getFileNameSize(file)}`,
-        );
-        return await getUint8ArrayView(thumbnail);
+        return await FFmpegService.generateVideoThumbnail(fileOrPath);
     } catch (e) {
-        log.info(
-            `ffmpeg thumbnail generated failed  ${getFileNameSize(
-                file,
-            )} error: ${e.message}`,
-        );
         log.error(
-            `failed to generate thumbnail using ffmpeg for format ${fileTypeInfo.exactType}`,
+            `Failed to generate thumbnail using FFmpeg for ${fopLabel(fileOrPath)}`,
             e,
         );
-        thumbnail = await generateVideoThumbnailUsingCanvas(file);
+        // If we're on the web, try falling back to using the canvas instead.
+        if (fileOrPath instanceof File) {
+            log.info()
+        }
+
+        return await generateVideoThumbnailUsingCanvas(file);
     }
     return thumbnail;
-}
+};
 
 async function generateVideoThumbnailUsingCanvas(file: File | ElectronFile) {
     const canvas = document.createElement("canvas");
