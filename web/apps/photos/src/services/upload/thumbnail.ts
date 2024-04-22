@@ -1,23 +1,18 @@
-import { fopLabel } from "@/next/file";
 import log from "@/next/log";
-import { ElectronFile, type DesktopFilePath } from "@/next/types/file";
+import { ElectronFile } from "@/next/types/file";
 import { CustomErrorMessage, type Electron } from "@/next/types/ipc";
-import { CustomError } from "@ente/shared/error";
 import { withTimeout } from "@ente/shared/utils";
 import { FILE_TYPE } from "constants/file";
 import { BLACK_THUMBNAIL_BASE64 } from "constants/upload";
-import * as FFmpegService from "services/ffmpeg";
+import * as ffmpeg from "services/ffmpeg";
 import { heicToJPEG } from "services/heic-convert";
 import { FileTypeInfo } from "types/upload";
 import { isFileHEIC } from "utils/file";
-import { getUint8ArrayView } from "../readerService";
 
 /** Maximum width or height of the generated thumbnail */
 const maxThumbnailDimension = 720;
 /** Maximum size (in bytes) of the generated thumbnail */
 const maxThumbnailSize = 100 * 1024; // 100 KB
-
-const WAIT_TIME_THUMBNAIL_GENERATION = 30 * 1000;
 
 class ModuleState {
     /**
@@ -170,94 +165,50 @@ const generateImageThumbnailUsingCanvas = async (
     return await compressedJPEGData(canvas);
 };
 
-const generateVideoThumbnail = async (fileOrPath: File | DesktopFilePath) => {
+const generateVideoThumbnail = async (blob: Blob) => {
     try {
-        return await FFmpegService.generateVideoThumbnail(fileOrPath);
+        return await ffmpeg.generateVideoThumbnail(blob);
     } catch (e) {
         log.error(
-            `Failed to generate thumbnail using FFmpeg for ${fopLabel(fileOrPath)}`,
+            `Failed to generate video thumbnail using FFmpeg, will fallback to canvas`,
             e,
         );
-        // If we're on the web, try falling back to using the canvas instead.
-        if (fileOrPath instanceof File) {
-            log.info();
-        }
-
-        return await generateVideoThumbnailUsingCanvas(file);
+        return generateVideoThumbnailUsingCanvas(blob);
     }
-    return thumbnail;
 };
 
-async function generateVideoThumbnailUsingCanvas(file: File | ElectronFile) {
+const generateVideoThumbnailUsingCanvas = async (blob: Blob) => {
     const canvas = document.createElement("canvas");
-    const canvasCTX = canvas.getContext("2d");
+    const canvasCtx = canvas.getContext("2d");
 
-    let timeout = null;
-    let videoURL = null;
-
-    let video = document.createElement("video");
-    videoURL = URL.createObjectURL(new Blob([await file.arrayBuffer()]));
-    await new Promise((resolve, reject) => {
-        video.preload = "metadata";
-        video.src = videoURL;
-        video.addEventListener("loadeddata", function () {
-            try {
-                URL.revokeObjectURL(videoURL);
-                if (!video) {
-                    throw Error("video load failed");
+    const videoURL = URL.createObjectURL(blob);
+    await withTimeout(
+        new Promise((resolve, reject) => {
+            const video = document.createElement("video");
+            video.preload = "metadata";
+            video.src = videoURL;
+            video.addEventListener("loadeddata", () => {
+                try {
+                    URL.revokeObjectURL(videoURL);
+                    const { width, height } = scaledThumbnailDimensions(
+                        video.videoWidth,
+                        video.videoHeight,
+                        maxThumbnailDimension,
+                    );
+                    canvas.width = width;
+                    canvas.height = height;
+                    canvasCtx.drawImage(video, 0, 0, width, height);
+                    resolve(undefined);
+                } catch (e) {
+                    reject(e);
                 }
-                const { width, height } = scaledThumbnailDimensions(
-                    video.videoWidth,
-                    video.videoHeight,
-                    maxThumbnailDimension,
-                );
-                canvas.width = width;
-                canvas.height = height;
-                canvasCTX.drawImage(video, 0, 0, width, height);
-                video = null;
-                clearTimeout(timeout);
-                resolve(null);
-            } catch (e) {
-                const err = Error(
-                    `${CustomError.THUMBNAIL_GENERATION_FAILED} err: ${e}`,
-                );
-                log.error(CustomError.THUMBNAIL_GENERATION_FAILED, e);
-                reject(err);
-            }
-        });
-        timeout = setTimeout(
-            () => reject(new Error("Operation timed out")),
-            WAIT_TIME_THUMBNAIL_GENERATION,
-        );
-    });
-    const thumbnailBlob = await getCompressedThumbnailBlobFromCanvas(canvas);
-    return await getUint8ArrayView(thumbnailBlob);
-}
-
-const compressedJPEGData = async (canvas: HTMLCanvasElement) => {
-    let blob: Blob;
-    let prevSize = Number.MAX_SAFE_INTEGER;
-    let quality = 0.7;
-
-    do {
-        if (blob) prevSize = blob.size;
-        blob = await new Promise((resolve) => {
-            canvas.toBlob((blob) => resolve(blob), "image/jpeg", quality);
-        });
-        quality -= 0.1;
-    } while (
-        quality >= 0.5 &&
-        blob.size > maxThumbnailSize &&
-        percentageSizeDiff(blob.size, prevSize) >= 10
+            });
+        }),
+        30 * 1000,
     );
 
-    return blob;
+    return await compressedJPEGData(canvas);
 };
-
-const percentageSizeDiff = (
-    newThumbnailSize: number,
-    oldThumbnailSize: number,
-) => ((oldThumbnailSize - newThumbnailSize) * 100) / oldThumbnailSize;
 
 /**
  * Compute the size of the thumbnail to create for an image with the given
@@ -286,3 +237,28 @@ const scaledThumbnailDimensions = (
         return { width: 0, height: 0 };
     return thumbnailDimensions;
 };
+
+const compressedJPEGData = async (canvas: HTMLCanvasElement) => {
+    let blob: Blob;
+    let prevSize = Number.MAX_SAFE_INTEGER;
+    let quality = 0.7;
+
+    do {
+        if (blob) prevSize = blob.size;
+        blob = await new Promise((resolve) => {
+            canvas.toBlob((blob) => resolve(blob), "image/jpeg", quality);
+        });
+        quality -= 0.1;
+    } while (
+        quality >= 0.5 &&
+        blob.size > maxThumbnailSize &&
+        percentageSizeDiff(blob.size, prevSize) >= 10
+    );
+
+    return blob;
+};
+
+const percentageSizeDiff = (
+    newThumbnailSize: number,
+    oldThumbnailSize: number,
+) => ((oldThumbnailSize - newThumbnailSize) * 100) / oldThumbnailSize;
