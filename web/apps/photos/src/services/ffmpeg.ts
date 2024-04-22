@@ -12,7 +12,7 @@ import { type DedicatedFFmpegWorker } from "worker/ffmpeg.worker";
 
 /** Called during upload */
 export async function generateVideoThumbnail(
-    file: File | ElectronFile,
+    fileOrPath: File | ElectronFile | string,
 ): Promise<File | ElectronFile> {
     let seekTime = 1;
     while (seekTime >= 0) {
@@ -161,20 +161,24 @@ export async function convertToMP4(file: File) {
  * 10-20x faster than the wasm one currently. See: [Note: ffmpeg in Electron].
  */
 const ffmpegExec = async (
-    cmd: string[],
+    command: string[],
     inputFile: File | ElectronFile,
-    outputFilename: string,
+    outputFileName: string,
     timeoutMS: number = 0,
 ): Promise<File | ElectronFile> => {
     const electron = globalThis.electron;
     if (electron || false) {
-        /* TODO(MR): ElectronFile changes */
-        // return electron.runFFmpegCmd(cmd, inputFile, outputFilename, timeoutMS);
+        return electron.ffmpegExec(
+            command,
+            inputDataOrPath,
+            outputFileName,
+            timeoutMS
+        )
     } else {
         return workerFactory
             .instance()
             .then((worker) =>
-                worker.run(cmd, inputFile, outputFilename, timeoutMS),
+                worker.execute(command, inputFile, outputFileName, timeoutMS),
             );
     }
 };
