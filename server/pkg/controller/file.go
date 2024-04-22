@@ -64,8 +64,9 @@ func (c *FileController) validateFileCreateOrUpdateReq(userID int64, file ente.F
 	if !strings.HasPrefix(file.File.ObjectKey, objectPathPrefix) || !strings.HasPrefix(file.Thumbnail.ObjectKey, objectPathPrefix) {
 		return stacktrace.Propagate(ente.ErrBadRequest, "Incorrect object key reported")
 	}
+	isCreateFileReq := file.ID == 0
 	// Check for attributes for fileCreation. We don't send key details on update
-	if file.ID == 0 {
+	if isCreateFileReq {
 		if file.EncryptedKey == "" || file.KeyDecryptionNonce == "" {
 			return stacktrace.Propagate(ente.ErrBadRequest, "EncryptedKey and KeyDecryptionNonce are required")
 		}
@@ -76,17 +77,22 @@ func (c *FileController) validateFileCreateOrUpdateReq(userID int64, file ente.F
 	if file.UpdationTime == 0 {
 		return stacktrace.Propagate(ente.ErrBadRequest, "UpdationTime is required")
 	}
-	collection, err := c.CollectionRepo.Get(file.CollectionID)
-	if err != nil {
-		return stacktrace.Propagate(err, "")
+	if isCreateFileReq {
+		collection, err := c.CollectionRepo.Get(file.CollectionID)
+		if err != nil {
+			return stacktrace.Propagate(err, "")
+		}
+		// Verify that user owns the collection.
+		// Warning: Do not remove this check
+		if collection.Owner.ID != userID {
+			return stacktrace.Propagate(ente.ErrPermissionDenied, "collection doesn't belong to user")
+		}
+		if collection.IsDeleted {
+			return stacktrace.Propagate(ente.ErrNotFound, "collection has been deleted")
+		}
 	}
-	// Verify that user owns the collection.
-	// Warning: Do not remove this check
-	if collection.Owner.ID != userID || file.OwnerID != userID {
-		return stacktrace.Propagate(ente.ErrPermissionDenied, "")
-	}
-	if collection.IsDeleted {
-		return stacktrace.Propagate(ente.ErrNotFound, "collection has been deleted")
+	if file.OwnerID != userID {
+		return stacktrace.Propagate(ente.ErrPermissionDenied, "file ownerID doesn't match with userID")
 	}
 	return nil
 }
