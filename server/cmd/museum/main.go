@@ -672,6 +672,7 @@ func main() {
 
 	privateAPI.POST("/remote-store/update", remoteStoreHandler.InsertOrUpdate)
 	privateAPI.GET("/remote-store", remoteStoreHandler.GetKey)
+	privateAPI.GET("/remote-store/feature-flags", remoteStoreHandler.GetFeatureFlags)
 
 	pushHandler := &api.PushHandler{PushController: pushController}
 	privateAPI.POST("/push/token", pushHandler.AddToken)

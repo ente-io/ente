@@ -12,33 +12,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type FlagKey string
-
-const (
-	RecoveryKeyVerified FlagKey = "recoveryKeyVerified"
-	MapEnabled          FlagKey = "mapEnabled"
-	FaceSearchEnabled   FlagKey = "faceSearchEnabled"
-	PassKeyEnabled      FlagKey = "passKeyEnabled"
-)
-
-func isBoolType(key FlagKey) bool {
-	switch key {
-	case RecoveryKeyVerified, MapEnabled, FaceSearchEnabled, PassKeyEnabled:
-		return true
-	default:
-		return false
-	}
-}
-
-var (
-	_allowKeys = map[FlagKey]*bool{
-		RecoveryKeyVerified: nil,
-		MapEnabled:          nil,
-		FaceSearchEnabled:   nil,
-		PassKeyEnabled:      nil,
-	}
-)
-
 // Controller is interface for exposing business logic related to for remote store
 type Controller struct {
 	Repo *remotestore.Repository
@@ -77,18 +50,18 @@ func (c *Controller) GetFeatureFlags(ctx *gin.Context) (*ente.FeatureFlagRespons
 		DisableCFWorker: false,
 	}
 	for key, value := range values {
-		flag := FlagKey(key)
-		if !isBoolType(flag) {
+		flag := ente.FlagKey(key)
+		if !flag.IsBoolType() {
 			continue
 		}
 		switch flag {
-		case RecoveryKeyVerified:
-			response.RestoreKeyVerified = value == "true"
-		case MapEnabled:
+		case ente.RecoveryKeyVerified:
+			response.RecoveryKeyVerified = value == "true"
+		case ente.MapEnabled:
 			response.MapEnabled = value == "true"
-		case FaceSearchEnabled:
+		case ente.FaceSearchEnabled:
 			response.FaceSearchEnabled = value == "true"
-		case PassKeyEnabled:
+		case ente.PassKeyEnabled:
 			response.PassKeyEnabled = value == "true"
 		}
 	}
@@ -96,11 +69,11 @@ func (c *Controller) GetFeatureFlags(ctx *gin.Context) (*ente.FeatureFlagRespons
 }
 
 func _validateRequest(request ente.UpdateKeyValueRequest) error {
-	flag := FlagKey(request.Key)
-	if _, ok := _allowKeys[flag]; !ok {
-		return stacktrace.Propagate(ente.NewBadRequestWithMessage(fmt.Sprintf("key %s is not allowed", request.Key)), "key not allowed")
+	flag := ente.FlagKey(request.Key)
+	if !flag.UserEditable() {
+		return stacktrace.Propagate(ente.NewBadRequestWithMessage(fmt.Sprintf("key %s is not user editable", request.Key)), "key not user editable")
 	}
-	if isBoolType(flag) && request.Value != "true" && request.Value != "false" {
+	if flag.IsBoolType() && request.Value != "true" && request.Value != "false" {
 		return stacktrace.Propagate(ente.NewBadRequestWithMessage(fmt.Sprintf("value %s is not allowed", request.Value)), "value not allowed")
 	}
 	return nil
