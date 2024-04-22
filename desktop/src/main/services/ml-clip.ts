@@ -20,7 +20,7 @@ const cachedCLIPImageSession = makeCachedInferenceSession(
 );
 
 export const clipImageEmbedding = async (jpegImageData: Uint8Array) => {
-    const tempFilePath = await makeTempFilePath("");
+    const tempFilePath = await makeTempFilePath();
     const imageStream = new Response(jpegImageData.buffer).body;
     await writeStream(tempFilePath, imageStream);
     try {

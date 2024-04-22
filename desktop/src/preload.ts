@@ -144,17 +144,10 @@ const generateImageThumbnail = (
 
 const ffmpegExec = (
     command: string[],
-    inputDataOrPath: Uint8Array | string,
-    outputFileName: string,
+    dataOrPath: Uint8Array | string,
     timeoutMS: number,
 ): Promise<Uint8Array> =>
-    ipcRenderer.invoke(
-        "ffmpegExec",
-        command,
-        inputDataOrPath,
-        outputFileName,
-        timeoutMS,
-    );
+    ipcRenderer.invoke("ffmpegExec", command, dataOrPath, timeoutMS);
 
 // - ML
 

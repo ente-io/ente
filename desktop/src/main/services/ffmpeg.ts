@@ -37,8 +37,7 @@ const outputPathPlaceholder = "OUTPUT";
  */
 export const ffmpegExec = async (
     command: string[],
-    inputDataOrPath: Uint8Array | string,
-    outputFileName: string,
+    dataOrPath: Uint8Array | string,
     timeoutMS: number,
 ): Promise<Uint8Array> => {
     // TODO (MR): This currently copies files for both input and output. This
@@ -47,18 +46,18 @@ export const ffmpegExec = async (
 
     let inputFilePath: string;
     let isInputFileTemporary: boolean;
-    if (typeof inputDataOrPath == "string") {
-        inputFilePath = inputDataOrPath;
+    if (typeof dataOrPath == "string") {
+        inputFilePath = dataOrPath;
         isInputFileTemporary = false;
     } else {
-        inputFilePath = await makeTempFilePath("input" /* arbitrary */);
+        inputFilePath = await makeTempFilePath(".in");
         isInputFileTemporary = true;
-        await fs.writeFile(inputFilePath, inputDataOrPath);
+        await fs.writeFile(inputFilePath, dataOrPath);
     }
 
     let outputFilePath: string | undefined;
     try {
-        outputFilePath = await makeTempFilePath(outputFileName);
+        outputFilePath = await makeTempFilePath(".out");
 
         const cmd = substitutePlaceholders(
             command,

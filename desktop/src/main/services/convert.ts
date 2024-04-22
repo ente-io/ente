@@ -14,7 +14,7 @@ export const convertToJPEG = async (
     imageData: Uint8Array,
 ): Promise<Uint8Array> => {
     const inputFilePath = await makeTempFilePath(fileName);
-    const outputFilePath = await makeTempFilePath("output.jpeg");
+    const outputFilePath = await makeTempFilePath(".jpeg");
 
     // Construct the command first, it may throw on NotAvailable on win32.
     const command = convertToJPEGCommand(inputFilePath, outputFilePath);
@@ -150,7 +150,7 @@ async function generateImageThumbnail_(
     let tempOutputFilePath: string;
     let quality = MAX_QUALITY;
     try {
-        tempOutputFilePath = await makeTempFilePath("thumb.jpeg");
+        tempOutputFilePath = await makeTempFilePath(".jpeg");
         let thumbnail: Uint8Array;
         do {
             await execAsync(

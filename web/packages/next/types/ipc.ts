@@ -237,11 +237,11 @@ export interface Electron {
     ) => Promise<Uint8Array>;
 
     /**
-     * Execute a ffmpeg {@link command}.
+     * Execute a FFmpeg {@link command} on the given {@link dataOrPath}.
      *
-     * This executes the command using the ffmpeg executable we bundle with our
-     * desktop app. There is also a ffmpeg wasm implementation that we use when
-     * running on the web, it also has a sibling function with the same
+     * This executes the command using a FFmpeg executable we bundle with our
+     * desktop app. We also have a wasm FFmpeg wasm implementation that we use
+     * when running on the web, which has a sibling function with the same
      * parameters. See [Note: ffmpeg in Electron].
      *
      * @param command An array of strings, each representing one positional
@@ -250,25 +250,20 @@ export interface Electron {
      * (respectively {@link inputPathPlaceholder},
      * {@link outputPathPlaceholder}, {@link ffmpegPathPlaceholder}).
      *
-     * @param inputDataOrPath The bytes of the input file, or the path to the
-     * input file on the user's local disk. In both cases, the data gets
-     * serialized to a temporary file, and then that path gets substituted in
-     * the ffmpeg {@link command} by {@link inputPathPlaceholder}.
-     *
-     * @param outputFileName The name of the file we instruct ffmpeg to produce
-     * when giving it the given {@link command}. The contents of this file get
-     * returned as the result.
+     * @param dataOrPath The bytes of the input file, or the path to the input
+     * file on the user's local disk. In both cases, the data gets serialized to
+     * a temporary file, and then that path gets substituted in the FFmpeg
+     * {@link command} in lieu of {@link inputPathPlaceholder}.
      *
      * @param timeoutMS If non-zero, then abort and throw a timeout error if the
      * ffmpeg command takes more than the given number of milliseconds.
      *
      * @returns The contents of the output file produced by the ffmpeg command
-     * at {@link outputFileName}.
+     * (specified as {@link outputPathPlaceholder} in {@link command}).
      */
     ffmpegExec: (
         command: string[],
-        inputDataOrPath: Uint8Array | string,
-        outputFileName: string,
+        dataOrPath: Uint8Array | string,
         timeoutMS: number,
     ) => Promise<Uint8Array>;
 

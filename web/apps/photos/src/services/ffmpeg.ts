@@ -36,7 +36,6 @@ export const generateVideoThumbnail = async (blob: Blob) => {
                 outputPathPlaceholder,
             ],
             blob,
-            "thumb.jpeg",
         );
 
     try {
@@ -161,27 +160,25 @@ export async function convertToMP4(file: File) {
  * Run the given FFmpeg command.
  *
  * If we're running in the context of our desktop app, use the FFmpeg binary we
- * bundle with our desktop app to run the command. Otherwise fallback to using
- * the wasm FFmpeg we link to from our web app in a web worker.
+ * bundle with our desktop app to run the command. Otherwise fallback to using a
+ * wasm FFmpeg in a web worker.
  *
- * As a rough ballpark, the native FFmpeg integration in the desktop app is
- * 10-20x faster than the wasm one currently. See: [Note: FFmpeg in Electron].
+ * As a rough ballpark, currently the native FFmpeg integration in the desktop
+ * app is 10-20x faster than the wasm one. See: [Note: FFmpeg in Electron].
  */
 const ffmpegExec = async (
     command: string[],
     blob: Blob,
-    outputFileName: string,
     timeoutMs: number = 0,
-): Promise<Uint8Array> => {
+) => {
     const electron = globalThis.electron;
-    if (electron)
-        return electron.ffmpegExec(command, blob, outputFileName, timeoutMs);
-    else
-        return workerFactory
-            .lazy()
-            .then((worker) =>
-                worker.exec(command, blob, outputFileName, timeoutMs),
-            );
+    if (electron) {
+        const data = new Uint8Array(await blob.arrayBuffer());
+        return await electron.ffmpegExec(command, data, timeoutMs);
+    } else {
+        const worker = await workerFactory.lazy()
+        return await worker.exec(command, blob, timeoutMs);
+    }
 };
 
 const ffmpegExec2 = async (
