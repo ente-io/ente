@@ -401,6 +401,16 @@ class FileUploader {
       _logger.severe('Trying to upload file with missing localID');
       return file;
     }
+    if (!CollectionsService.instance.allowUpload(collectionID)) {
+      _logger.warning(
+        'Upload not allowed for collection $collectionID',
+      );
+      if (!file.isUploaded && file.generatedID != null) {
+        _logger.info("Deleting file entry for " + file.toString());
+        await FilesDB.instance.deleteByGeneratedID(file.generatedID!);
+      }
+      return file;
+    }
 
     final String lockKey = file.localID!;
 
