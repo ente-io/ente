@@ -1,4 +1,9 @@
-import { convertBytesToHumanReadable, getFileNameSize } from "@/next/file";
+import { encodeLivePhoto } from "@/media/live-photo";
+import {
+    basename,
+    convertBytesToHumanReadable,
+    getFileNameSize,
+} from "@/next/file";
 import log from "@/next/log";
 import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
 import {
@@ -6,11 +11,11 @@ import {
     EncryptionResult,
 } from "@ente/shared/crypto/types";
 import { CustomError, handleUploadError } from "@ente/shared/error";
-import { sleep } from "@ente/shared/utils";
+import { wait } from "@ente/shared/utils";
 import { Remote } from "comlink";
+import { FILE_TYPE } from "constants/file";
 import {
     FILE_READER_CHUNK_SIZE,
-    MAX_FILE_SIZE_SUPPORTED,
     MULTIPART_PART_SIZE,
     UPLOAD_RESULT,
 } from "constants/upload";
@@ -30,7 +35,6 @@ import {
     ExtractMetadataResult,
     FileInMemory,
     FileTypeInfo,
-    FileWithCollection,
     FileWithMetadata,
     Logger,
     ParsedMetadataJSON,
@@ -41,6 +45,9 @@ import {
     UploadFile,
     UploadURL,
     isDataStream,
+    type FileWithCollection2,
+    type LivePhotoAssets,
+    type UploadAsset2,
 } from "types/upload";
 import {
     getNonEmptyMagicMetadataProps,
@@ -55,7 +62,6 @@ import {
 import { getFileType } from "../typeDetectionService";
 import {
     MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT,
-    clusterLivePhotoFiles,
     extractLivePhotoMetadata,
     extractMetadata,
     getClippedMetadataJSONMapKeyForFile,
@@ -63,11 +69,10 @@ import {
     getLivePhotoName,
     getLivePhotoSize,
     getMetadataJSONMapKeyForFile,
-    readLivePhoto,
 } from "./metadataService";
 import { uploadStreamUsingMultipart } from "./multiPartUploadService";
 import publicUploadHttpClient from "./publicUploadHttpClient";
-import { generateThumbnail } from "./thumbnailService";
+import { generateThumbnail } from "./thumbnail";
 import UIService from "./uiService";
 import uploadCancelService from "./uploadCancelService";
 import UploadHttpClient from "./uploadHttpClient";
@@ -127,10 +132,10 @@ class UploadService {
             : getFileSize(file);
     }
 
-    getAssetName({ isLivePhoto, file, livePhotoAssets }: UploadAsset) {
+    getAssetName({ isLivePhoto, file, livePhotoAssets }: UploadAsset2) {
         return isLivePhoto
             ? getLivePhotoName(livePhotoAssets)
-            : getFilename(file);
+            : getFileName(file);
     }
 
     getAssetFileType({ isLivePhoto, file, livePhotoAssets }: UploadAsset) {
@@ -150,7 +155,7 @@ class UploadService {
 
     async extractAssetMetadata(
         worker: Remote<DedicatedCryptoWorker>,
-        { isLivePhoto, file, livePhotoAssets }: UploadAsset,
+        { isLivePhoto, file, livePhotoAssets }: UploadAsset2,
         collectionID: number,
         fileTypeInfo: FileTypeInfo,
     ): Promise<ExtractMetadataResult> {
@@ -169,10 +174,6 @@ class UploadService {
                   fileTypeInfo,
                   file,
               );
-    }
-
-    clusterLivePhotoFiles(mediaFiles: FileWithCollection[]) {
-        return clusterLivePhotoFiles(mediaFiles);
     }
 
     constructPublicMagicMetadata(
@@ -361,9 +362,8 @@ function getFileSize(file: File | ElectronFile) {
     return file.size;
 }
 
-function getFilename(file: File | ElectronFile) {
-    return file.name;
-}
+export const getFileName = (file: File | ElectronFile | string) =>
+    typeof file == "string" ? basename(file) : file.name;
 
 async function readFile(
     fileTypeInfo: FileTypeInfo,
@@ -399,24 +399,54 @@ async function readFile(
     };
 }
 
+async function readLivePhoto(
+    fileTypeInfo: FileTypeInfo,
+    livePhotoAssets: LivePhotoAssets,
+) {
+    const { thumbnail, hasStaticThumbnail } = await generateThumbnail(
+        livePhotoAssets.image,
+        {
+            exactType: fileTypeInfo.imageType,
+            fileType: FILE_TYPE.IMAGE,
+        },
+    );
+
+    const imageData = await getUint8ArrayView(livePhotoAssets.image);
+
+    const videoData = await getUint8ArrayView(livePhotoAssets.video);
+
+    return {
+        filedata: await encodeLivePhoto({
+            imageFileName: livePhotoAssets.image.name,
+            imageData,
+            videoFileName: livePhotoAssets.video.name,
+            videoData,
+        }),
+        thumbnail,
+        hasStaticThumbnail,
+    };
+}
+
 export async function extractFileMetadata(
     worker: Remote<DedicatedCryptoWorker>,
     parsedMetadataJSONMap: ParsedMetadataJSONMap,
     collectionID: number,
     fileTypeInfo: FileTypeInfo,
-    rawFile: File | ElectronFile,
+    rawFile: File | ElectronFile | string,
 ): Promise<ExtractMetadataResult> {
-    let key = getMetadataJSONMapKeyForFile(collectionID, rawFile.name);
+    const rawFileName = getFileName(rawFile);
+    let key = getMetadataJSONMapKeyForFile(collectionID, rawFileName);
     let googleMetadata: ParsedMetadataJSON = parsedMetadataJSONMap.get(key);
 
     if (!googleMetadata && key.length > MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT) {
-        key = getClippedMetadataJSONMapKeyForFile(collectionID, rawFile.name);
+        key = getClippedMetadataJSONMapKeyForFile(collectionID, rawFileName);
         googleMetadata = parsedMetadataJSONMap.get(key);
     }
 
     const { metadata, publicMagicMetadata } = await extractMetadata(
         worker,
-        rawFile,
+        /* TODO(MR): ElectronFile changes */
+        rawFile as File | ElectronFile,
         fileTypeInfo,
     );
 
@@ -533,22 +563,26 @@ interface UploadResponse {
 export async function uploader(
     worker: Remote<DedicatedCryptoWorker>,
     existingFiles: EnteFile[],
-    fileWithCollection: FileWithCollection,
+    fileWithCollection: FileWithCollection2,
     uploaderName: string,
 ): Promise<UploadResponse> {
-    const { collection, localID, ...uploadAsset } = fileWithCollection;
+    const { collection, localID, ...uploadAsset2 } = fileWithCollection;
+    /* TODO(MR): ElectronFile changes */
+    const uploadAsset = uploadAsset2 as UploadAsset;
     const fileNameSize = `${uploadService.getAssetName(
         fileWithCollection,
     )}_${convertBytesToHumanReadable(uploadService.getAssetSize(uploadAsset))}`;
 
     log.info(`uploader called for  ${fileNameSize}`);
     UIService.setFileProgress(localID, 0);
-    await sleep(0);
+    await wait(0);
     let fileTypeInfo: FileTypeInfo;
     let fileSize: number;
     try {
+        const maxFileSize = 4 * 1024 * 1024 * 1024; // 4 GB
+
         fileSize = uploadService.getAssetSize(uploadAsset);
-        if (fileSize >= MAX_FILE_SIZE_SUPPORTED) {
+        if (fileSize >= maxFileSize) {
             return { fileUploadResult: UPLOAD_RESULT.TOO_LARGE };
         }
         log.info(`getting filetype for ${fileNameSize}`);

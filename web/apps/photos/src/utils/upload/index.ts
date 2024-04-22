@@ -1,10 +1,15 @@
 import { basename, dirname } from "@/next/file";
 import { FILE_TYPE } from "constants/file";
-import { A_SEC_IN_MICROSECONDS, PICKED_UPLOAD_TYPE } from "constants/upload";
+import { PICKED_UPLOAD_TYPE } from "constants/upload";
 import isElectron from "is-electron";
 import { exportMetadataDirectoryName } from "services/export";
 import { EnteFile } from "types/file";
-import { ElectronFile, FileWithCollection, Metadata } from "types/upload";
+import {
+    ElectronFile,
+    FileWithCollection,
+    Metadata,
+    type FileWithCollection2,
+} from "types/upload";
 
 const TYPE_JSON = "json";
 const DEDUPE_COLLECTION = new Set(["icloud library", "icloudlibrary"]);
@@ -40,12 +45,13 @@ export function areFilesSame(
          * precision of file times to prevent timing attacks and fingerprinting.
          * Context: https://developer.mozilla.org/en-US/docs/Web/API/File/lastModified#reduced_time_precision
          */
+        const oneSecond = 1e6;
         if (
             existingFile.fileType === newFile.fileType &&
             Math.abs(existingFile.creationTime - newFile.creationTime) <
-                A_SEC_IN_MICROSECONDS &&
+                oneSecond &&
             Math.abs(existingFile.modificationTime - newFile.modificationTime) <
-                A_SEC_IN_MICROSECONDS &&
+                oneSecond &&
             existingFile.title === newFile.title
         ) {
             return true;
@@ -95,9 +101,26 @@ export function segregateMetadataAndMediaFiles(
     return { mediaFiles, metadataJSONFiles };
 }
 
+export function segregateMetadataAndMediaFiles2(
+    filesWithCollectionToUpload: FileWithCollection2[],
+) {
+    const metadataJSONFiles: FileWithCollection2[] = [];
+    const mediaFiles: FileWithCollection2[] = [];
+    filesWithCollectionToUpload.forEach((fileWithCollection) => {
+        const file = fileWithCollection.file;
+        const s = typeof file == "string" ? file : file.name;
+        if (s.toLowerCase().endsWith(TYPE_JSON)) {
+            metadataJSONFiles.push(fileWithCollection);
+        } else {
+            mediaFiles.push(fileWithCollection);
+        }
+    });
+    return { mediaFiles, metadataJSONFiles };
+}
+
 export function areFileWithCollectionsSame(
-    firstFile: FileWithCollection,
-    secondFile: FileWithCollection,
+    firstFile: FileWithCollection2,
+    secondFile: FileWithCollection2,
 ): boolean {
     return firstFile.localID === secondFile.localID;
 }
@@ -176,11 +199,15 @@ export function getImportSuggestion(
 // b => [e,f,g],
 // c => [h, i]]
 export function groupFilesBasedOnParentFolder(
-    toUploadFiles: File[] | ElectronFile[],
+    toUploadFiles: File[] | ElectronFile[] | string[],
 ) {
-    const collectionNameToFilesMap = new Map<string, (File | ElectronFile)[]>();
+    const collectionNameToFilesMap = new Map<
+        string,
+        File[] | ElectronFile[] | string[]
+    >();
     for (const file of toUploadFiles) {
-        const filePath = file["path"] as string;
+        const filePath =
+            typeof file == "string" ? file : (file["path"] as string);
 
         let folderPath = filePath.substring(0, filePath.lastIndexOf("/"));
         // If the parent folder of a file is "metadata"
@@ -200,17 +227,25 @@ export function groupFilesBasedOnParentFolder(
         if (!collectionNameToFilesMap.has(folderName)) {
             collectionNameToFilesMap.set(folderName, []);
         }
-        collectionNameToFilesMap.get(folderName).push(file);
+        // TODO: Remove the cast
+        collectionNameToFilesMap.get(folderName).push(file as any);
     }
     return collectionNameToFilesMap;
 }
 
-export function filterOutSystemFiles(files: File[] | ElectronFile[]) {
+export function filterOutSystemFiles(
+    files: File[] | ElectronFile[] | string[] | undefined | null,
+) {
+    if (!files) return files;
+
     if (files[0] instanceof File) {
         const browserFiles = files as File[];
         return browserFiles.filter((file) => {
             return !isSystemFile(file);
         });
+    } else if (typeof files[0] == "string") {
+        const filePaths = files as string[];
+        return filePaths.filter((path) => !isHiddenFile(path));
     } else {
         const electronFiles = files as ElectronFile[];
         return electronFiles.filter((file) => {

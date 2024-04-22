@@ -1,7 +1,7 @@
 import { haveWindow } from "@/next/env";
 import { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { Remote } from "comlink";
-import { DedicatedSearchWorker } from "worker/search.worker";
+import { type DedicatedSearchWorker } from "worker/search.worker";
 
 class ComlinkSearchWorker {
     private comlinkWorkerInstance: Remote<DedicatedSearchWorker>;

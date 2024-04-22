@@ -29,7 +29,7 @@ import { createWatcher } from "./main/services/watch";
 import { userPreferences } from "./main/stores/user-preferences";
 import { migrateLegacyWatchStoreIfNeeded } from "./main/stores/watch";
 import { registerStreamProtocol } from "./main/stream";
-import { isDev } from "./main/util";
+import { isDev } from "./main/utils-electron";
 
 /**
  * The URL where the renderer HTML is being served from.
@@ -205,6 +205,8 @@ const createMainWindow = async () => {
         window.webContents.reload();
     });
 
+    // "The unresponsive event is fired when Chromium detects that your
+    //  webContents is not responding to input messages for > 30 seconds."
     window.webContents.on("unresponsive", () => {
         log.error(
             "Main window's webContents are unresponsive, will restart the renderer process",

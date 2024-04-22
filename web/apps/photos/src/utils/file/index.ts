@@ -1,14 +1,11 @@
 import { decodeLivePhoto } from "@/media/live-photo";
-import { convertBytesToHumanReadable } from "@/next/file";
 import log from "@/next/log";
-import type { Electron } from "@/next/types/ipc";
+import { CustomErrorMessage, type Electron } from "@/next/types/ipc";
 import { workerBridge } from "@/next/worker/worker-bridge";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
-import { CustomError } from "@ente/shared/error";
-import { isPlaybackPossible } from "@ente/shared/media/video-playback";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import { User } from "@ente/shared/user/types";
-import { downloadUsingAnchor } from "@ente/shared/utils";
+import { downloadUsingAnchor, withTimeout } from "@ente/shared/utils";
 import {
     FILE_TYPE,
     RAW_FORMATS,
@@ -21,18 +18,14 @@ import {
 import { t } from "i18next";
 import isElectron from "is-electron";
 import { moveToHiddenCollection } from "services/collectionService";
-import DownloadManager, {
-    LivePhotoSourceURL,
-    SourceURLs,
-} from "services/download";
-import * as ffmpegService from "services/ffmpeg/ffmpegService";
+import DownloadManager from "services/download";
 import {
     deleteFromTrash,
     trashFiles,
     updateFileMagicMetadata,
     updateFilePublicMagicMetadata,
 } from "services/fileService";
-import heicConversionService from "services/heicConversionService";
+import { heicToJPEG } from "services/heic-convert";
 import { getFileType } from "services/typeDetectionService";
 import { updateFileCreationDateInEXIF } from "services/upload/exifService";
 import {
@@ -55,8 +48,6 @@ import { isArchivedFile, updateMagicMetadata } from "utils/magicMetadata";
 import { safeFileName } from "utils/native-fs";
 import { writeStream } from "utils/native-stream";
 
-const WAIT_TIME_IMAGE_CONVERSION = 30 * 1000;
-
 export enum FILE_OPS_TYPE {
     DOWNLOAD,
     FIX_TIME,
@@ -66,6 +57,20 @@ export enum FILE_OPS_TYPE {
     TRASH,
     DELETE_PERMANENTLY,
 }
+
+class ModuleState {
+    /**
+     * This will be set to true if we get an error from the Node.js side of our
+     * desktop app telling us that native JPEG conversion is not available for
+     * the current OS/arch combination. That way, we can stop pestering it again
+     * and again (saving an IPC round-trip).
+     *
+     * Note the double negative when it is used.
+     */
+    isNativeJPEGConversionNotAvailable = false;
+}
+
+const moduleState = new ModuleState();
 
 export async function getUpdatedEXIFFileForDownload(
     fileReader: FileReader,
@@ -271,234 +276,66 @@ export function generateStreamFromArrayBuffer(data: Uint8Array) {
     });
 }
 
-export async function getRenderableFileURL(
-    file: EnteFile,
-    fileBlob: Blob,
-    originalFileURL: string,
-    forceConvert: boolean,
-): Promise<SourceURLs> {
-    let srcURLs: SourceURLs["url"];
-    switch (file.metadata.fileType) {
-        case FILE_TYPE.IMAGE: {
-            const convertedBlob = await getRenderableImage(
-                file.metadata.title,
-                fileBlob,
-            );
-            const convertedURL = getFileObjectURL(
-                originalFileURL,
-                fileBlob,
-                convertedBlob,
-            );
-            srcURLs = convertedURL;
-            break;
-        }
-        case FILE_TYPE.LIVE_PHOTO: {
-            srcURLs = await getRenderableLivePhotoURL(
-                file,
-                fileBlob,
-                forceConvert,
-            );
-            break;
-        }
-        case FILE_TYPE.VIDEO: {
-            const convertedBlob = await getPlayableVideo(
-                file.metadata.title,
-                fileBlob,
-                forceConvert,
-            );
-            const convertedURL = getFileObjectURL(
-                originalFileURL,
-                fileBlob,
-                convertedBlob,
-            );
-            srcURLs = convertedURL;
-            break;
-        }
-        default: {
-            srcURLs = originalFileURL;
-            break;
-        }
-    }
-
-    let isOriginal: boolean;
-    if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
-        isOriginal = false;
-    } else {
-        isOriginal = (srcURLs as string) === (originalFileURL as string);
-    }
-
-    return {
-        url: srcURLs,
-        isOriginal,
-        isRenderable:
-            file.metadata.fileType !== FILE_TYPE.LIVE_PHOTO && !!srcURLs,
-        type:
-            file.metadata.fileType === FILE_TYPE.LIVE_PHOTO
-                ? "livePhoto"
-                : "normal",
-    };
-}
-
-async function getRenderableLivePhotoURL(
-    file: EnteFile,
-    fileBlob: Blob,
-    forceConvert: boolean,
-): Promise<LivePhotoSourceURL> {
-    const livePhoto = await decodeLivePhoto(file.metadata.title, fileBlob);
-
-    const getRenderableLivePhotoImageURL = async () => {
-        try {
-            const imageBlob = new Blob([livePhoto.imageData]);
-            const convertedImageBlob = await getRenderableImage(
-                livePhoto.imageFileName,
-                imageBlob,
-            );
-
-            return URL.createObjectURL(convertedImageBlob);
-        } catch (e) {
-            //ignore and return null
-            return null;
-        }
-    };
-
-    const getRenderableLivePhotoVideoURL = async () => {
-        try {
-            const videoBlob = new Blob([livePhoto.videoData]);
-            const convertedVideoBlob = await getPlayableVideo(
-                livePhoto.videoFileName,
-                videoBlob,
-                forceConvert,
-                true,
-            );
-            return URL.createObjectURL(convertedVideoBlob);
-        } catch (e) {
-            //ignore and return null
-            return null;
-        }
-    };
-
-    return {
-        image: getRenderableLivePhotoImageURL,
-        video: getRenderableLivePhotoVideoURL,
-    };
-}
-
-export async function getPlayableVideo(
-    videoNameTitle: string,
-    videoBlob: Blob,
-    forceConvert = false,
-    runOnWeb = false,
-) {
-    try {
-        const isPlayable = await isPlaybackPossible(
-            URL.createObjectURL(videoBlob),
-        );
-        if (isPlayable && !forceConvert) {
-            return videoBlob;
-        } else {
-            if (!forceConvert && !runOnWeb && !isElectron()) {
-                return null;
-            }
-            log.info(
-                `video format not supported, converting it name: ${videoNameTitle}`,
-            );
-            const mp4ConvertedVideo = await ffmpegService.convertToMP4(
-                new File([videoBlob], videoNameTitle),
-            );
-            log.info(`video successfully converted ${videoNameTitle}`);
-            return new Blob([await mp4ConvertedVideo.arrayBuffer()]);
-        }
-    } catch (e) {
-        log.error("video conversion failed", e);
-        return null;
-    }
-}
-
-export async function getRenderableImage(fileName: string, imageBlob: Blob) {
+export const getRenderableImage = async (fileName: string, imageBlob: Blob) => {
     let fileTypeInfo: FileTypeInfo;
     try {
         const tempFile = new File([imageBlob], fileName);
         fileTypeInfo = await getFileType(tempFile);
-        log.debug(() => `file type info: ${JSON.stringify(fileTypeInfo)}`);
+        log.debug(
+            () =>
+                `Obtaining renderable image for ${JSON.stringify(fileTypeInfo)}`,
+        );
         const { exactType } = fileTypeInfo;
-        let convertedImageBlob: Blob;
-        if (isRawFile(exactType)) {
-            try {
-                if (!isSupportedRawFormat(exactType)) {
-                    throw Error(CustomError.UNSUPPORTED_RAW_FORMAT);
-                }
 
-                if (!isElectron()) {
-                    throw new Error("not available on web");
-                }
-                log.info(
-                    `RawConverter called for ${fileName}-${convertBytesToHumanReadable(
-                        imageBlob.size,
-                    )}`,
-                );
-                convertedImageBlob = await convertToJPEGInElectron(
-                    imageBlob,
-                    fileName,
-                );
-                log.info(`${fileName} successfully converted`);
-            } catch (e) {
-                try {
-                    if (!isFileHEIC(exactType)) {
-                        throw e;
-                    }
-                    log.info(
-                        `HEICConverter called for ${fileName}-${convertBytesToHumanReadable(
-                            imageBlob.size,
-                        )}`,
-                    );
-                    convertedImageBlob =
-                        await heicConversionService.convert(imageBlob);
-                    log.info(`${fileName} successfully converted`);
-                } catch (e) {
-                    throw Error(CustomError.NON_PREVIEWABLE_FILE);
-                }
-            }
-            return convertedImageBlob;
-        } else {
+        if (!isRawFile(exactType)) {
+            // Not something we know how to handle yet, give back the original.
             return imageBlob;
         }
+
+        let jpegBlob: Blob | undefined;
+
+        const available = !moduleState.isNativeJPEGConversionNotAvailable;
+        if (isElectron() && available && isSupportedRawFormat(exactType)) {
+            // If we're running in our desktop app, see if our Node.js layer can
+            // convert this into a JPEG using native tools for us.
+            try {
+                jpegBlob = await nativeConvertToJPEG(fileName, imageBlob);
+            } catch (e) {
+                if (e.message == CustomErrorMessage.NotAvailable) {
+                    moduleState.isNativeJPEGConversionNotAvailable = true;
+                } else {
+                    log.error("Native conversion to JPEG failed", e);
+                }
+            }
+        }
+
+        if (!jpegBlob && isFileHEIC(exactType)) {
+            // If it is an HEIC file, use our web HEIC converter.
+            jpegBlob = await heicToJPEG(imageBlob);
+        }
+
+        return jpegBlob;
     } catch (e) {
         log.error(
-            `Failed to get renderable image for ${JSON.stringify(fileTypeInfo)}`,
+            `Failed to get renderable image for ${JSON.stringify(fileTypeInfo ?? fileName)}`,
             e,
         );
-        return null;
+        return undefined;
     }
-}
+};
 
-const convertToJPEGInElectron = async (
-    fileBlob: Blob,
-    filename: string,
-): Promise<Blob> => {
-    try {
-        const startTime = Date.now();
-        const inputFileData = new Uint8Array(await fileBlob.arrayBuffer());
-        const electron = globalThis.electron;
-        const convertedFileData = electron
-            ? await electron.convertToJPEG(inputFileData, filename)
-            : await workerBridge.convertToJPEG(inputFileData, filename);
-        log.info(
-            `originalFileSize:${convertBytesToHumanReadable(
-                fileBlob?.size,
-            )},convertedFileSize:${convertBytesToHumanReadable(
-                convertedFileData?.length,
-            )},  native conversion time: ${Date.now() - startTime}ms `,
-        );
-        return new Blob([convertedFileData]);
-    } catch (e) {
-        if (
-            e.message !==
-            CustomError.WINDOWS_NATIVE_IMAGE_PROCESSING_NOT_SUPPORTED
-        ) {
-            log.error("failed to convert to jpeg natively", e);
-        }
-        throw e;
-    }
+const nativeConvertToJPEG = async (fileName: string, imageBlob: Blob) => {
+    const startTime = Date.now();
+    const imageData = new Uint8Array(await imageBlob.arrayBuffer());
+    const electron = globalThis.electron;
+    // If we're running in a worker, we need to reroute the request back to
+    // the main thread since workers don't have access to the `window` (and
+    // thus, to the `window.electron`) object.
+    const jpegData = electron
+        ? await electron.convertToJPEG(fileName, imageData)
+        : await workerBridge.convertToJPEG(fileName, imageData);
+    log.debug(() => `Native JPEG conversion took ${Date.now() - startTime} ms`);
+    return new Blob([jpegData]);
 };
 
 export function isFileHEIC(exactType: string) {
@@ -859,7 +696,6 @@ export const copyFileToClipboard = async (fileUrl: string) => {
     const image = new Image();
 
     const blobPromise = new Promise<Blob>((resolve, reject) => {
-        let timeout: NodeJS.Timeout = null;
         try {
             image.setAttribute("src", fileUrl);
             image.onload = () => {
@@ -873,26 +709,17 @@ export const copyFileToClipboard = async (fileUrl: string) => {
                     "image/png",
                     1,
                 );
-
-                clearTimeout(timeout);
             };
         } catch (e) {
-            log.error("failed to copy to clipboard", e);
+            log.error("Failed to copy to clipboard", e);
             reject(e);
-        } finally {
-            clearTimeout(timeout);
         }
-        timeout = setTimeout(
-            () => reject(new Error("Operation timed out")),
-            WAIT_TIME_IMAGE_CONVERSION,
-        );
     });
 
-    const { ClipboardItem } = window;
+    const blob = await withTimeout(blobPromise, 30 * 1000);
 
-    await navigator.clipboard
-        .write([new ClipboardItem({ "image/png": blobPromise })])
-        .catch((e) => log.error("failed to copy to clipboard", e));
+    const { ClipboardItem } = window;
+    await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
 };
 
 export function getLatestVersionFiles(files: EnteFile[]) {
@@ -1060,17 +887,4 @@ const fixTimeHelper = async (
     }) => void,
 ) => {
     setFixCreationTimeAttributes({ files: selectedFiles });
-};
-
-const getFileObjectURL = (
-    originalFileURL: string,
-    originalBlob: Blob,
-    convertedBlob: Blob,
-) => {
-    const convertedURL = convertedBlob
-        ? convertedBlob === originalBlob
-            ? originalFileURL
-            : URL.createObjectURL(convertedBlob)
-        : null;
-    return convertedURL;
 };

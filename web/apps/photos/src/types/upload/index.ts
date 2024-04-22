@@ -105,6 +105,23 @@ export interface FileWithCollection extends UploadAsset {
     collectionID?: number;
 }
 
+export interface UploadAsset2 {
+    isLivePhoto?: boolean;
+    file?: File | ElectronFile | string;
+    livePhotoAssets?: LivePhotoAssets2;
+}
+
+export interface LivePhotoAssets2 {
+    image: File | ElectronFile | string;
+    video: File | ElectronFile | string;
+}
+
+export interface FileWithCollection2 extends UploadAsset2 {
+    localID: number;
+    collection?: Collection;
+    collectionID?: number;
+}
+
 export type ParsedMetadataJSONMap = Map<string, ParsedMetadataJSON>;
 
 export interface UploadURL {

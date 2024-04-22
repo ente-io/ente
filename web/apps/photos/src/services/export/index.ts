@@ -6,7 +6,7 @@ import { Events, eventBus } from "@ente/shared/events";
 import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
 import { formatDateTimeShort } from "@ente/shared/time/format";
 import { User } from "@ente/shared/user/types";
-import { sleep } from "@ente/shared/utils";
+import { wait } from "@ente/shared/utils";
 import QueueProcessor, {
     CancellationStatus,
     RequestCanceller,
@@ -919,7 +919,7 @@ class ExportService {
                 e.message === CustomError.EXPORT_RECORD_JSON_PARSING_FAILED &&
                 retry
             ) {
-                await sleep(1000);
+                await wait(1000);
                 return await this.getExportRecord(folder, false);
             }
             if (e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST) {

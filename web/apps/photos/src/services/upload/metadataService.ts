@@ -1,5 +1,5 @@
-import { encodeLivePhoto } from "@/media/live-photo";
-import { getFileNameSize } from "@/next/file";
+import { ensureElectron } from "@/next/electron";
+import { basename, getFileNameSize } from "@/next/file";
 import log from "@/next/log";
 import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
 import { CustomError } from "@ente/shared/error";
@@ -10,13 +10,8 @@ import {
 } from "@ente/shared/time";
 import { Remote } from "comlink";
 import { FILE_TYPE } from "constants/file";
-import {
-    FILE_READER_CHUNK_SIZE,
-    LIVE_PHOTO_ASSET_SIZE_LIMIT,
-    NULL_EXTRACTED_METADATA,
-    NULL_LOCATION,
-} from "constants/upload";
-import * as ffmpegService from "services/ffmpeg/ffmpegService";
+import { FILE_READER_CHUNK_SIZE, NULL_LOCATION } from "constants/upload";
+import * as ffmpegService from "services/ffmpeg";
 import { getElectronFileStream, getFileStream } from "services/readerService";
 import { getFileType } from "services/typeDetectionService";
 import { FilePublicMagicMetadataProps } from "types/file";
@@ -25,20 +20,20 @@ import {
     ElectronFile,
     ExtractMetadataResult,
     FileTypeInfo,
-    FileWithCollection,
     LivePhotoAssets,
     Location,
     Metadata,
     ParsedExtractedMetadata,
     ParsedMetadataJSON,
     ParsedMetadataJSONMap,
+    type FileWithCollection,
+    type FileWithCollection2,
+    type LivePhotoAssets2,
 } from "types/upload";
 import { getFileTypeFromExtensionForLivePhotoClustering } from "utils/file/livePhoto";
-import { getUint8ArrayView } from "../readerService";
 import { getEXIFLocation, getEXIFTime, getParsedExifData } from "./exifService";
-import { generateThumbnail } from "./thumbnailService";
 import uploadCancelService from "./uploadCancelService";
-import { extractFileMetadata } from "./uploadService";
+import { extractFileMetadata, getFileName } from "./uploadService";
 
 const NULL_PARSED_METADATA_JSON: ParsedMetadataJSON = {
     creationTime: null,
@@ -65,6 +60,13 @@ const EXIF_TAGS_NEEDED = [
 ];
 
 export const MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT = 46;
+
+export const NULL_EXTRACTED_METADATA: ParsedExtractedMetadata = {
+    location: NULL_LOCATION,
+    creationTime: null,
+    width: null,
+    height: null,
+};
 
 export async function extractMetadata(
     worker: Remote<DedicatedCryptoWorker>,
@@ -167,65 +169,77 @@ export const getMetadataJSONMapKeyForFile = (
     return `${collectionID}-${getFileOriginalName(fileName)}`;
 };
 
-export async function parseMetadataJSON(receivedFile: File | ElectronFile) {
+export async function parseMetadataJSON(
+    receivedFile: File | ElectronFile | string,
+) {
     try {
-        if (!(receivedFile instanceof File)) {
-            receivedFile = new File(
-                [await receivedFile.blob()],
-                receivedFile.name,
-            );
+        let text: string;
+        if (typeof receivedFile == "string") {
+            text = await ensureElectron().fs.readTextFile(receivedFile);
+        } else {
+            if (!(receivedFile instanceof File)) {
+                receivedFile = new File(
+                    [await receivedFile.blob()],
+                    receivedFile.name,
+                );
+            }
+            text = await receivedFile.text();
         }
-        const metadataJSON: object = JSON.parse(await receivedFile.text());
 
-        const parsedMetadataJSON: ParsedMetadataJSON =
-            NULL_PARSED_METADATA_JSON;
-        if (!metadataJSON) {
-            return;
-        }
-
-        if (
-            metadataJSON["photoTakenTime"] &&
-            metadataJSON["photoTakenTime"]["timestamp"]
-        ) {
-            parsedMetadataJSON.creationTime =
-                metadataJSON["photoTakenTime"]["timestamp"] * 1000000;
-        } else if (
-            metadataJSON["creationTime"] &&
-            metadataJSON["creationTime"]["timestamp"]
-        ) {
-            parsedMetadataJSON.creationTime =
-                metadataJSON["creationTime"]["timestamp"] * 1000000;
-        }
-        if (
-            metadataJSON["modificationTime"] &&
-            metadataJSON["modificationTime"]["timestamp"]
-        ) {
-            parsedMetadataJSON.modificationTime =
-                metadataJSON["modificationTime"]["timestamp"] * 1000000;
-        }
-        let locationData: Location = NULL_LOCATION;
-        if (
-            metadataJSON["geoData"] &&
-            (metadataJSON["geoData"]["latitude"] !== 0.0 ||
-                metadataJSON["geoData"]["longitude"] !== 0.0)
-        ) {
-            locationData = metadataJSON["geoData"];
-        } else if (
-            metadataJSON["geoDataExif"] &&
-            (metadataJSON["geoDataExif"]["latitude"] !== 0.0 ||
-                metadataJSON["geoDataExif"]["longitude"] !== 0.0)
-        ) {
-            locationData = metadataJSON["geoDataExif"];
-        }
-        if (locationData !== null) {
-            parsedMetadataJSON.latitude = locationData.latitude;
-            parsedMetadataJSON.longitude = locationData.longitude;
-        }
-        return parsedMetadataJSON;
+        return parseMetadataJSONText(text);
     } catch (e) {
         log.error("parseMetadataJSON failed", e);
         // ignore
     }
+}
+
+export async function parseMetadataJSONText(text: string) {
+    const metadataJSON: object = JSON.parse(text);
+
+    const parsedMetadataJSON: ParsedMetadataJSON = NULL_PARSED_METADATA_JSON;
+    if (!metadataJSON) {
+        return;
+    }
+
+    if (
+        metadataJSON["photoTakenTime"] &&
+        metadataJSON["photoTakenTime"]["timestamp"]
+    ) {
+        parsedMetadataJSON.creationTime =
+            metadataJSON["photoTakenTime"]["timestamp"] * 1000000;
+    } else if (
+        metadataJSON["creationTime"] &&
+        metadataJSON["creationTime"]["timestamp"]
+    ) {
+        parsedMetadataJSON.creationTime =
+            metadataJSON["creationTime"]["timestamp"] * 1000000;
+    }
+    if (
+        metadataJSON["modificationTime"] &&
+        metadataJSON["modificationTime"]["timestamp"]
+    ) {
+        parsedMetadataJSON.modificationTime =
+            metadataJSON["modificationTime"]["timestamp"] * 1000000;
+    }
+    let locationData: Location = NULL_LOCATION;
+    if (
+        metadataJSON["geoData"] &&
+        (metadataJSON["geoData"]["latitude"] !== 0.0 ||
+            metadataJSON["geoData"]["longitude"] !== 0.0)
+    ) {
+        locationData = metadataJSON["geoData"];
+    } else if (
+        metadataJSON["geoDataExif"] &&
+        (metadataJSON["geoDataExif"]["latitude"] !== 0.0 ||
+            metadataJSON["geoDataExif"]["longitude"] !== 0.0)
+    ) {
+        locationData = metadataJSON["geoDataExif"];
+    }
+    if (locationData !== null) {
+        parsedMetadataJSON.latitude = locationData.latitude;
+        parsedMetadataJSON.longitude = locationData.longitude;
+    }
+    return parsedMetadataJSON;
 }
 
 // tries to extract date from file name if available else returns null
@@ -340,7 +354,7 @@ export async function extractLivePhotoMetadata(
     parsedMetadataJSONMap: ParsedMetadataJSONMap,
     collectionID: number,
     fileTypeInfo: FileTypeInfo,
-    livePhotoAssets: LivePhotoAssets,
+    livePhotoAssets: LivePhotoAssets2,
 ): Promise<ExtractMetadataResult> {
     const imageFileTypeInfo: FileTypeInfo = {
         fileType: FILE_TYPE.IMAGE,
@@ -356,7 +370,11 @@ export async function extractLivePhotoMetadata(
         imageFileTypeInfo,
         livePhotoAssets.image,
     );
-    const videoHash = await getFileHash(worker, livePhotoAssets.video);
+    const videoHash = await getFileHash(
+        worker,
+        /* TODO(MR): ElectronFile changes */
+        livePhotoAssets.video as File | ElectronFile,
+    );
     return {
         metadata: {
             ...imageMetadata,
@@ -374,47 +392,20 @@ export function getLivePhotoSize(livePhotoAssets: LivePhotoAssets) {
     return livePhotoAssets.image.size + livePhotoAssets.video.size;
 }
 
-export function getLivePhotoName(livePhotoAssets: LivePhotoAssets) {
-    return livePhotoAssets.image.name;
-}
+export const getLivePhotoName = ({ image }: LivePhotoAssets2) =>
+    typeof image == "string" ? basename(image) : image.name;
 
-export async function readLivePhoto(
-    fileTypeInfo: FileTypeInfo,
-    livePhotoAssets: LivePhotoAssets,
-) {
-    const { thumbnail, hasStaticThumbnail } = await generateThumbnail(
-        livePhotoAssets.image,
-        {
-            exactType: fileTypeInfo.imageType,
-            fileType: FILE_TYPE.IMAGE,
-        },
-    );
-
-    const imageData = await getUint8ArrayView(livePhotoAssets.image);
-
-    const videoData = await getUint8ArrayView(livePhotoAssets.video);
-
-    return {
-        filedata: await encodeLivePhoto({
-            imageFileName: livePhotoAssets.image.name,
-            imageData,
-            videoFileName: livePhotoAssets.video.name,
-            videoData,
-        }),
-        thumbnail,
-        hasStaticThumbnail,
-    };
-}
-
-export async function clusterLivePhotoFiles(mediaFiles: FileWithCollection[]) {
+export async function clusterLivePhotoFiles(mediaFiles: FileWithCollection2[]) {
     try {
-        const analysedMediaFiles: FileWithCollection[] = [];
+        const analysedMediaFiles: FileWithCollection2[] = [];
         mediaFiles
             .sort((firstMediaFile, secondMediaFile) =>
                 splitFilenameAndExtension(
-                    firstMediaFile.file.name,
+                    getFileName(firstMediaFile.file),
                 )[0].localeCompare(
-                    splitFilenameAndExtension(secondMediaFile.file.name)[0],
+                    splitFilenameAndExtension(
+                        getFileName(secondMediaFile.file),
+                    )[0],
                 ),
             )
             .sort(
@@ -430,23 +421,25 @@ export async function clusterLivePhotoFiles(mediaFiles: FileWithCollection[]) {
             const secondMediaFile = mediaFiles[index + 1];
             const firstFileType =
                 getFileTypeFromExtensionForLivePhotoClustering(
-                    firstMediaFile.file.name,
+                    getFileName(firstMediaFile.file),
                 );
             const secondFileType =
                 getFileTypeFromExtensionForLivePhotoClustering(
-                    secondMediaFile.file.name,
+                    getFileName(secondMediaFile.file),
                 );
             const firstFileIdentifier: LivePhotoIdentifier = {
                 collectionID: firstMediaFile.collectionID,
                 fileType: firstFileType,
-                name: firstMediaFile.file.name,
-                size: firstMediaFile.file.size,
+                name: getFileName(firstMediaFile.file),
+                /* TODO(MR): ElectronFile changes */
+                size: (firstMediaFile as FileWithCollection).file.size,
             };
             const secondFileIdentifier: LivePhotoIdentifier = {
                 collectionID: secondMediaFile.collectionID,
                 fileType: secondFileType,
-                name: secondMediaFile.file.name,
-                size: secondMediaFile.file.size,
+                name: getFileName(secondMediaFile.file),
+                /* TODO(MR): ElectronFile changes */
+                size: (secondMediaFile as FileWithCollection).file.size,
             };
             if (
                 areFilesLivePhotoAssets(
@@ -454,8 +447,8 @@ export async function clusterLivePhotoFiles(mediaFiles: FileWithCollection[]) {
                     secondFileIdentifier,
                 )
             ) {
-                let imageFile: File | ElectronFile;
-                let videoFile: File | ElectronFile;
+                let imageFile: File | ElectronFile | string;
+                let videoFile: File | ElectronFile | string;
                 if (
                     firstFileType === FILE_TYPE.IMAGE &&
                     secondFileType === FILE_TYPE.VIDEO
@@ -539,6 +532,8 @@ function areFilesLivePhotoAssets(
         areNotSameFileType &&
         firstFileNameWithoutSuffix === secondFileNameWithoutSuffix
     ) {
+        const LIVE_PHOTO_ASSET_SIZE_LIMIT = 20 * 1024 * 1024; // 20MB
+
         // checks size of live Photo assets are less than allowed limit
         // I did that based on the assumption that live photo assets ideally would not be larger than LIVE_PHOTO_ASSET_SIZE_LIMIT
         // also zipping library doesn't support stream as a input

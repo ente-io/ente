@@ -12,7 +12,6 @@ import type { FSWatcher } from "chokidar";
 import { ipcMain } from "electron/main";
 import type {
     CollectionMapping,
-    ElectronFile,
     FolderWatch,
     PendingUploads,
 } from "../types/ipc";
@@ -39,13 +38,13 @@ import {
     updateAndRestart,
     updateOnNextRestart,
 } from "./services/app-update";
-import { runFFmpegCmd } from "./services/ffmpeg";
+import { convertToJPEG, generateImageThumbnail } from "./services/convert";
+import { ffmpegExec } from "./services/ffmpeg";
 import { getDirFiles } from "./services/fs";
 import {
-    convertToJPEG,
-    generateImageThumbnail,
-} from "./services/imageProcessor";
-import { clipImageEmbedding, clipTextEmbedding } from "./services/ml-clip";
+    clipImageEmbedding,
+    clipTextEmbeddingIfAvailable,
+} from "./services/ml-clip";
 import { detectFaces, faceEmbedding } from "./services/ml-face";
 import {
     clearStores,
@@ -66,7 +65,7 @@ import {
     watchUpdateIgnoredFiles,
     watchUpdateSyncedFiles,
 } from "./services/watch";
-import { openDirectory, openLogDirectory } from "./util";
+import { openDirectory, openLogDirectory } from "./utils-electron";
 
 /**
  * Listen for IPC events sent/invoked by the renderer process, and route them to
@@ -142,8 +141,8 @@ export const attachIPCHandlers = () => {
 
     // - Conversion
 
-    ipcMain.handle("convertToJPEG", (_, fileData, filename) =>
-        convertToJPEG(fileData, filename),
+    ipcMain.handle("convertToJPEG", (_, fileName, imageData) =>
+        convertToJPEG(fileName, imageData),
     );
 
     ipcMain.handle(
@@ -153,14 +152,14 @@ export const attachIPCHandlers = () => {
     );
 
     ipcMain.handle(
-        "runFFmpegCmd",
+        "ffmpegExec",
         (
             _,
-            cmd: string[],
-            inputFile: File | ElectronFile,
+            command: string[],
+            inputDataOrPath: Uint8Array | string,
             outputFileName: string,
-            dontTimeout?: boolean,
-        ) => runFFmpegCmd(cmd, inputFile, outputFileName, dontTimeout),
+            timeoutMS: number,
+        ) => ffmpegExec(command, inputDataOrPath, outputFileName, timeoutMS),
     );
 
     // - ML
@@ -169,8 +168,8 @@ export const attachIPCHandlers = () => {
         clipImageEmbedding(jpegImageData),
     );
 
-    ipcMain.handle("clipTextEmbedding", (_, text: string) =>
-        clipTextEmbedding(text),
+    ipcMain.handle("clipTextEmbeddingIfAvailable", (_, text: string) =>
+        clipTextEmbeddingIfAvailable(text),
     );
 
     ipcMain.handle("detectFaces", (_, input: Float32Array) =>

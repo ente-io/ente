@@ -9,7 +9,7 @@ import { allowWindowClose } from "../main";
 import { forceCheckForAppUpdates } from "./services/app-update";
 import autoLauncher from "./services/auto-launcher";
 import { userPreferences } from "./stores/user-preferences";
-import { openLogDirectory } from "./util";
+import { isDev, openLogDirectory } from "./utils-electron";
 
 /** Create and return the entries in the app's main menu bar */
 export const createApplicationMenu = async (mainWindow: BrowserWindow) => {
@@ -22,6 +22,9 @@ export const createApplicationMenu = async (mainWindow: BrowserWindow) => {
 
     const macOSOnly = (options: MenuItemConstructorOptions[]) =>
         process.platform == "darwin" ? options : [];
+
+    const devOnly = (options: MenuItemConstructorOptions[]) =>
+        isDev ? options : [];
 
     const handleCheckForUpdates = () => forceCheckForAppUpdates(mainWindow);
 
@@ -139,7 +142,9 @@ export const createApplicationMenu = async (mainWindow: BrowserWindow) => {
             label: "View",
             submenu: [
                 { label: "Reload", role: "reload" },
-                { label: "Toggle Dev Tools", role: "toggleDevTools" },
+                ...devOnly([
+                    { label: "Toggle Dev Tools", role: "toggleDevTools" },
+                ]),
                 { type: "separator" },
                 { label: "Toggle Full Screen", role: "togglefullscreen" },
             ],
