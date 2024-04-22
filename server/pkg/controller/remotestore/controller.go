@@ -21,6 +21,15 @@ const (
 	PassKeyEnabled      FlagKey = "passKeyEnabled"
 )
 
+func isBoolType(key FlagKey) bool {
+	switch key {
+	case RecoveryKeyVerified, MapEnabled, FaceSearchEnabled, PassKeyEnabled:
+		return true
+	default:
+		return false
+	}
+}
+
 var (
 	_allowKeys = map[FlagKey]*bool{
 		RecoveryKeyVerified: nil,
@@ -57,11 +66,41 @@ func (c *Controller) Get(ctx *gin.Context, req ente.GetValueRequest) (*ente.GetV
 	return &ente.GetValueResponse{Value: value}, nil
 }
 
+func (c *Controller) GetFeatureFlags(ctx *gin.Context) (*ente.FeatureFlagResponse, error) {
+	userID := auth.GetUserID(ctx.Request.Header)
+	values, err := c.Repo.GetAllValues(ctx, userID)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
+	response := &ente.FeatureFlagResponse{
+		EnableStripe:    true, // enable stripe for all
+		DisableCFWorker: false,
+	}
+	for key, value := range values {
+		flag := FlagKey(key)
+		if !isBoolType(flag) {
+			continue
+		}
+		switch flag {
+		case RecoveryKeyVerified:
+			response.RestoreKeyVerified = value == "true"
+		case MapEnabled:
+			response.MapEnabled = value == "true"
+		case FaceSearchEnabled:
+			response.FaceSearchEnabled = value == "true"
+		case PassKeyEnabled:
+			response.PassKeyEnabled = value == "true"
+		}
+	}
+	return response, nil
+}
+
 func _validateRequest(request ente.UpdateKeyValueRequest) error {
-	if _, ok := _allowKeys[FlagKey(request.Key)]; !ok {
+	flag := FlagKey(request.Key)
+	if _, ok := _allowKeys[flag]; !ok {
 		return stacktrace.Propagate(ente.NewBadRequestWithMessage(fmt.Sprintf("key %s is not allowed", request.Key)), "key not allowed")
 	}
-	if request.Value != "true" && request.Value != "false" {
+	if isBoolType(flag) && request.Value != "true" && request.Value != "false" {
 		return stacktrace.Propagate(ente.NewBadRequestWithMessage(fmt.Sprintf("value %s is not allowed", request.Value)), "value not allowed")
 	}
 	return nil
