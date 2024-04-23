@@ -62,8 +62,10 @@ class ModuleState {
     /**
      * This will be set to true if we get an error from the Node.js side of our
      * desktop app telling us that native JPEG conversion is not available for
-     * the current OS/arch combination. That way, we can stop pestering it again
-     * and again (saving an IPC round-trip).
+     * the current OS/arch combination.
+     *
+     * That way, we can stop pestering it again and again (saving an IPC
+     * round-trip).
      *
      * Note the double negative when it is used.
      */

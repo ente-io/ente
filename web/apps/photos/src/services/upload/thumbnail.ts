@@ -180,11 +180,11 @@ const percentageSizeDiff = (
  * app, and this dependency is enforced by the need to pass the {@link electron}
  * object which we use to perform IPC with the Node.js side of our desktop app.
  *
- * @param dataOrPath The image or video {@link File}, or the path to the image
- * or video file on the user's local filesystem, whose thumbnail we want to
- * generate.
+ * @param dataOrPath Contents of an image or video file, or the path to the
+ * image or video file on the user's local filesystem, whose thumbnail we want
+ * to generate.
  *
- * @param fileTypeInfo The type information for {@link fileOrPath}.
+ * @param fileTypeInfo The type information for {@link dataOrPath}.
  *
  * @return The JPEG data of the generated thumbnail.
  *
@@ -192,39 +192,16 @@ const percentageSizeDiff = (
  */
 export const generateThumbnailNative = async (
     electron: Electron,
-    fileOrPath: File | string,
+    dataOrPath: Uint8Array | string,
     fileTypeInfo: FileTypeInfo,
 ): Promise<Uint8Array> =>
     fileTypeInfo.fileType === FILE_TYPE.IMAGE
-        ? await generateImageThumbnailNative(electron, fileOrPath)
-        : await generateVideoThumbnailNative(blob);
-
-const generateImageThumbnailNative = async (
-    electron: Electron,
-    fileOrPath: File | string,
-) => {
-    const startTime = Date.now();
-    const jpegData = await electron.generateImageThumbnail(
-        fileOrPath instanceof File
-            ? new Uint8Array(await fileOrPath.arrayBuffer())
-            : fileOrPath,
-        maxThumbnailDimension,
-        maxThumbnailSize,
-    );
-    log.debug(
-        () => `Native thumbnail generation took ${Date.now() - startTime} ms`,
-    );
-    return jpegData;
-};
-
-const dataOrPath = (fileOrPath) => {
-    fileOrPath
-}
-const generateVideoThumbnailNative = async (
-    electron: Electron,
-    fileOrPath: File | string,
-) => ffmpeg.generateVideoThumbnailNative(electron, )
-
+        ? await electron.generateImageThumbnail(
+              dataOrPath,
+              maxThumbnailDimension,
+              maxThumbnailSize,
+          )
+        : ffmpeg.generateVideoThumbnailNative(electron, dataOrPath);
 
 /**
  * A fallback, black, thumbnail for use in cases where thumbnail generation

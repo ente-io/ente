@@ -364,13 +364,15 @@ const readAsset = async (
 class ModuleState {
     /**
      * This will be set to true if we get an error from the Node.js side of our
-     * desktop app telling us that native JPEG conversion is not available for
-     * the current OS/arch combination. That way, we can stop pestering it again
-     * and again (saving an IPC round-trip).
+     * desktop app telling us that native image thumbnail generation is not
+     * available for the current OS/arch combination.
+     *
+     * That way, we can stop pestering it again and again (saving an IPC
+     * round-trip).
      *
      * Note the double negative when it is used.
      */
-    isNativeThumbnailCreationNotAvailable = false;
+    isNativeImageThumbnailCreationNotAvailable = false;
 }
 
 const moduleState = new ModuleState();
@@ -429,7 +431,8 @@ const readFileOrPath = async (
 ): Promise<FileInMemory> => {
     log.info(`Reading file ${fopLabel(fileOrPath)} `);
 
-    // If it's a file, read it into data
+    // If it's a file, read-in its data. We need to do it once anyway for
+    // generating the thumbnail.
     const dataOrPath =
         fileOrPath instanceof File
             ? new Uint8Array(await fileOrPath.arrayBuffer())
@@ -438,8 +441,8 @@ const readFileOrPath = async (
     let thumbnail: Uint8Array;
 
     const electron = globalThis.electron;
-    const available = !moduleState.isNativeThumbnailCreationNotAvailable;
-    if (electron && available) {
+    if (electron) {
+        if  !moduleState.isNativeImageThumbnailCreationNotAvailable;
         try {
             return await generateImageThumbnailNative(electron, fileOrPath);
         } catch (e) {
