@@ -55,6 +55,7 @@ class _FaceWidgetState extends State<FaceWidget> {
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             final ImageProvider imageProvider = MemoryImage(snapshot.data!);
+
             return GestureDetector(
               onTap: () async {
                 if (widget.editMode) return;
@@ -263,32 +264,12 @@ class _FaceWidgetState extends State<FaceWidget> {
             },
             child: Column(
               children: [
-                Container(
-                  height: 60,
+                SizedBox(
                   width: 60,
-                  decoration: ShapeDecoration(
-                    shape: RoundedRectangleBorder(
-                      borderRadius:
-                          const BorderRadius.all(Radius.elliptical(16, 12)),
-                      side: widget.highlight
-                          ? BorderSide(
-                              color: getEnteColorScheme(context).primary700,
-                              width: 2.0,
-                            )
-                          : BorderSide.none,
-                    ),
-                  ),
-                  child: ClipRRect(
-                    borderRadius:
-                        const BorderRadius.all(Radius.elliptical(16, 12)),
-                    child: SizedBox(
-                      width: 60,
-                      height: 60,
-                      child: CroppedFaceImageView(
-                        enteFile: widget.file,
-                        face: widget.face,
-                      ),
-                    ),
+                  height: 60,
+                  child: CroppedFaceImageView(
+                    enteFile: widget.file,
+                    face: widget.face,
                   ),
                 ),
                 const SizedBox(height: 8),
