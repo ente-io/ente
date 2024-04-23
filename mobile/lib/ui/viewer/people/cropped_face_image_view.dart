@@ -33,70 +33,72 @@ class CroppedFaceImageView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const double viewWidth = 60;
-    const double viewHeight = 60;
-    return SizedBox(
-      width: viewWidth,
-      height: viewHeight,
-      child: FutureBuilder(
-        future: getImage(),
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            final double imageAspectRatio = enteFile.width / enteFile.height;
-            final Image image = snapshot.data!;
+    return FutureBuilder(
+      future: getImage(),
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          return LayoutBuilder(
+            builder: ((context, constraints) {
+              final double imageAspectRatio = enteFile.width / enteFile.height;
+              final Image image = snapshot.data!;
 
-            final faceBox = face.detection.box;
+              final double viewWidth = constraints.maxWidth;
+              final double viewHeight = constraints.maxHeight;
 
-            final double relativeFaceCenterX = faceBox.xMin + faceBox.width / 2;
-            final double relativeFaceCenterY =
-                faceBox.yMin + faceBox.height / 2;
+              final faceBox = face.detection.box;
 
-            const double desiredFaceHeightRelativeToWidget = 8 / 10;
-            final double scale =
-                (1 / faceBox.height) * desiredFaceHeightRelativeToWidget;
+              final double relativeFaceCenterX =
+                  faceBox.xMin + faceBox.width / 2;
+              final double relativeFaceCenterY =
+                  faceBox.yMin + faceBox.height / 2;
 
-            const double widgetCenterX = viewWidth / 2;
-            const double widgetCenterY = viewHeight / 2;
+              const double desiredFaceHeightRelativeToWidget = 8 / 10;
+              final double scale =
+                  (1 / faceBox.height) * desiredFaceHeightRelativeToWidget;
 
-            const double widgetAspectRatio = viewWidth / viewHeight;
-            final double imageToWidgetRatio =
-                imageAspectRatio / widgetAspectRatio;
+              final double widgetCenterX = viewWidth / 2;
+              final double widgetCenterY = viewHeight / 2;
 
-            double offsetX =
-                (widgetCenterX - relativeFaceCenterX * viewWidth) * scale;
-            double offsetY =
-                (widgetCenterY - relativeFaceCenterY * viewHeight) * scale;
+              final double widgetAspectRatio = viewWidth / viewHeight;
+              final double imageToWidgetRatio =
+                  imageAspectRatio / widgetAspectRatio;
 
-            if (imageAspectRatio < widgetAspectRatio) {
-              // Landscape Image: Adjust offsetX more conservatively
-              offsetX = offsetX * imageToWidgetRatio;
-            } else {
-              // Portrait Image: Adjust offsetY more conservatively
-              offsetY = offsetY / imageToWidgetRatio;
-            }
-            return ClipRRect(
-              borderRadius: const BorderRadius.all(Radius.elliptical(16, 12)),
-              child: Transform.translate(
-                offset: Offset(
-                  offsetX,
-                  offsetY,
+              double offsetX =
+                  (widgetCenterX - relativeFaceCenterX * viewWidth) * scale;
+              double offsetY =
+                  (widgetCenterY - relativeFaceCenterY * viewHeight) * scale;
+
+              if (imageAspectRatio < widgetAspectRatio) {
+                // Landscape Image: Adjust offsetX more conservatively
+                offsetX = offsetX * imageToWidgetRatio;
+              } else {
+                // Portrait Image: Adjust offsetY more conservatively
+                offsetY = offsetY / imageToWidgetRatio;
+              }
+              return ClipRRect(
+                borderRadius: const BorderRadius.all(Radius.elliptical(16, 12)),
+                child: Transform.translate(
+                  offset: Offset(
+                    offsetX,
+                    offsetY,
+                  ),
+                  child: Transform.scale(
+                    scale: scale,
+                    child: image,
+                  ),
                 ),
-                child: Transform.scale(
-                  scale: scale,
-                  child: image,
-                ),
-              ),
-            );
-          } else {
-            if (snapshot.hasError) {
-              log('Error getting cover face for person: ${snapshot.error}');
-            }
-            return ThumbnailWidget(
-              enteFile,
-            );
+              );
+            }),
+          );
+        } else {
+          if (snapshot.hasError) {
+            log('Error getting cover face for person: ${snapshot.error}');
           }
-        },
-      ),
+          return ThumbnailWidget(
+            enteFile,
+          );
+        }
+      },
     );
   }
 

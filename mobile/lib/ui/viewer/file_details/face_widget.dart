@@ -264,9 +264,13 @@ class _FaceWidgetState extends State<FaceWidget> {
             },
             child: Column(
               children: [
-                CroppedFaceImageView(
-                  enteFile: widget.file,
-                  face: widget.face,
+                SizedBox(
+                  width: 60,
+                  height: 60,
+                  child: CroppedFaceImageView(
+                    enteFile: widget.file,
+                    face: widget.face,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 if (widget.person != null)
