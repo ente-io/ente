@@ -10,19 +10,19 @@ PODS:
     - Flutter
   - file_saver (0.0.1):
     - Flutter
-  - Firebase/CoreOnly (10.22.0):
-    - FirebaseCore (= 10.22.0)
-  - Firebase/Messaging (10.22.0):
+  - Firebase/CoreOnly (10.24.0):
+    - FirebaseCore (= 10.24.0)
+  - Firebase/Messaging (10.24.0):
     - Firebase/CoreOnly
-    - FirebaseMessaging (~> 10.22.0)
-  - firebase_core (2.29.0):
-    - Firebase/CoreOnly (= 10.22.0)
+    - FirebaseMessaging (~> 10.24.0)
+  - firebase_core (2.30.0):
+    - Firebase/CoreOnly (= 10.24.0)
     - Flutter
-  - firebase_messaging (14.7.19):
-    - Firebase/Messaging (= 10.22.0)
+  - firebase_messaging (14.8.1):
+    - Firebase/Messaging (= 10.24.0)
     - firebase_core
     - Flutter
-  - FirebaseCore (10.22.0):
+  - FirebaseCore (10.24.0):
     - FirebaseCoreInternal (~> 10.0)
     - GoogleUtilities/Environment (~> 7.12)
     - GoogleUtilities/Logger (~> 7.12)
@@ -33,7 +33,7 @@ PODS:
     - GoogleUtilities/Environment (~> 7.8)
     - GoogleUtilities/UserDefaults (~> 7.8)
     - PromisesObjC (~> 2.1)
-  - FirebaseMessaging (10.22.0):
+  - FirebaseMessaging (10.24.0):
     - FirebaseCore (~> 10.0)
     - FirebaseInstallations (~> 10.0)
     - GoogleDataTransport (~> 9.3)
@@ -175,7 +175,7 @@ PODS:
   - SDWebImage (5.19.1):
     - SDWebImage/Core (= 5.19.1)
   - SDWebImage/Core (5.19.1)
-  - SDWebImageWebPCoder (0.14.5):
+  - SDWebImageWebPCoder (0.14.6):
     - libwebp (~> 1.0)
     - SDWebImage/Core (~> 5.17)
   - Sentry/HybridSDK (8.21.0):
@@ -193,14 +193,14 @@ PODS:
   - sqflite (0.0.3):
     - Flutter
     - FlutterMacOS
-  - sqlite3 (3.45.1):
-    - sqlite3/common (= 3.45.1)
-  - sqlite3/common (3.45.1)
-  - sqlite3/fts5 (3.45.1):
+  - "sqlite3 (3.45.3+1)":
+    - "sqlite3/common (= 3.45.3+1)"
+  - "sqlite3/common (3.45.3+1)"
+  - "sqlite3/fts5 (3.45.3+1)":
     - sqlite3/common
-  - sqlite3/perf-threadsafe (3.45.1):
+  - "sqlite3/perf-threadsafe (3.45.3+1)":
     - sqlite3/common
-  - sqlite3/rtree (3.45.1):
+  - "sqlite3/rtree (3.45.3+1)":
     - sqlite3/common
   - sqlite3_flutter_libs (0.0.1):
     - Flutter
@@ -404,13 +404,13 @@ SPEC CHECKSUMS:
   connectivity_plus: ddd7f30999e1faaef5967c23d5b6d503d10434db
   device_info_plus: c6fb39579d0f423935b0c9ce7ee2f44b71b9fce6
   file_saver: 503e386464dbe118f630e17b4c2e1190fa0cf808
-  Firebase: 797fd7297b7e1be954432743a0b3f90038e45a71
-  firebase_core: aaadbddb3cb2ee3792b9804f9dbb63e5f6f7b55c
-  firebase_messaging: e65050bf9b187511d80ea3a4de7cf5573d2c7543
-  FirebaseCore: 0326ec9b05fbed8f8716cddbf0e36894a13837f7
+  Firebase: 91fefd38712feb9186ea8996af6cbdef41473442
+  firebase_core: 66b99b4fb4e5d7cc4e88d4c195fe986681f3466a
+  firebase_messaging: 0eb0425d28b4f4af147cdd4adcaf7c0100df28ed
+  FirebaseCore: 11dc8a16dfb7c5e3c3f45ba0e191a33ac4f50894
   FirebaseCoreInternal: bcb5acffd4ea05e12a783ecf835f2210ce3dc6af
   FirebaseInstallations: 8f581fca6478a50705d2bd2abd66d306e0f5736e
-  FirebaseMessaging: 9f71037fd9db3376a4caa54e5a3949d1027b4b6e
+  FirebaseMessaging: 4d52717dd820707cc4eadec5eb981b4832ec8d5d
   fk_user_agent: 1f47ec39291e8372b1d692b50084b0d54103c545
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
   flutter_email_sender: 02d7443217d8c41483223627972bfdc09f74276b
@@ -452,14 +452,14 @@ SPEC CHECKSUMS:
   receive_sharing_intent: 6837b01768e567fe8562182397bf43d63d8c6437
   screen_brightness_ios: 715ca807df953bf676d339f11464e438143ee625
   SDWebImage: 40b0b4053e36c660a764958bff99eed16610acbb
-  SDWebImageWebPCoder: c94f09adbca681822edad9e532ac752db713eabf
+  SDWebImageWebPCoder: e38c0a70396191361d60c092933e22c20d5b1380
   Sentry: ebc12276bd17613a114ab359074096b6b3725203
   sentry_flutter: 88ebea3f595b0bc16acc5bedacafe6d60c12dcd5
   SentryPrivate: d651efb234cf385ec9a1cdd3eff94b5e78a0e0fe
   share_plus: c3fef564749587fc939ef86ffb283ceac0baf9f5
   shared_preferences_foundation: b4c3b4cddf1c21f02770737f147a3f5da9d39695
   sqflite: 673a0e54cc04b7d6dba8d24fb8095b31c3a99eec
-  sqlite3: 73b7fc691fdc43277614250e04d183740cb15078
+  sqlite3: 02d1f07eaaa01f80a1c16b4b31dfcbb3345ee01a
   sqlite3_flutter_libs: af0e8fe9bce48abddd1ffdbbf839db0302d72d80
   Toast: 1f5ea13423a1e6674c4abdac5be53587ae481c4e
   uni_links: d97da20c7701486ba192624d99bffaaffcfc298a

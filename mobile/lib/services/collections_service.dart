@@ -30,9 +30,9 @@ import 'package:photos/models/collection/collection_items.dart';
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/files_split.dart";
 import "package:photos/models/metadata/collection_magic.dart";
+import "package:photos/service_locator.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
 import "package:photos/services/favorites_service.dart";
-import "package:photos/services/feature_flag_service.dart";
 import 'package:photos/services/file_magic_service.dart';
 import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/services/remote_sync_service.dart';
@@ -1179,7 +1179,7 @@ class CollectionsService {
       await _addToCollection(dstCollectionID, splitResult.ownedByCurrentUser);
     }
     if (splitResult.ownedByOtherUsers.isNotEmpty) {
-      if (!FeatureFlagService.instance.isInternalUserOrDebugBuild()) {
+      if (!flagService.internalUser) {
         throw ArgumentError('Cannot add files owned by other users');
       }
       late final List<EnteFile> filesToCopy;
