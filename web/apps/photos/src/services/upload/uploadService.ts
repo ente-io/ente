@@ -5,10 +5,7 @@ import log from "@/next/log";
 import { ElectronFile } from "@/next/types/file";
 import { CustomErrorMessage } from "@/next/types/ipc";
 import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
-import {
-    B64EncryptionResult,
-    EncryptionResult,
-} from "@ente/shared/crypto/types";
+import { EncryptionResult } from "@ente/shared/crypto/types";
 import { CustomError, handleUploadError } from "@ente/shared/error";
 import { wait } from "@ente/shared/utils";
 import { Remote } from "comlink";
@@ -19,7 +16,6 @@ import {
     UPLOAD_RESULT,
 } from "constants/upload";
 import { addToCollection } from "services/collectionService";
-import { Collection } from "types/collection";
 import {
     EnteFile,
     type FilePublicMagicMetadata,
@@ -221,21 +217,6 @@ class UploadService {
         }
     }
 
-    getUploadFile(
-        collection: Collection,
-        backupedFile: BackupedFile,
-        fileKey: B64EncryptionResult,
-    ): UploadFile {
-        const uploadFile: UploadFile = {
-            collectionID: collection.id,
-            encryptedKey: fileKey.encryptedData,
-            keyDecryptionNonce: fileKey.nonce,
-            ...backupedFile,
-        };
-        uploadFile;
-        return uploadFile;
-    }
-
     private async getUploadURL() {
         if (this.uploadURLs.length === 0 && this.pendingUploadCount) {
             await this.fetchUploadURLs();
@@ -435,11 +416,12 @@ export async function uploader(
             encryptedFile.file,
         );
 
-        const uploadFile: UploadFile = uploadService.getUploadFile(
-            collection,
-            backupedFile,
-            encryptedFile.fileKey,
-        );
+        const uploadFile: UploadFile = {
+            collectionID: collection.id,
+            encryptedKey: encryptedFile.fileKey.encryptedData,
+            keyDecryptionNonce: encryptedFile.fileKey.nonce,
+            ...backupedFile,
+        };
         log.info(`uploading file to server ${fileNameSize}`);
 
         const uploadedFile = await uploadService.uploadFile(uploadFile);
