@@ -13,17 +13,6 @@ import {
 } from "types/file";
 import { EncryptedMagicMetadata } from "types/magicMetadata";
 
-export interface DataStream {
-    stream: ReadableStream<Uint8Array>;
-    chunkCount: number;
-}
-
-export function isDataStream(object: any): object is DataStream {
-    return "stream" in object;
-}
-
-export type Logger = (message: string) => void;
-
 export interface Metadata {
     /**
      * The file name.
@@ -110,6 +99,15 @@ export type ParsedMetadataJSONMap = Map<string, ParsedMetadataJSON>;
 export interface UploadURL {
     url: string;
     objectKey: string;
+}
+
+export interface DataStream {
+    stream: ReadableStream<Uint8Array>;
+    chunkCount: number;
+}
+
+export function isDataStream(object: any): object is DataStream {
+    return "stream" in object;
 }
 
 export interface FileInMemory {

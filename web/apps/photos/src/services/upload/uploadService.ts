@@ -26,12 +26,10 @@ import {
 import { EncryptedMagicMetadata } from "types/magicMetadata";
 import {
     BackupedFile,
-    DataStream,
     EncryptedFile,
     FileInMemory,
     FileTypeInfo,
     FileWithMetadata,
-    Logger,
     MultipartUploadURLs,
     ParsedMetadataJSONMap,
     ProcessedFile,
@@ -40,6 +38,7 @@ import {
     UploadFile,
     UploadURL,
     isDataStream,
+    type DataStream,
     type FileWithCollection2,
     type LivePhotoAssets2,
     type Metadata,
@@ -249,6 +248,8 @@ class UploadService {
 const uploadService = new UploadService();
 
 export default uploadService;
+
+export type Logger = (message: string) => void;
 
 interface UploadResponse {
     fileUploadResult: UPLOAD_RESULT;

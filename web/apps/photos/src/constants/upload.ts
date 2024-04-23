@@ -70,11 +70,6 @@ export enum UPLOAD_STAGES {
     FINISH,
 }
 
-export enum UPLOAD_STRATEGY {
-    SINGLE_COLLECTION,
-    COLLECTION_PER_FOLDER,
-}
-
 export enum UPLOAD_RESULT {
     FAILED,
     ALREADY_UPLOADED,

@@ -1,5 +1,5 @@
 import { ensureElectron } from "@/next/electron";
-import { basename, getFileNameSize } from "@/next/file";
+import { getFileNameSize } from "@/next/file";
 import log from "@/next/log";
 import { ElectronFile } from "@/next/types/file";
 import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
@@ -17,7 +17,6 @@ import { getElectronFileStream, getFileStream } from "services/readerService";
 import { getFileType } from "services/typeDetectionService";
 import { FilePublicMagicMetadataProps } from "types/file";
 import {
-    DataStream,
     ExtractMetadataResult,
     FileTypeInfo,
     LivePhotoAssets,
@@ -26,6 +25,7 @@ import {
     ParsedExtractedMetadata,
     ParsedMetadataJSON,
     ParsedMetadataJSONMap,
+    type DataStream,
     type FileWithCollection,
     type FileWithCollection2,
     type LivePhotoAssets2,
@@ -34,7 +34,7 @@ import {
 import { getFileTypeFromExtensionForLivePhotoClustering } from "utils/file/livePhoto";
 import { getEXIFLocation, getEXIFTime, getParsedExifData } from "./exifService";
 import uploadCancelService from "./uploadCancelService";
-import { extractFileMetadata, getFileName } from "./uploadService";
+import { getFileName } from "./uploadService";
 
 const NULL_PARSED_METADATA_JSON: ParsedMetadataJSON = {
     creationTime: null,
