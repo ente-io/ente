@@ -375,7 +375,56 @@ class ModuleState {
 const moduleState = new ModuleState();
 
 
+/**
+ * Read the given file or path into an in-memory representation.
+ *
+ * [Note: The fileOrPath parameter to upload]
+ *
+ * The file can be either a web
+ * [File](https://developer.mozilla.org/en-US/docs/Web/API/File) or the absolute
+ * path to a file on desk. When and why, read on.
+ *
+ * This code gets invoked in two contexts:
+ *
+ * 1. web: the normal mode, when we're running in as a web app in the browser.
+ *
+ * 2. desktop: when we're running inside our desktop app.
+ *
+ * In the web context, we'll always get a File, since within the browser we
+ * cannot programmatically construct paths to or arbitrarily access files on the
+ * user's filesystem. Note that even if we were to have an absolute path at
+ * hand, we cannot programmatically create such File objects to arbitrary
+ * absolute paths on user's local filesystem for security reasons.
+ *
+ * So in the web context, this will always be a File we get as a result of an
+ * explicit user interaction (e.g. drag and drop).
+ *
+ * In the desktop context, this can be either a File or a path.
+ *
+ * 1. If the user provided us this file via some user interaction (say a drag
+ *    and a drop), this'll still be a File.
+ *
+ * 2. However, when running in the desktop app we have the ability to access
+ *    absolute paths on the user's file system. For example, if the user asks us
+ *    to watch certain folders on their disk for changes, we'll be able to pick
+ *    up new images being added, and in such cases, the parameter here will be a
+ *    path. Another example is when resuming an previously interrupted upload -
+ *    we'll only have the path at hand in such cases, not the File object.
+ *
+ * The advantage of the File object is that the browser has already read it into
+ * memory for us. The disadvantage comes in the case where we need to
+ * communicate with the native Node.js layer of our desktop app. Since this
+ * communication happens over IPC, the File's contents need to be serialized and
+ * copied, which is a bummer for large videos etc.
+ *
+ * So when we do have a path, we first try to see if we can perform IPC using
+ * the path itself (e.g. when generating thumbnails). Eventually, we'll need to
+ * read the file once when we need to encrypt and upload it, but if we're smart
+ * we can do all the rest of the IPC operations using the path itself, and for
+ * the read during upload using a streaming IPC mechanism.
+ */
 async function readFile(
+    fileOrPath
     fileTypeInfo: FileTypeInfo,
     rawFile: File | ElectronFile,
 ): Promise<FileInMemory> {
@@ -396,11 +445,13 @@ async function readFile(
         filedata = await getUint8ArrayView(rawFile);
     }
 
+    let thumbnail: Uint8Array
+
     const electron = globalThis.electron;
     const available = !moduleState.isNativeThumbnailCreationNotAvailable;
     if (electron && available) {
         try {
-            return await generateImageThumbnailInElectron(electron, blob);
+            return await generateImageThumbnailNative(electron, fileOrPath);
         } catch (e) {
             if (e.message == CustomErrorMessage.NotAvailable) {
                 moduleState.isNativeThumbnailCreationNotAvailable = true;
@@ -409,6 +460,21 @@ async function readFile(
             }
         }
     }
+
+
+    try {
+        const thumbnail =
+            fileTypeInfo.fileType === FILE_TYPE.IMAGE
+                ? await generateImageThumbnailUsingCanvas(blob, fileTypeInfo)
+                : await generateVideoThumbnail(blob);
+
+        if (thumbnail.length == 0) throw new Error("Empty thumbnail");
+        return { thumbnail, hasStaticThumbnail: false };
+    } catch (e) {
+        log.error(`Failed to generate ${fileTypeInfo.exactType} thumbnail`, e);
+        return { thumbnail: fallbackThumbnail(), hasStaticThumbnail: true };
+    }
+
 
     if (filedata instanceof Uint8Array) {
 

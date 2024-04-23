@@ -29,19 +29,11 @@ const maxThumbnailSize = 100 * 1024; // 100 KB
 export const generateThumbnail = async (
     blob: Blob,
     fileTypeInfo: FileTypeInfo,
-): Promise<Uint8Array> => {
-    try {
-        const thumbnail =
+): Promise<Uint8Array> =>
             fileTypeInfo.fileType === FILE_TYPE.IMAGE
                 ? await generateImageThumbnailUsingCanvas(blob, fileTypeInfo)
                 : await generateVideoThumbnail(blob);
 
-        if (thumbnail.length == 0) throw new Error("Empty thumbnail");
-        return { thumbnail, hasStaticThumbnail: false };
-    } catch (e) {
-        log.error(`Failed to generate ${fileTypeInfo.exactType} thumbnail`, e);
-        return { thumbnail: fallbackThumbnail(), hasStaticThumbnail: true };
-    }
 };
 
 /**
