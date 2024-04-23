@@ -1,5 +1,5 @@
 import 'dart:developer' as dev;
-import "dart:math" show Random;
+import "dart:math" show Random, min;
 
 import "package:flutter/foundation.dart";
 import "package:logging/logging.dart";
@@ -454,27 +454,36 @@ class ClusterFeedbackService {
       name: "getSuggestionsUsingMedian",
     );
 
-    // First only do a simple check on the big clusters
+    // First only do a simple check on the big clusters, if the person does not have small clusters yet
     final EnteWatch watch = EnteWatch("ClusterFeedbackService")..start();
-    final Map<int, List<double>> clusterAvgBigClusters =
-        await _getUpdateClusterAvg(
-      allClusterIdsToCountMap,
-      ignoredClusters,
-      minClusterSize: kMinimumClusterSizeSearchResult,
-    );
-    dev.log(
-      'computed avg for ${clusterAvgBigClusters.length} clusters, in ${DateTime.now().difference(startTime).inMilliseconds} ms',
-    );
-    final List<(int, double)> suggestionsMeanBigClusters = _calcSuggestionsMean(
-      clusterAvgBigClusters,
-      personClusters,
-      ignoredClusters,
-      goodMeanDistance,
-    );
-    if (suggestionsMeanBigClusters.isNotEmpty) {
-      return suggestionsMeanBigClusters
-          .map((e) => (e.$1, e.$2, true))
-          .toList(growable: false);
+    final smallestPersonClusterSize = personClusters
+        .map((clusterID) => allClusterIdsToCountMap[clusterID] ?? 0)
+        .reduce((value, element) => min(value, element));
+    final checkSizes = [kMinimumClusterSizeSearchResult, 20, 10, 5];
+    for (final minimumSize in checkSizes.toSet()) {
+      if (smallestPersonClusterSize >= minimumSize) {
+        final Map<int, List<double>> clusterAvgBigClusters =
+            await _getUpdateClusterAvg(
+          allClusterIdsToCountMap,
+          ignoredClusters,
+          minClusterSize: minimumSize,
+        );
+        dev.log(
+          'computed avg for ${clusterAvgBigClusters.length} clusters, in ${DateTime.now().difference(startTime).inMilliseconds} ms',
+        );
+        final List<(int, double)> suggestionsMeanBigClusters =
+            _calcSuggestionsMean(
+          clusterAvgBigClusters,
+          personClusters,
+          ignoredClusters,
+          goodMeanDistance,
+        );
+        if (suggestionsMeanBigClusters.isNotEmpty) {
+          return suggestionsMeanBigClusters
+              .map((e) => (e.$1, e.$2, true))
+              .toList(growable: false);
+        }
+      }
     }
 
     // Get and update the cluster summary to get the avg (centroid) and count
