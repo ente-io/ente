@@ -109,45 +109,34 @@ class UploadService {
         this.pendingUploadCount--;
     }
 
-    async uploadToBucket(
-        logger: Logger,
-        file: ProcessedFile,
-    ): Promise<BackupedFile> {
+    async uploadToBucket(file: ProcessedFile): Promise<BackupedFile> {
         try {
             let fileObjectKey: string = null;
-            logger("uploading file to bucket");
+
             if (isDataStream(file.file.encryptedData)) {
-                logger("uploading using multipart");
                 fileObjectKey = await uploadStreamUsingMultipart(
-                    logger,
                     file.localID,
                     file.file.encryptedData,
                 );
-                logger("uploading using multipart done");
             } else {
-                logger("uploading using single part");
                 const progressTracker = UIService.trackUploadProgress(
                     file.localID,
                 );
                 const fileUploadURL = await this.getUploadURL();
                 if (!this.isCFUploadProxyDisabled) {
-                    logger("uploading using cf proxy");
                     fileObjectKey = await UploadHttpClient.putFileV2(
                         fileUploadURL,
                         file.file.encryptedData as Uint8Array,
                         progressTracker,
                     );
                 } else {
-                    logger("uploading directly to s3");
                     fileObjectKey = await UploadHttpClient.putFile(
                         fileUploadURL,
                         file.file.encryptedData as Uint8Array,
                         progressTracker,
                     );
                 }
-                logger("uploading using single part done");
             }
-            logger("uploading thumbnail to bucket");
             const thumbnailUploadURL = await this.getUploadURL();
             let thumbnailObjectKey: string = null;
             if (!this.isCFUploadProxyDisabled) {
@@ -163,7 +152,6 @@ class UploadService {
                     null,
                 );
             }
-            logger("uploading thumbnail to bucket done");
 
             const backupedFile: BackupedFile = {
                 file: {
@@ -248,8 +236,6 @@ class UploadService {
 const uploadService = new UploadService();
 
 export default uploadService;
-
-export type Logger = (message: string) => void;
 
 interface UploadResponse {
     fileUploadResult: UPLOAD_RESULT;
@@ -380,11 +366,7 @@ export async function uploader(
             throw Error(CustomError.UPLOAD_CANCELLED);
         }
         log.info(`uploadToBucket ${fileNameSize}`);
-        const logger: Logger = (message: string) => {
-            log.info(message, `fileNameSize: ${fileNameSize}`);
-        };
         const backupedFile: BackupedFile = await uploadService.uploadToBucket(
-            logger,
             encryptedFile.file,
         );
 
@@ -920,20 +902,16 @@ interface PartEtag {
 }
 
 export async function uploadStreamUsingMultipart(
-    logger: Logger,
     fileLocalID: number,
     dataStream: DataStream,
 ) {
     const uploadPartCount = Math.ceil(
         dataStream.chunkCount / FILE_CHUNKS_COMBINED_FOR_A_UPLOAD_PART,
     );
-    logger(`fetching ${uploadPartCount} urls for multipart upload`);
     const multipartUploadURLs =
         await uploadService.fetchMultipartUploadURLs(uploadPartCount);
-    logger(`fetched ${uploadPartCount} urls for multipart upload`);
 
     const fileObjectKey = await uploadStreamInParts(
-        logger,
         multipartUploadURLs,
         dataStream.stream,
         fileLocalID,
@@ -943,7 +921,6 @@ export async function uploadStreamUsingMultipart(
 }
 
 async function uploadStreamInParts(
-    logger: Logger,
     multipartUploadURLs: MultipartUploadURLs,
     dataStream: ReadableStream<Uint8Array>,
     fileLocalID: number,
@@ -952,7 +929,6 @@ async function uploadStreamInParts(
     const streamReader = dataStream.getReader();
     const percentPerPart = getRandomProgressPerPartUpload(uploadPartCount);
     const partEtags: PartEtag[] = [];
-    logger(`uploading file in chunks`);
     for (const [
         index,
         fileUploadURL,
@@ -986,10 +962,7 @@ async function uploadStreamInParts(
     if (!done) {
         throw Error(CustomError.CHUNK_MORE_THAN_EXPECTED);
     }
-    logger(`uploading file in chunks done`);
-    logger(`completing multipart upload`);
     await completeMultipartUpload(partEtags, multipartUploadURLs.completeURL);
-    logger(`completing multipart upload done`);
     return multipartUploadURLs.objectKey;
 }
 
