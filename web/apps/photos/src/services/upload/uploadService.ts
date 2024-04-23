@@ -54,12 +54,9 @@ import {
     getNonEmptyMagicMetadataProps,
     updateMagicMetadata,
 } from "utils/magicMetadata";
+import { readStream } from "utils/native-stream";
 import { findMatchingExistingFiles } from "utils/upload";
-import {
-    getElectronFileStream,
-    getFileStream,
-    getUint8ArrayView,
-} from "../readerService";
+import { getFileStream, getUint8ArrayView } from "../readerService";
 import { getFileType } from "../typeDetectionService";
 import {
     MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT,
@@ -431,6 +428,29 @@ const readFileOrPath = async (
 ): Promise<FileInMemory> => {
     log.info(`Reading file ${fopLabel(fileOrPath)} `);
 
+    let dataOrStream: Uint8Array | DataStream;
+    if (fileOrPath instanceof File) {
+        const file = fileOrPath;
+        if (file.size > MULTIPART_PART_SIZE) {
+            dataOrStream = getFileStream(file, FILE_READER_CHUNK_SIZE);
+        } else {
+            dataOrStream = new Uint8Array(await file.arrayBuffer());
+        }
+    } else {
+        const path = fileOrPath;
+        const { stream, size } = await readStream(path);
+        if (size > MULTIPART_PART_SIZE) {
+            const chunkCount = Math.ceil(size / FILE_READER_CHUNK_SIZE);
+            dataOrStream = { stream, chunkCount };
+        } else {
+            dataOrStream = new Uint8Array(
+                await new Response(stream).arrayBuffer(),
+            );
+        }
+    }
+
+    let filedata: Uint8Array | DataStream;
+
     // If it's a file, read-in its data. We need to do it once anyway for
     // generating the thumbnail.
     const dataOrPath =
@@ -438,55 +458,39 @@ const readFileOrPath = async (
             ? new Uint8Array(await fileOrPath.arrayBuffer())
             : fileOrPath;
 
-    let thumbnail: Uint8Array;
+    // let thumbnail: Uint8Array;
 
-    const electron = globalThis.electron;
-    if (electron) {
-        if  !moduleState.isNativeImageThumbnailCreationNotAvailable;
-        try {
-            return await generateImageThumbnailNative(electron, fileOrPath);
-        } catch (e) {
-            if (e.message == CustomErrorMessage.NotAvailable) {
-                moduleState.isNativeThumbnailCreationNotAvailable = true;
-            } else {
-                log.error("Native thumbnail creation failed", e);
-            }
-        }
-    }
+    // const electron = globalThis.electron;
+    // if (electron) {
+    //     if  !moduleState.isNativeImageThumbnailCreationNotAvailable;
+    //     try {
+    //         return await generateImageThumbnailNative(electron, fileOrPath);
+    //     } catch (e) {
+    //         if (e.message == CustomErrorMessage.NotAvailable) {
+    //             moduleState.isNativeThumbnailCreationNotAvailable = true;
+    //         } else {
+    //             log.error("Native thumbnail creation failed", e);
+    //         }
+    //     }
+    // }
 
-    let filedata: Uint8Array | DataStream;
-    if (!(rawFile instanceof File)) {
-        if (rawFile.size > MULTIPART_PART_SIZE) {
-            filedata = await getElectronFileStream(
-                rawFile,
-                FILE_READER_CHUNK_SIZE,
-            );
-        } else {
-            filedata = await getUint8ArrayView(rawFile);
-        }
-    } else if (rawFile.size > MULTIPART_PART_SIZE) {
-        filedata = getFileStream(rawFile, FILE_READER_CHUNK_SIZE);
-    } else {
-        filedata = await getUint8ArrayView(rawFile);
-    }
+    // try {
+    //     const thumbnail =
+    //         fileTypeInfo.fileType === FILE_TYPE.IMAGE
+    //             ? await generateImageThumbnailUsingCanvas(blob, fileTypeInfo)
+    //             : await generateVideoThumbnail(blob);
 
-    try {
-        const thumbnail =
-            fileTypeInfo.fileType === FILE_TYPE.IMAGE
-                ? await generateImageThumbnailUsingCanvas(blob, fileTypeInfo)
-                : await generateVideoThumbnail(blob);
+    //     if (thumbnail.length == 0) throw new Error("Empty thumbnail");
+    //     return { thumbnail, hasStaticThumbnail: false };
+    // } catch (e) {
+    //     log.error(`Failed to generate ${fileTypeInfo.exactType} thumbnail`, e);
+    //     return { thumbnail: fallbackThumbnail(), hasStaticThumbnail: true };
+    // }
 
-        if (thumbnail.length == 0) throw new Error("Empty thumbnail");
-        return { thumbnail, hasStaticThumbnail: false };
-    } catch (e) {
-        log.error(`Failed to generate ${fileTypeInfo.exactType} thumbnail`, e);
-        return { thumbnail: fallbackThumbnail(), hasStaticThumbnail: true };
-    }
-
-    if (filedata instanceof Uint8Array) {
-    } else {
-        filedata.stream;
-    }
+    // if (filedata instanceof Uint8Array) {
+    // } else {
+    //     filedata.stream;
+    // }
 
     log.info(`read file data successfully ${getFileNameSize(rawFile)} `);
 
