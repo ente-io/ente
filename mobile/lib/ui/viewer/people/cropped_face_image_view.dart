@@ -33,48 +33,48 @@ class CroppedFaceImageView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: getImage(),
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          final double imageAspectRatio = enteFile.width / enteFile.height;
-          final Image image = snapshot.data!;
+    const double viewWidth = 60;
+    const double viewHeight = 60;
+    return SizedBox(
+      width: viewWidth,
+      height: viewHeight,
+      child: FutureBuilder(
+        future: getImage(),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            final double imageAspectRatio = enteFile.width / enteFile.height;
+            final Image image = snapshot.data!;
 
-          const double viewWidth = 60;
-          const double viewHeight = 60;
+            final faceBox = face.detection.box;
 
-          final faceBox = face.detection.box;
+            final double relativeFaceCenterX = faceBox.xMin + faceBox.width / 2;
+            final double relativeFaceCenterY =
+                faceBox.yMin + faceBox.height / 2;
 
-          final double relativeFaceCenterX = faceBox.xMin + faceBox.width / 2;
-          final double relativeFaceCenterY = faceBox.yMin + faceBox.height / 2;
+            const double desiredFaceHeightRelativeToWidget = 8 / 10;
+            final double scale =
+                (1 / faceBox.height) * desiredFaceHeightRelativeToWidget;
 
-          const double desiredFaceHeightRelativeToWidget = 8 / 10;
-          final double scale =
-              (1 / faceBox.height) * desiredFaceHeightRelativeToWidget;
+            const double widgetCenterX = viewWidth / 2;
+            const double widgetCenterY = viewHeight / 2;
 
-          const double widgetCenterX = viewWidth / 2;
-          const double widgetCenterY = viewHeight / 2;
+            const double widgetAspectRatio = viewWidth / viewHeight;
+            final double imageToWidgetRatio =
+                imageAspectRatio / widgetAspectRatio;
 
-          const double widgetAspectRatio = viewWidth / viewHeight;
-          final double imageToWidgetRatio =
-              imageAspectRatio / widgetAspectRatio;
+            double offsetX =
+                (widgetCenterX - relativeFaceCenterX * viewWidth) * scale;
+            double offsetY =
+                (widgetCenterY - relativeFaceCenterY * viewHeight) * scale;
 
-          double offsetX =
-              (widgetCenterX - relativeFaceCenterX * viewWidth) * scale;
-          double offsetY =
-              (widgetCenterY - relativeFaceCenterY * viewHeight) * scale;
-
-          if (imageAspectRatio < widgetAspectRatio) {
-            // Landscape Image: Adjust offsetX more conservatively
-            offsetX = offsetX * imageToWidgetRatio;
-          } else {
-            // Portrait Image: Adjust offsetY more conservatively
-            offsetY = offsetY / imageToWidgetRatio;
-          }
-          return SizedBox(
-            width: viewWidth,
-            height: viewHeight,
-            child: ClipRRect(
+            if (imageAspectRatio < widgetAspectRatio) {
+              // Landscape Image: Adjust offsetX more conservatively
+              offsetX = offsetX * imageToWidgetRatio;
+            } else {
+              // Portrait Image: Adjust offsetY more conservatively
+              offsetY = offsetY / imageToWidgetRatio;
+            }
+            return ClipRRect(
               borderRadius: const BorderRadius.all(Radius.elliptical(16, 12)),
               child: Transform.translate(
                 offset: Offset(
@@ -86,17 +86,17 @@ class CroppedFaceImageView extends StatelessWidget {
                   child: image,
                 ),
               ),
-            ),
-          );
-        } else {
-          if (snapshot.hasError) {
-            log('Error getting cover face for person: ${snapshot.error}');
+            );
+          } else {
+            if (snapshot.hasError) {
+              log('Error getting cover face for person: ${snapshot.error}');
+            }
+            return ThumbnailWidget(
+              enteFile,
+            );
           }
-          return ThumbnailWidget(
-            enteFile,
-          );
-        }
-      },
+        },
+      ),
     );
   }
 
