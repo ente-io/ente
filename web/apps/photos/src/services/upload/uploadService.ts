@@ -185,6 +185,11 @@ export const uploader = async (
     const name = assetName(fileWithCollection);
     log.info(`Uploading ${name}`);
 
+    const abortIfCancelled = () => {
+        if (uploadCancelService.isUploadCancelationRequested())
+            throw Error(CustomError.UPLOAD_CANCELLED);
+    };
+
     const { collection, localID, ...uploadAsset2 } = fileWithCollection;
     /* TODO(MR): ElectronFile changes */
     const uploadAsset = uploadAsset2 as UploadAsset;
@@ -242,9 +247,8 @@ export const uploader = async (
                 };
             }
         }
-        if (uploadCancelService.isUploadCancelationRequested()) {
-            throw Error(CustomError.UPLOAD_CANCELLED);
-        }
+
+        abortIfCancelled();
 
         const file = await readAsset(fileTypeInfo, uploadAsset);
 
@@ -265,9 +269,7 @@ export const uploader = async (
             pubMagicMetadata,
         };
 
-        if (uploadCancelService.isUploadCancelationRequested()) {
-            throw Error(CustomError.UPLOAD_CANCELLED);
-        }
+        abortIfCancelled();
 
         const encryptedFile = await encryptFile(
             worker,
@@ -275,9 +277,7 @@ export const uploader = async (
             collection.key,
         );
 
-        if (uploadCancelService.isUploadCancelationRequested()) {
-            throw Error(CustomError.UPLOAD_CANCELLED);
-        }
+        abortIfCancelled();
 
         const backupedFile: BackupedFile = await uploadToBucket(
             encryptedFile.file,
