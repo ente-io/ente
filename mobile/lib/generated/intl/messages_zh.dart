@@ -988,6 +988,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "scanCode": MessageLookupByLibrary.simpleMessage("扫描二维码/条码"),
         "scanThisBarcodeWithnyourAuthenticatorApp":
             MessageLookupByLibrary.simpleMessage("用您的身份验证器应用\n扫描此条码"),
+        "search": MessageLookupByLibrary.simpleMessage("搜索"),
         "searchAlbumsEmptySection": MessageLookupByLibrary.simpleMessage("相册"),
         "searchByAlbumNameHint": MessageLookupByLibrary.simpleMessage("相册名称"),
         "searchByExamples": MessageLookupByLibrary.simpleMessage(

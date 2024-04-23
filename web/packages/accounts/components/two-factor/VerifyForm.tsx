@@ -9,7 +9,7 @@ import {
     VerticallyCentered,
 } from "@ente/shared/components/Container";
 import SubmitButton from "@ente/shared/components/SubmitButton";
-import { sleep } from "@ente/shared/utils";
+import { wait } from "@ente/shared/utils";
 import { Box, Typography } from "@mui/material";
 
 interface formValues {
@@ -33,7 +33,7 @@ export default function VerifyTwoFactor(props: Props) {
     const markSuccessful = async () => {
         setWaiting(false);
         setSuccess(true);
-        await sleep(1000);
+        await wait(1000);
     };
 
     const submitForm = async (

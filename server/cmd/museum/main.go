@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	b64 "encoding/base64"
 	"fmt"
+	"github.com/ente-io/museum/pkg/controller/file_copy"
 	"net/http"
 	"os"
 	"os/signal"
@@ -193,7 +194,7 @@ func main() {
 	commonBillController := commonbilling.NewController(storagBonusRepo, userRepo, usageRepo)
 	appStoreController := controller.NewAppStoreController(defaultPlan,
 		billingRepo, fileRepo, userRepo, commonBillController)
-
+	remoteStoreController := &remoteStoreCtrl.Controller{Repo: remoteStoreRepository}
 	playStoreController := controller.NewPlayStoreController(defaultPlan,
 		billingRepo, fileRepo, userRepo, storagBonusRepo, commonBillController)
 	stripeController := controller.NewStripeController(plans, stripeClients,
@@ -389,9 +390,17 @@ func main() {
 		timeout.WithHandler(healthCheckHandler.PingDBStats),
 		timeout.WithResponse(timeOutResponse),
 	))
+	fileCopyCtrl := &file_copy.FileCopyController{
+		FileController: fileController,
+		CollectionCtrl: collectionController,
+		S3Config:       s3Config,
+		ObjectRepo:     objectRepo,
+		FileRepo:       fileRepo,
+	}
 
 	fileHandler := &api.FileHandler{
-		Controller: fileController,
+		Controller:   fileController,
+		FileCopyCtrl: fileCopyCtrl,
 	}
 	privateAPI.GET("/files/upload-urls", fileHandler.GetUploadURLs)
 	privateAPI.GET("/files/multipart-upload-urls", fileHandler.GetMultipartUploadURLs)
@@ -400,6 +409,7 @@ func main() {
 	privateAPI.GET("/files/preview/:fileID", fileHandler.GetThumbnail)
 	privateAPI.GET("/files/preview/v2/:fileID", fileHandler.GetThumbnail)
 	privateAPI.POST("/files", fileHandler.CreateOrUpdate)
+	privateAPI.POST("/files/copy", fileHandler.CopyFiles)
 	privateAPI.PUT("/files/update", fileHandler.Update)
 	privateAPI.POST("/files/trash", fileHandler.Trash)
 	privateAPI.POST("/files/size", fileHandler.GetSize)
@@ -600,6 +610,7 @@ func main() {
 		UserAuthRepo:            userAuthRepo,
 		UserController:          userController,
 		FamilyController:        familyController,
+		RemoteStoreController:   remoteStoreController,
 		FileRepo:                fileRepo,
 		StorageBonusRepo:        storagBonusRepo,
 		BillingRepo:             billingRepo,
@@ -621,6 +632,7 @@ func main() {
 	adminAPI.PUT("/user/change-email", adminHandler.ChangeEmail)
 	adminAPI.DELETE("/user/delete", adminHandler.DeleteUser)
 	adminAPI.POST("/user/recover", adminHandler.RecoverAccount)
+	adminAPI.POST("/user/update-flag", adminHandler.UpdateFeatureFlag)
 	adminAPI.GET("/email-hash", adminHandler.GetEmailHash)
 	adminAPI.POST("/emails-from-hashes", adminHandler.GetEmailsFromHashes)
 	adminAPI.PUT("/user/subscription", adminHandler.UpdateSubscription)
@@ -648,7 +660,6 @@ func main() {
 	privateAPI.DELETE("/authenticator/entity", authenticatorHandler.DeleteEntity)
 	privateAPI.GET("/authenticator/entity/diff", authenticatorHandler.GetDiff)
 
-	remoteStoreController := &remoteStoreCtrl.Controller{Repo: remoteStoreRepository}
 	dataCleanupController := &dataCleanupCtrl.DeleteUserCleanupController{
 		Repo:           dataCleanupRepository,
 		UserRepo:       userRepo,
@@ -662,6 +673,7 @@ func main() {
 
 	privateAPI.POST("/remote-store/update", remoteStoreHandler.InsertOrUpdate)
 	privateAPI.GET("/remote-store", remoteStoreHandler.GetKey)
+	privateAPI.GET("/remote-store/feature-flags", remoteStoreHandler.GetFeatureFlags)
 
 	pushHandler := &api.PushHandler{PushController: pushController}
 	privateAPI.POST("/push/token", pushHandler.AddToken)

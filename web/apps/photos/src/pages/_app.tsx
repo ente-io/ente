@@ -5,7 +5,7 @@ import {
     logStartupBanner,
     logUnhandledErrorsAndRejections,
 } from "@/next/log-web";
-import { AppUpdateInfo } from "@/next/types/ipc";
+import { AppUpdate } from "@/next/types/ipc";
 import {
     APPS,
     APP_TITLES,
@@ -91,8 +91,6 @@ type AppContextType = {
     closeMessageDialog: () => void;
     setDialogMessage: SetDialogBoxAttributes;
     setNotificationAttributes: SetNotificationAttributes;
-    isFolderSyncRunning: boolean;
-    setIsFolderSyncRunning: (isRunning: boolean) => void;
     watchFolderView: boolean;
     setWatchFolderView: (isOpen: boolean) => void;
     watchFolderFiles: FileList;
@@ -128,7 +126,6 @@ export default function App({ Component, pageProps }: AppProps) {
     useState<DialogBoxAttributes>(null);
     const [messageDialogView, setMessageDialogView] = useState(false);
     const [dialogBoxV2View, setDialogBoxV2View] = useState(false);
-    const [isFolderSyncRunning, setIsFolderSyncRunning] = useState(false);
     const [watchFolderView, setWatchFolderView] = useState(false);
     const [watchFolderFiles, setWatchFolderFiles] = useState<FileList>(null);
     const isMobile = useMediaQuery("(max-width:428px)");
@@ -160,9 +157,9 @@ export default function App({ Component, pageProps }: AppProps) {
         const electron = globalThis.electron;
         if (!electron) return;
 
-        const showUpdateDialog = (updateInfo: AppUpdateInfo) => {
-            if (updateInfo.autoUpdatable) {
-                setDialogMessage(getUpdateReadyToInstallMessage(updateInfo));
+        const showUpdateDialog = (update: AppUpdate) => {
+            if (update.autoUpdatable) {
+                setDialogMessage(getUpdateReadyToInstallMessage(update));
             } else {
                 setNotificationAttributes({
                     endIcon: <ArrowForward />,
@@ -170,7 +167,7 @@ export default function App({ Component, pageProps }: AppProps) {
                     message: t("UPDATE_AVAILABLE"),
                     onClick: () =>
                         setDialogMessage(
-                            getUpdateAvailableForDownloadMessage(updateInfo),
+                            getUpdateAvailableForDownloadMessage(update),
                         ),
                 });
             }
@@ -403,8 +400,6 @@ export default function App({ Component, pageProps }: AppProps) {
                         finishLoading,
                         closeMessageDialog,
                         setDialogMessage,
-                        isFolderSyncRunning,
-                        setIsFolderSyncRunning,
                         watchFolderView,
                         setWatchFolderView,
                         watchFolderFiles,

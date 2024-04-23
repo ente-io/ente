@@ -9,7 +9,7 @@ import 'package:photos/core/constants.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
-import "package:photos/services/feature_flag_service.dart";
+import "package:photos/service_locator.dart";
 import 'package:photos/services/files_service.dart';
 import "package:photos/ui/actions/file/file_actions.dart";
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
@@ -161,8 +161,7 @@ class _VideoWidgetState extends State<VideoWidget> {
         }
       }).onError(
         (error, stackTrace) {
-          if (mounted &&
-              FeatureFlagService.instance.isInternalUserOrDebugBuild()) {
+          if (mounted && flagService.internalUser) {
             if (error is Exception) {
               showErrorDialogForException(
                 context: context,

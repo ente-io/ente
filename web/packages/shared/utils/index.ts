@@ -4,9 +4,8 @@
  * This function is a promisified `setTimeout`. It returns a promise that
  * resolves after {@link ms} milliseconds.
  */
-export async function sleep(ms: number) {
-    await new Promise((resolve) => setTimeout(resolve, ms));
-}
+export const wait = (ms: number) =>
+    new Promise((resolve) => setTimeout(resolve, ms));
 
 export function downloadAsFile(filename: string, content: string) {
     const file = new Blob([content], {
@@ -49,29 +48,27 @@ export async function retryAsyncFunction<T>(
             if (attemptNumber === waitTimeBeforeNextTry.length) {
                 throw e;
             }
-            await sleep(waitTimeBeforeNextTry[attemptNumber]);
+            await wait(waitTimeBeforeNextTry[attemptNumber]);
         }
     }
 }
 
-export const promiseWithTimeout = async <T>(
-    request: Promise<T>,
-    timeout: number,
-): Promise<T> => {
-    const timeoutRef = { current: null };
-    const rejectOnTimeout = new Promise<null>((_, reject) => {
-        timeoutRef.current = setTimeout(
+/**
+ * Await the given {@link promise} for {@link timeoutMS} milliseconds. If it
+ * does not resolve within {@link timeoutMS}, then reject with a timeout error.
+ */
+export const withTimeout = async <T>(promise: Promise<T>, ms: number) => {
+    let timeoutId: ReturnType<typeof setTimeout>;
+    const rejectOnTimeout = new Promise<T>((_, reject) => {
+        timeoutId = setTimeout(
             () => reject(new Error("Operation timed out")),
-            timeout,
+            ms,
         );
     });
-    const requestWithTimeOutCancellation = async () => {
-        const resp = await request;
-        clearTimeout(timeoutRef.current);
-        return resp;
+    const promiseAndCancelTimeout = async () => {
+        const result = await promise;
+        clearTimeout(timeoutId);
+        return result;
     };
-    return await Promise.race([
-        requestWithTimeOutCancellation(),
-        rejectOnTimeout,
-    ]);
+    return Promise.race([promiseAndCancelTimeout(), rejectOnTimeout]);
 };

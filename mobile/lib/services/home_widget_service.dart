@@ -8,9 +8,14 @@ import "package:logging/logging.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/db/files_db.dart";
+import "package:photos/models/collection/collection_items.dart";
 import "package:photos/models/file/file_type.dart";
+import "package:photos/services/collections_service.dart";
 import "package:photos/services/favorites_service.dart";
+import "package:photos/ui/viewer/file/detail_page.dart";
+import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/utils/file_util.dart";
+import "package:photos/utils/navigation_util.dart";
 import "package:photos/utils/preload_util.dart";
 
 class HomeWidgetService {
@@ -170,5 +175,50 @@ class HomeWidgetService {
       null,
     );
     _logger.info(">>> SlideshowWidget cleared");
+  }
+
+  Future<void> onLaunchFromWidget(Uri? uri, BuildContext context) async {
+    if (uri == null) return;
+
+    final collectionID =
+        await FavoritesService.instance.getFavoriteCollectionID();
+    if (collectionID == null) {
+      return;
+    }
+
+    final collection = CollectionsService.instance.getCollectionByID(
+      collectionID,
+    );
+    if (collection == null) {
+      return;
+    }
+
+    final thumbnail = await CollectionsService.instance.getCover(collection);
+
+    final previousGeneratedId =
+        await hw.HomeWidget.getWidgetData<int>("home_widget_last_img");
+
+    final res = previousGeneratedId != null
+        ? await FilesDB.instance.getFile(
+            previousGeneratedId,
+          )
+        : null;
+
+    routeToPage(
+      context,
+      CollectionPage(
+        CollectionWithThumbnail(
+          collection,
+          thumbnail,
+        ),
+      ),
+    ).ignore();
+
+    if (res == null) return;
+
+    final page = DetailPage(
+      DetailPageConfiguration(List.unmodifiable([res]), null, 0, "collection"),
+    );
+    routeToPage(context, page, forceCustomPageRoute: true).ignore();
   }
 }

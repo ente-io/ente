@@ -374,6 +374,30 @@ func (repo *CollectionRepository) DoesFileExistInCollections(fileID int64, cIDs 
 	return exists, stacktrace.Propagate(err, "")
 }
 
+// VerifyAllFileIDsExistsInCollection returns error if the fileIDs don't exist in the collection
+func (repo *CollectionRepository) VerifyAllFileIDsExistsInCollection(ctx context.Context, cID int64, fileIDs []int64) error {
+	fileIdMap := make(map[int64]bool)
+	rows, err := repo.DB.QueryContext(ctx, `SELECT file_id FROM collection_files WHERE collection_id = $1 AND is_deleted = $2 AND file_id = ANY ($3)`,
+		cID, false, pq.Array(fileIDs))
+	if err != nil {
+		return stacktrace.Propagate(err, "")
+	}
+	for rows.Next() {
+		var fileID int64
+		if err := rows.Scan(&fileID); err != nil {
+			return stacktrace.Propagate(err, "")
+		}
+		fileIdMap[fileID] = true
+	}
+	// find fileIds that are not present in the collection
+	for _, fileID := range fileIDs {
+		if _, ok := fileIdMap[fileID]; !ok {
+			return stacktrace.Propagate(fmt.Errorf("fileID %d not found in collection %d", fileID, cID), "")
+		}
+	}
+	return nil
+}
+
 // GetCollectionShareeRole returns true if the collection is shared with the user
 func (repo *CollectionRepository) GetCollectionShareeRole(cID int64, userID int64) (*ente.CollectionParticipantRole, error) {
 	var role *ente.CollectionParticipantRole

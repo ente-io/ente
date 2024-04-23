@@ -3,23 +3,7 @@
 //
 // See [Note: types.ts <-> preload.ts <-> ipc.ts]
 
-import type { ElectronFile, WatchMapping } from "./file";
-
-export interface AppUpdateInfo {
-    autoUpdatable: boolean;
-    version: string;
-}
-
-export enum FILE_PATH_TYPE {
-    FILES = "files",
-    ZIPS = "zips",
-}
-
-export enum PICKED_UPLOAD_TYPE {
-    FILES = "files",
-    FOLDERS = "folders",
-    ZIPS = "zips",
-}
+import type { ElectronFile } from "./file";
 
 /**
  * Extra APIs provided by our Node.js layer when our code is running inside our
@@ -111,7 +95,7 @@ export interface Electron {
      * Note: Setting a callback clears any previous callbacks.
      */
     onAppUpdateAvailable: (
-        cb?: ((updateInfo: AppUpdateInfo) => void) | undefined,
+        cb?: ((update: AppUpdate) => void) | undefined,
     ) => void;
 
     /**
@@ -199,34 +183,94 @@ export interface Electron {
          * @param contents The string contents to write.
          */
         writeFile: (path: string, contents: string) => Promise<void>;
-    };
 
-    /*
-     * TODO: AUDIT below this - Some of the types we use below are not copyable
-     * across process boundaries, and such functions will (expectedly) fail at
-     * runtime. For such functions, find an efficient alternative or refactor
-     * the dataflow.
-     */
+        /**
+         * Return true if there is an item at {@link dirPath}, and it is as
+         * directory.
+         */
+        isDir: (dirPath: string) => Promise<boolean>;
+    };
 
     // - Conversion
 
+    /**
+     * Try to convert an arbitrary image into JPEG using native layer tools.
+     *
+     * The behaviour is OS dependent. On macOS we use the `sips` utility, and on
+     * some Linux architectures we use an ImageMagick executable bundled with
+     * our desktop app.
+     *
+     * In other cases (primarily Windows), where native JPEG conversion is not
+     * yet possible, this function will throw an error with the
+     * {@link CustomErrorMessage.NotAvailable} message.
+     *
+     * @param fileName The name of the file whose data we're being given.
+     * @param imageData The raw image data (the contents of the image file).
+     * @returns JPEG data of the converted image.
+     */
     convertToJPEG: (
-        fileData: Uint8Array,
-        filename: string,
+        fileName: string,
+        imageData: Uint8Array,
     ) => Promise<Uint8Array>;
 
+    /**
+     * Generate a JPEG thumbnail for the given image.
+     *
+     * The behaviour is OS dependent. On macOS we use the `sips` utility, and on
+     * some Linux architectures we use an ImageMagick executable bundled with
+     * our desktop app.
+     *
+     * In other cases (primarily Windows), where native thumbnail generation is
+     * not yet possible, this function will throw an error with the
+     * {@link CustomErrorMessage.NotAvailable} message.
+     *
+     * @param inputFile The file whose thumbnail we want.
+     * @param maxDimension The maximum width or height of the generated
+     * thumbnail.
+     * @param maxSize Maximum size (in bytes) of the generated thumbnail.
+     * @returns JPEG data of the generated thumbnail.
+     */
     generateImageThumbnail: (
         inputFile: File | ElectronFile,
         maxDimension: number,
         maxSize: number,
     ) => Promise<Uint8Array>;
 
-    runFFmpegCmd: (
-        cmd: string[],
-        inputFile: File | ElectronFile,
+    /**
+     * Execute a ffmpeg {@link command}.
+     *
+     * This executes the command using the ffmpeg executable we bundle with our
+     * desktop app. There is also a ffmpeg wasm implementation that we use when
+     * running on the web, it also has a sibling function with the same
+     * parameters. See [Note: ffmpeg in Electron].
+     *
+     * @param command An array of strings, each representing one positional
+     * parameter in the command to execute. Placeholders for the input, output
+     * and ffmpeg's own path are replaced before executing the command
+     * (respectively {@link inputPathPlaceholder},
+     * {@link outputPathPlaceholder}, {@link ffmpegPathPlaceholder}).
+     *
+     * @param inputDataOrPath The bytes of the input file, or the path to the
+     * input file on the user's local disk. In both cases, the data gets
+     * serialized to a temporary file, and then that path gets substituted in
+     * the ffmpeg {@link command} by {@link inputPathPlaceholder}.
+     *
+     * @param outputFileName The name of the file we instruct ffmpeg to produce
+     * when giving it the given {@link command}. The contents of this file get
+     * returned as the result.
+     *
+     * @param timeoutMS If non-zero, then abort and throw a timeout error if the
+     * ffmpeg command takes more than the given number of milliseconds.
+     *
+     * @returns The contents of the output file produced by the ffmpeg command
+     * at {@link outputFileName}.
+     */
+    ffmpegExec: (
+        command: string[],
+        inputDataOrPath: Uint8Array | string,
         outputFileName: string,
-        dontTimeout?: boolean,
-    ) => Promise<File>;
+        timeoutMS: number,
+    ) => Promise<Uint8Array>;
 
     // - ML
 
@@ -242,7 +286,18 @@ export interface Electron {
     clipImageEmbedding: (jpegImageData: Uint8Array) => Promise<Float32Array>;
 
     /**
-     * Return a CLIP embedding of the given image.
+     * Return a CLIP embedding of the given image if we already have the model
+     * downloaded and prepped. If the model is not available return `undefined`.
+     *
+     * This differs from the other sibling ML functions in that it doesn't wait
+     * for the model download to finish. It does trigger a model download, but
+     * then immediately returns `undefined`. At some future point, when the
+     * model downloaded finishes, calls to this function will start returning
+     * the result we seek.
+     *
+     * The reason for doing it in this asymmetric way is because CLIP text
+     * embeddings are used as part of deducing user initiated search results,
+     * and we don't want to block that interaction on a large network request.
      *
      * See: [Note: CLIP based magic search]
      *
@@ -250,7 +305,9 @@ export interface Electron {
      *
      * @returns A CLIP embedding.
      */
-    clipTextEmbedding: (text: string) => Promise<Float32Array>;
+    clipTextEmbeddingIfAvailable: (
+        text: string,
+    ) => Promise<Float32Array | undefined>;
 
     /**
      * Detect faces in the given image using YOLO.
@@ -284,51 +341,256 @@ export interface Electron {
 
     // - Watch
 
-    registerWatcherFunctions: (
-        addFile: (file: ElectronFile) => Promise<void>,
-        removeFile: (path: string) => Promise<void>,
-        removeFolder: (folderPath: string) => Promise<void>,
-    ) => void;
+    /**
+     * Interface with the file system watcher running in our Node.js layer.
+     *
+     * [Note: Folder vs Directory in the context of FolderWatch-es]
+     *
+     * A note on terminology: The word "folder" is used to the top level root
+     * folder for which a {@link FolderWatch} has been added. This folder is
+     * also in 1-1 correspondence to be a directory on the user's disk. It can
+     * have other, nested directories too (which may or may not be getting
+     * mapped to separate Ente collections), but we'll not refer to these nested
+     * directories as folders - only the root of the tree, which the user
+     * dragged/dropped or selected to set up the folder watch, will be referred
+     * to as a folder when naming things.
+     */
+    watch: {
+        /**
+         * Return the list of folder watches, pruning non-existing directories.
+         *
+         * The list of folder paths (and auxillary details) is persisted in the
+         * Node.js layer. The implementation of this function goes through the
+         * list, permanently removes any watches whose on-disk directory is no
+         * longer present, and returns this pruned list of watches.
+         */
+        get: () => Promise<FolderWatch[]>;
 
-    addWatchMapping: (
-        collectionName: string,
-        folderPath: string,
-        uploadStrategy: number,
-    ) => Promise<void>;
+        /**
+         * Add a new folder watch for the given {@link folderPath}.
+         *
+         * This adds a new entry in the list of watches (persisting them on
+         * disk), and also starts immediately observing for file system events
+         * that happen within {@link folderPath}.
+         *
+         * @param collectionMapping Determines how nested directories (if any)
+         * get mapped to Ente collections.
+         *
+         * @returns The updated list of watches.
+         */
+        add: (
+            folderPath: string,
+            collectionMapping: CollectionMapping,
+        ) => Promise<FolderWatch[]>;
 
-    removeWatchMapping: (folderPath: string) => Promise<void>;
+        /**
+         * Remove the pre-existing watch for the given {@link folderPath}.
+         *
+         * Persist this removal, and also stop listening for file system events
+         * that happen within the {@link folderPath}.
+         *
+         * @returns The updated list of watches.
+         */
+        remove: (folderPath: string) => Promise<FolderWatch[]>;
 
-    getWatchMappings: () => Promise<WatchMapping[]>;
+        /**
+         * Update the list of synced files for the folder watch associated
+         * with the given {@link folderPath}.
+         */
+        updateSyncedFiles: (
+            syncedFiles: FolderWatch["syncedFiles"],
+            folderPath: string,
+        ) => Promise<void>;
 
-    updateWatchMappingSyncedFiles: (
-        folderPath: string,
-        files: WatchMapping["syncedFiles"],
-    ) => Promise<void>;
+        /**
+         * Update the list of ignored file paths for the folder watch
+         * associated with the given {@link folderPath}.
+         */
+        updateIgnoredFiles: (
+            ignoredFiles: FolderWatch["ignoredFiles"],
+            folderPath: string,
+        ) => Promise<void>;
 
-    updateWatchMappingIgnoredFiles: (
-        folderPath: string,
-        files: WatchMapping["ignoredFiles"],
-    ) => Promise<void>;
+        /**
+         * Register the function to invoke when a file is added in one of the
+         * folders we are watching.
+         *
+         * The callback function is passed the path to the file that was added,
+         * and the folder watch it was associated with.
+         *
+         * The path is guaranteed to use POSIX separators ('/').
+         */
+        onAddFile: (f: (path: string, watch: FolderWatch) => void) => void;
 
-    // - FS legacy
-    isFolder: (dirPath: string) => Promise<boolean>;
+        /**
+         * Register the function to invoke when a file is removed in one of the
+         * folders we are watching.
+         *
+         * The callback function is passed the path to the file that was
+         * removed, and the folder watch it was associated with.
+         *
+         * The path is guaranteed to use POSIX separators ('/').
+         */
+        onRemoveFile: (f: (path: string, watch: FolderWatch) => void) => void;
+
+        /**
+         * Register the function to invoke when a directory is removed in one of
+         * the folders we are watching.
+         *
+         * The callback function is passed the path to the directory that was
+         * removed, and the folder watch it was associated with.
+         *
+         * The path is guaranteed to use POSIX separators ('/').
+         */
+        onRemoveDir: (f: (path: string, watch: FolderWatch) => void) => void;
+
+        /**
+         * Return the paths of all the files under the given folder.
+         *
+         * This function walks the directory tree starting at {@link folderPath}
+         * and returns a list of the absolute paths of all the files that exist
+         * therein. It will recursively traverse into nested directories, and
+         * return the absolute paths of the files there too.
+         *
+         * The returned paths are guaranteed to use POSIX separators ('/').
+         */
+        findFiles: (folderPath: string) => Promise<string[]>;
+    };
 
     // - Upload
 
-    getPendingUploads: () => Promise<{
-        files: ElectronFile[];
-        collectionName: string;
-        type: string;
-    }>;
-    setToUploadFiles: (
-        /** TODO(MR): This is the actual type */
-        // type: FILE_PATH_TYPE,
-        type: PICKED_UPLOAD_TYPE,
+    /**
+     * Return any pending uploads that were previously enqueued but haven't yet
+     * been completed.
+     *
+     * The state of pending uploads is persisted in the Node.js layer.
+     *
+     * Note that we might have both outstanding zip and regular file uploads at
+     * the same time. In such cases, the zip file ones get precedence.
+     */
+    pendingUploads: () => Promise<PendingUploads | undefined>;
+
+    /**
+     * Set or clear the name of the collection where the pending upload is
+     * directed to.
+     */
+    setPendingUploadCollection: (collectionName: string) => Promise<void>;
+
+    /**
+     * Update the list of files (of {@link type}) associated with the pending
+     * upload.
+     */
+    setPendingUploadFiles: (
+        type: PendingUploads["type"],
         filePaths: string[],
     ) => Promise<void>;
+
+    /*
+     * TODO: AUDIT below this - Some of the types we use below are not copyable
+     * across process boundaries, and such functions will (expectedly) fail at
+     * runtime. For such functions, find an efficient alternative or refactor
+     * the dataflow.
+     */
+
+    // -
+
     getElectronFilesFromGoogleZip: (
         filePath: string,
     ) => Promise<ElectronFile[]>;
-    setToUploadCollection: (collectionName: string) => Promise<void>;
     getDirFiles: (dirPath: string) => Promise<ElectronFile[]>;
+}
+
+/**
+ * Errors that have special semantics on the web side.
+ *
+ * [Note: Custom errors across Electron/Renderer boundary]
+ *
+ * If we need to identify errors thrown by the main process when invoked from
+ * the renderer process, we can only use the `message` field because:
+ *
+ * > Errors thrown throw `handle` in the main process are not transparent as
+ * > they are serialized and only the `message` property from the original error
+ * > is provided to the renderer process.
+ * >
+ * > - https://www.electronjs.org/docs/latest/tutorial/ipc
+ * >
+ * > Ref: https://github.com/electron/electron/issues/24427
+ */
+export const CustomErrorMessage = {
+    NotAvailable: "This feature in not available on the current OS/arch",
+};
+
+/**
+ * Data passed across the IPC bridge when an app update is available.
+ */
+export interface AppUpdate {
+    /** `true` if the user automatically update to this (new) version */
+    autoUpdatable: boolean;
+    /** The new version that is available */
+    version: string;
+}
+
+/**
+ * A top level folder that was selected by the user for watching.
+ *
+ * The user can set up multiple such watches. Each of these can in turn be
+ * syncing multiple on disk folders to one or more Ente collections (depending
+ * on the value of {@link collectionMapping}).
+ *
+ * This type is passed across the IPC boundary. It is persisted on the Node.js
+ * side.
+ */
+export interface FolderWatch {
+    /**
+     * Specify if nested files should all be mapped to the same single root
+     * collection, or if there should be a collection per directory that has
+     * files. @see {@link CollectionMapping}.
+     */
+    collectionMapping: CollectionMapping;
+    /**
+     * The path to the (root) folder we are watching.
+     */
+    folderPath: string;
+    /**
+     * Files that have already been uploaded.
+     */
+    syncedFiles: FolderWatchSyncedFile[];
+    /**
+     * Files (paths) that should be ignored when uploading.
+     */
+    ignoredFiles: string[];
+}
+
+/**
+ * The ways in which directories are mapped to collection.
+ *
+ * This comes into play when we have nested directories that we are trying to
+ * upload or watch on the user's local file system.
+ */
+export type CollectionMapping =
+    /** All files go into a single collection named after the root directory. */
+    | "root"
+    /** Each file goes to a collection named after its parent directory. */
+    | "parent";
+
+/**
+ * An on-disk file that was synced as part of a folder watch.
+ */
+export interface FolderWatchSyncedFile {
+    path: string;
+    uploadedFileID: number;
+    collectionID: number;
+}
+
+/**
+ * When the user starts an upload, we remember the files they'd selected or drag
+ * and dropped so that we can resume (if needed) when the app restarts after
+ * being stopped in the middle of the uploads.
+ */
+export interface PendingUploads {
+    /** The collection to which we're uploading */
+    collectionName: string;
+    /* The upload can be either of a Google Takeout zip, or regular files */
+    type: "files" | "zips";
+    files: ElectronFile[];
 }

@@ -42,52 +42,96 @@ export default function PairingMode() {
     }, []);
 
     useEffect(() => {
-        if (!cast) return;
-        if (isCastReady) return;
+        if (!cast) {
+            console.log("cast not ready");
+            return;
+        }
+        if (isCastReady) {
+            console.log("cast already ready");
+            return;
+        }
         const context = cast.framework.CastReceiverContext.getInstance();
-
+        context.setLoggerLevel(cast.framework.LoggerLevel.DEBUG);
+        const castDebugLogger = cast.debug.CastDebugLogger.getInstance();
         try {
             const options = new cast.framework.CastReceiverOptions();
+            options.maxInactivity = 3600;
+            context.addEventListener(
+                cast.framework.system.EventType.READY,
+                () => {
+                    if (!castDebugLogger.debugOverlayElement_) {
+                        // Enable debug logger and show a 'DEBUG MODE' overlay at top left corner.
+                        castDebugLogger.setEnabled(true);
+                    }
+                },
+            );
+            context.addEventListener(
+                cast.framework.system.EventType.ERROR,
+                (event) => {
+                    castDebugLogger.info(
+                        "Context Error - ",
+                        JSON.stringify(event),
+                    );
+                },
+            );
             options.customNamespaces = Object.assign({});
             options.customNamespaces["urn:x-cast:pair-request"] =
                 cast.framework.system.MessageType.JSON;
 
             options.disableIdleTimeout = true;
+            context.set;
 
             context.addCustomMessageListener(
                 "urn:x-cast:pair-request",
                 messageReceiveHandler,
             );
             context.start(options);
+            setIsCastReady(true);
         } catch (e) {
+            console.log("failed to create cast context", e);
             log.error("failed to create cast context", e);
         }
-        setIsCastReady(true);
+
         return () => {
+            console.log("stopping cast context");
             context.stop();
         };
-    }, [cast, isCastReady]);
+    }, [cast]);
 
     const messageReceiveHandler = (message: {
         type: string;
         senderId: string;
         data: any;
     }) => {
-        cast.framework.CastReceiverContext.getInstance().sendCustomMessage(
-            "urn:x-cast:pair-request",
-            message.senderId,
-            {
-                code: digits.join(""),
-            },
-        );
+        console.log("received message", message);
+        try {
+            console.log("sending pair request response message");
+            cast.framework.CastReceiverContext.getInstance().sendCustomMessage(
+                "urn:x-cast:pair-request",
+                message.senderId,
+                {
+                    code: digits.join(""),
+                },
+            );
+            console.log("sent pair request response message");
+        } catch (e) {
+            console.log("failed to pair request response message", e);
+            log.error("failed to send message", e);
+        }
     };
 
     const init = async () => {
-        const data = generateSecureData(6);
-        setDigits(convertDataToDecimalString(data).split(""));
-        const keypair = await generateKeyPair();
-        setPublicKeyB64(await toB64(keypair.publicKey));
-        setPrivateKeyB64(await toB64(keypair.privateKey));
+        try {
+            const data = generateSecureData(6);
+            setDigits(convertDataToDecimalString(data).split(""));
+            const keypair = await generateKeyPair();
+            setPublicKeyB64(await toB64(keypair.publicKey));
+            setPrivateKeyB64(await toB64(keypair.privateKey));
+        } catch (e) {
+            console.log("failed to generate keypair", e);
+            log.error("failed to generate keypair", e);
+            throw e;
+        }
     };
 
     const generateKeyPair = async () => {

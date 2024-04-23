@@ -10,7 +10,11 @@
 
 import type { FSWatcher } from "chokidar";
 import { ipcMain } from "electron/main";
-import type { ElectronFile, FILE_PATH_TYPE, WatchMapping } from "../types/ipc";
+import type {
+    CollectionMapping,
+    FolderWatch,
+    PendingUploads,
+} from "../types/ipc";
 import {
     selectDirectory,
     showUploadDirsDialog,
@@ -19,13 +23,13 @@ import {
 } from "./dialogs";
 import {
     fsExists,
+    fsIsDir,
     fsMkdirIfNeeded,
     fsReadTextFile,
     fsRename,
     fsRm,
     fsRmdir,
     fsWriteFile,
-    isFolder,
 } from "./fs";
 import { logToDisk } from "./log";
 import {
@@ -34,13 +38,13 @@ import {
     updateAndRestart,
     updateOnNextRestart,
 } from "./services/app-update";
-import { runFFmpegCmd } from "./services/ffmpeg";
+import { convertToJPEG, generateImageThumbnail } from "./services/convert";
+import { ffmpegExec } from "./services/ffmpeg";
 import { getDirFiles } from "./services/fs";
 import {
-    convertToJPEG,
-    generateImageThumbnail,
-} from "./services/imageProcessor";
-import { clipImageEmbedding, clipTextEmbedding } from "./services/ml-clip";
+    clipImageEmbedding,
+    clipTextEmbeddingIfAvailable,
+} from "./services/ml-clip";
 import { detectFaces, faceEmbedding } from "./services/ml-face";
 import {
     clearStores,
@@ -49,18 +53,19 @@ import {
 } from "./services/store";
 import {
     getElectronFilesFromGoogleZip,
-    getPendingUploads,
-    setToUploadCollection,
-    setToUploadFiles,
+    pendingUploads,
+    setPendingUploadCollection,
+    setPendingUploadFiles,
 } from "./services/upload";
 import {
-    addWatchMapping,
-    getWatchMappings,
-    removeWatchMapping,
-    updateWatchMappingIgnoredFiles,
-    updateWatchMappingSyncedFiles,
+    watchAdd,
+    watchFindFiles,
+    watchGet,
+    watchRemove,
+    watchUpdateIgnoredFiles,
+    watchUpdateSyncedFiles,
 } from "./services/watch";
-import { openDirectory, openLogDirectory } from "./util";
+import { openDirectory, openLogDirectory } from "./utils-electron";
 
 /**
  * Listen for IPC events sent/invoked by the renderer process, and route them to
@@ -132,10 +137,12 @@ export const attachIPCHandlers = () => {
         fsWriteFile(path, contents),
     );
 
+    ipcMain.handle("fsIsDir", (_, dirPath: string) => fsIsDir(dirPath));
+
     // - Conversion
 
-    ipcMain.handle("convertToJPEG", (_, fileData, filename) =>
-        convertToJPEG(fileData, filename),
+    ipcMain.handle("convertToJPEG", (_, fileName, imageData) =>
+        convertToJPEG(fileName, imageData),
     );
 
     ipcMain.handle(
@@ -145,14 +152,14 @@ export const attachIPCHandlers = () => {
     );
 
     ipcMain.handle(
-        "runFFmpegCmd",
+        "ffmpegExec",
         (
             _,
-            cmd: string[],
-            inputFile: File | ElectronFile,
+            command: string[],
+            inputDataOrPath: Uint8Array | string,
             outputFileName: string,
-            dontTimeout?: boolean,
-        ) => runFFmpegCmd(cmd, inputFile, outputFileName, dontTimeout),
+            timeoutMS: number,
+        ) => ffmpegExec(command, inputDataOrPath, outputFileName, timeoutMS),
     );
 
     // - ML
@@ -161,8 +168,8 @@ export const attachIPCHandlers = () => {
         clipImageEmbedding(jpegImageData),
     );
 
-    ipcMain.handle("clipTextEmbedding", (_, text: string) =>
-        clipTextEmbedding(text),
+    ipcMain.handle("clipTextEmbeddingIfAvailable", (_, text: string) =>
+        clipTextEmbeddingIfAvailable(text),
     );
 
     ipcMain.handle("detectFaces", (_, input: Float32Array) =>
@@ -183,26 +190,24 @@ export const attachIPCHandlers = () => {
 
     ipcMain.handle("showUploadZipDialog", () => showUploadZipDialog());
 
-    // - FS Legacy
-
-    ipcMain.handle("isFolder", (_, dirPath: string) => isFolder(dirPath));
-
     // - Upload
 
-    ipcMain.handle("getPendingUploads", () => getPendingUploads());
+    ipcMain.handle("pendingUploads", () => pendingUploads());
+
+    ipcMain.handle("setPendingUploadCollection", (_, collectionName: string) =>
+        setPendingUploadCollection(collectionName),
+    );
 
     ipcMain.handle(
-        "setToUploadFiles",
-        (_, type: FILE_PATH_TYPE, filePaths: string[]) =>
-            setToUploadFiles(type, filePaths),
+        "setPendingUploadFiles",
+        (_, type: PendingUploads["type"], filePaths: string[]) =>
+            setPendingUploadFiles(type, filePaths),
     );
+
+    // -
 
     ipcMain.handle("getElectronFilesFromGoogleZip", (_, filePath: string) =>
         getElectronFilesFromGoogleZip(filePath),
-    );
-
-    ipcMain.handle("setToUploadCollection", (_, collectionName: string) =>
-        setToUploadCollection(collectionName),
     );
 
     ipcMain.handle("getDirFiles", (_, dirPath: string) => getDirFiles(dirPath));
@@ -213,42 +218,36 @@ export const attachIPCHandlers = () => {
  * watch folder functionality.
  *
  * It gets passed a {@link FSWatcher} instance which it can then forward to the
- * actual handlers.
+ * actual handlers if they need access to it to do their thing.
  */
 export const attachFSWatchIPCHandlers = (watcher: FSWatcher) => {
     // - Watch
 
-    ipcMain.handle(
-        "addWatchMapping",
-        (
-            _,
-            collectionName: string,
-            folderPath: string,
-            uploadStrategy: number,
-        ) =>
-            addWatchMapping(
-                watcher,
-                collectionName,
-                folderPath,
-                uploadStrategy,
-            ),
-    );
-
-    ipcMain.handle("removeWatchMapping", (_, folderPath: string) =>
-        removeWatchMapping(watcher, folderPath),
-    );
-
-    ipcMain.handle("getWatchMappings", () => getWatchMappings());
+    ipcMain.handle("watchGet", () => watchGet(watcher));
 
     ipcMain.handle(
-        "updateWatchMappingSyncedFiles",
-        (_, folderPath: string, files: WatchMapping["syncedFiles"]) =>
-            updateWatchMappingSyncedFiles(folderPath, files),
+        "watchAdd",
+        (_, folderPath: string, collectionMapping: CollectionMapping) =>
+            watchAdd(watcher, folderPath, collectionMapping),
+    );
+
+    ipcMain.handle("watchRemove", (_, folderPath: string) =>
+        watchRemove(watcher, folderPath),
     );
 
     ipcMain.handle(
-        "updateWatchMappingIgnoredFiles",
-        (_, folderPath: string, files: WatchMapping["ignoredFiles"]) =>
-            updateWatchMappingIgnoredFiles(folderPath, files),
+        "watchUpdateSyncedFiles",
+        (_, syncedFiles: FolderWatch["syncedFiles"], folderPath: string) =>
+            watchUpdateSyncedFiles(syncedFiles, folderPath),
+    );
+
+    ipcMain.handle(
+        "watchUpdateIgnoredFiles",
+        (_, ignoredFiles: FolderWatch["ignoredFiles"], folderPath: string) =>
+            watchUpdateIgnoredFiles(ignoredFiles, folderPath),
+    );
+
+    ipcMain.handle("watchFindFiles", (_, folderPath: string) =>
+        watchFindFiles(folderPath),
     );
 };

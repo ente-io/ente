@@ -18,6 +18,7 @@ import 'package:photos/models/file/trash_file.dart';
 import 'package:photos/models/ignored_file.dart';
 import "package:photos/models/metadata/common_keys.dart";
 import 'package:photos/models/selected_files.dart';
+import "package:photos/service_locator.dart";
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/hidden_service.dart';
 import 'package:photos/services/ignored_files_service.dart';
@@ -53,47 +54,70 @@ class FileAppBar extends StatefulWidget {
 
 class FileAppBarState extends State<FileAppBar> {
   final _logger = Logger("FadingAppBar");
+  final List<Widget> _actions = [];
+
+  @override
+  void didUpdateWidget(FileAppBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.file.generatedID != widget.file.generatedID) {
+      _getActions();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    _logger.fine("building app bar ${widget.file.generatedID?.toString()}");
+
+    //When the widget is initialized, the actions are not available.
+    //Cannot call _getActions() in initState.
+    if (_actions.isEmpty) {
+      _getActions();
+    }
+
+    final isTrashedFile = widget.file is TrashFile;
+    final shouldShowActions = widget.shouldShowActions && !isTrashedFile;
     return CustomAppBar(
       ValueListenableBuilder(
         valueListenable: widget.enableFullScreenNotifier,
-        builder: (context, bool isFullScreen, _) {
+        builder: (context, bool isFullScreen, child) {
           return IgnorePointer(
             ignoring: isFullScreen,
             child: AnimatedOpacity(
               opacity: isFullScreen ? 0 : 1,
               duration: const Duration(milliseconds: 150),
-              child: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.black.withOpacity(0.72),
-                      Colors.black.withOpacity(0.6),
-                      Colors.transparent,
-                    ],
-                    stops: const [0, 0.2, 1],
-                  ),
-                ),
-                child: _buildAppBar(),
-              ),
+              child: child,
             ),
           );
         },
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Colors.black.withOpacity(0.72),
+                Colors.black.withOpacity(0.6),
+                Colors.transparent,
+              ],
+              stops: const [0, 0.2, 1],
+            ),
+          ),
+          child: AppBar(
+            iconTheme: const IconThemeData(
+              color: Colors.white,
+            ), //same for both themes
+            actions: shouldShowActions ? _actions : [],
+            elevation: 0,
+            backgroundColor: const Color(0x00000000),
+          ),
+        ),
       ),
       Size.fromHeight(Platform.isAndroid ? 84 : 96),
     );
   }
 
-  AppBar _buildAppBar() {
-    _logger.fine("building app bar ${widget.file.generatedID?.toString()}");
-
-    final List<Widget> actions = [];
-    final isTrashedFile = widget.file is TrashFile;
-    final shouldShowActions = widget.shouldShowActions && !isTrashedFile;
+  List<Widget> _getActions() {
+    _actions.clear();
     final bool isOwnedByUser = widget.file.isOwner;
     final bool isFileUploaded = widget.file.isUploaded;
     bool isFileHidden = false;
@@ -104,7 +128,7 @@ class FileAppBarState extends State<FileAppBar> {
           false;
     }
     if (widget.file.isLiveOrMotionPhoto) {
-      actions.add(
+      _actions.add(
         IconButton(
           icon: const Icon(Icons.album_outlined),
           onPressed: () {
@@ -117,8 +141,10 @@ class FileAppBarState extends State<FileAppBar> {
       );
     }
     // only show fav option for files owned by the user
-    if (isOwnedByUser && !isFileHidden && isFileUploaded) {
-      actions.add(
+    if ((isOwnedByUser || flagService.internalUser) &&
+        !isFileHidden &&
+        isFileUploaded) {
+      _actions.add(
         Padding(
           padding: const EdgeInsets.all(8),
           child: FavoriteWidget(widget.file),
@@ -126,7 +152,7 @@ class FileAppBarState extends State<FileAppBar> {
       );
     }
     if (!isFileUploaded) {
-      actions.add(
+      _actions.add(
         UploadIconWidget(
           file: widget.file,
           key: ValueKey(widget.file.tag),
@@ -241,7 +267,7 @@ class FileAppBarState extends State<FileAppBar> {
       }
     }
     if (items.isNotEmpty) {
-      actions.add(
+      _actions.add(
         PopupMenuButton(
           itemBuilder: (context) {
             return items;
@@ -262,13 +288,7 @@ class FileAppBarState extends State<FileAppBar> {
         ),
       );
     }
-    return AppBar(
-      iconTheme:
-          const IconThemeData(color: Colors.white), //same for both themes
-      actions: shouldShowActions ? actions : [],
-      elevation: 0,
-      backgroundColor: const Color(0x00000000),
-    );
+    return _actions;
   }
 
   Future<void> _handleHideRequest(BuildContext context) async {

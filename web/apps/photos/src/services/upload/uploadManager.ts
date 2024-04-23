@@ -1,4 +1,4 @@
-import { getFileNameSize } from "@/next/file";
+import { ensureElectron } from "@/next/electron";
 import log from "@/next/log";
 import { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { getDedicatedCryptoWorker } from "@ente/shared/crypto";
@@ -8,37 +8,39 @@ import { Events, eventBus } from "@ente/shared/events";
 import { Remote } from "comlink";
 import { UPLOAD_RESULT, UPLOAD_STAGES } from "constants/upload";
 import isElectron from "is-electron";
-import ImportService from "services/importService";
 import {
     getLocalPublicFiles,
     getPublicCollectionUID,
 } from "services/publicCollectionService";
 import { getDisableCFUploadProxyFlag } from "services/userService";
-import watchFolderService from "services/watchFolder/watchFolderService";
+import watcher from "services/watch";
 import { Collection } from "types/collection";
 import { EncryptedEnteFile, EnteFile } from "types/file";
 import { SetFiles } from "types/gallery";
 import {
+    ElectronFile,
     FileWithCollection,
     ParsedMetadataJSON,
     ParsedMetadataJSONMap,
     PublicUploadProps,
+    type FileWithCollection2,
 } from "types/upload";
 import { ProgressUpdater } from "types/upload/ui";
 import { decryptFile, getUserOwnedFiles, sortFiles } from "utils/file";
 import {
     areFileWithCollectionsSame,
     segregateMetadataAndMediaFiles,
+    segregateMetadataAndMediaFiles2,
 } from "utils/upload";
 import { getLocalFiles } from "../fileService";
 import {
+    clusterLivePhotoFiles,
     getMetadataJSONMapKeyForJSON,
     parseMetadataJSON,
 } from "./metadataService";
 import { default as UIService, default as uiService } from "./uiService";
 import uploadCancelService from "./uploadCancelService";
-import UploadService from "./uploadService";
-import uploader from "./uploader";
+import UploadService, { getFileName, uploader } from "./uploadService";
 
 const MAX_CONCURRENT_UPLOADS = 4;
 
@@ -47,9 +49,9 @@ class UploadManager {
         ComlinkWorker<typeof DedicatedCryptoWorker>
     >(MAX_CONCURRENT_UPLOADS);
     private parsedMetadataJSONMap: ParsedMetadataJSONMap;
-    private filesToBeUploaded: FileWithCollection[];
-    private remainingFiles: FileWithCollection[] = [];
-    private failedFiles: FileWithCollection[];
+    private filesToBeUploaded: FileWithCollection2[];
+    private remainingFiles: FileWithCollection2[] = [];
+    private failedFiles: FileWithCollection2[];
     private existingFiles: EnteFile[];
     private setFiles: SetFiles;
     private collections: Map<number, Collection>;
@@ -151,7 +153,7 @@ class UploadManager {
             if (mediaFiles.length) {
                 log.info(`clusterLivePhotoFiles started`);
                 const analysedMediaFiles =
-                    await UploadService.clusterLivePhotoFiles(mediaFiles);
+                    await clusterLivePhotoFiles(mediaFiles);
                 log.info(`clusterLivePhotoFiles ended`);
                 log.info(
                     `got live photos: ${
@@ -177,7 +179,7 @@ class UploadManager {
             if (e.message === CustomError.UPLOAD_CANCELLED) {
                 if (isElectron()) {
                     this.remainingFiles = [];
-                    await ImportService.cancelRemainingUploads();
+                    await cancelRemainingUploads();
                 }
             } else {
                 log.error("uploading failed with error", e);
@@ -202,37 +204,121 @@ class UploadManager {
         }
     }
 
-    private async parseMetadataJSONFiles(metadataFiles: FileWithCollection[]) {
+    public async queueFilesForUpload2(
+        filesWithCollectionToUploadIn: FileWithCollection2[],
+        collections: Collection[],
+        uploaderName?: string,
+    ) {
+        try {
+            if (this.uploadInProgress) {
+                throw Error("can't run multiple uploads at once");
+            }
+            this.uploadInProgress = true;
+            await this.updateExistingFilesAndCollections(collections);
+            this.uploaderName = uploaderName;
+            log.info(
+                `received ${filesWithCollectionToUploadIn.length} files to upload`,
+            );
+            uiService.setFilenames(
+                new Map<number, string>(
+                    filesWithCollectionToUploadIn.map((mediaFile) => [
+                        mediaFile.localID,
+                        UploadService.getAssetName(mediaFile),
+                    ]),
+                ),
+            );
+            const { metadataJSONFiles, mediaFiles } =
+                segregateMetadataAndMediaFiles2(filesWithCollectionToUploadIn);
+            log.info(`has ${metadataJSONFiles.length} metadata json files`);
+            log.info(`has ${mediaFiles.length} media files`);
+            if (metadataJSONFiles.length) {
+                UIService.setUploadStage(
+                    UPLOAD_STAGES.READING_GOOGLE_METADATA_FILES,
+                );
+                await this.parseMetadataJSONFiles(metadataJSONFiles);
+
+                UploadService.setParsedMetadataJSONMap(
+                    this.parsedMetadataJSONMap,
+                );
+            }
+            if (mediaFiles.length) {
+                log.info(`clusterLivePhotoFiles started`);
+                const analysedMediaFiles =
+                    await clusterLivePhotoFiles(mediaFiles);
+                log.info(`clusterLivePhotoFiles ended`);
+                log.info(
+                    `got live photos: ${
+                        mediaFiles.length !== analysedMediaFiles.length
+                    }`,
+                );
+                uiService.setFilenames(
+                    new Map<number, string>(
+                        analysedMediaFiles.map((mediaFile) => [
+                            mediaFile.localID,
+                            UploadService.getAssetName(mediaFile),
+                        ]),
+                    ),
+                );
+
+                UIService.setHasLivePhoto(
+                    mediaFiles.length !== analysedMediaFiles.length,
+                );
+
+                await this.uploadMediaFiles(analysedMediaFiles);
+            }
+        } catch (e) {
+            if (e.message === CustomError.UPLOAD_CANCELLED) {
+                if (isElectron()) {
+                    this.remainingFiles = [];
+                    await cancelRemainingUploads();
+                }
+            } else {
+                log.error("uploading failed with error", e);
+                throw e;
+            }
+        } finally {
+            UIService.setUploadStage(UPLOAD_STAGES.FINISH);
+            for (let i = 0; i < MAX_CONCURRENT_UPLOADS; i++) {
+                this.cryptoWorkers[i]?.terminate();
+            }
+            this.uploadInProgress = false;
+        }
+        try {
+            if (!UIService.hasFilesInResultList()) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (e) {
+            log.error(" failed to return shouldCloseProgressBar", e);
+            return false;
+        }
+    }
+
+    private async parseMetadataJSONFiles(metadataFiles: FileWithCollection2[]) {
         try {
             log.info(`parseMetadataJSONFiles function executed `);
 
             UIService.reset(metadataFiles.length);
 
             for (const { file, collectionID } of metadataFiles) {
+                const name = getFileName(file);
                 try {
                     if (uploadCancelService.isUploadCancelationRequested()) {
                         throw Error(CustomError.UPLOAD_CANCELLED);
                     }
-                    log.info(
-                        `parsing metadata json file ${getFileNameSize(file)}`,
-                    );
+
+                    log.info(`parsing metadata json file ${name}`);
 
                     const parsedMetadataJSON = await parseMetadataJSON(file);
                     if (parsedMetadataJSON) {
                         this.parsedMetadataJSONMap.set(
-                            getMetadataJSONMapKeyForJSON(
-                                collectionID,
-                                file.name,
-                            ),
+                            getMetadataJSONMapKeyForJSON(collectionID, name),
                             parsedMetadataJSON && { ...parsedMetadataJSON },
                         );
                         UIService.increaseFileUploaded();
                     }
-                    log.info(
-                        `successfully parsed metadata json file ${getFileNameSize(
-                            file,
-                        )}`,
-                    );
+                    log.info(`successfully parsed metadata json file ${name}`);
                 } catch (e) {
                     if (e.message === CustomError.UPLOAD_CANCELLED) {
                         throw e;
@@ -240,9 +326,7 @@ class UploadManager {
                         // and don't break for subsequent files just log and move on
                         log.error("parsing failed for a file", e);
                         log.info(
-                            `failed to parse metadata json file ${getFileNameSize(
-                                file,
-                            )} error: ${e.message}`,
+                            `failed to parse metadata json file ${name} error: ${e.message}`,
                         );
                     }
                 }
@@ -255,7 +339,7 @@ class UploadManager {
         }
     }
 
-    private async uploadMediaFiles(mediaFiles: FileWithCollection[]) {
+    private async uploadMediaFiles(mediaFiles: FileWithCollection2[]) {
         log.info(`uploadMediaFiles called`);
         this.filesToBeUploaded = [...this.filesToBeUploaded, ...mediaFiles];
 
@@ -316,7 +400,7 @@ class UploadManager {
     async postUploadTask(
         fileUploadResult: UPLOAD_RESULT,
         uploadedFile: EncryptedEnteFile | EnteFile | null,
-        fileWithCollection: FileWithCollection,
+        fileWithCollection: FileWithCollection2,
     ) {
         try {
             let decryptedFile: EnteFile;
@@ -383,15 +467,17 @@ class UploadManager {
 
     private async watchFolderCallback(
         fileUploadResult: UPLOAD_RESULT,
-        fileWithCollection: FileWithCollection,
+        fileWithCollection: FileWithCollection2,
         uploadedFile: EncryptedEnteFile,
     ) {
         if (isElectron()) {
-            await watchFolderService.onFileUpload(
-                fileUploadResult,
-                fileWithCollection,
-                uploadedFile,
-            );
+            if (watcher.isUploadRunning()) {
+                await watcher.onFileUpload(
+                    fileUploadResult,
+                    fileWithCollection,
+                    uploadedFile,
+                );
+            }
         }
     }
 
@@ -425,19 +511,62 @@ class UploadManager {
     }
 
     private async updateElectronRemainingFiles(
-        fileWithCollection: FileWithCollection,
+        fileWithCollection: FileWithCollection2,
     ) {
         if (isElectron()) {
             this.remainingFiles = this.remainingFiles.filter(
                 (file) => !areFileWithCollectionsSame(file, fileWithCollection),
             );
-            await ImportService.updatePendingUploads(this.remainingFiles);
+            await updatePendingUploads(this.remainingFiles);
         }
     }
 
     public shouldAllowNewUpload = () => {
-        return !this.uploadInProgress || watchFolderService.isUploadRunning();
+        return !this.uploadInProgress || watcher.isUploadRunning();
     };
 }
 
 export default new UploadManager();
+
+export const setToUploadCollection = async (collections: Collection[]) => {
+    let collectionName: string = null;
+    /* collection being one suggest one of two things
+                1. Either the user has upload to a single existing collection
+                2. Created a new single collection to upload to
+                    may have had multiple folder, but chose to upload
+                    to one album
+                hence saving the collection name when upload collection count is 1
+                helps the info of user choosing this options
+                and on next upload we can directly start uploading to this collection
+            */
+    if (collections.length === 1) {
+        collectionName = collections[0].name;
+    }
+    await ensureElectron().setPendingUploadCollection(collectionName);
+};
+
+const updatePendingUploads = async (files: FileWithCollection2[]) => {
+    const paths = files
+        .map((file) =>
+            file.isLivePhoto
+                ? [file.livePhotoAssets.image, file.livePhotoAssets.video]
+                : [file.file],
+        )
+        .flat()
+        .map((f) => getFilePathElectron(f));
+    await ensureElectron().setPendingUploadFiles("files", paths);
+};
+
+/**
+ * NOTE: a stop gap measure, only meant to be called by code that is running in
+ * the context of a desktop app initiated upload
+ */
+export const getFilePathElectron = (file: File | ElectronFile | string) =>
+    typeof file == "string" ? file : (file as ElectronFile).path;
+
+const cancelRemainingUploads = async () => {
+    const electron = ensureElectron();
+    await electron.setPendingUploadCollection(undefined);
+    await electron.setPendingUploadFiles("zips", []);
+    await electron.setPendingUploadFiles("files", []);
+};

@@ -1,9 +1,9 @@
+import { decodeLivePhoto } from "@/media/live-photo";
 import log from "@/next/log";
 import { FILE_TYPE } from "constants/file";
 import PQueue from "p-queue";
 import DownloadManager from "services/download";
 import { getLocalFiles } from "services/fileService";
-import { decodeLivePhoto } from "services/livePhotoService";
 import { EnteFile } from "types/file";
 import { Dimensions } from "types/image";
 import {
@@ -134,11 +134,11 @@ async function getOriginalConvertedFile(file: EnteFile, queue?: PQueue) {
     if (file.metadata.fileType === FILE_TYPE.IMAGE) {
         return await getRenderableImage(file.metadata.title, fileBlob);
     } else {
-        const livePhoto = await decodeLivePhoto(file, fileBlob);
-        return await getRenderableImage(
-            livePhoto.imageNameTitle,
-            new Blob([livePhoto.image]),
+        const { imageFileName, imageData } = await decodeLivePhoto(
+            file.metadata.title,
+            fileBlob,
         );
+        return await getRenderableImage(imageFileName, new Blob([imageData]));
     }
 }
 

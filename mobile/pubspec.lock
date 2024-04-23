@@ -443,6 +443,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.17"
+  ente_feature_flag:
+    dependency: "direct main"
+    description:
+      path: "plugins/ente_feature_flag"
+      relative: true
+    source: path
+    version: "0.0.1"
   equatable:
     dependency: "direct main"
     description:
@@ -560,10 +567,10 @@ packages:
     dependency: "direct main"
     description:
       name: firebase_core
-      sha256: a864d1b6afd25497a3b57b016886d1763df52baaa69758a46723164de8d187fe
+      sha256: "6b1152a5af3b1cfe7e45309e96fc1aa14873f410f7aadb3878aa7812acfa7531"
       url: "https://pub.dev"
     source: hosted
-    version: "2.29.0"
+    version: "2.30.0"
   firebase_core_platform_interface:
     dependency: transitive
     description:
@@ -584,10 +591,10 @@ packages:
     dependency: "direct main"
     description:
       name: firebase_messaging
-      sha256: e41586e0fd04fe9a40424f8b0053d0832e6d04f49e020cdaf9919209a28497e9
+      sha256: "87e3eda0ecdfeadb5fd1cf0dc5153aea5307a0cfca751c4b1ac97bfdd805660e"
       url: "https://pub.dev"
     source: hosted
-    version: "14.7.19"
+    version: "14.8.1"
   firebase_messaging_platform_interface:
     dependency: transitive
     description:
@@ -714,10 +721,10 @@ packages:
     dependency: "direct main"
     description:
       name: flutter_local_notifications
-      sha256: a701df4866f9a38bb8e4450a54c143bbeeb0ce2381e7df5a36e1006f3b43bb28
+      sha256: f9a05409385b77b06c18f200a41c7c2711ebf7415669350bb0f8474c07bd40d1
       url: "https://pub.dev"
     source: hosted
-    version: "17.0.1"
+    version: "17.0.0"
   flutter_local_notifications_linux:
     dependency: transitive
     description:
@@ -2064,7 +2071,7 @@ packages:
     source: hosted
     version: "0.3.0"
   sqlite3:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: sqlite3
       sha256: "072128763f1547e3e9b4735ce846bfd226d68019ccda54db4cd427b12dfdedc9"

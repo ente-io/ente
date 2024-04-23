@@ -1,9 +1,9 @@
 import log from "@/next/log";
 import PairedSuccessfullyOverlay from "components/PairedSuccessfullyOverlay";
-import Theatre from "components/Theatre";
+import { PhotoAuditorium } from "components/PhotoAuditorium";
 import { FILE_TYPE } from "constants/file";
 import { useRouter } from "next/router";
-import { createContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
     getCastCollection,
     getLocalFiles,
@@ -13,25 +13,20 @@ import { Collection } from "types/collection";
 import { EnteFile } from "types/file";
 import { getPreviewableImage, isRawFileFromFileName } from "utils/file";
 
-export const SlideshowContext = createContext<{
-    showNextSlide: () => void;
-}>(null);
-
 const renderableFileURLCache = new Map<number, string>();
 
 export default function Slideshow() {
-    const [collectionFiles, setCollectionFiles] = useState<EnteFile[]>([]);
-
-    const [currentFile, setCurrentFile] = useState<EnteFile | undefined>(
-        undefined,
-    );
-    const [nextFile, setNextFile] = useState<EnteFile | undefined>(undefined);
-
     const [loading, setLoading] = useState(true);
     const [castToken, setCastToken] = useState<string>("");
     const [castCollection, setCastCollection] = useState<
         Collection | undefined
-    >(undefined);
+    >();
+    const [collectionFiles, setCollectionFiles] = useState<EnteFile[]>([]);
+    const [currentFileId, setCurrentFileId] = useState<number | undefined>();
+    const [currentFileURL, setCurrentFileURL] = useState<string | undefined>();
+    const [nextFileURL, setNextFileURL] = useState<string | undefined>();
+
+    const router = useRouter();
 
     const syncCastFiles = async (token: string) => {
         try {
@@ -72,28 +67,15 @@ export default function Slideshow() {
 
     const isFileEligibleForCast = (file: EnteFile) => {
         const fileType = file.metadata.fileType;
-        if (fileType !== FILE_TYPE.IMAGE && fileType !== FILE_TYPE.LIVE_PHOTO) {
+        if (fileType !== FILE_TYPE.IMAGE && fileType !== FILE_TYPE.LIVE_PHOTO)
             return false;
-        }
 
-        const fileSizeLimit = 100 * 1024 * 1024;
+        if (file.info.fileSize > 100 * 1024 * 1024) return false;
 
-        if (file.info.fileSize > fileSizeLimit) {
-            return false;
-        }
-
-        const name = file.metadata.title;
-
-        if (fileType === FILE_TYPE.IMAGE) {
-            if (isRawFileFromFileName(name)) {
-                return false;
-            }
-        }
+        if (isRawFileFromFileName(file.metadata.title)) return false;
 
         return true;
     };
-
-    const router = useRouter();
 
     useEffect(() => {
         try {
@@ -117,9 +99,9 @@ export default function Slideshow() {
         showNextSlide();
     }, [collectionFiles]);
 
-    const showNextSlide = () => {
+    const showNextSlide = async () => {
         const currentIndex = collectionFiles.findIndex(
-            (file) => file.id === currentFile?.id,
+            (file) => file.id === currentFileId,
         );
 
         const nextIndex = (currentIndex + 1) % collectionFiles.length;
@@ -128,63 +110,44 @@ export default function Slideshow() {
         const nextFile = collectionFiles[nextIndex];
         const nextNextFile = collectionFiles[nextNextIndex];
 
-        setCurrentFile(nextFile);
-        setNextFile(nextNextFile);
+        let nextURL = renderableFileURLCache.get(nextFile.id);
+        let nextNextURL = renderableFileURLCache.get(nextNextFile.id);
+
+        if (!nextURL) {
+            try {
+                const blob = await getPreviewableImage(nextFile, castToken);
+                const url = URL.createObjectURL(blob);
+                renderableFileURLCache.set(nextFile.id, url);
+                nextURL = url;
+            } catch (e) {
+                return;
+            }
+        }
+
+        if (!nextNextURL) {
+            try {
+                const blob = await getPreviewableImage(nextNextFile, castToken);
+                const url = URL.createObjectURL(blob);
+                renderableFileURLCache.set(nextNextFile.id, url);
+                nextNextURL = url;
+            } catch (e) {
+                return;
+            }
+        }
+
+        setLoading(false);
+        setCurrentFileId(nextFile.id);
+        setCurrentFileURL(nextURL);
+        setNextFileURL(nextNextURL);
     };
 
-    const [renderableFileURL, setRenderableFileURL] = useState<string>("");
-
-    const getRenderableFileURL = async () => {
-        if (!currentFile) return;
-
-        const cacheValue = renderableFileURLCache.get(currentFile.id);
-        if (cacheValue) {
-            setRenderableFileURL(cacheValue);
-            setLoading(false);
-            return;
-        }
-
-        try {
-            const blob = await getPreviewableImage(
-                currentFile as EnteFile,
-                castToken,
-            );
-
-            const url = URL.createObjectURL(blob);
-
-            renderableFileURLCache.set(currentFile?.id, url);
-
-            setRenderableFileURL(url);
-        } catch (e) {
-            return;
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        if (currentFile) {
-            getRenderableFileURL();
-        }
-    }, [currentFile]);
+    if (loading) return <PairedSuccessfullyOverlay />;
 
     return (
-        <>
-            <SlideshowContext.Provider value={{ showNextSlide }}>
-                <Theatre
-                    file1={{
-                        fileName: currentFile?.metadata.title,
-                        fileURL: renderableFileURL,
-                        type: currentFile?.metadata.fileType,
-                    }}
-                    file2={{
-                        fileName: nextFile?.metadata.title,
-                        fileURL: renderableFileURL,
-                        type: nextFile?.metadata.fileType,
-                    }}
-                />
-            </SlideshowContext.Provider>
-            {loading && <PairedSuccessfullyOverlay />}
-        </>
+        <PhotoAuditorium
+            url={currentFileURL}
+            nextSlideUrl={nextFileURL}
+            showNextSlide={showNextSlide}
+        />
     );
 }

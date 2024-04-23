@@ -24,6 +24,11 @@ export function isDataStream(object: any): object is DataStream {
 export type Logger = (message: string) => void;
 
 export interface Metadata {
+    /**
+     * The file name.
+     *
+     * See: [Note: File name for local EnteFile objects]
+     */
     title: string;
     creationTime: number;
     modificationTime: number;
@@ -87,14 +92,31 @@ export interface UploadAsset {
     isLivePhoto?: boolean;
     file?: File | ElectronFile;
     livePhotoAssets?: LivePhotoAssets;
-    isElectron?: boolean;
 }
+
 export interface LivePhotoAssets {
     image: globalThis.File | ElectronFile;
     video: globalThis.File | ElectronFile;
 }
 
 export interface FileWithCollection extends UploadAsset {
+    localID: number;
+    collection?: Collection;
+    collectionID?: number;
+}
+
+export interface UploadAsset2 {
+    isLivePhoto?: boolean;
+    file?: File | ElectronFile | string;
+    livePhotoAssets?: LivePhotoAssets2;
+}
+
+export interface LivePhotoAssets2 {
+    image: File | ElectronFile | string;
+    video: File | ElectronFile | string;
+}
+
+export interface FileWithCollection2 extends UploadAsset2 {
     localID: number;
     collection?: Collection;
     collectionID?: number;
@@ -149,13 +171,6 @@ export interface ParsedExtractedMetadata {
     creationTime: number;
     width: number;
     height: number;
-}
-
-// This is used to prompt the user the make upload strategy choice
-export interface ImportSuggestion {
-    rootFolderName: string;
-    hasNestedFolders: boolean;
-    hasRootLevelFileWithFolder: boolean;
 }
 
 export interface PublicUploadProps {

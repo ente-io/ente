@@ -74,8 +74,6 @@ export const CustomError = {
     EXIF_DATA_NOT_FOUND: "exif data not found",
     SELECT_FOLDER_ABORTED: "select folder aborted",
     NON_MEDIA_FILE: "non media file",
-    UNSUPPORTED_RAW_FORMAT: "unsupported raw format",
-    NON_PREVIEWABLE_FILE: "non previewable file",
     PROCESSING_FAILED: "processing failed",
     EXPORT_RECORD_JSON_PARSING_FAILED: "export record json parsing failed",
     TWO_FACTOR_ENABLED: "two factor enabled",
@@ -84,8 +82,6 @@ export const CustomError = {
     ServerError: "server error",
     FILE_NOT_FOUND: "file not found",
     UNSUPPORTED_PLATFORM: "Unsupported platform",
-    MODEL_DOWNLOAD_PENDING:
-        "Model download pending, skipping clip search request",
     UPDATE_URL_FILE_ID_MISMATCH: "update url file id mismatch",
     URL_ALREADY_SET: "url already set",
     FILE_CONVERSION_FAILED: "file conversion failed",

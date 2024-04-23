@@ -11,18 +11,7 @@ export function handleDownloads(mainWindow: BrowserWindow) {
     });
 }
 
-export function handleExternalLinks(mainWindow: BrowserWindow) {
-    mainWindow.webContents.setWindowOpenHandler(({ url }) => {
-        if (!url.startsWith(rendererURL)) {
-            shell.openExternal(url);
-            return { action: "deny" };
-        } else {
-            return { action: "allow" };
-        }
-    });
-}
-
-export function getUniqueSavePath(filename: string, directory: string): string {
+function getUniqueSavePath(filename: string, directory: string): string {
     let uniqueFileSavePath = path.join(directory, filename);
     const { name: filenameWithoutExtension, ext: extension } =
         path.parse(filename);
@@ -42,12 +31,15 @@ export function getUniqueSavePath(filename: string, directory: string): string {
     return uniqueFileSavePath;
 }
 
-function lowerCaseHeaders(responseHeaders: Record<string, string[]>) {
-    const headers: Record<string, string[]> = {};
-    for (const key of Object.keys(responseHeaders)) {
-        headers[key.toLowerCase()] = responseHeaders[key];
-    }
-    return headers;
+export function handleExternalLinks(mainWindow: BrowserWindow) {
+    mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+        if (!url.startsWith(rendererURL)) {
+            shell.openExternal(url);
+            return { action: "deny" };
+        } else {
+            return { action: "allow" };
+        }
+    });
 }
 
 export function addAllowOriginHeader(mainWindow: BrowserWindow) {
@@ -60,4 +52,12 @@ export function addAllowOriginHeader(mainWindow: BrowserWindow) {
             });
         },
     );
+}
+
+function lowerCaseHeaders(responseHeaders: Record<string, string[]>) {
+    const headers: Record<string, string[]> = {};
+    for (const key of Object.keys(responseHeaders)) {
+        headers[key.toLowerCase()] = responseHeaders[key];
+    }
+    return headers;
 }

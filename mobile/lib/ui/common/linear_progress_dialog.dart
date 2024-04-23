@@ -27,8 +27,8 @@ class LinearProgressDialogState extends State<LinearProgressDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async => false,
+    return PopScope(
+      canPop: false,
       child: AlertDialog(
         title: Text(
           widget.message,
