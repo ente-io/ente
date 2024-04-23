@@ -22,8 +22,8 @@ import { addToCollection } from "services/collectionService";
 import { Collection } from "types/collection";
 import {
     EnteFile,
-    FilePublicMagicMetadata,
-    FilePublicMagicMetadataProps,
+    type FilePublicMagicMetadata,
+    type FilePublicMagicMetadataProps,
 } from "types/file";
 import { EncryptedMagicMetadata } from "types/magicMetadata";
 import {
@@ -118,18 +118,6 @@ class UploadService {
 
     reducePendingUploadCount() {
         this.pendingUploadCount--;
-    }
-
-    getAssetSize({ isLivePhoto, file, livePhotoAssets }: UploadAsset) {
-        return isLivePhoto
-            ? getLivePhotoSize(livePhotoAssets)
-            : getFileSize(file);
-    }
-
-    getAssetFileType({ isLivePhoto, file, livePhotoAssets }: UploadAsset) {
-        return isLivePhoto
-            ? getLivePhotoFileType(livePhotoAssets)
-            : getFileType(file);
     }
 
     async extractAssetMetadata(
@@ -310,18 +298,8 @@ const uploadService = new UploadService();
 
 export default uploadService;
 
-const constructPublicMagicMetadata = async (
-    publicMagicMetadataProps: FilePublicMagicMetadataProps,
-): Promise<FilePublicMagicMetadata> => {
-    const nonEmptyPublicMagicMetadataProps = getNonEmptyMagicMetadataProps(
-        publicMagicMetadataProps,
-    );
-
-    if (Object.values(nonEmptyPublicMagicMetadataProps)?.length === 0) {
-        return null;
-    }
-    return await updateMagicMetadata(publicMagicMetadataProps);
-};
+export const getFileName = (file: File | ElectronFile | string) =>
+    typeof file == "string" ? basename(file) : file.name;
 
 function getFileSize(file: File | ElectronFile) {
     return file.size;
@@ -340,9 +318,19 @@ export const assetName = ({
 }: UploadAsset2) =>
     isLivePhoto ? getFileName(livePhotoAssets.image) : getFileName(file);
 
-export const getFileName = (file: File | ElectronFile | string) =>
-    typeof file == "string" ? basename(file) : file.name;
+const getAssetSize = ({ isLivePhoto, file, livePhotoAssets }: UploadAsset) => {
+    return isLivePhoto ? getLivePhotoSize(livePhotoAssets) : getFileSize(file);
+};
 
+const getAssetFileType = ({
+    isLivePhoto,
+    file,
+    livePhotoAssets,
+}: UploadAsset) => {
+    return isLivePhoto
+        ? getLivePhotoFileType(livePhotoAssets)
+        : getFileType(file);
+};
 const readAsset = async (
     fileTypeInfo: FileTypeInfo,
     { isLivePhoto, file, livePhotoAssets }: UploadAsset2,
@@ -615,6 +603,19 @@ const readLivePhoto = async (
     };
 };
 
+const constructPublicMagicMetadata = async (
+    publicMagicMetadataProps: FilePublicMagicMetadataProps,
+): Promise<FilePublicMagicMetadata> => {
+    const nonEmptyPublicMagicMetadataProps = getNonEmptyMagicMetadataProps(
+        publicMagicMetadataProps,
+    );
+
+    if (Object.values(nonEmptyPublicMagicMetadataProps)?.length === 0) {
+        return null;
+    }
+    return await updateMagicMetadata(publicMagicMetadataProps);
+};
+
 async function encryptFile(
     worker: Remote<DedicatedCryptoWorker>,
     file: FileWithMetadata,
@@ -727,7 +728,7 @@ export async function uploader(
     const uploadAsset = uploadAsset2 as UploadAsset;
     const fileNameSize = `${assetName(
         fileWithCollection,
-    )}_${convertBytesToHumanReadable(uploadService.getAssetSize(uploadAsset))}`;
+    )}_${convertBytesToHumanReadable(getAssetSize(uploadAsset))}`;
 
     log.info(`uploader called for  ${fileNameSize}`);
     UIService.setFileProgress(localID, 0);
@@ -737,12 +738,13 @@ export async function uploader(
     try {
         const maxFileSize = 4 * 1024 * 1024 * 1024; // 4 GB
 
-        fileSize = uploadService.getAssetSize(uploadAsset);
+        fileSize = getAssetSize(uploadAsset);
         if (fileSize >= maxFileSize) {
             return { fileUploadResult: UPLOAD_RESULT.TOO_LARGE };
         }
         log.info(`getting filetype for ${fileNameSize}`);
-        fileTypeInfo = await uploadService.getAssetFileType(uploadAsset);
+        fileTypeInfo = await getAssetFileType(uploadAsset);
+
         log.info(
             `got filetype for ${fileNameSize} - ${JSON.stringify(fileTypeInfo)}`,
         );
