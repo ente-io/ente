@@ -212,38 +212,26 @@ export const uploader = async (
             fileTypeInfo,
         );
 
-        const matchingExistingFiles = findMatchingExistingFiles(
-            existingFiles,
-            metadata,
-        );
+        const matches = findMatchingExistingFiles(existingFiles, metadata);
+        const anyMatch = matches?.length > 0 ? matches[0] : undefined;
 
-        if (matchingExistingFiles?.length) {
-            const matchingExistingFilesCollectionIDs =
-                matchingExistingFiles.map((e) => e.collectionID);
-
-            if (matchingExistingFilesCollectionIDs.includes(collection.id)) {
-                log.info(
-                    `Skipping upload of ${name} since it is already present in the collection`,
-                );
-                const sameCollectionMatchingExistingFile =
-                    matchingExistingFiles.find(
-                        (f) => f.collectionID === collection.id,
-                    );
+        if (anyMatch) {
+            const matchInSameCollection = matches.find(
+                (f) => f.collectionID == collection.id,
+            );
+            if (matchInSameCollection) {
                 return {
                     fileUploadResult: UPLOAD_RESULT.ALREADY_UPLOADED,
-                    uploadedFile: sameCollectionMatchingExistingFile,
+                    uploadedFile: matchInSameCollection,
                 };
             } else {
-                log.info(
-                    `Symlinking ${name} to existing file in ${matchingExistingFilesCollectionIDs.length} collections`,
-                );
-                // any of the matching file can used to add a symlink
-                const resultFile = Object.assign({}, matchingExistingFiles[0]);
-                resultFile.collectionID = collection.id;
-                await addToCollection(collection, [resultFile]);
+                // Any of the matching files can be used to add a symlink.
+                const symlink = Object.assign({}, anyMatch);
+                symlink.collectionID = collection.id;
+                await addToCollection(collection, [symlink]);
                 return {
                     fileUploadResult: UPLOAD_RESULT.ADDED_SYMLINK,
-                    uploadedFile: resultFile,
+                    uploadedFile: symlink,
                 };
             }
         }
