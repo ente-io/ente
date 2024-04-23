@@ -144,15 +144,6 @@ class UploadService {
             : getFileType(file);
     }
 
-    async readAsset(
-        fileTypeInfo: FileTypeInfo,
-        { isLivePhoto, file, livePhotoAssets }: UploadAsset,
-    ) {
-        return isLivePhoto
-            ? await readLivePhoto(fileTypeInfo, livePhotoAssets)
-            : await readFile(fileTypeInfo, file);
-    }
-
     async extractAssetMetadata(
         worker: Remote<DedicatedCryptoWorker>,
         { isLivePhoto, file, livePhotoAssets }: UploadAsset2,
@@ -174,12 +165,6 @@ class UploadService {
                   fileTypeInfo,
                   file,
               );
-    }
-
-    constructPublicMagicMetadata(
-        publicMagicMetadataProps: FilePublicMagicMetadataProps,
-    ) {
-        return constructPublicMagicMetadata(publicMagicMetadataProps);
     }
 
     async encryptAsset(
@@ -345,9 +330,9 @@ const uploadService = new UploadService();
 
 export default uploadService;
 
-export async function constructPublicMagicMetadata(
+const constructPublicMagicMetadata = async (
     publicMagicMetadataProps: FilePublicMagicMetadataProps,
-): Promise<FilePublicMagicMetadata> {
+): Promise<FilePublicMagicMetadata> => {
     const nonEmptyPublicMagicMetadataProps = getNonEmptyMagicMetadataProps(
         publicMagicMetadataProps,
     );
@@ -356,7 +341,7 @@ export async function constructPublicMagicMetadata(
         return null;
     }
     return await updateMagicMetadata(publicMagicMetadataProps);
-}
+};
 
 function getFileSize(file: File | ElectronFile) {
     return file.size;
@@ -365,14 +350,19 @@ function getFileSize(file: File | ElectronFile) {
 export const getFileName = (file: File | ElectronFile | string) =>
     typeof file == "string" ? basename(file) : file.name;
 
+const readAsset = async (
+    fileTypeInfo: FileTypeInfo,
+    { isLivePhoto, file, livePhotoAssets }: UploadAsset,
+) => {
+    return isLivePhoto
+        ? await readLivePhoto(fileTypeInfo, livePhotoAssets)
+        : await readFile(fileTypeInfo, file);
+};
+
 async function readFile(
     fileTypeInfo: FileTypeInfo,
     rawFile: File | ElectronFile,
 ): Promise<FileInMemory> {
-    const { thumbnail, hasStaticThumbnail } = await generateThumbnail(
-        rawFile,
-        fileTypeInfo,
-    );
     log.info(`reading file data ${getFileNameSize(rawFile)} `);
     let filedata: Uint8Array | DataStream;
     if (!(rawFile instanceof File)) {
@@ -390,7 +380,18 @@ async function readFile(
         filedata = await getUint8ArrayView(rawFile);
     }
 
+    if (filedata instanceof Uint8Array) {
+
+    } else {
+        filedata.stream
+    }
+
     log.info(`read file data successfully ${getFileNameSize(rawFile)} `);
+
+    const { thumbnail, hasStaticThumbnail } = await generateThumbnail(
+        rawFile,
+        fileTypeInfo,
+    );
 
     return {
         filedata,
@@ -403,17 +404,18 @@ async function readLivePhoto(
     fileTypeInfo: FileTypeInfo,
     livePhotoAssets: LivePhotoAssets,
 ) {
+    const imageData = await getUint8ArrayView(livePhotoAssets.image);
+
+    const videoData = await getUint8ArrayView(livePhotoAssets.video);
+
+    const imageBlob = new Blob([imageData]);
     const { thumbnail, hasStaticThumbnail } = await generateThumbnail(
-        livePhotoAssets.image,
+        imageBlob,
         {
             exactType: fileTypeInfo.imageType,
             fileType: FILE_TYPE.IMAGE,
         },
     );
-
-    const imageData = await getUint8ArrayView(livePhotoAssets.image);
-
-    const videoData = await getUint8ArrayView(livePhotoAssets.video);
 
     return {
         filedata: await encodeLivePhoto({
@@ -649,17 +651,16 @@ export async function uploader(
         }
         log.info(`reading asset ${fileNameSize}`);
 
-        const file = await uploadService.readAsset(fileTypeInfo, uploadAsset);
+        const file = readAsset(fileTypeInfo, uploadAsset);
 
         if (file.hasStaticThumbnail) {
             metadata.hasStaticThumbnail = true;
         }
 
-        const pubMagicMetadata =
-            await uploadService.constructPublicMagicMetadata({
-                ...publicMagicMetadata,
-                uploaderName,
-            });
+        const pubMagicMetadata = await constructPublicMagicMetadata({
+            ...publicMagicMetadata,
+            uploaderName,
+        });
 
         const fileWithMetadata: FileWithMetadata = {
             localID,
