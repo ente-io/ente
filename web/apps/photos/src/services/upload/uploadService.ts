@@ -242,21 +242,19 @@ interface UploadResponse {
     uploadedFile?: EnteFile;
 }
 
-export async function uploader(
+export const uploader = async (
     worker: Remote<DedicatedCryptoWorker>,
     existingFiles: EnteFile[],
     fileWithCollection: FileWithCollection2,
     parsedMetadataJSONMap: ParsedMetadataJSONMap,
     uploaderName: string,
-): Promise<UploadResponse> {
+): Promise<UploadResponse> => {
     const name = assetName(fileWithCollection);
     log.info(`Uploading ${name}`);
 
     const { collection, localID, ...uploadAsset2 } = fileWithCollection;
     /* TODO(MR): ElectronFile changes */
     const uploadAsset = uploadAsset2 as UploadAsset;
-    UIService.setFileProgress(localID, 0);
-    await wait(0);
     let fileTypeInfo: FileTypeInfo;
     let fileSize: number;
     try {
@@ -396,7 +394,7 @@ export async function uploader(
                 return { fileUploadResult: UPLOAD_RESULT.FAILED };
         }
     }
-}
+};
 
 export const getFileName = (file: File | ElectronFile | string) =>
     typeof file == "string" ? basename(file) : file.name;

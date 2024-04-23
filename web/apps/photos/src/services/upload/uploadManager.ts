@@ -6,6 +6,7 @@ import { getDedicatedCryptoWorker } from "@ente/shared/crypto";
 import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
 import { CustomError } from "@ente/shared/error";
 import { Events, eventBus } from "@ente/shared/events";
+import { wait } from "@ente/shared/utils";
 import { Remote } from "comlink";
 import { UPLOAD_RESULT, UPLOAD_STAGES } from "constants/upload";
 import isElectron from "is-electron";
@@ -372,6 +373,10 @@ class UploadManager {
             const { collectionID } = fileWithCollection;
             const collection = this.collections.get(collectionID);
             fileWithCollection = { ...fileWithCollection, collection };
+
+            UIService.setFileProgress(fileWithCollection.localID, 0);
+            await wait(0);
+
             const { fileUploadResult, uploadedFile } = await uploader(
                 worker,
                 this.existingFiles,
