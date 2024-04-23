@@ -12,7 +12,6 @@ import {
 } from "types/upload";
 
 const TYPE_JSON = "json";
-const DEDUPE_COLLECTION = new Set(["icloud library", "icloudlibrary"]);
 
 export function findMatchingExistingFiles(
     existingFiles: EnteFile[],
@@ -25,11 +24,6 @@ export function findMatchingExistingFiles(
         }
     }
     return matchingFiles;
-}
-
-export function shouldDedupeAcrossCollection(collectionName: string): boolean {
-    // using set to avoid unnecessary regex for removing spaces for each upload
-    return DEDUPE_COLLECTION.has(collectionName.toLocaleLowerCase());
 }
 
 export function areFilesSame(
