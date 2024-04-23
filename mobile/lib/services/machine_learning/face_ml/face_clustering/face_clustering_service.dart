@@ -624,7 +624,7 @@ class FaceClusteringService {
     }
 
     // analyze the results
-    FaceClusteringService._analyzeClusterResults(sortedFaceInfos);
+    // FaceClusteringService._analyzeClusterResults(sortedFaceInfos);
 
     return ClusteringResult(
       newFaceIdToCluster: newFaceIdToCluster,

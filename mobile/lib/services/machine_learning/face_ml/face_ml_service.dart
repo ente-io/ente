@@ -295,6 +295,7 @@ class FaceMlService {
     bool clusterInBuckets = true,
   }) async {
     _logger.info("`clusterAllImages()` called");
+    final clusterAllImagesTime = DateTime.now();
 
     try {
       // Get a sense of the total number of faces in the database
@@ -408,7 +409,8 @@ class FaceMlService {
         _logger.info('Done updating FaceIDs with clusterIDs in the DB, in '
             '${DateTime.now().difference(clusterDoneTime).inSeconds} seconds');
       }
-      _logger.info('clusterAllImages() finished');
+      _logger.info('clusterAllImages() finished, in '
+          '${DateTime.now().difference(clusterAllImagesTime).inSeconds} seconds');
     } catch (e, s) {
       _logger.severe("`clusterAllImages` failed", e, s);
     }
