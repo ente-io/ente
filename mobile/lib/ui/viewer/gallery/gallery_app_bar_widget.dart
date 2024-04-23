@@ -2,10 +2,6 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math' as math;
 
-import "package:cast/device.dart";
-import "package:cast/discovery_service.dart";
-import "package:cast/session.dart";
-import "package:cast/session_manager.dart";
 import "package:flutter/cupertino.dart";
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
@@ -580,7 +576,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         ),
       );
     }
-    if (widget.collection != null) {
+    if (widget.collection != null && castService.isSupported) {
       actions.add(castWidget(context));
     }
     if (items.isNotEmpty) {
@@ -650,8 +646,8 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   }
 
   Widget castWidget(BuildContext context) {
-    return FutureBuilder<List<CastDevice>>(
-      future: CastDiscoveryService().search(),
+    return FutureBuilder<List<Object>>(
+      future: castService.searchDevices(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return Center(
@@ -679,7 +675,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
                   showGenericErrorDialog(context: context, error: e).ignore();
                 }
               },
-              child: Text( device.name),
+              child: Text(device.toString()),
             );
           }).toList(),
         );
@@ -689,35 +685,9 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
 
   Future<void> _connectToYourApp(
     BuildContext context,
-    CastDevice object,
+    Object castDevice,
   ) async {
-    final session = await CastSessionManager().startSession(object);
-
-    session.stateStream.listen((state) {
-      if (state == CastSessionState.connected) {
-        const snackBar = SnackBar(content: Text('Connected'));
-        ScaffoldMessenger.of(context).showSnackBar(snackBar);
-
-        _sendPairingRequestToTV(session);
-      }
-    });
-
-    session.messageStream.listen((message) {
-      print('receive message: $message');
-    });
-
-    session.sendMessage(CastSession.kNamespaceReceiver, {
-      'type': 'LAUNCH',
-      'appId': 'F5BCEC64', // set the appId of your app here
-    });
-
-    _sendPairingRequestToTV(session);
-  }
-
-  void _sendPairingRequestToTV(CastSession session) {
-    print('_sendMessageToYourApp');
-
-    session.sendMessage('urn:x-cast:pair-request', {});
+    await castService.connectDevice(context, castDevice);
   }
 
   Future<void> onCleanUncategorizedClick(BuildContext buildContext) async {

@@ -210,7 +210,7 @@ packages:
     source: hosted
     version: "1.1.1"
   cast:
-    dependency: "direct main"
+    dependency: transitive
     description:
       path: "."
       ref: multicast_version
@@ -443,6 +443,20 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.17"
+  ente_cast:
+    dependency: "direct main"
+    description:
+      path: "plugins/ente_cast"
+      relative: true
+    source: path
+    version: "0.0.1"
+  ente_cast_normal:
+    dependency: "direct main"
+    description:
+      path: "plugins/ente_cast_normal"
+      relative: true
+    source: path
+    version: "0.0.1"
   ente_feature_flag:
     dependency: "direct main"
     description:

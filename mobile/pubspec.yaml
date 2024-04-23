@@ -27,10 +27,6 @@ dependencies:
   battery_info: ^1.1.1
   bip39: ^1.0.6
   cached_network_image: ^3.0.0
-  cast:
-    git:
-      url: https://github.com/guyluz11/flutter_cast.git
-      ref: multicast_version
   chewie:
     git:
       url: https://github.com/ente-io/chewie.git
@@ -51,6 +47,10 @@ dependencies:
   dotted_border: ^2.1.0
   dropdown_button2: ^2.0.0
   email_validator: ^2.0.1
+  ente_cast:
+    path: plugins/ente_cast
+  ente_cast_normal:
+    path: plugins/ente_cast_normal
   ente_feature_flag:
     path: plugins/ente_feature_flag
   equatable: ^2.0.5
