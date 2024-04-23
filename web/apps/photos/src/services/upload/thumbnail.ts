@@ -14,25 +14,26 @@ const maxThumbnailDimension = 720;
 const maxThumbnailSize = 100 * 1024; // 100 KB
 
 /**
- * Generate a JPEG thumbnail for the given image or video data.
+ * Generate a JPEG thumbnail for the given image or video blob.
  *
  * The thumbnail has a smaller file size so that is quick to load. But more
  * importantly, it uses a universal file format (JPEG in our case) so that the
  * thumbnail itself can be opened in all clients, even those like the web client
  * itself that might not yet have support for more exotic formats.
  *
- * @param blob The data (blob) of the file whose thumbnail we want to generate.
- * @param fileTypeInfo The type information for the file.
+ * @param blob The image or video blob whose thumbnail we want to generate.
+ *
+ * @param fileTypeInfo The type information for the file this blob came from.
  *
  * @return The JPEG data of the generated thumbnail.
  */
-export const generateThumbnail = async (
+export const generateThumbnailWeb = async (
     blob: Blob,
     fileTypeInfo: FileTypeInfo,
 ): Promise<Uint8Array> =>
     fileTypeInfo.fileType === FILE_TYPE.IMAGE
         ? await generateImageThumbnailUsingCanvas(blob, fileTypeInfo)
-        : await generateVideoThumbnail(blob);
+        : await generateVideoThumbnailWeb(blob);
 
 const generateImageThumbnailUsingCanvas = async (
     blob: Blob,
@@ -74,12 +75,12 @@ const generateImageThumbnailUsingCanvas = async (
     return await compressedJPEGData(canvas);
 };
 
-const generateVideoThumbnail = async (blob: Blob) => {
+const generateVideoThumbnailWeb = async (blob: Blob) => {
     try {
-        return await ffmpeg.generateVideoThumbnail(blob);
+        return await ffmpeg.generateVideoThumbnailWeb(blob);
     } catch (e) {
         log.error(
-            `Failed to generate video thumbnail using FFmpeg, will fallback to canvas`,
+            `Failed to generate video thumbnail using the wasm FFmpeg web worker, will fallback to canvas`,
             e,
         );
         return generateVideoThumbnailUsingCanvas(blob);
@@ -173,52 +174,35 @@ const percentageSizeDiff = (
 ) => ((oldThumbnailSize - newThumbnailSize) * 100) / oldThumbnailSize;
 
 /**
- * A fallback, black, thumbnail for use in cases where thumbnail generation
- * fails.
- */
-export const fallbackThumbnail = () =>
-    Uint8Array.from(atob(BLACK_THUMBNAIL_BASE64), (c) => c.charCodeAt(0));
-
-/**
- * Generate a JPEG thumbnail for the given file using native tools.
+ * Generate a JPEG thumbnail for the given file or path using native tools.
  *
  * This function only works when we're running in the context of our desktop
  * app, and this dependency is enforced by the need to pass the {@link electron}
  * object which we use to perform IPC with the Node.js side of our desktop app.
  *
- * @param fileOrPath Either the image or video File, or the path to the image or
- * video file on the user's local filesystem, whose thumbnail we want to
+ * @param dataOrPath The image or video {@link File}, or the path to the image
+ * or video file on the user's local filesystem, whose thumbnail we want to
  * generate.
  *
- * @param fileTypeInfo The type information for the file.
+ * @param fileTypeInfo The type information for {@link fileOrPath}.
  *
  * @return The JPEG data of the generated thumbnail.
  *
- * @see {@link generateThumbnail}.
+ * See also {@link generateThumbnailWeb}.
  */
 export const generateThumbnailNative = async (
     electron: Electron,
     fileOrPath: File | string,
     fileTypeInfo: FileTypeInfo,
-): Promise<GeneratedThumbnail> => {
-    try {
-        const thumbnail =
-            fileTypeInfo.fileType === FILE_TYPE.IMAGE
-                ? await generateImageThumbnailNative(electron, fileOrPath)
-                : await generateVideoThumbnail(blob);
-
-        if (thumbnail.length == 0) throw new Error("Empty thumbnail");
-        return { thumbnail, hasStaticThumbnail: false };
-    } catch (e) {
-        log.error(`Failed to generate ${fileTypeInfo.exactType} thumbnail`, e);
-        return { thumbnail: fallbackThumbnail(), hasStaticThumbnail: true };
-    }
-};
+): Promise<Uint8Array> =>
+    fileTypeInfo.fileType === FILE_TYPE.IMAGE
+        ? await generateImageThumbnailNative(electron, fileOrPath)
+        : await generateVideoThumbnailNative(blob);
 
 const generateImageThumbnailNative = async (
     electron: Electron,
     fileOrPath: File | string,
-): Promise<Uint8Array> => {
+) => {
     const startTime = Date.now();
     const jpegData = await electron.generateImageThumbnail(
         fileOrPath instanceof File
@@ -232,3 +216,19 @@ const generateImageThumbnailNative = async (
     );
     return jpegData;
 };
+
+const dataOrPath = (fileOrPath) => {
+    fileOrPath
+}
+const generateVideoThumbnailNative = async (
+    electron: Electron,
+    fileOrPath: File | string,
+) => ffmpeg.generateVideoThumbnailNative(electron, )
+
+
+/**
+ * A fallback, black, thumbnail for use in cases where thumbnail generation
+ * fails.
+ */
+export const fallbackThumbnail = () =>
+    Uint8Array.from(atob(BLACK_THUMBNAIL_BASE64), (c) => c.charCodeAt(0));

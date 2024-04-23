@@ -375,7 +375,6 @@ class ModuleState {
 
 const moduleState = new ModuleState();
 
-
 /**
  * Read the given file or path into an in-memory representation.
  *
@@ -424,13 +423,19 @@ const moduleState = new ModuleState();
  * we can do all the rest of the IPC operations using the path itself, and for
  * the read during upload using a streaming IPC mechanism.
  */
-async function readFile(
+const readFileOrPath = async (
     fileOrPath: File | string,
     fileTypeInfo: FileTypeInfo,
-): Promise<FileInMemory> {
+): Promise<FileInMemory> => {
     log.info(`Reading file ${fopLabel(fileOrPath)} `);
 
-    let thumbnail: Uint8Array
+    // If it's a file, read it into data
+    const dataOrPath =
+        fileOrPath instanceof File
+            ? new Uint8Array(await fileOrPath.arrayBuffer())
+            : fileOrPath;
+
+    let thumbnail: Uint8Array;
 
     const electron = globalThis.electron;
     const available = !moduleState.isNativeThumbnailCreationNotAvailable;
@@ -462,7 +467,6 @@ async function readFile(
         filedata = await getUint8ArrayView(rawFile);
     }
 
-
     try {
         const thumbnail =
             fileTypeInfo.fileType === FILE_TYPE.IMAGE
@@ -476,11 +480,9 @@ async function readFile(
         return { thumbnail: fallbackThumbnail(), hasStaticThumbnail: true };
     }
 
-
     if (filedata instanceof Uint8Array) {
-
     } else {
-        filedata.stream
+        filedata.stream;
     }
 
     log.info(`read file data successfully ${getFileNameSize(rawFile)} `);
@@ -495,7 +497,7 @@ async function readFile(
         thumbnail,
         hasStaticThumbnail,
     };
-}
+};
 
 async function readLivePhoto(
     fileTypeInfo: FileTypeInfo,
