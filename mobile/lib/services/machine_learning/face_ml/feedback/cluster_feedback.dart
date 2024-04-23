@@ -65,8 +65,13 @@ class ClusterFeedbackService {
 
     try {
       // Get the suggestions for the person using centroids and median
+      final startTime = DateTime.now();
       final List<(int, double, bool)> suggestClusterIds =
           await _getSuggestions(person);
+      final findSuggestionsTime = DateTime.now();
+      _logger.info(
+        '`_getSuggestions`: Found ${suggestClusterIds.length} suggestions in ${findSuggestionsTime.difference(startTime).inMilliseconds} ms',
+      );
 
       // Get the files for the suggestions
       final Map<int, Set<int>> fileIdToClusterID =
@@ -437,10 +442,10 @@ class ClusterFeedbackService {
   Future<List<(int, double, bool)>> _getSuggestions(
     PersonEntity p, {
     int sampleSize = 50,
-    double maxMedianDistance = 0.65,
+    double maxMedianDistance = 0.62,
     double goodMedianDistance = 0.55,
     double maxMeanDistance = 0.65,
-    double goodMeanDistance = 0.5,
+    double goodMeanDistance = 0.54,
   }) async {
     // Get all the cluster data
     final startTime = DateTime.now();
@@ -459,7 +464,7 @@ class ClusterFeedbackService {
     final smallestPersonClusterSize = personClusters
         .map((clusterID) => allClusterIdsToCountMap[clusterID] ?? 0)
         .reduce((value, element) => min(value, element));
-    final checkSizes = [kMinimumClusterSizeSearchResult, 20, 10, 5];
+    final checkSizes = [kMinimumClusterSizeSearchResult, 20, 10, 5, 1];
     for (final minimumSize in checkSizes.toSet()) {
       if (smallestPersonClusterSize >= minimumSize) {
         final Map<int, List<double>> clusterAvgBigClusters =
