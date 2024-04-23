@@ -10,7 +10,7 @@ import 'package:photos/events/two_factor_status_change_event.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/models/user_details.dart";
-import "package:photos/services/feature_flag_service.dart";
+import 'package:photos/service_locator.dart';
 import 'package:photos/services/local_authentication_service.dart';
 import "package:photos/services/passkey_service.dart";
 import 'package:photos/services/user_service.dart';
@@ -70,8 +70,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
     final Completer completer = Completer();
     final List<Widget> children = [];
     if (_config.hasConfiguredAccount()) {
-      final bool isInternalUser =
-          FeatureFlagService.instance.isInternalUserOrDebugBuild();
+      final bool isInternalUser = flagService.internalUser;
       children.addAll(
         [
           sectionOptionSpacing,

@@ -23,9 +23,9 @@ import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
 import 'package:photos/models/upload_strategy.dart';
+import "package:photos/service_locator.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/collections_service.dart';
-import "package:photos/services/feature_flag_service.dart";
 import 'package:photos/services/ignored_files_service.dart';
 import 'package:photos/services/local_file_update_service.dart';
 import "package:photos/services/notification_service.dart";
@@ -185,7 +185,7 @@ class RemoteSyncService {
         rethrow;
       } else {
         _logger.severe("Error executing remote sync ", e, s);
-        if (FeatureFlagService.instance.isInternalUserOrDebugBuild()) {
+        if (flagService.internalUser) {
           rethrow;
         }
       }

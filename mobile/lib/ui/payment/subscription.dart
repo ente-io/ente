@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:photos/core/configuration.dart';
-import 'package:photos/services/feature_flag_service.dart';
+import "package:photos/service_locator.dart";
 import 'package:photos/services/update_service.dart';
 import "package:photos/ui/payment/store_subscription_page.dart";
 import 'package:photos/ui/payment/stripe_subscription_page.dart';
@@ -9,8 +9,7 @@ StatefulWidget getSubscriptionPage({bool isOnBoarding = false}) {
   if (UpdateService.instance.isIndependentFlavor()) {
     return StripeSubscriptionPage(isOnboarding: isOnBoarding);
   }
-  if (FeatureFlagService.instance.enableStripe() &&
-      _isUserCreatedPostStripeSupport()) {
+  if (flagService.enableStripe && _isUserCreatedPostStripeSupport()) {
     return StripeSubscriptionPage(isOnboarding: isOnBoarding);
   } else {
     return StoreSubscriptionPage(isOnboarding: isOnBoarding);

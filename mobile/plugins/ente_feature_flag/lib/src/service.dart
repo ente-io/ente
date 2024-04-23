@@ -46,7 +46,7 @@ class FlagService {
       if (kDebugMode) {
         debugPrint("Fetching feature flags");
       }
-      final response = await _enteDio.get("/remote-store/feature_flags");
+      final response = await _enteDio.get("/remote-store/feature-flags");
       final remoteFlags = RemoteFlags.fromMap(response.data);
       await _prefs.setString("remote_flags", remoteFlags.toJson());
       _flags = remoteFlags;

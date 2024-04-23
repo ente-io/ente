@@ -18,8 +18,8 @@ import 'package:photos/models/file/trash_file.dart';
 import 'package:photos/models/ignored_file.dart';
 import "package:photos/models/metadata/common_keys.dart";
 import 'package:photos/models/selected_files.dart';
+import "package:photos/service_locator.dart";
 import 'package:photos/services/collections_service.dart';
-import "package:photos/services/feature_flag_service.dart";
 import 'package:photos/services/hidden_service.dart';
 import 'package:photos/services/ignored_files_service.dart';
 import 'package:photos/services/local_sync_service.dart';
@@ -141,8 +141,7 @@ class FileAppBarState extends State<FileAppBar> {
       );
     }
     // only show fav option for files owned by the user
-    if ((isOwnedByUser ||
-            FeatureFlagService.instance.isInternalUserOrDebugBuild()) &&
+    if ((isOwnedByUser || flagService.internalUser) &&
         !isFileHidden &&
         isFileUploaded) {
       _actions.add(

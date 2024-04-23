@@ -14,8 +14,8 @@ import 'package:photos/models/files_split.dart';
 import 'package:photos/models/gallery_type.dart';
 import "package:photos/models/metadata/common_keys.dart";
 import 'package:photos/models/selected_files.dart';
+import "package:photos/service_locator.dart";
 import 'package:photos/services/collections_service.dart';
-import "package:photos/services/feature_flag_service.dart";
 import 'package:photos/services/hidden_service.dart';
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -98,7 +98,7 @@ class _FileSelectionActionsWidgetState
 
   @override
   Widget build(BuildContext context) {
-    _isInternalUser = FeatureFlagService.instance.isInternalUserOrDebugBuild();
+    _isInternalUser = flagService.internalUser;
     final ownedFilesCount = split.ownedByCurrentUser.length;
     final ownedAndPendingUploadFilesCount =
         ownedFilesCount + split.pendingUploads.length;
