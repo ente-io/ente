@@ -2,6 +2,7 @@ import { encodeLivePhoto } from "@/media/live-photo";
 import {
     basename,
     convertBytesToHumanReadable,
+    fopLabel,
     getFileNameSize,
 } from "@/next/file";
 import log from "@/next/log";
@@ -424,26 +425,10 @@ const moduleState = new ModuleState();
  * the read during upload using a streaming IPC mechanism.
  */
 async function readFile(
-    fileOrPath
+    fileOrPath: File | string,
     fileTypeInfo: FileTypeInfo,
-    rawFile: File | ElectronFile,
 ): Promise<FileInMemory> {
-    log.info(`reading file data ${getFileNameSize(rawFile)} `);
-    let filedata: Uint8Array | DataStream;
-    if (!(rawFile instanceof File)) {
-        if (rawFile.size > MULTIPART_PART_SIZE) {
-            filedata = await getElectronFileStream(
-                rawFile,
-                FILE_READER_CHUNK_SIZE,
-            );
-        } else {
-            filedata = await getUint8ArrayView(rawFile);
-        }
-    } else if (rawFile.size > MULTIPART_PART_SIZE) {
-        filedata = getFileStream(rawFile, FILE_READER_CHUNK_SIZE);
-    } else {
-        filedata = await getUint8ArrayView(rawFile);
-    }
+    log.info(`Reading file ${fopLabel(fileOrPath)} `);
 
     let thumbnail: Uint8Array
 
@@ -459,6 +444,22 @@ async function readFile(
                 log.error("Native thumbnail creation failed", e);
             }
         }
+    }
+
+    let filedata: Uint8Array | DataStream;
+    if (!(rawFile instanceof File)) {
+        if (rawFile.size > MULTIPART_PART_SIZE) {
+            filedata = await getElectronFileStream(
+                rawFile,
+                FILE_READER_CHUNK_SIZE,
+            );
+        } else {
+            filedata = await getUint8ArrayView(rawFile);
+        }
+    } else if (rawFile.size > MULTIPART_PART_SIZE) {
+        filedata = getFileStream(rawFile, FILE_READER_CHUNK_SIZE);
+    } else {
+        filedata = await getUint8ArrayView(rawFile);
     }
 
 

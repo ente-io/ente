@@ -1,4 +1,5 @@
 import { ElectronFile } from "@/next/types/file";
+import type { Electron } from "@/next/types/ipc";
 import { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { validateAndGetCreationUnixTimeInMicroSeconds } from "@ente/shared/time";
 import { Remote } from "comlink";
@@ -12,31 +13,21 @@ import { ParsedExtractedMetadata } from "types/upload";
 import { type DedicatedFFmpegWorker } from "worker/ffmpeg.worker";
 
 /**
- * Generate a thumbnail of the given video using FFmpeg.
+ * Generate a thumbnail for the given video using a wasm FFmpeg running in a web
+ * worker.
  *
  * This function is called during upload, when we need to generate thumbnails
  * for the new files that the user is adding.
  *
  * @param blob The input video blob.
+ *
  * @returns JPEG data of the generated thumbnail.
+ *
+ * See also {@link generateVideoThumbnailNative}.
  */
-export const generateVideoThumbnail = async (blob: Blob) => {
+export const generateVideoThumbnailWeb = async (blob: Blob) => {
     const thumbnailAtTime = (seekTime: number) =>
-        ffmpegExec(
-            [
-                ffmpegPathPlaceholder,
-                "-i",
-                inputPathPlaceholder,
-                "-ss",
-                `00:00:0${seekTime}`,
-                "-vframes",
-                "1",
-                "-vf",
-                "scale=-1:720",
-                outputPathPlaceholder,
-            ],
-            blob,
-        );
+        ffmpegExecWeb(commandForThumbnailAtTime(seekTime), blob, 0);
 
     try {
         // Try generating thumbnail at seekTime 1 second.
@@ -47,6 +38,50 @@ export const generateVideoThumbnail = async (blob: Blob) => {
         return await thumbnailAtTime(0);
     }
 };
+
+/**
+ * Generate a thumbnail for the given video using a native FFmpeg binary bundled
+ * with our desktop app.
+ *
+ * This function is called during upload, when we need to generate thumbnails
+ * for the new files that the user is adding.
+ *
+ * @param dataOrPath The input video's data or the path to the video on the
+ * user's local filesystem. See: [Note: The fileOrPath parameter to upload].
+ *
+ * @returns JPEG data of the generated thumbnail.
+ *
+ * See also {@link generateVideoThumbnailNative}.
+ */
+export const generateVideoThumbnailNative = async (
+    electron: Electron,
+    dataOrPath: Uint8Array | string,
+) => {
+    const thumbnailAtTime = (seekTime: number) =>
+        electron.ffmpegExec(commandForThumbnailAtTime(seekTime), dataOrPath, 0);
+
+    try {
+        // Try generating thumbnail at seekTime 1 second.
+        return await thumbnailAtTime(1);
+    } catch (e) {
+        // If that fails, try again at the beginning. If even this throws, let
+        // it fail.
+        return await thumbnailAtTime(0);
+    }
+};
+
+const commandForThumbnailAtTime = (seekTime: number) => [
+    ffmpegPathPlaceholder,
+    "-i",
+    inputPathPlaceholder,
+    "-ss",
+    `00:00:0${seekTime}`,
+    "-vframes",
+    "1",
+    "-vf",
+    "scale=-1:720",
+    outputPathPlaceholder,
+];
 
 /** Called during upload */
 export async function extractVideoMetadata(file: File | ElectronFile) {
@@ -157,16 +192,28 @@ export async function convertToMP4(file: File) {
 }
 
 /**
- * Run the given FFmpeg command.
- *
- * If we're running in the context of our desktop app, use the FFmpeg binary we
- * bundle with our desktop app to run the command. Otherwise fallback to using a
- * wasm FFmpeg in a web worker.
+ * Run the given FFmpeg command using a wasm FFmpeg running in a web worker.
  *
  * As a rough ballpark, currently the native FFmpeg integration in the desktop
  * app is 10-20x faster than the wasm one. See: [Note: FFmpeg in Electron].
  */
-const ffmpegExec = async (
+const ffmpegExecWeb = async (
+    command: string[],
+    blob: Blob,
+    timeoutMs: number,
+) => {
+    const worker = await workerFactory.lazy();
+    return await worker.exec(command, blob, timeoutMs);
+};
+
+/**
+ * Run the given FFmpeg command using a native FFmpeg binary bundled with our
+ * desktop app.
+ *
+ * See also: {@link ffmpegExecWeb}.
+ */
+const ffmpegExecNative = async (
+    electron: Electron,
     command: string[],
     blob: Blob,
     timeoutMs: number = 0,
@@ -176,7 +223,7 @@ const ffmpegExec = async (
         const data = new Uint8Array(await blob.arrayBuffer());
         return await electron.ffmpegExec(command, data, timeoutMs);
     } else {
-        const worker = await workerFactory.lazy()
+        const worker = await workerFactory.lazy();
         return await worker.exec(command, blob, timeoutMs);
     }
 };

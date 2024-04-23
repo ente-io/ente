@@ -1,4 +1,4 @@
-import type { DesktopFilePath, ElectronFile } from "./types/file";
+import type { ElectronFile } from "./types/file";
 
 /**
  * The two parts of a file name - the name itself, and an (optional) extension.
@@ -70,8 +70,8 @@ export const dirname = (path: string) => {
  * Return a short description of the given {@link fileOrPath} suitable for
  * helping identify it in log messages.
  */
-export const fopLabel = (fileOrPath: File | DesktopFilePath) =>
-    fileOrPath instanceof File ? `File(${fileOrPath.name})` : fileOrPath.path;
+export const fopLabel = (fileOrPath: File | string) =>
+    fileOrPath instanceof File ? `File(${fileOrPath.name})` : fileOrPath;
 
 export function getFileNameSize(file: File | ElectronFile) {
     return `${file.name}_${convertBytesToHumanReadable(file.size)}`;

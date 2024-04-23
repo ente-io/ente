@@ -30,79 +30,16 @@ export const generateThumbnail = async (
     blob: Blob,
     fileTypeInfo: FileTypeInfo,
 ): Promise<Uint8Array> =>
-            fileTypeInfo.fileType === FILE_TYPE.IMAGE
-                ? await generateImageThumbnailUsingCanvas(blob, fileTypeInfo)
-                : await generateVideoThumbnail(blob);
-
-};
-
-/**
- * A fallback, black, thumbnail for use in cases where thumbnail generation
- * fails.
- */
-export const fallbackThumbnail = () =>
-    Uint8Array.from(atob(BLACK_THUMBNAIL_BASE64), (c) => c.charCodeAt(0));
-
-/**
- * Generate a JPEG thumbnail for the given file using native tools.
- *
- * This function only works when we're running in the context of our desktop
- * app, and this dependency is enforced by the need to pass the {@link electron}
- * object which we use to perform IPC with the Node.js side of our desktop app.
- *
- * @param fileOrPath Either the image or video File, or the path to the image or
- * video file on the user's local filesystem, whose thumbnail we want to
- * generate.
- *
- * @param fileTypeInfo The type information for the file.
- *
- * @return The JPEG data of the generated thumbnail.
- *
- * @see {@link generateThumbnail}.
- */
-export const generateThumbnailNative = async (
-    electron: Electron,
-    fileOrPath: File | string,
-    fileTypeInfo: FileTypeInfo,
-): Promise<GeneratedThumbnail> => {
-    try {
-        const thumbnail =
-            fileTypeInfo.fileType === FILE_TYPE.IMAGE
-                ? await generateImageThumbnailNative(electron, fileOrPath)
-                : await generateVideoThumbnail(blob);
-
-        if (thumbnail.length == 0) throw new Error("Empty thumbnail");
-        return { thumbnail, hasStaticThumbnail: false };
-    } catch (e) {
-        log.error(`Failed to generate ${fileTypeInfo.exactType} thumbnail`, e);
-        return { thumbnail: fallbackThumbnail(), hasStaticThumbnail: true };
-    }
-};
-
-const generateImageThumbnailNative = async (
-    electron: Electron,
-    fileOrPath: File | string,
-): Promise<Uint8Array> => {
-    const startTime = Date.now();
-    const jpegData = await electron.generateImageThumbnail(
-        fileOrPath instanceof File
-            ? new Uint8Array(await fileOrPath.arrayBuffer())
-            : fileOrPath,
-        maxThumbnailDimension,
-        maxThumbnailSize,
-    );
-    log.debug(
-        () => `Native thumbnail generation took ${Date.now() - startTime} ms`,
-    );
-    return jpegData;
-};
+    fileTypeInfo.fileType === FILE_TYPE.IMAGE
+        ? await generateImageThumbnailUsingCanvas(blob, fileTypeInfo)
+        : await generateVideoThumbnail(blob);
 
 const generateImageThumbnailUsingCanvas = async (
     blob: Blob,
     fileTypeInfo: FileTypeInfo,
 ) => {
     if (isFileHEIC(fileTypeInfo.exactType)) {
-        log.debug(() => `Pre-converting ${fileTypeInfo.exactType} to JPEG`);
+        log.debug(() => `Pre-converting HEIC to JPEG for thumbnail generation`);
         blob = await heicToJPEG(blob);
     }
 
@@ -234,3 +171,64 @@ const percentageSizeDiff = (
     newThumbnailSize: number,
     oldThumbnailSize: number,
 ) => ((oldThumbnailSize - newThumbnailSize) * 100) / oldThumbnailSize;
+
+/**
+ * A fallback, black, thumbnail for use in cases where thumbnail generation
+ * fails.
+ */
+export const fallbackThumbnail = () =>
+    Uint8Array.from(atob(BLACK_THUMBNAIL_BASE64), (c) => c.charCodeAt(0));
+
+/**
+ * Generate a JPEG thumbnail for the given file using native tools.
+ *
+ * This function only works when we're running in the context of our desktop
+ * app, and this dependency is enforced by the need to pass the {@link electron}
+ * object which we use to perform IPC with the Node.js side of our desktop app.
+ *
+ * @param fileOrPath Either the image or video File, or the path to the image or
+ * video file on the user's local filesystem, whose thumbnail we want to
+ * generate.
+ *
+ * @param fileTypeInfo The type information for the file.
+ *
+ * @return The JPEG data of the generated thumbnail.
+ *
+ * @see {@link generateThumbnail}.
+ */
+export const generateThumbnailNative = async (
+    electron: Electron,
+    fileOrPath: File | string,
+    fileTypeInfo: FileTypeInfo,
+): Promise<GeneratedThumbnail> => {
+    try {
+        const thumbnail =
+            fileTypeInfo.fileType === FILE_TYPE.IMAGE
+                ? await generateImageThumbnailNative(electron, fileOrPath)
+                : await generateVideoThumbnail(blob);
+
+        if (thumbnail.length == 0) throw new Error("Empty thumbnail");
+        return { thumbnail, hasStaticThumbnail: false };
+    } catch (e) {
+        log.error(`Failed to generate ${fileTypeInfo.exactType} thumbnail`, e);
+        return { thumbnail: fallbackThumbnail(), hasStaticThumbnail: true };
+    }
+};
+
+const generateImageThumbnailNative = async (
+    electron: Electron,
+    fileOrPath: File | string,
+): Promise<Uint8Array> => {
+    const startTime = Date.now();
+    const jpegData = await electron.generateImageThumbnail(
+        fileOrPath instanceof File
+            ? new Uint8Array(await fileOrPath.arrayBuffer())
+            : fileOrPath,
+        maxThumbnailDimension,
+        maxThumbnailSize,
+    );
+    log.debug(
+        () => `Native thumbnail generation took ${Date.now() - startTime} ms`,
+    );
+    return jpegData;
+};
