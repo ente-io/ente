@@ -430,10 +430,122 @@ const moduleState = new ModuleState();
 const readFileOrPath = async (
     fileOrPath: File | string,
     fileTypeInfo: FileTypeInfo,
-): Promise<FileInMemory> =>
-    fileOrPath instanceof File
-        ? _readFile(fileOrPath, fileTypeInfo)
-        : _readPath(fileOrPath, fileTypeInfo);
+): Promise<FileInMemory> => {
+    let file: File | undefined;
+    let dataOrStream: Uint8Array | DataStream;
+    let fileSize: number;
+
+    if (fileOrPath instanceof File) {
+        file = fileOrPath;
+        fileSize = file.size;
+        dataOrStream =
+            fileSize > MULTIPART_PART_SIZE
+                ? getFileStream(file, FILE_READER_CHUNK_SIZE)
+                : new Uint8Array(await file.arrayBuffer());
+    } else {
+        const path = fileOrPath;
+        const { response, size } = await readStream(ensureElectron(), path);
+        fileSize = size;
+        if (size > MULTIPART_PART_SIZE) {
+            const chunkCount = Math.ceil(size / FILE_READER_CHUNK_SIZE);
+            dataOrStream = { stream: response.body, chunkCount };
+        } else {
+            dataOrStream = new Uint8Array(await response.arrayBuffer());
+        }
+    }
+
+    let thumbnail: Uint8Array | undefined;
+    let hasStaticThumbnail = false;
+
+    const electron = globalThis.electron;
+    if (electron) {
+        // On Windows native thumbnail creation for images is not yet implemented.
+        const notAvailable =
+            fileTypeInfo.fileType == FILE_TYPE.IMAGE &&
+            moduleState.isNativeImageThumbnailCreationNotAvailable;
+
+        try {
+            if (!notAvailable) {
+                if (fileOrPath instanceof File) {
+                    if (dataOrStream instanceof Uint8Array) {
+                        thumbnail = await generateThumbnailNative(
+                            electron,
+                            dataOrStream,
+                            fileTypeInfo,
+                        );
+                    }
+                } else {
+                    thumbnail = await generateThumbnailNative(
+                        electron,
+                        fileOrPath,
+                        fileTypeInfo,
+                    );
+                }
+            }
+        } catch (e) {
+            if (e.message == CustomErrorMessage.NotAvailable) {
+                moduleState.isNativeImageThumbnailCreationNotAvailable = true;
+            } else {
+                log.error("Native thumbnail creation failed", e);
+            }
+        }
+    }
+
+    // If needed, fallback to browser based thumbnail generation. First, see if
+    // we already have a file (which is also a blob).
+    if (!thumbnail && file) {
+        try {
+            thumbnail = await generateThumbnailWeb(file, fileTypeInfo);
+        } catch (e) {
+            log.error(
+                `Failed to generate ${fileTypeInfo.exactType} thumbnail`,
+                e,
+            );
+        }
+    }
+
+    // Otherwise see if the data is small enough to read in memory.
+    if (!thumbnail) {
+        let data: Uint8Array | undefined;
+        if (dataOrStream instanceof Uint8Array) {
+            data = dataOrStream;
+        } else {
+            // Read the stream into memory, since the our web based thumbnail
+            // generation methods need the entire file in memory. Don't try this
+            // fallback for huge files though lest we run out of memory.
+            if (fileSize < 100 * 1024 * 1024 /* 100 MB */) {
+                data = new Uint8Array(
+                    await new Response(dataOrStream.stream).arrayBuffer(),
+                );
+                // The Readable stream cannot be read twice, so also overwrite
+                // the stream with the data we read.
+                dataOrStream = data;
+            }
+        }
+        if (data) {
+            const blob = new Blob([data]);
+            try {
+                thumbnail = await generateThumbnailWeb(blob, fileTypeInfo);
+            } catch (e) {
+                log.error(
+                    `Failed to generate ${fileTypeInfo.exactType} thumbnail`,
+                    e,
+                );
+            }
+        }
+    }
+
+    if (!thumbnail) {
+        thumbnail = fallbackThumbnail();
+        hasStaticThumbnail = true;
+    }
+
+    return {
+        filedata: dataOrStream,
+        thumbnail,
+        hasStaticThumbnail,
+    };
+};
 
 const _readFile = async (file: File, fileTypeInfo: FileTypeInfo) => {
     const dataOrStream =

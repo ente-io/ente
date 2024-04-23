@@ -994,6 +994,7 @@ class ExportService {
                         file,
                     );
                     await writeStream(
+                        electron,
                         `${collectionExportPath}/${fileExportName}`,
                         updatedFileStream,
                     );
@@ -1047,6 +1048,7 @@ class ExportService {
                 file,
             );
             await writeStream(
+                electron,
                 `${collectionExportPath}/${imageExportName}`,
                 imageStream,
             );
@@ -1061,6 +1063,7 @@ class ExportService {
             );
             try {
                 await writeStream(
+                    electron,
                     `${collectionExportPath}/${videoExportName}`,
                     videoStream,
                 );

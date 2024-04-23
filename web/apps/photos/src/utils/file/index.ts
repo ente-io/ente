@@ -646,7 +646,11 @@ async function downloadFileDesktop(
             fs.exists,
         );
         const imageStream = generateStreamFromArrayBuffer(imageData);
-        await writeStream(`${downloadDir}/${imageExportName}`, imageStream);
+        await writeStream(
+            electron,
+            `${downloadDir}/${imageExportName}`,
+            imageStream,
+        );
         try {
             const videoExportName = await safeFileName(
                 downloadDir,
@@ -654,7 +658,11 @@ async function downloadFileDesktop(
                 fs.exists,
             );
             const videoStream = generateStreamFromArrayBuffer(videoData);
-            await writeStream(`${downloadDir}/${videoExportName}`, videoStream);
+            await writeStream(
+                electron,
+                `${downloadDir}/${videoExportName}`,
+                videoStream,
+            );
         } catch (e) {
             await fs.rm(`${downloadDir}/${imageExportName}`);
             throw e;
@@ -665,7 +673,11 @@ async function downloadFileDesktop(
             file.metadata.title,
             fs.exists,
         );
-        await writeStream(`${downloadDir}/${fileExportName}`, updatedStream);
+        await writeStream(
+            electron,
+            `${downloadDir}/${fileExportName}`,
+            updatedStream,
+        );
     }
 }
 

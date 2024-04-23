@@ -4,12 +4,17 @@
  * NOTE: These functions only work when we're running in our desktop app.
  */
 
+import type { Electron } from "@/next/types/ipc";
+
 /**
  * Stream the given file from the user's local filesystem.
  *
- * **This only works when we're running in our desktop app**. It uses the
+ * This only works when we're running in our desktop app since it uses the
  * "stream://" protocol handler exposed by our custom code in the Node.js layer.
  * See: [Note: IPC streams].
+ *
+ * To avoid accidentally invoking it in a non-desktop app context, it requires
+ * the {@link Electron} object as a parameter (even though it doesn't use it).
  *
  * @param path The path on the file on the user's local filesystem whose
  * contents we want to stream.
@@ -23,6 +28,7 @@
  * * The size is the size of the file that we'll be reading from disk.
  */
 export const readStream = async (
+    _: Electron,
     path: string,
 ): Promise<{ response: Response; size: number }> => {
     const req = new Request(`stream://read${path}`, {
@@ -47,14 +53,22 @@ export const readStream = async (
 /**
  * Write the given stream to a file on the local machine.
  *
- * **This only works when we're running in our desktop app**. It uses the
+ * This only works when we're running in our desktop app since it uses the
  * "stream://" protocol handler exposed by our custom code in the Node.js layer.
  * See: [Note: IPC streams].
  *
+ * To avoid accidentally invoking it in a non-desktop app context, it requires
+ * the {@link Electron} object as a parameter (even though it doesn't use it).
+ *
  * @param path The path on the local machine where to write the file to.
+ *
  * @param stream The stream which should be written into the file.
- *  */
-export const writeStream = async (path: string, stream: ReadableStream) => {
+ */
+export const writeStream = async (
+    _: Electron,
+    path: string,
+    stream: ReadableStream,
+) => {
     // TODO(MR): This doesn't currently work.
     //
     // Not sure what I'm doing wrong here; I've opened an issue upstream
