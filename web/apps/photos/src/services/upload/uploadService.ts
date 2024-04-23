@@ -838,7 +838,7 @@ const uploadToBucket = async (
             );
         } else {
             const progressTracker = makeProgessTracker(file.localID);
-            const fileUploadURL = await this.getUploadURL();
+            const fileUploadURL = await uploadService.getUploadURL();
             if (!isCFUploadProxyDisabled) {
                 fileObjectKey = await UploadHttpClient.putFileV2(
                     fileUploadURL,
@@ -895,7 +895,7 @@ interface PartEtag {
     ETag: string;
 }
 
-export async function uploadStreamUsingMultipart(
+async function uploadStreamUsingMultipart(
     fileLocalID: number,
     dataStream: DataStream,
     makeProgessTracker: MakeProgressTracker,
@@ -910,7 +910,8 @@ export async function uploadStreamUsingMultipart(
     const { stream } = dataStream;
 
     const streamReader = stream.getReader();
-    const percentPerPart = getRandomProgressPerPartUpload(uploadPartCount);
+    const percentPerPart =
+        RANDOM_PERCENTAGE_PROGRESS_FOR_PUT() / uploadPartCount;
     const partEtags: PartEtag[] = [];
     for (const [
         index,
@@ -945,14 +946,19 @@ export async function uploadStreamUsingMultipart(
     if (!done) {
         throw Error(CustomError.CHUNK_MORE_THAN_EXPECTED);
     }
-    await completeMultipartUpload(partEtags, multipartUploadURLs.completeURL);
-    return multipartUploadURLs.objectKey;
-}
 
-function getRandomProgressPerPartUpload(uploadPartCount: number) {
-    const percentPerPart =
-        RANDOM_PERCENTAGE_PROGRESS_FOR_PUT() / uploadPartCount;
-    return percentPerPart;
+    const completeURL = multipartUploadURLs.completeURL;
+    const cBody = convert.js2xml(
+        { CompleteMultipartUpload: { Part: partEtags } },
+        { compact: true, ignoreComment: true, spaces: 4 },
+    );
+    if (!isCFUploadProxyDisabled) {
+        await UploadHttpClient.completeMultipartUploadV2(completeURL, cBody);
+    } else {
+        await UploadHttpClient.completeMultipartUpload(completeURL, cBody);
+    }
+
+    return multipartUploadURLs.objectKey;
 }
 
 async function combineChunksToFormUploadPart(
@@ -969,20 +975,4 @@ async function combineChunksToFormUploadPart(
         }
     }
     return Uint8Array.from(combinedChunks);
-}
-
-async function completeMultipartUpload(
-    partEtags: PartEtag[],
-    completeURL: string,
-) {
-    const options = { compact: true, ignoreComment: true, spaces: 4 };
-    const body = convert.js2xml(
-        { CompleteMultipartUpload: { Part: partEtags } },
-        options,
-    );
-    if (!uploadService.getIsCFUploadProxyDisabled()) {
-        await UploadHttpClient.completeMultipartUploadV2(completeURL, body);
-    } else {
-        await UploadHttpClient.completeMultipartUpload(completeURL, body);
-    }
 }
