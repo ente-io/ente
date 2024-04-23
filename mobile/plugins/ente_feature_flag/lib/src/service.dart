@@ -9,11 +9,13 @@ import "package:shared_preferences/shared_preferences.dart";
 
 import "model.dart";
 
-class FeatureFlagService {
+class FlagService {
   late final SharedPreferences _prefs;
   late final Dio _enteDio;
+  bool _usingEnteEmail = false;
 
-  FeatureFlagService(this._prefs, this._enteDio) {
+  FlagService(this._prefs, this._enteDio) {
+    _usingEnteEmail = _prefs.getString("email")?.endsWith("@ente.io") ?? false;
     Future.delayed(const Duration(seconds: 5), () {
       _fetch();
     });
@@ -55,9 +57,11 @@ class FeatureFlagService {
 
   bool get disableCFWorker => flags.disableCFWorker;
 
-  bool get internalUser => flags.internalUser;
+  bool get internalUser => flags.internalUser || _usingEnteEmail;
 
   bool get betaUser => flags.betaUser;
+
+  bool get internalOrBetaUser => internalUser || betaUser;
 
   bool get enableStripe => Platform.isIOS ? false : flags.enableStripe;
 
