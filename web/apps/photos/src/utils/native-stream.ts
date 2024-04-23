@@ -5,6 +5,34 @@
  */
 
 /**
+ * Stream the given file from the user's local filesystem.
+ *
+ * **This only works when we're running in our desktop app**. It uses the
+ * "stream://" protocol handler exposed by our custom code in the Node.js layer.
+ * See: [Note: IPC streams].
+ *
+ * @param path The path on the file on the user's local filesystem whose
+ * contents we want to stream.
+ *
+ * @return A standard web {@link Response} object that contains the contents of
+ * the file. In particular, `response.body` will be a {@link ReadableStream}
+ * that can be used to read the files contents in a streaming, chunked, manner.
+ */
+export const readStream = async (path: string) => {
+    const req = new Request(`stream://read${path}`, {
+        method: "GET",
+    });
+
+    const res = await fetch(req);
+    if (!res.ok)
+        throw new Error(
+            `Failed to read stream from ${path}: HTTP ${res.status}`,
+        );
+
+    return res;
+};
+
+/**
  * Write the given stream to a file on the local machine.
  *
  * **This only works when we're running in our desktop app**. It uses the

@@ -43,6 +43,16 @@ export const registerStreamProtocol = () => {
         // Convert e.g. "%20" to spaces.
         const path = decodeURIComponent(pathname);
         switch (host) {
+            case "read":
+                try {
+                    return net.fetch(pathToFileURL(path).toString());
+                } catch (e) {
+                    log.error(`Failed to read stream for ${url}`, e);
+                    return new Response(`Failed to read stream: ${e.message}`, {
+                        status: 500,
+                    });
+                }
+
             case "write":
                 try {
                     await writeStream(path, request.body);
@@ -53,16 +63,6 @@ export const registerStreamProtocol = () => {
                         `Failed to write stream: ${e.message}`,
                         { status: 500 },
                     );
-                }
-
-            case "read":
-                try {
-                    return net.fetch(pathToFileURL(path).toString());
-                } catch (e) {
-                    log.error(`Failed to read stream for ${url}`, e);
-                    return new Response(`Failed to read stream: ${e.message}`, {
-                        status: 500,
-                    });
                 }
 
             default:
