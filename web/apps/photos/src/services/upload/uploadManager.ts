@@ -150,10 +150,6 @@ class UploadManager {
                     UPLOAD_STAGES.READING_GOOGLE_METADATA_FILES,
                 );
                 await this.parseMetadataJSONFiles(metadataJSONFiles);
-
-                UploadService.setParsedMetadataJSONMap(
-                    this.parsedMetadataJSONMap,
-                );
             }
             if (mediaFiles.length) {
                 log.info(`clusterLivePhotoFiles started`);
@@ -241,10 +237,6 @@ class UploadManager {
                     UPLOAD_STAGES.READING_GOOGLE_METADATA_FILES,
                 );
                 await this.parseMetadataJSONFiles(metadataJSONFiles);
-
-                UploadService.setParsedMetadataJSONMap(
-                    this.parsedMetadataJSONMap,
-                );
             }
             if (mediaFiles.length) {
                 log.info(`clusterLivePhotoFiles started`);
@@ -384,6 +376,7 @@ class UploadManager {
                 worker,
                 this.existingFiles,
                 fileWithCollection,
+                this.parsedMetadataJSONMap,
                 this.uploaderName,
             );
 

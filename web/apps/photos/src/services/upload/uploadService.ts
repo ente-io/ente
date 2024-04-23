@@ -26,12 +26,10 @@ import {
     BackupedFile,
     DataStream,
     EncryptedFile,
-    ExtractMetadataResult,
     FileInMemory,
     FileTypeInfo,
     FileWithMetadata,
     Logger,
-    ParsedMetadataJSON,
     ParsedMetadataJSONMap,
     ProcessedFile,
     PublicUploadProps,
@@ -71,10 +69,6 @@ import UploadHttpClient from "./uploadHttpClient";
 /** Upload files to cloud storage */
 class UploadService {
     private uploadURLs: UploadURL[] = [];
-    private parsedMetadataJSONMap: ParsedMetadataJSONMap = new Map<
-        string,
-        ParsedMetadataJSON
-    >();
 
     private uploaderName: string;
 
@@ -97,10 +91,6 @@ class UploadService {
         await this.preFetchUploadURLs();
     }
 
-    setParsedMetadataJSONMap(parsedMetadataJSONMap: ParsedMetadataJSONMap) {
-        this.parsedMetadataJSONMap = parsedMetadataJSONMap;
-    }
-
     setUploaderName(uploaderName: string) {
         this.uploaderName = uploaderName;
     }
@@ -115,21 +105,6 @@ class UploadService {
 
     reducePendingUploadCount() {
         this.pendingUploadCount--;
-    }
-
-    async extractAssetMetadata(
-        worker: Remote<DedicatedCryptoWorker>,
-        uploadAsset: UploadAsset2,
-        collectionID: number,
-        fileTypeInfo: FileTypeInfo,
-    ): Promise<ExtractMetadataResult> {
-        return await extractAssetMetadata(
-            worker,
-            this.parsedMetadataJSONMap,
-            uploadAsset,
-            collectionID,
-            fileTypeInfo,
-        );
     }
 
     async uploadToBucket(
@@ -281,6 +256,7 @@ export async function uploader(
     worker: Remote<DedicatedCryptoWorker>,
     existingFiles: EnteFile[],
     fileWithCollection: FileWithCollection2,
+    parsedMetadataJSONMap: ParsedMetadataJSONMap,
     uploaderName: string,
 ): Promise<UploadResponse> {
     const { collection, localID, ...uploadAsset2 } = fileWithCollection;
@@ -310,13 +286,13 @@ export async function uploader(
         );
 
         log.info(`extracting  metadata ${fileNameSize}`);
-        const { metadata, publicMagicMetadata } =
-            await uploadService.extractAssetMetadata(
-                worker,
-                uploadAsset,
-                collection.id,
-                fileTypeInfo,
-            );
+        const { metadata, publicMagicMetadata } = await extractAssetMetadata(
+            worker,
+            parsedMetadataJSONMap,
+            uploadAsset,
+            collection.id,
+            fileTypeInfo,
+        );
 
         const matchingExistingFiles = findMatchingExistingFiles(
             existingFiles,
@@ -490,6 +466,7 @@ const getAssetFileType = ({
         ? getLivePhotoFileType(livePhotoAssets)
         : getFileType(file);
 };
+
 const readAsset = async (
     fileTypeInfo: FileTypeInfo,
     { isLivePhoto, file, livePhotoAssets }: UploadAsset2,
