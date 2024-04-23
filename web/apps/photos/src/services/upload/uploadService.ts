@@ -249,14 +249,12 @@ export async function uploader(
     parsedMetadataJSONMap: ParsedMetadataJSONMap,
     uploaderName: string,
 ): Promise<UploadResponse> {
+    const name = assetName(fileWithCollection);
+    log.info(`Uploading ${name}`);
+
     const { collection, localID, ...uploadAsset2 } = fileWithCollection;
     /* TODO(MR): ElectronFile changes */
     const uploadAsset = uploadAsset2 as UploadAsset;
-    const fileNameSize = `${assetName(
-        fileWithCollection,
-    )}_${convertBytesToHumanReadable(getAssetSize(uploadAsset))}`;
-
-    log.info(`uploader called for  ${fileNameSize}`);
     UIService.setFileProgress(localID, 0);
     await wait(0);
     let fileTypeInfo: FileTypeInfo;
@@ -268,14 +266,8 @@ export async function uploader(
         if (fileSize >= maxFileSize) {
             return { fileUploadResult: UPLOAD_RESULT.TOO_LARGE };
         }
-        log.info(`getting filetype for ${fileNameSize}`);
         fileTypeInfo = await getAssetFileType(uploadAsset);
 
-        log.info(
-            `got filetype for ${fileNameSize} - ${JSON.stringify(fileTypeInfo)}`,
-        );
-
-        log.info(`extracting  metadata ${fileNameSize}`);
         const { metadata, publicMagicMetadata } = await extractAssetMetadata(
             worker,
             parsedMetadataJSONMap,
@@ -288,23 +280,14 @@ export async function uploader(
             existingFiles,
             metadata,
         );
-        log.debug(
-            () =>
-                `matchedFileList: ${matchingExistingFiles
-                    .map((f) => `${f.id}-${f.metadata.title}`)
-                    .join(",")}`,
-        );
+
         if (matchingExistingFiles?.length) {
             const matchingExistingFilesCollectionIDs =
                 matchingExistingFiles.map((e) => e.collectionID);
-            log.debug(
-                () =>
-                    `matched file collectionIDs:${matchingExistingFilesCollectionIDs}
-                       and collectionID:${collection.id}`,
-            );
+
             if (matchingExistingFilesCollectionIDs.includes(collection.id)) {
                 log.info(
-                    `file already present in the collection , skipped upload for  ${fileNameSize}`,
+                    `Skipping upload of ${name} since it is already present in the collection`,
                 );
                 const sameCollectionMatchingExistingFile =
                     matchingExistingFiles.find(
@@ -316,7 +299,7 @@ export async function uploader(
                 };
             } else {
                 log.info(
-                    `same file in ${matchingExistingFilesCollectionIDs.length} collection found for  ${fileNameSize} ,adding symlink`,
+                    `Symlinking ${name} to existing file in ${matchingExistingFilesCollectionIDs.length} collections`,
                 );
                 // any of the matching file can used to add a symlink
                 const resultFile = Object.assign({}, matchingExistingFiles[0]);
@@ -331,7 +314,6 @@ export async function uploader(
         if (uploadCancelService.isUploadCancelationRequested()) {
             throw Error(CustomError.UPLOAD_CANCELLED);
         }
-        log.info(`reading asset ${fileNameSize}`);
 
         const file = await readAsset(fileTypeInfo, uploadAsset);
 
@@ -355,7 +337,7 @@ export async function uploader(
         if (uploadCancelService.isUploadCancelationRequested()) {
             throw Error(CustomError.UPLOAD_CANCELLED);
         }
-        log.info(`encryptFile ${fileNameSize}`);
+
         const encryptedFile = await encryptFile(
             worker,
             fileWithMetadata,
@@ -365,7 +347,7 @@ export async function uploader(
         if (uploadCancelService.isUploadCancelationRequested()) {
             throw Error(CustomError.UPLOAD_CANCELLED);
         }
-        log.info(`uploadToBucket ${fileNameSize}`);
+
         const backupedFile: BackupedFile = await uploadService.uploadToBucket(
             encryptedFile.file,
         );
@@ -376,11 +358,8 @@ export async function uploader(
             keyDecryptionNonce: encryptedFile.fileKey.nonce,
             ...backupedFile,
         };
-        log.info(`uploading file to server ${fileNameSize}`);
 
         const uploadedFile = await uploadService.uploadFile(uploadFile);
-
-        log.info(`${fileNameSize} successfully uploaded`);
 
         return {
             fileUploadResult: metadata.hasStaticThumbnail
@@ -389,7 +368,7 @@ export async function uploader(
             uploadedFile: uploadedFile,
         };
     } catch (e) {
-        log.info(`upload failed for  ${fileNameSize} ,error: ${e.message}`);
+        log.error(`Upload failed for ${name}`, e);
         if (
             e.message !== CustomError.UPLOAD_CANCELLED &&
             e.message !== CustomError.UNSUPPORTED_FILE_FORMAT
