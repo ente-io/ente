@@ -918,19 +918,14 @@ interface PartEtag {
     ETag: string;
 }
 
-function calculatePartCount(chunkCount: number) {
-    const partCount = Math.ceil(
-        chunkCount / FILE_CHUNKS_COMBINED_FOR_A_UPLOAD_PART,
-    );
-    return partCount;
-}
-
 export async function uploadStreamUsingMultipart(
     logger: Logger,
     fileLocalID: number,
     dataStream: DataStream,
 ) {
-    const uploadPartCount = calculatePartCount(dataStream.chunkCount);
+    const uploadPartCount = Math.ceil(
+        dataStream.chunkCount / FILE_CHUNKS_COMBINED_FOR_A_UPLOAD_PART,
+    );
     logger(`fetching ${uploadPartCount} urls for multipart upload`);
     const multipartUploadURLs =
         await uploadService.fetchMultipartUploadURLs(uploadPartCount);
