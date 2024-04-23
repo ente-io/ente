@@ -855,11 +855,23 @@ class ClusterFeedbackService {
 
   Future<void> _sortSuggestionsOnDistanceToPerson(
     PersonEntity person,
-    List<ClusterSuggestion> suggestions,
-  ) async {
+    List<ClusterSuggestion> suggestions, {
+    bool onlySortBigSuggestions = true,
+  }) async {
     if (suggestions.isEmpty) {
       debugPrint('No suggestions to sort');
       return;
+    }
+    if (onlySortBigSuggestions) {
+      final bigSuggestions = suggestions
+          .where(
+            (s) => s.filesInCluster.length > kMinimumClusterSizeSearchResult,
+          )
+          .toList();
+      if (bigSuggestions.isEmpty) {
+        debugPrint('No big suggestions to sort');
+        return;
+      }
     }
     final startTime = DateTime.now();
     final faceMlDb = FaceMLDataDB.instance;
@@ -867,6 +879,7 @@ class ClusterFeedbackService {
     // Get the cluster averages for the person's clusters and the suggestions' clusters
     final Map<int, (Uint8List, int)> clusterToSummary =
         await faceMlDb.getAllClusterSummary();
+    final clusterSummaryCallTime = DateTime.now();
 
     // Calculate the avg embedding of the person
     final personClusters = await faceMlDb.getPersonClusterIDs(person.remoteID);
@@ -913,7 +926,7 @@ class ClusterFeedbackService {
 
     final endTime = DateTime.now();
     _logger.info(
-      "Sorting suggestions based on distance to person took ${endTime.difference(startTime).inMilliseconds} ms for ${suggestions.length} suggestions",
+      "Sorting suggestions based on distance to person took ${endTime.difference(startTime).inMilliseconds} ms for ${suggestions.length} suggestions, of which ${clusterSummaryCallTime.difference(startTime).inMilliseconds} ms was spent on the cluster summary call",
     );
   }
 }
