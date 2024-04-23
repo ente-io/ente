@@ -7,7 +7,6 @@ import { CustomErrorMessage } from "@/next/types/ipc";
 import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
 import { EncryptionResult } from "@ente/shared/crypto/types";
 import { CustomError, handleUploadError } from "@ente/shared/error";
-import { wait } from "@ente/shared/utils";
 import { Remote } from "comlink";
 import { FILE_TYPE } from "constants/file";
 import {
@@ -30,7 +29,6 @@ import {
     FileInMemory,
     FileTypeInfo,
     FileWithMetadata,
-    MultipartUploadURLs,
     ParsedMetadataJSONMap,
     ProcessedFile,
     PublicUploadProps,
@@ -64,7 +62,6 @@ import {
     generateThumbnailNative,
     generateThumbnailWeb,
 } from "./thumbnail";
-import UIService from "./uiService";
 import uploadCancelService from "./uploadCancelService";
 import UploadHttpClient from "./uploadHttpClient";
 
@@ -109,7 +106,10 @@ class UploadService {
         this.pendingUploadCount--;
     }
 
-    async uploadToBucket(file: ProcessedFile): Promise<BackupedFile> {
+    async uploadToBucket(
+        file: ProcessedFile,
+        makeProgessTracker: MakeProgressTracker,
+    ): Promise<BackupedFile> {
         try {
             let fileObjectKey: string = null;
 
@@ -117,11 +117,10 @@ class UploadService {
                 fileObjectKey = await uploadStreamUsingMultipart(
                     file.localID,
                     file.file.encryptedData,
+                    makeProgessTracker,
                 );
             } else {
-                const progressTracker = UIService.trackUploadProgress(
-                    file.localID,
-                );
+                const progressTracker = makeProgessTracker(file.localID);
                 const fileUploadURL = await this.getUploadURL();
                 if (!this.isCFUploadProxyDisabled) {
                     fileObjectKey = await UploadHttpClient.putFileV2(
@@ -237,6 +236,19 @@ const uploadService = new UploadService();
 
 export default uploadService;
 
+/**
+ * A function that can be called to obtain a "progressTracker" that then is
+ * directly fed to axios to both cancel the upload if needed, and update the
+ * progress status.
+ *
+ * Needs more type.
+ */
+type MakeProgressTracker = (
+    fileLocalID: number,
+    percentPerPart?: number,
+    index?: number,
+) => unknown;
+
 interface UploadResponse {
     fileUploadResult: UPLOAD_RESULT;
     uploadedFile?: EnteFile;
@@ -248,6 +260,7 @@ export const uploader = async (
     fileWithCollection: FileWithCollection2,
     parsedMetadataJSONMap: ParsedMetadataJSONMap,
     uploaderName: string,
+    makeProgessTracker: MakeProgressTracker,
 ): Promise<UploadResponse> => {
     const name = assetName(fileWithCollection);
     log.info(`Uploading ${name}`);
@@ -348,6 +361,7 @@ export const uploader = async (
 
         const backupedFile: BackupedFile = await uploadService.uploadToBucket(
             encryptedFile.file,
+            makeProgessTracker,
         );
 
         const uploadFile: UploadFile = {
@@ -881,6 +895,7 @@ interface PartEtag {
 export async function uploadStreamUsingMultipart(
     fileLocalID: number,
     dataStream: DataStream,
+    makeProgessTracker: MakeProgressTracker,
 ) {
     const uploadPartCount = Math.ceil(
         dataStream.chunkCount / FILE_CHUNKS_COMBINED_FOR_A_UPLOAD_PART,
@@ -888,22 +903,9 @@ export async function uploadStreamUsingMultipart(
     const multipartUploadURLs =
         await uploadService.fetchMultipartUploadURLs(uploadPartCount);
 
-    const fileObjectKey = await uploadStreamInParts(
-        multipartUploadURLs,
-        dataStream.stream,
-        fileLocalID,
-        uploadPartCount,
-    );
-    return fileObjectKey;
-}
+    const { stream } = dataStream;
 
-async function uploadStreamInParts(
-    multipartUploadURLs: MultipartUploadURLs,
-    dataStream: ReadableStream<Uint8Array>,
-    fileLocalID: number,
-    uploadPartCount: number,
-) {
-    const streamReader = dataStream.getReader();
+    const streamReader = stream.getReader();
     const percentPerPart = getRandomProgressPerPartUpload(uploadPartCount);
     const partEtags: PartEtag[] = [];
     for (const [
@@ -914,7 +916,7 @@ async function uploadStreamInParts(
             throw Error(CustomError.UPLOAD_CANCELLED);
         }
         const uploadChunk = await combineChunksToFormUploadPart(streamReader);
-        const progressTracker = UIService.trackUploadProgress(
+        const progressTracker = makeProgessTracker(
             fileLocalID,
             percentPerPart,
             index,
