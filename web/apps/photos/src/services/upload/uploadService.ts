@@ -240,14 +240,14 @@ export const uploader = async (
 
         const file = await readAsset(fileTypeInfo, uploadAsset);
 
-        if (file.hasStaticThumbnail) {
-            metadata.hasStaticThumbnail = true;
-        }
+        if (file.hasStaticThumbnail) metadata.hasStaticThumbnail = true;
 
         const pubMagicMetadata = await constructPublicMagicMetadata({
             ...publicMagicMetadata,
             uploaderName,
         });
+
+        abortIfCancelled();
 
         const fileWithMetadata: FileWithMetadata = {
             localID,
@@ -257,8 +257,6 @@ export const uploader = async (
             pubMagicMetadata,
         };
 
-        abortIfCancelled();
-
         const encryptedFile = await encryptFile(
             worker,
             fileWithMetadata,
@@ -267,20 +265,18 @@ export const uploader = async (
 
         abortIfCancelled();
 
-        const backupedFile: BackupedFile = await uploadToBucket(
+        const backupedFile = await uploadToBucket(
             encryptedFile.file,
             makeProgessTracker,
             uploadService.getIsCFUploadProxyDisabled(),
         );
 
-        const uploadFile: UploadFile = {
+        const uploadedFile = await uploadService.uploadFile({
             collectionID: collection.id,
             encryptedKey: encryptedFile.fileKey.encryptedData,
             keyDecryptionNonce: encryptedFile.fileKey.nonce,
             ...backupedFile,
-        };
-
-        const uploadedFile = await uploadService.uploadFile(uploadFile);
+        });
 
         return {
             fileUploadResult: metadata.hasStaticThumbnail
