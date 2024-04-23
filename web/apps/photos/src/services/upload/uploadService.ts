@@ -438,14 +438,12 @@ const readFileOrPath = async (
         }
     } else {
         const path = fileOrPath;
-        const { stream, size } = await readStream(path);
+        const { response, size } = await readStream(path);
         if (size > MULTIPART_PART_SIZE) {
             const chunkCount = Math.ceil(size / FILE_READER_CHUNK_SIZE);
-            dataOrStream = { stream, chunkCount };
+            dataOrStream = { stream: response.body, chunkCount };
         } else {
-            dataOrStream = new Uint8Array(
-                await new Response(stream).arrayBuffer(),
-            );
+            dataOrStream = new Uint8Array(await response.arrayBuffer());
         }
     }
 

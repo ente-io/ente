@@ -14,13 +14,17 @@
  * @param path The path on the file on the user's local filesystem whose
  * contents we want to stream.
  *
- * @return A (ReadableStream, size) tuple. The {@link ReadableStream} can be
- * used to read the files contents in a streaming manner. The size value is the
- * the size of the file that we'll be reading from disk.
+ * @return A ({@link Response}, size) tuple.
+ *
+ * * The response contains the contents of the file. In particular, the `body`
+ *   {@link ReadableStream} property of this response can be used to read the
+ *   files contents in a streaming manner.
+ *
+ * * The size is the size of the file that we'll be reading from disk.
  */
 export const readStream = async (
     path: string,
-): Promise<{ stream: ReadableStream; size: number }> => {
+): Promise<{ response: Response; size: number }> => {
     const req = new Request(`stream://read${path}`, {
         method: "GET",
     });
@@ -37,7 +41,7 @@ export const readStream = async (
             `Got a numeric Content-Length when reading a stream. The response was ${res}`,
         );
 
-    return { stream: res.body, size };
+    return { response: res, size };
 };
 
 /**
