@@ -69,8 +69,6 @@ import UploadHttpClient from "./uploadHttpClient";
 class UploadService {
     private uploadURLs: UploadURL[] = [];
 
-    private uploaderName: string;
-
     private pendingUploadCount: number = 0;
 
     private publicUploadProps: PublicUploadProps = undefined;
@@ -88,14 +86,6 @@ class UploadService {
     async setFileCount(fileCount: number) {
         this.pendingUploadCount = fileCount;
         await this.preFetchUploadURLs();
-    }
-
-    setUploaderName(uploaderName: string) {
-        this.uploaderName = uploaderName;
-    }
-
-    getUploaderName() {
-        return this.uploaderName;
     }
 
     getIsCFUploadProxyDisabled() {
