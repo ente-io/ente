@@ -90,13 +90,13 @@ export interface FileWithCollection extends UploadAsset {
 
 export interface UploadAsset2 {
     isLivePhoto?: boolean;
-    file?: File | ElectronFile | string;
+    file?: File | string;
     livePhotoAssets?: LivePhotoAssets2;
 }
 
 export interface LivePhotoAssets2 {
-    image: File | ElectronFile | string;
-    video: File | ElectronFile | string;
+    image: File | string;
+    video: File | string;
 }
 
 export interface FileWithCollection2 extends UploadAsset2 {

@@ -44,7 +44,7 @@ import {
     UploadURL,
     isDataStream,
     type FileWithCollection2,
-    type LivePhotoAssets,
+    type LivePhotoAssets2,
     type UploadAsset2,
 } from "types/upload";
 import {
@@ -53,7 +53,7 @@ import {
 } from "utils/magicMetadata";
 import { readStream } from "utils/native-stream";
 import { findMatchingExistingFiles } from "utils/upload";
-import { getFileStream, getUint8ArrayView } from "../readerService";
+import { getFileStream } from "../readerService";
 import { getFileType } from "../typeDetectionService";
 import {
     MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT,
@@ -351,7 +351,7 @@ export const getFileName = (file: File | ElectronFile | string) =>
 
 const readAsset = async (
     fileTypeInfo: FileTypeInfo,
-    { isLivePhoto, file, livePhotoAssets }: UploadAsset,
+    { isLivePhoto, file, livePhotoAssets }: UploadAsset2,
 ) => {
     return isLivePhoto
         ? await readLivePhoto(livePhotoAssets, fileTypeInfo)
@@ -520,9 +520,7 @@ const withThumbnail = async (
                 // Read the stream into memory. Don't try this fallback for huge
                 // files though lest we run out of memory.
                 if (fileSize < 100 * 1024 * 1024 /* 100 MB */) {
-                    const data = new Uint8Array(
-                        await new Response(dataOrStream.stream).arrayBuffer(),
-                    );
+                    const data = await readEntireStream(dataOrStream.stream);
                     // The Readable stream cannot be read twice, so also
                     // overwrite the stream with the data we read.
                     dataOrStream = data;
@@ -561,6 +559,17 @@ const withThumbnail = async (
     };
 };
 
+/**
+ * Read the entirety of a readable stream.
+ *
+ * It is not recommended to use this for large (say, multi-hundred MB) files. It
+ * is provided as a syntactic shortcut for cases where we already know that the
+ * size of the stream will be reasonable enough to be read in its entirety
+ * without us running out of memory.
+ */
+const readEntireStream = async (stream: ReadableStream) =>
+    new Uint8Array(await new Response(stream).arrayBuffer());
+
 const readImageOrVideo = async (
     fileOrPath: File | string,
     fileTypeInfo: FileTypeInfo,
@@ -570,28 +579,42 @@ const readImageOrVideo = async (
 };
 
 const readLivePhoto = async (
-    livePhotoAssets: LivePhotoAssets,
+    livePhotoAssets: LivePhotoAssets2,
     fileTypeInfo: FileTypeInfo,
 ) => {
-    const imageData = await getUint8ArrayView(livePhotoAssets.image);
-
-    const videoData = await getUint8ArrayView(livePhotoAssets.video);
-
-    const imageBlob = new Blob([imageData]);
-    const { thumbnail, hasStaticThumbnail } = await generateThumbnail(
-        imageBlob,
+    const readImage = await readFileOrPath(livePhotoAssets.image);
+    const {
+        filedata: imageDataOrStream,
+        thumbnail,
+        hasStaticThumbnail,
+    } = await withThumbnail(
+        livePhotoAssets.image,
         {
             exactType: fileTypeInfo.imageType,
             fileType: FILE_TYPE.IMAGE,
         },
+        readImage.dataOrStream,
+        readImage.fileSize,
     );
+    const readVideo = await readFileOrPath(livePhotoAssets.video);
+
+    // We can revisit this later, but the existing code always read the
+    // full files into memory here, and to avoid changing the rest of
+    // the scaffolding retain the same behaviour.
+    //
+    // This is a reasonable assumption too, since the videos
+    // corresponding to live photos are only a couple of seconds long.
+    const toData = async (dataOrStream: Uint8Array | DataStream) =>
+        dataOrStream instanceof Uint8Array
+            ? dataOrStream
+            : await readEntireStream(dataOrStream.stream);
 
     return {
         filedata: await encodeLivePhoto({
-            imageFileName: livePhotoAssets.image.name,
-            imageData,
-            videoFileName: livePhotoAssets.video.name,
-            videoData,
+            imageFileName: getFileName(livePhotoAssets.image),
+            imageData: await toData(imageDataOrStream),
+            videoFileName: getFileName(livePhotoAssets.video),
+            videoData: await toData(readVideo.dataOrStream),
         }),
         thumbnail,
         hasStaticThumbnail,
