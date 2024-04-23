@@ -49,7 +49,7 @@ import {
     updateMagicMetadata,
 } from "utils/magicMetadata";
 import { readStream } from "utils/native-stream";
-import { findMatchingExistingFiles, hasFileHash } from "utils/upload";
+import { hasFileHash } from "utils/upload";
 import { getFileStream } from "../readerService";
 import { getFileType } from "../typeDetectionService";
 import {
@@ -130,14 +130,6 @@ class UploadService {
             collectionID,
             fileTypeInfo,
         );
-    }
-
-    async encryptAsset(
-        worker: Remote<DedicatedCryptoWorker>,
-        file: FileWithMetadata,
-        encryptionKey: string,
-    ): Promise<EncryptedFile> {
-        return encryptFile(worker, file, encryptionKey);
     }
 
     async uploadToBucket(
@@ -397,8 +389,8 @@ export async function uploader(
         if (uploadCancelService.isUploadCancelationRequested()) {
             throw Error(CustomError.UPLOAD_CANCELLED);
         }
-        log.info(`encryptAsset ${fileNameSize}`);
-        const encryptedFile = await uploadService.encryptAsset(
+        log.info(`encryptFile ${fileNameSize}`);
+        const encryptedFile = await encryptFile(
             worker,
             fileWithMetadata,
             collection.key,
