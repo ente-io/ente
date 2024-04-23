@@ -374,7 +374,7 @@ class ModuleState {
      *
      * Note the double negative when it is used.
      */
-    isNativeImageThumbnailCreationNotAvailable = false;
+    isNativeImageThumbnailGenerationNotAvailable = false;
 }
 
 const moduleState = new ModuleState();
@@ -431,12 +431,11 @@ const readFileOrPath = async (
     fileOrPath: File | string,
     fileTypeInfo: FileTypeInfo,
 ): Promise<FileInMemory> => {
-    let file: File | undefined;
     let dataOrStream: Uint8Array | DataStream;
     let fileSize: number;
 
     if (fileOrPath instanceof File) {
-        file = fileOrPath;
+        const file = fileOrPath;
         fileSize = file.size;
         dataOrStream =
             fileSize > MULTIPART_PART_SIZE
@@ -458,80 +457,82 @@ const readFileOrPath = async (
     let hasStaticThumbnail = false;
 
     const electron = globalThis.electron;
-    if (electron) {
-        // On Windows native thumbnail creation for images is not yet implemented.
-        const notAvailable =
-            fileTypeInfo.fileType == FILE_TYPE.IMAGE &&
-            moduleState.isNativeImageThumbnailCreationNotAvailable;
+    const notAvailable =
+        fileTypeInfo.fileType == FILE_TYPE.IMAGE &&
+        moduleState.isNativeImageThumbnailGenerationNotAvailable;
 
+    // 1. Native thumbnail generation.
+    if (electron && !notAvailable) {
         try {
-            if (!notAvailable) {
-                if (fileOrPath instanceof File) {
-                    if (dataOrStream instanceof Uint8Array) {
-                        thumbnail = await generateThumbnailNative(
-                            electron,
-                            dataOrStream,
-                            fileTypeInfo,
-                        );
-                    }
-                } else {
+            if (fileOrPath instanceof File) {
+                if (dataOrStream instanceof Uint8Array) {
                     thumbnail = await generateThumbnailNative(
                         electron,
-                        fileOrPath,
+                        dataOrStream,
                         fileTypeInfo,
                     );
+                } else {
+                    // This was large enough to need streaming, and trying to
+                    // read it into memory or copying over IPC might cause us to
+                    // run out of memory. So skip the native generation for it,
+                    // instead let it get processed by the browser based
+                    // thumbnailer (case 2).
                 }
+            } else {
+                thumbnail = await generateThumbnailNative(
+                    electron,
+                    fileOrPath,
+                    fileTypeInfo,
+                );
             }
         } catch (e) {
             if (e.message == CustomErrorMessage.NotAvailable) {
-                moduleState.isNativeImageThumbnailCreationNotAvailable = true;
+                moduleState.isNativeImageThumbnailGenerationNotAvailable = true;
             } else {
-                log.error("Native thumbnail creation failed", e);
+                log.error("Native thumbnail generation failed", e);
             }
         }
     }
 
-    // If needed, fallback to browser based thumbnail generation. First, see if
-    // we already have a file (which is also a blob).
-    if (!thumbnail && file) {
-        try {
-            thumbnail = await generateThumbnailWeb(file, fileTypeInfo);
-        } catch (e) {
-            log.error(
-                `Failed to generate ${fileTypeInfo.exactType} thumbnail`,
-                e,
-            );
-        }
-    }
-
-    // Otherwise see if the data is small enough to read in memory.
     if (!thumbnail) {
-        let data: Uint8Array | undefined;
-        if (dataOrStream instanceof Uint8Array) {
-            data = dataOrStream;
+        let blob: Blob | undefined;
+        if (fileOrPath instanceof File) {
+            // 2. Browser based thumbnail generation for `File`s.
+            blob = fileOrPath;
         } else {
-            // Read the stream into memory, since the our web based thumbnail
-            // generation methods need the entire file in memory. Don't try this
-            // fallback for huge files though lest we run out of memory.
-            if (fileSize < 100 * 1024 * 1024 /* 100 MB */) {
-                data = new Uint8Array(
-                    await new Response(dataOrStream.stream).arrayBuffer(),
-                );
-                // The Readable stream cannot be read twice, so also overwrite
-                // the stream with the data we read.
-                dataOrStream = data;
+            // 3. Browser based thumbnail generation for paths.
+            if (dataOrStream instanceof Uint8Array) {
+                blob = new Blob([dataOrStream]);
+            } else {
+                // Read the stream into memory. Don't try this fallback for huge
+                // files though lest we run out of memory.
+                if (fileSize < 100 * 1024 * 1024 /* 100 MB */) {
+                    const data = new Uint8Array(
+                        await new Response(dataOrStream.stream).arrayBuffer(),
+                    );
+                    // The Readable stream cannot be read twice, so also
+                    // overwrite the stream with the data we read.
+                    dataOrStream = data;
+                    blob = new Blob([data]);
+                } else {
+                    // There isn't a normal scenario where this should happen.
+                    // Case 1, should've already worked, and the only known
+                    // reason it'd have been  skipped is for image files on
+                    // Windows, but those should be less than 100 MB.
+                    //
+                    // So don't risk running out of memory for a case we don't
+                    // comprehend.
+                    log.error(
+                        `Not using browser based thumbnail generation fallback for large file at path ${fileOrPath}`,
+                    );
+                }
             }
         }
-        if (data) {
-            const blob = new Blob([data]);
-            try {
-                thumbnail = await generateThumbnailWeb(blob, fileTypeInfo);
-            } catch (e) {
-                log.error(
-                    `Failed to generate ${fileTypeInfo.exactType} thumbnail`,
-                    e,
-                );
-            }
+
+        try {
+            thumbnail = await generateThumbnailWeb(blob, fileTypeInfo);
+        } catch (e) {
+            log.error("Web thumbnail creation failed", e);
         }
     }
 
@@ -590,7 +591,7 @@ const _readPath = async (path: string, fileTypeInfo: FileTypeInfo) => {
     // On Windows native thumbnail creation for images is not yet implemented.
     const notAvailable =
         fileTypeInfo.fileType == FILE_TYPE.IMAGE &&
-        moduleState.isNativeImageThumbnailCreationNotAvailable;
+        moduleState.isNativeImageThumbnailGenerationNotAvailable;
 
     try {
         if (!notAvailable) {
@@ -602,7 +603,7 @@ const _readPath = async (path: string, fileTypeInfo: FileTypeInfo) => {
         }
     } catch (e) {
         if (e.message == CustomErrorMessage.NotAvailable) {
-            moduleState.isNativeImageThumbnailCreationNotAvailable = true;
+            moduleState.isNativeImageThumbnailGenerationNotAvailable = true;
         } else {
             log.error("Native thumbnail creation failed", e);
         }
