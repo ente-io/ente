@@ -17,6 +17,8 @@
  * @return A standard web {@link Response} object that contains the contents of
  * the file. In particular, `response.body` will be a {@link ReadableStream}
  * that can be used to read the files contents in a streaming, chunked, manner.
+ * Also, the response is guaranteed to have a "Content-Length" header indicating
+ * the size of the file that we'll be reading from disk.
  */
 export const readStream = async (path: string) => {
     const req = new Request(`stream://read${path}`, {

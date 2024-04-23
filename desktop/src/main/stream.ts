@@ -44,31 +44,47 @@ export const registerStreamProtocol = () => {
         const path = decodeURIComponent(pathname);
         switch (host) {
             case "read":
-                try {
-                    return net.fetch(pathToFileURL(path).toString());
-                } catch (e) {
-                    log.error(`Failed to read stream for ${url}`, e);
-                    return new Response(`Failed to read stream: ${e.message}`, {
-                        status: 500,
-                    });
-                }
-
+                return handleRead(path);
             case "write":
-                try {
-                    await writeStream(path, request.body);
-                    return new Response("", { status: 200 });
-                } catch (e) {
-                    log.error(`Failed to write stream for ${url}`, e);
-                    return new Response(
-                        `Failed to write stream: ${e.message}`,
-                        { status: 500 },
-                    );
-                }
-
+                return handleWrite(path, request);
             default:
                 return new Response("", { status: 404 });
         }
     });
+};
+
+const handleRead = async (path: string) => {
+    try {
+        const res = await net.fetch(pathToFileURL(path).toString());
+        if (res.ok) {
+            // net.fetch defaults to text/plain, which might be fine
+            // in practice, but as an extra precaution indicate that
+            // this is binary data.
+            res.headers.set("Content-Type", "application/octet-stream");
+
+            // Add the file's size as the Content-Length header.
+            const fileSize = (await fs.stat(path)).size;
+            res.headers.set("Content-Length", `${fileSize}`);
+        }
+        return res;
+    } catch (e) {
+        log.error(`Failed to read stream at ${path}`, e);
+        return new Response(`Failed to read stream: ${e.message}`, {
+            status: 500,
+        });
+    }
+};
+
+const handleWrite = async (path: string, request: Request) => {
+    try {
+        await writeStream(path, request.body);
+        return new Response("", { status: 200 });
+    } catch (e) {
+        log.error(`Failed to write stream to ${path}`, e);
+        return new Response(`Failed to write stream: ${e.message}`, {
+            status: 500,
+        });
+    }
 };
 
 /**
