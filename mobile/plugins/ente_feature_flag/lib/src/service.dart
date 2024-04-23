@@ -40,7 +40,7 @@ class FlagService {
 
   Future<void> _fetch() async {
     try {
-      if (_prefs.containsKey("token")) {
+      if (!_prefs.containsKey("token")) {
         return;
       }
       if (kDebugMode) {
@@ -57,7 +57,7 @@ class FlagService {
 
   bool get disableCFWorker => flags.disableCFWorker;
 
-  bool get internalUser => flags.internalUser || _usingEnteEmail;
+  bool get internalUser => flags.internalUser || _usingEnteEmail || kDebugMode;
 
   bool get betaUser => flags.betaUser;
 

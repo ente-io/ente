@@ -6,11 +6,11 @@ environment:
   sdk: '>=3.3.0 <4.0.0'
 
 dependencies:
+  collection:
+  dio: ^4.0.6
   flutter:
     sdk: flutter
-  collection:
-  dio:
-  shared_preferences:
+  shared_preferences: ^2.0.5
   stack_trace:
 
 dev_dependencies:
