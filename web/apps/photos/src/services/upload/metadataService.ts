@@ -29,6 +29,7 @@ import {
     type FileWithCollection,
     type FileWithCollection2,
     type LivePhotoAssets2,
+    type UploadAsset2,
 } from "types/upload";
 import { getFileTypeFromExtensionForLivePhotoClustering } from "utils/file/livePhoto";
 import { getEXIFLocation, getEXIFTime, getParsedExifData } from "./exifService";
@@ -349,7 +350,63 @@ export async function getLivePhotoFileType(
     };
 }
 
-export async function extractLivePhotoMetadata(
+export const extractAssetMetadata = async (
+    worker: Remote<DedicatedCryptoWorker>,
+    parsedMetadataJSONMap: ParsedMetadataJSONMap,
+    { isLivePhoto, file, livePhotoAssets }: UploadAsset2,
+    collectionID: number,
+    fileTypeInfo: FileTypeInfo,
+): Promise<ExtractMetadataResult> => {
+    return isLivePhoto
+        ? await extractLivePhotoMetadata(
+              worker,
+              parsedMetadataJSONMap,
+              collectionID,
+              fileTypeInfo,
+              livePhotoAssets,
+          )
+        : await extractFileMetadata(
+              worker,
+              parsedMetadataJSONMap,
+              collectionID,
+              fileTypeInfo,
+              file,
+          );
+};
+
+async function extractFileMetadata(
+    worker: Remote<DedicatedCryptoWorker>,
+    parsedMetadataJSONMap: ParsedMetadataJSONMap,
+    collectionID: number,
+    fileTypeInfo: FileTypeInfo,
+    rawFile: File | ElectronFile | string,
+): Promise<ExtractMetadataResult> {
+    const rawFileName = getFileName(rawFile);
+    let key = getMetadataJSONMapKeyForFile(collectionID, rawFileName);
+    let googleMetadata: ParsedMetadataJSON = parsedMetadataJSONMap.get(key);
+
+    if (!googleMetadata && key.length > MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT) {
+        key = getClippedMetadataJSONMapKeyForFile(collectionID, rawFileName);
+        googleMetadata = parsedMetadataJSONMap.get(key);
+    }
+
+    const { metadata, publicMagicMetadata } = await extractMetadata(
+        worker,
+        /* TODO(MR): ElectronFile changes */
+        rawFile as File | ElectronFile,
+        fileTypeInfo,
+    );
+
+    for (const [key, value] of Object.entries(googleMetadata ?? {})) {
+        if (!value) {
+            continue;
+        }
+        metadata[key] = value;
+    }
+    return { metadata, publicMagicMetadata };
+}
+
+async function extractLivePhotoMetadata(
     worker: Remote<DedicatedCryptoWorker>,
     parsedMetadataJSONMap: ParsedMetadataJSONMap,
     collectionID: number,

@@ -56,14 +56,10 @@ import { findMatchingExistingFiles } from "utils/upload";
 import { getFileStream } from "../readerService";
 import { getFileType } from "../typeDetectionService";
 import {
-    MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT,
-    extractLivePhotoMetadata,
-    extractMetadata,
-    getClippedMetadataJSONMapKeyForFile,
+    extractAssetMetadata,
     getLivePhotoFileType,
     getLivePhotoName,
     getLivePhotoSize,
-    getMetadataJSONMapKeyForFile,
 } from "./metadataService";
 import { uploadStreamUsingMultipart } from "./multiPartUploadService";
 import publicUploadHttpClient from "./publicUploadHttpClient";
@@ -145,25 +141,17 @@ class UploadService {
 
     async extractAssetMetadata(
         worker: Remote<DedicatedCryptoWorker>,
-        { isLivePhoto, file, livePhotoAssets }: UploadAsset2,
+        uploadAsset: UploadAsset2,
         collectionID: number,
         fileTypeInfo: FileTypeInfo,
     ): Promise<ExtractMetadataResult> {
-        return isLivePhoto
-            ? extractLivePhotoMetadata(
-                  worker,
-                  this.parsedMetadataJSONMap,
-                  collectionID,
-                  fileTypeInfo,
-                  livePhotoAssets,
-              )
-            : await extractFileMetadata(
-                  worker,
-                  this.parsedMetadataJSONMap,
-                  collectionID,
-                  fileTypeInfo,
-                  file,
-              );
+        return await extractAssetMetadata(
+            worker,
+            this.parsedMetadataJSONMap,
+            uploadAsset,
+            collectionID,
+            fileTypeInfo,
+        );
     }
 
     async encryptAsset(
@@ -621,38 +609,6 @@ const readLivePhoto = async (
     };
 };
 
-export async function extractFileMetadata(
-    worker: Remote<DedicatedCryptoWorker>,
-    parsedMetadataJSONMap: ParsedMetadataJSONMap,
-    collectionID: number,
-    fileTypeInfo: FileTypeInfo,
-    rawFile: File | ElectronFile | string,
-): Promise<ExtractMetadataResult> {
-    const rawFileName = getFileName(rawFile);
-    let key = getMetadataJSONMapKeyForFile(collectionID, rawFileName);
-    let googleMetadata: ParsedMetadataJSON = parsedMetadataJSONMap.get(key);
-
-    if (!googleMetadata && key.length > MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT) {
-        key = getClippedMetadataJSONMapKeyForFile(collectionID, rawFileName);
-        googleMetadata = parsedMetadataJSONMap.get(key);
-    }
-
-    const { metadata, publicMagicMetadata } = await extractMetadata(
-        worker,
-        /* TODO(MR): ElectronFile changes */
-        rawFile as File | ElectronFile,
-        fileTypeInfo,
-    );
-
-    for (const [key, value] of Object.entries(googleMetadata ?? {})) {
-        if (!value) {
-            continue;
-        }
-        metadata[key] = value;
-    }
-    return { metadata, publicMagicMetadata };
-}
-
 async function encryptFile(
     worker: Remote<DedicatedCryptoWorker>,
     file: FileWithMetadata,
@@ -843,7 +799,7 @@ export async function uploader(
         }
         log.info(`reading asset ${fileNameSize}`);
 
-        const file = readAsset(fileTypeInfo, uploadAsset);
+        const file = await readAsset(fileTypeInfo, uploadAsset);
 
         if (file.hasStaticThumbnail) {
             metadata.hasStaticThumbnail = true;
