@@ -1,10 +1,8 @@
 import { basename, dirname } from "@/next/file";
 import { ElectronFile } from "@/next/types/file";
-import { FILE_TYPE } from "constants/file";
 import { PICKED_UPLOAD_TYPE } from "constants/upload";
 import isElectron from "is-electron";
 import { exportMetadataDirectoryName } from "services/export";
-import { EnteFile } from "types/file";
 import {
     FileWithCollection,
     Metadata,
