@@ -1,6 +1,6 @@
 import { encodeLivePhoto } from "@/media/live-photo";
 import { ensureElectron } from "@/next/electron";
-import { basename, convertBytesToHumanReadable } from "@/next/file";
+import { basename } from "@/next/file";
 import log from "@/next/log";
 import { ElectronFile } from "@/next/types/file";
 import { CustomErrorMessage } from "@/next/types/ipc";
@@ -68,11 +68,8 @@ import UploadHttpClient from "./uploadHttpClient";
 /** Upload files to cloud storage */
 class UploadService {
     private uploadURLs: UploadURL[] = [];
-
     private pendingUploadCount: number = 0;
-
     private publicUploadProps: PublicUploadProps = undefined;
-
     private isCFUploadProxyDisabled: boolean = false;
 
     init(
@@ -304,19 +301,14 @@ export const uploader = async (
             uploadedFile: uploadedFile,
         };
     } catch (e) {
-        log.error(`Upload failed for ${name}`, e);
-        if (
-            e.message !== CustomError.UPLOAD_CANCELLED &&
-            e.message !== CustomError.UNSUPPORTED_FILE_FORMAT
-        ) {
-            log.error(
-                `file upload failed - ${JSON.stringify({
-                    fileFormat: fileTypeInfo?.exactType,
-                    fileSize: convertBytesToHumanReadable(fileSize),
-                })}`,
-                e,
-            );
+        if (e.message == CustomError.UPLOAD_CANCELLED) {
+            log.info(`Upload for ${name} cancelled`);
+        } else if (e.message == CustomError.UNSUPPORTED_FILE_FORMAT) {
+            log.info(`Not uploading ${name}: unsupported file format`);
+        } else {
+            log.error(`Upload failed for ${name}`, e);
         }
+
         const error = handleUploadError(e);
         switch (error.message) {
             case CustomError.ETAG_MISSING:
