@@ -70,7 +70,6 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
     final Completer completer = Completer();
     final List<Widget> children = [];
     if (_config.hasConfiguredAccount()) {
-      final bool isInternalUser = flagService.internalUser;
       children.addAll(
         [
           sectionOptionSpacing,
@@ -102,8 +101,8 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
               },
             ),
           ),
-          if (isInternalUser) sectionOptionSpacing,
-          if (isInternalUser)
+          if (flagService.passKeyEnabled) sectionOptionSpacing,
+          if (flagService.passKeyEnabled)
             MenuItemWidget(
               captionedTextWidget: CaptionedTextWidget(
                 title: context.l10n.passkey,
