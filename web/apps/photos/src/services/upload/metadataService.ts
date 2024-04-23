@@ -17,7 +17,6 @@ import { getElectronFileStream, getFileStream } from "services/readerService";
 import { getFileType } from "services/typeDetectionService";
 import { FilePublicMagicMetadataProps } from "types/file";
 import {
-    ExtractMetadataResult,
     FileTypeInfo,
     LivePhotoAssets,
     Location,
@@ -68,6 +67,11 @@ export const NULL_EXTRACTED_METADATA: ParsedExtractedMetadata = {
     width: null,
     height: null,
 };
+
+export interface ExtractMetadataResult {
+    metadata: Metadata;
+    publicMagicMetadata: FilePublicMagicMetadataProps;
+}
 
 export async function extractMetadata(
     worker: Remote<DedicatedCryptoWorker>,

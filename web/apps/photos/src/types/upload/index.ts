@@ -132,6 +132,7 @@ export interface EncryptedFile {
     file: ProcessedFile;
     fileKey: B64EncryptionResult;
 }
+
 export interface ProcessedFile {
     file: LocalFileAttributes<Uint8Array | DataStream>;
     thumbnail: LocalFileAttributes<Uint8Array>;
@@ -163,9 +164,4 @@ export interface PublicUploadProps {
     token: string;
     passwordToken: string;
     accessedThroughSharedURL: boolean;
-}
-
-export interface ExtractMetadataResult {
-    metadata: Metadata;
-    publicMagicMetadata: FilePublicMagicMetadataProps;
 }

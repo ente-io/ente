@@ -93,14 +93,14 @@ class UploadService {
         this.pendingUploadCount--;
     }
 
-    private async getUploadURL() {
+    async getUploadURL() {
         if (this.uploadURLs.length === 0 && this.pendingUploadCount) {
             await this.fetchUploadURLs();
         }
         return this.uploadURLs.pop();
     }
 
-    public async preFetchUploadURLs() {
+    private async preFetchUploadURLs() {
         try {
             await this.fetchUploadURLs();
             // checking for any subscription related errors
@@ -819,7 +819,7 @@ const uploadToBucket = async (
                 );
             }
         }
-        const thumbnailUploadURL = await this.getUploadURL();
+        const thumbnailUploadURL = await uploadService.getUploadURL();
         let thumbnailObjectKey: string = null;
         if (!isCFUploadProxyDisabled) {
             thumbnailObjectKey = await UploadHttpClient.putFileV2(
