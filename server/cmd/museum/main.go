@@ -194,7 +194,7 @@ func main() {
 	commonBillController := commonbilling.NewController(storagBonusRepo, userRepo, usageRepo)
 	appStoreController := controller.NewAppStoreController(defaultPlan,
 		billingRepo, fileRepo, userRepo, commonBillController)
-
+	remoteStoreController := &remoteStoreCtrl.Controller{Repo: remoteStoreRepository}
 	playStoreController := controller.NewPlayStoreController(defaultPlan,
 		billingRepo, fileRepo, userRepo, storagBonusRepo, commonBillController)
 	stripeController := controller.NewStripeController(plans, stripeClients,
@@ -610,6 +610,7 @@ func main() {
 		UserAuthRepo:            userAuthRepo,
 		UserController:          userController,
 		FamilyController:        familyController,
+		RemoteStoreController:   remoteStoreController,
 		FileRepo:                fileRepo,
 		StorageBonusRepo:        storagBonusRepo,
 		BillingRepo:             billingRepo,
@@ -631,6 +632,7 @@ func main() {
 	adminAPI.PUT("/user/change-email", adminHandler.ChangeEmail)
 	adminAPI.DELETE("/user/delete", adminHandler.DeleteUser)
 	adminAPI.POST("/user/recover", adminHandler.RecoverAccount)
+	adminAPI.POST("/user/update-flag", adminHandler.UpdateFeatureFlag)
 	adminAPI.GET("/email-hash", adminHandler.GetEmailHash)
 	adminAPI.POST("/emails-from-hashes", adminHandler.GetEmailsFromHashes)
 	adminAPI.PUT("/user/subscription", adminHandler.UpdateSubscription)
@@ -658,7 +660,6 @@ func main() {
 	privateAPI.DELETE("/authenticator/entity", authenticatorHandler.DeleteEntity)
 	privateAPI.GET("/authenticator/entity/diff", authenticatorHandler.GetDiff)
 
-	remoteStoreController := &remoteStoreCtrl.Controller{Repo: remoteStoreRepository}
 	dataCleanupController := &dataCleanupCtrl.DeleteUserCleanupController{
 		Repo:           dataCleanupRepository,
 		UserRepo:       userRepo,
@@ -672,6 +673,7 @@ func main() {
 
 	privateAPI.POST("/remote-store/update", remoteStoreHandler.InsertOrUpdate)
 	privateAPI.GET("/remote-store", remoteStoreHandler.GetKey)
+	privateAPI.GET("/remote-store/feature-flags", remoteStoreHandler.GetFeatureFlags)
 
 	pushHandler := &api.PushHandler{PushController: pushController}
 	privateAPI.POST("/push/token", pushHandler.AddToken)
