@@ -106,73 +106,6 @@ class UploadService {
         this.pendingUploadCount--;
     }
 
-    async uploadToBucket(
-        file: ProcessedFile,
-        makeProgessTracker: MakeProgressTracker,
-    ): Promise<BackupedFile> {
-        try {
-            let fileObjectKey: string = null;
-
-            if (isDataStream(file.file.encryptedData)) {
-                fileObjectKey = await uploadStreamUsingMultipart(
-                    file.localID,
-                    file.file.encryptedData,
-                    makeProgessTracker,
-                );
-            } else {
-                const progressTracker = makeProgessTracker(file.localID);
-                const fileUploadURL = await this.getUploadURL();
-                if (!this.isCFUploadProxyDisabled) {
-                    fileObjectKey = await UploadHttpClient.putFileV2(
-                        fileUploadURL,
-                        file.file.encryptedData as Uint8Array,
-                        progressTracker,
-                    );
-                } else {
-                    fileObjectKey = await UploadHttpClient.putFile(
-                        fileUploadURL,
-                        file.file.encryptedData as Uint8Array,
-                        progressTracker,
-                    );
-                }
-            }
-            const thumbnailUploadURL = await this.getUploadURL();
-            let thumbnailObjectKey: string = null;
-            if (!this.isCFUploadProxyDisabled) {
-                thumbnailObjectKey = await UploadHttpClient.putFileV2(
-                    thumbnailUploadURL,
-                    file.thumbnail.encryptedData,
-                    null,
-                );
-            } else {
-                thumbnailObjectKey = await UploadHttpClient.putFile(
-                    thumbnailUploadURL,
-                    file.thumbnail.encryptedData,
-                    null,
-                );
-            }
-
-            const backupedFile: BackupedFile = {
-                file: {
-                    decryptionHeader: file.file.decryptionHeader,
-                    objectKey: fileObjectKey,
-                },
-                thumbnail: {
-                    decryptionHeader: file.thumbnail.decryptionHeader,
-                    objectKey: thumbnailObjectKey,
-                },
-                metadata: file.metadata,
-                pubMagicMetadata: file.pubMagicMetadata,
-            };
-            return backupedFile;
-        } catch (e) {
-            if (e.message !== CustomError.UPLOAD_CANCELLED) {
-                log.error("error uploading to bucket", e);
-            }
-            throw e;
-        }
-    }
-
     private async getUploadURL() {
         if (this.uploadURLs.length === 0 && this.pendingUploadCount) {
             await this.fetchUploadURLs();
@@ -359,9 +292,10 @@ export const uploader = async (
             throw Error(CustomError.UPLOAD_CANCELLED);
         }
 
-        const backupedFile: BackupedFile = await uploadService.uploadToBucket(
+        const backupedFile: BackupedFile = await uploadToBucket(
             encryptedFile.file,
             makeProgessTracker,
+            uploadService.getIsCFUploadProxyDisabled(),
         );
 
         const uploadFile: UploadFile = {
@@ -887,6 +821,75 @@ function areFilesWithFileHashSame(
     }
 }
 
+const uploadToBucket = async (
+    file: ProcessedFile,
+    makeProgessTracker: MakeProgressTracker,
+    isCFUploadProxyDisabled: boolean,
+): Promise<BackupedFile> => {
+    try {
+        let fileObjectKey: string = null;
+
+        if (isDataStream(file.file.encryptedData)) {
+            fileObjectKey = await uploadStreamUsingMultipart(
+                file.localID,
+                file.file.encryptedData,
+                makeProgessTracker,
+                isCFUploadProxyDisabled,
+            );
+        } else {
+            const progressTracker = makeProgessTracker(file.localID);
+            const fileUploadURL = await this.getUploadURL();
+            if (!isCFUploadProxyDisabled) {
+                fileObjectKey = await UploadHttpClient.putFileV2(
+                    fileUploadURL,
+                    file.file.encryptedData as Uint8Array,
+                    progressTracker,
+                );
+            } else {
+                fileObjectKey = await UploadHttpClient.putFile(
+                    fileUploadURL,
+                    file.file.encryptedData as Uint8Array,
+                    progressTracker,
+                );
+            }
+        }
+        const thumbnailUploadURL = await this.getUploadURL();
+        let thumbnailObjectKey: string = null;
+        if (!isCFUploadProxyDisabled) {
+            thumbnailObjectKey = await UploadHttpClient.putFileV2(
+                thumbnailUploadURL,
+                file.thumbnail.encryptedData,
+                null,
+            );
+        } else {
+            thumbnailObjectKey = await UploadHttpClient.putFile(
+                thumbnailUploadURL,
+                file.thumbnail.encryptedData,
+                null,
+            );
+        }
+
+        const backupedFile: BackupedFile = {
+            file: {
+                decryptionHeader: file.file.decryptionHeader,
+                objectKey: fileObjectKey,
+            },
+            thumbnail: {
+                decryptionHeader: file.thumbnail.decryptionHeader,
+                objectKey: thumbnailObjectKey,
+            },
+            metadata: file.metadata,
+            pubMagicMetadata: file.pubMagicMetadata,
+        };
+        return backupedFile;
+    } catch (e) {
+        if (e.message !== CustomError.UPLOAD_CANCELLED) {
+            log.error("error uploading to bucket", e);
+        }
+        throw e;
+    }
+};
+
 interface PartEtag {
     PartNumber: number;
     ETag: string;
@@ -896,6 +899,7 @@ export async function uploadStreamUsingMultipart(
     fileLocalID: number,
     dataStream: DataStream,
     makeProgessTracker: MakeProgressTracker,
+    isCFUploadProxyDisabled: boolean,
 ) {
     const uploadPartCount = Math.ceil(
         dataStream.chunkCount / FILE_CHUNKS_COMBINED_FOR_A_UPLOAD_PART,
@@ -922,7 +926,7 @@ export async function uploadStreamUsingMultipart(
             index,
         );
         let eTag = null;
-        if (!uploadService.getIsCFUploadProxyDisabled()) {
+        if (!isCFUploadProxyDisabled) {
             eTag = await UploadHttpClient.putFilePartV2(
                 fileUploadURL,
                 uploadChunk,
