@@ -27,9 +27,10 @@ class CastServiceImpl extends CastService {
   }
 
   @override
-  Future<List<Object>> searchDevices() {
-    // TODO: implement searchDevices
-    throw UnimplementedError();
+  Future<List<(String, Object)>> searchDevices() {
+    return CastDiscoveryService().search().then((devices) {
+      return devices.map((device) => (device.name, device)).toList();
+    });
   }
 
   @override

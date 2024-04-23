@@ -646,7 +646,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   }
 
   Widget castWidget(BuildContext context) {
-    return FutureBuilder<List<Object>>(
+    return FutureBuilder<List<(String, Object)>>(
       future: castService.searchDevices(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
@@ -666,7 +666,9 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         }
 
         return Column(
-          children: snapshot.data!.map((device) {
+          children: snapshot.data!.map((result) {
+            final device = result.$2;
+            final name = result.$1;
             return GestureDetector(
               onTap: () async {
                 try {
@@ -675,7 +677,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
                   showGenericErrorDialog(context: context, error: e).ignore();
                 }
               },
-              child: Text(device.toString()),
+              child: Text(name),
             );
           }).toList(),
         );

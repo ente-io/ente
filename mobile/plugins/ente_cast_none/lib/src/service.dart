@@ -8,10 +8,11 @@ class CastServiceImpl extends CastService {
   }
 
   @override
-  Future<List<Object>> searchDevices() {
-    throw UnimplementedError();
-  }
+  bool get isSupported => false;
 
   @override
-  bool get isSupported => false;
+  Future<List<(String, Object)>> searchDevices() {
+    // TODO: implement searchDevices
+    throw UnimplementedError();
+  }
 }
