@@ -70,7 +70,7 @@ import {
 } from "./metadataService";
 import { uploadStreamUsingMultipart } from "./multiPartUploadService";
 import publicUploadHttpClient from "./publicUploadHttpClient";
-import { generateThumbnail } from "./thumbnail";
+import { fallbackThumbnail, generateThumbnailWeb } from "./thumbnail";
 import UIService from "./uiService";
 import uploadCancelService from "./uploadCancelService";
 import UploadHttpClient from "./uploadHttpClient";
@@ -422,6 +422,39 @@ const moduleState = new ModuleState();
  * we can do all the rest of the IPC operations using the path itself, and for
  * the read during upload using a streaming IPC mechanism.
  */
+const readFileOrPath = async (
+    fileOrPath: File | string,
+    fileTypeInfo: FileTypeInfo,
+): Promise<FileInMemory> =>
+    fileOrPath instanceof File
+        ? _readFile(fileOrPath, fileTypeInfo)
+        : _readPath(fileOrPath, fileTypeInfo);
+
+const _readFile = async (file: File, fileTypeInfo: FileTypeInfo) => {
+    const dataOrStream =
+        file.size > MULTIPART_PART_SIZE
+            ? getFileStream(file, FILE_READER_CHUNK_SIZE)
+            : new Uint8Array(await file.arrayBuffer());
+
+    let thumbnail: Uint8Array;
+    let hasStaticThumbnail = false;
+
+    try {
+        thumbnail = await generateThumbnailWeb(file, fileTypeInfo);
+        if (thumbnail.length == 0) throw new Error("Empty thumbnail");
+    } catch (e) {
+        log.error(`Failed to generate ${fileTypeInfo.exactType} thumbnail`, e);
+        thumbnail = fallbackThumbnail();
+        hasStaticThumbnail = true;
+    }
+
+    return {
+        filedata: dataOrStream,
+        thumbnail,
+        hasStaticThumbnail,
+    };
+};
+
 const readFileOrPath = async (
     fileOrPath: File | string,
     fileTypeInfo: FileTypeInfo,
