@@ -264,13 +264,56 @@ class _FaceWidgetState extends State<FaceWidget> {
             },
             child: Column(
               children: [
-                SizedBox(
-                  width: 60,
-                  height: 60,
-                  child: CroppedFaceImageView(
-                    enteFile: widget.file,
-                    face: widget.face,
-                  ),
+                Stack(
+                  children: [
+                    Container(
+                      height: 60,
+                      width: 60,
+                      decoration: ShapeDecoration(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: const BorderRadius.all(
+                            Radius.elliptical(16, 12),
+                          ),
+                          side: widget.highlight
+                              ? BorderSide(
+                                  color: getEnteColorScheme(context).primary700,
+                                  width: 1.0,
+                                )
+                              : BorderSide.none,
+                        ),
+                      ),
+                      child: ClipRRect(
+                        borderRadius:
+                            const BorderRadius.all(Radius.elliptical(16, 12)),
+                        child: SizedBox(
+                          width: 60,
+                          height: 60,
+                          child: CroppedFaceImageView(
+                            enteFile: widget.file,
+                            face: widget.face,
+                          ),
+                        ),
+                      ),
+                    ),
+                    // TODO: the edges of the green line are still not properly rounded around ClipRRect
+                    if (widget.editMode)
+                      Positioned(
+                        right: 0,
+                        top: 0,
+                        child: GestureDetector(
+                          onTap: _cornerIconPressed,
+                          child: isJustRemoved
+                              ? const Icon(
+                                  CupertinoIcons.add_circled_solid,
+                                  color: Colors.green,
+                                )
+                              : const Icon(
+                                  Icons.cancel,
+                                  color: Colors.red,
+                                ),
+                        ),
+                      ),
+                  ],
                 ),
                 const SizedBox(height: 8),
                 if (widget.person != null)
