@@ -63,14 +63,23 @@ const imageMagickPath = () =>
     path.join(isDev ? "build" : process.resourcesPath, "image-magick");
 
 export const generateImageThumbnail = async (
-    imageData: Uint8Array,
+    dataOrPath: Uint8Array | string,
     maxDimension: number,
     maxSize: number,
 ): Promise<Uint8Array> => {
-    const inputFilePath = await makeTempFilePath();
+    let inputFilePath: string;
+    let isInputFileTemporary: boolean;
+    if (dataOrPath instanceof Uint8Array) {
+        inputFilePath = await makeTempFilePath();
+        isInputFileTemporary = true;
+    } else {
+        inputFilePath = dataOrPath;
+        isInputFileTemporary = false;
+    }
+
     const outputFilePath = await makeTempFilePath(".jpeg");
 
-    // Construct the command first, it may throw NotAvailable on win32.
+    // Construct the command first, it may throw `NotAvailable` on win32.
     let quality = 70;
     let command = generateImageThumbnailCommand(
         inputFilePath,
@@ -80,8 +89,8 @@ export const generateImageThumbnail = async (
     );
 
     try {
-        if (imageData instanceof Uint8Array)
-            await fs.writeFile(inputFilePath, imageData);
+        if (dataOrPath instanceof Uint8Array)
+            await fs.writeFile(inputFilePath, dataOrPath);
 
         let thumbnail: Uint8Array;
         do {
@@ -98,7 +107,7 @@ export const generateImageThumbnail = async (
         return thumbnail;
     } finally {
         try {
-            await deleteTempFile(inputFilePath);
+            if (isInputFileTemporary) await deleteTempFile(inputFilePath);
             await deleteTempFile(outputFilePath);
         } catch (e) {
             log.error("Ignoring error when cleaning up temp files", e);

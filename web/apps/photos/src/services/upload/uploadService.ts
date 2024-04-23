@@ -359,6 +359,22 @@ const readAsset = async (
         : await readFile(fileTypeInfo, file);
 };
 
+// TODO(MR): Merge with the uploader
+class ModuleState {
+    /**
+     * This will be set to true if we get an error from the Node.js side of our
+     * desktop app telling us that native JPEG conversion is not available for
+     * the current OS/arch combination. That way, we can stop pestering it again
+     * and again (saving an IPC round-trip).
+     *
+     * Note the double negative when it is used.
+     */
+    isNativeThumbnailCreationNotAvailable = false;
+}
+
+const moduleState = new ModuleState();
+
+
 async function readFile(
     fileTypeInfo: FileTypeInfo,
     rawFile: File | ElectronFile,
@@ -378,6 +394,20 @@ async function readFile(
         filedata = getFileStream(rawFile, FILE_READER_CHUNK_SIZE);
     } else {
         filedata = await getUint8ArrayView(rawFile);
+    }
+
+    const electron = globalThis.electron;
+    const available = !moduleState.isNativeThumbnailCreationNotAvailable;
+    if (electron && available) {
+        try {
+            return await generateImageThumbnailInElectron(electron, blob);
+        } catch (e) {
+            if (e.message == CustomErrorMessage.NotAvailable) {
+                moduleState.isNativeThumbnailCreationNotAvailable = true;
+            } else {
+                log.error("Native thumbnail creation failed", e);
+            }
+        }
     }
 
     if (filedata instanceof Uint8Array) {

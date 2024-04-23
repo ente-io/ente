@@ -221,8 +221,8 @@ export interface Electron {
      * not yet possible, this function will throw an error with the
      * {@link CustomErrorMessage.NotAvailable} message.
      *
-     * @param imageData The raw image data (the contents of the image file)
-     * whose thumbnail we want to generate.
+     * @param dataOrPath The raw image data (the contents of the image file), or
+     * the path to the image file, whose thumbnail we want to generate.
      * @param maxDimension The maximum width or height of the generated
      * thumbnail.
      * @param maxSize Maximum size (in bytes) of the generated thumbnail.
@@ -230,7 +230,7 @@ export interface Electron {
      * @returns JPEG data of the generated thumbnail.
      */
     generateImageThumbnail: (
-        imageData: Uint8Array,
+        dataOrPath: Uint8Array | string,
         maxDimension: number,
         maxSize: number,
     ) => Promise<Uint8Array>;

@@ -147,8 +147,12 @@ export const attachIPCHandlers = () => {
 
     ipcMain.handle(
         "generateImageThumbnail",
-        (_, imageData: Uint8Array, maxDimension: number, maxSize: number) =>
-            generateImageThumbnail(imageData, maxDimension, maxSize),
+        (
+            _,
+            dataOrPath: Uint8Array | string,
+            maxDimension: number,
+            maxSize: number,
+        ) => generateImageThumbnail(dataOrPath, maxDimension, maxSize),
     );
 
     ipcMain.handle(

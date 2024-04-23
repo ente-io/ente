@@ -48,17 +48,19 @@ export const ffmpegExec = async (
 
     let inputFilePath: string;
     let isInputFileTemporary: boolean;
-    if (typeof dataOrPath == "string") {
-        inputFilePath = dataOrPath;
-        isInputFileTemporary = false;
-    } else {
+    if (dataOrPath instanceof Uint8Array) {
         inputFilePath = await makeTempFilePath();
         isInputFileTemporary = true;
-        await fs.writeFile(inputFilePath, dataOrPath);
+    } else {
+        inputFilePath = dataOrPath;
+        isInputFileTemporary = false;
     }
 
     const outputFilePath = await makeTempFilePath();
     try {
+        if (dataOrPath instanceof Uint8Array)
+            await fs.writeFile(inputFilePath, dataOrPath);
+
         const cmd = substitutePlaceholders(
             command,
             inputFilePath,

@@ -114,7 +114,12 @@ export interface UploadURL {
 
 export interface FileInMemory {
     filedata: Uint8Array | DataStream;
+    /** The JPEG data of the generated thumbnail */
     thumbnail: Uint8Array;
+    /**
+     * `true` if this is a fallback (all black) thumbnail we're returning since
+     * thumbnail generation failed for some reason.
+     */
     hasStaticThumbnail: boolean;
 }
 
