@@ -1,6 +1,7 @@
 // ignore_for_file: always_use_package_imports
 
 import "dart:convert";
+import "dart:developer";
 import "dart:io";
 
 import "package:dio/dio.dart";
@@ -10,9 +11,9 @@ import "package:shared_preferences/shared_preferences.dart";
 import "model.dart";
 
 class FlagService {
-  late final SharedPreferences _prefs;
-  late final Dio _enteDio;
-  bool _usingEnteEmail = false;
+  final SharedPreferences _prefs;
+  final Dio _enteDio;
+  late final bool _usingEnteEmail;
 
   FlagService(this._prefs, this._enteDio) {
     _usingEnteEmail = _prefs.getString("email")?.endsWith("@ente.io") ?? false;
@@ -25,7 +26,7 @@ class FlagService {
 
   RemoteFlags get flags {
     try {
-      if (_flags == null) {
+      if (!_prefs.containsKey("remote_flags")) {
         _fetch().ignore();
       }
       _flags ??= RemoteFlags.fromMap(
@@ -33,7 +34,7 @@ class FlagService {
       );
       return _flags!;
     } catch (e) {
-      debugPrint("Error getting flags: $e");
+      debugPrint("Failed to get feature flags $e");
       return RemoteFlags.defaultValue;
     }
   }
@@ -41,11 +42,10 @@ class FlagService {
   Future<void> _fetch() async {
     try {
       if (!_prefs.containsKey("token")) {
+        log("token not found, skip", name: "FlagService");
         return;
       }
-      if (kDebugMode) {
-        debugPrint("Fetching feature flags");
-      }
+      log("fetching feature flags", name: "FlagService");
       final response = await _enteDio.get("/remote-store/feature-flags");
       final remoteFlags = RemoteFlags.fromMap(response.data);
       await _prefs.setString("remote_flags", remoteFlags.toJson());
@@ -69,7 +69,7 @@ class FlagService {
 
   bool get faceSearchEnabled => flags.faceSearchEnabled;
 
-  bool get passKeyEnabled => flags.passKeyEnabled;
+  bool get passKeyEnabled => flags.passKeyEnabled || internalOrBetaUser;
 
   bool get recoveryKeyVerified => flags.recoveryKeyVerified;
 }
