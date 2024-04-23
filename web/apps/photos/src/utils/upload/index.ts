@@ -13,70 +13,8 @@ import {
 
 const TYPE_JSON = "json";
 
-export function findMatchingExistingFiles(
-    existingFiles: EnteFile[],
-    newFileMetadata: Metadata,
-): EnteFile[] {
-    const matchingFiles: EnteFile[] = [];
-    for (const existingFile of existingFiles) {
-        if (areFilesSame(existingFile.metadata, newFileMetadata)) {
-            matchingFiles.push(existingFile);
-        }
-    }
-    return matchingFiles;
-}
-
-export function areFilesSame(
-    existingFile: Metadata,
-    newFile: Metadata,
-): boolean {
-    if (hasFileHash(existingFile) && hasFileHash(newFile)) {
-        return areFilesWithFileHashSame(existingFile, newFile);
-    } else {
-        /*
-         * The maximum difference in the creation/modification times of two similar files is set to 1 second.
-         * This is because while uploading files in the web - browsers and users could have set reduced
-         * precision of file times to prevent timing attacks and fingerprinting.
-         * Context: https://developer.mozilla.org/en-US/docs/Web/API/File/lastModified#reduced_time_precision
-         */
-        const oneSecond = 1e6;
-        if (
-            existingFile.fileType === newFile.fileType &&
-            Math.abs(existingFile.creationTime - newFile.creationTime) <
-                oneSecond &&
-            Math.abs(existingFile.modificationTime - newFile.modificationTime) <
-                oneSecond &&
-            existingFile.title === newFile.title
-        ) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-}
-
 export function hasFileHash(file: Metadata) {
     return file.hash || (file.imageHash && file.videoHash);
-}
-
-export function areFilesWithFileHashSame(
-    existingFile: Metadata,
-    newFile: Metadata,
-): boolean {
-    if (
-        existingFile.fileType !== newFile.fileType ||
-        existingFile.title !== newFile.title
-    ) {
-        return false;
-    }
-    if (existingFile.fileType === FILE_TYPE.LIVE_PHOTO) {
-        return (
-            existingFile.imageHash === newFile.imageHash &&
-            existingFile.videoHash === newFile.videoHash
-        );
-    } else {
-        return existingFile.hash === newFile.hash;
-    }
 }
 
 export function segregateMetadataAndMediaFiles(
