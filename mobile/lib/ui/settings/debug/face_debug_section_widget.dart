@@ -8,7 +8,6 @@ import "package:photos/events/people_changed_event.dart";
 import "package:photos/face/db.dart";
 import "package:photos/face/model/person.dart";
 import 'package:photos/services/machine_learning/face_ml/face_ml_service.dart';
-import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
@@ -284,34 +283,34 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
             );
           },
         ),
-        sectionOptionSpacing,
-        MenuItemWidget(
-          captionedTextWidget: const CaptionedTextWidget(
-            title: "Rank blurs",
-          ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
-          trailingIcon: Icons.chevron_right_outlined,
-          trailingIconIsMuted: true,
-          onTap: () async {
-            await showChoiceDialog(
-              context,
-              title: "Are you sure?",
-              body:
-                  "This will delete all clusters and put blurry faces in separate clusters per ten points.",
-              firstButtonLabel: "Yes, confirm",
-              firstButtonOnTap: () async {
-                try {
-                  await ClusterFeedbackService.instance
-                      .createFakeClustersByBlurValue();
-                  showShortToast(context, "Done");
-                } catch (e, s) {
-                  _logger.warning('Failed to rank faces on blur values ', e, s);
-                  await showGenericErrorDialog(context: context, error: e);
-                }
-              },
-            );
-          },
-        ),
+        // sectionOptionSpacing,
+        // MenuItemWidget(
+        //   captionedTextWidget: const CaptionedTextWidget(
+        //     title: "Rank blurs",
+        //   ),
+        //   pressedColor: getEnteColorScheme(context).fillFaint,
+        //   trailingIcon: Icons.chevron_right_outlined,
+        //   trailingIconIsMuted: true,
+        //   onTap: () async {
+        //     await showChoiceDialog(
+        //       context,
+        //       title: "Are you sure?",
+        //       body:
+        //           "This will delete all clusters and put blurry faces in separate clusters per ten points.",
+        //       firstButtonLabel: "Yes, confirm",
+        //       firstButtonOnTap: () async {
+        //         try {
+        //           await ClusterFeedbackService.instance
+        //               .createFakeClustersByBlurValue();
+        //           showShortToast(context, "Done");
+        //         } catch (e, s) {
+        //           _logger.warning('Failed to rank faces on blur values ', e, s);
+        //           await showGenericErrorDialog(context: context, error: e);
+        //         }
+        //       },
+        //     );
+        //   },
+        // ),
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(

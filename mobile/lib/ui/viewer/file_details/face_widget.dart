@@ -1,5 +1,4 @@
 import "dart:developer" show log;
-import "dart:io" show Platform;
 import "dart:typed_data";
 
 import "package:flutter/cupertino.dart";
@@ -20,6 +19,8 @@ import "package:photos/ui/viewer/people/people_page.dart";
 import "package:photos/utils/face/face_box_crop.dart";
 import "package:photos/utils/thumbnail_util.dart";
 // import "package:photos/utils/toast_util.dart";
+
+const useGeneratedFaceCrops = false;
 
 class FaceWidget extends StatefulWidget {
   final EnteFile file;
@@ -48,7 +49,7 @@ class _FaceWidgetState extends State<FaceWidget> {
 
   @override
   Widget build(BuildContext context) {
-    if (Platform.isIOS) {
+    if (useGeneratedFaceCrops) {
       return FutureBuilder<Uint8List?>(
         future: getFaceCrop(),
         builder: (context, snapshot) {
