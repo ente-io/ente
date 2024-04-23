@@ -435,7 +435,7 @@ async function extractLivePhotoMetadata(
     return {
         metadata: {
             ...imageMetadata,
-            title: getLivePhotoName(livePhotoAssets),
+            title: getFileName(livePhotoAssets.image),
             fileType: FILE_TYPE.LIVE_PHOTO,
             imageHash: imageMetadata.hash,
             videoHash: videoHash,
@@ -448,9 +448,6 @@ async function extractLivePhotoMetadata(
 export function getLivePhotoSize(livePhotoAssets: LivePhotoAssets) {
     return livePhotoAssets.image.size + livePhotoAssets.video.size;
 }
-
-export const getLivePhotoName = ({ image }: LivePhotoAssets2) =>
-    typeof image == "string" ? basename(image) : image.name;
 
 export async function clusterLivePhotoFiles(mediaFiles: FileWithCollection2[]) {
     try {

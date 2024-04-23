@@ -40,7 +40,12 @@ import {
 } from "./metadataService";
 import { default as UIService, default as uiService } from "./uiService";
 import uploadCancelService from "./uploadCancelService";
-import UploadService, { getFileName, uploader } from "./uploadService";
+import UploadService, {
+    assetName,
+    getAssetName,
+    getFileName,
+    uploader,
+} from "./uploadService";
 
 const MAX_CONCURRENT_UPLOADS = 4;
 
@@ -132,7 +137,7 @@ class UploadManager {
                 new Map<number, string>(
                     filesWithCollectionToUploadIn.map((mediaFile) => [
                         mediaFile.localID,
-                        UploadService.getAssetName(mediaFile),
+                        getAssetName(mediaFile),
                     ]),
                 ),
             );
@@ -164,7 +169,7 @@ class UploadManager {
                     new Map<number, string>(
                         analysedMediaFiles.map((mediaFile) => [
                             mediaFile.localID,
-                            UploadService.getAssetName(mediaFile),
+                            assetName(mediaFile),
                         ]),
                     ),
                 );
@@ -223,7 +228,7 @@ class UploadManager {
                 new Map<number, string>(
                     filesWithCollectionToUploadIn.map((mediaFile) => [
                         mediaFile.localID,
-                        UploadService.getAssetName(mediaFile),
+                        assetName(mediaFile),
                     ]),
                 ),
             );
@@ -255,7 +260,7 @@ class UploadManager {
                     new Map<number, string>(
                         analysedMediaFiles.map((mediaFile) => [
                             mediaFile.localID,
-                            UploadService.getAssetName(mediaFile),
+                            assetName(mediaFile),
                         ]),
                     ),
                 );

@@ -58,7 +58,6 @@ import { getFileType } from "../typeDetectionService";
 import {
     extractAssetMetadata,
     getLivePhotoFileType,
-    getLivePhotoName,
     getLivePhotoSize,
 } from "./metadataService";
 import { uploadStreamUsingMultipart } from "./multiPartUploadService";
@@ -125,12 +124,6 @@ class UploadService {
         return isLivePhoto
             ? getLivePhotoSize(livePhotoAssets)
             : getFileSize(file);
-    }
-
-    getAssetName({ isLivePhoto, file, livePhotoAssets }: UploadAsset2) {
-        return isLivePhoto
-            ? getLivePhotoName(livePhotoAssets)
-            : getFileName(file);
     }
 
     getAssetFileType({ isLivePhoto, file, livePhotoAssets }: UploadAsset) {
@@ -333,6 +326,19 @@ const constructPublicMagicMetadata = async (
 function getFileSize(file: File | ElectronFile) {
     return file.size;
 }
+export const getAssetName = ({
+    isLivePhoto,
+    file,
+    livePhotoAssets,
+}: UploadAsset) =>
+    isLivePhoto ? getFileName(livePhotoAssets.image) : getFileName(file);
+
+export const assetName = ({
+    isLivePhoto,
+    file,
+    livePhotoAssets,
+}: UploadAsset2) =>
+    isLivePhoto ? getFileName(livePhotoAssets.image) : getFileName(file);
 
 export const getFileName = (file: File | ElectronFile | string) =>
     typeof file == "string" ? basename(file) : file.name;
@@ -719,7 +725,7 @@ export async function uploader(
     const { collection, localID, ...uploadAsset2 } = fileWithCollection;
     /* TODO(MR): ElectronFile changes */
     const uploadAsset = uploadAsset2 as UploadAsset;
-    const fileNameSize = `${uploadService.getAssetName(
+    const fileNameSize = `${assetName(
         fileWithCollection,
     )}_${convertBytesToHumanReadable(uploadService.getAssetSize(uploadAsset))}`;
 
