@@ -34,7 +34,6 @@ import {
     getMetadataJSONMapKeyForFile,
     type ParsedMetadataJSON,
 } from "./takeout";
-import uploadCancelService from "./uploadCancelService";
 import { getFileName } from "./uploadService";
 
 const EXIF_TAGS_NEEDED = [
@@ -310,89 +309,77 @@ export function getLivePhotoSize(livePhotoAssets: LivePhotoAssets) {
  * single live photo when appropriate.
  */
 export const clusterLivePhotos = (mediaFiles: FileWithCollection2[]) => {
-    try {
-        const result: FileWithCollection2[] = [];
-        mediaFiles
-            .sort((f, g) =>
-                nameAndExtension(getFileName(f.file))[0].localeCompare(
-                    nameAndExtension(getFileName(g.file))[0],
-                ),
-            )
-            .sort((f, g) => f.collectionID - g.collectionID);
-        let index = 0;
-        while (index < mediaFiles.length - 1) {
-            if (uploadCancelService.isUploadCancelationRequested()) {
-                throw Error(CustomError.UPLOAD_CANCELLED);
-            }
-            const f = mediaFiles[index];
-            const g = mediaFiles[index + 1];
-            const fFileType = getFileTypeFromExtensionForLivePhotoClustering(
-                getFileName(f.file),
-            );
-            const gFileType = getFileTypeFromExtensionForLivePhotoClustering(
-                getFileName(g.file),
-            );
-            const fFileIdentifier: LivePhotoIdentifier = {
-                collectionID: f.collectionID,
-                fileType: fFileType,
-                name: getFileName(f.file),
-                /* TODO(MR): ElectronFile changes */
-                size: (f as FileWithCollection).file.size,
-            };
-            const gFileIdentifier: LivePhotoIdentifier = {
-                collectionID: g.collectionID,
-                fileType: gFileType,
-                name: getFileName(g.file),
-                /* TODO(MR): ElectronFile changes */
-                size: (g as FileWithCollection).file.size,
-            };
-            if (areLivePhotoAssets(fFileIdentifier, gFileIdentifier)) {
-                let imageFile: File | ElectronFile | string;
-                let videoFile: File | ElectronFile | string;
-                if (
-                    fFileType === FILE_TYPE.IMAGE &&
-                    gFileType === FILE_TYPE.VIDEO
-                ) {
-                    imageFile = f.file;
-                    videoFile = g.file;
-                } else {
-                    videoFile = f.file;
-                    imageFile = g.file;
-                }
-                const livePhotoLocalID = f.localID;
-                result.push({
-                    localID: livePhotoLocalID,
-                    collectionID: f.collectionID,
-                    isLivePhoto: true,
-                    livePhotoAssets: {
-                        image: imageFile,
-                        video: videoFile,
-                    },
-                });
-                index += 2;
+    const result: FileWithCollection2[] = [];
+    mediaFiles
+        .sort((f, g) =>
+            nameAndExtension(getFileName(f.file))[0].localeCompare(
+                nameAndExtension(getFileName(g.file))[0],
+            ),
+        )
+        .sort((f, g) => f.collectionID - g.collectionID);
+    let index = 0;
+    while (index < mediaFiles.length - 1) {
+        const f = mediaFiles[index];
+        const g = mediaFiles[index + 1];
+        const fFileType = getFileTypeFromExtensionForLivePhotoClustering(
+            getFileName(f.file),
+        );
+        const gFileType = getFileTypeFromExtensionForLivePhotoClustering(
+            getFileName(g.file),
+        );
+        const fFileIdentifier: LivePhotoIdentifier = {
+            collectionID: f.collectionID,
+            fileType: fFileType,
+            name: getFileName(f.file),
+            /* TODO(MR): ElectronFile changes */
+            size: (f as FileWithCollection).file.size,
+        };
+        const gFileIdentifier: LivePhotoIdentifier = {
+            collectionID: g.collectionID,
+            fileType: gFileType,
+            name: getFileName(g.file),
+            /* TODO(MR): ElectronFile changes */
+            size: (g as FileWithCollection).file.size,
+        };
+        if (areLivePhotoAssets(fFileIdentifier, gFileIdentifier)) {
+            let imageFile: File | ElectronFile | string;
+            let videoFile: File | ElectronFile | string;
+            if (
+                fFileType === FILE_TYPE.IMAGE &&
+                gFileType === FILE_TYPE.VIDEO
+            ) {
+                imageFile = f.file;
+                videoFile = g.file;
             } else {
-                result.push({
-                    ...f,
-                    isLivePhoto: false,
-                });
-                index += 1;
+                videoFile = f.file;
+                imageFile = g.file;
             }
-        }
-        if (index === mediaFiles.length - 1) {
+            const livePhotoLocalID = f.localID;
             result.push({
-                ...mediaFiles[index],
+                localID: livePhotoLocalID,
+                collectionID: f.collectionID,
+                isLivePhoto: true,
+                livePhotoAssets: {
+                    image: imageFile,
+                    video: videoFile,
+                },
+            });
+            index += 2;
+        } else {
+            result.push({
+                ...f,
                 isLivePhoto: false,
             });
-        }
-        return result;
-    } catch (e) {
-        if (e.message === CustomError.UPLOAD_CANCELLED) {
-            throw e;
-        } else {
-            log.error("failed to cluster live photo", e);
-            throw e;
+            index += 1;
         }
     }
+    if (index === mediaFiles.length - 1) {
+        result.push({
+            ...mediaFiles[index],
+            isLivePhoto: false,
+        });
+    }
+    return result;
 };
 
 interface LivePhotoIdentifier {

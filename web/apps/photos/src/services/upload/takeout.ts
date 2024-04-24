@@ -97,12 +97,11 @@ export const tryParseTakeoutMetadataJSON = async (
         log.error("Failed to parse takeout metadata JSON", e);
         return undefined;
     }
-}
+};
 
 const NULL_PARSED_METADATA_JSON: ParsedMetadataJSON = {
     creationTime: null,
     modificationTime: null,
-    latitude: null, longitude: null
     ...NULL_LOCATION,
 };
 
@@ -153,4 +152,4 @@ const parseMetadataJSONText = (text: string) => {
         parsedMetadataJSON.longitude = locationData.longitude;
     }
     return parsedMetadataJSON;
-}
+};

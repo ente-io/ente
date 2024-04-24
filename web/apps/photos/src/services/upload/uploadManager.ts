@@ -43,7 +43,7 @@ import {
     segregateMetadataAndMediaFiles2,
 } from "utils/upload";
 import { getLocalFiles } from "../fileService";
-import { clusterLivePhotoFiles } from "./metadataService";
+import { clusterLivePhotoFiles, clusterLivePhotos } from "./metadataService";
 import {
     getMetadataJSONMapKeyForJSON,
     tryParseTakeoutMetadataJSON,
@@ -369,7 +369,11 @@ class UploadManager {
             }
 
             if (mediaFiles.length) {
-                const clusteredMediaFiles = await clusterLivePhotos(mediaFiles);
+                const clusteredMediaFiles = clusterLivePhotos(mediaFiles);
+
+                if (uploadCancelService.isUploadCancelationRequested()) {
+                    throw Error(CustomError.UPLOAD_CANCELLED);
+                }
 
                 this.uiService.setFilenames(
                     new Map<number, string>(
