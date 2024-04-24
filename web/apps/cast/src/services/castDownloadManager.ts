@@ -1,8 +1,8 @@
+import { FILE_TYPE } from "@/media/file";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { CustomError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { getCastFileURL } from "@ente/shared/network/api";
-import { FILE_TYPE } from "constants/file";
 import { EnteFile } from "types/file";
 import { generateStreamFromArrayBuffer } from "utils/file";
 

@@ -1,4 +1,3 @@
-import { CollectionSummaryType, CollectionType } from "constants/collection";
 import { EnteFile } from "types/file";
 import {
     EncryptedMagicMetadata,
@@ -20,6 +19,13 @@ export interface CollectionUser {
     role: COLLECTION_ROLE;
 }
 
+enum CollectionType {
+    folder = "folder",
+    favorites = "favorites",
+    album = "album",
+    uncategorized = "uncategorized",
+}
+
 export interface EncryptedCollection {
     id: number;
     owner: CollectionUser;
@@ -32,7 +38,7 @@ export interface EncryptedCollection {
     type: CollectionType;
     attributes: collectionAttributes;
     sharees: CollectionUser[];
-    publicURLs?: PublicURL[];
+    publicURLs?: unknown;
     updationTime: number;
     isDeleted: boolean;
     magicMetadata: EncryptedMagicMetadata;
@@ -61,65 +67,12 @@ export interface Collection
 // define a method on Collection interface to return the sync key as collection.id-time
 // this is used to store the last sync time of a collection in local storage
 
-export interface PublicURL {
-    url: string;
-    deviceLimit: number;
-    validTill: number;
-    enableDownload: boolean;
-    enableCollect: boolean;
-    passwordEnabled: boolean;
-    nonce?: string;
-    opsLimit?: number;
-    memLimit?: number;
-}
-
-export interface UpdatePublicURL {
-    collectionID: number;
-    disablePassword?: boolean;
-    enableDownload?: boolean;
-    enableCollect?: boolean;
-    validTill?: number;
-    deviceLimit?: number;
-    passHash?: string;
-    nonce?: string;
-    opsLimit?: number;
-    memLimit?: number;
-}
-
-export interface CreatePublicAccessTokenRequest {
-    collectionID: number;
-    validTill?: number;
-    deviceLimit?: number;
-}
-
-export interface EncryptedFileKey {
-    id: number;
-    encryptedKey: string;
-    keyDecryptionNonce: string;
-}
-
-export interface AddToCollectionRequest {
-    collectionID: number;
-    files: EncryptedFileKey[];
-}
-
-export interface MoveToCollectionRequest {
-    fromCollectionID: number;
-    toCollectionID: number;
-    files: EncryptedFileKey[];
-}
-
 export interface collectionAttributes {
     encryptedPath?: string;
     pathDecryptionNonce?: string;
 }
 
 export type CollectionToFileMap = Map<number, EnteFile>;
-
-export interface RemoveFromCollectionRequest {
-    collectionID: number;
-    fileIDs: number[];
-}
 
 export interface CollectionMagicMetadataProps {
     visibility?: VISIBILITY_STATE;
@@ -144,16 +97,4 @@ export interface CollectionPublicMagicMetadataProps {
 export type CollectionPublicMagicMetadata =
     MagicMetadataCore<CollectionPublicMagicMetadataProps>;
 
-export interface CollectionSummary {
-    id: number;
-    name: string;
-    type: CollectionSummaryType;
-    coverFile: EnteFile;
-    latestFile: EnteFile;
-    fileCount: number;
-    updationTime: number;
-    order?: number;
-}
-
-export type CollectionSummaries = Map<number, CollectionSummary>;
 export type CollectionFilesCount = Map<number, number>;

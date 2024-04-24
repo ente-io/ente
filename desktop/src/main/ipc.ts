@@ -38,9 +38,9 @@ import {
     updateAndRestart,
     updateOnNextRestart,
 } from "./services/app-update";
-import { convertToJPEG, generateImageThumbnail } from "./services/convert";
 import { ffmpegExec } from "./services/ffmpeg";
 import { getDirFiles } from "./services/fs";
+import { convertToJPEG, generateImageThumbnail } from "./services/image";
 import {
     clipImageEmbedding,
     clipTextEmbeddingIfAvailable,
@@ -141,14 +141,18 @@ export const attachIPCHandlers = () => {
 
     // - Conversion
 
-    ipcMain.handle("convertToJPEG", (_, fileName, imageData) =>
-        convertToJPEG(fileName, imageData),
+    ipcMain.handle("convertToJPEG", (_, imageData: Uint8Array) =>
+        convertToJPEG(imageData),
     );
 
     ipcMain.handle(
         "generateImageThumbnail",
-        (_, inputFile, maxDimension, maxSize) =>
-            generateImageThumbnail(inputFile, maxDimension, maxSize),
+        (
+            _,
+            dataOrPath: Uint8Array | string,
+            maxDimension: number,
+            maxSize: number,
+        ) => generateImageThumbnail(dataOrPath, maxDimension, maxSize),
     );
 
     ipcMain.handle(
@@ -156,10 +160,10 @@ export const attachIPCHandlers = () => {
         (
             _,
             command: string[],
-            inputDataOrPath: Uint8Array | string,
-            outputFileName: string,
+            dataOrPath: Uint8Array | string,
+            outputFileExtension: string,
             timeoutMS: number,
-        ) => ffmpegExec(command, inputDataOrPath, outputFileName, timeoutMS),
+        ) => ffmpegExec(command, dataOrPath, outputFileExtension, timeoutMS),
     );
 
     // - ML

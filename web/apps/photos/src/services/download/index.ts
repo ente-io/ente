@@ -1,3 +1,4 @@
+import { FILE_TYPE } from "@/media/file";
 import { decodeLivePhoto } from "@/media/live-photo";
 import { openCache, type BlobCache } from "@/next/blob-cache";
 import log from "@/next/log";
@@ -8,7 +9,6 @@ import { CustomError } from "@ente/shared/error";
 import { Events, eventBus } from "@ente/shared/events";
 import { isPlaybackPossible } from "@ente/shared/media/video-playback";
 import { Remote } from "comlink";
-import { FILE_TYPE } from "constants/file";
 import isElectron from "is-electron";
 import * as ffmpegService from "services/ffmpeg";
 import { EnteFile } from "types/file";
@@ -617,7 +617,7 @@ async function getPlayableVideo(
                 new File([videoBlob], videoNameTitle),
             );
             log.info(`video successfully converted ${videoNameTitle}`);
-            return new Blob([await mp4ConvertedVideo.arrayBuffer()]);
+            return new Blob([mp4ConvertedVideo]);
         }
     } catch (e) {
         log.error("video conversion failed", e);

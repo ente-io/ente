@@ -1,7 +1,7 @@
+import { FILE_TYPE } from "@/media/file";
 import log from "@/next/log";
 import PairedSuccessfullyOverlay from "components/PairedSuccessfullyOverlay";
 import { PhotoAuditorium } from "components/PhotoAuditorium";
-import { FILE_TYPE } from "constants/file";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import {

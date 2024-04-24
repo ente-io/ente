@@ -1,8 +1,8 @@
+import { FILE_TYPE } from "@/media/file";
 import log from "@/next/log";
 import { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { eventBus, Events } from "@ente/shared/events";
 import { getToken, getUserID } from "@ente/shared/storage/localStorage/helpers";
-import { FILE_TYPE } from "constants/file";
 import debounce from "debounce";
 import PQueue from "p-queue";
 import { JobResult } from "types/common/job";

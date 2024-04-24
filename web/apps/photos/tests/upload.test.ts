@@ -1,5 +1,5 @@
+import { FILE_TYPE } from "@/media/file";
 import { tryToParseDateTime } from "@ente/shared/time";
-import { FILE_TYPE } from "constants/file";
 import { getLocalCollections } from "services/collectionService";
 import { getLocalFiles } from "services/fileService";
 import {
@@ -7,7 +7,7 @@ import {
     getClippedMetadataJSONMapKeyForFile,
     getMetadataJSONMapKeyForFile,
     getMetadataJSONMapKeyForJSON,
-} from "services/upload/metadataService";
+} from "services/upload/takeout";
 import { getUserDetailsV2 } from "services/userService";
 import { groupFilesBasedOnCollectionID } from "utils/file";
 

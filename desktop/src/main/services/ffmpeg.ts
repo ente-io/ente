@@ -1,30 +1,32 @@
 import pathToFfmpeg from "ffmpeg-static";
 import fs from "node:fs/promises";
+import log from "../log";
 import { withTimeout } from "../utils";
 import { execAsync } from "../utils-electron";
 import { deleteTempFile, makeTempFilePath } from "../utils-temp";
 
+/* Duplicated in the web app's code (used by the WASM FFmpeg implementation). */
 const ffmpegPathPlaceholder = "FFMPEG";
 const inputPathPlaceholder = "INPUT";
 const outputPathPlaceholder = "OUTPUT";
 
 /**
- * Run a ffmpeg command
+ * Run a FFmpeg command
  *
- * [Note: ffmpeg in Electron]
+ * [Note: FFmpeg in Electron]
  *
- * There is a wasm build of ffmpeg, but that is currently 10-20 times slower
+ * There is a wasm build of FFmpeg, but that is currently 10-20 times slower
  * that the native build. That is slow enough to be unusable for our purposes.
  * https://ffmpegwasm.netlify.app/docs/performance
  *
- * So the alternative is to bundle a ffmpeg binary with our app. e.g.
+ * So the alternative is to bundle a FFmpeg executable binary with our app. e.g.
  *
  *     yarn add fluent-ffmpeg ffmpeg-static ffprobe-static
  *
  * (we only use ffmpeg-static, the rest are mentioned for completeness' sake).
  *
- * Interestingly, Electron already bundles an ffmpeg library (it comes from the
- * ffmpeg fork maintained by Chromium).
+ * Interestingly, Electron already bundles an binary FFmpeg library (it comes
+ * from the ffmpeg fork maintained by Chromium).
  * https://chromium.googlesource.com/chromium/third_party/ffmpeg
  * https://stackoverflow.com/questions/53963672/what-version-of-ffmpeg-is-bundled-inside-electron
  *
@@ -37,8 +39,8 @@ const outputPathPlaceholder = "OUTPUT";
  */
 export const ffmpegExec = async (
     command: string[],
-    inputDataOrPath: Uint8Array | string,
-    outputFileName: string,
+    dataOrPath: Uint8Array | string,
+    outputFileExtension: string,
     timeoutMS: number,
 ): Promise<Uint8Array> => {
     // TODO (MR): This currently copies files for both input and output. This
@@ -47,18 +49,18 @@ export const ffmpegExec = async (
 
     let inputFilePath: string;
     let isInputFileTemporary: boolean;
-    if (typeof inputDataOrPath == "string") {
-        inputFilePath = inputDataOrPath;
-        isInputFileTemporary = false;
-    } else {
-        inputFilePath = await makeTempFilePath("input" /* arbitrary */);
+    if (dataOrPath instanceof Uint8Array) {
+        inputFilePath = await makeTempFilePath();
         isInputFileTemporary = true;
-        await fs.writeFile(inputFilePath, inputDataOrPath);
+    } else {
+        inputFilePath = dataOrPath;
+        isInputFileTemporary = false;
     }
 
-    let outputFilePath: string | undefined;
+    const outputFilePath = await makeTempFilePath(outputFileExtension);
     try {
-        outputFilePath = await makeTempFilePath(outputFileName);
+        if (dataOrPath instanceof Uint8Array)
+            await fs.writeFile(inputFilePath, dataOrPath);
 
         const cmd = substitutePlaceholders(
             command,
@@ -71,8 +73,12 @@ export const ffmpegExec = async (
 
         return fs.readFile(outputFilePath);
     } finally {
-        if (isInputFileTemporary) await deleteTempFile(inputFilePath);
-        if (outputFilePath) await deleteTempFile(outputFilePath);
+        try {
+            if (isInputFileTemporary) await deleteTempFile(inputFilePath);
+            await deleteTempFile(outputFilePath);
+        } catch (e) {
+            log.error("Ignoring error when cleaning up temp files", e);
+        }
     }
 };
 
@@ -96,7 +102,7 @@ const substitutePlaceholders = (
 /**
  * Return the path to the `ffmpeg` binary.
  *
- * At runtime, the ffmpeg binary is present in a path like (macOS example):
+ * At runtime, the FFmpeg binary is present in a path like (macOS example):
  * `ente.app/Contents/Resources/app.asar.unpacked/node_modules/ffmpeg-static/ffmpeg`
  */
 const ffmpegBinaryPath = () => {

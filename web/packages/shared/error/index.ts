@@ -22,7 +22,6 @@ export function isApiErrorResponse(object: any): object is ApiErrorResponse {
 }
 
 export const CustomError = {
-    THUMBNAIL_GENERATION_FAILED: "thumbnail generation failed",
     VIDEO_PLAYBACK_FAILED: "video playback failed",
     ETAG_MISSING: "no header/etag present in response body",
     KEY_MISSING: "encrypted key missing from localStorage",
@@ -49,7 +48,6 @@ export const CustomError = {
     SUBSCRIPTION_NEEDED: "subscription not present",
     NOT_FOUND: "not found ",
     NO_METADATA: "no metadata",
-    TOO_LARGE_LIVE_PHOTO_ASSETS: "too large live photo assets",
     NOT_A_DATE: "not a date",
     NOT_A_LOCATION: "not a location",
     FILE_ID_NOT_FOUND: "file with id not found",

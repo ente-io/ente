@@ -1,4 +1,4 @@
-import { FILE_TYPE } from "constants/file";
+import { FILE_TYPE } from "@/media/file";
 import { City } from "services/locationSearchService";
 import { LocationTagData } from "types/entity";
 import { EnteFile } from "types/file";

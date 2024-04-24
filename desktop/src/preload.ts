@@ -124,35 +124,32 @@ const fsIsDir = (dirPath: string): Promise<boolean> =>
 
 // - Conversion
 
-const convertToJPEG = (
-    fileName: string,
-    imageData: Uint8Array,
-): Promise<Uint8Array> =>
-    ipcRenderer.invoke("convertToJPEG", fileName, imageData);
+const convertToJPEG = (imageData: Uint8Array): Promise<Uint8Array> =>
+    ipcRenderer.invoke("convertToJPEG", imageData);
 
 const generateImageThumbnail = (
-    inputFile: File | ElectronFile,
+    dataOrPath: Uint8Array | string,
     maxDimension: number,
     maxSize: number,
 ): Promise<Uint8Array> =>
     ipcRenderer.invoke(
         "generateImageThumbnail",
-        inputFile,
+        dataOrPath,
         maxDimension,
         maxSize,
     );
 
 const ffmpegExec = (
     command: string[],
-    inputDataOrPath: Uint8Array | string,
-    outputFileName: string,
+    dataOrPath: Uint8Array | string,
+    outputFileExtension: string,
     timeoutMS: number,
 ): Promise<Uint8Array> =>
     ipcRenderer.invoke(
         "ffmpegExec",
         command,
-        inputDataOrPath,
-        outputFileName,
+        dataOrPath,
+        outputFileExtension,
         timeoutMS,
     );
 

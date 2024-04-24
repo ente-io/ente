@@ -1,3 +1,5 @@
+import { ElectronFile } from "@/next/types/file";
+import type { Electron } from "@/next/types/ipc";
 import { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { validateAndGetCreationUnixTimeInMicroSeconds } from "@ente/shared/time";
 import { Remote } from "comlink";
@@ -7,40 +9,79 @@ import {
     outputPathPlaceholder,
 } from "constants/ffmpeg";
 import { NULL_LOCATION } from "constants/upload";
-import { ElectronFile, ParsedExtractedMetadata } from "types/upload";
+import { ParsedExtractedMetadata } from "types/upload";
 import { type DedicatedFFmpegWorker } from "worker/ffmpeg.worker";
 
-/** Called during upload */
-export async function generateVideoThumbnail(
-    file: File | ElectronFile,
-): Promise<File | ElectronFile> {
-    let seekTime = 1;
-    while (seekTime >= 0) {
-        try {
-            return await ffmpegExec(
-                [
-                    ffmpegPathPlaceholder,
-                    "-i",
-                    inputPathPlaceholder,
-                    "-ss",
-                    `00:00:0${seekTime}`,
-                    "-vframes",
-                    "1",
-                    "-vf",
-                    "scale=-1:720",
-                    outputPathPlaceholder,
-                ],
-                file,
-                "thumb.jpeg",
-            );
-        } catch (e) {
-            if (seekTime === 0) {
-                throw e;
-            }
-        }
-        seekTime--;
+/**
+ * Generate a thumbnail for the given video using a wasm FFmpeg running in a web
+ * worker.
+ *
+ * This function is called during upload, when we need to generate thumbnails
+ * for the new files that the user is adding.
+ *
+ * @param blob The input video blob.
+ *
+ * @returns JPEG data of the generated thumbnail.
+ *
+ * See also {@link generateVideoThumbnailNative}.
+ */
+export const generateVideoThumbnailWeb = async (blob: Blob) =>
+    generateVideoThumbnail((seekTime: number) =>
+        ffmpegExecWeb(genThumbnailCommand(seekTime), blob, "jpeg", 0),
+    );
+
+const generateVideoThumbnail = async (
+    thumbnailAtTime: (seekTime: number) => Promise<Uint8Array>,
+) => {
+    try {
+        // Try generating thumbnail at seekTime 1 second.
+        return await thumbnailAtTime(1);
+    } catch (e) {
+        // If that fails, try again at the beginning. If even this throws, let
+        // it fail.
+        return await thumbnailAtTime(0);
     }
-}
+};
+
+/**
+ * Generate a thumbnail for the given video using a native FFmpeg binary bundled
+ * with our desktop app.
+ *
+ * This function is called during upload, when we need to generate thumbnails
+ * for the new files that the user is adding.
+ *
+ * @param dataOrPath The input video's data or the path to the video on the
+ * user's local filesystem. See: [Note: The fileOrPath parameter to upload].
+ *
+ * @returns JPEG data of the generated thumbnail.
+ *
+ * See also {@link generateVideoThumbnailNative}.
+ */
+export const generateVideoThumbnailNative = async (
+    electron: Electron,
+    dataOrPath: Uint8Array | string,
+) =>
+    generateVideoThumbnail((seekTime: number) =>
+        electron.ffmpegExec(
+            genThumbnailCommand(seekTime),
+            dataOrPath,
+            "jpeg",
+            0,
+        ),
+    );
+
+const genThumbnailCommand = (seekTime: number) => [
+    ffmpegPathPlaceholder,
+    "-i",
+    inputPathPlaceholder,
+    "-ss",
+    `00:00:0${seekTime}`,
+    "-vframes",
+    "1",
+    "-vf",
+    "scale=-1:720",
+    outputPathPlaceholder,
+];
 
 /** Called during upload */
 export async function extractVideoMetadata(file: File | ElectronFile) {
@@ -48,7 +89,7 @@ export async function extractVideoMetadata(file: File | ElectronFile) {
     // -c [short for codex] copy[(stream_specifier)[ffmpeg.org/ffmpeg.html#Stream-specifiers]] => copies all the stream without re-encoding
     // -map_metadata [http://ffmpeg.org/ffmpeg.html#Advanced-options search for map_metadata] => copies all stream metadata to the out
     // -f ffmetadata [https://ffmpeg.org/ffmpeg-formats.html#Metadata-1] => dump metadata from media files into a simple UTF-8-encoded INI-like text file
-    const metadata = await ffmpegExec(
+    const metadata = await ffmpegExec2(
         [
             ffmpegPathPlaceholder,
             "-i",
@@ -62,11 +103,9 @@ export async function extractVideoMetadata(file: File | ElectronFile) {
             outputPathPlaceholder,
         ],
         file,
-        `metadata.txt`,
+        "txt",
     );
-    return parseFFmpegExtractedMetadata(
-        new Uint8Array(await metadata.arrayBuffer()),
-    );
+    return parseFFmpegExtractedMetadata(metadata);
 }
 
 enum MetadataTags {
@@ -135,7 +174,7 @@ function parseCreationTime(creationTime: string) {
 
 /** Called when viewing a file */
 export async function convertToMP4(file: File) {
-    return await ffmpegExec(
+    return await ffmpegExec2(
         [
             ffmpegPathPlaceholder,
             "-i",
@@ -145,50 +184,86 @@ export async function convertToMP4(file: File) {
             outputPathPlaceholder,
         ],
         file,
-        "output.mp4",
+        "mp4",
         30 * 1000,
     );
 }
 
 /**
- * Run the given ffmpeg command.
+ * Run the given FFmpeg command using a wasm FFmpeg running in a web worker.
  *
- * If we're running in the context of our desktop app, use the ffmpeg binary we
- * bundle with our desktop app to run the command. Otherwise fallback to using
- * the wasm ffmpeg we link to from our web app in a web worker.
- *
- * As a rough ballpark, the native ffmpeg integration in the desktop app is
- * 10-20x faster than the wasm one currently. See: [Note: ffmpeg in Electron].
+ * As a rough ballpark, currently the native FFmpeg integration in the desktop
+ * app is 10-20x faster than the wasm one. See: [Note: FFmpeg in Electron].
  */
-const ffmpegExec = async (
-    cmd: string[],
+const ffmpegExecWeb = async (
+    command: string[],
+    blob: Blob,
+    outputFileExtension: string,
+    timeoutMs: number,
+) => {
+    const worker = await workerFactory.lazy();
+    return await worker.exec(command, blob, outputFileExtension, timeoutMs);
+};
+
+/**
+ * Run the given FFmpeg command using a native FFmpeg binary bundled with our
+ * desktop app.
+ *
+ * See also: {@link ffmpegExecWeb}.
+ */
+/*
+TODO(MR): Remove me
+const ffmpegExecNative = async (
+    electron: Electron,
+    command: string[],
+    blob: Blob,
+    timeoutMs: number = 0,
+) => {
+    const electron = globalThis.electron;
+    if (electron) {
+        const data = new Uint8Array(await blob.arrayBuffer());
+        return await electron.ffmpegExec(command, data, timeoutMs);
+    } else {
+        const worker = await workerFactory.lazy();
+        return await worker.exec(command, blob, timeoutMs);
+    }
+};
+*/
+
+const ffmpegExec2 = async (
+    command: string[],
     inputFile: File | ElectronFile,
-    outputFilename: string,
+    outputFileExtension: string,
     timeoutMS: number = 0,
-): Promise<File | ElectronFile> => {
+) => {
     const electron = globalThis.electron;
     if (electron || false) {
-        /* TODO(MR): ElectronFile changes */
-        // return electron.runFFmpegCmd(cmd, inputFile, outputFilename, timeoutMS);
+        throw new Error("WIP");
+        // return electron.ffmpegExec(
+        //     command,
+        //     /* TODO(MR): ElectronFile changes */
+        //     inputFile as unknown as string,
+        //     outputFileName,
+        //     timeoutMS,
+        // );
     } else {
-        return workerFactory
-            .instance()
-            .then((worker) =>
-                worker.run(cmd, inputFile, outputFilename, timeoutMS),
-            );
+        /* TODO(MR): ElectronFile changes */
+        return ffmpegExecWeb(
+            command,
+            inputFile as File,
+            outputFileExtension,
+            timeoutMS,
+        );
     }
 };
 
 /** Lazily create a singleton instance of our worker */
 class WorkerFactory {
-    private _instance: Promise<Remote<DedicatedFFmpegWorker>>;
+    private instance: Promise<Remote<DedicatedFFmpegWorker>>;
 
-    async instance() {
-        if (!this._instance) {
-            const comlinkWorker = createComlinkWorker();
-            this._instance = comlinkWorker.remote;
-        }
-        return this._instance;
+    async lazy() {
+        if (!this.instance) this.instance = createComlinkWorker().remote;
+        return this.instance;
     }
 }
 

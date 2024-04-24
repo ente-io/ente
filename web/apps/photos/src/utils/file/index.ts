@@ -1,3 +1,4 @@
+import { FILE_TYPE } from "@/media/file";
 import { decodeLivePhoto } from "@/media/live-photo";
 import log from "@/next/log";
 import { CustomErrorMessage, type Electron } from "@/next/types/ipc";
@@ -6,15 +7,6 @@ import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import { User } from "@ente/shared/user/types";
 import { downloadUsingAnchor, withTimeout } from "@ente/shared/utils";
-import {
-    FILE_TYPE,
-    RAW_FORMATS,
-    SUPPORTED_RAW_FORMATS,
-    TYPE_HEIC,
-    TYPE_HEIF,
-    TYPE_JPEG,
-    TYPE_JPG,
-} from "constants/file";
 import { t } from "i18next";
 import isElectron from "is-electron";
 import { moveToHiddenCollection } from "services/collectionService";
@@ -48,6 +40,38 @@ import { isArchivedFile, updateMagicMetadata } from "utils/magicMetadata";
 import { safeFileName } from "utils/native-fs";
 import { writeStream } from "utils/native-stream";
 
+const TYPE_HEIC = "heic";
+const TYPE_HEIF = "heif";
+const TYPE_JPEG = "jpeg";
+const TYPE_JPG = "jpg";
+
+const RAW_FORMATS = [
+    "heic",
+    "rw2",
+    "tiff",
+    "arw",
+    "cr3",
+    "cr2",
+    "raf",
+    "nef",
+    "psd",
+    "dng",
+    "tif",
+];
+
+const SUPPORTED_RAW_FORMATS = [
+    "heic",
+    "rw2",
+    "tiff",
+    "arw",
+    "cr3",
+    "cr2",
+    "nef",
+    "psd",
+    "dng",
+    "tif",
+];
+
 export enum FILE_OPS_TYPE {
     DOWNLOAD,
     FIX_TIME,
@@ -62,8 +86,10 @@ class ModuleState {
     /**
      * This will be set to true if we get an error from the Node.js side of our
      * desktop app telling us that native JPEG conversion is not available for
-     * the current OS/arch combination. That way, we can stop pestering it again
-     * and again (saving an IPC round-trip).
+     * the current OS/arch combination.
+     *
+     * That way, we can stop pestering it again and again (saving an IPC
+     * round-trip).
      *
      * Note the double negative when it is used.
      */
@@ -292,14 +318,12 @@ export const getRenderableImage = async (fileName: string, imageBlob: Blob) => {
             return imageBlob;
         }
 
-        let jpegBlob: Blob | undefined;
-
         const available = !moduleState.isNativeJPEGConversionNotAvailable;
         if (isElectron() && available && isSupportedRawFormat(exactType)) {
             // If we're running in our desktop app, see if our Node.js layer can
             // convert this into a JPEG using native tools for us.
             try {
-                jpegBlob = await nativeConvertToJPEG(fileName, imageBlob);
+                return await nativeConvertToJPEG(imageBlob);
             } catch (e) {
                 if (e.message == CustomErrorMessage.NotAvailable) {
                     moduleState.isNativeJPEGConversionNotAvailable = true;
@@ -309,12 +333,12 @@ export const getRenderableImage = async (fileName: string, imageBlob: Blob) => {
             }
         }
 
-        if (!jpegBlob && isFileHEIC(exactType)) {
+        if (isFileHEIC(exactType)) {
             // If it is an HEIC file, use our web HEIC converter.
-            jpegBlob = await heicToJPEG(imageBlob);
+            return await heicToJPEG(imageBlob);
         }
 
-        return jpegBlob;
+        return undefined;
     } catch (e) {
         log.error(
             `Failed to get renderable image for ${JSON.stringify(fileTypeInfo ?? fileName)}`,
@@ -324,7 +348,7 @@ export const getRenderableImage = async (fileName: string, imageBlob: Blob) => {
     }
 };
 
-const nativeConvertToJPEG = async (fileName: string, imageBlob: Blob) => {
+const nativeConvertToJPEG = async (imageBlob: Blob) => {
     const startTime = Date.now();
     const imageData = new Uint8Array(await imageBlob.arrayBuffer());
     const electron = globalThis.electron;
@@ -332,8 +356,8 @@ const nativeConvertToJPEG = async (fileName: string, imageBlob: Blob) => {
     // the main thread since workers don't have access to the `window` (and
     // thus, to the `window.electron`) object.
     const jpegData = electron
-        ? await electron.convertToJPEG(fileName, imageData)
-        : await workerBridge.convertToJPEG(fileName, imageData);
+        ? await electron.convertToJPEG(imageData)
+        : await workerBridge.convertToJPEG(imageData);
     log.debug(() => `Native JPEG conversion took ${Date.now() - startTime} ms`);
     return new Blob([jpegData]);
 };
@@ -441,6 +465,18 @@ export function isSharedFile(user: User, file: EnteFile) {
     return file.ownerID !== user.id;
 }
 
+/**
+ * [Note: File name for local EnteFile objects]
+ *
+ * The title property in a file's metadata is the original file's name. The
+ * metadata of a file cannot be edited. So if later on the file's name is
+ * changed, then the edit is stored in the `editedName` property of the public
+ * metadata of the file.
+ *
+ * This function merges these edits onto the file object that we use locally.
+ * Effectively, post this step, the file's metadata.title can be used in lieu of
+ * its filename.
+ */
 export function mergeMetadata(files: EnteFile[]): EnteFile[] {
     return files.map((file) => {
         if (file.pubMagicMetadata?.data.editedTime) {
@@ -646,7 +682,11 @@ async function downloadFileDesktop(
             fs.exists,
         );
         const imageStream = generateStreamFromArrayBuffer(imageData);
-        await writeStream(`${downloadDir}/${imageExportName}`, imageStream);
+        await writeStream(
+            electron,
+            `${downloadDir}/${imageExportName}`,
+            imageStream,
+        );
         try {
             const videoExportName = await safeFileName(
                 downloadDir,
@@ -654,7 +694,11 @@ async function downloadFileDesktop(
                 fs.exists,
             );
             const videoStream = generateStreamFromArrayBuffer(videoData);
-            await writeStream(`${downloadDir}/${videoExportName}`, videoStream);
+            await writeStream(
+                electron,
+                `${downloadDir}/${videoExportName}`,
+                videoStream,
+            );
         } catch (e) {
             await fs.rm(`${downloadDir}/${imageExportName}`);
             throw e;
@@ -665,7 +709,11 @@ async function downloadFileDesktop(
             file.metadata.title,
             fs.exists,
         );
-        await writeStream(`${downloadDir}/${fileExportName}`, updatedStream);
+        await writeStream(
+            electron,
+            `${downloadDir}/${fileExportName}`,
+            updatedStream,
+        );
     }
 }
 
@@ -690,14 +738,14 @@ export const getUserOwnedFiles = (files: EnteFile[]) => {
 };
 
 // doesn't work on firefox
-export const copyFileToClipboard = async (fileUrl: string) => {
+export const copyFileToClipboard = async (fileURL: string) => {
     const canvas = document.createElement("canvas");
     const canvasCTX = canvas.getContext("2d");
     const image = new Image();
 
     const blobPromise = new Promise<Blob>((resolve, reject) => {
         try {
-            image.setAttribute("src", fileUrl);
+            image.setAttribute("src", fileURL);
             image.onload = () => {
                 canvas.width = image.width;
                 canvas.height = image.height;

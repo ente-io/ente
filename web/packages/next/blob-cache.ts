@@ -113,6 +113,10 @@ export const openCache = async (
  *
  *     await blob.arrayBuffer()
  *
+ * To convert from a Blob to Uint8Array, chain the two steps
+ *
+ *     new Uint8Array(await blob.arrayBuffer())
+ *
  * To convert from an ArrayBuffer or Uint8Array to Blob
  *
  *     new Blob([arrayBuffer, andOrAnyArray, andOrstring])

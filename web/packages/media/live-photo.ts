@@ -1,5 +1,52 @@
 import { fileNameFromComponents, nameAndExtension } from "@/next/file";
 import JSZip from "jszip";
+import { FILE_TYPE } from "./file";
+
+const potentialImageExtensions = [
+    "heic",
+    "heif",
+    "jpeg",
+    "jpg",
+    "png",
+    "gif",
+    "bmp",
+    "tiff",
+    "webp",
+];
+
+const potentialVideoExtensions = [
+    "mov",
+    "mp4",
+    "m4v",
+    "avi",
+    "wmv",
+    "flv",
+    "mkv",
+    "webm",
+    "3gp",
+    "3g2",
+    "avi",
+    "ogv",
+    "mpg",
+    "mp",
+];
+
+/**
+ * Use the file extension of the given {@link fileName} to deduce if is is
+ * potentially the image or the video part of a Live Photo.
+ */
+export const potentialFileTypeFromExtension = (
+    fileName: string,
+): FILE_TYPE | undefined => {
+    let [, ext] = nameAndExtension(fileName);
+    if (!ext) return undefined;
+
+    ext = ext.toLowerCase();
+
+    if (potentialImageExtensions.includes(ext)) return FILE_TYPE.IMAGE;
+    else if (potentialVideoExtensions.includes(ext)) return FILE_TYPE.VIDEO;
+    else return undefined;
+};
 
 /**
  * An in-memory representation of a live photo.

@@ -66,6 +66,13 @@ export const dirname = (path: string) => {
     return pathComponents.join("/");
 };
 
+/**
+ * Return a short description of the given {@link fileOrPath} suitable for
+ * helping identify it in log messages.
+ */
+export const fopLabel = (fileOrPath: File | string) =>
+    fileOrPath instanceof File ? `File(${fileOrPath.name})` : fileOrPath;
+
 export function getFileNameSize(file: File | ElectronFile) {
     return `${file.name}_${convertBytesToHumanReadable(file.size)}`;
 }

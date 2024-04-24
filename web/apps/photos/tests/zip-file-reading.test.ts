@@ -1,7 +1,7 @@
 import { getFileNameSize } from "@/next/file";
+import type { DataStream } from "@ente/shared/utils/data-stream";
 import { FILE_READER_CHUNK_SIZE, PICKED_UPLOAD_TYPE } from "constants/upload";
 import { getElectronFileStream, getFileStream } from "services/readerService";
-import { DataStream } from "types/upload";
 import { getImportSuggestion } from "utils/upload";
 
 // This was for used to verify that converting from the browser readable stream

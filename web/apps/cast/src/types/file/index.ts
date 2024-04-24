@@ -64,25 +64,6 @@ export interface EnteFile
     isConverted?: boolean;
 }
 
-export interface TrashRequest {
-    items: TrashRequestItems[];
-}
-
-export interface TrashRequestItems {
-    fileID: number;
-    collectionID: number;
-}
-
-export interface FileWithUpdatedMagicMetadata {
-    file: EnteFile;
-    updatedMagicMetadata: FileMagicMetadata;
-}
-
-export interface FileWithUpdatedPublicMagicMetadata {
-    file: EnteFile;
-    updatedPublicMagicMetadata: FilePublicMagicMetadata;
-}
-
 export interface FileMagicMetadataProps {
     visibility?: VISIBILITY_STATE;
     filePaths?: string[];

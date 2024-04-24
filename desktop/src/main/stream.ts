@@ -1,15 +1,16 @@
 /**
  * @file stream data to-from renderer using a custom protocol handler.
  */
-import { protocol } from "electron/main";
+import { net, protocol } from "electron/main";
 import { createWriteStream, existsSync } from "node:fs";
 import fs from "node:fs/promises";
 import { Readable } from "node:stream";
+import { pathToFileURL } from "node:url";
 import log from "./log";
 
 /**
  * Register a protocol handler that we use for streaming large files between the
- * main process (node) and the renderer process (browser) layer.
+ * main (Node.js) and renderer (Chromium) processes.
  *
  * [Note: IPC streams]
  *
@@ -17,10 +18,13 @@ import log from "./log";
  * across IPC. And passing the entire contents of the file is not feasible for
  * large video files because of the memory pressure the copying would entail.
  *
- * As an alternative, we register a custom protocol handler that can provided a
+ * As an alternative, we register a custom protocol handler that can provides a
  * bi-directional stream. The renderer can stream data to the node side by
  * streaming the request. The node side can stream to the renderer side by
  * streaming the response.
+ *
+ * The stream is not full duplex - while both reads and writes can be streamed,
+ * they need to be streamed separately.
  *
  * See also: [Note: Transferring large amount of data over IPC]
  *
@@ -29,27 +33,58 @@ import log from "./log";
 export const registerStreamProtocol = () => {
     protocol.handle("stream", async (request: Request) => {
         const url = request.url;
+        // The request URL contains the command to run as the host, and the
+        // pathname of the file as the path. For example,
+        //
+        //     stream://write/path/to/file
+        //              host-pathname-----
+        //
         const { host, pathname } = new URL(url);
         // Convert e.g. "%20" to spaces.
         const path = decodeURIComponent(pathname);
         switch (host) {
-            /* stream://write/path/to/file */
-            /*          host-pathname----- */
+            case "read":
+                return handleRead(path);
             case "write":
-                try {
-                    await writeStream(path, request.body);
-                    return new Response("", { status: 200 });
-                } catch (e) {
-                    log.error(`Failed to write stream for ${url}`, e);
-                    return new Response(
-                        `Failed to write stream: ${e.message}`,
-                        { status: 500 },
-                    );
-                }
+                return handleWrite(path, request);
             default:
                 return new Response("", { status: 404 });
         }
     });
+};
+
+const handleRead = async (path: string) => {
+    try {
+        const res = await net.fetch(pathToFileURL(path).toString());
+        if (res.ok) {
+            // net.fetch defaults to text/plain, which might be fine
+            // in practice, but as an extra precaution indicate that
+            // this is binary data.
+            res.headers.set("Content-Type", "application/octet-stream");
+
+            // Add the file's size as the Content-Length header.
+            const fileSize = (await fs.stat(path)).size;
+            res.headers.set("Content-Length", `${fileSize}`);
+        }
+        return res;
+    } catch (e) {
+        log.error(`Failed to read stream at ${path}`, e);
+        return new Response(`Failed to read stream: ${e.message}`, {
+            status: 500,
+        });
+    }
+};
+
+const handleWrite = async (path: string, request: Request) => {
+    try {
+        await writeStream(path, request.body);
+        return new Response("", { status: 200 });
+    } catch (e) {
+        log.error(`Failed to write stream to ${path}`, e);
+        return new Response(`Failed to write stream: ${e.message}`, {
+            status: 500,
+        });
+    }
 };
 
 /**

@@ -204,14 +204,11 @@ export interface Electron {
      * yet possible, this function will throw an error with the
      * {@link CustomErrorMessage.NotAvailable} message.
      *
-     * @param fileName The name of the file whose data we're being given.
      * @param imageData The raw image data (the contents of the image file).
+     *
      * @returns JPEG data of the converted image.
      */
-    convertToJPEG: (
-        fileName: string,
-        imageData: Uint8Array,
-    ) => Promise<Uint8Array>;
+    convertToJPEG: (imageData: Uint8Array) => Promise<Uint8Array>;
 
     /**
      * Generate a JPEG thumbnail for the given image.
@@ -224,24 +221,26 @@ export interface Electron {
      * not yet possible, this function will throw an error with the
      * {@link CustomErrorMessage.NotAvailable} message.
      *
-     * @param inputFile The file whose thumbnail we want.
+     * @param dataOrPath The raw image data (the contents of the image file), or
+     * the path to the image file, whose thumbnail we want to generate.
      * @param maxDimension The maximum width or height of the generated
      * thumbnail.
      * @param maxSize Maximum size (in bytes) of the generated thumbnail.
+     *
      * @returns JPEG data of the generated thumbnail.
      */
     generateImageThumbnail: (
-        inputFile: File | ElectronFile,
+        dataOrPath: Uint8Array | string,
         maxDimension: number,
         maxSize: number,
     ) => Promise<Uint8Array>;
 
     /**
-     * Execute a ffmpeg {@link command}.
+     * Execute a FFmpeg {@link command} on the given {@link dataOrPath}.
      *
-     * This executes the command using the ffmpeg executable we bundle with our
-     * desktop app. There is also a ffmpeg wasm implementation that we use when
-     * running on the web, it also has a sibling function with the same
+     * This executes the command using a FFmpeg executable we bundle with our
+     * desktop app. We also have a wasm FFmpeg wasm implementation that we use
+     * when running on the web, which has a sibling function with the same
      * parameters. See [Note: ffmpeg in Electron].
      *
      * @param command An array of strings, each representing one positional
@@ -250,25 +249,27 @@ export interface Electron {
      * (respectively {@link inputPathPlaceholder},
      * {@link outputPathPlaceholder}, {@link ffmpegPathPlaceholder}).
      *
-     * @param inputDataOrPath The bytes of the input file, or the path to the
-     * input file on the user's local disk. In both cases, the data gets
-     * serialized to a temporary file, and then that path gets substituted in
-     * the ffmpeg {@link command} by {@link inputPathPlaceholder}.
+     * @param dataOrPath The bytes of the input file, or the path to the input
+     * file on the user's local disk. In both cases, the data gets serialized to
+     * a temporary file, and then that path gets substituted in the FFmpeg
+     * {@link command} in lieu of {@link inputPathPlaceholder}.
      *
-     * @param outputFileName The name of the file we instruct ffmpeg to produce
-     * when giving it the given {@link command}. The contents of this file get
-     * returned as the result.
+     * @param outputFileExtension The extension (without the dot, e.g. "jpeg")
+     * to use for the output file that we ask FFmpeg to create in
+     * {@param command}. While this file will eventually get deleted, and we'll
+     * just return its contents, for some FFmpeg command the extension matters
+     * (e.g. conversion to a JPEG fails if the extension is arbitrary).
      *
      * @param timeoutMS If non-zero, then abort and throw a timeout error if the
      * ffmpeg command takes more than the given number of milliseconds.
      *
      * @returns The contents of the output file produced by the ffmpeg command
-     * at {@link outputFileName}.
+     * (specified as {@link outputPathPlaceholder} in {@link command}).
      */
     ffmpegExec: (
         command: string[],
-        inputDataOrPath: Uint8Array | string,
-        outputFileName: string,
+        dataOrPath: Uint8Array | string,
+        outputFileExtension: string,
         timeoutMS: number,
     ) => Promise<Uint8Array>;
 

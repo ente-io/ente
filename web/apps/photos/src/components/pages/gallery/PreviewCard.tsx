@@ -1,3 +1,4 @@
+import { FILE_TYPE } from "@/media/file";
 import log from "@/next/log";
 import { Overlay } from "@ente/shared/components/Container";
 import { CustomError } from "@ente/shared/error";
@@ -11,7 +12,6 @@ import {
     StaticThumbnail,
 } from "components/PlaceholderThumbnails";
 import { TRASH_SECTION } from "constants/collection";
-import { FILE_TYPE } from "constants/file";
 import { GAP_BTW_TILES, IMAGE_CONTAINER_MAX_WIDTH } from "constants/gallery";
 import { DeduplicateContext } from "pages/deduplicate";
 import { GalleryContext } from "pages/gallery";
