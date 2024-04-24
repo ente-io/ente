@@ -913,6 +913,11 @@ class ClusterFeedbackService {
 
     // Sort the suggestions based on the distance to the person
     for (final suggestion in suggestions) {
+      if (onlySortBigSuggestions) {
+        if (suggestion.filesInCluster.length <= 8) {
+          continue;
+        }
+      }
       final clusterID = suggestion.clusterIDToMerge;
       final faceIDs = suggestion.faceIDsInCluster;
       final faceIdToEmbeddingMap = await faceMlDb.getFaceEmbeddingMapForFaces(
