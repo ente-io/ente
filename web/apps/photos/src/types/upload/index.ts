@@ -38,13 +38,6 @@ export interface Location {
     longitude: number;
 }
 
-export interface ParsedMetadataJSON {
-    creationTime: number;
-    modificationTime: number;
-    latitude: number;
-    longitude: number;
-}
-
 export interface MultipartUploadURLs {
     objectKey: string;
     partURLs: string[];
@@ -92,8 +85,6 @@ export interface FileWithCollection2 extends UploadAsset2 {
     collection?: Collection;
     collectionID?: number;
 }
-
-export type ParsedMetadataJSONMap = Map<string, ParsedMetadataJSON>;
 
 export interface UploadURL {
     url: string;

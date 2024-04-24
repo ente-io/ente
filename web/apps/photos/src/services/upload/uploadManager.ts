@@ -26,8 +26,6 @@ import { EncryptedEnteFile, EnteFile } from "types/file";
 import { SetFiles } from "types/gallery";
 import {
     FileWithCollection,
-    ParsedMetadataJSON,
-    ParsedMetadataJSONMap,
     PublicUploadProps,
     type FileWithCollection2,
 } from "types/upload";
@@ -50,6 +48,7 @@ import {
     getMetadataJSONMapKeyForJSON,
     parseMetadataJSON,
 } from "./metadataService";
+import type { ParsedMetadataJSON } from "./takeout";
 import uploadCancelService from "./uploadCancelService";
 import UploadService, {
     assetName,
@@ -264,7 +263,7 @@ class UploadManager {
     private cryptoWorkers = new Array<
         ComlinkWorker<typeof DedicatedCryptoWorker>
     >(MAX_CONCURRENT_UPLOADS);
-    private parsedMetadataJSONMap: ParsedMetadataJSONMap;
+    private parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>;
     private filesToBeUploaded: FileWithCollection2[];
     private remainingFiles: FileWithCollection2[] = [];
     private failedFiles: FileWithCollection2[];

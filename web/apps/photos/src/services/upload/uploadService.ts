@@ -29,7 +29,6 @@ import {
     FileInMemory,
     FileTypeInfo,
     FileWithMetadata,
-    ParsedMetadataJSONMap,
     ProcessedFile,
     PublicUploadProps,
     UploadAsset,
@@ -64,6 +63,7 @@ import {
 } from "./thumbnail";
 import uploadCancelService from "./uploadCancelService";
 import UploadHttpClient from "./uploadHttpClient";
+import type { ParsedMetadataJSON } from "./takeout";
 
 /** Upload files to cloud storage */
 class UploadService {
@@ -169,7 +169,7 @@ export const uploader = async (
     worker: Remote<DedicatedCryptoWorker>,
     existingFiles: EnteFile[],
     fileWithCollection: FileWithCollection2,
-    parsedMetadataJSONMap: ParsedMetadataJSONMap,
+    parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
     uploaderName: string,
     isCFUploadProxyDisabled: boolean,
     makeProgessTracker: MakeProgressTracker,

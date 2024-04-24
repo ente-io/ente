@@ -1,4 +1,3 @@
-import { ensureElectron } from "@/next/electron";
 import { getFileNameSize } from "@/next/file";
 import log from "@/next/log";
 import { ElectronFile } from "@/next/types/file";
@@ -19,11 +18,8 @@ import { FilePublicMagicMetadataProps } from "types/file";
 import {
     FileTypeInfo,
     LivePhotoAssets,
-    Location,
     Metadata,
     ParsedExtractedMetadata,
-    ParsedMetadataJSON,
-    ParsedMetadataJSONMap,
     type DataStream,
     type FileWithCollection,
     type FileWithCollection2,
@@ -32,14 +28,14 @@ import {
 } from "types/upload";
 import { getFileTypeFromExtensionForLivePhotoClustering } from "utils/file/livePhoto";
 import { getEXIFLocation, getEXIFTime, getParsedExifData } from "./exifService";
+import {
+    MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT,
+    getClippedMetadataJSONMapKeyForFile,
+    getMetadataJSONMapKeyForFile,
+    type ParsedMetadataJSON,
+} from "./takeout";
 import uploadCancelService from "./uploadCancelService";
 import { getFileName } from "./uploadService";
-
-const NULL_PARSED_METADATA_JSON: ParsedMetadataJSON = {
-    creationTime: null,
-    modificationTime: null,
-    ...NULL_LOCATION,
-};
 
 const EXIF_TAGS_NEEDED = [
     "DateTimeOriginal",
@@ -58,8 +54,6 @@ const EXIF_TAGS_NEEDED = [
     "PixelYDimension",
     "MetadataDate",
 ];
-
-export const MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT = 46;
 
 export const NULL_EXTRACTED_METADATA: ParsedExtractedMetadata = {
     location: NULL_LOCATION,
@@ -138,115 +132,6 @@ export async function getImageMetadata(
     return imageMetadata;
 }
 
-export const getMetadataJSONMapKeyForJSON = (
-    collectionID: number,
-    jsonFileName: string,
-) => {
-    let title = jsonFileName.slice(0, -1 * ".json".length);
-    const endsWithNumberedSuffixWithBrackets = title.match(/\(\d+\)$/);
-    if (endsWithNumberedSuffixWithBrackets) {
-        title = title.slice(
-            0,
-            -1 * endsWithNumberedSuffixWithBrackets[0].length,
-        );
-        const [name, extension] = splitFilenameAndExtension(title);
-        return `${collectionID}-${name}${endsWithNumberedSuffixWithBrackets[0]}.${extension}`;
-    }
-    return `${collectionID}-${title}`;
-};
-
-// if the file name is greater than MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT(46) , then google photos clips the file name
-// so we need to use the clipped file name to get the metadataJSON file
-export const getClippedMetadataJSONMapKeyForFile = (
-    collectionID: number,
-    fileName: string,
-) => {
-    return `${collectionID}-${fileName.slice(
-        0,
-        MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT,
-    )}`;
-};
-
-export const getMetadataJSONMapKeyForFile = (
-    collectionID: number,
-    fileName: string,
-) => {
-    return `${collectionID}-${getFileOriginalName(fileName)}`;
-};
-
-export async function parseMetadataJSON(
-    receivedFile: File | ElectronFile | string,
-) {
-    try {
-        let text: string;
-        if (typeof receivedFile == "string") {
-            text = await ensureElectron().fs.readTextFile(receivedFile);
-        } else {
-            if (!(receivedFile instanceof File)) {
-                receivedFile = new File(
-                    [await receivedFile.blob()],
-                    receivedFile.name,
-                );
-            }
-            text = await receivedFile.text();
-        }
-
-        return parseMetadataJSONText(text);
-    } catch (e) {
-        log.error("parseMetadataJSON failed", e);
-        // ignore
-    }
-}
-
-export async function parseMetadataJSONText(text: string) {
-    const metadataJSON: object = JSON.parse(text);
-
-    const parsedMetadataJSON: ParsedMetadataJSON = NULL_PARSED_METADATA_JSON;
-    if (!metadataJSON) {
-        return;
-    }
-
-    if (
-        metadataJSON["photoTakenTime"] &&
-        metadataJSON["photoTakenTime"]["timestamp"]
-    ) {
-        parsedMetadataJSON.creationTime =
-            metadataJSON["photoTakenTime"]["timestamp"] * 1000000;
-    } else if (
-        metadataJSON["creationTime"] &&
-        metadataJSON["creationTime"]["timestamp"]
-    ) {
-        parsedMetadataJSON.creationTime =
-            metadataJSON["creationTime"]["timestamp"] * 1000000;
-    }
-    if (
-        metadataJSON["modificationTime"] &&
-        metadataJSON["modificationTime"]["timestamp"]
-    ) {
-        parsedMetadataJSON.modificationTime =
-            metadataJSON["modificationTime"]["timestamp"] * 1000000;
-    }
-    let locationData: Location = NULL_LOCATION;
-    if (
-        metadataJSON["geoData"] &&
-        (metadataJSON["geoData"]["latitude"] !== 0.0 ||
-            metadataJSON["geoData"]["longitude"] !== 0.0)
-    ) {
-        locationData = metadataJSON["geoData"];
-    } else if (
-        metadataJSON["geoDataExif"] &&
-        (metadataJSON["geoDataExif"]["latitude"] !== 0.0 ||
-            metadataJSON["geoDataExif"]["longitude"] !== 0.0)
-    ) {
-        locationData = metadataJSON["geoDataExif"];
-    }
-    if (locationData !== null) {
-        parsedMetadataJSON.latitude = locationData.latitude;
-        parsedMetadataJSON.longitude = locationData.longitude;
-    }
-    return parsedMetadataJSON;
-}
-
 // tries to extract date from file name if available else returns null
 export function extractDateFromFileName(filename: string): number {
     try {
@@ -281,32 +166,6 @@ export function extractDateFromFileName(filename: string): number {
 function convertSignalNameToFusedDateString(filename: string) {
     const dateStringParts = filename.split("-");
     return `${dateStringParts[1]}${dateStringParts[2]}${dateStringParts[3]}-${dateStringParts[4]}`;
-}
-
-const EDITED_FILE_SUFFIX = "-edited";
-
-/*
-    Get the original file name for edited file to associate it to original file's metadataJSON file
-    as edited file doesn't have their own metadata file
-*/
-function getFileOriginalName(fileName: string) {
-    let originalName: string = null;
-    const [nameWithoutExtension, extension] =
-        splitFilenameAndExtension(fileName);
-
-    const isEditedFile = nameWithoutExtension.endsWith(EDITED_FILE_SUFFIX);
-    if (isEditedFile) {
-        originalName = nameWithoutExtension.slice(
-            0,
-            -1 * EDITED_FILE_SUFFIX.length,
-        );
-    } else {
-        originalName = nameWithoutExtension;
-    }
-    if (extension) {
-        originalName += "." + extension;
-    }
-    return originalName;
 }
 
 async function getVideoMetadata(file: File | ElectronFile) {
@@ -356,7 +215,7 @@ export async function getLivePhotoFileType(
 
 export const extractAssetMetadata = async (
     worker: Remote<DedicatedCryptoWorker>,
-    parsedMetadataJSONMap: ParsedMetadataJSONMap,
+    parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
     { isLivePhoto, file, livePhotoAssets }: UploadAsset2,
     collectionID: number,
     fileTypeInfo: FileTypeInfo,
@@ -380,7 +239,7 @@ export const extractAssetMetadata = async (
 
 async function extractFileMetadata(
     worker: Remote<DedicatedCryptoWorker>,
-    parsedMetadataJSONMap: ParsedMetadataJSONMap,
+    parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
     collectionID: number,
     fileTypeInfo: FileTypeInfo,
     rawFile: File | ElectronFile | string,
@@ -412,7 +271,7 @@ async function extractFileMetadata(
 
 async function extractLivePhotoMetadata(
     worker: Remote<DedicatedCryptoWorker>,
-    parsedMetadataJSONMap: ParsedMetadataJSONMap,
+    parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
     collectionID: number,
     fileTypeInfo: FileTypeInfo,
     livePhotoAssets: LivePhotoAssets2,

@@ -7,7 +7,7 @@ import {
     getClippedMetadataJSONMapKeyForFile,
     getMetadataJSONMapKeyForFile,
     getMetadataJSONMapKeyForJSON,
-} from "services/upload/metadataService";
+} from "services/upload/takeout";
 import { getUserDetailsV2 } from "services/userService";
 import { groupFilesBasedOnCollectionID } from "utils/file";
 
