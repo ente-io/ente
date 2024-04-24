@@ -195,7 +195,7 @@ export const uploader = async (
         const { metadata, publicMagicMetadata } = await extractAssetMetadata(
             worker,
             parsedMetadataJSONMap,
-            uploadAsset,
+            uploadAsset2,
             collection.id,
             fileTypeInfo,
         );
@@ -229,7 +229,7 @@ export const uploader = async (
 
         abortIfCancelled();
 
-        const file = await readAsset(fileTypeInfo, uploadAsset);
+        const file = await readAsset(fileTypeInfo, uploadAsset2);
 
         if (file.hasStaticThumbnail) metadata.hasStaticThumbnail = true;
 

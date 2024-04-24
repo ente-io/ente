@@ -490,7 +490,8 @@ export default function Uploader(props: Props) {
                 throw e;
             }
             await waitInQueueAndUploadFiles(
-                filesWithCollectionToUpload,
+                /* TODO(MR): ElectronFile changes */
+                filesWithCollectionToUpload as FileWithCollection[],
                 collections,
             );
             toUploadFiles.current = null;
@@ -569,7 +570,8 @@ export default function Uploader(props: Props) {
             if (isElectron()) {
                 if (watcher.isUploadRunning()) {
                     await watcher.allFileUploadsDone(
-                        filesWithCollectionToUploadIn,
+                        /* TODO(MR): ElectronFile changes */
+                        filesWithCollectionToUploadIn as FileWithCollection2[],
                         collections,
                     );
                 } else if (watcher.isSyncPaused()) {
