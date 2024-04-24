@@ -489,7 +489,7 @@ export default function Uploader(props: Props) {
                 });
                 throw e;
             }
-            await waitInQueueAndUploadFiles2(
+            await waitInQueueAndUploadFiles(
                 filesWithCollectionToUpload,
                 collections,
             );
@@ -509,24 +509,6 @@ export default function Uploader(props: Props) {
             currentPromise,
             async () =>
                 await uploadFiles(
-                    filesWithCollectionToUploadIn,
-                    collections,
-                    uploaderName,
-                ),
-        );
-        await currentUploadPromise.current;
-    };
-
-    const waitInQueueAndUploadFiles2 = async (
-        filesWithCollectionToUploadIn: FileWithCollection2[],
-        collections: Collection[],
-        uploaderName?: string,
-    ) => {
-        const currentPromise = currentUploadPromise.current;
-        currentUploadPromise.current = waitAndRun(
-            currentPromise,
-            async () =>
-                await uploadFiles2(
                     filesWithCollectionToUploadIn,
                     collections,
                     uploaderName,
@@ -577,63 +559,6 @@ export default function Uploader(props: Props) {
             }
             const shouldCloseUploadProgress =
                 await uploadManager.queueFilesForUpload(
-                    filesWithCollectionToUploadIn,
-                    collections,
-                    uploaderName,
-                );
-            if (shouldCloseUploadProgress) {
-                closeUploadProgress();
-            }
-            if (isElectron()) {
-                if (watcher.isUploadRunning()) {
-                    await watcher.allFileUploadsDone(
-                        filesWithCollectionToUploadIn,
-                        collections,
-                    );
-                } else if (watcher.isSyncPaused()) {
-                    // resume the service after user upload is done
-                    watcher.resumePausedSync();
-                }
-            }
-        } catch (e) {
-            log.error("failed to upload files", e);
-            showUserFacingError(e.message);
-            closeUploadProgress();
-        } finally {
-            postUploadAction();
-        }
-    };
-
-    const uploadFiles2 = async (
-        filesWithCollectionToUploadIn: FileWithCollection2[],
-        collections: Collection[],
-        uploaderName?: string,
-    ) => {
-        try {
-            log.info("uploadFiles called");
-            preUploadAction();
-            if (
-                electron &&
-                !isPendingDesktopUpload.current &&
-                !watcher.isUploadRunning()
-            ) {
-                await setToUploadCollection(collections);
-                if (zipPaths.current) {
-                    await electron.setPendingUploadFiles(
-                        "zips",
-                        zipPaths.current,
-                    );
-                    zipPaths.current = null;
-                }
-                await electron.setPendingUploadFiles(
-                    "files",
-                    filesWithCollectionToUploadIn.map(
-                        ({ file }) => (file as ElectronFile).path,
-                    ),
-                );
-            }
-            const shouldCloseUploadProgress =
-                await uploadManager.queueFilesForUpload2(
                     filesWithCollectionToUploadIn,
                     collections,
                     uploaderName,

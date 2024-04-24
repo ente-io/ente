@@ -30,23 +30,6 @@ export function segregateMetadataAndMediaFiles(
     return { mediaFiles, metadataJSONFiles };
 }
 
-export function segregateMetadataAndMediaFiles2(
-    filesWithCollectionToUpload: FileWithCollection2[],
-) {
-    const metadataJSONFiles: FileWithCollection2[] = [];
-    const mediaFiles: FileWithCollection2[] = [];
-    filesWithCollectionToUpload.forEach((fileWithCollection) => {
-        const file = fileWithCollection.file;
-        const s = typeof file == "string" ? file : file.name;
-        if (s.toLowerCase().endsWith(TYPE_JSON)) {
-            metadataJSONFiles.push(fileWithCollection);
-        } else {
-            mediaFiles.push(fileWithCollection);
-        }
-    });
-    return { mediaFiles, metadataJSONFiles };
-}
-
 export function areFileWithCollectionsSame(
     firstFile: FileWithCollection2,
     secondFile: FileWithCollection2,

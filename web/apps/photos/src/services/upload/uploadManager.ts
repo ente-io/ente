@@ -31,7 +31,6 @@ import {
     FileWithCollection,
     PublicUploadProps,
     type FileWithCollection2,
-    type LivePhotoAssets,
     type LivePhotoAssets2,
 } from "types/upload";
 import {
@@ -45,7 +44,6 @@ import { decryptFile, getUserOwnedFiles, sortFiles } from "utils/file";
 import {
     areFileWithCollectionsSame,
     segregateMetadataAndMediaFiles,
-    segregateMetadataAndMediaFiles2,
 } from "utils/upload";
 import { getLocalFiles } from "../fileService";
 import {
@@ -423,93 +421,6 @@ class UploadManager {
         }
     }
 
-    public async queueFilesForUpload2(
-        filesWithCollectionToUploadIn: FileWithCollection2[],
-        collections: Collection[],
-        uploaderName?: string,
-    ) {
-        try {
-            if (this.uploadInProgress) {
-                throw Error("can't run multiple uploads at once");
-            }
-            this.uploadInProgress = true;
-            await this.updateExistingFilesAndCollections(collections);
-            this.uploaderName = uploaderName;
-            log.info(
-                `received ${filesWithCollectionToUploadIn.length} files to upload`,
-            );
-            this.uiService.setFilenames(
-                new Map<number, string>(
-                    filesWithCollectionToUploadIn.map((mediaFile) => [
-                        mediaFile.localID,
-                        assetName(mediaFile),
-                    ]),
-                ),
-            );
-            const { metadataJSONFiles, mediaFiles } =
-                segregateMetadataAndMediaFiles2(filesWithCollectionToUploadIn);
-            log.info(`has ${metadataJSONFiles.length} metadata json files`);
-            log.info(`has ${mediaFiles.length} media files`);
-            if (metadataJSONFiles.length) {
-                this.uiService.setUploadStage(
-                    UPLOAD_STAGES.READING_GOOGLE_METADATA_FILES,
-                );
-                await this.parseMetadataJSONFiles(metadataJSONFiles);
-            }
-            if (mediaFiles.length) {
-                log.info(`clusterLivePhotoFiles started`);
-                const analysedMediaFiles =
-                    await clusterLivePhotoFiles(mediaFiles);
-                log.info(`clusterLivePhotoFiles ended`);
-                log.info(
-                    `got live photos: ${
-                        mediaFiles.length !== analysedMediaFiles.length
-                    }`,
-                );
-                this.uiService.setFilenames(
-                    new Map<number, string>(
-                        analysedMediaFiles.map((mediaFile) => [
-                            mediaFile.localID,
-                            assetName(mediaFile),
-                        ]),
-                    ),
-                );
-
-                this.uiService.setHasLivePhoto(
-                    mediaFiles.length !== analysedMediaFiles.length,
-                );
-
-                await this.uploadMediaFiles(analysedMediaFiles);
-            }
-        } catch (e) {
-            if (e.message === CustomError.UPLOAD_CANCELLED) {
-                if (isElectron()) {
-                    this.remainingFiles = [];
-                    await cancelRemainingUploads();
-                }
-            } else {
-                log.error("uploading failed with error", e);
-                throw e;
-            }
-        } finally {
-            this.uiService.setUploadStage(UPLOAD_STAGES.FINISH);
-            for (let i = 0; i < MAX_CONCURRENT_UPLOADS; i++) {
-                this.cryptoWorkers[i]?.terminate();
-            }
-            this.uploadInProgress = false;
-        }
-        try {
-            if (!this.uiService.hasFilesInResultList()) {
-                return true;
-            } else {
-                return false;
-            }
-        } catch (e) {
-            log.error(" failed to return shouldCloseProgressBar", e);
-            return false;
-        }
-    }
-
     private async parseMetadataJSONFiles(metadataFiles: FileWithCollection2[]) {
         try {
             log.info(`parseMetadataJSONFiles function executed `);
@@ -816,12 +727,12 @@ type ClusterableFile = {
     collectionID: number;
     // fileOrPath: File | ElectronFile | string;
     file: File | ElectronFile | string;
-}
+};
 
 type ClusteredFile = ClusterableFile & {
     isLivePhoto: boolean;
     livePhotoAssets?: LivePhotoAssets2;
-}
+};
 
 /**
  * Go through the given files, combining any sibling image + video assets into a
