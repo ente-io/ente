@@ -777,13 +777,25 @@ class ClusterFeedbackService {
     Map<int, int>? allClusterIdsToCountMap,
   }) {
     final Map<int, List<(int, double)>> suggestions = {};
-    for (final otherClusterID in clusterAvg.keys) {
+    int suggestionCount = 0;
+    final w = (kDebugMode ? EnteWatch('getSuggestions') : null)?..start();
+    final clusterAvgVectors = clusterAvg.map(
+      (key, value) => MapEntry(
+        key,
+        Vector.fromList(
+          value,
+          dtype: DType.float32,
+        ),
+      ),
+    );
+    w?.log('converted avg to vectors for ${clusterAvg.length} averages');
+    for (final otherClusterID in clusterAvgVectors.keys) {
       // ignore the cluster that belong to the person or is ignored
       if (personClusters.contains(otherClusterID) ||
           ignoredClusters.contains(otherClusterID)) {
         continue;
       }
-      final otherAvg = clusterAvg[otherClusterID]!;
+      final otherAvg = clusterAvgVectors[otherClusterID]!;
       int? nearestPersonCluster;
       double? minDistance;
       for (final personCluster in personClusters) {
@@ -791,8 +803,8 @@ class ClusterFeedbackService {
           _logger.info('no avg for cluster $personCluster');
           continue;
         }
-        final avg = clusterAvg[personCluster]!;
-        final distance = cosineDistForNormVectors(avg, otherAvg);
+        final avg = clusterAvgVectors[personCluster]!;
+        final distance = 1 - avg.dot(otherAvg);
         if (distance < maxClusterDistance) {
           if (minDistance == null || distance < minDistance) {
             minDistance = distance;
@@ -804,8 +816,13 @@ class ClusterFeedbackService {
         suggestions
             .putIfAbsent(nearestPersonCluster, () => [])
             .add((otherClusterID, minDistance));
+        suggestionCount++;
+      }
+      if (suggestionCount >= 2000) {
+        break;
       }
     }
+    w?.log('calculation inside calcSuggestionsMean');
 
     if (suggestions.isNotEmpty) {
       final List<(int, double)> suggestClusterIds = [];
@@ -816,18 +833,18 @@ class ClusterFeedbackService {
         (a, b) => a.$2.compareTo(b.$2),
       ); // sort by distance
 
-      List<int>? suggestClusterIdsSizes;
-      if (allClusterIdsToCountMap != null) {
-        suggestClusterIdsSizes = suggestClusterIds
-            .map((e) => allClusterIdsToCountMap[e.$1]!)
-            .toList(growable: false);
-      }
-      final suggestClusterIdsDistances =
-          suggestClusterIds.map((e) => e.$2).toList(growable: false);
+      // List<int>? suggestClusterIdsSizes;
+      // if (allClusterIdsToCountMap != null) {
+      //   suggestClusterIdsSizes = suggestClusterIds
+      //       .map((e) => allClusterIdsToCountMap[e.$1]!)
+      //       .toList(growable: false);
+      // }
+      // final suggestClusterIdsDistances =
+      //     suggestClusterIds.map((e) => e.$2).toList(growable: false);
       _logger.info(
-        "Already found good suggestions using mean: $suggestClusterIds, ${suggestClusterIdsSizes != null ? 'with sizes $suggestClusterIdsSizes' : ''} and distances $suggestClusterIdsDistances",
+        "Already found ${suggestClusterIds.length} good suggestions using mean",
       );
-      return suggestClusterIds;
+      return suggestClusterIds.sublist(0, min(suggestClusterIds.length, 20));
     } else {
       _logger.info("No suggestions found using mean");
       return <(int, double)>[];
