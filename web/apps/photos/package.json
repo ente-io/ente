@@ -29,6 +29,7 @@
         "leaflet-defaulticon-compatibility": "^0.1.1",
         "localforage": "^1.9.0",
         "memoize-one": "^6.0.0",
+        "mime-types": "^2.1.35",
         "ml-matrix": "^6.10.4",
         "otpauth": "^9.0.2",
         "p-debounce": "^4.0.0",
