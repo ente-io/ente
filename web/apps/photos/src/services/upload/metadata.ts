@@ -128,7 +128,7 @@ async function extractMetadata(
     } else if (fileTypeInfo.fileType === FILE_TYPE.VIDEO) {
         extractedMetadata = await getVideoMetadata(receivedFile);
     }
-    const fileHash = await getFileHash(worker, receivedFile);
+    const hash = await getFileHash(worker, receivedFile);
 
     const metadata: Metadata = {
         title: receivedFile.name,
@@ -140,7 +140,7 @@ async function extractMetadata(
         latitude: extractedMetadata.location.latitude,
         longitude: extractedMetadata.location.longitude,
         fileType: fileTypeInfo.fileType,
-        hash: fileHash,
+        hash,
     };
     const publicMagicMetadata: FilePublicMagicMetadataProps = {
         w: extractedMetadata.width,

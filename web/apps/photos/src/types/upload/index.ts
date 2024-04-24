@@ -12,6 +12,7 @@ import {
 } from "types/file";
 import { EncryptedMagicMetadata } from "types/magicMetadata";
 
+/** Information about the file that never changes post upload. */
 export interface Metadata {
     /**
      * The file name.
