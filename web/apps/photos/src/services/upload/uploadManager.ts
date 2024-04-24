@@ -1,4 +1,5 @@
 import { ensureElectron } from "@/next/electron";
+import { nameAndExtension } from "@/next/file";
 import log from "@/next/log";
 import { ElectronFile } from "@/next/types/file";
 import { ComlinkWorker } from "@/next/worker/comlink-worker";
@@ -9,6 +10,7 @@ import { Events, eventBus } from "@ente/shared/events";
 import { wait } from "@ente/shared/utils";
 import { Canceler } from "axios";
 import { Remote } from "comlink";
+import { FILE_TYPE } from "constants/file";
 import {
     RANDOM_PERCENTAGE_PROGRESS_FOR_PUT,
     UPLOAD_RESULT,
@@ -43,7 +45,6 @@ import {
     segregateMetadataAndMediaFiles2,
 } from "utils/upload";
 import { getLocalFiles } from "../fileService";
-import { clusterLivePhotoFiles, clusterLivePhotos } from "./metadataService";
 import {
     getMetadataJSONMapKeyForJSON,
     tryParseTakeoutMetadataJSON,
@@ -56,6 +57,7 @@ import UploadService, {
     getFileName,
     uploader,
 } from "./uploadService";
+import { getFileTypeFromExtensionForLivePhotoClustering } from "utils/file/livePhoto";
 
 const MAX_CONCURRENT_UPLOADS = 4;
 
@@ -799,4 +801,165 @@ const cancelRemainingUploads = async () => {
     await electron.setPendingUploadCollection(undefined);
     await electron.setPendingUploadFiles("zips", []);
     await electron.setPendingUploadFiles("files", []);
+};
+
+/**
+ * Go through the given files, combining any sibling image + video assets into a
+ * single live photo when appropriate.
+ */
+const clusterLivePhotos = (mediaFiles: FileWithCollection2[]) => {
+    const result: FileWithCollection2[] = [];
+    mediaFiles
+        .sort((f, g) =>
+            nameAndExtension(getFileName(f.file))[0].localeCompare(
+                nameAndExtension(getFileName(g.file))[0],
+            ),
+        )
+        .sort((f, g) => f.collectionID - g.collectionID);
+    let index = 0;
+    while (index < mediaFiles.length - 1) {
+        const f = mediaFiles[index];
+        const g = mediaFiles[index + 1];
+        const fFileType = getFileTypeFromExtensionForLivePhotoClustering(
+            getFileName(f.file),
+        );
+        const gFileType = getFileTypeFromExtensionForLivePhotoClustering(
+            getFileName(g.file),
+        );
+        const fa: PotentialLivePhotoAsset = {
+            collectionID: f.collectionID,
+            fileType: fFileType,
+            fileName: getFileName(f.file),
+            /* TODO(MR): ElectronFile changes */
+            size: (f as FileWithCollection).file.size,
+        };
+        const ga: PotentialLivePhotoAsset = {
+            collectionID: g.collectionID,
+            fileType: gFileType,
+            fileName: getFileName(g.file),
+            /* TODO(MR): ElectronFile changes */
+            size: (g as FileWithCollection).file.size,
+        };
+        if (areLivePhotoAssets(fa, ga)) {
+            let imageFile: File | ElectronFile | string;
+            let videoFile: File | ElectronFile | string;
+            if (
+                fFileType === FILE_TYPE.IMAGE &&
+                gFileType === FILE_TYPE.VIDEO
+            ) {
+                imageFile = f.file;
+                videoFile = g.file;
+            } else {
+                videoFile = f.file;
+                imageFile = g.file;
+            }
+            const livePhotoLocalID = f.localID;
+            result.push({
+                localID: livePhotoLocalID,
+                collectionID: f.collectionID,
+                isLivePhoto: true,
+                livePhotoAssets: {
+                    image: imageFile,
+                    video: videoFile,
+                },
+            });
+            index += 2;
+        } else {
+            result.push({
+                ...f,
+                isLivePhoto: false,
+            });
+            index += 1;
+        }
+    }
+    if (index === mediaFiles.length - 1) {
+        result.push({
+            ...mediaFiles[index],
+            isLivePhoto: false,
+        });
+    }
+    return result;
+};
+
+interface PotentialLivePhotoAsset {
+    collectionID: number;
+    fileType: FILE_TYPE;
+    fileName: string;
+    size: number;
+}
+
+const areLivePhotoAssets = (
+    f: PotentialLivePhotoAsset,
+    g: PotentialLivePhotoAsset,
+) => {
+    if (f.collectionID != g.collectionID) return false;
+
+    const [fName, fExt] = nameAndExtension(f.fileName);
+    const [gName, gExt] = nameAndExtension(g.fileName);
+
+    let fPrunedName: string;
+    let gPrunedName: string;
+    if (f.fileType == FILE_TYPE.IMAGE && g.fileType == FILE_TYPE.VIDEO) {
+        fPrunedName = removePotentialLivePhotoSuffix(
+            fName,
+            // A Google Live Photo image file can have video extension appended
+            // as suffix, so we pass that to removePotentialLivePhotoSuffix to
+            // remove it.
+            //
+            // Example: IMG_20210630_0001.mp4.jpg (Google Live Photo image file)
+            gExt ? `.${gExt}` : undefined,
+        );
+        gPrunedName = removePotentialLivePhotoSuffix(gName);
+    } else if (f.fileType == FILE_TYPE.VIDEO && g.fileType == FILE_TYPE.IMAGE) {
+        fPrunedName = removePotentialLivePhotoSuffix(fName);
+        gPrunedName = removePotentialLivePhotoSuffix(
+            gName,
+            fExt ? `.${fExt}` : undefined,
+        );
+    } else {
+        return false;
+    }
+
+    if (fPrunedName != gPrunedName) return false;
+
+    // Also check that the size of an individual Live Photo asset is less than
+    // an (arbitrary) limit. This should be true in practice as the videos for a
+    // live photo are a few seconds long. Further on, the zipping library that
+    // we use doesn't support stream as a input.
+
+    const maxAssetSize = 20 * 1024 * 1024; /* 20MB */
+    if (f.size > maxAssetSize || g.size > maxAssetSize) {
+        log.info(
+            `Not classifying assets with too large sizes ${[f.size, g.size]} as a live photo`,
+        );
+        return false;
+    }
+
+    return true;
+};
+
+const removePotentialLivePhotoSuffix = (name: string, suffix?: string) => {
+    const suffix_3 = "_3";
+
+    // The icloud-photos-downloader library appends _HVEC to the end of the
+    // filename in case of live photos.
+    //
+    // https://github.com/icloud-photos-downloader/icloud_photos_downloader
+    const suffix_hvec = "_HVEC";
+
+    let foundSuffix: string | undefined;
+    if (name.endsWith(suffix_3)) {
+        foundSuffix = suffix_3;
+    } else if (
+        name.endsWith(suffix_hvec) ||
+        name.endsWith(suffix_hvec.toLowerCase())
+    ) {
+        foundSuffix = suffix_hvec;
+    } else if (suffix) {
+        if (name.endsWith(suffix) || name.endsWith(suffix.toLowerCase())) {
+            foundSuffix = suffix;
+        }
+    }
+
+    return foundSuffix ? name.slice(0, foundSuffix.length * -1) : name;
 };
