@@ -50,6 +50,7 @@ class _FavoriteWidgetState extends State<FavoriteWidget> {
             : LikeButton(
                 size: 24,
                 isLiked: isLiked,
+                padding: const EdgeInsets.all(2),
                 onTap: (oldValue) async {
                   if (widget.file.uploadedFileID == null ||
                       widget.file.ownerID !=
