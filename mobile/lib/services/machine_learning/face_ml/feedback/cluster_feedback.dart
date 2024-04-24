@@ -647,7 +647,6 @@ class ClusterFeedbackService {
     final allClusterIds = allClusterIdsToCountMap.keys.toSet();
     int ignoredClustersCnt = 0, alreadyUpdatedClustersCnt = 0;
     int smallerClustersCnt = 0;
-    final serializationTime = DateTime.now();
     for (final id in allClusterIdsToCountMap.keys) {
       if (ignoredClusters.contains(id)) {
         allClusterIds.remove(id);
