@@ -56,7 +56,8 @@ import UploadService, {
     uploader,
 } from "./uploadService";
 
-const MAX_CONCURRENT_UPLOADS = 4;
+/** The number of uploads to process in parallel. */
+const maxConcurrentUploads = 4;
 
 class UIService {
     private progressUpdater: ProgressUpdater;
@@ -261,7 +262,7 @@ function segregatedFinishedUploadsToList(finishedUploads: FinishedUploads) {
 class UploadManager {
     private cryptoWorkers = new Array<
         ComlinkWorker<typeof DedicatedCryptoWorker>
-    >(MAX_CONCURRENT_UPLOADS);
+    >(maxConcurrentUploads);
     private parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>;
     private filesToBeUploaded: FileWithCollection2[];
     private remainingFiles: FileWithCollection2[] = [];
@@ -411,7 +412,7 @@ class UploadManager {
             }
         } finally {
             this.uiService.setUploadStage(UPLOAD_STAGES.FINISH);
-            for (let i = 0; i < MAX_CONCURRENT_UPLOADS; i++) {
+            for (let i = 0; i < maxConcurrentUploads; i++) {
                 this.cryptoWorkers[i]?.terminate();
             }
             this.uploadInProgress = false;
@@ -490,7 +491,7 @@ class UploadManager {
         const uploadProcesses = [];
         for (
             let i = 0;
-            i < MAX_CONCURRENT_UPLOADS && this.filesToBeUploaded.length > 0;
+            i < maxConcurrentUploads && this.filesToBeUploaded.length > 0;
             i++
         ) {
             this.cryptoWorkers[i] = getDedicatedCryptoWorker();
