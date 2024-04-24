@@ -1,5 +1,18 @@
 import 'dart:math' show sqrt;
 
+import "package:ml_linalg/vector.dart";
+
+/// Calculates the cosine distance between two embeddings/vectors using SIMD from ml_linalg
+/// 
+/// WARNING: This assumes both vectors are already normalized!
+double cosineDistanceSIMD(Vector vector1, Vector vector2) {
+  if (vector1.length != vector2.length) {
+    throw ArgumentError('Vectors must be the same length');
+  }
+
+  return 1 - vector1.dot(vector2);
+}
+
 /// Calculates the cosine distance between two embeddings/vectors.
 ///
 /// Throws an ArgumentError if the vectors are of different lengths or
