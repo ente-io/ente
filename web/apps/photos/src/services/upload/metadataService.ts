@@ -322,21 +322,21 @@ export const clusterLivePhotos = (mediaFiles: FileWithCollection2[]) => {
         const gFileType = getFileTypeFromExtensionForLivePhotoClustering(
             getFileName(g.file),
         );
-        const fFileIdentifier: LivePhotoIdentifier = {
+        const fa: PotentialLivePhotoAsset = {
             collectionID: f.collectionID,
             fileType: fFileType,
-            name: getFileName(f.file),
+            fileName: getFileName(f.file),
             /* TODO(MR): ElectronFile changes */
             size: (f as FileWithCollection).file.size,
         };
-        const gFileIdentifier: LivePhotoIdentifier = {
+        const ga: PotentialLivePhotoAsset = {
             collectionID: g.collectionID,
             fileType: gFileType,
-            name: getFileName(g.file),
+            fileName: getFileName(g.file),
             /* TODO(MR): ElectronFile changes */
             size: (g as FileWithCollection).file.size,
         };
-        if (areLivePhotoAssets(fFileIdentifier, gFileIdentifier)) {
+        if (areLivePhotoAssets(fa, ga)) {
             let imageFile: File | ElectronFile | string;
             let videoFile: File | ElectronFile | string;
             if (
@@ -377,61 +377,61 @@ export const clusterLivePhotos = (mediaFiles: FileWithCollection2[]) => {
     return result;
 };
 
-interface LivePhotoIdentifier {
+interface PotentialLivePhotoAsset {
     collectionID: number;
     fileType: FILE_TYPE;
-    name: string;
+    fileName: string;
     size: number;
 }
 
-const areLivePhotoAssets = (f: LivePhotoIdentifier, g: LivePhotoIdentifier) => {
-    const haveSameCollectionID = f.collectionID === g.collectionID;
-    const areNotSameFileType = f.fileType !== g.fileType;
+const areLivePhotoAssets = (
+    f: PotentialLivePhotoAsset,
+    g: PotentialLivePhotoAsset,
+) => {
+    if (f.collectionID != g.collectionID) return false;
 
-    let firstFileNameWithoutSuffix: string;
-    let secondFileNameWithoutSuffix: string;
-    if (f.fileType === FILE_TYPE.IMAGE) {
-        firstFileNameWithoutSuffix = removePotentialLivePhotoSuffix(
-            getFileNameWithoutExtension(f.name),
-            // Note: The Google Live Photo image file can have video extension appended as suffix, passing that to removePotentialLivePhotoSuffix to remove it
+    const [fName, fExt] = nameAndExtension(f.fileName);
+    const [gName, gExt] = nameAndExtension(g.fileName);
+
+    let fPrunedName: string;
+    let gPrunedName: string;
+    if (f.fileType == FILE_TYPE.IMAGE && g.fileType == FILE_TYPE.VIDEO) {
+        fPrunedName = removePotentialLivePhotoSuffix(
+            fName,
+            // A Google Live Photo image file can have video extension appended
+            // as suffix, so we pass that to removePotentialLivePhotoSuffix to
+            // remove it.
+            //
             // Example: IMG_20210630_0001.mp4.jpg (Google Live Photo image file)
-            getFileExtensionWithDot(g.name),
+            gExt ? `.${gExt}` : undefined,
         );
-        secondFileNameWithoutSuffix = removePotentialLivePhotoSuffix(
-            getFileNameWithoutExtension(g.name),
+        gPrunedName = removePotentialLivePhotoSuffix(gName);
+    } else if (f.fileType == FILE_TYPE.VIDEO && g.fileType == FILE_TYPE.IMAGE) {
+        fPrunedName = removePotentialLivePhotoSuffix(fName);
+        gPrunedName = removePotentialLivePhotoSuffix(
+            gName,
+            fExt ? `.${fExt}` : undefined,
         );
     } else {
-        firstFileNameWithoutSuffix = removePotentialLivePhotoSuffix(
-            getFileNameWithoutExtension(f.name),
-        );
-        secondFileNameWithoutSuffix = removePotentialLivePhotoSuffix(
-            getFileNameWithoutExtension(g.name),
-            getFileExtensionWithDot(f.name),
-        );
+        return false;
     }
-    if (
-        haveSameCollectionID &&
-        isImageOrVideo(f.fileType) &&
-        isImageOrVideo(g.fileType) &&
-        areNotSameFileType &&
-        firstFileNameWithoutSuffix === secondFileNameWithoutSuffix
-    ) {
-        // Also check that the size of an individual Live Photo asset is less
-        // than an (arbitrary) limit. This should be true in practice as the
-        // videos for a live photo are a few seconds long. Further on, the
-        // zipping library that we use doesn't support stream as a input.
 
-        const maxAssetSize = 20 * 1024 * 1024; /* 20MB */
+    if (fPrunedName != gPrunedName) return false;
 
-        if (f.size <= maxAssetSize && g.size <= maxAssetSize) {
-            return true;
-        } else {
-            log.info(
-                `Not classifying assets with too large sizes ${[f.size, g.size]} as a live photo`,
-            );
-        }
+    // Also check that the size of an individual Live Photo asset is less than
+    // an (arbitrary) limit. This should be true in practice as the videos for a
+    // live photo are a few seconds long. Further on, the zipping library that
+    // we use doesn't support stream as a input.
+
+    const maxAssetSize = 20 * 1024 * 1024; /* 20MB */
+    if (f.size > maxAssetSize || g.size > maxAssetSize) {
+        log.info(
+            `Not classifying assets with too large sizes ${[f.size, g.size]} as a live photo`,
+        );
+        return false;
     }
-    return false;
+
+    return true;
 };
 
 const removePotentialLivePhotoSuffix = (name: string, suffix?: string) => {
@@ -459,21 +459,6 @@ const removePotentialLivePhotoSuffix = (name: string, suffix?: string) => {
 
     return foundSuffix ? name.slice(0, foundSuffix.length * -1) : name;
 };
-
-function getFileNameWithoutExtension(filename: string) {
-    const lastDotPosition = filename.lastIndexOf(".");
-    if (lastDotPosition === -1) return filename;
-    else return filename.slice(0, lastDotPosition);
-}
-
-function getFileExtensionWithDot(filename: string) {
-    const lastDotPosition = filename.lastIndexOf(".");
-    if (lastDotPosition === -1) return "";
-    else return filename.slice(lastDotPosition);
-}
-
-const isImageOrVideo = (fileType: FILE_TYPE) =>
-    [FILE_TYPE.IMAGE, FILE_TYPE.VIDEO].includes(fileType);
 
 async function getFileHash(
     worker: Remote<DedicatedCryptoWorker>,
