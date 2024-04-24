@@ -429,6 +429,12 @@ class UploadManager {
         }
     }
 
+    private abortIfCancelled = () => {
+        if (uploadCancelService.isUploadCancelationRequested()) {
+            throw Error(CustomError.UPLOAD_CANCELLED);
+        }
+    };
+
     private async parseMetadataJSONFiles(metadataFiles: FileWithCollection2[]) {
         try {
             log.info(`parseMetadataJSONFiles function executed `);
@@ -436,12 +442,9 @@ class UploadManager {
             this.uiService.reset(metadataFiles.length);
 
             for (const { file, collectionID } of metadataFiles) {
+                this.abortIfCancelled();
                 const name = getFileName(file);
                 try {
-                    if (uploadCancelService.isUploadCancelationRequested()) {
-                        throw Error(CustomError.UPLOAD_CANCELLED);
-                    }
-
                     log.info(`parsing metadata json file ${name}`);
 
                     const metadataJSON =
@@ -523,6 +526,9 @@ class UploadManager {
                 this.parsedMetadataJSONMap,
                 this.uploaderName,
                 this.isCFUploadProxyDisabled,
+                () => {
+                    this.abortIfCancelled();
+                },
                 (
                     fileLocalID: number,
                     percentPerPart?: number,
