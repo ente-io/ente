@@ -4,7 +4,7 @@ import log from "@/next/log";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { RAW_FORMATS } from "constants/upload";
 import CastDownloadManager from "services/castDownloadManager";
-import { tryDetectMediaMIMEType } from "services/detect-type";
+import { detectMediaMIMEType } from "services/detect-type";
 import {
     EncryptedEnteFile,
     EnteFile,
@@ -132,7 +132,7 @@ export const getPreviewableImage = async (
             );
             fileBlob = new Blob([imageData]);
         }
-        const mimeType = await tryDetectMediaMIMEType(
+        const mimeType = await detectMediaMIMEType(
             new File([fileBlob], file.metadata.title),
         );
         if (!mimeType) return undefined;

@@ -7,7 +7,7 @@ import {
 import log from "@/next/log";
 import { ElectronFile } from "@/next/types/file";
 import { CustomError } from "@ente/shared/error";
-import FileType, { FileTypeResult } from "file-type";
+import { fileTypeFromBuffer, type FileTypeResult } from "file-type";
 import { getFileExtension } from "utils/file";
 import { getUint8ArrayView } from "./readerService";
 
@@ -83,7 +83,7 @@ async function extractElectronFileType(file: ElectronFile) {
 }
 
 async function getFileTypeFromBuffer(buffer: Uint8Array) {
-    const result = await FileType.fromBuffer(buffer);
+    const result = await fileTypeFromBuffer(buffer);
     if (!result?.mime) {
         let logableInfo = "";
         try {

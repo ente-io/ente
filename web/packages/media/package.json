@@ -4,6 +4,7 @@
     "private": true,
     "dependencies": {
         "@/next": "*",
+        "file-type": "^19",
         "jszip": "^3.10"
     }
 }
