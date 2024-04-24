@@ -7,14 +7,6 @@ import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import { User } from "@ente/shared/user/types";
 import { downloadUsingAnchor, withTimeout } from "@ente/shared/utils";
-import {
-    RAW_FORMATS,
-    SUPPORTED_RAW_FORMATS,
-    TYPE_HEIC,
-    TYPE_HEIF,
-    TYPE_JPEG,
-    TYPE_JPG,
-} from "constants/file";
 import { t } from "i18next";
 import isElectron from "is-electron";
 import { moveToHiddenCollection } from "services/collectionService";
@@ -47,6 +39,38 @@ import { FileTypeInfo } from "types/upload";
 import { isArchivedFile, updateMagicMetadata } from "utils/magicMetadata";
 import { safeFileName } from "utils/native-fs";
 import { writeStream } from "utils/native-stream";
+
+const TYPE_HEIC = "heic";
+const TYPE_HEIF = "heif";
+const TYPE_JPEG = "jpeg";
+const TYPE_JPG = "jpg";
+
+const RAW_FORMATS = [
+    "heic",
+    "rw2",
+    "tiff",
+    "arw",
+    "cr3",
+    "cr2",
+    "raf",
+    "nef",
+    "psd",
+    "dng",
+    "tif",
+];
+
+const SUPPORTED_RAW_FORMATS = [
+    "heic",
+    "rw2",
+    "tiff",
+    "arw",
+    "cr3",
+    "cr2",
+    "nef",
+    "psd",
+    "dng",
+    "tif",
+];
 
 export enum FILE_OPS_TYPE {
     DOWNLOAD,
