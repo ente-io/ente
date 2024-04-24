@@ -64,7 +64,7 @@ const ffmpegExec = async (
     try {
         ffmpeg.FS("writeFile", inputPath, inputData);
 
-        log.info(`Running FFmpeg (wasm) command ${cmd}`);
+        log.debug(() => `[wasm] ffmpeg ${cmd.join(" ")}`);
         await ffmpeg.run(...cmd);
 
         return ffmpeg.FS("readFile", outputPath);
@@ -98,14 +98,16 @@ const substitutePlaceholders = (
     inputFilePath: string,
     outputFilePath: string,
 ) =>
-    command.map((segment) => {
-        if (segment == ffmpegPathPlaceholder) {
-            return "";
-        } else if (segment == inputPathPlaceholder) {
-            return inputFilePath;
-        } else if (segment == outputPathPlaceholder) {
-            return outputFilePath;
-        } else {
-            return segment;
-        }
-    });
+    command
+        .map((segment) => {
+            if (segment == ffmpegPathPlaceholder) {
+                return undefined;
+            } else if (segment == inputPathPlaceholder) {
+                return inputFilePath;
+            } else if (segment == outputPathPlaceholder) {
+                return outputFilePath;
+            } else {
+                return segment;
+            }
+        })
+        .filter((c) => !!c);
