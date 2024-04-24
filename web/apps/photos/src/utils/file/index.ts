@@ -19,7 +19,7 @@ import {
     updateFilePublicMagicMetadata,
 } from "services/fileService";
 import { heicToJPEG } from "services/heic-convert";
-import { getFileType } from "services/typeDetectionService";
+import { deduceFileTypeInfo } from "services/typeDetectionService";
 import {
     EncryptedEnteFile,
     EnteFile,
@@ -130,19 +130,19 @@ export async function downloadFile(file: EnteFile) {
             const { imageFileName, imageData, videoFileName, videoData } =
                 await decodeLivePhoto(file.metadata.title, fileBlob);
             const image = new File([imageData], imageFileName);
-            const imageType = await getFileType(image);
+            const imageType = await deduceFileTypeInfo(image);
             const tempImageURL = URL.createObjectURL(
                 new Blob([imageData], { type: imageType.mimeType }),
             );
             const video = new File([videoData], videoFileName);
-            const videoType = await getFileType(video);
+            const videoType = await deduceFileTypeInfo(video);
             const tempVideoURL = URL.createObjectURL(
                 new Blob([videoData], { type: videoType.mimeType }),
             );
             downloadUsingAnchor(tempImageURL, imageFileName);
             downloadUsingAnchor(tempVideoURL, videoFileName);
         } else {
-            const fileType = await getFileType(
+            const fileType = await deduceFileTypeInfo(
                 new File([fileBlob], file.metadata.title),
             );
             fileBlob = await new Response(
@@ -305,7 +305,7 @@ export const getRenderableImage = async (fileName: string, imageBlob: Blob) => {
     let fileTypeInfo: FileTypeInfo;
     try {
         const tempFile = new File([imageBlob], fileName);
-        fileTypeInfo = await getFileType(tempFile);
+        fileTypeInfo = await deduceFileTypeInfo(tempFile);
         log.debug(
             () =>
                 `Obtaining renderable image for ${JSON.stringify(fileTypeInfo)}`,
@@ -724,7 +724,7 @@ export const getArchivedFiles = (files: EnteFile[]) => {
 };
 
 export const createTypedObjectURL = async (blob: Blob, fileName: string) => {
-    const type = await getFileType(new File([blob], fileName));
+    const type = await deduceFileTypeInfo(new File([blob], fileName));
     return URL.createObjectURL(new Blob([blob], { type: type.mimeType }));
 };
 

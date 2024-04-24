@@ -46,7 +46,7 @@ import { GalleryContext } from "pages/gallery";
 import downloadManager, { LoadedLivePhotoSourceURL } from "services/download";
 import { getParsedExifData } from "services/exif";
 import { trashFiles } from "services/fileService";
-import { getFileType } from "services/typeDetectionService";
+import { deduceFileTypeInfo } from "services/typeDetectionService";
 import { SetFilesDownloadProgressAttributesCreator } from "types/gallery";
 import { isClipboardItemPresent } from "utils/common";
 import { pauseVideo, playVideo } from "utils/photoFrame";
@@ -594,7 +594,7 @@ function PhotoViewer(props: Iprops) {
                         .image;
                     fileObject = await getFileFromURL(url, file.metadata.title);
                 }
-                const fileTypeInfo = await getFileType(fileObject);
+                const fileTypeInfo = await deduceFileTypeInfo(fileObject);
                 const exifData = await getParsedExifData(
                     fileObject,
                     fileTypeInfo,

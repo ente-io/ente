@@ -15,7 +15,7 @@ const TYPE_VIDEO = "video";
 const TYPE_IMAGE = "image";
 const CHUNK_SIZE_FOR_TYPE_DETECTION = 4100;
 
-export async function getFileType(
+export async function deduceFileTypeInfo(
     receivedFile: File | ElectronFile,
 ): Promise<FileTypeInfo> {
     try {

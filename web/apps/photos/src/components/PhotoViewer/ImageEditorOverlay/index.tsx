@@ -43,7 +43,7 @@ import mime from "mime-types";
 import { AppContext } from "pages/_app";
 import { getLocalCollections } from "services/collectionService";
 import downloadManager from "services/download";
-import { getFileType } from "services/typeDetectionService";
+import { deduceFileTypeInfo } from "services/typeDetectionService";
 import uploadManager from "services/upload/uploadManager";
 import { EnteFile } from "types/file";
 import { FileWithCollection } from "types/upload";
@@ -486,7 +486,7 @@ const ImageEditorOverlay = (props: IProps) => {
             if (!canvasRef.current) return;
 
             const editedFile = await getEditedFile();
-            const fileType = await getFileType(editedFile);
+            const fileType = await deduceFileTypeInfo(editedFile);
             const tempImgURL = URL.createObjectURL(
                 new Blob([editedFile], { type: fileType.mimeType }),
             );
