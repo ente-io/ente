@@ -161,8 +161,9 @@ export const attachIPCHandlers = () => {
             _,
             command: string[],
             dataOrPath: Uint8Array | string,
+            outputFileExtension: string,
             timeoutMS: number,
-        ) => ffmpegExec(command, dataOrPath, timeoutMS),
+        ) => ffmpegExec(command, dataOrPath, outputFileExtension, timeoutMS),
     );
 
     // - ML

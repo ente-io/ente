@@ -25,10 +25,14 @@ import { type DedicatedFFmpegWorker } from "worker/ffmpeg.worker";
  *
  * See also {@link generateVideoThumbnailNative}.
  */
-export const generateVideoThumbnailWeb = async (blob: Blob) => {
-    const thumbnailAtTime = (seekTime: number) =>
-        ffmpegExecWeb(commandForThumbnailAtTime(seekTime), blob, 0);
+export const generateVideoThumbnailWeb = async (blob: Blob) =>
+    generateVideoThumbnail((seekTime: number) =>
+        ffmpegExecWeb(genThumbnailCommand(seekTime), blob, "jpeg", 0),
+    );
 
+const generateVideoThumbnail = async (
+    thumbnailAtTime: (seekTime: number) => Promise<Uint8Array>,
+) => {
     try {
         // Try generating thumbnail at seekTime 1 second.
         return await thumbnailAtTime(1);
@@ -56,21 +60,17 @@ export const generateVideoThumbnailWeb = async (blob: Blob) => {
 export const generateVideoThumbnailNative = async (
     electron: Electron,
     dataOrPath: Uint8Array | string,
-) => {
-    const thumbnailAtTime = (seekTime: number) =>
-        electron.ffmpegExec(commandForThumbnailAtTime(seekTime), dataOrPath, 0);
+) =>
+    generateVideoThumbnail((seekTime: number) =>
+        electron.ffmpegExec(
+            genThumbnailCommand(seekTime),
+            dataOrPath,
+            "jpeg",
+            0,
+        ),
+    );
 
-    try {
-        // Try generating thumbnail at seekTime 1 second.
-        return await thumbnailAtTime(1);
-    } catch (e) {
-        // If that fails, try again at the beginning. If even this throws, let
-        // it fail.
-        return await thumbnailAtTime(0);
-    }
-};
-
-const commandForThumbnailAtTime = (seekTime: number) => [
+const genThumbnailCommand = (seekTime: number) => [
     ffmpegPathPlaceholder,
     "-i",
     inputPathPlaceholder,
@@ -103,7 +103,7 @@ export async function extractVideoMetadata(file: File | ElectronFile) {
             outputPathPlaceholder,
         ],
         file,
-        `metadata.txt`,
+        "txt",
     );
     return parseFFmpegExtractedMetadata(metadata);
 }
@@ -184,7 +184,7 @@ export async function convertToMP4(file: File) {
             outputPathPlaceholder,
         ],
         file,
-        "output.mp4",
+        "mp4",
         30 * 1000,
     );
 }
@@ -198,10 +198,11 @@ export async function convertToMP4(file: File) {
 const ffmpegExecWeb = async (
     command: string[],
     blob: Blob,
+    outputFileExtension: string,
     timeoutMs: number,
 ) => {
     const worker = await workerFactory.lazy();
-    return await worker.exec(command, blob, timeoutMs);
+    return await worker.exec(command, blob, outputFileExtension, timeoutMs);
 };
 
 /**
@@ -232,7 +233,7 @@ const ffmpegExecNative = async (
 const ffmpegExec2 = async (
     command: string[],
     inputFile: File | ElectronFile,
-    outputFileName: string,
+    outputFileExtension: string,
     timeoutMS: number = 0,
 ) => {
     const electron = globalThis.electron;
@@ -247,7 +248,12 @@ const ffmpegExec2 = async (
         // );
     } else {
         /* TODO(MR): ElectronFile changes */
-        return ffmpegExecWeb(command, inputFile as File, timeoutMS);
+        return ffmpegExecWeb(
+            command,
+            inputFile as File,
+            outputFileExtension,
+            timeoutMS,
+        );
     }
 };
 

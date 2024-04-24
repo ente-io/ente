@@ -26,10 +26,16 @@ export class DedicatedFFmpegWorker {
      * This is a sibling of {@link ffmpegExec} exposed by the desktop app in
      * `ipc.ts`. See [Note: FFmpeg in Electron].
      */
-    async exec(command: string[], blob: Blob, timeoutMs): Promise<Uint8Array> {
+    async exec(
+        command: string[],
+        blob: Blob,
+        outputFileExtension: string,
+        timeoutMs,
+    ): Promise<Uint8Array> {
         if (!this.ffmpeg.isLoaded()) await this.ffmpeg.load();
 
-        const go = () => ffmpegExec(this.ffmpeg, command, blob);
+        const go = () =>
+            ffmpegExec(this.ffmpeg, command, outputFileExtension, blob);
 
         const request = this.ffmpegTaskQueue.queueUpRequest(() =>
             timeoutMs ? withTimeout(go(), timeoutMs) : go(),
@@ -41,9 +47,15 @@ export class DedicatedFFmpegWorker {
 
 expose(DedicatedFFmpegWorker, self);
 
-const ffmpegExec = async (ffmpeg: FFmpeg, command: string[], blob: Blob) => {
-    const inputPath = `${randomPrefix()}.in`;
-    const outputPath = `${randomPrefix()}.out`;
+const ffmpegExec = async (
+    ffmpeg: FFmpeg,
+    command: string[],
+    outputFileExtension: string,
+    blob: Blob,
+) => {
+    const inputPath = randomPrefix();
+    const outputSuffix = outputFileExtension ? "." + outputFileExtension : "";
+    const outputPath = randomPrefix() + outputSuffix;
 
     const cmd = substitutePlaceholders(command, inputPath, outputPath);
 

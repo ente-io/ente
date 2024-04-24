@@ -9,7 +9,7 @@ import { deleteTempFile, makeTempFilePath } from "../utils-temp";
 
 export const convertToJPEG = async (imageData: Uint8Array) => {
     const inputFilePath = await makeTempFilePath();
-    const outputFilePath = await makeTempFilePath(".jpeg");
+    const outputFilePath = await makeTempFilePath("jpeg");
 
     // Construct the command first, it may throw NotAvailable on win32.
     const command = convertToJPEGCommand(inputFilePath, outputFilePath);
@@ -77,7 +77,7 @@ export const generateImageThumbnail = async (
         isInputFileTemporary = false;
     }
 
-    const outputFilePath = await makeTempFilePath(".jpeg");
+    const outputFilePath = await makeTempFilePath("jpeg");
 
     // Construct the command first, it may throw `NotAvailable` on win32.
     let quality = 70;

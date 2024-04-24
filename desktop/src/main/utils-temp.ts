@@ -29,17 +29,18 @@ const randomPrefix = () => {
  *
  * The function returns the path to a file in the system temp directory (in an
  * Ente specific folder therin) with a random prefix and an (optional)
- * {@link suffix}.
+ * {@link extension}.
  *
- * It ensures that there is no existing file with the same name already.
+ * It ensures that there is no existing item with the same name already.
  *
  * Use {@link deleteTempFile} to remove this file when you're done.
  */
-export const makeTempFilePath = async (suffix?: string) => {
+export const makeTempFilePath = async (extension?: string) => {
     const tempDir = await enteTempDirPath();
+    const suffix = extension ? "." + extension : "";
     let result: string;
     do {
-        result = path.join(tempDir, `${randomPrefix()}${suffix ?? ""}`);
+        result = path.join(tempDir, randomPrefix() + suffix);
     } while (existsSync(result));
     return result;
 };

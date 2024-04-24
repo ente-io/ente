@@ -40,6 +40,7 @@ const outputPathPlaceholder = "OUTPUT";
 export const ffmpegExec = async (
     command: string[],
     dataOrPath: Uint8Array | string,
+    outputFileExtension: string,
     timeoutMS: number,
 ): Promise<Uint8Array> => {
     // TODO (MR): This currently copies files for both input and output. This
@@ -56,7 +57,7 @@ export const ffmpegExec = async (
         isInputFileTemporary = false;
     }
 
-    const outputFilePath = await makeTempFilePath();
+    const outputFilePath = await makeTempFilePath(outputFileExtension);
     try {
         if (dataOrPath instanceof Uint8Array)
             await fs.writeFile(inputFilePath, dataOrPath);

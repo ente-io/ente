@@ -254,6 +254,12 @@ export interface Electron {
      * a temporary file, and then that path gets substituted in the FFmpeg
      * {@link command} in lieu of {@link inputPathPlaceholder}.
      *
+     * @param outputFileExtension The extension (without the dot, e.g. "jpeg")
+     * to use for the output file that we ask FFmpeg to create in
+     * {@param command}. While this file will eventually get deleted, and we'll
+     * just return its contents, for some FFmpeg command the extension matters
+     * (e.g. conversion to a JPEG fails if the extension is arbitrary).
+     *
      * @param timeoutMS If non-zero, then abort and throw a timeout error if the
      * ffmpeg command takes more than the given number of milliseconds.
      *
@@ -263,6 +269,7 @@ export interface Electron {
     ffmpegExec: (
         command: string[],
         dataOrPath: Uint8Array | string,
+        outputFileExtension: string,
         timeoutMS: number,
     ) => Promise<Uint8Array>;
 
