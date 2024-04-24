@@ -144,12 +144,7 @@ class FileAppBarState extends State<FileAppBar> {
     if ((isOwnedByUser || flagService.internalUser) &&
         !isFileHidden &&
         isFileUploaded) {
-      _actions.add(
-        Padding(
-          padding: const EdgeInsets.all(8),
-          child: FavoriteWidget(widget.file),
-        ),
-      );
+      _actions.add(FavoriteWidget(widget.file));
     }
     if (!isFileUploaded) {
       _actions.add(

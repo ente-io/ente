@@ -195,7 +195,7 @@ class _HomeWidgetState extends State<HomeWidget> {
       },
     );
     _initDeepLinks();
-    UpdateService.instance.shouldShowUpdateNoification().then((value) {
+    UpdateService.instance.shouldShowUpdateNotification().then((value) {
       Future.delayed(Duration.zero, () {
         if (value) {
           showDialog(
