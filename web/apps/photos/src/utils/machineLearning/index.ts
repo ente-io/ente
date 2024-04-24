@@ -1,6 +1,6 @@
+import { FILE_TYPE } from "@/media/file";
 import { decodeLivePhoto } from "@/media/live-photo";
 import log from "@/next/log";
-import { FILE_TYPE } from "constants/file";
 import PQueue from "p-queue";
 import DownloadManager from "services/download";
 import { getLocalFiles } from "services/fileService";

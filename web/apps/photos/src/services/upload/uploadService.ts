@@ -1,3 +1,4 @@
+import { FILE_TYPE } from "@/media/file";
 import { encodeLivePhoto } from "@/media/live-photo";
 import { ensureElectron } from "@/next/electron";
 import { basename } from "@/next/file";
@@ -9,7 +10,6 @@ import { EncryptionResult } from "@ente/shared/crypto/types";
 import { CustomError, handleUploadError } from "@ente/shared/error";
 import { isDataStream, type DataStream } from "@ente/shared/utils/data-stream";
 import { Remote } from "comlink";
-import { FILE_TYPE } from "constants/file";
 import {
     FILE_CHUNKS_COMBINED_FOR_A_UPLOAD_PART,
     FILE_READER_CHUNK_SIZE,

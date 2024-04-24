@@ -16,6 +16,7 @@ import {
     isSupportedRawFormat,
 } from "utils/file";
 
+import { FILE_TYPE } from "@/media/file";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import AlbumOutlined from "@mui/icons-material/AlbumOutlined";
@@ -34,7 +35,6 @@ import InfoIcon from "@mui/icons-material/InfoOutlined";
 import ReplayIcon from "@mui/icons-material/Replay";
 import ZoomInOutlinedIcon from "@mui/icons-material/ZoomInOutlined";
 import { Box, Button, styled } from "@mui/material";
-import { FILE_TYPE } from "constants/file";
 import {
     defaultLivePhotoDefaultOptions,
     photoSwipeV4Events,

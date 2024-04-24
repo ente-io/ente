@@ -1,7 +1,7 @@
+import { FILE_TYPE } from "@/media/file";
 import log from "@/next/log";
 import { ElectronFile } from "@/next/types/file";
 import { CustomError } from "@ente/shared/error";
-import { FILE_TYPE } from "constants/file";
 import {
     KNOWN_NON_MEDIA_FORMATS,
     WHITELISTED_FILE_FORMATS,

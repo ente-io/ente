@@ -1,5 +1,5 @@
+import { FILE_TYPE } from "@/media/file";
 import { ENCRYPTION_CHUNK_SIZE } from "@ente/shared/crypto/constants";
-import { FILE_TYPE } from "constants/file";
 import { FileTypeInfo, Location } from "types/upload";
 
 // list of format that were missed by type-detection for some files.

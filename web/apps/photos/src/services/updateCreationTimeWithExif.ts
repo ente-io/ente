@@ -1,7 +1,7 @@
+import { FILE_TYPE } from "@/media/file";
 import log from "@/next/log";
 import { validateAndGetCreationUnixTimeInMicroSeconds } from "@ente/shared/time";
 import type { FixOption } from "components/FixCreationTime";
-import { FILE_TYPE } from "constants/file";
 import { getFileType } from "services/typeDetectionService";
 import { EnteFile } from "types/file";
 import {

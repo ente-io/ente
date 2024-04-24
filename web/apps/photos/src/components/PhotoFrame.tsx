@@ -1,3 +1,4 @@
+import { FILE_TYPE } from "@/media/file";
 import log from "@/next/log";
 import { PHOTOS_PAGES } from "@ente/shared/constants/pages";
 import { CustomError } from "@ente/shared/error";
@@ -5,7 +6,6 @@ import useMemoSingleThreaded from "@ente/shared/hooks/useMemoSingleThreaded";
 import { styled } from "@mui/material";
 import PhotoViewer from "components/PhotoViewer";
 import { TRASH_SECTION } from "constants/collection";
-import { FILE_TYPE } from "constants/file";
 import { useRouter } from "next/router";
 import { GalleryContext } from "pages/gallery";
 import PhotoSwipe from "photoswipe";

@@ -1,8 +1,8 @@
+import { FILE_TYPE } from "@/media/file";
 import log from "@/next/log";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { getEndpoint } from "@ente/shared/network/api";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
-import { FILE_TYPE } from "constants/file";
 import { EnteFile } from "types/file";
 import { Metadata } from "types/upload";
 import { hasFileHash } from "utils/upload";

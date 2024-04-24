@@ -1,3 +1,4 @@
+import { FILE_TYPE } from "@/media/file";
 import { potentialFileTypeFromExtension } from "@/media/live-photo";
 import { ensureElectron } from "@/next/electron";
 import { nameAndExtension } from "@/next/file";
@@ -11,7 +12,6 @@ import { Events, eventBus } from "@ente/shared/events";
 import { wait } from "@ente/shared/utils";
 import { Canceler } from "axios";
 import { Remote } from "comlink";
-import { FILE_TYPE } from "constants/file";
 import {
     RANDOM_PERCENTAGE_PROGRESS_FOR_PUT,
     UPLOAD_RESULT,

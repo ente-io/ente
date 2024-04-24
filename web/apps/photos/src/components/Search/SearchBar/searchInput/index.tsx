@@ -1,6 +1,6 @@
+import { FILE_TYPE } from "@/media/file";
 import CloseIcon from "@mui/icons-material/Close";
 import { IconButton } from "@mui/material";
-import { FILE_TYPE } from "constants/file";
 import { t } from "i18next";
 import memoize from "memoize-one";
 import pDebounce from "p-debounce";

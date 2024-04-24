@@ -1,7 +1,7 @@
+import { FILE_TYPE } from "@/media/file";
 import log from "@/next/log";
 import { type Electron } from "@/next/types/ipc";
 import { withTimeout } from "@ente/shared/utils";
-import { FILE_TYPE } from "constants/file";
 import { BLACK_THUMBNAIL_BASE64 } from "constants/upload";
 import * as ffmpeg from "services/ffmpeg";
 import { heicToJPEG } from "services/heic-convert";

@@ -1,10 +1,10 @@
+import { FILE_TYPE } from "@/media/file";
 import type { ElectronFile } from "@/next/types/file";
 import {
     B64EncryptionResult,
     LocalFileAttributes,
 } from "@ente/shared/crypto/types";
 import type { DataStream } from "@ente/shared/utils/data-stream";
-import { FILE_TYPE } from "constants/file";
 import { Collection } from "types/collection";
 import {
     FilePublicMagicMetadata,

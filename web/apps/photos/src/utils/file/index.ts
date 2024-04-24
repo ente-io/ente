@@ -1,3 +1,4 @@
+import { FILE_TYPE } from "@/media/file";
 import { decodeLivePhoto } from "@/media/live-photo";
 import log from "@/next/log";
 import { CustomErrorMessage, type Electron } from "@/next/types/ipc";
@@ -7,7 +8,6 @@ import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import { User } from "@ente/shared/user/types";
 import { downloadUsingAnchor, withTimeout } from "@ente/shared/utils";
 import {
-    FILE_TYPE,
     RAW_FORMATS,
     SUPPORTED_RAW_FORMATS,
     TYPE_HEIC,

@@ -1,3 +1,4 @@
+import { FILE_TYPE } from "@/media/file";
 import { getFileNameSize } from "@/next/file";
 import log from "@/next/log";
 import { ElectronFile } from "@/next/types/file";
@@ -10,7 +11,6 @@ import {
 } from "@ente/shared/time";
 import type { DataStream } from "@ente/shared/utils/data-stream";
 import { Remote } from "comlink";
-import { FILE_TYPE } from "constants/file";
 import { FILE_READER_CHUNK_SIZE, NULL_LOCATION } from "constants/upload";
 import * as ffmpegService from "services/ffmpeg";
 import { getElectronFileStream, getFileStream } from "services/readerService";

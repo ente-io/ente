@@ -1,3 +1,4 @@
+import { FILE_TYPE } from "@/media/file";
 import { decodeLivePhoto } from "@/media/live-photo";
 import { ensureElectron } from "@/next/electron";
 import log from "@/next/log";
@@ -11,7 +12,6 @@ import QueueProcessor, {
     CancellationStatus,
     RequestCanceller,
 } from "@ente/shared/utils/queueProcessor";
-import { FILE_TYPE } from "constants/file";
 import { Collection } from "types/collection";
 import {
     CollectionExportNames,

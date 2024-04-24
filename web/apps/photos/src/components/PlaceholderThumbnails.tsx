@@ -1,8 +1,8 @@
+import { FILE_TYPE } from "@/media/file";
 import { Overlay } from "@ente/shared/components/Container";
 import PhotoOutlined from "@mui/icons-material/PhotoOutlined";
 import PlayCircleOutlineOutlined from "@mui/icons-material/PlayCircleOutlineOutlined";
 import { styled } from "@mui/material";
-import { FILE_TYPE } from "constants/file";
 
 interface Iprops {
     fileType: FILE_TYPE;
