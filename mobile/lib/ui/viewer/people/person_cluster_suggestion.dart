@@ -116,20 +116,25 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
         clusterID: clusterID,
       );
       Bus.instance.fire(PeopleChangedEvent());
+      // Increment the suggestion index
+      if (mounted) {
+        setState(() => currentSuggestionIndex++);
+      }
+
+      // Check if we need to fetch new data
+      if (currentSuggestionIndex >= (numberOfSuggestions)) {
+        setState(() {
+          currentSuggestionIndex = 0;
+          futureBuilderKey = UniqueKey(); // Reset to trigger FutureBuilder
+          _fetchClusterSuggestions();
+        });
+      }
     } else {
       await FaceMLDataDB.instance.captureNotPersonFeedback(
         personID: widget.person.remoteID,
         clusterID: clusterID,
       );
-    }
-
-    // Increment the suggestion index
-    if (mounted) {
-      setState(() => currentSuggestionIndex++);
-    }
-
-    // Check if we need to fetch new data
-    if (currentSuggestionIndex >= (numberOfSuggestions)) {
+      // Recalculate the suggestions when a suggestion is rejected
       setState(() {
         currentSuggestionIndex = 0;
         futureBuilderKey = UniqueKey(); // Reset to trigger FutureBuilder
