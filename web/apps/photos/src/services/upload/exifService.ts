@@ -1,5 +1,4 @@
 import log from "@/next/log";
-import { CustomError } from "@ente/shared/error";
 import { validateAndGetCreationUnixTimeInMicroSeconds } from "@ente/shared/time";
 import { NULL_LOCATION } from "constants/upload";
 import exifr from "exifr";
@@ -176,7 +175,7 @@ function parseExifData(exifData: RawEXIFData): ParsedEXIFData {
 function parseEXIFDate(dateTimeString: string) {
     try {
         if (typeof dateTimeString !== "string" || dateTimeString === "") {
-            throw Error(CustomError.NOT_A_DATE);
+            throw new Error("Invalid date string");
         }
 
         // Check and parse date in the format YYYYMMDD
@@ -207,7 +206,7 @@ function parseEXIFDate(dateTimeString: string) {
             typeof day === "undefined" ||
             Number.isNaN(day)
         ) {
-            throw Error(CustomError.NOT_A_DATE);
+            throw new Error("Invalid date");
         }
         let date: Date;
         if (
@@ -223,7 +222,7 @@ function parseEXIFDate(dateTimeString: string) {
             date = new Date(year, month - 1, day, hour, minute, second);
         }
         if (Number.isNaN(+date)) {
-            throw Error(CustomError.NOT_A_DATE);
+            throw new Error("Invalid date");
         }
         return date;
     } catch (e) {
@@ -245,7 +244,7 @@ export function parseEXIFLocation(
             gpsLatitude.length !== 3 ||
             gpsLongitude.length !== 3
         ) {
-            throw Error(CustomError.NOT_A_LOCATION);
+            throw new Error("Invalid EXIF location");
         }
         const latitude = convertDMSToDD(
             gpsLatitude[0],
