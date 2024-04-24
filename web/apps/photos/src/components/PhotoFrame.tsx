@@ -1,4 +1,4 @@
-import { FILE_TYPE } from "@/media/file";
+import { FILE_TYPE } from "@/media/file-type";
 import log from "@/next/log";
 import { PHOTOS_PAGES } from "@ente/shared/constants/pages";
 import { CustomError } from "@ente/shared/error";

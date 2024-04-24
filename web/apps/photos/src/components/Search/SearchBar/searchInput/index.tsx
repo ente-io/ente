@@ -1,4 +1,4 @@
-import { FILE_TYPE } from "@/media/file";
+import { FILE_TYPE } from "@/media/file-type";
 import CloseIcon from "@mui/icons-material/Close";
 import { IconButton } from "@mui/material";
 import { t } from "i18next";

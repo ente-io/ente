@@ -1,4 +1,4 @@
-import { FILE_TYPE } from "@/media/file";
+import { FILE_TYPE } from "@/media/file-type";
 import { potentialFileTypeFromExtension } from "@/media/live-photo";
 import { ensureElectron } from "@/next/electron";
 import { nameAndExtension } from "@/next/file";

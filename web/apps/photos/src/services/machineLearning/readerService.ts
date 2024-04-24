@@ -1,4 +1,4 @@
-import { FILE_TYPE } from "@/media/file";
+import { FILE_TYPE } from "@/media/file-type";
 import log from "@/next/log";
 import { MLSyncContext, MLSyncFileContext } from "types/machineLearning";
 import {

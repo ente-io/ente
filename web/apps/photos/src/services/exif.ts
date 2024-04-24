@@ -1,9 +1,10 @@
+import { type FileTypeInfo } from "@/media/file-type";
 import log from "@/next/log";
 import { validateAndGetCreationUnixTimeInMicroSeconds } from "@ente/shared/time";
 import { NULL_LOCATION } from "constants/upload";
 import exifr from "exifr";
 import piexif from "piexifjs";
-import { FileTypeInfo, Location } from "types/upload";
+import { Location } from "types/upload";
 
 type ParsedEXIFData = Record<string, any> &
     Partial<{

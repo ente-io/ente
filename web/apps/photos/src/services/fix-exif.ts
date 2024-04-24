@@ -1,4 +1,4 @@
-import { FILE_TYPE } from "@/media/file";
+import { FILE_TYPE } from "@/media/file-type";
 import log from "@/next/log";
 import { validateAndGetCreationUnixTimeInMicroSeconds } from "@ente/shared/time";
 import type { FixOption } from "components/FixCreationTime";

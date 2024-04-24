@@ -1,4 +1,4 @@
-import { FILE_TYPE } from "@/media/file";
+import { FILE_TYPE } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
 import { openCache, type BlobCache } from "@/next/blob-cache";
 import log from "@/next/log";

@@ -1,11 +1,10 @@
-import { FILE_TYPE } from "@/media/file";
+import { FILE_TYPE, type FileTypeInfo } from "@/media/file-type";
 import log from "@/next/log";
 import { type Electron } from "@/next/types/ipc";
 import { withTimeout } from "@ente/shared/utils";
 import { BLACK_THUMBNAIL_BASE64 } from "constants/upload";
 import * as ffmpeg from "services/ffmpeg";
 import { heicToJPEG } from "services/heic-convert";
-import { FileTypeInfo } from "types/upload";
 import { isFileHEIC } from "utils/file";
 
 /** Maximum width or height of the generated thumbnail */

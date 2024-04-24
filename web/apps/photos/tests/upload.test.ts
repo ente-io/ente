@@ -1,4 +1,4 @@
-import { FILE_TYPE } from "@/media/file";
+import { FILE_TYPE } from "@/media/file-type";
 import { tryToParseDateTime } from "@ente/shared/time";
 import { getLocalCollections } from "services/collectionService";
 import { getLocalFiles } from "services/fileService";

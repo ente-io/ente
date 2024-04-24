@@ -16,7 +16,7 @@ import {
     isSupportedRawFormat,
 } from "utils/file";
 
-import { FILE_TYPE } from "@/media/file";
+import { FILE_TYPE } from "@/media/file-type";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import AlbumOutlined from "@mui/icons-material/AlbumOutlined";

@@ -1,4 +1,4 @@
-import { FILE_TYPE } from "@/media/file";
+import { FILE_TYPE, type FileTypeInfo } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
 import log from "@/next/log";
 import { CustomErrorMessage, type Electron } from "@/next/types/ipc";
@@ -35,7 +35,6 @@ import {
     SetFilesDownloadProgressAttributesCreator,
 } from "types/gallery";
 import { VISIBILITY_STATE } from "types/magicMetadata";
-import { FileTypeInfo } from "types/upload";
 import { isArchivedFile, updateMagicMetadata } from "utils/magicMetadata";
 import { safeFileName } from "utils/native-fs";
 import { writeStream } from "utils/native-stream";

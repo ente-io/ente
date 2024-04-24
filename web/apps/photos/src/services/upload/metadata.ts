@@ -1,4 +1,4 @@
-import { FILE_TYPE } from "@/media/file";
+import { FILE_TYPE, type FileTypeInfo } from "@/media/file-type";
 import { getFileNameSize } from "@/next/file";
 import log from "@/next/log";
 import { ElectronFile } from "@/next/types/file";
@@ -17,7 +17,6 @@ import * as ffmpegService from "services/ffmpeg";
 import { getElectronFileStream, getFileStream } from "services/readerService";
 import { FilePublicMagicMetadataProps } from "types/file";
 import {
-    FileTypeInfo,
     Metadata,
     ParsedExtractedMetadata,
     type LivePhotoAssets2,

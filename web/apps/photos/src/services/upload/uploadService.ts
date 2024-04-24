@@ -1,4 +1,4 @@
-import { FILE_TYPE } from "@/media/file";
+import { FILE_TYPE, type FileTypeInfo } from "@/media/file-type";
 import { encodeLivePhoto } from "@/media/live-photo";
 import { ensureElectron } from "@/next/electron";
 import { basename } from "@/next/file";
@@ -28,7 +28,6 @@ import {
     BackupedFile,
     EncryptedFile,
     FileInMemory,
-    FileTypeInfo,
     FileWithMetadata,
     ProcessedFile,
     PublicUploadProps,
