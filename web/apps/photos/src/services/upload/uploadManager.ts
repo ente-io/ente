@@ -41,10 +41,7 @@ import {
     SegregatedFinishedUploads,
 } from "types/upload/ui";
 import { decryptFile, getUserOwnedFiles, sortFiles } from "utils/file";
-import {
-    areFileWithCollectionsSame,
-    segregateMetadataAndMediaFiles,
-} from "utils/upload";
+import { segregateMetadataAndMediaFiles } from "utils/upload";
 import { getLocalFiles } from "../fileService";
 import {
     getMetadataJSONMapKeyForJSON,
@@ -552,7 +549,7 @@ class UploadManager {
             log.info(
                 `post upload action -> fileUploadResult: ${fileUploadResult} uploadedFile present ${!!uploadedFile}`,
             );
-            await this.updateElectronRemainingFiles(fileWithCollection);
+            await this.removeFromPendingUploads(fileWithCollection);
             switch (fileUploadResult) {
                 case UPLOAD_RESULT.FAILED:
                 case UPLOAD_RESULT.BLOCKED:
@@ -655,12 +652,10 @@ class UploadManager {
         this.setFiles((files) => sortFiles([...files, decryptedFile]));
     }
 
-    private async updateElectronRemainingFiles(
-        fileWithCollection: FileWithCollection2,
-    ) {
+    private async removeFromPendingUploads(file: FileWithCollection2) {
         if (isElectron()) {
             this.remainingFiles = this.remainingFiles.filter(
-                (file) => !areFileWithCollectionsSame(file, fileWithCollection),
+                (f) => f.localID != file.localID,
             );
             await updatePendingUploads(this.remainingFiles);
         }
