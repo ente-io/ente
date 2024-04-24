@@ -15,11 +15,3 @@ export interface Metadata {
     version?: number;
     deviceFolder?: string;
 }
-
-export interface FileTypeInfo {
-    fileType: FILE_TYPE;
-    exactType: string;
-    mimeType?: string;
-    imageType?: string;
-    videoType?: string;
-}

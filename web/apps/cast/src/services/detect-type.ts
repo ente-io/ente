@@ -24,5 +24,5 @@ export const detectMediaMIMEType = async (file: File): Promise<string> => {
 
     const ext = lowercaseExtension(file.name);
     if (!ext) return undefined;
-    return KnownFileTypeInfos.find((f) => f.exactType == ext)?.mimeType;
+    return KnownFileTypeInfos.find((f) => f.extension == ext)?.mimeType;
 };

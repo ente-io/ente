@@ -341,9 +341,9 @@ const getLivePhotoFileType = async (
     const videoFileTypeInfo = await detectFileTypeInfo(livePhotoAssets.video);
     return {
         fileType: FILE_TYPE.LIVE_PHOTO,
-        exactType: `${imageFileTypeInfo.exactType}+${videoFileTypeInfo.exactType}`,
-        imageType: imageFileTypeInfo.exactType,
-        videoType: videoFileTypeInfo.exactType,
+        extension: `${imageFileTypeInfo.extension}+${videoFileTypeInfo.extension}`,
+        imageType: imageFileTypeInfo.extension,
+        videoType: videoFileTypeInfo.extension,
     };
 };
 
@@ -588,7 +588,7 @@ const readLivePhoto = async (
     } = await withThumbnail(
         livePhotoAssets.image,
         {
-            exactType: fileTypeInfo.imageType,
+            extension: fileTypeInfo.imageType,
             fileType: FILE_TYPE.IMAGE,
         },
         readImage.dataOrStream,

@@ -36,16 +36,15 @@ type RawEXIFData = Record<string, any> &
 
 export async function getParsedExifData(
     receivedFile: File,
-    { exactType }: FileTypeInfo,
+    { extension }: FileTypeInfo,
     tags?: string[],
 ): Promise<ParsedEXIFData> {
     const exifLessFormats = ["gif", "bmp"];
     const exifrUnsupportedFileFormatMessage = "Unknown file format";
 
     try {
-        if (exifLessFormats.includes(exactType)) {
-            return null;
-        }
+        if (exifLessFormats.includes(extension)) return null;
+
         const exifData: RawEXIFData = await exifr.parse(receivedFile, {
             reviveValues: false,
             tiff: true,
@@ -68,10 +67,10 @@ export async function getParsedExifData(
         return parseExifData(filteredExifData);
     } catch (e) {
         if (e.message == exifrUnsupportedFileFormatMessage) {
-            log.error(`EXIFR does not support format ${exactType}`, e);
+            log.error(`EXIFR does not support ${extension} files`, e);
             return undefined;
         } else {
-            log.error(`Failed to parse EXIF data of ${exactType} file`, e);
+            log.error(`Failed to parse EXIF data for a ${extension} file`, e);
             throw e;
         }
     }

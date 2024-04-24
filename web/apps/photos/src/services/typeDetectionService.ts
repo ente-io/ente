@@ -59,12 +59,12 @@ export const detectFileTypeInfo = async (
         }
         return {
             fileType,
-            exactType: typeResult.ext,
+            extension: typeResult.ext,
             mimeType: typeResult.mime,
         };
     } catch (e) {
         const extension = lowercaseExtension(fileOrPath.name);
-        const known = KnownFileTypeInfos.find((f) => f.exactType == extension);
+        const known = KnownFileTypeInfos.find((f) => f.extension == extension);
         if (known) return known;
 
         if (KnownNonMediaFileExtensions.includes(extension))
@@ -91,8 +91,8 @@ async function extractElectronFileType(file: ElectronFile) {
 
 async function getFileTypeFromBuffer(buffer: Uint8Array) {
     const result = await FileType.fromBuffer(buffer);
-    if (!result?.mime) {
-        throw Error(`Could not deduce MIME type from buffer`);
+    if (!result?.ext || !result?.mime) {
+        throw Error(`Could not deduce file type from buffer`);
     }
     return result;
 }

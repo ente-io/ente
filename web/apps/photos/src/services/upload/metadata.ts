@@ -246,7 +246,7 @@ async function extractLivePhotoMetadata(
 ): Promise<ExtractMetadataResult> {
     const imageFileTypeInfo: FileTypeInfo = {
         fileType: FILE_TYPE.IMAGE,
-        exactType: fileTypeInfo.imageType,
+        extension: fileTypeInfo.imageType,
     };
     const {
         metadata: imageMetadata,

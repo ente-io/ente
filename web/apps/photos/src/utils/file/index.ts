@@ -1,4 +1,4 @@
-import { FILE_TYPE, type FileTypeInfo } from "@/media/file-type";
+import { FILE_TYPE } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
 import { lowercaseExtension } from "@/next/file";
 import log from "@/next/log";
@@ -39,9 +39,6 @@ import { VISIBILITY_STATE } from "types/magicMetadata";
 import { isArchivedFile, updateMagicMetadata } from "utils/magicMetadata";
 import { safeFileName } from "utils/native-fs";
 import { writeStream } from "utils/native-stream";
-
-const TYPE_HEIC = "heic";
-const TYPE_HEIF = "heif";
 
 const RAW_FORMATS = [
     "heic",
@@ -287,23 +284,22 @@ export function generateStreamFromArrayBuffer(data: Uint8Array) {
 }
 
 export const getRenderableImage = async (fileName: string, imageBlob: Blob) => {
-    let fileTypeInfo: FileTypeInfo;
     try {
         const tempFile = new File([imageBlob], fileName);
-        fileTypeInfo = await detectFileTypeInfo(tempFile);
+        const fileTypeInfo = await detectFileTypeInfo(tempFile);
         log.debug(
-            () =>
-                `Obtaining renderable image for ${JSON.stringify(fileTypeInfo)}`,
+            () => `Need renderable image for ${JSON.stringify(fileTypeInfo)}`,
         );
-        const { exactType } = fileTypeInfo;
+        const { extension } = fileTypeInfo;
 
-        if (!isRawFile(exactType)) {
-            // Not something we know how to handle yet, give back the original.
+        if (!isRawFile(extension)) {
+            // Either it is not something we know how to handle yet, or
+            // something that the browser already knows how to render.
             return imageBlob;
         }
 
         const available = !moduleState.isNativeJPEGConversionNotAvailable;
-        if (isElectron() && available && isSupportedRawFormat(exactType)) {
+        if (isElectron() && available && isSupportedRawFormat(extension)) {
             // If we're running in our desktop app, see if our Node.js layer can
             // convert this into a JPEG using native tools for us.
             try {
@@ -317,17 +313,14 @@ export const getRenderableImage = async (fileName: string, imageBlob: Blob) => {
             }
         }
 
-        if (isFileHEIC(exactType)) {
-            // If it is an HEIC file, use our web HEIC converter.
+        if (extension == "heic" || extension == "heif") {
+            // For HEIC/HEIF files we can use our web HEIC converter.
             return await heicToJPEG(imageBlob);
         }
 
         return undefined;
     } catch (e) {
-        log.error(
-            `Failed to get renderable image for ${JSON.stringify(fileTypeInfo ?? fileName)}`,
-            e,
-        );
+        log.error(`Failed to get renderable image for ${fileName}`, e);
         return undefined;
     }
 };
@@ -345,13 +338,6 @@ const nativeConvertToJPEG = async (imageBlob: Blob) => {
     log.debug(() => `Native JPEG conversion took ${Date.now() - startTime} ms`);
     return new Blob([jpegData]);
 };
-
-export function isFileHEIC(exactType: string) {
-    return (
-        exactType.toLowerCase().endsWith(TYPE_HEIC) ||
-        exactType.toLowerCase().endsWith(TYPE_HEIF)
-    );
-}
 
 export function isRawFile(exactType: string) {
     return RAW_FORMATS.includes(exactType.toLowerCase());
