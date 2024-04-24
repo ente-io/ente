@@ -1,4 +1,4 @@
-import { getFileNameSize } from "@/next/file";
+import { getFileNameSize, nameAndExtension } from "@/next/file";
 import log from "@/next/log";
 import { ElectronFile } from "@/next/types/file";
 import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
@@ -188,13 +188,6 @@ async function getVideoMetadata(file: File | ElectronFile) {
     return videoMetadata;
 }
 
-interface LivePhotoIdentifier {
-    collectionID: number;
-    fileType: FILE_TYPE;
-    name: string;
-    size: number;
-}
-
 const UNDERSCORE_THREE = "_3";
 // Note: The icloud-photos-downloader library appends _HVEC to the end of the filename in case of live photos
 // https://github.com/icloud-photos-downloader/icloud_photos_downloader
@@ -312,74 +305,64 @@ export function getLivePhotoSize(livePhotoAssets: LivePhotoAssets) {
     return livePhotoAssets.image.size + livePhotoAssets.video.size;
 }
 
-export async function clusterLivePhotoFiles(mediaFiles: FileWithCollection2[]) {
+/**
+ * Go through the given files, combining any sibling image + video assets into a
+ * single live photo when appropriate.
+ */
+export const clusterLivePhotos = (mediaFiles: FileWithCollection2[]) => {
     try {
-        const analysedMediaFiles: FileWithCollection2[] = [];
+        const result: FileWithCollection2[] = [];
         mediaFiles
-            .sort((firstMediaFile, secondMediaFile) =>
-                splitFilenameAndExtension(
-                    getFileName(firstMediaFile.file),
-                )[0].localeCompare(
-                    splitFilenameAndExtension(
-                        getFileName(secondMediaFile.file),
-                    )[0],
+            .sort((f, g) =>
+                nameAndExtension(getFileName(f.file))[0].localeCompare(
+                    nameAndExtension(getFileName(g.file))[0],
                 ),
             )
-            .sort(
-                (firstMediaFile, secondMediaFile) =>
-                    firstMediaFile.collectionID - secondMediaFile.collectionID,
-            );
+            .sort((f, g) => f.collectionID - g.collectionID);
         let index = 0;
         while (index < mediaFiles.length - 1) {
             if (uploadCancelService.isUploadCancelationRequested()) {
                 throw Error(CustomError.UPLOAD_CANCELLED);
             }
-            const firstMediaFile = mediaFiles[index];
-            const secondMediaFile = mediaFiles[index + 1];
-            const firstFileType =
-                getFileTypeFromExtensionForLivePhotoClustering(
-                    getFileName(firstMediaFile.file),
-                );
-            const secondFileType =
-                getFileTypeFromExtensionForLivePhotoClustering(
-                    getFileName(secondMediaFile.file),
-                );
-            const firstFileIdentifier: LivePhotoIdentifier = {
-                collectionID: firstMediaFile.collectionID,
-                fileType: firstFileType,
-                name: getFileName(firstMediaFile.file),
+            const f = mediaFiles[index];
+            const g = mediaFiles[index + 1];
+            const fFileType = getFileTypeFromExtensionForLivePhotoClustering(
+                getFileName(f.file),
+            );
+            const gFileType = getFileTypeFromExtensionForLivePhotoClustering(
+                getFileName(g.file),
+            );
+            const fFileIdentifier: LivePhotoIdentifier = {
+                collectionID: f.collectionID,
+                fileType: fFileType,
+                name: getFileName(f.file),
                 /* TODO(MR): ElectronFile changes */
-                size: (firstMediaFile as FileWithCollection).file.size,
+                size: (f as FileWithCollection).file.size,
             };
-            const secondFileIdentifier: LivePhotoIdentifier = {
-                collectionID: secondMediaFile.collectionID,
-                fileType: secondFileType,
-                name: getFileName(secondMediaFile.file),
+            const gFileIdentifier: LivePhotoIdentifier = {
+                collectionID: g.collectionID,
+                fileType: gFileType,
+                name: getFileName(g.file),
                 /* TODO(MR): ElectronFile changes */
-                size: (secondMediaFile as FileWithCollection).file.size,
+                size: (g as FileWithCollection).file.size,
             };
-            if (
-                areFilesLivePhotoAssets(
-                    firstFileIdentifier,
-                    secondFileIdentifier,
-                )
-            ) {
+            if (areLivePhotoAssets(fFileIdentifier, gFileIdentifier)) {
                 let imageFile: File | ElectronFile | string;
                 let videoFile: File | ElectronFile | string;
                 if (
-                    firstFileType === FILE_TYPE.IMAGE &&
-                    secondFileType === FILE_TYPE.VIDEO
+                    fFileType === FILE_TYPE.IMAGE &&
+                    gFileType === FILE_TYPE.VIDEO
                 ) {
-                    imageFile = firstMediaFile.file;
-                    videoFile = secondMediaFile.file;
+                    imageFile = f.file;
+                    videoFile = g.file;
                 } else {
-                    videoFile = firstMediaFile.file;
-                    imageFile = secondMediaFile.file;
+                    videoFile = f.file;
+                    imageFile = g.file;
                 }
-                const livePhotoLocalID = firstMediaFile.localID;
-                analysedMediaFiles.push({
+                const livePhotoLocalID = f.localID;
+                result.push({
                     localID: livePhotoLocalID,
-                    collectionID: firstMediaFile.collectionID,
+                    collectionID: f.collectionID,
                     isLivePhoto: true,
                     livePhotoAssets: {
                         image: imageFile,
@@ -388,20 +371,20 @@ export async function clusterLivePhotoFiles(mediaFiles: FileWithCollection2[]) {
                 });
                 index += 2;
             } else {
-                analysedMediaFiles.push({
-                    ...firstMediaFile,
+                result.push({
+                    ...f,
                     isLivePhoto: false,
                 });
                 index += 1;
             }
         }
         if (index === mediaFiles.length - 1) {
-            analysedMediaFiles.push({
+            result.push({
                 ...mediaFiles[index],
                 isLivePhoto: false,
             });
         }
-        return analysedMediaFiles;
+        return result;
     } catch (e) {
         if (e.message === CustomError.UPLOAD_CANCELLED) {
             throw e;
@@ -410,42 +393,44 @@ export async function clusterLivePhotoFiles(mediaFiles: FileWithCollection2[]) {
             throw e;
         }
     }
+};
+
+interface LivePhotoIdentifier {
+    collectionID: number;
+    fileType: FILE_TYPE;
+    name: string;
+    size: number;
 }
 
-function areFilesLivePhotoAssets(
-    firstFileIdentifier: LivePhotoIdentifier,
-    secondFileIdentifier: LivePhotoIdentifier,
-) {
-    const haveSameCollectionID =
-        firstFileIdentifier.collectionID === secondFileIdentifier.collectionID;
-    const areNotSameFileType =
-        firstFileIdentifier.fileType !== secondFileIdentifier.fileType;
+const areLivePhotoAssets = (f: LivePhotoIdentifier, g: LivePhotoIdentifier) => {
+    const haveSameCollectionID = f.collectionID === g.collectionID;
+    const areNotSameFileType = f.fileType !== g.fileType;
 
     let firstFileNameWithoutSuffix: string;
     let secondFileNameWithoutSuffix: string;
-    if (firstFileIdentifier.fileType === FILE_TYPE.IMAGE) {
+    if (f.fileType === FILE_TYPE.IMAGE) {
         firstFileNameWithoutSuffix = removePotentialLivePhotoSuffix(
-            getFileNameWithoutExtension(firstFileIdentifier.name),
+            getFileNameWithoutExtension(f.name),
             // Note: The Google Live Photo image file can have video extension appended as suffix, passing that to removePotentialLivePhotoSuffix to remove it
             // Example: IMG_20210630_0001.mp4.jpg (Google Live Photo image file)
-            getFileExtensionWithDot(secondFileIdentifier.name),
+            getFileExtensionWithDot(g.name),
         );
         secondFileNameWithoutSuffix = removePotentialLivePhotoSuffix(
-            getFileNameWithoutExtension(secondFileIdentifier.name),
+            getFileNameWithoutExtension(g.name),
         );
     } else {
         firstFileNameWithoutSuffix = removePotentialLivePhotoSuffix(
-            getFileNameWithoutExtension(firstFileIdentifier.name),
+            getFileNameWithoutExtension(f.name),
         );
         secondFileNameWithoutSuffix = removePotentialLivePhotoSuffix(
-            getFileNameWithoutExtension(secondFileIdentifier.name),
-            getFileExtensionWithDot(firstFileIdentifier.name),
+            getFileNameWithoutExtension(g.name),
+            getFileExtensionWithDot(f.name),
         );
     }
     if (
         haveSameCollectionID &&
-        isImageOrVideo(firstFileIdentifier.fileType) &&
-        isImageOrVideo(secondFileIdentifier.fileType) &&
+        isImageOrVideo(f.fileType) &&
+        isImageOrVideo(g.fileType) &&
         areNotSameFileType &&
         firstFileNameWithoutSuffix === secondFileNameWithoutSuffix
     ) {
@@ -455,23 +440,20 @@ function areFilesLivePhotoAssets(
         // I did that based on the assumption that live photo assets ideally would not be larger than LIVE_PHOTO_ASSET_SIZE_LIMIT
         // also zipping library doesn't support stream as a input
         if (
-            firstFileIdentifier.size <= LIVE_PHOTO_ASSET_SIZE_LIMIT &&
-            secondFileIdentifier.size <= LIVE_PHOTO_ASSET_SIZE_LIMIT
+            f.size <= LIVE_PHOTO_ASSET_SIZE_LIMIT &&
+            g.size <= LIVE_PHOTO_ASSET_SIZE_LIMIT
         ) {
             return true;
         } else {
             log.error(
                 `${CustomError.TOO_LARGE_LIVE_PHOTO_ASSETS} - ${JSON.stringify({
-                    fileSizes: [
-                        firstFileIdentifier.size,
-                        secondFileIdentifier.size,
-                    ],
+                    fileSizes: [f.size, g.size],
                 })}`,
             );
         }
     }
     return false;
-}
+};
 
 function removePotentialLivePhotoSuffix(
     filenameWithoutExtension: string,

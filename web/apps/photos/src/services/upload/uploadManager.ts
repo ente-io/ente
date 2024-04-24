@@ -367,19 +367,13 @@ class UploadManager {
                 );
                 await this.parseMetadataJSONFiles(metadataJSONFiles);
             }
+
             if (mediaFiles.length) {
-                log.info(`clusterLivePhotoFiles started`);
-                const analysedMediaFiles =
-                    await clusterLivePhotoFiles(mediaFiles);
-                log.info(`clusterLivePhotoFiles ended`);
-                log.info(
-                    `got live photos: ${
-                        mediaFiles.length !== analysedMediaFiles.length
-                    }`,
-                );
+                const clusteredMediaFiles = await clusterLivePhotos(mediaFiles);
+
                 this.uiService.setFilenames(
                     new Map<number, string>(
-                        analysedMediaFiles.map((mediaFile) => [
+                        clusteredMediaFiles.map((mediaFile) => [
                             mediaFile.localID,
                             assetName(mediaFile),
                         ]),
@@ -387,10 +381,10 @@ class UploadManager {
                 );
 
                 this.uiService.setHasLivePhoto(
-                    mediaFiles.length !== analysedMediaFiles.length,
+                    mediaFiles.length !== clusteredMediaFiles.length,
                 );
 
-                await this.uploadMediaFiles(analysedMediaFiles);
+                await this.uploadMediaFiles(clusteredMediaFiles);
             }
         } catch (e) {
             if (e.message === CustomError.UPLOAD_CANCELLED) {
