@@ -373,7 +373,7 @@ Future<void> _logFGHeartBeatInfo() async {
   final String lastRun = lastFGTaskHeartBeatTime == 0
       ? 'never'
       : DateTime.fromMicrosecondsSinceEpoch(lastFGTaskHeartBeatTime).toString();
-  _logger.info('isAlreaduunningFG: $isRunningInFG, last Beat: $lastRun');
+  _logger.info('isAlreadyRunningFG: $isRunningInFG, last Beat: $lastRun');
 }
 
 void _scheduleSuicide(Duration duration, [String? taskID]) {
