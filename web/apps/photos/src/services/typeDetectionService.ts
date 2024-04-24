@@ -15,17 +15,36 @@ const TYPE_VIDEO = "video";
 const TYPE_IMAGE = "image";
 const CHUNK_SIZE_FOR_TYPE_DETECTION = 4100;
 
-export async function deduceFileTypeInfo(
-    receivedFile: File | ElectronFile,
-): Promise<FileTypeInfo> {
+/**
+ * Read the file's initial contents or use the file's name to deduce its type.
+ *
+ * This function first reads an initial chunk of the file and tries to deduce
+ * the file's {@link FileTypeInfo} from it. If that doesn't work, it then falls
+ * back to using the file's name to deduce it.
+ *
+ * If neither of these two approaches work, it throws an exception.
+ *
+ * If we were able to detect the file type, but it is explicitly not a media
+ * (image or video) format that we support, this function throws an error with
+ * the message `CustomError.UNSUPPORTED_FILE_FORMAT`.
+ *
+ * @param fileOrPath A {@link File} object, or the path to the file on the
+ * user's local filesystem. It is only valid to provide a path if we're running
+ * in the context of our desktop app.
+ *
+ * @returns The deduced {@link FileTypeInfo}.
+ */
+export const deduceFileTypeInfo = async (
+    fileOrPath: File | ElectronFile,
+): Promise<FileTypeInfo> => {
     try {
         let fileType: FILE_TYPE;
         let typeResult: FileTypeResult;
 
-        if (receivedFile instanceof File) {
-            typeResult = await extractFileType(receivedFile);
+        if (fileOrPath instanceof File) {
+            typeResult = await extractFileType(fileOrPath);
         } else {
-            typeResult = await extractElectronFileType(receivedFile);
+            typeResult = await extractElectronFileType(fileOrPath);
         }
 
         const mimTypeParts: string[] = typeResult.mime?.split("/");
@@ -49,7 +68,7 @@ export async function deduceFileTypeInfo(
             mimeType: typeResult.mime,
         };
     } catch (e) {
-        const fileFormat = getFileExtension(receivedFile.name);
+        const fileFormat = getFileExtension(fileOrPath.name);
         const whiteListedFormat = KnownFileTypeInfos.find(
             (a) => a.exactType === fileFormat,
         );
@@ -66,7 +85,7 @@ export async function deduceFileTypeInfo(
         log.error(`type detection failed for format ${fileFormat}`, e);
         throw new Error(`type detection failed ${fileFormat}`);
     }
-}
+};
 
 async function extractFileType(file: File) {
     const fileBlobChunk = file.slice(0, CHUNK_SIZE_FOR_TYPE_DETECTION);
