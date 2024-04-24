@@ -24,6 +24,7 @@ import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/services/update_service.dart';
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
+import "package:photos/ui/cast/auto.dart";
 import 'package:photos/ui/components/action_sheet_widget.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
 import "package:photos/ui/components/dialog_widget.dart";
@@ -656,53 +657,6 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     return actions;
   }
 
-  Widget castWidget(BuildContext context) {
-    return FutureBuilder<List<(String, Object)>>(
-      future: castService.searchDevices(),
-      builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          return Center(
-            child: Text(
-              'Error: ${snapshot.error.toString()}',
-            ),
-          );
-        } else if (!snapshot.hasData) {
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
-        }
-
-        if (snapshot.data!.isEmpty) {
-          return const Text('No device');
-        }
-
-        return Column(
-          children: snapshot.data!.map((result) {
-            final device = result.$2;
-            final name = result.$1;
-            return GestureDetector(
-              onTap: () async {
-                try {
-                  await _connectToYourApp(context, device);
-                } catch (e) {
-                  showGenericErrorDialog(context: context, error: e).ignore();
-                }
-              },
-              child: Text(name),
-            );
-          }).toList(),
-        );
-      },
-    );
-  }
-
-  Future<void> _connectToYourApp(
-    BuildContext context,
-    Object castDevice,
-  ) async {
-    await castService.connectDevice(context, castDevice);
-  }
-
   Future<void> onCleanUncategorizedClick(BuildContext buildContext) async {
     final actionResult = await showChoiceActionSheet(
       context,
@@ -944,7 +898,13 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       );
     }
     if (result.action == ButtonAction.first) {
-      showToast(context, "Coming soon");
+      await showDialog(
+        context: context,
+        barrierDismissible: true,
+        builder: (BuildContext context) {
+          return AutoCastDialog();
+        },
+      );
     }
     if (result.action == ButtonAction.second) {
       await _pairWithPin(gw);
