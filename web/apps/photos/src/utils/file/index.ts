@@ -1,5 +1,6 @@
 import { FILE_TYPE, type FileTypeInfo } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
+import { lowercaseExtension } from "@/next/file";
 import log from "@/next/log";
 import { CustomErrorMessage, type Electron } from "@/next/types/ipc";
 import { workerBridge } from "@/next/worker/worker-bridge";
@@ -41,8 +42,6 @@ import { writeStream } from "utils/native-stream";
 
 const TYPE_HEIC = "heic";
 const TYPE_HEIF = "heif";
-const TYPE_JPEG = "jpeg";
-const TYPE_JPG = "jpg";
 
 const RAW_FORMATS = [
     "heic",
@@ -102,11 +101,11 @@ export async function getUpdatedEXIFFileForDownload(
     file: EnteFile,
     fileStream: ReadableStream<Uint8Array>,
 ): Promise<ReadableStream<Uint8Array>> {
-    const extension = getFileExtension(file.metadata.title);
+    const extension = lowercaseExtension(file.metadata.title);
     if (
         file.metadata.fileType === FILE_TYPE.IMAGE &&
         file.pubMagicMetadata?.data.editedTime &&
-        (extension === TYPE_JPEG || extension === TYPE_JPG)
+        (extension == "jpeg" || extension == "jpg")
     ) {
         const fileBlob = await new Response(fileStream).blob();
         const updatedFileBlob = await updateFileCreationDateInEXIF(
@@ -276,20 +275,6 @@ export async function decryptFile(
         log.error("file decryption failed", e);
         throw e;
     }
-}
-
-export function splitFilenameAndExtension(filename: string): [string, string] {
-    const lastDotPosition = filename.lastIndexOf(".");
-    if (lastDotPosition === -1) return [filename, null];
-    else
-        return [
-            filename.slice(0, lastDotPosition),
-            filename.slice(lastDotPosition + 1),
-        ];
-}
-
-export function getFileExtension(filename: string) {
-    return splitFilenameAndExtension(filename)[1]?.toLocaleLowerCase();
 }
 
 export function generateStreamFromArrayBuffer(data: Uint8Array) {

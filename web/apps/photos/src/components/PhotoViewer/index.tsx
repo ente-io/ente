@@ -10,13 +10,13 @@ import { EnteFile } from "types/file";
 import {
     copyFileToClipboard,
     downloadSingleFile,
-    getFileExtension,
     getFileFromURL,
     isRawFile,
     isSupportedRawFormat,
 } from "utils/file";
 
 import { FILE_TYPE } from "@/media/file-type";
+import { lowercaseExtension } from "@/next/file";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import AlbumOutlined from "@mui/icons-material/AlbumOutlined";
@@ -348,7 +348,7 @@ function PhotoViewer(props: Iprops) {
     }
 
     function updateShowEditButton(file: EnteFile) {
-        const extension = getFileExtension(file.metadata.title);
+        const extension = lowercaseExtension(file.metadata.title);
         const isSupported =
             !isRawFile(extension) || isSupportedRawFormat(extension);
         setShowEditButton(
@@ -611,9 +611,8 @@ function PhotoViewer(props: Iprops) {
             }
         } catch (e) {
             setExif({ key: file.src, value: null });
-            const fileExtension = getFileExtension(file.metadata.title);
             log.error(
-                `checkExifAvailable failed for extension ${fileExtension}`,
+                `checkExifAvailable failed for file ${file.metadata.title}`,
                 e,
             );
         }

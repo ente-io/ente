@@ -26,6 +26,18 @@ export const nameAndExtension = (fileName: string): FileNameComponents => {
 };
 
 /**
+ * If the file has an extension, return a lowercased version of it.
+ *
+ * This is handy when comparing the extension to a known set without worrying
+ * about case sensitivity.
+ *
+ * See {@link nameAndExtension} for its more generic sibling.
+ */
+export const lowercaseExtension = (fileName: string): string | undefined => {
+    const [, ext] = nameAndExtension(fileName);
+    return ext?.toLowerCase();
+};
+/**
  * Construct a file name from its components (name and extension).
  *
  * Inverse of {@link nameAndExtension}.

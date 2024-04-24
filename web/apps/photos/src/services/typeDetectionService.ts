@@ -4,7 +4,7 @@ import {
     KnownNonMediaFileExtensions,
     type FileTypeInfo,
 } from "@/media/file-type";
-import { nameAndExtension } from "@/next/file";
+import { lowercaseExtension } from "@/next/file";
 import { ElectronFile } from "@/next/types/file";
 import { CustomError } from "@ente/shared/error";
 import FileType, { type FileTypeResult } from "file-type";
@@ -63,7 +63,7 @@ export const detectFileTypeInfo = async (
             mimeType: typeResult.mime,
         };
     } catch (e) {
-        const [, extension] = nameAndExtension(fileOrPath.name);
+        const extension = lowercaseExtension(fileOrPath.name);
         const known = KnownFileTypeInfos.find((f) => f.exactType == extension);
         if (known) return known;
 
