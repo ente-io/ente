@@ -617,7 +617,7 @@ async function getPlayableVideo(
                 new File([videoBlob], videoNameTitle),
             );
             log.info(`video successfully converted ${videoNameTitle}`);
-            return new Blob([await mp4ConvertedVideo.arrayBuffer()]);
+            return new Blob([mp4ConvertedVideo]);
         }
     } catch (e) {
         log.error("video conversion failed", e);
