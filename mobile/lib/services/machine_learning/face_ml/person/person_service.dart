@@ -1,3 +1,4 @@
+import "dart:async" show unawaited;
 import "dart:convert";
 
 import "package:flutter/foundation.dart";
@@ -102,10 +103,12 @@ class PersonService {
       faces: faceIds.toSet(),
     );
     personData.assigned!.add(clusterInfo);
-    await entityService.addOrUpdate(
-      EntityType.person,
-      json.encode(personData.toJson()),
-      id: personID,
+    unawaited(
+      entityService.addOrUpdate(
+        EntityType.person,
+        json.encode(personData.toJson()),
+        id: personID,
+      ),
     );
     await faceMLDataDB.assignClusterToPerson(
       personID: personID,
