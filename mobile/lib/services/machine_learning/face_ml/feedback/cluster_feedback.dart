@@ -456,20 +456,17 @@ class ClusterFeedbackService {
     double maxMeanDistance = 0.65,
     double goodMeanDistance = 0.54,
   }) async {
+    final w = (kDebugMode ? EnteWatch('getSuggestions') : null)?..start();
     // Get all the cluster data
-    final startTime = DateTime.now();
     final faceMlDb = FaceMLDataDB.instance;
-    // final Map<int, List<(int, double)>> suggestions = {};
     final allClusterIdsToCountMap = await faceMlDb.clusterIdToFaceCount();
     final ignoredClusters = await faceMlDb.getPersonIgnoredClusters(p.remoteID);
     final personClusters = await faceMlDb.getPersonClusterIDs(p.remoteID);
-    dev.log(
-      '${p.data.name} has ${personClusters.length} existing clusters, getting all database data took ${DateTime.now().difference(startTime).inMilliseconds} ms',
-      name: "getSuggestionsUsingMedian",
+    w?.log(
+      '${p.data.name} has ${personClusters.length} existing clusters, getting all database data done',
     );
 
     // First only do a simple check on the big clusters, if the person does not have small clusters yet
-    final w = (kDebugMode ? EnteWatch('getSuggestions') : null)?..start();
     final smallestPersonClusterSize = personClusters
         .map((clusterID) => allClusterIdsToCountMap[clusterID] ?? 0)
         .reduce((value, element) => min(value, element));
@@ -482,10 +479,9 @@ class ClusterFeedbackService {
           ignoredClusters,
           minClusterSize: minimumSize,
         );
-        dev.log(
-          'computed avg for ${clusterAvgBigClusters.length} clusters, in ${DateTime.now().difference(startTime).inMilliseconds} ms',
+        w?.log(
+          'Calculate avg for ${clusterAvgBigClusters.length} clusters of min size $minimumSize',
         );
-        w?.log('Calculate avg for min size $minimumSize');
         final List<(int, double)> suggestionsMeanBigClusters =
             _calcSuggestionsMean(
           clusterAvgBigClusters,
@@ -493,7 +489,9 @@ class ClusterFeedbackService {
           ignoredClusters,
           goodMeanDistance,
         );
-        w?.log('Calculate suggestions using mean for min size $minimumSize');
+        w?.log(
+          'Calculate suggestions using mean for ${clusterAvgBigClusters.length} clusters of min size $minimumSize',
+        );
         if (suggestionsMeanBigClusters.isNotEmpty) {
           return suggestionsMeanBigClusters
               .map((e) => (e.$1, e.$2, true))
@@ -508,8 +506,8 @@ class ClusterFeedbackService {
       allClusterIdsToCountMap,
       ignoredClusters,
     );
-    dev.log(
-      'computed avg for ${clusterAvg.length} clusters, in ${DateTime.now().difference(startTime).inMilliseconds} ms',
+    w?.log(
+      'computed avg for ${clusterAvg.length} clusters,',
     );
 
     // Find the other cluster candidates based on the mean
@@ -649,6 +647,7 @@ class ClusterFeedbackService {
     int maxClusterInCurrentRun = 500,
     int maxEmbeddingToRead = 10000,
   }) async {
+    final w = (kDebugMode ? EnteWatch('_getUpdateClusterAvg') : null)?..start();
     final startTime = DateTime.now();
     final faceMlDb = FaceMLDataDB.instance;
     _logger.info(
@@ -661,8 +660,8 @@ class ClusterFeedbackService {
 
     final Map<int, Vector> clusterAvg = {};
 
-    dev.log(
-      'getUpdateClusterAvg database call for getAllClusterSummary took ${DateTime.now().difference(startTime).inMilliseconds} ms',
+    w?.log(
+      'getUpdateClusterAvg database call for getAllClusterSummary',
     );
 
     final allClusterIds = allClusterIdsToCountMap.keys.toSet();
@@ -687,8 +686,8 @@ class ClusterFeedbackService {
         smallerClustersCnt++;
       }
     }
-    dev.log(
-      'serialization of embeddings took ${DateTime.now().difference(serializationTime).inMilliseconds} ms',
+    w?.log(
+      'serialization of embeddings',
     );
     _logger.info(
       'Ignored $ignoredClustersCnt clusters, already updated $alreadyUpdatedClustersCnt clusters, $smallerClustersCnt clusters are smaller than $minClusterSize',
@@ -708,12 +707,7 @@ class ClusterFeedbackService {
           allClusterIdsToCountMap[b]!.compareTo(allClusterIdsToCountMap[a]!),
     );
     int indexedInCurrentRun = 0;
-    final EnteWatch? w = kDebugMode ? EnteWatch("computeAvg") : null;
-    w?.start();
-
-    w?.log(
-      'reading embeddings for $maxClusterInCurrentRun or ${sortedClusterIDs.length} clusters',
-    );
+    w?.reset();
 
     int currentPendingRead = 0;
     final List<int> clusterIdsToRead = [];
@@ -790,7 +784,6 @@ class ClusterFeedbackService {
     final Map<int, List<(int, double)>> suggestions = {};
     int suggestionCount = 0;
     final w = (kDebugMode ? EnteWatch('getSuggestions') : null)?..start();
-    w?.log('converted avg to vectors for ${clusterAvg.length} averages');
     for (final otherClusterID in clusterAvg.keys) {
       // ignore the cluster that belong to the person or is ignored
       if (personClusters.contains(otherClusterID) ||
