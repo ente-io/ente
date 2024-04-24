@@ -137,7 +137,9 @@ some cases.
     JavaScript (Live photos are zip files under the hood).
 
 -   "[file-type](https://github.com/sindresorhus/file-type)" is used for MIME
-   type detection.
+   type detection. We are at an old version 16.5.4 because v17 onwards the
+   package became ESM only - for our limited use case, the custom Webpack
+   configuration that entails is not worth the upgrade.
 
 ## Photos app specific
 
