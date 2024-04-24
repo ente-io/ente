@@ -812,12 +812,12 @@ class ClusterFeedbackService {
       for (final List<(int, double)> suggestion in suggestions.values) {
         suggestClusterIds.addAll(suggestion);
       }
+      suggestClusterIds.sort(
+        (a, b) => a.$2.compareTo(b.$2),
+      ); // sort by distance
+
       List<int>? suggestClusterIdsSizes;
       if (allClusterIdsToCountMap != null) {
-        suggestClusterIds.sort(
-          (a, b) => allClusterIdsToCountMap[b.$1]!
-              .compareTo(allClusterIdsToCountMap[a.$1]!),
-        );
         suggestClusterIdsSizes = suggestClusterIds
             .map((e) => allClusterIdsToCountMap[e.$1]!)
             .toList(growable: false);
