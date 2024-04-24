@@ -67,7 +67,6 @@ export const CustomError = {
     AUTH_KEY_NOT_FOUND: "auth key not found",
     EXIF_DATA_NOT_FOUND: "exif data not found",
     SELECT_FOLDER_ABORTED: "select folder aborted",
-    NON_MEDIA_FILE: "non media file",
     PROCESSING_FAILED: "processing failed",
     EXPORT_RECORD_JSON_PARSING_FAILED: "export record json parsing failed",
     TWO_FACTOR_ENABLED: "two factor enabled",

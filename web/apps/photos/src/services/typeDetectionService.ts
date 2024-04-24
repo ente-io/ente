@@ -4,23 +4,18 @@ import {
     KnownNonMediaFileExtensions,
     type FileTypeInfo,
 } from "@/media/file-type";
-import log from "@/next/log";
+import { nameAndExtension } from "@/next/file";
 import { ElectronFile } from "@/next/types/file";
 import { CustomError } from "@ente/shared/error";
 import FileType, { type FileTypeResult } from "file-type";
-import { getFileExtension } from "utils/file";
 import { getUint8ArrayView } from "./readerService";
 
-const TYPE_VIDEO = "video";
-const TYPE_IMAGE = "image";
-const CHUNK_SIZE_FOR_TYPE_DETECTION = 4100;
-
 /**
- * Read the file's initial contents or use the file's name to deduce its type.
+ * Read the file's initial contents or use the file's name to detect its type.
  *
- * This function first reads an initial chunk of the file and tries to deduce
+ * This function first reads an initial chunk of the file and tries to detect
  * the file's {@link FileTypeInfo} from it. If that doesn't work, it then falls
- * back to using the file's name to deduce it.
+ * back to using the file's name to detect it.
  *
  * If neither of these two approaches work, it throws an exception.
  *
@@ -32,9 +27,9 @@ const CHUNK_SIZE_FOR_TYPE_DETECTION = 4100;
  * user's local filesystem. It is only valid to provide a path if we're running
  * in the context of our desktop app.
  *
- * @returns The deduced {@link FileTypeInfo}.
+ * @returns The detected {@link FileTypeInfo}.
  */
-export const deduceFileTypeInfo = async (
+export const detectFileTypeInfo = async (
     fileOrPath: File | ElectronFile,
 ): Promise<FileTypeInfo> => {
     try {
@@ -53,14 +48,14 @@ export const deduceFileTypeInfo = async (
             throw Error(CustomError.INVALID_MIME_TYPE(typeResult.mime));
         }
         switch (mimTypeParts[0]) {
-            case TYPE_IMAGE:
+            case "image":
                 fileType = FILE_TYPE.IMAGE;
                 break;
-            case TYPE_VIDEO:
+            case "video":
                 fileType = FILE_TYPE.VIDEO;
                 break;
             default:
-                throw Error(CustomError.NON_MEDIA_FILE);
+                throw new Error(CustomError.UNSUPPORTED_FILE_FORMAT);
         }
         return {
             fileType,
@@ -68,27 +63,20 @@ export const deduceFileTypeInfo = async (
             mimeType: typeResult.mime,
         };
     } catch (e) {
-        const fileFormat = getFileExtension(fileOrPath.name);
-        const whiteListedFormat = KnownFileTypeInfos.find(
-            (a) => a.exactType === fileFormat,
-        );
-        if (whiteListedFormat) {
-            return whiteListedFormat;
-        }
-        if (KnownNonMediaFileExtensions.includes(fileFormat)) {
+        const [, extension] = nameAndExtension(fileOrPath.name);
+        const known = KnownFileTypeInfos.find((f) => f.exactType == extension);
+        if (known) return known;
+
+        if (KnownNonMediaFileExtensions.includes(extension))
             throw Error(CustomError.UNSUPPORTED_FILE_FORMAT);
-        }
-        if (e.message === CustomError.NON_MEDIA_FILE) {
-            log.error(`unsupported file format ${fileFormat}`, e);
-            throw Error(CustomError.UNSUPPORTED_FILE_FORMAT);
-        }
-        log.error(`type detection failed for format ${fileFormat}`, e);
-        throw new Error(`type detection failed ${fileFormat}`);
+
+        throw e;
     }
 };
 
 async function extractFileType(file: File) {
-    const fileBlobChunk = file.slice(0, CHUNK_SIZE_FOR_TYPE_DETECTION);
+    const chunkSizeForTypeDetection = 4100;
+    const fileBlobChunk = file.slice(0, chunkSizeForTypeDetection);
     const fileDataChunk = await getUint8ArrayView(fileBlobChunk);
     return getFileTypeFromBuffer(fileDataChunk);
 }
@@ -104,13 +92,7 @@ async function extractElectronFileType(file: ElectronFile) {
 async function getFileTypeFromBuffer(buffer: Uint8Array) {
     const result = await FileType.fromBuffer(buffer);
     if (!result?.mime) {
-        let logableInfo = "";
-        try {
-            logableInfo = `result: ${JSON.stringify(result)}`;
-        } catch (e) {
-            logableInfo = "failed to stringify result";
-        }
-        throw Error(`mimetype missing from file type result - ${logableInfo}`);
+        throw Error(`Could not deduce MIME type from buffer`);
     }
     return result;
 }

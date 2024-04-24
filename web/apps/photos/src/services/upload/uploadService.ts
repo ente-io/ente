@@ -48,7 +48,7 @@ import { readStream } from "utils/native-stream";
 import { hasFileHash } from "utils/upload";
 import * as convert from "xml-js";
 import { getFileStream } from "../readerService";
-import { deduceFileTypeInfo } from "../typeDetectionService";
+import { detectFileTypeInfo } from "../typeDetectionService";
 import { extractAssetMetadata } from "./metadata";
 import publicUploadHttpClient from "./publicUploadHttpClient";
 import type { ParsedMetadataJSON } from "./takeout";
@@ -331,14 +331,14 @@ const getAssetFileType = ({
 }: UploadAsset) => {
     return isLivePhoto
         ? getLivePhotoFileType(livePhotoAssets)
-        : deduceFileTypeInfo(file);
+        : detectFileTypeInfo(file);
 };
 
 const getLivePhotoFileType = async (
     livePhotoAssets: LivePhotoAssets,
 ): Promise<FileTypeInfo> => {
-    const imageFileTypeInfo = await deduceFileTypeInfo(livePhotoAssets.image);
-    const videoFileTypeInfo = await deduceFileTypeInfo(livePhotoAssets.video);
+    const imageFileTypeInfo = await detectFileTypeInfo(livePhotoAssets.image);
+    const videoFileTypeInfo = await detectFileTypeInfo(livePhotoAssets.video);
     return {
         fileType: FILE_TYPE.LIVE_PHOTO,
         exactType: `${imageFileTypeInfo.exactType}+${videoFileTypeInfo.exactType}`,

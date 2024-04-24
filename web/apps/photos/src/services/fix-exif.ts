@@ -2,7 +2,7 @@ import { FILE_TYPE } from "@/media/file-type";
 import log from "@/next/log";
 import { validateAndGetCreationUnixTimeInMicroSeconds } from "@ente/shared/time";
 import type { FixOption } from "components/FixCreationTime";
-import { deduceFileTypeInfo } from "services/typeDetectionService";
+import { detectFileTypeInfo } from "services/typeDetectionService";
 import { EnteFile } from "types/file";
 import {
     changeFileCreationTime,
@@ -53,7 +53,7 @@ export async function updateCreationTimeWithExif(
                         [fileBlob],
                         file.metadata.title,
                     );
-                    const fileTypeInfo = await deduceFileTypeInfo(fileObject);
+                    const fileTypeInfo = await detectFileTypeInfo(fileObject);
                     const exifData = await getParsedExifData(
                         fileObject,
                         fileTypeInfo,
