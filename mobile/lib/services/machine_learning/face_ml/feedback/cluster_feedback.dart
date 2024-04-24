@@ -877,21 +877,21 @@ class ClusterFeedbackService {
     final faceMlDb = FaceMLDataDB.instance;
 
     // Get the cluster averages for the person's clusters and the suggestions' clusters
-    final Map<int, (Uint8List, int)> clusterToSummary =
-        await faceMlDb.getAllClusterSummary();
+    final personClusters = await faceMlDb.getPersonClusterIDs(person.remoteID);
+    final Map<int, (Uint8List, int)> personClusterToSummary =
+        await faceMlDb.getClusterToClusterSummary(personClusters);
     final clusterSummaryCallTime = DateTime.now();
 
     // Calculate the avg embedding of the person
-    final personClusters = await faceMlDb.getPersonClusterIDs(person.remoteID);
     final personEmbeddingsCount = personClusters
-        .map((e) => clusterToSummary[e]!.$2)
+        .map((e) => personClusterToSummary[e]!.$2)
         .reduce((a, b) => a + b);
     final List<double> personAvg = List.filled(192, 0);
     for (final personClusterID in personClusters) {
-      final personClusterBlob = clusterToSummary[personClusterID]!.$1;
+      final personClusterBlob = personClusterToSummary[personClusterID]!.$1;
       final personClusterAvg = EVector.fromBuffer(personClusterBlob).values;
       final clusterWeight =
-          clusterToSummary[personClusterID]!.$2 / personEmbeddingsCount;
+          personClusterToSummary[personClusterID]!.$2 / personEmbeddingsCount;
       for (int i = 0; i < personClusterAvg.length; i++) {
         personAvg[i] += personClusterAvg[i] *
             clusterWeight; // Weighted sum of the cluster averages

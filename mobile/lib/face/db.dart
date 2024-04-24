@@ -846,6 +846,21 @@ class FaceMLDataDB {
     return result;
   }
 
+  Future<Map<int, (Uint8List, int)>> getClusterToClusterSummary(Iterable<int> clusterIDs) async {
+    final db = await instance.sqliteAsyncDB;
+    final Map<int, (Uint8List, int)> result = {};
+    final rows = await db.getAll(
+      'SELECT * FROM $clusterSummaryTable WHERE $clusterIDColumn IN (${clusterIDs.join(",")})',
+    );
+    for (final r in rows) {
+      final id = r[clusterIDColumn] as int;
+      final avg = r[avgColumn] as Uint8List;
+      final count = r[countColumn] as int;
+      result[id] = (avg, count);
+    }
+    return result;
+  }
+
   Future<Map<int, String>> getClusterIDToPersonID() async {
     final db = await instance.database;
     final List<Map<String, dynamic>> maps = await db.rawQuery(
