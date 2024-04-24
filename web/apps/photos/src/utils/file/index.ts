@@ -333,7 +333,7 @@ export const getRenderableImage = async (fileName: string, imageBlob: Blob) => {
             }
         }
 
-        if (!isFileHEIC(exactType)) {
+        if (isFileHEIC(exactType)) {
             // If it is an HEIC file, use our web HEIC converter.
             return await heicToJPEG(imageBlob);
         }
