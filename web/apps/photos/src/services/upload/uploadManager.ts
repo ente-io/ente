@@ -43,12 +43,12 @@ import {
     segregateMetadataAndMediaFiles2,
 } from "utils/upload";
 import { getLocalFiles } from "../fileService";
+import { clusterLivePhotoFiles } from "./metadataService";
 import {
-    clusterLivePhotoFiles,
     getMetadataJSONMapKeyForJSON,
-    parseMetadataJSON,
-} from "./metadataService";
-import type { ParsedMetadataJSON } from "./takeout";
+    tryParseTakeoutMetadataJSON,
+    type ParsedMetadataJSON,
+} from "./takeout";
 import uploadCancelService from "./uploadCancelService";
 import UploadService, {
     assetName,
@@ -523,11 +523,12 @@ class UploadManager {
 
                     log.info(`parsing metadata json file ${name}`);
 
-                    const parsedMetadataJSON = await parseMetadataJSON(file);
-                    if (parsedMetadataJSON) {
+                    const metadataJSON =
+                        await tryParseTakeoutMetadataJSON(file);
+                    if (metadataJSON) {
                         this.parsedMetadataJSONMap.set(
                             getMetadataJSONMapKeyForJSON(collectionID, name),
-                            parsedMetadataJSON && { ...parsedMetadataJSON },
+                            metadataJSON && { ...metadataJSON },
                         );
                         this.uiService.increaseFileUploaded();
                     }

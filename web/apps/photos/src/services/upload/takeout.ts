@@ -74,9 +74,10 @@ function getFileOriginalName(fileName: string) {
     return originalName;
 }
 
-export async function parseMetadataJSON(
+/** Try to parse the contents of a metadata JSON file in a Google Takeout. */
+export const tryParseTakeoutMetadataJSON = async (
     receivedFile: File | ElectronFile | string,
-) {
+): Promise<ParsedMetadataJSON | undefined> => {
     try {
         let text: string;
         if (typeof receivedFile == "string") {
@@ -93,8 +94,8 @@ export async function parseMetadataJSON(
 
         return parseMetadataJSONText(text);
     } catch (e) {
-        log.error("parseMetadataJSON failed", e);
-        // ignore
+        log.error("Failed to parse takeout metadata JSON", e);
+        return undefined;
     }
 }
 
@@ -105,13 +106,13 @@ const NULL_PARSED_METADATA_JSON: ParsedMetadataJSON = {
     ...NULL_LOCATION,
 };
 
-export async function parseMetadataJSONText(text: string) {
+const parseMetadataJSONText = (text: string) => {
     const metadataJSON: object = JSON.parse(text);
+    if (!metadataJSON) {
+        return undefined;
+    }
 
     const parsedMetadataJSON: ParsedMetadataJSON = NULL_PARSED_METADATA_JSON;
-    if (!metadataJSON) {
-        return;
-    }
 
     if (
         metadataJSON["photoTakenTime"] &&
