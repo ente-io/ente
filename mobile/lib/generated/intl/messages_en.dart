@@ -357,6 +357,7 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Authentication failed, please try again"),
         "authenticationSuccessful":
             MessageLookupByLibrary.simpleMessage("Authentication successful!"),
+        "autoPair": MessageLookupByLibrary.simpleMessage("Auto pair"),
         "available": MessageLookupByLibrary.simpleMessage("Available"),
         "backedUpFolders":
             MessageLookupByLibrary.simpleMessage("Backed up folders"),
@@ -982,6 +983,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "orPickAnExistingOne":
             MessageLookupByLibrary.simpleMessage("Or pick an existing one"),
         "pair": MessageLookupByLibrary.simpleMessage("Pair"),
+        "pairWithPin": MessageLookupByLibrary.simpleMessage("Pair with PIN"),
         "passkey": MessageLookupByLibrary.simpleMessage("Passkey"),
         "passkeyAuthTitle":
             MessageLookupByLibrary.simpleMessage("Passkey verification"),

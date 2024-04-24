@@ -8378,6 +8378,26 @@ class S {
     );
   }
 
+  /// `Auto pair`
+  String get autoPair {
+    return Intl.message(
+      'Auto pair',
+      name: 'autoPair',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Pair with PIN`
+  String get pairWithPin {
+    return Intl.message(
+      'Pair with PIN',
+      name: 'pairWithPin',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Device not found`
   String get deviceNotFound {
     return Intl.message(
