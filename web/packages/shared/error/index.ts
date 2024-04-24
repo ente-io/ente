@@ -48,8 +48,6 @@ export const CustomError = {
     SUBSCRIPTION_NEEDED: "subscription not present",
     NOT_FOUND: "not found ",
     NO_METADATA: "no metadata",
-    NOT_A_DATE: "not a date",
-    NOT_A_LOCATION: "not a location",
     FILE_ID_NOT_FOUND: "file with id not found",
     WEAK_DEVICE: "password decryption failed on the device",
     INCORRECT_PASSWORD: "incorrect password",

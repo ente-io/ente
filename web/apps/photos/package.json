@@ -21,7 +21,6 @@
         "exifr": "^7.1.3",
         "fast-srp-hap": "^2.0.4",
         "ffmpeg-wasm": "file:./thirdparty/ffmpeg-wasm",
-        "file-type": "^16.5.4",
         "formik": "^2.1.5",
         "hdbscan": "0.0.1-alpha.5",
         "heic-convert": "^2.0.0",

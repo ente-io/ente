@@ -1,4 +1,4 @@
-import { FILE_TYPE } from "@/media/file";
+import { FILE_TYPE } from "@/media/file-type";
 import { Overlay } from "@ente/shared/components/Container";
 import PhotoOutlined from "@mui/icons-material/PhotoOutlined";
 import PlayCircleOutlineOutlined from "@mui/icons-material/PlayCircleOutlineOutlined";

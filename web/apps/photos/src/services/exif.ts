@@ -1,12 +1,10 @@
+import { type FileTypeInfo } from "@/media/file-type";
 import log from "@/next/log";
-import { CustomError } from "@ente/shared/error";
 import { validateAndGetCreationUnixTimeInMicroSeconds } from "@ente/shared/time";
-import { EXIFLESS_FORMATS, NULL_LOCATION } from "constants/upload";
+import { NULL_LOCATION } from "constants/upload";
 import exifr from "exifr";
 import piexif from "piexifjs";
-import { FileTypeInfo, Location } from "types/upload";
-
-const EXIFR_UNSUPPORTED_FILE_FORMAT_MESSAGE = "Unknown file format";
+import { Location } from "types/upload";
 
 type ParsedEXIFData = Record<string, any> &
     Partial<{
@@ -38,11 +36,14 @@ type RawEXIFData = Record<string, any> &
 
 export async function getParsedExifData(
     receivedFile: File,
-    fileTypeInfo: FileTypeInfo,
+    { exactType }: FileTypeInfo,
     tags?: string[],
 ): Promise<ParsedEXIFData> {
+    const exifLessFormats = ["gif", "bmp"];
+    const exifrUnsupportedFileFormatMessage = "Unknown file format";
+
     try {
-        if (EXIFLESS_FORMATS.includes(fileTypeInfo.exactType)) {
+        if (exifLessFormats.includes(exactType)) {
             return null;
         }
         const exifData: RawEXIFData = await exifr.parse(receivedFile, {
@@ -66,16 +67,11 @@ export async function getParsedExifData(
             : exifData;
         return parseExifData(filteredExifData);
     } catch (e) {
-        if (e.message === EXIFR_UNSUPPORTED_FILE_FORMAT_MESSAGE) {
-            log.error(
-                `exif library unsupported format ${fileTypeInfo.exactType}`,
-                e,
-            );
+        if (e.message == exifrUnsupportedFileFormatMessage) {
+            log.error(`EXIFR does not support format ${exactType}`, e);
+            return undefined;
         } else {
-            log.error(
-                `get parsed exif data failed for file type ${fileTypeInfo.exactType}`,
-                e,
-            );
+            log.error(`Failed to parse EXIF data of ${exactType} file`, e);
             throw e;
         }
     }
@@ -180,7 +176,7 @@ function parseExifData(exifData: RawEXIFData): ParsedEXIFData {
 function parseEXIFDate(dateTimeString: string) {
     try {
         if (typeof dateTimeString !== "string" || dateTimeString === "") {
-            throw Error(CustomError.NOT_A_DATE);
+            throw new Error("Invalid date string");
         }
 
         // Check and parse date in the format YYYYMMDD
@@ -211,7 +207,7 @@ function parseEXIFDate(dateTimeString: string) {
             typeof day === "undefined" ||
             Number.isNaN(day)
         ) {
-            throw Error(CustomError.NOT_A_DATE);
+            throw new Error("Invalid date");
         }
         let date: Date;
         if (
@@ -227,7 +223,7 @@ function parseEXIFDate(dateTimeString: string) {
             date = new Date(year, month - 1, day, hour, minute, second);
         }
         if (Number.isNaN(+date)) {
-            throw Error(CustomError.NOT_A_DATE);
+            throw new Error("Invalid date");
         }
         return date;
     } catch (e) {
@@ -249,7 +245,7 @@ export function parseEXIFLocation(
             gpsLatitude.length !== 3 ||
             gpsLongitude.length !== 3
         ) {
-            throw Error(CustomError.NOT_A_LOCATION);
+            throw new Error("Invalid EXIF location");
         }
         const latitude = convertDMSToDD(
             gpsLatitude[0],

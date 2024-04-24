@@ -1,4 +1,4 @@
-import { FILE_TYPE } from "@/media/file";
+import { FILE_TYPE, type FileTypeInfo } from "@/media/file-type";
 import { encodeLivePhoto } from "@/media/live-photo";
 import { ensureElectron } from "@/next/electron";
 import { basename } from "@/next/file";
@@ -28,7 +28,6 @@ import {
     BackupedFile,
     EncryptedFile,
     FileInMemory,
-    FileTypeInfo,
     FileWithMetadata,
     ProcessedFile,
     PublicUploadProps,
@@ -58,7 +57,6 @@ import {
     generateThumbnailNative,
     generateThumbnailWeb,
 } from "./thumbnail";
-import uploadCancelService from "./uploadCancelService";
 import UploadHttpClient from "./uploadHttpClient";
 
 /** Upload files to cloud storage */
@@ -168,15 +166,11 @@ export const uploader = async (
     parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
     uploaderName: string,
     isCFUploadProxyDisabled: boolean,
+    abortIfCancelled: () => void,
     makeProgessTracker: MakeProgressTracker,
 ): Promise<UploadResponse> => {
     const name = assetName(fileWithCollection);
     log.info(`Uploading ${name}`);
-
-    const abortIfCancelled = () => {
-        if (uploadCancelService.isUploadCancelationRequested())
-            throw Error(CustomError.UPLOAD_CANCELLED);
-    };
 
     const { collection, localID, ...uploadAsset2 } = fileWithCollection;
     /* TODO(MR): ElectronFile changes */

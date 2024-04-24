@@ -1,4 +1,4 @@
-import { FILE_TYPE } from "@/media/file";
+import { FILE_TYPE } from "@/media/file-type";
 import { ensureElectron } from "@/next/electron";
 import log from "@/next/log";
 import ComlinkCryptoWorker from "@ente/shared/crypto";

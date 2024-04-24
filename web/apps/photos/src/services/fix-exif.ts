@@ -1,4 +1,4 @@
-import { FILE_TYPE } from "@/media/file";
+import { FILE_TYPE } from "@/media/file-type";
 import log from "@/next/log";
 import { validateAndGetCreationUnixTimeInMicroSeconds } from "@ente/shared/time";
 import type { FixOption } from "components/FixCreationTime";
@@ -9,7 +9,7 @@ import {
     updateExistingFilePubMetadata,
 } from "utils/file";
 import downloadManager from "./download";
-import { getParsedExifData } from "./upload/exifService";
+import { getParsedExifData } from "./exif";
 
 const EXIF_TIME_TAGS = [
     "DateTimeOriginal",

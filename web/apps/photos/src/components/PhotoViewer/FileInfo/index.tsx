@@ -17,7 +17,7 @@ import { t } from "i18next";
 import { AppContext } from "pages/_app";
 import { GalleryContext } from "pages/gallery";
 import { useContext, useEffect, useMemo, useState } from "react";
-import { getEXIFLocation } from "services/upload/exifService";
+import { getEXIFLocation } from "services/exif";
 import { EnteFile } from "types/file";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 import {

@@ -1,4 +1,4 @@
-import { FILE_TYPE } from "@/media/file";
+import { FILE_TYPE } from "@/media/file-type";
 import type { ElectronFile } from "@/next/types/file";
 import {
     B64EncryptionResult,
@@ -44,14 +44,6 @@ export interface MultipartUploadURLs {
     objectKey: string;
     partURLs: string[];
     completeURL: string;
-}
-
-export interface FileTypeInfo {
-    fileType: FILE_TYPE;
-    exactType: string;
-    mimeType?: string;
-    imageType?: string;
-    videoType?: string;
 }
 
 export interface UploadAsset {

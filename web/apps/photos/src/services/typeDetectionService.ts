@@ -1,13 +1,13 @@
-import { FILE_TYPE } from "@/media/file";
+import {
+    FILE_TYPE,
+    KnownFileTypeInfos,
+    KnownNonMediaFileExtensions,
+    type FileTypeInfo,
+} from "@/media/file-type";
 import log from "@/next/log";
 import { ElectronFile } from "@/next/types/file";
 import { CustomError } from "@ente/shared/error";
-import {
-    KNOWN_NON_MEDIA_FORMATS,
-    WHITELISTED_FILE_FORMATS,
-} from "constants/upload";
-import FileType, { FileTypeResult } from "file-type";
-import { FileTypeInfo } from "types/upload";
+import FileType, { type FileTypeResult } from "file-type";
 import { getFileExtension } from "utils/file";
 import { getUint8ArrayView } from "./readerService";
 
@@ -50,13 +50,13 @@ export async function getFileType(
         };
     } catch (e) {
         const fileFormat = getFileExtension(receivedFile.name);
-        const whiteListedFormat = WHITELISTED_FILE_FORMATS.find(
+        const whiteListedFormat = KnownFileTypeInfos.find(
             (a) => a.exactType === fileFormat,
         );
         if (whiteListedFormat) {
             return whiteListedFormat;
         }
-        if (KNOWN_NON_MEDIA_FORMATS.includes(fileFormat)) {
+        if (KnownNonMediaFileExtensions.includes(fileFormat)) {
             throw Error(CustomError.UNSUPPORTED_FILE_FORMAT);
         }
         if (e.message === CustomError.NON_MEDIA_FILE) {

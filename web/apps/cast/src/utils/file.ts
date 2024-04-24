@@ -1,10 +1,10 @@
-import { FILE_TYPE } from "@/media/file";
+import { FILE_TYPE } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
 import log from "@/next/log";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { RAW_FORMATS } from "constants/upload";
 import CastDownloadManager from "services/castDownloadManager";
-import { getFileType } from "services/typeDetectionService";
+import { detectMediaMIMEType } from "services/detect-type";
 import {
     EncryptedEnteFile,
     EnteFile,
@@ -132,10 +132,11 @@ export const getPreviewableImage = async (
             );
             fileBlob = new Blob([imageData]);
         }
-        const fileType = await getFileType(
+        const mimeType = await detectMediaMIMEType(
             new File([fileBlob], file.metadata.title),
         );
-        fileBlob = new Blob([fileBlob], { type: fileType.mimeType });
+        if (!mimeType) return undefined;
+        fileBlob = new Blob([fileBlob], { type: mimeType });
         return fileBlob;
     } catch (e) {
         log.error("failed to download file", e);

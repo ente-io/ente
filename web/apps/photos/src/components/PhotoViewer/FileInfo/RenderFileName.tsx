@@ -1,4 +1,4 @@
-import { FILE_TYPE } from "@/media/file";
+import { FILE_TYPE } from "@/media/file-type";
 import { nameAndExtension } from "@/next/file";
 import log from "@/next/log";
 import { FlexWrapper } from "@ente/shared/components/Container";

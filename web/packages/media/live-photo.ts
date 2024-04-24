@@ -1,6 +1,6 @@
 import { fileNameFromComponents, nameAndExtension } from "@/next/file";
 import JSZip from "jszip";
-import { FILE_TYPE } from "./file";
+import { FILE_TYPE } from "./file-type";
 
 const potentialImageExtensions = [
     "heic",

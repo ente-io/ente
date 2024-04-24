@@ -1,4 +1,4 @@
-import { FILE_TYPE } from "@/media/file";
+import { FILE_TYPE } from "@/media/file-type";
 import { potentialFileTypeFromExtension } from "@/media/live-photo";
 import { ensureElectron } from "@/next/electron";
 import { nameAndExtension } from "@/next/file";
@@ -48,7 +48,6 @@ import {
     tryParseTakeoutMetadataJSON,
     type ParsedMetadataJSON,
 } from "./takeout";
-import uploadCancelService from "./uploadCancelService";
 import UploadService, {
     assetName,
     getAssetName,
@@ -56,7 +55,32 @@ import UploadService, {
     uploader,
 } from "./uploadService";
 
-const MAX_CONCURRENT_UPLOADS = 4;
+/** The number of uploads to process in parallel. */
+const maxConcurrentUploads = 4;
+
+interface UploadCancelStatus {
+    value: boolean;
+}
+
+class UploadCancelService {
+    private shouldUploadBeCancelled: UploadCancelStatus = {
+        value: false,
+    };
+
+    reset() {
+        this.shouldUploadBeCancelled.value = false;
+    }
+
+    requestUploadCancelation() {
+        this.shouldUploadBeCancelled.value = true;
+    }
+
+    isUploadCancelationRequested(): boolean {
+        return this.shouldUploadBeCancelled.value;
+    }
+}
+
+const uploadCancelService = new UploadCancelService();
 
 class UIService {
     private progressUpdater: ProgressUpdater;
@@ -261,7 +285,7 @@ function segregatedFinishedUploadsToList(finishedUploads: FinishedUploads) {
 class UploadManager {
     private cryptoWorkers = new Array<
         ComlinkWorker<typeof DedicatedCryptoWorker>
-    >(MAX_CONCURRENT_UPLOADS);
+    >(maxConcurrentUploads);
     private parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>;
     private filesToBeUploaded: FileWithCollection2[];
     private remainingFiles: FileWithCollection2[] = [];
@@ -411,7 +435,7 @@ class UploadManager {
             }
         } finally {
             this.uiService.setUploadStage(UPLOAD_STAGES.FINISH);
-            for (let i = 0; i < MAX_CONCURRENT_UPLOADS; i++) {
+            for (let i = 0; i < maxConcurrentUploads; i++) {
                 this.cryptoWorkers[i]?.terminate();
             }
             this.uploadInProgress = false;
@@ -428,6 +452,12 @@ class UploadManager {
         }
     }
 
+    private abortIfCancelled = () => {
+        if (uploadCancelService.isUploadCancelationRequested()) {
+            throw Error(CustomError.UPLOAD_CANCELLED);
+        }
+    };
+
     private async parseMetadataJSONFiles(metadataFiles: FileWithCollection2[]) {
         try {
             log.info(`parseMetadataJSONFiles function executed `);
@@ -435,12 +465,9 @@ class UploadManager {
             this.uiService.reset(metadataFiles.length);
 
             for (const { file, collectionID } of metadataFiles) {
+                this.abortIfCancelled();
                 const name = getFileName(file);
                 try {
-                    if (uploadCancelService.isUploadCancelationRequested()) {
-                        throw Error(CustomError.UPLOAD_CANCELLED);
-                    }
-
                     log.info(`parsing metadata json file ${name}`);
 
                     const metadataJSON =
@@ -490,7 +517,7 @@ class UploadManager {
         const uploadProcesses = [];
         for (
             let i = 0;
-            i < MAX_CONCURRENT_UPLOADS && this.filesToBeUploaded.length > 0;
+            i < maxConcurrentUploads && this.filesToBeUploaded.length > 0;
             i++
         ) {
             this.cryptoWorkers[i] = getDedicatedCryptoWorker();
@@ -522,6 +549,9 @@ class UploadManager {
                 this.parsedMetadataJSONMap,
                 this.uploaderName,
                 this.isCFUploadProxyDisabled,
+                () => {
+                    this.abortIfCancelled();
+                },
                 (
                     fileLocalID: number,
                     percentPerPart?: number,

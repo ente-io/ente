@@ -1,4 +1,4 @@
-import { FILE_TYPE } from "@/media/file";
+import { FILE_TYPE, type FileTypeInfo } from "@/media/file-type";
 import { getFileNameSize } from "@/next/file";
 import log from "@/next/log";
 import { ElectronFile } from "@/next/types/file";
@@ -12,17 +12,16 @@ import {
 import type { DataStream } from "@ente/shared/utils/data-stream";
 import { Remote } from "comlink";
 import { FILE_READER_CHUNK_SIZE, NULL_LOCATION } from "constants/upload";
+import { getEXIFLocation, getEXIFTime, getParsedExifData } from "services/exif";
 import * as ffmpegService from "services/ffmpeg";
 import { getElectronFileStream, getFileStream } from "services/readerService";
 import { FilePublicMagicMetadataProps } from "types/file";
 import {
-    FileTypeInfo,
     Metadata,
     ParsedExtractedMetadata,
     type LivePhotoAssets2,
     type UploadAsset2,
 } from "types/upload";
-import { getEXIFLocation, getEXIFTime, getParsedExifData } from "./exifService";
 import {
     MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT,
     getClippedMetadataJSONMapKeyForFile,
