@@ -187,11 +187,6 @@ async function getVideoMetadata(file: File | ElectronFile) {
     return videoMetadata;
 }
 
-const UNDERSCORE_THREE = "_3";
-// Note: The icloud-photos-downloader library appends _HVEC to the end of the filename in case of live photos
-// https://github.com/icloud-photos-downloader/icloud_photos_downloader
-const UNDERSCORE_HEVC = "_HVEC";
-
 export async function getLivePhotoFileType(
     livePhotoAssets: LivePhotoAssets,
 ): Promise<FileTypeInfo> {
@@ -442,32 +437,31 @@ const areLivePhotoAssets = (f: LivePhotoIdentifier, g: LivePhotoIdentifier) => {
     return false;
 };
 
-function removePotentialLivePhotoSuffix(
-    filenameWithoutExtension: string,
-    suffix?: string,
-) {
-    let presentSuffix: string;
-    if (filenameWithoutExtension.endsWith(UNDERSCORE_THREE)) {
-        presentSuffix = UNDERSCORE_THREE;
-    } else if (filenameWithoutExtension.endsWith(UNDERSCORE_HEVC)) {
-        presentSuffix = UNDERSCORE_HEVC;
+const removePotentialLivePhotoSuffix = (name: string, suffix?: string) => {
+    const suffix_3 = "_3";
+
+    // The icloud-photos-downloader library appends _HVEC to the end of the
+    // filename in case of live photos.
+    //
+    // https://github.com/icloud-photos-downloader/icloud_photos_downloader
+    const suffix_hvec = "_HVEC";
+
+    let foundSuffix: string | undefined;
+    if (name.endsWith(suffix_3)) {
+        foundSuffix = suffix_3;
     } else if (
-        filenameWithoutExtension.endsWith(UNDERSCORE_HEVC.toLowerCase())
+        name.endsWith(suffix_hvec) ||
+        name.endsWith(suffix_hvec.toLowerCase())
     ) {
-        presentSuffix = UNDERSCORE_HEVC.toLowerCase();
+        foundSuffix = suffix_hvec;
     } else if (suffix) {
-        if (filenameWithoutExtension.endsWith(suffix)) {
-            presentSuffix = suffix;
-        } else if (filenameWithoutExtension.endsWith(suffix.toLowerCase())) {
-            presentSuffix = suffix.toLowerCase();
+        if (name.endsWith(suffix) || name.endsWith(suffix.toLowerCase())) {
+            foundSuffix = suffix;
         }
     }
-    if (presentSuffix) {
-        return filenameWithoutExtension.slice(0, presentSuffix.length * -1);
-    } else {
-        return filenameWithoutExtension;
-    }
-}
+
+    return foundSuffix ? name.slice(0, foundSuffix.length * -1) : name;
+};
 
 function getFileNameWithoutExtension(filename: string) {
     const lastDotPosition = filename.lastIndexOf(".");
@@ -479,16 +473,6 @@ function getFileExtensionWithDot(filename: string) {
     const lastDotPosition = filename.lastIndexOf(".");
     if (lastDotPosition === -1) return "";
     else return filename.slice(lastDotPosition);
-}
-
-function splitFilenameAndExtension(filename: string): [string, string] {
-    const lastDotPosition = filename.lastIndexOf(".");
-    if (lastDotPosition === -1) return [filename, null];
-    else
-        return [
-            filename.slice(0, lastDotPosition),
-            filename.slice(lastDotPosition + 1),
-        ];
 }
 
 const isImageOrVideo = (fileType: FILE_TYPE) =>
