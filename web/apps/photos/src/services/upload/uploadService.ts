@@ -56,6 +56,7 @@ import {
     getLivePhotoSize,
 } from "./metadataService";
 import publicUploadHttpClient from "./publicUploadHttpClient";
+import type { ParsedMetadataJSON } from "./takeout";
 import {
     fallbackThumbnail,
     generateThumbnailNative,
@@ -63,7 +64,6 @@ import {
 } from "./thumbnail";
 import uploadCancelService from "./uploadCancelService";
 import UploadHttpClient from "./uploadHttpClient";
-import type { ParsedMetadataJSON } from "./takeout";
 
 /** Upload files to cloud storage */
 class UploadService {
@@ -264,6 +264,7 @@ export const uploader = async (
             encryptedFile.file,
             makeProgessTracker,
             isCFUploadProxyDisabled,
+            abortIfCancelled,
         );
 
         const uploadedFile = await uploadService.uploadFile({
@@ -766,6 +767,7 @@ const uploadToBucket = async (
     file: ProcessedFile,
     makeProgessTracker: MakeProgressTracker,
     isCFUploadProxyDisabled: boolean,
+    abortIfCancelled: () => void,
 ): Promise<BackupedFile> => {
     try {
         let fileObjectKey: string = null;
@@ -776,6 +778,7 @@ const uploadToBucket = async (
                 file.file.encryptedData,
                 makeProgessTracker,
                 isCFUploadProxyDisabled,
+                abortIfCancelled,
             );
         } else {
             const progressTracker = makeProgessTracker(file.localID);
@@ -841,6 +844,7 @@ async function uploadStreamUsingMultipart(
     dataStream: DataStream,
     makeProgessTracker: MakeProgressTracker,
     isCFUploadProxyDisabled: boolean,
+    abortIfCancelled: () => void,
 ) {
     const uploadPartCount = Math.ceil(
         dataStream.chunkCount / FILE_CHUNKS_COMBINED_FOR_A_UPLOAD_PART,
@@ -858,9 +862,8 @@ async function uploadStreamUsingMultipart(
         index,
         fileUploadURL,
     ] of multipartUploadURLs.partURLs.entries()) {
-        if (uploadCancelService.isUploadCancelationRequested()) {
-            throw Error(CustomError.UPLOAD_CANCELLED);
-        }
+        abortIfCancelled();
+
         const uploadChunk = await combineChunksToFormUploadPart(streamReader);
         const progressTracker = makeProgessTracker(
             fileLocalID,
