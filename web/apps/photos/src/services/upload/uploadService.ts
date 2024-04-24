@@ -34,8 +34,6 @@ import {
     UploadAsset,
     UploadFile,
     UploadURL,
-    isDataStream,
-    type DataStream,
     type FileWithCollection2,
     type LivePhotoAssets,
     type LivePhotoAssets2,
@@ -61,6 +59,7 @@ import {
 } from "./thumbnail";
 import uploadCancelService from "./uploadCancelService";
 import UploadHttpClient from "./uploadHttpClient";
+import { isDataStream, type DataStream } from "@ente/shared/utils/data-stream";
 
 /** Upload files to cloud storage */
 class UploadService {

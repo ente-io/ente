@@ -1,4 +1,4 @@
-import { DataStream } from "@/next/types/file";
+import type { DataStream } from "../utils/data-stream";
 
 export interface LocalFileAttributes<
     T extends string | Uint8Array | DataStream,

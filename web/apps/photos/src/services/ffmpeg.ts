@@ -212,6 +212,8 @@ const ffmpegExecWeb = async (
  *
  * See also: {@link ffmpegExecWeb}.
  */
+/*
+TODO(MR): Remove me
 const ffmpegExecNative = async (
     electron: Electron,
     command: string[],
@@ -227,6 +229,7 @@ const ffmpegExecNative = async (
         return await worker.exec(command, blob, timeoutMs);
     }
 };
+*/
 
 const ffmpegExec2 = async (
     command: string[],

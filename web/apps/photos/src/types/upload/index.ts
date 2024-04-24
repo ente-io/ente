@@ -3,6 +3,7 @@ import {
     B64EncryptionResult,
     LocalFileAttributes,
 } from "@ente/shared/crypto/types";
+import type { DataStream } from "@ente/shared/utils/data-stream";
 import { FILE_TYPE } from "constants/file";
 import { Collection } from "types/collection";
 import {
@@ -90,15 +91,6 @@ export interface FileWithCollection2 extends UploadAsset2 {
 export interface UploadURL {
     url: string;
     objectKey: string;
-}
-
-export interface DataStream {
-    stream: ReadableStream<Uint8Array>;
-    chunkCount: number;
-}
-
-export function isDataStream(object: any): object is DataStream {
-    return "stream" in object;
 }
 
 export interface FileInMemory {

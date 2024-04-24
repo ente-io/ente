@@ -18,7 +18,6 @@ import {
     FileTypeInfo,
     Metadata,
     ParsedExtractedMetadata,
-    type DataStream,
     type LivePhotoAssets2,
     type UploadAsset2,
 } from "types/upload";
@@ -30,6 +29,7 @@ import {
     type ParsedMetadataJSON,
 } from "./takeout";
 import { getFileName } from "./uploadService";
+import type { DataStream } from "@ente/shared/utils/data-stream";
 
 const EXIF_TAGS_NEEDED = [
     "DateTimeOriginal",
