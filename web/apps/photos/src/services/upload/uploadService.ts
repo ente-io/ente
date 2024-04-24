@@ -152,7 +152,7 @@ export default uploadService;
  * directly fed to axios to both cancel the upload if needed, and update the
  * progress status.
  *
- * Needs more type.
+ * Enhancement: The return value needs to be typed.
  */
 type MakeProgressTracker = (
     fileLocalID: number,
@@ -204,7 +204,10 @@ export const uploader = async (
             fileTypeInfo,
         );
 
-        const matches = findMatchingExistingFiles(existingFiles, metadata);
+        const matches = existingFiles.filter((file) =>
+            areFilesSame(file.metadata, metadata),
+        );
+
         const anyMatch = matches?.length > 0 ? matches[0] : undefined;
 
         if (anyMatch) {
@@ -717,67 +720,47 @@ async function encryptFileStream(
     };
 }
 
-export function findMatchingExistingFiles(
-    existingFiles: EnteFile[],
-    newFileMetadata: Metadata,
-): EnteFile[] {
-    const matchingFiles: EnteFile[] = [];
-    for (const existingFile of existingFiles) {
-        if (areFilesSame(existingFile.metadata, newFileMetadata)) {
-            matchingFiles.push(existingFile);
-        }
-    }
-    return matchingFiles;
-}
+/**
+ * Return true if the two files, as represented by their metadata, are same.
+ *
+ * Note that the metadata includes the hash of the file's contents (when
+ * available), so this also in effect compares the contents of the files, not
+ * just the "meta" information about them.
+ */
+const areFilesSame = (f: Metadata, g: Metadata) =>
+    hasFileHash(f) && hasFileHash(g)
+        ? areFilesSameHash(f, g)
+        : areFilesSameNoHash(f, g);
 
-export function areFilesSame(
-    existingFile: Metadata,
-    newFile: Metadata,
-): boolean {
-    if (hasFileHash(existingFile) && hasFileHash(newFile)) {
-        return areFilesWithFileHashSame(existingFile, newFile);
-    } else {
-        /*
-         * The maximum difference in the creation/modification times of two similar files is set to 1 second.
-         * This is because while uploading files in the web - browsers and users could have set reduced
-         * precision of file times to prevent timing attacks and fingerprinting.
-         * Context: https://developer.mozilla.org/en-US/docs/Web/API/File/lastModified#reduced_time_precision
-         */
-        const oneSecond = 1e6;
-        if (
-            existingFile.fileType === newFile.fileType &&
-            Math.abs(existingFile.creationTime - newFile.creationTime) <
-                oneSecond &&
-            Math.abs(existingFile.modificationTime - newFile.modificationTime) <
-                oneSecond &&
-            existingFile.title === newFile.title
-        ) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-}
-
-function areFilesWithFileHashSame(
-    existingFile: Metadata,
-    newFile: Metadata,
-): boolean {
-    if (
-        existingFile.fileType !== newFile.fileType ||
-        existingFile.title !== newFile.title
-    ) {
+const areFilesSameHash = (f: Metadata, g: Metadata) => {
+    if (f.fileType !== g.fileType || f.title !== g.title) {
         return false;
     }
-    if (existingFile.fileType === FILE_TYPE.LIVE_PHOTO) {
-        return (
-            existingFile.imageHash === newFile.imageHash &&
-            existingFile.videoHash === newFile.videoHash
-        );
+    if (f.fileType === FILE_TYPE.LIVE_PHOTO) {
+        return f.imageHash === g.imageHash && f.videoHash === g.videoHash;
     } else {
-        return existingFile.hash === newFile.hash;
+        return f.hash === g.hash;
     }
-}
+};
+
+const areFilesSameNoHash = (f: Metadata, g: Metadata) => {
+    /*
+     * The maximum difference in the creation/modification times of two similar
+     * files is set to 1 second. This is because while uploading files in the
+     * web - browsers and users could have set reduced precision of file times
+     * to prevent timing attacks and fingerprinting.
+     *
+     * See:
+     * https://developer.mozilla.org/en-US/docs/Web/API/File/lastModified#reduced_time_precision
+     */
+    const oneSecond = 1e6;
+    return (
+        f.fileType === g.fileType &&
+        Math.abs(f.creationTime - g.creationTime) < oneSecond &&
+        Math.abs(f.modificationTime - g.modificationTime) < oneSecond &&
+        f.title === g.title
+    );
+};
 
 const uploadToBucket = async (
     file: ProcessedFile,

@@ -11,9 +11,8 @@ import {
 
 const TYPE_JSON = "json";
 
-export function hasFileHash(file: Metadata) {
-    return file.hash || (file.imageHash && file.videoHash);
-}
+export const hasFileHash = (file: Metadata) =>
+    file.hash || (file.imageHash && file.videoHash);
 
 export function segregateMetadataAndMediaFiles(
     filesWithCollectionToUpload: FileWithCollection[],
