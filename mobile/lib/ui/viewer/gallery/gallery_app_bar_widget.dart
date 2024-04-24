@@ -578,7 +578,17 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       );
     }
     if (widget.collection != null && castService.isSupported) {
-      actions.add(castWidget(context));
+      actions.add(
+        Tooltip(
+          message: "Cast album",
+          child: IconButton(
+            icon: const Icon(Icons.cast_outlined),
+            onPressed: () async {
+              await _castChoiceDialog();
+            },
+          ),
+        ),
+      );
     }
     if (items.isNotEmpty) {
       actions.add(
@@ -607,7 +617,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
             } else if (value == AlbumPopupAction.leave) {
               await _leaveAlbum(context);
             } else if (value == AlbumPopupAction.playOnTv) {
-              await castAlbum();
+              await _castChoiceDialog();
             } else if (value == AlbumPopupAction.freeUpSpace) {
               await _deleteBackedUpFiles(context);
             } else if (value == AlbumPopupAction.setCover) {
@@ -889,7 +899,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     setState(() {});
   }
 
-  Future<void> castAlbum() async {
+  Future<void> _castChoiceDialog() async {
     final gw = CastGateway(NetworkClient.instance.enteDio);
     // stop any existing cast session
     gw.revokeAllTokens().ignore();
@@ -908,10 +918,6 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           buttonAction: ButtonAction.first,
           shouldSurfaceExecutionStates: true,
           isInAlert: true,
-          onTap: () async {
-            showToast(context, "Coming soon");
-            // await _castAlbum(gw);
-          },
         ),
         ButtonWidget(
           labelText: S.of(context).pairWithPin,
