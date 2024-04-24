@@ -94,7 +94,7 @@ export default function PairingMode() {
 
         return () => {
             console.log("stopping cast context");
-            context.stop();
+            // context.stop();
         };
     }, [cast]);
 
