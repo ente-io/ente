@@ -49,14 +49,14 @@ const EXIF_TAGS_NEEDED = [
     "MetadataDate",
 ];
 
-export const NULL_EXTRACTED_METADATA: ParsedExtractedMetadata = {
+const NULL_EXTRACTED_METADATA: ParsedExtractedMetadata = {
     location: NULL_LOCATION,
     creationTime: null,
     width: null,
     height: null,
 };
 
-export interface ExtractMetadataResult {
+interface ExtractMetadataResult {
     metadata: Metadata;
     publicMagicMetadata: FilePublicMagicMetadataProps;
 }

@@ -51,7 +51,7 @@ import { hasFileHash } from "utils/upload";
 import * as convert from "xml-js";
 import { getFileStream } from "../readerService";
 import { getFileType } from "../typeDetectionService";
-import { extractAssetMetadata, getLivePhotoFileType } from "./metadataService";
+import { extractAssetMetadata } from "./metadata";
 import publicUploadHttpClient from "./publicUploadHttpClient";
 import type { ParsedMetadataJSON } from "./takeout";
 import {
