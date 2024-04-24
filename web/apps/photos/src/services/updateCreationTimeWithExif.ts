@@ -9,7 +9,7 @@ import {
     updateExistingFilePubMetadata,
 } from "utils/file";
 import downloadManager from "./download";
-import { getParsedExifData } from "./upload/exifService";
+import { getParsedExifData } from "./exif";
 
 const EXIF_TIME_TAGS = [
     "DateTimeOriginal",

@@ -11,6 +11,7 @@ import { t } from "i18next";
 import isElectron from "is-electron";
 import { moveToHiddenCollection } from "services/collectionService";
 import DownloadManager from "services/download";
+import { updateFileCreationDateInEXIF } from "services/exif";
 import {
     deleteFromTrash,
     trashFiles,
@@ -19,7 +20,6 @@ import {
 } from "services/fileService";
 import { heicToJPEG } from "services/heic-convert";
 import { getFileType } from "services/typeDetectionService";
-import { updateFileCreationDateInEXIF } from "services/upload/exifService";
 import {
     EncryptedEnteFile,
     EnteFile,

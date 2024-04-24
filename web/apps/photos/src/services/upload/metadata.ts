@@ -22,7 +22,7 @@ import {
     type LivePhotoAssets2,
     type UploadAsset2,
 } from "types/upload";
-import { getEXIFLocation, getEXIFTime, getParsedExifData } from "./exifService";
+import { getEXIFLocation, getEXIFTime, getParsedExifData } from "../exif";
 import {
     MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT,
     getClippedMetadataJSONMapKeyForFile,
