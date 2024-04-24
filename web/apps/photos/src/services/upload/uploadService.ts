@@ -37,6 +37,7 @@ import {
     isDataStream,
     type DataStream,
     type FileWithCollection2,
+    type LivePhotoAssets,
     type LivePhotoAssets2,
     type Metadata,
     type UploadAsset2,
@@ -50,11 +51,7 @@ import { hasFileHash } from "utils/upload";
 import * as convert from "xml-js";
 import { getFileStream } from "../readerService";
 import { getFileType } from "../typeDetectionService";
-import {
-    extractAssetMetadata,
-    getLivePhotoFileType,
-    getLivePhotoSize,
-} from "./metadataService";
+import { extractAssetMetadata, getLivePhotoFileType } from "./metadataService";
 import publicUploadHttpClient from "./publicUploadHttpClient";
 import type { ParsedMetadataJSON } from "./takeout";
 import {
@@ -330,6 +327,10 @@ const getAssetSize = ({ isLivePhoto, file, livePhotoAssets }: UploadAsset) => {
     return isLivePhoto ? getLivePhotoSize(livePhotoAssets) : getFileSize(file);
 };
 
+const getLivePhotoSize = (livePhotoAssets: LivePhotoAssets) => {
+    return livePhotoAssets.image.size + livePhotoAssets.video.size;
+};
+
 const getAssetFileType = ({
     isLivePhoto,
     file,
@@ -338,6 +339,19 @@ const getAssetFileType = ({
     return isLivePhoto
         ? getLivePhotoFileType(livePhotoAssets)
         : getFileType(file);
+};
+
+const getLivePhotoFileType = async (
+    livePhotoAssets: LivePhotoAssets,
+): Promise<FileTypeInfo> => {
+    const imageFileTypeInfo = await getFileType(livePhotoAssets.image);
+    const videoFileTypeInfo = await getFileType(livePhotoAssets.video);
+    return {
+        fileType: FILE_TYPE.LIVE_PHOTO,
+        exactType: `${imageFileTypeInfo.exactType}+${videoFileTypeInfo.exactType}`,
+        imageType: imageFileTypeInfo.exactType,
+        videoType: videoFileTypeInfo.exactType,
+    };
 };
 
 const readAsset = async (

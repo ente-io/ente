@@ -13,11 +13,9 @@ import { FILE_TYPE } from "constants/file";
 import { FILE_READER_CHUNK_SIZE, NULL_LOCATION } from "constants/upload";
 import * as ffmpegService from "services/ffmpeg";
 import { getElectronFileStream, getFileStream } from "services/readerService";
-import { getFileType } from "services/typeDetectionService";
 import { FilePublicMagicMetadataProps } from "types/file";
 import {
     FileTypeInfo,
-    LivePhotoAssets,
     Metadata,
     ParsedExtractedMetadata,
     type DataStream,
@@ -95,7 +93,7 @@ export async function extractMetadata(
     return { metadata, publicMagicMetadata };
 }
 
-export async function getImageMetadata(
+async function getImageMetadata(
     receivedFile: File | ElectronFile,
     fileTypeInfo: FileTypeInfo,
 ): Promise<ParsedExtractedMetadata> {
@@ -129,7 +127,7 @@ export async function getImageMetadata(
 }
 
 // tries to extract date from file name if available else returns null
-export function extractDateFromFileName(filename: string): number {
+function extractDateFromFileName(filename: string): number {
     try {
         filename = filename.trim();
         let parsedDate: Date;
@@ -182,19 +180,6 @@ async function getVideoMetadata(file: File | ElectronFile) {
     }
 
     return videoMetadata;
-}
-
-export async function getLivePhotoFileType(
-    livePhotoAssets: LivePhotoAssets,
-): Promise<FileTypeInfo> {
-    const imageFileTypeInfo = await getFileType(livePhotoAssets.image);
-    const videoFileTypeInfo = await getFileType(livePhotoAssets.video);
-    return {
-        fileType: FILE_TYPE.LIVE_PHOTO,
-        exactType: `${imageFileTypeInfo.exactType}+${videoFileTypeInfo.exactType}`,
-        imageType: imageFileTypeInfo.exactType,
-        videoType: videoFileTypeInfo.exactType,
-    };
 }
 
 export const extractAssetMetadata = async (
@@ -330,8 +315,4 @@ async function getFileHash(
         log.error("getFileHash failed", e);
         log.info(`file hashing failed ${getFileNameSize(file)} ,${e.message} `);
     }
-}
-
-export function getLivePhotoSize(livePhotoAssets: LivePhotoAssets) {
-    return livePhotoAssets.image.size + livePhotoAssets.video.size;
 }
