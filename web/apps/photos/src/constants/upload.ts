@@ -46,8 +46,6 @@ export const WHITELISTED_FILE_FORMATS: FileTypeInfo[] = [
 
 export const KNOWN_NON_MEDIA_FORMATS = ["xmp", "html", "txt"];
 
-export const EXIFLESS_FORMATS = ["gif", "bmp"];
-
 // this is the chunk size of the un-encrypted file which is read and encrypted before uploading it as a single part.
 export const MULTIPART_PART_SIZE = 20 * 1024 * 1024;
 
