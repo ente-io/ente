@@ -48,7 +48,6 @@ import {
     tryParseTakeoutMetadataJSON,
     type ParsedMetadataJSON,
 } from "./takeout";
-import uploadCancelService from "./uploadCancelService";
 import UploadService, {
     assetName,
     getAssetName,
@@ -58,6 +57,30 @@ import UploadService, {
 
 /** The number of uploads to process in parallel. */
 const maxConcurrentUploads = 4;
+
+interface UploadCancelStatus {
+    value: boolean;
+}
+
+class UploadCancelService {
+    private shouldUploadBeCancelled: UploadCancelStatus = {
+        value: false,
+    };
+
+    reset() {
+        this.shouldUploadBeCancelled.value = false;
+    }
+
+    requestUploadCancelation() {
+        this.shouldUploadBeCancelled.value = true;
+    }
+
+    isUploadCancelationRequested(): boolean {
+        return this.shouldUploadBeCancelled.value;
+    }
+}
+
+const uploadCancelService = new UploadCancelService();
 
 class UIService {
     private progressUpdater: ProgressUpdater;
