@@ -31,6 +31,8 @@ import {
     FileWithCollection,
     PublicUploadProps,
     type FileWithCollection2,
+    type LivePhotoAssets,
+    type LivePhotoAssets2,
 } from "types/upload";
 import {
     FinishedUploads,
@@ -804,11 +806,29 @@ const cancelRemainingUploads = async () => {
 };
 
 /**
+ * The data needed by {@link clusterLivePhotos} to do its thing.
+ *
+ * As files progress through stages, they get more and more bits tacked on to
+ * them. These types document the journey.
+ */
+type ClusterableFile = {
+    localID: number;
+    collectionID: number;
+    // fileOrPath: File | ElectronFile | string;
+    file: File | ElectronFile | string;
+}
+
+type ClusteredFile = ClusterableFile & {
+    isLivePhoto: boolean;
+    livePhotoAssets?: LivePhotoAssets2;
+}
+
+/**
  * Go through the given files, combining any sibling image + video assets into a
  * single live photo when appropriate.
  */
-const clusterLivePhotos = (mediaFiles: FileWithCollection2[]) => {
-    const result: FileWithCollection2[] = [];
+const clusterLivePhotos = (mediaFiles: ClusterableFile[]) => {
+    const result: ClusteredFile[] = [];
     mediaFiles
         .sort((f, g) =>
             nameAndExtension(getFileName(f.file))[0].localeCompare(
