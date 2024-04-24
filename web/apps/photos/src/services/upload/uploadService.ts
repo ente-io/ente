@@ -70,23 +70,14 @@ class UploadService {
     private uploadURLs: UploadURL[] = [];
     private pendingUploadCount: number = 0;
     private publicUploadProps: PublicUploadProps = undefined;
-    private isCFUploadProxyDisabled: boolean = false;
 
-    init(
-        publicUploadProps: PublicUploadProps,
-        isCFUploadProxyDisabled: boolean,
-    ) {
+    init(publicUploadProps: PublicUploadProps) {
         this.publicUploadProps = publicUploadProps;
-        this.isCFUploadProxyDisabled = isCFUploadProxyDisabled;
     }
 
     async setFileCount(fileCount: number) {
         this.pendingUploadCount = fileCount;
         await this.preFetchUploadURLs();
-    }
-
-    getIsCFUploadProxyDisabled() {
-        return this.isCFUploadProxyDisabled;
     }
 
     reducePendingUploadCount() {
@@ -180,6 +171,7 @@ export const uploader = async (
     fileWithCollection: FileWithCollection2,
     parsedMetadataJSONMap: ParsedMetadataJSONMap,
     uploaderName: string,
+    isCFUploadProxyDisabled: boolean,
     makeProgessTracker: MakeProgressTracker,
 ): Promise<UploadResponse> => {
     const name = assetName(fileWithCollection);
@@ -268,7 +260,7 @@ export const uploader = async (
         const backupedFile = await uploadToBucket(
             encryptedFile.file,
             makeProgessTracker,
-            uploadService.getIsCFUploadProxyDisabled(),
+            isCFUploadProxyDisabled,
         );
 
         const uploadedFile = await uploadService.uploadFile({

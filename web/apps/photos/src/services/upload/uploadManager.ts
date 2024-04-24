@@ -275,21 +275,25 @@ class UploadManager {
     private publicUploadProps: PublicUploadProps;
     private uploaderName: string;
     private uiService: UIService;
+    private isCFUploadProxyDisabled: boolean = false;
 
+    constructor() {
+        this.uiService = new UIService();
+    }
     public async init(
         progressUpdater: ProgressUpdater,
         setFiles: SetFiles,
         publicCollectProps: PublicUploadProps,
         isCFUploadProxyDisabled: boolean,
     ) {
-        this.uiService = new UIService();
         this.uiService.init(progressUpdater);
         const remoteIsCFUploadProxyDisabled =
             await getDisableCFUploadProxyFlag();
         if (remoteIsCFUploadProxyDisabled) {
             isCFUploadProxyDisabled = remoteIsCFUploadProxyDisabled;
         }
-        UploadService.init(publicCollectProps, isCFUploadProxyDisabled);
+        this.isCFUploadProxyDisabled = isCFUploadProxyDisabled;
+        UploadService.init(publicCollectProps);
         this.setFiles = setFiles;
         this.publicUploadProps = publicCollectProps;
     }
@@ -597,6 +601,7 @@ class UploadManager {
                 fileWithCollection,
                 this.parsedMetadataJSONMap,
                 this.uploaderName,
+                this.isCFUploadProxyDisabled,
                 (
                     fileLocalID: number,
                     percentPerPart?: number,

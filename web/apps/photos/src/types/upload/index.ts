@@ -7,7 +7,6 @@ import { FILE_TYPE } from "constants/file";
 import { Collection } from "types/collection";
 import {
     FilePublicMagicMetadata,
-    FilePublicMagicMetadataProps,
     MetadataFileAttributes,
     S3FileAttributes,
 } from "types/file";
