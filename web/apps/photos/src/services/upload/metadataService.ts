@@ -416,21 +416,18 @@ const areLivePhotoAssets = (f: LivePhotoIdentifier, g: LivePhotoIdentifier) => {
         areNotSameFileType &&
         firstFileNameWithoutSuffix === secondFileNameWithoutSuffix
     ) {
-        const LIVE_PHOTO_ASSET_SIZE_LIMIT = 20 * 1024 * 1024; // 20MB
+        // Also check that the size of an individual Live Photo asset is less
+        // than an (arbitrary) limit. This should be true in practice as the
+        // videos for a live photo are a few seconds long. Further on, the
+        // zipping library that we use doesn't support stream as a input.
 
-        // checks size of live Photo assets are less than allowed limit
-        // I did that based on the assumption that live photo assets ideally would not be larger than LIVE_PHOTO_ASSET_SIZE_LIMIT
-        // also zipping library doesn't support stream as a input
-        if (
-            f.size <= LIVE_PHOTO_ASSET_SIZE_LIMIT &&
-            g.size <= LIVE_PHOTO_ASSET_SIZE_LIMIT
-        ) {
+        const maxAssetSize = 20 * 1024 * 1024; /* 20MB */
+
+        if (f.size <= maxAssetSize && g.size <= maxAssetSize) {
             return true;
         } else {
-            log.error(
-                `${CustomError.TOO_LARGE_LIVE_PHOTO_ASSETS} - ${JSON.stringify({
-                    fileSizes: [f.size, g.size],
-                })}`,
+            log.info(
+                `Not classifying assets with too large sizes ${[f.size, g.size]} as a live photo`,
             );
         }
     }
