@@ -105,9 +105,7 @@ export async function extractVideoMetadata(file: File | ElectronFile) {
         file,
         `metadata.txt`,
     );
-    return parseFFmpegExtractedMetadata(
-        new Uint8Array(await metadata.arrayBuffer()),
-    );
+    return parseFFmpegExtractedMetadata(metadata);
 }
 
 enum MetadataTags {
@@ -236,9 +234,10 @@ const ffmpegExec2 = async (
     inputFile: File | ElectronFile,
     outputFileName: string,
     timeoutMS: number = 0,
-): Promise<File | ElectronFile> => {
+) => {
     const electron = globalThis.electron;
     if (electron || false) {
+        throw new Error("WIP");
         // return electron.ffmpegExec(
         //     command,
         //     /* TODO(MR): ElectronFile changes */
@@ -247,16 +246,8 @@ const ffmpegExec2 = async (
         //     timeoutMS,
         // );
     } else {
-        return workerFactory
-            .lazy()
-            .then((worker) =>
-                worker.execute(
-                    command,
-                    /* TODO(MR): ElectronFile changes */ inputFile as File,
-                    outputFileName,
-                    timeoutMS,
-                ),
-            );
+        /* TODO(MR): ElectronFile changes */
+        return ffmpegExecWeb(command, inputFile as File, timeoutMS);
     }
 };
 
