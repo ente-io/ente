@@ -757,6 +757,10 @@ const areFilesSameHash = (f: Metadata, g: Metadata) => {
     }
 };
 
+/**
+ * Older files that were uploaded before we introduced hashing will not have
+ * hashes, so retain and use the logic we used back then for such files.
+ */
 const areFilesSameNoHash = (f: Metadata, g: Metadata) => {
     /*
      * The maximum difference in the creation/modification times of two similar
