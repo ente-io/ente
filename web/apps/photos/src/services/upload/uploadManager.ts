@@ -364,11 +364,17 @@ class UploadManager {
                 this.uiService.setUploadStage(
                     UPLOAD_STAGES.READING_GOOGLE_METADATA_FILES,
                 );
-                await this.parseMetadataJSONFiles(metadataJSONFiles);
+                /* TODO(MR): ElectronFile changes */
+                await this.parseMetadataJSONFiles(
+                    metadataJSONFiles as FileWithCollection2[],
+                );
             }
 
             if (mediaFiles.length) {
-                const clusteredMediaFiles = clusterLivePhotos(mediaFiles);
+                /* TODO(MR): ElectronFile changes */
+                const clusteredMediaFiles = clusterLivePhotos(
+                    mediaFiles as ClusterableFile[],
+                );
 
                 if (uploadCancelService.isUploadCancelationRequested()) {
                     throw Error(CustomError.UPLOAD_CANCELLED);
@@ -378,7 +384,8 @@ class UploadManager {
                     new Map<number, string>(
                         clusteredMediaFiles.map((mediaFile) => [
                             mediaFile.localID,
-                            assetName(mediaFile),
+                            /* TODO(MR): ElectronFile changes */
+                            assetName(mediaFile as FileWithCollection2),
                         ]),
                     ),
                 );
@@ -387,7 +394,10 @@ class UploadManager {
                     mediaFiles.length !== clusteredMediaFiles.length,
                 );
 
-                await this.uploadMediaFiles(clusteredMediaFiles);
+                /* TODO(MR): ElectronFile changes */
+                await this.uploadMediaFiles(
+                    clusteredMediaFiles as FileWithCollection2[],
+                );
             }
         } catch (e) {
             if (e.message === CustomError.UPLOAD_CANCELLED) {
@@ -721,7 +731,7 @@ type ClusterableFile = {
     localID: number;
     collectionID: number;
     // fileOrPath: File | ElectronFile | string;
-    file: File | ElectronFile | string;
+    file?: File | ElectronFile | string;
 };
 
 type ClusteredFile = ClusterableFile & {
@@ -770,8 +780,13 @@ const clusterLivePhotos = (mediaFiles: ClusterableFile[]) => {
                 collectionID: f.collectionID,
                 isLivePhoto: true,
                 livePhotoAssets: {
-                    image: fFileType == FILE_TYPE.IMAGE ? f.file : g.file,
-                    video: fFileType == FILE_TYPE.IMAGE ? g.file : f.file,
+                    /* TODO(MR): ElectronFile changes */
+                    image: (fFileType == FILE_TYPE.IMAGE ? f.file : g.file) as
+                        | string
+                        | File,
+                    video: (fFileType == FILE_TYPE.IMAGE ? g.file : f.file) as
+                        | string
+                        | File,
                 },
             });
             index += 2;

@@ -195,7 +195,7 @@ export const uploader = async (
         const { metadata, publicMagicMetadata } = await extractAssetMetadata(
             worker,
             parsedMetadataJSONMap,
-            uploadAsset,
+            uploadAsset2,
             collection.id,
             fileTypeInfo,
         );
@@ -229,7 +229,7 @@ export const uploader = async (
 
         abortIfCancelled();
 
-        const file = await readAsset(fileTypeInfo, uploadAsset);
+        const file = await readAsset(fileTypeInfo, uploadAsset2);
 
         if (file.hasStaticThumbnail) metadata.hasStaticThumbnail = true;
 
@@ -760,6 +760,12 @@ const areFilesSameHash = (f: Metadata, g: Metadata) => {
 /**
  * Older files that were uploaded before we introduced hashing will not have
  * hashes, so retain and use the logic we used back then for such files.
+ *
+ * Deprecation notice April 2024: Note that hashing was introduced very early
+ * (years ago), so the chance of us finding files without hashes is rare. And
+ * even in these cases, the worst that'll happen is that a duplicate file would
+ * get uploaded which can later be deduped. So we can get rid of this case at
+ * some point (e.g. the mobile app doesn't do this extra check, just uploads).
  */
 const areFilesSameNoHash = (f: Metadata, g: Metadata) => {
     /*
@@ -773,10 +779,10 @@ const areFilesSameNoHash = (f: Metadata, g: Metadata) => {
      */
     const oneSecond = 1e6;
     return (
-        f.fileType === g.fileType &&
+        f.fileType == g.fileType &&
+        f.title == g.title &&
         Math.abs(f.creationTime - g.creationTime) < oneSecond &&
-        Math.abs(f.modificationTime - g.modificationTime) < oneSecond &&
-        f.title === g.title
+        Math.abs(f.modificationTime - g.modificationTime) < oneSecond
     );
 };
 
