@@ -1,3 +1,4 @@
+import "dart:async" show unawaited;
 import "dart:math";
 
 import "package:flutter/foundation.dart" show kDebugMode;
@@ -61,8 +62,9 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
                 ),
               );
             }
-            final numberOfDifferentSuggestions = snapshot.data!.length;
-            final currentSuggestion = snapshot.data![currentSuggestionIndex];
+            final allSuggestions = snapshot.data!;
+            final numberOfDifferentSuggestions = allSuggestions.length;
+            final currentSuggestion = allSuggestions[currentSuggestionIndex];
             final int clusterID = currentSuggestion.clusterIDToMerge;
             final double distance = currentSuggestion.distancePersonToCluster;
             final bool usingMean = currentSuggestion.usedOnlyMeanForSuggestion;
@@ -90,6 +92,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
                   usingMean,
                   files,
                   numberOfDifferentSuggestions,
+                  allSuggestions,
                 ),
               ),
             );
@@ -155,8 +158,9 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
     bool usingMean,
     List<EnteFile> files,
     int numberOfSuggestions,
+    List<ClusterSuggestion> allSuggestions,
   ) {
-    return Column(
+    final widgetToReturn = Column(
       key: ValueKey("cluster_id-$clusterID"),
       children: <Widget>[
         if (kDebugMode)
@@ -233,6 +237,28 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
         ),
       ],
     );
+    // Precompute face thumbnails for next suggestions, in case there are
+    const precompute = 6;
+    const maxComputations = 10;
+    int compCount = 0;
+
+    if (allSuggestions.length > currentSuggestionIndex + 1) {
+      for (final suggestion in allSuggestions.sublist(
+        currentSuggestionIndex + 1,
+        min(allSuggestions.length, currentSuggestionIndex + precompute),
+      )) {
+        final files = suggestion.filesInCluster;
+        final clusterID = suggestion.clusterIDToMerge;
+        for (final file in files.sublist(0, min(files.length, 8))) {
+          unawaited(PersonFaceWidget.precomputeFaceCrops(file, clusterID));
+          compCount++;
+          if (compCount >= maxComputations) {
+            break;
+          }
+        }
+      }
+    }
+    return widgetToReturn;
   }
 
   List<Widget> _buildThumbnailWidgets(
