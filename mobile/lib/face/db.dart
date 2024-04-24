@@ -332,6 +332,20 @@ class FaceMLDataDB {
     return mapRowToFace(result.first);
   }
 
+  Future<Map<int, Iterable<String>>> getClusterToFaceIDs(Set<int> clusterIDs) async {
+    final db = await instance.sqliteAsyncDB;
+    final Map<int, List<String>> result = {};
+    final List<Map<String, dynamic>> maps = await db.getAll(
+      'SELECT $fcClusterID, $fcFaceId FROM $faceClustersTable WHERE $fcClusterID IN (${clusterIDs.join(",")})',
+    );
+    for (final map in maps) {
+      final clusterID = map[fcClusterID] as int;
+      final faceID = map[fcFaceId] as String;
+      result.putIfAbsent(clusterID, () => <String>[]).add(faceID);
+    }
+    return result;
+  }
+
   Future<Iterable<String>> getFaceIDsForCluster(int clusterID) async {
     final db = await instance.sqliteAsyncDB;
     final List<Map<String, dynamic>> maps = await db.getAll(

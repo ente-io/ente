@@ -25,12 +25,14 @@ class ClusterSuggestion {
   final double distancePersonToCluster;
   final bool usedOnlyMeanForSuggestion;
   final List<EnteFile> filesInCluster;
+  final List<String> faceIDsInCluster;
 
   ClusterSuggestion(
     this.clusterIDToMerge,
     this.distancePersonToCluster,
     this.usedOnlyMeanForSuggestion,
     this.filesInCluster,
+    this.faceIDsInCluster,
   );
 }
 
@@ -60,24 +62,27 @@ class ClusterFeedbackService {
     bool extremeFilesFirst = true,
   }) async {
     _logger.info(
-      'getClusterFilesForPersonID ${kDebugMode ? person.data.name : person.remoteID}',
+      'getSuggestionForPerson ${kDebugMode ? person.data.name : person.remoteID}',
     );
 
     try {
       // Get the suggestions for the person using centroids and median
       final startTime = DateTime.now();
-      final List<(int, double, bool)> suggestClusterIds =
+      final List<(int, double, bool)> foundSuggestions =
           await _getSuggestions(person);
       final findSuggestionsTime = DateTime.now();
       _logger.info(
-        '`_getSuggestions`: Found ${suggestClusterIds.length} suggestions in ${findSuggestionsTime.difference(startTime).inMilliseconds} ms',
+        'getSuggestionForPerson `_getSuggestions`: Found ${foundSuggestions.length} suggestions in ${findSuggestionsTime.difference(startTime).inMilliseconds} ms',
       );
 
       // Get the files for the suggestions
+      final suggestionClusterIDs = foundSuggestions.map((e) => e.$1).toSet();
       final Map<int, Set<int>> fileIdToClusterID =
           await FaceMLDataDB.instance.getFileIdToClusterIDSetForCluster(
-        suggestClusterIds.map((e) => e.$1).toSet(),
+        suggestionClusterIDs,
       );
+      final clusterIdToFaceIDs =
+          await FaceMLDataDB.instance.getClusterToFaceIDs(suggestionClusterIDs);
       final Map<int, List<EnteFile>> clusterIDToFiles = {};
       final allFiles = await SearchService.instance.getAllFiles();
       for (final f in allFiles) {
@@ -95,7 +100,7 @@ class ClusterFeedbackService {
       }
 
       final List<ClusterSuggestion> clusterIdAndFiles = [];
-      for (final clusterSuggestion in suggestClusterIds) {
+      for (final clusterSuggestion in foundSuggestions) {
         if (clusterIDToFiles.containsKey(clusterSuggestion.$1)) {
           clusterIdAndFiles.add(
             ClusterSuggestion(
@@ -103,14 +108,20 @@ class ClusterFeedbackService {
               clusterSuggestion.$2,
               clusterSuggestion.$3,
               clusterIDToFiles[clusterSuggestion.$1]!,
+              clusterIdToFaceIDs[clusterSuggestion.$1]!.toList(),
             ),
           );
         }
       }
+      final getFilesTime = DateTime.now();
 
+      final sortingStartTime = DateTime.now();
       if (extremeFilesFirst) {
         await _sortSuggestionsOnDistanceToPerson(person, clusterIdAndFiles);
       }
+      _logger.info(
+        'getSuggestionForPerson post-processing suggestions took ${DateTime.now().difference(findSuggestionsTime).inMilliseconds} ms, of which sorting took ${DateTime.now().difference(sortingStartTime).inMilliseconds} ms and getting files took ${getFilesTime.difference(findSuggestionsTime).inMilliseconds} ms',
+      );
 
       return clusterIdAndFiles;
     } catch (e, s) {
@@ -883,6 +894,7 @@ class ClusterFeedbackService {
     final clusterSummaryCallTime = DateTime.now();
 
     // Calculate the avg embedding of the person
+    final w = (kDebugMode ? EnteWatch('sortSuggestions') : null)?..start();
     final personEmbeddingsCount = personClusters
         .map((e) => personClusterToSummary[e]!.$2)
         .reduce((a, b) => a + b);
@@ -897,12 +909,17 @@ class ClusterFeedbackService {
             clusterWeight; // Weighted sum of the cluster averages
       }
     }
+    w?.log('calculated person avg');
 
     // Sort the suggestions based on the distance to the person
     for (final suggestion in suggestions) {
       final clusterID = suggestion.clusterIDToMerge;
-      final faceIdToEmbeddingMap = await faceMlDb.getFaceEmbeddingMapForFile(
-        suggestion.filesInCluster.map((e) => e.uploadedFileID!).toList(),
+      final faceIDs = suggestion.faceIDsInCluster;
+      final faceIdToEmbeddingMap = await faceMlDb.getFaceEmbeddingMapForFaces(
+        faceIDs,
+      );
+      w?.log(
+        'got ${faceIdToEmbeddingMap.values.length} embeddings for ${suggestion.filesInCluster.length} files for cluster $clusterID',
       );
       final fileIdToDistanceMap = {};
       for (final entry in faceIdToEmbeddingMap.entries) {
@@ -912,12 +929,14 @@ class ClusterFeedbackService {
           EVector.fromBuffer(entry.value).values,
         );
       }
+      w?.log('calculated distances for cluster $clusterID');
       suggestion.filesInCluster.sort((b, a) {
         //todo: review with @laurens, added this to avoid null safety issue
         final double distanceA = fileIdToDistanceMap[a.uploadedFileID!] ?? -1;
         final double distanceB = fileIdToDistanceMap[b.uploadedFileID!] ?? -1;
         return distanceA.compareTo(distanceB);
       });
+      w?.log('sorted files for cluster $clusterID');
 
       debugPrint(
         "[${_logger.name}] Sorted suggestions for cluster $clusterID based on distance to person: ${suggestion.filesInCluster.map((e) => fileIdToDistanceMap[e.uploadedFileID]).toList()}",
