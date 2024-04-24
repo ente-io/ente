@@ -64,7 +64,7 @@ export async function getFileType(
             throw Error(CustomError.UNSUPPORTED_FILE_FORMAT);
         }
         log.error(`type detection failed for format ${fileFormat}`, e);
-        throw Error(CustomError.TYPE_DETECTION_FAILED(fileFormat));
+        throw new Error(`type detection failed ${fileFormat}`);
     }
 }
 
