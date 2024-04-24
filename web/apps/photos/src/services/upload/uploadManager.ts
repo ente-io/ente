@@ -1,3 +1,4 @@
+import { potentialFileTypeFromExtension } from "@/media/live-photo";
 import { ensureElectron } from "@/next/electron";
 import { nameAndExtension } from "@/next/file";
 import log from "@/next/log";
@@ -57,7 +58,6 @@ import UploadService, {
     getFileName,
     uploader,
 } from "./uploadService";
-import { getFileTypeFromExtensionForLivePhotoClustering } from "utils/file/livePhoto";
 
 const MAX_CONCURRENT_UPLOADS = 4;
 
@@ -820,47 +820,32 @@ const clusterLivePhotos = (mediaFiles: FileWithCollection2[]) => {
     while (index < mediaFiles.length - 1) {
         const f = mediaFiles[index];
         const g = mediaFiles[index + 1];
-        const fFileType = getFileTypeFromExtensionForLivePhotoClustering(
-            getFileName(f.file),
-        );
-        const gFileType = getFileTypeFromExtensionForLivePhotoClustering(
-            getFileName(g.file),
-        );
+        const fFileName = getFileName(f.file);
+        const gFileName = getFileName(g.file);
+        const fFileType = potentialFileTypeFromExtension(fFileName);
+        const gFileType = potentialFileTypeFromExtension(gFileName);
         const fa: PotentialLivePhotoAsset = {
-            collectionID: f.collectionID,
+            fileName: fFileName,
             fileType: fFileType,
-            fileName: getFileName(f.file),
+            collectionID: f.collectionID,
             /* TODO(MR): ElectronFile changes */
             size: (f as FileWithCollection).file.size,
         };
         const ga: PotentialLivePhotoAsset = {
-            collectionID: g.collectionID,
+            fileName: gFileName,
             fileType: gFileType,
-            fileName: getFileName(g.file),
+            collectionID: g.collectionID,
             /* TODO(MR): ElectronFile changes */
             size: (g as FileWithCollection).file.size,
         };
         if (areLivePhotoAssets(fa, ga)) {
-            let imageFile: File | ElectronFile | string;
-            let videoFile: File | ElectronFile | string;
-            if (
-                fFileType === FILE_TYPE.IMAGE &&
-                gFileType === FILE_TYPE.VIDEO
-            ) {
-                imageFile = f.file;
-                videoFile = g.file;
-            } else {
-                videoFile = f.file;
-                imageFile = g.file;
-            }
-            const livePhotoLocalID = f.localID;
             result.push({
-                localID: livePhotoLocalID,
+                localID: f.localID,
                 collectionID: f.collectionID,
                 isLivePhoto: true,
                 livePhotoAssets: {
-                    image: imageFile,
-                    video: videoFile,
+                    image: fFileType == FILE_TYPE.IMAGE ? f.file : g.file,
+                    video: fFileType == FILE_TYPE.IMAGE ? g.file : f.file,
                 },
             });
             index += 2;
@@ -882,9 +867,9 @@ const clusterLivePhotos = (mediaFiles: FileWithCollection2[]) => {
 };
 
 interface PotentialLivePhotoAsset {
-    collectionID: number;
-    fileType: FILE_TYPE;
     fileName: string;
+    fileType: FILE_TYPE;
+    collectionID: number;
     size: number;
 }
 
