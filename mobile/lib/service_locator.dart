@@ -1,6 +1,6 @@
 import "package:dio/dio.dart";
 import "package:ente_cast/ente_cast.dart";
-import "package:ente_cast_none/ente_cast_none.dart";
+import "package:ente_cast_normal/ente_cast_normal.dart";
 import "package:ente_feature_flag/ente_feature_flag.dart";
 import "package:shared_preferences/shared_preferences.dart";
 

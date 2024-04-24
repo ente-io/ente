@@ -25,9 +25,9 @@ import 'package:photos/services/sync_service.dart';
 import 'package:photos/services/update_service.dart';
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
 import "package:photos/ui/cast/auto.dart";
+import "package:photos/ui/cast/choose.dart";
 import 'package:photos/ui/components/action_sheet_widget.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
-import "package:photos/ui/components/dialog_widget.dart";
 import 'package:photos/ui/components/models/button_type.dart';
 import "package:photos/ui/map/enable_map.dart";
 import "package:photos/ui/map/map_screen.dart";
@@ -857,47 +857,20 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     final gw = CastGateway(NetworkClient.instance.enteDio);
     // stop any existing cast session
     gw.revokeAllTokens().ignore();
-    final result = await showDialogWidget(
+    final result = await showDialog<ButtonAction?>(
       context: context,
-      title: S.of(context).playOnTv,
-      body:
-          "Auto Pair requires connecting to Google servers and only works with Chromecast supported devices. Google will not receive sensitive data, such as your photos.\n\nPair with PIN works for any large screen device you want to play your album on.",
-      buttons: [
-        ButtonWidget(
-          labelText: S.of(context).autoPair,
-          icon: Icons.cast_outlined,
-          buttonType: ButtonType.trailingIconPrimary,
-          buttonSize: ButtonSize.large,
-          shouldStickToDarkTheme: true,
-          buttonAction: ButtonAction.first,
-          shouldSurfaceExecutionStates: true,
-          isInAlert: true,
-        ),
-        ButtonWidget(
-          labelText: S.of(context).pairWithPin,
-          buttonType: ButtonType.trailingIconPrimary,
-          // icon for pairing with TV manually
-          icon: Icons.tv_outlined,
-          buttonSize: ButtonSize.large,
-          isInAlert: true,
-          shouldStickToDarkTheme: true,
-          buttonAction: ButtonAction.second,
-          shouldSurfaceExecutionStates: false,
-        ),
-        // cancel button
-      ],
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return CastChooseDialog();
+      },
     );
     _logger.info("Cast result: $result");
     if (result == null) {
       return;
     }
-    if (result.action == ButtonAction.error) {
-      await showGenericErrorDialog(
-        context: context,
-        error: result.exception,
-      );
-    }
-    if (result.action == ButtonAction.first) {
+    // wait to allow the dialog to close
+    await Future.delayed(const Duration(milliseconds: 100));
+    if (result == ButtonAction.first) {
       await showDialog(
         context: context,
         barrierDismissible: true,
@@ -906,7 +879,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         },
       );
     }
-    if (result.action == ButtonAction.second) {
+    if (result == ButtonAction.second) {
       await _pairWithPin(gw);
     }
   }
