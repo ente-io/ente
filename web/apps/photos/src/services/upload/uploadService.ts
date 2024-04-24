@@ -7,6 +7,7 @@ import { CustomErrorMessage } from "@/next/types/ipc";
 import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
 import { EncryptionResult } from "@ente/shared/crypto/types";
 import { CustomError, handleUploadError } from "@ente/shared/error";
+import { isDataStream, type DataStream } from "@ente/shared/utils/data-stream";
 import { Remote } from "comlink";
 import { FILE_TYPE } from "constants/file";
 import {
@@ -59,7 +60,6 @@ import {
 } from "./thumbnail";
 import uploadCancelService from "./uploadCancelService";
 import UploadHttpClient from "./uploadHttpClient";
-import { isDataStream, type DataStream } from "@ente/shared/utils/data-stream";
 
 /** Upload files to cloud storage */
 class UploadService {

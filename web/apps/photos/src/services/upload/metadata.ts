@@ -8,6 +8,7 @@ import {
     tryToParseDateTime,
     validateAndGetCreationUnixTimeInMicroSeconds,
 } from "@ente/shared/time";
+import type { DataStream } from "@ente/shared/utils/data-stream";
 import { Remote } from "comlink";
 import { FILE_TYPE } from "constants/file";
 import { FILE_READER_CHUNK_SIZE, NULL_LOCATION } from "constants/upload";
@@ -29,7 +30,6 @@ import {
     type ParsedMetadataJSON,
 } from "./takeout";
 import { getFileName } from "./uploadService";
-import type { DataStream } from "@ente/shared/utils/data-stream";
 
 const EXIF_TAGS_NEEDED = [
     "DateTimeOriginal",

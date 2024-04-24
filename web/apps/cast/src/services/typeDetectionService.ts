@@ -1,14 +1,13 @@
-import { nameAndExtension } from "@/next/file";
+import { FILE_TYPE } from "@/media/file";
+import { convertBytesToHumanReadable, nameAndExtension } from "@/next/file";
 import log from "@/next/log";
 import { CustomError } from "@ente/shared/error";
-import { FILE_TYPE } from "constants/file";
 import {
     KNOWN_NON_MEDIA_FORMATS,
     WHITELISTED_FILE_FORMATS,
 } from "constants/upload";
 import FileType from "file-type";
 import { FileTypeInfo } from "types/upload";
-import { getUint8ArrayView } from "./readerService";
 
 const TYPE_VIDEO = "video";
 const TYPE_IMAGE = "image";
@@ -64,6 +63,18 @@ async function extractFileType(file: File) {
     const fileBlobChunk = file.slice(0, CHUNK_SIZE_FOR_TYPE_DETECTION);
     const fileDataChunk = await getUint8ArrayView(fileBlobChunk);
     return getFileTypeFromBuffer(fileDataChunk);
+}
+
+export async function getUint8ArrayView(file: Blob): Promise<Uint8Array> {
+    try {
+        return new Uint8Array(await file.arrayBuffer());
+    } catch (e) {
+        log.error(
+            `Failed to read file blob of size ${convertBytesToHumanReadable(file.size)}`,
+            e,
+        );
+        throw e;
+    }
 }
 
 async function getFileTypeFromBuffer(buffer: Uint8Array) {

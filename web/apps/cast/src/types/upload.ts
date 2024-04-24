@@ -1,4 +1,4 @@
-import { FILE_TYPE } from "constants/file";
+import { FILE_TYPE } from "@/media/file";
 
 export interface Metadata {
     title: string;
