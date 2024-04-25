@@ -5,6 +5,7 @@ import { lowercaseExtension, nameAndExtension } from "@/next/file";
 import log from "@/next/log";
 import { ElectronFile } from "@/next/types/file";
 import { ComlinkWorker } from "@/next/worker/comlink-worker";
+import { ensure } from "@/utils/ensure";
 import { getDedicatedCryptoWorker } from "@ente/shared/crypto";
 import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
 import { CustomError } from "@ente/shared/error";
@@ -47,7 +48,7 @@ import {
     tryParseTakeoutMetadataJSON,
     type ParsedMetadataJSON,
 } from "./takeout";
-import UploadService, { assetName, fopSize, uploader } from "./uploadService";
+import UploadService, { assetName, fopSize, getFileName, uploader } from "./uploadService";
 
 /** The number of uploads to process in parallel. */
 const maxConcurrentUploads = 4;
@@ -296,6 +297,7 @@ class UploadManager {
     constructor() {
         this.uiService = new UIService();
     }
+
     public async init(
         progressUpdater: ProgressUpdater,
         setFiles: SetFiles,
@@ -327,7 +329,7 @@ class UploadManager {
         this.uploaderName = null;
     }
 
-    prepareForNewUpload() {
+    public prepareForNewUpload() {
         this.resetState();
         this.uiService.reset();
         uploadCancelService.reset();
@@ -353,12 +355,17 @@ class UploadManager {
             this.uploaderName = uploaderName;
 
             const namedFiles: FileWithCollectionIDAndName[] =
-                /* TODO(MR): ElectronFile changes */
-                (filesWithCollectionToUploadIn as FileWithCollection2[]).map(
-                    (f) => {
-                        return { ...f, fileName: assetName(f) };
-                    },
-                );
+                filesWithCollectionToUploadIn.map((f) => {
+                    return {
+                        localID: f.localID,
+                        collectionID: ensure(f.collectionID),
+                        fileOrPath: f.
+                        fileName: f.isLivePhoto ? getFileName(f.livePhotoAssets.image) : getFileName(f.file),
+                        isLivePhoto: f.isLivePhoto,
+
+                        fileName: assetName(f),
+                    };
+                });
 
             this.uiService.setFilenames(
                 new Map<number, string>(
@@ -542,7 +549,7 @@ class UploadManager {
         }
     }
 
-    async postUploadTask(
+    private async postUploadTask(
         fileUploadResult: UPLOAD_RESULT,
         uploadedFile: EncryptedEnteFile | EnteFile | null,
         fileWithCollection: FileWithCollection2,
@@ -627,19 +634,19 @@ class UploadManager {
     }
 
     public cancelRunningUpload() {
-        log.info("user cancelled running upload");
+        log.info("User cancelled running upload");
         this.uiService.setUploadStage(UPLOAD_STAGES.CANCELLING);
         uploadCancelService.requestUploadCancelation();
     }
 
-    getFailedFilesWithCollections() {
+    public getFailedFilesWithCollections() {
         return {
             files: this.failedFiles,
             collections: [...this.collections.values()],
         };
     }
 
-    getUploaderName() {
+    public getUploaderName() {
         return this.uploaderName;
     }
 
@@ -670,6 +677,62 @@ class UploadManager {
 }
 
 export default new UploadManager();
+
+/**
+ * The data operated on by the intermediate stages of the upload.
+ *
+ * [Note: Intermediate file types during upload]
+ *
+ * As files progress through stages, they get more and more bits tacked on to
+ * them. These types document the journey.
+ *
+ * - The input is {@link FileWithCollection}. This can either be a new
+ *   {@link FileWithCollection}, in which case it'll only have a
+ *   {@link localID}, {@link collectionID} and a {@link file}. Or it could be a
+ *   retry, in which case it'll not have a {@link file} but instead will have
+ *   data from a previous stage, like a snake eating its tail.
+ *
+ * - Immediately we convert it to {@link FileWithCollectionIDAndName}. This is
+ *   to mostly systematize what we have, and also attach a {@link fileName}.
+ *
+ * - These then get converted to "assets", whereby both parts of a live photo
+ *   are combined. This is a {@link ClusteredFile}.
+ *
+ * - On to the {@link ClusteredFile} we attach the corresponding
+ *   {@link collection}, giving us {@link UploadableFile}. This is what gets
+ *   queued and then passed to the {@link uploader}.
+ */
+type FileWithCollectionIDAndName = {
+    /** A unique ID for the duration of the upload */
+    localID: number;
+    /** The ID of the collection to which this file should be uploaded. */
+    collectionID: number;
+    /**
+     * The name of the file.
+     *
+     * In case of live photos, this'll be the name of the image part.
+     */
+    fileName: string;
+    /** `true` if this is a live photo. */
+    isLivePhoto?: boolean;
+    /* Valid for non-live photos */
+    fileOrPath?: File | string;
+    /* Valid for live photos */
+    livePhotoAssets?: LivePhotoAssets2;
+};
+
+
+const makeFileWithCollectionIDAndName = (        file: FileWithCollection[]) => {
+}
+
+type ClusteredFile = {
+    localID: number;
+    collectionID: number;
+    fileName: string;
+    isLivePhoto: boolean;
+    file?: File | string;
+    livePhotoAssets?: LivePhotoAssets2;
+};
 
 const splitMetadataAndMediaFiles = (
     files: FileWithCollectionIDAndName[],
@@ -730,29 +793,6 @@ const cancelRemainingUploads = async () => {
     await electron.setPendingUploadFiles("files", []);
 };
 
-/**
- * The data operated on by the intermediate stages of the upload.
- *
- * As files progress through stages, they get more and more bits tacked on to
- * them. These types document the journey.
- */
-type FileWithCollectionIDAndName = {
-    localID: number;
-    collectionID: number;
-    fileName: string;
-    isLivePhoto?: boolean;
-    file?: File | string;
-    livePhotoAssets?: LivePhotoAssets2;
-};
-
-type ClusteredFile = {
-    localID: number;
-    collectionID: number;
-    fileName: string;
-    isLivePhoto: boolean;
-    file?: File | string;
-    livePhotoAssets?: LivePhotoAssets2;
-};
 
 /**
  * Go through the given files, combining any sibling image + video assets into a

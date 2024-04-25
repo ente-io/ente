@@ -27,6 +27,7 @@ export interface MultipartUploadURLs {
 export interface UploadAsset {
     isLivePhoto?: boolean;
     file?: File | ElectronFile;
+    fileOrPath?: File | ElectronFile;
     livePhotoAssets?: LivePhotoAssets;
 }
 
@@ -44,6 +45,7 @@ export interface FileWithCollection extends UploadAsset {
 export interface UploadAsset2 {
     isLivePhoto?: boolean;
     file?: File | string;
+    fileOrPath?: File | string;
     livePhotoAssets?: LivePhotoAssets2;
 }
 
