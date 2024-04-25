@@ -56,7 +56,7 @@ class _AutoCastDialogState extends State<AutoCastDialog> {
               }
 
               if (snapshot.data!.isEmpty) {
-                return const Center(child: Text(S.of(context).noDeviceFound));
+                return Center(child: Text(S.of(context).noDeviceFound));
               }
 
               return Column(

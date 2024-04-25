@@ -6,9 +6,9 @@ import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
 
 class CastChooseDialog extends StatefulWidget {
-  CastChooseDialog({
+  const CastChooseDialog({
     Key? key,
-  }) : super(key: key) {}
+  }) : super(key: key);
 
   @override
   State<CastChooseDialog> createState() => _CastChooseDialogState();

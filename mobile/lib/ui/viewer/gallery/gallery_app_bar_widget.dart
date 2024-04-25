@@ -861,7 +861,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       context: context,
       barrierDismissible: true,
       builder: (BuildContext context) {
-        return CastChooseDialog();
+        return const CastChooseDialog();
       },
     );
     _logger.info("Cast result: $result");
