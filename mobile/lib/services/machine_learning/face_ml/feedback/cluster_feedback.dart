@@ -474,30 +474,30 @@ class ClusterFeedbackService {
     final checkSizes = [kMinimumClusterSizeSearchResult, 20, 10, 5, 1];
     late Map<int, Vector> clusterAvgBigClusters;
     for (final minimumSize in checkSizes.toSet()) {
-      if (smallestPersonClusterSize >= minimumSize) {
-        clusterAvgBigClusters = await _getUpdateClusterAvg(
-          allClusterIdsToCountMap,
-          ignoredClusters,
-          minClusterSize: minimumSize,
-        );
-        w?.log(
-          'Calculate avg for ${clusterAvgBigClusters.length} clusters of min size $minimumSize',
-        );
-        final List<(int, double)> suggestionsMeanBigClusters =
-            _calcSuggestionsMean(
-          clusterAvgBigClusters,
-          personClusters,
-          ignoredClusters,
-          goodMeanDistance,
-        );
-        w?.log(
-          'Calculate suggestions using mean for ${clusterAvgBigClusters.length} clusters of min size $minimumSize',
-        );
-        if (suggestionsMeanBigClusters.isNotEmpty) {
-          return suggestionsMeanBigClusters
-              .map((e) => (e.$1, e.$2, true))
-              .toList(growable: false);
-        }
+      // if (smallestPersonClusterSize >= minimumSize) {
+      clusterAvgBigClusters = await _getUpdateClusterAvg(
+        allClusterIdsToCountMap,
+        ignoredClusters,
+        minClusterSize: minimumSize,
+      );
+      w?.log(
+        'Calculate avg for ${clusterAvgBigClusters.length} clusters of min size $minimumSize',
+      );
+      final List<(int, double)> suggestionsMeanBigClusters =
+          _calcSuggestionsMean(
+        clusterAvgBigClusters,
+        personClusters,
+        ignoredClusters,
+        goodMeanDistance,
+      );
+      w?.log(
+        'Calculate suggestions using mean for ${clusterAvgBigClusters.length} clusters of min size $minimumSize',
+      );
+      if (suggestionsMeanBigClusters.isNotEmpty) {
+        return suggestionsMeanBigClusters
+            .map((e) => (e.$1, e.$2, true))
+            .toList(growable: false);
+        // }
       }
     }
     w?.reset();
