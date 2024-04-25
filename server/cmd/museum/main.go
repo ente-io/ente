@@ -839,7 +839,7 @@ func setupAndStartCrons(userAuthRepo *repo.UserAuthRepository, publicCollectionR
 
 	schedule(c, "@every 24h", func() {
 		_ = userAuthRepo.RemoveDeletedTokens(timeUtil.MicrosecondBeforeDays(30))
-		_ = castDb.DeleteOldCodes(context.Background(), timeUtil.MicrosecondBeforeDays(1))
+		_ = castDb.DeleteOldSessions(context.Background(), timeUtil.MicrosecondBeforeDays(7))
 		_ = publicCollectionRepo.CleanupAccessHistory(context.Background())
 	})
 
@@ -897,6 +897,8 @@ func setupAndStartCrons(userAuthRepo *repo.UserAuthRepository, publicCollectionR
 	})
 
 	schedule(c, "@every 30m", func() {
+		// delete unclaimed codes older than 60 minutes
+		_ = castDb.DeleteUnclaimedCodes(context.Background(), timeUtil.MicrosecondsBeforeMinutes(60))
 		dataCleanupCtrl.DeleteDataCron()
 	})
 
