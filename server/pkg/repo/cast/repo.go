@@ -7,6 +7,7 @@ import (
 	"github.com/ente-io/museum/pkg/utils/random"
 	"github.com/ente-io/stacktrace"
 	"github.com/google/uuid"
+	log "github.com/sirupsen/logrus"
 	"strings"
 )
 
@@ -89,11 +90,26 @@ func (r *Repository) UpdateLastUsedAtForToken(ctx context.Context, token string)
 	return nil
 }
 
-// DeleteOldCodes that are not associated with a collection and are older than the given time
-func (r *Repository) DeleteOldCodes(ctx context.Context, expiryTime int64) error {
-	_, err := r.DB.ExecContext(ctx, "DELETE FROM casting WHERE last_used_at < $1 and is_deleted=false and collection_id is null", expiryTime)
+// DeleteUnclaimedCodes that are not associated with a collection and are older than the given time
+func (r *Repository) DeleteUnclaimedCodes(ctx context.Context, expiryTime int64) error {
+	result, err := r.DB.ExecContext(ctx, "DELETE FROM casting WHERE last_used_at < $1 and is_deleted=false and collection_id is null", expiryTime)
 	if err != nil {
 		return err
+	}
+	if rows, rErr := result.RowsAffected(); rErr == nil && rows > 0 {
+		log.Infof("Deleted %d unclaimed codes", rows)
+	}
+	return nil
+}
+
+// DeleteOldSessions where last used at is older than the given time
+func (r *Repository) DeleteOldSessions(ctx context.Context, expiryTime int64) error {
+	result, err := r.DB.ExecContext(ctx, "DELETE FROM casting WHERE last_used_at < $1", expiryTime)
+	if err != nil {
+		return err
+	}
+	if rows, rErr := result.RowsAffected(); rErr == nil && rows > 0 {
+		log.Infof("Deleted %d old sessions", rows)
 	}
 	return nil
 }
