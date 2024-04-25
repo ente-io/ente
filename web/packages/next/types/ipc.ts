@@ -189,6 +189,11 @@ export interface Electron {
          * directory.
          */
         isDir: (dirPath: string) => Promise<boolean>;
+
+        /**
+         * Return the size in bytes of the file at {@link path}.
+         */
+        size: (path: string) => Promise<number>;
     };
 
     // - Conversion

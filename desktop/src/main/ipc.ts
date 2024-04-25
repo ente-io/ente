@@ -29,6 +29,7 @@ import {
     fsRename,
     fsRm,
     fsRmdir,
+    fsSize,
     fsWriteFile,
 } from "./fs";
 import { logToDisk } from "./log";
@@ -138,6 +139,8 @@ export const attachIPCHandlers = () => {
     );
 
     ipcMain.handle("fsIsDir", (_, dirPath: string) => fsIsDir(dirPath));
+
+    ipcMain.handle("fsSize", (_, path: string) => fsSize(path));
 
     // - Conversion
 

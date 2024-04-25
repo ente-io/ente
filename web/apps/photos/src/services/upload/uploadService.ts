@@ -318,6 +318,17 @@ export const uploader = async (
     }
 };
 
+/**
+ * Return the size of the given file
+ *
+ * @param fileOrPath The {@link File}, or the path to it. Note that it is only
+ * valid to specify a path if we are running in the context of our desktop app.
+ */
+export const fopSize = async (fileOrPath: File | string): Promise<number> =>
+    fileOrPath instanceof File
+        ? fileOrPath.size
+        : await ensureElectron().fs.size(fileOrPath);
+
 export const getFileName = (file: File | ElectronFile | string) =>
     typeof file == "string" ? basename(file) : file.name;
 

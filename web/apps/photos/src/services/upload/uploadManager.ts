@@ -50,6 +50,7 @@ import {
 } from "./takeout";
 import UploadService, {
     assetName,
+    fopSize,
     getAssetName,
     getFileName,
     uploader,
@@ -396,7 +397,7 @@ class UploadManager {
 
             if (mediaFiles.length) {
                 /* TODO(MR): ElectronFile changes */
-                const clusteredMediaFiles = clusterLivePhotos(
+                const clusteredMediaFiles = await clusterLivePhotos(
                     mediaFiles as ClusterableFile[],
                 );
 
@@ -775,7 +776,7 @@ type ClusteredFile = {
  * Go through the given files, combining any sibling image + video assets into a
  * single live photo when appropriate.
  */
-const clusterLivePhotos = (files: ClusterableFile[]) => {
+const clusterLivePhotos = async (files: ClusterableFile[]) => {
     const result: ClusteredFile[] = [];
     const filesWithName: (ClusterableFile & { fileName: string })[] = files.map(
         (f) => {
@@ -799,17 +800,15 @@ const clusterLivePhotos = (files: ClusterableFile[]) => {
             fileName: f.fileName,
             fileType: fFileType,
             collectionID: f.collectionID,
-            /* TODO(MR): ElectronFile changes */
-            size: (f as FileWithCollection).file.size,
+            fileOrPath: f.file,
         };
         const ga: PotentialLivePhotoAsset = {
             fileName: g.fileName,
             fileType: gFileType,
             collectionID: g.collectionID,
-            /* TODO(MR): ElectronFile changes */
-            size: (g as FileWithCollection).file.size,
+            fileOrPath: g.file,
         };
-        if (areLivePhotoAssets(fa, ga)) {
+        if (await areLivePhotoAssets(fa, ga)) {
             result.push({
                 localID: f.localID,
                 collectionID: f.collectionID,
@@ -841,10 +840,10 @@ interface PotentialLivePhotoAsset {
     fileName: string;
     fileType: FILE_TYPE;
     collectionID: number;
-    size: number;
+    fileOrPath: File | string;
 }
 
-const areLivePhotoAssets = (
+const areLivePhotoAssets = async (
     f: PotentialLivePhotoAsset,
     g: PotentialLivePhotoAsset,
 ) => {
@@ -884,9 +883,11 @@ const areLivePhotoAssets = (
     // we use doesn't support stream as a input.
 
     const maxAssetSize = 20 * 1024 * 1024; /* 20MB */
-    if (f.size > maxAssetSize || g.size > maxAssetSize) {
+    const fSize = await fopSize(f.fileOrPath);
+    const gSize = await fopSize(g.fileOrPath);
+    if (fSize > maxAssetSize || gSize > maxAssetSize) {
         log.info(
-            `Not classifying assets with too large sizes ${[f.size, g.size]} as a live photo`,
+            `Not classifying assets with too large sizes ${[fSize, gSize]} as a live photo`,
         );
         return false;
     }
