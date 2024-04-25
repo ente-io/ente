@@ -6,8 +6,6 @@ import isElectron from "is-electron";
 import { exportMetadataDirectoryName } from "services/export";
 import { FileWithCollection, type FileWithCollection2 } from "types/upload";
 
-const TYPE_JSON = "json";
-
 export const hasFileHash = (file: Metadata) =>
     file.hash || (file.imageHash && file.videoHash);
 
@@ -18,7 +16,7 @@ export function segregateMetadataAndMediaFiles(
     const mediaFiles: FileWithCollection[] = [];
     filesWithCollectionToUpload.forEach((fileWithCollection) => {
         const file = fileWithCollection.file;
-        if (file.name.toLowerCase().endsWith(TYPE_JSON)) {
+        if (file.name.toLowerCase().endsWith("json")) {
             metadataJSONFiles.push(fileWithCollection);
         } else {
             mediaFiles.push(fileWithCollection);

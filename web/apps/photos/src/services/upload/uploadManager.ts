@@ -364,15 +364,14 @@ class UploadManager {
         uploaderName?: string,
     ) {
         try {
-            if (this.uploadInProgress) {
-                throw Error("can't run multiple uploads at once");
-            }
+            if (this.uploadInProgress)
+                throw new Error("Cannot run multiple uploads at once");
+
+            log.info(`Uploading ${filesWithCollectionToUploadIn.length} files`);
             this.uploadInProgress = true;
             await this.updateExistingFilesAndCollections(collections);
             this.uploaderName = uploaderName;
-            log.info(
-                `received ${filesWithCollectionToUploadIn.length} files to upload`,
-            );
+
             this.uiService.setFilenames(
                 new Map<number, string>(
                     filesWithCollectionToUploadIn.map((mediaFile) => [
@@ -381,10 +380,10 @@ class UploadManager {
                     ]),
                 ),
             );
+
             const { metadataJSONFiles, mediaFiles } =
                 segregateMetadataAndMediaFiles(filesWithCollectionToUploadIn);
-            log.info(`has ${metadataJSONFiles.length} metadata json files`);
-            log.info(`has ${mediaFiles.length} media files`);
+
             if (metadataJSONFiles.length) {
                 this.uiService.setUploadStage(
                     UPLOAD_STAGES.READING_GOOGLE_METADATA_FILES,
@@ -458,44 +457,21 @@ class UploadManager {
     };
 
     private async parseMetadataJSONFiles(metadataFiles: FileWithCollection2[]) {
-        try {
-            log.info(`parseMetadataJSONFiles function executed `);
+        this.uiService.reset(metadataFiles.length);
 
-            this.uiService.reset(metadataFiles.length);
+        for (const { file, collectionID } of metadataFiles) {
+            this.abortIfCancelled();
 
-            for (const { file, collectionID } of metadataFiles) {
-                this.abortIfCancelled();
-                const name = getFileName(file);
-                try {
-                    log.info(`parsing metadata json file ${name}`);
-
-                    const metadataJSON =
-                        await tryParseTakeoutMetadataJSON(file);
-                    if (metadataJSON) {
-                        this.parsedMetadataJSONMap.set(
-                            getMetadataJSONMapKeyForJSON(collectionID, name),
-                            metadataJSON && { ...metadataJSON },
-                        );
-                        this.uiService.increaseFileUploaded();
-                    }
-                    log.info(`successfully parsed metadata json file ${name}`);
-                } catch (e) {
-                    if (e.message === CustomError.UPLOAD_CANCELLED) {
-                        throw e;
-                    } else {
-                        // and don't break for subsequent files just log and move on
-                        log.error("parsing failed for a file", e);
-                        log.info(
-                            `failed to parse metadata json file ${name} error: ${e.message}`,
-                        );
-                    }
-                }
+            const fileName = getFileName(file);
+            log.info(`Parsing metadata JSON ${fileName}`);
+            const metadataJSON = await tryParseTakeoutMetadataJSON(file);
+            if (metadataJSON) {
+                this.parsedMetadataJSONMap.set(
+                    getMetadataJSONMapKeyForJSON(collectionID, fileName),
+                    metadataJSON,
+                );
+                this.uiService.increaseFileUploaded();
             }
-        } catch (e) {
-            if (e.message !== CustomError.UPLOAD_CANCELLED) {
-                log.error("error seeding MetadataMap", e);
-            }
-            throw e;
         }
     }
 
