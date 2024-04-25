@@ -495,7 +495,7 @@ const readFOPFileTypeInfoAndSize = async (
 const readEntireStream = async (stream: ReadableStream) =>
     new Uint8Array(await new Response(stream).arrayBuffer());
 
-interface ExtractMetadataResult {
+interface ExtractAssetMetadataResult {
     metadata: Metadata;
     publicMagicMetadata: FilePublicMagicMetadataProps;
 }
@@ -510,50 +510,45 @@ const extractAssetMetadata = async (
     collectionID: number,
     parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
     worker: Remote<DedicatedCryptoWorker>,
-): Promise<ExtractMetadataResult> => {
-    return isLivePhoto
+): Promise<ExtractAssetMetadataResult> =>
+    isLivePhoto
         ? await extractLivePhotoMetadata(
-              worker,
-              parsedMetadataJSONMap,
-              collectionID,
-              fileTypeInfo,
               livePhotoAssets,
-          )
-        : await extractFileMetadata(
-              worker,
-              parsedMetadataJSONMap,
-              collectionID,
               fileTypeInfo,
+              collectionID,
+              parsedMetadataJSONMap,
+              worker,
+          )
+        : await extractImageOrVideoMetadata(
               file,
+              fileTypeInfo,
+              collectionID,
+              parsedMetadataJSONMap,
+              worker,
           );
-};
 
-async function extractLivePhotoMetadata(
-    worker: Remote<DedicatedCryptoWorker>,
-    parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
-    collectionID: number,
-    fileTypeInfo: FileTypeInfo,
+const extractLivePhotoMetadata = async (
     livePhotoAssets: LivePhotoAssets2,
-): Promise<ExtractMetadataResult> {
+    fileTypeInfo: FileTypeInfo,
+    collectionID: number,
+    parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
+    worker: Remote<DedicatedCryptoWorker>,
+) => {
     const imageFileTypeInfo: FileTypeInfo = {
         fileType: FILE_TYPE.IMAGE,
         extension: fileTypeInfo.imageType,
     };
-    const {
-        metadata: imageMetadata,
-        publicMagicMetadata: imagePublicMagicMetadata,
-    } = await extractFileMetadata(
-        worker,
-        parsedMetadataJSONMap,
-        collectionID,
-        imageFileTypeInfo,
-        livePhotoAssets.image,
-    );
-    const videoHash = await getFileHash(
-        worker,
-        /* TODO(MR): ElectronFile changes */
-        livePhotoAssets.video as File | ElectronFile,
-    );
+    const { metadata: imageMetadata, publicMagicMetadata } =
+        await extractImageOrVideoMetadata(
+            livePhotoAssets.image,
+            imageFileTypeInfo,
+            collectionID,
+            parsedMetadataJSONMap,
+            worker,
+        );
+
+    const videoHash = await computeHash(livePhotoAssets.video, worker);
+
     return {
         metadata: {
             ...imageMetadata,
@@ -563,20 +558,20 @@ async function extractLivePhotoMetadata(
             videoHash: videoHash,
             hash: undefined,
         },
-        publicMagicMetadata: imagePublicMagicMetadata,
+        publicMagicMetadata,
     };
-}
+};
 
-async function extractFileMetadata(
-    worker: Remote<DedicatedCryptoWorker>,
-    parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
-    collectionID: number,
-    fileTypeInfo: FileTypeInfo,
+const extractImageOrVideoMetadata = async (
     rawFile: File | ElectronFile | string,
-): Promise<ExtractMetadataResult> {
+    fileTypeInfo: FileTypeInfo,
+    collectionID: number,
+    parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
+    worker: Remote<DedicatedCryptoWorker>,
+) => {
     const rawFileName = getFileName(rawFile);
     let key = getMetadataJSONMapKeyForFile(collectionID, rawFileName);
-    let googleMetadata: ParsedMetadataJSON = parsedMetadataJSONMap.get(key);
+    let googleMetadata = parsedMetadataJSONMap.get(key);
 
     if (!googleMetadata && key.length > MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT) {
         key = getClippedMetadataJSONMapKeyForFile(collectionID, rawFileName);
@@ -584,10 +579,10 @@ async function extractFileMetadata(
     }
 
     const { metadata, publicMagicMetadata } = await extractMetadata(
-        worker,
         /* TODO(MR): ElectronFile changes */
         rawFile as File | ElectronFile,
         fileTypeInfo,
+        worker,
     );
 
     for (const [key, value] of Object.entries(googleMetadata ?? {})) {
@@ -597,7 +592,7 @@ async function extractFileMetadata(
         metadata[key] = value;
     }
     return { metadata, publicMagicMetadata };
-}
+};
 
 const NULL_EXTRACTED_METADATA: ParsedExtractedMetadata = {
     location: NULL_LOCATION,
@@ -606,18 +601,18 @@ const NULL_EXTRACTED_METADATA: ParsedExtractedMetadata = {
     height: null,
 };
 
-async function extractMetadata(
-    worker: Remote<DedicatedCryptoWorker>,
+const extractMetadata = async (
     receivedFile: File | ElectronFile,
     fileTypeInfo: FileTypeInfo,
-): Promise<ExtractMetadataResult> {
+    worker: Remote<DedicatedCryptoWorker>,
+) => {
     let extractedMetadata: ParsedExtractedMetadata = NULL_EXTRACTED_METADATA;
     if (fileTypeInfo.fileType === FILE_TYPE.IMAGE) {
         extractedMetadata = await getImageMetadata(receivedFile, fileTypeInfo);
     } else if (fileTypeInfo.fileType === FILE_TYPE.VIDEO) {
         extractedMetadata = await getVideoMetadata(receivedFile);
     }
-    const hash = await getFileHash(worker, receivedFile);
+    const hash = await computeHash(receivedFile, worker);
 
     const metadata: Metadata = {
         title: receivedFile.name,
@@ -679,10 +674,11 @@ async function getVideoMetadata(file: File | ElectronFile) {
     return videoMetadata;
 }
 
-async function getFileHash(
+const computeHash = async (
+    fileOrPath: File | string,
     worker: Remote<DedicatedCryptoWorker>,
-    file: File | ElectronFile,
-) {
+) => {
+    const file = fileOrPath as File; /* TODO(MR): ElectronFile changes */
     try {
         log.info(`getFileHash called for ${getFileNameSize(file)}`);
         let filedata: DataStream;
@@ -717,7 +713,7 @@ async function getFileHash(
         log.error("getFileHash failed", e);
         log.info(`file hashing failed ${getFileNameSize(file)} ,${e.message} `);
     }
-}
+};
 
 const readAsset = async (
     fileTypeInfo: FileTypeInfo,
