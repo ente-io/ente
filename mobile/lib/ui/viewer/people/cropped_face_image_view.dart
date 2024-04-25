@@ -1,11 +1,14 @@
-import 'dart:developer' show log;
 import "dart:io" show File;
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import "package:image/image.dart" as img;
+import "package:logging/logging.dart";
 import "package:photos/face/model/face.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/utils/file_util.dart";
+import "package:photos/utils/image_util.dart";
 
 class CroppedFaceInfo {
   final Image image;
@@ -21,7 +24,7 @@ class CroppedFaceInfo {
   });
 }
 
-class CroppedFaceImageView extends StatelessWidget {
+class CroppedFaceImageView extends StatefulWidget {
   final EnteFile enteFile;
   final Face face;
 
@@ -32,85 +35,74 @@ class CroppedFaceImageView extends StatelessWidget {
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: getImage(),
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          return LayoutBuilder(
-            builder: ((context, constraints) {
-              final double imageAspectRatio = enteFile.width / enteFile.height;
-              final Image image = snapshot.data!;
+  CroppedFaceImageViewState createState() => CroppedFaceImageViewState();
+}
 
-              final double viewWidth = constraints.maxWidth;
-              final double viewHeight = constraints.maxHeight;
+class CroppedFaceImageViewState extends State<CroppedFaceImageView> {
+  ui.Image? _image;
+  final _logger = Logger("CroppedFaceImageView");
 
-              final faceBox = face.detection.box;
-
-              final double relativeFaceCenterX =
-                  faceBox.xMin + faceBox.width / 2;
-              final double relativeFaceCenterY =
-                  faceBox.yMin + faceBox.height / 2;
-
-              const double desiredFaceHeightRelativeToWidget = 8 / 10;
-              final double scale =
-                  (1 / faceBox.height) * desiredFaceHeightRelativeToWidget;
-
-              final double widgetCenterX = viewWidth / 2;
-              final double widgetCenterY = viewHeight / 2;
-
-              final double widgetAspectRatio = viewWidth / viewHeight;
-              final double imageToWidgetRatio =
-                  imageAspectRatio / widgetAspectRatio;
-
-              double offsetX =
-                  (widgetCenterX - relativeFaceCenterX * viewWidth) * scale;
-              double offsetY =
-                  (widgetCenterY - relativeFaceCenterY * viewHeight) * scale;
-
-              if (imageAspectRatio < widgetAspectRatio) {
-                // Landscape Image: Adjust offsetX more conservatively
-                offsetX = offsetX * imageToWidgetRatio;
-              } else {
-                // Portrait Image: Adjust offsetY more conservatively
-                offsetY = offsetY / imageToWidgetRatio;
-              }
-              return ClipRRect(
-                borderRadius: const BorderRadius.all(Radius.elliptical(16, 12)),
-                child: Transform.translate(
-                  offset: Offset(
-                    offsetX,
-                    offsetY,
-                  ),
-                  child: Transform.scale(
-                    scale: scale,
-                    child: image,
-                  ),
-                ),
-              );
-            }),
-          );
-        } else {
-          if (snapshot.hasError) {
-            log('Error getting cover face for person: ${snapshot.error}');
-          }
-          return ThumbnailWidget(
-            enteFile,
-          );
-        }
-      },
-    );
+  @override
+  void initState() {
+    super.initState();
+    _loadImage();
   }
 
-  Future<Image?> getImage() async {
-    final File? ioFile = await getFile(enteFile);
-    if (ioFile == null) {
+  @override
+  void dispose() {
+    super.dispose();
+    _image?.dispose();
+  }
+
+  Future<void> _loadImage() async {
+    final image = await getImage();
+    if (mounted) {
+      setState(() {
+        _image = image;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _image != null
+        ? LayoutBuilder(
+            builder: (context, constraints) {
+              return RawImage(
+                image: _image!,
+              );
+            },
+          )
+        : ThumbnailWidget(widget.enteFile);
+  }
+
+  Future<ui.Image?> getImage() async {
+    try {
+      final faceBox = widget.face.detection.box;
+      final File? ioFile = await getFile(widget.enteFile);
+      if (ioFile == null) {
+        return null;
+      }
+
+      final image = await img.decodeImageFile(ioFile.path);
+
+      if (image == null) {
+        throw Exception("Failed decoding image file ${widget.enteFile.title}}");
+      }
+
+      final croppedImage = img.copyCrop(
+        image,
+        x: (image.width * faceBox.xMin).round(),
+        y: (image.height * faceBox.yMin).round(),
+        width: (image.width * faceBox.width).round(),
+        height: (image.height * faceBox.height).round(),
+        antialias: false,
+      );
+
+      return convertImageToFlutterUi(croppedImage);
+    } catch (e, s) {
+      _logger.severe("Error getting image", e, s);
       return null;
     }
-
-    final imageData = await ioFile.readAsBytes();
-    final image = Image.memory(imageData, fit: BoxFit.contain);
-
-    return image;
   }
 }
