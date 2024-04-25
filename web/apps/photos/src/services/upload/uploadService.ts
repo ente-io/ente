@@ -709,19 +709,10 @@ const computeHash = async (
 const readAsset = async (
     fileTypeInfo: FileTypeInfo,
     { isLivePhoto, file, livePhotoAssets }: UploadAsset2,
-) => {
-    return isLivePhoto
+) =>
+    isLivePhoto
         ? await readLivePhoto(livePhotoAssets, fileTypeInfo)
         : await readImageOrVideo(file, fileTypeInfo);
-};
-
-const readImageOrVideo = async (
-    fileOrPath: File | string,
-    fileTypeInfo: FileTypeInfo,
-) => {
-    const { dataOrStream, fileSize } = await readFileOrPath(fileOrPath);
-    return withThumbnail(fileOrPath, fileTypeInfo, dataOrStream, fileSize);
-};
 
 const readLivePhoto = async (
     livePhotoAssets: LivePhotoAssets2,
@@ -743,12 +734,12 @@ const readLivePhoto = async (
     );
     const readVideo = await readFileOrPath(livePhotoAssets.video);
 
-    // We can revisit this later, but the existing code always read the
-    // full files into memory here, and to avoid changing the rest of
-    // the scaffolding retain the same behaviour.
+    // We can revisit this later, but the existing code always read the entire
+    // file into memory here, and to avoid changing the rest of the scaffolding
+    // retain the same behaviour.
     //
-    // This is a reasonable assumption too, since the videos
-    // corresponding to live photos are only a couple of seconds long.
+    // This is a reasonable assumption too, since the videos corresponding to
+    // live photos are only a couple of seconds long.
     const toData = async (dataOrStream: Uint8Array | DataStream) =>
         dataOrStream instanceof Uint8Array
             ? dataOrStream
@@ -764,6 +755,14 @@ const readLivePhoto = async (
         thumbnail,
         hasStaticThumbnail,
     };
+};
+
+const readImageOrVideo = async (
+    fileOrPath: File | string,
+    fileTypeInfo: FileTypeInfo,
+) => {
+    const { dataOrStream, fileSize } = await readFileOrPath(fileOrPath);
+    return withThumbnail(fileOrPath, fileTypeInfo, dataOrStream, fileSize);
 };
 
 // TODO(MR): Merge with the uploader
