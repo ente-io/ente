@@ -169,12 +169,10 @@ export const uploader = async (
     abortIfCancelled: () => void,
     makeProgessTracker: MakeProgressTracker,
 ): Promise<UploadResponse> => {
+    const { collection, localID, ...uploadAsset } = fileWithCollection;
     const name = assetName(fileWithCollection);
     log.info(`Uploading ${name}`);
 
-    const { collection, localID, ...uploadAsset2 } = fileWithCollection;
-    /* TODO(MR): ElectronFile changes */
-    const uploadAsset = uploadAsset2 as UploadAsset;
     try {
         /*
          * We read the file three times:
@@ -203,7 +201,7 @@ export const uploader = async (
         const { metadata, publicMagicMetadata } = await extractAssetMetadata(
             worker,
             parsedMetadataJSONMap,
-            uploadAsset2,
+            uploadAsset,
             collection.id,
             fileTypeInfo,
         );
@@ -237,7 +235,7 @@ export const uploader = async (
 
         abortIfCancelled();
 
-        const file = await readAsset(fileTypeInfo, uploadAsset2);
+        const file = await readAsset(fileTypeInfo, uploadAsset);
 
         if (file.hasStaticThumbnail) metadata.hasStaticThumbnail = true;
 
@@ -404,14 +402,48 @@ const readFileOrPath = async (
 };
 
 /**
- * Read the beginning of the file or use its filename to determine its MIME
- * type. Use that to construct and return a {@link FileTypeInfo}.
+ * Read the file(s) to determine the type and size of the given {@link asset}.
+ */
+const readFileTypeInfoAndSize = async ({
+    isLivePhoto,
+    livePhotoAssets,
+    file,
+}: UploadAsset2): Promise<{ fileTypeInfo: FileTypeInfo; fileSize: number }> =>
+    isLivePhoto
+        ? readLivePhotoFileTypeInfoAndSize(livePhotoAssets)
+        : readFOPFileTypeInfoAndSize(file);
+
+const readLivePhotoFileTypeInfoAndSize = async ({
+    image,
+    video,
+}: LivePhotoAssets2): Promise<{
+    fileTypeInfo: FileTypeInfo;
+    fileSize: number;
+}> => {
+    const img = await readFOPFileTypeInfoAndSize(image);
+    const vid = await readFOPFileTypeInfoAndSize(video);
+
+    return {
+        fileTypeInfo: {
+            fileType: FILE_TYPE.LIVE_PHOTO,
+            extension: `${img.fileTypeInfo.extension}+${vid.fileTypeInfo.extension}`,
+            imageType: img.fileTypeInfo.extension,
+            videoType: vid.fileTypeInfo.extension,
+        },
+        fileSize: img.fileSize + vid.fileSize,
+    };
+};
+
+/**
+ * Read the beginning of the given file (or its path), or use its filename as a
+ * fallback, to determine its MIME type. From that, construct and return a
+ * {@link FileTypeInfo}.
  *
  * While we're at it, also return the size of the file.
  *
  * @param fileOrPath See: [Note: Reading a fileOrPath]
  */
-const readFileTypeInfoAndSize = async (
+const readFOPFileTypeInfoAndSize = async (
     fileOrPath: File | string,
 ): Promise<{ fileTypeInfo: FileTypeInfo; fileSize: number }> => {
     const { dataOrStream, fileSize } = await readFileOrPath(fileOrPath);
@@ -429,49 +461,7 @@ const readFileTypeInfoAndSize = async (
 
     return { fileTypeInfo, fileSize };
 };
-/*
-    const getAssetSize = ({
-        isLivePhoto,
-        file,
-        livePhotoAssets,
-    }: UploadAsset) => {
-        return isLivePhoto
-            ? getLivePhotoSize(livePhotoAssets)
-            : getFileSize(file);
-    };
 
-    const getLivePhotoSize = (livePhotoAssets: LivePhotoAssets) => {
-        return livePhotoAssets.image.size + livePhotoAssets.video.size;
-    };
-
-    const getAssetFileType = ({
-        isLivePhoto,
-        file,
-        livePhotoAssets,
-    }: UploadAsset) => {
-        return isLivePhoto
-            ? getLivePhotoFileType(livePhotoAssets)
-            : detectFileTypeInfo(file);
-    };
-
-    const getLivePhotoFileType = async (
-        livePhotoAssets: LivePhotoAssets,
-    ): Promise<FileTypeInfo> => {
-        const imageFileTypeInfo = await detectFileTypeInfo(
-            livePhotoAssets.image,
-        );
-        const videoFileTypeInfo = await detectFileTypeInfo(
-            livePhotoAssets.video,
-        );
-        return {
-            fileType: FILE_TYPE.LIVE_PHOTO,
-            extension: `${imageFileTypeInfo.extension}+${videoFileTypeInfo.extension}`,
-            imageType: imageFileTypeInfo.extension,
-            videoType: videoFileTypeInfo.extension,
-        };
-    };
-};
-*/
 const readAsset = async (
     fileTypeInfo: FileTypeInfo,
     { isLivePhoto, file, livePhotoAssets }: UploadAsset2,
