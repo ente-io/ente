@@ -5,6 +5,7 @@ import { basename } from "@/next/file";
 import log from "@/next/log";
 import { ElectronFile } from "@/next/types/file";
 import { CustomErrorMessage } from "@/next/types/ipc";
+import { ensure } from "@/utils/ensure";
 import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
 import { EncryptionResult } from "@ente/shared/crypto/types";
 import { CustomError, handleUploadError } from "@ente/shared/error";
@@ -35,7 +36,6 @@ import {
     UploadFile,
     UploadURL,
     type FileWithCollection2,
-    type LivePhotoAssets,
     type LivePhotoAssets2,
     type Metadata,
     type UploadAsset2,
@@ -47,7 +47,7 @@ import {
 import { readStream } from "utils/native-stream";
 import { hasFileHash } from "utils/upload";
 import * as convert from "xml-js";
-import { detectFileTypeInfo } from "../detect-type";
+import { detectFileTypeInfoFromChunk } from "../detect-type";
 import { getFileStream } from "../readerService";
 import { extractAssetMetadata } from "./metadata";
 import publicUploadHttpClient from "./publicUploadHttpClient";
@@ -416,20 +416,20 @@ const readFileTypeInfoAndSize = async (
 ): Promise<{ fileTypeInfo: FileTypeInfo; fileSize: number }> => {
     const { dataOrStream, fileSize } = await readFileOrPath(fileOrPath);
 
-    function getFileSize(file: File | ElectronFile) {
-        return file.size;
-    }
+    const fileTypeInfo = await detectFileTypeInfoFromChunk(async () => {
+        if (dataOrStream instanceof Uint8Array) {
+            return dataOrStream;
+        } else {
+            const reader = dataOrStream.stream.getReader();
+            const chunk = ensure((await reader.read()).value);
+            await reader.cancel();
+            return chunk;
+        }
+    }, getFileName(fileOrPath));
 
-    async function extractElectronFileType(file: ElectronFile) {
-        const stream = await file.stream();
-        const reader = stream.getReader();
-        const { value: fileDataChunk } = await reader.read();
-        await reader.cancel();
-        return getFileTypeFromBuffer(fileDataChunk);
-    }
-
-    fileSize = getAssetSize(uploadAsset);
-    fileTypeInfo = await getAssetFileType(uploadAsset);
+    return { fileTypeInfo, fileSize };
+};
+/*
     const getAssetSize = ({
         isLivePhoto,
         file,
@@ -471,7 +471,7 @@ const readFileTypeInfoAndSize = async (
         };
     };
 };
-
+*/
 const readAsset = async (
     fileTypeInfo: FileTypeInfo,
     { isLivePhoto, file, livePhotoAssets }: UploadAsset2,
