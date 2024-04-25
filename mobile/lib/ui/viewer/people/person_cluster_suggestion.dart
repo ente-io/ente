@@ -1,4 +1,4 @@
-import "dart:async" show unawaited;
+import "dart:async" show StreamSubscription, unawaited;
 import "dart:math";
 
 import "package:flutter/foundation.dart" show kDebugMode;
@@ -30,16 +30,25 @@ class PersonReviewClusterSuggestion extends StatefulWidget {
 
 class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
   int currentSuggestionIndex = 0;
+  bool fetch = true;
   Key futureBuilderKey = UniqueKey();
 
   // Declare a variable for the future
   late Future<List<ClusterSuggestion>> futureClusterSuggestions;
+  late StreamSubscription<PeopleChangedEvent> _peopleChangedEvent;
 
   @override
   void initState() {
     super.initState();
     // Initialize the future in initState
-    _fetchClusterSuggestions();
+    if (fetch) _fetchClusterSuggestions();
+    fetch = true;
+  }
+
+  @override
+  void dispose() {
+    _peopleChangedEvent.cancel();
+    super.dispose();
   }
 
   @override
@@ -62,6 +71,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
                 ),
               );
             }
+
             final allSuggestions = snapshot.data!;
             final numberOfDifferentSuggestions = allSuggestions.length;
             final currentSuggestion = allSuggestions[currentSuggestionIndex];
@@ -69,6 +79,19 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
             final double distance = currentSuggestion.distancePersonToCluster;
             final bool usingMean = currentSuggestion.usedOnlyMeanForSuggestion;
             final List<EnteFile> files = currentSuggestion.filesInCluster;
+
+            _peopleChangedEvent =
+                Bus.instance.on<PeopleChangedEvent>().listen((event) {
+              if (event.type == PeopleEventType.removedFilesFromCluster &&
+                  (event.source == clusterID.toString())) {
+                for (var updatedFile in event.relevantFiles!) {
+                  files.remove(updatedFile);
+                }
+                fetch = false;
+                setState(() {});
+              }
+            });
+
             return InkWell(
               onTap: () {
                 Navigator.of(context).push(
@@ -161,7 +184,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
     List<ClusterSuggestion> allSuggestions,
   ) {
     final widgetToReturn = Column(
-      key: ValueKey("cluster_id-$clusterID"),
+      key: ValueKey("cluster_id-$clusterID-files-${files.length}"),
       children: <Widget>[
         if (kDebugMode)
           Text(
