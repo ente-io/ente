@@ -401,9 +401,7 @@ class UploadManager {
                     mediaFiles as ClusterableFile[],
                 );
 
-                if (uploadCancelService.isUploadCancelationRequested()) {
-                    throw Error(CustomError.UPLOAD_CANCELLED);
-                }
+                this.abortIfCancelled();
 
                 this.uiService.setFilenames(
                     new Map<number, string>(
@@ -531,9 +529,8 @@ class UploadManager {
         const uiService = this.uiService;
 
         while (this.filesToBeUploaded.length > 0) {
-            if (uploadCancelService.isUploadCancelationRequested()) {
-                throw Error(CustomError.UPLOAD_CANCELLED);
-            }
+            this.abortIfCancelled();
+
             let fileWithCollection = this.filesToBeUploaded.pop();
             const { collectionID } = fileWithCollection;
             const collection = this.collections.get(collectionID);
