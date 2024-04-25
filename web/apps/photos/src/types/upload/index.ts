@@ -55,7 +55,7 @@ export interface LivePhotoAssets2 {
 export interface FileWithCollection2 extends UploadAsset2 {
     localID: number;
     collection?: Collection;
-    collectionID?: number;
+    collectionID: number;
 }
 
 export interface UploadURL {

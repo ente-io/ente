@@ -32,7 +32,6 @@ import {
     PublicUploadProps,
     type FileWithCollection2,
     type LivePhotoAssets2,
-    type UploadAsset2,
 } from "types/upload";
 import {
     FinishedUploads,
@@ -48,12 +47,7 @@ import {
     tryParseTakeoutMetadataJSON,
     type ParsedMetadataJSON,
 } from "./takeout";
-import UploadService, {
-    assetName,
-    fopSize,
-    getFileName,
-    uploader,
-} from "./uploadService";
+import UploadService, { assetName, fopSize, uploader } from "./uploadService";
 
 /** The number of uploads to process in parallel. */
 const maxConcurrentUploads = 4;
@@ -383,25 +377,21 @@ class UploadManager {
             }
 
             if (mediaFiles.length) {
-                /* TODO(MR): ElectronFile changes */
-                const clusteredMediaFiles = await clusterLivePhotos(
-                    mediaFiles as ClusterableFile[],
-                );
+                const clusteredMediaFiles = await clusterLivePhotos(mediaFiles);
 
                 this.abortIfCancelled();
 
                 this.uiService.setFilenames(
                     new Map<number, string>(
-                        clusteredMediaFiles.map((mediaFile) => [
-                            mediaFile.localID,
-                            /* TODO(MR): ElectronFile changes */
-                            assetName(mediaFile as FileWithCollection2),
+                        clusteredMediaFiles.map((file) => [
+                            file.localID,
+                            file.fileName,
                         ]),
                     ),
                 );
 
                 this.uiService.setHasLivePhoto(
-                    mediaFiles.length !== clusteredMediaFiles.length,
+                    mediaFiles.length != clusteredMediaFiles.length,
                 );
 
                 /* TODO(MR): ElectronFile changes */
@@ -740,28 +730,25 @@ const cancelRemainingUploads = async () => {
     await electron.setPendingUploadFiles("files", []);
 };
 
-type FileWithCollectionIDAndName = UploadAsset2 & {
-    localID: number;
-    collectionID?: number;
-    fileName: string;
-};
-
 /**
- * The data needed by {@link clusterLivePhotos} to do its thing.
+ * The data operated on by the intermediate stages of the upload.
  *
  * As files progress through stages, they get more and more bits tacked on to
  * them. These types document the journey.
  */
-type ClusterableFile = {
+type FileWithCollectionIDAndName = {
     localID: number;
     collectionID: number;
-    // fileOrPath: File | ElectronFile | string;
-    file: File | string;
+    fileName: string;
+    isLivePhoto?: boolean;
+    file?: File | string;
+    livePhotoAssets?: LivePhotoAssets2;
 };
 
 type ClusteredFile = {
     localID: number;
     collectionID: number;
+    fileName: string;
     isLivePhoto: boolean;
     file?: File | string;
     livePhotoAssets?: LivePhotoAssets2;
@@ -771,14 +758,9 @@ type ClusteredFile = {
  * Go through the given files, combining any sibling image + video assets into a
  * single live photo when appropriate.
  */
-const clusterLivePhotos = async (files: ClusterableFile[]) => {
+const clusterLivePhotos = async (files: FileWithCollectionIDAndName[]) => {
     const result: ClusteredFile[] = [];
-    const filesWithName: (ClusterableFile & { fileName: string })[] = files.map(
-        (f) => {
-            return { ...f, fileName: getFileName(f.file) };
-        },
-    );
-    filesWithName
+    files
         .sort((f, g) =>
             nameAndExtension(f.fileName)[0].localeCompare(
                 nameAndExtension(g.fileName)[0],
@@ -786,9 +768,9 @@ const clusterLivePhotos = async (files: ClusterableFile[]) => {
         )
         .sort((f, g) => f.collectionID - g.collectionID);
     let index = 0;
-    while (index < filesWithName.length - 1) {
-        const f = filesWithName[index];
-        const g = filesWithName[index + 1];
+    while (index < files.length - 1) {
+        const f = files[index];
+        const g = files[index + 1];
         const fFileType = potentialFileTypeFromExtension(f.fileName);
         const gFileType = potentialFileTypeFromExtension(g.fileName);
         const fa: PotentialLivePhotoAsset = {
@@ -804,7 +786,7 @@ const clusterLivePhotos = async (files: ClusterableFile[]) => {
             fileOrPath: g.file,
         };
         if (await areLivePhotoAssets(fa, ga)) {
-            result.push({
+            const livePhoto = {
                 localID: f.localID,
                 collectionID: f.collectionID,
                 isLivePhoto: true,
@@ -812,6 +794,10 @@ const clusterLivePhotos = async (files: ClusterableFile[]) => {
                     image: fFileType == FILE_TYPE.IMAGE ? f.file : g.file,
                     video: fFileType == FILE_TYPE.IMAGE ? g.file : f.file,
                 },
+            };
+            result.push({
+                ...livePhoto,
+                fileName: assetName(livePhoto),
             });
             index += 2;
         } else {
@@ -822,9 +808,9 @@ const clusterLivePhotos = async (files: ClusterableFile[]) => {
             index += 1;
         }
     }
-    if (index === filesWithName.length - 1) {
+    if (index === files.length - 1) {
         result.push({
-            ...filesWithName[index],
+            ...files[index],
             isLivePhoto: false,
         });
     }

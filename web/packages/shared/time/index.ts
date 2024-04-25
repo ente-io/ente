@@ -5,7 +5,6 @@ export interface TimeDelta {
     years?: number;
 }
 
-
 export function getUnixTimeInMicroSecondsWithDelta(delta: TimeDelta): number {
     let currentDate = new Date();
     if (delta?.hours) {

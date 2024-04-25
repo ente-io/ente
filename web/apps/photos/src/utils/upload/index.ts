@@ -4,17 +4,9 @@ import { ElectronFile } from "@/next/types/file";
 import { PICKED_UPLOAD_TYPE } from "constants/upload";
 import isElectron from "is-electron";
 import { exportMetadataDirectoryName } from "services/export";
-import { FileWithCollection, type FileWithCollection2 } from "types/upload";
 
 export const hasFileHash = (file: Metadata) =>
     file.hash || (file.imageHash && file.videoHash);
-
-export function areFileWithCollectionsSame(
-    firstFile: FileWithCollection2,
-    secondFile: FileWithCollection2,
-): boolean {
-    return firstFile.localID === secondFile.localID;
-}
 
 /**
  * Return true if all the paths in the given list are items that belong to the
