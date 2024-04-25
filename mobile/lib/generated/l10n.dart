@@ -8583,6 +8583,26 @@ class S {
       args: [],
     );
   }
+
+  /// `Auto Pair requires connecting to Google servers and only works with Chromecast supported devices. Google will not receive sensitive data, such as your photos.`
+  String get autoPairGoogle {
+    return Intl.message(
+      'Auto Pair requires connecting to Google servers and only works with Chromecast supported devices. Google will not receive sensitive data, such as your photos.',
+      name: 'autoPairGoogle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Pair with PIN works for any large screen device you want to play your album on.`
+  String get manualPairDesc {
+    return Intl.message(
+      'Pair with PIN works for any large screen device you want to play your album on.',
+      name: 'manualPairDesc',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

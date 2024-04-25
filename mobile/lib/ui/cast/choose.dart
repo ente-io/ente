@@ -1,6 +1,6 @@
 import "package:flutter/material.dart";
 import "package:photos/generated/l10n.dart";
-import "package:photos/service_locator.dart";
+import "package:photos/l10n/l10n.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
@@ -11,10 +11,10 @@ class CastChooseDialog extends StatefulWidget {
   }) : super(key: key) {}
 
   @override
-  State<CastChooseDialog> createState() => _AutoCastDialogState();
+  State<CastChooseDialog> createState() => _CastChooseDialogState();
 }
 
-class _AutoCastDialogState extends State<CastChooseDialog> {
+class _CastChooseDialogState extends State<CastChooseDialog> {
   final bool doesUserExist = true;
 
   @override
@@ -22,7 +22,7 @@ class _AutoCastDialogState extends State<CastChooseDialog> {
     final textStyle = getEnteTextTheme(context);
     final AlertDialog alert = AlertDialog(
       title: Text(
-        "Play album on TV",
+        context.l10n.playOnTv,
         style: textStyle.largeBold,
       ),
       content: Column(
@@ -31,7 +31,7 @@ class _AutoCastDialogState extends State<CastChooseDialog> {
         children: [
           const SizedBox(height: 8),
           Text(
-            "Auto Pair requires connecting to Google servers and only works with Chromecast supported devices. Google will not receive sensitive data, such as your photos.",
+            S.of(context).autoPairGoogle,
             style: textStyle.bodyMuted,
           ),
           const SizedBox(height: 12),
@@ -50,7 +50,7 @@ class _AutoCastDialogState extends State<CastChooseDialog> {
           ),
           const SizedBox(height: 36),
           Text(
-            "Pair with PIN works for any large screen device you want to play your album on.",
+            S.of(context).manualPairDesc,
             style: textStyle.bodyMuted,
           ),
           const SizedBox(height: 12),
@@ -72,12 +72,5 @@ class _AutoCastDialogState extends State<CastChooseDialog> {
       ),
     );
     return alert;
-  }
-
-  Future<void> _connectToYourApp(
-    BuildContext context,
-    Object castDevice,
-  ) async {
-    await castService.connectDevice(context, castDevice);
   }
 }

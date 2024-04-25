@@ -358,6 +358,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "authenticationSuccessful":
             MessageLookupByLibrary.simpleMessage("Authentication successful!"),
         "autoPair": MessageLookupByLibrary.simpleMessage("Auto pair"),
+        "autoPairGoogle": MessageLookupByLibrary.simpleMessage(
+            "Auto Pair requires connecting to Google servers and only works with Chromecast supported devices. Google will not receive sensitive data, such as your photos."),
         "available": MessageLookupByLibrary.simpleMessage("Available"),
         "backedUpFolders":
             MessageLookupByLibrary.simpleMessage("Backed up folders"),
@@ -903,6 +905,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "manageParticipants": MessageLookupByLibrary.simpleMessage("Manage"),
         "manageSubscription":
             MessageLookupByLibrary.simpleMessage("Manage subscription"),
+        "manualPairDesc": MessageLookupByLibrary.simpleMessage(
+            "Pair with PIN works for any large screen device you want to play your album on."),
         "map": MessageLookupByLibrary.simpleMessage("Map"),
         "maps": MessageLookupByLibrary.simpleMessage("Maps"),
         "mastodon": MessageLookupByLibrary.simpleMessage("Mastodon"),
