@@ -62,9 +62,15 @@ const handleRead = async (path: string) => {
             // this is binary data.
             res.headers.set("Content-Type", "application/octet-stream");
 
+            const stat = await fs.stat(path);
+
             // Add the file's size as the Content-Length header.
-            const fileSize = (await fs.stat(path)).size;
+            const fileSize = stat.size;
             res.headers.set("Content-Length", `${fileSize}`);
+
+            // Add the file's last modified time (as epoch milliseconds).
+            const mtimeMs = stat.mtimeMs;
+            res.headers.set("X-Last-Modified-Ms", `${mtimeMs}`);
         }
         return res;
     } catch (e) {

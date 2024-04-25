@@ -375,21 +375,32 @@ export const assetName = ({
  */
 const readFileOrPath = async (
     fileOrPath: File | string,
-): Promise<{ dataOrStream: Uint8Array | DataStream; fileSize: number }> => {
+): Promise<{
+    dataOrStream: Uint8Array | DataStream;
+    fileSize: number;
+    lastModifiedMs: number;
+}> => {
     let dataOrStream: Uint8Array | DataStream;
     let fileSize: number;
+    let lastModifiedMs: number;
 
     if (fileOrPath instanceof File) {
         const file = fileOrPath;
         fileSize = file.size;
+        lastModifiedMs = file.lastModified;
         dataOrStream =
             fileSize > MULTIPART_PART_SIZE
                 ? getFileStream(file, FILE_READER_CHUNK_SIZE)
                 : new Uint8Array(await file.arrayBuffer());
     } else {
         const path = fileOrPath;
-        const { response, size } = await readStream(ensureElectron(), path);
+        const {
+            response,
+            size,
+            lastModifiedMs: lm,
+        } = await readStream(ensureElectron(), path);
         fileSize = size;
+        lastModifiedMs = lm;
         if (size > MULTIPART_PART_SIZE) {
             const chunkCount = Math.ceil(size / FILE_READER_CHUNK_SIZE);
             dataOrStream = { stream: response.body, chunkCount };
@@ -398,7 +409,7 @@ const readFileOrPath = async (
         }
     }
 
-    return { dataOrStream, fileSize };
+    return { dataOrStream, fileSize, lastModifiedMs };
 };
 
 /**

@@ -34,7 +34,7 @@ type RawEXIFData = Record<string, any> &
         ImageHeight: number;
     }>;
 
-const EXIF_TAGS_NEEDED = [
+const exifTagsNeededForParsingImageMetadata = [
     "DateTimeOriginal",
     "CreateDate",
     "ModifyDate",
@@ -53,31 +53,19 @@ const EXIF_TAGS_NEEDED = [
 ];
 
 /**
- * Read EXIF data from an image and use that to construct and return an
- * {@link ParsedExtractedMetadata}. This function is tailored for use when we
- * upload files.
+ * Read EXIF data from an image {@link file} and use that to construct and
+ * return an {@link ParsedExtractedMetadata}.
  *
- * @param fileOrData The image {@link File}, or its contents.
+ * This function is tailored for use when we upload files.
  */
 export const parseImageMetadata = async (
-    fileOrData: File | Uint8Array,
+    file: File,
     fileTypeInfo: FileTypeInfo,
 ): Promise<ParsedExtractedMetadata> => {
-    /*
-        if (!(receivedFile instanceof File)) {
-            receivedFile = new File(
-                [await receivedFile.blob()],
-                receivedFile.name,
-                {
-                    lastModified: receivedFile.lastModified,
-                },
-            );
-        }
-        */
     const exifData = await getParsedExifData(
-        fileOrData,
+        file,
         fileTypeInfo,
-        EXIF_TAGS_NEEDED,
+        exifTagsNeededForParsingImageMetadata,
     );
 
     return {
