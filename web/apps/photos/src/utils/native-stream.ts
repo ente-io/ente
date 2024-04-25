@@ -19,18 +19,21 @@ import type { Electron } from "@/next/types/ipc";
  * @param path The path on the file on the user's local filesystem whose
  * contents we want to stream.
  *
- * @return A ({@link Response}, size) tuple.
+ * @return A ({@link Response}, size, lastModifiedMs) triple.
  *
  * * The response contains the contents of the file. In particular, the `body`
  *   {@link ReadableStream} property of this response can be used to read the
  *   files contents in a streaming manner.
  *
  * * The size is the size of the file that we'll be reading from disk.
+ *
+ * * The lastModifiedMs value is the last modified time of the file that we're
+ *   reading, expressed as epoch milliseconds.
  */
 export const readStream = async (
     _: Electron,
     path: string,
-): Promise<{ response: Response; size: number }> => {
+): Promise<{ response: Response; size: number; lastModifiedMs: number }> => {
     const req = new Request(`stream://read${path}`, {
         method: "GET",
     });
@@ -41,13 +44,19 @@ export const readStream = async (
             `Failed to read stream from ${path}: HTTP ${res.status}`,
         );
 
-    const size = +res.headers["Content-Length"];
-    if (isNaN(size))
-        throw new Error(
-            `Got a numeric Content-Length when reading a stream. The response was ${res}`,
-        );
+    const size = readNumericHeader(res, "Content-Length");
+    const lastModifiedMs = readNumericHeader(res, "X-Last-Modified-Ms");
 
-    return { response: res, size };
+    return { response: res, size, lastModifiedMs };
+};
+
+const readNumericHeader = (res: Response, key: string) => {
+    const value = +res.headers[key];
+    if (isNaN(value))
+        throw new Error(
+            `Expected a numeric ${key} when reading a stream response: ${res}`,
+        );
+    return value;
 };
 
 /**

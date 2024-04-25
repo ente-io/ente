@@ -122,6 +122,9 @@ const fsWriteFile = (path: string, contents: string): Promise<void> =>
 const fsIsDir = (dirPath: string): Promise<boolean> =>
     ipcRenderer.invoke("fsIsDir", dirPath);
 
+const fsSize = (path: string): Promise<number> =>
+    ipcRenderer.invoke("fsSize", path);
+
 // - Conversion
 
 const convertToJPEG = (imageData: Uint8Array): Promise<Uint8Array> =>
@@ -331,6 +334,7 @@ contextBridge.exposeInMainWorld("electron", {
         readTextFile: fsReadTextFile,
         writeFile: fsWriteFile,
         isDir: fsIsDir,
+        size: fsSize,
     },
 
     // - Conversion

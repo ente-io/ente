@@ -77,7 +77,7 @@ export const ffmpegExec = async (
             if (isInputFileTemporary) await deleteTempFile(inputFilePath);
             await deleteTempFile(outputFilePath);
         } catch (e) {
-            log.error("Ignoring error when cleaning up temp files", e);
+            log.error("Could not clean up temp files", e);
         }
     }
 };

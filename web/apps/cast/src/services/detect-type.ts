@@ -1,5 +1,5 @@
 import { KnownFileTypeInfos } from "@/media/file-type";
-import { nameAndExtension } from "@/next/file";
+import { lowercaseExtension } from "@/next/file";
 import FileType from "file-type";
 
 /**
@@ -22,8 +22,7 @@ export const detectMediaMIMEType = async (file: File): Promise<string> => {
         else throw new Error(`Detected MIME type ${mime} is not a media file`);
     }
 
-    let [, ext] = nameAndExtension(file.name);
+    const ext = lowercaseExtension(file.name);
     if (!ext) return undefined;
-    ext = ext.toLowerCase();
-    return KnownFileTypeInfos.find((f) => f.exactType == ext)?.mimeType;
+    return KnownFileTypeInfos.find((f) => f.extension == ext)?.mimeType;
 };

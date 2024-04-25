@@ -1,4 +1,8 @@
-import { fileNameFromComponents, nameAndExtension } from "@/next/file";
+import {
+    fileNameFromComponents,
+    lowercaseExtension,
+    nameAndExtension,
+} from "@/next/file";
 import JSZip from "jszip";
 import { FILE_TYPE } from "./file-type";
 
@@ -38,10 +42,8 @@ const potentialVideoExtensions = [
 export const potentialFileTypeFromExtension = (
     fileName: string,
 ): FILE_TYPE | undefined => {
-    let [, ext] = nameAndExtension(fileName);
+    const ext = lowercaseExtension(fileName);
     if (!ext) return undefined;
-
-    ext = ext.toLowerCase();
 
     if (potentialImageExtensions.includes(ext)) return FILE_TYPE.IMAGE;
     else if (potentialVideoExtensions.includes(ext)) return FILE_TYPE.VIDEO;

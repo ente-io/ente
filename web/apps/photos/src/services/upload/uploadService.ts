@@ -1,10 +1,12 @@
 import { FILE_TYPE, type FileTypeInfo } from "@/media/file-type";
 import { encodeLivePhoto } from "@/media/live-photo";
+import type { Metadata } from "@/media/types/file";
 import { ensureElectron } from "@/next/electron";
 import { basename } from "@/next/file";
 import log from "@/next/log";
 import { ElectronFile } from "@/next/types/file";
 import { CustomErrorMessage } from "@/next/types/ipc";
+import { ensure } from "@/utils/ensure";
 import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
 import { EncryptionResult } from "@ente/shared/crypto/types";
 import { CustomError, handleUploadError } from "@ente/shared/error";
@@ -14,10 +16,13 @@ import {
     FILE_CHUNKS_COMBINED_FOR_A_UPLOAD_PART,
     FILE_READER_CHUNK_SIZE,
     MULTIPART_PART_SIZE,
+    NULL_LOCATION,
     RANDOM_PERCENTAGE_PROGRESS_FOR_PUT,
     UPLOAD_RESULT,
 } from "constants/upload";
 import { addToCollection } from "services/collectionService";
+import { parseImageMetadata } from "services/exif";
+import * as ffmpeg from "services/ffmpeg";
 import {
     EnteFile,
     type FilePublicMagicMetadata,
@@ -29,15 +34,14 @@ import {
     EncryptedFile,
     FileInMemory,
     FileWithMetadata,
+    ParsedExtractedMetadata,
     ProcessedFile,
     PublicUploadProps,
     UploadAsset,
     UploadFile,
     UploadURL,
     type FileWithCollection2,
-    type LivePhotoAssets,
     type LivePhotoAssets2,
-    type Metadata,
     type UploadAsset2,
 } from "types/upload";
 import {
@@ -47,11 +51,12 @@ import {
 import { readStream } from "utils/native-stream";
 import { hasFileHash } from "utils/upload";
 import * as convert from "xml-js";
+import { detectFileTypeInfoFromChunk } from "../detect-type";
 import { getFileStream } from "../readerService";
-import { getFileType } from "../typeDetectionService";
-import { extractAssetMetadata } from "./metadata";
+import { tryParseEpochMicrosecondsFromFileName } from "./date";
 import publicUploadHttpClient from "./publicUploadHttpClient";
 import type { ParsedMetadataJSON } from "./takeout";
+import { matchTakeoutMetadata } from "./takeout";
 import {
     fallbackThumbnail,
     generateThumbnailNative,
@@ -160,38 +165,52 @@ interface UploadResponse {
 }
 
 export const uploader = async (
-    worker: Remote<DedicatedCryptoWorker>,
-    existingFiles: EnteFile[],
     fileWithCollection: FileWithCollection2,
-    parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
     uploaderName: string,
+    existingFiles: EnteFile[],
+    parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
+    worker: Remote<DedicatedCryptoWorker>,
     isCFUploadProxyDisabled: boolean,
     abortIfCancelled: () => void,
     makeProgessTracker: MakeProgressTracker,
 ): Promise<UploadResponse> => {
-    const name = assetName(fileWithCollection);
+    const { collection, localID, ...uploadAsset } = fileWithCollection;
+    const name = assetName(uploadAsset);
     log.info(`Uploading ${name}`);
 
-    const { collection, localID, ...uploadAsset2 } = fileWithCollection;
-    /* TODO(MR): ElectronFile changes */
-    const uploadAsset = uploadAsset2 as UploadAsset;
-    let fileTypeInfo: FileTypeInfo;
-    let fileSize: number;
     try {
-        const maxFileSize = 4 * 1024 * 1024 * 1024; // 4 GB
+        /*
+         * We read the file four times:
+         * 1. To determine its MIME type (only needs first few KBs).
+         * 2. To extract its metadata.
+         * 3. To calculate its hash.
+         * 4. To encrypt it.
+         *
+         * When we already have a File object the multiple reads are fine.
+         *
+         * When we're in the context of our desktop app and have a path, it
+         * might be possible to optimize further by using `ReadableStream.tee`
+         * to perform these steps simultaneously. However, that'll require
+         * restructuring the code so that these steps run in a parallel manner
+         * (tee will not work for strictly sequential reads of large streams).
+         */
 
-        fileSize = getAssetSize(uploadAsset);
-        if (fileSize >= maxFileSize) {
+        const { fileTypeInfo, fileSize, lastModifiedMs } =
+            await readAssetDetails(uploadAsset);
+
+        const maxFileSize = 4 * 1024 * 1024 * 1024; /* 4 GB */
+        if (fileSize >= maxFileSize)
             return { fileUploadResult: UPLOAD_RESULT.TOO_LARGE };
-        }
-        fileTypeInfo = await getAssetFileType(uploadAsset);
+
+        abortIfCancelled();
 
         const { metadata, publicMagicMetadata } = await extractAssetMetadata(
-            worker,
-            parsedMetadataJSONMap,
-            uploadAsset2,
-            collection.id,
+            uploadAsset,
             fileTypeInfo,
+            lastModifiedMs,
+            collection.id,
+            parsedMetadataJSONMap,
+            worker,
         );
 
         const matches = existingFiles.filter((file) =>
@@ -223,9 +242,12 @@ export const uploader = async (
 
         abortIfCancelled();
 
-        const file = await readAsset(fileTypeInfo, uploadAsset2);
+        const { filedata, thumbnail, hasStaticThumbnail } = await readAsset(
+            fileTypeInfo,
+            uploadAsset,
+        );
 
-        if (file.hasStaticThumbnail) metadata.hasStaticThumbnail = true;
+        if (hasStaticThumbnail) metadata.hasStaticThumbnail = true;
 
         const pubMagicMetadata = await constructPublicMagicMetadata({
             ...publicMagicMetadata,
@@ -236,16 +258,16 @@ export const uploader = async (
 
         const fileWithMetadata: FileWithMetadata = {
             localID,
-            filedata: file.filedata,
-            thumbnail: file.thumbnail,
+            filedata,
+            thumbnail,
             metadata,
             pubMagicMetadata,
         };
 
         const encryptedFile = await encryptFile(
-            worker,
             fileWithMetadata,
             collection.key,
+            worker,
         );
 
         abortIfCancelled();
@@ -296,12 +318,20 @@ export const uploader = async (
     }
 };
 
+/**
+ * Return the size of the given file
+ *
+ * @param fileOrPath The {@link File}, or the path to it. Note that it is only
+ * valid to specify a path if we are running in the context of our desktop app.
+ */
+export const fopSize = async (fileOrPath: File | string): Promise<number> =>
+    fileOrPath instanceof File
+        ? fileOrPath.size
+        : await ensureElectron().fs.size(fileOrPath);
+
 export const getFileName = (file: File | ElectronFile | string) =>
     typeof file == "string" ? basename(file) : file.name;
 
-function getFileSize(file: File | ElectronFile) {
-    return file.size;
-}
 export const getAssetName = ({
     isLivePhoto,
     file,
@@ -316,67 +346,10 @@ export const assetName = ({
 }: UploadAsset2) =>
     isLivePhoto ? getFileName(livePhotoAssets.image) : getFileName(file);
 
-const getAssetSize = ({ isLivePhoto, file, livePhotoAssets }: UploadAsset) => {
-    return isLivePhoto ? getLivePhotoSize(livePhotoAssets) : getFileSize(file);
-};
-
-const getLivePhotoSize = (livePhotoAssets: LivePhotoAssets) => {
-    return livePhotoAssets.image.size + livePhotoAssets.video.size;
-};
-
-const getAssetFileType = ({
-    isLivePhoto,
-    file,
-    livePhotoAssets,
-}: UploadAsset) => {
-    return isLivePhoto
-        ? getLivePhotoFileType(livePhotoAssets)
-        : getFileType(file);
-};
-
-const getLivePhotoFileType = async (
-    livePhotoAssets: LivePhotoAssets,
-): Promise<FileTypeInfo> => {
-    const imageFileTypeInfo = await getFileType(livePhotoAssets.image);
-    const videoFileTypeInfo = await getFileType(livePhotoAssets.video);
-    return {
-        fileType: FILE_TYPE.LIVE_PHOTO,
-        exactType: `${imageFileTypeInfo.exactType}+${videoFileTypeInfo.exactType}`,
-        imageType: imageFileTypeInfo.exactType,
-        videoType: videoFileTypeInfo.exactType,
-    };
-};
-
-const readAsset = async (
-    fileTypeInfo: FileTypeInfo,
-    { isLivePhoto, file, livePhotoAssets }: UploadAsset2,
-) => {
-    return isLivePhoto
-        ? await readLivePhoto(livePhotoAssets, fileTypeInfo)
-        : await readImageOrVideo(file, fileTypeInfo);
-};
-
-// TODO(MR): Merge with the uploader
-class ModuleState {
-    /**
-     * This will be set to true if we get an error from the Node.js side of our
-     * desktop app telling us that native image thumbnail generation is not
-     * available for the current OS/arch combination.
-     *
-     * That way, we can stop pestering it again and again (saving an IPC
-     * round-trip).
-     *
-     * Note the double negative when it is used.
-     */
-    isNativeImageThumbnailGenerationNotAvailable = false;
-}
-
-const moduleState = new ModuleState();
-
 /**
  * Read the given file or path into an in-memory representation.
  *
- * [Note: The fileOrPath parameter to upload]
+ * See: [Note: Reading a fileOrPath]
  *
  * The file can be either a web
  * [File](https://developer.mozilla.org/en-US/docs/Web/API/File) or the absolute
@@ -423,21 +396,32 @@ const moduleState = new ModuleState();
  */
 const readFileOrPath = async (
     fileOrPath: File | string,
-): Promise<{ dataOrStream: Uint8Array | DataStream; fileSize: number }> => {
+): Promise<{
+    dataOrStream: Uint8Array | DataStream;
+    fileSize: number;
+    lastModifiedMs: number;
+}> => {
     let dataOrStream: Uint8Array | DataStream;
     let fileSize: number;
+    let lastModifiedMs: number;
 
     if (fileOrPath instanceof File) {
         const file = fileOrPath;
         fileSize = file.size;
+        lastModifiedMs = file.lastModified;
         dataOrStream =
             fileSize > MULTIPART_PART_SIZE
                 ? getFileStream(file, FILE_READER_CHUNK_SIZE)
                 : new Uint8Array(await file.arrayBuffer());
     } else {
         const path = fileOrPath;
-        const { response, size } = await readStream(ensureElectron(), path);
+        const {
+            response,
+            size,
+            lastModifiedMs: lm,
+        } = await readStream(ensureElectron(), path);
         fileSize = size;
+        lastModifiedMs = lm;
         if (size > MULTIPART_PART_SIZE) {
             const chunkCount = Math.ceil(size / FILE_READER_CHUNK_SIZE);
             dataOrStream = { stream: response.body, chunkCount };
@@ -446,8 +430,423 @@ const readFileOrPath = async (
         }
     }
 
-    return { dataOrStream, fileSize };
+    return { dataOrStream, fileSize, lastModifiedMs };
 };
+
+/** A variant of {@readFileOrPath} that always returns an {@link DataStream}. */
+const readFileOrPathStream = async (
+    fileOrPath: File | string,
+): Promise<DataStream> => {
+    if (fileOrPath instanceof File) {
+        return getFileStream(fileOrPath, FILE_READER_CHUNK_SIZE);
+    } else {
+        const { response, size } = await readStream(
+            ensureElectron(),
+            fileOrPath,
+        );
+        const chunkCount = Math.ceil(size / FILE_READER_CHUNK_SIZE);
+        return { stream: response.body, chunkCount };
+    }
+};
+
+interface ReadAssetDetailsResult {
+    fileTypeInfo: FileTypeInfo;
+    fileSize: number;
+    lastModifiedMs: number;
+}
+
+/**
+ * Read the file(s) to determine the type, size and last modified time of the
+ * given {@link asset}.
+ */
+const readAssetDetails = async ({
+    isLivePhoto,
+    livePhotoAssets,
+    file,
+}: UploadAsset2): Promise<ReadAssetDetailsResult> =>
+    isLivePhoto
+        ? readLivePhotoDetails(livePhotoAssets)
+        : readImageOrVideoDetails(file);
+
+const readLivePhotoDetails = async ({ image, video }: LivePhotoAssets2) => {
+    const img = await readImageOrVideoDetails(image);
+    const vid = await readImageOrVideoDetails(video);
+
+    return {
+        fileTypeInfo: {
+            fileType: FILE_TYPE.LIVE_PHOTO,
+            extension: `${img.fileTypeInfo.extension}+${vid.fileTypeInfo.extension}`,
+            imageType: img.fileTypeInfo.extension,
+            videoType: vid.fileTypeInfo.extension,
+        },
+        fileSize: img.fileSize + vid.fileSize,
+        lastModifiedMs: img.lastModifiedMs,
+    };
+};
+
+/**
+ * Read the beginning of the given file (or its path), or use its filename as a
+ * fallback, to determine its MIME type. From that, construct and return a
+ * {@link FileTypeInfo}.
+ *
+ * While we're at it, also return the size of the file, and its last modified
+ * time (expressed as epoch milliseconds).
+ *
+ * @param fileOrPath See: [Note: Reading a fileOrPath]
+ */
+const readImageOrVideoDetails = async (fileOrPath: File | string) => {
+    const { dataOrStream, fileSize, lastModifiedMs } =
+        await readFileOrPath(fileOrPath);
+
+    const fileTypeInfo = await detectFileTypeInfoFromChunk(async () => {
+        if (dataOrStream instanceof Uint8Array) {
+            return dataOrStream;
+        } else {
+            const reader = dataOrStream.stream.getReader();
+            const chunk = ensure((await reader.read()).value);
+            await reader.cancel();
+            return chunk;
+        }
+    }, getFileName(fileOrPath));
+
+    return { fileTypeInfo, fileSize, lastModifiedMs };
+};
+
+/**
+ * Read the entirety of a readable stream.
+ *
+ * It is not recommended to use this for large (say, multi-hundred MB) files. It
+ * is provided as a syntactic shortcut for cases where we already know that the
+ * size of the stream will be reasonable enough to be read in its entirety
+ * without us running out of memory.
+ */
+const readEntireStream = async (stream: ReadableStream) =>
+    new Uint8Array(await new Response(stream).arrayBuffer());
+
+interface ExtractAssetMetadataResult {
+    metadata: Metadata;
+    publicMagicMetadata: FilePublicMagicMetadataProps;
+}
+
+/**
+ * Compute the hash, extract EXIF or other metadata, and merge in data from the
+ * {@link parsedMetadataJSONMap} for the assets. Return the resultant metadatum.
+ */
+const extractAssetMetadata = async (
+    { isLivePhoto, file, livePhotoAssets }: UploadAsset2,
+    fileTypeInfo: FileTypeInfo,
+    lastModifiedMs: number,
+    collectionID: number,
+    parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
+    worker: Remote<DedicatedCryptoWorker>,
+): Promise<ExtractAssetMetadataResult> =>
+    isLivePhoto
+        ? await extractLivePhotoMetadata(
+              livePhotoAssets,
+              fileTypeInfo,
+              lastModifiedMs,
+              collectionID,
+              parsedMetadataJSONMap,
+              worker,
+          )
+        : await extractImageOrVideoMetadata(
+              file,
+              fileTypeInfo,
+              lastModifiedMs,
+              collectionID,
+              parsedMetadataJSONMap,
+              worker,
+          );
+
+const extractLivePhotoMetadata = async (
+    livePhotoAssets: LivePhotoAssets2,
+    fileTypeInfo: FileTypeInfo,
+    lastModifiedMs: number,
+    collectionID: number,
+    parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
+    worker: Remote<DedicatedCryptoWorker>,
+) => {
+    const imageFileTypeInfo: FileTypeInfo = {
+        fileType: FILE_TYPE.IMAGE,
+        extension: fileTypeInfo.imageType,
+    };
+    const { metadata: imageMetadata, publicMagicMetadata } =
+        await extractImageOrVideoMetadata(
+            livePhotoAssets.image,
+            imageFileTypeInfo,
+            lastModifiedMs,
+            collectionID,
+            parsedMetadataJSONMap,
+            worker,
+        );
+
+    const videoHash = await computeHash(livePhotoAssets.video, worker);
+
+    return {
+        metadata: {
+            ...imageMetadata,
+            title: getFileName(livePhotoAssets.image),
+            fileType: FILE_TYPE.LIVE_PHOTO,
+            imageHash: imageMetadata.hash,
+            videoHash: videoHash,
+            hash: undefined,
+        },
+        publicMagicMetadata,
+    };
+};
+
+const extractImageOrVideoMetadata = async (
+    fileOrPath: File | string,
+    fileTypeInfo: FileTypeInfo,
+    lastModifiedMs: number,
+    collectionID: number,
+    parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
+    worker: Remote<DedicatedCryptoWorker>,
+) => {
+    const fileName = getFileName(fileOrPath);
+    const { fileType } = fileTypeInfo;
+
+    let extractedMetadata: ParsedExtractedMetadata;
+    if (fileType === FILE_TYPE.IMAGE) {
+        extractedMetadata =
+            (await tryExtractImageMetadata(
+                fileOrPath,
+                fileTypeInfo,
+                lastModifiedMs,
+            )) ?? NULL_EXTRACTED_METADATA;
+    } else if (fileType === FILE_TYPE.VIDEO) {
+        extractedMetadata =
+            (await tryExtractVideoMetadata(fileOrPath)) ??
+            NULL_EXTRACTED_METADATA;
+    } else {
+        throw new Error(`Unexpected file type ${fileType} for ${fileOrPath}`);
+    }
+
+    const hash = await computeHash(fileOrPath, worker);
+
+    const modificationTime = lastModifiedMs * 1000;
+    const creationTime =
+        extractedMetadata.creationTime ??
+        tryParseEpochMicrosecondsFromFileName(fileName) ??
+        modificationTime;
+
+    const metadata: Metadata = {
+        title: fileName,
+        creationTime,
+        modificationTime,
+        latitude: extractedMetadata.location.latitude,
+        longitude: extractedMetadata.location.longitude,
+        fileType,
+        hash,
+    };
+
+    const publicMagicMetadata: FilePublicMagicMetadataProps = {
+        w: extractedMetadata.width,
+        h: extractedMetadata.height,
+    };
+
+    const takeoutMetadata = matchTakeoutMetadata(
+        fileName,
+        collectionID,
+        parsedMetadataJSONMap,
+    );
+
+    if (takeoutMetadata)
+        for (const [key, value] of Object.entries(takeoutMetadata))
+            if (value) metadata[key] = value;
+
+    return { metadata, publicMagicMetadata };
+};
+
+const NULL_EXTRACTED_METADATA: ParsedExtractedMetadata = {
+    location: NULL_LOCATION,
+    creationTime: null,
+    width: null,
+    height: null,
+};
+
+async function tryExtractImageMetadata(
+    fileOrPath: File | string,
+    fileTypeInfo: FileTypeInfo,
+    lastModifiedMs: number,
+): Promise<ParsedExtractedMetadata> {
+    let file: File;
+    if (fileOrPath instanceof File) {
+        file = fileOrPath;
+    } else {
+        const path = fileOrPath;
+        // The library we use for extracting EXIF from images, exifr, doesn't
+        // support streams. But unlike videos, for images it is reasonable to
+        // read the entire stream into memory here.
+        const { response } = await readStream(ensureElectron(), path);
+        file = new File([await response.arrayBuffer()], basename(path), {
+            lastModified: lastModifiedMs,
+        });
+    }
+
+    try {
+        return await parseImageMetadata(file, fileTypeInfo);
+    } catch (e) {
+        log.error(`Failed to extract image metadata for ${fileOrPath}`, e);
+        return undefined;
+    }
+}
+
+const tryExtractVideoMetadata = async (fileOrPath: File | string) => {
+    try {
+        return await ffmpeg.extractVideoMetadata(fileOrPath);
+    } catch (e) {
+        log.error(`Failed to extract video metadata for ${fileOrPath}`, e);
+        return undefined;
+    }
+};
+
+const computeHash = async (
+    fileOrPath: File | string,
+    worker: Remote<DedicatedCryptoWorker>,
+) => {
+    const { stream, chunkCount } = await readFileOrPathStream(fileOrPath);
+    const hashState = await worker.initChunkHashing();
+
+    const streamReader = stream.getReader();
+    for (let i = 0; i < chunkCount; i++) {
+        const { done, value: chunk } = await streamReader.read();
+        if (done) throw new Error("Less chunks than expected");
+        await worker.hashFileChunk(hashState, Uint8Array.from(chunk));
+    }
+
+    const { done } = await streamReader.read();
+    if (!done) throw new Error("More chunks than expected");
+    return await worker.completeChunkHashing(hashState);
+};
+
+/**
+ * Return true if the two files, as represented by their metadata, are same.
+ *
+ * Note that the metadata includes the hash of the file's contents (when
+ * available), so this also in effect compares the contents of the files, not
+ * just the "meta" information about them.
+ */
+const areFilesSame = (f: Metadata, g: Metadata) =>
+    hasFileHash(f) && hasFileHash(g)
+        ? areFilesSameHash(f, g)
+        : areFilesSameNoHash(f, g);
+
+const areFilesSameHash = (f: Metadata, g: Metadata) => {
+    if (f.fileType !== g.fileType || f.title !== g.title) {
+        return false;
+    }
+    if (f.fileType === FILE_TYPE.LIVE_PHOTO) {
+        return f.imageHash === g.imageHash && f.videoHash === g.videoHash;
+    } else {
+        return f.hash === g.hash;
+    }
+};
+
+/**
+ * Older files that were uploaded before we introduced hashing will not have
+ * hashes, so retain and use the logic we used back then for such files.
+ *
+ * Deprecation notice April 2024: Note that hashing was introduced very early
+ * (years ago), so the chance of us finding files without hashes is rare. And
+ * even in these cases, the worst that'll happen is that a duplicate file would
+ * get uploaded which can later be deduped. So we can get rid of this case at
+ * some point (e.g. the mobile app doesn't do this extra check, just uploads).
+ */
+const areFilesSameNoHash = (f: Metadata, g: Metadata) => {
+    /*
+     * The maximum difference in the creation/modification times of two similar
+     * files is set to 1 second. This is because while uploading files in the
+     * web - browsers and users could have set reduced precision of file times
+     * to prevent timing attacks and fingerprinting.
+     *
+     * See:
+     * https://developer.mozilla.org/en-US/docs/Web/API/File/lastModified#reduced_time_precision
+     */
+    const oneSecond = 1e6;
+    return (
+        f.fileType == g.fileType &&
+        f.title == g.title &&
+        Math.abs(f.creationTime - g.creationTime) < oneSecond &&
+        Math.abs(f.modificationTime - g.modificationTime) < oneSecond
+    );
+};
+
+const readAsset = async (
+    fileTypeInfo: FileTypeInfo,
+    { isLivePhoto, file, livePhotoAssets }: UploadAsset2,
+) =>
+    isLivePhoto
+        ? await readLivePhoto(livePhotoAssets, fileTypeInfo)
+        : await readImageOrVideo(file, fileTypeInfo);
+
+const readLivePhoto = async (
+    livePhotoAssets: LivePhotoAssets2,
+    fileTypeInfo: FileTypeInfo,
+) => {
+    const readImage = await readFileOrPath(livePhotoAssets.image);
+    const {
+        filedata: imageDataOrStream,
+        thumbnail,
+        hasStaticThumbnail,
+    } = await withThumbnail(
+        livePhotoAssets.image,
+        {
+            extension: fileTypeInfo.imageType,
+            fileType: FILE_TYPE.IMAGE,
+        },
+        readImage.dataOrStream,
+        readImage.fileSize,
+    );
+    const readVideo = await readFileOrPath(livePhotoAssets.video);
+
+    // We can revisit this later, but the existing code always read the entire
+    // file into memory here, and to avoid changing the rest of the scaffolding
+    // retain the same behaviour.
+    //
+    // This is a reasonable assumption too, since the videos corresponding to
+    // live photos are only a couple of seconds long.
+    const toData = async (dataOrStream: Uint8Array | DataStream) =>
+        dataOrStream instanceof Uint8Array
+            ? dataOrStream
+            : await readEntireStream(dataOrStream.stream);
+
+    return {
+        filedata: await encodeLivePhoto({
+            imageFileName: getFileName(livePhotoAssets.image),
+            imageData: await toData(imageDataOrStream),
+            videoFileName: getFileName(livePhotoAssets.video),
+            videoData: await toData(readVideo.dataOrStream),
+        }),
+        thumbnail,
+        hasStaticThumbnail,
+    };
+};
+
+const readImageOrVideo = async (
+    fileOrPath: File | string,
+    fileTypeInfo: FileTypeInfo,
+) => {
+    const { dataOrStream, fileSize } = await readFileOrPath(fileOrPath);
+    return withThumbnail(fileOrPath, fileTypeInfo, dataOrStream, fileSize);
+};
+
+// TODO(MR): Merge with the uploader
+class ModuleState {
+    /**
+     * This will be set to true if we get an error from the Node.js side of our
+     * desktop app telling us that native image thumbnail generation is not
+     * available for the current OS/arch combination.
+     *
+     * That way, we can stop pestering it again and again (saving an IPC
+     * round-trip).
+     *
+     * Note the double negative when it is used.
+     */
+    isNativeImageThumbnailGenerationNotAvailable = false;
+}
+
+const moduleState = new ModuleState();
 
 /**
  * Augment the given {@link dataOrStream} with thumbnail information.
@@ -557,68 +956,6 @@ const withThumbnail = async (
     };
 };
 
-/**
- * Read the entirety of a readable stream.
- *
- * It is not recommended to use this for large (say, multi-hundred MB) files. It
- * is provided as a syntactic shortcut for cases where we already know that the
- * size of the stream will be reasonable enough to be read in its entirety
- * without us running out of memory.
- */
-const readEntireStream = async (stream: ReadableStream) =>
-    new Uint8Array(await new Response(stream).arrayBuffer());
-
-const readImageOrVideo = async (
-    fileOrPath: File | string,
-    fileTypeInfo: FileTypeInfo,
-) => {
-    const { dataOrStream, fileSize } = await readFileOrPath(fileOrPath);
-    return withThumbnail(fileOrPath, fileTypeInfo, dataOrStream, fileSize);
-};
-
-const readLivePhoto = async (
-    livePhotoAssets: LivePhotoAssets2,
-    fileTypeInfo: FileTypeInfo,
-) => {
-    const readImage = await readFileOrPath(livePhotoAssets.image);
-    const {
-        filedata: imageDataOrStream,
-        thumbnail,
-        hasStaticThumbnail,
-    } = await withThumbnail(
-        livePhotoAssets.image,
-        {
-            exactType: fileTypeInfo.imageType,
-            fileType: FILE_TYPE.IMAGE,
-        },
-        readImage.dataOrStream,
-        readImage.fileSize,
-    );
-    const readVideo = await readFileOrPath(livePhotoAssets.video);
-
-    // We can revisit this later, but the existing code always read the
-    // full files into memory here, and to avoid changing the rest of
-    // the scaffolding retain the same behaviour.
-    //
-    // This is a reasonable assumption too, since the videos
-    // corresponding to live photos are only a couple of seconds long.
-    const toData = async (dataOrStream: Uint8Array | DataStream) =>
-        dataOrStream instanceof Uint8Array
-            ? dataOrStream
-            : await readEntireStream(dataOrStream.stream);
-
-    return {
-        filedata: await encodeLivePhoto({
-            imageFileName: getFileName(livePhotoAssets.image),
-            imageData: await toData(imageDataOrStream),
-            videoFileName: getFileName(livePhotoAssets.video),
-            videoData: await toData(readVideo.dataOrStream),
-        }),
-        thumbnail,
-        hasStaticThumbnail,
-    };
-};
-
 const constructPublicMagicMetadata = async (
     publicMagicMetadataProps: FilePublicMagicMetadataProps,
 ): Promise<FilePublicMagicMetadata> => {
@@ -632,73 +969,65 @@ const constructPublicMagicMetadata = async (
     return await updateMagicMetadata(publicMagicMetadataProps);
 };
 
-async function encryptFile(
-    worker: Remote<DedicatedCryptoWorker>,
+const encryptFile = async (
     file: FileWithMetadata,
     encryptionKey: string,
-): Promise<EncryptedFile> {
-    try {
-        const { key: fileKey, file: encryptedFiledata } = await encryptFiledata(
-            worker,
-            file.filedata,
-        );
+    worker: Remote<DedicatedCryptoWorker>,
+): Promise<EncryptedFile> => {
+    const { key: fileKey, file: encryptedFiledata } = await encryptFiledata(
+        file.filedata,
+        worker,
+    );
 
-        const { file: encryptedThumbnail } = await worker.encryptThumbnail(
-            file.thumbnail,
-            fileKey,
-        );
-        const { file: encryptedMetadata } = await worker.encryptMetadata(
-            file.metadata,
-            fileKey,
-        );
+    const { file: encryptedThumbnail } = await worker.encryptThumbnail(
+        file.thumbnail,
+        fileKey,
+    );
 
-        let encryptedPubMagicMetadata: EncryptedMagicMetadata;
-        if (file.pubMagicMetadata) {
-            const { file: encryptedPubMagicMetadataData } =
-                await worker.encryptMetadata(
-                    file.pubMagicMetadata.data,
-                    fileKey,
-                );
-            encryptedPubMagicMetadata = {
-                version: file.pubMagicMetadata.version,
-                count: file.pubMagicMetadata.count,
-                data: encryptedPubMagicMetadataData.encryptedData,
-                header: encryptedPubMagicMetadataData.decryptionHeader,
-            };
-        }
+    const { file: encryptedMetadata } = await worker.encryptMetadata(
+        file.metadata,
+        fileKey,
+    );
 
-        const encryptedKey = await worker.encryptToB64(fileKey, encryptionKey);
-
-        const result: EncryptedFile = {
-            file: {
-                file: encryptedFiledata,
-                thumbnail: encryptedThumbnail,
-                metadata: encryptedMetadata,
-                pubMagicMetadata: encryptedPubMagicMetadata,
-                localID: file.localID,
-            },
-            fileKey: encryptedKey,
+    let encryptedPubMagicMetadata: EncryptedMagicMetadata;
+    if (file.pubMagicMetadata) {
+        const { file: encryptedPubMagicMetadataData } =
+            await worker.encryptMetadata(file.pubMagicMetadata.data, fileKey);
+        encryptedPubMagicMetadata = {
+            version: file.pubMagicMetadata.version,
+            count: file.pubMagicMetadata.count,
+            data: encryptedPubMagicMetadataData.encryptedData,
+            header: encryptedPubMagicMetadataData.decryptionHeader,
         };
-        return result;
-    } catch (e) {
-        log.error("Error encrypting files", e);
-        throw e;
     }
-}
 
-async function encryptFiledata(
-    worker: Remote<DedicatedCryptoWorker>,
+    const encryptedKey = await worker.encryptToB64(fileKey, encryptionKey);
+
+    const result: EncryptedFile = {
+        file: {
+            file: encryptedFiledata,
+            thumbnail: encryptedThumbnail,
+            metadata: encryptedMetadata,
+            pubMagicMetadata: encryptedPubMagicMetadata,
+            localID: file.localID,
+        },
+        fileKey: encryptedKey,
+    };
+    return result;
+};
+
+const encryptFiledata = async (
     filedata: Uint8Array | DataStream,
-): Promise<EncryptionResult<Uint8Array | DataStream>> {
-    return isDataStream(filedata)
-        ? await encryptFileStream(worker, filedata)
-        : await worker.encryptFile(filedata);
-}
-
-async function encryptFileStream(
     worker: Remote<DedicatedCryptoWorker>,
+): Promise<EncryptionResult<Uint8Array | DataStream>> =>
+    isDataStream(filedata)
+        ? await encryptFileStream(filedata, worker)
+        : await worker.encryptFile(filedata);
+
+const encryptFileStream = async (
     fileData: DataStream,
-) {
+    worker: Remote<DedicatedCryptoWorker>,
+) => {
     const { stream, chunkCount } = fileData;
     const fileStreamReader = stream.getReader();
     const { key, decryptionHeader, pushState } =
@@ -726,58 +1055,6 @@ async function encryptFileStream(
             encryptedData: { stream: encryptedFileStream, chunkCount },
         },
     };
-}
-
-/**
- * Return true if the two files, as represented by their metadata, are same.
- *
- * Note that the metadata includes the hash of the file's contents (when
- * available), so this also in effect compares the contents of the files, not
- * just the "meta" information about them.
- */
-const areFilesSame = (f: Metadata, g: Metadata) =>
-    hasFileHash(f) && hasFileHash(g)
-        ? areFilesSameHash(f, g)
-        : areFilesSameNoHash(f, g);
-
-const areFilesSameHash = (f: Metadata, g: Metadata) => {
-    if (f.fileType !== g.fileType || f.title !== g.title) {
-        return false;
-    }
-    if (f.fileType === FILE_TYPE.LIVE_PHOTO) {
-        return f.imageHash === g.imageHash && f.videoHash === g.videoHash;
-    } else {
-        return f.hash === g.hash;
-    }
-};
-
-/**
- * Older files that were uploaded before we introduced hashing will not have
- * hashes, so retain and use the logic we used back then for such files.
- *
- * Deprecation notice April 2024: Note that hashing was introduced very early
- * (years ago), so the chance of us finding files without hashes is rare. And
- * even in these cases, the worst that'll happen is that a duplicate file would
- * get uploaded which can later be deduped. So we can get rid of this case at
- * some point (e.g. the mobile app doesn't do this extra check, just uploads).
- */
-const areFilesSameNoHash = (f: Metadata, g: Metadata) => {
-    /*
-     * The maximum difference in the creation/modification times of two similar
-     * files is set to 1 second. This is because while uploading files in the
-     * web - browsers and users could have set reduced precision of file times
-     * to prevent timing attacks and fingerprinting.
-     *
-     * See:
-     * https://developer.mozilla.org/en-US/docs/Web/API/File/lastModified#reduced_time_precision
-     */
-    const oneSecond = 1e6;
-    return (
-        f.fileType == g.fileType &&
-        f.title == g.title &&
-        Math.abs(f.creationTime - g.creationTime) < oneSecond &&
-        Math.abs(f.modificationTime - g.modificationTime) < oneSecond
-    );
 };
 
 const uploadToBucket = async (
@@ -845,7 +1122,7 @@ const uploadToBucket = async (
         return backupedFile;
     } catch (e) {
         if (e.message !== CustomError.UPLOAD_CANCELLED) {
-            log.error("error uploading to bucket", e);
+            log.error("Error when uploading to bucket", e);
         }
         throw e;
     }
@@ -904,9 +1181,7 @@ async function uploadStreamUsingMultipart(
         partEtags.push({ PartNumber: index + 1, ETag: eTag });
     }
     const { done } = await streamReader.read();
-    if (!done) {
-        throw Error(CustomError.CHUNK_MORE_THAN_EXPECTED);
-    }
+    if (!done) throw new Error("More chunks than expected");
 
     const completeURL = multipartUploadURLs.completeURL;
     const cBody = convert.js2xml(

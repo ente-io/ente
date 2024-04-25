@@ -1,41 +1,12 @@
+import type { Metadata } from "@/media/types/file";
 import { basename, dirname } from "@/next/file";
 import { ElectronFile } from "@/next/types/file";
 import { PICKED_UPLOAD_TYPE } from "constants/upload";
 import isElectron from "is-electron";
 import { exportMetadataDirectoryName } from "services/export";
-import {
-    FileWithCollection,
-    Metadata,
-    type FileWithCollection2,
-} from "types/upload";
-
-const TYPE_JSON = "json";
 
 export const hasFileHash = (file: Metadata) =>
     file.hash || (file.imageHash && file.videoHash);
-
-export function segregateMetadataAndMediaFiles(
-    filesWithCollectionToUpload: FileWithCollection[],
-) {
-    const metadataJSONFiles: FileWithCollection[] = [];
-    const mediaFiles: FileWithCollection[] = [];
-    filesWithCollectionToUpload.forEach((fileWithCollection) => {
-        const file = fileWithCollection.file;
-        if (file.name.toLowerCase().endsWith(TYPE_JSON)) {
-            metadataJSONFiles.push(fileWithCollection);
-        } else {
-            mediaFiles.push(fileWithCollection);
-        }
-    });
-    return { mediaFiles, metadataJSONFiles };
-}
-
-export function areFileWithCollectionsSame(
-    firstFile: FileWithCollection2,
-    secondFile: FileWithCollection2,
-): boolean {
-    return firstFile.localID === secondFile.localID;
-}
 
 /**
  * Return true if all the paths in the given list are items that belong to the

@@ -1,4 +1,4 @@
-import { FILE_TYPE } from "@/media/file-type";
+import type { Metadata } from "@/media/types/file";
 import type { ElectronFile } from "@/next/types/file";
 import {
     B64EncryptionResult,
@@ -12,28 +12,6 @@ import {
     S3FileAttributes,
 } from "types/file";
 import { EncryptedMagicMetadata } from "types/magicMetadata";
-
-/** Information about the file that never changes post upload. */
-export interface Metadata {
-    /**
-     * The file name.
-     *
-     * See: [Note: File name for local EnteFile objects]
-     */
-    title: string;
-    creationTime: number;
-    modificationTime: number;
-    latitude: number;
-    longitude: number;
-    fileType: FILE_TYPE;
-    hasStaticThumbnail?: boolean;
-    hash?: string;
-    imageHash?: string;
-    videoHash?: string;
-    localID?: number;
-    version?: number;
-    deviceFolder?: string;
-}
 
 export interface Location {
     latitude: number;
@@ -49,6 +27,7 @@ export interface MultipartUploadURLs {
 export interface UploadAsset {
     isLivePhoto?: boolean;
     file?: File | ElectronFile;
+    fileOrPath?: File | ElectronFile;
     livePhotoAssets?: LivePhotoAssets;
 }
 
@@ -66,6 +45,7 @@ export interface FileWithCollection extends UploadAsset {
 export interface UploadAsset2 {
     isLivePhoto?: boolean;
     file?: File | string;
+    fileOrPath?: File | string;
     livePhotoAssets?: LivePhotoAssets2;
 }
 
@@ -77,7 +57,7 @@ export interface LivePhotoAssets2 {
 export interface FileWithCollection2 extends UploadAsset2 {
     localID: number;
     collection?: Collection;
-    collectionID?: number;
+    collectionID: number;
 }
 
 export interface UploadURL {

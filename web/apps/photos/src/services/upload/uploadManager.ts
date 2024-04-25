@@ -1,10 +1,11 @@
 import { FILE_TYPE } from "@/media/file-type";
 import { potentialFileTypeFromExtension } from "@/media/live-photo";
 import { ensureElectron } from "@/next/electron";
-import { nameAndExtension } from "@/next/file";
+import { lowercaseExtension, nameAndExtension } from "@/next/file";
 import log from "@/next/log";
 import { ElectronFile } from "@/next/types/file";
 import { ComlinkWorker } from "@/next/worker/comlink-worker";
+import { ensure } from "@/utils/ensure";
 import { getDedicatedCryptoWorker } from "@ente/shared/crypto";
 import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
 import { CustomError } from "@ente/shared/error";
@@ -41,7 +42,6 @@ import {
     SegregatedFinishedUploads,
 } from "types/upload/ui";
 import { decryptFile, getUserOwnedFiles, sortFiles } from "utils/file";
-import { segregateMetadataAndMediaFiles } from "utils/upload";
 import { getLocalFiles } from "../fileService";
 import {
     getMetadataJSONMapKeyForJSON,
@@ -50,7 +50,7 @@ import {
 } from "./takeout";
 import UploadService, {
     assetName,
-    getAssetName,
+    fopSize,
     getFileName,
     uploader,
 } from "./uploadService";
@@ -302,6 +302,7 @@ class UploadManager {
     constructor() {
         this.uiService = new UIService();
     }
+
     public async init(
         progressUpdater: ProgressUpdater,
         setFiles: SetFiles,
@@ -333,7 +334,7 @@ class UploadManager {
         this.uploaderName = null;
     }
 
-    prepareForNewUpload() {
+    public prepareForNewUpload() {
         this.resetState();
         this.uiService.reset();
         uploadCancelService.reset();
@@ -344,78 +345,58 @@ class UploadManager {
         this.uiService.setUploadProgressView(true);
     }
 
-    async updateExistingFilesAndCollections(collections: Collection[]) {
-        if (this.publicUploadProps.accessedThroughSharedURL) {
-            this.existingFiles = await getLocalPublicFiles(
-                getPublicCollectionUID(this.publicUploadProps.token),
-            );
-        } else {
-            this.existingFiles = getUserOwnedFiles(await getLocalFiles());
-        }
-        this.collections = new Map(
-            collections.map((collection) => [collection.id, collection]),
-        );
-    }
-
     public async queueFilesForUpload(
         filesWithCollectionToUploadIn: FileWithCollection[],
         collections: Collection[],
         uploaderName?: string,
     ) {
         try {
-            if (this.uploadInProgress) {
-                throw Error("can't run multiple uploads at once");
-            }
+            if (this.uploadInProgress)
+                throw new Error("Cannot run multiple uploads at once");
+
+            log.info(`Uploading ${filesWithCollectionToUploadIn.length} files`);
             this.uploadInProgress = true;
-            await this.updateExistingFilesAndCollections(collections);
             this.uploaderName = uploaderName;
-            log.info(
-                `received ${filesWithCollectionToUploadIn.length} files to upload`,
-            );
+
+            await this.updateExistingFilesAndCollections(collections);
+
+            const namedFiles: FileWithCollectionIDAndName[] =
+                filesWithCollectionToUploadIn.map(
+                    makeFileWithCollectionIDAndName,
+                );
+
             this.uiService.setFilenames(
                 new Map<number, string>(
-                    filesWithCollectionToUploadIn.map((mediaFile) => [
-                        mediaFile.localID,
-                        getAssetName(mediaFile),
-                    ]),
+                    namedFiles.map((f) => [f.localID, f.fileName]),
                 ),
             );
-            const { metadataJSONFiles, mediaFiles } =
-                segregateMetadataAndMediaFiles(filesWithCollectionToUploadIn);
-            log.info(`has ${metadataJSONFiles.length} metadata json files`);
-            log.info(`has ${mediaFiles.length} media files`);
-            if (metadataJSONFiles.length) {
+
+            const [metadataFiles, mediaFiles] =
+                splitMetadataAndMediaFiles(namedFiles);
+
+            if (metadataFiles.length) {
                 this.uiService.setUploadStage(
                     UPLOAD_STAGES.READING_GOOGLE_METADATA_FILES,
                 );
-                /* TODO(MR): ElectronFile changes */
-                await this.parseMetadataJSONFiles(
-                    metadataJSONFiles as FileWithCollection2[],
-                );
+                await this.parseMetadataJSONFiles(metadataFiles);
             }
 
             if (mediaFiles.length) {
-                /* TODO(MR): ElectronFile changes */
-                const clusteredMediaFiles = clusterLivePhotos(
-                    mediaFiles as ClusterableFile[],
-                );
+                const clusteredMediaFiles = await clusterLivePhotos(mediaFiles);
 
-                if (uploadCancelService.isUploadCancelationRequested()) {
-                    throw Error(CustomError.UPLOAD_CANCELLED);
-                }
+                this.abortIfCancelled();
 
                 this.uiService.setFilenames(
                     new Map<number, string>(
-                        clusteredMediaFiles.map((mediaFile) => [
-                            mediaFile.localID,
-                            /* TODO(MR): ElectronFile changes */
-                            assetName(mediaFile as FileWithCollection2),
+                        clusteredMediaFiles.map((file) => [
+                            file.localID,
+                            file.fileName,
                         ]),
                     ),
                 );
 
                 this.uiService.setHasLivePhoto(
-                    mediaFiles.length !== clusteredMediaFiles.length,
+                    mediaFiles.length != clusteredMediaFiles.length,
                 );
 
                 /* TODO(MR): ElectronFile changes */
@@ -458,50 +439,38 @@ class UploadManager {
         }
     };
 
-    private async parseMetadataJSONFiles(metadataFiles: FileWithCollection2[]) {
-        try {
-            log.info(`parseMetadataJSONFiles function executed `);
+    private async updateExistingFilesAndCollections(collections: Collection[]) {
+        if (this.publicUploadProps.accessedThroughSharedURL) {
+            this.existingFiles = await getLocalPublicFiles(
+                getPublicCollectionUID(this.publicUploadProps.token),
+            );
+        } else {
+            this.existingFiles = getUserOwnedFiles(await getLocalFiles());
+        }
+        this.collections = new Map(
+            collections.map((collection) => [collection.id, collection]),
+        );
+    }
 
-            this.uiService.reset(metadataFiles.length);
+    private async parseMetadataJSONFiles(files: FileWithCollectionIDAndName[]) {
+        this.uiService.reset(files.length);
 
-            for (const { file, collectionID } of metadataFiles) {
-                this.abortIfCancelled();
-                const name = getFileName(file);
-                try {
-                    log.info(`parsing metadata json file ${name}`);
+        for (const { file, fileName, collectionID } of files) {
+            this.abortIfCancelled();
 
-                    const metadataJSON =
-                        await tryParseTakeoutMetadataJSON(file);
-                    if (metadataJSON) {
-                        this.parsedMetadataJSONMap.set(
-                            getMetadataJSONMapKeyForJSON(collectionID, name),
-                            metadataJSON && { ...metadataJSON },
-                        );
-                        this.uiService.increaseFileUploaded();
-                    }
-                    log.info(`successfully parsed metadata json file ${name}`);
-                } catch (e) {
-                    if (e.message === CustomError.UPLOAD_CANCELLED) {
-                        throw e;
-                    } else {
-                        // and don't break for subsequent files just log and move on
-                        log.error("parsing failed for a file", e);
-                        log.info(
-                            `failed to parse metadata json file ${name} error: ${e.message}`,
-                        );
-                    }
-                }
+            log.info(`Parsing metadata JSON ${fileName}`);
+            const metadataJSON = await tryParseTakeoutMetadataJSON(file);
+            if (metadataJSON) {
+                this.parsedMetadataJSONMap.set(
+                    getMetadataJSONMapKeyForJSON(collectionID, fileName),
+                    metadataJSON,
+                );
+                this.uiService.increaseFileUploaded();
             }
-        } catch (e) {
-            if (e.message !== CustomError.UPLOAD_CANCELLED) {
-                log.error("error seeding MetadataMap", e);
-            }
-            throw e;
         }
     }
 
     private async uploadMediaFiles(mediaFiles: FileWithCollection2[]) {
-        log.info(`uploadMediaFiles called`);
         this.filesToBeUploaded = [...this.filesToBeUploaded, ...mediaFiles];
 
         if (isElectron()) {
@@ -531,9 +500,8 @@ class UploadManager {
         const uiService = this.uiService;
 
         while (this.filesToBeUploaded.length > 0) {
-            if (uploadCancelService.isUploadCancelationRequested()) {
-                throw Error(CustomError.UPLOAD_CANCELLED);
-            }
+            this.abortIfCancelled();
+
             let fileWithCollection = this.filesToBeUploaded.pop();
             const { collectionID } = fileWithCollection;
             const collection = this.collections.get(collectionID);
@@ -543,11 +511,11 @@ class UploadManager {
             await wait(0);
 
             const { fileUploadResult, uploadedFile } = await uploader(
-                worker,
-                this.existingFiles,
                 fileWithCollection,
-                this.parsedMetadataJSONMap,
                 this.uploaderName,
+                this.existingFiles,
+                this.parsedMetadataJSONMap,
+                worker,
                 this.isCFUploadProxyDisabled,
                 () => {
                     this.abortIfCancelled();
@@ -579,16 +547,14 @@ class UploadManager {
         }
     }
 
-    async postUploadTask(
+    private async postUploadTask(
         fileUploadResult: UPLOAD_RESULT,
         uploadedFile: EncryptedEnteFile | EnteFile | null,
         fileWithCollection: FileWithCollection2,
     ) {
         try {
             let decryptedFile: EnteFile;
-            log.info(
-                `post upload action -> fileUploadResult: ${fileUploadResult} uploadedFile present ${!!uploadedFile}`,
-            );
+            log.info(`Upload completed with result: ${fileUploadResult}`);
             await this.removeFromPendingUploads(fileWithCollection);
             switch (fileUploadResult) {
                 case UPLOAD_RESULT.FAILED:
@@ -614,7 +580,9 @@ class UploadManager {
                     // no-op
                     break;
                 default:
-                    throw Error("Invalid Upload Result" + fileUploadResult);
+                    throw new Error(
+                        `Invalid Upload Result ${fileUploadResult}`,
+                    );
             }
             if (
                 [
@@ -631,7 +599,7 @@ class UploadManager {
                             fileWithCollection.livePhotoAssets.image,
                     });
                 } catch (e) {
-                    log.error("Error in fileUploaded handlers", e);
+                    log.warn("Ignoring error in fileUploaded handlers", e);
                 }
                 this.updateExistingFiles(decryptedFile);
             }
@@ -664,19 +632,19 @@ class UploadManager {
     }
 
     public cancelRunningUpload() {
-        log.info("user cancelled running upload");
+        log.info("User cancelled running upload");
         this.uiService.setUploadStage(UPLOAD_STAGES.CANCELLING);
         uploadCancelService.requestUploadCancelation();
     }
 
-    getFailedFilesWithCollections() {
+    public getFailedFilesWithCollections() {
         return {
             files: this.failedFiles,
             collections: [...this.collections.values()],
         };
     }
 
-    getUploaderName() {
+    public getUploaderName() {
         return this.uploaderName;
     }
 
@@ -707,6 +675,101 @@ class UploadManager {
 }
 
 export default new UploadManager();
+
+/**
+ * The data operated on by the intermediate stages of the upload.
+ *
+ * [Note: Intermediate file types during upload]
+ *
+ * As files progress through stages, they get more and more bits tacked on to
+ * them. These types document the journey.
+ *
+ * - The input is {@link FileWithCollection}. This can either be a new
+ *   {@link FileWithCollection}, in which case it'll only have a
+ *   {@link localID}, {@link collectionID} and a {@link file}. Or it could be a
+ *   retry, in which case it'll not have a {@link file} but instead will have
+ *   data from a previous stage, like a snake eating its tail.
+ *
+ * - Immediately we convert it to {@link FileWithCollectionIDAndName}. This is
+ *   to mostly systematize what we have, and also attach a {@link fileName}.
+ *
+ * - These then get converted to "assets", whereby both parts of a live photo
+ *   are combined. This is a {@link ClusteredFile}.
+ *
+ * - On to the {@link ClusteredFile} we attach the corresponding
+ *   {@link collection}, giving us {@link UploadableFile}. This is what gets
+ *   queued and then passed to the {@link uploader}.
+ */
+type FileWithCollectionIDAndName = {
+    /** A unique ID for the duration of the upload */
+    localID: number;
+    /** The ID of the collection to which this file should be uploaded. */
+    collectionID: number;
+    /**
+     * The name of the file.
+     *
+     * In case of live photos, this'll be the name of the image part.
+     */
+    fileName: string;
+    /** `true` if this is a live photo. */
+    isLivePhoto?: boolean;
+    /* Valid for non-live photos */
+    fileOrPath?: File | string;
+    /** Alias */
+    file?: File | string;
+    /* Valid for live photos */
+    livePhotoAssets?: LivePhotoAssets2;
+};
+
+const makeFileWithCollectionIDAndName = (
+    f: FileWithCollection,
+): FileWithCollectionIDAndName => {
+    /* TODO(MR): ElectronFile */
+    const fileOrPath = (f.fileOrPath ?? f.file) as File | string;
+    if (!(fileOrPath instanceof File || typeof fileOrPath == "string"))
+        throw new Error(`Unexpected file ${f}`);
+
+    return {
+        localID: ensure(f.localID),
+        collectionID: ensure(f.collectionID),
+        fileName: ensure(
+            f.isLivePhoto
+                ? getFileName(f.livePhotoAssets.image)
+                : getFileName(fileOrPath),
+        ),
+        isLivePhoto: f.isLivePhoto,
+        /* TODO(MR): ElectronFile */
+        file: fileOrPath,
+        fileOrPath: fileOrPath,
+        /* TODO(MR): ElectronFile */
+        livePhotoAssets: f.livePhotoAssets as LivePhotoAssets2,
+    };
+};
+
+type ClusteredFile = {
+    localID: number;
+    collectionID: number;
+    fileName: string;
+    isLivePhoto: boolean;
+    file?: File | string;
+    livePhotoAssets?: LivePhotoAssets2;
+};
+
+const splitMetadataAndMediaFiles = (
+    files: FileWithCollectionIDAndName[],
+): [
+    metadata: FileWithCollectionIDAndName[],
+    media: FileWithCollectionIDAndName[],
+] =>
+    files.reduce(
+        ([metadata, media], file) => {
+            if (lowercaseExtension(file.fileName) == "json")
+                metadata.push(file);
+            else media.push(file);
+            return [metadata, media];
+        },
+        [[], []],
+    );
 
 export const setToUploadCollection = async (collections: Collection[]) => {
     let collectionName: string = null;
@@ -752,72 +815,49 @@ const cancelRemainingUploads = async () => {
 };
 
 /**
- * The data needed by {@link clusterLivePhotos} to do its thing.
- *
- * As files progress through stages, they get more and more bits tacked on to
- * them. These types document the journey.
- */
-type ClusterableFile = {
-    localID: number;
-    collectionID: number;
-    // fileOrPath: File | ElectronFile | string;
-    file?: File | ElectronFile | string;
-};
-
-type ClusteredFile = ClusterableFile & {
-    isLivePhoto: boolean;
-    livePhotoAssets?: LivePhotoAssets2;
-};
-
-/**
  * Go through the given files, combining any sibling image + video assets into a
  * single live photo when appropriate.
  */
-const clusterLivePhotos = (mediaFiles: ClusterableFile[]) => {
+const clusterLivePhotos = async (files: FileWithCollectionIDAndName[]) => {
     const result: ClusteredFile[] = [];
-    mediaFiles
+    files
         .sort((f, g) =>
-            nameAndExtension(getFileName(f.file))[0].localeCompare(
-                nameAndExtension(getFileName(g.file))[0],
+            nameAndExtension(f.fileName)[0].localeCompare(
+                nameAndExtension(g.fileName)[0],
             ),
         )
         .sort((f, g) => f.collectionID - g.collectionID);
     let index = 0;
-    while (index < mediaFiles.length - 1) {
-        const f = mediaFiles[index];
-        const g = mediaFiles[index + 1];
-        const fFileName = getFileName(f.file);
-        const gFileName = getFileName(g.file);
-        const fFileType = potentialFileTypeFromExtension(fFileName);
-        const gFileType = potentialFileTypeFromExtension(gFileName);
+    while (index < files.length - 1) {
+        const f = files[index];
+        const g = files[index + 1];
+        const fFileType = potentialFileTypeFromExtension(f.fileName);
+        const gFileType = potentialFileTypeFromExtension(g.fileName);
         const fa: PotentialLivePhotoAsset = {
-            fileName: fFileName,
+            fileName: f.fileName,
             fileType: fFileType,
             collectionID: f.collectionID,
-            /* TODO(MR): ElectronFile changes */
-            size: (f as FileWithCollection).file.size,
+            fileOrPath: f.file,
         };
         const ga: PotentialLivePhotoAsset = {
-            fileName: gFileName,
+            fileName: g.fileName,
             fileType: gFileType,
             collectionID: g.collectionID,
-            /* TODO(MR): ElectronFile changes */
-            size: (g as FileWithCollection).file.size,
+            fileOrPath: g.file,
         };
-        if (areLivePhotoAssets(fa, ga)) {
-            result.push({
+        if (await areLivePhotoAssets(fa, ga)) {
+            const livePhoto = {
                 localID: f.localID,
                 collectionID: f.collectionID,
                 isLivePhoto: true,
                 livePhotoAssets: {
-                    /* TODO(MR): ElectronFile changes */
-                    image: (fFileType == FILE_TYPE.IMAGE ? f.file : g.file) as
-                        | string
-                        | File,
-                    video: (fFileType == FILE_TYPE.IMAGE ? g.file : f.file) as
-                        | string
-                        | File,
+                    image: fFileType == FILE_TYPE.IMAGE ? f.file : g.file,
+                    video: fFileType == FILE_TYPE.IMAGE ? g.file : f.file,
                 },
+            };
+            result.push({
+                ...livePhoto,
+                fileName: assetName(livePhoto),
             });
             index += 2;
         } else {
@@ -828,9 +868,9 @@ const clusterLivePhotos = (mediaFiles: ClusterableFile[]) => {
             index += 1;
         }
     }
-    if (index === mediaFiles.length - 1) {
+    if (index === files.length - 1) {
         result.push({
-            ...mediaFiles[index],
+            ...files[index],
             isLivePhoto: false,
         });
     }
@@ -841,10 +881,10 @@ interface PotentialLivePhotoAsset {
     fileName: string;
     fileType: FILE_TYPE;
     collectionID: number;
-    size: number;
+    fileOrPath: File | string;
 }
 
-const areLivePhotoAssets = (
+const areLivePhotoAssets = async (
     f: PotentialLivePhotoAsset,
     g: PotentialLivePhotoAsset,
 ) => {
@@ -884,9 +924,11 @@ const areLivePhotoAssets = (
     // we use doesn't support stream as a input.
 
     const maxAssetSize = 20 * 1024 * 1024; /* 20MB */
-    if (f.size > maxAssetSize || g.size > maxAssetSize) {
+    const fSize = await fopSize(f.fileOrPath);
+    const gSize = await fopSize(g.fileOrPath);
+    if (fSize > maxAssetSize || gSize > maxAssetSize) {
         log.info(
-            `Not classifying assets with too large sizes ${[f.size, g.size]} as a live photo`,
+            `Not classifying assets with too large sizes ${[fSize, gSize]} as a live photo`,
         );
         return false;
     }

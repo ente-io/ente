@@ -5,7 +5,6 @@ import { withTimeout } from "@ente/shared/utils";
 import { BLACK_THUMBNAIL_BASE64 } from "constants/upload";
 import * as ffmpeg from "services/ffmpeg";
 import { heicToJPEG } from "services/heic-convert";
-import { isFileHEIC } from "utils/file";
 
 /** Maximum width or height of the generated thumbnail */
 const maxThumbnailDimension = 720;
@@ -36,9 +35,9 @@ export const generateThumbnailWeb = async (
 
 const generateImageThumbnailUsingCanvas = async (
     blob: Blob,
-    fileTypeInfo: FileTypeInfo,
+    { extension }: FileTypeInfo,
 ) => {
-    if (isFileHEIC(fileTypeInfo.exactType)) {
+    if (extension == "heic" || extension == "heif") {
         log.debug(() => `Pre-converting HEIC to JPEG for thumbnail generation`);
         blob = await heicToJPEG(blob);
     }

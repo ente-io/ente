@@ -1,5 +1,6 @@
-import { FILE_TYPE, type FileTypeInfo } from "@/media/file-type";
+import { FILE_TYPE } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
+import { lowercaseExtension } from "@/next/file";
 import log from "@/next/log";
 import { CustomErrorMessage, type Electron } from "@/next/types/ipc";
 import { workerBridge } from "@/next/worker/worker-bridge";
@@ -10,6 +11,7 @@ import { downloadUsingAnchor, withTimeout } from "@ente/shared/utils";
 import { t } from "i18next";
 import isElectron from "is-electron";
 import { moveToHiddenCollection } from "services/collectionService";
+import { detectFileTypeInfo } from "services/detect-type";
 import DownloadManager from "services/download";
 import { updateFileCreationDateInEXIF } from "services/exif";
 import {
@@ -19,7 +21,6 @@ import {
     updateFilePublicMagicMetadata,
 } from "services/fileService";
 import { heicToJPEG } from "services/heic-convert";
-import { getFileType } from "services/typeDetectionService";
 import {
     EncryptedEnteFile,
     EnteFile,
@@ -38,11 +39,6 @@ import { VISIBILITY_STATE } from "types/magicMetadata";
 import { isArchivedFile, updateMagicMetadata } from "utils/magicMetadata";
 import { safeFileName } from "utils/native-fs";
 import { writeStream } from "utils/native-stream";
-
-const TYPE_HEIC = "heic";
-const TYPE_HEIF = "heif";
-const TYPE_JPEG = "jpeg";
-const TYPE_JPG = "jpg";
 
 const RAW_FORMATS = [
     "heic",
@@ -102,11 +98,11 @@ export async function getUpdatedEXIFFileForDownload(
     file: EnteFile,
     fileStream: ReadableStream<Uint8Array>,
 ): Promise<ReadableStream<Uint8Array>> {
-    const extension = getFileExtension(file.metadata.title);
+    const extension = lowercaseExtension(file.metadata.title);
     if (
         file.metadata.fileType === FILE_TYPE.IMAGE &&
         file.pubMagicMetadata?.data.editedTime &&
-        (extension === TYPE_JPEG || extension === TYPE_JPG)
+        (extension == "jpeg" || extension == "jpg")
     ) {
         const fileBlob = await new Response(fileStream).blob();
         const updatedFileBlob = await updateFileCreationDateInEXIF(
@@ -130,19 +126,19 @@ export async function downloadFile(file: EnteFile) {
             const { imageFileName, imageData, videoFileName, videoData } =
                 await decodeLivePhoto(file.metadata.title, fileBlob);
             const image = new File([imageData], imageFileName);
-            const imageType = await getFileType(image);
+            const imageType = await detectFileTypeInfo(image);
             const tempImageURL = URL.createObjectURL(
                 new Blob([imageData], { type: imageType.mimeType }),
             );
             const video = new File([videoData], videoFileName);
-            const videoType = await getFileType(video);
+            const videoType = await detectFileTypeInfo(video);
             const tempVideoURL = URL.createObjectURL(
                 new Blob([videoData], { type: videoType.mimeType }),
             );
             downloadUsingAnchor(tempImageURL, imageFileName);
             downloadUsingAnchor(tempVideoURL, videoFileName);
         } else {
-            const fileType = await getFileType(
+            const fileType = await detectFileTypeInfo(
                 new File([fileBlob], file.metadata.title),
             );
             fileBlob = await new Response(
@@ -278,20 +274,6 @@ export async function decryptFile(
     }
 }
 
-export function splitFilenameAndExtension(filename: string): [string, string] {
-    const lastDotPosition = filename.lastIndexOf(".");
-    if (lastDotPosition === -1) return [filename, null];
-    else
-        return [
-            filename.slice(0, lastDotPosition),
-            filename.slice(lastDotPosition + 1),
-        ];
-}
-
-export function getFileExtension(filename: string) {
-    return splitFilenameAndExtension(filename)[1]?.toLocaleLowerCase();
-}
-
 export function generateStreamFromArrayBuffer(data: Uint8Array) {
     return new ReadableStream({
         async start(controller: ReadableStreamDefaultController) {
@@ -302,23 +284,22 @@ export function generateStreamFromArrayBuffer(data: Uint8Array) {
 }
 
 export const getRenderableImage = async (fileName: string, imageBlob: Blob) => {
-    let fileTypeInfo: FileTypeInfo;
     try {
         const tempFile = new File([imageBlob], fileName);
-        fileTypeInfo = await getFileType(tempFile);
+        const fileTypeInfo = await detectFileTypeInfo(tempFile);
         log.debug(
-            () =>
-                `Obtaining renderable image for ${JSON.stringify(fileTypeInfo)}`,
+            () => `Need renderable image for ${JSON.stringify(fileTypeInfo)}`,
         );
-        const { exactType } = fileTypeInfo;
+        const { extension } = fileTypeInfo;
 
-        if (!isRawFile(exactType)) {
-            // Not something we know how to handle yet, give back the original.
+        if (!isRawFile(extension)) {
+            // Either it is not something we know how to handle yet, or
+            // something that the browser already knows how to render.
             return imageBlob;
         }
 
         const available = !moduleState.isNativeJPEGConversionNotAvailable;
-        if (isElectron() && available && isSupportedRawFormat(exactType)) {
+        if (isElectron() && available && isSupportedRawFormat(extension)) {
             // If we're running in our desktop app, see if our Node.js layer can
             // convert this into a JPEG using native tools for us.
             try {
@@ -332,17 +313,14 @@ export const getRenderableImage = async (fileName: string, imageBlob: Blob) => {
             }
         }
 
-        if (isFileHEIC(exactType)) {
-            // If it is an HEIC file, use our web HEIC converter.
+        if (extension == "heic" || extension == "heif") {
+            // For HEIC/HEIF files we can use our web HEIC converter.
             return await heicToJPEG(imageBlob);
         }
 
         return undefined;
     } catch (e) {
-        log.error(
-            `Failed to get renderable image for ${JSON.stringify(fileTypeInfo ?? fileName)}`,
-            e,
-        );
+        log.error(`Failed to get renderable image for ${fileName}`, e);
         return undefined;
     }
 };
@@ -360,13 +338,6 @@ const nativeConvertToJPEG = async (imageBlob: Blob) => {
     log.debug(() => `Native JPEG conversion took ${Date.now() - startTime} ms`);
     return new Blob([jpegData]);
 };
-
-export function isFileHEIC(exactType: string) {
-    return (
-        exactType.toLowerCase().endsWith(TYPE_HEIC) ||
-        exactType.toLowerCase().endsWith(TYPE_HEIF)
-    );
-}
 
 export function isRawFile(exactType: string) {
     return RAW_FORMATS.includes(exactType.toLowerCase());
@@ -724,7 +695,7 @@ export const getArchivedFiles = (files: EnteFile[]) => {
 };
 
 export const createTypedObjectURL = async (blob: Blob, fileName: string) => {
-    const type = await getFileType(new File([blob], fileName));
+    const type = await detectFileTypeInfo(new File([blob], fileName));
     return URL.createObjectURL(new Blob([blob], { type: type.mimeType }));
 };
 

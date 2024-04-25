@@ -1,7 +1,7 @@
 import { FILE_TYPE } from "@/media/file-type";
-import { tryToParseDateTime } from "@ente/shared/time";
 import { getLocalCollections } from "services/collectionService";
 import { getLocalFiles } from "services/fileService";
+import { tryToParseDateTime } from "services/upload/date";
 import {
     MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT,
     getClippedMetadataJSONMapKeyForFile,

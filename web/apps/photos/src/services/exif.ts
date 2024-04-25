@@ -4,7 +4,7 @@ import { validateAndGetCreationUnixTimeInMicroSeconds } from "@ente/shared/time"
 import { NULL_LOCATION } from "constants/upload";
 import exifr from "exifr";
 import piexif from "piexifjs";
-import { Location } from "types/upload";
+import { Location, type ParsedExtractedMetadata } from "types/upload";
 
 type ParsedEXIFData = Record<string, any> &
     Partial<{
@@ -34,18 +34,59 @@ type RawEXIFData = Record<string, any> &
         ImageHeight: number;
     }>;
 
+const exifTagsNeededForParsingImageMetadata = [
+    "DateTimeOriginal",
+    "CreateDate",
+    "ModifyDate",
+    "GPSLatitude",
+    "GPSLongitude",
+    "GPSLatitudeRef",
+    "GPSLongitudeRef",
+    "DateCreated",
+    "ExifImageWidth",
+    "ExifImageHeight",
+    "ImageWidth",
+    "ImageHeight",
+    "PixelXDimension",
+    "PixelYDimension",
+    "MetadataDate",
+];
+
+/**
+ * Read EXIF data from an image {@link file} and use that to construct and
+ * return an {@link ParsedExtractedMetadata}.
+ *
+ * This function is tailored for use when we upload files.
+ */
+export const parseImageMetadata = async (
+    file: File,
+    fileTypeInfo: FileTypeInfo,
+): Promise<ParsedExtractedMetadata> => {
+    const exifData = await getParsedExifData(
+        file,
+        fileTypeInfo,
+        exifTagsNeededForParsingImageMetadata,
+    );
+
+    return {
+        location: getEXIFLocation(exifData),
+        creationTime: getEXIFTime(exifData),
+        width: exifData?.imageWidth ?? null,
+        height: exifData?.imageHeight ?? null,
+    };
+};
+
 export async function getParsedExifData(
     receivedFile: File,
-    { exactType }: FileTypeInfo,
+    { extension }: FileTypeInfo,
     tags?: string[],
 ): Promise<ParsedEXIFData> {
     const exifLessFormats = ["gif", "bmp"];
     const exifrUnsupportedFileFormatMessage = "Unknown file format";
 
     try {
-        if (exifLessFormats.includes(exactType)) {
-            return null;
-        }
+        if (exifLessFormats.includes(extension)) return null;
+
         const exifData: RawEXIFData = await exifr.parse(receivedFile, {
             reviveValues: false,
             tiff: true,
@@ -68,10 +109,10 @@ export async function getParsedExifData(
         return parseExifData(filteredExifData);
     } catch (e) {
         if (e.message == exifrUnsupportedFileFormatMessage) {
-            log.error(`EXIFR does not support format ${exactType}`, e);
+            log.error(`EXIFR does not support ${extension} files`, e);
             return undefined;
         } else {
-            log.error(`Failed to parse EXIF data of ${exactType} file`, e);
+            log.error(`Failed to parse EXIF data for a ${extension} file`, e);
             throw e;
         }
     }

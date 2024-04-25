@@ -23,7 +23,7 @@ export const convertToJPEG = async (imageData: Uint8Array) => {
             await deleteTempFile(inputFilePath);
             await deleteTempFile(outputFilePath);
         } catch (e) {
-            log.error("Ignoring error when cleaning up temp files", e);
+            log.error("Could not clean up temp files", e);
         }
     }
 };
@@ -110,7 +110,7 @@ export const generateImageThumbnail = async (
             if (isInputFileTemporary) await deleteTempFile(inputFilePath);
             await deleteTempFile(outputFilePath);
         } catch (e) {
-            log.error("Ignoring error when cleaning up temp files", e);
+            log.error("Could not clean up temp files", e);
         }
     }
 };

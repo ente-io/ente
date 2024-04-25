@@ -1,5 +1,6 @@
 import { FILE_TYPE } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
+import type { Metadata } from "@/media/types/file";
 import { ensureElectron } from "@/next/electron";
 import log from "@/next/log";
 import { CustomError } from "@ente/shared/error";
@@ -22,7 +23,6 @@ import {
     FileExportNames,
 } from "types/export";
 import { EnteFile } from "types/file";
-import { Metadata } from "types/upload";
 import {
     constructCollectionNameMap,
     getCollectionUserFacingName,
