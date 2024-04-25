@@ -111,7 +111,7 @@ const parseMetadataJSONText = (text: string) => {
         return undefined;
     }
 
-    const parsedMetadataJSON: ParsedMetadataJSON = NULL_PARSED_METADATA_JSON;
+    const parsedMetadataJSON = { ...NULL_PARSED_METADATA_JSON };
 
     if (
         metadataJSON["photoTakenTime"] &&
