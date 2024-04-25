@@ -22,7 +22,7 @@ import {
 } from "constants/upload";
 import { addToCollection } from "services/collectionService";
 import { parseImageMetadata } from "services/exif";
-import * as ffmpegService from "services/ffmpeg";
+import * as ffmpeg from "services/ffmpeg";
 import {
     EnteFile,
     type FilePublicMagicMetadata,
@@ -680,7 +680,7 @@ async function tryExtractImageMetadata(
 
 const tryExtractVideoMetadata = async (fileOrPath: File | string) => {
     try {
-        return await ffmpegService.extractVideoMetadata(fileOrPath);
+        return await ffmpeg.extractVideoMetadata(fileOrPath);
     } catch (e) {
         log.error(`Failed to extract video metadata for ${fileOrPath}`, e);
         return undefined;

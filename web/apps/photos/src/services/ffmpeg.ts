@@ -26,11 +26,11 @@ import { type DedicatedFFmpegWorker } from "worker/ffmpeg.worker";
  * See also {@link generateVideoThumbnailNative}.
  */
 export const generateVideoThumbnailWeb = async (blob: Blob) =>
-    generateVideoThumbnail((seekTime: number) =>
-        ffmpegExecWeb(genThumbnailCommand(seekTime), blob, "jpeg", 0),
+    _generateVideoThumbnail((seekTime: number) =>
+        ffmpegExecWeb(makeGenThumbnailCommand(seekTime), blob, "jpeg", 0),
     );
 
-const generateVideoThumbnail = async (
+const _generateVideoThumbnail = async (
     thumbnailAtTime: (seekTime: number) => Promise<Uint8Array>,
 ) => {
     try {
@@ -61,16 +61,16 @@ export const generateVideoThumbnailNative = async (
     electron: Electron,
     dataOrPath: Uint8Array | string,
 ) =>
-    generateVideoThumbnail((seekTime: number) =>
+    _generateVideoThumbnail((seekTime: number) =>
         electron.ffmpegExec(
-            genThumbnailCommand(seekTime),
+            makeGenThumbnailCommand(seekTime),
             dataOrPath,
             "jpeg",
             0,
         ),
     );
 
-const genThumbnailCommand = (seekTime: number) => [
+const makeGenThumbnailCommand = (seekTime: number) => [
     ffmpegPathPlaceholder,
     "-i",
     inputPathPlaceholder,
@@ -83,30 +83,58 @@ const genThumbnailCommand = (seekTime: number) => [
     outputPathPlaceholder,
 ];
 
-/** Called during upload */
-export async function extractVideoMetadata(file: File | ElectronFile) {
-    // https://stackoverflow.com/questions/9464617/retrieving-and-saving-media-metadata-using-ffmpeg
-    // -c [short for codex] copy[(stream_specifier)[ffmpeg.org/ffmpeg.html#Stream-specifiers]] => copies all the stream without re-encoding
-    // -map_metadata [http://ffmpeg.org/ffmpeg.html#Advanced-options search for map_metadata] => copies all stream metadata to the out
-    // -f ffmetadata [https://ffmpeg.org/ffmpeg-formats.html#Metadata-1] => dump metadata from media files into a simple UTF-8-encoded INI-like text file
-    const metadata = await ffmpegExec2(
-        [
-            ffmpegPathPlaceholder,
-            "-i",
-            inputPathPlaceholder,
-            "-c",
-            "copy",
-            "-map_metadata",
-            "0",
-            "-f",
-            "ffmetadata",
-            outputPathPlaceholder,
-        ],
-        file,
-        "txt",
-    );
-    return parseFFmpegExtractedMetadata(metadata);
-}
+/**
+ * Extract metadata from the given video
+ *
+ * When we're running in the context of our desktop app _and_ we're passed a
+ * file path , this uses the native FFmpeg bundled with our desktop app.
+ * Otherwise it uses a wasm FFmpeg running in a web worker.
+ *
+ * This function is called during upload, when we need to extract the metadata
+ * of videos that the user is uploading.
+ *
+ * @param fileOrPath A {@link File}, or the absolute path to a file on the
+ * user's local filesytem. A path can only be provided when we're running in the
+ * context of our desktop app.
+ */
+export const extractVideoMetadata = async (
+    fileOrPath: File | string,
+): Promise<ParsedExtractedMetadata> => {
+    const command = extractVideoMetadataCommand;
+    const outputData =
+        fileOrPath instanceof File
+            ? await ffmpegExecWeb(command, fileOrPath, "txt", 0)
+            : await electron.ffmpegExec(command, fileOrPath, "txt", 0);
+
+    return parseFFmpegExtractedMetadata(outputData);
+};
+
+// Options:
+//
+// - `-c [short for codex] copy`
+// - copy is the [stream_specifier](ffmpeg.org/ffmpeg.html#Stream-specifiers)
+// - copies all the stream without re-encoding
+//
+// - `-map_metadata`
+// - http://ffmpeg.org/ffmpeg.html#Advanced-options (search for map_metadata)
+// - copies all stream metadata to the output
+//
+// - `-f ffmetadata`
+// - https://ffmpeg.org/ffmpeg-formats.html#Metadata-1
+// - dump metadata from media files into a simple INI-like utf-8 text file
+//
+const extractVideoMetadataCommand = [
+    ffmpegPathPlaceholder,
+    "-i",
+    inputPathPlaceholder,
+    "-c",
+    "copy",
+    "-map_metadata",
+    "0",
+    "-f",
+    "ffmetadata",
+    outputPathPlaceholder,
+];
 
 enum MetadataTags {
     CREATION_TIME = "creation_time",
