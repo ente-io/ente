@@ -69,7 +69,7 @@ class FaceClusteringService {
   bool isRunning = false;
 
   static const kRecommendedDistanceThreshold = 0.24;
-  static const kConservativeDistanceThreshold = 0.15;
+  static const kConservativeDistanceThreshold = 0.16;
 
   // singleton pattern
   FaceClusteringService._privateConstructor();
@@ -961,9 +961,9 @@ class FaceClusteringService {
 
     // Run the DBSCAN clustering
     final List<List<int>> clusterOutput = dbscan.run(embeddings);
-    final List<List<FaceInfo>> clusteredFaceInfos = clusterOutput
-        .map((cluster) => cluster.map((idx) => faceInfos[idx]).toList())
-        .toList();
+    // final List<List<FaceInfo>> clusteredFaceInfos = clusterOutput
+    //     .map((cluster) => cluster.map((idx) => faceInfos[idx]).toList())
+    //     .toList();
     final List<List<String>> clusteredFaceIDs = clusterOutput
         .map((cluster) => cluster.map((idx) => faceInfos[idx].faceID).toList())
         .toList();
