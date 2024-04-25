@@ -9,22 +9,6 @@ import { FileWithCollection, type FileWithCollection2 } from "types/upload";
 export const hasFileHash = (file: Metadata) =>
     file.hash || (file.imageHash && file.videoHash);
 
-export function segregateMetadataAndMediaFiles(
-    filesWithCollectionToUpload: FileWithCollection[],
-) {
-    const metadataJSONFiles: FileWithCollection[] = [];
-    const mediaFiles: FileWithCollection[] = [];
-    filesWithCollectionToUpload.forEach((fileWithCollection) => {
-        const file = fileWithCollection.file;
-        if (file.name.toLowerCase().endsWith("json")) {
-            metadataJSONFiles.push(fileWithCollection);
-        } else {
-            mediaFiles.push(fileWithCollection);
-        }
-    });
-    return { mediaFiles, metadataJSONFiles };
-}
-
 export function areFileWithCollectionsSame(
     firstFile: FileWithCollection2,
     secondFile: FileWithCollection2,

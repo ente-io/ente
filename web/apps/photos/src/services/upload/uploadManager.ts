@@ -1,7 +1,7 @@
 import { FILE_TYPE } from "@/media/file-type";
 import { potentialFileTypeFromExtension } from "@/media/live-photo";
 import { ensureElectron } from "@/next/electron";
-import { nameAndExtension } from "@/next/file";
+import { lowercaseExtension, nameAndExtension } from "@/next/file";
 import log from "@/next/log";
 import { ElectronFile } from "@/next/types/file";
 import { ComlinkWorker } from "@/next/worker/comlink-worker";
@@ -32,6 +32,7 @@ import {
     PublicUploadProps,
     type FileWithCollection2,
     type LivePhotoAssets2,
+    type UploadAsset2,
 } from "types/upload";
 import {
     FinishedUploads,
@@ -41,7 +42,6 @@ import {
     SegregatedFinishedUploads,
 } from "types/upload/ui";
 import { decryptFile, getUserOwnedFiles, sortFiles } from "utils/file";
-import { segregateMetadataAndMediaFiles } from "utils/upload";
 import { getLocalFiles } from "../fileService";
 import {
     getMetadataJSONMapKeyForJSON,
@@ -51,7 +51,6 @@ import {
 import UploadService, {
     assetName,
     fopSize,
-    getAssetName,
     getFileName,
     uploader,
 } from "./uploadService";
@@ -345,19 +344,6 @@ class UploadManager {
         this.uiService.setUploadProgressView(true);
     }
 
-    async updateExistingFilesAndCollections(collections: Collection[]) {
-        if (this.publicUploadProps.accessedThroughSharedURL) {
-            this.existingFiles = await getLocalPublicFiles(
-                getPublicCollectionUID(this.publicUploadProps.token),
-            );
-        } else {
-            this.existingFiles = getUserOwnedFiles(await getLocalFiles());
-        }
-        this.collections = new Map(
-            collections.map((collection) => [collection.id, collection]),
-        );
-    }
-
     public async queueFilesForUpload(
         filesWithCollectionToUploadIn: FileWithCollection[],
         collections: Collection[],
@@ -372,26 +358,28 @@ class UploadManager {
             await this.updateExistingFilesAndCollections(collections);
             this.uploaderName = uploaderName;
 
+            const namedFiles: FileWithCollectionIDAndName[] =
+                /* TODO(MR): ElectronFile changes */
+                (filesWithCollectionToUploadIn as FileWithCollection2[]).map(
+                    (f) => {
+                        return { ...f, fileName: assetName(f) };
+                    },
+                );
+
             this.uiService.setFilenames(
                 new Map<number, string>(
-                    filesWithCollectionToUploadIn.map((mediaFile) => [
-                        mediaFile.localID,
-                        getAssetName(mediaFile),
-                    ]),
+                    namedFiles.map((f) => [f.localID, f.fileName]),
                 ),
             );
 
-            const { metadataJSONFiles, mediaFiles } =
-                segregateMetadataAndMediaFiles(filesWithCollectionToUploadIn);
+            const [metadataFiles, mediaFiles] =
+                splitMetadataAndMediaFiles(namedFiles);
 
-            if (metadataJSONFiles.length) {
+            if (metadataFiles.length) {
                 this.uiService.setUploadStage(
                     UPLOAD_STAGES.READING_GOOGLE_METADATA_FILES,
                 );
-                /* TODO(MR): ElectronFile changes */
-                await this.parseMetadataJSONFiles(
-                    metadataJSONFiles as FileWithCollection2[],
-                );
+                await this.parseMetadataJSONFiles(metadataFiles);
             }
 
             if (mediaFiles.length) {
@@ -456,13 +444,25 @@ class UploadManager {
         }
     };
 
-    private async parseMetadataJSONFiles(metadataFiles: FileWithCollection2[]) {
-        this.uiService.reset(metadataFiles.length);
+    private async updateExistingFilesAndCollections(collections: Collection[]) {
+        if (this.publicUploadProps.accessedThroughSharedURL) {
+            this.existingFiles = await getLocalPublicFiles(
+                getPublicCollectionUID(this.publicUploadProps.token),
+            );
+        } else {
+            this.existingFiles = getUserOwnedFiles(await getLocalFiles());
+        }
+        this.collections = new Map(
+            collections.map((collection) => [collection.id, collection]),
+        );
+    }
 
-        for (const { file, collectionID } of metadataFiles) {
+    private async parseMetadataJSONFiles(files: FileWithCollectionIDAndName[]) {
+        this.uiService.reset(files.length);
+
+        for (const { file, fileName, collectionID } of files) {
             this.abortIfCancelled();
 
-            const fileName = getFileName(file);
             log.info(`Parsing metadata JSON ${fileName}`);
             const metadataJSON = await tryParseTakeoutMetadataJSON(file);
             if (metadataJSON) {
@@ -681,6 +681,22 @@ class UploadManager {
 
 export default new UploadManager();
 
+const splitMetadataAndMediaFiles = (
+    files: FileWithCollectionIDAndName[],
+): [
+    metadata: FileWithCollectionIDAndName[],
+    media: FileWithCollectionIDAndName[],
+] =>
+    files.reduce(
+        ([metadata, media], file) => {
+            if (lowercaseExtension(file.fileName) == "json")
+                metadata.push(file);
+            else media.push(file);
+            return [metadata, media];
+        },
+        [[], []],
+    );
+
 export const setToUploadCollection = async (collections: Collection[]) => {
     let collectionName: string = null;
     /* collection being one suggest one of two things
@@ -722,6 +738,12 @@ const cancelRemainingUploads = async () => {
     await electron.setPendingUploadCollection(undefined);
     await electron.setPendingUploadFiles("zips", []);
     await electron.setPendingUploadFiles("files", []);
+};
+
+type FileWithCollectionIDAndName = UploadAsset2 & {
+    localID: number;
+    collectionID?: number;
+    fileName: string;
 };
 
 /**
