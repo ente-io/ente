@@ -1,5 +1,6 @@
 import { FILE_TYPE, type FileTypeInfo } from "@/media/file-type";
 import { encodeLivePhoto } from "@/media/live-photo";
+import type { Metadata } from "@/media/types/file";
 import { ensureElectron } from "@/next/electron";
 import { basename, getFileNameSize } from "@/next/file";
 import log from "@/next/log";
@@ -42,7 +43,6 @@ import {
     UploadURL,
     type FileWithCollection2,
     type LivePhotoAssets2,
-    type Metadata,
     type UploadAsset2,
 } from "types/upload";
 import {

@@ -1,9 +1,9 @@
+import type { Metadata } from "@/media/types/file";
 import {
     EncryptedMagicMetadata,
     MagicMetadataCore,
     VISIBILITY_STATE,
 } from "types/magicMetadata";
-import { Metadata } from "types/upload";
 
 export interface MetadataFileAttributes {
     encryptedData: string;

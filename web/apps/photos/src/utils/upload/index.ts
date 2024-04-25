@@ -1,13 +1,10 @@
+import type { Metadata } from "@/media/types/file";
 import { basename, dirname } from "@/next/file";
 import { ElectronFile } from "@/next/types/file";
 import { PICKED_UPLOAD_TYPE } from "constants/upload";
 import isElectron from "is-electron";
 import { exportMetadataDirectoryName } from "services/export";
-import {
-    FileWithCollection,
-    Metadata,
-    type FileWithCollection2,
-} from "types/upload";
+import { FileWithCollection, type FileWithCollection2 } from "types/upload";
 
 const TYPE_JSON = "json";
 
