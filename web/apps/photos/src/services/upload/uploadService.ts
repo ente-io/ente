@@ -196,8 +196,8 @@ export const uploader = async (
          * (tee will not work for strictly sequential reads of large streams).
          */
 
-        const { fileTypeInfo, fileSize } =
-            await readFileTypeInfoAndSize(uploadAsset);
+        const { fileTypeInfo, fileSize, lastModifiedMs } =
+            await readAssetDetails(uploadAsset);
 
         const maxFileSize = 4 * 1024 * 1024 * 1024; /* 4 GB */
         if (fileSize >= maxFileSize)
@@ -208,6 +208,7 @@ export const uploader = async (
         const { metadata, publicMagicMetadata } = await extractAssetMetadata(
             uploadAsset,
             fileTypeInfo,
+            lastModifiedMs,
             collection.id,
             parsedMetadataJSONMap,
             worker,
@@ -419,27 +420,28 @@ const readFileOrPath = async (
     return { dataOrStream, fileSize, lastModifiedMs };
 };
 
+interface ReadAssetDetailsResult {
+    fileTypeInfo: FileTypeInfo;
+    fileSize: number;
+    lastModifiedMs: number;
+}
+
 /**
- * Read the file(s) to determine the type and size of the given {@link asset}.
+ * Read the file(s) to determine the type, size and last modified time of the
+ * given {@link asset}.
  */
-const readFileTypeInfoAndSize = async ({
+const readAssetDetails = async ({
     isLivePhoto,
     livePhotoAssets,
     file,
-}: UploadAsset2): Promise<{ fileTypeInfo: FileTypeInfo; fileSize: number }> =>
+}: UploadAsset2): Promise<ReadAssetDetailsResult> =>
     isLivePhoto
-        ? readLivePhotoFileTypeInfoAndSize(livePhotoAssets)
-        : readFOPFileTypeInfoAndSize(file);
+        ? readLivePhotoDetails(livePhotoAssets)
+        : readImageOrVideoDetails(file);
 
-const readLivePhotoFileTypeInfoAndSize = async ({
-    image,
-    video,
-}: LivePhotoAssets2): Promise<{
-    fileTypeInfo: FileTypeInfo;
-    fileSize: number;
-}> => {
-    const img = await readFOPFileTypeInfoAndSize(image);
-    const vid = await readFOPFileTypeInfoAndSize(video);
+const readLivePhotoDetails = async ({ image, video }: LivePhotoAssets2) => {
+    const img = await readImageOrVideoDetails(image);
+    const vid = await readImageOrVideoDetails(video);
 
     return {
         fileTypeInfo: {
@@ -449,6 +451,7 @@ const readLivePhotoFileTypeInfoAndSize = async ({
             videoType: vid.fileTypeInfo.extension,
         },
         fileSize: img.fileSize + vid.fileSize,
+        lastModifiedMs: img.lastModifiedMs,
     };
 };
 
@@ -457,14 +460,14 @@ const readLivePhotoFileTypeInfoAndSize = async ({
  * fallback, to determine its MIME type. From that, construct and return a
  * {@link FileTypeInfo}.
  *
- * While we're at it, also return the size of the file.
+ * While we're at it, also return the size of the file, and its last modified
+ * time (expressed as epoch milliseconds).
  *
  * @param fileOrPath See: [Note: Reading a fileOrPath]
  */
-const readFOPFileTypeInfoAndSize = async (
-    fileOrPath: File | string,
-): Promise<{ fileTypeInfo: FileTypeInfo; fileSize: number }> => {
-    const { dataOrStream, fileSize } = await readFileOrPath(fileOrPath);
+const readImageOrVideoDetails = async (fileOrPath: File | string) => {
+    const { dataOrStream, fileSize, lastModifiedMs } =
+        await readFileOrPath(fileOrPath);
 
     const fileTypeInfo = await detectFileTypeInfoFromChunk(async () => {
         if (dataOrStream instanceof Uint8Array) {
@@ -477,7 +480,7 @@ const readFOPFileTypeInfoAndSize = async (
         }
     }, getFileName(fileOrPath));
 
-    return { fileTypeInfo, fileSize };
+    return { fileTypeInfo, fileSize, lastModifiedMs };
 };
 
 /**
@@ -503,6 +506,7 @@ interface ExtractAssetMetadataResult {
 const extractAssetMetadata = async (
     { isLivePhoto, file, livePhotoAssets }: UploadAsset2,
     fileTypeInfo: FileTypeInfo,
+    lastModifiedMs: number,
     collectionID: number,
     parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
     worker: Remote<DedicatedCryptoWorker>,
@@ -511,6 +515,7 @@ const extractAssetMetadata = async (
         ? await extractLivePhotoMetadata(
               livePhotoAssets,
               fileTypeInfo,
+              lastModifiedMs,
               collectionID,
               parsedMetadataJSONMap,
               worker,
@@ -518,6 +523,7 @@ const extractAssetMetadata = async (
         : await extractImageOrVideoMetadata(
               file,
               fileTypeInfo,
+              lastModifiedMs,
               collectionID,
               parsedMetadataJSONMap,
               worker,
@@ -526,6 +532,7 @@ const extractAssetMetadata = async (
 const extractLivePhotoMetadata = async (
     livePhotoAssets: LivePhotoAssets2,
     fileTypeInfo: FileTypeInfo,
+    lastModifiedMs: number,
     collectionID: number,
     parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
     worker: Remote<DedicatedCryptoWorker>,
@@ -538,6 +545,7 @@ const extractLivePhotoMetadata = async (
         await extractImageOrVideoMetadata(
             livePhotoAssets.image,
             imageFileTypeInfo,
+            lastModifiedMs,
             collectionID,
             parsedMetadataJSONMap,
             worker,
@@ -561,6 +569,7 @@ const extractLivePhotoMetadata = async (
 const extractImageOrVideoMetadata = async (
     fileOrPath: File | string,
     fileTypeInfo: FileTypeInfo,
+    lastModifiedMs: number,
     collectionID: number,
     parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
     worker: Remote<DedicatedCryptoWorker>,
@@ -571,8 +580,11 @@ const extractImageOrVideoMetadata = async (
     let extractedMetadata: ParsedExtractedMetadata;
     if (fileType === FILE_TYPE.IMAGE) {
         extractedMetadata =
-            (await tryExtractImageMetadata(fileOrPath, fileTypeInfo)) ??
-            NULL_EXTRACTED_METADATA;
+            (await tryExtractImageMetadata(
+                fileOrPath,
+                fileTypeInfo,
+                lastModifiedMs,
+            )) ?? NULL_EXTRACTED_METADATA;
     } else if (fileType === FILE_TYPE.VIDEO) {
         extractedMetadata =
             (await tryExtractVideoMetadata(fileOrPath)) ??
@@ -583,13 +595,16 @@ const extractImageOrVideoMetadata = async (
 
     const hash = await computeHash(fileOrPath, worker);
 
+    const modificationTime = lastModifiedMs * 1000;
+    const creationTime =
+        extractedMetadata.creationTime ??
+        tryParseEpochMicrosecondsFromFileName(fileName) ??
+        modificationTime;
+
     const metadata: Metadata = {
         title: fileName,
-        creationTime:
-            extractedMetadata.creationTime ??
-            tryParseEpochMicrosecondsFromFileName(fileName) ??
-            receivedFile.lastModified * 1000,
-        modificationTime: receivedFile.lastModified * 1000,
+        creationTime,
+        modificationTime,
         latitude: extractedMetadata.location.latitude,
         longitude: extractedMetadata.location.longitude,
         fileType,
@@ -624,16 +639,13 @@ const NULL_EXTRACTED_METADATA: ParsedExtractedMetadata = {
 async function tryExtractImageMetadata(
     fileOrPath: File | string,
     fileTypeInfo: FileTypeInfo,
+    lastModifiedMs: number,
 ): Promise<ParsedExtractedMetadata> {
     try {
         if (!(fileOrPath instanceof File)) {
-            fileOrPath = new File(
-                [await fileOrPath.blob()],
-                fileOrPath.name,
-                {
-                    lastModified: fileOrPath.lastModified,
-                },
-            );
+            fileOrPath = new File([await fileOrPath.blob()], fileOrPath.name, {
+                lastModified: lastModifiedMs,
+            });
         }
         return await parseImageMetadata(fileOrPath, fileTypeInfo);
     } catch (e) {
