@@ -11,9 +11,6 @@ export interface FileTypeInfo {
      * A lowercased, standardized extension for files of the current type.
      *
      * TODO(MR): This in not valid for LIVE_PHOTO.
-     *
-     * See https://github.com/sindresorhus/file-type/blob/main/core.d.ts for the
-     * full list of values this property can have.
      */
     extension: string;
     mimeType?: string;

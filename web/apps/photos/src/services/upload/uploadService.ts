@@ -47,8 +47,8 @@ import {
 import { readStream } from "utils/native-stream";
 import { hasFileHash } from "utils/upload";
 import * as convert from "xml-js";
+import { detectFileTypeInfo } from "../detect-type";
 import { getFileStream } from "../readerService";
-import { detectFileTypeInfo } from "../typeDetectionService";
 import { extractAssetMetadata } from "./metadata";
 import publicUploadHttpClient from "./publicUploadHttpClient";
 import type { ParsedMetadataJSON } from "./takeout";
@@ -175,14 +175,12 @@ export const uploader = async (
     const { collection, localID, ...uploadAsset2 } = fileWithCollection;
     /* TODO(MR): ElectronFile changes */
     const uploadAsset = uploadAsset2 as UploadAsset;
-    let fileTypeInfo: FileTypeInfo;
-    let fileSize: number;
     try {
         /*
          * We read the file three times:
          * 1. To determine its MIME type (only needs first few KBs).
          * 2. To calculate its hash.
-         * 3. To compute its thumbnail and then encrypt it.
+         * 3. To encrypt it.
          *
          * When we already have a File object the multiple reads are fine. When
          * we're in the context of our desktop app and have a path, it might be
@@ -192,13 +190,15 @@ export const uploader = async (
          * manner (tee will not work for strictly sequential reads of large
          * streams).
          */
-        const maxFileSize = 4 * 1024 * 1024 * 1024; // 4 GB
 
-        fileSize = getAssetSize(uploadAsset);
-        if (fileSize >= maxFileSize) {
+        const { fileTypeInfo, fileSize } =
+            await readFileTypeInfoAndSize(uploadAsset);
+
+        const maxFileSize = 4 * 1024 * 1024 * 1024; /* 4 GB */
+        if (fileSize >= maxFileSize)
             return { fileUploadResult: UPLOAD_RESULT.TOO_LARGE };
-        }
-        fileTypeInfo = await getAssetFileType(uploadAsset);
+
+        abortIfCancelled();
 
         const { metadata, publicMagicMetadata } = await extractAssetMetadata(
             worker,
@@ -313,9 +313,6 @@ export const uploader = async (
 export const getFileName = (file: File | ElectronFile | string) =>
     typeof file == "string" ? basename(file) : file.name;
 
-function getFileSize(file: File | ElectronFile) {
-    return file.size;
-}
 export const getAssetName = ({
     isLivePhoto,
     file,
@@ -330,41 +327,10 @@ export const assetName = ({
 }: UploadAsset2) =>
     isLivePhoto ? getFileName(livePhotoAssets.image) : getFileName(file);
 
-const getAssetSize = ({ isLivePhoto, file, livePhotoAssets }: UploadAsset) => {
-    return isLivePhoto ? getLivePhotoSize(livePhotoAssets) : getFileSize(file);
-};
-
-const getLivePhotoSize = (livePhotoAssets: LivePhotoAssets) => {
-    return livePhotoAssets.image.size + livePhotoAssets.video.size;
-};
-
-const getAssetFileType = ({
-    isLivePhoto,
-    file,
-    livePhotoAssets,
-}: UploadAsset) => {
-    return isLivePhoto
-        ? getLivePhotoFileType(livePhotoAssets)
-        : detectFileTypeInfo(file);
-};
-
-const getLivePhotoFileType = async (
-    livePhotoAssets: LivePhotoAssets,
-): Promise<FileTypeInfo> => {
-    const imageFileTypeInfo = await detectFileTypeInfo(livePhotoAssets.image);
-    const videoFileTypeInfo = await detectFileTypeInfo(livePhotoAssets.video);
-    return {
-        fileType: FILE_TYPE.LIVE_PHOTO,
-        extension: `${imageFileTypeInfo.extension}+${videoFileTypeInfo.extension}`,
-        imageType: imageFileTypeInfo.extension,
-        videoType: videoFileTypeInfo.extension,
-    };
-};
-
 /**
  * Read the given file or path into an in-memory representation.
  *
- * [Note: The fileOrPath parameter to upload]
+ * See: [Note: Reading a fileOrPath]
  *
  * The file can be either a web
  * [File](https://developer.mozilla.org/en-US/docs/Web/API/File) or the absolute
@@ -435,6 +401,75 @@ const readFileOrPath = async (
     }
 
     return { dataOrStream, fileSize };
+};
+
+/**
+ * Read the beginning of the file or use its filename to determine its MIME
+ * type. Use that to construct and return a {@link FileTypeInfo}.
+ *
+ * While we're at it, also return the size of the file.
+ *
+ * @param fileOrPath See: [Note: Reading a fileOrPath]
+ */
+const readFileTypeInfoAndSize = async (
+    fileOrPath: File | string,
+): Promise<{ fileTypeInfo: FileTypeInfo; fileSize: number }> => {
+    const { dataOrStream, fileSize } = await readFileOrPath(fileOrPath);
+
+    function getFileSize(file: File | ElectronFile) {
+        return file.size;
+    }
+
+    async function extractElectronFileType(file: ElectronFile) {
+        const stream = await file.stream();
+        const reader = stream.getReader();
+        const { value: fileDataChunk } = await reader.read();
+        await reader.cancel();
+        return getFileTypeFromBuffer(fileDataChunk);
+    }
+
+    fileSize = getAssetSize(uploadAsset);
+    fileTypeInfo = await getAssetFileType(uploadAsset);
+    const getAssetSize = ({
+        isLivePhoto,
+        file,
+        livePhotoAssets,
+    }: UploadAsset) => {
+        return isLivePhoto
+            ? getLivePhotoSize(livePhotoAssets)
+            : getFileSize(file);
+    };
+
+    const getLivePhotoSize = (livePhotoAssets: LivePhotoAssets) => {
+        return livePhotoAssets.image.size + livePhotoAssets.video.size;
+    };
+
+    const getAssetFileType = ({
+        isLivePhoto,
+        file,
+        livePhotoAssets,
+    }: UploadAsset) => {
+        return isLivePhoto
+            ? getLivePhotoFileType(livePhotoAssets)
+            : detectFileTypeInfo(file);
+    };
+
+    const getLivePhotoFileType = async (
+        livePhotoAssets: LivePhotoAssets,
+    ): Promise<FileTypeInfo> => {
+        const imageFileTypeInfo = await detectFileTypeInfo(
+            livePhotoAssets.image,
+        );
+        const videoFileTypeInfo = await detectFileTypeInfo(
+            livePhotoAssets.video,
+        );
+        return {
+            fileType: FILE_TYPE.LIVE_PHOTO,
+            extension: `${imageFileTypeInfo.extension}+${videoFileTypeInfo.extension}`,
+            imageType: imageFileTypeInfo.extension,
+            videoType: videoFileTypeInfo.extension,
+        };
+    };
 };
 
 const readAsset = async (

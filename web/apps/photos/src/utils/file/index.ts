@@ -11,6 +11,7 @@ import { downloadUsingAnchor, withTimeout } from "@ente/shared/utils";
 import { t } from "i18next";
 import isElectron from "is-electron";
 import { moveToHiddenCollection } from "services/collectionService";
+import { detectFileTypeInfo } from "services/detect-type";
 import DownloadManager from "services/download";
 import { updateFileCreationDateInEXIF } from "services/exif";
 import {
@@ -20,7 +21,6 @@ import {
     updateFilePublicMagicMetadata,
 } from "services/fileService";
 import { heicToJPEG } from "services/heic-convert";
-import { detectFileTypeInfo } from "services/typeDetectionService";
 import {
     EncryptedEnteFile,
     EnteFile,

@@ -2,7 +2,7 @@ import { FILE_TYPE } from "@/media/file-type";
 import log from "@/next/log";
 import { validateAndGetCreationUnixTimeInMicroSeconds } from "@ente/shared/time";
 import type { FixOption } from "components/FixCreationTime";
-import { detectFileTypeInfo } from "services/typeDetectionService";
+import { detectFileTypeInfo } from "services/detect-type";
 import { EnteFile } from "types/file";
 import {
     changeFileCreationTime,

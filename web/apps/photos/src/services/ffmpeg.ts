@@ -51,7 +51,7 @@ const generateVideoThumbnail = async (
  * for the new files that the user is adding.
  *
  * @param dataOrPath The input video's data or the path to the video on the
- * user's local filesystem. See: [Note: The fileOrPath parameter to upload].
+ * user's local filesystem. See: [Note: Reading a fileOrPath].
  *
  * @returns JPEG data of the generated thumbnail.
  *
