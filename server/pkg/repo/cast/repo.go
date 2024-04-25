@@ -90,8 +90,8 @@ func (r *Repository) UpdateLastUsedAtForToken(ctx context.Context, token string)
 }
 
 // DeleteOldCodes that are not associated with a collection and are older than the given time
-func (r *Repository) DeleteOldCodes(ctx context.Context, expirtyTime int64) error {
-	_, err := r.DB.ExecContext(ctx, "DELETE FROM casting WHERE last_used_at < $1 and is_deleted=false and collection_id is null", expirtyTime)
+func (r *Repository) DeleteOldCodes(ctx context.Context, expiryTime int64) error {
+	_, err := r.DB.ExecContext(ctx, "DELETE FROM casting WHERE last_used_at < $1 and is_deleted=false and collection_id is null", expiryTime)
 	if err != nil {
 		return err
 	}
