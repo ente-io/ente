@@ -57,11 +57,7 @@ import { getFileStream } from "../readerService";
 import { tryParseEpochMicrosecondsFromFileName } from "./date";
 import publicUploadHttpClient from "./publicUploadHttpClient";
 import type { ParsedMetadataJSON } from "./takeout";
-import {
-    MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT,
-    getClippedMetadataJSONMapKeyForFile,
-    getMetadataJSONMapKeyForFile,
-} from "./takeout";
+import { matchTakeoutMetadata } from "./takeout";
 import {
     fallbackThumbnail,
     generateThumbnailNative,
@@ -563,34 +559,58 @@ const extractLivePhotoMetadata = async (
 };
 
 const extractImageOrVideoMetadata = async (
-    rawFile: File | ElectronFile | string,
+    fileOrPath: File | string,
     fileTypeInfo: FileTypeInfo,
     collectionID: number,
     parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
     worker: Remote<DedicatedCryptoWorker>,
 ) => {
-    const rawFileName = getFileName(rawFile);
-    let key = getMetadataJSONMapKeyForFile(collectionID, rawFileName);
-    let googleMetadata = parsedMetadataJSONMap.get(key);
+    const fileName = getFileName(fileOrPath);
+    const { fileType } = fileTypeInfo;
 
-    if (!googleMetadata && key.length > MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT) {
-        key = getClippedMetadataJSONMapKeyForFile(collectionID, rawFileName);
-        googleMetadata = parsedMetadataJSONMap.get(key);
+    let extractedMetadata: ParsedExtractedMetadata;
+    if (fileType === FILE_TYPE.IMAGE) {
+        extractedMetadata =
+            (await tryExtractImageMetadata(fileOrPath, fileTypeInfo)) ??
+            NULL_EXTRACTED_METADATA;
+    } else if (fileType === FILE_TYPE.VIDEO) {
+        extractedMetadata =
+            (await tryExtractVideoMetadata(fileOrPath)) ??
+            NULL_EXTRACTED_METADATA;
+    } else {
+        throw new Error(`Unexpected file type ${fileType} for ${fileOrPath}`);
     }
 
-    const { metadata, publicMagicMetadata } = await extractMetadata(
-        /* TODO(MR): ElectronFile changes */
-        rawFile as File | ElectronFile,
-        fileTypeInfo,
-        worker,
+    const hash = await computeHash(fileOrPath, worker);
+
+    const metadata: Metadata = {
+        title: fileName,
+        creationTime:
+            extractedMetadata.creationTime ??
+            tryParseEpochMicrosecondsFromFileName(fileName) ??
+            receivedFile.lastModified * 1000,
+        modificationTime: receivedFile.lastModified * 1000,
+        latitude: extractedMetadata.location.latitude,
+        longitude: extractedMetadata.location.longitude,
+        fileType,
+        hash,
+    };
+
+    const publicMagicMetadata: FilePublicMagicMetadataProps = {
+        w: extractedMetadata.width,
+        h: extractedMetadata.height,
+    };
+
+    const takeoutMetadata = matchTakeoutMetadata(
+        fileName,
+        collectionID,
+        parsedMetadataJSONMap,
     );
 
-    for (const [key, value] of Object.entries(googleMetadata ?? {})) {
-        if (!value) {
-            continue;
-        }
-        metadata[key] = value;
-    }
+    if (takeoutMetadata)
+        for (const [key, value] of Object.entries(takeoutMetadata))
+            if (value) metadata[key] = value;
+
     return { metadata, publicMagicMetadata };
 };
 
@@ -601,78 +621,35 @@ const NULL_EXTRACTED_METADATA: ParsedExtractedMetadata = {
     height: null,
 };
 
-const extractMetadata = async (
-    receivedFile: File | ElectronFile,
-    fileTypeInfo: FileTypeInfo,
-    worker: Remote<DedicatedCryptoWorker>,
-) => {
-    let extractedMetadata: ParsedExtractedMetadata = NULL_EXTRACTED_METADATA;
-    if (fileTypeInfo.fileType === FILE_TYPE.IMAGE) {
-        extractedMetadata = await getImageMetadata(receivedFile, fileTypeInfo);
-    } else if (fileTypeInfo.fileType === FILE_TYPE.VIDEO) {
-        extractedMetadata = await getVideoMetadata(receivedFile);
-    }
-    const hash = await computeHash(receivedFile, worker);
-
-    const metadata: Metadata = {
-        title: receivedFile.name,
-        creationTime:
-            extractedMetadata.creationTime ??
-            tryParseEpochMicrosecondsFromFileName(receivedFile.name) ??
-            receivedFile.lastModified * 1000,
-        modificationTime: receivedFile.lastModified * 1000,
-        latitude: extractedMetadata.location.latitude,
-        longitude: extractedMetadata.location.longitude,
-        fileType: fileTypeInfo.fileType,
-        hash,
-    };
-    const publicMagicMetadata: FilePublicMagicMetadataProps = {
-        w: extractedMetadata.width,
-        h: extractedMetadata.height,
-    };
-    return { metadata, publicMagicMetadata };
-}
-
-async function getImageMetadata(
-    receivedFile: File | ElectronFile,
+async function tryExtractImageMetadata(
+    fileOrPath: File | string,
     fileTypeInfo: FileTypeInfo,
 ): Promise<ParsedExtractedMetadata> {
     try {
-        if (!(receivedFile instanceof File)) {
-            receivedFile = new File(
-                [await receivedFile.blob()],
-                receivedFile.name,
+        if (!(fileOrPath instanceof File)) {
+            fileOrPath = new File(
+                [await fileOrPath.blob()],
+                fileOrPath.name,
                 {
-                    lastModified: receivedFile.lastModified,
+                    lastModified: fileOrPath.lastModified,
                 },
             );
         }
-        return await parseImageMetadata(receivedFile, fileTypeInfo);
+        return await parseImageMetadata(fileOrPath, fileTypeInfo);
     } catch (e) {
-        log.error("Failed to parse image metadata", e);
-        return NULL_EXTRACTED_METADATA;
+        log.error(`Failed to extract image metadata for ${fileOrPath}`, e);
+        return undefined;
     }
 }
 
-async function getVideoMetadata(file: File | ElectronFile) {
-    let videoMetadata = NULL_EXTRACTED_METADATA;
+const tryExtractVideoMetadata = async (fileOrPath: File | string) => {
     try {
-        log.info(`getVideoMetadata called for ${getFileNameSize(file)}`);
-        videoMetadata = await ffmpegService.extractVideoMetadata(file);
-        log.info(
-            `videoMetadata successfully extracted ${getFileNameSize(file)}`,
-        );
+        return await ffmpegService.extractVideoMetadata(fileOrPath);
     } catch (e) {
-        log.error("failed to get video metadata", e);
-        log.info(
-            `videoMetadata extracted failed ${getFileNameSize(file)} ,${
-                e.message
-            } `,
-        );
+        log.error(`Failed to extract video metadata for ${fileOrPath}`, e);
+        return undefined;
     }
-
-    return videoMetadata;
-}
+};
 
 const computeHash = async (
     fileOrPath: File | string,

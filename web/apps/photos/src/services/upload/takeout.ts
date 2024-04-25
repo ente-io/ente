@@ -153,3 +153,23 @@ const parseMetadataJSONText = (text: string) => {
     }
     return parsedMetadataJSON;
 };
+
+/**
+ * Return the matching entry (if any) from {@link parsedMetadataJSONMap} for the
+ * {@link fileName} and {@link collectionID} combination.
+ */
+export const matchTakeoutMetadata = (
+    fileName: string,
+    collectionID: number,
+    parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
+) => {
+    let key = getMetadataJSONMapKeyForFile(collectionID, fileName);
+    let takeoutMetadata = parsedMetadataJSONMap.get(key);
+
+    if (!takeoutMetadata && key.length > MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT) {
+        key = getClippedMetadataJSONMapKeyForFile(collectionID, fileName);
+        takeoutMetadata = parsedMetadataJSONMap.get(key);
+    }
+
+    return takeoutMetadata;
+};
