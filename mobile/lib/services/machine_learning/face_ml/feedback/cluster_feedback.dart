@@ -98,10 +98,10 @@ class ClusterFeedbackService {
         }
       }
 
-      final List<ClusterSuggestion> clusterIdAndFiles = [];
+      final List<ClusterSuggestion> finalSuggestions = [];
       for (final clusterSuggestion in foundSuggestions) {
         if (clusterIDToFiles.containsKey(clusterSuggestion.$1)) {
-          clusterIdAndFiles.add(
+          finalSuggestions.add(
             ClusterSuggestion(
               clusterSuggestion.$1,
               clusterSuggestion.$2,
@@ -116,13 +116,13 @@ class ClusterFeedbackService {
 
       final sortingStartTime = DateTime.now();
       if (extremeFilesFirst) {
-        await _sortSuggestionsOnDistanceToPerson(person, clusterIdAndFiles);
+        await _sortSuggestionsOnDistanceToPerson(person, finalSuggestions);
       }
       _logger.info(
         'getSuggestionForPerson post-processing suggestions took ${DateTime.now().difference(findSuggestionsTime).inMilliseconds} ms, of which sorting took ${DateTime.now().difference(sortingStartTime).inMilliseconds} ms and getting files took ${getFilesTime.difference(findSuggestionsTime).inMilliseconds} ms',
       );
 
-      return clusterIdAndFiles;
+      return finalSuggestions;
     } catch (e, s) {
       _logger.severe("Error in getClusterFilesForPersonID", e, s);
       rethrow;
@@ -463,9 +463,15 @@ class ClusterFeedbackService {
     final allClusterIdsToCountMap = await faceMlDb.clusterIdToFaceCount();
     final ignoredClusters = await faceMlDb.getPersonIgnoredClusters(p.remoteID);
     final personClusters = await faceMlDb.getPersonClusterIDs(p.remoteID);
+    final personFaceIDs =
+        await FaceMLDataDB.instance.getFaceIDsForPerson(p.remoteID);
+    final personFileIDs = personFaceIDs.map(getFileIdFromFaceId).toSet();
     w?.log(
       '${p.data.name} has ${personClusters.length} existing clusters, getting all database data done',
     );
+    final allClusterIdToFaceIDs =
+        await FaceMLDataDB.instance.getAllClusterIdToFaceIDs();
+    w?.log('getAllClusterIdToFaceIDs done');
 
     // First only do a simple check on the big clusters, if the person does not have small clusters yet
     final smallestPersonClusterSize = personClusters
@@ -473,6 +479,7 @@ class ClusterFeedbackService {
         .reduce((value, element) => min(value, element));
     final checkSizes = [kMinimumClusterSizeSearchResult, 20, 10, 5, 1];
     late Map<int, Vector> clusterAvgBigClusters;
+    final List<(int, double)> suggestionsMean = [];
     for (final minimumSize in checkSizes.toSet()) {
       // if (smallestPersonClusterSize >= minimumSize) {
       clusterAvgBigClusters = await _getUpdateClusterAvg(
@@ -493,8 +500,24 @@ class ClusterFeedbackService {
       w?.log(
         'Calculate suggestions using mean for ${clusterAvgBigClusters.length} clusters of min size $minimumSize',
       );
-      if (suggestionsMeanBigClusters.isNotEmpty) {
-        return suggestionsMeanBigClusters
+      for (final suggestion in suggestionsMeanBigClusters) {
+        // Skip suggestions that have a high overlap with the person's files
+        final suggestionSet = allClusterIdToFaceIDs[suggestion.$1]!
+            .map((faceID) => getFileIdFromFaceId(faceID))
+            .toSet();
+        final overlap = personFileIDs.intersection(suggestionSet);
+        if (overlap.isNotEmpty &&
+            ((overlap.length / suggestionSet.length) > 0.5)) {
+          await FaceMLDataDB.instance.captureNotPersonFeedback(
+            personID: p.remoteID,
+            clusterID: suggestion.$1,
+          );
+          continue;
+        }
+        suggestionsMean.add(suggestion);
+      }
+      if (suggestionsMean.isNotEmpty) {
+        return suggestionsMean
             .map((e) => (e.$1, e.$2, true))
             .toList(growable: false);
         // }
