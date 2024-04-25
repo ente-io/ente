@@ -243,21 +243,6 @@ export default function PairingMode() {
                         </a>{" "}
                         for help
                     </p>
-                    <div
-                        style={{
-                            position: "fixed",
-                            bottom: "20px",
-                            right: "20px",
-                            backgroundColor: "white",
-                            display: "flex",
-                            justifyContent: "center",
-                            alignItems: "center",
-                            padding: "10px",
-                            borderRadius: "10px",
-                        }}
-                    >
-                        <img src="/images/help-qrcode.webp" />
-                    </div>
                 </div>
             </div>
         </>
