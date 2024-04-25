@@ -175,7 +175,7 @@ export const uploader = async (
     makeProgessTracker: MakeProgressTracker,
 ): Promise<UploadResponse> => {
     const { collection, localID, ...uploadAsset } = fileWithCollection;
-    const name = assetName(fileWithCollection);
+    const name = assetName(uploadAsset);
     log.info(`Uploading ${name}`);
 
     try {
@@ -242,9 +242,12 @@ export const uploader = async (
 
         abortIfCancelled();
 
-        const file = await readAsset(fileTypeInfo, uploadAsset);
+        const { filedata, thumbnail, hasStaticThumbnail } = await readAsset(
+            fileTypeInfo,
+            uploadAsset,
+        );
 
-        if (file.hasStaticThumbnail) metadata.hasStaticThumbnail = true;
+        if (hasStaticThumbnail) metadata.hasStaticThumbnail = true;
 
         const pubMagicMetadata = await constructPublicMagicMetadata({
             ...publicMagicMetadata,
@@ -255,16 +258,16 @@ export const uploader = async (
 
         const fileWithMetadata: FileWithMetadata = {
             localID,
-            filedata: file.filedata,
-            thumbnail: file.thumbnail,
+            filedata,
+            thumbnail,
             metadata,
             pubMagicMetadata,
         };
 
         const encryptedFile = await encryptFile(
-            worker,
             fileWithMetadata,
             collection.key,
+            worker,
         );
 
         abortIfCancelled();
@@ -706,6 +709,58 @@ const computeHash = async (
     return await worker.completeChunkHashing(hashState);
 };
 
+/**
+ * Return true if the two files, as represented by their metadata, are same.
+ *
+ * Note that the metadata includes the hash of the file's contents (when
+ * available), so this also in effect compares the contents of the files, not
+ * just the "meta" information about them.
+ */
+const areFilesSame = (f: Metadata, g: Metadata) =>
+    hasFileHash(f) && hasFileHash(g)
+        ? areFilesSameHash(f, g)
+        : areFilesSameNoHash(f, g);
+
+const areFilesSameHash = (f: Metadata, g: Metadata) => {
+    if (f.fileType !== g.fileType || f.title !== g.title) {
+        return false;
+    }
+    if (f.fileType === FILE_TYPE.LIVE_PHOTO) {
+        return f.imageHash === g.imageHash && f.videoHash === g.videoHash;
+    } else {
+        return f.hash === g.hash;
+    }
+};
+
+/**
+ * Older files that were uploaded before we introduced hashing will not have
+ * hashes, so retain and use the logic we used back then for such files.
+ *
+ * Deprecation notice April 2024: Note that hashing was introduced very early
+ * (years ago), so the chance of us finding files without hashes is rare. And
+ * even in these cases, the worst that'll happen is that a duplicate file would
+ * get uploaded which can later be deduped. So we can get rid of this case at
+ * some point (e.g. the mobile app doesn't do this extra check, just uploads).
+ */
+const areFilesSameNoHash = (f: Metadata, g: Metadata) => {
+    /*
+     * The maximum difference in the creation/modification times of two similar
+     * files is set to 1 second. This is because while uploading files in the
+     * web - browsers and users could have set reduced precision of file times
+     * to prevent timing attacks and fingerprinting.
+     *
+     * See:
+     * https://developer.mozilla.org/en-US/docs/Web/API/File/lastModified#reduced_time_precision
+     */
+    const oneSecond = 1e6;
+    return (
+        f.fileType == g.fileType &&
+        f.title == g.title &&
+        Math.abs(f.creationTime - g.creationTime) < oneSecond &&
+        Math.abs(f.modificationTime - g.modificationTime) < oneSecond
+    );
+};
+
 const readAsset = async (
     fileTypeInfo: FileTypeInfo,
     { isLivePhoto, file, livePhotoAssets }: UploadAsset2,
@@ -903,73 +958,65 @@ const constructPublicMagicMetadata = async (
     return await updateMagicMetadata(publicMagicMetadataProps);
 };
 
-async function encryptFile(
-    worker: Remote<DedicatedCryptoWorker>,
+const encryptFile = async (
     file: FileWithMetadata,
     encryptionKey: string,
-): Promise<EncryptedFile> {
-    try {
-        const { key: fileKey, file: encryptedFiledata } = await encryptFiledata(
-            worker,
-            file.filedata,
-        );
+    worker: Remote<DedicatedCryptoWorker>,
+): Promise<EncryptedFile> => {
+    const { key: fileKey, file: encryptedFiledata } = await encryptFiledata(
+        file.filedata,
+        worker,
+    );
 
-        const { file: encryptedThumbnail } = await worker.encryptThumbnail(
-            file.thumbnail,
-            fileKey,
-        );
-        const { file: encryptedMetadata } = await worker.encryptMetadata(
-            file.metadata,
-            fileKey,
-        );
+    const { file: encryptedThumbnail } = await worker.encryptThumbnail(
+        file.thumbnail,
+        fileKey,
+    );
 
-        let encryptedPubMagicMetadata: EncryptedMagicMetadata;
-        if (file.pubMagicMetadata) {
-            const { file: encryptedPubMagicMetadataData } =
-                await worker.encryptMetadata(
-                    file.pubMagicMetadata.data,
-                    fileKey,
-                );
-            encryptedPubMagicMetadata = {
-                version: file.pubMagicMetadata.version,
-                count: file.pubMagicMetadata.count,
-                data: encryptedPubMagicMetadataData.encryptedData,
-                header: encryptedPubMagicMetadataData.decryptionHeader,
-            };
-        }
+    const { file: encryptedMetadata } = await worker.encryptMetadata(
+        file.metadata,
+        fileKey,
+    );
 
-        const encryptedKey = await worker.encryptToB64(fileKey, encryptionKey);
-
-        const result: EncryptedFile = {
-            file: {
-                file: encryptedFiledata,
-                thumbnail: encryptedThumbnail,
-                metadata: encryptedMetadata,
-                pubMagicMetadata: encryptedPubMagicMetadata,
-                localID: file.localID,
-            },
-            fileKey: encryptedKey,
+    let encryptedPubMagicMetadata: EncryptedMagicMetadata;
+    if (file.pubMagicMetadata) {
+        const { file: encryptedPubMagicMetadataData } =
+            await worker.encryptMetadata(file.pubMagicMetadata.data, fileKey);
+        encryptedPubMagicMetadata = {
+            version: file.pubMagicMetadata.version,
+            count: file.pubMagicMetadata.count,
+            data: encryptedPubMagicMetadataData.encryptedData,
+            header: encryptedPubMagicMetadataData.decryptionHeader,
         };
-        return result;
-    } catch (e) {
-        log.error("Error encrypting files", e);
-        throw e;
     }
-}
 
-async function encryptFiledata(
-    worker: Remote<DedicatedCryptoWorker>,
+    const encryptedKey = await worker.encryptToB64(fileKey, encryptionKey);
+
+    const result: EncryptedFile = {
+        file: {
+            file: encryptedFiledata,
+            thumbnail: encryptedThumbnail,
+            metadata: encryptedMetadata,
+            pubMagicMetadata: encryptedPubMagicMetadata,
+            localID: file.localID,
+        },
+        fileKey: encryptedKey,
+    };
+    return result;
+};
+
+const encryptFiledata = async (
     filedata: Uint8Array | DataStream,
-): Promise<EncryptionResult<Uint8Array | DataStream>> {
-    return isDataStream(filedata)
-        ? await encryptFileStream(worker, filedata)
-        : await worker.encryptFile(filedata);
-}
-
-async function encryptFileStream(
     worker: Remote<DedicatedCryptoWorker>,
+): Promise<EncryptionResult<Uint8Array | DataStream>> =>
+    isDataStream(filedata)
+        ? await encryptFileStream(filedata, worker)
+        : await worker.encryptFile(filedata);
+
+const encryptFileStream = async (
     fileData: DataStream,
-) {
+    worker: Remote<DedicatedCryptoWorker>,
+) => {
     const { stream, chunkCount } = fileData;
     const fileStreamReader = stream.getReader();
     const { key, decryptionHeader, pushState } =
@@ -997,58 +1044,6 @@ async function encryptFileStream(
             encryptedData: { stream: encryptedFileStream, chunkCount },
         },
     };
-}
-
-/**
- * Return true if the two files, as represented by their metadata, are same.
- *
- * Note that the metadata includes the hash of the file's contents (when
- * available), so this also in effect compares the contents of the files, not
- * just the "meta" information about them.
- */
-const areFilesSame = (f: Metadata, g: Metadata) =>
-    hasFileHash(f) && hasFileHash(g)
-        ? areFilesSameHash(f, g)
-        : areFilesSameNoHash(f, g);
-
-const areFilesSameHash = (f: Metadata, g: Metadata) => {
-    if (f.fileType !== g.fileType || f.title !== g.title) {
-        return false;
-    }
-    if (f.fileType === FILE_TYPE.LIVE_PHOTO) {
-        return f.imageHash === g.imageHash && f.videoHash === g.videoHash;
-    } else {
-        return f.hash === g.hash;
-    }
-};
-
-/**
- * Older files that were uploaded before we introduced hashing will not have
- * hashes, so retain and use the logic we used back then for such files.
- *
- * Deprecation notice April 2024: Note that hashing was introduced very early
- * (years ago), so the chance of us finding files without hashes is rare. And
- * even in these cases, the worst that'll happen is that a duplicate file would
- * get uploaded which can later be deduped. So we can get rid of this case at
- * some point (e.g. the mobile app doesn't do this extra check, just uploads).
- */
-const areFilesSameNoHash = (f: Metadata, g: Metadata) => {
-    /*
-     * The maximum difference in the creation/modification times of two similar
-     * files is set to 1 second. This is because while uploading files in the
-     * web - browsers and users could have set reduced precision of file times
-     * to prevent timing attacks and fingerprinting.
-     *
-     * See:
-     * https://developer.mozilla.org/en-US/docs/Web/API/File/lastModified#reduced_time_precision
-     */
-    const oneSecond = 1e6;
-    return (
-        f.fileType == g.fileType &&
-        f.title == g.title &&
-        Math.abs(f.creationTime - g.creationTime) < oneSecond &&
-        Math.abs(f.modificationTime - g.modificationTime) < oneSecond
-    );
 };
 
 const uploadToBucket = async (
@@ -1116,7 +1111,7 @@ const uploadToBucket = async (
         return backupedFile;
     } catch (e) {
         if (e.message !== CustomError.UPLOAD_CANCELLED) {
-            log.error("error uploading to bucket", e);
+            log.error("Error when uploading to bucket", e);
         }
         throw e;
     }

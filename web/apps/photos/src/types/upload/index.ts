@@ -1,4 +1,4 @@
-import { FILE_TYPE } from "@/media/file-type";
+import type { Metadata } from "@/media/types/file";
 import type { ElectronFile } from "@/next/types/file";
 import {
     B64EncryptionResult,
@@ -12,7 +12,6 @@ import {
     S3FileAttributes,
 } from "types/file";
 import { EncryptedMagicMetadata } from "types/magicMetadata";
-
 
 export interface Location {
     latitude: number;
