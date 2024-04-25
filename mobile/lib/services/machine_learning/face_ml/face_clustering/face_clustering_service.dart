@@ -69,7 +69,7 @@ class FaceClusteringService {
   bool isRunning = false;
 
   static const kRecommendedDistanceThreshold = 0.24;
-  static const kConservativeDistanceThreshold = 0.06;
+  static const kConservativeDistanceThreshold = 0.15;
 
   // singleton pattern
   FaceClusteringService._privateConstructor();
