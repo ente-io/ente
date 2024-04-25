@@ -21,15 +21,7 @@ const load = (() => {
                         cast,
                     });
                 });
-
                 document.body.appendChild(script);
-                const debugScript = document.createElement("script");
-                debugScript.src =
-                    "https://www.gstatic.com/cast/sdk/libs/devtools/debug_layer/caf_receiver_logger.js";
-                debugScript.addEventListener("load", () => {
-                    console.log("debug script loaded");
-                });
-                document.body.appendChild(debugScript);
             });
         }
         return promise;

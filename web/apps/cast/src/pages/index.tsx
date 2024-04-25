@@ -43,37 +43,16 @@ export default function PairingMode() {
 
     useEffect(() => {
         if (!cast) {
-            console.log("cast not ready");
             return;
         }
         if (isCastReady) {
-            console.log("cast already ready");
             return;
         }
         const context = cast.framework.CastReceiverContext.getInstance();
-        context.setLoggerLevel(cast.framework.LoggerLevel.DEBUG);
-        const castDebugLogger = cast.debug.CastDebugLogger.getInstance();
+
         try {
             const options = new cast.framework.CastReceiverOptions();
             options.maxInactivity = 3600;
-            context.addEventListener(
-                cast.framework.system.EventType.READY,
-                () => {
-                    if (!castDebugLogger.debugOverlayElement_) {
-                        // Enable debug logger and show a 'DEBUG MODE' overlay at top left corner.
-                        castDebugLogger.setEnabled(true);
-                    }
-                },
-            );
-            context.addEventListener(
-                cast.framework.system.EventType.ERROR,
-                (event) => {
-                    castDebugLogger.info(
-                        "Context Error - ",
-                        JSON.stringify(event),
-                    );
-                },
-            );
             options.customNamespaces = Object.assign({});
             options.customNamespaces["urn:x-cast:pair-request"] =
                 cast.framework.system.MessageType.JSON;
@@ -88,12 +67,10 @@ export default function PairingMode() {
             context.start(options);
             setIsCastReady(true);
         } catch (e) {
-            console.log("failed to create cast context", e);
             log.error("failed to create cast context", e);
         }
 
         return () => {
-            console.log("stopping cast context");
             // context.stop();
         };
     }, [cast]);
@@ -103,9 +80,7 @@ export default function PairingMode() {
         senderId: string;
         data: any;
     }) => {
-        console.log("received message", message);
         try {
-            console.log("sending pair request response message");
             cast.framework.CastReceiverContext.getInstance().sendCustomMessage(
                 "urn:x-cast:pair-request",
                 message.senderId,
@@ -113,9 +88,7 @@ export default function PairingMode() {
                     code: digits.join(""),
                 },
             );
-            console.log("sent pair request response message");
         } catch (e) {
-            console.log("failed to pair request response message", e);
             log.error("failed to send message", e);
         }
     };
@@ -128,7 +101,6 @@ export default function PairingMode() {
             setPublicKeyB64(await toB64(keypair.publicKey));
             setPrivateKeyB64(await toB64(keypair.privateKey));
         } catch (e) {
-            console.log("failed to generate keypair", e);
             log.error("failed to generate keypair", e);
             throw e;
         }
@@ -271,21 +243,6 @@ export default function PairingMode() {
                         </a>{" "}
                         for help
                     </p>
-                    <div
-                        style={{
-                            position: "fixed",
-                            bottom: "20px",
-                            right: "20px",
-                            backgroundColor: "white",
-                            display: "flex",
-                            justifyContent: "center",
-                            alignItems: "center",
-                            padding: "10px",
-                            borderRadius: "10px",
-                        }}
-                    >
-                        <img src="/images/help-qrcode.webp" />
-                    </div>
                 </div>
             </div>
         </>
