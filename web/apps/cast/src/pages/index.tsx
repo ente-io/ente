@@ -64,6 +64,15 @@ export default function PairingMode() {
                 "urn:x-cast:pair-request",
                 messageReceiveHandler,
             );
+
+            // listen to close request and stop the context
+            context.addEventListener(
+                cast.framework.system.EventType.SENDER_DISCONNECTED,
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                (_) => {
+                    context.stop();
+                },
+            );
             context.start(options);
             setIsCastReady(true);
         } catch (e) {
