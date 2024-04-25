@@ -48,7 +48,12 @@ import {
     tryParseTakeoutMetadataJSON,
     type ParsedMetadataJSON,
 } from "./takeout";
-import UploadService, { assetName, fopSize, getFileName, uploader } from "./uploadService";
+import UploadService, {
+    assetName,
+    fopSize,
+    getFileName,
+    uploader,
+} from "./uploadService";
 
 /** The number of uploads to process in parallel. */
 const maxConcurrentUploads = 4;
@@ -351,21 +356,14 @@ class UploadManager {
 
             log.info(`Uploading ${filesWithCollectionToUploadIn.length} files`);
             this.uploadInProgress = true;
-            await this.updateExistingFilesAndCollections(collections);
             this.uploaderName = uploaderName;
 
-            const namedFiles: FileWithCollectionIDAndName[] =
-                filesWithCollectionToUploadIn.map((f) => {
-                    return {
-                        localID: f.localID,
-                        collectionID: ensure(f.collectionID),
-                        fileOrPath: f.
-                        fileName: f.isLivePhoto ? getFileName(f.livePhotoAssets.image) : getFileName(f.file),
-                        isLivePhoto: f.isLivePhoto,
+            await this.updateExistingFilesAndCollections(collections);
 
-                        fileName: assetName(f),
-                    };
-                });
+            const namedFiles: FileWithCollectionIDAndName[] =
+                filesWithCollectionToUploadIn.map(
+                    makeFileWithCollectionIDAndName,
+                );
 
             this.uiService.setFilenames(
                 new Map<number, string>(
@@ -717,13 +715,36 @@ type FileWithCollectionIDAndName = {
     isLivePhoto?: boolean;
     /* Valid for non-live photos */
     fileOrPath?: File | string;
+    /** Alias */
+    file?: File | string;
     /* Valid for live photos */
     livePhotoAssets?: LivePhotoAssets2;
 };
 
+const makeFileWithCollectionIDAndName = (
+    f: FileWithCollection,
+): FileWithCollectionIDAndName => {
+    /* TODO(MR): ElectronFile */
+    const fileOrPath = (f.fileOrPath ?? f.file) as File | string;
+    if (!(fileOrPath instanceof File || typeof fileOrPath == "string"))
+        throw new Error(`Unexpected file ${f}`);
 
-const makeFileWithCollectionIDAndName = (        file: FileWithCollection[]) => {
-}
+    return {
+        localID: ensure(f.localID),
+        collectionID: ensure(f.collectionID),
+        fileName: ensure(
+            f.isLivePhoto
+                ? getFileName(f.livePhotoAssets.image)
+                : getFileName(fileOrPath),
+        ),
+        isLivePhoto: f.isLivePhoto,
+        /* TODO(MR): ElectronFile */
+        file: fileOrPath,
+        fileOrPath: fileOrPath,
+        /* TODO(MR): ElectronFile */
+        livePhotoAssets: f.livePhotoAssets as LivePhotoAssets2,
+    };
+};
 
 type ClusteredFile = {
     localID: number;
@@ -792,7 +813,6 @@ const cancelRemainingUploads = async () => {
     await electron.setPendingUploadFiles("zips", []);
     await electron.setPendingUploadFiles("files", []);
 };
-
 
 /**
  * Go through the given files, combining any sibling image + video assets into a
