@@ -146,8 +146,8 @@ class FaceMLDataDB {
   }
 
   Future<Map<int, int>> clusterIdToFaceCount() async {
-    final db = await instance.database;
-    final List<Map<String, dynamic>> maps = await db.rawQuery(
+    final db = await instance.sqliteAsyncDB;
+    final List<Map<String, dynamic>> maps = await db.getAll(
       'SELECT $fcClusterID, COUNT(*) as count FROM $faceClustersTable where $fcClusterID IS NOT NULL GROUP BY $fcClusterID ',
     );
     final Map<int, int> result = {};
@@ -158,15 +158,15 @@ class FaceMLDataDB {
   }
 
   Future<Set<int>> getPersonIgnoredClusters(String personID) async {
-    final db = await instance.database;
+    final db = await instance.sqliteAsyncDB;
     // find out clusterIds that are assigned to other persons using the clusters table
-    final List<Map<String, dynamic>> maps = await db.rawQuery(
+    final List<Map<String, dynamic>> maps = await db.getAll(
       'SELECT $clusterIDColumn FROM $clusterPersonTable WHERE $personIdColumn != ? AND $personIdColumn IS NOT NULL',
       [personID],
     );
     final Set<int> ignoredClusterIDs =
         maps.map((e) => e[clusterIDColumn] as int).toSet();
-    final List<Map<String, dynamic>> rejectMaps = await db.rawQuery(
+    final List<Map<String, dynamic>> rejectMaps = await db.getAll(
       'SELECT $clusterIDColumn FROM $notPersonFeedback WHERE $personIdColumn = ?',
       [personID],
     );
@@ -176,8 +176,8 @@ class FaceMLDataDB {
   }
 
   Future<Set<int>> getPersonClusterIDs(String personID) async {
-    final db = await instance.database;
-    final List<Map<String, dynamic>> maps = await db.rawQuery(
+    final db = await instance.sqliteAsyncDB;
+    final List<Map<String, dynamic>> maps = await db.getAll(
       'SELECT $clusterIDColumn FROM $clusterPersonTable WHERE $personIdColumn = ?',
       [personID],
     );
