@@ -357,6 +357,10 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Authentication failed, please try again"),
         "authenticationSuccessful":
             MessageLookupByLibrary.simpleMessage("Authentication successful!"),
+        "autoCastDialogBody": MessageLookupByLibrary.simpleMessage(
+            "You\'ll see available Cast devices here."),
+        "autoCastiOSPermission": MessageLookupByLibrary.simpleMessage(
+            "Make sure Local Network permissions are turned on for the Ente Photos app, in Settings."),
         "autoPair": MessageLookupByLibrary.simpleMessage("Auto pair"),
         "autoPairGoogle": MessageLookupByLibrary.simpleMessage(
             "Auto Pair requires connecting to Google servers and only works with Chromecast supported devices. Google will not receive sensitive data, such as your photos."),
@@ -463,6 +467,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Confirm recovery key"),
         "confirmYourRecoveryKey":
             MessageLookupByLibrary.simpleMessage("Confirm your recovery key"),
+        "connectToDevice":
+            MessageLookupByLibrary.simpleMessage("Connect to device"),
         "contactFamilyAdmin": m12,
         "contactSupport":
             MessageLookupByLibrary.simpleMessage("Contact support"),
@@ -941,6 +947,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "no": MessageLookupByLibrary.simpleMessage("No"),
         "noAlbumsSharedByYouYet":
             MessageLookupByLibrary.simpleMessage("No albums shared by you yet"),
+        "noDeviceFound":
+            MessageLookupByLibrary.simpleMessage("No device found"),
         "noDeviceLimit": MessageLookupByLibrary.simpleMessage("None"),
         "noDeviceThatCanBeDeleted": MessageLookupByLibrary.simpleMessage(
             "You\'ve no files on this device that can be deleted"),

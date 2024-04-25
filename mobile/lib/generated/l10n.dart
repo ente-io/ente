@@ -8603,6 +8603,46 @@ class S {
       args: [],
     );
   }
+
+  /// `Connect to device`
+  String get connectToDevice {
+    return Intl.message(
+      'Connect to device',
+      name: 'connectToDevice',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You'll see available Cast devices here.`
+  String get autoCastDialogBody {
+    return Intl.message(
+      'You\'ll see available Cast devices here.',
+      name: 'autoCastDialogBody',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Make sure Local Network permissions are turned on for the Ente Photos app, in Settings.`
+  String get autoCastiOSPermission {
+    return Intl.message(
+      'Make sure Local Network permissions are turned on for the Ente Photos app, in Settings.',
+      name: 'autoCastiOSPermission',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No device found`
+  String get noDeviceFound {
+    return Intl.message(
+      'No device found',
+      name: 'noDeviceFound',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

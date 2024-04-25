@@ -1216,5 +1216,9 @@
   "createCollaborativeLink": "Create collaborative link",
   "search": "Search",
   "autoPairGoogle": "Auto Pair requires connecting to Google servers and only works with Chromecast supported devices. Google will not receive sensitive data, such as your photos.",
-  "manualPairDesc": "Pair with PIN works for any large screen device you want to play your album on."
+  "manualPairDesc": "Pair with PIN works for any large screen device you want to play your album on.",
+  "connectToDevice": "Connect to device",
+  "autoCastDialogBody": "You'll see available Cast devices here.",
+  "autoCastiOSPermission": "Make sure Local Network permissions are turned on for the Ente Photos app, in Settings.",
+  "noDeviceFound": "No device found"
 }

@@ -1,6 +1,7 @@
 import "dart:io";
 
 import "package:flutter/material.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
@@ -24,7 +25,7 @@ class _AutoCastDialogState extends State<AutoCastDialog> {
 
     final AlertDialog alert = AlertDialog(
       title: Text(
-        "Connect to device",
+        S.of(context).connectToDevice,
         style: textStyle.largeBold,
       ),
       content: Column(
@@ -32,12 +33,12 @@ class _AutoCastDialogState extends State<AutoCastDialog> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            "You'll see available Cast devices here.",
+            S.of(context).autoCastDialogBody,
             style: textStyle.bodyMuted,
           ),
           if (Platform.isIOS)
             Text(
-              "Make sure Local Network permissions are turned on for the Ente Photos app, in Settings.",
+              S.of(context).autoCastiOSPermission,
               style: textStyle.bodyMuted,
             ),
           const SizedBox(height: 16),
@@ -55,7 +56,7 @@ class _AutoCastDialogState extends State<AutoCastDialog> {
               }
 
               if (snapshot.data!.isEmpty) {
-                return const Center(child: Text('No device'));
+                return const Center(child: Text(S.of(context).noDeviceFound));
               }
 
               return Column(
