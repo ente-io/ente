@@ -1,5 +1,5 @@
 import { FILE_TYPE } from "@/media/file-type";
-import { tryToParseDateTime } from "@ente/shared/time";
+import { tryToParseDateTime } from "services/upload/date";
 import { getLocalCollections } from "services/collectionService";
 import { getLocalFiles } from "services/fileService";
 import {

@@ -4,11 +4,6 @@ import log from "@/next/log";
 import { ElectronFile } from "@/next/types/file";
 import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
 import { CustomError } from "@ente/shared/error";
-import {
-    parseDateFromFusedDateString,
-    tryToParseDateTime,
-    validateAndGetCreationUnixTimeInMicroSeconds,
-} from "@ente/shared/time";
 import type { DataStream } from "@ente/shared/utils/data-stream";
 import { Remote } from "comlink";
 import { FILE_READER_CHUNK_SIZE, NULL_LOCATION } from "constants/upload";
@@ -22,6 +17,7 @@ import {
     type LivePhotoAssets2,
     type UploadAsset2,
 } from "types/upload";
+import { tryParseEpochMicrosecondsFromFileName } from "./date";
 import {
     MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT,
     getClippedMetadataJSONMapKeyForFile,
@@ -154,7 +150,7 @@ async function extractMetadata(
         title: receivedFile.name,
         creationTime:
             extractedMetadata.creationTime ??
-            tryExtractDateFromFileName(receivedFile.name) ??
+            tryParseEpochMicrosecondsFromFileName(receivedFile.name) ??
             receivedFile.lastModified * 1000,
         modificationTime: receivedFile.lastModified * 1000,
         latitude: extractedMetadata.location.latitude,
@@ -189,43 +185,6 @@ async function getImageMetadata(
         return NULL_EXTRACTED_METADATA;
     }
 }
-
-/**
- * Try to extract a date from file name for certain known patterns.
- *
- * If it doesn't match a known pattern, or if there is some error during the
- * extraction, return `undefined`.
- */
-const tryExtractDateFromFileName = (fileName: string): number | undefined => {
-    try {
-        fileName = fileName.trim();
-        let parsedDate: Date;
-        if (fileName.startsWith("IMG-") || fileName.startsWith("VID-")) {
-            // WhatsApp media files
-            // Sample name: IMG-20171218-WA0028.jpg
-            parsedDate = parseDateFromFusedDateString(fileName.split("-")[1]);
-        } else if (fileName.startsWith("Screenshot_")) {
-            // Screenshots on Android
-            // Sample name: Screenshot_20181227-152914.jpg
-            parsedDate = parseDateFromFusedDateString(
-                fileName.replaceAll("Screenshot_", ""),
-            );
-        } else if (fileName.startsWith("signal-")) {
-            // Signal images
-            // Sample name: signal-2018-08-21-100217.jpg
-            const p = fileName.split("-");
-            const dateString = `${p[1]}${p[2]}${p[3]}-${p[4]}`;
-            parsedDate = parseDateFromFusedDateString(dateString);
-        }
-        if (!parsedDate) {
-            parsedDate = tryToParseDateTime(fileName);
-        }
-        return validateAndGetCreationUnixTimeInMicroSeconds(parsedDate);
-    } catch (e) {
-        log.error(`Could not extract date from file name ${fileName}`, e);
-        return undefined;
-    }
-};
 
 async function getVideoMetadata(file: File | ElectronFile) {
     let videoMetadata = NULL_EXTRACTED_METADATA;
