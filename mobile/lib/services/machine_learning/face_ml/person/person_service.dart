@@ -193,7 +193,7 @@ class PersonService {
     }
 
     logger.info("Storing feedback for ${faceIdToClusterID.length} faces");
-    await faceMLDataDB.updateClusterIdToFaceId(faceIdToClusterID);
+    await faceMLDataDB.updateFaceIdToClusterId(faceIdToClusterID);
     await faceMLDataDB.bulkAssignClusterToPersonID(clusterToPersonID);
   }
 

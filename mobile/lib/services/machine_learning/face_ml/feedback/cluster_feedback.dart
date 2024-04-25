@@ -412,7 +412,7 @@ class ClusterFeedbackService {
         final newClusterID = startClusterID + blurValue ~/ 10;
         faceIdToCluster[faceID] = newClusterID;
       }
-      await FaceMLDataDB.instance.updateClusterIdToFaceId(faceIdToCluster);
+      await FaceMLDataDB.instance.updateFaceIdToClusterId(faceIdToCluster);
 
       Bus.instance.fire(PeopleChangedEvent());
     } catch (e, s) {

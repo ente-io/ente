@@ -98,7 +98,7 @@ class FaceMLDataDB {
     }
   }
 
-  Future<void> updateClusterIdToFaceId(
+  Future<void> updateFaceIdToClusterId(
     Map<String, int> faceIDToClusterID,
   ) async {
     final db = await instance.database;
@@ -197,8 +197,8 @@ class FaceMLDataDB {
     int clusterID, {
     int? limit,
   }) async {
-    final db = await instance.database;
-    final List<Map<String, dynamic>> maps = await db.rawQuery(
+    final db = await instance.sqliteAsyncDB;
+    final List<Map<String, dynamic>> maps = await db.getAll(
       'SELECT $faceEmbeddingBlob FROM $facesTable WHERE  $faceIDColumn in (SELECT $fcFaceId from $faceClustersTable where $fcClusterID = ?) ${limit != null ? 'LIMIT $limit' : ''}',
       [clusterID],
     );
@@ -209,7 +209,7 @@ class FaceMLDataDB {
     Iterable<int> clusterIDs, {
     int? limit,
   }) async {
-    final db = await instance.database;
+    final db = await instance.sqliteAsyncDB;
     final Map<int, List<Uint8List>> result = {};
 
     final selectQuery = '''
@@ -220,7 +220,7 @@ class FaceMLDataDB {
     ${limit != null ? 'LIMIT $limit' : ''}
   ''';
 
-    final List<Map<String, dynamic>> maps = await db.rawQuery(selectQuery);
+    final List<Map<String, dynamic>> maps = await db.getAll(selectQuery);
 
     for (final map in maps) {
       final clusterID = map[fcClusterID] as int;
@@ -321,8 +321,8 @@ class FaceMLDataDB {
   }
 
   Future<Face?> getFaceForFaceID(String faceID) async {
-    final db = await instance.database;
-    final result = await db.rawQuery(
+    final db = await instance.sqliteAsyncDB;
+    final result = await db.getAll(
       'SELECT * FROM $facesTable where $faceIDColumn = ?',
       [faceID],
     );
@@ -420,8 +420,8 @@ class FaceMLDataDB {
   Future<Map<String, int?>> getFaceIdsToClusterIds(
     Iterable<String> faceIds,
   ) async {
-    final db = await instance.database;
-    final List<Map<String, dynamic>> maps = await db.rawQuery(
+    final db = await instance.sqliteAsyncDB;
+    final List<Map<String, dynamic>> maps = await db.getAll(
       'SELECT $fcFaceId, $fcClusterID FROM $faceClustersTable where $fcFaceId IN (${faceIds.map((id) => "'$id'").join(",")})',
     );
     final Map<String, int?> result = {};
@@ -433,8 +433,8 @@ class FaceMLDataDB {
 
   Future<Map<int, Set<int>>> getFileIdToClusterIds() async {
     final Map<int, Set<int>> result = {};
-    final db = await instance.database;
-    final List<Map<String, dynamic>> maps = await db.rawQuery(
+    final db = await instance.sqliteAsyncDB;
+    final List<Map<String, dynamic>> maps = await db.getAll(
       'SELECT $fcClusterID, $fcFaceId FROM $faceClustersTable',
     );
 
@@ -791,9 +791,9 @@ class FaceMLDataDB {
 
   // for a given personID, return a map of clusterID to fileIDs using join query
   Future<Map<int, Set<int>>> getFileIdToClusterIDSet(String personID) {
-    final db = instance.database;
+    final db = instance.sqliteAsyncDB;
     return db.then((db) async {
-      final List<Map<String, dynamic>> maps = await db.rawQuery(
+      final List<Map<String, dynamic>> maps = await db.getAll(
         'SELECT $faceClustersTable.$fcClusterID, $fcFaceId FROM $faceClustersTable '
         'INNER JOIN $clusterPersonTable '
         'ON $faceClustersTable.$fcClusterID = $clusterPersonTable.$clusterIDColumn '
@@ -814,9 +814,9 @@ class FaceMLDataDB {
   Future<Map<int, Set<int>>> getFileIdToClusterIDSetForCluster(
     Set<int> clusterIDs,
   ) {
-    final db = instance.database;
+    final db = instance.sqliteAsyncDB;
     return db.then((db) async {
-      final List<Map<String, dynamic>> maps = await db.rawQuery(
+      final List<Map<String, dynamic>> maps = await db.getAll(
         'SELECT $fcClusterID, $fcFaceId FROM $faceClustersTable '
         'WHERE $fcClusterID IN (${clusterIDs.join(",")})',
       );
@@ -894,8 +894,8 @@ class FaceMLDataDB {
   }
 
   Future<Map<int, String>> getClusterIDToPersonID() async {
-    final db = await instance.database;
-    final List<Map<String, dynamic>> maps = await db.rawQuery(
+    final db = await instance.sqliteAsyncDB;
+    final List<Map<String, dynamic>> maps = await db.getAll(
       'SELECT $personIdColumn, $clusterIDColumn FROM $clusterPersonTable',
     );
     final Map<int, String> result = {};
