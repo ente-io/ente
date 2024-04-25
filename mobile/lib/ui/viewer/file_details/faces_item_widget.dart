@@ -71,9 +71,9 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
         ];
       }
 
-      // Remove faces with low scores and blurry faces
+      // Remove faces with low scores
       if (!kDebugMode) {
-        faces.removeWhere((face) => (face.isBlurry || face.score < 0.75));
+        faces.removeWhere((face) => (face.score < 0.75));
       }
 
       if (faces.isEmpty) {
