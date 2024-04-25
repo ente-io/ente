@@ -477,7 +477,7 @@ class ClusterFeedbackService {
     final smallestPersonClusterSize = personClusters
         .map((clusterID) => allClusterIdsToCountMap[clusterID] ?? 0)
         .reduce((value, element) => min(value, element));
-    final checkSizes = [kMinimumClusterSizeSearchResult, 20, 10, 5, 1];
+    final checkSizes = [20, kMinimumClusterSizeSearchResult, 10, 5, 1];
     late Map<int, Vector> clusterAvgBigClusters;
     final List<(int, double)> suggestionsMean = [];
     for (final minimumSize in checkSizes.toSet()) {
