@@ -896,30 +896,37 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       alwaysShowSuccessState: false,
       initialValue: code,
       onSubmit: (String text) async {
-        try {
-          code = text.trim();
-          final String? publicKey = await gw.getPublicKey(code);
-          if (publicKey == null) {
-            showToast(context, S.of(context).deviceNotFound);
-            // show _pairPin again
-            Future.delayed(Duration.zero, () => _pairWithPin(gw, code));
-            return;
-          }
-          final String castToken = const Uuid().v4().toString();
-          final castPayload = CollectionsService.instance
-              .getCastData(castToken, widget.collection!, publicKey);
-          await gw.publishCastPayload(
-            code,
-            castPayload,
-            widget.collection!.id,
-            castToken,
-          );
-        } catch (e, s) {
-          _logger.severe("Failed to cast album", e, s);
-          await showGenericErrorDialog(context: context, error: e);
+        final bool paired = await _castPair(gw, text);
+        if (!paired) {
           Future.delayed(Duration.zero, () => _pairWithPin(gw, code));
         }
       },
     );
+  }
+
+  Future<bool> _castPair(CastGateway gw, String code) async {
+    try {
+      final String? publicKey = await gw.getPublicKey(code);
+      if (publicKey == null) {
+        showToast(context, S.of(context).deviceNotFound);
+
+        return false;
+      }
+      final String castToken = const Uuid().v4().toString();
+      final castPayload = CollectionsService.instance
+          .getCastData(castToken, widget.collection!, publicKey);
+      await gw.publishCastPayload(
+        code,
+        castPayload,
+        widget.collection!.id,
+        castToken,
+      );
+      showToast(context, "Pairing complete");
+      return true;
+    } catch (e, s) {
+      _logger.severe("Failed to cast album", e, s);
+      await showGenericErrorDialog(context: context, error: e);
+      return false;
+    }
   }
 }
