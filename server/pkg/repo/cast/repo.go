@@ -14,7 +14,7 @@ type Repository struct {
 	DB *sql.DB
 }
 
-func (r *Repository) AddCode(ctx context.Context, code *string, pubKey string) (string, error) {
+func (r *Repository) AddCode(ctx context.Context, code *string, pubKey string, ip string) (string, error) {
 	var codeValue string
 	var err error
 	if code == nil || *code == "" {
@@ -25,7 +25,7 @@ func (r *Repository) AddCode(ctx context.Context, code *string, pubKey string) (
 	} else {
 		codeValue = strings.TrimSpace(*code)
 	}
-	_, err = r.DB.ExecContext(ctx, "INSERT INTO casting (code, public_key, id) VALUES ($1, $2, $3)", codeValue, pubKey, uuid.New())
+	_, err = r.DB.ExecContext(ctx, "INSERT INTO casting (code, public_key, id, ip) VALUES ($1, $2, $3, $4)", codeValue, pubKey, uuid.New(), ip)
 	if err != nil {
 		return "", err
 	}
@@ -38,17 +38,17 @@ func (r *Repository) InsertCastData(ctx context.Context, castUserID int64, code 
 	return err
 }
 
-func (r *Repository) GetPubKey(ctx context.Context, code string) (string, error) {
-	var pubKey string
-	row := r.DB.QueryRowContext(ctx, "SELECT public_key FROM casting WHERE code = $1 and is_deleted=false", code)
-	err := row.Scan(&pubKey)
+func (r *Repository) GetPubKeyAndIp(ctx context.Context, code string) (string, string, error) {
+	var pubKey, ip string
+	row := r.DB.QueryRowContext(ctx, "SELECT public_key, ip FROM casting WHERE code = $1 and is_deleted=false", code)
+	err := row.Scan(&pubKey, &ip)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return "", ente.ErrNotFoundError.NewErr("code not found")
+			return "", "", ente.ErrNotFoundError.NewErr("code not found")
 		}
-		return "", err
+		return "", "", err
 	}
-	return pubKey, nil
+	return pubKey, ip, nil
 }
 
 func (r *Repository) GetEncCastData(ctx context.Context, code string) (*string, error) {
