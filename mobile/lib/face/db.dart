@@ -332,7 +332,9 @@ class FaceMLDataDB {
     return mapRowToFace(result.first);
   }
 
-  Future<Map<int, Iterable<String>>> getClusterToFaceIDs(Set<int> clusterIDs) async {
+  Future<Map<int, Iterable<String>>> getClusterToFaceIDs(
+    Set<int> clusterIDs,
+  ) async {
     final db = await instance.sqliteAsyncDB;
     final Map<int, List<String>> result = {};
     final List<Map<String, dynamic>> maps = await db.getAll(
@@ -860,7 +862,9 @@ class FaceMLDataDB {
     return result;
   }
 
-  Future<Map<int, (Uint8List, int)>> getClusterToClusterSummary(Iterable<int> clusterIDs) async {
+  Future<Map<int, (Uint8List, int)>> getClusterToClusterSummary(
+    Iterable<int> clusterIDs,
+  ) async {
     final db = await instance.sqliteAsyncDB;
     final Map<int, (Uint8List, int)> result = {};
     final rows = await db.getAll(
