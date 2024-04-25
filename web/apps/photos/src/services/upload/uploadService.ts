@@ -656,13 +656,22 @@ async function tryExtractImageMetadata(
     fileTypeInfo: FileTypeInfo,
     lastModifiedMs: number,
 ): Promise<ParsedExtractedMetadata> {
+    let file: File;
+    if (fileOrPath instanceof File) {
+        file = fileOrPath;
+    } else {
+        const path = fileOrPath;
+        // The library we use for extracting EXIF from images, exifr, doesn't
+        // support streams. But unlike videos, for images it is reasonable to
+        // read the entire stream into memory here.
+        const { response } = await readStream(ensureElectron(), path);
+        file = new File([await response.arrayBuffer()], basename(path), {
+            lastModified: lastModifiedMs,
+        });
+    }
+
     try {
-        if (!(fileOrPath instanceof File)) {
-            fileOrPath = new File([await fileOrPath.blob()], fileOrPath.name, {
-                lastModified: lastModifiedMs,
-            });
-        }
-        return await parseImageMetadata(fileOrPath, fileTypeInfo);
+        return await parseImageMetadata(file, fileTypeInfo);
     } catch (e) {
         log.error(`Failed to extract image metadata for ${fileOrPath}`, e);
         return undefined;
