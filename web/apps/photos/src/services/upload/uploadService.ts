@@ -2,7 +2,7 @@ import { FILE_TYPE, type FileTypeInfo } from "@/media/file-type";
 import { encodeLivePhoto } from "@/media/live-photo";
 import type { Metadata } from "@/media/types/file";
 import { ensureElectron } from "@/next/electron";
-import { basename, getFileNameSize } from "@/next/file";
+import { basename } from "@/next/file";
 import log from "@/next/log";
 import { ElectronFile } from "@/next/types/file";
 import { CustomErrorMessage } from "@/next/types/ipc";
@@ -23,7 +23,6 @@ import {
 import { addToCollection } from "services/collectionService";
 import { parseImageMetadata } from "services/exif";
 import * as ffmpegService from "services/ffmpeg";
-import { getElectronFileStream } from "services/readerService";
 import {
     EnteFile,
     type FilePublicMagicMetadata,
@@ -420,6 +419,22 @@ const readFileOrPath = async (
     return { dataOrStream, fileSize, lastModifiedMs };
 };
 
+/** A variant of {@readFileOrPath} that always returns an {@link DataStream}. */
+const readFileOrPathStream = async (
+    fileOrPath: File | string,
+): Promise<DataStream> => {
+    if (fileOrPath instanceof File) {
+        return getFileStream(fileOrPath, FILE_READER_CHUNK_SIZE);
+    } else {
+        const { response, size } = await readStream(
+            ensureElectron(),
+            fileOrPath,
+        );
+        const chunkCount = Math.ceil(size / FILE_READER_CHUNK_SIZE);
+        return { stream: response.body, chunkCount };
+    }
+};
+
 interface ReadAssetDetailsResult {
     fileTypeInfo: FileTypeInfo;
     fileSize: number;
@@ -667,41 +682,19 @@ const computeHash = async (
     fileOrPath: File | string,
     worker: Remote<DedicatedCryptoWorker>,
 ) => {
-    const file = fileOrPath as File; /* TODO(MR): ElectronFile changes */
-    try {
-        log.info(`getFileHash called for ${getFileNameSize(file)}`);
-        let filedata: DataStream;
-        if (file instanceof File) {
-            filedata = getFileStream(file, FILE_READER_CHUNK_SIZE);
-        } else {
-            filedata = await getElectronFileStream(
-                file,
-                FILE_READER_CHUNK_SIZE,
-            );
-        }
-        const hashState = await worker.initChunkHashing();
+    const { stream, chunkCount } = await readFileOrPathStream(fileOrPath);
+    const hashState = await worker.initChunkHashing();
 
-        const streamReader = filedata.stream.getReader();
-        for (let i = 0; i < filedata.chunkCount; i++) {
-            const { done, value: chunk } = await streamReader.read();
-            if (done) {
-                throw Error(CustomError.CHUNK_LESS_THAN_EXPECTED);
-            }
-            await worker.hashFileChunk(hashState, Uint8Array.from(chunk));
-        }
-        const { done } = await streamReader.read();
-        if (!done) {
-            throw Error(CustomError.CHUNK_MORE_THAN_EXPECTED);
-        }
-        const hash = await worker.completeChunkHashing(hashState);
-        log.info(
-            `file hashing completed successfully ${getFileNameSize(file)}`,
-        );
-        return hash;
-    } catch (e) {
-        log.error("getFileHash failed", e);
-        log.info(`file hashing failed ${getFileNameSize(file)} ,${e.message} `);
+    const streamReader = stream.getReader();
+    for (let i = 0; i < chunkCount; i++) {
+        const { done, value: chunk } = await streamReader.read();
+        if (done) throw new Error("Less chunks than expected");
+        await worker.hashFileChunk(hashState, Uint8Array.from(chunk));
     }
+
+    const { done } = await streamReader.read();
+    if (!done) throw new Error("More chunks than expected");
+    return await worker.completeChunkHashing(hashState);
 };
 
 const readAsset = async (
@@ -1174,9 +1167,7 @@ async function uploadStreamUsingMultipart(
         partEtags.push({ PartNumber: index + 1, ETag: eTag });
     }
     const { done } = await streamReader.read();
-    if (!done) {
-        throw Error(CustomError.CHUNK_MORE_THAN_EXPECTED);
-    }
+    if (!done) throw new Error("More chunks than expected");
 
     const completeURL = multipartUploadURLs.completeURL;
     const cBody = convert.js2xml(
