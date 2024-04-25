@@ -586,9 +586,7 @@ class UploadManager {
     ) {
         try {
             let decryptedFile: EnteFile;
-            log.info(
-                `post upload action -> fileUploadResult: ${fileUploadResult} uploadedFile present ${!!uploadedFile}`,
-            );
+            log.info(`Upload completed with result: ${fileUploadResult}`);
             await this.removeFromPendingUploads(fileWithCollection);
             switch (fileUploadResult) {
                 case UPLOAD_RESULT.FAILED:
@@ -614,7 +612,9 @@ class UploadManager {
                     // no-op
                     break;
                 default:
-                    throw Error("Invalid Upload Result" + fileUploadResult);
+                    throw new Error(
+                        `Invalid Upload Result ${fileUploadResult}`,
+                    );
             }
             if (
                 [
@@ -631,7 +631,7 @@ class UploadManager {
                             fileWithCollection.livePhotoAssets.image,
                     });
                 } catch (e) {
-                    log.error("Error in fileUploaded handlers", e);
+                    log.warn("Ignoring error in fileUploaded handlers", e);
                 }
                 this.updateExistingFiles(decryptedFile);
             }
