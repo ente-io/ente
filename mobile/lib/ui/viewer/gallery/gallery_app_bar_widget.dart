@@ -880,11 +880,11 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       );
     }
     if (result == ButtonAction.second) {
-      await _pairWithPin(gw);
+      await _pairWithPin(gw, '');
     }
   }
 
-  Future<void> _pairWithPin(CastGateway gw) async {
+  Future<void> _pairWithPin(CastGateway gw, String code) async {
     await showTextInputDialog(
       context,
       title: context.l10n.playOnTv,
@@ -892,12 +892,17 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       submitButtonLabel: S.of(context).pair,
       textInputType: TextInputType.streetAddress,
       hintText: context.l10n.deviceCodeHint,
+      showOnlyLoadingState: true,
+      alwaysShowSuccessState: false,
+      initialValue: code,
       onSubmit: (String text) async {
         try {
-          final code = text.trim();
+          code = text.trim();
           final String? publicKey = await gw.getPublicKey(code);
           if (publicKey == null) {
             showToast(context, S.of(context).deviceNotFound);
+            // show _pairPin again
+            Future.delayed(Duration.zero, () => _pairWithPin(gw, code));
             return;
           }
           final String castToken = const Uuid().v4().toString();
@@ -912,6 +917,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         } catch (e, s) {
           _logger.severe("Failed to cast album", e, s);
           await showGenericErrorDialog(context: context, error: e);
+          Future.delayed(Duration.zero, () => _pairWithPin(gw, code));
         }
       },
     );
