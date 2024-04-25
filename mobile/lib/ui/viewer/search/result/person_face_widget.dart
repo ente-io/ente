@@ -69,7 +69,7 @@ class PersonFaceWidget extends StatelessWidget {
             return Stack(
               fit: StackFit.expand,
               children: [
-                CroppedFaceImageView(enteFile: file, face: face),
+                CroppedFaceImgImageView(enteFile: file, face: face),
               ],
             );
           } else {

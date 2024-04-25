@@ -267,7 +267,7 @@ class _FaceWidgetState extends State<FaceWidget> {
                 SizedBox(
                   width: 60,
                   height: 60,
-                  child: CroppedFaceImageView(
+                  child: CroppedFaceImgImageView(
                     enteFile: widget.file,
                     face: widget.face,
                   ),
