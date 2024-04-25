@@ -501,7 +501,6 @@ class UploadManager {
     }
 
     private async uploadMediaFiles(mediaFiles: FileWithCollection2[]) {
-        log.info(`uploadMediaFiles called`);
         this.filesToBeUploaded = [...this.filesToBeUploaded, ...mediaFiles];
 
         if (isElectron()) {
@@ -761,11 +760,14 @@ type ClusterableFile = {
     localID: number;
     collectionID: number;
     // fileOrPath: File | ElectronFile | string;
-    file?: File | ElectronFile | string;
+    file: File | string;
 };
 
-type ClusteredFile = ClusterableFile & {
+type ClusteredFile = {
+    localID: number;
+    collectionID: number;
     isLivePhoto: boolean;
+    file?: File | string;
     livePhotoAssets?: LivePhotoAssets2;
 };
 
@@ -773,32 +775,35 @@ type ClusteredFile = ClusterableFile & {
  * Go through the given files, combining any sibling image + video assets into a
  * single live photo when appropriate.
  */
-const clusterLivePhotos = (mediaFiles: ClusterableFile[]) => {
+const clusterLivePhotos = (files: ClusterableFile[]) => {
     const result: ClusteredFile[] = [];
-    mediaFiles
+    const filesWithName: (ClusterableFile & { fileName: string })[] = files.map(
+        (f) => {
+            return { ...f, fileName: getFileName(f.file) };
+        },
+    );
+    filesWithName
         .sort((f, g) =>
-            nameAndExtension(getFileName(f.file))[0].localeCompare(
-                nameAndExtension(getFileName(g.file))[0],
+            nameAndExtension(f.fileName)[0].localeCompare(
+                nameAndExtension(g.fileName)[0],
             ),
         )
         .sort((f, g) => f.collectionID - g.collectionID);
     let index = 0;
-    while (index < mediaFiles.length - 1) {
-        const f = mediaFiles[index];
-        const g = mediaFiles[index + 1];
-        const fFileName = getFileName(f.file);
-        const gFileName = getFileName(g.file);
-        const fFileType = potentialFileTypeFromExtension(fFileName);
-        const gFileType = potentialFileTypeFromExtension(gFileName);
+    while (index < filesWithName.length - 1) {
+        const f = filesWithName[index];
+        const g = filesWithName[index + 1];
+        const fFileType = potentialFileTypeFromExtension(f.fileName);
+        const gFileType = potentialFileTypeFromExtension(g.fileName);
         const fa: PotentialLivePhotoAsset = {
-            fileName: fFileName,
+            fileName: f.fileName,
             fileType: fFileType,
             collectionID: f.collectionID,
             /* TODO(MR): ElectronFile changes */
             size: (f as FileWithCollection).file.size,
         };
         const ga: PotentialLivePhotoAsset = {
-            fileName: gFileName,
+            fileName: g.fileName,
             fileType: gFileType,
             collectionID: g.collectionID,
             /* TODO(MR): ElectronFile changes */
@@ -810,13 +815,8 @@ const clusterLivePhotos = (mediaFiles: ClusterableFile[]) => {
                 collectionID: f.collectionID,
                 isLivePhoto: true,
                 livePhotoAssets: {
-                    /* TODO(MR): ElectronFile changes */
-                    image: (fFileType == FILE_TYPE.IMAGE ? f.file : g.file) as
-                        | string
-                        | File,
-                    video: (fFileType == FILE_TYPE.IMAGE ? g.file : f.file) as
-                        | string
-                        | File,
+                    image: fFileType == FILE_TYPE.IMAGE ? f.file : g.file,
+                    video: fFileType == FILE_TYPE.IMAGE ? g.file : f.file,
                 },
             });
             index += 2;
@@ -828,9 +828,9 @@ const clusterLivePhotos = (mediaFiles: ClusterableFile[]) => {
             index += 1;
         }
     }
-    if (index === mediaFiles.length - 1) {
+    if (index === filesWithName.length - 1) {
         result.push({
-            ...mediaFiles[index],
+            ...filesWithName[index],
             isLivePhoto: false,
         });
     }
