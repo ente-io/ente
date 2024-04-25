@@ -178,6 +178,20 @@ export const uploader = async (
     let fileTypeInfo: FileTypeInfo;
     let fileSize: number;
     try {
+        /*
+         * We read the file three times:
+         * 1. To determine its MIME type (only needs first few KBs).
+         * 2. To calculate its hash.
+         * 3. To compute its thumbnail and then encrypt it.
+         *
+         * When we already have a File object the multiple reads are fine. When
+         * we're in the context of our desktop app and have a path, it might be
+         * possible to optimize this further by using `ReadableStream.tee` to
+         * perform these three steps simultaneously. However, that'll require
+         * restructuring the code so that these steps run in some parallel
+         * manner (tee will not work for strictly sequential reads of large
+         * streams).
+         */
         const maxFileSize = 4 * 1024 * 1024 * 1024; // 4 GB
 
         fileSize = getAssetSize(uploadAsset);
@@ -347,32 +361,6 @@ const getLivePhotoFileType = async (
     };
 };
 
-const readAsset = async (
-    fileTypeInfo: FileTypeInfo,
-    { isLivePhoto, file, livePhotoAssets }: UploadAsset2,
-) => {
-    return isLivePhoto
-        ? await readLivePhoto(livePhotoAssets, fileTypeInfo)
-        : await readImageOrVideo(file, fileTypeInfo);
-};
-
-// TODO(MR): Merge with the uploader
-class ModuleState {
-    /**
-     * This will be set to true if we get an error from the Node.js side of our
-     * desktop app telling us that native image thumbnail generation is not
-     * available for the current OS/arch combination.
-     *
-     * That way, we can stop pestering it again and again (saving an IPC
-     * round-trip).
-     *
-     * Note the double negative when it is used.
-     */
-    isNativeImageThumbnailGenerationNotAvailable = false;
-}
-
-const moduleState = new ModuleState();
-
 /**
  * Read the given file or path into an in-memory representation.
  *
@@ -448,6 +436,94 @@ const readFileOrPath = async (
 
     return { dataOrStream, fileSize };
 };
+
+const readAsset = async (
+    fileTypeInfo: FileTypeInfo,
+    { isLivePhoto, file, livePhotoAssets }: UploadAsset2,
+) => {
+    return isLivePhoto
+        ? await readLivePhoto(livePhotoAssets, fileTypeInfo)
+        : await readImageOrVideo(file, fileTypeInfo);
+};
+
+/**
+ * Read the entirety of a readable stream.
+ *
+ * It is not recommended to use this for large (say, multi-hundred MB) files. It
+ * is provided as a syntactic shortcut for cases where we already know that the
+ * size of the stream will be reasonable enough to be read in its entirety
+ * without us running out of memory.
+ */
+const readEntireStream = async (stream: ReadableStream) =>
+    new Uint8Array(await new Response(stream).arrayBuffer());
+
+const readImageOrVideo = async (
+    fileOrPath: File | string,
+    fileTypeInfo: FileTypeInfo,
+) => {
+    const { dataOrStream, fileSize } = await readFileOrPath(fileOrPath);
+    return withThumbnail(fileOrPath, fileTypeInfo, dataOrStream, fileSize);
+};
+
+const readLivePhoto = async (
+    livePhotoAssets: LivePhotoAssets2,
+    fileTypeInfo: FileTypeInfo,
+) => {
+    const readImage = await readFileOrPath(livePhotoAssets.image);
+    const {
+        filedata: imageDataOrStream,
+        thumbnail,
+        hasStaticThumbnail,
+    } = await withThumbnail(
+        livePhotoAssets.image,
+        {
+            extension: fileTypeInfo.imageType,
+            fileType: FILE_TYPE.IMAGE,
+        },
+        readImage.dataOrStream,
+        readImage.fileSize,
+    );
+    const readVideo = await readFileOrPath(livePhotoAssets.video);
+
+    // We can revisit this later, but the existing code always read the
+    // full files into memory here, and to avoid changing the rest of
+    // the scaffolding retain the same behaviour.
+    //
+    // This is a reasonable assumption too, since the videos
+    // corresponding to live photos are only a couple of seconds long.
+    const toData = async (dataOrStream: Uint8Array | DataStream) =>
+        dataOrStream instanceof Uint8Array
+            ? dataOrStream
+            : await readEntireStream(dataOrStream.stream);
+
+    return {
+        filedata: await encodeLivePhoto({
+            imageFileName: getFileName(livePhotoAssets.image),
+            imageData: await toData(imageDataOrStream),
+            videoFileName: getFileName(livePhotoAssets.video),
+            videoData: await toData(readVideo.dataOrStream),
+        }),
+        thumbnail,
+        hasStaticThumbnail,
+    };
+};
+
+// TODO(MR): Merge with the uploader
+class ModuleState {
+    /**
+     * This will be set to true if we get an error from the Node.js side of our
+     * desktop app telling us that native image thumbnail generation is not
+     * available for the current OS/arch combination.
+     *
+     * That way, we can stop pestering it again and again (saving an IPC
+     * round-trip).
+     *
+     * Note the double negative when it is used.
+     */
+    isNativeImageThumbnailGenerationNotAvailable = false;
+}
+
+const moduleState = new ModuleState();
 
 /**
  * Augment the given {@link dataOrStream} with thumbnail information.
@@ -552,68 +628,6 @@ const withThumbnail = async (
 
     return {
         filedata: dataOrStream,
-        thumbnail,
-        hasStaticThumbnail,
-    };
-};
-
-/**
- * Read the entirety of a readable stream.
- *
- * It is not recommended to use this for large (say, multi-hundred MB) files. It
- * is provided as a syntactic shortcut for cases where we already know that the
- * size of the stream will be reasonable enough to be read in its entirety
- * without us running out of memory.
- */
-const readEntireStream = async (stream: ReadableStream) =>
-    new Uint8Array(await new Response(stream).arrayBuffer());
-
-const readImageOrVideo = async (
-    fileOrPath: File | string,
-    fileTypeInfo: FileTypeInfo,
-) => {
-    const { dataOrStream, fileSize } = await readFileOrPath(fileOrPath);
-    return withThumbnail(fileOrPath, fileTypeInfo, dataOrStream, fileSize);
-};
-
-const readLivePhoto = async (
-    livePhotoAssets: LivePhotoAssets2,
-    fileTypeInfo: FileTypeInfo,
-) => {
-    const readImage = await readFileOrPath(livePhotoAssets.image);
-    const {
-        filedata: imageDataOrStream,
-        thumbnail,
-        hasStaticThumbnail,
-    } = await withThumbnail(
-        livePhotoAssets.image,
-        {
-            extension: fileTypeInfo.imageType,
-            fileType: FILE_TYPE.IMAGE,
-        },
-        readImage.dataOrStream,
-        readImage.fileSize,
-    );
-    const readVideo = await readFileOrPath(livePhotoAssets.video);
-
-    // We can revisit this later, but the existing code always read the
-    // full files into memory here, and to avoid changing the rest of
-    // the scaffolding retain the same behaviour.
-    //
-    // This is a reasonable assumption too, since the videos
-    // corresponding to live photos are only a couple of seconds long.
-    const toData = async (dataOrStream: Uint8Array | DataStream) =>
-        dataOrStream instanceof Uint8Array
-            ? dataOrStream
-            : await readEntireStream(dataOrStream.stream);
-
-    return {
-        filedata: await encodeLivePhoto({
-            imageFileName: getFileName(livePhotoAssets.image),
-            imageData: await toData(imageDataOrStream),
-            videoFileName: getFileName(livePhotoAssets.video),
-            videoData: await toData(readVideo.dataOrStream),
-        }),
         thumbnail,
         hasStaticThumbnail,
     };
