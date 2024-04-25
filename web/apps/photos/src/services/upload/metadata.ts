@@ -12,7 +12,7 @@ import {
 import type { DataStream } from "@ente/shared/utils/data-stream";
 import { Remote } from "comlink";
 import { FILE_READER_CHUNK_SIZE, NULL_LOCATION } from "constants/upload";
-import { getEXIFLocation, getEXIFTime, getParsedExifData } from "services/exif";
+import { parseImageMetadata } from "services/exif";
 import * as ffmpegService from "services/ffmpeg";
 import { getElectronFileStream, getFileStream } from "services/readerService";
 import { FilePublicMagicMetadataProps } from "types/file";
@@ -29,24 +29,6 @@ import {
     type ParsedMetadataJSON,
 } from "./takeout";
 import { getFileName } from "./uploadService";
-
-const EXIF_TAGS_NEEDED = [
-    "DateTimeOriginal",
-    "CreateDate",
-    "ModifyDate",
-    "GPSLatitude",
-    "GPSLongitude",
-    "GPSLatitudeRef",
-    "GPSLongitudeRef",
-    "DateCreated",
-    "ExifImageWidth",
-    "ExifImageHeight",
-    "ImageWidth",
-    "ImageHeight",
-    "PixelXDimension",
-    "PixelYDimension",
-    "MetadataDate",
-];
 
 const NULL_EXTRACTED_METADATA: ParsedExtractedMetadata = {
     location: NULL_LOCATION,
@@ -83,6 +65,45 @@ export const extractAssetMetadata = async (
               file,
           );
 };
+
+async function extractLivePhotoMetadata(
+    worker: Remote<DedicatedCryptoWorker>,
+    parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
+    collectionID: number,
+    fileTypeInfo: FileTypeInfo,
+    livePhotoAssets: LivePhotoAssets2,
+): Promise<ExtractMetadataResult> {
+    const imageFileTypeInfo: FileTypeInfo = {
+        fileType: FILE_TYPE.IMAGE,
+        extension: fileTypeInfo.imageType,
+    };
+    const {
+        metadata: imageMetadata,
+        publicMagicMetadata: imagePublicMagicMetadata,
+    } = await extractFileMetadata(
+        worker,
+        parsedMetadataJSONMap,
+        collectionID,
+        imageFileTypeInfo,
+        livePhotoAssets.image,
+    );
+    const videoHash = await getFileHash(
+        worker,
+        /* TODO(MR): ElectronFile changes */
+        livePhotoAssets.video as File | ElectronFile,
+    );
+    return {
+        metadata: {
+            ...imageMetadata,
+            title: getFileName(livePhotoAssets.image),
+            fileType: FILE_TYPE.LIVE_PHOTO,
+            imageHash: imageMetadata.hash,
+            videoHash: videoHash,
+            hash: undefined,
+        },
+        publicMagicMetadata: imagePublicMagicMetadata,
+    };
+}
 
 async function extractFileMetadata(
     worker: Remote<DedicatedCryptoWorker>,
@@ -152,7 +173,6 @@ async function getImageMetadata(
     receivedFile: File | ElectronFile,
     fileTypeInfo: FileTypeInfo,
 ): Promise<ParsedExtractedMetadata> {
-    let imageMetadata = NULL_EXTRACTED_METADATA;
     try {
         if (!(receivedFile instanceof File)) {
             receivedFile = new File(
@@ -163,22 +183,11 @@ async function getImageMetadata(
                 },
             );
         }
-        const exifData = await getParsedExifData(
-            receivedFile,
-            fileTypeInfo,
-            EXIF_TAGS_NEEDED,
-        );
-
-        imageMetadata = {
-            location: getEXIFLocation(exifData),
-            creationTime: getEXIFTime(exifData),
-            width: exifData?.imageWidth ?? null,
-            height: exifData?.imageHeight ?? null,
-        };
+        return await parseImageMetadata(receivedFile, fileTypeInfo);
     } catch (e) {
-        log.error("getExifData failed", e);
+        log.error("Failed to parse image metadata", e);
+        return NULL_EXTRACTED_METADATA;
     }
-    return imageMetadata;
 }
 
 // tries to extract date from file name if available else returns null
@@ -235,45 +244,6 @@ async function getVideoMetadata(file: File | ElectronFile) {
     }
 
     return videoMetadata;
-}
-
-async function extractLivePhotoMetadata(
-    worker: Remote<DedicatedCryptoWorker>,
-    parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
-    collectionID: number,
-    fileTypeInfo: FileTypeInfo,
-    livePhotoAssets: LivePhotoAssets2,
-): Promise<ExtractMetadataResult> {
-    const imageFileTypeInfo: FileTypeInfo = {
-        fileType: FILE_TYPE.IMAGE,
-        extension: fileTypeInfo.imageType,
-    };
-    const {
-        metadata: imageMetadata,
-        publicMagicMetadata: imagePublicMagicMetadata,
-    } = await extractFileMetadata(
-        worker,
-        parsedMetadataJSONMap,
-        collectionID,
-        imageFileTypeInfo,
-        livePhotoAssets.image,
-    );
-    const videoHash = await getFileHash(
-        worker,
-        /* TODO(MR): ElectronFile changes */
-        livePhotoAssets.video as File | ElectronFile,
-    );
-    return {
-        metadata: {
-            ...imageMetadata,
-            title: getFileName(livePhotoAssets.image),
-            fileType: FILE_TYPE.LIVE_PHOTO,
-            imageHash: imageMetadata.hash,
-            videoHash: videoHash,
-            hash: undefined,
-        },
-        publicMagicMetadata: imagePublicMagicMetadata,
-    };
 }
 
 async function getFileHash(
