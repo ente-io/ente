@@ -543,11 +543,11 @@ class UploadManager {
             await wait(0);
 
             const { fileUploadResult, uploadedFile } = await uploader(
-                worker,
-                this.existingFiles,
                 fileWithCollection,
-                this.parsedMetadataJSONMap,
                 this.uploaderName,
+                this.existingFiles,
+                this.parsedMetadataJSONMap,
+                worker,
                 this.isCFUploadProxyDisabled,
                 () => {
                     this.abortIfCancelled();

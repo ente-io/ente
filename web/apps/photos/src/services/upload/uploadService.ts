@@ -170,11 +170,11 @@ interface UploadResponse {
 }
 
 export const uploader = async (
-    worker: Remote<DedicatedCryptoWorker>,
-    existingFiles: EnteFile[],
     fileWithCollection: FileWithCollection2,
-    parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
     uploaderName: string,
+    existingFiles: EnteFile[],
+    parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
+    worker: Remote<DedicatedCryptoWorker>,
     isCFUploadProxyDisabled: boolean,
     abortIfCancelled: () => void,
     makeProgessTracker: MakeProgressTracker,
@@ -185,18 +185,19 @@ export const uploader = async (
 
     try {
         /*
-         * We read the file three times:
+         * We read the file four times:
          * 1. To determine its MIME type (only needs first few KBs).
-         * 2. To calculate its hash.
-         * 3. To encrypt it.
+         * 2. To extract its metadata.
+         * 3. To calculate its hash.
+         * 4. To encrypt it.
          *
-         * When we already have a File object the multiple reads are fine. When
-         * we're in the context of our desktop app and have a path, it might be
-         * possible to optimize this further by using `ReadableStream.tee` to
-         * perform these three steps simultaneously. However, that'll require
-         * restructuring the code so that these steps run in some parallel
-         * manner (tee will not work for strictly sequential reads of large
-         * streams).
+         * When we already have a File object the multiple reads are fine.
+         *
+         * When we're in the context of our desktop app and have a path, it
+         * might be possible to optimize further by using `ReadableStream.tee`
+         * to perform these steps simultaneously. However, that'll require
+         * restructuring the code so that these steps run in a parallel manner
+         * (tee will not work for strictly sequential reads of large streams).
          */
 
         const { fileTypeInfo, fileSize } =
@@ -209,11 +210,11 @@ export const uploader = async (
         abortIfCancelled();
 
         const { metadata, publicMagicMetadata } = await extractAssetMetadata(
-            worker,
-            parsedMetadataJSONMap,
             uploadAsset,
-            collection.id,
             fileTypeInfo,
+            collection.id,
+            parsedMetadataJSONMap,
+            worker,
         );
 
         const matches = existingFiles.filter((file) =>
@@ -499,12 +500,16 @@ interface ExtractMetadataResult {
     publicMagicMetadata: FilePublicMagicMetadataProps;
 }
 
+/**
+ * Compute the hash, extract EXIF or other metadata, and merge in data from the
+ * {@link parsedMetadataJSONMap} for the assets. Return the resultant metadatum.
+ */
 const extractAssetMetadata = async (
-    worker: Remote<DedicatedCryptoWorker>,
-    parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
     { isLivePhoto, file, livePhotoAssets }: UploadAsset2,
-    collectionID: number,
     fileTypeInfo: FileTypeInfo,
+    collectionID: number,
+    parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
+    worker: Remote<DedicatedCryptoWorker>,
 ): Promise<ExtractMetadataResult> => {
     return isLivePhoto
         ? await extractLivePhotoMetadata(

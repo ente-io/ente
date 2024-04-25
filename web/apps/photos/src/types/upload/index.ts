@@ -25,6 +25,7 @@ export interface Metadata {
     modificationTime: number;
     latitude: number;
     longitude: number;
+    /** The "Ente" file type. */
     fileType: FILE_TYPE;
     hasStaticThumbnail?: boolean;
     hash?: string;
