@@ -1,7 +1,8 @@
 import { dialog } from "electron/main";
+import fs from "node:fs/promises";
 import path from "node:path";
 import type { ElectronFile } from "../types/ipc";
-import { getDirFilePaths, getElectronFile } from "./services/fs";
+import { getElectronFile } from "./services/fs";
 import { getElectronFilesFromGoogleZip } from "./services/upload";
 
 export const selectDirectory = async () => {
@@ -32,6 +33,23 @@ export const showUploadDirsDialog = async () => {
     }
 
     return await Promise.all(filePaths.map(getElectronFile));
+};
+
+// https://stackoverflow.com/a/63111390
+const getDirFilePaths = async (dirPath: string) => {
+    if (!(await fs.stat(dirPath)).isDirectory()) {
+        return [dirPath];
+    }
+
+    let files: string[] = [];
+    const filePaths = await fs.readdir(dirPath);
+
+    for (const filePath of filePaths) {
+        const absolute = path.join(dirPath, filePath);
+        files = [...files, ...(await getDirFilePaths(absolute))];
+    }
+
+    return files;
 };
 
 export const showUploadZipDialog = async () => {

@@ -503,7 +503,6 @@ export interface Electron {
     getElectronFilesFromGoogleZip: (
         filePath: string,
     ) => Promise<ElectronFile[]>;
-    getDirFiles: (dirPath: string) => Promise<ElectronFile[]>;
 }
 
 /**
