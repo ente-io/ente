@@ -12,28 +12,14 @@ final _computer = Computer.shared();
 ///Convert img.Image to ui.Image and use RawImage to display.
 Future<List<img.Image>> generateImgFaceThumbnails(
   String imagePath,
-  List<FaceBox> faceBoxes,
-) async {
+  List<FaceBox> faceBoxes, {
+  ///Pass decodedImage decoded by [decodeToImgImage] to avoid decoding image
+  ///multiple times if all faces are from the same image (eg: File info).
+  img.Image? decodedImage,
+}) async {
   final faceThumbnails = <img.Image>[];
 
-  img.Image? image =
-      await _computer.compute(_decodeImageFile, param: {"filePath": imagePath});
-
-  if (image == null) {
-    _logger.info(
-      "Failed to decode image. Compressing to jpg and decoding",
-    );
-    final compressedJPGImage =
-        await FlutterImageCompress.compressWithFile(imagePath);
-    image = await _computer.compute(
-      _decodeJpg,
-      param: {"image": compressedJPGImage},
-    );
-
-    if (image == null) {
-      throw Exception("Failed to decode image");
-    }
-  }
+  final image = decodedImage ?? await decodeToImgImage(imagePath);
 
   for (FaceBox faceBox in faceBoxes) {
     final croppedImage = cropFaceBoxFromImage(image, faceBox);
@@ -45,8 +31,23 @@ Future<List<img.Image>> generateImgFaceThumbnails(
 
 Future<List<Uint8List>> generateJpgFaceThumbnails(
   String imagePath,
-  List<FaceBox> faceBoxes,
-) async {
+  List<FaceBox> faceBoxes, {
+  ///Pass decodedImage decoded by [decodeToImgImage] to avoid decoding image
+  ///multiple times if all faces are from the same image (eg: File info).
+  img.Image? decodedImage,
+}) async {
+  final image = decodedImage ?? await decodeToImgImage(imagePath);
+  final croppedImages = <img.Image>[];
+  for (FaceBox faceBox in faceBoxes) {
+    final croppedImage = cropFaceBoxFromImage(image, faceBox);
+    croppedImages.add(croppedImage);
+  }
+
+  return await _computer
+      .compute(_encodeImagesToJpg, param: {"images": croppedImages});
+}
+
+Future<img.Image> decodeToImgImage(String imagePath) async {
   img.Image? image =
       await _computer.compute(_decodeImageFile, param: {"filePath": imagePath});
 
@@ -63,16 +64,12 @@ Future<List<Uint8List>> generateJpgFaceThumbnails(
 
     if (image == null) {
       throw Exception("Failed to decode image");
+    } else {
+      return image;
     }
+  } else {
+    return image;
   }
-  final croppedImages = <img.Image>[];
-  for (FaceBox faceBox in faceBoxes) {
-    final croppedImage = cropFaceBoxFromImage(image, faceBox);
-    croppedImages.add(croppedImage);
-  }
-
-  return await _computer
-      .compute(_encodeImagesToJpg, param: {"images": croppedImages});
 }
 
 /// Returns an Image from 'package:image/image.dart'
