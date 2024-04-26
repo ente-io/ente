@@ -99,7 +99,7 @@ class _CodeWidgetState extends State<CodeWidget> {
                     onSelected: () => _onShowQrPressed(null),
                   ),
                   MenuItem(
-                    label: l10n.pinText,
+                    label: widget.code.isPinned ? l10n.unpinText : l10n.pinText,
                     icon: widget.code.isPinned
                         ? Icons.push_pin
                         : Icons.push_pin_outlined,
@@ -156,7 +156,7 @@ class _CodeWidgetState extends State<CodeWidget> {
                   icon: widget.code.isPinned
                       ? Icons.push_pin
                       : Icons.push_pin_outlined,
-                  label: l10n.pinText,
+                  label: widget.code.isPinned ? l10n.unpinText : l10n.pinText,
                   padding: const EdgeInsets.only(left: 4, right: 0),
                   spacing: 8,
                 ),
@@ -202,7 +202,16 @@ class _CodeWidgetState extends State<CodeWidget> {
     return ClipRRect(
       borderRadius: BorderRadius.circular(8),
       child: Container(
-        color: Theme.of(context).colorScheme.codeCardBackgroundColor,
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.codeCardBackgroundColor,
+          boxShadow: [
+            BoxShadow(
+              color: Theme.of(context).colorScheme.shadow,
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
         child: Material(
           color: Colors.transparent,
           child: InkWell(
@@ -233,34 +242,47 @@ class _CodeWidgetState extends State<CodeWidget> {
 
   Widget _getCardContents(AppLocalizations l10n) {
     return SizedBox(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.center,
+      child: Stack(
         children: [
-          if (widget.code.type == Type.totp)
-            CodeTimerProgress(
-              period: widget.code.period,
-            ),
-          const SizedBox(
-            height: 16,
-          ),
-          Row(
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              _shouldShowLargeIcon ? _getIcon() : const SizedBox.shrink(),
-              Expanded(
-                child: Column(
-                  children: [
-                    _getTopRow(),
-                    const SizedBox(height: 4),
-                    _getBottomRow(l10n),
-                  ],
+              if (widget.code.type == Type.totp)
+                CodeTimerProgress(
+                  period: widget.code.period,
                 ),
+              const SizedBox(
+                height: 16,
+              ),
+              Row(
+                children: [
+                  _shouldShowLargeIcon ? _getIcon() : const SizedBox.shrink(),
+                  Expanded(
+                    child: Column(
+                      children: [
+                        _getTopRow(),
+                        const SizedBox(height: 4),
+                        _getBottomRow(l10n),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(
+                height: 20,
               ),
             ],
           ),
-          const SizedBox(
-            height: 20,
-          ),
+          if (widget.code.isPinned)
+            const Positioned(
+              right: 4,
+              top: 4,
+              child: Icon(
+                Icons.push_pin,
+                size: 12,
+              ),
+            ),
         ],
       ),
     );

@@ -105,6 +105,7 @@ class Code {
         _getType(uri),
         _getCounter(uri),
         rawData,
+        display: display,
       );
     } catch (e) {
       // if account name contains # without encoding,
@@ -150,7 +151,7 @@ class Code {
   Map<String, dynamic> toExportJson() {
     return {
       'rawData': rawData,
-      'display': display?.toJson(),
+      if (display != null) 'display': display?.toJson(),
     };
   }
 
@@ -236,7 +237,8 @@ class Code {
         other.secret == secret &&
         other.counter == counter &&
         other.type == type &&
-        other.rawData == rawData;
+        other.rawData == rawData &&
+        other.display == display;
   }
 
   @override
@@ -250,6 +252,11 @@ class Code {
         counter.hashCode ^
         rawData.hashCode ^
         display.hashCode;
+  }
+
+  @override
+  String toString() {
+    return 'Code(account: $account, issuer: $issuer, digits: $digits, period: $period, secret: $secret, algorithm: $algorithm, type: $type, counter: $counter, rawData: $rawData, display: $display)';
   }
 }
 
