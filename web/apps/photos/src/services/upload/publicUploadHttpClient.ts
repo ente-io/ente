@@ -3,7 +3,7 @@ import { CustomError, handleUploadError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { getEndpoint } from "@ente/shared/network/api";
 import { EnteFile } from "types/file";
-import { MultipartUploadURLs, UploadFile, UploadURL } from "types/upload";
+import { MultipartUploadURLs, UploadFile, UploadURL } from "./uploadService";
 import { retryHTTPCall } from "utils/upload/uploadRetrier";
 
 const ENDPOINT = getEndpoint();

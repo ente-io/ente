@@ -47,12 +47,7 @@ import {
     tryParseTakeoutMetadataJSON,
     type ParsedMetadataJSON,
 } from "./takeout";
-import UploadService, {
-    assetName,
-    fopSize,
-    getFileName,
-    uploader,
-} from "./uploadService";
+import UploadService, { fopSize, getFileName, uploader } from "./uploadService";
 
 /** The number of uploads to process in parallel. */
 const maxConcurrentUploads = 4;
@@ -837,24 +832,17 @@ const clusterLivePhotos = async (files: FileWithCollectionIDAndName[]) => {
             fileOrPath: g.fileOrPath,
         };
         if (await areLivePhotoAssets(fa, ga)) {
-            const livePhoto = {
+            const [image, video] =
+                fFileType == FILE_TYPE.IMAGE ? [f, g] : [g, f];
+            result.push({
                 localID: f.localID,
                 collectionID: f.collectionID,
+                fileName: image.fileName,
                 isLivePhoto: true,
                 livePhotoAssets: {
-                    image:
-                        fFileType == FILE_TYPE.IMAGE
-                            ? f.fileOrPath
-                            : g.fileOrPath,
-                    video:
-                        fFileType == FILE_TYPE.IMAGE
-                            ? g.fileOrPath
-                            : f.fileOrPath,
+                    image: image.fileOrPath,
+                    video: video.fileOrPath,
                 },
-            };
-            result.push({
-                ...livePhoto,
-                fileName: assetName(livePhoto),
             });
             index += 2;
         } else {

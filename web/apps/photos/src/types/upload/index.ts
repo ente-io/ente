@@ -1,27 +1,9 @@
-import type { Metadata } from "@/media/types/file";
 import type { ElectronFile } from "@/next/types/file";
-import {
-    B64EncryptionResult,
-    LocalFileAttributes,
-} from "@ente/shared/crypto/types";
-import type { DataStream } from "@ente/shared/utils/data-stream";
 import { Collection } from "types/collection";
-import {
-    FilePublicMagicMetadata,
-    MetadataFileAttributes,
-    S3FileAttributes,
-} from "types/file";
-import { EncryptedMagicMetadata } from "types/magicMetadata";
 
 export interface Location {
     latitude: number;
     longitude: number;
-}
-
-export interface MultipartUploadURLs {
-    objectKey: string;
-    partURLs: string[];
-    completeURL: string;
 }
 
 export interface UploadAsset {
@@ -42,70 +24,15 @@ export interface FileWithCollection extends UploadAsset {
     collectionID?: number;
 }
 
-export interface UploadAsset2 {
-    isLivePhoto?: boolean;
-    file?: File | string;
-    fileOrPath?: File | string;
-    livePhotoAssets?: LivePhotoAssets2;
-}
-
 export interface LivePhotoAssets2 {
     image: File | string;
     video: File | string;
 }
 
-export interface FileWithCollection2 extends UploadAsset2 {
+export interface FileWithCollection2 extends UploadAsset {
     localID: number;
     collection?: Collection;
     collectionID: number;
-}
-
-export interface UploadURL {
-    url: string;
-    objectKey: string;
-}
-
-export interface FileInMemory {
-    filedata: Uint8Array | DataStream;
-    /** The JPEG data of the generated thumbnail */
-    thumbnail: Uint8Array;
-    /**
-     * `true` if this is a fallback (all black) thumbnail we're returning since
-     * thumbnail generation failed for some reason.
-     */
-    hasStaticThumbnail: boolean;
-}
-
-export interface FileWithMetadata
-    extends Omit<FileInMemory, "hasStaticThumbnail"> {
-    metadata: Metadata;
-    localID: number;
-    pubMagicMetadata: FilePublicMagicMetadata;
-}
-
-export interface EncryptedFile {
-    file: ProcessedFile;
-    fileKey: B64EncryptionResult;
-}
-
-export interface ProcessedFile {
-    file: LocalFileAttributes<Uint8Array | DataStream>;
-    thumbnail: LocalFileAttributes<Uint8Array>;
-    metadata: LocalFileAttributes<string>;
-    pubMagicMetadata: EncryptedMagicMetadata;
-    localID: number;
-}
-export interface BackupedFile {
-    file: S3FileAttributes;
-    thumbnail: S3FileAttributes;
-    metadata: MetadataFileAttributes;
-    pubMagicMetadata: EncryptedMagicMetadata;
-}
-
-export interface UploadFile extends BackupedFile {
-    collectionID: number;
-    encryptedKey: string;
-    keyDecryptionNonce: string;
 }
 
 export interface ParsedExtractedMetadata {

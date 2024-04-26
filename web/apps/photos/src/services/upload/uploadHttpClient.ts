@@ -4,8 +4,8 @@ import HTTPService from "@ente/shared/network/HTTPService";
 import { getEndpoint, getUploadEndpoint } from "@ente/shared/network/api";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { EnteFile } from "types/file";
-import { MultipartUploadURLs, UploadFile, UploadURL } from "types/upload";
 import { retryHTTPCall } from "utils/upload/uploadRetrier";
+import { MultipartUploadURLs, UploadFile, UploadURL } from "./uploadService";
 
 const ENDPOINT = getEndpoint();
 const UPLOAD_ENDPOINT = getUploadEndpoint();

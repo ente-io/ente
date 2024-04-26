@@ -8,7 +8,11 @@ import { ElectronFile } from "@/next/types/file";
 import { CustomErrorMessage } from "@/next/types/ipc";
 import { ensure } from "@/utils/ensure";
 import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
-import { EncryptionResult } from "@ente/shared/crypto/types";
+import {
+    B64EncryptionResult,
+    EncryptionResult,
+    LocalFileAttributes,
+} from "@ente/shared/crypto/types";
 import { CustomError, handleUploadError } from "@ente/shared/error";
 import { isDataStream, type DataStream } from "@ente/shared/utils/data-stream";
 import { Remote } from "comlink";
@@ -25,24 +29,18 @@ import { parseImageMetadata } from "services/exif";
 import * as ffmpeg from "services/ffmpeg";
 import {
     EnteFile,
+    MetadataFileAttributes,
+    S3FileAttributes,
     type EncryptedEnteFile,
     type FilePublicMagicMetadata,
     type FilePublicMagicMetadataProps,
 } from "types/file";
 import { EncryptedMagicMetadata } from "types/magicMetadata";
 import {
-    BackupedFile,
-    EncryptedFile,
-    FileInMemory,
-    FileWithMetadata,
     ParsedExtractedMetadata,
-    ProcessedFile,
     PublicUploadProps,
     UploadAsset,
-    UploadFile,
-    UploadURL,
     type LivePhotoAssets2,
-    type UploadAsset2,
 } from "types/upload";
 import {
     getNonEmptyMagicMetadataProps,
@@ -147,6 +145,68 @@ const uploadService = new UploadService();
 
 export default uploadService;
 
+/* -- Various intermediate type used during upload -- */
+
+interface UploadAsset2 {
+    isLivePhoto?: boolean;
+    fileOrPath?: File | string;
+    livePhotoAssets?: LivePhotoAssets2;
+}
+
+interface FileInMemory {
+    filedata: Uint8Array | DataStream;
+    /** The JPEG data of the generated thumbnail */
+    thumbnail: Uint8Array;
+    /**
+     * `true` if this is a fallback (all black) thumbnail we're returning since
+     * thumbnail generation failed for some reason.
+     */
+    hasStaticThumbnail: boolean;
+}
+
+interface FileWithMetadata extends Omit<FileInMemory, "hasStaticThumbnail"> {
+    metadata: Metadata;
+    localID: number;
+    pubMagicMetadata: FilePublicMagicMetadata;
+}
+
+interface EncryptedFile {
+    file: ProcessedFile;
+    fileKey: B64EncryptionResult;
+}
+
+interface ProcessedFile {
+    file: LocalFileAttributes<Uint8Array | DataStream>;
+    thumbnail: LocalFileAttributes<Uint8Array>;
+    metadata: LocalFileAttributes<string>;
+    pubMagicMetadata: EncryptedMagicMetadata;
+    localID: number;
+}
+
+export interface BackupedFile {
+    file: S3FileAttributes;
+    thumbnail: S3FileAttributes;
+    metadata: MetadataFileAttributes;
+    pubMagicMetadata: EncryptedMagicMetadata;
+}
+
+export interface UploadFile extends BackupedFile {
+    collectionID: number;
+    encryptedKey: string;
+    keyDecryptionNonce: string;
+}
+
+export interface MultipartUploadURLs {
+    objectKey: string;
+    partURLs: string[];
+    completeURL: string;
+}
+
+export interface UploadURL {
+    url: string;
+    objectKey: string;
+}
+
 /**
  * A function that can be called to obtain a "progressTracker" that then is
  * directly fed to axios to both cancel the upload if needed, and update the
@@ -165,8 +225,15 @@ interface UploadResponse {
     uploadedFile?: EncryptedEnteFile | EnteFile;
 }
 
+/**
+ * Upload the given {@link UploadableFile}
+ *
+ * This is lower layer implementation of the upload. It is invoked by
+ * {@link UploadManager} after it has assembled all the relevant bits we need to
+ * go forth and upload.
+ */
 export const uploader = async (
-    fileWithCollection: UploadableFile,
+    { collection, localID, fileName, ...uploadAsset }: UploadableFile,
     uploaderName: string,
     existingFiles: EnteFile[],
     parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
@@ -175,10 +242,7 @@ export const uploader = async (
     abortIfCancelled: () => void,
     makeProgessTracker: MakeProgressTracker,
 ): Promise<UploadResponse> => {
-    const { collection, localID, ...uploadAsset } = fileWithCollection;
-    const name = assetName(uploadAsset);
-    log.info(`Uploading ${name}`);
-
+    log.info(`Uploading ${fileName}`);
     try {
         /*
          * We read the file four times:
@@ -295,11 +359,11 @@ export const uploader = async (
         };
     } catch (e) {
         if (e.message == CustomError.UPLOAD_CANCELLED) {
-            log.info(`Upload for ${name} cancelled`);
+            log.info(`Upload for ${fileName} cancelled`);
         } else if (e.message == CustomError.UNSUPPORTED_FILE_FORMAT) {
-            log.info(`Not uploading ${name}: unsupported file format`);
+            log.info(`Not uploading ${fileName}: unsupported file format`);
         } else {
-            log.error(`Upload failed for ${name}`, e);
+            log.error(`Upload failed for ${fileName}`, e);
         }
 
         const error = handleUploadError(e);
@@ -337,13 +401,6 @@ export const getAssetName = ({
     file,
     livePhotoAssets,
 }: UploadAsset) =>
-    isLivePhoto ? getFileName(livePhotoAssets.image) : getFileName(file);
-
-export const assetName = ({
-    isLivePhoto,
-    file,
-    livePhotoAssets,
-}: UploadAsset2) =>
     isLivePhoto ? getFileName(livePhotoAssets.image) : getFileName(file);
 
 /**
@@ -462,11 +519,11 @@ interface ReadAssetDetailsResult {
 const readAssetDetails = async ({
     isLivePhoto,
     livePhotoAssets,
-    file,
+    fileOrPath,
 }: UploadAsset2): Promise<ReadAssetDetailsResult> =>
     isLivePhoto
         ? readLivePhotoDetails(livePhotoAssets)
-        : readImageOrVideoDetails(file);
+        : readImageOrVideoDetails(fileOrPath);
 
 const readLivePhotoDetails = async ({ image, video }: LivePhotoAssets2) => {
     const img = await readImageOrVideoDetails(image);
@@ -533,7 +590,7 @@ interface ExtractAssetMetadataResult {
  * {@link parsedMetadataJSONMap} for the assets. Return the resultant metadatum.
  */
 const extractAssetMetadata = async (
-    { isLivePhoto, file, livePhotoAssets }: UploadAsset2,
+    { isLivePhoto, fileOrPath, livePhotoAssets }: UploadAsset2,
     fileTypeInfo: FileTypeInfo,
     lastModifiedMs: number,
     collectionID: number,
@@ -550,7 +607,7 @@ const extractAssetMetadata = async (
               worker,
           )
         : await extractImageOrVideoMetadata(
-              file,
+              fileOrPath,
               fileTypeInfo,
               lastModifiedMs,
               collectionID,
@@ -774,11 +831,11 @@ const areFilesSameNoHash = (f: Metadata, g: Metadata) => {
 
 const readAsset = async (
     fileTypeInfo: FileTypeInfo,
-    { isLivePhoto, file, livePhotoAssets }: UploadAsset2,
+    { isLivePhoto, fileOrPath, livePhotoAssets }: UploadAsset2,
 ) =>
     isLivePhoto
         ? await readLivePhoto(livePhotoAssets, fileTypeInfo)
-        : await readImageOrVideo(file, fileTypeInfo);
+        : await readImageOrVideo(fileOrPath, fileTypeInfo);
 
 const readLivePhoto = async (
     livePhotoAssets: LivePhotoAssets2,
