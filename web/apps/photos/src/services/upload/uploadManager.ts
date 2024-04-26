@@ -31,7 +31,7 @@ import { SetFiles } from "types/gallery";
 import {
     FileWithCollection,
     PublicUploadProps,
-    type FileWithCollection2,
+    type FileWithCollection2 as ClusteredFile,
     type LivePhotoAssets2,
 } from "types/upload";
 import {
@@ -276,9 +276,9 @@ class UploadManager {
         ComlinkWorker<typeof DedicatedCryptoWorker>
     >(maxConcurrentUploads);
     private parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>;
-    private filesToBeUploaded: FileWithCollection2[];
-    private remainingFiles: FileWithCollection2[] = [];
-    private failedFiles: FileWithCollection2[];
+    private filesToBeUploaded: ClusteredFile[];
+    private remainingFiles: ClusteredFile[] = [];
+    private failedFiles: ClusteredFile[];
     private existingFiles: EnteFile[];
     private setFiles: SetFiles;
     private collections: Map<number, Collection>;
@@ -393,10 +393,7 @@ class UploadManager {
                     mediaFiles.length != clusteredMediaFiles.length,
                 );
 
-                /* TODO(MR): ElectronFile changes */
-                await this.uploadMediaFiles(
-                    clusteredMediaFiles as FileWithCollection2[],
-                );
+                await this.uploadMediaFiles(clusteredMediaFiles);
             }
         } catch (e) {
             if (e.message === CustomError.UPLOAD_CANCELLED) {
@@ -456,7 +453,7 @@ class UploadManager {
         }
     }
 
-    private async uploadMediaFiles(mediaFiles: FileWithCollection2[]) {
+    private async uploadMediaFiles(mediaFiles: ClusteredFile[]) {
         this.filesToBeUploaded = [...this.filesToBeUploaded, ...mediaFiles];
 
         if (isElectron()) {
@@ -536,7 +533,7 @@ class UploadManager {
     private async postUploadTask(
         fileUploadResult: UPLOAD_RESULT,
         uploadedFile: EncryptedEnteFile | EnteFile | null,
-        fileWithCollection: FileWithCollection2,
+        fileWithCollection: ClusteredFile,
     ) {
         try {
             let decryptedFile: EnteFile;
@@ -603,7 +600,7 @@ class UploadManager {
 
     private async watchFolderCallback(
         fileUploadResult: UPLOAD_RESULT,
-        fileWithCollection: FileWithCollection2,
+        fileWithCollection: ClusteredFile,
         uploadedFile: EncryptedEnteFile,
     ) {
         if (isElectron()) {
@@ -646,7 +643,7 @@ class UploadManager {
         this.setFiles((files) => sortFiles([...files, decryptedFile]));
     }
 
-    private async removeFromPendingUploads(file: FileWithCollection2) {
+    private async removeFromPendingUploads(file: ClusteredFile) {
         if (isElectron()) {
             this.remainingFiles = this.remainingFiles.filter(
                 (f) => f.localID != file.localID,
@@ -773,12 +770,12 @@ export const setToUploadCollection = async (collections: Collection[]) => {
     await ensureElectron().setPendingUploadCollection(collectionName);
 };
 
-const updatePendingUploads = async (files: FileWithCollection2[]) => {
+const updatePendingUploads = async (files: ClusteredFile[]) => {
     const paths = files
         .map((file) =>
             file.isLivePhoto
                 ? [file.livePhotoAssets.image, file.livePhotoAssets.video]
-                : [file.file],
+                : [file.fileOrPath],
         )
         .flat()
         .map((f) => getFilePathElectron(f));
