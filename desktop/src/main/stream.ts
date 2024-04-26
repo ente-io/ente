@@ -57,10 +57,12 @@ const handleRead = async (path: string) => {
     try {
         const res = await net.fetch(pathToFileURL(path).toString());
         if (res.ok) {
-            // net.fetch defaults to text/plain, which might be fine
-            // in practice, but as an extra precaution indicate that
-            // this is binary data.
-            res.headers.set("Content-Type", "application/octet-stream");
+            // `net.fetch` already seems to add "Content-Type" and
+            // "Last-Modified" headers. But since we already are stat-ting the
+            // file for the "Content-Length", we explicitly add the
+            // "X-Last-Modified-Ms" too, (a) guaranteeing its presence, and (b)
+            // having it be in the exact format we want (no string <-> date
+            // conversions) and (c) keeping milliseconds.
 
             const stat = await fs.stat(path);
 
