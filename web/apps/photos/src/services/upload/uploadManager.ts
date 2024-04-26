@@ -339,7 +339,18 @@ class UploadManager {
         this.uiService.setUploadProgressView(true);
     }
 
-    public async queueFilesForUpload(
+    /**
+     * Upload files
+     *
+     * This function waits for all the files to get uploaded (successfully or
+     * unsucessfully) before returning.
+     *
+     * @param filesWithCollectionToUploadIn The files to upload, each paired
+     * with the id of the collection that they should be uploaded into.
+     *
+     * @returns `true` if at least one file was processed
+     */
+    public async uploadFiles(
         filesWithCollectionToUploadIn: FileWithCollection[],
         collections: Collection[],
         uploaderName?: string,

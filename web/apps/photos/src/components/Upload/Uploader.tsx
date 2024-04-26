@@ -558,12 +558,11 @@ export default function Uploader(props: Props) {
                     ),
                 );
             }
-            const shouldCloseUploadProgress =
-                await uploadManager.queueFilesForUpload(
-                    filesWithCollectionToUploadIn,
-                    collections,
-                    uploaderName,
-                );
+            const shouldCloseUploadProgress = await uploadManager.uploadFiles(
+                filesWithCollectionToUploadIn,
+                collections,
+                uploaderName,
+            );
             if (shouldCloseUploadProgress) {
                 closeUploadProgress();
             }
@@ -595,7 +594,7 @@ export default function Uploader(props: Props) {
                 uploadManager.getFailedFilesWithCollections();
             const uploaderName = uploadManager.getUploaderName();
             await preUploadAction();
-            await uploadManager.queueFilesForUpload(
+            await uploadManager.uploadFiles(
                 /* TODO(MR): ElectronFile changes */
                 filesWithCollections.files as FileWithCollection[],
                 filesWithCollections.collections,

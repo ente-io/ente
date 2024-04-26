@@ -515,7 +515,7 @@ const ImageEditorOverlay = (props: IProps) => {
 
             uploadManager.prepareForNewUpload();
             uploadManager.showUploadProgressDialog();
-            uploadManager.queueFilesForUpload([file], [collection]);
+            uploadManager.uploadFiles([file], [collection]);
             setFileURL(null);
             props.onClose();
             props.closePhotoViewer();
