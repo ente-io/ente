@@ -25,6 +25,7 @@ import { parseImageMetadata } from "services/exif";
 import * as ffmpeg from "services/ffmpeg";
 import {
     EnteFile,
+    type EncryptedEnteFile,
     type FilePublicMagicMetadata,
     type FilePublicMagicMetadataProps,
 } from "types/file";
@@ -40,7 +41,6 @@ import {
     UploadAsset,
     UploadFile,
     UploadURL,
-    type FileWithCollection2,
     type LivePhotoAssets2,
     type UploadAsset2,
 } from "types/upload";
@@ -63,6 +63,7 @@ import {
     generateThumbnailWeb,
 } from "./thumbnail";
 import UploadHttpClient from "./uploadHttpClient";
+import type { UploadableFile } from "./uploadManager";
 
 /** Upload files to cloud storage */
 class UploadService {
@@ -160,12 +161,12 @@ type MakeProgressTracker = (
 ) => unknown;
 
 interface UploadResponse {
-    fileUploadResult: UPLOAD_RESULT;
-    uploadedFile?: EnteFile;
+    uploadResult: UPLOAD_RESULT;
+    uploadedFile?: EncryptedEnteFile | EnteFile;
 }
 
 export const uploader = async (
-    fileWithCollection: FileWithCollection2,
+    fileWithCollection: UploadableFile,
     uploaderName: string,
     existingFiles: EnteFile[],
     parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
@@ -200,7 +201,7 @@ export const uploader = async (
 
         const maxFileSize = 4 * 1024 * 1024 * 1024; /* 4 GB */
         if (fileSize >= maxFileSize)
-            return { fileUploadResult: UPLOAD_RESULT.TOO_LARGE };
+            return { uploadResult: UPLOAD_RESULT.TOO_LARGE };
 
         abortIfCancelled();
 
@@ -225,7 +226,7 @@ export const uploader = async (
             );
             if (matchInSameCollection) {
                 return {
-                    fileUploadResult: UPLOAD_RESULT.ALREADY_UPLOADED,
+                    uploadResult: UPLOAD_RESULT.ALREADY_UPLOADED,
                     uploadedFile: matchInSameCollection,
                 };
             } else {
@@ -234,7 +235,7 @@ export const uploader = async (
                 symlink.collectionID = collection.id;
                 await addToCollection(collection, [symlink]);
                 return {
-                    fileUploadResult: UPLOAD_RESULT.ADDED_SYMLINK,
+                    uploadResult: UPLOAD_RESULT.ADDED_SYMLINK,
                     uploadedFile: symlink,
                 };
             }
@@ -287,7 +288,7 @@ export const uploader = async (
         });
 
         return {
-            fileUploadResult: metadata.hasStaticThumbnail
+            uploadResult: metadata.hasStaticThumbnail
                 ? UPLOAD_RESULT.UPLOADED_WITH_STATIC_THUMBNAIL
                 : UPLOAD_RESULT.UPLOADED,
             uploadedFile: uploadedFile,
@@ -304,16 +305,15 @@ export const uploader = async (
         const error = handleUploadError(e);
         switch (error.message) {
             case CustomError.ETAG_MISSING:
-                return { fileUploadResult: UPLOAD_RESULT.BLOCKED };
+                return { uploadResult: UPLOAD_RESULT.BLOCKED };
             case CustomError.UNSUPPORTED_FILE_FORMAT:
-                return { fileUploadResult: UPLOAD_RESULT.UNSUPPORTED };
+                return { uploadResult: UPLOAD_RESULT.UNSUPPORTED };
             case CustomError.FILE_TOO_LARGE:
                 return {
-                    fileUploadResult:
-                        UPLOAD_RESULT.LARGER_THAN_AVAILABLE_STORAGE,
+                    uploadResult: UPLOAD_RESULT.LARGER_THAN_AVAILABLE_STORAGE,
                 };
             default:
-                return { fileUploadResult: UPLOAD_RESULT.FAILED };
+                return { uploadResult: UPLOAD_RESULT.FAILED };
         }
     }
 };

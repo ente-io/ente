@@ -31,7 +31,6 @@ import { SetFiles } from "types/gallery";
 import {
     FileWithCollection,
     PublicUploadProps,
-    type FileWithCollection2 as ClusteredFile,
     type LivePhotoAssets2,
 } from "types/upload";
 import {
@@ -485,16 +484,16 @@ class UploadManager {
         while (this.filesToBeUploaded.length > 0) {
             this.abortIfCancelled();
 
-            let fileWithCollection = this.filesToBeUploaded.pop();
-            const { collectionID } = fileWithCollection;
+            const clusteredFile = this.filesToBeUploaded.pop();
+            const { localID, collectionID } = clusteredFile;
             const collection = this.collections.get(collectionID);
-            fileWithCollection = { ...fileWithCollection, collection };
+            const uploadableFile = { ...clusteredFile, collection };
 
-            uiService.setFileProgress(fileWithCollection.localID, 0);
+            uiService.setFileProgress(localID, 0);
             await wait(0);
 
-            const { fileUploadResult, uploadedFile } = await uploader(
-                fileWithCollection,
+            const { uploadResult, uploadedFile } = await uploader(
+                uploadableFile,
                 this.uploaderName,
                 this.existingFiles,
                 this.parsedMetadataJSONMap,
@@ -516,46 +515,43 @@ class UploadManager {
             );
 
             const finalUploadResult = await this.postUploadTask(
-                fileUploadResult,
+                uploadableFile,
+                uploadResult,
                 uploadedFile,
-                fileWithCollection,
             );
 
-            this.uiService.moveFileToResultList(
-                fileWithCollection.localID,
-                finalUploadResult,
-            );
+            this.uiService.moveFileToResultList(localID, finalUploadResult);
             this.uiService.increaseFileUploaded();
             UploadService.reducePendingUploadCount();
         }
     }
 
     private async postUploadTask(
-        fileUploadResult: UPLOAD_RESULT,
-        uploadedFile: EncryptedEnteFile | EnteFile | null,
-        fileWithCollection: ClusteredFile,
+        uploadableFile: UploadableFile,
+        uploadResult: UPLOAD_RESULT,
+        uploadedFile: EncryptedEnteFile | EnteFile | undefined,
     ) {
+        log.info(`Upload completed with result: ${uploadResult}`);
         try {
             let decryptedFile: EnteFile;
-            log.info(`Upload completed with result: ${fileUploadResult}`);
-            await this.removeFromPendingUploads(fileWithCollection);
-            switch (fileUploadResult) {
+            await this.removeFromPendingUploads(uploadableFile);
+            switch (uploadResult) {
                 case UPLOAD_RESULT.FAILED:
                 case UPLOAD_RESULT.BLOCKED:
-                    this.failedFiles.push(fileWithCollection);
+                    this.failedFiles.push(uploadableFile);
                     break;
                 case UPLOAD_RESULT.ALREADY_UPLOADED:
                     decryptedFile = uploadedFile as EnteFile;
                     break;
                 case UPLOAD_RESULT.ADDED_SYMLINK:
                     decryptedFile = uploadedFile as EnteFile;
-                    fileUploadResult = UPLOAD_RESULT.UPLOADED;
+                    uploadResult = UPLOAD_RESULT.UPLOADED;
                     break;
                 case UPLOAD_RESULT.UPLOADED:
                 case UPLOAD_RESULT.UPLOADED_WITH_STATIC_THUMBNAIL:
                     decryptedFile = await decryptFile(
                         uploadedFile as EncryptedEnteFile,
-                        fileWithCollection.collection.key,
+                        uploadableFile.collection.key,
                     );
                     break;
                 case UPLOAD_RESULT.UNSUPPORTED:
@@ -563,23 +559,21 @@ class UploadManager {
                     // no-op
                     break;
                 default:
-                    throw new Error(
-                        `Invalid Upload Result ${fileUploadResult}`,
-                    );
+                    throw new Error(`Invalid Upload Result ${uploadResult}`);
             }
             if (
                 [
                     UPLOAD_RESULT.ADDED_SYMLINK,
                     UPLOAD_RESULT.UPLOADED,
                     UPLOAD_RESULT.UPLOADED_WITH_STATIC_THUMBNAIL,
-                ].includes(fileUploadResult)
+                ].includes(uploadResult)
             ) {
                 try {
                     eventBus.emit(Events.FILE_UPLOADED, {
                         enteFile: decryptedFile,
                         localFile:
-                            fileWithCollection.file ??
-                            fileWithCollection.livePhotoAssets.image,
+                            uploadableFile.fileOrPath ??
+                            uploadableFile.livePhotoAssets.image,
                     });
                 } catch (e) {
                     log.warn("Ignoring error in fileUploaded handlers", e);
@@ -587,11 +581,11 @@ class UploadManager {
                 this.updateExistingFiles(decryptedFile);
             }
             await this.watchFolderCallback(
-                fileUploadResult,
-                fileWithCollection,
+                uploadResult,
+                uploadableFile,
                 uploadedFile as EncryptedEnteFile,
             );
-            return fileUploadResult;
+            return uploadResult;
         } catch (e) {
             log.error("failed to do post file upload action", e);
             return UPLOAD_RESULT.FAILED;
@@ -729,6 +723,11 @@ const makeFileWithCollectionIDAndName = (
     };
 };
 
+/**
+ * A file with both parts of a live photo clubbed together.
+ *
+ * See: [Note: Intermediate file types during upload].
+ */
 type ClusteredFile = {
     localID: number;
     collectionID: number;
@@ -736,6 +735,16 @@ type ClusteredFile = {
     isLivePhoto: boolean;
     fileOrPath?: File | string;
     livePhotoAssets?: LivePhotoAssets2;
+};
+
+/**
+ * The file that we hand off to the uploader. Essentially {@link ClusteredFile}
+ * with the {@link collection} attached to it.
+ *
+ * See: [Note: Intermediate file types during upload].
+ */
+export type UploadableFile = ClusteredFile & {
+    collection: Collection;
 };
 
 const splitMetadataAndMediaFiles = (
