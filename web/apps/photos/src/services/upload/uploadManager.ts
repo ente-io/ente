@@ -576,7 +576,9 @@ class UploadManager {
         uploadResult: UPLOAD_RESULT,
         uploadedFile: EncryptedEnteFile | EnteFile | undefined,
     ) {
-        log.info(`Upload completed with result: ${uploadResult}`);
+        log.info(
+            `Uploaded ${uploadableFile.fileName} with result ${uploadResult}`,
+        );
         try {
             let decryptedFile: EnteFile;
             await this.removeFromPendingUploads(uploadableFile);
