@@ -4,8 +4,10 @@ import "dart:io" show File;
 import 'package:flutter/material.dart';
 import "package:photos/face/model/face.dart";
 import "package:photos/models/file/file.dart";
+import "package:photos/models/file/file_type.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/utils/file_util.dart";
+import "package:photos/utils/thumbnail_util.dart";
 
 class CroppedFaceInfo {
   final Image image;
@@ -103,7 +105,12 @@ class CroppedFaceImageView extends StatelessWidget {
   }
 
   Future<Image?> getImage() async {
-    final File? ioFile = await getFile(enteFile);
+    final File? ioFile;
+    if (enteFile.fileType == FileType.video) {
+      ioFile = await getThumbnailForUploadedFile(enteFile);
+    } else {
+      ioFile = await getFile(enteFile);
+    }
     if (ioFile == null) {
       return null;
     }
