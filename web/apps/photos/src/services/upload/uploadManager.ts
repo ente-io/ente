@@ -31,7 +31,7 @@ import { SetFiles } from "types/gallery";
 import {
     FileWithCollection,
     PublicUploadProps,
-    type LivePhotoAssets2,
+    type LivePhotoAssets,
 } from "types/upload";
 import {
     FinishedUploads,
@@ -690,14 +690,14 @@ type FileWithCollectionIDAndName = {
     /** Alias */
     file?: File | string;
     /* Valid for live photos */
-    livePhotoAssets?: LivePhotoAssets2;
+    livePhotoAssets?: LivePhotoAssets;
 };
 
 const makeFileWithCollectionIDAndName = (
     f: FileWithCollection,
 ): FileWithCollectionIDAndName => {
     /* TODO(MR): ElectronFile */
-    const fileOrPath = (f.fileOrPath ?? f.file) as File | string;
+    const fileOrPath = f.fileOrPath;
     if (!(fileOrPath instanceof File || typeof fileOrPath == "string"))
         throw new Error(`Unexpected file ${f}`);
 
@@ -714,7 +714,7 @@ const makeFileWithCollectionIDAndName = (
         file: fileOrPath,
         fileOrPath: fileOrPath,
         /* TODO(MR): ElectronFile */
-        livePhotoAssets: f.livePhotoAssets as LivePhotoAssets2,
+        livePhotoAssets: f.livePhotoAssets as LivePhotoAssets,
     };
 };
 
@@ -729,7 +729,7 @@ type ClusteredFile = {
     fileName: string;
     isLivePhoto: boolean;
     fileOrPath?: File | string;
-    livePhotoAssets?: LivePhotoAssets2;
+    livePhotoAssets?: LivePhotoAssets;
 };
 
 /**

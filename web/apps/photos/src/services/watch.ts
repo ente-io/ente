@@ -17,7 +17,7 @@ import debounce from "debounce";
 import uploadManager from "services/upload/uploadManager";
 import { Collection } from "types/collection";
 import { EncryptedEnteFile } from "types/file";
-import { type FileWithCollection2 } from "types/upload";
+import { type FileWithCollection } from "types/upload";
 import { groupFilesBasedOnCollectionID } from "utils/file";
 import { isHiddenFile } from "utils/upload";
 import { removeFromCollection } from "./collectionService";
@@ -322,7 +322,7 @@ class FolderWatcher {
      */
     async onFileUpload(
         fileUploadResult: UPLOAD_RESULT,
-        fileWithCollection: FileWithCollection2,
+        fileWithCollection: FileWithCollection,
         file: EncryptedEnteFile,
     ) {
         // The files we get here will have fileWithCollection.file as a string,
@@ -375,7 +375,7 @@ class FolderWatcher {
      * {@link upload} get uploaded.
      */
     async allFileUploadsDone(
-        filesWithCollection: FileWithCollection2[],
+        filesWithCollection: FileWithCollection[],
         collections: Collection[],
     ) {
         const electron = ensureElectron();
@@ -411,7 +411,7 @@ class FolderWatcher {
         this.debouncedRunNextEvent();
     }
 
-    private deduceSyncedAndIgnored(filesWithCollection: FileWithCollection2[]) {
+    private deduceSyncedAndIgnored(filesWithCollection: UploadedFile[]) {
         const syncedFiles: FolderWatch["syncedFiles"] = [];
         const ignoredFiles: FolderWatch["ignoredFiles"] = [];
 
@@ -453,7 +453,7 @@ class FolderWatcher {
                     markIgnored(videoPath);
                 }
             } else {
-                const path = ensureString(fileWithCollection.file);
+                const path = ensureString(fileWithCollection.fileOrPath);
                 const file = this.uploadedFileForPath.get(path);
                 if (file) {
                     markSynced(file, path);

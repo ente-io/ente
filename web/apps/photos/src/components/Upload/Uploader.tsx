@@ -33,7 +33,7 @@ import {
     SetLoading,
     UploadTypeSelectorIntent,
 } from "types/gallery";
-import { FileWithCollection, type FileWithCollection2 } from "types/upload";
+import { type FileWithCollection } from "types/upload";
 import {
     InProgressUpload,
     SegregatedFinishedUploads,
@@ -48,9 +48,9 @@ import {
 } from "utils/ui";
 import {
     DEFAULT_IMPORT_SUGGESTION,
-    filterOutSystemFiles,
     getImportSuggestion,
     groupFilesBasedOnParentFolder,
+    pruneHiddenFiles,
     type ImportSuggestion,
 } from "utils/upload";
 import { SetCollectionNamerAttributes } from "../Collections/CollectionNamer";
@@ -122,11 +122,10 @@ export default function Uploader(props: Props) {
         string[] | undefined
     >();
     const [electronFiles, setElectronFiles] = useState<ElectronFile[]>(null);
-    const [webFiles, setWebFiles] = useState([]);
+    const [webFiles, setWebFiles] = useState<File[]>([]);
 
-    const toUploadFiles = useRef<
-        File[] | ElectronFile[] | string[] | undefined | null
-    >(null);
+    const fileOrPathsToUpload = useRef<(File | string)[]>([]);
+
     /**
      * If true, then the next upload we'll be processing was initiated by our
      * desktop app.
@@ -340,30 +339,34 @@ export default function Uploader(props: Props) {
             props.setLoading(true);
             if (webFiles?.length > 0) {
                 // File selection by drag and drop or selection of file.
-                toUploadFiles.current = webFiles;
+                fileOrPathsToUpload.current = webFiles;
                 setWebFiles([]);
             } else if (appContext.sharedFiles?.length > 0) {
-                toUploadFiles.current = appContext.sharedFiles;
+                fileOrPathsToUpload.current = appContext.sharedFiles;
                 appContext.resetSharedFiles();
             } else if (electronFiles?.length > 0) {
                 // File selection from desktop app - deprecated
-                toUploadFiles.current = electronFiles;
+                log.warn("Using deprecated code path for ElectronFiles");
+                fileOrPathsToUpload.current = electronFiles.map((f) => f.path);
                 setElectronFiles([]);
             } else if (desktopFilePaths && desktopFilePaths.length > 0) {
                 // File selection from our desktop app
-                toUploadFiles.current = desktopFilePaths;
+                fileOrPathsToUpload.current = desktopFilePaths;
                 setDesktopFilePaths(undefined);
             }
 
-            toUploadFiles.current = filterOutSystemFiles(toUploadFiles.current);
-            if (toUploadFiles.current.length === 0) {
+            fileOrPathsToUpload.current = pruneHiddenFiles(
+                fileOrPathsToUpload.current,
+            );
+            if (fileOrPathsToUpload.current.length === 0) {
                 props.setLoading(false);
                 return;
             }
 
             const importSuggestion = getImportSuggestion(
                 pickedUploadType.current,
-                toUploadFiles.current.map((file) =>
+                fileOrPathsToUpload.current.map((file) =>
+                    /** TODO(MR): Is path valid for Web files? */
                     typeof file == "string" ? file : file["path"],
                 ),
             );
@@ -409,12 +412,13 @@ export default function Uploader(props: Props) {
                 `upload file to an existing collection name:${collection.name}, collectionID:${collection.id}`,
             );
             await preCollectionCreationAction();
-            const filesWithCollectionToUpload: FileWithCollection[] =
-                toUploadFiles.current.map((file, index) => ({
-                    file,
+            const filesWithCollectionToUpload = fileOrPathsToUpload.current.map(
+                (fileOrPath, index) => ({
+                    fileOrPath,
                     localID: index,
                     collectionID: collection.id,
-                }));
+                }),
+            );
             await waitInQueueAndUploadFiles(
                 filesWithCollectionToUpload,
                 [collection],
@@ -434,7 +438,7 @@ export default function Uploader(props: Props) {
                 `upload file to an new collections strategy:${strategy} ,collectionName:${collectionName}`,
             );
             await preCollectionCreationAction();
-            let filesWithCollectionToUpload: FileWithCollection2[] = [];
+            let filesWithCollectionToUpload: FileWithCollection[] = [];
             const collections: Collection[] = [];
             let collectionNameToFilesMap = new Map<
                 string,
@@ -443,11 +447,11 @@ export default function Uploader(props: Props) {
             if (strategy == "root") {
                 collectionNameToFilesMap.set(
                     collectionName,
-                    toUploadFiles.current,
+                    fileOrPathsToUpload.current,
                 );
             } else {
                 collectionNameToFilesMap = groupFilesBasedOnParentFolder(
-                    toUploadFiles.current,
+                    fileOrPathsToUpload.current,
                 );
             }
             log.info(
@@ -494,7 +498,7 @@ export default function Uploader(props: Props) {
                 filesWithCollectionToUpload as FileWithCollection[],
                 collections,
             );
-            toUploadFiles.current = null;
+            fileOrPathsToUpload.current = null;
         } catch (e) {
             log.error("Failed to upload files to new collections", e);
         }
@@ -553,7 +557,11 @@ export default function Uploader(props: Props) {
                 await electron.setPendingUploadFiles(
                     "files",
                     filesWithCollectionToUploadIn.map(
-                        ({ file }) => (file as ElectronFile).path,
+                        // TODO(MR): ElectronFile
+                        ({ fileOrPath }) =>
+                            typeof fileOrPath == "string"
+                                ? fileOrPath
+                                : (fileOrPath as any as ElectronFile).path,
                     ),
                 );
             }
@@ -566,8 +574,7 @@ export default function Uploader(props: Props) {
             if (isElectron()) {
                 if (watcher.isUploadRunning()) {
                     await watcher.allFileUploadsDone(
-                        /* TODO(MR): ElectronFile changes */
-                        filesWithCollectionToUploadIn as FileWithCollection2[],
+                        filesWithCollectionToUploadIn,
                         collections,
                     );
                 } else if (watcher.isSyncPaused()) {
@@ -592,7 +599,6 @@ export default function Uploader(props: Props) {
             const uploaderName = uploadManager.getUploaderName();
             await preUploadAction();
             await uploadManager.uploadFiles(
-                /* TODO(MR): ElectronFile changes */
                 filesWithCollections.files as FileWithCollection[],
                 filesWithCollections.collections,
                 uploaderName,
@@ -857,7 +863,7 @@ export default function Uploader(props: Props) {
                 open={userNameInputDialogView}
                 onClose={handleUserNameInputDialogClose}
                 onNameSubmit={handlePublicUpload}
-                toUploadFilesCount={toUploadFiles.current?.length}
+                toUploadFilesCount={fileOrPathsToUpload.current?.length}
                 uploaderName={uploaderNameRef.current}
             />
         </>

@@ -4,6 +4,7 @@ import { ElectronFile } from "@/next/types/file";
 import { PICKED_UPLOAD_TYPE } from "constants/upload";
 import isElectron from "is-electron";
 import { exportMetadataDirectoryName } from "services/export";
+import { fopFileName } from "services/upload/uploadService";
 
 export const hasFileHash = (file: Metadata) =>
     file.hash || (file.imageHash && file.videoHash);
@@ -116,30 +117,14 @@ export function groupFilesBasedOnParentFolder(
     return collectionNameToFilesMap;
 }
 
-export function filterOutSystemFiles(
-    files: File[] | ElectronFile[] | string[] | undefined | null,
-) {
-    if (!files) return files;
+/**
+ * Filter out hidden files from amongst {@link fileOrPaths}.
+ *
+ * Hidden files are those whose names begin with a "." (dot).
+ */
 
-    if (files[0] instanceof File) {
-        const browserFiles = files as File[];
-        return browserFiles.filter((file) => {
-            return !isSystemFile(file);
-        });
-    } else if (typeof files[0] == "string") {
-        const filePaths = files as string[];
-        return filePaths.filter((path) => !isHiddenFile(path));
-    } else {
-        const electronFiles = files as ElectronFile[];
-        return electronFiles.filter((file) => {
-            return !isSystemFile(file);
-        });
-    }
-}
-
-export function isSystemFile(file: File | ElectronFile) {
-    return file.name.startsWith(".");
-}
+export const pruneHiddenFiles = (fileOrPaths: (File | string)[]) =>
+    fileOrPaths.filter((f) => !fopFileName(f).startsWith("."));
 
 /**
  * Return true if the file at the given {@link path} is hidden.

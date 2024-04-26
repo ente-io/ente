@@ -38,7 +38,7 @@ import { EncryptedMagicMetadata } from "types/magicMetadata";
 import {
     ParsedExtractedMetadata,
     PublicUploadProps,
-    type LivePhotoAssets2,
+    type LivePhotoAssets,
 } from "types/upload";
 import {
     getNonEmptyMagicMetadataProps,
@@ -168,7 +168,7 @@ export const fopSize = async (fileOrPath: File | string): Promise<number> =>
 interface UploadAsset2 {
     isLivePhoto?: boolean;
     fileOrPath?: File | string;
-    livePhotoAssets?: LivePhotoAssets2;
+    livePhotoAssets?: LivePhotoAssets;
 }
 
 interface FileInMemory {
@@ -522,7 +522,7 @@ const readAssetDetails = async ({
         ? readLivePhotoDetails(livePhotoAssets)
         : readImageOrVideoDetails(fileOrPath);
 
-const readLivePhotoDetails = async ({ image, video }: LivePhotoAssets2) => {
+const readLivePhotoDetails = async ({ image, video }: LivePhotoAssets) => {
     const img = await readImageOrVideoDetails(image);
     const vid = await readImageOrVideoDetails(video);
 
@@ -613,7 +613,7 @@ const extractAssetMetadata = async (
           );
 
 const extractLivePhotoMetadata = async (
-    livePhotoAssets: LivePhotoAssets2,
+    livePhotoAssets: LivePhotoAssets,
     fileTypeInfo: FileTypeInfo,
     lastModifiedMs: number,
     collectionID: number,
@@ -835,7 +835,7 @@ const readAsset = async (
         : await readImageOrVideo(fileOrPath, fileTypeInfo);
 
 const readLivePhoto = async (
-    livePhotoAssets: LivePhotoAssets2,
+    livePhotoAssets: LivePhotoAssets,
     fileTypeInfo: FileTypeInfo,
 ) => {
     const readImage = await readFileOrPath(livePhotoAssets.image);

@@ -1,38 +1,21 @@
 import type { ElectronFile } from "@/next/types/file";
-import { Collection } from "types/collection";
 
 export interface Location {
     latitude: number;
     longitude: number;
 }
 
-export interface UploadAsset {
+export interface FileWithCollection {
+    localID: number;
+    collectionID: number;
     isLivePhoto?: boolean;
-    file?: File | ElectronFile;
-    fileOrPath?: File | ElectronFile;
+    fileOrPath?: File | string;
     livePhotoAssets?: LivePhotoAssets;
 }
 
 export interface LivePhotoAssets {
-    image: globalThis.File | ElectronFile;
-    video: globalThis.File | ElectronFile;
-}
-
-export interface FileWithCollection extends UploadAsset {
-    localID: number;
-    collection?: Collection;
-    collectionID?: number;
-}
-
-export interface LivePhotoAssets2 {
     image: File | string;
     video: File | string;
-}
-
-export interface FileWithCollection2 extends UploadAsset {
-    localID: number;
-    collection?: Collection;
-    collectionID: number;
 }
 
 export interface ParsedExtractedMetadata {
