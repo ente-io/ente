@@ -536,7 +536,6 @@ export default function Uploader(props: Props) {
         uploaderName?: string,
     ) => {
         try {
-            log.info("uploadFiles called");
             preUploadAction();
             if (
                 electron &&
@@ -558,14 +557,12 @@ export default function Uploader(props: Props) {
                     ),
                 );
             }
-            const shouldCloseUploadProgress = await uploadManager.uploadFiles(
+            const wereFilesProcessed = await uploadManager.uploadFiles(
                 filesWithCollectionToUploadIn,
                 collections,
                 uploaderName,
             );
-            if (shouldCloseUploadProgress) {
-                closeUploadProgress();
-            }
+            if (!wereFilesProcessed) closeUploadProgress();
             if (isElectron()) {
                 if (watcher.isUploadRunning()) {
                     await watcher.allFileUploadsDone(
@@ -579,7 +576,7 @@ export default function Uploader(props: Props) {
                 }
             }
         } catch (e) {
-            log.error("failed to upload files", e);
+            log.error("Failed to upload files", e);
             showUserFacingError(e.message);
             closeUploadProgress();
         } finally {
@@ -589,7 +586,7 @@ export default function Uploader(props: Props) {
 
     const retryFailed = async () => {
         try {
-            log.info("user retrying failed  upload");
+            log.info("Retrying failed uploads");
             const filesWithCollections =
                 uploadManager.getFailedFilesWithCollections();
             const uploaderName = uploadManager.getUploaderName();
@@ -601,7 +598,7 @@ export default function Uploader(props: Props) {
                 uploaderName,
             );
         } catch (e) {
-            log.error("retry failed files failed", e);
+            log.error("Retrying failed uploads failed", e);
             showUserFacingError(e.message);
             closeUploadProgress();
         } finally {

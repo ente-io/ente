@@ -170,13 +170,7 @@ class UIService {
     }
 
     hasFilesInResultList() {
-        const finishedUploadsList = groupByResult(this.finishedUploads);
-        for (const x of finishedUploadsList.values()) {
-            if (x.length > 0) {
-                return true;
-            }
-        }
-        return false;
+        return this.finishedUploads.size > 0;
     }
 
     private updateProgressBarUI() {
@@ -342,8 +336,11 @@ class UploadManager {
     /**
      * Upload files
      *
-     * This function waits for all the files to get uploaded (successfully or
+     * This method waits for all the files to get uploaded (successfully or
      * unsucessfully) before returning.
+     *
+     * It is an error to call this method when there is already an in-progress
+     * upload.
      *
      * @param filesWithCollectionToUploadIn The files to upload, each paired
      * with the id of the collection that they should be uploaded into.
@@ -427,16 +424,7 @@ class UploadManager {
             this.uploadInProgress = false;
         }
 
-        try {
-            if (!this.uiService.hasFilesInResultList()) {
-                return true;
-            } else {
-                return false;
-            }
-        } catch (e) {
-            log.error(" failed to return shouldCloseProgressBar", e);
-            return false;
-        }
+        return this.uiService.hasFilesInResultList();
     }
 
     private abortIfCancelled = () => {
