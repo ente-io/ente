@@ -39,6 +39,7 @@ export const readStream = async (
     });
 
     const res = await fetch(req);
+    console.log(Object.fromEntries(res.headers.entries()));
     if (!res.ok)
         throw new Error(
             `Failed to read stream from ${path}: HTTP ${res.status}`,

@@ -15,11 +15,7 @@ import { existsSync } from "node:fs";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import {
-    addAllowOriginHeader,
-    handleDownloads,
-    handleExternalLinks,
-} from "./main/init";
+import { handleDownloads, handleExternalLinks } from "./main/init";
 import { attachFSWatchIPCHandlers, attachIPCHandlers } from "./main/ipc";
 import log, { initLogging } from "./main/log";
 import { createApplicationMenu, createTrayContextMenu } from "./main/menu";
@@ -349,7 +345,11 @@ const main = () => {
         registerStreamProtocol();
         handleDownloads(mainWindow);
         handleExternalLinks(mainWindow);
-        addAllowOriginHeader(mainWindow);
+        // TODO(MR): Remove or resurrect
+        // The commit that introduced this header override had the message
+        // "fix cors issue for uploads". Not sure what that means, so disabling
+        // it for now to see why exactly this is required.
+        // addAllowOriginHeader(mainWindow);
 
         // Start loading the renderer
         mainWindow.loadURL(rendererURL);
