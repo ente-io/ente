@@ -4,7 +4,7 @@ import { validateAndGetCreationUnixTimeInMicroSeconds } from "@ente/shared/time"
 import { NULL_LOCATION } from "constants/upload";
 import exifr from "exifr";
 import piexif from "piexifjs";
-import { Location, type ParsedExtractedMetadata } from "types/upload";
+import type { Location, ParsedExtractedMetadata } from "types/metadata";
 
 type ParsedEXIFData = Record<string, any> &
     Partial<{
@@ -311,7 +311,7 @@ export function parseEXIFLocation(
             })}`,
             e,
         );
-        return NULL_LOCATION;
+        return { ...NULL_LOCATION };
     }
 }
 
@@ -328,7 +328,7 @@ function convertDMSToDD(
 
 export function getEXIFLocation(exifData: ParsedEXIFData): Location {
     if (!exifData || (!exifData.latitude && exifData.latitude !== 0)) {
-        return NULL_LOCATION;
+        return { ...NULL_LOCATION };
     }
     return { latitude: exifData.latitude, longitude: exifData.longitude };
 }

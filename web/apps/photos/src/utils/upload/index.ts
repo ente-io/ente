@@ -1,9 +1,9 @@
 import type { Metadata } from "@/media/types/file";
 import { basename, dirname } from "@/next/file";
-import { ElectronFile } from "@/next/types/file";
 import { PICKED_UPLOAD_TYPE } from "constants/upload";
 import isElectron from "is-electron";
 import { exportMetadataDirectoryName } from "services/export";
+import { fopFileName } from "services/upload/uploadService";
 
 export const hasFileHash = (file: Metadata) =>
     file.hash || (file.imageHash && file.videoHash);
@@ -81,16 +81,16 @@ export function getImportSuggestion(
 // [a => [j],
 // b => [e,f,g],
 // c => [h, i]]
-export function groupFilesBasedOnParentFolder(
-    toUploadFiles: File[] | ElectronFile[] | string[],
-) {
-    const collectionNameToFilesMap = new Map<
-        string,
-        File[] | ElectronFile[] | string[]
-    >();
-    for (const file of toUploadFiles) {
+export const groupFilesBasedOnParentFolder = (
+    fileOrPaths: (File | string)[],
+) => {
+    const result = new Map<string, (File | string)[]>();
+    for (const fileOrPath of fileOrPaths) {
         const filePath =
-            typeof file == "string" ? file : (file["path"] as string);
+            /* TODO(MR): ElectronFile */
+            typeof fileOrPath == "string"
+                ? fileOrPath
+                : (fileOrPath["path"] as string);
 
         let folderPath = filePath.substring(0, filePath.lastIndexOf("/"));
         // If the parent folder of a file is "metadata"
@@ -104,42 +104,21 @@ export function groupFilesBasedOnParentFolder(
         const folderName = folderPath.substring(
             folderPath.lastIndexOf("/") + 1,
         );
-        if (!folderName?.length) {
-            throw Error("folderName can't be null");
-        }
-        if (!collectionNameToFilesMap.has(folderName)) {
-            collectionNameToFilesMap.set(folderName, []);
-        }
-        // TODO: Remove the cast
-        collectionNameToFilesMap.get(folderName).push(file as any);
+        if (!folderName) throw Error("Unexpected empty folder name");
+        if (!result.has(folderName)) result.set(folderName, []);
+        result.get(folderName).push(fileOrPath);
     }
-    return collectionNameToFilesMap;
-}
+    return result;
+};
 
-export function filterOutSystemFiles(
-    files: File[] | ElectronFile[] | string[] | undefined | null,
-) {
-    if (!files) return files;
+/**
+ * Filter out hidden files from amongst {@link fileOrPaths}.
+ *
+ * Hidden files are those whose names begin with a "." (dot).
+ */
 
-    if (files[0] instanceof File) {
-        const browserFiles = files as File[];
-        return browserFiles.filter((file) => {
-            return !isSystemFile(file);
-        });
-    } else if (typeof files[0] == "string") {
-        const filePaths = files as string[];
-        return filePaths.filter((path) => !isHiddenFile(path));
-    } else {
-        const electronFiles = files as ElectronFile[];
-        return electronFiles.filter((file) => {
-            return !isSystemFile(file);
-        });
-    }
-}
-
-export function isSystemFile(file: File | ElectronFile) {
-    return file.name.startsWith(".");
-}
+export const pruneHiddenFiles = (fileOrPaths: (File | string)[]) =>
+    fileOrPaths.filter((f) => !fopFileName(f).startsWith("."));
 
 /**
  * Return true if the file at the given {@link path} is hidden.
