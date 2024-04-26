@@ -4,7 +4,7 @@ import { validateAndGetCreationUnixTimeInMicroSeconds } from "@ente/shared/time"
 import { NULL_LOCATION } from "constants/upload";
 import exifr from "exifr";
 import piexif from "piexifjs";
-import { Location, type ParsedExtractedMetadata } from "types/upload";
+import type { Location, ParsedExtractedMetadata } from "types/metadata";
 
 type ParsedEXIFData = Record<string, any> &
     Partial<{

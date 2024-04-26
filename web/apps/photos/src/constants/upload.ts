@@ -1,5 +1,5 @@
 import { ENCRYPTION_CHUNK_SIZE } from "@ente/shared/crypto/constants";
-import { Location } from "types/upload";
+import { Location } from "types/metadata";
 
 // this is the chunk size of the un-encrypted file which is read and encrypted before uploading it as a single part.
 export const MULTIPART_PART_SIZE = 20 * 1024 * 1024;

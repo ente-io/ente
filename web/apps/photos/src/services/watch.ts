@@ -14,10 +14,11 @@ import type {
 import { ensureString } from "@/utils/ensure";
 import { UPLOAD_RESULT } from "constants/upload";
 import debounce from "debounce";
-import uploadManager from "services/upload/uploadManager";
+import uploadManager, {
+    type FileWithCollection,
+} from "services/upload/uploadManager";
 import { Collection } from "types/collection";
 import { EncryptedEnteFile } from "types/file";
-import { type FileWithCollection } from "types/upload";
 import { groupFilesBasedOnCollectionID } from "utils/file";
 import { isHiddenFile } from "utils/upload";
 import { removeFromCollection } from "./collectionService";

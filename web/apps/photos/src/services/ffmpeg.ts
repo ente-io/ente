@@ -9,8 +9,8 @@ import {
     outputPathPlaceholder,
 } from "constants/ffmpeg";
 import { NULL_LOCATION } from "constants/upload";
-import { ParsedExtractedMetadata } from "types/upload";
-import { type DedicatedFFmpegWorker } from "worker/ffmpeg.worker";
+import type { ParsedExtractedMetadata } from "types/metadata";
+import type { DedicatedFFmpegWorker } from "worker/ffmpeg.worker";
 
 /**
  * Generate a thumbnail for the given video using a wasm FFmpeg running in a web

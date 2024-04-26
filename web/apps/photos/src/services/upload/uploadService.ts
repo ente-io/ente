@@ -27,6 +27,10 @@ import { addToCollection } from "services/collectionService";
 import { parseImageMetadata } from "services/exif";
 import * as ffmpeg from "services/ffmpeg";
 import {
+    PublicUploadProps,
+    type LivePhotoAssets,
+} from "services/upload/uploadManager";
+import {
     EnteFile,
     MetadataFileAttributes,
     S3FileAttributes,
@@ -35,11 +39,7 @@ import {
     type FilePublicMagicMetadataProps,
 } from "types/file";
 import { EncryptedMagicMetadata } from "types/magicMetadata";
-import {
-    ParsedExtractedMetadata,
-    PublicUploadProps,
-    type LivePhotoAssets,
-} from "types/upload";
+import type { ParsedExtractedMetadata } from "types/metadata";
 import {
     getNonEmptyMagicMetadataProps,
     updateMagicMetadata,

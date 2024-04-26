@@ -4,7 +4,7 @@ import { ensureElectron } from "@/next/electron";
 import { nameAndExtension } from "@/next/file";
 import log from "@/next/log";
 import { NULL_LOCATION } from "constants/upload";
-import { type Location } from "types/upload";
+import type { Location } from "types/metadata";
 
 export interface ParsedMetadataJSON {
     creationTime: number;
@@ -124,7 +124,7 @@ const parseMetadataJSONText = (text: string) => {
         parsedMetadataJSON.modificationTime =
             metadataJSON["modificationTime"]["timestamp"] * 1000000;
     }
-    let locationData: Location = NULL_LOCATION;
+    let locationData: Location = { ...NULL_LOCATION };
     if (
         metadataJSON["geoData"] &&
         (metadataJSON["geoData"]["latitude"] !== 0.0 ||

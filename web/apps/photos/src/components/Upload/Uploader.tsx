@@ -19,6 +19,13 @@ import {
     getPublicCollectionUploaderName,
     savePublicCollectionUploaderName,
 } from "services/publicCollectionService";
+import type {
+    FileWithCollection,
+    InProgressUpload,
+    SegregatedFinishedUploads,
+    UploadCounter,
+    UploadFileNames,
+} from "services/upload/uploadManager";
 import uploadManager, {
     setToUploadCollection,
 } from "services/upload/uploadManager";
@@ -33,13 +40,6 @@ import {
     SetLoading,
     UploadTypeSelectorIntent,
 } from "types/gallery";
-import { type FileWithCollection } from "types/upload";
-import {
-    InProgressUpload,
-    SegregatedFinishedUploads,
-    UploadCounter,
-    UploadFileNames,
-} from "types/upload/ui";
 import { getOrCreateAlbum } from "utils/collection";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 import {

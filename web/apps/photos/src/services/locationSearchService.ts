@@ -1,6 +1,6 @@
 import log from "@/next/log";
 import { LocationTagData } from "types/entity";
-import { Location } from "types/upload";
+import { Location } from "types/metadata";
 
 export interface City {
     city: string;

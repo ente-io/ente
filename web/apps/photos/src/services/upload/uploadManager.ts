@@ -28,18 +28,6 @@ import watcher from "services/watch";
 import { Collection } from "types/collection";
 import { EncryptedEnteFile, EnteFile } from "types/file";
 import { SetFiles } from "types/gallery";
-import {
-    FileWithCollection,
-    PublicUploadProps,
-    type LivePhotoAssets,
-} from "types/upload";
-import {
-    FinishedUploads,
-    InProgressUpload,
-    InProgressUploads,
-    ProgressUpdater,
-    SegregatedFinishedUploads,
-} from "types/upload/ui";
 import { decryptFile, getUserOwnedFiles, sortFiles } from "utils/file";
 import { getLocalFiles } from "../fileService";
 import {
@@ -49,8 +37,69 @@ import {
 } from "./takeout";
 import UploadService, { fopFileName, fopSize, uploader } from "./uploadService";
 
+export type FileID = number;
+
+export type PercentageUploaded = number;
+/* localID => fileName */
+export type UploadFileNames = Map<FileID, string>;
+
+export interface UploadCounter {
+    finished: number;
+    total: number;
+}
+
+export interface InProgressUpload {
+    localFileID: FileID;
+    progress: PercentageUploaded;
+}
+
+export interface FinishedUpload {
+    localFileID: FileID;
+    result: UPLOAD_RESULT;
+}
+
+export type InProgressUploads = Map<FileID, PercentageUploaded>;
+
+export type FinishedUploads = Map<FileID, UPLOAD_RESULT>;
+
+export type SegregatedFinishedUploads = Map<UPLOAD_RESULT, FileID[]>;
+
+export interface ProgressUpdater {
+    setPercentComplete: React.Dispatch<React.SetStateAction<number>>;
+    setUploadCounter: React.Dispatch<React.SetStateAction<UploadCounter>>;
+    setUploadStage: React.Dispatch<React.SetStateAction<UPLOAD_STAGES>>;
+    setInProgressUploads: React.Dispatch<
+        React.SetStateAction<InProgressUpload[]>
+    >;
+    setFinishedUploads: React.Dispatch<
+        React.SetStateAction<SegregatedFinishedUploads>
+    >;
+    setUploadFilenames: React.Dispatch<React.SetStateAction<UploadFileNames>>;
+    setHasLivePhotos: React.Dispatch<React.SetStateAction<boolean>>;
+    setUploadProgressView: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
 /** The number of uploads to process in parallel. */
 const maxConcurrentUploads = 4;
+
+export interface FileWithCollection {
+    localID: number;
+    collectionID: number;
+    isLivePhoto?: boolean;
+    fileOrPath?: File | string;
+    livePhotoAssets?: LivePhotoAssets;
+}
+
+export interface LivePhotoAssets {
+    image: File | string;
+    video: File | string;
+}
+
+export interface PublicUploadProps {
+    token: string;
+    passwordToken: string;
+    accessedThroughSharedURL: boolean;
+}
 
 interface UploadCancelStatus {
     value: boolean;
