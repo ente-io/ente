@@ -57,12 +57,14 @@ const handleRead = async (path: string) => {
     try {
         const res = await net.fetch(pathToFileURL(path).toString());
         if (res.ok) {
-            // `net.fetch` already seems to add "Content-Type" and
-            // "Last-Modified" headers. But since we already are stat-ting the
-            // file for the "Content-Length", we explicitly add the
-            // "X-Last-Modified-Ms" too, (a) guaranteeing its presence, and (b)
-            // having it be in the exact format we want (no string <-> date
-            // conversions) and (c) keeping milliseconds.
+            // net.fetch already seems to add "Content-Type" and "Last-Modified"
+            // headers, but I couldn't find documentation for this. In any case,
+            // since we already are stat-ting the file for the "Content-Length",
+            // we explicitly add the "X-Last-Modified-Ms" too,
+            // 1. guaranteeing its presence
+            // 2. having it be in the exact format we want (no string <-> date
+            //    conversions)
+            // 3. Retaining milliseconds.
 
             const stat = await fs.stat(path);
 

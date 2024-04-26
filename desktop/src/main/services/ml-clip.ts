@@ -150,7 +150,7 @@ export const clipTextEmbeddingIfAvailable = async (text: string) => {
 
     // Don't wait for the download to complete
     if (typeof sessionOrStatus == "string") {
-        console.log(
+        log.info(
             "Ignoring CLIP text embedding request because model download is pending",
         );
         return undefined;
