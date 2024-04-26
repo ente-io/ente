@@ -713,7 +713,7 @@ const extractImageOrVideoMetadata = async (
 };
 
 const NULL_EXTRACTED_METADATA: ParsedExtractedMetadata = {
-    location: NULL_LOCATION,
+    location: { ...NULL_LOCATION },
     creationTime: null,
     width: null,
     height: null,

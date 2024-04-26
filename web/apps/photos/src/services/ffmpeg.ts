@@ -179,7 +179,7 @@ function parseFFmpegExtractedMetadata(encodedMetadata: Uint8Array) {
 }
 
 function parseAppleISOLocation(isoLocation: string) {
-    let location = NULL_LOCATION;
+    let location = { ...NULL_LOCATION };
     if (isoLocation) {
         const [latitude, longitude] = isoLocation
             .match(/(\+|-)\d+\.*\d+/g)

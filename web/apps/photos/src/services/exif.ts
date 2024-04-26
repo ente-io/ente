@@ -311,7 +311,7 @@ export function parseEXIFLocation(
             })}`,
             e,
         );
-        return NULL_LOCATION;
+        return { ...NULL_LOCATION };
     }
 }
 
@@ -328,7 +328,7 @@ function convertDMSToDD(
 
 export function getEXIFLocation(exifData: ParsedEXIFData): Location {
     if (!exifData || (!exifData.latitude && exifData.latitude !== 0)) {
-        return NULL_LOCATION;
+        return { ...NULL_LOCATION };
     }
     return { latitude: exifData.latitude, longitude: exifData.longitude };
 }
