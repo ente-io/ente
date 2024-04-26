@@ -149,8 +149,8 @@ export default uploadService;
  * @param fileOrPath The {@link File}, or the path to it. Note that it is only
  * valid to specify a path if we are running in the context of our desktop app.
  */
-export const fopFileName = (file: File | string) =>
-    typeof file == "string" ? basename(file) : file.name;
+export const fopFileName = (fileOrPath: File | string) =>
+    typeof fileOrPath == "string" ? basename(fileOrPath) : fileOrPath.name;
 
 /**
  * Return the size of the given {@link fileOrPath}.

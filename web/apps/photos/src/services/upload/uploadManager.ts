@@ -4,6 +4,7 @@ import { ensureElectron } from "@/next/electron";
 import { lowercaseExtension, nameAndExtension } from "@/next/file";
 import log from "@/next/log";
 import { ElectronFile } from "@/next/types/file";
+import type { Electron } from "@/next/types/ipc";
 import { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { ensure } from "@/utils/ensure";
 import { getDedicatedCryptoWorker } from "@ente/shared/crypto";
@@ -681,12 +682,13 @@ class UploadManager {
         this.setFiles((files) => sortFiles([...files, decryptedFile]));
     }
 
-    private async removeFromPendingUploads(file: ClusteredFile) {
-        if (isElectron()) {
+    private async removeFromPendingUploads({ localID }: ClusteredFile) {
+        const electron = globalThis.electron;
+        if (electron) {
             this.remainingFiles = this.remainingFiles.filter(
-                (f) => f.localID != file.localID,
+                (f) => f.localID != localID,
             );
-            await updatePendingUploads(this.remainingFiles);
+            await updatePendingUploads(electron, this.remainingFiles);
         }
     }
 
@@ -707,9 +709,10 @@ export default new UploadManager();
  *
  * - The input is {@link FileWithCollection}. This can either be a new
  *   {@link FileWithCollection}, in which case it'll only have a
- *   {@link localID}, {@link collectionID} and a {@link file}. Or it could be a
- *   retry, in which case it'll not have a {@link file} but instead will have
- *   data from a previous stage, like a snake eating its tail.
+ *   {@link localID}, {@link collectionID} and a {@link fileOrPath}. Or it could
+ *   be a retry, in which case it'll not have a {@link fileOrPath} but instead
+ *   will have data from a previous stage (concretely, it'll just be a
+ *   relabelled {@link ClusteredFile}), like a snake eating its tail.
  *
  * - Immediately we convert it to {@link FileWithCollectionIDAndName}. This is
  *   to mostly systematize what we have, and also attach a {@link fileName}.
@@ -736,8 +739,6 @@ type FileWithCollectionIDAndName = {
     isLivePhoto?: boolean;
     /* Valid for non-live photos */
     fileOrPath?: File | string;
-    /** Alias */
-    file?: File | string;
     /* Valid for live photos */
     livePhotoAssets?: LivePhotoAssets;
 };
@@ -745,8 +746,8 @@ type FileWithCollectionIDAndName = {
 const makeFileWithCollectionIDAndName = (
     f: FileWithCollection,
 ): FileWithCollectionIDAndName => {
-    /* TODO(MR): ElectronFile */
     const fileOrPath = f.fileOrPath;
+    /* TODO(MR): ElectronFile */
     if (!(fileOrPath instanceof File || typeof fileOrPath == "string"))
         throw new Error(`Unexpected file ${f}`);
 
@@ -759,11 +760,8 @@ const makeFileWithCollectionIDAndName = (
                 : fopFileName(fileOrPath),
         ),
         isLivePhoto: f.isLivePhoto,
-        /* TODO(MR): ElectronFile - alias */
-        file: fileOrPath,
         fileOrPath: fileOrPath,
-        /* TODO(MR): ElectronFile */
-        livePhotoAssets: f.livePhotoAssets as LivePhotoAssets,
+        livePhotoAssets: f.livePhotoAssets,
     };
 };
 
@@ -823,7 +821,10 @@ export const setToUploadCollection = async (collections: Collection[]) => {
     await ensureElectron().setPendingUploadCollection(collectionName);
 };
 
-const updatePendingUploads = async (files: ClusteredFile[]) => {
+const updatePendingUploads = async (
+    electron: Electron,
+    files: ClusteredFile[],
+) => {
     const paths = files
         .map((file) =>
             file.isLivePhoto
@@ -832,7 +833,7 @@ const updatePendingUploads = async (files: ClusteredFile[]) => {
         )
         .flat()
         .map((f) => getFilePathElectron(f));
-    await ensureElectron().setPendingUploadFiles("files", paths);
+    await electron.setPendingUploadFiles("files", paths);
 };
 
 /**
