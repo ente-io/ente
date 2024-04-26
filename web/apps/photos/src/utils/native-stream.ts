@@ -51,7 +51,7 @@ export const readStream = async (
 };
 
 const readNumericHeader = (res: Response, key: string) => {
-    const valueText = res.headers[key];
+    const valueText = res.headers.get(key);
     const value = +valueText;
     if (isNaN(value))
         throw new Error(
