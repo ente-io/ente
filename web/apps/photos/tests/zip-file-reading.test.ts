@@ -1,6 +1,7 @@
 import { getFileNameSize } from "@/next/file";
+import { ENCRYPTION_CHUNK_SIZE } from "@ente/shared/crypto/constants";
 import type { DataStream } from "@ente/shared/utils/data-stream";
-import { FILE_READER_CHUNK_SIZE, PICKED_UPLOAD_TYPE } from "constants/upload";
+import { PICKED_UPLOAD_TYPE } from "constants/upload";
 import { getElectronFileStream, getFileStream } from "services/readerService";
 import { getImportSuggestion } from "utils/upload";
 
@@ -35,11 +36,11 @@ export const testZipFileReading = async () => {
             i++;
             let filedata: DataStream;
             if (file instanceof File) {
-                filedata = getFileStream(file, FILE_READER_CHUNK_SIZE);
+                filedata = getFileStream(file, ENCRYPTION_CHUNK_SIZE);
             } else {
                 filedata = await getElectronFileStream(
                     file,
-                    FILE_READER_CHUNK_SIZE,
+                    ENCRYPTION_CHUNK_SIZE,
                 );
             }
             const streamReader = filedata.stream.getReader();

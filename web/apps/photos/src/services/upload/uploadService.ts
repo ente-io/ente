@@ -6,6 +6,7 @@ import { basename } from "@/next/file";
 import log from "@/next/log";
 import { CustomErrorMessage } from "@/next/types/ipc";
 import { ensure } from "@/utils/ensure";
+import { ENCRYPTION_CHUNK_SIZE } from "@ente/shared/crypto/constants";
 import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
 import {
     B64EncryptionResult,
@@ -16,9 +17,6 @@ import { CustomError, handleUploadError } from "@ente/shared/error";
 import { isDataStream, type DataStream } from "@ente/shared/utils/data-stream";
 import { Remote } from "comlink";
 import {
-    FILE_CHUNKS_COMBINED_FOR_A_UPLOAD_PART,
-    FILE_READER_CHUNK_SIZE,
-    MULTIPART_PART_SIZE,
     NULL_LOCATION,
     RANDOM_PERCENTAGE_PROGRESS_FOR_PUT,
     UPLOAD_RESULT,
@@ -60,6 +58,18 @@ import {
 } from "./thumbnail";
 import UploadHttpClient from "./uploadHttpClient";
 import type { UploadableFile } from "./uploadManager";
+
+/** Allow up to 5 ENCRYPTION_CHUNK_SIZE chunks in an upload part */
+const maximumChunksPerUploadPart = 5;
+
+/**
+ * The chunk size of the un-encrypted file which is read and encrypted before
+ * uploading it as a single part of a multipart upload.
+ *
+ * ENCRYPTION_CHUNK_SIZE is 4 MB, and maximum number of chunks in a single
+ * upload part is 5, so this is 20 MB.
+ * */
+const multipartPartSize = ENCRYPTION_CHUNK_SIZE * maximumChunksPerUploadPart;
 
 /** Upload files to cloud storage */
 class UploadService {
@@ -464,8 +474,8 @@ const readFileOrPath = async (
         fileSize = file.size;
         lastModifiedMs = file.lastModified;
         dataOrStream =
-            fileSize > MULTIPART_PART_SIZE
-                ? getFileStream(file, FILE_READER_CHUNK_SIZE)
+            fileSize > multipartPartSize
+                ? getFileStream(file, ENCRYPTION_CHUNK_SIZE)
                 : new Uint8Array(await file.arrayBuffer());
     } else {
         const path = fileOrPath;
@@ -476,8 +486,8 @@ const readFileOrPath = async (
         } = await readStream(ensureElectron(), path);
         fileSize = size;
         lastModifiedMs = lm;
-        if (size > MULTIPART_PART_SIZE) {
-            const chunkCount = Math.ceil(size / FILE_READER_CHUNK_SIZE);
+        if (size > multipartPartSize) {
+            const chunkCount = Math.ceil(size / ENCRYPTION_CHUNK_SIZE);
             dataOrStream = { stream: response.body, chunkCount };
         } else {
             dataOrStream = new Uint8Array(await response.arrayBuffer());
@@ -492,13 +502,13 @@ const readFileOrPathStream = async (
     fileOrPath: File | string,
 ): Promise<DataStream> => {
     if (fileOrPath instanceof File) {
-        return getFileStream(fileOrPath, FILE_READER_CHUNK_SIZE);
+        return getFileStream(fileOrPath, ENCRYPTION_CHUNK_SIZE);
     } else {
         const { response, size } = await readStream(
             ensureElectron(),
             fileOrPath,
         );
-        const chunkCount = Math.ceil(size / FILE_READER_CHUNK_SIZE);
+        const chunkCount = Math.ceil(size / ENCRYPTION_CHUNK_SIZE);
         return { stream: response.body, chunkCount };
     }
 };
@@ -760,6 +770,8 @@ const computeHash = async (
     worker: Remote<DedicatedCryptoWorker>,
 ) => {
     const { stream, chunkCount } = await readFileOrPathStream(fileOrPath);
+    // TODO(MR): ElectronFile
+    console.log("got stream and chunks", stream, chunkCount);
     const hashState = await worker.initChunkHashing();
 
     const streamReader = stream.getReader();
@@ -1195,7 +1207,7 @@ async function uploadStreamUsingMultipart(
     abortIfCancelled: () => void,
 ) {
     const uploadPartCount = Math.ceil(
-        dataStream.chunkCount / FILE_CHUNKS_COMBINED_FOR_A_UPLOAD_PART,
+        dataStream.chunkCount / maximumChunksPerUploadPart,
     );
     const multipartUploadURLs =
         await uploadService.fetchMultipartUploadURLs(uploadPartCount);
@@ -1255,7 +1267,7 @@ async function combineChunksToFormUploadPart(
     streamReader: ReadableStreamDefaultReader<Uint8Array>,
 ) {
     const combinedChunks = [];
-    for (let i = 0; i < FILE_CHUNKS_COMBINED_FOR_A_UPLOAD_PART; i++) {
+    for (let i = 0; i < maximumChunksPerUploadPart; i++) {
         const { done, value: chunk } = await streamReader.read();
         if (done) {
             break;
