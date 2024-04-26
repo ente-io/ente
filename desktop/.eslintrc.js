@@ -7,11 +7,6 @@ module.exports = {
         // "plugin:@typescript-eslint/strict-type-checked",
         // "plugin:@typescript-eslint/stylistic-type-checked",
     ],
-    /* Temporarily add a global
-       Enhancement: Remove me */
-    globals: {
-        NodeJS: "readonly",
-    },
     plugins: ["@typescript-eslint"],
     parser: "@typescript-eslint/parser",
     parserOptions: {
