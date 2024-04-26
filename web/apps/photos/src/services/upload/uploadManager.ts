@@ -47,7 +47,7 @@ import {
     tryParseTakeoutMetadataJSON,
     type ParsedMetadataJSON,
 } from "./takeout";
-import UploadService, { fopSize, getFileName, uploader } from "./uploadService";
+import UploadService, { fopFileName, fopSize, uploader } from "./uploadService";
 
 /** The number of uploads to process in parallel. */
 const maxConcurrentUploads = 4;
@@ -706,8 +706,8 @@ const makeFileWithCollectionIDAndName = (
         collectionID: ensure(f.collectionID),
         fileName: ensure(
             f.isLivePhoto
-                ? getFileName(f.livePhotoAssets.image)
-                : getFileName(fileOrPath),
+                ? fopFileName(f.livePhotoAssets.image)
+                : fopFileName(fileOrPath),
         ),
         isLivePhoto: f.isLivePhoto,
         /* TODO(MR): ElectronFile - alias */

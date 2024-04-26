@@ -4,7 +4,6 @@ import type { Metadata } from "@/media/types/file";
 import { ensureElectron } from "@/next/electron";
 import { basename } from "@/next/file";
 import log from "@/next/log";
-import { ElectronFile } from "@/next/types/file";
 import { CustomErrorMessage } from "@/next/types/ipc";
 import { ensure } from "@/utils/ensure";
 import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
@@ -39,7 +38,6 @@ import { EncryptedMagicMetadata } from "types/magicMetadata";
 import {
     ParsedExtractedMetadata,
     PublicUploadProps,
-    UploadAsset,
     type LivePhotoAssets2,
 } from "types/upload";
 import {
@@ -144,6 +142,26 @@ class UploadService {
 const uploadService = new UploadService();
 
 export default uploadService;
+
+/**
+ * Return the file name for the given {@link fileOrPath}.
+ *
+ * @param fileOrPath The {@link File}, or the path to it. Note that it is only
+ * valid to specify a path if we are running in the context of our desktop app.
+ */
+export const fopFileName = (file: File | string) =>
+    typeof file == "string" ? basename(file) : file.name;
+
+/**
+ * Return the size of the given {@link fileOrPath}.
+ *
+ * @param fileOrPath The {@link File}, or the path to it. Note that it is only
+ * valid to specify a path if we are running in the context of our desktop app.
+ */
+export const fopSize = async (fileOrPath: File | string): Promise<number> =>
+    fileOrPath instanceof File
+        ? fileOrPath.size
+        : await ensureElectron().fs.size(fileOrPath);
 
 /* -- Various intermediate type used during upload -- */
 
@@ -383,27 +401,6 @@ export const uploader = async (
 };
 
 /**
- * Return the size of the given file
- *
- * @param fileOrPath The {@link File}, or the path to it. Note that it is only
- * valid to specify a path if we are running in the context of our desktop app.
- */
-export const fopSize = async (fileOrPath: File | string): Promise<number> =>
-    fileOrPath instanceof File
-        ? fileOrPath.size
-        : await ensureElectron().fs.size(fileOrPath);
-
-export const getFileName = (file: File | ElectronFile | string) =>
-    typeof file == "string" ? basename(file) : file.name;
-
-export const getAssetName = ({
-    isLivePhoto,
-    file,
-    livePhotoAssets,
-}: UploadAsset) =>
-    isLivePhoto ? getFileName(livePhotoAssets.image) : getFileName(file);
-
-/**
  * Read the given file or path into an in-memory representation.
  *
  * See: [Note: Reading a fileOrPath]
@@ -564,7 +561,7 @@ const readImageOrVideoDetails = async (fileOrPath: File | string) => {
             await reader.cancel();
             return chunk;
         }
-    }, getFileName(fileOrPath));
+    }, fopFileName(fileOrPath));
 
     return { fileTypeInfo, fileSize, lastModifiedMs };
 };
@@ -642,7 +639,7 @@ const extractLivePhotoMetadata = async (
     return {
         metadata: {
             ...imageMetadata,
-            title: getFileName(livePhotoAssets.image),
+            title: fopFileName(livePhotoAssets.image),
             fileType: FILE_TYPE.LIVE_PHOTO,
             imageHash: imageMetadata.hash,
             videoHash: videoHash,
@@ -660,7 +657,7 @@ const extractImageOrVideoMetadata = async (
     parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
     worker: Remote<DedicatedCryptoWorker>,
 ) => {
-    const fileName = getFileName(fileOrPath);
+    const fileName = fopFileName(fileOrPath);
     const { fileType } = fileTypeInfo;
 
     let extractedMetadata: ParsedExtractedMetadata;
@@ -870,9 +867,9 @@ const readLivePhoto = async (
 
     return {
         filedata: await encodeLivePhoto({
-            imageFileName: getFileName(livePhotoAssets.image),
+            imageFileName: fopFileName(livePhotoAssets.image),
             imageData: await toData(imageDataOrStream),
-            videoFileName: getFileName(livePhotoAssets.video),
+            videoFileName: fopFileName(livePhotoAssets.video),
             videoData: await toData(readVideo.dataOrStream),
         }),
         thumbnail,
