@@ -39,7 +39,6 @@ export const readStream = async (
     });
 
     const res = await fetch(req);
-    console.log(Object.fromEntries(res.headers.entries()));
     if (!res.ok)
         throw new Error(
             `Failed to read stream from ${path}: HTTP ${res.status}`,
@@ -103,7 +102,7 @@ export const writeStream = async (
         // GET can't have a body
         method: "POST",
         body: stream,
-        // @ts-expect-error TypeScript's libdom.d.ts does not include the
+        // --@ts-expect-error TypeScript's libdom.d.ts does not include the
         // "duplex" parameter, e.g. see
         // https://github.com/node-fetch/node-fetch/issues/1769.
         duplex: "half",
