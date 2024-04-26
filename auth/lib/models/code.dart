@@ -2,6 +2,7 @@ import 'package:ente_auth/utils/totp_util.dart';
 
 class Code {
   static const defaultDigits = 6;
+  static const steamDigits = 5;
   static const defaultPeriod = 30;
 
   int? generatedID;
@@ -67,10 +68,12 @@ class Code {
     String issuer,
     String secret,
   ) {
+    final digits =
+        issuer.toLowerCase() == "steam" ? steamDigits : defaultDigits;
     return Code(
       account,
       issuer,
-      defaultDigits,
+      digits,
       defaultPeriod,
       secret,
       Algorithm.sha1,
@@ -82,10 +85,13 @@ class Code {
 
   static Code fromRawData(String rawData) {
     Uri uri = Uri.parse(rawData);
+    final issuer = _getIssuer(uri);
+    final digits = issuer.toLowerCase() == "stream" ? 5 : _getDigits(uri);
+
     try {
       return Code(
         _getAccount(uri),
-        _getIssuer(uri),
+        issuer,
         _getDigits(uri),
         _getPeriod(uri),
         getSanitizedSecret(uri.queryParameters['secret']!),
@@ -184,7 +190,7 @@ class Code {
   }
 
   static Type _getType(Uri uri) {
-    if (uri.host == "totp") {
+    if (uri.host == "totp" || uri.host == "steam") {
       return Type.totp;
     } else if (uri.host == "hotp") {
       return Type.hotp;

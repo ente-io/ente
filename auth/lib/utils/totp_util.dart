@@ -3,13 +3,13 @@ import 'package:flutter/foundation.dart';
 import 'package:otp/otp.dart' as otp;
 
 String getOTP(Code code) {
-  if(code.type == Type.hotp) {
+  if (code.type == Type.hotp) {
     return _getHOTPCode(code);
   }
   return otp.OTP.generateTOTPCodeString(
     getSanitizedSecret(code.secret),
     DateTime.now().millisecondsSinceEpoch,
-    length: code.digits,
+    length: code.issuer.toLowerCase() == "steam" ? 5 : code.digits,
     interval: code.period,
     algorithm: _getAlgorithm(code),
     isGoogle: true,
@@ -20,7 +20,7 @@ String _getHOTPCode(Code code) {
   return otp.OTP.generateHOTPCodeString(
     getSanitizedSecret(code.secret),
     code.counter,
-    length: code.digits,
+    length: code.issuer.toLowerCase() == "steam" ? 5 : code.digits,
     algorithm: _getAlgorithm(code),
     isGoogle: true,
   );
@@ -30,7 +30,7 @@ String getNextTotp(Code code) {
   return otp.OTP.generateTOTPCodeString(
     getSanitizedSecret(code.secret),
     DateTime.now().millisecondsSinceEpoch + code.period * 1000,
-    length: code.digits,
+    length: code.issuer.toLowerCase() == "stream" ? 5 : code.digits,
     interval: code.period,
     algorithm: _getAlgorithm(code),
     isGoogle: true,
