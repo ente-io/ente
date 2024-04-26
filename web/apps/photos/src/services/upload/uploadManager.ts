@@ -112,7 +112,7 @@ class UIService {
             convertInProgressUploadsToList(this.inProgressUploads),
         );
         this.progressUpdater.setFinishedUploads(
-            segregatedFinishedUploadsToList(this.finishedUploads),
+            groupByResult(this.finishedUploads),
         );
     }
 
@@ -170,9 +170,7 @@ class UIService {
     }
 
     hasFilesInResultList() {
-        const finishedUploadsList = segregatedFinishedUploadsToList(
-            this.finishedUploads,
-        );
+        const finishedUploadsList = groupByResult(this.finishedUploads);
         for (const x of finishedUploadsList.values()) {
             if (x.length > 0) {
                 return true;
@@ -210,9 +208,7 @@ class UIService {
         setInProgressUploads(
             convertInProgressUploadsToList(this.inProgressUploads),
         );
-        setFinishedUploads(
-            segregatedFinishedUploadsToList(this.finishedUploads),
-        );
+        setFinishedUploads(groupByResult(this.finishedUploads));
     }
 
     trackUploadProgress(
@@ -271,16 +267,14 @@ function convertInProgressUploadsToList(inProgressUploads) {
     );
 }
 
-function segregatedFinishedUploadsToList(finishedUploads: FinishedUploads) {
-    const segregatedFinishedUploads = new Map() as SegregatedFinishedUploads;
+const groupByResult = (finishedUploads: FinishedUploads) => {
+    const groups: SegregatedFinishedUploads = new Map();
     for (const [localID, result] of finishedUploads) {
-        if (!segregatedFinishedUploads.has(result)) {
-            segregatedFinishedUploads.set(result, []);
-        }
-        segregatedFinishedUploads.get(result).push(localID);
+        if (!groups.has(result)) groups.set(result, []);
+        groups.get(result).push(localID);
     }
-    return segregatedFinishedUploads;
-}
+    return groups;
+};
 
 class UploadManager {
     private cryptoWorkers = new Array<
@@ -350,14 +344,14 @@ class UploadManager {
         collections: Collection[],
         uploaderName?: string,
     ) {
+        if (this.uploadInProgress)
+            throw new Error("Cannot run multiple uploads at once");
+
+        log.info(`Uploading ${filesWithCollectionToUploadIn.length} files`);
+        this.uploadInProgress = true;
+        this.uploaderName = uploaderName;
+
         try {
-            if (this.uploadInProgress)
-                throw new Error("Cannot run multiple uploads at once");
-
-            log.info(`Uploading ${filesWithCollectionToUploadIn.length} files`);
-            this.uploadInProgress = true;
-            this.uploaderName = uploaderName;
-
             await this.updateExistingFilesAndCollections(collections);
 
             const namedFiles: FileWithCollectionIDAndName[] =
@@ -421,6 +415,7 @@ class UploadManager {
             }
             this.uploadInProgress = false;
         }
+
         try {
             if (!this.uiService.hasFilesInResultList()) {
                 return true;
