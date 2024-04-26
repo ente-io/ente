@@ -1,10 +1,7 @@
 import "dart:io" show File;
 import 'dart:ui' as ui;
 
-import "package:computer/computer.dart";
 import 'package:flutter/material.dart';
-import "package:flutter/widgets.dart";
-import "package:flutter_image_compress/flutter_image_compress.dart";
 import "package:image/image.dart" as img;
 import "package:logging/logging.dart";
 import "package:photos/face/model/face.dart";
@@ -43,7 +40,6 @@ class CroppedFaceImageView extends StatefulWidget {
 
 class CroppedFaceImageViewState extends State<CroppedFaceImageView> {
   ui.Image? _image;
-  final _computer = Computer.shared();
   final _logger = Logger("CroppedFaceImageView");
 
   @override
@@ -83,32 +79,17 @@ class CroppedFaceImageViewState extends State<CroppedFaceImageView> {
   Future<ui.Image?> getImage() async {
     try {
       final faceBox = widget.face.detection.box;
-
       final File? ioFile = await getFile(widget.enteFile);
       if (ioFile == null) {
         return null;
       }
 
-      img.Image? image = await _computer
-          .compute(decodeImage, param: {"filePath": ioFile.path});
+      final image = await img.decodeImageFile(ioFile.path);
 
       if (image == null) {
-        _logger.info(
-          "Failed to decode image ${widget.enteFile.title}. Compressing to jpg and decoding",
-        );
-        final compressedJPGImage =
-            await FlutterImageCompress.compressWithFile(ioFile.path);
-        image = await _computer.compute(
-          decodeJPGImage,
-          param: {"image": compressedJPGImage},
-        );
-
-        if (image == null) {
-          throw Exception("Failed to decode image");
-        }
+        throw Exception("Failed decoding image file ${widget.enteFile.title}}");
       }
 
-      final stopwatch = Stopwatch()..start();
       final croppedImage = img.copyCrop(
         image,
         x: (image.width * faceBox.xMin).round(),
@@ -117,22 +98,11 @@ class CroppedFaceImageViewState extends State<CroppedFaceImageView> {
         height: (image.height * faceBox.height).round(),
         antialias: false,
       );
-      _logger.info(
-        "Image crop took ${stopwatch.elapsedMilliseconds}ms ----------------",
-      );
-      stopwatch.stop();
+
       return convertImageToFlutterUi(croppedImage);
     } catch (e, s) {
       _logger.severe("Error getting image", e, s);
       return null;
     }
   }
-}
-
-Future<img.Image?> decodeImage(Map args) async {
-  return await img.decodeImageFile(args["filePath"]);
-}
-
-img.Image? decodeJPGImage(Map args) {
-  return img.decodeJpg(args["image"])!;
 }
