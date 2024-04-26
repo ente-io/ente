@@ -30,7 +30,7 @@ String getNextTotp(Code code) {
   return otp.OTP.generateTOTPCodeString(
     getSanitizedSecret(code.secret),
     DateTime.now().millisecondsSinceEpoch + code.period * 1000,
-    length: code.issuer.toLowerCase() == "stream" ? 5 : code.digits,
+    length: code.issuer.toLowerCase() == "steam" ? 5 : code.digits,
     interval: code.period,
     algorithm: _getAlgorithm(code),
     isGoogle: true,

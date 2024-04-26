@@ -86,13 +86,13 @@ class Code {
   static Code fromRawData(String rawData) {
     Uri uri = Uri.parse(rawData);
     final issuer = _getIssuer(uri);
-    final digits = issuer.toLowerCase() == "stream" ? 5 : _getDigits(uri);
+    final digits = issuer.toLowerCase() == "steam" ? 5 : _getDigits(uri);
 
     try {
       return Code(
         _getAccount(uri),
         issuer,
-        _getDigits(uri),
+        digits,
         _getPeriod(uri),
         getSanitizedSecret(uri.queryParameters['secret']!),
         _getAlgorithm(uri),
