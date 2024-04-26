@@ -33,9 +33,64 @@ class PersonFaceWidget extends StatelessWidget {
         ),
         super(key: key);
 
+  static Future<void> precomputeFaceCrops(file, clusterID) async {
+    try {
+      final Face? face = await FaceMLDataDB.instance.getCoverFaceForPerson(
+        recentFileID: file.uploadedFileID!,
+        clusterID: clusterID,
+      );
+      if (face == null) {
+        debugPrint(
+          "No cover face for cluster $clusterID and recentFile ${file.uploadedFileID}",
+        );
+        return;
+      }
+      final Uint8List? cachedFace = faceCropCache.get(face.faceID);
+      if (cachedFace != null) {
+        return;
+      }
+      final faceCropCacheFile = cachedFaceCropPath(face.faceID);
+      if ((await faceCropCacheFile.exists())) {
+        final data = await faceCropCacheFile.readAsBytes();
+        faceCropCache.put(face.faceID, data);
+        return;
+      }
+      EnteFile? fileForFaceCrop = file;
+      if (face.fileID != file.uploadedFileID!) {
+        fileForFaceCrop =
+            await FilesDB.instance.getAnyUploadedFile(face.fileID);
+      }
+      if (fileForFaceCrop == null) {
+        return;
+      }
+
+      final result = await pool.withResource(
+        () async => await getFaceCrops(
+          fileForFaceCrop!,
+          {
+            face.faceID: face.detection.box,
+          },
+        ),
+      );
+      final Uint8List? computedCrop = result?[face.faceID];
+      if (computedCrop != null) {
+        faceCropCache.put(face.faceID, computedCrop);
+        faceCropCacheFile.writeAsBytes(computedCrop).ignore();
+      }
+      return;
+    } catch (e, s) {
+      log(
+        "Error getting cover face for cluster $clusterID",
+        error: e,
+        stackTrace: s,
+      );
+      return;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    if (useGeneratedFaceCrops) {
+    if (!useGeneratedFaceCrops) {
       return FutureBuilder<Uint8List?>(
         future: getFaceCrop(),
         builder: (context, snapshot) {

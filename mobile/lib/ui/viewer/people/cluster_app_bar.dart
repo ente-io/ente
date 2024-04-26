@@ -207,14 +207,14 @@ class _AppBarWidgetState extends State<ClusterAppBar> {
         if (embedding.key == otherEmbedding.key) {
           continue;
         }
-        final distance64 = 1.0 -
-            Vector.fromList(embedding.value, dtype: DType.float64).dot(
-              Vector.fromList(otherEmbedding.value, dtype: DType.float64),
-            );
-        final distance32 = 1.0 -
-            Vector.fromList(embedding.value, dtype: DType.float32).dot(
-              Vector.fromList(otherEmbedding.value, dtype: DType.float32),
-            );
+        final distance64 = cosineDistanceSIMD(
+          Vector.fromList(embedding.value, dtype: DType.float64),
+          Vector.fromList(otherEmbedding.value, dtype: DType.float64),
+        );
+        final distance32 = cosineDistanceSIMD(
+          Vector.fromList(embedding.value, dtype: DType.float32),
+          Vector.fromList(otherEmbedding.value, dtype: DType.float32),
+        );
         final distance = cosineDistForNormVectors(
           embedding.value,
           otherEmbedding.value,

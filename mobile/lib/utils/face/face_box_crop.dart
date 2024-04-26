@@ -11,7 +11,7 @@ import "package:photos/utils/thumbnail_util.dart";
 import "package:pool/pool.dart";
 
 final LRUMap<String, Uint8List?> faceCropCache = LRUMap(1000);
-final pool = Pool(5, timeout: const Duration(seconds: 15));
+final pool = Pool(10, timeout: const Duration(seconds: 15));
 Future<Map<String, Uint8List>?> getFaceCrops(
   EnteFile file,
   Map<String, FaceBox> faceBoxeMap,

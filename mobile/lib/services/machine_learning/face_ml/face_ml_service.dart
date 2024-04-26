@@ -350,7 +350,7 @@ class FaceMlService {
           }
 
           await FaceMLDataDB.instance
-              .updateClusterIdToFaceId(clusteringResult.newFaceIdToCluster);
+              .updateFaceIdToClusterId(clusteringResult.newFaceIdToCluster);
           await FaceMLDataDB.instance
               .clusterSummaryUpdate(clusteringResult.newClusterSummaries!);
           _logger.info(
@@ -403,7 +403,7 @@ class FaceMlService {
           'Updating ${clusteringResult.newFaceIdToCluster.length} FaceIDs with clusterIDs in the DB',
         );
         await FaceMLDataDB.instance
-            .updateClusterIdToFaceId(clusteringResult.newFaceIdToCluster);
+            .updateFaceIdToClusterId(clusteringResult.newFaceIdToCluster);
         await FaceMLDataDB.instance
             .clusterSummaryUpdate(clusteringResult.newClusterSummaries!);
         _logger.info('Done updating FaceIDs with clusterIDs in the DB, in '

@@ -1,8 +1,8 @@
 import 'package:photos/services/machine_learning/face_ml/face_detection/face_detection_service.dart';
 
 /// Blur detection threshold
-const kLaplacianHardThreshold = 15;
-const kLaplacianSoftThreshold = 100;
+const kLaplacianHardThreshold = 10;
+const kLaplacianSoftThreshold = 50;
 const kLaplacianVerySoftThreshold = 200;
 
 /// Default blur value
