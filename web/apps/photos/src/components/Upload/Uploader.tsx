@@ -362,7 +362,7 @@ export default function Uploader(props: Props) {
             } else if (desktopFilePaths && desktopFilePaths.length > 0) {
                 // File selection from our desktop app
                 fileOrPathsToUpload.current = desktopFilePaths;
-                setDesktopFilePaths(undefined);
+                setDesktopFilePaths([]);
             }
 
             fileOrPathsToUpload.current = pruneHiddenFiles(
