@@ -51,10 +51,11 @@ export const readStream = async (
 };
 
 const readNumericHeader = (res: Response, key: string) => {
-    const value = +res.headers[key];
+    const valueText = res.headers[key];
+    const value = +valueText;
     if (isNaN(value))
         throw new Error(
-            `Expected a numeric ${key} when reading a stream response: ${res}`,
+            `Expected a numeric ${key} when reading a stream response, instead got ${valueText}`,
         );
     return value;
 };
