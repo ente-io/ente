@@ -1,6 +1,5 @@
 import type { Metadata } from "@/media/types/file";
 import { basename, dirname } from "@/next/file";
-import { ElectronFile } from "@/next/types/file";
 import { PICKED_UPLOAD_TYPE } from "constants/upload";
 import isElectron from "is-electron";
 import { exportMetadataDirectoryName } from "services/export";
@@ -82,16 +81,16 @@ export function getImportSuggestion(
 // [a => [j],
 // b => [e,f,g],
 // c => [h, i]]
-export function groupFilesBasedOnParentFolder(
-    toUploadFiles: File[] | ElectronFile[] | string[],
-) {
-    const collectionNameToFilesMap = new Map<
-        string,
-        File[] | ElectronFile[] | string[]
-    >();
-    for (const file of toUploadFiles) {
+export const groupFilesBasedOnParentFolder = (
+    fileOrPaths: (File | string)[],
+) => {
+    const result = new Map<string, (File | string)[]>();
+    for (const fileOrPath of fileOrPaths) {
         const filePath =
-            typeof file == "string" ? file : (file["path"] as string);
+            /* TODO(MR): ElectronFile */
+            typeof fileOrPath == "string"
+                ? fileOrPath
+                : (fileOrPath["path"] as string);
 
         let folderPath = filePath.substring(0, filePath.lastIndexOf("/"));
         // If the parent folder of a file is "metadata"
@@ -105,17 +104,12 @@ export function groupFilesBasedOnParentFolder(
         const folderName = folderPath.substring(
             folderPath.lastIndexOf("/") + 1,
         );
-        if (!folderName?.length) {
-            throw Error("folderName can't be null");
-        }
-        if (!collectionNameToFilesMap.has(folderName)) {
-            collectionNameToFilesMap.set(folderName, []);
-        }
-        // TODO: Remove the cast
-        collectionNameToFilesMap.get(folderName).push(file as any);
+        if (!folderName) throw Error("Unexpected empty folder name");
+        if (!result.has(folderName)) result.set(folderName, []);
+        result.get(folderName).push(fileOrPath);
     }
-    return collectionNameToFilesMap;
-}
+    return result;
+};
 
 /**
  * Filter out hidden files from amongst {@link fileOrPaths}.

@@ -347,7 +347,7 @@ class FolderWatcher {
                 );
             } else {
                 this.uploadedFileForPath.set(
-                    ensureString(fileWithCollection.file),
+                    ensureString(fileWithCollection.fileOrPath),
                     file,
                 );
             }
@@ -365,7 +365,7 @@ class FolderWatcher {
                 );
             } else {
                 this.unUploadableFilePaths.add(
-                    ensureString(fileWithCollection.file),
+                    ensureString(fileWithCollection.fileOrPath),
                 );
             }
         }
@@ -412,7 +412,7 @@ class FolderWatcher {
         this.debouncedRunNextEvent();
     }
 
-    private deduceSyncedAndIgnored(filesWithCollection: UploadedFile[]) {
+    private deduceSyncedAndIgnored(filesWithCollection: FileWithCollection[]) {
         const syncedFiles: FolderWatch["syncedFiles"] = [];
         const ignoredFiles: FolderWatch["ignoredFiles"] = [];
 
