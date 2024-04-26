@@ -99,6 +99,8 @@ class _HomePageState extends State<HomePage> {
       _codes = codes;
       _hasLoaded = true;
       _applyFilteringAndRefresh();
+    }).onError((error, stackTrace) {
+      _logger.severe('Error while loading codes', error, stackTrace);
     });
   }
 
@@ -258,6 +260,11 @@ class _HomePageState extends State<HomePage> {
           onManuallySetupTap: _redirectToManualEntryPage,
         );
       } else {
+        _filteredCodes.sort((a, b) {
+          if (b.isPinned && !a.isPinned) return 1;
+          if (!b.isPinned && a.isPinned) return -1;
+          return 0;
+        });
         final list = AlignedGridView.count(
           crossAxisCount: (MediaQuery.sizeOf(context).width ~/ 400)
               .clamp(1, double.infinity)
@@ -360,7 +367,7 @@ class _HomePageState extends State<HomePage> {
     }
     if (mounted && link.toLowerCase().startsWith("otpauth://")) {
       try {
-        final newCode = Code.fromRawData(link);
+        final newCode = Code.fromOTPAuthUrl(link);
         getNextTotp(newCode);
         CodeStore.instance.addCode(newCode);
         _focusNewCode(newCode);

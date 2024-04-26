@@ -29,10 +29,17 @@ class CodeStore {
     final List<Code> codes = [];
     for (final entity in entities) {
       final decodeJson = jsonDecode(entity.rawData);
-      final code = Code.fromRawData(decodeJson);
-      code.generatedID = entity.generatedID;
-      code.hasSynced = entity.hasSynced;
-      codes.add(code);
+      if (decodeJson is String && decodeJson.startsWith('otpauth://')) {
+        final code = Code.fromOTPAuthUrl(decodeJson);
+        code.generatedID = entity.generatedID;
+        code.hasSynced = entity.hasSynced;
+        codes.add(code);
+      } else {
+        final code = Code.fromExportJson(decodeJson);
+        code.generatedID = entity.generatedID;
+        code.hasSynced = entity.hasSynced;
+        codes.add(code);
+      }
     }
 
     // sort codes by issuer,account
@@ -54,28 +61,33 @@ class CodeStore {
     final mode = accountMode ?? _authenticatorService.getAccountMode();
     final codes = await getAllCodes(accountMode: mode);
     bool isExistingCode = false;
+    bool hasSameCode = false;
     for (final existingCode in codes) {
-      if (existingCode == code) {
-        _logger.info("Found duplicate code, skipping add");
-        return AddResult.duplicate;
-      } else if (existingCode.generatedID == code.generatedID) {
+      if (code.generatedID != null &&
+          existingCode.generatedID == code.generatedID) {
         isExistingCode = true;
         break;
       }
+      if (existingCode == code) {
+        hasSameCode = true;
+      }
+    }
+    if (!isExistingCode && hasSameCode) {
+      return AddResult.duplicate;
     }
     late AddResult result;
     if (isExistingCode) {
       result = AddResult.updateCode;
       await _authenticatorService.updateEntry(
         code.generatedID!,
-        jsonEncode(code.rawData),
+        jsonEncode(code.toExportJson()),
         shouldSync,
         mode,
       );
     } else {
       result = AddResult.newCode;
       code.generatedID = await _authenticatorService.addEntry(
-        jsonEncode(code.rawData),
+        jsonEncode(code.toExportJson()),
         shouldSync,
         mode,
       );
@@ -93,7 +105,7 @@ class CodeStore {
   bool _isOfflineImportRunning = false;
 
   Future<void> importOfflineCodes() async {
-    if(_isOfflineImportRunning) {
+    if (_isOfflineImportRunning) {
       return;
     }
     _isOfflineImportRunning = true;

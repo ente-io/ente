@@ -1,4 +1,6 @@
+import 'package:ente_auth/models/code_display.dart';
 import 'package:ente_auth/utils/totp_util.dart';
+import 'package:flutter/foundation.dart';
 
 class Code {
   static const defaultDigits = 6;
@@ -12,9 +14,15 @@ class Code {
   final String secret;
   final Algorithm algorithm;
   final Type type;
+
+  /// otpauth url in the code
   final String rawData;
   final int counter;
   bool? hasSynced;
+
+  final CodeDisplay? display;
+
+  bool get isPinned => display?.pinned ?? false;
 
   Code(
     this.account,
@@ -27,6 +35,7 @@ class Code {
     this.counter,
     this.rawData, {
     this.generatedID,
+    this.display,
   });
 
   Code copyWith({
@@ -38,6 +47,7 @@ class Code {
     Algorithm? algorithm,
     Type? type,
     int? counter,
+    CodeDisplay? display,
   }) {
     final String updateAccount = account ?? this.account;
     final String updateIssuer = issuer ?? this.issuer;
@@ -47,6 +57,7 @@ class Code {
     final Algorithm updatedAlgo = algorithm ?? this.algorithm;
     final Type updatedType = type ?? this.type;
     final int updatedCounter = counter ?? this.counter;
+    final CodeDisplay? updatedDisplay = display ?? this.display;
 
     return Code(
       updateAccount,
@@ -59,6 +70,7 @@ class Code {
       updatedCounter,
       "otpauth://${updatedType.name}/$updateIssuer:$updateAccount?algorithm=${updatedAlgo.name}&digits=$updatedDigits&issuer=$updateIssuer&period=$updatePeriod&secret=$updatedSecret${updatedType == Type.hotp ? "&counter=$updatedCounter" : ""}",
       generatedID: generatedID,
+      display: updatedDisplay,
     );
   }
 
@@ -80,7 +92,7 @@ class Code {
     );
   }
 
-  static Code fromRawData(String rawData) {
+  static Code fromOTPAuthUrl(String rawData, {CodeDisplay? display}) {
     Uri uri = Uri.parse(rawData);
     try {
       return Code(
@@ -98,7 +110,7 @@ class Code {
       // if account name contains # without encoding,
       // rest of the url are treated as url fragment
       if (rawData.contains("#")) {
-        return Code.fromRawData(rawData.replaceAll("#", '%23'));
+        return Code.fromOTPAuthUrl(rawData.replaceAll("#", '%23'));
       } else {
         rethrow;
       }
@@ -120,6 +132,26 @@ class Code {
     } catch (e) {
       return "";
     }
+  }
+
+  static Code fromExportJson(Map rawJson) {
+    try {
+      Code resultCode = Code.fromOTPAuthUrl(
+        rawJson['rawData'],
+        display: CodeDisplay.fromJson(rawJson['display']),
+      );
+      return resultCode;
+    } catch (e) {
+      debugPrint("Failed to parse code from export json $e");
+      rethrow;
+    }
+  }
+
+  Map<String, dynamic> toExportJson() {
+    return {
+      'rawData': rawData,
+      'display': display?.toJson(),
+    };
   }
 
   static String _getIssuer(Uri uri) {
@@ -184,7 +216,7 @@ class Code {
   }
 
   static Type _getType(Uri uri) {
-    if (uri.host == "totp") {
+    if (uri.host == "totp" || uri.host == "steam") {
       return Type.totp;
     } else if (uri.host == "hotp") {
       return Type.hotp;
@@ -216,7 +248,8 @@ class Code {
         secret.hashCode ^
         type.hashCode ^
         counter.hashCode ^
-        rawData.hashCode;
+        rawData.hashCode ^
+        display.hashCode;
   }
 }
 

@@ -89,8 +89,8 @@ Future<int?> _processLastpassExportFile(
 
     // Build the OTP URL
     String otpUrl =
-          'otpauth://totp/$issuer:$account?secret=$secret&issuer=$issuer&algorithm=$algorithm&digits=$digits&period=$timer';
-    parsedCodes.add(Code.fromRawData(otpUrl));
+        'otpauth://totp/$issuer:$account?secret=$secret&issuer=$issuer&algorithm=$algorithm&digits=$digits&period=$timer';
+    parsedCodes.add(Code.fromOTPAuthUrl(otpUrl));
   }
 
   for (final code in parsedCodes) {

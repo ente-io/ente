@@ -6,6 +6,7 @@ import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/ente_theme_data.dart';
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/models/code.dart';
+import 'package:ente_auth/models/code_display.dart';
 import 'package:ente_auth/onboarding/view/setup_enter_secret_key_page.dart';
 import 'package:ente_auth/onboarding/view/view_qr_page.dart';
 import 'package:ente_auth/services/local_authentication_service.dart';
@@ -98,6 +99,13 @@ class _CodeWidgetState extends State<CodeWidget> {
                     onSelected: () => _onShowQrPressed(null),
                   ),
                   MenuItem(
+                    label: l10n.pinText,
+                    icon: widget.code.isPinned
+                        ? Icons.push_pin
+                        : Icons.push_pin_outlined,
+                    onSelected: () => _onShowQrPressed(null),
+                  ),
+                  MenuItem(
                     label: l10n.edit,
                     icon: Icons.edit,
                     onSelected: () => _onEditPressed(null),
@@ -133,6 +141,22 @@ class _CodeWidgetState extends State<CodeWidget> {
                       Theme.of(context).colorScheme.inverseBackgroundColor,
                   icon: Icons.qr_code_2_outlined,
                   label: "QR",
+                  padding: const EdgeInsets.only(left: 4, right: 0),
+                  spacing: 8,
+                ),
+                const SizedBox(
+                  width: 4,
+                ),
+                SlidableAction(
+                  onPressed: _onPinPressed,
+                  backgroundColor: Colors.grey.withOpacity(0.1),
+                  borderRadius: const BorderRadius.all(Radius.circular(12.0)),
+                  foregroundColor:
+                      Theme.of(context).colorScheme.inverseBackgroundColor,
+                  icon: widget.code.isPinned
+                      ? Icons.push_pin
+                      : Icons.push_pin_outlined,
+                  label: l10n.pinText,
                   padding: const EdgeInsets.only(left: 4, right: 0),
                   spacing: 8,
                 ),
@@ -446,6 +470,15 @@ class _CodeWidgetState extends State<CodeWidget> {
         },
       ),
     );
+  }
+
+  Future<void> _onPinPressed(_) async {
+    bool currentlyPinned = widget.code.isPinned;
+    final display = widget.code.display ?? CodeDisplay();
+    final Code code = widget.code.copyWith(
+      display: display.copyWith(pinned: !currentlyPinned),
+    );
+    unawaited(CodeStore.instance.addCode(code));
   }
 
   void _onDeletePressed(_) async {

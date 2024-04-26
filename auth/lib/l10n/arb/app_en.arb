@@ -157,6 +157,7 @@
       }
     }
   },
+  "invalidQRCode": "Invalid QR code",
   "noRecoveryKeyTitle": "No recovery key?",
   "enterEmailHint": "Enter your email address",
   "invalidEmailTitle": "Invalid email address",
@@ -421,5 +422,6 @@
   "invalidEndpoint": "Invalid endpoint",
   "invalidEndpointMessage": "Sorry, the endpoint you entered is invalid. Please enter a valid endpoint and try again.",
   "endpointUpdatedMessage": "Endpoint updated successfully",
-  "customEndpoint": "Connected to {endpoint}"
+  "customEndpoint": "Connected to {endpoint}",
+  "pinText": "Pin"
 }
