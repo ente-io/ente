@@ -151,11 +151,12 @@ class Code {
   }
 
   String toExportFormat() {
-    return Uri.parse(
-      rawData +
-          "&codeDisplay=" +
-          jsonEncode((display ?? CodeDisplay()).toJson()),
-    ).toString();
+    return jsonEncode(
+      Uri.parse(
+        "$rawData&codeDisplay="
+        "${jsonEncode((display ?? CodeDisplay()).toJson())}",
+      ).toString(),
+    );
   }
 
   static String _getIssuer(Uri uri) {

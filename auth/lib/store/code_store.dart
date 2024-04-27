@@ -29,18 +29,16 @@ class CodeStore {
     final List<Code> codes = [];
     for (final entity in entities) {
       try {
-        if (entity.rawData.startsWith('otpauth://')) {
-          final code = Code.fromOTPAuthUrl(entity.rawData);
-          code.generatedID = entity.generatedID;
-          code.hasSynced = entity.hasSynced;
-          codes.add(code);
+        final decodeJson = jsonDecode(entity.rawData);
+        late Code code;
+        if (decodeJson is String && decodeJson.startsWith('otpauth://')) {
+          code = Code.fromOTPAuthUrl(decodeJson);
         } else {
-          final decodeJson = jsonDecode(entity.rawData);
-          final code = Code.fromExportJson(decodeJson);
-          code.generatedID = entity.generatedID;
-          code.hasSynced = entity.hasSynced;
-          codes.add(code);
+          code = Code.fromExportJson(decodeJson);
         }
+        code.generatedID = entity.generatedID;
+        code.hasSynced = entity.hasSynced;
+        codes.add(code);
       } catch (e) {
         _logger.severe("Could not parse code", e);
       }
