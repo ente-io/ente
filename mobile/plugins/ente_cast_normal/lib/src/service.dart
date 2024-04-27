@@ -7,10 +7,15 @@ import "package:flutter/material.dart";
 class CastServiceImpl extends CastService {
   final String _appId = 'F5BCEC64';
   final String _pairRequestNamespace = 'urn:x-cast:pair-request';
-  final Map<String, CastDevice> sessionIDToDeviceID = {};
+  final Map<int, String> collectionIDToSessions = {};
 
   @override
-  Future<void> connectDevice(BuildContext context, Object device) async {
+  Future<void> connectDevice(
+    BuildContext context,
+    Object device, {
+    int? collectionID,
+    void Function(Map<CastMessageType, Map<String, dynamic>>)? onMessage,
+  }) async {
     final CastDevice castDevice = device as CastDevice;
     final session = await CastSessionManager().startSession(castDevice);
     session.messageStream.listen((message) {
@@ -21,6 +26,13 @@ class CastServiceImpl extends CastService {
         );
         session.sendMessage(_pairRequestNamespace, {});
       } else {
+        if (onMessage != null && message!.containsKey("code")) {
+          onMessage(
+            {
+              CastMessageType.pairCode: message,
+            },
+          );
+        }
         print('receive message: $message');
       }
     });
@@ -29,12 +41,10 @@ class CastServiceImpl extends CastService {
       if (state == CastSessionState.connected) {
         const snackBar = SnackBar(content: Text('Connected'));
         ScaffoldMessenger.of(context).showSnackBar(snackBar);
-        sessionIDToDeviceID[session.sessionId] = castDevice;
         debugPrint("Send request to pair");
         session.sendMessage(_pairRequestNamespace, {});
       } else if (state == CastSessionState.closed) {
         dev.log('Session closed', name: 'CastServiceImpl');
-        sessionIDToDeviceID.remove(session.sessionId);
       }
     });
 
@@ -55,4 +65,29 @@ class CastServiceImpl extends CastService {
 
   @override
   bool get isSupported => true;
+
+  @override
+  Future<void> closeActiveCasts() {
+    final sessions = CastSessionManager().sessions;
+    for (final session in sessions) {
+      session.sendMessage(
+        _pairRequestNamespace,
+        {
+          "type": "CLOSE",
+        },
+      );
+      session.close();
+    }
+    return Future.value();
+  }
+
+  @override
+  Future<Map<String, String>> getActiveSessions() {
+    final sessions = CastSessionManager().sessions;
+    final Map<String, String> result = {};
+    for (final session in sessions) {
+      result[session.sessionId] = session.state.toString();
+    }
+    return Future.value(result);
+  }
 }
