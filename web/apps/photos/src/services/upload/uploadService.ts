@@ -431,9 +431,17 @@ export const uploader = async (
  *
  * The file can be either a web
  * [File](https://developer.mozilla.org/en-US/docs/Web/API/File) or the absolute
- * path to a file on desk. When and why, read on.
+ * path to a file on desk.
  *
- * This code gets invoked in two contexts:
+ * tl;dr; There are three cases:
+ *
+ * 1. web / File
+ * 2. desktop / File
+ * 3. desktop / path
+ *
+ * For the when and why, read on.
+ *
+ * The code that accesses files (e.g. uplaads) gets invoked in two contexts:
  *
  * 1. web: the normal mode, when we're running in as a web app in the browser.
  *
@@ -450,27 +458,31 @@ export const uploader = async (
  *
  * In the desktop context, this can be either a File or a path.
  *
- * 1. If the user provided us this file via some user interaction (say a drag
+ * 2. If the user provided us this file via some user interaction (say a drag
  *    and a drop), this'll still be a File.
  *
- * 2. However, when running in the desktop app we have the ability to access
+ * 3. However, when running in the desktop app we have the ability to access
  *    absolute paths on the user's file system. For example, if the user asks us
  *    to watch certain folders on their disk for changes, we'll be able to pick
  *    up new images being added, and in such cases, the parameter here will be a
  *    path. Another example is when resuming an previously interrupted upload -
  *    we'll only have the path at hand in such cases, not the File object.
  *
+ * Case 2, when we're provided a path, is simple. We don't have a choice, since
+ * we cannot still programmatically construct a File object (we can construct it
+ * on the Node.js layer, but it can't then be transferred over the IPC
+ * boundary). So all our operations use the path itself.
+ *
+ * Case 3 involves a choice on a use-case basis, since (a) such File objects
+ * also have the full path (unlike the bona-fide web File objects that only have
+ * a relative path), and (b) neither File nor the path is a better choice that
+ * would be for all scenarios.
+ *
  * The advantage of the File object is that the browser has already read it into
  * memory for us. The disadvantage comes in the case where we need to
  * communicate with the native Node.js layer of our desktop app. Since this
  * communication happens over IPC, the File's contents need to be serialized and
  * copied, which is a bummer for large videos etc.
- *
- * So when we do have a path, we first try to see if we can perform IPC using
- * the path itself (e.g. when generating thumbnails). Eventually, we'll need to
- * read the file once when we need to encrypt and upload it, but if we're smart
- * we can do all the rest of the IPC operations using the path itself, and for
- * the read during upload using a streaming IPC mechanism.
  */
 const readFileOrPath = async (
     fileOrPath: File | string,
@@ -1040,7 +1052,7 @@ const withThumbnail = async (
                 } else {
                     // There isn't a normal scenario where this should happen.
                     // Case 1, should've already worked, and the only known
-                    // reason it'd have been  skipped is for image files on
+                    // reason it'd have been skipped is for image files on
                     // Windows, but those should be less than 100 MB.
                     //
                     // So don't risk running out of memory for a case we don't
