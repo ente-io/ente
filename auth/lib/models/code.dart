@@ -86,7 +86,8 @@ class Code {
   static Code fromRawData(String rawData) {
     Uri uri = Uri.parse(rawData);
     final issuer = _getIssuer(uri);
-    final digits = issuer.toLowerCase() == "steam" ? 5 : _getDigits(uri);
+    final digits =
+        issuer.toLowerCase() == "steam" ? steamDigits : _getDigits(uri);
 
     try {
       return Code(
