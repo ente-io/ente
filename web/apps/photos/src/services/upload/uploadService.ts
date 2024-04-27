@@ -1,3 +1,4 @@
+import { hasFileHash } from "@/media/file";
 import { FILE_TYPE, type FileTypeInfo } from "@/media/file-type";
 import { encodeLivePhoto } from "@/media/live-photo";
 import type { Metadata } from "@/media/types/file";
@@ -8,13 +9,8 @@ import { CustomErrorMessage } from "@/next/types/ipc";
 import { ensure } from "@/utils/ensure";
 import { ENCRYPTION_CHUNK_SIZE } from "@ente/shared/crypto/constants";
 import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
-import {
-    B64EncryptionResult,
-    EncryptionResult,
-    LocalFileAttributes,
-} from "@ente/shared/crypto/types";
+import { B64EncryptionResult } from "@ente/shared/crypto/types";
 import { CustomError, handleUploadError } from "@ente/shared/error";
-import { isDataStream, type DataStream } from "@ente/shared/utils/data-stream";
 import { Remote } from "comlink";
 import {
     NULL_LOCATION,
@@ -43,7 +39,6 @@ import {
     updateMagicMetadata,
 } from "utils/magicMetadata";
 import { readStream } from "utils/native-stream";
-import { hasFileHash } from "utils/upload";
 import * as convert from "xml-js";
 import { detectFileTypeInfoFromChunk } from "../detect-type";
 import { getFileStream } from "../readerService";

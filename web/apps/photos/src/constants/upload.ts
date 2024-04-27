@@ -24,9 +24,3 @@ export enum UPLOAD_RESULT {
     UPLOADED_WITH_STATIC_THUMBNAIL,
     ADDED_SYMLINK,
 }
-
-export enum PICKED_UPLOAD_TYPE {
-    FILES = "files",
-    FOLDERS = "folders",
-    ZIPS = "zips",
-}
