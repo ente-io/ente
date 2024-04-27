@@ -4,6 +4,7 @@ import "dart:typed_data";
 import "package:flutter/cupertino.dart";
 import "package:flutter/foundation.dart" show kDebugMode;
 import "package:flutter/material.dart";
+import "package:photos/extensions/stop_watch.dart";
 import "package:photos/face/db.dart";
 import "package:photos/face/model/face.dart";
 import "package:photos/face/model/person.dart";
@@ -65,7 +66,50 @@ class _FaceWidgetState extends State<FaceWidget> {
                   name: "FaceWidget",
                 );
                 if (widget.person == null && widget.clusterID == null) {
-                  return;
+                  // Get faceID and double check that it doesn't belong to an existing clusterID. If it does, push that cluster page
+                  final w = (kDebugMode ? EnteWatch('FaceWidget') : null)
+                    ?..start();
+                  final existingClusterID = await FaceMLDataDB.instance
+                      .getClusterIDForFaceID(widget.face.faceID);
+                  w?.log('getting existing clusterID for faceID');
+                  if (existingClusterID != null) {
+                    final fileIdsToClusterIds =
+                        await FaceMLDataDB.instance.getFileIdToClusterIds();
+                    final files = await SearchService.instance.getAllFiles();
+                    final clusterFiles = files
+                        .where(
+                          (file) =>
+                              fileIdsToClusterIds[file.uploadedFileID]
+                                  ?.contains(existingClusterID) ??
+                              false,
+                        )
+                        .toList();
+                    await Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => ClusterPage(
+                          clusterFiles,
+                          clusterID: existingClusterID,
+                        ),
+                      ),
+                    );
+                  }
+
+                  // Create new clusterID for the faceID and update DB to assign the faceID to the new clusterID
+                  final int newClusterID =
+                      DateTime.now().microsecondsSinceEpoch;
+                  await FaceMLDataDB.instance.updateFaceIdToClusterId(
+                    {widget.face.faceID: newClusterID},
+                  );
+
+                  // Push page for the new cluster
+                  await Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => ClusterPage(
+                        [widget.file],
+                        clusterID: newClusterID,
+                      ),
+                    ),
+                  );
                 }
                 if (widget.person != null) {
                   await Navigator.of(context).push(
@@ -230,7 +274,49 @@ class _FaceWidgetState extends State<FaceWidget> {
                 name: "FaceWidget",
               );
               if (widget.person == null && widget.clusterID == null) {
-                return;
+                // Get faceID and double check that it doesn't belong to an existing clusterID. If it does, push that cluster page
+                final w = (kDebugMode ? EnteWatch('FaceWidget') : null)
+                  ?..start();
+                final existingClusterID = await FaceMLDataDB.instance
+                    .getClusterIDForFaceID(widget.face.faceID);
+                w?.log('getting existing clusterID for faceID');
+                if (existingClusterID != null) {
+                  final fileIdsToClusterIds =
+                      await FaceMLDataDB.instance.getFileIdToClusterIds();
+                  final files = await SearchService.instance.getAllFiles();
+                  final clusterFiles = files
+                      .where(
+                        (file) =>
+                            fileIdsToClusterIds[file.uploadedFileID]
+                                ?.contains(existingClusterID) ??
+                            false,
+                      )
+                      .toList();
+                  await Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => ClusterPage(
+                        clusterFiles,
+                        clusterID: existingClusterID,
+                      ),
+                    ),
+                  );
+                }
+
+                // Create new clusterID for the faceID and update DB to assign the faceID to the new clusterID
+                final int newClusterID = DateTime.now().microsecondsSinceEpoch;
+                await FaceMLDataDB.instance.updateFaceIdToClusterId(
+                  {widget.face.faceID: newClusterID},
+                );
+
+                // Push page for the new cluster
+                await Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => ClusterPage(
+                      [widget.file],
+                      clusterID: newClusterID,
+                    ),
+                  ),
+                );
               }
               if (widget.person != null) {
                 await Navigator.of(context).push(

@@ -966,7 +966,12 @@ class FaceMlService {
     switch (typeOfData) {
       case FileDataForML.fileData:
         final stopwatch = Stopwatch()..start();
-        final File? file = await getFile(enteFile, isOrigin: true);
+        File? file;
+        if (enteFile.fileType == FileType.video) {
+          file = await getThumbnailForUploadedFile(enteFile);
+        } else {
+          file = await getFile(enteFile, isOrigin: true);
+        }
         if (file == null) {
           _logger.warning("Could not get file for $enteFile");
           imagePath = null;
@@ -1292,10 +1297,6 @@ class FaceMlService {
     }
     // Skip if the file is not uploaded or not owned by the user
     if (!enteFile.isUploaded || enteFile.isOwner == false) {
-      return true;
-    }
-    // Skip if the file is a video
-    if (enteFile.fileType == FileType.video) {
       return true;
     }
     // I don't know how motionPhotos and livePhotos work, so I'm also just skipping them for now
