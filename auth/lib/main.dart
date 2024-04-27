@@ -156,7 +156,7 @@ Future<void> _init(bool bool, {String? via}) async {
 }
 
 Future<void> _setupPrivacyScreen() async {
-  if (!PlatformUtil.isMobile()) return;
+  if (!PlatformUtil.isMobile() || kDebugMode) return;
   final brightness =
       SchedulerBinding.instance.platformDispatcher.platformBrightness;
   bool isInDarkMode = brightness == Brightness.dark;
