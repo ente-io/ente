@@ -71,6 +71,25 @@ const maximumChunksPerUploadPart = 5;
  * */
 const multipartPartSize = ENCRYPTION_CHUNK_SIZE * maximumChunksPerUploadPart;
 
+interface DataStream {
+    stream: ReadableStream<Uint8Array>;
+    chunkCount: number;
+}
+
+function isDataStream(object: any): object is DataStream {
+    return "stream" in object;
+}
+
+interface LocalFileAttributes<T extends string | Uint8Array | DataStream> {
+    encryptedData: T;
+    decryptionHeader: string;
+}
+
+interface EncryptionResult<T extends string | Uint8Array | DataStream> {
+    file: LocalFileAttributes<T>;
+    key: string;
+}
+
 /** Upload files to cloud storage */
 class UploadService {
     private uploadURLs: UploadURL[] = [];
