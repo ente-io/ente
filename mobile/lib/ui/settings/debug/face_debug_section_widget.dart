@@ -216,9 +216,14 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
-            await FaceMLDataDB.instance.dropFeedbackTables();
-            Bus.instance.fire(PeopleChangedEvent());
-            showShortToast(context, "Done");
+            try {
+              await FaceMLDataDB.instance.dropFeedbackTables();
+              Bus.instance.fire(PeopleChangedEvent());
+              showShortToast(context, "Done");
+            } catch (e, s) {
+              _logger.warning('reset feedback failed ', e, s);
+              await showGenericErrorDialog(context: context, error: e);
+            }
           },
         ),
         sectionOptionSpacing,
