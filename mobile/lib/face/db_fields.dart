@@ -96,6 +96,7 @@ const createNotPersonFeedbackTable = '''
 CREATE TABLE IF NOT EXISTS $notPersonFeedback (
   $personIdColumn	TEXT NOT NULL,
   $clusterIDColumn	INTEGER NOT NULL
+  PRIMARY KEY($personIdColumn, $clusterIDColumn)
 );
 ''';
 const dropNotPersonFeedbackTable = 'DROP TABLE IF EXISTS $notPersonFeedback';
