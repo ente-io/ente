@@ -152,7 +152,9 @@ class Code {
 
   String toExportFormat() {
     return Uri.parse(
-      rawData + "&codeDisplay=" + jsonEncode(display ?? CodeDisplay()),
+      rawData +
+          "&codeDisplay=" +
+          jsonEncode((display ?? CodeDisplay()).toJson()),
     ).toString();
   }
 
@@ -253,11 +255,6 @@ class Code {
         counter.hashCode ^
         rawData.hashCode ^
         display.hashCode;
-  }
-
-  @override
-  String toString() {
-    return 'Code(account: $account, issuer: $issuer, digits: $digits, period: $period, secret: $secret, algorithm: $algorithm, type: $type, counter: $counter, rawData: $rawData, display: $display)';
   }
 }
 
