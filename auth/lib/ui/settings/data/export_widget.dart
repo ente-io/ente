@@ -172,13 +172,10 @@ Future<void> _exportCodes(BuildContext context, String fileContent) async {
 
 Future<String> _getAuthDataForExport() async {
   final codes = await CodeStore.instance.getAllCodes();
-  List<Map<String, dynamic>> items = [];
+  String data = "";
   for (final code in codes) {
-    items.add(code.toExportJson());
+    data += "${code.rawData}\n";
   }
-  final data = {
-    "items": items,
-  };
 
-  return jsonEncode(data);
+  return data;
 }

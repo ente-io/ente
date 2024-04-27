@@ -80,14 +80,14 @@ class CodeStore {
       result = AddResult.updateCode;
       await _authenticatorService.updateEntry(
         code.generatedID!,
-        jsonEncode(code.toExportJson()),
+        code.toExportFormat(),
         shouldSync,
         mode,
       );
     } else {
       result = AddResult.newCode;
       code.generatedID = await _authenticatorService.addEntry(
-        jsonEncode(code.toExportJson()),
+        code.toExportFormat(),
         shouldSync,
         mode,
       );

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:ente_auth/models/code_display.dart';
 import 'package:ente_auth/utils/totp_util.dart';
 import 'package:flutter/foundation.dart';
@@ -105,7 +107,7 @@ class Code {
         _getType(uri),
         _getCounter(uri),
         rawData,
-        display: display,
+        display: CodeDisplay.fromUri(uri),
       );
     } catch (e) {
       // if account name contains # without encoding,
@@ -148,11 +150,10 @@ class Code {
     }
   }
 
-  Map<String, dynamic> toExportJson() {
-    return {
-      'rawData': rawData,
-      if (display != null) 'display': display?.toJson(),
-    };
+  String toExportFormat() {
+    return Uri.parse(
+      rawData + "&codeDisplay=" + jsonEncode(display ?? CodeDisplay()),
+    ).toString();
   }
 
   static String _getIssuer(Uri uri) {
