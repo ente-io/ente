@@ -774,18 +774,9 @@ const computeHash = async (
     console.log("got stream and chunks", stream, chunkCount);
     const hashState = await worker.initChunkHashing();
 
-    const chunkedStream = stream.pipeThrough(
-        new TransformStream(
-            undefined,
-            new ByteLengthQueuingStrategy({
-                highWaterMark: ENCRYPTION_CHUNK_SIZE,
-            }),
-        ),
-    );
-    const streamReader = chunkedStream.getReader();
+    const streamReader = stream.getReader();
     for (let i = 0; i < chunkCount; i++) {
         const { done, value: chunk } = await streamReader.read();
-        console.log("chunk size", chunk.length);
         if (done) throw new Error("Less chunks than expected");
         await worker.hashFileChunk(hashState, Uint8Array.from(chunk));
     }
