@@ -90,7 +90,7 @@ class PersonFaceWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (!useGeneratedFaceCrops) {
+    if (useGeneratedFaceCrops) {
       return FutureBuilder<Uint8List?>(
         future: getFaceCrop(),
         builder: (context, snapshot) {
