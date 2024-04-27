@@ -28,22 +28,29 @@ class CodeStore {
         await _authenticatorService.getEntities(mode);
     final List<Code> codes = [];
     for (final entity in entities) {
-      final decodeJson = jsonDecode(entity.rawData);
-      if (decodeJson is String && decodeJson.startsWith('otpauth://')) {
-        final code = Code.fromOTPAuthUrl(decodeJson);
-        code.generatedID = entity.generatedID;
-        code.hasSynced = entity.hasSynced;
-        codes.add(code);
-      } else {
-        final code = Code.fromExportJson(decodeJson);
-        code.generatedID = entity.generatedID;
-        code.hasSynced = entity.hasSynced;
-        codes.add(code);
+      try {
+        if (entity.rawData.startsWith('otpauth://')) {
+          final code = Code.fromOTPAuthUrl(entity.rawData);
+          code.generatedID = entity.generatedID;
+          code.hasSynced = entity.hasSynced;
+          codes.add(code);
+        } else {
+          final decodeJson = jsonDecode(entity.rawData);
+          final code = Code.fromExportJson(decodeJson);
+          code.generatedID = entity.generatedID;
+          code.hasSynced = entity.hasSynced;
+          codes.add(code);
+        }
+      } catch (e) {
+        _logger.severe("Could not parse code", e);
       }
     }
 
     // sort codes by issuer,account
     codes.sort((a, b) {
+      if (b.isPinned && !a.isPinned) return 1;
+      if (!b.isPinned && a.isPinned) return -1;
+
       final issuerComparison = compareAsciiLowerCaseNatural(a.issuer, b.issuer);
       if (issuerComparison != 0) {
         return issuerComparison;
