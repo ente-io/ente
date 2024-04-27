@@ -14,14 +14,11 @@ const _faceImageBufferFactor = 0.2;
 ///Convert img.Image to ui.Image and use RawImage to display.
 Future<List<img.Image>> generateImgFaceThumbnails(
   String imagePath,
-  List<FaceBox> faceBoxes, {
-  ///Pass decodedImage decoded by [decodeToImgImage] to avoid decoding image
-  ///multiple times if all faces are from the same image (eg: File info).
-  img.Image? decodedImage,
-}) async {
+  List<FaceBox> faceBoxes,
+) async {
   final faceThumbnails = <img.Image>[];
 
-  final image = decodedImage ?? await decodeToImgImage(imagePath);
+  final image = await decodeToImgImage(imagePath);
 
   for (FaceBox faceBox in faceBoxes) {
     final croppedImage = cropFaceBoxFromImage(image, faceBox);
@@ -33,12 +30,9 @@ Future<List<img.Image>> generateImgFaceThumbnails(
 
 Future<List<Uint8List>> generateJpgFaceThumbnails(
   String imagePath,
-  List<FaceBox> faceBoxes, {
-  ///Pass decodedImage decoded by [decodeToImgImage] to avoid decoding image
-  ///multiple times if all faces are from the same image (eg: File info).
-  img.Image? decodedImage,
-}) async {
-  final image = decodedImage ?? await decodeToImgImage(imagePath);
+  List<FaceBox> faceBoxes,
+) async {
+  final image = await decodeToImgImage(imagePath);
   final croppedImages = <img.Image>[];
   for (FaceBox faceBox in faceBoxes) {
     final croppedImage = cropFaceBoxFromImage(image, faceBox);
