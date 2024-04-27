@@ -7,6 +7,26 @@ import "package:image/image.dart" as img;
 import "package:logging/logging.dart";
 import "package:photos/face/model/box.dart";
 
+/// Bounding box of a face.
+///
+/// [xMin] and [yMin] are the coordinates of the top left corner of the box, and
+/// [width] and [height] are the width and height of the box.
+///
+/// One unit is equal to one pixel in the original image.
+class FaceBoxImage {
+  final int xMin;
+  final int yMin;
+  final int width;
+  final int height;
+
+  FaceBoxImage({
+    required this.xMin,
+    required this.yMin,
+    required this.width,
+    required this.height,
+  });
+}
+
 final _logger = Logger("FaceUtil");
 final _computer = Computer.shared();
 const _faceImageBufferFactor = 0.2;
