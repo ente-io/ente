@@ -9,7 +9,8 @@ String getOTP(Code code) {
   return otp.OTP.generateTOTPCodeString(
     getSanitizedSecret(code.secret),
     DateTime.now().millisecondsSinceEpoch,
-    length: code.issuer.toLowerCase() == "steam" ? 5 : code.digits,
+    length:
+        code.issuer.toLowerCase() == "steam" ? Code.steamDigits : code.digits,
     interval: code.period,
     algorithm: _getAlgorithm(code),
     isGoogle: true,
@@ -20,7 +21,8 @@ String _getHOTPCode(Code code) {
   return otp.OTP.generateHOTPCodeString(
     getSanitizedSecret(code.secret),
     code.counter,
-    length: code.issuer.toLowerCase() == "steam" ? 5 : code.digits,
+    length:
+        code.issuer.toLowerCase() == "steam" ? Code.steamDigits : code.digits,
     algorithm: _getAlgorithm(code),
     isGoogle: true,
   );
@@ -30,7 +32,8 @@ String getNextTotp(Code code) {
   return otp.OTP.generateTOTPCodeString(
     getSanitizedSecret(code.secret),
     DateTime.now().millisecondsSinceEpoch + code.period * 1000,
-    length: code.issuer.toLowerCase() == "steam" ? 5 : code.digits,
+    length:
+        code.issuer.toLowerCase() == "steam" ? Code.steamDigits : code.digits,
     interval: code.period,
     algorithm: _getAlgorithm(code),
     isGoogle: true,
