@@ -20,7 +20,7 @@ import "package:photos/utils/face/face_box_crop.dart";
 import "package:photos/utils/thumbnail_util.dart";
 // import "package:photos/utils/toast_util.dart";
 
-const useGeneratedFaceCrops = false;
+const useGeneratedFaceCrops = true;
 
 class FaceWidget extends StatefulWidget {
   final EnteFile file;
