@@ -21,6 +21,8 @@ import 'package:ente_auth/utils/totp_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_context_menu/flutter_context_menu.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:logging/logging.dart';
 import 'package:move_to_background/move_to_background.dart';
 
@@ -127,16 +129,16 @@ class _CodeWidgetState extends State<CodeWidget> {
           return Slidable(
             key: ValueKey(widget.code.hashCode),
             endActionPane: ActionPane(
-              extentRatio: 0.60,
+              extentRatio: 0.90,
               motion: const ScrollMotion(),
               children: [
                 const SizedBox(
-                  width: 4,
+                  width: 14,
                 ),
                 SlidableAction(
                   onPressed: _onShowQrPressed,
                   backgroundColor: Colors.grey.withOpacity(0.1),
-                  borderRadius: const BorderRadius.all(Radius.circular(12.0)),
+                  borderRadius: const BorderRadius.all(Radius.circular(8)),
                   foregroundColor:
                       Theme.of(context).colorScheme.inverseBackgroundColor,
                   icon: Icons.qr_code_2_outlined,
@@ -145,28 +147,36 @@ class _CodeWidgetState extends State<CodeWidget> {
                   spacing: 8,
                 ),
                 const SizedBox(
-                  width: 4,
+                  width: 14,
                 ),
-                SlidableAction(
+                CustomSlidableAction(
                   onPressed: _onPinPressed,
                   backgroundColor: Colors.grey.withOpacity(0.1),
-                  borderRadius: const BorderRadius.all(Radius.circular(12.0)),
+                  borderRadius: const BorderRadius.all(Radius.circular(8)),
                   foregroundColor:
                       Theme.of(context).colorScheme.inverseBackgroundColor,
-                  icon: widget.code.isPinned
-                      ? Icons.push_pin
-                      : Icons.push_pin_outlined,
-                  label: widget.code.isPinned ? l10n.unpinText : l10n.pinText,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      if (widget.code.isPinned)
+                        SvgPicture.asset("assets/svg/pin-active.svg")
+                      else
+                        SvgPicture.asset("assets/svg/pin-inactive.svg"),
+                      const SizedBox(height: 8),
+                      Text(
+                        widget.code.isPinned ? l10n.unpinText : l10n.pinText,
+                      ),
+                    ],
+                  ),
                   padding: const EdgeInsets.only(left: 4, right: 0),
-                  spacing: 8,
                 ),
                 const SizedBox(
-                  width: 4,
+                  width: 14,
                 ),
                 SlidableAction(
                   onPressed: _onEditPressed,
                   backgroundColor: Colors.grey.withOpacity(0.1),
-                  borderRadius: const BorderRadius.all(Radius.circular(12.0)),
+                  borderRadius: const BorderRadius.all(Radius.circular(8)),
                   foregroundColor:
                       Theme.of(context).colorScheme.inverseBackgroundColor,
                   icon: Icons.edit_outlined,
@@ -175,12 +185,12 @@ class _CodeWidgetState extends State<CodeWidget> {
                   spacing: 8,
                 ),
                 const SizedBox(
-                  width: 4,
+                  width: 14,
                 ),
                 SlidableAction(
                   onPressed: _onDeletePressed,
                   backgroundColor: Colors.grey.withOpacity(0.1),
-                  borderRadius: const BorderRadius.all(Radius.circular(12.0)),
+                  borderRadius: const BorderRadius.all(Radius.circular(8)),
                   foregroundColor: const Color(0xFFFE4A49),
                   icon: Icons.delete,
                   label: l10n.delete,
@@ -199,19 +209,38 @@ class _CodeWidgetState extends State<CodeWidget> {
   }
 
   Widget _clippedCard(AppLocalizations l10n) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(8),
-      child: Container(
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.codeCardBackgroundColor,
-          boxShadow: [
-            BoxShadow(
-              color: Theme.of(context).colorScheme.shadow,
-              blurRadius: 8,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
+    return Container(
+      height: 132,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(8),
+        color: Theme.of(context).colorScheme.codeCardBackgroundColor,
+        boxShadow: widget.code.isPinned
+            ? [
+                BoxShadow(
+                  color: const Color(0xFF000000).withOpacity(0.03),
+                  blurRadius: 2,
+                  offset: const Offset(0, 7),
+                ),
+                BoxShadow(
+                  color: const Color(0xFF000000).withOpacity(0.09),
+                  blurRadius: 2,
+                  offset: const Offset(0, 4),
+                ),
+                BoxShadow(
+                  color: const Color(0xFF000000).withOpacity(0.16),
+                  blurRadius: 1,
+                  offset: const Offset(0, 1),
+                ),
+                BoxShadow(
+                  color: const Color(0xFF000000).withOpacity(0.18),
+                  blurRadius: 1,
+                  offset: const Offset(0, 0),
+                ),
+              ]
+            : [],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(8),
         child: Material(
           color: Colors.transparent,
           child: InkWell(
@@ -241,50 +270,46 @@ class _CodeWidgetState extends State<CodeWidget> {
   }
 
   Widget _getCardContents(AppLocalizations l10n) {
-    return SizedBox(
-      child: Stack(
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              if (widget.code.type == Type.totp)
-                CodeTimerProgress(
-                  period: widget.code.period,
-                ),
-              const SizedBox(
-                height: 16,
+    return Stack(
+      children: [
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            if (widget.code.type == Type.totp)
+              CodeTimerProgress(
+                period: widget.code.period,
               ),
-              Row(
-                children: [
-                  _shouldShowLargeIcon ? _getIcon() : const SizedBox.shrink(),
-                  Expanded(
-                    child: Column(
-                      children: [
-                        _getTopRow(),
-                        const SizedBox(height: 4),
-                        _getBottomRow(l10n),
-                      ],
-                    ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                _shouldShowLargeIcon ? _getIcon() : const SizedBox.shrink(),
+                Expanded(
+                  child: Column(
+                    children: [
+                      _getTopRow(),
+                      const SizedBox(height: 4),
+                      _getBottomRow(l10n),
+                    ],
                   ),
-                ],
-              ),
-              const SizedBox(
-                height: 20,
-              ),
-            ],
-          ),
-          if (widget.code.isPinned)
-            const Positioned(
-              right: 4,
-              top: 4,
-              child: Icon(
-                Icons.push_pin,
-                size: 12,
-              ),
+                ),
+              ],
             ),
+            const SizedBox(
+              height: 20,
+            ),
+          ],
+        ),
+        if (widget.code.isPinned) ...[
+          Align(
+            alignment: Alignment.topRight,
+            child: Padding(
+              padding: const EdgeInsets.only(right: 6, top: 6),
+              child: SvgPicture.asset("assets/svg/pin-card.svg"),
+            ),
+          ),
         ],
-      ),
+      ],
     );
   }
 
@@ -500,7 +525,15 @@ class _CodeWidgetState extends State<CodeWidget> {
     final Code code = widget.code.copyWith(
       display: display.copyWith(pinned: !currentlyPinned),
     );
-    unawaited(CodeStore.instance.addCode(code));
+    unawaited(
+      CodeStore.instance.addCode(code).then(
+            (value) => Fluttertoast.showToast(
+              msg: !currentlyPinned
+                  ? context.l10n.pinnedCodeMessage(widget.code.issuer)
+                  : context.l10n.unpinnedCodeMessage(widget.code.issuer),
+            ),
+          ),
+    );
   }
 
   void _onDeletePressed(_) async {

@@ -128,6 +128,7 @@ flutter:
     - assets/simple-icons/_data/
     - assets/custom-icons/icons/
     - assets/custom-icons/_data/
+    - assets/svg/
 
   fonts:
     - family: Inter

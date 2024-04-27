@@ -48,7 +48,7 @@ class _CodeTimerProgressState extends State<CodeTimerProgress>
   @override
   Widget build(BuildContext context) {
     return LinearProgressWidget(
-      color: _progress > 0.4 ? Colors.green : Colors.orange,
+      color: _progress > 0.4 ? const Color(0xFF9610D6) : Colors.orange,
       fractionOfStorage: _progress,
     );
   }

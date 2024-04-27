@@ -424,5 +424,7 @@
   "endpointUpdatedMessage": "Endpoint updated successfully",
   "customEndpoint": "Connected to {endpoint}",
   "pinText": "Pin",
-  "unpinText": "Unpin"
+  "unpinText": "Unpin",
+  "pinnedCodeMessage": "{code} has been pinned",
+  "unpinnedCodeMessage": "{code} has been unpinned"
 }
