@@ -611,7 +611,7 @@ const isSyncedOrIgnoredPath = (path: string, watch: FolderWatch) =>
 
 const collectionNameForPath = (path: string, watch: FolderWatch) =>
     watch.collectionMapping == "root"
-        ? dirname(watch.folderPath)
+        ? basename(watch.folderPath)
         : parentDirectoryName(path);
 
 const parentDirectoryName = (path: string) => basename(dirname(path));
