@@ -870,7 +870,7 @@ class FaceMlService {
     stopwatch.stop();
     _logger.info(
       "Finished Analyze image (${result.faces.length} faces) with uploadedFileID ${enteFile.uploadedFileID}, in "
-      "${stopwatch.elapsedMilliseconds} ms",
+      "${stopwatch.elapsedMilliseconds} ms (including time waiting for inference engine availability)",
     );
 
     return result;
