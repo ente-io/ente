@@ -110,7 +110,11 @@ const handleReadZip = async (zipPath: string, zipEntryPath: string) => {
                 // browser doesn't tinker with it thinking of it as text.
                 "Content-Type": "application/octet-stream",
                 "Content-Length": `${entry.size}`,
-                // !!TODO(MR): Is this ms
+                // While it is documented that entry.time is the modification
+                // time, the units are not mentioned. By seeing the source code,
+                // we can verify that it is indeed epoch milliseconds. See
+                // `parseZipTime` in the node-stream-zip source,
+                // https://github.com/antelle/node-stream-zip/blob/master/node_stream_zip.js
                 "X-Last-Modified-Ms": `${entry.time}`,
             },
         });
