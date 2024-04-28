@@ -366,6 +366,9 @@ export default function Uploader(props: Props) {
                 setDesktopFilePaths([]);
             }
 
+            log.debug(() => "Uploader received:");
+            log.debug(() => fileOrPathsToUpload.current);
+
             fileOrPathsToUpload.current = pruneHiddenFiles(
                 fileOrPathsToUpload.current,
             );
