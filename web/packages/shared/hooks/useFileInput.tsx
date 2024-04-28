@@ -18,6 +18,24 @@ export interface FileWithPath extends File {
     readonly path?: string;
 }
 
+/**
+ * Return three things:
+ *
+ * - A function that can be called to trigger the showing of the select file /
+ *   directory dialog.
+ *
+ * - The list of properties that should be passed to a dummy `input` element
+ *   that needs to be created to anchor the select file dialog. This input HTML
+ *   element is not going to be visible, but it needs to be part of the DOM fro
+ *   the open trigger to have effect.
+ *
+ * - The list of files that the user selected. This will be a list even if the
+ *   user selected directories - in that case, it will be the recursive list of
+ *   files within this directory.
+ *
+ * @param param0 If {@link directory} is true, the file open dialog will ask the
+ * user to select directories. Otherwise it'll ask the user to select files.
+ */
 export default function useFileInput({ directory }: { directory?: boolean }) {
     const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
     const inputRef = useRef<HTMLInputElement>();
