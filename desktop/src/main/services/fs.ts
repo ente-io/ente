@@ -7,29 +7,6 @@ import log from "../log";
 
 const FILE_STREAM_CHUNK_SIZE: number = 4 * 1024 * 1024;
 
-export async function getDirFiles(dirPath: string) {
-    const files = await getDirFilePaths(dirPath);
-    const electronFiles = await Promise.all(files.map(getElectronFile));
-    return electronFiles;
-}
-
-// https://stackoverflow.com/a/63111390
-export const getDirFilePaths = async (dirPath: string) => {
-    if (!(await fs.stat(dirPath)).isDirectory()) {
-        return [dirPath];
-    }
-
-    let files: string[] = [];
-    const filePaths = await fs.readdir(dirPath);
-
-    for (const filePath of filePaths) {
-        const absolute = path.join(dirPath, filePath);
-        files = [...files, ...(await getDirFilePaths(absolute))];
-    }
-
-    return files;
-};
-
 const getFileStream = async (filePath: string) => {
     const file = await fs.open(filePath, "r");
     let offset = 0;

@@ -261,9 +261,6 @@ const getElectronFilesFromGoogleZip = (
 ): Promise<ElectronFile[]> =>
     ipcRenderer.invoke("getElectronFilesFromGoogleZip", filePath);
 
-const getDirFiles = (dirPath: string): Promise<ElectronFile[]> =>
-    ipcRenderer.invoke("getDirFiles", dirPath);
-
 /**
  * These objects exposed here will become available to the JS code in our
  * renderer (the web/ code) as `window.ElectronAPIs.*`
@@ -380,5 +377,4 @@ contextBridge.exposeInMainWorld("electron", {
     // -
 
     getElectronFilesFromGoogleZip,
-    getDirFiles,
 });

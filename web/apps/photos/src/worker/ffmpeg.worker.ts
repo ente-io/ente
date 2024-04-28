@@ -62,12 +62,16 @@ const ffmpegExec = async (
     const inputData = new Uint8Array(await blob.arrayBuffer());
 
     try {
-        ffmpeg.FS("writeFile", inputPath, inputData);
+        const startTime = Date.now();
 
-        log.debug(() => `[wasm] ffmpeg ${cmd.join(" ")}`);
+        ffmpeg.FS("writeFile", inputPath, inputData);
         await ffmpeg.run(...cmd);
 
-        return ffmpeg.FS("readFile", outputPath);
+        const result = ffmpeg.FS("readFile", outputPath);
+
+        const ms = Math.round(Date.now() - startTime);
+        log.debug(() => `[wasm] ffmpeg ${cmd.join(" ")} (${ms} ms)`);
+        return result;
     } finally {
         try {
             ffmpeg.FS("unlink", inputPath);

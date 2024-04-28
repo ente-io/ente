@@ -8,18 +8,15 @@
  *
  * https://www.electronjs.org/docs/latest/tutorial/process-model#the-main-process
  */
-import { nativeImage } from "electron";
-import { app, BrowserWindow, Menu, protocol, Tray } from "electron/main";
+
+import { nativeImage, shell } from "electron/common";
+import type { WebContents } from "electron/main";
+import { BrowserWindow, Menu, Tray, app, protocol } from "electron/main";
 import serveNextAt from "next-electron-server";
 import { existsSync } from "node:fs";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import {
-    addAllowOriginHeader,
-    handleDownloads,
-    handleExternalLinks,
-} from "./main/init";
 import { attachFSWatchIPCHandlers, attachIPCHandlers } from "./main/ipc";
 import log, { initLogging } from "./main/log";
 import { createApplicationMenu, createTrayContextMenu } from "./main/menu";
@@ -34,7 +31,7 @@ import { isDev } from "./main/utils-electron";
 /**
  * The URL where the renderer HTML is being served from.
  */
-export const rendererURL = "ente://app";
+const rendererURL = "ente://app";
 
 /**
  * We want to hide our window instead of closing it when the user presses the
@@ -209,7 +206,7 @@ const createMainWindow = async () => {
     //  webContents is not responding to input messages for > 30 seconds."
     window.webContents.on("unresponsive", () => {
         log.error(
-            "Main window's webContents are unresponsive, will restart the renderer process",
+            "MainWindow's webContents are unresponsive, will restart the renderer process",
         );
         window.webContents.forcefullyCrashRenderer();
     });
@@ -238,6 +235,58 @@ const createMainWindow = async () => {
     window.on("focus", () => window.webContents.send("mainWindowFocus"));
 
     return window;
+};
+
+/**
+ * Automatically set the save path for user initiated downloads to the system's
+ * "downloads" directory instead of asking the user to select a save location.
+ */
+export const setDownloadPath = (webContents: WebContents) => {
+    webContents.session.on("will-download", (_, item) => {
+        item.setSavePath(
+            uniqueSavePath(app.getPath("downloads"), item.getFilename()),
+        );
+    });
+};
+
+const uniqueSavePath = (dirPath: string, fileName: string) => {
+    const { name, ext } = path.parse(fileName);
+
+    let savePath = path.join(dirPath, fileName);
+    let n = 1;
+    while (existsSync(savePath)) {
+        const suffixedName = [`${name}(${n})`, ext].filter((x) => x).join(".");
+        savePath = path.join(dirPath, suffixedName);
+        n++;
+    }
+    return savePath;
+};
+
+/**
+ * Allow opening external links, e.g. when the user clicks on the "Feature
+ * requests" button in the sidebar (to open our GitHub repository), or when they
+ * click the "Support" button to send an email to support.
+ *
+ * @param webContents The renderer to configure.
+ */
+export const allowExternalLinks = (webContents: WebContents) => {
+    // By default, if the user were open a link, say
+    // https://github.com/ente-io/ente/discussions, then it would open a _new_
+    // BrowserWindow within our app.
+    //
+    // This is not the behaviour we want; what we want is to ask the system to
+    // handle the link (e.g. open the URL in the default browser, or if it is a
+    // mailto: link, then open the user's mail client).
+    //
+    // Returning `action` "deny" accomplishes this.
+    webContents.setWindowOpenHandler(({ url }) => {
+        if (!url.startsWith(rendererURL)) {
+            shell.openExternal(url);
+            return { action: "deny" };
+        } else {
+            return { action: "allow" };
+        }
+    });
 };
 
 /**
@@ -342,19 +391,26 @@ const main = () => {
     //
     // Note that some Electron APIs can only be used after this event occurs.
     app.on("ready", async () => {
-        // Create window and prepare for renderer
+        // Create window and prepare for the renderer.
         mainWindow = await createMainWindow();
         attachIPCHandlers();
         attachFSWatchIPCHandlers(createWatcher(mainWindow));
         registerStreamProtocol();
-        handleDownloads(mainWindow);
-        handleExternalLinks(mainWindow);
-        addAllowOriginHeader(mainWindow);
 
-        // Start loading the renderer
+        // Configure the renderer's environment.
+        setDownloadPath(mainWindow.webContents);
+        allowExternalLinks(mainWindow.webContents);
+
+        // TODO(MR): Remove or resurrect
+        // The commit that introduced this header override had the message
+        // "fix cors issue for uploads". Not sure what that means, so disabling
+        // it for now to see why exactly this is required.
+        // addAllowOriginHeader(mainWindow);
+
+        // Start loading the renderer.
         mainWindow.loadURL(rendererURL);
 
-        // Continue on with the rest of the startup sequence
+        // Continue on with the rest of the startup sequence.
         Menu.setApplicationMenu(await createApplicationMenu(mainWindow));
         setupTrayItem(mainWindow);
         if (!isDev) setupAutoUpdater(mainWindow);

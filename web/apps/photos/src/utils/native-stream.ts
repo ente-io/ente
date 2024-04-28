@@ -51,10 +51,11 @@ export const readStream = async (
 };
 
 const readNumericHeader = (res: Response, key: string) => {
-    const value = +res.headers[key];
+    const valueText = res.headers.get(key);
+    const value = +valueText;
     if (isNaN(value))
         throw new Error(
-            `Expected a numeric ${key} when reading a stream response: ${res}`,
+            `Expected a numeric ${key} when reading a stream response, instead got ${valueText}`,
         );
     return value;
 };
@@ -101,7 +102,7 @@ export const writeStream = async (
         // GET can't have a body
         method: "POST",
         body: stream,
-        // @ts-expect-error TypeScript's libdom.d.ts does not include the
+        // --@ts-expect-error TypeScript's libdom.d.ts does not include the
         // "duplex" parameter, e.g. see
         // https://github.com/node-fetch/node-fetch/issues/1769.
         duplex: "half",

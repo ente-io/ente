@@ -1,5 +1,5 @@
 import { ensureElectron } from "@/next/electron";
-import { basename } from "@/next/file";
+import { basename, dirname } from "@/next/file";
 import type { CollectionMapping, FolderWatch } from "@/next/types/ipc";
 import { ensure } from "@/utils/ensure";
 import {
@@ -32,7 +32,6 @@ import { t } from "i18next";
 import { AppContext } from "pages/_app";
 import React, { useContext, useEffect, useState } from "react";
 import watcher from "services/watch";
-import { areAllInSameDirectory } from "utils/upload";
 
 interface WatchFolderProps {
     open: boolean;
@@ -324,3 +323,12 @@ const EntryOptions: React.FC<EntryOptionsProps> = ({ confirmStopWatching }) => {
         </OverflowMenu>
     );
 };
+
+/**
+ * Return true if all the paths in the given list are items that belong to the
+ * same (arbitrary) directory.
+ *
+ * Empty list of paths is considered to be in the same directory.
+ */
+const areAllInSameDirectory = (paths: string[]) =>
+    new Set(paths.map(dirname)).size == 1;

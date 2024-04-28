@@ -33,11 +33,9 @@ export const execAsync = (command: string | string[]) => {
         ? shellescape(command)
         : command;
     const startTime = Date.now();
-    log.debug(() => `Running shell command: ${escapedCommand}`);
     const result = execAsync_(escapedCommand);
     log.debug(
-        () =>
-            `Completed in ${Math.round(Date.now() - startTime)} ms (${escapedCommand})`,
+        () => `${escapedCommand} (${Math.round(Date.now() - startTime)} ms)`,
     );
     return result;
 };

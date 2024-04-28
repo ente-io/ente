@@ -1,3 +1,4 @@
+import { hasFileHash } from "@/media/file";
 import { FILE_TYPE, type FileTypeInfo } from "@/media/file-type";
 import { encodeLivePhoto } from "@/media/live-photo";
 import type { Metadata } from "@/media/types/file";
@@ -6,19 +7,12 @@ import { basename } from "@/next/file";
 import log from "@/next/log";
 import { CustomErrorMessage } from "@/next/types/ipc";
 import { ensure } from "@/utils/ensure";
+import { ENCRYPTION_CHUNK_SIZE } from "@ente/shared/crypto/constants";
 import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
-import {
-    B64EncryptionResult,
-    EncryptionResult,
-    LocalFileAttributes,
-} from "@ente/shared/crypto/types";
+import { B64EncryptionResult } from "@ente/shared/crypto/types";
 import { CustomError, handleUploadError } from "@ente/shared/error";
-import { isDataStream, type DataStream } from "@ente/shared/utils/data-stream";
 import { Remote } from "comlink";
 import {
-    FILE_CHUNKS_COMBINED_FOR_A_UPLOAD_PART,
-    FILE_READER_CHUNK_SIZE,
-    MULTIPART_PART_SIZE,
     NULL_LOCATION,
     RANDOM_PERCENTAGE_PROGRESS_FOR_PUT,
     UPLOAD_RESULT,
@@ -45,10 +39,8 @@ import {
     updateMagicMetadata,
 } from "utils/magicMetadata";
 import { readStream } from "utils/native-stream";
-import { hasFileHash } from "utils/upload";
 import * as convert from "xml-js";
 import { detectFileTypeInfoFromChunk } from "../detect-type";
-import { getFileStream } from "../readerService";
 import { tryParseEpochMicrosecondsFromFileName } from "./date";
 import publicUploadHttpClient from "./publicUploadHttpClient";
 import type { ParsedMetadataJSON } from "./takeout";
@@ -60,6 +52,51 @@ import {
 } from "./thumbnail";
 import UploadHttpClient from "./uploadHttpClient";
 import type { UploadableFile } from "./uploadManager";
+
+/**
+ * A readable stream for a file, and its associated size and last modified time.
+ *
+ * This is the in-memory representation of the `fileOrPath` type that we usually
+ * pass around. See: [Note: Reading a fileOrPath]
+ */
+interface FileStream {
+    /**
+     * A stream of the file's contents
+     *
+     * This stream is guaranteed to emit data in ENCRYPTION_CHUNK_SIZE chunks
+     * (except the last chunk which can be smaller since a file would rarely
+     * align exactly to a ENCRYPTION_CHUNK_SIZE multiple).
+     *
+     * Note: A stream can only be read once!
+     */
+    stream: ReadableStream<Uint8Array>;
+    /**
+     * Number of chunks {@link stream} will emit, each ENCRYPTION_CHUNK_SIZE
+     * sized (except the last one).
+     */
+    chunkCount: number;
+    /**
+     * The size in bytes of the underlying file.
+     */
+    fileSize: number;
+    /**
+     * The modification time of the file, in epoch milliseconds.
+     */
+    lastModifiedMs: number;
+    /**
+     * Set to the underlying {@link File} when we also have access to it.
+     */
+    file?: File;
+}
+
+/**
+ * If the stream we have is more than 5 ENCRYPTION_CHUNK_SIZE chunks, then use
+ * multipart uploads for it, with each multipart-part containing 5 chunks.
+ *
+ * ENCRYPTION_CHUNK_SIZE is 4 MB, and the number of chunks in a single upload
+ * part is 5, so each part is (up to) 20 MB.
+ */
+const multipartChunksPerPart = 5;
 
 /** Upload files to cloud storage */
 class UploadService {
@@ -165,14 +202,14 @@ export const fopSize = async (fileOrPath: File | string): Promise<number> =>
 
 /* -- Various intermediate type used during upload -- */
 
-interface UploadAsset2 {
+interface UploadAsset {
     isLivePhoto?: boolean;
     fileOrPath?: File | string;
     livePhotoAssets?: LivePhotoAssets;
 }
 
-interface FileInMemory {
-    filedata: Uint8Array | DataStream;
+interface ThumbnailedFile {
+    fileStreamOrData: FileStream | Uint8Array;
     /** The JPEG data of the generated thumbnail */
     thumbnail: Uint8Array;
     /**
@@ -182,7 +219,7 @@ interface FileInMemory {
     hasStaticThumbnail: boolean;
 }
 
-interface FileWithMetadata extends Omit<FileInMemory, "hasStaticThumbnail"> {
+interface FileWithMetadata extends Omit<ThumbnailedFile, "hasStaticThumbnail"> {
     metadata: Metadata;
     localID: number;
     pubMagicMetadata: FilePublicMagicMetadata;
@@ -193,8 +230,38 @@ interface EncryptedFile {
     fileKey: B64EncryptionResult;
 }
 
+interface EncryptedFileStream {
+    /**
+     * A stream of the file's encrypted contents
+     *
+     * This stream is guaranteed to emit data in ENCRYPTION_CHUNK_SIZE chunks
+     * (except the last chunk which can be smaller since a file would rarely
+     * align exactly to a ENCRYPTION_CHUNK_SIZE multiple).
+     */
+    stream: ReadableStream<Uint8Array>;
+    /**
+     * Number of chunks {@link stream} will emit, each ENCRYPTION_CHUNK_SIZE
+     * sized (except the last one).
+     */
+    chunkCount: number;
+}
+
+interface LocalFileAttributes<
+    T extends string | Uint8Array | EncryptedFileStream,
+> {
+    encryptedData: T;
+    decryptionHeader: string;
+}
+
+interface EncryptionResult<
+    T extends string | Uint8Array | EncryptedFileStream,
+> {
+    file: LocalFileAttributes<T>;
+    key: string;
+}
+
 interface ProcessedFile {
-    file: LocalFileAttributes<Uint8Array | DataStream>;
+    file: LocalFileAttributes<Uint8Array | EncryptedFileStream>;
     thumbnail: LocalFileAttributes<Uint8Array>;
     metadata: LocalFileAttributes<string>;
     pubMagicMetadata: EncryptedMagicMetadata;
@@ -325,10 +392,8 @@ export const uploader = async (
 
         abortIfCancelled();
 
-        const { filedata, thumbnail, hasStaticThumbnail } = await readAsset(
-            fileTypeInfo,
-            uploadAsset,
-        );
+        const { fileStreamOrData, thumbnail, hasStaticThumbnail } =
+            await readAsset(fileTypeInfo, uploadAsset);
 
         if (hasStaticThumbnail) metadata.hasStaticThumbnail = true;
 
@@ -341,7 +406,7 @@ export const uploader = async (
 
         const fileWithMetadata: FileWithMetadata = {
             localID,
-            filedata,
+            fileStreamOrData,
             thumbnail,
             metadata,
             pubMagicMetadata,
@@ -403,13 +468,21 @@ export const uploader = async (
 /**
  * Read the given file or path into an in-memory representation.
  *
- * See: [Note: Reading a fileOrPath]
+ * [Note: Reading a fileOrPath]
  *
  * The file can be either a web
  * [File](https://developer.mozilla.org/en-US/docs/Web/API/File) or the absolute
- * path to a file on desk. When and why, read on.
+ * path to a file on desk.
  *
- * This code gets invoked in two contexts:
+ * tl;dr; There are three cases:
+ *
+ * 1. web / File
+ * 2. desktop / File
+ * 3. desktop / path
+ *
+ * For the when and why, read on.
+ *
+ * The code that accesses files (e.g. uplaads) gets invoked in two contexts:
  *
  * 1. web: the normal mode, when we're running in as a web app in the browser.
  *
@@ -426,47 +499,47 @@ export const uploader = async (
  *
  * In the desktop context, this can be either a File or a path.
  *
- * 1. If the user provided us this file via some user interaction (say a drag
+ * 2. If the user provided us this file via some user interaction (say a drag
  *    and a drop), this'll still be a File.
  *
- * 2. However, when running in the desktop app we have the ability to access
+ * 3. However, when running in the desktop app we have the ability to access
  *    absolute paths on the user's file system. For example, if the user asks us
  *    to watch certain folders on their disk for changes, we'll be able to pick
  *    up new images being added, and in such cases, the parameter here will be a
  *    path. Another example is when resuming an previously interrupted upload -
  *    we'll only have the path at hand in such cases, not the File object.
  *
+ * Case 2, when we're provided a path, is simple. We don't have a choice, since
+ * we cannot still programmatically construct a File object (we can construct it
+ * on the Node.js layer, but it can't then be transferred over the IPC
+ * boundary). So all our operations use the path itself.
+ *
+ * Case 3 involves a choice on a use-case basis, since
+ *
+ * (a) unlike in the web context, such File objects also have the full path.
+ *     See: [Note: File paths when running under Electron].
+ *
+ * (b) neither File nor the path is a better choice for all use cases.
+ *
  * The advantage of the File object is that the browser has already read it into
  * memory for us. The disadvantage comes in the case where we need to
  * communicate with the native Node.js layer of our desktop app. Since this
  * communication happens over IPC, the File's contents need to be serialized and
  * copied, which is a bummer for large videos etc.
- *
- * So when we do have a path, we first try to see if we can perform IPC using
- * the path itself (e.g. when generating thumbnails). Eventually, we'll need to
- * read the file once when we need to encrypt and upload it, but if we're smart
- * we can do all the rest of the IPC operations using the path itself, and for
- * the read during upload using a streaming IPC mechanism.
  */
 const readFileOrPath = async (
     fileOrPath: File | string,
-): Promise<{
-    dataOrStream: Uint8Array | DataStream;
-    fileSize: number;
-    lastModifiedMs: number;
-}> => {
-    let dataOrStream: Uint8Array | DataStream;
+): Promise<FileStream> => {
+    let underlyingStream: ReadableStream;
+    let file: File | undefined;
     let fileSize: number;
     let lastModifiedMs: number;
 
     if (fileOrPath instanceof File) {
-        const file = fileOrPath;
+        file = fileOrPath;
+        underlyingStream = file.stream();
         fileSize = file.size;
         lastModifiedMs = file.lastModified;
-        dataOrStream =
-            fileSize > MULTIPART_PART_SIZE
-                ? getFileStream(file, FILE_READER_CHUNK_SIZE)
-                : new Uint8Array(await file.arrayBuffer());
     } else {
         const path = fileOrPath;
         const {
@@ -474,33 +547,46 @@ const readFileOrPath = async (
             size,
             lastModifiedMs: lm,
         } = await readStream(ensureElectron(), path);
+        underlyingStream = response.body;
         fileSize = size;
         lastModifiedMs = lm;
-        if (size > MULTIPART_PART_SIZE) {
-            const chunkCount = Math.ceil(size / FILE_READER_CHUNK_SIZE);
-            dataOrStream = { stream: response.body, chunkCount };
-        } else {
-            dataOrStream = new Uint8Array(await response.arrayBuffer());
-        }
     }
 
-    return { dataOrStream, fileSize, lastModifiedMs };
-};
+    const N = ENCRYPTION_CHUNK_SIZE;
+    const chunkCount = Math.ceil(fileSize / ENCRYPTION_CHUNK_SIZE);
 
-/** A variant of {@readFileOrPath} that always returns an {@link DataStream}. */
-const readFileOrPathStream = async (
-    fileOrPath: File | string,
-): Promise<DataStream> => {
-    if (fileOrPath instanceof File) {
-        return getFileStream(fileOrPath, FILE_READER_CHUNK_SIZE);
-    } else {
-        const { response, size } = await readStream(
-            ensureElectron(),
-            fileOrPath,
-        );
-        const chunkCount = Math.ceil(size / FILE_READER_CHUNK_SIZE);
-        return { stream: response.body, chunkCount };
-    }
+    // Pipe the underlying stream through a transformer that emits
+    // ENCRYPTION_CHUNK_SIZE-ed chunks (except the last one, which can be
+    // smaller).
+    let pending: Uint8Array | undefined;
+    const transformer = new TransformStream<Uint8Array, Uint8Array>({
+        async transform(
+            chunk: Uint8Array,
+            controller: TransformStreamDefaultController,
+        ) {
+            let next: Uint8Array;
+            if (pending) {
+                next = new Uint8Array(pending.length + chunk.length);
+                next.set(pending);
+                next.set(chunk, pending.length);
+                pending = undefined;
+            } else {
+                next = chunk;
+            }
+            while (next.length >= N) {
+                controller.enqueue(next.slice(0, N));
+                next = next.slice(N);
+            }
+            if (next.length) pending = next;
+        },
+        flush(controller: TransformStreamDefaultController) {
+            if (pending) controller.enqueue(pending);
+        },
+    });
+
+    const stream = underlyingStream.pipeThrough(transformer);
+
+    return { stream, chunkCount, fileSize, lastModifiedMs, file };
 };
 
 interface ReadAssetDetailsResult {
@@ -517,7 +603,7 @@ const readAssetDetails = async ({
     isLivePhoto,
     livePhotoAssets,
     fileOrPath,
-}: UploadAsset2): Promise<ReadAssetDetailsResult> =>
+}: UploadAsset): Promise<ReadAssetDetailsResult> =>
     isLivePhoto
         ? readLivePhotoDetails(livePhotoAssets)
         : readImageOrVideoDetails(fileOrPath);
@@ -549,18 +635,14 @@ const readLivePhotoDetails = async ({ image, video }: LivePhotoAssets) => {
  * @param fileOrPath See: [Note: Reading a fileOrPath]
  */
 const readImageOrVideoDetails = async (fileOrPath: File | string) => {
-    const { dataOrStream, fileSize, lastModifiedMs } =
+    const { stream, fileSize, lastModifiedMs } =
         await readFileOrPath(fileOrPath);
 
     const fileTypeInfo = await detectFileTypeInfoFromChunk(async () => {
-        if (dataOrStream instanceof Uint8Array) {
-            return dataOrStream;
-        } else {
-            const reader = dataOrStream.stream.getReader();
-            const chunk = ensure((await reader.read()).value);
-            await reader.cancel();
-            return chunk;
-        }
+        const reader = stream.getReader();
+        const chunk = ensure((await reader.read()).value);
+        await reader.cancel();
+        return chunk;
     }, fopFileName(fileOrPath));
 
     return { fileTypeInfo, fileSize, lastModifiedMs };
@@ -587,7 +669,7 @@ interface ExtractAssetMetadataResult {
  * {@link parsedMetadataJSONMap} for the assets. Return the resultant metadatum.
  */
 const extractAssetMetadata = async (
-    { isLivePhoto, fileOrPath, livePhotoAssets }: UploadAsset2,
+    { isLivePhoto, fileOrPath, livePhotoAssets }: UploadAsset,
     fileTypeInfo: FileTypeInfo,
     lastModifiedMs: number,
     collectionID: number,
@@ -759,7 +841,7 @@ const computeHash = async (
     fileOrPath: File | string,
     worker: Remote<DedicatedCryptoWorker>,
 ) => {
-    const { stream, chunkCount } = await readFileOrPathStream(fileOrPath);
+    const { stream, chunkCount } = await readFileOrPath(fileOrPath);
     const hashState = await worker.initChunkHashing();
 
     const streamReader = stream.getReader();
@@ -828,8 +910,8 @@ const areFilesSameNoHash = (f: Metadata, g: Metadata) => {
 
 const readAsset = async (
     fileTypeInfo: FileTypeInfo,
-    { isLivePhoto, fileOrPath, livePhotoAssets }: UploadAsset2,
-) =>
+    { isLivePhoto, fileOrPath, livePhotoAssets }: UploadAsset,
+): Promise<ThumbnailedFile> =>
     isLivePhoto
         ? await readLivePhoto(livePhotoAssets, fileTypeInfo)
         : await readImageOrVideo(fileOrPath, fileTypeInfo);
@@ -838,9 +920,8 @@ const readLivePhoto = async (
     livePhotoAssets: LivePhotoAssets,
     fileTypeInfo: FileTypeInfo,
 ) => {
-    const readImage = await readFileOrPath(livePhotoAssets.image);
     const {
-        filedata: imageDataOrStream,
+        fileStreamOrData: imageFileStreamOrData,
         thumbnail,
         hasStaticThumbnail,
     } = await withThumbnail(
@@ -849,28 +930,29 @@ const readLivePhoto = async (
             extension: fileTypeInfo.imageType,
             fileType: FILE_TYPE.IMAGE,
         },
-        readImage.dataOrStream,
-        readImage.fileSize,
+        await readFileOrPath(livePhotoAssets.image),
     );
-    const readVideo = await readFileOrPath(livePhotoAssets.video);
+    const videoFileStreamOrData = await readFileOrPath(livePhotoAssets.video);
 
-    // We can revisit this later, but the existing code always read the entire
-    // file into memory here, and to avoid changing the rest of the scaffolding
-    // retain the same behaviour.
+    // The JS zip library that encodeLivePhoto uses does not support
+    // ReadableStreams, so pass the file (blob) if we have one, otherwise read
+    // the entire stream into memory and pass the resultant data.
     //
-    // This is a reasonable assumption too, since the videos corresponding to
-    // live photos are only a couple of seconds long.
-    const toData = async (dataOrStream: Uint8Array | DataStream) =>
-        dataOrStream instanceof Uint8Array
-            ? dataOrStream
-            : await readEntireStream(dataOrStream.stream);
+    // This is a reasonable behaviour since the videos corresponding to live
+    // photos are only a couple of seconds long (we have already done a
+    // pre-flight check to ensure their size is small in `areLivePhotoAssets`).
+    const fileOrData = async (sd: FileStream | Uint8Array) => {
+        const _fs = async ({ file, stream }: FileStream) =>
+            file ? file : await readEntireStream(stream);
+        return sd instanceof Uint8Array ? sd : _fs(sd);
+    };
 
     return {
-        filedata: await encodeLivePhoto({
+        fileStreamOrData: await encodeLivePhoto({
             imageFileName: fopFileName(livePhotoAssets.image),
-            imageData: await toData(imageDataOrStream),
+            imageFileOrData: await fileOrData(imageFileStreamOrData),
             videoFileName: fopFileName(livePhotoAssets.video),
-            videoData: await toData(readVideo.dataOrStream),
+            videoFileOrData: await fileOrData(videoFileStreamOrData),
         }),
         thumbnail,
         hasStaticThumbnail,
@@ -881,8 +963,8 @@ const readImageOrVideo = async (
     fileOrPath: File | string,
     fileTypeInfo: FileTypeInfo,
 ) => {
-    const { dataOrStream, fileSize } = await readFileOrPath(fileOrPath);
-    return withThumbnail(fileOrPath, fileTypeInfo, dataOrStream, fileSize);
+    const fileStream = await readFileOrPath(fileOrPath);
+    return withThumbnail(fileOrPath, fileTypeInfo, fileStream);
 };
 
 // TODO(MR): Merge with the uploader
@@ -906,17 +988,17 @@ const moduleState = new ModuleState();
  * Augment the given {@link dataOrStream} with thumbnail information.
  *
  * This is a companion method for {@link readFileOrPath}, and can be used to
- * convert the result of {@link readFileOrPath} into an {@link FileInMemory}.
+ * convert the result of {@link readFileOrPath} into an {@link ThumbnailedFile}.
  *
- * Note: The returned dataOrStream might be different from the one that we
- * provide to it.
+ * Note: The `fileStream` in the returned ThumbnailedFile may be different from
+ * the one passed to the function.
  */
 const withThumbnail = async (
     fileOrPath: File | string,
     fileTypeInfo: FileTypeInfo,
-    dataOrStream: Uint8Array | DataStream,
-    fileSize: number,
-): Promise<FileInMemory> => {
+    fileStream: FileStream,
+): Promise<ThumbnailedFile> => {
+    let fileData: Uint8Array | undefined;
     let thumbnail: Uint8Array | undefined;
     let hasStaticThumbnail = false;
 
@@ -925,30 +1007,16 @@ const withThumbnail = async (
         fileTypeInfo.fileType == FILE_TYPE.IMAGE &&
         moduleState.isNativeImageThumbnailGenerationNotAvailable;
 
-    // 1. Native thumbnail generation.
+    // 1. Native thumbnail generation using file's path.
     if (electron && !notAvailable) {
         try {
-            if (fileOrPath instanceof File) {
-                if (dataOrStream instanceof Uint8Array) {
-                    thumbnail = await generateThumbnailNative(
-                        electron,
-                        dataOrStream,
-                        fileTypeInfo,
-                    );
-                } else {
-                    // This was large enough to need streaming, and trying to
-                    // read it into memory or copying over IPC might cause us to
-                    // run out of memory. So skip the native generation for it,
-                    // instead let it get processed by the browser based
-                    // thumbnailer (case 2).
-                }
-            } else {
-                thumbnail = await generateThumbnailNative(
-                    electron,
-                    fileOrPath,
-                    fileTypeInfo,
-                );
-            }
+            // When running in the context of our desktop app, File paths will
+            // be absolute. See: [Note: File paths when running under Electron].
+            thumbnail = await generateThumbnailNative(
+                electron,
+                fileOrPath instanceof File ? fileOrPath["path"] : fileOrPath,
+                fileTypeInfo,
+            );
         } catch (e) {
             if (e.message == CustomErrorMessage.NotAvailable) {
                 moduleState.isNativeImageThumbnailGenerationNotAvailable = true;
@@ -961,38 +1029,47 @@ const withThumbnail = async (
     if (!thumbnail) {
         let blob: Blob | undefined;
         if (fileOrPath instanceof File) {
-            // 2. Browser based thumbnail generation for `File`s.
+            // 2. Browser based thumbnail generation for File (blobs).
             blob = fileOrPath;
         } else {
             // 3. Browser based thumbnail generation for paths.
-            if (dataOrStream instanceof Uint8Array) {
-                blob = new Blob([dataOrStream]);
+            //
+            // There are two reasons why we could get here:
+            //
+            // - We're running under Electron, but thumbnail generation is not
+            //   available. This is currently only a specific scenario for image
+            //   files on Windows.
+            //
+            // - We're running under the Electron, but the thumbnail generation
+            //   otherwise failed for some exception.
+            //
+            // The fallback in this case involves reading the entire stream into
+            // memory, and passing that data across the IPC boundary in a single
+            // go (i.e. not in a streaming manner). This is risky for videos of
+            // unbounded sizes, plus that isn't the expected scenario. So
+            // instead of trying to cater for arbitrary exceptions, we only run
+            // this fallback to cover for the case where thumbnail generation
+            // was not available for an image file on Windows. If/when we add
+            // support of native thumbnailing on Windows too, this entire branch
+            // can be removed.
+
+            if (fileTypeInfo.fileType == FILE_TYPE.IMAGE) {
+                const data = await readEntireStream(fileStream.stream);
+                blob = new Blob([data]);
+
+                // The Readable stream cannot be read twice, so use the data
+                // directly for subsequent steps.
+                fileData = data;
             } else {
-                // Read the stream into memory. Don't try this fallback for huge
-                // files though lest we run out of memory.
-                if (fileSize < 100 * 1024 * 1024 /* 100 MB */) {
-                    const data = await readEntireStream(dataOrStream.stream);
-                    // The Readable stream cannot be read twice, so also
-                    // overwrite the stream with the data we read.
-                    dataOrStream = data;
-                    blob = new Blob([data]);
-                } else {
-                    // There isn't a normal scenario where this should happen.
-                    // Case 1, should've already worked, and the only known
-                    // reason it'd have been  skipped is for image files on
-                    // Windows, but those should be less than 100 MB.
-                    //
-                    // So don't risk running out of memory for a case we don't
-                    // comprehend.
-                    log.error(
-                        `Not using browser based thumbnail generation fallback for large file at path ${fileOrPath}`,
-                    );
-                }
+                log.warn(
+                    `Not using browser based thumbnail generation fallback for video at path ${fileOrPath}`,
+                );
             }
         }
 
         try {
-            thumbnail = await generateThumbnailWeb(blob, fileTypeInfo);
+            if (blob)
+                thumbnail = await generateThumbnailWeb(blob, fileTypeInfo);
         } catch (e) {
             log.error("Web thumbnail creation failed", e);
         }
@@ -1004,7 +1081,7 @@ const withThumbnail = async (
     }
 
     return {
-        filedata: dataOrStream,
+        fileStreamOrData: fileData ?? fileStream,
         thumbnail,
         hasStaticThumbnail,
     };
@@ -1029,7 +1106,7 @@ const encryptFile = async (
     worker: Remote<DedicatedCryptoWorker>,
 ): Promise<EncryptedFile> => {
     const { key: fileKey, file: encryptedFiledata } = await encryptFiledata(
-        file.filedata,
+        file.fileStreamOrData,
         worker,
     );
 
@@ -1071,15 +1148,15 @@ const encryptFile = async (
 };
 
 const encryptFiledata = async (
-    filedata: Uint8Array | DataStream,
+    fileStreamOrData: FileStream | Uint8Array,
     worker: Remote<DedicatedCryptoWorker>,
-): Promise<EncryptionResult<Uint8Array | DataStream>> =>
-    isDataStream(filedata)
-        ? await encryptFileStream(filedata, worker)
-        : await worker.encryptFile(filedata);
+): Promise<EncryptionResult<Uint8Array | EncryptedFileStream>> =>
+    fileStreamOrData instanceof Uint8Array
+        ? await worker.encryptFile(fileStreamOrData)
+        : await encryptFileStream(fileStreamOrData, worker);
 
 const encryptFileStream = async (
-    fileData: DataStream,
+    fileData: FileStream,
     worker: Remote<DedicatedCryptoWorker>,
 ) => {
     const { stream, chunkCount } = fileData;
@@ -1120,27 +1197,38 @@ const uploadToBucket = async (
     try {
         let fileObjectKey: string = null;
 
-        if (isDataStream(file.file.encryptedData)) {
+        const encryptedData = file.file.encryptedData;
+        if (
+            !(encryptedData instanceof Uint8Array) &&
+            encryptedData.chunkCount >= multipartChunksPerPart
+        ) {
+            // We have a stream, and it is more than multipartChunksPerPart
+            // chunks long, so use a multipart upload to upload it.
             fileObjectKey = await uploadStreamUsingMultipart(
                 file.localID,
-                file.file.encryptedData,
+                encryptedData,
                 makeProgessTracker,
                 isCFUploadProxyDisabled,
                 abortIfCancelled,
             );
         } else {
+            const data =
+                encryptedData instanceof Uint8Array
+                    ? encryptedData
+                    : await readEntireStream(encryptedData.stream);
+
             const progressTracker = makeProgessTracker(file.localID);
             const fileUploadURL = await uploadService.getUploadURL();
             if (!isCFUploadProxyDisabled) {
                 fileObjectKey = await UploadHttpClient.putFileV2(
                     fileUploadURL,
-                    file.file.encryptedData as Uint8Array,
+                    data,
                     progressTracker,
                 );
             } else {
                 fileObjectKey = await UploadHttpClient.putFile(
                     fileUploadURL,
-                    file.file.encryptedData as Uint8Array,
+                    data,
                     progressTracker,
                 );
             }
@@ -1189,13 +1277,13 @@ interface PartEtag {
 
 async function uploadStreamUsingMultipart(
     fileLocalID: number,
-    dataStream: DataStream,
+    dataStream: EncryptedFileStream,
     makeProgessTracker: MakeProgressTracker,
     isCFUploadProxyDisabled: boolean,
     abortIfCancelled: () => void,
 ) {
     const uploadPartCount = Math.ceil(
-        dataStream.chunkCount / FILE_CHUNKS_COMBINED_FOR_A_UPLOAD_PART,
+        dataStream.chunkCount / multipartChunksPerPart,
     );
     const multipartUploadURLs =
         await uploadService.fetchMultipartUploadURLs(uploadPartCount);
@@ -1255,7 +1343,7 @@ async function combineChunksToFormUploadPart(
     streamReader: ReadableStreamDefaultReader<Uint8Array>,
 ) {
     const combinedChunks = [];
-    for (let i = 0; i < FILE_CHUNKS_COMBINED_FOR_A_UPLOAD_PART; i++) {
+    for (let i = 0; i < multipartChunksPerPart; i++) {
         const { done, value: chunk } = await streamReader.read();
         if (done) {
             break;

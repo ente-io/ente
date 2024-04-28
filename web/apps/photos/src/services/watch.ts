@@ -20,7 +20,6 @@ import uploadManager, {
 import { Collection } from "types/collection";
 import { EncryptedEnteFile } from "types/file";
 import { groupFilesBasedOnCollectionID } from "utils/file";
-import { isHiddenFile } from "utils/upload";
 import { removeFromCollection } from "./collectionService";
 import { getLocalFiles } from "./fileService";
 
@@ -597,6 +596,13 @@ const pathsToUpload = (paths: string[], watch: FolderWatch) =>
         .filter((path) => !isSyncedOrIgnoredPath(path, watch));
 
 /**
+ * Return true if the file at the given {@link path} is hidden.
+ *
+ * Hidden files are those whose names begin with a "." (dot).
+ */
+const isHiddenFile = (path: string) => basename(path).startsWith(".");
+
+/**
  * Return the paths to previously synced files that are no longer on disk and so
  * must be removed from the Ente collection.
  */
@@ -611,7 +617,7 @@ const isSyncedOrIgnoredPath = (path: string, watch: FolderWatch) =>
 
 const collectionNameForPath = (path: string, watch: FolderWatch) =>
     watch.collectionMapping == "root"
-        ? dirname(watch.folderPath)
+        ? basename(watch.folderPath)
         : parentDirectoryName(path);
 
 const parentDirectoryName = (path: string) => basename(dirname(path));

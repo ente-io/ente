@@ -5,7 +5,7 @@ import { CustomError } from "@ente/shared/error";
 import { isPromise } from "@ente/shared/utils";
 import DiscFullIcon from "@mui/icons-material/DiscFull";
 import UserNameInputDialog from "components/UserNameInputDialog";
-import { PICKED_UPLOAD_TYPE, UPLOAD_STAGES } from "constants/upload";
+import { UPLOAD_STAGES } from "constants/upload";
 import { t } from "i18next";
 import isElectron from "is-electron";
 import { AppContext } from "pages/_app";
@@ -13,6 +13,7 @@ import { GalleryContext } from "pages/gallery";
 import { useContext, useEffect, useRef, useState } from "react";
 import billingService from "services/billingService";
 import { getLatestCollections } from "services/collectionService";
+import { exportMetadataDirectoryName } from "services/export";
 import {
     getPublicCollectionUID,
     getPublicCollectionUploaderName,
@@ -28,6 +29,7 @@ import type {
 import uploadManager, {
     setToUploadCollection,
 } from "services/upload/uploadManager";
+import { fopFileName } from "services/upload/uploadService";
 import watcher from "services/watch";
 import { NotificationAttributes } from "types/Notification";
 import { Collection } from "types/collection";
@@ -45,19 +47,18 @@ import {
     getDownloadAppMessage,
     getRootLevelFileWithFolderNotAllowMessage,
 } from "utils/ui";
-import {
-    DEFAULT_IMPORT_SUGGESTION,
-    getImportSuggestion,
-    groupFilesBasedOnParentFolder,
-    pruneHiddenFiles,
-    type ImportSuggestion,
-} from "utils/upload";
 import { SetCollectionNamerAttributes } from "../Collections/CollectionNamer";
 import { CollectionMappingChoiceModal } from "./CollectionMappingChoiceModal";
 import UploadProgress from "./UploadProgress";
 import UploadTypeSelector from "./UploadTypeSelector";
 
 const FIRST_ALBUM_NAME = "My First Album";
+
+enum PICKED_UPLOAD_TYPE {
+    FILES = "files",
+    FOLDERS = "folders",
+    ZIPS = "zips",
+}
 
 interface Props {
     syncWithRemote: (force?: boolean, silent?: boolean) => Promise<void>;
@@ -362,8 +363,11 @@ export default function Uploader(props: Props) {
             } else if (desktopFilePaths && desktopFilePaths.length > 0) {
                 // File selection from our desktop app
                 fileOrPathsToUpload.current = desktopFilePaths;
-                setDesktopFilePaths(undefined);
+                setDesktopFilePaths([]);
             }
+
+            log.debug(() => "Uploader received:");
+            log.debug(() => fileOrPathsToUpload.current);
 
             fileOrPathsToUpload.current = pruneHiddenFiles(
                 fileOrPathsToUpload.current,
@@ -876,3 +880,103 @@ async function waitAndRun(
     }
     await task();
 }
+
+// This is used to prompt the user the make upload strategy choice
+interface ImportSuggestion {
+    rootFolderName: string;
+    hasNestedFolders: boolean;
+    hasRootLevelFileWithFolder: boolean;
+}
+
+const DEFAULT_IMPORT_SUGGESTION: ImportSuggestion = {
+    rootFolderName: "",
+    hasNestedFolders: false,
+    hasRootLevelFileWithFolder: false,
+};
+
+function getImportSuggestion(
+    uploadType: PICKED_UPLOAD_TYPE,
+    paths: string[],
+): ImportSuggestion {
+    if (isElectron() && uploadType === PICKED_UPLOAD_TYPE.FILES) {
+        return DEFAULT_IMPORT_SUGGESTION;
+    }
+
+    const getCharCount = (str: string) => (str.match(/\//g) ?? []).length;
+    paths.sort((path1, path2) => getCharCount(path1) - getCharCount(path2));
+    const firstPath = paths[0];
+    const lastPath = paths[paths.length - 1];
+
+    const L = firstPath.length;
+    let i = 0;
+    const firstFileFolder = firstPath.substring(0, firstPath.lastIndexOf("/"));
+    const lastFileFolder = lastPath.substring(0, lastPath.lastIndexOf("/"));
+
+    while (i < L && firstPath.charAt(i) === lastPath.charAt(i)) i++;
+    let commonPathPrefix = firstPath.substring(0, i);
+
+    if (commonPathPrefix) {
+        commonPathPrefix = commonPathPrefix.substring(
+            0,
+            commonPathPrefix.lastIndexOf("/"),
+        );
+        if (commonPathPrefix) {
+            commonPathPrefix = commonPathPrefix.substring(
+                commonPathPrefix.lastIndexOf("/") + 1,
+            );
+        }
+    }
+    return {
+        rootFolderName: commonPathPrefix || null,
+        hasNestedFolders: firstFileFolder !== lastFileFolder,
+        hasRootLevelFileWithFolder: firstFileFolder === "",
+    };
+}
+
+// This function groups files that are that have the same parent folder into collections
+// For Example, for user files have a directory structure like this
+//              a
+//            / |  \
+//           b  j   c
+//          /|\    /  \
+//         e f g   h  i
+//
+// The files will grouped into 3 collections.
+// [a => [j],
+// b => [e,f,g],
+// c => [h, i]]
+const groupFilesBasedOnParentFolder = (fileOrPaths: (File | string)[]) => {
+    const result = new Map<string, (File | string)[]>();
+    for (const fileOrPath of fileOrPaths) {
+        const filePath =
+            /* TODO(MR): ElectronFile */
+            typeof fileOrPath == "string"
+                ? fileOrPath
+                : (fileOrPath["path"] as string);
+
+        let folderPath = filePath.substring(0, filePath.lastIndexOf("/"));
+        // If the parent folder of a file is "metadata"
+        // we consider it to be part of the parent folder
+        // For Eg,For FileList  -> [a/x.png, a/metadata/x.png.json]
+        // they will both we grouped into the collection "a"
+        // This is cluster the metadata json files in the same collection as the file it is for
+        if (folderPath.endsWith(exportMetadataDirectoryName)) {
+            folderPath = folderPath.substring(0, folderPath.lastIndexOf("/"));
+        }
+        const folderName = folderPath.substring(
+            folderPath.lastIndexOf("/") + 1,
+        );
+        if (!folderName) throw Error("Unexpected empty folder name");
+        if (!result.has(folderName)) result.set(folderName, []);
+        result.get(folderName).push(fileOrPath);
+    }
+    return result;
+};
+
+/**
+ * Filter out hidden files from amongst {@link fileOrPaths}.
+ *
+ * Hidden files are those whose names begin with a "." (dot).
+ */
+const pruneHiddenFiles = (fileOrPaths: (File | string)[]) =>
+    fileOrPaths.filter((f) => !fopFileName(f).startsWith("."));

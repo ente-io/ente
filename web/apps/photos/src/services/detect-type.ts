@@ -93,8 +93,7 @@ const readInitialChunkOfFile = async (file: File) => {
 
 const detectFileTypeFromBuffer = async (buffer: Uint8Array) => {
     const result = await FileType.fromBuffer(buffer);
-    if (!result?.ext || !result?.mime) {
-        throw Error(`Could not deduce file type from buffer`);
-    }
+    if (!result)
+        throw Error("Could not deduce file type from the file's contents");
     return result;
 };

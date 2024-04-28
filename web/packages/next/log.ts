@@ -34,7 +34,7 @@ const messageWithError = (message: string, e?: unknown) => {
     if (e instanceof Error) {
         // In practice, we expect ourselves to be called with Error objects, so
         // this is the happy path so to say.
-        return `${e.name}: ${e.message}\n${e.stack}`;
+        es = [`${e.name}: ${e.message}`, e.stack].filter((x) => x).join("\n");
     } else {
         // For the rest rare cases, use the default string serialization of e.
         es = String(e);

@@ -40,7 +40,6 @@ import {
     updateOnNextRestart,
 } from "./services/app-update";
 import { ffmpegExec } from "./services/ffmpeg";
-import { getDirFiles } from "./services/fs";
 import { convertToJPEG, generateImageThumbnail } from "./services/image";
 import {
     clipImageEmbedding,
@@ -216,8 +215,6 @@ export const attachIPCHandlers = () => {
     ipcMain.handle("getElectronFilesFromGoogleZip", (_, filePath: string) =>
         getElectronFilesFromGoogleZip(filePath),
     );
-
-    ipcMain.handle("getDirFiles", (_, dirPath: string) => getDirFiles(dirPath));
 };
 
 /**

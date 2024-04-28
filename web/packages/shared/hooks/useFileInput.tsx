@@ -1,5 +1,19 @@
 import { useCallback, useRef, useState } from "react";
 
+/*
+ * TODO (MR): Understand how this is happening, and validate it further (on
+ * first glance this is correct).
+ *
+ * [Note: File paths when running under Electron]
+ *
+ * We have access to the absolute path of the web {@link File} object when we
+ * are running in the context of our desktop app.
+ *
+ * This is in contrast to the `webkitRelativePath` that we get when we're
+ * running in the browser, which is the relative path to the directory that the
+ * user selected (or just the name of the file if the user selected or
+ * drag/dropped a single one).
+ */
 export interface FileWithPath extends File {
     readonly path?: string;
 }
