@@ -110,6 +110,14 @@ export const decodeLivePhoto = async (
     return { imageFileName, imageData, videoFileName, videoData };
 };
 
+/** Variant of {@link LivePhoto}, but one that allows files and data. */
+interface EncodeLivePhotoInput {
+    imageFileName: string;
+    imageFileOrData: File | Uint8Array;
+    videoFileName: string;
+    videoFileOrData: File | Uint8Array;
+}
+
 /**
  * Return a binary serialized representation of a live photo.
  *
@@ -122,15 +130,15 @@ export const decodeLivePhoto = async (
  */
 export const encodeLivePhoto = async ({
     imageFileName,
-    imageData,
+    imageFileOrData,
     videoFileName,
-    videoData,
-}: LivePhoto) => {
+    videoFileOrData,
+}: EncodeLivePhotoInput) => {
     const [, imageExt] = nameAndExtension(imageFileName);
     const [, videoExt] = nameAndExtension(videoFileName);
 
     const zip = new JSZip();
-    zip.file(fileNameFromComponents(["image", imageExt]), imageData);
-    zip.file(fileNameFromComponents(["video", videoExt]), videoData);
+    zip.file(fileNameFromComponents(["image", imageExt]), imageFileOrData);
+    zip.file(fileNameFromComponents(["video", videoExt]), videoFileOrData);
     return await zip.generateAsync({ type: "uint8array" });
 };
