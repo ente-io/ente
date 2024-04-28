@@ -366,12 +366,13 @@ export default function Uploader(props: Props) {
                 setDesktopFilePaths([]);
             }
 
-            log.debug(() => "Uploader received:");
+            log.debug(() => "Uploader invoked");
             log.debug(() => fileOrPathsToUpload.current);
 
             fileOrPathsToUpload.current = pruneHiddenFiles(
                 fileOrPathsToUpload.current,
             );
+
             if (fileOrPathsToUpload.current.length === 0) {
                 props.setLoading(false);
                 return;
@@ -385,6 +386,8 @@ export default function Uploader(props: Props) {
                 ),
             );
             setImportSuggestion(importSuggestion);
+
+            log.debug(() => importSuggestion);
 
             handleCollectionCreationAndUpload(
                 importSuggestion,
