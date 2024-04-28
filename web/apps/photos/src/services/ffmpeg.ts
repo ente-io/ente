@@ -1,4 +1,3 @@
-import { ElectronFile } from "@/next/types/file";
 import type { Electron } from "@/next/types/ipc";
 import { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { validateAndGetCreationUnixTimeInMicroSeconds } from "@ente/shared/time";
@@ -200,23 +199,6 @@ function parseCreationTime(creationTime: string) {
     return dateTime;
 }
 
-/** Called when viewing a file */
-export async function convertToMP4(file: File) {
-    return await ffmpegExec2(
-        [
-            ffmpegPathPlaceholder,
-            "-i",
-            inputPathPlaceholder,
-            "-preset",
-            "ultrafast",
-            outputPathPlaceholder,
-        ],
-        file,
-        "mp4",
-        30 * 1000,
-    );
-}
-
 /**
  * Run the given FFmpeg command using a wasm FFmpeg running in a web worker.
  *
@@ -234,55 +216,53 @@ const ffmpegExecWeb = async (
 };
 
 /**
- * Run the given FFmpeg command using a native FFmpeg binary bundled with our
- * desktop app.
+ * Convert a video from a format that is not supported in the browser to MP4.
+ *
+ * This function is called when the user views a video or a live photo, and we
+ * want to play it back. The idea is to convert it to MP4 which has much more
+ * universal support in browsers.
+ *
+ * @param blob The video blob.
+ *
+ * @returns The mp4 video data.
+ */
+export const convertToMP4 = async (blob: Blob) =>
+    ffmpegExecNativeOrWeb(
+        [
+            ffmpegPathPlaceholder,
+            "-i",
+            inputPathPlaceholder,
+            "-preset",
+            "ultrafast",
+            outputPathPlaceholder,
+        ],
+        blob,
+        "mp4",
+        30 * 1000,
+    );
+
+/**
+ * Run the given FFmpeg command using a native FFmpeg binary when we're running
+ * in the context of our desktop app, otherwise using the browser based wasm
+ * FFmpeg implemenation.
  *
  * See also: {@link ffmpegExecWeb}.
  */
-/*
-TODO(MR): Remove me
-const ffmpegExecNative = async (
-    electron: Electron,
+const ffmpegExecNativeOrWeb = async (
     command: string[],
     blob: Blob,
-    timeoutMs: number = 0,
-) => {
-    const electron = globalThis.electron;
-    if (electron) {
-        const data = new Uint8Array(await blob.arrayBuffer());
-        return await electron.ffmpegExec(command, data, timeoutMs);
-    } else {
-        const worker = await workerFactory.lazy();
-        return await worker.exec(command, blob, timeoutMs);
-    }
-};
-*/
-
-const ffmpegExec2 = async (
-    command: string[],
-    inputFile: File | ElectronFile,
     outputFileExtension: string,
-    timeoutMS: number = 0,
+    timeoutMs: number,
 ) => {
     const electron = globalThis.electron;
-    if (electron || false) {
-        throw new Error("WIP");
-        // return electron.ffmpegExec(
-        //     command,
-        //     /* TODO(MR): ElectronFile changes */
-        //     inputFile as unknown as string,
-        //     outputFileName,
-        //     timeoutMS,
-        // );
-    } else {
-        /* TODO(MR): ElectronFile changes */
-        return ffmpegExecWeb(
+    if (electron)
+        return electron.ffmpegExec(
             command,
-            inputFile as File,
+            new Uint8Array(await blob.arrayBuffer()),
             outputFileExtension,
-            timeoutMS,
+            timeoutMs,
         );
-    }
+    else return ffmpegExecWeb(command, blob, outputFileExtension, timeoutMs);
 };
 
 /** Lazily create a singleton instance of our worker */

@@ -1,6 +1,6 @@
 import { useCallback, useRef, useState } from "react";
 
-/*
+/**
  * TODO (MR): Understand how this is happening, and validate it further (on
  * first glance this is correct).
  *
