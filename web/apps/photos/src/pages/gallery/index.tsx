@@ -224,6 +224,14 @@ export default function Gallery() {
     } = useFileInput({
         directory: true,
     });
+    const {
+        selectedFiles: webFileSelectorZipFiles,
+        open: openZipFileSelector,
+        getInputProps: getZipFileSelectorInputProps,
+    } = useFileInput({
+        directory: false,
+        accept: ".zip"
+    });
 
     const [isInSearchMode, setIsInSearchMode] = useState(false);
     const [searchResultSummary, setSetSearchResultSummary] =
@@ -1023,6 +1031,7 @@ export default function Gallery() {
                     getDragAndDropInputProps={getDragAndDropInputProps}
                     getFileSelectorInputProps={getFileSelectorInputProps}
                     getFolderSelectorInputProps={getFolderSelectorInputProps}
+                    getZipFileSelectorInputProps={getZipFileSelectorInputProps}
                 />
                 {blockingLoad && (
                     <LoadingOverlay>
@@ -1123,10 +1132,12 @@ export default function Gallery() {
                     }
                     webFileSelectorFiles={webFileSelectorFiles}
                     webFolderSelectorFiles={webFolderSelectorFiles}
+                    webFileSelectorZipFiles={webFileSelectorZipFiles}
                     dragAndDropFiles={dragAndDropFiles}
                     uploadTypeSelectorView={uploadTypeSelectorView}
                     showUploadFilesDialog={openFileSelector}
                     showUploadDirsDialog={openFolderSelector}
+                    showUploadZipFilesDialog={openZipFileSelector}
                     showSessionExpiredMessage={showSessionExpiredMessage}
                 />
                 <Sidebar

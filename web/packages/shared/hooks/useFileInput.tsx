@@ -18,6 +18,11 @@ export interface FileWithPath extends File {
     readonly path?: string;
 }
 
+interface UseFileInputParams {
+    directory?: boolean;
+    accept?: string;
+}
+
 /**
  * Return three things:
  *
@@ -33,10 +38,18 @@ export interface FileWithPath extends File {
  *   user selected directories - in that case, it will be the recursive list of
  *   files within this directory.
  *
- * @param param0 If {@link directory} is true, the file open dialog will ask the
- * user to select directories. Otherwise it'll ask the user to select files.
+ * @param param0
+ *
+ * - If {@link directory} is true, the file open dialog will ask the user to
+ *   select directories. Otherwise it'll ask the user to select files.
+ *
+ * - If {@link accept} is specified, it'll restrict the type of files that the
+ *   user can select by setting the "accept" attribute of the underlying HTML
+ *   input element we use to surface the file selector dialog. For value of
+ *   accept can be an extension or a MIME type (See
+ *   https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/accept).
  */
-export default function useFileInput({ directory }: { directory?: boolean }) {
+export default function useFileInput({ directory, accept }: UseFileInputParams) {
     const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
     const inputRef = useRef<HTMLInputElement>();
 
@@ -66,6 +79,7 @@ export default function useFileInput({ directory }: { directory?: boolean }) {
             ...(directory ? { directory: "", webkitdirectory: "" } : {}),
             ref: inputRef,
             onChange: handleChange,
+            ...(accept ? { accept } : {}),
         }),
         [],
     );

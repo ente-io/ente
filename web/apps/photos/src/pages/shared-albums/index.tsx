@@ -550,6 +550,7 @@ export default function PublicCollectionGallery() {
                     getDragAndDropInputProps={getDragAndDropInputProps}
                     getFileSelectorInputProps={getFileSelectorInputProps}
                     getFolderSelectorInputProps={getFolderSelectorInputProps}
+                    getZipFileSelectorInputProps={undefined}
                 />
                 <SharedAlbumNavbar
                     showUploadButton={
