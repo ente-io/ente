@@ -253,6 +253,9 @@ const setPendingUploadFiles = (
 ): Promise<void> =>
     ipcRenderer.invoke("setPendingUploadFiles", type, filePaths);
 
+const lsZip = (zipPath: string): Promise<string[]> =>
+    ipcRenderer.invoke("lsZip", zipPath);
+
 // - TODO: AUDIT below this
 // -
 
@@ -373,6 +376,7 @@ contextBridge.exposeInMainWorld("electron", {
     pendingUploads,
     setPendingUploadCollection,
     setPendingUploadFiles,
+    lsZip,
 
     // -
 

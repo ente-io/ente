@@ -69,6 +69,10 @@ const storeKey = (type: PendingUploads["type"]): keyof UploadStatusStore => {
     }
 };
 
+export const lsZip = async (zipPath: string) => {
+    return [zipPath];
+};
+
 export const getElectronFilesFromGoogleZip = async (filePath: string) => {
     const zip = new StreamZip.async({
         file: filePath,

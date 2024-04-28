@@ -2,6 +2,8 @@
  * @file Streaming IPC communication with the Node.js layer of our desktop app.
  *
  * NOTE: These functions only work when we're running in our desktop app.
+ *
+ * See: [Note: IPC streams].
  */
 
 import type { Electron } from "@/next/types/ipc";

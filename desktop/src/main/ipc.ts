@@ -53,6 +53,7 @@ import {
 } from "./services/store";
 import {
     getElectronFilesFromGoogleZip,
+    lsZip,
     pendingUploads,
     setPendingUploadCollection,
     setPendingUploadFiles,
@@ -209,6 +210,8 @@ export const attachIPCHandlers = () => {
         (_, type: PendingUploads["type"], filePaths: string[]) =>
             setPendingUploadFiles(type, filePaths),
     );
+
+    ipcMain.handle("lsZip", (_, zipPath: string) => lsZip(zipPath));
 
     // -
 

@@ -491,6 +491,19 @@ export interface Electron {
         filePaths: string[],
     ) => Promise<void>;
 
+    /**
+     * Get the list of files that are present in the given zip file.
+     *
+     * @param zipPath The path of the zip file on the user's local file system.
+     *
+     * @returns A list of paths, one for each file in the given zip. Directories
+     * are traversed recursively, but the directory entries themselves will be
+     * excluded from the returned list.
+     *
+     * To read the contents of the files themselves, see [Note: IPC streams].
+     */
+    lsZip: (zipPath: string) => Promise<string[]>;
+
     /*
      * TODO: AUDIT below this - Some of the types we use below are not copyable
      * across process boundaries, and such functions will (expectedly) fail at
