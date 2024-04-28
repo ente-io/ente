@@ -1,4 +1,3 @@
-import { convertBytesToHumanReadable } from "@/next/file";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import { Box, styled } from "@mui/material";
 import {
@@ -20,6 +19,7 @@ import {
 } from "react-window";
 import { Duplicate } from "services/deduplicationService";
 import { EnteFile } from "types/file";
+import { convertBytesToHumanReadable } from "utils/file";
 
 export enum ITEM_TYPE {
     TIME = "TIME",
