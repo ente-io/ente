@@ -944,7 +944,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         widget.collection!.id,
         castToken,
       );
-      showToast(context, "Pairing complete");
+      showToast(context, S.of(context).pairingComplete);
       return true;
     } catch (e, s) {
       _logger.severe("Failed to cast album", e, s);

@@ -8683,6 +8683,16 @@ class S {
       args: [],
     );
   }
+
+  /// `Pairing complete`
+  String get pairingComplete {
+    return Intl.message(
+      'Pairing complete',
+      name: 'pairingComplete',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

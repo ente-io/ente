@@ -1000,6 +1000,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Or pick an existing one"),
         "pair": MessageLookupByLibrary.simpleMessage("Pair"),
         "pairWithPin": MessageLookupByLibrary.simpleMessage("Pair with PIN"),
+        "pairingComplete":
+            MessageLookupByLibrary.simpleMessage("Pairing complete"),
         "passkey": MessageLookupByLibrary.simpleMessage("Passkey"),
         "passkeyAuthTitle":
             MessageLookupByLibrary.simpleMessage("Passkey verification"),

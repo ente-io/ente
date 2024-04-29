@@ -1224,5 +1224,6 @@
   "stopCastingTitle": "Stop casting",
   "stopCastingBody": "Do you want to stop casting?",
   "castIPMismatchTitle": "Failed to cast album",
-  "castIPMismatchBody": "Please make sure you are on the same network as the TV."
+  "castIPMismatchBody": "Please make sure you are on the same network as the TV.",
+  "pairingComplete": "Pairing complete"
 }
