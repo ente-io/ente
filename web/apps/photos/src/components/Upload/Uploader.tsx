@@ -1,6 +1,6 @@
 import { basename } from "@/next/file";
 import log from "@/next/log";
-import { ElectronFile, type FileAndPath } from "@/next/types/file";
+import { type FileAndPath } from "@/next/types/file";
 import type { CollectionMapping, Electron, ZipEntry } from "@/next/types/ipc";
 import { CustomError } from "@ente/shared/error";
 import { isPromise } from "@ente/shared/utils";
@@ -27,9 +27,7 @@ import type {
     UploadCounter,
     UploadFileNames,
 } from "services/upload/uploadManager";
-import uploadManager, {
-    setToUploadCollection,
-} from "services/upload/uploadManager";
+import uploadManager from "services/upload/uploadManager";
 import watcher from "services/watch";
 import { NotificationAttributes } from "types/Notification";
 import { Collection } from "types/collection";
@@ -253,8 +251,6 @@ export default function Uploader({
                 if (!pending) return;
 
                 const { collectionName, filePaths, zipEntries } = pending;
-                if (filePaths.length == 0 && zipEntries.length == 0) return;
-
                 log.info("Resuming pending upload", pending);
                 isPendingDesktopUpload.current = true;
                 pendingDesktopUploadCollectionName.current = collectionName;
@@ -339,11 +335,13 @@ export default function Uploader({
         );
 
         itemsToUpload.current = prunedItemAndPaths.map(([i]) => i);
-        fileOrPathsToUpload.current = itemsToUpload.current.map((i) => {
-            if (typeof i == "string" || i instanceof File) return i;
-            if (Array.isArray(i)) return undefined;
-            return i.file;
-        }).filter((x) => x);
+        fileOrPathsToUpload.current = itemsToUpload.current
+            .map((i) => {
+                if (typeof i == "string" || i instanceof File) return i;
+                if (Array.isArray(i)) return undefined;
+                return i.file;
+            })
+            .filter((x) => x);
         itemsToUpload.current = [];
         if (fileOrPathsToUpload.current.length === 0) {
             props.setLoading(false);
@@ -515,23 +513,10 @@ export default function Uploader({
                 !isPendingDesktopUpload.current &&
                 !watcher.isUploadRunning()
             ) {
-                await setToUploadCollection(collections);
-                if (zipPaths.current) {
-                    await electron.setPendingUploadFiles(
-                        "zips",
-                        zipPaths.current,
-                    );
-                    zipPaths.current = null;
-                }
-                await electron.setPendingUploadFiles(
-                    "files",
-                    filesWithCollectionToUploadIn.map(
-                        // TODO(MR): ElectronFile
-                        ({ fileOrPath }) =>
-                            typeof fileOrPath == "string"
-                                ? fileOrPath
-                                : (fileOrPath as any as ElectronFile).path,
-                    ),
+                setPendingUploads(
+                    electron,
+                    collections,
+                    filesWithCollectionToUploadIn,
                 );
             }
             const wereFilesProcessed = await uploadManager.uploadFiles(
@@ -922,4 +907,44 @@ const groupFilesBasedOnParentFolder = (fileOrPaths: (File | string)[]) => {
         result.get(folderName).push(fileOrPath);
     }
     return result;
+};
+
+export const setPendingUploads = async (
+    electron: Electron,
+    collections: Collection[],
+    filesWithCollectionToUploadIn: FileWithCollection[],
+) => {
+    let collectionName: string | undefined;
+    /* collection being one suggest one of two things
+        1. Either the user has upload to a single existing collection
+        2. Created a new single collection to upload to
+            may have had multiple folder, but chose to upload
+            to one album
+        hence saving the collection name when upload collection count is 1
+        helps the info of user choosing this options
+        and on next upload we can directly start uploading to this collection
+    */
+    if (collections.length === 1) {
+        collectionName = collections[0].name;
+    }
+
+    const filePaths: string[] = [];
+    const zipEntries: ZipEntry[] = [];
+    for (const file of filesWithCollectionToUploadIn) {
+        if (file instanceof File) {
+            throw new Error("Unexpected web file for a desktop pending upload");
+        } else if (typeof file == "string") {
+            filePaths.push(file);
+        } else if (Array.isArray(file)) {
+            zipEntries.push(file);
+        } else {
+            filePaths.push(file.path);
+        }
+    }
+
+    await electron.setPendingUploads({
+        collectionName,
+        filePaths,
+        zipEntries,
+    });
 };

@@ -2,9 +2,9 @@ import Store, { Schema } from "electron-store";
 
 export interface UploadStatusStore {
     /* The collection to which we're uploading, or the root collection. */
-    collectionName: string;
+    collectionName?: string;
     /** Paths to regular files that are pending upload */
-    filePaths: string[];
+    filePaths?: string[];
     /**
      * Each item is the path to a zip file and the name of an entry within it.
      *

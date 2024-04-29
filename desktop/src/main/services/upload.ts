@@ -25,9 +25,8 @@ export const listZipEntries = async (zipPath: string): Promise<ZipEntry[]> => {
 
 export const pendingUploads = async (): Promise<PendingUploads | undefined> => {
     const collectionName = uploadStatusStore.get("collectionName");
-    if (!collectionName) return undefined;
 
-    const allFilePaths = uploadStatusStore.get("filePaths");
+    const allFilePaths = uploadStatusStore.get("filePaths") ?? [];
     const filePaths = allFilePaths.filter((f) => existsSync(f));
 
     const allZipEntries = uploadStatusStore.get("zipEntries");
@@ -49,6 +48,8 @@ export const pendingUploads = async (): Promise<PendingUploads | undefined> => {
     } else {
         zipEntries = allZipEntries.filter(([z]) => existsSync(z));
     }
+
+    if (filePaths.length == 0 && zipEntries.length == 0) return undefined;
 
     return {
         collectionName,
