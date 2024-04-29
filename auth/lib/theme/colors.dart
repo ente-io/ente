@@ -200,7 +200,7 @@ const Color _primary500 = Color.fromARGB(255, 204, 10, 101);
 const Color _primary400 = Color.fromARGB(255, 122, 41, 193);
 const Color _primary300 = Color.fromARGB(255, 152, 77, 244);
 
-const Color _warning700 = Color.fromRGBO(234, 63, 63, 1);
+const Color _warning700 = Color.fromRGBO(245, 52, 52, 1);
 const Color _warning500 = Color.fromRGBO(255, 101, 101, 1);
 const Color _warning800 = Color(0xFFF53434);
 const Color warning500 = Color.fromRGBO(255, 101, 101, 1);

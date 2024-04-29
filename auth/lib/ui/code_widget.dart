@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:ui' as ui;
 
 import 'package:clipboard/clipboard.dart';
 import 'package:ente_auth/core/configuration.dart';
@@ -159,9 +160,21 @@ class _CodeWidgetState extends State<CodeWidget> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       if (widget.code.isPinned)
-                        SvgPicture.asset("assets/svg/pin-active.svg")
+                        SvgPicture.asset(
+                          "assets/svg/pin-active.svg",
+                          colorFilter: ui.ColorFilter.mode(
+                            Theme.of(context).colorScheme.primary,
+                            BlendMode.srcIn,
+                          ),
+                        )
                       else
-                        SvgPicture.asset("assets/svg/pin-inactive.svg"),
+                        SvgPicture.asset(
+                          "assets/svg/pin-inactive.svg",
+                          colorFilter: ui.ColorFilter.mode(
+                            Theme.of(context).colorScheme.primary,
+                            BlendMode.srcIn,
+                          ),
+                        ),
                       const SizedBox(height: 8),
                       Text(
                         widget.code.isPinned ? l10n.unpinText : l10n.pinText,
@@ -276,7 +289,11 @@ class _CodeWidgetState extends State<CodeWidget> {
           Align(
             alignment: Alignment.topRight,
             child: CustomPaint(
-              painter: PinBgPainter(strokeColor: const Color(0xFFF9ECFF)),
+              painter: PinBgPainter(
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? const Color(0xFF390C4F)
+                    : const Color(0xFFF9ECFF),
+              ),
               size: const Size(39, 39),
             ),
           ),
@@ -600,21 +617,18 @@ class _CodeWidgetState extends State<CodeWidget> {
 }
 
 class PinBgPainter extends CustomPainter {
-  final Color strokeColor;
+  final Color color;
   final PaintingStyle paintingStyle;
-  final double strokeWidth;
 
   PinBgPainter({
-    this.strokeColor = Colors.black,
-    this.strokeWidth = 3,
+    this.color = Colors.black,
     this.paintingStyle = PaintingStyle.fill,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
     Paint paint = Paint()
-      ..color = strokeColor
-      ..strokeWidth = strokeWidth
+      ..color = color
       ..style = paintingStyle;
 
     canvas.drawPath(getTrianglePath(size.width, size.height), paint);
@@ -630,8 +644,7 @@ class PinBgPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(PinBgPainter oldDelegate) {
-    return oldDelegate.strokeColor != strokeColor ||
-        oldDelegate.paintingStyle != paintingStyle ||
-        oldDelegate.strokeWidth != strokeWidth;
+    return oldDelegate.color != color ||
+        oldDelegate.paintingStyle != paintingStyle;
   }
 }

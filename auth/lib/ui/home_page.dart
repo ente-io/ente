@@ -60,6 +60,7 @@ class _HomePageState extends State<HomePage> {
   StreamSubscription<CodesUpdatedEvent>? _streamSubscription;
   StreamSubscription<TriggerLogoutEvent>? _triggerLogoutEvent;
   StreamSubscription<IconsChangedEvent>? _iconsChangedEvent;
+  String selectedTag = "";
 
   @override
   void initState() {
@@ -118,6 +119,11 @@ class _HomePageState extends State<HomePage> {
       for (final CodeState codeState in _codes!.allCodes) {
         if (codeState.error != null) continue;
 
+        if (selectedTag != "" &&
+            !codeState.code!.display.tags.contains(selectedTag)) {
+          continue;
+        }
+
         if (codeState.code!.issuer.toLowerCase().contains(val)) {
           issuerMatch.add(codeState);
         } else if (codeState.code!.account.toLowerCase().contains(val)) {
@@ -127,7 +133,15 @@ class _HomePageState extends State<HomePage> {
       _filteredCodes = issuerMatch;
       _filteredCodes.addAll(accountMatch);
     } else {
-      _filteredCodes = _codes?.allCodes ?? [];
+      _filteredCodes = _codes?.allCodes
+              .where(
+                (element) =>
+                    selectedTag == "" ||
+                    element.code != null &&
+                        element.code!.display.tags.contains(selectedTag),
+              )
+              .toList() ??
+          [];
     }
     if (mounted) {
       setState(() {});
@@ -178,6 +192,10 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    if (!(_codes?.tags.contains(selectedTag) ?? true)) {
+      selectedTag = "";
+      setState(() {});
+    }
     return PopScope(
       onPopInvoked: (_) async {
         if (_isSettingsOpen) {
@@ -279,12 +297,30 @@ class _HomePageState extends State<HomePage> {
                 itemCount: _codes?.tags == null ? 0 : _codes!.tags.length + 1,
                 itemBuilder: (context, index) {
                   if (index == 0) {
-                    return const TagChip(
+                    return TagChip(
                       label: "All",
-                      isSelected: true,
+                      state: selectedTag == ""
+                          ? TagChipState.selected
+                          : TagChipState.unselected,
+                      onTap: () {
+                        selectedTag = "";
+                        setState(() {});
+                        _applyFilteringAndRefresh();
+                      },
                     );
                   }
-                  return TagChip(label: _codes!.tags[index - 1]);
+                  return TagChip(
+                    label: _codes!.tags[index - 1],
+                    action: TagChipAction.menu,
+                    state: selectedTag == _codes!.tags[index - 1]
+                        ? TagChipState.selected
+                        : TagChipState.unselected,
+                    onTap: () {
+                      selectedTag = _codes!.tags[index - 1];
+                      setState(() {});
+                      _applyFilteringAndRefresh();
+                    },
+                  );
                 },
               ),
             ),
