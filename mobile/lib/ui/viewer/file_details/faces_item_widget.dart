@@ -71,9 +71,9 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
         ];
       }
 
-      // Remove faces with low scores and blurry faces
+      // Remove faces with low scores
       if (!kDebugMode) {
-        faces.removeWhere((face) => (face.isBlurry || face.score < 0.75));
+        faces.removeWhere((face) => (face.score < 0.75));
       }
 
       if (faces.isEmpty) {
@@ -85,9 +85,6 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
         ];
       }
 
-      // Sort the faces by score in descending order, so that the highest scoring face is first.
-      faces.sort((Face a, Face b) => b.score.compareTo(a.score));
-
       // TODO: add deduplication of faces of same person
       final faceIdsToClusterIds = await FaceMLDataDB.instance
           .getFaceIdsToClusterIds(faces.map((face) => face.faceID));
@@ -95,6 +92,29 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
           await PersonService.instance.getPersonsMap();
       final clusterIDToPerson =
           await FaceMLDataDB.instance.getClusterIDToPersonID();
+
+      // Sort faces by name and score
+      final faceIdToPersonID = <String, String>{};
+      for (final face in faces) {
+        final clusterID = faceIdsToClusterIds[face.faceID];
+        if (clusterID != null) {
+          final personID = clusterIDToPerson[clusterID];
+          if (personID != null) {
+            faceIdToPersonID[face.faceID] = personID;
+          }
+        }
+      }
+      faces.sort((Face a, Face b) {
+        final aPersonID = faceIdToPersonID[a.faceID];
+        final bPersonID = faceIdToPersonID[b.faceID];
+        if (aPersonID != null && bPersonID == null) {
+          return -1;
+        } else if (aPersonID == null && bPersonID != null) {
+          return 1;
+        } else {
+          return b.score.compareTo(a.score);
+        }
+      });
 
       final lastViewedClusterID = ClusterFeedbackService.lastViewedClusterID;
 

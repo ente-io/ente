@@ -28,6 +28,7 @@ import "package:photos/models/search/search_constants.dart";
 import "package:photos/models/search/search_types.dart";
 import 'package:photos/services/collections_service.dart';
 import "package:photos/services/location_service.dart";
+import "package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import 'package:photos/services/machine_learning/semantic_search/semantic_search_service.dart';
 import "package:photos/states/location_screen_state.dart";
@@ -824,7 +825,7 @@ class SearchService {
             "Cluster $clusterId should not have person id ${clusterIDToPersonID[clusterId]}",
           );
         }
-        if (files.length < 20 && sortedClusterIds.length > 3) {
+        if (files.length < kMinimumClusterSizeSearchResult && sortedClusterIds.length > 3) {
           continue;
         }
         facesResult.add(

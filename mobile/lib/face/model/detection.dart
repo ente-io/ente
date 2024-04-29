@@ -155,7 +155,7 @@ class Detection {
         (nose[0] < min(leftEye[0], rightEye[0]) - 0.5 * eyeDistanceX) &&
             (nose[0] < min(leftMouth[0], rightMouth[0]));
     final bool noseStickingOutRight =
-        (nose[0] > max(leftEye[0], rightEye[0]) - 0.5 * eyeDistanceX) &&
+        (nose[0] > max(leftEye[0], rightEye[0]) + 0.5 * eyeDistanceX) &&
             (nose[0] > max(leftMouth[0], rightMouth[0]));
 
     return faceIsUpright && (noseStickingOutLeft || noseStickingOutRight);

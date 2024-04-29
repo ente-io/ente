@@ -16,7 +16,7 @@ const mlVersionColumn = 'ml_version';
 
 const createFacesTable = '''CREATE TABLE IF NOT EXISTS $facesTable (
   $fileIDColumn	INTEGER NOT NULL,
-  $faceIDColumn  TEXT NOT NULL,
+  $faceIDColumn  TEXT NOT NULL UNIQUE,
 	$faceDetectionColumn	TEXT NOT NULL,
   $faceEmbeddingBlob BLOB NOT NULL,
   $faceScore  REAL NOT NULL,
@@ -95,7 +95,8 @@ const notPersonFeedback = 'not_person_feedback';
 const createNotPersonFeedbackTable = '''
 CREATE TABLE IF NOT EXISTS $notPersonFeedback (
   $personIdColumn	TEXT NOT NULL,
-  $clusterIDColumn	INTEGER NOT NULL
+  $clusterIDColumn	INTEGER NOT NULL,
+  PRIMARY KEY($personIdColumn, $clusterIDColumn)
 );
 ''';
 const dropNotPersonFeedbackTable = 'DROP TABLE IF EXISTS $notPersonFeedback';

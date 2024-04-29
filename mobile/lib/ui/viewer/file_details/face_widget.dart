@@ -1,10 +1,10 @@
 import "dart:developer" show log;
-import "dart:io" show Platform;
 import "dart:typed_data";
 
 import "package:flutter/cupertino.dart";
 import "package:flutter/foundation.dart" show kDebugMode;
 import "package:flutter/material.dart";
+import "package:photos/extensions/stop_watch.dart";
 import "package:photos/face/db.dart";
 import "package:photos/face/model/face.dart";
 import "package:photos/face/model/person.dart";
@@ -20,6 +20,8 @@ import "package:photos/ui/viewer/people/people_page.dart";
 import "package:photos/utils/face/face_box_crop.dart";
 import "package:photos/utils/thumbnail_util.dart";
 // import "package:photos/utils/toast_util.dart";
+
+const useGeneratedFaceCrops = true;
 
 class FaceWidget extends StatefulWidget {
   final EnteFile file;
@@ -48,12 +50,13 @@ class _FaceWidgetState extends State<FaceWidget> {
 
   @override
   Widget build(BuildContext context) {
-    if (Platform.isIOS) {
+    if (useGeneratedFaceCrops) {
       return FutureBuilder<Uint8List?>(
         future: getFaceCrop(),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             final ImageProvider imageProvider = MemoryImage(snapshot.data!);
+
             return GestureDetector(
               onTap: () async {
                 if (widget.editMode) return;
@@ -63,7 +66,50 @@ class _FaceWidgetState extends State<FaceWidget> {
                   name: "FaceWidget",
                 );
                 if (widget.person == null && widget.clusterID == null) {
-                  return;
+                  // Get faceID and double check that it doesn't belong to an existing clusterID. If it does, push that cluster page
+                  final w = (kDebugMode ? EnteWatch('FaceWidget') : null)
+                    ?..start();
+                  final existingClusterID = await FaceMLDataDB.instance
+                      .getClusterIDForFaceID(widget.face.faceID);
+                  w?.log('getting existing clusterID for faceID');
+                  if (existingClusterID != null) {
+                    final fileIdsToClusterIds =
+                        await FaceMLDataDB.instance.getFileIdToClusterIds();
+                    final files = await SearchService.instance.getAllFiles();
+                    final clusterFiles = files
+                        .where(
+                          (file) =>
+                              fileIdsToClusterIds[file.uploadedFileID]
+                                  ?.contains(existingClusterID) ??
+                              false,
+                        )
+                        .toList();
+                    await Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => ClusterPage(
+                          clusterFiles,
+                          clusterID: existingClusterID,
+                        ),
+                      ),
+                    );
+                  }
+
+                  // Create new clusterID for the faceID and update DB to assign the faceID to the new clusterID
+                  final int newClusterID =
+                      DateTime.now().microsecondsSinceEpoch;
+                  await FaceMLDataDB.instance.updateFaceIdToClusterId(
+                    {widget.face.faceID: newClusterID},
+                  );
+
+                  // Push page for the new cluster
+                  await Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => ClusterPage(
+                        [widget.file],
+                        clusterID: newClusterID,
+                      ),
+                    ),
+                  );
                 }
                 if (widget.person != null) {
                   await Navigator.of(context).push(
@@ -228,7 +274,49 @@ class _FaceWidgetState extends State<FaceWidget> {
                 name: "FaceWidget",
               );
               if (widget.person == null && widget.clusterID == null) {
-                return;
+                // Get faceID and double check that it doesn't belong to an existing clusterID. If it does, push that cluster page
+                final w = (kDebugMode ? EnteWatch('FaceWidget') : null)
+                  ?..start();
+                final existingClusterID = await FaceMLDataDB.instance
+                    .getClusterIDForFaceID(widget.face.faceID);
+                w?.log('getting existing clusterID for faceID');
+                if (existingClusterID != null) {
+                  final fileIdsToClusterIds =
+                      await FaceMLDataDB.instance.getFileIdToClusterIds();
+                  final files = await SearchService.instance.getAllFiles();
+                  final clusterFiles = files
+                      .where(
+                        (file) =>
+                            fileIdsToClusterIds[file.uploadedFileID]
+                                ?.contains(existingClusterID) ??
+                            false,
+                      )
+                      .toList();
+                  await Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => ClusterPage(
+                        clusterFiles,
+                        clusterID: existingClusterID,
+                      ),
+                    ),
+                  );
+                }
+
+                // Create new clusterID for the faceID and update DB to assign the faceID to the new clusterID
+                final int newClusterID = DateTime.now().microsecondsSinceEpoch;
+                await FaceMLDataDB.instance.updateFaceIdToClusterId(
+                  {widget.face.faceID: newClusterID},
+                );
+
+                // Push page for the new cluster
+                await Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => ClusterPage(
+                      [widget.file],
+                      clusterID: newClusterID,
+                    ),
+                  ),
+                );
               }
               if (widget.person != null) {
                 await Navigator.of(context).push(
@@ -262,33 +350,56 @@ class _FaceWidgetState extends State<FaceWidget> {
             },
             child: Column(
               children: [
-                Container(
-                  height: 60,
-                  width: 60,
-                  decoration: ShapeDecoration(
-                    shape: RoundedRectangleBorder(
-                      borderRadius:
-                          const BorderRadius.all(Radius.elliptical(16, 12)),
-                      side: widget.highlight
-                          ? BorderSide(
-                              color: getEnteColorScheme(context).primary700,
-                              width: 2.0,
-                            )
-                          : BorderSide.none,
-                    ),
-                  ),
-                  child: ClipRRect(
-                    borderRadius:
-                        const BorderRadius.all(Radius.elliptical(16, 12)),
-                    child: SizedBox(
-                      width: 60,
+                Stack(
+                  children: [
+                    Container(
                       height: 60,
-                      child: CroppedFaceImageView(
-                        enteFile: widget.file,
-                        face: widget.face,
+                      width: 60,
+                      decoration: ShapeDecoration(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: const BorderRadius.all(
+                            Radius.elliptical(16, 12),
+                          ),
+                          side: widget.highlight
+                              ? BorderSide(
+                                  color: getEnteColorScheme(context).primary700,
+                                  width: 1.0,
+                                )
+                              : BorderSide.none,
+                        ),
+                      ),
+                      child: ClipRRect(
+                        borderRadius:
+                            const BorderRadius.all(Radius.elliptical(16, 12)),
+                        child: SizedBox(
+                          width: 60,
+                          height: 60,
+                          child: CroppedFaceImageView(
+                            enteFile: widget.file,
+                            face: widget.face,
+                          ),
+                        ),
                       ),
                     ),
-                  ),
+                    // TODO: the edges of the green line are still not properly rounded around ClipRRect
+                    if (widget.editMode)
+                      Positioned(
+                        right: 0,
+                        top: 0,
+                        child: GestureDetector(
+                          onTap: _cornerIconPressed,
+                          child: isJustRemoved
+                              ? const Icon(
+                                  CupertinoIcons.add_circled_solid,
+                                  color: Colors.green,
+                                )
+                              : const Icon(
+                                  Icons.cancel,
+                                  color: Colors.red,
+                                ),
+                        ),
+                      ),
+                  ],
                 ),
                 const SizedBox(height: 8),
                 if (widget.person != null)

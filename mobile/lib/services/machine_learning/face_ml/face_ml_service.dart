@@ -295,6 +295,7 @@ class FaceMlService {
     bool clusterInBuckets = true,
   }) async {
     _logger.info("`clusterAllImages()` called");
+    final clusterAllImagesTime = DateTime.now();
 
     try {
       // Get a sense of the total number of faces in the database
@@ -349,7 +350,7 @@ class FaceMlService {
           }
 
           await FaceMLDataDB.instance
-              .updateClusterIdToFaceId(clusteringResult.newFaceIdToCluster);
+              .updateFaceIdToClusterId(clusteringResult.newFaceIdToCluster);
           await FaceMLDataDB.instance
               .clusterSummaryUpdate(clusteringResult.newClusterSummaries!);
           _logger.info(
@@ -402,13 +403,14 @@ class FaceMlService {
           'Updating ${clusteringResult.newFaceIdToCluster.length} FaceIDs with clusterIDs in the DB',
         );
         await FaceMLDataDB.instance
-            .updateClusterIdToFaceId(clusteringResult.newFaceIdToCluster);
+            .updateFaceIdToClusterId(clusteringResult.newFaceIdToCluster);
         await FaceMLDataDB.instance
             .clusterSummaryUpdate(clusteringResult.newClusterSummaries!);
         _logger.info('Done updating FaceIDs with clusterIDs in the DB, in '
             '${DateTime.now().difference(clusterDoneTime).inSeconds} seconds');
       }
-      _logger.info('clusterAllImages() finished');
+      _logger.info('clusterAllImages() finished, in '
+          '${DateTime.now().difference(clusterAllImagesTime).inSeconds} seconds');
     } catch (e, s) {
       _logger.severe("`clusterAllImages` failed", e, s);
     }
@@ -868,7 +870,7 @@ class FaceMlService {
     stopwatch.stop();
     _logger.info(
       "Finished Analyze image (${result.faces.length} faces) with uploadedFileID ${enteFile.uploadedFileID}, in "
-      "${stopwatch.elapsedMilliseconds} ms",
+      "${stopwatch.elapsedMilliseconds} ms (including time waiting for inference engine availability)",
     );
 
     return result;
@@ -964,7 +966,12 @@ class FaceMlService {
     switch (typeOfData) {
       case FileDataForML.fileData:
         final stopwatch = Stopwatch()..start();
-        final File? file = await getFile(enteFile, isOrigin: true);
+        File? file;
+        if (enteFile.fileType == FileType.video) {
+          file = await getThumbnailForUploadedFile(enteFile);
+        } else {
+          file = await getFile(enteFile, isOrigin: true);
+        }
         if (file == null) {
           _logger.warning("Could not get file for $enteFile");
           imagePath = null;
@@ -1290,10 +1297,6 @@ class FaceMlService {
     }
     // Skip if the file is not uploaded or not owned by the user
     if (!enteFile.isUploaded || enteFile.isOwner == false) {
-      return true;
-    }
-    // Skip if the file is a video
-    if (enteFile.fileType == FileType.video) {
       return true;
     }
     // I don't know how motionPhotos and livePhotos work, so I'm also just skipping them for now

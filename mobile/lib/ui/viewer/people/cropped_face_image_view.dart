@@ -4,8 +4,10 @@ import "dart:io" show File;
 import 'package:flutter/material.dart';
 import "package:photos/face/model/face.dart";
 import "package:photos/models/file/file.dart";
+import "package:photos/models/file/file_type.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/utils/file_util.dart";
+import "package:photos/utils/thumbnail_util.dart";
 
 class CroppedFaceInfo {
   final Image image;
@@ -38,7 +40,8 @@ class CroppedFaceImageView extends StatelessWidget {
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           return LayoutBuilder(
-            builder: (BuildContext context, BoxConstraints constraints) {
+            builder: ((context, constraints) {
+              final double imageAspectRatio = enteFile.width / enteFile.height;
               final Image image = snapshot.data!;
 
               final double viewWidth = constraints.maxWidth;
@@ -51,14 +54,13 @@ class CroppedFaceImageView extends StatelessWidget {
               final double relativeFaceCenterY =
                   faceBox.yMin + faceBox.height / 2;
 
-              const double desiredFaceHeightRelativeToWidget = 1 / 2;
+              const double desiredFaceHeightRelativeToWidget = 8 / 10;
               final double scale =
                   (1 / faceBox.height) * desiredFaceHeightRelativeToWidget;
 
               final double widgetCenterX = viewWidth / 2;
               final double widgetCenterY = viewHeight / 2;
 
-              final double imageAspectRatio = enteFile.width / enteFile.height;
               final double widgetAspectRatio = viewWidth / viewHeight;
               final double imageToWidgetRatio =
                   imageAspectRatio / widgetAspectRatio;
@@ -68,16 +70,15 @@ class CroppedFaceImageView extends StatelessWidget {
               double offsetY =
                   (widgetCenterY - relativeFaceCenterY * viewHeight) * scale;
 
-              if (imageAspectRatio > widgetAspectRatio) {
+              if (imageAspectRatio < widgetAspectRatio) {
                 // Landscape Image: Adjust offsetX more conservatively
                 offsetX = offsetX * imageToWidgetRatio;
               } else {
                 // Portrait Image: Adjust offsetY more conservatively
                 offsetY = offsetY / imageToWidgetRatio;
               }
-
-              return ClipRect(
-                clipBehavior: Clip.antiAlias,
+              return ClipRRect(
+                borderRadius: const BorderRadius.all(Radius.elliptical(16, 12)),
                 child: Transform.translate(
                   offset: Offset(
                     offsetX,
@@ -89,7 +90,7 @@ class CroppedFaceImageView extends StatelessWidget {
                   ),
                 ),
               );
-            },
+            }),
           );
         } else {
           if (snapshot.hasError) {
@@ -104,13 +105,18 @@ class CroppedFaceImageView extends StatelessWidget {
   }
 
   Future<Image?> getImage() async {
-    final File? ioFile = await getFile(enteFile);
+    final File? ioFile;
+    if (enteFile.fileType == FileType.video) {
+      ioFile = await getThumbnailForUploadedFile(enteFile);
+    } else {
+      ioFile = await getFile(enteFile);
+    }
     if (ioFile == null) {
       return null;
     }
 
     final imageData = await ioFile.readAsBytes();
-    final image = Image.memory(imageData, fit: BoxFit.cover);
+    final image = Image.memory(imageData, fit: BoxFit.contain);
 
     return image;
   }

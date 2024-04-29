@@ -61,7 +61,7 @@ class EntityService {
   }) async {
     final key = await getOrCreateEntityKey(type);
     final encryptedKeyData = await CryptoUtil.encryptChaCha(
-      utf8.encode(plainText) as Uint8List,
+      utf8.encode(plainText),
       key,
     );
     final String encryptedData =

@@ -1,3 +1,4 @@
+import "dart:async" show StreamSubscription, unawaited;
 import "dart:math";
 
 import "package:flutter/foundation.dart" show kDebugMode;
@@ -29,16 +30,25 @@ class PersonReviewClusterSuggestion extends StatefulWidget {
 
 class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
   int currentSuggestionIndex = 0;
+  bool fetch = true;
   Key futureBuilderKey = UniqueKey();
 
   // Declare a variable for the future
   late Future<List<ClusterSuggestion>> futureClusterSuggestions;
+  late StreamSubscription<PeopleChangedEvent> _peopleChangedEvent;
 
   @override
   void initState() {
     super.initState();
     // Initialize the future in initState
-    _fetchClusterSuggestions();
+    if (fetch) _fetchClusterSuggestions();
+    fetch = true;
+  }
+
+  @override
+  void dispose() {
+    _peopleChangedEvent.cancel();
+    super.dispose();
   }
 
   @override
@@ -61,12 +71,27 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
                 ),
               );
             }
-            final numberOfDifferentSuggestions = snapshot.data!.length;
-            final currentSuggestion = snapshot.data![currentSuggestionIndex];
+
+            final allSuggestions = snapshot.data!;
+            final numberOfDifferentSuggestions = allSuggestions.length;
+            final currentSuggestion = allSuggestions[currentSuggestionIndex];
             final int clusterID = currentSuggestion.clusterIDToMerge;
             final double distance = currentSuggestion.distancePersonToCluster;
             final bool usingMean = currentSuggestion.usedOnlyMeanForSuggestion;
             final List<EnteFile> files = currentSuggestion.filesInCluster;
+
+            _peopleChangedEvent =
+                Bus.instance.on<PeopleChangedEvent>().listen((event) {
+              if (event.type == PeopleEventType.removedFilesFromCluster &&
+                  (event.source == clusterID.toString())) {
+                for (var updatedFile in event.relevantFiles!) {
+                  files.remove(updatedFile);
+                }
+                fetch = false;
+                setState(() {});
+              }
+            });
+
             return InkWell(
               onTap: () {
                 Navigator.of(context).push(
@@ -90,6 +115,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
                   usingMean,
                   files,
                   numberOfDifferentSuggestions,
+                  allSuggestions,
                 ),
               ),
             );
@@ -116,20 +142,25 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
         clusterID: clusterID,
       );
       Bus.instance.fire(PeopleChangedEvent());
+      // Increment the suggestion index
+      if (mounted) {
+        setState(() => currentSuggestionIndex++);
+      }
+
+      // Check if we need to fetch new data
+      if (currentSuggestionIndex >= (numberOfSuggestions)) {
+        setState(() {
+          currentSuggestionIndex = 0;
+          futureBuilderKey = UniqueKey(); // Reset to trigger FutureBuilder
+          _fetchClusterSuggestions();
+        });
+      }
     } else {
       await FaceMLDataDB.instance.captureNotPersonFeedback(
         personID: widget.person.remoteID,
         clusterID: clusterID,
       );
-    }
-
-    // Increment the suggestion index
-    if (mounted) {
-      setState(() => currentSuggestionIndex++);
-    }
-
-    // Check if we need to fetch new data
-    if (currentSuggestionIndex >= (numberOfSuggestions)) {
+      // Recalculate the suggestions when a suggestion is rejected
       setState(() {
         currentSuggestionIndex = 0;
         futureBuilderKey = UniqueKey(); // Reset to trigger FutureBuilder
@@ -150,9 +181,10 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
     bool usingMean,
     List<EnteFile> files,
     int numberOfSuggestions,
+    List<ClusterSuggestion> allSuggestions,
   ) {
-    return Column(
-      key: ValueKey("cluster_id-$clusterID"),
+    final widgetToReturn = Column(
+      key: ValueKey("cluster_id-$clusterID-files-${files.length}"),
       children: <Widget>[
         if (kDebugMode)
           Text(
@@ -228,6 +260,28 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
         ),
       ],
     );
+    // Precompute face thumbnails for next suggestions, in case there are
+    const precompute = 6;
+    const maxComputations = 10;
+    int compCount = 0;
+
+    if (allSuggestions.length > currentSuggestionIndex + 1) {
+      for (final suggestion in allSuggestions.sublist(
+        currentSuggestionIndex + 1,
+        min(allSuggestions.length, currentSuggestionIndex + precompute),
+      )) {
+        final files = suggestion.filesInCluster;
+        final clusterID = suggestion.clusterIDToMerge;
+        for (final file in files.sublist(0, min(files.length, 8))) {
+          unawaited(PersonFaceWidget.precomputeFaceCrops(file, clusterID));
+          compCount++;
+          if (compCount >= maxComputations) {
+            break;
+          }
+        }
+      }
+    }
+    return widgetToReturn;
   }
 
   List<Widget> _buildThumbnailWidgets(

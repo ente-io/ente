@@ -69,7 +69,7 @@ class FaceClusteringService {
   bool isRunning = false;
 
   static const kRecommendedDistanceThreshold = 0.24;
-  static const kConservativeDistanceThreshold = 0.06;
+  static const kConservativeDistanceThreshold = 0.16;
 
   // singleton pattern
   FaceClusteringService._privateConstructor();
@@ -560,10 +560,10 @@ class FaceClusteringService {
       for (int j = i - 1; j >= 0; j--) {
         late double distance;
         if (sortedFaceInfos[i].vEmbedding != null) {
-          distance = 1.0 -
-              sortedFaceInfos[i]
-                  .vEmbedding!
-                  .dot(sortedFaceInfos[j].vEmbedding!);
+          distance = cosineDistanceSIMD(
+            sortedFaceInfos[i].vEmbedding!,
+            sortedFaceInfos[j].vEmbedding!,
+          );
         } else {
           distance = cosineDistForNormVectors(
             sortedFaceInfos[i].embedding!,
@@ -624,7 +624,7 @@ class FaceClusteringService {
     }
 
     // analyze the results
-    FaceClusteringService._analyzeClusterResults(sortedFaceInfos);
+    // FaceClusteringService._analyzeClusterResults(sortedFaceInfos);
 
     return ClusteringResult(
       newFaceIdToCluster: newFaceIdToCluster,
@@ -804,8 +804,10 @@ class FaceClusteringService {
       double closestDistance = double.infinity;
       for (int j = 0; j < totalFaces; j++) {
         if (i == j) continue;
-        final double distance =
-            1.0 - faceInfos[i].vEmbedding!.dot(faceInfos[j].vEmbedding!);
+        final double distance = cosineDistanceSIMD(
+          faceInfos[i].vEmbedding!,
+          faceInfos[j].vEmbedding!,
+        );
         if (distance < closestDistance) {
           closestDistance = distance;
           closestIdx = j;
@@ -855,10 +857,10 @@ class FaceClusteringService {
       for (int i = 0; i < clusterIds.length; i++) {
         for (int j = 0; j < clusterIds.length; j++) {
           if (i == j) continue;
-          final double newDistance = 1.0 -
-              clusterIdToMeanEmbeddingAndWeight[clusterIds[i]]!.$1.dot(
-                    clusterIdToMeanEmbeddingAndWeight[clusterIds[j]]!.$1,
-                  );
+          final double newDistance = cosineDistanceSIMD(
+            clusterIdToMeanEmbeddingAndWeight[clusterIds[i]]!.$1,
+            clusterIdToMeanEmbeddingAndWeight[clusterIds[j]]!.$1,
+          );
           if (newDistance < distance) {
             distance = newDistance;
             clusterIDsToMerge = (clusterIds[i], clusterIds[j]);
@@ -959,9 +961,9 @@ class FaceClusteringService {
 
     // Run the DBSCAN clustering
     final List<List<int>> clusterOutput = dbscan.run(embeddings);
-    final List<List<FaceInfo>> clusteredFaceInfos = clusterOutput
-        .map((cluster) => cluster.map((idx) => faceInfos[idx]).toList())
-        .toList();
+    // final List<List<FaceInfo>> clusteredFaceInfos = clusterOutput
+    //     .map((cluster) => cluster.map((idx) => faceInfos[idx]).toList())
+    //     .toList();
     final List<List<String>> clusteredFaceIDs = clusterOutput
         .map((cluster) => cluster.map((idx) => faceInfos[idx].faceID).toList())
         .toList();
