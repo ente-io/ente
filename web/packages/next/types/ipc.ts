@@ -501,11 +501,16 @@ export interface Electron {
     setPendingUploads: (pendingUploads: PendingUploads) => Promise<void>;
 
     /**
-     * Update the list of files (of {@link type}) associated with the pending
-     * upload.
+     * Mark the given files (given by their {@link paths}) as having been
+     * uploaded.
      */
-    markUploaded: (
-        pathOrZipEntry: string | [zipPath: string, entryName: string],
+    markUploadedFiles: (paths: PendingUploads["filePaths"]) => Promise<void>;
+
+    /**
+     * Mark the given zip file entries as having been uploaded.
+     */
+    markUploadedZipEntries: (
+        entries: PendingUploads["zipEntries"],
     ) => Promise<void>;
 
     /**

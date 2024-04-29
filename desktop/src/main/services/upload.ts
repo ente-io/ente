@@ -60,9 +60,21 @@ export const pendingUploads = async (): Promise<PendingUploads | undefined> => {
 export const setPendingUploads = async (pendingUploads: PendingUploads) =>
     uploadStatusStore.set(pendingUploads);
 
-export const markUploaded = async (
-    pathOrZipEntry: string | [zipPath: string, entryName: string],
-) => {};
+export const markUploadedFiles = async (paths: string[]) => {
+    const existing = uploadStatusStore.get("filePaths");
+    const updated = existing.filter((p) => !paths.includes(p));
+    uploadStatusStore.set("filePaths", updated);
+};
+
+export const markUploadedZipEntries = async (
+    entries: [zipPath: string, entryName: string][],
+) => {
+    const existing = uploadStatusStore.get("zipEntries");
+    const updated = existing.filter(
+        (z) => !entries.some((e) => z[0] == e[0] && z[1] == e[1]),
+    );
+    uploadStatusStore.set("zipEntries", updated);
+};
 
 const validSavedPaths = (type: PendingUploads["type"]) => {
     const key = storeKey(type);

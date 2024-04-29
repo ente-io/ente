@@ -250,9 +250,12 @@ const pendingUploads = (): Promise<PendingUploads | undefined> =>
 const setPendingUploads = (pendingUploads: PendingUploads): Promise<void> =>
     ipcRenderer.invoke("setPendingUploads", pendingUploads);
 
-const markUploaded = (
-    pathOrZipEntry: string | [zipPath: string, entryName: string],
-): Promise<void> => ipcRenderer.invoke("markUploaded", pathOrZipEntry);
+const markUploadedFiles = (paths: PendingUploads["filePaths"]): Promise<void> =>
+    ipcRenderer.invoke("markUploadedFiles", paths);
+
+const markUploadedZipEntries = (
+    zipEntries: PendingUploads["zipEntries"],
+): Promise<void> => ipcRenderer.invoke("markUploadedZipEntries", zipEntries);
 
 const clearPendingUploads = (): Promise<void> =>
     ipcRenderer.invoke("clearPendingUploads");
@@ -369,6 +372,7 @@ contextBridge.exposeInMainWorld("electron", {
     lsZip,
     pendingUploads,
     setPendingUploads,
-    markUploaded,
+    markUploadedFiles,
+    markUploadedZipEntries,
     clearPendingUploads,
 });
