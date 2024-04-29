@@ -1,5 +1,6 @@
 import "dart:io";
 
+import "package:ente_cast/ente_cast.dart";
 import "package:flutter/material.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/service_locator.dart";
@@ -8,7 +9,11 @@ import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/utils/dialog_util.dart";
 
 class AutoCastDialog extends StatefulWidget {
-  AutoCastDialog({
+  // async method that takes string as input
+  // and returns void
+  final void Function(String) onConnect;
+  AutoCastDialog(
+    this.onConnect, {
     Key? key,
   }) : super(key: key) {}
 
@@ -88,6 +93,16 @@ class _AutoCastDialogState extends State<AutoCastDialog> {
     BuildContext context,
     Object castDevice,
   ) async {
-    await castService.connectDevice(context, castDevice);
+    await castService.connectDevice(
+      context,
+      castDevice,
+      onMessage: (message) {
+        if (message.containsKey(CastMessageType.pairCode)) {
+          final code = message[CastMessageType.pairCode]!['code'];
+          widget.onConnect(code);
+          // Navigator.of(context).pop();
+        }
+      },
+    );
   }
 }

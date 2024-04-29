@@ -875,7 +875,11 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         context: context,
         barrierDismissible: true,
         builder: (BuildContext context) {
-          return AutoCastDialog();
+          return AutoCastDialog(
+            (device) async {
+              await _castPair(gw, device);
+            },
+          );
         },
       );
     }
