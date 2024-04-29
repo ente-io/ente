@@ -6,7 +6,6 @@ import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/ente_theme_data.dart';
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/models/code.dart';
-import 'package:ente_auth/models/code_display.dart';
 import 'package:ente_auth/onboarding/view/setup_enter_secret_key_page.dart';
 import 'package:ente_auth/onboarding/view/view_qr_page.dart';
 import 'package:ente_auth/services/local_authentication_service.dart';
@@ -272,6 +271,14 @@ class _CodeWidgetState extends State<CodeWidget> {
   Widget _getCardContents(AppLocalizations l10n) {
     return Stack(
       children: [
+        if (widget.code.isPinned)
+          Align(
+            alignment: Alignment.topRight,
+            child: CustomPaint(
+              painter: PinBgPainter(strokeColor: const Color(0xFFF9ECFF)),
+              size: const Size(39, 39),
+            ),
+          ),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -521,7 +528,7 @@ class _CodeWidgetState extends State<CodeWidget> {
 
   Future<void> _onPinPressed(_) async {
     bool currentlyPinned = widget.code.isPinned;
-    final display = widget.code.display ?? CodeDisplay();
+    final display = widget.code.display;
     final Code code = widget.code.copyWith(
       display: display.copyWith(pinned: !currentlyPinned),
     );
@@ -585,5 +592,42 @@ class _CodeWidgetState extends State<CodeWidget> {
       return "${code.substring(0, 3)} ${code.substring(3, 6)}";
     }
     return code;
+  }
+}
+
+class PinBgPainter extends CustomPainter {
+  final Color strokeColor;
+  final PaintingStyle paintingStyle;
+  final double strokeWidth;
+
+  PinBgPainter({
+    this.strokeColor = Colors.black,
+    this.strokeWidth = 3,
+    this.paintingStyle = PaintingStyle.fill,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    Paint paint = Paint()
+      ..color = strokeColor
+      ..strokeWidth = strokeWidth
+      ..style = paintingStyle;
+
+    canvas.drawPath(getTrianglePath(size.width, size.height), paint);
+  }
+
+  Path getTrianglePath(double x, double y) {
+    return Path()
+      ..moveTo(0, 0)
+      ..lineTo(x, 0)
+      ..lineTo(x, y)
+      ..lineTo(0, 0);
+  }
+
+  @override
+  bool shouldRepaint(PinBgPainter oldDelegate) {
+    return oldDelegate.strokeColor != strokeColor ||
+        oldDelegate.paintingStyle != paintingStyle ||
+        oldDelegate.strokeWidth != strokeWidth;
   }
 }
