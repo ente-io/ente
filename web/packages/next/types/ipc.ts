@@ -466,56 +466,52 @@ export interface Electron {
     // - Upload
 
     /**
-     * Return any pending uploads that were previously enqueued but haven't yet
-     * been completed.
-     *
-     * The state of pending uploads is persisted in the Node.js layer.
-     *
-     * Note that we might have both outstanding zip and regular file uploads at
-     * the same time. In such cases, the zip file ones get precedence.
-     */
-    pendingUploads: () => Promise<PendingUploads | undefined>;
-
-    /**
-     * Set or clear the name of the collection where the pending upload is
-     * directed to.
-     */
-    setPendingUploadCollection: (collectionName: string) => Promise<void>;
-
-    /**
-     * Update the list of files (of {@link type}) associated with the pending
-     * upload.
-     */
-    setPendingUploadFiles: (
-        type: PendingUploads["type"],
-        filePaths: string[],
-    ) => Promise<void>;
-
-    /**
      * Get the list of files that are present in the given zip file.
      *
      * @param zipPath The path of the zip file on the user's local file system.
      *
      * @returns A list of paths, one for each file in the given zip. Directories
      * are traversed recursively, but the directory entries themselves will be
-     * excluded from the returned list.
+     * excluded from the returned list. File entries whose file name begins with
+     * a dot (i.e. "hidden" files) will also be excluded.
      *
      * To read the contents of the files themselves, see [Note: IPC streams].
      */
     lsZip: (zipPath: string) => Promise<string[]>;
 
-    /*
-     * TODO: AUDIT below this - Some of the types we use below are not copyable
-     * across process boundaries, and such functions will (expectedly) fail at
-     * runtime. For such functions, find an efficient alternative or refactor
-     * the dataflow.
+    /**
+     * Return any pending uploads that were previously enqueued but haven't yet
+     * been completed.
+     *
+     * The state of pending uploads is persisted in the Node.js layer. Or app
+     * start, we read in this data from the Node.js layer via this IPC method.
+     * The Node.js code returns the persisted data after filtering out any files
+     * that no longer exist on disk.
      */
+    pendingUploads: () => Promise<PendingUploads | undefined>;
 
-    // -
+    /**
+     * Set the state of pending uploads.
+     *
+     * Typically, this would be called at the start of an upload. Thereafter, as
+     * each item gets uploaded one by one, we'd call {@link markUploaded}.
+     * Finally, once the upload completes (or gets cancelled), we'd call
+     * {@link clearPendingUploads} to complete the circle.
+     */
+    setPendingUploads: (pendingUploads: PendingUploads) => Promise<void>;
 
-    getElectronFilesFromGoogleZip: (
-        filePath: string,
-    ) => Promise<ElectronFile[]>;
+    /**
+     * Update the list of files (of {@link type}) associated with the pending
+     * upload.
+     */
+    markUploaded: (
+        pathOrZipEntry: string | [zipPath: string, entryName: string],
+    ) => Promise<void>;
+
+    /**
+     * Clear any pending uploads.
+     */
+    clearPendingUploads: () => Promise<void>;
 }
 
 /**
@@ -622,12 +618,12 @@ export interface PendingUploads {
      */
     filePaths: string[];
     /**
-     * Paths of zip files that need to be uploaded.
+     * When the user uploads a zip file, we create a "zip entry" for each entry
+     * within that zip file. Such an entry is a tuple containin the path to a
+     * zip file itself, and the name of an entry within it.
+     *
+     * These are the remaining of those zip entries that still need to be
+     * uploaded.
      */
-    zipPaths: string[];
-    /**
-     * For each zip file, which of its entries (paths) within the zip file that
-     * need to be uploaded.
-     */
-    zipEntries: Record<string, string[]>;
+    zipEntries: [zipPath: string, entryName: string][];
 }
