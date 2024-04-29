@@ -720,13 +720,15 @@ class UploadManager {
         this.setFiles((files) => sortFiles([...files, decryptedFile]));
     }
 
-    private async removeFromPendingUploads({ localID }: ClusteredUploadItem) {
+    private async removeFromPendingUploads(
+        clusteredUploadItem: ClusteredUploadItem,
+    ) {
         const electron = globalThis.electron;
         if (electron) {
             this.remainingFiles = this.remainingFiles.filter(
-                (f) => f.localID != localID,
+                (f) => f.localID != clusteredUploadItem.localID,
             );
-            await updatePendingUploads(electron, this.remainingFiles);
+            await markUploaded(electron, clusteredUploadItem);
         }
     }
 
@@ -784,25 +786,18 @@ type UploadItemWithCollectionIDAndName = {
 
 const makeUploadItemWithCollectionIDAndName = (
     f: UploadItemWithCollection,
-): UploadItemWithCollectionIDAndName => {
-    const fileOrPath = f.uploadItem;
-    /* TODO(MR): ElectronFile */
-    if (!(fileOrPath instanceof File || typeof fileOrPath == "string"))
-        throw new Error(`Unexpected file ${f}`);
-
-    return {
-        localID: ensure(f.localID),
-        collectionID: ensure(f.collectionID),
-        fileName: ensure(
-            f.isLivePhoto
-                ? uploadItemFileName(f.livePhotoAssets.image)
-                : uploadItemFileName(fileOrPath),
-        ),
-        isLivePhoto: f.isLivePhoto,
-        uploadItem: fileOrPath,
-        livePhotoAssets: f.livePhotoAssets,
-    };
-};
+): UploadItemWithCollectionIDAndName => ({
+    localID: ensure(f.localID),
+    collectionID: ensure(f.collectionID),
+    fileName: ensure(
+        f.isLivePhoto
+            ? uploadItemFileName(f.livePhotoAssets.image)
+            : uploadItemFileName(f.uploadItem),
+    ),
+    isLivePhoto: f.isLivePhoto,
+    uploadItem: f.uploadItem,
+    livePhotoAssets: f.livePhotoAssets,
+});
 
 /**
  * An upload item with both parts of a live photo clubbed together.
@@ -829,12 +824,12 @@ export type UploadableUploadItem = ClusteredUploadItem & {
 };
 
 const splitMetadataAndMediaFiles = (
-    files: UploadItemWithCollectionIDAndName[],
+    items: UploadItemWithCollectionIDAndName[],
 ): [
     metadata: UploadItemWithCollectionIDAndName[],
     media: UploadItemWithCollectionIDAndName[],
 ] =>
-    files.reduce(
+    items.reduce(
         ([metadata, media], f) => {
             if (lowercaseExtension(f.fileName) == "json") metadata.push(f);
             else media.push(f);
@@ -843,19 +838,45 @@ const splitMetadataAndMediaFiles = (
         [[], []],
     );
 
-const updatePendingUploads = async (
-    electron: Electron,
-    files: ClusteredUploadItem[],
-) => {
-    const paths = files
-        .map((file) =>
-            file.isLivePhoto
-                ? [file.livePhotoAssets.image, file.livePhotoAssets.video]
-                : [file.uploadItem],
-        )
-        .flat()
-        .map((f) => getFilePathElectron(f));
-    await electron.setPendingUploadFiles("files", paths);
+const markUploaded = async (electron: Electron, item: ClusteredUploadItem) => {
+    // TODO: This can be done better
+    if (item.isLivePhoto) {
+        const [p0, p1] = [
+            item.livePhotoAssets.image,
+            item.livePhotoAssets.video,
+        ];
+        if (Array.isArray(p0) && Array.isArray(p1)) {
+            electron.markUploadedZipEntries([p0, p1]);
+        } else if (typeof p0 == "string" && typeof p1 == "string") {
+            electron.markUploadedFiles([p0, p1]);
+        } else if (
+            p0 &&
+            typeof p0 == "object" &&
+            "path" in p0 &&
+            p1 &&
+            typeof p1 == "object" &&
+            "path" in p1
+        ) {
+            electron.markUploadedFiles([p0.path, p1.path]);
+        } else {
+            throw new Error(
+                "Attempting to mark upload completion of unexpected desktop upload items",
+            );
+        }
+    } else {
+        const p = ensure(item.uploadItem);
+        if (Array.isArray(p)) {
+            electron.markUploadedZipEntries([p]);
+        } else if (typeof p == "string") {
+            electron.markUploadedFiles([p]);
+        } else if (p && typeof p == "object" && "path" in p) {
+            electron.markUploadedFiles([p]);
+        } else {
+            throw new Error(
+                "Attempting to mark upload completion of unexpected desktop upload items",
+            );
+        }
+    }
 };
 
 /**
@@ -865,12 +886,7 @@ const updatePendingUploads = async (
 export const getFilePathElectron = (file: File | ElectronFile | string) =>
     typeof file == "string" ? file : (file as ElectronFile).path;
 
-const cancelRemainingUploads = async () => {
-    const electron = ensureElectron();
-    await electron.setPendingUploadCollection(undefined);
-    await electron.setPendingUploadFiles("zips", []);
-    await electron.setPendingUploadFiles("files", []);
-};
+const cancelRemainingUploads = () => ensureElectron().clearPendingUploads();
 
 /**
  * Go through the given files, combining any sibling image + video assets into a
