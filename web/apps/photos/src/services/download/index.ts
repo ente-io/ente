@@ -150,7 +150,7 @@ class DownloadManagerImpl {
         this.ensureInitialized();
 
         const key = file.id.toString();
-        const cached = await this.thumbnailCache.get(key);
+        const cached = await this.thumbnailCache?.get(key);
         if (cached) return new Uint8Array(await cached.arrayBuffer());
         if (localOnly) return null;
 
