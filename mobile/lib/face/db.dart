@@ -13,14 +13,16 @@ import "package:photos/face/model/face.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/services/machine_learning/face_ml/face_clustering/face_info_for_clustering.dart";
 import 'package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart';
-// import 'package:sqflite/sqflite.dart';
-import 'package:sqlite_async/sqlite_async.dart' as sqlite_async;
+import 'package:sqlite_async/sqlite_async.dart';
 
-/// Stores all data for the ML-related features. The database can be accessed by `MlDataDB.instance.database`.
+/// Stores all data for the FacesML-related features. The database can be accessed by `FaceMLDataDB.instance.database`.
 ///
 /// This includes:
 /// [facesTable] - Stores all the detected faces and its embeddings in the images.
-/// [personTable] - Stores all the clusters of faces which are considered to be the same person.
+/// [createFaceClustersTable] - Stores all the mappings from the faces (faceID) to the clusters (clusterID).
+/// [clusterPersonTable] - Stores all the clusters that are mapped to a certain person.
+/// [clusterSummaryTable] - Stores a summary of each cluster, containg the mean embedding and the number of faces in the cluster.
+/// [notPersonFeedback] - Stores the clusters that are confirmed not to belong to a certain person by the user
 class FaceMLDataDB {
   static final Logger _logger = Logger("FaceMLDataDB");
 
@@ -32,28 +34,28 @@ class FaceMLDataDB {
   static final FaceMLDataDB instance = FaceMLDataDB._privateConstructor();
 
   // only have a single app-wide reference to the database
-  static Future<sqlite_async.SqliteDatabase>? _sqliteAsyncDBFuture;
+  static Future<SqliteDatabase>? _sqliteAsyncDBFuture;
 
-  Future<sqlite_async.SqliteDatabase> get asyncDB async {
+  Future<SqliteDatabase> get asyncDB async {
     _sqliteAsyncDBFuture ??= _initSqliteAsyncDatabase();
     return _sqliteAsyncDBFuture!;
   }
 
-  Future<sqlite_async.SqliteDatabase> _initSqliteAsyncDatabase() async {
+  Future<SqliteDatabase> _initSqliteAsyncDatabase() async {
     final documentsDirectory = await getApplicationDocumentsDirectory();
     final String databaseDirectory =
         join(documentsDirectory.path, _databaseName);
     _logger.info("Opening sqlite_async access: DB path " + databaseDirectory);
     final asyncDBConnection =
-        sqlite_async.SqliteDatabase(path: databaseDirectory, maxReaders: 2);
+        SqliteDatabase(path: databaseDirectory, maxReaders: 2);
     await _onCreate(asyncDBConnection);
     return asyncDBConnection;
   }
 
-  Future<void> _onCreate(sqlite_async.SqliteDatabase asyncDBConnection) async {
-    final migrations = sqlite_async.SqliteMigrations()
+  Future<void> _onCreate(SqliteDatabase asyncDBConnection) async {
+    final migrations = SqliteMigrations()
       ..add(
-        sqlite_async.SqliteMigration(_databaseVersion, (tx) async {
+        SqliteMigration(_databaseVersion, (tx) async {
           await tx.execute(createFacesTable);
           await tx.execute(createFaceClustersTable);
           await tx.execute(createClusterPersonTable);
@@ -791,7 +793,7 @@ class FaceMLDataDB {
     final parameterSets =
         clusterToPersonID.entries.map((e) => [e.value, e.key]).toList();
 
-      await db.executeBatch(sql, parameterSets);
+    await db.executeBatch(sql, parameterSets);
   }
 
   Future<void> removeClusterToPerson({
