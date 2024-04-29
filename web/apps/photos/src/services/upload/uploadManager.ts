@@ -350,9 +350,9 @@ class UploadManager {
         ComlinkWorker<typeof DedicatedCryptoWorker>
     >(maxConcurrentUploads);
     private parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>;
-    private filesToBeUploaded: ClusteredFile[];
-    private remainingFiles: ClusteredFile[] = [];
-    private failedFiles: ClusteredFile[];
+    private filesToBeUploaded: ClusteredUploadItem[];
+    private remainingFiles: ClusteredUploadItem[] = [];
+    private failedFiles: ClusteredUploadItem[];
     private existingFiles: EnteFile[];
     private setFiles: SetFiles;
     private collections: Map<number, Collection>;
@@ -533,7 +533,7 @@ class UploadManager {
         }
     }
 
-    private async uploadMediaFiles(mediaFiles: ClusteredFile[]) {
+    private async uploadMediaFiles(mediaFiles: ClusteredUploadItem[]) {
         this.filesToBeUploaded = [...this.filesToBeUploaded, ...mediaFiles];
 
         if (isElectron()) {
@@ -608,7 +608,7 @@ class UploadManager {
     }
 
     private async postUploadTask(
-        uploadableFile: UploadableFile,
+        uploadableFile: UploadableUploadItem,
         uploadResult: UPLOAD_RESULT,
         uploadedFile: EncryptedEnteFile | EnteFile | undefined,
     ) {
@@ -655,7 +655,7 @@ class UploadManager {
                     eventBus.emit(Events.FILE_UPLOADED, {
                         enteFile: decryptedFile,
                         localFile:
-                            uploadableFile.fileOrPath ??
+                            uploadableFile.uploadItem ??
                             uploadableFile.livePhotoAssets.image,
                     });
                 } catch (e) {
@@ -677,7 +677,7 @@ class UploadManager {
 
     private async watchFolderCallback(
         fileUploadResult: UPLOAD_RESULT,
-        fileWithCollection: ClusteredFile,
+        fileWithCollection: ClusteredUploadItem,
         uploadedFile: EncryptedEnteFile,
     ) {
         if (isElectron()) {
@@ -720,7 +720,7 @@ class UploadManager {
         this.setFiles((files) => sortFiles([...files, decryptedFile]));
     }
 
-    private async removeFromPendingUploads({ localID }: ClusteredFile) {
+    private async removeFromPendingUploads({ localID }: ClusteredUploadItem) {
         const electron = globalThis.electron;
         if (electron) {
             this.remainingFiles = this.remainingFiles.filter(
@@ -747,20 +747,21 @@ export default new UploadManager();
  *
  * - The input is {@link UploadItemWithCollection}. This can either be a new
  *   {@link UploadItemWithCollection}, in which case it'll only have a
- *   {@link localID}, {@link collectionID} and a {@link fileOrPath}. Or it could
- *   be a retry, in which case it'll not have a {@link fileOrPath} but instead
+ *   {@link localID}, {@link collectionID} and a {@link uploadItem}. Or it could
+ *   be a retry, in which case it'll not have a {@link uploadItem} but instead
  *   will have data from a previous stage (concretely, it'll just be a
- *   relabelled {@link ClusteredFile}), like a snake eating its tail.
+ *   relabelled {@link ClusteredUploadItem}), like a snake eating its tail.
  *
- * - Immediately we convert it to {@link UploadItemWithCollectionIDAndName}. This is
- *   to mostly systematize what we have, and also attach a {@link fileName}.
+ * - Immediately we convert it to {@link UploadItemWithCollectionIDAndName}.
+ *   This is to mostly systematize what we have, and also attach a
+ *   {@link fileName}.
  *
  * - These then get converted to "assets", whereby both parts of a live photo
- *   are combined. This is a {@link ClusteredFile}.
+ *   are combined. This is a {@link ClusteredUploadItem}.
  *
- * - On to the {@link ClusteredFile} we attach the corresponding
- *   {@link collection}, giving us {@link UploadableFile}. This is what gets
- *   queued and then passed to the {@link uploader}.
+ * - On to the {@link ClusteredUploadItem} we attach the corresponding
+ *   {@link collection}, giving us {@link UploadableUploadItem}. This is what
+ *   gets queued and then passed to the {@link uploader}.
  */
 type UploadItemWithCollectionIDAndName = {
     /** A unique ID for the duration of the upload */
@@ -804,26 +805,26 @@ const makeUploadItemWithCollectionIDAndName = (
 };
 
 /**
- * A file with both parts of a live photo clubbed together.
+ * An upload item with both parts of a live photo clubbed together.
  *
  * See: [Note: Intermediate file types during upload].
  */
-type ClusteredFile = {
+type ClusteredUploadItem = {
     localID: number;
     collectionID: number;
     fileName: string;
     isLivePhoto: boolean;
-    fileOrPath?: File | string;
+    uploadItem?: UploadItem;
     livePhotoAssets?: LivePhotoAssets;
 };
 
 /**
- * The file that we hand off to the uploader. Essentially {@link ClusteredFile}
- * with the {@link collection} attached to it.
+ * The file that we hand off to the uploader. Essentially
+ * {@link ClusteredUploadItem} with the {@link collection} attached to it.
  *
  * See: [Note: Intermediate file types during upload].
  */
-export type UploadableFile = ClusteredFile & {
+export type UploadableUploadItem = ClusteredUploadItem & {
     collection: Collection;
 };
 
@@ -844,13 +845,13 @@ const splitMetadataAndMediaFiles = (
 
 const updatePendingUploads = async (
     electron: Electron,
-    files: ClusteredFile[],
+    files: ClusteredUploadItem[],
 ) => {
     const paths = files
         .map((file) =>
             file.isLivePhoto
                 ? [file.livePhotoAssets.image, file.livePhotoAssets.video]
-                : [file.fileOrPath],
+                : [file.uploadItem],
         )
         .flat()
         .map((f) => getFilePathElectron(f));
@@ -878,7 +879,7 @@ const cancelRemainingUploads = async () => {
 const clusterLivePhotos = async (
     files: UploadItemWithCollectionIDAndName[],
 ) => {
-    const result: ClusteredFile[] = [];
+    const result: ClusteredUploadItem[] = [];
     files
         .sort((f, g) =>
             nameAndExtension(f.fileName)[0].localeCompare(

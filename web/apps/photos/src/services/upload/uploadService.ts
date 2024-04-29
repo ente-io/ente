@@ -51,7 +51,7 @@ import {
     generateThumbnailWeb,
 } from "./thumbnail";
 import UploadHttpClient from "./uploadHttpClient";
-import type { UploadItem, UploadableFile } from "./uploadManager";
+import type { UploadItem, UploadableUploadItem } from "./uploadManager";
 
 /**
  * A readable stream for a file, and its associated size and last modified time.
@@ -315,14 +315,14 @@ interface UploadResponse {
 }
 
 /**
- * Upload the given {@link UploadableFile}
+ * Upload the given {@link UploadableUploadItem}
  *
  * This is lower layer implementation of the upload. It is invoked by
  * {@link UploadManager} after it has assembled all the relevant bits we need to
  * go forth and upload.
  */
 export const uploader = async (
-    { collection, localID, fileName, ...uploadAsset }: UploadableFile,
+    { collection, localID, fileName, ...uploadAsset }: UploadableUploadItem,
     uploaderName: string,
     existingFiles: EnteFile[],
     parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
