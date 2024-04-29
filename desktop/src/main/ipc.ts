@@ -52,6 +52,7 @@ import {
     saveEncryptionKey,
 } from "./services/store";
 import {
+    clearPendingUploads,
     getElectronFilesFromGoogleZip,
     lsZip,
     pendingUploads,
@@ -199,6 +200,8 @@ export const attachIPCHandlers = () => {
 
     // - Upload
 
+    ipcMain.handle("lsZip", (_, zipPath: string) => lsZip(zipPath));
+
     ipcMain.handle("pendingUploads", () => pendingUploads());
 
     ipcMain.handle("setPendingUploadCollection", (_, collectionName: string) =>
@@ -211,7 +214,7 @@ export const attachIPCHandlers = () => {
             setPendingUploadFiles(type, filePaths),
     );
 
-    ipcMain.handle("lsZip", (_, zipPath: string) => lsZip(zipPath));
+    ipcMain.handle("clearPendingUploads", () => clearPendingUploads());
 
     // -
 

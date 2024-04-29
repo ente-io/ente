@@ -8,6 +8,24 @@ import {
 } from "../stores/upload-status";
 import { getElectronFile, getZipFileStream } from "./fs";
 
+export const lsZip = async (zipPath: string) => {
+    const zip = new StreamZip.async({ file: zipPath });
+
+    const entries = await zip.entries();
+    const entryPaths: string[] = [];
+
+    for (const entry of Object.values(entries)) {
+        const basename = path.basename(entry.name);
+        // Ignore "hidden" files (files whose names begins with a dot).
+        if (entry.isFile && basename.length > 0 && basename[0] != ".") {
+            // `entry.name` is the path within the zip.
+            entryPaths.push(entry.name);
+        }
+    }
+
+    return [entryPaths];
+};
+
 export const pendingUploads = async () => {
     const collectionName = uploadStatusStore.get("collectionName");
     const filePaths = validSavedPaths("files");
@@ -60,6 +78,10 @@ export const setPendingUploadFiles = (
     else uploadStatusStore.delete(key);
 };
 
+export const clearPendingUploads = () => {
+    uploadStatusStore.clear();
+};
+
 const storeKey = (type: PendingUploads["type"]): keyof UploadStatusStore => {
     switch (type) {
         case "zips":
@@ -67,10 +89,6 @@ const storeKey = (type: PendingUploads["type"]): keyof UploadStatusStore => {
         case "files":
             return "filePaths";
     }
-};
-
-export const lsZip = async (zipPath: string) => {
-    return [zipPath];
 };
 
 export const getElectronFilesFromGoogleZip = async (filePath: string) => {

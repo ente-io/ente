@@ -601,14 +601,33 @@ export interface FolderWatchSyncedFile {
 }
 
 /**
- * When the user starts an upload, we remember the files they'd selected or drag
- * and dropped so that we can resume (if needed) when the app restarts after
- * being stopped in the middle of the uploads.
+ * State about pending and in-progress uploads.
+ *
+ * When the user starts an upload, we remember the files they'd selected (or
+ * drag-dropped) so that we can resume if they restart the app in before the
+ * uploads have been completed. This state is kept on the Electron side, and
+ * this object is the IPC intermediary.
  */
 export interface PendingUploads {
-    /** The collection to which we're uploading */
+    /**
+     * The collection to which we're uploading, or the root collection.
+     *
+     * This is name of the collection (when uploading to a singular collection)
+     * or the root collection (when uploading to separate * albums) to which we
+     * these uploads are meant to go to. See {@link CollectionMapping}.
+     */
     collectionName: string;
-    /* The upload can be either of a Google Takeout zip, or regular files */
-    type: "files" | "zips";
-    files: ElectronFile[];
+    /**
+     * Paths of regular files that need to be uploaded.
+     */
+    filePaths: string[];
+    /**
+     * Paths of zip files that need to be uploaded.
+     */
+    zipPaths: string[];
+    /**
+     * For each zip file, which of its entries (paths) within the zip file that
+     * need to be uploaded.
+     */
+    zipEntries: Record<string, string[]>;
 }
