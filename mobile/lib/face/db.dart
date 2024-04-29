@@ -99,9 +99,7 @@ class FaceMLDataDB {
         ];
       }).toList();
 
-      await db.writeTransaction((tx) async {
-        await tx.executeBatch(sql, parameterSets);
-      });
+      await db.executeBatch(sql, parameterSets);
     }
   }
 
@@ -122,9 +120,8 @@ class FaceMLDataDB {
         ON CONFLICT($fcFaceId) DO UPDATE SET $fcClusterID = excluded.$fcClusterID
       ''';
       final parameterSets = batch.map((e) => [e.key, e.value]).toList();
-      await db.writeTransaction((tx) async {
-        await tx.executeBatch(sql, parameterSets);
-      });
+
+      await db.executeBatch(sql, parameterSets);
     }
   }
 
@@ -475,9 +472,7 @@ class FaceMLDataDB {
     ''';
     final parameterSets =
         faceIDToClusterID.entries.map((e) => [e.key, e.value]).toList();
-    await db.writeTransaction((tx) async {
-      await tx.executeBatch(sql, parameterSets);
-    });
+    await db.executeBatch(sql, parameterSets);
   }
 
   Future<void> removePerson(String personID) async {
@@ -756,9 +751,7 @@ class FaceMLDataDB {
     ''';
     final parameterSets =
         clusterToPersonID.entries.map((e) => [e.value, e.key]).toList();
-    await db.writeTransaction((tx) async {
-      await tx.executeBatch(sql, parameterSets);
-    });
+    await db.executeBatch(sql, parameterSets);
     // final batch = db.batch();
     // for (final entry in clusterToPersonID.entries) {
     //   final clusterID = entry.key;
@@ -798,9 +791,7 @@ class FaceMLDataDB {
     final parameterSets =
         clusterToPersonID.entries.map((e) => [e.value, e.key]).toList();
 
-    await db.writeTransaction((tx) async {
-      await tx.executeBatch(sql, parameterSets);
-    });
+      await db.executeBatch(sql, parameterSets);
   }
 
   Future<void> removeClusterToPerson({
@@ -867,9 +858,7 @@ class FaceMLDataDB {
     int batchCounter = 0;
     for (final entry in summary.entries) {
       if (batchCounter == 400) {
-        await db.writeTransaction((tx) async {
-          await tx.executeBatch(sql, parameterSets);
-        });
+        await db.executeBatch(sql, parameterSets);
         batchCounter = 0;
         parameterSets.clear();
       }
@@ -879,9 +868,7 @@ class FaceMLDataDB {
       parameterSets.add([clusterID, avg, count]);
       batchCounter++;
     }
-    await db.writeTransaction((tx) async {
-      await tx.executeBatch(sql, parameterSets);
-    });
+    await db.executeBatch(sql, parameterSets);
 
     // var batch = db.batch();
     // int batchCounter = 0;
