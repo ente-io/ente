@@ -190,25 +190,12 @@ export const uploadItemFileName = (uploadItem: UploadItem) => {
     return uploadItem.file.name;
 };
 
-/**
- * Return the size of the given {@link uploadItem}.
- */
-export const uploadItemSize = async (
-    uploadItem: UploadItem,
-): Promise<number> => {
-    if (uploadItem instanceof File) return uploadItem.size;
-    if (typeof uploadItem == "string")
-        return ensureElectron().pathOrZipEntrySize(uploadItem);
-    if (Array.isArray(uploadItem))
-        return ensureElectron().pathOrZipEntrySize(uploadItem);
-    return uploadItem.file.size;
-};
 
 /* -- Various intermediate type used during upload -- */
 
 interface UploadAsset {
     isLivePhoto?: boolean;
-    fileOrPath?: File | string;
+    uploadItem?: UploadItem;
     livePhotoAssets?: LivePhotoAssets;
 }
 
@@ -606,7 +593,7 @@ interface ReadAssetDetailsResult {
 const readAssetDetails = async ({
     isLivePhoto,
     livePhotoAssets,
-    fileOrPath,
+    uploadItem: fileOrPath,
 }: UploadAsset): Promise<ReadAssetDetailsResult> =>
     isLivePhoto
         ? readLivePhotoDetails(livePhotoAssets)
@@ -673,7 +660,7 @@ interface ExtractAssetMetadataResult {
  * {@link parsedMetadataJSONMap} for the assets. Return the resultant metadatum.
  */
 const extractAssetMetadata = async (
-    { isLivePhoto, fileOrPath, livePhotoAssets }: UploadAsset,
+    { isLivePhoto, uploadItem: fileOrPath, livePhotoAssets }: UploadAsset,
     fileTypeInfo: FileTypeInfo,
     lastModifiedMs: number,
     collectionID: number,
@@ -914,7 +901,7 @@ const areFilesSameNoHash = (f: Metadata, g: Metadata) => {
 
 const readAsset = async (
     fileTypeInfo: FileTypeInfo,
-    { isLivePhoto, fileOrPath, livePhotoAssets }: UploadAsset,
+    { isLivePhoto, uploadItem: fileOrPath, livePhotoAssets }: UploadAsset,
 ): Promise<ThumbnailedFile> =>
     isLivePhoto
         ? await readLivePhoto(livePhotoAssets, fileTypeInfo)

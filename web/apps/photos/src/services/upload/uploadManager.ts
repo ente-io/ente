@@ -36,11 +36,7 @@ import {
     tryParseTakeoutMetadataJSON,
     type ParsedMetadataJSON,
 } from "./takeout";
-import UploadService, {
-    uploadItemFileName,
-    uploadItemSize,
-    uploader,
-} from "./uploadService";
+import UploadService, { uploadItemFileName, uploader } from "./uploadService";
 
 export type FileID = number;
 
@@ -350,9 +346,9 @@ class UploadManager {
         ComlinkWorker<typeof DedicatedCryptoWorker>
     >(maxConcurrentUploads);
     private parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>;
-    private filesToBeUploaded: ClusteredUploadItem[];
-    private remainingFiles: ClusteredUploadItem[] = [];
-    private failedFiles: ClusteredUploadItem[];
+    private itemsToBeUploaded: ClusteredUploadItem[];
+    private remainingItems: ClusteredUploadItem[] = [];
+    private failedItems: ClusteredUploadItem[];
     private existingFiles: EnteFile[];
     private setFiles: SetFiles;
     private collections: Map<number, Collection>;
@@ -389,9 +385,9 @@ class UploadManager {
     }
 
     private resetState() {
-        this.filesToBeUploaded = [];
-        this.remainingFiles = [];
-        this.failedFiles = [];
+        this.itemsToBeUploaded = [];
+        this.remainingItems = [];
+        this.failedItems = [];
         this.parsedMetadataJSONMap = new Map<string, ParsedMetadataJSON>();
 
         this.uploaderName = null;
@@ -455,24 +451,24 @@ class UploadManager {
             }
 
             if (mediaItems.length) {
-                const clusteredMediaFiles = await clusterLivePhotos(mediaItems);
+                const clusteredMediaItems = await clusterLivePhotos(mediaItems);
 
                 this.abortIfCancelled();
 
                 // Live photos might've been clustered together, reset the list
                 // of files to reflect that.
-                this.uiService.setFiles(clusteredMediaFiles);
+                this.uiService.setFiles(clusteredMediaItems);
 
                 this.uiService.setHasLivePhoto(
-                    mediaItems.length != clusteredMediaFiles.length,
+                    mediaItems.length != clusteredMediaItems.length,
                 );
 
-                await this.uploadMediaFiles(clusteredMediaFiles);
+                await this.uploadMediaItems(clusteredMediaItems);
             }
         } catch (e) {
             if (e.message === CustomError.UPLOAD_CANCELLED) {
                 if (isElectron()) {
-                    this.remainingFiles = [];
+                    this.remainingItems = [];
                     await cancelRemainingUploads();
                 }
             } else {
@@ -531,48 +527,48 @@ class UploadManager {
         }
     }
 
-    private async uploadMediaFiles(mediaFiles: ClusteredUploadItem[]) {
-        this.filesToBeUploaded = [...this.filesToBeUploaded, ...mediaFiles];
+    private async uploadMediaItems(mediaItems: ClusteredUploadItem[]) {
+        this.itemsToBeUploaded = [...this.itemsToBeUploaded, ...mediaItems];
 
         if (isElectron()) {
-            this.remainingFiles = [...this.remainingFiles, ...mediaFiles];
+            this.remainingItems = [...this.remainingItems, ...mediaItems];
         }
 
-        this.uiService.reset(mediaFiles.length);
+        this.uiService.reset(mediaItems.length);
 
-        await UploadService.setFileCount(mediaFiles.length);
+        await UploadService.setFileCount(mediaItems.length);
 
         this.uiService.setUploadStage(UPLOAD_STAGES.UPLOADING);
 
         const uploadProcesses = [];
         for (
             let i = 0;
-            i < maxConcurrentUploads && this.filesToBeUploaded.length > 0;
+            i < maxConcurrentUploads && this.itemsToBeUploaded.length > 0;
             i++
         ) {
             this.cryptoWorkers[i] = getDedicatedCryptoWorker();
             const worker = await this.cryptoWorkers[i].remote;
-            uploadProcesses.push(this.uploadNextFileInQueue(worker));
+            uploadProcesses.push(this.uploadNextItemInQueue(worker));
         }
         await Promise.all(uploadProcesses);
     }
 
-    private async uploadNextFileInQueue(worker: Remote<DedicatedCryptoWorker>) {
+    private async uploadNextItemInQueue(worker: Remote<DedicatedCryptoWorker>) {
         const uiService = this.uiService;
 
-        while (this.filesToBeUploaded.length > 0) {
+        while (this.itemsToBeUploaded.length > 0) {
             this.abortIfCancelled();
 
-            const clusteredFile = this.filesToBeUploaded.pop();
-            const { localID, collectionID } = clusteredFile;
+            const clusteredItem = this.itemsToBeUploaded.pop();
+            const { localID, collectionID } = clusteredItem;
             const collection = this.collections.get(collectionID);
-            const uploadableFile = { ...clusteredFile, collection };
+            const uploadableItem = { ...clusteredItem, collection };
 
             uiService.setFileProgress(localID, 0);
             await wait(0);
 
             const { uploadResult, uploadedFile } = await uploader(
-                uploadableFile,
+                uploadableItem,
                 this.uploaderName,
                 this.existingFiles,
                 this.parsedMetadataJSONMap,
@@ -594,7 +590,7 @@ class UploadManager {
             );
 
             const finalUploadResult = await this.postUploadTask(
-                uploadableFile,
+                uploadableItem,
                 uploadResult,
                 uploadedFile,
             );
@@ -606,20 +602,20 @@ class UploadManager {
     }
 
     private async postUploadTask(
-        uploadableFile: UploadableUploadItem,
+        uploadableItem: UploadableUploadItem,
         uploadResult: UPLOAD_RESULT,
         uploadedFile: EncryptedEnteFile | EnteFile | undefined,
     ) {
         log.info(
-            `Uploaded ${uploadableFile.fileName} with result ${uploadResult}`,
+            `Uploaded ${uploadableItem.fileName} with result ${uploadResult}`,
         );
         try {
             let decryptedFile: EnteFile;
-            await this.removeFromPendingUploads(uploadableFile);
+            await this.removeFromPendingUploads(uploadableItem);
             switch (uploadResult) {
                 case UPLOAD_RESULT.FAILED:
                 case UPLOAD_RESULT.BLOCKED:
-                    this.failedFiles.push(uploadableFile);
+                    this.failedItems.push(uploadableItem);
                     break;
                 case UPLOAD_RESULT.ALREADY_UPLOADED:
                     decryptedFile = uploadedFile as EnteFile;
@@ -632,7 +628,7 @@ class UploadManager {
                 case UPLOAD_RESULT.UPLOADED_WITH_STATIC_THUMBNAIL:
                     decryptedFile = await decryptFile(
                         uploadedFile as EncryptedEnteFile,
-                        uploadableFile.collection.key,
+                        uploadableItem.collection.key,
                     );
                     break;
                 case UPLOAD_RESULT.UNSUPPORTED:
@@ -653,8 +649,8 @@ class UploadManager {
                     eventBus.emit(Events.FILE_UPLOADED, {
                         enteFile: decryptedFile,
                         localFile:
-                            uploadableFile.uploadItem ??
-                            uploadableFile.livePhotoAssets.image,
+                            uploadableItem.uploadItem ??
+                            uploadableItem.livePhotoAssets.image,
                     });
                 } catch (e) {
                     log.warn("Ignoring error in fileUploaded handlers", e);
@@ -663,7 +659,7 @@ class UploadManager {
             }
             await this.watchFolderCallback(
                 uploadResult,
-                uploadableFile,
+                uploadableItem,
                 uploadedFile as EncryptedEnteFile,
             );
             return uploadResult;
@@ -697,7 +693,7 @@ class UploadManager {
 
     public getFailedItemsWithCollections() {
         return {
-            items: this.failedFiles,
+            items: this.failedItems,
             collections: [...this.collections.values()],
         };
     }
@@ -723,7 +719,7 @@ class UploadManager {
     ) {
         const electron = globalThis.electron;
         if (electron) {
-            this.remainingFiles = this.remainingFiles.filter(
+            this.remainingItems = this.remainingItems.filter(
                 (f) => f.localID != clusteredUploadItem.localID,
             );
             await markUploaded(electron, clusteredUploadItem);
@@ -868,7 +864,7 @@ const markUploaded = async (electron: Electron, item: ClusteredUploadItem) => {
         } else if (typeof p == "string") {
             electron.markUploadedFiles([p]);
         } else if (p && typeof p == "object" && "path" in p) {
-            electron.markUploadedFiles([p]);
+            electron.markUploadedFiles([p.path]);
         } else {
             throw new Error(
                 "Attempting to mark upload completion of unexpected desktop upload items",
@@ -884,10 +880,10 @@ const cancelRemainingUploads = () => ensureElectron().clearPendingUploads();
  * single live photo when appropriate.
  */
 const clusterLivePhotos = async (
-    files: UploadItemWithCollectionIDAndName[],
+    items: UploadItemWithCollectionIDAndName[],
 ) => {
     const result: ClusteredUploadItem[] = [];
-    files
+    items
         .sort((f, g) =>
             nameAndExtension(f.fileName)[0].localeCompare(
                 nameAndExtension(g.fileName)[0],
@@ -895,9 +891,9 @@ const clusterLivePhotos = async (
         )
         .sort((f, g) => f.collectionID - g.collectionID);
     let index = 0;
-    while (index < files.length - 1) {
-        const f = files[index];
-        const g = files[index + 1];
+    while (index < items.length - 1) {
+        const f = items[index];
+        const g = items[index + 1];
         const fFileType = potentialFileTypeFromExtension(f.fileName);
         const gFileType = potentialFileTypeFromExtension(g.fileName);
         const fa: PotentialLivePhotoAsset = {
@@ -934,9 +930,9 @@ const clusterLivePhotos = async (
             index += 1;
         }
     }
-    if (index === files.length - 1) {
+    if (index === items.length - 1) {
         result.push({
-            ...files[index],
+            ...items[index],
             isLivePhoto: false,
         });
     }
@@ -994,7 +990,7 @@ const areLivePhotoAssets = async (
     const gSize = await uploadItemSize(g.uploadItem);
     if (fSize > maxAssetSize || gSize > maxAssetSize) {
         log.info(
-            `Not classifying assets with too large sizes ${[fSize, gSize]} as a live photo`,
+            `Not classifying files with too large sizes (${fSize} and ${gSize} bytes) as a live photo`,
         );
         return false;
     }
@@ -1026,4 +1022,16 @@ const removePotentialLivePhotoSuffix = (name: string, suffix?: string) => {
     }
 
     return foundSuffix ? name.slice(0, foundSuffix.length * -1) : name;
+};
+
+/**
+ * Return the size of the given {@link uploadItem}.
+ */
+const uploadItemSize = async (uploadItem: UploadItem): Promise<number> => {
+    if (uploadItem instanceof File) return uploadItem.size;
+    if (typeof uploadItem == "string")
+        return ensureElectron().pathOrZipEntrySize(uploadItem);
+    if (Array.isArray(uploadItem))
+        return ensureElectron().pathOrZipEntrySize(uploadItem);
+    return uploadItem.file.size;
 };
