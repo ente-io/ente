@@ -1,35 +1,53 @@
 import StreamZip from "node-stream-zip";
 import { existsSync } from "original-fs";
 import path from "path";
-import { ElectronFile, type PendingUploads } from "../../types/ipc";
+import type { ElectronFile, PendingUploads, ZipEntry } from "../../types/ipc";
 import {
     uploadStatusStore,
     type UploadStatusStore,
 } from "../stores/upload-status";
 import { getElectronFile, getZipFileStream } from "./fs";
 
-export const lsZip = async (zipPath: string) => {
+export const zipEntries = async (zipPath: string): Promise<ZipEntry[]> => {
     const zip = new StreamZip.async({ file: zipPath });
 
     const entries = await zip.entries();
-    const entryPaths: string[] = [];
+    const entryNames: string[] = [];
 
     for (const entry of Object.values(entries)) {
         const basename = path.basename(entry.name);
         // Ignore "hidden" files (files whose names begins with a dot).
         if (entry.isFile && basename.length > 0 && basename[0] != ".") {
             // `entry.name` is the path within the zip.
-            entryPaths.push(entry.name);
+            entryNames.push(entry.name);
         }
     }
 
-    return [entryPaths];
+    return entryNames.map((entryName) => [zipPath, entryName]);
 };
 
 export const pendingUploads = async (): Promise<PendingUploads | undefined> => {
-    /* TODO */
     const collectionName = uploadStatusStore.get("collectionName");
-    const filePaths = validSavedPaths("files");
+    if (!collectionName) return undefined;
+
+    const allFilePaths = uploadStatusStore.get("filePaths");
+    const filePaths = allFilePaths.filter((f) => existsSync(f));
+
+    let allZipEntries = uploadStatusStore.get("zipEntries");
+    // Migration code - May 2024. Remove after a bit.
+    //
+    // The older store formats will not have zipEntries and instead will have
+    // zipPaths. If we find such a case, read the zipPaths and enqueue all of
+    // their files as zipEntries in the result. This potentially can be cause us
+    // to try reuploading an already uploaded file, but the dedup logic will
+    // kick in at that point so no harm will come off it.
+    if (allZipEntries === undefined) {
+        const allZipPaths = uploadStatusStore.get("filePaths");
+        const zipPaths = allZipPaths.filter((f) => existsSync(f));
+        lsZip();
+    }
+
+    if (allZipEntries) "files";
     const zipPaths = validSavedPaths("zips");
 
     let files: ElectronFile[] = [];

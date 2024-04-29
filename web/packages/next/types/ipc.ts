@@ -470,18 +470,21 @@ export interface Electron {
      *
      * @param zipPath The path of the zip file on the user's local file system.
      *
-     * @returns A list of paths, one for each file in the given zip. Directories
-     * are traversed recursively, but the directory entries themselves will be
-     * excluded from the returned list. File entries whose file name begins with
-     * a dot (i.e. "hidden" files) will also be excluded.
+     * @returns A list of (zipPath, entryName) tuples, one for each file in the
+     * given zip. Directories are traversed recursively, but the directory
+     * entries themselves will be excluded from the returned list. File entries
+     * whose file name begins with a dot (i.e. "hidden" files) will also be
+     * excluded.
      *
      * To read the contents of the files themselves, see [Note: IPC streams].
      */
-    lsZip: (zipPath: string) => Promise<string[]>;
+    zipEntries : (zipPath: string) => Promise<ZipEntry[]>
 
     /**
      * Return any pending uploads that were previously enqueued but haven't yet
      * been completed.
+     *
+     * Return undefined if there are no such pending uploads.
      *
      * The state of pending uploads is persisted in the Node.js layer. Or app
      * start, we read in this data from the Node.js layer via this IPC method.
@@ -493,10 +496,13 @@ export interface Electron {
     /**
      * Set the state of pending uploads.
      *
-     * Typically, this would be called at the start of an upload. Thereafter, as
-     * each item gets uploaded one by one, we'd call {@link markUploaded}.
-     * Finally, once the upload completes (or gets cancelled), we'd call
-     * {@link clearPendingUploads} to complete the circle.
+     * - Typically, this would be called at the start of an upload.
+     *
+     * - Thereafter, as each item gets uploaded one by one, we'd call
+     *   {@link markUploadedFiles} or {@link markUploadedZipEntries}.
+     *
+     * - Finally, once the upload completes (or gets cancelled), we'd call
+     *   {@link clearPendingUploads} to complete the circle.
      */
     setPendingUploads: (pendingUploads: PendingUploads) => Promise<void>;
 
@@ -602,6 +608,17 @@ export interface FolderWatchSyncedFile {
 }
 
 /**
+ * When the user uploads a zip file, we create a "zip entry" for each entry
+ * within that zip file. Such an entry is a tuple containin the path to a zip
+ * file itself, and the name of an entry within it.
+ *
+ * The name of the entry is not just the file name, but rather is the full path
+ * of the file within the zip. That is, each entry name uniquely identifies a
+ * particular file within the given zip.
+ */
+export type ZipEntry = [zipPath: string, entryName: string];
+
+/**
  * State about pending and in-progress uploads.
  *
  * When the user starts an upload, we remember the files they'd selected (or
@@ -623,12 +640,7 @@ export interface PendingUploads {
      */
     filePaths: string[];
     /**
-     * When the user uploads a zip file, we create a "zip entry" for each entry
-     * within that zip file. Such an entry is a tuple containin the path to a
-     * zip file itself, and the name of an entry within it.
-     *
-     * These are the remaining of those zip entries that still need to be
-     * uploaded.
+     * {@link ZipEntry} (zip path and entry name) that need to be uploaded.
      */
-    zipEntries: [zipPath: string, entryName: string][];
+    zipEntries: ZipEntry[];
 }

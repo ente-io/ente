@@ -7,8 +7,10 @@ export interface UploadStatusStore {
     filePaths: string[];
     /**
      * Each item is the path to a zip file and the name of an entry within it.
+     *
+     * This is marked optional since legacy stores will not have it.
      */
-    zipEntries: [zipPath: string, entryName: string][];
+    zipEntries?: [zipPath: string, entryName: string][];
     /** Legacy paths to zip files, now subsumed into zipEntries */
     zipPaths?: string[];
 }

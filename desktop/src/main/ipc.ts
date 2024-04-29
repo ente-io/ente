@@ -53,11 +53,11 @@ import {
 } from "./services/store";
 import {
     clearPendingUploads,
-    lsZip,
     markUploadedFiles,
     markUploadedZipEntries,
     pendingUploads,
     setPendingUploads,
+    zipEntries,
 } from "./services/upload";
 import {
     watchAdd,
@@ -200,7 +200,7 @@ export const attachIPCHandlers = () => {
 
     // - Upload
 
-    ipcMain.handle("lsZip", (_, zipPath: string) => lsZip(zipPath));
+    ipcMain.handle("zipEntries", (_, zipPath: string) => zipEntries(zipPath));
 
     ipcMain.handle("pendingUploads", () => pendingUploads());
 

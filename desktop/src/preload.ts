@@ -47,6 +47,7 @@ import type {
     ElectronFile,
     FolderWatch,
     PendingUploads,
+    ZipEntry,
 } from "./types/ipc";
 
 // - General
@@ -241,8 +242,8 @@ const watchFindFiles = (folderPath: string): Promise<string[]> =>
 
 // - Upload
 
-const lsZip = (zipPath: string): Promise<string[]> =>
-    ipcRenderer.invoke("lsZip", zipPath);
+const zipEntries = (zipPath: string): Promise<ZipEntry[]> =>
+    ipcRenderer.invoke("zipEntries", zipPath);
 
 const pendingUploads = (): Promise<PendingUploads | undefined> =>
     ipcRenderer.invoke("pendingUploads");
@@ -369,7 +370,7 @@ contextBridge.exposeInMainWorld("electron", {
 
     // - Upload
 
-    lsZip,
+    zipEntries,
     pendingUploads,
     setPendingUploads,
     markUploadedFiles,
