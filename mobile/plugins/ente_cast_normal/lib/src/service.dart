@@ -70,24 +70,27 @@ class CastServiceImpl extends CastService {
   Future<void> closeActiveCasts() {
     final sessions = CastSessionManager().sessions;
     for (final session in sessions) {
-      session.sendMessage(
-        _pairRequestNamespace,
-        {
-          "type": "CLOSE",
-        },
-      );
+      debugPrint("send close message for ${session.sessionId}");
+      session.sendMessage(CastSession.kNamespaceConnection, {
+        'type': 'CLOSE',
+      });
+      debugPrint("close session ${session.sessionId}");
       session.close();
     }
+    CastSessionManager().sessions.clear();
+    debugPrint("send close message");
     return Future.value();
   }
 
   @override
-  Future<Map<String, String>> getActiveSessions() {
+  Map<String, String> getActiveSessions() {
     final sessions = CastSessionManager().sessions;
     final Map<String, String> result = {};
     for (final session in sessions) {
-      result[session.sessionId] = session.state.toString();
+      if (session.state == CastSessionState.connected) {
+        result[session.sessionId] = session.state.toString();
+      }
     }
-    return Future.value(result);
+    return result;
   }
 }

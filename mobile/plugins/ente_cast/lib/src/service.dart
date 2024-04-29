@@ -12,7 +12,7 @@ abstract class CastService {
     void Function(Map<CastMessageType, Map<String, dynamic>>)? onMessage,
   });
   // returns a map of sessionID to deviceNames
-  Future<Map<String, String>> getActiveSessions();
+  Map<String, String> getActiveSessions();
 
   Future<void> closeActiveCasts();
 }

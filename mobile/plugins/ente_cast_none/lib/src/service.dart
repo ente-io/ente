@@ -28,7 +28,7 @@ class CastServiceImpl extends CastService {
   }
 
   @override
-  Future<Map<String, String>> getActiveSessions() {
+  Map<String, String> getActiveSessions() {
     // TODO: implement getActiveSessions
     throw UnimplementedError();
   }

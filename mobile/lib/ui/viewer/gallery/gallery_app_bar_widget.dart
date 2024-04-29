@@ -583,9 +583,14 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         Tooltip(
           message: "Cast album",
           child: IconButton(
-            icon: const Icon(Icons.cast_outlined),
+            icon: castService.getActiveSessions().isNotEmpty
+                ? const Icon(Icons.cast_connected_rounded)
+                : const Icon(Icons.cast_outlined),
             onPressed: () async {
               await _castChoiceDialog();
+              if (mounted) {
+                setState(() {});
+              }
             },
           ),
         ),
@@ -855,6 +860,21 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
 
   Future<void> _castChoiceDialog() async {
     final gw = CastGateway(NetworkClient.instance.enteDio);
+    if (castService.getActiveSessions().isNotEmpty) {
+      await showChoiceDialog(
+        context,
+        title: "Stop casting",
+        firstButtonLabel: "Yes",
+        secondButtonLabel: "No",
+        body: "Do you want to stop casting?",
+        firstButtonOnTap: () async {
+          gw.revokeAllTokens().ignore();
+          await castService.closeActiveCasts();
+        },
+      );
+      return;
+    }
+
     // stop any existing cast session
     gw.revokeAllTokens().ignore();
     final result = await showDialog<ButtonAction?>(

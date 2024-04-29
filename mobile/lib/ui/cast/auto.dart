@@ -100,7 +100,7 @@ class _AutoCastDialogState extends State<AutoCastDialog> {
         if (message.containsKey(CastMessageType.pairCode)) {
           final code = message[CastMessageType.pairCode]!['code'];
           widget.onConnect(code);
-          // Navigator.of(context).pop();
+          Navigator.of(context).pop();
         }
       },
     );
