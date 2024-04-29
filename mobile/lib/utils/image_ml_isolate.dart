@@ -22,6 +22,7 @@ enum ImageOperation {
   preprocessMobileFaceNet,
   preprocessMobileFaceNetOnnx,
   generateFaceThumbnails,
+  generateFaceThumbnailsUsingCanvas,
   cropAndPadFace,
 }
 
@@ -226,6 +227,19 @@ class ImageMlIsolate {
               faceBoxes,
             );
             sendPort.send(List.from(results));
+          case ImageOperation.generateFaceThumbnailsUsingCanvas:
+            final imagePath = args['imagePath'] as String;
+            final Uint8List imageData = await File(imagePath).readAsBytes();
+            final faceBoxesJson =
+                args['faceBoxesList'] as List<Map<String, dynamic>>;
+            final List<FaceBox> faceBoxes =
+                faceBoxesJson.map((json) => FaceBox.fromJson(json)).toList();
+            final List<Uint8List> results =
+                await generateFaceThumbnailsUsingCanvas(
+              imageData,
+              faceBoxes,
+            );
+            sendPort.send(List.from(results));
           case ImageOperation.cropAndPadFace:
             final imageData = args['imageData'] as Uint8List;
             final faceBox = args['faceBox'] as List<double>;
@@ -366,7 +380,7 @@ class ImageMlIsolate {
     );
     final inputs = results['inputs'] as Float32List;
     final originalSize = Dimensions(
-      width:results['originalWidth'] as int,
+      width: results['originalWidth'] as int,
       height: results['originalHeight'] as int,
     );
     final newSize = Dimensions(
@@ -493,6 +507,26 @@ class ImageMlIsolate {
     return await _runInIsolate(
       (
         ImageOperation.generateFaceThumbnails,
+        {
+          'imagePath': imagePath,
+          'faceBoxesList': faceBoxesJson,
+        },
+      ),
+    ).then((value) => value.cast<Uint8List>());
+  }
+
+  /// Generates face thumbnails for all [faceBoxes] in [imageData].
+  ///
+  /// Uses [generateFaceThumbnailsUsingCanvas] inside the isolate.
+  Future<List<Uint8List>> generateFaceThumbnailsForImageUsingCanvas(
+    String imagePath,
+    List<FaceBox> faceBoxes,
+  ) async {
+    final List<Map<String, dynamic>> faceBoxesJson =
+        faceBoxes.map((box) => box.toJson()).toList();
+    return await _runInIsolate(
+      (
+        ImageOperation.generateFaceThumbnailsUsingCanvas,
         {
           'imagePath': imagePath,
           'faceBoxesList': faceBoxesJson,

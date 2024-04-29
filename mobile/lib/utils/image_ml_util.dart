@@ -1272,12 +1272,10 @@ Future<List<Uint8List>> generateFaceThumbnails(
   }
 }
 
-@Deprecated("Old method using canvas, replaced by `generateFaceThumbnails`")
-
 /// Generates a face thumbnail from [imageData] and a [faceDetection].
 ///
 /// Returns a [Uint8List] image, in png format.
-Future<List<Uint8List>> generateFaceThumbnailsFromDataAndDetections(
+Future<List<Uint8List>> generateFaceThumbnailsUsingCanvas(
   Uint8List imageData,
   List<FaceBox> faceBoxes,
 ) async {
