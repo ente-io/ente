@@ -242,8 +242,8 @@ const watchFindFiles = (folderPath: string): Promise<string[]> =>
 
 // - Upload
 
-const zipEntries = (zipPath: string): Promise<ZipEntry[]> =>
-    ipcRenderer.invoke("zipEntries", zipPath);
+const listZipEntries = (zipPath: string): Promise<ZipEntry[]> =>
+    ipcRenderer.invoke("listZipEntries", zipPath);
 
 const pendingUploads = (): Promise<PendingUploads | undefined> =>
     ipcRenderer.invoke("pendingUploads");
@@ -370,7 +370,7 @@ contextBridge.exposeInMainWorld("electron", {
 
     // - Upload
 
-    zipEntries,
+    listZipEntries,
     pendingUploads,
     setPendingUploads,
     markUploadedFiles,

@@ -478,7 +478,7 @@ export interface Electron {
      *
      * To read the contents of the files themselves, see [Note: IPC streams].
      */
-    zipEntries : (zipPath: string) => Promise<ZipEntry[]>
+    listZipEntries : (zipPath: string) => Promise<ZipEntry[]>
 
     /**
      * Return any pending uploads that were previously enqueued but haven't yet
