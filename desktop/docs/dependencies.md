@@ -94,12 +94,12 @@ Some extra ones specific to the code here are:
 
 ### Format conversion
 
-The main tool we use is for arbitrary conversions is FFMPEG. To bundle a
+The main tool we use is for arbitrary conversions is ffmpeg. To bundle a
 (platform specific) static binary of ffmpeg with our app, we use
 [ffmpeg-static](https://github.com/eugeneware/ffmpeg-static).
 
 > There is a significant (~20x) speed difference between using the compiled
-> FFMPEG binary and using the WASM one (that our renderer process already has).
+> ffmpeg binary and using the wasm one (that our renderer process already has).
 > Which is why we bundle it to speed up operations on the desktop app.
 
 In addition, we also bundle a static Linux binary of imagemagick in our extra

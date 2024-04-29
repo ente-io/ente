@@ -10,12 +10,13 @@ import { EnteFile } from "types/file";
 import {
     copyFileToClipboard,
     downloadSingleFile,
-    getFileExtension,
     getFileFromURL,
     isRawFile,
     isSupportedRawFormat,
 } from "utils/file";
 
+import { FILE_TYPE } from "@/media/file-type";
+import { lowercaseExtension } from "@/next/file";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import AlbumOutlined from "@mui/icons-material/AlbumOutlined";
@@ -34,7 +35,6 @@ import InfoIcon from "@mui/icons-material/InfoOutlined";
 import ReplayIcon from "@mui/icons-material/Replay";
 import ZoomInOutlinedIcon from "@mui/icons-material/ZoomInOutlined";
 import { Box, Button, styled } from "@mui/material";
-import { FILE_TYPE } from "constants/file";
 import {
     defaultLivePhotoDefaultOptions,
     photoSwipeV4Events,
@@ -43,10 +43,10 @@ import { t } from "i18next";
 import isElectron from "is-electron";
 import { AppContext } from "pages/_app";
 import { GalleryContext } from "pages/gallery";
+import { detectFileTypeInfo } from "services/detect-type";
 import downloadManager, { LoadedLivePhotoSourceURL } from "services/download";
+import { getParsedExifData } from "services/exif";
 import { trashFiles } from "services/fileService";
-import { getFileType } from "services/typeDetectionService";
-import { getParsedExifData } from "services/upload/exifService";
 import { SetFilesDownloadProgressAttributesCreator } from "types/gallery";
 import { isClipboardItemPresent } from "utils/common";
 import { pauseVideo, playVideo } from "utils/photoFrame";
@@ -348,7 +348,7 @@ function PhotoViewer(props: Iprops) {
     }
 
     function updateShowEditButton(file: EnteFile) {
-        const extension = getFileExtension(file.metadata.title);
+        const extension = lowercaseExtension(file.metadata.title);
         const isSupported =
             !isRawFile(extension) || isSupportedRawFormat(extension);
         setShowEditButton(
@@ -594,7 +594,7 @@ function PhotoViewer(props: Iprops) {
                         .image;
                     fileObject = await getFileFromURL(url, file.metadata.title);
                 }
-                const fileTypeInfo = await getFileType(fileObject);
+                const fileTypeInfo = await detectFileTypeInfo(fileObject);
                 const exifData = await getParsedExifData(
                     fileObject,
                     fileTypeInfo,
@@ -611,9 +611,8 @@ function PhotoViewer(props: Iprops) {
             }
         } catch (e) {
             setExif({ key: file.src, value: null });
-            const fileExtension = getFileExtension(file.metadata.title);
             log.error(
-                `checkExifAvailable failed for extension ${fileExtension}`,
+                `checkExifAvailable failed for file ${file.metadata.title}`,
                 e,
             );
         }

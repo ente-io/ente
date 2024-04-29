@@ -42,52 +42,77 @@ export default function PairingMode() {
     }, []);
 
     useEffect(() => {
-        if (!cast) return;
-        if (isCastReady) return;
+        if (!cast) {
+            return;
+        }
+        if (isCastReady) {
+            return;
+        }
         const context = cast.framework.CastReceiverContext.getInstance();
 
         try {
             const options = new cast.framework.CastReceiverOptions();
+            options.maxInactivity = 3600;
             options.customNamespaces = Object.assign({});
             options.customNamespaces["urn:x-cast:pair-request"] =
                 cast.framework.system.MessageType.JSON;
 
             options.disableIdleTimeout = true;
+            context.set;
 
             context.addCustomMessageListener(
                 "urn:x-cast:pair-request",
                 messageReceiveHandler,
             );
+
+            // listen to close request and stop the context
+            context.addEventListener(
+                cast.framework.system.EventType.SENDER_DISCONNECTED,
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                (_) => {
+                    context.stop();
+                },
+            );
             context.start(options);
+            setIsCastReady(true);
         } catch (e) {
             log.error("failed to create cast context", e);
         }
-        setIsCastReady(true);
+
         return () => {
-            context.stop();
+            // context.stop();
         };
-    }, [cast, isCastReady]);
+    }, [cast]);
 
     const messageReceiveHandler = (message: {
         type: string;
         senderId: string;
         data: any;
     }) => {
-        cast.framework.CastReceiverContext.getInstance().sendCustomMessage(
-            "urn:x-cast:pair-request",
-            message.senderId,
-            {
-                code: digits.join(""),
-            },
-        );
+        try {
+            cast.framework.CastReceiverContext.getInstance().sendCustomMessage(
+                "urn:x-cast:pair-request",
+                message.senderId,
+                {
+                    code: digits.join(""),
+                },
+            );
+        } catch (e) {
+            log.error("failed to send message", e);
+        }
     };
 
     const init = async () => {
-        const data = generateSecureData(6);
-        setDigits(convertDataToDecimalString(data).split(""));
-        const keypair = await generateKeyPair();
-        setPublicKeyB64(await toB64(keypair.publicKey));
-        setPrivateKeyB64(await toB64(keypair.privateKey));
+        try {
+            const data = generateSecureData(6);
+            setDigits(convertDataToDecimalString(data).split(""));
+            const keypair = await generateKeyPair();
+            setPublicKeyB64(await toB64(keypair.publicKey));
+            setPrivateKeyB64(await toB64(keypair.privateKey));
+        } catch (e) {
+            log.error("failed to generate keypair", e);
+            throw e;
+        }
     };
 
     const generateKeyPair = async () => {
@@ -227,21 +252,6 @@ export default function PairingMode() {
                         </a>{" "}
                         for help
                     </p>
-                    <div
-                        style={{
-                            position: "fixed",
-                            bottom: "20px",
-                            right: "20px",
-                            backgroundColor: "white",
-                            display: "flex",
-                            justifyContent: "center",
-                            alignItems: "center",
-                            padding: "10px",
-                            borderRadius: "10px",
-                        }}
-                    >
-                        <img src="/images/help-qrcode.webp" />
-                    </div>
                 </div>
             </div>
         </>

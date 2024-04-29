@@ -26,6 +26,23 @@ export const nameAndExtension = (fileName: string): FileNameComponents => {
 };
 
 /**
+ * If the file name or path has an extension, return a lowercased version of it.
+ *
+ * This is handy when comparing the extension to a known set without worrying
+ * about case sensitivity.
+ *
+ * See {@link nameAndExtension} for its more generic sibling.
+ */
+export const lowercaseExtension = (
+    fileNameOrPath: string,
+): string | undefined => {
+    // We rely on the implementation of nameAndExtension using lastIndexOf to
+    // allow us to also work on paths.
+    const [, ext] = nameAndExtension(fileNameOrPath);
+    return ext?.toLowerCase();
+};
+
+/**
  * Construct a file name from its components (name and extension).
  *
  * Inverse of {@link nameAndExtension}.
@@ -65,6 +82,13 @@ export const dirname = (path: string) => {
     }
     return pathComponents.join("/");
 };
+
+/**
+ * Return a short description of the given {@link fileOrPath} suitable for
+ * helping identify it in log messages.
+ */
+export const fopLabel = (fileOrPath: File | string) =>
+    fileOrPath instanceof File ? `File(${fileOrPath.name})` : fileOrPath;
 
 export function getFileNameSize(file: File | ElectronFile) {
     return `${file.name}_${convertBytesToHumanReadable(file.size)}`;

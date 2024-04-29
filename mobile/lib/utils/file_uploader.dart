@@ -29,7 +29,6 @@ import "package:photos/models/metadata/file_magic.dart";
 import 'package:photos/models/upload_url.dart';
 import "package:photos/models/user_details.dart";
 import 'package:photos/services/collections_service.dart';
-import "package:photos/services/feature_flag_service.dart";
 import "package:photos/services/file_magic_service.dart";
 import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/services/sync_service.dart';
@@ -402,6 +401,16 @@ class FileUploader {
       _logger.severe('Trying to upload file with missing localID');
       return file;
     }
+    if (!CollectionsService.instance.allowUpload(collectionID)) {
+      _logger.warning(
+        'Upload not allowed for collection $collectionID',
+      );
+      if (!file.isUploaded && file.generatedID != null) {
+        _logger.info("Deleting file entry for " + file.toString());
+        await FilesDB.instance.deleteByGeneratedID(file.generatedID!);
+      }
+      return file;
+    }
 
     final String lockKey = file.localID!;
 
@@ -497,7 +506,7 @@ class FileUploader {
 
       // Calculate the number of parts for the file. Multiple part upload
       // is only enabled for internal users and debug builds till it's battle tested.
-      final count = FeatureFlagService.instance.isInternalUserOrDebugBuild()
+      final count = kDebugMode
           ? await calculatePartCount(
               await encryptedFile.length(),
             )

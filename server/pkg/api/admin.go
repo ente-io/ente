@@ -3,6 +3,7 @@ package api
 import (
 	"errors"
 	"fmt"
+	"github.com/ente-io/museum/pkg/controller/remotestore"
 	"net/http"
 	"strconv"
 	"strings"
@@ -43,6 +44,7 @@ type AdminHandler struct {
 	BillingController       *controller.BillingController
 	UserController          *user.UserController
 	FamilyController        *family.Controller
+	RemoteStoreController   *remotestore.Controller
 	ObjectCleanupController *controller.ObjectCleanupController
 	MailingListsController  *controller.MailingListsController
 	DiscordController       *discord.DiscordController
@@ -257,6 +259,32 @@ func (h *AdminHandler) RemovePasskeys(c *gin.Context) {
 		return
 	}
 	logger.Info("Passkeys successfully removed")
+	c.JSON(http.StatusOK, gin.H{})
+}
+
+func (h *AdminHandler) UpdateFeatureFlag(c *gin.Context) {
+	var request ente.AdminUpdateKeyValueRequest
+	if err := c.ShouldBindJSON(&request); err != nil {
+		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, "Bad request"))
+		return
+	}
+	go h.DiscordController.NotifyAdminAction(
+		fmt.Sprintf("Admin (%d) updating flag:%s to val:%s for %d", auth.GetUserID(c.Request.Header), request.Key, request.Value, request.UserID))
+
+	logger := logrus.WithFields(logrus.Fields{
+		"user_id":  request.UserID,
+		"admin_id": auth.GetUserID(c.Request.Header),
+		"req_id":   requestid.Get(c),
+		"req_ctx":  "update_feature_flag",
+	})
+	logger.Info("Start update")
+	err := h.RemoteStoreController.AdminInsertOrUpdate(c, request)
+	if err != nil {
+		logger.WithError(err).Error("Failed to update flag")
+		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
+	logger.Info("successfully updated flag")
 	c.JSON(http.StatusOK, gin.H{})
 }
 

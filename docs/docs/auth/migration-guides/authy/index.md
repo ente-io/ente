@@ -18,7 +18,7 @@ A guide written by Green, an ente.io lover
 Migrating from Authy can be tiring, as you cannot export your 2FA codes through
 the app, meaning that you would have to reconfigure 2FA for all of your accounts
 for your new 2FA authenticator. However, easier ways exist to export your codes
-out of Authy. This guide will cover two of the most used methods for mograting
+out of Authy. This guide will cover two of the most used methods for migrating
 from Authy to Ente Authenticator.
 
 > [!CAUTION]

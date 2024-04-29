@@ -1,4 +1,3 @@
-import log from "@/next/log";
 import ChevronRight from "@mui/icons-material/ChevronRight";
 import ScienceIcon from "@mui/icons-material/Science";
 import { Box, DialogProps, Stack, Typography } from "@mui/material";
@@ -37,13 +36,10 @@ export default function AdvancedSettings({ open, onClose, onRootClose }) {
         }
     };
 
-    const toggleCFProxy = async () => {
-        try {
-            appContext.setIsCFProxyDisabled(!appContext.isCFProxyDisabled);
-        } catch (e) {
-            log.error("toggleFasterUpload failed", e);
-        }
+    const toggleCFProxy = () => {
+        appContext.setIsCFProxyDisabled(!appContext.isCFProxyDisabled);
     };
+
     const [indexingStatus, setIndexingStatus] = useState<CLIPIndexingStatus>({
         indexed: 0,
         pending: 0,

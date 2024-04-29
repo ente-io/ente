@@ -9,7 +9,7 @@ import 'package:photos/core/constants.dart';
 import 'package:photos/models/file/file_type.dart';
 import 'package:photos/models/location/location.dart';
 import "package:photos/models/metadata/file_magic.dart";
-import 'package:photos/services/feature_flag_service.dart';
+import "package:photos/service_locator.dart";
 import 'package:photos/utils/date_time_util.dart';
 import 'package:photos/utils/exif_util.dart';
 import 'package:photos/utils/file_uploader_util.dart';
@@ -247,8 +247,7 @@ class EnteFile {
       return "$localFileServer/$uploadedFileID";
     }
     final endpoint = Configuration.instance.getHttpEndpoint();
-    if (endpoint != kDefaultProductionEndpoint ||
-        FeatureFlagService.instance.disableCFWorker()) {
+    if (endpoint != kDefaultProductionEndpoint || flagService.disableCFWorker) {
       return endpoint + "/files/download/" + uploadedFileID.toString();
     } else {
       return "https://files.ente.io/?fileID=" + uploadedFileID.toString();
@@ -264,8 +263,7 @@ class EnteFile {
       return "$localFileServer/thumb/$uploadedFileID";
     }
     final endpoint = Configuration.instance.getHttpEndpoint();
-    if (endpoint != kDefaultProductionEndpoint ||
-        FeatureFlagService.instance.disableCFWorker()) {
+    if (endpoint != kDefaultProductionEndpoint || flagService.disableCFWorker) {
       return endpoint + "/files/preview/" + uploadedFileID.toString();
     } else {
       return "https://thumbnails.ente.io/?fileID=" + uploadedFileID.toString();
