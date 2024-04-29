@@ -26,6 +26,7 @@ import type {
     SegregatedFinishedUploads,
     UploadCounter,
     UploadFileNames,
+    UploadItem,
 } from "services/upload/uploadManager";
 import uploadManager from "services/upload/uploadManager";
 import watcher from "services/watch";
@@ -160,10 +161,10 @@ export default function Uploader({
      * Consolidated and cleaned list obtained from {@link webFiles},
      * {@link desktopFiles}, {@link desktopFilePaths} and
      * {@link desktopZipEntries}.
+     *
+     * See the documentation of {@link UploadItem} for more details.
      */
-    const itemsToUpload = useRef<UploadItem[]>(
-        [],
-    );
+    const uploadItems = useRef<UploadItem[]>([]);
 
     // TODO(MR): temp, doesn't have zips
     const fileOrPathsToUpload = useRef<(File | string)[]>([]);
@@ -251,6 +252,7 @@ export default function Uploader({
                 if (!pending) return;
 
                 const { collectionName, filePaths, zipEntries } = pending;
+
                 log.info("Resuming pending upload", pending);
                 isPendingDesktopUpload.current = true;
                 pendingDesktopUploadCollectionName.current = collectionName;
@@ -300,7 +302,7 @@ export default function Uploader({
     // Trigger an upload when any of the dependencies change.
     useEffect(() => {
         const itemAndPaths = [
-            /* TODO(MR): use webkitRelativePath || name here */
+            /* TODO(MR): ElectronFile | use webkitRelativePath || name here */
             webFiles.map((f) => [f, f["path"]]),
             desktopFiles.map((fp) => [fp, fp.path]),
             desktopFilePaths.map((p) => [p, p]),
@@ -320,6 +322,7 @@ export default function Uploader({
                 return;
             }
         }
+
         uploadRunning.current = true;
         props.closeUploadTypeSelector();
         props.setLoading(true);
@@ -334,15 +337,15 @@ export default function Uploader({
             ([_, p]) => !basename(p).startsWith("."),
         );
 
-        itemsToUpload.current = prunedItemAndPaths.map(([i]) => i);
-        fileOrPathsToUpload.current = itemsToUpload.current
+        uploadItems.current = prunedItemAndPaths.map(([i]) => i);
+        fileOrPathsToUpload.current = uploadItems.current
             .map((i) => {
                 if (typeof i == "string" || i instanceof File) return i;
                 if (Array.isArray(i)) return undefined;
                 return i.file;
             })
             .filter((x) => x);
-        itemsToUpload.current = [];
+        uploadItems.current = [];
         if (fileOrPathsToUpload.current.length === 0) {
             props.setLoading(false);
             return;
@@ -912,7 +915,7 @@ const groupFilesBasedOnParentFolder = (fileOrPaths: (File | string)[]) => {
 export const setPendingUploads = async (
     electron: Electron,
     collections: Collection[],
-    filesWithCollectionToUploadIn: FileWithCollection[],
+    uploadItems: UploadItem[],
 ) => {
     let collectionName: string | undefined;
     /* collection being one suggest one of two things
@@ -930,15 +933,15 @@ export const setPendingUploads = async (
 
     const filePaths: string[] = [];
     const zipEntries: ZipEntry[] = [];
-    for (const file of filesWithCollectionToUploadIn) {
-        if (file instanceof File) {
+    for (const item of uploadItems) {
+        if (item instanceof File) {
             throw new Error("Unexpected web file for a desktop pending upload");
-        } else if (typeof file == "string") {
-            filePaths.push(file);
-        } else if (Array.isArray(file)) {
-            zipEntries.push(file);
+        } else if (typeof item == "string") {
+            filePaths.push(item);
+        } else if (Array.isArray(item)) {
+            zipEntries.push(item);
         } else {
-            filePaths.push(file.path);
+            filePaths.push(item.path);
         }
     }
 
