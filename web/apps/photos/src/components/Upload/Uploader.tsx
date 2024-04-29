@@ -161,7 +161,7 @@ export default function Uploader({
      * {@link desktopFiles}, {@link desktopFilePaths} and
      * {@link desktopZipEntries}.
      */
-    const itemsToUpload = useRef<(File | FileAndPath | string | ZipEntry)[]>(
+    const itemsToUpload = useRef<UploadItem[]>(
         [],
     );
 
@@ -924,7 +924,7 @@ export const setPendingUploads = async (
         helps the info of user choosing this options
         and on next upload we can directly start uploading to this collection
     */
-    if (collections.length === 1) {
+    if (collections.length == 1) {
         collectionName = collections[0].name;
     }
 

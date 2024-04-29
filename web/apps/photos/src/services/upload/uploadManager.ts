@@ -3,8 +3,8 @@ import { potentialFileTypeFromExtension } from "@/media/live-photo";
 import { ensureElectron } from "@/next/electron";
 import { lowercaseExtension, nameAndExtension } from "@/next/file";
 import log from "@/next/log";
-import { ElectronFile } from "@/next/types/file";
-import type { Electron } from "@/next/types/ipc";
+import { ElectronFile, type FileAndPath } from "@/next/types/file";
+import type { Electron, ZipEntry } from "@/next/types/ipc";
 import { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { ensure } from "@/utils/ensure";
 import { getDedicatedCryptoWorker } from "@ente/shared/crypto";
@@ -82,6 +82,32 @@ export interface ProgressUpdater {
 
 /** The number of uploads to process in parallel. */
 const maxConcurrentUploads = 4;
+
+/**
+ * An item to upload is one of the following:
+ *
+ * 1. A file drag-and-dropped or selected by the user when we are running in the
+ *    web browser. These is the {@link File} case.
+ *
+ * 2. A file drag-and-dropped or selected by the user when we are running in the
+ *    context of our desktop app. In such cases, we also have the absolute path
+ *    of the file in the user's local filesystem. this is the
+ *    {@link FileAndPath} case.
+ *
+ * 3. A file path programmatically requested by the desktop app. For example, we
+ *    might be resuming a previously interrupted upload after an app restart
+ *    (thus we no longer have access to the {@link File} from case 2). Or we
+ *    could be uploading a file this is in one of the folders the user has asked
+ *    us to watch for changes. This is the {@link string} case.
+ *
+ * 4. A file within a zip file. This too is only possible when we are running in
+ *    the context of our desktop app. The user might have drag-and-dropped or
+ *    selected the zip file, or it might be a zip file that they'd previously
+ *    selected but we now are resuming an interrupted upload. Either ways, what
+ *    we have is a path to zip file, and the name of an entry within that zip
+ *    file. This is the {@link ZipEntry} case.
+ */
+export type UploadItem = File | FileAndPath | string | ZipEntry;
 
 export interface FileWithCollection {
     localID: number;
@@ -805,23 +831,6 @@ const splitMetadataAndMediaFiles = (
         },
         [[], []],
     );
-
-export const setToUploadCollection = async (collections: Collection[]) => {
-    let collectionName: string = null;
-    /* collection being one suggest one of two things
-                1. Either the user has upload to a single existing collection
-                2. Created a new single collection to upload to
-                    may have had multiple folder, but chose to upload
-                    to one album
-                hence saving the collection name when upload collection count is 1
-                helps the info of user choosing this options
-                and on next upload we can directly start uploading to this collection
-            */
-    if (collections.length === 1) {
-        collectionName = collections[0].name;
-    }
-    await ensureElectron().setPendingUploadCollection(collectionName);
-};
 
 const updatePendingUploads = async (
     electron: Electron,
