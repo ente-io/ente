@@ -23,11 +23,11 @@ class AutoCastDialog extends StatefulWidget {
 
 class _AutoCastDialogState extends State<AutoCastDialog> {
   final bool doesUserExist = true;
+  final Set<Object> _isDeviceTapInProgress = {};
 
   @override
   Widget build(BuildContext context) {
     final textStyle = getEnteTextTheme(context);
-
     final AlertDialog alert = AlertDialog(
       title: Text(
         S.of(context).connectToDevice,
@@ -65,19 +65,39 @@ class _AutoCastDialogState extends State<AutoCastDialog> {
               }
 
               return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: snapshot.data!.map((result) {
                   final device = result.$2;
                   final name = result.$1;
                   return GestureDetector(
                     onTap: () async {
+                      if (_isDeviceTapInProgress.contains(device)) {
+                        return;
+                      }
+                      setState(() {
+                        _isDeviceTapInProgress.add(device);
+                      });
                       try {
                         await _connectToYourApp(context, device);
                       } catch (e) {
                         showGenericErrorDialog(context: context, error: e)
                             .ignore();
+                      } finally {
+                        setState(() {
+                          _isDeviceTapInProgress.remove(device);
+                        });
                       }
                     },
-                    child: Text(name),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                      child: Row(
+                        children: [
+                          Expanded(child: Text(name)),
+                          if (_isDeviceTapInProgress.contains(device))
+                            const EnteLoadingWidget(),
+                        ],
+                      ),
+                    ),
                   );
                 }).toList(),
               );
@@ -93,6 +113,8 @@ class _AutoCastDialogState extends State<AutoCastDialog> {
     BuildContext context,
     Object castDevice,
   ) async {
+    // sleep for 10 seconds
+    await Future.delayed(const Duration(seconds: 10));
     await castService.connectDevice(
       context,
       castDevice,
