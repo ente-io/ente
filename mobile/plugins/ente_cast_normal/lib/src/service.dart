@@ -78,14 +78,13 @@ class CastServiceImpl extends CastService {
       }).timeout(
         const Duration(seconds: 5),
         onTimeout: () {
-          print('sendMessage timed out after 5 seconds');
+          debugPrint('sendMessage timed out after 5 seconds');
         },
       );
       debugPrint("close session ${session.sessionId}");
       session.close();
     }
     CastSessionManager().sessions.clear();
-    debugPrint("send close message");
     return Future.value();
   }
 

@@ -38,7 +38,7 @@ class _CastChooseDialogState extends State<CastChooseDialog> {
           ButtonWidget(
             labelText: S.of(context).autoPair,
             icon: Icons.cast_outlined,
-            buttonType: ButtonType.primary,
+            buttonType: ButtonType.neutral,
             buttonSize: ButtonSize.large,
             shouldStickToDarkTheme: true,
             buttonAction: ButtonAction.first,
@@ -56,7 +56,7 @@ class _CastChooseDialogState extends State<CastChooseDialog> {
           const SizedBox(height: 12),
           ButtonWidget(
             labelText: S.of(context).pairWithPin,
-            buttonType: ButtonType.primary,
+            buttonType: ButtonType.neutral,
             // icon for pairing with TV manually
             icon: Icons.tv_outlined,
             buttonSize: ButtonSize.large,
