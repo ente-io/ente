@@ -1,5 +1,6 @@
 import "package:ente_auth/l10n/l10n.dart";
 import 'package:ente_auth/models/code.dart';
+import 'package:ente_auth/models/code_display.dart';
 import 'package:ente_auth/ui/components/buttons/button_widget.dart';
 import 'package:ente_auth/ui/components/models/button_result.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
@@ -8,8 +9,9 @@ import "package:flutter/material.dart";
 
 class SetupEnterSecretKeyPage extends StatefulWidget {
   final Code? code;
+  final List<String> tags;
 
-  SetupEnterSecretKeyPage({this.code, super.key});
+  SetupEnterSecretKeyPage({this.code, super.key, required this.tags});
 
   @override
   State<SetupEnterSecretKeyPage> createState() =>
@@ -20,7 +22,9 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
   late TextEditingController _issuerController;
   late TextEditingController _accountController;
   late TextEditingController _secretController;
+  late TextEditingController _tagController;
   late bool _secretKeyObscured;
+  late List<String> tags = [...?widget.code?.display.tags];
 
   @override
   void initState() {
@@ -34,6 +38,7 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
     _secretController = TextEditingController(
       text: widget.code?.secret,
     );
+    _tagController = TextEditingController();
     _secretKeyObscured = widget.code != null;
     super.initState();
   }
@@ -50,6 +55,7 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 40.0, horizontal: 40),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 TextFormField(
                   // The validator receives the text that the user has entered.
@@ -109,6 +115,54 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
                   controller: _accountController,
                 ),
                 const SizedBox(
+                  height: 20,
+                ),
+                TextFormField(
+                  // The validator receives the text that the user has entered.
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return "Please enter some text";
+                    }
+                    return null;
+                  },
+                  onFieldSubmitted: (str) {
+                    if (str.trim().isEmpty) {
+                      return;
+                    }
+
+                    if (!tags.contains(str)) {
+                      tags.add(str);
+                    }
+
+                    // Clear the tag
+                    _tagController.text = "";
+                    setState(() {});
+                  },
+                  decoration: InputDecoration(
+                    hintText: l10n.codeTagHint,
+                  ),
+                  controller: _tagController,
+                ),
+                if (tags.isNotEmpty) ...[
+                  const SizedBox(height: 10),
+                  Wrap(
+                    spacing: 12,
+                    alignment: WrapAlignment.start,
+                    children: tags
+                        .map(
+                          (e) => TagChip(
+                            label: e,
+                            onTap: () {
+                              tags.remove(e);
+                              setState(() {});
+                            },
+                          ),
+                        )
+                        .toList(),
+                  ),
+                  const SizedBox(height: 10),
+                ],
+                const SizedBox(
                   height: 40,
                 ),
                 SizedBox(
@@ -166,16 +220,19 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
           return;
         }
       }
+      final CodeDisplay display = widget.code!.display.copyWith(tags: tags);
       final Code newCode = widget.code == null
           ? Code.fromAccountAndSecret(
               account,
               issuer,
               secret,
+              display,
             )
           : widget.code!.copyWith(
               account: account,
               issuer: issuer,
               secret: secret,
+              display: display,
             );
       // Verify the validity of the code
       getOTP(newCode);
@@ -193,6 +250,55 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
       context,
       context.l10n.incorrectDetails,
       message ?? context.l10n.pleaseVerifyDetails,
+    );
+  }
+}
+
+class TagChip extends StatelessWidget {
+  final String label;
+  final VoidCallback? onTap;
+  final bool isSelected;
+
+  const TagChip({
+    super.key,
+    required this.label,
+    this.isSelected = false,
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Chip(
+        label: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                color: isSelected ? Colors.white : const Color(0xFF8232E1),
+              ),
+            ),
+            if (isSelected) ...[
+              const SizedBox(width: 4),
+              const Icon(
+                Icons.check,
+                size: 16,
+                color: Colors.white,
+              ),
+            ],
+          ],
+        ),
+        backgroundColor:
+            isSelected ? const Color(0xFF722ED1) : const Color(0xFFFCF5FF),
+        side: BorderSide(
+          color: isSelected ? const Color(0xFF722ED1) : const Color(0xFFFCF5FF),
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(100),
+        ),
+      ),
     );
   }
 }

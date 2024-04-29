@@ -22,9 +22,9 @@ class Code {
   final int counter;
   bool? hasSynced;
 
-  final CodeDisplay? display;
+  final CodeDisplay display;
 
-  bool get isPinned => display?.pinned ?? false;
+  bool get isPinned => display.pinned;
 
   Code(
     this.account,
@@ -37,7 +37,7 @@ class Code {
     this.counter,
     this.rawData, {
     this.generatedID,
-    this.display,
+    required this.display,
   });
 
   Code copyWith({
@@ -59,7 +59,7 @@ class Code {
     final Algorithm updatedAlgo = algorithm ?? this.algorithm;
     final Type updatedType = type ?? this.type;
     final int updatedCounter = counter ?? this.counter;
-    final CodeDisplay? updatedDisplay = display ?? this.display;
+    final CodeDisplay updatedDisplay = display ?? this.display;
 
     return Code(
       updateAccount,
@@ -80,6 +80,7 @@ class Code {
     String account,
     String issuer,
     String secret,
+    CodeDisplay? display,
   ) {
     return Code(
       account,
@@ -91,6 +92,7 @@ class Code {
       Type.totp,
       0,
       "otpauth://totp/$issuer:$account?algorithm=SHA1&digits=6&issuer=$issuer&period=30&secret=$secret",
+      display: display ?? CodeDisplay(),
     );
   }
 
@@ -107,7 +109,7 @@ class Code {
         _getType(uri),
         _getCounter(uri),
         rawData,
-        display: CodeDisplay.fromUri(uri),
+        display: CodeDisplay.fromUri(uri) ?? CodeDisplay(),
       );
     } catch (e) {
       // if account name contains # without encoding,
@@ -154,7 +156,7 @@ class Code {
     return jsonEncode(
       Uri.parse(
         "$rawData&codeDisplay="
-        "${jsonEncode((display ?? CodeDisplay()).toJson())}",
+        "${jsonEncode(display.toJson())}",
       ).toString(),
     );
   }
@@ -221,7 +223,7 @@ class Code {
   }
 
   static Type _getType(Uri uri) {
-    if (uri.host == "totp" || uri.host == "steam") {
+    if (uri.host == "totp") {
       return Type.totp;
     } else if (uri.host == "hotp") {
       return Type.hotp;

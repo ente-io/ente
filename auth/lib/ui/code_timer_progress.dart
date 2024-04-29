@@ -1,3 +1,4 @@
+import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/linear_progress_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -47,9 +48,14 @@ class _CodeTimerProgressState extends State<CodeTimerProgress>
 
   @override
   Widget build(BuildContext context) {
-    return LinearProgressWidget(
-      color: _progress > 0.4 ? const Color(0xFF9610D6) : Colors.orange,
-      fractionOfStorage: _progress,
+    return SizedBox(
+      height: 3,
+      child: LinearProgressWidget(
+        color: _progress > 0.4
+            ? getEnteColorScheme(context).primary700
+            : Colors.orange,
+        fractionOfStorage: _progress,
+      ),
     );
   }
 }

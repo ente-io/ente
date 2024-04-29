@@ -95,6 +95,7 @@ Future<int?> _processBitwardenExportFile(
           account,
           issuer,
           totp,
+          null,
         );
       }
 

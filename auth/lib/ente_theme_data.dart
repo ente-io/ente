@@ -427,6 +427,10 @@ extension CustomColorScheme on ColorScheme {
       ? const Color.fromRGBO(246, 246, 246, 1)
       : const Color.fromRGBO(40, 40, 40, 0.6);
 
+  Color get primaryColor => brightness == Brightness.light
+      ? const Color(0xFF9610D6)
+      : const Color(0xFF9610D6);
+
   EnteTheme get enteTheme =>
       brightness == Brightness.light ? lightTheme : darkTheme;
 

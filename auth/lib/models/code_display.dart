@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
+
 /// Used to store the display settings of a code.
 class CodeDisplay {
   final bool pinned;
@@ -48,6 +50,7 @@ class CodeDisplay {
       trashed: json['trashed'] ?? false,
       lastUsedAt: json['lastUsedAt'] ?? 0,
       tapCount: json['tapCount'] ?? 0,
+      tags: List<String>.from(json['tags'] ?? []),
     );
   }
 
@@ -65,6 +68,28 @@ class CodeDisplay {
       'trashed': trashed,
       'lastUsedAt': lastUsedAt,
       'tapCount': tapCount,
+      'tags': tags,
     };
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+
+    return other is CodeDisplay &&
+        other.pinned == pinned &&
+        other.trashed == trashed &&
+        other.lastUsedAt == lastUsedAt &&
+        other.tapCount == tapCount &&
+        listEquals(other.tags, tags);
+  }
+
+  @override
+  int get hashCode {
+    return pinned.hashCode ^
+        trashed.hashCode ^
+        lastUsedAt.hashCode ^
+        tapCount.hashCode ^
+        tags.hashCode;
   }
 }

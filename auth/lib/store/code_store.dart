@@ -6,6 +6,7 @@ import 'package:ente_auth/core/event_bus.dart';
 import 'package:ente_auth/events/codes_updated_event.dart';
 import 'package:ente_auth/models/authenticator/entity_result.dart';
 import 'package:ente_auth/models/code.dart';
+import 'package:ente_auth/models/codes.dart';
 import 'package:ente_auth/services/authenticator_service.dart';
 import 'package:ente_auth/store/offline_authenticator_db.dart';
 import 'package:logging/logging.dart';
@@ -22,14 +23,16 @@ class CodeStore {
     _authenticatorService = AuthenticatorService.instance;
   }
 
-  Future<List<Code>> getAllCodes({AccountMode? accountMode}) async {
+  Future<Codes> getAllCodes({AccountMode? accountMode}) async {
     final mode = accountMode ?? _authenticatorService.getAccountMode();
     final List<EntityResult> entities =
         await _authenticatorService.getEntities(mode);
-    final List<Code> codes = [];
+    final List<CodeState> codes = [];
+    List<String> tags = [];
     for (final entity in entities) {
       try {
         final decodeJson = jsonDecode(entity.rawData);
+
         late Code code;
         if (decodeJson is String && decodeJson.startsWith('otpauth://')) {
           code = Code.fromOTPAuthUrl(decodeJson);
@@ -38,24 +41,38 @@ class CodeStore {
         }
         code.generatedID = entity.generatedID;
         code.hasSynced = entity.hasSynced;
-        codes.add(code);
+        codes.add(CodeState(code: code, error: null));
+        tags.addAll(code.display.tags);
       } catch (e) {
+        codes.add(CodeState(code: null, error: e.toString()));
         _logger.severe("Could not parse code", e);
       }
     }
 
     // sort codes by issuer,account
     codes.sort((a, b) {
-      if (b.isPinned && !a.isPinned) return 1;
-      if (!b.isPinned && a.isPinned) return -1;
+      if (a.code == null && b.code == null) return 0;
+      if (a.code == null) return 1;
+      if (b.code == null) return -1;
 
-      final issuerComparison = compareAsciiLowerCaseNatural(a.issuer, b.issuer);
+      final firstCode = a.code!;
+      final secondCode = b.code!;
+
+      if (secondCode.isPinned && !firstCode.isPinned) return 1;
+      if (!secondCode.isPinned && firstCode.isPinned) return -1;
+
+      final issuerComparison =
+          compareAsciiLowerCaseNatural(firstCode.issuer, secondCode.issuer);
       if (issuerComparison != 0) {
         return issuerComparison;
       }
-      return compareAsciiLowerCaseNatural(a.account, b.account);
+      return compareAsciiLowerCaseNatural(
+        firstCode.account,
+        secondCode.account,
+      );
     });
-    return codes;
+    tags = tags.toSet().toList();
+    return Codes(allCodes: codes, tags: tags);
   }
 
   Future<AddResult> addCode(
@@ -67,7 +84,7 @@ class CodeStore {
     final codes = await getAllCodes(accountMode: mode);
     bool isExistingCode = false;
     bool hasSameCode = false;
-    for (final existingCode in codes) {
+    for (final existingCode in codes.validCodes) {
       if (code.generatedID != null &&
           existingCode.generatedID == code.generatedID) {
         isExistingCode = true;
@@ -124,8 +141,9 @@ class CodeStore {
       }
       logger.info('start import');
 
-      List<Code> offlineCodes = await CodeStore.instance
-          .getAllCodes(accountMode: AccountMode.offline);
+      List<Code> offlineCodes = (await CodeStore.instance
+              .getAllCodes(accountMode: AccountMode.offline))
+          .validCodes;
       if (offlineCodes.isEmpty) {
         return;
       }
@@ -134,8 +152,9 @@ class CodeStore {
         logger.info("skip as online sync is not done");
         return;
       }
-      final List<Code> onlineCodes =
-          await CodeStore.instance.getAllCodes(accountMode: AccountMode.online);
+      final List<Code> onlineCodes = (await CodeStore.instance
+              .getAllCodes(accountMode: AccountMode.online))
+          .validCodes;
       logger.info(
         'importing ${offlineCodes.length} offline codes with ${onlineCodes.length} online codes',
       );

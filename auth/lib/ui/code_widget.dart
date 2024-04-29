@@ -27,8 +27,9 @@ import 'package:move_to_background/move_to_background.dart';
 
 class CodeWidget extends StatefulWidget {
   final Code code;
+  final List<String> tags;
 
-  const CodeWidget(this.code, {super.key});
+  const CodeWidget(this.code, this.tags, {super.key});
 
   @override
   State<CodeWidget> createState() => _CodeWidgetState();
@@ -500,7 +501,10 @@ class _CodeWidgetState extends State<CodeWidget> {
     final Code? code = await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (BuildContext context) {
-          return SetupEnterSecretKeyPage(code: widget.code);
+          return SetupEnterSecretKeyPage(
+            code: widget.code,
+            tags: widget.tags,
+          );
         },
       ),
     );

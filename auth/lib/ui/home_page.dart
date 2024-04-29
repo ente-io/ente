@@ -10,6 +10,7 @@ import 'package:ente_auth/events/icons_changed_event.dart';
 import 'package:ente_auth/events/trigger_logout_event.dart';
 import "package:ente_auth/l10n/l10n.dart";
 import 'package:ente_auth/models/code.dart';
+import 'package:ente_auth/models/codes.dart';
 import 'package:ente_auth/onboarding/view/setup_enter_secret_key_page.dart';
 import 'package:ente_auth/services/preference_service.dart';
 import 'package:ente_auth/services/user_service.dart';
@@ -54,8 +55,8 @@ class _HomePageState extends State<HomePage> {
   final FocusNode searchInputFocusNode = FocusNode();
   bool _showSearchBox = false;
   String _searchText = "";
-  List<Code> _codes = [];
-  List<Code> _filteredCodes = [];
+  Codes? _codes;
+  List<CodeState> _filteredCodes = [];
   StreamSubscription<CodesUpdatedEvent>? _streamSubscription;
   StreamSubscription<TriggerLogoutEvent>? _triggerLogoutEvent;
   StreamSubscription<IconsChangedEvent>? _iconsChangedEvent;
@@ -105,26 +106,28 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _applyFilteringAndRefresh() {
-    if (_searchText.isNotEmpty && _showSearchBox) {
+    if (_searchText.isNotEmpty && _showSearchBox && _codes != null) {
       final String val = _searchText.toLowerCase();
       // Prioritize issuer match above account for better UX while searching
       // for a specific TOTP for email providers. Searching for "emailProvider" like (gmail, proton) should
       // show the email provider first instead of other accounts where protonmail
       // is the account name.
-      final List<Code> issuerMatch = [];
-      final List<Code> accountMatch = [];
+      final List<CodeState> issuerMatch = [];
+      final List<CodeState> accountMatch = [];
 
-      for (final Code code in _codes) {
-        if (code.issuer.toLowerCase().contains(val)) {
-          issuerMatch.add(code);
-        } else if (code.account.toLowerCase().contains(val)) {
-          accountMatch.add(code);
+      for (final CodeState codeState in _codes!.allCodes) {
+        if (codeState.error != null) continue;
+
+        if (codeState.code!.issuer.toLowerCase().contains(val)) {
+          issuerMatch.add(codeState);
+        } else if (codeState.code!.account.toLowerCase().contains(val)) {
+          accountMatch.add(codeState);
         }
       }
       _filteredCodes = issuerMatch;
       _filteredCodes.addAll(accountMatch);
     } else {
-      _filteredCodes = _codes;
+      _filteredCodes = _codes?.allCodes ?? [];
     }
     if (mounted) {
       setState(() {});
@@ -151,7 +154,7 @@ class _HomePageState extends State<HomePage> {
     if (code != null) {
       await CodeStore.instance.addCode(code);
       // Focus the new code by searching
-      if (_codes.length > 2) {
+      if ((_codes?.allCodes.length ?? 0) > 2) {
         _focusNewCode(code);
       }
     }
@@ -161,7 +164,9 @@ class _HomePageState extends State<HomePage> {
     final Code? code = await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (BuildContext context) {
-          return SetupEnterSecretKeyPage();
+          return SetupEnterSecretKeyPage(
+            tags: _codes?.tags ?? [],
+          );
         },
       ),
     );
@@ -219,6 +224,7 @@ class _HomePageState extends State<HomePage> {
                     focusedBorder: InputBorder.none,
                   ),
                 ),
+          centerTitle: true,
           actions: <Widget>[
             IconButton(
               icon: _showSearchBox
@@ -243,7 +249,7 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
         floatingActionButton: !_hasLoaded ||
-                _codes.isEmpty ||
+                (_codes?.allCodes.isEmpty ?? true) ||
                 !PreferenceService.instance.hasShownCoachMark()
             ? null
             : _getFab(),
@@ -260,18 +266,61 @@ class _HomePageState extends State<HomePage> {
           onManuallySetupTap: _redirectToManualEntryPage,
         );
       } else {
-        final list = AlignedGridView.count(
-          crossAxisCount: (MediaQuery.sizeOf(context).width ~/ 400)
-              .clamp(1, double.infinity)
-              .toInt(),
-          itemBuilder: ((context, index) {
-            try {
-              return ClipRect(child: CodeWidget(_filteredCodes[index]));
-            } catch (e) {
-              return const Text("Failed");
-            }
-          }),
-          itemCount: _filteredCodes.length,
+        final list = Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(
+              height: 48,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+                separatorBuilder: (context, index) => const SizedBox(width: 8),
+                itemCount: _codes?.tags == null ? 0 : _codes!.tags.length + 1,
+                itemBuilder: (context, index) {
+                  if (index == 0) {
+                    return const TagChip(
+                      label: "All",
+                      isSelected: true,
+                    );
+                  }
+                  return TagChip(label: _codes!.tags[index - 1]);
+                },
+              ),
+            ),
+            Expanded(
+              child: AlignedGridView.count(
+                crossAxisCount: (MediaQuery.sizeOf(context).width ~/ 400)
+                    .clamp(1, double.infinity)
+                    .toInt(),
+                itemBuilder: ((context, index) {
+                  try {
+                    if (_filteredCodes[index].error != null) {
+                      return Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(
+                            l10n.sorryUnableToGenCode(
+                              _filteredCodes[index].code?.issuer ?? "",
+                            ),
+                          ),
+                        ),
+                      );
+                    }
+                    return ClipRect(
+                      child: CodeWidget(
+                        _filteredCodes[index].code!,
+                        _codes?.tags ?? [],
+                      ),
+                    );
+                  } catch (e) {
+                    return const Text("Failed");
+                  }
+                }),
+                itemCount: _filteredCodes.length,
+              ),
+            ),
+          ],
         );
         if (!PreferenceService.instance.hasShownCoachMark()) {
           return Stack(
@@ -291,17 +340,22 @@ class _HomePageState extends State<HomePage> {
                                 .clamp(1, double.infinity)
                                 .toInt(),
                         itemBuilder: ((context, index) {
-                          Code? code;
-                          try {
-                            code = _filteredCodes[index];
-                            return CodeWidget(code);
-                          } catch (e, s) {
-                            _logger.severe("code widget error", e, s);
+                          final codeState = _filteredCodes[index];
+                          if (codeState.code != null) {
+                            return CodeWidget(
+                              codeState.code!,
+                              _codes?.tags ?? [],
+                            );
+                          } else {
+                            _logger.severe(
+                              "code widget error",
+                              codeState.error,
+                            );
                             return Center(
                               child: Padding(
                                 padding: const EdgeInsets.all(8.0),
                                 child: Text(
-                                  l10n.sorryUnableToGenCode(code?.issuer ?? ""),
+                                  l10n.sorryUnableToGenCode(""),
                                 ),
                               ),
                             );

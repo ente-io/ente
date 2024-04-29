@@ -20,6 +20,7 @@
   "codeIssuerHint": "Issuer",
   "codeSecretKeyHint": "Secret Key",
   "codeAccountHint": "Account (you@domain.com)",
+  "codeTagHint": "Tag",
   "accountKeyType": "Type of key",
   "sessionExpired": "Session expired",
   "@sessionExpired": {
