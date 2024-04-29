@@ -26,7 +26,7 @@ class CastServiceImpl extends CastService {
         );
         session.sendMessage(_pairRequestNamespace, {});
       } else {
-        if (onMessage != null && message!.containsKey("code")) {
+        if (onMessage != null && message.containsKey("code")) {
           onMessage(
             {
               CastMessageType.pairCode: message,
