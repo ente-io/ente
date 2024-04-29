@@ -394,6 +394,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "cannotAddMorePhotosAfterBecomingViewer": m9,
         "cannotDeleteSharedFiles":
             MessageLookupByLibrary.simpleMessage("Cannot delete shared files"),
+        "castIPMismatchBody": MessageLookupByLibrary.simpleMessage(
+            "Please make sure you are on the same network as the TV."),
+        "castIPMismatchTitle":
+            MessageLookupByLibrary.simpleMessage("Failed to cast album"),
         "castInstruction": MessageLookupByLibrary.simpleMessage(
             "Visit cast.ente.io on the device you want to pair.\n\nEnter the code below to play the album on your TV."),
         "centerPoint": MessageLookupByLibrary.simpleMessage("Center point"),

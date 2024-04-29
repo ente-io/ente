@@ -948,7 +948,15 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       return true;
     } catch (e, s) {
       _logger.severe("Failed to cast album", e, s);
-      await showGenericErrorDialog(context: context, error: e);
+      if (e is CastIPMismatchException) {
+        await showErrorDialog(
+          context,
+          S.of(context).castIPMismatchTitle,
+          S.of(context).castIPMismatchBody,
+        );
+      } else {
+        await showGenericErrorDialog(context: context, error: e);
+      }
       return false;
     }
   }

@@ -8663,6 +8663,26 @@ class S {
       args: [],
     );
   }
+
+  /// `Failed to cast album`
+  String get castIPMismatchTitle {
+    return Intl.message(
+      'Failed to cast album',
+      name: 'castIPMismatchTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please make sure you are on the same network as the TV.`
+  String get castIPMismatchBody {
+    return Intl.message(
+      'Please make sure you are on the same network as the TV.',
+      name: 'castIPMismatchBody',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
