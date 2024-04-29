@@ -95,7 +95,7 @@ const notPersonFeedback = 'not_person_feedback';
 const createNotPersonFeedbackTable = '''
 CREATE TABLE IF NOT EXISTS $notPersonFeedback (
   $personIdColumn	TEXT NOT NULL,
-  $clusterIDColumn	INTEGER NOT NULL
+  $clusterIDColumn	INTEGER NOT NULL,
   PRIMARY KEY($personIdColumn, $clusterIDColumn)
 );
 ''';

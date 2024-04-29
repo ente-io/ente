@@ -191,13 +191,11 @@ class FaceMLDataDB {
   Future<void> clearTable() async {
     final db = await instance.asyncDB;
 
-    await db.writeTransaction((tx) async {
-      await tx.execute(deleteFacesTable);
-      await tx.execute(dropClusterPersonTable);
-      await tx.execute(dropClusterSummaryTable);
-      await tx.execute(deletePersonTable);
-      await tx.execute(dropNotPersonFeedbackTable);
-    });
+    await db.execute(deleteFacesTable);
+    await db.execute(dropClusterPersonTable);
+    await db.execute(dropClusterSummaryTable);
+    await db.execute(deletePersonTable);
+    await db.execute(dropNotPersonFeedbackTable);
   }
 
   Future<Iterable<Uint8List>> getFaceEmbeddingsForCluster(
@@ -728,11 +726,9 @@ class FaceMLDataDB {
     try {
       final db = await instance.asyncDB;
 
-      await db.writeTransaction((tx) async {
-        await tx.execute(dropFaceClustersTable);
-        await tx.execute(createFaceClustersTable);
-        await tx.execute(fcClusterIDIndex);
-      });
+      await db.execute(dropFaceClustersTable);
+      await db.execute(createFaceClustersTable);
+      await db.execute(fcClusterIDIndex);
     } catch (e, s) {
       _logger.severe('Error resetting clusterIDs', e, s);
     }
@@ -964,27 +960,21 @@ class FaceMLDataDB {
     try {
       final db = await instance.asyncDB;
       if (faces) {
-        await db.writeTransaction((tx) async {
-          await tx.execute(deleteFacesTable);
-          await tx.execute(createFacesTable);
-          await tx.execute(dropFaceClustersTable);
-          await tx.execute(createFaceClustersTable);
-          await tx.execute(fcClusterIDIndex);
-        });
+        await db.execute(deleteFacesTable);
+        await db.execute(createFacesTable);
+        await db.execute(dropFaceClustersTable);
+        await db.execute(createFaceClustersTable);
+        await db.execute(fcClusterIDIndex);
       }
 
-      await db.writeTransaction((tx) async {
-        await tx.execute(deletePersonTable);
-        await tx.execute(dropClusterPersonTable);
-        await tx.execute(dropClusterSummaryTable);
-        await tx.execute(dropNotPersonFeedbackTable);
-      });
+      await db.execute(deletePersonTable);
+      await db.execute(dropClusterPersonTable);
+      await db.execute(dropClusterSummaryTable);
+      await db.execute(dropNotPersonFeedbackTable);
 
-      await db.writeTransaction((tx) async {
-        await tx.execute(createClusterPersonTable);
-        await tx.execute(createNotPersonFeedbackTable);
-        await tx.execute(createClusterSummaryTable);
-      });
+      await db.execute(createClusterPersonTable);
+      await db.execute(createNotPersonFeedbackTable);
+      await db.execute(createClusterSummaryTable);
     } catch (e, s) {
       _logger.severe('Error dropping clusters and person table', e, s);
     }
@@ -995,15 +985,16 @@ class FaceMLDataDB {
     try {
       final db = await instance.asyncDB;
 
-      await db.writeTransaction((tx) async {
-        await tx.execute(deletePersonTable);
-        await tx.execute(dropClusterPersonTable);
-        await tx.execute(dropNotPersonFeedbackTable);
-        await tx.execute(dropClusterSummaryTable);
-        await tx.execute(createClusterPersonTable);
-        await tx.execute(createNotPersonFeedbackTable);
-        await tx.execute(createClusterSummaryTable);
-      });
+      // Drop the tables
+      await db.execute(deletePersonTable);
+      await db.execute(dropClusterPersonTable);
+      await db.execute(dropNotPersonFeedbackTable);
+      await db.execute(dropClusterSummaryTable);
+
+      // Recreate the tables
+      await db.execute(createClusterPersonTable);
+      await db.execute(createNotPersonFeedbackTable);
+      await db.execute(createClusterSummaryTable);
     } catch (e) {
       _logger.severe('Error dropping feedback tables', e);
     }
