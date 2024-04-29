@@ -14,6 +14,7 @@ import type {
     CollectionMapping,
     FolderWatch,
     PendingUploads,
+    ZipEntry,
 } from "../types/ipc";
 import {
     selectDirectory,
@@ -29,7 +30,6 @@ import {
     fsRename,
     fsRm,
     fsRmdir,
-    fsSize,
     fsWriteFile,
 } from "./fs";
 import { logToDisk } from "./log";
@@ -54,6 +54,7 @@ import {
 import {
     clearPendingUploads,
     listZipEntries,
+    pathOrZipEntrySize,
     markUploadedFiles,
     markUploadedZipEntries,
     pendingUploads,
@@ -141,8 +142,6 @@ export const attachIPCHandlers = () => {
 
     ipcMain.handle("fsIsDir", (_, dirPath: string) => fsIsDir(dirPath));
 
-    ipcMain.handle("fsSize", (_, path: string) => fsSize(path));
-
     // - Conversion
 
     ipcMain.handle("convertToJPEG", (_, imageData: Uint8Array) =>
@@ -202,6 +201,12 @@ export const attachIPCHandlers = () => {
 
     ipcMain.handle("listZipEntries", (_, zipPath: string) =>
         listZipEntries(zipPath),
+    );
+
+    ipcMain.handle(
+        "pathOrZipEntrySize",
+        (_, pathOrZipEntry: string | ZipEntry) =>
+            pathOrZipEntrySize(pathOrZipEntry),
     );
 
     ipcMain.handle("pendingUploads", () => pendingUploads());

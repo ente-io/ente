@@ -1,4 +1,5 @@
 import StreamZip from "node-stream-zip";
+import fs from "node:fs/promises";
 import { existsSync } from "original-fs";
 import path from "path";
 import type { ElectronFile, PendingUploads, ZipEntry } from "../../types/ipc";
@@ -21,6 +22,20 @@ export const listZipEntries = async (zipPath: string): Promise<ZipEntry[]> => {
     }
 
     return entryNames.map((entryName) => [zipPath, entryName]);
+};
+
+export const pathOrZipEntrySize = async (
+    pathOrZipEntry: string | ZipEntry,
+): Promise<number> => {
+    if (typeof pathOrZipEntry == "string") {
+        const stat = await fs.stat(pathOrZipEntry);
+        return stat.size;
+    } else {
+        const [zipPath, entryName] = pathOrZipEntry;
+        const zip = new StreamZip.async({ file: zipPath });
+        const entry = await zip.entry(entryName);
+        return entry.size;
+    }
 };
 
 export const pendingUploads = async (): Promise<PendingUploads | undefined> => {

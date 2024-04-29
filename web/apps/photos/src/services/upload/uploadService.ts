@@ -197,13 +197,12 @@ export const uploadItemSize = async (
     uploadItem: UploadItem,
 ): Promise<number> => {
     if (uploadItem instanceof File) return uploadItem.size;
-    if (typeof uploadItem == "string") return basename(uploadItem);
-    if (Array.isArray(uploadItem)) return basename(uploadItem[1]);
+    if (typeof uploadItem == "string")
+        return ensureElectron().pathOrZipEntrySize(uploadItem);
+    if (Array.isArray(uploadItem))
+        return ensureElectron().pathOrZipEntrySize(uploadItem);
     return uploadItem.file.size;
 };
-uploadItem instanceof File
-    ? uploadItem.size
-    : await ensureElectron().fs.size(uploadItem);
 
 /* -- Various intermediate type used during upload -- */
 

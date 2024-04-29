@@ -123,9 +123,6 @@ const fsWriteFile = (path: string, contents: string): Promise<void> =>
 const fsIsDir = (dirPath: string): Promise<boolean> =>
     ipcRenderer.invoke("fsIsDir", dirPath);
 
-const fsSize = (path: string): Promise<number> =>
-    ipcRenderer.invoke("fsSize", path);
-
 // - Conversion
 
 const convertToJPEG = (imageData: Uint8Array): Promise<Uint8Array> =>
@@ -247,6 +244,10 @@ const pathForFile = (file: File) => webUtils.getPathForFile(file);
 const listZipEntries = (zipPath: string): Promise<ZipEntry[]> =>
     ipcRenderer.invoke("listZipEntries", zipPath);
 
+const pathOrZipEntrySize = (
+    pathOrZipEntry: string | ZipEntry,
+): Promise<number> => ipcRenderer.invoke("pathOrZipEntrySize", pathOrZipEntry);
+
 const pendingUploads = (): Promise<PendingUploads | undefined> =>
     ipcRenderer.invoke("pendingUploads");
 
@@ -333,7 +334,6 @@ contextBridge.exposeInMainWorld("electron", {
         readTextFile: fsReadTextFile,
         writeFile: fsWriteFile,
         isDir: fsIsDir,
-        size: fsSize,
     },
 
     // - Conversion
@@ -374,6 +374,7 @@ contextBridge.exposeInMainWorld("electron", {
 
     pathForFile,
     listZipEntries,
+    pathOrZipEntrySize,
     pendingUploads,
     setPendingUploads,
     markUploadedFiles,

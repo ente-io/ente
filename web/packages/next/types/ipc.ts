@@ -189,11 +189,6 @@ export interface Electron {
          * directory.
          */
         isDir: (dirPath: string) => Promise<boolean>;
-
-        /**
-         * Return the size in bytes of the file at {@link path}.
-         */
-        size: (path: string) => Promise<number>;
     };
 
     // - Conversion
@@ -491,6 +486,12 @@ export interface Electron {
      * To read the contents of the files themselves, see [Note: IPC streams].
      */
     listZipEntries: (zipPath: string) => Promise<ZipEntry[]>;
+
+    /**
+     * Return the size in bytes of the file at the given path or of a particular
+     * entry within a zip file.
+     */
+    pathOrZipEntrySize: (pathOrZipEntry: string | ZipEntry) => Promise<number>;
 
     /**
      * Return any pending uploads that were previously enqueued but haven't yet
