@@ -5,7 +5,7 @@ import "dart:typed_data";
 import "package:computer/computer.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/network/network.dart";
-import "package:photos/db/embeddings_db.dart";
+import "package:photos/db/embeddings_sqlite_db.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/models/embedding.dart";
 import "package:photos/models/file/file.dart";
@@ -19,7 +19,7 @@ class EmbeddingStore {
 
   static final EmbeddingStore instance = EmbeddingStore._privateConstructor();
 
-  static const kEmbeddingsSyncTimeKey = "sync_time_embeddings_v2";
+  static const kEmbeddingsSyncTimeKey = "sync_time_embeddings_v3-test";
 
   final _logger = Logger("EmbeddingStore");
   final _dio = NetworkClient.instance.enteDio;

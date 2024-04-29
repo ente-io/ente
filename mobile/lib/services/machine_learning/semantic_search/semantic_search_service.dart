@@ -7,7 +7,7 @@ import "package:logging/logging.dart";
 import "package:photos/core/cache/lru_map.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
-import "package:photos/db/embeddings_db.dart";
+import "package:photos/db/embeddings_sqlite_db.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/events/diff_sync_complete_event.dart";
 import 'package:photos/events/embedding_updated_event.dart';
@@ -72,7 +72,6 @@ class SemanticSearchService {
     _mlFramework = _currentModel == Model.onnxClip
         ? ONNX(shouldDownloadOverMobileData)
         : GGML(shouldDownloadOverMobileData);
-    await EmbeddingsDB.instance.init();
     await EmbeddingStore.instance.init();
     await _loadEmbeddings();
     Bus.instance.on<EmbeddingUpdatedEvent>().listen((event) {
