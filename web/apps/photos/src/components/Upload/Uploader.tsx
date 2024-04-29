@@ -198,7 +198,6 @@ export default function Uploader({
     };
     const handleCollectionSelectorCancel = () => {
         uploadRunning.current = false;
-        appContext.resetSharedFiles();
     };
 
     const handleUserNameInputDialogClose = () => {
@@ -298,10 +297,10 @@ export default function Uploader({
 
     useEffect(() => {
         if (
+            webFiles.length > 0 ||
             desktopFilePaths.length > 0 ||
             electronFiles.length > 0 ||
-            webFiles.length > 0 ||
-            appContext.sharedFiles?.length > 0
+
         ) {
             log.info(
                 `upload request type: ${
@@ -311,12 +310,11 @@ export default function Uploader({
                           ? "electronFiles"
                           : webFiles.length > 0
                             ? "webFiles"
-                            : "sharedFiles"
+                            : "-"
                 } count ${
                     desktopFilePaths.length +
                     electronFiles.length +
-                    webFiles.length +
-                    (appContext.sharedFiles?.length ?? 0)
+                    webFiles.length
                 }`,
             );
             if (uploadManager.isUploadRunning()) {
@@ -340,9 +338,6 @@ export default function Uploader({
                 // File selection by drag and drop or selection of file.
                 fileOrPathsToUpload.current = webFiles;
                 setWebFiles([]);
-            } else if (appContext.sharedFiles?.length > 0) {
-                fileOrPathsToUpload.current = appContext.sharedFiles;
-                appContext.resetSharedFiles();
             } else if (electronFiles?.length > 0) {
                 // File selection from desktop app - deprecated
                 log.warn("Using deprecated code path for ElectronFiles");
@@ -386,7 +381,7 @@ export default function Uploader({
             pickedUploadType.current = null;
             props.setLoading(false);
         }
-    }, [webFiles, appContext.sharedFiles, electronFiles, desktopFilePaths]);
+    }, [webFiles, , electronFiles, desktopFilePaths]);
 
     const preCollectionCreationAction = async () => {
         props.closeCollectionSelector?.();
