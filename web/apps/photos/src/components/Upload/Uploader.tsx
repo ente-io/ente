@@ -1,3 +1,4 @@
+import { basename } from "@/next/file";
 import log from "@/next/log";
 import { ElectronFile, type FileAndPath } from "@/next/types/file";
 import type { CollectionMapping, Electron, ZipEntry } from "@/next/types/ipc";
@@ -29,7 +30,6 @@ import type {
 import uploadManager, {
     setToUploadCollection,
 } from "services/upload/uploadManager";
-import { fopFileName } from "services/upload/uploadService";
 import watcher from "services/watch";
 import { NotificationAttributes } from "types/Notification";
 import { Collection } from "types/collection";
@@ -88,8 +88,11 @@ interface Props {
 
 export default function Uploader({
     dragAndDropFiles,
+    openFileSelector,
     fileSelectorFiles,
+    openFolderSelector,
     folderSelectorFiles,
+    openZipFileSelector,
     fileSelectorZipFiles,
     ...props
 }: Props) {
@@ -163,6 +166,9 @@ export default function Uploader({
     const itemsToUpload = useRef<(File | FileAndPath | string | ZipEntry)[]>(
         [],
     );
+
+    // TODO(MR): temp, doesn't have zips
+    const fileOrPathsToUpload = useRef<(File | string)[]>([]);
 
     /**
      * If true, then the next upload we'll be processing was initiated by our
@@ -295,93 +301,74 @@ export default function Uploader({
         fileSelectorZipFiles,
     ]);
 
+    // Trigger an upload when any of the dependencies change.
     useEffect(() => {
-        if (
-            webFiles.length > 0 ||
-            desktopFilePaths.length > 0 ||
-            electronFiles.length > 0 ||
+        const itemAndPaths = [
+            /* TODO(MR): use webkitRelativePath || name here */
+            webFiles.map((f) => [f, f["path"]]),
+            desktopFiles.map((fp) => [fp, fp.path]),
+            desktopFilePaths.map((p) => [p, p]),
+            desktopZipEntries.map((ze) => [ze, ze[1]]),
+        ].flat();
 
-        ) {
-            log.info(
-                `upload request type: ${
-                    desktopFilePaths.length > 0
-                        ? "desktopFilePaths"
-                        : electronFiles.length > 0
-                          ? "electronFiles"
-                          : webFiles.length > 0
-                            ? "webFiles"
-                            : "-"
-                } count ${
-                    desktopFilePaths.length +
-                    electronFiles.length +
-                    webFiles.length
-                }`,
-            );
-            if (uploadManager.isUploadRunning()) {
-                if (watcher.isUploadRunning()) {
-                    // Pause watch folder sync on user upload
-                    log.info(
-                        "Folder watcher was uploading, pausing it to first run user upload",
-                    );
-                    watcher.pauseRunningSync();
-                } else {
-                    log.info(
-                        "Ignoring new upload request because an upload is already running",
-                    );
-                    return;
-                }
-            }
-            uploadRunning.current = true;
-            props.closeUploadTypeSelector();
-            props.setLoading(true);
-            if (webFiles?.length > 0) {
-                // File selection by drag and drop or selection of file.
-                fileOrPathsToUpload.current = webFiles;
-                setWebFiles([]);
-            } else if (electronFiles?.length > 0) {
-                // File selection from desktop app - deprecated
-                log.warn("Using deprecated code path for ElectronFiles");
-                fileOrPathsToUpload.current = electronFiles.map((f) => f.path);
-                setElectronFiles([]);
-            } else if (desktopFilePaths && desktopFilePaths.length > 0) {
-                // File selection from our desktop app
-                fileOrPathsToUpload.current = desktopFilePaths;
-                setDesktopFilePaths([]);
-            }
+        if (itemAndPaths.length == 0) return;
 
-            log.debug(() => "Uploader invoked");
-            log.debug(() => fileOrPathsToUpload.current);
-
-            fileOrPathsToUpload.current = pruneHiddenFiles(
-                fileOrPathsToUpload.current,
-            );
-
-            if (fileOrPathsToUpload.current.length === 0) {
-                props.setLoading(false);
+        if (uploadManager.isUploadRunning()) {
+            if (watcher.isUploadRunning()) {
+                log.info("Pausing watch folder sync to prioritize user upload");
+                watcher.pauseRunningSync();
+            } else {
+                log.info(
+                    "Ignoring new upload request when upload is already running",
+                );
                 return;
             }
-
-            const importSuggestion = getImportSuggestion(
-                pickedUploadType.current,
-                fileOrPathsToUpload.current.map((file) =>
-                    /** TODO(MR): Is path valid for Web files? */
-                    typeof file == "string" ? file : file["path"],
-                ),
-            );
-            setImportSuggestion(importSuggestion);
-
-            log.debug(() => importSuggestion);
-
-            handleCollectionCreationAndUpload(
-                importSuggestion,
-                props.isFirstUpload,
-                pickedUploadType.current,
-                publicCollectionGalleryContext.accessedThroughSharedURL,
-            );
-            pickedUploadType.current = null;
-            props.setLoading(false);
         }
-    }, [webFiles, , electronFiles, desktopFilePaths]);
+        uploadRunning.current = true;
+        props.closeUploadTypeSelector();
+        props.setLoading(true);
+
+        setWebFiles([]);
+        setDesktopFiles([]);
+        setDesktopFilePaths([]);
+        setDesktopZipEntries([]);
+
+        // Remove hidden files (files whose names begins with a ".").
+        const prunedItemAndPaths = itemAndPaths.filter(
+            ([_, p]) => !basename(p).startsWith("."),
+        );
+
+        itemsToUpload.current = prunedItemAndPaths.map(([i]) => i);
+        fileOrPathsToUpload.current = itemsToUpload.current.map((i) => {
+            if (typeof i == "string" || i instanceof File) return i;
+            if (Array.isArray(i)) return undefined;
+            return i.file;
+        }).filter((x) => x);
+        itemsToUpload.current = [];
+        if (fileOrPathsToUpload.current.length === 0) {
+            props.setLoading(false);
+            return;
+        }
+
+        const importSuggestion = getImportSuggestion(
+            pickedUploadType.current,
+            prunedItemAndPaths.map(([_, p]) => p),
+        );
+        setImportSuggestion(importSuggestion);
+
+        log.debug(() => "Uploader invoked:");
+        log.debug(() => fileOrPathsToUpload.current);
+        log.debug(() => importSuggestion);
+
+        handleCollectionCreationAndUpload(
+            importSuggestion,
+            props.isFirstUpload,
+            pickedUploadType.current,
+            publicCollectionGalleryContext.accessedThroughSharedURL,
+        );
+        pickedUploadType.current = null;
+        props.setLoading(false);
+    }, [webFiles, desktopFiles, desktopFilePaths, desktopZipEntries]);
 
     const preCollectionCreationAction = async () => {
         props.closeCollectionSelector?.();
@@ -711,24 +698,24 @@ export default function Uploader({
         uploadManager.cancelRunningUpload();
     };
 
-    const handleUpload = async (type: PICKED_UPLOAD_TYPE) => {
+    const handleUpload = (type: PICKED_UPLOAD_TYPE) => {
         pickedUploadType.current = type;
         if (type === PICKED_UPLOAD_TYPE.FILES) {
-            props.showUploadFilesDialog();
+            openFileSelector();
         } else if (type === PICKED_UPLOAD_TYPE.FOLDERS) {
-            props.showUploadDirsDialog();
+            openFolderSelector();
         } else {
-            if (props.showUploadZipFilesDialog && electron) {
-                props.showUploadZipFilesDialog();
+            if (openZipFileSelector && electron) {
+                openZipFileSelector();
             } else {
                 appContext.setDialogMessage(getDownloadAppMessage());
             }
         }
     };
 
-    const handleFileUpload = handleUpload(PICKED_UPLOAD_TYPE.FILES);
-    const handleFolderUpload = handleUpload(PICKED_UPLOAD_TYPE.FOLDERS);
-    const handleZipUpload = handleUpload(PICKED_UPLOAD_TYPE.ZIPS);
+    const handleFileUpload = () => handleUpload(PICKED_UPLOAD_TYPE.FILES);
+    const handleFolderUpload = () => handleUpload(PICKED_UPLOAD_TYPE.FOLDERS);
+    const handleZipUpload = () => handleUpload(PICKED_UPLOAD_TYPE.ZIPS);
 
     const handlePublicUpload = async (
         uploaderName: string,
@@ -831,7 +818,7 @@ const desktopFilesAndZipEntries = async (
     files: File[],
 ): Promise<{ fileAndPaths: FileAndPath[]; zipEntries: ZipEntry[] }> => {
     const fileAndPaths: FileAndPath[] = [];
-    const zipEntries: ZipEntry[] = [];
+    let zipEntries: ZipEntry[] = [];
 
     for (const file of files) {
         const path = electron.pathForFile(file);
@@ -936,11 +923,3 @@ const groupFilesBasedOnParentFolder = (fileOrPaths: (File | string)[]) => {
     }
     return result;
 };
-
-/**
- * Filter out hidden files from amongst {@link fileOrPaths}.
- *
- * Hidden files are those whose names begin with a "." (dot).
- */
-const pruneHiddenFiles = (fileOrPaths: (File | string)[]) =>
-    fileOrPaths.filter((f) => !fopFileName(f).startsWith("."));
