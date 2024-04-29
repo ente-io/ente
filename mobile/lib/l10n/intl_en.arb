@@ -1220,5 +1220,7 @@
   "connectToDevice": "Connect to device",
   "autoCastDialogBody": "You'll see available Cast devices here.",
   "autoCastiOSPermission": "Make sure Local Network permissions are turned on for the Ente Photos app, in Settings.",
-  "noDeviceFound": "No device found"
+  "noDeviceFound": "No device found",
+  "stopCastingTitle": "Stop casting",
+  "stopCastingBody": "Do you want to stop casting?"
 }

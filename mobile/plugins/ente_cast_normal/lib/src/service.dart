@@ -39,8 +39,6 @@ class CastServiceImpl extends CastService {
 
     session.stateStream.listen((state) {
       if (state == CastSessionState.connected) {
-        const snackBar = SnackBar(content: Text('Connected'));
-        ScaffoldMessenger.of(context).showSnackBar(snackBar);
         debugPrint("Send request to pair");
         session.sendMessage(_pairRequestNamespace, {});
       } else if (state == CastSessionState.closed) {

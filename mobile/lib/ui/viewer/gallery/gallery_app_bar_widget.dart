@@ -863,10 +863,10 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     if (castService.getActiveSessions().isNotEmpty) {
       await showChoiceDialog(
         context,
-        title: "Stop casting",
-        firstButtonLabel: "Yes",
-        secondButtonLabel: "No",
-        body: "Do you want to stop casting?",
+        title: S.of(context).stopCastingTitle,
+        firstButtonLabel: S.of(context).yes,
+        secondButtonLabel: S.of(context).no,
+        body: S.of(context).stopCastingBody,
         firstButtonOnTap: () async {
           gw.revokeAllTokens().ignore();
           await castService.closeActiveCasts();
@@ -884,7 +884,6 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         return const CastChooseDialog();
       },
     );
-    _logger.info("Cast result: $result");
     if (result == null) {
       return;
     }

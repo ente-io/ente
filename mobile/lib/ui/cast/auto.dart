@@ -113,8 +113,6 @@ class _AutoCastDialogState extends State<AutoCastDialog> {
     BuildContext context,
     Object castDevice,
   ) async {
-    // sleep for 10 seconds
-    await Future.delayed(const Duration(seconds: 10));
     await castService.connectDevice(
       context,
       castDevice,

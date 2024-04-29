@@ -8643,6 +8643,26 @@ class S {
       args: [],
     );
   }
+
+  /// `Stop casting`
+  String get stopCastingTitle {
+    return Intl.message(
+      'Stop casting',
+      name: 'stopCastingTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Do you want to stop casting?`
+  String get stopCastingBody {
+    return Intl.message(
+      'Do you want to stop casting?',
+      name: 'stopCastingBody',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

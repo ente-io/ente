@@ -1342,6 +1342,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "sparkleSuccess": MessageLookupByLibrary.simpleMessage("✨ Success"),
         "startBackup": MessageLookupByLibrary.simpleMessage("Start backup"),
         "status": MessageLookupByLibrary.simpleMessage("Status"),
+        "stopCastingBody": MessageLookupByLibrary.simpleMessage(
+            "Do you want to stop casting?"),
+        "stopCastingTitle":
+            MessageLookupByLibrary.simpleMessage("Stop casting"),
         "storage": MessageLookupByLibrary.simpleMessage("Storage"),
         "storageBreakupFamily": MessageLookupByLibrary.simpleMessage("Family"),
         "storageBreakupYou": MessageLookupByLibrary.simpleMessage("You"),
