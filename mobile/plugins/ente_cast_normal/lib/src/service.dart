@@ -71,9 +71,16 @@ class CastServiceImpl extends CastService {
     final sessions = CastSessionManager().sessions;
     for (final session in sessions) {
       debugPrint("send close message for ${session.sessionId}");
-      session.sendMessage(CastSession.kNamespaceConnection, {
-        'type': 'CLOSE',
-      });
+      Future(() {
+        session.sendMessage(CastSession.kNamespaceConnection, {
+          'type': 'CLOSE',
+        });
+      }).timeout(
+        const Duration(seconds: 5),
+        onTimeout: () {
+          print('sendMessage timed out after 5 seconds');
+        },
+      );
       debugPrint("close session ${session.sessionId}");
       session.close();
     }
