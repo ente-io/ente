@@ -574,6 +574,9 @@ class _EditTagDialogState extends State<EditTagDialog> {
             if (_tag.trim().isEmpty) return;
 
             // traverse through all the codes and edit this tag's value
+            // get all codes
+            // update tag
+            // addCode
           },
         ),
       ],
