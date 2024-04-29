@@ -6,10 +6,10 @@
  * See: [Note: IPC streams].
  */
 
-import type { Electron } from "@/next/types/ipc";
+import type { Electron, ZipEntry } from "@/next/types/ipc";
 
 /**
- * Stream the given file from the user's local filesystem.
+ * Stream the given file or zip entry from the user's local filesystem.
  *
  * This only works when we're running in our desktop app since it uses the
  * "stream://" protocol handler exposed by our custom code in the Node.js layer.
@@ -18,8 +18,9 @@ import type { Electron } from "@/next/types/ipc";
  * To avoid accidentally invoking it in a non-desktop app context, it requires
  * the {@link Electron} object as a parameter (even though it doesn't use it).
  *
- * @param path The path on the file on the user's local filesystem whose
- * contents we want to stream.
+ * @param pathOrZipEntry Either the path on the file on the user's local
+ * filesystem whose contents we want to stream. Or a tuple containing the path
+ * to a zip file and the name of the entry within it.
  *
  * @return A ({@link Response}, size, lastModifiedMs) triple.
  *
@@ -34,16 +35,25 @@ import type { Electron } from "@/next/types/ipc";
  */
 export const readStream = async (
     _: Electron,
-    path: string,
+    pathOrZipEntry: string | ZipEntry,
 ): Promise<{ response: Response; size: number; lastModifiedMs: number }> => {
-    const req = new Request(`stream://read${path}`, {
+    let url: URL;
+    if (typeof pathOrZipEntry == "string") {
+        url = new URL(`stream://read${pathOrZipEntry}`);
+    } else {
+        const [zipPath, entryName] = pathOrZipEntry;
+        url = new URL(`stream://read${zipPath}`);
+        url.hash = entryName;
+    }
+
+    const req = new Request(url, {
         method: "GET",
     });
 
     const res = await fetch(req);
     if (!res.ok)
         throw new Error(
-            `Failed to read stream from ${path}: HTTP ${res.status}`,
+            `Failed to read stream from ${url}: HTTP ${res.status}`,
         );
 
     const size = readNumericHeader(res, "Content-Length");

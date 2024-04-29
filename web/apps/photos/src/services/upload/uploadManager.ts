@@ -3,7 +3,7 @@ import { potentialFileTypeFromExtension } from "@/media/live-photo";
 import { ensureElectron } from "@/next/electron";
 import { lowercaseExtension, nameAndExtension } from "@/next/file";
 import log from "@/next/log";
-import { ElectronFile, type FileAndPath } from "@/next/types/file";
+import { type FileAndPath } from "@/next/types/file";
 import type { Electron, ZipEntry } from "@/next/types/ipc";
 import { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { ensure } from "@/utils/ensure";
@@ -437,25 +437,25 @@ class UploadManager {
         try {
             await this.updateExistingFilesAndCollections(collections);
 
-            const namedFiles = itemsWithCollection.map(
+            const namedItems = itemsWithCollection.map(
                 makeUploadItemWithCollectionIDAndName,
             );
 
-            this.uiService.setFiles(namedFiles);
+            this.uiService.setFiles(namedItems);
 
-            const [metadataFiles, mediaFiles] =
-                splitMetadataAndMediaFiles(namedFiles);
+            const [metadataItems, mediaItems] =
+                splitMetadataAndMediaItems(namedItems);
 
-            if (metadataFiles.length) {
+            if (metadataItems.length) {
                 this.uiService.setUploadStage(
                     UPLOAD_STAGES.READING_GOOGLE_METADATA_FILES,
                 );
 
-                await this.parseMetadataJSONFiles(metadataFiles);
+                await this.parseMetadataJSONFiles(metadataItems);
             }
 
-            if (mediaFiles.length) {
-                const clusteredMediaFiles = await clusterLivePhotos(mediaFiles);
+            if (mediaItems.length) {
+                const clusteredMediaFiles = await clusterLivePhotos(mediaItems);
 
                 this.abortIfCancelled();
 
@@ -464,7 +464,7 @@ class UploadManager {
                 this.uiService.setFiles(clusteredMediaFiles);
 
                 this.uiService.setHasLivePhoto(
-                    mediaFiles.length != clusteredMediaFiles.length,
+                    mediaItems.length != clusteredMediaFiles.length,
                 );
 
                 await this.uploadMediaFiles(clusteredMediaFiles);
@@ -510,19 +510,17 @@ class UploadManager {
     }
 
     private async parseMetadataJSONFiles(
-        files: UploadItemWithCollectionIDAndName[],
+        items: UploadItemWithCollectionIDAndName[],
     ) {
-        this.uiService.reset(files.length);
+        this.uiService.reset(items.length);
 
-        for (const {
-            uploadItem: fileOrPath,
-            fileName,
-            collectionID,
-        } of files) {
+        for (const { uploadItem, fileName, collectionID } of items) {
             this.abortIfCancelled();
 
             log.info(`Parsing metadata JSON ${fileName}`);
-            const metadataJSON = await tryParseTakeoutMetadataJSON(fileOrPath);
+            const metadataJSON = await tryParseTakeoutMetadataJSON(
+                ensure(uploadItem),
+            );
             if (metadataJSON) {
                 this.parsedMetadataJSONMap.set(
                     getMetadataJSONMapKeyForJSON(collectionID, fileName),
@@ -823,7 +821,7 @@ export type UploadableUploadItem = ClusteredUploadItem & {
     collection: Collection;
 };
 
-const splitMetadataAndMediaFiles = (
+const splitMetadataAndMediaItems = (
     items: UploadItemWithCollectionIDAndName[],
 ): [
     metadata: UploadItemWithCollectionIDAndName[],
@@ -879,13 +877,6 @@ const markUploaded = async (electron: Electron, item: ClusteredUploadItem) => {
     }
 };
 
-/**
- * NOTE: a stop gap measure, only meant to be called by code that is running in
- * the context of a desktop app initiated upload
- */
-export const getFilePathElectron = (file: File | ElectronFile | string) =>
-    typeof file == "string" ? file : (file as ElectronFile).path;
-
 const cancelRemainingUploads = () => ensureElectron().clearPendingUploads();
 
 /**
@@ -913,13 +904,13 @@ const clusterLivePhotos = async (
             fileName: f.fileName,
             fileType: fFileType,
             collectionID: f.collectionID,
-            fileOrPath: f.uploadItem,
+            uploadItem: f.uploadItem,
         };
         const ga: PotentialLivePhotoAsset = {
             fileName: g.fileName,
             fileType: gFileType,
             collectionID: g.collectionID,
-            fileOrPath: g.uploadItem,
+            uploadItem: g.uploadItem,
         };
         if (await areLivePhotoAssets(fa, ga)) {
             const [image, video] =
@@ -956,7 +947,7 @@ interface PotentialLivePhotoAsset {
     fileName: string;
     fileType: FILE_TYPE;
     collectionID: number;
-    fileOrPath: File | string;
+    uploadItem: UploadItem;
 }
 
 const areLivePhotoAssets = async (
@@ -999,8 +990,8 @@ const areLivePhotoAssets = async (
     // we use doesn't support stream as a input.
 
     const maxAssetSize = 20 * 1024 * 1024; /* 20MB */
-    const fSize = await uploadItemSize(f.fileOrPath);
-    const gSize = await uploadItemSize(g.fileOrPath);
+    const fSize = await uploadItemSize(f.uploadItem);
+    const gSize = await uploadItemSize(g.uploadItem);
     if (fSize > maxAssetSize || gSize > maxAssetSize) {
         log.info(
             `Not classifying assets with too large sizes ${[fSize, gSize]} as a live photo`,
