@@ -1,6 +1,6 @@
 import log from "@/next/log";
-import { ElectronFile } from "@/next/types/file";
-import type { CollectionMapping, Electron } from "@/next/types/ipc";
+import { ElectronFile, type FileAndPath } from "@/next/types/file";
+import type { CollectionMapping, ZipEntry } from "@/next/types/ipc";
 import { CustomError } from "@ente/shared/error";
 import { isPromise } from "@ente/shared/utils";
 import DiscFullIcon from "@mui/icons-material/DiscFull";
@@ -124,20 +124,39 @@ export default function Uploader(props: Props) {
      */
     const [webFiles, setWebFiles] = useState<File[]>([]);
     /**
+     * {@link File}s that the user drag-dropped or selected for uploads,
+     * augmented with their paths. These siblings of {@link webFiles} come into
+     * play when we are running in the context of our desktop app.
+     */
+    const [desktopFiles, setDesktopFiles] = useState<FileAndPath[]>([]);
+    /**
      * Paths of file to upload that we've received over the IPC bridge from the
      * code running in the Node.js layer of our desktop app.
+     *
+     * Unlike {@link filesWithPaths} which are still user initiated,
+     * {@link desktopFilePaths} can be set via programmatic action. For example,
+     * if the user has setup a folder watch, and a new file is added on their
+     * local filesystem in one of the watched folders, then the relevant path of
+     * the new file would get added to {@link desktopFilePaths}.
      */
     const [desktopFilePaths, setDesktopFilePaths] = useState<string[]>([]);
     /**
-     * TODO(MR): When?
+     * (zip file path, entry within zip file) tuples for zip files that the user
+     * is trying to upload. These are only set when we are running in the
+     * context of our desktop app. They may be set either on a user action (when
+     * the user selects or drag-drops zip files) or programmatically (when the
+     * app is trying to resume pending uploads from a previous session).
      */
-    const [electronFiles, setElectronFiles] = useState<ElectronFile[]>([]);
+    const [desktopZipEntries, setDesktopZipEntries] = useState<ZipEntry[]>([]);
 
     /**
-     * Consolidated and cleaned list obtained from {@link webFiles} and
-     * {@link desktopFilePaths}.
+     * Consolidated and cleaned list obtained from {@link webFiles},
+     * {@link desktopFiles}, {@link desktopFilePaths} and
+     * {@link desktopZipEntries}.
      */
-    const fileOrPathsToUpload = useRef<(File | string)[]>([]);
+    const itemsToUpload = useRef<(File | FileAndPath | string | ZipEntry)[]>(
+        [],
+    );
 
     /**
      * If true, then the next upload we'll be processing was initiated by our
@@ -151,9 +170,12 @@ export default function Uploader(props: Props) {
      */
     const pendingDesktopUploadCollectionName = useRef<string>("");
 
-    // This is set when the user choses a type to upload from the upload type selector dialog
+    /**
+     * This is set to thue user's choice when the user chooses one of the
+     * predefined type to upload from the upload type selector dialog
+     */
     const pickedUploadType = useRef<PICKED_UPLOAD_TYPE>(null);
-    const zipPaths = useRef<string[]>(null);
+
     const currentUploadPromise = useRef<Promise<void>>(null);
     const uploadRunning = useRef(false);
     const uploaderNameRef = useRef<string>(null);
@@ -778,31 +800,11 @@ export default function Uploader(props: Props) {
         }
     };
 
-    const handleDesktopUpload = async (
-        type: PICKED_UPLOAD_TYPE,
-        electron: Electron,
-    ) => {
-        let files: ElectronFile[];
-        pickedUploadType.current = type;
-        if (type === PICKED_UPLOAD_TYPE.FILES) {
-            files = await electron.showUploadFilesDialog();
-        } else if (type === PICKED_UPLOAD_TYPE.FOLDERS) {
-            files = await electron.showUploadDirsDialog();
-        } else {
-            const response = await electron.showUploadZipDialog();
-            files = response.files;
-            zipPaths.current = response.zipPaths;
-        }
-        if (files?.length > 0) {
-            log.info(
-                ` desktop upload for type:${type} and fileCount: ${files?.length} requested`,
-            );
-            setElectronFiles(files);
-            props.closeUploadTypeSelector();
-        }
+    const cancelUploads = () => {
+        uploadManager.cancelRunningUpload();
     };
 
-    const handleWebUpload = async (type: PICKED_UPLOAD_TYPE) => {
+    const handleUpload = async (type: PICKED_UPLOAD_TYPE) => {
         pickedUploadType.current = type;
         if (type === PICKED_UPLOAD_TYPE.FILES) {
             props.showUploadFilesDialog();
@@ -814,18 +816,6 @@ export default function Uploader(props: Props) {
             } else {
                 appContext.setDialogMessage(getDownloadAppMessage());
             }
-        }
-    };
-
-    const cancelUploads = () => {
-        uploadManager.cancelRunningUpload();
-    };
-
-    const handleUpload = (type) => () => {
-        if (electron) {
-            handleDesktopUpload(type, electron);
-        } else {
-            handleWebUpload(type);
         }
     };
 
