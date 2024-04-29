@@ -37,7 +37,7 @@ class EmbeddingsDB {
           1,
           (tx) async {
             await tx.execute(
-              'CREATE TABLE $tableName IF NOT EXISTS ($columnFileID INTEGER NOT NULL, $columnModel TEXT NOT NULL, $columnEmbedding BLOB NOT NULL, $columnUpdationTime INTEGER, UNIQUE ($columnFileID, $columnModel))',
+              'CREATE TABLE $tableName ($columnFileID INTEGER NOT NULL, $columnModel TEXT NOT NULL, $columnEmbedding BLOB NOT NULL, $columnUpdationTime INTEGER, UNIQUE ($columnFileID, $columnModel))',
             );
           },
         ),
@@ -61,7 +61,7 @@ class EmbeddingsDB {
   Future<void> put(Embedding embedding) async {
     final db = await _database;
     await db.execute(
-      'INSERT OR REPLACE INTO $tableName ($columnFileID, $columnModel, $columnEmbedding) VALUES (?, ?, ?, ?)',
+      'INSERT OR REPLACE INTO $tableName ($columnFileID, $columnModel, $columnEmbedding, $columnUpdationTime) VALUES (?, ?, ?, ?)',
       _getRowFromEmbedding(embedding),
     );
     Bus.instance.fire(EmbeddingUpdatedEvent());
@@ -71,7 +71,7 @@ class EmbeddingsDB {
     final db = await _database;
     final inputs = embeddings.map((e) => _getRowFromEmbedding(e)).toList();
     await db.executeBatch(
-      'INSERT OR REPLACE INTO $tableName ($columnFileID, $columnModel, $columnEmbedding) values(?, ?, ?, ?)',
+      'INSERT OR REPLACE INTO $tableName ($columnFileID, $columnModel, $columnEmbedding, $columnUpdationTime) values(?, ?, ?, ?)',
       inputs,
     );
     Bus.instance.fire(EmbeddingUpdatedEvent());
