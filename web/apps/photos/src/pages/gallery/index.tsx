@@ -211,26 +211,26 @@ export default function Gallery() {
         disabled: shouldDisableDropzone,
     });
     const {
-        selectedFiles: webFileSelectorFiles,
+        selectedFiles: fileSelectorFiles,
         open: openFileSelector,
         getInputProps: getFileSelectorInputProps,
     } = useFileInput({
         directory: false,
     });
     const {
-        selectedFiles: webFolderSelectorFiles,
+        selectedFiles: folderSelectorFiles,
         open: openFolderSelector,
         getInputProps: getFolderSelectorInputProps,
     } = useFileInput({
         directory: true,
     });
     const {
-        selectedFiles: webFileSelectorZipFiles,
+        selectedFiles: fileSelectorZipFiles,
         open: openZipFileSelector,
         getInputProps: getZipFileSelectorInputProps,
     } = useFileInput({
         directory: false,
-        accept: ".zip"
+        accept: ".zip",
     });
 
     const [isInSearchMode, setIsInSearchMode] = useState(false);
@@ -1121,7 +1121,6 @@ export default function Gallery() {
                         null,
                         false,
                     )}
-                    uploadTypeSelectorIntent={uploadTypeSelectorIntent}
                     setLoading={setBlockingLoad}
                     setCollectionNamerAttributes={setCollectionNamerAttributes}
                     setShouldDisableDropzone={setShouldDisableDropzone}
@@ -1130,15 +1129,18 @@ export default function Gallery() {
                     isFirstUpload={
                         !hasNonSystemCollections(collectionSummaries)
                     }
-                    webFileSelectorFiles={webFileSelectorFiles}
-                    webFolderSelectorFiles={webFolderSelectorFiles}
-                    webFileSelectorZipFiles={webFileSelectorZipFiles}
-                    dragAndDropFiles={dragAndDropFiles}
-                    uploadTypeSelectorView={uploadTypeSelectorView}
-                    showUploadFilesDialog={openFileSelector}
-                    showUploadDirsDialog={openFolderSelector}
-                    showUploadZipFilesDialog={openZipFileSelector}
-                    showSessionExpiredMessage={showSessionExpiredMessage}
+                    {...{
+                        dragAndDropFiles,
+                        openFileSelector,
+                        fileSelectorFiles,
+                        openFolderSelector,
+                        folderSelectorFiles,
+                        openZipFileSelector,
+                        fileSelectorZipFiles,
+                        uploadTypeSelectorIntent,
+                        uploadTypeSelectorView,
+                        showSessionExpiredMessage,
+                    }}
                 />
                 <Sidebar
                     collectionSummaries={collectionSummaries}

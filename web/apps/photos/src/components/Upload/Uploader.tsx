@@ -74,13 +74,13 @@ interface Props {
     isFirstUpload?: boolean;
     uploadTypeSelectorView: boolean;
     showSessionExpiredMessage: () => void;
-    showUploadFilesDialog: () => void;
-    showUploadDirsDialog: () => void;
-    showUploadZipFilesDialog?: () => void;
-    webFolderSelectorFiles: File[];
-    webFileSelectorFiles: File[];
-    webFileSelectorZipFiles?: File[];
     dragAndDropFiles: File[];
+    openFileSelector: () => void;
+    fileSelectorFiles: File[];
+    openFolderSelector: () => void;
+    folderSelectorFiles: File[];
+    openZipFileSelector?: () => void;
+    fileSelectorZipFiles?: File[];
     uploadCollection?: Collection;
     uploadTypeSelectorIntent: UploadTypeSelectorIntent;
     activeCollection?: Collection;
@@ -239,16 +239,16 @@ export default function Uploader(props: Props) {
             watcher.init(upload, requestSyncWithRemote);
 
             electron.pendingUploads().then((pending) => {
-                if (pending) {
-                    log.info("Resuming pending desktop upload", pending);
-                    resumeDesktopUpload(
-                        pending.type == "files"
-                            ? PICKED_UPLOAD_TYPE.FILES
-                            : PICKED_UPLOAD_TYPE.ZIPS,
-                        pending.files,
-                        pending.collectionName,
-                    );
-                }
+                if (!pending) return;
+
+                const { collectionName, filePaths, zipEntries } = pending;
+                if (filePaths.length == 0 && zipEntries.length == 0) return;
+
+                log.info("Resuming pending upload", pending);
+                isPendingDesktopUpload.current = true;
+                pendingDesktopUploadCollectionName.current = collectionName;
+                setDesktopFilePaths(filePaths);
+                setDesktopZipEntries(zipEntries);
             });
         }
     }, [
@@ -258,9 +258,8 @@ export default function Uploader(props: Props) {
         appContext.isCFProxyDisabled,
     ]);
 
-    // this handles the change of selectorFiles changes on web when user selects
-    // files for upload through the opened file/folder selector or dragAndDrop them
-    //  the webFiles state is update which triggers the upload of those files
+    // Handle selected files when user selects files for upload through the open
+    // file / open folder selection dialog, or drag-and-drops them.
     useEffect(() => {
         if (appContext.watchFolderView) {
             // if watch folder dialog is open don't catch the dropped file
@@ -462,19 +461,6 @@ export default function Uploader(props: Props) {
             props.setLoading(false);
         }
     }, [webFiles, appContext.sharedFiles, electronFiles, desktopFilePaths]);
-
-    const resumeDesktopUpload = async (
-        type: PICKED_UPLOAD_TYPE,
-        electronFiles: ElectronFile[],
-        collectionName: string,
-    ) => {
-        if (electronFiles && electronFiles?.length > 0) {
-            isPendingDesktopUpload.current = true;
-            pendingDesktopUploadCollectionName.current = collectionName;
-            pickedUploadType.current = type;
-            setElectronFiles(electronFiles);
-        }
-    };
 
     const preCollectionCreationAction = async () => {
         props.closeCollectionSelector?.();

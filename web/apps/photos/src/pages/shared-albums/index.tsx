@@ -118,14 +118,14 @@ export default function PublicCollectionGallery() {
         disabled: shouldDisableDropzone,
     });
     const {
-        selectedFiles: webFileSelectorFiles,
+        selectedFiles: fileSelectorFiles,
         open: openFileSelector,
         getInputProps: getFileSelectorInputProps,
     } = useFileInput({
         directory: false,
     });
     const {
-        selectedFiles: webFolderSelectorFiles,
+        selectedFiles: folderSelectorFiles,
         open: openFolderSelector,
         getInputProps: getFolderSelectorInputProps,
     } = useFileInput({
@@ -583,17 +583,19 @@ export default function PublicCollectionGallery() {
                     setLoading={setBlockingLoad}
                     setShouldDisableDropzone={setShouldDisableDropzone}
                     setFiles={setPublicFiles}
-                    webFileSelectorFiles={webFileSelectorFiles}
-                    webFolderSelectorFiles={webFolderSelectorFiles}
-                    dragAndDropFiles={dragAndDropFiles}
                     uploadTypeSelectorView={uploadTypeSelectorView}
                     closeUploadTypeSelector={closeUploadTypeSelectorView}
-                    showUploadFilesDialog={openFileSelector}
-                    showUploadDirsDialog={openFolderSelector}
                     showSessionExpiredMessage={showPublicLinkExpiredMessage}
                     uploadTypeSelectorIntent={
                         UploadTypeSelectorIntent.collectPhotos
                     }
+                    {...{
+                        dragAndDropFiles,
+                        openFileSelector,
+                        fileSelectorFiles,
+                        openFolderSelector,
+                        folderSelectorFiles,
+                    }}
                 />
                 <FilesDownloadProgress
                     attributesList={filesDownloadProgressAttributesList}
