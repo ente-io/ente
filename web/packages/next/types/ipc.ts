@@ -466,6 +466,18 @@ export interface Electron {
     // - Upload
 
     /**
+     * Return the file system path that this File object points to.
+     *
+     * This method is a bit different from the other methods on the Electron
+     * object in the sense that there is no actual IPC happening - the
+     * implementation of this method is completely in the preload script. Thus
+     * we can pass it an otherwise unserializable File object.
+     *
+     * Consequently, it is also _not_ async.
+     */
+    pathForFile: (file: File) => string;
+
+    /**
      * Get the list of files that are present in the given zip file.
      *
      * @param zipPath The path of the zip file on the user's local file system.
@@ -478,7 +490,7 @@ export interface Electron {
      *
      * To read the contents of the files themselves, see [Note: IPC streams].
      */
-    listZipEntries : (zipPath: string) => Promise<ZipEntry[]>
+    listZipEntries: (zipPath: string) => Promise<ZipEntry[]>;
 
     /**
      * Return any pending uploads that were previously enqueued but haven't yet

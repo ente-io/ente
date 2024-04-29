@@ -18,8 +18,9 @@ export interface ElectronFile {
 
 /**
  * When we are running in the context of our desktop app, we have access to the
- * absolute path of the file under consideration. This type combines these two
- * bits of information to remove the need to query it again and again.
+ * absolute path of {@link File} objects. This convenience type clubs these two
+ * bits of information, saving us the need to query the path again and again
+ * using the {@link getPathForFile} method of {@link Electron}.
  */
 export interface FileAndPath {
     file: File;

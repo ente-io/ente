@@ -1,6 +1,6 @@
 import log from "@/next/log";
 import { ElectronFile, type FileAndPath } from "@/next/types/file";
-import type { CollectionMapping, ZipEntry } from "@/next/types/ipc";
+import type { CollectionMapping, Electron, ZipEntry } from "@/next/types/ipc";
 import { CustomError } from "@ente/shared/error";
 import { isPromise } from "@ente/shared/utils";
 import DiscFullIcon from "@mui/icons-material/DiscFull";
@@ -86,7 +86,13 @@ interface Props {
     activeCollection?: Collection;
 }
 
-export default function Uploader(props: Props) {
+export default function Uploader({
+    dragAndDropFiles,
+    fileSelectorFiles,
+    folderSelectorFiles,
+    fileSelectorZipFiles,
+    ...props
+}: Props) {
     const appContext = useContext(AppContext);
     const galleryContext = useContext(GalleryContext);
     const publicCollectionGalleryContext = useContext(
@@ -266,108 +272,28 @@ export default function Uploader(props: Props) {
             // as they are folder being dropped for watching
             return;
         }
-        if (
-            pickedUploadType.current === PICKED_UPLOAD_TYPE.FOLDERS &&
-            props.webFolderSelectorFiles?.length > 0
-        ) {
-            log.info(`received folder upload request`);
-            setWebFiles(props.webFolderSelectorFiles);
-        } else if (
-            pickedUploadType.current === PICKED_UPLOAD_TYPE.FILES &&
-            props.webFileSelectorFiles?.length > 0
-        ) {
-            log.info(`received file upload request`);
-            setWebFiles(props.webFileSelectorFiles);
-        } else if (
-            pickedUploadType.current === PICKED_UPLOAD_TYPE.ZIPS &&
-            props.webFileSelectorZipFiles?.length > 0
-        ) {
-            if (electron) {
-                const main = async () => {
-                    const zips: File[] = [];
-                    let electronFiles = [] as ElectronFile[];
-                    for (const file of props.webFileSelectorZipFiles) {
-                        if (file.name.endsWith(".zip")) {
-                            const zipFiles = await electron.lsZip(
-                                (file as any).path,
-                            );
-                            log.info(
-                                `zip file - ${file.name} contains ${zipFiles.length} files`,
-                            );
-                            zips.push(file);
-                            // TODO(MR): This cast is incorrect, but interim.
-                            electronFiles = [
-                                ...electronFiles,
-                                ...(zipFiles as unknown as ElectronFile[]),
-                            ];
-                        }
-                    }
-                    // setWebFiles(props.webFileSelectorZipFiles);
-                    zipPaths.current = zips.map((file) => (file as any).path);
-                    setElectronFiles(electronFiles);
-                };
-                main();
-            }
-        } else if (props.dragAndDropFiles?.length > 0) {
-            isDragAndDrop.current = true;
-            if (electron) {
-                const main = async () => {
-                    try {
-                        // check and parse dropped files which are zip files
-                        log.info(`uploading dropped files from desktop app`);
-                        const zips: File[] = [];
-                        let electronFiles = [] as ElectronFile[];
-                        for (const file of props.dragAndDropFiles) {
-                            if (file.name.endsWith(".zip")) {
-                                const zipFiles = await electron.lsZip(
-                                    (file as any).path,
-                                );
-                                log.info(
-                                    `zip file - ${file.name} contains ${zipFiles.length} files`,
-                                );
-                                zips.push(file);
-                                // TODO(MR): This cast is incorrect, but interim.
-                                electronFiles = [
-                                    ...electronFiles,
-                                    ...(zipFiles as unknown as ElectronFile[]),
-                                ];
-                            } else {
-                                // type cast to ElectronFile as the file is dropped from desktop app
-                                // type file and ElectronFile should be interchangeable, but currently they have some differences.
-                                // Typescript is giving error
-                                // Conversion of type 'File' to type 'ElectronFile' may be a mistake because neither type sufficiently
-                                // overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
-                                // Type 'File' is missing the following properties from type 'ElectronFile': path, blob
-                                // for now patching by type casting first to unknown and then to ElectronFile
-                                // TODO: fix types and remove type cast
-                                electronFiles.push(
-                                    file as unknown as ElectronFile,
-                                );
-                            }
-                        }
-                        log.info(
-                            `uploading dropped files from desktop app - ${electronFiles.length} files found`,
-                        );
-                        zipPaths.current = zips.map(
-                            (file) => (file as any).path,
-                        );
-                        setElectronFiles(electronFiles);
-                    } catch (e) {
-                        log.error("failed to upload desktop dropped files", e);
-                        setWebFiles(props.dragAndDropFiles);
-                    }
-                };
-                main();
-            } else {
-                log.info(`uploading dropped files from web app`);
-                setWebFiles(props.dragAndDropFiles);
-            }
+
+        const files = [
+            dragAndDropFiles,
+            fileSelectorFiles,
+            folderSelectorFiles,
+            fileSelectorZipFiles,
+        ].flat();
+        if (electron) {
+            desktopFilesAndZipEntries(electron, files).then(
+                ({ fileAndPaths, zipEntries }) => {
+                    setDesktopFiles(fileAndPaths);
+                    setDesktopZipEntries(zipEntries);
+                },
+            );
+        } else {
+            setWebFiles(files);
         }
     }, [
-        props.dragAndDropFiles,
-        props.webFileSelectorFiles,
-        props.webFolderSelectorFiles,
-        props.webFileSelectorZipFiles,
+        dragAndDropFiles,
+        fileSelectorFiles,
+        folderSelectorFiles,
+        fileSelectorZipFiles,
     ]);
 
     useEffect(() => {
@@ -904,6 +830,25 @@ async function waitAndRun(
     }
     await task();
 }
+
+const desktopFilesAndZipEntries = async (
+    electron: Electron,
+    files: File[],
+): Promise<{ fileAndPaths: FileAndPath[]; zipEntries: ZipEntry[] }> => {
+    const fileAndPaths: FileAndPath[] = [];
+    const zipEntries: ZipEntry[] = [];
+
+    for (const file of files) {
+        const path = electron.pathForFile(file);
+        if (file.name.endsWith(".zip")) {
+            zipEntries = zipEntries.concat(await electron.listZipEntries(path));
+        } else {
+            fileAndPaths.push({ file, path });
+        }
+    }
+
+    return { fileAndPaths, zipEntries };
+};
 
 // This is used to prompt the user the make upload strategy choice
 interface ImportSuggestion {

@@ -37,7 +37,7 @@
  * -    [main]      desktop/src/main/ipc.ts                  contains impl
  */
 
-import { contextBridge, ipcRenderer } from "electron/renderer";
+import { contextBridge, ipcRenderer, webUtils } from "electron/renderer";
 
 // While we can't import other code, we can import types since they're just
 // needed when compiling and will not be needed or looked around for at runtime.
@@ -242,6 +242,8 @@ const watchFindFiles = (folderPath: string): Promise<string[]> =>
 
 // - Upload
 
+const pathForFile = (file: File) => webUtils.getPathForFile(file);
+
 const listZipEntries = (zipPath: string): Promise<ZipEntry[]> =>
     ipcRenderer.invoke("listZipEntries", zipPath);
 
@@ -370,6 +372,7 @@ contextBridge.exposeInMainWorld("electron", {
 
     // - Upload
 
+    pathForFile,
     listZipEntries,
     pendingUploads,
     setPendingUploads,
