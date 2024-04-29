@@ -52,12 +52,11 @@ import {
     saveEncryptionKey,
 } from "./services/store";
 import {
-    clearPendingUploads,
-    getElectronFilesFromGoogleZip,
     lsZip,
     pendingUploads,
-    setPendingUploadCollection,
-    setPendingUploadFiles,
+    setPendingUploads,
+    markUploaded,
+    clearPendingUploads,
 } from "./services/upload";
 import {
     watchAdd,
@@ -204,14 +203,11 @@ export const attachIPCHandlers = () => {
 
     ipcMain.handle("pendingUploads", () => pendingUploads());
 
-    ipcMain.handle("setPendingUploadCollection", (_, collectionName: string) =>
-        setPendingUploadCollection(collectionName),
-    );
+    ipcMain.handle("setPendingUploads", (_, pendingUploads: PendingUploads) =>
+        setPendingUploads(pendingUploads),
 
-    ipcMain.handle(
-        "setPendingUploadFiles",
-        (_, type: PendingUploads["type"], filePaths: string[]) =>
-            setPendingUploadFiles(type, filePaths),
+    ipcMain.handle("markUploaded", (_, pathOrZipEntry: string | [zipPath: string, entryName: string]) =>
+        markUploaded(pathOrZipEntry),
     );
 
     ipcMain.handle("clearPendingUploads", () => clearPendingUploads());

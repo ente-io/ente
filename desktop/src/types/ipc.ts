@@ -27,8 +27,8 @@ export interface FolderWatchSyncedFile {
 
 export interface PendingUploads {
     collectionName: string;
-    type: "files" | "zips";
-    files: ElectronFile[];
+    filePaths: string[];
+    zipEntries: [zipPath: string, entryName: string][];
 }
 
 /**

@@ -247,25 +247,15 @@ const lsZip = (zipPath: string): Promise<string[]> =>
 const pendingUploads = (): Promise<PendingUploads | undefined> =>
     ipcRenderer.invoke("pendingUploads");
 
-const setPendingUploadCollection = (collectionName: string): Promise<void> =>
-    ipcRenderer.invoke("setPendingUploadCollection", collectionName);
+const setPendingUploads = (pendingUploads: PendingUploads): Promise<void> =>
+    ipcRenderer.invoke("setPendingUploads", pendingUploads);
 
-const setPendingUploadFiles = (
-    type: PendingUploads["type"],
-    filePaths: string[],
-): Promise<void> =>
-    ipcRenderer.invoke("setPendingUploadFiles", type, filePaths);
+const markUploaded = (
+    pathOrZipEntry: string | [zipPath: string, entryName: string],
+): Promise<void> => ipcRenderer.invoke("markUploaded", pathOrZipEntry);
 
 const clearPendingUploads = (): Promise<void> =>
     ipcRenderer.invoke("clearPendingUploads");
-
-// - TODO: AUDIT below this
-// -
-
-const getElectronFilesFromGoogleZip = (
-    filePath: string,
-): Promise<ElectronFile[]> =>
-    ipcRenderer.invoke("getElectronFilesFromGoogleZip", filePath);
 
 /**
  * These objects exposed here will become available to the JS code in our
@@ -378,11 +368,7 @@ contextBridge.exposeInMainWorld("electron", {
 
     lsZip,
     pendingUploads,
-    setPendingUploadCollection,
-    setPendingUploadFiles,
+    setPendingUploads,
+    markUploaded,
     clearPendingUploads,
-
-    // -
-
-    getElectronFilesFromGoogleZip,
 });

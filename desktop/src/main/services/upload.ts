@@ -26,7 +26,8 @@ export const lsZip = async (zipPath: string) => {
     return [entryPaths];
 };
 
-export const pendingUploads = async () => {
+export const pendingUploads = async (): Promise<PendingUploads | undefined> => {
+    /* TODO */
     const collectionName = uploadStatusStore.get("collectionName");
     const filePaths = validSavedPaths("files");
     const zipPaths = validSavedPaths("zips");
@@ -56,7 +57,14 @@ export const pendingUploads = async () => {
     };
 };
 
-export const validSavedPaths = (type: PendingUploads["type"]) => {
+export const setPendingUploads = async (pendingUploads: PendingUploads) =>
+    uploadStatusStore.set(pendingUploads);
+
+export const markUploaded = async (
+    pathOrZipEntry: string | [zipPath: string, entryName: string],
+) => {};
+
+const validSavedPaths = (type: PendingUploads["type"]) => {
     const key = storeKey(type);
     const savedPaths = (uploadStatusStore.get(key) as string[]) ?? [];
     const paths = savedPaths.filter((p) => existsSync(p));
@@ -64,12 +72,12 @@ export const validSavedPaths = (type: PendingUploads["type"]) => {
     return paths;
 };
 
-export const setPendingUploadCollection = (collectionName: string) => {
+const setPendingUploadCollection = (collectionName: string) => {
     if (collectionName) uploadStatusStore.set("collectionName", collectionName);
     else uploadStatusStore.delete("collectionName");
 };
 
-export const setPendingUploadFiles = (
+const setPendingUploadFiles = (
     type: PendingUploads["type"],
     filePaths: string[],
 ) => {
@@ -78,9 +86,7 @@ export const setPendingUploadFiles = (
     else uploadStatusStore.delete(key);
 };
 
-export const clearPendingUploads = () => {
-    uploadStatusStore.clear();
-};
+export const clearPendingUploads = () => uploadStatusStore.clear();
 
 const storeKey = (type: PendingUploads["type"]): keyof UploadStatusStore => {
     switch (type) {

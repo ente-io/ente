@@ -10,7 +10,7 @@ export interface UploadStatusStore {
      */
     zipEntries: [zipPath: string, entryName: string][];
     /** Legacy paths to zip files, now subsumed into zipEntries */
-    zipPaths: string[];
+    zipPaths?: string[];
 }
 
 const uploadStatusSchema: Schema<UploadStatusStore> = {
