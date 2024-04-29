@@ -36,7 +36,11 @@ import {
     tryParseTakeoutMetadataJSON,
     type ParsedMetadataJSON,
 } from "./takeout";
-import UploadService, { fopFileName, fopSize, uploader } from "./uploadService";
+import UploadService, {
+    uploadItemFileName,
+    uploadItemSize,
+    uploader,
+} from "./uploadService";
 
 export type FileID = number;
 
@@ -413,28 +417,28 @@ class UploadManager {
      * It is an error to call this method when there is already an in-progress
      * upload.
      *
-     * @param filesWithCollectionToUploadIn The files to upload, each paired
-     * with the id of the collection that they should be uploaded into.
+     * @param itemsWithCollection The items to upload, each paired with the id
+     * of the collection that they should be uploaded into.
      *
      * @returns `true` if at least one file was processed
      */
-    public async uploadFiles(
-        filesWithCollectionToUploadIn: UploadItemWithCollection[],
+    public async uploadItems(
+        itemsWithCollection: UploadItemWithCollection[],
         collections: Collection[],
         uploaderName?: string,
     ) {
         if (this.uploadInProgress)
             throw new Error("Cannot run multiple uploads at once");
 
-        log.info(`Uploading ${filesWithCollectionToUploadIn.length} files`);
+        log.info(`Uploading ${itemsWithCollection.length} files`);
         this.uploadInProgress = true;
         this.uploaderName = uploaderName;
 
         try {
             await this.updateExistingFilesAndCollections(collections);
 
-            const namedFiles = filesWithCollectionToUploadIn.map(
-                makeFileWithCollectionIDAndName,
+            const namedFiles = itemsWithCollection.map(
+                makeUploadItemWithCollectionIDAndName,
             );
 
             this.uiService.setFiles(namedFiles);
@@ -505,10 +509,16 @@ class UploadManager {
         );
     }
 
-    private async parseMetadataJSONFiles(files: FileWithCollectionIDAndName[]) {
+    private async parseMetadataJSONFiles(
+        files: UploadItemWithCollectionIDAndName[],
+    ) {
         this.uiService.reset(files.length);
 
-        for (const { fileOrPath, fileName, collectionID } of files) {
+        for (const {
+            uploadItem: fileOrPath,
+            fileName,
+            collectionID,
+        } of files) {
             this.abortIfCancelled();
 
             log.info(`Parsing metadata JSON ${fileName}`);
@@ -687,9 +697,9 @@ class UploadManager {
         uploadCancelService.requestUploadCancelation();
     }
 
-    public getFailedFilesWithCollections() {
+    public getFailedItemsWithCollections() {
         return {
-            files: this.failedFiles,
+            items: this.failedFiles,
             collections: [...this.collections.values()],
         };
     }
@@ -742,7 +752,7 @@ export default new UploadManager();
  *   will have data from a previous stage (concretely, it'll just be a
  *   relabelled {@link ClusteredFile}), like a snake eating its tail.
  *
- * - Immediately we convert it to {@link FileWithCollectionIDAndName}. This is
+ * - Immediately we convert it to {@link UploadItemWithCollectionIDAndName}. This is
  *   to mostly systematize what we have, and also attach a {@link fileName}.
  *
  * - These then get converted to "assets", whereby both parts of a live photo
@@ -752,7 +762,7 @@ export default new UploadManager();
  *   {@link collection}, giving us {@link UploadableFile}. This is what gets
  *   queued and then passed to the {@link uploader}.
  */
-type FileWithCollectionIDAndName = {
+type UploadItemWithCollectionIDAndName = {
     /** A unique ID for the duration of the upload */
     localID: number;
     /** The ID of the collection to which this file should be uploaded. */
@@ -766,14 +776,14 @@ type FileWithCollectionIDAndName = {
     /** `true` if this is a live photo. */
     isLivePhoto?: boolean;
     /* Valid for non-live photos */
-    fileOrPath?: File | string;
+    uploadItem?: UploadItem;
     /* Valid for live photos */
     livePhotoAssets?: LivePhotoAssets;
 };
 
-const makeFileWithCollectionIDAndName = (
+const makeUploadItemWithCollectionIDAndName = (
     f: UploadItemWithCollection,
-): FileWithCollectionIDAndName => {
+): UploadItemWithCollectionIDAndName => {
     const fileOrPath = f.uploadItem;
     /* TODO(MR): ElectronFile */
     if (!(fileOrPath instanceof File || typeof fileOrPath == "string"))
@@ -784,11 +794,11 @@ const makeFileWithCollectionIDAndName = (
         collectionID: ensure(f.collectionID),
         fileName: ensure(
             f.isLivePhoto
-                ? fopFileName(f.livePhotoAssets.image)
-                : fopFileName(fileOrPath),
+                ? uploadItemFileName(f.livePhotoAssets.image)
+                : uploadItemFileName(fileOrPath),
         ),
         isLivePhoto: f.isLivePhoto,
-        fileOrPath: fileOrPath,
+        uploadItem: fileOrPath,
         livePhotoAssets: f.livePhotoAssets,
     };
 };
@@ -818,10 +828,10 @@ export type UploadableFile = ClusteredFile & {
 };
 
 const splitMetadataAndMediaFiles = (
-    files: FileWithCollectionIDAndName[],
+    files: UploadItemWithCollectionIDAndName[],
 ): [
-    metadata: FileWithCollectionIDAndName[],
-    media: FileWithCollectionIDAndName[],
+    metadata: UploadItemWithCollectionIDAndName[],
+    media: UploadItemWithCollectionIDAndName[],
 ] =>
     files.reduce(
         ([metadata, media], f) => {
@@ -865,7 +875,9 @@ const cancelRemainingUploads = async () => {
  * Go through the given files, combining any sibling image + video assets into a
  * single live photo when appropriate.
  */
-const clusterLivePhotos = async (files: FileWithCollectionIDAndName[]) => {
+const clusterLivePhotos = async (
+    files: UploadItemWithCollectionIDAndName[],
+) => {
     const result: ClusteredFile[] = [];
     files
         .sort((f, g) =>
@@ -884,13 +896,13 @@ const clusterLivePhotos = async (files: FileWithCollectionIDAndName[]) => {
             fileName: f.fileName,
             fileType: fFileType,
             collectionID: f.collectionID,
-            fileOrPath: f.fileOrPath,
+            fileOrPath: f.uploadItem,
         };
         const ga: PotentialLivePhotoAsset = {
             fileName: g.fileName,
             fileType: gFileType,
             collectionID: g.collectionID,
-            fileOrPath: g.fileOrPath,
+            fileOrPath: g.uploadItem,
         };
         if (await areLivePhotoAssets(fa, ga)) {
             const [image, video] =
@@ -901,8 +913,8 @@ const clusterLivePhotos = async (files: FileWithCollectionIDAndName[]) => {
                 fileName: image.fileName,
                 isLivePhoto: true,
                 livePhotoAssets: {
-                    image: image.fileOrPath,
-                    video: video.fileOrPath,
+                    image: image.uploadItem,
+                    video: video.uploadItem,
                 },
             });
             index += 2;
@@ -970,8 +982,8 @@ const areLivePhotoAssets = async (
     // we use doesn't support stream as a input.
 
     const maxAssetSize = 20 * 1024 * 1024; /* 20MB */
-    const fSize = await fopSize(f.fileOrPath);
-    const gSize = await fopSize(g.fileOrPath);
+    const fSize = await uploadItemSize(f.fileOrPath);
+    const gSize = await uploadItemSize(g.fileOrPath);
     if (fSize > maxAssetSize || gSize > maxAssetSize) {
         log.info(
             `Not classifying assets with too large sizes ${[fSize, gSize]} as a live photo`,

@@ -51,7 +51,7 @@ import {
     generateThumbnailWeb,
 } from "./thumbnail";
 import UploadHttpClient from "./uploadHttpClient";
-import type { UploadableFile } from "./uploadManager";
+import type { UploadItem, UploadableFile } from "./uploadManager";
 
 /**
  * A readable stream for a file, and its associated size and last modified time.
@@ -181,24 +181,29 @@ const uploadService = new UploadService();
 export default uploadService;
 
 /**
- * Return the file name for the given {@link fileOrPath}.
- *
- * @param fileOrPath The {@link File}, or the path to it. Note that it is only
- * valid to specify a path if we are running in the context of our desktop app.
+ * Return the file name for the given {@link uploadItem}.
  */
-export const fopFileName = (fileOrPath: File | string) =>
-    typeof fileOrPath == "string" ? basename(fileOrPath) : fileOrPath.name;
+export const uploadItemFileName = (uploadItem: UploadItem) => {
+    if (uploadItem instanceof File) return uploadItem.name;
+    if (typeof uploadItem == "string") return basename(uploadItem);
+    if (Array.isArray(uploadItem)) return basename(uploadItem[1]);
+    return uploadItem.file.name;
+};
 
 /**
- * Return the size of the given {@link fileOrPath}.
- *
- * @param fileOrPath The {@link File}, or the path to it. Note that it is only
- * valid to specify a path if we are running in the context of our desktop app.
+ * Return the size of the given {@link uploadItem}.
  */
-export const fopSize = async (fileOrPath: File | string): Promise<number> =>
-    fileOrPath instanceof File
-        ? fileOrPath.size
-        : await ensureElectron().fs.size(fileOrPath);
+export const uploadItemSize = async (
+    uploadItem: UploadItem,
+): Promise<number> => {
+    if (uploadItem instanceof File) return uploadItem.size;
+    if (typeof uploadItem == "string") return basename(uploadItem);
+    if (Array.isArray(uploadItem)) return basename(uploadItem[1]);
+    return uploadItem.file.size;
+};
+uploadItem instanceof File
+    ? uploadItem.size
+    : await ensureElectron().fs.size(uploadItem);
 
 /* -- Various intermediate type used during upload -- */
 
@@ -643,7 +648,7 @@ const readImageOrVideoDetails = async (fileOrPath: File | string) => {
         const chunk = ensure((await reader.read()).value);
         await reader.cancel();
         return chunk;
-    }, fopFileName(fileOrPath));
+    }, uploadItemFileName(fileOrPath));
 
     return { fileTypeInfo, fileSize, lastModifiedMs };
 };
@@ -721,7 +726,7 @@ const extractLivePhotoMetadata = async (
     return {
         metadata: {
             ...imageMetadata,
-            title: fopFileName(livePhotoAssets.image),
+            title: uploadItemFileName(livePhotoAssets.image),
             fileType: FILE_TYPE.LIVE_PHOTO,
             imageHash: imageMetadata.hash,
             videoHash: videoHash,
@@ -739,7 +744,7 @@ const extractImageOrVideoMetadata = async (
     parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
     worker: Remote<DedicatedCryptoWorker>,
 ) => {
-    const fileName = fopFileName(fileOrPath);
+    const fileName = uploadItemFileName(fileOrPath);
     const { fileType } = fileTypeInfo;
 
     let extractedMetadata: ParsedExtractedMetadata;
@@ -949,9 +954,9 @@ const readLivePhoto = async (
 
     return {
         fileStreamOrData: await encodeLivePhoto({
-            imageFileName: fopFileName(livePhotoAssets.image),
+            imageFileName: uploadItemFileName(livePhotoAssets.image),
             imageFileOrData: await fileOrData(imageFileStreamOrData),
-            videoFileName: fopFileName(livePhotoAssets.video),
+            videoFileName: uploadItemFileName(livePhotoAssets.video),
             videoFileOrData: await fileOrData(videoFileStreamOrData),
         }),
         thumbnail,

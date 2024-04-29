@@ -475,7 +475,7 @@ export default function Uploader({
             let index = 0;
             for (const [
                 collectionName,
-                fileOrPaths,
+                uploadItems,
             ] of collectionNameToUploadItems) {
                 const collection = await getOrCreateAlbum(
                     collectionName,
@@ -485,10 +485,10 @@ export default function Uploader({
                 props.setCollections([...existingCollections, ...collections]);
                 uploadItemsWithCollection = [
                     ...uploadItemsWithCollection,
-                    ...fileOrPaths.map((fileOrPath) => ({
+                    ...uploadItems.map((uploadItem) => ({
                         localID: index++,
                         collectionID: collection.id,
-                        fileOrPath,
+                        uploadItem,
                     })),
                 ];
             }
@@ -556,7 +556,7 @@ export default function Uploader({
                         .filter((x) => x),
                 );
             }
-            const wereFilesProcessed = await uploadManager.uploadFiles(
+            const wereFilesProcessed = await uploadManager.uploadItems(
                 uploadItemsWithCollection,
                 collections,
                 uploaderName,
@@ -586,11 +586,11 @@ export default function Uploader({
     const retryFailed = async () => {
         try {
             log.info("Retrying failed uploads");
-            const { files, collections } =
-                uploadManager.getFailedFilesWithCollections();
+            const { items, collections } =
+                uploadManager.getFailedItemsWithCollections();
             const uploaderName = uploadManager.getUploaderName();
             await preUploadAction();
-            await uploadManager.uploadFiles(files, collections, uploaderName);
+            await uploadManager.uploadItems(items, collections, uploaderName);
         } catch (e) {
             log.error("Retrying failed uploads failed", e);
             showUserFacingError(e.message);
