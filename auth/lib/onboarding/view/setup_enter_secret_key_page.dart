@@ -1,6 +1,7 @@
 import "package:ente_auth/l10n/l10n.dart";
 import 'package:ente_auth/models/code.dart';
 import 'package:ente_auth/models/code_display.dart';
+import 'package:ente_auth/store/code_store.dart';
 import 'package:ente_auth/ui/components/buttons/button_widget.dart';
 import 'package:ente_auth/ui/components/models/button_result.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
@@ -385,7 +386,7 @@ class TagChip extends StatelessWidget {
                     if (value == 0) {
                       showEditDialog(context, label);
                     } else if (value == 1) {
-                      showDeleteTagDialog(context);
+                      showDeleteTagDialog(context, label);
                     }
                   },
                   itemBuilder: (BuildContext context) {
@@ -570,13 +571,26 @@ class _EditTagDialogState extends State<EditTagDialog> {
               color: Colors.purple,
             ),
           ),
-          onPressed: () {
+          onPressed: () async {
             if (_tag.trim().isEmpty) return;
 
             // traverse through all the codes and edit this tag's value
-            // get all codes
-            // update tag
-            // addCode
+            final relevantCodes = (await CodeStore.instance.getAllCodes())
+                .validCodes
+                .where((element) => element.display.tags.contains(widget.tag));
+
+            for (final code in relevantCodes) {
+              final tags = code.display.tags;
+              tags.remove(widget.tag);
+              tags.add(_tag);
+              await CodeStore.instance.addCode(
+                code.copyWith(
+                  display: code.display.copyWith(tags: tags),
+                ),
+              );
+            }
+
+            Navigator.pop(context);
           },
         ),
       ],
@@ -584,7 +598,7 @@ class _EditTagDialogState extends State<EditTagDialog> {
   }
 }
 
-Future<void> showDeleteTagDialog(BuildContext context) async {
+Future<void> showDeleteTagDialog(BuildContext context, String tag) async {
   FocusScope.of(context).requestFocus();
   final l10n = context.l10n;
   await showChoiceActionSheet(
@@ -594,7 +608,20 @@ Future<void> showDeleteTagDialog(BuildContext context) async {
     firstButtonLabel: l10n.delete,
     isCritical: true,
     firstButtonOnTap: () async {
-      // traverse through all codes and remove this tag
+      // traverse through all the codes and edit this tag's value
+      final relevantCodes = (await CodeStore.instance.getAllCodes())
+          .validCodes
+          .where((element) => element.display.tags.contains(tag));
+
+      for (final code in relevantCodes) {
+        final tags = code.display.tags;
+        tags.remove(tag);
+        await CodeStore.instance.addCode(
+          code.copyWith(
+            display: code.display.copyWith(tags: tags),
+          ),
+        );
+      }
     },
   );
 }
