@@ -109,17 +109,17 @@ const maxConcurrentUploads = 4;
  */
 export type UploadItem = File | FileAndPath | string | ZipEntry;
 
-export interface FileWithCollection {
+export interface UploadItemWithCollection {
     localID: number;
     collectionID: number;
     isLivePhoto?: boolean;
-    fileOrPath?: File | string;
+    uploadItem?: UploadItem;
     livePhotoAssets?: LivePhotoAssets;
 }
 
 export interface LivePhotoAssets {
-    image: File | string;
-    video: File | string;
+    image: UploadItem;
+    video: UploadItem;
 }
 
 export interface PublicUploadProps {
@@ -419,7 +419,7 @@ class UploadManager {
      * @returns `true` if at least one file was processed
      */
     public async uploadFiles(
-        filesWithCollectionToUploadIn: FileWithCollection[],
+        filesWithCollectionToUploadIn: UploadItemWithCollection[],
         collections: Collection[],
         uploaderName?: string,
     ) {
@@ -735,8 +735,8 @@ export default new UploadManager();
  * As files progress through stages, they get more and more bits tacked on to
  * them. These types document the journey.
  *
- * - The input is {@link FileWithCollection}. This can either be a new
- *   {@link FileWithCollection}, in which case it'll only have a
+ * - The input is {@link UploadItemWithCollection}. This can either be a new
+ *   {@link UploadItemWithCollection}, in which case it'll only have a
  *   {@link localID}, {@link collectionID} and a {@link fileOrPath}. Or it could
  *   be a retry, in which case it'll not have a {@link fileOrPath} but instead
  *   will have data from a previous stage (concretely, it'll just be a
@@ -772,9 +772,9 @@ type FileWithCollectionIDAndName = {
 };
 
 const makeFileWithCollectionIDAndName = (
-    f: FileWithCollection,
+    f: UploadItemWithCollection,
 ): FileWithCollectionIDAndName => {
-    const fileOrPath = f.fileOrPath;
+    const fileOrPath = f.uploadItem;
     /* TODO(MR): ElectronFile */
     if (!(fileOrPath instanceof File || typeof fileOrPath == "string"))
         throw new Error(`Unexpected file ${f}`);

@@ -21,12 +21,12 @@ import {
     savePublicCollectionUploaderName,
 } from "services/publicCollectionService";
 import type {
-    FileWithCollection,
     InProgressUpload,
     SegregatedFinishedUploads,
     UploadCounter,
     UploadFileNames,
     UploadItem,
+    UploadItemWithCollection,
 } from "services/upload/uploadManager";
 import uploadManager from "services/upload/uploadManager";
 import watcher from "services/watch";
@@ -86,6 +86,7 @@ interface Props {
 }
 
 export default function Uploader({
+    isFirstUpload,
     dragAndDropFiles,
     openFileSelector,
     fileSelectorFiles,
@@ -162,12 +163,14 @@ export default function Uploader({
      * {@link desktopFiles}, {@link desktopFilePaths} and
      * {@link desktopZipEntries}.
      *
+     * Augment each {@link UploadItem} with its "path" (relative path or name in
+     * the case of {@link webFiles}, absolute path in the case of
+     * {@link desktopFiles}, {@link desktopFilePaths}, and the path within the
+     * zip file for {@link desktopZipEntries}).
+     *
      * See the documentation of {@link UploadItem} for more details.
      */
-    const uploadItems = useRef<UploadItem[]>([]);
-
-    // TODO(MR): temp, doesn't have zips
-    const fileOrPathsToUpload = useRef<(File | string)[]>([]);
+    const uploadItemsAndPaths = useRef<[UploadItem, string][]>([]);
 
     /**
      * If true, then the next upload we'll be processing was initiated by our
@@ -301,15 +304,15 @@ export default function Uploader({
 
     // Trigger an upload when any of the dependencies change.
     useEffect(() => {
-        const itemAndPaths = [
+        const allItemAndPaths = [
             /* TODO(MR): ElectronFile | use webkitRelativePath || name here */
-            webFiles.map((f) => [f, f["path"]]),
+            webFiles.map((f) => [f, f["path"] ?? f.name]),
             desktopFiles.map((fp) => [fp, fp.path]),
             desktopFilePaths.map((p) => [p, p]),
             desktopZipEntries.map((ze) => [ze, ze[1]]),
-        ].flat();
+        ].flat() as [UploadItem, string][];
 
-        if (itemAndPaths.length == 0) return;
+        if (allItemAndPaths.length == 0) return;
 
         if (uploadManager.isUploadRunning()) {
             if (watcher.isUploadRunning()) {
@@ -333,42 +336,93 @@ export default function Uploader({
         setDesktopZipEntries([]);
 
         // Remove hidden files (files whose names begins with a ".").
-        const prunedItemAndPaths = itemAndPaths.filter(
+        const prunedItemAndPaths = allItemAndPaths.filter(
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             ([_, p]) => !basename(p).startsWith("."),
         );
 
-        uploadItems.current = prunedItemAndPaths.map(([i]) => i);
-        fileOrPathsToUpload.current = uploadItems.current
-            .map((i) => {
-                if (typeof i == "string" || i instanceof File) return i;
-                if (Array.isArray(i)) return undefined;
-                return i.file;
-            })
-            .filter((x) => x);
-        uploadItems.current = [];
-        if (fileOrPathsToUpload.current.length === 0) {
+        uploadItemsAndPaths.current = prunedItemAndPaths;
+        if (uploadItemsAndPaths.current.length === 0) {
             props.setLoading(false);
             return;
         }
 
         const importSuggestion = getImportSuggestion(
             pickedUploadType.current,
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             prunedItemAndPaths.map(([_, p]) => p),
         );
         setImportSuggestion(importSuggestion);
 
         log.debug(() => "Uploader invoked:");
-        log.debug(() => fileOrPathsToUpload.current);
+        log.debug(() => uploadItemsAndPaths.current);
         log.debug(() => importSuggestion);
 
-        handleCollectionCreationAndUpload(
-            importSuggestion,
-            props.isFirstUpload,
-            pickedUploadType.current,
-            publicCollectionGalleryContext.accessedThroughSharedURL,
-        );
+        const _pickedUploadType = pickedUploadType.current;
         pickedUploadType.current = null;
         props.setLoading(false);
+
+        (async () => {
+            if (publicCollectionGalleryContext.accessedThroughSharedURL) {
+                const uploaderName = await getPublicCollectionUploaderName(
+                    getPublicCollectionUID(
+                        publicCollectionGalleryContext.token,
+                    ),
+                );
+                uploaderNameRef.current = uploaderName;
+                showUserNameInputDialog();
+                return;
+            }
+
+            if (isPendingDesktopUpload.current) {
+                isPendingDesktopUpload.current = false;
+                if (pendingDesktopUploadCollectionName.current) {
+                    uploadFilesToNewCollections(
+                        "root",
+                        pendingDesktopUploadCollectionName.current,
+                    );
+                    pendingDesktopUploadCollectionName.current = null;
+                } else {
+                    uploadFilesToNewCollections("parent");
+                }
+                return;
+            }
+
+            if (electron && _pickedUploadType === PICKED_UPLOAD_TYPE.ZIPS) {
+                uploadFilesToNewCollections("parent");
+                return;
+            }
+
+            if (isFirstUpload && !importSuggestion.rootFolderName) {
+                importSuggestion.rootFolderName = FIRST_ALBUM_NAME;
+            }
+
+            if (isDragAndDrop.current) {
+                isDragAndDrop.current = false;
+                if (
+                    props.activeCollection &&
+                    props.activeCollection.owner.id === galleryContext.user?.id
+                ) {
+                    uploadFilesToExistingCollection(props.activeCollection);
+                    return;
+                }
+            }
+
+            let showNextModal = () => {};
+            if (importSuggestion.hasNestedFolders) {
+                showNextModal = () => setChoiceModalView(true);
+            } else {
+                showNextModal = () =>
+                    showCollectionCreateModal(importSuggestion.rootFolderName);
+            }
+
+            props.setCollectionSelectorAttributes({
+                callback: uploadFilesToExistingCollection,
+                onCancel: handleCollectionSelectorCancel,
+                showNextModal,
+                intent: CollectionSelectorIntent.upload,
+            });
+        })();
     }, [webFiles, desktopFiles, desktopFilePaths, desktopZipEntries]);
 
     const preCollectionCreationAction = async () => {
@@ -382,100 +436,78 @@ export default function Uploader({
         collection: Collection,
         uploaderName?: string,
     ) => {
-        try {
-            log.info(
-                `Uploading files existing collection id ${collection.id} (${collection.name})`,
-            );
-            await preCollectionCreationAction();
-            const filesWithCollectionToUpload = fileOrPathsToUpload.current.map(
-                (fileOrPath, index) => ({
-                    fileOrPath,
-                    localID: index,
-                    collectionID: collection.id,
-                }),
-            );
-            await waitInQueueAndUploadFiles(
-                filesWithCollectionToUpload,
-                [collection],
-                uploaderName,
-            );
-        } catch (e) {
-            log.error("Failed to upload files to existing collection", e);
-        }
+        await preCollectionCreationAction();
+        const uploadItemsWithCollection = uploadItemsAndPaths.current.map(
+            ([uploadItem], index) => ({
+                uploadItem,
+                localID: index,
+                collectionID: collection.id,
+            }),
+        );
+        await waitInQueueAndUploadFiles(
+            uploadItemsWithCollection,
+            [collection],
+            uploaderName,
+        );
+        uploadItemsAndPaths.current = null;
     };
 
     const uploadFilesToNewCollections = async (
         mapping: CollectionMapping,
         collectionName?: string,
     ) => {
-        try {
-            log.info(
-                `Uploading files to collection using ${mapping} mapping (${collectionName ?? "<NA>"})`,
+        await preCollectionCreationAction();
+        let uploadItemsWithCollection: UploadItemWithCollection[] = [];
+        const collections: Collection[] = [];
+        let collectionNameToUploadItems = new Map<string, UploadItem[]>();
+        if (mapping == "root") {
+            collectionNameToUploadItems.set(
+                collectionName,
+                uploadItemsAndPaths.current.map(([i]) => i),
             );
-            await preCollectionCreationAction();
-            let filesWithCollectionToUpload: FileWithCollection[] = [];
-            const collections: Collection[] = [];
-            let collectionNameToFileOrPaths = new Map<
-                string,
-                (File | string)[]
-            >();
-            if (mapping == "root") {
-                collectionNameToFileOrPaths.set(
-                    collectionName,
-                    fileOrPathsToUpload.current,
-                );
-            } else {
-                collectionNameToFileOrPaths = groupFilesBasedOnParentFolder(
-                    fileOrPathsToUpload.current,
-                );
-            }
-            try {
-                const existingCollections = await getLatestCollections();
-                let index = 0;
-                for (const [
-                    collectionName,
-                    fileOrPaths,
-                ] of collectionNameToFileOrPaths) {
-                    const collection = await getOrCreateAlbum(
-                        collectionName,
-                        existingCollections,
-                    );
-                    collections.push(collection);
-                    props.setCollections([
-                        ...existingCollections,
-                        ...collections,
-                    ]);
-                    filesWithCollectionToUpload = [
-                        ...filesWithCollectionToUpload,
-                        ...fileOrPaths.map((fileOrPath) => ({
-                            localID: index++,
-                            collectionID: collection.id,
-                            fileOrPath,
-                        })),
-                    ];
-                }
-            } catch (e) {
-                closeUploadProgress();
-                log.error("Failed to create album", e);
-                appContext.setDialogMessage({
-                    title: t("ERROR"),
-                    close: { variant: "critical" },
-                    content: t("CREATE_ALBUM_FAILED"),
-                });
-                throw e;
-            }
-            await waitInQueueAndUploadFiles(
-                filesWithCollectionToUpload,
-                collections,
+        } else {
+            collectionNameToUploadItems = groupFilesBasedOnParentFolder(
+                uploadItemsAndPaths.current,
             );
-            fileOrPathsToUpload.current = null;
-        } catch (e) {
-            log.error("Failed to upload files to new collections", e);
         }
+        try {
+            const existingCollections = await getLatestCollections();
+            let index = 0;
+            for (const [
+                collectionName,
+                fileOrPaths,
+            ] of collectionNameToUploadItems) {
+                const collection = await getOrCreateAlbum(
+                    collectionName,
+                    existingCollections,
+                );
+                collections.push(collection);
+                props.setCollections([...existingCollections, ...collections]);
+                uploadItemsWithCollection = [
+                    ...uploadItemsWithCollection,
+                    ...fileOrPaths.map((fileOrPath) => ({
+                        localID: index++,
+                        collectionID: collection.id,
+                        fileOrPath,
+                    })),
+                ];
+            }
+        } catch (e) {
+            closeUploadProgress();
+            log.error("Failed to create album", e);
+            appContext.setDialogMessage({
+                title: t("ERROR"),
+                close: { variant: "critical" },
+                content: t("CREATE_ALBUM_FAILED"),
+            });
+            throw e;
+        }
+        await waitInQueueAndUploadFiles(uploadItemsWithCollection, collections);
+        uploadItemsAndPaths.current = null;
     };
 
     const waitInQueueAndUploadFiles = async (
-        filesWithCollectionToUploadIn: FileWithCollection[],
+        uploadItemsWithCollection: UploadItemWithCollection[],
         collections: Collection[],
         uploaderName?: string,
     ) => {
@@ -484,7 +516,7 @@ export default function Uploader({
             currentPromise,
             async () =>
                 await uploadFiles(
-                    filesWithCollectionToUploadIn,
+                    uploadItemsWithCollection,
                     collections,
                     uploaderName,
                 ),
@@ -505,7 +537,7 @@ export default function Uploader({
     }
 
     const uploadFiles = async (
-        filesWithCollectionToUploadIn: FileWithCollection[],
+        uploadItemsWithCollection: UploadItemWithCollection[],
         collections: Collection[],
         uploaderName?: string,
     ) => {
@@ -519,11 +551,13 @@ export default function Uploader({
                 setPendingUploads(
                     electron,
                     collections,
-                    filesWithCollectionToUploadIn,
+                    uploadItemsWithCollection
+                        .map(({ uploadItem }) => uploadItem)
+                        .filter((x) => x),
                 );
             }
             const wereFilesProcessed = await uploadManager.uploadFiles(
-                filesWithCollectionToUploadIn,
+                uploadItemsWithCollection,
                 collections,
                 uploaderName,
             );
@@ -531,11 +565,12 @@ export default function Uploader({
             if (isElectron()) {
                 if (watcher.isUploadRunning()) {
                     await watcher.allFileUploadsDone(
-                        filesWithCollectionToUploadIn,
+                        uploadItemsWithCollection,
                         collections,
                     );
                 } else if (watcher.isSyncPaused()) {
-                    // resume the service after user upload is done
+                    // Resume folder watch after the user upload that
+                    // interrupted it is done.
                     watcher.resumePausedSync();
                 }
             }
@@ -608,78 +643,6 @@ export default function Uploader({
             autoFilledName: suggestedName,
             callback: uploadToSingleNewCollection,
         });
-    };
-
-    const handleCollectionCreationAndUpload = async (
-        importSuggestion: ImportSuggestion,
-        isFirstUpload: boolean,
-        pickedUploadType: PICKED_UPLOAD_TYPE,
-        accessedThroughSharedURL?: boolean,
-    ) => {
-        try {
-            if (accessedThroughSharedURL) {
-                const uploaderName = await getPublicCollectionUploaderName(
-                    getPublicCollectionUID(
-                        publicCollectionGalleryContext.token,
-                    ),
-                );
-                uploaderNameRef.current = uploaderName;
-                showUserNameInputDialog();
-                return;
-            }
-
-            if (isPendingDesktopUpload.current) {
-                isPendingDesktopUpload.current = false;
-                if (pendingDesktopUploadCollectionName.current) {
-                    uploadFilesToNewCollections(
-                        "root",
-                        pendingDesktopUploadCollectionName.current,
-                    );
-                    pendingDesktopUploadCollectionName.current = null;
-                } else {
-                    uploadFilesToNewCollections("parent");
-                }
-                return;
-            }
-
-            if (isElectron() && pickedUploadType === PICKED_UPLOAD_TYPE.ZIPS) {
-                uploadFilesToNewCollections("parent");
-                return;
-            }
-
-            if (isFirstUpload && !importSuggestion.rootFolderName) {
-                importSuggestion.rootFolderName = FIRST_ALBUM_NAME;
-            }
-
-            if (isDragAndDrop.current) {
-                isDragAndDrop.current = false;
-                if (
-                    props.activeCollection &&
-                    props.activeCollection.owner.id === galleryContext.user?.id
-                ) {
-                    uploadFilesToExistingCollection(props.activeCollection);
-                    return;
-                }
-            }
-
-            let showNextModal = () => {};
-            if (importSuggestion.hasNestedFolders) {
-                showNextModal = () => setChoiceModalView(true);
-            } else {
-                showNextModal = () =>
-                    showCollectionCreateModal(importSuggestion.rootFolderName);
-            }
-
-            props.setCollectionSelectorAttributes({
-                callback: uploadFilesToExistingCollection,
-                onCancel: handleCollectionSelectorCancel,
-                showNextModal,
-                intent: CollectionSelectorIntent.upload,
-            });
-        } catch (e) {
-            // TODO(MR): Why?
-            log.warn("Ignoring error in handleCollectionCreationAndUpload", e);
-        }
     };
 
     const cancelUploads = () => {
@@ -784,7 +747,7 @@ export default function Uploader({
                 open={userNameInputDialogView}
                 onClose={handleUserNameInputDialogClose}
                 onNameSubmit={handlePublicUpload}
-                toUploadFilesCount={fileOrPathsToUpload.current?.length}
+                toUploadFilesCount={uploadItemsAndPaths.current?.length}
                 uploaderName={uploaderNameRef.current}
             />
         </>
@@ -884,16 +847,12 @@ function getImportSuggestion(
 // [a => [j],
 // b => [e,f,g],
 // c => [h, i]]
-const groupFilesBasedOnParentFolder = (fileOrPaths: (File | string)[]) => {
-    const result = new Map<string, (File | string)[]>();
-    for (const fileOrPath of fileOrPaths) {
-        const filePath =
-            /* TODO(MR): ElectronFile */
-            typeof fileOrPath == "string"
-                ? fileOrPath
-                : (fileOrPath["path"] as string);
-
-        let folderPath = filePath.substring(0, filePath.lastIndexOf("/"));
+const groupFilesBasedOnParentFolder = (
+    uploadItemsAndPaths: [UploadItem, string][],
+) => {
+    const result = new Map<string, UploadItem[]>();
+    for (const [uploadItem, pathOrName] of uploadItemsAndPaths) {
+        let folderPath = pathOrName.substring(0, pathOrName.lastIndexOf("/"));
         // If the parent folder of a file is "metadata"
         // we consider it to be part of the parent folder
         // For Eg,For FileList  -> [a/x.png, a/metadata/x.png.json]
@@ -907,7 +866,7 @@ const groupFilesBasedOnParentFolder = (fileOrPaths: (File | string)[]) => {
         );
         if (!folderName) throw Error("Unexpected empty folder name");
         if (!result.has(folderName)) result.set(folderName, []);
-        result.get(folderName).push(fileOrPath);
+        result.get(folderName).push(uploadItem);
     }
     return result;
 };
