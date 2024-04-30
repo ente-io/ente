@@ -37,7 +37,7 @@
  * -    [main]      desktop/src/main/ipc.ts                  contains impl
  */
 
-import { contextBridge, ipcRenderer } from "electron/renderer";
+import { contextBridge, ipcRenderer, webUtils } from "electron/renderer";
 
 // While we can't import other code, we can import types since they're just
 // needed when compiling and will not be needed or looked around for at runtime.
@@ -47,6 +47,7 @@ import type {
     ElectronFile,
     FolderWatch,
     PendingUploads,
+    ZipItem,
 } from "./types/ipc";
 
 // - General
@@ -122,36 +123,33 @@ const fsWriteFile = (path: string, contents: string): Promise<void> =>
 const fsIsDir = (dirPath: string): Promise<boolean> =>
     ipcRenderer.invoke("fsIsDir", dirPath);
 
-const fsSize = (path: string): Promise<number> =>
-    ipcRenderer.invoke("fsSize", path);
-
 // - Conversion
 
 const convertToJPEG = (imageData: Uint8Array): Promise<Uint8Array> =>
     ipcRenderer.invoke("convertToJPEG", imageData);
 
 const generateImageThumbnail = (
-    dataOrPath: Uint8Array | string,
+    dataOrPathOrZipItem: Uint8Array | string | ZipItem,
     maxDimension: number,
     maxSize: number,
 ): Promise<Uint8Array> =>
     ipcRenderer.invoke(
         "generateImageThumbnail",
-        dataOrPath,
+        dataOrPathOrZipItem,
         maxDimension,
         maxSize,
     );
 
 const ffmpegExec = (
     command: string[],
-    dataOrPath: Uint8Array | string,
+    dataOrPathOrZipItem: Uint8Array | string | ZipItem,
     outputFileExtension: string,
     timeoutMS: number,
 ): Promise<Uint8Array> =>
     ipcRenderer.invoke(
         "ffmpegExec",
         command,
-        dataOrPath,
+        dataOrPathOrZipItem,
         outputFileExtension,
         timeoutMS,
     );
@@ -241,25 +239,29 @@ const watchFindFiles = (folderPath: string): Promise<string[]> =>
 
 // - Upload
 
+const pathForFile = (file: File) => webUtils.getPathForFile(file);
+
+const listZipItems = (zipPath: string): Promise<ZipItem[]> =>
+    ipcRenderer.invoke("listZipItems", zipPath);
+
+const pathOrZipItemSize = (pathOrZipItem: string | ZipItem): Promise<number> =>
+    ipcRenderer.invoke("pathOrZipItemSize", pathOrZipItem);
+
 const pendingUploads = (): Promise<PendingUploads | undefined> =>
     ipcRenderer.invoke("pendingUploads");
 
-const setPendingUploadCollection = (collectionName: string): Promise<void> =>
-    ipcRenderer.invoke("setPendingUploadCollection", collectionName);
+const setPendingUploads = (pendingUploads: PendingUploads): Promise<void> =>
+    ipcRenderer.invoke("setPendingUploads", pendingUploads);
 
-const setPendingUploadFiles = (
-    type: PendingUploads["type"],
-    filePaths: string[],
-): Promise<void> =>
-    ipcRenderer.invoke("setPendingUploadFiles", type, filePaths);
+const markUploadedFiles = (paths: PendingUploads["filePaths"]): Promise<void> =>
+    ipcRenderer.invoke("markUploadedFiles", paths);
 
-// - TODO: AUDIT below this
-// -
+const markUploadedZipItems = (
+    items: PendingUploads["zipItems"],
+): Promise<void> => ipcRenderer.invoke("markUploadedZipItems", items);
 
-const getElectronFilesFromGoogleZip = (
-    filePath: string,
-): Promise<ElectronFile[]> =>
-    ipcRenderer.invoke("getElectronFilesFromGoogleZip", filePath);
+const clearPendingUploads = (): Promise<void> =>
+    ipcRenderer.invoke("clearPendingUploads");
 
 /**
  * These objects exposed here will become available to the JS code in our
@@ -331,7 +333,6 @@ contextBridge.exposeInMainWorld("electron", {
         readTextFile: fsReadTextFile,
         writeFile: fsWriteFile,
         isDir: fsIsDir,
-        size: fsSize,
     },
 
     // - Conversion
@@ -370,11 +371,12 @@ contextBridge.exposeInMainWorld("electron", {
 
     // - Upload
 
+    pathForFile,
+    listZipItems,
+    pathOrZipItemSize,
     pendingUploads,
-    setPendingUploadCollection,
-    setPendingUploadFiles,
-
-    // -
-
-    getElectronFilesFromGoogleZip,
+    setPendingUploads,
+    markUploadedFiles,
+    markUploadedZipItems,
+    clearPendingUploads,
 });

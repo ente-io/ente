@@ -1,73 +1,104 @@
 import StreamZip from "node-stream-zip";
+import fs from "node:fs/promises";
 import { existsSync } from "original-fs";
 import path from "path";
-import { ElectronFile, type PendingUploads } from "../../types/ipc";
-import {
-    uploadStatusStore,
-    type UploadStatusStore,
-} from "../stores/upload-status";
-import { getElectronFile, getZipFileStream } from "./fs";
+import type { ElectronFile, PendingUploads, ZipItem } from "../../types/ipc";
+import { uploadStatusStore } from "../stores/upload-status";
+import { getZipFileStream } from "./fs";
 
-export const pendingUploads = async () => {
-    const collectionName = uploadStatusStore.get("collectionName");
-    const filePaths = validSavedPaths("files");
-    const zipPaths = validSavedPaths("zips");
+export const listZipItems = async (zipPath: string): Promise<ZipItem[]> => {
+    const zip = new StreamZip.async({ file: zipPath });
 
-    let files: ElectronFile[] = [];
-    let type: PendingUploads["type"];
+    const entries = await zip.entries();
+    const entryNames: string[] = [];
 
-    if (zipPaths.length) {
-        type = "zips";
-        for (const zipPath of zipPaths) {
-            files = [
-                ...files,
-                ...(await getElectronFilesFromGoogleZip(zipPath)),
-            ];
+    for (const entry of Object.values(entries)) {
+        const basename = path.basename(entry.name);
+        // Ignore "hidden" files (files whose names begins with a dot).
+        if (entry.isFile && basename.length > 0 && basename[0] != ".") {
+            // `entry.name` is the path within the zip.
+            entryNames.push(entry.name);
         }
-        const pendingFilePaths = new Set(filePaths);
-        files = files.filter((file) => pendingFilePaths.has(file.path));
-    } else if (filePaths.length) {
-        type = "files";
-        files = await Promise.all(filePaths.map(getElectronFile));
     }
 
+    zip.close();
+
+    return entryNames.map((entryName) => [zipPath, entryName]);
+};
+
+export const pathOrZipItemSize = async (
+    pathOrZipItem: string | ZipItem,
+): Promise<number> => {
+    if (typeof pathOrZipItem == "string") {
+        const stat = await fs.stat(pathOrZipItem);
+        return stat.size;
+    } else {
+        const [zipPath, entryName] = pathOrZipItem;
+        const zip = new StreamZip.async({ file: zipPath });
+        const entry = await zip.entry(entryName);
+        const size = entry.size;
+        zip.close();
+        return size;
+    }
+};
+
+export const pendingUploads = async (): Promise<PendingUploads | undefined> => {
+    const collectionName = uploadStatusStore.get("collectionName");
+
+    const allFilePaths = uploadStatusStore.get("filePaths") ?? [];
+    const filePaths = allFilePaths.filter((f) => existsSync(f));
+
+    const allZipItems = uploadStatusStore.get("zipItems");
+    let zipItems: typeof allZipItems;
+
+    // Migration code - May 2024. Remove after a bit.
+    //
+    // The older store formats will not have zipItems and instead will have
+    // zipPaths. If we find such a case, read the zipPaths and enqueue all of
+    // their files as zipItems in the result.
+    //
+    // This potentially can be cause us to try reuploading an already uploaded
+    // file, but the dedup logic will kick in at that point so no harm will come
+    // off it.
+    if (allZipItems === undefined) {
+        const allZipPaths = uploadStatusStore.get("filePaths");
+        const zipPaths = allZipPaths.filter((f) => existsSync(f));
+        zipItems = [];
+        for (const zip of zipPaths)
+            zipItems = zipItems.concat(await listZipItems(zip));
+    } else {
+        zipItems = allZipItems.filter(([z]) => existsSync(z));
+    }
+
+    if (filePaths.length == 0 && zipItems.length == 0) return undefined;
+
     return {
-        files,
         collectionName,
-        type,
+        filePaths,
+        zipItems,
     };
 };
 
-export const validSavedPaths = (type: PendingUploads["type"]) => {
-    const key = storeKey(type);
-    const savedPaths = (uploadStatusStore.get(key) as string[]) ?? [];
-    const paths = savedPaths.filter((p) => existsSync(p));
-    uploadStatusStore.set(key, paths);
-    return paths;
+export const setPendingUploads = async (pendingUploads: PendingUploads) =>
+    uploadStatusStore.set(pendingUploads);
+
+export const markUploadedFiles = async (paths: string[]) => {
+    const existing = uploadStatusStore.get("filePaths");
+    const updated = existing.filter((p) => !paths.includes(p));
+    uploadStatusStore.set("filePaths", updated);
 };
 
-export const setPendingUploadCollection = (collectionName: string) => {
-    if (collectionName) uploadStatusStore.set("collectionName", collectionName);
-    else uploadStatusStore.delete("collectionName");
-};
-
-export const setPendingUploadFiles = (
-    type: PendingUploads["type"],
-    filePaths: string[],
+export const markUploadedZipItems = async (
+    items: [zipPath: string, entryName: string][],
 ) => {
-    const key = storeKey(type);
-    if (filePaths) uploadStatusStore.set(key, filePaths);
-    else uploadStatusStore.delete(key);
+    const existing = uploadStatusStore.get("zipItems");
+    const updated = existing.filter(
+        (z) => !items.some((e) => z[0] == e[0] && z[1] == e[1]),
+    );
+    uploadStatusStore.set("zipItems", updated);
 };
 
-const storeKey = (type: PendingUploads["type"]): keyof UploadStatusStore => {
-    switch (type) {
-        case "zips":
-            return "zipPaths";
-        case "files":
-            return "filePaths";
-    }
-};
+export const clearPendingUploads = () => uploadStatusStore.clear();
 
 export const getElectronFilesFromGoogleZip = async (filePath: string) => {
     const zip = new StreamZip.async({
@@ -84,6 +115,8 @@ export const getElectronFilesFromGoogleZip = async (filePath: string) => {
             files.push(await getZipEntryAsElectronFile(zipName, zip, entry));
         }
     }
+
+    zip.close();
 
     return files;
 };
