@@ -102,11 +102,23 @@ const handleReadZip = async (zipPath: string, entryName: string) => {
         const entry = await zip.entry(entryName);
         if (!entry) return new Response("", { status: 404 });
 
+        // This returns an "old style" NodeJS.ReadableStream.
         const stream = await zip.stream(entry);
+        // Convert it into a new style NodeJS.Readable.
+        const nodeReadable = new Readable().wrap(stream);
+        // Then convert it into a Web stream.
+        const webReadableStreamAny = Readable.toWeb(nodeReadable);
+        // However, we get a ReadableStream<any> now. This doesn't go into the
+        // `BodyInit` expected by the Response constructor, which wants a
+        // ReadableStream<Uint8Array>. Force a cast.
+        const webReadableStream =
+            webReadableStreamAny as ReadableStream<Uint8Array>;
 
-        // TODO(MR): when to call zip.close()
+        // Close the zip handle when the underlying stream closes.
+        // TODO(MR): Verify
+        stream.on("end", () => zip.close());
 
-        return new Response(Readable.toWeb(new Readable(stream)), {
+        return new Response(webReadableStream, {
             headers: {
                 // We don't know the exact type, but it doesn't really matter,
                 // just set it to a generic binary content-type so that the
