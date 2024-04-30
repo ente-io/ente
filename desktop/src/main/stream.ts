@@ -8,6 +8,7 @@ import fs from "node:fs/promises";
 import { Readable } from "node:stream";
 import { pathToFileURL } from "node:url";
 import log from "./log";
+import { ensure } from "./utils/common";
 
 /**
  * Register a protocol handler that we use for streaming large files between the
@@ -89,7 +90,7 @@ const handleRead = async (path: string) => {
         return res;
     } catch (e) {
         log.error(`Failed to read stream at ${path}`, e);
-        return new Response(`Failed to read stream: ${e.message}`, {
+        return new Response(`Failed to read stream: ${String(e)}`, {
             status: 500,
         });
     }
@@ -133,11 +134,11 @@ const handleReadZip = async (zipPath: string, entryName: string) => {
 
 const handleWrite = async (path: string, request: Request) => {
     try {
-        await writeStream(path, request.body);
+        await writeStream(path, ensure(request.body));
         return new Response("", { status: 200 });
     } catch (e) {
         log.error(`Failed to write stream to ${path}`, e);
-        return new Response(`Failed to write stream: ${e.message}`, {
+        return new Response(`Failed to write stream: ${String(e)}`, {
             status: 500,
         });
     }

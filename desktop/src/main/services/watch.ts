@@ -47,16 +47,15 @@ const eventData = (path: string): [string, FolderWatch] => {
     return [path, watch];
 };
 
-export const watchGet = (watcher: FSWatcher) => {
-    const [valid, deleted] = folderWatches().reduce(
-        ([valid, deleted], watch) => {
-            (fsIsDir(watch.folderPath) ? valid : deleted).push(watch);
-            return [valid, deleted];
-        },
-        [[], []],
-    );
-    if (deleted.length) {
-        for (const watch of deleted) watchRemove(watcher, watch.folderPath);
+export const watchGet = async (watcher: FSWatcher): Promise<FolderWatch[]> => {
+    const valid: FolderWatch[] = [];
+    const deletedPaths: string[] = [];
+    for (const watch of folderWatches()) {
+        if (await fsIsDir(watch.folderPath)) valid.push(watch);
+        else deletedPaths.push(watch.folderPath);
+    }
+    if (deletedPaths.length) {
+        await Promise.all(deletedPaths.map((p) => watchRemove(watcher, p)));
         setFolderWatches(valid);
     }
     return valid;
