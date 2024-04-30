@@ -12,7 +12,7 @@ export const setupAutoUpdater = (mainWindow: BrowserWindow) => {
     autoUpdater.autoDownload = false;
 
     const oneDay = 1 * 24 * 60 * 60 * 1000;
-    setInterval(() => checkForUpdatesAndNotify(mainWindow), oneDay);
+    setInterval(() => void checkForUpdatesAndNotify(mainWindow), oneDay);
     void checkForUpdatesAndNotify(mainWindow);
 };
 

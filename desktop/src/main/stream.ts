@@ -117,7 +117,7 @@ const handleReadZip = async (zipPath: string, entryName: string) => {
 
         // Close the zip handle when the underlying stream closes.
         // TODO(MR): Verify
-        stream.on("end", () => zip.close());
+        stream.on("end", () => void zip.close());
 
         return new Response(webReadableStream, {
             headers: {
@@ -173,17 +173,17 @@ export const writeStream = (filePath: string, readableStream: ReadableStream) =>
 const writeNodeStream = async (filePath: string, fileStream: Readable) => {
     const writeable = createWriteStream(filePath);
 
-    fileStream.on("error", (error) => {
-        writeable.destroy(error); // Close the writable stream with an error
+    fileStream.on("error", (err) => {
+        writeable.destroy(err); // Close the writable stream with an error
     });
 
     fileStream.pipe(writeable);
 
     await new Promise((resolve, reject) => {
         writeable.on("finish", resolve);
-        writeable.on("error", async (err: Error) => {
+        writeable.on("error", (err) => {
             if (existsSync(filePath)) {
-                await fs.unlink(filePath);
+                void fs.unlink(filePath);
             }
             reject(err);
         });

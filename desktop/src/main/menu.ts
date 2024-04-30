@@ -30,7 +30,7 @@ export const createApplicationMenu = async (mainWindow: BrowserWindow) => {
     const handleCheckForUpdates = () => forceCheckForAppUpdates(mainWindow);
 
     const handleViewChangelog = () =>
-        shell.openExternal(
+        void shell.openExternal(
             "https://github.com/ente-io/ente/blob/main/desktop/CHANGELOG.md",
         );
 
@@ -46,13 +46,15 @@ export const createApplicationMenu = async (mainWindow: BrowserWindow) => {
         shouldHideDockIcon = !shouldHideDockIcon;
     };
 
-    const handleHelp = () => shell.openExternal("https://help.ente.io/photos/");
+    const handleHelp = () =>
+        void shell.openExternal("https://help.ente.io/photos/");
 
-    const handleSupport = () => shell.openExternal("mailto:support@ente.io");
+    const handleSupport = () =>
+        void shell.openExternal("mailto:support@ente.io");
 
-    const handleBlog = () => shell.openExternal("https://ente.io/blog/");
+    const handleBlog = () => void shell.openExternal("https://ente.io/blog/");
 
-    const handleViewLogs = openLogDirectory;
+    const handleViewLogs = () => void openLogDirectory();
 
     return Menu.buildFromTemplate([
         {
