@@ -33,7 +33,5 @@ module.exports = {
                 ignoreArrowShorthand: true,
             },
         ],
-        /* Temporary (RIP) */
-        "@typescript-eslint/no-unsafe-return": "off",
     },
 };

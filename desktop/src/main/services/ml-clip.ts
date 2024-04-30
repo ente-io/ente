@@ -64,7 +64,7 @@ const getRGBData = async (jpegFilePath: string): Promise<number[]> => {
     const ny2 = 224;
     const totalSize = 3 * nx2 * ny2;
 
-    const result = Array(totalSize).fill(0);
+    const result = Array<number>(totalSize).fill(0);
     const scale = Math.max(nx, ny) / 224;
 
     const nx3 = Math.round(nx / scale);
