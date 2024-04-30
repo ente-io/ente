@@ -1133,8 +1133,11 @@ Future<(Float32List, List<AlignmentResult>, List<bool>, List<double>, Size)>
     alignedImageIndex += 3 * width * height;
     final grayscalems = blurDetectionStopwatch.elapsedMilliseconds;
     log('creating grayscale matrix took $grayscalems ms');
-    final (isBlur, blurValue) = await BlurDetectionService.instance
-        .predictIsBlurGrayLaplacian(faceGrayMatrix, faceDirection: face.getFaceDirection());
+    final (isBlur, blurValue) =
+        await BlurDetectionService.instance.predictIsBlurGrayLaplacian(
+      faceGrayMatrix,
+      faceDirection: face.getFaceDirection(),
+    );
     final blurms = blurDetectionStopwatch.elapsedMilliseconds - grayscalems;
     log('blur detection took $blurms ms');
     log(
@@ -1283,8 +1286,7 @@ Future<List<Uint8List>> generateFaceThumbnailsUsingCanvas(
   int i = 0;
 
   try {
-    final List<Uint8List> faceThumbnails = [];
-
+    final futureFaceThumbnails = <Future<Uint8List>>[];
     for (final faceBox in faceBoxes) {
       // Note that the faceBox values are relative to the image size, so we need to convert them to absolute values first
       final double xMinAbs = faceBox.xMin * img.width;
@@ -1292,26 +1294,45 @@ Future<List<Uint8List>> generateFaceThumbnailsUsingCanvas(
       final double widthAbs = faceBox.width * img.width;
       final double heightAbs = faceBox.height * img.height;
 
-      final Image faceThumbnail = await cropImageWithCanvas(
-        img,
-        x: xMinAbs - widthAbs / 2,
-        y: yMinAbs - heightAbs / 2,
-        width: widthAbs * 2,
-        height: heightAbs * 2,
+      futureFaceThumbnails.add(
+        cropAndEncodeCanvas(
+          img,
+          x: xMinAbs - widthAbs / 2,
+          y: yMinAbs - heightAbs / 2,
+          width: widthAbs * 2,
+          height: heightAbs * 2,
+        ),
       );
-      final Uint8List faceThumbnailPng = await encodeImageToUint8List(
-        faceThumbnail,
-        format: ImageByteFormat.png,
-      );
-      faceThumbnails.add(faceThumbnailPng);
       i++;
     }
+    final List<Uint8List> faceThumbnails =
+        await Future.wait(futureFaceThumbnails);
     return faceThumbnails;
   } catch (e) {
     log('[ImageMlUtils] Error generating face thumbnails: $e');
     log('[ImageMlUtils] cropImage problematic input argument: ${faceBoxes[i]}');
     return [];
   }
+}
+
+Future<Uint8List> cropAndEncodeCanvas(
+  Image image, {
+  required double x,
+  required double y,
+  required double width,
+  required double height,
+}) async {
+  final croppedImage = await cropImageWithCanvas(
+    image,
+    x: x,
+    y: y,
+    width: width,
+    height: height,
+  );
+  return await encodeImageToUint8List(
+    croppedImage,
+    format: ImageByteFormat.png,
+  );
 }
 
 @Deprecated('For second pass of BlazeFace, no longer used')
