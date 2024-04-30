@@ -41,6 +41,19 @@ export default function PairingMode() {
         init();
     }, []);
 
+    const init = async () => {
+        try {
+            const data = generateSecureData(6);
+            setDigits(convertDataToDecimalString(data).split(""));
+            const keypair = await generateKeyPair();
+            setPublicKeyB64(await toB64(keypair.publicKey));
+            setPrivateKeyB64(await toB64(keypair.privateKey));
+        } catch (e) {
+            log.error("failed to generate keypair", e);
+            throw e;
+        }
+    };
+
     useEffect(() => {
         if (!cast) {
             return;
@@ -99,19 +112,6 @@ export default function PairingMode() {
             );
         } catch (e) {
             log.error("failed to send message", e);
-        }
-    };
-
-    const init = async () => {
-        try {
-            const data = generateSecureData(6);
-            setDigits(convertDataToDecimalString(data).split(""));
-            const keypair = await generateKeyPair();
-            setPublicKeyB64(await toB64(keypair.publicKey));
-            setPrivateKeyB64(await toB64(keypair.privateKey));
-        } catch (e) {
-            log.error("failed to generate keypair", e);
-            throw e;
         }
     };
 
