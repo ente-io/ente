@@ -1294,13 +1294,19 @@ Future<List<Uint8List>> generateFaceThumbnailsUsingCanvas(
       final double widthAbs = faceBox.width * img.width;
       final double heightAbs = faceBox.height * img.height;
 
+      // Prevent the face from going out of image bounds
+      final int xCrop = (xMinAbs - widthAbs / 2).round().clamp(0, img.width);
+      final int yCrop = (yMinAbs - heightAbs / 2).round().clamp(0, img.height);
+      final int widthCrop = min((widthAbs * 2).round(), img.width - xCrop);
+      final int heightCrop = min((heightAbs * 2).round(), img.height - yCrop);
+
       futureFaceThumbnails.add(
         cropAndEncodeCanvas(
           img,
-          x: xMinAbs - widthAbs / 2,
-          y: yMinAbs - heightAbs / 2,
-          width: widthAbs * 2,
-          height: heightAbs * 2,
+          x: xCrop.toDouble(),
+          y: yCrop.toDouble(),
+          width: widthCrop.toDouble(),
+          height: heightCrop.toDouble(),
         ),
       );
       i++;
