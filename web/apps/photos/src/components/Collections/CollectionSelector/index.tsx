@@ -39,6 +39,7 @@ interface Props {
     collections: Collection[];
     collectionSummaries: CollectionSummaries;
 }
+
 function CollectionSelector({
     attributes,
     collectionSummaries,
@@ -46,7 +47,7 @@ function CollectionSelector({
     ...props
 }: Props) {
     const appContext = useContext(AppContext);
-
+    const [searchQuery, setSearchQuery] = useState("");
     const [collectionsToShow, setCollectionsToShow] = useState<
         CollectionSummary[]
     >([]);
@@ -81,6 +82,7 @@ function CollectionSelector({
                         return isMoveToAllowedCollection(type);
                     }
                 })
+
                 .sort((a, b) => {
                     return a.name.localeCompare(b.name);
                 })
@@ -89,15 +91,24 @@ function CollectionSelector({
                         COLLECTION_SORT_ORDER.get(a.type) -
                         COLLECTION_SORT_ORDER.get(b.type)
                     );
-                });
+                })
+                .filter((collection) =>
+                    collection.name
+                        .toLowerCase()
+                        .includes(searchQuery.toLowerCase()),
+                );
             if (collectionsToShow.length === 0) {
-                props.onClose();
-                attributes.showNextModal();
+                if (searchQuery !== "") {
+                    return console.log("No Albums with that name...");
+                } else {
+                    props.onClose();
+                    attributes.showNextModal();
+                }
             }
             setCollectionsToShow(collectionsToShow);
         };
         main();
-    }, [collectionSummaries, attributes, props.open]);
+    }, [collectionSummaries, attributes, props.open, searchQuery]);
 
     if (!collectionsToShow?.length) {
         return <></>;
@@ -121,6 +132,12 @@ function CollectionSelector({
         props.onClose();
     };
 
+    const handleSearchInputChange = (e) => {
+        if (e) {
+            setSearchQuery(e.target.value);
+        } else console.log("No collections to show.....");
+    };
+
     return (
         <AllCollectionDialog
             onClose={onUserTriggeredClose}
@@ -142,6 +159,17 @@ function CollectionSelector({
                             ? t("UNHIDE_TO_COLLECTION")
                             : t("SELECT_COLLECTION")}
             </DialogTitleWithCloseButton>
+            <input
+                style={{
+                    height: "50px",
+                    fontSize: "16px",
+                    borderRadius: "10px",
+                    margin: "10px",
+                }}
+                placeholder="Search Albums..."
+                value={searchQuery}
+                onChange={handleSearchInputChange}
+            />
             <DialogContent sx={{ "&&&": { padding: 0 } }}>
                 <FlexWrapper flexWrap="wrap" gap={"4px"} padding={"16px"}>
                     <AddCollectionButton
