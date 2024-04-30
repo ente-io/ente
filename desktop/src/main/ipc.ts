@@ -16,12 +16,19 @@ import type {
     PendingUploads,
     ZipItem,
 } from "../types/ipc";
+import { logToDisk } from "./log";
 import {
+    appVersion,
+    skipAppUpdate,
+    updateAndRestart,
+    updateOnNextRestart,
+} from "./services/app-update";
+import {
+    openDirectory,
+    openLogDirectory,
     selectDirectory,
-    showUploadDirsDialog,
-    showUploadFilesDialog,
-    showUploadZipDialog,
-} from "./dialogs";
+} from "./services/dir";
+import { ffmpegExec } from "./services/ffmpeg";
 import {
     fsExists,
     fsIsDir,
@@ -31,15 +38,7 @@ import {
     fsRm,
     fsRmdir,
     fsWriteFile,
-} from "./fs";
-import { logToDisk } from "./log";
-import {
-    appVersion,
-    skipAppUpdate,
-    updateAndRestart,
-    updateOnNextRestart,
-} from "./services/app-update";
-import { ffmpegExec } from "./services/ffmpeg";
+} from "./services/fs";
 import { convertToJPEG, generateImageThumbnail } from "./services/image";
 import {
     clipImageEmbedding,
@@ -68,7 +67,6 @@ import {
     watchUpdateIgnoredFiles,
     watchUpdateSyncedFiles,
 } from "./services/watch";
-import { openDirectory, openLogDirectory } from "./utils-electron";
 
 /**
  * Listen for IPC events sent/invoked by the renderer process, and route them to
@@ -95,16 +93,20 @@ export const attachIPCHandlers = () => {
 
     ipcMain.handle("appVersion", () => appVersion());
 
-    ipcMain.handle("openDirectory", (_, dirPath) => openDirectory(dirPath));
+    ipcMain.handle("openDirectory", (_, dirPath: string) =>
+        openDirectory(dirPath),
+    );
 
     ipcMain.handle("openLogDirectory", () => openLogDirectory());
 
     // See [Note: Catching exception during .send/.on]
-    ipcMain.on("logToDisk", (_, message) => logToDisk(message));
+    ipcMain.on("logToDisk", (_, message: string) => logToDisk(message));
+
+    ipcMain.handle("selectDirectory", () => selectDirectory());
 
     ipcMain.on("clearStores", () => clearStores());
 
-    ipcMain.handle("saveEncryptionKey", (_, encryptionKey) =>
+    ipcMain.handle("saveEncryptionKey", (_, encryptionKey: string) =>
         saveEncryptionKey(encryptionKey),
     );
 
@@ -114,21 +116,23 @@ export const attachIPCHandlers = () => {
 
     ipcMain.on("updateAndRestart", () => updateAndRestart());
 
-    ipcMain.on("updateOnNextRestart", (_, version) =>
+    ipcMain.on("updateOnNextRestart", (_, version: string) =>
         updateOnNextRestart(version),
     );
 
-    ipcMain.on("skipAppUpdate", (_, version) => skipAppUpdate(version));
+    ipcMain.on("skipAppUpdate", (_, version: string) => skipAppUpdate(version));
 
     // - FS
 
-    ipcMain.handle("fsExists", (_, path) => fsExists(path));
+    ipcMain.handle("fsExists", (_, path: string) => fsExists(path));
 
     ipcMain.handle("fsRename", (_, oldPath: string, newPath: string) =>
         fsRename(oldPath, newPath),
     );
 
-    ipcMain.handle("fsMkdirIfNeeded", (_, dirPath) => fsMkdirIfNeeded(dirPath));
+    ipcMain.handle("fsMkdirIfNeeded", (_, dirPath: string) =>
+        fsMkdirIfNeeded(dirPath),
+    );
 
     ipcMain.handle("fsRmdir", (_, path: string) => fsRmdir(path));
 
@@ -192,16 +196,6 @@ export const attachIPCHandlers = () => {
     ipcMain.handle("faceEmbedding", (_, input: Float32Array) =>
         faceEmbedding(input),
     );
-
-    // - File selection
-
-    ipcMain.handle("selectDirectory", () => selectDirectory());
-
-    ipcMain.handle("showUploadFilesDialog", () => showUploadFilesDialog());
-
-    ipcMain.handle("showUploadDirsDialog", () => showUploadDirsDialog());
-
-    ipcMain.handle("showUploadZipDialog", () => showUploadZipDialog());
 
     // - Upload
 

@@ -2,13 +2,13 @@ import pathToFfmpeg from "ffmpeg-static";
 import fs from "node:fs/promises";
 import type { ZipItem } from "../../types/ipc";
 import log from "../log";
-import { withTimeout } from "../utils";
-import { execAsync } from "../utils-electron";
+import { ensure, withTimeout } from "../utils/common";
+import { execAsync } from "../utils/electron";
 import {
     deleteTempFile,
     makeFileForDataOrPathOrZipItem,
     makeTempFilePath,
-} from "../utils-temp";
+} from "../utils/temp";
 
 /* Duplicated in the web app's code (used by the WASM FFmpeg implementation). */
 const ffmpegPathPlaceholder = "FFMPEG";
@@ -110,5 +110,5 @@ const ffmpegBinaryPath = () => {
     // This substitution of app.asar by app.asar.unpacked is suggested by the
     // ffmpeg-static library author themselves:
     // https://github.com/eugeneware/ffmpeg-static/issues/16
-    return pathToFfmpeg.replace("app.asar", "app.asar.unpacked");
+    return ensure(pathToFfmpeg).replace("app.asar", "app.asar.unpacked");
 };

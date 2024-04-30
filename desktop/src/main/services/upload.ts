@@ -1,10 +1,9 @@
 import StreamZip from "node-stream-zip";
 import fs from "node:fs/promises";
+import path from "node:path";
 import { existsSync } from "original-fs";
-import path from "path";
-import type { ElectronFile, PendingUploads, ZipItem } from "../../types/ipc";
+import type { PendingUploads, ZipItem } from "../../types/ipc";
 import { uploadStatusStore } from "../stores/upload-status";
-import { getZipFileStream } from "./fs";
 
 export const listZipItems = async (zipPath: string): Promise<ZipItem[]> => {
     const zip = new StreamZip.async({ file: zipPath });
@@ -15,13 +14,13 @@ export const listZipItems = async (zipPath: string): Promise<ZipItem[]> => {
     for (const entry of Object.values(entries)) {
         const basename = path.basename(entry.name);
         // Ignore "hidden" files (files whose names begins with a dot).
-        if (entry.isFile && basename.length > 0 && basename[0] != ".") {
+        if (entry.isFile && basename.startsWith(".")) {
             // `entry.name` is the path within the zip.
             entryNames.push(entry.name);
         }
     }
 
-    zip.close();
+    await zip.close();
 
     return entryNames.map((entryName) => [zipPath, entryName]);
 };
@@ -36,8 +35,12 @@ export const pathOrZipItemSize = async (
         const [zipPath, entryName] = pathOrZipItem;
         const zip = new StreamZip.async({ file: zipPath });
         const entry = await zip.entry(entryName);
+        if (!entry)
+            throw new Error(
+                `An entry with name ${entryName} does not exist in the zip file at ${zipPath}`,
+            );
         const size = entry.size;
-        zip.close();
+        await zip.close();
         return size;
     }
 };
@@ -61,7 +64,7 @@ export const pendingUploads = async (): Promise<PendingUploads | undefined> => {
     // file, but the dedup logic will kick in at that point so no harm will come
     // off it.
     if (allZipItems === undefined) {
-        const allZipPaths = uploadStatusStore.get("filePaths");
+        const allZipPaths = uploadStatusStore.get("filePaths") ?? [];
         const zipPaths = allZipPaths.filter((f) => existsSync(f));
         zipItems = [];
         for (const zip of zipPaths)
@@ -79,71 +82,23 @@ export const pendingUploads = async (): Promise<PendingUploads | undefined> => {
     };
 };
 
-export const setPendingUploads = async (pendingUploads: PendingUploads) =>
+export const setPendingUploads = (pendingUploads: PendingUploads) =>
     uploadStatusStore.set(pendingUploads);
 
-export const markUploadedFiles = async (paths: string[]) => {
+export const markUploadedFiles = (paths: string[]) => {
     const existing = uploadStatusStore.get("filePaths");
-    const updated = existing.filter((p) => !paths.includes(p));
+    const updated = existing?.filter((p) => !paths.includes(p));
     uploadStatusStore.set("filePaths", updated);
 };
 
-export const markUploadedZipItems = async (
+export const markUploadedZipItems = (
     items: [zipPath: string, entryName: string][],
 ) => {
     const existing = uploadStatusStore.get("zipItems");
-    const updated = existing.filter(
+    const updated = existing?.filter(
         (z) => !items.some((e) => z[0] == e[0] && z[1] == e[1]),
     );
     uploadStatusStore.set("zipItems", updated);
 };
 
 export const clearPendingUploads = () => uploadStatusStore.clear();
-
-export const getElectronFilesFromGoogleZip = async (filePath: string) => {
-    const zip = new StreamZip.async({
-        file: filePath,
-    });
-    const zipName = path.basename(filePath, ".zip");
-
-    const entries = await zip.entries();
-    const files: ElectronFile[] = [];
-
-    for (const entry of Object.values(entries)) {
-        const basename = path.basename(entry.name);
-        if (entry.isFile && basename.length > 0 && basename[0] !== ".") {
-            files.push(await getZipEntryAsElectronFile(zipName, zip, entry));
-        }
-    }
-
-    zip.close();
-
-    return files;
-};
-
-export async function getZipEntryAsElectronFile(
-    zipName: string,
-    zip: StreamZip.StreamZipAsync,
-    entry: StreamZip.ZipEntry,
-): Promise<ElectronFile> {
-    return {
-        path: path
-            .join(zipName, entry.name)
-            .split(path.sep)
-            .join(path.posix.sep),
-        name: path.basename(entry.name),
-        size: entry.size,
-        lastModified: entry.time,
-        stream: async () => {
-            return await getZipFileStream(zip, entry.name);
-        },
-        blob: async () => {
-            const buffer = await zip.entryData(entry.name);
-            return new Blob([new Uint8Array(buffer)]);
-        },
-        arrayBuffer: async () => {
-            const buffer = await zip.entryData(entry.name);
-            return new Uint8Array(buffer);
-        },
-    };
-}

@@ -26,7 +26,7 @@ import { createWatcher } from "./main/services/watch";
 import { userPreferences } from "./main/stores/user-preferences";
 import { migrateLegacyWatchStoreIfNeeded } from "./main/stores/watch";
 import { registerStreamProtocol } from "./main/stream";
-import { isDev } from "./main/utils-electron";
+import { isDev } from "./main/utils/electron";
 
 /**
  * The URL where the renderer HTML is being served from.
@@ -142,35 +142,11 @@ const registerPrivilegedSchemes = () => {
 };
 
 /**
- * [Note: Increased disk cache for the desktop app]
- *
- * Set the "disk-cache-size" command line flag to ask the Chromium process to
- * use a larger size for the caches that it keeps on disk. This allows us to use
- * the web based caching mechanisms on both the web and the desktop app, just
- * ask the embedded Chromium to be a bit more generous in disk usage when
- * running as the desktop app.
- *
- * The size we provide is in bytes.
- * https://www.electronjs.org/docs/latest/api/command-line-switches#--disk-cache-sizesize
- *
- * Note that increasing the disk cache size does not guarantee that Chromium
- * will respect in verbatim, it uses its own heuristics atop this hint.
- * https://superuser.com/questions/378991/what-is-chrome-default-cache-size-limit/1577693#1577693
- *
- * See also: [Note: Caching files].
- */
-const increaseDiskCache = () =>
-    app.commandLine.appendSwitch(
-        "disk-cache-size",
-        `${5 * 1024 * 1024 * 1024}`, // 5 GB
-    );
-
-/**
  * Create an return the {@link BrowserWindow} that will form our app's UI.
  *
  * This window will show the HTML served from {@link rendererURL}.
  */
-const createMainWindow = async () => {
+const createMainWindow = () => {
     // Create the main window. This'll show our web content.
     const window = new BrowserWindow({
         webPreferences: {
@@ -184,7 +160,7 @@ const createMainWindow = async () => {
         show: false,
     });
 
-    const wasAutoLaunched = await autoLauncher.wasAutoLaunched();
+    const wasAutoLaunched = autoLauncher.wasAutoLaunched();
     if (wasAutoLaunched) {
         // Don't automatically show the app's window if we were auto-launched.
         // On macOS, also hide the dock icon on macOS.
@@ -198,7 +174,7 @@ const createMainWindow = async () => {
     if (isDev) window.webContents.openDevTools();
 
     window.webContents.on("render-process-gone", (_, details) => {
-        log.error(`render-process-gone: ${details}`);
+        log.error(`render-process-gone: ${details.reason}`);
         window.webContents.reload();
     });
 
@@ -227,7 +203,7 @@ const createMainWindow = async () => {
     });
 
     window.on("show", () => {
-        if (process.platform == "darwin") app.dock.show();
+        if (process.platform == "darwin") void app.dock.show();
     });
 
     // Let ipcRenderer know when mainWindow is in the foreground so that it can
@@ -281,7 +257,7 @@ export const allowExternalLinks = (webContents: WebContents) => {
     // Returning `action` "deny" accomplishes this.
     webContents.setWindowOpenHandler(({ url }) => {
         if (!url.startsWith(rendererURL)) {
-            shell.openExternal(url);
+            void shell.openExternal(url);
             return { action: "deny" };
         } else {
             return { action: "allow" };
@@ -321,24 +297,24 @@ const setupTrayItem = (mainWindow: BrowserWindow) => {
  * Older versions of our app used to maintain a cache dir using the main
  * process. This has been deprecated in favor of using a normal web cache.
  *
- * See [Note: Increased disk cache for the desktop app]
- *
  * Delete the old cache dir if it exists. This code was added March 2024, and
  * can be removed after some time once most people have upgraded to newer
  * versions.
  */
 const deleteLegacyDiskCacheDirIfExists = async () => {
-    // The existing code was passing "cache" as a parameter to getPath. This is
-    // incorrect if we go by the types - "cache" is not a valid value for the
-    // parameter to `app.getPath`.
+    // The existing code was passing "cache" as a parameter to getPath.
     //
-    // It might be an issue in the types, since at runtime it seems to work. For
-    // example, on macOS I get `~/Library/Caches`.
+    // However, "cache" is not a valid parameter to getPath. It works! (for
+    // example, on macOS I get `~/Library/Caches`), but it is intentionally not
+    // documented as part of the public API:
+    //
+    // - docs: remove "cache" from app.getPath
+    //   https://github.com/electron/electron/pull/33509
     //
     // Irrespective, we replicate the original behaviour so that we get back the
-    // same path that the old got was getting.
+    // same path that the old code was getting.
     //
-    // @ts-expect-error
+    // @ts-expect-error "cache" works but is not part of the public API.
     const cacheDir = path.join(app.getPath("cache"), "ente");
     if (existsSync(cacheDir)) {
         log.info(`Removing legacy disk cache from ${cacheDir}`);
@@ -375,7 +351,6 @@ const main = () => {
     // The order of the next two calls is important
     setupRendererServer();
     registerPrivilegedSchemes();
-    increaseDiskCache();
     migrateLegacyWatchStoreIfNeeded();
 
     app.on("second-instance", () => {
@@ -390,39 +365,35 @@ const main = () => {
     // Emitted once, when Electron has finished initializing.
     //
     // Note that some Electron APIs can only be used after this event occurs.
-    app.on("ready", async () => {
-        // Create window and prepare for the renderer.
-        mainWindow = await createMainWindow();
-        attachIPCHandlers();
-        attachFSWatchIPCHandlers(createWatcher(mainWindow));
-        registerStreamProtocol();
+    void app.whenReady().then(() => {
+        void (async () => {
+            // Create window and prepare for the renderer.
+            mainWindow = createMainWindow();
+            attachIPCHandlers();
+            attachFSWatchIPCHandlers(createWatcher(mainWindow));
+            registerStreamProtocol();
 
-        // Configure the renderer's environment.
-        setDownloadPath(mainWindow.webContents);
-        allowExternalLinks(mainWindow.webContents);
+            // Configure the renderer's environment.
+            setDownloadPath(mainWindow.webContents);
+            allowExternalLinks(mainWindow.webContents);
 
-        // TODO(MR): Remove or resurrect
-        // The commit that introduced this header override had the message
-        // "fix cors issue for uploads". Not sure what that means, so disabling
-        // it for now to see why exactly this is required.
-        // addAllowOriginHeader(mainWindow);
+            // Start loading the renderer.
+            void mainWindow.loadURL(rendererURL);
 
-        // Start loading the renderer.
-        mainWindow.loadURL(rendererURL);
+            // Continue on with the rest of the startup sequence.
+            Menu.setApplicationMenu(await createApplicationMenu(mainWindow));
+            setupTrayItem(mainWindow);
+            if (!isDev) setupAutoUpdater(mainWindow);
 
-        // Continue on with the rest of the startup sequence.
-        Menu.setApplicationMenu(await createApplicationMenu(mainWindow));
-        setupTrayItem(mainWindow);
-        if (!isDev) setupAutoUpdater(mainWindow);
-
-        try {
-            deleteLegacyDiskCacheDirIfExists();
-            deleteLegacyKeysStoreIfExists();
-        } catch (e) {
-            // Log but otherwise ignore errors during non-critical startup
-            // actions.
-            log.error("Ignoring startup error", e);
-        }
+            try {
+                await deleteLegacyDiskCacheDirIfExists();
+                await deleteLegacyKeysStoreIfExists();
+            } catch (e) {
+                // Log but otherwise ignore errors during non-critical startup
+                // actions.
+                log.error("Ignoring startup error", e);
+            }
+        })();
     });
 
     // This is a macOS only event. Show our window when the user activates the

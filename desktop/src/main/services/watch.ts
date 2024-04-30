@@ -3,9 +3,10 @@ import { BrowserWindow } from "electron/main";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { FolderWatch, type CollectionMapping } from "../../types/ipc";
-import { fsIsDir } from "../fs";
 import log from "../log";
 import { watchStore } from "../stores/watch";
+import { posixPath } from "../utils/electron";
+import { fsIsDir } from "./fs";
 
 /**
  * Create and return a new file system watcher.
@@ -46,23 +47,15 @@ const eventData = (path: string): [string, FolderWatch] => {
     return [path, watch];
 };
 
-/**
- * Convert a file system {@link filePath} that uses the local system specific
- * path separators into a path that uses POSIX file separators.
- */
-const posixPath = (filePath: string) =>
-    filePath.split(path.sep).join(path.posix.sep);
-
-export const watchGet = (watcher: FSWatcher) => {
-    const [valid, deleted] = folderWatches().reduce(
-        ([valid, deleted], watch) => {
-            (fsIsDir(watch.folderPath) ? valid : deleted).push(watch);
-            return [valid, deleted];
-        },
-        [[], []],
-    );
-    if (deleted.length) {
-        for (const watch of deleted) watchRemove(watcher, watch.folderPath);
+export const watchGet = async (watcher: FSWatcher): Promise<FolderWatch[]> => {
+    const valid: FolderWatch[] = [];
+    const deletedPaths: string[] = [];
+    for (const watch of folderWatches()) {
+        if (await fsIsDir(watch.folderPath)) valid.push(watch);
+        else deletedPaths.push(watch.folderPath);
+    }
+    if (deletedPaths.length) {
+        await Promise.all(deletedPaths.map((p) => watchRemove(watcher, p)));
         setFolderWatches(valid);
     }
     return valid;
@@ -80,7 +73,7 @@ export const watchAdd = async (
 ) => {
     const watches = folderWatches();
 
-    if (!fsIsDir(folderPath))
+    if (!(await fsIsDir(folderPath)))
         throw new Error(
             `Attempting to add a folder watch for a folder path ${folderPath} that is not an existing directory`,
         );
@@ -104,7 +97,7 @@ export const watchAdd = async (
     return watches;
 };
 
-export const watchRemove = async (watcher: FSWatcher, folderPath: string) => {
+export const watchRemove = (watcher: FSWatcher, folderPath: string) => {
     const watches = folderWatches();
     const filtered = watches.filter((watch) => watch.folderPath != folderPath);
     if (watches.length == filtered.length)

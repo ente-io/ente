@@ -1,28 +1,5 @@
 import { useCallback, useRef, useState } from "react";
 
-/**
- * [Note: File paths when running under Electron]
- *
- * We have access to the absolute path of the web {@link File} object when we
- * are running in the context of our desktop app.
- *
- * https://www.electronjs.org/docs/latest/api/file-object
- *
- * This is in contrast to the `webkitRelativePath` that we get when we're
- * running in the browser, which is the relative path to the directory that the
- * user selected (or just the name of the file if the user selected or
- * drag/dropped a single one).
- *
- * Note that this is a deprecated approach. From Electron docs:
- *
- * > Warning: The path property that Electron adds to the File interface is
- * > deprecated and will be removed in a future Electron release. We recommend
- * > you use `webUtils.getPathForFile` instead.
- */
-export interface FileWithPath extends File {
-    readonly path?: string;
-}
-
 interface UseFileInputParams {
     directory?: boolean;
     accept?: string;
@@ -72,19 +49,31 @@ export default function useFileInput({
         event,
     ) => {
         if (!!event.target && !!event.target.files) {
-            const files = [...event.target.files].map((file) =>
-                toFileWithPath(file),
-            );
-            setSelectedFiles(files);
+            setSelectedFiles([...event.target.files]);
         }
     };
+
+    // [Note: webkitRelativePath]
+    //
+    // If the webkitdirectory attribute of an <input> HTML element is set then
+    // the File objects that we get will have `webkitRelativePath` property
+    // containing the relative path to the selected directory.
+    //
+    // https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement/webkitdirectory
+    //
+    // These paths use the POSIX path separator ("/").
+    // https://stackoverflow.com/questions/62806233/when-using-webkitrelativepath-is-the-path-separator-operating-system-specific
+    //
+    const directoryOpts = directory
+        ? { directory: "", webkitdirectory: "" }
+        : {};
 
     const getInputProps = useCallback(
         () => ({
             type: "file",
             multiple: true,
             style: { display: "none" },
-            ...(directory ? { directory: "", webkitdirectory: "" } : {}),
+            ...directoryOpts,
             ref: inputRef,
             onChange: handleChange,
             ...(accept ? { accept } : {}),
@@ -97,27 +86,4 @@ export default function useFileInput({
         open: openSelectorDialog,
         selectedFiles: selectedFiles,
     };
-}
-
-// https://github.com/react-dropzone/file-selector/blob/master/src/file.ts#L88
-export function toFileWithPath(file: File, path?: string): FileWithPath {
-    if (typeof (file as any).path !== "string") {
-        // on electron, path is already set to the absolute path
-        const { webkitRelativePath } = file;
-        Object.defineProperty(file, "path", {
-            value:
-                typeof path === "string"
-                    ? path
-                    : typeof webkitRelativePath === "string" && // If <input webkitdirectory> is set,
-                        // the File will have a {webkitRelativePath} property
-                        // https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement/webkitdirectory
-                        webkitRelativePath.length > 0
-                      ? webkitRelativePath
-                      : file.name,
-            writable: false,
-            configurable: false,
-            enumerable: true,
-        });
-    }
-    return file;
 }

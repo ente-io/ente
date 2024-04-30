@@ -1,15 +1,15 @@
 /** @file Image format conversions and thumbnail generation */
 
 import fs from "node:fs/promises";
-import path from "path";
+import path from "node:path";
 import { CustomErrorMessage, type ZipItem } from "../../types/ipc";
 import log from "../log";
-import { execAsync, isDev } from "../utils-electron";
+import { execAsync, isDev } from "../utils/electron";
 import {
     deleteTempFile,
     makeFileForDataOrPathOrZipItem,
     makeTempFilePath,
-} from "../utils-temp";
+} from "../utils/temp";
 
 export const convertToJPEG = async (imageData: Uint8Array) => {
     const inputFilePath = await makeTempFilePath();

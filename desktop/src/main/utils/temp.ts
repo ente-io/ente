@@ -2,8 +2,9 @@ import { app } from "electron/main";
 import StreamZip from "node-stream-zip";
 import { existsSync } from "node:fs";
 import fs from "node:fs/promises";
-import path from "path";
-import type { ZipItem } from "../types/ipc";
+import path from "node:path";
+import type { ZipItem } from "../../types/ipc";
+import { ensure } from "./common";
 
 /**
  * Our very own directory within the system temp directory. Go crazy, but
@@ -17,13 +18,10 @@ const enteTempDirPath = async () => {
 
 /** Generate a random string suitable for being used as a file name prefix */
 const randomPrefix = () => {
-    const alphabet =
-        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    const ch = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    const randomChar = () => ensure(ch[Math.floor(Math.random() * ch.length)]);
 
-    let result = "";
-    for (let i = 0; i < 10; i++)
-        result += alphabet[Math.floor(Math.random() * alphabet.length)];
-    return result;
+    return Array(10).fill("").map(randomChar).join("");
 };
 
 /**
@@ -76,15 +74,14 @@ interface FileForDataOrPathOrZipItem {
      */
     isFileTemporary: boolean;
     /**
-     * If set, this'll be a function that can be called to actually write the
-     * contents of the source `Uint8Array | string | ZipItem` into the file at
-     * {@link path}.
+     * A function that can be called to actually write the contents of the
+     * source `Uint8Array | string | ZipItem` into the file at {@link path}.
      *
-     * It will be undefined if the source is already a path since nothing needs
-     * to be written in that case. In the other two cases this function will
-     * write the data or zip item into the file at {@link path}.
+     * It will do nothing in the case when the source is already a path. In the
+     * other two cases this function will write the data or zip item into the
+     * file at {@link path}.
      */
-    writeToTemporaryFile?: () => Promise<void>;
+    writeToTemporaryFile: () => Promise<void>;
 }
 
 /**
@@ -101,7 +98,9 @@ export const makeFileForDataOrPathOrZipItem = async (
 ): Promise<FileForDataOrPathOrZipItem> => {
     let path: string;
     let isFileTemporary: boolean;
-    let writeToTemporaryFile: () => Promise<void> | undefined;
+    let writeToTemporaryFile = async () => {
+        /* no-op */
+    };
 
     if (typeof dataOrPathOrZipItem == "string") {
         path = dataOrPathOrZipItem;
@@ -117,7 +116,7 @@ export const makeFileForDataOrPathOrZipItem = async (
                 const [zipPath, entryName] = dataOrPathOrZipItem;
                 const zip = new StreamZip.async({ file: zipPath });
                 await zip.extract(entryName, path);
-                zip.close();
+                await zip.close();
             };
         }
     }

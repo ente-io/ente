@@ -15,8 +15,8 @@
         "dev-main": "tsc && electron app/main.js",
         "dev-renderer": "cd ../web && yarn install && yarn dev:photos",
         "postinstall": "electron-builder install-app-deps",
-        "lint": "yarn prettier --check . && eslint --ext .ts src",
-        "lint-fix": "yarn prettier --write . && eslint --fix --ext .ts src"
+        "lint": "yarn prettier --check . && eslint --ext .ts src && yarn tsc",
+        "lint-fix": "yarn prettier --write . && eslint --fix --ext .ts src && yarn tsc"
     },
     "dependencies": {
         "any-shell-escape": "^0.1",
@@ -34,6 +34,7 @@
         "onnxruntime-node": "^1.17"
     },
     "devDependencies": {
+        "@tsconfig/node20": "^20.1.4",
         "@types/auto-launch": "^5.0",
         "@types/ffmpeg-static": "^3.0",
         "@typescript-eslint/eslint-plugin": "^7",

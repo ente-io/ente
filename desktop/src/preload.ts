@@ -44,7 +44,6 @@ import { contextBridge, ipcRenderer, webUtils } from "electron/renderer";
 import type {
     AppUpdate,
     CollectionMapping,
-    ElectronFile,
     FolderWatch,
     PendingUploads,
     ZipItem,
@@ -52,23 +51,23 @@ import type {
 
 // - General
 
-const appVersion = (): Promise<string> => ipcRenderer.invoke("appVersion");
+const appVersion = () => ipcRenderer.invoke("appVersion");
 
 const logToDisk = (message: string): void =>
     ipcRenderer.send("logToDisk", message);
 
-const openDirectory = (dirPath: string): Promise<void> =>
+const openDirectory = (dirPath: string) =>
     ipcRenderer.invoke("openDirectory", dirPath);
 
-const openLogDirectory = (): Promise<void> =>
-    ipcRenderer.invoke("openLogDirectory");
+const openLogDirectory = () => ipcRenderer.invoke("openLogDirectory");
+
+const selectDirectory = () => ipcRenderer.invoke("selectDirectory");
 
 const clearStores = () => ipcRenderer.send("clearStores");
 
-const encryptionKey = (): Promise<string | undefined> =>
-    ipcRenderer.invoke("encryptionKey");
+const encryptionKey = () => ipcRenderer.invoke("encryptionKey");
 
-const saveEncryptionKey = (encryptionKey: string): Promise<void> =>
+const saveEncryptionKey = (encryptionKey: string) =>
     ipcRenderer.invoke("saveEncryptionKey", encryptionKey);
 
 const onMainWindowFocus = (cb?: () => void) => {
@@ -100,39 +99,36 @@ const skipAppUpdate = (version: string) => {
 
 // - FS
 
-const fsExists = (path: string): Promise<boolean> =>
-    ipcRenderer.invoke("fsExists", path);
+const fsExists = (path: string) => ipcRenderer.invoke("fsExists", path);
 
-const fsMkdirIfNeeded = (dirPath: string): Promise<void> =>
+const fsMkdirIfNeeded = (dirPath: string) =>
     ipcRenderer.invoke("fsMkdirIfNeeded", dirPath);
 
-const fsRename = (oldPath: string, newPath: string): Promise<void> =>
+const fsRename = (oldPath: string, newPath: string) =>
     ipcRenderer.invoke("fsRename", oldPath, newPath);
 
-const fsRmdir = (path: string): Promise<void> =>
-    ipcRenderer.invoke("fsRmdir", path);
+const fsRmdir = (path: string) => ipcRenderer.invoke("fsRmdir", path);
 
-const fsRm = (path: string): Promise<void> => ipcRenderer.invoke("fsRm", path);
+const fsRm = (path: string) => ipcRenderer.invoke("fsRm", path);
 
-const fsReadTextFile = (path: string): Promise<string> =>
+const fsReadTextFile = (path: string) =>
     ipcRenderer.invoke("fsReadTextFile", path);
 
-const fsWriteFile = (path: string, contents: string): Promise<void> =>
+const fsWriteFile = (path: string, contents: string) =>
     ipcRenderer.invoke("fsWriteFile", path, contents);
 
-const fsIsDir = (dirPath: string): Promise<boolean> =>
-    ipcRenderer.invoke("fsIsDir", dirPath);
+const fsIsDir = (dirPath: string) => ipcRenderer.invoke("fsIsDir", dirPath);
 
 // - Conversion
 
-const convertToJPEG = (imageData: Uint8Array): Promise<Uint8Array> =>
+const convertToJPEG = (imageData: Uint8Array) =>
     ipcRenderer.invoke("convertToJPEG", imageData);
 
 const generateImageThumbnail = (
     dataOrPathOrZipItem: Uint8Array | string | ZipItem,
     maxDimension: number,
     maxSize: number,
-): Promise<Uint8Array> =>
+) =>
     ipcRenderer.invoke(
         "generateImageThumbnail",
         dataOrPathOrZipItem,
@@ -145,7 +141,7 @@ const ffmpegExec = (
     dataOrPathOrZipItem: Uint8Array | string | ZipItem,
     outputFileExtension: string,
     timeoutMS: number,
-): Promise<Uint8Array> =>
+) =>
     ipcRenderer.invoke(
         "ffmpegExec",
         command,
@@ -156,62 +152,37 @@ const ffmpegExec = (
 
 // - ML
 
-const clipImageEmbedding = (jpegImageData: Uint8Array): Promise<Float32Array> =>
+const clipImageEmbedding = (jpegImageData: Uint8Array) =>
     ipcRenderer.invoke("clipImageEmbedding", jpegImageData);
 
-const clipTextEmbeddingIfAvailable = (
-    text: string,
-): Promise<Float32Array | undefined> =>
+const clipTextEmbeddingIfAvailable = (text: string) =>
     ipcRenderer.invoke("clipTextEmbeddingIfAvailable", text);
 
-const detectFaces = (input: Float32Array): Promise<Float32Array> =>
+const detectFaces = (input: Float32Array) =>
     ipcRenderer.invoke("detectFaces", input);
 
-const faceEmbedding = (input: Float32Array): Promise<Float32Array> =>
+const faceEmbedding = (input: Float32Array) =>
     ipcRenderer.invoke("faceEmbedding", input);
-
-// - File selection
-
-// TODO: Deprecated - use dialogs on the renderer process itself
-
-const selectDirectory = (): Promise<string> =>
-    ipcRenderer.invoke("selectDirectory");
-
-const showUploadFilesDialog = (): Promise<ElectronFile[]> =>
-    ipcRenderer.invoke("showUploadFilesDialog");
-
-const showUploadDirsDialog = (): Promise<ElectronFile[]> =>
-    ipcRenderer.invoke("showUploadDirsDialog");
-
-const showUploadZipDialog = (): Promise<{
-    zipPaths: string[];
-    files: ElectronFile[];
-}> => ipcRenderer.invoke("showUploadZipDialog");
 
 // - Watch
 
-const watchGet = (): Promise<FolderWatch[]> => ipcRenderer.invoke("watchGet");
+const watchGet = () => ipcRenderer.invoke("watchGet");
 
-const watchAdd = (
-    folderPath: string,
-    collectionMapping: CollectionMapping,
-): Promise<FolderWatch[]> =>
+const watchAdd = (folderPath: string, collectionMapping: CollectionMapping) =>
     ipcRenderer.invoke("watchAdd", folderPath, collectionMapping);
 
-const watchRemove = (folderPath: string): Promise<FolderWatch[]> =>
+const watchRemove = (folderPath: string) =>
     ipcRenderer.invoke("watchRemove", folderPath);
 
 const watchUpdateSyncedFiles = (
     syncedFiles: FolderWatch["syncedFiles"],
     folderPath: string,
-): Promise<void> =>
-    ipcRenderer.invoke("watchUpdateSyncedFiles", syncedFiles, folderPath);
+) => ipcRenderer.invoke("watchUpdateSyncedFiles", syncedFiles, folderPath);
 
 const watchUpdateIgnoredFiles = (
     ignoredFiles: FolderWatch["ignoredFiles"],
     folderPath: string,
-): Promise<void> =>
-    ipcRenderer.invoke("watchUpdateIgnoredFiles", ignoredFiles, folderPath);
+) => ipcRenderer.invoke("watchUpdateIgnoredFiles", ignoredFiles, folderPath);
 
 const watchOnAddFile = (f: (path: string, watch: FolderWatch) => void) => {
     ipcRenderer.removeAllListeners("watchAddFile");
@@ -234,34 +205,31 @@ const watchOnRemoveDir = (f: (path: string, watch: FolderWatch) => void) => {
     );
 };
 
-const watchFindFiles = (folderPath: string): Promise<string[]> =>
+const watchFindFiles = (folderPath: string) =>
     ipcRenderer.invoke("watchFindFiles", folderPath);
 
 // - Upload
 
 const pathForFile = (file: File) => webUtils.getPathForFile(file);
 
-const listZipItems = (zipPath: string): Promise<ZipItem[]> =>
+const listZipItems = (zipPath: string) =>
     ipcRenderer.invoke("listZipItems", zipPath);
 
-const pathOrZipItemSize = (pathOrZipItem: string | ZipItem): Promise<number> =>
+const pathOrZipItemSize = (pathOrZipItem: string | ZipItem) =>
     ipcRenderer.invoke("pathOrZipItemSize", pathOrZipItem);
 
-const pendingUploads = (): Promise<PendingUploads | undefined> =>
-    ipcRenderer.invoke("pendingUploads");
+const pendingUploads = () => ipcRenderer.invoke("pendingUploads");
 
-const setPendingUploads = (pendingUploads: PendingUploads): Promise<void> =>
+const setPendingUploads = (pendingUploads: PendingUploads) =>
     ipcRenderer.invoke("setPendingUploads", pendingUploads);
 
-const markUploadedFiles = (paths: PendingUploads["filePaths"]): Promise<void> =>
+const markUploadedFiles = (paths: PendingUploads["filePaths"]) =>
     ipcRenderer.invoke("markUploadedFiles", paths);
 
-const markUploadedZipItems = (
-    items: PendingUploads["zipItems"],
-): Promise<void> => ipcRenderer.invoke("markUploadedZipItems", items);
+const markUploadedZipItems = (items: PendingUploads["zipItems"]) =>
+    ipcRenderer.invoke("markUploadedZipItems", items);
 
-const clearPendingUploads = (): Promise<void> =>
-    ipcRenderer.invoke("clearPendingUploads");
+const clearPendingUploads = () => ipcRenderer.invoke("clearPendingUploads");
 
 /**
  * These objects exposed here will become available to the JS code in our
@@ -310,6 +278,7 @@ contextBridge.exposeInMainWorld("electron", {
     logToDisk,
     openDirectory,
     openLogDirectory,
+    selectDirectory,
     clearStores,
     encryptionKey,
     saveEncryptionKey,
@@ -347,13 +316,6 @@ contextBridge.exposeInMainWorld("electron", {
     clipTextEmbeddingIfAvailable,
     detectFaces,
     faceEmbedding,
-
-    // - File selection
-
-    selectDirectory,
-    showUploadFilesDialog,
-    showUploadDirsDialog,
-    showUploadZipDialog,
 
     // - Watch
 

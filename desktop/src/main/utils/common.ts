@@ -1,9 +1,18 @@
 /**
- * @file grab bag of utitity functions.
+ * @file grab bag of utility functions.
  *
- * Many of these are verbatim copies of functions from web code since there
- * isn't currently a common package that both of them share.
+ * These are verbatim copies of functions from web code since there isn't
+ * currently a common package that both of them share.
  */
+
+/**
+ * Throw an exception if the given value is `null` or `undefined`.
+ */
+export const ensure = <T>(v: T | null | undefined): T => {
+    if (v === null) throw new Error("Required value was null");
+    if (v === undefined) throw new Error("Required value was not found");
+    return v;
+};
 
 /**
  * Wait for {@link ms} milliseconds

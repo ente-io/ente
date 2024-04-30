@@ -324,10 +324,12 @@ export default function Uploader({
     // Trigger an upload when any of the dependencies change.
     useEffect(() => {
         const allItemAndPaths = [
-            /* TODO(MR): ElectronFile | use webkitRelativePath || name here */
-            webFiles.map((f) => [f, f["path"] ?? f.name]),
+            // See: [Note: webkitRelativePath]. In particular, they use POSIX
+            // separators.
+            webFiles.map((f) => [f, f.webkitRelativePath ?? f.name]),
             desktopFiles.map((fp) => [fp, fp.path]),
             desktopFilePaths.map((p) => [p, p]),
+            // ze[1], the entry name, uses POSIX separators.
             desktopZipItems.map((ze) => [ze, ze[1]]),
         ].flat() as [UploadItem, string][];
 
@@ -930,9 +932,5 @@ export const setPendingUploads = async (
         }
     }
 
-    await electron.setPendingUploads({
-        collectionName,
-        filePaths,
-        zipItems: zipItems,
-    });
+    await electron.setPendingUploads({ collectionName, filePaths, zipItems });
 };
