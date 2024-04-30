@@ -18,7 +18,7 @@ import type { Electron, ZipItem } from "@/next/types/ipc";
  * To avoid accidentally invoking it in a non-desktop app context, it requires
  * the {@link Electron} object as a parameter (even though it doesn't use it).
  *
- * @param pathOrZipEntry Either the path on the file on the user's local file
+ * @param pathOrZipItem Either the path on the file on the user's local file
  * system whose contents we want to stream. Or a tuple containing the path to a
  * zip file and the name of the entry within it.
  *
@@ -35,20 +35,18 @@ import type { Electron, ZipItem } from "@/next/types/ipc";
  */
 export const readStream = async (
     _: Electron,
-    pathOrZipEntry: string | ZipItem,
+    pathOrZipItem: string | ZipItem,
 ): Promise<{ response: Response; size: number; lastModifiedMs: number }> => {
     let url: URL;
-    if (typeof pathOrZipEntry == "string") {
-        url = new URL(`stream://read${pathOrZipEntry}`);
+    if (typeof pathOrZipItem == "string") {
+        url = new URL(`stream://read${pathOrZipItem}`);
     } else {
-        const [zipPath, entryName] = pathOrZipEntry;
+        const [zipPath, entryName] = pathOrZipItem;
         url = new URL(`stream://read${zipPath}`);
         url.hash = entryName;
     }
 
-    const req = new Request(url, {
-        method: "GET",
-    });
+    const req = new Request(url, { method: "GET" });
 
     const res = await fetch(req);
     if (!res.ok)
