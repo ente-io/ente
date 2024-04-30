@@ -202,8 +202,8 @@ const createMainWindow = () => {
             app.dock.hide();
     });
 
-    window.on("show", async () => {
-        if (process.platform == "darwin") await app.dock.show();
+    window.on("show", () => {
+        if (process.platform == "darwin") void app.dock.show();
     });
 
     // Let ipcRenderer know when mainWindow is in the foreground so that it can
@@ -365,33 +365,35 @@ const main = () => {
     // Emitted once, when Electron has finished initializing.
     //
     // Note that some Electron APIs can only be used after this event occurs.
-    app.on("ready", async () => {
-        // Create window and prepare for the renderer.
-        mainWindow = createMainWindow();
-        attachIPCHandlers();
-        attachFSWatchIPCHandlers(createWatcher(mainWindow));
-        registerStreamProtocol();
+    app.on("ready", () => {
+        void (async () => {
+            // Create window and prepare for the renderer.
+            mainWindow = createMainWindow();
+            attachIPCHandlers();
+            attachFSWatchIPCHandlers(createWatcher(mainWindow));
+            registerStreamProtocol();
 
-        // Configure the renderer's environment.
-        setDownloadPath(mainWindow.webContents);
-        allowExternalLinks(mainWindow.webContents);
+            // Configure the renderer's environment.
+            setDownloadPath(mainWindow.webContents);
+            allowExternalLinks(mainWindow.webContents);
 
-        // Start loading the renderer.
-        void mainWindow.loadURL(rendererURL);
+            // Start loading the renderer.
+            void mainWindow.loadURL(rendererURL);
 
-        // Continue on with the rest of the startup sequence.
-        Menu.setApplicationMenu(await createApplicationMenu(mainWindow));
-        setupTrayItem(mainWindow);
-        if (!isDev) setupAutoUpdater(mainWindow);
+            // Continue on with the rest of the startup sequence.
+            Menu.setApplicationMenu(await createApplicationMenu(mainWindow));
+            setupTrayItem(mainWindow);
+            if (!isDev) setupAutoUpdater(mainWindow);
 
-        try {
-            await deleteLegacyDiskCacheDirIfExists();
-            await deleteLegacyKeysStoreIfExists();
-        } catch (e) {
-            // Log but otherwise ignore errors during non-critical startup
-            // actions.
-            log.error("Ignoring startup error", e);
-        }
+            try {
+                await deleteLegacyDiskCacheDirIfExists();
+                await deleteLegacyKeysStoreIfExists();
+            } catch (e) {
+                // Log but otherwise ignore errors during non-critical startup
+                // actions.
+                log.error("Ignoring startup error", e);
+            }
+        })();
     });
 
     // This is a macOS only event. Show our window when the user activates the

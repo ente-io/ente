@@ -28,7 +28,7 @@ module.exports = {
         /* Temporary (RIP) */
         "@typescript-eslint/no-unsafe-return": "off",
         "@typescript-eslint/no-confusing-void-expression": "off",
-        "@typescript-eslint/no-misused-promises": "off",
+        // "@typescript-eslint/no-misused-promises": "off",
         // "@typescript-eslint/no-floating-promises": "off",
     },
 };
