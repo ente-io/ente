@@ -58,7 +58,8 @@ class _FaceWidgetState extends State<FaceWidget> {
         future: givenFaces ? widget.faceCrops : getFaceCrop(),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
-            final ImageProvider imageProvider = MemoryImage(snapshot.data![widget.face.faceID]!);
+            final ImageProvider imageProvider =
+                MemoryImage(snapshot.data![widget.face.faceID]!);
 
             return GestureDetector(
               onTap: () async {

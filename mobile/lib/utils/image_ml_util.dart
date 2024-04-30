@@ -1328,19 +1328,31 @@ Future<List<Uint8List>> generateFaceThumbnailsUsingCanvas(
       final double widthAbs = faceBox.width * img.width;
       final double heightAbs = faceBox.height * img.height;
 
+      // Calculate the crop values by adding some padding around the face and making sure it's centered
+      const regularPadding = 0.4;
+      const minimumPadding = 0.1;
+      final num xCrop = (xMinAbs - widthAbs * regularPadding);
+      final num xOvershoot = min(0, xCrop).abs() / widthAbs;
+      final num widthCrop = widthAbs * (1 + 2 * regularPadding) -
+          2 * min(xOvershoot, regularPadding - minimumPadding) * widthAbs;
+      final num yCrop = (yMinAbs - heightAbs * regularPadding);
+      final num yOvershoot = min(0, yCrop).abs() / heightAbs;
+      final num heightCrop = heightAbs * (1 + 2 * regularPadding) -
+          2 * min(yOvershoot, regularPadding - minimumPadding) * heightAbs;
+
       // Prevent the face from going out of image bounds
-      final num xCrop = (xMinAbs - widthAbs / 2).clamp(0, img.width);
-      final num yCrop = (yMinAbs - heightAbs / 2).clamp(0, img.height);
-      final num widthCrop = min((widthAbs * 2), img.width - xCrop);
-      final num heightCrop = min((heightAbs * 2), img.height - yCrop);
+      final xCropSafe = xCrop.clamp(0, img.width);
+      final yCropSafe = yCrop.clamp(0, img.height);
+      final widthCropSafe = widthCrop.clamp(0, img.width - xCropSafe);
+      final heightCropSafe = heightCrop.clamp(0, img.height - yCropSafe);
 
       futureFaceThumbnails.add(
         cropAndEncodeCanvas(
           img,
-          x: xCrop.toDouble(),
-          y: yCrop.toDouble(),
-          width: widthCrop.toDouble(),
-          height: heightCrop.toDouble(),
+          x: xCropSafe.toDouble(),
+          y: yCropSafe.toDouble(),
+          width: widthCropSafe.toDouble(),
+          height: heightCropSafe.toDouble(),
         ),
       );
       i++;
