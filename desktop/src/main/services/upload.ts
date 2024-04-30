@@ -21,6 +21,8 @@ export const listZipEntries = async (zipPath: string): Promise<ZipEntry[]> => {
         }
     }
 
+    zip.close();
+
     return entryNames.map((entryName) => [zipPath, entryName]);
 };
 
@@ -34,7 +36,9 @@ export const pathOrZipEntrySize = async (
         const [zipPath, entryName] = pathOrZipEntry;
         const zip = new StreamZip.async({ file: zipPath });
         const entry = await zip.entry(entryName);
-        return entry.size;
+        const size = entry.size;
+        zip.close();
+        return size;
     }
 };
 
@@ -109,6 +113,8 @@ export const getElectronFilesFromGoogleZip = async (filePath: string) => {
             files.push(await getZipEntryAsElectronFile(zipName, zip, entry));
         }
     }
+
+    zip.close();
 
     return files;
 };

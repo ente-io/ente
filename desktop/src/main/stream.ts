@@ -100,6 +100,7 @@ const handleReadZip = async (zipPath: string, zipEntryPath: string) => {
         const zip = new StreamZip.async({ file: zipPath });
         const entry = await zip.entry(zipEntryPath);
         const stream = await zip.stream(entry);
+        // TODO(MR): when to call zip.close()
 
         return new Response(Readable.toWeb(new Readable(stream)), {
             headers: {
