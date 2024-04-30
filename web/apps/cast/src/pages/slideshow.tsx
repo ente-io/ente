@@ -103,12 +103,25 @@ export default function Slideshow() {
 
     const showNextSlide = async () => {
         try {
+            console.log("showNextSlide");
             const currentIndex = collectionFiles.findIndex(
                 (file) => file.id === currentFileId,
             );
 
+            console.log(
+                "showNextSlide-index",
+                currentIndex,
+                collectionFiles.length,
+            );
+
             const nextIndex = (currentIndex + 1) % collectionFiles.length;
             const nextNextIndex = (nextIndex + 1) % collectionFiles.length;
+
+            console.log(
+                "showNextSlide-nextIndex and nextNextIndex",
+                nextIndex,
+                nextNextIndex,
+            );
 
             const nextFile = collectionFiles[nextIndex];
             const nextNextFile = collectionFiles[nextNextIndex];
