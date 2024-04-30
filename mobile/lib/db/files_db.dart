@@ -455,6 +455,7 @@ class FilesDB {
   }
 
   Future<int> insert(EnteFile file) async {
+    _logger.info("Inserting $file");
     final db = await instance.database;
     return db.insert(
       filesTable,

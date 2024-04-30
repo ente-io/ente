@@ -30,6 +30,7 @@ export default function Slideshow() {
 
     const syncCastFiles = async (token: string) => {
         try {
+            console.log("syncCastFiles");
             const castToken = window.localStorage.getItem("castToken");
             const requestedCollectionKey =
                 window.localStorage.getItem("collectionKey");
@@ -50,6 +51,7 @@ export default function Slideshow() {
             }
         } catch (e) {
             log.error("error during sync", e);
+            // go back to preview page
             router.push("/");
         }
     };
@@ -100,45 +102,79 @@ export default function Slideshow() {
     }, [collectionFiles]);
 
     const showNextSlide = async () => {
-        const currentIndex = collectionFiles.findIndex(
-            (file) => file.id === currentFileId,
-        );
+        try {
+            console.log("showNextSlide");
+            const currentIndex = collectionFiles.findIndex(
+                (file) => file.id === currentFileId,
+            );
 
-        const nextIndex = (currentIndex + 1) % collectionFiles.length;
-        const nextNextIndex = (nextIndex + 1) % collectionFiles.length;
+            console.log(
+                "showNextSlide-index",
+                currentIndex,
+                collectionFiles.length,
+            );
 
-        const nextFile = collectionFiles[nextIndex];
-        const nextNextFile = collectionFiles[nextNextIndex];
+            const nextIndex = (currentIndex + 1) % collectionFiles.length;
+            const nextNextIndex = (nextIndex + 1) % collectionFiles.length;
 
-        let nextURL = renderableFileURLCache.get(nextFile.id);
-        let nextNextURL = renderableFileURLCache.get(nextNextFile.id);
+            console.log(
+                "showNextSlide-nextIndex and nextNextIndex",
+                nextIndex,
+                nextNextIndex,
+            );
 
-        if (!nextURL) {
-            try {
-                const blob = await getPreviewableImage(nextFile, castToken);
-                const url = URL.createObjectURL(blob);
-                renderableFileURLCache.set(nextFile.id, url);
-                nextURL = url;
-            } catch (e) {
-                return;
+            const nextFile = collectionFiles[nextIndex];
+            const nextNextFile = collectionFiles[nextNextIndex];
+
+            let nextURL = renderableFileURLCache.get(nextFile.id);
+            let nextNextURL = renderableFileURLCache.get(nextNextFile.id);
+
+            if (!nextURL) {
+                try {
+                    console.log("nextURL doesn't exist yet");
+                    const blob = await getPreviewableImage(nextFile, castToken);
+                    console.log("nextURL blobread");
+                    const url = URL.createObjectURL(blob);
+                    console.log("nextURL", url);
+                    renderableFileURLCache.set(nextFile.id, url);
+                    console.log("nextUrlCache set");
+                    nextURL = url;
+                } catch (e) {
+                    console.log("error in nextUrl", e);
+                    return;
+                }
+            } else {
+                console.log("nextURL already exists");
             }
-        }
 
-        if (!nextNextURL) {
-            try {
-                const blob = await getPreviewableImage(nextNextFile, castToken);
-                const url = URL.createObjectURL(blob);
-                renderableFileURLCache.set(nextNextFile.id, url);
-                nextNextURL = url;
-            } catch (e) {
-                return;
+            if (!nextNextURL) {
+                try {
+                    console.log("nextNextURL doesn't exist yet");
+                    const blob = await getPreviewableImage(
+                        nextNextFile,
+                        castToken,
+                    );
+                    console.log("nextNextURL blobread");
+                    const url = URL.createObjectURL(blob);
+                    console.log("nextNextURL", url);
+                    renderableFileURLCache.set(nextNextFile.id, url);
+                    console.log("nextNextURCacheL set");
+                    nextNextURL = url;
+                } catch (e) {
+                    console.log("error in nextNextURL", e);
+                    return;
+                }
+            } else {
+                console.log("nextNextURL already exists");
             }
-        }
 
-        setLoading(false);
-        setCurrentFileId(nextFile.id);
-        setCurrentFileURL(nextURL);
-        setNextFileURL(nextNextURL);
+            setLoading(false);
+            setCurrentFileId(nextFile.id);
+            setCurrentFileURL(nextURL);
+            setNextFileURL(nextNextURL);
+        } catch (e) {
+            console.log("error in showNextSlide", e);
+        }
     };
 
     if (loading) return <PairedSuccessfullyOverlay />;

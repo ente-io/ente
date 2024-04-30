@@ -41,6 +41,19 @@ export default function PairingMode() {
         init();
     }, []);
 
+    const init = async () => {
+        try {
+            const data = generateSecureData(6);
+            setDigits(convertDataToDecimalString(data).split(""));
+            const keypair = await generateKeyPair();
+            setPublicKeyB64(await toB64(keypair.publicKey));
+            setPrivateKeyB64(await toB64(keypair.privateKey));
+        } catch (e) {
+            log.error("failed to generate keypair", e);
+            throw e;
+        }
+    };
+
     useEffect(() => {
         if (!cast) {
             return;
@@ -99,19 +112,6 @@ export default function PairingMode() {
             );
         } catch (e) {
             log.error("failed to send message", e);
-        }
-    };
-
-    const init = async () => {
-        try {
-            const data = generateSecureData(6);
-            setDigits(convertDataToDecimalString(data).split(""));
-            const keypair = await generateKeyPair();
-            setPublicKeyB64(await toB64(keypair.publicKey));
-            setPrivateKeyB64(await toB64(keypair.privateKey));
-        } catch (e) {
-            log.error("failed to generate keypair", e);
-            throw e;
         }
     };
 
@@ -174,12 +174,18 @@ export default function PairingMode() {
     const router = useRouter();
 
     useEffect(() => {
+        console.log("useEffect for pairing called");
         if (digits.length < 1 || !publicKeyB64 || !privateKeyB64) return;
 
         const interval = setInterval(async () => {
+            console.log("polling for cast data");
             const data = await pollForCastData();
-            if (!data) return;
+            if (!data) {
+                console.log("no data");
+                return;
+            }
             storeCastData(data);
+            console.log("pushing slideshow");
             await router.push("/slideshow");
         }, 1000);
 

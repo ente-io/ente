@@ -39,7 +39,7 @@ dependencies:
   connectivity_plus: ^6.0.2
   cross_file: ^0.3.3
   crypto: ^3.0.2
-  cupertino_icons: ^1.0.0
+  cupertino_icons: ^1.0.8
   defer_pointer: ^0.0.2
   device_info_plus: ^9.0.3
   dio: ^4.0.6
@@ -47,6 +47,10 @@ dependencies:
   dotted_border: ^2.1.0
   dropdown_button2: ^2.0.0
   email_validator: ^2.0.1
+  ente_cast:
+    path: plugins/ente_cast
+  ente_cast_normal:
+    path: plugins/ente_cast_normal
   ente_feature_flag:
     path: plugins/ente_feature_flag
   equatable: ^2.0.5

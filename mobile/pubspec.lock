@@ -209,6 +209,15 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.1"
+  cast:
+    dependency: transitive
+    description:
+      path: "."
+      ref: multicast_version
+      resolved-ref: "1f39cd4d6efa9363e77b2439f0317bae0c92dda1"
+      url: "https://github.com/guyluz11/flutter_cast.git"
+    source: git
+    version: "2.0.9"
   characters:
     dependency: transitive
     description:
@@ -342,10 +351,10 @@ packages:
     dependency: "direct main"
     description:
       name: cupertino_icons
-      sha256: d57953e10f9f8327ce64a508a355f0b1ec902193f66288e8cb5070e7c47eeb2d
+      sha256: ba631d1c7f7bef6b729a622b7b752645a2d076dba9976925b8f25725a30e1ee6
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.6"
+    version: "1.0.8"
   dart_style:
     dependency: transitive
     description:
@@ -434,6 +443,20 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.17"
+  ente_cast:
+    dependency: "direct main"
+    description:
+      path: "plugins/ente_cast"
+      relative: true
+    source: path
+    version: "0.0.1"
+  ente_cast_normal:
+    dependency: "direct main"
+    description:
+      path: "plugins/ente_cast_normal"
+      relative: true
+    source: path
+    version: "0.0.1"
   ente_feature_flag:
     dependency: "direct main"
     description:
@@ -1423,6 +1446,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.2"
+  multicast_dns:
+    dependency: transitive
+    description:
+      name: multicast_dns
+      sha256: "316cc47a958d4bd3c67bd238fe8b44fdfb6133bad89cb191c0c3bd3edb14e296"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.3.2+6"
   nested:
     dependency: transitive
     description:
@@ -1736,6 +1767,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.0"
+  protobuf:
+    dependency: transitive
+    description:
+      name: protobuf
+      sha256: "68645b24e0716782e58948f8467fd42a880f255096a821f9e7d0ec625b00c84d"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.1.0"
   provider:
     dependency: "direct main"
     description:

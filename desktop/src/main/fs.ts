@@ -27,5 +27,3 @@ export const fsIsDir = async (dirPath: string) => {
     const stat = await fs.stat(dirPath);
     return stat.isDirectory();
 };
-
-export const fsSize = (path: string) => fs.stat(path).then((s) => s.size);

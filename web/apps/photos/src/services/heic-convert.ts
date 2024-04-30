@@ -1,4 +1,3 @@
-import { convertBytesToHumanReadable } from "@/next/file";
 import log from "@/next/log";
 import { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { CustomError } from "@ente/shared/error";
@@ -51,15 +50,10 @@ class HEICConverter {
                                     const startTime = Date.now();
                                     const convertedHEIC =
                                         await worker.heicToJPEG(fileBlob);
-                                    log.info(
-                                        `originalFileSize:${convertBytesToHumanReadable(
-                                            fileBlob?.size,
-                                        )},convertedFileSize:${convertBytesToHumanReadable(
-                                            convertedHEIC?.size,
-                                        )},  heic conversion time: ${
-                                            Date.now() - startTime
-                                        }ms `,
+                                    const ms = Math.round(
+                                        Date.now() - startTime,
                                     );
+                                    log.debug(() => `heic => jpeg (${ms} ms)`);
                                     clearTimeout(timeout);
                                     resolve(convertedHEIC);
                                 } catch (e) {
@@ -71,18 +65,7 @@ class HEICConverter {
                     );
                     if (!convertedHEIC || convertedHEIC?.size === 0) {
                         log.error(
-                            `converted heic fileSize is Zero - ${JSON.stringify(
-                                {
-                                    originalFileSize:
-                                        convertBytesToHumanReadable(
-                                            fileBlob?.size ?? 0,
-                                        ),
-                                    convertedFileSize:
-                                        convertBytesToHumanReadable(
-                                            convertedHEIC?.size ?? 0,
-                                        ),
-                                },
-                            )}`,
+                            `Converted HEIC file is empty (original was ${fileBlob?.size} bytes)`,
                         );
                     }
                     await new Promise((resolve) => {
@@ -94,7 +77,7 @@ class HEICConverter {
                     this.workerPool.push(convertWorker);
                     return convertedHEIC;
                 } catch (e) {
-                    log.error("heic conversion failed", e);
+                    log.error("HEIC conversion failed", e);
                     convertWorker.terminate();
                     this.workerPool.push(createComlinkWorker());
                     throw e;

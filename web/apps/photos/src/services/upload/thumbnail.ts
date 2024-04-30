@@ -4,6 +4,7 @@ import { type Electron } from "@/next/types/ipc";
 import { withTimeout } from "@ente/shared/utils";
 import * as ffmpeg from "services/ffmpeg";
 import { heicToJPEG } from "services/heic-convert";
+import { toDataOrPathOrZipEntry, type DesktopUploadItem } from "./types";
 
 /** Maximum width or height of the generated thumbnail */
 const maxThumbnailDimension = 720;
@@ -178,7 +179,7 @@ const percentageSizeDiff = (
  * object which we use to perform IPC with the Node.js side of our desktop app.
  *
  * @param dataOrPath Contents of an image or video file, or the path to the
- * image or video file on the user's local filesystem, whose thumbnail we want
+ * image or video file on the user's local file system, whose thumbnail we want
  * to generate.
  *
  * @param fileTypeInfo The type information for {@link dataOrPath}.
@@ -189,16 +190,16 @@ const percentageSizeDiff = (
  */
 export const generateThumbnailNative = async (
     electron: Electron,
-    dataOrPath: Uint8Array | string,
+    desktopUploadItem: DesktopUploadItem,
     fileTypeInfo: FileTypeInfo,
 ): Promise<Uint8Array> =>
     fileTypeInfo.fileType === FILE_TYPE.IMAGE
         ? await electron.generateImageThumbnail(
-              dataOrPath,
+              toDataOrPathOrZipEntry(desktopUploadItem),
               maxThumbnailDimension,
               maxThumbnailSize,
           )
-        : ffmpeg.generateVideoThumbnailNative(electron, dataOrPath);
+        : ffmpeg.generateVideoThumbnailNative(electron, desktopUploadItem);
 
 /**
  * A fallback, black, thumbnail for use in cases where thumbnail generation

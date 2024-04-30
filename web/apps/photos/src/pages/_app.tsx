@@ -80,8 +80,6 @@ const redirectMap = new Map([
 
 type AppContextType = {
     showNavBar: (show: boolean) => void;
-    sharedFiles: File[];
-    resetSharedFiles: () => void;
     mlSearchEnabled: boolean;
     mapEnabled: boolean;
     updateMlSearchEnabled: (enabled: boolean) => Promise<void>;
@@ -114,7 +112,6 @@ export default function App({ Component, pageProps }: AppProps) {
         typeof window !== "undefined" && !window.navigator.onLine,
     );
     const [showNavbar, setShowNavBar] = useState(false);
-    const [sharedFiles, setSharedFiles] = useState<File[]>(null);
     const [redirectName, setRedirectName] = useState<string>(null);
     const [mlSearchEnabled, setMlSearchEnabled] = useState(false);
     const [mapEnabled, setMapEnabled] = useState(false);
@@ -227,7 +224,6 @@ export default function App({ Component, pageProps }: AppProps) {
 
     const setUserOnline = () => setOffline(false);
     const setUserOffline = () => setOffline(true);
-    const resetSharedFiles = () => setSharedFiles(null);
 
     useEffect(() => {
         const redirectTo = async (redirect) => {
@@ -352,22 +348,8 @@ export default function App({ Component, pageProps }: AppProps) {
                 <CssBaseline enableColorScheme />
                 {showNavbar && <AppNavbar isMobile={isMobile} />}
                 <MessageContainer>
-                    {offline && t("OFFLINE_MSG")}
+                    {isI18nReady && offline && t("OFFLINE_MSG")}
                 </MessageContainer>
-                {sharedFiles &&
-                    (router.pathname === "/gallery" ? (
-                        <MessageContainer>
-                            {t("files_to_be_uploaded", {
-                                count: sharedFiles.length,
-                            })}
-                        </MessageContainer>
-                    ) : (
-                        <MessageContainer>
-                            {t("login_to_upload_files", {
-                                count: sharedFiles.length,
-                            })}
-                        </MessageContainer>
-                    ))}
                 <LoadingBar color="#51cd7c" ref={loadingBar} />
 
                 <DialogBox
@@ -394,8 +376,6 @@ export default function App({ Component, pageProps }: AppProps) {
                         showNavBar,
                         mlSearchEnabled,
                         updateMlSearchEnabled,
-                        sharedFiles,
-                        resetSharedFiles,
                         startLoading,
                         finishLoading,
                         closeMessageDialog,
