@@ -26,7 +26,7 @@ import { createWatcher } from "./main/services/watch";
 import { userPreferences } from "./main/stores/user-preferences";
 import { migrateLegacyWatchStoreIfNeeded } from "./main/stores/watch";
 import { registerStreamProtocol } from "./main/stream";
-import { isDev } from "./main/utils";
+import { isDev } from "./main/utils/electron";
 
 /**
  * The URL where the renderer HTML is being served from.

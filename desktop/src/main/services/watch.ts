@@ -5,7 +5,7 @@ import path from "node:path";
 import { FolderWatch, type CollectionMapping } from "../../types/ipc";
 import log from "../log";
 import { watchStore } from "../stores/watch";
-import { posixPath } from "../utils";
+import { posixPath } from "../utils/electron";
 import { fsIsDir } from "./fs";
 
 /**

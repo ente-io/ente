@@ -10,7 +10,7 @@ import { forceCheckForAppUpdates } from "./services/app-update";
 import autoLauncher from "./services/auto-launcher";
 import { openLogDirectory } from "./services/dir";
 import { userPreferences } from "./stores/user-preferences";
-import { isDev } from "./utils";
+import { isDev } from "./utils/electron";
 
 /** Create and return the entries in the app's main menu bar */
 export const createApplicationMenu = async (mainWindow: BrowserWindow) => {
