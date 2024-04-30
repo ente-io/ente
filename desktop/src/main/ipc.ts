@@ -14,7 +14,7 @@ import type {
     CollectionMapping,
     FolderWatch,
     PendingUploads,
-    ZipEntry,
+    ZipItem,
 } from "../types/ipc";
 import {
     selectDirectory,
@@ -56,7 +56,7 @@ import {
     listZipEntries,
     markUploadedFiles,
     markUploadedZipEntries,
-    pathOrZipEntrySize,
+    pathOrZipItemSize,
     pendingUploads,
     setPendingUploads,
 } from "./services/upload";
@@ -152,11 +152,10 @@ export const attachIPCHandlers = () => {
         "generateImageThumbnail",
         (
             _,
-            dataOrPathOrZipEntry: Uint8Array | string | ZipEntry,
+            dataOrPathOrZipItem: Uint8Array | string | ZipItem,
             maxDimension: number,
             maxSize: number,
-        ) =>
-            generateImageThumbnail(dataOrPathOrZipEntry, maxDimension, maxSize),
+        ) => generateImageThumbnail(dataOrPathOrZipItem, maxDimension, maxSize),
     );
 
     ipcMain.handle(
@@ -164,13 +163,13 @@ export const attachIPCHandlers = () => {
         (
             _,
             command: string[],
-            dataOrPathOrZipEntry: Uint8Array | string | ZipEntry,
+            dataOrPathOrZipItem: Uint8Array | string | ZipItem,
             outputFileExtension: string,
             timeoutMS: number,
         ) =>
             ffmpegExec(
                 command,
-                dataOrPathOrZipEntry,
+                dataOrPathOrZipItem,
                 outputFileExtension,
                 timeoutMS,
             ),
@@ -210,10 +209,8 @@ export const attachIPCHandlers = () => {
         listZipEntries(zipPath),
     );
 
-    ipcMain.handle(
-        "pathOrZipEntrySize",
-        (_, pathOrZipEntry: string | ZipEntry) =>
-            pathOrZipEntrySize(pathOrZipEntry),
+    ipcMain.handle("pathOrZipItemSize", (_, pathOrZipItem: string | ZipItem) =>
+        pathOrZipItemSize(pathOrZipItem),
     );
 
     ipcMain.handle("pendingUploads", () => pendingUploads());
@@ -229,7 +226,7 @@ export const attachIPCHandlers = () => {
 
     ipcMain.handle(
         "markUploadedZipEntries",
-        (_, zipEntries: PendingUploads["zipEntries"]) =>
+        (_, zipEntries: PendingUploads["zipItems"]) =>
             markUploadedZipEntries(zipEntries),
     );
 

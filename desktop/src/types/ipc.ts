@@ -25,12 +25,12 @@ export interface FolderWatchSyncedFile {
     collectionID: number;
 }
 
-export type ZipEntry = [zipPath: string, entryName: string];
+export type ZipItem = [zipPath: string, entryName: string];
 
 export interface PendingUploads {
     collectionName: string;
     filePaths: string[];
-    zipEntries: ZipEntry[];
+    zipItems: ZipItem[];
 }
 
 /**

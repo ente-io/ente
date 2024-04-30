@@ -47,7 +47,7 @@ import type {
     ElectronFile,
     FolderWatch,
     PendingUploads,
-    ZipEntry,
+    ZipItem,
 } from "./types/ipc";
 
 // - General
@@ -129,27 +129,27 @@ const convertToJPEG = (imageData: Uint8Array): Promise<Uint8Array> =>
     ipcRenderer.invoke("convertToJPEG", imageData);
 
 const generateImageThumbnail = (
-    dataOrPathOrZipEntry: Uint8Array | string | ZipEntry,
+    dataOrPathOrZipItem: Uint8Array | string | ZipItem,
     maxDimension: number,
     maxSize: number,
 ): Promise<Uint8Array> =>
     ipcRenderer.invoke(
         "generateImageThumbnail",
-        dataOrPathOrZipEntry,
+        dataOrPathOrZipItem,
         maxDimension,
         maxSize,
     );
 
 const ffmpegExec = (
     command: string[],
-    dataOrPathOrZipEntry: Uint8Array | string | ZipEntry,
+    dataOrPathOrZipItem: Uint8Array | string | ZipItem,
     outputFileExtension: string,
     timeoutMS: number,
 ): Promise<Uint8Array> =>
     ipcRenderer.invoke(
         "ffmpegExec",
         command,
-        dataOrPathOrZipEntry,
+        dataOrPathOrZipItem,
         outputFileExtension,
         timeoutMS,
     );
@@ -241,12 +241,11 @@ const watchFindFiles = (folderPath: string): Promise<string[]> =>
 
 const pathForFile = (file: File) => webUtils.getPathForFile(file);
 
-const listZipEntries = (zipPath: string): Promise<ZipEntry[]> =>
+const listZipEntries = (zipPath: string): Promise<ZipItem[]> =>
     ipcRenderer.invoke("listZipEntries", zipPath);
 
-const pathOrZipEntrySize = (
-    pathOrZipEntry: string | ZipEntry,
-): Promise<number> => ipcRenderer.invoke("pathOrZipEntrySize", pathOrZipEntry);
+const pathOrZipItemSize = (pathOrZipItem: string | ZipItem): Promise<number> =>
+    ipcRenderer.invoke("pathOrZipItemSize", pathOrZipItem);
 
 const pendingUploads = (): Promise<PendingUploads | undefined> =>
     ipcRenderer.invoke("pendingUploads");
@@ -258,7 +257,7 @@ const markUploadedFiles = (paths: PendingUploads["filePaths"]): Promise<void> =>
     ipcRenderer.invoke("markUploadedFiles", paths);
 
 const markUploadedZipEntries = (
-    zipEntries: PendingUploads["zipEntries"],
+    zipEntries: PendingUploads["zipItems"],
 ): Promise<void> => ipcRenderer.invoke("markUploadedZipEntries", zipEntries);
 
 const clearPendingUploads = (): Promise<void> =>
@@ -374,7 +373,7 @@ contextBridge.exposeInMainWorld("electron", {
 
     pathForFile,
     listZipEntries,
-    pathOrZipEntrySize,
+    pathOrZipItemSize,
     pendingUploads,
     setPendingUploads,
     markUploadedFiles,

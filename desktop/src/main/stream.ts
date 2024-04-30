@@ -95,10 +95,10 @@ const handleRead = async (path: string) => {
     }
 };
 
-const handleReadZip = async (zipPath: string, zipEntryPath: string) => {
+const handleReadZip = async (zipPath: string, entryName: string) => {
     try {
         const zip = new StreamZip.async({ file: zipPath });
-        const entry = await zip.entry(zipEntryPath);
+        const entry = await zip.entry(entryName);
         const stream = await zip.stream(entry);
         // TODO(MR): when to call zip.close()
 
@@ -119,7 +119,7 @@ const handleReadZip = async (zipPath: string, zipEntryPath: string) => {
         });
     } catch (e) {
         log.error(
-            `Failed to read entry ${zipEntryPath} from zip file at ${zipPath}`,
+            `Failed to read entry ${entryName} from zip file at ${zipPath}`,
             e,
         );
         return new Response(`Failed to read stream: ${e.message}`, {

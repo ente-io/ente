@@ -1,12 +1,12 @@
 import pathToFfmpeg from "ffmpeg-static";
 import fs from "node:fs/promises";
-import type { ZipEntry } from "../../types/ipc";
+import type { ZipItem } from "../../types/ipc";
 import log from "../log";
 import { withTimeout } from "../utils";
 import { execAsync } from "../utils-electron";
 import {
     deleteTempFile,
-    makeFileForDataOrPathOrZipEntry,
+    makeFileForDataOrPathOrZipItem,
     makeTempFilePath,
 } from "../utils-temp";
 
@@ -44,12 +44,12 @@ const outputPathPlaceholder = "OUTPUT";
  */
 export const ffmpegExec = async (
     command: string[],
-    dataOrPathOrZipEntry: Uint8Array | string | ZipEntry,
+    dataOrPathOrZipItem: Uint8Array | string | ZipItem,
     outputFileExtension: string,
     timeoutMS: number,
 ): Promise<Uint8Array> => {
     // TODO (MR): This currently copies files for both input (when
-    // dataOrPathOrZipEntry is data) and output. This needs to be tested
+    // dataOrPathOrZipItem is data) and output. This needs to be tested
     // extremely large video files when invoked downstream of `convertToMP4` in
     // the web code.
 
@@ -57,7 +57,7 @@ export const ffmpegExec = async (
         path: inputFilePath,
         isFileTemporary: isInputFileTemporary,
         writeToTemporaryFile: writeToTemporaryInputFile,
-    } = await makeFileForDataOrPathOrZipEntry(dataOrPathOrZipEntry);
+    } = await makeFileForDataOrPathOrZipItem(dataOrPathOrZipItem);
 
     const outputFilePath = await makeTempFilePath(outputFileExtension);
     try {

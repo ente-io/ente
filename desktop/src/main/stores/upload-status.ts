@@ -1,17 +1,28 @@
 import Store, { Schema } from "electron-store";
 
 export interface UploadStatusStore {
-    /* The collection to which we're uploading, or the root collection. */
+    /**
+     * The collection to which we're uploading, or the root collection.
+     *
+     * Not all pending uploads will have an associated collection.
+     */
     collectionName?: string;
-    /** Paths to regular files that are pending upload */
+    /**
+     * Paths to regular files that are pending upload.
+     *
+     * This should generally be present, albeit empty, but it is marked optional
+     * in sympathy with its siblings.
+     */
     filePaths?: string[];
     /**
      * Each item is the path to a zip file and the name of an entry within it.
      *
      * This is marked optional since legacy stores will not have it.
      */
-    zipEntries?: [zipPath: string, entryName: string][];
-    /** Legacy paths to zip files, now subsumed into zipEntries */
+    zipItems?: [zipPath: string, entryName: string][];
+    /**
+     * @deprecated Legacy paths to zip files, now subsumed into zipEntries.
+     */
     zipPaths?: string[];
 }
 
@@ -25,7 +36,7 @@ const uploadStatusSchema: Schema<UploadStatusStore> = {
             type: "string",
         },
     },
-    zipEntries: {
+    zipItems: {
         type: "array",
         items: {
             type: "array",

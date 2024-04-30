@@ -2,11 +2,11 @@ import StreamZip from "node-stream-zip";
 import fs from "node:fs/promises";
 import { existsSync } from "original-fs";
 import path from "path";
-import type { ElectronFile, PendingUploads, ZipEntry } from "../../types/ipc";
+import type { ElectronFile, PendingUploads, ZipItem } from "../../types/ipc";
 import { uploadStatusStore } from "../stores/upload-status";
 import { getZipFileStream } from "./fs";
 
-export const listZipEntries = async (zipPath: string): Promise<ZipEntry[]> => {
+export const listZipEntries = async (zipPath: string): Promise<ZipItem[]> => {
     const zip = new StreamZip.async({ file: zipPath });
 
     const entries = await zip.entries();
@@ -26,14 +26,14 @@ export const listZipEntries = async (zipPath: string): Promise<ZipEntry[]> => {
     return entryNames.map((entryName) => [zipPath, entryName]);
 };
 
-export const pathOrZipEntrySize = async (
-    pathOrZipEntry: string | ZipEntry,
+export const pathOrZipItemSize = async (
+    pathOrZipItem: string | ZipItem,
 ): Promise<number> => {
-    if (typeof pathOrZipEntry == "string") {
-        const stat = await fs.stat(pathOrZipEntry);
+    if (typeof pathOrZipItem == "string") {
+        const stat = await fs.stat(pathOrZipItem);
         return stat.size;
     } else {
-        const [zipPath, entryName] = pathOrZipEntry;
+        const [zipPath, entryName] = pathOrZipItem;
         const zip = new StreamZip.async({ file: zipPath });
         const entry = await zip.entry(entryName);
         const size = entry.size;
@@ -73,7 +73,7 @@ export const pendingUploads = async (): Promise<PendingUploads | undefined> => {
     return {
         collectionName,
         filePaths,
-        zipEntries,
+        zipItems: zipEntries,
     };
 };
 

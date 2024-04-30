@@ -3,7 +3,7 @@ import StreamZip from "node-stream-zip";
 import { existsSync } from "node:fs";
 import fs from "node:fs/promises";
 import path from "path";
-import type { ZipEntry } from "../types/ipc";
+import type { ZipItem } from "../types/ipc";
 
 /**
  * Our very own directory within the system temp directory. Go crazy, but
@@ -64,9 +64,11 @@ export const deleteTempFile = async (tempFilePath: string) => {
     await fs.rm(tempFilePath, { force: true });
 };
 
-/** The result of {@link makeFileForDataOrPathOrZipEntry}. */
-interface FileForDataOrPathOrZipEntry {
-    /** The path to the file (possibly temporary) */
+/** The result of {@link makeFileForDataOrPathOrZipItem}. */
+interface FileForDataOrPathOrZipItem {
+    /**
+     * The path to the file (possibly temporary).
+     */
     path: string;
     /**
      * `true` if {@link path} points to a temporary file which should be deleted
@@ -75,12 +77,12 @@ interface FileForDataOrPathOrZipEntry {
     isFileTemporary: boolean;
     /**
      * If set, this'll be a function that can be called to actually write the
-     * contents of the source `Uint8Array | string | ZipEntry` into the file at
+     * contents of the source `Uint8Array | string | ZipItem` into the file at
      * {@link path}.
      *
      * It will be undefined if the source is already a path since nothing needs
      * to be written in that case. In the other two cases this function will
-     * write the data or zip entry into the file at {@link path}.
+     * write the data or zip item into the file at {@link path}.
      */
     writeToTemporaryFile?: () => Promise<void>;
 }
@@ -88,31 +90,31 @@ interface FileForDataOrPathOrZipEntry {
 /**
  * Return the path to a file, a boolean indicating if this is a temporary path
  * that needs to be deleted after processing, and a function to write the given
- * {@link dataOrPathOrZipEntry} into that temporary file if needed.
+ * {@link dataOrPathOrZipItem} into that temporary file if needed.
  *
- * @param dataOrPathOrZipEntry The contents of the file, or the path to an
+ * @param dataOrPathOrZipItem The contents of the file, or the path to an
  * existing file, or a (path to a zip file, name of an entry within that zip
  * file) tuple.
  */
-export const makeFileForDataOrPathOrZipEntry = async (
-    dataOrPathOrZipEntry: Uint8Array | string | ZipEntry,
-): Promise<FileForDataOrPathOrZipEntry> => {
+export const makeFileForDataOrPathOrZipItem = async (
+    dataOrPathOrZipItem: Uint8Array | string | ZipItem,
+): Promise<FileForDataOrPathOrZipItem> => {
     let path: string;
     let isFileTemporary: boolean;
     let writeToTemporaryFile: () => Promise<void> | undefined;
 
-    if (typeof dataOrPathOrZipEntry == "string") {
-        path = dataOrPathOrZipEntry;
+    if (typeof dataOrPathOrZipItem == "string") {
+        path = dataOrPathOrZipItem;
         isFileTemporary = false;
     } else {
         path = await makeTempFilePath();
         isFileTemporary = true;
-        if (dataOrPathOrZipEntry instanceof Uint8Array) {
+        if (dataOrPathOrZipItem instanceof Uint8Array) {
             writeToTemporaryFile = () =>
-                fs.writeFile(path, dataOrPathOrZipEntry);
+                fs.writeFile(path, dataOrPathOrZipItem);
         } else {
             writeToTemporaryFile = async () => {
-                const [zipPath, entryName] = dataOrPathOrZipEntry;
+                const [zipPath, entryName] = dataOrPathOrZipItem;
                 const zip = new StreamZip.async({ file: zipPath });
                 await zip.extract(entryName, path);
                 zip.close();

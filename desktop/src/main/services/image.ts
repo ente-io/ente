@@ -2,12 +2,12 @@
 
 import fs from "node:fs/promises";
 import path from "path";
-import { CustomErrorMessage, type ZipEntry } from "../../types/ipc";
+import { CustomErrorMessage, type ZipItem } from "../../types/ipc";
 import log from "../log";
 import { execAsync, isDev } from "../utils-electron";
 import {
     deleteTempFile,
-    makeFileForDataOrPathOrZipEntry,
+    makeFileForDataOrPathOrZipItem,
     makeTempFilePath,
 } from "../utils-temp";
 
@@ -67,7 +67,7 @@ const imageMagickPath = () =>
     path.join(isDev ? "build" : process.resourcesPath, "image-magick");
 
 export const generateImageThumbnail = async (
-    dataOrPathOrZipEntry: Uint8Array | string | ZipEntry,
+    dataOrPathOrZipItem: Uint8Array | string | ZipItem,
     maxDimension: number,
     maxSize: number,
 ): Promise<Uint8Array> => {
@@ -75,7 +75,7 @@ export const generateImageThumbnail = async (
         path: inputFilePath,
         isFileTemporary: isInputFileTemporary,
         writeToTemporaryFile: writeToTemporaryInputFile,
-    } = await makeFileForDataOrPathOrZipEntry(dataOrPathOrZipEntry);
+    } = await makeFileForDataOrPathOrZipItem(dataOrPathOrZipItem);
 
     const outputFilePath = await makeTempFilePath("jpeg");
 
