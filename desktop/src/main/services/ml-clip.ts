@@ -45,7 +45,7 @@ const clipImageEmbedding_ = async (jpegFilePath: string) => {
             `onnx/clip image embedding took ${Date.now() - t1} ms (prep: ${t2 - t1} ms, inference: ${Date.now() - t2} ms)`,
     );
     /* Need these model specific casts to type the result */
-    const imageEmbedding = results["output"].data as Float32Array;
+    const imageEmbedding = ensure(results["output"]).data as Float32Array;
     return normalizeEmbedding(imageEmbedding);
 };
 
@@ -56,19 +56,19 @@ const getRGBData = async (jpegFilePath: string) => {
         formatAsRGBA: false,
     });
 
-    const nx: number = rawImageData.width;
-    const ny: number = rawImageData.height;
-    const inputImage: Uint8Array = rawImageData.data;
+    const nx = rawImageData.width;
+    const ny = rawImageData.height;
+    const inputImage = rawImageData.data;
 
-    const nx2: number = 224;
-    const ny2: number = 224;
-    const totalSize: number = 3 * nx2 * ny2;
+    const nx2 = 224;
+    const ny2 = 224;
+    const totalSize = 3 * nx2 * ny2;
 
     const result: number[] = Array(totalSize).fill(0);
-    const scale: number = Math.max(nx, ny) / 224;
+    const scale = Math.max(nx, ny) / 224;
 
-    const nx3: number = Math.round(nx / scale);
-    const ny3: number = Math.round(ny / scale);
+    const nx3 = Math.round(nx / scale);
+    const ny3 = Math.round(ny / scale);
 
     const mean: number[] = [0.48145466, 0.4578275, 0.40821073];
     const std: number[] = [0.26862954, 0.26130258, 0.27577711];
@@ -77,40 +77,40 @@ const getRGBData = async (jpegFilePath: string) => {
         for (let x = 0; x < nx3; x++) {
             for (let c = 0; c < 3; c++) {
                 // Linear interpolation
-                const sx: number = (x + 0.5) * scale - 0.5;
-                const sy: number = (y + 0.5) * scale - 0.5;
+                const sx = (x + 0.5) * scale - 0.5;
+                const sy = (y + 0.5) * scale - 0.5;
 
-                const x0: number = Math.max(0, Math.floor(sx));
-                const y0: number = Math.max(0, Math.floor(sy));
+                const x0 = Math.max(0, Math.floor(sx));
+                const y0 = Math.max(0, Math.floor(sy));
 
-                const x1: number = Math.min(x0 + 1, nx - 1);
-                const y1: number = Math.min(y0 + 1, ny - 1);
+                const x1 = Math.min(x0 + 1, nx - 1);
+                const y1 = Math.min(y0 + 1, ny - 1);
 
-                const dx: number = sx - x0;
-                const dy: number = sy - y0;
+                const dx = sx - x0;
+                const dy = sy - y0;
 
-                const j00: number = 3 * (y0 * nx + x0) + c;
-                const j01: number = 3 * (y0 * nx + x1) + c;
-                const j10: number = 3 * (y1 * nx + x0) + c;
-                const j11: number = 3 * (y1 * nx + x1) + c;
+                const j00 = 3 * (y0 * nx + x0) + c;
+                const j01 = 3 * (y0 * nx + x1) + c;
+                const j10 = 3 * (y1 * nx + x0) + c;
+                const j11 = 3 * (y1 * nx + x1) + c;
 
-                const v00: number = inputImage[j00];
-                const v01: number = inputImage[j01];
-                const v10: number = inputImage[j10];
-                const v11: number = inputImage[j11];
+                const v00 = inputImage[j00] ?? 0;
+                const v01 = inputImage[j01] ?? 0;
+                const v10 = inputImage[j10] ?? 0;
+                const v11 = inputImage[j11] ?? 0;
 
-                const v0: number = v00 * (1 - dx) + v01 * dx;
-                const v1: number = v10 * (1 - dx) + v11 * dx;
+                const v0 = v00 * (1 - dx) + v01 * dx;
+                const v1 = v10 * (1 - dx) + v11 * dx;
 
-                const v: number = v0 * (1 - dy) + v1 * dy;
+                const v = v0 * (1 - dy) + v1 * dy;
 
-                const v2: number = Math.min(Math.max(Math.round(v), 0), 255);
+                const v2 = Math.min(Math.max(Math.round(v), 0), 255);
 
                 // createTensorWithDataList is dumb compared to reshape and
                 // hence has to be given with one channel after another
-                const i: number = y * nx3 + x + (c % 3) * 224 * 224;
+                const i = y * nx3 + x + (c % 3) * 224 * 224;
 
-                result[i] = (v2 / 255 - mean[c]) / std[c];
+                result[i] = (v2 / 255 - (mean[c] ?? 0)) / (std[c] ?? 1);
             }
         }
     }
@@ -121,11 +121,11 @@ const getRGBData = async (jpegFilePath: string) => {
 const normalizeEmbedding = (embedding: Float32Array) => {
     let normalization = 0;
     for (let index = 0; index < embedding.length; index++) {
-        normalization += embedding[index] * embedding[index];
+        normalization += ensure(embedding[index]) * ensure(embedding[index]);
     }
     const sqrtNormalization = Math.sqrt(normalization);
     for (let index = 0; index < embedding.length; index++) {
-        embedding[index] = embedding[index] / sqrtNormalization;
+        embedding[index] = ensure(embedding[index]) / sqrtNormalization;
     }
     return embedding;
 };
@@ -168,6 +168,6 @@ export const clipTextEmbeddingIfAvailable = async (text: string) => {
         () =>
             `onnx/clip text embedding took ${Date.now() - t1} ms (prep: ${t2 - t1} ms, inference: ${Date.now() - t2} ms)`,
     );
-    const textEmbedding = results["output"].data as Float32Array;
+    const textEmbedding = ensure(results["output"]).data as Float32Array;
     return normalizeEmbedding(textEmbedding);
 };

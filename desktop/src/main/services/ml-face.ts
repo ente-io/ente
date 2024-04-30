@@ -8,6 +8,7 @@
  */
 import * as ort from "onnxruntime-node";
 import log from "../log";
+import { ensure } from "../utils/common";
 import { makeCachedInferenceSession } from "./ml";
 
 const cachedFaceDetectionSession = makeCachedInferenceSession(
@@ -23,7 +24,7 @@ export const detectFaces = async (input: Float32Array) => {
     };
     const results = await session.run(feeds);
     log.debug(() => `onnx/yolo face detection took ${Date.now() - t} ms`);
-    return results["output"].data;
+    return ensure(results["output"]).data;
 };
 
 const cachedFaceEmbeddingSession = makeCachedInferenceSession(

@@ -41,33 +41,28 @@
         "target": "es2022",
         "module": "node16",
 
+        /* Emit the generated JS into `app/` */
+        "outDir": "app",
+
         /* Enable various workarounds to play better with CJS libraries */
         "esModuleInterop": true,
         /* Speed things up by not type checking `node_modules` */
         "skipLibCheck": true,
 
-        /* Emit the generated JS into `app/` */
-        "outDir": "app",
-
-        /* Temporary overrides to get things to compile with the older config */
-        // "strict": false,
-        "noImplicitAny": true,
-
-        /* Below is the state we want */
-        /* Enable these one by one */
-        "strict": true,
-
         /* Require the `type` modifier when importing types */
-        // "verbatimModuleSyntax": true
+        /* We want this, but it causes "ESM syntax is not allowed in a CommonJS
+           module when 'verbatimModuleSyntax' is enabled" currently */
+        /* "verbatimModuleSyntax": true, */
 
+        "strict": true,
         /* Stricter than strict */
-        // "noImplicitReturns": true,
-        // "noUnusedParameters": true,
-        // "noUnusedLocals": true,
-        // "noFallthroughCasesInSwitch": true,
+        "noImplicitReturns": true,
+        "noUnusedParameters": true,
+        "noUnusedLocals": true,
+        "noFallthroughCasesInSwitch": true,
         /* e.g. makes array indexing returns undefined */
-        // "noUncheckedIndexedAccess": true,
-        // "exactOptionalPropertyTypes": true,
+        "noUncheckedIndexedAccess": true,
+        "exactOptionalPropertyTypes": true
     },
     /* Transpile all `.ts` files in `src/` */
     "include": ["src/**/*.ts"]

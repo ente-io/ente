@@ -410,6 +410,7 @@ export default class {
                     newWord.push(first + second);
                     i += 2;
                 } else {
+                    // @ts-expect-error "Array indexing can return undefined but not modifying thirdparty code"
                     newWord.push(word[i]);
                     i += 1;
                 }
@@ -434,6 +435,7 @@ export default class {
                 .map((b) => this.byteEncoder[b.charCodeAt(0) as number])
                 .join("");
             bpeTokens.push(
+                // @ts-expect-error "Array indexing can return undefined but not modifying thirdparty code"
                 ...this.bpe(token)
                     .split(" ")
                     .map((bpeToken: string) => this.encoder[bpeToken]),
@@ -458,6 +460,7 @@ export default class {
             .join("");
         text = [...text]
             .map((c) => this.byteDecoder[c])
+            // @ts-expect-error "Array indexing can return undefined but not modifying thirdparty code"
             .map((v) => String.fromCharCode(v))
             .join("")
             .replace(/<\/w>/g, " ");
