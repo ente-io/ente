@@ -50,14 +50,15 @@ import {
     generateThumbnailNative,
     generateThumbnailWeb,
 } from "./thumbnail";
+import type { UploadItem } from "./types";
 import UploadHttpClient from "./uploadHttpClient";
-import type { UploadableFile } from "./uploadManager";
+import type { UploadableUploadItem } from "./uploadManager";
 
 /**
  * A readable stream for a file, and its associated size and last modified time.
  *
- * This is the in-memory representation of the `fileOrPath` type that we usually
- * pass around. See: [Note: Reading a fileOrPath]
+ * This is the in-memory representation of the {@link UploadItem} type that we
+ * usually pass around. See: [Note: Reading a UploadItem]
  */
 interface FileStream {
     /**
@@ -181,30 +182,20 @@ const uploadService = new UploadService();
 export default uploadService;
 
 /**
- * Return the file name for the given {@link fileOrPath}.
- *
- * @param fileOrPath The {@link File}, or the path to it. Note that it is only
- * valid to specify a path if we are running in the context of our desktop app.
+ * Return the file name for the given {@link uploadItem}.
  */
-export const fopFileName = (fileOrPath: File | string) =>
-    typeof fileOrPath == "string" ? basename(fileOrPath) : fileOrPath.name;
-
-/**
- * Return the size of the given {@link fileOrPath}.
- *
- * @param fileOrPath The {@link File}, or the path to it. Note that it is only
- * valid to specify a path if we are running in the context of our desktop app.
- */
-export const fopSize = async (fileOrPath: File | string): Promise<number> =>
-    fileOrPath instanceof File
-        ? fileOrPath.size
-        : await ensureElectron().fs.size(fileOrPath);
+export const uploadItemFileName = (uploadItem: UploadItem) => {
+    if (uploadItem instanceof File) return uploadItem.name;
+    if (typeof uploadItem == "string") return basename(uploadItem);
+    if (Array.isArray(uploadItem)) return basename(uploadItem[1]);
+    return uploadItem.file.name;
+};
 
 /* -- Various intermediate type used during upload -- */
 
 interface UploadAsset {
     isLivePhoto?: boolean;
-    fileOrPath?: File | string;
+    uploadItem?: UploadItem;
     livePhotoAssets?: LivePhotoAssets;
 }
 
@@ -311,14 +302,14 @@ interface UploadResponse {
 }
 
 /**
- * Upload the given {@link UploadableFile}
+ * Upload the given {@link UploadableUploadItem}
  *
  * This is lower layer implementation of the upload. It is invoked by
  * {@link UploadManager} after it has assembled all the relevant bits we need to
  * go forth and upload.
  */
 export const uploader = async (
-    { collection, localID, fileName, ...uploadAsset }: UploadableFile,
+    { collection, localID, fileName, ...uploadAsset }: UploadableUploadItem,
     uploaderName: string,
     existingFiles: EnteFile[],
     parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
@@ -466,19 +457,21 @@ export const uploader = async (
 };
 
 /**
- * Read the given file or path into an in-memory representation.
+ * Read the given file or path or zip item into an in-memory representation.
  *
- * [Note: Reading a fileOrPath]
+ * [Note: Reading a UploadItem]
  *
  * The file can be either a web
- * [File](https://developer.mozilla.org/en-US/docs/Web/API/File) or the absolute
- * path to a file on desk.
+ * [File](https://developer.mozilla.org/en-US/docs/Web/API/File), the absolute
+ * path to a file on desk, a combination of these two, or a entry in a zip file
+ * on the user's local file system.
  *
- * tl;dr; There are three cases:
+ * tl;dr; There are four cases:
  *
  * 1. web / File
- * 2. desktop / File
+ * 2. desktop / File (+ path)
  * 3. desktop / path
+ * 4. desktop / ZipItem
  *
  * For the when and why, read on.
  *
@@ -490,66 +483,73 @@ export const uploader = async (
  *
  * In the web context, we'll always get a File, since within the browser we
  * cannot programmatically construct paths to or arbitrarily access files on the
- * user's filesystem. Note that even if we were to have an absolute path at
- * hand, we cannot programmatically create such File objects to arbitrary
- * absolute paths on user's local filesystem for security reasons.
+ * user's file system.
+ *
+ * > Note that even if we were to somehow have an absolute path at hand, we
+ *   cannot programmatically create such File objects to arbitrary absolute
+ *   paths on user's local file system for security reasons.
  *
  * So in the web context, this will always be a File we get as a result of an
- * explicit user interaction (e.g. drag and drop).
+ * explicit user interaction (e.g. drag and drop or using a file selector).
  *
- * In the desktop context, this can be either a File or a path.
+ * In the desktop context, this can be either a File (+ path), or a path, or an
+ * entry within a zip file.
  *
  * 2. If the user provided us this file via some user interaction (say a drag
- *    and a drop), this'll still be a File.
+ *    and a drop), this'll still be a File. But unlike in the web context, we
+ *    also have access to the full path of this file.
  *
- * 3. However, when running in the desktop app we have the ability to access
- *    absolute paths on the user's file system. For example, if the user asks us
- *    to watch certain folders on their disk for changes, we'll be able to pick
- *    up new images being added, and in such cases, the parameter here will be a
- *    path. Another example is when resuming an previously interrupted upload -
- *    we'll only have the path at hand in such cases, not the File object.
+ * 3. In addition, when running in the desktop app we have the ability to
+ *    initate programmatic access absolute paths on the user's file system. For
+ *    example, if the user asks us to watch certain folders on their disk for
+ *    changes, we'll be able to pick up new images being added, and in such
+ *    cases, the parameter here will be a path. Another example is when resuming
+ *    an previously interrupted upload - we'll only have the path at hand in
+ *    such cases, not the original File object since the app subsequently
+ *    restarted.
  *
- * Case 2, when we're provided a path, is simple. We don't have a choice, since
- * we cannot still programmatically construct a File object (we can construct it
- * on the Node.js layer, but it can't then be transferred over the IPC
- * boundary). So all our operations use the path itself.
+ * 4. The user might've also initiated an upload of a zip file (or we might be
+ *    resuming one). In such cases we will get a tuple (path to the zip file on
+ *    the local file system, and the name of the entry within that zip file).
  *
- * Case 3 involves a choice on a use-case basis, since
+ * Case 3 and 4, when we're provided a path, are simple. We don't have a choice,
+ * since we cannot still programmatically construct a File object (we can
+ * construct it on the Node.js layer, but it can't then be transferred over the
+ * IPC boundary). So all our operations use the path itself.
  *
- * (a) unlike in the web context, such File objects also have the full path.
- *     See: [Note: File paths when running under Electron].
+ * Case 2 involves a choice on a use-case basis. Neither File nor the path is a
+ * better choice for all use cases.
  *
- * (b) neither File nor the path is a better choice for all use cases.
- *
- * The advantage of the File object is that the browser has already read it into
- * memory for us. The disadvantage comes in the case where we need to
- * communicate with the native Node.js layer of our desktop app. Since this
- * communication happens over IPC, the File's contents need to be serialized and
- * copied, which is a bummer for large videos etc.
+ * > The advantage of the File object is that the browser has already read it
+ *   into memory for us. The disadvantage comes in the case where we need to
+ *   communicate with the native Node.js layer of our desktop app. Since this
+ *   communication happens over IPC, the File's contents need to be serialized
+ *   and copied, which is a bummer for large videos etc.
  */
-const readFileOrPath = async (
-    fileOrPath: File | string,
-): Promise<FileStream> => {
+const readUploadItem = async (uploadItem: UploadItem): Promise<FileStream> => {
     let underlyingStream: ReadableStream;
     let file: File | undefined;
     let fileSize: number;
     let lastModifiedMs: number;
 
-    if (fileOrPath instanceof File) {
-        file = fileOrPath;
-        underlyingStream = file.stream();
-        fileSize = file.size;
-        lastModifiedMs = file.lastModified;
-    } else {
-        const path = fileOrPath;
+    if (typeof uploadItem == "string" || Array.isArray(uploadItem)) {
         const {
             response,
             size,
             lastModifiedMs: lm,
-        } = await readStream(ensureElectron(), path);
+        } = await readStream(ensureElectron(), uploadItem);
         underlyingStream = response.body;
         fileSize = size;
         lastModifiedMs = lm;
+    } else {
+        if (uploadItem instanceof File) {
+            file = uploadItem;
+        } else {
+            file = uploadItem.file;
+        }
+        underlyingStream = file.stream();
+        fileSize = file.size;
+        lastModifiedMs = file.lastModified;
     }
 
     const N = ENCRYPTION_CHUNK_SIZE;
@@ -596,17 +596,17 @@ interface ReadAssetDetailsResult {
 }
 
 /**
- * Read the file(s) to determine the type, size and last modified time of the
- * given {@link asset}.
+ * Read the associated file(s) to determine the type, size and last modified
+ * time of the given {@link asset}.
  */
 const readAssetDetails = async ({
     isLivePhoto,
     livePhotoAssets,
-    fileOrPath,
+    uploadItem,
 }: UploadAsset): Promise<ReadAssetDetailsResult> =>
     isLivePhoto
         ? readLivePhotoDetails(livePhotoAssets)
-        : readImageOrVideoDetails(fileOrPath);
+        : readImageOrVideoDetails(uploadItem);
 
 const readLivePhotoDetails = async ({ image, video }: LivePhotoAssets) => {
     const img = await readImageOrVideoDetails(image);
@@ -632,18 +632,18 @@ const readLivePhotoDetails = async ({ image, video }: LivePhotoAssets) => {
  * While we're at it, also return the size of the file, and its last modified
  * time (expressed as epoch milliseconds).
  *
- * @param fileOrPath See: [Note: Reading a fileOrPath]
+ * @param uploadItem See: [Note: Reading a UploadItem]
  */
-const readImageOrVideoDetails = async (fileOrPath: File | string) => {
+const readImageOrVideoDetails = async (uploadItem: UploadItem) => {
     const { stream, fileSize, lastModifiedMs } =
-        await readFileOrPath(fileOrPath);
+        await readUploadItem(uploadItem);
 
     const fileTypeInfo = await detectFileTypeInfoFromChunk(async () => {
         const reader = stream.getReader();
         const chunk = ensure((await reader.read()).value);
         await reader.cancel();
         return chunk;
-    }, fopFileName(fileOrPath));
+    }, uploadItemFileName(uploadItem));
 
     return { fileTypeInfo, fileSize, lastModifiedMs };
 };
@@ -669,7 +669,7 @@ interface ExtractAssetMetadataResult {
  * {@link parsedMetadataJSONMap} for the assets. Return the resultant metadatum.
  */
 const extractAssetMetadata = async (
-    { isLivePhoto, fileOrPath, livePhotoAssets }: UploadAsset,
+    { isLivePhoto, uploadItem, livePhotoAssets }: UploadAsset,
     fileTypeInfo: FileTypeInfo,
     lastModifiedMs: number,
     collectionID: number,
@@ -686,7 +686,7 @@ const extractAssetMetadata = async (
               worker,
           )
         : await extractImageOrVideoMetadata(
-              fileOrPath,
+              uploadItem,
               fileTypeInfo,
               lastModifiedMs,
               collectionID,
@@ -721,7 +721,7 @@ const extractLivePhotoMetadata = async (
     return {
         metadata: {
             ...imageMetadata,
-            title: fopFileName(livePhotoAssets.image),
+            title: uploadItemFileName(livePhotoAssets.image),
             fileType: FILE_TYPE.LIVE_PHOTO,
             imageHash: imageMetadata.hash,
             videoHash: videoHash,
@@ -732,33 +732,33 @@ const extractLivePhotoMetadata = async (
 };
 
 const extractImageOrVideoMetadata = async (
-    fileOrPath: File | string,
+    uploadItem: UploadItem,
     fileTypeInfo: FileTypeInfo,
     lastModifiedMs: number,
     collectionID: number,
     parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
     worker: Remote<DedicatedCryptoWorker>,
 ) => {
-    const fileName = fopFileName(fileOrPath);
+    const fileName = uploadItemFileName(uploadItem);
     const { fileType } = fileTypeInfo;
 
     let extractedMetadata: ParsedExtractedMetadata;
     if (fileType === FILE_TYPE.IMAGE) {
         extractedMetadata =
             (await tryExtractImageMetadata(
-                fileOrPath,
+                uploadItem,
                 fileTypeInfo,
                 lastModifiedMs,
             )) ?? NULL_EXTRACTED_METADATA;
     } else if (fileType === FILE_TYPE.VIDEO) {
         extractedMetadata =
-            (await tryExtractVideoMetadata(fileOrPath)) ??
+            (await tryExtractVideoMetadata(uploadItem)) ??
             NULL_EXTRACTED_METADATA;
     } else {
-        throw new Error(`Unexpected file type ${fileType} for ${fileOrPath}`);
+        throw new Error(`Unexpected file type ${fileType} for ${uploadItem}`);
     }
 
-    const hash = await computeHash(fileOrPath, worker);
+    const hash = await computeHash(uploadItem, worker);
 
     const modificationTime = lastModifiedMs * 1000;
     const creationTime =
@@ -802,46 +802,48 @@ const NULL_EXTRACTED_METADATA: ParsedExtractedMetadata = {
 };
 
 async function tryExtractImageMetadata(
-    fileOrPath: File | string,
+    uploadItem: UploadItem,
     fileTypeInfo: FileTypeInfo,
     lastModifiedMs: number,
 ): Promise<ParsedExtractedMetadata> {
     let file: File;
-    if (fileOrPath instanceof File) {
-        file = fileOrPath;
-    } else {
-        const path = fileOrPath;
+    if (typeof uploadItem == "string" || Array.isArray(uploadItem)) {
         // The library we use for extracting EXIF from images, exifr, doesn't
         // support streams. But unlike videos, for images it is reasonable to
         // read the entire stream into memory here.
-        const { response } = await readStream(ensureElectron(), path);
+        const { response } = await readStream(ensureElectron(), uploadItem);
+        const path = typeof uploadItem == "string" ? uploadItem : uploadItem[1];
         file = new File([await response.arrayBuffer()], basename(path), {
             lastModified: lastModifiedMs,
         });
+    } else if (uploadItem instanceof File) {
+        file = uploadItem;
+    } else {
+        file = uploadItem.file;
     }
 
     try {
         return await parseImageMetadata(file, fileTypeInfo);
     } catch (e) {
-        log.error(`Failed to extract image metadata for ${fileOrPath}`, e);
+        log.error(`Failed to extract image metadata for ${uploadItem}`, e);
         return undefined;
     }
 }
 
-const tryExtractVideoMetadata = async (fileOrPath: File | string) => {
+const tryExtractVideoMetadata = async (uploadItem: UploadItem) => {
     try {
-        return await ffmpeg.extractVideoMetadata(fileOrPath);
+        return await ffmpeg.extractVideoMetadata(uploadItem);
     } catch (e) {
-        log.error(`Failed to extract video metadata for ${fileOrPath}`, e);
+        log.error(`Failed to extract video metadata for ${uploadItem}`, e);
         return undefined;
     }
 };
 
 const computeHash = async (
-    fileOrPath: File | string,
+    uploadItem: UploadItem,
     worker: Remote<DedicatedCryptoWorker>,
 ) => {
-    const { stream, chunkCount } = await readFileOrPath(fileOrPath);
+    const { stream, chunkCount } = await readUploadItem(uploadItem);
     const hashState = await worker.initChunkHashing();
 
     const streamReader = stream.getReader();
@@ -910,11 +912,11 @@ const areFilesSameNoHash = (f: Metadata, g: Metadata) => {
 
 const readAsset = async (
     fileTypeInfo: FileTypeInfo,
-    { isLivePhoto, fileOrPath, livePhotoAssets }: UploadAsset,
+    { isLivePhoto, uploadItem, livePhotoAssets }: UploadAsset,
 ): Promise<ThumbnailedFile> =>
     isLivePhoto
         ? await readLivePhoto(livePhotoAssets, fileTypeInfo)
-        : await readImageOrVideo(fileOrPath, fileTypeInfo);
+        : await readImageOrVideo(uploadItem, fileTypeInfo);
 
 const readLivePhoto = async (
     livePhotoAssets: LivePhotoAssets,
@@ -930,28 +932,28 @@ const readLivePhoto = async (
             extension: fileTypeInfo.imageType,
             fileType: FILE_TYPE.IMAGE,
         },
-        await readFileOrPath(livePhotoAssets.image),
+        await readUploadItem(livePhotoAssets.image),
     );
-    const videoFileStreamOrData = await readFileOrPath(livePhotoAssets.video);
+    const videoFileStreamOrData = await readUploadItem(livePhotoAssets.video);
 
     // The JS zip library that encodeLivePhoto uses does not support
     // ReadableStreams, so pass the file (blob) if we have one, otherwise read
     // the entire stream into memory and pass the resultant data.
     //
     // This is a reasonable behaviour since the videos corresponding to live
-    // photos are only a couple of seconds long (we have already done a
-    // pre-flight check to ensure their size is small in `areLivePhotoAssets`).
+    // photos are only a couple of seconds long (we've already done a pre-flight
+    // check during areLivePhotoAssets to ensure their size is small).
     const fileOrData = async (sd: FileStream | Uint8Array) => {
-        const _fs = async ({ file, stream }: FileStream) =>
+        const fos = async ({ file, stream }: FileStream) =>
             file ? file : await readEntireStream(stream);
-        return sd instanceof Uint8Array ? sd : _fs(sd);
+        return sd instanceof Uint8Array ? sd : fos(sd);
     };
 
     return {
         fileStreamOrData: await encodeLivePhoto({
-            imageFileName: fopFileName(livePhotoAssets.image),
+            imageFileName: uploadItemFileName(livePhotoAssets.image),
             imageFileOrData: await fileOrData(imageFileStreamOrData),
-            videoFileName: fopFileName(livePhotoAssets.video),
+            videoFileName: uploadItemFileName(livePhotoAssets.video),
             videoFileOrData: await fileOrData(videoFileStreamOrData),
         }),
         thumbnail,
@@ -960,11 +962,11 @@ const readLivePhoto = async (
 };
 
 const readImageOrVideo = async (
-    fileOrPath: File | string,
+    uploadItem: UploadItem,
     fileTypeInfo: FileTypeInfo,
 ) => {
-    const fileStream = await readFileOrPath(fileOrPath);
-    return withThumbnail(fileOrPath, fileTypeInfo, fileStream);
+    const fileStream = await readUploadItem(uploadItem);
+    return withThumbnail(uploadItem, fileTypeInfo, fileStream);
 };
 
 // TODO(MR): Merge with the uploader
@@ -987,14 +989,17 @@ const moduleState = new ModuleState();
 /**
  * Augment the given {@link dataOrStream} with thumbnail information.
  *
- * This is a companion method for {@link readFileOrPath}, and can be used to
- * convert the result of {@link readFileOrPath} into an {@link ThumbnailedFile}.
+ * This is a companion method for {@link readUploadItem}, and can be used to
+ * convert the result of {@link readUploadItem} into an {@link ThumbnailedFile}.
  *
- * Note: The `fileStream` in the returned ThumbnailedFile may be different from
- * the one passed to the function.
+ * @param uploadItem The {@link UploadItem} where the given {@link fileStream}
+ * came from.
+ *
+ * Note: The `fileStream` in the returned {@link ThumbnailedFile} may be
+ * different from the one passed to the function.
  */
 const withThumbnail = async (
-    fileOrPath: File | string,
+    uploadItem: UploadItem,
     fileTypeInfo: FileTypeInfo,
     fileStream: FileStream,
 ): Promise<ThumbnailedFile> => {
@@ -1007,14 +1012,12 @@ const withThumbnail = async (
         fileTypeInfo.fileType == FILE_TYPE.IMAGE &&
         moduleState.isNativeImageThumbnailGenerationNotAvailable;
 
-    // 1. Native thumbnail generation using file's path.
-    if (electron && !notAvailable) {
+    // 1. Native thumbnail generation using items's (effective) path.
+    if (electron && !notAvailable && !(uploadItem instanceof File)) {
         try {
-            // When running in the context of our desktop app, File paths will
-            // be absolute. See: [Note: File paths when running under Electron].
             thumbnail = await generateThumbnailNative(
                 electron,
-                fileOrPath instanceof File ? fileOrPath["path"] : fileOrPath,
+                uploadItem,
                 fileTypeInfo,
             );
         } catch (e) {
@@ -1028,9 +1031,9 @@ const withThumbnail = async (
 
     if (!thumbnail) {
         let blob: Blob | undefined;
-        if (fileOrPath instanceof File) {
+        if (uploadItem instanceof File) {
             // 2. Browser based thumbnail generation for File (blobs).
-            blob = fileOrPath;
+            blob = uploadItem;
         } else {
             // 3. Browser based thumbnail generation for paths.
             //
@@ -1046,12 +1049,14 @@ const withThumbnail = async (
             // The fallback in this case involves reading the entire stream into
             // memory, and passing that data across the IPC boundary in a single
             // go (i.e. not in a streaming manner). This is risky for videos of
-            // unbounded sizes, plus that isn't the expected scenario. So
-            // instead of trying to cater for arbitrary exceptions, we only run
-            // this fallback to cover for the case where thumbnail generation
-            // was not available for an image file on Windows. If/when we add
-            // support of native thumbnailing on Windows too, this entire branch
-            // can be removed.
+            // unbounded sizes, plus we shouldn't even be getting here unless
+            // something went wrong.
+            //
+            // So instead of trying to cater for arbitrary exceptions, we only
+            // run this fallback to cover for the case where thumbnail
+            // generation was not available for an image file on Windows.
+            // If/when we add support of native thumbnailing on Windows too,
+            // this entire branch can be removed.
 
             if (fileTypeInfo.fileType == FILE_TYPE.IMAGE) {
                 const data = await readEntireStream(fileStream.stream);
@@ -1062,7 +1067,7 @@ const withThumbnail = async (
                 fileData = data;
             } else {
                 log.warn(
-                    `Not using browser based thumbnail generation fallback for video at path ${fileOrPath}`,
+                    `Not using browser based thumbnail generation fallback for video at path ${uploadItem}`,
                 );
             }
         }

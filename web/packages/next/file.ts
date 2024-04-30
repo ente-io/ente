@@ -1,5 +1,3 @@
-import type { ElectronFile } from "./types/file";
-
 /**
  * The two parts of a file name - the name itself, and an (optional) extension.
  *
@@ -82,27 +80,3 @@ export const dirname = (path: string) => {
     }
     return pathComponents.join("/");
 };
-
-/**
- * Return a short description of the given {@link fileOrPath} suitable for
- * helping identify it in log messages.
- */
-export const fopLabel = (fileOrPath: File | string) =>
-    fileOrPath instanceof File ? `File(${fileOrPath.name})` : fileOrPath;
-
-export function getFileNameSize(file: File | ElectronFile) {
-    return `${file.name}_${convertBytesToHumanReadable(file.size)}`;
-}
-
-export function convertBytesToHumanReadable(
-    bytes: number,
-    precision = 2,
-): string {
-    if (bytes === 0 || isNaN(bytes)) {
-        return "0 MB";
-    }
-
-    const i = Math.floor(Math.log(bytes) / Math.log(1024));
-    const sizes = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
-    return (bytes / Math.pow(1024, i)).toFixed(precision) + " " + sizes[i];
-}

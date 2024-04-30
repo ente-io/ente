@@ -211,18 +211,26 @@ export default function Gallery() {
         disabled: shouldDisableDropzone,
     });
     const {
-        selectedFiles: webFileSelectorFiles,
+        selectedFiles: fileSelectorFiles,
         open: openFileSelector,
         getInputProps: getFileSelectorInputProps,
     } = useFileInput({
         directory: false,
     });
     const {
-        selectedFiles: webFolderSelectorFiles,
+        selectedFiles: folderSelectorFiles,
         open: openFolderSelector,
         getInputProps: getFolderSelectorInputProps,
     } = useFileInput({
         directory: true,
+    });
+    const {
+        selectedFiles: fileSelectorZipFiles,
+        open: openZipFileSelector,
+        getInputProps: getZipFileSelectorInputProps,
+    } = useFileInput({
+        directory: false,
+        accept: ".zip",
     });
 
     const [isInSearchMode, setIsInSearchMode] = useState(false);
@@ -1023,6 +1031,7 @@ export default function Gallery() {
                     getDragAndDropInputProps={getDragAndDropInputProps}
                     getFileSelectorInputProps={getFileSelectorInputProps}
                     getFolderSelectorInputProps={getFolderSelectorInputProps}
+                    getZipFileSelectorInputProps={getZipFileSelectorInputProps}
                 />
                 {blockingLoad && (
                     <LoadingOverlay>
@@ -1112,7 +1121,6 @@ export default function Gallery() {
                         null,
                         false,
                     )}
-                    uploadTypeSelectorIntent={uploadTypeSelectorIntent}
                     setLoading={setBlockingLoad}
                     setCollectionNamerAttributes={setCollectionNamerAttributes}
                     setShouldDisableDropzone={setShouldDisableDropzone}
@@ -1121,13 +1129,18 @@ export default function Gallery() {
                     isFirstUpload={
                         !hasNonSystemCollections(collectionSummaries)
                     }
-                    webFileSelectorFiles={webFileSelectorFiles}
-                    webFolderSelectorFiles={webFolderSelectorFiles}
-                    dragAndDropFiles={dragAndDropFiles}
-                    uploadTypeSelectorView={uploadTypeSelectorView}
-                    showUploadFilesDialog={openFileSelector}
-                    showUploadDirsDialog={openFolderSelector}
-                    showSessionExpiredMessage={showSessionExpiredMessage}
+                    {...{
+                        dragAndDropFiles,
+                        openFileSelector,
+                        fileSelectorFiles,
+                        openFolderSelector,
+                        folderSelectorFiles,
+                        openZipFileSelector,
+                        fileSelectorZipFiles,
+                        uploadTypeSelectorIntent,
+                        uploadTypeSelectorView,
+                        showSessionExpiredMessage,
+                    }}
                 />
                 <Sidebar
                     collectionSummaries={collectionSummaries}

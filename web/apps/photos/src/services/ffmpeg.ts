@@ -1,4 +1,3 @@
-import { ElectronFile } from "@/next/types/file";
 import type { Electron } from "@/next/types/ipc";
 import { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { validateAndGetCreationUnixTimeInMicroSeconds } from "@ente/shared/time";
@@ -11,6 +10,11 @@ import {
 import { NULL_LOCATION } from "constants/upload";
 import type { ParsedExtractedMetadata } from "types/metadata";
 import type { DedicatedFFmpegWorker } from "worker/ffmpeg.worker";
+import {
+    toDataOrPathOrZipEntry,
+    type DesktopUploadItem,
+    type UploadItem,
+} from "./upload/types";
 
 /**
  * Generate a thumbnail for the given video using a wasm FFmpeg running in a web
@@ -51,7 +55,7 @@ const _generateVideoThumbnail = async (
  * for the new files that the user is adding.
  *
  * @param dataOrPath The input video's data or the path to the video on the
- * user's local filesystem. See: [Note: Reading a fileOrPath].
+ * user's local file system. See: [Note: Reading a UploadItem].
  *
  * @returns JPEG data of the generated thumbnail.
  *
@@ -59,12 +63,12 @@ const _generateVideoThumbnail = async (
  */
 export const generateVideoThumbnailNative = async (
     electron: Electron,
-    dataOrPath: Uint8Array | string,
+    desktopUploadItem: DesktopUploadItem,
 ) =>
     _generateVideoThumbnail((seekTime: number) =>
         electron.ffmpegExec(
             makeGenThumbnailCommand(seekTime),
-            dataOrPath,
+            toDataOrPathOrZipEntry(desktopUploadItem),
             "jpeg",
             0,
         ),
@@ -93,18 +97,23 @@ const makeGenThumbnailCommand = (seekTime: number) => [
  * This function is called during upload, when we need to extract the metadata
  * of videos that the user is uploading.
  *
- * @param fileOrPath A {@link File}, or the absolute path to a file on the
+ * @param uploadItem A {@link File}, or the absolute path to a file on the
  * user's local filesytem. A path can only be provided when we're running in the
  * context of our desktop app.
  */
 export const extractVideoMetadata = async (
-    fileOrPath: File | string,
+    uploadItem: UploadItem,
 ): Promise<ParsedExtractedMetadata> => {
     const command = extractVideoMetadataCommand;
     const outputData =
-        fileOrPath instanceof File
-            ? await ffmpegExecWeb(command, fileOrPath, "txt", 0)
-            : await electron.ffmpegExec(command, fileOrPath, "txt", 0);
+        uploadItem instanceof File
+            ? await ffmpegExecWeb(command, uploadItem, "txt", 0)
+            : await electron.ffmpegExec(
+                  command,
+                  toDataOrPathOrZipEntry(uploadItem),
+                  "txt",
+                  0,
+              );
 
     return parseFFmpegExtractedMetadata(outputData);
 };
@@ -200,23 +209,6 @@ function parseCreationTime(creationTime: string) {
     return dateTime;
 }
 
-/** Called when viewing a file */
-export async function convertToMP4(file: File) {
-    return await ffmpegExec2(
-        [
-            ffmpegPathPlaceholder,
-            "-i",
-            inputPathPlaceholder,
-            "-preset",
-            "ultrafast",
-            outputPathPlaceholder,
-        ],
-        file,
-        "mp4",
-        30 * 1000,
-    );
-}
-
 /**
  * Run the given FFmpeg command using a wasm FFmpeg running in a web worker.
  *
@@ -234,55 +226,53 @@ const ffmpegExecWeb = async (
 };
 
 /**
- * Run the given FFmpeg command using a native FFmpeg binary bundled with our
- * desktop app.
+ * Convert a video from a format that is not supported in the browser to MP4.
+ *
+ * This function is called when the user views a video or a live photo, and we
+ * want to play it back. The idea is to convert it to MP4 which has much more
+ * universal support in browsers.
+ *
+ * @param blob The video blob.
+ *
+ * @returns The mp4 video data.
+ */
+export const convertToMP4 = async (blob: Blob) =>
+    ffmpegExecNativeOrWeb(
+        [
+            ffmpegPathPlaceholder,
+            "-i",
+            inputPathPlaceholder,
+            "-preset",
+            "ultrafast",
+            outputPathPlaceholder,
+        ],
+        blob,
+        "mp4",
+        30 * 1000,
+    );
+
+/**
+ * Run the given FFmpeg command using a native FFmpeg binary when we're running
+ * in the context of our desktop app, otherwise using the browser based wasm
+ * FFmpeg implemenation.
  *
  * See also: {@link ffmpegExecWeb}.
  */
-/*
-TODO(MR): Remove me
-const ffmpegExecNative = async (
-    electron: Electron,
+const ffmpegExecNativeOrWeb = async (
     command: string[],
     blob: Blob,
-    timeoutMs: number = 0,
-) => {
-    const electron = globalThis.electron;
-    if (electron) {
-        const data = new Uint8Array(await blob.arrayBuffer());
-        return await electron.ffmpegExec(command, data, timeoutMs);
-    } else {
-        const worker = await workerFactory.lazy();
-        return await worker.exec(command, blob, timeoutMs);
-    }
-};
-*/
-
-const ffmpegExec2 = async (
-    command: string[],
-    inputFile: File | ElectronFile,
     outputFileExtension: string,
-    timeoutMS: number = 0,
+    timeoutMs: number,
 ) => {
     const electron = globalThis.electron;
-    if (electron || false) {
-        throw new Error("WIP");
-        // return electron.ffmpegExec(
-        //     command,
-        //     /* TODO(MR): ElectronFile changes */
-        //     inputFile as unknown as string,
-        //     outputFileName,
-        //     timeoutMS,
-        // );
-    } else {
-        /* TODO(MR): ElectronFile changes */
-        return ffmpegExecWeb(
+    if (electron)
+        return electron.ffmpegExec(
             command,
-            inputFile as File,
+            new Uint8Array(await blob.arrayBuffer()),
             outputFileExtension,
-            timeoutMS,
+            timeoutMs,
         );
-    }
+    else return ffmpegExecWeb(command, blob, outputFileExtension, timeoutMs);
 };
 
 /** Lazily create a singleton instance of our worker */
