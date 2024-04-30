@@ -365,7 +365,7 @@ const main = () => {
     // Emitted once, when Electron has finished initializing.
     //
     // Note that some Electron APIs can only be used after this event occurs.
-    app.on("ready", () => {
+    void app.whenReady().then(() => {
         void (async () => {
             // Create window and prepare for the renderer.
             mainWindow = createMainWindow();
