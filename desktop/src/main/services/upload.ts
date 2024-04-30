@@ -14,7 +14,7 @@ export const listZipItems = async (zipPath: string): Promise<ZipItem[]> => {
     for (const entry of Object.values(entries)) {
         const basename = path.basename(entry.name);
         // Ignore "hidden" files (files whose names begins with a dot).
-        if (entry.isFile && basename.length > 0 && basename[0] != ".") {
+        if (entry.isFile && basename.startsWith(".")) {
             // `entry.name` is the path within the zip.
             entryNames.push(entry.name);
         }

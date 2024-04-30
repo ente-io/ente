@@ -24,7 +24,7 @@ export const detectFaces = async (input: Float32Array) => {
     };
     const results = await session.run(feeds);
     log.debug(() => `onnx/yolo face detection took ${Date.now() - t} ms`);
-    return ensure(results["output"]).data;
+    return ensure(results.output).data;
 };
 
 const cachedFaceEmbeddingSession = makeCachedInferenceSession(
@@ -47,7 +47,6 @@ export const faceEmbedding = async (input: Float32Array) => {
     const results = await session.run(feeds);
     log.debug(() => `onnx/yolo face embedding took ${Date.now() - t} ms`);
     /* Need these model specific casts to extract and type the result */
-    return (results.embeddings as unknown as Record<string, unknown>)[
-        "cpuData"
-    ] as Float32Array;
+    return (results.embeddings as unknown as Record<string, unknown>)
+        .cpuData as Float32Array;
 };

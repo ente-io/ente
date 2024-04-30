@@ -45,7 +45,7 @@ const clipImageEmbedding_ = async (jpegFilePath: string) => {
             `onnx/clip image embedding took ${Date.now() - t1} ms (prep: ${t2 - t1} ms, inference: ${Date.now() - t2} ms)`,
     );
     /* Need these model specific casts to type the result */
-    const imageEmbedding = ensure(results["output"]).data as Float32Array;
+    const imageEmbedding = ensure(results.output).data as Float32Array;
     return normalizeEmbedding(imageEmbedding);
 };
 
@@ -120,13 +120,12 @@ const getRGBData = async (jpegFilePath: string): Promise<number[]> => {
 
 const normalizeEmbedding = (embedding: Float32Array) => {
     let normalization = 0;
-    for (let index = 0; index < embedding.length; index++) {
-        normalization += ensure(embedding[index]) * ensure(embedding[index]);
-    }
+    for (const v of embedding) normalization += v * v;
+
     const sqrtNormalization = Math.sqrt(normalization);
-    for (let index = 0; index < embedding.length; index++) {
+    for (let index = 0; index < embedding.length; index++)
         embedding[index] = ensure(embedding[index]) / sqrtNormalization;
-    }
+
     return embedding;
 };
 
@@ -168,6 +167,6 @@ export const clipTextEmbeddingIfAvailable = async (text: string) => {
         () =>
             `onnx/clip text embedding took ${Date.now() - t1} ms (prep: ${t2 - t1} ms, inference: ${Date.now() - t2} ms)`,
     );
-    const textEmbedding = ensure(results["output"]).data as Float32Array;
+    const textEmbedding = ensure(results.output).data as Float32Array;
     return normalizeEmbedding(textEmbedding);
 };

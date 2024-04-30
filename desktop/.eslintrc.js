@@ -5,8 +5,7 @@ module.exports = {
         "eslint:recommended",
         "plugin:@typescript-eslint/eslint-recommended",
         "plugin:@typescript-eslint/strict-type-checked",
-        /* What we really want eventually */
-        // "plugin:@typescript-eslint/stylistic-type-checked",
+        "plugin:@typescript-eslint/stylistic-type-checked",
     ],
     plugins: ["@typescript-eslint"],
     parser: "@typescript-eslint/parser",

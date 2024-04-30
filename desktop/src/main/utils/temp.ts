@@ -98,7 +98,9 @@ export const makeFileForDataOrPathOrZipItem = async (
 ): Promise<FileForDataOrPathOrZipItem> => {
     let path: string;
     let isFileTemporary: boolean;
-    let writeToTemporaryFile = async () => {};
+    let writeToTemporaryFile = async () => {
+        /* no-op */
+    };
 
     if (typeof dataOrPathOrZipItem == "string") {
         path = dataOrPathOrZipItem;
