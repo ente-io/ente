@@ -522,29 +522,30 @@ export const uploader = async (
  * communication happens over IPC, the File's contents need to be serialized and
  * copied, which is a bummer for large videos etc.
  */
-const readUploadItem = async (
-    fileOrPath: File | string,
-): Promise<FileStream> => {
+const readUploadItem = async (uploadItem: UploadItem): Promise<FileStream> => {
     let underlyingStream: ReadableStream;
     let file: File | undefined;
     let fileSize: number;
     let lastModifiedMs: number;
 
-    if (fileOrPath instanceof File) {
-        file = fileOrPath;
-        underlyingStream = file.stream();
-        fileSize = file.size;
-        lastModifiedMs = file.lastModified;
-    } else {
-        const path = fileOrPath;
+    if (typeof uploadItem == "string" || Array.isArray(uploadItem)) {
         const {
             response,
             size,
             lastModifiedMs: lm,
-        } = await readStream(ensureElectron(), path);
+        } = await readStream(ensureElectron(), uploadItem);
         underlyingStream = response.body;
         fileSize = size;
         lastModifiedMs = lm;
+    } else {
+        if (uploadItem instanceof File) {
+            file = uploadItem;
+        } else {
+            file = uploadItem.file;
+        }
+        underlyingStream = file.stream();
+        fileSize = file.size;
+        lastModifiedMs = file.lastModified;
     }
 
     const N = ENCRYPTION_CHUNK_SIZE;
@@ -591,8 +592,8 @@ interface ReadAssetDetailsResult {
 }
 
 /**
- * Read the file(s) to determine the type, size and last modified time of the
- * given {@link asset}.
+ * Read the associated file(s) to determine the type, size and last modified
+ * time of the given {@link asset}.
  */
 const readAssetDetails = async ({
     isLivePhoto,
@@ -664,7 +665,7 @@ interface ExtractAssetMetadataResult {
  * {@link parsedMetadataJSONMap} for the assets. Return the resultant metadatum.
  */
 const extractAssetMetadata = async (
-    { isLivePhoto, uploadItem: fileOrPath, livePhotoAssets }: UploadAsset,
+    { isLivePhoto, uploadItem, livePhotoAssets }: UploadAsset,
     fileTypeInfo: FileTypeInfo,
     lastModifiedMs: number,
     collectionID: number,
@@ -681,7 +682,7 @@ const extractAssetMetadata = async (
               worker,
           )
         : await extractImageOrVideoMetadata(
-              fileOrPath,
+              uploadItem,
               fileTypeInfo,
               lastModifiedMs,
               collectionID,
@@ -727,33 +728,33 @@ const extractLivePhotoMetadata = async (
 };
 
 const extractImageOrVideoMetadata = async (
-    fileOrPath: File | string,
+    uploadItem: UploadItem,
     fileTypeInfo: FileTypeInfo,
     lastModifiedMs: number,
     collectionID: number,
     parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
     worker: Remote<DedicatedCryptoWorker>,
 ) => {
-    const fileName = uploadItemFileName(fileOrPath);
+    const fileName = uploadItemFileName(uploadItem);
     const { fileType } = fileTypeInfo;
 
     let extractedMetadata: ParsedExtractedMetadata;
     if (fileType === FILE_TYPE.IMAGE) {
         extractedMetadata =
             (await tryExtractImageMetadata(
-                fileOrPath,
+                uploadItem,
                 fileTypeInfo,
                 lastModifiedMs,
             )) ?? NULL_EXTRACTED_METADATA;
     } else if (fileType === FILE_TYPE.VIDEO) {
         extractedMetadata =
-            (await tryExtractVideoMetadata(fileOrPath)) ??
+            (await tryExtractVideoMetadata(uploadItem)) ??
             NULL_EXTRACTED_METADATA;
     } else {
-        throw new Error(`Unexpected file type ${fileType} for ${fileOrPath}`);
+        throw new Error(`Unexpected file type ${fileType} for ${uploadItem}`);
     }
 
-    const hash = await computeHash(fileOrPath, worker);
+    const hash = await computeHash(uploadItem, worker);
 
     const modificationTime = lastModifiedMs * 1000;
     const creationTime =
@@ -797,46 +798,48 @@ const NULL_EXTRACTED_METADATA: ParsedExtractedMetadata = {
 };
 
 async function tryExtractImageMetadata(
-    fileOrPath: File | string,
+    uploadItem: UploadItem,
     fileTypeInfo: FileTypeInfo,
     lastModifiedMs: number,
 ): Promise<ParsedExtractedMetadata> {
     let file: File;
-    if (fileOrPath instanceof File) {
-        file = fileOrPath;
-    } else {
-        const path = fileOrPath;
+    if (typeof uploadItem == "string" || Array.isArray(uploadItem)) {
         // The library we use for extracting EXIF from images, exifr, doesn't
         // support streams. But unlike videos, for images it is reasonable to
         // read the entire stream into memory here.
-        const { response } = await readStream(ensureElectron(), path);
+        const { response } = await readStream(ensureElectron(), uploadItem);
+        const path = typeof uploadItem == "string" ? uploadItem : uploadItem[1];
         file = new File([await response.arrayBuffer()], basename(path), {
             lastModified: lastModifiedMs,
         });
+    } else if (uploadItem instanceof File) {
+        file = uploadItem;
+    } else {
+        file = uploadItem.file;
     }
 
     try {
         return await parseImageMetadata(file, fileTypeInfo);
     } catch (e) {
-        log.error(`Failed to extract image metadata for ${fileOrPath}`, e);
+        log.error(`Failed to extract image metadata for ${uploadItem}`, e);
         return undefined;
     }
 }
 
-const tryExtractVideoMetadata = async (fileOrPath: File | string) => {
+const tryExtractVideoMetadata = async (uploadItem: UploadItem) => {
     try {
-        return await ffmpeg.extractVideoMetadata(fileOrPath);
+        return await ffmpeg.extractVideoMetadata(uploadItem);
     } catch (e) {
-        log.error(`Failed to extract video metadata for ${fileOrPath}`, e);
+        log.error(`Failed to extract video metadata for ${uploadItem}`, e);
         return undefined;
     }
 };
 
 const computeHash = async (
-    fileOrPath: File | string,
+    uploadItem: UploadItem,
     worker: Remote<DedicatedCryptoWorker>,
 ) => {
-    const { stream, chunkCount } = await readUploadItem(fileOrPath);
+    const { stream, chunkCount } = await readUploadItem(uploadItem);
     const hashState = await worker.initChunkHashing();
 
     const streamReader = stream.getReader();
@@ -905,11 +908,11 @@ const areFilesSameNoHash = (f: Metadata, g: Metadata) => {
 
 const readAsset = async (
     fileTypeInfo: FileTypeInfo,
-    { isLivePhoto, uploadItem: fileOrPath, livePhotoAssets }: UploadAsset,
+    { isLivePhoto, uploadItem, livePhotoAssets }: UploadAsset,
 ): Promise<ThumbnailedFile> =>
     isLivePhoto
         ? await readLivePhoto(livePhotoAssets, fileTypeInfo)
-        : await readImageOrVideo(fileOrPath, fileTypeInfo);
+        : await readImageOrVideo(uploadItem, fileTypeInfo);
 
 const readLivePhoto = async (
     livePhotoAssets: LivePhotoAssets,
@@ -955,11 +958,11 @@ const readLivePhoto = async (
 };
 
 const readImageOrVideo = async (
-    fileOrPath: File | string,
+    uploadItem: UploadItem,
     fileTypeInfo: FileTypeInfo,
 ) => {
-    const fileStream = await readUploadItem(fileOrPath);
-    return withThumbnail(fileOrPath, fileTypeInfo, fileStream);
+    const fileStream = await readUploadItem(uploadItem);
+    return withThumbnail(uploadItem, fileTypeInfo, fileStream);
 };
 
 // TODO(MR): Merge with the uploader
@@ -985,11 +988,14 @@ const moduleState = new ModuleState();
  * This is a companion method for {@link readUploadItem}, and can be used to
  * convert the result of {@link readUploadItem} into an {@link ThumbnailedFile}.
  *
- * Note: The `fileStream` in the returned ThumbnailedFile may be different from
- * the one passed to the function.
+ * @param uploadItem The {@link UploadItem} where the given {@link fileStream}
+ * came from.
+ *
+ * Note: The `fileStream` in the returned {@link ThumbnailedFile} may be
+ * different from the one passed to the function.
  */
 const withThumbnail = async (
-    fileOrPath: File | string,
+    uploadItem: UploadItem,
     fileTypeInfo: FileTypeInfo,
     fileStream: FileStream,
 ): Promise<ThumbnailedFile> => {
@@ -1009,7 +1015,7 @@ const withThumbnail = async (
             // be absolute. See: [Note: File paths when running under Electron].
             thumbnail = await generateThumbnailNative(
                 electron,
-                fileOrPath instanceof File ? fileOrPath["path"] : fileOrPath,
+                uploadItem instanceof File ? uploadItem["path"] : uploadItem,
                 fileTypeInfo,
             );
         } catch (e) {
@@ -1023,9 +1029,9 @@ const withThumbnail = async (
 
     if (!thumbnail) {
         let blob: Blob | undefined;
-        if (fileOrPath instanceof File) {
+        if (uploadItem instanceof File) {
             // 2. Browser based thumbnail generation for File (blobs).
-            blob = fileOrPath;
+            blob = uploadItem;
         } else {
             // 3. Browser based thumbnail generation for paths.
             //
@@ -1057,7 +1063,7 @@ const withThumbnail = async (
                 fileData = data;
             } else {
                 log.warn(
-                    `Not using browser based thumbnail generation fallback for video at path ${fileOrPath}`,
+                    `Not using browser based thumbnail generation fallback for video at path ${uploadItem}`,
                 );
             }
         }
