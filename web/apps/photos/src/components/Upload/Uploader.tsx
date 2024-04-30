@@ -284,12 +284,26 @@ export default function Uploader({
             return;
         }
 
-        const files = [
-            dragAndDropFiles,
-            fileSelectorFiles,
-            folderSelectorFiles,
-            fileSelectorZipFiles,
-        ].flat();
+        let files: File[];
+
+        switch (pickedUploadType.current) {
+            case PICKED_UPLOAD_TYPE.FILES:
+                files = fileSelectorFiles;
+                break;
+
+            case PICKED_UPLOAD_TYPE.FOLDERS:
+                files = folderSelectorFiles;
+                break;
+
+            case PICKED_UPLOAD_TYPE.ZIPS:
+                files = fileSelectorZipFiles;
+                break;
+
+            default:
+                files = dragAndDropFiles;
+                break;
+        }
+
         if (electron) {
             desktopFilesAndZipItems(electron, files).then(
                 ({ fileAndPaths, zipItems }) => {
