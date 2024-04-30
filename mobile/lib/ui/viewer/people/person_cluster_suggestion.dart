@@ -273,7 +273,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
         final files = suggestion.filesInCluster;
         final clusterID = suggestion.clusterIDToMerge;
         for (final file in files.sublist(0, min(files.length, 8))) {
-          unawaited(PersonFaceWidget.precomputeFaceCrops(file, clusterID));
+          unawaited(PersonFaceWidget.precomputeNextFaceCrops(file, clusterID));
           compCount++;
           if (compCount >= maxComputations) {
             break;

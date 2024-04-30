@@ -33,7 +33,7 @@ class PersonFaceWidget extends StatelessWidget {
         ),
         super(key: key);
 
-  static Future<void> precomputeFaceCrops(file, clusterID) async {
+  static Future<void> precomputeNextFaceCrops(file, clusterID) async {
     try {
       final Face? face = await FaceMLDataDB.instance.getCoverFaceForPerson(
         recentFileID: file.uploadedFileID!,
