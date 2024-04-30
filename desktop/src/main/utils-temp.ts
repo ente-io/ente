@@ -1,7 +1,9 @@
 import { app } from "electron/main";
+import StreamZip from "node-stream-zip";
 import { existsSync } from "node:fs";
 import fs from "node:fs/promises";
 import path from "path";
+import type { ZipItem } from "../types/ipc";
 
 /**
  * Our very own directory within the system temp directory. Go crazy, but
@@ -13,35 +15,34 @@ const enteTempDirPath = async () => {
     return result;
 };
 
-const randomPrefix = (length: number) => {
-    const CHARACTERS =
+/** Generate a random string suitable for being used as a file name prefix */
+const randomPrefix = () => {
+    const alphabet =
         "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
     let result = "";
-    const charactersLength = CHARACTERS.length;
-    for (let i = 0; i < length; i++) {
-        result += CHARACTERS.charAt(
-            Math.floor(Math.random() * charactersLength),
-        );
-    }
+    for (let i = 0; i < 10; i++)
+        result += alphabet[Math.floor(Math.random() * alphabet.length)];
     return result;
 };
 
 /**
- * Return the path to a temporary file with the given {@link formatSuffix}.
+ * Return the path to a temporary file with the given {@link suffix}.
  *
  * The function returns the path to a file in the system temp directory (in an
- * Ente specific folder therin) with a random prefix and the given
- * {@link formatSuffix}. It ensures that there is no existing file with the same
- * name already.
+ * Ente specific folder therin) with a random prefix and an (optional)
+ * {@link extension}.
+ *
+ * It ensures that there is no existing item with the same name already.
  *
  * Use {@link deleteTempFile} to remove this file when you're done.
  */
-export const makeTempFilePath = async (formatSuffix: string) => {
+export const makeTempFilePath = async (extension?: string) => {
     const tempDir = await enteTempDirPath();
+    const suffix = extension ? "." + extension : "";
     let result: string;
     do {
-        result = path.join(tempDir, randomPrefix(10) + "-" + formatSuffix);
+        result = path.join(tempDir, randomPrefix() + suffix);
     } while (existsSync(result));
     return result;
 };
@@ -61,4 +62,65 @@ export const deleteTempFile = async (tempFilePath: string) => {
     if (!tempFilePath.startsWith(tempDir))
         throw new Error(`Attempting to delete a non-temp file ${tempFilePath}`);
     await fs.rm(tempFilePath, { force: true });
+};
+
+/** The result of {@link makeFileForDataOrPathOrZipItem}. */
+interface FileForDataOrPathOrZipItem {
+    /**
+     * The path to the file (possibly temporary).
+     */
+    path: string;
+    /**
+     * `true` if {@link path} points to a temporary file which should be deleted
+     * once we are done processing.
+     */
+    isFileTemporary: boolean;
+    /**
+     * If set, this'll be a function that can be called to actually write the
+     * contents of the source `Uint8Array | string | ZipItem` into the file at
+     * {@link path}.
+     *
+     * It will be undefined if the source is already a path since nothing needs
+     * to be written in that case. In the other two cases this function will
+     * write the data or zip item into the file at {@link path}.
+     */
+    writeToTemporaryFile?: () => Promise<void>;
+}
+
+/**
+ * Return the path to a file, a boolean indicating if this is a temporary path
+ * that needs to be deleted after processing, and a function to write the given
+ * {@link dataOrPathOrZipItem} into that temporary file if needed.
+ *
+ * @param dataOrPathOrZipItem The contents of the file, or the path to an
+ * existing file, or a (path to a zip file, name of an entry within that zip
+ * file) tuple.
+ */
+export const makeFileForDataOrPathOrZipItem = async (
+    dataOrPathOrZipItem: Uint8Array | string | ZipItem,
+): Promise<FileForDataOrPathOrZipItem> => {
+    let path: string;
+    let isFileTemporary: boolean;
+    let writeToTemporaryFile: () => Promise<void> | undefined;
+
+    if (typeof dataOrPathOrZipItem == "string") {
+        path = dataOrPathOrZipItem;
+        isFileTemporary = false;
+    } else {
+        path = await makeTempFilePath();
+        isFileTemporary = true;
+        if (dataOrPathOrZipItem instanceof Uint8Array) {
+            writeToTemporaryFile = () =>
+                fs.writeFile(path, dataOrPathOrZipItem);
+        } else {
+            writeToTemporaryFile = async () => {
+                const [zipPath, entryName] = dataOrPathOrZipItem;
+                const zip = new StreamZip.async({ file: zipPath });
+                await zip.extract(entryName, path);
+                zip.close();
+            };
+        }
+    }
+
+    return { path, isFileTemporary, writeToTemporaryFile };
 };

@@ -14,6 +14,7 @@ import type {
     CollectionMapping,
     FolderWatch,
     PendingUploads,
+    ZipItem,
 } from "../types/ipc";
 import {
     selectDirectory,
@@ -38,9 +39,8 @@ import {
     updateAndRestart,
     updateOnNextRestart,
 } from "./services/app-update";
-import { convertToJPEG, generateImageThumbnail } from "./services/convert";
 import { ffmpegExec } from "./services/ffmpeg";
-import { getDirFiles } from "./services/fs";
+import { convertToJPEG, generateImageThumbnail } from "./services/image";
 import {
     clipImageEmbedding,
     clipTextEmbeddingIfAvailable,
@@ -52,10 +52,13 @@ import {
     saveEncryptionKey,
 } from "./services/store";
 import {
-    getElectronFilesFromGoogleZip,
+    clearPendingUploads,
+    listZipItems,
+    markUploadedFiles,
+    markUploadedZipItems,
+    pathOrZipItemSize,
     pendingUploads,
-    setPendingUploadCollection,
-    setPendingUploadFiles,
+    setPendingUploads,
 } from "./services/upload";
 import {
     watchAdd,
@@ -141,14 +144,18 @@ export const attachIPCHandlers = () => {
 
     // - Conversion
 
-    ipcMain.handle("convertToJPEG", (_, fileName, imageData) =>
-        convertToJPEG(fileName, imageData),
+    ipcMain.handle("convertToJPEG", (_, imageData: Uint8Array) =>
+        convertToJPEG(imageData),
     );
 
     ipcMain.handle(
         "generateImageThumbnail",
-        (_, inputFile, maxDimension, maxSize) =>
-            generateImageThumbnail(inputFile, maxDimension, maxSize),
+        (
+            _,
+            dataOrPathOrZipItem: Uint8Array | string | ZipItem,
+            maxDimension: number,
+            maxSize: number,
+        ) => generateImageThumbnail(dataOrPathOrZipItem, maxDimension, maxSize),
     );
 
     ipcMain.handle(
@@ -156,10 +163,16 @@ export const attachIPCHandlers = () => {
         (
             _,
             command: string[],
-            inputDataOrPath: Uint8Array | string,
-            outputFileName: string,
+            dataOrPathOrZipItem: Uint8Array | string | ZipItem,
+            outputFileExtension: string,
             timeoutMS: number,
-        ) => ffmpegExec(command, inputDataOrPath, outputFileName, timeoutMS),
+        ) =>
+            ffmpegExec(
+                command,
+                dataOrPathOrZipItem,
+                outputFileExtension,
+                timeoutMS,
+            ),
     );
 
     // - ML
@@ -192,25 +205,31 @@ export const attachIPCHandlers = () => {
 
     // - Upload
 
+    ipcMain.handle("listZipItems", (_, zipPath: string) =>
+        listZipItems(zipPath),
+    );
+
+    ipcMain.handle("pathOrZipItemSize", (_, pathOrZipItem: string | ZipItem) =>
+        pathOrZipItemSize(pathOrZipItem),
+    );
+
     ipcMain.handle("pendingUploads", () => pendingUploads());
 
-    ipcMain.handle("setPendingUploadCollection", (_, collectionName: string) =>
-        setPendingUploadCollection(collectionName),
+    ipcMain.handle("setPendingUploads", (_, pendingUploads: PendingUploads) =>
+        setPendingUploads(pendingUploads),
     );
 
     ipcMain.handle(
-        "setPendingUploadFiles",
-        (_, type: PendingUploads["type"], filePaths: string[]) =>
-            setPendingUploadFiles(type, filePaths),
+        "markUploadedFiles",
+        (_, paths: PendingUploads["filePaths"]) => markUploadedFiles(paths),
     );
 
-    // -
-
-    ipcMain.handle("getElectronFilesFromGoogleZip", (_, filePath: string) =>
-        getElectronFilesFromGoogleZip(filePath),
+    ipcMain.handle(
+        "markUploadedZipItems",
+        (_, items: PendingUploads["zipItems"]) => markUploadedZipItems(items),
     );
 
-    ipcMain.handle("getDirFiles", (_, dirPath: string) => getDirFiles(dirPath));
+    ipcMain.handle("clearPendingUploads", () => clearPendingUploads());
 };
 
 /**

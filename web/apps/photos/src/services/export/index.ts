@@ -1,4 +1,6 @@
+import { FILE_TYPE } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
+import type { Metadata } from "@/media/types/file";
 import { ensureElectron } from "@/next/electron";
 import log from "@/next/log";
 import { CustomError } from "@ente/shared/error";
@@ -11,7 +13,6 @@ import QueueProcessor, {
     CancellationStatus,
     RequestCanceller,
 } from "@ente/shared/utils/queueProcessor";
-import { FILE_TYPE } from "constants/file";
 import { Collection } from "types/collection";
 import {
     CollectionExportNames,
@@ -22,7 +23,6 @@ import {
     FileExportNames,
 } from "types/export";
 import { EnteFile } from "types/file";
-import { Metadata } from "types/upload";
 import {
     constructCollectionNameMap,
     getCollectionUserFacingName,
@@ -46,13 +46,13 @@ const exportRecordFileName = "export_status.json";
 
 /**
  * Name of the top level directory which we create underneath the selected
- * directory when the user starts an export to the filesystem.
+ * directory when the user starts an export to the file system.
  */
 const exportDirectoryName = "Ente Photos";
 
 /**
- * Name of the directory in which we put our metadata when exporting to the
- * filesystem.
+ * Name of the directory in which we put our metadata when exporting to the file
+ * system.
  */
 export const exportMetadataDirectoryName = "metadata";
 
@@ -994,6 +994,7 @@ class ExportService {
                         file,
                     );
                     await writeStream(
+                        electron,
                         `${collectionExportPath}/${fileExportName}`,
                         updatedFileStream,
                     );
@@ -1047,6 +1048,7 @@ class ExportService {
                 file,
             );
             await writeStream(
+                electron,
                 `${collectionExportPath}/${imageExportName}`,
                 imageStream,
             );
@@ -1061,6 +1063,7 @@ class ExportService {
             );
             try {
                 await writeStream(
+                    electron,
                     `${collectionExportPath}/${videoExportName}`,
                     videoStream,
                 );
@@ -1375,7 +1378,7 @@ const isExportInProgress = (exportStage: ExportStage) =>
  *
  * Also move its associated metadata JSON to Trash.
  *
- * @param exportDir The root directory on the user's filesystem where we are
+ * @param exportDir The root directory on the user's file system where we are
  * exporting to.
  * */
 const moveToTrash = async (

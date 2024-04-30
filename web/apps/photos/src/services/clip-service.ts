@@ -1,10 +1,10 @@
+import { FILE_TYPE } from "@/media/file-type";
 import { ensureElectron } from "@/next/electron";
 import log from "@/next/log";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { CustomError } from "@ente/shared/error";
 import { Events, eventBus } from "@ente/shared/events";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
-import { FILE_TYPE } from "constants/file";
 import isElectron from "is-electron";
 import PQueue from "p-queue";
 import { Embedding } from "types/embedding";

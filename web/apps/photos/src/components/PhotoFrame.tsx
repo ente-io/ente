@@ -1,3 +1,4 @@
+import { FILE_TYPE } from "@/media/file-type";
 import log from "@/next/log";
 import { PHOTOS_PAGES } from "@ente/shared/constants/pages";
 import { CustomError } from "@ente/shared/error";
@@ -5,7 +6,6 @@ import useMemoSingleThreaded from "@ente/shared/hooks/useMemoSingleThreaded";
 import { styled } from "@mui/material";
 import PhotoViewer from "components/PhotoViewer";
 import { TRASH_SECTION } from "constants/collection";
-import { FILE_TYPE } from "constants/file";
 import { useRouter } from "next/router";
 import { GalleryContext } from "pages/gallery";
 import PhotoSwipe from "photoswipe";
@@ -308,11 +308,7 @@ const PhotoFrame = ({
         item: EnteFile,
     ) => {
         log.info(
-            `[${
-                item.id
-            }] getSlideData called for thumbnail:${!!item.msrc} sourceLoaded:${
-                item.isSourceLoaded
-            } fetching:${fetching[item.id]}`,
+            `[${item.id}] getSlideData called for thumbnail: ${!!item.msrc} sourceLoaded: ${item.isSourceLoaded} fetching:${fetching[item.id]}`,
         );
 
         if (!item.msrc) {
@@ -327,9 +323,7 @@ const PhotoFrame = ({
                 try {
                     updateURL(index)(item.id, url);
                     log.info(
-                        `[${
-                            item.id
-                        }] calling invalidateCurrItems for thumbnail msrc :${!!item.msrc}`,
+                        `[${item.id}] calling invalidateCurrItems for thumbnail msrc: ${!!item.msrc}`,
                     );
                     instance.invalidateCurrItems();
                     if ((instance as any).isOpen()) {
@@ -381,7 +375,7 @@ const PhotoFrame = ({
                 try {
                     await updateSrcURL(index, item.id, dummyImgSrcUrl);
                     log.info(
-                        `[${item.id}] calling invalidateCurrItems for live photo imgSrc, source loaded :${item.isSourceLoaded}`,
+                        `[${item.id}] calling invalidateCurrItems for live photo imgSrc, source loaded: ${item.isSourceLoaded}`,
                     );
                     instance.invalidateCurrItems();
                     if ((instance as any).isOpen()) {
@@ -415,7 +409,7 @@ const PhotoFrame = ({
                         true,
                     );
                     log.info(
-                        `[${item.id}] calling invalidateCurrItems for live photo complete, source loaded :${item.isSourceLoaded}`,
+                        `[${item.id}] calling invalidateCurrItems for live photo complete, source loaded: ${item.isSourceLoaded}`,
                     );
                     instance.invalidateCurrItems();
                     if ((instance as any).isOpen()) {
@@ -433,7 +427,7 @@ const PhotoFrame = ({
                 try {
                     await updateSrcURL(index, item.id, srcURLs);
                     log.info(
-                        `[${item.id}] calling invalidateCurrItems for src, source loaded :${item.isSourceLoaded}`,
+                        `[${item.id}] calling invalidateCurrItems for src, source loaded: ${item.isSourceLoaded}`,
                     );
                     instance.invalidateCurrItems();
                     if ((instance as any).isOpen()) {
@@ -476,9 +470,7 @@ const PhotoFrame = ({
         try {
             updateURL(index)(item.id, item.msrc, true);
             log.info(
-                `[${
-                    item.id
-                }] calling invalidateCurrItems for thumbnail msrc :${!!item.msrc}`,
+                `[${item.id}] calling invalidateCurrItems for thumbnail msrc: ${!!item.msrc}`,
             );
             instance.invalidateCurrItems();
             if ((instance as any).isOpen()) {
@@ -495,7 +487,7 @@ const PhotoFrame = ({
         }
         try {
             log.info(
-                `[${item.id}] new file getConvertedVideo request- ${item.metadata.title}}`,
+                `[${item.id}] new file getConvertedVideo request ${item.metadata.title}}`,
             );
             fetching[item.id] = true;
 
@@ -504,7 +496,7 @@ const PhotoFrame = ({
             try {
                 await updateSrcURL(index, item.id, srcURL, true);
                 log.info(
-                    `[${item.id}] calling invalidateCurrItems for src, source loaded :${item.isSourceLoaded}`,
+                    `[${item.id}] calling invalidateCurrItems for src, source loaded: ${item.isSourceLoaded}`,
                 );
                 instance.invalidateCurrItems();
                 if ((instance as any).isOpen()) {

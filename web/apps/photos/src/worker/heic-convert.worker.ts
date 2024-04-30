@@ -1,6 +1,5 @@
 import { expose } from "comlink";
 import HeicConvert from "heic-convert";
-import { getUint8ArrayView } from "services/readerService";
 
 export class DedicatedHEICConvertWorker {
     async heicToJPEG(heicBlob: Blob) {
@@ -16,9 +15,8 @@ expose(DedicatedHEICConvertWorker, self);
  * Both the input and output are blobs.
  */
 export const heicToJPEG = async (heicBlob: Blob): Promise<Blob> => {
-    const filedata = await getUint8ArrayView(heicBlob);
-    const result = await HeicConvert({ buffer: filedata, format: "JPEG" });
-    const convertedFileData = new Uint8Array(result);
-    const convertedFileBlob = new Blob([convertedFileData]);
-    return convertedFileBlob;
+    const buffer = new Uint8Array(await heicBlob.arrayBuffer());
+    const result = await HeicConvert({ buffer, format: "JPEG" });
+    const convertedData = new Uint8Array(result);
+    return new Blob([convertedData]);
 };

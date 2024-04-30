@@ -1,9 +1,10 @@
+import { FILE_TYPE } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
 import log from "@/next/log";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
-import { FILE_TYPE, RAW_FORMATS } from "constants/file";
+import { RAW_FORMATS } from "constants/upload";
 import CastDownloadManager from "services/castDownloadManager";
-import { getFileType } from "services/typeDetectionService";
+import { detectMediaMIMEType } from "services/detect-type";
 import {
     EncryptedEnteFile,
     EnteFile,
@@ -103,18 +104,6 @@ export function isRawFileFromFileName(fileName: string) {
     return false;
 }
 
-/**
- * [Note: File name for local EnteFile objects]
- *
- * The title property in a file's metadata is the original file's name. The
- * metadata of a file cannot be edited. So if later on the file's name is
- * changed, then the edit is stored in the `editedName` property of the public
- * metadata of the file.
- *
- * This function merges these edits onto the file object that we use locally.
- * Effectively, post this step, the file's metadata.title can be used in lieu of
- * its filename.
- */
 export function mergeMetadata(files: EnteFile[]): EnteFile[] {
     return files.map((file) => {
         if (file.pubMagicMetadata?.data.editedTime) {
@@ -143,10 +132,11 @@ export const getPreviewableImage = async (
             );
             fileBlob = new Blob([imageData]);
         }
-        const fileType = await getFileType(
+        const mimeType = await detectMediaMIMEType(
             new File([fileBlob], file.metadata.title),
         );
-        fileBlob = new Blob([fileBlob], { type: fileType.mimeType });
+        if (!mimeType) return undefined;
+        fileBlob = new Blob([fileBlob], { type: mimeType });
         return fileBlob;
     } catch (e) {
         log.error("failed to download file", e);

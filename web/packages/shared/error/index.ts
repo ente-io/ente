@@ -22,13 +22,10 @@ export function isApiErrorResponse(object: any): object is ApiErrorResponse {
 }
 
 export const CustomError = {
-    THUMBNAIL_GENERATION_FAILED: "thumbnail generation failed",
     VIDEO_PLAYBACK_FAILED: "video playback failed",
     ETAG_MISSING: "no header/etag present in response body",
     KEY_MISSING: "encrypted key missing from localStorage",
     FAILED_TO_LOAD_WEB_WORKER: "failed to load web worker",
-    CHUNK_MORE_THAN_EXPECTED: "chunks more than expected",
-    CHUNK_LESS_THAN_EXPECTED: "chunks less than expected",
     UNSUPPORTED_FILE_FORMAT: "unsupported file format",
     FILE_TOO_LARGE: "file too large",
     SUBSCRIPTION_EXPIRED: "subscription expired",
@@ -49,9 +46,6 @@ export const CustomError = {
     SUBSCRIPTION_NEEDED: "subscription not present",
     NOT_FOUND: "not found ",
     NO_METADATA: "no metadata",
-    TOO_LARGE_LIVE_PHOTO_ASSETS: "too large live photo assets",
-    NOT_A_DATE: "not a date",
-    NOT_A_LOCATION: "not a location",
     FILE_ID_NOT_FOUND: "file with id not found",
     WEAK_DEVICE: "password decryption failed on the device",
     INCORRECT_PASSWORD: "incorrect password",
@@ -60,8 +54,6 @@ export const CustomError = {
     HIDDEN_COLLECTION_SYNC_FILE_ATTEMPTED:
         "hidden collection sync file attempted",
     UNKNOWN_ERROR: "Something went wrong, please try again",
-    TYPE_DETECTION_FAILED: (fileFormat: string) =>
-        `type detection failed ${fileFormat}`,
     WINDOWS_NATIVE_IMAGE_PROCESSING_NOT_SUPPORTED:
         "Windows native image processing is not supported",
     NETWORK_ERROR: "Network Error",
@@ -73,7 +65,6 @@ export const CustomError = {
     AUTH_KEY_NOT_FOUND: "auth key not found",
     EXIF_DATA_NOT_FOUND: "exif data not found",
     SELECT_FOLDER_ABORTED: "select folder aborted",
-    NON_MEDIA_FILE: "non media file",
     PROCESSING_FAILED: "processing failed",
     EXPORT_RECORD_JSON_PARSING_FAILED: "export record json parsing failed",
     TWO_FACTOR_ENABLED: "two factor enabled",

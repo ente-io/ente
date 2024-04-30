@@ -1,8 +1,6 @@
-import { nameAndExtension } from "@/next/file";
 import log from "@/next/log";
 import { withTimeout } from "@ente/shared/utils";
 import QueueProcessor from "@ente/shared/utils/queueProcessor";
-import { generateTempName } from "@ente/shared/utils/temp";
 import { expose } from "comlink";
 import {
     ffmpegPathPlaceholder,
@@ -10,108 +8,110 @@ import {
     outputPathPlaceholder,
 } from "constants/ffmpeg";
 import { FFmpeg, createFFmpeg } from "ffmpeg-wasm";
-import { getUint8ArrayView } from "services/readerService";
 
 export class DedicatedFFmpegWorker {
-    private wasmFFmpeg: WasmFFmpeg;
-
-    constructor() {
-        this.wasmFFmpeg = new WasmFFmpeg();
-    }
-
-    /**
-     * Execute a ffmpeg {@link command}.
-     *
-     * This is a sibling of {@link ffmpegExec} in ipc.ts exposed by the desktop
-     * app. See [Note: ffmpeg in Electron].
-     */
-    run(cmd, inputFile, outputFileName, timeoutMS) {
-        return this.wasmFFmpeg.run(cmd, inputFile, outputFileName, timeoutMS);
-    }
-}
-
-expose(DedicatedFFmpegWorker, self);
-
-export class WasmFFmpeg {
     private ffmpeg: FFmpeg;
-    private ready: Promise<void> = null;
-    private ffmpegTaskQueue = new QueueProcessor<File>();
+    private ffmpegTaskQueue = new QueueProcessor<Uint8Array>();
 
     constructor() {
         this.ffmpeg = createFFmpeg({
             corePath: "/js/ffmpeg/ffmpeg-core.js",
             mt: false,
         });
-
-        this.ready = this.init();
     }
 
-    private async init() {
-        if (!this.ffmpeg.isLoaded()) {
-            await this.ffmpeg.load();
-        }
-    }
+    /**
+     * Execute a FFmpeg {@link command} on {@link blob}.
+     *
+     * This is a sibling of {@link ffmpegExec} exposed by the desktop app in
+     * `ipc.ts`. See [Note: FFmpeg in Electron].
+     */
+    async exec(
+        command: string[],
+        blob: Blob,
+        outputFileExtension: string,
+        timeoutMs,
+    ): Promise<Uint8Array> {
+        if (!this.ffmpeg.isLoaded()) await this.ffmpeg.load();
 
-    async run(
-        cmd: string[],
-        inputFile: File,
-        outputFileName: string,
-        timeoutMS,
-    ) {
-        const exec = () => this.execute(cmd, inputFile, outputFileName);
+        const go = () =>
+            ffmpegExec(this.ffmpeg, command, outputFileExtension, blob);
+
         const request = this.ffmpegTaskQueue.queueUpRequest(() =>
-            timeoutMS ? withTimeout<File>(exec(), timeoutMS) : exec(),
+            timeoutMs ? withTimeout(go(), timeoutMs) : go(),
         );
+
         return await request.promise;
     }
+}
 
-    private async execute(
-        cmd: string[],
-        inputFile: File,
-        outputFileName: string,
-    ) {
-        let tempInputFilePath: string;
-        let tempOutputFilePath: string;
+expose(DedicatedFFmpegWorker, self);
+
+const ffmpegExec = async (
+    ffmpeg: FFmpeg,
+    command: string[],
+    outputFileExtension: string,
+    blob: Blob,
+) => {
+    const inputPath = randomPrefix();
+    const outputSuffix = outputFileExtension ? "." + outputFileExtension : "";
+    const outputPath = randomPrefix() + outputSuffix;
+
+    const cmd = substitutePlaceholders(command, inputPath, outputPath);
+
+    const inputData = new Uint8Array(await blob.arrayBuffer());
+
+    try {
+        const startTime = Date.now();
+
+        ffmpeg.FS("writeFile", inputPath, inputData);
+        await ffmpeg.run(...cmd);
+
+        const result = ffmpeg.FS("readFile", outputPath);
+
+        const ms = Math.round(Date.now() - startTime);
+        log.debug(() => `[wasm] ffmpeg ${cmd.join(" ")} (${ms} ms)`);
+        return result;
+    } finally {
         try {
-            await this.ready;
-            const [, extension] = nameAndExtension(inputFile.name);
-            const tempNameSuffix = extension ? `input.${extension}` : "input";
-            tempInputFilePath = `${generateTempName(10, tempNameSuffix)}`;
-            this.ffmpeg.FS(
-                "writeFile",
-                tempInputFilePath,
-                await getUint8ArrayView(inputFile),
-            );
-            tempOutputFilePath = `${generateTempName(10, outputFileName)}`;
-
-            cmd = cmd.map((cmdPart) => {
-                if (cmdPart === ffmpegPathPlaceholder) {
-                    return "";
-                } else if (cmdPart === inputPathPlaceholder) {
-                    return tempInputFilePath;
-                } else if (cmdPart === outputPathPlaceholder) {
-                    return tempOutputFilePath;
-                } else {
-                    return cmdPart;
-                }
-            });
-            log.info(`${cmd}`);
-            await this.ffmpeg.run(...cmd);
-            return new File(
-                [this.ffmpeg.FS("readFile", tempOutputFilePath)],
-                outputFileName,
-            );
-        } finally {
-            try {
-                this.ffmpeg.FS("unlink", tempInputFilePath);
-            } catch (e) {
-                log.error("unlink input file failed", e);
-            }
-            try {
-                this.ffmpeg.FS("unlink", tempOutputFilePath);
-            } catch (e) {
-                log.error("unlink output file failed", e);
-            }
+            ffmpeg.FS("unlink", inputPath);
+        } catch (e) {
+            log.error(`Failed to remove input ${inputPath}`, e);
+        }
+        try {
+            ffmpeg.FS("unlink", outputPath);
+        } catch (e) {
+            log.error(`Failed to remove output ${outputPath}`, e);
         }
     }
-}
+};
+
+/** Generate a random string suitable for being used as a file name prefix */
+const randomPrefix = () => {
+    const alphabet =
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+    let result = "";
+    for (let i = 0; i < 10; i++)
+        result += alphabet[Math.floor(Math.random() * alphabet.length)];
+    return result;
+};
+
+const substitutePlaceholders = (
+    command: string[],
+    inputFilePath: string,
+    outputFilePath: string,
+) =>
+    command
+        .map((segment) => {
+            if (segment == ffmpegPathPlaceholder) {
+                return undefined;
+            } else if (segment == inputPathPlaceholder) {
+                return inputFilePath;
+            } else if (segment == outputPathPlaceholder) {
+                return outputFilePath;
+            } else {
+                return segment;
+            }
+        })
+        .filter((c) => !!c);

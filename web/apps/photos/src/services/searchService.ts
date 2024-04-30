@@ -1,6 +1,6 @@
+import { FILE_TYPE } from "@/media/file-type";
 import log from "@/next/log";
 import * as chrono from "chrono-node";
-import { FILE_TYPE } from "constants/file";
 import { t } from "i18next";
 import { Collection } from "types/collection";
 import { EntityType, LocationTag, LocationTagData } from "types/entity";

@@ -1,10 +1,11 @@
+import { FILE_TYPE } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
 import { ensureElectron } from "@/next/electron";
+import { nameAndExtension } from "@/next/file";
 import log from "@/next/log";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import { User } from "@ente/shared/user/types";
 import { wait } from "@ente/shared/utils";
-import { FILE_TYPE } from "constants/file";
 import { getLocalCollections } from "services/collectionService";
 import downloadManager from "services/download";
 import { getAllLocalFiles } from "services/fileService";
@@ -25,7 +26,6 @@ import {
     getIDBasedSortedFiles,
     getPersonalFiles,
     mergeMetadata,
-    splitFilenameAndExtension,
 } from "utils/file";
 import {
     safeDirectoryName,
@@ -501,9 +501,7 @@ const getUniqueFileExportNameForMigration = (
             .get(collectionPath)
             ?.has(getFileSavePath(collectionPath, fileExportName))
     ) {
-        const filenameParts = splitFilenameAndExtension(
-            sanitizeFilename(filename),
-        );
+        const filenameParts = nameAndExtension(sanitizeFilename(filename));
         if (filenameParts[1]) {
             fileExportName = `${filenameParts[0]}(${count}).${filenameParts[1]}`;
         } else {

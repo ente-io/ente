@@ -1,8 +1,3 @@
-export enum UPLOAD_STRATEGY {
-    SINGLE_COLLECTION,
-    COLLECTION_PER_FOLDER,
-}
-
 /*
  * ElectronFile is a custom interface that is used to represent
  * any file on disk as a File-like object in the Electron desktop app.
@@ -21,9 +16,15 @@ export interface ElectronFile {
     arrayBuffer: () => Promise<Uint8Array>;
 }
 
-export interface DataStream {
-    stream: ReadableStream<Uint8Array>;
-    chunkCount: number;
+/**
+ * When we are running in the context of our desktop app, we have access to the
+ * absolute path of {@link File} objects. This convenience type clubs these two
+ * bits of information, saving us the need to query the path again and again
+ * using the {@link getPathForFile} method of {@link Electron}.
+ */
+export interface FileAndPath {
+    file: File;
+    path: string;
 }
 
 export interface EventQueueItem {

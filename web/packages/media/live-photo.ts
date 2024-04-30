@@ -1,5 +1,54 @@
-import { fileNameFromComponents, nameAndExtension } from "@/next/file";
+import {
+    fileNameFromComponents,
+    lowercaseExtension,
+    nameAndExtension,
+} from "@/next/file";
 import JSZip from "jszip";
+import { FILE_TYPE } from "./file-type";
+
+const potentialImageExtensions = [
+    "heic",
+    "heif",
+    "jpeg",
+    "jpg",
+    "png",
+    "gif",
+    "bmp",
+    "tiff",
+    "webp",
+];
+
+const potentialVideoExtensions = [
+    "mov",
+    "mp4",
+    "m4v",
+    "avi",
+    "wmv",
+    "flv",
+    "mkv",
+    "webm",
+    "3gp",
+    "3g2",
+    "avi",
+    "ogv",
+    "mpg",
+    "mp",
+];
+
+/**
+ * Use the file extension of the given {@link fileName} to deduce if is is
+ * potentially the image or the video part of a Live Photo.
+ */
+export const potentialFileTypeFromExtension = (
+    fileName: string,
+): FILE_TYPE | undefined => {
+    const ext = lowercaseExtension(fileName);
+    if (!ext) return undefined;
+
+    if (potentialImageExtensions.includes(ext)) return FILE_TYPE.IMAGE;
+    else if (potentialVideoExtensions.includes(ext)) return FILE_TYPE.VIDEO;
+    else return undefined;
+};
 
 /**
  * An in-memory representation of a live photo.
@@ -61,6 +110,14 @@ export const decodeLivePhoto = async (
     return { imageFileName, imageData, videoFileName, videoData };
 };
 
+/** Variant of {@link LivePhoto}, but one that allows files and data. */
+interface EncodeLivePhotoInput {
+    imageFileName: string;
+    imageFileOrData: File | Uint8Array;
+    videoFileName: string;
+    videoFileOrData: File | Uint8Array;
+}
+
 /**
  * Return a binary serialized representation of a live photo.
  *
@@ -73,15 +130,15 @@ export const decodeLivePhoto = async (
  */
 export const encodeLivePhoto = async ({
     imageFileName,
-    imageData,
+    imageFileOrData,
     videoFileName,
-    videoData,
-}: LivePhoto) => {
+    videoFileOrData,
+}: EncodeLivePhotoInput) => {
     const [, imageExt] = nameAndExtension(imageFileName);
     const [, videoExt] = nameAndExtension(videoFileName);
 
     const zip = new JSZip();
-    zip.file(fileNameFromComponents(["image", imageExt]), imageData);
-    zip.file(fileNameFromComponents(["video", videoExt]), videoData);
+    zip.file(fileNameFromComponents(["image", imageExt]), imageFileOrData);
+    zip.file(fileNameFromComponents(["video", videoExt]), videoFileOrData);
     return await zip.generateAsync({ type: "uint8array" });
 };

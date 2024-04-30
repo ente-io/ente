@@ -1,15 +1,15 @@
+import { FILE_TYPE } from "@/media/file-type";
 import log from "@/next/log";
 import { validateAndGetCreationUnixTimeInMicroSeconds } from "@ente/shared/time";
 import type { FixOption } from "components/FixCreationTime";
-import { FILE_TYPE } from "constants/file";
-import { getFileType } from "services/typeDetectionService";
+import { detectFileTypeInfo } from "services/detect-type";
 import { EnteFile } from "types/file";
 import {
     changeFileCreationTime,
     updateExistingFilePubMetadata,
 } from "utils/file";
 import downloadManager from "./download";
-import { getParsedExifData } from "./upload/exifService";
+import { getParsedExifData } from "./exif";
 
 const EXIF_TIME_TAGS = [
     "DateTimeOriginal",
@@ -53,7 +53,7 @@ export async function updateCreationTimeWithExif(
                         [fileBlob],
                         file.metadata.title,
                     );
-                    const fileTypeInfo = await getFileType(fileObject);
+                    const fileTypeInfo = await detectFileTypeInfo(fileObject);
                     const exifData = await getParsedExifData(
                         fileObject,
                         fileTypeInfo,

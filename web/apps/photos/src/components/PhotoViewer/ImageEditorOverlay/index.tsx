@@ -42,11 +42,10 @@ import { t } from "i18next";
 import mime from "mime-types";
 import { AppContext } from "pages/_app";
 import { getLocalCollections } from "services/collectionService";
+import { detectFileTypeInfo } from "services/detect-type";
 import downloadManager from "services/download";
-import { getFileType } from "services/typeDetectionService";
 import uploadManager from "services/upload/uploadManager";
 import { EnteFile } from "types/file";
-import { FileWithCollection } from "types/upload";
 import { getEditorCloseConfirmationMessage } from "utils/ui";
 import ColoursMenu from "./ColoursMenu";
 import CropMenu, { cropRegionOfCanvas, getCropRegionArgs } from "./CropMenu";
@@ -486,7 +485,7 @@ const ImageEditorOverlay = (props: IProps) => {
             if (!canvasRef.current) return;
 
             const editedFile = await getEditedFile();
-            const fileType = await getFileType(editedFile);
+            const fileType = await detectFileTypeInfo(editedFile);
             const tempImgURL = URL.createObjectURL(
                 new Blob([editedFile], { type: fileType.mimeType }),
             );
@@ -507,15 +506,15 @@ const ImageEditorOverlay = (props: IProps) => {
             );
 
             const editedFile = await getEditedFile();
-            const file: FileWithCollection = {
-                file: editedFile,
-                collectionID: props.file.collectionID,
+            const file = {
+                uploadItem: editedFile,
                 localID: 1,
+                collectionID: props.file.collectionID,
             };
 
             uploadManager.prepareForNewUpload();
             uploadManager.showUploadProgressDialog();
-            uploadManager.queueFilesForUpload([file], [collection]);
+            uploadManager.uploadItems([file], [collection]);
             setFileURL(null);
             props.onClose();
             props.closePhotoViewer();

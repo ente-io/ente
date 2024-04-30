@@ -20,7 +20,7 @@ const cachedCLIPImageSession = makeCachedInferenceSession(
 );
 
 export const clipImageEmbedding = async (jpegImageData: Uint8Array) => {
-    const tempFilePath = await makeTempFilePath("");
+    const tempFilePath = await makeTempFilePath();
     const imageStream = new Response(jpegImageData.buffer).body;
     await writeStream(tempFilePath, imageStream);
     try {
@@ -150,7 +150,7 @@ export const clipTextEmbeddingIfAvailable = async (text: string) => {
 
     // Don't wait for the download to complete
     if (typeof sessionOrStatus == "string") {
-        console.log(
+        log.info(
             "Ignoring CLIP text embedding request because model download is pending",
         );
         return undefined;

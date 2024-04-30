@@ -1,4 +1,3 @@
-import { convertBytesToHumanReadable } from "@/next/file";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import { formatDate, getDate, isSameDay } from "@ente/shared/time/format";
 import { Box, Checkbox, Link, Typography, styled } from "@mui/material";
@@ -23,6 +22,7 @@ import {
     areEqual,
 } from "react-window";
 import { EnteFile } from "types/file";
+import { convertBytesToHumanReadable } from "utils/file";
 import { handleSelectCreator } from "utils/photoFrame";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 

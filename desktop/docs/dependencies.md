@@ -13,7 +13,7 @@ Electron embeds Chromium and Node.js in the generated app's binary. The
 generated app thus consists of two separate processes - the _main_ process, and
 a _renderer_ process.
 
--   The _main_ process is runs the embedded node. This process can deal with the
+-   The _main_ process runs the embedded node. This process can deal with the
     host OS - it is conceptually like a `node` repl running on your machine. In
     our case, the TypeScript code (in the `src/` directory) gets transpiled by
     `tsc` into JavaScript in the `build/app/` directory, which gets bundled in

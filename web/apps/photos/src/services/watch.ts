@@ -14,12 +14,12 @@ import type {
 import { ensureString } from "@/utils/ensure";
 import { UPLOAD_RESULT } from "constants/upload";
 import debounce from "debounce";
-import uploadManager from "services/upload/uploadManager";
+import uploadManager, {
+    type UploadItemWithCollection,
+} from "services/upload/uploadManager";
 import { Collection } from "types/collection";
 import { EncryptedEnteFile } from "types/file";
-import { type FileWithCollection2 } from "types/upload";
 import { groupFilesBasedOnCollectionID } from "utils/file";
-import { isHiddenFile } from "utils/upload";
 import { removeFromCollection } from "./collectionService";
 import { getLocalFiles } from "./fileService";
 
@@ -317,16 +317,17 @@ class FolderWatcher {
     }
 
     /**
-     * Callback invoked by the uploader whenever a file we requested to
+     * Callback invoked by the uploader whenever a item we requested to
      * {@link upload} gets uploaded.
      */
     async onFileUpload(
         fileUploadResult: UPLOAD_RESULT,
-        fileWithCollection: FileWithCollection2,
+        item: UploadItemWithCollection,
         file: EncryptedEnteFile,
     ) {
-        // The files we get here will have fileWithCollection.file as a string,
-        // not as a File or a ElectronFile
+        // Re the usage of ensureString: For desktop watch, the only possibility
+        // for a UploadItem is for it to be a string (the absolute path to a
+        // file on disk).
         if (
             [
                 UPLOAD_RESULT.ADDED_SYMLINK,
@@ -335,18 +336,18 @@ class FolderWatcher {
                 UPLOAD_RESULT.ALREADY_UPLOADED,
             ].includes(fileUploadResult)
         ) {
-            if (fileWithCollection.isLivePhoto) {
+            if (item.isLivePhoto) {
                 this.uploadedFileForPath.set(
-                    ensureString(fileWithCollection.livePhotoAssets.image),
+                    ensureString(item.livePhotoAssets.image),
                     file,
                 );
                 this.uploadedFileForPath.set(
-                    ensureString(fileWithCollection.livePhotoAssets.video),
+                    ensureString(item.livePhotoAssets.video),
                     file,
                 );
             } else {
                 this.uploadedFileForPath.set(
-                    ensureString(fileWithCollection.file),
+                    ensureString(item.uploadItem),
                     file,
                 );
             }
@@ -355,17 +356,15 @@ class FolderWatcher {
                 fileUploadResult,
             )
         ) {
-            if (fileWithCollection.isLivePhoto) {
+            if (item.isLivePhoto) {
                 this.unUploadableFilePaths.add(
-                    ensureString(fileWithCollection.livePhotoAssets.image),
+                    ensureString(item.livePhotoAssets.image),
                 );
                 this.unUploadableFilePaths.add(
-                    ensureString(fileWithCollection.livePhotoAssets.video),
+                    ensureString(item.livePhotoAssets.video),
                 );
             } else {
-                this.unUploadableFilePaths.add(
-                    ensureString(fileWithCollection.file),
-                );
+                this.unUploadableFilePaths.add(ensureString(item.uploadItem));
             }
         }
     }
@@ -375,7 +374,7 @@ class FolderWatcher {
      * {@link upload} get uploaded.
      */
     async allFileUploadsDone(
-        filesWithCollection: FileWithCollection2[],
+        uploadItemsWithCollection: UploadItemWithCollection[],
         collections: Collection[],
     ) {
         const electron = ensureElectron();
@@ -384,14 +383,15 @@ class FolderWatcher {
         log.debug(() =>
             JSON.stringify({
                 f: "watch/allFileUploadsDone",
-                filesWithCollection,
+                uploadItemsWithCollection,
                 collections,
                 watch,
             }),
         );
 
-        const { syncedFiles, ignoredFiles } =
-            this.deduceSyncedAndIgnored(filesWithCollection);
+        const { syncedFiles, ignoredFiles } = this.deduceSyncedAndIgnored(
+            uploadItemsWithCollection,
+        );
 
         if (syncedFiles.length > 0)
             await electron.watch.updateSyncedFiles(
@@ -411,7 +411,9 @@ class FolderWatcher {
         this.debouncedRunNextEvent();
     }
 
-    private deduceSyncedAndIgnored(filesWithCollection: FileWithCollection2[]) {
+    private deduceSyncedAndIgnored(
+        uploadItemsWithCollection: UploadItemWithCollection[],
+    ) {
         const syncedFiles: FolderWatch["syncedFiles"] = [];
         const ignoredFiles: FolderWatch["ignoredFiles"] = [];
 
@@ -430,14 +432,13 @@ class FolderWatcher {
             this.unUploadableFilePaths.delete(path);
         };
 
-        for (const fileWithCollection of filesWithCollection) {
-            if (fileWithCollection.isLivePhoto) {
-                const imagePath = ensureString(
-                    fileWithCollection.livePhotoAssets.image,
-                );
-                const videoPath = ensureString(
-                    fileWithCollection.livePhotoAssets.video,
-                );
+        for (const item of uploadItemsWithCollection) {
+            // Re the usage of ensureString: For desktop watch, the only
+            // possibility for a UploadItem is for it to be a string (the
+            // absolute path to a file on disk).
+            if (item.isLivePhoto) {
+                const imagePath = ensureString(item.livePhotoAssets.image);
+                const videoPath = ensureString(item.livePhotoAssets.video);
 
                 const imageFile = this.uploadedFileForPath.get(imagePath);
                 const videoFile = this.uploadedFileForPath.get(videoPath);
@@ -453,7 +454,7 @@ class FolderWatcher {
                     markIgnored(videoPath);
                 }
             } else {
-                const path = ensureString(fileWithCollection.file);
+                const path = ensureString(item.uploadItem);
                 const file = this.uploadedFileForPath.get(path);
                 if (file) {
                     markSynced(file, path);
@@ -596,6 +597,13 @@ const pathsToUpload = (paths: string[], watch: FolderWatch) =>
         .filter((path) => !isSyncedOrIgnoredPath(path, watch));
 
 /**
+ * Return true if the file at the given {@link path} is hidden.
+ *
+ * Hidden files are those whose names begin with a "." (dot).
+ */
+const isHiddenFile = (path: string) => basename(path).startsWith(".");
+
+/**
  * Return the paths to previously synced files that are no longer on disk and so
  * must be removed from the Ente collection.
  */
@@ -610,7 +618,7 @@ const isSyncedOrIgnoredPath = (path: string, watch: FolderWatch) =>
 
 const collectionNameForPath = (path: string, watch: FolderWatch) =>
     watch.collectionMapping == "root"
-        ? dirname(watch.folderPath)
+        ? basename(watch.folderPath)
         : parentDirectoryName(path);
 
 const parentDirectoryName = (path: string) => basename(dirname(path));

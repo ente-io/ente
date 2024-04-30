@@ -1,3 +1,4 @@
+import { FILE_TYPE } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
 import { openCache, type BlobCache } from "@/next/blob-cache";
 import log from "@/next/log";
@@ -8,9 +9,8 @@ import { CustomError } from "@ente/shared/error";
 import { Events, eventBus } from "@ente/shared/events";
 import { isPlaybackPossible } from "@ente/shared/media/video-playback";
 import { Remote } from "comlink";
-import { FILE_TYPE } from "constants/file";
 import isElectron from "is-electron";
-import * as ffmpegService from "services/ffmpeg";
+import * as ffmpeg from "services/ffmpeg";
 import { EnteFile } from "types/file";
 import { generateStreamFromArrayBuffer, getRenderableImage } from "utils/file";
 import { PhotosDownloadClient } from "./clients/photos";
@@ -150,7 +150,7 @@ class DownloadManagerImpl {
         this.ensureInitialized();
 
         const key = file.id.toString();
-        const cached = await this.thumbnailCache.get(key);
+        const cached = await this.thumbnailCache?.get(key);
         if (cached) return new Uint8Array(await cached.arrayBuffer());
         if (localOnly) return null;
 
@@ -610,17 +610,13 @@ async function getPlayableVideo(
             if (!forceConvert && !runOnWeb && !isElectron()) {
                 return null;
             }
-            log.info(
-                `video format not supported, converting it name: ${videoNameTitle}`,
-            );
-            const mp4ConvertedVideo = await ffmpegService.convertToMP4(
-                new File([videoBlob], videoNameTitle),
-            );
-            log.info(`video successfully converted ${videoNameTitle}`);
-            return new Blob([await mp4ConvertedVideo.arrayBuffer()]);
+            // TODO(MR): This might not work for very large (~ GB) videos. Test.
+            log.info(`Converting video ${videoNameTitle} to mp4`);
+            const convertedVideoData = await ffmpeg.convertToMP4(videoBlob);
+            return new Blob([convertedVideoData]);
         }
     } catch (e) {
-        log.error("video conversion failed", e);
+        log.error("Video conversion failed", e);
         return null;
     }
 }

@@ -73,8 +73,12 @@ class UpdateService {
     return _latestVersion;
   }
 
-  Future<bool> shouldShowUpdateNoification() async {
+  Future<bool> shouldShowUpdateNotification() async {
     final shouldUpdate = await this.shouldUpdate();
+
+    if (!shouldUpdate) {
+      return false;
+    }
 
     final lastNotificationShownTime =
         _prefs.getInt(kUpdateAvailableShownTimeKey) ?? 0;
@@ -87,7 +91,7 @@ class UpdateService {
   }
 
   Future<void> showUpdateNotification() async {
-    if (await shouldShowUpdateNoification()) {
+    if (await shouldShowUpdateNotification()) {
       // ignore: unawaited_futures
       NotificationService.instance.showNotification(
         "Update available",

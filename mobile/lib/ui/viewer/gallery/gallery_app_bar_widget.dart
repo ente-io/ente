@@ -26,6 +26,7 @@ import 'package:photos/services/update_service.dart';
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
 import "package:photos/ui/cast/auto.dart";
 import "package:photos/ui/cast/choose.dart";
+import "package:photos/ui/common/popup_item.dart";
 import 'package:photos/ui/components/action_sheet_widget.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
@@ -321,263 +322,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         ),
       );
     }
-    final List<PopupMenuItem<AlbumPopupAction>> items = [];
-    if (galleryType.canRename()) {
-      items.add(
-        PopupMenuItem(
-          value: AlbumPopupAction.rename,
-          child: Row(
-            children: [
-              Icon(isQuickLink ? Icons.photo_album_outlined : Icons.edit),
-              const Padding(
-                padding: EdgeInsets.all(8),
-              ),
-              Text(
-                isQuickLink
-                    ? S.of(context).convertToAlbum
-                    : S.of(context).renameAlbum,
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-    if (galleryType.canSetCover()) {
-      items.add(
-        PopupMenuItem(
-          value: AlbumPopupAction.setCover,
-          child: Row(
-            children: [
-              const Icon(Icons.image_outlined),
-              const Padding(
-                padding: EdgeInsets.all(8),
-              ),
-              Text(S.of(context).setCover),
-            ],
-          ),
-        ),
-      );
-    }
-    if (galleryType.showMap()) {
-      items.add(
-        PopupMenuItem(
-          value: AlbumPopupAction.map,
-          child: Row(
-            children: [
-              const Icon(Icons.map_outlined),
-              const Padding(
-                padding: EdgeInsets.all(8),
-              ),
-              Text(S.of(context).map),
-            ],
-          ),
-        ),
-      );
-    }
 
-    if (galleryType.canSort()) {
-      items.add(
-        PopupMenuItem(
-          value: AlbumPopupAction.sort,
-          child: Row(
-            children: [
-              const Icon(Icons.sort_outlined),
-              const Padding(
-                padding: EdgeInsets.all(8),
-              ),
-              Text(
-                S.of(context).sortAlbumsBy,
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    if (galleryType == GalleryType.uncategorized) {
-      items.add(
-        PopupMenuItem(
-          value: AlbumPopupAction.cleanUncategorized,
-          child: Row(
-            children: [
-              const Icon(Icons.crop_original_outlined),
-              const Padding(
-                padding: EdgeInsets.all(8),
-              ),
-              Text(S.of(context).cleanUncategorized),
-            ],
-          ),
-        ),
-      );
-    }
-    if (galleryType.canPin()) {
-      items.add(
-        PopupMenuItem(
-          value: AlbumPopupAction.pinAlbum,
-          child: Row(
-            children: [
-              widget.collection!.isPinned
-                  ? const Icon(CupertinoIcons.pin_slash)
-                  : Transform.rotate(
-                      angle: 45 * math.pi / 180, // rotate by 45 degrees
-                      child: const Icon(CupertinoIcons.pin),
-                    ),
-              const Padding(
-                padding: EdgeInsets.all(8),
-              ),
-              Text(
-                widget.collection!.isPinned
-                    ? S.of(context).unpinAlbum
-                    : S.of(context).pinAlbum,
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-    final bool isArchived = widget.collection?.isArchived() ?? false;
-    final bool isHidden = widget.collection?.isHidden() ?? false;
-    // Do not show archive option for favorite collection. If collection is
-    // already archived, allow user to unarchive that collection.
-    if (isArchived || (galleryType.canArchive() && !isHidden)) {
-      items.add(
-        PopupMenuItem(
-          value: AlbumPopupAction.ownedArchive,
-          child: Row(
-            children: [
-              Icon(isArchived ? Icons.unarchive : Icons.archive_outlined),
-              const Padding(
-                padding: EdgeInsets.all(8),
-              ),
-              Text(
-                isArchived
-                    ? S.of(context).unarchiveAlbum
-                    : S.of(context).archiveAlbum,
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-    if (!isArchived && galleryType.canHide()) {
-      items.add(
-        PopupMenuItem(
-          value: AlbumPopupAction.ownedHide,
-          child: Row(
-            children: [
-              Icon(
-                isHidden
-                    ? Icons.visibility_outlined
-                    : Icons.visibility_off_outlined,
-              ),
-              const Padding(
-                padding: EdgeInsets.all(8),
-              ),
-              Text(
-                isHidden ? S.of(context).unhide : S.of(context).hide,
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-    if (widget.collection != null && isInternalUser) {
-      items.add(
-        PopupMenuItem(
-          value: AlbumPopupAction.playOnTv,
-          child: Row(
-            children: [
-              const Icon(Icons.tv_outlined),
-              const Padding(
-                padding: EdgeInsets.all(8),
-              ),
-              Text(context.l10n.playOnTv),
-            ],
-          ),
-        ),
-      );
-    }
-
-    if (galleryType.canDelete()) {
-      items.add(
-        PopupMenuItem(
-          value: isQuickLink
-              ? AlbumPopupAction.removeLink
-              : AlbumPopupAction.delete,
-          child: Row(
-            children: [
-              Icon(
-                isQuickLink
-                    ? Icons.remove_circle_outline
-                    : Icons.delete_outline,
-              ),
-              const Padding(
-                padding: EdgeInsets.all(8),
-              ),
-              Text(
-                isQuickLink
-                    ? S.of(context).removeLink
-                    : S.of(context).deleteAlbum,
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    if (galleryType == GalleryType.sharedCollection) {
-      final bool hasShareeArchived = widget.collection!.hasShareeArchived();
-      items.add(
-        PopupMenuItem(
-          value: AlbumPopupAction.sharedArchive,
-          child: Row(
-            children: [
-              Icon(
-                hasShareeArchived ? Icons.unarchive : Icons.archive_outlined,
-              ),
-              const Padding(
-                padding: EdgeInsets.all(8),
-              ),
-              Text(
-                hasShareeArchived
-                    ? S.of(context).unarchiveAlbum
-                    : S.of(context).archiveAlbum,
-              ),
-            ],
-          ),
-        ),
-      );
-      items.add(
-        PopupMenuItem(
-          value: AlbumPopupAction.leave,
-          child: Row(
-            children: [
-              const Icon(Icons.logout),
-              const Padding(
-                padding: EdgeInsets.all(8),
-              ),
-              Text(S.of(context).leaveAlbum),
-            ],
-          ),
-        ),
-      );
-    }
-    if (galleryType == GalleryType.localFolder) {
-      items.add(
-        PopupMenuItem(
-          value: AlbumPopupAction.freeUpSpace,
-          child: Row(
-            children: [
-              const Icon(Icons.delete_sweep_outlined),
-              const Padding(
-                padding: EdgeInsets.all(8),
-              ),
-              Text(S.of(context).freeUpDeviceSpace),
-            ],
-          ),
-        ),
-      );
-    }
     if (widget.collection != null && castService.isSupported) {
       actions.add(
         Tooltip(
@@ -596,6 +341,117 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         ),
       );
     }
+    final List<EntePopupMenuItem<AlbumPopupAction>> items = [];
+    items.addAll([
+      if (galleryType.canRename())
+        EntePopupMenuItem(
+          isQuickLink
+              ? S.of(context).convertToAlbum
+              : S.of(context).renameAlbum,
+          value: AlbumPopupAction.rename,
+          icon: isQuickLink ? Icons.photo_album_outlined : Icons.edit,
+        ),
+      if (galleryType.canSetCover())
+        EntePopupMenuItem(
+          S.of(context).setCover,
+          value: AlbumPopupAction.setCover,
+          icon: Icons.image_outlined,
+        ),
+      if (galleryType.showMap())
+        EntePopupMenuItem(
+          S.of(context).map,
+          value: AlbumPopupAction.map,
+          icon: Icons.map_outlined,
+        ),
+      if (galleryType.canSort())
+        EntePopupMenuItem(
+          S.of(context).sortAlbumsBy,
+          value: AlbumPopupAction.sort,
+          icon: Icons.sort_outlined,
+        ),
+      if (galleryType == GalleryType.uncategorized)
+        EntePopupMenuItem(
+          S.of(context).cleanUncategorized,
+          value: AlbumPopupAction.cleanUncategorized,
+          icon: Icons.crop_original_outlined,
+        ),
+      if (galleryType.canPin())
+        EntePopupMenuItem(
+          widget.collection!.isPinned
+              ? S.of(context).unpinAlbum
+              : S.of(context).pinAlbum,
+          value: AlbumPopupAction.pinAlbum,
+          iconWidget: widget.collection!.isPinned
+              ? const Icon(CupertinoIcons.pin_slash)
+              : Transform.rotate(
+                  angle: 45 * math.pi / 180, // rotate by 45 degrees
+                  child: const Icon(CupertinoIcons.pin),
+                ),
+        ),
+    ]);
+    final bool isArchived = widget.collection?.isArchived() ?? false;
+    final bool isHidden = widget.collection?.isHidden() ?? false;
+
+    items.addAll(
+      [
+        // Do not show archive option for favorite collection. If collection is
+        // already archived, allow user to unarchive that collection.
+        if (isArchived || (galleryType.canArchive() && !isHidden))
+          EntePopupMenuItem(
+            value: AlbumPopupAction.ownedArchive,
+            isArchived
+                ? S.of(context).unarchiveAlbum
+                : S.of(context).archiveAlbum,
+            icon: isArchived ? Icons.unarchive : Icons.archive_outlined,
+          ),
+        if (!isArchived && galleryType.canHide())
+          EntePopupMenuItem(
+            value: AlbumPopupAction.ownedHide,
+            isHidden ? S.of(context).unhide : S.of(context).hide,
+            icon: isHidden
+                ? Icons.visibility_outlined
+                : Icons.visibility_off_outlined,
+          ),
+        if (widget.collection != null && isInternalUser)
+          EntePopupMenuItem(
+            value: AlbumPopupAction.playOnTv,
+            context.l10n.playOnTv,
+            icon: Icons.tv_outlined,
+          ),
+        if (galleryType.canDelete())
+          EntePopupMenuItem(
+            isQuickLink ? S.of(context).removeLink : S.of(context).deleteAlbum,
+            value: isQuickLink
+                ? AlbumPopupAction.removeLink
+                : AlbumPopupAction.delete,
+            icon: isQuickLink
+                ? Icons.remove_circle_outline
+                : Icons.delete_outline,
+          ),
+        if (galleryType == GalleryType.sharedCollection)
+          EntePopupMenuItem(
+            widget.collection!.hasShareeArchived()
+                ? S.of(context).unarchiveAlbum
+                : S.of(context).archiveAlbum,
+            value: AlbumPopupAction.sharedArchive,
+            icon: widget.collection!.hasShareeArchived()
+                ? Icons.unarchive
+                : Icons.archive_outlined,
+          ),
+        if (galleryType == GalleryType.sharedCollection)
+          EntePopupMenuItem(
+            S.of(context).leaveAlbum,
+            value: AlbumPopupAction.leave,
+            icon: Icons.logout,
+          ),
+        if (galleryType == GalleryType.localFolder)
+          EntePopupMenuItem(
+            S.of(context).freeUpDeviceSpace,
+            value: AlbumPopupAction.freeUpSpace,
+            icon: Icons.delete_sweep_outlined,
+          ),
+      ],
+    );
     if (items.isNotEmpty) {
       actions.add(
         PopupMenuButton(
