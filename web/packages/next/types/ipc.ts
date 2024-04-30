@@ -632,6 +632,19 @@ export interface FolderWatchSyncedFile {
  * The name of the entry is not just the file name, but rather is the full path
  * of the file within the zip. That is, each entry name uniquely identifies a
  * particular file within the given zip.
+ *
+ * When `entryName` is a path within a nested directory, it is guaranteed to use
+ * the POSIX path separator ("/") since that is the path separator required by
+ * the ZIP format itself
+ *
+ * > 4.4.17.1 The name of the file, with optional relative path.
+ * >
+ * >  The path stored MUST NOT contain a drive or  device letter, or a leading
+ * >  slash. All slashes MUST be forward slashes '/' as opposed to  backwards
+ * >  slashes '\' for compatibility with Amiga and UNIX file systems etc.  If
+ * >  input came from standard input, there is no file name field.
+ * >
+ * > https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT
  */
 export type ZipItem = [zipPath: string, entryName: string];
 
