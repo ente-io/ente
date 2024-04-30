@@ -39,7 +39,7 @@ dependencies:
   connectivity_plus: ^6.0.2
   cross_file: ^0.3.3
   crypto: ^3.0.2
-  cupertino_icons: ^1.0.0
+  cupertino_icons: ^1.0.8
   defer_pointer: ^0.0.2
   device_info_plus: ^9.0.3
   dio: ^4.0.6
