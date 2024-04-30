@@ -57,8 +57,8 @@ import type { UploadableUploadItem } from "./uploadManager";
 /**
  * A readable stream for a file, and its associated size and last modified time.
  *
- * This is the in-memory representation of the `fileOrPath` type that we usually
- * pass around. See: [Note: Reading a UploadItem]
+ * This is the in-memory representation of the {@link UploadItem} type that we
+ * usually pass around. See: [Note: Reading a UploadItem]
  */
 interface FileStream {
     /**
@@ -602,11 +602,11 @@ interface ReadAssetDetailsResult {
 const readAssetDetails = async ({
     isLivePhoto,
     livePhotoAssets,
-    uploadItem: fileOrPath,
+    uploadItem,
 }: UploadAsset): Promise<ReadAssetDetailsResult> =>
     isLivePhoto
         ? readLivePhotoDetails(livePhotoAssets)
-        : readImageOrVideoDetails(fileOrPath);
+        : readImageOrVideoDetails(uploadItem);
 
 const readLivePhotoDetails = async ({ image, video }: LivePhotoAssets) => {
     const img = await readImageOrVideoDetails(image);
@@ -941,12 +941,12 @@ const readLivePhoto = async (
     // the entire stream into memory and pass the resultant data.
     //
     // This is a reasonable behaviour since the videos corresponding to live
-    // photos are only a couple of seconds long (we have already done a
-    // pre-flight check to ensure their size is small in `areLivePhotoAssets`).
+    // photos are only a couple of seconds long (we've already done a pre-flight
+    // check during areLivePhotoAssets to ensure their size is small).
     const fileOrData = async (sd: FileStream | Uint8Array) => {
-        const _fs = async ({ file, stream }: FileStream) =>
+        const fos = async ({ file, stream }: FileStream) =>
             file ? file : await readEntireStream(stream);
-        return sd instanceof Uint8Array ? sd : _fs(sd);
+        return sd instanceof Uint8Array ? sd : fos(sd);
     };
 
     return {

@@ -20,12 +20,12 @@ import {
     getPublicCollectionUploaderName,
     savePublicCollectionUploaderName,
 } from "services/publicCollectionService";
+import type { UploadItem } from "services/upload/types";
 import type {
     InProgressUpload,
     SegregatedFinishedUploads,
     UploadCounter,
     UploadFileNames,
-    UploadItem,
     UploadItemWithCollection,
 } from "services/upload/uploadManager";
 import uploadManager from "services/upload/uploadManager";

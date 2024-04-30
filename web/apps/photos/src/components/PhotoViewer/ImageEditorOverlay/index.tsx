@@ -507,7 +507,7 @@ const ImageEditorOverlay = (props: IProps) => {
 
             const editedFile = await getEditedFile();
             const file = {
-                fileOrPath: editedFile,
+                uploadItem: editedFile,
                 localID: 1,
                 collectionID: props.file.collectionID,
             };
