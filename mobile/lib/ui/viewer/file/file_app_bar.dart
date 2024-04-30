@@ -158,7 +158,7 @@ class FileAppBarState extends State<FileAppBar> {
               Icon(
                 Platform.isAndroid
                     ? Icons.download
-                    : CupertinoIcons.cloud_download,
+                    : Icons.cloud_download_outlined,
                 color: Theme.of(context).iconTheme.color,
               ),
               const Padding(
