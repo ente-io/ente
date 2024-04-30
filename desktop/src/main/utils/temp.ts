@@ -4,6 +4,7 @@ import { existsSync } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
 import type { ZipItem } from "../../types/ipc";
+import { ensure } from "./common";
 
 /**
  * Our very own directory within the system temp directory. Go crazy, but
@@ -17,13 +18,10 @@ const enteTempDirPath = async () => {
 
 /** Generate a random string suitable for being used as a file name prefix */
 const randomPrefix = () => {
-    const alphabet =
-        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    const ch = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    const randomChar = () => ensure(ch[Math.floor(Math.random() * ch.length)]);
 
-    let result = "";
-    for (let i = 0; i < 10; i++)
-        result += alphabet[Math.floor(Math.random() * alphabet.length)];
-    return result;
+    return Array(10).fill("").map(randomChar).join("");
 };
 
 /**
