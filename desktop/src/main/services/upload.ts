@@ -82,16 +82,16 @@ export const pendingUploads = async (): Promise<PendingUploads | undefined> => {
     };
 };
 
-export const setPendingUploads = async (pendingUploads: PendingUploads) =>
+export const setPendingUploads = (pendingUploads: PendingUploads) =>
     uploadStatusStore.set(pendingUploads);
 
-export const markUploadedFiles = async (paths: string[]) => {
+export const markUploadedFiles = (paths: string[]) => {
     const existing = uploadStatusStore.get("filePaths");
     const updated = existing?.filter((p) => !paths.includes(p));
     uploadStatusStore.set("filePaths", updated);
 };
 
-export const markUploadedZipItems = async (
+export const markUploadedZipItems = (
     items: [zipPath: string, entryName: string][],
 ) => {
     const existing = uploadStatusStore.get("zipItems");
