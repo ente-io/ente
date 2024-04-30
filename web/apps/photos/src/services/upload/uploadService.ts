@@ -482,45 +482,48 @@ export const uploader = async (
  *
  * In the web context, we'll always get a File, since within the browser we
  * cannot programmatically construct paths to or arbitrarily access files on the
- * user's file system. Note that even if we were to have an absolute path at
- * hand, we cannot programmatically create such File objects to arbitrary
- * absolute paths on user's local file system for security reasons.
+ * user's file system.
+ *
+ * > Note that even if we were to somehow have an absolute path at hand, we
+ *   cannot programmatically create such File objects to arbitrary absolute
+ *   paths on user's local file system for security reasons.
  *
  * So in the web context, this will always be a File we get as a result of an
- * explicit user interaction (e.g. drag and drop).
+ * explicit user interaction (e.g. drag and drop or using a file selector).
  *
  * In the desktop context, this can be either a File (+ path), or a path, or an
  * entry within a zip file.
  *
  * 2. If the user provided us this file via some user interaction (say a drag
- *    and a drop), this'll still be a File. Note that unlike in the web context,
- *    such File objects also have the full path. See: [Note: File paths when
- *    running under Electron].
+ *    and a drop), this'll still be a File. But unlike in the web context, we
+ *    also have access to the full path of this file.
  *
- * 3. However, when running in the desktop app we have the ability to access
- *    absolute paths on the user's file system. For example, if the user asks us
- *    to watch certain folders on their disk for changes, we'll be able to pick
- *    up new images being added, and in such cases, the parameter here will be a
- *    path. Another example is when resuming an previously interrupted upload -
- *    we'll only have the path at hand in such cases, not the File object.
+ * 3. In addition, when running in the desktop app we have the ability to
+ *    initate programmatic access absolute paths on the user's file system. For
+ *    example, if the user asks us to watch certain folders on their disk for
+ *    changes, we'll be able to pick up new images being added, and in such
+ *    cases, the parameter here will be a path. Another example is when resuming
+ *    an previously interrupted upload - we'll only have the path at hand in
+ *    such cases, not the original File object since the app subsequently
+ *    restarted.
  *
- * 4. The user might've also initiated an upload of a zip file. In this case we
- *    will get a tuple (path to the zip file on the local file system, and the
- *    name of the entry within that zip file).
+ * 4. The user might've also initiated an upload of a zip file (or we might be
+ *    resuming one). In such cases we will get a tuple (path to the zip file on
+ *    the local file system, and the name of the entry within that zip file).
  *
  * Case 3 and 4, when we're provided a path, are simple. We don't have a choice,
  * since we cannot still programmatically construct a File object (we can
  * construct it on the Node.js layer, but it can't then be transferred over the
  * IPC boundary). So all our operations use the path itself.
  *
- * Case 2 involves a choice on a use-case basis as neither File nor the path is
- * a better choice for all use cases.
+ * Case 2 involves a choice on a use-case basis. Neither File nor the path is a
+ * better choice for all use cases.
  *
- * The advantage of the File object is that the browser has already read it into
- * memory for us. The disadvantage comes in the case where we need to
- * communicate with the native Node.js layer of our desktop app. Since this
- * communication happens over IPC, the File's contents need to be serialized and
- * copied, which is a bummer for large videos etc.
+ * > The advantage of the File object is that the browser has already read it
+ *   into memory for us. The disadvantage comes in the case where we need to
+ *   communicate with the native Node.js layer of our desktop app. Since this
+ *   communication happens over IPC, the File's contents need to be serialized
+ *   and copied, which is a bummer for large videos etc.
  */
 const readUploadItem = async (uploadItem: UploadItem): Promise<FileStream> => {
     let underlyingStream: ReadableStream;
