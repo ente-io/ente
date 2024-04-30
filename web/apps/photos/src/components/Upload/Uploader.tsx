@@ -1,7 +1,7 @@
 import { basename } from "@/next/file";
 import log from "@/next/log";
 import { type FileAndPath } from "@/next/types/file";
-import type { CollectionMapping, Electron, ZipEntry } from "@/next/types/ipc";
+import type { CollectionMapping, Electron, ZipItem } from "@/next/types/ipc";
 import { CustomError } from "@ente/shared/error";
 import { isPromise } from "@ente/shared/utils";
 import DiscFullIcon from "@mui/icons-material/DiscFull";
@@ -127,15 +127,18 @@ export default function Uploader({
     );
 
     /**
-     * {@link File}s that the user drag-dropped or selected for uploads. This is
-     * the only type of selection that is possible when we're running in the
-     * browser.
+     * {@link File}s that the user drag-dropped or selected for uploads (web).
+     *
+     * This is the only type of selection that is possible when we're running in
+     * the browser.
      */
     const [webFiles, setWebFiles] = useState<File[]>([]);
     /**
      * {@link File}s that the user drag-dropped or selected for uploads,
-     * augmented with their paths. These siblings of {@link webFiles} come into
-     * play when we are running in the context of our desktop app.
+     * augmented with their paths (desktop).
+     *
+     * These siblings of {@link webFiles} come into play when we are running in
+     * the context of our desktop app.
      */
     const [desktopFiles, setDesktopFiles] = useState<FileAndPath[]>([]);
     /**
@@ -151,22 +154,24 @@ export default function Uploader({
     const [desktopFilePaths, setDesktopFilePaths] = useState<string[]>([]);
     /**
      * (zip file path, entry within zip file) tuples for zip files that the user
-     * is trying to upload. These are only set when we are running in the
-     * context of our desktop app. They may be set either on a user action (when
-     * the user selects or drag-drops zip files) or programmatically (when the
-     * app is trying to resume pending uploads from a previous session).
+     * is trying to upload.
+     *
+     * These are only set when we are running in the context of our desktop app.
+     * They may be set either on a user action (when the user selects or
+     * drag-drops zip files) or programmatically (when the app is trying to
+     * resume pending uploads from a previous session).
      */
-    const [desktopZipEntries, setDesktopZipEntries] = useState<ZipEntry[]>([]);
+    const [desktopZipItems, setDesktopZipItems] = useState<ZipItem[]>([]);
 
     /**
      * Consolidated and cleaned list obtained from {@link webFiles},
      * {@link desktopFiles}, {@link desktopFilePaths} and
-     * {@link desktopZipEntries}.
+     * {@link desktopZipItems}.
      *
      * Augment each {@link UploadItem} with its "path" (relative path or name in
      * the case of {@link webFiles}, absolute path in the case of
      * {@link desktopFiles}, {@link desktopFilePaths}, and the path within the
-     * zip file for {@link desktopZipEntries}).
+     * zip file for {@link desktopZipItems}).
      *
      * See the documentation of {@link UploadItem} for more details.
      */
@@ -254,13 +259,13 @@ export default function Uploader({
             electron.pendingUploads().then((pending) => {
                 if (!pending) return;
 
-                const { collectionName, filePaths, zipEntries } = pending;
+                const { collectionName, filePaths, zipItems } = pending;
 
                 log.info("Resuming pending upload", pending);
                 isPendingDesktopUpload.current = true;
                 pendingDesktopUploadCollectionName.current = collectionName;
                 setDesktopFilePaths(filePaths);
-                setDesktopZipEntries(zipEntries);
+                setDesktopZipItems(zipItems);
             });
         }
     }, [
@@ -286,10 +291,10 @@ export default function Uploader({
             fileSelectorZipFiles,
         ].flat();
         if (electron) {
-            desktopFilesAndZipEntries(electron, files).then(
-                ({ fileAndPaths, zipEntries }) => {
+            desktopFilesAndZipItems(electron, files).then(
+                ({ fileAndPaths, zipItems }) => {
                     setDesktopFiles(fileAndPaths);
-                    setDesktopZipEntries(zipEntries);
+                    setDesktopZipItems(zipItems);
                 },
             );
         } else {
@@ -309,7 +314,7 @@ export default function Uploader({
             webFiles.map((f) => [f, f["path"] ?? f.name]),
             desktopFiles.map((fp) => [fp, fp.path]),
             desktopFilePaths.map((p) => [p, p]),
-            desktopZipEntries.map((ze) => [ze, ze[1]]),
+            desktopZipItems.map((ze) => [ze, ze[1]]),
         ].flat() as [UploadItem, string][];
 
         if (allItemAndPaths.length == 0) return;
@@ -333,7 +338,7 @@ export default function Uploader({
         setWebFiles([]);
         setDesktopFiles([]);
         setDesktopFilePaths([]);
-        setDesktopZipEntries([]);
+        setDesktopZipItems([]);
 
         // Remove hidden files (files whose names begins with a ".").
         const prunedItemAndPaths = allItemAndPaths.filter(
@@ -423,7 +428,7 @@ export default function Uploader({
                 intent: CollectionSelectorIntent.upload,
             });
         })();
-    }, [webFiles, desktopFiles, desktopFilePaths, desktopZipEntries]);
+    }, [webFiles, desktopFiles, desktopFilePaths, desktopZipItems]);
 
     const preCollectionCreationAction = async () => {
         props.closeCollectionSelector?.();
@@ -764,23 +769,23 @@ async function waitAndRun(
     await task();
 }
 
-const desktopFilesAndZipEntries = async (
+const desktopFilesAndZipItems = async (
     electron: Electron,
     files: File[],
-): Promise<{ fileAndPaths: FileAndPath[]; zipEntries: ZipEntry[] }> => {
+): Promise<{ fileAndPaths: FileAndPath[]; zipItems: ZipItem[] }> => {
     const fileAndPaths: FileAndPath[] = [];
-    let zipEntries: ZipEntry[] = [];
+    let zipItems: ZipItem[] = [];
 
     for (const file of files) {
         const path = electron.pathForFile(file);
         if (file.name.endsWith(".zip")) {
-            zipEntries = zipEntries.concat(await electron.listZipEntries(path));
+            zipItems = zipItems.concat(await electron.listZipItems(path));
         } else {
             fileAndPaths.push({ file, path });
         }
     }
 
-    return { fileAndPaths, zipEntries };
+    return { fileAndPaths, zipItems };
 };
 
 // This is used to prompt the user the make upload strategy choice
@@ -891,14 +896,14 @@ export const setPendingUploads = async (
     }
 
     const filePaths: string[] = [];
-    const zipEntries: ZipEntry[] = [];
+    const zipItems: ZipItem[] = [];
     for (const item of uploadItems) {
         if (item instanceof File) {
             throw new Error("Unexpected web file for a desktop pending upload");
         } else if (typeof item == "string") {
             filePaths.push(item);
         } else if (Array.isArray(item)) {
-            zipEntries.push(item);
+            zipItems.push(item);
         } else {
             filePaths.push(item.path);
         }
@@ -907,6 +912,6 @@ export const setPendingUploads = async (
     await electron.setPendingUploads({
         collectionName,
         filePaths,
-        zipEntries,
+        zipItems: zipItems,
     });
 };

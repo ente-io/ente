@@ -6,7 +6,7 @@
  * See: [Note: IPC streams].
  */
 
-import type { Electron, ZipEntry } from "@/next/types/ipc";
+import type { Electron, ZipItem } from "@/next/types/ipc";
 
 /**
  * Stream the given file or zip entry from the user's local filesystem.
@@ -35,7 +35,7 @@ import type { Electron, ZipEntry } from "@/next/types/ipc";
  */
 export const readStream = async (
     _: Electron,
-    pathOrZipEntry: string | ZipEntry,
+    pathOrZipEntry: string | ZipItem,
 ): Promise<{ response: Response; size: number; lastModifiedMs: number }> => {
     let url: URL;
     if (typeof pathOrZipEntry == "string") {

@@ -21,7 +21,7 @@ export interface UploadStatusStore {
      */
     zipItems?: [zipPath: string, entryName: string][];
     /**
-     * @deprecated Legacy paths to zip files, now subsumed into zipEntries.
+     * @deprecated Legacy paths to zip files, now subsumed into zipItems.
      */
     zipPaths?: string[];
 }

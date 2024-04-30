@@ -4,7 +4,7 @@ import { ensureElectron } from "@/next/electron";
 import { lowercaseExtension, nameAndExtension } from "@/next/file";
 import log from "@/next/log";
 import { type FileAndPath } from "@/next/types/file";
-import type { Electron, ZipEntry } from "@/next/types/ipc";
+import type { Electron, ZipItem } from "@/next/types/ipc";
 import { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { ensure } from "@/utils/ensure";
 import { getDedicatedCryptoWorker } from "@ente/shared/crypto";
@@ -105,9 +105,9 @@ const maxConcurrentUploads = 4;
  *    selected the zip file, or it might be a zip file that they'd previously
  *    selected but we now are resuming an interrupted upload. Either ways, what
  *    we have is a path to zip file, and the name of an entry within that zip
- *    file. This is the {@link ZipEntry} case.
+ *    file. This is the {@link ZipItem} case.
  */
-export type UploadItem = File | FileAndPath | string | ZipEntry;
+export type UploadItem = File | FileAndPath | string | ZipItem;
 
 export interface UploadItemWithCollection {
     localID: number;
@@ -840,7 +840,7 @@ const markUploaded = async (electron: Electron, item: ClusteredUploadItem) => {
             item.livePhotoAssets.video,
         ];
         if (Array.isArray(p0) && Array.isArray(p1)) {
-            electron.markUploadedZipEntries([p0, p1]);
+            electron.markUploadedZipItems([p0, p1]);
         } else if (typeof p0 == "string" && typeof p1 == "string") {
             electron.markUploadedFiles([p0, p1]);
         } else if (
@@ -860,7 +860,7 @@ const markUploaded = async (electron: Electron, item: ClusteredUploadItem) => {
     } else {
         const p = ensure(item.uploadItem);
         if (Array.isArray(p)) {
-            electron.markUploadedZipEntries([p]);
+            electron.markUploadedZipItems([p]);
         } else if (typeof p == "string") {
             electron.markUploadedFiles([p]);
         } else if (p && typeof p == "object" && "path" in p) {
@@ -1030,8 +1030,8 @@ const removePotentialLivePhotoSuffix = (name: string, suffix?: string) => {
 const uploadItemSize = async (uploadItem: UploadItem): Promise<number> => {
     if (uploadItem instanceof File) return uploadItem.size;
     if (typeof uploadItem == "string")
-        return ensureElectron().pathOrZipEntrySize(uploadItem);
+        return ensureElectron().pathOrZipItemSize(uploadItem);
     if (Array.isArray(uploadItem))
-        return ensureElectron().pathOrZipEntrySize(uploadItem);
+        return ensureElectron().pathOrZipItemSize(uploadItem);
     return uploadItem.file.size;
 };

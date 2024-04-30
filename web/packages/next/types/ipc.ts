@@ -221,7 +221,7 @@ export interface Electron {
      * not yet possible, this function will throw an error with the
      * {@link CustomErrorMessage.NotAvailable} message.
      *
-     * @param dataOrPathOrZipEntry The file whose thumbnail we want to generate.
+     * @param dataOrPathOrZipItem The file whose thumbnail we want to generate.
      * It can be provided as raw image data (the contents of the image file), or
      * the path to the image file, or a tuple containing the path of the zip
      * file along with the name of an entry in it.
@@ -234,14 +234,14 @@ export interface Electron {
      * @returns JPEG data of the generated thumbnail.
      */
     generateImageThumbnail: (
-        dataOrPathOrZipEntry: Uint8Array | string | ZipEntry,
+        dataOrPathOrZipItem: Uint8Array | string | ZipItem,
         maxDimension: number,
         maxSize: number,
     ) => Promise<Uint8Array>;
 
     /**
      * Execute a FFmpeg {@link command} on the given
-     * {@link dataOrPathOrZipEntry}.
+     * {@link dataOrPathOrZipItem}.
      *
      * This executes the command using a FFmpeg executable we bundle with our
      * desktop app. We also have a wasm FFmpeg wasm implementation that we use
@@ -254,7 +254,7 @@ export interface Electron {
      * (respectively {@link inputPathPlaceholder},
      * {@link outputPathPlaceholder}, {@link ffmpegPathPlaceholder}).
      *
-     * @param dataOrPathOrZipEntry The bytes of the input file, or the path to
+     * @param dataOrPathOrZipItem The bytes of the input file, or the path to
      * the input file on the user's local disk, or the path to a zip file on the
      * user's disk and the name of an entry in it. In all three cases, the data
      * gets serialized to a temporary file, and then that path gets substituted
@@ -274,7 +274,7 @@ export interface Electron {
      */
     ffmpegExec: (
         command: string[],
-        dataOrPathOrZipEntry: Uint8Array | string | ZipEntry,
+        dataOrPathOrZipItem: Uint8Array | string | ZipItem,
         outputFileExtension: string,
         timeoutMS: number,
     ) => Promise<Uint8Array>;
@@ -491,13 +491,13 @@ export interface Electron {
      *
      * To read the contents of the files themselves, see [Note: IPC streams].
      */
-    listZipEntries: (zipPath: string) => Promise<ZipEntry[]>;
+    listZipItems: (zipPath: string) => Promise<ZipItem[]>;
 
     /**
      * Return the size in bytes of the file at the given path or of a particular
      * entry within a zip file.
      */
-    pathOrZipEntrySize: (pathOrZipEntry: string | ZipEntry) => Promise<number>;
+    pathOrZipItemSize: (pathOrZipItem: string | ZipItem) => Promise<number>;
 
     /**
      * Return any pending uploads that were previously enqueued but haven't yet
@@ -518,7 +518,7 @@ export interface Electron {
      * - Typically, this would be called at the start of an upload.
      *
      * - Thereafter, as each item gets uploaded one by one, we'd call
-     *   {@link markUploadedFiles} or {@link markUploadedZipEntries}.
+     *   {@link markUploadedFiles} or {@link markUploadedZipItems}.
      *
      * - Finally, once the upload completes (or gets cancelled), we'd call
      *   {@link clearPendingUploads} to complete the circle.
@@ -532,11 +532,9 @@ export interface Electron {
     markUploadedFiles: (paths: PendingUploads["filePaths"]) => Promise<void>;
 
     /**
-     * Mark the given zip file entries as having been uploaded.
+     * Mark the given {@link ZipItem}s as having been uploaded.
      */
-    markUploadedZipEntries: (
-        entries: PendingUploads["zipEntries"],
-    ) => Promise<void>;
+    markUploadedZipItems: (items: PendingUploads["zipItems"]) => Promise<void>;
 
     /**
      * Clear any pending uploads.
@@ -627,15 +625,17 @@ export interface FolderWatchSyncedFile {
 }
 
 /**
- * When the user uploads a zip file, we create a "zip entry" for each entry
- * within that zip file. Such an entry is a tuple containin the path to a zip
- * file itself, and the name of an entry within it.
+ * A particular file within a zip file.
+ *
+ * When the user uploads a zip file, we create a "zip item" for each entry
+ * within the zip file. Each such entry is a tuple containing the (path to a zip
+ * file itself, and the name of an entry within it).
  *
  * The name of the entry is not just the file name, but rather is the full path
  * of the file within the zip. That is, each entry name uniquely identifies a
  * particular file within the given zip.
  */
-export type ZipEntry = [zipPath: string, entryName: string];
+export type ZipItem = [zipPath: string, entryName: string];
 
 /**
  * State about pending and in-progress uploads.
@@ -659,7 +659,7 @@ export interface PendingUploads {
      */
     filePaths: string[];
     /**
-     * {@link ZipEntry} (zip path and entry name) that need to be uploaded.
+     * {@link ZipItem} (zip path and entry name) that need to be uploaded.
      */
-    zipEntries: ZipEntry[];
+    zipItems: ZipItem[];
 }

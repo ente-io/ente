@@ -241,8 +241,8 @@ const watchFindFiles = (folderPath: string): Promise<string[]> =>
 
 const pathForFile = (file: File) => webUtils.getPathForFile(file);
 
-const listZipEntries = (zipPath: string): Promise<ZipItem[]> =>
-    ipcRenderer.invoke("listZipEntries", zipPath);
+const listZipItems = (zipPath: string): Promise<ZipItem[]> =>
+    ipcRenderer.invoke("listZipItems", zipPath);
 
 const pathOrZipItemSize = (pathOrZipItem: string | ZipItem): Promise<number> =>
     ipcRenderer.invoke("pathOrZipItemSize", pathOrZipItem);
@@ -256,9 +256,9 @@ const setPendingUploads = (pendingUploads: PendingUploads): Promise<void> =>
 const markUploadedFiles = (paths: PendingUploads["filePaths"]): Promise<void> =>
     ipcRenderer.invoke("markUploadedFiles", paths);
 
-const markUploadedZipEntries = (
-    zipEntries: PendingUploads["zipItems"],
-): Promise<void> => ipcRenderer.invoke("markUploadedZipEntries", zipEntries);
+const markUploadedZipItems = (
+    items: PendingUploads["zipItems"],
+): Promise<void> => ipcRenderer.invoke("markUploadedZipItems", items);
 
 const clearPendingUploads = (): Promise<void> =>
     ipcRenderer.invoke("clearPendingUploads");
@@ -372,11 +372,11 @@ contextBridge.exposeInMainWorld("electron", {
     // - Upload
 
     pathForFile,
-    listZipEntries,
+    listZipItems,
     pathOrZipItemSize,
     pendingUploads,
     setPendingUploads,
     markUploadedFiles,
-    markUploadedZipEntries,
+    markUploadedZipItems,
     clearPendingUploads,
 });

@@ -53,9 +53,9 @@ import {
 } from "./services/store";
 import {
     clearPendingUploads,
-    listZipEntries,
+    listZipItems,
     markUploadedFiles,
-    markUploadedZipEntries,
+    markUploadedZipItems,
     pathOrZipItemSize,
     pendingUploads,
     setPendingUploads,
@@ -205,8 +205,8 @@ export const attachIPCHandlers = () => {
 
     // - Upload
 
-    ipcMain.handle("listZipEntries", (_, zipPath: string) =>
-        listZipEntries(zipPath),
+    ipcMain.handle("listZipItems", (_, zipPath: string) =>
+        listZipItems(zipPath),
     );
 
     ipcMain.handle("pathOrZipItemSize", (_, pathOrZipItem: string | ZipItem) =>
@@ -225,9 +225,8 @@ export const attachIPCHandlers = () => {
     );
 
     ipcMain.handle(
-        "markUploadedZipEntries",
-        (_, zipEntries: PendingUploads["zipItems"]) =>
-            markUploadedZipEntries(zipEntries),
+        "markUploadedZipItems",
+        (_, items: PendingUploads["zipItems"]) => markUploadedZipItems(items),
     );
 
     ipcMain.handle("clearPendingUploads", () => clearPendingUploads());
