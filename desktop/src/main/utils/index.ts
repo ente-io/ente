@@ -1,5 +1,5 @@
 /**
- * @file grab bag of utitity functions.
+ * @file grab bag of utility functions.
  *
  * Many of these are verbatim copies of functions from web code since there
  * isn't currently a common package that both of them share.

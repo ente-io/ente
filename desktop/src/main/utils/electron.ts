@@ -1,11 +1,19 @@
 import shellescape from "any-shell-escape";
 import { app } from "electron/main";
 import { exec } from "node:child_process";
+import path from "node:path";
 import { promisify } from "node:util";
 import log from "../log";
 
 /** `true` if the app is running in development mode. */
 export const isDev = !app.isPackaged;
+
+/**
+ * Convert a file system {@link filePath} that uses the local system specific
+ * path separators into a path that uses POSIX file separators.
+ */
+export const posixPath = (filePath: string) =>
+    filePath.split(path.sep).join(path.posix.sep);
 
 /**
  * Run a shell command asynchronously.

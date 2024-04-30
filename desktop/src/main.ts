@@ -401,12 +401,6 @@ const main = () => {
         setDownloadPath(mainWindow.webContents);
         allowExternalLinks(mainWindow.webContents);
 
-        // TODO(MR): Remove or resurrect
-        // The commit that introduced this header override had the message
-        // "fix cors issue for uploads". Not sure what that means, so disabling
-        // it for now to see why exactly this is required.
-        // addAllowOriginHeader(mainWindow);
-
         // Start loading the renderer.
         mainWindow.loadURL(rendererURL);
 
