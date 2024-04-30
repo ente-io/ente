@@ -7,9 +7,9 @@ import { isDev } from "./utils/electron";
  *
  * This will set our underlying logger up to log to a file named `ente.log`,
  *
- * - on Linux at ~/.config/ente/logs/main.log
- * - on macOS at ~/Library/Logs/ente/main.log
- * - on Windows at %USERPROFILE%\AppData\Roaming\ente\logs\main.log
+ * - on Linux at ~/.config/ente/logs/ente.log
+ * - on macOS at ~/Library/Logs/ente/ente.log
+ * - on Windows at %USERPROFILE%\AppData\Roaming\ente\logs\ente.log
  *
  * On dev builds, it will also log to the console.
  */
