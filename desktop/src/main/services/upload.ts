@@ -20,7 +20,7 @@ export const listZipItems = async (zipPath: string): Promise<ZipItem[]> => {
         }
     }
 
-    zip.close();
+    await zip.close();
 
     return entryNames.map((entryName) => [zipPath, entryName]);
 };
@@ -40,7 +40,7 @@ export const pathOrZipItemSize = async (
                 `An entry with name ${entryName} does not exist in the zip file at ${zipPath}`,
             );
         const size = entry.size;
-        zip.close();
+        await zip.close();
         return size;
     }
 };

@@ -114,7 +114,7 @@ export const makeFileForDataOrPathOrZipItem = async (
                 const [zipPath, entryName] = dataOrPathOrZipItem;
                 const zip = new StreamZip.async({ file: zipPath });
                 await zip.extract(entryName, path);
-                zip.close();
+                await zip.close();
             };
         }
     }

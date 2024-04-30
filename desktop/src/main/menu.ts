@@ -35,7 +35,7 @@ export const createApplicationMenu = async (mainWindow: BrowserWindow) => {
         );
 
     const toggleAutoLaunch = () => {
-        autoLauncher.toggleAutoLaunch();
+        void autoLauncher.toggleAutoLaunch();
         isAutoLaunchEnabled = !isAutoLaunchEnabled;
     };
 
