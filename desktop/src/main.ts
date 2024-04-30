@@ -202,8 +202,8 @@ const createMainWindow = () => {
             app.dock.hide();
     });
 
-    window.on("show", () => {
-        if (process.platform == "darwin") app.dock.show();
+    window.on("show", async () => {
+        if (process.platform == "darwin") await app.dock.show();
     });
 
     // Let ipcRenderer know when mainWindow is in the foreground so that it can
@@ -257,7 +257,7 @@ export const allowExternalLinks = (webContents: WebContents) => {
     // Returning `action` "deny" accomplishes this.
     webContents.setWindowOpenHandler(({ url }) => {
         if (!url.startsWith(rendererURL)) {
-            shell.openExternal(url);
+            void shell.openExternal(url);
             return { action: "deny" };
         } else {
             return { action: "allow" };
@@ -377,7 +377,7 @@ const main = () => {
         allowExternalLinks(mainWindow.webContents);
 
         // Start loading the renderer.
-        mainWindow.loadURL(rendererURL);
+        void mainWindow.loadURL(rendererURL);
 
         // Continue on with the rest of the startup sequence.
         Menu.setApplicationMenu(await createApplicationMenu(mainWindow));
@@ -385,8 +385,8 @@ const main = () => {
         if (!isDev) setupAutoUpdater(mainWindow);
 
         try {
-            deleteLegacyDiskCacheDirIfExists();
-            deleteLegacyKeysStoreIfExists();
+            await deleteLegacyDiskCacheDirIfExists();
+            await deleteLegacyKeysStoreIfExists();
         } catch (e) {
             // Log but otherwise ignore errors during non-critical startup
             // actions.
