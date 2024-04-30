@@ -930,9 +930,5 @@ export const setPendingUploads = async (
         }
     }
 
-    await electron.setPendingUploads({
-        collectionName,
-        filePaths,
-        zipItems: zipItems,
-    });
+    await electron.setPendingUploads({ collectionName, filePaths, zipItems });
 };

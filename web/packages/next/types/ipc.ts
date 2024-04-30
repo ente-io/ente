@@ -650,8 +650,10 @@ export interface PendingUploads {
      * This is name of the collection (when uploading to a singular collection)
      * or the root collection (when uploading to separate * albums) to which we
      * these uploads are meant to go to. See {@link CollectionMapping}.
+     *
+     * It will not be set if we're just uploading standalone files.
      */
-    collectionName: string;
+    collectionName?: string;
     /**
      * Paths of regular files that need to be uploaded.
      */

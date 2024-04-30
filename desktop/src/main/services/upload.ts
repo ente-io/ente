@@ -35,6 +35,10 @@ export const pathOrZipItemSize = async (
         const [zipPath, entryName] = pathOrZipItem;
         const zip = new StreamZip.async({ file: zipPath });
         const entry = await zip.entry(entryName);
+        if (!entry)
+            throw new Error(
+                `An entry with name ${entryName} does not exist in the zip file at ${zipPath}`,
+            );
         const size = entry.size;
         zip.close();
         return size;
@@ -60,7 +64,7 @@ export const pendingUploads = async (): Promise<PendingUploads | undefined> => {
     // file, but the dedup logic will kick in at that point so no harm will come
     // off it.
     if (allZipItems === undefined) {
-        const allZipPaths = uploadStatusStore.get("filePaths");
+        const allZipPaths = uploadStatusStore.get("filePaths") ?? [];
         const zipPaths = allZipPaths.filter((f) => existsSync(f));
         zipItems = [];
         for (const zip of zipPaths)
@@ -83,7 +87,7 @@ export const setPendingUploads = async (pendingUploads: PendingUploads) =>
 
 export const markUploadedFiles = async (paths: string[]) => {
     const existing = uploadStatusStore.get("filePaths");
-    const updated = existing.filter((p) => !paths.includes(p));
+    const updated = existing?.filter((p) => !paths.includes(p));
     uploadStatusStore.set("filePaths", updated);
 };
 
@@ -91,7 +95,7 @@ export const markUploadedZipItems = async (
     items: [zipPath: string, entryName: string][],
 ) => {
     const existing = uploadStatusStore.get("zipItems");
-    const updated = existing.filter(
+    const updated = existing?.filter(
         (z) => !items.some((e) => z[0] == e[0] && z[1] == e[1]),
     );
     uploadStatusStore.set("zipItems", updated);
