@@ -34,6 +34,7 @@
         "onnxruntime-node": "^1.17"
     },
     "devDependencies": {
+        "@tsconfig/node20": "^20.1.4",
         "@types/auto-launch": "^5.0",
         "@types/ffmpeg-static": "^3.0",
         "@typescript-eslint/eslint-plugin": "^7",

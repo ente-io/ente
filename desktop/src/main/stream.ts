@@ -6,6 +6,7 @@ import StreamZip from "node-stream-zip";
 import { createWriteStream, existsSync } from "node:fs";
 import fs from "node:fs/promises";
 import { Readable } from "node:stream";
+import { ReadableStream } from "node:stream/web";
 import { pathToFileURL } from "node:url";
 import log from "./log";
 import { ensure } from "./utils/common";
