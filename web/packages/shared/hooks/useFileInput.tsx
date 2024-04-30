@@ -72,19 +72,27 @@ export default function useFileInput({
         event,
     ) => {
         if (!!event.target && !!event.target.files) {
-            const files = [...event.target.files].map((file) =>
-                toFileWithPath(file),
-            );
-            setSelectedFiles(files);
+            setSelectedFiles([...event.target.files]);
         }
     };
+
+    // [Note: webkitRelativePath]
+    //
+    // If the webkitdirectory attribute of an <input> HTML element is set then
+    // the File objects that we get will have `webkitRelativePath` property
+    // containing the relative path to the selected directory.
+    //
+    // https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement/webkitdirectory
+    const directoryOpts = directory
+        ? { directory: "", webkitdirectory: "" }
+        : {};
 
     const getInputProps = useCallback(
         () => ({
             type: "file",
             multiple: true,
             style: { display: "none" },
-            ...(directory ? { directory: "", webkitdirectory: "" } : {}),
+            ...directoryOpts,
             ref: inputRef,
             onChange: handleChange,
             ...(accept ? { accept } : {}),
@@ -97,27 +105,4 @@ export default function useFileInput({
         open: openSelectorDialog,
         selectedFiles: selectedFiles,
     };
-}
-
-// https://github.com/react-dropzone/file-selector/blob/master/src/file.ts#L88
-export function toFileWithPath(file: File, path?: string): FileWithPath {
-    if (typeof (file as any).path !== "string") {
-        // on electron, path is already set to the absolute path
-        const { webkitRelativePath } = file;
-        Object.defineProperty(file, "path", {
-            value:
-                typeof path === "string"
-                    ? path
-                    : typeof webkitRelativePath === "string" && // If <input webkitdirectory> is set,
-                        // the File will have a {webkitRelativePath} property
-                        // https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement/webkitdirectory
-                        webkitRelativePath.length > 0
-                      ? webkitRelativePath
-                      : file.name,
-            writable: false,
-            configurable: false,
-            enumerable: true,
-        });
-    }
-    return file;
 }

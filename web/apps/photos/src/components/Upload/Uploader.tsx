@@ -324,8 +324,8 @@ export default function Uploader({
     // Trigger an upload when any of the dependencies change.
     useEffect(() => {
         const allItemAndPaths = [
-            /* TODO(MR): ElectronFile | use webkitRelativePath || name here */
-            webFiles.map((f) => [f, f["path"] ?? f.name]),
+            // See: [Note: webkitRelativePath]
+            webFiles.map((f) => [f, f.webkitRelativePath ?? f.name]),
             desktopFiles.map((fp) => [fp, fp.path]),
             desktopFilePaths.map((p) => [p, p]),
             desktopZipItems.map((ze) => [ze, ze[1]]),
