@@ -209,6 +209,7 @@ export default function Uploader({
         setChoiceModalView(false);
         uploadRunning.current = false;
     };
+
     const handleCollectionSelectorCancel = () => {
         uploadRunning.current = false;
     };
@@ -234,6 +235,7 @@ export default function Uploader({
             publicCollectionGalleryContext,
             appContext.isCFProxyDisabled,
         );
+
         if (uploadManager.isUploadRunning()) {
             setUploadProgressView(true);
         }
@@ -709,28 +711,19 @@ export default function Uploader({
         }
     };
 
-    const handleUploadToSingleCollection = () => {
-        uploadToSingleNewCollection(importSuggestion.rootFolderName);
-    };
-
-    const handleUploadToMultipleCollections = () => {
-        if (importSuggestion.hasRootLevelFileWithFolder) {
-            appContext.setDialogMessage(
-                getRootLevelFileWithFolderNotAllowMessage(),
-            );
-            return;
-        }
-        uploadFilesToNewCollections("parent");
-    };
-
     const didSelectCollectionMapping = (mapping: CollectionMapping) => {
         switch (mapping) {
             case "root":
-                handleUploadToSingleCollection();
+                uploadToSingleNewCollection(importSuggestion.rootFolderName);
                 break;
             case "parent":
-                handleUploadToMultipleCollections();
-                break;
+                if (importSuggestion.hasRootLevelFileWithFolder) {
+                    appContext.setDialogMessage(
+                        getRootLevelFileWithFolderNotAllowMessage(),
+                    );
+                } else {
+                    uploadFilesToNewCollections("parent");
+                }
         }
     };
 
