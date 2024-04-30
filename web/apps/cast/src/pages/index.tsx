@@ -174,12 +174,18 @@ export default function PairingMode() {
     const router = useRouter();
 
     useEffect(() => {
+        console.log("useEffect for pairing called");
         if (digits.length < 1 || !publicKeyB64 || !privateKeyB64) return;
 
         const interval = setInterval(async () => {
+            console.log("polling for cast data");
             const data = await pollForCastData();
-            if (!data) return;
+            if (!data) {
+                console.log("no data");
+                return;
+            }
             storeCastData(data);
+            console.log("pushing slideshow");
             await router.push("/slideshow");
         }, 1000);
 
