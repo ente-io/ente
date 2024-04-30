@@ -1,5 +1,6 @@
 /* eslint-env node */
 module.exports = {
+    root: true,
     extends: [
         "eslint:recommended",
         "plugin:@typescript-eslint/eslint-recommended",
@@ -12,10 +13,17 @@ module.exports = {
     parserOptions: {
         project: true,
     },
-    root: true,
     ignorePatterns: [".eslintrc.js", "app", "out", "dist"],
     env: {
         es2022: true,
         node: true,
+    },
+    rules: {
+        "@typescript-eslint/restrict-template-expressions": [
+            "error",
+            {
+                allowNumber: true,
+            },
+        ],
     },
 };
