@@ -3,7 +3,7 @@ import { type FolderWatch } from "../../types/ipc";
 import log from "../log";
 
 interface WatchStore {
-    mappings: FolderWatchWithLegacyFields[];
+    mappings?: FolderWatchWithLegacyFields[];
 }
 
 type FolderWatchWithLegacyFields = FolderWatch & {
@@ -54,7 +54,8 @@ export const watchStore = new Store({
  */
 export const migrateLegacyWatchStoreIfNeeded = () => {
     let needsUpdate = false;
-    const watches = watchStore.get("mappings").map((watch) => {
+    const updatedWatches = [];
+    for (const watch of watchStore.get("mappings") ?? []) {
         let collectionMapping = watch.collectionMapping;
         // The required type defines the latest schema, but before migration
         // this'll be undefined, so tell ESLint to calm down.
@@ -67,10 +68,10 @@ export const migrateLegacyWatchStoreIfNeeded = () => {
             delete watch.rootFolderName;
             needsUpdate = true;
         }
-        return { ...watch, collectionMapping };
-    });
+        updatedWatches.push({ ...watch, collectionMapping });
+    }
     if (needsUpdate) {
-        watchStore.set("mappings", watches);
+        watchStore.set("mappings", updatedWatches);
         log.info("Migrated legacy watch store data to new schema");
     }
 };

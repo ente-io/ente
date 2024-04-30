@@ -73,7 +73,7 @@ export const watchAdd = async (
 ) => {
     const watches = folderWatches();
 
-    if (!fsIsDir(folderPath))
+    if (!(await fsIsDir(folderPath)))
         throw new Error(
             `Attempting to add a folder watch for a folder path ${folderPath} that is not an existing directory`,
         );
@@ -97,7 +97,7 @@ export const watchAdd = async (
     return watches;
 };
 
-export const watchRemove = async (watcher: FSWatcher, folderPath: string) => {
+export const watchRemove = (watcher: FSWatcher, folderPath: string) => {
     const watches = folderWatches();
     const filtered = watches.filter((watch) => watch.folderPath != folderPath);
     if (watches.length == filtered.length)
