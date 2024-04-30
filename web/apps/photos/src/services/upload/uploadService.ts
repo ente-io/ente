@@ -57,7 +57,7 @@ import type { UploadItem, UploadableUploadItem } from "./uploadManager";
  * A readable stream for a file, and its associated size and last modified time.
  *
  * This is the in-memory representation of the `fileOrPath` type that we usually
- * pass around. See: [Note: Reading a fileOrPath]
+ * pass around. See: [Note: Reading a UploadItem]
  */
 interface FileStream {
     /**
@@ -189,7 +189,6 @@ export const uploadItemFileName = (uploadItem: UploadItem) => {
     if (Array.isArray(uploadItem)) return basename(uploadItem[1]);
     return uploadItem.file.name;
 };
-
 
 /* -- Various intermediate type used during upload -- */
 
@@ -457,19 +456,21 @@ export const uploader = async (
 };
 
 /**
- * Read the given file or path into an in-memory representation.
+ * Read the given file or path or zip entry into an in-memory representation.
  *
- * [Note: Reading a fileOrPath]
+ * [Note: Reading a UploadItem]
  *
  * The file can be either a web
- * [File](https://developer.mozilla.org/en-US/docs/Web/API/File) or the absolute
- * path to a file on desk.
+ * [File](https://developer.mozilla.org/en-US/docs/Web/API/File), the absolute
+ * path to a file on desk, a combination of these two, or a entry in a zip file
+ * on the user's local filesystem.
  *
- * tl;dr; There are three cases:
+ * tl;dr; There are four cases:
  *
  * 1. web / File
- * 2. desktop / File
+ * 2. desktop / File (+ path)
  * 3. desktop / path
+ * 4. desktop / ZipEntry
  *
  * For the when and why, read on.
  *
@@ -488,10 +489,13 @@ export const uploader = async (
  * So in the web context, this will always be a File we get as a result of an
  * explicit user interaction (e.g. drag and drop).
  *
- * In the desktop context, this can be either a File or a path.
+ * In the desktop context, this can be either a File (+ path), or a path, or an
+ * entry within a zip file.
  *
  * 2. If the user provided us this file via some user interaction (say a drag
- *    and a drop), this'll still be a File.
+ *    and a drop), this'll still be a File. Note that unlike in the web context,
+ *    such File objects also have the full path. See: [Note: File paths when
+ *    running under Electron].
  *
  * 3. However, when running in the desktop app we have the ability to access
  *    absolute paths on the user's file system. For example, if the user asks us
@@ -500,17 +504,17 @@ export const uploader = async (
  *    path. Another example is when resuming an previously interrupted upload -
  *    we'll only have the path at hand in such cases, not the File object.
  *
- * Case 2, when we're provided a path, is simple. We don't have a choice, since
- * we cannot still programmatically construct a File object (we can construct it
- * on the Node.js layer, but it can't then be transferred over the IPC
- * boundary). So all our operations use the path itself.
+ * 4. The user might've also initiated an upload of a zip file. In this case we
+ *    will get a tuple (path to the zip file on the local file system, and the
+ *    name of the entry within that zip file).
  *
- * Case 3 involves a choice on a use-case basis, since
+ * Case 3 and 4, when we're provided a path, are simple. We don't have a choice,
+ * since we cannot still programmatically construct a File object (we can
+ * construct it on the Node.js layer, but it can't then be transferred over the
+ * IPC boundary). So all our operations use the path itself.
  *
- * (a) unlike in the web context, such File objects also have the full path.
- *     See: [Note: File paths when running under Electron].
- *
- * (b) neither File nor the path is a better choice for all use cases.
+ * Case 2 involves a choice on a use-case basis as neither File nor the path is
+ * a better choice for all use cases.
  *
  * The advantage of the File object is that the browser has already read it into
  * memory for us. The disadvantage comes in the case where we need to
@@ -518,7 +522,7 @@ export const uploader = async (
  * communication happens over IPC, the File's contents need to be serialized and
  * copied, which is a bummer for large videos etc.
  */
-const readFileOrPath = async (
+const readUploadItem = async (
     fileOrPath: File | string,
 ): Promise<FileStream> => {
     let underlyingStream: ReadableStream;
@@ -623,18 +627,18 @@ const readLivePhotoDetails = async ({ image, video }: LivePhotoAssets) => {
  * While we're at it, also return the size of the file, and its last modified
  * time (expressed as epoch milliseconds).
  *
- * @param fileOrPath See: [Note: Reading a fileOrPath]
+ * @param uploadItem See: [Note: Reading a UploadItem]
  */
-const readImageOrVideoDetails = async (fileOrPath: File | string) => {
+const readImageOrVideoDetails = async (uploadItem: UploadItem) => {
     const { stream, fileSize, lastModifiedMs } =
-        await readFileOrPath(fileOrPath);
+        await readUploadItem(uploadItem);
 
     const fileTypeInfo = await detectFileTypeInfoFromChunk(async () => {
         const reader = stream.getReader();
         const chunk = ensure((await reader.read()).value);
         await reader.cancel();
         return chunk;
-    }, uploadItemFileName(fileOrPath));
+    }, uploadItemFileName(uploadItem));
 
     return { fileTypeInfo, fileSize, lastModifiedMs };
 };
@@ -832,7 +836,7 @@ const computeHash = async (
     fileOrPath: File | string,
     worker: Remote<DedicatedCryptoWorker>,
 ) => {
-    const { stream, chunkCount } = await readFileOrPath(fileOrPath);
+    const { stream, chunkCount } = await readUploadItem(fileOrPath);
     const hashState = await worker.initChunkHashing();
 
     const streamReader = stream.getReader();
@@ -921,9 +925,9 @@ const readLivePhoto = async (
             extension: fileTypeInfo.imageType,
             fileType: FILE_TYPE.IMAGE,
         },
-        await readFileOrPath(livePhotoAssets.image),
+        await readUploadItem(livePhotoAssets.image),
     );
-    const videoFileStreamOrData = await readFileOrPath(livePhotoAssets.video);
+    const videoFileStreamOrData = await readUploadItem(livePhotoAssets.video);
 
     // The JS zip library that encodeLivePhoto uses does not support
     // ReadableStreams, so pass the file (blob) if we have one, otherwise read
@@ -954,7 +958,7 @@ const readImageOrVideo = async (
     fileOrPath: File | string,
     fileTypeInfo: FileTypeInfo,
 ) => {
-    const fileStream = await readFileOrPath(fileOrPath);
+    const fileStream = await readUploadItem(fileOrPath);
     return withThumbnail(fileOrPath, fileTypeInfo, fileStream);
 };
 
@@ -978,8 +982,8 @@ const moduleState = new ModuleState();
 /**
  * Augment the given {@link dataOrStream} with thumbnail information.
  *
- * This is a companion method for {@link readFileOrPath}, and can be used to
- * convert the result of {@link readFileOrPath} into an {@link ThumbnailedFile}.
+ * This is a companion method for {@link readUploadItem}, and can be used to
+ * convert the result of {@link readUploadItem} into an {@link ThumbnailedFile}.
  *
  * Note: The `fileStream` in the returned ThumbnailedFile may be different from
  * the one passed to the function.
