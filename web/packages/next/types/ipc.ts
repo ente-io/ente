@@ -641,7 +641,7 @@ export interface FolderWatchSyncedFile {
  * >
  * >  The path stored MUST NOT contain a drive or  device letter, or a leading
  * >  slash. All slashes MUST be forward slashes '/' as opposed to  backwards
- * >  slashes '\' for compatibility with Amiga and UNIX file systems etc.  If
+ * >  slashes '\' for compatibility with Amiga and UNIX file systems etc. If
  * >  input came from standard input, there is no file name field.
  * >
  * > https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT

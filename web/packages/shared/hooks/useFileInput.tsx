@@ -60,6 +60,10 @@ export default function useFileInput({
     // containing the relative path to the selected directory.
     //
     // https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement/webkitdirectory
+    //
+    // These paths use the POSIX path separator ("/").
+    // https://stackoverflow.com/questions/62806233/when-using-webkitrelativepath-is-the-path-separator-operating-system-specific
+    //
     const directoryOpts = directory
         ? { directory: "", webkitdirectory: "" }
         : {};

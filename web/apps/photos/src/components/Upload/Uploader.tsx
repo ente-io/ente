@@ -324,10 +324,12 @@ export default function Uploader({
     // Trigger an upload when any of the dependencies change.
     useEffect(() => {
         const allItemAndPaths = [
-            // See: [Note: webkitRelativePath]
+            // See: [Note: webkitRelativePath]. In particular, they use POSIX
+            // separators.
             webFiles.map((f) => [f, f.webkitRelativePath ?? f.name]),
             desktopFiles.map((fp) => [fp, fp.path]),
             desktopFilePaths.map((p) => [p, p]),
+            // ze[1], the entry name, uses POSIX separators.
             desktopZipItems.map((ze) => [ze, ze[1]]),
         ].flat() as [UploadItem, string][];
 
