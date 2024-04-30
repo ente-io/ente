@@ -16,6 +16,19 @@ import type {
     PendingUploads,
     ZipItem,
 } from "../types/ipc";
+import { logToDisk } from "./log";
+import {
+    appVersion,
+    skipAppUpdate,
+    updateAndRestart,
+    updateOnNextRestart,
+} from "./services/app-update";
+import {
+    openDirectory,
+    openLogDirectory,
+    selectDirectory,
+} from "./services/dir";
+import { ffmpegExec } from "./services/ffmpeg";
 import {
     fsExists,
     fsIsDir,
@@ -25,16 +38,7 @@ import {
     fsRm,
     fsRmdir,
     fsWriteFile,
-} from "./fs";
-import { logToDisk } from "./log";
-import {
-    appVersion,
-    skipAppUpdate,
-    updateAndRestart,
-    updateOnNextRestart,
-} from "./services/app-update";
-import { selectDirectory } from "./services/dialog";
-import { ffmpegExec } from "./services/ffmpeg";
+} from "./services/fs";
 import { convertToJPEG, generateImageThumbnail } from "./services/image";
 import {
     clipImageEmbedding,
@@ -63,7 +67,6 @@ import {
     watchUpdateIgnoredFiles,
     watchUpdateSyncedFiles,
 } from "./services/watch";
-import { openDirectory, openLogDirectory } from "./utils-electron";
 
 /**
  * Listen for IPC events sent/invoked by the renderer process, and route them to

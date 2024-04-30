@@ -11,7 +11,7 @@ import * as ort from "onnxruntime-node";
 import Tokenizer from "../../thirdparty/clip-bpe-ts/mod";
 import log from "../log";
 import { writeStream } from "../stream";
-import { deleteTempFile, makeTempFilePath } from "../utils-temp";
+import { deleteTempFile, makeTempFilePath } from "../utils/temp";
 import { makeCachedInferenceSession } from "./ml";
 
 const cachedCLIPImageSession = makeCachedInferenceSession(

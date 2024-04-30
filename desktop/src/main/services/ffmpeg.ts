@@ -3,12 +3,12 @@ import fs from "node:fs/promises";
 import type { ZipItem } from "../../types/ipc";
 import log from "../log";
 import { withTimeout } from "../utils";
-import { execAsync } from "../utils-electron";
+import { execAsync } from "../utils/electron";
 import {
     deleteTempFile,
     makeFileForDataOrPathOrZipItem,
     makeTempFilePath,
-} from "../utils-temp";
+} from "../utils/temp";
 
 /* Duplicated in the web app's code (used by the WASM FFmpeg implementation). */
 const ffmpegPathPlaceholder = "FFMPEG";

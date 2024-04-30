@@ -9,7 +9,7 @@ import { allowWindowClose } from "../main";
 import { forceCheckForAppUpdates } from "./services/app-update";
 import autoLauncher from "./services/auto-launcher";
 import { userPreferences } from "./stores/user-preferences";
-import { isDev, openLogDirectory } from "./utils-electron";
+import { isDev, openLogDirectory } from "./utils/electron";
 
 /** Create and return the entries in the app's main menu bar */
 export const createApplicationMenu = async (mainWindow: BrowserWindow) => {

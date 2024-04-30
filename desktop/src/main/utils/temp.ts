@@ -3,7 +3,7 @@ import StreamZip from "node-stream-zip";
 import { existsSync } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
-import type { ZipItem } from "../types/ipc";
+import type { ZipItem } from "../../types/ipc";
 
 /**
  * Our very own directory within the system temp directory. Go crazy, but

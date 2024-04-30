@@ -3,10 +3,10 @@ import { BrowserWindow } from "electron/main";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { FolderWatch, type CollectionMapping } from "../../types/ipc";
-import { fsIsDir } from "../fs";
 import log from "../log";
 import { watchStore } from "../stores/watch";
-import { posixPath } from "../utils-path";
+import { posixPath } from "../utils/path";
+import { fsIsDir } from "./fs";
 
 /**
  * Create and return a new file system watcher.
