@@ -264,16 +264,24 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
     const precomputeSuggestions = 6;
     const maxPrecomputations = 10;
     int compCount = 0;
-
     if (allSuggestions.length > currentSuggestionIndex + 1) {
       for (final suggestion in allSuggestions.sublist(
         currentSuggestionIndex + 1,
-        min(allSuggestions.length, currentSuggestionIndex + precomputeSuggestions),
+        min(
+          allSuggestions.length,
+          currentSuggestionIndex + precomputeSuggestions,
+        ),
       )) {
         final files = suggestion.filesInCluster;
         final clusterID = suggestion.clusterIDToMerge;
         for (final file in files.sublist(0, min(files.length, 8))) {
-          unawaited(PersonFaceWidget.precomputeNextFaceCrops(file, clusterID));
+          unawaited(
+            PersonFaceWidget.precomputeNextFaceCrops(
+              file,
+              clusterID,
+              useFullFile: false,
+            ),
+          );
           compCount++;
           if (compCount >= maxPrecomputations) {
             break;

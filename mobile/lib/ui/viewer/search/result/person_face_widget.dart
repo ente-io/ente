@@ -168,7 +168,8 @@ class PersonFaceWidget extends StatelessWidget {
     }
   }
 
-  static Future<void> precomputeNextFaceCrops(file, clusterID) async {
+  static Future<void> precomputeNextFaceCrops(file, clusterID,
+      {required bool useFullFile,}) async {
     try {
       final Face? face = await FaceMLDataDB.instance.getCoverFaceForPerson(
         recentFileID: file.uploadedFileID!,
@@ -190,6 +191,13 @@ class PersonFaceWidget extends StatelessWidget {
         faceCropCache.put(face.faceID, data);
         return;
       }
+      if (!useFullFile) {
+        final Uint8List? cachedFaceThumbnail =
+            faceCropThumbnailCache.get(face.faceID);
+        if (cachedFaceThumbnail != null) {
+          return;
+        }
+      }
       EnteFile? fileForFaceCrop = file;
       if (face.fileID != file.uploadedFileID!) {
         fileForFaceCrop =
@@ -205,12 +213,17 @@ class PersonFaceWidget extends StatelessWidget {
           {
             face.faceID: face.detection.box,
           },
+          useFullFile: useFullFile,
         ),
       );
       final Uint8List? computedCrop = result?[face.faceID];
       if (computedCrop != null) {
-        faceCropCache.put(face.faceID, computedCrop);
-        faceCropCacheFile.writeAsBytes(computedCrop).ignore();
+        if (useFullFile) {
+          faceCropCache.put(face.faceID, computedCrop);
+          faceCropCacheFile.writeAsBytes(computedCrop).ignore();
+        } else {
+          faceCropThumbnailCache.put(face.faceID, computedCrop);
+        }
       }
       return;
     } catch (e, s) {
