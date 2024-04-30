@@ -1,7 +1,6 @@
+import { FILE_TYPE } from "@/media/file-type";
 import log from "@/next/log";
-import { CustomError } from "@ente/shared/error";
 import * as chrono from "chrono-node";
-import { FILE_TYPE } from "constants/file";
 import { t } from "i18next";
 import { Collection } from "types/collection";
 import { EntityType, LocationTag, LocationTagData } from "types/entity";
@@ -287,24 +286,20 @@ async function getLocationSuggestions(searchPhrase: string) {
     return [...locationTagSuggestions, ...citySearchSuggestions];
 }
 
-async function getClipSuggestion(searchPhrase: string): Promise<Suggestion> {
-    try {
-        if (!clipService.isPlatformSupported()) {
-            return null;
-        }
-
-        const clipResults = await searchClip(searchPhrase);
-        return {
-            type: SuggestionType.CLIP,
-            value: clipResults,
-            label: searchPhrase,
-        };
-    } catch (e) {
-        if (!e.message?.includes(CustomError.MODEL_DOWNLOAD_PENDING)) {
-            log.error("getClipSuggestion failed", e);
-        }
+async function getClipSuggestion(
+    searchPhrase: string,
+): Promise<Suggestion | undefined> {
+    if (!clipService.isPlatformSupported()) {
         return null;
     }
+
+    const clipResults = await searchClip(searchPhrase);
+    if (!clipResults) return undefined;
+    return {
+        type: SuggestionType.CLIP,
+        value: clipResults,
+        label: searchPhrase,
+    };
 }
 
 function searchCollection(
@@ -374,9 +369,14 @@ async function searchLocationTag(searchPhrase: string): Promise<LocationTag[]> {
     return matchedLocationTags;
 }
 
-async function searchClip(searchPhrase: string): Promise<ClipSearchScores> {
+const searchClip = async (
+    searchPhrase: string,
+): Promise<ClipSearchScores | undefined> => {
+    const textEmbedding =
+        await clipService.getTextEmbeddingIfAvailable(searchPhrase);
+    if (!textEmbedding) return undefined;
+
     const imageEmbeddings = await getLocalEmbeddings();
-    const textEmbedding = await clipService.getTextEmbedding(searchPhrase);
     const clipSearchResult = new Map<number, number>(
         (
             await Promise.all(
@@ -394,7 +394,7 @@ async function searchClip(searchPhrase: string): Promise<ClipSearchScores> {
     );
 
     return clipSearchResult;
-}
+};
 
 function convertSuggestionToSearchQuery(option: Suggestion): Search {
     switch (option.type) {

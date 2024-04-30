@@ -7,7 +7,6 @@
         "@/next": "*",
         "@ente/accounts": "*",
         "@ente/eslint-config": "*",
-        "@ente/shared": "*",
-        "mime-types": "^2.1.35"
+        "@ente/shared": "*"
     }
 }

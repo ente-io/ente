@@ -5,115 +5,22 @@
  *
  * @see `web/apps/photos/src/services/clip-service.ts` for more details.
  */
-import { existsSync } from "fs";
 import jpeg from "jpeg-js";
 import fs from "node:fs/promises";
 import * as ort from "onnxruntime-node";
 import Tokenizer from "../../thirdparty/clip-bpe-ts/mod";
-import { CustomErrors } from "../../types/ipc";
 import log from "../log";
 import { writeStream } from "../stream";
-import { generateTempFilePath } from "../temp";
-import { deleteTempFile } from "./ffmpeg";
-import {
-    createInferenceSession,
-    downloadModel,
-    modelPathDownloadingIfNeeded,
-    modelSavePath,
-} from "./ml";
+import { deleteTempFile, makeTempFilePath } from "../utils-temp";
+import { makeCachedInferenceSession } from "./ml";
 
-const textModelName = "clip-text-vit-32-uint8.onnx";
-const textModelByteSize = 64173509; // 61.2 MB
-
-const imageModelName = "clip-image-vit-32-float32.onnx";
-const imageModelByteSize = 351468764; // 335.2 MB
-
-let activeImageModelDownload: Promise<string> | undefined;
-
-const imageModelPathDownloadingIfNeeded = async () => {
-    try {
-        if (activeImageModelDownload) {
-            log.info("Waiting for CLIP image model download to finish");
-            await activeImageModelDownload;
-        } else {
-            activeImageModelDownload = modelPathDownloadingIfNeeded(
-                imageModelName,
-                imageModelByteSize,
-            );
-            return await activeImageModelDownload;
-        }
-    } finally {
-        activeImageModelDownload = undefined;
-    }
-};
-
-let textModelDownloadInProgress = false;
-
-/* TODO(MR): use the generic method. Then we can remove the exports for the
-   internal details functions that we use here */
-const textModelPathDownloadingIfNeeded = async () => {
-    if (textModelDownloadInProgress)
-        throw Error(CustomErrors.MODEL_DOWNLOAD_PENDING);
-
-    const modelPath = modelSavePath(textModelName);
-    if (!existsSync(modelPath)) {
-        log.info("CLIP text model not found, downloading");
-        textModelDownloadInProgress = true;
-        downloadModel(modelPath, textModelName)
-            .catch((e) => {
-                // log but otherwise ignore
-                log.error("CLIP text model download failed", e);
-            })
-            .finally(() => {
-                textModelDownloadInProgress = false;
-            });
-        throw Error(CustomErrors.MODEL_DOWNLOAD_PENDING);
-    } else {
-        const localFileSize = (await fs.stat(modelPath)).size;
-        if (localFileSize !== textModelByteSize) {
-            log.error(
-                `CLIP text model size ${localFileSize} does not match the expected size, downloading again`,
-            );
-            textModelDownloadInProgress = true;
-            downloadModel(modelPath, textModelName)
-                .catch((e) => {
-                    // log but otherwise ignore
-                    log.error("CLIP text model download failed", e);
-                })
-                .finally(() => {
-                    textModelDownloadInProgress = false;
-                });
-            throw Error(CustomErrors.MODEL_DOWNLOAD_PENDING);
-        }
-    }
-
-    return modelPath;
-};
-
-let imageSessionPromise: Promise<any> | undefined;
-
-const onnxImageSession = async () => {
-    if (!imageSessionPromise) {
-        imageSessionPromise = (async () => {
-            const modelPath = await imageModelPathDownloadingIfNeeded();
-            return createInferenceSession(modelPath);
-        })();
-    }
-    return imageSessionPromise;
-};
-
-let _textSession: any = null;
-
-const onnxTextSession = async () => {
-    if (!_textSession) {
-        const modelPath = await textModelPathDownloadingIfNeeded();
-        _textSession = await createInferenceSession(modelPath);
-    }
-    return _textSession;
-};
+const cachedCLIPImageSession = makeCachedInferenceSession(
+    "clip-image-vit-32-float32.onnx",
+    351468764 /* 335.2 MB */,
+);
 
 export const clipImageEmbedding = async (jpegImageData: Uint8Array) => {
-    const tempFilePath = await generateTempFilePath("");
+    const tempFilePath = await makeTempFilePath();
     const imageStream = new Response(jpegImageData.buffer).body;
     await writeStream(tempFilePath, imageStream);
     try {
@@ -124,19 +31,20 @@ export const clipImageEmbedding = async (jpegImageData: Uint8Array) => {
 };
 
 const clipImageEmbedding_ = async (jpegFilePath: string) => {
-    const imageSession = await onnxImageSession();
+    const session = await cachedCLIPImageSession();
     const t1 = Date.now();
     const rgbData = await getRGBData(jpegFilePath);
     const feeds = {
         input: new ort.Tensor("float32", rgbData, [1, 3, 224, 224]),
     };
     const t2 = Date.now();
-    const results = await imageSession.run(feeds);
+    const results = await session.run(feeds);
     log.debug(
         () =>
             `onnx/clip image embedding took ${Date.now() - t1} ms (prep: ${t2 - t1} ms, inference: ${Date.now() - t2} ms)`,
     );
-    const imageEmbedding = results["output"].data; // Float32Array
+    /* Need these model specific casts to type the result */
+    const imageEmbedding = results["output"].data as Float32Array;
     return normalizeEmbedding(imageEmbedding);
 };
 
@@ -221,6 +129,11 @@ const normalizeEmbedding = (embedding: Float32Array) => {
     return embedding;
 };
 
+const cachedCLIPTextSession = makeCachedInferenceSession(
+    "clip-text-vit-32-uint8.onnx",
+    64173509 /* 61.2 MB */,
+);
+
 let _tokenizer: Tokenizer = null;
 const getTokenizer = () => {
     if (!_tokenizer) {
@@ -229,8 +142,21 @@ const getTokenizer = () => {
     return _tokenizer;
 };
 
-export const clipTextEmbedding = async (text: string) => {
-    const imageSession = await onnxTextSession();
+export const clipTextEmbeddingIfAvailable = async (text: string) => {
+    const sessionOrStatus = await Promise.race([
+        cachedCLIPTextSession(),
+        "downloading-model",
+    ]);
+
+    // Don't wait for the download to complete
+    if (typeof sessionOrStatus == "string") {
+        log.info(
+            "Ignoring CLIP text embedding request because model download is pending",
+        );
+        return undefined;
+    }
+
+    const session = sessionOrStatus;
     const t1 = Date.now();
     const tokenizer = getTokenizer();
     const tokenizedText = Int32Array.from(tokenizer.encodeForCLIP(text));
@@ -238,11 +164,11 @@ export const clipTextEmbedding = async (text: string) => {
         input: new ort.Tensor("int32", tokenizedText, [1, 77]),
     };
     const t2 = Date.now();
-    const results = await imageSession.run(feeds);
+    const results = await session.run(feeds);
     log.debug(
         () =>
             `onnx/clip text embedding took ${Date.now() - t1} ms (prep: ${t2 - t1} ms, inference: ${Date.now() - t2} ms)`,
     );
-    const textEmbedding = results["output"].data;
+    const textEmbedding = results["output"].data as Float32Array;
     return normalizeEmbedding(textEmbedding);
 };

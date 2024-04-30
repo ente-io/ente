@@ -7,6 +7,7 @@ import (
 	"github.com/ente-io/museum/pkg/utils/random"
 	"github.com/ente-io/stacktrace"
 	"github.com/google/uuid"
+	log "github.com/sirupsen/logrus"
 	"strings"
 )
 
@@ -14,7 +15,7 @@ type Repository struct {
 	DB *sql.DB
 }
 
-func (r *Repository) AddCode(ctx context.Context, code *string, pubKey string) (string, error) {
+func (r *Repository) AddCode(ctx context.Context, code *string, pubKey string, ip string) (string, error) {
 	var codeValue string
 	var err error
 	if code == nil || *code == "" {
@@ -25,7 +26,7 @@ func (r *Repository) AddCode(ctx context.Context, code *string, pubKey string) (
 	} else {
 		codeValue = strings.TrimSpace(*code)
 	}
-	_, err = r.DB.ExecContext(ctx, "INSERT INTO casting (code, public_key, id) VALUES ($1, $2, $3)", codeValue, pubKey, uuid.New())
+	_, err = r.DB.ExecContext(ctx, "INSERT INTO casting (code, public_key, id, ip) VALUES ($1, $2, $3, $4)", codeValue, pubKey, uuid.New(), ip)
 	if err != nil {
 		return "", err
 	}
@@ -38,17 +39,17 @@ func (r *Repository) InsertCastData(ctx context.Context, castUserID int64, code 
 	return err
 }
 
-func (r *Repository) GetPubKey(ctx context.Context, code string) (string, error) {
-	var pubKey string
-	row := r.DB.QueryRowContext(ctx, "SELECT public_key FROM casting WHERE code = $1 and is_deleted=false", code)
-	err := row.Scan(&pubKey)
+func (r *Repository) GetPubKeyAndIp(ctx context.Context, code string) (string, string, error) {
+	var pubKey, ip string
+	row := r.DB.QueryRowContext(ctx, "SELECT public_key, ip FROM casting WHERE code = $1 and is_deleted=false", code)
+	err := row.Scan(&pubKey, &ip)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return "", ente.ErrNotFoundError.NewErr("code not found")
+			return "", "", ente.ErrNotFoundError.NewErr("code not found")
 		}
-		return "", err
+		return "", "", err
 	}
-	return pubKey, nil
+	return pubKey, ip, nil
 }
 
 func (r *Repository) GetEncCastData(ctx context.Context, code string) (*string, error) {
@@ -89,11 +90,26 @@ func (r *Repository) UpdateLastUsedAtForToken(ctx context.Context, token string)
 	return nil
 }
 
-// DeleteOldCodes that are not associated with a collection and are older than the given time
-func (r *Repository) DeleteOldCodes(ctx context.Context, expirtyTime int64) error {
-	_, err := r.DB.ExecContext(ctx, "DELETE FROM casting WHERE last_used_at < $1 and is_deleted=false and collection_id is null", expirtyTime)
+// DeleteUnclaimedCodes that are not associated with a collection and are older than the given time
+func (r *Repository) DeleteUnclaimedCodes(ctx context.Context, expiryTime int64) error {
+	result, err := r.DB.ExecContext(ctx, "DELETE FROM casting WHERE last_used_at < $1 and is_deleted=false and collection_id is null", expiryTime)
 	if err != nil {
 		return err
+	}
+	if rows, rErr := result.RowsAffected(); rErr == nil && rows > 0 {
+		log.Infof("Deleted %d unclaimed codes", rows)
+	}
+	return nil
+}
+
+// DeleteOldSessions where last used at is older than the given time
+func (r *Repository) DeleteOldSessions(ctx context.Context, expiryTime int64) error {
+	result, err := r.DB.ExecContext(ctx, "DELETE FROM casting WHERE last_used_at < $1", expiryTime)
+	if err != nil {
+		return err
+	}
+	if rows, rErr := result.RowsAffected(); rErr == nil && rows > 0 {
+		log.Infof("Deleted %d old sessions", rows)
 	}
 	return nil
 }

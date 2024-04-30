@@ -5,10 +5,9 @@ import {
     MobileDateTimePicker,
 } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
-import {
-    MAX_EDITED_CREATION_TIME,
-    MIN_EDITED_CREATION_TIME,
-} from "constants/file";
+
+const MIN_EDITED_CREATION_TIME = new Date(1800, 0, 1);
+const MAX_EDITED_CREATION_TIME = new Date();
 
 interface Props {
     initialValue?: Date;

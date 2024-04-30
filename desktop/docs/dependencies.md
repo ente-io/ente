@@ -13,7 +13,7 @@ Electron embeds Chromium and Node.js in the generated app's binary. The
 generated app thus consists of two separate processes - the _main_ process, and
 a _renderer_ process.
 
--   The _main_ process is runs the embedded node. This process can deal with the
+-   The _main_ process runs the embedded node. This process can deal with the
     host OS - it is conceptually like a `node` repl running on your machine. In
     our case, the TypeScript code (in the `src/` directory) gets transpiled by
     `tsc` into JavaScript in the `build/app/` directory, which gets bundled in
@@ -94,12 +94,12 @@ Some extra ones specific to the code here are:
 
 ### Format conversion
 
-The main tool we use is for arbitrary conversions is FFMPEG. To bundle a
+The main tool we use is for arbitrary conversions is ffmpeg. To bundle a
 (platform specific) static binary of ffmpeg with our app, we use
 [ffmpeg-static](https://github.com/eugeneware/ffmpeg-static).
 
 > There is a significant (~20x) speed difference between using the compiled
-> FFMPEG binary and using the WASM one (that our renderer process already has).
+> ffmpeg binary and using the wasm one (that our renderer process already has).
 > Which is why we bundle it to speed up operations on the desktop app.
 
 In addition, we also bundle a static Linux binary of imagemagick in our extra

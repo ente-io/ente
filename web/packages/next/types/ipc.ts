@@ -189,34 +189,94 @@ export interface Electron {
          * directory.
          */
         isDir: (dirPath: string) => Promise<boolean>;
-    };
 
-    /*
-     * TODO: AUDIT below this - Some of the types we use below are not copyable
-     * across process boundaries, and such functions will (expectedly) fail at
-     * runtime. For such functions, find an efficient alternative or refactor
-     * the dataflow.
-     */
+        /**
+         * Return the size in bytes of the file at {@link path}.
+         */
+        size: (path: string) => Promise<number>;
+    };
 
     // - Conversion
 
-    convertToJPEG: (
-        fileData: Uint8Array,
-        filename: string,
-    ) => Promise<Uint8Array>;
+    /**
+     * Try to convert an arbitrary image into JPEG using native layer tools.
+     *
+     * The behaviour is OS dependent. On macOS we use the `sips` utility, and on
+     * some Linux architectures we use an ImageMagick executable bundled with
+     * our desktop app.
+     *
+     * In other cases (primarily Windows), where native JPEG conversion is not
+     * yet possible, this function will throw an error with the
+     * {@link CustomErrorMessage.NotAvailable} message.
+     *
+     * @param imageData The raw image data (the contents of the image file).
+     *
+     * @returns JPEG data of the converted image.
+     */
+    convertToJPEG: (imageData: Uint8Array) => Promise<Uint8Array>;
 
+    /**
+     * Generate a JPEG thumbnail for the given image.
+     *
+     * The behaviour is OS dependent. On macOS we use the `sips` utility, and on
+     * some Linux architectures we use an ImageMagick executable bundled with
+     * our desktop app.
+     *
+     * In other cases (primarily Windows), where native thumbnail generation is
+     * not yet possible, this function will throw an error with the
+     * {@link CustomErrorMessage.NotAvailable} message.
+     *
+     * @param dataOrPath The raw image data (the contents of the image file), or
+     * the path to the image file, whose thumbnail we want to generate.
+     * @param maxDimension The maximum width or height of the generated
+     * thumbnail.
+     * @param maxSize Maximum size (in bytes) of the generated thumbnail.
+     *
+     * @returns JPEG data of the generated thumbnail.
+     */
     generateImageThumbnail: (
-        inputFile: File | ElectronFile,
+        dataOrPath: Uint8Array | string,
         maxDimension: number,
         maxSize: number,
     ) => Promise<Uint8Array>;
 
-    runFFmpegCmd: (
-        cmd: string[],
-        inputFile: File | ElectronFile,
-        outputFileName: string,
-        dontTimeout?: boolean,
-    ) => Promise<File>;
+    /**
+     * Execute a FFmpeg {@link command} on the given {@link dataOrPath}.
+     *
+     * This executes the command using a FFmpeg executable we bundle with our
+     * desktop app. We also have a wasm FFmpeg wasm implementation that we use
+     * when running on the web, which has a sibling function with the same
+     * parameters. See [Note: ffmpeg in Electron].
+     *
+     * @param command An array of strings, each representing one positional
+     * parameter in the command to execute. Placeholders for the input, output
+     * and ffmpeg's own path are replaced before executing the command
+     * (respectively {@link inputPathPlaceholder},
+     * {@link outputPathPlaceholder}, {@link ffmpegPathPlaceholder}).
+     *
+     * @param dataOrPath The bytes of the input file, or the path to the input
+     * file on the user's local disk. In both cases, the data gets serialized to
+     * a temporary file, and then that path gets substituted in the FFmpeg
+     * {@link command} in lieu of {@link inputPathPlaceholder}.
+     *
+     * @param outputFileExtension The extension (without the dot, e.g. "jpeg")
+     * to use for the output file that we ask FFmpeg to create in
+     * {@param command}. While this file will eventually get deleted, and we'll
+     * just return its contents, for some FFmpeg command the extension matters
+     * (e.g. conversion to a JPEG fails if the extension is arbitrary).
+     *
+     * @param timeoutMS If non-zero, then abort and throw a timeout error if the
+     * ffmpeg command takes more than the given number of milliseconds.
+     *
+     * @returns The contents of the output file produced by the ffmpeg command
+     * (specified as {@link outputPathPlaceholder} in {@link command}).
+     */
+    ffmpegExec: (
+        command: string[],
+        dataOrPath: Uint8Array | string,
+        outputFileExtension: string,
+        timeoutMS: number,
+    ) => Promise<Uint8Array>;
 
     // - ML
 
@@ -232,7 +292,18 @@ export interface Electron {
     clipImageEmbedding: (jpegImageData: Uint8Array) => Promise<Float32Array>;
 
     /**
-     * Return a CLIP embedding of the given image.
+     * Return a CLIP embedding of the given image if we already have the model
+     * downloaded and prepped. If the model is not available return `undefined`.
+     *
+     * This differs from the other sibling ML functions in that it doesn't wait
+     * for the model download to finish. It does trigger a model download, but
+     * then immediately returns `undefined`. At some future point, when the
+     * model downloaded finishes, calls to this function will start returning
+     * the result we seek.
+     *
+     * The reason for doing it in this asymmetric way is because CLIP text
+     * embeddings are used as part of deducing user initiated search results,
+     * and we don't want to block that interaction on a large network request.
      *
      * See: [Note: CLIP based magic search]
      *
@@ -240,7 +311,9 @@ export interface Electron {
      *
      * @returns A CLIP embedding.
      */
-    clipTextEmbedding: (text: string) => Promise<Float32Array>;
+    clipTextEmbeddingIfAvailable: (
+        text: string,
+    ) => Promise<Float32Array | undefined>;
 
     /**
      * Detect faces in the given image using YOLO.
@@ -418,13 +491,39 @@ export interface Electron {
         filePaths: string[],
     ) => Promise<void>;
 
+    /*
+     * TODO: AUDIT below this - Some of the types we use below are not copyable
+     * across process boundaries, and such functions will (expectedly) fail at
+     * runtime. For such functions, find an efficient alternative or refactor
+     * the dataflow.
+     */
+
     // -
 
     getElectronFilesFromGoogleZip: (
         filePath: string,
     ) => Promise<ElectronFile[]>;
-    getDirFiles: (dirPath: string) => Promise<ElectronFile[]>;
 }
+
+/**
+ * Errors that have special semantics on the web side.
+ *
+ * [Note: Custom errors across Electron/Renderer boundary]
+ *
+ * If we need to identify errors thrown by the main process when invoked from
+ * the renderer process, we can only use the `message` field because:
+ *
+ * > Errors thrown throw `handle` in the main process are not transparent as
+ * > they are serialized and only the `message` property from the original error
+ * > is provided to the renderer process.
+ * >
+ * > - https://www.electronjs.org/docs/latest/tutorial/ipc
+ * >
+ * > Ref: https://github.com/electron/electron/issues/24427
+ */
+export const CustomErrorMessage = {
+    NotAvailable: "This feature in not available on the current OS/arch",
+};
 
 /**
  * Data passed across the IPC bridge when an app update is available.

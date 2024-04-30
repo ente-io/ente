@@ -1,6 +1,6 @@
 import { haveWindow } from "@/next/env";
 import { ComlinkWorker } from "@/next/worker/comlink-worker";
-import { DedicatedMLWorker } from "worker/ml.worker";
+import { type DedicatedMLWorker } from "worker/ml.worker";
 
 export const getDedicatedMLWorker = (name: string) => {
     if (haveWindow()) {

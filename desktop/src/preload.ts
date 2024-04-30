@@ -122,40 +122,38 @@ const fsWriteFile = (path: string, contents: string): Promise<void> =>
 const fsIsDir = (dirPath: string): Promise<boolean> =>
     ipcRenderer.invoke("fsIsDir", dirPath);
 
-// - AUDIT below this
+const fsSize = (path: string): Promise<number> =>
+    ipcRenderer.invoke("fsSize", path);
 
 // - Conversion
 
-const convertToJPEG = (
-    fileData: Uint8Array,
-    filename: string,
-): Promise<Uint8Array> =>
-    ipcRenderer.invoke("convertToJPEG", fileData, filename);
+const convertToJPEG = (imageData: Uint8Array): Promise<Uint8Array> =>
+    ipcRenderer.invoke("convertToJPEG", imageData);
 
 const generateImageThumbnail = (
-    inputFile: File | ElectronFile,
+    dataOrPath: Uint8Array | string,
     maxDimension: number,
     maxSize: number,
 ): Promise<Uint8Array> =>
     ipcRenderer.invoke(
         "generateImageThumbnail",
-        inputFile,
+        dataOrPath,
         maxDimension,
         maxSize,
     );
 
-const runFFmpegCmd = (
-    cmd: string[],
-    inputFile: File | ElectronFile,
-    outputFileName: string,
-    dontTimeout?: boolean,
-): Promise<File> =>
+const ffmpegExec = (
+    command: string[],
+    dataOrPath: Uint8Array | string,
+    outputFileExtension: string,
+    timeoutMS: number,
+): Promise<Uint8Array> =>
     ipcRenderer.invoke(
-        "runFFmpegCmd",
-        cmd,
-        inputFile,
-        outputFileName,
-        dontTimeout,
+        "ffmpegExec",
+        command,
+        dataOrPath,
+        outputFileExtension,
+        timeoutMS,
     );
 
 // - ML
@@ -163,8 +161,10 @@ const runFFmpegCmd = (
 const clipImageEmbedding = (jpegImageData: Uint8Array): Promise<Float32Array> =>
     ipcRenderer.invoke("clipImageEmbedding", jpegImageData);
 
-const clipTextEmbedding = (text: string): Promise<Float32Array> =>
-    ipcRenderer.invoke("clipTextEmbedding", text);
+const clipTextEmbeddingIfAvailable = (
+    text: string,
+): Promise<Float32Array | undefined> =>
+    ipcRenderer.invoke("clipTextEmbeddingIfAvailable", text);
 
 const detectFaces = (input: Float32Array): Promise<Float32Array> =>
     ipcRenderer.invoke("detectFaces", input);
@@ -253,6 +253,7 @@ const setPendingUploadFiles = (
 ): Promise<void> =>
     ipcRenderer.invoke("setPendingUploadFiles", type, filePaths);
 
+// - TODO: AUDIT below this
 // -
 
 const getElectronFilesFromGoogleZip = (
@@ -260,45 +261,46 @@ const getElectronFilesFromGoogleZip = (
 ): Promise<ElectronFile[]> =>
     ipcRenderer.invoke("getElectronFilesFromGoogleZip", filePath);
 
-const getDirFiles = (dirPath: string): Promise<ElectronFile[]> =>
-    ipcRenderer.invoke("getDirFiles", dirPath);
-
-//
-// These objects exposed here will become available to the JS code in our
-// renderer (the web/ code) as `window.ElectronAPIs.*`
-//
-// There are a few related concepts at play here, and it might be worthwhile to
-// read their (excellent) documentation to get an understanding;
-//`
-// - ContextIsolation:
-//   https://www.electronjs.org/docs/latest/tutorial/context-isolation
-//
-// - IPC https://www.electronjs.org/docs/latest/tutorial/ipc
-//
-// [Note: Transferring large amount of data over IPC]
-//
-// Electron's IPC implementation uses the HTML standard Structured Clone
-// Algorithm to serialize objects passed between processes.
-// https://www.electronjs.org/docs/latest/tutorial/ipc#object-serialization
-//
-// In particular, ArrayBuffer is eligible for structured cloning.
-// https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Structured_clone_algorithm
-//
-// Also, ArrayBuffer is "transferable", which means it is a zero-copy operation
-// operation when it happens across threads.
-// https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Transferable_objects
-//
-// In our case though, we're not dealing with threads but separate processes. So
-// the ArrayBuffer will be copied:
-// > "parameters, errors and return values are **copied** when they're sent over
-//   the bridge".
-//   https://www.electronjs.org/docs/latest/api/context-bridge#methods
-//
-// The copy itself is relatively fast, but the problem with transfering large
-// amounts of data is potentially running out of memory during the copy.
-//
-// For an alternative, see [Note: IPC streams].
-//
+/**
+ * These objects exposed here will become available to the JS code in our
+ * renderer (the web/ code) as `window.ElectronAPIs.*`
+ *
+ * There are a few related concepts at play here, and it might be worthwhile to
+ * read their (excellent) documentation to get an understanding;
+ *`
+ * - ContextIsolation:
+ *   https://www.electronjs.org/docs/latest/tutorial/context-isolation
+ *
+ * - IPC https://www.electronjs.org/docs/latest/tutorial/ipc
+ *
+ * ---
+ *
+ * [Note: Transferring large amount of data over IPC]
+ *
+ * Electron's IPC implementation uses the HTML standard Structured Clone
+ * Algorithm to serialize objects passed between processes.
+ * https://www.electronjs.org/docs/latest/tutorial/ipc#object-serialization
+ *
+ * In particular, ArrayBuffer is eligible for structured cloning.
+ * https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Structured_clone_algorithm
+ *
+ * Also, ArrayBuffer is "transferable", which means it is a zero-copy operation
+ * operation when it happens across threads.
+ * https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Transferable_objects
+ *
+ * In our case though, we're not dealing with threads but separate processes. So
+ * the ArrayBuffer will be copied:
+ *
+ * > "parameters, errors and return values are **copied** when they're sent over
+ * > the bridge".
+ * >
+ * > https://www.electronjs.org/docs/latest/api/context-bridge#methods
+ *
+ * The copy itself is relatively fast, but the problem with transfering large
+ * amounts of data is potentially running out of memory during the copy.
+ *
+ * For an alternative, see [Note: IPC streams].
+ */
 contextBridge.exposeInMainWorld("electron", {
     // - General
 
@@ -329,18 +331,19 @@ contextBridge.exposeInMainWorld("electron", {
         readTextFile: fsReadTextFile,
         writeFile: fsWriteFile,
         isDir: fsIsDir,
+        size: fsSize,
     },
 
     // - Conversion
 
     convertToJPEG,
     generateImageThumbnail,
-    runFFmpegCmd,
+    ffmpegExec,
 
     // - ML
 
     clipImageEmbedding,
-    clipTextEmbedding,
+    clipTextEmbeddingIfAvailable,
     detectFaces,
     faceEmbedding,
 
@@ -374,5 +377,4 @@ contextBridge.exposeInMainWorld("electron", {
     // -
 
     getElectronFilesFromGoogleZip,
-    getDirFiles,
 });

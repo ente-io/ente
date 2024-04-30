@@ -1,11 +1,11 @@
 import { UPLOAD_STAGES } from "constants/upload";
 import { createContext } from "react";
-import {
+import type {
     InProgressUpload,
     SegregatedFinishedUploads,
     UploadCounter,
     UploadFileNames,
-} from "types/upload/ui";
+} from "services/upload/uploadManager";
 
 interface UploadProgressContextType {
     open: boolean;

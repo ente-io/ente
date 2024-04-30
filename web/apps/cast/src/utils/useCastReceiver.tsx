@@ -21,7 +21,6 @@ const load = (() => {
                         cast,
                     });
                 });
-
                 document.body.appendChild(script);
             });
         }

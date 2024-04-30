@@ -621,14 +621,7 @@ class FaceMlService {
           'No faces detected for file with name:${enteFile.displayName}',
         );
         faces.add(
-          Face(
-            '${result.fileId}-0',
-            result.fileId,
-            <double>[],
-            result.errorOccured ? -1.0 : 0.0,
-            face_detection.Detection.empty(),
-            0.0,
-          ),
+          Face.empty(result.fileId, error: result.errorOccured),
         );
       } else {
         if (result.decodedImageSize.width == -1 ||

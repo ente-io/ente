@@ -58,17 +58,17 @@ const checkForUpdatesAndNotify = async (mainWindow: BrowserWindow) => {
     log.debug(() => "Attempting auto update");
     autoUpdater.downloadUpdate();
 
-    let timeout: NodeJS.Timeout;
+    let timeoutId: ReturnType<typeof setTimeout>;
     const fiveMinutes = 5 * 60 * 1000;
     autoUpdater.on("update-downloaded", () => {
-        timeout = setTimeout(
+        timeoutId = setTimeout(
             () => showUpdateDialog({ autoUpdatable: true, version }),
             fiveMinutes,
         );
     });
 
     autoUpdater.on("error", (error) => {
-        clearTimeout(timeout);
+        clearTimeout(timeoutId);
         log.error("Auto update failed", error);
         showUpdateDialog({ autoUpdatable: false, version });
     });

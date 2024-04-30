@@ -7,6 +7,7 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/opened_settings_event.dart';
 import "package:photos/generated/l10n.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/storage_bonus_service.dart";
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/ente_theme.dart';
@@ -144,7 +145,7 @@ class SettingsPage extends StatelessWidget {
       const AboutSectionWidget(),
     ]);
 
-    if (hasLoggedIn) {
+    if (hasLoggedIn && flagService.internalUser) {
       contents.addAll([sectionSpacing, const DebugSectionWidget()]);
       contents.addAll([sectionSpacing, const FaceDebugSectionWidget()]);
     }
