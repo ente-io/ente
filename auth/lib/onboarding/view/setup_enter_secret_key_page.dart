@@ -372,7 +372,7 @@ class TagChip extends StatelessWidget {
             ] else if (state == TagChipState.selected &&
                 action == TagChipAction.menu) ...[
               SizedBox(
-                width: 18,
+                width: 32,
                 child: PopupMenuButton<int>(
                   iconSize: 16,
                   shape: RoundedRectangleBorder(
