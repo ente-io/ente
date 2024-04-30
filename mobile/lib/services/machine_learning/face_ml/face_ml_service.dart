@@ -317,6 +317,7 @@ class FaceMlService {
         int bucket = 1;
 
         while (true) {
+          final bucketStartTime = DateTime.now();
           final faceInfoForClustering =
               await FaceMLDataDB.instance.getFaceInfoForClustering(
             minScore: minFaceScore,
@@ -354,7 +355,7 @@ class FaceMlService {
           await FaceMLDataDB.instance
               .clusterSummaryUpdate(clusteringResult.newClusterSummaries!);
           _logger.info(
-            'Done with clustering ${offset + faceInfoForClustering.length} embeddings (${(100 * (offset + faceInfoForClustering.length) / totalFaces).toStringAsFixed(0)}%) in bucket $bucket, offset: $offset',
+            'Done with clustering ${offset + faceInfoForClustering.length} embeddings (${(100 * (offset + faceInfoForClustering.length) / totalFaces).toStringAsFixed(0)}%) in bucket $bucket, offset: $offset, in ${DateTime.now().difference(bucketStartTime).inSeconds} seconds',
           );
           if (offset + bucketSize >= totalFaces) {
             _logger.info('All faces clustered');
