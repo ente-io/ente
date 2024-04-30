@@ -44,7 +44,6 @@ import { contextBridge, ipcRenderer, webUtils } from "electron/renderer";
 import type {
     AppUpdate,
     CollectionMapping,
-    ElectronFile,
     FolderWatch,
     PendingUploads,
     ZipItem,
@@ -172,21 +171,6 @@ const detectFaces = (input: Float32Array): Promise<Float32Array> =>
 
 const faceEmbedding = (input: Float32Array): Promise<Float32Array> =>
     ipcRenderer.invoke("faceEmbedding", input);
-
-// - File selection
-
-// TODO: Deprecated - use dialogs on the renderer process itself
-
-const showUploadFilesDialog = (): Promise<ElectronFile[]> =>
-    ipcRenderer.invoke("showUploadFilesDialog");
-
-const showUploadDirsDialog = (): Promise<ElectronFile[]> =>
-    ipcRenderer.invoke("showUploadDirsDialog");
-
-const showUploadZipDialog = (): Promise<{
-    zipPaths: string[];
-    files: ElectronFile[];
-}> => ipcRenderer.invoke("showUploadZipDialog");
 
 // - Watch
 
