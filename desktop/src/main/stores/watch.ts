@@ -54,8 +54,11 @@ export const watchStore = new Store({
  */
 export const migrateLegacyWatchStoreIfNeeded = () => {
     let needsUpdate = false;
-    const watches = watchStore.get("mappings")?.map((watch) => {
+    const watches = watchStore.get("mappings").map((watch) => {
         let collectionMapping = watch.collectionMapping;
+        // The required type defines the latest schema, but before migration
+        // this'll be undefined, so tell ESLint to calm down.
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         if (!collectionMapping) {
             collectionMapping = watch.uploadStrategy == 1 ? "parent" : "root";
             needsUpdate = true;
