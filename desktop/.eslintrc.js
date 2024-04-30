@@ -4,8 +4,8 @@ module.exports = {
     extends: [
         "eslint:recommended",
         "plugin:@typescript-eslint/eslint-recommended",
-        /* What we really want eventually */
         "plugin:@typescript-eslint/strict-type-checked",
+        /* What we really want eventually */
         // "plugin:@typescript-eslint/stylistic-type-checked",
     ],
     plugins: ["@typescript-eslint"],
@@ -19,16 +19,21 @@ module.exports = {
         node: true,
     },
     rules: {
+        /* Allow numbers to be used in template literals */
         "@typescript-eslint/restrict-template-expressions": [
             "error",
             {
                 allowNumber: true,
             },
         ],
+        /* Allow void expressions as the entire body of an arrow function */
+        "@typescript-eslint/no-confusing-void-expression": [
+            "error",
+            {
+                ignoreArrowShorthand: true,
+            },
+        ],
         /* Temporary (RIP) */
         "@typescript-eslint/no-unsafe-return": "off",
-        "@typescript-eslint/no-confusing-void-expression": "off",
-        // "@typescript-eslint/no-misused-promises": "off",
-        // "@typescript-eslint/no-floating-promises": "off",
     },
 };
