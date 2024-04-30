@@ -76,15 +76,14 @@ interface FileForDataOrPathOrZipItem {
      */
     isFileTemporary: boolean;
     /**
-     * If set, this'll be a function that can be called to actually write the
-     * contents of the source `Uint8Array | string | ZipItem` into the file at
-     * {@link path}.
+     * A function that can be called to actually write the contents of the
+     * source `Uint8Array | string | ZipItem` into the file at {@link path}.
      *
-     * It will be undefined if the source is already a path since nothing needs
-     * to be written in that case. In the other two cases this function will
-     * write the data or zip item into the file at {@link path}.
+     * It will do nothing in the case when the source is already a path. In the
+     * other two cases this function will write the data or zip item into the
+     * file at {@link path}.
      */
-    writeToTemporaryFile?: () => Promise<void>;
+    writeToTemporaryFile: () => Promise<void>;
 }
 
 /**
@@ -101,7 +100,7 @@ export const makeFileForDataOrPathOrZipItem = async (
 ): Promise<FileForDataOrPathOrZipItem> => {
     let path: string;
     let isFileTemporary: boolean;
-    let writeToTemporaryFile: () => Promise<void> | undefined;
+    let writeToTemporaryFile = async () => {};
 
     if (typeof dataOrPathOrZipItem == "string") {
         path = dataOrPathOrZipItem;
