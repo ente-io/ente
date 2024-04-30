@@ -93,18 +93,20 @@ export const attachIPCHandlers = () => {
 
     ipcMain.handle("appVersion", () => appVersion());
 
-    ipcMain.handle("openDirectory", (_, dirPath) => openDirectory(dirPath));
+    ipcMain.handle("openDirectory", (_, dirPath: string) =>
+        openDirectory(dirPath),
+    );
 
     ipcMain.handle("openLogDirectory", () => openLogDirectory());
 
     // See [Note: Catching exception during .send/.on]
-    ipcMain.on("logToDisk", (_, message) => logToDisk(message));
+    ipcMain.on("logToDisk", (_, message: string) => logToDisk(message));
 
     ipcMain.handle("selectDirectory", () => selectDirectory());
 
     ipcMain.on("clearStores", () => clearStores());
 
-    ipcMain.handle("saveEncryptionKey", (_, encryptionKey) =>
+    ipcMain.handle("saveEncryptionKey", (_, encryptionKey: string) =>
         saveEncryptionKey(encryptionKey),
     );
 
@@ -114,21 +116,23 @@ export const attachIPCHandlers = () => {
 
     ipcMain.on("updateAndRestart", () => updateAndRestart());
 
-    ipcMain.on("updateOnNextRestart", (_, version) =>
+    ipcMain.on("updateOnNextRestart", (_, version: string) =>
         updateOnNextRestart(version),
     );
 
-    ipcMain.on("skipAppUpdate", (_, version) => skipAppUpdate(version));
+    ipcMain.on("skipAppUpdate", (_, version: string) => skipAppUpdate(version));
 
     // - FS
 
-    ipcMain.handle("fsExists", (_, path) => fsExists(path));
+    ipcMain.handle("fsExists", (_, path: string) => fsExists(path));
 
     ipcMain.handle("fsRename", (_, oldPath: string, newPath: string) =>
         fsRename(oldPath, newPath),
     );
 
-    ipcMain.handle("fsMkdirIfNeeded", (_, dirPath) => fsMkdirIfNeeded(dirPath));
+    ipcMain.handle("fsMkdirIfNeeded", (_, dirPath: string) =>
+        fsMkdirIfNeeded(dirPath),
+    );
 
     ipcMain.handle("fsRmdir", (_, path: string) => fsRmdir(path));
 
