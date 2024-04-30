@@ -6,6 +6,7 @@ import { FolderWatch, type CollectionMapping } from "../../types/ipc";
 import { fsIsDir } from "../fs";
 import log from "../log";
 import { watchStore } from "../stores/watch";
+import { posixPath } from "../utils-path";
 
 /**
  * Create and return a new file system watcher.
@@ -45,13 +46,6 @@ const eventData = (path: string): [string, FolderWatch] => {
 
     return [path, watch];
 };
-
-/**
- * Convert a file system {@link filePath} that uses the local system specific
- * path separators into a path that uses POSIX file separators.
- */
-const posixPath = (filePath: string) =>
-    filePath.split(path.sep).join(path.posix.sep);
 
 export const watchGet = (watcher: FSWatcher) => {
     const [valid, deleted] = folderWatches().reduce(

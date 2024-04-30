@@ -2,7 +2,7 @@ import { app } from "electron/main";
 import StreamZip from "node-stream-zip";
 import { existsSync } from "node:fs";
 import fs from "node:fs/promises";
-import path from "path";
+import path from "node:path";
 import type { ZipItem } from "../types/ipc";
 
 /**

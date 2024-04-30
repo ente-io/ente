@@ -17,12 +17,6 @@ import type {
     ZipItem,
 } from "../types/ipc";
 import {
-    selectDirectory,
-    showUploadDirsDialog,
-    showUploadFilesDialog,
-    showUploadZipDialog,
-} from "./dialogs";
-import {
     fsExists,
     fsIsDir,
     fsMkdirIfNeeded,
@@ -39,6 +33,7 @@ import {
     updateAndRestart,
     updateOnNextRestart,
 } from "./services/app-update";
+import { selectDirectory } from "./services/dialog";
 import { ffmpegExec } from "./services/ffmpeg";
 import { convertToJPEG, generateImageThumbnail } from "./services/image";
 import {
@@ -101,6 +96,8 @@ export const attachIPCHandlers = () => {
 
     // See [Note: Catching exception during .send/.on]
     ipcMain.on("logToDisk", (_, message) => logToDisk(message));
+
+    ipcMain.handle("selectDirectory", () => selectDirectory());
 
     ipcMain.on("clearStores", () => clearStores());
 
@@ -192,16 +189,6 @@ export const attachIPCHandlers = () => {
     ipcMain.handle("faceEmbedding", (_, input: Float32Array) =>
         faceEmbedding(input),
     );
-
-    // - File selection
-
-    ipcMain.handle("selectDirectory", () => selectDirectory());
-
-    ipcMain.handle("showUploadFilesDialog", () => showUploadFilesDialog());
-
-    ipcMain.handle("showUploadDirsDialog", () => showUploadDirsDialog());
-
-    ipcMain.handle("showUploadZipDialog", () => showUploadZipDialog());
 
     // - Upload
 

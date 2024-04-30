@@ -1,28 +1,5 @@
 import { useCallback, useRef, useState } from "react";
 
-/**
- * [Note: File paths when running under Electron]
- *
- * We have access to the absolute path of the web {@link File} object when we
- * are running in the context of our desktop app.
- *
- * https://www.electronjs.org/docs/latest/api/file-object
- *
- * This is in contrast to the `webkitRelativePath` that we get when we're
- * running in the browser, which is the relative path to the directory that the
- * user selected (or just the name of the file if the user selected or
- * drag/dropped a single one).
- *
- * Note that this is a deprecated approach. From Electron docs:
- *
- * > Warning: The path property that Electron adds to the File interface is
- * > deprecated and will be removed in a future Electron release. We recommend
- * > you use `webUtils.getPathForFile` instead.
- */
-export interface FileWithPath extends File {
-    readonly path?: string;
-}
-
 interface UseFileInputParams {
     directory?: boolean;
     accept?: string;

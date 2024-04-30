@@ -63,6 +63,9 @@ const openDirectory = (dirPath: string): Promise<void> =>
 const openLogDirectory = (): Promise<void> =>
     ipcRenderer.invoke("openLogDirectory");
 
+const selectDirectory = (): Promise<string | undefined> =>
+    ipcRenderer.invoke("selectDirectory");
+
 const clearStores = () => ipcRenderer.send("clearStores");
 
 const encryptionKey = (): Promise<string | undefined> =>
@@ -173,9 +176,6 @@ const faceEmbedding = (input: Float32Array): Promise<Float32Array> =>
 // - File selection
 
 // TODO: Deprecated - use dialogs on the renderer process itself
-
-const selectDirectory = (): Promise<string> =>
-    ipcRenderer.invoke("selectDirectory");
 
 const showUploadFilesDialog = (): Promise<ElectronFile[]> =>
     ipcRenderer.invoke("showUploadFilesDialog");
@@ -310,6 +310,7 @@ contextBridge.exposeInMainWorld("electron", {
     logToDisk,
     openDirectory,
     openLogDirectory,
+    selectDirectory,
     clearStores,
     encryptionKey,
     saveEncryptionKey,
@@ -347,13 +348,6 @@ contextBridge.exposeInMainWorld("electron", {
     clipTextEmbeddingIfAvailable,
     detectFaces,
     faceEmbedding,
-
-    // - File selection
-
-    selectDirectory,
-    showUploadFilesDialog,
-    showUploadDirsDialog,
-    showUploadZipDialog,
 
     // - Watch
 

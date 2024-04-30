@@ -3,8 +3,6 @@
 //
 // See [Note: types.ts <-> preload.ts <-> ipc.ts]
 
-import type { ElectronFile } from "./file";
-
 /**
  * Extra APIs provided by our Node.js layer when our code is running inside our
  * desktop (Electron) app.
@@ -50,6 +48,18 @@ export interface Electron {
      * @see {@link openDirectory}
      */
     openLogDirectory: () => Promise<void>;
+
+    /**
+     * Ask the user to select a directory on their local file system, and return
+     * it path.
+     *
+     * We don't strictly need IPC for this, we can use a hidden <input> element
+     * and trigger its click for the same behaviour (as we do for the
+     * `useFileInput` hook that we use for uploads). However, it's a bit
+     * cumbersome, and we anyways will need to IPC to get back its full path, so
+     * it is just convenient to expose this direct method.
+     */
+    selectDirectory: () => Promise<string | undefined>;
 
     /**
      * Clear any stored data.
@@ -121,6 +131,8 @@ export interface Electron {
      * been marked as skipped so that we don't prompt the user again.
      */
     skipAppUpdate: (version: string) => void;
+
+    // - FS
 
     /**
      * A subset of file system access APIs.
@@ -331,20 +343,6 @@ export interface Electron {
      * is specific to our implementation and the model (MobileFaceNet) we use.
      */
     faceEmbedding: (input: Float32Array) => Promise<Float32Array>;
-
-    // - File selection
-    // TODO: Deprecated - use dialogs on the renderer process itself
-
-    selectDirectory: () => Promise<string>;
-
-    showUploadFilesDialog: () => Promise<ElectronFile[]>;
-
-    showUploadDirsDialog: () => Promise<ElectronFile[]>;
-
-    showUploadZipDialog: () => Promise<{
-        zipPaths: string[];
-        files: ElectronFile[];
-    }>;
 
     // - Watch
 
