@@ -379,41 +379,36 @@ class _FileSelectionActionsWidgetState
       ),
     );
 
-    if (items.isNotEmpty) {
-      final scrollController = ScrollController();
-      // h4ck: https://github.com/flutter/flutter/issues/57920#issuecomment-893970066
-      return MediaQuery(
-        data: MediaQuery.of(context).removePadding(removeBottom: true),
-        child: SafeArea(
-          child: Scrollbar(
-            radius: const Radius.circular(1),
-            thickness: 2,
-            controller: scrollController,
-            thumbVisibility: true,
-            child: SingleChildScrollView(
-              physics: const BouncingScrollPhysics(
-                decelerationRate: ScrollDecelerationRate.fast,
-              ),
-              scrollDirection: Axis.horizontal,
-              child: Container(
-                padding: const EdgeInsets.only(bottom: 24),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(width: 4),
-                    ...items,
-                    const SizedBox(width: 4),
-                  ],
-                ),
+    final scrollController = ScrollController();
+    // h4ck: https://github.com/flutter/flutter/issues/57920#issuecomment-893970066
+    return MediaQuery(
+      data: MediaQuery.of(context).removePadding(removeBottom: true),
+      child: SafeArea(
+        child: Scrollbar(
+          radius: const Radius.circular(1),
+          thickness: 2,
+          controller: scrollController,
+          thumbVisibility: true,
+          child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(
+              decelerationRate: ScrollDecelerationRate.fast,
+            ),
+            scrollDirection: Axis.horizontal,
+            child: Container(
+              padding: const EdgeInsets.only(bottom: 24),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(width: 4),
+                  ...items,
+                  const SizedBox(width: 4),
+                ],
               ),
             ),
           ),
         ),
-      );
-    } else {
-      // TODO: Return "Select All" here
-      return const SizedBox.shrink();
-    }
+      ),
+    );
   }
 
   Future<void> _moveFiles() async {
