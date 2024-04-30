@@ -1,7 +1,8 @@
 /**
- * Throw an exception if the given value is undefined.
+ * Throw an exception if the given value is `null` or `undefined`.
  */
-export const ensure = <T>(v: T | undefined): T => {
+export const ensure = <T>(v: T | null | undefined): T => {
+    if (v === null) throw new Error("Required value was null");
     if (v === undefined) throw new Error("Required value was not found");
     return v;
 };

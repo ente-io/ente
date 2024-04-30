@@ -3,7 +3,7 @@ import fs from "node:fs/promises";
 import type { ZipItem } from "../../types/ipc";
 import log from "../log";
 import { execAsync } from "../utils";
-import { withTimeout } from "../utils/common";
+import { ensure, withTimeout } from "../utils/common";
 import {
     deleteTempFile,
     makeFileForDataOrPathOrZipItem,
@@ -110,5 +110,5 @@ const ffmpegBinaryPath = () => {
     // This substitution of app.asar by app.asar.unpacked is suggested by the
     // ffmpeg-static library author themselves:
     // https://github.com/eugeneware/ffmpeg-static/issues/16
-    return pathToFfmpeg.replace("app.asar", "app.asar.unpacked");
+    return ensure(pathToFfmpeg).replace("app.asar", "app.asar.unpacked");
 };
