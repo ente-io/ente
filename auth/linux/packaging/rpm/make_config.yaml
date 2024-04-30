@@ -11,7 +11,7 @@ display_name: Auth
 
 requires:
   - libsqlite3x
-  - webkit2gtk-4.0
+  - webkit2gtk4.0
   - libsodium
   - libsecret
   - libappindicator
