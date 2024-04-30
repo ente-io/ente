@@ -65,7 +65,7 @@ const logError_ = (message: string) => {
     if (isDev) console.error(`[error] ${message}`);
 };
 
-const logInfo = (...params: any[]) => {
+const logInfo = (...params: unknown[]) => {
     const message = params
         .map((p) => (typeof p == "string" ? p : util.inspect(p)))
         .join(" ");
@@ -73,7 +73,7 @@ const logInfo = (...params: any[]) => {
     if (isDev) console.log(`[info] ${message}`);
 };
 
-const logDebug = (param: () => any) => {
+const logDebug = (param: () => unknown) => {
     if (isDev) {
         const p = param();
         console.log(`[debug] ${typeof p == "string" ? p : util.inspect(p)}`);
