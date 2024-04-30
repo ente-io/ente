@@ -26,6 +26,7 @@ const useGeneratedFaceCrops = true;
 class FaceWidget extends StatefulWidget {
   final EnteFile file;
   final Face face;
+  final Future<Map<String, Uint8List>?>? faceCrops;
   final PersonEntity? person;
   final int? clusterID;
   final bool highlight;
@@ -34,6 +35,7 @@ class FaceWidget extends StatefulWidget {
   const FaceWidget(
     this.file,
     this.face, {
+    this.faceCrops,
     this.person,
     this.clusterID,
     this.highlight = false,
@@ -50,12 +52,13 @@ class _FaceWidgetState extends State<FaceWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final bool givenFaces = widget.faceCrops != null;
     if (useGeneratedFaceCrops) {
-      return FutureBuilder<Uint8List?>(
-        future: getFaceCrop(),
+      return FutureBuilder<Map<String, Uint8List>?>(
+        future: givenFaces ? widget.faceCrops : getFaceCrop(),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
-            final ImageProvider imageProvider = MemoryImage(snapshot.data!);
+            final ImageProvider imageProvider = MemoryImage(snapshot.data![widget.face.faceID]!);
 
             return GestureDetector(
               onTap: () async {
@@ -460,17 +463,17 @@ class _FaceWidgetState extends State<FaceWidget> {
     }
   }
 
-  Future<Uint8List?> getFaceCrop() async {
+  Future<Map<String, Uint8List>?> getFaceCrop() async {
     try {
       final Uint8List? cachedFace = faceCropCache.get(widget.face.faceID);
       if (cachedFace != null) {
-        return cachedFace;
+        return {widget.face.faceID: cachedFace};
       }
       final faceCropCacheFile = cachedFaceCropPath(widget.face.faceID);
       if ((await faceCropCacheFile.exists())) {
         final data = await faceCropCacheFile.readAsBytes();
         faceCropCache.put(widget.face.faceID, data);
-        return data;
+        return {widget.face.faceID: data};
       }
 
       final result = await pool.withResource(
@@ -486,7 +489,7 @@ class _FaceWidgetState extends State<FaceWidget> {
         faceCropCache.put(widget.face.faceID, computedCrop);
         faceCropCacheFile.writeAsBytes(computedCrop).ignore();
       }
-      return computedCrop;
+      return {widget.face.faceID: computedCrop!};
     } catch (e, s) {
       log(
         "Error getting face for faceID: ${widget.face.faceID}",
