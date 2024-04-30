@@ -38,7 +38,7 @@ class AutoLauncher {
         }
     }
 
-    async wasAutoLaunched() {
+    wasAutoLaunched() {
         if (this.autoLaunch) {
             return app.commandLine.hasSwitch("hidden");
         } else {

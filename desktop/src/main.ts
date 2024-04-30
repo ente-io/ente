@@ -146,7 +146,7 @@ const registerPrivilegedSchemes = () => {
  *
  * This window will show the HTML served from {@link rendererURL}.
  */
-const createMainWindow = async () => {
+const createMainWindow = () => {
     // Create the main window. This'll show our web content.
     const window = new BrowserWindow({
         webPreferences: {
@@ -160,7 +160,7 @@ const createMainWindow = async () => {
         show: false,
     });
 
-    const wasAutoLaunched = await autoLauncher.wasAutoLaunched();
+    const wasAutoLaunched = autoLauncher.wasAutoLaunched();
     if (wasAutoLaunched) {
         // Don't automatically show the app's window if we were auto-launched.
         // On macOS, also hide the dock icon on macOS.
@@ -367,7 +367,7 @@ const main = () => {
     // Note that some Electron APIs can only be used after this event occurs.
     app.on("ready", async () => {
         // Create window and prepare for the renderer.
-        mainWindow = await createMainWindow();
+        mainWindow = createMainWindow();
         attachIPCHandlers();
         attachFSWatchIPCHandlers(createWatcher(mainWindow));
         registerStreamProtocol();

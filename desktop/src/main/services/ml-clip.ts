@@ -49,7 +49,7 @@ const clipImageEmbedding_ = async (jpegFilePath: string) => {
     return normalizeEmbedding(imageEmbedding);
 };
 
-const getRGBData = async (jpegFilePath: string) => {
+const getRGBData = async (jpegFilePath: string): Promise<number[]> => {
     const jpegData = await fs.readFile(jpegFilePath);
     const rawImageData = jpeg.decode(jpegData, {
         useTArray: true,
@@ -64,7 +64,7 @@ const getRGBData = async (jpegFilePath: string) => {
     const ny2 = 224;
     const totalSize = 3 * nx2 * ny2;
 
-    const result: number[] = Array(totalSize).fill(0);
+    const result = Array(totalSize).fill(0);
     const scale = Math.max(nx, ny) / 224;
 
     const nx3 = Math.round(nx / scale);
