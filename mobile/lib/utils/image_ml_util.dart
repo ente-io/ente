@@ -525,6 +525,40 @@ Future<Image> cropImage(
   return newImage;
 }
 
+Future<Image> cropImageWithCanvasSimple(
+  Image image, {
+  required double x,
+  required double y,
+  required double width,
+  required double height,
+}) async {
+  final recorder = PictureRecorder();
+  final canvas = Canvas(
+    recorder,
+    Rect.fromPoints(
+      const Offset(0, 0),
+      Offset(width, height),
+    ),
+  );
+
+  canvas.drawImageRect(
+    image,
+    Rect.fromPoints(
+      Offset(x, y),
+      Offset(x + width, y + height),
+    ),
+    Rect.fromPoints(
+      const Offset(0, 0),
+      Offset(width, height),
+    ),
+    Paint()..filterQuality = FilterQuality.medium,
+  );
+
+  final picture = recorder.endRecording();
+  return picture.toImage(width.toInt(), height.toInt());
+}
+
+@Deprecated('Old image processing method, use `cropImage` instead!')
 /// Crops an [image] based on the specified [x], [y], [width] and [height].
 /// Optionally, the cropped image can be resized to comply with a [maxSize] and/or [minSize].
 /// Optionally, the cropped image can be rotated from the center by [rotation] radians.
@@ -1295,10 +1329,10 @@ Future<List<Uint8List>> generateFaceThumbnailsUsingCanvas(
       final double heightAbs = faceBox.height * img.height;
 
       // Prevent the face from going out of image bounds
-      final int xCrop = (xMinAbs - widthAbs / 2).round().clamp(0, img.width);
-      final int yCrop = (yMinAbs - heightAbs / 2).round().clamp(0, img.height);
-      final int widthCrop = min((widthAbs * 2).round(), img.width - xCrop);
-      final int heightCrop = min((heightAbs * 2).round(), img.height - yCrop);
+      final num xCrop = (xMinAbs - widthAbs / 2).clamp(0, img.width);
+      final num yCrop = (yMinAbs - heightAbs / 2).clamp(0, img.height);
+      final num widthCrop = min((widthAbs * 2), img.width - xCrop);
+      final num heightCrop = min((heightAbs * 2), img.height - yCrop);
 
       futureFaceThumbnails.add(
         cropAndEncodeCanvas(
@@ -1328,7 +1362,7 @@ Future<Uint8List> cropAndEncodeCanvas(
   required double width,
   required double height,
 }) async {
-  final croppedImage = await cropImageWithCanvas(
+  final croppedImage = await cropImageWithCanvasSimple(
     image,
     x: x,
     y: y,
