@@ -123,17 +123,17 @@ export interface Electron {
     skipAppUpdate: (version: string) => void;
 
     /**
-     * A subset of filesystem access APIs.
+     * A subset of file system access APIs.
      *
      * The renderer process, being a web process, does not have full access to
-     * the local filesystem apart from files explicitly dragged and dropped (or
+     * the local file system apart from files explicitly dragged and dropped (or
      * selected by the user in a native file open dialog).
      *
-     * The main process, however, has full filesystem access (limited only be an
+     * The main process, however, has full fil system access (limited only be an
      * OS level sandbox on the entire process).
      *
      * When we're running in the desktop app, we want to better utilize the
-     * local filesystem access to provide more integrated features to the user -
+     * local file system access to provide more integrated features to the user;
      * things that are not currently possible using web technologies. For
      * example, continuous exports to an arbitrary user chosen location on disk,
      * or watching some folders for changes and syncing them automatically.

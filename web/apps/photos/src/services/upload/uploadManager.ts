@@ -91,7 +91,7 @@ const maxConcurrentUploads = 4;
  *
  * 2. A file drag-and-dropped or selected by the user when we are running in the
  *    context of our desktop app. In such cases, we also have the absolute path
- *    of the file in the user's local filesystem. this is the
+ *    of the file in the user's local file system. this is the
  *    {@link FileAndPath} case.
  *
  * 3. A file path programmatically requested by the desktop app. For example, we

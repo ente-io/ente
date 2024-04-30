@@ -148,8 +148,8 @@ export default function Uploader({
      * Unlike {@link filesWithPaths} which are still user initiated,
      * {@link desktopFilePaths} can be set via programmatic action. For example,
      * if the user has setup a folder watch, and a new file is added on their
-     * local filesystem in one of the watched folders, then the relevant path of
-     * the new file would get added to {@link desktopFilePaths}.
+     * local file system in one of the watched folders, then the relevant path
+     * of the new file would get added to {@link desktopFilePaths}.
      */
     const [desktopFilePaths, setDesktopFilePaths] = useState<string[]>([]);
     /**

@@ -178,7 +178,7 @@ const percentageSizeDiff = (
  * object which we use to perform IPC with the Node.js side of our desktop app.
  *
  * @param dataOrPath Contents of an image or video file, or the path to the
- * image or video file on the user's local filesystem, whose thumbnail we want
+ * image or video file on the user's local file system, whose thumbnail we want
  * to generate.
  *
  * @param fileTypeInfo The type information for {@link dataOrPath}.

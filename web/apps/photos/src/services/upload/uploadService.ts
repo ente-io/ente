@@ -456,21 +456,21 @@ export const uploader = async (
 };
 
 /**
- * Read the given file or path or zip entry into an in-memory representation.
+ * Read the given file or path or zip item into an in-memory representation.
  *
  * [Note: Reading a UploadItem]
  *
  * The file can be either a web
  * [File](https://developer.mozilla.org/en-US/docs/Web/API/File), the absolute
  * path to a file on desk, a combination of these two, or a entry in a zip file
- * on the user's local filesystem.
+ * on the user's local file system.
  *
  * tl;dr; There are four cases:
  *
  * 1. web / File
  * 2. desktop / File (+ path)
  * 3. desktop / path
- * 4. desktop / ZipEntry
+ * 4. desktop / ZipItem
  *
  * For the when and why, read on.
  *
@@ -482,9 +482,9 @@ export const uploader = async (
  *
  * In the web context, we'll always get a File, since within the browser we
  * cannot programmatically construct paths to or arbitrarily access files on the
- * user's filesystem. Note that even if we were to have an absolute path at
+ * user's file system. Note that even if we were to have an absolute path at
  * hand, we cannot programmatically create such File objects to arbitrary
- * absolute paths on user's local filesystem for security reasons.
+ * absolute paths on user's local file system for security reasons.
  *
  * So in the web context, this will always be a File we get as a result of an
  * explicit user interaction (e.g. drag and drop).

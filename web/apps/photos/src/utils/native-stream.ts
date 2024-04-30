@@ -9,7 +9,7 @@
 import type { Electron, ZipItem } from "@/next/types/ipc";
 
 /**
- * Stream the given file or zip entry from the user's local filesystem.
+ * Stream the given file or zip entry from the user's local file system.
  *
  * This only works when we're running in our desktop app since it uses the
  * "stream://" protocol handler exposed by our custom code in the Node.js layer.
@@ -18,9 +18,9 @@ import type { Electron, ZipItem } from "@/next/types/ipc";
  * To avoid accidentally invoking it in a non-desktop app context, it requires
  * the {@link Electron} object as a parameter (even though it doesn't use it).
  *
- * @param pathOrZipEntry Either the path on the file on the user's local
- * filesystem whose contents we want to stream. Or a tuple containing the path
- * to a zip file and the name of the entry within it.
+ * @param pathOrZipEntry Either the path on the file on the user's local file
+ * system whose contents we want to stream. Or a tuple containing the path to a
+ * zip file and the name of the entry within it.
  *
  * @return A ({@link Response}, size, lastModifiedMs) triple.
  *
