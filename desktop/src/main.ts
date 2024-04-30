@@ -142,30 +142,6 @@ const registerPrivilegedSchemes = () => {
 };
 
 /**
- * [Note: Increased disk cache for the desktop app]
- *
- * Set the "disk-cache-size" command line flag to ask the Chromium process to
- * use a larger size for the caches that it keeps on disk. This allows us to use
- * the web based caching mechanisms on both the web and the desktop app, just
- * ask the embedded Chromium to be a bit more generous in disk usage when
- * running as the desktop app.
- *
- * The size we provide is in bytes.
- * https://www.electronjs.org/docs/latest/api/command-line-switches#--disk-cache-sizesize
- *
- * Note that increasing the disk cache size does not guarantee that Chromium
- * will respect in verbatim, it uses its own heuristics atop this hint.
- * https://superuser.com/questions/378991/what-is-chrome-default-cache-size-limit/1577693#1577693
- *
- * See also: [Note: Caching files].
- */
-const increaseDiskCache = () =>
-    app.commandLine.appendSwitch(
-        "disk-cache-size",
-        `${5 * 1024 * 1024 * 1024}`, // 5 GB
-    );
-
-/**
  * Create an return the {@link BrowserWindow} that will form our app's UI.
  *
  * This window will show the HTML served from {@link rendererURL}.
@@ -321,8 +297,6 @@ const setupTrayItem = (mainWindow: BrowserWindow) => {
  * Older versions of our app used to maintain a cache dir using the main
  * process. This has been deprecated in favor of using a normal web cache.
  *
- * See [Note: Increased disk cache for the desktop app]
- *
  * Delete the old cache dir if it exists. This code was added March 2024, and
  * can be removed after some time once most people have upgraded to newer
  * versions.
@@ -375,7 +349,6 @@ const main = () => {
     // The order of the next two calls is important
     setupRendererServer();
     registerPrivilegedSchemes();
-    increaseDiskCache();
     migrateLegacyWatchStoreIfNeeded();
 
     app.on("second-instance", () => {
