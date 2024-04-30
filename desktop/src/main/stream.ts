@@ -163,39 +163,12 @@ const handleWrite = async (path: string, request: Request) => {
  * The returned promise resolves when the write completes.
  *
  * @param filePath The local filesystem path where the file should be written.
- * @param readableStream A [web
- * ReadableStream](https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream)
+ *
+ * @param readableStream A web
+ * [ReadableStream](https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream).
  */
 export const writeStream = (filePath: string, readableStream: ReadableStream) =>
-    writeNodeStream(filePath, convertWebReadableStreamToNode(readableStream));
-
-/**
- * Convert a Web ReadableStream into a Node.js ReadableStream
- *
- * This can be used to, for example, write a ReadableStream obtained via
- * `net.fetch` into a file using the Node.js `fs` APIs
- */
-const convertWebReadableStreamToNode = (readableStream: ReadableStream) => {
-    const reader = readableStream.getReader();
-    const rs = new Readable();
-
-    rs._read = async () => {
-        try {
-            const result = await reader.read();
-
-            if (!result.done) {
-                rs.push(Buffer.from(result.value));
-            } else {
-                rs.push(null);
-                return;
-            }
-        } catch (e) {
-            rs.emit("error", e);
-        }
-    };
-
-    return rs;
-};
+    writeNodeStream(filePath, Readable.fromWeb(readableStream));
 
 const writeNodeStream = async (filePath: string, fileStream: Readable) => {
     const writeable = createWriteStream(filePath);
@@ -208,11 +181,11 @@ const writeNodeStream = async (filePath: string, fileStream: Readable) => {
 
     await new Promise((resolve, reject) => {
         writeable.on("finish", resolve);
-        writeable.on("error", async (e: unknown) => {
+        writeable.on("error", async (err: Error) => {
             if (existsSync(filePath)) {
                 await fs.unlink(filePath);
             }
-            reject(e);
+            reject(err);
         });
     });
 };
