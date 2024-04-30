@@ -1,4 +1,4 @@
-import "dart:io";
+import "dart:io" show File;
 
 import "package:flutter/foundation.dart";
 import "package:photos/core/cache/lru_map.dart";
@@ -12,24 +12,27 @@ import "package:photos/utils/thumbnail_util.dart";
 import "package:pool/pool.dart";
 
 final LRUMap<String, Uint8List?> faceCropCache = LRUMap(1000);
+final LRUMap<String, Uint8List?> faceCropThumbnailCache = LRUMap(1000);
 final pool = Pool(10, timeout: const Duration(seconds: 15));
 Future<Map<String, Uint8List>?> getFaceCrops(
   EnteFile file,
-  Map<String, FaceBox> faceBoxeMap,
+  Map<String, FaceBox> faceBoxeMap, {
+  bool useFullFile = true,
+  }
 ) async {
   late String? imagePath;
-  if (file.fileType != FileType.video) {
+  if (useFullFile && file.fileType != FileType.video) {
     final File? ioFile = await getFile(file);
     if (ioFile == null) {
       return null;
     }
     imagePath = ioFile.path;
   } else {
-    final thumbnail = await getThumbnailForUploadedFile(file);
-    if (thumbnail == null) {
-      return null;
-    }
-    imagePath = thumbnail.path;
+  final thumbnail = await getThumbnailForUploadedFile(file);
+  if (thumbnail == null) {
+    return null;
+  }
+  imagePath = thumbnail.path;
   }
   final List<String> faceIds = [];
   final List<FaceBox> faceBoxes = [];
