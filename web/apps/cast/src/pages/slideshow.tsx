@@ -131,29 +131,41 @@ export default function Slideshow() {
 
             if (!nextURL) {
                 try {
+                    console.log("nextURL doesn't exist yet");
                     const blob = await getPreviewableImage(nextFile, castToken);
+                    console.log("nextURL blobread");
                     const url = URL.createObjectURL(blob);
+                    console.log("nextURL", url);
                     renderableFileURLCache.set(nextFile.id, url);
+                    console.log("nextUrlCache set");
                     nextURL = url;
                 } catch (e) {
                     console.log("error in nextUrl", e);
                     return;
                 }
+            } else {
+                console.log("nextURL already exists");
             }
 
             if (!nextNextURL) {
                 try {
+                    console.log("nextNextURL doesn't exist yet");
                     const blob = await getPreviewableImage(
                         nextNextFile,
                         castToken,
                     );
+                    console.log("nextNextURL blobread");
                     const url = URL.createObjectURL(blob);
+                    console.log("nextNextURL", url);
                     renderableFileURLCache.set(nextNextFile.id, url);
+                    console.log("nextNextURCacheL set");
                     nextNextURL = url;
                 } catch (e) {
                     console.log("error in nextNextURL", e);
                     return;
                 }
+            } else {
+                console.log("nextNextURL already exists");
             }
 
             setLoading(false);
