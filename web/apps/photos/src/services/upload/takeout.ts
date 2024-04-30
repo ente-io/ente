@@ -6,7 +6,7 @@ import log from "@/next/log";
 import { NULL_LOCATION } from "constants/upload";
 import type { Location } from "types/metadata";
 import { readStream } from "utils/native-stream";
-import type { UploadItem } from "./uploadManager";
+import type { UploadItem } from "./types";
 
 export interface ParsedMetadataJSON {
     creationTime: number;

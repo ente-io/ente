@@ -10,6 +10,7 @@ import {
 import { NULL_LOCATION } from "constants/upload";
 import type { ParsedExtractedMetadata } from "types/metadata";
 import type { DedicatedFFmpegWorker } from "worker/ffmpeg.worker";
+import type { UploadItem } from "./upload/types";
 
 /**
  * Generate a thumbnail for the given video using a wasm FFmpeg running in a web
@@ -92,18 +93,18 @@ const makeGenThumbnailCommand = (seekTime: number) => [
  * This function is called during upload, when we need to extract the metadata
  * of videos that the user is uploading.
  *
- * @param fileOrPath A {@link File}, or the absolute path to a file on the
+ * @param uploadItem A {@link File}, or the absolute path to a file on the
  * user's local filesytem. A path can only be provided when we're running in the
  * context of our desktop app.
  */
 export const extractVideoMetadata = async (
-    fileOrPath: File | string,
+    uploadItem: UploadItem,
 ): Promise<ParsedExtractedMetadata> => {
     const command = extractVideoMetadataCommand;
     const outputData =
-        fileOrPath instanceof File
-            ? await ffmpegExecWeb(command, fileOrPath, "txt", 0)
-            : await electron.ffmpegExec(command, fileOrPath, "txt", 0);
+        uploadItem instanceof File
+            ? await ffmpegExecWeb(command, uploadItem, "txt", 0)
+            : await electron.ffmpegExec(command, uploadItem, "txt", 0);
 
     return parseFFmpegExtractedMetadata(outputData);
 };

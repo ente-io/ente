@@ -50,8 +50,9 @@ import {
     generateThumbnailNative,
     generateThumbnailWeb,
 } from "./thumbnail";
+import type { UploadItem } from "./types";
 import UploadHttpClient from "./uploadHttpClient";
-import type { UploadItem, UploadableUploadItem } from "./uploadManager";
+import type { UploadableUploadItem } from "./uploadManager";
 
 /**
  * A readable stream for a file, and its associated size and last modified time.
