@@ -29,3 +29,19 @@ import type { ZipItem } from "@/next/types/ipc";
  * Also see: [Note: Reading a UploadItem].
  */
 export type UploadItem = File | FileAndPath | string | ZipItem;
+
+/**
+ * The of cases of {@link UploadItem} that apply when we're running in the
+ * context of our desktop app.
+ */
+export type DesktopUploadItem = Exclude<UploadItem, File>;
+
+/**
+ * For each of cases of {@link UploadItem} that apply when we're running in the
+ * context of our desktop app, return a value that can be passed to
+ * {@link Electron} functions over IPC.
+ */
+export const toDataOrPathOrZipEntry = (desktopUploadItem: DesktopUploadItem) =>
+    typeof desktopUploadItem == "string" || Array.isArray(desktopUploadItem)
+        ? desktopUploadItem
+        : desktopUploadItem.path;

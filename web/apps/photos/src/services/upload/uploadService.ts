@@ -1012,14 +1012,12 @@ const withThumbnail = async (
         fileTypeInfo.fileType == FILE_TYPE.IMAGE &&
         moduleState.isNativeImageThumbnailGenerationNotAvailable;
 
-    // 1. Native thumbnail generation using file's path.
-    if (electron && !notAvailable) {
+    // 1. Native thumbnail generation using items's (effective) path.
+    if (electron && !notAvailable && !(uploadItem instanceof File)) {
         try {
-            // When running in the context of our desktop app, File paths will
-            // be absolute. See: [Note: File paths when running under Electron].
             thumbnail = await generateThumbnailNative(
                 electron,
-                uploadItem instanceof File ? uploadItem["path"] : uploadItem,
+                uploadItem,
                 fileTypeInfo,
             );
         } catch (e) {
@@ -1051,12 +1049,14 @@ const withThumbnail = async (
             // The fallback in this case involves reading the entire stream into
             // memory, and passing that data across the IPC boundary in a single
             // go (i.e. not in a streaming manner). This is risky for videos of
-            // unbounded sizes, plus that isn't the expected scenario. So
-            // instead of trying to cater for arbitrary exceptions, we only run
-            // this fallback to cover for the case where thumbnail generation
-            // was not available for an image file on Windows. If/when we add
-            // support of native thumbnailing on Windows too, this entire branch
-            // can be removed.
+            // unbounded sizes, plus we shouldn't even be getting here unless
+            // something went wrong.
+            //
+            // So instead of trying to cater for arbitrary exceptions, we only
+            // run this fallback to cover for the case where thumbnail
+            // generation was not available for an image file on Windows.
+            // If/when we add support of native thumbnailing on Windows too,
+            // this entire branch can be removed.
 
             if (fileTypeInfo.fileType == FILE_TYPE.IMAGE) {
                 const data = await readEntireStream(fileStream.stream);

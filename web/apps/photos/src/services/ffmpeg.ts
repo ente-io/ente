@@ -10,7 +10,11 @@ import {
 import { NULL_LOCATION } from "constants/upload";
 import type { ParsedExtractedMetadata } from "types/metadata";
 import type { DedicatedFFmpegWorker } from "worker/ffmpeg.worker";
-import type { UploadItem } from "./upload/types";
+import {
+    toDataOrPathOrZipEntry,
+    type DesktopUploadItem,
+    type UploadItem,
+} from "./upload/types";
 
 /**
  * Generate a thumbnail for the given video using a wasm FFmpeg running in a web
@@ -59,12 +63,12 @@ const _generateVideoThumbnail = async (
  */
 export const generateVideoThumbnailNative = async (
     electron: Electron,
-    dataOrPath: Uint8Array | string,
+    desktopUploadItem: DesktopUploadItem,
 ) =>
     _generateVideoThumbnail((seekTime: number) =>
         electron.ffmpegExec(
             makeGenThumbnailCommand(seekTime),
-            dataOrPath,
+            toDataOrPathOrZipEntry(desktopUploadItem),
             "jpeg",
             0,
         ),
@@ -104,20 +108,15 @@ export const extractVideoMetadata = async (
     const outputData =
         uploadItem instanceof File
             ? await ffmpegExecWeb(command, uploadItem, "txt", 0)
-            : await electron.ffmpegExec(command, forE(uploadItem), "txt", 0);
+            : await electron.ffmpegExec(
+                  command,
+                  toDataOrPathOrZipEntry(uploadItem),
+                  "txt",
+                  0,
+              );
 
     return parseFFmpegExtractedMetadata(outputData);
 };
-
-/**
- * For each of cases of {@link UploadItem} that apply when we're running in the
- * context of our desktop app, return a value that can be passed to
- * {@link Electron}'s {@link ffmpegExec} over IPC.
- */
-const forE = (desktopUploadItem: Exclude<UploadItem, File>) =>
-    typeof desktopUploadItem == "string" || Array.isArray(desktopUploadItem)
-        ? desktopUploadItem
-        : desktopUploadItem.path;
 
 // Options:
 //
