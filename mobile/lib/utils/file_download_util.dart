@@ -170,7 +170,7 @@ Future<void> downloadToGallery(EnteFile file) async {
       _logger.severe('Failed to save assert of type $type');
     }
   } catch (e) {
-    _logger.warning("Failed to save file", e);
+    _logger.severe("Failed to save file", e);
     rethrow;
   } finally {
     await PhotoManager.startChangeNotify();
