@@ -27,6 +27,11 @@ class EmbeddingsDB {
     return _dbFuture!;
   }
 
+  Future<void> init() async {
+    final dir = await getApplicationDocumentsDirectory();
+    await _clearDeprecatedStores(dir);
+  }
+
   Future<SqliteDatabase> _initDatabase() async {
     final Directory documentsDirectory =
         await getApplicationDocumentsDirectory();
@@ -125,5 +130,16 @@ class EmbeddingsDB {
       Float32List.fromList(embedding.embedding).buffer.asUint8List(),
       embedding.updationTime,
     ];
+  }
+
+  Future<void> _clearDeprecatedStores(Directory dir) async {
+    final deprecatedStore = Directory(dir.path + "/object-box-store");
+    if (await deprecatedStore.exists()) {
+      await deprecatedStore.delete(recursive: true);
+    }
+    final deprecatedDB = File(dir.path + "/default.isar");
+    if (await deprecatedDB.exists()) {
+      await deprecatedDB.delete();
+    }
   }
 }
