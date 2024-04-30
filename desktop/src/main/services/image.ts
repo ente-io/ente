@@ -1,8 +1,9 @@
 /** @file Image format conversions and thumbnail generation */
 
+import StreamZip from "node-stream-zip";
 import fs from "node:fs/promises";
 import path from "path";
-import { CustomErrorMessage } from "../../types/ipc";
+import { CustomErrorMessage, type ZipEntry } from "../../types/ipc";
 import log from "../log";
 import { execAsync, isDev } from "../utils-electron";
 import { deleteTempFile, makeTempFilePath } from "../utils-temp";
@@ -63,18 +64,31 @@ const imageMagickPath = () =>
     path.join(isDev ? "build" : process.resourcesPath, "image-magick");
 
 export const generateImageThumbnail = async (
-    dataOrPath: Uint8Array | string,
+    dataOrPathOrZipEntry: Uint8Array | string | ZipEntry,
     maxDimension: number,
     maxSize: number,
 ): Promise<Uint8Array> => {
     let inputFilePath: string;
     let isInputFileTemporary: boolean;
-    if (dataOrPath instanceof Uint8Array) {
+    let writeToTemporaryInputFile = async () => {};
+    if (typeof dataOrPathOrZipEntry == "string") {
+        inputFilePath = dataOrPathOrZipEntry;
+        isInputFileTemporary = false;
+    } else {
         inputFilePath = await makeTempFilePath();
         isInputFileTemporary = true;
-    } else {
-        inputFilePath = dataOrPath;
-        isInputFileTemporary = false;
+        if (dataOrPathOrZipEntry instanceof Uint8Array) {
+            writeToTemporaryInputFile = async () => {
+                await fs.writeFile(inputFilePath, dataOrPathOrZipEntry);
+            };
+        } else {
+            writeToTemporaryInputFile = async () => {
+                const [zipPath, entryName] = dataOrPathOrZipEntry;
+                const zip = new StreamZip.async({ file: zipPath });
+                await zip.extract(entryName, inputFilePath);
+                zip.close();
+            };
+        }
     }
 
     const outputFilePath = await makeTempFilePath("jpeg");
@@ -89,8 +103,7 @@ export const generateImageThumbnail = async (
     );
 
     try {
-        if (dataOrPath instanceof Uint8Array)
-            await fs.writeFile(inputFilePath, dataOrPath);
+        writeToTemporaryInputFile();
 
         let thumbnail: Uint8Array;
         do {

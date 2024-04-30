@@ -97,9 +97,7 @@ const handleRead = async (path: string) => {
 
 const handleReadZip = async (zipPath: string, zipEntryPath: string) => {
     try {
-        const zip = new StreamZip.async({
-            file: zipPath,
-        });
+        const zip = new StreamZip.async({ file: zipPath });
         const entry = await zip.entry(zipEntryPath);
         const stream = await zip.stream(entry);
 

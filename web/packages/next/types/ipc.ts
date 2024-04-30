@@ -221,22 +221,27 @@ export interface Electron {
      * not yet possible, this function will throw an error with the
      * {@link CustomErrorMessage.NotAvailable} message.
      *
-     * @param dataOrPath The raw image data (the contents of the image file), or
-     * the path to the image file, whose thumbnail we want to generate.
+     * @param dataOrPathOrZipEntry The file whose thumbnail we want to generate.
+     * It can be provided as raw image data (the contents of the image file), or
+     * the path to the image file, or a tuple containing the path of the zip
+     * file along with the name of an entry in it.
+     *
      * @param maxDimension The maximum width or height of the generated
      * thumbnail.
+     *
      * @param maxSize Maximum size (in bytes) of the generated thumbnail.
      *
      * @returns JPEG data of the generated thumbnail.
      */
     generateImageThumbnail: (
-        dataOrPath: Uint8Array | string,
+        dataOrPathOrZipEntry: Uint8Array | string | ZipEntry,
         maxDimension: number,
         maxSize: number,
     ) => Promise<Uint8Array>;
 
     /**
-     * Execute a FFmpeg {@link command} on the given {@link dataOrPath}.
+     * Execute a FFmpeg {@link command} on the given
+     * {@link dataOrPathOrZipEntry}.
      *
      * This executes the command using a FFmpeg executable we bundle with our
      * desktop app. We also have a wasm FFmpeg wasm implementation that we use
@@ -249,10 +254,11 @@ export interface Electron {
      * (respectively {@link inputPathPlaceholder},
      * {@link outputPathPlaceholder}, {@link ffmpegPathPlaceholder}).
      *
-     * @param dataOrPath The bytes of the input file, or the path to the input
-     * file on the user's local disk. In both cases, the data gets serialized to
-     * a temporary file, and then that path gets substituted in the FFmpeg
-     * {@link command} in lieu of {@link inputPathPlaceholder}.
+     * @param dataOrPathOrZipEntry The bytes of the input file, or the path to
+     * the input file on the user's local disk, or the path to a zip file on the
+     * user's disk and the name of an entry in it. In all three cases, the data
+     * gets serialized to a temporary file, and then that path gets substituted
+     * in the FFmpeg {@link command} in lieu of {@link inputPathPlaceholder}.
      *
      * @param outputFileExtension The extension (without the dot, e.g. "jpeg")
      * to use for the output file that we ask FFmpeg to create in
@@ -268,7 +274,7 @@ export interface Electron {
      */
     ffmpegExec: (
         command: string[],
-        dataOrPath: Uint8Array | string,
+        dataOrPathOrZipEntry: Uint8Array | string | ZipEntry,
         outputFileExtension: string,
         timeoutMS: number,
     ) => Promise<Uint8Array>;

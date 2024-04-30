@@ -54,9 +54,9 @@ import {
 import {
     clearPendingUploads,
     listZipEntries,
-    pathOrZipEntrySize,
     markUploadedFiles,
     markUploadedZipEntries,
+    pathOrZipEntrySize,
     pendingUploads,
     setPendingUploads,
 } from "./services/upload";
@@ -152,10 +152,11 @@ export const attachIPCHandlers = () => {
         "generateImageThumbnail",
         (
             _,
-            dataOrPath: Uint8Array | string,
+            dataOrPathOrZipEntry: Uint8Array | string | ZipEntry,
             maxDimension: number,
             maxSize: number,
-        ) => generateImageThumbnail(dataOrPath, maxDimension, maxSize),
+        ) =>
+            generateImageThumbnail(dataOrPathOrZipEntry, maxDimension, maxSize),
     );
 
     ipcMain.handle(
@@ -163,10 +164,16 @@ export const attachIPCHandlers = () => {
         (
             _,
             command: string[],
-            dataOrPath: Uint8Array | string,
+            dataOrPathOrZipEntry: Uint8Array | string | ZipEntry,
             outputFileExtension: string,
             timeoutMS: number,
-        ) => ffmpegExec(command, dataOrPath, outputFileExtension, timeoutMS),
+        ) =>
+            ffmpegExec(
+                command,
+                dataOrPathOrZipEntry,
+                outputFileExtension,
+                timeoutMS,
+            ),
     );
 
     // - ML

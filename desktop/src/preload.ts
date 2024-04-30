@@ -129,27 +129,27 @@ const convertToJPEG = (imageData: Uint8Array): Promise<Uint8Array> =>
     ipcRenderer.invoke("convertToJPEG", imageData);
 
 const generateImageThumbnail = (
-    dataOrPath: Uint8Array | string,
+    dataOrPathOrZipEntry: Uint8Array | string | ZipEntry,
     maxDimension: number,
     maxSize: number,
 ): Promise<Uint8Array> =>
     ipcRenderer.invoke(
         "generateImageThumbnail",
-        dataOrPath,
+        dataOrPathOrZipEntry,
         maxDimension,
         maxSize,
     );
 
 const ffmpegExec = (
     command: string[],
-    dataOrPath: Uint8Array | string,
+    dataOrPathOrZipEntry: Uint8Array | string | ZipEntry,
     outputFileExtension: string,
     timeoutMS: number,
 ): Promise<Uint8Array> =>
     ipcRenderer.invoke(
         "ffmpegExec",
         command,
-        dataOrPath,
+        dataOrPathOrZipEntry,
         outputFileExtension,
         timeoutMS,
     );
