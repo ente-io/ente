@@ -4,7 +4,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { CustomErrorMessage, type ZipItem } from "../../types/ipc";
 import log from "../log";
-import { execAsync, isDev } from "../utils/electron";
+import { execAsync, isDev } from "../utils";
 import {
     deleteTempFile,
     makeFileForDataOrPathOrZipItem,

@@ -50,12 +50,12 @@
         "outDir": "app",
 
         /* Temporary overrides to get things to compile with the older config */
-        "strict": false,
-        "noImplicitAny": true
+        // "strict": false,
+        "noImplicitAny": true,
 
         /* Below is the state we want */
         /* Enable these one by one */
-        // "strict": true,
+        "strict": true,
 
         /* Require the `type` modifier when importing types */
         // "verbatimModuleSyntax": true

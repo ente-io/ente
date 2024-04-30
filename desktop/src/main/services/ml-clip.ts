@@ -22,6 +22,7 @@ const cachedCLIPImageSession = makeCachedInferenceSession(
 export const clipImageEmbedding = async (jpegImageData: Uint8Array) => {
     const tempFilePath = await makeTempFilePath();
     const imageStream = new Response(jpegImageData.buffer).body;
+    if (!imageStream) throw new Error("Missing body that we just fed data to");
     await writeStream(tempFilePath, imageStream);
     try {
         return await clipImageEmbedding_(tempFilePath);
@@ -134,11 +135,9 @@ const cachedCLIPTextSession = makeCachedInferenceSession(
     64173509 /* 61.2 MB */,
 );
 
-let _tokenizer: Tokenizer = null;
+let _tokenizer: Tokenizer | undefined;
 const getTokenizer = () => {
-    if (!_tokenizer) {
-        _tokenizer = new Tokenizer();
-    }
+    if (!_tokenizer) _tokenizer = new Tokenizer();
     return _tokenizer;
 };
 

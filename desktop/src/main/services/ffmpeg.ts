@@ -2,8 +2,8 @@ import pathToFfmpeg from "ffmpeg-static";
 import fs from "node:fs/promises";
 import type { ZipItem } from "../../types/ipc";
 import log from "../log";
-import { withTimeout } from "../utils";
-import { execAsync } from "../utils/electron";
+import { execAsync } from "../utils";
+import { withTimeout } from "../utils/common";
 import {
     deleteTempFile,
     makeFileForDataOrPathOrZipItem,

@@ -1,7 +1,7 @@
 import { shell } from "electron/common";
 import { app, dialog } from "electron/main";
 import path from "node:path";
-import { posixPath } from "../utils/electron";
+import { posixPath } from "../utils";
 
 export const selectDirectory = async () => {
     const result = await dialog.showOpenDialog({

@@ -1,6 +1,6 @@
 import log from "electron-log";
 import util from "node:util";
-import { isDev } from "./utils/electron";
+import { isDev } from "./utils";
 
 /**
  * Initialize logging in the main process.

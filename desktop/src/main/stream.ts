@@ -99,7 +99,10 @@ const handleReadZip = async (zipPath: string, entryName: string) => {
     try {
         const zip = new StreamZip.async({ file: zipPath });
         const entry = await zip.entry(entryName);
+        if (!entry) return new Response("", { status: 404 });
+
         const stream = await zip.stream(entry);
+
         // TODO(MR): when to call zip.close()
 
         return new Response(Readable.toWeb(new Readable(stream)), {
@@ -122,7 +125,7 @@ const handleReadZip = async (zipPath: string, entryName: string) => {
             `Failed to read entry ${entryName} from zip file at ${zipPath}`,
             e,
         );
-        return new Response(`Failed to read stream: ${e.message}`, {
+        return new Response(`Failed to read stream: ${String(e)}`, {
             status: 500,
         });
     }
