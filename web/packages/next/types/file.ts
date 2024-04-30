@@ -16,6 +16,17 @@ export interface ElectronFile {
     arrayBuffer: () => Promise<Uint8Array>;
 }
 
+/**
+ * When we are running in the context of our desktop app, we have access to the
+ * absolute path of {@link File} objects. This convenience type clubs these two
+ * bits of information, saving us the need to query the path again and again
+ * using the {@link getPathForFile} method of {@link Electron}.
+ */
+export interface FileAndPath {
+    file: File;
+    path: string;
+}
+
 export interface EventQueueItem {
     type: "upload" | "trash";
     folderPath: string;

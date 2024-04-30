@@ -2,6 +2,7 @@
  * @file stream data to-from renderer using a custom protocol handler.
  */
 import { net, protocol } from "electron/main";
+import StreamZip from "node-stream-zip";
 import { createWriteStream, existsSync } from "node:fs";
 import fs from "node:fs/promises";
 import { Readable } from "node:stream";
@@ -34,17 +35,23 @@ export const registerStreamProtocol = () => {
     protocol.handle("stream", async (request: Request) => {
         const url = request.url;
         // The request URL contains the command to run as the host, and the
-        // pathname of the file as the path. For example,
+        // pathname of the file as the path. An additional path can be specified
+        // as the URL hash.
         //
-        //     stream://write/path/to/file
-        //              host-pathname-----
+        // For example,
         //
-        const { host, pathname } = new URL(url);
+        //     stream://write/path/to/file#/path/to/another/file
+        //              host[pathname----] [pathname-2---------]
+        //
+        const { host, pathname, hash } = new URL(url);
         // Convert e.g. "%20" to spaces.
         const path = decodeURIComponent(pathname);
+        const hashPath = decodeURIComponent(hash);
         switch (host) {
             case "read":
                 return handleRead(path);
+            case "read-zip":
+                return handleReadZip(path, hashPath);
             case "write":
                 return handleWrite(path, request);
             default:
@@ -82,6 +89,39 @@ const handleRead = async (path: string) => {
         return res;
     } catch (e) {
         log.error(`Failed to read stream at ${path}`, e);
+        return new Response(`Failed to read stream: ${e.message}`, {
+            status: 500,
+        });
+    }
+};
+
+const handleReadZip = async (zipPath: string, entryName: string) => {
+    try {
+        const zip = new StreamZip.async({ file: zipPath });
+        const entry = await zip.entry(entryName);
+        const stream = await zip.stream(entry);
+        // TODO(MR): when to call zip.close()
+
+        return new Response(Readable.toWeb(new Readable(stream)), {
+            headers: {
+                // We don't know the exact type, but it doesn't really matter,
+                // just set it to a generic binary content-type so that the
+                // browser doesn't tinker with it thinking of it as text.
+                "Content-Type": "application/octet-stream",
+                "Content-Length": `${entry.size}`,
+                // While it is documented that entry.time is the modification
+                // time, the units are not mentioned. By seeing the source code,
+                // we can verify that it is indeed epoch milliseconds. See
+                // `parseZipTime` in the node-stream-zip source,
+                // https://github.com/antelle/node-stream-zip/blob/master/node_stream_zip.js
+                "X-Last-Modified-Ms": `${entry.time}`,
+            },
+        });
+    } catch (e) {
+        log.error(
+            `Failed to read entry ${entryName} from zip file at ${zipPath}`,
+            e,
+        );
         return new Response(`Failed to read stream: ${e.message}`, {
             status: 500,
         });

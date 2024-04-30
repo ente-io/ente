@@ -777,7 +777,7 @@ class FaceMLDataDB {
     final db = await instance.asyncDB;
 
     const String sql = '''
-      INSERT INTO $notPersonFeedback ($personIdColumn, $clusterIDColumn) VALUES (?, ?) ON CONFLICT($personIdColumn, $clusterIDColumn) DO NOTHING
+      INSERT INTO $notPersonFeedback ($personIdColumn, $clusterIDColumn) VALUES (?, ?) ON CONFLICT DO NOTHING
     ''';
     await db.execute(sql, [personID, clusterID]);
   }
@@ -788,7 +788,7 @@ class FaceMLDataDB {
     final db = await instance.asyncDB;
 
     const String sql = '''
-      INSERT INTO $notPersonFeedback ($personIdColumn, $clusterIDColumn) VALUES (?, ?) ON CONFLICT($personIdColumn, $clusterIDColumn) DO NOTHING
+      INSERT INTO $notPersonFeedback ($personIdColumn, $clusterIDColumn) VALUES (?, ?) ON CONFLICT DO NOTHING
     ''';
     final parameterSets =
         clusterToPersonID.entries.map((e) => [e.value, e.key]).toList();

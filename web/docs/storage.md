@@ -34,6 +34,6 @@ meant for larger, tabular data.
 OPFS is used for caching entire files when we're running under Electron (the Web
 Cache API is used in the browser).
 
-As it name suggests, it is an entire filesystem, private for us ("origin"). In
+As it name suggests, it is an entire file system, private for us ("origin"). In
 is not undbounded though, and the storage is not guaranteed to be persistent (at
 least with the APIs we use), hence the cache designation.

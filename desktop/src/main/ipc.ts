@@ -14,6 +14,7 @@ import type {
     CollectionMapping,
     FolderWatch,
     PendingUploads,
+    ZipItem,
 } from "../types/ipc";
 import {
     selectDirectory,
@@ -29,7 +30,6 @@ import {
     fsRename,
     fsRm,
     fsRmdir,
-    fsSize,
     fsWriteFile,
 } from "./fs";
 import { logToDisk } from "./log";
@@ -52,10 +52,13 @@ import {
     saveEncryptionKey,
 } from "./services/store";
 import {
-    getElectronFilesFromGoogleZip,
+    clearPendingUploads,
+    listZipItems,
+    markUploadedFiles,
+    markUploadedZipItems,
+    pathOrZipItemSize,
     pendingUploads,
-    setPendingUploadCollection,
-    setPendingUploadFiles,
+    setPendingUploads,
 } from "./services/upload";
 import {
     watchAdd,
@@ -139,8 +142,6 @@ export const attachIPCHandlers = () => {
 
     ipcMain.handle("fsIsDir", (_, dirPath: string) => fsIsDir(dirPath));
 
-    ipcMain.handle("fsSize", (_, path: string) => fsSize(path));
-
     // - Conversion
 
     ipcMain.handle("convertToJPEG", (_, imageData: Uint8Array) =>
@@ -151,10 +152,10 @@ export const attachIPCHandlers = () => {
         "generateImageThumbnail",
         (
             _,
-            dataOrPath: Uint8Array | string,
+            dataOrPathOrZipItem: Uint8Array | string | ZipItem,
             maxDimension: number,
             maxSize: number,
-        ) => generateImageThumbnail(dataOrPath, maxDimension, maxSize),
+        ) => generateImageThumbnail(dataOrPathOrZipItem, maxDimension, maxSize),
     );
 
     ipcMain.handle(
@@ -162,10 +163,16 @@ export const attachIPCHandlers = () => {
         (
             _,
             command: string[],
-            dataOrPath: Uint8Array | string,
+            dataOrPathOrZipItem: Uint8Array | string | ZipItem,
             outputFileExtension: string,
             timeoutMS: number,
-        ) => ffmpegExec(command, dataOrPath, outputFileExtension, timeoutMS),
+        ) =>
+            ffmpegExec(
+                command,
+                dataOrPathOrZipItem,
+                outputFileExtension,
+                timeoutMS,
+            ),
     );
 
     // - ML
@@ -198,23 +205,31 @@ export const attachIPCHandlers = () => {
 
     // - Upload
 
+    ipcMain.handle("listZipItems", (_, zipPath: string) =>
+        listZipItems(zipPath),
+    );
+
+    ipcMain.handle("pathOrZipItemSize", (_, pathOrZipItem: string | ZipItem) =>
+        pathOrZipItemSize(pathOrZipItem),
+    );
+
     ipcMain.handle("pendingUploads", () => pendingUploads());
 
-    ipcMain.handle("setPendingUploadCollection", (_, collectionName: string) =>
-        setPendingUploadCollection(collectionName),
+    ipcMain.handle("setPendingUploads", (_, pendingUploads: PendingUploads) =>
+        setPendingUploads(pendingUploads),
     );
 
     ipcMain.handle(
-        "setPendingUploadFiles",
-        (_, type: PendingUploads["type"], filePaths: string[]) =>
-            setPendingUploadFiles(type, filePaths),
+        "markUploadedFiles",
+        (_, paths: PendingUploads["filePaths"]) => markUploadedFiles(paths),
     );
 
-    // -
-
-    ipcMain.handle("getElectronFilesFromGoogleZip", (_, filePath: string) =>
-        getElectronFilesFromGoogleZip(filePath),
+    ipcMain.handle(
+        "markUploadedZipItems",
+        (_, items: PendingUploads["zipItems"]) => markUploadedZipItems(items),
     );
+
+    ipcMain.handle("clearPendingUploads", () => clearPendingUploads());
 };
 
 /**

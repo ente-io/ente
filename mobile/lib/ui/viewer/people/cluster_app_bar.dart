@@ -18,6 +18,7 @@ import "package:photos/services/machine_learning/face_ml/face_clustering/cosine_
 import "package:photos/services/machine_learning/face_ml/face_ml_result.dart";
 import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart";
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
+import "package:photos/ui/common/popup_item.dart";
 import "package:photos/ui/viewer/people/cluster_breakup_page.dart";
 
 class ClusterAppBar extends StatefulWidget {
@@ -104,58 +105,20 @@ class _AppBarWidgetState extends State<ClusterAppBar> {
       return actions;
     }
 
-    final List<PopupMenuItem<ClusterPopupAction>> items = [];
+    final List<EntePopupMenuItem<ClusterPopupAction>> items = [];
 
     items.addAll(
       [
-        // PopupMenuItem(
-        //   value: ClusterPopupAction.setCover,
-        //   child: Row(
-        //     children: [
-        //       const Icon(Icons.image_outlined),
-        //       const Padding(
-        //         padding: EdgeInsets.all(8),
-        //       ),
-        //       Text(S.of(context).setCover),
-        //     ],
-        //   ),
-        // ),
-        const PopupMenuItem(
+        EntePopupMenuItem(
+          "Break up cluster",
           value: ClusterPopupAction.breakupCluster,
-          child: Row(
-            children: [
-              Icon(Icons.analytics_outlined),
-              Padding(
-                padding: EdgeInsets.all(8),
-              ),
-              Text('Break up cluster'),
-            ],
-          ),
+          icon: Icons.analytics_outlined,
         ),
-        const PopupMenuItem(
+        EntePopupMenuItem(
+          "Validate cluster",
           value: ClusterPopupAction.validateCluster,
-          child: Row(
-            children: [
-              Icon(Icons.search_off_outlined),
-              Padding(
-                padding: EdgeInsets.all(8),
-              ),
-              Text('Validate cluster'),
-            ],
-          ),
+          icon: Icons.search_off_outlined,
         ),
-        // PopupMenuItem(
-        //   value: ClusterPopupAction.hide,
-        //   child: Row(
-        //     children: [
-        //       const Icon(Icons.visibility_off_outlined),
-        //       const Padding(
-        //         padding: EdgeInsets.all(8),
-        //       ),
-        //       Text(S.of(context).hide),
-        //     ],
-        //   ),
-        // ),
       ],
     );
 

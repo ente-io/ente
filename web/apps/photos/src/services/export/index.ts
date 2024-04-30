@@ -46,13 +46,13 @@ const exportRecordFileName = "export_status.json";
 
 /**
  * Name of the top level directory which we create underneath the selected
- * directory when the user starts an export to the filesystem.
+ * directory when the user starts an export to the file system.
  */
 const exportDirectoryName = "Ente Photos";
 
 /**
- * Name of the directory in which we put our metadata when exporting to the
- * filesystem.
+ * Name of the directory in which we put our metadata when exporting to the file
+ * system.
  */
 export const exportMetadataDirectoryName = "metadata";
 
@@ -1378,7 +1378,7 @@ const isExportInProgress = (exportStage: ExportStage) =>
  *
  * Also move its associated metadata JSON to Trash.
  *
- * @param exportDir The root directory on the user's filesystem where we are
+ * @param exportDir The root directory on the user's file system where we are
  * exporting to.
  * */
 const moveToTrash = async (
