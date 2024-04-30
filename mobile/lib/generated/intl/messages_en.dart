@@ -721,6 +721,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "filesBackedUpFromDevice": m22,
         "filesBackedUpInAlbum": m23,
         "filesDeleted": MessageLookupByLibrary.simpleMessage("Files deleted"),
+        "filesSavedToGallery":
+            MessageLookupByLibrary.simpleMessage("Files saved to gallery"),
         "flip": MessageLookupByLibrary.simpleMessage("Flip"),
         "forYourMemories":
             MessageLookupByLibrary.simpleMessage("for your memories"),

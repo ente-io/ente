@@ -5945,6 +5945,16 @@ class S {
     );
   }
 
+  /// `Files saved to gallery`
+  String get filesSavedToGallery {
+    return Intl.message(
+      'Files saved to gallery',
+      name: 'filesSavedToGallery',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Failed to save file to gallery`
   String get fileFailedToSaveToGallery {
     return Intl.message(
