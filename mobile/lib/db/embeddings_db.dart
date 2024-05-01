@@ -133,13 +133,13 @@ class EmbeddingsDB {
   }
 
   Future<void> _clearDeprecatedStores(Directory dir) async {
-    final deprecatedStore = Directory(dir.path + "/object-box-store");
-    if (await deprecatedStore.exists()) {
-      await deprecatedStore.delete(recursive: true);
+    final deprecatedObjectBox = Directory(dir.path + "/object-box-store");
+    if (await deprecatedObjectBox.exists()) {
+      await deprecatedObjectBox.delete(recursive: true);
     }
-    final deprecatedDB = File(dir.path + "/default.isar");
-    if (await deprecatedDB.exists()) {
-      await deprecatedDB.delete();
+    final deprecatedIsar = File(dir.path + "/default.isar");
+    if (await deprecatedIsar.exists()) {
+      await deprecatedIsar.delete();
     }
   }
 
