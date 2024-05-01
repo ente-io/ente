@@ -64,6 +64,7 @@ import {
     watchFindFiles,
     watchGet,
     watchRemove,
+    watchReset,
     watchUpdateIgnoredFiles,
     watchUpdateSyncedFiles,
 } from "./services/watch";
@@ -263,4 +264,6 @@ export const attachFSWatchIPCHandlers = (watcher: FSWatcher) => {
     ipcMain.handle("watchFindFiles", (_, folderPath: string) =>
         watchFindFiles(folderPath),
     );
+
+    ipcMain.handle("watchReset", () => watchReset(watcher));
 };

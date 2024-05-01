@@ -462,6 +462,17 @@ export interface Electron {
          * The returned paths are guaranteed to use POSIX separators ('/').
          */
         findFiles: (folderPath: string) => Promise<string[]>;
+
+        /**
+         * Stop watching all existing folder watches and remove any callbacks.
+         *
+         * This function is meant to be called when the user logs out. It stops
+         * all existing folder watches and forgets about any "on*" callback
+         * functions that have been registered.
+         *
+         * The persisted state itself gets cleared via {@link clearStores}.
+         */
+        reset: () => Promise<void>;
     };
 
     // - Upload

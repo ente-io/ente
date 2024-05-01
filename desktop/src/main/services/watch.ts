@@ -150,3 +150,7 @@ export const watchFindFiles = async (dirPath: string) => {
     }
     return paths;
 };
+
+export const watchReset = async (watcher: FSWatcher) => {
+    await watcher.close();
+};
