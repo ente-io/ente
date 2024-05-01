@@ -261,7 +261,9 @@ export default function Uploader({
 
                 const { collectionName, filePaths, zipItems } = pending;
 
-                log.info("Resuming pending upload", pending);
+                log.info(
+                    `Resuming pending of upload of ${filePaths.length + zipItems.length} items${collectionName ? " to collection " + collectionName : ""}`,
+                );
                 isPendingDesktopUpload.current = true;
                 pendingDesktopUploadCollectionName.current = collectionName;
                 setDesktopFilePaths(filePaths);
