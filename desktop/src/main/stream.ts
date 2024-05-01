@@ -48,7 +48,8 @@ export const registerStreamProtocol = () => {
         const { host, pathname, hash } = new URL(url);
         // Convert e.g. "%20" to spaces.
         const path = decodeURIComponent(pathname);
-        const hashPath = decodeURIComponent(hash);
+        // `hash` begins with a "#", slice that off.
+        const hashPath = decodeURIComponent(hash.slice(1));
         switch (host) {
             case "read":
                 return handleRead(path);
