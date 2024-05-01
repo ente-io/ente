@@ -1409,6 +1409,6 @@ const moveToTrash = async (
             metadataFileName,
             fs.exists,
         );
-        await fs.rename(filePath, metadataTrashFilePath);
+        await fs.rename(metadataFilePath, metadataTrashFilePath);
     }
 };
