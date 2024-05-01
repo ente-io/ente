@@ -111,14 +111,13 @@ function getShrinkRatio(width: number, columns: number) {
     );
 }
 
-const ListContainer = styled(Box)<{
-    columns: number;
-    shrinkRatio: number;
-    groups?: number[];
+const ListContainer = styled(Box, {
+    shouldForwardProp: (propName) => propName != "gridTemplateColumns",
+})<{
+    gridTemplateColumns: string;
 }>`
     display: grid;
-    grid-template-columns: ${({ columns, shrinkRatio, groups }) =>
-        getTemplateColumns(columns, shrinkRatio, groups)};
+    grid-template-columns: ${(props) => props.gridTemplateColumns};
     grid-column-gap: ${GAP_BTW_TILES}px;
     width: 100%;
     color: #fff;
@@ -235,9 +234,11 @@ const PhotoListRow = React.memo(
         return (
             <ListItem style={style}>
                 <ListContainer
-                    columns={columns}
-                    shrinkRatio={shrinkRatio}
-                    groups={timeStampList[index].groups}
+                    gridTemplateColumns={getTemplateColumns(
+                        columns,
+                        shrinkRatio,
+                        timeStampList[index].groups,
+                    )}
                 >
                     {renderListItem(timeStampList[index], isScrolling)}
                 </ListContainer>
