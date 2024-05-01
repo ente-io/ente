@@ -1398,17 +1398,19 @@ const moveToTrash = async (
 
     if (await fs.exists(filePath)) {
         await fs.mkdirIfNeeded(trashDir);
-        const trashFilePath = await safeFileName(trashDir, fileName, fs.exists);
+        const trashFileName = await safeFileName(trashDir, fileName, fs.exists);
+        const trashFilePath = `${trashDir}/${trashFileName}`;
         await fs.rename(filePath, trashFilePath);
     }
 
     if (await fs.exists(metadataFilePath)) {
         await fs.mkdirIfNeeded(metadataTrashDir);
-        const metadataTrashFilePath = await safeFileName(
+        const metadataTrashFileName = await safeFileName(
             metadataTrashDir,
             metadataFileName,
             fs.exists,
         );
+        const metadataTrashFilePath = `${metadataTrashDir}/${metadataTrashFileName}`;
         await fs.rename(metadataFilePath, metadataTrashFilePath);
     }
 };
