@@ -580,21 +580,34 @@ class _EditTagDialogState extends State<EditTagDialog> {
           onPressed: () async {
             if (_tag.trim().isEmpty) return;
 
+            final dialog = createProgressDialog(
+              context,
+              context.l10n.pleaseWait,
+            );
+            await dialog.show();
+
             // traverse through all the codes and edit this tag's value
             final relevantCodes = (await CodeStore.instance.getAllCodes())
                 .validCodes
                 .where((element) => element.display.tags.contains(widget.tag));
 
+            final tasks = <Future>[];
+
             for (final code in relevantCodes) {
               final tags = code.display.tags;
               tags.remove(widget.tag);
               tags.add(_tag);
-              await CodeStore.instance.addCode(
-                code.copyWith(
-                  display: code.display.copyWith(tags: tags),
+              tasks.add(
+                CodeStore.instance.addCode(
+                  code.copyWith(
+                    display: code.display.copyWith(tags: tags),
+                  ),
                 ),
               );
             }
+
+            await Future.wait(tasks);
+            await dialog.hide();
 
             Navigator.pop(context);
           },
@@ -619,15 +632,21 @@ Future<void> showDeleteTagDialog(BuildContext context, String tag) async {
           .validCodes
           .where((element) => element.display.tags.contains(tag));
 
+      final tasks = <Future>[];
+
       for (final code in relevantCodes) {
         final tags = code.display.tags;
         tags.remove(tag);
-        await CodeStore.instance.addCode(
-          code.copyWith(
-            display: code.display.copyWith(tags: tags),
+        tasks.add(
+          CodeStore.instance.addCode(
+            code.copyWith(
+              display: code.display.copyWith(tags: tags),
+            ),
           ),
         );
       }
+
+      await Future.wait(tasks);
     },
   );
 }
