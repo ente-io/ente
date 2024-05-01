@@ -43,7 +43,7 @@ export const readStream = async (
         url = new URL(`stream://read?${params.toString()}`);
     } else {
         const [zipPath, entryName] = pathOrZipItem;
-        const params = new URLSearchParams({ path: zipPath, path2: entryName });
+        const params = new URLSearchParams({ zipPath, entryName });
         url = new URL(`stream://read-zip?${params.toString()}`);
     }
 
@@ -90,6 +90,9 @@ export const writeStream = async (
     path: string,
     stream: ReadableStream,
 ) => {
+    const params = new URLSearchParams({ path });
+    const url = new URL(`stream://write?${params.toString()}`);
+
     // TODO(MR): This doesn't currently work.
     //
     // Not sure what I'm doing wrong here; I've opened an issue upstream
@@ -120,7 +123,7 @@ export const writeStream = async (
     });
     */
 
-    const req = new Request(`stream://write${path}`, {
+    const req = new Request(url, {
         method: "POST",
         body: await new Response(stream).blob(),
     });
