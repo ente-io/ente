@@ -42,7 +42,7 @@ class EmbeddingsDB {
           1,
           (tx) async {
             await tx.execute(
-              'CREATE TABLE $tableName ($columnFileID INTEGER NOT NULL, $columnModel TEXT NOT NULL, $columnEmbedding BLOB NOT NULL, $columnUpdationTime INTEGER, UNIQUE ($columnFileID, $columnModel))',
+              'CREATE TABLE $tableName ($columnFileID INTEGER NOT NULL, $columnModel INTEGER NOT NULL, $columnEmbedding BLOB NOT NULL, $columnUpdationTime INTEGER, UNIQUE ($columnFileID, $columnModel))',
             );
           },
         ),
@@ -102,7 +102,7 @@ class EmbeddingsDB {
     final db = await _database;
     await db.execute(
       'DELETE FROM $tableName WHERE $columnModel = ?',
-      [serialize(model)],
+      [modelToInt(model)!],
     );
     Bus.instance.fire(EmbeddingUpdatedEvent());
   }
@@ -117,7 +117,7 @@ class EmbeddingsDB {
 
   Embedding _getEmbeddingFromRow(Map<String, dynamic> row) {
     final fileID = row[columnFileID];
-    final model = deserialize(row[columnModel]);
+    final model = intToModel(row[columnModel])!;
     final bytes = row[columnEmbedding] as Uint8List;
     final list = Float32List.view(bytes.buffer);
     return Embedding(fileID: fileID, model: model, embedding: list);
@@ -126,7 +126,7 @@ class EmbeddingsDB {
   List<Object?> _getRowFromEmbedding(Embedding embedding) {
     return [
       embedding.fileID,
-      serialize(embedding.model),
+      modelToInt(embedding.model)!,
       Float32List.fromList(embedding.embedding).buffer.asUint8List(),
       embedding.updationTime,
     ];
@@ -140,6 +140,28 @@ class EmbeddingsDB {
     final deprecatedDB = File(dir.path + "/default.isar");
     if (await deprecatedDB.exists()) {
       await deprecatedDB.delete();
+    }
+  }
+
+  int? modelToInt(Model model) {
+    switch (model) {
+      case Model.onnxClip:
+        return 1;
+      case Model.ggmlClip:
+        return 2;
+      default:
+        return null;
+    }
+  }
+
+  Model? intToModel(int model) {
+    switch (model) {
+      case 1:
+        return Model.onnxClip;
+      case 2:
+        return Model.ggmlClip;
+      default:
+        return null;
     }
   }
 }
