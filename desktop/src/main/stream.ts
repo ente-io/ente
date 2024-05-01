@@ -48,7 +48,8 @@ export const registerStreamProtocol = () => {
         const { host, pathname, hash } = new URL(url);
         // Convert e.g. "%20" to spaces.
         const path = decodeURIComponent(pathname);
-        const hashPath = decodeURIComponent(hash);
+        // `hash` begins with a "#", slice that off.
+        const hashPath = decodeURIComponent(hash.slice(1));
         switch (host) {
             case "read":
                 return handleRead(path);
@@ -116,7 +117,6 @@ const handleReadZip = async (zipPath: string, entryName: string) => {
             webReadableStreamAny as ReadableStream<Uint8Array>;
 
         // Close the zip handle when the underlying stream closes.
-        // TODO(MR): Verify
         stream.on("end", () => void zip.close());
 
         return new Response(webReadableStream, {

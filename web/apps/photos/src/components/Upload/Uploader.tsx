@@ -261,7 +261,9 @@ export default function Uploader({
 
                 const { collectionName, filePaths, zipItems } = pending;
 
-                log.info("Resuming pending upload", pending);
+                log.info(
+                    `Resuming pending of upload of ${filePaths.length + zipItems.length} items${collectionName ? " to collection " + collectionName : ""}`,
+                );
                 isPendingDesktopUpload.current = true;
                 pendingDesktopUploadCollectionName.current = collectionName;
                 setDesktopFilePaths(filePaths);
@@ -323,13 +325,26 @@ export default function Uploader({
 
     // Trigger an upload when any of the dependencies change.
     useEffect(() => {
+        // Re the paths:
+        //
+        // - These are not necessarily the full paths. In particular, when
+        //   running on the browser they'll be the relative paths (at best) or
+        //   just the file-name otherwise.
+        //
+        // - All the paths use POSIX separators. See inline comments.
         const allItemAndPaths = [
             // See: [Note: webkitRelativePath]. In particular, they use POSIX
             // separators.
             webFiles.map((f) => [f, f.webkitRelativePath ?? f.name]),
+            // The paths we get from the desktop app all eventually come either
+            // from electron.selectDirectory or electron.pathForFile, both of
+            // which return POSIX paths.
             desktopFiles.map((fp) => [fp, fp.path]),
             desktopFilePaths.map((p) => [p, p]),
-            // ze[1], the entry name, uses POSIX separators.
+            // The first path, that of the zip file itself, is POSIX like the
+            // other paths we get over the IPC boundary. And the second path,
+            // ze[1], the entry name, uses POSIX separators because that is what
+            // the ZIP format uses.
             desktopZipItems.map((ze) => [ze, ze[1]]),
         ].flat() as [UploadItem, string][];
 
@@ -792,10 +807,7 @@ async function waitAndRun(
     await task();
 }
 
-const desktopFilesAndZipItems = async (
-    electron: Electron,
-    files: File[],
-): Promise<{ fileAndPaths: FileAndPath[]; zipItems: ZipItem[] }> => {
+const desktopFilesAndZipItems = async (electron: Electron, files: File[]) => {
     const fileAndPaths: FileAndPath[] = [];
     let zipItems: ZipItem[] = [];
 

@@ -17,8 +17,11 @@ export const selectDirectory = async () => {
  * For example, on macOS this'll open {@link dirPath} in Finder.
  */
 export const openDirectory = async (dirPath: string) => {
+    // We need to use `path.normalize` because `shell.openPath; does not support
+    // POSIX path, it needs to be a platform specific path:
+    // https://github.com/electron/electron/issues/28831#issuecomment-826370589
     const res = await shell.openPath(path.normalize(dirPath));
-    // shell.openPath resolves with a string containing the error message
+    // `shell.openPath` resolves with a string containing the error message
     // corresponding to the failure if a failure occurred, otherwise "".
     if (res) throw new Error(`Failed to open directory ${dirPath}: res`);
 };

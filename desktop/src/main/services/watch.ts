@@ -35,8 +35,8 @@ export const createWatcher = (mainWindow: BrowserWindow) => {
     return watcher;
 };
 
-const eventData = (path: string): [string, FolderWatch] => {
-    path = posixPath(path);
+const eventData = (platformPath: string): [string, FolderWatch] => {
+    const path = posixPath(platformPath);
 
     const watch = folderWatches().find((watch) =>
         path.startsWith(watch.folderPath + "/"),

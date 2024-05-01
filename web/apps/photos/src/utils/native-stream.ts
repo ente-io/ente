@@ -42,7 +42,7 @@ export const readStream = async (
         url = new URL(`stream://read${pathOrZipItem}`);
     } else {
         const [zipPath, entryName] = pathOrZipItem;
-        url = new URL(`stream://read${zipPath}`);
+        url = new URL(`stream://read-zip${zipPath}`);
         url.hash = entryName;
     }
 

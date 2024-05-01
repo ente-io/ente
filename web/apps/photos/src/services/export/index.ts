@@ -547,6 +547,9 @@ class ExportService {
         isCanceled: CancellationStatus,
     ) {
         const fs = ensureElectron().fs;
+        const rmdirIfExists = async (dirPath: string) => {
+            if (await fs.exists(dirPath)) await fs.rmdir(dirPath);
+        };
         try {
             const exportRecord = await this.getExportRecord(exportFolder);
             const collectionIDPathMap =
@@ -581,11 +584,11 @@ class ExportService {
                     );
                     try {
                         // delete the collection metadata folder
-                        await fs.rmdir(
+                        await rmdirIfExists(
                             getMetadataFolderExportPath(collectionExportPath),
                         );
                         // delete the collection folder
-                        await fs.rmdir(collectionExportPath);
+                        await rmdirIfExists(collectionExportPath);
                     } catch (e) {
                         await this.addCollectionExportedRecord(
                             exportFolder,
@@ -1398,17 +1401,19 @@ const moveToTrash = async (
 
     if (await fs.exists(filePath)) {
         await fs.mkdirIfNeeded(trashDir);
-        const trashFilePath = await safeFileName(trashDir, fileName, fs.exists);
+        const trashFileName = await safeFileName(trashDir, fileName, fs.exists);
+        const trashFilePath = `${trashDir}/${trashFileName}`;
         await fs.rename(filePath, trashFilePath);
     }
 
     if (await fs.exists(metadataFilePath)) {
         await fs.mkdirIfNeeded(metadataTrashDir);
-        const metadataTrashFilePath = await safeFileName(
+        const metadataTrashFileName = await safeFileName(
             metadataTrashDir,
             metadataFileName,
             fs.exists,
         );
-        await fs.rename(filePath, metadataTrashFilePath);
+        const metadataTrashFilePath = `${metadataTrashDir}/${metadataTrashFileName}`;
+        await fs.rename(metadataFilePath, metadataTrashFilePath);
     }
 };

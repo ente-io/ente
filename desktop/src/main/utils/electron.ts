@@ -9,11 +9,26 @@ import log from "../log";
 export const isDev = !app.isPackaged;
 
 /**
- * Convert a file system {@link filePath} that uses the local system specific
- * path separators into a path that uses POSIX file separators.
+ * Convert a file system {@link platformPath} that uses the local system
+ * specific path separators into a path that uses POSIX file separators.
+ *
+ * For all paths that we persist or pass over the IPC boundary, we always use
+ * POSIX paths, even on Windows.
+ *
+ * Windows recognizes both forward and backslashes. This also works with drive
+ * names. c:\foo\bar and c:/foo/bar are both valid.
+ *
+ * > Almost all paths passed to Windows APIs are normalized. During
+ * > normalization, Windows performs the following steps: ... All forward
+ * > slashes (/) are converted into the standard Windows separator, the back
+ * > slash (\).
+ * >
+ * > https://learn.microsoft.com/en-us/dotnet/standard/io/file-path-formats
  */
-export const posixPath = (filePath: string) =>
-    filePath.split(path.sep).join(path.posix.sep);
+export const posixPath = (platformPath: string) =>
+    path.sep == path.posix.sep
+        ? platformPath
+        : platformPath.split(path.sep).join(path.posix.sep);
 
 /**
  * Run a shell command asynchronously.
