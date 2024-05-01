@@ -53,6 +53,8 @@ export interface Electron {
      * Ask the user to select a directory on their local file system, and return
      * it path.
      *
+     * The returned path is guaranteed to use POSIX separators ('/').
+     *
      * We don't strictly need IPC for this, we can use a hidden <input> element
      * and trigger its click for the same behaviour (as we do for the
      * `useFileInput` hook that we use for uploads). However, it's a bit
