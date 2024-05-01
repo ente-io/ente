@@ -9,8 +9,8 @@ import { watchStore } from "../stores/watch";
  * This is useful to reset state when the user logs out.
  */
 export const clearStores = () => {
-    uploadStatusStore.clear();
     safeStorageStore.clear();
+    uploadStatusStore.clear();
     watchStore.clear();
 };
 
