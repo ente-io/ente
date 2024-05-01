@@ -547,6 +547,9 @@ class ExportService {
         isCanceled: CancellationStatus,
     ) {
         const fs = ensureElectron().fs;
+        const rmdirIfExists = async (dirPath: string) => {
+            if (await fs.exists(dirPath)) await fs.rmdir(dirPath);
+        };
         try {
             const exportRecord = await this.getExportRecord(exportFolder);
             const collectionIDPathMap =
@@ -581,11 +584,11 @@ class ExportService {
                     );
                     try {
                         // delete the collection metadata folder
-                        await fs.rmdir(
+                        await rmdirIfExists(
                             getMetadataFolderExportPath(collectionExportPath),
                         );
                         // delete the collection folder
-                        await fs.rmdir(collectionExportPath);
+                        await rmdirIfExists(collectionExportPath);
                     } catch (e) {
                         await this.addCollectionExportedRecord(
                             exportFolder,
