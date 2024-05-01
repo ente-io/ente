@@ -208,6 +208,13 @@ const watchOnRemoveDir = (f: (path: string, watch: FolderWatch) => void) => {
 const watchFindFiles = (folderPath: string) =>
     ipcRenderer.invoke("watchFindFiles", folderPath);
 
+const watchReset = async () => {
+    ipcRenderer.removeAllListeners("watchAddFile");
+    ipcRenderer.removeAllListeners("watchRemoveFile");
+    ipcRenderer.removeAllListeners("watchRemoveDir");
+    await ipcRenderer.invoke("watchReset");
+};
+
 // - Upload
 
 const pathForFile = (file: File) => webUtils.getPathForFile(file);
@@ -323,12 +330,13 @@ contextBridge.exposeInMainWorld("electron", {
         get: watchGet,
         add: watchAdd,
         remove: watchRemove,
+        updateSyncedFiles: watchUpdateSyncedFiles,
+        updateIgnoredFiles: watchUpdateIgnoredFiles,
         onAddFile: watchOnAddFile,
         onRemoveFile: watchOnRemoveFile,
         onRemoveDir: watchOnRemoveDir,
         findFiles: watchFindFiles,
-        updateSyncedFiles: watchUpdateSyncedFiles,
-        updateIgnoredFiles: watchUpdateIgnoredFiles,
+        reset: watchReset,
     },
 
     // - Upload

@@ -37,26 +37,18 @@ export const registerStreamProtocol = () => {
     protocol.handle("stream", async (request: Request) => {
         const url = request.url;
         // The request URL contains the command to run as the host, and the
-        // pathname of the file as the path. An additional path can be specified
-        // as the URL hash.
-        //
-        // For example,
-        //
-        //     stream://write/path/to/file#/path/to/another/file
-        //              host[pathname----] [pathname-2---------]
-        //
-        const { host, pathname, hash } = new URL(url);
-        // Convert e.g. "%20" to spaces.
-        const path = decodeURIComponent(pathname);
-        // `hash` begins with a "#", slice that off.
-        const hashPath = decodeURIComponent(hash.slice(1));
+        // pathname of the file(s) as the search params.
+        const { host, searchParams } = new URL(url);
         switch (host) {
             case "read":
-                return handleRead(path);
+                return handleRead(ensure(searchParams.get("path")));
             case "read-zip":
-                return handleReadZip(path, hashPath);
+                return handleReadZip(
+                    ensure(searchParams.get("zipPath")),
+                    ensure(searchParams.get("entryName")),
+                );
             case "write":
-                return handleWrite(path, request);
+                return handleWrite(ensure(searchParams.get("path")), request);
             default:
                 return new Response("", { status: 404 });
         }
