@@ -18,6 +18,9 @@
         "lint": "yarn prettier --check --log-level warn . && eslint --ext .ts src && yarn tsc",
         "lint-fix": "yarn prettier --write --log-level warn . && eslint --fix --ext .ts src && yarn tsc"
     },
+    "resolutions": {
+        "jackspeak": "2.1.1"
+    },
     "dependencies": {
         "any-shell-escape": "^0.1",
         "auto-launch": "^5.0",
