@@ -10,6 +10,7 @@ import mlIDbStorage, {
     ML_SYNC_CONFIG_NAME,
     ML_SYNC_JOB_CONFIG_NAME,
 } from "utils/storage/mlIDbStorage";
+import { isInternalUser } from "utils/user";
 
 export async function getMLSyncJobConfig() {
     return mlIDbStorage.getConfig(
@@ -23,10 +24,15 @@ export async function getMLSyncConfig() {
 }
 
 export async function getMLSearchConfig() {
-    return mlIDbStorage.getConfig(
-        ML_SEARCH_CONFIG_NAME,
-        DEFAULT_ML_SEARCH_CONFIG,
-    );
+    if (isInternalUser()) {
+        return mlIDbStorage.getConfig(
+            ML_SEARCH_CONFIG_NAME,
+            DEFAULT_ML_SEARCH_CONFIG,
+        );
+    }
+    // Force disabled for everyone else while we finalize it to avoid redundant
+    // reindexing for users.
+    return DEFAULT_ML_SEARCH_CONFIG;
 }
 
 export async function updateMLSyncJobConfig(newConfig: JobConfig) {
