@@ -316,6 +316,12 @@ class _HomePageState extends State<HomePage> {
                         ? TagChipState.selected
                         : TagChipState.unselected,
                     onTap: () {
+                      if (selectedTag == _codes!.tags[index - 1]) {
+                        selectedTag = "";
+                        setState(() {});
+                        _applyFilteringAndRefresh();
+                        return;
+                      }
                       selectedTag = _codes!.tags[index - 1];
                       setState(() {});
                       _applyFilteringAndRefresh();
