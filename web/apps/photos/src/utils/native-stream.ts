@@ -39,10 +39,12 @@ export const readStream = async (
 ): Promise<{ response: Response; size: number; lastModifiedMs: number }> => {
     let url: URL;
     if (typeof pathOrZipItem == "string") {
-        url = new URL(`stream://read${pathOrZipItem}`);
+        url = new URL("stream://read");
+        url.pathname = pathOrZipItem
     } else {
         const [zipPath, entryName] = pathOrZipItem;
-        url = new URL(`stream://read-zip${zipPath}`);
+        url = new URL("stream://read-zip");
+        url.pathname = zipPath;
         url.hash = entryName;
     }
 

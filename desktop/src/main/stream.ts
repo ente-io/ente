@@ -50,6 +50,9 @@ export const registerStreamProtocol = () => {
         const path = decodeURIComponent(pathname);
         // `hash` begins with a "#", slice that off.
         const hashPath = decodeURIComponent(hash.slice(1));
+        log.debug(
+            () => `[stream] ${host} ${path}${hashPath ? "::" + hashPath : ""}`,
+        );
         switch (host) {
             case "read":
                 return handleRead(path);
