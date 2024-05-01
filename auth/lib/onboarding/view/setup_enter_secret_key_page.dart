@@ -320,9 +320,7 @@ class TagChip extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           color: state == TagChipState.selected
-              ? Theme.of(context).brightness == Brightness.dark
-                  ? const Color(0xFF722ED1)
-                  : const Color(0xFF722ED1)
+              ? const Color(0xFF722ED1)
               : Theme.of(context).brightness == Brightness.dark
                   ? const Color(0xFF1C0F22)
                   : const Color(0xFFFCF5FF),
@@ -331,16 +329,20 @@ class TagChip extends StatelessWidget {
             gradient: LinearGradient(
               colors: state == TagChipState.selected
                   ? [
-                      const Color(0x00B37FEB),
-                      const Color(0x33AE40E3),
+                      const Color(0xFFB37FEB),
+                      const Color(0xFFAE40E3).withOpacity(
+                        Theme.of(context).brightness == Brightness.dark
+                            ? .53
+                            : 1,
+                      ),
                     ]
                   : [
                       Theme.of(context).brightness == Brightness.dark
                           ? const Color(0xFFAD00FF)
-                          : const Color(0x00AD00FF),
+                          : const Color(0xFFAD00FF).withOpacity(0.2),
                       Theme.of(context).brightness == Brightness.dark
-                          ? const Color(0x43A269BD)
-                          : const Color(0x338609C2),
+                          ? const Color(0xFFA269BD).withOpacity(0.53)
+                          : const Color(0xFF8609C2).withOpacity(0.2),
                     ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
@@ -348,7 +350,8 @@ class TagChip extends StatelessWidget {
           ),
         ),
         margin: const EdgeInsets.symmetric(vertical: 4),
-        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 16),
+        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 16)
+            .copyWith(right: 0),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -363,25 +366,26 @@ class TagChip extends StatelessWidget {
             ),
             if (state == TagChipState.selected &&
                 action == TagChipAction.check) ...[
-              const SizedBox(width: 4),
+              const SizedBox(width: 16),
               const Icon(
                 Icons.check,
                 size: 16,
                 color: Colors.white,
               ),
+              const SizedBox(width: 16),
             ] else if (state == TagChipState.selected &&
                 action == TagChipAction.menu) ...[
               SizedBox(
-                width: 32,
+                width: 48,
                 child: PopupMenuButton<int>(
                   iconSize: 16,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
                   surfaceTintColor: Theme.of(context).cardColor,
                   iconColor: Colors.white,
                   initialValue: -1,
-                  padding: EdgeInsets.zero,
                   onSelected: (value) {
                     if (value == 0) {
                       showEditDialog(context, label);
@@ -424,6 +428,8 @@ class TagChip extends StatelessWidget {
                   },
                 ),
               ),
+            ] else ...[
+              const SizedBox(width: 16),
             ],
           ],
         ),
