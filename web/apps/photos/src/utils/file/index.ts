@@ -301,7 +301,8 @@ export const getRenderableImage = async (fileName: string, imageBlob: Blob) => {
         const tempFile = new File([imageBlob], fileName);
         const fileTypeInfo = await detectFileTypeInfo(tempFile);
         log.debug(
-            () => `Need renderable image for ${JSON.stringify(fileTypeInfo)}`,
+            () =>
+                `Need renderable image for ${JSON.stringify({ fileName, ...fileTypeInfo })}`,
         );
         const { extension } = fileTypeInfo;
 
