@@ -5,7 +5,7 @@ import "dart:typed_data";
 import "package:computer/computer.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/network/network.dart";
-import "package:photos/db/embeddings_sqlite_db.dart";
+import "package:photos/db/embeddings_db.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/models/embedding.dart";
 import "package:photos/models/file/file.dart";
