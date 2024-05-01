@@ -45,19 +45,15 @@ export const registerStreamProtocol = () => {
         //     stream://write/path/to/file#/path/to/another/file
         //              host[pathname----] [pathname-2---------]
         //
-        const { host, pathname, hash } = new URL(url);
-        // Convert e.g. "%20" to spaces.
-        const path = decodeURIComponent(pathname);
-        // `hash` begins with a "#", slice that off.
-        const hashPath = decodeURIComponent(hash.slice(1));
-        log.debug(
-            () => `[stream] ${host} ${path}${hashPath ? "::" + hashPath : ""}`,
-        );
+        const { host, searchParams } = new URL(url);
+        const path = ensure(searchParams.get("path"));
+        const path2 = searchParams.get("path2") ?? undefined;
+        log.debug(() => `[stream] ${host} ${path}${path2 ? "::" + path2 : ""}`);
         switch (host) {
             case "read":
                 return handleRead(path);
             case "read-zip":
-                return handleReadZip(path, hashPath);
+                return handleReadZip(path, ensure(path2));
             case "write":
                 return handleWrite(path, request);
             default:

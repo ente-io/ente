@@ -39,11 +39,12 @@ export const readStream = async (
 ): Promise<{ response: Response; size: number; lastModifiedMs: number }> => {
     let url: URL;
     if (typeof pathOrZipItem == "string") {
-        url = new URL(`stream://read${encodeURIComponent(pathOrZipItem)}`);
+        const params = new URLSearchParams({ path: pathOrZipItem });
+        url = new URL(`stream://read?${params.toString()}`);
     } else {
         const [zipPath, entryName] = pathOrZipItem;
-        url = new URL(`stream://read-zip${encodeURIComponent(zipPath)}`);
-        url.hash = entryName;
+        const params = new URLSearchParams({ path: zipPath, path2: entryName });
+        url = new URL(`stream://read-zip?${params.toString()}`);
     }
 
     const req = new Request(url, { method: "GET" });
