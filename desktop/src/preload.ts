@@ -208,11 +208,11 @@ const watchOnRemoveDir = (f: (path: string, watch: FolderWatch) => void) => {
 const watchFindFiles = (folderPath: string) =>
     ipcRenderer.invoke("watchFindFiles", folderPath);
 
-const watchReset = () => {
+const watchReset = async () => {
     ipcRenderer.removeAllListeners("watchAddFile");
     ipcRenderer.removeAllListeners("watchRemoveFile");
     ipcRenderer.removeAllListeners("watchRemoveDir");
-    return ipcRenderer.invoke("watchReset");
+    await ipcRenderer.invoke("watchReset");
 };
 
 // - Upload
