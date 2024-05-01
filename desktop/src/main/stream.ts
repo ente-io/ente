@@ -117,7 +117,6 @@ const handleReadZip = async (zipPath: string, entryName: string) => {
             webReadableStreamAny as ReadableStream<Uint8Array>;
 
         // Close the zip handle when the underlying stream closes.
-        // TODO(MR): Verify
         stream.on("end", () => void zip.close());
 
         return new Response(webReadableStream, {
