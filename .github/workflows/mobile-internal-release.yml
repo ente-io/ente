@@ -54,3 +54,4 @@ jobs:
                   packageName: io.ente.photos
                   releaseFiles: mobile/build/app/outputs/bundle/playstoreRelease/app-playstore-release.aab
                   track: internal
+                  changesNotSentForReview: true
