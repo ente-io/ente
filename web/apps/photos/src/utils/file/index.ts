@@ -319,7 +319,7 @@ export const getRenderableImage = async (fileName: string, imageBlob: Blob) => {
             try {
                 return await nativeConvertToJPEG(imageBlob);
             } catch (e) {
-                if (e.message == CustomErrorMessage.NotAvailable) {
+                if (e.message.endsWith(CustomErrorMessage.NotAvailable)) {
                     moduleState.isNativeJPEGConversionNotAvailable = true;
                 } else {
                     log.error("Native conversion to JPEG failed", e);
