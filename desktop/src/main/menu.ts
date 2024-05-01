@@ -19,7 +19,7 @@ export const createApplicationMenu = async (mainWindow: BrowserWindow) => {
     // Whenever the menu is redrawn the current value of these variables is used
     // to set the checked state for the various settings checkboxes.
     let isAutoLaunchEnabled = await autoLauncher.isEnabled();
-    let shouldHideDockIcon = userPreferences.get("hideDockIcon");
+    let shouldHideDockIcon = !!userPreferences.get("hideDockIcon");
 
     const macOSOnly = (options: MenuItemConstructorOptions[]) =>
         process.platform == "darwin" ? options : [];

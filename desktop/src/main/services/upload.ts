@@ -46,7 +46,7 @@ export const pathOrZipItemSize = async (
 };
 
 export const pendingUploads = async (): Promise<PendingUploads | undefined> => {
-    const collectionName = uploadStatusStore.get("collectionName");
+    const collectionName = uploadStatusStore.get("collectionName") ?? undefined;
 
     const allFilePaths = uploadStatusStore.get("filePaths") ?? [];
     const filePaths = allFilePaths.filter((f) => existsSync(f));
@@ -62,7 +62,7 @@ export const pendingUploads = async (): Promise<PendingUploads | undefined> => {
     //
     // This potentially can be cause us to try reuploading an already uploaded
     // file, but the dedup logic will kick in at that point so no harm will come
-    // off it.
+    // of it.
     if (allZipItems === undefined) {
         const allZipPaths = uploadStatusStore.get("filePaths") ?? [];
         const zipPaths = allZipPaths.filter((f) => existsSync(f));
@@ -82,20 +82,65 @@ export const pendingUploads = async (): Promise<PendingUploads | undefined> => {
     };
 };
 
-export const setPendingUploads = (pendingUploads: PendingUploads) =>
-    uploadStatusStore.set(pendingUploads);
+/**
+ * [Note: Missing values in electron-store]
+ *
+ * Suppose we were to create a store like this:
+ *
+ *     const store = new Store({
+ *         schema: {
+ *             foo: { type: "string" },
+ *             bars: { type: "array", items: { type: "string" } },
+ *         },
+ *     });
+ *
+ * If we fetch `store.get("foo")` or `store.get("bars")`, we get `undefined`.
+ * But if we try to set these back to `undefined`, say `store.set("foo",
+ * someUndefValue)`, we get asked to
+ *
+ *     TypeError: Use `delete()` to clear values
+ *
+ * This happens even if we do bulk object updates, e.g. with a JS object that
+ * has undefined keys:
+ *
+ * > TypeError: Setting a value of type `undefined` for key `collectionName` is
+ * > not allowed as it's not supported by JSON
+ *
+ * So what should the TypeScript type for "foo" be?
+ *
+ * If it is were to not include the possibility of `undefined`, then the type
+ * would lie because `store.get("foo")` can indeed be `undefined. But if we were
+ * to include the possibility of `undefined`, then trying to `store.set("foo",
+ * someUndefValue)` will throw.
+ *
+ * The approach we take is to rely on false-y values (empty strings and empty
+ * arrays) to indicate missing values, and then converting those to `undefined`
+ * when reading from the store, and converting `undefined` to the corresponding
+ * false-y value when writing.
+ */
+export const setPendingUploads = ({
+    collectionName,
+    filePaths,
+    zipItems,
+}: PendingUploads) => {
+    uploadStatusStore.set({
+        collectionName: collectionName ?? "",
+        filePaths: filePaths,
+        zipItems: zipItems,
+    });
+};
 
 export const markUploadedFiles = (paths: string[]) => {
-    const existing = uploadStatusStore.get("filePaths");
-    const updated = existing?.filter((p) => !paths.includes(p));
+    const existing = uploadStatusStore.get("filePaths") ?? [];
+    const updated = existing.filter((p) => !paths.includes(p));
     uploadStatusStore.set("filePaths", updated);
 };
 
 export const markUploadedZipItems = (
     items: [zipPath: string, entryName: string][],
 ) => {
-    const existing = uploadStatusStore.get("zipItems");
-    const updated = existing?.filter(
+    const existing = uploadStatusStore.get("zipItems") ?? [];
+    const updated = existing.filter(
         (z) => !items.some((e) => z[0] == e[0] && z[1] == e[1]),
     );
     uploadStatusStore.set("zipItems", updated);

@@ -6,24 +6,24 @@ export interface UploadStatusStore {
      *
      * Not all pending uploads will have an associated collection.
      */
-    collectionName: string | undefined;
+    collectionName?: string;
     /**
      * Paths to regular files that are pending upload.
      *
      * This should generally be present, albeit empty, but it is marked optional
      * in sympathy with its siblings.
      */
-    filePaths: string[] | undefined;
+    filePaths?: string[];
     /**
      * Each item is the path to a zip file and the name of an entry within it.
      *
      * This is marked optional since legacy stores will not have it.
      */
-    zipItems: [zipPath: string, entryName: string][] | undefined;
+    zipItems?: [zipPath: string, entryName: string][];
     /**
      * @deprecated Legacy paths to zip files, now subsumed into zipItems.
      */
-    zipPaths: string[] | undefined;
+    zipPaths?: string[];
 }
 
 const uploadStatusSchema: Schema<UploadStatusStore> = {

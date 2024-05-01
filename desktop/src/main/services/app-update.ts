@@ -36,18 +36,21 @@ const checkForUpdatesAndNotify = async (mainWindow: BrowserWindow) => {
 
     log.debug(() => `Update check found version ${version}`);
 
+    if (!version)
+        throw new Error("Unexpected empty version obtained from auto-updater");
+
     if (compareVersions(version, app.getVersion()) <= 0) {
         log.debug(() => "Skipping update, already at latest version");
         return;
     }
 
-    if (version === userPreferences.get("skipAppVersion")) {
+    if (version == userPreferences.get("skipAppVersion")) {
         log.info(`User chose to skip version ${version}`);
         return;
     }
 
     const mutedVersion = userPreferences.get("muteUpdateNotificationVersion");
-    if (version === mutedVersion) {
+    if (version == mutedVersion) {
         log.info(`User has muted update notifications for version ${version}`);
         return;
     }
