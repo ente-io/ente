@@ -114,7 +114,9 @@ class PersonService {
   }
 
   bool _shouldUpdateRemotePerson(
-      PersonData personData, Map<int, Set<String>> dbPersonCluster) {
+    PersonData personData,
+    Map<int, Set<String>> dbPersonCluster,
+  ) {
     bool result = false;
     if ((personData.assigned?.length ?? 0) != dbPersonCluster.length) {
       log(
