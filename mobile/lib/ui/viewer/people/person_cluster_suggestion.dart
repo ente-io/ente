@@ -104,6 +104,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
                       sortedFiles,
                       personID: widget.person,
                       clusterID: clusterID,
+                      showNamingBanner: false,
                     ),
                   ),
                 );

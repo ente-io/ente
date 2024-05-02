@@ -31,6 +31,7 @@ class ClusterPage extends StatefulWidget {
   final int clusterID;
   final PersonEntity? personID;
   final String appendTitle;
+  final bool showNamingBanner;
 
   static const GalleryType appBarType = GalleryType.cluster;
   static const GalleryType overlayType = GalleryType.cluster;
@@ -42,6 +43,7 @@ class ClusterPage extends StatefulWidget {
     required this.clusterID,
     this.personID,
     this.appendTitle = "",
+    this.showNamingBanner = true,
     Key? key,
   }) : super(key: key);
 
@@ -140,42 +142,52 @@ class _ClusterPageState extends State<ClusterPage> {
       ),
       body: Column(
         children: [
-          const SizedBox(height: 12),
-          RepaintBoundary(
-            child: Padding(
-              padding:
-                  const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
-              child: NotificationWidget(
-                startIcon: Icons.person_add_outlined,
-                actionIcon: Icons.add_outlined,
-                text: S.of(context).addAName,
-                subText: S.of(context).findPeopleByName,
-                // text: S.of(context).addAName,
-                // subText: S.of(context).findPersonsByName,
-                type: NotificationType.greenBanner,
-                onTap: () async {
-                  if (widget.personID == null) {
-                    final result = await showAssignPersonAction(
-                      context,
-                      clusterID: widget.clusterID,
-                    );
-                    if (result != null && result is PersonEntity) {
-                      Navigator.pop(context);
-                      // ignore: unawaited_futures
-                      routeToPage(context, PeoplePage(person: result));
-                    }
-                  } else {
-                    showShortToast(context, "No personID or clusterID");
-                  }
-                },
-              ),
-            ).animate(onPlay: (controller) => controller.repeat()).shimmer(
-                  duration: 1000.ms,
-                  delay: 3200.ms,
-                  size: 0.6,
-                ),
-          ),
-          const SizedBox(height: 12),
+          widget.showNamingBanner
+              ? const SizedBox(height: 12)
+              : const SizedBox.shrink(),
+          widget.showNamingBanner
+              ? RepaintBoundary(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 8.0,
+                      horizontal: 8.0,
+                    ),
+                    child: NotificationWidget(
+                      startIcon: Icons.person_add_outlined,
+                      actionIcon: Icons.add_outlined,
+                      text: S.of(context).addAName,
+                      subText: S.of(context).findPeopleByName,
+                      // text: S.of(context).addAName,
+                      // subText: S.of(context).findPersonsByName,
+                      type: NotificationType.greenBanner,
+                      onTap: () async {
+                        if (widget.personID == null) {
+                          final result = await showAssignPersonAction(
+                            context,
+                            clusterID: widget.clusterID,
+                          );
+                          if (result != null && result is PersonEntity) {
+                            Navigator.pop(context);
+                            // ignore: unawaited_futures
+                            routeToPage(context, PeoplePage(person: result));
+                          }
+                        } else {
+                          showShortToast(context, "No personID or clusterID");
+                        }
+                      },
+                    ),
+                  )
+                      .animate(onPlay: (controller) => controller.repeat())
+                      .shimmer(
+                        duration: 1000.ms,
+                        delay: 3200.ms,
+                        size: 0.6,
+                      ),
+                )
+              : const SizedBox.shrink(),
+          widget.showNamingBanner
+              ? const SizedBox(height: 12)
+              : const SizedBox.shrink(),
           Expanded(
             child: Stack(
               alignment: Alignment.bottomCenter,
