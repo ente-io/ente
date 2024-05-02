@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:gradient_borders/box_borders/gradient_box_border.dart';
 
-class GradientButton extends StatelessWidget {
-  final List<Color> linearGradientColors;
+class GradientButton extends StatefulWidget {
   final Function? onTap;
 
   // text is ignored if child is specified
@@ -13,16 +13,8 @@ class GradientButton extends StatelessWidget {
   // padding between the text and icon
   final double paddingValue;
 
-  // used when two icons are in row
-  final bool reversedGradient;
-
   const GradientButton({
     super.key,
-    this.linearGradientColors = const [
-      Color.fromARGB(255, 133, 44, 210),
-      Color.fromARGB(255, 187, 26, 93),
-    ],
-    this.reversedGradient = false,
     this.onTap,
     this.text = '',
     this.iconData,
@@ -30,11 +22,18 @@ class GradientButton extends StatelessWidget {
   });
 
   @override
+  State<GradientButton> createState() => _GradientButtonState();
+}
+
+class _GradientButtonState extends State<GradientButton> {
+  bool isTapped = false;
+
+  @override
   Widget build(BuildContext context) {
     Widget buttonContent;
-    if (iconData == null) {
+    if (widget.iconData == null) {
       buttonContent = Text(
-        text,
+        widget.text,
         style: const TextStyle(
           color: Colors.white,
           fontWeight: FontWeight.w600,
@@ -48,13 +47,13 @@ class GradientButton extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Icon(
-            iconData,
+            widget.iconData,
             size: 20,
             color: Colors.white,
           ),
           const Padding(padding: EdgeInsets.symmetric(horizontal: 6)),
           Text(
-            text,
+            widget.text,
             style: const TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.w600,
@@ -66,20 +65,78 @@ class GradientButton extends StatelessWidget {
       );
     }
     return InkWell(
-      onTap: onTap as void Function()?,
-      child: Container(
-        height: 56,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: const Alignment(0.1, -0.9),
-            end: const Alignment(-0.6, 0.9),
-            colors: reversedGradient
-                ? linearGradientColors.reversed.toList()
-                : linearGradientColors,
+      onTapDown: (_) {
+        setState(() {
+          isTapped = true;
+        });
+      },
+      onTapUp: (_) {
+        setState(() {
+          isTapped = false;
+        });
+      },
+      onTapCancel: () {
+        setState(() {
+          isTapped = false;
+        });
+      },
+      borderRadius: BorderRadius.circular(16),
+      onTap: widget.onTap as void Function()?,
+      child: Stack(
+        children: [
+          Container(
+            height: 56,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              color: const Color(0xFF531DAB),
+              boxShadow: isTapped
+                  ? []
+                  : [
+                      const BoxShadow(
+                        color: Color(0xFF000000),
+                        offset: Offset(0, 2),
+                        spreadRadius: 0,
+                        blurRadius: 2,
+                      ),
+                      BoxShadow(
+                        color: const Color(0xFF9254DE).withOpacity(0.32),
+                        offset: const Offset(0, 0),
+                        spreadRadius: 0,
+                        blurRadius: 20,
+                      ),
+                    ],
+            ),
           ),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Center(child: buttonContent),
+          Container(
+            height: 56,
+            decoration: BoxDecoration(
+              // gradient: LinearGradient(
+              //   begin: Alignment(0, -0.2),
+              //   end: Alignment(1.1, 1.1),
+              //   stops: [0, 0.18, 0.83],
+              //   colors: [
+              //     Color(0xFFB37FEB),
+              //     Color(0x00D2AEF5),
+              //     Color(0xFFEFDBFF),
+              //   ],
+              // ),
+              border: const GradientBoxBorder(
+                width: 1,
+                gradient: LinearGradient(
+                  colors: [
+                    Color(0xFFB37FEB),
+                    Color(0xFF22075E),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+              ),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Center(child: buttonContent),
+          ),
+        ],
       ),
     );
   }

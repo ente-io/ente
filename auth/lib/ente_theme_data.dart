@@ -497,7 +497,7 @@ ElevatedButtonThemeData buildElevatedButtonThemeData({
       ),
       padding: const EdgeInsets.symmetric(vertical: 18),
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(8)),
+        borderRadius: BorderRadius.all(Radius.circular(16)),
       ),
     ),
   );
