@@ -21,11 +21,10 @@ The workflow is:
 
 1.  Finalize the changes in the source repo.
 
-    - Update the CHANGELOG.
-    - Update the version in `package.json`
-    - `git commit -m 'Release v1.x.x'`
-    - Open PR, merge into main.
-
+    -   Update the CHANGELOG.
+    -   Update the version in `package.json`
+    -   `git commit -m 'Release v1.x.x'`
+    -   Open PR, merge into main.
 
 2.  Tag this commit with a tag matching the pattern `photosd-v1.2.3`, where
     `1.2.3` is the version in `package.json`
