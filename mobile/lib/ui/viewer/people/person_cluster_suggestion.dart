@@ -79,6 +79,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
             final double distance = currentSuggestion.distancePersonToCluster;
             final bool usingMean = currentSuggestion.usedOnlyMeanForSuggestion;
             final List<EnteFile> files = currentSuggestion.filesInCluster;
+            files.sort((a, b) => b.creationTime!.compareTo(a.creationTime!));
 
             _peopleChangedEvent =
                 Bus.instance.on<PeopleChangedEvent>().listen((event) {
