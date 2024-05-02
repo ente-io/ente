@@ -1,33 +1,59 @@
 ## Releases
 
-The Github Action that builds the desktop binaries is triggered by pushing a tag
-matching the pattern `photosd-v1.2.3`. This value should match the version in
-`package.json`.
+Conceptually, the release is straightforward: We push a tag, a GitHub workflow
+gets triggered that creates a draft release with artifacts built from that tag.
+We then publish that release. The download links on our website, and existing
+apps already know how to check for the latest GitHub release and update
+accordingly.
 
-To make a new release
+The complication comes by the fact that Electron Updater (the mechanism that we
+use for auto updates) doesn't work well with monorepos. So we need to keep a
+separate (non-mono) repository just for doing releases.
 
-1. Create a new branch (can be named anything). On this branch, change the
-   `version` in `package.json` to `1.x.x` and finalize `CHANGELOG.md`.
+-   Source code lives here, in [ente-io/ente](https://github.com/ente-io/ente).
 
-2. Commit, tag and push to remote. Note that the tag should have a `photosd-`
-   prefix:
+-   Releases are done from
+    [ente-io/photos-desktop](https://github.com/ente-io/photos-desktop).
+
+## Workflow
+
+The workflow is:
+
+1.  Finalize the changes in the source repo.
+
+    - Update the CHANGELOG.
+    - Update the version in `package.json`
+    - `git commit -m 'Release v1.x.x'`
+    - Open PR, merge into main.
+
+
+2.  Tag this commit with a tag matching the pattern `photosd-v1.2.3`, where
+    `1.2.3` is the version in `package.json`
 
     ```sh
-    git add CHANGELOG.md package.json
-    git commit -m 'Release v1.x.x'
     git tag photosd-v1.x.x
     git push origin photosd-v1.x.x
     ```
 
-   This will trigger the GitHub action that will create a new draft release.
+3.  Head over to the releases repository, copy all relevant changes from the
+    source repository, commit and push the changes.
 
-3. To wrap up, increase the version number in `package.json` the next release
-   train. That is, suppose we just released `v4.0.1`. Then we'll change the
-   version number in main to `v4.0.2-beta.0`. Each pre-release will modify the
-   `beta.0` part. Finally, at the time of the next release, this'll become
-   `v4.0.2`.
+    ```sh
+    cp ../ente/desktop/CHANGELOG.md CHANGELOG.md
+    git add CHANGELOG.md
+    git commit -m 'Release v1.x.x'
+    git push origin main
+    ```
 
-4. Open a PR for the branch to get it merged into main.
+4.  Tag this commit, but this time _don't_ use the `photosd-` prefix. Push the
+    tag to trigger the GitHub action.
+
+    ```sh
+    git tag v1.x.x
+    git push origin v1.x.x
+    ```
+
+## Post build
 
 The GitHub Action runs on Windows, Linux and macOS. It produces the artifacts
 defined in the `build` value in `package.json`.
@@ -36,17 +62,11 @@ defined in the `build` value in `package.json`.
 -   Linux - An AppImage, and 3 other packages (`.rpm`, `.deb`, `.pacman`)
 -   macOS - A universal DMG
 
-Additionally, the GitHub action notarizes the macOS DMG. For this it needs
-credentials provided via GitHub secrets.
+Additionally, the GitHub action notarizes and signs the macOS DMG (For this it
+uses credentials provided via GitHub secrets).
 
-To rollout the build, we need to publish the draft release. This needs to be
-done in the old photos-desktop repository since that the Electron Updater
-mechanism doesn't work well with monorepos. So we need to create a new tag with
-changelog updates on
-[photos-desktop](https://github.com/ente-io/photos-desktop/), use that to create
-a new release, copying over all the artifacts.
-
-Thereafter, everything is automated:
+To rollout the build, we need to publish the draft release. Thereafter,
+everything is automated:
 
 -   The website automatically redirects to the latest release on GitHub when
     people try to download.
