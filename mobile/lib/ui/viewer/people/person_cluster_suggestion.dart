@@ -94,10 +94,14 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
 
             return InkWell(
               onTap: () {
+                final List<EnteFile> sortedFiles =
+                    List<EnteFile>.from(currentSuggestion.filesInCluster);
+                sortedFiles
+                    .sort((a, b) => b.creationTime!.compareTo(a.creationTime!));
                 Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (context) => ClusterPage(
-                      files,
+                      sortedFiles,
                       personID: widget.person,
                       clusterID: clusterID,
                     ),
@@ -215,9 +219,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
               start: 4,
             ),
           ),
-        const SizedBox(
-          height: 24.0,
-        ),
+        const SizedBox(height: 24.0),
         Text(
           "${files.length} photos",
           style: getEnteTextTheme(context).body,
