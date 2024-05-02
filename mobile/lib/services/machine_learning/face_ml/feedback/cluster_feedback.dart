@@ -481,46 +481,46 @@ class ClusterFeedbackService {
     late Map<int, Vector> clusterAvgBigClusters;
     final List<(int, double)> suggestionsMean = [];
     for (final minimumSize in checkSizes.toSet()) {
-      // if (smallestPersonClusterSize >= minimumSize) {
-      clusterAvgBigClusters = await _getUpdateClusterAvg(
-        allClusterIdsToCountMap,
-        ignoredClusters,
-        minClusterSize: minimumSize,
-      );
-      w?.log(
-        'Calculate avg for ${clusterAvgBigClusters.length} clusters of min size $minimumSize',
-      );
-      final List<(int, double)> suggestionsMeanBigClusters =
-          _calcSuggestionsMean(
-        clusterAvgBigClusters,
-        personClusters,
-        ignoredClusters,
-        goodMeanDistance,
-      );
-      w?.log(
-        'Calculate suggestions using mean for ${clusterAvgBigClusters.length} clusters of min size $minimumSize',
-      );
-      for (final suggestion in suggestionsMeanBigClusters) {
-        // Skip suggestions that have a high overlap with the person's files
-        final suggestionSet = allClusterIdToFaceIDs[suggestion.$1]!
-            .map((faceID) => getFileIdFromFaceId(faceID))
-            .toSet();
-        final overlap = personFileIDs.intersection(suggestionSet);
-        if (overlap.isNotEmpty &&
-            ((overlap.length / suggestionSet.length) > 0.5)) {
-          await FaceMLDataDB.instance.captureNotPersonFeedback(
-            personID: p.remoteID,
-            clusterID: suggestion.$1,
-          );
-          continue;
+      if (smallestPersonClusterSize >= minimumSize) {
+        clusterAvgBigClusters = await _getUpdateClusterAvg(
+          allClusterIdsToCountMap,
+          ignoredClusters,
+          minClusterSize: minimumSize,
+        );
+        w?.log(
+          'Calculate avg for ${clusterAvgBigClusters.length} clusters of min size $minimumSize',
+        );
+        final List<(int, double)> suggestionsMeanBigClusters =
+            _calcSuggestionsMean(
+          clusterAvgBigClusters,
+          personClusters,
+          ignoredClusters,
+          goodMeanDistance,
+        );
+        w?.log(
+          'Calculate suggestions using mean for ${clusterAvgBigClusters.length} clusters of min size $minimumSize',
+        );
+        for (final suggestion in suggestionsMeanBigClusters) {
+          // Skip suggestions that have a high overlap with the person's files
+          final suggestionSet = allClusterIdToFaceIDs[suggestion.$1]!
+              .map((faceID) => getFileIdFromFaceId(faceID))
+              .toSet();
+          final overlap = personFileIDs.intersection(suggestionSet);
+          if (overlap.isNotEmpty &&
+              ((overlap.length / suggestionSet.length) > 0.5)) {
+            await FaceMLDataDB.instance.captureNotPersonFeedback(
+              personID: p.remoteID,
+              clusterID: suggestion.$1,
+            );
+            continue;
+          }
+          suggestionsMean.add(suggestion);
         }
-        suggestionsMean.add(suggestion);
-      }
-      if (suggestionsMean.isNotEmpty) {
-        return suggestionsMean
-            .map((e) => (e.$1, e.$2, true))
-            .toList(growable: false);
-        // }
+        if (suggestionsMean.isNotEmpty) {
+          return suggestionsMean
+              .map((e) => (e.$1, e.$2, true))
+              .toList(growable: false);
+        }
       }
     }
     w?.reset();
