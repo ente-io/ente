@@ -1,6 +1,7 @@
 import 'dart:developer' as dev;
 import "dart:math" show Random, min;
 
+import "package:computer/computer.dart";
 import "package:flutter/foundation.dart";
 import "package:logging/logging.dart";
 import "package:ml_linalg/linalg.dart";
@@ -37,6 +38,7 @@ class ClusterSuggestion {
 
 class ClusterFeedbackService {
   final Logger _logger = Logger("ClusterFeedbackService");
+  final _computer = Computer.shared();
   ClusterFeedbackService._privateConstructor();
 
   static final ClusterFeedbackService instance =
@@ -257,7 +259,7 @@ class ClusterFeedbackService {
     watch.log('computed avg for ${clusterAvg.length} clusters');
 
     // Find the actual closest clusters for the person
-    final List<(int, double)> suggestions = _calcSuggestionsMean(
+    final List<(int, double)> suggestions = await calcSuggestionsMeanInComputer(
       clusterAvg,
       personClusters,
       ignoredClusters,
@@ -491,7 +493,7 @@ class ClusterFeedbackService {
           'Calculate avg for ${clusterAvgBigClusters.length} clusters of min size $minimumSize',
         );
         final List<(int, double)> suggestionsMeanBigClusters =
-            _calcSuggestionsMean(
+            await calcSuggestionsMeanInComputer(
           clusterAvgBigClusters,
           personClusters,
           ignoredClusters,
@@ -527,7 +529,8 @@ class ClusterFeedbackService {
 
     // Find the other cluster candidates based on the median
     final clusterAvg = clusterAvgBigClusters;
-    final List<(int, double)> moreSuggestionsMean = _calcSuggestionsMean(
+    final List<(int, double)> moreSuggestionsMean =
+        await calcSuggestionsMeanInComputer(
       clusterAvg,
       personClusters,
       ignoredClusters,
@@ -775,86 +778,21 @@ class ClusterFeedbackService {
     return clusterAvg;
   }
 
-  /// Returns a map of person's clusterID to map of closest clusterID to with disstance
-  List<(int, double)> _calcSuggestionsMean(
+  Future<List<(int, double)>> calcSuggestionsMeanInComputer(
     Map<int, Vector> clusterAvg,
     Set<int> personClusters,
     Set<int> ignoredClusters,
-    double maxClusterDistance, {
-    Map<int, int>? allClusterIdsToCountMap,
-  }) {
-    final Map<int, List<(int, double)>> suggestions = {};
-    const suggestionMax = 2000;
-    int suggestionCount = 0;
-    int comparisons = 0;
-    final w = (kDebugMode ? EnteWatch('getSuggestions') : null)?..start();
-
-    // ignore the clusters that belong to the person or is ignored
-    Set<int> otherClusters = clusterAvg.keys.toSet().difference(personClusters);
-    otherClusters = otherClusters.difference(ignoredClusters);
-
-    for (final otherClusterID in otherClusters) {
-      final Vector? otherAvg = clusterAvg[otherClusterID];
-      if (otherAvg == null) {
-        _logger.warning('no avg for othercluster $otherClusterID');
-        continue;
-      }
-      int? nearestPersonCluster;
-      double? minDistance;
-      for (final personCluster in personClusters) {
-        if (clusterAvg[personCluster] == null) {
-          _logger.warning('no avg for personcluster $personCluster');
-          continue;
-        }
-        final Vector avg = clusterAvg[personCluster]!;
-        final distance = cosineDistanceSIMD(avg, otherAvg);
-        comparisons++;
-        if (distance < maxClusterDistance) {
-          if (minDistance == null || distance < minDistance) {
-            minDistance = distance;
-            nearestPersonCluster = personCluster;
-          }
-        }
-      }
-      if (nearestPersonCluster != null && minDistance != null) {
-        suggestions
-            .putIfAbsent(nearestPersonCluster, () => [])
-            .add((otherClusterID, minDistance));
-        suggestionCount++;
-      }
-      if (suggestionCount >= suggestionMax) {
-        break;
-      }
-    }
-    w?.log(
-      'calculation inside calcSuggestionsMean for ${personClusters.length} person clusters and ${otherClusters.length} other clusters (so ${personClusters.length * otherClusters.length} combinations, $comparisons comparisons made resulted in $suggestionCount suggestions)',
+    double maxClusterDistance,
+  ) async {
+    return await _computer.compute(
+      _calcSuggestionsMean,
+      param: {
+        'clusterAvg': clusterAvg,
+        'personClusters': personClusters,
+        'ignoredClusters': ignoredClusters,
+        'maxClusterDistance': maxClusterDistance,
+      },
     );
-
-    if (suggestions.isNotEmpty) {
-      final List<(int, double)> suggestClusterIds = [];
-      for (final List<(int, double)> suggestion in suggestions.values) {
-        suggestClusterIds.addAll(suggestion);
-      }
-      suggestClusterIds.sort(
-        (a, b) => a.$2.compareTo(b.$2),
-      ); // sort by distance
-
-      // List<int>? suggestClusterIdsSizes;
-      // if (allClusterIdsToCountMap != null) {
-      //   suggestClusterIdsSizes = suggestClusterIds
-      //       .map((e) => allClusterIdsToCountMap[e.$1]!)
-      //       .toList(growable: false);
-      // }
-      // final suggestClusterIdsDistances =
-      //     suggestClusterIds.map((e) => e.$2).toList(growable: false);
-      _logger.info(
-        "Already found ${suggestClusterIds.length} good suggestions using mean",
-      );
-      return suggestClusterIds.sublist(0, min(suggestClusterIds.length, 20));
-    } else {
-      _logger.info("No suggestions found using mean");
-      return <(int, double)>[];
-    }
   }
 
   List<T> _randomSampleWithoutReplacement<T>(
@@ -981,5 +919,79 @@ class ClusterFeedbackService {
     _logger.info(
       "Sorting suggestions based on distance to person took ${endTime.difference(startTime).inMilliseconds} ms for ${suggestions.length} suggestions, of which ${clusterSummaryCallTime.difference(startTime).inMilliseconds} ms was spent on the cluster summary call",
     );
+  }
+}
+
+/// Returns a map of person's clusterID to map of closest clusterID to with disstance
+List<(int, double)> _calcSuggestionsMean(Map<String, dynamic> args) {
+  // Fill in args
+  final Map<int, Vector> clusterAvg = args['clusterAvg'];
+  final Set<int> personClusters = args['personClusters'];
+  final Set<int> ignoredClusters = args['ignoredClusters'];
+  final double maxClusterDistance = args['maxClusterDistance'];
+
+  final Map<int, List<(int, double)>> suggestions = {};
+  const suggestionMax = 2000;
+  int suggestionCount = 0;
+  int comparisons = 0;
+  final w = (kDebugMode ? EnteWatch('getSuggestions') : null)?..start();
+
+  // ignore the clusters that belong to the person or is ignored
+  Set<int> otherClusters = clusterAvg.keys.toSet().difference(personClusters);
+  otherClusters = otherClusters.difference(ignoredClusters);
+
+  for (final otherClusterID in otherClusters) {
+    final Vector? otherAvg = clusterAvg[otherClusterID];
+    if (otherAvg == null) {
+      dev.log('[WARNING] no avg for othercluster $otherClusterID');
+      continue;
+    }
+    int? nearestPersonCluster;
+    double? minDistance;
+    for (final personCluster in personClusters) {
+      if (clusterAvg[personCluster] == null) {
+        dev.log('[WARNING] no avg for personcluster $personCluster');
+        continue;
+      }
+      final Vector avg = clusterAvg[personCluster]!;
+      final distance = cosineDistanceSIMD(avg, otherAvg);
+      comparisons++;
+      if (distance < maxClusterDistance) {
+        if (minDistance == null || distance < minDistance) {
+          minDistance = distance;
+          nearestPersonCluster = personCluster;
+        }
+      }
+    }
+    if (nearestPersonCluster != null && minDistance != null) {
+      suggestions
+          .putIfAbsent(nearestPersonCluster, () => [])
+          .add((otherClusterID, minDistance));
+      suggestionCount++;
+    }
+    if (suggestionCount >= suggestionMax) {
+      break;
+    }
+  }
+  w?.log(
+    'calculation inside calcSuggestionsMean for ${personClusters.length} person clusters and ${otherClusters.length} other clusters (so ${personClusters.length * otherClusters.length} combinations, $comparisons comparisons made resulted in $suggestionCount suggestions)',
+  );
+
+  if (suggestions.isNotEmpty) {
+    final List<(int, double)> suggestClusterIds = [];
+    for (final List<(int, double)> suggestion in suggestions.values) {
+      suggestClusterIds.addAll(suggestion);
+    }
+    suggestClusterIds.sort(
+      (a, b) => a.$2.compareTo(b.$2),
+    ); // sort by distance
+
+    dev.log(
+      "Already found ${suggestClusterIds.length} good suggestions using mean",
+    );
+    return suggestClusterIds.sublist(0, min(suggestClusterIds.length, 20));
+  } else {
+    dev.log("No suggestions found using mean");
+    return <(int, double)>[];
   }
 }
