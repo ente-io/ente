@@ -749,10 +749,10 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       await showDialog(
         context: context,
         barrierDismissible: true,
-        builder: (BuildContext context) {
+        builder: (BuildContext bContext) {
           return AutoCastDialog(
             (device) async {
-              await _castPair(gw, device);
+              await _castPair(bContext, gw, device);
             },
           );
         },
@@ -775,7 +775,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       alwaysShowSuccessState: false,
       initialValue: code,
       onSubmit: (String text) async {
-        final bool paired = await _castPair(gw, text);
+        final bool paired = await _castPair(context, gw, text);
         if (!paired) {
           Future.delayed(Duration.zero, () => _pairWithPin(gw, code));
         }
@@ -783,8 +783,15 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     );
   }
 
-  Future<bool> _castPair(CastGateway gw, String code) async {
+  String lastCode = '';
+  Future<bool> _castPair(
+      BuildContext bContext, CastGateway gw, String code) async {
     try {
+      if (lastCode == code) {
+        return false;
+      }
+      lastCode = code;
+      _logger.info("Casting album to device with code $code");
       final String? publicKey = await gw.getPublicKey(code);
       if (publicKey == null) {
         showToast(context, S.of(context).deviceNotFound);
@@ -794,15 +801,18 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       final String castToken = const Uuid().v4().toString();
       final castPayload = CollectionsService.instance
           .getCastData(castToken, widget.collection!, publicKey);
+      _logger.info("Casting album with token $castToken");
       await gw.publishCastPayload(
         code,
         castPayload,
         widget.collection!.id,
         castToken,
       );
-      showToast(context, S.of(context).pairingComplete);
+      _logger.info("Casted album with token $castToken");
+      // showToast(bContext, S.of(context).pairingComplete);
       return true;
     } catch (e, s) {
+      lastCode = '';
       _logger.severe("Failed to cast album", e, s);
       if (e is CastIPMismatchException) {
         await showErrorDialog(
@@ -811,7 +821,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           S.of(context).castIPMismatchBody,
         );
       } else {
-        await showGenericErrorDialog(context: context, error: e);
+        await showGenericErrorDialog(context: bContext, error: e);
       }
       return false;
     }

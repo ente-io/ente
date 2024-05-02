@@ -49,7 +49,7 @@ class _AutoCastDialogState extends State<AutoCastDialog> {
           const SizedBox(height: 16),
           FutureBuilder<List<(String, Object)>>(
             future: castService.searchDevices(),
-            builder: (context, snapshot) {
+            builder: (_, snapshot) {
               if (snapshot.hasError) {
                 return Center(
                   child: Text(
@@ -79,13 +79,20 @@ class _AutoCastDialogState extends State<AutoCastDialog> {
                       });
                       try {
                         await _connectToYourApp(context, device);
+                        if (mounted) {
+                          setState(() {
+                            _isDeviceTapInProgress.remove(device);
+                          });
+                          Navigator.of(context).pop();
+                        }
                       } catch (e) {
-                        showGenericErrorDialog(context: context, error: e)
-                            .ignore();
-                      } finally {
-                        setState(() {
-                          _isDeviceTapInProgress.remove(device);
-                        });
+                        if (mounted) {
+                          setState(() {
+                            _isDeviceTapInProgress.remove(device);
+                          });
+                          showGenericErrorDialog(context: context, error: e)
+                              .ignore();
+                        }
                       }
                     },
                     child: Padding(
@@ -120,7 +127,6 @@ class _AutoCastDialogState extends State<AutoCastDialog> {
         if (message.containsKey(CastMessageType.pairCode)) {
           final code = message[CastMessageType.pairCode]!['code'];
           widget.onConnect(code);
-          Navigator.of(context).pop();
         }
       },
     );
