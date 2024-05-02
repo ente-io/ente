@@ -88,39 +88,40 @@ class _GradientButtonState extends State<GradientButton> {
             height: 56,
             width: double.infinity,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(4),
               color: const Color(0xFF531DAB),
-              boxShadow: isTapped
-                  ? []
-                  : [
-                      const BoxShadow(
-                        color: Color(0xFF000000),
-                        offset: Offset(0, 2),
-                        spreadRadius: 0,
-                        blurRadius: 2,
-                      ),
-                      BoxShadow(
-                        color: const Color(0xFF9254DE).withOpacity(0.32),
-                        offset: const Offset(0, 0),
-                        spreadRadius: 0,
-                        blurRadius: 20,
-                      ),
-                    ],
+              boxShadow: [
+                const BoxShadow(
+                  color: Color(0xFF000000),
+                  offset: Offset(0, 2),
+                  spreadRadius: 0,
+                  blurRadius: 2,
+                ),
+                BoxShadow(
+                  color: const Color(0xFF9254DE).withOpacity(0.32),
+                  offset: const Offset(0, 0),
+                  spreadRadius: 0,
+                  blurRadius: 20,
+                ),
+              ],
             ),
           ),
           Container(
             height: 56,
             decoration: BoxDecoration(
-              // gradient: LinearGradient(
-              //   begin: Alignment(0, -0.2),
-              //   end: Alignment(1.1, 1.1),
-              //   stops: [0, 0.18, 0.83],
-              //   colors: [
-              //     Color(0xFFB37FEB),
-              //     Color(0x00D2AEF5),
-              //     Color(0xFFEFDBFF),
-              //   ],
-              // ),
+              gradient: isTapped
+                  ? null
+                  : const LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      stops: [0, 0.18, 1],
+                      colors: [
+                        Color(0xFFEFDBFF),
+                        Color(0x00D2AEF5),
+                        Color(0xFFB37FEB),
+                      ],
+                    ),
+              backgroundBlendMode: isTapped ? null : BlendMode.overlay,
               border: const GradientBoxBorder(
                 width: 1,
                 gradient: LinearGradient(
@@ -132,7 +133,7 @@ class _GradientButtonState extends State<GradientButton> {
                   end: Alignment.bottomRight,
                 ),
               ),
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(4),
             ),
             child: Center(child: buttonContent),
           ),
