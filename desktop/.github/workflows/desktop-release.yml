@@ -1,0 +1,86 @@
+name: "Release"
+
+# This will create a new draft release with public artifacts.
+#
+# Note that a release will only get created if there is an associated tag
+# (GitHub releases need a corresponding tag).
+#
+# The canonical source for this action is in the repository where we keep the
+# source code for the Ente Photos desktop app: https://github.com/ente-io/ente
+#
+# However, it actually lives and runs in the repository that we use for making
+# releases: https://github.com/ente-io/photos-desktop
+#
+# We need two repositories because Electron updater currently doesn't work well
+# with monorepos. For more details, see `docs/release.md`.
+
+on:
+    push:
+        # Run when a tag matching the pattern "v*"" is pushed.
+        #
+        # See: [Note: Testing release workflows that are triggered by tags].
+        tags:
+            - "v*"
+
+jobs:
+    release:
+        runs-on: ${{ matrix.os }}
+
+        defaults:
+            run:
+                working-directory: desktop
+
+        strategy:
+            matrix:
+                os: [macos-latest, ubuntu-latest, windows-latest]
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+              with:
+                  # Checkout the tag photosd-v1.x.x from the source code
+                  # repository when we're invoked for tag v1.x.x on the releases
+                  # repository.
+                  repository: ente-io/ente
+                  ref: photosd-${{ github.ref }}
+                  submodules: recursive
+
+            - name: Setup node
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 20
+
+            - name: Install dependencies
+              run: yarn install
+
+            - name: Prepare for app notarization
+              if: startsWith(matrix.os, 'macos')
+              # Import Apple API key for app notarization on macOS
+              run: |
+                  mkdir -p ~/private_keys/
+                  echo '${{ secrets.API_KEY }}' > ~/private_keys/AuthKey_${{ secrets.API_KEY_ID }}.p8
+
+            - name: Install libarchive-tools for pacman build
+              if: startsWith(matrix.os, 'ubuntu')
+              # See:
+              # https://github.com/electron-userland/electron-builder/issues/4181
+              run: sudo apt-get install libarchive-tools
+
+            - name: Build
+              uses: ente-io/action-electron-builder@v1.0.0
+              with:
+                  # GitHub token, automatically provided to the action
+                  # (No need to define this secret in the repo settings)
+                  github_token: ${{ secrets.GITHUB_TOKEN }}
+
+                  # If the commit is tagged with a version (e.g. "v1.0.0"),
+                  # release the app after building.
+                  release: ${{ startsWith(github.ref, 'refs/tags/v') }}
+
+                  mac_certs: ${{ secrets.MAC_CERTS }}
+                  mac_certs_password: ${{ secrets.MAC_CERTS_PASSWORD }}
+              env:
+                  # macOS notarization API key details
+                  API_KEY_ID: ${{ secrets.API_KEY_ID }}
+                  API_KEY_ISSUER_ID: ${{ secrets.API_KEY_ISSUER_ID }}
+                  USE_HARD_LINKS: false

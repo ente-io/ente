@@ -10,12 +10,6 @@ To know more about Ente, see [our main README](../README.md) or visit
 
 ## Building from source
 
-> [!CAUTION]
->
-> We're improving the security of the desktop app further by migrating to
-> Electron's sandboxing and contextIsolation. These updates are still WIP and
-> meanwhile the instructions below might not fully work on the main branch.
-
 Fetch submodules
 
 ```sh
