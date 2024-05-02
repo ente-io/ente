@@ -370,7 +370,7 @@ export default function Gallery() {
                 syncWithRemote(false, true);
             }, SYNC_INTERVAL_IN_MICROSECONDS);
             if (electron) {
-                void clipService.setupOnFileUploadListener();
+                // void clipService.setupOnFileUploadListener();
                 electron.onMainWindowFocus(() => syncWithRemote(false, true));
             }
         };

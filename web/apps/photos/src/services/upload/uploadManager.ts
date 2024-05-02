@@ -609,11 +609,25 @@ class UploadManager {
                 ].includes(uploadResult)
             ) {
                 try {
+                    let file: File | undefined;
+                    const uploadItem =
+                        uploadableItem.uploadItem ??
+                        uploadableItem.livePhotoAssets.image;
+                    if (uploadItem) {
+                        if (uploadItem instanceof File) {
+                            file = uploadItem;
+                        } else if (
+                            typeof uploadItem == "string" ||
+                            Array.isArray(uploadItem)
+                        ) {
+                            // path from desktop, no file object
+                        } else {
+                            file = uploadItem.file;
+                        }
+                    }
                     eventBus.emit(Events.FILE_UPLOADED, {
                         enteFile: decryptedFile,
-                        localFile:
-                            uploadableItem.uploadItem ??
-                            uploadableItem.livePhotoAssets.image,
+                        localFile: file,
                     });
                 } catch (e) {
                     log.warn("Ignoring error in fileUploaded handlers", e);

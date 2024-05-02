@@ -1,6 +1,5 @@
 import { basename } from "@/next/file";
 import log from "@/next/log";
-import { type FileAndPath } from "@/next/types/file";
 import type { CollectionMapping, Electron, ZipItem } from "@/next/types/ipc";
 import { CustomError } from "@ente/shared/error";
 import { isPromise } from "@ente/shared/utils";
@@ -20,7 +19,7 @@ import {
     getPublicCollectionUploaderName,
     savePublicCollectionUploaderName,
 } from "services/publicCollectionService";
-import type { UploadItem } from "services/upload/types";
+import type { FileAndPath, UploadItem } from "services/upload/types";
 import type {
     InProgressUpload,
     SegregatedFinishedUploads,

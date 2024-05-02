@@ -22,7 +22,7 @@ import {
     getFaceSearchEnabledStatus,
     updateFaceSearchEnabledStatus,
 } from "services/userService";
-import { openLink } from "utils/common";
+import { isInternalUser } from "utils/user";
 
 export const MLSearchSettings = ({ open, onClose, onRootClose }) => {
     const {
@@ -255,8 +255,8 @@ function EnableFaceSearch({ open, onClose, enableFaceSearch, onRootClose }) {
 }
 
 function EnableMLSearch({ onClose, enableMlSearch, onRootClose }) {
-    const showDetails = () =>
-        openLink("https://ente.io/blog/desktop-ml-beta", true);
+    // const showDetails = () =>
+    //     openLink("https://ente.io/blog/desktop-ml-beta", true);
 
     return (
         <Stack spacing={"4px"} py={"12px"}>
@@ -269,25 +269,37 @@ function EnableMLSearch({ onClose, enableMlSearch, onRootClose }) {
                 <Box px={"8px"}>
                     {" "}
                     <Typography color="text.muted">
-                        <Trans i18nKey={"ENABLE_ML_SEARCH_DESCRIPTION"} />
+                        {/* <Trans i18nKey={"ENABLE_ML_SEARCH_DESCRIPTION"} /> */}
+                        <p>
+                            We're putting finishing touches, coming back soon!
+                        </p>
+                        <p>
+                            <small>
+                                Existing indexed faces will continue to show.
+                            </small>
+                        </p>
                     </Typography>
                 </Box>
-                <Stack px={"8px"} spacing={"8px"}>
-                    <Button
-                        color={"accent"}
-                        size="large"
-                        onClick={enableMlSearch}
-                    >
-                        {t("ENABLE")}
-                    </Button>
-                    <Button
+                {isInternalUser() && (
+                    <Stack px={"8px"} spacing={"8px"}>
+                        <Button
+                            color={"accent"}
+                            size="large"
+                            onClick={enableMlSearch}
+                        >
+                            {t("ENABLE")}
+                        </Button>
+                        {/*
+                        <Button
                         color="secondary"
                         size="large"
                         onClick={showDetails}
-                    >
-                        {t("ML_MORE_DETAILS")}
-                    </Button>
-                </Stack>
+                        >
+                            {t("ML_MORE_DETAILS")}
+                        </Button>
+                        */}
+                    </Stack>
+                )}
             </Stack>
         </Stack>
     );
