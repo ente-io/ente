@@ -664,33 +664,25 @@ class ClusterFeedbackService {
         await faceMlDb.getAllClusterSummary(minClusterSize);
     final Map<int, (Uint8List, int)> updatesForClusterSummary = {};
 
-    final Map<int, Vector> clusterAvg = {};
-
     w?.log(
       'getUpdateClusterAvg database call for getAllClusterSummary',
     );
 
-    final allClusterIds = allClusterIdsToCountMap.keys.toSet();
-    int ignoredClustersCnt = 0, alreadyUpdatedClustersCnt = 0;
-    int smallerClustersCnt = 0;
-    for (final id in allClusterIdsToCountMap.keys) {
-      if (ignoredClusters.contains(id)) {
-        allClusterIds.remove(id);
-        ignoredClustersCnt++;
-      }
-      if (clusterToSummary[id]?.$2 == allClusterIdsToCountMap[id]) {
-        allClusterIds.remove(id);
-        clusterAvg[id] = Vector.fromList(
-          EVector.fromBuffer(clusterToSummary[id]!.$1).values,
-          dtype: DType.float32,
-        );
-        alreadyUpdatedClustersCnt++;
-      }
-      if (allClusterIdsToCountMap[id]! < minClusterSize) {
-        allClusterIds.remove(id);
-        smallerClustersCnt++;
-      }
-    }
+    final serializationEmbeddings = await _computer.compute(
+      checkAndSerializeCurrentClusterMeans,
+      param: {
+        'allClusterIdsToCountMap': allClusterIdsToCountMap,
+        'minClusterSize': minClusterSize,
+        'ignoredClusters': ignoredClusters,
+        'clusterToSummary': clusterToSummary,
+      },
+    ) as (Map<int, Vector>, Set<int>, int, int, int);
+    final clusterAvg = serializationEmbeddings.$1;
+    final allClusterIds = serializationEmbeddings.$2;
+    final ignoredClustersCnt = serializationEmbeddings.$3;
+    final alreadyUpdatedClustersCnt = serializationEmbeddings.$4;
+    final smallerClustersCnt = serializationEmbeddings.$5;
+
     w?.log(
       'serialization of embeddings',
     );
@@ -994,4 +986,46 @@ List<(int, double)> _calcSuggestionsMean(Map<String, dynamic> args) {
     dev.log("No suggestions found using mean");
     return <(int, double)>[];
   }
+}
+
+Future<(Map<int, Vector>, Set<int>, int, int, int)>
+    checkAndSerializeCurrentClusterMeans(
+  Map args,
+) async {
+  final Map<int, int> allClusterIdsToCountMap = args['allClusterIdsToCountMap'];
+  final int minClusterSize = args['minClusterSize'] ?? 1;
+  final Set<int> ignoredClusters = args['ignoredClusters'] ?? {};
+  final Map<int, (Uint8List, int)> clusterToSummary = args['clusterToSummary'];
+
+  final Map<int, Vector> clusterAvg = {};
+
+  final allClusterIds = allClusterIdsToCountMap.keys.toSet();
+  int ignoredClustersCnt = 0, alreadyUpdatedClustersCnt = 0;
+  int smallerClustersCnt = 0;
+  for (final id in allClusterIdsToCountMap.keys) {
+    if (ignoredClusters.contains(id)) {
+      allClusterIds.remove(id);
+      ignoredClustersCnt++;
+    }
+    if (clusterToSummary[id]?.$2 == allClusterIdsToCountMap[id]) {
+      allClusterIds.remove(id);
+      clusterAvg[id] = Vector.fromList(
+        EVector.fromBuffer(clusterToSummary[id]!.$1).values,
+        dtype: DType.float32,
+      );
+      alreadyUpdatedClustersCnt++;
+    }
+    if (allClusterIdsToCountMap[id]! < minClusterSize) {
+      allClusterIds.remove(id);
+      smallerClustersCnt++;
+    }
+  }
+
+  return (
+    clusterAvg,
+    allClusterIds,
+    ignoredClustersCnt,
+    alreadyUpdatedClustersCnt,
+    smallerClustersCnt
+  );
 }
