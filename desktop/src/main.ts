@@ -127,15 +127,7 @@ const registerPrivilegedSchemes = () => {
         {
             scheme: "stream",
             privileges: {
-                // TODO(MR): Remove the commented bits if we don't end up
-                // needing them by the time the IPC refactoring is done.
-
-                // Prevent the insecure origin issues when fetching this
-                // secure: true,
-                // Allow the web fetch API in the renderer to use this scheme.
                 supportFetchAPI: true,
-                // Allow it to be used with video tags.
-                // stream: true,
             },
         },
     ]);
