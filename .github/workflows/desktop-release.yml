@@ -63,8 +63,8 @@ jobs:
                   # release the app after building
                   release: ${{ startsWith(github.ref, 'refs/tags/v') }}
 
-                  mac_certs: ${{ secrets.MAC_CERTS }}
-                  mac_certs_password: ${{ secrets.MAC_CERTS_PASSWORD }}
+                  mac_certs: ${{ secrets.MAC_OS_CERTIFICATE }}
+                  mac_certs_password: ${{ secrets.MAC_OS_CERTIFICATE_PASSWORD }}
               env:
                   # macOS notarization API key details
                   API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
