@@ -386,7 +386,26 @@ class FaceMLDataDB {
     return maps.map((e) => e[fcFaceId] as String).toSet();
   }
 
-  Future<Iterable<String>> getFaceIDsForPerson(String personID) async {
+  // Get Map of personID to Map of clusterID to faceIDs
+  Future<Map<String, Map<int, Set<String>>>>
+      getPersonToClusterIdToFaceIds() async {
+    final db = await instance.asyncDB;
+    final List<Map<String, dynamic>> maps = await db.getAll(
+      'SELECT $personIdColumn, $faceClustersTable.$fcClusterID, $fcFaceId FROM $clusterPersonTable '
+      'LEFT JOIN $faceClustersTable ON $clusterPersonTable.$clusterIDColumn = $faceClustersTable.$fcClusterID',
+    );
+    final Map<String, Map<int, Set<String>>> result = {};
+    for (final map in maps) {
+      final personID = map[personIdColumn] as String;
+      final clusterID = map[fcClusterID] as int;
+      final faceID = map[fcFaceId] as String;
+      result.putIfAbsent(personID, () => {}).putIfAbsent(clusterID, () => {})
+        ..add(faceID);
+    }
+    return result;
+  }
+
+  Future<Set<String>> getFaceIDsForPerson(String personID) async {
     final db = await instance.asyncDB;
     final faceIdsResult = await db.getAll(
       'SELECT $fcFaceId FROM $faceClustersTable LEFT JOIN $clusterPersonTable '

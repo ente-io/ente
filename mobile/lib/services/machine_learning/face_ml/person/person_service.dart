@@ -1,10 +1,12 @@
 import "dart:async" show unawaited;
 import "dart:convert";
+import "dart:developer";
 
 import "package:flutter/foundation.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/people_changed_event.dart";
+import "package:photos/extensions/stop_watch.dart";
 import "package:photos/face/db.dart";
 import "package:photos/face/model/person.dart";
 import "package:photos/models/api/entity/type.dart";
@@ -67,6 +69,89 @@ class PersonService {
   Future<Set<String>> personIDs() async {
     final entities = await entityService.getEntities(EntityType.person);
     return entities.map((e) => e.id).toSet();
+  }
+
+  Future<void> reconcileClusters() async {
+    final EnteWatch? w = kDebugMode ? EnteWatch("reconcileClusters") : null;
+    w?.start();
+    await storeRemoteFeedback();
+    w?.log("Stored remote feedback");
+    final dbPersonClusterInfo =
+        await faceMLDataDB.getPersonToClusterIdToFaceIds();
+    w?.log("Got DB person cluster info");
+    final persons = await getPersonsMap();
+    w?.log("Got persons");
+    for (var personID in dbPersonClusterInfo.keys) {
+      final person = persons[personID];
+      if (person == null) {
+        logger.warning("Person $personID not found");
+        continue;
+      }
+      final personData = person.data;
+      final Map<int, Set<String>> dbPersonCluster =
+          dbPersonClusterInfo[personID]!;
+      if (_shouldUpdateRemotePerson(personData, dbPersonCluster)) {
+        final personData = person.data;
+        personData.assigned = dbPersonCluster.entries
+            .map(
+              (e) => ClusterInfo(
+                id: e.key,
+                faces: e.value,
+              ),
+            )
+            .toList();
+        entityService
+            .addOrUpdate(
+              EntityType.person,
+              json.encode(personData.toJson()),
+              id: personID,
+            )
+            .ignore();
+        personData.logStats();
+      }
+    }
+    w?.log("Reconciled clusters for ${persons.length} persons");
+  }
+
+  bool _shouldUpdateRemotePerson(
+      PersonData personData, Map<int, Set<String>> dbPersonCluster) {
+    bool result = false;
+    if ((personData.assigned?.length ?? 0) != dbPersonCluster.length) {
+      log(
+        "Person ${personData.name} has ${personData.assigned?.length} clusters, but ${dbPersonCluster.length} clusters found in DB",
+        name: "PersonService",
+      );
+      result = true;
+    } else {
+      for (ClusterInfo info in personData.assigned!) {
+        final dbCluster = dbPersonCluster[info.id];
+        if (dbCluster == null) {
+          log(
+            "Cluster ${info.id} not found in DB for person ${personData.name}",
+            name: "PersonService",
+          );
+          result = true;
+          continue;
+        }
+        if (info.faces.length != dbCluster.length) {
+          log(
+            "Cluster ${info.id} has ${info.faces.length} faces, but ${dbCluster.length} faces found in DB",
+            name: "PersonService",
+          );
+          result = true;
+        }
+        for (var faceId in info.faces) {
+          if (!dbCluster.contains(faceId)) {
+            log(
+              "Face $faceId not found in cluster ${info.id} for person ${personData.name}",
+              name: "PersonService",
+            );
+            result = true;
+          }
+        }
+      }
+    }
+    return result;
   }
 
   Future<PersonEntity> addPerson(String name, int clusterID) async {

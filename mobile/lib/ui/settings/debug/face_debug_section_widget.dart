@@ -288,6 +288,24 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
             );
           },
         ),
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            title: "Sync person mappings ",
+          ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async {
+            try {
+              await PersonService.instance.reconcileClusters();
+              Bus.instance.fire(PeopleChangedEvent());
+              showShortToast(context, "Done");
+            } catch (e, s) {
+              _logger.warning('sync person mappings failed ', e, s);
+              await showGenericErrorDialog(context: context, error: e);
+            }
+          },
+        ),
         // sectionOptionSpacing,
         // MenuItemWidget(
         //   captionedTextWidget: const CaptionedTextWidget(
