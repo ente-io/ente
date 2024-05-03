@@ -289,7 +289,13 @@ class _PersonActionSheetState extends State<PersonActionSheet> {
     }
   }
 
-  Future<Iterable<PersonEntity>> _getPersons() async {
-    return PersonService.instance.getPersons();
+  Future<Iterable<PersonEntity>> _getPersons({
+    bool excludeHidden = true,
+  }) async {
+    final persons = await PersonService.instance.getPersons();
+    if (excludeHidden) {
+      persons.removeWhere((person) => person.data.isHidden);
+    }
+    return persons;
   }
 }
