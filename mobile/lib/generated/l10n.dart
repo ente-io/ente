@@ -8594,20 +8594,20 @@ class S {
     );
   }
 
-  /// `Auto Pair requires connecting to Google servers and only works with Chromecast supported devices. Google will not receive sensitive data, such as your photos.`
-  String get autoPairGoogle {
+  /// `Auto pair works only with devices that support Chromecast.`
+  String get autoPairDesc {
     return Intl.message(
-      'Auto Pair requires connecting to Google servers and only works with Chromecast supported devices. Google will not receive sensitive data, such as your photos.',
-      name: 'autoPairGoogle',
+      'Auto pair works only with devices that support Chromecast.',
+      name: 'autoPairDesc',
       desc: '',
       args: [],
     );
   }
 
-  /// `Pair with PIN works for any large screen device you want to play your album on.`
+  /// `Pair with PIN works with any screen you wish to view your album on.`
   String get manualPairDesc {
     return Intl.message(
-      'Pair with PIN works for any large screen device you want to play your album on.',
+      'Pair with PIN works with any screen you wish to view your album on.',
       name: 'manualPairDesc',
       desc: '',
       args: [],
