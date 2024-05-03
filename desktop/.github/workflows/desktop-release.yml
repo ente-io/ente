@@ -55,13 +55,6 @@ jobs:
             - name: Install dependencies
               run: yarn install
 
-            - name: Prepare for app notarization
-              if: startsWith(matrix.os, 'macos')
-              # Import Apple API key for app notarization on macOS
-              run: |
-                  mkdir -p ~/private_keys/
-                  echo '${{ secrets.API_KEY }}' > ~/private_keys/AuthKey_${{ secrets.API_KEY_ID }}.p8
-
             - name: Install libarchive-tools for pacman build
               if: startsWith(matrix.os, 'ubuntu')
               # See:
@@ -84,7 +77,8 @@ jobs:
                   mac_certs: ${{ secrets.MAC_CERTS }}
                   mac_certs_password: ${{ secrets.MAC_CERTS_PASSWORD }}
               env:
-                  # macOS notarization API key details
-                  API_KEY_ID: ${{ secrets.API_KEY_ID }}
-                  API_KEY_ISSUER_ID: ${{ secrets.API_KEY_ISSUER_ID }}
+                  # macOS notarization credentials key details
+                  APPLE_ID: ${{ secrets.APPLE_ID }}
+                  APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+                  APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
                   USE_HARD_LINKS: false
