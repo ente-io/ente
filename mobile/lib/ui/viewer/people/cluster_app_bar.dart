@@ -109,6 +109,11 @@ class _AppBarWidgetState extends State<ClusterAppBar> {
     items.addAll(
       [
         EntePopupMenuItem(
+          "Hide person",
+          value: ClusterPopupAction.hide,
+          icon: Icons.hide_image_outlined,
+        ),
+        EntePopupMenuItem(
           "Break up cluster",
           value: ClusterPopupAction.breakupCluster,
           icon: Icons.analytics_outlined,
@@ -126,12 +131,13 @@ class _AppBarWidgetState extends State<ClusterAppBar> {
             if (value == ClusterPopupAction.breakupCluster) {
               // ignore: unawaited_futures
               await _breakUpCluster(context);
+            } else if (value == ClusterPopupAction.hide) {
+              await ClusterFeedbackService.instance
+                  .hideCluster(widget.clusterID);
+              Navigator.of(context).pop(); // Close the cluster page
             }
             // else if (value == ClusterPopupAction.setCover) {
             //   await setCoverPhoto(context);
-            // } else if (value == ClusterPopupAction.hide) {
-            //   // ignore: unawaited_futures
-            // }
           },
         ),
       );
