@@ -28,7 +28,7 @@ func NewController(castRepo *castRepo.Repository,
 }
 
 func (c *Controller) RegisterDevice(ctx *gin.Context, request *cast.RegisterDeviceRequest) (string, error) {
-	return c.CastRepo.AddCode(ctx, request.DeviceCode, request.PublicKey, network.GetClientIP(ctx))
+	return c.CastRepo.AddCode(ctx, request.PublicKey, network.GetClientIP(ctx))
 }
 
 func (c *Controller) GetPublicKey(ctx *gin.Context, deviceCode string) (string, error) {

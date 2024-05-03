@@ -8,24 +8,14 @@ import (
 	"github.com/ente-io/stacktrace"
 	"github.com/google/uuid"
 	log "github.com/sirupsen/logrus"
-	"strings"
 )
 
 type Repository struct {
 	DB *sql.DB
 }
 
-func (r *Repository) AddCode(ctx context.Context, code *string, pubKey string, ip string) (string, error) {
-	var codeValue string
-	var err error
-	if code == nil || *code == "" {
-		codeValue, err = random.GenerateSixDigitOtp()
-		if err != nil {
-			return "", stacktrace.Propagate(err, "")
-		}
-	} else {
-		codeValue = strings.TrimSpace(*code)
-	}
+func (r *Repository) AddCode(ctx context.Context, pubKey string, ip string) (string, error) {
+	codeValue, err := random.GenerateAlphaNumString(6)
 	_, err = r.DB.ExecContext(ctx, "INSERT INTO casting (code, public_key, id, ip) VALUES ($1, $2, $3, $4)", codeValue, pubKey, uuid.New(), ip)
 	if err != nil {
 		return "", err
