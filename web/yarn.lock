@@ -1000,6 +1000,11 @@
     "@types/node" "*"
     base-x "^3.0.6"
 
+"@types/chromecast-caf-receiver@^6.0.14":
+  version "6.0.14"
+  resolved "https://registry.yarnpkg.com/@types/chromecast-caf-receiver/-/chromecast-caf-receiver-6.0.14.tgz#e1e781c62c84ee85899fd20d658e258f8f45f5be"
+  integrity sha512-qvN4uE4MlYCEtniTtjxG4D+KeEXfs/Sgqex9sSZdPVh5rffdifINYzKH3z3QRl+0mk41vD6vYZ8s8ZfW/8iFoQ==
+
 "@types/estree@1.0.5":
   version "1.0.5"
   resolved "https://registry.yarnpkg.com/@types/estree/-/estree-1.0.5.tgz#a6ce3e556e00fd9895dd872dd172ad0d4bd687f4"
