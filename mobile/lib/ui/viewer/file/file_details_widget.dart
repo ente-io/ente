@@ -1,7 +1,11 @@
+import "dart:async" show StreamSubscription;
+
 import "package:exif/exif.dart";
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/configuration.dart";
+import "package:photos/core/event_bus.dart";
+import "package:photos/events/people_changed_event.dart";
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
@@ -51,6 +55,8 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
     "longRef": null,
   };
 
+  late final StreamSubscription<PeopleChangedEvent> _peopleChangedEvent;
+
   bool _isImage = false;
   late int _currentUserID;
   bool showExifListTile = false;
@@ -64,6 +70,10 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
     hasLocationData.value = widget.file.hasLocation;
     _isImage = widget.file.fileType == FileType.image ||
         widget.file.fileType == FileType.livePhoto;
+
+    _peopleChangedEvent = Bus.instance.on<PeopleChangedEvent>().listen((event) {
+      setState(() {});
+    });
 
     _exifNotifier.addListener(() {
       if (_exifNotifier.value != null && !widget.file.hasLocation) {
@@ -93,6 +103,7 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
   @override
   void dispose() {
     _exifNotifier.dispose();
+    _peopleChangedEvent.cancel();
     super.dispose();
   }
 
