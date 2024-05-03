@@ -294,7 +294,7 @@ class ClusterFeedbackService {
   }
 
   Future<void> hideCluster(int clusterID) async {
-    await PersonService.instance.addPerson('hidden', clusterID, isHidden: true);
+    await PersonService.instance.addPerson('(hidden)', clusterID, isHidden: true);
     Bus.instance.fire(PeopleChangedEvent());
     return;
   }
