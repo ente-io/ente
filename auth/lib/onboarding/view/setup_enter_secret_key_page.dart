@@ -20,7 +20,6 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
   late TextEditingController _issuerController;
   late TextEditingController _accountController;
   late TextEditingController _secretController;
-  late TextEditingController _digitsController;
   late bool _secretKeyObscured;
 
   @override
@@ -34,9 +33,6 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
     );
     _secretController = TextEditingController(
       text: widget.code?.secret,
-    );
-    _digitsController = TextEditingController(
-      text: widget.code?.digits.toString(),
     );
     _secretKeyObscured = widget.code != null;
     super.initState();
@@ -118,31 +114,7 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
                   ),
                   controller: _accountController,
                 ),
-                const SizedBox(
-                  height: 20,
-                ),
-                TextFormField(
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return "Please enter some number";
-                    }
-                    if (int.tryParse(value) == null) {
-                      return "Please enter a valid number";
-                    }
-                    return null;
-                  },
-                  readOnly: widget.code?.type == Type.steam,
-                  keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
-                    hintText: l10n.digitsAccountHint,
-                    labelText: l10n.digitsAccountHint,
-                    floatingLabelBehavior: FloatingLabelBehavior.auto,
-                  ),
-                  controller: _digitsController,
-                ),
-                const SizedBox(
-                  height: 40,
-                ),
+                const SizedBox(height: 40),
                 SizedBox(
                   width: 400,
                   child: OutlinedButton(
@@ -184,10 +156,15 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
       final account = _accountController.text.trim();
       final issuer = _issuerController.text.trim();
       final secret = _secretController.text.trim().replaceAll(' ', '');
-      final digits = int.tryParse(_digitsController.text.trim()) ??
-          (widget.code?.type == Type.steam
-              ? Code.steamDigits
-              : Code.defaultDigits);
+      final isStreamCode = issuer.toLowerCase() == "steam";
+      late int digits;
+      if (widget.code != null) {
+        digits = widget.code!.digits;
+      } else if (isStreamCode) {
+        digits = Code.steamDigits;
+      } else {
+        digits = Code.defaultDigits;
+      }
       if (widget.code != null && widget.code!.secret != secret) {
         ButtonResult? result = await showChoiceActionSheet(
           context,
@@ -204,7 +181,7 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
       }
       final Code newCode = widget.code == null
           ? Code.fromAccountAndSecret(
-              Type.totp,
+              isStreamCode ? Type.steam : Type.totp,
               account,
               issuer,
               secret,
@@ -214,7 +191,6 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
               account: account,
               issuer: issuer,
               secret: secret,
-              digits: digits,
             );
       // Verify the validity of the code
       getOTP(newCode);
