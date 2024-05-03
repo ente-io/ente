@@ -1,6 +1,8 @@
 /// <reference types="chromecast-caf-receiver" />
 import { useEffect, useState } from "react";
 
+export type Cast = typeof cast;
+
 /**
  * Load the Chromecast Web Receiver SDK and return a reference to the `cast`
  * global object that the SDK attaches to the window.
@@ -8,7 +10,7 @@ import { useEffect, useState } from "react";
  * https://developers.google.com/cast/docs/web_receiver/basic
  */
 export const useCastReceiver = () => {
-    const [receiver, setReceiver] = useState<typeof cast | undefined>();
+    const [receiver, setReceiver] = useState<Cast | undefined>();
 
     useEffect(() => {
         const script = document.createElement("script");
