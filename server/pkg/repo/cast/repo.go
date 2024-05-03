@@ -16,6 +16,9 @@ type Repository struct {
 
 func (r *Repository) AddCode(ctx context.Context, pubKey string, ip string) (string, error) {
 	codeValue, err := random.GenerateAlphaNumString(6)
+	if err != nil {
+		return "", err
+	}
 	_, err = r.DB.ExecContext(ctx, "INSERT INTO casting (code, public_key, id, ip) VALUES ($1, $2, $3, $4)", codeValue, pubKey, uuid.New(), ip)
 	if err != nil {
 		return "", err
