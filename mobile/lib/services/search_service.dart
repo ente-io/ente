@@ -787,6 +787,7 @@ class SearchService {
           continue;
         }
         final PersonEntity p = personIdToPerson[personID]!;
+        if (p.data.isHidden) continue;
         facesResult.add(
           GenericSearchResult(
             ResultType.faces,
@@ -825,7 +826,8 @@ class SearchService {
             "Cluster $clusterId should not have person id ${clusterIDToPersonID[clusterId]}",
           );
         }
-        if (files.length < kMinimumClusterSizeSearchResult && sortedClusterIds.length > 3) {
+        if (files.length < kMinimumClusterSizeSearchResult &&
+            sortedClusterIds.length > 3) {
           continue;
         }
         facesResult.add(
