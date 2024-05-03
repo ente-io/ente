@@ -157,14 +157,6 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
       final issuer = _issuerController.text.trim();
       final secret = _secretController.text.trim().replaceAll(' ', '');
       final isStreamCode = issuer.toLowerCase() == "steam";
-      late int digits;
-      if (widget.code != null) {
-        digits = widget.code!.digits;
-      } else if (isStreamCode) {
-        digits = Code.steamDigits;
-      } else {
-        digits = Code.defaultDigits;
-      }
       if (widget.code != null && widget.code!.secret != secret) {
         ButtonResult? result = await showChoiceActionSheet(
           context,
@@ -185,7 +177,7 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
               account,
               issuer,
               secret,
-              digits,
+              isStreamCode ? Code.steamDigits : Code.defaultDigits,
             )
           : widget.code!.copyWith(
               account: account,

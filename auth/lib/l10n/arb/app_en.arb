@@ -20,8 +20,6 @@
   "codeIssuerHint": "Issuer",
   "codeSecretKeyHint": "Secret Key",
   "codeAccountHint": "Account (you@domain.com)",
-  "digitsAccountHint": "Digits (default=6)",
-  "accountKeyType": "Type of key",
   "sessionExpired": "Session expired",
   "@sessionExpired": {
     "description": "Title of the dialog when the users current session is invalid/expired"
