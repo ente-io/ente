@@ -44,7 +44,7 @@ class PeopleAppBar extends StatefulWidget {
 enum PeoplPopupAction {
   rename,
   setCover,
-  remove,
+  removeLabel,
   viewPhotos,
   confirmPhotos,
   unignore,
@@ -171,15 +171,15 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
           //   ),
           // ),
 
-          PopupMenuItem(
-            value: PeoplPopupAction.remove,
+          const PopupMenuItem(
+            value: PeoplPopupAction.removeLabel,
             child: Row(
               children: [
-                const Icon(Icons.remove_circle_outline),
-                const Padding(
+                Icon(Icons.remove_circle_outline),
+                Padding(
                   padding: EdgeInsets.all(8),
                 ),
-                Text(S.of(context).remove),
+                Text("Remove label"),
               ],
             ),
           ),
@@ -260,7 +260,7 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
               await setCoverPhoto(context);
             } else if (value == PeoplPopupAction.unignore) {
               await _showPerson(context);
-            } else if (value == PeoplPopupAction.remove) {
+            } else if (value == PeoplPopupAction.removeLabel) {
               await PersonService.instance.deletePerson(widget.person.remoteID);
             }
           },
@@ -275,7 +275,8 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
     bool assignName = false;
     await showChoiceDialog(
       context,
-      title: "Are you sure you want to show this person in people section again??",
+      title:
+          "Are you sure you want to show this person in people section again??",
       firstButtonLabel: "Yes, show person",
       firstButtonOnTap: () async {
         try {
