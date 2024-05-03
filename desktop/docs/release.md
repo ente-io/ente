@@ -34,22 +34,11 @@ The workflow is:
     git push origin photosd-v1.x.x
     ```
 
-3.  Head over to the releases repository, copy all relevant changes from the
-    source repository, commit and push the changes.
+3.  Head over to the releases repository and run the trigger script, passing it
+    the tag _without_ the `photosd-` prefix.
 
     ```sh
-    cp ../ente/desktop/CHANGELOG.md CHANGELOG.md
-    git add CHANGELOG.md
-    git commit -m 'Release v1.x.x'
-    git push origin main
-    ```
-
-4.  Tag this commit, but this time _don't_ use the `photosd-` prefix. Push the
-    tag to trigger the GitHub action.
-
-    ```sh
-    git tag v1.x.x
-    git push origin v1.x.x
+    ./.github/trigger-release.sh v1.x.x
     ```
 
 ## Post build
