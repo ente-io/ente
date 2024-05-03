@@ -326,7 +326,6 @@ Future<bool> _isRunningInForeground() async {
 }
 
 Future<void> _killBGTask([String? taskId]) async {
-  _logger.info("KillingBGTask taskId: $taskId ***************");
   await UploadLocksDB.instance.releaseLocksAcquiredByOwnerBefore(
     ProcessType.background.toString(),
     DateTime.now().microsecondsSinceEpoch,
@@ -341,7 +340,6 @@ Future<void> _killBGTask([String? taskId]) async {
   ///Band aid for background process not getting killed. Should migrate to using
   ///workmanager instead of background_fetch.
   Isolate.current.kill();
-  _logger.info('Kill BG task done *************');
 }
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
