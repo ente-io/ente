@@ -1,5 +1,3 @@
-import "dart:async";
-
 import 'package:flutter/material.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/services/update_service.dart';
@@ -9,7 +7,6 @@ import 'package:photos/ui/components/divider_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/components/title_bar_title_widget.dart';
 import 'package:photos/ui/notification/update/change_log_entry.dart';
-import "package:url_launcher/url_launcher_string.dart";
 
 class ChangeLogPage extends StatefulWidget {
   const ChangeLogPage({
@@ -81,31 +78,31 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
                     const SizedBox(
                       height: 8,
                     ),
-                    ButtonWidget(
-                      buttonType: ButtonType.trailingIconSecondary,
-                      buttonSize: ButtonSize.large,
-                      labelText: S.of(context).joinDiscord,
-                      icon: Icons.discord_outlined,
-                      iconColor: enteColorScheme.primary500,
-                      onTap: () async {
-                        unawaited(
-                          launchUrlString(
-                            "https://discord.com/invite/z2YVKkycX3",
-                            mode: LaunchMode.externalApplication,
-                          ),
-                        );
-                      },
-                    ),
                     // ButtonWidget(
                     //   buttonType: ButtonType.trailingIconSecondary,
                     //   buttonSize: ButtonSize.large,
-                    //   labelText: S.of(context).rateTheApp,
-                    //   icon: Icons.favorite_rounded,
+                    //   labelText: S.of(context).joinDiscord,
+                    //   icon: Icons.discord_outlined,
                     //   iconColor: enteColorScheme.primary500,
                     //   onTap: () async {
-                    //     await UpdateService.instance.launchReviewUrl();
+                    //     unawaited(
+                    //       launchUrlString(
+                    //         "https://discord.com/invite/z2YVKkycX3",
+                    //         mode: LaunchMode.externalApplication,
+                    //       ),
+                    //     );
                     //   },
                     // ),
+                    ButtonWidget(
+                      buttonType: ButtonType.trailingIconSecondary,
+                      buttonSize: ButtonSize.large,
+                      labelText: S.of(context).rateTheApp,
+                      icon: Icons.favorite_rounded,
+                      iconColor: enteColorScheme.primary500,
+                      onTap: () async {
+                        await UpdateService.instance.launchReviewUrl();
+                      },
+                    ),
                     const SizedBox(height: 8),
                   ],
                 ),
@@ -122,18 +119,16 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
     final List<ChangeLogEntry> items = [];
     items.addAll([
       ChangeLogEntry(
-        "Improved Performance for Large Galleries ✨",
-        'We\'ve made significant improvements to how quickly galleries load and'
-            ' with less stutter, especially for those with a lot of photos and videos.',
+        "Cast albums to TV ✨",
+        "View a slideshow of your albums on any big screen! Open an album and click on the Cast button to get started.",
       ),
       ChangeLogEntry(
-        "Enhanced Functionality for Video Backups",
-        'Even if video backups are disabled, you can now manually upload individual videos.',
+        "Own shared photos",
+        "You can now add shared items to your favorites to any of your personal albums. Ente will create a copy that is fully owned by you and can be organized to your liking.",
       ),
       ChangeLogEntry(
-        "Bug Fixes",
-        'Many a bugs were squashed in this release.\n'
-            '\nIf you run into any, please write to team@ente.io, or let us know on Discord! 🙏',
+        "Performance improvements",
+        "This release also brings in major changes that should improve responsiveness. If you discover room for improvement, please let us know!",
       ),
     ]);
 
