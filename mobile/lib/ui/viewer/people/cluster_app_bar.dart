@@ -44,7 +44,6 @@ class ClusterAppBar extends StatefulWidget {
 enum ClusterPopupAction {
   setCover,
   breakupCluster,
-  validateCluster,
   hide,
 }
 
@@ -114,11 +113,6 @@ class _AppBarWidgetState extends State<ClusterAppBar> {
           value: ClusterPopupAction.breakupCluster,
           icon: Icons.analytics_outlined,
         ),
-        EntePopupMenuItem(
-          "Validate cluster",
-          value: ClusterPopupAction.validateCluster,
-          icon: Icons.search_off_outlined,
-        ),
       ],
     );
 
@@ -132,8 +126,6 @@ class _AppBarWidgetState extends State<ClusterAppBar> {
             if (value == ClusterPopupAction.breakupCluster) {
               // ignore: unawaited_futures
               await _breakUpCluster(context);
-            } else if (value == ClusterPopupAction.validateCluster) {
-              await _validateCluster(context);
             }
             // else if (value == ClusterPopupAction.setCover) {
             //   await setCoverPhoto(context);
@@ -148,6 +140,9 @@ class _AppBarWidgetState extends State<ClusterAppBar> {
     return actions;
   }
 
+  @Deprecated(
+    'Used for debugging an issue with conflicts on cluster IDs, resolved now',
+  )
   Future<void> _validateCluster(BuildContext context) async {
     _logger.info('_validateCluster called');
     final faceMlDb = FaceMLDataDB.instance;
