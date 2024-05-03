@@ -278,9 +278,8 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
     bool assignName = false;
     await showChoiceDialog(
       context,
-      title: "Do you want to name the person?",
-      firstButtonLabel: "Yes, name person",
-      secondButtonLabel: "No, unhide person only",
+      title: "Are you sure you want to unhide this person?",
+      firstButtonLabel: "Yes, unhide person",
       firstButtonOnTap: () async {
         try {
           await PersonService.instance
@@ -289,17 +288,6 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
           assignName = true;
         } catch (e, s) {
           _logger.severe('Unhiding and naming person failed', e, s);
-          // await showGenericErrorDialog(context: context, error: e);
-        }
-      },
-      secondButtonOnTap: () async {
-        try {
-          await PersonService.instance
-              .deletePerson(widget.person.remoteID, onlyMapping: false);
-          Bus.instance.fire(PeopleChangedEvent());
-          Navigator.of(context).pop(); // Close the hidden page
-        } catch (e, s) {
-          _logger.severe('Unhiding a person failed', e, s);
           // await showGenericErrorDialog(context: context, error: e);
         }
       },
