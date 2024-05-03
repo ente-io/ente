@@ -32,7 +32,9 @@ jobs:
 
         strategy:
             matrix:
-                os: [macos-latest, ubuntu-latest, windows-latest]
+                os: [macos-latest]
+                # Commented for testing
+                # os: [macos-latest, ubuntu-latest, windows-latest]
 
         steps:
             - name: Checkout code
@@ -42,7 +44,7 @@ jobs:
                   # repository when we're invoked for tag v1.x.x on the releases
                   # repository.
                   repository: ente-io/ente
-                  ref: photosd-${{ github.ref }}
+                  ref: photosd-${{ github.ref_name }}
                   submodules: recursive
 
             - name: Setup node
