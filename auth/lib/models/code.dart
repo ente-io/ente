@@ -243,8 +243,7 @@ class Code {
         other.secret == secret &&
         other.counter == counter &&
         other.type == type &&
-        other.rawData == rawData &&
-        other.display == display;
+        other.rawData == rawData;
   }
 
   @override
@@ -256,8 +255,7 @@ class Code {
         secret.hashCode ^
         type.hashCode ^
         counter.hashCode ^
-        rawData.hashCode ^
-        display.hashCode;
+        rawData.hashCode;
   }
 }
 

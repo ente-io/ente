@@ -16,6 +16,7 @@ import 'package:ente_auth/services/preference_service.dart';
 import 'package:ente_auth/services/user_service.dart';
 import 'package:ente_auth/store/code_store.dart';
 import 'package:ente_auth/ui/account/logout_dialog.dart';
+import 'package:ente_auth/ui/code_error_widget.dart';
 import 'package:ente_auth/ui/code_widget.dart';
 import 'package:ente_auth/ui/common/loading_widget.dart';
 import 'package:ente_auth/ui/home/coach_mark_widget.dart';
@@ -335,19 +336,11 @@ class _HomePageState extends State<HomePage> {
                 crossAxisCount: (MediaQuery.sizeOf(context).width ~/ 400)
                     .clamp(1, double.infinity)
                     .toInt(),
+                padding: const EdgeInsets.only(bottom: 80),
                 itemBuilder: ((context, index) {
                   try {
                     if (_filteredCodes[index].error != null) {
-                      return Center(
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text(
-                            l10n.sorryUnableToGenCode(
-                              _filteredCodes[index].code?.issuer ?? "",
-                            ),
-                          ),
-                        ),
-                      );
+                      return const CodeErrorWidget();
                     }
                     return ClipRect(
                       child: CodeWidget(
@@ -381,6 +374,7 @@ class _HomePageState extends State<HomePage> {
                             (MediaQuery.sizeOf(context).width ~/ 400)
                                 .clamp(1, double.infinity)
                                 .toInt(),
+                        padding: const EdgeInsets.only(bottom: 80),
                         itemBuilder: ((context, index) {
                           final codeState = _filteredCodes[index];
                           if (codeState.code != null) {
@@ -393,14 +387,7 @@ class _HomePageState extends State<HomePage> {
                               "code widget error",
                               codeState.error,
                             );
-                            return Center(
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text(
-                                  l10n.sorryUnableToGenCode(""),
-                                ),
-                              ),
-                            );
+                            return const CodeErrorWidget();
                           }
                         }),
                         itemCount: _filteredCodes.length,

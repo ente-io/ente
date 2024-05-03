@@ -434,5 +434,7 @@
   "create": "Create",
   "editTag": "Edit Tag",
   "deleteTagTitle": "Delete tag?",
-  "deleteTagMessage": "Are you sure you want to delete this tag? This action is irreversible."
+  "deleteTagMessage": "Are you sure you want to delete this tag? This action is irreversible.",
+  "somethingWentWrongUpdateApp": "Something went wrong, please update the app",
+  "updateNotAvailable": "Update not available"
 }

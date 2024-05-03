@@ -13,12 +13,19 @@ class GradientButton extends StatefulWidget {
   // padding between the text and icon
   final double paddingValue;
 
+  final double fontSize;
+  final double borderRadius;
+  final double borderWidth;
+
   const GradientButton({
     super.key,
     this.onTap,
     this.text = '',
     this.iconData,
     this.paddingValue = 0.0,
+    this.fontSize = 18,
+    this.borderRadius = 4,
+    this.borderWidth = 1,
   });
 
   @override
@@ -34,11 +41,11 @@ class _GradientButtonState extends State<GradientButton> {
     if (widget.iconData == null) {
       buttonContent = Text(
         widget.text,
-        style: const TextStyle(
+        style: TextStyle(
           color: Colors.white,
           fontWeight: FontWeight.w600,
           fontFamily: 'Inter-SemiBold',
-          fontSize: 18,
+          fontSize: widget.fontSize,
         ),
       );
     } else {
@@ -54,11 +61,11 @@ class _GradientButtonState extends State<GradientButton> {
           const Padding(padding: EdgeInsets.symmetric(horizontal: 6)),
           Text(
             widget.text,
-            style: const TextStyle(
+            style: TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.w600,
               fontFamily: 'Inter-SemiBold',
-              fontSize: 18,
+              fontSize: widget.fontSize,
             ),
           ),
         ],
@@ -80,7 +87,7 @@ class _GradientButtonState extends State<GradientButton> {
           isTapped = false;
         });
       },
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(widget.borderRadius),
       onTap: widget.onTap as void Function()?,
       child: Stack(
         children: [
@@ -122,9 +129,9 @@ class _GradientButtonState extends State<GradientButton> {
                       ],
                     ),
               backgroundBlendMode: isTapped ? null : BlendMode.overlay,
-              border: const GradientBoxBorder(
-                width: 1,
-                gradient: LinearGradient(
+              border: GradientBoxBorder(
+                width: widget.borderWidth,
+                gradient: const LinearGradient(
                   colors: [
                     Color(0xFFB37FEB),
                     Color(0xFF22075E),
@@ -133,7 +140,7 @@ class _GradientButtonState extends State<GradientButton> {
                   end: Alignment.bottomRight,
                 ),
               ),
-              borderRadius: BorderRadius.circular(4),
+              borderRadius: BorderRadius.circular(widget.borderRadius),
             ),
             child: Center(child: buttonContent),
           ),
