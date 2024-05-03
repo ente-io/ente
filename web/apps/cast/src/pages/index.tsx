@@ -9,27 +9,8 @@ import { useEffect, useState } from "react";
 import { storeCastData } from "services/cast/castService";
 import { useCastReceiver } from "../utils/useCastReceiver";
 
-// Function to generate cryptographically secure digits
-const generateSecureData = (length: number): Uint8Array => {
-    const array = new Uint8Array(length);
-    window.crypto.getRandomValues(array);
-    // Modulo operation to ensure each byte is a single digit
-    for (let i = 0; i < length; i++) {
-        array[i] = array[i] % 10;
-    }
-    return array;
-};
-
-const convertDataToDecimalString = (data: Uint8Array): string => {
-    let decimalString = "";
-    for (let i = 0; i < data.length; i++) {
-        decimalString += data[i].toString(); // No need to pad, as each value is a single digit
-    }
-    return decimalString;
-};
-
 export default function PairingMode() {
-    const [digits, setDigits] = useState<string[]>([]);
+    const [deviceCode, setDeviceCode] = useState<string[]>([]);
     const [publicKeyB64, setPublicKeyB64] = useState("");
     const [privateKeyB64, setPrivateKeyB64] = useState("");
     const [codePending, setCodePending] = useState(true);
@@ -43,8 +24,6 @@ export default function PairingMode() {
 
     const init = async () => {
         try {
-            const data = generateSecureData(6);
-            setDigits(convertDataToDecimalString(data).split(""));
             const keypair = await generateKeyPair();
             setPublicKeyB64(await toB64(keypair.publicKey));
             setPrivateKeyB64(await toB64(keypair.privateKey));
@@ -107,7 +86,7 @@ export default function PairingMode() {
                 "urn:x-cast:pair-request",
                 message.senderId,
                 {
-                    code: digits.join(""),
+                    code: deviceCode.join(""),
                 },
             );
         } catch (e) {
@@ -117,9 +96,7 @@ export default function PairingMode() {
 
     const generateKeyPair = async () => {
         await _sodium.ready;
-
         const keypair = _sodium.crypto_box_keypair();
-
         return keypair;
     };
 
@@ -133,7 +110,7 @@ export default function PairingMode() {
         let devicePayload = "";
         try {
             const encDastData = await castGateway.getCastData(
-                `${digits.join("")}`,
+                `${deviceCode.join("")}`,
             );
             if (!encDastData) return;
             devicePayload = encDastData;
@@ -157,10 +134,8 @@ export default function PairingMode() {
     const advertisePublicKey = async (publicKeyB64: string) => {
         // hey client, we exist!
         try {
-            await castGateway.registerDevice(
-                `${digits.join("")}`,
-                publicKeyB64,
-            );
+            const codeValue = await castGateway.registerDevice(publicKeyB64);
+            setDeviceCode(codeValue.split(""));
             setCodePending(false);
         } catch (e) {
             // schedule re-try after 5 seconds
@@ -175,7 +150,7 @@ export default function PairingMode() {
 
     useEffect(() => {
         console.log("useEffect for pairing called");
-        if (digits.length < 1 || !publicKeyB64 || !privateKeyB64) return;
+        if (deviceCode.length < 1 || !publicKeyB64 || !privateKeyB64) return;
 
         const interval = setInterval(async () => {
             console.log("polling for cast data");
@@ -192,7 +167,7 @@ export default function PairingMode() {
         return () => {
             clearInterval(interval);
         };
-    }, [digits, publicKeyB64, privateKeyB64, codePending]);
+    }, [deviceCode, publicKeyB64, privateKeyB64, codePending]);
 
     useEffect(() => {
         if (!publicKeyB64) return;
@@ -235,7 +210,7 @@ export default function PairingMode() {
                             <EnteSpinner />
                         ) : (
                             <>
-                                <LargeType chars={digits} />
+                                <LargeType chars={deviceCode} />
                             </>
                         )}
                     </div>
