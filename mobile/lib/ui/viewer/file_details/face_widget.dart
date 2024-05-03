@@ -202,7 +202,9 @@ class _FaceWidgetState extends State<FaceWidget> {
                   const SizedBox(height: 8),
                   if (widget.person != null)
                     Text(
-                      widget.person!.data.name.trim(),
+                      widget.person!.data.isIgnored
+                          ? '(ignored)'
+                          : widget.person!.data.name.trim(),
                       style: Theme.of(context).textTheme.bodySmall,
                       overflow: TextOverflow.ellipsis,
                       maxLines: 1,

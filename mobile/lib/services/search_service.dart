@@ -787,7 +787,7 @@ class SearchService {
           continue;
         }
         final PersonEntity p = personIdToPerson[personID]!;
-        if (p.data.isHidden) continue;
+        if (p.data.isIgnored) continue;
         facesResult.add(
           GenericSearchResult(
             ResultType.faces,

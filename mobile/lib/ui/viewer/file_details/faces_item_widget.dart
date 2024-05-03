@@ -123,9 +123,9 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
       // Make sure hidden faces are last
       faces.sort((Face a, Face b) {
         final aIsHidden =
-            persons[faceIdToPersonID[a.faceID]]?.data.isHidden ?? false;
+            persons[faceIdToPersonID[a.faceID]]?.data.isIgnored ?? false;
         final bIsHidden =
-            persons[faceIdToPersonID[b.faceID]]?.data.isHidden ?? false;
+            persons[faceIdToPersonID[b.faceID]]?.data.isIgnored ?? false;
         if (aIsHidden && !bIsHidden) {
           return 1;
         } else if (!aIsHidden && bIsHidden) {

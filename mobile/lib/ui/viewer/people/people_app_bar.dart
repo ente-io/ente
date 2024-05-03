@@ -27,7 +27,7 @@ class PeopleAppBar extends StatefulWidget {
   final SelectedFiles selectedFiles;
   final PersonEntity person;
 
-  bool get isHidden => person.data.isHidden;
+  bool get isIgnored => person.data.isIgnored;
 
   const PeopleAppBar(
     this.type,
@@ -143,7 +143,7 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
 
     final List<PopupMenuItem<PeoplPopupAction>> items = [];
 
-    if (!widget.isHidden) {
+    if (!widget.isIgnored) {
       items.addAll(
         [
           PopupMenuItem(

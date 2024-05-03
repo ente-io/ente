@@ -294,7 +294,7 @@ class _PersonActionSheetState extends State<PersonActionSheet> {
   }) async {
     final persons = await PersonService.instance.getPersons();
     if (excludeHidden) {
-      persons.removeWhere((person) => person.data.isHidden);
+      persons.removeWhere((person) => person.data.isIgnored);
     }
     return persons;
   }

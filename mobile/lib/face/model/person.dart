@@ -56,6 +56,9 @@ class PersonData {
 
   bool hasAvatar() => avatarFaceId != null;
 
+  bool get isIgnored =>
+      (name.isEmpty || name == '(hidden)' || name == '(ignored)');
+
   PersonData({
     required this.name,
     this.assigned,
