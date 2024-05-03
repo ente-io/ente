@@ -1,4 +1,4 @@
-import { cast } from "chromecast-caf-receiver";
+/// <reference types="chromecast-caf-receiver" />
 import { useEffect, useState } from "react";
 
 type Receiver = {
