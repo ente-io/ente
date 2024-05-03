@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## v1.7.0 (Unreleased)
+
+v1.7 is a major rewrite to improve the security of our app. We have enabled
+sandboxing and disabled node integration for the renderer process. All this
+required restructuring our IPC mechanisms, which resulted in a lot of under the
+hood changes. The outcome is a more secure app that also uses the latest and
+greatest Electron recommendations.
+
 ## v1.6.63
 
 ### New
