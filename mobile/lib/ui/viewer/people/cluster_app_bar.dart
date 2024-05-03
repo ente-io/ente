@@ -45,7 +45,7 @@ class ClusterAppBar extends StatefulWidget {
 enum ClusterPopupAction {
   setCover,
   breakupCluster,
-  hide,
+  ignore,
 }
 
 class _AppBarWidgetState extends State<ClusterAppBar> {
@@ -110,8 +110,8 @@ class _AppBarWidgetState extends State<ClusterAppBar> {
     items.addAll(
       [
         EntePopupMenuItem(
-          "Hide person",
-          value: ClusterPopupAction.hide,
+          "Ignore person",
+          value: ClusterPopupAction.ignore,
           icon: Icons.hide_image_outlined,
         ),
         EntePopupMenuItem(
@@ -132,8 +132,8 @@ class _AppBarWidgetState extends State<ClusterAppBar> {
             if (value == ClusterPopupAction.breakupCluster) {
               // ignore: unawaited_futures
               await _breakUpCluster(context);
-            } else if (value == ClusterPopupAction.hide) {
-              await _onHideClusterClicked(context);
+            } else if (value == ClusterPopupAction.ignore) {
+              await _onIgnoredClusterClicked(context);
             }
             // else if (value == ClusterPopupAction.setCover) {
             //   await setCoverPhoto(context);
@@ -197,19 +197,19 @@ class _AppBarWidgetState extends State<ClusterAppBar> {
     }
   }
 
-  Future<void> _onHideClusterClicked(BuildContext context) async {
+  Future<void> _onIgnoredClusterClicked(BuildContext context) async {
     await showChoiceDialog(
       context,
-      title: "Are you sure you want to hide this person?",
+      title: "Are you sure you want to ignore this person?",
       body:
-          "The person will not be displayed in the discovery tap anymore. You can unhide the person by going to the hidden person grouping from the file info of one of the photos.",
+          "The person grouping will not be displayed in the discovery tap anymore. Photos will remain untouched.",
       firstButtonLabel: "Yes, confirm",
       firstButtonOnTap: () async {
         try {
-          await ClusterFeedbackService.instance.hideCluster(widget.clusterID);
+          await ClusterFeedbackService.instance.ignoreCluster(widget.clusterID);
           Navigator.of(context).pop(); // Close the cluster page
         } catch (e, s) {
-          _logger.severe('Hiding a cluster failed', e, s);
+          _logger.severe('Ignoring a cluster failed', e, s);
           // await showGenericErrorDialog(context: context, error: e);
         }
       },

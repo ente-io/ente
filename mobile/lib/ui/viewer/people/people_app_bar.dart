@@ -47,8 +47,7 @@ enum PeoplPopupAction {
   remove,
   viewPhotos,
   confirmPhotos,
-  hide,
-  unhide,
+  unignore,
 }
 
 class _AppBarWidgetState extends State<PeopleAppBar> {
@@ -214,14 +213,14 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
       items.addAll(
         [
           const PopupMenuItem(
-            value: PeoplPopupAction.unhide,
+            value: PeoplPopupAction.unignore,
             child: Row(
               children: [
                 Icon(Icons.visibility_outlined),
                 Padding(
                   padding: EdgeInsets.all(8),
                 ),
-                Text("Unhide person"),
+                Text("Show person"),
               ],
             ),
           ),
@@ -259,10 +258,8 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
               await _renameAlbum(context);
             } else if (value == PeoplPopupAction.setCover) {
               await setCoverPhoto(context);
-            } else if (value == PeoplPopupAction.hide) {
-              // ignore: unawaited_futures
-            } else if (value == PeoplPopupAction.unhide) {
-              await _unhidePerson(context);
+            } else if (value == PeoplPopupAction.unignore) {
+              await _showPerson(context);
             } else if (value == PeoplPopupAction.remove) {
               await PersonService.instance.deletePerson(widget.person.remoteID);
             }
@@ -274,12 +271,12 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
     return actions;
   }
 
-  Future<void> _unhidePerson(BuildContext context) async {
+  Future<void> _showPerson(BuildContext context) async {
     bool assignName = false;
     await showChoiceDialog(
       context,
-      title: "Are you sure you want to unhide this person?",
-      firstButtonLabel: "Yes, unhide person",
+      title: "Are you sure you want to show this person in people section again??",
+      firstButtonLabel: "Yes, show person",
       firstButtonOnTap: () async {
         try {
           await PersonService.instance
@@ -287,7 +284,7 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
           Bus.instance.fire(PeopleChangedEvent());
           assignName = true;
         } catch (e, s) {
-          _logger.severe('Unhiding and naming person failed', e, s);
+          _logger.severe('Unignoring/showing and naming person failed', e, s);
           // await showGenericErrorDialog(context: context, error: e);
         }
       },
