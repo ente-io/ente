@@ -46,13 +46,13 @@ const exportRecordFileName = "export_status.json";
 
 /**
  * Name of the top level directory which we create underneath the selected
- * directory when the user starts an export to the filesystem.
+ * directory when the user starts an export to the file system.
  */
 const exportDirectoryName = "Ente Photos";
 
 /**
- * Name of the directory in which we put our metadata when exporting to the
- * filesystem.
+ * Name of the directory in which we put our metadata when exporting to the file
+ * system.
  */
 export const exportMetadataDirectoryName = "metadata";
 
@@ -547,6 +547,9 @@ class ExportService {
         isCanceled: CancellationStatus,
     ) {
         const fs = ensureElectron().fs;
+        const rmdirIfExists = async (dirPath: string) => {
+            if (await fs.exists(dirPath)) await fs.rmdir(dirPath);
+        };
         try {
             const exportRecord = await this.getExportRecord(exportFolder);
             const collectionIDPathMap =
@@ -581,11 +584,11 @@ class ExportService {
                     );
                     try {
                         // delete the collection metadata folder
-                        await fs.rmdir(
+                        await rmdirIfExists(
                             getMetadataFolderExportPath(collectionExportPath),
                         );
                         // delete the collection folder
-                        await fs.rmdir(collectionExportPath);
+                        await rmdirIfExists(collectionExportPath);
                     } catch (e) {
                         await this.addCollectionExportedRecord(
                             exportFolder,
@@ -1378,7 +1381,7 @@ const isExportInProgress = (exportStage: ExportStage) =>
  *
  * Also move its associated metadata JSON to Trash.
  *
- * @param exportDir The root directory on the user's filesystem where we are
+ * @param exportDir The root directory on the user's file system where we are
  * exporting to.
  * */
 const moveToTrash = async (
@@ -1398,17 +1401,19 @@ const moveToTrash = async (
 
     if (await fs.exists(filePath)) {
         await fs.mkdirIfNeeded(trashDir);
-        const trashFilePath = await safeFileName(trashDir, fileName, fs.exists);
+        const trashFileName = await safeFileName(trashDir, fileName, fs.exists);
+        const trashFilePath = `${trashDir}/${trashFileName}`;
         await fs.rename(filePath, trashFilePath);
     }
 
     if (await fs.exists(metadataFilePath)) {
         await fs.mkdirIfNeeded(metadataTrashDir);
-        const metadataTrashFilePath = await safeFileName(
+        const metadataTrashFileName = await safeFileName(
             metadataTrashDir,
             metadataFileName,
             fs.exists,
         );
-        await fs.rename(filePath, metadataTrashFilePath);
+        const metadataTrashFilePath = `${metadataTrashDir}/${metadataTrashFileName}`;
+        await fs.rename(metadataFilePath, metadataTrashFilePath);
     }
 };

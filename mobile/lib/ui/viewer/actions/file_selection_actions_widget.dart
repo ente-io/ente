@@ -3,6 +3,7 @@ import "dart:async";
 import 'package:fast_base58/fast_base58.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import "package:logging/logging.dart";
 import "package:modal_bottom_sheet/modal_bottom_sheet.dart";
 import 'package:photos/core/configuration.dart';
 import "package:photos/generated/l10n.dart";
@@ -30,6 +31,8 @@ import 'package:photos/ui/sharing/manage_links_widget.dart';
 import "package:photos/ui/tools/collage/collage_creator_page.dart";
 import "package:photos/ui/viewer/location/update_location_data_widget.dart";
 import 'package:photos/utils/delete_file_util.dart';
+import "package:photos/utils/dialog_util.dart";
+import "package:photos/utils/file_download_util.dart";
 import 'package:photos/utils/magic_util.dart';
 import 'package:photos/utils/navigation_util.dart';
 import "package:photos/utils/share_util.dart";
@@ -56,6 +59,7 @@ class FileSelectionActionsWidget extends StatefulWidget {
 
 class _FileSelectionActionsWidgetState
     extends State<FileSelectionActionsWidget> {
+  static final _logger = Logger("FileSelectionActionsWidget");
   late int currentUserID;
   late FilesSplit split;
   late CollectionActions collectionActions;
@@ -115,6 +119,8 @@ class _FileSelectionActionsWidgetState
         !widget.selectedFiles.files.any(
           (element) => element.fileType == FileType.video,
         );
+    final showDownloadOption =
+        widget.selectedFiles.files.any((element) => element.localID == null);
 
     //To animate adding and removing of [SelectedActionButton], add all items
     //and set [shouldShow] to false for items that should not be shown and true
@@ -367,6 +373,16 @@ class _FileSelectionActionsWidgetState
       );
     }
 
+    if (showDownloadOption) {
+      items.add(
+        SelectionActionButton(
+          labelText: S.of(context).download,
+          icon: Icons.cloud_download_outlined,
+          onTap: () => _download(widget.selectedFiles.files.toList()),
+        ),
+      );
+    }
+
     items.add(
       SelectionActionButton(
         labelText: S.of(context).share,
@@ -379,41 +395,36 @@ class _FileSelectionActionsWidgetState
       ),
     );
 
-    if (items.isNotEmpty) {
-      final scrollController = ScrollController();
-      // h4ck: https://github.com/flutter/flutter/issues/57920#issuecomment-893970066
-      return MediaQuery(
-        data: MediaQuery.of(context).removePadding(removeBottom: true),
-        child: SafeArea(
-          child: Scrollbar(
-            radius: const Radius.circular(1),
-            thickness: 2,
-            controller: scrollController,
-            thumbVisibility: true,
-            child: SingleChildScrollView(
-              physics: const BouncingScrollPhysics(
-                decelerationRate: ScrollDecelerationRate.fast,
-              ),
-              scrollDirection: Axis.horizontal,
-              child: Container(
-                padding: const EdgeInsets.only(bottom: 24),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(width: 4),
-                    ...items,
-                    const SizedBox(width: 4),
-                  ],
-                ),
+    final scrollController = ScrollController();
+    // h4ck: https://github.com/flutter/flutter/issues/57920#issuecomment-893970066
+    return MediaQuery(
+      data: MediaQuery.of(context).removePadding(removeBottom: true),
+      child: SafeArea(
+        child: Scrollbar(
+          radius: const Radius.circular(1),
+          thickness: 2,
+          controller: scrollController,
+          thumbVisibility: true,
+          child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(
+              decelerationRate: ScrollDecelerationRate.fast,
+            ),
+            scrollDirection: Axis.horizontal,
+            child: Container(
+              padding: const EdgeInsets.only(bottom: 24),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(width: 4),
+                  ...items,
+                  const SizedBox(width: 4),
+                ],
               ),
             ),
           ),
         ),
-      );
-    } else {
-      // TODO: Return "Select All" here
-      return const SizedBox.shrink();
-    }
+      ),
+    );
   }
 
   Future<void> _moveFiles() async {
@@ -645,6 +656,31 @@ class _FileSelectionActionsWidgetState
       widget.selectedFiles.files.toList(),
     )) {
       widget.selectedFiles.clearAll();
+    }
+  }
+
+  Future<void> _download(List<EnteFile> files) async {
+    final dialog = createProgressDialog(
+      context,
+      S.of(context).downloading,
+      isDismissible: true,
+    );
+    await dialog.show();
+    try {
+      final futures = <Future>[];
+      for (final file in files) {
+        if (file.localID == null) {
+          futures.add(downloadToGallery(file));
+        }
+      }
+      await Future.wait(futures);
+      await dialog.hide();
+      widget.selectedFiles.clearAll();
+      showToast(context, S.of(context).filesSavedToGallery);
+    } catch (e) {
+      _logger.warning("Failed to save files", e);
+      await dialog.hide();
+      await showGenericErrorDialog(context: context, error: e);
     }
   }
 }

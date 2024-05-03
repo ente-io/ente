@@ -36,13 +36,20 @@ ente --help
 
 ### Accounts
 
-If you wish, you can add multiple accounts (your own and that of your family members) and export all data using this tool.
+If you wish, you can add multiple accounts (your own and that of your family
+members) and export all data using this tool.
 
 #### Add an account
 
 ```shell
 ente account add
 ```
+
+> [!NOTE]
+>
+> `ente account add` does not create new accounts, it just adds pre-existing
+> accounts to the list of accounts that the CLI knows about so that you can use
+> them for other actions.
 
 #### List accounts
 

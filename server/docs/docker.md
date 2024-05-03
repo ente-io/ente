@@ -45,7 +45,7 @@ require you to clone the repository or build any images.
     +    image: ghcr.io/ente-io/server
     ```
 
-4. Create an (empty) configuration file. Yyou can later put your custom
+4. Create an (empty) configuration file. You can later put your custom
    configuration in this if needed.
 
    ```sh

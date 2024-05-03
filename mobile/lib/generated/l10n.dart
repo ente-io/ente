@@ -5945,6 +5945,16 @@ class S {
     );
   }
 
+  /// `Files saved to gallery`
+  String get filesSavedToGallery {
+    return Intl.message(
+      'Files saved to gallery',
+      name: 'filesSavedToGallery',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Failed to save file to gallery`
   String get fileFailedToSaveToGallery {
     return Intl.message(
@@ -8378,6 +8388,26 @@ class S {
     );
   }
 
+  /// `Auto pair`
+  String get autoPair {
+    return Intl.message(
+      'Auto pair',
+      name: 'autoPair',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Pair with PIN`
+  String get pairWithPin {
+    return Intl.message(
+      'Pair with PIN',
+      name: 'pairWithPin',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Device not found`
   String get deviceNotFound {
     return Intl.message(
@@ -8559,6 +8589,116 @@ class S {
     return Intl.message(
       'Search',
       name: 'search',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Auto Pair requires connecting to Google servers and only works with Chromecast supported devices. Google will not receive sensitive data, such as your photos.`
+  String get autoPairGoogle {
+    return Intl.message(
+      'Auto Pair requires connecting to Google servers and only works with Chromecast supported devices. Google will not receive sensitive data, such as your photos.',
+      name: 'autoPairGoogle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Pair with PIN works for any large screen device you want to play your album on.`
+  String get manualPairDesc {
+    return Intl.message(
+      'Pair with PIN works for any large screen device you want to play your album on.',
+      name: 'manualPairDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Connect to device`
+  String get connectToDevice {
+    return Intl.message(
+      'Connect to device',
+      name: 'connectToDevice',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You'll see available Cast devices here.`
+  String get autoCastDialogBody {
+    return Intl.message(
+      'You\'ll see available Cast devices here.',
+      name: 'autoCastDialogBody',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Make sure Local Network permissions are turned on for the Ente Photos app, in Settings.`
+  String get autoCastiOSPermission {
+    return Intl.message(
+      'Make sure Local Network permissions are turned on for the Ente Photos app, in Settings.',
+      name: 'autoCastiOSPermission',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No device found`
+  String get noDeviceFound {
+    return Intl.message(
+      'No device found',
+      name: 'noDeviceFound',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Stop casting`
+  String get stopCastingTitle {
+    return Intl.message(
+      'Stop casting',
+      name: 'stopCastingTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Do you want to stop casting?`
+  String get stopCastingBody {
+    return Intl.message(
+      'Do you want to stop casting?',
+      name: 'stopCastingBody',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Failed to cast album`
+  String get castIPMismatchTitle {
+    return Intl.message(
+      'Failed to cast album',
+      name: 'castIPMismatchTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please make sure you are on the same network as the TV.`
+  String get castIPMismatchBody {
+    return Intl.message(
+      'Please make sure you are on the same network as the TV.',
+      name: 'castIPMismatchBody',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Pairing complete`
+  String get pairingComplete {
+    return Intl.message(
+      'Pairing complete',
+      name: 'pairingComplete',
       desc: '',
       args: [],
     );

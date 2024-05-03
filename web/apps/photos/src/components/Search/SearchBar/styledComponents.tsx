@@ -23,7 +23,9 @@ export const SearchMobileBox = styled(FluidContainer)`
     }
 `;
 
-export const SearchInputWrapper = styled(CenteredFlex)<{ isOpen: boolean }>`
+export const SearchInputWrapper = styled(CenteredFlex, {
+    shouldForwardProp: (propName) => propName != "isOpen",
+})<{ isOpen: boolean }>`
     background: ${({ theme }) => theme.colors.background.base};
     max-width: 484px;
     margin: auto;

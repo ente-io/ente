@@ -1,6 +1,6 @@
 {
     "name": "ente",
-    "version": "1.6.63",
+    "version": "1.7.0-beta.0",
     "private": true,
     "description": "Desktop client for Ente Photos",
     "author": "Ente <code@ente.io>",
@@ -15,8 +15,11 @@
         "dev-main": "tsc && electron app/main.js",
         "dev-renderer": "cd ../web && yarn install && yarn dev:photos",
         "postinstall": "electron-builder install-app-deps",
-        "lint": "yarn prettier --check . && eslint --ext .ts src",
-        "lint-fix": "yarn prettier --write . && eslint --fix --ext .ts src"
+        "lint": "yarn prettier --check --log-level warn . && eslint --ext .ts src && yarn tsc",
+        "lint-fix": "yarn prettier --write --log-level warn . && eslint --fix --ext .ts src && yarn tsc"
+    },
+    "resolutions": {
+        "jackspeak": "2.1.1"
     },
     "dependencies": {
         "any-shell-escape": "^0.1",
@@ -34,12 +37,13 @@
         "onnxruntime-node": "^1.17"
     },
     "devDependencies": {
+        "@tsconfig/node20": "^20.1.4",
         "@types/auto-launch": "^5.0",
         "@types/ffmpeg-static": "^3.0",
         "@typescript-eslint/eslint-plugin": "^7",
         "@typescript-eslint/parser": "^7",
         "concurrently": "^8",
-        "electron": "^29",
+        "electron": "^30",
         "electron-builder": "^24",
         "electron-builder-notarize": "^1.5",
         "eslint": "^8",

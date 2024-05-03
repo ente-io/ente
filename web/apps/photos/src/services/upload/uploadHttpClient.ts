@@ -3,8 +3,8 @@ import { CustomError, handleUploadError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { getEndpoint, getUploadEndpoint } from "@ente/shared/network/api";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
+import { wait } from "@ente/shared/utils";
 import { EnteFile } from "types/file";
-import { retryHTTPCall } from "utils/upload/uploadRetrier";
 import { MultipartUploadURLs, UploadFile, UploadURL } from "./uploadService";
 
 const ENDPOINT = getEndpoint();
@@ -236,3 +236,31 @@ class UploadHttpClient {
 }
 
 export default new UploadHttpClient();
+
+const retrySleepTimeInMilliSeconds = [2000, 5000, 10000];
+
+export async function retryHTTPCall(
+    func: () => Promise<any>,
+    checkForBreakingError?: (error) => void,
+): Promise<any> {
+    const retrier = async (
+        func: () => Promise<any>,
+        attemptNumber: number = 0,
+    ) => {
+        try {
+            const resp = await func();
+            return resp;
+        } catch (e) {
+            if (checkForBreakingError) {
+                checkForBreakingError(e);
+            }
+            if (attemptNumber < retrySleepTimeInMilliSeconds.length) {
+                await wait(retrySleepTimeInMilliSeconds[attemptNumber]);
+                return await retrier(func, attemptNumber + 1);
+            } else {
+                throw e;
+            }
+        }
+    };
+    return await retrier(func);
+}

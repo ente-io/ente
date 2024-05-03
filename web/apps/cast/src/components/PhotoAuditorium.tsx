@@ -11,14 +11,16 @@ export const PhotoAuditorium: React.FC<PhotoAuditoriumProps> = ({
     showNextSlide,
 }) => {
     useEffect(() => {
+        console.log("showing slide");
         const timeoutId = window.setTimeout(() => {
+            console.log("showing next slide  timer");
             showNextSlide();
         }, 10000);
 
         return () => {
             if (timeoutId) clearTimeout(timeoutId);
         };
-    }, [showNextSlide]);
+    }, []);
 
     return (
         <div

@@ -25,10 +25,13 @@ configure the endpoint the app should be connecting to.
 > You can download the CLI from
 > [here](https://github.com/ente-io/ente/releases?q=tag%3Acli-v0)
 
-Define a config.yaml and put it either in the same directory as CLI or path
-defined in env variable `ENTE_CLI_CONFIG_PATH`
+Define a config.yaml and put it either in the same directory as where you run
+the CLI from ("current working directory"), or in the path defined in env
+variable `ENTE_CLI_CONFIG_PATH`:
 
 ```yaml
 endpoint:
     api: "http://localhost:8080"
 ```
+
+(Another [example](https://github.com/ente-io/ente/blob/main/cli/config.yaml.example))

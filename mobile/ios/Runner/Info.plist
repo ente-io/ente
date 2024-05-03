@@ -105,5 +105,14 @@
 		<true/>
 		<key>UIApplicationSupportsIndirectInputEvents</key>
 		<true/>
+		<key>NSBonjourServices</key>
+                <array>
+                  <string>_googlecast._tcp</string>
+                  <string>F5BCEC64._googlecast._tcp</string>
+                </array>
+
+                <key>NSLocalNetworkUsageDescription</key>
+                <string>${PRODUCT_NAME} uses the local network to discover Cast-enabled devices on your WiFi
+                network.</string>
 	</dict>
 </plist>

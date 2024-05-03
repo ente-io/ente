@@ -1,13 +1,34 @@
 import shellescape from "any-shell-escape";
-import { shell } from "electron"; /* TODO(MR): Why is this not in /main? */
 import { app } from "electron/main";
 import { exec } from "node:child_process";
 import path from "node:path";
 import { promisify } from "node:util";
-import log from "./log";
+import log from "../log";
 
 /** `true` if the app is running in development mode. */
 export const isDev = !app.isPackaged;
+
+/**
+ * Convert a file system {@link platformPath} that uses the local system
+ * specific path separators into a path that uses POSIX file separators.
+ *
+ * For all paths that we persist or pass over the IPC boundary, we always use
+ * POSIX paths, even on Windows.
+ *
+ * Windows recognizes both forward and backslashes. This also works with drive
+ * names. c:\foo\bar and c:/foo/bar are both valid.
+ *
+ * > Almost all paths passed to Windows APIs are normalized. During
+ * > normalization, Windows performs the following steps: ... All forward
+ * > slashes (/) are converted into the standard Windows separator, the back
+ * > slash (\).
+ * >
+ * > https://learn.microsoft.com/en-us/dotnet/standard/io/file-path-formats
+ */
+export const posixPath = (platformPath: string) =>
+    path.sep == path.posix.sep
+        ? platformPath
+        : platformPath.split(path.sep).join(path.posix.sep);
 
 /**
  * Run a shell command asynchronously.
@@ -33,49 +54,11 @@ export const execAsync = (command: string | string[]) => {
         ? shellescape(command)
         : command;
     const startTime = Date.now();
-    log.debug(() => `Running shell command: ${escapedCommand}`);
     const result = execAsync_(escapedCommand);
     log.debug(
-        () =>
-            `Completed in ${Math.round(Date.now() - startTime)} ms (${escapedCommand})`,
+        () => `${escapedCommand} (${Math.round(Date.now() - startTime)} ms)`,
     );
     return result;
 };
 
 const execAsync_ = promisify(exec);
-
-/**
- * Open the given {@link dirPath} in the system's folder viewer.
- *
- * For example, on macOS this'll open {@link dirPath} in Finder.
- */
-export const openDirectory = async (dirPath: string) => {
-    const res = await shell.openPath(path.normalize(dirPath));
-    // shell.openPath resolves with a string containing the error message
-    // corresponding to the failure if a failure occurred, otherwise "".
-    if (res) throw new Error(`Failed to open directory ${dirPath}: res`);
-};
-
-/**
- * Open the app's log directory in the system's folder viewer.
- *
- * @see {@link openDirectory}
- */
-export const openLogDirectory = () => openDirectory(logDirectoryPath());
-
-/**
- * Return the path where the logs for the app are saved.
- *
- * [Note: Electron app paths]
- *
- * By default, these paths are at the following locations:
- *
- * - macOS: `~/Library/Application Support/ente`
- * - Linux: `~/.config/ente`
- * - Windows: `%APPDATA%`, e.g. `C:\Users\<username>\AppData\Local\ente`
- * - Windows: C:\Users\<you>\AppData\Local\<Your App Name>
- *
- * https://www.electronjs.org/docs/latest/api/app
- *
- */
-const logDirectoryPath = () => app.getPath("logs");

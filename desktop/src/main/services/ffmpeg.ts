@@ -1,9 +1,14 @@
 import pathToFfmpeg from "ffmpeg-static";
 import fs from "node:fs/promises";
+import type { ZipItem } from "../../types/ipc";
 import log from "../log";
-import { withTimeout } from "../utils";
-import { execAsync } from "../utils-electron";
-import { deleteTempFile, makeTempFilePath } from "../utils-temp";
+import { ensure, withTimeout } from "../utils/common";
+import { execAsync } from "../utils/electron";
+import {
+    deleteTempFile,
+    makeFileForDataOrPathOrZipItem,
+    makeTempFilePath,
+} from "../utils/temp";
 
 /* Duplicated in the web app's code (used by the WASM FFmpeg implementation). */
 const ffmpegPathPlaceholder = "FFMPEG";
@@ -39,28 +44,24 @@ const outputPathPlaceholder = "OUTPUT";
  */
 export const ffmpegExec = async (
     command: string[],
-    dataOrPath: Uint8Array | string,
+    dataOrPathOrZipItem: Uint8Array | string | ZipItem,
     outputFileExtension: string,
     timeoutMS: number,
 ): Promise<Uint8Array> => {
-    // TODO (MR): This currently copies files for both input and output. This
-    // needs to be tested extremely large video files when invoked downstream of
-    // `convertToMP4` in the web code.
+    // TODO (MR): This currently copies files for both input (when
+    // dataOrPathOrZipItem is data) and output. This needs to be tested
+    // extremely large video files when invoked downstream of `convertToMP4` in
+    // the web code.
 
-    let inputFilePath: string;
-    let isInputFileTemporary: boolean;
-    if (dataOrPath instanceof Uint8Array) {
-        inputFilePath = await makeTempFilePath();
-        isInputFileTemporary = true;
-    } else {
-        inputFilePath = dataOrPath;
-        isInputFileTemporary = false;
-    }
+    const {
+        path: inputFilePath,
+        isFileTemporary: isInputFileTemporary,
+        writeToTemporaryFile: writeToTemporaryInputFile,
+    } = await makeFileForDataOrPathOrZipItem(dataOrPathOrZipItem);
 
     const outputFilePath = await makeTempFilePath(outputFileExtension);
     try {
-        if (dataOrPath instanceof Uint8Array)
-            await fs.writeFile(inputFilePath, dataOrPath);
+        await writeToTemporaryInputFile();
 
         const cmd = substitutePlaceholders(
             command,
@@ -109,5 +110,5 @@ const ffmpegBinaryPath = () => {
     // This substitution of app.asar by app.asar.unpacked is suggested by the
     // ffmpeg-static library author themselves:
     // https://github.com/eugeneware/ffmpeg-static/issues/16
-    return pathToFfmpeg.replace("app.asar", "app.asar.unpacked");
+    return ensure(pathToFfmpeg).replace("app.asar", "app.asar.unpacked");
 };

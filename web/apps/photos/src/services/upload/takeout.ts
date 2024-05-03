@@ -5,6 +5,8 @@ import { nameAndExtension } from "@/next/file";
 import log from "@/next/log";
 import { NULL_LOCATION } from "constants/upload";
 import type { Location } from "types/metadata";
+import { readStream } from "utils/native-stream";
+import type { UploadItem } from "./types";
 
 export interface ParsedMetadataJSON {
     creationTime: number;
@@ -75,18 +77,26 @@ function getFileOriginalName(fileName: string) {
 
 /** Try to parse the contents of a metadata JSON file from a Google Takeout. */
 export const tryParseTakeoutMetadataJSON = async (
-    fileOrPath: File | string,
+    uploadItem: UploadItem,
 ): Promise<ParsedMetadataJSON | undefined> => {
     try {
-        const text =
-            fileOrPath instanceof File
-                ? await fileOrPath.text()
-                : await ensureElectron().fs.readTextFile(fileOrPath);
-
-        return parseMetadataJSONText(text);
+        return parseMetadataJSONText(await uploadItemText(uploadItem));
     } catch (e) {
         log.error("Failed to parse takeout metadata JSON", e);
         return undefined;
+    }
+};
+
+const uploadItemText = async (uploadItem: UploadItem) => {
+    if (uploadItem instanceof File) {
+        return await uploadItem.text();
+    } else if (typeof uploadItem == "string") {
+        return await ensureElectron().fs.readTextFile(uploadItem);
+    } else if (Array.isArray(uploadItem)) {
+        const { response } = await readStream(ensureElectron(), uploadItem);
+        return await response.text();
+    } else {
+        return await uploadItem.file.text();
     }
 };
 

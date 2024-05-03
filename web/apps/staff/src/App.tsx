@@ -9,7 +9,7 @@ export const App: React.FC = () => {
             .then((userDetails) => {
                 console.log("Fetched user details", userDetails);
             })
-            .catch((e) => {
+            .catch((e: unknown) => {
                 console.error("Failed to fetch user details", e);
             });
     };
