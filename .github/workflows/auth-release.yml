@@ -17,8 +17,8 @@ name: "Release (auth)"
 # We use a suffix like `-test` to indicate that these are test tags, and that
 # they belong to a pre-release.
 #
-# If you need to do multiple tests, add a +x at the end of the tag. e.g.
-# `auth-v1.2.3-test+1`.
+# If you need to do multiple tests, add a .x at the end of the tag. e.g.
+# `auth-v1.2.3-test.1`.
 #
 # Once the testing is done, also delete the tag(s) please.
 
