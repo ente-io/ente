@@ -1,4 +1,6 @@
 import { FILE_TYPE } from "@/media/file-type";
+import { isNonWebImageFileExtension } from "@/media/formats";
+import { nameAndExtension } from "@/next/file";
 import log from "@/next/log";
 import PairedSuccessfullyOverlay from "components/PairedSuccessfullyOverlay";
 import { PhotoAuditorium } from "components/PhotoAuditorium";
@@ -11,7 +13,7 @@ import {
 } from "services/cast/castService";
 import { Collection } from "types/collection";
 import { EnteFile } from "types/file";
-import { getPreviewableImage, isRawFileFromFileName } from "utils/file";
+import { getPreviewableImage } from "utils/file";
 
 const renderableFileURLCache = new Map<number, string>();
 
@@ -74,7 +76,9 @@ export default function Slideshow() {
 
         if (file.info.fileSize > 100 * 1024 * 1024) return false;
 
-        if (isRawFileFromFileName(file.metadata.title)) return false;
+        const [, extension] = nameAndExtension(file.metadata.title);
+
+        if (isNonWebImageFileExtension(extension)) return false;
 
         return true;
     };

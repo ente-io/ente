@@ -2,7 +2,6 @@ import { FILE_TYPE } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
 import log from "@/next/log";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
-import { RAW_FORMATS } from "constants/upload";
 import CastDownloadManager from "services/castDownloadManager";
 import { detectMediaMIMEType } from "services/detect-type";
 import {
@@ -93,15 +92,6 @@ export function generateStreamFromArrayBuffer(data: Uint8Array) {
             controller.close();
         },
     });
-}
-
-export function isRawFileFromFileName(fileName: string) {
-    for (const rawFormat of RAW_FORMATS) {
-        if (fileName.toLowerCase().endsWith(rawFormat)) {
-            return true;
-        }
-    }
-    return false;
 }
 
 export function mergeMetadata(files: EnteFile[]): EnteFile[] {
