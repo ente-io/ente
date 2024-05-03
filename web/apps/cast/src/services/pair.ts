@@ -6,9 +6,11 @@ import _sodium from "libsodium-wrappers";
 import { type Cast } from "../utils/useCastReceiver";
 
 /**
- * Listen for pairing requests using the given {@link cast} instance.
+ * Listen for pairing requests using the given {@link cast} instance. On
+ * successful pairing, return the payload (JSON) sent by the sender who
+ * connected to us.
  *
- * [Note: Cast protocol]
+ * [Note: Pairing protocol]
  *
  * The Chromecast Framework (represented here by our handle to the Chromecast
  * Web SDK, {@link cast}) itself is used for only the initial handshake, none of
@@ -35,19 +37,14 @@ import { type Cast } from "../utils/useCastReceiver";
  *    them a message containing the pairing code. This exchange is the only data
  *    that traverses over the Chromecast connection.
  *
- * 5. If at anytime the
+ * 5. In parallel, start polling museum to ask it if anyone has claimed that
+ *    code we vended out and used that to send us an payload encrypted using our
+ *    public key. This payload is a JSON object that contains the data we need
+ *    to initiate a slideshow for a particular Ente collection.
  *
- *
- *
- * in our custom //    "urn:x-cast:pair-request" namespace. over Chromecast
-        protocol is minimal:
- *
- * 1. Client (Web or mobile) sends an (empty) message in our custom //
-        "urn:x-cast:pair-request" namespace.
-        //
-        // 2. We reply with the device code.
-*/
-export const listenForPairingRequest = async (cast: Cast) => {
+ * 6. When that happens, decrypt that data with our private key, and return it.
+ */
+export const pair = async (cast: Cast) => {
     // Generate keypair
     const keypair = await generateKeyPair();
     const publicKeyB64 = await toB64(keypair.publicKey);
@@ -65,7 +62,7 @@ export const listenForPairingRequest = async (cast: Cast) => {
         }
     } while (code === undefined);
 
-    // Listen for incoming messages sent via the Chromecast SDK
+    // Prepare the Chromecast "context".
     const context = cast.framework.CastReceiverContext.getInstance();
     const namespace = "urn:x-cast:pair-request";
 
@@ -94,7 +91,38 @@ export const listenForPairingRequest = async (cast: Cast) => {
         () => context.stop(),
     );
 
+    // Start listening for Chromecast connections.
     context.start(options);
+
+    // Start polling museum
+    let decryptedJSON: unknown | undefined
+    do {
+        // The client will send us the encrypted payload using our public key
+        // that we registered with museum. Then, we can decrypt this using the
+        // private key of the pair and return the plaintext payload, which'll be
+        // a JSON object containing all the data we need to play the collection
+        // slideshow.
+        let devicePayload = "";
+        try {
+            const encDastData = await castGateway.getCastData(`${deviceCode}`);
+            if (!encDastData) return;
+            devicePayload = encDastData;
+        } catch (e) {
+            setCodePending(true);
+            init();
+            return;
+        }
+
+        const decryptedPayload = await boxSealOpen(
+            devicePayload,
+            publicKeyB64,
+            privateKeyB64,
+        );
+
+        const decryptedPayloadObj = JSON.parse(atob(decryptedPayload));
+
+        return decryptedPayloadObj;
+    };
 };
 
 const generateKeyPair = async () => {
