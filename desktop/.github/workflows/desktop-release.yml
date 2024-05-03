@@ -71,6 +71,8 @@ jobs:
             - name: Build
               uses: ente-io/action-electron-builder@v1.0.0
               with:
+                  package_root: desktop
+
                   # GitHub token, automatically provided to the action
                   # (No need to define this secret in the repo settings)
                   github_token: ${{ secrets.GITHUB_TOKEN }}
