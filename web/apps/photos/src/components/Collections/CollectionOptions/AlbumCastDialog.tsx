@@ -162,7 +162,7 @@ export default function AlbumCastDialog(props: Props) {
                         <>
                             <Typography color={"text.muted"}>
                                 {t(
-                                    "AUTO_CAST_PAIR_REQUIRES_CONNECTION_TO_GOOGLE",
+                                    "AUTO_CAST_PAIR_DESC",
                                 )}
                             </Typography>
 
@@ -179,7 +179,7 @@ export default function AlbumCastDialog(props: Props) {
                         </>
                     )}
                     <Typography color="text.muted">
-                        {t("PAIR_WITH_PIN_WORKS_FOR_ANY_LARGE_SCREEN_DEVICE")}
+                        {t("PAIR_WITH_PIN_DESC")}
                     </Typography>
 
                     <EnteButton
