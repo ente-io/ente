@@ -1,4 +1,5 @@
 import { FILE_TYPE } from "@/media/file-type";
+import { isNonWebImageFileExtension } from "@/media/formats";
 import { decodeLivePhoto } from "@/media/live-photo";
 import { lowercaseExtension } from "@/next/file";
 import log from "@/next/log";
@@ -39,20 +40,6 @@ import { VISIBILITY_STATE } from "types/magicMetadata";
 import { isArchivedFile, updateMagicMetadata } from "utils/magicMetadata";
 import { safeFileName } from "utils/native-fs";
 import { writeStream } from "utils/native-stream";
-
-const RAW_FORMATS = [
-    "heic",
-    "rw2",
-    "tiff",
-    "arw",
-    "cr3",
-    "cr2",
-    "raf",
-    "nef",
-    "psd",
-    "dng",
-    "tif",
-];
 
 const SUPPORTED_RAW_FORMATS = [
     "heic",
@@ -306,9 +293,9 @@ export const getRenderableImage = async (fileName: string, imageBlob: Blob) => {
         );
         const { extension } = fileTypeInfo;
 
-        if (!isRawFile(extension)) {
-            // Either it is not something we know how to handle yet, or
-            // something that the browser already knows how to render.
+        if (!isNonWebImageFileExtension(extension)) {
+            // Either it is something that the browser already knows how to
+            // render, or something we don't even about yet.
             return imageBlob;
         }
 
