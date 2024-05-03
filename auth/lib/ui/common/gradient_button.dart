@@ -119,16 +119,16 @@ class _GradientButtonState extends State<GradientButton> {
               gradient: isTapped
                   ? null
                   : const LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      stops: [0, 0.18, 1],
+                      begin: Alignment.bottomRight,
+                      end: Alignment.topLeft,
+                      stops: [0, 0.16, 0.88],
                       colors: [
-                        Color(0xFFEFDBFF),
-                        Color(0x00D2AEF5),
-                        Color(0xFFB37FEB),
+                        Color.fromRGBO(179, 127, 235, 1),
+                        Color.fromRGBO(210, 174, 245, 0),
+                        Color.fromRGBO(239, 219, 255, 1),
                       ],
                     ),
-              backgroundBlendMode: isTapped ? null : BlendMode.overlay,
+              backgroundBlendMode: isTapped ? null : BlendMode.hue,
               border: GradientBoxBorder(
                 width: widget.borderWidth,
                 gradient: const LinearGradient(
