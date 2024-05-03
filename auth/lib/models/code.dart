@@ -81,7 +81,7 @@ class Code {
       Algorithm.sha1,
       type,
       0,
-      "otpauth://${type.name}/$issuer:$account?algorithm=SHA1${type == Type.steam ? "" : "&digits=$digits"}&issuer=$issuer&period=30&secret=$secret",
+      "otpauth://${type.name}/$issuer:$account?algorithm=SHA1&digits=$digits&issuer=$issuer&period=30&secret=$secret",
     );
   }
 
@@ -149,9 +149,11 @@ class Code {
 
   static int _getDigits(Uri uri, String issuer) {
     try {
-      if (issuer.toLowerCase() == "steam") return steamDigits;
       return int.parse(uri.queryParameters['digits']!);
     } catch (e) {
+      if (issuer.toLowerCase() == "steam") {
+        return steamDigits;
+      }
       return defaultDigits;
     }
   }
