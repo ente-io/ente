@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import "dart:isolate";
 
 import "package:adaptive_theme/adaptive_theme.dart";
 import 'package:background_fetch/background_fetch.dart';
@@ -276,6 +277,7 @@ Future<void> _scheduleHeartBeat(
     isBackground ? kLastBGTaskHeartBeatTime : kLastFGTaskHeartBeatTime,
     DateTime.now().microsecondsSinceEpoch,
   );
+  _logger.info("Heartbeat scheduled for ${isBackground ? 'BG' : 'FG'} task");
   Future.delayed(kHeartBeatFrequency, () async {
     // ignore: unawaited_futures
     _scheduleHeartBeat(prefs, isBackground);
@@ -303,11 +305,16 @@ Future<void> _scheduleFGSync(String caller) async {
 }
 
 void _scheduleBGTaskKill(String taskId) async {
+  _logger.info("debugBGTask : Checking if BG task should be killed");
   if (await _isRunningInForeground()) {
     _logger.info("Found app in FG, committing seppuku. $taskId");
     await _killBGTask(taskId);
     return;
   }
+  _logger.info(
+    "is running in foreground: ${await _isRunningInForeground()} *************",
+  );
+  _logger.info("debugBGTask : isNotRunningInForeground *************");
   Future.delayed(kHeartBeatFrequency, () async {
     _scheduleBGTaskKill(taskId);
   });
@@ -325,15 +332,22 @@ Future<bool> _isRunningInForeground() async {
 }
 
 Future<void> _killBGTask([String? taskId]) async {
+  _logger.info("KillingBGTask taskId: $taskId ***************");
   await UploadLocksDB.instance.releaseLocksAcquiredByOwnerBefore(
     ProcessType.background.toString(),
     DateTime.now().microsecondsSinceEpoch,
   );
   final prefs = await SharedPreferences.getInstance();
+
   await prefs.remove(kLastBGTaskHeartBeatTime);
   if (taskId != null) {
     BackgroundFetch.finish(taskId);
   }
+
+  ///Band aid for background process not getting killed. Should migrate to using
+  ///workmanager instead of background_fetch.
+  Isolate.current.kill();
+  _logger.info('Kill BG task done *************');
 }
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
