@@ -14,15 +14,20 @@ import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
+import "package:photos/ui/viewer/people/add_person_action_sheet.dart";
+import "package:photos/ui/viewer/people/people_page.dart";
 import "package:photos/ui/viewer/people/person_cluster_suggestion.dart";
 import 'package:photos/ui/viewer/people/person_clusters_page.dart';
 import "package:photos/utils/dialog_util.dart";
+import "package:photos/utils/navigation_util.dart";
 
 class PeopleAppBar extends StatefulWidget {
   final GalleryType type;
   final String? title;
   final SelectedFiles selectedFiles;
   final PersonEntity person;
+
+  bool get isHidden => person.data.isHidden;
 
   const PeopleAppBar(
     this.type,
@@ -43,6 +48,7 @@ enum PeoplPopupAction {
   viewPhotos,
   confirmPhotos,
   hide,
+  unhide,
 }
 
 class _AppBarWidgetState extends State<PeopleAppBar> {
@@ -138,71 +144,90 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
 
     final List<PopupMenuItem<PeoplPopupAction>> items = [];
 
-    items.addAll(
-      [
-        PopupMenuItem(
-          value: PeoplPopupAction.rename,
-          child: Row(
-            children: [
-              const Icon(Icons.edit),
-              const Padding(
-                padding: EdgeInsets.all(8),
-              ),
-              Text(S.of(context).rename),
-            ],
+    if (!widget.isHidden) {
+      items.addAll(
+        [
+          PopupMenuItem(
+            value: PeoplPopupAction.rename,
+            child: Row(
+              children: [
+                const Icon(Icons.edit),
+                const Padding(
+                  padding: EdgeInsets.all(8),
+                ),
+                Text(S.of(context).rename),
+              ],
+            ),
           ),
-        ),
-        // PopupMenuItem(
-        //   value: PeoplPopupAction.setCover,
-        //   child: Row(
-        //     children: [
-        //       const Icon(Icons.image_outlined),
-        //       const Padding(
-        //         padding: EdgeInsets.all(8),
-        //       ),
-        //       Text(S.of(context).setCover),
-        //     ],
-        //   ),
-        // ),
+          // PopupMenuItem(
+          //   value: PeoplPopupAction.setCover,
+          //   child: Row(
+          //     children: [
+          //       const Icon(Icons.image_outlined),
+          //       const Padding(
+          //         padding: EdgeInsets.all(8),
+          //       ),
+          //       Text(S.of(context).setCover),
+          //     ],
+          //   ),
+          // ),
 
-        PopupMenuItem(
-          value: PeoplPopupAction.remove,
-          child: Row(
-            children: [
-              const Icon(Icons.remove_circle_outline),
-              const Padding(
-                padding: EdgeInsets.all(8),
-              ),
-              Text(S.of(context).remove),
-            ],
+          PopupMenuItem(
+            value: PeoplPopupAction.remove,
+            child: Row(
+              children: [
+                const Icon(Icons.remove_circle_outline),
+                const Padding(
+                  padding: EdgeInsets.all(8),
+                ),
+                Text(S.of(context).remove),
+              ],
+            ),
           ),
-        ),
-        const PopupMenuItem(
-          value: PeoplPopupAction.viewPhotos,
-          child: Row(
-            children: [
-              Icon(Icons.view_array_outlined),
-              Padding(
-                padding: EdgeInsets.all(8),
-              ),
-              Text('View confirmed photos'),
-            ],
+          const PopupMenuItem(
+            value: PeoplPopupAction.viewPhotos,
+            child: Row(
+              children: [
+                Icon(Icons.view_array_outlined),
+                Padding(
+                  padding: EdgeInsets.all(8),
+                ),
+                Text('View confirmed photos'),
+              ],
+            ),
           ),
-        ),
-        const PopupMenuItem(
-          value: PeoplPopupAction.confirmPhotos,
-          child: Row(
-            children: [
-              Icon(CupertinoIcons.square_stack_3d_down_right),
-              Padding(
-                padding: EdgeInsets.all(8),
-              ),
-              Text('Review suggestions'),
-            ],
+          const PopupMenuItem(
+            value: PeoplPopupAction.confirmPhotos,
+            child: Row(
+              children: [
+                Icon(CupertinoIcons.square_stack_3d_down_right),
+                Padding(
+                  padding: EdgeInsets.all(8),
+                ),
+                Text('Review suggestions'),
+              ],
+            ),
           ),
-        ),
-      ],
-    );
+        ],
+      );
+    } else {
+      items.addAll(
+        [
+          const PopupMenuItem(
+            value: PeoplPopupAction.unhide,
+            child: Row(
+              children: [
+                Icon(Icons.visibility_outlined),
+                Padding(
+                  padding: EdgeInsets.all(8),
+                ),
+                Text("Unhide person"),
+              ],
+            ),
+          ),
+        ],
+      );
+    }
 
     if (items.isNotEmpty) {
       actions.add(
@@ -236,6 +261,8 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
               await setCoverPhoto(context);
             } else if (value == PeoplPopupAction.hide) {
               // ignore: unawaited_futures
+            } else if (value == PeoplPopupAction.unhide) {
+              await _unhidePerson(context);
             } else if (value == PeoplPopupAction.remove) {
               await PersonService.instance.deletePerson(widget.person.remoteID);
             }
@@ -245,6 +272,49 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
     }
 
     return actions;
+  }
+
+  Future<void> _unhidePerson(BuildContext context) async {
+    bool assignName = false;
+    await showChoiceDialog(
+      context,
+      title: "Do you want to name the person?",
+      firstButtonLabel: "Yes, name person",
+      secondButtonLabel: "No, unhide person only",
+      firstButtonOnTap: () async {
+        try {
+          await PersonService.instance
+              .deletePerson(widget.person.remoteID, onlyMapping: false);
+          Bus.instance.fire(PeopleChangedEvent());
+          assignName = true;
+        } catch (e, s) {
+          _logger.severe('Unhiding and naming person failed', e, s);
+          // await showGenericErrorDialog(context: context, error: e);
+        }
+      },
+      secondButtonOnTap: () async {
+        try {
+          await PersonService.instance
+              .deletePerson(widget.person.remoteID, onlyMapping: false);
+          Bus.instance.fire(PeopleChangedEvent());
+          Navigator.of(context).pop(); // Close the hidden page
+        } catch (e, s) {
+          _logger.severe('Unhiding a person failed', e, s);
+          // await showGenericErrorDialog(context: context, error: e);
+        }
+      },
+    );
+    if (assignName) {
+      final result = await showAssignPersonAction(
+        context,
+        clusterID: widget.person.data.assigned!.first.id,
+      );
+      Navigator.pop(context);
+      if (result != null && result is PersonEntity) {
+        // ignore: unawaited_futures
+        routeToPage(context, PeoplePage(person: result));
+      }
+    }
   }
 
   Future<void> setCoverPhoto(BuildContext context) async {
