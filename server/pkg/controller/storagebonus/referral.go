@@ -3,7 +3,7 @@ package storagebonus
 import (
 	"database/sql"
 	"errors"
-	"fmt"
+	"github.com/ente-io/museum/pkg/utils/random"
 
 	"github.com/ente-io/museum/ente"
 	entity "github.com/ente-io/museum/ente/storagebonus"
@@ -119,7 +119,7 @@ func (c *Controller) GetOrCreateReferralCode(ctx *gin.Context, userID int64) (*s
 		if !errors.Is(err, sql.ErrNoRows) {
 			return nil, stacktrace.Propagate(err, "failed to get storagebonus code")
 		}
-		code, err := generateAlphaNumString(codeLength)
+		code, err := random.GenerateAlphaNumString(codeLength)
 		if err != nil {
 			return nil, stacktrace.Propagate(err, "")
 		}
@@ -130,31 +130,4 @@ func (c *Controller) GetOrCreateReferralCode(ctx *gin.Context, userID int64) (*s
 		referralCode = &code
 	}
 	return referralCode, nil
-}
-
-// generateAlphaNumString returns AlphaNumeric code of given length
-// which exclude number 0 and letter O. The code always starts with an
-// alphabet
-func generateAlphaNumString(length int) (string, error) {
-	// Define the alphabet and numbers to be used in the string.
-	alphabet := "ABCDEFGHIJKLMNPQRSTUVWXYZ"
-	// Define the alphabet and numbers to be used in the string.
-	alphaNum := fmt.Sprintf("%s123456789", alphabet)
-	// Allocate a byte slice with the desired length.
-	result := make([]byte, length)
-	// Generate the first letter as an alphabet.
-	r0, err := auth.GenerateRandomInt(int64(len(alphabet)))
-	if err != nil {
-		return "", stacktrace.Propagate(err, "")
-	}
-	result[0] = alphabet[r0]
-	// Generate the remaining characters as alphanumeric.
-	for i := 1; i < length; i++ {
-		ri, err := auth.GenerateRandomInt(int64(len(alphaNum)))
-		if err != nil {
-			return "", stacktrace.Propagate(err, "")
-		}
-		result[i] = alphaNum[ri]
-	}
-	return string(result), nil
 }
