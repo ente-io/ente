@@ -156,7 +156,11 @@ class PersonService {
     return result;
   }
 
-  Future<PersonEntity> addPerson(String name, int clusterID) async {
+  Future<PersonEntity> addPerson(
+    String name,
+    int clusterID, {
+    bool isHidden = false,
+  }) async {
     final faceIds = await faceMLDataDB.getFaceIDsForCluster(clusterID);
     final data = PersonData(
       name: name,
@@ -166,6 +170,7 @@ class PersonService {
           faces: faceIds.toSet(),
         ),
       ],
+      isHidden: isHidden,
     );
     final result = await entityService.addOrUpdate(
       EntityType.person,

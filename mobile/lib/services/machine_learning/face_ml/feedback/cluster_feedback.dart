@@ -293,6 +293,12 @@ class ClusterFeedbackService {
     return true;
   }
 
+  Future<void> hideCluster(int clusterID) async {
+    await PersonService.instance.addPerson('hidden', clusterID, isHidden: true);
+    Bus.instance.fire(PeopleChangedEvent());
+    return;
+  }
+
   // TODO: iterate over this method to find sweet spot
   Future<Map<int, List<String>>> breakUpCluster(
     int clusterID, {
