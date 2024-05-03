@@ -20,6 +20,7 @@ import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedba
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
 import "package:photos/ui/common/popup_item.dart";
 import "package:photos/ui/viewer/people/cluster_breakup_page.dart";
+import "package:photos/utils/dialog_util.dart";
 
 class ClusterAppBar extends StatefulWidget {
   final GalleryType type;
@@ -132,9 +133,7 @@ class _AppBarWidgetState extends State<ClusterAppBar> {
               // ignore: unawaited_futures
               await _breakUpCluster(context);
             } else if (value == ClusterPopupAction.hide) {
-              await ClusterFeedbackService.instance
-                  .hideCluster(widget.clusterID);
-              Navigator.of(context).pop(); // Close the cluster page
+              await _onHideClusterClicked(context);
             }
             // else if (value == ClusterPopupAction.setCover) {
             //   await setCoverPhoto(context);
@@ -196,6 +195,25 @@ class _AppBarWidgetState extends State<ClusterAppBar> {
         );
       }
     }
+  }
+
+  Future<void> _onHideClusterClicked(BuildContext context) async {
+    await showChoiceDialog(
+      context,
+      title: "Are you sure you want to hide this person?",
+      body:
+          "The person will not be displayed in the discovery tap anymore. You can unhide the person by going to the hidden person grouping from the file info of one of the photos.",
+      firstButtonLabel: "Yes, confirm",
+      firstButtonOnTap: () async {
+        try {
+          await ClusterFeedbackService.instance.hideCluster(widget.clusterID);
+          Navigator.of(context).pop(); // Close the cluster page
+        } catch (e, s) {
+          _logger.severe('Hiding a cluster failed', e, s);
+          // await showGenericErrorDialog(context: context, error: e);
+        }
+      },
+    );
   }
 
   Future<void> _breakUpCluster(BuildContext context) async {
