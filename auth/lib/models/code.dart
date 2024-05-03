@@ -59,7 +59,7 @@ class Code {
       updatedType,
       updatedCounter,
       "otpauth://${updatedType.name}/$updateIssuer:$updateAccount?algorithm=${updatedAlgo.name}"
-      "${updatedType == Type.steam ? "" : "&digits=$updatedDigits"}&issuer=$updateIssuer"
+      "&digits=$updatedDigits&issuer=$updateIssuer"
       "&period=$updatePeriod&secret=$updatedSecret${updatedType == Type.hotp ? "&counter=$updatedCounter" : ""}",
       generatedID: generatedID,
     );
