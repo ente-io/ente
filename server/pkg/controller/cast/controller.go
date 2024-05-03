@@ -2,7 +2,6 @@ package cast
 
 import (
 	"context"
-	"github.com/ente-io/museum/ente"
 	"github.com/ente-io/museum/ente/cast"
 	"github.com/ente-io/museum/pkg/controller/access"
 	castRepo "github.com/ente-io/museum/pkg/repo/cast"
@@ -42,7 +41,6 @@ func (c *Controller) GetPublicKey(ctx *gin.Context, deviceCode string) (string, 
 			"ip":         ip,
 			"clientIP":   network.GetClientIP(ctx),
 		}).Warn("GetPublicKey: IP mismatch")
-		return "", &ente.ErrCastIPMismatch
 	}
 	return pubKey, nil
 }
