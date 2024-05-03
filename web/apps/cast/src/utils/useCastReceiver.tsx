@@ -36,7 +36,7 @@ export const useCastReceiver = () => {
         load().then((receiver) => {
             setReceiver(receiver);
         });
-    });
+    }, []);
 
     return receiver;
 };
