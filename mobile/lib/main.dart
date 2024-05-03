@@ -277,7 +277,6 @@ Future<void> _scheduleHeartBeat(
     isBackground ? kLastBGTaskHeartBeatTime : kLastFGTaskHeartBeatTime,
     DateTime.now().microsecondsSinceEpoch,
   );
-  _logger.info("Heartbeat scheduled for ${isBackground ? 'BG' : 'FG'} task");
   Future.delayed(kHeartBeatFrequency, () async {
     // ignore: unawaited_futures
     _scheduleHeartBeat(prefs, isBackground);
@@ -305,16 +304,11 @@ Future<void> _scheduleFGSync(String caller) async {
 }
 
 void _scheduleBGTaskKill(String taskId) async {
-  _logger.info("debugBGTask : Checking if BG task should be killed");
   if (await _isRunningInForeground()) {
     _logger.info("Found app in FG, committing seppuku. $taskId");
     await _killBGTask(taskId);
     return;
   }
-  _logger.info(
-    "is running in foreground: ${await _isRunningInForeground()} *************",
-  );
-  _logger.info("debugBGTask : isNotRunningInForeground *************");
   Future.delayed(kHeartBeatFrequency, () async {
     _scheduleBGTaskKill(taskId);
   });
