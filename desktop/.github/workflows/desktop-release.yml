@@ -32,9 +32,7 @@ jobs:
 
         strategy:
             matrix:
-                os: [macos-latest]
-                # Commented for testing
-                # os: [macos-latest, ubuntu-latest, windows-latest]
+                os: [macos-latest, ubuntu-latest, windows-latest]
 
         steps:
             - name: Checkout code
