@@ -10,7 +10,7 @@ import { storeCastData } from "services/cast/castService";
 import { useCastReceiver } from "../utils/useCastReceiver";
 
 export default function PairingMode() {
-    const [deviceCode, setDeviceCode] = useState<string[]>([]);
+    const [deviceCode, setDeviceCode] = useState("");
     const [publicKeyB64, setPublicKeyB64] = useState("");
     const [privateKeyB64, setPrivateKeyB64] = useState("");
     const [codePending, setCodePending] = useState(true);
@@ -86,7 +86,7 @@ export default function PairingMode() {
                 "urn:x-cast:pair-request",
                 message.senderId,
                 {
-                    code: deviceCode.join(""),
+                    code: deviceCode,
                 },
             );
         } catch (e) {
@@ -109,9 +109,7 @@ export default function PairingMode() {
         // then, we can decrypt this and store all the necessary info locally so we can play the collection slideshow.
         let devicePayload = "";
         try {
-            const encDastData = await castGateway.getCastData(
-                `${deviceCode.join("")}`,
-            );
+            const encDastData = await castGateway.getCastData(`${deviceCode}`);
             if (!encDastData) return;
             devicePayload = encDastData;
         } catch (e) {
@@ -135,7 +133,7 @@ export default function PairingMode() {
         // hey client, we exist!
         try {
             const codeValue = await castGateway.registerDevice(publicKeyB64);
-            setDeviceCode(codeValue.split(""));
+            setDeviceCode(codeValue);
             setCodePending(false);
         } catch (e) {
             // schedule re-try after 5 seconds
@@ -210,7 +208,7 @@ export default function PairingMode() {
                             <EnteSpinner />
                         ) : (
                             <>
-                                <LargeType chars={deviceCode} />
+                                <LargeType chars={deviceCode.split("")} />
                             </>
                         )}
                     </div>
