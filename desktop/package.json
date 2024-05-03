@@ -3,6 +3,7 @@
     "version": "1.7.0-beta.0",
     "private": true,
     "description": "Desktop client for Ente Photos",
+    "repository": "github:ente-io/photos-desktop",
     "author": "Ente <code@ente.io>",
     "main": "app/main.js",
     "scripts": {
@@ -44,7 +45,7 @@
         "@typescript-eslint/parser": "^7",
         "concurrently": "^8",
         "electron": "^30",
-        "electron-builder": "^24",
+        "electron-builder": "25.0.0-alpha.6",
         "electron-builder-notarize": "^1.5",
         "eslint": "^8",
         "prettier": "^3",

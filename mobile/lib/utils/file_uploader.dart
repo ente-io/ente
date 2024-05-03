@@ -376,7 +376,13 @@ class FileUploader {
     if (Platform.isAndroid) {
       final bool hasPermission = await Permission.accessMediaLocation.isGranted;
       if (!hasPermission) {
-        throw NoMediaLocationAccessError();
+        final permissionStatus = await Permission.accessMediaLocation.request();
+        if (!permissionStatus.isGranted) {
+          _logger.severe(
+            "Media location access denied with permission status: ${permissionStatus.name}",
+          );
+          throw NoMediaLocationAccessError();
+        }
       }
     }
   }

@@ -362,8 +362,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "autoCastiOSPermission": MessageLookupByLibrary.simpleMessage(
             "Make sure Local Network permissions are turned on for the Ente Photos app, in Settings."),
         "autoPair": MessageLookupByLibrary.simpleMessage("Auto pair"),
-        "autoPairGoogle": MessageLookupByLibrary.simpleMessage(
-            "Auto Pair requires connecting to Google servers and only works with Chromecast supported devices. Google will not receive sensitive data, such as your photos."),
+        "autoPairDesc": MessageLookupByLibrary.simpleMessage(
+            "Auto pair works only with devices that support Chromecast."),
         "available": MessageLookupByLibrary.simpleMessage("Available"),
         "backedUpFolders":
             MessageLookupByLibrary.simpleMessage("Backed up folders"),
@@ -918,7 +918,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "manageSubscription":
             MessageLookupByLibrary.simpleMessage("Manage subscription"),
         "manualPairDesc": MessageLookupByLibrary.simpleMessage(
-            "Pair with PIN works for any large screen device you want to play your album on."),
+            "Pair with PIN works with any screen you wish to view your album on."),
         "map": MessageLookupByLibrary.simpleMessage("Map"),
         "maps": MessageLookupByLibrary.simpleMessage("Maps"),
         "mastodon": MessageLookupByLibrary.simpleMessage("Mastodon"),
