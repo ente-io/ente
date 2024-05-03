@@ -120,6 +120,20 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
           return b.score.compareTo(a.score);
         }
       });
+      // Make sure hidden faces are last
+      faces.sort((Face a, Face b) {
+        final aIsHidden =
+            persons[faceIdToPersonID[a.faceID]]?.data.isHidden ?? false;
+        final bIsHidden =
+            persons[faceIdToPersonID[b.faceID]]?.data.isHidden ?? false;
+        if (aIsHidden && !bIsHidden) {
+          return 1;
+        } else if (!aIsHidden && bIsHidden) {
+          return -1;
+        } else {
+          return 0;
+        }
+      });
 
       final lastViewedClusterID = ClusterFeedbackService.lastViewedClusterID;
 
