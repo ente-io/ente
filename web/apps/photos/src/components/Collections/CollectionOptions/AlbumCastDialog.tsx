@@ -161,9 +161,7 @@ export default function AlbumCastDialog(props: Props) {
                     {browserCanCast && (
                         <>
                             <Typography color={"text.muted"}>
-                                {t(
-                                    "AUTO_CAST_PAIR_DESC",
-                                )}
+                                {t("AUTO_CAST_PAIR_DESC")}
                             </Typography>
 
                             <EnteButton
