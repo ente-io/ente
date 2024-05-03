@@ -16,7 +16,7 @@ export default function PairingMode() {
     const [codePending, setCodePending] = useState(true);
     const [isCastReady, setIsCastReady] = useState(false);
 
-    const { cast } = useCastReceiver();
+    const cast = useCastReceiver();
 
     useEffect(() => {
         init();
