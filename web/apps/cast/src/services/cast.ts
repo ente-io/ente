@@ -3,6 +3,7 @@ import { isNonWebImageFileExtension } from "@/media/formats";
 import { decodeLivePhoto } from "@/media/live-photo";
 import { nameAndExtension } from "@/next/file";
 import log from "@/next/log";
+import { ensure } from "@/utils/ensure";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { CustomError, parseSharingErrorCodes } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
@@ -25,6 +26,41 @@ export interface SavedCollectionFiles {
 const ENDPOINT = getEndpoint();
 const COLLECTION_FILES_TABLE = "collection-files";
 const COLLECTIONS_TABLE = "collections";
+
+/**
+ * Save the data received after pairing with a sender into local storage.
+ *
+ * We will read in back when we start the slideshow.
+ */
+export const storeCastData = (payload: unknown) => {
+    if (!payload || typeof payload != "object")
+        throw new Error("Unexpected cast data");
+
+    // Iterate through all the keys of the payload object and save them to
+    // localStorage. We don't validate here, we'll validate when we read these
+    // values back in `readCastData`.
+    for (const key in payload) {
+        window.localStorage.setItem(key, payload[key]);
+    }
+};
+
+interface CastData {
+    /** A key to decrypt the collection we are casting. */
+    collectionKey: string;
+    /** A credential to use for fetching media files for this cast session. */
+    castToken: string;
+}
+
+/**
+ * Read back the cast data we got after pairing.
+ *
+ * Sibling of {@link storeCastData}
+ */
+export const readCastData = (): CastData => {
+    const collectionKey = ensure(window.localStorage.getItem("collectionKey"));
+    const castToken = ensure(window.localStorage.getItem("castToken"));
+    return { collectionKey, castToken };
+};
 
 const getLastSyncKey = (collectionUID: string) => `${collectionUID}-time`;
 
@@ -232,8 +268,8 @@ const fetchFiles = async (
 };
 
 export const getCastCollection = async (
-    castToken: string,
     collectionKey: string,
+    castToken: string,
 ): Promise<Collection> => {
     try {
         const resp = await HTTPService.get(`${ENDPOINT}/cast/info`, null, {
@@ -275,13 +311,6 @@ export const getCastCollection = async (
     } catch (e) {
         log.error("failed to get cast collection", e);
         throw e;
-    }
-};
-
-export const storeCastData = (payloadObj: Object) => {
-    // iterate through all the keys in the payload object and set them in localStorage.
-    for (const key in payloadObj) {
-        window.localStorage.setItem(key, payloadObj[key]);
     }
 };
 

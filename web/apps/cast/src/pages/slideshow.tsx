@@ -8,6 +8,7 @@ import {
     getCastCollection,
     getLocalFiles,
     isFileEligibleForCast,
+    readCastData,
     syncPublicFiles,
 } from "services/cast";
 import { Collection } from "types/collection";
@@ -28,13 +29,10 @@ export default function Slideshow() {
 
     const syncCastFiles = async (token: string) => {
         try {
-            console.log("syncCastFiles");
-            const castToken = window.localStorage.getItem("castToken");
-            const requestedCollectionKey =
-                window.localStorage.getItem("collectionKey");
+            const { castToken, collectionKey } = readCastData();
             const collection = await getCastCollection(
+                collectionKey,
                 castToken,
-                requestedCollectionKey,
             );
             if (
                 castCollection === undefined ||
