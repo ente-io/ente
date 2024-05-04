@@ -159,6 +159,8 @@ export const advertiseCode = (
  * given pairing code. If so, decrypt it using our private key and return the
  * JSON payload. Phase 3 of the pairing protocol.
  *
+ * Returns `undefined` if there hasn't been any data obtained yet.
+ *
  * See: [Note: Pairing protocol].
  */
 export const getCastData = async (registration: Registration) => {
@@ -167,6 +169,7 @@ export const getCastData = async (registration: Registration) => {
     // The client will send us the encrypted payload using our public key that
     // we registered with museum.
     const encryptedCastData = await castGateway.getCastData(pairingCode);
+    if (!encryptedCastData) return;
 
     // Decrypt it using the private key of the pair and return the plaintext
     // payload, which'll be a JSON object containing the data we need to start a
