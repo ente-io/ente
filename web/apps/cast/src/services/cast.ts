@@ -163,6 +163,71 @@ const getCastCollection = async (
     return collection;
 };
 
+const saveCollection = async (collection: Collection) => {
+    const collections =
+        (await localForage.getItem<Collection[]>(COLLECTIONS_TABLE)) ?? [];
+    await localForage.setItem(
+        COLLECTIONS_TABLE,
+        dedupeCollections([collection, ...collections]),
+    );
+};
+
+const syncPublicFiles = async (
+    castToken: string,
+    collection: Collection,
+    setPublicFiles: (files: EnteFile[]) => void,
+) => {
+    let files: EnteFile[] = [];
+    const sortAsc = collection?.pubMagicMetadata?.data.asc ?? false;
+    const collectionUID = String(collection.id);
+    const localFiles = await getLocalFiles(collectionUID);
+    files = [...files, ...localFiles];
+    try {
+        const lastSyncTime = await getSyncTime(collectionUID);
+        if (collection.updationTime === lastSyncTime) {
+            return sortFiles(files, sortAsc);
+        }
+        const fetchedFiles = await fetchFiles(
+            castToken,
+            collection,
+            lastSyncTime,
+            files,
+            setPublicFiles,
+        );
+
+        files = [...files, ...fetchedFiles];
+        const latestVersionFiles = new Map<string, EnteFile>();
+        files.forEach((file) => {
+            const uid = `${file.collectionID}-${file.id}`;
+            if (
+                !latestVersionFiles.has(uid) ||
+                latestVersionFiles.get(uid).updationTime < file.updationTime
+            ) {
+                latestVersionFiles.set(uid, file);
+            }
+        });
+        files = [];
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        for (const [_, file] of latestVersionFiles) {
+            if (file.isDeleted) {
+                continue;
+            }
+            files.push(file);
+        }
+        await savecollectionFiles(collectionUID, files);
+        await updateSyncTime(collectionUID, collection.updationTime);
+        setPublicFiles([...sortFiles(mergeMetadata(files), sortAsc)]);
+    } catch (e) {
+        const parsedError = parseSharingErrorCodes(e);
+        log.error("failed to sync shared collection files", e);
+        if (parsedError.message === CustomError.TOKEN_EXPIRED) {
+            throw e;
+        }
+    }
+    return [...sortFiles(mergeMetadata(files), sortAsc)];
+};
+
+
 const getLastSyncKey = (collectionUID: string) => `${collectionUID}-time`;
 
 export const getLocalFiles = async (
@@ -192,26 +257,6 @@ const savecollectionFiles = async (
             { collectionLocalID: collectionUID, files },
             ...collectionFiles,
         ]),
-    );
-};
-
-export const getLocalCollections = async (collectionKey: string) => {
-    const localCollections =
-        (await localForage.getItem<Collection[]>(COLLECTIONS_TABLE)) || [];
-    const collection =
-        localCollections.find(
-            (localSavedPublicCollection) =>
-                localSavedPublicCollection.key === collectionKey,
-        ) || null;
-    return collection;
-};
-
-const saveCollection = async (collection: Collection) => {
-    const collections =
-        (await localForage.getItem<Collection[]>(COLLECTIONS_TABLE)) ?? [];
-    await localForage.setItem(
-        COLLECTIONS_TABLE,
-        dedupeCollections([collection, ...collections]),
     );
 };
 
@@ -248,65 +293,6 @@ async function getSyncTime(collectionUID: string): Promise<number> {
 const updateSyncTime = async (collectionUID: string, time: number) =>
     await localForage.setItem(getLastSyncKey(collectionUID), time);
 
-const syncPublicFiles = async (
-    castToken: string,
-    collection: Collection,
-    setPublicFiles: (files: EnteFile[]) => void,
-) => {
-    try {
-        let files: EnteFile[] = [];
-        const sortAsc = collection?.pubMagicMetadata?.data.asc ?? false;
-        const collectionUID = String(collection.id);
-        const localFiles = await getLocalFiles(collectionUID);
-        files = [...files, ...localFiles];
-        try {
-            const lastSyncTime = await getSyncTime(collectionUID);
-            if (collection.updationTime === lastSyncTime) {
-                return sortFiles(files, sortAsc);
-            }
-            const fetchedFiles = await fetchFiles(
-                castToken,
-                collection,
-                lastSyncTime,
-                files,
-                setPublicFiles,
-            );
-
-            files = [...files, ...fetchedFiles];
-            const latestVersionFiles = new Map<string, EnteFile>();
-            files.forEach((file) => {
-                const uid = `${file.collectionID}-${file.id}`;
-                if (
-                    !latestVersionFiles.has(uid) ||
-                    latestVersionFiles.get(uid).updationTime < file.updationTime
-                ) {
-                    latestVersionFiles.set(uid, file);
-                }
-            });
-            files = [];
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            for (const [_, file] of latestVersionFiles) {
-                if (file.isDeleted) {
-                    continue;
-                }
-                files.push(file);
-            }
-            await savecollectionFiles(collectionUID, files);
-            await updateSyncTime(collectionUID, collection.updationTime);
-            setPublicFiles([...sortFiles(mergeMetadata(files), sortAsc)]);
-        } catch (e) {
-            const parsedError = parseSharingErrorCodes(e);
-            log.error("failed to sync shared collection files", e);
-            if (parsedError.message === CustomError.TOKEN_EXPIRED) {
-                throw e;
-            }
-        }
-        return [...sortFiles(mergeMetadata(files), sortAsc)];
-    } catch (e) {
-        log.error("failed to get local  or sync shared collection files", e);
-        throw e;
-    }
-};
 
 const fetchFiles = async (
     castToken: string,
