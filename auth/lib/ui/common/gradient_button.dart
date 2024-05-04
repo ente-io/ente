@@ -96,7 +96,7 @@ class _GradientButtonState extends State<GradientButton> {
             height: 56,
             width: double.infinity,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(4),
+              borderRadius: BorderRadius.circular(widget.borderRadius),
               color: const Color(0xFF531DAB),
               boxShadow: [
                 const BoxShadow(
