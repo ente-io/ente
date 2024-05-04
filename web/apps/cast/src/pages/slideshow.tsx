@@ -3,113 +3,57 @@ import { PairedSuccessfullyOverlay } from "components/PairedSuccessfullyOverlay"
 import { SlideView } from "components/Slide";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { readCastData, renderableURLs } from "services/cast";
+import { readCastData, renderableImageURLs } from "services/cast";
 
 export default function Slideshow() {
     const [loading, setLoading] = useState(true);
-    const [castToken, setCastToken] = useState<string>("");
-    // const [castCollection, setCastCollection] = useState<
-    // Collection | undefined
-    // >();
-    // const [collectionFiles, setCollectionFiles] = useState<EnteFile[]>([]);
-    // const [currentFileId, setCurrentFileId] = useState<number | undefined>();
-    const [currentFileURL, setCurrentFileURL] = useState<string | undefined>();
-    const [nextFileURL, setNextFileURL] = useState<string | undefined>();
-    const [urlGenerator, setURLGenerator] = useState<
-        AsyncGenerator | undefined
-    >();
-    // const [canCast, setCanCast] = useState(false);
+    const [imageURL, setImageURL] = useState<string | undefined>();
+    const [nextImageURL, setNextImageURL] = useState<string | undefined>();
 
     const router = useRouter();
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const syncCastFiles = async (token: string) => {
-        try {
-            setURLGenerator(renderableURLs(readCastData()));
-            // setCanCast(true);
-            setLoading(false);
-        } catch (e) {
-            log.error("Failed to prepare URL generator", e);
-            // Go back to pairing page
-            router.push("/");
-        }
-    };
-
-    const advance = async () => {
-        console.log("in advance");
-        if (!urlGenerator) throw new Error("Unexpected state");
-        const { value: urls, done } = await urlGenerator.next();
-        if (done) {
-            log.warn("Empty collection");
-            // Go back to pairing page
-            router.push("/");
-            return;
-        }
-        setCurrentFileURL(urls[0]);
-        setNextFileURL(urls[1]);
-    };
-
-    /*
-    const syncCastFiles0 = async (token: string) => {
-        try {
-            const { castToken, collectionKey } = readCastData();
-            const collection = await getCastCollection(
-                collectionKey,
-                castToken,
-            );
-            if (
-                castCollection === undefined ||
-                castCollection.updationTime !== collection.updationTime
-            ) {
-                setCastCollection(collection);
-                await syncPublicFiles(token, collection, () => {});
-                const files = await getLocalFiles(String(collection.id));
-                setCollectionFiles(
-                    files.filter((file) => isFileEligibleForCast(file)),
-                );
-            }
-        } catch (e) {
-            log.error("error during sync", e);
-            // go back to preview page
-            router.push("/");
-        }
-    };
-    */
+    /** Go back to pairing page */
+    const pair = () => router.push("/");
 
     useEffect(() => {
-        if (castToken) {
-            const intervalId = setInterval(() => {
-                syncCastFiles(castToken);
-            }, 10000);
-            syncCastFiles(castToken);
-
-            return () => clearInterval(intervalId);
-        }
-    }, [castToken]);
-
-    useEffect(() => {
+        let urlGenerator: AsyncGenerator<[string, string], void>;
         try {
-            const castToken = window.localStorage.getItem("castToken");
-            // Wait 2 seconds to ensure the green tick and the confirmation
-            // message remains visible for at least 2 seconds before we start
-            // the slideshow.
-            const timeoutId = setTimeout(() => {
-                setCastToken(castToken);
-            }, 2000);
-
-            return () => clearTimeout(timeoutId);
+            urlGenerator = renderableImageURLs(readCastData());
         } catch (e) {
-            log.error("error during sync", e);
-            router.push("/");
+            log.error("Failed to prepare generator", e);
+            pair();
         }
+
+        advance(urlGenerator);
+
+        const interval = window.setInterval(() => {
+            advance(urlGenerator);
+        }, 10000);
+
+        return () => clearInterval(interval);
     }, []);
 
-    /*
-    useEffect(() => {
-        if (collectionFiles.length < 1) return;
-        showNextSlide();
-    }, [collectionFiles]);
+    const advance = async (
+        urlGenerator: AsyncGenerator<[string, string], void>,
+    ) => {
+        try {
+            const { value: urls, done } = await urlGenerator.next();
+            if (done) {
+                log.warn("Empty collection");
+                pair();
+                return;
+            }
 
+            setImageURL(urls[0]);
+            setNextImageURL(urls[1]);
+            setLoading(false);
+        } catch (e) {
+            log.error("Failed to generate image URL", e);
+            pair();
+        }
+    };
+
+    /*
     const showNextSlide = async () => {
         try {
             console.log("showNextSlide");
@@ -168,25 +112,7 @@ export default function Slideshow() {
     };
     */
 
-    useEffect(() => {
-        if (loading) return;
+    if (loading) return <PairedSuccessfullyOverlay />;
 
-        console.log("showing slide");
-        const timeoutId = window.setTimeout(() => {
-            console.log("showing next slide  timer");
-            // showNextSlide();
-            advance();
-        }, 10000);
-
-        return () => {
-            if (timeoutId) clearTimeout(timeoutId);
-        };
-    }, [loading]);
-
-    console.log({ a: "render", loading, currentFileURL, nextFileURL });
-
-    if (loading || !currentFileURL || !nextFileURL)
-        return <PairedSuccessfullyOverlay />;
-
-    return <SlideView url={currentFileURL} nextURL={nextFileURL} />;
+    return <SlideView url={imageURL} nextURL={nextImageURL} />;
 }

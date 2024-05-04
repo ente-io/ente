@@ -63,28 +63,31 @@ export const readCastData = (): CastData => {
     return { collectionKey, castToken };
 };
 
+type RenderableImageURLPair = [url: string, nextURL: string];
+
 /**
  * An async generator function that loops through all the files in the
  * collection, returning renderable URLs to each that can be displayed in a
  * slideshow.
  *
- * Each time it resolves with a pair of URLs, one for the current slideshow
- * image, and one for the image to be displayed next.
+ * Each time it resolves with a pair of URLs (a {@link RenderableImageURLPair}),
+ * one for the current slideshow image, and one for the slideshow image that
+ * will be displayed next.
+ *
+ * If there are no renderable image in the collection, the sequence ends by
+ * yielding `{done: true}`.
  *
  * Once it reaches the end of the collection, it starts from the beginning
- * again.
+ * again. So the sequence will continue indefinitely for non-empty collections.
  *
  * It ignores errors in the fetching and decoding of individual images in the
  * collection, and just moves onward to the next one. It will however throw if
- * there are errors in getting the collection itself.
- *
- * If there are no renderable image in the collection, the sequence ends by
- * yielding `done: true`.
+ * there are errors when getting the collection itself.
  *
  * @param castData The collection to show and credentials to fetch the files
  * within it.
  */
-export const renderableURLs = async function* (castData: CastData) {
+export const renderableImageURLs = async function* (castData: CastData) {
     const { collectionKey, castToken } = castData;
     let previousURL: string | undefined;
     while (true) {
@@ -93,15 +96,16 @@ export const renderableURLs = async function* (castData: CastData) {
         const allFiles = await getLocalFiles(String(collection.id));
         const files = allFiles.filter((file) => isFileEligibleForCast(file));
 
+        if (!files.length) return;
+
         for (const file of files) {
-            console.log("in generator", previousURL);
             if (!previousURL) {
                 previousURL = await createRenderableURL(castToken, file);
                 continue;
             }
 
             const url = await createRenderableURL(castToken, file);
-            const urls = [previousURL, url];
+            const urls: RenderableImageURLPair = [previousURL, url];
             previousURL = url;
             yield urls;
         }
