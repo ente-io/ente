@@ -4,16 +4,14 @@ import { SlideView } from "components/Slide";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import {
+    createRenderableURL,
     getCastCollection,
     getLocalFiles,
-    getPreviewableImage,
     isFileEligibleForCast,
     syncPublicFiles,
 } from "services/cast";
 import { Collection } from "types/collection";
 import { EnteFile } from "types/file";
-
-const renderableFileURLCache = new Map<number, string>();
 
 export default function Slideshow() {
     const [loading, setLoading] = useState(true);
@@ -114,46 +112,23 @@ export default function Slideshow() {
             const nextFile = collectionFiles[nextIndex];
             const nextNextFile = collectionFiles[nextNextIndex];
 
-            let nextURL = renderableFileURLCache.get(nextFile.id);
-            let nextNextURL = renderableFileURLCache.get(nextNextFile.id);
-
-            if (!nextURL) {
-                try {
-                    console.log("nextURL doesn't exist yet");
-                    const blob = await getPreviewableImage(nextFile, castToken);
-                    console.log("nextURL blobread");
-                    const url = URL.createObjectURL(blob);
-                    console.log("nextURL", url);
-                    renderableFileURLCache.set(nextFile.id, url);
-                    console.log("nextUrlCache set");
-                    nextURL = url;
-                } catch (e) {
-                    console.log("error in nextUrl", e);
-                    return;
-                }
-            } else {
-                console.log("nextURL already exists");
+            let nextURL: string
+            try {
+                nextURL = await createRenderableURL(nextFile, castToken);
+            } catch (e) {
+                console.log("error in nextUrl", e);
+                return;
             }
 
-            if (!nextNextURL) {
-                try {
-                    console.log("nextNextURL doesn't exist yet");
-                    const blob = await getPreviewableImage(
-                        nextNextFile,
-                        castToken,
-                    );
-                    console.log("nextNextURL blobread");
-                    const url = URL.createObjectURL(blob);
-                    console.log("nextNextURL", url);
-                    renderableFileURLCache.set(nextNextFile.id, url);
-                    console.log("nextNextURCacheL set");
-                    nextNextURL = url;
-                } catch (e) {
-                    console.log("error in nextNextURL", e);
-                    return;
-                }
-            } else {
-                console.log("nextNextURL already exists");
+            let nextNextURL: string
+            try {
+                nextNextURL = await createRenderableURL(
+                    nextNextFile,
+                    castToken,
+                );
+            } catch (e) {
+                console.log("error in nextNextURL", e);
+                return;
             }
 
             setLoading(false);

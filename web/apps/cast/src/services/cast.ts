@@ -400,6 +400,16 @@ export function mergeMetadata(files: EnteFile[]): EnteFile[] {
     });
 }
 
+/**
+ * Create and return a new data URL that can be used to show the given
+ * {@link file} in our slideshow image viewer.
+ *
+ * Once we're done showing the file, the URL should be revoked using
+ * {@link URL.revokeObjectURL} to free up browser resources.
+ */
+export const createRenderableURL = async (file: EnteFile, castToken: string) =>
+    URL.createObjectURL(await getPreviewableImage(file, castToken));
+
 export const getPreviewableImage = async (
     file: EnteFile,
     castToken: string,
