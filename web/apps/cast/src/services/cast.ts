@@ -108,6 +108,11 @@ export const renderableImageURLs = async function* (castData: CastData) {
      */
     const urls: string[] = [""];
     let i = 0;
+
+    /**
+     * Number of milliseconds to keep the slide on the screen.
+     */
+    const slideDuration = 10000; /* 10 s */
     /**
      * Time when we last yielded.
      *
@@ -115,6 +120,11 @@ export const renderableImageURLs = async function* (castData: CastData) {
      * accounts for the time we spend fetching and processing the images.
      */
     let lastYieldTime = Date.now();
+
+    // The first time around advance the lastYieldTime into the future so that
+    // we don't wait around too long for the first slide (we do want to wait a
+    // bit, for the user to see the checkmark animation as reassurance).
+    lastYieldTime += 7500; /* 7.5 s */
 
     while (true) {
         const collection = await getCastCollection(castToken, collectionKey);
@@ -126,15 +136,15 @@ export const renderableImageURLs = async function* (castData: CastData) {
         for (const file of files) {
             if (!isFileEligibleForCast(file)) continue;
 
-            if (urls.length < 4) {
-                try {
-                    urls.push(await createRenderableURL(castToken, file));
-                    haveEligibleFiles = true;
-                } catch (e) {
-                    log.error("Skipping unrenderable file", e);
-                }
+            try {
+                urls.push(await createRenderableURL(castToken, file));
+                haveEligibleFiles = true;
+            } catch (e) {
+                log.error("Skipping unrenderable file", e);
                 continue;
             }
+
+            if (urls.length < 4) continue;
 
             const oldestURL = urls.shift();
             if (oldestURL && i !== 1) URL.revokeObjectURL(oldestURL);
@@ -146,7 +156,8 @@ export const renderableImageURLs = async function* (castData: CastData) {
             ];
 
             const elapsedTime = Date.now() - lastYieldTime;
-            if (elapsedTime < 10000) await wait(10000 - elapsedTime);
+            if (elapsedTime > 0 && elapsedTime < slideDuration)
+                await wait(slideDuration - elapsedTime);
 
             lastYieldTime = Date.now();
             yield urlPair;
