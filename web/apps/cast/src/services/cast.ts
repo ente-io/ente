@@ -91,31 +91,20 @@ type RenderableImageURLPair = [url: string, nextURL: string];
 export const renderableImageURLs = async function* (castData: CastData) {
     const { collectionKey, castToken } = castData;
 
-    /** The URL that we gave out second most recently. */
-    let oldURL: string | undefined;
     /**
-     * The URL that we gave out most recently. This is the URL that is currently
-     * being shown in the slideshow.
-     */
-    let url: string | undefined;
-    /**
-     * The two URLs we will give out when we next yield, plus an extra one that
-     * we have pre-fetched.
-     */
-    const nextURLs: string[] = [];
-
-    /**
-     * We can revoke an object URL when it no longer the one being displayed and
-     * it is not one of those that we're planning to give out next.
+     * We have a sliding window of four URLs, with the `urls[1]` being the one
+     * that is the one currently being shown in the slideshow.
      *
-     * We have a sliding window of five URLs:
+     * At each step, we shift the window towards the right by shifting out the
+     * leftmost (oldest) `urls[0]`, and adding a new one at the end.
      *
-     *     [oldURL, url, nextURLs[0], nextURLs[1], nextURLs[2]]
+     * We can revoke url[0] when we shift it out because we know it is not being
+     * used anymore.
      *
-     * Note that for small albums of only a few renderable items, these URLs
-     * might possibly be the same as each other.
+     * To start off, we put two dummy entries, empty strings, in the array to
+     * avoid needing to special case the first render too much.
      */
-    const canRevokeURL = (u: string) => ![url, ...nextURLs].includes(u);
+    const urls: string[] = ["", ""];
 
     while (true) {
         const collection = await getCastCollection(castToken, collectionKey);
@@ -127,9 +116,9 @@ export const renderableImageURLs = async function* (castData: CastData) {
         outer: for (const file of files) {
             if (!isFileEligibleForCast(file)) continue;
 
-            while (nextURLs.length < 3) {
+            while (urls.length < 4) {
                 try {
-                    nextURLs.push(await createRenderableURL(castToken, file));
+                    urls.push(await createRenderableURL(castToken, file));
                 } catch (e) {
                     log.error("Skipping unrenderable file", e);
                     continue outer;
@@ -138,16 +127,10 @@ export const renderableImageURLs = async function* (castData: CastData) {
 
             haveEligibleFiles = true;
 
-            const urlPair: RenderableImageURLPair = [
-                ensure(nextURLs[0]),
-                ensure(nextURLs[1]),
-            ];
-            // Revoke the oldest one.
-            if (oldURL && canRevokeURL(oldURL)) URL.revokeObjectURL(oldURL);
-            // Slide the window to the right.
-            oldURL = url;
-            url = nextURLs.shift();
-            yield urlPair;
+            const oldestURL = urls.shift();
+            if (oldestURL) URL.revokeObjectURL(oldestURL);
+
+            yield [ensure(urls[0]), ensure(urls[1])];
         }
 
         // This collection does not have any files that we can show.
