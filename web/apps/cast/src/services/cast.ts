@@ -1,7 +1,3 @@
-// eslint has already fixed this warning, we don't have the latest version yet
-// https://github.com/eslint/eslint/pull/18286
-/* eslint-disable no-constant-condition */
-
 import log from "@/next/log";
 import { boxSealOpen, toB64 } from "@ente/shared/crypto/internal/libsodium";
 import castGateway from "@ente/shared/network/cast";
@@ -86,6 +82,10 @@ export const register = async (): Promise<Registration> => {
 
     // Register keypair with museum to get a pairing code.
     let pairingCode: string;
+    // eslint has fixed this spurious warning, but we're not on the latest
+    // version yet, so add a disable.
+    // https://github.com/eslint/eslint/pull/18286
+    /* eslint-disable no-constant-condition */
     while (true) {
         try {
             pairingCode = await castGateway.registerDevice(publicKeyB64);
@@ -143,7 +143,7 @@ export const advertiseCode = (
         incomingMessageListener as unknown as SystemEventHandler,
     );
 
-    // Shutdown ourselves if the "sender" disconnects.
+    // Shutdown ourselves if the sender disconnects.
     // TODO(MR): Does it?
     context.addEventListener(
         cast.framework.system.EventType.SENDER_DISCONNECTED,

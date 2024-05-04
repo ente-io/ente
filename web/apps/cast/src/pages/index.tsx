@@ -39,7 +39,7 @@ export default function PairingMode() {
         try {
             const data = await getCastData(registration);
             if (!data) {
-                // No one has connected yet
+                // No one has connected yet.
                 return;
             }
 
@@ -48,7 +48,7 @@ export default function PairingMode() {
             await router.push("/slideshow");
         } catch (e) {
             console.log("Failed to get cast data", e);
-            // Start again from the beginning
+            // Start again from the beginning.
             setPairingCode(undefined);
             init();
         }
