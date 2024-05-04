@@ -563,6 +563,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "enterPassword": MessageLookupByLibrary.simpleMessage("输入密码"),
         "enterPasswordToEncrypt":
             MessageLookupByLibrary.simpleMessage("输入我们可以用来加密您的数据的密码"),
+        "enterPersonName":
+            MessageLookupByLibrary.simpleMessage("Enter person name"),
         "enterReferralCode": MessageLookupByLibrary.simpleMessage("输入推荐代码"),
         "enterThe6digitCodeFromnyourAuthenticatorApp":
             MessageLookupByLibrary.simpleMessage("从你的身份验证器应用中\n输入6位数字代码"),
@@ -952,6 +954,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "removeLink": MessageLookupByLibrary.simpleMessage("移除链接"),
         "removeParticipant": MessageLookupByLibrary.simpleMessage("移除参与者"),
         "removeParticipantBody": m43,
+        "removePersonLabel":
+            MessageLookupByLibrary.simpleMessage("Remove person label"),
         "removePublicLink": MessageLookupByLibrary.simpleMessage("删除公开链接"),
         "removeShareItemsWarning":
             MessageLookupByLibrary.simpleMessage("您要删除的某些项目是由其他人添加的，您将无法访问它们"),

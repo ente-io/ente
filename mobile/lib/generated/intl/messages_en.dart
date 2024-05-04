@@ -663,6 +663,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "enterPassword": MessageLookupByLibrary.simpleMessage("Enter password"),
         "enterPasswordToEncrypt": MessageLookupByLibrary.simpleMessage(
             "Enter a password we can use to encrypt your data"),
+        "enterPersonName":
+            MessageLookupByLibrary.simpleMessage("Enter person name"),
         "enterReferralCode":
             MessageLookupByLibrary.simpleMessage("Enter referral code"),
         "enterThe6digitCodeFromnyourAuthenticatorApp":
@@ -1133,6 +1135,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "removeParticipant":
             MessageLookupByLibrary.simpleMessage("Remove participant"),
         "removeParticipantBody": m43,
+        "removePersonLabel":
+            MessageLookupByLibrary.simpleMessage("Remove person label"),
         "removePublicLink":
             MessageLookupByLibrary.simpleMessage("Remove public link"),
         "removeShareItemsWarning": MessageLookupByLibrary.simpleMessage(

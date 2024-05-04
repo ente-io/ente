@@ -101,6 +101,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Wprowadź nowe hasło, którego możemy użyć do zaszyfrowania Twoich danych"),
         "enterPasswordToEncrypt": MessageLookupByLibrary.simpleMessage(
             "Wprowadź hasło, którego możemy użyć do zaszyfrowania Twoich danych"),
+        "enterPersonName":
+            MessageLookupByLibrary.simpleMessage("Enter person name"),
         "enterValidEmail": MessageLookupByLibrary.simpleMessage(
             "Podaj poprawny adres e-mail."),
         "enterYourEmailAddress":
@@ -166,6 +168,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Jeśli zapomnisz hasła, jedynym sposobem odzyskania danych jest ten klucz."),
         "recoverySuccessful":
             MessageLookupByLibrary.simpleMessage("Odzyskano pomyślnie!"),
+        "removePersonLabel":
+            MessageLookupByLibrary.simpleMessage("Remove person label"),
         "resendEmail":
             MessageLookupByLibrary.simpleMessage("Wyślij e-mail ponownie"),
         "resetPasswordTitle":

@@ -8593,6 +8593,26 @@ class S {
       args: [],
     );
   }
+
+  /// `Enter person name`
+  String get enterPersonName {
+    return Intl.message(
+      'Enter person name',
+      name: 'enterPersonName',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Remove person label`
+  String get removePersonLabel {
+    return Intl.message(
+      'Remove person label',
+      name: 'removePersonLabel',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

@@ -57,6 +57,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage(
                 "Edits to location will only be seen within Ente"),
         "email": MessageLookupByLibrary.simpleMessage("E-post"),
+        "enterPersonName":
+            MessageLookupByLibrary.simpleMessage("Enter person name"),
         "enterValidEmail": MessageLookupByLibrary.simpleMessage(
             "Vennligst skriv inn en gyldig e-postadresse."),
         "enterYourEmailAddress": MessageLookupByLibrary.simpleMessage(
@@ -77,6 +79,8 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Modify your query, or try searching for"),
         "moveToHiddenAlbum":
             MessageLookupByLibrary.simpleMessage("Move to hidden album"),
+        "removePersonLabel":
+            MessageLookupByLibrary.simpleMessage("Remove person label"),
         "search": MessageLookupByLibrary.simpleMessage("Search"),
         "selectALocation":
             MessageLookupByLibrary.simpleMessage("Select a location"),

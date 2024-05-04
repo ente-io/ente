@@ -41,7 +41,7 @@ class PeopleAppBar extends StatefulWidget {
   State<PeopleAppBar> createState() => _AppBarWidgetState();
 }
 
-enum PeoplPopupAction {
+enum PeoplePopupAction {
   rename,
   setCover,
   removeLabel,
@@ -99,12 +99,12 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
     );
   }
 
-  Future<dynamic> _renameAlbum(BuildContext context) async {
+  Future<dynamic> _renamePerson(BuildContext context) async {
     final result = await showTextInputDialog(
       context,
-      title: 'Rename',
+      title: S.of(context).rename,
       submitButtonLabel: S.of(context).done,
-      hintText: S.of(context).enterAlbumName,
+      hintText: S.of(context).enterPersonName,
       alwaysShowSuccessState: true,
       initialValue: widget.person.data.name,
       textCapitalization: TextCapitalization.words,
@@ -141,13 +141,13 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
       return actions;
     }
 
-    final List<PopupMenuItem<PeoplPopupAction>> items = [];
+    final List<PopupMenuItem<PeoplePopupAction>> items = [];
 
     if (!widget.isIgnored) {
       items.addAll(
         [
           PopupMenuItem(
-            value: PeoplPopupAction.rename,
+            value: PeoplePopupAction.rename,
             child: Row(
               children: [
                 const Icon(Icons.edit),
@@ -171,20 +171,20 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
           //   ),
           // ),
 
-          const PopupMenuItem(
-            value: PeoplPopupAction.removeLabel,
+          PopupMenuItem(
+            value: PeoplePopupAction.removeLabel,
             child: Row(
               children: [
-                Icon(Icons.remove_circle_outline),
-                Padding(
+                const Icon(Icons.remove_circle_outline),
+                const Padding(
                   padding: EdgeInsets.all(8),
                 ),
-                Text("Remove label"),
+                Text(S.of(context).removePersonLabel),
               ],
             ),
           ),
           const PopupMenuItem(
-            value: PeoplPopupAction.viewPhotos,
+            value: PeoplePopupAction.viewPhotos,
             child: Row(
               children: [
                 Icon(Icons.view_array_outlined),
@@ -196,7 +196,7 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
             ),
           ),
           const PopupMenuItem(
-            value: PeoplPopupAction.confirmPhotos,
+            value: PeoplePopupAction.confirmPhotos,
             child: Row(
               children: [
                 Icon(CupertinoIcons.square_stack_3d_down_right),
@@ -213,7 +213,7 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
       items.addAll(
         [
           const PopupMenuItem(
-            value: PeoplPopupAction.unignore,
+            value: PeoplePopupAction.unignore,
             child: Row(
               children: [
                 Icon(Icons.visibility_outlined),
@@ -234,8 +234,8 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
           itemBuilder: (context) {
             return items;
           },
-          onSelected: (PeoplPopupAction value) async {
-            if (value == PeoplPopupAction.viewPhotos) {
+          onSelected: (PeoplePopupAction value) async {
+            if (value == PeoplePopupAction.viewPhotos) {
               // ignore: unawaited_futures
               unawaited(
                 Navigator.of(context).push(
@@ -244,7 +244,7 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
                   ),
                 ),
               );
-            } else if (value == PeoplPopupAction.confirmPhotos) {
+            } else if (value == PeoplePopupAction.confirmPhotos) {
               // ignore: unawaited_futures
               unawaited(
                 Navigator.of(context).push(
@@ -254,13 +254,13 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
                   ),
                 ),
               );
-            } else if (value == PeoplPopupAction.rename) {
-              await _renameAlbum(context);
-            } else if (value == PeoplPopupAction.setCover) {
+            } else if (value == PeoplePopupAction.rename) {
+              await _renamePerson(context);
+            } else if (value == PeoplePopupAction.setCover) {
               await setCoverPhoto(context);
-            } else if (value == PeoplPopupAction.unignore) {
+            } else if (value == PeoplePopupAction.unignore) {
               await _showPerson(context);
-            } else if (value == PeoplPopupAction.removeLabel) {
+            } else if (value == PeoplePopupAction.removeLabel) {
               await PersonService.instance.deletePerson(widget.person.remoteID);
             }
           },

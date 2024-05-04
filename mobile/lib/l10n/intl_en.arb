@@ -1215,5 +1215,7 @@
   "endpointUpdatedMessage": "Endpoint updated successfully",
   "customEndpoint": "Connected to {endpoint}",
   "createCollaborativeLink": "Create collaborative link",
-  "search": "Search"
+  "search": "Search",
+  "enterPersonName": "Enter person name",
+  "removePersonLabel": "Remove person label"
 }

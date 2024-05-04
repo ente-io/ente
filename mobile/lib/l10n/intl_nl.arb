@@ -1212,5 +1212,7 @@
   "endpointUpdatedMessage": "Eindpunt met succes bijgewerkt",
   "customEndpoint": "Verbonden met {endpoint}",
   "createCollaborativeLink": "Maak een gezamenlijke link",
-  "search": "Zoeken"
+  "search": "Zoeken",
+  "enterPersonName": "Enter person name",
+  "removePersonLabel": "Remove person label"
 }

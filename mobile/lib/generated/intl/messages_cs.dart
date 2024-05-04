@@ -44,6 +44,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "editsToLocationWillOnlyBeSeenWithinEnte":
             MessageLookupByLibrary.simpleMessage(
                 "Edits to location will only be seen within Ente"),
+        "enterPersonName":
+            MessageLookupByLibrary.simpleMessage("Enter person name"),
         "fileTypes": MessageLookupByLibrary.simpleMessage("File types"),
         "joinDiscord": MessageLookupByLibrary.simpleMessage("Join Discord"),
         "locations": MessageLookupByLibrary.simpleMessage("Locations"),
@@ -55,6 +57,8 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Modify your query, or try searching for"),
         "moveToHiddenAlbum":
             MessageLookupByLibrary.simpleMessage("Move to hidden album"),
+        "removePersonLabel":
+            MessageLookupByLibrary.simpleMessage("Remove person label"),
         "search": MessageLookupByLibrary.simpleMessage("Search"),
         "selectALocation":
             MessageLookupByLibrary.simpleMessage("Select a location"),
