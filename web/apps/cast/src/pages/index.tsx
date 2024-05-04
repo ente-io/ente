@@ -7,7 +7,7 @@ import { storeCastData } from "services/cast";
 import { advertiseCode, getCastData, register } from "services/pair";
 import { castReceiverLoadingIfNeeded } from "../utils/cast-receiver";
 
-export default function PairingMode() {
+export default function Index() {
     const [publicKeyB64, setPublicKeyB64] = useState<string | undefined>();
     const [privateKeyB64, setPrivateKeyB64] = useState<string | undefined>();
     const [pairingCode, setPairingCode] = useState<string | undefined>();
