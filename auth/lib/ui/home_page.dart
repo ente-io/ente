@@ -11,9 +11,12 @@ import 'package:ente_auth/events/trigger_logout_event.dart';
 import "package:ente_auth/l10n/l10n.dart";
 import 'package:ente_auth/models/code.dart';
 import 'package:ente_auth/models/codes.dart';
+import 'package:ente_auth/onboarding/model/tag_enums.dart';
+import 'package:ente_auth/onboarding/view/common/tag_chip.dart';
 import 'package:ente_auth/onboarding/view/setup_enter_secret_key_page.dart';
 import 'package:ente_auth/services/preference_service.dart';
 import 'package:ente_auth/services/user_service.dart';
+import 'package:ente_auth/store/code_display_store.dart';
 import 'package:ente_auth/store/code_store.dart';
 import 'package:ente_auth/ui/account/logout_dialog.dart';
 import 'package:ente_auth/ui/code_error_widget.dart';
@@ -56,8 +59,9 @@ class _HomePageState extends State<HomePage> {
   final FocusNode searchInputFocusNode = FocusNode();
   bool _showSearchBox = false;
   String _searchText = "";
-  Codes? _codes;
-  List<CodeState> _filteredCodes = [];
+  AllCodes? _allCodes;
+  List<String> tags = [];
+  List<Code> _filteredCodes = [];
   StreamSubscription<CodesUpdatedEvent>? _streamSubscription;
   StreamSubscription<TriggerLogoutEvent>? _triggerLogoutEvent;
   StreamSubscription<IconsChangedEvent>? _iconsChangedEvent;
@@ -99,47 +103,56 @@ class _HomePageState extends State<HomePage> {
 
   void _loadCodes() {
     CodeStore.instance.getAllCodes().then((codes) {
-      _codes = codes;
+      _allCodes = codes;
       _hasLoaded = true;
       _applyFilteringAndRefresh();
     }).onError((error, stackTrace) {
       _logger.severe('Error while loading codes', error, stackTrace);
     });
+    CodeDisplayStore.instance.getAllTags().then((value) {
+      tags = value;
+
+      if (mounted) {
+        if (!tags.contains(selectedTag)) {
+          selectedTag = "";
+        }
+        setState(() {});
+      }
+    }).onError((error, stackTrace) {
+      _logger.severe('Error while loading tags', error, stackTrace);
+    });
   }
 
   void _applyFilteringAndRefresh() {
-    if (_searchText.isNotEmpty && _showSearchBox && _codes != null) {
+    if (_searchText.isNotEmpty && _showSearchBox && _allCodes != null) {
       final String val = _searchText.toLowerCase();
       // Prioritize issuer match above account for better UX while searching
       // for a specific TOTP for email providers. Searching for "emailProvider" like (gmail, proton) should
       // show the email provider first instead of other accounts where protonmail
       // is the account name.
-      final List<CodeState> issuerMatch = [];
-      final List<CodeState> accountMatch = [];
+      final List<Code> issuerMatch = [];
+      final List<Code> accountMatch = [];
 
-      for (final CodeState codeState in _codes!.allCodes) {
-        if (codeState.error != null) continue;
-
+      for (final Code codeState in _allCodes!.codes) {
         if (selectedTag != "" &&
-            !codeState.code!.display.tags.contains(selectedTag)) {
+            !codeState.display.tags.contains(selectedTag)) {
           continue;
         }
 
-        if (codeState.code!.issuer.toLowerCase().contains(val)) {
+        if (codeState.issuer.toLowerCase().contains(val)) {
           issuerMatch.add(codeState);
-        } else if (codeState.code!.account.toLowerCase().contains(val)) {
+        } else if (codeState.account.toLowerCase().contains(val)) {
           accountMatch.add(codeState);
         }
       }
       _filteredCodes = issuerMatch;
       _filteredCodes.addAll(accountMatch);
     } else {
-      _filteredCodes = _codes?.allCodes
+      _filteredCodes = _allCodes?.codes
               .where(
                 (element) =>
                     selectedTag == "" ||
-                    element.code != null &&
-                        element.code!.display.tags.contains(selectedTag),
+                    element.display.tags.contains(selectedTag),
               )
               .toList() ??
           [];
@@ -169,7 +182,7 @@ class _HomePageState extends State<HomePage> {
     if (code != null) {
       await CodeStore.instance.addCode(code);
       // Focus the new code by searching
-      if ((_codes?.allCodes.length ?? 0) > 2) {
+      if ((_allCodes?.codes.length ?? 0) > 2) {
         _focusNewCode(code);
       }
     }
@@ -179,9 +192,7 @@ class _HomePageState extends State<HomePage> {
     final Code? code = await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (BuildContext context) {
-          return SetupEnterSecretKeyPage(
-            tags: _codes?.tags ?? [],
-          );
+          return SetupEnterSecretKeyPage();
         },
       ),
     );
@@ -193,10 +204,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    if (!(_codes?.tags.contains(selectedTag) ?? true)) {
-      selectedTag = "";
-      setState(() {});
-    }
+
     return PopScope(
       onPopInvoked: (_) async {
         if (_isSettingsOpen) {
@@ -245,30 +253,32 @@ class _HomePageState extends State<HomePage> {
                 ),
           centerTitle: true,
           actions: <Widget>[
-            IconButton(
-              icon: _showSearchBox
-                  ? const Icon(Icons.clear)
-                  : const Icon(Icons.search),
-              tooltip: l10n.search,
-              onPressed: () {
-                setState(
-                  () {
-                    _showSearchBox = !_showSearchBox;
-                    if (!_showSearchBox) {
-                      _textController.clear();
-                      _searchText = "";
-                    } else {
-                      _searchText = _textController.text;
-                    }
-                    _applyFilteringAndRefresh();
-                  },
-                );
-              },
-            ),
+            if (_allCodes?.state == AllCodesState.value)
+              IconButton(
+                icon: _showSearchBox
+                    ? const Icon(Icons.clear)
+                    : const Icon(Icons.search),
+                tooltip: l10n.search,
+                onPressed: () {
+                  setState(
+                    () {
+                      _showSearchBox = !_showSearchBox;
+                      if (!_showSearchBox) {
+                        _textController.clear();
+                        _searchText = "";
+                      } else {
+                        _searchText = _textController.text;
+                      }
+                      _applyFilteringAndRefresh();
+                    },
+                  );
+                },
+              ),
           ],
         ),
         floatingActionButton: !_hasLoaded ||
-                (_codes?.allCodes.isEmpty ?? true) ||
+                (_allCodes?.codes.isEmpty ?? true) ||
+                _allCodes?.state == AllCodesState.error ||
                 !PreferenceService.instance.hasShownCoachMark()
             ? null
             : _getFab(),
@@ -288,71 +298,75 @@ class _HomePageState extends State<HomePage> {
         final list = Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(
-              height: 48,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
-                separatorBuilder: (context, index) => const SizedBox(width: 8),
-                itemCount: _codes?.tags == null ? 0 : _codes!.tags.length + 1,
-                itemBuilder: (context, index) {
-                  if (index == 0) {
+            if (_allCodes?.state == AllCodesState.value)
+              SizedBox(
+                height: 48,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+                  separatorBuilder: (context, index) =>
+                      const SizedBox(width: 8),
+                  itemCount: tags.length + 1,
+                  itemBuilder: (context, index) {
+                    if (index == 0) {
+                      return TagChip(
+                        label: "All",
+                        state: selectedTag == ""
+                            ? TagChipState.selected
+                            : TagChipState.unselected,
+                        onTap: () {
+                          selectedTag = "";
+                          setState(() {});
+                          _applyFilteringAndRefresh();
+                        },
+                      );
+                    }
                     return TagChip(
-                      label: "All",
-                      state: selectedTag == ""
+                      label: tags[index - 1],
+                      action: TagChipAction.menu,
+                      state: selectedTag == tags[index - 1]
                           ? TagChipState.selected
                           : TagChipState.unselected,
                       onTap: () {
-                        selectedTag = "";
+                        if (selectedTag == tags[index - 1]) {
+                          selectedTag = "";
+                          setState(() {});
+                          _applyFilteringAndRefresh();
+                          return;
+                        }
+                        selectedTag = tags[index - 1];
                         setState(() {});
                         _applyFilteringAndRefresh();
                       },
                     );
-                  }
-                  return TagChip(
-                    label: _codes!.tags[index - 1],
-                    action: TagChipAction.menu,
-                    state: selectedTag == _codes!.tags[index - 1]
-                        ? TagChipState.selected
-                        : TagChipState.unselected,
-                    onTap: () {
-                      if (selectedTag == _codes!.tags[index - 1]) {
-                        selectedTag = "";
-                        setState(() {});
-                        _applyFilteringAndRefresh();
-                        return;
-                      }
-                      selectedTag = _codes!.tags[index - 1];
-                      setState(() {});
-                      _applyFilteringAndRefresh();
-                    },
-                  );
-                },
+                  },
+                ),
               ),
-            ),
             Expanded(
               child: AlignedGridView.count(
                 crossAxisCount: (MediaQuery.sizeOf(context).width ~/ 400)
                     .clamp(1, double.infinity)
                     .toInt(),
+                physics: _allCodes?.state == AllCodesState.value
+                    ? const AlwaysScrollableScrollPhysics()
+                    : const NeverScrollableScrollPhysics(),
                 padding: const EdgeInsets.only(bottom: 80),
                 itemBuilder: ((context, index) {
-                  try {
-                    if (_filteredCodes[index].error != null) {
-                      return const CodeErrorWidget();
-                    }
-                    return ClipRect(
-                      child: CodeWidget(
-                        _filteredCodes[index].code!,
-                        _codes?.tags ?? [],
-                      ),
-                    );
-                  } catch (e) {
-                    return const Text("Failed");
+                  if (index == 0 && _allCodes?.state == AllCodesState.error) {
+                    return const CodeErrorWidget();
                   }
+                  final newIndex =
+                      index - (_allCodes?.state == AllCodesState.error ? 1 : 0);
+                  return ClipRect(
+                    child: CodeWidget(
+                      _filteredCodes[newIndex],
+                      hasError: _allCodes?.state == AllCodesState.error,
+                    ),
+                  );
                 }),
-                itemCount: _filteredCodes.length,
+                itemCount: (_allCodes?.state == AllCodesState.error ? 1 : 0) +
+                    _filteredCodes.length,
               ),
             ),
           ],
@@ -377,18 +391,9 @@ class _HomePageState extends State<HomePage> {
                         padding: const EdgeInsets.only(bottom: 80),
                         itemBuilder: ((context, index) {
                           final codeState = _filteredCodes[index];
-                          if (codeState.code != null) {
-                            return CodeWidget(
-                              codeState.code!,
-                              _codes?.tags ?? [],
-                            );
-                          } else {
-                            _logger.severe(
-                              "code widget error",
-                              codeState.error,
-                            );
-                            return const CodeErrorWidget();
-                          }
+                          return CodeWidget(
+                            codeState,
+                          );
                         }),
                         itemCount: _filteredCodes.length,
                       )

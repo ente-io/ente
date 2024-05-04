@@ -171,9 +171,9 @@ Future<void> _exportCodes(BuildContext context, String fileContent) async {
 }
 
 Future<String> _getAuthDataForExport() async {
-  final codes = await CodeStore.instance.getAllCodes();
+  final allCodes = await CodeStore.instance.getAllCodes();
   String data = "";
-  for (final code in codes.validCodes) {
+  for (final code in allCodes.codes) {
     data += "${code.rawData}\n";
   }
 

@@ -1,19 +1,25 @@
+import 'dart:async';
+
+import 'package:ente_auth/core/event_bus.dart';
+import 'package:ente_auth/events/codes_updated_event.dart';
 import "package:ente_auth/l10n/l10n.dart";
 import 'package:ente_auth/models/code.dart';
 import 'package:ente_auth/models/code_display.dart';
-import 'package:ente_auth/store/code_store.dart';
+import 'package:ente_auth/onboarding/model/tag_enums.dart';
+import 'package:ente_auth/onboarding/view/common/add_chip.dart';
+import 'package:ente_auth/onboarding/view/common/add_tag.dart';
+import 'package:ente_auth/onboarding/view/common/tag_chip.dart';
+import 'package:ente_auth/store/code_display_store.dart';
 import 'package:ente_auth/ui/components/buttons/button_widget.dart';
 import 'package:ente_auth/ui/components/models/button_result.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/totp_util.dart';
 import "package:flutter/material.dart";
-import 'package:gradient_borders/box_borders/gradient_box_border.dart';
 
 class SetupEnterSecretKeyPage extends StatefulWidget {
   final Code? code;
-  final List<String> tags;
 
-  SetupEnterSecretKeyPage({this.code, super.key, required this.tags});
+  SetupEnterSecretKeyPage({this.code, super.key});
 
   @override
   State<SetupEnterSecretKeyPage> createState() =>
@@ -26,7 +32,8 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
   late TextEditingController _secretController;
   late bool _secretKeyObscured;
   late List<String> tags = [...?widget.code?.display.tags];
-  late List<String> allTags = [...widget.tags];
+  List<String> allTags = [];
+  StreamSubscription<CodesUpdatedEvent>? _streamSubscription;
 
   @override
   void initState() {
@@ -41,7 +48,22 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
       text: widget.code?.secret,
     );
     _secretKeyObscured = widget.code != null;
+    _loadTags();
+    _streamSubscription = Bus.instance.on<CodesUpdatedEvent>().listen((event) {
+      _loadTags();
+    });
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _streamSubscription?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _loadTags() async {
+    allTags = await CodeDisplayStore.instance.getAllTags();
+    setState(() {});
   }
 
   @override
@@ -260,404 +282,4 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
       message ?? context.l10n.pleaseVerifyDetails,
     );
   }
-}
-
-class AddChip extends StatelessWidget {
-  final VoidCallback? onTap;
-
-  const AddChip({
-    super.key,
-    this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8.0),
-        child: Icon(
-          Icons.add_circle_outline,
-          size: 30,
-          color: Theme.of(context).brightness == Brightness.dark
-              ? const Color(0xFF9610D6)
-              : const Color(0xFF8232E1),
-        ),
-      ),
-    );
-  }
-}
-
-enum TagChipState {
-  selected,
-  unselected,
-}
-
-enum TagChipAction {
-  none,
-  menu,
-  check,
-}
-
-class TagChip extends StatelessWidget {
-  final String label;
-  final VoidCallback? onTap;
-  final TagChipState state;
-  final TagChipAction action;
-
-  const TagChip({
-    super.key,
-    required this.label,
-    this.state = TagChipState.unselected,
-    this.action = TagChipAction.none,
-    this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          color: state == TagChipState.selected
-              ? const Color(0xFF722ED1)
-              : Theme.of(context).brightness == Brightness.dark
-                  ? const Color(0xFF1C0F22)
-                  : const Color(0xFFFCF5FF),
-          borderRadius: BorderRadius.circular(100),
-          border: GradientBoxBorder(
-            gradient: LinearGradient(
-              colors: state == TagChipState.selected
-                  ? [
-                      const Color(0xFFB37FEB),
-                      const Color(0xFFAE40E3).withOpacity(
-                        Theme.of(context).brightness == Brightness.dark
-                            ? .53
-                            : 1,
-                      ),
-                    ]
-                  : [
-                      Theme.of(context).brightness == Brightness.dark
-                          ? const Color(0xFFAD00FF)
-                          : const Color(0xFFAD00FF).withOpacity(0.2),
-                      Theme.of(context).brightness == Brightness.dark
-                          ? const Color(0xFFA269BD).withOpacity(0.53)
-                          : const Color(0xFF8609C2).withOpacity(0.2),
-                    ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
-        ),
-        margin: const EdgeInsets.symmetric(vertical: 4),
-        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 16)
-            .copyWith(right: 0),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              label,
-              style: TextStyle(
-                color: state == TagChipState.selected ||
-                        Theme.of(context).brightness == Brightness.dark
-                    ? Colors.white
-                    : const Color(0xFF8232E1),
-              ),
-            ),
-            if (state == TagChipState.selected &&
-                action == TagChipAction.check) ...[
-              const SizedBox(width: 16),
-              const Icon(
-                Icons.check,
-                size: 16,
-                color: Colors.white,
-              ),
-              const SizedBox(width: 16),
-            ] else if (state == TagChipState.selected &&
-                action == TagChipAction.menu) ...[
-              SizedBox(
-                width: 48,
-                child: PopupMenuButton<int>(
-                  iconSize: 16,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  surfaceTintColor: Theme.of(context).cardColor,
-                  iconColor: Colors.white,
-                  initialValue: -1,
-                  onSelected: (value) {
-                    if (value == 0) {
-                      showEditDialog(context, label);
-                    } else if (value == 1) {
-                      showDeleteTagDialog(context, label);
-                    }
-                  },
-                  itemBuilder: (BuildContext context) {
-                    return [
-                      PopupMenuItem(
-                        child: Row(
-                          children: [
-                            const Icon(Icons.edit_outlined, size: 16),
-                            const SizedBox(width: 12),
-                            Text(context.l10n.edit),
-                          ],
-                        ),
-                        value: 0,
-                      ),
-                      PopupMenuItem(
-                        child: Row(
-                          children: [
-                            const Icon(
-                              Icons.delete_outline,
-                              size: 16,
-                              color: Color(0xFFF53434),
-                            ),
-                            const SizedBox(width: 12),
-                            Text(
-                              context.l10n.delete,
-                              style: const TextStyle(
-                                color: Color(0xFFF53434),
-                              ),
-                            ),
-                          ],
-                        ),
-                        value: 1,
-                      ),
-                    ];
-                  },
-                ),
-              ),
-            ] else ...[
-              const SizedBox(width: 16),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class AddTagDialog extends StatefulWidget {
-  const AddTagDialog({
-    super.key,
-    required this.onTap,
-  });
-
-  final void Function(String) onTap;
-
-  @override
-  State<AddTagDialog> createState() => _AddTagDialogState();
-}
-
-class _AddTagDialogState extends State<AddTagDialog> {
-  String _tag = "";
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    return AlertDialog(
-      title: Text(l10n.createNewTag),
-      content: SingleChildScrollView(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            TextFormField(
-              decoration: InputDecoration(
-                hintText: l10n.tag,
-                hintStyle: const TextStyle(
-                  color: Colors.white30,
-                ),
-                contentPadding: const EdgeInsets.all(12),
-              ),
-              onChanged: (value) {
-                setState(() {
-                  _tag = value;
-                });
-              },
-              autocorrect: false,
-              initialValue: _tag,
-              autofocus: true,
-            ),
-          ],
-        ),
-      ),
-      actions: [
-        TextButton(
-          child: Text(
-            l10n.cancel,
-            style: const TextStyle(
-              color: Colors.redAccent,
-            ),
-          ),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-        TextButton(
-          child: Text(
-            l10n.create,
-            style: const TextStyle(
-              color: Colors.purple,
-            ),
-          ),
-          onPressed: () {
-            if (_tag.trim().isEmpty) return;
-
-            widget.onTap(_tag);
-          },
-        ),
-      ],
-    );
-  }
-}
-
-class EditTagDialog extends StatefulWidget {
-  const EditTagDialog({
-    super.key,
-    required this.tag,
-  });
-
-  final String tag;
-
-  @override
-  State<EditTagDialog> createState() => _EditTagDialogState();
-}
-
-class _EditTagDialogState extends State<EditTagDialog> {
-  late String _tag = widget.tag;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    return AlertDialog(
-      title: Text(l10n.editTag),
-      content: SingleChildScrollView(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            TextFormField(
-              decoration: InputDecoration(
-                hintText: l10n.tag,
-                hintStyle: const TextStyle(
-                  color: Colors.white30,
-                ),
-                contentPadding: const EdgeInsets.all(12),
-              ),
-              onChanged: (value) {
-                setState(() {
-                  _tag = value;
-                });
-              },
-              autocorrect: false,
-              initialValue: _tag,
-              autofocus: true,
-            ),
-          ],
-        ),
-      ),
-      actions: [
-        TextButton(
-          child: Text(
-            l10n.cancel,
-            style: const TextStyle(
-              color: Colors.redAccent,
-            ),
-          ),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-        TextButton(
-          child: Text(
-            l10n.saveAction,
-            style: const TextStyle(
-              color: Colors.purple,
-            ),
-          ),
-          onPressed: () async {
-            if (_tag.trim().isEmpty) return;
-
-            final dialog = createProgressDialog(
-              context,
-              context.l10n.pleaseWait,
-            );
-            await dialog.show();
-
-            // traverse through all the codes and edit this tag's value
-            final relevantCodes = (await CodeStore.instance.getAllCodes())
-                .validCodes
-                .where((element) => element.display.tags.contains(widget.tag));
-
-            final tasks = <Future>[];
-
-            for (final code in relevantCodes) {
-              final tags = code.display.tags;
-              tags.remove(widget.tag);
-              tags.add(_tag);
-              tasks.add(
-                CodeStore.instance.addCode(
-                  code.copyWith(
-                    display: code.display.copyWith(tags: tags),
-                  ),
-                ),
-              );
-            }
-
-            await Future.wait(tasks);
-            await dialog.hide();
-
-            Navigator.pop(context);
-          },
-        ),
-      ],
-    );
-  }
-}
-
-Future<void> showDeleteTagDialog(BuildContext context, String tag) async {
-  FocusScope.of(context).requestFocus();
-  final l10n = context.l10n;
-  await showChoiceActionSheet(
-    context,
-    title: l10n.deleteTagTitle,
-    body: l10n.deleteTagMessage,
-    firstButtonLabel: l10n.delete,
-    isCritical: true,
-    firstButtonOnTap: () async {
-      // traverse through all the codes and edit this tag's value
-      final relevantCodes = (await CodeStore.instance.getAllCodes())
-          .validCodes
-          .where((element) => element.display.tags.contains(tag));
-
-      final tasks = <Future>[];
-
-      for (final code in relevantCodes) {
-        final tags = code.display.tags;
-        tags.remove(tag);
-        tasks.add(
-          CodeStore.instance.addCode(
-            code.copyWith(
-              display: code.display.copyWith(tags: tags),
-            ),
-          ),
-        );
-      }
-
-      await Future.wait(tasks);
-    },
-  );
-}
-
-Future<void> showEditDialog(BuildContext context, String tag) async {
-  await showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return EditTagDialog(tag: tag);
-    },
-    barrierColor: Colors.black.withOpacity(0.85),
-    barrierDismissible: false,
-  );
 }

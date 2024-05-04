@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gradient_borders/box_borders/gradient_box_border.dart';
 
 class GradientButton extends StatefulWidget {
@@ -113,22 +114,19 @@ class _GradientButtonState extends State<GradientButton> {
               ],
             ),
           ),
+          if (!isTapped)
+            ClipRRect(
+              borderRadius: BorderRadius.circular(widget.borderRadius),
+              child: SvgPicture.asset(
+                'assets/svg/button-tint.svg',
+                fit: BoxFit.fill,
+                width: double.infinity,
+                height: 56,
+              ),
+            ),
           Container(
             height: 56,
             decoration: BoxDecoration(
-              gradient: isTapped
-                  ? null
-                  : const LinearGradient(
-                      begin: Alignment.bottomRight,
-                      end: Alignment.topLeft,
-                      stops: [0, 0.16, 0.88],
-                      colors: [
-                        Color.fromRGBO(179, 127, 235, 1),
-                        Color.fromRGBO(210, 174, 245, 0),
-                        Color.fromRGBO(239, 219, 255, 1),
-                      ],
-                    ),
-              backgroundBlendMode: isTapped ? null : BlendMode.hue,
               border: GradientBoxBorder(
                 width: widget.borderWidth,
                 gradient: const LinearGradient(

@@ -23,12 +23,13 @@ class CodeStore {
     _authenticatorService = AuthenticatorService.instance;
   }
 
-  Future<Codes> getAllCodes({AccountMode? accountMode}) async {
+  Future<AllCodes> getAllCodes({AccountMode? accountMode}) async {
     final mode = accountMode ?? _authenticatorService.getAccountMode();
     final List<EntityResult> entities =
         await _authenticatorService.getEntities(mode);
-    final List<CodeState> codes = [];
-    List<String> tags = [];
+    final List<Code> codes = [];
+    bool hasError = false;
+
     for (final entity in entities) {
       try {
         final decodeJson = jsonDecode(entity.rawData);
@@ -41,23 +42,15 @@ class CodeStore {
         }
         code.generatedID = entity.generatedID;
         code.hasSynced = entity.hasSynced;
-        codes.add(CodeState(code: code, error: null));
-        tags.addAll(code.display.tags);
+        codes.add(code);
       } catch (e) {
-        codes.add(CodeState(code: null, error: e.toString()));
+        hasError = true;
         _logger.severe("Could not parse code", e);
       }
     }
 
     // sort codes by issuer,account
-    codes.sort((a, b) {
-      if (a.code == null && b.code == null) return 0;
-      if (a.code == null) return 1;
-      if (b.code == null) return -1;
-
-      final firstCode = a.code!;
-      final secondCode = b.code!;
-
+    codes.sort((firstCode, secondCode) {
       if (secondCode.isPinned && !firstCode.isPinned) return 1;
       if (!secondCode.isPinned && firstCode.isPinned) return -1;
 
@@ -71,8 +64,10 @@ class CodeStore {
         secondCode.account,
       );
     });
-    tags = tags.toSet().toList();
-    return Codes(allCodes: codes, tags: tags);
+    return AllCodes(
+      codes: codes,
+      state: hasError ? AllCodesState.error : AllCodesState.value,
+    );
   }
 
   Future<AddResult> addCode(
@@ -81,10 +76,10 @@ class CodeStore {
     AccountMode? accountMode,
   }) async {
     final mode = accountMode ?? _authenticatorService.getAccountMode();
-    final codes = await getAllCodes(accountMode: mode);
+    final allCodes = await getAllCodes(accountMode: mode);
     bool isExistingCode = false;
     bool hasSameCode = false;
-    for (final existingCode in codes.validCodes) {
+    for (final existingCode in allCodes.codes) {
       if (code.generatedID != null &&
           existingCode.generatedID == code.generatedID) {
         isExistingCode = true;
@@ -143,7 +138,7 @@ class CodeStore {
 
       List<Code> offlineCodes = (await CodeStore.instance
               .getAllCodes(accountMode: AccountMode.offline))
-          .validCodes;
+          .codes;
       if (offlineCodes.isEmpty) {
         return;
       }
@@ -154,7 +149,7 @@ class CodeStore {
       }
       final List<Code> onlineCodes = (await CodeStore.instance
               .getAllCodes(accountMode: AccountMode.online))
-          .validCodes;
+          .codes;
       logger.info(
         'importing ${offlineCodes.length} offline codes with ${onlineCodes.length} online codes',
       );
