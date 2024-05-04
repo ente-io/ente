@@ -5,10 +5,18 @@ import { wait } from "@ente/shared/utils";
 import _sodium from "libsodium-wrappers";
 import { type Cast } from "../utils/useCastReceiver";
 
+export interface Registration {
+    /** A pairing code shown on the screen. A client can use this to connect. */
+    pairingCode: string;
+    /** The public part of the keypair we registered with the server. */
+    publicKeyB64: string;
+    /** The private part of the keypair we registered with the server. */
+    privateKeyB64: string;
+}
+
 /**
- * Listen for pairing requests using the given {@link cast} instance. On
- * successful pairing, return the payload (JSON) sent by the sender who
- * connected to us.
+ * Register a keypair with the server and return a pairing code that can be used
+ * to connect to us. Phase 1 of the pairing protocol.
  *
  * [Note: Pairing protocol]
  *
@@ -43,24 +51,44 @@ import { type Cast } from "../utils/useCastReceiver";
  *    to initiate a slideshow for a particular Ente collection.
  *
  * 6. When that happens, decrypt that data with our private key, and return it.
+ *
+ * Steps 1 and 2 are done by the {@link register} function, which returns a
+ * {@link Registration}.
+ *
+ * At this time we start showing the pairing code on the UI, and proceed with
+ * the remaining steps using the {@link pair} function that returns the data we
+ * need to start the slideshow.
  */
-export const pair = async (cast: Cast) => {
+export const register = async (): Promise<Registration> => {
     // Generate keypair.
     const keypair = await generateKeyPair();
     const publicKeyB64 = await toB64(keypair.publicKey);
     const privateKeyB64 = await toB64(keypair.privateKey);
 
     // Register keypair with museum to get a pairing code.
-    let code: string;
+    let pairingCode: string;
     do {
         try {
-            code = await castGateway.registerDevice(publicKeyB64);
+            pairingCode = await castGateway.registerDevice(publicKeyB64);
         } catch (e) {
             log.error("Failed to register public key with server", e);
             // Schedule retry after 10 seconds.
             await wait(10000);
         }
-    } while (code === undefined);
+    } while (pairingCode === undefined);
+
+    return { pairingCode, publicKeyB64, privateKeyB64 };
+};
+
+/**
+ * Listen for pairing requests using the given {@link cast} instance for
+ * connections for {@link registration}. Phase 2 of the pairing protocol.
+ *
+ * On successful pairing, return the payload (JSON) sent by the sender who
+ * connected to us. See: [Note: Pairing protocol]
+ */
+export const pair = async (cast: Cast, registration: Registration) => {
+    const { pairingCode, publicKeyB64, privateKeyB64 } = registration;
 
     // Prepare the Chromecast "context".
     const context = cast.framework.CastReceiverContext.getInstance();
@@ -76,7 +104,7 @@ export const pair = async (cast: Cast) => {
 
     // Reply with the code that we have if anyone asks over chromecast.
     const incomingMessageListener = ({ senderId }: { senderId: string }) =>
-        context.sendCustomMessage(namespace, senderId, { code });
+        context.sendCustomMessage(namespace, senderId, { code: pairingCode });
 
     context.addCustomMessageListener(
         namespace,
@@ -104,7 +132,7 @@ export const pair = async (cast: Cast) => {
         // a JSON object containing the data we need to start a slideshow for
         // some collection.
         try {
-            encryptedCastData = await castGateway.getCastData(code);
+            encryptedCastData = await castGateway.getCastData(pairingCode);
         } catch (e) {
             log.error("Failed to get cast data from server", e);
             // Schedule retry after 10 seconds.
