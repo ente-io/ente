@@ -92,6 +92,7 @@ Future<int?> _processBitwardenExportFile(
         var account = item['login']['username'];
 
         code = Code.fromAccountAndSecret(
+          Type.totp,
           account,
           issuer,
           totp,

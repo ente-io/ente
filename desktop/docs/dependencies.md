@@ -13,7 +13,7 @@ Electron embeds Chromium and Node.js in the generated app's binary. The
 generated app thus consists of two separate processes - the _main_ process, and
 a _renderer_ process.
 
--   The _main_ process is runs the embedded node. This process can deal with the
+-   The _main_ process runs the embedded node. This process can deal with the
     host OS - it is conceptually like a `node` repl running on your machine. In
     our case, the TypeScript code (in the `src/` directory) gets transpiled by
     `tsc` into JavaScript in the `build/app/` directory, which gets bundled in
@@ -89,6 +89,9 @@ Some extra ones specific to the code here are:
 -   [shx](https://github.com/shelljs/shx) for providing a portable way to use
     Unix commands in our `package.json` scripts. This allows us to use the same
     commands (like `ln`) across different platforms like Linux and Windows.
+
+-   [@tsconfig/recommended](https://github.com/tsconfig/bases) gives us a base
+    tsconfig for the Node.js version that our current Electron version uses.
 
 ## Functionality
 

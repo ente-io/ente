@@ -7,7 +7,6 @@ import {
 import { lowercaseExtension } from "@/next/file";
 import { CustomError } from "@ente/shared/error";
 import FileType from "file-type";
-import { getUint8ArrayView } from "./readerService";
 
 /**
  * Read the file's initial contents or use the file's name to detect its type.
@@ -89,13 +88,12 @@ export const detectFileTypeInfoFromChunk = async (
 const readInitialChunkOfFile = async (file: File) => {
     const chunkSizeForTypeDetection = 4100;
     const chunk = file.slice(0, chunkSizeForTypeDetection);
-    return await getUint8ArrayView(chunk);
+    return new Uint8Array(await chunk.arrayBuffer());
 };
 
 const detectFileTypeFromBuffer = async (buffer: Uint8Array) => {
     const result = await FileType.fromBuffer(buffer);
-    if (!result?.ext || !result?.mime) {
-        throw Error(`Could not deduce file type from buffer`);
-    }
+    if (!result)
+        throw Error("Could not deduce file type from the file's contents");
     return result;
 };

@@ -116,6 +116,19 @@ export async function getUpdatedEXIFFileForDownload(
     }
 }
 
+export function convertBytesToHumanReadable(
+    bytes: number,
+    precision = 2,
+): string {
+    if (bytes === 0 || isNaN(bytes)) {
+        return "0 MB";
+    }
+
+    const i = Math.floor(Math.log(bytes) / Math.log(1024));
+    const sizes = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
+    return (bytes / Math.pow(1024, i)).toFixed(precision) + " " + sizes[i];
+}
+
 export async function downloadFile(file: EnteFile) {
     try {
         const fileReader = new FileReader();
@@ -288,7 +301,8 @@ export const getRenderableImage = async (fileName: string, imageBlob: Blob) => {
         const tempFile = new File([imageBlob], fileName);
         const fileTypeInfo = await detectFileTypeInfo(tempFile);
         log.debug(
-            () => `Need renderable image for ${JSON.stringify(fileTypeInfo)}`,
+            () =>
+                `Need renderable image for ${JSON.stringify({ fileName, ...fileTypeInfo })}`,
         );
         const { extension } = fileTypeInfo;
 
@@ -305,7 +319,7 @@ export const getRenderableImage = async (fileName: string, imageBlob: Blob) => {
             try {
                 return await nativeConvertToJPEG(imageBlob);
             } catch (e) {
-                if (e.message == CustomErrorMessage.NotAvailable) {
+                if (e.message.endsWith(CustomErrorMessage.NotAvailable)) {
                     moduleState.isNativeJPEGConversionNotAvailable = true;
                 } else {
                     log.error("Native conversion to JPEG failed", e);

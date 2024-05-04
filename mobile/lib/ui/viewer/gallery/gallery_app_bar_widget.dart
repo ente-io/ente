@@ -24,6 +24,9 @@ import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/services/update_service.dart';
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
+import "package:photos/ui/cast/auto.dart";
+import "package:photos/ui/cast/choose.dart";
+import "package:photos/ui/common/popup_item.dart";
 import 'package:photos/ui/components/action_sheet_widget.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
@@ -319,263 +322,136 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         ),
       );
     }
-    final List<PopupMenuItem<AlbumPopupAction>> items = [];
-    if (galleryType.canRename()) {
-      items.add(
-        PopupMenuItem(
+
+    if (widget.collection != null && castService.isSupported) {
+      actions.add(
+        Tooltip(
+          message: "Cast album",
+          child: IconButton(
+            icon: castService.getActiveSessions().isNotEmpty
+                ? const Icon(Icons.cast_connected_rounded)
+                : const Icon(Icons.cast_outlined),
+            onPressed: () async {
+              await _castChoiceDialog();
+              if (mounted) {
+                setState(() {});
+              }
+            },
+          ),
+        ),
+      );
+    }
+    final List<EntePopupMenuItem<AlbumPopupAction>> items = [];
+    items.addAll([
+      if (galleryType.canRename())
+        EntePopupMenuItem(
+          isQuickLink
+              ? S.of(context).convertToAlbum
+              : S.of(context).renameAlbum,
           value: AlbumPopupAction.rename,
-          child: Row(
-            children: [
-              Icon(isQuickLink ? Icons.photo_album_outlined : Icons.edit),
-              const Padding(
-                padding: EdgeInsets.all(8),
-              ),
-              Text(
-                isQuickLink
-                    ? S.of(context).convertToAlbum
-                    : S.of(context).renameAlbum,
-              ),
-            ],
-          ),
+          icon: isQuickLink ? Icons.photo_album_outlined : Icons.edit,
         ),
-      );
-    }
-    if (galleryType.canSetCover()) {
-      items.add(
-        PopupMenuItem(
+      if (galleryType.canSetCover())
+        EntePopupMenuItem(
+          S.of(context).setCover,
           value: AlbumPopupAction.setCover,
-          child: Row(
-            children: [
-              const Icon(Icons.image_outlined),
-              const Padding(
-                padding: EdgeInsets.all(8),
-              ),
-              Text(S.of(context).setCover),
-            ],
-          ),
+          icon: Icons.image_outlined,
         ),
-      );
-    }
-    if (galleryType.showMap()) {
-      items.add(
-        PopupMenuItem(
+      if (galleryType.showMap())
+        EntePopupMenuItem(
+          S.of(context).map,
           value: AlbumPopupAction.map,
-          child: Row(
-            children: [
-              const Icon(Icons.map_outlined),
-              const Padding(
-                padding: EdgeInsets.all(8),
-              ),
-              Text(S.of(context).map),
-            ],
-          ),
+          icon: Icons.map_outlined,
         ),
-      );
-    }
-
-    if (galleryType.canSort()) {
-      items.add(
-        PopupMenuItem(
+      if (galleryType.canSort())
+        EntePopupMenuItem(
+          S.of(context).sortAlbumsBy,
           value: AlbumPopupAction.sort,
-          child: Row(
-            children: [
-              const Icon(Icons.sort_outlined),
-              const Padding(
-                padding: EdgeInsets.all(8),
-              ),
-              Text(
-                S.of(context).sortAlbumsBy,
-              ),
-            ],
-          ),
+          icon: Icons.sort_outlined,
         ),
-      );
-    }
-
-    if (galleryType == GalleryType.uncategorized) {
-      items.add(
-        PopupMenuItem(
+      if (galleryType == GalleryType.uncategorized)
+        EntePopupMenuItem(
+          S.of(context).cleanUncategorized,
           value: AlbumPopupAction.cleanUncategorized,
-          child: Row(
-            children: [
-              const Icon(Icons.crop_original_outlined),
-              const Padding(
-                padding: EdgeInsets.all(8),
-              ),
-              Text(S.of(context).cleanUncategorized),
-            ],
-          ),
+          icon: Icons.crop_original_outlined,
         ),
-      );
-    }
-    if (galleryType.canPin()) {
-      items.add(
-        PopupMenuItem(
+      if (galleryType.canPin())
+        EntePopupMenuItem(
+          widget.collection!.isPinned
+              ? S.of(context).unpinAlbum
+              : S.of(context).pinAlbum,
           value: AlbumPopupAction.pinAlbum,
-          child: Row(
-            children: [
-              widget.collection!.isPinned
-                  ? const Icon(CupertinoIcons.pin_slash)
-                  : Transform.rotate(
-                      angle: 45 * math.pi / 180, // rotate by 45 degrees
-                      child: const Icon(CupertinoIcons.pin),
-                    ),
-              const Padding(
-                padding: EdgeInsets.all(8),
-              ),
-              Text(
-                widget.collection!.isPinned
-                    ? S.of(context).unpinAlbum
-                    : S.of(context).pinAlbum,
-              ),
-            ],
-          ),
+          iconWidget: widget.collection!.isPinned
+              ? const Icon(CupertinoIcons.pin_slash)
+              : Transform.rotate(
+                  angle: 45 * math.pi / 180, // rotate by 45 degrees
+                  child: const Icon(CupertinoIcons.pin),
+                ),
         ),
-      );
-    }
+    ]);
     final bool isArchived = widget.collection?.isArchived() ?? false;
     final bool isHidden = widget.collection?.isHidden() ?? false;
-    // Do not show archive option for favorite collection. If collection is
-    // already archived, allow user to unarchive that collection.
-    if (isArchived || (galleryType.canArchive() && !isHidden)) {
-      items.add(
-        PopupMenuItem(
-          value: AlbumPopupAction.ownedArchive,
-          child: Row(
-            children: [
-              Icon(isArchived ? Icons.unarchive : Icons.archive_outlined),
-              const Padding(
-                padding: EdgeInsets.all(8),
-              ),
-              Text(
-                isArchived
-                    ? S.of(context).unarchiveAlbum
-                    : S.of(context).archiveAlbum,
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-    if (!isArchived && galleryType.canHide()) {
-      items.add(
-        PopupMenuItem(
-          value: AlbumPopupAction.ownedHide,
-          child: Row(
-            children: [
-              Icon(
-                isHidden
-                    ? Icons.visibility_outlined
-                    : Icons.visibility_off_outlined,
-              ),
-              const Padding(
-                padding: EdgeInsets.all(8),
-              ),
-              Text(
-                isHidden ? S.of(context).unhide : S.of(context).hide,
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-    if (widget.collection != null && isInternalUser) {
-      items.add(
-        PopupMenuItem(
-          value: AlbumPopupAction.playOnTv,
-          child: Row(
-            children: [
-              const Icon(Icons.tv_outlined),
-              const Padding(
-                padding: EdgeInsets.all(8),
-              ),
-              Text(context.l10n.playOnTv),
-            ],
-          ),
-        ),
-      );
-    }
 
-    if (galleryType.canDelete()) {
-      items.add(
-        PopupMenuItem(
-          value: isQuickLink
-              ? AlbumPopupAction.removeLink
-              : AlbumPopupAction.delete,
-          child: Row(
-            children: [
-              Icon(
-                isQuickLink
-                    ? Icons.remove_circle_outline
-                    : Icons.delete_outline,
-              ),
-              const Padding(
-                padding: EdgeInsets.all(8),
-              ),
-              Text(
-                isQuickLink
-                    ? S.of(context).removeLink
-                    : S.of(context).deleteAlbum,
-              ),
-            ],
+    items.addAll(
+      [
+        // Do not show archive option for favorite collection. If collection is
+        // already archived, allow user to unarchive that collection.
+        if (isArchived || (galleryType.canArchive() && !isHidden))
+          EntePopupMenuItem(
+            value: AlbumPopupAction.ownedArchive,
+            isArchived
+                ? S.of(context).unarchiveAlbum
+                : S.of(context).archiveAlbum,
+            icon: isArchived ? Icons.unarchive : Icons.archive_outlined,
           ),
-        ),
-      );
-    }
-
-    if (galleryType == GalleryType.sharedCollection) {
-      final bool hasShareeArchived = widget.collection!.hasShareeArchived();
-      items.add(
-        PopupMenuItem(
-          value: AlbumPopupAction.sharedArchive,
-          child: Row(
-            children: [
-              Icon(
-                hasShareeArchived ? Icons.unarchive : Icons.archive_outlined,
-              ),
-              const Padding(
-                padding: EdgeInsets.all(8),
-              ),
-              Text(
-                hasShareeArchived
-                    ? S.of(context).unarchiveAlbum
-                    : S.of(context).archiveAlbum,
-              ),
-            ],
+        if (!isArchived && galleryType.canHide())
+          EntePopupMenuItem(
+            value: AlbumPopupAction.ownedHide,
+            isHidden ? S.of(context).unhide : S.of(context).hide,
+            icon: isHidden
+                ? Icons.visibility_outlined
+                : Icons.visibility_off_outlined,
           ),
-        ),
-      );
-      items.add(
-        PopupMenuItem(
-          value: AlbumPopupAction.leave,
-          child: Row(
-            children: [
-              const Icon(Icons.logout),
-              const Padding(
-                padding: EdgeInsets.all(8),
-              ),
-              Text(S.of(context).leaveAlbum),
-            ],
+        if (widget.collection != null && isInternalUser)
+          EntePopupMenuItem(
+            value: AlbumPopupAction.playOnTv,
+            context.l10n.playOnTv,
+            icon: Icons.tv_outlined,
           ),
-        ),
-      );
-    }
-    if (galleryType == GalleryType.localFolder) {
-      items.add(
-        PopupMenuItem(
-          value: AlbumPopupAction.freeUpSpace,
-          child: Row(
-            children: [
-              const Icon(Icons.delete_sweep_outlined),
-              const Padding(
-                padding: EdgeInsets.all(8),
-              ),
-              Text(S.of(context).freeUpDeviceSpace),
-            ],
+        if (galleryType.canDelete())
+          EntePopupMenuItem(
+            isQuickLink ? S.of(context).removeLink : S.of(context).deleteAlbum,
+            value: isQuickLink
+                ? AlbumPopupAction.removeLink
+                : AlbumPopupAction.delete,
+            icon: isQuickLink
+                ? Icons.remove_circle_outline
+                : Icons.delete_outline,
           ),
-        ),
-      );
-    }
+        if (galleryType == GalleryType.sharedCollection)
+          EntePopupMenuItem(
+            widget.collection!.hasShareeArchived()
+                ? S.of(context).unarchiveAlbum
+                : S.of(context).archiveAlbum,
+            value: AlbumPopupAction.sharedArchive,
+            icon: widget.collection!.hasShareeArchived()
+                ? Icons.unarchive
+                : Icons.archive_outlined,
+          ),
+        if (galleryType == GalleryType.sharedCollection)
+          EntePopupMenuItem(
+            S.of(context).leaveAlbum,
+            value: AlbumPopupAction.leave,
+            icon: Icons.logout,
+          ),
+        if (galleryType == GalleryType.localFolder)
+          EntePopupMenuItem(
+            S.of(context).freeUpDeviceSpace,
+            value: AlbumPopupAction.freeUpSpace,
+            icon: Icons.delete_sweep_outlined,
+          ),
+      ],
+    );
     if (items.isNotEmpty) {
       actions.add(
         PopupMenuButton(
@@ -603,7 +479,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
             } else if (value == AlbumPopupAction.leave) {
               await _leaveAlbum(context);
             } else if (value == AlbumPopupAction.playOnTv) {
-              await castAlbum();
+              await _castChoiceDialog();
             } else if (value == AlbumPopupAction.freeUpSpace) {
               await _deleteBackedUpFiles(context);
             } else if (value == AlbumPopupAction.setCover) {
@@ -838,10 +714,56 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     setState(() {});
   }
 
-  Future<void> castAlbum() async {
+  Future<void> _castChoiceDialog() async {
     final gw = CastGateway(NetworkClient.instance.enteDio);
+    if (castService.getActiveSessions().isNotEmpty) {
+      await showChoiceDialog(
+        context,
+        title: S.of(context).stopCastingTitle,
+        firstButtonLabel: S.of(context).yes,
+        secondButtonLabel: S.of(context).no,
+        body: S.of(context).stopCastingBody,
+        firstButtonOnTap: () async {
+          gw.revokeAllTokens().ignore();
+          await castService.closeActiveCasts();
+        },
+      );
+      return;
+    }
+
     // stop any existing cast session
     gw.revokeAllTokens().ignore();
+    final result = await showDialog<ButtonAction?>(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return const CastChooseDialog();
+      },
+    );
+    if (result == null) {
+      return;
+    }
+    // wait to allow the dialog to close
+    await Future.delayed(const Duration(milliseconds: 100));
+    if (result == ButtonAction.first) {
+      await showDialog(
+        context: context,
+        barrierDismissible: true,
+        builder: (BuildContext bContext) {
+          return AutoCastDialog(
+            (device) async {
+              await _castPair(bContext, gw, device);
+            },
+          );
+        },
+      );
+    }
+    if (result == ButtonAction.second) {
+      await _pairWithPin(gw, '');
+    }
+  }
+
+  Future<void> _pairWithPin(CastGateway gw, String code) async {
     await showTextInputDialog(
       context,
       title: context.l10n.playOnTv,
@@ -849,28 +771,59 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       submitButtonLabel: S.of(context).pair,
       textInputType: TextInputType.streetAddress,
       hintText: context.l10n.deviceCodeHint,
+      showOnlyLoadingState: true,
+      alwaysShowSuccessState: false,
+      initialValue: code,
       onSubmit: (String text) async {
-        try {
-          final code = text.trim();
-          final String? publicKey = await gw.getPublicKey(code);
-          if (publicKey == null) {
-            showToast(context, S.of(context).deviceNotFound);
-            return;
-          }
-          final String castToken = const Uuid().v4().toString();
-          final castPayload = CollectionsService.instance
-              .getCastData(castToken, widget.collection!, publicKey);
-          await gw.publishCastPayload(
-            code,
-            castPayload,
-            widget.collection!.id,
-            castToken,
-          );
-        } catch (e, s) {
-          _logger.severe("Failed to cast album", e, s);
-          await showGenericErrorDialog(context: context, error: e);
+        final bool paired = await _castPair(context, gw, text);
+        if (!paired) {
+          Future.delayed(Duration.zero, () => _pairWithPin(gw, code));
         }
       },
     );
+  }
+
+  String lastCode = '';
+  Future<bool> _castPair(
+      BuildContext bContext, CastGateway gw, String code) async {
+    try {
+      if (lastCode == code) {
+        return false;
+      }
+      lastCode = code;
+      _logger.info("Casting album to device with code $code");
+      final String? publicKey = await gw.getPublicKey(code);
+      if (publicKey == null) {
+        showToast(context, S.of(context).deviceNotFound);
+
+        return false;
+      }
+      final String castToken = const Uuid().v4().toString();
+      final castPayload = CollectionsService.instance
+          .getCastData(castToken, widget.collection!, publicKey);
+      _logger.info("Casting album with token $castToken");
+      await gw.publishCastPayload(
+        code,
+        castPayload,
+        widget.collection!.id,
+        castToken,
+      );
+      _logger.info("Casted album with token $castToken");
+      // showToast(bContext, S.of(context).pairingComplete);
+      return true;
+    } catch (e, s) {
+      lastCode = '';
+      _logger.severe("Failed to cast album", e, s);
+      if (e is CastIPMismatchException) {
+        await showErrorDialog(
+          context,
+          S.of(context).castIPMismatchTitle,
+          S.of(context).castIPMismatchBody,
+        );
+      } else {
+        await showGenericErrorDialog(context: bContext, error: e);
+      }
+      return false;
+    }
   }
 }

@@ -1,11 +1,15 @@
 /** @file Image format conversions and thumbnail generation */
 
 import fs from "node:fs/promises";
-import path from "path";
-import { CustomErrorMessage } from "../../types/ipc";
+import path from "node:path";
+import { CustomErrorMessage, type ZipItem } from "../../types/ipc";
 import log from "../log";
-import { execAsync, isDev } from "../utils-electron";
-import { deleteTempFile, makeTempFilePath } from "../utils-temp";
+import { execAsync, isDev } from "../utils/electron";
+import {
+    deleteTempFile,
+    makeFileForDataOrPathOrZipItem,
+    makeTempFilePath,
+} from "../utils/temp";
 
 export const convertToJPEG = async (imageData: Uint8Array) => {
     const inputFilePath = await makeTempFilePath();
@@ -63,19 +67,15 @@ const imageMagickPath = () =>
     path.join(isDev ? "build" : process.resourcesPath, "image-magick");
 
 export const generateImageThumbnail = async (
-    dataOrPath: Uint8Array | string,
+    dataOrPathOrZipItem: Uint8Array | string | ZipItem,
     maxDimension: number,
     maxSize: number,
 ): Promise<Uint8Array> => {
-    let inputFilePath: string;
-    let isInputFileTemporary: boolean;
-    if (dataOrPath instanceof Uint8Array) {
-        inputFilePath = await makeTempFilePath();
-        isInputFileTemporary = true;
-    } else {
-        inputFilePath = dataOrPath;
-        isInputFileTemporary = false;
-    }
+    const {
+        path: inputFilePath,
+        isFileTemporary: isInputFileTemporary,
+        writeToTemporaryFile: writeToTemporaryInputFile,
+    } = await makeFileForDataOrPathOrZipItem(dataOrPathOrZipItem);
 
     const outputFilePath = await makeTempFilePath("jpeg");
 
@@ -89,8 +89,7 @@ export const generateImageThumbnail = async (
     );
 
     try {
-        if (dataOrPath instanceof Uint8Array)
-            await fs.writeFile(inputFilePath, dataOrPath);
+        await writeToTemporaryInputFile();
 
         let thumbnail: Uint8Array;
         do {

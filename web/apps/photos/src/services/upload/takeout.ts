@@ -3,9 +3,10 @@
 import { ensureElectron } from "@/next/electron";
 import { nameAndExtension } from "@/next/file";
 import log from "@/next/log";
-import type { ElectronFile } from "@/next/types/file";
 import { NULL_LOCATION } from "constants/upload";
-import { type Location } from "types/upload";
+import type { Location } from "types/metadata";
+import { readStream } from "utils/native-stream";
+import type { UploadItem } from "./types";
 
 export interface ParsedMetadataJSON {
     creationTime: number;
@@ -74,28 +75,28 @@ function getFileOriginalName(fileName: string) {
     return originalName;
 }
 
-/** Try to parse the contents of a metadata JSON file in a Google Takeout. */
+/** Try to parse the contents of a metadata JSON file from a Google Takeout. */
 export const tryParseTakeoutMetadataJSON = async (
-    receivedFile: File | ElectronFile | string,
+    uploadItem: UploadItem,
 ): Promise<ParsedMetadataJSON | undefined> => {
     try {
-        let text: string;
-        if (typeof receivedFile == "string") {
-            text = await ensureElectron().fs.readTextFile(receivedFile);
-        } else {
-            if (!(receivedFile instanceof File)) {
-                receivedFile = new File(
-                    [await receivedFile.blob()],
-                    receivedFile.name,
-                );
-            }
-            text = await receivedFile.text();
-        }
-
-        return parseMetadataJSONText(text);
+        return parseMetadataJSONText(await uploadItemText(uploadItem));
     } catch (e) {
         log.error("Failed to parse takeout metadata JSON", e);
         return undefined;
+    }
+};
+
+const uploadItemText = async (uploadItem: UploadItem) => {
+    if (uploadItem instanceof File) {
+        return await uploadItem.text();
+    } else if (typeof uploadItem == "string") {
+        return await ensureElectron().fs.readTextFile(uploadItem);
+    } else if (Array.isArray(uploadItem)) {
+        const { response } = await readStream(ensureElectron(), uploadItem);
+        return await response.text();
+    } else {
+        return await uploadItem.file.text();
     }
 };
 
@@ -133,7 +134,7 @@ const parseMetadataJSONText = (text: string) => {
         parsedMetadataJSON.modificationTime =
             metadataJSON["modificationTime"]["timestamp"] * 1000000;
     }
-    let locationData: Location = NULL_LOCATION;
+    let locationData: Location = { ...NULL_LOCATION };
     if (
         metadataJSON["geoData"] &&
         (metadataJSON["geoData"]["latitude"] !== 0.0 ||

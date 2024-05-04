@@ -3,8 +3,6 @@
 //
 // See [Note: types.ts <-> preload.ts <-> ipc.ts]
 
-import type { ElectronFile } from "./file";
-
 /**
  * Extra APIs provided by our Node.js layer when our code is running inside our
  * desktop (Electron) app.
@@ -50,6 +48,20 @@ export interface Electron {
      * @see {@link openDirectory}
      */
     openLogDirectory: () => Promise<void>;
+
+    /**
+     * Ask the user to select a directory on their local file system, and return
+     * it path.
+     *
+     * The returned path is guaranteed to use POSIX separators ('/').
+     *
+     * We don't strictly need IPC for this, we can use a hidden <input> element
+     * and trigger its click for the same behaviour (as we do for the
+     * `useFileInput` hook that we use for uploads). However, it's a bit
+     * cumbersome, and we anyways will need to IPC to get back its full path, so
+     * it is just convenient to expose this direct method.
+     */
+    selectDirectory: () => Promise<string | undefined>;
 
     /**
      * Clear any stored data.
@@ -122,18 +134,20 @@ export interface Electron {
      */
     skipAppUpdate: (version: string) => void;
 
+    // - FS
+
     /**
-     * A subset of filesystem access APIs.
+     * A subset of file system access APIs.
      *
      * The renderer process, being a web process, does not have full access to
-     * the local filesystem apart from files explicitly dragged and dropped (or
+     * the local file system apart from files explicitly dragged and dropped (or
      * selected by the user in a native file open dialog).
      *
-     * The main process, however, has full filesystem access (limited only be an
+     * The main process, however, has full fil system access (limited only be an
      * OS level sandbox on the entire process).
      *
      * When we're running in the desktop app, we want to better utilize the
-     * local filesystem access to provide more integrated features to the user -
+     * local file system access to provide more integrated features to the user;
      * things that are not currently possible using web technologies. For
      * example, continuous exports to an arbitrary user chosen location on disk,
      * or watching some folders for changes and syncing them automatically.
@@ -189,11 +203,6 @@ export interface Electron {
          * directory.
          */
         isDir: (dirPath: string) => Promise<boolean>;
-
-        /**
-         * Return the size in bytes of the file at {@link path}.
-         */
-        size: (path: string) => Promise<number>;
     };
 
     // - Conversion
@@ -226,22 +235,27 @@ export interface Electron {
      * not yet possible, this function will throw an error with the
      * {@link CustomErrorMessage.NotAvailable} message.
      *
-     * @param dataOrPath The raw image data (the contents of the image file), or
-     * the path to the image file, whose thumbnail we want to generate.
+     * @param dataOrPathOrZipItem The file whose thumbnail we want to generate.
+     * It can be provided as raw image data (the contents of the image file), or
+     * the path to the image file, or a tuple containing the path of the zip
+     * file along with the name of an entry in it.
+     *
      * @param maxDimension The maximum width or height of the generated
      * thumbnail.
+     *
      * @param maxSize Maximum size (in bytes) of the generated thumbnail.
      *
      * @returns JPEG data of the generated thumbnail.
      */
     generateImageThumbnail: (
-        dataOrPath: Uint8Array | string,
+        dataOrPathOrZipItem: Uint8Array | string | ZipItem,
         maxDimension: number,
         maxSize: number,
     ) => Promise<Uint8Array>;
 
     /**
-     * Execute a FFmpeg {@link command} on the given {@link dataOrPath}.
+     * Execute a FFmpeg {@link command} on the given
+     * {@link dataOrPathOrZipItem}.
      *
      * This executes the command using a FFmpeg executable we bundle with our
      * desktop app. We also have a wasm FFmpeg wasm implementation that we use
@@ -254,10 +268,11 @@ export interface Electron {
      * (respectively {@link inputPathPlaceholder},
      * {@link outputPathPlaceholder}, {@link ffmpegPathPlaceholder}).
      *
-     * @param dataOrPath The bytes of the input file, or the path to the input
-     * file on the user's local disk. In both cases, the data gets serialized to
-     * a temporary file, and then that path gets substituted in the FFmpeg
-     * {@link command} in lieu of {@link inputPathPlaceholder}.
+     * @param dataOrPathOrZipItem The bytes of the input file, or the path to
+     * the input file on the user's local disk, or the path to a zip file on the
+     * user's disk and the name of an entry in it. In all three cases, the data
+     * gets serialized to a temporary file, and then that path gets substituted
+     * in the FFmpeg {@link command} in lieu of {@link inputPathPlaceholder}.
      *
      * @param outputFileExtension The extension (without the dot, e.g. "jpeg")
      * to use for the output file that we ask FFmpeg to create in
@@ -273,7 +288,7 @@ export interface Electron {
      */
     ffmpegExec: (
         command: string[],
-        dataOrPath: Uint8Array | string,
+        dataOrPathOrZipItem: Uint8Array | string | ZipItem,
         outputFileExtension: string,
         timeoutMS: number,
     ) => Promise<Uint8Array>;
@@ -330,20 +345,6 @@ export interface Electron {
      * is specific to our implementation and the model (MobileFaceNet) we use.
      */
     faceEmbedding: (input: Float32Array) => Promise<Float32Array>;
-
-    // - File selection
-    // TODO: Deprecated - use dialogs on the renderer process itself
-
-    selectDirectory: () => Promise<string>;
-
-    showUploadFilesDialog: () => Promise<ElectronFile[]>;
-
-    showUploadDirsDialog: () => Promise<ElectronFile[]>;
-
-    showUploadZipDialog: () => Promise<{
-        zipPaths: string[];
-        files: ElectronFile[];
-    }>;
 
     // - Watch
 
@@ -461,49 +462,95 @@ export interface Electron {
          * The returned paths are guaranteed to use POSIX separators ('/').
          */
         findFiles: (folderPath: string) => Promise<string[]>;
+
+        /**
+         * Stop watching all existing folder watches and remove any callbacks.
+         *
+         * This function is meant to be called when the user logs out. It stops
+         * all existing folder watches and forgets about any "on*" callback
+         * functions that have been registered.
+         *
+         * The persisted state itself gets cleared via {@link clearStores}.
+         */
+        reset: () => Promise<void>;
     };
 
     // - Upload
 
     /**
+     * Return the file system path that this File object points to.
+     *
+     * This method is a bit different from the other methods on the Electron
+     * object in the sense that there is no actual IPC happening - the
+     * implementation of this method is completely in the preload script. Thus
+     * we can pass it an otherwise unserializable File object.
+     *
+     * Consequently, it is also _not_ async.
+     */
+    pathForFile: (file: File) => string;
+
+    /**
+     * Get the list of files that are present in the given zip file.
+     *
+     * @param zipPath The path of the zip file on the user's local file system.
+     *
+     * @returns A list of (zipPath, entryName) tuples, one for each file in the
+     * given zip. Directories are traversed recursively, but the directory
+     * entries themselves will be excluded from the returned list. File entries
+     * whose file name begins with a dot (i.e. "hidden" files) will also be
+     * excluded.
+     *
+     * To read the contents of the files themselves, see [Note: IPC streams].
+     */
+    listZipItems: (zipPath: string) => Promise<ZipItem[]>;
+
+    /**
+     * Return the size in bytes of the file at the given path or of a particular
+     * entry within a zip file.
+     */
+    pathOrZipItemSize: (pathOrZipItem: string | ZipItem) => Promise<number>;
+
+    /**
      * Return any pending uploads that were previously enqueued but haven't yet
      * been completed.
      *
-     * The state of pending uploads is persisted in the Node.js layer.
+     * Return undefined if there are no such pending uploads.
      *
-     * Note that we might have both outstanding zip and regular file uploads at
-     * the same time. In such cases, the zip file ones get precedence.
+     * The state of pending uploads is persisted in the Node.js layer. Or app
+     * start, we read in this data from the Node.js layer via this IPC method.
+     * The Node.js code returns the persisted data after filtering out any files
+     * that no longer exist on disk.
      */
     pendingUploads: () => Promise<PendingUploads | undefined>;
 
     /**
-     * Set or clear the name of the collection where the pending upload is
-     * directed to.
+     * Set the state of pending uploads.
+     *
+     * - Typically, this would be called at the start of an upload.
+     *
+     * - Thereafter, as each item gets uploaded one by one, we'd call
+     *   {@link markUploadedFiles} or {@link markUploadedZipItems}.
+     *
+     * - Finally, once the upload completes (or gets cancelled), we'd call
+     *   {@link clearPendingUploads} to complete the circle.
      */
-    setPendingUploadCollection: (collectionName: string) => Promise<void>;
+    setPendingUploads: (pendingUploads: PendingUploads) => Promise<void>;
 
     /**
-     * Update the list of files (of {@link type}) associated with the pending
-     * upload.
+     * Mark the given files (given by their {@link paths}) as having been
+     * uploaded.
      */
-    setPendingUploadFiles: (
-        type: PendingUploads["type"],
-        filePaths: string[],
-    ) => Promise<void>;
+    markUploadedFiles: (paths: PendingUploads["filePaths"]) => Promise<void>;
 
-    /*
-     * TODO: AUDIT below this - Some of the types we use below are not copyable
-     * across process boundaries, and such functions will (expectedly) fail at
-     * runtime. For such functions, find an efficient alternative or refactor
-     * the dataflow.
+    /**
+     * Mark the given {@link ZipItem}s as having been uploaded.
      */
+    markUploadedZipItems: (items: PendingUploads["zipItems"]) => Promise<void>;
 
-    // -
-
-    getElectronFilesFromGoogleZip: (
-        filePath: string,
-    ) => Promise<ElectronFile[]>;
-    getDirFiles: (dirPath: string) => Promise<ElectronFile[]>;
+    /**
+     * Clear any pending uploads.
+     */
+    clearPendingUploads: () => Promise<void>;
 }
 
 /**
@@ -589,14 +636,56 @@ export interface FolderWatchSyncedFile {
 }
 
 /**
- * When the user starts an upload, we remember the files they'd selected or drag
- * and dropped so that we can resume (if needed) when the app restarts after
- * being stopped in the middle of the uploads.
+ * A particular file within a zip file.
+ *
+ * When the user uploads a zip file, we create a "zip item" for each entry
+ * within the zip file. Each such entry is a tuple containing the (path to a zip
+ * file itself, and the name of an entry within it).
+ *
+ * The name of the entry is not just the file name, but rather is the full path
+ * of the file within the zip. That is, each entry name uniquely identifies a
+ * particular file within the given zip.
+ *
+ * When `entryName` is a path within a nested directory, it is guaranteed to use
+ * the POSIX path separator ("/") since that is the path separator required by
+ * the ZIP format itself
+ *
+ * > 4.4.17.1 The name of the file, with optional relative path.
+ * >
+ * >  The path stored MUST NOT contain a drive or  device letter, or a leading
+ * >  slash. All slashes MUST be forward slashes '/' as opposed to  backwards
+ * >  slashes '\' for compatibility with Amiga and UNIX file systems etc. If
+ * >  input came from standard input, there is no file name field.
+ * >
+ * > https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT
+ */
+export type ZipItem = [zipPath: string, entryName: string];
+
+/**
+ * State about pending and in-progress uploads.
+ *
+ * When the user starts an upload, we remember the files they'd selected (or
+ * drag-dropped) so that we can resume if they restart the app in before the
+ * uploads have been completed. This state is kept on the Electron side, and
+ * this object is the IPC intermediary.
  */
 export interface PendingUploads {
-    /** The collection to which we're uploading */
-    collectionName: string;
-    /* The upload can be either of a Google Takeout zip, or regular files */
-    type: "files" | "zips";
-    files: ElectronFile[];
+    /**
+     * The collection to which we're uploading, or the root collection.
+     *
+     * This is name of the collection (when uploading to a singular collection)
+     * or the root collection (when uploading to separate * albums) to which we
+     * these uploads are meant to go to. See {@link CollectionMapping}.
+     *
+     * It will not be set if we're just uploading standalone files.
+     */
+    collectionName?: string;
+    /**
+     * Paths of regular files that need to be uploaded.
+     */
+    filePaths: string[];
+    /**
+     * {@link ZipItem} (zip path and entry name) that need to be uploaded.
+     */
+    zipItems: ZipItem[];
 }

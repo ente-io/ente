@@ -4,7 +4,7 @@ import { validateAndGetCreationUnixTimeInMicroSeconds } from "@ente/shared/time"
 import { NULL_LOCATION } from "constants/upload";
 import exifr from "exifr";
 import piexif from "piexifjs";
-import { Location, type ParsedExtractedMetadata } from "types/upload";
+import type { Location, ParsedExtractedMetadata } from "types/metadata";
 
 type ParsedEXIFData = Record<string, any> &
     Partial<{
@@ -167,14 +167,7 @@ function parseExifData(exifData: RawEXIFData): ParsedEXIFData {
             parsedExif.imageWidth = ImageWidth;
             parsedExif.imageHeight = ImageHeight;
         } else {
-            log.error(
-                `Image dimension parsing failed - ImageWidth or ImageHeight is not a number ${JSON.stringify(
-                    {
-                        ImageWidth,
-                        ImageHeight,
-                    },
-                )}`,
-            );
+            log.warn("EXIF: Ignoring non-numeric ImageWidth or ImageHeight");
         }
     } else if (ExifImageWidth && ExifImageHeight) {
         if (
@@ -184,13 +177,8 @@ function parseExifData(exifData: RawEXIFData): ParsedEXIFData {
             parsedExif.imageWidth = ExifImageWidth;
             parsedExif.imageHeight = ExifImageHeight;
         } else {
-            log.error(
-                `Image dimension parsing failed - ExifImageWidth or ExifImageHeight is not a number ${JSON.stringify(
-                    {
-                        ExifImageWidth,
-                        ExifImageHeight,
-                    },
-                )}`,
+            log.warn(
+                "EXIF: Ignoring non-numeric ExifImageWidth or ExifImageHeight",
             );
         }
     } else if (PixelXDimension && PixelYDimension) {
@@ -201,13 +189,8 @@ function parseExifData(exifData: RawEXIFData): ParsedEXIFData {
             parsedExif.imageWidth = PixelXDimension;
             parsedExif.imageHeight = PixelYDimension;
         } else {
-            log.error(
-                `Image dimension parsing failed - PixelXDimension or PixelYDimension is not a number ${JSON.stringify(
-                    {
-                        PixelXDimension,
-                        PixelYDimension,
-                    },
-                )}`,
+            log.warn(
+                "EXIF: Ignoring non-numeric PixelXDimension or PixelYDimension",
             );
         }
     }
@@ -302,16 +285,14 @@ export function parseEXIFLocation(
         );
         return { latitude, longitude };
     } catch (e) {
-        log.error(
-            `Failed to parseEXIFLocation ${JSON.stringify({
-                gpsLatitude,
-                gpsLatitudeRef,
-                gpsLongitude,
-                gpsLongitudeRef,
-            })}`,
-            e,
-        );
-        return NULL_LOCATION;
+        const p = {
+            gpsLatitude,
+            gpsLatitudeRef,
+            gpsLongitude,
+            gpsLongitudeRef,
+        };
+        log.error(`Failed to parse EXIF location ${JSON.stringify(p)}`, e);
+        return { ...NULL_LOCATION };
     }
 }
 
@@ -328,7 +309,7 @@ function convertDMSToDD(
 
 export function getEXIFLocation(exifData: ParsedEXIFData): Location {
     if (!exifData || (!exifData.latitude && exifData.latitude !== 0)) {
-        return NULL_LOCATION;
+        return { ...NULL_LOCATION };
     }
     return { latitude: exifData.latitude, longitude: exifData.longitude };
 }

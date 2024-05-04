@@ -2,11 +2,14 @@
  * @file stream data to-from renderer using a custom protocol handler.
  */
 import { net, protocol } from "electron/main";
+import StreamZip from "node-stream-zip";
 import { createWriteStream, existsSync } from "node:fs";
 import fs from "node:fs/promises";
 import { Readable } from "node:stream";
+import { ReadableStream } from "node:stream/web";
 import { pathToFileURL } from "node:url";
 import log from "./log";
+import { ensure } from "./utils/common";
 
 /**
  * Register a protocol handler that we use for streaming large files between the
@@ -34,19 +37,18 @@ export const registerStreamProtocol = () => {
     protocol.handle("stream", async (request: Request) => {
         const url = request.url;
         // The request URL contains the command to run as the host, and the
-        // pathname of the file as the path. For example,
-        //
-        //     stream://write/path/to/file
-        //              host-pathname-----
-        //
-        const { host, pathname } = new URL(url);
-        // Convert e.g. "%20" to spaces.
-        const path = decodeURIComponent(pathname);
+        // pathname of the file(s) as the search params.
+        const { host, searchParams } = new URL(url);
         switch (host) {
             case "read":
-                return handleRead(path);
+                return handleRead(ensure(searchParams.get("path")));
+            case "read-zip":
+                return handleReadZip(
+                    ensure(searchParams.get("zipPath")),
+                    ensure(searchParams.get("entryName")),
+                );
             case "write":
-                return handleWrite(path, request);
+                return handleWrite(ensure(searchParams.get("path")), request);
             default:
                 return new Response("", { status: 404 });
         }
@@ -57,10 +59,17 @@ const handleRead = async (path: string) => {
     try {
         const res = await net.fetch(pathToFileURL(path).toString());
         if (res.ok) {
-            // net.fetch defaults to text/plain, which might be fine
-            // in practice, but as an extra precaution indicate that
-            // this is binary data.
-            res.headers.set("Content-Type", "application/octet-stream");
+            // net.fetch already seems to add "Content-Type" and "Last-Modified"
+            // headers, but I couldn't find documentation for this. In any case,
+            // since we already are stat-ting the file for the "Content-Length",
+            // we explicitly add the "X-Last-Modified-Ms" too,
+            //
+            // 1. Guaranteeing its presence,
+            //
+            // 2. Having it be in the exact format we want (no string <-> date
+            //    conversions),
+            //
+            // 3. Retaining milliseconds.
 
             const stat = await fs.stat(path);
 
@@ -75,7 +84,54 @@ const handleRead = async (path: string) => {
         return res;
     } catch (e) {
         log.error(`Failed to read stream at ${path}`, e);
-        return new Response(`Failed to read stream: ${e.message}`, {
+        return new Response(`Failed to read stream: ${String(e)}`, {
+            status: 500,
+        });
+    }
+};
+
+const handleReadZip = async (zipPath: string, entryName: string) => {
+    try {
+        const zip = new StreamZip.async({ file: zipPath });
+        const entry = await zip.entry(entryName);
+        if (!entry) return new Response("", { status: 404 });
+
+        // This returns an "old style" NodeJS.ReadableStream.
+        const stream = await zip.stream(entry);
+        // Convert it into a new style NodeJS.Readable.
+        const nodeReadable = new Readable().wrap(stream);
+        // Then convert it into a Web stream.
+        const webReadableStreamAny = Readable.toWeb(nodeReadable);
+        // However, we get a ReadableStream<any> now. This doesn't go into the
+        // `BodyInit` expected by the Response constructor, which wants a
+        // ReadableStream<Uint8Array>. Force a cast.
+        const webReadableStream =
+            webReadableStreamAny as ReadableStream<Uint8Array>;
+
+        // Close the zip handle when the underlying stream closes.
+        stream.on("end", () => void zip.close());
+
+        return new Response(webReadableStream, {
+            headers: {
+                // We don't know the exact type, but it doesn't really matter,
+                // just set it to a generic binary content-type so that the
+                // browser doesn't tinker with it thinking of it as text.
+                "Content-Type": "application/octet-stream",
+                "Content-Length": `${entry.size}`,
+                // While it is documented that entry.time is the modification
+                // time, the units are not mentioned. By seeing the source code,
+                // we can verify that it is indeed epoch milliseconds. See
+                // `parseZipTime` in the node-stream-zip source,
+                // https://github.com/antelle/node-stream-zip/blob/master/node_stream_zip.js
+                "X-Last-Modified-Ms": `${entry.time}`,
+            },
+        });
+    } catch (e) {
+        log.error(
+            `Failed to read entry ${entryName} from zip file at ${zipPath}`,
+            e,
+        );
+        return new Response(`Failed to read stream: ${String(e)}`, {
             status: 500,
         });
     }
@@ -83,11 +139,11 @@ const handleRead = async (path: string) => {
 
 const handleWrite = async (path: string, request: Request) => {
     try {
-        await writeStream(path, request.body);
+        await writeStream(path, ensure(request.body));
         return new Response("", { status: 200 });
     } catch (e) {
         log.error(`Failed to write stream to ${path}`, e);
-        return new Response(`Failed to write stream: ${e.message}`, {
+        return new Response(`Failed to write stream: ${String(e)}`, {
             status: 500,
         });
     }
@@ -99,59 +155,29 @@ const handleWrite = async (path: string, request: Request) => {
  * The returned promise resolves when the write completes.
  *
  * @param filePath The local filesystem path where the file should be written.
- * @param readableStream A [web
- * ReadableStream](https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream)
+ *
+ * @param readableStream A web
+ * [ReadableStream](https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream).
  */
 export const writeStream = (filePath: string, readableStream: ReadableStream) =>
-    writeNodeStream(filePath, convertWebReadableStreamToNode(readableStream));
+    writeNodeStream(filePath, Readable.fromWeb(readableStream));
 
-/**
- * Convert a Web ReadableStream into a Node.js ReadableStream
- *
- * This can be used to, for example, write a ReadableStream obtained via
- * `net.fetch` into a file using the Node.js `fs` APIs
- */
-const convertWebReadableStreamToNode = (readableStream: ReadableStream) => {
-    const reader = readableStream.getReader();
-    const rs = new Readable();
-
-    rs._read = async () => {
-        try {
-            const result = await reader.read();
-
-            if (!result.done) {
-                rs.push(Buffer.from(result.value));
-            } else {
-                rs.push(null);
-                return;
-            }
-        } catch (e) {
-            rs.emit("error", e);
-        }
-    };
-
-    return rs;
-};
-
-const writeNodeStream = async (
-    filePath: string,
-    fileStream: NodeJS.ReadableStream,
-) => {
+const writeNodeStream = async (filePath: string, fileStream: Readable) => {
     const writeable = createWriteStream(filePath);
 
-    fileStream.on("error", (error) => {
-        writeable.destroy(error); // Close the writable stream with an error
+    fileStream.on("error", (err) => {
+        writeable.destroy(err); // Close the writable stream with an error
     });
 
     fileStream.pipe(writeable);
 
     await new Promise((resolve, reject) => {
         writeable.on("finish", resolve);
-        writeable.on("error", async (e: unknown) => {
+        writeable.on("error", (err) => {
             if (existsSync(filePath)) {
-                await fs.unlink(filePath);
+                void fs.unlink(filePath);
             }
-            reject(e);
+            reject(err);
         });
     });
 };

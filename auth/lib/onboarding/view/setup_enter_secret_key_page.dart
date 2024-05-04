@@ -90,6 +90,8 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
                   },
                   decoration: InputDecoration(
                     hintText: l10n.codeIssuerHint,
+                    floatingLabelBehavior: FloatingLabelBehavior.auto,
+                    labelText: l10n.codeIssuerHint,
                   ),
                   controller: _issuerController,
                   autofocus: true,
@@ -107,6 +109,8 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
                   },
                   decoration: InputDecoration(
                     hintText: l10n.codeSecretKeyHint,
+                    floatingLabelBehavior: FloatingLabelBehavior.auto,
+                    labelText: l10n.codeSecretKeyHint,
                     suffixIcon: IconButton(
                       onPressed: () {
                         setState(() {
@@ -134,9 +138,12 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
                   },
                   decoration: InputDecoration(
                     hintText: l10n.codeAccountHint,
+                    floatingLabelBehavior: FloatingLabelBehavior.auto,
+                    labelText: l10n.codeAccountHint,
                   ),
                   controller: _accountController,
                 ),
+                const SizedBox(height: 40),
                 const SizedBox(
                   height: 20,
                 ),
@@ -218,6 +225,7 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 16.0,
+                        vertical: 4,
                       ),
                       child: Text(l10n.saveAction),
                     ),
@@ -236,6 +244,7 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
       final account = _accountController.text.trim();
       final issuer = _issuerController.text.trim();
       final secret = _secretController.text.trim().replaceAll(' ', '');
+      final isStreamCode = issuer.toLowerCase() == "steam";
       if (widget.code != null && widget.code!.secret != secret) {
         ButtonResult? result = await showChoiceActionSheet(
           context,
@@ -253,9 +262,11 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
       final CodeDisplay display = widget.code!.display.copyWith(tags: tags);
       final Code newCode = widget.code == null
           ? Code.fromAccountAndSecret(
+              isStreamCode ? Type.steam : Type.totp,
               account,
               issuer,
               secret,
+              isStreamCode ? Code.steamDigits : Code.defaultDigits,
               display,
             )
           : widget.code!.copyWith(

@@ -1,11 +1,9 @@
-import 'dart:convert';
-
-import 'package:ente_auth/models/code_display.dart';
 import 'package:ente_auth/utils/totp_util.dart';
 import 'package:flutter/foundation.dart';
 
 class Code {
   static const defaultDigits = 6;
+  static const steamDigits = 5;
   static const defaultPeriod = 30;
 
   int? generatedID;
@@ -70,39 +68,45 @@ class Code {
       updatedAlgo,
       updatedType,
       updatedCounter,
-      "otpauth://${updatedType.name}/$updateIssuer:$updateAccount?algorithm=${updatedAlgo.name}&digits=$updatedDigits&issuer=$updateIssuer&period=$updatePeriod&secret=$updatedSecret${updatedType == Type.hotp ? "&counter=$updatedCounter" : ""}",
+      "otpauth://${updatedType.name}/$updateIssuer:$updateAccount?algorithm=${updatedAlgo.name}"
+      "&digits=$updatedDigits&issuer=$updateIssuer"
+      "&period=$updatePeriod&secret=$updatedSecret${updatedType == Type.hotp ? "&counter=$updatedCounter" : ""}",
       generatedID: generatedID,
       display: updatedDisplay,
     );
   }
 
   static Code fromAccountAndSecret(
+    Type type,
     String account,
     String issuer,
     String secret,
     CodeDisplay? display,
+    int digits,
   ) {
     return Code(
       account,
       issuer,
-      defaultDigits,
+      digits,
       defaultPeriod,
       secret,
       Algorithm.sha1,
-      Type.totp,
+      type,
       0,
-      "otpauth://totp/$issuer:$account?algorithm=SHA1&digits=6&issuer=$issuer&period=30&secret=$secret",
+      "otpauth://${type.name}/$issuer:$account?algorithm=SHA1&digits=$digits&issuer=$issuer&period=30&secret=$secret",
       display: display ?? CodeDisplay(),
     );
   }
 
   static Code fromOTPAuthUrl(String rawData, {CodeDisplay? display}) {
     Uri uri = Uri.parse(rawData);
+    final issuer = _getIssuer(uri);
+
     try {
       return Code(
         _getAccount(uri),
-        _getIssuer(uri),
-        _getDigits(uri),
+        issuer,
+        _getDigits(uri, issuer),
         _getPeriod(uri),
         getSanitizedSecret(uri.queryParameters['secret']!),
         _getAlgorithm(uri),
@@ -179,10 +183,13 @@ class Code {
     }
   }
 
-  static int _getDigits(Uri uri) {
+  static int _getDigits(Uri uri, String issuer) {
     try {
       return int.parse(uri.queryParameters['digits']!);
     } catch (e) {
+      if (issuer.toLowerCase() == "steam") {
+        return steamDigits;
+      }
       return defaultDigits;
     }
   }
@@ -225,6 +232,8 @@ class Code {
   static Type _getType(Uri uri) {
     if (uri.host == "totp") {
       return Type.totp;
+    } else if (uri.host == "steam") {
+      return Type.steam;
     } else if (uri.host == "hotp") {
       return Type.hotp;
     }
@@ -262,6 +271,9 @@ class Code {
 enum Type {
   totp,
   hotp,
+  steam;
+
+  bool get isTOTPCompatible => this == totp || this == steam;
 }
 
 enum Algorithm {

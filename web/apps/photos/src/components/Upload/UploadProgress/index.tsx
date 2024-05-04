@@ -1,18 +1,16 @@
-import { useContext, useEffect, useState } from "react";
-import { UploadProgressDialog } from "./dialog";
-import { MinimizedUploadProgress } from "./minimized";
-
-import { t } from "i18next";
-
 import { UPLOAD_STAGES } from "constants/upload";
 import UploadProgressContext from "contexts/uploadProgress";
+import { t } from "i18next";
 import { AppContext } from "pages/_app";
-import {
+import { useContext, useEffect, useState } from "react";
+import type {
     InProgressUpload,
     SegregatedFinishedUploads,
     UploadCounter,
     UploadFileNames,
-} from "types/upload/ui";
+} from "services/upload/uploadManager";
+import { UploadProgressDialog } from "./dialog";
+import { MinimizedUploadProgress } from "./minimized";
 
 interface Props {
     open: boolean;

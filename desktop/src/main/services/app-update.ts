@@ -12,8 +12,8 @@ export const setupAutoUpdater = (mainWindow: BrowserWindow) => {
     autoUpdater.autoDownload = false;
 
     const oneDay = 1 * 24 * 60 * 60 * 1000;
-    setInterval(() => checkForUpdatesAndNotify(mainWindow), oneDay);
-    checkForUpdatesAndNotify(mainWindow);
+    setInterval(() => void checkForUpdatesAndNotify(mainWindow), oneDay);
+    void checkForUpdatesAndNotify(mainWindow);
 };
 
 /**
@@ -22,7 +22,7 @@ export const setupAutoUpdater = (mainWindow: BrowserWindow) => {
 export const forceCheckForAppUpdates = (mainWindow: BrowserWindow) => {
     userPreferences.delete("skipAppVersion");
     userPreferences.delete("muteUpdateNotificationVersion");
-    checkForUpdatesAndNotify(mainWindow);
+    void checkForUpdatesAndNotify(mainWindow);
 };
 
 const checkForUpdatesAndNotify = async (mainWindow: BrowserWindow) => {
@@ -36,18 +36,21 @@ const checkForUpdatesAndNotify = async (mainWindow: BrowserWindow) => {
 
     log.debug(() => `Update check found version ${version}`);
 
+    if (!version)
+        throw new Error("Unexpected empty version obtained from auto-updater");
+
     if (compareVersions(version, app.getVersion()) <= 0) {
         log.debug(() => "Skipping update, already at latest version");
         return;
     }
 
-    if (version === userPreferences.get("skipAppVersion")) {
+    if (version == userPreferences.get("skipAppVersion")) {
         log.info(`User chose to skip version ${version}`);
         return;
     }
 
     const mutedVersion = userPreferences.get("muteUpdateNotificationVersion");
-    if (version === mutedVersion) {
+    if (version == mutedVersion) {
         log.info(`User has muted update notifications for version ${version}`);
         return;
     }
@@ -56,7 +59,7 @@ const checkForUpdatesAndNotify = async (mainWindow: BrowserWindow) => {
         mainWindow.webContents.send("appUpdateAvailable", update);
 
     log.debug(() => "Attempting auto update");
-    autoUpdater.downloadUpdate();
+    await autoUpdater.downloadUpdate();
 
     let timeoutId: ReturnType<typeof setTimeout>;
     const fiveMinutes = 5 * 60 * 1000;

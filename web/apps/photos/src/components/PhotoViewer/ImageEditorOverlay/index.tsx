@@ -46,7 +46,6 @@ import { detectFileTypeInfo } from "services/detect-type";
 import downloadManager from "services/download";
 import uploadManager from "services/upload/uploadManager";
 import { EnteFile } from "types/file";
-import { FileWithCollection } from "types/upload";
 import { getEditorCloseConfirmationMessage } from "utils/ui";
 import ColoursMenu from "./ColoursMenu";
 import CropMenu, { cropRegionOfCanvas, getCropRegionArgs } from "./CropMenu";
@@ -507,15 +506,15 @@ const ImageEditorOverlay = (props: IProps) => {
             );
 
             const editedFile = await getEditedFile();
-            const file: FileWithCollection = {
-                file: editedFile,
-                collectionID: props.file.collectionID,
+            const file = {
+                uploadItem: editedFile,
                 localID: 1,
+                collectionID: props.file.collectionID,
             };
 
             uploadManager.prepareForNewUpload();
             uploadManager.showUploadProgressDialog();
-            uploadManager.queueFilesForUpload([file], [collection]);
+            uploadManager.uploadItems([file], [collection]);
             setFileURL(null);
             props.onClose();
             props.closePhotoViewer();

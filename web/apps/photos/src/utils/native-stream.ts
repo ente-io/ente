@@ -2,12 +2,14 @@
  * @file Streaming IPC communication with the Node.js layer of our desktop app.
  *
  * NOTE: These functions only work when we're running in our desktop app.
+ *
+ * See: [Note: IPC streams].
  */
 
-import type { Electron } from "@/next/types/ipc";
+import type { Electron, ZipItem } from "@/next/types/ipc";
 
 /**
- * Stream the given file from the user's local filesystem.
+ * Stream the given file or zip entry from the user's local file system.
  *
  * This only works when we're running in our desktop app since it uses the
  * "stream://" protocol handler exposed by our custom code in the Node.js layer.
@@ -16,8 +18,9 @@ import type { Electron } from "@/next/types/ipc";
  * To avoid accidentally invoking it in a non-desktop app context, it requires
  * the {@link Electron} object as a parameter (even though it doesn't use it).
  *
- * @param path The path on the file on the user's local filesystem whose
- * contents we want to stream.
+ * @param pathOrZipItem Either the path on the file on the user's local file
+ * system whose contents we want to stream. Or a tuple containing the path to a
+ * zip file and the name of the entry within it.
  *
  * @return A ({@link Response}, size, lastModifiedMs) triple.
  *
@@ -32,16 +35,24 @@ import type { Electron } from "@/next/types/ipc";
  */
 export const readStream = async (
     _: Electron,
-    path: string,
+    pathOrZipItem: string | ZipItem,
 ): Promise<{ response: Response; size: number; lastModifiedMs: number }> => {
-    const req = new Request(`stream://read${path}`, {
-        method: "GET",
-    });
+    let url: URL;
+    if (typeof pathOrZipItem == "string") {
+        const params = new URLSearchParams({ path: pathOrZipItem });
+        url = new URL(`stream://read?${params.toString()}`);
+    } else {
+        const [zipPath, entryName] = pathOrZipItem;
+        const params = new URLSearchParams({ zipPath, entryName });
+        url = new URL(`stream://read-zip?${params.toString()}`);
+    }
+
+    const req = new Request(url, { method: "GET" });
 
     const res = await fetch(req);
     if (!res.ok)
         throw new Error(
-            `Failed to read stream from ${path}: HTTP ${res.status}`,
+            `Failed to read stream from ${url}: HTTP ${res.status}`,
         );
 
     const size = readNumericHeader(res, "Content-Length");
@@ -51,10 +62,11 @@ export const readStream = async (
 };
 
 const readNumericHeader = (res: Response, key: string) => {
-    const value = +res.headers[key];
+    const valueText = res.headers.get(key);
+    const value = +valueText;
     if (isNaN(value))
         throw new Error(
-            `Expected a numeric ${key} when reading a stream response: ${res}`,
+            `Expected a numeric ${key} when reading a stream response, instead got ${valueText}`,
         );
     return value;
 };
@@ -78,26 +90,16 @@ export const writeStream = async (
     path: string,
     stream: ReadableStream,
 ) => {
-    // TODO(MR): This doesn't currently work.
-    //
-    // Not sure what I'm doing wrong here; I've opened an issue upstream
-    // https://github.com/electron/electron/issues/41872
-    //
-    // A gist with a minimal reproduction
-    // https://gist.github.com/mnvr/e08d9f4876fb8400b7615347b4d268eb
-    //
-    // Meanwhile, write the complete body in one go (this'll eventually run into
-    // memory failures with large files - just a temporary stopgap to get the
-    // code to work).
+    const params = new URLSearchParams({ path });
+    const url = new URL(`stream://write?${params.toString()}`);
 
-    /*
     // The duplex parameter needs to be set to 'half' when streaming requests.
     //
     // Currently browsers, and specifically in our case, since this code runs
     // only within our desktop (Electron) app, Chromium, don't support 'full'
     // duplex mode (i.e. streaming both the request and the response).
     // https://developer.chrome.com/docs/capabilities/web-apis/fetch-streaming-requests
-    const req = new Request(`stream://write${path}`, {
+    const req = new Request(url, {
         // GET can't have a body
         method: "POST",
         body: stream,
@@ -105,12 +107,6 @@ export const writeStream = async (
         // "duplex" parameter, e.g. see
         // https://github.com/node-fetch/node-fetch/issues/1769.
         duplex: "half",
-    });
-    */
-
-    const req = new Request(`stream://write${path}`, {
-        method: "POST",
-        body: await new Response(stream).blob(),
     });
 
     const res = await fetch(req);
