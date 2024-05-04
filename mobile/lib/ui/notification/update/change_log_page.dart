@@ -123,8 +123,12 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
         "View a slideshow of your albums on any big screen! Open an album and click on the Cast button to get started.",
       ),
       ChangeLogEntry(
-        "Own shared photos",
+        "Organize shared photos",
         "You can now add shared items to your favorites to any of your personal albums. Ente will create a copy that is fully owned by you and can be organized to your liking.",
+      ),
+      ChangeLogEntry(
+        "Download multiple items",
+        "You can now download multiple items to your gallery at once. Select the items you want to download and click on the download button.",
       ),
       ChangeLogEntry(
         "Performance improvements",
