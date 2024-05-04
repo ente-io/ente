@@ -36,9 +36,10 @@ export default function Slideshow() {
     };
 
     const advance = async () => {
+        console.log("in advance");
         if (!urlGenerator) throw new Error("Unexpected state");
-        const urls = await urlGenerator.next();
-        if (!urls) {
+        const { value: urls, done } = await urlGenerator.next();
+        if (done) {
             log.warn("Empty collection");
             // Go back to pairing page
             router.push("/");
@@ -182,7 +183,10 @@ export default function Slideshow() {
         };
     }, [loading]);
 
-    if (loading) return <PairedSuccessfullyOverlay />;
+    console.log({ a: "render", loading, currentFileURL, nextFileURL });
+
+    if (loading || !currentFileURL || !nextFileURL)
+        return <PairedSuccessfullyOverlay />;
 
     return <SlideView url={currentFileURL} nextURL={nextFileURL} />;
 }

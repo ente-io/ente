@@ -78,15 +78,15 @@ export const readCastData = (): CastData => {
  * collection, and just moves onward to the next one. It will however throw if
  * there are errors in getting the collection itself.
  *
- * If there are no renderable image in the collection, it resolves with
- * `undefined`.
+ * If there are no renderable image in the collection, the sequence ends by
+ * yielding `done: true`.
  *
  * @param castData The collection to show and credentials to fetch the files
  * within it.
  */
 export const renderableURLs = async function* (castData: CastData) {
     const { collectionKey, castToken } = castData;
-    let previousURL: string | undefined
+    let previousURL: string | undefined;
     while (true) {
         const collection = await getCollection(castToken, collectionKey);
         await syncPublicFiles(castToken, collection, () => {});
@@ -94,6 +94,7 @@ export const renderableURLs = async function* (castData: CastData) {
         const files = allFiles.filter((file) => isFileEligibleForCast(file));
 
         for (const file of files) {
+            console.log("in generator", previousURL);
             if (!previousURL) {
                 previousURL = await createRenderableURL(castToken, file);
                 continue;
