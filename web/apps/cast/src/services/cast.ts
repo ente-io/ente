@@ -3,7 +3,7 @@ import { isNonWebImageFileExtension } from "@/media/formats";
 import { decodeLivePhoto } from "@/media/live-photo";
 import { nameAndExtension } from "@/next/file";
 import log from "@/next/log";
-import { ensure } from "@/utils/ensure";
+import { ensureString } from "@/utils/ensure";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { CustomError, parseSharingErrorCodes } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
@@ -54,12 +54,57 @@ interface CastData {
 /**
  * Read back the cast data we got after pairing.
  *
- * Sibling of {@link storeCastData}
+ * Sibling of {@link storeCastData}. It throws an error if the expected data is
+ * not present in localStorage.
  */
 export const readCastData = (): CastData => {
-    const collectionKey = ensure(window.localStorage.getItem("collectionKey"));
-    const castToken = ensure(window.localStorage.getItem("castToken"));
+    const collectionKey = ensureString(localStorage.getItem("collectionKey"));
+    const castToken = ensureString(localStorage.getItem("castToken"));
     return { collectionKey, castToken };
+};
+
+/**
+ * An async generator function that loops through all the files in the
+ * collection, returning renderable URLs to each that can be displayed in a
+ * slideshow.
+ *
+ * Each time it resolves with a pair of URLs, one for the current slideshow
+ * image, and one for the image to be displayed next.
+ *
+ * Once it reaches the end of the collection, it starts from the beginning
+ * again.
+ *
+ * It ignores errors in the fetching and decoding of individual images in the
+ * collection, and just moves onward to the next one. It will however throw if
+ * there are errors in getting the collection itself.
+ *
+ * If there are no renderable image in the collection, it resolves with
+ * `undefined`.
+ *
+ * @param castData The collection to show and credentials to fetch the files
+ * within it.
+ */
+export const renderableURLs = async function* (castData: CastData) {
+    const { collectionKey, castToken } = castData;
+    let previousURL: string | undefined
+    while (true) {
+        const collection = await getCollection(castToken, collectionKey);
+        await syncPublicFiles(castToken, collection, () => {});
+        const allFiles = await getLocalFiles(String(collection.id));
+        const files = allFiles.filter((file) => isFileEligibleForCast(file));
+
+        for (const file of files) {
+            if (!previousURL) {
+                previousURL = await createRenderableURL(castToken, file);
+                continue;
+            }
+
+            const url = await createRenderableURL(castToken, file);
+            const urls = [previousURL, url];
+            previousURL = url;
+            yield urls;
+        }
+    }
 };
 
 const getLastSyncKey = (collectionUID: string) => `${collectionUID}-time`;
@@ -147,8 +192,8 @@ async function getSyncTime(collectionUID: string): Promise<number> {
 const updateSyncTime = async (collectionUID: string, time: number) =>
     await localForage.setItem(getLastSyncKey(collectionUID), time);
 
-export const syncPublicFiles = async (
-    token: string,
+const syncPublicFiles = async (
+    castToken: string,
     collection: Collection,
     setPublicFiles: (files: EnteFile[]) => void,
 ) => {
@@ -164,7 +209,7 @@ export const syncPublicFiles = async (
                 return sortFiles(files, sortAsc);
             }
             const fetchedFiles = await fetchFiles(
-                token,
+                castToken,
                 collection,
                 lastSyncTime,
                 files,
@@ -267,9 +312,9 @@ const fetchFiles = async (
     }
 };
 
-export const getCastCollection = async (
-    collectionKey: string,
+const getCollection = async (
     castToken: string,
+    collectionKey: string,
 ): Promise<Collection> => {
     try {
         const resp = await HTTPService.get(`${ENDPOINT}/cast/info`, null, {
@@ -408,12 +453,12 @@ export function mergeMetadata(files: EnteFile[]): EnteFile[] {
  * Once we're done showing the file, the URL should be revoked using
  * {@link URL.revokeObjectURL} to free up browser resources.
  */
-export const createRenderableURL = async (file: EnteFile, castToken: string) =>
-    URL.createObjectURL(await getPreviewableImage(file, castToken));
+export const createRenderableURL = async (castToken: string, file: EnteFile) =>
+    URL.createObjectURL(await getPreviewableImage(castToken, file));
 
 export const getPreviewableImage = async (
-    file: EnteFile,
     castToken: string,
+    file: EnteFile,
 ): Promise<Blob> => {
     try {
         let fileBlob = await downloadFile(castToken, file);
