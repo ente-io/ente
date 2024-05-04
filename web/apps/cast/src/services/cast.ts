@@ -98,17 +98,29 @@ export const renderableImageURLs = async function* (castData: CastData) {
         for (const file of files) {
             if (!isFileEligibleForCast(file)) continue;
 
-            haveEligibleFiles = true;
-
             if (!previousURL) {
-                previousURL = await createRenderableURL(castToken, file);
+                try {
+                    previousURL = await createRenderableURL(castToken, file);
+                } catch (e) {
+                    log.error("Skipping unrenderable file", e);
+                }
                 continue;
             }
 
-            const url = await createRenderableURL(castToken, file);
+            let url: string;
+            try {
+                url = await createRenderableURL(castToken, file);
+            } catch (e) {
+                log.error("Skipping unrenderable file", e);
+                continue;
+            }
+
+            haveEligibleFiles = true;
+
             const urls: RenderableImageURLPair = [previousURL, url];
             previousURL = url;
             yield urls;
+            // TODO: URL.revokeObjectURL where
         }
 
         // This collection does not have any files that we can show.
@@ -404,41 +416,7 @@ export function mergeMetadata(files: EnteFile[]): EnteFile[] {
     });
 }
 
-/**
- * Create and return a new data URL that can be used to show the given
- * {@link file} in our slideshow image viewer.
- *
- * Once we're done showing the file, the URL should be revoked using
- * {@link URL.revokeObjectURL} to free up browser resources.
- */
-export const createRenderableURL = async (castToken: string, file: EnteFile) =>
-    URL.createObjectURL(await getPreviewableImage(castToken, file));
-
-export const getPreviewableImage = async (
-    castToken: string,
-    file: EnteFile,
-): Promise<Blob> => {
-    try {
-        let fileBlob = await downloadFile(castToken, file);
-        if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
-            const { imageData } = await decodeLivePhoto(
-                file.metadata.title,
-                fileBlob,
-            );
-            fileBlob = new Blob([imageData]);
-        }
-        const mimeType = await detectMediaMIMEType(
-            new File([fileBlob], file.metadata.title),
-        );
-        if (!mimeType) return undefined;
-        fileBlob = new Blob([fileBlob], { type: mimeType });
-        return fileBlob;
-    } catch (e) {
-        log.error("failed to download file", e);
-    }
-};
-
-export const isFileEligibleForCast = (file: EnteFile) => {
+const isFileEligibleForCast = (file: EnteFile) => {
     if (!isImageOrLivePhoto(file)) return false;
     if (file.info.fileSize > 100 * 1024 * 1024) return false;
 
@@ -451,6 +429,29 @@ export const isFileEligibleForCast = (file: EnteFile) => {
 const isImageOrLivePhoto = (file: EnteFile) => {
     const fileType = file.metadata.fileType;
     return fileType == FILE_TYPE.IMAGE || fileType == FILE_TYPE.LIVE_PHOTO;
+};
+
+/**
+ * Create and return a new data URL that can be used to show the given
+ * {@link file} in our slideshow image viewer.
+ *
+ * Once we're done showing the file, the URL should be revoked using
+ * {@link URL.revokeObjectURL} to free up browser resources.
+ */
+const createRenderableURL = async (castToken: string, file: EnteFile) =>
+    URL.createObjectURL(await renderableImageBlob(castToken, file));
+
+const renderableImageBlob = async (castToken: string, file: EnteFile) => {
+    const fileName = file.metadata.title;
+    let blob = await downloadFile(castToken, file);
+    if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
+        const { imageData } = await decodeLivePhoto(fileName, blob);
+        blob = new Blob([imageData]);
+    }
+    const mimeType = await detectMediaMIMEType(new File([blob], fileName));
+    if (!mimeType)
+        throw new Error(`Could not detect MIME type for file ${fileName}`);
+    return new Blob([blob], { type: mimeType });
 };
 
 const downloadFile = async (castToken: string, file: EnteFile) => {
