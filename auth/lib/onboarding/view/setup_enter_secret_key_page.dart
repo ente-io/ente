@@ -63,7 +63,9 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
 
   Future<void> _loadTags() async {
     allTags = await CodeDisplayStore.instance.getAllTags();
-    setState(() {});
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   @override
