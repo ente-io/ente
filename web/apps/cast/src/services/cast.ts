@@ -91,14 +91,17 @@ export const renderableImageURLs = async function* (castData: CastData) {
     const { collectionKey, castToken } = castData;
     let previousURL: string | undefined;
     while (true) {
-        const collection = await getCollection(castToken, collectionKey);
+        const collection = await getCastCollection(castToken, collectionKey);
         await syncPublicFiles(castToken, collection, () => {});
-        const allFiles = await getLocalFiles(String(collection.id));
-        const files = allFiles.filter((file) => isFileEligibleForCast(file));
+        const files = await getLocalFiles(String(collection.id));
 
-        if (!files.length) return;
+        let haveEligibleFiles = false;
 
         for (const file of files) {
+            if (!isFileEligibleForCast(file)) continue;
+
+            haveEligibleFiles = true;
+
             if (!previousURL) {
                 previousURL = await createRenderableURL(castToken, file);
                 continue;
@@ -109,7 +112,55 @@ export const renderableImageURLs = async function* (castData: CastData) {
             previousURL = url;
             yield urls;
         }
+
+        // This collection does not have any files that we can show.
+        if (!haveEligibleFiles) return;
     }
+};
+
+const getCastCollection = async (
+    castToken: string,
+    collectionKey: string,
+): Promise<Collection> => {
+    const resp = await HTTPService.get(`${ENDPOINT}/cast/info`, null, {
+        "Cache-Control": "no-cache",
+        "X-Cast-Access-Token": castToken,
+    });
+
+    let collection = resp.data.collection;
+
+    const cryptoWorker = await ComlinkCryptoWorker.getInstance();
+
+    const collectionName =
+        collection.name ||
+        (await cryptoWorker.decryptToUTF8(
+            collection.encryptedName,
+            collection.nameDecryptionNonce,
+            collectionKey,
+        ));
+
+    let collectionPublicMagicMetadata: CollectionPublicMagicMetadata;
+    if (collection.pubMagicMetadata?.data) {
+        collectionPublicMagicMetadata = {
+            ...collection.pubMagicMetadata,
+            data: await cryptoWorker.decryptMetadata(
+                collection.pubMagicMetadata.data,
+                collection.pubMagicMetadata.header,
+                collectionKey,
+            ),
+        };
+    }
+
+    collection = {
+        ...collection,
+        name: collectionName,
+        key: collectionKey,
+        pubMagicMetadata: collectionPublicMagicMetadata,
+    };
+
+    await saveCollection(collection);
+
+    return collection;
 };
 
 const getLastSyncKey = (collectionUID: string) => `${collectionUID}-time`;
@@ -313,53 +364,6 @@ const fetchFiles = async (
         return decryptedFiles;
     } catch (e) {
         log.error("Get cast files failed", e);
-        throw e;
-    }
-};
-
-const getCollection = async (
-    castToken: string,
-    collectionKey: string,
-): Promise<Collection> => {
-    try {
-        const resp = await HTTPService.get(`${ENDPOINT}/cast/info`, null, {
-            "Cache-Control": "no-cache",
-            "X-Cast-Access-Token": castToken,
-        });
-        const fetchedCollection = resp.data.collection;
-
-        const cryptoWorker = await ComlinkCryptoWorker.getInstance();
-
-        const collectionName = (fetchedCollection.name =
-            fetchedCollection.name ||
-            (await cryptoWorker.decryptToUTF8(
-                fetchedCollection.encryptedName,
-                fetchedCollection.nameDecryptionNonce,
-                collectionKey,
-            )));
-
-        let collectionPublicMagicMetadata: CollectionPublicMagicMetadata;
-        if (fetchedCollection.pubMagicMetadata?.data) {
-            collectionPublicMagicMetadata = {
-                ...fetchedCollection.pubMagicMetadata,
-                data: await cryptoWorker.decryptMetadata(
-                    fetchedCollection.pubMagicMetadata.data,
-                    fetchedCollection.pubMagicMetadata.header,
-                    collectionKey,
-                ),
-            };
-        }
-
-        const collection = {
-            ...fetchedCollection,
-            name: collectionName,
-            key: collectionKey,
-            pubMagicMetadata: collectionPublicMagicMetadata,
-        };
-        await saveCollection(collection);
-        return collection;
-    } catch (e) {
-        log.error("failed to get cast collection", e);
         throw e;
     }
 };
