@@ -12,10 +12,10 @@ import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/ui/common/loading_widget.dart';
+import "package:photos/ui/viewer/gallery/component/group/type.dart";
 import "package:photos/ui/viewer/gallery/component/multiple_groups_gallery_view.dart";
 import 'package:photos/ui/viewer/gallery/empty_state.dart';
 import "package:photos/ui/viewer/gallery/state/gallery_context_state.dart";
-import 'package:photos/utils/date_time_util.dart';
 import "package:photos/utils/debouncer.dart";
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
@@ -59,6 +59,7 @@ class Gallery extends StatefulWidget {
 
   // add a Function variable to get sort value in bool
   final SortAscFn? sortAsyncFn;
+  final GroupType groupType;
 
   const Gallery({
     required this.asyncLoader,
@@ -73,6 +74,7 @@ class Gallery extends StatefulWidget {
     this.emptyState = const EmptyState(),
     this.scrollBottomSafeArea = 120.0,
     this.albumName = '',
+    this.groupType = GroupType.day,
     this.enableFileGrouping = true,
     this.loadingWidget = const EnteLoadingWidget(),
     this.disableScroll = false,
@@ -248,6 +250,7 @@ class GalleryState extends State<Gallery> {
     return GalleryContextState(
       sortOrderAsc: _sortOrderAsc,
       inSelectionMode: widget.inSelectionMode,
+      type: widget.groupType,
       child: MultipleGroupsGalleryView(
         itemScroller: _itemScroller,
         groupedFiles: currentGroupedFiles,
@@ -273,13 +276,11 @@ class GalleryState extends State<Gallery> {
 
   List<List<EnteFile>> _groupFiles(List<EnteFile> files) {
     List<EnteFile> dailyFiles = [];
+
     final List<List<EnteFile>> resultGroupedFiles = [];
     for (int index = 0; index < files.length; index++) {
       if (index > 0 &&
-          !areFromSameDay(
-            files[index - 1].creationTime!,
-            files[index].creationTime!,
-          )) {
+          !widget.groupType.areFromSameGroup(files[index - 1], files[index])) {
         resultGroupedFiles.add(dailyFiles);
         dailyFiles = [];
       }

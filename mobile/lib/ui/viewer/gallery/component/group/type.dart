@@ -25,6 +25,18 @@ extension GroupTypeExtension on GroupType {
   String getTitle(BuildContext context, EnteFile file, {EnteFile? lastFile}) {
     if (this == GroupType.day) {
       return _getDayTitle(context, file.creationTime!);
+    } else if (this == GroupType.week) {
+      // return weeks starting date to end date based on file
+      final date = DateTime.fromMicrosecondsSinceEpoch(file.creationTime!);
+      final startOfWeek = date.subtract(Duration(days: date.weekday - 1));
+      final endOfWeek = startOfWeek.add(const Duration(days: 6));
+      return "${DateFormat.MMMd(Localizations.localeOf(context).languageCode).format(startOfWeek)} - ${DateFormat.MMMd(Localizations.localeOf(context).languageCode).format(endOfWeek)}, ${endOfWeek.year}";
+    } else if (this == GroupType.year) {
+      final date = DateTime.fromMicrosecondsSinceEpoch(file.creationTime!);
+      return DateFormat.y(Localizations.localeOf(context).languageCode)
+          .format(date);
+    } else {
+      throw UnimplementedError("not implemented for $this");
     }
     throw UnimplementedError("not implemented for $this");
   }
@@ -33,6 +45,21 @@ extension GroupTypeExtension on GroupType {
     switch (this) {
       case GroupType.day:
         return areFromSameDay(first.creationTime!, second.creationTime!);
+      case GroupType.month:
+        return DateTime.fromMicrosecondsSinceEpoch(first.creationTime!).year ==
+                DateTime.fromMicrosecondsSinceEpoch(second.creationTime!)
+                    .year &&
+            DateTime.fromMicrosecondsSinceEpoch(first.creationTime!).month ==
+                DateTime.fromMicrosecondsSinceEpoch(second.creationTime!).month;
+      case GroupType.year:
+        return DateTime.fromMicrosecondsSinceEpoch(first.creationTime!).year ==
+            DateTime.fromMicrosecondsSinceEpoch(second.creationTime!).year;
+      case GroupType.week:
+        final firstDate =
+            DateTime.fromMicrosecondsSinceEpoch(first.creationTime!);
+        final secondDate =
+            DateTime.fromMicrosecondsSinceEpoch(second.creationTime!);
+        return areDatesInSameWeek(firstDate, secondDate);
       default:
         throw UnimplementedError("not implemented for $this");
     }

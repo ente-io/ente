@@ -187,7 +187,11 @@ class _LazyGroupGalleryState extends State<LazyGroupGallery> {
           children: [
             if (widget.enableFileGrouping)
               GroupHeaderWidget(
-                title: groupType.getTitle(context, _filesInGroup[0]),
+                title: groupType.getTitle(
+                  context,
+                  _filesInGroup[0],
+                  lastFile: _filesInGroup.last,
+                ),
                 gridSize: widget.photoGridSize,
               ),
             Expanded(child: Container()),
