@@ -1,5 +1,5 @@
-/* eslint has already fixed this warning, we don't have the latest version yet
-   https://github.com/eslint/eslint/pull/18286 */
+// eslint has already fixed this warning, we don't have the latest version yet
+// https://github.com/eslint/eslint/pull/18286
 /* eslint-disable no-constant-condition */
 
 import log from "@/next/log";
@@ -30,20 +30,18 @@ export interface Registration {
  *
  * The pairing happens in two phases:
  *
- * Phase 1
+ * Phase 1 - {@link register}
  *
  * 1. We (the receiver) generate a public/private keypair. and register the
  *    public part of it with museum.
  *
  * 2. Museum gives us a pairing "code" in lieu. Show this on the screen.
  *
- * Phase 2
+ * Phase 2 - {@link advertiseCode}
  *
  * There are two ways the client can connect - either by sending us a blank
  * message over the Chromecast protocol (to which we'll reply with the pairing
  * code), or by the user manually entering the pairing code on their screen.
- *
- * So there are two parallel processes.
  *
  * 3. Listen for incoming messages over the Chromecast connection.
  *
@@ -60,11 +58,12 @@ export interface Registration {
  *    that traverses over the Chromecast connection.
  *
  * Once the client gets the pairing code (via Chromecast or manual entry),
- * they'll let museum know. So
+ * they'll let museum know. So in parallel with Phase 2, we perform Phase 3.
  *
- * 7. In parallel, keep polling museum to ask it if anyone has claimed that code
- *    we vended out and used that to send us an payload encrypted using our
- *    public key.
+ * Phase 3 - {@link getCastData} in a setInterval.
+ *
+ * 7. Keep polling museum to ask it if anyone has claimed that code we vended
+ *    out and used that to send us an payload encrypted using our public key.
  *
  * 8. When that happens, decrypt that data with our private key, and return this
  *    payload. It is a JSON object that contains the data we need to initiate a
@@ -73,9 +72,11 @@ export interface Registration {
  * Phase 1 (Steps 1 and 2) are done by the {@link register} function, which
  * returns a {@link Registration}.
  *
- * At this time we start showing the pairing code on the UI, and proceed with
- * the remaining steps (Phase 2) using the {@link pair} function that returns
- * the data we need to start the slideshow.
+ * At this time we start showing the pairing code on the UI, and start phase 2,
+ * {@link advertiseCode} to vend out the pairing code to Chromecast connections.
+ *
+ * In parallel, we start Phase 3, calling {@link getCastData} in a loop. Once we
+ * get a response, we decrypt it to get the data we need to start the slideshow.
  */
 export const register = async (): Promise<Registration> => {
     // Generate keypair.
@@ -100,15 +101,16 @@ export const register = async (): Promise<Registration> => {
 };
 
 /**
- * Listen for pairing requests using the given {@link cast} instance for
- * connections for {@link registration}. Phase 2 of the pairing protocol.
+ * Listen for incoming messages on the given {@link cast} receiver, replying to
+ * each of them with a pairing code obtained using the given {@link pairingCode}
+ * callback. Phase 2 of the pairing protocol.
  *
- * On successful pairing, return the payload (JSON) sent by the sender who
- * connected to us. See: [Note: Pairing protocol]
+ * See: [Note: Pairing protocol].
  */
-export const pair = async (cast: Cast, registration: Registration) => {
-    const { pairingCode, publicKeyB64, privateKeyB64 } = registration;
-
+export const advertiseCode = (
+    cast: Cast,
+    pairingCode: () => string | undefined,
+) => {
     // Prepare the Chromecast "context".
     const context = cast.framework.CastReceiverContext.getInstance();
     const namespace = "urn:x-cast:pair-request";
@@ -121,9 +123,18 @@ export const pair = async (cast: Cast, registration: Registration) => {
         cast.framework.system.MessageType.JSON;
     options.disableIdleTimeout = true;
 
-    // Reply with the code that we have if anyone asks over chromecast.
-    const incomingMessageListener = ({ senderId }: { senderId: string }) =>
-        context.sendCustomMessage(namespace, senderId, { code: pairingCode });
+    // Reply with the code that we have if anyone asks over Chromecast.
+    const incomingMessageListener = ({ senderId }: { senderId: string }) => {
+        const code = pairingCode();
+        if (!code) {
+            log.warn(
+                "Ignoring incoming Chromecast message because we do not yet have a pairing code",
+            );
+            return;
+        }
+
+        context.sendCustomMessage(namespace, senderId, { code });
+    };
 
     context.addCustomMessageListener(
         namespace,
@@ -141,26 +152,25 @@ export const pair = async (cast: Cast, registration: Registration) => {
 
     // Start listening for Chromecast connections.
     context.start(options);
+};
 
-    // Start polling museum.
-    let encryptedCastData: string | undefined | null;
-    while (true) {
-        // The client will send us the encrypted payload using our public key
-        // that we registered with museum. Then, we can decrypt this using the
-        // private key of the pair and return the plaintext payload, which'll be
-        // a JSON object containing the data we need to start a slideshow for
-        // some collection.
-        try {
-            encryptedCastData = await castGateway.getCastData(pairingCode);
-        } catch (e) {
-            log.error("Failed to get cast data from server", e);
-        }
-        if (encryptedCastData) break;
-        // Nobody's claimed the code yet (or there was some error). Poll again
-        // after 2 seconds.
-        await wait(2000);
-    }
+/**
+ * Ask museum if anyone has sent a (encrypted) payload corresponding to the
+ * given pairing code. If so, decrypt it using our private key and return the
+ * JSON payload. Phase 3 of the pairing protocol.
+ *
+ * See: [Note: Pairing protocol].
+ */
+export const getCastData = async (registration: Registration) => {
+    const { pairingCode, publicKeyB64, privateKeyB64 } = registration;
 
+    // The client will send us the encrypted payload using our public key that
+    // we registered with museum.
+    const encryptedCastData = await castGateway.getCastData(pairingCode);
+
+    // Decrypt it using the private key of the pair and return the plaintext
+    // payload, which'll be a JSON object containing the data we need to start a
+    // slideshow for some collection.
     const decryptedCastData = await boxSealOpen(
         encryptedCastData,
         publicKeyB64,

@@ -1,164 +1,65 @@
+import log from "@/next/log";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import LargeType from "components/LargeType";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { pair, register, type Registration } from "services/cast";
+import { advertiseCode, getCastData, register } from "services/cast";
 import { storeCastData } from "services/cast/castService";
 import { useCastReceiver } from "../utils/useCastReceiver";
 
 export default function PairingMode() {
-    const [registration, setRegistration] = useState<
-        Registration | undefined
-    >();
+    const [publicKeyB64, setPublicKeyB64] = useState<string | undefined>();
+    const [privateKeyB64, setPrivateKeyB64] = useState<string | undefined>();
+    const [pairingCode, setPairingCode] = useState<string | undefined>();
+
+    // The returned cast object is a reference to a global instance and can be
+    // used in a useEffect dependency list.
     const cast = useCastReceiver();
+
     const router = useRouter();
 
-    // useEffect(() => {
-    //     init();
-    // }, []);
-
-    // const init = async () => {
-    //     try {
-    //         const keypair = await generateKeyPair();
-    //         setPublicKeyB64(await toB64(keypair.publicKey));
-    //         setPrivateKeyB64(await toB64(keypair.privateKey));
-    //     } catch (e) {
-    //         log.error("failed to generate keypair", e);
-    //         throw e;
-    //     }
-    // };
-
-    // useEffect(() => {
-    //     if (!cast) {
-    //         return;
-    //     }
-    //     if (isCastReady) {
-    //         return;
-    //     }
-    //     const context = cast.framework.CastReceiverContext.getInstance();
-
-    //     try {
-    //         const options = new cast.framework.CastReceiverOptions();
-    //         options.maxInactivity = 3600;
-    //         options.customNamespaces = Object.assign({});
-    //         options.customNamespaces["urn:x-cast:pair-request"] =
-    //             cast.framework.system.MessageType.JSON;
-
-    //         options.disableIdleTimeout = true;
-    //         context.set;
-
-    //         context.addCustomMessageListener(
-    //             "urn:x-cast:pair-request",
-    //             messageReceiveHandler,
-    //         );
-
-    //         // listen to close request and stop the context
-    //         context.addEventListener(
-    //             cast.framework.system.EventType.SENDER_DISCONNECTED,
-    //             // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    //             (_) => {
-    //                 context.stop();
-    //             },
-    //         );
-    //         context.start(options);
-    //         setIsCastReady(true);
-    //     } catch (e) {
-    //         log.error("failed to create cast context", e);
-    //     }
-
-    //     return () => {
-    //         // context.stop();
-    //     };
-    // }, [cast]);
-
-    // const messageReceiveHandler = (message: {
-    //     type: string;
-    //     senderId: string;
-    //     data: any;
-    // }) => {
-    //     try {
-    //         cast.framework.CastReceiverContext.getInstance().sendCustomMessage(
-    //             "urn:x-cast:pair-request",
-    //             message.senderId,
-    //             {
-    //                 code: deviceCode,
-    //             },
-    //         );
-    //     } catch (e) {
-    //         log.error("failed to send message", e);
-    //     }
-    // };
-
-    // const generateKeyPair = async () => {
-    //     await _sodium.ready;
-    //     const keypair = _sodium.crypto_box_keypair();
-    //     return keypair;
-    // };
-
-    // const pollForCastData = async () => {
-    //     if (codePending) {
-    //         return;
-    //     }
-    //     // see if we were acknowledged on the client.
-    //     // the client will send us the encrypted payload using our public key that we advertised.
-    //     // then, we can decrypt this and store all the necessary info locally so we can play the collection slideshow.
-    //     let devicePayload = "";
-    //     try {
-    //         const encDastData = await castGateway.getCastData(`${deviceCode}`);
-    //         if (!encDastData) return;
-    //         devicePayload = encDastData;
-    //     } catch (e) {
-    //         setCodePending(true);
-    //         init();
-    //         return;
-    //     }
-
-    //     const decryptedPayload = await boxSealOpen(
-    //         devicePayload,
-    //         publicKeyB64,
-    //         privateKeyB64,
-    //     );
-
-    //     const decryptedPayloadObj = JSON.parse(atob(decryptedPayload));
-
-    //     return decryptedPayloadObj;
-    // };
-
-    // const advertisePublicKey = async (publicKeyB64: string) => {
-    //     // hey client, we exist!
-    //     try {
-    //         const codeValue = await castGateway.registerDevice(publicKeyB64);
-    //         setDeviceCode(codeValue);
-    //         setCodePending(false);
-    //     } catch (e) {
-    //         // schedule re-try after 5 seconds
-    //         setTimeout(() => {
-    //             init();
-    //         }, 5000);
-    //         return;
-    //     }
-    // };
+    const init = () => {
+        register().then((r) => {
+            setPublicKeyB64(r.publicKeyB64);
+            setPrivateKeyB64(r.privateKeyB64);
+            setPairingCode(r.pairingCode);
+        });
+    };
 
     useEffect(() => {
-        register().then((r) => setRegistration(r));
+        init();
     }, []);
 
     useEffect(() => {
-        if (!cast || !registration) return;
+        if (cast) advertiseCode(cast, () => pairingCode);
+    }, [cast]);
 
-        pair(cast, registration).then((data) => {
+    const pollTick = async () => {
+        const registration = { publicKeyB64, privateKeyB64, pairingCode };
+        try {
+            const data = await getCastData(registration);
+            if (!data) {
+                // No one has connected yet
+                return;
+            }
+
+            log.info("Pairing complete");
             storeCastData(data);
-            router.push("/slideshow");
-        });
-    }, [cast, registration]);
+            await router.push("/slideshow");
+        } catch (e) {
+            console.log("Failed to get cast data", e);
+            // Start again from the beginning
+            setPairingCode(undefined);
+            init();
+        }
+    };
 
-    // console.log([cast, registration]);
-    // useEffect(() => {
-    //     if (!publicKeyB64) return;
-    //     advertisePublicKey(publicKeyB64);
-    // }, [publicKeyB64]);
+    useEffect(() => {
+        if (!publicKeyB64 || !privateKeyB64 || !pairingCode) return;
 
-    const { pairingCode } = registration ?? {};
+        const interval = setInterval(pollTick, 2000);
+        return () => clearInterval(interval);
+    }, [publicKeyB64, privateKeyB64, pairingCode]);
 
     return (
         <>
