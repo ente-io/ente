@@ -5,16 +5,12 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { storeCastData } from "services/cast";
 import { advertiseCode, getCastData, register } from "services/pair";
-import { useCastReceiver } from "../utils/useCastReceiver";
+import { castReceiverLoadingIfNeeded } from "../utils/cast-receiver";
 
 export default function PairingMode() {
     const [publicKeyB64, setPublicKeyB64] = useState<string | undefined>();
     const [privateKeyB64, setPrivateKeyB64] = useState<string | undefined>();
     const [pairingCode, setPairingCode] = useState<string | undefined>();
-
-    // The returned cast object is a reference to a global instance and can be
-    // used in a useEffect dependency list.
-    const cast = useCastReceiver();
 
     const router = useRouter();
 
@@ -31,8 +27,10 @@ export default function PairingMode() {
     }, []);
 
     useEffect(() => {
-        if (cast) advertiseCode(cast, () => pairingCode);
-    }, [cast]);
+        castReceiverLoadingIfNeeded().then((cast) =>
+            advertiseCode(cast, () => pairingCode),
+        );
+    }, []);
 
     const pollTick = async () => {
         const registration = { publicKeyB64, privateKeyB64, pairingCode };

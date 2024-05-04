@@ -3,7 +3,7 @@ import { boxSealOpen, toB64 } from "@ente/shared/crypto/internal/libsodium";
 import castGateway from "@ente/shared/network/cast";
 import { wait } from "@ente/shared/utils";
 import _sodium from "libsodium-wrappers";
-import { type Cast } from "../utils/useCastReceiver";
+import { type Cast } from "../utils/cast-receiver";
 
 export interface Registration {
     /** A pairing code shown on the screen. A client can use this to connect. */
