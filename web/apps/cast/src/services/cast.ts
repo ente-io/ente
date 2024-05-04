@@ -387,15 +387,6 @@ export async function decryptFile(
     }
 }
 
-export function generateStreamFromArrayBuffer(data: Uint8Array) {
-    return new ReadableStream({
-        async start(controller: ReadableStreamDefaultController) {
-            controller.enqueue(data);
-            controller.close();
-        },
-    });
-}
-
 export function mergeMetadata(files: EnteFile[]): EnteFile[] {
     return files.map((file) => {
         if (file.pubMagicMetadata?.data.editedTime) {
@@ -454,18 +445,18 @@ const downloadFile = async (castToken: string, file: EnteFile) => {
     if (!isImageOrLivePhoto(file))
         throw new Error("Can only cast images and live photos");
 
-    const cryptoWorker = await ComlinkCryptoWorker.getInstance();
+    const url = getCastFileURL(file.id);
     const resp = await HTTPService.get(
-        getCastFileURL(file.id),
+        url,
         null,
         {
             "X-Cast-Access-Token": castToken,
         },
         { responseType: "arraybuffer" },
     );
-    if (typeof resp.data === "undefined") {
-        throw Error(CustomError.REQUEST_FAILED);
-    }
+    if (resp.data === undefined) throw new Error(`Failed to get ${url}`);
+
+    const cryptoWorker = await ComlinkCryptoWorker.getInstance();
     const decrypted = await cryptoWorker.decryptFile(
         new Uint8Array(resp.data),
         await cryptoWorker.fromB64(file.file.decryptionHeader),
@@ -473,3 +464,12 @@ const downloadFile = async (castToken: string, file: EnteFile) => {
     );
     return generateStreamFromArrayBuffer(decrypted);
 };
+
+function generateStreamFromArrayBuffer(data: Uint8Array) {
+    return new ReadableStream({
+        async start(controller: ReadableStreamDefaultController) {
+            controller.enqueue(data);
+            controller.close();
+        },
+    });
+}
