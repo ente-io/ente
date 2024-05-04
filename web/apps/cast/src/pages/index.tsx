@@ -10,9 +10,8 @@ export default function PairingMode() {
     const [registration, setRegistration] = useState<
         Registration | undefined
     >();
-    const [deviceCode, setDeviceCode] = useState("");
-
     const cast = useCastReceiver();
+    const router = useRouter();
 
     // useEffect(() => {
     //     init();
@@ -140,8 +139,6 @@ export default function PairingMode() {
     //     }
     // };
 
-    const router = useRouter();
-
     useEffect(() => {
         register().then((r) => setRegistration(r));
     }, []);
@@ -155,11 +152,13 @@ export default function PairingMode() {
         });
     }, [cast, registration]);
 
-    console.log([cast, registration]);
+    // console.log([cast, registration]);
     // useEffect(() => {
     //     if (!publicKeyB64) return;
     //     advertisePublicKey(publicKeyB64);
     // }, [publicKeyB64]);
+
+    const { pairingCode } = registration ?? {};
 
     return (
         <>
@@ -193,8 +192,8 @@ export default function PairingMode() {
                             overflow: "hidden",
                         }}
                     >
-                        {deviceCode ? (
-                            <LargeType chars={deviceCode.split("")} />
+                        {pairingCode ? (
+                            <LargeType chars={pairingCode.split("")} />
                         ) : (
                             <EnteSpinner />
                         )}

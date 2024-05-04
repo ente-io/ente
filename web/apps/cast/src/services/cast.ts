@@ -28,12 +28,22 @@ export interface Registration {
  * Web SDK, {@link cast}) itself is used for only the initial handshake, none of
  * the data, even encrypted passes over it thereafter.
  *
- * The entire protocol is quite simple.
+ * The pairing happens in two phases:
+ *
+ * Phase 1
  *
  * 1. We (the receiver) generate a public/private keypair. and register the
  *    public part of it with museum.
  *
- * 2. Museum gives us a pairing "code" in lieu.
+ * 2. Museum gives us a pairing "code" in lieu. Show this on the screen.
+ *
+ * Phase 2
+ *
+ * There are two ways the client can connect - either by sending us a blank
+ * message over the Chromecast protocol (to which we'll reply with the pairing
+ * code), or by the user manually entering the pairing code on their screen.
+ *
+ * So there are two parallel processes.
  *
  * 3. Listen for incoming messages over the Chromecast connection.
  *
@@ -49,19 +59,23 @@ export interface Registration {
  *    them a message containing the pairing code. This exchange is the only data
  *    that traverses over the Chromecast connection.
  *
- * 5. In parallel, start polling museum to ask it if anyone has claimed that
- *    code we vended out and used that to send us an payload encrypted using our
- *    public key. This payload is a JSON object that contains the data we need
- *    to initiate a slideshow for a particular Ente collection.
+ * Once the client gets the pairing code (via Chromecast or manual entry),
+ * they'll let museum know. So
  *
- * 6. When that happens, decrypt that data with our private key, and return it.
+ * 7. In parallel, keep polling museum to ask it if anyone has claimed that code
+ *    we vended out and used that to send us an payload encrypted using our
+ *    public key.
  *
- * Steps 1 and 2 are done by the {@link register} function, which returns a
- * {@link Registration}.
+ * 8. When that happens, decrypt that data with our private key, and return this
+ *    payload. It is a JSON object that contains the data we need to initiate a
+ *    slideshow for a particular Ente collection.
+ *
+ * Phase 1 (Steps 1 and 2) are done by the {@link register} function, which
+ * returns a {@link Registration}.
  *
  * At this time we start showing the pairing code on the UI, and proceed with
- * the remaining steps using the {@link pair} function that returns the data we
- * need to start the slideshow.
+ * the remaining steps (Phase 2) using the {@link pair} function that returns
+ * the data we need to start the slideshow.
  */
 export const register = async (): Promise<Registration> => {
     // Generate keypair.
@@ -128,7 +142,7 @@ export const pair = async (cast: Cast, registration: Registration) => {
     // Start listening for Chromecast connections.
     context.start(options);
 
-    // Start polling museum
+    // Start polling museum.
     let encryptedCastData: string | undefined | null;
     while (true) {
         // The client will send us the encrypted payload using our public key
@@ -142,8 +156,9 @@ export const pair = async (cast: Cast, registration: Registration) => {
             log.error("Failed to get cast data from server", e);
         }
         if (encryptedCastData) break;
-        // Schedule retry after 10 seconds.
-        await wait(5000);
+        // Nobody's claimed the code yet (or there was some error). Poll again
+        // after 2 seconds.
+        await wait(2000);
     }
 
     const decryptedCastData = await boxSealOpen(
