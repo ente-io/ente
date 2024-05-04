@@ -8,8 +8,8 @@
  * then we sort by this key. Since the key is random, the sorted array will have
  * the original elements in a random order.
  */
-export const shuffle = <T>(xs: T[]) =>
+export const shuffled = <T>(xs: T[]) =>
     xs
         .map((x) => [Math.random(), x])
         .sort()
-        .map(([, x]) => x);
+        .map(([, x]) => x) as T[];

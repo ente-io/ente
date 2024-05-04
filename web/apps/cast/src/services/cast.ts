@@ -3,6 +3,7 @@ import { isNonWebImageFileExtension } from "@/media/formats";
 import { decodeLivePhoto } from "@/media/live-photo";
 import { nameAndExtension } from "@/next/file";
 import log from "@/next/log";
+import { shuffled } from "@/utils/array";
 import { ensure, ensureString } from "@/utils/ensure";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { CustomError, parseSharingErrorCodes } from "@ente/shared/error";
@@ -129,11 +130,15 @@ export const renderableImageURLs = async function* (castData: CastData) {
     while (true) {
         const collection = await getCastCollection(castToken, collectionKey);
         await syncPublicFiles(castToken, collection, () => {});
-        const files = await getLocalFiles(String(collection.id));
+        const encryptedFiles = shuffled(
+            await getEncryptedCollectionFiles(castToken),
+        );
 
         let haveEligibleFiles = false;
 
-        for (const file of files) {
+        for (const encryptedFile of encryptedFiles) {
+            const file = await decryptEnteFile(encryptedFile, collectionKey);
+
             if (!isFileEligibleForCast(file)) continue;
 
             try {
@@ -238,6 +243,70 @@ const getEncryptedCollectionFiles = async (
         );
     } while (resp.data.hasMore);
     return files;
+};
+
+/**
+ * Decrypt the given {@link EncryptedEnteFile}, returning a {@link EnteFile}.
+ */
+const decryptEnteFile = async (
+    encryptedFile: EncryptedEnteFile,
+    collectionKey: string,
+): Promise<EnteFile> => {
+    const worker = await ComlinkCryptoWorker.getInstance();
+    const {
+        encryptedKey,
+        keyDecryptionNonce,
+        metadata,
+        magicMetadata,
+        pubMagicMetadata,
+        ...restFileProps
+    } = encryptedFile;
+    const fileKey = await worker.decryptB64(
+        encryptedKey,
+        keyDecryptionNonce,
+        collectionKey,
+    );
+    const fileMetadata = await worker.decryptMetadata(
+        metadata.encryptedData,
+        metadata.decryptionHeader,
+        fileKey,
+    );
+    let fileMagicMetadata: FileMagicMetadata;
+    let filePubMagicMetadata: FilePublicMagicMetadata;
+    if (magicMetadata?.data) {
+        fileMagicMetadata = {
+            ...encryptedFile.magicMetadata,
+            data: await worker.decryptMetadata(
+                magicMetadata.data,
+                magicMetadata.header,
+                fileKey,
+            ),
+        };
+    }
+    if (pubMagicMetadata?.data) {
+        filePubMagicMetadata = {
+            ...pubMagicMetadata,
+            data: await worker.decryptMetadata(
+                pubMagicMetadata.data,
+                pubMagicMetadata.header,
+                fileKey,
+            ),
+        };
+    }
+    const file = {
+        ...restFileProps,
+        key: fileKey,
+        metadata: fileMetadata,
+        magicMetadata: fileMagicMetadata,
+        pubMagicMetadata: filePubMagicMetadata,
+    };
+    if (file.pubMagicMetadata?.data.editedTime) {
+        file.metadata.creationTime = file.pubMagicMetadata.data.editedTime;
+    }
+    if (file.pubMagicMetadata?.data.editedName) {
+        file.metadata.title = file.pubMagicMetadata.data.editedName;
+    }
+    return file;
 };
 
 const syncPublicFiles = async (
