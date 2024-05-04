@@ -9,6 +9,7 @@ import { CustomError, parseSharingErrorCodes } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { getCastFileURL, getEndpoint } from "@ente/shared/network/api";
 import localForage from "@ente/shared/storage/localForage";
+import { wait } from "@ente/shared/utils";
 import { detectMediaMIMEType } from "services/detect-type";
 import { Collection, CollectionPublicMagicMetadata } from "types/collection";
 import {
@@ -107,6 +108,13 @@ export const renderableImageURLs = async function* (castData: CastData) {
      */
     const urls: string[] = [""];
     let i = 0;
+    /**
+     * Time when we last yielded.
+     *
+     * We use this to keep an roughly periodic spacing between yields that
+     * accounts for the time we spend fetching and processing the images.
+     */
+    let lastYieldTime = Date.now();
 
     while (true) {
         const collection = await getCastCollection(castToken, collectionKey);
@@ -136,6 +144,11 @@ export const renderableImageURLs = async function* (castData: CastData) {
                 ensure(urls[0]),
                 ensure(urls[1]),
             ];
+
+            const elapsedTime = Date.now() - lastYieldTime;
+            if (elapsedTime < 10000) await wait(10000 - elapsedTime);
+
+            lastYieldTime = Date.now();
             yield urlPair;
         }
 

@@ -16,101 +16,35 @@ export default function Slideshow() {
     const pair = () => router.push("/");
 
     useEffect(() => {
-        let urlGenerator: AsyncGenerator<[string, string], void>;
-        try {
-            urlGenerator = renderableImageURLs(readCastData());
-        } catch (e) {
-            log.error("Failed to prepare generator", e);
-            pair();
-        }
+        let stop = false;
 
-        advance(urlGenerator);
+        const loop = async () => {
+            try {
+                const urlGenerator = renderableImageURLs(readCastData());
+                while (!stop) {
+                    const { value: urls, done } = await urlGenerator.next();
+                    if (done) {
+                        log.warn("Empty collection");
+                        pair();
+                        return;
+                    }
 
-        const interval = window.setInterval(() => {
-            advance(urlGenerator);
-        }, 10000);
-
-        return () => clearInterval(interval);
-    }, []);
-
-    const advance = async (
-        urlGenerator: AsyncGenerator<[string, string], void>,
-    ) => {
-        try {
-            const { value: urls, done } = await urlGenerator.next();
-            if (done) {
-                log.warn("Empty collection");
+                    setImageURL(urls[0]);
+                    setNextImageURL(urls[1]);
+                    setLoading(false);
+                }
+            } catch (e) {
+                log.error("Failed to prepare generator", e);
                 pair();
-                return;
             }
+        };
 
-            setImageURL(urls[0]);
-            setNextImageURL(urls[1]);
-            setLoading(false);
-        } catch (e) {
-            log.error("Failed to generate image URL", e);
-            pair();
-        }
-    };
+        void loop();
 
-    /*
-    const showNextSlide = async () => {
-        try {
-            console.log("showNextSlide");
-            const currentIndex = collectionFiles.findIndex(
-                (file) => file.id === currentFileId,
-            );
-
-            console.log(
-                "showNextSlide-index",
-                currentIndex,
-                collectionFiles.length,
-            );
-
-            const nextIndex = (currentIndex + 1) % collectionFiles.length;
-            const nextNextIndex = (nextIndex + 1) % collectionFiles.length;
-
-            console.log(
-                "showNextSlide-nextIndex and nextNextIndex",
-                nextIndex,
-                nextNextIndex,
-            );
-
-            const nextFile = collectionFiles[nextIndex];
-            const nextNextFile = collectionFiles[nextNextIndex];
-
-            let nextURL: string;
-            try {
-                nextURL = await createRenderableURL(nextFile, castToken);
-            } catch (e) {
-                console.log("error in nextUrl", e);
-                return;
-            }
-
-            let nextNextURL: string;
-            try {
-                nextNextURL = await createRenderableURL(
-                    nextNextFile,
-                    castToken,
-                );
-            } catch (e) {
-                console.log("error in nextNextURL", e);
-                return;
-            }
-
-            setLoading(false);
-            setCurrentFileId(nextFile.id);
-            // TODO: These might be the same in case the album has < 3 files
-            // so commenting this out for now.
-            // if (currentFileURL) URL.revokeObjectURL(currentFileURL);
-            setCurrentFileURL(nextURL);
-            // if (nextFileURL) URL.revokeObjectURL(nextFileURL);
-            setNextFileURL(nextNextURL);
-        } catch (e) {
-            console.log("error in showNextSlide", e);
-        }
-    };
-    */
+        return () => {
+            stop = true;
+        };
+    }, []);
 
     if (loading) return <PairedSuccessfullyOverlay />;
 
