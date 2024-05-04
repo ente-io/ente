@@ -112,7 +112,7 @@ export default function Slideshow() {
             const nextFile = collectionFiles[nextIndex];
             const nextNextFile = collectionFiles[nextNextIndex];
 
-            let nextURL: string
+            let nextURL: string;
             try {
                 nextURL = await createRenderableURL(nextFile, castToken);
             } catch (e) {
@@ -120,7 +120,7 @@ export default function Slideshow() {
                 return;
             }
 
-            let nextNextURL: string
+            let nextNextURL: string;
             try {
                 nextNextURL = await createRenderableURL(
                     nextNextFile,
@@ -133,7 +133,11 @@ export default function Slideshow() {
 
             setLoading(false);
             setCurrentFileId(nextFile.id);
+            // TODO: These might be the same in case the album has < 3 files
+            // so commenting this out for now.
+            // if (currentFileURL) URL.revokeObjectURL(currentFileURL);
             setCurrentFileURL(nextURL);
+            // if (nextFileURL) URL.revokeObjectURL(nextFileURL);
             setNextFileURL(nextNextURL);
         } catch (e) {
             console.log("error in showNextSlide", e);
