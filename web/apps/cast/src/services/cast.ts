@@ -1,3 +1,7 @@
+/* eslint has already fixed this warning, we don't have the latest version yet
+   https://github.com/eslint/eslint/pull/18286 */
+/* eslint-disable no-constant-condition */
+
 import log from "@/next/log";
 import { boxSealOpen, toB64 } from "@ente/shared/crypto/internal/libsodium";
 import castGateway from "@ente/shared/network/cast";
@@ -67,15 +71,16 @@ export const register = async (): Promise<Registration> => {
 
     // Register keypair with museum to get a pairing code.
     let pairingCode: string;
-    do {
+    while (true) {
         try {
             pairingCode = await castGateway.registerDevice(publicKeyB64);
         } catch (e) {
             log.error("Failed to register public key with server", e);
-            // Schedule retry after 10 seconds.
-            await wait(10000);
         }
-    } while (pairingCode === undefined);
+        if (pairingCode) break;
+        // Schedule retry after 10 seconds.
+        await wait(10000);
+    }
 
     return { pairingCode, publicKeyB64, privateKeyB64 };
 };
@@ -124,8 +129,8 @@ export const pair = async (cast: Cast, registration: Registration) => {
     context.start(options);
 
     // Start polling museum
-    let encryptedCastData: string | undefined;
-    do {
+    let encryptedCastData: string | undefined | null;
+    while (true) {
         // The client will send us the encrypted payload using our public key
         // that we registered with museum. Then, we can decrypt this using the
         // private key of the pair and return the plaintext payload, which'll be
@@ -135,10 +140,11 @@ export const pair = async (cast: Cast, registration: Registration) => {
             encryptedCastData = await castGateway.getCastData(pairingCode);
         } catch (e) {
             log.error("Failed to get cast data from server", e);
-            // Schedule retry after 10 seconds.
-            await wait(5000);
         }
-    } while (encryptedCastData === undefined);
+        if (encryptedCastData) break;
+        // Schedule retry after 10 seconds.
+        await wait(5000);
+    }
 
     const decryptedCastData = await boxSealOpen(
         encryptedCastData,

@@ -155,6 +155,7 @@ export default function PairingMode() {
         });
     }, [cast, registration]);
 
+    console.log([cast, registration]);
     // useEffect(() => {
     //     if (!publicKeyB64) return;
     //     advertisePublicKey(publicKeyB64);
