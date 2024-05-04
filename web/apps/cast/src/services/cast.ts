@@ -278,34 +278,6 @@ export const getCastCollection = async (
     }
 };
 
-export const removeCollection = async (
-    collectionUID: string,
-    collectionKey: string,
-) => {
-    const collections =
-        (await localForage.getItem<Collection[]>(COLLECTIONS_TABLE)) || [];
-    await localForage.setItem(
-        COLLECTIONS_TABLE,
-        collections.filter((collection) => collection.key !== collectionKey),
-    );
-    await removeCollectionFiles(collectionUID);
-};
-
-export const removeCollectionFiles = async (collectionUID: string) => {
-    await localForage.removeItem(getLastSyncKey(collectionUID));
-    const collectionFiles =
-        (await localForage.getItem<SavedCollectionFiles[]>(
-            COLLECTION_FILES_TABLE,
-        )) ?? [];
-    await localForage.setItem(
-        COLLECTION_FILES_TABLE,
-        collectionFiles.filter(
-            (collectionFiles) =>
-                collectionFiles.collectionLocalID !== collectionUID,
-        ),
-    );
-};
-
 export const storeCastData = (payloadObj: Object) => {
     // iterate through all the keys in the payload object and set them in localStorage.
     for (const key in payloadObj) {
