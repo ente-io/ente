@@ -293,9 +293,9 @@ packages:
     dependency: "direct main"
     description:
       path: "packages/desktop_webview_window"
-      ref: HEAD
-      resolved-ref: eac48ddf6fe09a7fed693107aad62c282013b510
-      url: "https://github.com/MixinNetwork/flutter-plugins"
+      ref: fix-webkit-version
+      resolved-ref: fe2223e4edfecdbb3a97bb9e3ced73db4ae9d979
+      url: "https://github.com/ente-io/flutter-desktopwebview-fork"
     source: git
     version: "0.2.4"
   device_info_plus:
