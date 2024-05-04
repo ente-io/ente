@@ -3,7 +3,7 @@ import { isNonWebImageFileExtension } from "@/media/formats";
 import { nameAndExtension } from "@/next/file";
 import log from "@/next/log";
 import PairedSuccessfullyOverlay from "components/PairedSuccessfullyOverlay";
-import { PhotoAuditorium } from "components/PhotoAuditorium";
+import { SlideView } from "components/Slide";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import {
@@ -181,13 +181,21 @@ export default function Slideshow() {
         }
     };
 
+    useEffect(() => {
+        if (loading) return;
+
+        console.log("showing slide");
+        const timeoutId = window.setTimeout(() => {
+            console.log("showing next slide  timer");
+            showNextSlide();
+        }, 10000);
+
+        return () => {
+            if (timeoutId) clearTimeout(timeoutId);
+        };
+    }, [loading]);
+
     if (loading) return <PairedSuccessfullyOverlay />;
 
-    return (
-        <PhotoAuditorium
-            url={currentFileURL}
-            nextSlideUrl={nextFileURL}
-            showNextSlide={showNextSlide}
-        />
-    );
+    return <SlideView url={currentFileURL} nextURL={nextFileURL} />;
 }
