@@ -101,10 +101,12 @@ export const renderableImageURLs = async function* (castData: CastData) {
      * We can revoke url[0] when we shift it out because we know it is not being
      * used anymore.
      *
-     * To start off, we put two dummy entries, empty strings, in the array to
-     * avoid needing to special case the first render too much.
+     * We need to special case the first two renders to avoid revoking the
+     * initial URLs that are displayed the first two times. This results in a
+     * memory leak of the very first objectURL that we display.
      */
-    const urls: string[] = ["", ""];
+    const urls: string[] = [""];
+    let i = 0;
 
     while (true) {
         const collection = await getCastCollection(castToken, collectionKey);
@@ -113,24 +115,28 @@ export const renderableImageURLs = async function* (castData: CastData) {
 
         let haveEligibleFiles = false;
 
-        outer: for (const file of files) {
+        for (const file of files) {
             if (!isFileEligibleForCast(file)) continue;
 
-            while (urls.length < 4) {
+            if (urls.length < 4) {
                 try {
                     urls.push(await createRenderableURL(castToken, file));
+                    haveEligibleFiles = true;
                 } catch (e) {
                     log.error("Skipping unrenderable file", e);
-                    continue outer;
                 }
+                continue;
             }
 
-            haveEligibleFiles = true;
-
             const oldestURL = urls.shift();
-            if (oldestURL) URL.revokeObjectURL(oldestURL);
+            if (oldestURL && i !== 1) URL.revokeObjectURL(oldestURL);
+            i += 1;
 
-            yield [ensure(urls[0]), ensure(urls[1])];
+            const urlPair: RenderableImageURLPair = [
+                ensure(urls[0]),
+                ensure(urls[1]),
+            ];
+            yield urlPair;
         }
 
         // This collection does not have any files that we can show.
