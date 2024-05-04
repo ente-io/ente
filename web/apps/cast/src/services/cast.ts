@@ -209,6 +209,37 @@ const getCastCollection = async (
     };
 };
 
+/**
+ * Fetch the list of non-deleted files in the given collection.
+ *
+ * The returned files are not decrypted yet, so their metadata will not be
+ * readable.
+ */
+const getEncryptedCollectionFiles = async (
+    castToken: string,
+): Promise<EncryptedEnteFile[]> => {
+    let files: EncryptedEnteFile[] = [];
+    let sinceTime = 0;
+    let resp;
+    do {
+        resp = await HTTPService.get(
+            `${getEndpoint()}/cast/diff`,
+            { sinceTime },
+            {
+                "Cache-Control": "no-cache",
+                "X-Cast-Access-Token": castToken,
+            },
+        );
+        const diff = resp.data.diff;
+        files = files.concat(diff.filter((file) => !file.isDeleted));
+        sinceTime = diff.reduce(
+            (max, file) => Math.max(max, file.updationTime),
+            sinceTime,
+        );
+    } while (resp.data.hasMore);
+    return files;
+};
+
 const syncPublicFiles = async (
     castToken: string,
     collection: Collection,
