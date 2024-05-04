@@ -340,10 +340,6 @@ const nativeConvertToJPEG = async (imageBlob: Blob) => {
     return new Blob([jpegData]);
 };
 
-export function isRawFile(exactType: string) {
-    return RAW_FORMATS.includes(exactType.toLowerCase());
-}
-
 export function isSupportedRawFormat(exactType: string) {
     return SUPPORTED_RAW_FORMATS.includes(exactType.toLowerCase());
 }
