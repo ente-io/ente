@@ -35,10 +35,13 @@ extension GroupTypeExtension on GroupType {
       final date = DateTime.fromMicrosecondsSinceEpoch(file.creationTime!);
       return DateFormat.y(Localizations.localeOf(context).languageCode)
           .format(date);
+    } else if (this == GroupType.month) {
+      final date = DateTime.fromMicrosecondsSinceEpoch(file.creationTime!);
+      return DateFormat.MMMd(Localizations.localeOf(context).languageCode)
+          .format(date);
     } else {
       throw UnimplementedError("not implemented for $this");
     }
-    throw UnimplementedError("not implemented for $this");
   }
 
   bool areFromSameGroup(EnteFile first, EnteFile second) {
