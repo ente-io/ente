@@ -11,6 +11,7 @@ import 'package:photos/theme/ente_theme.dart';
 import "package:photos/ui/viewer/gallery/component/grid/place_holder_grid_view_widget.dart";
 import "package:photos/ui/viewer/gallery/component/group/group_gallery.dart";
 import "package:photos/ui/viewer/gallery/component/group/group_header_widget.dart";
+import "package:photos/ui/viewer/gallery/component/group/type.dart";
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import "package:photos/ui/viewer/gallery/state/gallery_context_state.dart";
 
@@ -178,6 +179,7 @@ class _LazyGroupGalleryState extends State<LazyGroupGallery> {
     if (_filesInGroup.isEmpty) {
       return const SizedBox.shrink();
     }
+    final groupType = GalleryContextState.of(context)!.type;
     return Column(
       children: [
         Row(
@@ -185,7 +187,7 @@ class _LazyGroupGalleryState extends State<LazyGroupGallery> {
           children: [
             if (widget.enableFileGrouping)
               GroupHeaderWidget(
-                timestamp: _filesInGroup[0].creationTime!,
+                title: groupType.getTitle(context, _filesInGroup[0]),
                 gridSize: widget.photoGridSize,
               ),
             Expanded(child: Container()),
