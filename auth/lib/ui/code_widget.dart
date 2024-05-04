@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:ui' as ui;
 
 import 'package:clipboard/clipboard.dart';
 import 'package:ente_auth/core/configuration.dart';

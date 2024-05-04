@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:ente_auth/models/code_display.dart';
 import 'package:ente_auth/utils/totp_util.dart';
 import 'package:flutter/foundation.dart';
 

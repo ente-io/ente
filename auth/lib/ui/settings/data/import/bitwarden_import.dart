@@ -97,6 +97,7 @@ Future<int?> _processBitwardenExportFile(
           issuer,
           totp,
           null,
+          Code.defaultDigits,
         );
       }
 
