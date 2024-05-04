@@ -23,7 +23,6 @@ export interface SavedCollectionFiles {
     files: EnteFile[];
 }
 
-const ENDPOINT = getEndpoint();
 const COLLECTION_FILES_TABLE = "collection-files";
 
 /**
@@ -121,7 +120,7 @@ const getCastCollection = async (
     castToken: string,
     collectionKey: string,
 ): Promise<Collection> => {
-    const resp = await HTTPService.get(`${ENDPOINT}/cast/info`, null, {
+    const resp = await HTTPService.get(`${getEndpoint()}/cast/info`, null, {
         "Cache-Control": "no-cache",
         "X-Cast-Access-Token": castToken,
     });
@@ -273,57 +272,49 @@ const fetchFiles = async (
     files: EnteFile[],
     setPublicFiles: (files: EnteFile[]) => void,
 ): Promise<EnteFile[]> => {
-    try {
-        let decryptedFiles: EnteFile[] = [];
-        let time = sinceTime;
-        let resp;
-        const sortAsc = collection?.pubMagicMetadata?.data.asc ?? false;
-        do {
-            if (!castToken) {
-                break;
-            }
-            resp = await HTTPService.get(
-                `${ENDPOINT}/cast/diff`,
-                {
-                    sinceTime: time,
-                },
-                {
-                    "Cache-Control": "no-cache",
-                    "X-Cast-Access-Token": castToken,
-                },
-            );
-            decryptedFiles = [
-                ...decryptedFiles,
-                ...(await Promise.all(
-                    resp.data.diff.map(async (file: EncryptedEnteFile) => {
-                        if (!file.isDeleted) {
-                            return await decryptFile(file, collection.key);
-                        } else {
-                            return file;
-                        }
-                    }) as Promise<EnteFile>[],
-                )),
-            ];
+    const sortAsc = collection?.pubMagicMetadata?.data.asc ?? false;
+    let decryptedFiles: EnteFile[] = [];
+    let time = sinceTime;
+    let resp;
+    do {
+        resp = await HTTPService.get(
+            `${getEndpoint()}/cast/diff`,
+            {
+                sinceTime: time,
+            },
+            {
+                "Cache-Control": "no-cache",
+                "X-Cast-Access-Token": castToken,
+            },
+        );
+        decryptedFiles = [
+            ...decryptedFiles,
+            ...(await Promise.all(
+                resp.data.diff.map(async (file: EncryptedEnteFile) => {
+                    if (!file.isDeleted) {
+                        return await decryptFile(file, collection.key);
+                    } else {
+                        return file;
+                    }
+                }) as Promise<EnteFile>[],
+            )),
+        ];
 
-            if (resp.data.diff.length) {
-                time = resp.data.diff.slice(-1)[0].updationTime;
-            }
-            setPublicFiles(
-                sortFiles(
-                    mergeMetadata(
-                        [...(files || []), ...decryptedFiles].filter(
-                            (item) => !item.isDeleted,
-                        ),
+        if (resp.data.diff.length) {
+            time = resp.data.diff.slice(-1)[0].updationTime;
+        }
+        setPublicFiles(
+            sortFiles(
+                mergeMetadata(
+                    [...(files || []), ...decryptedFiles].filter(
+                        (item) => !item.isDeleted,
                     ),
-                    sortAsc,
                 ),
-            );
-        } while (resp.data.hasMore);
-        return decryptedFiles;
-    } catch (e) {
-        log.error("Get cast files failed", e);
-        throw e;
-    }
+                sortAsc,
+            ),
+        );
+    } while (resp.data.hasMore);
+    return decryptedFiles;
 };
 
 export function sortFiles(files: EnteFile[], sortAsc = false) {
