@@ -25,7 +25,6 @@ export interface SavedCollectionFiles {
 
 const ENDPOINT = getEndpoint();
 const COLLECTION_FILES_TABLE = "collection-files";
-const COLLECTIONS_TABLE = "collections";
 
 /**
  * Save the data received after pairing with a sender into local storage.
@@ -127,7 +126,7 @@ const getCastCollection = async (
         "X-Cast-Access-Token": castToken,
     });
 
-    let collection = resp.data.collection;
+    const collection = resp.data.collection;
 
     const cryptoWorker = await ComlinkCryptoWorker.getInstance();
 
@@ -151,25 +150,12 @@ const getCastCollection = async (
         };
     }
 
-    collection = {
+    return {
         ...collection,
         name: collectionName,
         key: collectionKey,
         pubMagicMetadata: collectionPublicMagicMetadata,
     };
-
-    await saveCollection(collection);
-
-    return collection;
-};
-
-const saveCollection = async (collection: Collection) => {
-    const collections =
-        (await localForage.getItem<Collection[]>(COLLECTIONS_TABLE)) ?? [];
-    await localForage.setItem(
-        COLLECTIONS_TABLE,
-        dedupeCollections([collection, ...collections]),
-    );
 };
 
 const syncPublicFiles = async (
@@ -227,7 +213,6 @@ const syncPublicFiles = async (
     return [...sortFiles(mergeMetadata(files), sortAsc)];
 };
 
-
 const getLastSyncKey = (collectionUID: string) => `${collectionUID}-time`;
 
 export const getLocalFiles = async (
@@ -260,18 +245,6 @@ const savecollectionFiles = async (
     );
 };
 
-const dedupeCollections = (collections: Collection[]) => {
-    const keySet = new Set([]);
-    return collections.filter((collection) => {
-        if (!keySet.has(collection.key)) {
-            keySet.add(collection.key);
-            return true;
-        } else {
-            return false;
-        }
-    });
-};
-
 const dedupeCollectionFiles = (collectionFiles: SavedCollectionFiles[]) => {
     const keySet = new Set([]);
     return collectionFiles.filter(({ collectionLocalID: collectionUID }) => {
@@ -292,7 +265,6 @@ async function getSyncTime(collectionUID: string): Promise<number> {
 
 const updateSyncTime = async (collectionUID: string, time: number) =>
     await localForage.setItem(getLastSyncKey(collectionUID), time);
-
 
 const fetchFiles = async (
     castToken: string,
