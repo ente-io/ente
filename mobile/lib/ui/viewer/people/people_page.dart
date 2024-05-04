@@ -73,8 +73,10 @@ class _PeoplePageState extends State<PeoplePage> {
     for (final e in result.entries) {
       resultFiles.addAll(e.value);
     }
-    files = resultFiles;
-    return resultFiles;
+    final List<EnteFile> sortedFiles = List<EnteFile>.from(resultFiles);
+    sortedFiles.sort((a, b) => b.creationTime!.compareTo(a.creationTime!));
+    files = sortedFiles;
+    return sortedFiles;
   }
 
   @override
