@@ -405,9 +405,7 @@ export const getPreviewableImage = async (
     castToken: string,
 ): Promise<Blob> => {
     try {
-        let fileBlob = await new Response(
-            await downloadFile(castToken, file),
-        ).blob();
+        let fileBlob = await downloadFile(castToken, file);
         if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
             const { imageData } = await decodeLivePhoto(
                 file.metadata.title,
@@ -462,14 +460,5 @@ const downloadFile = async (castToken: string, file: EnteFile) => {
         await cryptoWorker.fromB64(file.file.decryptionHeader),
         file.key,
     );
-    return generateStreamFromArrayBuffer(decrypted);
+    return new Response(decrypted).blob();
 };
-
-function generateStreamFromArrayBuffer(data: Uint8Array) {
-    return new ReadableStream({
-        async start(controller: ReadableStreamDefaultController) {
-            controller.enqueue(data);
-            controller.close();
-        },
-    });
-}
