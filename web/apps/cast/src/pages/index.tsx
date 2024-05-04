@@ -14,6 +14,10 @@ export default function Index() {
 
     const router = useRouter();
 
+    useEffect(() => {
+        init();
+    }, []);
+
     const init = () => {
         register().then((r) => {
             setPublicKeyB64(r.publicKeyB64);
@@ -23,14 +27,17 @@ export default function Index() {
     };
 
     useEffect(() => {
-        init();
-    }, []);
-
-    useEffect(() => {
         castReceiverLoadingIfNeeded().then((cast) =>
             advertiseCode(cast, () => pairingCode),
         );
     }, []);
+
+    useEffect(() => {
+        if (!publicKeyB64 || !privateKeyB64 || !pairingCode) return;
+
+        const interval = setInterval(pollTick, 2000);
+        return () => clearInterval(interval);
+    }, [publicKeyB64, privateKeyB64, pairingCode]);
 
     const pollTick = async () => {
         const registration = { publicKeyB64, privateKeyB64, pairingCode };
@@ -51,13 +58,6 @@ export default function Index() {
             init();
         }
     };
-
-    useEffect(() => {
-        if (!publicKeyB64 || !privateKeyB64 || !pairingCode) return;
-
-        const interval = setInterval(pollTick, 2000);
-        return () => clearInterval(interval);
-    }, [publicKeyB64, privateKeyB64, pairingCode]);
 
     return (
         <>
