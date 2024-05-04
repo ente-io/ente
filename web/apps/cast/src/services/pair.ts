@@ -1,5 +1,5 @@
 import log from "@/next/log";
-import { toB64 } from "@ente/shared/crypto/internal/libsodium";
+import { boxSealOpen, toB64 } from "@ente/shared/crypto/internal/libsodium";
 import castGateway from "@ente/shared/network/cast";
 import { wait } from "@ente/shared/utils";
 import _sodium from "libsodium-wrappers";
@@ -45,7 +45,7 @@ import { type Cast } from "../utils/useCastReceiver";
  * 6. When that happens, decrypt that data with our private key, and return it.
  */
 export const pair = async (cast: Cast) => {
-    // Generate keypair
+    // Generate keypair.
     const keypair = await generateKeyPair();
     const publicKeyB64 = await toB64(keypair.publicKey);
     const privateKeyB64 = await toB64(keypair.privateKey);
@@ -86,6 +86,7 @@ export const pair = async (cast: Cast) => {
     );
 
     // Shutdown ourselves if the "sender" disconnects.
+    // TODO(MR): Does it?
     context.addEventListener(
         cast.framework.system.EventType.SENDER_DISCONNECTED,
         () => context.stop(),
@@ -95,34 +96,29 @@ export const pair = async (cast: Cast) => {
     context.start(options);
 
     // Start polling museum
-    let decryptedJSON: unknown | undefined
+    let encryptedCastData: string | undefined;
     do {
         // The client will send us the encrypted payload using our public key
         // that we registered with museum. Then, we can decrypt this using the
         // private key of the pair and return the plaintext payload, which'll be
-        // a JSON object containing all the data we need to play the collection
-        // slideshow.
-        let devicePayload = "";
+        // a JSON object containing the data we need to start a slideshow for
+        // some collection.
         try {
-            const encDastData = await castGateway.getCastData(`${deviceCode}`);
-            if (!encDastData) return;
-            devicePayload = encDastData;
+            encryptedCastData = await castGateway.getCastData(code);
         } catch (e) {
-            setCodePending(true);
-            init();
-            return;
+            log.error("Failed to get cast data from server", e);
+            // Schedule retry after 10 seconds.
+            await wait(5000);
         }
+    } while (encryptedCastData === undefined);
 
-        const decryptedPayload = await boxSealOpen(
-            devicePayload,
-            publicKeyB64,
-            privateKeyB64,
-        );
+    const decryptedCastData = await boxSealOpen(
+        encryptedCastData,
+        publicKeyB64,
+        privateKeyB64,
+    );
 
-        const decryptedPayloadObj = JSON.parse(atob(decryptedPayload));
-
-        return decryptedPayloadObj;
-    };
+    return JSON.parse(atob(decryptedCastData));
 };
 
 const generateKeyPair = async () => {
