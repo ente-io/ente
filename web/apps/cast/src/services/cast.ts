@@ -3,7 +3,7 @@ import { isNonWebImageFileExtension } from "@/media/formats";
 import { decodeLivePhoto } from "@/media/live-photo";
 import { nameAndExtension } from "@/next/file";
 import log from "@/next/log";
-import { ensureString } from "@/utils/ensure";
+import { ensure, ensureString } from "@/utils/ensure";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { CustomError, parseSharingErrorCodes } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
@@ -69,25 +69,54 @@ type RenderableImageURLPair = [url: string, nextURL: string];
  * slideshow.
  *
  * Each time it resolves with a pair of URLs (a {@link RenderableImageURLPair}),
- * one for the current slideshow image, and one for the slideshow image that
- * will be displayed next.
+ * one for the next slideshow image, and one for the slideshow image that will
+ * be displayed after that. It also pre-fetches the next to next URL each time.
  *
  * If there are no renderable image in the collection, the sequence ends by
  * yielding `{done: true}`.
  *
- * Once it reaches the end of the collection, it starts from the beginning
- * again. So the sequence will continue indefinitely for non-empty collections.
+ * Otherwise when the generator reaches the end of the collection, it starts
+ * from the beginning again. So the sequence will continue indefinitely for
+ * non-empty collections.
  *
- * It ignores errors in the fetching and decoding of individual images in the
- * collection, and just moves onward to the next one. It will however throw if
- * there are errors when getting the collection itself.
+ * The generator ignores errors in the fetching and decoding of individual
+ * images in the collection, skipping the erroneous ones and moving onward to
+ * the next one. It will however throw if there are errors when getting the
+ * collection itself. This can happen both the first time, or when we are about
+ * to loop around to the start of the collection.
  *
  * @param castData The collection to show and credentials to fetch the files
  * within it.
  */
 export const renderableImageURLs = async function* (castData: CastData) {
     const { collectionKey, castToken } = castData;
-    let previousURL: string | undefined;
+
+    /** The URL that we gave out second most recently. */
+    let oldURL: string | undefined;
+    /**
+     * The URL that we gave out most recently. This is the URL that is currently
+     * being shown in the slideshow.
+     */
+    let url: string | undefined;
+    /**
+     * The two URLs we will give out when we next yield, plus an extra one that
+     * we have pre-fetched.
+     */
+    const nextURLs: string[] = [];
+
+    /**
+     * We can revoke an object URL when it no longer the one being displayed and
+     * it is not one of those that we're planning to give out next.
+     *
+     * We have a sliding window of five URLs:
+     *
+     *     [oldURL, url, nextURLs[0], nextURLs[1], nextURLs[2]]
+     *
+     * Note that for small albums of only a few renderable items, these URLs
+     * might possibly be the same as each other.
+     */
+    const canRevokeURL = (u: string) => ![url, ...nextURLs].includes(u);
+
     while (true) {
         const collection = await getCastCollection(castToken, collectionKey);
         await syncPublicFiles(castToken, collection, () => {});
@@ -95,32 +124,30 @@ export const renderableImageURLs = async function* (castData: CastData) {
 
         let haveEligibleFiles = false;
 
-        for (const file of files) {
+        outer: for (const file of files) {
             if (!isFileEligibleForCast(file)) continue;
 
-            if (!previousURL) {
+            while (nextURLs.length < 3) {
                 try {
-                    previousURL = await createRenderableURL(castToken, file);
+                    nextURLs.push(await createRenderableURL(castToken, file));
                 } catch (e) {
                     log.error("Skipping unrenderable file", e);
+                    continue outer;
                 }
-                continue;
-            }
-
-            let url: string;
-            try {
-                url = await createRenderableURL(castToken, file);
-            } catch (e) {
-                log.error("Skipping unrenderable file", e);
-                continue;
             }
 
             haveEligibleFiles = true;
 
-            const urls: RenderableImageURLPair = [previousURL, url];
-            previousURL = url;
-            yield urls;
-            // TODO: URL.revokeObjectURL where
+            const urlPair: RenderableImageURLPair = [
+                ensure(nextURLs[0]),
+                ensure(nextURLs[1]),
+            ];
+            // Revoke the oldest one.
+            if (oldURL && canRevokeURL(oldURL)) URL.revokeObjectURL(oldURL);
+            // Slide the window to the right.
+            oldURL = url;
+            url = nextURLs.shift();
+            yield urlPair;
         }
 
         // This collection does not have any files that we can show.
