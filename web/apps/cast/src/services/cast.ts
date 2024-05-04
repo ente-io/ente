@@ -1,5 +1,7 @@
 import { FILE_TYPE } from "@/media/file-type";
+import { isNonWebImageFileExtension } from "@/media/formats";
 import { decodeLivePhoto } from "@/media/live-photo";
+import { nameAndExtension } from "@/next/file";
 import log from "@/next/log";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { CustomError, parseSharingErrorCodes } from "@ente/shared/error";
@@ -433,94 +435,41 @@ export const getPreviewableImage = async (
     }
 };
 
-const downloadFile = async (castToken: string, file: EnteFile) => {
-    const cryptoWorker = await ComlinkCryptoWorker.getInstance();
+export const isFileEligibleForCast = (file: EnteFile) => {
+    if (!isImageOrLivePhoto(file)) return false;
+    if (file.info.fileSize > 100 * 1024 * 1024) return false;
 
-    if (
-        file.metadata.fileType === FILE_TYPE.IMAGE ||
-        file.metadata.fileType === FILE_TYPE.LIVE_PHOTO
-    ) {
-        const resp = await HTTPService.get(
-            getCastFileURL(file.id),
-            null,
-            {
-                "X-Cast-Access-Token": castToken,
-            },
-            { responseType: "arraybuffer" },
-        );
-        if (typeof resp.data === "undefined") {
-            throw Error(CustomError.REQUEST_FAILED);
-        }
-        const decrypted = await cryptoWorker.decryptFile(
-            new Uint8Array(resp.data),
-            await cryptoWorker.fromB64(file.file.decryptionHeader),
-            file.key,
-        );
-        return generateStreamFromArrayBuffer(decrypted);
-    }
-    const resp = await fetch(getCastFileURL(file.id), {
-        headers: {
+    const [, extension] = nameAndExtension(file.metadata.title);
+    if (isNonWebImageFileExtension(extension)) return false;
+
+    return true;
+};
+
+const isImageOrLivePhoto = (file: EnteFile) => {
+    const fileType = file.metadata.fileType;
+    return fileType == FILE_TYPE.IMAGE || fileType == FILE_TYPE.LIVE_PHOTO;
+};
+
+const downloadFile = async (castToken: string, file: EnteFile) => {
+    if (!isImageOrLivePhoto(file))
+        throw new Error("Can only cast images and live photos");
+
+    const cryptoWorker = await ComlinkCryptoWorker.getInstance();
+    const resp = await HTTPService.get(
+        getCastFileURL(file.id),
+        null,
+        {
             "X-Cast-Access-Token": castToken,
         },
-    });
-    const reader = resp.body.getReader();
-
-    const stream = new ReadableStream({
-        async start(controller) {
-            const decryptionHeader = await cryptoWorker.fromB64(
-                file.file.decryptionHeader,
-            );
-            const fileKey = await cryptoWorker.fromB64(file.key);
-            const { pullState, decryptionChunkSize } =
-                await cryptoWorker.initChunkDecryption(
-                    decryptionHeader,
-                    fileKey,
-                );
-            let data = new Uint8Array();
-            // The following function handles each data chunk
-            function push() {
-                // "done" is a Boolean and value a "Uint8Array"
-                reader.read().then(async ({ done, value }) => {
-                    // Is there more data to read?
-                    if (!done) {
-                        const buffer = new Uint8Array(
-                            data.byteLength + value.byteLength,
-                        );
-                        buffer.set(new Uint8Array(data), 0);
-                        buffer.set(new Uint8Array(value), data.byteLength);
-                        if (buffer.length > decryptionChunkSize) {
-                            const fileData = buffer.slice(
-                                0,
-                                decryptionChunkSize,
-                            );
-                            const { decryptedData } =
-                                await cryptoWorker.decryptFileChunk(
-                                    fileData,
-                                    pullState,
-                                );
-                            controller.enqueue(decryptedData);
-                            data = buffer.slice(decryptionChunkSize);
-                        } else {
-                            data = buffer;
-                        }
-                        push();
-                    } else {
-                        if (data) {
-                            const { decryptedData } =
-                                await cryptoWorker.decryptFileChunk(
-                                    data,
-                                    pullState,
-                                );
-                            controller.enqueue(decryptedData);
-                            data = null;
-                        }
-                        controller.close();
-                    }
-                });
-            }
-
-            push();
-        },
-    });
-    return stream;
+        { responseType: "arraybuffer" },
+    );
+    if (typeof resp.data === "undefined") {
+        throw Error(CustomError.REQUEST_FAILED);
+    }
+    const decrypted = await cryptoWorker.decryptFile(
+        new Uint8Array(resp.data),
+        await cryptoWorker.fromB64(file.file.decryptionHeader),
+        file.key,
+    );
+    return generateStreamFromArrayBuffer(decrypted);
 };

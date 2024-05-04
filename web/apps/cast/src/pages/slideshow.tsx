@@ -1,6 +1,3 @@
-import { FILE_TYPE } from "@/media/file-type";
-import { isNonWebImageFileExtension } from "@/media/formats";
-import { nameAndExtension } from "@/next/file";
 import log from "@/next/log";
 import PairedSuccessfullyOverlay from "components/PairedSuccessfullyOverlay";
 import { SlideView } from "components/Slide";
@@ -10,6 +7,7 @@ import {
     getCastCollection,
     getLocalFiles,
     getPreviewableImage,
+    isFileEligibleForCast,
     syncPublicFiles,
 } from "services/cast";
 import { Collection } from "types/collection";
@@ -68,20 +66,6 @@ export default function Slideshow() {
             return () => clearInterval(intervalId);
         }
     }, [castToken]);
-
-    const isFileEligibleForCast = (file: EnteFile) => {
-        const fileType = file.metadata.fileType;
-        if (fileType !== FILE_TYPE.IMAGE && fileType !== FILE_TYPE.LIVE_PHOTO)
-            return false;
-
-        if (file.info.fileSize > 100 * 1024 * 1024) return false;
-
-        const [, extension] = nameAndExtension(file.metadata.title);
-
-        if (isNonWebImageFileExtension(extension)) return false;
-
-        return true;
-    };
 
     useEffect(() => {
         try {
