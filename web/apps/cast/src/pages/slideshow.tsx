@@ -1,5 +1,5 @@
 import log from "@/next/log";
-import PairedSuccessfullyOverlay from "components/PairedSuccessfullyOverlay";
+import { PairedSuccessfullyOverlay } from "components/PairedSuccessfullyOverlay";
 import { SlideView } from "components/Slide";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";

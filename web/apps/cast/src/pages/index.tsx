@@ -1,6 +1,6 @@
 import log from "@/next/log";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
-import LargeType from "components/LargeType";
+import { LargeType } from "components/LargeType";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { storeCastData } from "services/cast";
