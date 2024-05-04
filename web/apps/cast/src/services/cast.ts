@@ -183,9 +183,9 @@ const getEncryptedCollectionFiles = async (
             },
         );
         const diff = resp.data.diff;
-        files = files.concat(diff.filter((file) => !file.isDeleted));
+        files = files.concat(diff.filter((file: EnteFile) => !file.isDeleted));
         sinceTime = diff.reduce(
-            (max, file) => Math.max(max, file.updationTime),
+            (max: number, file: EnteFile) => Math.max(max, file.updationTime),
             sinceTime,
         );
     } while (resp.data.hasMore);
