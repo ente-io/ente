@@ -116,11 +116,15 @@ export const advertiseCode = (
     const namespace = "urn:x-cast:pair-request";
 
     const options = new cast.framework.CastReceiverOptions();
-    // TODO(MR): Are any of these options required?
-    options.maxInactivity = 3600;
+    // Do not automatically close the connection when the sender disconnects.
+    options.maxInactivity = 3600; /* 1 hour */
+    // TODO:Is this required? The docs say "(The default type of a message bus
+    // is JSON; if not provided here)."
     options.customNamespaces = Object.assign({});
     options.customNamespaces[namespace] =
         cast.framework.system.MessageType.JSON;
+    // TODO: This looks like the only one needed, but a comment with the reason
+    // might be good.
     options.disableIdleTimeout = true;
 
     // Reply with the code that we have if anyone asks over Chromecast.
@@ -144,7 +148,7 @@ export const advertiseCode = (
     );
 
     // Shutdown ourselves if the sender disconnects.
-    // TODO(MR): Does it?
+    // TODO(MR): I assume the page reloads on shutdown. Is that correct?
     context.addEventListener(
         cast.framework.system.EventType.SENDER_DISCONNECTED,
         () => context.stop(),

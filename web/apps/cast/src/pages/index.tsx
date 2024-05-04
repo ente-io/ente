@@ -52,7 +52,7 @@ export default function Index() {
             storeCastData(data);
             await router.push("/slideshow");
         } catch (e) {
-            console.log("Failed to get cast data", e);
+            log.error("Failed to get cast data", e);
             // Start again from the beginning.
             setPairingCode(undefined);
             init();
