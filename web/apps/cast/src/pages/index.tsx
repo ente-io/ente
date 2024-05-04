@@ -3,8 +3,8 @@ import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import LargeType from "components/LargeType";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import { storeCastData } from "services/cast";
 import { advertiseCode, getCastData, register } from "services/pair";
-import { storeCastData } from "services/cast/castService";
 import { useCastReceiver } from "../utils/useCastReceiver";
 
 export default function PairingMode() {

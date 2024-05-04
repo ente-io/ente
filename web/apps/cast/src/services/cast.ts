@@ -1,17 +1,25 @@
+import { FILE_TYPE } from "@/media/file-type";
+import { decodeLivePhoto } from "@/media/live-photo";
 import log from "@/next/log";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { CustomError, parseSharingErrorCodes } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
-import { getEndpoint } from "@ente/shared/network/api";
+import { getCastFileURL, getEndpoint } from "@ente/shared/network/api";
 import localForage from "@ente/shared/storage/localForage";
+import { detectMediaMIMEType } from "services/detect-type";
 import { Collection, CollectionPublicMagicMetadata } from "types/collection";
-import { EncryptedEnteFile, EnteFile } from "types/file";
-import { decryptFile, mergeMetadata, sortFiles } from "utils/file";
+import {
+    EncryptedEnteFile,
+    EnteFile,
+    FileMagicMetadata,
+    FilePublicMagicMetadata,
+} from "types/file";
 
 export interface SavedCollectionFiles {
     collectionLocalID: string;
     files: EnteFile[];
 }
+
 const ENDPOINT = getEndpoint();
 const COLLECTION_FILES_TABLE = "collection-files";
 const COLLECTIONS_TABLE = "collections";
@@ -301,4 +309,218 @@ export const storeCastData = (payloadObj: Object) => {
     for (const key in payloadObj) {
         window.localStorage.setItem(key, payloadObj[key]);
     }
+};
+
+export function sortFiles(files: EnteFile[], sortAsc = false) {
+    // sort based on the time of creation time of the file,
+    // for files with same creation time, sort based on the time of last modification
+    const factor = sortAsc ? -1 : 1;
+    return files.sort((a, b) => {
+        if (a.metadata.creationTime === b.metadata.creationTime) {
+            return (
+                factor *
+                (b.metadata.modificationTime - a.metadata.modificationTime)
+            );
+        }
+        return factor * (b.metadata.creationTime - a.metadata.creationTime);
+    });
+}
+
+export async function decryptFile(
+    file: EncryptedEnteFile,
+    collectionKey: string,
+): Promise<EnteFile> {
+    try {
+        const worker = await ComlinkCryptoWorker.getInstance();
+        const {
+            encryptedKey,
+            keyDecryptionNonce,
+            metadata,
+            magicMetadata,
+            pubMagicMetadata,
+            ...restFileProps
+        } = file;
+        const fileKey = await worker.decryptB64(
+            encryptedKey,
+            keyDecryptionNonce,
+            collectionKey,
+        );
+        const fileMetadata = await worker.decryptMetadata(
+            metadata.encryptedData,
+            metadata.decryptionHeader,
+            fileKey,
+        );
+        let fileMagicMetadata: FileMagicMetadata;
+        let filePubMagicMetadata: FilePublicMagicMetadata;
+        if (magicMetadata?.data) {
+            fileMagicMetadata = {
+                ...file.magicMetadata,
+                data: await worker.decryptMetadata(
+                    magicMetadata.data,
+                    magicMetadata.header,
+                    fileKey,
+                ),
+            };
+        }
+        if (pubMagicMetadata?.data) {
+            filePubMagicMetadata = {
+                ...pubMagicMetadata,
+                data: await worker.decryptMetadata(
+                    pubMagicMetadata.data,
+                    pubMagicMetadata.header,
+                    fileKey,
+                ),
+            };
+        }
+        return {
+            ...restFileProps,
+            key: fileKey,
+            metadata: fileMetadata,
+            magicMetadata: fileMagicMetadata,
+            pubMagicMetadata: filePubMagicMetadata,
+        };
+    } catch (e) {
+        log.error("file decryption failed", e);
+        throw e;
+    }
+}
+
+export function generateStreamFromArrayBuffer(data: Uint8Array) {
+    return new ReadableStream({
+        async start(controller: ReadableStreamDefaultController) {
+            controller.enqueue(data);
+            controller.close();
+        },
+    });
+}
+
+export function mergeMetadata(files: EnteFile[]): EnteFile[] {
+    return files.map((file) => {
+        if (file.pubMagicMetadata?.data.editedTime) {
+            file.metadata.creationTime = file.pubMagicMetadata.data.editedTime;
+        }
+        if (file.pubMagicMetadata?.data.editedName) {
+            file.metadata.title = file.pubMagicMetadata.data.editedName;
+        }
+
+        return file;
+    });
+}
+
+export const getPreviewableImage = async (
+    file: EnteFile,
+    castToken: string,
+): Promise<Blob> => {
+    try {
+        let fileBlob = await new Response(
+            await downloadFile(castToken, file),
+        ).blob();
+        if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
+            const { imageData } = await decodeLivePhoto(
+                file.metadata.title,
+                fileBlob,
+            );
+            fileBlob = new Blob([imageData]);
+        }
+        const mimeType = await detectMediaMIMEType(
+            new File([fileBlob], file.metadata.title),
+        );
+        if (!mimeType) return undefined;
+        fileBlob = new Blob([fileBlob], { type: mimeType });
+        return fileBlob;
+    } catch (e) {
+        log.error("failed to download file", e);
+    }
+};
+
+const downloadFile = async (castToken: string, file: EnteFile) => {
+    const cryptoWorker = await ComlinkCryptoWorker.getInstance();
+
+    if (
+        file.metadata.fileType === FILE_TYPE.IMAGE ||
+        file.metadata.fileType === FILE_TYPE.LIVE_PHOTO
+    ) {
+        const resp = await HTTPService.get(
+            getCastFileURL(file.id),
+            null,
+            {
+                "X-Cast-Access-Token": castToken,
+            },
+            { responseType: "arraybuffer" },
+        );
+        if (typeof resp.data === "undefined") {
+            throw Error(CustomError.REQUEST_FAILED);
+        }
+        const decrypted = await cryptoWorker.decryptFile(
+            new Uint8Array(resp.data),
+            await cryptoWorker.fromB64(file.file.decryptionHeader),
+            file.key,
+        );
+        return generateStreamFromArrayBuffer(decrypted);
+    }
+    const resp = await fetch(getCastFileURL(file.id), {
+        headers: {
+            "X-Cast-Access-Token": castToken,
+        },
+    });
+    const reader = resp.body.getReader();
+
+    const stream = new ReadableStream({
+        async start(controller) {
+            const decryptionHeader = await cryptoWorker.fromB64(
+                file.file.decryptionHeader,
+            );
+            const fileKey = await cryptoWorker.fromB64(file.key);
+            const { pullState, decryptionChunkSize } =
+                await cryptoWorker.initChunkDecryption(
+                    decryptionHeader,
+                    fileKey,
+                );
+            let data = new Uint8Array();
+            // The following function handles each data chunk
+            function push() {
+                // "done" is a Boolean and value a "Uint8Array"
+                reader.read().then(async ({ done, value }) => {
+                    // Is there more data to read?
+                    if (!done) {
+                        const buffer = new Uint8Array(
+                            data.byteLength + value.byteLength,
+                        );
+                        buffer.set(new Uint8Array(data), 0);
+                        buffer.set(new Uint8Array(value), data.byteLength);
+                        if (buffer.length > decryptionChunkSize) {
+                            const fileData = buffer.slice(
+                                0,
+                                decryptionChunkSize,
+                            );
+                            const { decryptedData } =
+                                await cryptoWorker.decryptFileChunk(
+                                    fileData,
+                                    pullState,
+                                );
+                            controller.enqueue(decryptedData);
+                            data = buffer.slice(decryptionChunkSize);
+                        } else {
+                            data = buffer;
+                        }
+                        push();
+                    } else {
+                        if (data) {
+                            const { decryptedData } =
+                                await cryptoWorker.decryptFileChunk(
+                                    data,
+                                    pullState,
+                                );
+                            controller.enqueue(decryptedData);
+                            data = null;
+                        }
+                        controller.close();
+                    }
+                });
+            }
+
+            push();
+        },
+    });
+    return stream;
 };

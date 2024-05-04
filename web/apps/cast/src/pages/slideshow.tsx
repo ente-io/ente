@@ -9,11 +9,11 @@ import { useEffect, useState } from "react";
 import {
     getCastCollection,
     getLocalFiles,
+    getPreviewableImage,
     syncPublicFiles,
-} from "services/cast/castService";
+} from "services/cast";
 import { Collection } from "types/collection";
 import { EnteFile } from "types/file";
-import { getPreviewableImage } from "utils/file";
 
 const renderableFileURLCache = new Map<number, string>();
 
