@@ -83,7 +83,7 @@ export default function Index() {
                             fontWeight: "normal",
                         }}
                     >
-                        Enter this code on <b>ente</b> to pair this TV
+                        Enter this code on <b>Ente Photos</b> to pair this screen
                     </h1>
                     <div
                         style={{
