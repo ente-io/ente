@@ -58,7 +58,7 @@ export const PeopleList = React.memo((props: PeopleListProps) => {
                     }
                 >
                     <FaceCropImageView
-                        faceId={person.displayFaceId}
+                        faceID={person.displayFaceId}
                         cacheKey={person.faceCropCacheKey}
                     />
                 </FaceChip>
@@ -137,7 +137,7 @@ export function UnidentifiedFaces(props: {
                     faces.map((face, index) => (
                         <FaceChip key={index}>
                             <FaceCropImageView
-                                faceId={face.id}
+                                faceID={face.id}
                                 cacheKey={face.crop?.cacheKey}
                             />
                         </FaceChip>
@@ -148,12 +148,12 @@ export function UnidentifiedFaces(props: {
 }
 
 interface FaceCropImageViewProps {
-    faceId: string;
+    faceID: string;
     cacheKey?: string;
 }
 
 const FaceCropImageView: React.FC<FaceCropImageViewProps> = ({
-    faceId,
+    faceID,
     cacheKey,
 }) => {
     const [objectURL, setObjectURL] = useState<string | undefined>();
@@ -162,9 +162,9 @@ const FaceCropImageView: React.FC<FaceCropImageViewProps> = ({
         let didCancel = false;
         const electron = globalThis.electron;
 
-        if (cacheKey && electron) {
+        if (faceID && electron) {
             electron
-                .legacyFaceCrop(cacheKey)
+                .legacyFaceCrop(faceID)
                 /*
             cachedOrNew("face-crops", cacheKey, async () => {
                 const user = await ensureLocalUser();
@@ -184,7 +184,7 @@ const FaceCropImageView: React.FC<FaceCropImageViewProps> = ({
             didCancel = true;
             if (objectURL) URL.revokeObjectURL(objectURL);
         };
-    }, [faceId, cacheKey]);
+    }, [faceID, cacheKey]);
 
     return objectURL ? (
         <img src={objectURL} />
