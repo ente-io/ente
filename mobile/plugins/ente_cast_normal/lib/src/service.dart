@@ -59,7 +59,9 @@ class CastServiceImpl extends CastService {
 
   @override
   Future<List<(String, Object)>> searchDevices() {
-    return CastDiscoveryService().search().then((devices) {
+    return CastDiscoveryService()
+        .search(timeout: const Duration(seconds: 7))
+        .then((devices) {
       return devices.map((device) => (device.name, device)).toList();
     });
   }
