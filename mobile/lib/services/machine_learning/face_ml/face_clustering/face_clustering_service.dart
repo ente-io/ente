@@ -662,14 +662,16 @@ class FaceClusteringService {
         newEmbeddings.add(oldEmbeddings);
         final newMeanVector =
             newEmbeddings.reduce((a, b) => a + b) / (oldCount + newCount);
+        final newMeanVectorNormalized = newMeanVector / newMeanVector.norm();
         newClusterSummaries[clusterId] = (
-          EVector(values: newMeanVector.toList()).writeToBuffer(),
+          EVector(values: newMeanVectorNormalized.toList()).writeToBuffer(),
           oldCount + newCount
         );
       } else {
-        final newMeanVector = newEmbeddings.reduce((a, b) => a + b) / newCount;
+        final newMeanVector = newEmbeddings.reduce((a, b) => a + b);
+        final newMeanVectorNormalized = newMeanVector / newMeanVector.norm();
         newClusterSummaries[clusterId] =
-            (EVector(values: newMeanVector.toList()).writeToBuffer(), newCount);
+            (EVector(values: newMeanVectorNormalized.toList()).writeToBuffer(), newCount);
       }
     }
     log(
