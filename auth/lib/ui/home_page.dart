@@ -253,32 +253,30 @@ class _HomePageState extends State<HomePage> {
                 ),
           centerTitle: true,
           actions: <Widget>[
-            if (_allCodes?.state == AllCodesState.value)
-              IconButton(
-                icon: _showSearchBox
-                    ? const Icon(Icons.clear)
-                    : const Icon(Icons.search),
-                tooltip: l10n.search,
-                onPressed: () {
-                  setState(
-                    () {
-                      _showSearchBox = !_showSearchBox;
-                      if (!_showSearchBox) {
-                        _textController.clear();
-                        _searchText = "";
-                      } else {
-                        _searchText = _textController.text;
-                      }
-                      _applyFilteringAndRefresh();
-                    },
-                  );
-                },
-              ),
+            IconButton(
+              icon: _showSearchBox
+                  ? const Icon(Icons.clear)
+                  : const Icon(Icons.search),
+              tooltip: l10n.search,
+              onPressed: () {
+                setState(
+                  () {
+                    _showSearchBox = !_showSearchBox;
+                    if (!_showSearchBox) {
+                      _textController.clear();
+                      _searchText = "";
+                    } else {
+                      _searchText = _textController.text;
+                    }
+                    _applyFilteringAndRefresh();
+                  },
+                );
+              },
+            ),
           ],
         ),
         floatingActionButton: !_hasLoaded ||
                 (_allCodes?.codes.isEmpty ?? true) ||
-                _allCodes?.state == AllCodesState.error ||
                 !PreferenceService.instance.hasShownCoachMark()
             ? null
             : _getFab(),
@@ -361,7 +359,6 @@ class _HomePageState extends State<HomePage> {
                   return ClipRect(
                     child: CodeWidget(
                       _filteredCodes[newIndex],
-                      hasError: _allCodes?.state == AllCodesState.error,
                     ),
                   );
                 }),

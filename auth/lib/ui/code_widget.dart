@@ -28,12 +28,10 @@ import 'package:move_to_background/move_to_background.dart';
 
 class CodeWidget extends StatefulWidget {
   final Code code;
-  final bool hasError;
 
   const CodeWidget(
     this.code, {
     super.key,
-    this.hasError = false,
   });
 
   @override
@@ -92,11 +90,7 @@ class _CodeWidgetState extends State<CodeWidget> {
       _isInitialized = true;
     }
     final l10n = context.l10n;
-    return IgnorePointer(
-      ignoring: widget.hasError,
-      child: Opacity(
-        opacity: widget.hasError ? 0.5 : 1.0,
-        child: Container(
+    return Container(
           margin: const EdgeInsets.only(left: 16, right: 16, bottom: 8, top: 8),
           child: Builder(
             builder: (context) {
@@ -230,8 +224,8 @@ class _CodeWidgetState extends State<CodeWidget> {
               );
             },
           ),
-        ),
-      ),
+
+
     );
   }
 
