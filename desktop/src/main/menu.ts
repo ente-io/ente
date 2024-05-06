@@ -131,11 +131,11 @@ export const createApplicationMenu = async (mainWindow: BrowserWindow) => {
                         submenu: [
                             {
                                 role: "startSpeaking",
-                                label: "start speaking",
+                                label: "Start Speaking",
                             },
                             {
                                 role: "stopSpeaking",
-                                label: "stop speaking",
+                                label: "Stop Speaking",
                             },
                         ],
                     },

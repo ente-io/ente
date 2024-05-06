@@ -375,7 +375,7 @@ const main = () => {
             // Continue on with the rest of the startup sequence.
             Menu.setApplicationMenu(await createApplicationMenu(mainWindow));
             setupTrayItem(mainWindow);
-            if (!isDev) setupAutoUpdater(mainWindow);
+            setupAutoUpdater(mainWindow);
 
             try {
                 await deleteLegacyDiskCacheDirIfExists();
