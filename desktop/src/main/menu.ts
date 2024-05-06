@@ -25,7 +25,8 @@ export const createApplicationMenu = async (mainWindow: BrowserWindow) => {
         process.platform == "darwin" ? options : [];
 
     const devOnly = (options: MenuItemConstructorOptions[]) =>
-        isDev ? options : [];
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+        (isDev ?? true) ? options : [];
 
     const handleCheckForUpdates = () => forceCheckForAppUpdates(mainWindow);
 
