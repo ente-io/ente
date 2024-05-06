@@ -303,8 +303,10 @@ const setupTrayItem = (mainWindow: BrowserWindow) => {
  */
 const deleteLegacyDiskCacheDirIfExists = async () => {
     const removeIfExists = async (dirPath: string) => {
-        log.info(`Removing legacy disk cache from ${dirPath}`);
-        await fs.rm(dirPath, { recursive: true });
+        if (existsSync(dirPath)) {
+            log.info(`Removing legacy disk cache from ${dirPath}`);
+            await fs.rm(dirPath, { recursive: true });
+        }
     };
     // [Note: Getting the cache path]
     //
