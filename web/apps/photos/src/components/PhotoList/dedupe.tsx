@@ -304,6 +304,10 @@ export function DedupePhotoList({
         switch (listItem.itemType) {
             case ITEM_TYPE.SIZE_AND_COUNT:
                 return (
+                    /*TODO: Translate the full phrase instead of piecing
+                      together parts like this See:
+                      https://crowdin.com/editor/ente-photos-web/9/enus-de?view=comfortable&filter=basic&value=0#8104
+                      */
                     <SizeAndCountContainer span={columns}>
                         {listItem.fileCount} {t("FILES")},{" "}
                         {convertBytesToHumanReadable(listItem.fileSize || 0)}{" "}
