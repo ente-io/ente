@@ -20,7 +20,6 @@
   "codeIssuerHint": "Aussteller",
   "codeSecretKeyHint": "Geheimer Schlüssel",
   "codeAccountHint": "Konto (you@domain.com)",
-  "accountKeyType": "Art des Schlüssels",
   "sessionExpired": "Sitzung abgelaufen",
   "@sessionExpired": {
     "description": "Title of the dialog when the users current session is invalid/expired"

@@ -20,7 +20,6 @@
   "codeIssuerHint": "发行人",
   "codeSecretKeyHint": "私钥",
   "codeAccountHint": "账户 (you@domain.com)",
-  "accountKeyType": "密钥类型",
   "sessionExpired": "会话已过期",
   "@sessionExpired": {
     "description": "Title of the dialog when the users current session is invalid/expired"

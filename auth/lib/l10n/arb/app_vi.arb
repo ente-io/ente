@@ -20,7 +20,6 @@
   "codeIssuerHint": "Nhà phát hành",
   "codeSecretKeyHint": "Khóa bí mật",
   "codeAccountHint": "Tài khoản (bạn@miền.com)",
-  "accountKeyType": "Loại khóa",
   "sessionExpired": "Phiên làm việc đã hết hạn",
   "@sessionExpired": {
     "description": "Title of the dialog when the users current session is invalid/expired"
