@@ -445,7 +445,8 @@ export default function Gallery() {
         }
         let collectionURL = "";
         if (activeCollectionID !== ALL_SECTION) {
-            collectionURL = `?collection={activeCollectionID}`;
+            // TODO: Is this URL param even used?
+            collectionURL = `?collection=${activeCollectionID}`;
         }
         const href = `/gallery${collectionURL}`;
         router.push(href, undefined, { shallow: true });
