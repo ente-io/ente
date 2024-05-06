@@ -96,7 +96,6 @@ import {
     ALL_SECTION,
     ARCHIVE_SECTION,
     CollectionSummaryType,
-    DUMMY_UNCATEGORIZED_COLLECTION,
     HIDDEN_ITEMS_SECTION,
     TRASH_SECTION,
 } from "constants/collection";
@@ -446,18 +445,7 @@ export default function Gallery() {
         }
         let collectionURL = "";
         if (activeCollectionID !== ALL_SECTION) {
-            collectionURL += "?collection=";
-            if (activeCollectionID === ARCHIVE_SECTION) {
-                collectionURL += t("ARCHIVE_SECTION_NAME");
-            } else if (activeCollectionID === TRASH_SECTION) {
-                collectionURL += t("TRASH");
-            } else if (activeCollectionID === DUMMY_UNCATEGORIZED_COLLECTION) {
-                collectionURL += t("UNCATEGORIZED");
-            } else if (activeCollectionID === HIDDEN_ITEMS_SECTION) {
-                collectionURL += t("HIDDEN_ITEMS_SECTION_NAME");
-            } else {
-                collectionURL += activeCollectionID;
-            }
+            collectionURL = `?collection={activeCollectionID}`;
         }
         const href = `/gallery${collectionURL}`;
         router.push(href, undefined, { shallow: true });
