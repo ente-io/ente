@@ -175,8 +175,10 @@ const FaceCropImageView: React.FC<FaceCropImageViewProps> = ({
                 );
             })*/
                 .then((data) => {
-                    const blob = new Blob([data]);
-                    if (!didCancel) setObjectURL(URL.createObjectURL(blob));
+                    if (data) {
+                        const blob = new Blob([data]);
+                        if (!didCancel) setObjectURL(URL.createObjectURL(blob));
+                    }
                 });
         } else setObjectURL(undefined);
 
