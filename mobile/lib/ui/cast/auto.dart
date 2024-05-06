@@ -79,12 +79,6 @@ class _AutoCastDialogState extends State<AutoCastDialog> {
                       });
                       try {
                         await _connectToYourApp(context, device);
-                        if (mounted) {
-                          setState(() {
-                            _isDeviceTapInProgress.remove(device);
-                          });
-                          Navigator.of(context).pop();
-                        }
                       } catch (e) {
                         if (mounted) {
                           setState(() {
@@ -127,6 +121,11 @@ class _AutoCastDialogState extends State<AutoCastDialog> {
         if (message.containsKey(CastMessageType.pairCode)) {
           final code = message[CastMessageType.pairCode]!['code'];
           widget.onConnect(code);
+        }
+        if (mounted) {
+          setState(() {
+            _isDeviceTapInProgress.remove(castDevice);
+          });
         }
       },
     );

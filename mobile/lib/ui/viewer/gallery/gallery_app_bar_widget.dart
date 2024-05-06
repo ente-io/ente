@@ -758,6 +758,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           return AutoCastDialog(
             (device) async {
               await _castPair(bContext, gw, device);
+              Navigator.pop(bContext);
             },
           );
         },
