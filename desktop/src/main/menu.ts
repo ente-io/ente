@@ -10,7 +10,6 @@ import { forceCheckForAppUpdates } from "./services/app-update";
 import autoLauncher from "./services/auto-launcher";
 import { openLogDirectory } from "./services/dir";
 import { userPreferences } from "./stores/user-preferences";
-// import { isDev } from "./utils/electron";
 
 /** Create and return the entries in the app's main menu bar */
 export const createApplicationMenu = async (mainWindow: BrowserWindow) => {
@@ -23,11 +22,6 @@ export const createApplicationMenu = async (mainWindow: BrowserWindow) => {
 
     const macOSOnly = (options: MenuItemConstructorOptions[]) =>
         process.platform == "darwin" ? options : [];
-
-    // TODO(MR): Desktop-release
-    // const devOnly = (options: MenuItemConstructorOptions[]) =>
-    //     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    //     isDev ?? true ? options : [];
 
     const handleCheckForUpdates = () => forceCheckForAppUpdates(mainWindow);
 
@@ -147,9 +141,7 @@ export const createApplicationMenu = async (mainWindow: BrowserWindow) => {
             label: "View",
             submenu: [
                 { label: "Reload", role: "reload" },
-                // ...devOnly([
                 { label: "Toggle Dev Tools", role: "toggleDevTools" },
-                // ]),
                 { type: "separator" },
                 { label: "Toggle Full Screen", role: "togglefullscreen" },
             ],
