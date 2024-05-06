@@ -142,7 +142,7 @@ const createMainWindow = () => {
     // Create the main window. This'll show our web content.
     const window = new BrowserWindow({
         webPreferences: {
-            preload: path.join(app.getAppPath(), "preload.js"),
+            preload: path.join(__dirname, "preload.js"),
             sandbox: true,
         },
         // The color to show in the window until the web content gets loaded.
