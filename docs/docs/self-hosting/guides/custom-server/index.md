@@ -35,3 +35,16 @@ endpoint:
 ```
 
 (Another [example](https://github.com/ente-io/ente/blob/main/cli/config.yaml.example))
+
+## Web appps and Photos desktop app
+
+You will need to build the app from source and use the
+`NEXT_PUBLIC_ENTE_ENDPOINT` environment variable to tell it which server to
+connect to. For example:
+
+```sh
+NEXT_PUBLIC_ENTE_ENDPOINT=http://localhost:8080 yarn dev:photos
+```
+
+For more details, see [hosting the web
+app](https://help.ente.io/self-hosting/guides/web-app).
