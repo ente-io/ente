@@ -1,27 +1,17 @@
-import { useEffect } from "react";
-
-interface PhotoAuditoriumProps {
+interface SlideViewProps {
+    /** The URL of the image to show. */
     url: string;
-    nextSlideUrl: string;
-    showNextSlide: () => void;
+    /** The URL of the next image that we will transition to. */
+    nextURL: string;
 }
-export const PhotoAuditorium: React.FC<PhotoAuditoriumProps> = ({
-    url,
-    nextSlideUrl,
-    showNextSlide,
-}) => {
-    useEffect(() => {
-        console.log("showing slide");
-        const timeoutId = window.setTimeout(() => {
-            console.log("showing next slide  timer");
-            showNextSlide();
-        }, 10000);
 
-        return () => {
-            if (timeoutId) clearTimeout(timeoutId);
-        };
-    }, []);
-
+/**
+ * Show the image at {@link url} in a full screen view.
+ *
+ * Also show {@link nextURL} in an hidden image view to prepare the browser for
+ * an imminent transition to it.
+ */
+export const SlideView: React.FC<SlideViewProps> = ({ url, nextURL }) => {
     return (
         <div
             style={{
@@ -46,7 +36,7 @@ export const PhotoAuditorium: React.FC<PhotoAuditoriumProps> = ({
                 }}
             >
                 <img
-                    src={nextSlideUrl}
+                    src={nextURL}
                     style={{
                         maxWidth: "100%",
                         maxHeight: "100%",
