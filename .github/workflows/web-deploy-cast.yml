@@ -3,7 +3,7 @@ name: "Deploy (cast)"
 on:
     push:
         # Run workflow on pushes to the deploy/cast
-        branches: [deploy/cast]
+        branches: [deploy/cast, deploy-f/cast]
 
 jobs:
     deploy:
