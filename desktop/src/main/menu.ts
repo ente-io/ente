@@ -26,7 +26,7 @@ export const createApplicationMenu = async (mainWindow: BrowserWindow) => {
 
     const devOnly = (options: MenuItemConstructorOptions[]) =>
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        (isDev ?? true) ? options : [];
+        isDev ?? true ? options : [];
 
     const handleCheckForUpdates = () => forceCheckForAppUpdates(mainWindow);
 
