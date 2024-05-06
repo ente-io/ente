@@ -1,0 +1,70 @@
+name: "Draft release"
+
+# Build the desktop/draft-release branch and update the existing draft release
+# with the resultant artifacts.
+#
+# This is meant for doing tests that require the app to be signed and packaged.
+# Such releases should not be published to end users.
+#
+# Workflow:
+#
+# 1. Push your changes to the "desktop/draft-release" branch on
+#    https://github.com/ente-io/ente.
+#
+# 2. Create a draft release with tag equal to the version in the `package.json`.
+#
+# 3. Trigger this workflow. You can trigger it multiple times, each time it'll
+#    just update the artifacts attached to the same draft.
+#
+# 4. Once testing is done delete the draft.
+
+on:
+    # Trigger manually or `gh workflow run desktop-draft-release.yml`.
+    workflow_dispatch:
+
+jobs:
+    release:
+        runs-on: macos-latest
+
+        defaults:
+            run:
+                working-directory: desktop
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+              with:
+                  repository: ente-io/ente
+                  ref: desktop/draft-release
+                  submodules: recursive
+
+            - name: Setup node
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 20
+
+            - name: Install dependencies
+              run: yarn install
+
+            - name: Build
+              uses: ente-io/action-electron-builder@v1.0.0
+              with:
+                  package_root: desktop
+
+                  # GitHub token, automatically provided to the action
+                  # (No need to define this secret in the repo settings)
+                  github_token: ${{ secrets.GITHUB_TOKEN }}
+
+                  # If the commit is tagged with a version (e.g. "v1.0.0"),
+                  # release the app after building.
+                  release: ${{ startsWith(github.ref, 'refs/tags/v') }}
+
+                  mac_certs: ${{ secrets.MAC_CERTS }}
+                  mac_certs_password: ${{ secrets.MAC_CERTS_PASSWORD }}
+              env:
+                  # macOS notarization credentials key details
+                  APPLE_ID: ${{ secrets.APPLE_ID }}
+                  APPLE_APP_SPECIFIC_PASSWORD:
+                      ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+                  APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+                  USE_HARD_LINKS: false
