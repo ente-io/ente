@@ -108,7 +108,7 @@
 		<key>NSBonjourServices</key>
                 <array>
                   <string>_googlecast._tcp</string>
-                  <string>F5BCEC64._googlecast._tcp</string>
+                  <string>_F5BCEC64._googlecast._tcp</string>
                 </array>
 
                 <key>NSLocalNetworkUsageDescription</key>
