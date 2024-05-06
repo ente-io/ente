@@ -29,5 +29,4 @@ mac:
         arch: [universal]
     category: public.app-category.photography
     hardenedRuntime: true
-    notarize: true
 afterSign: electron-builder-notarize
