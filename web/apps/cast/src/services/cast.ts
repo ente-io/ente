@@ -7,7 +7,7 @@ import { shuffled } from "@/utils/array";
 import { ensure, ensureString } from "@/utils/ensure";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import HTTPService from "@ente/shared/network/HTTPService";
-import { getCastFileURL, getEndpoint } from "@ente/shared/network/api";
+import { getCastFileURL, getCastThumbnailURL, getEndpoint } from "@ente/shared/network/api";
 import { wait } from "@ente/shared/utils";
 import { detectMediaMIMEType } from "services/detect-type";
 import {
@@ -140,7 +140,8 @@ export const renderableImageURLs = async function* (castData: CastData) {
             if (urls.length < 4) continue;
 
             const oldestURL = urls.shift();
-            if (oldestURL && i !== 1) URL.revokeObjectURL(oldestURL);
+            console.log("Not revoking", oldestURL);
+            // if (oldestURL && i !== 1) URL.revokeObjectURL(oldestURL);
             i += 1;
 
             const urlPair: RenderableImageURLPair = [
@@ -298,7 +299,7 @@ const downloadFile = async (castToken: string, file: EnteFile) => {
     if (!isImageOrLivePhoto(file))
         throw new Error("Can only cast images and live photos");
 
-    const url = getCastFileURL(file.id);
+    const url = getCastThumbnailURL(file.id);
     const resp = await HTTPService.get(
         url,
         null,
@@ -312,7 +313,7 @@ const downloadFile = async (castToken: string, file: EnteFile) => {
     const cryptoWorker = await ComlinkCryptoWorker.getInstance();
     const decrypted = await cryptoWorker.decryptFile(
         new Uint8Array(resp.data),
-        await cryptoWorker.fromB64(file.file.decryptionHeader),
+        await cryptoWorker.fromB64(file.thumbnail.decryptionHeader),
         file.key,
     );
     return new Response(decrypted).blob();

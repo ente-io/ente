@@ -46,7 +46,7 @@ export default function Slideshow() {
         };
     }, []);
 
-    log.info("Rendering slideshow", { loading, imageURL, nextImageURL });
+    console.log("Rendering slideshow", { loading, imageURL, nextImageURL });
 
     if (loading) return <PairedSuccessfullyOverlay />;
 
