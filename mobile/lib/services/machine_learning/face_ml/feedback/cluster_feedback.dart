@@ -808,6 +808,11 @@ class ClusterFeedbackService {
     final alreadyUpdatedClustersCnt = serializationEmbeddings.$4;
     final smallerClustersCnt = serializationEmbeddings.$5;
 
+    // Assert that all existing clusterAvg are normalized
+    for (final avg in clusterAvg.values) {
+      assert((avg.norm() - 1.0).abs() < 1e-5);
+    }
+
     w?.log(
       'serialization of embeddings',
     );

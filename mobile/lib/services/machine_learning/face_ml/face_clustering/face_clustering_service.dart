@@ -482,6 +482,14 @@ class FaceClusteringService {
       );
     }
 
+    // Assert that the embeddings are normalized
+    for (final faceInfo in faceInfos) {
+      if (faceInfo.vEmbedding != null) {
+        final norm = faceInfo.vEmbedding!.norm();
+        assert((norm - 1.0).abs() < 1e-5);
+      }
+    }
+
     // Sort the faceInfos based on fileCreationTime, in ascending order, so oldest faces are first
     if (fileIDToCreationTime != null) {
       faceInfos.sort((a, b) {
@@ -670,8 +678,10 @@ class FaceClusteringService {
       } else {
         final newMeanVector = newEmbeddings.reduce((a, b) => a + b);
         final newMeanVectorNormalized = newMeanVector / newMeanVector.norm();
-        newClusterSummaries[clusterId] =
-            (EVector(values: newMeanVectorNormalized.toList()).writeToBuffer(), newCount);
+        newClusterSummaries[clusterId] = (
+          EVector(values: newMeanVectorNormalized.toList()).writeToBuffer(),
+          newCount
+        );
       }
     }
     log(
