@@ -320,6 +320,13 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("身份验证失败，请重试"),
         "authenticationSuccessful":
             MessageLookupByLibrary.simpleMessage("验证成功"),
+        "autoCastDialogBody":
+            MessageLookupByLibrary.simpleMessage("您将在此处看到可用的 Cast 设备。"),
+        "autoCastiOSPermission": MessageLookupByLibrary.simpleMessage(
+            "请确保已在“设置”中为 Ente Photos 应用打开本地网络权限。"),
+        "autoPair": MessageLookupByLibrary.simpleMessage("自动配对"),
+        "autoPairDesc":
+            MessageLookupByLibrary.simpleMessage("自动配对仅适用于支持 Chromecast 的设备。"),
         "available": MessageLookupByLibrary.simpleMessage("可用"),
         "backedUpFolders": MessageLookupByLibrary.simpleMessage("已备份的文件夹"),
         "backup": MessageLookupByLibrary.simpleMessage("备份"),
@@ -344,6 +351,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "cannotAddMorePhotosAfterBecomingViewer": m9,
         "cannotDeleteSharedFiles":
             MessageLookupByLibrary.simpleMessage("无法删除共享文件"),
+        "castIPMismatchBody":
+            MessageLookupByLibrary.simpleMessage("请确保您的设备与电视处于同一网络。"),
+        "castIPMismatchTitle": MessageLookupByLibrary.simpleMessage("投放相册失败"),
         "castInstruction": MessageLookupByLibrary.simpleMessage(
             "在您要配对的设备上访问 cast.ente.io。\n输入下面的代码即可在电视上播放相册。"),
         "centerPoint": MessageLookupByLibrary.simpleMessage("中心点"),
@@ -400,6 +410,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "confirmRecoveryKey": MessageLookupByLibrary.simpleMessage("确认恢复密钥"),
         "confirmYourRecoveryKey":
             MessageLookupByLibrary.simpleMessage("确认您的恢复密钥"),
+        "connectToDevice": MessageLookupByLibrary.simpleMessage("连接到设备"),
         "contactFamilyAdmin": m12,
         "contactSupport": MessageLookupByLibrary.simpleMessage("联系支持"),
         "contactToManageSubscription": m13,
@@ -610,6 +621,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "filesBackedUpFromDevice": m22,
         "filesBackedUpInAlbum": m23,
         "filesDeleted": MessageLookupByLibrary.simpleMessage("文件已删除"),
+        "filesSavedToGallery":
+            MessageLookupByLibrary.simpleMessage("多个文件已保存到相册"),
         "flip": MessageLookupByLibrary.simpleMessage("上下翻转"),
         "forYourMemories": MessageLookupByLibrary.simpleMessage("为您的回忆"),
         "forgotPassword": MessageLookupByLibrary.simpleMessage("忘记密码"),
@@ -765,6 +778,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "manageLink": MessageLookupByLibrary.simpleMessage("管理链接"),
         "manageParticipants": MessageLookupByLibrary.simpleMessage("管理"),
         "manageSubscription": MessageLookupByLibrary.simpleMessage("管理订阅"),
+        "manualPairDesc": MessageLookupByLibrary.simpleMessage(
+            "用 PIN 码配对适用于您希望在其上查看相册的任何屏幕。"),
         "map": MessageLookupByLibrary.simpleMessage("地图"),
         "maps": MessageLookupByLibrary.simpleMessage("地图"),
         "mastodon": MessageLookupByLibrary.simpleMessage("Mastodon"),
@@ -797,6 +812,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "no": MessageLookupByLibrary.simpleMessage("否"),
         "noAlbumsSharedByYouYet":
             MessageLookupByLibrary.simpleMessage("您尚未共享任何相册"),
+        "noDeviceFound": MessageLookupByLibrary.simpleMessage("未发现设备"),
         "noDeviceLimit": MessageLookupByLibrary.simpleMessage("无"),
         "noDeviceThatCanBeDeleted":
             MessageLookupByLibrary.simpleMessage("您在此设备上没有可被删除的文件"),
@@ -837,6 +853,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "orPickAnExistingOne":
             MessageLookupByLibrary.simpleMessage("或者选择一个现有的"),
         "pair": MessageLookupByLibrary.simpleMessage("配对"),
+        "pairWithPin": MessageLookupByLibrary.simpleMessage("用 PIN 配对"),
+        "pairingComplete": MessageLookupByLibrary.simpleMessage("配对完成"),
         "passkey": MessageLookupByLibrary.simpleMessage("通行密钥"),
         "passkeyAuthTitle": MessageLookupByLibrary.simpleMessage("通行密钥认证"),
         "password": MessageLookupByLibrary.simpleMessage("密码"),
@@ -1115,6 +1133,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "sparkleSuccess": MessageLookupByLibrary.simpleMessage("✨ 成功"),
         "startBackup": MessageLookupByLibrary.simpleMessage("开始备份"),
         "status": MessageLookupByLibrary.simpleMessage("状态"),
+        "stopCastingBody": MessageLookupByLibrary.simpleMessage("您想停止投放吗？"),
+        "stopCastingTitle": MessageLookupByLibrary.simpleMessage("停止投放"),
         "storage": MessageLookupByLibrary.simpleMessage("存储空间"),
         "storageBreakupFamily": MessageLookupByLibrary.simpleMessage("家庭"),
         "storageBreakupYou": MessageLookupByLibrary.simpleMessage("您"),
