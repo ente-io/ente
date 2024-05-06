@@ -93,6 +93,8 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   late bool isInternalUser;
   late GalleryType galleryType;
 
+  final ValueNotifier<int> castNotifier = ValueNotifier<int>(0);
+
   @override
   void initState() {
     super.initState();
@@ -328,14 +330,16 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         Tooltip(
           message: "Cast album",
           child: IconButton(
-            icon: castService.getActiveSessions().isNotEmpty
-                ? const Icon(Icons.cast_connected_rounded)
-                : const Icon(Icons.cast_outlined),
+            icon: ValueListenableBuilder<int>(
+              valueListenable: castNotifier,
+              builder: (context, value, child) {
+                return castService.getActiveSessions().isNotEmpty
+                    ? const Icon(Icons.cast_connected_rounded)
+                    : const Icon(Icons.cast_outlined);
+              },
+            ),
             onPressed: () async {
               await _castChoiceDialog();
-              if (mounted) {
-                setState(() {});
-              }
             },
           ),
         ),
@@ -728,6 +732,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           await castService.closeActiveCasts();
         },
       );
+      castNotifier.value++;
       return;
     }
 
@@ -753,6 +758,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           return AutoCastDialog(
             (device) async {
               await _castPair(bContext, gw, device);
+              Navigator.pop(bContext);
             },
           );
         },
@@ -785,7 +791,10 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
 
   String lastCode = '';
   Future<bool> _castPair(
-      BuildContext bContext, CastGateway gw, String code) async {
+    BuildContext bContext,
+    CastGateway gw,
+    String code,
+  ) async {
     try {
       if (lastCode == code) {
         return false;
@@ -801,15 +810,15 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       final String castToken = const Uuid().v4().toString();
       final castPayload = CollectionsService.instance
           .getCastData(castToken, widget.collection!, publicKey);
-      _logger.info("Casting album with token $castToken");
       await gw.publishCastPayload(
         code,
         castPayload,
         widget.collection!.id,
         castToken,
       );
-      _logger.info("Casted album with token $castToken");
+      _logger.info("cast album completed");
       // showToast(bContext, S.of(context).pairingComplete);
+      castNotifier.value++;
       return true;
     } catch (e, s) {
       lastCode = '';
@@ -823,6 +832,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       } else {
         await showGenericErrorDialog(context: bContext, error: e);
       }
+      castNotifier.value++;
       return false;
     }
   }
