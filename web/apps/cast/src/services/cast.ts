@@ -7,7 +7,7 @@ import { shuffled } from "@/utils/array";
 import { ensure, ensureString } from "@/utils/ensure";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import HTTPService from "@ente/shared/network/HTTPService";
-import { getCastFileURL, getCastThumbnailURL, getEndpoint } from "@ente/shared/network/api";
+import { getCastThumbnailURL, getEndpoint } from "@ente/shared/network/api";
 import { wait } from "@ente/shared/utils";
 import { detectMediaMIMEType } from "services/detect-type";
 import {
