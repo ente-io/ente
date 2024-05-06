@@ -11,6 +11,9 @@ export default function Index() {
     const [publicKeyB64, setPublicKeyB64] = useState<string | undefined>();
     const [privateKeyB64, setPrivateKeyB64] = useState<string | undefined>();
     const [pairingCode, setPairingCode] = useState<string | undefined>();
+    // TODO: This needs to change, since there is an interim period when the
+    // code becomes invalid.
+    const [haveInitializedCast, setHaveInitializedCast] = useState(false);
 
     const router = useRouter();
 
@@ -27,10 +30,11 @@ export default function Index() {
     };
 
     useEffect(() => {
-        if (pairingCode) {
-            castReceiverLoadingIfNeeded().then((cast) =>
-                advertiseCode(cast, () => pairingCode),
-            );
+        if (pairingCode && !haveInitializedCast) {
+            castReceiverLoadingIfNeeded().then((cast) => {
+                setHaveInitializedCast(true);
+                advertiseCode(cast, () => pairingCode);
+            });
         }
     }, [pairingCode]);
 
@@ -54,10 +58,11 @@ export default function Index() {
             storeCastData(data);
             await router.push("/slideshow");
         } catch (e) {
+            // Code has become invalid
             log.error("Failed to get cast data", e);
             // Start again from the beginning.
-            // setPairingCode(undefined);
-            // init();
+            setPairingCode(undefined);
+            init();
         }
     };
 
