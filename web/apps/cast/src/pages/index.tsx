@@ -27,10 +27,12 @@ export default function Index() {
     };
 
     useEffect(() => {
-        castReceiverLoadingIfNeeded().then((cast) =>
-            advertiseCode(cast, () => pairingCode),
-        );
-    }, []);
+        if (pairingCode) {
+            castReceiverLoadingIfNeeded().then((cast) =>
+                advertiseCode(cast, () => pairingCode),
+            );
+        }
+    }, [pairingCode]);
 
     useEffect(() => {
         if (!publicKeyB64 || !privateKeyB64 || !pairingCode) return;
@@ -54,8 +56,8 @@ export default function Index() {
         } catch (e) {
             log.error("Failed to get cast data", e);
             // Start again from the beginning.
-            setPairingCode(undefined);
-            init();
+            // setPairingCode(undefined);
+            // init();
         }
     };
 

@@ -116,8 +116,9 @@ export const advertiseCode = (
     const namespace = "urn:x-cast:pair-request";
 
     const options = new cast.framework.CastReceiverOptions();
+    options.skipPlayersLoad = true;
     // Do not automatically close the connection when the sender disconnects.
-    options.maxInactivity = 3600; /* 1 hour */
+    // options.maxInactivity = 3600; /* 1 hour */
     // TODO:Is this required? The docs say "(The default type of a message bus
     // is JSON; if not provided here)."
     options.customNamespaces = Object.assign({});
