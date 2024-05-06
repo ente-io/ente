@@ -346,6 +346,28 @@ export interface Electron {
      */
     faceEmbedding: (input: Float32Array) => Promise<Float32Array>;
 
+    /**
+     * Return a face crop stored by a previous version of ML.
+     *
+     * [Note: Legacy face crops]
+     *
+     * Older versions of ML generated and stored face crops in a "face-crops"
+     * cache directory on the Electron side. For the time being, we have
+     * disabled the face search whilst we put finishing touches to it. However,
+     * it'll be nice to still show the existing faces that have been clustered
+     * for people who opted in to the older beta.
+     *
+     * So we retain the older "face-crops" disk cache, and use this method to
+     * serve faces from it when needed.
+     *
+     * @param faceID An identifier corresponding to which the face crop had been
+     * stored by the older version of our app.
+     *
+     * @returns the JPEG data of the face crop if a file is found for the given
+     * {@link faceID}, otherwise undefined.
+     */
+    legacyFaceCrop: (faceID: string) => Promise<Uint8Array | undefined>;
+
     // - Watch
 
     /**
