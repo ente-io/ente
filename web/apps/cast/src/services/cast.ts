@@ -142,7 +142,7 @@ export const renderableImageURLs = async function* (castData: CastData) {
             const oldestURL = urls.shift();
             console.log("Not revoking", oldestURL);
             // if (oldestURL && i !== 1) URL.revokeObjectURL(oldestURL);
-            i += 1;
+            // i += 1;
 
             const urlPair: RenderableImageURLPair = [
                 ensure(urls[0]),
