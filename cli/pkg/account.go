@@ -59,7 +59,7 @@ func (c *ClICtrl) AddAccount(cxt context.Context) {
 		authResponse, flowErr = c.validateTOTP(cxt, authResponse)
 	}
 	if authResponse.EncryptedToken == "" || authResponse.KeyAttributes == nil {
-		panic("no encrypted token or keyAttributes")
+		log.Fatalf("missing key attributes or token.\nNote: Please use the mobile,web or desktop app to create a new account.\nIf you are trying to login to an existing account, report a bug.")
 	}
 	secretInfo, decErr := c.decryptAccSecretInfo(cxt, authResponse, keyEncKey)
 	if decErr != nil {
