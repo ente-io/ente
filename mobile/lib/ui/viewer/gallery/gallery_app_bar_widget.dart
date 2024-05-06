@@ -810,14 +810,13 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       final String castToken = const Uuid().v4().toString();
       final castPayload = CollectionsService.instance
           .getCastData(castToken, widget.collection!, publicKey);
-      _logger.info("Casting album with token $castToken");
       await gw.publishCastPayload(
         code,
         castPayload,
         widget.collection!.id,
         castToken,
       );
-      _logger.info("Casted album with token $castToken");
+      _logger.info("cast album completed");
       // showToast(bContext, S.of(context).pairingComplete);
       castNotifier.value++;
       return true;
