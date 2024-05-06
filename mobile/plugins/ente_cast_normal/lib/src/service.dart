@@ -24,7 +24,9 @@ class CastServiceImpl extends CastService {
           "got RECEIVER_STATUS, Send request to pair",
           name: "CastServiceImpl",
         );
-        session.sendMessage(_pairRequestNamespace, {});
+        session.sendMessage(_pairRequestNamespace, {
+          "collectionID": collectionID,
+        });
       } else {
         if (onMessage != null && message.containsKey("code")) {
           onMessage(
@@ -32,8 +34,9 @@ class CastServiceImpl extends CastService {
               CastMessageType.pairCode: message,
             },
           );
+        } else {
+          print('receive message: $message');
         }
-        print('receive message: $message');
       }
     });
 
