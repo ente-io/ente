@@ -98,7 +98,7 @@ export const renderableImageURLs = async function* (castData: CastData) {
      * memory leak of the very first objectURL that we display.
      */
     const urls: string[] = [""];
-    let i = 0;
+    // const i = 0;
 
     /**
      * Number of milliseconds to keep the slide on the screen.
