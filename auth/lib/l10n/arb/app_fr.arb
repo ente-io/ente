@@ -20,7 +20,6 @@
   "codeIssuerHint": "Émetteur",
   "codeSecretKeyHint": "Clé secrète",
   "codeAccountHint": "Compte (vous@exemple.com)",
-  "accountKeyType": "Type de clé",
   "sessionExpired": "Session expirée",
   "@sessionExpired": {
     "description": "Title of the dialog when the users current session is invalid/expired"

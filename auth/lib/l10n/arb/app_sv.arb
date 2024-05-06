@@ -16,7 +16,6 @@
   "codeIssuerHint": "Utfärdare",
   "codeSecretKeyHint": "Secret Key",
   "codeAccountHint": "Konto (du@domän.com)",
-  "accountKeyType": "Typ av nyckel",
   "sessionExpired": "Sessionen har gått ut",
   "@sessionExpired": {
     "description": "Title of the dialog when the users current session is invalid/expired"

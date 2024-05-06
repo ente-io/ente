@@ -20,7 +20,6 @@
   "codeIssuerHint": "Emissor",
   "codeSecretKeyHint": "Chave secreta",
   "codeAccountHint": "Conta (voce@dominio.com)",
-  "accountKeyType": "Tipo de chave",
   "sessionExpired": "Sessão expirada",
   "@sessionExpired": {
     "description": "Title of the dialog when the users current session is invalid/expired"
