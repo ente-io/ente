@@ -46,7 +46,6 @@
         "concurrently": "^8",
         "electron": "^30",
         "electron-builder": "25.0.0-alpha.6",
-        "electron-builder-notarize": "^1.5",
         "eslint": "^8",
         "prettier": "^3",
         "prettier-plugin-organize-imports": "^3",
