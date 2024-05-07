@@ -1,6 +1,6 @@
 {
     "name": "ente",
-    "version": "1.6.64-beta.0",
+    "version": "1.7.0-beta.0",
     "private": true,
     "description": "Desktop client for Ente Photos",
     "repository": "github:ente-io/photos-desktop",

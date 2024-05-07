@@ -16,16 +16,19 @@ export const setupAutoUpdater = (mainWindow: BrowserWindow) => {
      * [Note: Testing auto updates]
      *
      * By default, we skip checking for updates automatically in dev builds.
-     * This is because even if we were to find an update, installing it would
-     * fail because (at least on macOS), the auto update process requires signed
-     * builds.
+     * This is because even if installing updates would fail (at least on macOS)
+     * because auto updates only work for signed builds.
      *
      * So an end to end testing for updates requires using a temporary GitHub
-     * repository and signed builds therein.
+     * repository and signed builds therein. More on this later.
      *
-     * Howvere for partial checks of the UI flow, something like tis can be used
-     * to do a test of the update process (up until the actual installation
-     * itself).
+     * ---------------
+     *
+     * [Note: Testing auto updates - Sanity checks]
+     *
+     * However, for partial checks of the UI flow, something like the following
+     * can be used to do a test of the update process (up until the actual
+     * installation itself).
      *
      * Create a `app/dev-app-update.yml` with:
      *
@@ -39,25 +42,53 @@ export const setupAutoUpdater = (mainWindow: BrowserWindow) => {
      * In this directory, put `latest-mac.yml` and the DMG file that this YAML
      * file refers to.
      *
-     * Alternatively, `dev-app-update.yml` can contain some arbitrary GitHub
-     * repository, e.g.:
+     * Alternatively, `dev-app-update.yml` can point to some arbitrary GitHub
+     * repository too, e.g.:
      *
      *       provider: github
-     *       owner: foo
-     *       repo: bar
+     *       owner: ente-io
+     *       repo: test-desktop-updates
      *
-     * Finally, we can start the app to trigger the auto update. If we're in dev
-     * mode, we can use the "Check for updates..." menu option to trigger the
+     * Now we can use the "Check for updates..." menu option to trigger the
      * update flow.
      */
     autoUpdater.forceDevUpdateConfig = isDev;
     if (isDev) return;
 
+    /**
+     * [Note: Testing auto updates - End to end checks]
+     *
+     * Since end-to-end update testing can only be done with signed builds, the
+     * easiest way is to create temporary builds in a test repository.
+     *
+     * Let us say we have v2.0.0 about to go out. We have builds artifacts for
+     * v2.0.0 also in some draft release in our normal release repository.
+     *
+     * Create a new test repository, say `ente-io/test-desktop-updates`. In this
+     * repository, create a release v2.0.0, attaching the actual build
+     * artifacts. Make this release the latest.
+     *
+     * Now we need to create a old signed build.
+     *
+     * First, modify `package.json` to put in a version number older than the
+     * new version number that we want to test updating to, e.g. `v1.0.0-test`.
+     *
+     * Then uncomment the following block of code. This tells the auto updater
+     * to use `ente-io/test-desktop-updates` to get updates.
+     *
+     * With these two changes (older version and setFeedURL), create a new
+     * release signed build on CI. Install this build - it will check for
+     * updates in the temporary feed URL that we set, and we'll be able to check
+     * the full update flow.
+     */
+
+    /*
     autoUpdater.setFeedURL({
         provider: "github",
-        owner: "mnvr",
-        repo: "test-updates",
+        owner: "ente-io",
+        repo: "test-desktop-updates",
     });
+    */
 
     const oneDay = 1 * 24 * 60 * 60 * 1000;
     setInterval(() => void checkForUpdatesAndNotify(mainWindow), oneDay);
