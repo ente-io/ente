@@ -494,11 +494,11 @@
     "EXPORT_DIRECTORY_DOES_NOT_EXIST_MESSAGE": "<p>您选择的导出目录不存在。</p><p> 请选择一个有效的目录。</p>",
     "SUBSCRIPTION_VERIFICATION_ERROR": "订阅验证失败",
     "storage_unit": {
-        "b": "B",
-        "kb": "KB",
-        "mb": "MB",
-        "gb": "GB",
-        "tb": "TB"
+        "b": "",
+        "kb": "",
+        "mb": "",
+        "gb": "",
+        "tb": ""
     },
     "AFTER_TIME": {
         "HOUR": "1小时后",

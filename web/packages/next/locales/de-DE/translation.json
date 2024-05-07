@@ -494,11 +494,11 @@
     "EXPORT_DIRECTORY_DOES_NOT_EXIST_MESSAGE": "<p>Das von dir gewählte Exportverzeichnis existiert nicht.</p><p> Bitte wähle einen gültigen Ordner.</p>",
     "SUBSCRIPTION_VERIFICATION_ERROR": "Verifizierung des Abonnements fehlgeschlagen",
     "storage_unit": {
-        "b": "B",
-        "kb": "KB",
-        "mb": "MB",
-        "gb": "GB",
-        "tb": "TB"
+        "b": "",
+        "kb": "",
+        "mb": "",
+        "gb": "",
+        "tb": ""
     },
     "AFTER_TIME": {
         "HOUR": "nach einer Stunde",

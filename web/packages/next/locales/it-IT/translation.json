@@ -494,11 +494,11 @@
     "EXPORT_DIRECTORY_DOES_NOT_EXIST_MESSAGE": "",
     "SUBSCRIPTION_VERIFICATION_ERROR": "",
     "storage_unit": {
-        "b": "B",
-        "kb": "KB",
-        "mb": "MB",
-        "gb": "GB",
-        "tb": "TB"
+        "b": "",
+        "kb": "",
+        "mb": "",
+        "gb": "",
+        "tb": ""
     },
     "AFTER_TIME": {
         "HOUR": "dopo un'ora",
