@@ -69,7 +69,7 @@ export const ffmpegExec = async (
             outputFilePath,
         );
 
-        if (timeoutMS) await withTimeout(execAsync(cmd), 30 * 1000);
+        if (timeoutMS) await withTimeout(execAsync(cmd), timeoutMS);
         else await execAsync(cmd);
 
         return fs.readFile(outputFilePath);
