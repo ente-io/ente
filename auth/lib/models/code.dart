@@ -243,6 +243,10 @@ class Code {
     throw UnsupportedError("Unsupported format with host ${uri.host}");
   }
 
+  String get rawDataWithoutDisplay {
+    return "otpauth://${type.name}/$issuer:$account?algorithm=SHA1&digits=$digits&issuer=$issuer&period=30&secret=$secret";
+  }
+
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;

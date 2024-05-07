@@ -174,7 +174,7 @@ Future<String> _getAuthDataForExport() async {
   final allCodes = await CodeStore.instance.getAllCodes();
   String data = "";
   for (final code in allCodes.codes) {
-    data += "${code.rawData}\n";
+    data += "${code.rawDataWithoutDisplay}\n";
   }
 
   return data;
