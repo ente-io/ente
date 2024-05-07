@@ -163,12 +163,12 @@ class FaceMLDataDB {
   Future<Set<int>> getPersonIgnoredClusters(String personID) async {
     final db = await instance.asyncDB;
     // find out clusterIds that are assigned to other persons using the clusters table
-    final List<Map<String, dynamic>> maps = await db.getAll(
+    final List<Map<String, dynamic>> otherPersonMaps = await db.getAll(
       'SELECT $clusterIDColumn FROM $clusterPersonTable WHERE $personIdColumn != ? AND $personIdColumn IS NOT NULL',
       [personID],
     );
     final Set<int> ignoredClusterIDs =
-        maps.map((e) => e[clusterIDColumn] as int).toSet();
+        otherPersonMaps.map((e) => e[clusterIDColumn] as int).toSet();
     final List<Map<String, dynamic>> rejectMaps = await db.getAll(
       'SELECT $clusterIDColumn FROM $notPersonFeedback WHERE $personIdColumn = ?',
       [personID],

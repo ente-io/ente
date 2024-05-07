@@ -246,6 +246,7 @@ class ClusterFeedbackService {
   }) async {
     final faceMlDb = FaceMLDataDB.instance;
     final faceIDs = await faceMlDb.getFaceIDsForCluster(personClusterID);
+    final ignoredClusters = await faceMlDb.getPersonIgnoredClusters(p.remoteID);
     if (faceIDs.length < 2 * kMinimumClusterSizeSearchResult) {
       final fileIDs = faceIDs.map(getFileIdFromFaceId).toSet();
       if (fileIDs.length < kMinimumClusterSizeSearchResult) {
@@ -264,7 +265,7 @@ class ClusterFeedbackService {
     final EnteWatch watch = EnteWatch("ClusterFeedbackService")..start();
     final Map<int, Vector> clusterAvg = await _getUpdateClusterAvg(
       allClusterIdsToCountMap,
-      {},
+      ignoredClusters,
       minClusterSize: kMinimumClusterSizeSearchResult,
     );
     watch.log('computed avg for ${clusterAvg.length} clusters');
@@ -273,8 +274,8 @@ class ClusterFeedbackService {
     final List<(int, double)> suggestions = await calcSuggestionsMeanInComputer(
       clusterAvg,
       {personClusterID},
-      {},
-      0.34,
+      ignoredClusters,
+      0.32,
     );
 
     if (suggestions.isEmpty) {
