@@ -53,6 +53,12 @@ export const setupAutoUpdater = (mainWindow: BrowserWindow) => {
     autoUpdater.forceDevUpdateConfig = isDev;
     if (isDev) return;
 
+    autoUpdater.setFeedURL({
+        provider: "github",
+        owner: "mnvr",
+        repo: "test-updates",
+    });
+
     const oneDay = 1 * 24 * 60 * 60 * 1000;
     setInterval(() => void checkForUpdatesAndNotify(mainWindow), oneDay);
     void checkForUpdatesAndNotify(mainWindow);
