@@ -259,7 +259,7 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
-            title: "Drop People to clusterMapping",
+            title: "Drop People and clusterMapping",
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
@@ -269,7 +269,7 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
               context,
               title: "Are you sure?",
               body:
-                  "This won't delete the people, but will remove the mapping of people to clusters",
+                  "This will delete the people and all respective mappings of people to clusters",
               firstButtonLabel: "Yes, confirm",
               firstButtonOnTap: () async {
                 try {

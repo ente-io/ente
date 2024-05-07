@@ -228,7 +228,7 @@ class PersonService {
     personData.logStats();
   }
 
-  Future<void> deletePerson(String personID, {bool onlyMapping = true}) async {
+  Future<void> deletePerson(String personID, {bool onlyMapping = false}) async {
     if (onlyMapping) {
       final PersonEntity? entity = await getPerson(personID);
       if (entity == null) {
