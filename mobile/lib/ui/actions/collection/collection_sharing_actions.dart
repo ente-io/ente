@@ -439,7 +439,12 @@ class CollectionActions {
   ) async {
     final List<EnteFile> files =
         await FilesDB.instance.getAllFilesCollection(collection.id);
-    await moveFilesFromCurrentCollection(bContext, collection, files);
+    await moveFilesFromCurrentCollection(
+      bContext,
+      collection,
+      files,
+      isHidden: collection.isHidden() && !collection.isDefaultHidden(),
+    );
     // collection should be empty on server now
     await collectionsService.trashEmptyCollection(collection);
   }
