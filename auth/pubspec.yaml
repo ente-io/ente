@@ -1,6 +1,6 @@
 name: ente_auth
 description: ente two-factor authenticator
-version: 2.0.55+255
+version: 2.0.57+257
 publish_to: none
 
 environment:
@@ -20,7 +20,8 @@ dependencies:
   convert: ^3.1.1
   desktop_webview_window:
     git:
-      url: https://github.com/MixinNetwork/flutter-plugins
+      url: https://github.com/ente-io/flutter-desktopwebview-fork
+      ref: fix-webkit-version
       path: packages/desktop_webview_window
   device_info_plus: ^9.1.1
   dio: ^5.4.0

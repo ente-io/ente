@@ -1,4 +1,3 @@
-import { convertBytesToHumanReadable } from "@/next/file";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import { Box, styled } from "@mui/material";
 import {
@@ -20,6 +19,7 @@ import {
 } from "react-window";
 import { Duplicate } from "services/deduplicationService";
 import { EnteFile } from "types/file";
+import { formattedByteSize } from "utils/units";
 
 export enum ITEM_TYPE {
     TIME = "TIME",
@@ -304,10 +304,13 @@ export function DedupePhotoList({
         switch (listItem.itemType) {
             case ITEM_TYPE.SIZE_AND_COUNT:
                 return (
+                    /*TODO: Translate the full phrase instead of piecing
+                      together parts like this See:
+                      https://crowdin.com/editor/ente-photos-web/9/enus-de?view=comfortable&filter=basic&value=0#8104
+                      */
                     <SizeAndCountContainer span={columns}>
                         {listItem.fileCount} {t("FILES")},{" "}
-                        {convertBytesToHumanReadable(listItem.fileSize || 0)}{" "}
-                        {t("EACH")}
+                        {formattedByteSize(listItem.fileSize || 0)} {t("EACH")}
                     </SizeAndCountContainer>
                 );
             case ITEM_TYPE.FILE: {

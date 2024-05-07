@@ -1,4 +1,6 @@
+import { FILE_TYPE } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
+import type { Metadata } from "@/media/types/file";
 import { ensureElectron } from "@/next/electron";
 import log from "@/next/log";
 import { CustomError } from "@ente/shared/error";
@@ -6,12 +8,11 @@ import { Events, eventBus } from "@ente/shared/events";
 import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
 import { formatDateTimeShort } from "@ente/shared/time/format";
 import { User } from "@ente/shared/user/types";
-import { sleep } from "@ente/shared/utils";
+import { wait } from "@ente/shared/utils";
 import QueueProcessor, {
     CancellationStatus,
     RequestCanceller,
 } from "@ente/shared/utils/queueProcessor";
-import { FILE_TYPE } from "constants/file";
 import { Collection } from "types/collection";
 import {
     CollectionExportNames,
@@ -22,7 +23,6 @@ import {
     FileExportNames,
 } from "types/export";
 import { EnteFile } from "types/file";
-import { Metadata } from "types/upload";
 import {
     constructCollectionNameMap,
     getCollectionUserFacingName,
@@ -46,13 +46,13 @@ const exportRecordFileName = "export_status.json";
 
 /**
  * Name of the top level directory which we create underneath the selected
- * directory when the user starts an export to the filesystem.
+ * directory when the user starts an export to the file system.
  */
 const exportDirectoryName = "Ente Photos";
 
 /**
- * Name of the directory in which we put our metadata when exporting to the
- * filesystem.
+ * Name of the directory in which we put our metadata when exporting to the file
+ * system.
  */
 export const exportMetadataDirectoryName = "metadata";
 
@@ -547,6 +547,9 @@ class ExportService {
         isCanceled: CancellationStatus,
     ) {
         const fs = ensureElectron().fs;
+        const rmdirIfExists = async (dirPath: string) => {
+            if (await fs.exists(dirPath)) await fs.rmdir(dirPath);
+        };
         try {
             const exportRecord = await this.getExportRecord(exportFolder);
             const collectionIDPathMap =
@@ -581,11 +584,11 @@ class ExportService {
                     );
                     try {
                         // delete the collection metadata folder
-                        await fs.rmdir(
+                        await rmdirIfExists(
                             getMetadataFolderExportPath(collectionExportPath),
                         );
                         // delete the collection folder
-                        await fs.rmdir(collectionExportPath);
+                        await rmdirIfExists(collectionExportPath);
                     } catch (e) {
                         await this.addCollectionExportedRecord(
                             exportFolder,
@@ -919,7 +922,7 @@ class ExportService {
                 e.message === CustomError.EXPORT_RECORD_JSON_PARSING_FAILED &&
                 retry
             ) {
-                await sleep(1000);
+                await wait(1000);
                 return await this.getExportRecord(folder, false);
             }
             if (e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST) {
@@ -994,6 +997,7 @@ class ExportService {
                         file,
                     );
                     await writeStream(
+                        electron,
                         `${collectionExportPath}/${fileExportName}`,
                         updatedFileStream,
                     );
@@ -1047,6 +1051,7 @@ class ExportService {
                 file,
             );
             await writeStream(
+                electron,
                 `${collectionExportPath}/${imageExportName}`,
                 imageStream,
             );
@@ -1061,6 +1066,7 @@ class ExportService {
             );
             try {
                 await writeStream(
+                    electron,
                     `${collectionExportPath}/${videoExportName}`,
                     videoStream,
                 );
@@ -1375,7 +1381,7 @@ const isExportInProgress = (exportStage: ExportStage) =>
  *
  * Also move its associated metadata JSON to Trash.
  *
- * @param exportDir The root directory on the user's filesystem where we are
+ * @param exportDir The root directory on the user's file system where we are
  * exporting to.
  * */
 const moveToTrash = async (
@@ -1395,17 +1401,19 @@ const moveToTrash = async (
 
     if (await fs.exists(filePath)) {
         await fs.mkdirIfNeeded(trashDir);
-        const trashFilePath = await safeFileName(trashDir, fileName, fs.exists);
+        const trashFileName = await safeFileName(trashDir, fileName, fs.exists);
+        const trashFilePath = `${trashDir}/${trashFileName}`;
         await fs.rename(filePath, trashFilePath);
     }
 
     if (await fs.exists(metadataFilePath)) {
         await fs.mkdirIfNeeded(metadataTrashDir);
-        const metadataTrashFilePath = await safeFileName(
+        const metadataTrashFileName = await safeFileName(
             metadataTrashDir,
             metadataFileName,
             fs.exists,
         );
-        await fs.rename(filePath, metadataTrashFilePath);
+        const metadataTrashFilePath = `${metadataTrashDir}/${metadataTrashFileName}`;
+        await fs.rename(metadataFilePath, metadataTrashFilePath);
     }
 };

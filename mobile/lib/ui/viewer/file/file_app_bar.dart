@@ -1,32 +1,24 @@
 import 'dart:io';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:media_extension/media_extension.dart';
-import 'package:path/path.dart' as file_path;
-import 'package:photo_manager/photo_manager.dart';
-import 'package:photos/core/event_bus.dart';
-import 'package:photos/db/files_db.dart';
-import 'package:photos/events/local_photos_updated_event.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
 import 'package:photos/models/file/trash_file.dart';
-import 'package:photos/models/ignored_file.dart';
 import "package:photos/models/metadata/common_keys.dart";
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/hidden_service.dart';
-import 'package:photos/services/ignored_files_service.dart';
-import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/ui/collections/collection_action_sheet.dart';
 import 'package:photos/ui/viewer/file/custom_app_bar.dart';
 import "package:photos/ui/viewer/file_details/favorite_widget.dart";
 import "package:photos/ui/viewer/file_details/upload_icon_widget.dart";
 import 'package:photos/utils/dialog_util.dart';
+import "package:photos/utils/file_download_util.dart";
 import 'package:photos/utils/file_util.dart';
 import "package:photos/utils/magic_util.dart";
 import 'package:photos/utils/toast_util.dart';
@@ -140,13 +132,8 @@ class FileAppBarState extends State<FileAppBar> {
       );
     }
     // only show fav option for files owned by the user
-    if (isOwnedByUser && !isFileHidden && isFileUploaded) {
-      _actions.add(
-        Padding(
-          padding: const EdgeInsets.all(8),
-          child: FavoriteWidget(widget.file),
-        ),
-      );
+    if (!isFileHidden && isFileUploaded) {
+      _actions.add(FavoriteWidget(widget.file));
     }
     if (!isFileUploaded) {
       _actions.add(
@@ -167,7 +154,7 @@ class FileAppBarState extends State<FileAppBar> {
               Icon(
                 Platform.isAndroid
                     ? Icons.download
-                    : CupertinoIcons.cloud_download,
+                    : Icons.cloud_download_outlined,
                 color: Theme.of(context).iconTheme.color,
               ),
               const Padding(
@@ -332,96 +319,14 @@ class FileAppBarState extends State<FileAppBar> {
     );
     await dialog.show();
     try {
-      final FileType type = file.fileType;
-      final bool downloadLivePhotoOnDroid =
-          type == FileType.livePhoto && Platform.isAndroid;
-      AssetEntity? savedAsset;
-      final File? fileToSave = await getFile(file);
-      //Disabling notifications for assets changing to insert the file into
-      //files db before triggering a sync.
-      await PhotoManager.stopChangeNotify();
-      if (type == FileType.image) {
-        savedAsset = await PhotoManager.editor
-            .saveImageWithPath(fileToSave!.path, title: file.title!);
-      } else if (type == FileType.video) {
-        savedAsset = await PhotoManager.editor
-            .saveVideo(fileToSave!, title: file.title!);
-      } else if (type == FileType.livePhoto) {
-        final File? liveVideoFile =
-            await getFileFromServer(file, liveVideo: true);
-        if (liveVideoFile == null) {
-          throw AssertionError("Live video can not be null");
-        }
-        if (downloadLivePhotoOnDroid) {
-          await _saveLivePhotoOnDroid(fileToSave!, liveVideoFile, file);
-        } else {
-          savedAsset = await PhotoManager.editor.darwin.saveLivePhoto(
-            imageFile: fileToSave!,
-            videoFile: liveVideoFile,
-            title: file.title!,
-          );
-        }
-      }
-
-      if (savedAsset != null) {
-        file.localID = savedAsset.id;
-        await FilesDB.instance.insert(file);
-        Bus.instance.fire(
-          LocalPhotosUpdatedEvent(
-            [file],
-            source: "download",
-          ),
-        );
-      } else if (!downloadLivePhotoOnDroid && savedAsset == null) {
-        _logger.severe('Failed to save assert of type $type');
-      }
+      await downloadToGallery(file);
       showToast(context, S.of(context).fileSavedToGallery);
       await dialog.hide();
     } catch (e) {
       _logger.warning("Failed to save file", e);
       await dialog.hide();
       await showGenericErrorDialog(context: context, error: e);
-    } finally {
-      await PhotoManager.startChangeNotify();
-      LocalSyncService.instance.checkAndSync().ignore();
     }
-  }
-
-  Future<void> _saveLivePhotoOnDroid(
-    File image,
-    File video,
-    EnteFile enteFile,
-  ) async {
-    debugPrint("Downloading LivePhoto on Droid");
-    AssetEntity? savedAsset = await (PhotoManager.editor
-        .saveImageWithPath(image.path, title: enteFile.title!));
-    if (savedAsset == null) {
-      throw Exception("Failed to save image of live photo");
-    }
-    IgnoredFile ignoreVideoFile = IgnoredFile(
-      savedAsset.id,
-      savedAsset.title ?? '',
-      savedAsset.relativePath ?? 'remoteDownload',
-      "remoteDownload",
-    );
-    await IgnoredFilesService.instance.cacheAndInsert([ignoreVideoFile]);
-    final videoTitle = file_path.basenameWithoutExtension(enteFile.title!) +
-        file_path.extension(video.path);
-    savedAsset = (await (PhotoManager.editor.saveVideo(
-      video,
-      title: videoTitle,
-    )));
-    if (savedAsset == null) {
-      throw Exception("Failed to save video of live photo");
-    }
-
-    ignoreVideoFile = IgnoredFile(
-      savedAsset.id,
-      savedAsset.title ?? videoTitle,
-      savedAsset.relativePath ?? 'remoteDownload',
-      "remoteDownload",
-    );
-    await IgnoredFilesService.instance.cacheAndInsert([ignoreVideoFile]);
   }
 
   Future<void> _setAs(EnteFile file) async {

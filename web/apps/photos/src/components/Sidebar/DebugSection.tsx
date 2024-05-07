@@ -9,10 +9,6 @@ import { useContext, useEffect, useState } from "react";
 import { Trans } from "react-i18next";
 import { isInternalUser } from "utils/user";
 import { testUpload } from "../../../tests/upload.test";
-import {
-    testZipFileReading,
-    testZipWithRootFileReadingTest,
-} from "../../../tests/zip-file-reading.test";
 
 export default function DebugSection() {
     const appContext = useContext(AppContext);
@@ -62,25 +58,11 @@ export default function DebugSection() {
                 </Typography>
             )}
             {isInternalUser() && (
-                <>
-                    <EnteMenuItem
-                        variant="secondary"
-                        onClick={testUpload}
-                        label={"Test Upload"}
-                    />
-
-                    <EnteMenuItem
-                        variant="secondary"
-                        onClick={testZipFileReading}
-                        label="Test Zip file reading"
-                    />
-
-                    <EnteMenuItem
-                        variant="secondary"
-                        onClick={testZipWithRootFileReadingTest}
-                        label="Zip with Root file Test"
-                    />
-                </>
+                <EnteMenuItem
+                    variant="secondary"
+                    onClick={testUpload}
+                    label={"Test Upload"}
+                />
             )}
         </>
     );

@@ -1,4 +1,3 @@
-import { convertBytesToHumanReadable } from "@/next/file";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import { formatDate, getDate, isSameDay } from "@ente/shared/time/format";
 import { Box, Checkbox, Link, Typography, styled } from "@mui/material";
@@ -25,6 +24,7 @@ import {
 import { EnteFile } from "types/file";
 import { handleSelectCreator } from "utils/photoFrame";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
+import { formattedByteSize } from "utils/units";
 
 const A_DAY = 24 * 60 * 60 * 1000;
 const FOOTER_HEIGHT = 90;
@@ -111,14 +111,13 @@ function getShrinkRatio(width: number, columns: number) {
     );
 }
 
-const ListContainer = styled(Box)<{
-    columns: number;
-    shrinkRatio: number;
-    groups?: number[];
+const ListContainer = styled(Box, {
+    shouldForwardProp: (propName) => propName != "gridTemplateColumns",
+})<{
+    gridTemplateColumns: string;
 }>`
     display: grid;
-    grid-template-columns: ${({ columns, shrinkRatio, groups }) =>
-        getTemplateColumns(columns, shrinkRatio, groups)};
+    grid-template-columns: ${(props) => props.gridTemplateColumns};
     grid-column-gap: ${GAP_BTW_TILES}px;
     width: 100%;
     color: #fff;
@@ -235,9 +234,11 @@ const PhotoListRow = React.memo(
         return (
             <ListItem style={style}>
                 <ListContainer
-                    columns={columns}
-                    shrinkRatio={shrinkRatio}
-                    groups={timeStampList[index].groups}
+                    gridTemplateColumns={getTemplateColumns(
+                        columns,
+                        shrinkRatio,
+                        timeStampList[index].groups,
+                    )}
                 >
                     {renderListItem(timeStampList[index], isScrolling)}
                 </ListContainer>
@@ -828,8 +829,7 @@ export function PhotoList({
                 return (
                     <SizeAndCountContainer span={columns}>
                         {listItem.fileCount} {t("FILES")},{" "}
-                        {convertBytesToHumanReadable(listItem.fileSize || 0)}{" "}
-                        {t("EACH")}
+                        {formattedByteSize(listItem.fileSize || 0)} {t("EACH")}
                     </SizeAndCountContainer>
                 );
             case ITEM_TYPE.FILE: {

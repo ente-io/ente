@@ -5,7 +5,7 @@ import "package:intl/intl.dart";
 import "package:photos/core/event_bus.dart";
 import 'package:photos/events/embedding_updated_event.dart';
 import "package:photos/generated/l10n.dart";
-import "package:photos/services/feature_flag_service.dart";
+import "package:photos/service_locator.dart";
 import 'package:photos/services/machine_learning/semantic_search/frameworks/ml_framework.dart';
 import 'package:photos/services/machine_learning/semantic_search/semantic_search_service.dart';
 import "package:photos/theme/ente_theme.dart";
@@ -151,7 +151,7 @@ class _MachineLearningSettingsPageState
                   const SizedBox(
                     height: 12,
                   ),
-                  FeatureFlagService.instance.isInternalUserOrDebugBuild()
+                  flagService.internalUser
                       ? MenuItemWidget(
                           leadingIcon: Icons.delete_sweep_outlined,
                           captionedTextWidget: CaptionedTextWidget(

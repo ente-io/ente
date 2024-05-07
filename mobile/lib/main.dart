@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import "dart:isolate";
 
 import "package:adaptive_theme/adaptive_theme.dart";
 import 'package:background_fetch/background_fetch.dart';
@@ -20,12 +21,12 @@ import 'package:photos/core/network/network.dart';
 import 'package:photos/db/upload_locks_db.dart';
 import 'package:photos/ente_theme_data.dart';
 import "package:photos/l10n/l10n.dart";
+import "package:photos/service_locator.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/collections_service.dart';
 import "package:photos/services/entity_service.dart";
 import 'package:photos/services/favorites_service.dart';
-import 'package:photos/services/feature_flag_service.dart';
 import 'package:photos/services/home_widget_service.dart';
 import 'package:photos/services/local_file_update_service.dart';
 import 'package:photos/services/local_sync_service.dart';
@@ -176,6 +177,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
   _isProcessRunning = true;
   _logger.info("Initializing...  inBG =$isBackground via: $via");
   final SharedPreferences preferences = await SharedPreferences.getInstance();
+
   await _logFGHeartBeatInfo();
   unawaited(_scheduleHeartBeat(preferences, isBackground));
   AppLifecycleService.instance.init(preferences);
@@ -189,6 +191,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
   CryptoUtil.init();
   await Configuration.instance.init();
   await NetworkClient.instance.init();
+  ServiceLocator.instance.init(preferences, NetworkClient.instance.enteDio);
   await UserService.instance.init();
   await EntityService.instance.init();
   LocationService.instance.init(preferences);
@@ -213,8 +216,6 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
       await HomeWidgetService.instance.countHomeWidgets() == 0) {
     unawaited(HomeWidgetService.instance.initHomeWidget());
   }
-
-  unawaited(FeatureFlagService.instance.init());
   unawaited(SemanticSearchService.instance.init());
   MachineLearningController.instance.init();
   // Can not including existing tf/ml binaries as they are not being built
@@ -318,10 +319,15 @@ Future<void> _killBGTask([String? taskId]) async {
     DateTime.now().microsecondsSinceEpoch,
   );
   final prefs = await SharedPreferences.getInstance();
+
   await prefs.remove(kLastBGTaskHeartBeatTime);
   if (taskId != null) {
     BackgroundFetch.finish(taskId);
   }
+
+  ///Band aid for background process not getting killed. Should migrate to using
+  ///workmanager instead of background_fetch.
+  Isolate.current.kill();
 }
 
 Future<void> _logFGHeartBeatInfo() async {
@@ -332,7 +338,7 @@ Future<void> _logFGHeartBeatInfo() async {
   final String lastRun = lastFGTaskHeartBeatTime == 0
       ? 'never'
       : DateTime.fromMicrosecondsSinceEpoch(lastFGTaskHeartBeatTime).toString();
-  _logger.info('isAlreaduunningFG: $isRunningInFG, last Beat: $lastRun');
+  _logger.info('isAlreadyRunningFG: $isRunningInFG, last Beat: $lastRun');
 }
 
 void _scheduleSuicide(Duration duration, [String? taskID]) {

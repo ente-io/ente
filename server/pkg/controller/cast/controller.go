@@ -6,8 +6,10 @@ import (
 	"github.com/ente-io/museum/pkg/controller/access"
 	castRepo "github.com/ente-io/museum/pkg/repo/cast"
 	"github.com/ente-io/museum/pkg/utils/auth"
+	"github.com/ente-io/museum/pkg/utils/network"
 	"github.com/ente-io/stacktrace"
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 type Controller struct {
@@ -24,12 +26,23 @@ func NewController(castRepo *castRepo.Repository,
 	}
 }
 
-func (c *Controller) RegisterDevice(ctx context.Context, request *cast.RegisterDeviceRequest) (string, error) {
-	return c.CastRepo.AddCode(ctx, request.DeviceCode, request.PublicKey)
+func (c *Controller) RegisterDevice(ctx *gin.Context, request *cast.RegisterDeviceRequest) (string, error) {
+	return c.CastRepo.AddCode(ctx, request.PublicKey, network.GetClientIP(ctx))
 }
 
-func (c *Controller) GetPublicKey(ctx context.Context, deviceCode string) (string, error) {
-	return c.CastRepo.GetPubKey(ctx, deviceCode)
+func (c *Controller) GetPublicKey(ctx *gin.Context, deviceCode string) (string, error) {
+	pubKey, ip, err := c.CastRepo.GetPubKeyAndIp(ctx, deviceCode)
+	if err != nil {
+		return "", stacktrace.Propagate(err, "")
+	}
+	if ip != network.GetClientIP(ctx) {
+		logrus.WithFields(logrus.Fields{
+			"deviceCode": deviceCode,
+			"ip":         ip,
+			"clientIP":   network.GetClientIP(ctx),
+		}).Warn("GetPublicKey: IP mismatch")
+	}
+	return pubKey, nil
 }
 
 func (c *Controller) GetEncCastData(ctx context.Context, deviceCode string) (*string, error) {

@@ -1,6 +1,6 @@
-import FilledCircleCheck from "./FilledCircleCheck";
+import { FilledCircleCheck } from "./FilledCircleCheck";
 
-export default function PairedSuccessfullyOverlay() {
+export const PairedSuccessfullyOverlay: React.FC = () => {
     return (
         <div
             style={{
@@ -43,4 +43,4 @@ export default function PairedSuccessfullyOverlay() {
             </div>
         </div>
     );
-}
+};

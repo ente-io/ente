@@ -8,18 +8,15 @@
  *
  * https://www.electronjs.org/docs/latest/tutorial/process-model#the-main-process
  */
-import { nativeImage } from "electron";
-import { app, BrowserWindow, Menu, protocol, Tray } from "electron/main";
+
+import { nativeImage, shell } from "electron/common";
+import type { WebContents } from "electron/main";
+import { BrowserWindow, Menu, Tray, app, protocol } from "electron/main";
 import serveNextAt from "next-electron-server";
 import { existsSync } from "node:fs";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import {
-    addAllowOriginHeader,
-    handleDownloads,
-    handleExternalLinks,
-} from "./main/init";
 import { attachFSWatchIPCHandlers, attachIPCHandlers } from "./main/ipc";
 import log, { initLogging } from "./main/log";
 import { createApplicationMenu, createTrayContextMenu } from "./main/menu";
@@ -29,12 +26,12 @@ import { createWatcher } from "./main/services/watch";
 import { userPreferences } from "./main/stores/user-preferences";
 import { migrateLegacyWatchStoreIfNeeded } from "./main/stores/watch";
 import { registerStreamProtocol } from "./main/stream";
-import { isDev } from "./main/util";
+import { isDev } from "./main/utils/electron";
 
 /**
  * The URL where the renderer HTML is being served from.
  */
-export const rendererURL = "ente://app";
+const rendererURL = "ente://app";
 
 /**
  * We want to hide our window instead of closing it when the user presses the
@@ -130,54 +127,22 @@ const registerPrivilegedSchemes = () => {
         {
             scheme: "stream",
             privileges: {
-                // TODO(MR): Remove the commented bits if we don't end up
-                // needing them by the time the IPC refactoring is done.
-
-                // Prevent the insecure origin issues when fetching this
-                // secure: true,
-                // Allow the web fetch API in the renderer to use this scheme.
                 supportFetchAPI: true,
-                // Allow it to be used with video tags.
-                // stream: true,
             },
         },
     ]);
 };
 
 /**
- * [Note: Increased disk cache for the desktop app]
- *
- * Set the "disk-cache-size" command line flag to ask the Chromium process to
- * use a larger size for the caches that it keeps on disk. This allows us to use
- * the web based caching mechanisms on both the web and the desktop app, just
- * ask the embedded Chromium to be a bit more generous in disk usage when
- * running as the desktop app.
- *
- * The size we provide is in bytes.
- * https://www.electronjs.org/docs/latest/api/command-line-switches#--disk-cache-sizesize
- *
- * Note that increasing the disk cache size does not guarantee that Chromium
- * will respect in verbatim, it uses its own heuristics atop this hint.
- * https://superuser.com/questions/378991/what-is-chrome-default-cache-size-limit/1577693#1577693
- *
- * See also: [Note: Caching files].
- */
-const increaseDiskCache = () =>
-    app.commandLine.appendSwitch(
-        "disk-cache-size",
-        `${5 * 1024 * 1024 * 1024}`, // 5 GB
-    );
-
-/**
  * Create an return the {@link BrowserWindow} that will form our app's UI.
  *
  * This window will show the HTML served from {@link rendererURL}.
  */
-const createMainWindow = async () => {
+const createMainWindow = () => {
     // Create the main window. This'll show our web content.
     const window = new BrowserWindow({
         webPreferences: {
-            preload: path.join(app.getAppPath(), "preload.js"),
+            preload: path.join(__dirname, "preload.js"),
             sandbox: true,
         },
         // The color to show in the window until the web content gets loaded.
@@ -187,7 +152,7 @@ const createMainWindow = async () => {
         show: false,
     });
 
-    const wasAutoLaunched = await autoLauncher.wasAutoLaunched();
+    const wasAutoLaunched = autoLauncher.wasAutoLaunched();
     if (wasAutoLaunched) {
         // Don't automatically show the app's window if we were auto-launched.
         // On macOS, also hide the dock icon on macOS.
@@ -201,13 +166,15 @@ const createMainWindow = async () => {
     if (isDev) window.webContents.openDevTools();
 
     window.webContents.on("render-process-gone", (_, details) => {
-        log.error(`render-process-gone: ${details}`);
+        log.error(`render-process-gone: ${details.reason}`);
         window.webContents.reload();
     });
 
+    // "The unresponsive event is fired when Chromium detects that your
+    //  webContents is not responding to input messages for > 30 seconds."
     window.webContents.on("unresponsive", () => {
         log.error(
-            "Main window's webContents are unresponsive, will restart the renderer process",
+            "MainWindow's webContents are unresponsive, will restart the renderer process",
         );
         window.webContents.forcefullyCrashRenderer();
     });
@@ -228,7 +195,7 @@ const createMainWindow = async () => {
     });
 
     window.on("show", () => {
-        if (process.platform == "darwin") app.dock.show();
+        if (process.platform == "darwin") void app.dock.show();
     });
 
     // Let ipcRenderer know when mainWindow is in the foreground so that it can
@@ -236,6 +203,58 @@ const createMainWindow = async () => {
     window.on("focus", () => window.webContents.send("mainWindowFocus"));
 
     return window;
+};
+
+/**
+ * Automatically set the save path for user initiated downloads to the system's
+ * "downloads" directory instead of asking the user to select a save location.
+ */
+export const setDownloadPath = (webContents: WebContents) => {
+    webContents.session.on("will-download", (_, item) => {
+        item.setSavePath(
+            uniqueSavePath(app.getPath("downloads"), item.getFilename()),
+        );
+    });
+};
+
+const uniqueSavePath = (dirPath: string, fileName: string) => {
+    const { name, ext } = path.parse(fileName);
+
+    let savePath = path.join(dirPath, fileName);
+    let n = 1;
+    while (existsSync(savePath)) {
+        const suffixedName = [`${name}(${n})`, ext].filter((x) => x).join(".");
+        savePath = path.join(dirPath, suffixedName);
+        n++;
+    }
+    return savePath;
+};
+
+/**
+ * Allow opening external links, e.g. when the user clicks on the "Feature
+ * requests" button in the sidebar (to open our GitHub repository), or when they
+ * click the "Support" button to send an email to support.
+ *
+ * @param webContents The renderer to configure.
+ */
+export const allowExternalLinks = (webContents: WebContents) => {
+    // By default, if the user were open a link, say
+    // https://github.com/ente-io/ente/discussions, then it would open a _new_
+    // BrowserWindow within our app.
+    //
+    // This is not the behaviour we want; what we want is to ask the system to
+    // handle the link (e.g. open the URL in the default browser, or if it is a
+    // mailto: link, then open the user's mail client).
+    //
+    // Returning `action` "deny" accomplishes this.
+    webContents.setWindowOpenHandler(({ url }) => {
+        if (!url.startsWith(rendererURL)) {
+            void shell.openExternal(url);
+            return { action: "deny" };
+        } else {
+            return { action: "allow" };
+        }
+    });
 };
 
 /**
@@ -268,30 +287,46 @@ const setupTrayItem = (mainWindow: BrowserWindow) => {
 
 /**
  * Older versions of our app used to maintain a cache dir using the main
- * process. This has been deprecated in favor of using a normal web cache.
+ * process. This has been removed in favor of cache on the web layer.
  *
- * See [Note: Increased disk cache for the desktop app]
+ * Delete the old cache dir if it exists.
  *
- * Delete the old cache dir if it exists. This code was added March 2024, and
- * can be removed after some time once most people have upgraded to newer
- * versions.
+ * This will happen in two phases. The cache had three subdirectories:
+ *
+ * - Two of them, "thumbs" and "files", will be removed now (v1.7.0, May 2024).
+ *
+ * - The third one, "face-crops" will be removed once we finish the face search
+ *   changes. See: [Note: Legacy face crops].
+ *
+ * This migration code can be removed after some time once most people have
+ * upgraded to newer versions.
  */
 const deleteLegacyDiskCacheDirIfExists = async () => {
-    // The existing code was passing "cache" as a parameter to getPath. This is
-    // incorrect if we go by the types - "cache" is not a valid value for the
-    // parameter to `app.getPath`.
+    const removeIfExists = async (dirPath: string) => {
+        if (existsSync(dirPath)) {
+            log.info(`Removing legacy disk cache from ${dirPath}`);
+            await fs.rm(dirPath, { recursive: true });
+        }
+    };
+    // [Note: Getting the cache path]
     //
-    // It might be an issue in the types, since at runtime it seems to work. For
-    // example, on macOS I get `~/Library/Caches`.
+    // The existing code was passing "cache" as a parameter to getPath.
+    //
+    // However, "cache" is not a valid parameter to getPath. It works! (for
+    // example, on macOS I get `~/Library/Caches`), but it is intentionally not
+    // documented as part of the public API:
+    //
+    // - docs: remove "cache" from app.getPath
+    //   https://github.com/electron/electron/pull/33509
     //
     // Irrespective, we replicate the original behaviour so that we get back the
-    // same path that the old got was getting.
+    // same path that the old code was getting.
     //
-    // @ts-expect-error
+    // @ts-expect-error "cache" works but is not part of the public API.
     const cacheDir = path.join(app.getPath("cache"), "ente");
     if (existsSync(cacheDir)) {
-        log.info(`Removing legacy disk cache from ${cacheDir}`);
-        await fs.rm(cacheDir, { recursive: true });
+        await removeIfExists(path.join(cacheDir, "thumbs"));
+        await removeIfExists(path.join(cacheDir, "files"));
     }
 };
 
@@ -324,7 +359,6 @@ const main = () => {
     // The order of the next two calls is important
     setupRendererServer();
     registerPrivilegedSchemes();
-    increaseDiskCache();
     migrateLegacyWatchStoreIfNeeded();
 
     app.on("second-instance", () => {
@@ -339,32 +373,35 @@ const main = () => {
     // Emitted once, when Electron has finished initializing.
     //
     // Note that some Electron APIs can only be used after this event occurs.
-    app.on("ready", async () => {
-        // Create window and prepare for renderer
-        mainWindow = await createMainWindow();
-        attachIPCHandlers();
-        attachFSWatchIPCHandlers(createWatcher(mainWindow));
-        registerStreamProtocol();
-        handleDownloads(mainWindow);
-        handleExternalLinks(mainWindow);
-        addAllowOriginHeader(mainWindow);
+    void app.whenReady().then(() => {
+        void (async () => {
+            // Create window and prepare for the renderer.
+            mainWindow = createMainWindow();
+            attachIPCHandlers();
+            attachFSWatchIPCHandlers(createWatcher(mainWindow));
+            registerStreamProtocol();
 
-        // Start loading the renderer
-        mainWindow.loadURL(rendererURL);
+            // Configure the renderer's environment.
+            setDownloadPath(mainWindow.webContents);
+            allowExternalLinks(mainWindow.webContents);
 
-        // Continue on with the rest of the startup sequence
-        Menu.setApplicationMenu(await createApplicationMenu(mainWindow));
-        setupTrayItem(mainWindow);
-        if (!isDev) setupAutoUpdater(mainWindow);
+            // Start loading the renderer.
+            void mainWindow.loadURL(rendererURL);
 
-        try {
-            deleteLegacyDiskCacheDirIfExists();
-            deleteLegacyKeysStoreIfExists();
-        } catch (e) {
-            // Log but otherwise ignore errors during non-critical startup
-            // actions.
-            log.error("Ignoring startup error", e);
-        }
+            // Continue on with the rest of the startup sequence.
+            Menu.setApplicationMenu(await createApplicationMenu(mainWindow));
+            setupTrayItem(mainWindow);
+            setupAutoUpdater(mainWindow);
+
+            try {
+                await deleteLegacyDiskCacheDirIfExists();
+                await deleteLegacyKeysStoreIfExists();
+            } catch (e) {
+                // Log but otherwise ignore errors during non-critical startup
+                // actions.
+                log.error("Ignoring startup error", e);
+            }
+        })();
     });
 
     // This is a macOS only event. Show our window when the user activates the

@@ -17,8 +17,8 @@ name: "Release (auth)"
 # We use a suffix like `-test` to indicate that these are test tags, and that
 # they belong to a pre-release.
 #
-# If you need to do multiple tests, add a +x at the end of the tag. e.g.
-# `auth-v1.2.3-test+1`.
+# If you need to do multiple tests, add a .x at the end of the tag. e.g.
+# `auth-v1.2.3-test.1`.
 #
 # Once the testing is done, also delete the tag(s) please.
 
@@ -85,7 +85,7 @@ jobs:
             - name: Install dependencies for desktop build
               run: |
                   sudo apt-get update -y
-                  sudo apt-get install -y libsecret-1-dev libsodium-dev libwebkit2gtk-4.0-dev libfuse2 ninja-build libgtk-3-dev dpkg-dev pkg-config rpm libsqlite3-dev locate appindicator3-0.1 libappindicator3-dev libffi-dev libtiff5
+                  sudo apt-get install -y libsecret-1-dev libsodium-dev libwebkit2gtk-4.0-dev libfuse2 ninja-build libgtk-3-dev dpkg-dev pkg-config rpm patchelf libsqlite3-dev locate appindicator3-0.1 libappindicator3-dev libffi-dev libtiff5
                   sudo updatedb --localpaths='/usr/lib/x86_64-linux-gnu'
 
             - name: Install appimagetool

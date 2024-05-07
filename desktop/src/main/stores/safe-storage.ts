@@ -1,7 +1,7 @@
 import Store, { Schema } from "electron-store";
 
 interface SafeStorageStore {
-    encryptionKey: string;
+    encryptionKey?: string;
 }
 
 const safeStorageSchema: Schema<SafeStorageStore> = {

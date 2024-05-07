@@ -23,7 +23,7 @@ const colourPool = [
     "#808000", // Light Olive
 ];
 
-export default function LargeType({ chars }: { chars: string[] }) {
+export const LargeType = ({ chars }: { chars: string[] }) => {
     return (
         <Container style={{}}>
             {chars.map((char, i) => (
@@ -41,7 +41,7 @@ export default function LargeType({ chars }: { chars: string[] }) {
             ))}
         </Container>
     );
-}
+};
 
 const Container = styled("div")`
     font-size: 4rem;

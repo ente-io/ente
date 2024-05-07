@@ -12,10 +12,14 @@ class CastGateway {
       );
       return response.data["publicKey"];
     } catch (e) {
-      if (e is DioError &&
-          e.response != null &&
-          e.response!.statusCode == 404) {
-        return null;
+      if (e is DioError && e.response != null) {
+        if (e.response!.statusCode == 404) {
+          return null;
+        } else if (e.response!.statusCode == 403) {
+          throw CastIPMismatchException();
+        } else {
+          rethrow;
+        }
       }
       rethrow;
     }
@@ -47,4 +51,8 @@ class CastGateway {
       // swallow error
     }
   }
+}
+
+class CastIPMismatchException implements Exception {
+  CastIPMismatchException();
 }

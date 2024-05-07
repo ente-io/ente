@@ -27,23 +27,22 @@ class AutoLauncher {
     }
 
     async toggleAutoLaunch() {
-        const isEnabled = await this.isEnabled();
+        const wasEnabled = await this.isEnabled();
         const autoLaunch = this.autoLaunch;
         if (autoLaunch) {
-            if (isEnabled) await autoLaunch.disable();
+            if (wasEnabled) await autoLaunch.disable();
             else await autoLaunch.enable();
         } else {
-            if (isEnabled) app.setLoginItemSettings({ openAtLogin: false });
-            else app.setLoginItemSettings({ openAtLogin: true });
+            const openAtLogin = !wasEnabled;
+            app.setLoginItemSettings({ openAtLogin });
         }
     }
 
-    async wasAutoLaunched() {
+    wasAutoLaunched() {
         if (this.autoLaunch) {
             return app.commandLine.hasSwitch("hidden");
         } else {
-            // TODO(MR): This apparently doesn't work anymore.
-            return app.getLoginItemSettings().wasOpenedAtLogin;
+            return app.getLoginItemSettings().openAtLogin;
         }
     }
 }

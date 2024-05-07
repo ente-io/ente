@@ -1,14 +1,14 @@
+import { FILE_TYPE } from "@/media/file-type";
 import { nameAndExtension } from "@/next/file";
 import log from "@/next/log";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import PhotoOutlined from "@mui/icons-material/PhotoOutlined";
 import VideocamOutlined from "@mui/icons-material/VideocamOutlined";
 import Box from "@mui/material/Box";
-import { FILE_TYPE } from "constants/file";
 import { useEffect, useState } from "react";
 import { EnteFile } from "types/file";
-import { makeHumanReadableStorage } from "utils/billing";
 import { changeFileName, updateExistingFilePubMetadata } from "utils/file";
+import { formattedByteSize } from "utils/units";
 import { FileNameEditDialog } from "./FileNameEditDialog";
 import InfoItem from "./InfoItem";
 
@@ -33,7 +33,7 @@ const getCaption = (file: EnteFile, parsedExifData) => {
         captionParts.push(resolution);
     }
     if (fileSize) {
-        captionParts.push(makeHumanReadableStorage(fileSize));
+        captionParts.push(formattedByteSize(fileSize));
     }
     return (
         <FlexWrapper gap={1}>

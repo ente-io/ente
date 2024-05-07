@@ -12,7 +12,7 @@ description: ente photos application
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 
-version: 0.8.83+603
+version: 0.8.94+614
 publish_to: none
 
 environment:
@@ -39,7 +39,7 @@ dependencies:
   connectivity_plus: ^6.0.2
   cross_file: ^0.3.3
   crypto: ^3.0.2
-  cupertino_icons: ^1.0.0
+  cupertino_icons: ^1.0.8
   defer_pointer: ^0.0.2
   device_info_plus: ^9.0.3
   dio: ^4.0.6
@@ -47,6 +47,12 @@ dependencies:
   dotted_border: ^2.1.0
   dropdown_button2: ^2.0.0
   email_validator: ^2.0.1
+  ente_cast:
+    path: plugins/ente_cast
+  ente_cast_normal:
+    path: plugins/ente_cast_normal
+  ente_feature_flag:
+    path: plugins/ente_feature_flag
   equatable: ^2.0.5
   event_bus: ^2.0.0
   exif: ^3.0.0
@@ -90,11 +96,9 @@ dependencies:
   image: ^4.0.17
   image_editor: ^1.3.0
   intl: ^0.18.0
-  isar: ^3.1.0+1
-  isar_flutter_libs: ^3.1.0+1
   json_annotation: ^4.8.0
   latlong2: ^0.9.0
-  like_button: ^2.0.2
+  like_button: ^2.0.5
   loading_animations: ^2.1.0
   local_auth: ^2.1.5
   local_auth_android:
@@ -187,7 +191,6 @@ dev_dependencies:
   freezed: ^2.5.2
   integration_test:
     sdk: flutter
-  isar_generator: ^3.1.0+1
   json_serializable: ^6.6.1
   test: ^1.22.0
 

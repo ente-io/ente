@@ -7,7 +7,9 @@
         "@/next": "*",
         "@ente/accounts": "*",
         "@ente/eslint-config": "*",
-        "@ente/shared": "*",
-        "mime-types": "^2.1.35"
+        "@ente/shared": "*"
+    },
+    "devDependencies": {
+        "@types/chromecast-caf-receiver": "^6.0.14"
     }
 }

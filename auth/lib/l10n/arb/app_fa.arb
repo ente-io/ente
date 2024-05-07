@@ -14,7 +14,6 @@
   "codeIssuerHint": "صادر کننده",
   "codeSecretKeyHint": "کلید مخفی",
   "codeAccountHint": "حساب (you@domain.com)",
-  "accountKeyType": "نوع کلید",
   "sessionExpired": "نشست منقضی شده است",
   "@sessionExpired": {
     "description": "Title of the dialog when the users current session is invalid/expired"

@@ -3,7 +3,7 @@ name: "Deploy (accounts)"
 on:
     push:
         # Run workflow on pushes to the deploy/accounts
-        branches: [deploy/accounts]
+        branches: [deploy/accounts, deploy-f/accounts]
 
 jobs:
     deploy:

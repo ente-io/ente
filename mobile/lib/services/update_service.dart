@@ -16,7 +16,7 @@ class UpdateService {
   static final UpdateService instance = UpdateService._privateConstructor();
   static const kUpdateAvailableShownTimeKey = "update_available_shown_time_key";
   static const changeLogVersionKey = "update_change_log_key";
-  static const currentChangeLogVersion = 18;
+  static const currentChangeLogVersion = 19;
 
   LatestVersionInfo? _latestVersion;
   final _logger = Logger("UpdateService");
@@ -73,8 +73,12 @@ class UpdateService {
     return _latestVersion;
   }
 
-  Future<bool> shouldShowUpdateNoification() async {
+  Future<bool> shouldShowUpdateNotification() async {
     final shouldUpdate = await this.shouldUpdate();
+
+    if (!shouldUpdate) {
+      return false;
+    }
 
     final lastNotificationShownTime =
         _prefs.getInt(kUpdateAvailableShownTimeKey) ?? 0;
@@ -87,7 +91,7 @@ class UpdateService {
   }
 
   Future<void> showUpdateNotification() async {
-    if (await shouldShowUpdateNoification()) {
+    if (await shouldShowUpdateNotification()) {
       // ignore: unawaited_futures
       NotificationService.instance.showNotification(
         "Update available",

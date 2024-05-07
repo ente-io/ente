@@ -41,6 +41,7 @@ class HomeGalleryWidget extends StatelessWidget {
           hideIgnoredForUpload: true,
           dedupeUploadID: true,
           ignoredCollectionIDs: collectionsToHide,
+          ignoreSavedFiles: true,
         );
         if (hasSelectedAllForBackup) {
           result = await FilesDB.instance.getAllLocalAndUploadedFiles(

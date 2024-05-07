@@ -37,37 +37,37 @@
  * -    [main]      desktop/src/main/ipc.ts                  contains impl
  */
 
-import { contextBridge, ipcRenderer } from "electron/renderer";
+import { contextBridge, ipcRenderer, webUtils } from "electron/renderer";
 
 // While we can't import other code, we can import types since they're just
 // needed when compiling and will not be needed or looked around for at runtime.
 import type {
     AppUpdate,
     CollectionMapping,
-    ElectronFile,
     FolderWatch,
     PendingUploads,
+    ZipItem,
 } from "./types/ipc";
 
 // - General
 
-const appVersion = (): Promise<string> => ipcRenderer.invoke("appVersion");
+const appVersion = () => ipcRenderer.invoke("appVersion");
 
 const logToDisk = (message: string): void =>
     ipcRenderer.send("logToDisk", message);
 
-const openDirectory = (dirPath: string): Promise<void> =>
+const openDirectory = (dirPath: string) =>
     ipcRenderer.invoke("openDirectory", dirPath);
 
-const openLogDirectory = (): Promise<void> =>
-    ipcRenderer.invoke("openLogDirectory");
+const openLogDirectory = () => ipcRenderer.invoke("openLogDirectory");
+
+const selectDirectory = () => ipcRenderer.invoke("selectDirectory");
 
 const clearStores = () => ipcRenderer.send("clearStores");
 
-const encryptionKey = (): Promise<string | undefined> =>
-    ipcRenderer.invoke("encryptionKey");
+const encryptionKey = () => ipcRenderer.invoke("encryptionKey");
 
-const saveEncryptionKey = (encryptionKey: string): Promise<void> =>
+const saveEncryptionKey = (encryptionKey: string) =>
     ipcRenderer.invoke("saveEncryptionKey", encryptionKey);
 
 const onMainWindowFocus = (cb?: () => void) => {
@@ -99,121 +99,93 @@ const skipAppUpdate = (version: string) => {
 
 // - FS
 
-const fsExists = (path: string): Promise<boolean> =>
-    ipcRenderer.invoke("fsExists", path);
+const fsExists = (path: string) => ipcRenderer.invoke("fsExists", path);
 
-const fsMkdirIfNeeded = (dirPath: string): Promise<void> =>
+const fsMkdirIfNeeded = (dirPath: string) =>
     ipcRenderer.invoke("fsMkdirIfNeeded", dirPath);
 
-const fsRename = (oldPath: string, newPath: string): Promise<void> =>
+const fsRename = (oldPath: string, newPath: string) =>
     ipcRenderer.invoke("fsRename", oldPath, newPath);
 
-const fsRmdir = (path: string): Promise<void> =>
-    ipcRenderer.invoke("fsRmdir", path);
+const fsRmdir = (path: string) => ipcRenderer.invoke("fsRmdir", path);
 
-const fsRm = (path: string): Promise<void> => ipcRenderer.invoke("fsRm", path);
+const fsRm = (path: string) => ipcRenderer.invoke("fsRm", path);
 
-const fsReadTextFile = (path: string): Promise<string> =>
+const fsReadTextFile = (path: string) =>
     ipcRenderer.invoke("fsReadTextFile", path);
 
-const fsWriteFile = (path: string, contents: string): Promise<void> =>
+const fsWriteFile = (path: string, contents: string) =>
     ipcRenderer.invoke("fsWriteFile", path, contents);
 
-const fsIsDir = (dirPath: string): Promise<boolean> =>
-    ipcRenderer.invoke("fsIsDir", dirPath);
-
-// - AUDIT below this
+const fsIsDir = (dirPath: string) => ipcRenderer.invoke("fsIsDir", dirPath);
 
 // - Conversion
 
-const convertToJPEG = (
-    fileData: Uint8Array,
-    filename: string,
-): Promise<Uint8Array> =>
-    ipcRenderer.invoke("convertToJPEG", fileData, filename);
+const convertToJPEG = (imageData: Uint8Array) =>
+    ipcRenderer.invoke("convertToJPEG", imageData);
 
 const generateImageThumbnail = (
-    inputFile: File | ElectronFile,
+    dataOrPathOrZipItem: Uint8Array | string | ZipItem,
     maxDimension: number,
     maxSize: number,
-): Promise<Uint8Array> =>
+) =>
     ipcRenderer.invoke(
         "generateImageThumbnail",
-        inputFile,
+        dataOrPathOrZipItem,
         maxDimension,
         maxSize,
     );
 
-const runFFmpegCmd = (
-    cmd: string[],
-    inputFile: File | ElectronFile,
-    outputFileName: string,
-    dontTimeout?: boolean,
-): Promise<File> =>
+const ffmpegExec = (
+    command: string[],
+    dataOrPathOrZipItem: Uint8Array | string | ZipItem,
+    outputFileExtension: string,
+    timeoutMS: number,
+) =>
     ipcRenderer.invoke(
-        "runFFmpegCmd",
-        cmd,
-        inputFile,
-        outputFileName,
-        dontTimeout,
+        "ffmpegExec",
+        command,
+        dataOrPathOrZipItem,
+        outputFileExtension,
+        timeoutMS,
     );
 
 // - ML
 
-const clipImageEmbedding = (jpegImageData: Uint8Array): Promise<Float32Array> =>
+const clipImageEmbedding = (jpegImageData: Uint8Array) =>
     ipcRenderer.invoke("clipImageEmbedding", jpegImageData);
 
-const clipTextEmbedding = (text: string): Promise<Float32Array> =>
-    ipcRenderer.invoke("clipTextEmbedding", text);
+const clipTextEmbeddingIfAvailable = (text: string) =>
+    ipcRenderer.invoke("clipTextEmbeddingIfAvailable", text);
 
-const detectFaces = (input: Float32Array): Promise<Float32Array> =>
+const detectFaces = (input: Float32Array) =>
     ipcRenderer.invoke("detectFaces", input);
 
-const faceEmbedding = (input: Float32Array): Promise<Float32Array> =>
+const faceEmbedding = (input: Float32Array) =>
     ipcRenderer.invoke("faceEmbedding", input);
 
-// - File selection
-
-// TODO: Deprecated - use dialogs on the renderer process itself
-
-const selectDirectory = (): Promise<string> =>
-    ipcRenderer.invoke("selectDirectory");
-
-const showUploadFilesDialog = (): Promise<ElectronFile[]> =>
-    ipcRenderer.invoke("showUploadFilesDialog");
-
-const showUploadDirsDialog = (): Promise<ElectronFile[]> =>
-    ipcRenderer.invoke("showUploadDirsDialog");
-
-const showUploadZipDialog = (): Promise<{
-    zipPaths: string[];
-    files: ElectronFile[];
-}> => ipcRenderer.invoke("showUploadZipDialog");
+const legacyFaceCrop = (faceID: string) =>
+    ipcRenderer.invoke("legacyFaceCrop", faceID);
 
 // - Watch
 
-const watchGet = (): Promise<FolderWatch[]> => ipcRenderer.invoke("watchGet");
+const watchGet = () => ipcRenderer.invoke("watchGet");
 
-const watchAdd = (
-    folderPath: string,
-    collectionMapping: CollectionMapping,
-): Promise<FolderWatch[]> =>
+const watchAdd = (folderPath: string, collectionMapping: CollectionMapping) =>
     ipcRenderer.invoke("watchAdd", folderPath, collectionMapping);
 
-const watchRemove = (folderPath: string): Promise<FolderWatch[]> =>
+const watchRemove = (folderPath: string) =>
     ipcRenderer.invoke("watchRemove", folderPath);
 
 const watchUpdateSyncedFiles = (
     syncedFiles: FolderWatch["syncedFiles"],
     folderPath: string,
-): Promise<void> =>
-    ipcRenderer.invoke("watchUpdateSyncedFiles", syncedFiles, folderPath);
+) => ipcRenderer.invoke("watchUpdateSyncedFiles", syncedFiles, folderPath);
 
 const watchUpdateIgnoredFiles = (
     ignoredFiles: FolderWatch["ignoredFiles"],
     folderPath: string,
-): Promise<void> =>
-    ipcRenderer.invoke("watchUpdateIgnoredFiles", ignoredFiles, folderPath);
+) => ipcRenderer.invoke("watchUpdateIgnoredFiles", ignoredFiles, folderPath);
 
 const watchOnAddFile = (f: (path: string, watch: FolderWatch) => void) => {
     ipcRenderer.removeAllListeners("watchAddFile");
@@ -236,69 +208,97 @@ const watchOnRemoveDir = (f: (path: string, watch: FolderWatch) => void) => {
     );
 };
 
-const watchFindFiles = (folderPath: string): Promise<string[]> =>
+const watchFindFiles = (folderPath: string) =>
     ipcRenderer.invoke("watchFindFiles", folderPath);
+
+const watchReset = async () => {
+    ipcRenderer.removeAllListeners("watchAddFile");
+    ipcRenderer.removeAllListeners("watchRemoveFile");
+    ipcRenderer.removeAllListeners("watchRemoveDir");
+    await ipcRenderer.invoke("watchReset");
+};
 
 // - Upload
 
-const pendingUploads = (): Promise<PendingUploads | undefined> =>
-    ipcRenderer.invoke("pendingUploads");
+const pathForFile = (file: File) => {
+    const path = webUtils.getPathForFile(file);
+    // The path that we get back from `webUtils.getPathForFile` on Windows uses
+    // "/" as the path separator. Convert them to POSIX separators.
+    //
+    // Note that we do not have access to the path or the os module in the
+    // preload script, thus this hand rolled transformation.
 
-const setPendingUploadCollection = (collectionName: string): Promise<void> =>
-    ipcRenderer.invoke("setPendingUploadCollection", collectionName);
+    // However that makes TypeScript fidgety since we it cannot find navigator,
+    // as we haven't included "lib": ["dom"] in our tsconfig to avoid making DOM
+    // APIs available to our main Node.js code. We could create a separate
+    // tsconfig just for the preload script, but for now let's go with a cast.
+    //
+    // @ts-expect-error navigator is not defined.
+    const platform = (navigator as { platform: string }).platform;
+    return platform.toLowerCase().includes("win")
+        ? path.split("\\").join("/")
+        : path;
+};
 
-const setPendingUploadFiles = (
-    type: PendingUploads["type"],
-    filePaths: string[],
-): Promise<void> =>
-    ipcRenderer.invoke("setPendingUploadFiles", type, filePaths);
+const listZipItems = (zipPath: string) =>
+    ipcRenderer.invoke("listZipItems", zipPath);
 
-// -
+const pathOrZipItemSize = (pathOrZipItem: string | ZipItem) =>
+    ipcRenderer.invoke("pathOrZipItemSize", pathOrZipItem);
 
-const getElectronFilesFromGoogleZip = (
-    filePath: string,
-): Promise<ElectronFile[]> =>
-    ipcRenderer.invoke("getElectronFilesFromGoogleZip", filePath);
+const pendingUploads = () => ipcRenderer.invoke("pendingUploads");
 
-const getDirFiles = (dirPath: string): Promise<ElectronFile[]> =>
-    ipcRenderer.invoke("getDirFiles", dirPath);
+const setPendingUploads = (pendingUploads: PendingUploads) =>
+    ipcRenderer.invoke("setPendingUploads", pendingUploads);
 
-//
-// These objects exposed here will become available to the JS code in our
-// renderer (the web/ code) as `window.ElectronAPIs.*`
-//
-// There are a few related concepts at play here, and it might be worthwhile to
-// read their (excellent) documentation to get an understanding;
-//`
-// - ContextIsolation:
-//   https://www.electronjs.org/docs/latest/tutorial/context-isolation
-//
-// - IPC https://www.electronjs.org/docs/latest/tutorial/ipc
-//
-// [Note: Transferring large amount of data over IPC]
-//
-// Electron's IPC implementation uses the HTML standard Structured Clone
-// Algorithm to serialize objects passed between processes.
-// https://www.electronjs.org/docs/latest/tutorial/ipc#object-serialization
-//
-// In particular, ArrayBuffer is eligible for structured cloning.
-// https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Structured_clone_algorithm
-//
-// Also, ArrayBuffer is "transferable", which means it is a zero-copy operation
-// operation when it happens across threads.
-// https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Transferable_objects
-//
-// In our case though, we're not dealing with threads but separate processes. So
-// the ArrayBuffer will be copied:
-// > "parameters, errors and return values are **copied** when they're sent over
-//   the bridge".
-//   https://www.electronjs.org/docs/latest/api/context-bridge#methods
-//
-// The copy itself is relatively fast, but the problem with transfering large
-// amounts of data is potentially running out of memory during the copy.
-//
-// For an alternative, see [Note: IPC streams].
-//
+const markUploadedFiles = (paths: PendingUploads["filePaths"]) =>
+    ipcRenderer.invoke("markUploadedFiles", paths);
+
+const markUploadedZipItems = (items: PendingUploads["zipItems"]) =>
+    ipcRenderer.invoke("markUploadedZipItems", items);
+
+const clearPendingUploads = () => ipcRenderer.invoke("clearPendingUploads");
+
+/**
+ * These objects exposed here will become available to the JS code in our
+ * renderer (the web/ code) as `window.ElectronAPIs.*`
+ *
+ * There are a few related concepts at play here, and it might be worthwhile to
+ * read their (excellent) documentation to get an understanding;
+ *`
+ * - ContextIsolation:
+ *   https://www.electronjs.org/docs/latest/tutorial/context-isolation
+ *
+ * - IPC https://www.electronjs.org/docs/latest/tutorial/ipc
+ *
+ * ---
+ *
+ * [Note: Transferring large amount of data over IPC]
+ *
+ * Electron's IPC implementation uses the HTML standard Structured Clone
+ * Algorithm to serialize objects passed between processes.
+ * https://www.electronjs.org/docs/latest/tutorial/ipc#object-serialization
+ *
+ * In particular, ArrayBuffer is eligible for structured cloning.
+ * https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Structured_clone_algorithm
+ *
+ * Also, ArrayBuffer is "transferable", which means it is a zero-copy operation
+ * operation when it happens across threads.
+ * https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Transferable_objects
+ *
+ * In our case though, we're not dealing with threads but separate processes. So
+ * the ArrayBuffer will be copied:
+ *
+ * > "parameters, errors and return values are **copied** when they're sent over
+ * > the bridge".
+ * >
+ * > https://www.electronjs.org/docs/latest/api/context-bridge#methods
+ *
+ * The copy itself is relatively fast, but the problem with transfering large
+ * amounts of data is potentially running out of memory during the copy.
+ *
+ * For an alternative, see [Note: IPC streams].
+ */
 contextBridge.exposeInMainWorld("electron", {
     // - General
 
@@ -306,6 +306,7 @@ contextBridge.exposeInMainWorld("electron", {
     logToDisk,
     openDirectory,
     openLogDirectory,
+    selectDirectory,
     clearStores,
     encryptionKey,
     saveEncryptionKey,
@@ -335,21 +336,15 @@ contextBridge.exposeInMainWorld("electron", {
 
     convertToJPEG,
     generateImageThumbnail,
-    runFFmpegCmd,
+    ffmpegExec,
 
     // - ML
 
     clipImageEmbedding,
-    clipTextEmbedding,
+    clipTextEmbeddingIfAvailable,
     detectFaces,
     faceEmbedding,
-
-    // - File selection
-
-    selectDirectory,
-    showUploadFilesDialog,
-    showUploadDirsDialog,
-    showUploadZipDialog,
+    legacyFaceCrop,
 
     // - Watch
 
@@ -357,22 +352,23 @@ contextBridge.exposeInMainWorld("electron", {
         get: watchGet,
         add: watchAdd,
         remove: watchRemove,
+        updateSyncedFiles: watchUpdateSyncedFiles,
+        updateIgnoredFiles: watchUpdateIgnoredFiles,
         onAddFile: watchOnAddFile,
         onRemoveFile: watchOnRemoveFile,
         onRemoveDir: watchOnRemoveDir,
         findFiles: watchFindFiles,
-        updateSyncedFiles: watchUpdateSyncedFiles,
-        updateIgnoredFiles: watchUpdateIgnoredFiles,
+        reset: watchReset,
     },
 
     // - Upload
 
+    pathForFile,
+    listZipItems,
+    pathOrZipItemSize,
     pendingUploads,
-    setPendingUploadCollection,
-    setPendingUploadFiles,
-
-    // -
-
-    getElectronFilesFromGoogleZip,
-    getDirFiles,
+    setPendingUploads,
+    markUploadedFiles,
+    markUploadedZipItems,
+    clearPendingUploads,
 });

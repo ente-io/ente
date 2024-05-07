@@ -1,5 +1,3 @@
-import type { ElectronFile } from "./types/file";
-
 /**
  * The two parts of a file name - the name itself, and an (optional) extension.
  *
@@ -23,6 +21,23 @@ export const nameAndExtension = (fileName: string): FileNameComponents => {
     if (i == 0) return [fileName, undefined];
     // Both components present, just omit the dot.
     return [fileName.slice(0, i), fileName.slice(i + 1)];
+};
+
+/**
+ * If the file name or path has an extension, return a lowercased version of it.
+ *
+ * This is handy when comparing the extension to a known set without worrying
+ * about case sensitivity.
+ *
+ * See {@link nameAndExtension} for its more generic sibling.
+ */
+export const lowercaseExtension = (
+    fileNameOrPath: string,
+): string | undefined => {
+    // We rely on the implementation of nameAndExtension using lastIndexOf to
+    // allow us to also work on paths.
+    const [, ext] = nameAndExtension(fileNameOrPath);
+    return ext?.toLowerCase();
 };
 
 /**
@@ -65,20 +80,3 @@ export const dirname = (path: string) => {
     }
     return pathComponents.join("/");
 };
-
-export function getFileNameSize(file: File | ElectronFile) {
-    return `${file.name}_${convertBytesToHumanReadable(file.size)}`;
-}
-
-export function convertBytesToHumanReadable(
-    bytes: number,
-    precision = 2,
-): string {
-    if (bytes === 0 || isNaN(bytes)) {
-        return "0 MB";
-    }
-
-    const i = Math.floor(Math.log(bytes) / Math.log(1024));
-    const sizes = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
-    return (bytes / Math.pow(1024, i)).toFixed(precision) + " " + sizes[i];
-}

@@ -140,7 +140,7 @@ class CollectionActions {
         req,
       );
       logger.finest("adding files to share to new album");
-      await collectionsService.addToCollection(collection.id, files);
+      await collectionsService.addOrCopyToCollection(collection.id, files);
       logger.finest("creating public link for the newly created album");
       await CollectionsService.instance.createShareUrl(collection);
       await dialog.hide();
@@ -439,7 +439,12 @@ class CollectionActions {
   ) async {
     final List<EnteFile> files =
         await FilesDB.instance.getAllFilesCollection(collection.id);
-    await moveFilesFromCurrentCollection(bContext, collection, files);
+    await moveFilesFromCurrentCollection(
+      bContext,
+      collection,
+      files,
+      isHidden: collection.isHidden() && !collection.isDefaultHidden(),
+    );
     // collection should be empty on server now
     await collectionsService.trashEmptyCollection(collection);
   }

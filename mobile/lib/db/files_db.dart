@@ -455,6 +455,7 @@ class FilesDB {
   }
 
   Future<int> insert(EnteFile file) async {
+    _logger.info("Inserting $file");
     final db = await instance.database;
     return db.insert(
       filesTable,
@@ -504,6 +505,31 @@ class FilesDB {
       ids.add(result[columnUploadedFileID] as int);
     }
     return ids;
+  }
+
+  Future<(Set<int>, Map<String, int>)> getUploadAndHash(
+    int collectionID,
+  ) async {
+    final db = await instance.database;
+    final results = await db.query(
+      filesTable,
+      columns: [columnUploadedFileID, columnHash],
+      where:
+          '$columnCollectionID = ? AND ($columnUploadedFileID IS NOT NULL AND $columnUploadedFileID IS NOT -1)',
+      whereArgs: [
+        collectionID,
+      ],
+    );
+    final ids = <int>{};
+    final hash = <String, int>{};
+    for (final result in results) {
+      ids.add(result[columnUploadedFileID] as int);
+      if (result[columnHash] != null) {
+        hash[result[columnHash] as String] =
+            result[columnUploadedFileID] as int;
+      }
+    }
+    return (ids, hash);
   }
 
   Future<BackedUpFileIDs> getBackedUpIDs() async {
@@ -970,6 +996,29 @@ class FilesDB {
     );
 
     return convertToFiles(rows);
+  }
+
+  Future<Map<String, EnteFile>>
+      getUserOwnedFilesWithSameHashForGivenListOfFiles(
+    List<EnteFile> files,
+    int userID,
+  ) async {
+    final db = await sqliteAsyncDB;
+    final List<String> hashes = [];
+    for (final file in files) {
+      if (file.hash != null && file.hash != '') {
+        hashes.add(file.hash!);
+      }
+    }
+    if (hashes.isEmpty) {
+      return {};
+    }
+    final inParam = hashes.map((e) => "'$e'").join(',');
+    final rows = await db.execute('''
+      SELECT * FROM $filesTable WHERE $columnHash IN ($inParam) AND $columnOwnerID = $userID;
+      ''');
+    final matchedFiles = convertToFiles(rows);
+    return Map.fromIterable(matchedFiles, key: (e) => e.hash);
   }
 
   Future<List<EnteFile>> getUploadedFilesWithHashes(

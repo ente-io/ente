@@ -1,3 +1,5 @@
+import { FILE_TYPE } from "@/media/file-type";
+import { decodeLivePhoto } from "@/media/live-photo";
 import { openCache, type BlobCache } from "@/next/blob-cache";
 import log from "@/next/log";
 import { APPS } from "@ente/shared/apps/constants";
@@ -5,13 +7,12 @@ import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
 import { CustomError } from "@ente/shared/error";
 import { Events, eventBus } from "@ente/shared/events";
+import { isPlaybackPossible } from "@ente/shared/media/video-playback";
 import { Remote } from "comlink";
-import { FILE_TYPE } from "constants/file";
+import isElectron from "is-electron";
+import * as ffmpeg from "services/ffmpeg";
 import { EnteFile } from "types/file";
-import {
-    generateStreamFromArrayBuffer,
-    getRenderableFileURL,
-} from "utils/file";
+import { generateStreamFromArrayBuffer, getRenderableImage } from "utils/file";
 import { PhotosDownloadClient } from "./clients/photos";
 import { PublicAlbumsDownloadClient } from "./clients/publicAlbums";
 
@@ -149,7 +150,7 @@ class DownloadManagerImpl {
         this.ensureInitialized();
 
         const key = file.id.toString();
-        const cached = await this.thumbnailCache.get(key);
+        const cached = await this.thumbnailCache?.get(key);
         if (cached) return new Uint8Array(await cached.arrayBuffer());
         if (localOnly) return null;
 
@@ -303,7 +304,7 @@ class DownloadManagerImpl {
         if (cachedBlob) res = new Response(cachedBlob);
         else {
             res = await this.downloadClient.downloadFileStream(file);
-            this?.fileCache.put(cacheKey, await res.blob());
+            this.fileCache?.put(cacheKey, await res.blob());
         }
         const reader = res.body.getReader();
 
@@ -465,5 +466,157 @@ function createDownloadClient(
     } else {
         const { token } = tokens;
         return new PhotosDownloadClient(token, timeout);
+    }
+}
+
+async function getRenderableFileURL(
+    file: EnteFile,
+    fileBlob: Blob,
+    originalFileURL: string,
+    forceConvert: boolean,
+): Promise<SourceURLs> {
+    let srcURLs: SourceURLs["url"];
+    switch (file.metadata.fileType) {
+        case FILE_TYPE.IMAGE: {
+            const convertedBlob = await getRenderableImage(
+                file.metadata.title,
+                fileBlob,
+            );
+            const convertedURL = getFileObjectURL(
+                originalFileURL,
+                fileBlob,
+                convertedBlob,
+            );
+            srcURLs = convertedURL;
+            break;
+        }
+        case FILE_TYPE.LIVE_PHOTO: {
+            srcURLs = await getRenderableLivePhotoURL(
+                file,
+                fileBlob,
+                forceConvert,
+            );
+            break;
+        }
+        case FILE_TYPE.VIDEO: {
+            const convertedBlob = await getPlayableVideo(
+                file.metadata.title,
+                fileBlob,
+                forceConvert,
+            );
+            const convertedURL = getFileObjectURL(
+                originalFileURL,
+                fileBlob,
+                convertedBlob,
+            );
+            srcURLs = convertedURL;
+            break;
+        }
+        default: {
+            srcURLs = originalFileURL;
+            break;
+        }
+    }
+
+    let isOriginal: boolean;
+    if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
+        isOriginal = false;
+    } else {
+        isOriginal = (srcURLs as string) === (originalFileURL as string);
+    }
+
+    return {
+        url: srcURLs,
+        isOriginal,
+        isRenderable:
+            file.metadata.fileType !== FILE_TYPE.LIVE_PHOTO && !!srcURLs,
+        type:
+            file.metadata.fileType === FILE_TYPE.LIVE_PHOTO
+                ? "livePhoto"
+                : "normal",
+    };
+}
+
+const getFileObjectURL = (
+    originalFileURL: string,
+    originalBlob: Blob,
+    convertedBlob: Blob,
+) => {
+    const convertedURL = convertedBlob
+        ? convertedBlob === originalBlob
+            ? originalFileURL
+            : URL.createObjectURL(convertedBlob)
+        : null;
+    return convertedURL;
+};
+
+async function getRenderableLivePhotoURL(
+    file: EnteFile,
+    fileBlob: Blob,
+    forceConvert: boolean,
+): Promise<LivePhotoSourceURL> {
+    const livePhoto = await decodeLivePhoto(file.metadata.title, fileBlob);
+
+    const getRenderableLivePhotoImageURL = async () => {
+        try {
+            const imageBlob = new Blob([livePhoto.imageData]);
+            const convertedImageBlob = await getRenderableImage(
+                livePhoto.imageFileName,
+                imageBlob,
+            );
+
+            return URL.createObjectURL(convertedImageBlob);
+        } catch (e) {
+            //ignore and return null
+            return null;
+        }
+    };
+
+    const getRenderableLivePhotoVideoURL = async () => {
+        try {
+            const videoBlob = new Blob([livePhoto.videoData]);
+            const convertedVideoBlob = await getPlayableVideo(
+                livePhoto.videoFileName,
+                videoBlob,
+                forceConvert,
+                true,
+            );
+            return URL.createObjectURL(convertedVideoBlob);
+        } catch (e) {
+            //ignore and return null
+            return null;
+        }
+    };
+
+    return {
+        image: getRenderableLivePhotoImageURL,
+        video: getRenderableLivePhotoVideoURL,
+    };
+}
+
+async function getPlayableVideo(
+    videoNameTitle: string,
+    videoBlob: Blob,
+    forceConvert = false,
+    runOnWeb = false,
+) {
+    try {
+        const isPlayable = await isPlaybackPossible(
+            URL.createObjectURL(videoBlob),
+        );
+        if (isPlayable && !forceConvert) {
+            return videoBlob;
+        } else {
+            if (!forceConvert && !runOnWeb && !isElectron()) {
+                return null;
+            }
+            // TODO(MR): This might not work for very large (~ GB) videos. Test.
+            log.info(`Converting video ${videoNameTitle} to mp4`);
+            const convertedVideoData = await ffmpeg.convertToMP4(videoBlob);
+            return new Blob([convertedVideoData]);
+        }
+    } catch (e) {
+        log.error("Video conversion failed", e);
+        return null;
     }
 }
