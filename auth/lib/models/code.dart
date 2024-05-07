@@ -26,6 +26,9 @@ class Code {
 
   bool get isPinned => display.pinned;
 
+  final Object? err;
+  bool get hasError => err != null;
+
   Code(
     this.account,
     this.issuer,
@@ -38,7 +41,24 @@ class Code {
     this.rawData, {
     this.generatedID,
     required this.display,
+    this.err,
   });
+
+  factory Code.withError(Object error) {
+    return Code(
+      "",
+      "",
+      0,
+      0,
+      "",
+      Algorithm.sha1,
+      Type.totp,
+      0,
+      "",
+      err: error,
+      display: CodeDisplay(),
+    );
+  }
 
   Code copyWith({
     String? account,
@@ -123,7 +143,7 @@ class Code {
       if (rawData.contains("#")) {
         return Code.fromOTPAuthUrl(rawData.replaceAll("#", '%23'));
       } else {
-        rethrow;
+        return Code.withError(e);
       }
     }
   }

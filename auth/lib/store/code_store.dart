@@ -31,22 +31,22 @@ class CodeStore {
     bool hasError = false;
 
     for (final entity in entities) {
-      try {
-        final decodeJson = jsonDecode(entity.rawData);
+      final decodeJson = jsonDecode(entity.rawData);
 
-        late Code code;
-        if (decodeJson is String && decodeJson.startsWith('otpauth://')) {
-          code = Code.fromOTPAuthUrl(decodeJson);
-        } else {
-          code = Code.fromExportJson(decodeJson);
-        }
-        code.generatedID = entity.generatedID;
-        code.hasSynced = entity.hasSynced;
-        codes.add(code);
-      } catch (e) {
-        hasError = true;
-        _logger.severe("Could not parse code", e);
+      late Code code;
+      if (decodeJson is String && decodeJson.startsWith('otpauth://')) {
+        code = Code.fromOTPAuthUrl(decodeJson);
+      } else {
+        code = Code.fromExportJson(decodeJson);
       }
+      if (code.hasError) {
+        hasError = true;
+        _logger.severe("Could not parse code", code.err);
+        continue;
+      }
+      code.generatedID = entity.generatedID;
+      code.hasSynced = entity.hasSynced;
+      codes.add(code);
     }
 
     // sort codes by issuer,account
