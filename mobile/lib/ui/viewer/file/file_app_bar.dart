@@ -11,7 +11,6 @@ import 'package:photos/models/file/file_type.dart';
 import 'package:photos/models/file/trash_file.dart';
 import "package:photos/models/metadata/common_keys.dart";
 import 'package:photos/models/selected_files.dart';
-import "package:photos/service_locator.dart";
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/hidden_service.dart';
 import 'package:photos/ui/collections/collection_action_sheet.dart';
