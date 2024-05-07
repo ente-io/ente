@@ -1,6 +1,10 @@
 import log from "@/next/log";
+import { SpaceBetweenFlex } from "@ente/shared/components/Container";
 import { SUPPORT_EMAIL } from "@ente/shared/constants/urls";
-import { Link, Stack } from "@mui/material";
+import Close from "@mui/icons-material/Close";
+import { IconButton, Link, Stack } from "@mui/material";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
 import { PLAN_PERIOD } from "constants/gallery";
 import { t } from "i18next";
 import { AppContext } from "pages/_app";
@@ -12,6 +16,7 @@ import { Plan } from "types/billing";
 import { SetLoading } from "types/gallery";
 import {
     getLocalUserSubscription,
+    hasAddOnBonus,
     hasMobileSubscription,
     hasPaidSubscription,
     hasStripeSubscription,
@@ -22,10 +27,13 @@ import {
     planForSubscription,
     updateSubscription,
 } from "utils/billing";
+import { bytesInGB } from "utils/units";
 import { getLocalUserDetails } from "utils/user";
 import { getTotalFamilyUsage, isPartOfFamily } from "utils/user/family";
-import FreeSubscriptionPlanSelectorCard from "./free";
-import PaidSubscriptionPlanSelectorCard from "./paid";
+import { ManageSubscription } from "./manageSubscription";
+import { PeriodToggler } from "./periodToggler";
+import Plans from "./plans";
+import { BFAddOnRow } from "./plans/BfAddOnRow";
 
 interface Props {
     closeModal: any;
@@ -201,3 +209,154 @@ function PlanSelectorCard(props: Props) {
 }
 
 export default PlanSelectorCard;
+
+function FreeSubscriptionPlanSelectorCard({
+    plansResponse,
+    subscription,
+    bonusData,
+    closeModal,
+    setLoading,
+    planPeriod,
+    togglePeriod,
+    onPlanSelect,
+}) {
+    return (
+        <>
+            <Typography variant="h3" fontWeight={"bold"}>
+                {t("CHOOSE_PLAN")}
+            </Typography>
+
+            <Box>
+                <Stack spacing={3}>
+                    <Box>
+                        <PeriodToggler
+                            planPeriod={planPeriod}
+                            togglePeriod={togglePeriod}
+                        />
+                        <Typography variant="small" mt={0.5} color="text.muted">
+                            {t("TWO_MONTHS_FREE")}
+                        </Typography>
+                    </Box>
+                    <Plans
+                        plansResponse={plansResponse}
+                        planPeriod={planPeriod}
+                        onPlanSelect={onPlanSelect}
+                        subscription={subscription}
+                        bonusData={bonusData}
+                        closeModal={closeModal}
+                    />
+                    {hasAddOnBonus(bonusData) && (
+                        <BFAddOnRow
+                            bonusData={bonusData}
+                            closeModal={closeModal}
+                        />
+                    )}
+                    {hasAddOnBonus(bonusData) && (
+                        <ManageSubscription
+                            subscription={subscription}
+                            bonusData={bonusData}
+                            closeModal={closeModal}
+                            setLoading={setLoading}
+                        />
+                    )}
+                </Stack>
+            </Box>
+        </>
+    );
+}
+
+function PaidSubscriptionPlanSelectorCard({
+    plansResponse,
+    subscription,
+    bonusData,
+    closeModal,
+    usage,
+    planPeriod,
+    togglePeriod,
+    onPlanSelect,
+    setLoading,
+}) {
+    return (
+        <>
+            <Box pl={1.5} py={0.5}>
+                <SpaceBetweenFlex>
+                    <Box>
+                        <Typography variant="h3" fontWeight={"bold"}>
+                            {t("SUBSCRIPTION")}
+                        </Typography>
+                        <Typography variant="small" color={"text.muted"}>
+                            {bytesInGB(subscription.storage, 2)}{" "}
+                            {t("storage_unit.gb")}
+                        </Typography>
+                    </Box>
+                    <IconButton onClick={closeModal} color="secondary">
+                        <Close />
+                    </IconButton>
+                </SpaceBetweenFlex>
+            </Box>
+
+            <Box px={1.5}>
+                <Typography color={"text.muted"} fontWeight={"bold"}>
+                    <Trans
+                        i18nKey="CURRENT_USAGE"
+                        values={{
+                            usage: `${bytesInGB(usage, 2)} ${t("storage_unit.gb")}`,
+                        }}
+                    />
+                </Typography>
+            </Box>
+
+            <Box>
+                <Stack
+                    spacing={3}
+                    border={(theme) => `1px solid ${theme.palette.divider}`}
+                    p={1.5}
+                    borderRadius={(theme) => `${theme.shape.borderRadius}px`}
+                >
+                    <Box>
+                        <PeriodToggler
+                            planPeriod={planPeriod}
+                            togglePeriod={togglePeriod}
+                        />
+                        <Typography variant="small" mt={0.5} color="text.muted">
+                            {t("TWO_MONTHS_FREE")}
+                        </Typography>
+                    </Box>
+                    <Plans
+                        plansResponse={plansResponse}
+                        planPeriod={planPeriod}
+                        onPlanSelect={onPlanSelect}
+                        subscription={subscription}
+                        bonusData={bonusData}
+                        closeModal={closeModal}
+                    />
+                </Stack>
+
+                <Box py={1} px={1.5}>
+                    <Typography color={"text.muted"}>
+                        {!isSubscriptionCancelled(subscription)
+                            ? t("RENEWAL_ACTIVE_SUBSCRIPTION_STATUS", {
+                                  date: subscription.expiryTime,
+                              })
+                            : t("RENEWAL_CANCELLED_SUBSCRIPTION_STATUS", {
+                                  date: subscription.expiryTime,
+                              })}
+                    </Typography>
+                    {hasAddOnBonus(bonusData) && (
+                        <BFAddOnRow
+                            bonusData={bonusData}
+                            closeModal={closeModal}
+                        />
+                    )}
+                </Box>
+            </Box>
+
+            <ManageSubscription
+                subscription={subscription}
+                bonusData={bonusData}
+                closeModal={closeModal}
+                setLoading={setLoading}
+            />
+        </>
+    );
+}
