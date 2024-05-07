@@ -592,7 +592,7 @@ class ClusterFeedbackService {
     double maxMedianDistance = 0.62,
     double goodMedianDistance = 0.55,
     double maxMeanDistance = 0.65,
-    double goodMeanDistance = 0.50,
+    double goodMeanDistance = 0.40,
   }) async {
     final w = (kDebugMode ? EnteWatch('getSuggestions') : null)?..start();
     // Get all the cluster data
