@@ -176,32 +176,42 @@ function PlanSelectorCard(props: Props) {
         }
     }
 
+    const { closeModal, setLoading } = props;
+
+    const commonCardData = {
+        subscription,
+        bonusData,
+        closeModal,
+        planPeriod,
+        togglePeriod,
+        setLoading,
+    };
+
+    const plansList = (
+        <Plans
+            plansResponse={plansResponse}
+            planPeriod={planPeriod}
+            onPlanSelect={onPlanSelect}
+            subscription={subscription}
+            bonusData={bonusData}
+            closeModal={closeModal}
+        />
+    );
+
     return (
         <>
             <Stack spacing={3} p={1.5}>
                 {hasPaidSubscription(subscription) ? (
                     <PaidSubscriptionPlanSelectorCard
-                        plansResponse={plansResponse}
-                        subscription={subscription}
-                        bonusData={bonusData}
-                        closeModal={props.closeModal}
-                        planPeriod={planPeriod}
-                        togglePeriod={togglePeriod}
-                        onPlanSelect={onPlanSelect}
-                        setLoading={props.setLoading}
+                        {...commonCardData}
                         usage={usage}
-                    />
+                    >
+                        {plansList}
+                    </PaidSubscriptionPlanSelectorCard>
                 ) : (
-                    <FreeSubscriptionPlanSelectorCard
-                        plansResponse={plansResponse}
-                        subscription={subscription}
-                        bonusData={bonusData}
-                        closeModal={props.closeModal}
-                        setLoading={props.setLoading}
-                        planPeriod={planPeriod}
-                        togglePeriod={togglePeriod}
-                        onPlanSelect={onPlanSelect}
-                    />
+                    <FreeSubscriptionPlanSelectorCard {...commonCardData}>
+                        {plansList}
+                    </FreeSubscriptionPlanSelectorCard>
                 )}
             </Stack>
         </>
@@ -211,14 +221,13 @@ function PlanSelectorCard(props: Props) {
 export default PlanSelectorCard;
 
 function FreeSubscriptionPlanSelectorCard({
-    plansResponse,
+    children,
     subscription,
     bonusData,
     closeModal,
     setLoading,
     planPeriod,
     togglePeriod,
-    onPlanSelect,
 }) {
     return (
         <>
@@ -237,14 +246,7 @@ function FreeSubscriptionPlanSelectorCard({
                             {t("TWO_MONTHS_FREE")}
                         </Typography>
                     </Box>
-                    <Plans
-                        plansResponse={plansResponse}
-                        planPeriod={planPeriod}
-                        onPlanSelect={onPlanSelect}
-                        subscription={subscription}
-                        bonusData={bonusData}
-                        closeModal={closeModal}
-                    />
+                    {children}
                     {hasAddOnBonus(bonusData) && (
                         <BFAddOnRow
                             bonusData={bonusData}
@@ -266,14 +268,13 @@ function FreeSubscriptionPlanSelectorCard({
 }
 
 function PaidSubscriptionPlanSelectorCard({
-    plansResponse,
+    children,
     subscription,
     bonusData,
     closeModal,
     usage,
     planPeriod,
     togglePeriod,
-    onPlanSelect,
     setLoading,
 }) {
     return (
@@ -322,14 +323,7 @@ function PaidSubscriptionPlanSelectorCard({
                             {t("TWO_MONTHS_FREE")}
                         </Typography>
                     </Box>
-                    <Plans
-                        plansResponse={plansResponse}
-                        planPeriod={planPeriod}
-                        onPlanSelect={onPlanSelect}
-                        subscription={subscription}
-                        bonusData={bonusData}
-                        closeModal={closeModal}
-                    />
+                    {children}
                 </Stack>
 
                 <Box py={1} px={1.5}>
