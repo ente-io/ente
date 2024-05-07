@@ -447,7 +447,6 @@
     "DOWNLOAD_LOGS_MESSAGE": "<p>Cela va télécharger les journaux de débug, que vous pourrez nosu envoyer par e-mail pour nous aider à résoudre votre problàme .</p><p>Veuillez noter que les noms de fichiers seront inclus .</p>",
     "CHANGE_FOLDER": "Modifier le dossier",
     "TWO_MONTHS_FREE": "Obtenir 2 mois gratuits sur les plans annuels",
-    "GB": "Go",
     "POPULAR": "Populaire",
     "FREE_PLAN_OPTION_LABEL": "Poursuivre avec la version d'essai gratuite",
     "FREE_PLAN_DESCRIPTION": "1 Go pour 1 an",
@@ -494,12 +493,12 @@
     "EXPORT_DIRECTORY_DOES_NOT_EXIST": "Dossier d'export invalide",
     "EXPORT_DIRECTORY_DOES_NOT_EXIST_MESSAGE": "<p> Le dossier d'export que vous avez sélectionné n'existe pas </p><p>Veuillez sélectionner un dossier valide</p>",
     "SUBSCRIPTION_VERIFICATION_ERROR": "Échec de la vérification de l'abonnement",
-    "STORAGE_UNITS": {
-        "B": "o",
-        "KB": "Ko",
-        "MB": "Mo",
-        "GB": "Go",
-        "TB": "To"
+    "storage_unit": {
+        "b": "o",
+        "kb": "Ko",
+        "mb": "Mo",
+        "gb": "Go",
+        "tb": "To"
     },
     "AFTER_TIME": {
         "HOUR": "dans une heure",

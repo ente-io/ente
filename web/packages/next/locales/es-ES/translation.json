@@ -447,7 +447,6 @@
     "DOWNLOAD_LOGS_MESSAGE": "<p>Esto descargará los registros de depuración, que puede enviarnos por correo electrónico para ayudarnos a depurar su problema.</p><p> Tenga en cuenta que los nombres de los archivos se incluirán para ayudar al seguimiento de problemas con archivos específicos. </p>",
     "CHANGE_FOLDER": "Cambiar carpeta",
     "TWO_MONTHS_FREE": "Obtén 2 meses gratis en planes anuales",
-    "GB": "GB",
     "POPULAR": "Popular",
     "FREE_PLAN_OPTION_LABEL": "Continuar con el plan gratuito",
     "FREE_PLAN_DESCRIPTION": "1 GB por 1 año",
@@ -494,12 +493,12 @@
     "EXPORT_DIRECTORY_DOES_NOT_EXIST": "Archivo de exportación inválido",
     "EXPORT_DIRECTORY_DOES_NOT_EXIST_MESSAGE": "<p>El directorio de exportación seleccionado no existe.</p><p> Por favor, seleccione un directorio válido.</p>",
     "SUBSCRIPTION_VERIFICATION_ERROR": "Falló la verificación de la suscripción",
-    "STORAGE_UNITS": {
-        "B": "B",
-        "KB": "KB",
-        "MB": "MB",
-        "GB": "GB",
-        "TB": "TB"
+    "storage_unit": {
+        "b": "B",
+        "kb": "KB",
+        "mb": "MB",
+        "gb": "GB",
+        "tb": "TB"
     },
     "AFTER_TIME": {
         "HOUR": "después de una hora",

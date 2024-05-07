@@ -447,7 +447,6 @@
     "DOWNLOAD_LOGS_MESSAGE": "<p>Dit zal logboeken downloaden, die u ons kunt e-mailen om te helpen bij het debuggen van uw probleem.</p><p> Houd er rekening mee dat bestandsnamen worden opgenomen om problemen met specifieke bestanden bij te houden. </p>",
     "CHANGE_FOLDER": "Map wijzigen",
     "TWO_MONTHS_FREE": "Krijg 2 maanden gratis op jaarlijkse abonnementen",
-    "GB": "GB",
     "POPULAR": "Populair",
     "FREE_PLAN_OPTION_LABEL": "Doorgaan met gratis account",
     "FREE_PLAN_DESCRIPTION": "1 GB voor 1 jaar",
@@ -494,12 +493,12 @@
     "EXPORT_DIRECTORY_DOES_NOT_EXIST": "Ongeldige export map",
     "EXPORT_DIRECTORY_DOES_NOT_EXIST_MESSAGE": "<p>De export map die u heeft geselecteerd bestaat niet.</p><p> Selecteer een geldige map.</p>",
     "SUBSCRIPTION_VERIFICATION_ERROR": "Abonnementsverificatie mislukt",
-    "STORAGE_UNITS": {
-        "B": "B",
-        "KB": "KB",
-        "MB": "MB",
-        "GB": "GB",
-        "TB": "TB"
+    "storage_unit": {
+        "b": "B",
+        "kb": "KB",
+        "mb": "MB",
+        "gb": "GB",
+        "tb": "TB"
     },
     "AFTER_TIME": {
         "HOUR": "na één uur",

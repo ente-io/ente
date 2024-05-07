@@ -32,7 +32,8 @@ export default function PaidSubscriptionPlanSelectorCard({
                             {t("SUBSCRIPTION")}
                         </Typography>
                         <Typography variant="small" color={"text.muted"}>
-                            {bytesInGB(subscription.storage, 2)} {t("GB")}
+                            {bytesInGB(subscription.storage, 2)}{" "}
+                            {t("storage_unit.gb")}
                         </Typography>
                     </Box>
                     <IconButton onClick={closeModal} color="secondary">
@@ -46,7 +47,7 @@ export default function PaidSubscriptionPlanSelectorCard({
                     <Trans
                         i18nKey="CURRENT_USAGE"
                         values={{
-                            usage: `${bytesInGB(usage, 2)} ${t("GB")}`,
+                            usage: `${bytesInGB(usage, 2)} ${t("storage_unit.gb")}`,
                         }}
                     />
                 </Typography>

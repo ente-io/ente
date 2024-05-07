@@ -447,7 +447,6 @@
     "DOWNLOAD_LOGS_MESSAGE": "<p>Isto irá baixar os logs de depuração, que você pode enviar para nós para ajudar a depurar seu problema.</p><p> Por favor, note que os nomes de arquivos serão incluídos para ajudar a rastrear problemas com arquivos específicos. </p>",
     "CHANGE_FOLDER": "Alterar pasta",
     "TWO_MONTHS_FREE": "Obtenha 2 meses gratuitos em planos anuais",
-    "GB": "GB",
     "POPULAR": "Popular",
     "FREE_PLAN_OPTION_LABEL": "Continuar com teste gratuito",
     "FREE_PLAN_DESCRIPTION": "1 GB por 1 ano",
@@ -494,12 +493,12 @@
     "EXPORT_DIRECTORY_DOES_NOT_EXIST": "Diretório de exportação inválido",
     "EXPORT_DIRECTORY_DOES_NOT_EXIST_MESSAGE": "<p>O diretório de exportação que você selecionou não existe.</p><p> Por favor, selecione um diretório válido.</p>",
     "SUBSCRIPTION_VERIFICATION_ERROR": "Falha na verificação de assinatura",
-    "STORAGE_UNITS": {
-        "B": "B",
-        "KB": "KB",
-        "MB": "MB",
-        "GB": "GB",
-        "TB": "TB"
+    "storage_unit": {
+        "b": "B",
+        "kb": "KB",
+        "mb": "MB",
+        "gb": "GB",
+        "tb": "TB"
     },
     "AFTER_TIME": {
         "HOUR": "após uma hora",

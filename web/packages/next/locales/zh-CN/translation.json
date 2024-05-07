@@ -447,7 +447,6 @@
     "DOWNLOAD_LOGS_MESSAGE": "<p>这将下载调试日志，您可以发送电子邮件给我们来帮助调试您的问题。</p><p> 请注意文件名将被包含，以帮助跟踪特定文件中的问题。 </p>",
     "CHANGE_FOLDER": "更改文件夹",
     "TWO_MONTHS_FREE": "在年度计划上免费获得 2 个月",
-    "GB": "GB",
     "POPULAR": "流行的",
     "FREE_PLAN_OPTION_LABEL": "继续免费试用",
     "FREE_PLAN_DESCRIPTION": "1 GB 1年",
@@ -494,12 +493,12 @@
     "EXPORT_DIRECTORY_DOES_NOT_EXIST": "无效的导出目录",
     "EXPORT_DIRECTORY_DOES_NOT_EXIST_MESSAGE": "<p>您选择的导出目录不存在。</p><p> 请选择一个有效的目录。</p>",
     "SUBSCRIPTION_VERIFICATION_ERROR": "订阅验证失败",
-    "STORAGE_UNITS": {
-        "B": "B",
-        "KB": "KB",
-        "MB": "MB",
-        "GB": "GB",
-        "TB": "TB"
+    "storage_unit": {
+        "b": "B",
+        "kb": "KB",
+        "mb": "MB",
+        "gb": "GB",
+        "tb": "TB"
     },
     "AFTER_TIME": {
         "HOUR": "1小时后",

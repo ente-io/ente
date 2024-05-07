@@ -67,7 +67,7 @@ export function PlanRow({
                 </Typography>
                 <FlexWrapper flexWrap={"wrap"} gap={1}>
                     <Typography variant="h3" color="text.muted">
-                        {t("GB")}
+                        {t("storage_unit.gb")}
                     </Typography>
                     {popular && !hasPaidSubscription(subscription) && (
                         <Badge>{t("POPULAR")}</Badge>
