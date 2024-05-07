@@ -132,7 +132,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Please talk to ${providerName} support if you were charged";
 
   static String m38(endDate) =>
-      "Free trial valid till ${endDate}.\nYou can choose a paid plan afterwards.";
+      "Free trial valid till ${endDate}.\nYou can purchase a paid plan afterwards.";
 
   static String m39(toEmail) => "Please email us at ${toEmail}";
 

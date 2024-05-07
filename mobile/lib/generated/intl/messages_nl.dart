@@ -368,6 +368,14 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Verificatie mislukt, probeer het opnieuw"),
         "authenticationSuccessful":
             MessageLookupByLibrary.simpleMessage("Verificatie geslaagd!"),
+        "autoCastDialogBody": MessageLookupByLibrary.simpleMessage(
+            "Je zult de beschikbare Cast apparaten hier zien."),
+        "autoCastiOSPermission": MessageLookupByLibrary.simpleMessage(
+            "Zorg ervoor dat lokale netwerkrechten zijn ingeschakeld voor de Ente Photos app, in Instellingen."),
+        "autoPair":
+            MessageLookupByLibrary.simpleMessage("Automatisch koppelen"),
+        "autoPairDesc": MessageLookupByLibrary.simpleMessage(
+            "Automatisch koppelen werkt alleen met apparaten die Chromecast ondersteunen."),
         "available": MessageLookupByLibrary.simpleMessage("Beschikbaar"),
         "backedUpFolders":
             MessageLookupByLibrary.simpleMessage("Back-up mappen"),
@@ -399,6 +407,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "cannotAddMorePhotosAfterBecomingViewer": m9,
         "cannotDeleteSharedFiles": MessageLookupByLibrary.simpleMessage(
             "Kan gedeelde bestanden niet verwijderen"),
+        "castIPMismatchBody": MessageLookupByLibrary.simpleMessage(
+            "Zorg ervoor dat je op hetzelfde netwerk zit als de tv."),
+        "castIPMismatchTitle":
+            MessageLookupByLibrary.simpleMessage("Album casten mislukt"),
         "castInstruction": MessageLookupByLibrary.simpleMessage(
             "Bezoek cast.ente.io op het apparaat dat u wilt koppelen.\n\nVoer de code hieronder in om het album op uw TV af te spelen."),
         "centerPoint": MessageLookupByLibrary.simpleMessage("Middelpunt"),
@@ -473,6 +485,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Bevestig herstelsleutel"),
         "confirmYourRecoveryKey":
             MessageLookupByLibrary.simpleMessage("Bevestig herstelsleutel"),
+        "connectToDevice": MessageLookupByLibrary.simpleMessage(
+            "Verbinding maken met apparaat"),
         "contactFamilyAdmin": m12,
         "contactSupport":
             MessageLookupByLibrary.simpleMessage("Contacteer klantenservice"),
@@ -750,6 +764,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "filesBackedUpInAlbum": m23,
         "filesDeleted":
             MessageLookupByLibrary.simpleMessage("Bestanden verwijderd"),
+        "filesSavedToGallery": MessageLookupByLibrary.simpleMessage(
+            "Bestand opgeslagen in galerij"),
         "flip": MessageLookupByLibrary.simpleMessage("Omdraaien"),
         "forYourMemories":
             MessageLookupByLibrary.simpleMessage("voor uw herinneringen"),
@@ -938,6 +954,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "manageParticipants": MessageLookupByLibrary.simpleMessage("Beheren"),
         "manageSubscription":
             MessageLookupByLibrary.simpleMessage("Abonnement beheren"),
+        "manualPairDesc": MessageLookupByLibrary.simpleMessage(
+            "Koppelen met de PIN werkt met elk scherm waarop je jouw album wilt zien."),
         "map": MessageLookupByLibrary.simpleMessage("Kaart"),
         "maps": MessageLookupByLibrary.simpleMessage("Kaarten"),
         "mastodon": MessageLookupByLibrary.simpleMessage("Mastodon"),
@@ -974,6 +992,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "no": MessageLookupByLibrary.simpleMessage("Nee"),
         "noAlbumsSharedByYouYet": MessageLookupByLibrary.simpleMessage(
             "Nog geen albums gedeeld door jou"),
+        "noDeviceFound":
+            MessageLookupByLibrary.simpleMessage("Geen apparaat gevonden"),
         "noDeviceLimit": MessageLookupByLibrary.simpleMessage("Geen"),
         "noDeviceThatCanBeDeleted": MessageLookupByLibrary.simpleMessage(
             "Je hebt geen bestanden op dit apparaat die verwijderd kunnen worden"),
@@ -1023,6 +1043,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "orPickAnExistingOne":
             MessageLookupByLibrary.simpleMessage("Of kies een bestaande"),
         "pair": MessageLookupByLibrary.simpleMessage("Koppelen"),
+        "pairWithPin": MessageLookupByLibrary.simpleMessage("Koppelen met PIN"),
+        "pairingComplete":
+            MessageLookupByLibrary.simpleMessage("Koppeling voltooid"),
         "passkey": MessageLookupByLibrary.simpleMessage("Passkey"),
         "passkeyAuthTitle":
             MessageLookupByLibrary.simpleMessage("Passkey verificatie"),
@@ -1383,6 +1406,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "sparkleSuccess": MessageLookupByLibrary.simpleMessage("✨ Succes"),
         "startBackup": MessageLookupByLibrary.simpleMessage("Back-up starten"),
         "status": MessageLookupByLibrary.simpleMessage("Status"),
+        "stopCastingBody":
+            MessageLookupByLibrary.simpleMessage("Wil je stoppen met casten?"),
+        "stopCastingTitle":
+            MessageLookupByLibrary.simpleMessage("Casten stoppen"),
         "storage": MessageLookupByLibrary.simpleMessage("Opslagruimte"),
         "storageBreakupFamily": MessageLookupByLibrary.simpleMessage("Familie"),
         "storageBreakupYou": MessageLookupByLibrary.simpleMessage("Jij"),
