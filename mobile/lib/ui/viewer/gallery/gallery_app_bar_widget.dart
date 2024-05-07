@@ -738,34 +738,38 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
 
     // stop any existing cast session
     gw.revokeAllTokens().ignore();
-    final result = await showDialog<ButtonAction?>(
-      context: context,
-      barrierDismissible: true,
-      builder: (BuildContext context) {
-        return const CastChooseDialog();
-      },
-    );
-    if (result == null) {
-      return;
-    }
-    // wait to allow the dialog to close
-    await Future.delayed(const Duration(milliseconds: 100));
-    if (result == ButtonAction.first) {
-      await showDialog(
+    if (!Platform.isAndroid) {
+      await _pairWithPin(gw, '');
+    } else {
+      final result = await showDialog<ButtonAction?>(
         context: context,
         barrierDismissible: true,
-        builder: (BuildContext bContext) {
-          return AutoCastDialog(
-            (device) async {
-              await _castPair(bContext, gw, device);
-              Navigator.pop(bContext);
-            },
-          );
+        builder: (BuildContext context) {
+          return const CastChooseDialog();
         },
       );
-    }
-    if (result == ButtonAction.second) {
-      await _pairWithPin(gw, '');
+      if (result == null) {
+        return;
+      }
+      // wait to allow the dialog to close
+      await Future.delayed(const Duration(milliseconds: 100));
+      if (result == ButtonAction.first) {
+        await showDialog(
+          context: context,
+          barrierDismissible: true,
+          builder: (BuildContext bContext) {
+            return AutoCastDialog(
+              (device) async {
+                await _castPair(bContext, gw, device);
+                Navigator.pop(bContext);
+              },
+            );
+          },
+        );
+      }
+      if (result == ButtonAction.second) {
+        await _pairWithPin(gw, '');
+      }
     }
   }
 
