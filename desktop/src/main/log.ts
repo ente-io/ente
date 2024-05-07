@@ -1,15 +1,15 @@
 import log from "electron-log";
 import util from "node:util";
-import { isDev } from "./util";
+import { isDev } from "./utils/electron";
 
 /**
  * Initialize logging in the main process.
  *
  * This will set our underlying logger up to log to a file named `ente.log`,
  *
- * - on Linux at ~/.config/ente/logs/main.log
- * - on macOS at ~/Library/Logs/ente/main.log
- * - on Windows at %USERPROFILE%\AppData\Roaming\ente\logs\main.log
+ * - on Linux at ~/.config/ente/logs/ente.log
+ * - on macOS at ~/Library/Logs/ente/ente.log
+ * - on Windows at %USERPROFILE%\AppData\Roaming\ente\logs\ente.log
  *
  * On dev builds, it will also log to the console.
  */
@@ -65,7 +65,7 @@ const logError_ = (message: string) => {
     if (isDev) console.error(`[error] ${message}`);
 };
 
-const logInfo = (...params: any[]) => {
+const logInfo = (...params: unknown[]) => {
     const message = params
         .map((p) => (typeof p == "string" ? p : util.inspect(p)))
         .join(" ");
@@ -73,7 +73,7 @@ const logInfo = (...params: any[]) => {
     if (isDev) console.log(`[info] ${message}`);
 };
 
-const logDebug = (param: () => any) => {
+const logDebug = (param: () => unknown) => {
     if (isDev) {
         const p = param();
         console.log(`[debug] ${typeof p == "string" ? p : util.inspect(p)}`);

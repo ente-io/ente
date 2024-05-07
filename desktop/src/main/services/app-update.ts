@@ -1,19 +1,28 @@
 import { compareVersions } from "compare-versions";
-import { app, BrowserWindow } from "electron";
 import { default as electronLog } from "electron-log";
 import { autoUpdater } from "electron-updater";
+import { app, BrowserWindow } from "electron/main";
 import { allowWindowClose } from "../../main";
-import { AppUpdateInfo } from "../../types/ipc";
+import { AppUpdate } from "../../types/ipc";
 import log from "../log";
 import { userPreferences } from "../stores/user-preferences";
+import { isDev } from "../utils/electron";
 
 export const setupAutoUpdater = (mainWindow: BrowserWindow) => {
     autoUpdater.logger = electronLog;
     autoUpdater.autoDownload = false;
 
+    // Skip checking for updates automatically in dev builds. Installing an
+    // update would fail anyway since (at least on macOS), the auto update
+    // process requires signed builds.
+    //
+    // Even though this is skipped on app start, we can still use the "Check for
+    // updates..." menu option to trigger the update if we wish in dev builds.
+    if (isDev) return;
+
     const oneDay = 1 * 24 * 60 * 60 * 1000;
-    setInterval(() => checkForUpdatesAndNotify(mainWindow), oneDay);
-    checkForUpdatesAndNotify(mainWindow);
+    setInterval(() => void checkForUpdatesAndNotify(mainWindow), oneDay);
+    void checkForUpdatesAndNotify(mainWindow);
 };
 
 /**
@@ -22,7 +31,7 @@ export const setupAutoUpdater = (mainWindow: BrowserWindow) => {
 export const forceCheckForAppUpdates = (mainWindow: BrowserWindow) => {
     userPreferences.delete("skipAppVersion");
     userPreferences.delete("muteUpdateNotificationVersion");
-    checkForUpdatesAndNotify(mainWindow);
+    void checkForUpdatesAndNotify(mainWindow);
 };
 
 const checkForUpdatesAndNotify = async (mainWindow: BrowserWindow) => {
@@ -36,39 +45,42 @@ const checkForUpdatesAndNotify = async (mainWindow: BrowserWindow) => {
 
     log.debug(() => `Update check found version ${version}`);
 
+    if (!version)
+        throw new Error("Unexpected empty version obtained from auto-updater");
+
     if (compareVersions(version, app.getVersion()) <= 0) {
         log.debug(() => "Skipping update, already at latest version");
         return;
     }
 
-    if (version === userPreferences.get("skipAppVersion")) {
+    if (version == userPreferences.get("skipAppVersion")) {
         log.info(`User chose to skip version ${version}`);
         return;
     }
 
     const mutedVersion = userPreferences.get("muteUpdateNotificationVersion");
-    if (version === mutedVersion) {
+    if (version == mutedVersion) {
         log.info(`User has muted update notifications for version ${version}`);
         return;
     }
 
-    const showUpdateDialog = (updateInfo: AppUpdateInfo) =>
-        mainWindow.webContents.send("appUpdateAvailable", updateInfo);
+    const showUpdateDialog = (update: AppUpdate) =>
+        mainWindow.webContents.send("appUpdateAvailable", update);
 
     log.debug(() => "Attempting auto update");
-    autoUpdater.downloadUpdate();
+    await autoUpdater.downloadUpdate();
 
-    let timeout: NodeJS.Timeout;
+    let timeoutId: ReturnType<typeof setTimeout>;
     const fiveMinutes = 5 * 60 * 1000;
     autoUpdater.on("update-downloaded", () => {
-        timeout = setTimeout(
+        timeoutId = setTimeout(
             () => showUpdateDialog({ autoUpdatable: true, version }),
             fiveMinutes,
         );
     });
 
     autoUpdater.on("error", (error) => {
-        clearTimeout(timeout);
+        clearTimeout(timeoutId);
         log.error("Auto update failed", error);
         showUpdateDialog({ autoUpdatable: false, version });
     });

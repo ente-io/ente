@@ -96,7 +96,6 @@ import {
     ALL_SECTION,
     ARCHIVE_SECTION,
     CollectionSummaryType,
-    DUMMY_UNCATEGORIZED_COLLECTION,
     HIDDEN_ITEMS_SECTION,
     TRASH_SECTION,
 } from "constants/collection";
@@ -211,18 +210,26 @@ export default function Gallery() {
         disabled: shouldDisableDropzone,
     });
     const {
-        selectedFiles: webFileSelectorFiles,
+        selectedFiles: fileSelectorFiles,
         open: openFileSelector,
         getInputProps: getFileSelectorInputProps,
     } = useFileInput({
         directory: false,
     });
     const {
-        selectedFiles: webFolderSelectorFiles,
+        selectedFiles: folderSelectorFiles,
         open: openFolderSelector,
         getInputProps: getFolderSelectorInputProps,
     } = useFileInput({
         directory: true,
+    });
+    const {
+        selectedFiles: fileSelectorZipFiles,
+        open: openZipFileSelector,
+        getInputProps: getZipFileSelectorInputProps,
+    } = useFileInput({
+        directory: false,
+        accept: ".zip",
     });
 
     const [isInSearchMode, setIsInSearchMode] = useState(false);
@@ -362,7 +369,7 @@ export default function Gallery() {
                 syncWithRemote(false, true);
             }, SYNC_INTERVAL_IN_MICROSECONDS);
             if (electron) {
-                void clipService.setupOnFileUploadListener();
+                // void clipService.setupOnFileUploadListener();
                 electron.onMainWindowFocus(() => syncWithRemote(false, true));
             }
         };
@@ -438,18 +445,8 @@ export default function Gallery() {
         }
         let collectionURL = "";
         if (activeCollectionID !== ALL_SECTION) {
-            collectionURL += "?collection=";
-            if (activeCollectionID === ARCHIVE_SECTION) {
-                collectionURL += t("ARCHIVE_SECTION_NAME");
-            } else if (activeCollectionID === TRASH_SECTION) {
-                collectionURL += t("TRASH");
-            } else if (activeCollectionID === DUMMY_UNCATEGORIZED_COLLECTION) {
-                collectionURL += t("UNCATEGORIZED");
-            } else if (activeCollectionID === HIDDEN_ITEMS_SECTION) {
-                collectionURL += t("HIDDEN_ITEMS_SECTION_NAME");
-            } else {
-                collectionURL += activeCollectionID;
-            }
+            // TODO: Is this URL param even used?
+            collectionURL = `?collection=${activeCollectionID}`;
         }
         const href = `/gallery${collectionURL}`;
         router.push(href, undefined, { shallow: true });
@@ -1023,6 +1020,7 @@ export default function Gallery() {
                     getDragAndDropInputProps={getDragAndDropInputProps}
                     getFileSelectorInputProps={getFileSelectorInputProps}
                     getFolderSelectorInputProps={getFolderSelectorInputProps}
+                    getZipFileSelectorInputProps={getZipFileSelectorInputProps}
                 />
                 {blockingLoad && (
                     <LoadingOverlay>
@@ -1112,7 +1110,6 @@ export default function Gallery() {
                         null,
                         false,
                     )}
-                    uploadTypeSelectorIntent={uploadTypeSelectorIntent}
                     setLoading={setBlockingLoad}
                     setCollectionNamerAttributes={setCollectionNamerAttributes}
                     setShouldDisableDropzone={setShouldDisableDropzone}
@@ -1121,13 +1118,18 @@ export default function Gallery() {
                     isFirstUpload={
                         !hasNonSystemCollections(collectionSummaries)
                     }
-                    webFileSelectorFiles={webFileSelectorFiles}
-                    webFolderSelectorFiles={webFolderSelectorFiles}
-                    dragAndDropFiles={dragAndDropFiles}
-                    uploadTypeSelectorView={uploadTypeSelectorView}
-                    showUploadFilesDialog={openFileSelector}
-                    showUploadDirsDialog={openFolderSelector}
-                    showSessionExpiredMessage={showSessionExpiredMessage}
+                    {...{
+                        dragAndDropFiles,
+                        openFileSelector,
+                        fileSelectorFiles,
+                        openFolderSelector,
+                        folderSelectorFiles,
+                        openZipFileSelector,
+                        fileSelectorZipFiles,
+                        uploadTypeSelectorIntent,
+                        uploadTypeSelectorView,
+                        showSessionExpiredMessage,
+                    }}
                 />
                 <Sidebar
                     collectionSummaries={collectionSummaries}

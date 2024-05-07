@@ -464,6 +464,41 @@ func (c *CollectionController) isRemoveAllowed(ctx *gin.Context, actorUserID int
 	return nil
 }
 
+func (c *CollectionController) IsCopyAllowed(ctx *gin.Context, actorUserID int64, req ente.CopyFileSyncRequest) error {
+	// verify that srcCollectionID is accessible by actorUserID
+	if _, err := c.AccessCtrl.GetCollection(ctx, &access.GetCollectionParams{
+		CollectionID: req.SrcCollectionID,
+		ActorUserID:  actorUserID,
+	}); err != nil {
+		return stacktrace.Propagate(err, "failed to verify srcCollection access")
+	}
+	// verify that dstCollectionID is owned by actorUserID
+	if _, err := c.AccessCtrl.GetCollection(ctx, &access.GetCollectionParams{
+		CollectionID: req.DstCollection,
+		ActorUserID:  actorUserID,
+		VerifyOwner:  true,
+	}); err != nil {
+		return stacktrace.Propagate(err, "failed to ownership of the dstCollection access")
+	}
+	// verify that all FileIDs exists in the srcCollection
+	fileIDs := make([]int64, len(req.CollectionFileItems))
+	for idx, file := range req.CollectionFileItems {
+		fileIDs[idx] = file.ID
+	}
+	if err := c.CollectionRepo.VerifyAllFileIDsExistsInCollection(ctx, req.SrcCollectionID, fileIDs); err != nil {
+		return stacktrace.Propagate(err, "failed to verify fileIDs in srcCollection")
+	}
+	dsMap, err := c.FileRepo.GetOwnerToFileIDsMap(ctx, fileIDs)
+	if err != nil {
+		return err
+	}
+	// verify that none of the file belongs to actorUserID
+	if _, ok := dsMap[actorUserID]; ok {
+		return ente.NewBadRequestWithMessage("can not copy files owned by actor")
+	}
+	return nil
+}
+
 // GetDiffV2 returns the changes in user's collections since a timestamp, along with hasMore bool flag.
 func (c *CollectionController) GetDiffV2(ctx *gin.Context, cID int64, userID int64, sinceTime int64) ([]ente.File, bool, error) {
 	reqContextLogger := log.WithFields(log.Fields{

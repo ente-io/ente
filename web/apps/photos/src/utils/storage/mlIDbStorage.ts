@@ -97,10 +97,8 @@ class MLIDbStorage {
                         wasMLSearchEnabled = searchConfig.enabled;
                     }
                 } catch (e) {
-                    log.info(
-                        "Ignoring likely harmless error while trying to determine ML search status during migration",
-                        e,
-                    );
+                    // The configs store might not exist (e.g. during logout).
+                    // Ignore.
                 }
                 log.info(
                     `Previous ML database v${oldVersion} had ML search ${wasMLSearchEnabled ? "enabled" : "disabled"}`,
@@ -146,7 +144,13 @@ class MLIDbStorage {
                         .objectStore("configs")
                         .add(DEFAULT_ML_SEARCH_CONFIG, ML_SEARCH_CONFIG_NAME);
                 }
+                /*
+                This'll go in version 5. Note that version 4 was never released,
+                but it was in main for a while, so we'll just skip it to avoid
+                breaking the upgrade path for people who ran the mainline.
+                */
                 if (oldVersion < 4) {
+                    /*
                     try {
                         await tx
                             .objectStore("configs")
@@ -165,8 +169,8 @@ class MLIDbStorage {
                         // the shipped implementation should have a more
                         // deterministic migration.
                     }
+                    */
                 }
-
                 log.info(
                     `ML DB upgraded from version ${oldVersion} to version ${newVersion}`,
                 );

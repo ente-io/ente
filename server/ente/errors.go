@@ -149,6 +149,12 @@ var ErrCastPermissionDenied = ApiError{
 	HttpStatusCode: http.StatusForbidden,
 }
 
+var ErrCastIPMismatch = ApiError{
+	Code:           "CAST_IP_MISMATCH",
+	Message:        "IP mismatch",
+	HttpStatusCode: http.StatusForbidden,
+}
+
 type ErrorCode string
 
 const (

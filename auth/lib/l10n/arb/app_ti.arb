@@ -20,7 +20,6 @@
   "codeIssuerHint": "ኣዋጂ",
   "codeSecretKeyHint": "ምስጢራዊ መፍትሕ",
   "codeAccountHint": "ሕሳብ (you@domain.com)",
-  "accountKeyType": "ዓይነት መፍትሕ",
   "sessionExpired": "ክፍለ ግዜኡ ኣኺሉ።",
   "@sessionExpired": {
     "description": "Title of the dialog when the users current session is invalid/expired"

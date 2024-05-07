@@ -16,6 +16,7 @@ const int jan011981Time = 347155200000000;
 const int galleryLoadStartTime = -8000000000000000; // Wednesday, March 6, 1748
 const int galleryLoadEndTime = 9223372036854775807; // 2^63 -1
 const int batchSize = 1000;
+const int batchSizeCopy = 100;
 const photoGridSizeDefault = 4;
 const photoGridSizeMin = 2;
 const photoGridSizeMax = 6;
@@ -37,13 +38,6 @@ const mnemonicKeyWordCount = 24;
 const dragSensitivity = 8;
 
 const supportEmail = 'support@ente.io';
-
-// Default values for various feature flags
-class FFDefault {
-  static const bool enableStripe = true;
-  static const bool disableCFWorker = false;
-  static const bool enablePasskey = false;
-}
 
 // this is the chunk size of the un-encrypted file which is read and encrypted before uploading it as a single part.
 const multipartPartSize = 20 * 1024 * 1024;

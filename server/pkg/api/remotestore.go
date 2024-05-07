@@ -49,3 +49,13 @@ func (h *RemoteStoreHandler) GetKey(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, resp)
 }
+
+// GetFeatureFlags returns all the feature flags and value for given user
+func (h *RemoteStoreHandler) GetFeatureFlags(c *gin.Context) {
+	resp, err := h.Controller.GetFeatureFlags(c)
+	if err != nil {
+		handler.Error(c, stacktrace.Propagate(err, "failed to get feature flags"))
+		return
+	}
+	c.JSON(http.StatusOK, resp)
+}

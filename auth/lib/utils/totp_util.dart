@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:otp/otp.dart' as otp;
 
 String getOTP(Code code) {
-  if(code.type == Type.hotp) {
+  if (code.type == Type.hotp) {
     return _getHOTPCode(code);
   }
   return otp.OTP.generateTOTPCodeString(

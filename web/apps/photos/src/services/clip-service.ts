@@ -1,10 +1,10 @@
+import { FILE_TYPE } from "@/media/file-type";
 import { ensureElectron } from "@/next/electron";
 import log from "@/next/log";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { CustomError } from "@ente/shared/error";
 import { Events, eventBus } from "@ente/shared/events";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
-import { FILE_TYPE } from "constants/file";
 import isElectron from "is-electron";
 import PQueue from "p-queue";
 import { Embedding } from "types/embedding";
@@ -75,7 +75,6 @@ class CLIPService {
     private onFileUploadedHandler:
         | ((arg: { enteFile: EnteFile; localFile: globalThis.File }) => void)
         | null = null;
-    private unsupportedPlatform = false;
 
     constructor() {
         this.liveEmbeddingExtractionQueue = new PQueue({
@@ -85,7 +84,7 @@ class CLIPService {
     }
 
     isPlatformSupported = () => {
-        return isElectron() && !this.unsupportedPlatform;
+        return isElectron();
     };
 
     private logoutHandler = async () => {
@@ -99,9 +98,6 @@ class CLIPService {
 
     setupOnFileUploadListener = async () => {
         try {
-            if (this.unsupportedPlatform) {
-                return;
-            }
             if (this.onFileUploadedHandler) {
                 log.info("file upload listener already setup");
                 return;
@@ -188,26 +184,12 @@ class CLIPService {
         }
     };
 
-    getTextEmbedding = async (text: string): Promise<Float32Array> => {
-        try {
-            return ensureElectron().clipTextEmbedding(text);
-        } catch (e) {
-            if (e?.message?.includes(CustomError.UNSUPPORTED_PLATFORM)) {
-                this.unsupportedPlatform = true;
-            }
-            log.error("Failed to compute CLIP text embedding", e);
-            throw e;
-        }
+    getTextEmbeddingIfAvailable = async (text: string) => {
+        return ensureElectron().clipTextEmbeddingIfAvailable(text);
     };
 
     private runClipEmbeddingExtraction = async (canceller: AbortController) => {
         try {
-            if (this.unsupportedPlatform) {
-                log.info(
-                    `skipping clip embedding extraction, platform unsupported`,
-                );
-                return;
-            }
             const user = getData(LS_KEYS.USER);
             if (!user) {
                 return;
@@ -253,11 +235,6 @@ class CLIPService {
                             "failed to extract clip embedding for file",
                             e,
                         );
-                    }
-                    if (
-                        e?.message?.includes(CustomError.UNSUPPORTED_PLATFORM)
-                    ) {
-                        this.unsupportedPlatform = true;
                     }
                     if (
                         e?.message === CustomError.REQUEST_CANCELLED ||

@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import "package:photos/module/upload/model/multipart.dart";
-import "package:photos/module/upload/service/multipart.dart";
 import 'package:sqflite/sqflite.dart';
 import "package:sqflite_migration/sqflite_migration.dart";
 
@@ -313,8 +312,9 @@ class UploadLocksDB {
     int fileSize,
     String fileKey,
     String fileNonce,
-    String keyNonce,
-  ) async {
+    String keyNonce, {
+    required int partSize,
+  }) async {
     final db = await UploadLocksDB.instance.database;
     final objectKey = urls.objectKey;
 
@@ -331,8 +331,7 @@ class UploadLocksDB {
         _trackUploadTable.columnEncryptedFileKey: fileKey,
         _trackUploadTable.columnFileEncryptionNonce: fileNonce,
         _trackUploadTable.columnKeyEncryptionNonce: keyNonce,
-        _trackUploadTable.columnPartSize:
-            MultiPartUploader.multipartPartSizeForUpload,
+        _trackUploadTable.columnPartSize: partSize,
         _trackUploadTable.columnLastAttemptedAt:
             DateTime.now().millisecondsSinceEpoch,
       },

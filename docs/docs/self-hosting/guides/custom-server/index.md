@@ -25,10 +25,26 @@ configure the endpoint the app should be connecting to.
 > You can download the CLI from
 > [here](https://github.com/ente-io/ente/releases?q=tag%3Acli-v0)
 
-Define a config.yaml and put it either in the same directory as CLI or path
-defined in env variable `ENTE_CLI_CONFIG_PATH`
+Define a config.yaml and put it either in the same directory as where you run
+the CLI from ("current working directory"), or in the path defined in env
+variable `ENTE_CLI_CONFIG_PATH`:
 
 ```yaml
 endpoint:
     api: "http://localhost:8080"
 ```
+
+(Another [example](https://github.com/ente-io/ente/blob/main/cli/config.yaml.example))
+
+## Web appps and Photos desktop app
+
+You will need to build the app from source and use the
+`NEXT_PUBLIC_ENTE_ENDPOINT` environment variable to tell it which server to
+connect to. For example:
+
+```sh
+NEXT_PUBLIC_ENTE_ENDPOINT=http://localhost:8080 yarn dev:photos
+```
+
+For more details, see [hosting the web
+app](https://help.ente.io/self-hosting/guides/web-app).

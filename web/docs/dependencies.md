@@ -110,7 +110,7 @@ with Next.js.
 
 For more details, see [translations.md](translations.md).
 
-## Meta Frameworks
+## Meta frameworks
 
 ### Next.js
 
@@ -131,7 +131,17 @@ It is more lower level than Next, but the bells and whistles it doesn't have are
 the bells and whistles (and the accompanying complexity) that we don't need in
 some cases.
 
-## Photos
+## Media
+
+-   ["jszip"](https://github.com/Stuk/jszip) is used for reading zip files in
+    JavaScript (Live photos are zip files under the hood).
+
+-   ["file-type"](https://github.com/sindresorhus/file-type) is used for MIME
+    type detection. We are at an old version 16.5.4 because v17 onwards the
+    package became ESM only - for our limited use case, the custom Webpack
+    configuration that entails is not worth the upgrade.
+
+## Photos app specific
 
 ### Misc
 

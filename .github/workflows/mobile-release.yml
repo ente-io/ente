@@ -9,7 +9,7 @@ on:
             - "photos-v*"
 
 env:
-    FLUTTER_VERSION: "3.19.5"
+    FLUTTER_VERSION: "3.19.3"
 
 jobs:
     build:
@@ -24,6 +24,11 @@ jobs:
               uses: actions/checkout@v4
               with:
                   submodules: recursive
+
+            - name: Setup JDK 17
+              uses: actions/setup-java@v1
+              with:
+                  java-version: 17
 
             - name: Install Flutter ${{ env.FLUTTER_VERSION  }}
               uses: subosito/flutter-action@v2

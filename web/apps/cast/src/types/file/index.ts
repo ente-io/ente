@@ -1,9 +1,9 @@
+import type { Metadata } from "@/media/types/file";
 import {
     EncryptedMagicMetadata,
     MagicMetadataCore,
     VISIBILITY_STATE,
 } from "types/magicMetadata";
-import { Metadata } from "types/upload";
 
 export interface MetadataFileAttributes {
     encryptedData: string;
@@ -62,25 +62,6 @@ export interface EnteFile
     dataIndex?: number;
     conversionFailed?: boolean;
     isConverted?: boolean;
-}
-
-export interface TrashRequest {
-    items: TrashRequestItems[];
-}
-
-export interface TrashRequestItems {
-    fileID: number;
-    collectionID: number;
-}
-
-export interface FileWithUpdatedMagicMetadata {
-    file: EnteFile;
-    updatedMagicMetadata: FileMagicMetadata;
-}
-
-export interface FileWithUpdatedPublicMagicMetadata {
-    file: EnteFile;
-    updatedPublicMagicMetadata: FilePublicMagicMetadata;
 }
 
 export interface FileMagicMetadataProps {

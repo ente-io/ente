@@ -6,11 +6,8 @@ import { Badge } from "components/Badge";
 import { PLAN_PERIOD } from "constants/gallery";
 import { t } from "i18next";
 import { Plan, Subscription } from "types/billing";
-import {
-    convertBytesToGBs,
-    hasPaidSubscription,
-    isUserSubscribedPlan,
-} from "utils/billing";
+import { hasPaidSubscription, isUserSubscribedPlan } from "utils/billing";
+import { bytesInGB } from "utils/units";
 
 interface Iprops {
     plan: Plan;
@@ -66,7 +63,7 @@ export function PlanRow({
         <PlanRowContainer>
             <TopAlignedFluidContainer>
                 <Typography variant="h1" fontWeight={"bold"}>
-                    {convertBytesToGBs(plan.storage)}
+                    {bytesInGB(plan.storage)}
                 </Typography>
                 <FlexWrapper flexWrap={"wrap"} gap={1}>
                     <Typography variant="h3" color="text.muted">

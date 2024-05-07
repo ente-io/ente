@@ -2,6 +2,7 @@ import "dart:io";
 import "dart:typed_data";
 
 import "package:dio/dio.dart";
+import "package:ente_feature_flag/ente_feature_flag.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/db/upload_locks_db.dart";
@@ -9,14 +10,13 @@ import "package:photos/models/encryption_result.dart";
 import "package:photos/module/upload/model/multipart.dart";
 import "package:photos/module/upload/model/xml.dart";
 import "package:photos/services/collections_service.dart";
-import "package:photos/services/feature_flag_service.dart";
 import "package:photos/utils/crypto_util.dart";
 
 class MultiPartUploader {
   final Dio _enteDio;
   final Dio _s3Dio;
   final UploadLocksDB _db;
-  final FeatureFlagService _featureFlagService;
+  final FlagService _featureFlagService;
   late final Logger _logger = Logger("MultiPartUploader");
 
   MultiPartUploader(
@@ -50,8 +50,8 @@ class MultiPartUploader {
     );
   }
 
-  static int get multipartPartSizeForUpload {
-    if (FeatureFlagService.instance.isInternalUserOrDebugBuild()) {
+  int get multipartPartSizeForUpload {
+    if (_featureFlagService.internalUser) {
       return multipartPartSizeInternal;
     }
     return multipartPartSize;
@@ -60,7 +60,7 @@ class MultiPartUploader {
   Future<int> calculatePartCount(int fileSize) async {
     // Multipart upload is only enabled for internal users
     // and debug builds till it's battle tested.
-    if (!FeatureFlagService.instance.isInternalUserOrDebugBuild()) return 1;
+    if (!_featureFlagService.internalUser) return 1;
 
     final partCount = (fileSize / multipartPartSizeForUpload).ceil();
     return partCount;
@@ -69,7 +69,7 @@ class MultiPartUploader {
   Future<MultipartUploadURLs> getMultipartUploadURLs(int count) async {
     try {
       assert(
-        _featureFlagService.isInternalUserOrDebugBuild(),
+        _featureFlagService.internalUser,
         "Multipart upload should not be enabled for external users.",
       );
       final response = await _enteDio.get(
@@ -114,6 +114,7 @@ class MultiPartUploader {
       CryptoUtil.bin2base64(encryptedResult.encryptedData!),
       CryptoUtil.bin2base64(fileNonce),
       CryptoUtil.bin2base64(encryptedResult.nonce!),
+      partSize: multipartPartSizeForUpload,
     );
   }
 

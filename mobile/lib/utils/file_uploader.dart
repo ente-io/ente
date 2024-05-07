@@ -29,8 +29,8 @@ import "package:photos/models/metadata/file_magic.dart";
 import 'package:photos/models/upload_url.dart';
 import "package:photos/models/user_details.dart";
 import "package:photos/module/upload/service/multipart.dart";
+import "package:photos/service_locator.dart";
 import 'package:photos/services/collections_service.dart';
-import "package:photos/services/feature_flag_service.dart";
 import "package:photos/services/file_magic_service.dart";
 import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/services/sync_service.dart';
@@ -120,7 +120,7 @@ class FileUploader {
       _enteDio,
       _dio,
       UploadLocksDB.instance,
-      FeatureFlagService.instance,
+      flagService,
     );
     Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
       if (event.type == EventType.deletedFromDevice ||
@@ -179,7 +179,7 @@ class FileUploader {
       );
 
       return CollectionsService.instance
-          .addToCollection(collectionID, [uploadedFile]).then((aVoid) {
+          .addOrCopyToCollection(collectionID, [uploadedFile]).then((aVoid) {
         return uploadedFile;
       });
     });
@@ -365,10 +365,16 @@ class FileUploader {
     final List<ConnectivityResult> connections =
         await (Connectivity().checkConnectivity());
     bool canUploadUnderCurrentNetworkConditions = true;
-    if (connections.any((element) => element == ConnectivityResult.mobile)) {
-      canUploadUnderCurrentNetworkConditions =
-          Configuration.instance.shouldBackupOverMobileData();
+    if (!Configuration.instance.shouldBackupOverMobileData()) {
+      if (connections.any((element) => element == ConnectivityResult.mobile)) {
+        canUploadUnderCurrentNetworkConditions = false;
+      } else {
+        _logger.info(
+          "mobileBackupDisabled, backing up with connections: ${connections.map((e) => e.name).toString()}",
+        );
+      }
     }
+
     if (!canUploadUnderCurrentNetworkConditions) {
       throw WiFiUnavailableError();
     }
@@ -378,7 +384,13 @@ class FileUploader {
     if (Platform.isAndroid) {
       final bool hasPermission = await Permission.accessMediaLocation.isGranted;
       if (!hasPermission) {
-        throw NoMediaLocationAccessError();
+        final permissionStatus = await Permission.accessMediaLocation.request();
+        if (!permissionStatus.isGranted) {
+          _logger.severe(
+            "Media location access denied with permission status: ${permissionStatus.name}",
+          );
+          throw NoMediaLocationAccessError();
+        }
       }
     }
   }
@@ -407,6 +419,16 @@ class FileUploader {
     }
     if ((file.localID ?? '') == '') {
       _logger.severe('Trying to upload file with missing localID');
+      return file;
+    }
+    if (!CollectionsService.instance.allowUpload(collectionID)) {
+      _logger.warning(
+        'Upload not allowed for collection $collectionID',
+      );
+      if (!file.isUploaded && file.generatedID != null) {
+        _logger.info("Deleting file entry for " + file.toString());
+        await FilesDB.instance.deleteByGeneratedID(file.generatedID!);
+      }
       return file;
     }
 

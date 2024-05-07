@@ -1,12 +1,12 @@
 import Store, { Schema } from "electron-store";
 
-interface UserPreferencesSchema {
-    hideDockIcon: boolean;
+interface UserPreferences {
+    hideDockIcon?: boolean;
     skipAppVersion?: string;
     muteUpdateNotificationVersion?: string;
 }
 
-const userPreferencesSchema: Schema<UserPreferencesSchema> = {
+const userPreferencesSchema: Schema<UserPreferences> = {
     hideDockIcon: {
         type: "boolean",
     },

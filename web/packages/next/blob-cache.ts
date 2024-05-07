@@ -50,8 +50,6 @@ export type BlobCacheNamespace = (typeof blobCacheNames)[number];
  * ([the WebKit bug](https://bugs.webkit.org/show_bug.cgi?id=231706)), so it's
  * not trivial to use this as a full on replacement of the Web Cache in the
  * browser. So for now we go with this split implementation.
- *
- * See also: [Note: Increased disk cache for the desktop app].
  */
 export interface BlobCache {
     /**
@@ -112,6 +110,10 @@ export const openCache = async (
  * To convert from a Blob to ArrayBuffer
  *
  *     await blob.arrayBuffer()
+ *
+ * To convert from a Blob to Uint8Array, chain the two steps
+ *
+ *     new Uint8Array(await blob.arrayBuffer())
  *
  * To convert from an ArrayBuffer or Uint8Array to Blob
  *

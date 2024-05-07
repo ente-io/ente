@@ -1,4 +1,4 @@
-import { Location } from "types/upload";
+import { Location } from "types/metadata";
 
 export enum EntityType {
     LOCATION_TAG = "location",

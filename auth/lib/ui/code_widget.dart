@@ -53,7 +53,7 @@ class _CodeWidgetState extends State<CodeWidget> {
       String newCode = _getCurrentOTP();
       if (newCode != _currentCode.value) {
         _currentCode.value = newCode;
-        if (widget.code.type == Type.totp) {
+        if (widget.code.type.isTOTPCompatible) {
           _nextCode.value = _getNextTotp();
         }
       }
@@ -78,7 +78,7 @@ class _CodeWidgetState extends State<CodeWidget> {
     _shouldShowLargeIcon = PreferenceService.instance.shouldShowLargeIcons();
     if (!_isInitialized) {
       _currentCode.value = _getCurrentOTP();
-      if (widget.code.type == Type.totp) {
+      if (widget.code.type.isTOTPCompatible) {
         _nextCode.value = _getNextTotp();
       }
       _isInitialized = true;
@@ -213,7 +213,7 @@ class _CodeWidgetState extends State<CodeWidget> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          if (widget.code.type == Type.totp)
+          if (widget.code.type.isTOTPCompatible)
             CodeTimerProgress(
               period: widget.code.period,
             ),
@@ -263,7 +263,7 @@ class _CodeWidgetState extends State<CodeWidget> {
               },
             ),
           ),
-          widget.code.type == Type.totp
+          widget.code.type.isTOTPCompatible
               ? GestureDetector(
                   onTap: () {
                     _copyNextToClipboard();
@@ -481,7 +481,7 @@ class _CodeWidgetState extends State<CodeWidget> {
 
   String _getNextTotp() {
     try {
-      assert(widget.code.type == Type.totp);
+      assert(widget.code.type.isTOTPCompatible);
       return getNextTotp(widget.code);
     } catch (e) {
       return context.l10n.error;

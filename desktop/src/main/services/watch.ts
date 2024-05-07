@@ -1,101 +1,156 @@
-import type { FSWatcher } from "chokidar";
-import ElectronLog from "electron-log";
-import { FolderWatch, WatchStoreType } from "../../types/ipc";
-import { watchStore } from "../stores/watch.store";
+import chokidar, { type FSWatcher } from "chokidar";
+import { BrowserWindow } from "electron/main";
+import fs from "node:fs/promises";
+import path from "node:path";
+import { FolderWatch, type CollectionMapping } from "../../types/ipc";
+import log from "../log";
+import { watchStore } from "../stores/watch";
+import { posixPath } from "../utils/electron";
+import { fsIsDir } from "./fs";
 
-export const addWatchMapping = async (
-    watcher: FSWatcher,
-    rootFolderName: string,
-    folderPath: string,
-    uploadStrategy: number,
-) => {
-    ElectronLog.log(`Adding watch mapping: ${folderPath}`);
-    const watchMappings = getWatchMappings();
-    if (isMappingPresent(watchMappings, folderPath)) {
-        throw new Error(`Watch mapping already exists`);
+/**
+ * Create and return a new file system watcher.
+ *
+ * Internally this uses the watcher from the chokidar package.
+ *
+ * @param mainWindow The window handle is used to notify the renderer process of
+ * pertinent file system events.
+ */
+export const createWatcher = (mainWindow: BrowserWindow) => {
+    const send = (eventName: string) => (path: string) =>
+        mainWindow.webContents.send(eventName, ...eventData(path));
+
+    const folderPaths = folderWatches().map((watch) => watch.folderPath);
+
+    const watcher = chokidar.watch(folderPaths, {
+        awaitWriteFinish: true,
+    });
+
+    watcher
+        .on("add", send("watchAddFile"))
+        .on("unlink", send("watchRemoveFile"))
+        .on("unlinkDir", send("watchRemoveDir"))
+        .on("error", (error) => log.error("Error while watching files", error));
+
+    return watcher;
+};
+
+const eventData = (platformPath: string): [string, FolderWatch] => {
+    const path = posixPath(platformPath);
+
+    const watch = folderWatches().find((watch) =>
+        path.startsWith(watch.folderPath + "/"),
+    );
+
+    if (!watch) throw new Error(`No folder watch was found for path ${path}`);
+
+    return [path, watch];
+};
+
+export const watchGet = async (watcher: FSWatcher): Promise<FolderWatch[]> => {
+    const valid: FolderWatch[] = [];
+    const deletedPaths: string[] = [];
+    for (const watch of folderWatches()) {
+        if (await fsIsDir(watch.folderPath)) valid.push(watch);
+        else deletedPaths.push(watch.folderPath);
     }
+    if (deletedPaths.length) {
+        await Promise.all(deletedPaths.map((p) => watchRemove(watcher, p)));
+        setFolderWatches(valid);
+    }
+    return valid;
+};
 
-    watcher.add(folderPath);
+const folderWatches = (): FolderWatch[] => watchStore.get("mappings") ?? [];
 
-    watchMappings.push({
-        rootFolderName,
-        uploadStrategy,
+const setFolderWatches = (watches: FolderWatch[]) =>
+    watchStore.set("mappings", watches);
+
+export const watchAdd = async (
+    watcher: FSWatcher,
+    folderPath: string,
+    collectionMapping: CollectionMapping,
+) => {
+    const watches = folderWatches();
+
+    if (!(await fsIsDir(folderPath)))
+        throw new Error(
+            `Attempting to add a folder watch for a folder path ${folderPath} that is not an existing directory`,
+        );
+
+    if (watches.find((watch) => watch.folderPath == folderPath))
+        throw new Error(
+            `A folder watch with the given folder path ${folderPath} already exists`,
+        );
+
+    watches.push({
         folderPath,
+        collectionMapping,
         syncedFiles: [],
         ignoredFiles: [],
     });
 
-    setWatchMappings(watchMappings);
+    setFolderWatches(watches);
+
+    watcher.add(folderPath);
+
+    return watches;
 };
 
-function isMappingPresent(watchMappings: FolderWatch[], folderPath: string) {
-    const watchMapping = watchMappings?.find(
-        (mapping) => mapping.folderPath === folderPath,
-    );
-    return !!watchMapping;
-}
+export const watchRemove = (watcher: FSWatcher, folderPath: string) => {
+    const watches = folderWatches();
+    const filtered = watches.filter((watch) => watch.folderPath != folderPath);
+    if (watches.length == filtered.length)
+        throw new Error(
+            `Attempting to remove a non-existing folder watch for folder path ${folderPath}`,
+        );
+    setFolderWatches(filtered);
+    watcher.unwatch(folderPath);
+    return filtered;
+};
 
-export const removeWatchMapping = async (
-    watcher: FSWatcher,
+export const watchUpdateSyncedFiles = (
+    syncedFiles: FolderWatch["syncedFiles"],
     folderPath: string,
 ) => {
-    let watchMappings = getWatchMappings();
-    const watchMapping = watchMappings.find(
-        (mapping) => mapping.folderPath === folderPath,
+    setFolderWatches(
+        folderWatches().map((watch) => {
+            if (watch.folderPath == folderPath) {
+                watch.syncedFiles = syncedFiles;
+            }
+            return watch;
+        }),
     );
-
-    if (!watchMapping) {
-        throw new Error(`Watch mapping does not exist`);
-    }
-
-    watcher.unwatch(watchMapping.folderPath);
-
-    watchMappings = watchMappings.filter(
-        (mapping) => mapping.folderPath !== watchMapping.folderPath,
-    );
-
-    setWatchMappings(watchMappings);
 };
 
-export function updateWatchMappingSyncedFiles(
+export const watchUpdateIgnoredFiles = (
+    ignoredFiles: FolderWatch["ignoredFiles"],
     folderPath: string,
-    files: FolderWatch["syncedFiles"],
-): void {
-    const watchMappings = getWatchMappings();
-    const watchMapping = watchMappings.find(
-        (mapping) => mapping.folderPath === folderPath,
+) => {
+    setFolderWatches(
+        folderWatches().map((watch) => {
+            if (watch.folderPath == folderPath) {
+                watch.ignoredFiles = ignoredFiles;
+            }
+            return watch;
+        }),
     );
+};
 
-    if (!watchMapping) {
-        throw Error(`Watch mapping not found`);
+export const watchFindFiles = async (dirPath: string) => {
+    const items = await fs.readdir(dirPath, { withFileTypes: true });
+    let paths: string[] = [];
+    for (const item of items) {
+        const itemPath = path.posix.join(dirPath, item.name);
+        if (item.isFile()) {
+            paths.push(itemPath);
+        } else if (item.isDirectory()) {
+            paths = [...paths, ...(await watchFindFiles(itemPath))];
+        }
     }
+    return paths;
+};
 
-    watchMapping.syncedFiles = files;
-    setWatchMappings(watchMappings);
-}
-
-export function updateWatchMappingIgnoredFiles(
-    folderPath: string,
-    files: FolderWatch["ignoredFiles"],
-): void {
-    const watchMappings = getWatchMappings();
-    const watchMapping = watchMappings.find(
-        (mapping) => mapping.folderPath === folderPath,
-    );
-
-    if (!watchMapping) {
-        throw Error(`Watch mapping not found`);
-    }
-
-    watchMapping.ignoredFiles = files;
-    setWatchMappings(watchMappings);
-}
-
-export function getWatchMappings() {
-    const mappings = watchStore.get("mappings") ?? [];
-    return mappings;
-}
-
-function setWatchMappings(watchMappings: WatchStoreType["mappings"]) {
-    watchStore.set("mappings", watchMappings);
-}
+export const watchReset = (watcher: FSWatcher) => {
+    watcher.unwatch(folderWatches().map((watch) => watch.folderPath));
+};

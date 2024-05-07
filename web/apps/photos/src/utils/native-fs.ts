@@ -1,5 +1,5 @@
 /**
- * @file Utilities for native filesystem access.
+ * @file Utilities for native file system access.
  *
  * While they don't have any direct dependencies to our desktop app, they were
  * written for use by the code that runs in our desktop app.

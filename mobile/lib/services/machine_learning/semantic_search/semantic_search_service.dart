@@ -72,8 +72,8 @@ class SemanticSearchService {
     _mlFramework = _currentModel == Model.onnxClip
         ? ONNX(shouldDownloadOverMobileData)
         : GGML(shouldDownloadOverMobileData);
-    await EmbeddingsDB.instance.init();
     await EmbeddingStore.instance.init();
+    await EmbeddingsDB.instance.init();
     await _loadEmbeddings();
     Bus.instance.on<EmbeddingUpdatedEvent>().listen((event) {
       _embeddingLoaderDebouncer.run(() async {

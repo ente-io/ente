@@ -5,7 +5,7 @@ import {
     logStartupBanner,
     logUnhandledErrorsAndRejections,
 } from "@/next/log-web";
-import { AppUpdateInfo } from "@/next/types/ipc";
+import { AppUpdate } from "@/next/types/ipc";
 import {
     APPS,
     APP_TITLES,
@@ -80,8 +80,6 @@ const redirectMap = new Map([
 
 type AppContextType = {
     showNavBar: (show: boolean) => void;
-    sharedFiles: File[];
-    resetSharedFiles: () => void;
     mlSearchEnabled: boolean;
     mapEnabled: boolean;
     updateMlSearchEnabled: (enabled: boolean) => Promise<void>;
@@ -91,8 +89,6 @@ type AppContextType = {
     closeMessageDialog: () => void;
     setDialogMessage: SetDialogBoxAttributes;
     setNotificationAttributes: SetNotificationAttributes;
-    isFolderSyncRunning: boolean;
-    setIsFolderSyncRunning: (isRunning: boolean) => void;
     watchFolderView: boolean;
     setWatchFolderView: (isOpen: boolean) => void;
     watchFolderFiles: FileList;
@@ -116,7 +112,6 @@ export default function App({ Component, pageProps }: AppProps) {
         typeof window !== "undefined" && !window.navigator.onLine,
     );
     const [showNavbar, setShowNavBar] = useState(false);
-    const [sharedFiles, setSharedFiles] = useState<File[]>(null);
     const [redirectName, setRedirectName] = useState<string>(null);
     const [mlSearchEnabled, setMlSearchEnabled] = useState(false);
     const [mapEnabled, setMapEnabled] = useState(false);
@@ -128,7 +123,6 @@ export default function App({ Component, pageProps }: AppProps) {
     useState<DialogBoxAttributes>(null);
     const [messageDialogView, setMessageDialogView] = useState(false);
     const [dialogBoxV2View, setDialogBoxV2View] = useState(false);
-    const [isFolderSyncRunning, setIsFolderSyncRunning] = useState(false);
     const [watchFolderView, setWatchFolderView] = useState(false);
     const [watchFolderFiles, setWatchFolderFiles] = useState<FileList>(null);
     const isMobile = useMediaQuery("(max-width:428px)");
@@ -160,9 +154,9 @@ export default function App({ Component, pageProps }: AppProps) {
         const electron = globalThis.electron;
         if (!electron) return;
 
-        const showUpdateDialog = (updateInfo: AppUpdateInfo) => {
-            if (updateInfo.autoUpdatable) {
-                setDialogMessage(getUpdateReadyToInstallMessage(updateInfo));
+        const showUpdateDialog = (update: AppUpdate) => {
+            if (update.autoUpdatable) {
+                setDialogMessage(getUpdateReadyToInstallMessage(update));
             } else {
                 setNotificationAttributes({
                     endIcon: <ArrowForward />,
@@ -170,7 +164,7 @@ export default function App({ Component, pageProps }: AppProps) {
                     message: t("UPDATE_AVAILABLE"),
                     onClick: () =>
                         setDialogMessage(
-                            getUpdateAvailableForDownloadMessage(updateInfo),
+                            getUpdateAvailableForDownloadMessage(update),
                         ),
                 });
             }
@@ -230,7 +224,6 @@ export default function App({ Component, pageProps }: AppProps) {
 
     const setUserOnline = () => setOffline(false);
     const setUserOffline = () => setOffline(true);
-    const resetSharedFiles = () => setSharedFiles(null);
 
     useEffect(() => {
         const redirectTo = async (redirect) => {
@@ -355,22 +348,8 @@ export default function App({ Component, pageProps }: AppProps) {
                 <CssBaseline enableColorScheme />
                 {showNavbar && <AppNavbar isMobile={isMobile} />}
                 <MessageContainer>
-                    {offline && t("OFFLINE_MSG")}
+                    {isI18nReady && offline && t("OFFLINE_MSG")}
                 </MessageContainer>
-                {sharedFiles &&
-                    (router.pathname === "/gallery" ? (
-                        <MessageContainer>
-                            {t("files_to_be_uploaded", {
-                                count: sharedFiles.length,
-                            })}
-                        </MessageContainer>
-                    ) : (
-                        <MessageContainer>
-                            {t("login_to_upload_files", {
-                                count: sharedFiles.length,
-                            })}
-                        </MessageContainer>
-                    ))}
                 <LoadingBar color="#51cd7c" ref={loadingBar} />
 
                 <DialogBox
@@ -397,14 +376,10 @@ export default function App({ Component, pageProps }: AppProps) {
                         showNavBar,
                         mlSearchEnabled,
                         updateMlSearchEnabled,
-                        sharedFiles,
-                        resetSharedFiles,
                         startLoading,
                         finishLoading,
                         closeMessageDialog,
                         setDialogMessage,
-                        isFolderSyncRunning,
-                        setIsFolderSyncRunning,
                         watchFolderView,
                         setWatchFolderView,
                         watchFolderFiles,

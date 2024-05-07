@@ -22,6 +22,7 @@ import { object, string } from "yup";
 export const supportedLocales = [
     "en-US" /* English */,
     "fr-FR" /* French */,
+    "de-DE" /* German */,
     "zh-CN" /* Simplified Chinese */,
     "nl-NL" /* Dutch */,
     "es-ES" /* Spanish */,
@@ -209,6 +210,8 @@ const closestSupportedLocale = (
             return "en-US";
         } else if (ls.startsWith("fr")) {
             return "fr-FR";
+        } else if (ls.startsWith("de")) {
+            return "de-DE";
         } else if (ls.startsWith("zh")) {
             return "zh-CN";
         } else if (ls.startsWith("nl")) {

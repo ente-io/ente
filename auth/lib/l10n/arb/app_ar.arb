@@ -20,7 +20,6 @@
   "codeIssuerHint": "المصدِّر",
   "codeSecretKeyHint": "الرمز السري",
   "codeAccountHint": "الحساب (you@domain.com)",
-  "accountKeyType": "نوع المفتاح",
   "sessionExpired": "انتهت صلاحية الجلسة",
   "@sessionExpired": {
     "description": "Title of the dialog when the users current session is invalid/expired"

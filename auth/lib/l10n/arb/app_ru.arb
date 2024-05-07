@@ -20,7 +20,6 @@
   "codeIssuerHint": "Эмитент",
   "codeSecretKeyHint": "Секретный ключ",
   "codeAccountHint": "Аккаунт (you@domain.com)",
-  "accountKeyType": "Тип ключа",
   "sessionExpired": "Сеанс истек",
   "@sessionExpired": {
     "description": "Title of the dialog when the users current session is invalid/expired"
