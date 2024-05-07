@@ -447,7 +447,6 @@
     "DOWNLOAD_LOGS_MESSAGE": "",
     "CHANGE_FOLDER": "",
     "TWO_MONTHS_FREE": "",
-    "GB": "",
     "POPULAR": "",
     "FREE_PLAN_OPTION_LABEL": "",
     "FREE_PLAN_DESCRIPTION": "",
@@ -494,12 +493,12 @@
     "EXPORT_DIRECTORY_DOES_NOT_EXIST": "",
     "EXPORT_DIRECTORY_DOES_NOT_EXIST_MESSAGE": "",
     "SUBSCRIPTION_VERIFICATION_ERROR": "",
-    "STORAGE_UNITS": {
-        "B": "",
-        "KB": "",
-        "MB": "",
-        "GB": "",
-        "TB": ""
+    "storage_unit": {
+        "b": "",
+        "kb": "",
+        "mb": "",
+        "gb": "",
+        "tb": ""
     },
     "AFTER_TIME": {
         "HOUR": "",

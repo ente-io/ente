@@ -447,7 +447,6 @@
     "DOWNLOAD_LOGS_MESSAGE": "<p>Hier kannst du Debug-Logs herunterladen, die du uns zur Fehleranalyse zusenden kannst.</p><p> Beachte bitte, dass die Logs Dateinamen enthalten, um Probleme mit bestimmten Dateien nachvollziehen zu können. </p>",
     "CHANGE_FOLDER": "Ordner ändern",
     "TWO_MONTHS_FREE": "Erhalte 2 Monate kostenlos bei Jahresabonnements",
-    "GB": "GB",
     "POPULAR": "Beliebt",
     "FREE_PLAN_OPTION_LABEL": "Mit kostenloser Testversion fortfahren",
     "FREE_PLAN_DESCRIPTION": "1 GB für 1 Jahr",
@@ -494,12 +493,12 @@
     "EXPORT_DIRECTORY_DOES_NOT_EXIST": "Ungültiges Exportverzeichnis",
     "EXPORT_DIRECTORY_DOES_NOT_EXIST_MESSAGE": "<p>Das von dir gewählte Exportverzeichnis existiert nicht.</p><p> Bitte wähle einen gültigen Ordner.</p>",
     "SUBSCRIPTION_VERIFICATION_ERROR": "Verifizierung des Abonnements fehlgeschlagen",
-    "STORAGE_UNITS": {
-        "B": "B",
-        "KB": "KB",
-        "MB": "MB",
-        "GB": "GB",
-        "TB": "TB"
+    "storage_unit": {
+        "b": "B",
+        "kb": "KB",
+        "mb": "MB",
+        "gb": "GB",
+        "tb": "TB"
     },
     "AFTER_TIME": {
         "HOUR": "nach einer Stunde",

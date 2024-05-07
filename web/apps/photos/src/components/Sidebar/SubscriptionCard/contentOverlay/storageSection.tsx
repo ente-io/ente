@@ -40,7 +40,7 @@ export default function StorageSection({ usage, storage }: Iprops) {
                     fontWeight={"bold"}
                     sx={{ fontSize: "24px", lineHeight: "30px" }}
                 >
-                    {`${bytesInGB(usage)} /  ${bytesInGB(storage)} ${t("GB")} ${t("USED")}`}
+                    {`${bytesInGB(usage)} /  ${bytesInGB(storage)} ${t("storage_unit.gb")} ${t("USED")}`}
                 </Typography>
             </MobileSmallBox>
         </Box>

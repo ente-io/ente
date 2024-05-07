@@ -447,7 +447,6 @@
     "DOWNLOAD_LOGS_MESSAGE": "",
     "CHANGE_FOLDER": "Cambia Cartella",
     "TWO_MONTHS_FREE": "Ottieni 2 mesi gratis sui piani annuali",
-    "GB": "GB",
     "POPULAR": "",
     "FREE_PLAN_OPTION_LABEL": "",
     "FREE_PLAN_DESCRIPTION": "1 GB per 1 anno",
@@ -494,12 +493,12 @@
     "EXPORT_DIRECTORY_DOES_NOT_EXIST": "",
     "EXPORT_DIRECTORY_DOES_NOT_EXIST_MESSAGE": "",
     "SUBSCRIPTION_VERIFICATION_ERROR": "",
-    "STORAGE_UNITS": {
-        "B": "B",
-        "KB": "KB",
-        "MB": "MB",
-        "GB": "GB",
-        "TB": "TB"
+    "storage_unit": {
+        "b": "B",
+        "kb": "KB",
+        "mb": "MB",
+        "gb": "GB",
+        "tb": "TB"
     },
     "AFTER_TIME": {
         "HOUR": "dopo un'ora",

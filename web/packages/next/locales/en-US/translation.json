@@ -447,7 +447,6 @@
     "DOWNLOAD_LOGS_MESSAGE": "<p>This will download debug logs, which you can email to us to help debug your issue.</p><p> Please note that file names will be included to help track issues with specific files. </p>",
     "CHANGE_FOLDER": "Change Folder",
     "TWO_MONTHS_FREE": "Get 2 months free on yearly plans",
-    "GB": "GB",
     "POPULAR": "Popular",
     "FREE_PLAN_OPTION_LABEL": "Continue with free trial",
     "FREE_PLAN_DESCRIPTION": "1 GB for 1 year",
@@ -494,12 +493,12 @@
     "EXPORT_DIRECTORY_DOES_NOT_EXIST": "Invalid export directory",
     "EXPORT_DIRECTORY_DOES_NOT_EXIST_MESSAGE": "<p>The export directory you have selected does not exist.</p><p> Please select a valid directory.</p>",
     "SUBSCRIPTION_VERIFICATION_ERROR": "Subscription verification failed",
-    "STORAGE_UNITS": {
-        "B": "B",
-        "KB": "KB",
-        "MB": "MB",
-        "GB": "GB",
-        "TB": "TB"
+    "storage_unit": {
+        "b": "B",
+        "kb": "KB",
+        "mb": "MB",
+        "gb": "GB",
+        "tb": "TB"
     },
     "AFTER_TIME": {
         "HOUR": "after an hour",

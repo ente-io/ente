@@ -1,6 +1,6 @@
 import { t } from "i18next";
 
-const StorageUnits = ["B", "KB", "MB", "GB", "TB"];
+const units = ["b", "kb", "mb", "gb", "tb"];
 
 /**
  * Convert the given number of {@link bytes} to their equivalent GB string with
@@ -59,16 +59,16 @@ export const formattedStorageByteSize = (
     options?: FormattedStorageByteSizeOptions,
 ): string => {
     if (bytes <= 0) {
-        return `0 ${t("STORAGE_UNITS.MB")}`;
+        return `0 ${t("storage_unit.mb")}`;
     }
     const i = Math.floor(Math.log(bytes) / Math.log(1024));
 
     let quantity = bytes / Math.pow(1024, i);
-    let unit = StorageUnits[i];
+    let unit = units[i];
 
     if (quantity > 100 && unit !== "GB") {
         quantity /= 1024;
-        unit = StorageUnits[i + 1];
+        unit = units[i + 1];
     }
 
     quantity = Number(quantity.toFixed(1));
@@ -81,5 +81,5 @@ export const formattedStorageByteSize = (
         }
     }
 
-    return `${quantity} ${t(`STORAGE_UNITS.${unit}`)}`;
+    return `${quantity} ${t(`storage_unit.${unit}`)}`;
 };
