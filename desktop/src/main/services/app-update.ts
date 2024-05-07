@@ -20,26 +20,35 @@ export const setupAutoUpdater = (mainWindow: BrowserWindow) => {
      * fail because (at least on macOS), the auto update process requires signed
      * builds.
      *
-     * Even though this is skipped on app start, we can still use the "Check for
-     * updates..." menu option to trigger the update if we wish in dev builds.
+     * So an end to end testing for updates requires using a temporary GitHub
+     * repository and signed builds therein.
      *
-     * This can be used to do a test of the update process (up until the actual
-     * installation itself).
+     * Howvere for partial checks of the UI flow, something like tis can be used
+     * to do a test of the update process (up until the actual installation
+     * itself).
      *
-     * 1. Create a `app/dev-app-update.yml` with:
+     * Create a `app/dev-app-update.yml` with:
      *
      *     provider: generic
      *     url: http://127.0.0.1:7777/
      *
-     * 2. Start a local webserver in some directory:
+     * and start a local webserver in some directory:
      *
      *     python3 -m http.server 7777
      *
-     * 3. In this directory, put `latest-mac.yml` and the DMG file that this
-     *    YAML file refers to.
+     * In this directory, put `latest-mac.yml` and the DMG file that this YAML
+     * file refers to.
      *
-     * 4. Start the app, and use the "Check for updates..." menu option to
-     *    trigger the update flow.
+     * Alternatively, `dev-app-update.yml` can contain some arbitrary GitHub
+     * repository, e.g.:
+     *
+     *       provider: github
+     *       owner: foo
+     *       repo: bar
+     *
+     * Finally, we can start the app to trigger the auto update. If we're in dev
+     * mode, we can use the "Check for updates..." menu option to trigger the
+     * update flow.
      */
     autoUpdater.forceDevUpdateConfig = isDev;
     if (isDev) return;
