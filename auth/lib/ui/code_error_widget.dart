@@ -4,8 +4,8 @@ import 'package:ente_auth/services/update_service.dart';
 import 'package:ente_auth/ui/common/gradient_button.dart';
 import 'package:ente_auth/ui/linear_progress_widget.dart';
 import 'package:ente_auth/ui/settings/app_update_dialog.dart';
+import 'package:ente_auth/utils/toast_util.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 
 class CodeErrorWidget extends StatelessWidget {
   const CodeErrorWidget({super.key});
@@ -97,8 +97,9 @@ class CodeErrorWidget extends StatelessWidget {
                           barrierColor: Colors.black.withOpacity(0.85),
                         );
                       } catch (e) {
-                        await Fluttertoast.showToast(
-                          msg: context.l10n.updateNotAvailable,
+                        showToast(
+                          context,
+                          context.l10n.updateNotAvailable,
                         );
                       }
                     },

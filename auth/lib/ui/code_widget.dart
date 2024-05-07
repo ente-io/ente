@@ -22,7 +22,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_context_menu/flutter_context_menu.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:logging/logging.dart';
 import 'package:move_to_background/move_to_background.dart';
 
@@ -91,141 +90,135 @@ class _CodeWidgetState extends State<CodeWidget> {
     }
     final l10n = context.l10n;
     return Container(
-          margin: const EdgeInsets.only(left: 16, right: 16, bottom: 8, top: 8),
-          child: Builder(
-            builder: (context) {
-              if (PlatformUtil.isDesktop()) {
-                return ContextMenuRegion(
-                  contextMenu: ContextMenu(
-                    entries: <ContextMenuEntry>[
-                      MenuItem(
-                        label: 'QR',
-                        icon: Icons.qr_code_2_outlined,
-                        onSelected: () => _onShowQrPressed(null),
-                      ),
-                      MenuItem(
-                        label: widget.code.isPinned
-                            ? l10n.unpinText
-                            : l10n.pinText,
-                        icon: widget.code.isPinned
-                            ? Icons.push_pin
-                            : Icons.push_pin_outlined,
-                        onSelected: () => _onShowQrPressed(null),
-                      ),
-                      MenuItem(
-                        label: l10n.edit,
-                        icon: Icons.edit,
-                        onSelected: () => _onEditPressed(null),
-                      ),
-                      const MenuDivider(),
-                      MenuItem(
-                        label: l10n.delete,
-                        value: "Delete",
-                        icon: Icons.delete,
-                        onSelected: () => _onDeletePressed(null),
+      margin: const EdgeInsets.only(left: 16, right: 16, bottom: 8, top: 8),
+      child: Builder(
+        builder: (context) {
+          if (PlatformUtil.isDesktop()) {
+            return ContextMenuRegion(
+              contextMenu: ContextMenu(
+                entries: <ContextMenuEntry>[
+                  MenuItem(
+                    label: 'QR',
+                    icon: Icons.qr_code_2_outlined,
+                    onSelected: () => _onShowQrPressed(null),
+                  ),
+                  MenuItem(
+                    label: widget.code.isPinned ? l10n.unpinText : l10n.pinText,
+                    icon: widget.code.isPinned
+                        ? Icons.push_pin
+                        : Icons.push_pin_outlined,
+                    onSelected: () => _onPinPressed(null),
+                  ),
+                  MenuItem(
+                    label: l10n.edit,
+                    icon: Icons.edit,
+                    onSelected: () => _onEditPressed(null),
+                  ),
+                  const MenuDivider(),
+                  MenuItem(
+                    label: l10n.delete,
+                    value: "Delete",
+                    icon: Icons.delete,
+                    onSelected: () => _onDeletePressed(null),
+                  ),
+                ],
+                padding: const EdgeInsets.all(8.0),
+              ),
+              child: _clippedCard(l10n),
+            );
+          }
+
+          return Slidable(
+            key: ValueKey(widget.code.hashCode),
+            endActionPane: ActionPane(
+              extentRatio: 0.90,
+              motion: const ScrollMotion(),
+              children: [
+                const SizedBox(
+                  width: 14,
+                ),
+                SlidableAction(
+                  onPressed: _onShowQrPressed,
+                  backgroundColor: Colors.grey.withOpacity(0.1),
+                  borderRadius: const BorderRadius.all(Radius.circular(8)),
+                  foregroundColor:
+                      Theme.of(context).colorScheme.inverseBackgroundColor,
+                  icon: Icons.qr_code_2_outlined,
+                  label: "QR",
+                  padding: const EdgeInsets.only(left: 4, right: 0),
+                  spacing: 8,
+                ),
+                const SizedBox(
+                  width: 14,
+                ),
+                CustomSlidableAction(
+                  onPressed: _onPinPressed,
+                  backgroundColor: Colors.grey.withOpacity(0.1),
+                  borderRadius: const BorderRadius.all(Radius.circular(8)),
+                  foregroundColor:
+                      Theme.of(context).colorScheme.inverseBackgroundColor,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      if (widget.code.isPinned)
+                        SvgPicture.asset(
+                          "assets/svg/pin-active.svg",
+                          colorFilter: ui.ColorFilter.mode(
+                            Theme.of(context).colorScheme.primary,
+                            BlendMode.srcIn,
+                          ),
+                        )
+                      else
+                        SvgPicture.asset(
+                          "assets/svg/pin-inactive.svg",
+                          colorFilter: ui.ColorFilter.mode(
+                            Theme.of(context).colorScheme.primary,
+                            BlendMode.srcIn,
+                          ),
+                        ),
+                      const SizedBox(height: 8),
+                      Text(
+                        widget.code.isPinned ? l10n.unpinText : l10n.pinText,
                       ),
                     ],
-                    padding: const EdgeInsets.all(8.0),
                   ),
-                  child: _clippedCard(l10n),
-                );
-              }
-
-              return Slidable(
-                key: ValueKey(widget.code.hashCode),
-                endActionPane: ActionPane(
-                  extentRatio: 0.90,
-                  motion: const ScrollMotion(),
-                  children: [
-                    const SizedBox(
-                      width: 14,
-                    ),
-                    SlidableAction(
-                      onPressed: _onShowQrPressed,
-                      backgroundColor: Colors.grey.withOpacity(0.1),
-                      borderRadius: const BorderRadius.all(Radius.circular(8)),
-                      foregroundColor:
-                          Theme.of(context).colorScheme.inverseBackgroundColor,
-                      icon: Icons.qr_code_2_outlined,
-                      label: "QR",
-                      padding: const EdgeInsets.only(left: 4, right: 0),
-                      spacing: 8,
-                    ),
-                    const SizedBox(
-                      width: 14,
-                    ),
-                    CustomSlidableAction(
-                      onPressed: _onPinPressed,
-                      backgroundColor: Colors.grey.withOpacity(0.1),
-                      borderRadius: const BorderRadius.all(Radius.circular(8)),
-                      foregroundColor:
-                          Theme.of(context).colorScheme.inverseBackgroundColor,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          if (widget.code.isPinned)
-                            SvgPicture.asset(
-                              "assets/svg/pin-active.svg",
-                              colorFilter: ui.ColorFilter.mode(
-                                Theme.of(context).colorScheme.primary,
-                                BlendMode.srcIn,
-                              ),
-                            )
-                          else
-                            SvgPicture.asset(
-                              "assets/svg/pin-inactive.svg",
-                              colorFilter: ui.ColorFilter.mode(
-                                Theme.of(context).colorScheme.primary,
-                                BlendMode.srcIn,
-                              ),
-                            ),
-                          const SizedBox(height: 8),
-                          Text(
-                            widget.code.isPinned
-                                ? l10n.unpinText
-                                : l10n.pinText,
-                          ),
-                        ],
-                      ),
-                      padding: const EdgeInsets.only(left: 4, right: 0),
-                    ),
-                    const SizedBox(
-                      width: 14,
-                    ),
-                    SlidableAction(
-                      onPressed: _onEditPressed,
-                      backgroundColor: Colors.grey.withOpacity(0.1),
-                      borderRadius: const BorderRadius.all(Radius.circular(8)),
-                      foregroundColor:
-                          Theme.of(context).colorScheme.inverseBackgroundColor,
-                      icon: Icons.edit_outlined,
-                      label: l10n.edit,
-                      padding: const EdgeInsets.only(left: 4, right: 0),
-                      spacing: 8,
-                    ),
-                    const SizedBox(
-                      width: 14,
-                    ),
-                    SlidableAction(
-                      onPressed: _onDeletePressed,
-                      backgroundColor: Colors.grey.withOpacity(0.1),
-                      borderRadius: const BorderRadius.all(Radius.circular(8)),
-                      foregroundColor: const Color(0xFFFE4A49),
-                      icon: Icons.delete,
-                      label: l10n.delete,
-                      padding: const EdgeInsets.only(left: 0, right: 0),
-                      spacing: 8,
-                    ),
-                  ],
+                  padding: const EdgeInsets.only(left: 4, right: 0),
                 ),
-                child: Builder(
-                  builder: (context) => _clippedCard(l10n),
+                const SizedBox(
+                  width: 14,
                 ),
-              );
-            },
-          ),
-
-
+                SlidableAction(
+                  onPressed: _onEditPressed,
+                  backgroundColor: Colors.grey.withOpacity(0.1),
+                  borderRadius: const BorderRadius.all(Radius.circular(8)),
+                  foregroundColor:
+                      Theme.of(context).colorScheme.inverseBackgroundColor,
+                  icon: Icons.edit_outlined,
+                  label: l10n.edit,
+                  padding: const EdgeInsets.only(left: 4, right: 0),
+                  spacing: 8,
+                ),
+                const SizedBox(
+                  width: 14,
+                ),
+                SlidableAction(
+                  onPressed: _onDeletePressed,
+                  backgroundColor: Colors.grey.withOpacity(0.1),
+                  borderRadius: const BorderRadius.all(Radius.circular(8)),
+                  foregroundColor: const Color(0xFFFE4A49),
+                  icon: Icons.delete,
+                  label: l10n.delete,
+                  padding: const EdgeInsets.only(left: 0, right: 0),
+                  spacing: 8,
+                ),
+              ],
+            ),
+            child: Builder(
+              builder: (context) => _clippedCard(l10n),
+            ),
+          );
+        },
+      ),
     );
   }
 
@@ -562,8 +555,9 @@ class _CodeWidgetState extends State<CodeWidget> {
     );
     unawaited(
       CodeStore.instance.addCode(code).then(
-            (value) => Fluttertoast.showToast(
-              msg: !currentlyPinned
+            (value) => showToast(
+              context,
+              !currentlyPinned
                   ? context.l10n.pinnedCodeMessage(widget.code.issuer)
                   : context.l10n.unpinnedCodeMessage(widget.code.issuer),
             ),
