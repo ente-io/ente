@@ -734,38 +734,31 @@ class ExportService {
                     const collectionExportName =
                         collectionIDExportNameMap.get(collectionID);
 
-                    await this.removeFileExportedRecord(exportDir, fileUID);
-                    try {
-                        if (isLivePhotoExportName(fileExportName)) {
-                            const { image, video } =
-                                parseLivePhotoExportName(fileExportName);
+                    if (isLivePhotoExportName(fileExportName)) {
+                        const { image, video } =
+                            parseLivePhotoExportName(fileExportName);
 
-                            await moveToTrash(
-                                exportDir,
-                                collectionExportName,
-                                image,
-                            );
-
-                            await moveToTrash(
-                                exportDir,
-                                collectionExportName,
-                                video,
-                            );
-                        } else {
-                            await moveToTrash(
-                                exportDir,
-                                collectionExportName,
-                                fileExportName,
-                            );
-                        }
-                    } catch (e) {
-                        await this.addFileExportedRecord(
+                        await moveToTrash(
                             exportDir,
-                            fileUID,
+                            collectionExportName,
+                            image,
+                        );
+
+                        await moveToTrash(
+                            exportDir,
+                            collectionExportName,
+                            video,
+                        );
+                    } else {
+                        await moveToTrash(
+                            exportDir,
+                            collectionExportName,
                             fileExportName,
                         );
-                        throw e;
                     }
+
+                    await this.removeFileExportedRecord(exportDir, fileUID);
+
                     log.info(`Moved file id ${fileUID} to Trash`);
                 } catch (e) {
                     log.error("trashing failed for a file", e);
