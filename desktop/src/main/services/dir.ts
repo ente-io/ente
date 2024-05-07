@@ -40,12 +40,36 @@ export const openLogDirectory = () => openDirectory(logDirectoryPath());
  *
  * [Note: Electron app paths]
  *
- * By default, these paths are at the following locations:
+ * There are three paths we need to be aware of usually.
  *
- * - macOS: `~/Library/Application Support/ente`
+ * First is the "appData". We can obtain this with `app.getPath("appData")`.
+ * This is per-user application data directory. This is usually the following:
+ *
+ * - Windows: `%APPDATA%`, e.g. `C:\Users\<username>\AppData\Local`
+ * - Linux: `~/.config`
+ * - macOS: `~/Library/Application Support`
+ *
+ * Now, if we suffix the app's name onto the appData directory, we get the
+ * "userData" directory. This is the **primary** place applications are meant to
+ * store user's data, e.g. various configuration files and saved state.
+ *
+ * During development, our app name is "Electron", so this'd be, for example,
+ * `~/Library/Application Support/Electron` if we run using `yarn dev`. For the
+ * packaged production app, our app name is "ente", so this would be:
+ *
+ * - Windows: `%APPDATA%\ente`, e.g. `C:\Users\<username>\AppData\Local\ente`
  * - Linux: `~/.config/ente`
- * - Windows: `%APPDATA%`, e.g. `C:\Users\<username>\AppData\Local\ente`
- * - Windows: C:\Users\<you>\AppData\Local\<Your App Name>
+ * - macOS: `~/Library/Application Support/ente`
+ *
+ * Note that Chromium also stores the browser state, e.g. localStorage or disk
+ * caches, in userData.
+ *
+ * Finally, there is the "logs" directory. This is not within "appData" but has
+ * a slightly different OS specific path. Since our log file is named
+ * "ente.log", it can be found at:
+ *
+ * - macOS: ~/Library/Logs/ente/ente.log (production)
+ * - macOS: ~/Library/Logs/Electron/ente.log    (dev)
  *
  * https://www.electronjs.org/docs/latest/api/app
  *
