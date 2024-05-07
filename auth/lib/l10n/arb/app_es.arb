@@ -138,6 +138,7 @@
   "enterCodeHint": "Ingrese el código de seis dígitos de su aplicación de autenticación",
   "lostDeviceTitle": "¿Perdió su dispositivo?",
   "twoFactorAuthTitle": "Autenticación de dos factores",
+  "passkeyAuthTitle": "Verificación de llave de acceso",
   "verifyPasskey": "Verificar llave de acceso",
   "recoverAccount": "Recuperar cuenta",
   "enterRecoveryKeyHint": "Introduzca su clave de recuperación",
