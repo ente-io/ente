@@ -1,3 +1,4 @@
+import "package:ente_auth/theme/ente_theme.dart";
 import "package:flutter/material.dart";
 
 class AddChip extends StatelessWidget {
@@ -17,9 +18,7 @@ class AddChip extends StatelessWidget {
         child: Icon(
           Icons.add_circle_outline,
           size: 30,
-          color: Theme.of(context).brightness == Brightness.dark
-              ? const Color(0xFF9610D6)
-              : const Color(0xFF8232E1),
+          color: getEnteColorScheme(context).iconButtonColor,
         ),
       ),
     );

@@ -41,6 +41,8 @@ class EnteColorScheme {
   final Color primary400;
   final Color primary300;
 
+  final Color iconButtonColor;
+
   final Color warning700;
   final Color warning500;
   final Color warning400;
@@ -70,7 +72,8 @@ class EnteColorScheme {
     this.blurStrokeBase,
     this.blurStrokeFaint,
     this.blurStrokePressed,
-    this.avatarColors, {
+    this.avatarColors,
+    this.iconButtonColor, {
     this.primaryGreen = _primaryGreen,
     this.primary700 = _primary700,
     this.primary500 = _primary500,
@@ -107,6 +110,7 @@ const EnteColorScheme lightScheme = EnteColorScheme(
   blurStrokeFaintLight,
   blurStrokePressedLight,
   avatarLight,
+  _iconButtonBrightColor,
 );
 
 const EnteColorScheme darkScheme = EnteColorScheme(
@@ -132,6 +136,7 @@ const EnteColorScheme darkScheme = EnteColorScheme(
   blurStrokeFaintDark,
   blurStrokePressedDark,
   avatarDark,
+  _iconButtonDarkColor,
 );
 
 // Background Colors
@@ -199,6 +204,9 @@ const Color _primary700 = Color.fromARGB(255, 164, 0, 182);
 const Color _primary500 = Color.fromARGB(255, 204, 10, 101);
 const Color _primary400 = Color.fromARGB(255, 122, 41, 193);
 const Color _primary300 = Color.fromARGB(255, 152, 77, 244);
+
+const Color _iconButtonBrightColor = Color.fromRGBO(130, 50, 225, 1);
+const Color _iconButtonDarkColor = Color.fromRGBO(255, 150, 16, 1);
 
 const Color _warning700 = Color.fromRGBO(245, 52, 52, 1);
 const Color _warning500 = Color.fromRGBO(255, 101, 101, 1);
