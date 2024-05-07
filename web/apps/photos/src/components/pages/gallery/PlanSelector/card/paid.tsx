@@ -13,7 +13,7 @@ import Plans from "../plans";
 import { BFAddOnRow } from "../plans/BfAddOnRow";
 
 export default function PaidSubscriptionPlanSelectorCard({
-    plans,
+    plansResponse,
     subscription,
     bonusData,
     closeModal,
@@ -70,7 +70,7 @@ export default function PaidSubscriptionPlanSelectorCard({
                         </Typography>
                     </Box>
                     <Plans
-                        plans={plans}
+                        plansResponse={plansResponse}
                         planPeriod={planPeriod}
                         onPlanSelect={onPlanSelect}
                         subscription={subscription}

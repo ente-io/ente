@@ -1,7 +1,5 @@
 import log from "@/next/log";
 import { SUPPORT_EMAIL } from "@ente/shared/constants/urls";
-import { useLocalState } from "@ente/shared/hooks/useLocalState";
-import { LS_KEYS } from "@ente/shared/storage/localStorage";
 import { Link, Stack } from "@mui/material";
 import { PLAN_PERIOD } from "constants/gallery";
 import { t } from "i18next";
@@ -9,7 +7,7 @@ import { AppContext } from "pages/_app";
 import { GalleryContext } from "pages/gallery";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { Trans } from "react-i18next";
-import billingService from "services/billingService";
+import billingService, { type PlansResponse } from "services/billingService";
 import { Plan } from "types/billing";
 import { SetLoading } from "types/gallery";
 import {
@@ -36,7 +34,9 @@ interface Props {
 
 function PlanSelectorCard(props: Props) {
     const subscription = useMemo(() => getLocalUserSubscription(), []);
-    const [plans, setPlans] = useLocalState<Plan[]>(LS_KEYS.PLANS);
+    const [plansResponse, setPlansResponse] = useState<
+        PlansResponse | undefined
+    >();
 
     const [planPeriod, setPlanPeriod] = useState<PLAN_PERIOD>(
         subscription?.period || PLAN_PERIOD.MONTH,
@@ -76,7 +76,8 @@ function PlanSelectorCard(props: Props) {
         const main = async () => {
             try {
                 props.setLoading(true);
-                const plans = await billingService.getPlans();
+                const response = await billingService.getPlans();
+                const { plans } = response;
                 if (isSubscriptionActive(subscription)) {
                     const planNotListed =
                         plans.filter((plan) =>
@@ -90,7 +91,7 @@ function PlanSelectorCard(props: Props) {
                         plans.push(planForSubscription(subscription));
                     }
                 }
-                setPlans(plans);
+                setPlansResponse(response);
             } catch (e) {
                 log.error("plan selector modal open failed", e);
                 props.closeModal();
@@ -172,7 +173,7 @@ function PlanSelectorCard(props: Props) {
             <Stack spacing={3} p={1.5}>
                 {hasPaidSubscription(subscription) ? (
                     <PaidSubscriptionPlanSelectorCard
-                        plans={plans}
+                        plansResponse={plansResponse}
                         subscription={subscription}
                         bonusData={bonusData}
                         closeModal={props.closeModal}
@@ -184,7 +185,7 @@ function PlanSelectorCard(props: Props) {
                     />
                 ) : (
                     <FreeSubscriptionPlanSelectorCard
-                        plans={plans}
+                        plansResponse={plansResponse}
                         subscription={subscription}
                         bonusData={bonusData}
                         closeModal={props.closeModal}
