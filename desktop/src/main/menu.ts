@@ -82,12 +82,14 @@ export const createApplicationMenu = async (mainWindow: BrowserWindow) => {
                             checked: isAutoLaunchEnabled,
                             click: toggleAutoLaunch,
                         },
-                        {
-                            label: "Hide Dock Icon",
-                            type: "checkbox",
-                            checked: shouldHideDockIcon,
-                            click: toggleHideDockIcon,
-                        },
+                        ...macOSOnly([
+                            {
+                                label: "Hide Dock Icon",
+                                type: "checkbox",
+                                checked: shouldHideDockIcon,
+                                click: toggleHideDockIcon,
+                            },
+                        ]),
                     ],
                 },
 
