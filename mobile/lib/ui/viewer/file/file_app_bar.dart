@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:media_extension/media_extension.dart';
@@ -134,9 +133,7 @@ class FileAppBarState extends State<FileAppBar> {
       );
     }
     // only show fav option for files owned by the user
-    if ((isOwnedByUser || flagService.internalUser) &&
-        !isFileHidden &&
-        isFileUploaded) {
+    if (!isFileHidden && isFileUploaded) {
       _actions.add(FavoriteWidget(widget.file));
     }
     if (!isFileUploaded) {
