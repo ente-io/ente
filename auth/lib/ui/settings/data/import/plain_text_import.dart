@@ -108,7 +108,7 @@ Future<void> _pickImportFile(BuildContext context) async {
     if (codes.startsWith('otpauth://')) {
       List<String> splitCodes = codes.split(",");
       if (splitCodes.length == 1) {
-        splitCodes = codes.split("\n");
+        splitCodes = const LineSplitter().convert(codes);
       }
       for (final code in splitCodes) {
         try {
