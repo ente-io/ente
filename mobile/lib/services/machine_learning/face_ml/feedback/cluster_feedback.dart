@@ -240,44 +240,53 @@ class ClusterFeedbackService {
     return;
   }
 
-  Future<bool> checkAndDoAutomaticMerges(PersonEntity p) async {
+  Future<bool> checkAndDoAutomaticMerges(
+    PersonEntity p, {
+    required int personClusterID,
+  }) async {
     final faceMlDb = FaceMLDataDB.instance;
+    final faceIDs = await faceMlDb.getFaceIDsForCluster(personClusterID);
+    if (faceIDs.length < 2 * kMinimumClusterSizeSearchResult) {
+      final fileIDs = faceIDs.map(getFileIdFromFaceId).toSet();
+      if (fileIDs.length < kMinimumClusterSizeSearchResult) {
+        _logger.info(
+          'Cluster $personClusterID has less than $kMinimumClusterSizeSearchResult faces, not doing automatic merges',
+        );
+        return false;
+      }
+    }
     final allClusterIdsToCountMap = (await faceMlDb.clusterIdToFaceCount());
-    final ignoredClusters = await faceMlDb.getPersonIgnoredClusters(p.remoteID);
-    final personClusters = await faceMlDb.getPersonClusterIDs(p.remoteID);
-    dev.log(
-      '${p.data.name} has ${personClusters.length} existing clusters',
-      name: "ClusterFeedbackService",
+    _logger.info(
+      '${kDebugMode ? p.data.name : "private"} has existing clusterID $personClusterID, checking if we can automatically merge more',
     );
 
     // Get and update the cluster summary to get the avg (centroid) and count
     final EnteWatch watch = EnteWatch("ClusterFeedbackService")..start();
     final Map<int, Vector> clusterAvg = await _getUpdateClusterAvg(
       allClusterIdsToCountMap,
-      ignoredClusters,
+      {},
+      minClusterSize: kMinimumClusterSizeSearchResult,
     );
     watch.log('computed avg for ${clusterAvg.length} clusters');
 
     // Find the actual closest clusters for the person
     final List<(int, double)> suggestions = await calcSuggestionsMeanInComputer(
       clusterAvg,
-      personClusters,
-      ignoredClusters,
-      0.3,
+      {personClusterID},
+      {},
+      0.34,
     );
 
     if (suggestions.isEmpty) {
-      dev.log(
-        'No automatic merge suggestions for ${p.data.name}',
-        name: "ClusterFeedbackService",
+      _logger.info(
+        'No automatic merge suggestions for ${kDebugMode ? p.data.name : "private"}',
       );
       return false;
     }
 
     // log suggestions
-    dev.log(
-      'suggestions for ${p.data.name} for cluster ID ${p.remoteID} are  suggestions $suggestions}',
-      name: "ClusterFeedbackService",
+    _logger.info(
+      'suggestions for ${kDebugMode ? p.data.name : "private"} for cluster ID ${p.remoteID} are  suggestions $suggestions}',
     );
 
     for (final suggestion in suggestions) {
@@ -441,7 +450,7 @@ class ClusterFeedbackService {
     _logger.info(
       "Debug logging for cluster $clusterID${clusterSize != null ? ' with $clusterSize photos' : ''}",
     );
-    const int biggestClusterID = 1714971868664806;
+    const int biggestClusterID = 1715061228725148;
 
     // Logging the cluster summary for the cluster
     if (logClusterSummary) {
