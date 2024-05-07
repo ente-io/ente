@@ -97,14 +97,14 @@ class CodeStore {
       result = AddResult.updateCode;
       await _authenticatorService.updateEntry(
         code.generatedID!,
-        code.toExportFormat(),
+        code.toOTPAuthUrlFormat(),
         shouldSync,
         mode,
       );
     } else {
       result = AddResult.newCode;
       code.generatedID = await _authenticatorService.addEntry(
-        code.toExportFormat(),
+        code.toOTPAuthUrlFormat(),
         shouldSync,
         mode,
       );

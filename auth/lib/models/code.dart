@@ -159,7 +159,7 @@ class Code {
     }
   }
 
-  String toExportFormat() {
+  String toOTPAuthUrlFormat() {
     return jsonEncode(
       Uri.parse(
         "$rawData&codeDisplay="
