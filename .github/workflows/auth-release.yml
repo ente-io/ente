@@ -100,9 +100,8 @@ jobs:
             - name: Generate checksums and push to artifacts
               run: |
                 sha256sum artifacts/ente-* > artifacts/sha256sum
-                
 
-            - uses: actions/upload-artifact@v3
+            - uses: actions/upload-artifact@v4
               with:
                 name: sha-artifact
                 path: artifacts/sha256sum
@@ -172,10 +171,10 @@ jobs:
           env:
             LIBSODIUM_USE_PKGCONFIG: 1
 
-        - uses: actions/download-artifact@v3
+        - uses: actions/download-artifact@v4
           with:
             name: sha-artifact
-            path: artifacts/sha256sum
+            path: artifacts
 
         - name: Generate checksums
           run: sha256sum artifacts/ente-* >> artifacts/sha256sum
