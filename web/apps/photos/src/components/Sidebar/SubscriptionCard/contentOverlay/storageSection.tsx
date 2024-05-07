@@ -1,6 +1,6 @@
 import { Box, styled, Typography } from "@mui/material";
 import { t } from "i18next";
-import { bytesInGB, makeHumanReadableStorage } from "utils/units";
+import { bytesInGB, formattedStorageByteSize } from "utils/units";
 
 const MobileSmallBox = styled(Box)`
     display: none;
@@ -30,9 +30,9 @@ export default function StorageSection({ usage, storage }: Iprops) {
                     fontWeight={"bold"}
                     sx={{ fontSize: "24px", lineHeight: "30px" }}
                 >
-                    {`${makeHumanReadableStorage(usage, { roundUp: true })} ${t(
+                    {`${formattedStorageByteSize(usage, { round: true })} ${t(
                         "OF",
-                    )} ${makeHumanReadableStorage(storage)} ${t("USED")}`}
+                    )} ${formattedStorageByteSize(storage)} ${t("USED")}`}
                 </Typography>
             </DefaultBox>
             <MobileSmallBox>

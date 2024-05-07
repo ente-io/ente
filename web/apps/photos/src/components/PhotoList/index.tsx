@@ -24,7 +24,7 @@ import {
 import { EnteFile } from "types/file";
 import { handleSelectCreator } from "utils/photoFrame";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
-import { formattedBytes } from "utils/units";
+import { formattedByteSize } from "utils/units";
 
 const A_DAY = 24 * 60 * 60 * 1000;
 const FOOTER_HEIGHT = 90;
@@ -829,7 +829,7 @@ export function PhotoList({
                 return (
                     <SizeAndCountContainer span={columns}>
                         {listItem.fileCount} {t("FILES")},{" "}
-                        {formattedBytes(listItem.fileSize || 0)} {t("EACH")}
+                        {formattedByteSize(listItem.fileSize || 0)} {t("EACH")}
                     </SizeAndCountContainer>
                 );
             case ITEM_TYPE.FILE: {

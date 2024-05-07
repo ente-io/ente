@@ -1,7 +1,7 @@
 import { SpaceBetweenFlex } from "@ente/shared/components/Container";
 import { Box, Typography } from "@mui/material";
 import { t } from "i18next";
-import { makeHumanReadableStorage } from "utils/units";
+import { formattedStorageByteSize } from "utils/units";
 
 import { Progressbar } from "../../styledComponents";
 
@@ -19,7 +19,7 @@ export function IndividualUsageSection({ usage, storage, fileCount }: Iprops) {
                     marginTop: 1.5,
                 }}
             >
-                <Typography variant="mini">{`${makeHumanReadableStorage(
+                <Typography variant="mini">{`${formattedStorageByteSize(
                     storage - usage,
                 )} ${t("FREE")}`}</Typography>
                 <Typography variant="mini" fontWeight={"bold"}>

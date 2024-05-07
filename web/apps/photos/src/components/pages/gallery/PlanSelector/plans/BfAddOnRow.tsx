@@ -2,7 +2,7 @@ import { SpaceBetweenFlex } from "@ente/shared/components/Container";
 import { Box, styled, Typography } from "@mui/material";
 
 import { Trans } from "react-i18next";
-import { makeHumanReadableStorage } from "utils/units";
+import { formattedStorageByteSize } from "utils/units";
 
 const RowContainer = styled(SpaceBetweenFlex)(({ theme }) => ({
     // gap: theme.spacing(1.5),
@@ -24,7 +24,7 @@ export function BFAddOnRow({ bonusData, closeModal }) {
                                     <Trans
                                         i18nKey={"ADD_ON_AVAILABLE_TILL"}
                                         values={{
-                                            storage: makeHumanReadableStorage(
+                                            storage: formattedStorageByteSize(
                                                 bonus.storage,
                                             ),
                                             date: bonus.validTill,
