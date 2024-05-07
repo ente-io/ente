@@ -87,7 +87,7 @@ PODS:
   - SDWebImage/Core (5.19.0)
   - Sentry/HybridSDK (8.21.0):
     - SentryPrivate (= 8.21.0)
-  - sentry_flutter (0.0.1):
+  - sentry_flutter (7.19.0):
     - Flutter
     - FlutterMacOS
     - Sentry/HybridSDK (= 8.21.0)
@@ -249,7 +249,7 @@ SPEC CHECKSUMS:
   ReachabilitySwift: 5ae15e16814b5f9ef568963fb2c87aeb49158c66
   SDWebImage: 981fd7e860af070920f249fd092420006014c3eb
   Sentry: ebc12276bd17613a114ab359074096b6b3725203
-  sentry_flutter: dff1df05dc39c83d04f9330b36360fc374574c5e
+  sentry_flutter: 88ebea3f595b0bc16acc5bedacafe6d60c12dcd5
   SentryPrivate: d651efb234cf385ec9a1cdd3eff94b5e78a0e0fe
   share_plus: c3fef564749587fc939ef86ffb283ceac0baf9f5
   shared_preferences_foundation: b4c3b4cddf1c21f02770737f147a3f5da9d39695
@@ -263,4 +263,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: b4e3a7eabb03395b66e81fc061789f61526ee6bb
 
-COCOAPODS: 1.14.3
+COCOAPODS: 1.15.2
