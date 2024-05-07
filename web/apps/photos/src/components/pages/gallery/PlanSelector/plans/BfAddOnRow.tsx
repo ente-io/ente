@@ -2,7 +2,7 @@ import { SpaceBetweenFlex } from "@ente/shared/components/Container";
 import { Box, styled, Typography } from "@mui/material";
 
 import { Trans } from "react-i18next";
-import { makeHumanReadableStorage } from "utils/billing";
+import { makeHumanReadableStorage } from "utils/units";
 
 const RowContainer = styled(SpaceBetweenFlex)(({ theme }) => ({
     // gap: theme.spacing(1.5),

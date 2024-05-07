@@ -6,11 +6,8 @@ import { Badge } from "components/Badge";
 import { PLAN_PERIOD } from "constants/gallery";
 import { t } from "i18next";
 import { Plan, Subscription } from "types/billing";
-import {
-    convertBytesToGBs,
-    hasPaidSubscription,
-    isUserSubscribedPlan,
-} from "utils/billing";
+import { hasPaidSubscription, isUserSubscribedPlan } from "utils/billing";
+import { convertBytesToGBs } from "utils/units";
 
 interface Iprops {
     plan: Plan;

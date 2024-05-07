@@ -1,7 +1,7 @@
 import { SpaceBetweenFlex } from "@ente/shared/components/Container";
 import { Box, Typography } from "@mui/material";
 import { t } from "i18next";
-import { makeHumanReadableStorage } from "utils/billing";
+import { makeHumanReadableStorage } from "utils/units";
 
 import { Progressbar } from "../../styledComponents";
 

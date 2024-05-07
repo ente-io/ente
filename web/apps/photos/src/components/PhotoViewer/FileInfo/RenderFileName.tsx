@@ -7,7 +7,7 @@ import VideocamOutlined from "@mui/icons-material/VideocamOutlined";
 import Box from "@mui/material/Box";
 import { useEffect, useState } from "react";
 import { EnteFile } from "types/file";
-import { makeHumanReadableStorage } from "utils/billing";
+import { makeHumanReadableStorage } from "utils/units";
 import { changeFileName, updateExistingFilePubMetadata } from "utils/file";
 import { FileNameEditDialog } from "./FileNameEditDialog";
 import InfoItem from "./InfoItem";
