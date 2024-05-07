@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:ente_auth/models/code_display.dart';
 import 'package:ente_auth/utils/totp_util.dart';
-import 'package:flutter/foundation.dart';
 
 class Code {
   static const defaultDigits = 6;
@@ -147,16 +146,11 @@ class Code {
   }
 
   static Code fromExportJson(Map rawJson) {
-    try {
-      Code resultCode = Code.fromOTPAuthUrl(
-        rawJson['rawData'],
-        display: CodeDisplay.fromJson(rawJson['display']),
-      );
-      return resultCode;
-    } catch (e) {
-      debugPrint("Failed to parse code from export json $e");
-      rethrow;
-    }
+    Code resultCode = Code.fromOTPAuthUrl(
+      rawJson['rawData'],
+      display: CodeDisplay.fromJson(rawJson['display']),
+    );
+    return resultCode;
   }
 
   String toOTPAuthUrlFormat() {

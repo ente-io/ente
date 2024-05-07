@@ -13,12 +13,15 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 
+final _logger = Logger('PlainText');
+
 class PlainTextImport extends StatelessWidget {
   const PlainTextImport({super.key});
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+
     return Column(
       children: [
         Text(
@@ -125,7 +128,7 @@ Future<void> _pickImportFile(BuildContext context) async {
         try {
           parsedCodes.add(Code.fromExportJson(code));
         } catch (e) {
-          Logger('PlainText').severe("Could not parse code", e);
+          _logger.severe("Could not parse code", e);
         }
       }
     }
