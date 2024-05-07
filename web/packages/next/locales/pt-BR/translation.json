@@ -449,7 +449,7 @@
     "TWO_MONTHS_FREE": "Obtenha 2 meses gratuitos em planos anuais",
     "POPULAR": "Popular",
     "FREE_PLAN_OPTION_LABEL": "Continuar com teste gratuito",
-    "FREE_PLAN_DESCRIPTION": "1 GB por 1 ano",
+    "free_plan_description": "{{storage}} por 1 ano",
     "CURRENT_USAGE": "O uso atual é <strong>{{usage}}</strong>",
     "WEAK_DEVICE": "O navegador da web que você está usando não é poderoso o suficiente para criptografar suas fotos. Por favor, tente entrar para o ente no computador ou baixe o aplicativo móvel.",
     "DRAG_AND_DROP_HINT": "Ou arraste e solte na janela ente",

@@ -12,6 +12,7 @@ import {
     isPopularPlan,
     isUserSubscribedPlan,
 } from "utils/billing";
+import { formattedStorageByteSize } from "utils/units";
 import { PlanRow } from "./planRow";
 
 interface Iprops {
@@ -64,13 +65,15 @@ interface FreePlanRowProps {
     closeModal: () => void;
 }
 
-const FreePlanRow: React.FC<FreePlanRowProps> = ({ closeModal }) => {
+const FreePlanRow: React.FC<FreePlanRowProps> = ({ closeModal, storage }) => {
     return (
         <FreePlanRow_ onClick={closeModal}>
             <Box>
                 <Typography> {t("FREE_PLAN_OPTION_LABEL")}</Typography>
                 <Typography variant="small" color="text.muted">
-                    {t("FREE_PLAN_DESCRIPTION")}
+                    {t("free_plan_description", {
+                        storage: formattedStorageByteSize(storage),
+                    })}
                 </Typography>
             </Box>
             <IconButton className={"endIcon"}>

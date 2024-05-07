@@ -449,7 +449,7 @@
     "TWO_MONTHS_FREE": "在年度计划上免费获得 2 个月",
     "POPULAR": "流行的",
     "FREE_PLAN_OPTION_LABEL": "继续免费试用",
-    "FREE_PLAN_DESCRIPTION": "1 GB 1年",
+    "free_plan_description": "{{storage}} 1年",
     "CURRENT_USAGE": "当前使用量是 <strong>{{usage}}</strong>",
     "WEAK_DEVICE": "您使用的网络浏览器功能不够强大，无法加密您的照片。 请尝试在电脑上登录Ente，或下载Ente移动/桌面应用程序。",
     "DRAG_AND_DROP_HINT": "或者拖动并拖动到 Ente 窗口",
