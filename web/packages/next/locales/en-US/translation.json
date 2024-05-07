@@ -449,7 +449,7 @@
     "TWO_MONTHS_FREE": "Get 2 months free on yearly plans",
     "POPULAR": "Popular",
     "FREE_PLAN_OPTION_LABEL": "Continue with free trial",
-    "FREE_PLAN_DESCRIPTION": "1 GB for 1 year",
+    "free_plan_description": "{{storage}} for 1 year",
     "CURRENT_USAGE": "Current usage is <strong>{{usage}}</strong>",
     "WEAK_DEVICE": "The web browser you're using is not powerful enough to encrypt your photos. Please try to log in to Ente on your computer, or download the Ente mobile/desktop app.",
     "DRAG_AND_DROP_HINT": "Or drag and drop into the Ente window",

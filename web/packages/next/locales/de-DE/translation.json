@@ -449,7 +449,7 @@
     "TWO_MONTHS_FREE": "Erhalte 2 Monate kostenlos bei Jahresabonnements",
     "POPULAR": "Beliebt",
     "FREE_PLAN_OPTION_LABEL": "Mit kostenloser Testversion fortfahren",
-    "FREE_PLAN_DESCRIPTION": "1 GB für 1 Jahr",
+    "free_plan_description": "{{storage}} für 1 Jahr",
     "CURRENT_USAGE": "Aktuelle Nutzung ist <strong>{{usage}}</strong>",
     "WEAK_DEVICE": "Dein Browser ist nicht leistungsstark genug, um deine Bilder zu verschlüsseln. Versuche, dich an einem Computer bei Ente anzumelden, oder lade dir die Ente-App für dein Gerät (Handy oder Desktop) herunter.",
     "DRAG_AND_DROP_HINT": "Oder ziehe Dateien per Drag-and-Drop in das Ente-Fenster",

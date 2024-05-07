@@ -449,7 +449,7 @@
     "TWO_MONTHS_FREE": "Krijg 2 maanden gratis op jaarlijkse abonnementen",
     "POPULAR": "Populair",
     "FREE_PLAN_OPTION_LABEL": "Doorgaan met gratis account",
-    "FREE_PLAN_DESCRIPTION": "1 GB voor 1 jaar",
+    "free_plan_description": "{{storage}} voor 1 jaar",
     "CURRENT_USAGE": "Huidig gebruik is <strong>{{usage}}</strong>",
     "WEAK_DEVICE": "De webbrowser die u gebruikt is niet krachtig genoeg om uw foto's te versleutelen. Probeer in te loggen op uw computer, of download de Ente mobiel/desktop app.",
     "DRAG_AND_DROP_HINT": "Of sleep en plaats in het Ente venster",

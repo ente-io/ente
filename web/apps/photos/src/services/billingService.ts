@@ -19,8 +19,18 @@ enum PaymentActionType {
     Update = "update",
 }
 
+export interface FreePlan {
+    /* Number of bytes available in the free plan */
+    storage: number;
+}
+
+export interface PlansResponse {
+    freePlan: FreePlan;
+    plans: Plan[];
+}
+
 class billingService {
-    public async getPlans(): Promise<Plan[]> {
+    public async getPlans(): Promise<PlansResponse> {
         const token = getToken();
         try {
             let response;
@@ -37,8 +47,7 @@ class billingService {
                     },
                 );
             }
-            const { plans } = response.data;
-            return plans;
+            return response.data;
         } catch (e) {
             log.error("failed to get plans", e);
         }
