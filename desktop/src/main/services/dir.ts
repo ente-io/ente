@@ -72,7 +72,6 @@ export const openLogDirectory = () => openDirectory(logDirectoryPath());
  * - macOS: ~/Library/Logs/Electron/ente.log    (dev)
  *
  * https://www.electronjs.org/docs/latest/api/app
- *
  */
 const logDirectoryPath = () => app.getPath("logs");
 
