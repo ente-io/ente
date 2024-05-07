@@ -5,11 +5,8 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import { t } from "i18next";
 import { Trans } from "react-i18next";
-import {
-    convertBytesToGBs,
-    hasAddOnBonus,
-    isSubscriptionCancelled,
-} from "utils/billing";
+import { hasAddOnBonus, isSubscriptionCancelled } from "utils/billing";
+import { bytesInGB } from "utils/units";
 import { ManageSubscription } from "../manageSubscription";
 import { PeriodToggler } from "../periodToggler";
 import Plans from "../plans";
@@ -35,8 +32,7 @@ export default function PaidSubscriptionPlanSelectorCard({
                             {t("SUBSCRIPTION")}
                         </Typography>
                         <Typography variant="small" color={"text.muted"}>
-                            {convertBytesToGBs(subscription.storage, 2)}{" "}
-                            {t("GB")}
+                            {bytesInGB(subscription.storage, 2)} {t("GB")}
                         </Typography>
                     </Box>
                     <IconButton onClick={closeModal} color="secondary">
@@ -50,7 +46,7 @@ export default function PaidSubscriptionPlanSelectorCard({
                     <Trans
                         i18nKey="CURRENT_USAGE"
                         values={{
-                            usage: `${convertBytesToGBs(usage, 2)} ${t("GB")}`,
+                            usage: `${bytesInGB(usage, 2)} ${t("GB")}`,
                         }}
                     />
                 </Typography>

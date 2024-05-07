@@ -83,7 +83,8 @@ export default function Index() {
                             fontWeight: "normal",
                         }}
                     >
-                        Enter this code on <b>Ente Photos</b> to pair this screen
+                        Enter this code on <b>Ente Photos</b> to pair this
+                        screen
                     </h1>
                     <div
                         style={{
