@@ -12,12 +12,36 @@ export const setupAutoUpdater = (mainWindow: BrowserWindow) => {
     autoUpdater.logger = electronLog;
     autoUpdater.autoDownload = false;
 
-    // Skip checking for updates automatically in dev builds. Installing an
-    // update would fail anyway since (at least on macOS), the auto update
-    // process requires signed builds.
-    //
-    // Even though this is skipped on app start, we can still use the "Check for
-    // updates..." menu option to trigger the update if we wish in dev builds.
+    /**
+     * [Note: Testing auto updates]
+     *
+     * By default, we skip checking for updates automatically in dev builds.
+     * This is because even if we were to find an update, installing it would
+     * fail because (at least on macOS), the auto update process requires signed
+     * builds.
+     *
+     * Even though this is skipped on app start, we can still use the "Check for
+     * updates..." menu option to trigger the update if we wish in dev builds.
+     *
+     * This can be used to do a test of the update process (up until the actual
+     * installation itself).
+     *
+     * 1. Create a `app/dev-app-update.yml` with:
+     *
+     *     provider: generic
+     *     url: http://127.0.0.1:7777/
+     *
+     * 2. Start a local webserver in some directory:
+     *
+     *     python3 -m http.server 7777
+     *
+     * 3. In this directory, put `latest-mac.yml` and the DMG file that this
+     *    YAML file refers to.
+     *
+     * 4. Start the app, and use the "Check for updates..." menu option to
+     *    trigger the update flow.
+     */
+    autoUpdater.forceDevUpdateConfig = isDev;
     if (isDev) return;
 
     const oneDay = 1 * 24 * 60 * 60 * 1000;
