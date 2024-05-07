@@ -261,7 +261,8 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
           return;
         }
       }
-      final CodeDisplay display = widget.code!.display.copyWith(tags: tags);
+      final CodeDisplay display =
+          widget.code?.display.copyWith(tags: tags) ?? CodeDisplay(tags: tags);
       final Code newCode = widget.code == null
           ? Code.fromAccountAndSecret(
               isStreamCode ? Type.steam : Type.totp,
