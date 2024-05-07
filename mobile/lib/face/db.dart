@@ -988,7 +988,7 @@ class FaceMLDataDB {
     }
   }
 
-  /// WARNING: This will delete ALL data in the database! Only use this for debug/testing purposes!
+  /// WARNING: This will delete ALL data in the tables! Only use this for debug/testing purposes!
   Future<void> dropFeedbackTables() async {
     try {
       final db = await instance.asyncDB;
@@ -997,12 +997,10 @@ class FaceMLDataDB {
       await db.execute(deletePersonTable);
       await db.execute(dropClusterPersonTable);
       await db.execute(dropNotPersonFeedbackTable);
-      await db.execute(dropClusterSummaryTable);
 
       // Recreate the tables
       await db.execute(createClusterPersonTable);
       await db.execute(createNotPersonFeedbackTable);
-      await db.execute(createClusterSummaryTable);
     } catch (e) {
       _logger.severe('Error dropping feedback tables', e);
     }
