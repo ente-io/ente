@@ -22,9 +22,9 @@ import {
     areEqual,
 } from "react-window";
 import { EnteFile } from "types/file";
-import { convertBytesToHumanReadable } from "utils/file";
 import { handleSelectCreator } from "utils/photoFrame";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
+import { convertBytesToHumanReadable } from "utils/units";
 
 const A_DAY = 24 * 60 * 60 * 1000;
 const FOOTER_HEIGHT = 90;

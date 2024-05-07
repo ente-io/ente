@@ -19,7 +19,7 @@ import {
 } from "react-window";
 import { Duplicate } from "services/deduplicationService";
 import { EnteFile } from "types/file";
-import { convertBytesToHumanReadable } from "utils/file";
+import { convertBytesToHumanReadable } from "utils/units";
 
 export enum ITEM_TYPE {
     TIME = "TIME",

@@ -4,8 +4,26 @@ const StorageUnits = ["B", "KB", "MB", "GB", "TB"];
 
 const ONE_GB = 1024 * 1024 * 1024;
 
-export function convertBytesToGBs(bytes: number, precision = 0): string {
-    return (bytes / (1024 * 1024 * 1024)).toFixed(precision);
+/**
+ * Convert the given number of {@link bytes} to their equivalent GB string with
+ * {@link precision}.
+ *
+ * The returned string does not have the GB prefix.
+ */
+export const bytesInGB = (bytes: number, precision = 0): string =>
+    (bytes / (1024 * 1024 * 1024)).toFixed(precision);
+
+export function convertBytesToHumanReadable(
+    bytes: number,
+    precision = 2,
+): string {
+    if (bytes === 0 || isNaN(bytes)) {
+        return "0 MB";
+    }
+
+    const i = Math.floor(Math.log(bytes) / Math.log(1024));
+    const sizes = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
+    return (bytes / Math.pow(1024, i)).toFixed(precision) + " " + sizes[i];
 }
 
 export function makeHumanReadableStorage(
