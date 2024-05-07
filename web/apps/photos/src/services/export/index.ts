@@ -985,26 +985,21 @@ class ExportService {
                     file.metadata.title,
                     electron.fs.exists,
                 );
+                await this.saveMetadataFile(
+                    collectionExportPath,
+                    fileExportName,
+                    file,
+                );
+                await writeStream(
+                    electron,
+                    `${collectionExportPath}/${fileExportName}`,
+                    updatedFileStream,
+                );
                 await this.addFileExportedRecord(
                     exportDir,
                     fileUID,
                     fileExportName,
                 );
-                try {
-                    await this.saveMetadataFile(
-                        collectionExportPath,
-                        fileExportName,
-                        file,
-                    );
-                    await writeStream(
-                        electron,
-                        `${collectionExportPath}/${fileExportName}`,
-                        updatedFileStream,
-                    );
-                } catch (e) {
-                    await this.removeFileExportedRecord(exportDir, fileUID);
-                    throw e;
-                }
             }
         } catch (e) {
             log.error("download and save failed", e);
@@ -1032,52 +1027,46 @@ class ExportService {
             livePhoto.videoFileName,
             fs.exists,
         );
+
         const livePhotoExportName = getLivePhotoExportName(
             imageExportName,
             videoExportName,
         );
+
+        const imageStream = generateStreamFromArrayBuffer(livePhoto.imageData);
+        await this.saveMetadataFile(
+            collectionExportPath,
+            imageExportName,
+            file,
+        );
+        await writeStream(
+            electron,
+            `${collectionExportPath}/${imageExportName}`,
+            imageStream,
+        );
+
+        const videoStream = generateStreamFromArrayBuffer(livePhoto.videoData);
+        await this.saveMetadataFile(
+            collectionExportPath,
+            videoExportName,
+            file,
+        );
+        try {
+            await writeStream(
+                electron,
+                `${collectionExportPath}/${videoExportName}`,
+                videoStream,
+            );
+        } catch (e) {
+            await fs.rm(`${collectionExportPath}/${imageExportName}`);
+            throw e;
+        }
+
         await this.addFileExportedRecord(
             exportDir,
             fileUID,
             livePhotoExportName,
         );
-        try {
-            const imageStream = generateStreamFromArrayBuffer(
-                livePhoto.imageData,
-            );
-            await this.saveMetadataFile(
-                collectionExportPath,
-                imageExportName,
-                file,
-            );
-            await writeStream(
-                electron,
-                `${collectionExportPath}/${imageExportName}`,
-                imageStream,
-            );
-
-            const videoStream = generateStreamFromArrayBuffer(
-                livePhoto.videoData,
-            );
-            await this.saveMetadataFile(
-                collectionExportPath,
-                videoExportName,
-                file,
-            );
-            try {
-                await writeStream(
-                    electron,
-                    `${collectionExportPath}/${videoExportName}`,
-                    videoStream,
-                );
-            } catch (e) {
-                await fs.rm(`${collectionExportPath}/${imageExportName}`);
-                throw e;
-            }
-        } catch (e) {
-            await this.removeFileExportedRecord(exportDir, fileUID);
-            throw e;
-        }
     }
 
     private async saveMetadataFile(
