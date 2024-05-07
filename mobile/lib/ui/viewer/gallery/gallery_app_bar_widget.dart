@@ -90,7 +90,6 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   String? _appBarTitle;
   late CollectionActions collectionActions;
   bool isQuickLink = false;
-  late bool isInternalUser;
   late GalleryType galleryType;
 
   final ValueNotifier<int> castNotifier = ValueNotifier<int>(0);
@@ -101,7 +100,6 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     _selectedFilesListener = () {
       setState(() {});
     };
-    isInternalUser = flagService.internalUser;
     collectionActions = CollectionActions(CollectionsService.instance);
     widget.selectedFiles.addListener(_selectedFilesListener);
     _userAuthEventSubscription =
@@ -416,7 +414,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
                 ? Icons.visibility_outlined
                 : Icons.visibility_off_outlined,
           ),
-        if (widget.collection != null && isInternalUser)
+        if (widget.collection != null)
           EntePopupMenuItem(
             value: AlbumPopupAction.playOnTv,
             context.l10n.playOnTv,

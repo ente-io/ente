@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:media_extension/media_extension.dart';
@@ -12,7 +11,6 @@ import 'package:photos/models/file/file_type.dart';
 import 'package:photos/models/file/trash_file.dart';
 import "package:photos/models/metadata/common_keys.dart";
 import 'package:photos/models/selected_files.dart';
-import "package:photos/service_locator.dart";
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/hidden_service.dart';
 import 'package:photos/ui/collections/collection_action_sheet.dart';
@@ -134,9 +132,7 @@ class FileAppBarState extends State<FileAppBar> {
       );
     }
     // only show fav option for files owned by the user
-    if ((isOwnedByUser || flagService.internalUser) &&
-        !isFileHidden &&
-        isFileUploaded) {
+    if (!isFileHidden && isFileUploaded) {
       _actions.add(FavoriteWidget(widget.file));
     }
     if (!isFileUploaded) {
