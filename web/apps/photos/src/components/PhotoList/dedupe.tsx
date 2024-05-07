@@ -19,7 +19,7 @@ import {
 } from "react-window";
 import { Duplicate } from "services/deduplicationService";
 import { EnteFile } from "types/file";
-import { convertBytesToHumanReadable } from "utils/units";
+import { formattedBytes } from "utils/units";
 
 export enum ITEM_TYPE {
     TIME = "TIME",
@@ -310,8 +310,7 @@ export function DedupePhotoList({
                       */
                     <SizeAndCountContainer span={columns}>
                         {listItem.fileCount} {t("FILES")},{" "}
-                        {convertBytesToHumanReadable(listItem.fileSize || 0)}{" "}
-                        {t("EACH")}
+                        {formattedBytes(listItem.fileSize || 0)} {t("EACH")}
                     </SizeAndCountContainer>
                 );
             case ITEM_TYPE.FILE: {

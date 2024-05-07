@@ -13,10 +13,16 @@ const ONE_GB = 1024 * 1024 * 1024;
 export const bytesInGB = (bytes: number, precision = 0): string =>
     (bytes / (1024 * 1024 * 1024)).toFixed(precision);
 
-export function convertBytesToHumanReadable(
-    bytes: number,
-    precision = 2,
-): string {
+/**
+ * Convert the given number of {@link bytes} to a user visible string in an
+ * appropriately sized unit.
+ *
+ * The returned string includes the (localized) unit suffix, e.g. "TB".
+ *
+ * @param precision Modify the number of digits after the decimal point.
+ * Defaults to 2.
+ */
+export function formattedBytes(bytes: number, precision = 2): string {
     if (bytes === 0 || isNaN(bytes)) {
         return "0 MB";
     }
