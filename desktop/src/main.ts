@@ -142,7 +142,7 @@ const createMainWindow = () => {
     // Create the main window. This'll show our web content.
     const window = new BrowserWindow({
         webPreferences: {
-            preload: path.join(app.getAppPath(), "preload.js"),
+            preload: path.join(__dirname, "preload.js"),
             sandbox: true,
         },
         // The color to show in the window until the web content gets loaded.
@@ -287,13 +287,29 @@ const setupTrayItem = (mainWindow: BrowserWindow) => {
 
 /**
  * Older versions of our app used to maintain a cache dir using the main
- * process. This has been deprecated in favor of using a normal web cache.
+ * process. This has been removed in favor of cache on the web layer.
  *
- * Delete the old cache dir if it exists. This code was added March 2024, and
- * can be removed after some time once most people have upgraded to newer
- * versions.
+ * Delete the old cache dir if it exists.
+ *
+ * This will happen in two phases. The cache had three subdirectories:
+ *
+ * - Two of them, "thumbs" and "files", will be removed now (v1.7.0, May 2024).
+ *
+ * - The third one, "face-crops" will be removed once we finish the face search
+ *   changes. See: [Note: Legacy face crops].
+ *
+ * This migration code can be removed after some time once most people have
+ * upgraded to newer versions.
  */
 const deleteLegacyDiskCacheDirIfExists = async () => {
+    const removeIfExists = async (dirPath: string) => {
+        if (existsSync(dirPath)) {
+            log.info(`Removing legacy disk cache from ${dirPath}`);
+            await fs.rm(dirPath, { recursive: true });
+        }
+    };
+    // [Note: Getting the cache path]
+    //
     // The existing code was passing "cache" as a parameter to getPath.
     //
     // However, "cache" is not a valid parameter to getPath. It works! (for
@@ -309,8 +325,8 @@ const deleteLegacyDiskCacheDirIfExists = async () => {
     // @ts-expect-error "cache" works but is not part of the public API.
     const cacheDir = path.join(app.getPath("cache"), "ente");
     if (existsSync(cacheDir)) {
-        log.info(`Removing legacy disk cache from ${cacheDir}`);
-        await fs.rm(cacheDir, { recursive: true });
+        await removeIfExists(path.join(cacheDir, "thumbs"));
+        await removeIfExists(path.join(cacheDir, "files"));
     }
 };
 
@@ -375,7 +391,7 @@ const main = () => {
             // Continue on with the rest of the startup sequence.
             Menu.setApplicationMenu(await createApplicationMenu(mainWindow));
             setupTrayItem(mainWindow);
-            if (!isDev) setupAutoUpdater(mainWindow);
+            setupAutoUpdater(mainWindow);
 
             try {
                 await deleteLegacyDiskCacheDirIfExists();

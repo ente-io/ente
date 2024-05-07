@@ -10,7 +10,7 @@ import mlIDbStorage, {
     ML_SYNC_CONFIG_NAME,
     ML_SYNC_JOB_CONFIG_NAME,
 } from "utils/storage/mlIDbStorage";
-import { isInternalUser } from "utils/user";
+import { isInternalUserForML } from "utils/user";
 
 export async function getMLSyncJobConfig() {
     return mlIDbStorage.getConfig(
@@ -24,7 +24,7 @@ export async function getMLSyncConfig() {
 }
 
 export async function getMLSearchConfig() {
-    if (isInternalUser()) {
+    if (isInternalUserForML()) {
         return mlIDbStorage.getConfig(
             ML_SEARCH_CONFIG_NAME,
             DEFAULT_ML_SEARCH_CONFIG,

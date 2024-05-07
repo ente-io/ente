@@ -6,10 +6,19 @@ import { allowWindowClose } from "../../main";
 import { AppUpdate } from "../../types/ipc";
 import log from "../log";
 import { userPreferences } from "../stores/user-preferences";
+import { isDev } from "../utils/electron";
 
 export const setupAutoUpdater = (mainWindow: BrowserWindow) => {
     autoUpdater.logger = electronLog;
     autoUpdater.autoDownload = false;
+
+    // Skip checking for updates automatically in dev builds. Installing an
+    // update would fail anyway since (at least on macOS), the auto update
+    // process requires signed builds.
+    //
+    // Even though this is skipped on app start, we can still use the "Check for
+    // updates..." menu option to trigger the update if we wish in dev builds.
+    if (isDev) return;
 
     const oneDay = 1 * 24 * 60 * 60 * 1000;
     setInterval(() => void checkForUpdatesAndNotify(mainWindow), oneDay);

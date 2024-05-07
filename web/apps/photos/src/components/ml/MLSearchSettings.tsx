@@ -22,7 +22,7 @@ import {
     getFaceSearchEnabledStatus,
     updateFaceSearchEnabledStatus,
 } from "services/userService";
-import { isInternalUser } from "utils/user";
+import { isInternalUserForML } from "utils/user";
 
 export const MLSearchSettings = ({ open, onClose, onRootClose }) => {
     const {
@@ -280,7 +280,7 @@ function EnableMLSearch({ onClose, enableMlSearch, onRootClose }) {
                         </p>
                     </Typography>
                 </Box>
-                {isInternalUser() && (
+                {isInternalUserForML() && (
                     <Stack px={"8px"} spacing={"8px"}>
                         <Button
                             color={"accent"}
