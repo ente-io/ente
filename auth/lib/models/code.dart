@@ -244,7 +244,11 @@ class Code {
   }
 
   String get rawDataWithoutDisplay {
-    return "otpauth://${type.name}/$issuer:$account?algorithm=SHA1&digits=$digits&issuer=$issuer&period=30&secret=$secret";
+    final updatedIssuer = jsonEncode(issuer);
+    final uri = Uri.parse(
+      "otpauth://${type.name}/$updatedIssuer:$account?algorithm=SHA1&digits=$digits&issuer=$updatedIssuer&period=30&secret=$secret",
+    );
+    return uri.toString();
   }
 
   @override
