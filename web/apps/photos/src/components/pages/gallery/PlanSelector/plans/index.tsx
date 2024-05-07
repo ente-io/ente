@@ -16,7 +16,7 @@ import { formattedStorageByteSize } from "utils/units";
 import { PlanRow } from "./planRow";
 
 interface Iprops {
-    plansResponse: PlansResponse;
+    plansResponse: PlansResponse | undefined;
     planPeriod: PLAN_PERIOD;
     subscription: Subscription;
     bonusData?: BonusData;
@@ -32,7 +32,7 @@ const Plans = ({
     onPlanSelect,
     closeModal,
 }: Iprops) => {
-    const { freePlan, plans } = plansResponse;
+    const { freePlan, plans } = plansResponse ?? {};
     return (
         <Stack spacing={2}>
             {plans
@@ -48,7 +48,8 @@ const Plans = ({
                     />
                 ))}
             {!hasPaidSubscription(subscription) &&
-                !hasAddOnBonus(bonusData) && (
+                !hasAddOnBonus(bonusData) &&
+                freePlan && (
                     <FreePlanRow
                         storage={freePlan.storage}
                         closeModal={closeModal}
