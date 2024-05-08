@@ -282,6 +282,8 @@ internal:
     #     local-domain-value: 123456
     # List of user IDs that can use the admin API endpoints.
     admins: []
+    # Cleanup delay of S3/MinIO objects in minutes (default: 45 days = 64800 minutes)
+    # delete-object-delay: 64800
 
 # Replication config
 #

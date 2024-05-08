@@ -154,7 +154,7 @@ func main() {
 	dataCleanupRepository := &datacleanup.Repository{DB: db}
 
 	notificationHistoryRepo := &repo.NotificationHistoryRepository{DB: db}
-	queueRepo := &repo.QueueRepository{DB: db}
+	queueRepo := &repo.QueueRepository{DB: db, DeleteObjectDelay: viper.GetString("internal.delete-object-delay")}
 	objectRepo := &repo.ObjectRepository{DB: db, QueueRepo: queueRepo}
 	objectCleanupRepo := &repo.ObjectCleanupRepository{DB: db}
 	objectCopiesRepo := &repo.ObjectCopiesRepository{DB: db}

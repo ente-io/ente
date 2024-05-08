@@ -15,17 +15,7 @@ import (
 // QueueRepository defines methods to insert, delete items from queue
 type QueueRepository struct {
 	DB *sql.DB
-}
-
-// itemDeletionDelayInMinMap tracks the delay (in min) after which an item is ready to be processed.
-// -ve entry indicates that the item should be processed immediately, without any delay.
-var itemDeletionDelayInMinMap = map[string]int64{
-	DropFileEncMedataQueue:    -1 * 24 * 60, // -ve value to ensure attributes are immediately removed
-	DeleteObjectQueue:         45 * 24 * 60, // 45 days in minutes
-	DeleteEmbeddingsQueue:     -1 * 24 * 60, // -ve value to ensure embeddings are immediately removed
-	TrashCollectionQueueV3:    -1 * 24 * 60, // -ve value to ensure collections are immediately marked as trashed
-	TrashEmptyQueue:           -1 * 24 * 60, // -ve value to ensure empty trash request are processed in next cron run
-	RemoveComplianceHoldQueue: -1 * 24 * 60, // -ve value to ensure compliance hold is removed in next cron run
+    DeleteObjectDelay string
 }
 
 const (
@@ -124,8 +114,28 @@ func (repo *QueueRepository) DeleteItem(queueName string, item string) error {
 	return stacktrace.Propagate(err, "")
 }
 
+func getDeleteObjectDelayInt(DeleteObjectDelay *string) int64 {
+    DeleteObjectDelayInt, err := strconv.ParseInt(*DeleteObjectDelay, 10, 64)
+    if err != nil || DeleteObjectDelayInt == 0 {
+        DeleteObjectDelayInt = 45 * 24 * 60 // defaults to 45 days in minutes
+    }
+    logrus.Debugf("DeleteObjectDelay: %d minutes", DeleteObjectDelayInt)
+    return DeleteObjectDelayInt
+}
+
 // GetItemsReadyForDeletion method, for a given queue name, returns a list of QueueItem  which are ready for deletion
 func (repo *QueueRepository) GetItemsReadyForDeletion(queueName string, count int) ([]QueueItem, error) {
+    // itemDeletionDelayInMinMap tracks the delay (in min) after which an item is ready to be processed.
+    // -ve entry indicates that the item should be processed immediately, without any delay.
+    var itemDeletionDelayInMinMap = map[string]int64{
+    	DropFileEncMedataQueue:    -1 * 24 * 60, // -ve value to ensure attributes are immediately removed
+    	DeleteObjectQueue:         getDeleteObjectDelayInt(&repo.DeleteObjectDelay),
+    	DeleteEmbeddingsQueue:     -1 * 24 * 60, // -ve value to ensure embeddings are immediately removed
+    	TrashCollectionQueueV3:    -1 * 24 * 60, // -ve value to ensure collections are immediately marked as trashed
+    	TrashEmptyQueue:           -1 * 24 * 60, // -ve value to ensure empty trash request are processed in next cron run
+    	RemoveComplianceHoldQueue: -1 * 24 * 60, // -ve value to ensure compliance hold is removed in next cron run
+    }
+
 	delayInMin, ok := itemDeletionDelayInMinMap[queueName]
 	if !ok {
 		return nil, stacktrace.Propagate(fmt.Errorf("missing delay for %s", queueName), "")
