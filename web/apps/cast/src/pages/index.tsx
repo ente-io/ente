@@ -1,5 +1,6 @@
 import log from "@/next/log";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
+import { styled } from "@mui/material";
 import { PairingCode } from "components/PairingCode";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -65,65 +66,55 @@ export default function Index() {
     };
 
     return (
-        <>
+        <Container>
+            <img width={150} src="/images/ente.svg" />
+            <h1>
+                Enter this code on <b>Ente Photos</b> to pair this screen
+            </h1>
             <div
                 style={{
-                    height: "100%",
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
+                    borderRadius: "10px",
+                    overflow: "hidden",
                 }}
             >
-                <div
-                    style={{
-                        textAlign: "center",
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
-                    }}
-                >
-                    <img width={150} src="/images/ente.svg" />
-                    <h1
-                        style={{
-                            fontWeight: "normal",
-                        }}
-                    >
-                        Enter this code on <b>Ente Photos</b> to pair this
-                        screen
-                    </h1>
-                    <div
-                        style={{
-                            borderRadius: "10px",
-                            overflow: "hidden",
-                        }}
-                    >
-                        {pairingCode ? (
-                            <PairingCode code={pairingCode} />
-                        ) : (
-                            <EnteSpinner />
-                        )}
-                    </div>
-                    <p
-                        style={{
-                            fontSize: "1.2rem",
-                        }}
-                    >
-                        Visit{" "}
-                        <a
-                            style={{
-                                textDecoration: "none",
-                                color: "#87CEFA",
-                                fontWeight: "bold",
-                            }}
-                            href="https://ente.io/cast"
-                            target="_blank"
-                        >
-                            ente.io/cast
-                        </a>{" "}
-                        for help
-                    </p>
-                </div>
+                {pairingCode ? (
+                    <PairingCode code={pairingCode} />
+                ) : (
+                    <EnteSpinner />
+                )}
             </div>
-        </>
+            <p
+                style={{
+                    fontSize: "1.2rem",
+                }}
+            >
+                Visit{" "}
+                <a
+                    style={{
+                        textDecoration: "none",
+                        color: "#87CEFA",
+                        fontWeight: "bold",
+                    }}
+                    href="https://ente.io/cast"
+                    target="_blank"
+                >
+                    ente.io/cast
+                </a>{" "}
+                for help
+            </p>
+        </Container>
     );
 }
+
+const Container = styled("div")`
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+
+    h1 {
+        font-weight: normal;
+    }
+`;
