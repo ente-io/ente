@@ -12,25 +12,28 @@ export default function Index() {
     const [privateKeyB64, setPrivateKeyB64] = useState<string | undefined>();
     const [pairingCode, setPairingCode] = useState<string | undefined>();
 
+    // Keep a boolean flag to ensure that Cast Receiver starts only once even if
+    // pairing codes change.
+    const [haveInitializedCast, setHaveInitializedCast] = useState(false);
+
     const router = useRouter();
 
     useEffect(() => {
-        init();
-    }, []);
-
-    const init = () => {
-        register().then((r) => {
-            setPublicKeyB64(r.publicKeyB64);
-            setPrivateKeyB64(r.privateKeyB64);
-            setPairingCode(r.pairingCode);
-        });
-    };
-
-    useEffect(() => {
-        castReceiverLoadingIfNeeded().then((cast) =>
-            advertiseCode(cast, () => pairingCode),
-        );
-    }, []);
+        if (!pairingCode) {
+            register().then((r) => {
+                setPublicKeyB64(r.publicKeyB64);
+                setPrivateKeyB64(r.privateKeyB64);
+                setPairingCode(r.pairingCode);
+            });
+        } else {
+            if (!haveInitializedCast) {
+                castReceiverLoadingIfNeeded().then((cast) => {
+                    setHaveInitializedCast(true);
+                    advertiseCode(cast, () => pairingCode);
+                });
+            }
+        }
+    }, [pairingCode]);
 
     useEffect(() => {
         if (!publicKeyB64 || !privateKeyB64 || !pairingCode) return;
@@ -52,10 +55,12 @@ export default function Index() {
             storeCastData(data);
             await router.push("/slideshow");
         } catch (e) {
-            log.error("Failed to get cast data", e);
-            // Start again from the beginning.
+            // The pairing code becomes invalid after an hour, which will cause
+            // `getCastData` to fail. There might be other reasons this might
+            // fail too, but in all such cases, it is a reasonable idea to start
+            // again from the beginning.
+            log.warn("Failed to get cast data", e);
             setPairingCode(undefined);
-            init();
         }
     };
 

@@ -3,7 +3,7 @@ name: "Lint (auth)"
 on:
     # Run on every push to a branch other than main that changes auth/
     push:
-        branches-ignore: [main, "deploy/**"]
+        branches-ignore: [main, "deploy/**", "deploy-f/**"]
         paths:
             - "auth/**"
             - ".github/workflows/auth-lint.yml"

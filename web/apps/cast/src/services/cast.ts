@@ -84,26 +84,17 @@ export const renderableImageURLs = async function* (castData: CastData) {
     const { collectionKey, castToken } = castData;
 
     /**
-     * We have a sliding window of four URLs, with the `urls[1]` being the one
-     * that is the one currently being shown in the slideshow.
-     *
-     * At each step, we shift the window towards the right by shifting out the
-     * leftmost (oldest) `urls[0]`, and adding a new one at the end.
-     *
-     * We can revoke url[0] when we shift it out because we know it is not being
-     * used anymore.
-     *
-     * We need to special case the first two renders to avoid revoking the
-     * initial URLs that are displayed the first two times. This results in a
-     * memory leak of the very first objectURL that we display.
+     * Keep a FIFO queue of the URLs that we've vended out recently so that we
+     * can revoke those that are not being shown anymore.
      */
-    const urls: string[] = [""];
-    let i = 0;
+    const previousURLs: string[] = [];
 
-    /**
-     * Number of milliseconds to keep the slide on the screen.
-     */
+    /** The URL pair that we will yield */
+    const urls: string[] = [];
+
+    /** Number of milliseconds to keep the slide on the screen. */
     const slideDuration = 10000; /* 10 s */
+
     /**
      * Time when we last yielded.
      *
@@ -137,16 +128,33 @@ export const renderableImageURLs = async function* (castData: CastData) {
                 continue;
             }
 
-            if (urls.length < 4) continue;
+            // Need at least a pair.
+            //
+            // There are two scenarios:
+            //
+            // - First run: urls will initially be empty, so gobble two.
+            //
+            // - Subsequently, urls will have the "next" / "preloaded" URL left
+            //   over from the last time. We'll promote that to being the one
+            //   that'll get displayed, and preload another one.
+            if (urls.length < 2) continue;
 
-            const oldestURL = urls.shift();
-            if (oldestURL && i !== 1) URL.revokeObjectURL(oldestURL);
-            i += 1;
+            // The last element of previousURLs is the URL that is currently
+            // being shown on screen.
+            //
+            // The last to last element is the one that was shown prior to that,
+            // and now can be safely revoked.
+            if (previousURLs.length > 1)
+                URL.revokeObjectURL(previousURLs.shift());
 
-            const urlPair: RenderableImageURLPair = [
-                ensure(urls[0]),
-                ensure(urls[1]),
-            ];
+            // The URL that'll now get displayed on screen.
+            const url = ensure(urls.shift());
+            // The URL that we're preloading for next time around.
+            const nextURL = ensure(urls[0]);
+
+            previousURLs.push(url);
+
+            const urlPair: RenderableImageURLPair = [url, nextURL];
 
             const elapsedTime = Date.now() - lastYieldTime;
             if (elapsedTime > 0 && elapsedTime < slideDuration)
@@ -299,6 +307,8 @@ const downloadFile = async (castToken: string, file: EnteFile) => {
         throw new Error("Can only cast images and live photos");
 
     const url = getCastFileURL(file.id);
+    // TODO(MR): Remove if usused eventually
+    // const url = getCastThumbnailURL(file.id);
     const resp = await HTTPService.get(
         url,
         null,
@@ -313,6 +323,8 @@ const downloadFile = async (castToken: string, file: EnteFile) => {
     const decrypted = await cryptoWorker.decryptFile(
         new Uint8Array(resp.data),
         await cryptoWorker.fromB64(file.file.decryptionHeader),
+        // TODO(MR): Remove if usused eventually
+        // await cryptoWorker.fromB64(file.thumbnail.decryptionHeader),
         file.key,
     );
     return new Response(decrypted).blob();
