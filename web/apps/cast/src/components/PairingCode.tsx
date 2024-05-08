@@ -1,6 +1,6 @@
 import { styled } from "@mui/material";
 
-const colourPool = [
+const colors = [
     "#87CEFA", // Light Blue
     "#90EE90", // Light Green
     "#F08080", // Light Coral
@@ -23,27 +23,34 @@ const colourPool = [
     "#808000", // Light Olive
 ];
 
-export const LargeType = ({ chars }: { chars: string[] }) => {
+interface PairingCodeProps {
+    code: string;
+}
+
+export const PairingCode: React.FC<PairingCodeProps> = ({ code }) => {
     return (
-        <Container style={{}}>
-            {chars.map((char, i) => (
+        <PairingCode_>
+            {code.split("").map((char, i) => (
                 <span
                     key={i}
                     style={{
-                        // alternating background
+                        // Alternating background.
                         backgroundColor: i % 2 === 0 ? "#2e2e2e" : "#5e5e5e",
-                        // varying colors
-                        color: colourPool[i % colourPool.length],
+                        // Varying colors.
+                        color: colors[i % colors.length],
                     }}
                 >
                     {char}
                 </span>
             ))}
-        </Container>
+        </PairingCode_>
     );
 };
 
-const Container = styled("div")`
+const PairingCode_ = styled("div")`
+    border-radius: 10px;
+    overflow: hidden;
+
     font-size: 4rem;
     font-weight: bold;
     font-family: monospace;

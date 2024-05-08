@@ -103,10 +103,10 @@ export const renderableImageURLs = async function* (castData: CastData) {
      */
     let lastYieldTime = Date.now();
 
-    // The first time around advance the lastYieldTime into the future so that
+    // The first time around regress the lastYieldTime into the past so that
     // we don't wait around too long for the first slide (we do want to wait a
     // bit, for the user to see the checkmark animation as reassurance).
-    lastYieldTime += 7500; /* 7.5 s */
+    lastYieldTime -= slideDuration - 2500; /* wait at most 2.5 s */
 
     while (true) {
         const encryptedFiles = shuffled(
@@ -120,6 +120,7 @@ export const renderableImageURLs = async function* (castData: CastData) {
 
             if (!isFileEligibleForCast(file)) continue;
 
+            console.log("will start createRenderableURL", new Date());
             try {
                 urls.push(await createRenderableURL(castToken, file));
                 haveEligibleFiles = true;
@@ -127,6 +128,8 @@ export const renderableImageURLs = async function* (castData: CastData) {
                 log.error("Skipping unrenderable file", e);
                 continue;
             }
+
+            console.log("did end createRenderableURL", new Date());
 
             // Need at least a pair.
             //
@@ -137,7 +140,7 @@ export const renderableImageURLs = async function* (castData: CastData) {
             // - Subsequently, urls will have the "next" / "preloaded" URL left
             //   over from the last time. We'll promote that to being the one
             //   that'll get displayed, and preload another one.
-            if (urls.length < 2) continue;
+            // if (urls.length < 2) continue;
 
             // The last element of previousURLs is the URL that is currently
             // being shown on screen.
@@ -150,15 +153,17 @@ export const renderableImageURLs = async function* (castData: CastData) {
             // The URL that'll now get displayed on screen.
             const url = ensure(urls.shift());
             // The URL that we're preloading for next time around.
-            const nextURL = ensure(urls[0]);
+            const nextURL = ""; //ensure(urls[0]);
 
             previousURLs.push(url);
 
             const urlPair: RenderableImageURLPair = [url, nextURL];
 
             const elapsedTime = Date.now() - lastYieldTime;
-            if (elapsedTime > 0 && elapsedTime < slideDuration)
+            if (elapsedTime > 0 && elapsedTime < slideDuration) {
+                console.log("waiting", slideDuration - elapsedTime);
                 await wait(slideDuration - elapsedTime);
+            }
 
             lastYieldTime = Date.now();
             yield urlPair;
