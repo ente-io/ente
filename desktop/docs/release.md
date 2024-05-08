@@ -22,7 +22,9 @@ intended to be published, but serve as test release candidates.
 The workflow for making such "rc" builds is:
 
 1.  Update `package.json` in the source repo to use version `1.x.x-rc`. Create a
-    new draft release in the release repo with tag `v1.x.x-rc`.
+    new draft release in the release repo with title `1.x.x-rc`. In the tag
+    input enter `v1.x.x-rc` and select the option to "create a new tag on
+    publish".
 
 2.  Push code to the `desktop/rc` branch in the source repo.
 
