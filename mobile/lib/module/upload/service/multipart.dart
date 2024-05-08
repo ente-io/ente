@@ -1,8 +1,8 @@
 import "dart:io";
-import "dart:typed_data";
 
 import "package:dio/dio.dart";
 import "package:ente_feature_flag/ente_feature_flag.dart";
+import "package:flutter/foundation.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/db/upload_locks_db.dart";
@@ -183,13 +183,23 @@ class MultiPartUploader {
 
     final int encFileLength = encryptedFile.lengthSync();
     // Start parts upload
+    int count = 0;
     while (i < partsLength) {
+      count++;
       final partURL = partsURLs[i];
       final isLastPart = i == partsLength - 1;
       final fileSize = isLastPart ? encFileLength % partSize : partSize;
       _logger.info(
         "Uploading part ${i + 1} / $partsLength of size $fileSize bytes (total size $encFileLength).",
       );
+      if (kDebugMode && count > 1) {
+        // This is to catch any bugs in the code at future point of time.
+        // Due to lack of proper integrations tests, this act as a way to
+        // catch any bug early. :sed:
+        throw Exception(
+          'In debug mode, only one part will be uploaded at a time.',
+        );
+      }
       final response = await _s3Dio.put(
         partURL,
         data: encryptedFile.openRead(
