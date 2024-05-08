@@ -7,7 +7,7 @@ import { shuffled } from "@/utils/array";
 import { ensure, ensureString } from "@/utils/ensure";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import HTTPService from "@ente/shared/network/HTTPService";
-import { getCastThumbnailURL, getEndpoint } from "@ente/shared/network/api";
+import { getCastFileURL, getEndpoint } from "@ente/shared/network/api";
 import { wait } from "@ente/shared/utils";
 import { detectMediaMIMEType } from "services/detect-type";
 import {
@@ -299,7 +299,9 @@ const downloadFile = async (castToken: string, file: EnteFile) => {
     if (!isImageOrLivePhoto(file))
         throw new Error("Can only cast images and live photos");
 
-    const url = getCastThumbnailURL(file.id);
+    const url = getCastFileURL(file.id);
+    // TODO(MR): Remove if usused eventually
+    // const url = getCastThumbnailURL(file.id);
     const resp = await HTTPService.get(
         url,
         null,
@@ -313,7 +315,9 @@ const downloadFile = async (castToken: string, file: EnteFile) => {
     const cryptoWorker = await ComlinkCryptoWorker.getInstance();
     const decrypted = await cryptoWorker.decryptFile(
         new Uint8Array(resp.data),
-        await cryptoWorker.fromB64(file.thumbnail.decryptionHeader),
+        await cryptoWorker.fromB64(file.file.decryptionHeader),
+        // TODO(MR): Remove if usused eventually
+        // await cryptoWorker.fromB64(file.thumbnail.decryptionHeader),
         file.key,
     );
     return new Response(decrypted).blob();
