@@ -456,23 +456,23 @@ class FileUploader {
     MediaUploadData? mediaUploadData;
     mediaUploadData = await getUploadDataFromEnteFile(file);
 
-    var multipartEntryExists = mediaUploadData.hashData?.fileHash != null &&
-        await _uploadLocks.doesExists(
-          lockKey,
-          mediaUploadData.hashData!.fileHash!,
-          collectionID,
-        );
+    final String? existingMultipartEncFileName =
+        mediaUploadData.hashData?.fileHash != null
+            ? await _uploadLocks.getEncryptedFileName(
+                lockKey,
+                mediaUploadData.hashData!.fileHash!,
+                collectionID,
+              )
+            : null;
+    bool multipartEntryExists = existingMultipartEncFileName != null;
 
     final String uniqueID = const Uuid().v4().toString();
 
     final encryptedFilePath = multipartEntryExists
-        ? '$uploadPrefix${await _uploadLocks.getEncryptedFileName(
-            lockKey,
-            mediaUploadData.hashData!.fileHash!,
-            collectionID,
-          )}'
+        ? '$uploadPrefix$existingMultipartEncFileName'
         : '$uploadPrefix${uniqueID}_file.encrypted';
     final encryptedThumbnailPath = '$uploadPrefix${uniqueID}_thumb.encrypted';
+
     var uploadCompleted = false;
     // This flag is used to decide whether to clear the iOS origin file cache
     // or not.

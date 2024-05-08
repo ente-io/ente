@@ -182,20 +182,6 @@ class UploadLocksDB {
     );
   }
 
-  // For multipart download tracking
-  Future<bool> doesExists(String localId, String hash, int collectionID) async {
-    final db = await instance.database;
-    final rows = await db.query(
-      _trackUploadTable.table,
-      where: '${_trackUploadTable.columnLocalID} = ?'
-          ' AND ${_trackUploadTable.columnFileHash} = ?'
-          ' AND ${_trackUploadTable.columnCollectionID} = ?',
-      whereArgs: [localId, hash, collectionID],
-    );
-
-    return rows.isNotEmpty;
-  }
-
   Future<({String encryptedFileKey, String fileNonce, String keyNonce})>
       getFileEncryptionData(
     String localId,
@@ -421,7 +407,7 @@ class UploadLocksDB {
     });
   }
 
-  Future<String> getEncryptedFileName(
+  Future<String?> getEncryptedFileName(
     String localId,
     String fileHash,
     int collectionID,
@@ -435,7 +421,7 @@ class UploadLocksDB {
         whereArgs: [localId, fileHash, collectionID],
       );
       if (rows.isEmpty) {
-        throw Exception("No cached links found for $localId and $fileHash");
+        return null;
       }
       final row = rows.first;
       return row[_trackUploadTable.columnEncryptedFileName] as String;
