@@ -118,11 +118,6 @@ export const advertiseCode = (
     const options = new cast.framework.CastReceiverOptions();
     // We don't use the media features of the Cast SDK.
     options.skipPlayersLoad = true;
-    // TODO:Is this required? The docs say "(The default type of a message bus
-    // // is JSON; if not provided here)."
-    // options.customNamespaces = Object.assign({});
-    // options.customNamespaces[namespace] =
-    //     cast.framework.system.MessageType.JSON;
     // Do not stop the casting if the receiver is unreachable. A user should be
     // able to start a cast on their phone and then put it away, leaving the
     // cast running on their big screen.
