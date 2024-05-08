@@ -181,14 +181,14 @@ class MultiPartUploader {
       i++;
     }
 
+    final int encFileLength = encryptedFile.lengthSync();
     // Start parts upload
     while (i < partsLength) {
       final partURL = partsURLs[i];
       final isLastPart = i == partsLength - 1;
-      final fileSize =
-          isLastPart ? encryptedFile.lengthSync() % partSize : partSize;
+      final fileSize = isLastPart ? encFileLength % partSize : partSize;
       _logger.info(
-        "Uploading part ${i + 1} / $partsLength of size $fileSize bytes (total size ${encryptedFile.lengthSync()}).",
+        "Uploading part ${i + 1} / $partsLength of size $fileSize bytes (total size $encFileLength).",
       );
       final response = await _s3Dio.put(
         partURL,
