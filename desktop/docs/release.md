@@ -31,6 +31,7 @@ The workflow for making such "rc" builds is:
     ```sh
     gh workflow run desktop-release.yml
     ```
+
 We can do steps 2 and 3 multiple times; each time it'll just update the
 artifacts attached to the same draft.
 
