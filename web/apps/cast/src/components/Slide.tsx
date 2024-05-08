@@ -11,7 +11,7 @@ interface SlideViewProps {
  * Also show {@link nextURL} in an hidden image view to prepare the browser for
  * an imminent transition to it.
  */
-export const SlideView: React.FC<SlideViewProps> = ({ url }) => {
+export const SlideView: React.FC<SlideViewProps> = ({ url, nextURL }) => {
     return (
         <div
             style={{
@@ -35,14 +35,14 @@ export const SlideView: React.FC<SlideViewProps> = ({ url }) => {
                     backdropFilter: "blur(10px)",
                 }}
             >
-                {/* <img
+                <img
                     src={nextURL}
                     style={{
                         maxWidth: "100%",
                         maxHeight: "100%",
                         display: "none",
                     }}
-                /> */}
+                />
                 <img
                     src={url}
                     style={{

@@ -4,7 +4,7 @@ import { decodeLivePhoto } from "@/media/live-photo";
 import { nameAndExtension } from "@/next/file";
 import log from "@/next/log";
 import { shuffled } from "@/utils/array";
-import { ensureString } from "@/utils/ensure";
+import { ensure, ensureString } from "@/utils/ensure";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { getCastFileURL, getEndpoint } from "@ente/shared/network/api";
@@ -89,12 +89,12 @@ export const renderableImageURLs = async function* (castData: CastData) {
      */
     const previousURLs: string[] = [];
 
-    // const urls: string[] = [""];
+    /** The URL pair that we will yield */
+    const urls: string[] = [];
 
-    /**
-     * Number of milliseconds to keep the slide on the screen.
-     */
+    /** Number of milliseconds to keep the slide on the screen. */
     const slideDuration = 10000; /* 10 s */
+
     /**
      * Time when we last yielded.
      *
@@ -120,34 +120,41 @@ export const renderableImageURLs = async function* (castData: CastData) {
 
             if (!isFileEligibleForCast(file)) continue;
 
-            let url: string;
             try {
-                url = await createRenderableURL(castToken, file);
+                urls.push(await createRenderableURL(castToken, file));
                 haveEligibleFiles = true;
             } catch (e) {
                 log.error("Skipping unrenderable file", e);
                 continue;
             }
 
+            // Need at least a pair.
+            //
+            // There are two scenarios:
+            //
+            // - First run: urls will initially be empty, so gobble two.
+            //
+            // - Subsequently, urls will have the "next" / "preloaded" URL left
+            //   over from the last time. We'll promote that to being the one
+            //   that'll get displayed, and preload another one.
+            if (urls.length < 2) continue;
+
+            // The last element of previousURLs is the URL that is currently
+            // being shown on screen.
+            //
+            // The last to last element is the one that was shown prior to that,
+            // and now can be safely revoked.
             if (previousURLs.length > 1)
                 URL.revokeObjectURL(previousURLs.shift());
 
+            // The URL that'll now get displayed on screen.
+            const url = ensure(urls.shift());
+            // The URL that we're preloading for next time around.
+            const nextURL = ensure(urls[0]);
+
             previousURLs.push(url);
 
-            // const previousURL = oldURLs.length == 0 ? undefined : urls.shift();
-
-            // if (urls.length < 2) continue;
-
-            // console.log("Not revoking", oldestURL);
-            // if (oldestURL && i !== 1) URL.revokeObjectURL(oldestURL);
-            // i += 1;
-
-            const urlPair: RenderableImageURLPair = [
-                url,
-                "",
-                // ensure(urls[0]),
-                // ensure(urls[1]),
-            ];
+            const urlPair: RenderableImageURLPair = [url, nextURL];
 
             const elapsedTime = Date.now() - lastYieldTime;
             if (elapsedTime > 0 && elapsedTime < slideDuration)
