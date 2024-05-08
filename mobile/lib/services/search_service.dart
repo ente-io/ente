@@ -820,7 +820,8 @@ class SearchService {
         final files = clusterIdToFiles[clusterId]!;
         // final String clusterName = "ID:$clusterId,  ${files.length}";
         // final String clusterName = "${files.length}";
-        const String clusterName = "";
+        // const String clusterName = "";
+        final String clusterName = "$clusterId";
 
         if (clusterIDToPersonID[clusterId] != null) {
           throw Exception(

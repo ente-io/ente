@@ -30,6 +30,8 @@ class SearchableItemWidget extends StatelessWidget {
     final heroTagPrefix = additionalPrefix + searchResult.heroTag();
     final textTheme = getEnteTextTheme(context);
     final colorScheme = getEnteColorScheme(context);
+    final bool isCluster = (searchResult.type() == ResultType.faces &&
+        int.tryParse(searchResult.name()) != null);
 
     return GestureDetector(
       onTap: () {
@@ -76,14 +78,16 @@ class SearchableItemWidget extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            searchResult.name(),
-                            style: searchResult.type() ==
-                                    ResultType.locationSuggestion
-                                ? textTheme.bodyFaint
-                                : textTheme.body,
-                            overflow: TextOverflow.ellipsis,
-                          ),
+                          isCluster
+                              ? const SizedBox.shrink()
+                              : Text(
+                                  searchResult.name(),
+                                  style: searchResult.type() ==
+                                          ResultType.locationSuggestion
+                                      ? textTheme.bodyFaint
+                                      : textTheme.body,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
                           const SizedBox(
                             height: 2,
                           ),

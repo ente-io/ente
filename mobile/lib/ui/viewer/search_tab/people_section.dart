@@ -4,6 +4,7 @@ import "package:collection/collection.dart";
 import "package:flutter/material.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/events/event.dart";
+import "package:photos/face/model/person.dart";
 import "package:photos/models/search/album_search_result.dart";
 import "package:photos/models/search/generic_search_result.dart";
 import "package:photos/models/search/recent_searches.dart";
@@ -13,6 +14,8 @@ import "package:photos/models/search/search_types.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/viewer/file/no_thumbnail_widget.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
+import "package:photos/ui/viewer/people/add_person_action_sheet.dart";
+import "package:photos/ui/viewer/people/people_page.dart";
 import 'package:photos/ui/viewer/search/result/person_face_widget.dart';
 import "package:photos/ui/viewer/search/result/search_result_page.dart";
 import 'package:photos/ui/viewer/search/result/search_section_all_page.dart';
@@ -190,6 +193,8 @@ class SearchExample extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textScaleFactor = MediaQuery.textScaleFactorOf(context);
+    final bool isCluster = (searchResult.type() == ResultType.faces &&
+        int.tryParse(searchResult.name()) != null);
     late final double width;
     if (textScaleFactor <= 1.0) {
       width = 85.0;
@@ -258,13 +263,43 @@ class SearchExample extends StatelessWidget {
               const SizedBox(
                 height: 10,
               ),
-              Text(
-                searchResult.name(),
-                maxLines: 2,
-                textAlign: TextAlign.center,
-                overflow: TextOverflow.ellipsis,
-                style: getEnteTextTheme(context).mini,
-              ),
+              isCluster
+                  ? GestureDetector(
+                      onTap: () async {
+                        final result = await showAssignPersonAction(
+                          context,
+                          clusterID: int.parse(searchResult.name()),
+                        );
+                        if (result != null && result is PersonEntity) {
+                          // Navigator.pop(context);
+                          // ignore: unawaited_futures
+                          routeToPage(context, PeoplePage(person: result));
+                        }
+                      },
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(
+                            Icons.add_circle_outline_outlined,
+                            size: 12,
+                          ),
+                          Text(
+                            " name",
+                            maxLines: 1,
+                            textAlign: TextAlign.center,
+                            overflow: TextOverflow.ellipsis,
+                            style: getEnteTextTheme(context).mini,
+                          ),
+                        ],
+                      ),
+                    )
+                  : Text(
+                      searchResult.name(),
+                      maxLines: 2,
+                      textAlign: TextAlign.center,
+                      overflow: TextOverflow.ellipsis,
+                      style: getEnteTextTheme(context).mini,
+                    ),
             ],
           ),
         ),
