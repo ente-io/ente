@@ -11,30 +11,27 @@ export default function Index() {
     const [publicKeyB64, setPublicKeyB64] = useState<string | undefined>();
     const [privateKeyB64, setPrivateKeyB64] = useState<string | undefined>();
     const [pairingCode, setPairingCode] = useState<string | undefined>();
-    // TODO: This needs to change, since there is an interim period when the
-    // code becomes invalid.
+
+    // Keep a boolean flag to ensure that Cast Receiver starts only once even if
+    // pairing codes change.
     const [haveInitializedCast, setHaveInitializedCast] = useState(false);
 
     const router = useRouter();
 
     useEffect(() => {
-        init();
-    }, []);
-
-    const init = () => {
-        register().then((r) => {
-            setPublicKeyB64(r.publicKeyB64);
-            setPrivateKeyB64(r.privateKeyB64);
-            setPairingCode(r.pairingCode);
-        });
-    };
-
-    useEffect(() => {
-        if (pairingCode && !haveInitializedCast) {
-            castReceiverLoadingIfNeeded().then((cast) => {
-                setHaveInitializedCast(true);
-                advertiseCode(cast, () => pairingCode);
+        if (!pairingCode) {
+            register().then((r) => {
+                setPublicKeyB64(r.publicKeyB64);
+                setPrivateKeyB64(r.privateKeyB64);
+                setPairingCode(r.pairingCode);
             });
+        } else {
+            if (!haveInitializedCast) {
+                castReceiverLoadingIfNeeded().then((cast) => {
+                    setHaveInitializedCast(true);
+                    advertiseCode(cast, () => pairingCode);
+                });
+            }
         }
     }, [pairingCode]);
 
@@ -58,11 +55,12 @@ export default function Index() {
             storeCastData(data);
             await router.push("/slideshow");
         } catch (e) {
-            // Code has become invalid
-            log.error("Failed to get cast data", e);
-            // Start again from the beginning.
+            // The pairing code becomes invalid after an hour, which will cause
+            // `getCastData` to fail. There might be other reasons this might
+            // fail too, but in all such cases, it is a reasonable idea to start
+            // again from the beginning.
+            log.warn("Failed to get cast data", e);
             setPairingCode(undefined);
-            init();
         }
     };
 
