@@ -341,7 +341,8 @@ class FileUploader {
             await file.delete();
           } else {
             _logger.info(
-                'Skipping file $fileName as it was attempted recently on $lastAttemptTime');
+              'Skipping file $fileName as it was attempted recently on $lastAttemptTime',
+            );
           }
         }
       }
@@ -466,7 +467,6 @@ class FileUploader {
     }
 
     final tempDirectory = Configuration.instance.getTempDirectory();
-    final uploadPrefix = '$tempDirectory$uploadTempFilePrefix';
     MediaUploadData? mediaUploadData;
     mediaUploadData = await getUploadDataFromEnteFile(file);
 
@@ -918,7 +918,7 @@ class FileUploader {
       // for upload. On iOS, only remove the file from photo_manager/app cache
       // when upload is either completed or there's a tempFailure
       // Shared Media should only be cleared when the upload
-      // succeeds.Ha
+      // succeeds.
       if ((Platform.isIOS && (uploadCompleted || uploadHardFailure)) ||
           (uploadCompleted && file.isSharedMediaToAppSandbox)) {
         await mediaUploadData.sourceFile?.delete();
