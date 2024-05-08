@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
-import "dart:developer" as dev;
 import 'dart:io';
 import 'dart:math' as math;
 
@@ -419,7 +418,7 @@ class FileUploader {
           (fileOnDisk.updationTime ?? -1) != -1 &&
           (fileOnDisk.collectionID ?? -1) == collectionID;
       if (wasAlreadyUploaded) {
-        debugPrint("File is already uploaded ${fileOnDisk.tag}");
+        _logger.info("File is already uploaded ${fileOnDisk.tag}");
         return fileOnDisk;
       }
     }
@@ -488,18 +487,33 @@ class FileUploader {
       );
 
       Uint8List? key;
-      EncryptionResult? multipartEncryptionResult;
+      EncryptionResult? multiPartFileEncResult;
       if (isUpdatedFile) {
         key = getFileKey(file);
-      } else {
-        multipartEncryptionResult = multipartEntryExists
+        multiPartFileEncResult = multipartEntryExists
             ? await _multiPartUploader.getEncryptionResult(
                 lockKey,
                 mediaUploadData.hashData!.fileHash!,
                 collectionID,
               )
             : null;
-        key = multipartEncryptionResult?.key;
+        if (multiPartFileEncResult?.key != null &&
+            !listEquals(key, multiPartFileEncResult!.key)) {
+          _logger
+              .severe("Key mismatch for existing multipart entry, reuploading");
+          await _uploadLocks.deleteMultipartTrack(lockKey);
+          multipartEntryExists = false;
+          multiPartFileEncResult = null;
+        }
+      } else {
+        multiPartFileEncResult = multipartEntryExists
+            ? await _multiPartUploader.getEncryptionResult(
+                lockKey,
+                mediaUploadData.hashData!.fileHash!,
+                collectionID,
+              )
+            : null;
+        key = multiPartFileEncResult?.key;
 
         // check if the file is already uploaded and can be mapped to existing
         // uploaded file. If map is found, it also returns the corresponding
@@ -529,7 +543,7 @@ class FileUploader {
               .warning('encrypted file not found for multipart upload entry');
           await _uploadLocks.deleteMultipartTrack(lockKey);
           multipartEntryExists = false;
-          multipartEncryptionResult = null;
+          multiPartFileEncResult = null;
         }
       } else if (encryptedFileExists) {
         // otherwise just delete the file for singlepart upload
@@ -538,7 +552,7 @@ class FileUploader {
       await _checkIfWithinStorageLimit(mediaUploadData.sourceFile!);
       final encryptedFile = File(encryptedFilePath);
 
-      final EncryptionResult fileAttributes = multipartEncryptionResult ??
+      final EncryptionResult fileAttributes = multiPartFileEncResult ??
           await CryptoUtil.encryptFile(
             mediaUploadData.sourceFile!.path,
             encryptedFilePath,
@@ -581,7 +595,9 @@ class FileUploader {
         fileObjectKey = await _putFile(fileUploadURL, encryptedFile);
       } else {
         _isMultipartUpload = true;
-        dev.log("Init multipartUpload $multipartEntryExists", name: "Uploader");
+        _logger.finest(
+          "Init multipartUpload $multipartEntryExists, isUpdate $isUpdatedFile",
+        );
         if (multipartEntryExists) {
           fileObjectKey = await _multiPartUploader.putExistingMultipartFile(
             encryptedFile,
