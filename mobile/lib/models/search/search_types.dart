@@ -101,7 +101,7 @@ extension SectionTypeExtensions on SectionType {
   bool get isCTAVisible {
     switch (this) {
       case SectionType.face:
-        return true;
+        return false;
       case SectionType.content:
         return false;
       case SectionType.moment:
@@ -124,7 +124,7 @@ extension SectionTypeExtensions on SectionType {
   bool get isEmptyCTAVisible {
     switch (this) {
       case SectionType.face:
-        return true;
+        return false;
       case SectionType.content:
         return false;
       case SectionType.moment:
