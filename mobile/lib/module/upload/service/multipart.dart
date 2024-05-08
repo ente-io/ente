@@ -193,9 +193,6 @@ class MultiPartUploader {
         "Uploading part ${i + 1} / $partsLength of size $fileSize bytes (total size $encFileLength).",
       );
       if (kDebugMode && count > 1) {
-        // This is to catch any bugs in the code at future point of time.
-        // Due to lack of proper integrations tests, this act as a way to
-        // catch any bug early. :sed:
         throw Exception(
           'In debug mode, only one part will be uploaded at a time.',
         );

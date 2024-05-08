@@ -439,6 +439,7 @@ class FileUploader {
     }
 
     final String lockKey = file.localID!;
+    bool _isMultipartUpload = false;
 
     try {
       await _uploadLocks.acquireLock(
@@ -524,6 +525,8 @@ class FileUploader {
       // that we'll have to reupload as the nonce is lost
       if (multipartEntryExists) {
         if (!encryptedFileExists) {
+          _logger
+              .warning('encrypted file not found for multipart upload entry');
           await _uploadLocks.deleteMultipartTrack(lockKey);
           multipartEntryExists = false;
           multipartEncryptionResult = null;
@@ -577,6 +580,7 @@ class FileUploader {
         final fileUploadURL = await _getUploadURL();
         fileObjectKey = await _putFile(fileUploadURL, encryptedFile);
       } else {
+        _isMultipartUpload = true;
         dev.log("Init multipartUpload $multipartEntryExists", name: "Uploader");
         if (multipartEntryExists) {
           fileObjectKey = await _multiPartUploader.putExistingMultipartFile(
@@ -732,6 +736,7 @@ class FileUploader {
         encryptedFilePath,
         encryptedThumbnailPath,
         lockKey: lockKey,
+        isMultiPartUpload: _isMultipartUpload,
       );
     }
   }
@@ -876,20 +881,27 @@ class FileUploader {
     String encryptedFilePath,
     String encryptedThumbnailPath, {
     required String lockKey,
+    bool isMultiPartUpload = false,
   }) async {
     if (mediaUploadData != null && mediaUploadData.sourceFile != null) {
       // delete the file from app's internal cache if it was copied to app
       // for upload. On iOS, only remove the file from photo_manager/app cache
       // when upload is either completed or there's a tempFailure
       // Shared Media should only be cleared when the upload
-      // succeeds.
+      // succeeds.Ha
       if ((Platform.isIOS && (uploadCompleted || uploadHardFailure)) ||
           (uploadCompleted && file.isSharedMediaToAppSandbox)) {
         await mediaUploadData.sourceFile?.delete();
       }
     }
     if (File(encryptedFilePath).existsSync()) {
-      await File(encryptedFilePath).delete();
+      if (isMultiPartUpload && !uploadCompleted) {
+        _logger.fine(
+            "skip delete for multipart encrypted file $encryptedFilePath");
+      } else {
+        _logger.fine("deleting encrypted file $encryptedFilePath");
+        await File(encryptedFilePath).delete();
+      }
     }
     if (File(encryptedThumbnailPath).existsSync()) {
       await File(encryptedThumbnailPath).delete();
