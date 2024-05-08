@@ -132,8 +132,8 @@ export const advertiseCode = (
     // request for a different collection ID, restart the app to allow them to
     // reconnect using a freshly generated pairing code.
     //
-    // If the request does not have a collectionID, just keep a boolean flag.
-    let pairedCollectionID: string | boolean | undefined;
+    // If the request does not have a collectionID, forego this check.
+    let pairedCollectionID: string | undefined;
 
     type ListenerProps = {
         senderId: string;
@@ -150,19 +150,19 @@ export const advertiseCode = (
             context.stop();
         };
 
-        const cid =
+        const collectionID =
             data &&
             typeof data == "object" &&
             typeof data["collectionID"] == "string"
                 ? data["collectionID"]
                 : undefined;
 
-        if (pairedCollectionID !== undefined && pairedCollectionID != cid) {
-            restart(`incoming request for a new collection ${cid}`);
+        if (pairedCollectionID && pairedCollectionID != collectionID) {
+            restart(`incoming request for a new collection ${collectionID}`);
             return;
         }
 
-        pairedCollectionID = cid ?? true;
+        pairedCollectionID = collectionID;
 
         const code = pairingCode();
         if (!code) {
