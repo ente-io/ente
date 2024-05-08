@@ -4,31 +4,14 @@ import { FilledCircleCheck } from "./FilledCircleCheck";
 export const PairingComplete: React.FC = () => {
     return (
         <PairingComplete_>
-            <div
-                style={{
-                    display: "flex",
-                    alignItems: "center",
-                    flexDirection: "column",
-                    textAlign: "center",
-                }}
-            >
+            <Items>
                 <FilledCircleCheck />
-                <h2
-                    style={{
-                        marginBottom: 0,
-                    }}
-                >
-                    Pairing Complete
-                </h2>
-                <p
-                    style={{
-                        lineHeight: "1.5rem",
-                    }}
-                >
+                <h2>Pairing Complete</h2>
+                <p>
                     We're preparing your album.
                     <br /> This should only take a few seconds.
                 </p>
-            </div>
+            </Items>
         </PairingComplete_>
     );
 };
@@ -38,4 +21,17 @@ const PairingComplete_ = styled("div")`
     min-height: 100svh;
     justify-content: center;
     align-items: center;
+
+    line-height: 1.5rem;
+
+    h2 {
+        margin-block-end: 0;
+    }
+`;
+
+const Items = styled("div")`
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
 `;
