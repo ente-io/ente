@@ -366,7 +366,7 @@ class FaceClusteringService {
       '`predictWithinClusterComputer` called with ${input.length} faces and distance threshold $distanceThreshold',
     );
     try {
-      if (input.length < 100) {
+      if (input.length < 10) {
         final mergeThreshold = distanceThreshold + 0.06;
         _logger.info(
           'Running complete clustering on ${input.length} faces with distance threshold $mergeThreshold',
