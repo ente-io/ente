@@ -384,26 +384,22 @@ class UploadLocksDB {
     );
   }
 
-  Future<bool> isEncryptedPathSafeToDelete(String encryptedFileName) {
-    // If lastAttemptedAt exceeds 3 days or createdAt exceeds 7 days
-    final db = instance.database;
-    return db.then((db) async {
+  // getFileNameToLastAttemptedAtMap returns a map of encrypted file name to last attempted at time
+  Future<Map<String, int>> getFileNameToLastAttemptedAtMap() {
+    return instance.database.then((db) async {
       final rows = await db.query(
         _trackUploadTable.table,
-        where: '${_trackUploadTable.columnEncryptedFileName} = ?',
-        whereArgs: [encryptedFileName],
+        columns: [
+          _trackUploadTable.columnEncryptedFileName,
+          _trackUploadTable.columnLastAttemptedAt,
+        ],
       );
-      if (rows.isEmpty) {
-        return true;
+      final map = <String, int>{};
+      for (final row in rows) {
+        map[row[_trackUploadTable.columnEncryptedFileName] as String] =
+            row[_trackUploadTable.columnLastAttemptedAt] as int;
       }
-      final row = rows.first;
-      final lastAttemptedAt =
-          row[_trackUploadTable.columnLastAttemptedAt] as int?;
-      final createdAt = row[_trackUploadTable.columnCreatedAt] as int;
-      final now = DateTime.now().millisecondsSinceEpoch;
-      return (lastAttemptedAt == null ||
-              now - lastAttemptedAt > 3 * 24 * 60 * 60 * 1000) &&
-          now - createdAt > 7 * 24 * 60 * 60 * 1000;
+      return map;
     });
   }
 

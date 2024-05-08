@@ -327,8 +327,23 @@ class FileUploader {
       });
       if (filesToDelete.isNotEmpty) {
         _logger.info('Deleting ${filesToDelete.length} stale upload files ');
+        final fileNameToLastAttempt =
+            await _uploadLocks.getFileNameToLastAttemptedAtMap();
         for (final file in filesToDelete) {
-          await file.delete();
+          final fileName =
+              file.path.split('/').last.replaceAll(uploadTempFilePrefix, '');
+          final lastAttemptTime = fileNameToLastAttempt[fileName] != null
+              ? DateTime.fromMillisecondsSinceEpoch(
+                  fileNameToLastAttempt[fileName]!,
+                )
+              : null;
+          if (lastAttemptTime == null ||
+              DateTime.now().difference(lastAttemptTime).inDays > 1) {
+            await file.delete();
+          } else {
+            _logger.info(
+                'Skipping file $fileName as it was attempted recently on $lastAttemptTime');
+          }
         }
       }
 
