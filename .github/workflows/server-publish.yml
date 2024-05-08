@@ -39,7 +39,7 @@ jobs:
                   username: ${{ github.actor }}
                   password: ${{ secrets.GITHUB_TOKEN }}
 
-            - name: Tag as museum/ghcr
+            - name: Tag as server/ghcr
               run: |
-                  git tag -f museum/ghcr
-                  git push -f origin museum/ghcr
+                  git tag -f server/ghcr
+                  git push -f origin server/ghcr

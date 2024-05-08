@@ -41,5 +41,5 @@ Once the workflow completes, the resultant image will be available at
 image will also be tagged, well, "latest".
 
 The workflow will also tag the commit it used to build the image with
-`museum/ghcr`. This tag will be overwritten on each publish, and it'll point to
+`server/ghcr`. This tag will be overwritten on each publish, and it'll point to
 the code that was used in the most recent publish.
