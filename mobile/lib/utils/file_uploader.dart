@@ -52,6 +52,7 @@ class FileUploader {
   static const kBlockedUploadsPollFrequency = Duration(seconds: 2);
   static const kFileUploadTimeout = Duration(minutes: 50);
   static const k20MBStorageBuffer = 20 * 1024 * 1024;
+  static const _lastStaleFileCleanupTime = "lastStaleFileCleanupTime";
 
   final _logger = Logger("FileUploader");
   final _dio = NetworkClient.instance.getDio();
@@ -121,6 +122,11 @@ class FileUploader {
       UploadLocksDB.instance,
       flagService,
     );
+    if (currentTime - (_prefs.getInt(_lastStaleFileCleanupTime) ?? 0) >
+        tempDirCleanUpInterval) {
+      await removeStaleFiles();
+      await _prefs.setInt(_lastStaleFileCleanupTime, currentTime);
+    }
     Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
       if (event.type == EventType.deletedFromDevice ||
           event.type == EventType.deletedFromEverywhere) {

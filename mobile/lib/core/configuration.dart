@@ -155,7 +155,8 @@ class Configuration {
         }
         await _preferences.setInt(lastTempFolderClearTimeKey, currentTime);
         _logger.info(
-            "Cleared temp folder except $skippedTempUploadFiles upload files");
+          "Cleared temp folder except $skippedTempUploadFiles upload files",
+        );
       } else {
         _logger.info("Skipping temp folder clear");
       }
