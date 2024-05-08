@@ -1,3 +1,4 @@
+import { styled } from "@mui/material";
 import { FilledCircleCheck } from "./FilledCircleCheck";
 
 export const PairedSuccessfullyOverlay: React.FC = () => {
@@ -44,3 +45,16 @@ export const PairedSuccessfullyOverlay: React.FC = () => {
         </div>
     );
 };
+
+export const PairingSuccessful_ = styled("div")`
+    position: fixed;
+    top: 0;
+    right: 0;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+    background-color: black;
+`;
