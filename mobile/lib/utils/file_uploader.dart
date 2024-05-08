@@ -487,34 +487,17 @@ class FileUploader {
       );
 
       Uint8List? key;
-      EncryptionResult? multiPartFileEncResult;
+      EncryptionResult? multiPartFileEncResult = multipartEntryExists
+          ? await _multiPartUploader.getEncryptionResult(
+              lockKey,
+              mediaUploadData.hashData!.fileHash!,
+              collectionID,
+            )
+          : null;
       if (isUpdatedFile) {
         key = getFileKey(file);
-        multiPartFileEncResult = multipartEntryExists
-            ? await _multiPartUploader.getEncryptionResult(
-                lockKey,
-                mediaUploadData.hashData!.fileHash!,
-                collectionID,
-              )
-            : null;
-        if (multiPartFileEncResult?.key != null &&
-            !listEquals(key, multiPartFileEncResult!.key)) {
-          _logger
-              .severe("Key mismatch for existing multipart entry, reuploading");
-          await _uploadLocks.deleteMultipartTrack(lockKey);
-          multipartEntryExists = false;
-          multiPartFileEncResult = null;
-        }
       } else {
-        multiPartFileEncResult = multipartEntryExists
-            ? await _multiPartUploader.getEncryptionResult(
-                lockKey,
-                mediaUploadData.hashData!.fileHash!,
-                collectionID,
-              )
-            : null;
         key = multiPartFileEncResult?.key;
-
         // check if the file is already uploaded and can be mapped to existing
         // uploaded file. If map is found, it also returns the corresponding
         // mapped or update file entry.
@@ -538,9 +521,17 @@ class FileUploader {
       // If the multipart entry exists but the encrypted file doesn't, it means
       // that we'll have to reupload as the nonce is lost
       if (multipartEntryExists) {
-        if (!encryptedFileExists) {
-          _logger
-              .warning('encrypted file not found for multipart upload entry');
+        final bool updateWithDiffKey = isUpdatedFile &&
+            multiPartFileEncResult != null &&
+            !listEquals(key, multiPartFileEncResult.key);
+        if (!encryptedFileExists || updateWithDiffKey) {
+          if (updateWithDiffKey) {
+            _logger.severe('multiPart update resumed with differentKey');
+          } else {
+            _logger.warning(
+              'multiPart EncryptedFile missing, discard multipart entry',
+            );
+          }
           await _uploadLocks.deleteMultipartTrack(lockKey);
           multipartEntryExists = false;
           multiPartFileEncResult = null;
