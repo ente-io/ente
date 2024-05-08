@@ -1,6 +1,6 @@
 import log from "@/next/log";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
-import { LargeType } from "components/LargeType";
+import { PairingCode } from "components/PairingCode";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { storeCastData } from "services/cast";
@@ -98,7 +98,7 @@ export default function Index() {
                         }}
                     >
                         {pairingCode ? (
-                            <LargeType chars={pairingCode.split("")} />
+                            <PairingCode code={pairingCode} />
                         ) : (
                             <EnteSpinner />
                         )}

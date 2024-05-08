@@ -29,7 +29,7 @@ export default function Slideshow() {
                         // No items in this callection can be shown.
                         setIsEmpty(true);
                         // Go back to pairing screen after 3 seconds.
-                        setTimeout(pair, 3000);
+                        setTimeout(pair, 5000);
                         return;
                     }
 
