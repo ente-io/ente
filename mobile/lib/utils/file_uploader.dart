@@ -453,6 +453,7 @@ class FileUploader {
     }
 
     final tempDirectory = Configuration.instance.getTempDirectory();
+    final uploadPrefix = '$tempDirectory$uploadTempFilePrefix';
     MediaUploadData? mediaUploadData;
     mediaUploadData = await getUploadDataFromEnteFile(file);
 
@@ -466,14 +467,13 @@ class FileUploader {
     final String uniqueID = const Uuid().v4().toString();
 
     final encryptedFilePath = multipartEntryExists
-        ? await _uploadLocks.getEncryptedPath(
+        ? '$uploadPrefix${await _uploadLocks.getEncryptedFileName(
             lockKey,
             mediaUploadData.hashData!.fileHash!,
             collectionID,
-          )
-        : '$tempDirectory$uploadTempFilePrefix${uniqueID}_file.encrypted';
-    final encryptedThumbnailPath =
-        '$tempDirectory$uploadTempFilePrefix${uniqueID}_thumb.encrypted';
+          )}'
+        : '$uploadPrefix${uniqueID}_file.encrypted';
+    final encryptedThumbnailPath = '$uploadPrefix${uniqueID}_thumb.encrypted';
     var uploadCompleted = false;
     // This flag is used to decide whether to clear the iOS origin file cache
     // or not.
@@ -592,12 +592,13 @@ class FileUploader {
         } else {
           final fileUploadURLs =
               await _multiPartUploader.getMultipartUploadURLs(count);
+          final encFileName = encryptedFilePath.replaceAll(uploadPrefix, '');
           await _multiPartUploader.createTableEntry(
             lockKey,
             mediaUploadData.hashData!.fileHash!,
             collectionID,
             fileUploadURLs,
-            encryptedFilePath,
+            encFileName,
             await encryptedFile.length(),
             fileAttributes.key!,
             fileAttributes.header!,

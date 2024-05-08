@@ -23,7 +23,8 @@ class UploadLocksDB {
     columnLocalID: "local_id",
     columnFileHash: "file_hash",
     columnCollectionID: "collection_id",
-    columnEncryptedFilePath: "encrypted_file_path",
+    // todo: neeraj change the name before merging
+    columnEncryptedFileName: "encrypted_file_path",
     columnEncryptedFileSize: "encrypted_file_size",
     columnEncryptedFileKey: "encrypted_file_key",
     columnFileEncryptionNonce: "file_encryption_nonce",
@@ -95,7 +96,7 @@ class UploadLocksDB {
                   ${_trackUploadTable.columnLocalID} TEXT NOT NULL,
                   ${_trackUploadTable.columnFileHash} TEXT NOT NULL,
                   ${_trackUploadTable.columnCollectionID} INTEGER NOT NULL,
-                  ${_trackUploadTable.columnEncryptedFilePath} TEXT NOT NULL,
+                  ${_trackUploadTable.columnEncryptedFileName} TEXT NOT NULL,
                   ${_trackUploadTable.columnEncryptedFileSize} INTEGER NOT NULL,
                   ${_trackUploadTable.columnEncryptedFileKey} TEXT NOT NULL,
                   ${_trackUploadTable.columnFileEncryptionNonce} TEXT NOT NULL,
@@ -308,7 +309,7 @@ class UploadLocksDB {
     String fileHash,
     int collectionID,
     MultipartUploadURLs urls,
-    String encryptedFilePath,
+    String encryptedFileName,
     int fileSize,
     String fileKey,
     String fileNonce,
@@ -326,7 +327,7 @@ class UploadLocksDB {
         _trackUploadTable.columnCollectionID: collectionID,
         _trackUploadTable.columnObjectKey: objectKey,
         _trackUploadTable.columnCompleteUrl: urls.completeURL,
-        _trackUploadTable.columnEncryptedFilePath: encryptedFilePath,
+        _trackUploadTable.columnEncryptedFileName: encryptedFileName,
         _trackUploadTable.columnEncryptedFileSize: fileSize,
         _trackUploadTable.columnEncryptedFileKey: fileKey,
         _trackUploadTable.columnFileEncryptionNonce: fileNonce,
@@ -397,14 +398,14 @@ class UploadLocksDB {
     );
   }
 
-  Future<bool> isEncryptedPathSafeToDelete(String encryptedPath) {
+  Future<bool> isEncryptedPathSafeToDelete(String encryptedFileName) {
     // If lastAttemptedAt exceeds 3 days or createdAt exceeds 7 days
     final db = instance.database;
     return db.then((db) async {
       final rows = await db.query(
         _trackUploadTable.table,
-        where: '${_trackUploadTable.columnEncryptedFilePath} = ?',
-        whereArgs: [encryptedPath],
+        where: '${_trackUploadTable.columnEncryptedFileName} = ?',
+        whereArgs: [encryptedFileName],
       );
       if (rows.isEmpty) {
         return true;
@@ -420,7 +421,7 @@ class UploadLocksDB {
     });
   }
 
-  Future<String> getEncryptedPath(
+  Future<String> getEncryptedFileName(
     String localId,
     String fileHash,
     int collectionID,
@@ -437,7 +438,7 @@ class UploadLocksDB {
         throw Exception("No cached links found for $localId and $fileHash");
       }
       final row = rows.first;
-      return row[_trackUploadTable.columnEncryptedFilePath] as String;
+      return row[_trackUploadTable.columnEncryptedFileName] as String;
     });
   }
 }

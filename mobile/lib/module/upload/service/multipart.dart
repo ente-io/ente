@@ -91,7 +91,7 @@ class MultiPartUploader {
     String fileHash,
     int collectionID,
     MultipartUploadURLs urls,
-    String encryptedFilePath,
+    String encryptedFileName,
     int fileSize,
     Uint8List fileKey,
     Uint8List fileNonce,
@@ -109,7 +109,7 @@ class MultiPartUploader {
       fileHash,
       collectionID,
       urls,
-      encryptedFilePath,
+      encryptedFileName,
       fileSize,
       CryptoUtil.bin2base64(encryptedResult.encryptedData!),
       CryptoUtil.bin2base64(fileNonce),
@@ -192,7 +192,7 @@ class MultiPartUploader {
       _logger.info(
         "Uploading part ${i + 1} / $partsLength of size $fileSize bytes (total size $encFileLength).",
       );
-      if (kDebugMode && count > 1) {
+      if (kDebugMode && count > 3) {
         throw Exception(
           'In debug mode, only one part will be uploaded at a time.',
         );
