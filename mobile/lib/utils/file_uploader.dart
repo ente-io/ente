@@ -52,7 +52,6 @@ class FileUploader {
   static const kBlockedUploadsPollFrequency = Duration(seconds: 2);
   static const kFileUploadTimeout = Duration(minutes: 50);
   static const k20MBStorageBuffer = 20 * 1024 * 1024;
-  static const kUploadTempPrefix = "upload_file_";
 
   final _logger = Logger("FileUploader");
   final _dio = NetworkClient.instance.getDio();
@@ -317,7 +316,7 @@ class FileUploader {
       // ends with .encrypted. Fetch files in async manner
       final files = await Directory(dir).list().toList();
       final filesToDelete = files.where((file) {
-        return file.path.contains(kUploadTempPrefix) &&
+        return file.path.contains(uploadTempFilePrefix) &&
             file.path.contains(".encrypted");
       });
       if (filesToDelete.isNotEmpty) {
@@ -464,9 +463,9 @@ class FileUploader {
             mediaUploadData.hashData!.fileHash!,
             collectionID,
           )
-        : '$tempDirectory$kUploadTempPrefix${uniqueID}_file.encrypted';
+        : '$tempDirectory$uploadTempFilePrefix${uniqueID}_file.encrypted';
     final encryptedThumbnailPath =
-        '$tempDirectory$kUploadTempPrefix${uniqueID}_thumb.encrypted';
+        '$tempDirectory$uploadTempFilePrefix${uniqueID}_thumb.encrypted';
     var uploadCompleted = false;
     // This flag is used to decide whether to clear the iOS origin file cache
     // or not.
