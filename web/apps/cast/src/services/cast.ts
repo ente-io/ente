@@ -103,10 +103,10 @@ export const renderableImageURLs = async function* (castData: CastData) {
      */
     let lastYieldTime = Date.now();
 
-    // The first time around advance the lastYieldTime into the future so that
+    // The first time around regress the lastYieldTime into the past so that
     // we don't wait around too long for the first slide (we do want to wait a
     // bit, for the user to see the checkmark animation as reassurance).
-    lastYieldTime += 7500; /* 7.5 s */
+    lastYieldTime -= slideDuration - 2500; /* wait at most 2.5 s */
 
     while (true) {
         const encryptedFiles = shuffled(
