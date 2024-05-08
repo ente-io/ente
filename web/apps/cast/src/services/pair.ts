@@ -116,25 +116,68 @@ export const advertiseCode = (
     const namespace = "urn:x-cast:pair-request";
 
     const options = new cast.framework.CastReceiverOptions();
-    // options.skipPlayersLoad = true;
-    // Do not automatically close the connection when the sender disconnects.
-    options.maxInactivity = 3600; /* 1 hour */
+    // We don't use the media features of the Cast SDK.
+    options.skipPlayersLoad = true;
     // TODO:Is this required? The docs say "(The default type of a message bus
     // is JSON; if not provided here)."
     options.customNamespaces = Object.assign({});
     options.customNamespaces[namespace] =
         cast.framework.system.MessageType.JSON;
-    // TODO: This looks like the only one needed, but a comment with the reason
-    // might be good.
+    // Do not stop the casting if the receiver is unreachable. A user should be
+    // able to start a cast on their phone and then put it away, leaving the
+    // cast running on their big screen.
     options.disableIdleTimeout = true;
 
+    // The collection ID with which we paired. If we get another connection
+    // request for a different collection ID, restart the app to allow them to
+    // reconnect using a freshly generated pairing code.
+    //
+    // If the request does not have a collectionID, just keep a boolean flag.
+    let pairedCollectionID: string | boolean | undefined;
+
+    type ListenerProps = {
+        senderId: string;
+        data: unknown;
+    };
+
     // Reply with the code that we have if anyone asks over Chromecast.
-    const incomingMessageListener = ({ senderId }: { senderId: string }) => {
+    const incomingMessageListener = ({ senderId, data }: ListenerProps) => {
+        const restart = (reason: string) => {
+            log.error(`Restarting app because ${reason}`);
+            // context.stop will close the tab but it'll get reopened again
+            // immediately since the client app will reconnect in the scenarios
+            // where we're calling this function.
+            context.stop();
+        };
+
+        const cid =
+            data &&
+            typeof data == "object" &&
+            typeof data["collectionID"] == "string"
+                ? data["collectionID"]
+                : undefined;
+
+        if (pairedCollectionID !== undefined && pairedCollectionID != cid) {
+            restart(`incoming request for a new collection ${cid}`);
+            return;
+        }
+
+        pairedCollectionID = cid ?? true;
+
         const code = pairingCode();
         if (!code) {
-            log.warn(
-                "Ignoring incoming Chromecast message because we do not yet have a pairing code",
-            );
+            // Our caller waits until it has a pairing code before it calls
+            // `advertiseCode`, but there is still an edge case where we can
+            // find ourselves without a pairing code:
+            //
+            // 1. The current pairing code expires. We start the process to get
+            //    a new one.
+            //
+            // 2. But before that happens, someone connects.
+            //
+            // The window where this can happen is short, so if we do find
+            // ourselves in this scenario,
+            restart("we got a pairing request when refreshing pairing codes");
             return;
         }
 
@@ -148,8 +191,10 @@ export const advertiseCode = (
         incomingMessageListener as unknown as SystemEventHandler,
     );
 
-    // Shutdown ourselves if the sender disconnects.
-    // TODO(MR): I assume the page reloads on shutdown. Is that correct?
+    // Close the (chromecast) tab if the sender disconnects.
+    //
+    // Chromecast does a "shutdown" of our cast app when we call `context.stop`.
+    // This translates into it closing the tab where it is showing our app.
     context.addEventListener(
         cast.framework.system.EventType.SENDER_DISCONNECTED,
         () => context.stop(),
