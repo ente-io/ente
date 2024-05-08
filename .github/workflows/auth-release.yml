@@ -99,12 +99,7 @@ jobs:
 
             - name: Generate checksums and push to artifacts
               run: |
-                sha256sum artifacts/ente-* > artifacts/sha256sum
-
-            - uses: actions/upload-artifact@v4
-              with:
-                name: sha-artifact
-                path: artifacts/sha256sum
+                sha256sum artifacts/ente-* > artifacts/sha256sum-apk-deb
 
             - name: Create a draft GitHub release
               uses: ncipollo/release-action@v1
@@ -125,7 +120,6 @@ jobs:
                   track: internal
 
     build-fedora-etc:
-      needs: build-ubuntu
       runs-on: ubuntu-latest
 
       defaults:
@@ -151,7 +145,7 @@ jobs:
         - name: Install dependencies for desktop build
           run: |
             sudo apt-get update -y
-            sudo apt-get install -y libsecret-1-dev libsodium-dev libwebkit2gtk-4.0-dev libfuse2 ninja-build libgtk-3-dev dpkg-dev pkg-config rpm patchelf libsqlite3-dev locate appindicator3-0.1 libappindicator3-dev libffi-dev libtiff5
+            sudo apt-get install -y libsecret-1-dev libsodium-dev libwebkit2gtk-4.0-dev libfuse2 ninja-build libgtk-3-dev dpkg-dev pkg-config rpm patchelf libsqlite3-dev locate libayatana-appindicator3-dev libffi-dev libtiff5
             sudo updatedb --localpaths='/usr/lib/x86_64-linux-gnu'
 
         - name: Install appimagetool
@@ -168,16 +162,9 @@ jobs:
             flutter_distributor package --platform=linux --targets=appimage --skip-clean
             mv dist/**/*-*-linux.rpm artifacts/ente-${{ github.ref_name }}-x86_64.rpm
             mv dist/**/*-*-linux.AppImage artifacts/ente-${{ github.ref_name }}-x86_64.AppImage
-          env:
-            LIBSODIUM_USE_PKGCONFIG: 1
-
-        - uses: actions/download-artifact@v4
-          with:
-            name: sha-artifact
-            path: artifacts
 
         - name: Generate checksums
-          run: sha256sum artifacts/ente-* >> artifacts/sha256sum
+          run: sha256sum artifacts/ente-* >> artifacts/sha256sum-rpm-appimage
 
         - name: Create a draft GitHub release
           uses: ncipollo/release-action@v1
