@@ -23,8 +23,7 @@ class UploadLocksDB {
     columnLocalID: "local_id",
     columnFileHash: "file_hash",
     columnCollectionID: "collection_id",
-    // todo: neeraj change the name before merging
-    columnEncryptedFileName: "encrypted_file_path",
+    columnEncryptedFileName: "encrypted_file_name",
     columnEncryptedFileSize: "encrypted_file_size",
     columnEncryptedFileKey: "encrypted_file_key",
     columnFileEncryptionNonce: "file_encryption_nonce",
