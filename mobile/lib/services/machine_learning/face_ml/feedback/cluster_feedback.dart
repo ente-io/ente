@@ -275,7 +275,7 @@ class ClusterFeedbackService {
       clusterAvg,
       {personClusterID},
       ignoredClusters,
-      0.22,
+      0.24,
     );
 
     if (suggestions.isEmpty) {
