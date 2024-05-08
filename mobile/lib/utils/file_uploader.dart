@@ -570,18 +570,18 @@ class FileUploader {
       await encryptedThumbnailFile
           .writeAsBytes(encryptedThumbnailData.encryptedData!);
 
-      final thumbnailUploadURL = await _getUploadURL();
-      final String thumbnailObjectKey =
-          await _putFile(thumbnailUploadURL, encryptedThumbnailFile);
-
       // Calculate the number of parts for the file.
       final count = await _multiPartUploader.calculatePartCount(
         await encryptedFile.length(),
       );
 
       late String fileObjectKey;
+      late String thumbnailObjectKey;
 
       if (count <= 1) {
+        final thumbnailUploadURL = await _getUploadURL();
+        thumbnailObjectKey =
+            await _putFile(thumbnailUploadURL, encryptedThumbnailFile);
         final fileUploadURL = await _getUploadURL();
         fileObjectKey = await _putFile(fileUploadURL, encryptedFile);
       } else {
@@ -615,6 +615,13 @@ class FileUploader {
             encryptedFile,
           );
         }
+        // in case of multipart, upload the thumbnail towards the end to avoid
+        // re-uploading the thumbnail in case of failure.
+        // In regular upload, always upload the thumbnail first to keep existing behaviour
+        //
+        final thumbnailUploadURL = await _getUploadURL();
+        thumbnailObjectKey =
+            await _putFile(thumbnailUploadURL, encryptedThumbnailFile);
       }
 
       final metadata = await file.getMetadataForUpload(mediaUploadData);
