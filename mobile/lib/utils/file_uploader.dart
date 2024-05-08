@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
+import "dart:developer" as dev;
 import 'dart:io';
 import 'dart:math' as math;
 
@@ -576,6 +577,7 @@ class FileUploader {
         final fileUploadURL = await _getUploadURL();
         fileObjectKey = await _putFile(fileUploadURL, encryptedFile);
       } else {
+        dev.log("Init multipartUpload $multipartEntryExists", name: "Uploader");
         if (multipartEntryExists) {
           fileObjectKey = await _multiPartUploader.putExistingMultipartFile(
             encryptedFile,

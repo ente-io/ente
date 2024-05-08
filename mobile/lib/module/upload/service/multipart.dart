@@ -187,7 +187,9 @@ class MultiPartUploader {
       final isLastPart = i == partsLength - 1;
       final fileSize =
           isLastPart ? encryptedFile.lengthSync() % partSize : partSize;
-
+      _logger.info(
+        "Uploading part ${i + 1} / $partsLength of size $fileSize bytes (total size ${encryptedFile.lengthSync()}).",
+      );
       final response = await _s3Dio.put(
         partURL,
         data: encryptedFile.openRead(
