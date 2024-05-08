@@ -38,3 +38,8 @@ jobs:
                   tags: ${{ inputs.commit }}, latest
                   username: ${{ github.actor }}
                   password: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Tag as server/ghcr
+              run: |
+                  git tag -f server/ghcr
+                  git push -f origin server/ghcr
