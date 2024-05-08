@@ -330,8 +330,7 @@ class FileUploader {
         final fileNameToLastAttempt =
             await _uploadLocks.getFileNameToLastAttemptedAtMap();
         for (final file in filesToDelete) {
-          final fileName =
-              file.path.split('/').last.replaceAll(uploadTempFilePrefix, '');
+          final fileName = file.path.split('/').last;
           final lastAttemptTime = fileNameToLastAttempt[fileName] != null
               ? DateTime.fromMillisecondsSinceEpoch(
                   fileNameToLastAttempt[fileName]!,
@@ -484,9 +483,10 @@ class FileUploader {
     final String uniqueID = const Uuid().v4().toString();
 
     final encryptedFilePath = multipartEntryExists
-        ? '$uploadPrefix$existingMultipartEncFileName'
-        : '$uploadPrefix${uniqueID}_file.encrypted';
-    final encryptedThumbnailPath = '$uploadPrefix${uniqueID}_thumb.encrypted';
+        ? '$tempDirectory$existingMultipartEncFileName'
+        : '$tempDirectory$uploadTempFilePrefix${uniqueID}_file.encrypted';
+    final encryptedThumbnailPath =
+        '$tempDirectory$uploadTempFilePrefix${uniqueID}_thumb.encrypted';
 
     var uploadCompleted = false;
     // This flag is used to decide whether to clear the iOS origin file cache
@@ -614,7 +614,7 @@ class FileUploader {
         } else {
           final fileUploadURLs =
               await _multiPartUploader.getMultipartUploadURLs(count);
-          final encFileName = encryptedFilePath.replaceAll(uploadPrefix, '');
+          final encFileName = encryptedFile.path.split('/').last;
           await _multiPartUploader.createTableEntry(
             lockKey,
             mediaUploadData.hashData!.fileHash!,
