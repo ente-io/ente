@@ -139,11 +139,12 @@ class Configuration {
       if (tempDocumentsDir.existsSync() &&
           (_preferences.getInt(lastTempFolderClearTimeKey) ?? 0) <
               (currentTime - tempDirCleanUpInterval)) {
-        // list all files in the temp directory
+        int skippedTempUploadFiles = 0;
         final files = tempDocumentsDir.listSync();
         for (final file in files) {
           if (file is File) {
             if (file.path.contains(uploadTempFilePrefix)) {
+              skippedTempUploadFiles++;
               continue;
             }
             _logger.info("Deleting file: ${file.path}");
@@ -152,9 +153,9 @@ class Configuration {
             await file.delete(recursive: true);
           }
         }
-        // await tempDocumentsDir.delete(recursive: true);
         await _preferences.setInt(lastTempFolderClearTimeKey, currentTime);
-        _logger.info("Cleared temp folder");
+        _logger.info(
+            "Cleared temp folder except $skippedTempUploadFiles upload files");
       } else {
         _logger.info("Skipping temp folder clear");
       }
