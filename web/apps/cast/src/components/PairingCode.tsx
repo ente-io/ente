@@ -48,6 +48,9 @@ export const PairingCode: React.FC<PairingCodeProps> = ({ code }) => {
 };
 
 const PairingCode_ = styled("div")`
+    border-radius: 10px;
+    overflow: hidden;
+
     font-size: 4rem;
     font-weight: bold;
     font-family: monospace;

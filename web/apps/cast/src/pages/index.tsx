@@ -71,18 +71,7 @@ export default function Index() {
             <h1>
                 Enter this code on <b>Ente Photos</b> to pair this screen
             </h1>
-            <div
-                style={{
-                    borderRadius: "10px",
-                    overflow: "hidden",
-                }}
-            >
-                {pairingCode ? (
-                    <PairingCode code={pairingCode} />
-                ) : (
-                    <EnteSpinner />
-                )}
-            </div>
+            {pairingCode ? <PairingCode code={pairingCode} /> : <Spinner />}
             <p
                 style={{
                     fontSize: "1.2rem",
@@ -117,4 +106,15 @@ const Container = styled("div")`
     h1 {
         font-weight: normal;
     }
+`;
+
+const Spinner: React.FC = () => (
+    <Spinner_>
+        <EnteSpinner />
+    </Spinner_>
+);
+
+const Spinner_ = styled("div")`
+    /* Roughly same height as the pairing code section to roduce layout shift */
+    margin-block: 1.7rem;
 `;
