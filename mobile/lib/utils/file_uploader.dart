@@ -326,7 +326,7 @@ class FileUploader {
             file.path.contains(".encrypted");
       });
       if (filesToDelete.isNotEmpty) {
-        _logger.info('cleaning up state files ${filesToDelete.length}');
+        _logger.info('Deleting ${filesToDelete.length} stale upload files ');
         for (final file in filesToDelete) {
           await file.delete();
         }
