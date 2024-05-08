@@ -1,3 +1,5 @@
+import "package:flutter/foundation.dart";
+
 const int thumbnailSmallSize = 256;
 const int thumbnailQuality = 50;
 const int thumbnailLargeSize = 512;
@@ -98,4 +100,6 @@ const blackThumbnailBase64 = '/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAEBAQEBAQEB'
     'AKACgAoAKACgAoAKACgAoAKACgAoAKACgAoAKACgAoAKACgAoAKACgAoAKACgAoAKACgAoAKACgAoAKACgAoAKACgAoAKACgAoAKACgAoAKACgAoAKACgD/9k=';
 
 const uploadTempFilePrefix = "upload_file_";
-final tempDirCleanUpInterval = const Duration(seconds: 6).inMicroseconds;
+final tempDirCleanUpInterval = kDebugMode
+    ? const Duration(seconds: 30).inMicroseconds
+    : const Duration(hours: 6).inMicroseconds;
