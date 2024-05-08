@@ -350,6 +350,10 @@ func (c *Controller) getEmbeddingObjectsParallelV2(userID int64, dbEmbeddingRows
 }
 
 func (c *Controller) getEmbeddingObject(objectKey string, downloader *s3manager.Downloader) (ente.EmbeddingObject, error) {
+	return c.getEmbeddingObjectWithRetries(objectKey, downloader, 3)
+}
+
+func (c *Controller) getEmbeddingObjectWithRetries(objectKey string, downloader *s3manager.Downloader, retryCount int) (ente.EmbeddingObject, error) {
 	var obj ente.EmbeddingObject
 	buff := &aws.WriteAtBuffer{}
 	_, err := downloader.Download(buff, &s3.GetObjectInput{
@@ -358,6 +362,9 @@ func (c *Controller) getEmbeddingObject(objectKey string, downloader *s3manager.
 	})
 	if err != nil {
 		log.Error(err)
+		if retryCount > 0 {
+			return c.getEmbeddingObjectWithRetries(objectKey, downloader, retryCount-1)
+		}
 		return obj, stacktrace.Propagate(err, "")
 	}
 	err = json.Unmarshal(buff.Bytes(), &obj)
