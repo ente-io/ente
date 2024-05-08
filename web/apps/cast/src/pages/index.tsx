@@ -72,21 +72,9 @@ export default function Index() {
                 Enter this code on <b>Ente Photos</b> to pair this screen
             </h1>
             {pairingCode ? <PairingCode code={pairingCode} /> : <Spinner />}
-            <p
-                style={{
-                    fontSize: "1.2rem",
-                }}
-            >
+            <p>
                 Visit{" "}
-                <a
-                    style={{
-                        textDecoration: "none",
-                        color: "#87CEFA",
-                        fontWeight: "bold",
-                    }}
-                    href="https://ente.io/cast"
-                    target="_blank"
-                >
+                <a href="https://ente.io/cast" target="_blank">
                     ente.io/cast
                 </a>{" "}
                 for help
@@ -105,6 +93,15 @@ const Container = styled("div")`
 
     h1 {
         font-weight: normal;
+    }
+
+    p {
+        font-size: 1.2rem;
+    }
+    a {
+        text-decoration: none;
+        color: #87cefa;
+        font-weight: bold;
     }
 `;
 
