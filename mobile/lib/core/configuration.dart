@@ -72,8 +72,6 @@ class Configuration {
   static const anonymousUserIDKey = "anonymous_user_id";
   static const endPointKey = "endpoint";
 
-  final kTempFolderDeletionTimeBuffer = const Duration(hours: 6).inMicroseconds;
-
   static final _logger = Logger("Configuration");
 
   String? _cachedToken;
@@ -140,7 +138,7 @@ class Configuration {
       final currentTime = DateTime.now().microsecondsSinceEpoch;
       if (tempDocumentsDir.existsSync() &&
           (_preferences.getInt(lastTempFolderClearTimeKey) ?? 0) <
-              (currentTime - kTempFolderDeletionTimeBuffer)) {
+              (currentTime - tempDirCleanUpInterval)) {
         // list all files in the temp directory
         final files = tempDocumentsDir.listSync();
         for (final file in files) {

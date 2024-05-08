@@ -98,3 +98,4 @@ const blackThumbnailBase64 = '/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAEBAQEBAQEB'
     'AKACgAoAKACgAoAKACgAoAKACgAoAKACgAoAKACgAoAKACgAoAKACgAoAKACgAoAKACgAoAKACgAoAKACgAoAKACgAoAKACgAoAKACgAoAKACgAoAKACgD/9k=';
 
 const uploadTempFilePrefix = "upload_file_";
+final tempDirCleanUpInterval = const Duration(hours: 6).inMicroseconds;
