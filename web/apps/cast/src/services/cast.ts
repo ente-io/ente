@@ -4,7 +4,7 @@ import { decodeLivePhoto } from "@/media/live-photo";
 import { nameAndExtension } from "@/next/file";
 import log from "@/next/log";
 import { shuffled } from "@/utils/array";
-import { ensure, ensureString } from "@/utils/ensure";
+import { ensureString } from "@/utils/ensure";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { getCastFileURL, getEndpoint } from "@ente/shared/network/api";
@@ -84,21 +84,12 @@ export const renderableImageURLs = async function* (castData: CastData) {
     const { collectionKey, castToken } = castData;
 
     /**
-     * We have a sliding window of four URLs, with the `urls[1]` being the one
-     * that is the one currently being shown in the slideshow.
-     *
-     * At each step, we shift the window towards the right by shifting out the
-     * leftmost (oldest) `urls[0]`, and adding a new one at the end.
-     *
-     * We can revoke url[0] when we shift it out because we know it is not being
-     * used anymore.
-     *
-     * We need to special case the first two renders to avoid revoking the
-     * initial URLs that are displayed the first two times. This results in a
-     * memory leak of the very first objectURL that we display.
+     * Keep a FIFO queue of the URLs that we've vended out recently so that we
+     * can revoke those that are not being shown anymore.
      */
-    const urls: string[] = [""];
-    // const i = 0;
+    const previousURLs: string[] = [];
+
+    // const urls: string[] = [""];
 
     /**
      * Number of milliseconds to keep the slide on the screen.
@@ -129,24 +120,33 @@ export const renderableImageURLs = async function* (castData: CastData) {
 
             if (!isFileEligibleForCast(file)) continue;
 
+            let url: string;
             try {
-                urls.push(await createRenderableURL(castToken, file));
+                url = await createRenderableURL(castToken, file);
                 haveEligibleFiles = true;
             } catch (e) {
                 log.error("Skipping unrenderable file", e);
                 continue;
             }
 
-            if (urls.length < 4) continue;
+            if (previousURLs.length > 1)
+                URL.revokeObjectURL(previousURLs.shift());
 
-            const oldestURL = urls.shift();
-            console.log("Not revoking", oldestURL);
+            previousURLs.push(url);
+
+            // const previousURL = oldURLs.length == 0 ? undefined : urls.shift();
+
+            // if (urls.length < 2) continue;
+
+            // console.log("Not revoking", oldestURL);
             // if (oldestURL && i !== 1) URL.revokeObjectURL(oldestURL);
             // i += 1;
 
             const urlPair: RenderableImageURLPair = [
-                ensure(urls[0]),
-                ensure(urls[1]),
+                url,
+                "",
+                // ensure(urls[0]),
+                // ensure(urls[1]),
             ];
 
             const elapsedTime = Date.now() - lastYieldTime;
