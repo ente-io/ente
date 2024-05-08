@@ -905,7 +905,8 @@ class FileUploader {
     if (File(encryptedFilePath).existsSync()) {
       if (isMultiPartUpload && !uploadCompleted) {
         _logger.fine(
-            "skip delete for multipart encrypted file $encryptedFilePath");
+          "skip delete for multipart encrypted file $encryptedFilePath",
+        );
       } else {
         _logger.fine("deleting encrypted file $encryptedFilePath");
         await File(encryptedFilePath).delete();
