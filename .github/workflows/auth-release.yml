@@ -187,16 +187,6 @@ jobs:
             allowUpdates: true
             updateOnlyUnreleased: true
 
-        - name: Upload AAB to PlayStore
-          # disable this step if release tag contains nightly or beta
-          if: startsWith(github.ref, 'refs/tags/auth-v') && !contains(github.ref, 'nightly') && !contains(github.ref, 'beta')
-          uses: r0adkll/upload-google-play@v1
-          with:
-            serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
-            packageName: io.ente.auth
-            releaseFiles: auth/build/app/outputs/bundle/playstoreRelease/app-playstore-release.aab
-            track: internal
-
     build-windows:
         runs-on: windows-latest
 
