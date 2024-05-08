@@ -40,6 +40,11 @@ jobs:
               with:
                   node-version: 20
 
+            - name: Increase yarn timeout
+              # `yarn install` times out sometimes on the Windows runner,
+              # resulting in flaky builds.
+              run: yarn config set network-timeout 900000 -g
+
             - name: Install dependencies
               run: yarn install
 
