@@ -194,7 +194,7 @@ class MultiPartUploader {
       );
       if (kDebugMode && count > 3) {
         throw Exception(
-          'In debug mode, only one part will be uploaded at a time.',
+          'Forced exception to test multipart upload retry mechanism.',
         );
       }
       final response = await _s3Dio.put(
