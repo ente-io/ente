@@ -1,5 +1,5 @@
 import log from "@/next/log";
-import { PairedSuccessfullyOverlay } from "components/PairedSuccessfullyOverlay";
+import { PairingComplete } from "components/PairingComplete";
 import { SlideView } from "components/Slide";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -48,7 +48,7 @@ export default function Slideshow() {
 
     console.log("Rendering slideshow", { loading, imageURL, nextImageURL });
 
-    if (loading) return <PairedSuccessfullyOverlay />;
+    if (loading) return <PairingComplete />;
 
     return <SlideView url={imageURL} nextURL={nextImageURL} />;
 }
