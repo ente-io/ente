@@ -14,6 +14,7 @@ import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/viewer/people/cluster_page.dart";
+import "package:photos/ui/viewer/people/person_clusters_page.dart";
 import "package:photos/ui/viewer/search/result/person_face_widget.dart";
 
 class PersonReviewClusterSuggestion extends StatefulWidget {
@@ -56,6 +57,18 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Review suggestions'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.history_outlined),
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => PersonClustersPage(widget.person),
+                ),
+              );
+            },
+          ),
+        ],
       ),
       body: FutureBuilder<List<ClusterSuggestion>>(
         key: futureBuilderKey,
