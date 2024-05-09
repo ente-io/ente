@@ -93,9 +93,10 @@ const loadingChromecastSDKIfNeeded = async (): Promise<Cast> => {
         const script = document.createElement("script");
         script.src =
             "https://www.gstatic.com/cast/sdk/libs/caf_receiver/v3/cast_receiver_framework.js";
-
-        castReceiver.cast = cast;
-        script.addEventListener("load", () => resolve(cast));
+        script.addEventListener("load", () => {
+            castReceiver.cast = cast;
+            resolve(cast);
+        });
         document.body.appendChild(script);
     });
 
