@@ -4,8 +4,8 @@ import { styled } from "@mui/material";
 import { PairingCode } from "components/PairingCode";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { storeCastData } from "services/cast";
 import { advertiseCode, getCastData, register } from "services/pair";
+import { storeCastData } from "services/render";
 import { castReceiverLoadingIfNeeded } from "../utils/cast-receiver";
 
 export default function Index() {

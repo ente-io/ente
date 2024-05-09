@@ -4,7 +4,7 @@ import { FilledCircleCheck } from "components/FilledCircleCheck";
 import { SlideView } from "components/Slide";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { readCastData, renderableImageURLs } from "services/cast";
+import { readCastData, renderableImageURLs } from "services/render";
 
 export default function Slideshow() {
     const [loading, setLoading] = useState(true);
