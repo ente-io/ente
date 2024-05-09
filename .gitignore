@@ -3,3 +3,6 @@
 
 # macOS
 .DS_Store
+.idea
+.ente.authenticator.db
+.ente.offline_authenticator.db
