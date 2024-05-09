@@ -6,7 +6,7 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { advertiseCode, getCastData, register } from "services/pair";
 import { storeCastData } from "services/render";
-import { castReceiverLoadingIfNeeded } from "../utils/cast-receiver";
+import { castReceiverLoadingIfNeeded } from "../services/cast-receiver";
 
 export default function Index() {
     const [publicKeyB64, setPublicKeyB64] = useState<string | undefined>();
