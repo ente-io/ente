@@ -116,6 +116,8 @@ const advertiseCode = (cast: Cast) => {
     const namespace = "urn:x-cast:pair-request";
 
     const options = new cast.framework.CastReceiverOptions();
+    // Do not automatically close the connection when the sender disconnects.
+    options.maxInactivity = 3600; /* 1 hour */
     // We don't use the media features of the Cast SDK.
     options.skipPlayersLoad = true;
     // Do not stop the casting if the receiver is unreachable. A user should be
