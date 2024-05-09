@@ -16,10 +16,68 @@ class CastReceiver {
      * https://developers.google.com/cast/docs/web_receiver/basic
      */
     cast: Cast | undefined;
+    /**
+     * A promise that allows us to ensure multiple requests to load are funneled
+     * through the same reified load.
+     */
     loader: Promise<Cast> | undefined;
+    /**
+     * True if we have already attached listeners (i.e. if we have "started" the
+     * Chromecast SDK).
+     *
+     * Note that "stopping" the Chromecast SDK causes the Chromecast device to
+     * reload our tab, so this is a one way flag. The stop is something that'll
+     * only get triggered when we're actually running on a Chromecast since it
+     * always happens in response to a message handler.
+     */
+    haveStarted = false;
+    /**
+     * A callback to invoke to get the pairing code when we get a new incoming
+     * pairing request.
+     */
+    pairingCode: () => string | undefined;
+    /**
+     * A callback to invoke to get the ID of the collection that is currently
+     * being shown (if any).
+     */
+    collectionID: () => string | undefined;
 }
 
+/** Singleton instance of {@link CastReceiver}. */
 const castReceiver = new CastReceiver();
+
+/**
+ * Listen for incoming messages on the given {@link cast} receiver, replying to
+ * each of them with a pairing code obtained using the given {@link pairingCode}
+ * callback. Phase 2 of the pairing protocol.
+ *
+ * Calling this function multiple times is fine. The first time around, the
+ * Chromecast SDK will be loaded and will start listening. Subsequently, each
+ * time this is call, we'll update the callbacks, but otherwise just return
+ * immediately (letting the already attached listeners do their thing).
+ *
+ * @param pairingCode A callback to invoke to get the pairing code when we get a
+ * new incoming pairing request.
+ *
+ * @param collectionID A callback to invoke to get the ID of the collection that
+ * is currently being shown (if any).
+ *
+ * See: [Note: Pairing protocol].
+ */
+export const advertiseOnChromecast = (
+    pairingCode: () => string | undefined,
+    collectionID: () => string | undefined,
+) => {
+    // Always update the callbacks.
+    castReceiver.pairingCode = pairingCode;
+    castReceiver.collectionID = collectionID;
+
+    // No-op if we're already running.
+    if (castReceiver.haveStarted) return;
+
+    
+
+};
 
 /**
  * Load the Chromecast Web Receiver SDK and return a reference to the `cast`
@@ -27,10 +85,8 @@ const castReceiver = new CastReceiver();
  *
  * Calling this function multiple times is fine, once the Chromecast SDK is
  * loaded it'll thereafter return the reference to the same object always.
- *
- * https://developers.google.com/cast/docs/web_receiver/basic
  */
-export const castReceiverLoadingIfNeeded = async (): Promise<Cast> => {
+const castReceiverLoadingIfNeeded = async (): Promise<Cast> => {
     if (castReceiver.cast) return castReceiver.cast;
     if (castReceiver.loader) return await castReceiver.loader;
 
@@ -47,17 +103,7 @@ export const castReceiverLoadingIfNeeded = async (): Promise<Cast> => {
     return await castReceiver.loader;
 };
 
-/**
- * Listen for incoming messages on the given {@link cast} receiver, replying to
- * each of them with a pairing code obtained using the given {@link pairingCode}
- * callback. Phase 2 of the pairing protocol.
- *
- * See: [Note: Pairing protocol].
- */
-export const advertiseCode = (
-    cast: Cast,
-    pairingCode: () => string | undefined,
-) => {
+const advertiseCode_ = (cast: Cast, pairingCode: () => string | undefined) => {
     // Prepare the Chromecast "context".
     const context = cast.framework.CastReceiverContext.getInstance();
     const namespace = "urn:x-cast:pair-request";
