@@ -259,7 +259,7 @@ const isImageOrLivePhoto = (file: EnteFile) => {
  */
 const createRenderableURL = async (castToken: string, file: EnteFile) => {
     const imageBlob = await renderableImageBlob(castToken, file);
-    const resizedBlob = needsResize(file) ? await resize(imageBlob) : imageBlob;
+    const resizedBlob = needsResize() ? await resize(imageBlob) : imageBlob;
     return URL.createObjectURL(resizedBlob);
 };
 
