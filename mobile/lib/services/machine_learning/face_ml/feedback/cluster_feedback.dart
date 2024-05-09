@@ -151,18 +151,21 @@ class ClusterFeedbackService {
           await FilesDB.instance.getFileIDToCreationTime();
 
       // Re-cluster within the deleted faces
-      final newFaceIdToClusterID =
+      final clusterResult =
           await FaceClusteringService.instance.predictWithinClusterComputer(
         embeddings,
         fileIDToCreationTime: fileIDToCreationTime,
         distanceThreshold: 0.20,
       );
-      if (newFaceIdToClusterID == null || newFaceIdToClusterID.isEmpty) {
+      if (clusterResult == null || clusterResult.isEmpty) {
         return;
       }
+      final newFaceIdToClusterID = clusterResult.newFaceIdToCluster;
 
       // Update the deleted faces
       await FaceMLDataDB.instance.forceUpdateClusterIds(newFaceIdToClusterID);
+      await FaceMLDataDB.instance
+          .clusterSummaryUpdate(clusterResult.newClusterSummaries!);
 
       // Make sure the deleted faces don't get suggested in the future
       final notClusterIdToPersonId = <int, String>{};
@@ -200,18 +203,21 @@ class ClusterFeedbackService {
           await FilesDB.instance.getFileIDToCreationTime();
 
       // Re-cluster within the deleted faces
-      final newFaceIdToClusterID =
+      final clusterResult =
           await FaceClusteringService.instance.predictWithinClusterComputer(
         embeddings,
         fileIDToCreationTime: fileIDToCreationTime,
         distanceThreshold: 0.20,
       );
-      if (newFaceIdToClusterID == null || newFaceIdToClusterID.isEmpty) {
+      if (clusterResult == null || clusterResult.isEmpty) {
         return;
       }
+      final newFaceIdToClusterID = clusterResult.newFaceIdToCluster;
 
       // Update the deleted faces
       await FaceMLDataDB.instance.forceUpdateClusterIds(newFaceIdToClusterID);
+      await FaceMLDataDB.instance
+          .clusterSummaryUpdate(clusterResult.newClusterSummaries!);
 
       Bus.instance.fire(
         PeopleChangedEvent(
@@ -310,7 +316,7 @@ class ClusterFeedbackService {
   }
 
   // TODO: iterate over this method to find sweet spot
-  Future<Map<int, List<String>>> breakUpCluster(
+  Future<ClusteringResult> breakUpCluster(
     int clusterID, {
     bool useDbscan = false,
   }) async {
@@ -327,54 +333,20 @@ class ClusterFeedbackService {
     final fileIDToCreationTime =
         await FilesDB.instance.getFileIDToCreationTime();
 
-    final Map<int, List<String>> clusterIdToFaceIds = {};
-    if (useDbscan) {
-      final dbscanClusters = await FaceClusteringService.instance.predictDbscan(
-        embeddings,
-        fileIDToCreationTime: fileIDToCreationTime,
-        eps: 0.30,
-        minPts: 8,
-      );
+    final clusterResult =
+        await FaceClusteringService.instance.predictWithinClusterComputer(
+      embeddings,
+      fileIDToCreationTime: fileIDToCreationTime,
+      distanceThreshold: 0.14,
+    );
 
-      if (dbscanClusters.isEmpty) {
-        return {};
-      }
-
-      int maxClusterID = DateTime.now().millisecondsSinceEpoch;
-
-      for (final List<String> cluster in dbscanClusters) {
-        final faceIds = cluster;
-        clusterIdToFaceIds[maxClusterID] = faceIds;
-        maxClusterID++;
-      }
-    } else {
-      final faceIdToCluster =
-          await FaceClusteringService.instance.predictWithinClusterComputer(
-        embeddings,
-        fileIDToCreationTime: fileIDToCreationTime,
-        distanceThreshold: 0.22,
-      );
-
-      if (faceIdToCluster == null || faceIdToCluster.isEmpty) {
-        _logger.info('No clusters found');
-        return {};
-      } else {
-        _logger.info(
-          'Broke up cluster $clusterID into ${faceIdToCluster.values.toSet().length} clusters',
-        );
-      }
-
-      for (final entry in faceIdToCluster.entries) {
-        final clusterID = entry.value;
-        if (clusterIdToFaceIds.containsKey(clusterID)) {
-          clusterIdToFaceIds[clusterID]!.add(entry.key);
-        } else {
-          clusterIdToFaceIds[clusterID] = [entry.key];
-        }
-      }
+    if (clusterResult == null || clusterResult.isEmpty) {
+      _logger.info('No clusters found');
+      return ClusteringResult(newFaceIdToCluster: {});
     }
 
-    final clusterIdToCount = clusterIdToFaceIds.map((key, value) {
+    final clusterIdToCount =
+        clusterResult.newClusterIdToFaceIds!.map((key, value) {
       return MapEntry(key, value.length);
     });
     final amountOfNewClusters = clusterIdToCount.length;
@@ -383,28 +355,16 @@ class ClusterFeedbackService {
       'Broke up cluster $clusterID into $amountOfNewClusters clusters \n ${clusterIdToCount.toString()}',
     );
 
-    final clusterIdToDisplayNames = <int, List<String>>{};
     if (kDebugMode) {
-      for (final entry in clusterIdToFaceIds.entries) {
-        final faceIDs = entry.value;
-        final fileIDs = faceIDs.map((e) => getFileIdFromFaceId(e)).toList();
-        final files = await FilesDB.instance.getFilesFromIDs(fileIDs);
-        final displayNames = files.values.map((e) => e.displayName).toList();
-        clusterIdToDisplayNames[entry.key] = displayNames;
+      final Set allClusteredFaceIDsSet = {};
+      for (final List<String> value
+          in clusterResult.newClusterIdToFaceIds!.values) {
+        allClusteredFaceIDsSet.addAll(value);
       }
+      assert((originalFaceIDsSet.difference(allClusteredFaceIDsSet)).isEmpty);
     }
 
-    final Set allClusteredFaceIDsSet = {};
-    for (final List<String> value in clusterIdToFaceIds.values) {
-      allClusteredFaceIDsSet.addAll(value);
-    }
-    final clusterIDToNoiseFaceID =
-        originalFaceIDsSet.difference(allClusteredFaceIDsSet);
-    if (clusterIDToNoiseFaceID.isNotEmpty) {
-      clusterIdToFaceIds[-1] = clusterIDToNoiseFaceID.toList();
-    }
-
-    return clusterIdToFaceIds;
+    return clusterResult;
   }
 
   /// WARNING: this method is purely for debugging purposes, never use in production

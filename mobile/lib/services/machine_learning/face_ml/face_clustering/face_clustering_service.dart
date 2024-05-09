@@ -44,10 +44,15 @@ enum ClusterOperation { linearIncrementalClustering, dbscanClustering }
 
 class ClusteringResult {
   final Map<String, int> newFaceIdToCluster;
+  final Map<int, List<String>>? newClusterIdToFaceIds;
   final Map<int, (Uint8List, int)>? newClusterSummaries;
+
+  bool get isEmpty => newFaceIdToCluster.isEmpty;
+  
   ClusteringResult({
     required this.newFaceIdToCluster,
-    required this.newClusterSummaries,
+    this.newClusterSummaries,
+    this.newClusterIdToFaceIds,
   });
 }
 
@@ -316,7 +321,7 @@ class FaceClusteringService {
   /// Runs the clustering algorithm [runCompleteClustering] on the given [input], in computer.
   ///
   /// WARNING: Only use on small datasets, as it is not optimized for large datasets.
-  Future<Map<String, int>> predictCompleteComputer(
+  Future<ClusteringResult> predictCompleteComputer(
     Map<String, Uint8List> input, {
     Map<int, int>? fileIDToCreationTime,
     double distanceThreshold = kRecommendedDistanceThreshold,
@@ -326,7 +331,7 @@ class FaceClusteringService {
       _logger.warning(
         "Complete Clustering dataset of embeddings is empty, returning empty list.",
       );
-      return {};
+      return ClusteringResult(newFaceIdToCluster: {});
     }
 
     // Clustering inside the isolate
@@ -336,7 +341,7 @@ class FaceClusteringService {
 
     try {
       final startTime = DateTime.now();
-      final faceIdToCluster = await _computer.compute(
+      final clusteringResult = await _computer.compute(
         runCompleteClustering,
         param: {
           "input": input,
@@ -345,19 +350,19 @@ class FaceClusteringService {
           "mergeThreshold": mergeThreshold,
         },
         taskName: "createImageEmbedding",
-      ) as Map<String, int>;
+      ) as ClusteringResult;
       final endTime = DateTime.now();
       _logger.info(
         "Complete Clustering took: ${endTime.difference(startTime).inMilliseconds}ms",
       );
-      return faceIdToCluster;
+      return clusteringResult;
     } catch (e, s) {
       _logger.severe(e, s);
       rethrow;
     }
   }
 
-  Future<Map<String, int>?> predictWithinClusterComputer(
+  Future<ClusteringResult?> predictWithinClusterComputer(
     Map<String, Uint8List> input, {
     Map<int, int>? fileIDToCreationTime,
     double distanceThreshold = kRecommendedDistanceThreshold,
@@ -366,16 +371,19 @@ class FaceClusteringService {
       '`predictWithinClusterComputer` called with ${input.length} faces and distance threshold $distanceThreshold',
     );
     try {
-      if (input.length < 10) {
-        final mergeThreshold = distanceThreshold + 0.06;
+      if (input.length < 500) {
+        final mergeThreshold = distanceThreshold + 0.08;
         _logger.info(
           'Running complete clustering on ${input.length} faces with distance threshold $mergeThreshold',
         );
-        return predictCompleteComputer(
+        final result = await predictCompleteComputer(
           input,
           fileIDToCreationTime: fileIDToCreationTime,
+          distanceThreshold: distanceThreshold,
           mergeThreshold: mergeThreshold,
         );
+        if (result.newFaceIdToCluster.isEmpty) return null;
+        return result;
       } else {
         _logger.info(
           'Running linear clustering on ${input.length} faces with distance threshold $distanceThreshold',
@@ -385,7 +393,7 @@ class FaceClusteringService {
           fileIDToCreationTime: fileIDToCreationTime,
           distanceThreshold: distanceThreshold,
         );
-        return clusterResult?.newFaceIdToCluster;
+        return clusterResult;
       }
     } catch (e, s) {
       _logger.severe(e, s);
@@ -750,7 +758,7 @@ class FaceClusteringService {
     );
   }
 
-  static Map<String, int> runCompleteClustering(Map args) {
+  static ClusteringResult runCompleteClustering(Map args) {
     final input = args['input'] as Map<String, Uint8List>;
     final fileIDToCreationTime = args['fileIDToCreationTime'] as Map<int, int>?;
     final distanceThreshold = args['distanceThreshold'] as double;
@@ -792,7 +800,7 @@ class FaceClusteringService {
     }
 
     if (faceInfos.isEmpty) {
-      return {};
+      ClusteringResult(newFaceIdToCluster: {});
     }
     final int totalFaces = faceInfos.length;
 
@@ -920,12 +928,31 @@ class FaceClusteringService {
       newFaceIdToCluster[faceInfo.faceID] = faceInfo.clusterId!;
     }
 
+    final Map<int, List<String>> clusterIdToFaceIds = {};
+    for (final entry in newFaceIdToCluster.entries) {
+      final clusterID = entry.value;
+      if (clusterIdToFaceIds.containsKey(clusterID)) {
+        clusterIdToFaceIds[clusterID]!.add(entry.key);
+      } else {
+        clusterIdToFaceIds[clusterID] = [entry.key];
+      }
+    }
+
+    final newClusterSummaries = FaceClusteringService.updateClusterSummaries(
+      oldSummary: <int, (Uint8List, int)>{},
+      newFaceInfos: faceInfos,
+    );
+
     stopwatchClustering.stop();
     log(
       ' [CompleteClustering] ${DateTime.now()} Clustering for ${faceInfos.length} embeddings executed in ${stopwatchClustering.elapsedMilliseconds}ms',
     );
 
-    return newFaceIdToCluster;
+    return ClusteringResult(
+      newFaceIdToCluster: newFaceIdToCluster,
+      newClusterSummaries: newClusterSummaries,
+      newClusterIdToFaceIds: clusterIdToFaceIds,
+    );
   }
 
   static List<List<String>> _runDbscanClustering(Map args) {

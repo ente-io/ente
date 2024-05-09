@@ -7,10 +7,12 @@ import "package:ml_linalg/linalg.dart";
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import "package:photos/db/files_db.dart";
+import "package:photos/events/people_changed_event.dart";
 import 'package:photos/events/subscription_purchased_event.dart';
 import "package:photos/face/db.dart";
 import "package:photos/face/model/person.dart";
 import "package:photos/generated/protos/ente/common/vector.pb.dart";
+import "package:photos/models/file/file.dart";
 import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
@@ -20,6 +22,7 @@ import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedba
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
 import "package:photos/ui/common/popup_item.dart";
 import "package:photos/ui/viewer/people/cluster_breakup_page.dart";
+import "package:photos/ui/viewer/people/cluster_page.dart";
 import "package:photos/utils/dialog_util.dart";
 
 class ClusterAppBar extends StatefulWidget {
@@ -115,7 +118,7 @@ class _AppBarWidgetState extends State<ClusterAppBar> {
           icon: Icons.hide_image_outlined,
         ),
         EntePopupMenuItem(
-          "Break up cluster",
+          "Mixed grouping?",
           value: ClusterPopupAction.breakupCluster,
           icon: Icons.analytics_outlined,
         ),
@@ -217,34 +220,111 @@ class _AppBarWidgetState extends State<ClusterAppBar> {
   }
 
   Future<void> _breakUpCluster(BuildContext context) async {
-    final newClusterIDToFaceIDs =
-        await ClusterFeedbackService.instance.breakUpCluster(widget.clusterID);
+    if (!kDebugMode) {
+      bool userConfirmed = false;
+      List<EnteFile> biggestClusterFiles = [];
+      int biggestClusterID = -1;
+      await showChoiceDialog(
+        context,
+        title: "Does this grouping contain multiple people?",
+        body:
+            "We will automatically analyze the grouping again to determine if there are multiple people in the grouping, and separate them out again. This may take a few seconds.",
+        firstButtonLabel: "Yes, confirm",
+        firstButtonOnTap: () async {
+          try {
+            final breakupResult = await ClusterFeedbackService.instance
+                .breakUpCluster(widget.clusterID);
+            final Map<int, List<String>> newClusterIDToFaceIDs =
+                breakupResult.newClusterIdToFaceIds!;
+            final Map<String, int> newFaceIdToClusterID =
+                breakupResult.newFaceIdToCluster;
 
-    final allFileIDs = newClusterIDToFaceIDs.values
-        .expand((e) => e)
-        .map((e) => getFileIdFromFaceId(e))
-        .toList();
+            // Update to delete the old clusters and save the new clusters
+            await FaceMLDataDB.instance.deleteClusterSummary(widget.clusterID);
+            await FaceMLDataDB.instance
+                .clusterSummaryUpdate(breakupResult.newClusterSummaries!);
+            await FaceMLDataDB.instance
+                .updateFaceIdToClusterId(newFaceIdToClusterID);
 
-    final fileIDtoFile = await FilesDB.instance.getFilesFromIDs(
-      allFileIDs,
-    );
+            // Find the biggest cluster
+            biggestClusterID = -1;
+            int biggestClusterSize = 0;
+            for (final MapEntry<int, List<String>> clusterToFaces
+                in newClusterIDToFaceIDs.entries) {
+              if (clusterToFaces.value.length > biggestClusterSize) {
+                biggestClusterSize = clusterToFaces.value.length;
+                biggestClusterID = clusterToFaces.key;
+              }
+            }
+            // Get the files for the biggest new cluster
+            final biggestClusterFileIDs =
+                newClusterIDToFaceIDs[biggestClusterID]!
+                    .map((e) => getFileIdFromFaceId(e))
+                    .toList();
+            biggestClusterFiles = await FilesDB.instance
+                .getFilesFromIDs(
+                  biggestClusterFileIDs,
+                )
+                .then((mapping) => mapping.values.toList());
+            // Sort the files to prevent issues with the order of the files in gallery
+            biggestClusterFiles
+                .sort((a, b) => b.creationTime!.compareTo(a.creationTime!));
 
-    final newClusterIDToFiles = newClusterIDToFaceIDs.map(
-      (key, value) => MapEntry(
-        key,
-        value
-            .map((faceId) => fileIDtoFile[getFileIdFromFaceId(faceId)]!)
-            .toList(),
-      ),
-    );
+            userConfirmed = true;
+          } catch (e, s) {
+            _logger.severe('Breakup cluster failed', e, s);
+            // await showGenericErrorDialog(context: context, error: e);
+          }
+        },
+      );
+      if (userConfirmed) {
+        // Close the old cluster page
+        Navigator.of(context).pop();
 
-    await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => ClusterBreakupPage(
-          newClusterIDToFiles,
-          "(Analysis)",
+        // Push the new cluster page
+        await Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => ClusterPage(
+              biggestClusterFiles,
+              clusterID: biggestClusterID,
+            ),
+          ),
+        );
+        Bus.instance.fire(PeopleChangedEvent());
+      }
+    } else {
+      final breakupResult = await ClusterFeedbackService.instance
+          .breakUpCluster(widget.clusterID);
+
+      final Map<int, List<String>> newClusterIDToFaceIDs =
+          breakupResult.newClusterIdToFaceIds!;
+
+      final allFileIDs = newClusterIDToFaceIDs.values
+          .expand((e) => e)
+          .map((e) => getFileIdFromFaceId(e))
+          .toList();
+
+      final fileIDtoFile = await FilesDB.instance.getFilesFromIDs(
+        allFileIDs,
+      );
+
+      final newClusterIDToFiles = newClusterIDToFaceIDs.map(
+        (key, value) => MapEntry(
+          key,
+          value
+              .map((faceId) => fileIDtoFile[getFileIdFromFaceId(faceId)]!)
+              .toList(),
         ),
-      ),
-    );
+      );
+
+      await Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => ClusterBreakupPage(
+            newClusterIDToFiles,
+            "(Analysis)",
+          ),
+        ),
+      );
+    }
   }
 }
