@@ -1,5 +1,6 @@
 import { FILE_TYPE } from "@/media/file-type";
 import { isNonWebImageFileExtension } from "@/media/formats";
+import { scaledImageDimensions } from "@/media/image";
 import { decodeLivePhoto } from "@/media/live-photo";
 import { nameAndExtension } from "@/next/file";
 import log from "@/next/log";
@@ -256,8 +257,11 @@ const isImageOrLivePhoto = (file: EnteFile) => {
  * Once we're done showing the file, the URL should be revoked using
  * {@link URL.revokeObjectURL} to free up browser resources.
  */
-const createRenderableURL = async (castToken: string, file: EnteFile) =>
-    URL.createObjectURL(await renderableImageBlob(castToken, file));
+const createRenderableURL = async (castToken: string, file: EnteFile) => {
+    const imageBlob = await renderableImageBlob(castToken, file);
+    const resizedBlob = needsResize(file) ? await resize(imageBlob) : imageBlob;
+    return URL.createObjectURL(resizedBlob);
+};
 
 const renderableImageBlob = async (castToken: string, file: EnteFile) => {
     const fileName = file.metadata.title;
@@ -298,4 +302,61 @@ const downloadFile = async (castToken: string, file: EnteFile) => {
         file.key,
     );
     return new Response(decrypted).blob();
+};
+
+/**
+ * [Note: Chromecast media size limits]
+ *
+ * The Chromecast device fails to load the images if we give it too large
+ * images. This was tested in practice with a 2nd Gen Chromecast.
+ *
+ * The documentation also states:
+ *
+ * > Images have a display size limitation of 720p (1280x720). Images should be
+ * > optimized to 1280x720 or less to avoid scaling down on the receiver device.
+ * >
+ * > https://developers.google.com/cast/docs/media
+ *
+ * So if the size of the image we're wanting to show is more than these limits,
+ * resize it down to a JPEG whose size is clamped to these limits.
+ */
+const needsResize = (file: EnteFile) => {
+    const w = file.w;
+    const h = file.h;
+    // If we don't have either of these values, always resize to be on the safer
+    // side.
+    if (!w || !h) return true;
+    // Otherwise resize if any of the dimensions is outside the recommendation.
+    return Math.max(w, h) > 1280 || Math.min(w, h) > 720;
+};
+
+const resize = async (blob: Blob): Promise<Blob> => {
+    const canvas = document.createElement("canvas");
+    const canvasCtx = ensure(canvas.getContext("2d"));
+
+    return await new Promise((resolve, reject) => {
+        const imageURL = URL.createObjectURL(blob);
+        const image = new Image();
+        image.setAttribute("src", imageURL);
+        image.onload = () => {
+            try {
+                URL.revokeObjectURL(imageURL);
+                const { width, height } = scaledImageDimensions(
+                    image.width,
+                    image.height,
+                    1280,
+                );
+                canvas.width = width;
+                canvas.height = height;
+                canvasCtx.drawImage(image, 0, 0, width, height);
+                canvas.toBlob(
+                    (blob) => resolve(ensure(blob)),
+                    "image/jpeg",
+                    0.8 /* quality */,
+                );
+            } catch (e: unknown) {
+                reject(e);
+            }
+        };
+    });
 };
