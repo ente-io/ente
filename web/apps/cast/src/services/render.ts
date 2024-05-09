@@ -9,7 +9,11 @@ import { ensure } from "@/utils/ensure";
 import { wait } from "@/utils/promise";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import HTTPService from "@ente/shared/network/HTTPService";
-import { getCastThumbnailURL, getEndpoint } from "@ente/shared/network/api";
+import {
+    getCastFileURL,
+    getCastThumbnailURL,
+    getEndpoint,
+} from "@ente/shared/network/api";
 import type { CastData } from "services/cast-data";
 import { detectMediaMIMEType } from "services/detect-type";
 import {
@@ -281,9 +285,16 @@ const downloadFile = async (castToken: string, file: EnteFile) => {
     if (!isImageOrLivePhoto(file))
         throw new Error("Can only cast images and live photos");
 
-    // const url = getCastFileURL(file.id);
-    // TODO(MR): Remove if usused eventually
-    const url = getCastThumbnailURL(file.id);
+    // Change the behaviour when we're running on Chromecast.
+    //
+    // When testing with Chromecast device (2nd gen, this might not be true for
+    // newer variants), in practice we found that it is very underpowered, and
+    // struggles with hi-res images. So when we're running on Chromecast, just
+    // show the thumbnails.
+
+    const isCast = "cast" in globalThis;
+
+    const url = isCast ? getCastThumbnailURL(file.id) : getCastFileURL(file.id);
     const resp = await HTTPService.get(
         url,
         null,
@@ -297,9 +308,11 @@ const downloadFile = async (castToken: string, file: EnteFile) => {
     const cryptoWorker = await ComlinkCryptoWorker.getInstance();
     const decrypted = await cryptoWorker.decryptFile(
         new Uint8Array(resp.data),
-        // await cryptoWorker.fromB64(file.file.decryptionHeader),
-        // TODO(MR): Remove if usused eventually
-        await cryptoWorker.fromB64(file.thumbnail.decryptionHeader),
+        await cryptoWorker.fromB64(
+            isCast
+                ? file.thumbnail.decryptionHeader
+                : file.file.decryptionHeader,
+        ),
         file.key,
     );
     return new Response(decrypted).blob();
