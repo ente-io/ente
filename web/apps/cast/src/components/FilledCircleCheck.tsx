@@ -1,6 +1,6 @@
 import { styled } from "@mui/material";
 
-const FilledCircleCheck = () => {
+export const FilledCircleCheck: React.FC = () => {
     return (
         <Container>
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
@@ -10,8 +10,6 @@ const FilledCircleCheck = () => {
         </Container>
     );
 };
-
-export default FilledCircleCheck;
 
 const Container = styled("div")`
     width: 100px;

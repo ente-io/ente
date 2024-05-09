@@ -1,7 +1,7 @@
 import Store, { Schema } from "electron-store";
 
 interface UserPreferences {
-    hideDockIcon: boolean;
+    hideDockIcon?: boolean;
     skipAppVersion?: string;
     muteUpdateNotificationVersion?: string;
 }

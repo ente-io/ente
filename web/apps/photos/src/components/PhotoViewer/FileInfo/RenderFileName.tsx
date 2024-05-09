@@ -7,8 +7,8 @@ import VideocamOutlined from "@mui/icons-material/VideocamOutlined";
 import Box from "@mui/material/Box";
 import { useEffect, useState } from "react";
 import { EnteFile } from "types/file";
-import { makeHumanReadableStorage } from "utils/billing";
 import { changeFileName, updateExistingFilePubMetadata } from "utils/file";
+import { formattedByteSize } from "utils/units";
 import { FileNameEditDialog } from "./FileNameEditDialog";
 import InfoItem from "./InfoItem";
 
@@ -33,7 +33,7 @@ const getCaption = (file: EnteFile, parsedExifData) => {
         captionParts.push(resolution);
     }
     if (fileSize) {
-        captionParts.push(makeHumanReadableStorage(fileSize));
+        captionParts.push(formattedByteSize(fileSize));
     }
     return (
         <FlexWrapper gap={1}>

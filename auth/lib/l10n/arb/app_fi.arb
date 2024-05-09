@@ -12,7 +12,6 @@
   "codeIssuerHint": "Myöntäjä",
   "codeSecretKeyHint": "Salainen avain",
   "codeAccountHint": "Tili (sinun@jokinosoite.com)",
-  "accountKeyType": "Avaimen tyyppi",
   "sessionExpired": "Istunto on vanheutunut",
   "@sessionExpired": {
     "description": "Title of the dialog when the users current session is invalid/expired"

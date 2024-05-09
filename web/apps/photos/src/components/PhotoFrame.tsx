@@ -308,7 +308,7 @@ const PhotoFrame = ({
         item: EnteFile,
     ) => {
         log.info(
-            `[${item.id}] getSlideData called for thumbnail: ${!!item.msrc} sourceLoaded: ${item.isSourceLoaded} fetching:${fetching[item.id]}`,
+            `[${item.id}] getSlideData called for thumbnail: ${!!item.msrc} sourceLoaded: ${!!item.isSourceLoaded} fetching: ${!!fetching[item.id]}`,
         );
 
         if (!item.msrc) {

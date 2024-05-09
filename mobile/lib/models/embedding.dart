@@ -1,17 +1,7 @@
 import "dart:convert";
 
-import "package:isar/isar.dart";
-
-part 'embedding.g.dart';
-
-@collection
 class Embedding {
-  static const index = 'unique_file_model_embedding';
-
-  Id id = Isar.autoIncrement;
   final int fileID;
-  @enumerated
-  @Index(name: index, composite: [CompositeIndex('fileID')], unique: true, replace: true)
   final Model model;
   final List<double> embedding;
   int? updationTime;

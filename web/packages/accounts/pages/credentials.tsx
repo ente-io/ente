@@ -5,7 +5,6 @@ import { VerticallyCentered } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
 import FormPaperFooter from "@ente/shared/components/Form/FormPaper/Footer";
-import FormPaperTitle from "@ente/shared/components/Form/FormPaper/Title";
 import LinkButton from "@ente/shared/components/LinkButton";
 import VerifyMasterPasswordForm, {
     VerifyMasterPasswordFormProps,
@@ -39,6 +38,7 @@ import {
     setKey,
 } from "@ente/shared/storage/sessionStorage";
 import { KeyAttributes, User } from "@ente/shared/user/types";
+import { Typography, styled } from "@mui/material";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -259,7 +259,7 @@ export default function Credentials({ appContext, appName }: PageProps) {
     return (
         <VerticallyCentered>
             <FormPaper style={{ minWidth: "320px" }}>
-                <FormPaperTitle>{t("PASSWORD")}</FormPaperTitle>
+                <Title>{user.email}</Title>
 
                 <VerifyMasterPasswordForm
                     buttonText={t("VERIFY_PASSPHRASE")}
@@ -281,3 +281,19 @@ export default function Credentials({ appContext, appName }: PageProps) {
         </VerticallyCentered>
     );
 }
+
+const Title: React.FC<React.PropsWithChildren> = ({ children }) => {
+    return (
+        <Title_>
+            <Typography variant="h2">{t("PASSWORD")}</Typography>
+            <Typography color="text.faint">{children}</Typography>
+        </Title_>
+    );
+};
+
+const Title_ = styled("div")`
+    margin-block-end: 4rem;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+`;

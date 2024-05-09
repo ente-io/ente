@@ -1,4 +1,5 @@
 import { FILE_TYPE } from "@/media/file-type";
+import { isNonWebImageFileExtension } from "@/media/formats";
 import { decodeLivePhoto } from "@/media/live-photo";
 import { lowercaseExtension } from "@/next/file";
 import log from "@/next/log";
@@ -39,20 +40,6 @@ import { VISIBILITY_STATE } from "types/magicMetadata";
 import { isArchivedFile, updateMagicMetadata } from "utils/magicMetadata";
 import { safeFileName } from "utils/native-fs";
 import { writeStream } from "utils/native-stream";
-
-const RAW_FORMATS = [
-    "heic",
-    "rw2",
-    "tiff",
-    "arw",
-    "cr3",
-    "cr2",
-    "raf",
-    "nef",
-    "psd",
-    "dng",
-    "tif",
-];
 
 const SUPPORTED_RAW_FORMATS = [
     "heic",
@@ -114,19 +101,6 @@ export async function getUpdatedEXIFFileForDownload(
     } else {
         return fileStream;
     }
-}
-
-export function convertBytesToHumanReadable(
-    bytes: number,
-    precision = 2,
-): string {
-    if (bytes === 0 || isNaN(bytes)) {
-        return "0 MB";
-    }
-
-    const i = Math.floor(Math.log(bytes) / Math.log(1024));
-    const sizes = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
-    return (bytes / Math.pow(1024, i)).toFixed(precision) + " " + sizes[i];
 }
 
 export async function downloadFile(file: EnteFile) {
@@ -301,13 +275,14 @@ export const getRenderableImage = async (fileName: string, imageBlob: Blob) => {
         const tempFile = new File([imageBlob], fileName);
         const fileTypeInfo = await detectFileTypeInfo(tempFile);
         log.debug(
-            () => `Need renderable image for ${JSON.stringify(fileTypeInfo)}`,
+            () =>
+                `Need renderable image for ${JSON.stringify({ fileName, ...fileTypeInfo })}`,
         );
         const { extension } = fileTypeInfo;
 
-        if (!isRawFile(extension)) {
-            // Either it is not something we know how to handle yet, or
-            // something that the browser already knows how to render.
+        if (!isNonWebImageFileExtension(extension)) {
+            // Either it is something that the browser already knows how to
+            // render, or something we don't even about yet.
             return imageBlob;
         }
 
@@ -318,7 +293,7 @@ export const getRenderableImage = async (fileName: string, imageBlob: Blob) => {
             try {
                 return await nativeConvertToJPEG(imageBlob);
             } catch (e) {
-                if (e.message == CustomErrorMessage.NotAvailable) {
+                if (e.message.endsWith(CustomErrorMessage.NotAvailable)) {
                     moduleState.isNativeJPEGConversionNotAvailable = true;
                 } else {
                     log.error("Native conversion to JPEG failed", e);
@@ -351,10 +326,6 @@ const nativeConvertToJPEG = async (imageBlob: Blob) => {
     log.debug(() => `Native JPEG conversion took ${Date.now() - startTime} ms`);
     return new Blob([jpegData]);
 };
-
-export function isRawFile(exactType: string) {
-    return RAW_FORMATS.includes(exactType.toLowerCase());
-}
 
 export function isSupportedRawFormat(exactType: string) {
     return SUPPORTED_RAW_FORMATS.includes(exactType.toLowerCase());

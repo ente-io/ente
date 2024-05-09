@@ -1,4 +1,6 @@
 import "package:dio/dio.dart";
+import "package:ente_cast/ente_cast.dart";
+import "package:ente_cast_normal/ente_cast_normal.dart";
 import "package:ente_feature_flag/ente_feature_flag.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
@@ -25,4 +27,10 @@ FlagService get flagService {
     ServiceLocator.instance.enteDio,
   );
   return _flagService!;
+}
+
+CastService? _castService;
+CastService get castService {
+  _castService ??= CastServiceImpl();
+  return _castService!;
 }

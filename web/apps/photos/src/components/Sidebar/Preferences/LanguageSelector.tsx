@@ -19,6 +19,8 @@ export const localeName = (locale: SupportedLocale) => {
             return "English";
         case "fr-FR":
             return "Français";
+        case "de-DE":
+            return "Deutsch";
         case "zh-CN":
             return "中文";
         case "nl-NL":

@@ -90,6 +90,9 @@ Some extra ones specific to the code here are:
     Unix commands in our `package.json` scripts. This allows us to use the same
     commands (like `ln`) across different platforms like Linux and Windows.
 
+-   [@tsconfig/recommended](https://github.com/tsconfig/bases) gives us a base
+    tsconfig for the Node.js version that our current Electron version uses.
+
 ## Functionality
 
 ### Format conversion

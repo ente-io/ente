@@ -1,5 +1,4 @@
-import { Paper } from "@mui/material";
-import { styled } from "@mui/material/styles";
+import { Paper, styled } from "@mui/material";
 
 export const LivePhotoBtnContainer = styled(Paper)`
     border-radius: 4px;

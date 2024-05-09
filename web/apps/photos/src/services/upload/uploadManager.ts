@@ -321,7 +321,6 @@ class UploadManager {
     >(maxConcurrentUploads);
     private parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>;
     private itemsToBeUploaded: ClusteredUploadItem[];
-    private remainingItems: ClusteredUploadItem[] = [];
     private failedItems: ClusteredUploadItem[];
     private existingFiles: EnteFile[];
     private setFiles: SetFiles;
@@ -360,7 +359,6 @@ class UploadManager {
 
     private resetState() {
         this.itemsToBeUploaded = [];
-        this.remainingItems = [];
         this.failedItems = [];
         this.parsedMetadataJSONMap = new Map<string, ParsedMetadataJSON>();
 
@@ -440,17 +438,13 @@ class UploadManager {
                 await this.uploadMediaItems(clusteredMediaItems);
             }
         } catch (e) {
-            if (e.message === CustomError.UPLOAD_CANCELLED) {
-                if (isElectron()) {
-                    this.remainingItems = [];
-                    await cancelRemainingUploads();
-                }
-            } else {
-                log.error("Uploading failed", e);
+            if (e.message != CustomError.UPLOAD_CANCELLED) {
+                log.error("Upload failed", e);
                 throw e;
             }
         } finally {
             this.uiService.setUploadStage(UPLOAD_STAGES.FINISH);
+            void globalThis.electron?.clearPendingUploads();
             for (let i = 0; i < maxConcurrentUploads; i++) {
                 this.cryptoWorkers[i]?.terminate();
             }
@@ -503,15 +497,8 @@ class UploadManager {
 
     private async uploadMediaItems(mediaItems: ClusteredUploadItem[]) {
         this.itemsToBeUploaded = [...this.itemsToBeUploaded, ...mediaItems];
-
-        if (isElectron()) {
-            this.remainingItems = [...this.remainingItems, ...mediaItems];
-        }
-
         this.uiService.reset(mediaItems.length);
-
         await UploadService.setFileCount(mediaItems.length);
-
         this.uiService.setUploadStage(UPLOAD_STAGES.UPLOADING);
 
         const uploadProcesses = [];
@@ -584,8 +571,10 @@ class UploadManager {
             `Uploaded ${uploadableItem.fileName} with result ${uploadResult}`,
         );
         try {
+            const electron = globalThis.electron;
+            if (electron) await markUploaded(electron, uploadableItem);
+
             let decryptedFile: EnteFile;
-            await this.removeFromPendingUploads(uploadableItem);
             switch (uploadResult) {
                 case UPLOAD_RESULT.FAILED:
                 case UPLOAD_RESULT.BLOCKED:
@@ -620,11 +609,25 @@ class UploadManager {
                 ].includes(uploadResult)
             ) {
                 try {
+                    let file: File | undefined;
+                    const uploadItem =
+                        uploadableItem.uploadItem ??
+                        uploadableItem.livePhotoAssets.image;
+                    if (uploadItem) {
+                        if (uploadItem instanceof File) {
+                            file = uploadItem;
+                        } else if (
+                            typeof uploadItem == "string" ||
+                            Array.isArray(uploadItem)
+                        ) {
+                            // path from desktop, no file object
+                        } else {
+                            file = uploadItem.file;
+                        }
+                    }
                     eventBus.emit(Events.FILE_UPLOADED, {
                         enteFile: decryptedFile,
-                        localFile:
-                            uploadableItem.uploadItem ??
-                            uploadableItem.livePhotoAssets.image,
+                        localFile: file,
                     });
                 } catch (e) {
                     log.warn("Ignoring error in fileUploaded handlers", e);
@@ -686,18 +689,6 @@ class UploadManager {
 
     private updateUIFiles(decryptedFile: EnteFile) {
         this.setFiles((files) => sortFiles([...files, decryptedFile]));
-    }
-
-    private async removeFromPendingUploads(
-        clusteredUploadItem: ClusteredUploadItem,
-    ) {
-        const electron = globalThis.electron;
-        if (electron) {
-            this.remainingItems = this.remainingItems.filter(
-                (f) => f.localID != clusteredUploadItem.localID,
-            );
-            await markUploaded(electron, clusteredUploadItem);
-        }
     }
 
     public shouldAllowNewUpload = () => {
@@ -846,8 +837,6 @@ const markUploaded = async (electron: Electron, item: ClusteredUploadItem) => {
         }
     }
 };
-
-const cancelRemainingUploads = () => ensureElectron().clearPendingUploads();
 
 /**
  * Go through the given files, combining any sibling image + video assets into a

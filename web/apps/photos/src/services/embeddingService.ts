@@ -86,7 +86,11 @@ export const syncEmbeddings = async () => {
         allLocalFiles.forEach((file) => {
             fileIdToKeyMap.set(file.id, file.key);
         });
-        await cleanupDeletedEmbeddings(allLocalFiles, allEmbeddings);
+        await cleanupDeletedEmbeddings(
+            allLocalFiles,
+            allEmbeddings,
+            EMBEDDINGS_TABLE,
+        );
         log.info(`Syncing embeddings localCount: ${allEmbeddings.length}`);
         for (const model of models) {
             let modelLastSinceTime = await getModelEmbeddingSyncTime(model);
@@ -168,7 +172,11 @@ export const syncFileEmbeddings = async () => {
         allLocalFiles.forEach((file) => {
             fileIdToKeyMap.set(file.id, file.key);
         });
-        await cleanupDeletedEmbeddings(allLocalFiles, allEmbeddings);
+        await cleanupDeletedEmbeddings(
+            allLocalFiles,
+            allEmbeddings,
+            FILE_EMBEDING_TABLE,
+        );
         log.info(`Syncing embeddings localCount: ${allEmbeddings.length}`);
         for (const model of models) {
             let modelLastSinceTime = await getModelEmbeddingSyncTime(model);
@@ -289,6 +297,7 @@ export const putEmbedding = async (
 export const cleanupDeletedEmbeddings = async (
     allLocalFiles: EnteFile[],
     allLocalEmbeddings: Embedding[] | FileML[],
+    tableName: string,
 ) => {
     const activeFileIds = new Set<number>();
     allLocalFiles.forEach((file) => {
@@ -302,6 +311,6 @@ export const cleanupDeletedEmbeddings = async (
         log.info(
             `cleanupDeletedEmbeddings embeddingsCount: ${allLocalEmbeddings.length} remainingEmbeddingsCount: ${remainingEmbeddings.length}`,
         );
-        await localForage.setItem(EMBEDDINGS_TABLE, remainingEmbeddings);
+        await localForage.setItem(tableName, remainingEmbeddings);
     }
 };

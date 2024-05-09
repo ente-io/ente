@@ -132,14 +132,15 @@ class __BodyState extends State<_Body> {
     return maxWidth;
   }
 
+//Todo: this doesn't give the correct width of the word, make it right
   double computeWidthOfWord(String text, TextStyle style) {
     final textPainter = TextPainter(
       text: TextSpan(text: text, style: style),
       maxLines: 1,
       textDirection: TextDirection.ltr,
-      textScaleFactor: MediaQuery.of(context).textScaleFactor,
+      textScaler: MediaQuery.textScalerOf(context),
     )..layout();
-
-    return textPainter.size.width;
+//buffer of 8 added as width is shorter than actual text width
+    return textPainter.size.width + 8;
   }
 }

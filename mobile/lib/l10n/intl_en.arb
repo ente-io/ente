@@ -835,6 +835,7 @@
   "close": "Close",
   "setAs": "Set as",
   "fileSavedToGallery": "File saved to gallery",
+  "filesSavedToGallery": "Files saved to gallery",
   "fileFailedToSaveToGallery": "Failed to save file to gallery",
   "download": "Download",
   "pressAndHoldToPlayVideo": "Press and hold to play video",
@@ -1217,5 +1218,18 @@
   "createCollaborativeLink": "Create collaborative link",
   "search": "Search",
   "enterPersonName": "Enter person name",
-  "removePersonLabel": "Remove person label"
+  "removePersonLabel": "Remove person label",
+  "autoPairDesc": "Auto pair works only with devices that support Chromecast.",
+  "manualPairDesc": "Pair with PIN works with any screen you wish to view your album on.",
+  "connectToDevice": "Connect to device",
+  "autoCastDialogBody": "You'll see available Cast devices here.",
+  "autoCastiOSPermission": "Make sure Local Network permissions are turned on for the Ente Photos app, in Settings.",
+  "noDeviceFound": "No device found",
+  "stopCastingTitle": "Stop casting",
+  "stopCastingBody": "Do you want to stop casting?",
+  "castIPMismatchTitle": "Failed to cast album",
+  "castIPMismatchBody": "Please make sure you are on the same network as the TV.",
+  "pairingComplete": "Pairing complete",
+  "autoPair": "Auto pair",
+  "pairWithPin": "Pair with PIN"
 }

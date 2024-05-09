@@ -1,82 +1,36 @@
-import {
-    SESSION_KEYS,
-    clearKeys,
-    getKey,
-} from "@ente/shared/storage/sessionStorage";
-import { Typography, styled } from "@mui/material";
-import { t } from "i18next";
-import { useRouter } from "next/router";
-import {
-    createContext,
-    useContext,
-    useEffect,
-    useMemo,
-    useRef,
-    useState,
-} from "react";
-import {
-    constructEmailList,
-    createAlbum,
-    getAllLatestCollections,
-    getAllLocalCollections,
-    getCollectionSummaries,
-    getFavItemIds,
-    getHiddenItemsSummary,
-    getSectionSummaries,
-} from "services/collectionService";
-import { getLocalFiles, syncFiles } from "services/fileService";
-
-import { checkSubscriptionPurchase } from "utils/billing";
-
+import log from "@/next/log";
+import { APPS } from "@ente/shared/apps/constants";
+import { CenteredFlex } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
+import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
+import { CustomError } from "@ente/shared/error";
+import { useFileInput } from "@ente/shared/hooks/useFileInput";
+import useMemoSingleThreaded from "@ente/shared/hooks/useMemoSingleThreaded";
+import InMemoryStore, { MS_KEYS } from "@ente/shared/storage/InMemoryStore";
+import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import {
+    getToken,
     isFirstLogin,
     justSignedUp,
     setIsFirstLogin,
     setJustSignedUp,
 } from "@ente/shared/storage/localStorage/helpers";
-import CollectionSelector, {
-    CollectionSelectorAttributes,
-} from "components/Collections/CollectionSelector";
-import FullScreenDropZone from "components/FullScreenDropZone";
-import { LoadingOverlay } from "components/LoadingOverlay";
-import PhotoFrame from "components/PhotoFrame";
-import Sidebar from "components/Sidebar";
-import SelectedFileOptions from "components/pages/gallery/SelectedFileOptions";
-import { useDropzone } from "react-dropzone";
 import {
-    isTokenValid,
-    syncMapEnabled,
-    validateKey,
-} from "services/userService";
-import { preloadImage } from "utils/common";
-import {
-    FILE_OPS_TYPE,
-    constructFileToCollectionMap,
-    getSelectedFiles,
-    getUniqueFiles,
-    handleFileOps,
-    mergeMetadata,
-    sortFiles,
-} from "utils/file";
-
-import log from "@/next/log";
-import { APPS } from "@ente/shared/apps/constants";
-import { CenteredFlex } from "@ente/shared/components/Container";
-import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
-import { CustomError } from "@ente/shared/error";
-import useFileInput from "@ente/shared/hooks/useFileInput";
-import useMemoSingleThreaded from "@ente/shared/hooks/useMemoSingleThreaded";
-import InMemoryStore, { MS_KEYS } from "@ente/shared/storage/InMemoryStore";
-import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
-import { getToken } from "@ente/shared/storage/localStorage/helpers";
+    SESSION_KEYS,
+    clearKeys,
+    getKey,
+} from "@ente/shared/storage/sessionStorage";
 import { User } from "@ente/shared/user/types";
 import { isPromise } from "@ente/shared/utils";
+import { Typography, styled } from "@mui/material";
 import AuthenticateUserModal from "components/AuthenticateUserModal";
 import Collections from "components/Collections";
 import CollectionNamer, {
     CollectionNamerAttributes,
 } from "components/Collections/CollectionNamer";
+import CollectionSelector, {
+    CollectionSelectorAttributes,
+} from "components/Collections/CollectionSelector";
 import ExportModal from "components/ExportModal";
 import {
     FilesDownloadProgress,
@@ -85,31 +39,62 @@ import {
 import FixCreationTime, {
     FixCreationTimeAttributes,
 } from "components/FixCreationTime";
+import FullScreenDropZone from "components/FullScreenDropZone";
 import GalleryEmptyState from "components/GalleryEmptyState";
+import { LoadingOverlay } from "components/LoadingOverlay";
+import PhotoFrame from "components/PhotoFrame";
 import { ITEM_TYPE, TimeStampListItem } from "components/PhotoList";
 import SearchResultInfo from "components/Search/SearchResultInfo";
+import Sidebar from "components/Sidebar";
 import Uploader from "components/Upload/Uploader";
-import UploadInputs from "components/UploadSelectorInputs";
+import { UploadSelectorInputs } from "components/UploadSelectorInputs";
 import { GalleryNavbar } from "components/pages/gallery/Navbar";
 import PlanSelector from "components/pages/gallery/PlanSelector";
+import SelectedFileOptions from "components/pages/gallery/SelectedFileOptions";
 import {
     ALL_SECTION,
     ARCHIVE_SECTION,
     CollectionSummaryType,
-    DUMMY_UNCATEGORIZED_COLLECTION,
     HIDDEN_ITEMS_SECTION,
     TRASH_SECTION,
 } from "constants/collection";
 import { SYNC_INTERVAL_IN_MICROSECONDS } from "constants/gallery";
+import { t } from "i18next";
+import { useRouter } from "next/router";
 import { AppContext } from "pages/_app";
+import {
+    createContext,
+    useContext,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from "react";
+import { useDropzone } from "react-dropzone";
 import { clipService } from "services/clip-service";
-import { constructUserIDToEmailMap } from "services/collectionService";
+import {
+    constructEmailList,
+    constructUserIDToEmailMap,
+    createAlbum,
+    getAllLatestCollections,
+    getAllLocalCollections,
+    getCollectionSummaries,
+    getFavItemIds,
+    getHiddenItemsSummary,
+    getSectionSummaries,
+} from "services/collectionService";
 import downloadManager from "services/download";
 import { syncEmbeddings, syncFileEmbeddings } from "services/embeddingService";
 import { syncEntities } from "services/entityService";
+import { getLocalFiles, syncFiles } from "services/fileService";
 import locationSearchService from "services/locationSearchService";
 import { getLocalTrashedFiles, syncTrash } from "services/trashService";
 import uploadManager from "services/upload/uploadManager";
+import {
+    isTokenValid,
+    syncMapEnabled,
+    validateKey,
+} from "services/userService";
 import { Collection, CollectionSummaries } from "types/collection";
 import { EnteFile } from "types/file";
 import {
@@ -121,6 +106,7 @@ import {
 } from "types/gallery";
 import { Search, SearchResultSummary, UpdateSearch } from "types/search";
 import { FamilyData } from "types/user";
+import { checkSubscriptionPurchase } from "utils/billing";
 import {
     COLLECTION_OPS_TYPE,
     constructCollectionNameMap,
@@ -132,6 +118,16 @@ import {
     splitNormalAndHiddenCollections,
 } from "utils/collection";
 import ComlinkSearchWorker from "utils/comlink/ComlinkSearchWorker";
+import { preloadImage } from "utils/common";
+import {
+    FILE_OPS_TYPE,
+    constructFileToCollectionMap,
+    getSelectedFiles,
+    getUniqueFiles,
+    handleFileOps,
+    mergeMetadata,
+    sortFiles,
+} from "utils/file";
 import { isArchivedFile } from "utils/magicMetadata";
 import { getSessionExpiredMessage } from "utils/ui";
 import { getLocalFamilyData } from "utils/user/family";
@@ -202,8 +198,11 @@ export default function Gallery() {
     const [isPhotoSwipeOpen, setIsPhotoSwipeOpen] = useState(false);
 
     const {
+        // A function to call to get the props we should apply to the container,
         getRootProps: getDragAndDropRootProps,
+        // ... the props we should apply to the <input> element,
         getInputProps: getDragAndDropInputProps,
+        // ... and the files that we got.
         acceptedFiles: dragAndDropFiles,
     } = useDropzone({
         noClick: true,
@@ -211,23 +210,23 @@ export default function Gallery() {
         disabled: shouldDisableDropzone,
     });
     const {
-        selectedFiles: fileSelectorFiles,
-        open: openFileSelector,
         getInputProps: getFileSelectorInputProps,
+        openSelector: openFileSelector,
+        selectedFiles: fileSelectorFiles,
     } = useFileInput({
         directory: false,
     });
     const {
-        selectedFiles: folderSelectorFiles,
-        open: openFolderSelector,
         getInputProps: getFolderSelectorInputProps,
+        openSelector: openFolderSelector,
+        selectedFiles: folderSelectorFiles,
     } = useFileInput({
         directory: true,
     });
     const {
-        selectedFiles: fileSelectorZipFiles,
-        open: openZipFileSelector,
         getInputProps: getZipFileSelectorInputProps,
+        openSelector: openZipFileSelector,
+        selectedFiles: fileSelectorZipFiles,
     } = useFileInput({
         directory: false,
         accept: ".zip",
@@ -370,7 +369,7 @@ export default function Gallery() {
                 syncWithRemote(false, true);
             }, SYNC_INTERVAL_IN_MICROSECONDS);
             if (electron) {
-                void clipService.setupOnFileUploadListener();
+                // void clipService.setupOnFileUploadListener();
                 electron.onMainWindowFocus(() => syncWithRemote(false, true));
             }
         };
@@ -446,18 +445,8 @@ export default function Gallery() {
         }
         let collectionURL = "";
         if (activeCollectionID !== ALL_SECTION) {
-            collectionURL += "?collection=";
-            if (activeCollectionID === ARCHIVE_SECTION) {
-                collectionURL += t("ARCHIVE_SECTION_NAME");
-            } else if (activeCollectionID === TRASH_SECTION) {
-                collectionURL += t("TRASH");
-            } else if (activeCollectionID === DUMMY_UNCATEGORIZED_COLLECTION) {
-                collectionURL += t("UNCATEGORIZED");
-            } else if (activeCollectionID === HIDDEN_ITEMS_SECTION) {
-                collectionURL += t("HIDDEN_ITEMS_SECTION_NAME");
-            } else {
-                collectionURL += activeCollectionID;
-            }
+            // TODO: Is this URL param even used?
+            collectionURL = `?collection=${activeCollectionID}`;
         }
         const href = `/gallery${collectionURL}`;
         router.push(href, undefined, { shallow: true });
@@ -1024,14 +1013,14 @@ export default function Gallery() {
                 setSelectedFiles: setSelected,
             }}
         >
-            <FullScreenDropZone
-                getDragAndDropRootProps={getDragAndDropRootProps}
-            >
-                <UploadInputs
-                    getDragAndDropInputProps={getDragAndDropInputProps}
-                    getFileSelectorInputProps={getFileSelectorInputProps}
-                    getFolderSelectorInputProps={getFolderSelectorInputProps}
-                    getZipFileSelectorInputProps={getZipFileSelectorInputProps}
+            <FullScreenDropZone {...{ getDragAndDropRootProps }}>
+                <UploadSelectorInputs
+                    {...{
+                        getDragAndDropInputProps,
+                        getFileSelectorInputProps,
+                        getFolderSelectorInputProps,
+                        getZipFileSelectorInputProps,
+                    }}
                 />
                 {blockingLoad && (
                     <LoadingOverlay>

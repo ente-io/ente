@@ -10,4 +10,20 @@ module.exports = {
     parserOptions: { project: true },
     parser: "@typescript-eslint/parser",
     ignorePatterns: [".eslintrc.js"],
+    rules: {
+        /* Allow numbers to be used in template literals */
+        "@typescript-eslint/restrict-template-expressions": [
+            "error",
+            {
+                allowNumber: true,
+            },
+        ],
+        /* Allow void expressions as the entire body of an arrow function */
+        "@typescript-eslint/no-confusing-void-expression": [
+            "error",
+            {
+                ignoreArrowShorthand: true,
+            },
+        ],
+    },
 };

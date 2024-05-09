@@ -35,12 +35,12 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.quickLink:
       case GalleryType.uncategorized:
       case GalleryType.peopleTag:
+      case GalleryType.sharedCollection:
         return true;
 
       case GalleryType.hiddenSection:
       case GalleryType.hiddenOwnedCollection:
       case GalleryType.trash:
-      case GalleryType.sharedCollection:
       case GalleryType.cluster:
         return false;
     }

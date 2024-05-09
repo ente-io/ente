@@ -358,6 +358,13 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Authentication failed, please try again"),
         "authenticationSuccessful":
             MessageLookupByLibrary.simpleMessage("Authentication successful!"),
+        "autoCastDialogBody": MessageLookupByLibrary.simpleMessage(
+            "You\'ll see available Cast devices here."),
+        "autoCastiOSPermission": MessageLookupByLibrary.simpleMessage(
+            "Make sure Local Network permissions are turned on for the Ente Photos app, in Settings."),
+        "autoPair": MessageLookupByLibrary.simpleMessage("Auto pair"),
+        "autoPairDesc": MessageLookupByLibrary.simpleMessage(
+            "Auto pair works only with devices that support Chromecast."),
         "available": MessageLookupByLibrary.simpleMessage("Available"),
         "backedUpFolders":
             MessageLookupByLibrary.simpleMessage("Backed up folders"),
@@ -388,6 +395,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "cannotAddMorePhotosAfterBecomingViewer": m9,
         "cannotDeleteSharedFiles":
             MessageLookupByLibrary.simpleMessage("Cannot delete shared files"),
+        "castIPMismatchBody": MessageLookupByLibrary.simpleMessage(
+            "Please make sure you are on the same network as the TV."),
+        "castIPMismatchTitle":
+            MessageLookupByLibrary.simpleMessage("Failed to cast album"),
         "castInstruction": MessageLookupByLibrary.simpleMessage(
             "Visit cast.ente.io on the device you want to pair.\n\nEnter the code below to play the album on your TV."),
         "centerPoint": MessageLookupByLibrary.simpleMessage("Center point"),
@@ -461,6 +472,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Confirm recovery key"),
         "confirmYourRecoveryKey":
             MessageLookupByLibrary.simpleMessage("Confirm your recovery key"),
+        "connectToDevice":
+            MessageLookupByLibrary.simpleMessage("Connect to device"),
         "contactFamilyAdmin": m12,
         "contactSupport":
             MessageLookupByLibrary.simpleMessage("Contact support"),
@@ -724,6 +737,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "filesBackedUpFromDevice": m22,
         "filesBackedUpInAlbum": m23,
         "filesDeleted": MessageLookupByLibrary.simpleMessage("Files deleted"),
+        "filesSavedToGallery":
+            MessageLookupByLibrary.simpleMessage("Files saved to gallery"),
         "findPeopleByName": MessageLookupByLibrary.simpleMessage(
             "Find people quickly by searching by name"),
         "flip": MessageLookupByLibrary.simpleMessage("Flip"),
@@ -907,6 +922,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "manageParticipants": MessageLookupByLibrary.simpleMessage("Manage"),
         "manageSubscription":
             MessageLookupByLibrary.simpleMessage("Manage subscription"),
+        "manualPairDesc": MessageLookupByLibrary.simpleMessage(
+            "Pair with PIN works with any screen you wish to view your album on."),
         "map": MessageLookupByLibrary.simpleMessage("Map"),
         "maps": MessageLookupByLibrary.simpleMessage("Maps"),
         "mastodon": MessageLookupByLibrary.simpleMessage("Mastodon"),
@@ -941,6 +958,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "no": MessageLookupByLibrary.simpleMessage("No"),
         "noAlbumsSharedByYouYet":
             MessageLookupByLibrary.simpleMessage("No albums shared by you yet"),
+        "noDeviceFound":
+            MessageLookupByLibrary.simpleMessage("No device found"),
         "noDeviceLimit": MessageLookupByLibrary.simpleMessage("None"),
         "noDeviceThatCanBeDeleted": MessageLookupByLibrary.simpleMessage(
             "You\'ve no files on this device that can be deleted"),
@@ -987,6 +1006,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "orPickAnExistingOne":
             MessageLookupByLibrary.simpleMessage("Or pick an existing one"),
         "pair": MessageLookupByLibrary.simpleMessage("Pair"),
+        "pairWithPin": MessageLookupByLibrary.simpleMessage("Pair with PIN"),
+        "pairingComplete":
+            MessageLookupByLibrary.simpleMessage("Pairing complete"),
         "passkey": MessageLookupByLibrary.simpleMessage("Passkey"),
         "passkeyAuthTitle":
             MessageLookupByLibrary.simpleMessage("Passkey verification"),
@@ -1336,6 +1358,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "sparkleSuccess": MessageLookupByLibrary.simpleMessage("✨ Success"),
         "startBackup": MessageLookupByLibrary.simpleMessage("Start backup"),
         "status": MessageLookupByLibrary.simpleMessage("Status"),
+        "stopCastingBody": MessageLookupByLibrary.simpleMessage(
+            "Do you want to stop casting?"),
+        "stopCastingTitle":
+            MessageLookupByLibrary.simpleMessage("Stop casting"),
         "storage": MessageLookupByLibrary.simpleMessage("Storage"),
         "storageBreakupFamily": MessageLookupByLibrary.simpleMessage("Family"),
         "storageBreakupYou": MessageLookupByLibrary.simpleMessage("You"),

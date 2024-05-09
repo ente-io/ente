@@ -1,8 +1,9 @@
 {
     "name": "ente",
-    "version": "1.6.63",
+    "version": "1.7.0-rc",
     "private": true,
     "description": "Desktop client for Ente Photos",
+    "repository": "github:ente-io/photos-desktop",
     "author": "Ente <code@ente.io>",
     "main": "app/main.js",
     "scripts": {
@@ -10,13 +11,17 @@
         "build-main": "tsc && electron-builder",
         "build-main:quick": "tsc && electron-builder --dir --config.compression=store --config.mac.identity=null",
         "build-renderer": "cd ../web && yarn install && yarn build:photos && cd ../desktop && shx rm -f out && shx ln -sf ../web/apps/photos/out out",
+        "build:ci": "yarn build-renderer && tsc",
         "build:quick": "yarn build-renderer && yarn build-main:quick",
         "dev": "concurrently --kill-others --success first --names 'main,rndr' \"yarn dev-main\" \"yarn dev-renderer\"",
         "dev-main": "tsc && electron app/main.js",
         "dev-renderer": "cd ../web && yarn install && yarn dev:photos",
         "postinstall": "electron-builder install-app-deps",
-        "lint": "yarn prettier --check . && eslint --ext .ts src",
-        "lint-fix": "yarn prettier --write . && eslint --fix --ext .ts src"
+        "lint": "yarn prettier --check --log-level warn . && eslint --ext .ts src && yarn tsc",
+        "lint-fix": "yarn prettier --write --log-level warn . && eslint --fix --ext .ts src && yarn tsc"
+    },
+    "resolutions": {
+        "jackspeak": "2.1.1"
     },
     "dependencies": {
         "any-shell-escape": "^0.1",
@@ -34,14 +39,14 @@
         "onnxruntime-node": "^1.17"
     },
     "devDependencies": {
+        "@tsconfig/node20": "^20.1.4",
         "@types/auto-launch": "^5.0",
         "@types/ffmpeg-static": "^3.0",
         "@typescript-eslint/eslint-plugin": "^7",
         "@typescript-eslint/parser": "^7",
         "concurrently": "^8",
-        "electron": "^29",
-        "electron-builder": "^24",
-        "electron-builder-notarize": "^1.5",
+        "electron": "^30",
+        "electron-builder": "25.0.0-alpha.6",
         "eslint": "^8",
         "prettier": "^3",
         "prettier-plugin-organize-imports": "^3",

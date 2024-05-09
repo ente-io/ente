@@ -8,8 +8,8 @@ import {
 import { allowWindowClose } from "../main";
 import { forceCheckForAppUpdates } from "./services/app-update";
 import autoLauncher from "./services/auto-launcher";
+import { openLogDirectory } from "./services/dir";
 import { userPreferences } from "./stores/user-preferences";
-import { isDev, openLogDirectory } from "./utils-electron";
 
 /** Create and return the entries in the app's main menu bar */
 export const createApplicationMenu = async (mainWindow: BrowserWindow) => {
@@ -18,23 +18,20 @@ export const createApplicationMenu = async (mainWindow: BrowserWindow) => {
     // Whenever the menu is redrawn the current value of these variables is used
     // to set the checked state for the various settings checkboxes.
     let isAutoLaunchEnabled = await autoLauncher.isEnabled();
-    let shouldHideDockIcon = userPreferences.get("hideDockIcon");
+    let shouldHideDockIcon = !!userPreferences.get("hideDockIcon");
 
     const macOSOnly = (options: MenuItemConstructorOptions[]) =>
         process.platform == "darwin" ? options : [];
 
-    const devOnly = (options: MenuItemConstructorOptions[]) =>
-        isDev ? options : [];
-
     const handleCheckForUpdates = () => forceCheckForAppUpdates(mainWindow);
 
     const handleViewChangelog = () =>
-        shell.openExternal(
+        void shell.openExternal(
             "https://github.com/ente-io/ente/blob/main/desktop/CHANGELOG.md",
         );
 
     const toggleAutoLaunch = () => {
-        autoLauncher.toggleAutoLaunch();
+        void autoLauncher.toggleAutoLaunch();
         isAutoLaunchEnabled = !isAutoLaunchEnabled;
     };
 
@@ -45,13 +42,15 @@ export const createApplicationMenu = async (mainWindow: BrowserWindow) => {
         shouldHideDockIcon = !shouldHideDockIcon;
     };
 
-    const handleHelp = () => shell.openExternal("https://help.ente.io/photos/");
+    const handleHelp = () =>
+        void shell.openExternal("https://help.ente.io/photos/");
 
-    const handleSupport = () => shell.openExternal("mailto:support@ente.io");
+    const handleSupport = () =>
+        void shell.openExternal("mailto:support@ente.io");
 
-    const handleBlog = () => shell.openExternal("https://ente.io/blog/");
+    const handleBlog = () => void shell.openExternal("https://ente.io/blog/");
 
-    const handleViewLogs = openLogDirectory;
+    const handleViewLogs = () => void openLogDirectory();
 
     return Menu.buildFromTemplate([
         {
@@ -83,12 +82,14 @@ export const createApplicationMenu = async (mainWindow: BrowserWindow) => {
                             checked: isAutoLaunchEnabled,
                             click: toggleAutoLaunch,
                         },
-                        {
-                            label: "Hide Dock Icon",
-                            type: "checkbox",
-                            checked: shouldHideDockIcon,
-                            click: toggleHideDockIcon,
-                        },
+                        ...macOSOnly([
+                            {
+                                label: "Hide Dock Icon",
+                                type: "checkbox",
+                                checked: shouldHideDockIcon,
+                                click: toggleHideDockIcon,
+                            },
+                        ]),
                     ],
                 },
 
@@ -127,11 +128,11 @@ export const createApplicationMenu = async (mainWindow: BrowserWindow) => {
                         submenu: [
                             {
                                 role: "startSpeaking",
-                                label: "start speaking",
+                                label: "Start Speaking",
                             },
                             {
                                 role: "stopSpeaking",
-                                label: "stop speaking",
+                                label: "Stop Speaking",
                             },
                         ],
                     },
@@ -142,9 +143,7 @@ export const createApplicationMenu = async (mainWindow: BrowserWindow) => {
             label: "View",
             submenu: [
                 { label: "Reload", role: "reload" },
-                ...devOnly([
-                    { label: "Toggle Dev Tools", role: "toggleDevTools" },
-                ]),
+                { label: "Toggle Dev Tools", role: "toggleDevTools" },
                 { type: "separator" },
                 { label: "Toggle Full Screen", role: "togglefullscreen" },
             ],

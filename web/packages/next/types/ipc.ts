@@ -3,8 +3,6 @@
 //
 // See [Note: types.ts <-> preload.ts <-> ipc.ts]
 
-import type { ElectronFile } from "./file";
-
 /**
  * Extra APIs provided by our Node.js layer when our code is running inside our
  * desktop (Electron) app.
@@ -50,6 +48,20 @@ export interface Electron {
      * @see {@link openDirectory}
      */
     openLogDirectory: () => Promise<void>;
+
+    /**
+     * Ask the user to select a directory on their local file system, and return
+     * it path.
+     *
+     * The returned path is guaranteed to use POSIX separators ('/').
+     *
+     * We don't strictly need IPC for this, we can use a hidden <input> element
+     * and trigger its click for the same behaviour (as we do for the
+     * `useFileInput` hook that we use for uploads). However, it's a bit
+     * cumbersome, and we anyways will need to IPC to get back its full path, so
+     * it is just convenient to expose this direct method.
+     */
+    selectDirectory: () => Promise<string | undefined>;
 
     /**
      * Clear any stored data.
@@ -121,6 +133,8 @@ export interface Electron {
      * been marked as skipped so that we don't prompt the user again.
      */
     skipAppUpdate: (version: string) => void;
+
+    // - FS
 
     /**
      * A subset of file system access APIs.
@@ -332,19 +346,27 @@ export interface Electron {
      */
     faceEmbedding: (input: Float32Array) => Promise<Float32Array>;
 
-    // - File selection
-    // TODO: Deprecated - use dialogs on the renderer process itself
-
-    selectDirectory: () => Promise<string>;
-
-    showUploadFilesDialog: () => Promise<ElectronFile[]>;
-
-    showUploadDirsDialog: () => Promise<ElectronFile[]>;
-
-    showUploadZipDialog: () => Promise<{
-        zipPaths: string[];
-        files: ElectronFile[];
-    }>;
+    /**
+     * Return a face crop stored by a previous version of ML.
+     *
+     * [Note: Legacy face crops]
+     *
+     * Older versions of ML generated and stored face crops in a "face-crops"
+     * cache directory on the Electron side. For the time being, we have
+     * disabled the face search whilst we put finishing touches to it. However,
+     * it'll be nice to still show the existing faces that have been clustered
+     * for people who opted in to the older beta.
+     *
+     * So we retain the older "face-crops" disk cache, and use this method to
+     * serve faces from it when needed.
+     *
+     * @param faceID An identifier corresponding to which the face crop had been
+     * stored by the older version of our app.
+     *
+     * @returns the JPEG data of the face crop if a file is found for the given
+     * {@link faceID}, otherwise undefined.
+     */
+    legacyFaceCrop: (faceID: string) => Promise<Uint8Array | undefined>;
 
     // - Watch
 
@@ -462,6 +484,17 @@ export interface Electron {
          * The returned paths are guaranteed to use POSIX separators ('/').
          */
         findFiles: (folderPath: string) => Promise<string[]>;
+
+        /**
+         * Stop watching all existing folder watches and remove any callbacks.
+         *
+         * This function is meant to be called when the user logs out. It stops
+         * all existing folder watches and forgets about any "on*" callback
+         * functions that have been registered.
+         *
+         * The persisted state itself gets cleared via {@link clearStores}.
+         */
+        reset: () => Promise<void>;
     };
 
     // - Upload
@@ -634,6 +667,19 @@ export interface FolderWatchSyncedFile {
  * The name of the entry is not just the file name, but rather is the full path
  * of the file within the zip. That is, each entry name uniquely identifies a
  * particular file within the given zip.
+ *
+ * When `entryName` is a path within a nested directory, it is guaranteed to use
+ * the POSIX path separator ("/") since that is the path separator required by
+ * the ZIP format itself
+ *
+ * > 4.4.17.1 The name of the file, with optional relative path.
+ * >
+ * >  The path stored MUST NOT contain a drive or  device letter, or a leading
+ * >  slash. All slashes MUST be forward slashes '/' as opposed to  backwards
+ * >  slashes '\' for compatibility with Amiga and UNIX file systems etc. If
+ * >  input came from standard input, there is no file name field.
+ * >
+ * > https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT
  */
 export type ZipItem = [zipPath: string, entryName: string];
 
@@ -652,8 +698,10 @@ export interface PendingUploads {
      * This is name of the collection (when uploading to a singular collection)
      * or the root collection (when uploading to separate * albums) to which we
      * these uploads are meant to go to. See {@link CollectionMapping}.
+     *
+     * It will not be set if we're just uploading standalone files.
      */
-    collectionName: string;
+    collectionName?: string;
     /**
      * Paths of regular files that need to be uploaded.
      */
