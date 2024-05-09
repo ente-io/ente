@@ -224,13 +224,7 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
                       }
                       await _saveCode();
                     },
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16.0,
-                        vertical: 4,
-                      ),
-                      child: Text(l10n.saveAction),
-                    ),
+                    child: Text(l10n.saveAction),
                   ),
                 ),
               ],
