@@ -8,6 +8,7 @@ import (
 	"github.com/ente-io/stacktrace"
 	"github.com/google/uuid"
 	log "github.com/sirupsen/logrus"
+	"strings"
 )
 
 type Repository struct {
@@ -19,6 +20,7 @@ func (r *Repository) AddCode(ctx context.Context, pubKey string, ip string) (str
 	if err != nil {
 		return "", err
 	}
+	codeValue = strings.ToUpper(codeValue)
 	_, err = r.DB.ExecContext(ctx, "INSERT INTO casting (code, public_key, id, ip) VALUES ($1, $2, $3, $4)", codeValue, pubKey, uuid.New(), ip)
 	if err != nil {
 		return "", err
@@ -28,11 +30,13 @@ func (r *Repository) AddCode(ctx context.Context, pubKey string, ip string) (str
 
 // InsertCastData insert collection_id, cast_user, token and encrypted_payload for given code if collection_id is not null
 func (r *Repository) InsertCastData(ctx context.Context, castUserID int64, code string, collectionID int64, castToken string, encryptedPayload string) error {
+	code = strings.ToUpper(code)
 	_, err := r.DB.ExecContext(ctx, "UPDATE casting SET collection_id = $1, cast_user = $2, token = $3, encrypted_payload = $4 WHERE code = $5 and is_deleted=false", collectionID, castUserID, castToken, encryptedPayload, code)
 	return err
 }
 
 func (r *Repository) GetPubKeyAndIp(ctx context.Context, code string) (string, string, error) {
+	code = strings.ToUpper(code)
 	var pubKey, ip string
 	row := r.DB.QueryRowContext(ctx, "SELECT public_key, ip FROM casting WHERE code = $1 and is_deleted=false", code)
 	err := row.Scan(&pubKey, &ip)
@@ -46,6 +50,7 @@ func (r *Repository) GetPubKeyAndIp(ctx context.Context, code string) (string, s
 }
 
 func (r *Repository) GetEncCastData(ctx context.Context, code string) (*string, error) {
+	code = strings.ToUpper(code)
 	var payload sql.NullString
 	row := r.DB.QueryRowContext(ctx, "SELECT encrypted_payload FROM casting WHERE code = $1 and is_deleted=false", code)
 	err := row.Scan(&payload)
