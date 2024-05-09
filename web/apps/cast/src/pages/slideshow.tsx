@@ -1,10 +1,12 @@
 import log from "@/next/log";
+import { ensure } from "@/utils/ensure";
 import { styled } from "@mui/material";
 import { FilledCircleCheck } from "components/FilledCircleCheck";
 import { SlideView } from "components/Slide";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { readCastData, renderableImageURLs } from "services/render";
+import { readCastData } from "services/cast-data";
+import { renderableImageURLs } from "services/render";
 
 export default function Slideshow() {
     const [loading, setLoading] = useState(true);
@@ -22,7 +24,9 @@ export default function Slideshow() {
 
         const loop = async () => {
             try {
-                const urlGenerator = renderableImageURLs(readCastData());
+                const urlGenerator = renderableImageURLs(
+                    ensure(readCastData()),
+                );
                 while (!stop) {
                     const { value: urls, done } = await urlGenerator.next();
                     if (done) {

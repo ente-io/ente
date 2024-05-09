@@ -4,21 +4,14 @@ import { styled } from "@mui/material";
 import { PairingCode } from "components/PairingCode";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import { readCastData, storeCastData } from "services/cast-data";
 import { getCastData, register } from "services/pair";
-import { storeCastData } from "services/render";
-import {
-    advertiseCode,
-    castReceiverLoadingIfNeeded,
-} from "../services/cast-receiver";
+import { advertiseOnChromecast } from "../services/cast-receiver";
 
 export default function Index() {
     const [publicKeyB64, setPublicKeyB64] = useState<string | undefined>();
     const [privateKeyB64, setPrivateKeyB64] = useState<string | undefined>();
     const [pairingCode, setPairingCode] = useState<string | undefined>();
-
-    // Keep a boolean flag to ensure that Cast Receiver starts only once even if
-    // pairing codes change.
-    const [haveInitializedCast, setHaveInitializedCast] = useState(false);
 
     const router = useRouter();
 
@@ -30,12 +23,10 @@ export default function Index() {
                 setPairingCode(r.pairingCode);
             });
         } else {
-            if (!haveInitializedCast) {
-                castReceiverLoadingIfNeeded().then((cast) => {
-                    setHaveInitializedCast(true);
-                    advertiseCode(cast, () => pairingCode);
-                });
-            }
+            advertiseOnChromecast(
+                () => pairingCode,
+                () => readCastData()?.collectionID,
+            );
         }
     }, [pairingCode]);
 

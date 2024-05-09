@@ -4,11 +4,12 @@ import { decodeLivePhoto } from "@/media/live-photo";
 import { nameAndExtension } from "@/next/file";
 import log from "@/next/log";
 import { shuffled } from "@/utils/array";
-import { ensure, ensureString } from "@/utils/ensure";
+import { ensure } from "@/utils/ensure";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { getCastFileURL, getEndpoint } from "@ente/shared/network/api";
 import { wait } from "@ente/shared/utils";
+import type { CastData } from "services/cast-data";
 import { detectMediaMIMEType } from "services/detect-type";
 import {
     EncryptedEnteFile,
@@ -16,42 +17,6 @@ import {
     FileMagicMetadata,
     FilePublicMagicMetadata,
 } from "types/file";
-
-/**
- * Save the data received after pairing with a sender into local storage.
- *
- * We will read in back when we start the slideshow.
- */
-export const storeCastData = (payload: unknown) => {
-    if (!payload || typeof payload != "object")
-        throw new Error("Unexpected cast data");
-
-    // Iterate through all the keys of the payload object and save them to
-    // localStorage. We don't validate here, we'll validate when we read these
-    // values back in `readCastData`.
-    for (const key in payload) {
-        window.localStorage.setItem(key, payload[key]);
-    }
-};
-
-interface CastData {
-    /** A key to decrypt the collection we are casting. */
-    collectionKey: string;
-    /** A credential to use for fetching media files for this cast session. */
-    castToken: string;
-}
-
-/**
- * Read back the cast data we got after pairing.
- *
- * Sibling of {@link storeCastData}. It throws an error if the expected data is
- * not present in localStorage.
- */
-export const readCastData = (): CastData => {
-    const collectionKey = ensureString(localStorage.getItem("collectionKey"));
-    const castToken = ensureString(localStorage.getItem("castToken"));
-    return { collectionKey, castToken };
-};
 
 type RenderableImageURLPair = [url: string, nextURL: string];
 
