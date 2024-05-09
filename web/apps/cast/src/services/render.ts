@@ -8,12 +8,14 @@ import { shuffled } from "@/utils/array";
 import { ensure } from "@/utils/ensure";
 import { wait } from "@/utils/promise";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
+import { ApiError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
 import {
     getCastFileURL,
     getCastThumbnailURL,
     getEndpoint,
 } from "@ente/shared/network/api";
+import { HttpStatusCode } from "axios";
 import type { CastData } from "services/cast-data";
 import { detectMediaMIMEType } from "services/detect-type";
 import {
@@ -95,7 +97,16 @@ export const renderableImageURLs = async function* (castData: CastData) {
                 urls.push(await createRenderableURL(castToken, file));
                 haveEligibleFiles = true;
             } catch (e) {
-                // TODO (MR): Throw on token invaildation 403
+                if (
+                    e instanceof ApiError &&
+                    e.httpStatusCode == HttpStatusCode.Unauthorized
+                ) {
+                    // The token has expired. Rethrow the error, which will
+                    // bring us back to the pairing page.
+                    throw e;
+                }
+
+                // On all other errors (including temporary network issues),
                 log.error("Skipping unrenderable file", e);
                 continue;
             }
