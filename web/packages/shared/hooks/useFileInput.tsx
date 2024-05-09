@@ -93,7 +93,7 @@ export const useFileInput = ({
             onChange: handleChange,
             ...(accept ? { accept } : {}),
         }),
-        [directoryOpts, accept],
+        [directoryOpts, accept, handleChange],
     );
 
     return { getInputProps, openSelector, selectedFiles };
