@@ -13,3 +13,18 @@ export const shuffled = <T>(xs: T[]) =>
         .map((x) => [Math.random(), x])
         .sort()
         .map(([, x]) => x) as T[];
+
+/**
+ * Return the first non-empty string from the given list of strings.
+ *
+ * This function is needed because the `a ?? b` idiom doesn't do what you'd
+ * expect when a is "". Perhaps the behaviour is wrong, perhaps the expecation
+ * is wrong; this function papers over the differences.
+ *
+ * If none of the strings are non-empty, or if there are no strings in the given
+ * array, return undefined.
+ */
+export const firstNonEmpty = (ss: (string | undefined)[]) => {
+    for (const s of ss) if (s && s.length > 0) return s;
+    return undefined;
+};
