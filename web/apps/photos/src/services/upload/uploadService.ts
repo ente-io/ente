@@ -1021,7 +1021,7 @@ const withThumbnail = async (
                 fileTypeInfo,
             );
         } catch (e) {
-            if (e.message == CustomErrorMessage.NotAvailable) {
+            if (e.message.endsWith(CustomErrorMessage.NotAvailable)) {
                 moduleState.isNativeImageThumbnailGenerationNotAvailable = true;
             } else {
                 log.error("Native thumbnail generation failed", e);

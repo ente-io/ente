@@ -24,6 +24,8 @@ import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/services/update_service.dart';
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
+import "package:photos/ui/cast/auto.dart";
+import "package:photos/ui/cast/choose.dart";
 import "package:photos/ui/common/popup_item.dart";
 import 'package:photos/ui/components/action_sheet_widget.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
@@ -88,8 +90,9 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   String? _appBarTitle;
   late CollectionActions collectionActions;
   bool isQuickLink = false;
-  late bool isInternalUser;
   late GalleryType galleryType;
+
+  final ValueNotifier<int> castNotifier = ValueNotifier<int>(0);
 
   @override
   void initState() {
@@ -97,7 +100,6 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     _selectedFilesListener = () {
       setState(() {});
     };
-    isInternalUser = flagService.internalUser;
     collectionActions = CollectionActions(CollectionsService.instance);
     widget.selectedFiles.addListener(_selectedFilesListener);
     _userAuthEventSubscription =
@@ -320,6 +322,27 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         ),
       );
     }
+
+    if (widget.collection != null && castService.isSupported) {
+      actions.add(
+        Tooltip(
+          message: "Cast album",
+          child: IconButton(
+            icon: ValueListenableBuilder<int>(
+              valueListenable: castNotifier,
+              builder: (context, value, child) {
+                return castService.getActiveSessions().isNotEmpty
+                    ? const Icon(Icons.cast_connected_rounded)
+                    : const Icon(Icons.cast_outlined);
+              },
+            ),
+            onPressed: () async {
+              await _castChoiceDialog();
+            },
+          ),
+        ),
+      );
+    }
     final List<EntePopupMenuItem<AlbumPopupAction>> items = [];
     items.addAll([
       if (galleryType.canRename())
@@ -391,7 +414,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
                 ? Icons.visibility_outlined
                 : Icons.visibility_off_outlined,
           ),
-        if (widget.collection != null && isInternalUser)
+        if (widget.collection != null)
           EntePopupMenuItem(
             value: AlbumPopupAction.playOnTv,
             context.l10n.playOnTv,
@@ -458,7 +481,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
             } else if (value == AlbumPopupAction.leave) {
               await _leaveAlbum(context);
             } else if (value == AlbumPopupAction.playOnTv) {
-              await castAlbum();
+              await _castChoiceDialog();
             } else if (value == AlbumPopupAction.freeUpSpace) {
               await _deleteBackedUpFiles(context);
             } else if (value == AlbumPopupAction.setCover) {
@@ -693,10 +716,62 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     setState(() {});
   }
 
-  Future<void> castAlbum() async {
+  Future<void> _castChoiceDialog() async {
     final gw = CastGateway(NetworkClient.instance.enteDio);
+    if (castService.getActiveSessions().isNotEmpty) {
+      await showChoiceDialog(
+        context,
+        title: S.of(context).stopCastingTitle,
+        firstButtonLabel: S.of(context).yes,
+        secondButtonLabel: S.of(context).no,
+        body: S.of(context).stopCastingBody,
+        firstButtonOnTap: () async {
+          gw.revokeAllTokens().ignore();
+          await castService.closeActiveCasts();
+        },
+      );
+      castNotifier.value++;
+      return;
+    }
+
     // stop any existing cast session
     gw.revokeAllTokens().ignore();
+    if (!Platform.isAndroid) {
+      await _pairWithPin(gw, '');
+    } else {
+      final result = await showDialog<ButtonAction?>(
+        context: context,
+        barrierDismissible: true,
+        builder: (BuildContext context) {
+          return const CastChooseDialog();
+        },
+      );
+      if (result == null) {
+        return;
+      }
+      // wait to allow the dialog to close
+      await Future.delayed(const Duration(milliseconds: 100));
+      if (result == ButtonAction.first) {
+        await showDialog(
+          context: context,
+          barrierDismissible: true,
+          builder: (BuildContext bContext) {
+            return AutoCastDialog(
+              (device) async {
+                await _castPair(bContext, gw, device);
+                Navigator.pop(bContext);
+              },
+            );
+          },
+        );
+      }
+      if (result == ButtonAction.second) {
+        await _pairWithPin(gw, '');
+      }
+    }
+  }
+
+  Future<void> _pairWithPin(CastGateway gw, String code) async {
     await showTextInputDialog(
       context,
       title: context.l10n.playOnTv,
@@ -704,28 +779,63 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       submitButtonLabel: S.of(context).pair,
       textInputType: TextInputType.streetAddress,
       hintText: context.l10n.deviceCodeHint,
+      showOnlyLoadingState: true,
+      alwaysShowSuccessState: false,
+      initialValue: code,
       onSubmit: (String text) async {
-        try {
-          final code = text.trim();
-          final String? publicKey = await gw.getPublicKey(code);
-          if (publicKey == null) {
-            showToast(context, S.of(context).deviceNotFound);
-            return;
-          }
-          final String castToken = const Uuid().v4().toString();
-          final castPayload = CollectionsService.instance
-              .getCastData(castToken, widget.collection!, publicKey);
-          await gw.publishCastPayload(
-            code,
-            castPayload,
-            widget.collection!.id,
-            castToken,
-          );
-        } catch (e, s) {
-          _logger.severe("Failed to cast album", e, s);
-          await showGenericErrorDialog(context: context, error: e);
+        final bool paired = await _castPair(context, gw, text);
+        if (!paired) {
+          Future.delayed(Duration.zero, () => _pairWithPin(gw, code));
         }
       },
     );
+  }
+
+  String lastCode = '';
+  Future<bool> _castPair(
+    BuildContext bContext,
+    CastGateway gw,
+    String code,
+  ) async {
+    try {
+      if (lastCode == code) {
+        return false;
+      }
+      lastCode = code;
+      _logger.info("Casting album to device with code $code");
+      final String? publicKey = await gw.getPublicKey(code);
+      if (publicKey == null) {
+        showToast(context, S.of(context).deviceNotFound);
+
+        return false;
+      }
+      final String castToken = const Uuid().v4().toString();
+      final castPayload = CollectionsService.instance
+          .getCastData(castToken, widget.collection!, publicKey);
+      await gw.publishCastPayload(
+        code,
+        castPayload,
+        widget.collection!.id,
+        castToken,
+      );
+      _logger.info("cast album completed");
+      // showToast(bContext, S.of(context).pairingComplete);
+      castNotifier.value++;
+      return true;
+    } catch (e, s) {
+      lastCode = '';
+      _logger.severe("Failed to cast album", e, s);
+      if (e is CastIPMismatchException) {
+        await showErrorDialog(
+          context,
+          S.of(context).castIPMismatchTitle,
+          S.of(context).castIPMismatchBody,
+        );
+      } else {
+        await showGenericErrorDialog(context: bContext, error: e);
+      }
+      castNotifier.value++;
+      return false;
+    }
   }
 }

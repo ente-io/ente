@@ -1,11 +1,8 @@
-import { cachedOrNew } from "@/next/blob-cache";
-import { ensureLocalUser } from "@/next/local-user";
 import log from "@/next/log";
 import { Skeleton, styled } from "@mui/material";
 import { Legend } from "components/PhotoViewer/styledComponents/Legend";
 import { t } from "i18next";
 import React, { useEffect, useState } from "react";
-import machineLearningService from "services/machineLearning/machineLearningService";
 import { EnteFile } from "types/file";
 import { Face, Person } from "types/machineLearning";
 import { getPeopleList, getUnidentifiedFaces } from "utils/machineLearning";
@@ -61,7 +58,7 @@ export const PeopleList = React.memo((props: PeopleListProps) => {
                     }
                 >
                     <FaceCropImageView
-                        faceId={person.displayFaceId}
+                        faceID={person.displayFaceId}
                         cacheKey={person.faceCropCacheKey}
                     />
                 </FaceChip>
@@ -140,7 +137,7 @@ export function UnidentifiedFaces(props: {
                     faces.map((face, index) => (
                         <FaceChip key={index}>
                             <FaceCropImageView
-                                faceId={face.id}
+                                faceID={face.id}
                                 cacheKey={face.crop?.cacheKey}
                             />
                         </FaceChip>
@@ -151,20 +148,24 @@ export function UnidentifiedFaces(props: {
 }
 
 interface FaceCropImageViewProps {
-    faceId: string;
+    faceID: string;
     cacheKey?: string;
 }
 
 const FaceCropImageView: React.FC<FaceCropImageViewProps> = ({
-    faceId,
+    faceID,
     cacheKey,
 }) => {
     const [objectURL, setObjectURL] = useState<string | undefined>();
 
     useEffect(() => {
         let didCancel = false;
+        const electron = globalThis.electron;
 
-        if (cacheKey) {
+        if (faceID && electron) {
+            electron
+                .legacyFaceCrop(faceID)
+                /*
             cachedOrNew("face-crops", cacheKey, async () => {
                 const user = await ensureLocalUser();
                 return machineLearningService.regenerateFaceCrop(
@@ -172,16 +173,20 @@ const FaceCropImageView: React.FC<FaceCropImageViewProps> = ({
                     user.id,
                     faceId,
                 );
-            }).then((blob) => {
-                if (!didCancel) setObjectURL(URL.createObjectURL(blob));
-            });
+            })*/
+                .then((data) => {
+                    if (data) {
+                        const blob = new Blob([data]);
+                        if (!didCancel) setObjectURL(URL.createObjectURL(blob));
+                    }
+                });
         } else setObjectURL(undefined);
 
         return () => {
             didCancel = true;
             if (objectURL) URL.revokeObjectURL(objectURL);
         };
-    }, [faceId, cacheKey]);
+    }, [faceID, cacheKey]);
 
     return objectURL ? (
         <img src={objectURL} />

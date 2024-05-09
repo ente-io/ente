@@ -280,7 +280,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "allowAddingPhotos":
             MessageLookupByLibrary.simpleMessage("Permitir adicionar fotos"),
         "allowDownloads":
-            MessageLookupByLibrary.simpleMessage("Permitir transferências"),
+            MessageLookupByLibrary.simpleMessage("Permitir downloads"),
         "allowPeopleToAddPhotos": MessageLookupByLibrary.simpleMessage(
             "Permitir que pessoas adicionem fotos"),
         "androidBiometricHint":
@@ -311,7 +311,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Aplicar código"),
         "appstoreSubscription":
             MessageLookupByLibrary.simpleMessage("Assinatura da AppStore"),
-        "archive": MessageLookupByLibrary.simpleMessage("Arquivado"),
+        "archive": MessageLookupByLibrary.simpleMessage("Arquivar"),
         "archiveAlbum": MessageLookupByLibrary.simpleMessage("Arquivar álbum"),
         "archiving": MessageLookupByLibrary.simpleMessage("Arquivando..."),
         "areYouSureThatYouWantToLeaveTheFamily":
@@ -365,6 +365,14 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Falha na autenticação. Por favor, tente novamente"),
         "authenticationSuccessful":
             MessageLookupByLibrary.simpleMessage("Autenticação bem-sucedida!"),
+        "autoCastDialogBody": MessageLookupByLibrary.simpleMessage(
+            "Você verá dispositivos disponíveis para transmitir aqui."),
+        "autoCastiOSPermission": MessageLookupByLibrary.simpleMessage(
+            "Certifique-se de que as permissões de Rede local estão ativadas para o aplicativo de Fotos Ente, em Configurações."),
+        "autoPair":
+            MessageLookupByLibrary.simpleMessage("Pareamento automático"),
+        "autoPairDesc": MessageLookupByLibrary.simpleMessage(
+            "O pareamento automático funciona apenas com dispositivos que suportam o Chromecast."),
         "available": MessageLookupByLibrary.simpleMessage("Disponível"),
         "backedUpFolders":
             MessageLookupByLibrary.simpleMessage("Backup de pastas concluído"),
@@ -397,6 +405,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "cannotAddMorePhotosAfterBecomingViewer": m9,
         "cannotDeleteSharedFiles": MessageLookupByLibrary.simpleMessage(
             "Não é possível excluir arquivos compartilhados"),
+        "castIPMismatchBody": MessageLookupByLibrary.simpleMessage(
+            "Certifique-se de estar na mesma rede que a TV."),
+        "castIPMismatchTitle":
+            MessageLookupByLibrary.simpleMessage("Falha ao transmitir álbum"),
         "castInstruction": MessageLookupByLibrary.simpleMessage(
             "Visite cast.ente.io no dispositivo que você deseja parear.\n\ndigite o código abaixo para reproduzir o álbum em sua TV."),
         "centerPoint": MessageLookupByLibrary.simpleMessage("Ponto central"),
@@ -470,6 +482,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Confirme a chave de recuperação"),
         "confirmYourRecoveryKey": MessageLookupByLibrary.simpleMessage(
             "Confirme sua chave de recuperação"),
+        "connectToDevice":
+            MessageLookupByLibrary.simpleMessage("Conectar ao dispositivo"),
         "contactFamilyAdmin": m12,
         "contactSupport":
             MessageLookupByLibrary.simpleMessage("Contate o suporte"),
@@ -551,7 +565,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "deleteFromDevice":
             MessageLookupByLibrary.simpleMessage("Excluir do dispositivo"),
         "deleteFromEnte":
-            MessageLookupByLibrary.simpleMessage("Excluir do ente"),
+            MessageLookupByLibrary.simpleMessage("Excluir do Ente"),
         "deleteItemCount": m14,
         "deleteLocation": MessageLookupByLibrary.simpleMessage("Excluir Local"),
         "deletePhotos": MessageLookupByLibrary.simpleMessage("Excluir fotos"),
@@ -667,7 +681,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "enterCode": MessageLookupByLibrary.simpleMessage("Coloque o código"),
         "enterCodeDescription": MessageLookupByLibrary.simpleMessage(
             "Digite o código fornecido pelo seu amigo para reivindicar o armazenamento gratuito para vocês dois"),
-        "enterEmail": MessageLookupByLibrary.simpleMessage("Digite o email"),
+        "enterEmail": MessageLookupByLibrary.simpleMessage("Insira o e-mail"),
         "enterFileName":
             MessageLookupByLibrary.simpleMessage("Digite o nome do arquivo"),
         "enterNewPasswordToEncrypt": MessageLookupByLibrary.simpleMessage(
@@ -675,8 +689,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "enterPassword": MessageLookupByLibrary.simpleMessage("Digite a senha"),
         "enterPasswordToEncrypt": MessageLookupByLibrary.simpleMessage(
             "Insira a senha para criptografar seus dados"),
-        "enterPersonName":
-            MessageLookupByLibrary.simpleMessage("Enter person name"),
         "enterReferralCode": MessageLookupByLibrary.simpleMessage(
             "Insira o código de referência"),
         "enterThe6digitCodeFromnyourAuthenticatorApp":
@@ -740,8 +752,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "filesBackedUpInAlbum": m23,
         "filesDeleted":
             MessageLookupByLibrary.simpleMessage("Arquivos excluídos"),
-        "findPeopleByName": MessageLookupByLibrary.simpleMessage(
-            "Find people quickly by searching by name"),
+        "filesSavedToGallery":
+            MessageLookupByLibrary.simpleMessage("Arquivos salvos na galeria"),
         "flip": MessageLookupByLibrary.simpleMessage("Inverter"),
         "forYourMemories":
             MessageLookupByLibrary.simpleMessage("para suas memórias"),
@@ -825,7 +837,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "A chave de recuperação que você digitou não é válida. Certifique-se de que contém 24 palavras e verifique a ortografia de cada uma.\n\nSe você inseriu um código de recuperação mais antigo, verifique se ele tem 64 caracteres e verifique cada um deles."),
         "invite": MessageLookupByLibrary.simpleMessage("Convidar"),
         "inviteToEnte":
-            MessageLookupByLibrary.simpleMessage("Convidar para o ente"),
+            MessageLookupByLibrary.simpleMessage("Convidar para o Ente"),
         "inviteYourFriends":
             MessageLookupByLibrary.simpleMessage("Convide seus amigos"),
         "inviteYourFriendsToEnte":
@@ -933,6 +945,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "manageParticipants": MessageLookupByLibrary.simpleMessage("Gerenciar"),
         "manageSubscription":
             MessageLookupByLibrary.simpleMessage("Gerenciar assinatura"),
+        "manualPairDesc": MessageLookupByLibrary.simpleMessage(
+            "Parear com o PIN funciona com qualquer tela que você deseja ver o seu álbum ativado."),
         "map": MessageLookupByLibrary.simpleMessage("Mapa"),
         "maps": MessageLookupByLibrary.simpleMessage("Mapas"),
         "mastodon": MessageLookupByLibrary.simpleMessage("Mastodon"),
@@ -968,6 +982,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "no": MessageLookupByLibrary.simpleMessage("Não"),
         "noAlbumsSharedByYouYet": MessageLookupByLibrary.simpleMessage(
             "Nenhum álbum compartilhado por você ainda"),
+        "noDeviceFound": MessageLookupByLibrary.simpleMessage(
+            "Nenhum dispositivo encontrado"),
         "noDeviceLimit": MessageLookupByLibrary.simpleMessage("Nenhum"),
         "noDeviceThatCanBeDeleted": MessageLookupByLibrary.simpleMessage(
             "Você não tem nenhum arquivo neste dispositivo que pode ser excluído"),
@@ -1016,6 +1032,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "orPickAnExistingOne":
             MessageLookupByLibrary.simpleMessage("Ou escolha um existente"),
         "pair": MessageLookupByLibrary.simpleMessage("Parear"),
+        "pairWithPin": MessageLookupByLibrary.simpleMessage("Parear com PIN"),
+        "pairingComplete":
+            MessageLookupByLibrary.simpleMessage("Pareamento concluído"),
         "passkey": MessageLookupByLibrary.simpleMessage("Chave de acesso"),
         "passkeyAuthTitle": MessageLookupByLibrary.simpleMessage(
             "Autenticação via Chave de acesso"),
@@ -1170,8 +1189,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "removeParticipant":
             MessageLookupByLibrary.simpleMessage("Remover participante"),
         "removeParticipantBody": m43,
-        "removePersonLabel":
-            MessageLookupByLibrary.simpleMessage("Remove person label"),
         "removePublicLink":
             MessageLookupByLibrary.simpleMessage("Remover link público"),
         "removeShareItemsWarning": MessageLookupByLibrary.simpleMessage(
@@ -1386,6 +1403,10 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("✨ Bem-sucedido"),
         "startBackup": MessageLookupByLibrary.simpleMessage("Iniciar backup"),
         "status": MessageLookupByLibrary.simpleMessage("Estado"),
+        "stopCastingBody": MessageLookupByLibrary.simpleMessage(
+            "Você quer parar a transmissão?"),
+        "stopCastingTitle":
+            MessageLookupByLibrary.simpleMessage("Parar transmissão"),
         "storage": MessageLookupByLibrary.simpleMessage("Armazenamento"),
         "storageBreakupFamily": MessageLookupByLibrary.simpleMessage("Família"),
         "storageBreakupYou": MessageLookupByLibrary.simpleMessage("Você"),
@@ -1431,7 +1452,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "thankYouForSubscribing":
             MessageLookupByLibrary.simpleMessage("Obrigado por assinar!"),
         "theDownloadCouldNotBeCompleted": MessageLookupByLibrary.simpleMessage(
-            "Não foi possível concluir a transferência"),
+            "Não foi possível concluir o download"),
         "theRecoveryKeyYouEnteredIsIncorrect":
             MessageLookupByLibrary.simpleMessage(
                 "A chave de recuperação inserida está incorreta"),
@@ -1531,7 +1552,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "verificationId":
             MessageLookupByLibrary.simpleMessage("ID de Verificação"),
         "verify": MessageLookupByLibrary.simpleMessage("Verificar"),
-        "verifyEmail": MessageLookupByLibrary.simpleMessage("Verificar email"),
+        "verifyEmail": MessageLookupByLibrary.simpleMessage("Verificar e-mail"),
         "verifyEmailID": m65,
         "verifyIDLabel": MessageLookupByLibrary.simpleMessage("Verificar"),
         "verifyPasskey":

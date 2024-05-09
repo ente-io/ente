@@ -9,8 +9,7 @@ type CastRequest struct {
 }
 
 type RegisterDeviceRequest struct {
-	DeviceCode *string `json:"deviceCode"`
-	PublicKey  string  `json:"publicKey" binding:"required"`
+	PublicKey string `json:"publicKey" binding:"required"`
 }
 
 type AuthContext struct {

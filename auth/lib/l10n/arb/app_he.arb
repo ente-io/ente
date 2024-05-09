@@ -19,7 +19,6 @@
   "codeIssuerHint": "מנפיק",
   "codeSecretKeyHint": "מפתח סודי",
   "codeAccountHint": "חשבון(you@domain.com)",
-  "accountKeyType": "סוג מפתח",
   "sessionExpired": "זמן החיבור הסתיים",
   "@sessionExpired": {
     "description": "Title of the dialog when the users current session is invalid/expired"

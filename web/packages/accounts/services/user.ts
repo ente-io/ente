@@ -40,10 +40,18 @@ export const logoutUser = async () => {
     } catch (e) {
         log.error("Ignoring error when clearing files", e);
     }
-    try {
-        globalThis.electron?.clearStores();
-    } catch (e) {
-        log.error("Ignoring error when clearing electron stores", e);
+    const electron = globalThis.electron;
+    if (electron) {
+        try {
+            await electron.watch.reset();
+        } catch (e) {
+            log.error("Ignoring error when resetting native folder watches", e);
+        }
+        try {
+            await electron.clearStores();
+        } catch (e) {
+            log.error("Ignoring error when clearing native stores", e);
+        }
     }
     try {
         eventBus.emit(Events.LOGOUT);

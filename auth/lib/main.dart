@@ -37,6 +37,7 @@ import 'package:window_manager/window_manager.dart';
 final _logger = Logger("main");
 
 Future<void> initSystemTray() async {
+  if (PlatformUtil.isMobile()) return;
   String path = Platform.isWindows
       ? 'assets/icons/auth-icon.ico'
       : 'assets/icons/auth-icon.png';

@@ -9,15 +9,10 @@ export interface UploadStatusStore {
     collectionName?: string;
     /**
      * Paths to regular files that are pending upload.
-     *
-     * This should generally be present, albeit empty, but it is marked optional
-     * in sympathy with its siblings.
      */
     filePaths?: string[];
     /**
      * Each item is the path to a zip file and the name of an entry within it.
-     *
-     * This is marked optional since legacy stores will not have it.
      */
     zipItems?: [zipPath: string, entryName: string][];
     /**

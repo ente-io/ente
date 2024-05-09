@@ -194,8 +194,8 @@ func (repo *UserRepository) UpdateEmail(userID int64, encryptedEmail ente.Encryp
 
 // GetUserIDWithEmail returns the userID associated with a provided email
 func (repo *UserRepository) GetUserIDWithEmail(email string) (int64, error) {
-	trimmedEmail := strings.TrimSpace(email)
-	emailHash, err := crypto.GetHash(trimmedEmail, repo.HashingKey)
+	sanitizedEmail := strings.ToLower(strings.TrimSpace(email))
+	emailHash, err := crypto.GetHash(sanitizedEmail, repo.HashingKey)
 	if err != nil {
 		return -1, stacktrace.Propagate(err, "")
 	}
