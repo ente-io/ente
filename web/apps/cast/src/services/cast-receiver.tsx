@@ -116,8 +116,6 @@ const advertiseCode = (cast: Cast) => {
     const namespace = "urn:x-cast:pair-request";
 
     const options = new cast.framework.CastReceiverOptions();
-    // Do not automatically close the connection when the sender disconnects.
-    options.maxInactivity = 3600; /* 1 hour */
     // We don't use the media features of the Cast SDK.
     options.skipPlayersLoad = true;
     // Do not stop the casting if the receiver is unreachable. A user should be
@@ -132,23 +130,10 @@ const advertiseCode = (cast: Cast) => {
 
     // Reply with the code that we have if anyone asks over Chromecast.
     const incomingMessageListener = ({ senderId, data }: ListenerProps) => {
-        // TODO (MR): shutdown
-        const restart = (reason: string) => {
-            log.error(`Restarting app: ${reason}`);
-            // context.stop will close the tab but it'll get reopened again
-            // immediately since the client app will reconnect in the scenarios
-            // where we're calling this function.
-            context.stop();
-        };
-
-        // The collection ID with which we paired. If we get another connection
-        // request for a different collection ID, restart the app to allow them
-        // to reconnect using a freshly generated pairing code.
-        //
-        // If the request does not have a collectionID, forego this check.
-
+        // The collection ID with is currently paired (if any).
         const pairedCollectionID = castReceiver.collectionID?.();
 
+        // The collection ID in the request (if any).
         const collectionID =
             data &&
             typeof data == "object" &&
@@ -156,18 +141,28 @@ const advertiseCode = (cast: Cast) => {
                 ? data["collectionID"]
                 : undefined;
 
+        // If the request does not have a collectionID (or if we're not showing
+        // anything currently), forego this check.
+
         if (collectionID && pairedCollectionID) {
+            // If we get another connection request for a _different_ collection
+            // ID, stop the app to allow the second device to reconnect using a
+            // freshly generated pairing code.
             if (pairedCollectionID != collectionID) {
-                restart(
-                    `incoming request for a new collection ${collectionID}`,
-                );
+                log.info(`request for a new collection ${collectionID}`);
+                context.stop();
+            } else {
+                // Duplicate request for same collection that we're already
+                // showing. Ignore.
             }
             return;
         }
 
         const code = castReceiver.pairingCode?.();
         if (!code) {
+            // No code, but if we're already showing a collection, then ignore.
             if (pairedCollectionID) return;
+
             // Our caller waits until it has a pairing code before it calls
             // `advertiseCode`, but there is still an edge case where we can
             // find ourselves without a pairing code:
@@ -178,8 +173,9 @@ const advertiseCode = (cast: Cast) => {
             // 2. But before that happens, someone connects.
             //
             // The window where this can happen is short, so if we do find
-            // ourselves in this scenario,
-            restart("we got a pairing request when refreshing pairing codes");
+            // ourselves in this scenario, just shutdown.
+            log.error("got pairing request when refreshing pairing codes");
+            context.stop();
             return;
         }
 
