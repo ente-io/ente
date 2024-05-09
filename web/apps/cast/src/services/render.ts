@@ -320,13 +320,15 @@ const downloadFile = async (castToken: string, file: EnteFile) => {
  * So if the size of the image we're wanting to show is more than these limits,
  * resize it down to a JPEG whose size is clamped to these limits.
  */
-const needsResize = (file: EnteFile) => {
+const needsResize = () => {
+    //file: EnteFile) => {
+    return false; /*
     const w = file.pubMagicMetadata?.data?.w;
     const h = file.pubMagicMetadata?.data?.h;
     // If we don't have the size, always resize to be on the safer side.
     if (!w || !h) return true;
     // Otherwise resize if any of the dimensions is outside the recommendation.
-    return Math.max(w, h) > 1280 || Math.min(w, h) > 720;
+    return Math.max(w, h) > 1280 || Math.min(w, h) > 720;*/
 };
 
 const resize = async (blob: Blob): Promise<Blob> => {
