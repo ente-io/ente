@@ -97,8 +97,12 @@ export const renderableImageURLs = async function* (castData: CastData) {
                 haveEligibleFiles = true;
             } catch (e) {
                 if (e instanceof ApiError && e.httpStatusCode == 401) {
-                    // The token has expired. Rethrow the error, which will
-                    // bring us back to the pairing page.
+                    // The token has expired. This can happen, e.g., if the user
+                    // opens the dialog to cast again, causing the client to
+                    // invalidate existing tokens.
+                    //
+                    //  Rethrow the error, which will bring us back to the
+                    // pairing page.
                     throw e;
                 }
 
