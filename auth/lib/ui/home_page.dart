@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:app_links/app_links.dart';
+import 'package:collection/collection.dart';
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/core/event_bus.dart';
 import 'package:ente_auth/ente_theme_data.dart';
@@ -10,7 +11,6 @@ import 'package:ente_auth/events/icons_changed_event.dart';
 import 'package:ente_auth/events/trigger_logout_event.dart';
 import "package:ente_auth/l10n/l10n.dart";
 import 'package:ente_auth/models/code.dart';
-import 'package:ente_auth/models/codes.dart';
 import 'package:ente_auth/onboarding/model/tag_enums.dart';
 import 'package:ente_auth/onboarding/view/common/tag_chip.dart';
 import 'package:ente_auth/onboarding/view/setup_enter_secret_key_page.dart';
@@ -59,7 +59,7 @@ class _HomePageState extends State<HomePage> {
   final FocusNode searchInputFocusNode = FocusNode();
   bool _showSearchBox = false;
   String _searchText = "";
-  AllCodes? _allCodes;
+  List<Code>? _allCodes;
   List<String> tags = [];
   List<Code> _filteredCodes = [];
   StreamSubscription<CodesUpdatedEvent>? _streamSubscription;
@@ -133,9 +133,10 @@ class _HomePageState extends State<HomePage> {
       final List<Code> issuerMatch = [];
       final List<Code> accountMatch = [];
 
-      for (final Code codeState in _allCodes!.codes) {
-        if (selectedTag != "" &&
-            !codeState.display.tags.contains(selectedTag)) {
+      for (final Code codeState in _allCodes!) {
+        if (codeState.hasError ||
+            selectedTag != "" &&
+                !codeState.display.tags.contains(selectedTag)) {
           continue;
         }
 
@@ -148,11 +149,12 @@ class _HomePageState extends State<HomePage> {
       _filteredCodes = issuerMatch;
       _filteredCodes.addAll(accountMatch);
     } else {
-      _filteredCodes = _allCodes?.codes
-              .where(
+      _filteredCodes = _allCodes
+              ?.where(
                 (element) =>
-                    selectedTag == "" ||
-                    element.display.tags.contains(selectedTag),
+                    !element.hasError &&
+                    (selectedTag == "" ||
+                        element.display.tags.contains(selectedTag)),
               )
               .toList() ??
           [];
@@ -182,7 +184,7 @@ class _HomePageState extends State<HomePage> {
     if (code != null) {
       await CodeStore.instance.addCode(code);
       // Focus the new code by searching
-      if ((_allCodes?.codes.length ?? 0) > 2) {
+      if ((_allCodes?.where((e) => !e.hasError).length ?? 0) > 2) {
         _focusNewCode(code);
       }
     }
@@ -276,7 +278,7 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
         floatingActionButton: !_hasLoaded ||
-                (_allCodes?.codes.isEmpty ?? true) ||
+                (_allCodes?.isEmpty ?? true) ||
                 !PreferenceService.instance.hasShownCoachMark()
             ? null
             : _getFab(),
@@ -293,10 +295,14 @@ class _HomePageState extends State<HomePage> {
           onManuallySetupTap: _redirectToManualEntryPage,
         );
       } else {
+        final anyCodeHasError =
+            _allCodes?.firstWhereOrNull((element) => element.hasError) != null;
+        final indexOffset = anyCodeHasError ? 1 : 0;
+
         final list = Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (_allCodes?.state == AllCodesState.value)
+            if (!anyCodeHasError)
               SizedBox(
                 height: 48,
                 child: ListView.separated(
@@ -346,24 +352,21 @@ class _HomePageState extends State<HomePage> {
                 crossAxisCount: (MediaQuery.sizeOf(context).width ~/ 400)
                     .clamp(1, double.infinity)
                     .toInt(),
-                physics: _allCodes?.state == AllCodesState.value
-                    ? const AlwaysScrollableScrollPhysics()
-                    : const NeverScrollableScrollPhysics(),
+                physics: const AlwaysScrollableScrollPhysics(),
                 padding: const EdgeInsets.only(bottom: 80),
                 itemBuilder: ((context, index) {
-                  if (index == 0 && _allCodes?.state == AllCodesState.error) {
+                  if (index == 0 && anyCodeHasError) {
                     return const CodeErrorWidget();
                   }
-                  final newIndex =
-                      index - (_allCodes?.state == AllCodesState.error ? 1 : 0);
+                  final newIndex = index - indexOffset;
+
                   return ClipRect(
                     child: CodeWidget(
                       _filteredCodes[newIndex],
                     ),
                   );
                 }),
-                itemCount: (_allCodes?.state == AllCodesState.error ? 1 : 0) +
-                    _filteredCodes.length,
+                itemCount: _filteredCodes.length + indexOffset,
               ),
             ),
           ],

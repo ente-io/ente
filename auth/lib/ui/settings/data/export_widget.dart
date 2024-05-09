@@ -173,7 +173,8 @@ Future<void> _exportCodes(BuildContext context, String fileContent) async {
 Future<String> _getAuthDataForExport() async {
   final allCodes = await CodeStore.instance.getAllCodes();
   String data = "";
-  for (final code in allCodes.codes) {
+  for (final code in allCodes) {
+    if (code.hasError) continue;
     data += "${code.rawDataWithoutDisplay}\n";
   }
 

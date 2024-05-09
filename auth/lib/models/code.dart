@@ -44,7 +44,7 @@ class Code {
     this.err,
   });
 
-  factory Code.withError(Object error) {
+  factory Code.withError(Object error, String rawData) {
     return Code(
       "",
       "",
@@ -54,7 +54,7 @@ class Code {
       Algorithm.sha1,
       Type.totp,
       0,
-      "",
+      rawData,
       err: error,
       display: CodeDisplay(),
     );
@@ -143,7 +143,7 @@ class Code {
       if (rawData.contains("#")) {
         return Code.fromOTPAuthUrl(rawData.replaceAll("#", '%23'));
       } else {
-        return Code.withError(e);
+        rethrow;
       }
     }
   }
@@ -258,11 +258,12 @@ class Code {
   }
 
   String get rawDataWithoutDisplay {
-    final updatedIssuer = jsonEncode(issuer);
-    final uri = Uri.parse(
-      "otpauth://${type.name}/$updatedIssuer:$account?algorithm=SHA1&digits=$digits&issuer=$updatedIssuer&period=30&secret=$secret",
+    return jsonEncode(
+      Uri.parse(
+        "$rawData&codeDisplay="
+        "${jsonEncode(display.toJson())}",
+      ).toString(),
     );
-    return uri.toString();
   }
 
   @override

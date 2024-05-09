@@ -108,8 +108,9 @@ class SettingsPage extends StatelessWidget {
               await handleExportClick(context);
             } else {
               if (result.action == ButtonAction.second) {
-                bool hasCodes =
-                    (await CodeStore.instance.getAllCodes()).codes.isNotEmpty;
+                bool hasCodes = (await CodeStore.instance.getAllCodes())
+                    .where((element) => !element.hasError)
+                    .isNotEmpty;
                 if (hasCodes) {
                   final hasAuthenticated = await LocalAuthenticationService
                       .instance

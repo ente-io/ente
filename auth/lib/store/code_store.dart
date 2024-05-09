@@ -6,7 +6,6 @@ import 'package:ente_auth/core/event_bus.dart';
 import 'package:ente_auth/events/codes_updated_event.dart';
 import 'package:ente_auth/models/authenticator/entity_result.dart';
 import 'package:ente_auth/models/code.dart';
-import 'package:ente_auth/models/codes.dart';
 import 'package:ente_auth/services/authenticator_service.dart';
 import 'package:ente_auth/store/offline_authenticator_db.dart';
 import 'package:logging/logging.dart';
@@ -23,26 +22,25 @@ class CodeStore {
     _authenticatorService = AuthenticatorService.instance;
   }
 
-  Future<AllCodes> getAllCodes({AccountMode? accountMode}) async {
+  Future<List<Code>> getAllCodes({AccountMode? accountMode}) async {
     final mode = accountMode ?? _authenticatorService.getAccountMode();
     final List<EntityResult> entities =
         await _authenticatorService.getEntities(mode);
     final List<Code> codes = [];
-    bool hasError = false;
 
     for (final entity in entities) {
-      final decodeJson = jsonDecode(entity.rawData);
-
       late Code code;
-      if (decodeJson is String && decodeJson.startsWith('otpauth://')) {
-        code = Code.fromOTPAuthUrl(decodeJson);
-      } else {
-        code = Code.fromExportJson(decodeJson);
-      }
-      if (code.hasError) {
-        hasError = true;
+      try {
+        final decodeJson = jsonDecode(entity.rawData);
+
+        if (decodeJson is String && decodeJson.startsWith('otpauth://')) {
+          code = Code.fromOTPAuthUrl(decodeJson);
+        } else {
+          code = Code.fromExportJson(decodeJson);
+        }
+      } catch (e) {
+        code = Code.withError(e, entity.rawData);
         _logger.severe("Could not parse code", code.err);
-        continue;
       }
       code.generatedID = entity.generatedID;
       code.hasSynced = entity.hasSynced;
@@ -64,10 +62,8 @@ class CodeStore {
         secondCode.account,
       );
     });
-    return AllCodes(
-      codes: codes,
-      state: hasError ? AllCodesState.error : AllCodesState.value,
-    );
+
+    return codes;
   }
 
   Future<AddResult> addCode(
@@ -79,7 +75,8 @@ class CodeStore {
     final allCodes = await getAllCodes(accountMode: mode);
     bool isExistingCode = false;
     bool hasSameCode = false;
-    for (final existingCode in allCodes.codes) {
+    for (final existingCode in allCodes) {
+      if (existingCode.hasError) continue;
       if (code.generatedID != null &&
           existingCode.generatedID == code.generatedID) {
         isExistingCode = true;
@@ -138,7 +135,8 @@ class CodeStore {
 
       List<Code> offlineCodes = (await CodeStore.instance
               .getAllCodes(accountMode: AccountMode.offline))
-          .codes;
+          .where((element) => !element.hasError)
+          .toList();
       if (offlineCodes.isEmpty) {
         return;
       }
@@ -149,7 +147,8 @@ class CodeStore {
       }
       final List<Code> onlineCodes = (await CodeStore.instance
               .getAllCodes(accountMode: AccountMode.online))
-          .codes;
+          .where((element) => !element.hasError)
+          .toList();
       logger.info(
         'importing ${offlineCodes.length} offline codes with ${onlineCodes.length} online codes',
       );

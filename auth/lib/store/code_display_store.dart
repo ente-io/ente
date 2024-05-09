@@ -63,9 +63,9 @@ class CodeDisplayStore {
       isCritical: true,
       firstButtonOnTap: () async {
         // traverse through all the codes and edit this tag's value
-        final relevantCodes = (await CodeStore.instance.getAllCodes())
-            .codes
-            .where((element) => element.display.tags.contains(tag));
+        final relevantCodes = (await CodeStore.instance.getAllCodes()).where(
+          (element) => !element.hasError && element.display.tags.contains(tag),
+        );
 
         final tasks = <Future>[];
 
@@ -99,9 +99,10 @@ class CodeDisplayStore {
 
   Future<void> editTag(String previousTag, String updatedTag) async {
     // traverse through all the codes and edit this tag's value
-    final relevantCodes = (await CodeStore.instance.getAllCodes())
-        .codes
-        .where((element) => element.display.tags.contains(previousTag));
+    final relevantCodes = (await CodeStore.instance.getAllCodes()).where(
+      (element) =>
+          !element.hasError && element.display.tags.contains(previousTag),
+    );
 
     final tasks = <Future>[];
 

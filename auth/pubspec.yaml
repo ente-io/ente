@@ -14,7 +14,7 @@ dependencies:
   bip39: ^1.0.6 #done
   bloc: ^8.1.2
   clipboard: ^0.1.3
-  collection: # dart
+  collection: ^1.18.0 # dart
   confetti: ^0.7.0
   connectivity_plus: ^5.0.2
   convert: ^3.1.1
