@@ -2,8 +2,11 @@ import { FILE_TYPE } from "@/media/file-type";
 import { isNonWebImageFileExtension } from "@/media/formats";
 import { scaledImageDimensions } from "@/media/image";
 import { decodeLivePhoto } from "@/media/live-photo";
+import { createHEICConvertComlinkWorker } from "@/media/worker/heic-convert";
+import type { DedicatedHEICConvertWorker } from "@/media/worker/heic-convert.worker";
 import { nameAndExtension } from "@/next/file";
 import log from "@/next/log";
+import type { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { shuffled } from "@/utils/array";
 import { ensure } from "@/utils/ensure";
 import { wait } from "@/utils/promise";
@@ -50,6 +53,12 @@ type RenderableImageURLPair = [url: string, nextURL: string];
  * is kept at the top level to avoid passing it around.
  */
 let isChromecast = false;
+
+/**
+ * If we're using HEIC conversion, then this variable caches the comlink web
+ * worker we're using to perform the actual conversion.
+ */
+let heicWorker: ComlinkWorker<typeof DedicatedHEICConvertWorker> | undefined;
 
 /**
  * An async generator function that loops through all the files in the
@@ -285,8 +294,8 @@ const isFileEligible = (file: EnteFile) => {
     const [, extension] = nameAndExtension(file.metadata.title);
     if (isNonWebImageFileExtension(extension)) {
         if (isChromecast) return false;
-        // TODO(MR): HEIC support otherwise
-        return false;
+        // HEIC support otherwise.
+        return isHEIC(extension);
     }
 
     return true;
@@ -295,6 +304,17 @@ const isFileEligible = (file: EnteFile) => {
 const isImageOrLivePhoto = (file: EnteFile) => {
     const fileType = file.metadata.fileType;
     return fileType == FILE_TYPE.IMAGE || fileType == FILE_TYPE.LIVE_PHOTO;
+};
+
+const isHEIC = (extension: string) => {
+    const ext = extension.toLowerCase();
+    return ext == "heic" || ext == "heif";
+};
+
+export const heicToJPEG = async (heicBlob: Blob) => {
+    let worker = heicWorker;
+    if (!worker) heicWorker = worker = createHEICConvertComlinkWorker();
+    return await (await worker.remote).heicToJPEG(heicBlob);
 };
 
 /**
@@ -311,12 +331,23 @@ const createRenderableURL = async (castToken: string, file: EnteFile) => {
 };
 
 const renderableImageBlob = async (castToken: string, file: EnteFile) => {
-    const fileName = file.metadata.title;
+    let fileName = file.metadata.title;
     let blob = await downloadFile(castToken, file);
+
     if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
-        const { imageData } = await decodeLivePhoto(fileName, blob);
+        const { imageData, imageFileName } = await decodeLivePhoto(
+            fileName,
+            blob,
+        );
+        fileName = imageFileName;
         blob = new Blob([imageData]);
     }
+
+    const [, ext] = nameAndExtension(fileName);
+    if (isHEIC(ext)) {
+        blob = await heicToJPEG(blob);
+    }
+
     const mimeType = await detectMediaMIMEType(new File([blob], fileName));
     if (!mimeType)
         throw new Error(`Could not detect MIME type for file ${fileName}`);
