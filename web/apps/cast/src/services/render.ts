@@ -27,6 +27,31 @@ import {
 type RenderableImageURLPair = [url: string, nextURL: string];
 
 /**
+ * Change the behaviour when we're running on Chromecast.
+ *
+ * The Chromecast device fails to load the images if we give it too large
+ * images. The documentation states:
+ *
+ * > Images have a display size limitation of 720p (1280x720). Images should be
+ * > optimized to 1280x720 or less to avoid scaling down on the receiver device.
+ * >
+ * > https://developers.google.com/cast/docs/media
+ *
+ * When testing with Chromecast device (2nd gen, this might not be true for
+ * newer variants), in practice we found that even this is iffy, likely because
+ * in our case we also need to decrypt the E2EE data.
+ *
+ * So we have different codepaths when running on a Chromecast hardware.
+ *
+ * Also, to detect if we're running on a Chromecast, a user-agent check is the
+ * only way. See: https://issuetracker.google.com/issues/36189456.
+ *
+ * This variable is lazily updated when we enter {@link renderableImageURLs}. It
+ * is kept at the top level to avoid passing it around.
+ */
+let isChromecast = false;
+
+/**
  * An async generator function that loops through all the files in the
  * collection, returning renderable URLs to each that can be displayed in a
  * slideshow.
@@ -79,6 +104,8 @@ export const renderableImageURLs = async function* (castData: CastData) {
     // bit, for the user to see the checkmark animation as reassurance).
     lastYieldTime -= slideDuration - 2500; /* wait at most 2.5 s */
 
+    isChromecast = window.navigator.userAgent.includes("CrKey");
+
     while (true) {
         const encryptedFiles = shuffled(
             await getEncryptedCollectionFiles(castToken),
@@ -89,7 +116,7 @@ export const renderableImageURLs = async function* (castData: CastData) {
         for (const encryptedFile of encryptedFiles) {
             const file = await decryptEnteFile(encryptedFile, collectionKey);
 
-            if (!isFileEligibleForCast(file)) continue;
+            if (!isFileEligible(file)) continue;
 
             console.log("will start createRenderableURL", new Date());
             try {
@@ -155,29 +182,6 @@ export const renderableImageURLs = async function* (castData: CastData) {
         if (!haveEligibleFiles) return;
     }
 };
-
-/**
- * Change the behaviour when we're running on Chromecast.
- *
- * The Chromecast device fails to load the images if we give it too large
- * images. The documentation states:
- *
- * > Images have a display size limitation of 720p (1280x720). Images should
- * > be optimized to 1280x720 or less to avoid scaling down on the receiver
- * > device.
- * >
- * > https://developers.google.com/cast/docs/media
- *
- * When testing with Chromecast device (2nd gen, this might not be true for
- * newer variants), in practice we found that even this is iffy, likely
- * because in our case we also need to decrypt the E2EE data.
- *
- * So we have different codepaths when running on a Chromecast hardware.
- *
- * Also, to detect if we're running on a Chromecast, a user-agent check is
- * the only way. See: https://issuetracker.google.com/issues/36189456.
- */
-const isChromecast = () => window.navigator.userAgent.includes("CrKey");
 
 /**
  * Fetch the list of non-deleted files in the given collection.
@@ -274,12 +278,16 @@ const decryptEnteFile = async (
     return file;
 };
 
-const isFileEligibleForCast = (file: EnteFile) => {
+const isFileEligible = (file: EnteFile) => {
     if (!isImageOrLivePhoto(file)) return false;
     if (file.info.fileSize > 100 * 1024 * 1024) return false;
 
     const [, extension] = nameAndExtension(file.metadata.title);
-    if (isNonWebImageFileExtension(extension)) return false;
+    if (isNonWebImageFileExtension(extension)) {
+        if (isChromecast) return false;
+        // TODO(MR): HEIC support otherwise
+        return false;
+    }
 
     return true;
 };
@@ -319,9 +327,11 @@ const downloadFile = async (castToken: string, file: EnteFile) => {
     if (!isImageOrLivePhoto(file))
         throw new Error("Can only cast images and live photos");
 
-    const isCast = isChromecast();
+    const shouldUseThumbnail = isChromecast;
 
-    const url = isCast ? getCastThumbnailURL(file.id) : getCastFileURL(file.id);
+    const url = shouldUseThumbnail
+        ? getCastThumbnailURL(file.id)
+        : getCastFileURL(file.id);
     const resp = await HTTPService.get(
         url,
         null,
@@ -336,7 +346,7 @@ const downloadFile = async (castToken: string, file: EnteFile) => {
     const decrypted = await cryptoWorker.decryptFile(
         new Uint8Array(resp.data),
         await cryptoWorker.fromB64(
-            isCast
+            shouldUseThumbnail
                 ? file.thumbnail.decryptionHeader
                 : file.file.decryptionHeader,
         ),
