@@ -106,7 +106,7 @@ export const renderableImageURLs = async function* (castData: CastData) {
             // - Subsequently, urls will have the "next" / "preloaded" URL left
             //   over from the last time. We'll promote that to being the one
             //   that'll get displayed, and preload another one.
-            // if (urls.length < 2) continue;
+            if (urls.length < 2) continue;
 
             // The last element of previousURLs is the URL that is currently
             // being shown on screen.
@@ -119,8 +119,7 @@ export const renderableImageURLs = async function* (castData: CastData) {
             // The URL that'll now get displayed on screen.
             const url = ensure(urls.shift());
             // The URL that we're preloading for next time around.
-            // TODO(MR): Cast
-            const nextURL = ""; //ensure(urls[0]);
+            const nextURL = ensure(urls[0]);
 
             previousURLs.push(url);
 
