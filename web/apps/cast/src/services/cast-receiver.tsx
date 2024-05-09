@@ -35,12 +35,12 @@ class CastReceiver {
      * A callback to invoke to get the pairing code when we get a new incoming
      * pairing request.
      */
-    pairingCode: () => string | undefined;
+    pairingCode: (() => string | undefined) | undefined;
     /**
      * A callback to invoke to get the ID of the collection that is currently
      * being shown (if any).
      */
-    collectionID: () => string | undefined;
+    collectionID: (() => string | undefined) | undefined;
 }
 
 /** Singleton instance of {@link CastReceiver}. */
@@ -75,8 +75,7 @@ export const advertiseOnChromecast = (
     // No-op if we're already running.
     if (castReceiver.haveStarted) return;
 
-    
-
+    void loadingChromecastSDKIfNeeded().then((cast) => advertiseCode(cast));
 };
 
 /**
@@ -86,7 +85,7 @@ export const advertiseOnChromecast = (
  * Calling this function multiple times is fine, once the Chromecast SDK is
  * loaded it'll thereafter return the reference to the same object always.
  */
-const castReceiverLoadingIfNeeded = async (): Promise<Cast> => {
+const loadingChromecastSDKIfNeeded = async (): Promise<Cast> => {
     if (castReceiver.cast) return castReceiver.cast;
     if (castReceiver.loader) return await castReceiver.loader;
 
@@ -103,7 +102,14 @@ const castReceiverLoadingIfNeeded = async (): Promise<Cast> => {
     return await castReceiver.loader;
 };
 
-const advertiseCode_ = (cast: Cast, pairingCode: () => string | undefined) => {
+const advertiseCode = (cast: Cast) => {
+    if (castReceiver.haveStarted) {
+        // Multiple attempts raced to completion, ignore all but the first.
+        return;
+    }
+
+    castReceiver.haveStarted = true;
+
     // Prepare the Chromecast "context".
     const context = cast.framework.CastReceiverContext.getInstance();
     const namespace = "urn:x-cast:pair-request";
@@ -115,13 +121,6 @@ const advertiseCode_ = (cast: Cast, pairingCode: () => string | undefined) => {
     // able to start a cast on their phone and then put it away, leaving the
     // cast running on their big screen.
     options.disableIdleTimeout = true;
-
-    // The collection ID with which we paired. If we get another connection
-    // request for a different collection ID, restart the app to allow them to
-    // reconnect using a freshly generated pairing code.
-    //
-    // If the request does not have a collectionID, forego this check.
-    let pairedCollectionID: string | undefined;
 
     type ListenerProps = {
         senderId: string;
@@ -138,6 +137,14 @@ const advertiseCode_ = (cast: Cast, pairingCode: () => string | undefined) => {
             context.stop();
         };
 
+        // The collection ID with which we paired. If we get another connection
+        // request for a different collection ID, restart the app to allow them
+        // to reconnect using a freshly generated pairing code.
+        //
+        // If the request does not have a collectionID, forego this check.
+
+        const pairedCollectionID = castReceiver.collectionID?.();
+
         const collectionID =
             data &&
             typeof data == "object" &&
@@ -145,14 +152,16 @@ const advertiseCode_ = (cast: Cast, pairingCode: () => string | undefined) => {
                 ? data["collectionID"]
                 : undefined;
 
-        if (pairedCollectionID && pairedCollectionID != collectionID) {
+        if (
+            collectionID &&
+            pairedCollectionID &&
+            pairedCollectionID != collectionID
+        ) {
             restart(`incoming request for a new collection ${collectionID}`);
             return;
         }
 
-        pairedCollectionID = collectionID;
-
-        const code = pairingCode();
+        const code = castReceiver.pairingCode?.();
         if (!code) {
             // Our caller waits until it has a pairing code before it calls
             // `advertiseCode`, but there is still an edge case where we can
