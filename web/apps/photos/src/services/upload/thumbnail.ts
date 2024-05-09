@@ -1,10 +1,9 @@
 import { FILE_TYPE, type FileTypeInfo } from "@/media/file-type";
-import {
-    generateImageThumbnailUsingCanvas,
-    generateVideoThumbnailUsingCanvas,
-} from "@/media/image";
+import { scaledImageDimensions } from "@/media/image";
 import log from "@/next/log";
 import { type Electron } from "@/next/types/ipc";
+import { ensure } from "@/utils/ensure";
+import { withTimeout } from "@/utils/promise";
 import * as ffmpeg from "services/ffmpeg";
 import { heicToJPEG } from "services/heic-convert";
 import { toDataOrPathOrZipEntry, type DesktopUploadItem } from "./types";
@@ -48,6 +47,64 @@ const generateImageThumbnailWeb = async (
     return generateImageThumbnailUsingCanvas(blob);
 };
 
+const generateImageThumbnailUsingCanvas = async (blob: Blob) => {
+    const canvas = document.createElement("canvas");
+    const canvasCtx = ensure(canvas.getContext("2d"));
+
+    const imageURL = URL.createObjectURL(blob);
+    await withTimeout(
+        new Promise((resolve, reject) => {
+            const image = new Image();
+            image.setAttribute("src", imageURL);
+            image.onload = () => {
+                try {
+                    URL.revokeObjectURL(imageURL);
+                    const { width, height } = scaledImageDimensions(
+                        image.width,
+                        image.height,
+                        maxThumbnailDimension,
+                    );
+                    canvas.width = width;
+                    canvas.height = height;
+                    canvasCtx.drawImage(image, 0, 0, width, height);
+                    resolve(undefined);
+                } catch (e: unknown) {
+                    reject(e);
+                }
+            };
+        }),
+        30 * 1000,
+    );
+
+    return await compressedJPEGData(canvas);
+};
+
+const compressedJPEGData = async (canvas: HTMLCanvasElement) => {
+    let blob: Blob | undefined | null;
+    let prevSize = Number.MAX_SAFE_INTEGER;
+    let quality = 0.7;
+
+    do {
+        if (blob) prevSize = blob.size;
+        blob = await new Promise((resolve) => {
+            canvas.toBlob((blob) => resolve(blob), "image/jpeg", quality);
+        });
+        quality -= 0.1;
+    } while (
+        quality >= 0.5 &&
+        blob &&
+        blob.size > maxThumbnailSize &&
+        percentageSizeDiff(blob.size, prevSize) >= 10
+    );
+
+    return new Uint8Array(await ensure(blob).arrayBuffer());
+};
+
+const percentageSizeDiff = (
+    newThumbnailSize: number,
+    oldThumbnailSize: number,
+) => ((oldThumbnailSize - newThumbnailSize) * 100) / oldThumbnailSize;
+
 const generateVideoThumbnailWeb = async (blob: Blob) => {
     try {
         return await ffmpeg.generateVideoThumbnailWeb(blob);
@@ -58,6 +115,39 @@ const generateVideoThumbnailWeb = async (blob: Blob) => {
         );
         return generateVideoThumbnailUsingCanvas(blob);
     }
+};
+
+export const generateVideoThumbnailUsingCanvas = async (blob: Blob) => {
+    const canvas = document.createElement("canvas");
+    const canvasCtx = ensure(canvas.getContext("2d"));
+
+    const videoURL = URL.createObjectURL(blob);
+    await withTimeout(
+        new Promise((resolve, reject) => {
+            const video = document.createElement("video");
+            video.preload = "metadata";
+            video.src = videoURL;
+            video.addEventListener("loadeddata", () => {
+                try {
+                    URL.revokeObjectURL(videoURL);
+                    const { width, height } = scaledImageDimensions(
+                        video.videoWidth,
+                        video.videoHeight,
+                        maxThumbnailDimension,
+                    );
+                    canvas.width = width;
+                    canvas.height = height;
+                    canvasCtx.drawImage(video, 0, 0, width, height);
+                    resolve(undefined);
+                } catch (e) {
+                    reject(e);
+                }
+            });
+        }),
+        30 * 1000,
+    );
+
+    return await compressedJPEGData(canvas);
 };
 
 /**
