@@ -119,6 +119,7 @@ export const renderableImageURLs = async function* (castData: CastData) {
             // The URL that'll now get displayed on screen.
             const url = ensure(urls.shift());
             // The URL that we're preloading for next time around.
+            // TODO(MR): Cast
             const nextURL = ""; //ensure(urls[0]);
 
             previousURLs.push(url);
@@ -321,10 +322,9 @@ const downloadFile = async (castToken: string, file: EnteFile) => {
  * resize it down to a JPEG whose size is clamped to these limits.
  */
 const needsResize = (file: EnteFile) => {
-    const w = file.w;
-    const h = file.h;
-    // If we don't have either of these values, always resize to be on the safer
-    // side.
+    const w = file.pubMagicMetadata.data.w;
+    const h = file.pubMagicMetadata.data.h;
+    // If we don't have the size, always resize to be on the safer side.
     if (!w || !h) return true;
     // Otherwise resize if any of the dimensions is outside the recommendation.
     return Math.max(w, h) > 1280 || Math.min(w, h) > 720;
