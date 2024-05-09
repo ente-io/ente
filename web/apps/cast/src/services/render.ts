@@ -157,6 +157,29 @@ export const renderableImageURLs = async function* (castData: CastData) {
 };
 
 /**
+ * Change the behaviour when we're running on Chromecast.
+ *
+ * The Chromecast device fails to load the images if we give it too large
+ * images. The documentation states:
+ *
+ * > Images have a display size limitation of 720p (1280x720). Images should
+ * > be optimized to 1280x720 or less to avoid scaling down on the receiver
+ * > device.
+ * >
+ * > https://developers.google.com/cast/docs/media
+ *
+ * When testing with Chromecast device (2nd gen, this might not be true for
+ * newer variants), in practice we found that even this is iffy, likely
+ * because in our case we also need to decrypt the E2EE data.
+ *
+ * So we have different codepaths when running on a Chromecast hardware.
+ *
+ * Also, to detect if we're running on a Chromecast, a user-agent check is
+ * the only way. See: https://issuetracker.google.com/issues/36189456.
+ */
+const isChromecast = () => window.navigator.userAgent.includes("CrKey");
+
+/**
  * Fetch the list of non-deleted files in the given collection.
  *
  * The returned files are not decrypted yet, so their metadata will not be
@@ -296,14 +319,7 @@ const downloadFile = async (castToken: string, file: EnteFile) => {
     if (!isImageOrLivePhoto(file))
         throw new Error("Can only cast images and live photos");
 
-    // Change the behaviour when we're running on Chromecast.
-    //
-    // When testing with Chromecast device (2nd gen, this might not be true for
-    // newer variants), in practice we found that it is very underpowered, and
-    // struggles with hi-res images. So when we're running on Chromecast, just
-    // show the thumbnails.
-
-    const isCast = "cast" in globalThis;
+    const isCast = isChromecast();
 
     const url = isCast ? getCastThumbnailURL(file.id) : getCastFileURL(file.id);
     const resp = await HTTPService.get(
