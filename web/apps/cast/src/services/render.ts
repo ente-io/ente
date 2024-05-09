@@ -15,7 +15,6 @@ import {
     getCastThumbnailURL,
     getEndpoint,
 } from "@ente/shared/network/api";
-import { HttpStatusCode } from "axios";
 import type { CastData } from "services/cast-data";
 import { detectMediaMIMEType } from "services/detect-type";
 import {
@@ -97,10 +96,7 @@ export const renderableImageURLs = async function* (castData: CastData) {
                 urls.push(await createRenderableURL(castToken, file));
                 haveEligibleFiles = true;
             } catch (e) {
-                if (
-                    e instanceof ApiError &&
-                    e.httpStatusCode == HttpStatusCode.Unauthorized
-                ) {
+                if (e instanceof ApiError && e.httpStatusCode == 401) {
                     // The token has expired. Rethrow the error, which will
                     // bring us back to the pairing page.
                     throw e;
