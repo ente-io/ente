@@ -130,6 +130,7 @@ const advertiseCode = (cast: Cast) => {
 
     // Reply with the code that we have if anyone asks over Chromecast.
     const incomingMessageListener = ({ senderId, data }: ListenerProps) => {
+        // TODO (MR): shutdown
         const restart = (reason: string) => {
             log.error(`Restarting app: ${reason}`);
             // context.stop will close the tab but it'll get reopened again
@@ -153,17 +154,18 @@ const advertiseCode = (cast: Cast) => {
                 ? data["collectionID"]
                 : undefined;
 
-        if (
-            collectionID &&
-            pairedCollectionID &&
-            pairedCollectionID != collectionID
-        ) {
-            restart(`incoming request for a new collection ${collectionID}`);
+        if (collectionID && pairedCollectionID) {
+            if (pairedCollectionID != collectionID) {
+                restart(
+                    `incoming request for a new collection ${collectionID}`,
+                );
+            }
             return;
         }
 
         const code = castReceiver.pairingCode?.();
         if (!code) {
+            if (pairedCollectionID) return;
             // Our caller waits until it has a pairing code before it calls
             // `advertiseCode`, but there is still an edge case where we can
             // find ourselves without a pairing code:

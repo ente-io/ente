@@ -91,6 +91,7 @@ export const renderableImageURLs = async function* (castData: CastData) {
                 urls.push(await createRenderableURL(castToken, file));
                 haveEligibleFiles = true;
             } catch (e) {
+                // TODO (MR): Throw on token invaildation 403
                 log.error("Skipping unrenderable file", e);
                 continue;
             }
