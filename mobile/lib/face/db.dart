@@ -890,30 +890,13 @@ class FaceMLDataDB {
       batchCounter++;
     }
     await db.executeBatch(sql, parameterSets);
+  }
 
-    // var batch = db.batch();
-    // int batchCounter = 0;
-    // for (final entry in summary.entries) {
-    //   if (batchCounter == 400) {
-    //     await batch.commit(noResult: true);
-    //     batch = db.batch();
-    //     batchCounter = 0;
-    //   }
-    //   final int cluserID = entry.key;
-    //   final int count = entry.value.$2;
-    //   final Uint8List avg = entry.value.$1;
-    //   batch.insert(
-    //     clusterSummaryTable,
-    //     {
-    //       clusterIDColumn: cluserID,
-    //       avgColumn: avg,
-    //       countColumn: count,
-    //     },
-    //     conflictAlgorithm: ConflictAlgorithm.replace,
-    //   );
-    //   batchCounter++;
-    // }
-    // await batch.commit(noResult: true);
+  Future<void> deleteClusterSummary(int clusterID) async {
+    final db = await instance.asyncDB;
+    const String sqlDelete =
+        'DELETE FROM $clusterSummaryTable WHERE $clusterIDColumn = ?';
+    await db.execute(sqlDelete, [clusterID]);
   }
 
   /// Returns a map of clusterID to (avg embedding, count)
