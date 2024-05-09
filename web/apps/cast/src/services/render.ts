@@ -5,10 +5,10 @@ import { nameAndExtension } from "@/next/file";
 import log from "@/next/log";
 import { shuffled } from "@/utils/array";
 import { ensure } from "@/utils/ensure";
+import { wait } from "@/utils/promise";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { getCastFileURL, getEndpoint } from "@ente/shared/network/api";
-import { wait } from "@ente/shared/utils";
 import type { CastData } from "services/cast-data";
 import { detectMediaMIMEType } from "services/detect-type";
 import {

@@ -1,7 +1,7 @@
 import log from "@/next/log";
+import { wait } from "@/utils/promise";
 import { boxSealOpen, toB64 } from "@ente/shared/crypto/internal/libsodium";
 import castGateway from "@ente/shared/network/cast";
-import { wait } from "@ente/shared/utils";
 import _sodium from "libsodium-wrappers";
 
 export interface Registration {
