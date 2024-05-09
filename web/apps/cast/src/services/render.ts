@@ -321,8 +321,8 @@ const downloadFile = async (castToken: string, file: EnteFile) => {
  * resize it down to a JPEG whose size is clamped to these limits.
  */
 const needsResize = (file: EnteFile) => {
-    const w = file.pubMagicMetadata.data.w;
-    const h = file.pubMagicMetadata.data.h;
+    const w = file.pubMagicMetadata?.data?.w;
+    const h = file.pubMagicMetadata?.data?.h;
     // If we don't have the size, always resize to be on the safer side.
     if (!w || !h) return true;
     // Otherwise resize if any of the dimensions is outside the recommendation.
@@ -345,6 +345,7 @@ const resize = async (blob: Blob): Promise<Blob> => {
                     image.height,
                     1280,
                 );
+                console.log("resizing image", { image, width, height });
                 canvas.width = width;
                 canvas.height = height;
                 canvasCtx.drawImage(image, 0, 0, width, height);
