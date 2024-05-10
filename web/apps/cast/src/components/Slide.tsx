@@ -23,6 +23,9 @@ export const SlideView: React.FC<SlideViewProps> = ({ url, nextURL }) => {
                 backgroundRepeat: "no-repeat",
                 backgroundBlendMode: "multiply",
                 backgroundColor: "rgba(0, 0, 0, 0.5)",
+                // Smooth out the transition a bit.
+                // Does not work in Firefox.
+                transition: "background 2s",
             }}
         >
             <div
