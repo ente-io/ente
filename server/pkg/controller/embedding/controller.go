@@ -26,6 +26,11 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+const (
+	// maxEmbeddingDataSize is the min size of an embedding object in bytes
+	minEmbeddingDataSize = 2048
+)
+
 type Controller struct {
 	Repo                    *embedding.Repository
 	AccessCtrl              access.Controller
@@ -135,15 +140,23 @@ func (c *Controller) GetFilesEmbedding(ctx *gin.Context, req ente.GetFilesEmbedd
 		return nil, stacktrace.Propagate(err, "")
 	}
 
+	embeddingsWithData := make([]ente.Embedding, 0)
+	noEmbeddingFileIds := make([]int64, 0)
 	dbFileIds := make([]int64, 0)
-	for _, embedding := range userFileEmbeddings {
-		dbFileIds = append(dbFileIds, embedding.FileID)
+	// fileIDs that were indexed but they don't contain any embedding information
+	for i := range userFileEmbeddings {
+		dbFileIds = append(dbFileIds, userFileEmbeddings[i].FileID)
+		if userFileEmbeddings[i].Size != nil && *userFileEmbeddings[i].Size < minEmbeddingDataSize {
+			noEmbeddingFileIds = append(noEmbeddingFileIds, userFileEmbeddings[i].FileID)
+		} else {
+			embeddingsWithData = append(embeddingsWithData, userFileEmbeddings[i])
+		}
 	}
-	missingFileIds := array.FindMissingElementsInSecondList(req.FileIDs, dbFileIds)
+	pendingIndexFileIds := array.FindMissingElementsInSecondList(req.FileIDs, dbFileIds)
 	errFileIds := make([]int64, 0)
 
 	// Fetch missing userFileEmbeddings in parallel
-	embeddingObjects, err := c.getEmbeddingObjectsParallelV2(userID, userFileEmbeddings)
+	embeddingObjects, err := c.getEmbeddingObjectsParallelV2(userID, embeddingsWithData)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "")
 	}
@@ -166,9 +179,10 @@ func (c *Controller) GetFilesEmbedding(ctx *gin.Context, req ente.GetFilesEmbedd
 	}
 
 	return &ente.GetFilesEmbeddingResponse{
-		Embeddings:    fetchedEmbeddings,
-		NoDataFileIDs: missingFileIds,
-		ErrFileIDs:    errFileIds,
+		Embeddings:          fetchedEmbeddings,
+		PendingIndexFileIDs: pendingIndexFileIds,
+		ErrFileIDs:          errFileIds,
+		NoEmbeddingFileIDs:  noEmbeddingFileIds,
 	}, nil
 }
 
