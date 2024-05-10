@@ -25,7 +25,6 @@ jobs:
                   cache: "yarn"
                   cache-dependency-path: "web/yarn.lock"
 
-            - name: Install dependencies
-              run: yarn install && yarn run next telemetry disable
+            - run: yarn install
 
             - run: yarn lint
