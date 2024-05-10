@@ -315,6 +315,99 @@ class ClusterFeedbackService {
     return;
   }
 
+  Future<List<(int, int)>> checkForMixedClusters() async {
+    final faceMlDb = FaceMLDataDB.instance;
+    final allClusterToFaceCount = await faceMlDb.clusterIdToFaceCount();
+    final clustersToInspect = <int>[];
+    for (final clusterID in allClusterToFaceCount.keys) {
+      if (allClusterToFaceCount[clusterID]! > 20 &&
+          allClusterToFaceCount[clusterID]! < 500) {
+        clustersToInspect.add(clusterID);
+      }
+    }
+
+    final fileIDToCreationTime =
+        await FilesDB.instance.getFileIDToCreationTime();
+
+    final susClusters = <(int, int)>[];
+
+    final inspectionStart = DateTime.now();
+    for (final clusterID in clustersToInspect) {
+      final int originalClusterSize = allClusterToFaceCount[clusterID]!;
+      final faceIDs = await faceMlDb.getFaceIDsForCluster(clusterID);
+      final originalFaceIDsSet = faceIDs.toSet();
+
+      final embeddings = await faceMlDb.getFaceEmbeddingMapForFaces(faceIDs);
+
+      final clusterResult =
+          await FaceClusteringService.instance.predictWithinClusterComputer(
+        embeddings,
+        fileIDToCreationTime: fileIDToCreationTime,
+        distanceThreshold: 0.14,
+      );
+
+      if (clusterResult == null || clusterResult.isEmpty) {
+        _logger.warning(
+          '[CheckMixedClusters] Clustering did not seem to work for cluster $clusterID of size ${allClusterToFaceCount[clusterID]}',
+        );
+        continue;
+      }
+
+      final newClusterIdToCount =
+          clusterResult.newClusterIdToFaceIds!.map((key, value) {
+        return MapEntry(key, value.length);
+      });
+      final amountOfNewClusters = newClusterIdToCount.length;
+
+      _logger.info(
+        '[CheckMixedClusters] Broke up cluster $clusterID into $amountOfNewClusters clusters \n ${newClusterIdToCount.toString()}',
+      );
+
+      // Now find the sizes of the biggest and second biggest cluster
+      final int biggestClusterID = newClusterIdToCount.keys.reduce((a, b) {
+        return newClusterIdToCount[a]! > newClusterIdToCount[b]! ? a : b;
+      });
+      final int biggestSize = newClusterIdToCount[biggestClusterID]!;
+      final biggestRatio = biggestSize / originalClusterSize;
+      if (newClusterIdToCount.length > 1) {
+        final List<int> clusterIDs = newClusterIdToCount.keys.toList();
+        clusterIDs.remove(biggestClusterID);
+        final int secondBiggestClusterID = clusterIDs.reduce((a, b) {
+          return newClusterIdToCount[a]! > newClusterIdToCount[b]! ? a : b;
+        });
+        final int secondBiggestSize =
+            newClusterIdToCount[secondBiggestClusterID]!;
+        final secondBiggestRatio = secondBiggestSize / originalClusterSize;
+
+        if (biggestRatio < 0.5 || secondBiggestRatio > 0.2) {
+          final faceIdsOfCluster =
+              await faceMlDb.getFaceIDsForCluster(clusterID);
+          final uniqueFileIDs =
+              faceIdsOfCluster.map(getFileIdFromFaceId).toSet();
+          susClusters.add((clusterID, uniqueFileIDs.length));
+          _logger.info(
+            '[CheckMixedClusters] Detected that cluster $clusterID with size ${uniqueFileIDs.length} might be mixed',
+          );
+        }
+      } else {
+        _logger.info(
+          '[CheckMixedClusters] For cluster $clusterID we only found one cluster after reclustering',
+        );
+      }
+    }
+    _logger.info(
+      '[CheckMixedClusters] Inspection took ${DateTime.now().difference(inspectionStart).inSeconds} seconds',
+    );
+    if (susClusters.isNotEmpty) {
+      _logger.info(
+        '[CheckMixedClusters] Found ${susClusters.length} clusters that might be mixed: $susClusters',
+      );
+    } else {
+      _logger.info('[CheckMixedClusters] No mixed clusters found');
+    }
+    return susClusters;
+  }
+
   // TODO: iterate over this method to find sweet spot
   Future<ClusteringResult> breakUpCluster(
     int clusterID, {

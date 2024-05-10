@@ -276,21 +276,12 @@ class SearchExample extends StatelessWidget {
                           routeToPage(context, PeoplePage(person: result));
                         }
                       },
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(
-                            Icons.add_circle_outline_outlined,
-                            size: 12,
-                          ),
-                          Text(
-                            " name",
-                            maxLines: 1,
-                            textAlign: TextAlign.center,
-                            overflow: TextOverflow.ellipsis,
-                            style: getEnteTextTheme(context).mini,
-                          ),
-                        ],
+                      child: Text(
+                        "Add name",
+                        maxLines: 1,
+                        textAlign: TextAlign.center,
+                        overflow: TextOverflow.ellipsis,
+                        style: getEnteTextTheme(context).mini,
                       ),
                     )
                   : Text(
