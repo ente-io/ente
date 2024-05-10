@@ -6,12 +6,11 @@ import { SlideView } from "components/Slide";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { readCastData } from "services/cast-data";
-import { renderableImageURLs } from "services/render";
+import { imageURLGenerator } from "services/render";
 
 export default function Slideshow() {
     const [loading, setLoading] = useState(true);
     const [imageURL, setImageURL] = useState<string | undefined>();
-    const [nextImageURL, setNextImageURL] = useState<string | undefined>();
     const [isEmpty, setIsEmpty] = useState(false);
 
     const router = useRouter();
@@ -24,11 +23,9 @@ export default function Slideshow() {
 
         const loop = async () => {
             try {
-                const urlGenerator = renderableImageURLs(
-                    ensure(readCastData()),
-                );
+                const urlGenerator = imageURLGenerator(ensure(readCastData()));
                 while (!stop) {
-                    const { value: urls, done } = await urlGenerator.next();
+                    const { value: url, done } = await urlGenerator.next();
                     if (done) {
                         // No items in this callection can be shown.
                         setIsEmpty(true);
@@ -37,8 +34,7 @@ export default function Slideshow() {
                         return;
                     }
 
-                    setImageURL(urls[0]);
-                    setNextImageURL(urls[1]);
+                    setImageURL(url);
                     setLoading(false);
                 }
             } catch (e) {
@@ -54,12 +50,12 @@ export default function Slideshow() {
         };
     }, []);
 
-    console.log("Rendering slideshow", { loading, imageURL, nextImageURL });
+    console.log("Rendering slideshow", { loading, imageURL });
 
     if (loading) return <PairingComplete />;
     if (isEmpty) return <NoItems />;
 
-    return <SlideView url={imageURL} nextURL={nextImageURL} />;
+    return <SlideView url={imageURL} />;
 }
 
 const PairingComplete: React.FC = () => {

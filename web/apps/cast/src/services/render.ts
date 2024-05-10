@@ -18,6 +18,7 @@ import {
     getCastThumbnailURL,
     getEndpoint,
 } from "@ente/shared/network/api";
+import type { AxiosResponse } from "axios";
 import type { CastData } from "services/cast-data";
 import { detectMediaMIMEType } from "services/detect-type";
 import {
@@ -26,8 +27,6 @@ import {
     FileMagicMetadata,
     FilePublicMagicMetadata,
 } from "types/file";
-
-type RenderableImageURLPair = [url: string, nextURL: string];
 
 /**
  * Change the behaviour when we're running on Chromecast.
@@ -62,12 +61,10 @@ let heicWorker: ComlinkWorker<typeof DedicatedHEICConvertWorker> | undefined;
 
 /**
  * An async generator function that loops through all the files in the
- * collection, returning renderable URLs to each that can be displayed in a
- * slideshow.
+ * collection, returning renderable image URLs to each that can be displayed in
+ * a slideshow.
  *
- * Each time it resolves with a pair of URLs (a {@link RenderableImageURLPair}),
- * one for the next slideshow image, and one for the slideshow image that will
- * be displayed after that. It also pre-fetches the next to next URL each time.
+ * Each time it resolves with a (data) URL for the slideshow image to show next.
  *
  * If there are no renderable image in the collection, the sequence ends by
  * yielding `{done: true}`.
@@ -78,14 +75,18 @@ let heicWorker: ComlinkWorker<typeof DedicatedHEICConvertWorker> | undefined;
  *
  * The generator ignores errors in the fetching and decoding of individual
  * images in the collection, skipping the erroneous ones and moving onward to
- * the next one. It will however throw if there are errors when getting the
- * collection itself. This can happen both the first time, or when we are about
- * to loop around to the start of the collection.
+ * the next one.
+ *
+ * - It will however throw if there are errors when getting the collection
+ *   itself. This can happen both the first time, or when we are about to loop
+ *   around to the start of the collection.
+ *
+ * - It will also throw if three consecutive image fail.
  *
  * @param castData The collection to show and credentials to fetch the files
  * within it.
  */
-export const renderableImageURLs = async function* (castData: CastData) {
+export const imageURLGenerator = async function* (castData: CastData) {
     const { collectionKey, castToken } = castData;
 
     /**
@@ -93,9 +94,6 @@ export const renderableImageURLs = async function* (castData: CastData) {
      * can revoke those that are not being shown anymore.
      */
     const previousURLs: string[] = [];
-
-    /** The URL pair that we will yield */
-    const urls: string[] = [];
 
     /** Number of milliseconds to keep the slide on the screen. */
     const slideDuration = 10000; /* 10 s */
@@ -113,6 +111,14 @@ export const renderableImageURLs = async function* (castData: CastData) {
     // bit, for the user to see the checkmark animation as reassurance).
     lastYieldTime -= slideDuration - 2500; /* wait at most 2.5 s */
 
+    /**
+     * Number of time we have caught an exception while trying to generate an
+     * image URL for individual files.
+     *
+     * When this happens three times consecutively, we throw.
+     */
+    let consecutiveFailures = 0;
+
     isChromecast = window.navigator.userAgent.includes("CrKey");
 
     while (true) {
@@ -128,10 +134,16 @@ export const renderableImageURLs = async function* (castData: CastData) {
             if (!isFileEligible(file)) continue;
 
             console.log("will start createRenderableURL", new Date());
+            let url: string;
             try {
-                urls.push(await createRenderableURL(castToken, file));
+                url = await createRenderableURL(castToken, file);
+                consecutiveFailures = 0;
                 haveEligibleFiles = true;
             } catch (e) {
+                consecutiveFailures += 1;
+                // 1, 2, bang!
+                if (consecutiveFailures == 3) throw e;
+
                 if (e instanceof ApiError && e.httpStatusCode == 401) {
                     // The token has expired. This can happen, e.g., if the user
                     // opens the dialog to cast again, causing the client to
@@ -149,17 +161,6 @@ export const renderableImageURLs = async function* (castData: CastData) {
 
             console.log("did end createRenderableURL", new Date());
 
-            // Need at least a pair.
-            //
-            // There are two scenarios:
-            //
-            // - First run: urls will initially be empty, so gobble two.
-            //
-            // - Subsequently, urls will have the "next" / "preloaded" URL left
-            //   over from the last time. We'll promote that to being the one
-            //   that'll get displayed, and preload another one.
-            if (urls.length < 2) continue;
-
             // The last element of previousURLs is the URL that is currently
             // being shown on screen.
             //
@@ -168,14 +169,7 @@ export const renderableImageURLs = async function* (castData: CastData) {
             if (previousURLs.length > 1)
                 URL.revokeObjectURL(previousURLs.shift());
 
-            // The URL that'll now get displayed on screen.
-            const url = ensure(urls.shift());
-            // The URL that we're preloading for next time around.
-            const nextURL = ensure(urls[0]);
-
             previousURLs.push(url);
-
-            const urlPair: RenderableImageURLPair = [url, nextURL];
 
             const elapsedTime = Date.now() - lastYieldTime;
             if (elapsedTime > 0 && elapsedTime < slideDuration) {
@@ -184,7 +178,7 @@ export const renderableImageURLs = async function* (castData: CastData) {
             }
 
             lastYieldTime = Date.now();
-            yield urlPair;
+            yield url;
         }
 
         // This collection does not have any files that we can show.
@@ -203,7 +197,7 @@ const getEncryptedCollectionFiles = async (
 ): Promise<EncryptedEnteFile[]> => {
     let files: EncryptedEnteFile[] = [];
     let sinceTime = 0;
-    let resp;
+    let resp: AxiosResponse;
     do {
         resp = await HTTPService.get(
             `${getEndpoint()}/cast/diff`,
