@@ -1,5 +1,5 @@
 import { FILE_TYPE } from "@/media/file-type";
-import { isNonWebImageFileExtension } from "@/media/formats";
+import { isHEICExtension, isNonWebImageFileExtension } from "@/media/formats";
 import { scaledImageDimensions } from "@/media/image";
 import { decodeLivePhoto } from "@/media/live-photo";
 import { createHEICConvertComlinkWorker } from "@/media/worker/heic-convert";
@@ -285,10 +285,14 @@ const isFileEligible = (file: EnteFile) => {
     if (!isImageOrLivePhoto(file)) return false;
     if (file.info.fileSize > 100 * 1024 * 1024) return false;
 
+    // This check is fast but potentially incorrect because in practice we do
+    // encounter files that are incorrectly named and have a misleading
+    // extension. To detect the actual type, we need to sniff the MIME type, but
+    // that requires downloading and decrypting the file first.
     const [, extension] = nameAndExtension(file.metadata.title);
     if (isNonWebImageFileExtension(extension)) {
         // Of the known non-web types, we support HEIC.
-        return isHEIC(extension);
+        return isHEICExtension(extension);
     }
 
     return true;
@@ -297,11 +301,6 @@ const isFileEligible = (file: EnteFile) => {
 const isImageOrLivePhoto = (file: EnteFile) => {
     const fileType = file.metadata.fileType;
     return fileType == FILE_TYPE.IMAGE || fileType == FILE_TYPE.LIVE_PHOTO;
-};
-
-const isHEIC = (extension: string) => {
-    const ext = extension.toLowerCase();
-    return ext == "heic" || ext == "heif";
 };
 
 export const heicToJPEG = async (heicBlob: Blob) => {
@@ -336,14 +335,17 @@ const renderableImageBlob = async (castToken: string, file: EnteFile) => {
         blob = new Blob([imageData]);
     }
 
-    const [, ext] = nameAndExtension(fileName);
-    if (isHEIC(ext)) {
-        blob = await heicToJPEG(blob);
-    }
-
+    // We cannot rely on the file's extension to detect the file type, some
+    // files are incorrectly named. So use a MIME type sniffer first, but if
+    // that fails than fallback to the extension.
     const mimeType = await detectMediaMIMEType(new File([blob], fileName));
     if (!mimeType)
         throw new Error(`Could not detect MIME type for file ${fileName}`);
+
+    if (mimeType == "image/heif" || mimeType == "image/heic") {
+        blob = await heicToJPEG(blob);
+    }
+
     return new Blob([blob], { type: mimeType });
 };
 
