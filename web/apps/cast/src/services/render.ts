@@ -127,6 +127,7 @@ export const imageURLGenerator = async function* (castData: CastData) {
 
                 // On all other errors (including temporary network issues),
                 log.error("Skipping unrenderable file", e);
+                await wait(100); /* Breathe */
                 continue;
             }
 
