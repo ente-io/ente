@@ -283,6 +283,8 @@ internal:
     # List of user IDs that can use the admin API endpoints.
     admins: []
     # Cleanup delay of S3/MinIO objects in minutes (default: 45 days = 64800 minutes)
+    # WARNING: Only change this value when you know what you're doing, since this can cause things to break if configured incorrectly.
+    # For example, if replication is enabled then this value should be such that the deletion is never attempted before compliance lock passes.
     # delete-object-delay: 64800
 
 # Replication config
