@@ -26,10 +26,10 @@ export default function Slideshow() {
                 const urlGenerator = imageURLGenerator(ensure(readCastData()));
                 while (!stop) {
                     const { value: url, done } = await urlGenerator.next();
-                    if (done) {
+                    if (done || !url) {
                         // No items in this callection can be shown.
                         setIsEmpty(true);
-                        // Go back to pairing screen after 3 seconds.
+                        // Go back to pairing screen after 5 seconds.
                         setTimeout(pair, 5000);
                         return;
                     }
