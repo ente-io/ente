@@ -511,56 +511,61 @@ class FaceMLDataDB {
     });
   }
 
-  Future<Set<FaceInfoForClustering>> getFaceInfoForClustering({
+  Future<List<FaceInfoForClustering>> getFaceInfoForClustering({
     double minScore = kMinimumQualityFaceScore,
     int minClarity = kLaplacianHardThreshold,
     int maxFaces = 20000,
     int offset = 0,
     int batchSize = 10000,
   }) async {
-    final EnteWatch w = EnteWatch("getFaceEmbeddingMap")..start();
-    w.logAndReset(
-      'reading as float offset: $offset, maxFaces: $maxFaces, batchSize: $batchSize',
-    );
-    final db = await instance.asyncDB;
-
-    final Set<FaceInfoForClustering> result = {};
-    while (true) {
-      // Query a batch of rows
-      final List<Map<String, dynamic>> maps = await db.getAll(
-        'SELECT $faceIDColumn, $faceEmbeddingBlob, $faceScore, $faceBlur, $isSideways FROM $facesTable'
-        ' WHERE $faceScore > $minScore AND $faceBlur > $minClarity'
-        ' ORDER BY $faceIDColumn'
-        ' DESC LIMIT $batchSize OFFSET $offset',
+    try {
+      final EnteWatch w = EnteWatch("getFaceEmbeddingMap")..start();
+      w.logAndReset(
+        'reading as float offset: $offset, maxFaces: $maxFaces, batchSize: $batchSize',
       );
-      // Break the loop if no more rows
-      if (maps.isEmpty) {
-        break;
-      }
-      final List<String> faceIds = [];
-      for (final map in maps) {
-        faceIds.add(map[faceIDColumn] as String);
-      }
-      final faceIdToClusterId = await getFaceIdsToClusterIds(faceIds);
-      for (final map in maps) {
-        final faceID = map[faceIDColumn] as String;
-        final faceInfo = FaceInfoForClustering(
-          faceID: faceID,
-          clusterId: faceIdToClusterId[faceID],
-          embeddingBytes: map[faceEmbeddingBlob] as Uint8List,
-          faceScore: map[faceScore] as double,
-          blurValue: map[faceBlur] as double,
-          isSideways: (map[isSideways] as int) == 1,
+      final db = await instance.asyncDB;
+
+      final List<FaceInfoForClustering> result = {};
+      while (true) {
+        // Query a batch of rows
+        final List<Map<String, dynamic>> maps = await db.getAll(
+          'SELECT $faceIDColumn, $faceEmbeddingBlob, $faceScore, $faceBlur, $isSideways FROM $facesTable'
+          ' WHERE $faceScore > $minScore AND $faceBlur > $minClarity'
+          ' ORDER BY $faceIDColumn'
+          ' DESC LIMIT $batchSize OFFSET $offset',
         );
-        result.add(faceInfo);
+        // Break the loop if no more rows
+        if (maps.isEmpty) {
+          break;
+        }
+        final List<String> faceIds = [];
+        for (final map in maps) {
+          faceIds.add(map[faceIDColumn] as String);
+        }
+        final faceIdToClusterId = await getFaceIdsToClusterIds(faceIds);
+        for (final map in maps) {
+          final faceID = map[faceIDColumn] as String;
+          final faceInfo = FaceInfoForClustering(
+            faceID: faceID,
+            clusterId: faceIdToClusterId[faceID],
+            embeddingBytes: map[faceEmbeddingBlob] as Uint8List,
+            faceScore: map[faceScore] as double,
+            blurValue: map[faceBlur] as double,
+            isSideways: (map[isSideways] as int) == 1,
+          );
+          result.add(faceInfo);
+        }
+        if (result.length >= maxFaces) {
+          break;
+        }
+        offset += batchSize;
       }
-      if (result.length >= maxFaces) {
-        break;
-      }
-      offset += batchSize;
+      w.stopWithLog('done reading face embeddings ${result.length}');
+      return result;
+    } catch (e) {
+      _logger.severe('Error in getFaceInfoForClustering', e);
+      rethrow;
     }
-    w.stopWithLog('done reading face embeddings ${result.length}');
-    return result;
   }
 
   /// Returns a map of faceID to record of clusterId and faceEmbeddingBlob

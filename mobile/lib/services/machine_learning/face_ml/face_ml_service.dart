@@ -71,7 +71,9 @@ class FaceMlService {
 
   // singleton pattern
   FaceMlService._privateConstructor();
+
   static final instance = FaceMlService._privateConstructor();
+
   factory FaceMlService() => instance;
 
   final _initLock = Lock();
@@ -302,19 +304,15 @@ class FaceMlService {
       // Get a sense of the total number of faces in the database
       final int totalFaces = await FaceMLDataDB.instance
           .getTotalFaceCount(minFaceScore: minFaceScore);
-
-      // read the creation times from Files DB, in a map from fileID to creation time
       final fileIDToCreationTime =
           await FilesDB.instance.getFileIDToCreationTime();
-
       final startEmbeddingFetch = DateTime.now();
       // read all embeddings
-      final allFaceInfoForClustering = await FaceMLDataDB.instance
-          .getFaceInfoForClustering(
-            minScore: minFaceScore,
-            maxFaces: totalFaces,
-          )
-          .then((set) => set.toList());
+      final allFaceInfoForClustering =
+          await FaceMLDataDB.instance.getFaceInfoForClustering(
+        minScore: minFaceScore,
+        maxFaces: totalFaces,
+      );
       // sort the embeddings based on file creation time, oldest first
       allFaceInfoForClustering.sort((a, b) {
         final aFileId = getFileIdFromFaceId(a.faceID);
