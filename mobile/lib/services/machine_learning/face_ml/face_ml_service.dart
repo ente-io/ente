@@ -86,7 +86,7 @@ class FaceMlService {
   bool isInitialized = false;
   bool isImageIndexRunning = false;
   final int _parallelism = 10;
-  final int _remoteFetchLimit = 200;
+  final int _remoteFetchLimit = 100;
 
   Future<void> init({bool initializeImageMlIsolate = false}) async {
     return _initLock.synchronized(() async {
