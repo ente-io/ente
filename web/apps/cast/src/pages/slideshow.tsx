@@ -182,10 +182,7 @@ const SlideViewChromecast_ = styled("div")`
         width: 100%;
         height: 100%;
         object-fit: cover;
-
-        opacity: 0.2;
-        background-blend-mode: multiply;
-        background-color: rgba(0, 0, 0, 0.5);
+        opacity: 0.1;
     }
 
     img.svc-content {
