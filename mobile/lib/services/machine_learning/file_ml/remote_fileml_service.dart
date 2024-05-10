@@ -72,7 +72,8 @@ class RemoteFileMLService {
         },
       );
       final remoteEmb = res.data['embeddings'] as List;
-      final noFileIds = res.data['noDataFileIDs'] as List;
+      final pendingIndexFiles = res.data['pendingIndexFileIDs'] as List;
+      final noEmbeddingFiles = res.data['noEmbeddingFileIDs'] as List;
       final errFileIds = res.data['errFileIDs'] as List;
 
       final List<RemoteEmbedding> remoteEmbeddings = <RemoteEmbedding>[];
@@ -81,13 +82,14 @@ class RemoteFileMLService {
         remoteEmbeddings.add(embedding);
       }
 
-      final notIndexedFileIds = Set<int>.from(noFileIds.map((x) => x as int));
-      final fetchErrorFileIds = Set<int>.from(errFileIds.map((x) => x as int));
       final fileIDToFileMl = await decryptFileMLData(remoteEmbeddings);
       return FilesMLDataResponse(
         fileIDToFileMl,
-        notIndexedFileIds: notIndexedFileIds,
-        fetchErrorFileIds: fetchErrorFileIds,
+        noEmbeddingFileIDs:
+            Set<int>.from(noEmbeddingFiles.map((x) => x as int)),
+        fetchErrorFileIDs: Set<int>.from(errFileIds.map((x) => x as int)),
+        pendingIndexFileIDs:
+            Set<int>.from(pendingIndexFiles.map((x) => x as int)),
       );
     } catch (e, s) {
       _logger.severe("Failed to get embeddings", e, s);

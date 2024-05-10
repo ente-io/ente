@@ -27,6 +27,7 @@ import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
 import "package:photos/models/ml/ml_versions.dart";
+import "package:photos/service_locator.dart";
 import 'package:photos/services/machine_learning/face_ml/face_clustering/face_clustering_service.dart';
 import "package:photos/services/machine_learning/face_ml/face_clustering/face_info_for_clustering.dart";
 import 'package:photos/services/machine_learning/face_ml/face_detection/detection.dart';
@@ -537,7 +538,8 @@ class FaceMlService {
             for (final f in chunk) {
               fileIds.add(f.uploadedFileID!);
             }
-            final EnteWatch? w = kDebugMode ? EnteWatch("face_em_fetch") : null;
+            final EnteWatch? w =
+                flagService.internalUser ? EnteWatch("face_em_fetch") : null;
             w?.start();
             w?.log('starting remote fetch for ${fileIds.length} files');
             final res =
@@ -566,6 +568,16 @@ class FaceMlService {
               remoteFileIdToVersion[fileMl.fileID] =
                   fileMl.faceEmbedding.version;
             }
+            if (res.noEmbeddingFileIDs.isNotEmpty) {
+              _logger.info(
+                'No embeddings found for ${res.noEmbeddingFileIDs.length} files',
+              );
+              for (final fileID in res.noEmbeddingFileIDs) {
+                faces.add(Face.empty(fileID, error: false));
+                remoteFileIdToVersion[fileID] = faceMlVersion;
+              }
+            }
+
             await FaceMLDataDB.instance.bulkInsertFaces(faces);
             w?.logAndReset('stored embeddings');
             for (final entry in remoteFileIdToVersion.entries) {
