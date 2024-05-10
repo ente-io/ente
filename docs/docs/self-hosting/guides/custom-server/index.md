@@ -34,7 +34,8 @@ endpoint:
     api: "http://localhost:8080"
 ```
 
-(Another [example](https://github.com/ente-io/ente/blob/main/cli/config.yaml.example))
+(Another
+[example](https://github.com/ente-io/ente/blob/main/cli/config.yaml.example))
 
 ## Web appps and Photos desktop app
 
@@ -46,5 +47,5 @@ connect to. For example:
 NEXT_PUBLIC_ENTE_ENDPOINT=http://localhost:8080 yarn dev:photos
 ```
 
-For more details, see [hosting the web
-app](https://help.ente.io/self-hosting/guides/web-app).
+For more details, see
+[hosting the web app](https://help.ente.io/self-hosting/guides/web-app).
