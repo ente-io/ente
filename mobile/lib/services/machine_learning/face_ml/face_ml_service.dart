@@ -28,6 +28,7 @@ import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
 import "package:photos/models/ml/ml_versions.dart";
 import 'package:photos/services/machine_learning/face_ml/face_clustering/face_clustering_service.dart';
+import "package:photos/services/machine_learning/face_ml/face_clustering/face_info_for_clustering.dart";
 import 'package:photos/services/machine_learning/face_ml/face_detection/detection.dart';
 import 'package:photos/services/machine_learning/face_ml/face_detection/face_detection_exceptions.dart';
 import 'package:photos/services/machine_learning/face_ml/face_detection/face_detection_service.dart';
@@ -308,20 +309,27 @@ class FaceMlService {
           await FilesDB.instance.getFileIDToCreationTime();
       final startEmbeddingFetch = DateTime.now();
       // read all embeddings
-      final allFaceInfoForClustering =
-          await FaceMLDataDB.instance.getFaceInfoForClustering(
+      final result = await FaceMLDataDB.instance.getFaceInfoForClustering(
         minScore: minFaceScore,
         maxFaces: totalFaces,
       );
+      final Set<int> missingFileIDs = {};
+      final allFaceInfoForClustering = <FaceInfoForClustering>[];
+      for (final faceInfo in result) {
+        if (!fileIDToCreationTime.containsKey(faceInfo.fileID)) {
+          missingFileIDs.add(faceInfo.fileID);
+        } else {
+          allFaceInfoForClustering.add(faceInfo);
+        }
+      }
       // sort the embeddings based on file creation time, oldest first
       allFaceInfoForClustering.sort((a, b) {
-        final aFileId = getFileIdFromFaceId(a.faceID);
-        final bFileId = getFileIdFromFaceId(b.faceID);
-        return fileIDToCreationTime[aFileId]!
-            .compareTo(fileIDToCreationTime[bFileId]!);
+        return fileIDToCreationTime[a.fileID]!
+            .compareTo(fileIDToCreationTime[b.fileID]!);
       });
       _logger.info(
-        'Getting and sorting embeddings took ${DateTime.now().difference(startEmbeddingFetch).inMilliseconds} ms',
+        'Getting and sorting embeddings took ${DateTime.now().difference(startEmbeddingFetch).inMilliseconds} ms for ${allFaceInfoForClustering.length} embeddings'
+        'and ${missingFileIDs.length} missing fileIDs',
       );
 
       // Get the current cluster statistics

@@ -525,7 +525,7 @@ class FaceMLDataDB {
       );
       final db = await instance.asyncDB;
 
-      final List<FaceInfoForClustering> result = {};
+      final List<FaceInfoForClustering> result = <FaceInfoForClustering>[];
       while (true) {
         // Query a batch of rows
         final List<Map<String, dynamic>> maps = await db.getAll(
@@ -563,7 +563,7 @@ class FaceMLDataDB {
       w.stopWithLog('done reading face embeddings ${result.length}');
       return result;
     } catch (e) {
-      _logger.severe('Error in getFaceInfoForClustering', e);
+      _logger.severe('err in getFaceInfoForClustering', e);
       rethrow;
     }
   }
