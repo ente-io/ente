@@ -31,7 +31,7 @@ jobs:
                   cache-dependency-path: "docs/yarn.lock"
 
             - name: Install dependencies
-              run: yarn install
+              run: yarn install && yarn run next telemetry disable
 
             - name: Build production site
               run: yarn build

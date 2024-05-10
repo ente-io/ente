@@ -27,7 +27,6 @@
         "dev:payments": "yarn workspace payments dev",
         "dev:photos": "yarn workspace photos next dev",
         "dev:staff": "yarn workspace staff dev",
-        "postinstall": "yarn run next telemetry disable",
         "lint": "yarn prettier --check --log-level warn . && yarn workspaces run eslint --report-unused-disable-directives .",
         "lint-fix": "yarn prettier --write --log-level warn . && yarn workspaces run eslint --fix .",
         "preview": "yarn preview:photos",

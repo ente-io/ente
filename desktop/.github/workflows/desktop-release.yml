@@ -46,7 +46,7 @@ jobs:
               run: yarn config set network-timeout 900000 -g
 
             - name: Install dependencies
-              run: yarn install
+              run: yarn install && yarn run next telemetry disable
 
             - name: Install libarchive-tools for pacman build
               if: startsWith(matrix.os, 'ubuntu')
