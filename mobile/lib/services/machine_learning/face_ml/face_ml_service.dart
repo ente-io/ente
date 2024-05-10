@@ -84,7 +84,7 @@ class FaceMlService {
 
   bool isInitialized = false;
   bool isImageIndexRunning = false;
-  int kParallelism = 15;
+  int kParallelism = 50;
 
   Future<void> init({bool initializeImageMlIsolate = false}) async {
     return _initLock.synchronized(() async {
@@ -578,27 +578,29 @@ class FaceMlService {
             rethrow;
           }
         }
-
-        for (final enteFile in chunk) {
-          if (isImageIndexRunning == false) {
-            _logger.info("indexAllImages() was paused, stopping");
-            break outerLoop;
+        final smallerChuncks = chunk.chunks(10);
+        for (final smallerChunck in smallerChuncks) {
+          for (final enteFile in smallerChunck) {
+            if (isImageIndexRunning == false) {
+              _logger.info("indexAllImages() was paused, stopping");
+              break outerLoop;
+            }
+            if (_skipAnalysisEnteFile(
+              enteFile,
+              alreadyIndexedFiles,
+            )) {
+              fileSkippedCount++;
+              continue;
+            }
+            futures.add(processImage(enteFile));
           }
-          if (_skipAnalysisEnteFile(
-            enteFile,
-            alreadyIndexedFiles,
-          )) {
-            fileSkippedCount++;
-            continue;
-          }
-          futures.add(processImage(enteFile));
+          final awaitedFutures = await Future.wait(futures);
+          final sumFutures = awaitedFutures.fold<int>(
+            0,
+            (previousValue, element) => previousValue + (element ? 1 : 0),
+          );
+          fileAnalyzedCount += sumFutures;
         }
-        final awaitedFutures = await Future.wait(futures);
-        final sumFutures = awaitedFutures.fold<int>(
-          0,
-          (previousValue, element) => previousValue + (element ? 1 : 0),
-        );
-        fileAnalyzedCount += sumFutures;
       }
 
       stopwatch.stop();
