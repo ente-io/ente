@@ -71,16 +71,9 @@ const PairingComplete: React.FC = () => {
     );
 };
 
-const Message: React.FC<React.PropsWithChildren> = ({ children }) => {
-    return (
-        <Message_>
-            <MessageItems>{children}</MessageItems>
-        </Message_>
-    );
-};
-
-const Message_ = styled("div")`
+const Message = styled("div")`
     display: flex;
+    flex-direction: column;
     height: 100%;
     justify-content: center;
     align-items: center;
@@ -90,13 +83,6 @@ const Message_ = styled("div")`
     h2 {
         margin-block-end: 0;
     }
-`;
-
-const MessageItems = styled("div")`
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
 `;
 
 const NoItems: React.FC = () => {
