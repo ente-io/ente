@@ -1,5 +1,5 @@
 import log from "@/next/log";
-import { withTimeout } from "@ente/shared/utils";
+import { withTimeout } from "@/utils/promise";
 import QueueProcessor from "@ente/shared/utils/queueProcessor";
 import { expose } from "comlink";
 import {
