@@ -96,7 +96,7 @@ export const imageURLGenerator = async function* (castData: CastData) {
     const previousURLs: string[] = [];
 
     /** Number of milliseconds to keep the slide on the screen. */
-    const slideDuration = 10000; /* 10 s */
+    const slideDuration = 12000; /* 12 s */
 
     /**
      * Time when we last yielded.
