@@ -1015,6 +1015,11 @@
   resolved "https://registry.yarnpkg.com/@types/geojson/-/geojson-7946.0.14.tgz#319b63ad6df705ee2a65a73ef042c8271e696613"
   integrity sha512-WCfD5Ht3ZesJUsONdhvm84dmzWOiOzOAqOncN0++w0lBw1o8OuDNJF2McvvCef/yBqb/HYRahp1BYtODFQ8bRg==
 
+"@types/heic-convert@^1.2.3":
+  version "1.2.3"
+  resolved "https://registry.yarnpkg.com/@types/heic-convert/-/heic-convert-1.2.3.tgz#0705f36e467e7b6180806edd0b3f1e673514ff8c"
+  integrity sha512-5LJ2fGuVk/gnOLihoT56xJwrXxfnNepGvrHwlW5ZtT3HS4jO1AqBaAHCxXUpnY9UaD3zYcyxXMRM2fNN1AFF/Q==
+
 "@types/hoist-non-react-statics@^3.3.1":
   version "3.3.5"
   resolved "https://registry.yarnpkg.com/@types/hoist-non-react-statics/-/hoist-non-react-statics-3.3.5.tgz#dab7867ef789d87e2b4b0003c9d65c49cc44a494"
@@ -2839,7 +2844,7 @@ hdbscan@0.0.1-alpha.5:
   dependencies:
     kd-tree-javascript "^1.0.3"
 
-heic-convert@^2.0.0:
+heic-convert@^2.1:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/heic-convert/-/heic-convert-2.1.0.tgz#7f764529e37591ae263ef49582d1d0c13491526e"
   integrity sha512-1qDuRvEHifTVAj3pFIgkqGgJIr0M3X7cxEPjEp0oG4mo8GFjq99DpCo8Eg3kg17Cy0MTjxpFdoBHOatj7ZVKtg==
@@ -3321,7 +3326,7 @@ libsodium-wrappers@0.7.9:
   dependencies:
     libsodium "^0.7.0"
 
-libsodium@0.7.9, libsodium@^0.7.0:
+libsodium@^0.7.0:
   version "0.7.9"
   resolved "https://registry.yarnpkg.com/libsodium/-/libsodium-0.7.9.tgz#4bb7bcbf662ddd920d8795c227ae25bbbfa3821b"
   integrity sha512-gfeADtR4D/CM0oRUviKBViMGXZDgnFdMKMzHsvBdqLBHd9ySi6EtYnmuhHVDDYgYpAO8eU8hEY+F8vIUAPh08A==

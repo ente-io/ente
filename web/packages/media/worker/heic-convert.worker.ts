@@ -7,7 +7,7 @@ export class DedicatedHEICConvertWorker {
     }
 }
 
-expose(DedicatedHEICConvertWorker, self);
+expose(DedicatedHEICConvertWorker);
 
 /**
  * Convert a HEIC file to a JPEG file.

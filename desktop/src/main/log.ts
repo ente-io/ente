@@ -62,7 +62,7 @@ const logError = (message: string, e?: unknown) => {
 
 const logError_ = (message: string) => {
     log.error(`[main] [error] ${message}`);
-    if (isDev) console.error(`[error] ${message}`);
+    console.error(`[error] ${message}`);
 };
 
 const logInfo = (...params: unknown[]) => {
@@ -96,8 +96,8 @@ export default {
      * any arbitrary object that we obtain, say, when in a try-catch handler (in
      * JavaScript any arbitrary value can be thrown).
      *
-     * The log is written to disk. In development builds, the log is also
-     * printed to the main (Node.js) process console.
+     * The log is written to disk and printed to the main (Node.js) process's
+     * console.
      */
     error: logError,
     /**
@@ -120,7 +120,7 @@ export default {
      * The function can return an arbitrary value which is serialized before
      * being logged.
      *
-     * This log is NOT written to disk. And it is printed to the main (Node.js)
+     * This log is NOT written to disk. It is printed to the main (Node.js)
      * process console, but only on development builds.
      */
     debug: logDebug,

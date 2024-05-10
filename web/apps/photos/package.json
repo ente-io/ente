@@ -23,7 +23,6 @@
         "ffmpeg-wasm": "file:./thirdparty/ffmpeg-wasm",
         "formik": "^2.1.5",
         "hdbscan": "0.0.1-alpha.5",
-        "heic-convert": "^2.0.0",
         "idb": "^7.1.1",
         "leaflet": "^1.9.4",
         "leaflet-defaulticon-compatibility": "^0.1.1",
