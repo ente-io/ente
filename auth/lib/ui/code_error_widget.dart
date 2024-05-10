@@ -1,6 +1,7 @@
 import 'package:ente_auth/ente_theme_data.dart';
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/services/update_service.dart';
+import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/common/gradient_button.dart';
 import 'package:ente_auth/ui/linear_progress_widget.dart';
 import 'package:ente_auth/ui/settings/app_update_dialog.dart';
@@ -12,6 +13,8 @@ class CodeErrorWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+
     return Container(
       height: 132,
       width: double.infinity,
@@ -30,10 +33,10 @@ class CodeErrorWidget extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(
+            SizedBox(
               height: 3,
               child: LinearProgressWidget(
-                color: Color(0xFFF53434),
+                color: colorScheme.errorCodeProgressColor,
                 fractionOfStorage: 1,
               ),
             ),
@@ -41,21 +44,21 @@ class CodeErrorWidget extends StatelessWidget {
             Row(
               children: [
                 const SizedBox(width: 8),
-                const Align(
+                Align(
                   alignment: Alignment.center,
                   child: Icon(
                     Icons.info,
                     size: 18,
-                    color: Color(0xFFF53434),
+                    color: colorScheme.infoIconColor,
                   ),
                 ),
                 const SizedBox(width: 8),
                 Text(
                   context.l10n.error,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFFF53434),
+                    color: colorScheme.errorCardTextColor,
                   ),
                 ),
               ],

@@ -12,6 +12,7 @@ import 'package:ente_auth/onboarding/view/view_qr_page.dart';
 import 'package:ente_auth/services/local_authentication_service.dart';
 import 'package:ente_auth/services/preference_service.dart';
 import 'package:ente_auth/store/code_store.dart';
+import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/code_timer_progress.dart';
 import 'package:ente_auth/ui/utils/icon_utils.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
@@ -47,6 +48,7 @@ class _CodeWidgetState extends State<CodeWidget> {
   late bool _shouldShowLargeIcon;
   late bool _hideCode;
   bool isMaskingEnabled = false;
+  late final colorScheme = getEnteColorScheme(context);
 
   @override
   void initState() {
@@ -205,7 +207,7 @@ class _CodeWidgetState extends State<CodeWidget> {
                   onPressed: _onDeletePressed,
                   backgroundColor: Colors.grey.withOpacity(0.1),
                   borderRadius: const BorderRadius.all(Radius.circular(8)),
-                  foregroundColor: const Color(0xFFFE4A49),
+                  foregroundColor: colorScheme.deleteCodeTextColor,
                   icon: Icons.delete,
                   label: l10n.delete,
                   padding: const EdgeInsets.only(left: 0, right: 0),
@@ -228,30 +230,7 @@ class _CodeWidgetState extends State<CodeWidget> {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8),
         color: Theme.of(context).colorScheme.codeCardBackgroundColor,
-        boxShadow: widget.code.isPinned
-            ? [
-                BoxShadow(
-                  color: const Color(0xFF000000).withOpacity(0.03),
-                  blurRadius: 2,
-                  offset: const Offset(0, 7),
-                ),
-                BoxShadow(
-                  color: const Color(0xFF000000).withOpacity(0.09),
-                  blurRadius: 2,
-                  offset: const Offset(0, 4),
-                ),
-                BoxShadow(
-                  color: const Color(0xFF000000).withOpacity(0.16),
-                  blurRadius: 1,
-                  offset: const Offset(0, 1),
-                ),
-                BoxShadow(
-                  color: const Color(0xFF000000).withOpacity(0.18),
-                  blurRadius: 1,
-                  offset: const Offset(0, 0),
-                ),
-              ]
-            : [],
+        boxShadow: widget.code.isPinned ? colorScheme.pinnedCardBoxShadow : [],
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(8),
@@ -291,9 +270,7 @@ class _CodeWidgetState extends State<CodeWidget> {
             alignment: Alignment.topRight,
             child: CustomPaint(
               painter: PinBgPainter(
-                color: Theme.of(context).brightness == Brightness.dark
-                    ? const Color(0xFF390C4F)
-                    : const Color(0xFFF9ECFF),
+                color: colorScheme.pinnedBgColor,
               ),
               size: const Size(39, 39),
             ),

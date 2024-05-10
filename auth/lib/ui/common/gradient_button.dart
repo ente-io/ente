@@ -1,3 +1,4 @@
+import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gradient_borders/box_borders/gradient_box_border.dart';
@@ -72,6 +73,8 @@ class _GradientButtonState extends State<GradientButton> {
         ],
       );
     }
+    final colorScheme = getEnteColorScheme(context);
+
     return InkWell(
       onTapDown: (_) {
         setState(() {
@@ -97,7 +100,7 @@ class _GradientButtonState extends State<GradientButton> {
             width: double.infinity,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(widget.borderRadius),
-              color: const Color(0xFF531DAB),
+              color: colorScheme.gradientButtonBgColor,
             ),
           ),
           if (!isTapped)
@@ -115,11 +118,8 @@ class _GradientButtonState extends State<GradientButton> {
             decoration: BoxDecoration(
               border: GradientBoxBorder(
                 width: widget.borderWidth,
-                gradient: const LinearGradient(
-                  colors: [
-                    Color(0xFFB37FEB),
-                    Color(0xFF22075E),
-                  ],
+                gradient: LinearGradient(
+                  colors: colorScheme.gradientButtonBgColors,
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),

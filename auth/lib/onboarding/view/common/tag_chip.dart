@@ -1,6 +1,7 @@
 import "package:ente_auth/l10n/l10n.dart";
 import "package:ente_auth/onboarding/model/tag_enums.dart";
 import "package:ente_auth/store/code_display_store.dart";
+import "package:ente_auth/theme/ente_theme.dart";
 import "package:flutter/material.dart";
 import "package:gradient_borders/box_borders/gradient_box_border.dart";
 
@@ -20,35 +21,21 @@ class TagChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
           color: state == TagChipState.selected
-              ? const Color(0xFF722ED1)
-              : Theme.of(context).brightness == Brightness.dark
-                  ? const Color(0xFF1C0F22)
-                  : const Color(0xFFFCF5FF),
+              ? colorScheme.tagChipSelectedColor
+              : colorScheme.tagChipUnselectedColor,
           borderRadius: BorderRadius.circular(100),
           border: GradientBoxBorder(
             gradient: LinearGradient(
               colors: state == TagChipState.selected
-                  ? [
-                      const Color(0xFFB37FEB),
-                      const Color(0xFFAE40E3).withOpacity(
-                        Theme.of(context).brightness == Brightness.dark
-                            ? .53
-                            : 1,
-                      ),
-                    ]
-                  : [
-                      Theme.of(context).brightness == Brightness.dark
-                          ? const Color(0xFFAD00FF)
-                          : const Color(0xFFAD00FF).withOpacity(0.2),
-                      Theme.of(context).brightness == Brightness.dark
-                          ? const Color(0xFFA269BD).withOpacity(0.53)
-                          : const Color(0xFF8609C2).withOpacity(0.2),
-                    ],
+                  ? colorScheme.tagChipSelectedGradient
+                  : colorScheme.tagChipUnselectedGradient,
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -66,7 +53,7 @@ class TagChip extends StatelessWidget {
                 color: state == TagChipState.selected ||
                         Theme.of(context).brightness == Brightness.dark
                     ? Colors.white
-                    : const Color(0xFF8232E1),
+                    : colorScheme.tagTextUnselectedColor,
               ),
             ),
             if (state == TagChipState.selected &&
@@ -114,16 +101,16 @@ class TagChip extends StatelessWidget {
                       PopupMenuItem(
                         child: Row(
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.delete_outline,
                               size: 16,
-                              color: Color(0xFFF53434),
+                              color: colorScheme.deleteTagIconColor,
                             ),
                             const SizedBox(width: 12),
                             Text(
                               context.l10n.delete,
-                              style: const TextStyle(
-                                color: Color(0xFFF53434),
+                              style: TextStyle(
+                                color: colorScheme.deleteTagTextColor,
                               ),
                             ),
                           ],

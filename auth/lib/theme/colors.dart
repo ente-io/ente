@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 
 class EnteColorScheme {
@@ -50,6 +48,28 @@ class EnteColorScheme {
 
   final Color caution500;
   final List<Color> avatarColors;
+
+  // Tags
+  final Color tagChipSelectedColor;
+  final Color tagChipUnselectedColor;
+  final List<Color> tagChipSelectedGradient;
+  final List<Color> tagChipUnselectedGradient;
+  final Color tagTextUnselectedColor;
+  final Color deleteTagIconColor;
+  final Color deleteTagTextColor;
+
+  // Code Widget
+  final Color errorCodeProgressColor;
+  final Color infoIconColor;
+  final Color errorCardTextColor;
+  final Color deleteCodeTextColor;
+  final List<BoxShadow> pinnedCardBoxShadow;
+  final Color pinnedBgColor;
+
+  // Gradient Button
+  final Color gradientButtonBgColor;
+  final List<Color> gradientButtonBgColors;
+
   const EnteColorScheme(
     this.backgroundBase,
     this.backgroundElevated,
@@ -73,7 +93,22 @@ class EnteColorScheme {
     this.blurStrokeFaint,
     this.blurStrokePressed,
     this.avatarColors,
-    this.iconButtonColor, {
+    this.iconButtonColor,
+    this.tagChipUnselectedColor,
+    this.tagChipSelectedGradient,
+    this.tagChipUnselectedGradient,
+    this.pinnedBgColor, {
+    this.tagChipSelectedColor = _tagChipSelectedColor,
+    this.tagTextUnselectedColor = _tagTextUnselectedColor,
+    this.deleteTagIconColor = _deleteTagIconColor,
+    this.deleteTagTextColor = _deleteTagTextColor,
+    this.errorCodeProgressColor = _errorCodeProgressColor,
+    this.infoIconColor = _infoIconColor,
+    this.errorCardTextColor = _errorCardTextColor,
+    this.deleteCodeTextColor = _deleteCodeTextColor,
+    this.pinnedCardBoxShadow = _pinnedCardBoxShadow,
+    this.gradientButtonBgColor = _gradientButtonBgColor,
+    this.gradientButtonBgColors = _gradientButtonBgColors,
     this.primaryGreen = _primaryGreen,
     this.primary700 = _primary700,
     this.primary500 = _primary500,
@@ -111,6 +146,10 @@ const EnteColorScheme lightScheme = EnteColorScheme(
   blurStrokePressedLight,
   avatarLight,
   _iconButtonBrightColor,
+  _tagChipUnselectedColorLight,
+  _tagChipSelectedGradientLight,
+  _tagChipUnselectedGradientLight,
+  _pinnedBgColorLight,
 );
 
 const EnteColorScheme darkScheme = EnteColorScheme(
@@ -137,6 +176,10 @@ const EnteColorScheme darkScheme = EnteColorScheme(
   blurStrokePressedDark,
   avatarDark,
   _iconButtonDarkColor,
+  _tagChipUnselectedColorDark,
+  _tagChipSelectedGradientDark,
+  _tagChipUnselectedGradientDark,
+  _pinnedBgColorDark,
 );
 
 // Background Colors
@@ -267,4 +310,65 @@ const List<Color> avatarDark = [
   Color.fromRGBO(233, 154, 173, 1),
   Color.fromRGBO(209, 132, 132, 1),
   Color.fromRGBO(120, 181, 167, 1),
+];
+
+// Tags
+const Color _tagChipUnselectedColorLight = Color(0xFFFCF5FF);
+const Color _tagChipUnselectedColorDark = Color(0xFF1C0F22);
+const List<Color> _tagChipUnselectedGradientLight = [
+  Color(0x33AD00FF),
+  Color(0x338609C2),
+];
+const List<Color> _tagChipUnselectedGradientDark = [
+  Color(0xFFAD00FF),
+  Color(0x87A269BD),
+];
+const Color _tagChipSelectedColor = Color(0xFF722ED1);
+const List<Color> _tagChipSelectedGradientLight = [
+  Color(0xFFB37FEB),
+  Color(0xFFAE40E3),
+];
+const List<Color> _tagChipSelectedGradientDark = [
+  Color(0xFFB37FEB),
+  Color(0x87AE40E3),
+];
+const Color _tagTextUnselectedColor = Color(0xFF8232E1);
+const Color _deleteTagIconColor = Color(0xFFF53434);
+const Color _deleteTagTextColor = Color(0xFFF53434);
+
+// Code Widget
+const Color _pinnedBgColorLight = Color(0xFFF9ECFF);
+const Color _pinnedBgColorDark = Color(0xFF390C4F);
+const Color _errorCodeProgressColor = Color(0xFFF53434);
+const Color _infoIconColor = Color(0xFFF53434);
+const Color _errorCardTextColor = Color(0xFFF53434);
+const Color _deleteCodeTextColor = Color(0xFFFE4A49);
+const List<BoxShadow> _pinnedCardBoxShadow = [
+  BoxShadow(
+    color: Color(0x08000000),
+    blurRadius: 2,
+    offset: Offset(0, 7),
+  ),
+  BoxShadow(
+    color: Color(0x17000000),
+    blurRadius: 2,
+    offset: Offset(0, 4),
+  ),
+  BoxShadow(
+    color: Color(0x29000000),
+    blurRadius: 1,
+    offset: Offset(0, 1),
+  ),
+  BoxShadow(
+    color: Color(0x2E000000),
+    blurRadius: 1,
+    offset: Offset(0, 0),
+  ),
+];
+
+// Gradient Button
+const Color _gradientButtonBgColor = Color(0xFF531DAB);
+const List<Color> _gradientButtonBgColors = [
+  Color(0xFFB37FEB),
+  Color(0xFF22075E),
 ];
