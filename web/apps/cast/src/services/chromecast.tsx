@@ -32,6 +32,10 @@ class CastReceiver {
      */
     haveStarted = false;
     /**
+     * Cached result of the isChromecast test.
+     */
+    isChromecast: boolean | undefined;
+    /**
      * A callback to invoke to get the pairing code when we get a new incoming
      * pairing request.
      */
@@ -200,4 +204,24 @@ const advertiseCode = (cast: Cast) => {
 
     // Start listening for Chromecast connections.
     context.start(options);
+};
+
+/**
+ * Return true if we're running on a Chromecast device.
+ *
+ * This allows changing our app's behaviour when we're running on Chromecast.
+ * Such checks are needed because during our testing we found that in practice,
+ * some processing is too heavy for Chromecast hardware (we tested with a 2nd
+ * gen device, this might not be true for newer variants).
+ *
+ * This variable is lazily updated when we enter {@link renderableImageURLs}. It
+ * is kept at the top level to avoid passing it around.
+ */
+export const isChromecast = () => {
+    let result = castReceiver.isChromecast;
+    if (result === undefined) {
+        result = window.navigator.userAgent.includes("CrKey");
+        castReceiver.isChromecast = result;
+    }
+    return result;
 };

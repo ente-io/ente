@@ -27,31 +27,7 @@ import {
     FileMagicMetadata,
     FilePublicMagicMetadata,
 } from "types/file";
-
-/**
- * Change the behaviour when we're running on Chromecast.
- *
- * The Chromecast device fails to load the images if we give it too large
- * images. The documentation states:
- *
- * > Images have a display size limitation of 720p (1280x720). Images should be
- * > optimized to 1280x720 or less to avoid scaling down on the receiver device.
- * >
- * > https://developers.google.com/cast/docs/media
- *
- * When testing with Chromecast device (2nd gen, this might not be true for
- * newer variants), in practice we found that even this is iffy, likely because
- * in our case we also need to decrypt the E2EE data.
- *
- * So we have different codepaths when running on a Chromecast hardware.
- *
- * Also, to detect if we're running on a Chromecast, a user-agent check is the
- * only way. See: https://issuetracker.google.com/issues/36189456.
- *
- * This variable is lazily updated when we enter {@link renderableImageURLs}. It
- * is kept at the top level to avoid passing it around.
- */
-// let isChromecast = false;
+import { isChromecast } from "./chromecast";
 
 /**
  * If we're using HEIC conversion, then this variable caches the comlink web
@@ -119,8 +95,6 @@ export const imageURLGenerator = async function* (castData: CastData) {
      */
     let consecutiveFailures = 0;
 
-    // isChromecast = window.navigator.userAgent.includes("CrKey");
-
     while (true) {
         const encryptedFiles = shuffled(
             await getEncryptedCollectionFiles(castToken),
@@ -166,8 +140,8 @@ export const imageURLGenerator = async function* (castData: CastData) {
             //
             // The last to last element is the one that was shown prior to that,
             // and now can be safely revoked.
-            // if (previousURLs.length > 1)
-                // URL.revokeObjectURL(previousURLs.shift());
+            if (previousURLs.length > 1)
+                URL.revokeObjectURL(previousURLs.shift());
 
             previousURLs.push(url);
 
@@ -318,7 +292,7 @@ export const heicToJPEG = async (heicBlob: Blob) => {
  */
 const createRenderableURL = async (castToken: string, file: EnteFile) => {
     const imageBlob = await renderableImageBlob(castToken, file);
-    const resizedBlob = needsResize() ? await resize(imageBlob) : imageBlob;
+    const resizedBlob = needsResize(file) ? await resize(imageBlob) : imageBlob;
     return URL.createObjectURL(resizedBlob);
 };
 
@@ -353,7 +327,8 @@ const downloadFile = async (castToken: string, file: EnteFile) => {
     if (!isImageOrLivePhoto(file))
         throw new Error("Can only cast images and live photos");
 
-    const shouldUseThumbnail = true;
+    // TODO(MR):
+    const shouldUseThumbnail = false;
 
     const url = shouldUseThumbnail
         ? getCastThumbnailURL(file.id)
@@ -384,11 +359,6 @@ const downloadFile = async (castToken: string, file: EnteFile) => {
 /**
  * [Note: Chromecast media size limits]
  *
- * The Chromecast device fails to load the images if we give it too large
- * images. This was tested in practice with a 2nd Gen Chromecast.
- *
- * The documentation also states:
- *
  * > Images have a display size limitation of 720p (1280x720). Images should be
  * > optimized to 1280x720 or less to avoid scaling down on the receiver device.
  * >
@@ -397,15 +367,16 @@ const downloadFile = async (castToken: string, file: EnteFile) => {
  * So if the size of the image we're wanting to show is more than these limits,
  * resize it down to a JPEG whose size is clamped to these limits.
  */
-const needsResize = () => {
-    //file: EnteFile) => {
-    return false; /*
+const needsResize = (file: EnteFile) => {
+    // Resize only when running on Chromecast devices.
+    if (!isChromecast()) return false;
+
     const w = file.pubMagicMetadata?.data?.w;
     const h = file.pubMagicMetadata?.data?.h;
     // If we don't have the size, always resize to be on the safer side.
     if (!w || !h) return true;
     // Otherwise resize if any of the dimensions is outside the recommendation.
-    return Math.max(w, h) > 1280 || Math.min(w, h) > 720;*/
+    return Math.max(w, h) > 1280 || Math.min(w, h) > 720;
 };
 
 const resize = async (blob: Blob): Promise<Blob> => {

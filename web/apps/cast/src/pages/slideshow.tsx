@@ -2,10 +2,10 @@ import log from "@/next/log";
 import { ensure } from "@/utils/ensure";
 import { styled } from "@mui/material";
 import { FilledCircleCheck } from "components/FilledCircleCheck";
-import { SlideView } from "components/Slide";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { readCastData } from "services/cast-data";
+import { isChromecast } from "services/chromecast";
 import { imageURLGenerator } from "services/render";
 
 export default function Slideshow() {
@@ -55,7 +55,11 @@ export default function Slideshow() {
     if (loading) return <PairingComplete />;
     if (isEmpty) return <NoItems />;
 
-    return <SlideView url={imageURL} />;
+    return isChromecast() ? (
+        <SlideViewChromecast url={imageURL} />
+    ) : (
+        <SlideView url={imageURL} />
+    );
 }
 
 const PairingComplete: React.FC = () => {
@@ -97,3 +101,97 @@ const NoItems: React.FC = () => {
         </Message>
     );
 };
+
+interface SlideViewProps {
+    /** The URL of the image to show. */
+    url: string;
+}
+
+const SlideView: React.FC<SlideViewProps> = ({ url }) => {
+    return (
+        <SlideView_ style={{ backgroundImage: `url(${url})` }}>
+            <img src={url} decoding="sync" alt="" />
+        </SlideView_>
+    );
+};
+
+const SlideView_ = styled("div")`
+    width: 100%;
+    height: 100%;
+
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-blend-mode: multiply;
+    background-color: rgba(0, 0, 0, 0.5);
+
+    /* Smooth out the transition a bit.
+     *
+     * For the img itself, we set decoding="sync" to have it switch seamlessly.
+     * But there does not seem to be a way of setting decoding sync for the
+     * background image, and for large (multi-MB) images the background image
+     * switch is still visually non-atomic.
+     *
+     * As a workaround, add a long transition so that the background image
+     * transitions in a more "fade-to" manner. This effect might or might not be
+     * visually the best though.
+     *
+     * Does not work in Firefox, but that's fine, this is only a slight tweak,
+     * not a functional requirement.
+     */
+    transition: all 2s;
+
+    img {
+        width: 100%;
+        height: 100%;
+        backdrop-filter: blur(10px);
+        object-fit: contain;
+    }
+`;
+
+/**
+ * Variant of {@link SlideView} for use when we're running on Chromecast.
+ *
+ * Chromecast devices have trouble with
+ *
+ *     backdrop-filter: blur(10px);
+ *
+ * So emulate a cheaper approximation for use on Chromecast.
+ */
+const SlideViewChromecast: React.FC<SlideViewProps> = ({ url }) => {
+    return (
+        <SlideViewChromecast_>
+            <img className="svc-bg" src={url} alt="" />
+            <img className="svc-content" src={url} decoding="sync" alt="" />
+        </SlideViewChromecast_>
+    );
+};
+
+const SlideViewChromecast_ = styled("div")`
+    width: 100%;
+    height: 100%;
+
+    /* We can't set opacity of background-image, so use a wrapper */
+    position: relative;
+    overflow: hidden;
+
+    img.svg-bg {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+
+        opacity: 0.2;
+        background-blend-mode: multiply;
+        background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    img.svc-content {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
+`;

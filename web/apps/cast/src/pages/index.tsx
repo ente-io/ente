@@ -6,7 +6,7 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { readCastData, storeCastData } from "services/cast-data";
 import { getCastData, register } from "services/pair";
-import { advertiseOnChromecast } from "../services/cast-receiver";
+import { advertiseOnChromecast } from "../services/chromecast";
 
 export default function Index() {
     const [publicKeyB64, setPublicKeyB64] = useState<string | undefined>();
