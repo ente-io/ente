@@ -1,4 +1,4 @@
-name: "Internal Release - Photos"
+name: "Internal release (photos)"
 
 on:
     workflow_dispatch: # Allow manually running the action
