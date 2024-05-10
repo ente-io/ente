@@ -298,9 +298,15 @@ const createRenderableURL = async (castToken: string, file: EnteFile) => {
 
 const renderableImageBlob = async (castToken: string, file: EnteFile) => {
     let fileName = file.metadata.title;
-    let blob = await downloadFile(castToken, file);
 
-    if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
+    // Chromecast devices (at least the 2nd gen one) is not powerful enough to
+    // do the WASM HEIC conversion, so for such files use their thumbnails
+    // instead. Nb: the check is using the filename and might not be accurate.
+    const shouldUseThumbnail = isChromecast() && isHEICExtension(fileName);
+
+    let blob = await downloadFile(castToken, file, shouldUseThumbnail);
+
+    if (!shouldUseThumbnail && file.metadata.fileType == FILE_TYPE.LIVE_PHOTO) {
         const { imageData, imageFileName } = await decodeLivePhoto(
             fileName,
             blob,
@@ -316,22 +322,19 @@ const renderableImageBlob = async (castToken: string, file: EnteFile) => {
     if (!mimeType)
         throw new Error(`Could not detect MIME type for file ${fileName}`);
 
-    if (!isChromecast()) {
-        if (mimeType == "image/heif" || mimeType == "image/heic") {
-            blob = await heicToJPEG(blob);
-        }
-    }
+    if (mimeType == "image/heif" || mimeType == "image/heic")
+        blob = await heicToJPEG(blob);
 
     return new Blob([blob], { type: mimeType });
 };
 
-const downloadFile = async (castToken: string, file: EnteFile) => {
-    const fileName = file.metadata.title;
-
+const downloadFile = async (
+    castToken: string,
+    file: EnteFile,
+    shouldUseThumbnail: boolean,
+) => {
     if (!isImageOrLivePhoto(file))
         throw new Error("Can only cast images and live photos");
-
-    const shouldUseThumbnail = isChromecast() && isHEICExtension(fileName);
 
     const url = shouldUseThumbnail
         ? getCastThumbnailURL(file.id)

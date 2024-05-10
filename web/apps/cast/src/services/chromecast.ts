@@ -218,10 +218,10 @@ const advertiseCode = (cast: Cast) => {
  * is kept at the top level to avoid passing it around.
  */
 export const isChromecast = () => {
-    let result = castReceiver.isChromecast;
-    if (result === undefined) {
-        result = window.navigator.userAgent.includes("CrKey");
-        castReceiver.isChromecast = result;
+    let isCast = castReceiver.isChromecast;
+    if (isCast === undefined) {
+        isCast = window.navigator.userAgent.includes("CrKey");
+        castReceiver.isChromecast = isCast;
     }
-    return result;
+    return isCast;
 };
