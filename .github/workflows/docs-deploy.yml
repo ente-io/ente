@@ -37,11 +37,8 @@ jobs:
               run: yarn build
 
             - name: Publish
-              uses: cloudflare/pages-action@1
+              uses: cloudflare/wrangler-action@v3
               with:
                   accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
                   apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-                  projectName: ente
-                  branch: help
-                  directory: docs/docs/.vitepress/dist
-                  wranglerVersion: "3"
+                  command: pages deploy --project-name=ente --branch=help docs/docs/.vitepress/dist
