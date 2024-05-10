@@ -43,11 +43,19 @@ jobs:
               run: yarn build:${{ inputs.app }}
 
             - name: Publish ${{ inputs.app }} to preview
-              uses: cloudflare/pages-action@1
+              uses: cloudflare/wrangler-action@v3
               with:
                   accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
                   apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-                  projectName: ente
-                  branch: deploy/${{ inputs.app }}
-                  directory: web/apps/${{ inputs.app }}/out
-                  wranglerVersion: "3"
+                  # [Note: Wrangler commit-dirty]
+                  #
+                  # Without the --commit-dirty flag, running the wrangler-action
+                  # always prints a warning when used:
+                  #
+                  #     Warning: Your working directory is a git repo and has uncommitted changes
+                  #     To silence this warning, pass in --commit-dirty=true
+                  #
+                  # There is no clear documentation of if passing this is
+                  # harmless, but all indications and in-practice tests seem to
+                  # indicate so.
+                  command: pages deploy --project-name=ente --commit-dirty=true --branch=deploy/${{ inputs.app }} web/apps/${{ inputs.app }}/out

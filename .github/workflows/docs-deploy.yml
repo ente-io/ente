@@ -41,15 +41,4 @@ jobs:
               with:
                   accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
                   apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-                  # [Note: Wrangler commit-dirty]
-                  #
-                  # Without the --commit-dirty flag, running the wrangler-action
-                  # always prints a warning when used:
-                  #
-                  #     Warning: Your working directory is a git repo and has uncommitted changes
-                  #     To silence this warning, pass in --commit-dirty=true
-                  #
-                  # There is no clear documentation of if passing this is
-                  # harmless, but all indications and in-practice tests seem to
-                  # indicate so.
-                  command: pages deploy --project-name=ente --branch=help --commit-dirty=true docs/docs/.vitepress/dist
+                  command: pages deploy --project-name=ente --commit-dirty=true --branch=help docs/docs/.vitepress/dist

@@ -47,63 +47,48 @@ jobs:
               run: yarn build:photos
 
             - name: Publish photos
-              uses: cloudflare/pages-action@1
+              uses: cloudflare/wrangler-action@v3
               with:
                   accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
                   apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-                  projectName: ente
-                  branch: deploy/photos
-                  directory: web/apps/photos/out
-                  wranglerVersion: "3"
+                  command: pages deploy --project-name=ente --commit-dirty=true --branch=deploy/photos web/apps/photos/out
 
             - name: Build accounts
               run: yarn build:accounts
 
             - name: Publish accounts
-              uses: cloudflare/pages-action@1
+              uses: cloudflare/wrangler-action@v3
               with:
                   accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
                   apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-                  projectName: ente
-                  branch: deploy/accounts
-                  directory: web/apps/accounts/out
-                  wranglerVersion: "3"
+                  command: pages deploy --project-name=ente --commit-dirty=true --branch=deploy/accounts web/apps/accounts/out
 
             - name: Build auth
               run: yarn build:auth
 
             - name: Publish auth
-              uses: cloudflare/pages-action@1
+              uses: cloudflare/wrangler-action@v3
               with:
                   accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
                   apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-                  projectName: ente
-                  branch: deploy/auth
-                  directory: web/apps/auth/out
-                  wranglerVersion: "3"
+                  command: pages deploy --project-name=ente --commit-dirty=true --branch=deploy/auth web/apps/auth/out
 
             - name: Build cast
               run: yarn build:cast
 
             - name: Publish cast
-              uses: cloudflare/pages-action@1
+              uses: cloudflare/wrangler-action@v3
               with:
                   accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
                   apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-                  projectName: ente
-                  branch: deploy/cast
-                  directory: web/apps/cast/out
-                  wranglerVersion: "3"
+                  command: pages deploy --project-name=ente --commit-dirty=true --branch=deploy/cast web/apps/cast/out
 
             - name: Build payments
               run: yarn build:payments
 
             - name: Publish payments
-              uses: cloudflare/pages-action@1
+              uses: cloudflare/wrangler-action@v3
               with:
                   accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
                   apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-                  projectName: ente
-                  branch: deploy/payments
-                  directory: web/apps/payments/dist
-                  wranglerVersion: "3"
+                  command: pages deploy --project-name=ente --commit-dirty=true --branch=deploy/payments web/apps/payments/dist
