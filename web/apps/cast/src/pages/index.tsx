@@ -46,7 +46,6 @@ export default function Index() {
                 return;
             }
 
-            log.info("Pairing complete");
             storeCastData(data);
             await router.push("/slideshow");
         } catch (e) {
