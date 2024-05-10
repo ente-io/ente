@@ -45,13 +45,13 @@ const messageWithError = (message: string, e?: unknown) => {
 
 const logError = (message: string, e?: unknown) => {
     const m = `[error] ${messageWithError(message, e)}`;
-    if (isDevBuild) console.error(m);
+    console.error(m);
     logToDisk(m);
 };
 
 const logWarn = (message: string, e?: unknown) => {
     const m = `[warn] ${messageWithError(message, e)}`;
-    if (isDevBuild) console.error(m);
+    console.error(m);
     logToDisk(m);
 };
 
@@ -89,8 +89,7 @@ export default {
      * any arbitrary object that we obtain, say, when in a try-catch handler (in
      * JavaScript any arbitrary value can be thrown).
      *
-     * The log is written to disk. In development builds, the log is also
-     * printed to the browser console.
+     * The log is written to disk and printed to the browser console.
      */
     error: logError,
     /**
@@ -118,8 +117,8 @@ export default {
      * The function can return an arbitrary value which is serialized before
      * being logged.
      *
-     * This log is NOT written to disk. And it is printed to the browser
-     * console, but only in development builds.
+     * This log is NOT written to disk. It is printed to the browser console,
+     * but only in development builds.
      */
     debug: logDebug,
 };
