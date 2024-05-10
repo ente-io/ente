@@ -43,11 +43,8 @@ jobs:
               run: yarn build:${{ inputs.app }}
 
             - name: Publish ${{ inputs.app }} to preview
-              uses: cloudflare/pages-action@1
+              uses: cloudflare/wrangler-action@v3
               with:
                   accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
                   apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-                  projectName: ente
-                  branch: preview
-                  directory: web/apps/${{ inputs.app }}/out
-                  wranglerVersion: "3"
+                  command: pages deploy --project-name=ente --commit-dirty=true --branch=preview web/apps/${{ inputs.app }}/out

@@ -52,4 +52,4 @@ jobs:
                   # There is no clear documentation of if passing this is
                   # harmless, but all indications and in-practice tests seem to
                   # indicate so.
-                  command: pages deploy --project-name=ente --branch=help --commit-dirty=true docs/docs/.vitepress/dist
+                  command: pages deploy --project-name=ente --commit-dirty=true --branch=help docs/docs/.vitepress/dist
