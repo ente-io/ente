@@ -13,8 +13,8 @@ interface SlideViewProps {
  */
 export const SlideView: React.FC<SlideViewProps> = ({ url }) => {
     return (
-        <Container>
-            <img src={url} alt="" />
+        <Container style={{ backgroundImage: `url(${url})` }}>
+            <img src={url} decoding="sync" alt="" />
         </Container>
     );
 };
@@ -23,13 +23,12 @@ const Container = styled("div")`
     width: 100%;
     height: 100%;
 
-    /*
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
     background-blend-mode: multiply;
     background-color: rgba(0, 0, 0, 0.5);
-    */
+    opacity: 0.2;
 
     /* Smooth out the transition a bit.
      *
@@ -50,7 +49,7 @@ const Container = styled("div")`
     img {
         width: 100%;
         height: 100%;
-        backdrop-filter: blur(10px);
+        /* backdrop-filter: blur(10px); */
         object-fit: contain;
     }
 `;
