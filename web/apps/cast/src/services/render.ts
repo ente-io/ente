@@ -302,7 +302,8 @@ const renderableImageBlob = async (castToken: string, file: EnteFile) => {
     // Chromecast devices (at least the 2nd gen one) is not powerful enough to
     // do the WASM HEIC conversion, so for such files use their thumbnails
     // instead. Nb: the check is using the filename and might not be accurate.
-    const shouldUseThumbnail = isChromecast() && isHEICExtension(fileName);
+    const [, ext] = nameAndExtension(fileName);
+    const shouldUseThumbnail = isChromecast() && isHEICExtension(ext);
 
     let blob = await downloadFile(castToken, file, shouldUseThumbnail);
 
