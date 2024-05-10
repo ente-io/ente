@@ -257,15 +257,6 @@ class Code {
     throw UnsupportedError("Unsupported format with host ${uri.host}");
   }
 
-  String get rawDataWithoutDisplay {
-    return jsonEncode(
-      Uri.parse(
-        "$rawData&codeDisplay="
-        "${jsonEncode(display.toJson())}",
-      ).toString(),
-    );
-  }
-
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;

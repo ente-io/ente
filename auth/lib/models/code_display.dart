@@ -56,7 +56,8 @@ class CodeDisplay {
 
   static CodeDisplay? fromUri(Uri uri) {
     if (!uri.queryParameters.containsKey("codeDisplay")) return null;
-    final String codeDisplay = uri.queryParameters['codeDisplay']!;
+    final String codeDisplay =
+        uri.queryParameters['codeDisplay']!.replaceAll('%2C', ',');
     final decodedDisplay = jsonDecode(codeDisplay);
 
     return CodeDisplay.fromJson(decodedDisplay);

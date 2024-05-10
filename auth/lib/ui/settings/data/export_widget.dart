@@ -175,7 +175,7 @@ Future<String> _getAuthDataForExport() async {
   String data = "";
   for (final code in allCodes) {
     if (code.hasError) continue;
-    data += "${code.rawDataWithoutDisplay}\n";
+    data += "${code.rawData.replaceAll(',', '%2C')}\n";
   }
 
   return data;
