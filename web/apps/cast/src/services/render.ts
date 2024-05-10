@@ -316,19 +316,22 @@ const renderableImageBlob = async (castToken: string, file: EnteFile) => {
     if (!mimeType)
         throw new Error(`Could not detect MIME type for file ${fileName}`);
 
-    if (mimeType == "image/heif" || mimeType == "image/heic") {
-        blob = await heicToJPEG(blob);
+    if (!isChromecast()) {
+        if (mimeType == "image/heif" || mimeType == "image/heic") {
+            blob = await heicToJPEG(blob);
+        }
     }
 
     return new Blob([blob], { type: mimeType });
 };
 
 const downloadFile = async (castToken: string, file: EnteFile) => {
+    const fileName = file.metadata.title;
+
     if (!isImageOrLivePhoto(file))
         throw new Error("Can only cast images and live photos");
 
-    // TODO(MR):
-    const shouldUseThumbnail = false;
+    const shouldUseThumbnail = isChromecast() && isHEICExtension(fileName);
 
     const url = shouldUseThumbnail
         ? getCastThumbnailURL(file.id)
