@@ -1,19 +1,12 @@
 ---
-title: Archive
-description: |
-    Archiving photos and albums in Ente Photos to remove them from your home
-    timeline
+title: Cast
+description: Casting your photos on to a large screen or a TV or a Chromecast device
 ---
-
-> [!CAUTION]
->
-> This is preview documentation for an upcoming feature. This feature has not
-> yet been released yet, so the steps below will not work currently.
 
 # Cast
 
 With Ente Cast, you can play a slideshow of your favourite albums on your Google
-Chromecast TVs or other Internet-connected large screen devices.
+Chromecast TVs or any other internet-connected large screen devices.
 
 ## Get Started
 
