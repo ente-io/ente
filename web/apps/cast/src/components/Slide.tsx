@@ -45,6 +45,7 @@ export const SlideView: React.FC<SlideViewProps> = ({ url, nextURL }) => {
                 />
                 <img
                     src={url}
+                    decoding="sync"
                     style={{
                         maxWidth: "100%",
                         maxHeight: "100%",
