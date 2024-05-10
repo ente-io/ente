@@ -13,8 +13,8 @@ interface SlideViewProps {
  */
 export const SlideView: React.FC<SlideViewProps> = ({ url }) => {
     return (
-        <Container style={{ backgroundImage: `url(${url})` }}>
-            <img src={url} decoding="sync" alt="" />
+        <Container>
+            <img src={url} alt="" />
         </Container>
     );
 };
@@ -23,11 +23,13 @@ const Container = styled("div")`
     width: 100%;
     height: 100%;
 
+    /*
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
     background-blend-mode: multiply;
     background-color: rgba(0, 0, 0, 0.5);
+    */
 
     /* Smooth out the transition a bit.
      *
@@ -43,7 +45,7 @@ const Container = styled("div")`
      * Does not work in Firefox, but that's fine, this is only a slight tweak,
      * not a functional requirement.
      */
-    transition: all 2s;
+    /* transition: all 2s; */
 
     img {
         width: 100%;

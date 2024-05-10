@@ -51,7 +51,7 @@ import {
  * This variable is lazily updated when we enter {@link renderableImageURLs}. It
  * is kept at the top level to avoid passing it around.
  */
-let isChromecast = false;
+// let isChromecast = false;
 
 /**
  * If we're using HEIC conversion, then this variable caches the comlink web
@@ -119,7 +119,7 @@ export const imageURLGenerator = async function* (castData: CastData) {
      */
     let consecutiveFailures = 0;
 
-    isChromecast = window.navigator.userAgent.includes("CrKey");
+    // isChromecast = window.navigator.userAgent.includes("CrKey");
 
     while (true) {
         const encryptedFiles = shuffled(
@@ -166,8 +166,8 @@ export const imageURLGenerator = async function* (castData: CastData) {
             //
             // The last to last element is the one that was shown prior to that,
             // and now can be safely revoked.
-            if (previousURLs.length > 1)
-                URL.revokeObjectURL(previousURLs.shift());
+            // if (previousURLs.length > 1)
+                // URL.revokeObjectURL(previousURLs.shift());
 
             previousURLs.push(url);
 
@@ -353,7 +353,7 @@ const downloadFile = async (castToken: string, file: EnteFile) => {
     if (!isImageOrLivePhoto(file))
         throw new Error("Can only cast images and live photos");
 
-    const shouldUseThumbnail = isChromecast;
+    const shouldUseThumbnail = true;
 
     const url = shouldUseThumbnail
         ? getCastThumbnailURL(file.id)
