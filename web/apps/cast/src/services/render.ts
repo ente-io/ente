@@ -133,7 +133,7 @@ export const imageURLGenerator = async function* (castData: CastData) {
 
             if (!isFileEligible(file)) continue;
 
-            console.log("will start createRenderableURL", new Date());
+            console.log("will start createRenderableURL", new Date(), file);
             let url: string;
             try {
                 url = await createRenderableURL(castToken, file);

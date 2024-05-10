@@ -77,6 +77,7 @@ const Message = styled("div")`
     height: 100%;
     justify-content: center;
     align-items: center;
+    text-align: center;
 
     line-height: 1.5rem;
 
