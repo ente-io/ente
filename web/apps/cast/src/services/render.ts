@@ -1,6 +1,5 @@
 import { FILE_TYPE } from "@/media/file-type";
 import { isHEICExtension, isNonWebImageFileExtension } from "@/media/formats";
-import { scaledImageDimensions } from "@/media/image";
 import { decodeLivePhoto } from "@/media/live-photo";
 import { createHEICConvertComlinkWorker } from "@/media/worker/heic-convert";
 import type { DedicatedHEICConvertWorker } from "@/media/worker/heic-convert.worker";
@@ -8,7 +7,6 @@ import { nameAndExtension } from "@/next/file";
 import log from "@/next/log";
 import type { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { shuffled } from "@/utils/array";
-import { ensure } from "@/utils/ensure";
 import { wait } from "@/utils/promise";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { ApiError } from "@ente/shared/error";
@@ -292,21 +290,15 @@ export const heicToJPEG = async (heicBlob: Blob) => {
  */
 const createRenderableURL = async (castToken: string, file: EnteFile) => {
     const imageBlob = await renderableImageBlob(castToken, file);
-    const resizedBlob = needsResize(file) ? await resize(imageBlob) : imageBlob;
-    return URL.createObjectURL(resizedBlob);
+    return URL.createObjectURL(imageBlob);
 };
 
 const renderableImageBlob = async (castToken: string, file: EnteFile) => {
-    let fileName = file.metadata.title;
-
-    // Chromecast devices (at least the 2nd gen one) is not powerful enough to
-    // do the WASM HEIC conversion, so for such files use their thumbnails
-    // instead. Nb: the check is using the filename and might not be accurate.
-    const [, ext] = nameAndExtension(fileName);
-    const shouldUseThumbnail = isChromecast() && isHEICExtension(ext);
+    const shouldUseThumbnail = isChromecast();
 
     let blob = await downloadFile(castToken, file, shouldUseThumbnail);
 
+    let fileName = file.metadata.title;
     if (!shouldUseThumbnail && file.metadata.fileType == FILE_TYPE.LIVE_PHOTO) {
         const { imageData, imageFileName } = await decodeLivePhoto(
             fileName,
@@ -361,59 +353,4 @@ const downloadFile = async (
         file.key,
     );
     return new Response(decrypted).blob();
-};
-
-/**
- * [Note: Chromecast media size limits]
- *
- * > Images have a display size limitation of 720p (1280x720). Images should be
- * > optimized to 1280x720 or less to avoid scaling down on the receiver device.
- * >
- * > https://developers.google.com/cast/docs/media
- *
- * So if the size of the image we're wanting to show is more than these limits,
- * resize it down to a JPEG whose size is clamped to these limits.
- */
-const needsResize = (file: EnteFile) => {
-    // Resize only when running on Chromecast devices.
-    if (!isChromecast()) return false;
-
-    const w = file.pubMagicMetadata?.data?.w;
-    const h = file.pubMagicMetadata?.data?.h;
-    // If we don't have the size, always resize to be on the safer side.
-    if (!w || !h) return true;
-    // Otherwise resize if any of the dimensions is outside the recommendation.
-    return Math.max(w, h) > 1280 || Math.min(w, h) > 720;
-};
-
-const resize = async (blob: Blob): Promise<Blob> => {
-    const canvas = document.createElement("canvas");
-    const canvasCtx = ensure(canvas.getContext("2d"));
-
-    return await new Promise((resolve, reject) => {
-        const imageURL = URL.createObjectURL(blob);
-        const image = new Image();
-        image.setAttribute("src", imageURL);
-        image.onload = () => {
-            try {
-                URL.revokeObjectURL(imageURL);
-                const { width, height } = scaledImageDimensions(
-                    image.width,
-                    image.height,
-                    1280,
-                );
-                console.log("resizing image", { image, width, height });
-                canvas.width = width;
-                canvas.height = height;
-                canvasCtx.drawImage(image, 0, 0, width, height);
-                canvas.toBlob(
-                    (blob) => resolve(ensure(blob)),
-                    "image/jpeg",
-                    0.8 /* quality */,
-                );
-            } catch (e: unknown) {
-                reject(e);
-            }
-        };
-    });
 };
