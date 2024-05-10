@@ -85,7 +85,8 @@ class FaceMlService {
 
   bool isInitialized = false;
   bool isImageIndexRunning = false;
-  int kParallelism = 50;
+  final int _parallelism = 10;
+  final int _remoteFetchLimit = 100;
 
   Future<void> init({bool initializeImageMlIsolate = false}) async {
     return _initLock.synchronized(() async {
@@ -526,7 +527,8 @@ class FaceMlService {
       final sortedBylocalID = <EnteFile>[];
       sortedBylocalID.addAll(filesWithLocalID);
       sortedBylocalID.addAll(filesWithoutLocalID);
-      final List<List<EnteFile>> chunks = sortedBylocalID.chunks(kParallelism);
+      final List<List<EnteFile>> chunks =
+          sortedBylocalID.chunks(_remoteFetchLimit);
       outerLoop:
       for (final chunk in chunks) {
         final futures = <Future<bool>>[];
@@ -590,9 +592,9 @@ class FaceMlService {
             rethrow;
           }
         }
-        final smallerChuncks = chunk.chunks(10);
-        for (final smallerChunck in smallerChuncks) {
-          for (final enteFile in smallerChunck) {
+        final smallerChunks = chunk.chunks(_parallelism);
+        for (final smallestChunk in smallerChunks) {
+          for (final enteFile in smallestChunk) {
             if (isImageIndexRunning == false) {
               _logger.info("indexAllImages() was paused, stopping");
               break outerLoop;
