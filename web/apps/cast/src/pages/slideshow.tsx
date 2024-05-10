@@ -175,7 +175,7 @@ const SlideViewChromecast_ = styled("div")`
     position: relative;
     overflow: hidden;
 
-    img.svg-bg {
+    img.svc-bg {
         position: absolute;
         left: 0;
         top: 0;
