@@ -15,30 +15,8 @@ interface SlideViewProps {
  */
 export const SlideView: React.FC<SlideViewProps> = ({ url }) => {
     return (
-        <Container
-            style={{
-                backgroundImage: `url(${url})`,
-            }}
-        >
-            <div
-                style={{
-                    height: "100%",
-                    width: "100%",
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    backdropFilter: "blur(10px)",
-                }}
-            >
-                <img
-                    src={url}
-                    decoding="sync"
-                    style={{
-                        maxWidth: "100%",
-                        maxHeight: "100%",
-                    }}
-                />
-            </div>
+        <Container style={{ backgroundImage: `url(${url})` }}>
+            <img src={url} decoding="sync" />
         </Container>
     );
 };
@@ -46,12 +24,13 @@ export const SlideView: React.FC<SlideViewProps> = ({ url }) => {
 const Container = styled("div")`
     width: 100%;
     height: 100%;
-    /* backgroundImage: url({url}), */
+
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
     background-blend-mode: multiply;
     background-color: rgba(0, 0, 0, 0.5);
+
     /* Smooth out the transition a bit.
      *
      * For the img itself, we set decoding="sync" to have it switch seamlessly.
@@ -67,4 +46,11 @@ const Container = styled("div")`
      * not a functional requirement.
      */
     transition: all 2s;
+
+    img {
+        width: 100%;
+        height: 100%;
+        backdrop-filter: blur(10px);
+        object-fit: contain;
+    }
 `;
