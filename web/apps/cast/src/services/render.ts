@@ -287,8 +287,7 @@ const isFileEligible = (file: EnteFile) => {
 
     const [, extension] = nameAndExtension(file.metadata.title);
     if (isNonWebImageFileExtension(extension)) {
-        if (isChromecast) return false;
-        // HEIC support otherwise.
+        // Of the known non-web types, we support HEIC.
         return isHEIC(extension);
     }
 
