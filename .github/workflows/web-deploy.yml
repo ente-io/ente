@@ -1,17 +1,21 @@
-name: "Nightly (web)"
+name: "Deploy (photos)"
 
 on:
     schedule:
         # [Note: Run workflow every 24 hours]
         #
-        # Run every 24 hours - First field is minute, second is hour of the day
-        # This runs 23:15 UTC everyday - 1 and 15 are just arbitrary offset to
-        # avoid scheduling it on the exact hour, as suggested by GitHub.
+        # Run everyday at ~8:00 AM IST (except Sundays).
+        #
+        # First field is minute, second is hour of the day. Last is day of week,
+        # 0 being Sunday.
+        #
+        # Add a few minutes of offset to avoid scheduling on exact hourly
+        # boundaries (recommended by GitHub to avoid congestion).
         #
         # https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#schedule
         # https://crontab.guru/
         #
-        - cron: "15 23 * * *"
+        - cron: "25 2 * * 1-6"
     # Also allow manually running the workflow
     workflow_dispatch:
 
@@ -39,6 +43,19 @@ jobs:
             - name: Install dependencies
               run: yarn install
 
+            - name: Build photos
+              run: yarn build:photos
+
+            - name: Publish photos
+              uses: cloudflare/pages-action@1
+              with:
+                  accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+                  apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+                  projectName: ente
+                  branch: deploy/photos
+                  directory: web/apps/photos/out
+                  wranglerVersion: "3"
+
             - name: Build accounts
               run: yarn build:accounts
 
@@ -48,7 +65,7 @@ jobs:
                   accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
                   apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
                   projectName: ente
-                  branch: n-accounts
+                  branch: deploy/accounts
                   directory: web/apps/accounts/out
                   wranglerVersion: "3"
 
@@ -61,7 +78,7 @@ jobs:
                   accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
                   apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
                   projectName: ente
-                  branch: n-auth
+                  branch: deploy/auth
                   directory: web/apps/auth/out
                   wranglerVersion: "3"
 
@@ -74,7 +91,7 @@ jobs:
                   accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
                   apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
                   projectName: ente
-                  branch: n-cast
+                  branch: deploy/cast
                   directory: web/apps/cast/out
                   wranglerVersion: "3"
 
@@ -87,21 +104,6 @@ jobs:
                   accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
                   apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
                   projectName: ente
-                  branch: n-payments
+                  branch: deploy/payments
                   directory: web/apps/payments/dist
-                  wranglerVersion: "3"
-
-            - name: Build photos
-              run: yarn build:photos
-              env:
-                  NEXT_PUBLIC_ENTE_ALBUMS_ENDPOINT: https://albums.ente.sh
-
-            - name: Publish photos
-              uses: cloudflare/pages-action@1
-              with:
-                  accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-                  apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-                  projectName: ente
-                  branch: n-photos
-                  directory: web/apps/photos/out
                   wranglerVersion: "3"

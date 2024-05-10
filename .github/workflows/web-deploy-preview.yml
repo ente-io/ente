@@ -1,9 +1,19 @@
-name: "Deploy (cast)"
+name: "Deploy preview (web)"
 
 on:
-    push:
-        # Run workflow on pushes to the deploy/cast
-        branches: [deploy/cast, deploy-f/cast]
+    workflow_dispatch:
+        inputs:
+            app:
+                description: "App to build and deploy"
+                type: choice
+                required: true
+                default: "photos"
+                options:
+                    - "accounts"
+                    - "auth"
+                    - "cast"
+                    - "payments"
+                    - "photos"
 
 jobs:
     deploy:
@@ -29,15 +39,15 @@ jobs:
             - name: Install dependencies
               run: yarn install
 
-            - name: Build cast
-              run: yarn build:cast
+            - name: Build ${{ inputs.app }}
+              run: yarn build:${{ inputs.app }}
 
-            - name: Publish cast
+            - name: Publish ${{ inputs.app }} to preview
               uses: cloudflare/pages-action@1
               with:
                   accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
                   apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
                   projectName: ente
-                  branch: deploy/cast
-                  directory: web/apps/cast/out
+                  branch: preview
+                  directory: web/apps/${{ inputs.app }}/out
                   wranglerVersion: "3"

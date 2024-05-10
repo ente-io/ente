@@ -1,9 +1,19 @@
-name: "Deploy (accounts)"
+name: "Deploy one (web)"
 
 on:
-    push:
-        # Run workflow on pushes to the deploy/accounts
-        branches: [deploy/accounts, deploy-f/accounts]
+    workflow_dispatch:
+        inputs:
+            app:
+                description: "App to build and deploy"
+                type: choice
+                required: true
+                default: "photos"
+                options:
+                    - "accounts"
+                    - "auth"
+                    - "cast"
+                    - "payments"
+                    - "photos"
 
 jobs:
     deploy:
@@ -29,15 +39,15 @@ jobs:
             - name: Install dependencies
               run: yarn install
 
-            - name: Build accounts
-              run: yarn build:accounts
+            - name: Build ${{ inputs.app }}
+              run: yarn build:${{ inputs.app }}
 
-            - name: Publish accounts
+            - name: Publish ${{ inputs.app }} to preview
               uses: cloudflare/pages-action@1
               with:
                   accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
                   apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
                   projectName: ente
-                  branch: deploy/accounts
-                  directory: web/apps/accounts/out
+                  branch: deploy/${{ inputs.app }}
+                  directory: web/apps/${{ inputs.app }}/out
                   wranglerVersion: "3"
