@@ -3,8 +3,6 @@ import { styled } from "@mui/material";
 interface SlideViewProps {
     /** The URL of the image to show. */
     url: string;
-    /** The URL of the next image that we will transition to. */
-    nextURL: string;
 }
 
 /**
@@ -16,7 +14,7 @@ interface SlideViewProps {
 export const SlideView: React.FC<SlideViewProps> = ({ url }) => {
     return (
         <Container style={{ backgroundImage: `url(${url})` }}>
-            <img src={url} decoding="sync" />
+            <img src={url} decoding="sync" alt="" />
         </Container>
     );
 };
@@ -39,8 +37,8 @@ const Container = styled("div")`
      * switch is still visually non-atomic.
      *
      * As a workaround, add a long transition so that the background image
-     * transitions in a more "fade-across" manner. This effect might or might
-     * not be visually the best though.
+     * transitions in a more "fade-to" manner. This effect might or might not be
+     * visually the best though.
      *
      * Does not work in Firefox, but that's fine, this is only a slight tweak,
      * not a functional requirement.
