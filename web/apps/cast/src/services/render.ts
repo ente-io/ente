@@ -105,7 +105,6 @@ export const imageURLGenerator = async function* (castData: CastData) {
 
             if (!isFileEligible(file)) continue;
 
-            console.log("will start createRenderableURL", new Date(), file);
             let url: string;
             try {
                 url = await createRenderableURL(castToken, file);
@@ -131,8 +130,6 @@ export const imageURLGenerator = async function* (castData: CastData) {
                 continue;
             }
 
-            console.log("did end createRenderableURL", new Date());
-
             // The last element of previousURLs is the URL that is currently
             // being shown on screen.
             //
@@ -144,10 +141,8 @@ export const imageURLGenerator = async function* (castData: CastData) {
             previousURLs.push(url);
 
             const elapsedTime = Date.now() - lastYieldTime;
-            if (elapsedTime > 0 && elapsedTime < slideDuration) {
-                console.log("waiting", slideDuration - elapsedTime);
+            if (elapsedTime > 0 && elapsedTime < slideDuration)
                 await wait(slideDuration - elapsedTime);
-            }
 
             lastYieldTime = Date.now();
             yield url;

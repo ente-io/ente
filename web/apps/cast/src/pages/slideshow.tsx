@@ -50,8 +50,6 @@ export default function Slideshow() {
         };
     }, []);
 
-    console.log("Rendering slideshow", { loading, imageURL });
-
     if (loading) return <PairingComplete />;
     if (isEmpty) return <NoItems />;
 
