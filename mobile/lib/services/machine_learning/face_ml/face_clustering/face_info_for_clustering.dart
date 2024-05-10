@@ -7,6 +7,12 @@ class FaceInfoForClustering {
   final double faceScore;
   final double blurValue;
   final bool isSideways;
+  int? _fileID;
+
+  int get fileID {
+    _fileID ??= int.parse(faceID.split('_').first);
+    return _fileID!;
+  }
 
   FaceInfoForClustering({
     required this.faceID,
