@@ -361,9 +361,14 @@ class DownloadManagerImpl {
                             buffer.set(new Uint8Array(data), 0);
                             buffer.set(new Uint8Array(value), data.byteLength);
 
+                            // Note that buffer.length might be a multiple of
+                            // decryptionChunkSizes. We let that accumulate, and
+                            // drain it all with a while loop when done.
+
                             if (buffer.length > decryptionChunkSize) {
-                                const fileData = new Uint8Array(
-                                    buffer.slice(0, decryptionChunkSize),
+                                const fileData = buffer.slice(
+                                    0,
+                                    decryptionChunkSize,
                                 );
 
                                 const { decryptedData } =
@@ -372,11 +377,9 @@ class DownloadManagerImpl {
                                         pullState,
                                     );
                                 controller.enqueue(decryptedData);
-                                data = new Uint8Array(
-                                    buffer.slice(decryptionChunkSize),
-                                );
+                                data = buffer.slice(decryptionChunkSize);
                             } else {
-                                data = new Uint8Array(buffer);
+                                data = buffer;
                             }
                             more = true;
                         } else {
