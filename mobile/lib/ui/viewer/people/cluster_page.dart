@@ -57,6 +57,11 @@ class _ClusterPageState extends State<ClusterPage> {
   late final StreamSubscription<LocalPhotosUpdatedEvent> _filesUpdatedEvent;
   late final StreamSubscription<PeopleChangedEvent> _peopleChangedEvent;
 
+  bool get showNamingBanner =>
+      (!userDismissedNamingBanner && widget.showNamingBanner);
+
+  bool userDismissedNamingBanner = false;
+
   @override
   void initState() {
     super.initState();
@@ -142,44 +147,53 @@ class _ClusterPageState extends State<ClusterPage> {
       ),
       body: Column(
         children: [
-          widget.showNamingBanner
-              ? RepaintBoundary(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 8.0,
-                      horizontal: 8.0,
-                    ),
-                    child: NotificationWidget(
-                      startIcon: Icons.person_add_outlined,
-                      actionIcon: Icons.add_outlined,
-                      text: S.of(context).addAName,
-                      subText: S.of(context).findPeopleByName,
-                      // text: S.of(context).addAName,
-                      // subText: S.of(context).findPersonsByName,
-                      type: NotificationType.greenBanner,
-                      onTap: () async {
-                        if (widget.personID == null) {
-                          final result = await showAssignPersonAction(
-                            context,
-                            clusterID: widget.clusterID,
-                          );
-                          if (result != null && result is PersonEntity) {
-                            Navigator.pop(context);
-                            // ignore: unawaited_futures
-                            routeToPage(context, PeoplePage(person: result));
-                          }
-                        } else {
-                          showShortToast(context, "No personID or clusterID");
-                        }
-                      },
-                    ),
-                  )
-                      .animate(onPlay: (controller) => controller.repeat())
-                      .shimmer(
-                        duration: 1000.ms,
-                        delay: 3200.ms,
-                        size: 0.6,
+          showNamingBanner
+              ? Dismissible(
+                  key: const Key("namingBanner"),
+                  direction: DismissDirection.horizontal,
+                  onDismissed: (direction) {
+                    setState(() {
+                      userDismissedNamingBanner = true;
+                    });
+                  },
+                  child: RepaintBoundary(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 8.0,
+                        horizontal: 8.0,
                       ),
+                      child: NotificationWidget(
+                        startIcon: Icons.person_add_outlined,
+                        actionIcon: Icons.add_outlined,
+                        text: S.of(context).addAName,
+                        subText: S.of(context).findPeopleByName,
+                        // text: S.of(context).addAName,
+                        // subText: S.of(context).findPersonsByName,
+                        type: NotificationType.greenBanner,
+                        onTap: () async {
+                          if (widget.personID == null) {
+                            final result = await showAssignPersonAction(
+                              context,
+                              clusterID: widget.clusterID,
+                            );
+                            if (result != null && result is PersonEntity) {
+                              Navigator.pop(context);
+                              // ignore: unawaited_futures
+                              routeToPage(context, PeoplePage(person: result));
+                            }
+                          } else {
+                            showShortToast(context, "No personID or clusterID");
+                          }
+                        },
+                      ),
+                    )
+                        .animate(onPlay: (controller) => controller.repeat())
+                        .shimmer(
+                          duration: 1000.ms,
+                          delay: 3200.ms,
+                          size: 0.6,
+                        ),
+                  ),
                 )
               : const SizedBox.shrink(),
           Expanded(
