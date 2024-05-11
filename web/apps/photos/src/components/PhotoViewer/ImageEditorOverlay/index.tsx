@@ -449,18 +449,23 @@ const ImageEditorOverlay = (props: IProps) => {
         return <></>;
     }
 
+    const getEditedFile = async () => {
+        const originalSizeCanvas = ensure(originalSizeCanvasRef.current);
+        const originalFileName = props.file.metadata.title;
+        return canvasToFile(originalSizeCanvas, originalFileName, mimeType);
+    };
+
     const downloadEditedPhoto = async () => {
         if (!canvasRef.current) return;
 
-        const originalSizeCanvas = ensure(originalSizeCanvasRef.current);
-        const originalFileName = props.file.metadata.title;
-        void downloadAsFile(originalSizeCanvas, originalFileName, mimeType);
+        const f = await getEditedFile();
+        // Revokes the URL after downloading.
+        downloadUsingAnchor(URL.createObjectURL(f), f.name);
     };
 
     const saveCopyToEnte = async () => {
+        if (!canvasRef.current) return;
         try {
-            if (!canvasRef.current) return;
-
             const collections = await getLocalCollections();
 
             const collection = collections.find(
@@ -732,7 +737,7 @@ const ImageEditorOverlay = (props: IProps) => {
 export default ImageEditorOverlay;
 
 /**
- * Download the contents of the given canvas as a file on the user's computer.
+ * Create a new {@link File} with the contents of the given canvas.
  *
  * @param canvas A {@link HTMLCanvasElement} whose contents we want to download
  * as a file.
@@ -746,11 +751,11 @@ export default ImageEditorOverlay;
  * but this is not guaranteed and depends on browser support. If the original
  * MIME type can not be preserved, a PNG file will be downloaded.
  */
-const downloadAsFile = async (
+const canvasToFile = async (
     canvas: HTMLCanvasElement,
     originalFileName: string,
     originalMIMEType?: string,
-): Promise<void> => {
+): Promise<File> => {
     const image = new Image();
     image.src = canvas.toDataURL();
 
@@ -778,7 +783,7 @@ const downloadAsFile = async (
     const [originalName] = nameAndExtension(originalFileName);
     const fileName = `${originalName}-edited.${extension}`;
 
-    log.debug(() => ({ a: "download", blob, type: blob.type, mimeType }));
-    // Revokes the URL after downloading.
-    downloadUsingAnchor(URL.createObjectURL(blob), fileName);
+    log.debug(() => ({ a: "canvas => file", blob, type: blob.type, mimeType }));
+
+    return new File([blob], fileName);
 };
