@@ -1110,18 +1110,8 @@ const encryptFile = async (
     encryptionKey: string,
     worker: Remote<DedicatedCryptoWorker>,
 ): Promise<EncryptedFile> => {
-    let data: Uint8Array;
-    if (file.fileStreamOrData instanceof Uint8Array) {
-        data = file.fileStreamOrData;
-    } else {
-        data = new Uint8Array(
-            await new Response(file.fileStreamOrData.stream).arrayBuffer(),
-        );
-    }
-    console.log("Uploading data", data);
     const { key: fileKey, file: encryptedFiledata } = await encryptFiledata(
-        // file.fileStreamOrData,
-        data,
+        file.fileStreamOrData,
         worker,
     );
 

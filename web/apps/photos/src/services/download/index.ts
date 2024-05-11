@@ -278,7 +278,6 @@ class DownloadManagerImpl {
 
         if (
             file.metadata.fileType === FILE_TYPE.IMAGE ||
-            // file.metadata.fileType === FILE_TYPE.VIDEO ||
             file.metadata.fileType === FILE_TYPE.LIVE_PHOTO
         ) {
             const cachedBlob = await this.fileCache?.get(cacheKey);
@@ -321,7 +320,7 @@ class DownloadManagerImpl {
         const reader = res.body.getReader();
 
         const contentLength = +res.headers.get("Content-Length") ?? 0;
-        let downloadedBytes = 0;
+        // let downloadedBytes = 0;
 
         console.log({ a: 2, res, contentLength });
 
@@ -346,93 +345,63 @@ class DownloadManagerImpl {
                     let more = true;
                     while (more) {
                         more = false;
-                        console.log({ a: "push" });
 
                         // "done" is a Boolean and value a "Uint8Array"
                         const { done, value } = await reader.read();
                         console.log({ a: "read", done, value, data });
 
-                        try {
-                            // Is there more data to read?
-                            if (!done) {
-                                downloadedBytes += value.byteLength;
-                                onDownloadProgress({
-                                    loaded: downloadedBytes,
-                                    total: contentLength,
-                                });
-                                const buffer = new Uint8Array(
-                                    data.byteLength + value.byteLength,
-                                );
-                                buffer.set(new Uint8Array(data), 0);
-                                buffer.set(
-                                    new Uint8Array(value),
-                                    data.byteLength,
-                                );
-                                console.log({
-                                    a: "dec?",
-                                    buffer,
-                                    blen: buffer.length,
-                                    decryptionChunkSize,
-                                });
+                        // Is there more data to read?
+                        if (!done) {
+                            const buffer = new Uint8Array(
+                                data.byteLength + value.byteLength,
+                            );
+                            buffer.set(new Uint8Array(data), 0);
+                            buffer.set(new Uint8Array(value), data.byteLength);
+                            console.log({
+                                a: "dec?",
+                                buffer,
+                                blen: buffer.length,
+                                decryptionChunkSize,
+                            });
 
-                                if (buffer.length > decryptionChunkSize) {
-                                    const fileData = buffer.slice(
-                                        0,
-                                        decryptionChunkSize,
+                            if (buffer.length > decryptionChunkSize) {
+                                const fileData = new Uint8Array(
+                                    buffer.slice(0, decryptionChunkSize),
+                                );
+
+                                const { decryptedData } =
+                                    await this.cryptoWorker.decryptFileChunk(
+                                        fileData,
+                                        pullState,
                                     );
-                                    try {
-                                        const { decryptedData } =
-                                            await this.cryptoWorker.decryptFileChunk(
-                                                fileData,
-                                                pullState,
-                                            );
-                                        controller.enqueue(decryptedData);
-                                        data =
-                                            buffer.slice(decryptionChunkSize);
-                                    } catch (e) {
-                                        if (
-                                            e.message ===
-                                            CustomError.PROCESSING_FAILED
-                                        ) {
-                                            log.error(
-                                                `Failed to process file ${file.id} from localID: ${file.metadata.localID} version: ${file.metadata.version} deviceFolder:${file.metadata.deviceFolder}`,
-                                                e,
-                                            );
-                                        }
-                                        throw e;
-                                    }
-                                } else {
-                                    data = buffer;
-                                }
-                                more = true;
+                                controller.enqueue(decryptedData);
+                                data = new Uint8Array(
+                                    buffer.slice(decryptionChunkSize),
+                                );
                             } else {
-                                if (data) {
-                                    try {
-                                        const { decryptedData } =
-                                            await this.cryptoWorker.decryptFileChunk(
-                                                data,
-                                                pullState,
-                                            );
-                                        controller.enqueue(decryptedData);
-                                        data = null;
-                                    } catch (e) {
-                                        if (
-                                            e.message ===
-                                            CustomError.PROCESSING_FAILED
-                                        ) {
-                                            log.error(
-                                                `Failed to process file ${file.id} from localID: ${file.metadata.localID} version: ${file.metadata.version} deviceFolder:${file.metadata.deviceFolder}`,
-                                                e,
-                                            );
-                                        }
-                                        throw e;
-                                    }
-                                }
-                                controller.close();
+                                data = new Uint8Array(buffer);
                             }
-                        } catch (e) {
-                            log.error("Failed to process file chunk", e);
-                            controller.error(e);
+                            more = true;
+                        } else {
+                            while (data && data.length) {
+                                const chunk = new Uint8Array(
+                                    data.slice(0, decryptionChunkSize),
+                                );
+                                const { decryptedData } =
+                                    await this.cryptoWorker.decryptFileChunk(
+                                        chunk,
+                                        pullState,
+                                    );
+                                controller.enqueue(decryptedData);
+                                if (data.length > decryptionChunkSize) {
+                                    data = new Uint8Array(
+                                        data.slice(decryptionChunkSize),
+                                    );
+                                } else {
+                                    data = undefined;
+                                }
+                            }
+                            controller.close();
                         }
                     }
                 } catch (e) {
