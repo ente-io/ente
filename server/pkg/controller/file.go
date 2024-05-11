@@ -258,7 +258,7 @@ func (c *FileController) Update(ctx context.Context, userID int64, file ente.Fil
 }
 
 // GetUploadURLs returns a bunch of presigned URLs for uploading files
-func (c *FileController) GetUploadURLs(ctx context.Context, userID int64, count int, app ente.App) ([]ente.UploadURL, error) {
+func (c *FileController) GetUploadURLs(ctx context.Context, userID int64, count int, app ente.App, ignoreLimit bool) ([]ente.UploadURL, error) {
 	err := c.UsageCtrl.CanUploadFile(ctx, userID, nil, app)
 	if err != nil {
 		return []ente.UploadURL{}, stacktrace.Propagate(err, "")
@@ -268,7 +268,7 @@ func (c *FileController) GetUploadURLs(ctx context.Context, userID int64, count 
 	bucket := c.S3Config.GetHotBucket()
 	urls := make([]ente.UploadURL, 0)
 	objectKeys := make([]string, 0)
-	if count > MaxUploadURLsLimit {
+	if count > MaxUploadURLsLimit && !ignoreLimit {
 		count = MaxUploadURLsLimit
 	}
 	for i := 0; i < count; i++ {
