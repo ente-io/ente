@@ -80,79 +80,76 @@ class _SearchSectionState extends State<SearchSection> {
     debugPrint("Building section for ${widget.sectionType.name}");
     final shouldShowMore = _examples.length >= widget.limit - 1;
     final textTheme = getEnteTextTheme(context);
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: _examples.isNotEmpty
-          ? GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: () {
-                if (shouldShowMore) {
-                  routeToPage(
-                    context,
-                    SearchSectionAllPage(
-                      sectionType: widget.sectionType,
+    return _examples.isNotEmpty
+        ? GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () {
+              if (shouldShowMore) {
+                routeToPage(
+                  context,
+                  SearchSectionAllPage(
+                    sectionType: widget.sectionType,
+                  ),
+                );
+              }
+            },
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Text(
+                        widget.sectionType.sectionTitle(context),
+                        style: textTheme.largeBold,
+                      ),
                     ),
-                  );
-                }
-              },
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(12),
-                        child: Text(
+                    shouldShowMore
+                        ? Padding(
+                            padding: const EdgeInsets.all(12),
+                            child: Icon(
+                              Icons.chevron_right_outlined,
+                              color: getEnteColorScheme(context).strokeMuted,
+                            ),
+                          )
+                        : const SizedBox.shrink(),
+                  ],
+                ),
+                const SizedBox(height: 2),
+                SearchExampleRow(_examples, widget.sectionType),
+              ],
+            ),
+          )
+        : Padding(
+            padding: const EdgeInsets.only(left: 16, right: 8),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
                           widget.sectionType.sectionTitle(context),
                           style: textTheme.largeBold,
                         ),
-                      ),
-                      shouldShowMore
-                          ? Padding(
-                              padding: const EdgeInsets.all(12),
-                              child: Icon(
-                                Icons.chevron_right_outlined,
-                                color: getEnteColorScheme(context).strokeMuted,
-                              ),
-                            )
-                          : const SizedBox.shrink(),
-                    ],
-                  ),
-                  const SizedBox(height: 2),
-                  SearchExampleRow(_examples, widget.sectionType),
-                ],
-              ),
-            )
-          : Padding(
-              padding: const EdgeInsets.only(left: 16, right: 8),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            widget.sectionType.sectionTitle(context),
-                            style: textTheme.largeBold,
-                          ),
-                          const SizedBox(height: 24),
-                          Text(
-                            widget.sectionType.getEmptyStateText(context),
-                            style: textTheme.smallMuted,
-                          ),
-                        ],
-                      ),
+                        const SizedBox(height: 24),
+                        Text(
+                          widget.sectionType.getEmptyStateText(context),
+                          style: textTheme.smallMuted,
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  SearchSectionEmptyCTAIcon(widget.sectionType),
-                ],
-              ),
+                ),
+                const SizedBox(width: 8),
+                SearchSectionEmptyCTAIcon(widget.sectionType),
+              ],
             ),
-    );
+          );
   }
 }
 
@@ -231,7 +228,7 @@ class SearchExample extends StatelessWidget {
       child: SizedBox(
         width: width,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
+          padding: const EdgeInsets.only(left: 6, right: 6, top: 8),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -260,11 +257,9 @@ class SearchExample extends StatelessWidget {
                         ),
                       ),
               ),
-              const SizedBox(
-                height: 10,
-              ),
               isCluster
                   ? GestureDetector(
+                      behavior: HitTestBehavior.translucent,
                       onTap: () async {
                         final result = await showAssignPersonAction(
                           context,
@@ -276,20 +271,26 @@ class SearchExample extends StatelessWidget {
                           routeToPage(context, PeoplePage(person: result));
                         }
                       },
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 10, bottom: 16),
+                        child: Text(
+                          "Add name",
+                          maxLines: 1,
+                          textAlign: TextAlign.center,
+                          overflow: TextOverflow.ellipsis,
+                          style: getEnteTextTheme(context).mini,
+                        ),
+                      ),
+                    )
+                  : Padding(
+                      padding: const EdgeInsets.only(top: 10, bottom: 16),
                       child: Text(
-                        "Add name",
-                        maxLines: 1,
+                        searchResult.name(),
+                        maxLines: 2,
                         textAlign: TextAlign.center,
                         overflow: TextOverflow.ellipsis,
                         style: getEnteTextTheme(context).mini,
                       ),
-                    )
-                  : Text(
-                      searchResult.name(),
-                      maxLines: 2,
-                      textAlign: TextAlign.center,
-                      overflow: TextOverflow.ellipsis,
-                      style: getEnteTextTheme(context).mini,
                     ),
             ],
           ),
