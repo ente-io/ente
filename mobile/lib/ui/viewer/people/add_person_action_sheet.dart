@@ -9,8 +9,10 @@ import "package:photos/core/event_bus.dart";
 import "package:photos/events/people_changed_event.dart";
 import "package:photos/face/model/person.dart";
 import "package:photos/generated/l10n.dart";
+import "package:photos/models/file/file.dart";
 import 'package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart';
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
+import "package:photos/services/search_service.dart";
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/common/loading_widget.dart';
@@ -52,7 +54,7 @@ Future<dynamic> showAssignPersonAction(
     builder: (context) {
       return PersonActionSheet(
         actionType: actionType,
-        showOptionToCreateNewAlbum: showOptionToCreateNewAlbum,
+        showOptionToCreateNewPerson: showOptionToCreateNewAlbum,
         cluserID: clusterID,
       );
     },
@@ -72,11 +74,11 @@ Future<dynamic> showAssignPersonAction(
 class PersonActionSheet extends StatefulWidget {
   final PersonActionType actionType;
   final int cluserID;
-  final bool showOptionToCreateNewAlbum;
+  final bool showOptionToCreateNewPerson;
   const PersonActionSheet({
     required this.actionType,
     required this.cluserID,
-    required this.showOptionToCreateNewAlbum,
+    required this.showOptionToCreateNewPerson,
     super.key,
   });
 
@@ -177,7 +179,7 @@ class _PersonActionSheetState extends State<PersonActionSheet> {
     return Flexible(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 24, 4, 0),
-        child: FutureBuilder<Iterable<PersonEntity>>(
+        child: FutureBuilder<List<(PersonEntity, EnteFile)>>(
           future: _getPersons(),
           builder: (context, snapshot) {
             if (snapshot.hasError) {
@@ -185,17 +187,17 @@ class _PersonActionSheetState extends State<PersonActionSheet> {
               //Need to show an error on the UI here
               return const SizedBox.shrink();
             } else if (snapshot.hasData) {
-              final persons = snapshot.data as List<PersonEntity>;
+              final persons = snapshot.data!;
               final searchResults = _searchQuery.isNotEmpty
                   ? persons
                       .where(
-                        (element) => element.data.name
+                        (element) => element.$1.data.name
                             .toLowerCase()
                             .contains(_searchQuery),
                       )
                       .toList()
                   : persons;
-              final shouldShowCreateAlbum = widget.showOptionToCreateNewAlbum &&
+              final shouldShowAddPerson = widget.showOptionToCreateNewPerson &&
                   (_searchQuery.isEmpty || searchResults.isEmpty);
 
               return Scrollbar(
@@ -205,9 +207,9 @@ class _PersonActionSheetState extends State<PersonActionSheet> {
                   padding: const EdgeInsets.only(right: 12),
                   child: ListView.separated(
                     itemCount:
-                        searchResults.length + (shouldShowCreateAlbum ? 1 : 0),
+                        searchResults.length + (shouldShowAddPerson ? 1 : 0),
                     itemBuilder: (context, index) {
-                      if (index == 0 && shouldShowCreateAlbum) {
+                      if (index == 0 && shouldShowAddPerson) {
                         return GestureDetector(
                           child: const NewPersonItemWidget(),
                           onTap: () async => {
@@ -219,13 +221,14 @@ class _PersonActionSheetState extends State<PersonActionSheet> {
                           },
                         );
                       }
-                      final person = searchResults[
-                          index - (shouldShowCreateAlbum ? 1 : 0)];
+                      final person =
+                          searchResults[index - (shouldShowAddPerson ? 1 : 0)];
                       return PersonRowItem(
-                        person: person,
+                        person: person.$1,
+                        personFile: person.$2,
                         onTap: () async {
                           await PersonService.instance.assignClusterToPerson(
-                            personID: person.remoteID,
+                            personID: person.$1.remoteID,
                             clusterID: widget.cluserID,
                           );
                           Bus.instance.fire(PeopleChangedEvent());
@@ -235,7 +238,7 @@ class _PersonActionSheetState extends State<PersonActionSheet> {
                       );
                     },
                     separatorBuilder: (context, index) {
-                      return const SizedBox(height: 2);
+                      return const SizedBox(height: 6);
                     },
                   ),
                 ),
@@ -289,13 +292,22 @@ class _PersonActionSheetState extends State<PersonActionSheet> {
     }
   }
 
-  Future<Iterable<PersonEntity>> _getPersons({
+  Future<List<(PersonEntity, EnteFile)>> _getPersons({
     bool excludeHidden = true,
   }) async {
     final persons = await PersonService.instance.getPersons();
     if (excludeHidden) {
       persons.removeWhere((person) => person.data.isIgnored);
     }
-    return persons;
+    final List<(PersonEntity, EnteFile)> personAndFileID = [];
+    for (final person in persons) {
+      final clustersToFiles =
+          await SearchService.instance.getClusterFilesForPersonID(
+        person.remoteID,
+      );
+      final files = clustersToFiles.values.expand((e) => e).toList();
+      personAndFileID.add((person, files.first));
+    }
+    return personAndFileID;
   }
 }
