@@ -493,7 +493,9 @@ async function getRenderableFileURL(
             : undefined;
 
     let srcURLs: SourceURLs["url"];
+    let isOriginal: boolean;
     let mimeType: string | undefined;
+
     switch (file.metadata.fileType) {
         case FILE_TYPE.IMAGE: {
             const convertedBlob = await getRenderableImage(
@@ -502,6 +504,7 @@ async function getRenderableFileURL(
             );
             const convertedURL = existingOrNewObjectURL(convertedBlob);
             srcURLs = convertedURL;
+            isOriginal = convertedURL === originalFileURL;
             mimeType = convertedBlob?.type;
             break;
         }
@@ -511,6 +514,7 @@ async function getRenderableFileURL(
                 fileBlob,
                 forceConvert,
             );
+            isOriginal = false;
             break;
         }
         case FILE_TYPE.VIDEO: {
@@ -521,6 +525,7 @@ async function getRenderableFileURL(
             );
             const convertedURL = existingOrNewObjectURL(convertedBlob);
             srcURLs = convertedURL;
+            isOriginal = convertedURL === originalFileURL;
             mimeType = convertedBlob?.type;
             break;
         }
@@ -528,13 +533,6 @@ async function getRenderableFileURL(
             srcURLs = originalFileURL;
             break;
         }
-    }
-
-    let isOriginal: boolean;
-    if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
-        isOriginal = false;
-    } else {
-        isOriginal = (srcURLs as string) === (originalFileURL as string);
     }
 
     return {
