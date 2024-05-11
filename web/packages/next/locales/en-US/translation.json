@@ -565,6 +565,9 @@
     "IMAGE": "Image",
     "VIDEO": "Video",
     "LIVE_PHOTO": "Live Photo",
+    "editor": {
+        "crop": "Crop"
+    },
     "CONVERT": "Convert",
     "CONFIRM_EDITOR_CLOSE_MESSAGE": "Are you sure you want to close the editor?",
     "CONFIRM_EDITOR_CLOSE_DESCRIPTION": "Download your edited image or save a copy to Ente to persist your changes.",

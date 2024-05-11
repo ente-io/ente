@@ -645,7 +645,7 @@ const ImageEditorOverlay = (props: IProps) => {
                                 setCurrentTab(value);
                             }}
                         >
-                            <Tab label={t("CROP")} value="crop" />
+                            <Tab label={t("editor.crop")} value="crop" />
                             <Tab label={t("TRANSFORM")} value="transform" />
                             <Tab
                                 label={t("COLORS")}
