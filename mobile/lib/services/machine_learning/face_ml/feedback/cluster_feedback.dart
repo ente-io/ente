@@ -335,7 +335,6 @@ class ClusterFeedbackService {
     for (final clusterID in clustersToInspect) {
       final int originalClusterSize = allClusterToFaceCount[clusterID]!;
       final faceIDs = await faceMlDb.getFaceIDsForCluster(clusterID);
-      final originalFaceIDsSet = faceIDs.toSet();
 
       final embeddings = await faceMlDb.getFaceEmbeddingMapForFaces(faceIDs);
 
@@ -645,7 +644,7 @@ class ClusterFeedbackService {
     double maxMedianDistance = 0.62,
     double goodMedianDistance = 0.55,
     double maxMeanDistance = 0.65,
-    double goodMeanDistance = 0.40,
+    double goodMeanDistance = 0.45,
   }) async {
     final w = (kDebugMode ? EnteWatch('getSuggestions') : null)?..start();
     // Get all the cluster data
@@ -667,11 +666,12 @@ class ClusterFeedbackService {
     final smallestPersonClusterSize = personClusters
         .map((clusterID) => allClusterIdsToCountMap[clusterID] ?? 0)
         .reduce((value, element) => min(value, element));
-    final checkSizes = [20, kMinimumClusterSizeSearchResult, 10, 5, 1];
+    final checkSizes = [100, 20, kMinimumClusterSizeSearchResult, 10, 5, 1];
     late Map<int, Vector> clusterAvgBigClusters;
     final List<(int, double)> suggestionsMean = [];
     for (final minimumSize in checkSizes.toSet()) {
-      if (smallestPersonClusterSize >= minimumSize) {
+      if (smallestPersonClusterSize >=
+          min(minimumSize, kMinimumClusterSizeSearchResult)) {
         clusterAvgBigClusters = await _getUpdateClusterAvg(
           allClusterIdsToCountMap,
           ignoredClusters,
@@ -685,7 +685,7 @@ class ClusterFeedbackService {
           clusterAvgBigClusters,
           personClusters,
           ignoredClusters,
-          goodMeanDistance,
+          (minimumSize == 100) ? goodMeanDistance + 0.05 : goodMeanDistance,
         );
         w?.log(
           'Calculate suggestions using mean for ${clusterAvgBigClusters.length} clusters of min size $minimumSize',
