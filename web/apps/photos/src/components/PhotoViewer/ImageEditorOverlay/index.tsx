@@ -94,6 +94,10 @@ const ImageEditorOverlay = (props: IProps) => {
     const parentRef = useRef<HTMLDivElement | null>(null);
 
     const [fileURL, setFileURL] = useState<string>("");
+    // The MIME type of the original file that we are editing.
+    //
+    // It _should_ generally be present, but it is not guaranteed to be.
+    const [mimeType, setMIMEType] = useState<string | undefined>();
 
     const [currentRotationAngle, setCurrentRotationAngle] = useState(0);
 
@@ -372,6 +376,10 @@ const ImageEditorOverlay = (props: IProps) => {
                 );
                 img.src = srcURLs.url as string;
                 setFileURL(srcURLs.url as string);
+                // We're casting the srcURLs.url to string above, i.e. this code
+                // is not meant to run for the live photos scenario. For images,
+                // we usually will have the mime type.
+                setMIMEType(srcURLs.mimeType);
             } else {
                 img.src = fileURL;
             }
