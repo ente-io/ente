@@ -347,33 +347,28 @@ class DownloadManagerImpl {
                         // "done" is a Boolean and value a "Uint8Array"
                         const { done, value } = await reader.read();
 
-                        downloadedBytes += value.byteLength;
-                        onDownloadProgress({
-                            loaded: downloadedBytes,
-                            total: contentLength,
-                        });
-
                         // Is there more data to read?
                         if (!done) {
+                            downloadedBytes += value.length;
+                            onDownloadProgress({
+                                loaded: downloadedBytes,
+                                total: contentLength,
+                            });
+
                             const buffer = new Uint8Array(
-                                data.byteLength + value.byteLength,
+                                data.length + value.length,
                             );
                             buffer.set(new Uint8Array(data), 0);
-                            buffer.set(new Uint8Array(value), data.byteLength);
+                            buffer.set(new Uint8Array(value), data.length);
 
                             // Note that buffer.length might be a multiple of
-                            // decryptionChunkSizes. We let that accumulate, and
-                            // drain it all with a while loop when done.
+                            // decryptionChunkSize. We let these accumulate, and
+                            // drain it all with a nested while loop when done.
 
                             if (buffer.length > decryptionChunkSize) {
-                                const fileData = buffer.slice(
-                                    0,
-                                    decryptionChunkSize,
-                                );
-
                                 const { decryptedData } =
                                     await this.cryptoWorker.decryptFileChunk(
-                                        fileData,
+                                        buffer.slice(0, decryptionChunkSize),
                                         pullState,
                                     );
                                 controller.enqueue(decryptedData);
@@ -384,22 +379,16 @@ class DownloadManagerImpl {
                             more = true;
                         } else {
                             while (data && data.length) {
-                                const chunk = new Uint8Array(
-                                    data.slice(0, decryptionChunkSize),
-                                );
                                 const { decryptedData } =
                                     await this.cryptoWorker.decryptFileChunk(
-                                        chunk,
+                                        data.slice(0, decryptionChunkSize),
                                         pullState,
                                     );
                                 controller.enqueue(decryptedData);
-                                if (data.length > decryptionChunkSize) {
-                                    data = new Uint8Array(
-                                        data.slice(decryptionChunkSize),
-                                    );
-                                } else {
-                                    data = undefined;
-                                }
+                                data =
+                                    data.length > decryptionChunkSize
+                                        ? data.slice(decryptionChunkSize)
+                                        : undefined;
                             }
                             controller.close();
                         }
