@@ -132,7 +132,7 @@ class _PeoplePageState extends State<PeoplePage> {
                             horizontal: 8.0,
                           ),
                           child: NotificationWidget(
-                            startIcon: Icons.person_add_outlined,
+                            startIcon: Icons.star_border_rounded,
                             actionIcon: Icons.search_outlined,
                             text: "Review suggestions",
                             subText:
