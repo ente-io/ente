@@ -1,24 +1,6 @@
+import { nameAndExtension } from "@/next/file";
 import log from "@/next/log";
-import {
-    Backdrop,
-    Box,
-    CircularProgress,
-    IconButton,
-    Tab,
-    Tabs,
-    Typography,
-} from "@mui/material";
-import {
-    Dispatch,
-    MutableRefObject,
-    SetStateAction,
-    createContext,
-    useContext,
-    useEffect,
-    useRef,
-    useState,
-} from "react";
-
+import { ensure } from "@/utils/ensure";
 import {
     CenteredFlex,
     HorizontalFlex,
@@ -32,6 +14,15 @@ import CropIcon from "@mui/icons-material/Crop";
 import CropOriginalIcon from "@mui/icons-material/CropOriginal";
 import DownloadIcon from "@mui/icons-material/Download";
 import MenuIcon from "@mui/icons-material/Menu";
+import {
+    Backdrop,
+    Box,
+    CircularProgress,
+    IconButton,
+    Tab,
+    Tabs,
+    Typography,
+} from "@mui/material";
 import { EnteDrawer } from "components/EnteDrawer";
 import { EnteMenuItem } from "components/Menu/EnteMenuItem";
 import MenuItemDivider from "components/Menu/MenuItemDivider";
@@ -39,10 +30,18 @@ import { MenuItemGroup } from "components/Menu/MenuItemGroup";
 import MenuSectionTitle from "components/Menu/MenuSectionTitle";
 import { CORNER_THRESHOLD, FILTER_DEFAULT_VALUES } from "constants/photoEditor";
 import { t } from "i18next";
-import mime from "mime-types";
 import { AppContext } from "pages/_app";
+import {
+    Dispatch,
+    MutableRefObject,
+    SetStateAction,
+    createContext,
+    useContext,
+    useEffect,
+    useRef,
+    useState,
+} from "react";
 import { getLocalCollections } from "services/collectionService";
-import { detectFileTypeInfo } from "services/detect-type";
 import downloadManager from "services/download";
 import uploadManager from "services/upload/uploadManager";
 import { EnteFile } from "types/file";
@@ -71,13 +70,6 @@ export const ImageEditorOverlayContext = createContext(
 );
 
 type OperationTab = "crop" | "transform" | "colours";
-
-const getEditedFileName = (fileName: string) => {
-    const fileNameParts = fileName.split(".");
-    const extension = fileNameParts.pop();
-    const editedFileName = `${fileNameParts.join(".")}-edited.${extension}`;
-    return editedFileName;
-};
 
 export interface CropBoxProps {
     x: number;
@@ -438,37 +430,6 @@ const ImageEditorOverlay = (props: IProps) => {
         loadCanvas();
     }, [props.show, props.file]);
 
-    const exportCanvasToBlob = (): Promise<Blob> => {
-        try {
-            const canvas = originalSizeCanvasRef.current;
-            if (!canvas) return;
-
-            const mimeType = mime.lookup(props.file.metadata.title);
-
-            const image = new Image();
-            image.src = canvas.toDataURL();
-
-            const context = canvas.getContext("2d");
-            if (!context) return;
-            return new Promise((resolve) => {
-                canvas.toBlob(resolve, mimeType);
-            });
-        } catch (e) {
-            log.error("Error exporting canvas to blob", e);
-            throw e;
-        }
-    };
-
-    const getEditedFile = async () => {
-        const blob = await exportCanvasToBlob();
-        if (!blob) {
-            throw Error("no blob");
-        }
-        const editedFileName = getEditedFileName(props.file.metadata.title);
-        const editedFile = new File([blob], editedFileName);
-        return editedFile;
-    };
-
     const handleClose = () => {
         setFileURL(null);
         props.onClose();
@@ -489,18 +450,11 @@ const ImageEditorOverlay = (props: IProps) => {
     }
 
     const downloadEditedPhoto = async () => {
-        try {
-            if (!canvasRef.current) return;
+        if (!canvasRef.current) return;
 
-            const editedFile = await getEditedFile();
-            const fileType = await detectFileTypeInfo(editedFile);
-            const tempImgURL = URL.createObjectURL(
-                new Blob([editedFile], { type: fileType.mimeType }),
-            );
-            downloadUsingAnchor(tempImgURL, editedFile.name);
-        } catch (e) {
-            log.error("Error downloading edited photo", e);
-        }
+        const originalSizeCanvas = ensure(originalSizeCanvasRef.current);
+        const originalFileName = props.file.metadata.title;
+        void downloadAsFile(originalSizeCanvas, originalFileName, mimeType);
     };
 
     const saveCopyToEnte = async () => {
@@ -776,3 +730,55 @@ const ImageEditorOverlay = (props: IProps) => {
 };
 
 export default ImageEditorOverlay;
+
+/**
+ * Download the contents of the given canvas as a file on the user's computer.
+ *
+ * @param canvas A {@link HTMLCanvasElement} whose contents we want to download
+ * as a file.
+ *
+ * @param originalFileName The name of the original file which was used to seed
+ * the canvas. This will be used as a base name for the generated file (with an
+ * "-edited" suffix).
+ *
+ * @param originalMIMEType The MIME type of the original file which was used to
+ * seed the canvas. When possible, we try to download a file in the same format,
+ * but this is not guaranteed and depends on browser support. If the original
+ * MIME type can not be preserved, a PNG file will be downloaded.
+ */
+const downloadAsFile = async (
+    canvas: HTMLCanvasElement,
+    originalFileName: string,
+    originalMIMEType?: string,
+): Promise<void> => {
+    const image = new Image();
+    image.src = canvas.toDataURL();
+
+    // Browsers are required to support "image/png". They may also support
+    // "image/jpeg" and "image/webp". Potentially they may even support more
+    // formats, but to keep this scoped we limit to these three.
+    let [mimeType, extension] = ["image/png", "png"];
+    switch (originalMIMEType) {
+        case "image/jpeg":
+            mimeType = originalMIMEType;
+            extension = "jpeg";
+            break;
+        case "image/webp":
+            mimeType = originalMIMEType;
+            extension = "webp";
+            break;
+        default:
+            break;
+    }
+
+    const blob = ensure(
+        await new Promise<Blob>((resolve) => canvas.toBlob(resolve, mimeType)),
+    );
+
+    const [originalName] = nameAndExtension(originalFileName);
+    const fileName = `${originalName}-edited.${extension}`;
+
+    log.debug(() => ({ a: "download", blob, type: blob.type, mimeType }));
+    // Revokes the URL after downloading.
+    downloadUsingAnchor(URL.createObjectURL(blob), fileName);
+};
