@@ -46,14 +46,14 @@ class _PeoplePageState extends State<PeoplePage> {
   int? smallestClusterSize;
   Future<List<EnteFile>> filesFuture = Future.value([]);
 
-  bool get showSuggestionBanner => (!userDismissed &&
+  bool get showSuggestionBanner => (!userDismissedSuggestionBanner &&
       smallestClusterSize != null &&
       smallestClusterSize! >= kMinimumClusterSizeSearchResult &&
       files != null &&
       files!.isNotEmpty &&
       files!.length > 200);
 
-  bool userDismissed = false;
+  bool userDismissedSuggestionBanner = false;
 
   late final StreamSubscription<LocalPhotosUpdatedEvent> _filesUpdatedEvent;
   late final StreamSubscription<PeopleChangedEvent> _peopleChangedEvent;
@@ -133,7 +133,7 @@ class _PeoplePageState extends State<PeoplePage> {
                         direction: DismissDirection.horizontal,
                         onDismissed: (direction) {
                           setState(() {
-                            userDismissed = true;
+                            userDismissedSuggestionBanner = true;
                           });
                         },
                         child: RepaintBoundary(
