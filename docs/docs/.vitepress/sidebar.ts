@@ -124,6 +124,10 @@ export const sidebar = [
                 collapsed: true,
                 items: [
                     {
+                        text: "Desktop install",
+                        link: "/photos/troubleshooting/desktop-install/",
+                    },
+                    {
                         text: "Files not uploading",
                         link: "/photos/troubleshooting/files-not-uploading",
                     },
