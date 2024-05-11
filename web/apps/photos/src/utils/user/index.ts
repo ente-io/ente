@@ -14,8 +14,8 @@ export const isInternalUser = () => {
 };
 
 export const isInternalUserForML = () => {
-    const userId = (getData(LS_KEYS.USER) as User)?.id;
-    if (userId == 1) return true;
+    const userID = (getData(LS_KEYS.USER) as User)?.id;
+    if (userID == 1 || userID == 2) return true;
 
     return isInternalUser();
 };

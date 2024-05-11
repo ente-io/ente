@@ -5,11 +5,8 @@ import { isDev } from "./utils/electron";
 /**
  * Initialize logging in the main process.
  *
- * This will set our underlying logger up to log to a file named `ente.log`,
- *
- * - on Linux at ~/.config/ente/logs/ente.log
- * - on macOS at ~/Library/Logs/ente/ente.log
- * - on Windows at %USERPROFILE%\AppData\Roaming\ente\logs\ente.log
+ * This will set our underlying logger up to log to a file named `ente.log`, see
+ * [Note: App log path].
  *
  * On dev builds, it will also log to the console.
  */
