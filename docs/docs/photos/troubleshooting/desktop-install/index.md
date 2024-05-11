@@ -38,3 +38,16 @@ tl;dr; for example, on Ubuntu,
 ```sh
 sudo apt install libfuse2
 ```
+
+## Windows
+
+If the app stops with an "A JavaScript error occurred in the main process - The
+specified module could not be found" error on your Windows machine when you
+start it, then you might need to install the VC++ runtime from Microsoft.
+
+This is what the error looks like:
+
+![Error when VC++ runtime is not installed](windows-vc.png){width=500px}
+
+You can install the Microsoft VC++ redistributable runtime from here:<br/>
+https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170#latest-microsoft-visual-c-redistributable-version
