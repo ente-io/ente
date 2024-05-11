@@ -31,6 +31,12 @@ export type SourceURLs = {
     isOriginal: boolean;
     isRenderable: boolean;
     type: "normal" | "livePhoto";
+    /**
+     * Best effort attempt at obtaining the MIME type. This should always be set
+     * ideally, over time we need to find and fix the types for the cases where
+     * it can be missing.
+     */
+    mimeType?: string;
 };
 
 export type OnDownloadProgress = (event: {
@@ -476,6 +482,7 @@ async function getRenderableFileURL(
     forceConvert: boolean,
 ): Promise<SourceURLs> {
     let srcURLs: SourceURLs["url"];
+    let mimeType: string | undefined;
     switch (file.metadata.fileType) {
         case FILE_TYPE.IMAGE: {
             const convertedBlob = await getRenderableImage(
@@ -488,6 +495,7 @@ async function getRenderableFileURL(
                 convertedBlob,
             );
             srcURLs = convertedURL;
+            mimeType = convertedBlob.type;
             break;
         }
         case FILE_TYPE.LIVE_PHOTO: {
@@ -534,6 +542,7 @@ async function getRenderableFileURL(
             file.metadata.fileType === FILE_TYPE.LIVE_PHOTO
                 ? "livePhoto"
                 : "normal",
+        mimeType,
     };
 }
 
