@@ -46,11 +46,14 @@ class _PeoplePageState extends State<PeoplePage> {
   int? smallestClusterSize;
   Future<List<EnteFile>> filesFuture = Future.value([]);
 
-  bool get showSuggestionBanner => (smallestClusterSize != null &&
+  bool get showSuggestionBanner => (!userDismissed &&
+      smallestClusterSize != null &&
       smallestClusterSize! >= kMinimumClusterSizeSearchResult &&
       files != null &&
       files!.isNotEmpty &&
       files!.length > 200);
+
+  bool userDismissed = false;
 
   late final StreamSubscription<LocalPhotosUpdatedEvent> _filesUpdatedEvent;
   late final StreamSubscription<PeopleChangedEvent> _peopleChangedEvent;
@@ -125,41 +128,50 @@ class _PeoplePageState extends State<PeoplePage> {
             return Column(
               children: [
                 showSuggestionBanner
-                    ? RepaintBoundary(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            vertical: 8.0,
-                            horizontal: 8.0,
-                          ),
-                          child: NotificationWidget(
-                            startIcon: Icons.star_border_rounded,
-                            actionIcon: Icons.search_outlined,
-                            text: "Review suggestions",
-                            subText:
-                                "Improve the results by adding more suggested photos",
-                            type: NotificationType.greenBanner,
-                            onTap: () async {
-                              unawaited(
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        PersonReviewClusterSuggestion(
-                                      widget.person,
+                    ? Dismissible(
+                        key: const Key("suggestionBanner"),
+                        direction: DismissDirection.horizontal,
+                        onDismissed: (direction) {
+                          setState(() {
+                            userDismissed = true;
+                          });
+                        },
+                        child: RepaintBoundary(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 8.0,
+                              horizontal: 8.0,
+                            ),
+                            child: NotificationWidget(
+                              startIcon: Icons.star_border_rounded,
+                              actionIcon: Icons.search_outlined,
+                              text: "Review suggestions",
+                              subText:
+                                  "Improve the results by adding more suggested photos",
+                              type: NotificationType.greenBanner,
+                              onTap: () async {
+                                unawaited(
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          PersonReviewClusterSuggestion(
+                                        widget.person,
+                                      ),
                                     ),
                                   ),
-                                ),
-                              );
-                            },
-                          ),
-                        )
-                            .animate(
-                              onPlay: (controller) => controller.repeat(),
-                            )
-                            .shimmer(
-                              duration: 1000.ms,
-                              delay: 3200.ms,
-                              size: 0.6,
+                                );
+                              },
                             ),
+                          )
+                              .animate(
+                                onPlay: (controller) => controller.repeat(),
+                              )
+                              .shimmer(
+                                duration: 1000.ms,
+                                delay: 3200.ms,
+                                size: 0.6,
+                              ),
+                        ),
                       )
                     : const SizedBox.shrink(),
                 Expanded(
