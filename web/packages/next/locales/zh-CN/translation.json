@@ -565,6 +565,9 @@
     "IMAGE": "图像",
     "VIDEO": "视频",
     "LIVE_PHOTO": "实况照片",
+    "editor": {
+        "crop": ""
+    },
     "CONVERT": "转换",
     "CONFIRM_EDITOR_CLOSE_MESSAGE": "您确定要关闭编辑器吗？",
     "CONFIRM_EDITOR_CLOSE_DESCRIPTION": "下载已编辑的图片或将副本保存到 Ente 以保留您的更改。",

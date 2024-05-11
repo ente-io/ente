@@ -565,6 +565,9 @@
     "IMAGE": "Bild",
     "VIDEO": "Video",
     "LIVE_PHOTO": "Live-Foto",
+    "editor": {
+        "crop": ""
+    },
     "CONVERT": "Konvertieren",
     "CONFIRM_EDITOR_CLOSE_MESSAGE": "Editor wirklich schließen?",
     "CONFIRM_EDITOR_CLOSE_DESCRIPTION": "Lade dein bearbeitetes Bild herunter oder speichere es in Ente, um die Änderungen nicht zu verlieren.",
