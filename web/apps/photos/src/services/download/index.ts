@@ -492,8 +492,10 @@ async function getRenderableFileURL(
                 : URL.createObjectURL(convertedBlob)
             : undefined;
 
-    let srcURLs: SourceURLs["url"];
+    let url: SourceURLs["url"];
     let isOriginal: boolean;
+    let isRenderable: boolean;
+    let type: SourceURLs["type"] = "normal";
     let mimeType: string | undefined;
 
     switch (file.metadata.fileType) {
@@ -503,18 +505,17 @@ async function getRenderableFileURL(
                 fileBlob,
             );
             const convertedURL = existingOrNewObjectURL(convertedBlob);
-            srcURLs = convertedURL;
+            url = convertedURL;
             isOriginal = convertedURL === originalFileURL;
+            isRenderable = !!convertedURL;
             mimeType = convertedBlob?.type;
             break;
         }
         case FILE_TYPE.LIVE_PHOTO: {
-            srcURLs = await getRenderableLivePhotoURL(
-                file,
-                fileBlob,
-                forceConvert,
-            );
+            url = await getRenderableLivePhotoURL(file, fileBlob, forceConvert);
             isOriginal = false;
+            isRenderable = false;
+            type = "livePhoto";
             break;
         }
         case FILE_TYPE.VIDEO: {
@@ -524,28 +525,21 @@ async function getRenderableFileURL(
                 forceConvert,
             );
             const convertedURL = existingOrNewObjectURL(convertedBlob);
-            srcURLs = convertedURL;
+            url = convertedURL;
             isOriginal = convertedURL === originalFileURL;
+            isRenderable = !!convertedURL;
             mimeType = convertedBlob?.type;
             break;
         }
         default: {
-            srcURLs = originalFileURL;
+            url = originalFileURL;
+            isOriginal = true;
+            isRenderable = false;
             break;
         }
     }
 
-    return {
-        url: srcURLs,
-        isOriginal,
-        isRenderable:
-            file.metadata.fileType !== FILE_TYPE.LIVE_PHOTO && !!srcURLs,
-        type:
-            file.metadata.fileType === FILE_TYPE.LIVE_PHOTO
-                ? "livePhoto"
-                : "normal",
-        mimeType,
-    };
+    return { url, isOriginal, isRenderable, type, mimeType };
 }
 
 async function getRenderableLivePhotoURL(
