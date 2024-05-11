@@ -32,9 +32,13 @@ export type SourceURLs = {
     isRenderable: boolean;
     type: "normal" | "livePhoto";
     /**
-     * Best effort attempt at obtaining the MIME type. This should always be set
-     * ideally, over time we need to find and fix the types for the cases where
-     * it can be missing.
+     * Best effort attempt at obtaining the MIME type.
+     *
+     * Known cases where it is missing:
+     *
+     * - Live photos (these have a different code path for obtaining the URL).
+     * - A video that is passes the isPlayable test in the browser.
+     *
      */
     mimeType?: string;
 };
@@ -518,6 +522,7 @@ async function getRenderableFileURL(
                 convertedBlob,
             );
             srcURLs = convertedURL;
+            mimeType = convertedBlob.type;
             break;
         }
         default: {
@@ -622,7 +627,7 @@ async function getPlayableVideo(
             // TODO(MR): This might not work for very large (~ GB) videos. Test.
             log.info(`Converting video ${videoNameTitle} to mp4`);
             const convertedVideoData = await ffmpeg.convertToMP4(videoBlob);
-            return new Blob([convertedVideoData]);
+            return new Blob([convertedVideoData], { type: "video/mp4" });
         }
     } catch (e) {
         log.error("Video conversion failed", e);
