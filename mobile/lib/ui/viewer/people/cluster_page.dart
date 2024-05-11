@@ -143,9 +143,6 @@ class _ClusterPageState extends State<ClusterPage> {
       body: Column(
         children: [
           widget.showNamingBanner
-              ? const SizedBox(height: 12)
-              : const SizedBox.shrink(),
-          widget.showNamingBanner
               ? RepaintBoundary(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
@@ -184,9 +181,6 @@ class _ClusterPageState extends State<ClusterPage> {
                         size: 0.6,
                       ),
                 )
-              : const SizedBox.shrink(),
-          widget.showNamingBanner
-              ? const SizedBox(height: 12)
               : const SizedBox.shrink(),
           Expanded(
             child: Stack(
