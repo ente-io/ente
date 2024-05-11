@@ -310,25 +310,25 @@ class DownloadManagerImpl {
         }
 
         const cachedBlob = await this.fileCache?.get(cacheKey);
-        console.log({ a: 1, cacheKey, cachedBlob });
         let res: Response;
         if (cachedBlob) res = new Response(cachedBlob);
         else {
             res = await this.downloadClient.downloadFileStream(file);
+            // We don't have a files cache currently, so this was already a
+            // no-op. But even if we had a cache, this seems sus, because
+            // res.blob() will read the stream and I'd think then trying to do
+            // the subsequent read of the stream again below won't work.
+
             // this.fileCache?.put(cacheKey, await res.blob());
         }
         const reader = res.body.getReader();
 
         const contentLength = +res.headers.get("Content-Length") ?? 0;
-        // let downloadedBytes = 0;
-
-        console.log({ a: 2, res, contentLength });
+        let downloadedBytes = 0;
 
         const stream = new ReadableStream({
             start: async (controller) => {
                 try {
-                    console.log({ a: "start", controller });
-
                     const decryptionHeader = await this.cryptoWorker.fromB64(
                         file.file.decryptionHeader,
                     );
@@ -338,17 +338,20 @@ class DownloadManagerImpl {
                             decryptionHeader,
                             fileKey,
                         );
-                    console.log({ a: "init", decryptionHeader, fileKey, file });
 
                     let data = new Uint8Array();
-                    // The following function handles each data chunk
                     let more = true;
                     while (more) {
                         more = false;
 
                         // "done" is a Boolean and value a "Uint8Array"
                         const { done, value } = await reader.read();
-                        console.log({ a: "read", done, value, data });
+
+                        downloadedBytes += value.byteLength;
+                        onDownloadProgress({
+                            loaded: downloadedBytes,
+                            total: contentLength,
+                        });
 
                         // Is there more data to read?
                         if (!done) {
@@ -357,12 +360,6 @@ class DownloadManagerImpl {
                             );
                             buffer.set(new Uint8Array(data), 0);
                             buffer.set(new Uint8Array(value), data.byteLength);
-                            console.log({
-                                a: "dec?",
-                                buffer,
-                                blen: buffer.length,
-                                decryptionChunkSize,
-                            });
 
                             if (buffer.length > decryptionChunkSize) {
                                 const fileData = new Uint8Array(
