@@ -271,6 +271,10 @@ export function generateStreamFromArrayBuffer(data: Uint8Array) {
     });
 }
 
+/**
+ * The returned blob.type is filled in, whenever possible, with the MIME type of
+ * the data that we're dealing with.
+ */
 export const getRenderableImage = async (fileName: string, imageBlob: Blob) => {
     try {
         const tempFile = new File([imageBlob], fileName);
@@ -284,7 +288,16 @@ export const getRenderableImage = async (fileName: string, imageBlob: Blob) => {
         if (!isNonWebImageFileExtension(extension)) {
             // Either it is something that the browser already knows how to
             // render, or something we don't even about yet.
-            return imageBlob;
+            const mimeType = fileTypeInfo.mimeType;
+            if (!mimeType) {
+                log.info(
+                    "Trying to render a file without a MIME type",
+                    fileName,
+                );
+                return imageBlob;
+            } else {
+                return new Blob([imageBlob], { type: mimeType });
+            }
         }
 
         const available = !moduleState.isNativeJPEGConversionNotAvailable;
@@ -325,7 +338,7 @@ const nativeConvertToJPEG = async (imageBlob: Blob) => {
         ? await electron.convertToJPEG(imageData)
         : await workerBridge.convertToJPEG(imageData);
     log.debug(() => `Native JPEG conversion took ${Date.now() - startTime} ms`);
-    return new Blob([jpegData]);
+    return new Blob([jpegData], { type: "image/jpeg" });
 };
 
 export function isSupportedRawFormat(exactType: string) {

@@ -18,5 +18,5 @@ export const heicToJPEG = async (heicBlob: Blob): Promise<Blob> => {
     const buffer = new Uint8Array(await heicBlob.arrayBuffer());
     const result = await HeicConvert({ buffer, format: "JPEG" });
     const convertedData = new Uint8Array(result);
-    return new Blob([convertedData]);
+    return new Blob([convertedData], { type: "image/jpeg" });
 };

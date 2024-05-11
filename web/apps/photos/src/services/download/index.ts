@@ -31,6 +31,16 @@ export type SourceURLs = {
     isOriginal: boolean;
     isRenderable: boolean;
     type: "normal" | "livePhoto";
+    /**
+     * Best effort attempt at obtaining the MIME type.
+     *
+     * Known cases where it is missing:
+     *
+     * - Live photos (these have a different code path for obtaining the URL).
+     * - A video that is passes the isPlayable test in the browser.
+     *
+     */
+    mimeType?: string;
 };
 
 export type OnDownloadProgress = (event: {
@@ -476,6 +486,7 @@ async function getRenderableFileURL(
     forceConvert: boolean,
 ): Promise<SourceURLs> {
     let srcURLs: SourceURLs["url"];
+    let mimeType: string | undefined;
     switch (file.metadata.fileType) {
         case FILE_TYPE.IMAGE: {
             const convertedBlob = await getRenderableImage(
@@ -488,6 +499,7 @@ async function getRenderableFileURL(
                 convertedBlob,
             );
             srcURLs = convertedURL;
+            mimeType = convertedBlob.type;
             break;
         }
         case FILE_TYPE.LIVE_PHOTO: {
@@ -510,6 +522,7 @@ async function getRenderableFileURL(
                 convertedBlob,
             );
             srcURLs = convertedURL;
+            mimeType = convertedBlob.type;
             break;
         }
         default: {
@@ -534,6 +547,7 @@ async function getRenderableFileURL(
             file.metadata.fileType === FILE_TYPE.LIVE_PHOTO
                 ? "livePhoto"
                 : "normal",
+        mimeType,
     };
 }
 
@@ -613,7 +627,7 @@ async function getPlayableVideo(
             // TODO(MR): This might not work for very large (~ GB) videos. Test.
             log.info(`Converting video ${videoNameTitle} to mp4`);
             const convertedVideoData = await ffmpeg.convertToMP4(videoBlob);
-            return new Blob([convertedVideoData]);
+            return new Blob([convertedVideoData], { type: "video/mp4" });
         }
     } catch (e) {
         log.error("Video conversion failed", e);
