@@ -685,7 +685,7 @@ class ClusterFeedbackService {
           clusterAvgBigClusters,
           personClusters,
           ignoredClusters,
-          (minimumSize == 100) ? goodMeanDistance + 0.05 : goodMeanDistance,
+          (minimumSize == 100) ? goodMeanDistance + 0.15 : goodMeanDistance,
         );
         w?.log(
           'Calculate suggestions using mean for ${clusterAvgBigClusters.length} clusters of min size $minimumSize',
