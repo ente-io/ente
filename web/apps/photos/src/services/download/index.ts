@@ -485,6 +485,13 @@ async function getRenderableFileURL(
     originalFileURL: string,
     forceConvert: boolean,
 ): Promise<SourceURLs> {
+    const existingOrNewObjectURL = (convertedBlob: Blob) =>
+        convertedBlob
+            ? convertedBlob === fileBlob
+                ? originalFileURL
+                : URL.createObjectURL(convertedBlob)
+            : undefined;
+
     let srcURLs: SourceURLs["url"];
     let mimeType: string | undefined;
     switch (file.metadata.fileType) {
@@ -493,13 +500,9 @@ async function getRenderableFileURL(
                 file.metadata.title,
                 fileBlob,
             );
-            const convertedURL = getFileObjectURL(
-                originalFileURL,
-                fileBlob,
-                convertedBlob,
-            );
+            const convertedURL = existingOrNewObjectURL(convertedBlob);
             srcURLs = convertedURL;
-            mimeType = convertedBlob.type;
+            mimeType = convertedBlob?.type;
             break;
         }
         case FILE_TYPE.LIVE_PHOTO: {
@@ -516,13 +519,9 @@ async function getRenderableFileURL(
                 fileBlob,
                 forceConvert,
             );
-            const convertedURL = getFileObjectURL(
-                originalFileURL,
-                fileBlob,
-                convertedBlob,
-            );
+            const convertedURL = existingOrNewObjectURL(convertedBlob);
             srcURLs = convertedURL;
-            mimeType = convertedBlob.type;
+            mimeType = convertedBlob?.type;
             break;
         }
         default: {
@@ -550,19 +549,6 @@ async function getRenderableFileURL(
         mimeType,
     };
 }
-
-const getFileObjectURL = (
-    originalFileURL: string,
-    originalBlob: Blob,
-    convertedBlob: Blob,
-) => {
-    const convertedURL = convertedBlob
-        ? convertedBlob === originalBlob
-            ? originalFileURL
-            : URL.createObjectURL(convertedBlob)
-        : null;
-    return convertedURL;
-};
 
 async function getRenderableLivePhotoURL(
     file: EnteFile,
