@@ -30,7 +30,8 @@ import (
 
 const (
 	// maxEmbeddingDataSize is the min size of an embedding object in bytes
-	minEmbeddingDataSize = 2048
+	minEmbeddingDataSize  = 2048
+	embeddingFetchTimeout = 15 * gTime.Second
 )
 
 type Controller struct {
@@ -345,7 +346,7 @@ func (c *Controller) getEmbeddingObjectsParallelV2(userID int64, dbEmbeddingRows
 			defer wg.Done()
 			defer func() { <-globalFileFetchSemaphore }() // Release back to global semaphore
 			objectKey := c.getObjectKey(userID, dbEmbeddingRow.FileID, dbEmbeddingRow.Model)
-			ctx, cancel := context.WithTimeout(context.Background(), gTime.Second*10) // 10 seconds timeout
+			ctx, cancel := context.WithTimeout(context.Background(), embeddingFetchTimeout)
 			defer cancel()
 			obj, err := c.getEmbeddingObjectWithRetries(ctx, objectKey, downloader, 0)
 			if err != nil {
