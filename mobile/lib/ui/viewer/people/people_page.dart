@@ -147,7 +147,7 @@ class _PeoplePageState extends State<PeoplePage> {
                               actionIcon: Icons.search_outlined,
                               text: "Review suggestions",
                               subText:
-                                  "Improve the results by adding more suggested photos",
+                                  "Improve the results",
                               type: NotificationType.greenBanner,
                               onTap: () async {
                                 unawaited(
