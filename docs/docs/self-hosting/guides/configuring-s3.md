@@ -70,9 +70,6 @@ The same principle applies if you're deploying to your custom domain.
 > storage supports it (minio doesn't), you'll also need to then enable
 > `s3.use_path_style_urls`.
 
- make sure you also Keep in mind that SSL
-> will be needed if you're running over the
-
 To summarize:
 
 Set the S3 bucket `endpoint` in `credentials.yaml` to a `yourserverip:3200` or
