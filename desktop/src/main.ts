@@ -140,7 +140,7 @@ const registerPrivilegedSchemes = () => {
  * See: https://github.com/electron/electron/issues/17972
  */
 const suidWorkaroundOnLinux = () =>
-    process.platform == "linux" && app.commandLine.appendSwitch("--no-sandbox");
+    process.platform == "linux" && app.commandLine.appendSwitch("no-sandbox");
 
 /**
  * Create an return the {@link BrowserWindow} that will form our app's UI.
