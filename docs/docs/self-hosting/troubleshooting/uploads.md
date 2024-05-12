@@ -5,9 +5,9 @@ description: Fixing upload errors when trying to self host Ente
 
 # Uploads failing
 
-If uploads to your self-hosted server are failing, make sure that
-`credentials.yaml` has `yourserverip:3200` for all three minio locations.
+If uploads to your minio are failing, you need to ensure that you've configured
+the S3 bucket `endpoint` in `credentials.yaml` (or `museum.yaml`) to, say,
+`yourserverip:3200`. This can be any host or port, it just need to be a value
+that is reachable from both your client and from museum.
 
-By default it is `localhost:3200`, and it needs to be changed to an IP that is
-accessible from both where you are running the Ente clients (e.g. the mobile
-app) and also from within the Docker compose cluster.
+For more details, see [configuring-s3](/self-hosting/guides/configuring-s3).

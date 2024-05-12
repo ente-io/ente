@@ -202,6 +202,10 @@ export const sidebar = [
                         link: "/self-hosting/guides/system-requirements",
                     },
                     {
+                        text: "Configuring S3",
+                        link: "/self-hosting/guides/configuring-s3",
+                    },
+                    {
                         text: "Using external S3",
                         link: "/self-hosting/guides/external-s3",
                     },

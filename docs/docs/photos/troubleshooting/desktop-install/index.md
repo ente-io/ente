@@ -23,10 +23,11 @@ It is possible that the exact path might be different on your machine. Briefly,
 what we need to do is create `libz.so` as an alias for `libz.so.1`. For more
 details, see the following bugs in upstream repositories:
 
-* libz.so cannot open shared object file on ARM64 -
-  [/github.com/AppImage/AppImageKit/issues/1092](https://github.com/AppImage/AppImageKit/issues/1092)
+-   libz.so cannot open shared object file on ARM64 -
+    [/github.com/AppImage/AppImageKit/issues/1092](https://github.com/AppImage/AppImageKit/issues/1092)
 
-* libz.so: cannot open shared object file with Ubuntu arm64 - [github.com/electron-userland/electron-builder/issues/7835](https://github.com/electron-userland/electron-builder/issues/7835)
+-   libz.so: cannot open shared object file with Ubuntu arm64 -
+    [github.com/electron-userland/electron-builder/issues/7835](https://github.com/electron-userland/electron-builder/issues/7835)
 
 ## AppImage says it requires FUSE
 
