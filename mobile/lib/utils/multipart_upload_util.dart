@@ -6,8 +6,8 @@ import "package:dio/dio.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/core/network/network.dart";
+import 'package:photos/module/upload/model/xml.dart';
 import "package:photos/service_locator.dart";
-import "package:photos/utils/xml_parser_util.dart";
 
 final _enteDio = NetworkClient.instance.enteDio;
 final _dio = NetworkClient.instance.getDio();
