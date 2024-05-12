@@ -1,6 +1,8 @@
 ---
 title: Configuring S3 buckets
-description: Fixing upload errors when trying to self host Ente
+description:
+    Configure S3 endpoints to fix upload errors or use your self hosted ente
+    from outside localhost
 ---
 
 # Configuring S3
