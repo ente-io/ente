@@ -134,6 +134,15 @@ const registerPrivilegedSchemes = () => {
 };
 
 /**
+ * The Chromium sandbox causes the app to fail to run on various Linux
+ * distributions. Reproducible on Ubuntu 24.
+ *
+ * See: https://github.com/electron/electron/issues/17972
+ */
+const suidWorkaroundOnLinux = () =>
+    process.platform == "linux" && app.commandLine.appendSwitch("--no-sandbox");
+
+/**
  * Create an return the {@link BrowserWindow} that will form our app's UI.
  *
  * This window will show the HTML served from {@link rendererURL}.
@@ -356,6 +365,7 @@ const main = () => {
 
     initLogging();
     logStartupBanner();
+    suidWorkaroundOnLinux();
     // The order of the next two calls is important
     setupRendererServer();
     registerPrivilegedSchemes();
