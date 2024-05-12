@@ -37,8 +37,16 @@ and put your custom configuration there (in your case, you can put an entire
 > the `s3` object in
 > [configurations/local.yaml](https://github.com/ente-io/ente/blob/main/server/configurations/local.yaml).
 
-By default, replication is turned off so unless you've enabled you only need to
-configure the endpoint for the first bucket.
+By default, you only need to configure the endpoint for the first bucket.
+
+> [!NOTE]
+>
+> If you're wondering why there are 3 buckets - that's because our production
+> instance uses these to perform replication.
+>
+> However, in a self hosted setup replication is off by default (you can turn it
+> on if you want). When replication is turned off, only the first bucket is
+> used, and you can remove the other two if you wish or just ignore them.
 
 The `endpoint` for the first bucket in the starter `credentials.yaml` is
 `localhost:3200`. The way this works then is that both museum (`2`) and minio
@@ -52,8 +60,17 @@ If you were to try and connect from a mobile app, this would not work since
 endpoint to a value, say `yourserverip:3200`, so that the mobile app can also
 reach it.
 
-The same principle applies if you're deploying to your custom domain. To
-summarize:
+The same principle applies if you're deploying to your custom domain.
+
+> [!NOTE]
+>
+> If you need to configure SSL, for example if you're running over the internet,
+> you'll need to turn off `s3.are_local_buckets` (which disables SSL in the
+> default starter compose template). In such cases, unless your S3 object
+> storage supports it (minio doesn't), you'll also need to then enable
+> `s3.use_path_style_urls`.
+
+To summarize:
 
 Set the S3 bucket `endpoint` in `credentials.yaml` to a `yourserverip:3200` or
 some such IP/hostname that accessible from both where you are running the Ente
