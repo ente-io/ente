@@ -257,6 +257,7 @@ class _PersonActionSheetState extends State<PersonActionSheet> {
     String initValue = '',
     required int clusterID,
   }) async {
+    bool userAlreadyPressedAddButton = false;
     final result = await showTextInputDialog(
       context,
       title: "New person",
@@ -266,11 +267,15 @@ class _PersonActionSheetState extends State<PersonActionSheet> {
       initialValue: initValue,
       textCapitalization: TextCapitalization.words,
       onSubmit: (String text) async {
+        if (userAlreadyPressedAddButton) {
+          return;
+        }
         // indicates user cancelled the rename request
         if (text.trim() == "") {
           return;
         }
         try {
+          userAlreadyPressedAddButton = true;
           final PersonEntity p =
               await PersonService.instance.addPerson(text, clusterID);
           final bool extraPhotosFound = await ClusterFeedbackService.instance
@@ -282,7 +287,7 @@ class _PersonActionSheetState extends State<PersonActionSheet> {
           Navigator.pop(context, p);
         } catch (e, s) {
           Logger("_PersonActionSheetState")
-              .severe("Failed to rename album", e, s);
+              .severe("Failed to add person", e, s);
           rethrow;
         }
       },
