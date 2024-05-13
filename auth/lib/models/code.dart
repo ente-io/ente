@@ -174,12 +174,13 @@ class Code {
   }
 
   String toOTPAuthUrlFormat() {
-    return jsonEncode(
-      Uri.parse(
-        "$rawData&codeDisplay="
-        "${jsonEncode(display.toJson())}",
-      ).toString(),
-    );
+    final uri = Uri.parse(rawData);
+    final query = {...uri.queryParameters};
+    query["codeDisplay"] = jsonEncode(display.toJson());
+
+    final newUri = uri.replace(queryParameters: query);
+
+    return jsonEncode(newUri.toString());
   }
 
   static String _getIssuer(Uri uri) {
