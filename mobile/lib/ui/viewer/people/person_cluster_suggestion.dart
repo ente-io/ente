@@ -279,10 +279,11 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
       ],
     );
     // Precompute face thumbnails for next suggestions, in case there are
-    const precomputeSuggestions = 6;
-    const maxPrecomputations = 10;
+    const precomputeSuggestions = 8;
+    const maxPrecomputations = 8;
     int compCount = 0;
     if (allSuggestions.length > currentSuggestionIndex + 1) {
+      outerLoop:
       for (final suggestion in allSuggestions.sublist(
         currentSuggestionIndex + 1,
         min(
@@ -302,7 +303,10 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
           );
           compCount++;
           if (compCount >= maxPrecomputations) {
-            break;
+            debugPrint(
+              'Prefetching $compCount face thumbnails for suggestions',
+            );
+            break outerLoop;
           }
         }
       }
