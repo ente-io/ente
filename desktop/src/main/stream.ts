@@ -3,6 +3,7 @@
  */
 import { net, protocol } from "electron/main";
 import StreamZip from "node-stream-zip";
+import { randomUUID } from "node:crypto";
 import { createWriteStream, existsSync } from "node:fs";
 import fs from "node:fs/promises";
 import { Readable } from "node:stream";
@@ -10,7 +11,11 @@ import { ReadableStream } from "node:stream/web";
 import { pathToFileURL } from "node:url";
 import log from "./log";
 import { ensure } from "./utils/common";
-import { deleteTempFile } from "./utils/temp";
+import {
+    deleteTempFile,
+    deleteTempFileIgnoringErrors,
+    makeTempFilePath,
+} from "./utils/temp";
 
 /**
  * Register a protocol handler that we use for streaming large files between the
@@ -224,20 +229,22 @@ export const clearConvertToMP4Results = () => convertToMP4Results.clear();
  * See also: [Note: IPC streams]
  */
 
-const handleConvertToMP4Write = (request: Request) => {
-    /*
-    try {
-        const inputTempFilePath = await makeTempFilePath();
+const handleConvertToMP4Write = async (request: Request) => {
+    const inputTempFilePath = await makeTempFilePath();
+    await writeStream(inputTempFilePath, ensure(request.body));
 
-            await writeStream(path, ensure(request.body));
-            return new Response("", { status: 200 });
-        }
+    const outputTempFilePath = await makeTempFilePath();
+    try {
+        //
     } catch (e) {
-        log.error("Failed to handle convert-to-mp4 stream", e);
-        return new Response(`Failed to write stream: ${String(e)}`, {
-            status: 500,
-        });
-    }*/
+        await deleteTempFileIgnoringErrors(inputTempFilePath);
+        await deleteTempFileIgnoringErrors(outputTempFilePath);
+        throw e;
+    }
+
+    const token = randomUUID();
+    convertToMP4Results.set(token, outputTempFilePath);
+    return new Response(token, { status: 200 });
 };
 
 const handleConvertToMP4Read = async (token: string) => {

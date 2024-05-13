@@ -1,11 +1,10 @@
 import pathToFfmpeg from "ffmpeg-static";
 import fs from "node:fs/promises";
 import type { ZipItem } from "../../types/ipc";
-import log from "../log";
 import { ensure, withTimeout } from "../utils/common";
 import { execAsync } from "../utils/electron";
 import {
-    deleteTempFile,
+    deleteTempFileIgnoringErrors,
     makeFileForDataOrPathOrZipItem,
     makeTempFilePath,
 } from "../utils/temp";
@@ -74,12 +73,9 @@ export const ffmpegExec = async (
 
         return fs.readFile(outputFilePath);
     } finally {
-        try {
-            if (isInputFileTemporary) await deleteTempFile(inputFilePath);
-            await deleteTempFile(outputFilePath);
-        } catch (e) {
-            log.error("Could not clean up temp files", e);
-        }
+        if (isInputFileTemporary)
+            await deleteTempFileIgnoringErrors(inputFilePath);
+        await deleteTempFileIgnoringErrors(outputFilePath);
     }
 };
 
@@ -157,11 +153,8 @@ export const ffmpegConvertToMP4 = async (
 
         return fs.readFile(outputFilePath);
     } finally {
-        try {
-            if (isInputFileTemporary) await deleteTempFile(inputFilePath);
-            await deleteTempFile(outputFilePath);
-        } catch (e) {
-            log.error("Could not clean up temp files", e);
-        }
+        if (isInputFileTemporary)
+            await deleteTempFileIgnoringErrors(inputFilePath);
+        await deleteTempFileIgnoringErrors(outputFilePath);
     }
 };
