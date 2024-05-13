@@ -1,5 +1,6 @@
 import "dart:async" show StreamSubscription, unawaited;
 import "dart:math";
+import "dart:typed_data";
 
 import "package:flutter/foundation.dart" show kDebugMode;
 import "package:flutter/material.dart";
@@ -93,7 +94,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
             final bool usingMean = currentSuggestion.usedOnlyMeanForSuggestion;
             final List<EnteFile> files = currentSuggestion.filesInCluster;
 
-            final Future<bool> generateFaceThumbnails = _generateFaceThumbnails(
+            final Future<Map<int, Uint8List?>> generateFacedThumbnails = _generateFaceThumbnails(
               files.sublist(0, min(files.length, 8)),
               clusterID,
             );
@@ -139,7 +140,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
                   files,
                   numberOfDifferentSuggestions,
                   allSuggestions,
-                  generateFaceThumbnails,
+                  generateFacedThumbnails,
                 ),
               ),
             );
@@ -214,7 +215,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
     List<EnteFile> files,
     int numberOfSuggestions,
     List<ClusterSuggestion> allSuggestions,
-    Future<bool> generateFaceThumbnails,
+    Future<Map<int, Uint8List?>> generateFaceThumbnails,
   ) {
     final widgetToReturn = Column(
       key: ValueKey("cluster_id-$clusterID-files-${files.length}"),
@@ -315,15 +316,16 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
   Widget _buildThumbnailWidget(
     List<EnteFile> files,
     int clusterID,
-    Future<bool> generateFaceThumbnails,
+    Future<Map<int, Uint8List?>> generateFaceThumbnails,
   ) {
     return SizedBox(
       height: MediaQuery.of(context).size.height * 0.4,
-      child: FutureBuilder<bool>(
+      child: FutureBuilder<Map<int, Uint8List?>>(
         key: futureBuilderKeyFaceThumbnails,
         future: generateFaceThumbnails,
         builder: (context, snapshot) {
           if (snapshot.hasData) {
+            final faceThumbnails = snapshot.data!;
             return Column(
               children: <Widget>[
                 Row(
@@ -331,6 +333,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
                   children: _buildThumbnailWidgetsRow(
                     files,
                     clusterID,
+                    faceThumbnails,
                   ),
                 ),
                 if (files.length > 4) const SizedBox(height: 24),
@@ -340,6 +343,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
                     children: _buildThumbnailWidgetsRow(
                       files,
                       clusterID,
+                      faceThumbnails,
                       start: 4,
                     ),
                   ),
@@ -363,7 +367,8 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
 
   List<Widget> _buildThumbnailWidgetsRow(
     List<EnteFile> files,
-    int cluserId, {
+    int cluserId,
+    Map<int, Uint8List?> faceThumbnails, {
     int start = 0,
   }) {
     return List<Widget>.generate(
@@ -379,6 +384,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
               clusterID: cluserId,
               useFullFile: false,
               thumbnailFallback: false,
+              faceCrop: faceThumbnails[files[start + index].uploadedFileID!],
             ),
           ),
         ),
@@ -386,11 +392,11 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
     );
   }
 
-  Future<bool> _generateFaceThumbnails(
+  Future<Map<int, Uint8List?>> _generateFaceThumbnails(
     List<EnteFile> files,
     int clusterID,
   ) async {
-    final futures = <Future<void>>[];
+    final futures = <Future<Uint8List?>>[];
     for (final file in files) {
       futures.add(
         PersonFaceWidget.precomputeNextFaceCrops(
@@ -400,7 +406,11 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
         ),
       );
     }
-    await Future.wait(futures);
-    return true;
+    final faceCropsList = await Future.wait(futures);
+    final faceCrops = <int, Uint8List?>{};
+    for (var i = 0; i < faceCropsList.length; i++) {
+      faceCrops[files[i].uploadedFileID!] = faceCropsList[i];
+    }
+    return faceCrops;
   }
 }

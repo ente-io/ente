@@ -22,6 +22,7 @@ class PersonFaceWidget extends StatelessWidget {
   final int? clusterID;
   final bool useFullFile;
   final bool thumbnailFallback;
+  final Uint8List? faceCrop;
 
   // PersonFaceWidget constructor checks that both personId and clusterID are not null
   // and that the file is not null
@@ -31,6 +32,7 @@ class PersonFaceWidget extends StatelessWidget {
     this.clusterID,
     this.useFullFile = true,
     this.thumbnailFallback = true,
+    this.faceCrop,
     Key? key,
   })  : assert(
           personId != null || clusterID != null,
@@ -40,6 +42,17 @@ class PersonFaceWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (faceCrop != null) {
+      return Stack(
+        fit: StackFit.expand,
+        children: [
+          Image(
+            image: MemoryImage(faceCrop!),
+            fit: BoxFit.cover,
+          ),
+        ],
+      );
+    }
     if (useGeneratedFaceCrops) {
       return FutureBuilder<Uint8List?>(
         future: getFaceCrop(),
@@ -171,7 +184,7 @@ class PersonFaceWidget extends StatelessWidget {
     }
   }
 
-  static Future<void> precomputeNextFaceCrops(
+  static Future<Uint8List?> precomputeNextFaceCrops(
     file,
     clusterID, {
     required bool useFullFile,
@@ -185,23 +198,23 @@ class PersonFaceWidget extends StatelessWidget {
         debugPrint(
           "No cover face for cluster $clusterID and recentFile ${file.uploadedFileID}",
         );
-        return;
+        return null;
       }
       final Uint8List? cachedFace = faceCropCache.get(face.faceID);
       if (cachedFace != null) {
-        return;
+        return cachedFace;
       }
       final faceCropCacheFile = cachedFaceCropPath(face.faceID);
       if ((await faceCropCacheFile.exists())) {
         final data = await faceCropCacheFile.readAsBytes();
         faceCropCache.put(face.faceID, data);
-        return;
+        return data;
       }
       if (!useFullFile) {
         final Uint8List? cachedFaceThumbnail =
             faceCropThumbnailCache.get(face.faceID);
         if (cachedFaceThumbnail != null) {
-          return;
+          return cachedFaceThumbnail;
         }
       }
       EnteFile? fileForFaceCrop = file;
@@ -210,7 +223,7 @@ class PersonFaceWidget extends StatelessWidget {
             await FilesDB.instance.getAnyUploadedFile(face.fileID);
       }
       if (fileForFaceCrop == null) {
-        return;
+        return null;
       }
 
       final result = await pool.withResource(
@@ -231,14 +244,14 @@ class PersonFaceWidget extends StatelessWidget {
           faceCropThumbnailCache.put(face.faceID, computedCrop);
         }
       }
-      return;
+      return computedCrop;
     } catch (e, s) {
       log(
         "Error getting cover face for cluster $clusterID",
         error: e,
         stackTrace: s,
       );
-      return;
+      return null;
     }
   }
 }
