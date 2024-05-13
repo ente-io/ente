@@ -9,7 +9,8 @@ import "package:photos/face/model/face.dart";
 import "package:photos/face/model/person.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
-import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
+import "package:photos/ui/common/loading_widget.dart";
+// import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 import "package:photos/ui/viewer/file_details/face_widget.dart";
 import "package:photos/ui/viewer/people/cropped_face_image_view.dart";
 import "package:photos/utils/face/face_box_crop.dart";
@@ -56,9 +57,7 @@ class PersonFaceWidget extends StatelessWidget {
             if (snapshot.hasError) {
               log('Error getting cover face for person: ${snapshot.error}');
             }
-            return ThumbnailWidget(
-              file,
-            );
+            return const EnteLoadingWidget();
           }
         },
       );
@@ -78,9 +77,7 @@ class PersonFaceWidget extends StatelessWidget {
             if (snapshot.hasError) {
               log('Error getting cover face for person: ${snapshot.error}');
             }
-            return ThumbnailWidget(
-              file,
-            );
+            return const EnteLoadingWidget();
           }
         },
       );
@@ -168,8 +165,11 @@ class PersonFaceWidget extends StatelessWidget {
     }
   }
 
-  static Future<void> precomputeNextFaceCrops(file, clusterID,
-      {required bool useFullFile,}) async {
+  static Future<void> precomputeNextFaceCrops(
+    file,
+    clusterID, {
+    required bool useFullFile,
+  }) async {
     try {
       final Face? face = await FaceMLDataDB.instance.getCoverFaceForPerson(
         recentFileID: file.uploadedFileID!,
