@@ -32,7 +32,8 @@ class PersonReviewClusterSuggestion extends StatefulWidget {
 class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
   int currentSuggestionIndex = 0;
   bool fetch = true;
-  Key futureBuilderKey = UniqueKey();
+  Key futureBuilderKeySuggestions = UniqueKey();
+  Key futureBuilderKeyFaceThumbnails = UniqueKey();
 
   // Declare a variable for the future
   late Future<List<ClusterSuggestion>> futureClusterSuggestions;
@@ -71,11 +72,10 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
         ],
       ),
       body: FutureBuilder<List<ClusterSuggestion>>(
-        key: futureBuilderKey,
+        key: futureBuilderKeySuggestions,
         future: futureClusterSuggestions,
         builder: (context, snapshot) {
           if (snapshot.hasData) {
-            // final List<int> keys = snapshot.data!.map((e) => e.$1).toList();
             if (snapshot.data!.isEmpty) {
               return Center(
                 child: Text(
@@ -93,6 +93,11 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
             final bool usingMean = currentSuggestion.usedOnlyMeanForSuggestion;
             final List<EnteFile> files = currentSuggestion.filesInCluster;
 
+            final Future<bool> generateFaceThumbnails = _generateFaceThumbnails(
+              files.sublist(0, min(files.length, 8)),
+              clusterID,
+            );
+
             _peopleChangedEvent =
                 Bus.instance.on<PeopleChangedEvent>().listen((event) {
               if (event.type == PeopleEventType.removedFilesFromCluster &&
@@ -104,13 +109,13 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
                 setState(() {});
               }
             });
-
             return InkWell(
               onTap: () {
                 final List<EnteFile> sortedFiles =
                     List<EnteFile>.from(currentSuggestion.filesInCluster);
-                sortedFiles
-                    .sort((a, b) => b.creationTime!.compareTo(a.creationTime!));
+                sortedFiles.sort(
+                  (a, b) => b.creationTime!.compareTo(a.creationTime!),
+                );
                 Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (context) => ClusterPage(
@@ -134,6 +139,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
                   files,
                   numberOfDifferentSuggestions,
                   allSuggestions,
+                  generateFaceThumbnails,
                 ),
               ),
             );
@@ -169,9 +175,15 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
       if (currentSuggestionIndex >= (numberOfSuggestions)) {
         setState(() {
           currentSuggestionIndex = 0;
-          futureBuilderKey = UniqueKey(); // Reset to trigger FutureBuilder
+          futureBuilderKeySuggestions =
+              UniqueKey(); // Reset to trigger FutureBuilder
+          futureBuilderKeyFaceThumbnails = UniqueKey();
           _fetchClusterSuggestions();
         });
+      } else {
+        futureBuilderKeyFaceThumbnails = UniqueKey();
+        fetch = false;
+        setState(() {});
       }
     } else {
       await FaceMLDataDB.instance.captureNotPersonFeedback(
@@ -181,7 +193,9 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
       // Recalculate the suggestions when a suggestion is rejected
       setState(() {
         currentSuggestionIndex = 0;
-        futureBuilderKey = UniqueKey(); // Reset to trigger FutureBuilder
+        futureBuilderKeySuggestions =
+            UniqueKey(); // Reset to trigger FutureBuilder
+        futureBuilderKeyFaceThumbnails = UniqueKey();
         _fetchClusterSuggestions();
       });
     }
@@ -200,6 +214,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
     List<EnteFile> files,
     int numberOfSuggestions,
     List<ClusterSuggestion> allSuggestions,
+    Future<bool> generateFaceThumbnails,
   ) {
     final widgetToReturn = Column(
       key: ValueKey("cluster_id-$clusterID-files-${files.length}"),
@@ -215,27 +230,10 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
           style: getEnteTextTheme(context).largeMuted,
         ),
         const SizedBox(height: 24),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: _buildThumbnailWidgets(
-            files,
-            clusterID,
-          ),
-        ),
-        if (files.length > 4) const SizedBox(height: 24),
-        if (files.length > 4)
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: _buildThumbnailWidgets(
-              files,
-              clusterID,
-              start: 4,
-            ),
-          ),
-        const SizedBox(height: 24.0),
-        Text(
-          "${files.length} photos",
-          style: getEnteTextTheme(context).body,
+        _buildThumbnailWidget(
+          files,
+          clusterID,
+          generateFaceThumbnails,
         ),
         const SizedBox(
           height: 24.0,
@@ -314,7 +312,56 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
     return widgetToReturn;
   }
 
-  List<Widget> _buildThumbnailWidgets(
+  Widget _buildThumbnailWidget(
+    List<EnteFile> files,
+    int clusterID,
+    Future<bool> generateFaceThumbnails,
+  ) {
+    return SizedBox(
+      height: MediaQuery.of(context).size.height * 0.4,
+      child: FutureBuilder<bool>(
+        key: futureBuilderKeyFaceThumbnails,
+        future: generateFaceThumbnails,
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            return Column(
+              children: <Widget>[
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: _buildThumbnailWidgetsRow(
+                    files,
+                    clusterID,
+                  ),
+                ),
+                if (files.length > 4) const SizedBox(height: 24),
+                if (files.length > 4)
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: _buildThumbnailWidgetsRow(
+                      files,
+                      clusterID,
+                      start: 4,
+                    ),
+                  ),
+                const SizedBox(height: 24.0),
+                Text(
+                  "${files.length} photos",
+                  style: getEnteTextTheme(context).body,
+                ),
+              ],
+            );
+          } else if (snapshot.hasError) {
+            // log the error
+            return const Center(child: Text("Error"));
+          } else {
+            return const Center(child: CircularProgressIndicator());
+          }
+        },
+      ),
+    );
+  }
+
+  List<Widget> _buildThumbnailWidgetsRow(
     List<EnteFile> files,
     int cluserId, {
     int start = 0,
@@ -337,5 +384,23 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
         ),
       ),
     );
+  }
+
+  Future<bool> _generateFaceThumbnails(
+    List<EnteFile> files,
+    int clusterID,
+  ) async {
+    final futures = <Future<void>>[];
+    for (final file in files) {
+      futures.add(
+        PersonFaceWidget.precomputeNextFaceCrops(
+          file,
+          clusterID,
+          useFullFile: false,
+        ),
+      );
+    }
+    await Future.wait(futures);
+    return true;
   }
 }
