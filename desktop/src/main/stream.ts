@@ -229,7 +229,6 @@ export const clearConvertToMP4Results = () => convertToMP4Results.clear();
  *
  * See also: [Note: IPC streams]
  */
-
 const handleConvertToMP4Write = async (request: Request) => {
     const inputTempFilePath = await makeTempFilePath();
     await writeStream(inputTempFilePath, ensure(request.body));
@@ -238,9 +237,10 @@ const handleConvertToMP4Write = async (request: Request) => {
     try {
         await ffmpegConvertToMP4(inputTempFilePath, outputTempFilePath);
     } catch (e) {
-        await deleteTempFileIgnoringErrors(inputTempFilePath);
         await deleteTempFileIgnoringErrors(outputTempFilePath);
         throw e;
+    } finally {
+        await deleteTempFileIgnoringErrors(inputTempFilePath);
     }
 
     const token = randomUUID();
