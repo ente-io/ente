@@ -9,6 +9,11 @@ import {
 } from "constants/ffmpeg";
 import { NULL_LOCATION } from "constants/upload";
 import type { ParsedExtractedMetadata } from "types/metadata";
+import {
+    readConvertToMP4Done,
+    readConvertToMP4Stream,
+    writeConvertToMP4Stream,
+} from "utils/native-stream";
 import type { DedicatedFFmpegWorker } from "worker/ffmpeg.worker";
 import {
     toDataOrPathOrZipEntry,
@@ -236,10 +241,10 @@ const ffmpegExecWeb = async (
  *
  * @returns The mp4 video blob.
  */
-export const convertToMP4 = async (blob: Blob) => {
+export const convertToMP4 = async (blob: Blob): Promise<Blob | Uint8Array> => {
     const electron = globalThis.electron;
     if (electron) {
-        //
+        return convertToMP4Native(electron, blob);
     } else {
         return ffmpegExecWeb(
             [
@@ -257,44 +262,27 @@ export const convertToMP4 = async (blob: Blob) => {
     }
 };
 
-/**
- * Run the given FFmpeg command using a native FFmpeg binary when we're running
- * in the context of our desktop app, otherwise using the browser based wasm
- * FFmpeg implemenation.
- *
- * See also: {@link ffmpegExecWeb}.
- */
-const ffmpegExecNativeOrWeb = async (
-    command: string[],
-    blob: Blob,
-    outputFileExtension: string,
-    timeoutMs: number,
-) => {
-    const electron = globalThis.electron;
-    if (electron)
-        return electron.ffmpegExec(
-            command,
-            new Uint8Array(await blob.arrayBuffer()),
-            outputFileExtension,
-            timeoutMs,
-        );
-    else return ffmpegExecWeb(command, blob, outputFileExtension, timeoutMs);
+const convertToMP4Native = async (electron: Electron, blob: Blob) => {
+    const token = await writeConvertToMP4Stream(electron, blob);
+    const mp4Blob = await readConvertToMP4Stream(electron, token);
+    readConvertToMP4Done(electron, token);
+    return mp4Blob;
 };
 
 /** Lazily create a singleton instance of our worker */
 class WorkerFactory {
     private instance: Promise<Remote<DedicatedFFmpegWorker>>;
 
+    private createComlinkWorker = () =>
+        new ComlinkWorker<typeof DedicatedFFmpegWorker>(
+            "ffmpeg-worker",
+            new Worker(new URL("worker/ffmpeg.worker.ts", import.meta.url)),
+        );
+
     async lazy() {
-        if (!this.instance) this.instance = createComlinkWorker().remote;
+        if (!this.instance) this.instance = this.createComlinkWorker().remote;
         return this.instance;
     }
 }
 
 const workerFactory = new WorkerFactory();
-
-const createComlinkWorker = () =>
-    new ComlinkWorker<typeof DedicatedFFmpegWorker>(
-        "ffmpeg-worker",
-        new Worker(new URL("worker/ffmpeg.worker.ts", import.meta.url)),
-    );
