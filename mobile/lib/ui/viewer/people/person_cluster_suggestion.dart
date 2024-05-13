@@ -209,7 +209,8 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
             "ClusterID: $clusterID, Distance: ${distance.toStringAsFixed(3)}, usingMean: $usingMean",
             style: getEnteTextTheme(context).smallMuted,
           ),
-        Text( // TODO: come up with a better copy for strings below!
+        Text(
+          // TODO: come up with a better copy for strings below!
           files.length > 1
               ? "Do these photos belong to ${widget.person.data.name}?"
               : "Does this photo belong to ${widget.person.data.name}?",
@@ -328,6 +329,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
               files[start + index],
               clusterID: cluserId,
               useFullFile: false,
+              thumbnailFallback: false,
             ),
           ),
         ),

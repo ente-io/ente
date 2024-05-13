@@ -10,7 +10,7 @@ import "package:photos/face/model/person.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/ui/common/loading_widget.dart";
-// import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
+import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/ui/viewer/file_details/face_widget.dart";
 import "package:photos/ui/viewer/people/cropped_face_image_view.dart";
 import "package:photos/utils/face/face_box_crop.dart";
@@ -21,6 +21,7 @@ class PersonFaceWidget extends StatelessWidget {
   final String? personId;
   final int? clusterID;
   final bool useFullFile;
+  final bool thumbnailFallback;
 
   // PersonFaceWidget constructor checks that both personId and clusterID are not null
   // and that the file is not null
@@ -29,6 +30,7 @@ class PersonFaceWidget extends StatelessWidget {
     this.personId,
     this.clusterID,
     this.useFullFile = true,
+    this.thumbnailFallback = true,
     Key? key,
   })  : assert(
           personId != null || clusterID != null,
@@ -57,7 +59,9 @@ class PersonFaceWidget extends StatelessWidget {
             if (snapshot.hasError) {
               log('Error getting cover face for person: ${snapshot.error}');
             }
-            return const EnteLoadingWidget();
+            return thumbnailFallback
+                ? ThumbnailWidget(file)
+                : const EnteLoadingWidget();
           }
         },
       );
@@ -77,7 +81,9 @@ class PersonFaceWidget extends StatelessWidget {
             if (snapshot.hasError) {
               log('Error getting cover face for person: ${snapshot.error}');
             }
-            return const EnteLoadingWidget();
+            return thumbnailFallback
+                ? ThumbnailWidget(file)
+                : const EnteLoadingWidget();
           }
         },
       );
