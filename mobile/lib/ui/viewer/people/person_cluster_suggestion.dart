@@ -243,33 +243,36 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
         ), // Add some spacing between the thumbnail and the text
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          child: Row(
             children: <Widget>[
-              ButtonWidget(
-                buttonType: ButtonType.primary,
-                labelText: 'Yes, confirm',
-                buttonSize: ButtonSize.large,
-                onTap: () async => {
-                  await _handleUserClusterChoice(
-                    clusterID,
-                    true,
-                    numberOfSuggestions,
-                  ),
-                },
+              Expanded(
+                child: ButtonWidget(
+                  buttonType: ButtonType.critical,
+                  labelText: 'No',
+                  buttonSize: ButtonSize.large,
+                  onTap: () async => {
+                    await _handleUserClusterChoice(
+                      clusterID,
+                      false,
+                      numberOfSuggestions,
+                    ),
+                  },
+                ),
               ),
-              const SizedBox(height: 12.0), // Add some spacing
-              ButtonWidget(
-                buttonType: ButtonType.critical,
-                labelText: 'No',
-                buttonSize: ButtonSize.large,
-                onTap: () async => {
-                  await _handleUserClusterChoice(
-                    clusterID,
-                    false,
-                    numberOfSuggestions,
-                  ),
-                },
+              const SizedBox(width: 12.0),
+              Expanded(
+                child: ButtonWidget(
+                  buttonType: ButtonType.primary,
+                  labelText: 'Yes',
+                  buttonSize: ButtonSize.large,
+                  onTap: () async => {
+                    await _handleUserClusterChoice(
+                      clusterID,
+                      true,
+                      numberOfSuggestions,
+                    ),
+                  },
+                ),
               ),
             ],
           ),
