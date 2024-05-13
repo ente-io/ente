@@ -69,6 +69,7 @@ import {
     watchUpdateIgnoredFiles,
     watchUpdateSyncedFiles,
 } from "./services/watch";
+import { clearConvertToMP4Results } from "./stream";
 
 /**
  * Listen for IPC events sent/invoked by the renderer process, and route them to
@@ -107,6 +108,8 @@ export const attachIPCHandlers = () => {
     ipcMain.handle("selectDirectory", () => selectDirectory());
 
     ipcMain.on("clearStores", () => clearStores());
+
+    ipcMain.on("clearConvertToMP4Results", () => clearConvertToMP4Results());
 
     ipcMain.handle("saveEncryptionKey", (_, encryptionKey: string) =>
         saveEncryptionKey(encryptionKey),

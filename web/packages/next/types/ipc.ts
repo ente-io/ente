@@ -67,9 +67,16 @@ export interface Electron {
      * Clear any stored data.
      *
      * This is a coarse single shot cleanup, meant for use in clearing any
-     * Electron side state during logout.
+     * persisted Electron side state during logout.
      */
     clearStores: () => void;
+
+    /**
+     * Clear an state corresponding to in-flight convert-to-mp4 requests.
+     *
+     * This is meant for use during logout.
+     */
+    clearConvertToMP4Results: () => void;
 
     /**
      * Return the previously saved encryption key from persistent safe storage.

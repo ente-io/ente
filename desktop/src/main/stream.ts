@@ -42,13 +42,19 @@ export const registerStreamProtocol = () => {
         switch (host) {
             case "read":
                 return handleRead(ensure(searchParams.get("path")));
+
             case "read-zip":
                 return handleReadZip(
                     ensure(searchParams.get("zipPath")),
                     ensure(searchParams.get("entryName")),
                 );
+
             case "write":
                 return handleWrite(ensure(searchParams.get("path")), request);
+
+            case "convert-to-mp4":
+                return handleConvertToMP4(searchParams.get("token"), request);
+
             default:
                 return new Response("", { status: 404 });
         }
@@ -209,4 +215,29 @@ const writeNodeStream = async (filePath: string, fileStream: Readable) => {
  *
  * See also: [Note: IPC streams]
  */
-const convertToMP4 = (token?: string) => {};
+const handleConvertToMP4 = (token: string | undefined, request: Request) => {
+    // try {
+    //     if (token) {
+    //     } else {
+    //         await writeStream(path, ensure(request.body));
+    //         return new Response("", { status: 200 });
+    //     }
+    // } catch (e) {
+    //     log.error("Failed to handle convert-to-mp4 stream", e);
+    //     return new Response(`Failed to write stream: ${String(e)}`, {
+    //         status: 500,
+    //     });
+    // }
+};
+
+/**
+ * A map from token to file paths for convert-to-mp4 requests that we have
+ * received.
+ */
+const convertToMP4Results = new Map<string, string>();
+
+/**
+ * Clear any in-memory state for in-flight convert-to-mp4 requests. Meant to be
+ * called during logout.
+ */
+export const clearConvertToMP4Results = () => convertToMP4Results.clear();
