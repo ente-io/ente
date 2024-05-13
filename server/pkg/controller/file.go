@@ -502,7 +502,7 @@ func (c *FileController) UpdateMagicMetadata(ctx *gin.Context, req ente.UpdateMu
 	if err != nil {
 		return stacktrace.Propagate(err, "")
 	}
-	err = c.FileRepo.UpdateMagicAttributes(ctx, req.MetadataList, isPublicMetadata)
+	err = c.FileRepo.UpdateMagicAttributes(ctx, req.MetadataList, isPublicMetadata, req.SkipVersion)
 	if err != nil {
 		return stacktrace.Propagate(err, "failed to update magic attributes")
 	}

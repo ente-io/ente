@@ -134,6 +134,7 @@ type UpdateMagicMetadata struct {
 // UpdateMultipleMagicMetadataRequest request payload for updating magic metadata for list of files
 type UpdateMultipleMagicMetadataRequest struct {
 	MetadataList []UpdateMagicMetadata `json:"metadataList" binding:"required"`
+	SkipVersion  *bool                 `json:"skipVersion"`
 }
 
 // UploadURL represents the upload url for a specific object
