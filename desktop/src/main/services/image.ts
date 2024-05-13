@@ -79,7 +79,7 @@ export const generateImageThumbnail = async (
 
     const outputFilePath = await makeTempFilePath("jpeg");
 
-    // Construct the command first, it may throw `NotAvailable` on win32.
+    // Construct the command first, it may throw `NotAvailable`.
     let quality = 70;
     let command = generateImageThumbnailCommand(
         inputFilePath,
@@ -138,6 +138,9 @@ const generateImageThumbnailCommand = (
             ];
 
         case "linux":
+            // The bundled binary is an ELF x86-64 executable.
+            if (process.arch != "x64")
+                throw new Error(CustomErrorMessage.NotAvailable);
             return [
                 imageMagickPath(),
                 inputFilePath,
