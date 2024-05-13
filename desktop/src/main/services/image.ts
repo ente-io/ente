@@ -143,10 +143,10 @@ const generateImageThumbnailCommand = (
                 throw new Error(CustomErrorMessage.NotAvailable);
             return [
                 imageMagickPath(),
-                inputFilePath,
-                "-auto-orient",
                 "-define",
                 `jpeg:size=${2 * maxDimension}x${2 * maxDimension}`,
+                inputFilePath,
+                "-auto-orient",
                 "-thumbnail",
                 `${maxDimension}x${maxDimension}`,
                 "-unsharp",
