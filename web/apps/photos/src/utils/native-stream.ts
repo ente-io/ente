@@ -166,3 +166,24 @@ export const readConvertToMP4Stream = async (
 
     return res.blob();
 };
+
+/**
+ * Sibling of {@link readConvertToMP4Stream} to let the native side know when we
+ * are done reading the response, and they can dispose any temporary resources
+ * it was using.
+ *
+ * @param token A token obtained from {@link writeConvertToMP4Stream}.
+ */
+export const readConvertToMP4Done = async (
+    _: Electron,
+    token: string,
+): Promise<void> => {
+    // The value for `done` is arbitrary, only its presence matters.
+    const params = new URLSearchParams({ token, done: "1" });
+    const url = new URL(`stream://convert-to-mp4?${params.toString()}`);
+
+    const req = new Request(url, { method: "GET" });
+    const res = await fetch(req);
+    if (!res.ok)
+        throw new Error(`Failed to close stream at ${url}: HTTP ${res.status}`);
+};
