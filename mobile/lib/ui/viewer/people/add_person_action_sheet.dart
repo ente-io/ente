@@ -89,6 +89,7 @@ class PersonActionSheet extends StatefulWidget {
 class _PersonActionSheetState extends State<PersonActionSheet> {
   static const int cancelButtonSize = 80;
   String _searchQuery = "";
+  bool userAlreadyAssigned = false;
 
   @override
   void initState() {
@@ -228,6 +229,10 @@ class _PersonActionSheetState extends State<PersonActionSheet> {
                         person: person.$1,
                         personFile: person.$2,
                         onTap: () async {
+                          if (userAlreadyAssigned) {
+                            return;
+                          }
+                          userAlreadyAssigned = true;
                           await PersonService.instance.assignClusterToPerson(
                             personID: person.$1.remoteID,
                             clusterID: widget.cluserID,
@@ -258,7 +263,6 @@ class _PersonActionSheetState extends State<PersonActionSheet> {
     String initValue = '',
     required int clusterID,
   }) async {
-    bool userAlreadyPressedAddButton = false;
     final result = await showTextInputDialog(
       context,
       title: "New person",
@@ -268,7 +272,7 @@ class _PersonActionSheetState extends State<PersonActionSheet> {
       initialValue: initValue,
       textCapitalization: TextCapitalization.words,
       onSubmit: (String text) async {
-        if (userAlreadyPressedAddButton) {
+        if (userAlreadyAssigned) {
           return;
         }
         // indicates user cancelled the rename request
@@ -276,7 +280,7 @@ class _PersonActionSheetState extends State<PersonActionSheet> {
           return;
         }
         try {
-          userAlreadyPressedAddButton = true;
+          userAlreadyAssigned = true;
           final PersonEntity p =
               await PersonService.instance.addPerson(text, clusterID);
           final bool extraPhotosFound = await ClusterFeedbackService.instance
