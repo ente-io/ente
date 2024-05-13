@@ -1,7 +1,7 @@
 import pathToFfmpeg from "ffmpeg-static";
 import fs from "node:fs/promises";
 import type { ZipItem } from "../../types/ipc";
-import { ensure, withTimeout } from "../utils/common";
+import { ensure } from "../utils/common";
 import { execAsync } from "../utils/electron";
 import {
     deleteTempFileIgnoringErrors,
@@ -45,7 +45,6 @@ export const ffmpegExec = async (
     command: string[],
     dataOrPathOrZipItem: Uint8Array | string | ZipItem,
     outputFileExtension: string,
-    timeoutMS: number,
 ): Promise<Uint8Array> => {
     // TODO (MR): This currently copies files for both input (when
     // dataOrPathOrZipItem is data) and output. This needs to be tested
@@ -68,8 +67,7 @@ export const ffmpegExec = async (
             outputFilePath,
         );
 
-        if (timeoutMS) await withTimeout(execAsync(cmd), timeoutMS);
-        else await execAsync(cmd);
+        await execAsync(cmd);
 
         return fs.readFile(outputFilePath);
     } finally {
@@ -135,5 +133,5 @@ export const ffmpegConvertToMP4 = async (
 
     const cmd = substitutePlaceholders(command, inputFilePath, outputFilePath);
 
-    await withTimeout(execAsync(cmd), 30 * 1000);
+    await execAsync(cmd);
 };

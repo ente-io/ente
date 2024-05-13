@@ -36,7 +36,7 @@ import {
  */
 export const generateVideoThumbnailWeb = async (blob: Blob) =>
     _generateVideoThumbnail((seekTime: number) =>
-        ffmpegExecWeb(makeGenThumbnailCommand(seekTime), blob, "jpeg", 0),
+        ffmpegExecWeb(makeGenThumbnailCommand(seekTime), blob, "jpeg"),
     );
 
 const _generateVideoThumbnail = async (
@@ -75,7 +75,6 @@ export const generateVideoThumbnailNative = async (
             makeGenThumbnailCommand(seekTime),
             toDataOrPathOrZipEntry(desktopUploadItem),
             "jpeg",
-            0,
         ),
     );
 
@@ -112,12 +111,11 @@ export const extractVideoMetadata = async (
     const command = extractVideoMetadataCommand;
     const outputData =
         uploadItem instanceof File
-            ? await ffmpegExecWeb(command, uploadItem, "txt", 0)
+            ? await ffmpegExecWeb(command, uploadItem, "txt")
             : await electron.ffmpegExec(
                   command,
                   toDataOrPathOrZipEntry(uploadItem),
                   "txt",
-                  0,
               );
 
     return parseFFmpegExtractedMetadata(outputData);
@@ -224,10 +222,9 @@ const ffmpegExecWeb = async (
     command: string[],
     blob: Blob,
     outputFileExtension: string,
-    timeoutMs: number,
 ) => {
     const worker = await workerFactory.lazy();
-    return await worker.exec(command, blob, outputFileExtension, timeoutMs);
+    return await worker.exec(command, blob, outputFileExtension);
 };
 
 /**
@@ -246,19 +243,15 @@ export const convertToMP4 = async (blob: Blob): Promise<Blob | Uint8Array> => {
     if (electron) {
         return convertToMP4Native(electron, blob);
     } else {
-        return ffmpegExecWeb(
-            [
-                ffmpegPathPlaceholder,
-                "-i",
-                inputPathPlaceholder,
-                "-preset",
-                "ultrafast",
-                outputPathPlaceholder,
-            ],
-            blob,
-            "mp4",
-            30 * 1000,
-        );
+        const command = [
+            ffmpegPathPlaceholder,
+            "-i",
+            inputPathPlaceholder,
+            "-preset",
+            "ultrafast",
+            outputPathPlaceholder,
+        ];
+        return ffmpegExecWeb(command, blob, "mp4");
     }
 };
 

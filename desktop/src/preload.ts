@@ -143,14 +143,12 @@ const ffmpegExec = (
     command: string[],
     dataOrPathOrZipItem: Uint8Array | string | ZipItem,
     outputFileExtension: string,
-    timeoutMS: number,
 ) =>
     ipcRenderer.invoke(
         "ffmpegExec",
         command,
         dataOrPathOrZipItem,
         outputFileExtension,
-        timeoutMS,
     );
 
 // - ML
