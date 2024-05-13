@@ -111,7 +111,58 @@ export const writeStream = async (
 
     const res = await fetch(req);
     if (!res.ok)
+        throw new Error(`Failed to write stream to ${url}: HTTP ${res.status}`);
+};
+
+/**
+ * Variant of {@link writeStream} tailored for video conversion.
+ *
+ * @param blob The video to convert.
+ *
+ * @returns a token that can then be passed to {@link readConvertToMP4Stream} to
+ * read back the converted video. See: [Note: Convert to MP4].
+ */
+export const writeConvertToMP4Stream = async (_: Electron, blob: Blob) => {
+    const url = "stream://convert-to-mp4";
+
+    const req = new Request(url, {
+        method: "POST",
+        body: blob,
+        // @ts-expect-error TypeScript's libdom.d.ts does not include the
+        // "duplex" parameter, e.g. see
+        // https://github.com/node-fetch/node-fetch/issues/1769.
+        duplex: "half",
+    });
+
+    const res = await fetch(req);
+    if (!res.ok)
+        throw new Error(`Failed to write stream to ${url}: HTTP ${res.status}`);
+
+    const token = res.text();
+    return token;
+};
+
+/**
+ * Variant of {@link readStream} tailored for video conversion.
+ *
+ * @param token A token obtained from {@link writeConvertToMP4Stream}.
+ *
+ * @returns the contents of the converted video. See: [Note: Convert to MP4].
+ */
+export const readConvertToMP4Stream = async (
+    _: Electron,
+    token: string,
+): Promise<Blob> => {
+    const params = new URLSearchParams({ token });
+    const url = new URL(`stream://convert-to-mp4?${params.toString()}`);
+
+    const req = new Request(url, { method: "GET" });
+
+    const res = await fetch(req);
+    if (!res.ok)
         throw new Error(
-            `Failed to write stream to ${path}: HTTP ${res.status}`,
+            `Failed to read stream from ${url}: HTTP ${res.status}`,
         );
+
+    return res.blob();
 };

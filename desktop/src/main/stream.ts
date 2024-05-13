@@ -209,4 +209,4 @@ const writeNodeStream = async (filePath: string, fileStream: Readable) => {
  *
  * See also: [Note: IPC streams]
  */
-const convertToMP4 = (token: string | undefined) => {};
+const convertToMP4 = (token?: string) => {};
