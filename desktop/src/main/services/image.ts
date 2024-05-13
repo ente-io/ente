@@ -79,7 +79,7 @@ export const generateImageThumbnail = async (
 
     const outputFilePath = await makeTempFilePath("jpeg");
 
-    // Construct the command first, it may throw `NotAvailable` on win32.
+    // Construct the command first, it may throw `NotAvailable`.
     let quality = 70;
     let command = generateImageThumbnailCommand(
         inputFilePath,
@@ -94,6 +94,8 @@ export const generateImageThumbnail = async (
         let thumbnail: Uint8Array;
         do {
             await execAsync(command);
+            // TODO(MR): imagemagick debugging. Remove me after verifying logs.
+            log.info(`Generated thumbnail using ${command.join(" ")}`);
             thumbnail = new Uint8Array(await fs.readFile(outputFilePath));
             quality -= 10;
             command = generateImageThumbnailCommand(
@@ -138,14 +140,17 @@ const generateImageThumbnailCommand = (
             ];
 
         case "linux":
+            // The bundled binary is an ELF x86-64 executable.
+            if (process.arch != "x64")
+                throw new Error(CustomErrorMessage.NotAvailable);
             return [
                 imageMagickPath(),
-                inputFilePath,
-                "-auto-orient",
                 "-define",
                 `jpeg:size=${2 * maxDimension}x${2 * maxDimension}`,
+                inputFilePath,
+                "-auto-orient",
                 "-thumbnail",
-                `${maxDimension}x${maxDimension}>`,
+                `${maxDimension}x${maxDimension}`,
                 "-unsharp",
                 "0x.5",
                 "-quality",
