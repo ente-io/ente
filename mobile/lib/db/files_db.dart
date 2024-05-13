@@ -1,3 +1,4 @@
+import "dart:async";
 import "dart:io";
 
 import "package:computer/computer.dart";
@@ -1061,57 +1062,53 @@ class FilesDB {
     );
   }
 
-  Future<int> delete(int uploadedFileID) async {
-    final db = await instance.database;
-    return db.delete(
-      filesTable,
-      where: '$columnUploadedFileID =?',
-      whereArgs: [uploadedFileID],
+  Future<void> deleteByGeneratedID(int genID) async {
+    final db = await instance.sqliteAsyncDB;
+
+    await db.execute(
+      'DELETE FROM $filesTable WHERE $columnGeneratedID = ?',
+      [genID],
     );
   }
 
-  Future<int> deleteByGeneratedID(int genID) async {
-    final db = await instance.database;
-    return db.delete(
-      filesTable,
-      where: '$columnGeneratedID =?',
-      whereArgs: [genID],
+  Future<void> deleteMultipleUploadedFiles(List<int> uploadedFileIDs) async {
+    final db = await instance.sqliteAsyncDB;
+    final inParam = uploadedFileIDs.join(',');
+
+    await db.execute(
+      'DELETE FROM $filesTable WHERE $columnUploadedFileID IN ($inParam)',
     );
   }
 
-  Future<int> deleteMultipleUploadedFiles(List<int> uploadedFileIDs) async {
-    final db = await instance.database;
-    return await db.delete(
-      filesTable,
-      where: '$columnUploadedFileID IN (${uploadedFileIDs.join(', ')})',
-    );
-  }
-
-  Future<int> deleteMultipleByGeneratedIDs(List<int> generatedIDs) async {
+  Future<void> deleteMultipleByGeneratedIDs(List<int> generatedIDs) async {
     if (generatedIDs.isEmpty) {
-      return 0;
+      return;
     }
-    final db = await instance.database;
-    return await db.delete(
-      filesTable,
-      where: '$columnGeneratedID IN (${generatedIDs.join(', ')})',
+
+    final db = await instance.sqliteAsyncDB;
+    final inParam = generatedIDs.join(',');
+
+    await db.execute(
+      'DELETE FROM $filesTable WHERE $columnGeneratedID IN ($inParam)',
     );
   }
 
-  Future<int> deleteLocalFile(EnteFile file) async {
-    final db = await instance.database;
+  Future<void> deleteLocalFile(EnteFile file) async {
+    final db = await instance.sqliteAsyncDB;
     if (file.localID != null) {
       // delete all files with same local ID
-      return db.delete(
-        filesTable,
-        where: '$columnLocalID =?',
-        whereArgs: [file.localID],
+      unawaited(
+        db.execute(
+          'DELETE FROM $filesTable WHERE $columnLocalID = ?',
+          [file.localID],
+        ),
       );
     } else {
-      return db.delete(
-        filesTable,
-        where: '$columnGeneratedID =?',
-        whereArgs: [file.generatedID],
+      unawaited(
+        db.execute(
+          'DELETE FROM $filesTable WHERE $columnGeneratedID = ?',
+          [file.generatedID],
+        ),
       );
     }
   }
@@ -1138,37 +1135,34 @@ class FilesDB {
       inParam += "'" + localID + "',";
     }
     inParam = inParam.substring(0, inParam.length - 1);
-    final db = await instance.database;
-    final results = await db.query(
-      filesTable,
-      where: '$columnLocalID IN ($inParam)',
+    final db = await instance.sqliteAsyncDB;
+    final results = await db.getAll(
+      '''
+      SELECT * FROM $filesTable
+      WHERE $columnLocalID IN ($inParam);
+    ''',
     );
     return convertToFiles(results);
   }
 
-  Future<int> deleteUnSyncedLocalFiles(List<String> localIDs) async {
+  Future<void> deleteUnSyncedLocalFiles(List<String> localIDs) async {
     String inParam = "";
     for (final localID in localIDs) {
       inParam += "'" + localID + "',";
     }
     inParam = inParam.substring(0, inParam.length - 1);
-    final db = await instance.database;
-    return db.delete(
-      filesTable,
-      where:
-          '($columnUploadedFileID is NULL OR $columnUploadedFileID = -1 ) AND $columnLocalID IN ($inParam)',
+    final db = await instance.sqliteAsyncDB;
+    unawaited(
+      db.execute(
+        '''
+      DELETE FROM $filesTable
+      WHERE ($columnUploadedFileID is NULL OR $columnUploadedFileID = -1 ) AND $columnLocalID IN ($inParam)
+    ''',
+      ),
     );
   }
 
-  Future<int> deleteFromCollection(int uploadedFileID, int collectionID) async {
-    final db = await instance.database;
-    return db.delete(
-      filesTable,
-      where: '$columnUploadedFileID = ? AND $columnCollectionID = ?',
-      whereArgs: [uploadedFileID, collectionID],
-    );
-  }
-
+  /// Uses int in return value.
   Future<int> deleteFilesFromCollection(
     int collectionID,
     List<int> uploadedFileIDs,
@@ -1183,9 +1177,9 @@ class FilesDB {
   }
 
   Future<int> collectionFileCount(int collectionID) async {
-    final db = await instance.database;
+    final db = await instance.sqliteAsyncDB;
     final count = Sqflite.firstIntValue(
-      await db.rawQuery(
+      await db.execute(
         'SELECT COUNT(*) FROM $filesTable where $columnCollectionID = '
         '$collectionID AND $columnUploadedFileID IS NOT -1',
       ),
@@ -1198,15 +1192,13 @@ class FilesDB {
     int ownerID,
     Set<int> hiddenCollections,
   ) async {
-    final db = await instance.database;
-    final count = Sqflite.firstIntValue(
-      await db.rawQuery(
-        'SELECT COUNT(distinct($columnUploadedFileID)) FROM $filesTable where '
-        '$columnMMdVisibility'
-        ' = $visibility AND $columnOwnerID = $ownerID AND $columnCollectionID NOT IN (${hiddenCollections.join(', ')})',
-      ),
+    final db = await instance.sqliteAsyncDB;
+    final count = await db.execute(
+      'SELECT COUNT(distinct($columnUploadedFileID)) as COUNT FROM $filesTable where '
+      '$columnMMdVisibility'
+      ' = $visibility AND $columnOwnerID = $ownerID AND $columnCollectionID NOT IN (${hiddenCollections.join(', ')})',
     );
-    return count ?? 0;
+    return count.first['COUNT'] as int;
   }
 
   Future<int> deleteCollection(int collectionID) async {
