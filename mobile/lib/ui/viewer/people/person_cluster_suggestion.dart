@@ -211,9 +211,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
           ),
         Text(
           // TODO: come up with a better copy for strings below!
-          files.length > 1
-              ? "Do these photos belong to ${widget.person.data.name}?"
-              : "Does this photo belong to ${widget.person.data.name}?",
+          "Is this ${widget.person.data.name}?",
           style: getEnteTextTheme(context).largeMuted,
         ),
         const SizedBox(height: 24),
