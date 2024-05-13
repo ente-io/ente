@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:ente_auth/models/code.dart';
+import 'package:ente_auth/models/code_display.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -28,6 +31,25 @@ void main() {
     expect(code.account, "testdata@ente.io", reason: "accountMismatch");
     expect(code.secret, "ASKZNWOU6SVYAMVS");
     expect(code.counter, 15);
+  });
+
+  test("validateDisplay", () {
+    Code code = Code.fromOTPAuthUrl(
+      "otpauth://hotp/testdata@ente.io?secret=ASKZNWOU6SVYAMVS&issuer=GitHub&counter=15",
+    );
+    expect(code.issuer, "GitHub", reason: "issuerMismatch");
+    expect(code.account, "testdata@ente.io", reason: "accountMismatch");
+    expect(code.secret, "ASKZNWOU6SVYAMVS");
+    expect(code.counter, 15);
+    code = code.copyWith(
+      display: CodeDisplay(pinned: true, tags: ["tag1", "com,ma", ';;%\$']),
+    );
+    final dataToStore = code.toOTPAuthUrlFormat();
+    final restoredCode = Code.fromOTPAuthUrl(jsonDecode(dataToStore));
+    expect(restoredCode.display.pinned, true);
+    expect(restoredCode.display.tags, ["tag1", "com,ma", ';;%\$']);
+    final secondDataToStore = restoredCode.toOTPAuthUrlFormat();
+    expect(dataToStore, secondDataToStore);
   });
 //
 
