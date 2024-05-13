@@ -211,7 +211,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
           ),
         Text(
           // TODO: come up with a better copy for strings below!
-          "Is this ${widget.person.data.name}?",
+          "${widget.person.data.name}?",
           style: getEnteTextTheme(context).largeMuted,
         ),
         const SizedBox(height: 24),
