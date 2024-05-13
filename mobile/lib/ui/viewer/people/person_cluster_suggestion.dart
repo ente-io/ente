@@ -209,10 +209,10 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
             "ClusterID: $clusterID, Distance: ${distance.toStringAsFixed(3)}, usingMean: $usingMean",
             style: getEnteTextTheme(context).smallMuted,
           ),
-        Text(
+        Text( // TODO: come up with a better copy for strings below!
           files.length > 1
-              ? "These photos belong to ${widget.person.data.name}?"
-              : "This photo belongs to ${widget.person.data.name}?",
+              ? "Do these photos belong to ${widget.person.data.name}?"
+              : "Does this photo belong to ${widget.person.data.name}?",
           style: getEnteTextTheme(context).largeMuted,
         ),
         const SizedBox(height: 24),
