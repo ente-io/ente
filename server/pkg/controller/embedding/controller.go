@@ -146,7 +146,7 @@ func (c *Controller) GetFilesEmbedding(ctx *gin.Context, req ente.GetFilesEmbedd
 	embeddingsWithData := make([]ente.Embedding, 0)
 	noEmbeddingFileIds := make([]int64, 0)
 	dbFileIds := make([]int64, 0)
-	// fileIDs that were indexed but they don't contain any embedding information
+	// fileIDs that were indexed, but they don't contain any embedding information
 	for i := range userFileEmbeddings {
 		dbFileIds = append(dbFileIds, userFileEmbeddings[i].FileID)
 		if userFileEmbeddings[i].Size != nil && *userFileEmbeddings[i].Size < minEmbeddingDataSize {
