@@ -237,6 +237,7 @@ const handleConvertToMP4Write = async (request: Request) => {
     try {
         await ffmpegConvertToMP4(inputTempFilePath, outputTempFilePath);
     } catch (e) {
+        log.error("Conversion to MP4 failed", e);
         await deleteTempFileIgnoringErrors(outputTempFilePath);
         throw e;
     } finally {
