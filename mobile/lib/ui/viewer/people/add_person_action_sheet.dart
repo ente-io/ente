@@ -211,6 +211,7 @@ class _PersonActionSheetState extends State<PersonActionSheet> {
                     itemBuilder: (context, index) {
                       if (index == 0 && shouldShowAddPerson) {
                         return GestureDetector(
+                          behavior: HitTestBehavior.opaque,
                           child: const NewPersonItemWidget(),
                           onTap: () async => {
                             addNewPerson(
