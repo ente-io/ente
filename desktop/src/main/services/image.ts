@@ -148,7 +148,7 @@ const generateImageThumbnailCommand = (
                 "-define",
                 `jpeg:size=${2 * maxDimension}x${2 * maxDimension}`,
                 "-thumbnail",
-                `${maxDimension}x${maxDimension}>`,
+                `${maxDimension}x${maxDimension}`,
                 "-unsharp",
                 "0x.5",
                 "-quality",
