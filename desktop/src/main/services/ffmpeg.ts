@@ -112,3 +112,56 @@ const ffmpegBinaryPath = () => {
     // https://github.com/eugeneware/ffmpeg-static/issues/16
     return ensure(pathToFfmpeg).replace("app.asar", "app.asar.unpacked");
 };
+
+/**
+ * A variant of {@link ffmpegExec} adapted to work with streams so that it can
+ * handle the MP4 conversion of large video files.
+ *
+ * See: [Note: Convert to MP4]
+ *
+ * @param command
+ * @param dataOrPathOrZipItem
+ * @param outputFileExtension
+ * @param timeoutMS
+ * @returns
+ */
+export const ffmpegConvertToMP4 = async (
+    command: string[],
+    dataOrPathOrZipItem: Uint8Array | string | ZipItem,
+    outputFileExtension: string,
+    timeoutMS: number,
+): Promise<Uint8Array> => {
+    // TODO (MR): This currently copies files for both input (when
+    // dataOrPathOrZipItem is data) and output. This needs to be tested
+    // extremely large video files when invoked downstream of `convertToMP4` in
+    // the web code.
+
+    const {
+        path: inputFilePath,
+        isFileTemporary: isInputFileTemporary,
+        writeToTemporaryFile: writeToTemporaryInputFile,
+    } = await makeFileForDataOrPathOrZipItem(dataOrPathOrZipItem);
+
+    const outputFilePath = await makeTempFilePath(outputFileExtension);
+    try {
+        await writeToTemporaryInputFile();
+
+        const cmd = substitutePlaceholders(
+            command,
+            inputFilePath,
+            outputFilePath,
+        );
+
+        if (timeoutMS) await withTimeout(execAsync(cmd), timeoutMS);
+        else await execAsync(cmd);
+
+        return fs.readFile(outputFilePath);
+    } finally {
+        try {
+            if (isInputFileTemporary) await deleteTempFile(inputFilePath);
+            await deleteTempFile(outputFilePath);
+        } catch (e) {
+            log.error("Could not clean up temp files", e);
+        }
+    }
+};

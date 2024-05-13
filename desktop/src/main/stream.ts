@@ -181,3 +181,32 @@ const writeNodeStream = async (filePath: string, fileStream: Readable) => {
         });
     });
 };
+
+/**
+ * [Note: Convert to MP4]
+ *
+ * When we want to convert a video to MP4, if we were to send the entire
+ * contents of the video from the renderer to the main process over IPC, it just
+ * causes the renderer to run out of memory and restart when the videos are very
+ * large. So we need to stream the original video renderer → main and then
+ * stream back the converted video renderer ← main.
+ *
+ * Currently Chromium does not support bi-directional streaming ("full" duplex
+ * mode for the Web fetch API). So we need to simulate that using two different
+ * streaming requests.
+ *
+ *     renderer → main  stream://convert-to-mp4
+ *                      → request.body is the original video
+ *                      ← response is a token
+ *
+ *     renderer → main  stream://convert-to-mp4?token=<token>
+ *                      ← response.body is the converted video
+ *
+ * Note that the conversion itself is not streaming. The conversion still
+ * happens in a single shot, we are just streaming the data across the IPC
+ * boundary to allow us to pass large amounts of data without running out of
+ * memory.
+ *
+ * See also: [Note: IPC streams]
+ */
+const convertToMP4 = (token: string | undefined) => {};
