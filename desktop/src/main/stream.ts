@@ -10,6 +10,7 @@ import { Readable } from "node:stream";
 import { ReadableStream } from "node:stream/web";
 import { pathToFileURL } from "node:url";
 import log from "./log";
+import { ffmpegConvertToMP4 } from "./services/ffmpeg";
 import { ensure } from "./utils/common";
 import {
     deleteTempFile,
@@ -158,7 +159,7 @@ const handleWrite = async (path: string, request: Request) => {
  *
  * The returned promise resolves when the write completes.
  *
- * @param filePath The local filesystem path where the file should be written.
+ * @param filePath The local file system path where the file should be written.
  *
  * @param readableStream A web
  * [ReadableStream](https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream).
@@ -233,9 +234,9 @@ const handleConvertToMP4Write = async (request: Request) => {
     const inputTempFilePath = await makeTempFilePath();
     await writeStream(inputTempFilePath, ensure(request.body));
 
-    const outputTempFilePath = await makeTempFilePath();
+    const outputTempFilePath = await makeTempFilePath("mp4");
     try {
-        //
+        await ffmpegConvertToMP4(inputTempFilePath, outputTempFilePath);
     } catch (e) {
         await deleteTempFileIgnoringErrors(inputTempFilePath);
         await deleteTempFileIgnoringErrors(outputTempFilePath);

@@ -98,8 +98,8 @@ const makeGenThumbnailCommand = (seekTime: number) => [
  * of videos that the user is uploading.
  *
  * @param uploadItem A {@link File}, or the absolute path to a file on the
- * user's local filesytem. A path can only be provided when we're running in the
- * context of our desktop app.
+ * user's local file sytem. A path can only be provided when we're running in
+ * the context of our desktop app.
  */
 export const extractVideoMetadata = async (
     uploadItem: UploadItem,
@@ -234,22 +234,28 @@ const ffmpegExecWeb = async (
  *
  * @param blob The video blob.
  *
- * @returns The mp4 video data.
+ * @returns The mp4 video blob.
  */
-export const convertToMP4 = async (blob: Blob) =>
-    ffmpegExecNativeOrWeb(
-        [
-            ffmpegPathPlaceholder,
-            "-i",
-            inputPathPlaceholder,
-            "-preset",
-            "ultrafast",
-            outputPathPlaceholder,
-        ],
-        blob,
-        "mp4",
-        30 * 1000,
-    );
+export const convertToMP4 = async (blob: Blob) => {
+    const electron = globalThis.electron;
+    if (electron) {
+        //
+    } else {
+        return ffmpegExecWeb(
+            [
+                ffmpegPathPlaceholder,
+                "-i",
+                inputPathPlaceholder,
+                "-preset",
+                "ultrafast",
+                outputPathPlaceholder,
+            ],
+            blob,
+            "mp4",
+            30 * 1000,
+        );
+    }
+};
 
 /**
  * Run the given FFmpeg command using a native FFmpeg binary when we're running

@@ -114,47 +114,26 @@ const ffmpegBinaryPath = () => {
  * handle the MP4 conversion of large video files.
  *
  * See: [Note: Convert to MP4]
- *
- * @param command
- * @param dataOrPathOrZipItem
- * @param outputFileExtension
- * @param timeoutMS
- * @returns
+
+ * @param inputFilePath The path to a file on the user's local file system. This
+ * is the video we want to convert.
+ * @param inputFilePath The path to a file on the user's local file system where
+ * we should write the converted MP4 video.
  */
 export const ffmpegConvertToMP4 = async (
-    command: string[],
-    dataOrPathOrZipItem: Uint8Array | string | ZipItem,
-    outputFileExtension: string,
-    timeoutMS: number,
-): Promise<Uint8Array> => {
-    // TODO (MR): This currently copies files for both input (when
-    // dataOrPathOrZipItem is data) and output. This needs to be tested
-    // extremely large video files when invoked downstream of `convertToMP4` in
-    // the web code.
+    inputFilePath: string,
+    outputFilePath: string,
+): Promise<void> => {
+    const command = [
+        ffmpegPathPlaceholder,
+        "-i",
+        inputPathPlaceholder,
+        "-preset",
+        "ultrafast",
+        outputPathPlaceholder,
+    ];
 
-    const {
-        path: inputFilePath,
-        isFileTemporary: isInputFileTemporary,
-        writeToTemporaryFile: writeToTemporaryInputFile,
-    } = await makeFileForDataOrPathOrZipItem(dataOrPathOrZipItem);
+    const cmd = substitutePlaceholders(command, inputFilePath, outputFilePath);
 
-    const outputFilePath = await makeTempFilePath(outputFileExtension);
-    try {
-        await writeToTemporaryInputFile();
-
-        const cmd = substitutePlaceholders(
-            command,
-            inputFilePath,
-            outputFilePath,
-        );
-
-        if (timeoutMS) await withTimeout(execAsync(cmd), timeoutMS);
-        else await execAsync(cmd);
-
-        return fs.readFile(outputFilePath);
-    } finally {
-        if (isInputFileTemporary)
-            await deleteTempFileIgnoringErrors(inputFilePath);
-        await deleteTempFileIgnoringErrors(outputFilePath);
-    }
+    await withTimeout(execAsync(cmd), 30 * 1000);
 };
