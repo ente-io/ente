@@ -46,11 +46,6 @@ export const ffmpegExec = async (
     dataOrPathOrZipItem: Uint8Array | string | ZipItem,
     outputFileExtension: string,
 ): Promise<Uint8Array> => {
-    // TODO (MR): This currently copies files for both input (when
-    // dataOrPathOrZipItem is data) and output. This needs to be tested
-    // extremely large video files when invoked downstream of `convertToMP4` in
-    // the web code.
-
     const {
         path: inputFilePath,
         isFileTemporary: isInputFileTemporary,
