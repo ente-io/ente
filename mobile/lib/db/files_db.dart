@@ -1032,33 +1032,32 @@ class FilesDB {
     return convertToFiles(rows);
   }
 
-  Future<int> update(EnteFile file) async {
-    final db = await instance.database;
-    return await db.update(
-      filesTable,
-      _getRowForFile(file),
-      where: '$columnGeneratedID = ?',
-      whereArgs: [file.generatedID],
+  Future<void> update(EnteFile file) async {
+    final db = await instance.sqliteAsyncDB;
+    final setClause = _getSetClauseForFile(file);
+    await db.execute(
+      'UPDATE $filesTable SET '
+      '$setClause WHERE $columnGeneratedID = ?',
+      [file.generatedID],
     );
   }
 
-  Future<int> updateUploadedFileAcrossCollections(EnteFile file) async {
-    final db = await instance.database;
-    return await db.update(
-      filesTable,
-      _getRowForFileWithoutCollection(file),
-      where: '$columnUploadedFileID = ?',
-      whereArgs: [file.uploadedFileID],
+  Future<void> updateUploadedFileAcrossCollections(EnteFile file) async {
+    final db = await instance.sqliteAsyncDB;
+    final setClause = _getSetClauseForFileWithoutCollection(file);
+    await db.execute(
+      'UPDATE $filesTable SET '
+      '$setClause WHERE $columnUploadedFileID = ?',
+      [file.uploadedFileID],
     );
   }
 
-  Future<int> updateLocalIDForUploaded(int uploadedID, String localID) async {
-    final db = await instance.database;
-    return await db.update(
-      filesTable,
-      {columnLocalID: localID},
-      where: '$columnUploadedFileID = ? AND $columnLocalID IS NULL',
-      whereArgs: [uploadedID],
+  Future<void> updateLocalIDForUploaded(int uploadedID, String localID) async {
+    final db = await instance.sqliteAsyncDB;
+    await db.execute(
+      'UPDATE $filesTable SET $columnLocalID = ? WHERE $columnUploadedFileID = ?'
+      ' AND $columnLocalID IS NULL',
+      [localID, uploadedID],
     );
   }
 
@@ -1123,8 +1122,8 @@ class FilesDB {
       inParam += "'" + localID + "',";
     }
     inParam = inParam.substring(0, inParam.length - 1);
-    final db = await instance.database;
-    await db.rawQuery(
+    final db = await instance.sqliteAsyncDB;
+    await db.execute(
       '''
       UPDATE $filesTable
       SET $columnLocalID = NULL
@@ -1323,8 +1322,8 @@ class FilesDB {
       inParam += "'" + localID + "',";
     }
     inParam = inParam.substring(0, inParam.length - 1);
-    final db = await instance.database;
-    await db.rawUpdate(
+    final db = await instance.sqliteAsyncDB;
+    await db.execute(
       '''
       UPDATE $filesTable
       SET $columnUpdationTime = NULL
@@ -1552,17 +1551,24 @@ class FilesDB {
     if (uploadedFileIDToSize.isEmpty) {
       return;
     }
-    final db = await instance.database;
-    final batch = db.batch();
+    final db = await instance.sqliteAsyncDB;
+    final parameterSets = <List<Object?>>[];
+
     for (final uploadedFileID in uploadedFileIDToSize.keys) {
-      batch.update(
-        filesTable,
-        {columnFileSize: uploadedFileIDToSize[uploadedFileID]},
-        where: '$columnUploadedFileID = ?',
-        whereArgs: [uploadedFileID],
-      );
+      parameterSets.add([
+        uploadedFileIDToSize[uploadedFileID],
+        uploadedFileID,
+      ]);
     }
-    await batch.commit(noResult: true);
+
+    await db.executeBatch(
+      '''
+      UPDATE $filesTable
+      SET $columnFileSize = ?
+      WHERE $columnUploadedFileID = ?;
+    ''',
+      parameterSets,
+    );
   }
 
   Future<List<EnteFile>> getAllFilesFromDB(
@@ -1659,6 +1665,26 @@ class FilesDB {
       return <EnteFile>[];
     }
     return convertToFiles(results);
+  }
+
+  String _getSetClauseForFile(EnteFile file) {
+    final row = _getRowForFile(file);
+    final setClause = <String>[];
+    for (int i = 0; i < row.entries.length; i++) {
+      final entry = row.entries.elementAt(i);
+      setClause.add('${entry.key} = ${entry.value}');
+    }
+    return setClause.join(', ');
+  }
+
+  String _getSetClauseForFileWithoutCollection(EnteFile file) {
+    final row = _getRowForFileWithoutCollection(file);
+    final setClause = <String>[];
+    for (int i = 0; i < row.entries.length; i++) {
+      final entry = row.entries.elementAt(i);
+      setClause.add('${entry.key} = ${entry.value}');
+    }
+    return setClause.join(', ');
   }
 
   Map<String, dynamic> _getRowForFile(EnteFile file) {
