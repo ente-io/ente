@@ -1,11 +1,10 @@
 import pathToFfmpeg from "ffmpeg-static";
 import fs from "node:fs/promises";
 import type { ZipItem } from "../../types/ipc";
-import log from "../log";
-import { ensure, withTimeout } from "../utils/common";
+import { ensure } from "../utils/common";
 import { execAsync } from "../utils/electron";
 import {
-    deleteTempFile,
+    deleteTempFileIgnoringErrors,
     makeFileForDataOrPathOrZipItem,
     makeTempFilePath,
 } from "../utils/temp";
@@ -46,13 +45,7 @@ export const ffmpegExec = async (
     command: string[],
     dataOrPathOrZipItem: Uint8Array | string | ZipItem,
     outputFileExtension: string,
-    timeoutMS: number,
 ): Promise<Uint8Array> => {
-    // TODO (MR): This currently copies files for both input (when
-    // dataOrPathOrZipItem is data) and output. This needs to be tested
-    // extremely large video files when invoked downstream of `convertToMP4` in
-    // the web code.
-
     const {
         path: inputFilePath,
         isFileTemporary: isInputFileTemporary,
@@ -69,17 +62,13 @@ export const ffmpegExec = async (
             outputFilePath,
         );
 
-        if (timeoutMS) await withTimeout(execAsync(cmd), timeoutMS);
-        else await execAsync(cmd);
+        await execAsync(cmd);
 
         return fs.readFile(outputFilePath);
     } finally {
-        try {
-            if (isInputFileTemporary) await deleteTempFile(inputFilePath);
-            await deleteTempFile(outputFilePath);
-        } catch (e) {
-            log.error("Could not clean up temp files", e);
-        }
+        if (isInputFileTemporary)
+            await deleteTempFileIgnoringErrors(inputFilePath);
+        await deleteTempFileIgnoringErrors(outputFilePath);
     }
 };
 
@@ -111,4 +100,33 @@ const ffmpegBinaryPath = () => {
     // ffmpeg-static library author themselves:
     // https://github.com/eugeneware/ffmpeg-static/issues/16
     return ensure(pathToFfmpeg).replace("app.asar", "app.asar.unpacked");
+};
+
+/**
+ * A variant of {@link ffmpegExec} adapted to work with streams so that it can
+ * handle the MP4 conversion of large video files.
+ *
+ * See: [Note: Convert to MP4]
+
+ * @param inputFilePath The path to a file on the user's local file system. This
+ * is the video we want to convert.
+ * @param inputFilePath The path to a file on the user's local file system where
+ * we should write the converted MP4 video.
+ */
+export const ffmpegConvertToMP4 = async (
+    inputFilePath: string,
+    outputFilePath: string,
+): Promise<void> => {
+    const command = [
+        ffmpegPathPlaceholder,
+        "-i",
+        inputPathPlaceholder,
+        "-preset",
+        "ultrafast",
+        outputPathPlaceholder,
+    ];
+
+    const cmd = substitutePlaceholders(command, inputFilePath, outputFilePath);
+
+    await execAsync(cmd);
 };

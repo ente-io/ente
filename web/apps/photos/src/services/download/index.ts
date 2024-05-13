@@ -576,7 +576,6 @@ async function getPlayableVideo(
             if (!forceConvert && !runOnWeb && !isElectron()) {
                 return null;
             }
-            // TODO(MR): This might not work for very large (~ GB) videos. Test.
             log.info(`Converting video ${videoNameTitle} to mp4`);
             const convertedVideoData = await ffmpeg.convertToMP4(videoBlob);
             return new Blob([convertedVideoData], { type: "video/mp4" });

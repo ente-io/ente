@@ -6,7 +6,7 @@ import { CustomErrorMessage, type ZipItem } from "../../types/ipc";
 import log from "../log";
 import { execAsync, isDev } from "../utils/electron";
 import {
-    deleteTempFile,
+    deleteTempFileIgnoringErrors,
     makeFileForDataOrPathOrZipItem,
     makeTempFilePath,
 } from "../utils/temp";
@@ -23,12 +23,8 @@ export const convertToJPEG = async (imageData: Uint8Array) => {
         await execAsync(command);
         return new Uint8Array(await fs.readFile(outputFilePath));
     } finally {
-        try {
-            await deleteTempFile(inputFilePath);
-            await deleteTempFile(outputFilePath);
-        } catch (e) {
-            log.error("Could not clean up temp files", e);
-        }
+        await deleteTempFileIgnoringErrors(inputFilePath);
+        await deleteTempFileIgnoringErrors(outputFilePath);
     }
 };
 
@@ -107,12 +103,9 @@ export const generateImageThumbnail = async (
         } while (thumbnail.length > maxSize && quality > 50);
         return thumbnail;
     } finally {
-        try {
-            if (isInputFileTemporary) await deleteTempFile(inputFilePath);
-            await deleteTempFile(outputFilePath);
-        } catch (e) {
-            log.error("Could not clean up temp files", e);
-        }
+        if (isInputFileTemporary)
+            await deleteTempFileIgnoringErrors(inputFilePath);
+        await deleteTempFileIgnoringErrors(outputFilePath);
     }
 };
 

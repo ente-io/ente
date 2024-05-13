@@ -67,9 +67,16 @@ export interface Electron {
      * Clear any stored data.
      *
      * This is a coarse single shot cleanup, meant for use in clearing any
-     * Electron side state during logout.
+     * persisted Electron side state during logout.
      */
     clearStores: () => void;
+
+    /**
+     * Clear an state corresponding to in-flight convert-to-mp4 requests.
+     *
+     * This is meant for use during logout.
+     */
+    clearConvertToMP4Results: () => void;
 
     /**
      * Return the previously saved encryption key from persistent safe storage.
@@ -260,7 +267,7 @@ export interface Electron {
      * This executes the command using a FFmpeg executable we bundle with our
      * desktop app. We also have a wasm FFmpeg wasm implementation that we use
      * when running on the web, which has a sibling function with the same
-     * parameters. See [Note: ffmpeg in Electron].
+     * parameters. See [Note:FFmpeg in Electron].
      *
      * @param command An array of strings, each representing one positional
      * parameter in the command to execute. Placeholders for the input, output
@@ -280,9 +287,6 @@ export interface Electron {
      * just return its contents, for some FFmpeg command the extension matters
      * (e.g. conversion to a JPEG fails if the extension is arbitrary).
      *
-     * @param timeoutMS If non-zero, then abort and throw a timeout error if the
-     * ffmpeg command takes more than the given number of milliseconds.
-     *
      * @returns The contents of the output file produced by the ffmpeg command
      * (specified as {@link outputPathPlaceholder} in {@link command}).
      */
@@ -290,7 +294,6 @@ export interface Electron {
         command: string[],
         dataOrPathOrZipItem: Uint8Array | string | ZipItem,
         outputFileExtension: string,
-        timeoutMS: number,
     ) => Promise<Uint8Array>;
 
     // - ML

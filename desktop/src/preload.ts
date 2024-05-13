@@ -65,6 +65,9 @@ const selectDirectory = () => ipcRenderer.invoke("selectDirectory");
 
 const clearStores = () => ipcRenderer.send("clearStores");
 
+const clearConvertToMP4Results = () =>
+    ipcRenderer.send("clearConvertToMP4Results");
+
 const encryptionKey = () => ipcRenderer.invoke("encryptionKey");
 
 const saveEncryptionKey = (encryptionKey: string) =>
@@ -140,14 +143,12 @@ const ffmpegExec = (
     command: string[],
     dataOrPathOrZipItem: Uint8Array | string | ZipItem,
     outputFileExtension: string,
-    timeoutMS: number,
 ) =>
     ipcRenderer.invoke(
         "ffmpegExec",
         command,
         dataOrPathOrZipItem,
         outputFileExtension,
-        timeoutMS,
     );
 
 // - ML
@@ -308,6 +309,7 @@ contextBridge.exposeInMainWorld("electron", {
     openLogDirectory,
     selectDirectory,
     clearStores,
+    clearConvertToMP4Results,
     encryptionKey,
     saveEncryptionKey,
     onMainWindowFocus,

@@ -4,6 +4,7 @@ import { existsSync } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
 import type { ZipItem } from "../../types/ipc";
+import log from "../log";
 import { ensure } from "./common";
 
 /**
@@ -60,6 +61,19 @@ export const deleteTempFile = async (tempFilePath: string) => {
     if (!tempFilePath.startsWith(tempDir))
         throw new Error(`Attempting to delete a non-temp file ${tempFilePath}`);
     await fs.rm(tempFilePath, { force: true });
+};
+
+/**
+ * A variant of {@link deleteTempFile} that supresses any errors, making it
+ * safe to call them in a sequence without needing to handle the scenario where
+ * one of them failing causes the rest to be skipped.
+ */
+export const deleteTempFileIgnoringErrors = async (tempFilePath: string) => {
+    try {
+        await deleteTempFile(tempFilePath);
+    } catch (e) {
+        log.error(`Could not delete temporary file at path ${tempFilePath}`, e);
+    }
 };
 
 /** The result of {@link makeFileForDataOrPathOrZipItem}. */
