@@ -8,16 +8,106 @@ import PQueue from "p-queue";
 import { getMLSyncJobConfig } from "services/machineLearning/machineLearningService";
 import mlIDbStorage from "services/ml/db";
 import { MLSyncResult } from "services/ml/types";
-import { JobResult } from "types/common/job";
 import { EnteFile } from "types/file";
 import { getDedicatedMLWorker } from "utils/comlink/ComlinkMLWorker";
-import { SimpleJob } from "utils/common/job";
 import { DedicatedMLWorker } from "worker/ml.worker";
 import { logQueueStats } from "./machineLearningService";
 
 const LIVE_SYNC_IDLE_DEBOUNCE_SEC = 30;
 const LIVE_SYNC_QUEUE_TIMEOUT_SEC = 300;
 const LOCAL_FILES_UPDATED_DEBOUNCE_SEC = 30;
+
+export type JobState = "Scheduled" | "Running" | "NotScheduled";
+
+export interface JobConfig {
+    intervalSec: number;
+    maxItervalSec: number;
+    backoffMultiplier: number;
+}
+
+export interface JobResult {
+    shouldBackoff: boolean;
+}
+
+export class SimpleJob<R extends JobResult> {
+    private config: JobConfig;
+    private runCallback: () => Promise<R>;
+    private state: JobState;
+    private stopped: boolean;
+    private intervalSec: number;
+    private nextTimeoutId: ReturnType<typeof setTimeout>;
+
+    constructor(config: JobConfig, runCallback: () => Promise<R>) {
+        this.config = config;
+        this.runCallback = runCallback;
+        this.state = "NotScheduled";
+        this.stopped = true;
+        this.intervalSec = this.config.intervalSec;
+    }
+
+    public resetInterval() {
+        this.intervalSec = this.config.intervalSec;
+    }
+
+    public start() {
+        this.stopped = false;
+        this.resetInterval();
+        if (this.state !== "Running") {
+            this.scheduleNext();
+        } else {
+            log.info("Job already running, not scheduling");
+        }
+    }
+
+    private scheduleNext() {
+        if (this.state === "Scheduled" || this.nextTimeoutId) {
+            this.clearScheduled();
+        }
+
+        this.nextTimeoutId = setTimeout(
+            () => this.run(),
+            this.intervalSec * 1000,
+        );
+        this.state = "Scheduled";
+        log.info("Scheduled next job after: ", this.intervalSec);
+    }
+
+    async run() {
+        this.nextTimeoutId = undefined;
+        this.state = "Running";
+
+        try {
+            const jobResult = await this.runCallback();
+            if (jobResult && jobResult.shouldBackoff) {
+                this.intervalSec = Math.min(
+                    this.config.maxItervalSec,
+                    this.intervalSec * this.config.backoffMultiplier,
+                );
+            } else {
+                this.resetInterval();
+            }
+            log.info("Job completed");
+        } catch (e) {
+            console.error("Error while running Job: ", e);
+        } finally {
+            this.state = "NotScheduled";
+            !this.stopped && this.scheduleNext();
+        }
+    }
+
+    // currently client is responsible to terminate running job
+    public stop() {
+        this.stopped = true;
+        this.clearScheduled();
+    }
+
+    private clearScheduled() {
+        clearTimeout(this.nextTimeoutId);
+        this.nextTimeoutId = undefined;
+        this.state = "NotScheduled";
+        log.info("Cleared next job");
+    }
+}
 
 export interface MLSyncJobResult extends JobResult {
     mlSyncResult: MLSyncResult;

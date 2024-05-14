@@ -1,7 +1,13 @@
+import { haveWindow } from "@/next/env";
 import log from "@/next/log";
+import { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { APPS } from "@ente/shared/apps/constants";
-import ComlinkCryptoWorker from "@ente/shared/crypto";
+import ComlinkCryptoWorker, {
+    getDedicatedCryptoWorker,
+} from "@ente/shared/crypto";
+import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
 import { CustomError, parseUploadErrorCodes } from "@ente/shared/error";
+import PQueue from "p-queue";
 import downloadManager from "services/download";
 import { putEmbedding } from "services/embeddingService";
 import { getLocalFiles } from "services/fileService";
@@ -11,10 +17,23 @@ import mlIDbStorage, {
     ML_SYNC_JOB_CONFIG_NAME,
 } from "services/ml/db";
 import {
+    BlurDetectionMethod,
+    BlurDetectionService,
     ClipEmbedding,
+    ClusteringMethod,
+    ClusteringService,
     Face,
+    FaceAlignmentMethod,
+    FaceAlignmentService,
+    FaceCropMethod,
+    FaceCropService,
     FaceDetection,
+    FaceDetectionMethod,
+    FaceDetectionService,
+    FaceEmbeddingMethod,
+    FaceEmbeddingService,
     Landmark,
+    MLLibraryData,
     MLSearchConfig,
     MLSyncConfig,
     MLSyncContext,
@@ -22,39 +41,18 @@ import {
     MLSyncResult,
     MlFileData,
 } from "services/ml/types";
-import { JobConfig } from "types/common/job";
 import { EnteFile } from "types/file";
 import { isInternalUserForML } from "utils/user";
-import FaceService from "./faceService";
-import PeopleService from "./peopleService";
-import ReaderService from "./readerService";
-
-import { haveWindow } from "@/next/env";
-import { ComlinkWorker } from "@/next/worker/comlink-worker";
-import { getDedicatedCryptoWorker } from "@ente/shared/crypto";
-import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
-import PQueue from "p-queue";
-import {
-    BlurDetectionMethod,
-    BlurDetectionService,
-    ClusteringMethod,
-    ClusteringService,
-    FaceAlignmentMethod,
-    FaceAlignmentService,
-    FaceCropMethod,
-    FaceCropService,
-    FaceDetectionMethod,
-    FaceDetectionService,
-    FaceEmbeddingMethod,
-    FaceEmbeddingService,
-    MLLibraryData,
-} from "services/ml/types";
 import arcfaceAlignmentService from "./arcfaceAlignmentService";
 import arcfaceCropService from "./arcfaceCropService";
 import dbscanClusteringService from "./dbscanClusteringService";
+import FaceService from "./faceService";
 import hdbscanClusteringService from "./hdbscanClusteringService";
 import laplacianBlurDetectionService from "./laplacianBlurDetectionService";
+import type { JobConfig } from "./mlWorkManager";
 import mobileFaceNetEmbeddingService from "./mobileFaceNetEmbeddingService";
+import PeopleService from "./peopleService";
+import ReaderService from "./readerService";
 import yoloFaceDetectionService from "./yoloFaceDetectionService";
 
 export const DEFAULT_ML_SYNC_JOB_CONFIG: JobConfig = {
