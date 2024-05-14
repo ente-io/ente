@@ -1201,32 +1201,36 @@ class FilesDB {
     return count.first['COUNT'] as int;
   }
 
-  Future<int> deleteCollection(int collectionID) async {
-    final db = await instance.database;
-    return db.delete(
-      filesTable,
-      where: '$columnCollectionID = ?',
-      whereArgs: [collectionID],
+  Future<void> deleteCollection(int collectionID) async {
+    final db = await instance.sqliteAsyncDB;
+    unawaited(
+      db.execute(
+        'DELETE FROM $filesTable WHERE $columnCollectionID = ?',
+        [collectionID],
+      ),
     );
   }
 
-  Future<int> removeFromCollection(int collectionID, List<int> fileIDs) async {
-    final db = await instance.database;
-    return db.delete(
-      filesTable,
-      where:
-          '$columnCollectionID =? AND $columnUploadedFileID IN (${fileIDs.join(', ')})',
-      whereArgs: [collectionID],
+  Future<void> removeFromCollection(int collectionID, List<int> fileIDs) async {
+    final db = await instance.sqliteAsyncDB;
+    final inParam = fileIDs.join(',');
+    unawaited(
+      db.execute(
+        '''
+      DELETE FROM $filesTable
+      WHERE $columnCollectionID = ? AND $columnUploadedFileID IN ($inParam);
+      ''',
+        [collectionID],
+      ),
     );
   }
 
   Future<List<EnteFile>> getPendingUploadForCollection(int collectionID) async {
-    final db = await instance.database;
-    final results = await db.query(
-      filesTable,
-      where: '$columnCollectionID = ? AND ($columnUploadedFileID IS NULL OR '
-          '$columnUploadedFileID = -1)',
-      whereArgs: [collectionID],
+    final db = await instance.sqliteAsyncDB;
+    final results = await db.getAll(
+      'SELECT * FROM $filesTable WHERE $columnCollectionID = ? AND '
+      '($columnUploadedFileID IS NULL OR $columnUploadedFileID = -1)',
+      [collectionID],
     );
     return convertToFiles(results);
   }
@@ -1242,8 +1246,8 @@ class FilesDB {
       }
     }
     inParam = inParam.substring(0, inParam.length - 1);
-    final db = await instance.database;
-    final rows = await db.rawQuery(
+    final db = await instance.sqliteAsyncDB;
+    final rows = await db.execute(
       '''
       SELECT $columnLocalID
       FROM $filesTable
@@ -1262,8 +1266,8 @@ class FilesDB {
   // creationTime of the files in the collection.
   Future<Map<int, int>> getCollectionIDToMaxCreationTime() async {
     final enteWatch = EnteWatch("getCollectionIDToMaxCreationTime")..start();
-    final db = await instance.database;
-    final rows = await db.rawQuery(
+    final db = await instance.sqliteAsyncDB;
+    final rows = await db.execute(
       '''
       SELECT $columnCollectionID, MAX($columnCreationTime) AS max_creation_time
       FROM $filesTable
@@ -1288,16 +1292,17 @@ class FilesDB {
     int collectionID,
     bool sortAsc,
   ) async {
-    final db = await instance.database;
+    final db = await instance.sqliteAsyncDB;
     final order = sortAsc ? 'ASC' : 'DESC';
-    final rows = await db.query(
-      filesTable,
-      where: '$columnCollectionID = ? AND ($columnUploadedFileID IS NOT NULL '
-          'AND $columnUploadedFileID IS NOT -1)',
-      whereArgs: [collectionID],
-      orderBy:
-          '$columnCreationTime ' + order + ', $columnModificationTime ' + order,
-      limit: 1,
+    final rows = await db.getAll(
+      '''
+      SELECT * FROM $filesTable
+      WHERE $columnCollectionID = ? AND ($columnUploadedFileID IS NOT NULL
+      AND $columnUploadedFileID IS NOT -1)
+      ORDER BY $columnCreationTime $order, $columnModificationTime $order
+      LIMIT 1;
+    ''',
+      [collectionID],
     );
     if (rows.isEmpty) {
       return null;
@@ -1329,12 +1334,11 @@ class FilesDB {
     int uploadedFileID,
     int collectionID,
   ) async {
-    final db = await instance.database;
-    final rows = await db.query(
-      filesTable,
-      where: '$columnUploadedFileID = ? AND $columnCollectionID = ?',
-      whereArgs: [uploadedFileID, collectionID],
-      limit: 1,
+    final db = await instance.sqliteAsyncDB;
+    final rows = await db.getAll(
+      'SELECT * FROM $filesTable WHERE $columnUploadedFileID = ? AND '
+      '$columnCollectionID = ? LIMIT 1',
+      [uploadedFileID, collectionID],
     );
     return rows.isNotEmpty;
   }
@@ -1393,10 +1397,9 @@ class FilesDB {
       inParam += "'" + id.toString() + "',";
     }
     inParam = inParam.substring(0, inParam.length - 1);
-    final db = await instance.database;
-    final results = await db.query(
-      filesTable,
-      where: '$columnUploadedFileID IN ($inParam)',
+    final db = await instance.sqliteAsyncDB;
+    final results = await db.getAll(
+      'SELECT * FROM $filesTable WHERE $columnUploadedFileID IN ($inParam)',
     );
     final files = convertToFiles(results);
     for (EnteFile eachFile in files) {
@@ -1411,13 +1414,13 @@ class FilesDB {
   Future<Set<int>> getAllCollectionIDsOfFile(
     int uploadedFileID,
   ) async {
-    final db = await instance.database;
-    final results = await db.query(
-      filesTable,
-      where: '$columnUploadedFileID = ? AND $columnCollectionID != -1',
-      columns: [columnCollectionID],
-      whereArgs: [uploadedFileID],
-      distinct: true,
+    final db = await instance.sqliteAsyncDB;
+    final results = await db.getAll(
+      '''
+      SELECT DISTINCT $columnCollectionID FROM $filesTable
+      WHERE $columnUploadedFileID = ? AND $columnCollectionID != -1
+    ''',
+      [uploadedFileID],
     );
     final collectionIDsOfFile = <int>{};
     for (var result in results) {
@@ -1446,14 +1449,13 @@ class FilesDB {
     int cutOffTime,
     int ownerID,
   ) async {
-    final db = await instance.database;
-    final rows = await db.query(
-      filesTable,
-      columns: [columnGeneratedID],
-      distinct: true,
-      where:
-          '$columnCreationTime <= ? AND  ($columnOwnerID IS NULL OR $columnOwnerID = ?)',
-      whereArgs: [cutOffTime, ownerID],
+    final db = await instance.sqliteAsyncDB;
+    final rows = await db.getAll(
+      '''
+      SELECT DISTINCT $columnGeneratedID FROM $filesTable
+      WHERE $columnCreationTime <= ? AND ($columnOwnerID IS NULL OR $columnOwnerID = ?)
+    ''',
+      [cutOffTime, ownerID],
     );
     final result = <String>[];
     for (final row in rows) {
@@ -1465,15 +1467,14 @@ class FilesDB {
   // For givenUserID, get List of unique LocalIDs for files which are
   // uploaded by the given user and location is missing
   Future<List<String>> getLocalIDsForFilesWithoutLocation(int ownerID) async {
-    final db = await instance.database;
-    final rows = await db.query(
-      filesTable,
-      columns: [columnLocalID],
-      distinct: true,
-      where: '$columnOwnerID = ? AND $columnLocalID IS NOT NULL AND '
-          '($columnLatitude IS NULL OR '
-          '$columnLongitude IS NULL OR $columnLongitude = 0.0 or $columnLongitude = 0.0)',
-      whereArgs: [ownerID],
+    final db = await instance.sqliteAsyncDB;
+    final rows = await db.getAll(
+      '''
+      SELECT DISTINCT $columnLocalID FROM $filesTable
+      WHERE $columnOwnerID = ? AND $columnLocalID IS NOT NULL AND 
+      ($columnLatitude IS NULL OR $columnLongitude IS NULL OR $columnLatitude = 0.0 or $columnLongitude = 0.0)
+    ''',
+      [ownerID],
     );
     final result = <String>[];
     for (final row in rows) {
@@ -1484,13 +1485,13 @@ class FilesDB {
 
   // For a given userID, return unique uploadedFileId for the given userID
   Future<List<int>> getUploadIDsWithMissingSize(int userId) async {
-    final db = await instance.database;
-    final rows = await db.query(
-      filesTable,
-      columns: [columnUploadedFileID],
-      distinct: true,
-      where: '$columnOwnerID = ? AND $columnFileSize IS NULL',
-      whereArgs: [userId],
+    final db = await instance.sqliteAsyncDB;
+    final rows = await db.getAll(
+      '''
+      SELECT DISTINCT $columnUploadedFileID FROM $filesTable
+      WHERE $columnOwnerID = ? AND $columnFileSize IS NULL
+    ''',
+      [userId],
     );
     final result = <int>[];
     for (final row in rows) {
@@ -1501,14 +1502,13 @@ class FilesDB {
 
   // For a given userID, return unique localID for all uploaded live photos
   Future<List<String>> getLivePhotosForUser(int userId) async {
-    final db = await instance.database;
-    final rows = await db.query(
-      filesTable,
-      columns: [columnLocalID],
-      distinct: true,
-      where: '$columnOwnerID = ? AND '
-          '$columnFileType = ? AND $columnLocalID IS NOT NULL',
-      whereArgs: [userId, getInt(FileType.livePhoto)],
+    final db = await instance.sqliteAsyncDB;
+    final rows = await db.getAll(
+      '''
+      SELECT DISTINCT $columnLocalID FROM $filesTable
+      WHERE $columnOwnerID = ? AND $columnFileType = ? AND $columnLocalID IS NOT NULL
+    ''',
+      [userId, getInt(FileType.livePhoto)],
     );
     final result = <String>[];
     for (final row in rows) {
@@ -1518,15 +1518,16 @@ class FilesDB {
   }
 
   Future<List<String>> getLocalFilesBackedUpWithoutLocation(int userId) async {
-    final db = await instance.database;
-    final rows = await db.query(
-      filesTable,
-      columns: [columnLocalID],
-      distinct: true,
-      where:
-          '$columnOwnerID = ? AND $columnLocalID IS NOT NULL AND ($columnUploadedFileID IS NOT NULL AND $columnUploadedFileID IS NOT -1) '
-          'AND ($columnLatitude IS NULL OR $columnLongitude IS NULL OR $columnLongitude = 0.0 or $columnLongitude = 0.0)',
-      whereArgs: [userId],
+    final db = await instance.sqliteAsyncDB;
+    final rows = await db.getAll(
+      '''
+      SELECT DISTINCT $columnLocalID FROM $filesTable
+      WHERE $columnOwnerID = ? AND $columnLocalID IS NOT NULL AND
+      ($columnUploadedFileID IS NOT NULL AND $columnUploadedFileID IS NOT -1)
+      AND ($columnLatitude IS NULL OR $columnLongitude IS NULL OR
+      $columnLatitude = 0.0 or $columnLongitude = 0.0)
+      ''',
+      [userId],
     );
     final result = <String>[];
     for (final row in rows) {
@@ -1585,9 +1586,13 @@ class FilesDB {
   }
 
   Future<Map<FileType, int>> fetchFilesCountbyType(int userID) async {
-    final db = await instance.database;
-    final result = await db.rawQuery(
-      "SELECT $columnFileType, COUNT(DISTINCT $columnUploadedFileID) FROM $filesTable WHERE $columnUploadedFileID != -1 AND $columnOwnerID == $userID GROUP BY $columnFileType",
+    final db = await instance.sqliteAsyncDB;
+    final result = await db.execute(
+      '''
+      SELECT $columnFileType, COUNT(DISTINCT $columnUploadedFileID) 
+         FROM $filesTable WHERE $columnUploadedFileID != -1 AND 
+         $columnOwnerID == $userID GROUP BY $columnFileType
+      ''',
     );
 
     final filesCount = <FileType, int>{};
@@ -1606,18 +1611,20 @@ class FilesDB {
     bool? asc,
     required DBFilterOptions? filterOptions,
   }) async {
-    final db = await instance.database;
+    final db = await instance.sqliteAsyncDB;
     final order = (asc ?? false ? 'ASC' : 'DESC');
-    final results = await db.query(
-      filesTable,
-      where:
-          '$columnLatitude IS NOT NULL AND $columnLongitude IS NOT NULL AND ($columnLatitude IS NOT 0 OR $columnLongitude IS NOT 0)'
-          ' AND $columnCreationTime >= ? AND $columnCreationTime <= ?'
-          ' AND ($columnLocalID IS NOT NULL OR ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1))',
-      whereArgs: [startTime, endTime],
-      orderBy:
-          '$columnCreationTime ' + order + ', $columnModificationTime ' + order,
-      limit: limit,
+    final results = await db.getAll(
+      '''
+      SELECT * FROM $filesTable 
+      WHERE $columnLatitude IS NOT NULL AND $columnLongitude IS NOT NULL AND
+      ($columnLatitude IS NOT 0 OR $columnLongitude IS NOT 0) AND 
+      $columnCreationTime >= ? AND $columnCreationTime <= ? AND
+      ($columnLocalID IS NOT NULL OR ($columnCollectionID IS NOT NULL AND 
+      $columnCollectionID IS NOT -1)) 
+      ORDER BY $columnCreationTime $order, $columnModificationTime $order
+      LIMIT $limit
+      ''',
+      [startTime, endTime],
     );
     final files = convertToFiles(results);
     final List<EnteFile> filteredFiles =
@@ -1626,13 +1633,14 @@ class FilesDB {
   }
 
   Future<List<int>> getOwnedFileIDs(int ownerID) async {
-    final db = await instance.database;
-    final results = await db.query(
-      filesTable,
-      columns: [columnUploadedFileID],
-      where:
-          '($columnOwnerID = $ownerID AND $columnUploadedFileID IS NOT NULL AND $columnUploadedFileID IS NOT -1)',
-      distinct: true,
+    final db = await instance.sqliteAsyncDB;
+    final results = await db.getAll(
+      '''
+      SELECT DISTINCT $columnUploadedFileID FROM $filesTable
+      WHERE $columnOwnerID = ? AND $columnUploadedFileID IS NOT NULL AND
+      $columnUploadedFileID IS NOT -1)    
+    ''',
+      [ownerID],
     );
     final ids = <int>[];
     for (final result in results) {
@@ -1642,21 +1650,45 @@ class FilesDB {
   }
 
   Future<List<EnteFile>> getUploadedFiles(List<int> uploadedIDs) async {
-    final db = await instance.database;
+    final db = await instance.sqliteAsyncDB;
     String inParam = "";
     for (final id in uploadedIDs) {
       inParam += "'" + id.toString() + "',";
     }
     inParam = inParam.substring(0, inParam.length - 1);
-    final results = await db.query(
-      filesTable,
-      where: '$columnUploadedFileID IN ($inParam)',
-      groupBy: columnUploadedFileID,
+    final results = await db.getAll(
+      '''
+      SELECT * FROM $filesTable WHERE $columnUploadedFileID IN ($inParam)
+      GROUP BY $columnUploadedFileID
+''',
     );
     if (results.isEmpty) {
       return <EnteFile>[];
     }
     return convertToFiles(results);
+  }
+
+  ///For insertion, the syntax is as follows:
+  ///INSERT INTO table (column1,column2 ,..)
+  ///VALUES( value1,	value2 ,...);
+  ///This method returns:
+  ///{
+  ///  'columns': 'column1,column2 ,..',
+  /// 'values': 'value1,	value2 ,...'
+  /// }
+  Map<String, String> _getColumnsAndValuesForInsertion(EnteFile file) {
+    final row = _getRowForFile(file);
+    final columns = <String>[];
+    final values = <String>[];
+    for (int i = 0; i < row.entries.length; i++) {
+      final entry = row.entries.elementAt(i);
+      columns.add(entry.key);
+      values.add(entry.value.toString());
+    }
+    return {
+      'columns': columns.join(', '),
+      'values': values.join(', '),
+    };
   }
 
   String _getSetClauseForFile(EnteFile file) {
