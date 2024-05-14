@@ -1,9 +1,7 @@
 import "package:flutter/material.dart";
 import "package:flutter_animate/flutter_animate.dart";
 import "package:photos/ente_theme_data.dart";
-import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
-import "package:photos/theme/text_style.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import "package:photos/ui/viewer/search/result/person_face_widget.dart";
 
@@ -35,10 +33,10 @@ class PeopleBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
     final backgroundColor = colorScheme.backgroundElevated2;
-    final TextStyle mainTextStyle = darkTextTheme.bodyBold;
-    final TextStyle subTextStyle = darkTextTheme.miniMuted;
-    const EnteColorScheme strokeColorScheme = darkScheme;
+    final TextStyle mainTextStyle = textTheme.bodyBold;
+    final TextStyle subTextStyle = textTheme.miniMuted;
     late final Widget startWidget;
     late final bool roundedActionIcon;
     switch (type) {
@@ -112,9 +110,9 @@ class PeopleBanner extends StatelessWidget {
                   IconButtonWidget(
                     icon: actionIcon,
                     iconButtonType: IconButtonType.primary,
-                    iconColor: strokeColorScheme.strokeBase,
-                    defaultColor: strokeColorScheme.fillFaint,
-                    pressedColor: strokeColorScheme.fillMuted,
+                    iconColor: colorScheme.strokeBase,
+                    defaultColor: colorScheme.fillFaint,
+                    pressedColor: colorScheme.fillMuted,
                     roundedIcon: roundedActionIcon,
                     onTap: onTap,
                   ),
