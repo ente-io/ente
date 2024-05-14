@@ -66,9 +66,12 @@ The same principle applies if you're deploying to your custom domain.
 >
 > If you need to configure SSL, for example if you're running over the internet,
 > you'll need to turn off `s3.are_local_buckets` (which disables SSL in the
-> default starter compose template). In such cases, unless your S3 object
-> storage supports it (minio doesn't), you'll also need to then enable
-> `s3.use_path_style_urls`.
+> default starter compose template).
+>
+> Disabling `s3.are_local_buckets` also switches to the subdomain style URLs for
+> the buckets. However, not all S3 providers support these, in particular, minio
+> does not work with these in default configuration. So in such cases you'll
+> also need to then enable `s3.use_path_style_urls`.
 
 To summarize:
 
