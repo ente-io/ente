@@ -190,6 +190,7 @@ class SemanticSearchService {
     _logger.info(
       "Loading ${_cachedEmbeddings.length} took: ${(endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch)}ms",
     );
+    Bus.instance.fire(EmbeddingCacheUpdatedEvent());
     _logger.info("Cached embeddings: " + _cachedEmbeddings.length.toString());
   }
 
@@ -227,6 +228,7 @@ class SemanticSearchService {
         .getOwnedFileIDs(Configuration.instance.getUserID()!);
     final embeddedFileIDs =
         await EmbeddingsDB.instance.getFileIDs(_currentModel);
+
     uploadedFileIDs.removeWhere(
       (id) => embeddedFileIDs.contains(id),
     );
