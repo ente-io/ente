@@ -86,7 +86,7 @@ import {
 import downloadManager from "services/download";
 import {
     syncCLIPEmbeddings,
-    syncFileEmbeddings,
+    syncFaceEmbeddings,
 } from "services/embeddingService";
 import { syncEntities } from "services/entityService";
 import { getLocalFiles, syncFiles } from "services/fileService";
@@ -705,7 +705,7 @@ export default function Gallery() {
             await syncCLIPEmbeddings();
             const electron = globalThis.electron;
             if (isInternalUserForML() && electron) {
-                await syncFileEmbeddings();
+                await syncFaceEmbeddings();
             }
             if (clipService.isPlatformSupported()) {
                 void clipService.scheduleImageEmbeddingExtraction();
