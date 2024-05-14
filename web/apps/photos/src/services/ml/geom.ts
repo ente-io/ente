@@ -76,3 +76,17 @@ export class Box implements IRect {
         return new Box({ x, y, width, height });
     }
 }
+
+export function enlargeBox(box: Box, factor: number = 1.5) {
+    const center = new Point(box.x + box.width / 2, box.y + box.height / 2);
+
+    const size = new Point(box.width, box.height);
+    const newHalfSize = new Point((factor * size.x) / 2, (factor * size.y) / 2);
+
+    return boxFromBoundingBox({
+        left: center.x - newHalfSize.x,
+        top: center.y - newHalfSize.y,
+        right: center.x + newHalfSize.x,
+        bottom: center.y + newHalfSize.y,
+    });
+}

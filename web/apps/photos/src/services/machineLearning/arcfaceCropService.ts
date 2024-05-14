@@ -10,7 +10,7 @@ import {
 } from "services/ml/types";
 import { cropWithRotation } from "utils/image";
 import { getArcfaceAlignment } from "utils/machineLearning/faceAlign";
-import { enlargeBox } from "utils/machineLearning/index";
+import { enlargeBox } from "services/ml/geom";
 
 class ArcFaceCropService implements FaceCropService {
     public method: Versioned<FaceCropMethod>;

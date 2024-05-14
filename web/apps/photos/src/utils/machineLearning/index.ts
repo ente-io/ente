@@ -4,7 +4,7 @@ import log from "@/next/log";
 import PQueue from "p-queue";
 import DownloadManager from "services/download";
 import { getLocalFiles } from "services/fileService";
-import { Box, Dimensions, Point, boxFromBoundingBox } from "services/ml/geom";
+import { Dimensions } from "services/ml/geom";
 import {
     DetectedFace,
     Face,
@@ -17,20 +17,6 @@ import { EnteFile } from "types/file";
 import { getRenderableImage } from "utils/file";
 import { clamp, warpAffineFloat32List } from "utils/image";
 import mlIDbStorage from "utils/storage/mlIDbStorage";
-
-export function enlargeBox(box: Box, factor: number = 1.5) {
-    const center = new Point(box.x + box.width / 2, box.y + box.height / 2);
-
-    const size = new Point(box.width, box.height);
-    const newHalfSize = new Point((factor * size.x) / 2, (factor * size.y) / 2);
-
-    return boxFromBoundingBox({
-        left: center.x - newHalfSize.x,
-        top: center.y - newHalfSize.y,
-        right: center.x + newHalfSize.x,
-        bottom: center.y + newHalfSize.y,
-    });
-}
 
 export function getAllFacesFromMap(allFacesMap: Map<number, Array<Face>>) {
     const allFaces = [...allFacesMap.values()].flat();
