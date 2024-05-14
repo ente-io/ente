@@ -1024,7 +1024,10 @@ const withThumbnail = async (
             if (e.message.endsWith(CustomErrorMessage.NotAvailable)) {
                 moduleState.isNativeImageThumbnailGenerationNotAvailable = true;
                 // TODO(MR): release 1.7
-                log.info("Setting isNativeImageThumbnailGenerationNotAvailable", e);
+                log.info(
+                    "Setting isNativeImageThumbnailGenerationNotAvailable",
+                    e,
+                );
             } else {
                 log.error("Native thumbnail generation failed", e);
             }
