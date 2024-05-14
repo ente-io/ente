@@ -1,10 +1,9 @@
 // these utils only work in env where OffscreenCanvas is available
 
 import { Matrix, inverse } from "ml-matrix";
+import { Box, Dimensions } from "services/ml/geom";
 import { FaceAlignment } from "services/ml/types";
-import { BlobOptions, Dimensions } from "types/image";
 import { enlargeBox } from "utils/machineLearning";
-import { Box } from "services/ml/geom";
 
 export function normalizePixelBetween0And1(pixelValue: number) {
     return pixelValue / 255.0;
@@ -445,6 +444,11 @@ export function addPadding(image: ImageBitmap, padding: number) {
     );
 
     return offscreen.transferToImageBitmap();
+}
+
+export interface BlobOptions {
+    type?: string;
+    quality?: number;
 }
 
 export async function imageBitmapToBlob(

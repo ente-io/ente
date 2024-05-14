@@ -20,6 +20,11 @@ export class Point {
     }
 }
 
+export interface Dimensions {
+  width: number;
+  height: number;
+}
+
 export interface IBoundingBox {
     left: number;
     top: number;
@@ -98,11 +103,4 @@ export class Box implements IRect {
         ].map((val) => Math.round(val));
         return new Box({ x, y, width, height });
     }
-}
-
-export function isValidNumber(num: any) {
-    return (
-        (!!num && num !== Infinity && num !== -Infinity && !isNaN(num)) ||
-        num === 0
-    );
 }

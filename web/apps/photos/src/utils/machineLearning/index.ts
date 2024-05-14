@@ -4,7 +4,7 @@ import log from "@/next/log";
 import PQueue from "p-queue";
 import DownloadManager from "services/download";
 import { getLocalFiles } from "services/fileService";
-import { Box, Point, boxFromBoundingBox } from "services/ml/geom";
+import { Box, Dimensions, Point, boxFromBoundingBox } from "services/ml/geom";
 import {
     DetectedFace,
     Face,
@@ -14,7 +14,6 @@ import {
     Versioned,
 } from "services/ml/types";
 import { EnteFile } from "types/file";
-import { Dimensions } from "types/image";
 import { getRenderableImage } from "utils/file";
 import { clamp, warpAffineFloat32List } from "utils/image";
 import mlIDbStorage from "utils/storage/mlIDbStorage";
@@ -23,11 +22,11 @@ export function newBox(x: number, y: number, width: number, height: number) {
     return new Box({ x, y, width, height });
 }
 
-export function getBoxCenterPt(topLeft: Point, bottomRight: Point): Point {
+function getBoxCenterPt(topLeft: Point, bottomRight: Point): Point {
     return topLeft.add(bottomRight.sub(topLeft).div(new Point(2, 2)));
 }
 
-export function getBoxCenter(box: Box): Point {
+function getBoxCenter(box: Box): Point {
     return getBoxCenterPt(box.topLeft, box.bottomRight);
 }
 

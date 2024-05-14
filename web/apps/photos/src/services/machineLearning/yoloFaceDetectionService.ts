@@ -14,7 +14,7 @@ import {
     scale,
     translate,
 } from "transformation-matrix";
-import { Dimensions } from "types/image";
+import { Dimensions } from "services/ml/geom";
 import {
     clamp,
     getPixelBilinear,
