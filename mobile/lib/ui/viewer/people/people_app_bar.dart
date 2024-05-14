@@ -9,6 +9,7 @@ import "package:photos/events/people_changed_event.dart";
 import 'package:photos/events/subscription_purchased_event.dart';
 import "package:photos/face/model/person.dart";
 import "package:photos/generated/l10n.dart";
+import "package:photos/models/file/file.dart";
 import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
@@ -314,7 +315,10 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
         clusterID: widget.person.data.assigned!.first.id,
       );
       Navigator.pop(context);
-      if (result != null && result is PersonEntity) {
+      if (result != null && result is (PersonEntity, EnteFile)) {
+        // ignore: unawaited_futures
+        routeToPage(context, PeoplePage(person: result.$1));
+      } else if (result != null && result is PersonEntity) {
         // ignore: unawaited_futures
         routeToPage(context, PeoplePage(person: result));
       }

@@ -303,10 +303,11 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
               context,
               clusterID: clusterID,
             );
-            if (result == null || result is! PersonEntity) {
-              return;
+            if (result != null &&
+                (result is (PersonEntity, EnteFile) ||
+                    result is PersonEntity)) {
+              await _rejectSuggestion(clusterID, numberOfSuggestions);
             }
-            await _rejectSuggestion(clusterID, numberOfSuggestions);
           },
         ),
       ],

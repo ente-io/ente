@@ -184,7 +184,12 @@ class _ClusterPageState extends State<ClusterPage> {
                           context,
                           clusterID: widget.clusterID,
                         );
-                        if (result != null && result is PersonEntity) {
+                        if (result != null &&
+                            result is (PersonEntity, EnteFile)) {
+                          Navigator.pop(context);
+                          // ignore: unawaited_futures
+                          routeToPage(context, PeoplePage(person: result.$1));
+                        } else if (result != null && result is PersonEntity) {
                           Navigator.pop(context);
                           // ignore: unawaited_futures
                           routeToPage(context, PeoplePage(person: result));

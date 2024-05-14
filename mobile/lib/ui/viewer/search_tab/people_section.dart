@@ -5,6 +5,7 @@ import "package:flutter/material.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/events/event.dart";
 import "package:photos/face/model/person.dart";
+import "package:photos/models/file/file.dart";
 import "package:photos/models/search/album_search_result.dart";
 import "package:photos/models/search/generic_search_result.dart";
 import "package:photos/models/search/recent_searches.dart";
@@ -265,8 +266,11 @@ class SearchExample extends StatelessWidget {
                           context,
                           clusterID: int.parse(searchResult.name()),
                         );
-                        if (result != null && result is PersonEntity) {
-                          // Navigator.pop(context);
+                        if (result != null &&
+                            result is (PersonEntity, EnteFile)) {
+                          // ignore: unawaited_futures
+                          routeToPage(context, PeoplePage(person: result.$1));
+                        } else if (result != null && result is PersonEntity) {
                           // ignore: unawaited_futures
                           routeToPage(context, PeoplePage(person: result));
                         }
