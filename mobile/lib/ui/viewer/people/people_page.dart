@@ -178,30 +178,24 @@ class _PeoplePageState extends State<PeoplePage> {
                           });
                         },
                         child: RepaintBoundary(
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                              vertical: 8.0,
-                              horizontal: 8.0,
-                            ),
-                            child: NotificationWidget(
-                              startIcon: Icons.star_border_rounded,
-                              actionIcon: Icons.search_outlined,
-                              text: "Review suggestions",
-                              subText: "Improve the results",
-                              type: NotificationType.greenBanner,
-                              onTap: () async {
-                                unawaited(
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (context) =>
-                                          PersonReviewClusterSuggestion(
-                                        widget.person,
-                                      ),
+                          child: NotificationWidget(
+                            startIcon: Icons.star_border_rounded,
+                            actionIcon: Icons.search_outlined,
+                            text: "Review suggestions",
+                            subText: "Improve the results",
+                            type: NotificationType.greenBanner,
+                            onTap: () async {
+                              unawaited(
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        PersonReviewClusterSuggestion(
+                                      widget.person,
                                     ),
                                   ),
-                                );
-                              },
-                            ),
+                                ),
+                              );
+                            },
                           )
                               .animate(
                                 onPlay: (controller) => controller.repeat(),

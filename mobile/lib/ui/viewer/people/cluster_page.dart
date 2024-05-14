@@ -170,35 +170,29 @@ class _ClusterPageState extends State<ClusterPage> {
                     });
                   },
                   child: RepaintBoundary(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 8.0,
-                        horizontal: 8.0,
-                      ),
-                      child: NotificationWidget(
-                        startIcon: Icons.person_add_outlined,
-                        actionIcon: Icons.add_outlined,
-                        text: S.of(context).addAName,
-                        subText: S.of(context).findPeopleByName,
-                        // text: S.of(context).addAName,
-                        // subText: S.of(context).findPersonsByName,
-                        type: NotificationType.greenBanner,
-                        onTap: () async {
-                          if (widget.personID == null) {
-                            final result = await showAssignPersonAction(
-                              context,
-                              clusterID: widget.clusterID,
-                            );
-                            if (result != null && result is PersonEntity) {
-                              Navigator.pop(context);
-                              // ignore: unawaited_futures
-                              routeToPage(context, PeoplePage(person: result));
-                            }
-                          } else {
-                            showShortToast(context, "No personID or clusterID");
+                    child: NotificationWidget(
+                      startIcon: Icons.person_add_outlined,
+                      actionIcon: Icons.add_outlined,
+                      text: S.of(context).addAName,
+                      subText: S.of(context).findPeopleByName,
+                      // text: S.of(context).addAName,
+                      // subText: S.of(context).findPersonsByName,
+                      type: NotificationType.greenBanner,
+                      onTap: () async {
+                        if (widget.personID == null) {
+                          final result = await showAssignPersonAction(
+                            context,
+                            clusterID: widget.clusterID,
+                          );
+                          if (result != null && result is PersonEntity) {
+                            Navigator.pop(context);
+                            // ignore: unawaited_futures
+                            routeToPage(context, PeoplePage(person: result));
                           }
-                        },
-                      ),
+                        } else {
+                          showShortToast(context, "No personID or clusterID");
+                        }
+                      },
                     )
                         .animate(onPlay: (controller) => controller.repeat())
                         .shimmer(
