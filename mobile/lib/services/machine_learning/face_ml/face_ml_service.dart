@@ -484,7 +484,7 @@ class FaceMlService {
   /// Analyzes all the images in the database with the latest ml version and stores the results in the database.
   ///
   /// This function first checks if the image has already been analyzed with the lastest faceMlVersion and stored in the database. If so, it skips the image.
-  Future<void> indexAllImages() async {
+  Future<void> indexAllImages({int retryFetchCount = 10}) async {
     if (isImageIndexRunning) {
       _logger.warning("indexAllImages is already running, skipping");
       return;
@@ -589,7 +589,18 @@ class FaceMlService {
                 .info('already indexed files ${remoteFileIdToVersion.length}');
           } catch (e, s) {
             _logger.severe("err while getting files embeddings", e, s);
-            rethrow;
+            if (retryFetchCount < 1000) {
+              Future.delayed(Duration(seconds: retryFetchCount), () {
+                unawaited(indexAllImages(retryFetchCount: retryFetchCount * 2));
+              });
+              return;
+            } else {
+              _logger.severe(
+                  "Failed to fetch embeddings for files after multiple retries",
+                  e,
+                  s,);
+              rethrow;
+            }
           }
         }
         final smallerChunks = chunk.chunks(_parallelism);
