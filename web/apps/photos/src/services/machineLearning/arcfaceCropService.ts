@@ -1,4 +1,4 @@
-import { Box } from "services/ml/geom";
+import { Box, enlargeBox } from "services/ml/geom";
 import {
     FaceAlignment,
     FaceCrop,
@@ -9,8 +9,7 @@ import {
     Versioned,
 } from "services/ml/types";
 import { cropWithRotation } from "utils/image";
-import { getArcfaceAlignment } from "utils/machineLearning/faceAlign";
-import { enlargeBox } from "services/ml/geom";
+import { getArcfaceAlignment } from "./arcfaceAlignmentService";
 
 class ArcFaceCropService implements FaceCropService {
     public method: Versioned<FaceCropMethod>;
