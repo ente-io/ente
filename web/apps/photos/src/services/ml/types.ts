@@ -1,8 +1,8 @@
 import { DebugInfo } from "hdbscan";
 import PQueue from "p-queue";
+import { Dimensions } from "services/ml/geom";
 import { EnteFile } from "types/file";
-import { Dimensions } from "types/image";
-import { Box, Point } from "../../../thirdparty/face-api/classes";
+import { Box, Point } from "./geom";
 
 export interface MLSyncResult {
     nOutOfSyncFiles: number;
@@ -328,4 +328,9 @@ export interface MachineLearningWorker {
     sync(token: string, userID: number): Promise<MLSyncResult>;
 
     close(): void;
+}
+
+export interface ClipEmbedding {
+    embedding: Float32Array;
+    model: "ggml-clip" | "onnx-clip";
 }

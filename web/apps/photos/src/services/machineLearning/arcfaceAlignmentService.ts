@@ -4,7 +4,7 @@ import {
     FaceAlignmentService,
     FaceDetection,
     Versioned,
-} from "types/machineLearning";
+} from "services/ml/types";
 import { getArcfaceAlignment } from "utils/machineLearning/faceAlign";
 
 class ArcfaceAlignmentService implements FaceAlignmentService {

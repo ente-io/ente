@@ -6,13 +6,13 @@ import { MAX_ML_SYNC_ERROR_COUNT } from "constants/mlConfig";
 import downloadManager from "services/download";
 import { putEmbedding } from "services/embeddingService";
 import { getLocalFiles } from "services/fileService";
-import { EnteFile } from "types/file";
 import {
     MLSyncContext,
     MLSyncFileContext,
     MLSyncResult,
     MlFileData,
-} from "types/machineLearning";
+} from "services/ml/types";
+import { EnteFile } from "types/file";
 import { getMLSyncConfig } from "utils/machineLearning/config";
 import { LocalFileMlDataToServerFileMl } from "utils/machineLearning/mldataMappers";
 import mlIDbStorage from "utils/storage/mlIDbStorage";
@@ -348,7 +348,11 @@ class MachineLearningService {
 
     private async persistOnServer(mlFileData: MlFileData, enteFile: EnteFile) {
         const serverMl = LocalFileMlDataToServerFileMl(mlFileData);
-        log.info(mlFileData);
+        log.debug(() => ({ t: "Local ML file data", mlFileData }));
+        log.debug(() => ({
+            t: "Uploaded ML file data",
+            d: JSON.stringify(serverMl),
+        }));
 
         const comlinkCryptoWorker = await ComlinkCryptoWorker.getInstance();
         const { file: encryptedEmbeddingData } =

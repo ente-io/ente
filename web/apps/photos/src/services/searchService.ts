@@ -2,10 +2,10 @@ import { FILE_TYPE } from "@/media/file-type";
 import log from "@/next/log";
 import * as chrono from "chrono-node";
 import { t } from "i18next";
+import { Person } from "services/ml/types";
 import { Collection } from "types/collection";
 import { EntityType, LocationTag, LocationTagData } from "types/entity";
 import { EnteFile } from "types/file";
-import { Person } from "types/machineLearning";
 import {
     ClipSearchScores,
     DateValue,

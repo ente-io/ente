@@ -1,5 +1,5 @@
 import log from "@/next/log";
-import { Face, MLSyncContext, Person } from "types/machineLearning";
+import { Face, MLSyncContext, Person } from "services/ml/types";
 import {
     findFirstIfSorted,
     getAllFacesFromMap,

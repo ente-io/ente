@@ -4,8 +4,7 @@ import log from "@/next/log";
 import PQueue from "p-queue";
 import DownloadManager from "services/download";
 import { getLocalFiles } from "services/fileService";
-import { EnteFile } from "types/file";
-import { Dimensions } from "types/image";
+import { Box, Dimensions, Point, boxFromBoundingBox } from "services/ml/geom";
 import {
     DetectedFace,
     Face,
@@ -13,30 +12,19 @@ import {
     MlFileData,
     Person,
     Versioned,
-} from "types/machineLearning";
+} from "services/ml/types";
+import { EnteFile } from "types/file";
 import { getRenderableImage } from "utils/file";
 import { clamp, warpAffineFloat32List } from "utils/image";
 import mlIDbStorage from "utils/storage/mlIDbStorage";
-import { Box, Point } from "../../../thirdparty/face-api/classes";
-
-export function newBox(x: number, y: number, width: number, height: number) {
-    return new Box({ x, y, width, height });
-}
-
-export function getBoxCenterPt(topLeft: Point, bottomRight: Point): Point {
-    return topLeft.add(bottomRight.sub(topLeft).div(new Point(2, 2)));
-}
-
-export function getBoxCenter(box: Box): Point {
-    return getBoxCenterPt(box.topLeft, box.bottomRight);
-}
 
 export function enlargeBox(box: Box, factor: number = 1.5) {
-    const center = getBoxCenter(box);
+    const center = new Point(box.x + box.width / 2, box.y + box.height / 2);
+
     const size = new Point(box.width, box.height);
     const newHalfSize = new Point((factor * size.x) / 2, (factor * size.y) / 2);
 
-    return new Box({
+    return boxFromBoundingBox({
         left: center.x - newHalfSize.x,
         top: center.y - newHalfSize.y,
         right: center.x + newHalfSize.x,

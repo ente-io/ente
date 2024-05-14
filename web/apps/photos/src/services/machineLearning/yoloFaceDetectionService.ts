@@ -1,26 +1,30 @@
 import { workerBridge } from "@/next/worker/worker-bridge";
 import { euclidean } from "hdbscan";
 import {
+    Box,
+    Dimensions,
+    Point,
+    boxFromBoundingBox,
+    newBox,
+} from "services/ml/geom";
+import {
+    FaceDetection,
+    FaceDetectionMethod,
+    FaceDetectionService,
+    Versioned,
+} from "services/ml/types";
+import {
     Matrix,
     applyToPoint,
     compose,
     scale,
     translate,
 } from "transformation-matrix";
-import { Dimensions } from "types/image";
-import {
-    FaceDetection,
-    FaceDetectionMethod,
-    FaceDetectionService,
-    Versioned,
-} from "types/machineLearning";
 import {
     clamp,
     getPixelBilinear,
     normalizePixelBetween0And1,
 } from "utils/image";
-import { newBox } from "utils/machineLearning";
-import { Box, Point } from "../../../thirdparty/face-api/classes";
 
 class YoloFaceDetectionService implements FaceDetectionService {
     public method: Versioned<FaceDetectionMethod>;
@@ -296,7 +300,7 @@ function getDetectionCenter(detection: FaceDetection) {
         center.y += p.y;
     });
 
-    return center.div({ x: 4, y: 4 });
+    return new Point(center.x / 4, center.y / 4);
 }
 
 function computeTransformToBox(inBox: Box, toBox: Box): Matrix {
@@ -328,5 +332,5 @@ function newBoxFromPoints(
     right: number,
     bottom: number,
 ) {
-    return new Box({ left, top, right, bottom });
+    return boxFromBoundingBox({ left, top, right, bottom });
 }

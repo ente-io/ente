@@ -4,7 +4,6 @@ import { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { getDedicatedCryptoWorker } from "@ente/shared/crypto";
 import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
 import PQueue from "p-queue";
-import { EnteFile } from "types/file";
 import {
     BlurDetectionMethod,
     BlurDetectionService,
@@ -22,7 +21,8 @@ import {
     MLLibraryData,
     MLSyncConfig,
     MLSyncContext,
-} from "types/machineLearning";
+} from "services/ml/types";
+import { EnteFile } from "types/file";
 import { logQueueStats } from "utils/machineLearning";
 import arcfaceAlignmentService from "./arcfaceAlignmentService";
 import arcfaceCropService from "./arcfaceCropService";

@@ -1,6 +1,6 @@
 import { FILE_TYPE } from "@/media/file-type";
 import log from "@/next/log";
-import { MLSyncContext, MLSyncFileContext } from "types/machineLearning";
+import { MLSyncContext, MLSyncFileContext } from "services/ml/types";
 import {
     getLocalFileImageBitmap,
     getOriginalImageBitmap,

@@ -3,8 +3,8 @@ import {
     DEFAULT_ML_SYNC_CONFIG,
     DEFAULT_ML_SYNC_JOB_CONFIG,
 } from "constants/mlConfig";
+import { MLSearchConfig, MLSyncConfig } from "services/ml/types";
 import { JobConfig } from "types/common/job";
-import { MLSearchConfig, MLSyncConfig } from "types/machineLearning";
 import mlIDbStorage, {
     ML_SEARCH_CONFIG_NAME,
     ML_SYNC_CONFIG_NAME,

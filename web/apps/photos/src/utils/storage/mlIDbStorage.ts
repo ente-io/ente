@@ -15,8 +15,15 @@ import {
     openDB,
 } from "idb";
 import isElectron from "is-electron";
-import { Face, MLLibraryData, MlFileData, Person } from "types/machineLearning";
-import { IndexStatus } from "types/machineLearning/ui";
+import { Face, MLLibraryData, MlFileData, Person } from "services/ml/types";
+
+export interface IndexStatus {
+    outOfSyncFilesExists: boolean;
+    nSyncedFiles: number;
+    nTotalFiles: number;
+    localFilesSynced: boolean;
+    peopleIndexSynced: boolean;
+}
 
 interface Config {}
 
