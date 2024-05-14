@@ -415,7 +415,7 @@ func (c *Controller) getEmbeddingObject(ctx context.Context, objectKey string, d
 			cancel()
 			return ente.EmbeddingObject{}, stacktrace.Propagate(ctx.Err(), "")
 		default:
-			obj, err := c.downloadObject(fetchCtx, objectKey, downloader)
+			obj, err := c.downloadObject(fetchCtx, objectKey, downloader, c.embeddingBucket)
 			cancel() // Ensure cancel is called to release resources
 			if err == nil {
 				return obj, nil
@@ -438,11 +438,11 @@ func (c *Controller) getEmbeddingObject(ctx context.Context, objectKey string, d
 	return ente.EmbeddingObject{}, stacktrace.Propagate(errors.New("failed to fetch object"), "")
 }
 
-func (c *Controller) downloadObject(ctx context.Context, objectKey string, downloader *s3manager.Downloader) (ente.EmbeddingObject, error) {
+func (c *Controller) downloadObject(ctx context.Context, objectKey string, downloader *s3manager.Downloader, bucket *string) (ente.EmbeddingObject, error) {
 	var obj ente.EmbeddingObject
 	buff := &aws.WriteAtBuffer{}
 	_, err := downloader.DownloadWithContext(ctx, buff, &s3.GetObjectInput{
-		Bucket: c.embeddingBucket,
+		Bucket: bucket,
 		Key:    &objectKey,
 	})
 	if err != nil {
