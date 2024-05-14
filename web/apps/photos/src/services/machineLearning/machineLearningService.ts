@@ -19,7 +19,6 @@ import mlIDbStorage, {
 import {
     BlurDetectionMethod,
     BlurDetectionService,
-    ClipEmbedding,
     ClusteringMethod,
     ClusteringService,
     Face,
@@ -761,12 +760,10 @@ class ServerFileMl {
     public height?: number;
     public width?: number;
     public faceEmbedding: ServerFaceEmbeddings;
-    public clipEmbedding?: ClipEmbedding;
 
     public constructor(
         fileID: number,
         faceEmbedding: ServerFaceEmbeddings,
-        clipEmbedding?: ClipEmbedding,
         height?: number,
         width?: number,
     ) {
@@ -774,7 +771,6 @@ class ServerFileMl {
         this.height = height;
         this.width = width;
         this.faceEmbedding = faceEmbedding;
-        this.clipEmbedding = clipEmbedding;
     }
 }
 
@@ -895,7 +891,6 @@ function LocalFileMlDataToServerFileMl(
     return new ServerFileMl(
         localFileMlData.fileId,
         faceEmbeddings,
-        undefined,
         imageDimensions.height,
         imageDimensions.width,
     );
