@@ -225,7 +225,8 @@ class SemanticSearchService {
   Future<List<int>> _getFileIDsToBeIndexed() async {
     final uploadedFileIDs = await FilesDB.instance
         .getOwnedFileIDs(Configuration.instance.getUserID()!);
-    final embeddedFileIDs = _cachedEmbeddings.map((e) => e.fileID).toSet();
+    final embeddedFileIDs =
+        await EmbeddingsDB.instance.getFileIDs(_currentModel);
     uploadedFileIDs.removeWhere(
       (id) => embeddedFileIDs.contains(id),
     );
