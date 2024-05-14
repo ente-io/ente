@@ -11,44 +11,16 @@ import {
     FaceAlignment,
     MlFileData,
     Person,
-    Versioned,
 } from "services/ml/types";
 import { EnteFile } from "types/file";
 import { getRenderableImage } from "utils/file";
 import { clamp, warpAffineFloat32List } from "utils/image";
 import mlIDbStorage from "utils/storage/mlIDbStorage";
 
-export function getAllFacesFromMap(allFacesMap: Map<number, Array<Face>>) {
-    const allFaces = [...allFacesMap.values()].flat();
-
-    return allFaces;
-}
 
 export async function getLocalFile(fileId: number) {
     const localFiles = await getLocalFiles();
     return localFiles.find((f) => f.id === fileId);
-}
-
-export async function extractFaceImagesToFloat32(
-    faceAlignments: Array<FaceAlignment>,
-    faceSize: number,
-    image: ImageBitmap,
-): Promise<Float32Array> {
-    const faceData = new Float32Array(
-        faceAlignments.length * faceSize * faceSize * 3,
-    );
-    for (let i = 0; i < faceAlignments.length; i++) {
-        const alignedFace = faceAlignments[i];
-        const faceDataOffset = i * faceSize * faceSize * 3;
-        warpAffineFloat32List(
-            image,
-            alignedFace,
-            faceSize,
-            faceData,
-            faceDataOffset,
-        );
-    }
-    return faceData;
 }
 
 export function getFaceId(detectedFace: DetectedFace, imageDims: Dimensions) {
@@ -192,56 +164,3 @@ export async function getAllPeople(limit: number = undefined) {
         .sort((p1, p2) => p2.files.length - p1.files.length)
         .slice(0, limit);
 }
-
-export function findFirstIfSorted<T>(
-    elements: Array<T>,
-    comparator: (a: T, b: T) => number,
-) {
-    if (!elements || elements.length < 1) {
-        return;
-    }
-    let first = elements[0];
-
-    for (let i = 1; i < elements.length; i++) {
-        const comp = comparator(elements[i], first);
-        if (comp < 0) {
-            first = elements[i];
-        }
-    }
-
-    return first;
-}
-
-export function isDifferentOrOld(
-    method: Versioned<string>,
-    thanMethod: Versioned<string>,
-) {
-    return (
-        !method ||
-        method.value !== thanMethod.value ||
-        method.version < thanMethod.version
-    );
-}
-
-function primitiveArrayEquals(a, b) {
-    return (
-        Array.isArray(a) &&
-        Array.isArray(b) &&
-        a.length === b.length &&
-        a.every((val, index) => val === b[index])
-    );
-}
-
-export function areFaceIdsSame(ofFaces: Array<Face>, toFaces: Array<Face>) {
-    if (
-        (ofFaces === null || ofFaces === undefined) &&
-        (toFaces === null || toFaces === undefined)
-    ) {
-        return true;
-    }
-    return primitiveArrayEquals(
-        ofFaces?.map((f) => f.id),
-        toFaces?.map((f) => f.id),
-    );
-}
-
