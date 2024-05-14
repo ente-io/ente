@@ -26,7 +26,7 @@ class CodeStore {
     final mode = accountMode ?? _authenticatorService.getAccountMode();
     final List<EntityResult> entities =
         await _authenticatorService.getEntities(mode);
-    final List<Code> codes = [Code.withError("error", "gsd")];
+    final List<Code> codes = [];
 
     for (final entity in entities) {
       late Code code;
