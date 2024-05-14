@@ -58,32 +58,12 @@ export class Box implements IRect {
         this.height = height;
     }
 
-    public get left(): number {
-        return this.x;
-    }
-    public get top(): number {
-        return this.y;
-    }
-    public get right(): number {
-        return this.x + this.width;
-    }
-    public get bottom(): number {
-        return this.y + this.height;
-    }
-    public get area(): number {
-        return this.width * this.height;
-    }
     public get topLeft(): Point {
-        return new Point(this.left, this.top);
+        return new Point(this.x, this.y);
     }
-    public get topRight(): Point {
-        return new Point(this.right, this.top);
-    }
-    public get bottomLeft(): Point {
-        return new Point(this.left, this.bottom);
-    }
+
     public get bottomRight(): Point {
-        return new Point(this.right, this.bottom);
+        return new Point(this.x + this.width, this.y + this.height);
     }
 
     public round(): Box {
