@@ -149,7 +149,7 @@ export function LocalFileMlDataToServerFileMl(
     return new ServerFileMl(
         localFileMlData.fileId,
         faceEmbeddings,
-        null,
+        undefined,
         imageDimensions.height,
         imageDimensions.width,
     );
