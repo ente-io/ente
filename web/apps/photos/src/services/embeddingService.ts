@@ -7,6 +7,7 @@ import HTTPService from "@ente/shared/network/HTTPService";
 import { getEndpoint } from "@ente/shared/network/api";
 import localForage from "@ente/shared/storage/localForage";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
+import { FileML } from "services/machineLearning/machineLearningService";
 import type {
     Embedding,
     EmbeddingModel,
@@ -15,11 +16,6 @@ import type {
     PutEmbeddingRequest,
 } from "types/embedding";
 import { EnteFile } from "types/file";
-import {
-    getLatestVersionEmbeddings,
-    getLatestVersionFileEmbeddings,
-} from "utils/embedding";
-import { FileML } from "utils/machineLearning/mldataMappers";
 import { getLocalCollections } from "./collectionService";
 import { getAllLocalFiles } from "./fileService";
 import { getLocalTrashedFiles } from "./trashService";
@@ -239,6 +235,40 @@ export const syncFileEmbeddings = async () => {
     } catch (e) {
         log.error("Sync embeddings failed", e);
     }
+};
+
+const getLatestVersionEmbeddings = (embeddings: Embedding[]) => {
+    const latestVersionEntities = new Map<number, Embedding>();
+    embeddings.forEach((embedding) => {
+        if (!embedding?.fileID) {
+            return;
+        }
+        const existingEmbeddings = latestVersionEntities.get(embedding.fileID);
+        if (
+            !existingEmbeddings ||
+            existingEmbeddings.updatedAt < embedding.updatedAt
+        ) {
+            latestVersionEntities.set(embedding.fileID, embedding);
+        }
+    });
+    return Array.from(latestVersionEntities.values());
+};
+
+const getLatestVersionFileEmbeddings = (embeddings: FileML[]) => {
+    const latestVersionEntities = new Map<number, FileML>();
+    embeddings.forEach((embedding) => {
+        if (!embedding?.fileID) {
+            return;
+        }
+        const existingEmbeddings = latestVersionEntities.get(embedding.fileID);
+        if (
+            !existingEmbeddings ||
+            existingEmbeddings.updatedAt < embedding.updatedAt
+        ) {
+            latestVersionEntities.set(embedding.fileID, embedding);
+        }
+    });
+    return Array.from(latestVersionEntities.values());
 };
 
 export const getEmbeddingsDiff = async (
