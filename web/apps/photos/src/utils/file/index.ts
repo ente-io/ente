@@ -309,6 +309,8 @@ export const getRenderableImage = async (fileName: string, imageBlob: Blob) => {
             } catch (e) {
                 if (e.message.endsWith(CustomErrorMessage.NotAvailable)) {
                     moduleState.isNativeJPEGConversionNotAvailable = true;
+                    // TODO(MR): release 1.7
+                    log.info("Setting isNativeJPEGConversionNotAvailable", e);
                 } else {
                     log.error("Native conversion to JPEG failed", e);
                 }
