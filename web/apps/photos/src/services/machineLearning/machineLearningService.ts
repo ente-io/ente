@@ -6,13 +6,13 @@ import { MAX_ML_SYNC_ERROR_COUNT } from "constants/mlConfig";
 import downloadManager from "services/download";
 import { putEmbedding } from "services/embeddingService";
 import { getLocalFiles } from "services/fileService";
-import { EnteFile } from "types/file";
 import {
     MLSyncContext,
     MLSyncFileContext,
     MLSyncResult,
     MlFileData,
-} from "types/machineLearning";
+} from "services/ml/types";
+import { EnteFile } from "types/file";
 import { getMLSyncConfig } from "utils/machineLearning/config";
 import { LocalFileMlDataToServerFileMl } from "utils/machineLearning/mldataMappers";
 import mlIDbStorage from "utils/storage/mlIDbStorage";

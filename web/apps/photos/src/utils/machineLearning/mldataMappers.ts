@@ -1,10 +1,10 @@
 import {
+    ClipEmbedding,
     Face,
     FaceDetection,
     Landmark,
     MlFileData,
-} from "types/machineLearning";
-import { ClipEmbedding } from "types/machineLearning/data/clip";
+} from "services/ml/types";
 
 export interface FileML extends ServerFileMl {
     updatedAt: number;

@@ -4,8 +4,6 @@ import log from "@/next/log";
 import PQueue from "p-queue";
 import DownloadManager from "services/download";
 import { getLocalFiles } from "services/fileService";
-import { EnteFile } from "types/file";
-import { Dimensions } from "types/image";
 import {
     DetectedFace,
     Face,
@@ -13,7 +11,9 @@ import {
     MlFileData,
     Person,
     Versioned,
-} from "types/machineLearning";
+} from "services/ml/types";
+import { EnteFile } from "types/file";
+import { Dimensions } from "types/image";
 import { getRenderableImage } from "utils/file";
 import { clamp, warpAffineFloat32List } from "utils/image";
 import mlIDbStorage from "utils/storage/mlIDbStorage";

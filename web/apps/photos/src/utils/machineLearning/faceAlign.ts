@@ -1,6 +1,6 @@
 import { Matrix } from "ml-matrix";
+import { FaceAlignment, FaceDetection } from "services/ml/types";
 import { getSimilarityTransformation } from "similarity-transformation";
-import { FaceAlignment, FaceDetection } from "types/machineLearning";
 import { Point } from "../../../thirdparty/face-api/classes";
 
 const ARCFACE_LANDMARKS = [

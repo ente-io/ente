@@ -1,8 +1,8 @@
 // these utils only work in env where OffscreenCanvas is available
 
 import { Matrix, inverse } from "ml-matrix";
+import { FaceAlignment } from "services/ml/types";
 import { BlobOptions, Dimensions } from "types/image";
-import { FaceAlignment } from "types/machineLearning";
 import { enlargeBox } from "utils/machineLearning";
 import { Box } from "../../../thirdparty/face-api/classes";
 

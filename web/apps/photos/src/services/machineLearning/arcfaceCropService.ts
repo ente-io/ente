@@ -5,7 +5,7 @@ import {
     FaceCropService,
     FaceDetection,
     Versioned,
-} from "types/machineLearning";
+} from "services/ml/types";
 import { getArcfaceAlignment } from "utils/machineLearning/faceAlign";
 import { getFaceCrop } from "utils/machineLearning/faceCrop";
 

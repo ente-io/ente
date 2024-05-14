@@ -4,7 +4,7 @@ import { Legend } from "components/PhotoViewer/styledComponents/Legend";
 import { t } from "i18next";
 import React, { useEffect, useState } from "react";
 import { EnteFile } from "types/file";
-import { Face, Person } from "types/machineLearning";
+import { Face, Person } from "services/ml/types";
 import { getPeopleList, getUnidentifiedFaces } from "utils/machineLearning";
 
 const FaceChipContainer = styled("div")`

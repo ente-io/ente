@@ -5,7 +5,7 @@ import { t } from "i18next";
 import { AppContext } from "pages/_app";
 import { useContext } from "react";
 import { components } from "react-select";
-import { IndexStatus } from "types/machineLearning/ui";
+import { IndexStatus } from "utils/storage/mlIDbStorage";
 import { Suggestion, SuggestionType } from "types/search";
 
 const { Menu } = components;

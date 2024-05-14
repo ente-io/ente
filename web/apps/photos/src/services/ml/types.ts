@@ -329,3 +329,46 @@ export interface MachineLearningWorker {
 
     close(): void;
 }
+
+export interface ClipEmbedding {
+    embedding: Float32Array;
+    model: "ggml-clip" | "onnx-clip";
+}
+
+/// [`x`] and [y] are the coordinates of the top left corner of the box, so the minimim values
+/// [width] and [height] are the width and height of the box.
+/// All values are in absolute pixels relative to the original image size.
+export interface CenterBox {
+    x: number;
+    y: number;
+    height: number;
+    width: number;
+}
+
+export interface DetectionPoint {
+    x: number;
+    y: number;
+}
+
+export interface Detection {
+    box: CenterBox;
+    landmarks: DetectionPoint[];
+}
+
+export interface FileMLFace {
+    id: string;
+    confidence: number;
+    blur: number;
+    embedding: Float32Array;
+    detection: Detection;
+}
+
+export interface FileML {
+    fileID: number;
+    clip?: ClipEmbedding;
+    faces: Face[];
+    height: number;
+    width: number;
+    version: number;
+    error?: string;
+}

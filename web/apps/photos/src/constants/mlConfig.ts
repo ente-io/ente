@@ -1,5 +1,5 @@
 import { JobConfig } from "types/common/job";
-import { MLSearchConfig, MLSyncConfig } from "types/machineLearning";
+import { MLSearchConfig, MLSyncConfig } from "services/ml/types";
 
 export const DEFAULT_ML_SYNC_JOB_CONFIG: JobConfig = {
     intervalSec: 5,

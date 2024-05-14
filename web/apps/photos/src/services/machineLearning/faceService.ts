@@ -5,7 +5,7 @@ import {
     Face,
     MLSyncContext,
     MLSyncFileContext,
-} from "types/machineLearning";
+} from "services/ml/types";
 import { imageBitmapToBlob } from "utils/image";
 import {
     areFaceIdsSame,

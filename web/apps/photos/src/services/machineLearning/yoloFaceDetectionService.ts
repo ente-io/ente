@@ -1,6 +1,12 @@
 import { workerBridge } from "@/next/worker/worker-bridge";
 import { euclidean } from "hdbscan";
 import {
+    FaceDetection,
+    FaceDetectionMethod,
+    FaceDetectionService,
+    Versioned,
+} from "services/ml/types";
+import {
     Matrix,
     applyToPoint,
     compose,
@@ -8,12 +14,6 @@ import {
     translate,
 } from "transformation-matrix";
 import { Dimensions } from "types/image";
-import {
-    FaceDetection,
-    FaceDetectionMethod,
-    FaceDetectionService,
-    Versioned,
-} from "types/machineLearning";
 import {
     clamp,
     getPixelBilinear,

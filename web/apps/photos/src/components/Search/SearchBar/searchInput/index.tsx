@@ -17,7 +17,7 @@ import {
 import { Collection } from "types/collection";
 import { LocationTagData } from "types/entity";
 import { EnteFile } from "types/file";
-import { Person } from "types/machineLearning";
+import { Person } from "services/ml/types";
 import {
     ClipSearchScores,
     DateValue,

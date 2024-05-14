@@ -1,4 +1,4 @@
-import { FaceAlignment, FaceCrop, FaceCropConfig } from "types/machineLearning";
+import { FaceAlignment, FaceCrop, FaceCropConfig } from "services/ml/types";
 import { cropWithRotation } from "utils/image";
 import { enlargeBox } from ".";
 import { Box } from "../../../thirdparty/face-api/classes";
