@@ -8468,10 +8468,10 @@ class S {
     );
   }
 
-  /// `Find people quickly and search by name`
+  /// `Find people quickly by name`
   String get findPeopleByName {
     return Intl.message(
-      'Find people quickly and search by name',
+      'Find people quickly by name',
       name: 'findPeopleByName',
       desc: '',
       args: [],

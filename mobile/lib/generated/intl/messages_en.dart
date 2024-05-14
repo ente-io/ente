@@ -739,8 +739,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "filesDeleted": MessageLookupByLibrary.simpleMessage("Files deleted"),
         "filesSavedToGallery":
             MessageLookupByLibrary.simpleMessage("Files saved to gallery"),
-        "findPeopleByName": MessageLookupByLibrary.simpleMessage(
-            "Find people quickly and search by name"),
+        "findPeopleByName":
+            MessageLookupByLibrary.simpleMessage("Find people quickly by name"),
         "flip": MessageLookupByLibrary.simpleMessage("Flip"),
         "forYourMemories":
             MessageLookupByLibrary.simpleMessage("for your memories"),
