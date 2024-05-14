@@ -631,8 +631,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Dobre seu armazenamento"),
         "download": MessageLookupByLibrary.simpleMessage("Baixar"),
         "downloadFailed":
-            MessageLookupByLibrary.simpleMessage("Falha ao baixar"),
-        "downloading": MessageLookupByLibrary.simpleMessage("Baixando..."),
+            MessageLookupByLibrary.simpleMessage("Falha no download"),
+        "downloading":
+            MessageLookupByLibrary.simpleMessage("Fazendo download..."),
         "dropSupportEmail": m17,
         "duplicateFileCountWithStorageSaved": m18,
         "duplicateItemsGroup": m19,
@@ -718,8 +719,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Falha ao aplicar o código"),
         "failedToCancel":
             MessageLookupByLibrary.simpleMessage("Falha ao cancelar"),
-        "failedToDownloadVideo":
-            MessageLookupByLibrary.simpleMessage("Falha ao baixar vídeo"),
+        "failedToDownloadVideo": MessageLookupByLibrary.simpleMessage(
+            "Falha ao fazer download do vídeo"),
         "failedToFetchOriginalForEdit": MessageLookupByLibrary.simpleMessage(
             "Falha ao obter original para edição"),
         "failedToFetchReferralDetails": MessageLookupByLibrary.simpleMessage(
@@ -737,7 +738,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "familyPlans": MessageLookupByLibrary.simpleMessage("Plano familiar"),
         "faq": MessageLookupByLibrary.simpleMessage("Perguntas frequentes"),
         "faqs": MessageLookupByLibrary.simpleMessage("Perguntas frequentes"),
-        "favorite": MessageLookupByLibrary.simpleMessage("Favoritar"),
+        "favorite": MessageLookupByLibrary.simpleMessage("Favorito"),
         "feedback": MessageLookupByLibrary.simpleMessage("Comentários"),
         "fileFailedToSaveToGallery": MessageLookupByLibrary.simpleMessage(
             "Falha ao salvar o arquivo na galeria"),
@@ -904,8 +905,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Carregando galeria..."),
         "loadingMessage":
             MessageLookupByLibrary.simpleMessage("Carregando suas fotos..."),
-        "loadingModel":
-            MessageLookupByLibrary.simpleMessage("Baixando modelos..."),
+        "loadingModel": MessageLookupByLibrary.simpleMessage(
+            "Fazendo download de modelos..."),
         "localGallery": MessageLookupByLibrary.simpleMessage("Galeria local"),
         "location": MessageLookupByLibrary.simpleMessage("Local"),
         "locationName": MessageLookupByLibrary.simpleMessage("Nome do Local"),
