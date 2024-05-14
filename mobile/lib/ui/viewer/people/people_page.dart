@@ -2,7 +2,6 @@ import "dart:async";
 import "dart:developer";
 
 import 'package:flutter/material.dart';
-import "package:flutter_animate/flutter_animate.dart";
 import "package:logging/logging.dart";
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/files_updated_event.dart';
@@ -16,10 +15,10 @@ import 'package:photos/models/selected_files.dart';
 import "package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart";
 import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart";
 import "package:photos/services/search_service.dart";
-import "package:photos/ui/components/notification_widget.dart";
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import "package:photos/ui/viewer/people/people_app_bar.dart";
+import "package:photos/ui/viewer/people/people_banner.dart";
 import "package:photos/ui/viewer/people/person_cluster_suggestion.dart";
 
 class PeoplePage extends StatefulWidget {
@@ -177,34 +176,24 @@ class _PeoplePageState extends State<PeoplePage> {
                             userDismissedSuggestionBanner = true;
                           });
                         },
-                        child: RepaintBoundary(
-                          child: NotificationWidget(
-                            startIcon: Icons.star_border_rounded,
-                            actionIcon: Icons.search_outlined,
-                            text: "Review suggestions",
-                            subText: "Improve the results",
-                            type: NotificationType.greenBanner,
-                            onTap: () async {
-                              unawaited(
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        PersonReviewClusterSuggestion(
-                                      widget.person,
-                                    ),
+                        child: PeopleBanner(
+                          type: PeopleBannerType.suggestion,
+                          startIcon: Icons.face_retouching_natural,
+                          actionIcon: Icons.search_outlined,
+                          text: "Review suggestions",
+                          subText: "Improve the results",
+                          onTap: () async {
+                            unawaited(
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      PersonReviewClusterSuggestion(
+                                    widget.person,
                                   ),
                                 ),
-                              );
-                            },
-                          )
-                              .animate(
-                                onPlay: (controller) => controller.repeat(),
-                              )
-                              .shimmer(
-                                duration: 1000.ms,
-                                delay: 3200.ms,
-                                size: 0.6,
                               ),
+                            );
+                          },
                         ),
                       )
                     : const SizedBox.shrink(),
