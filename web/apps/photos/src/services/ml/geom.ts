@@ -7,14 +7,6 @@ export class Point {
         this.y = y;
     }
 
-    public add(pt: Point): Point {
-        return new Point(this.x + pt.x, this.y + pt.y);
-    }
-
-    public sub(pt: Point): Point {
-        return new Point(this.x - pt.x, this.y - pt.y);
-    }
-
     public div(pt: Point): Point {
         return new Point(this.x / pt.x, this.y / pt.y);
     }

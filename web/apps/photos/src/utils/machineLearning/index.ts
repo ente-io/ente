@@ -18,12 +18,9 @@ import { getRenderableImage } from "utils/file";
 import { clamp, warpAffineFloat32List } from "utils/image";
 import mlIDbStorage from "utils/storage/mlIDbStorage";
 
-function getBoxCenterPt(topLeft: Point, bottomRight: Point): Point {
-    return topLeft.add(bottomRight.sub(topLeft).div(new Point(2, 2)));
-}
-
 export function enlargeBox(box: Box, factor: number = 1.5) {
-    const center = getBoxCenterPt(box.topLeft, box.bottomRight);
+    const center = new Point(box.x + box.width / 2, box.y + box.height / 2);
+
     const size = new Point(box.width, box.height);
     const newHalfSize = new Point((factor * size.x) / 2, (factor * size.y) / 2);
 
