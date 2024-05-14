@@ -52,40 +52,24 @@ class ServerFaceEmbeddings {
 }
 
 class ServerFace {
-    public fileID: number;
     public faceID: string;
     public embeddings: number[];
     public detection: ServerDetection;
     public score: number;
     public blur: number;
-    public fileInfo?: ServerFileInfo;
 
     public constructor(
-        fileID: number,
         faceID: string,
         embeddings: number[],
         detection: ServerDetection,
         score: number,
         blur: number,
-        fileInfo?: ServerFileInfo,
     ) {
-        this.fileID = fileID;
         this.faceID = faceID;
         this.embeddings = embeddings;
         this.detection = detection;
         this.score = score;
         this.blur = blur;
-        this.fileInfo = fileInfo;
-    }
-}
-
-class ServerFileInfo {
-    public imageWidth?: number;
-    public imageHeight?: number;
-
-    public constructor(imageWidth?: number, imageHeight?: number) {
-        this.imageWidth = imageWidth;
-        this.imageHeight = imageHeight;
     }
 }
 
@@ -128,10 +112,7 @@ export function LocalFileMlDataToServerFileMl(
         return null;
     }
     const imageDimensions = localFileMlData.imageDimensions;
-    const fileInfo = new ServerFileInfo(
-        imageDimensions.width,
-        imageDimensions.height,
-    );
+
     const faces: ServerFace[] = [];
     for (let i = 0; i < localFileMlData.faces.length; i++) {
         const face: Face = localFileMlData.faces[i];
@@ -152,13 +133,11 @@ export function LocalFileMlDataToServerFileMl(
         }
 
         const newFaceObject = new ServerFace(
-            localFileMlData.fileId,
             faceID,
             Array.from(embedding),
             new ServerDetection(newBox, newLandmarks),
             score,
             blur,
-            fileInfo,
         );
         faces.push(newFaceObject);
     }
