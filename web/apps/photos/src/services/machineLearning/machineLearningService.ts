@@ -49,7 +49,6 @@ import {
     FaceEmbeddingService,
     MLLibraryData,
 } from "services/ml/types";
-import { logQueueStats } from "utils/machineLearning";
 import arcfaceAlignmentService from "./arcfaceAlignmentService";
 import arcfaceCropService from "./arcfaceCropService";
 import dbscanClusteringService from "./dbscanClusteringService";
@@ -901,5 +900,17 @@ function LocalFileMlDataToServerFileMl(
         undefined,
         imageDimensions.height,
         imageDimensions.width,
+    );
+}
+
+export function logQueueStats(queue: PQueue, name: string) {
+    queue.on("active", () =>
+        log.info(
+            `queuestats: ${name}: Active, Size: ${queue.size} Pending: ${queue.pending}`,
+        ),
+    );
+    queue.on("idle", () => log.info(`queuestats: ${name}: Idle`));
+    queue.on("error", (error) =>
+        console.error(`queuestats: ${name}: Error, `, error),
     );
 }

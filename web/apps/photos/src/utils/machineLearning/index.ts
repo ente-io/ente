@@ -245,14 +245,3 @@ export function areFaceIdsSame(ofFaces: Array<Face>, toFaces: Array<Face>) {
     );
 }
 
-export function logQueueStats(queue: PQueue, name: string) {
-    queue.on("active", () =>
-        log.info(
-            `queuestats: ${name}: Active, Size: ${queue.size} Pending: ${queue.pending}`,
-        ),
-    );
-    queue.on("idle", () => log.info(`queuestats: ${name}: Idle`));
-    queue.on("error", (error) =>
-        console.error(`queuestats: ${name}: Error, `, error),
-    );
-}

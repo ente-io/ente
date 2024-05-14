@@ -11,9 +11,9 @@ import { JobResult } from "types/common/job";
 import { EnteFile } from "types/file";
 import { getDedicatedMLWorker } from "utils/comlink/ComlinkMLWorker";
 import { SimpleJob } from "utils/common/job";
-import { logQueueStats } from "utils/machineLearning";
 import mlIDbStorage from "utils/storage/mlIDbStorage";
 import { DedicatedMLWorker } from "worker/ml.worker";
+import { logQueueStats } from "./machineLearningService";
 
 const LIVE_SYNC_IDLE_DEBOUNCE_SEC = 30;
 const LIVE_SYNC_QUEUE_TIMEOUT_SEC = 300;
