@@ -2,6 +2,7 @@ import { FILE_TYPE } from "@/media/file-type";
 import log from "@/next/log";
 import * as chrono from "chrono-node";
 import { t } from "i18next";
+import { getMLSyncConfig } from "services/machineLearning/machineLearningService";
 import { Person } from "services/ml/types";
 import { Collection } from "types/collection";
 import { EntityType, LocationTag, LocationTagData } from "types/entity";
@@ -16,8 +17,6 @@ import {
 } from "types/search";
 import ComlinkSearchWorker from "utils/comlink/ComlinkSearchWorker";
 import { getUniqueFiles } from "utils/file";
-import { getAllPeople } from "utils/machineLearning";
-import { getMLSyncConfig } from "services/machineLearning/machineLearningService";
 import { getFormattedDate } from "utils/search";
 import mlIDbStorage from "utils/storage/mlIDbStorage";
 import { clipService, computeClipMatchScore } from "./clip-service";
@@ -429,4 +428,15 @@ function convertSuggestionToSearchQuery(option: Suggestion): Search {
         case SuggestionType.CLIP:
             return { clip: option.value as ClipSearchScores };
     }
+}
+
+async function getAllPeople(limit: number = undefined) {
+    let people: Array<Person> = await mlIDbStorage.getAllPeople();
+    // await mlPeopleStore.iterate<Person, void>((person) => {
+    //     people.push(person);
+    // });
+    people = people ?? [];
+    return people
+        .sort((p1, p2) => p2.files.length - p1.files.length)
+        .slice(0, limit);
 }

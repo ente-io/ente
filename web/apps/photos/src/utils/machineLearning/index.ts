@@ -5,18 +5,10 @@ import PQueue from "p-queue";
 import DownloadManager from "services/download";
 import { getLocalFiles } from "services/fileService";
 import { Dimensions } from "services/ml/geom";
-import {
-    DetectedFace,
-    Face,
-    FaceAlignment,
-    MlFileData,
-    Person,
-} from "services/ml/types";
+import { DetectedFace } from "services/ml/types";
 import { EnteFile } from "types/file";
 import { getRenderableImage } from "utils/file";
-import { clamp, warpAffineFloat32List } from "utils/image";
-import mlIDbStorage from "utils/storage/mlIDbStorage";
-
+import { clamp } from "utils/image";
 
 export async function getLocalFile(fileId: number) {
     const localFiles = await getLocalFiles();
@@ -61,7 +53,7 @@ export function getFaceId(detectedFace: DetectedFace, imageDims: Dimensions) {
     return faceID;
 }
 
-export async function getImageBlobBitmap(blob: Blob): Promise<ImageBitmap> {
+async function getImageBlobBitmap(blob: Blob): Promise<ImageBitmap> {
     return await createImageBitmap(blob);
 }
 
@@ -108,59 +100,4 @@ export async function getLocalFileImageBitmap(
     let fileBlob = localFile as Blob;
     fileBlob = await getRenderableImage(enteFile.metadata.title, fileBlob);
     return getImageBlobBitmap(fileBlob);
-}
-
-export async function getPeopleList(file: EnteFile): Promise<Array<Person>> {
-    let startTime = Date.now();
-    const mlFileData: MlFileData = await mlIDbStorage.getFile(file.id);
-    log.info(
-        "getPeopleList:mlFilesStore:getItem",
-        Date.now() - startTime,
-        "ms",
-    );
-    if (!mlFileData?.faces || mlFileData.faces.length < 1) {
-        return [];
-    }
-
-    const peopleIds = mlFileData.faces
-        .filter((f) => f.personId !== null && f.personId !== undefined)
-        .map((f) => f.personId);
-    if (!peopleIds || peopleIds.length < 1) {
-        return [];
-    }
-    // log.info("peopleIds: ", peopleIds);
-    startTime = Date.now();
-    const peoplePromises = peopleIds.map(
-        (p) => mlIDbStorage.getPerson(p) as Promise<Person>,
-    );
-    const peopleList = await Promise.all(peoplePromises);
-    log.info(
-        "getPeopleList:mlPeopleStore:getItems",
-        Date.now() - startTime,
-        "ms",
-    );
-    // log.info("peopleList: ", peopleList);
-
-    return peopleList;
-}
-
-export async function getUnidentifiedFaces(
-    file: EnteFile,
-): Promise<Array<Face>> {
-    const mlFileData: MlFileData = await mlIDbStorage.getFile(file.id);
-
-    return mlFileData?.faces?.filter(
-        (f) => f.personId === null || f.personId === undefined,
-    );
-}
-
-export async function getAllPeople(limit: number = undefined) {
-    let people: Array<Person> = await mlIDbStorage.getAllPeople();
-    // await mlPeopleStore.iterate<Person, void>((person) => {
-    //     people.push(person);
-    // });
-    people = people ?? [];
-    return people
-        .sort((p1, p2) => p2.files.length - p1.files.length)
-        .slice(0, limit);
 }
