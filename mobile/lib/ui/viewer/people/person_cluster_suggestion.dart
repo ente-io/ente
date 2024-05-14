@@ -35,6 +35,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
   bool fetch = true;
   Key futureBuilderKeySuggestions = UniqueKey();
   Key futureBuilderKeyFaceThumbnails = UniqueKey();
+  bool canGiveFeedback = true;
 
   // Declare a variable for the future
   late Future<List<ClusterSuggestion>> futureClusterSuggestions;
@@ -94,7 +95,8 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
             final bool usingMean = currentSuggestion.usedOnlyMeanForSuggestion;
             final List<EnteFile> files = currentSuggestion.filesInCluster;
 
-            final Future<Map<int, Uint8List?>> generateFacedThumbnails = _generateFaceThumbnails(
+            final Future<Map<int, Uint8List?>> generateFacedThumbnails =
+                _generateFaceThumbnails(
               files.sublist(0, min(files.length, 8)),
               clusterID,
             );
@@ -161,7 +163,11 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
     int numberOfSuggestions,
   ) async {
     // Perform the action based on clusterID, e.g., assignClusterToPerson or captureNotPersonFeedback
+    if (!canGiveFeedback) {
+      return;
+    }
     if (yesOrNo) {
+      canGiveFeedback = false;
       await PersonService.instance.assignClusterToPerson(
         personID: widget.person.remoteID,
         clusterID: clusterID,
@@ -187,6 +193,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
         setState(() {});
       }
     } else {
+      canGiveFeedback = false;
       await FaceMLDataDB.instance.captureNotPersonFeedback(
         personID: widget.person.remoteID,
         clusterID: clusterID,
@@ -326,6 +333,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             final faceThumbnails = snapshot.data!;
+            canGiveFeedback = true;
             return Column(
               children: <Widget>[
                 Row(
@@ -358,6 +366,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
             // log the error
             return const Center(child: Text("Error"));
           } else {
+            canGiveFeedback = false;
             return const Center(child: CircularProgressIndicator());
           }
         },
