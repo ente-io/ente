@@ -30,14 +30,6 @@ class ServerFileMl {
         this.faceEmbedding = faceEmbedding;
         this.clipEmbedding = clipEmbedding;
     }
-
-    toJson(): string {
-        return JSON.stringify(this);
-    }
-
-    static fromJson(json: string): ServerFileMl {
-        return JSON.parse(json);
-    }
 }
 
 class ServerFaceEmbeddings {
@@ -56,14 +48,6 @@ class ServerFaceEmbeddings {
         this.version = version;
         this.client = client;
         this.error = error;
-    }
-
-    toJson(): string {
-        return JSON.stringify(this);
-    }
-
-    static fromJson(json: string): ServerFaceEmbeddings {
-        return JSON.parse(json);
     }
 }
 
@@ -93,14 +77,6 @@ class ServerFace {
         this.blur = blur;
         this.fileInfo = fileInfo;
     }
-
-    toJson(): string {
-        return JSON.stringify(this);
-    }
-
-    static fromJson(json: string): ServerFace {
-        return JSON.parse(json);
-    }
 }
 
 class ServerFileInfo {
@@ -121,14 +97,6 @@ class ServerDetection {
         this.box = box;
         this.landmarks = landmarks;
     }
-
-    toJson(): string {
-        return JSON.stringify(this);
-    }
-
-    static fromJson(json: string): ServerDetection {
-        return JSON.parse(json);
-    }
 }
 
 class ServerFaceBox {
@@ -147,14 +115,6 @@ class ServerFaceBox {
         this.yMin = yMin;
         this.width = width;
         this.height = height;
-    }
-
-    toJson(): string {
-        return JSON.stringify(this);
-    }
-
-    static fromJson(json: string): ServerFaceBox {
-        return JSON.parse(json);
     }
 }
 
@@ -215,51 +175,3 @@ export function LocalFileMlDataToServerFileMl(
         imageDimensions.width,
     );
 }
-
-// // Not sure if this actually works
-// export function ServerFileMlToLocalFileMlData(
-//     serverFileMl: ServerFileMl,
-// ): MlFileData {
-//     const faces: Face[] = [];
-//     const mlVersion: number = serverFileMl.faceEmbeddings.version;
-//     const errorCount = serverFileMl.faceEmbeddings.error ? 1 : 0;
-//     for (let i = 0; i < serverFileMl.faceEmbeddings.faces.length; i++) {
-//         const face = serverFileMl.faceEmbeddings.faces[i];
-//         if(face.detection.landmarks.length === 0) {
-//             continue;
-//         }
-//         const detection = face.detection;
-//         const box = detection.box;
-//         const landmarks = detection.landmarks;
-//         const newBox = new FaceBox(
-//             box.xMin,
-//             box.yMin,
-//             box.width,
-//             box.height,
-//         );
-//         const newLandmarks: Landmark[] = [];
-//         for (let j = 0; j < landmarks.length; j++) {
-//             newLandmarks.push(
-//                 {
-//                  x:   landmarks[j].x,
-//                 y: landmarks[j].y,
-//         } as Landmark
-//             );
-//         }
-//         const newDetection = new Detection(newBox, newLandmarks);
-//         const newFace = {
-
-//         } as Face
-//         faces.push(newFace);
-//     }
-//     return {
-//         fileId: serverFileMl.fileID,
-//         imageDimensions: {
-//             width: serverFileMl.width,
-//             height: serverFileMl.height,
-//         },
-//         faces,
-//         mlVersion,
-//         errorCount,
-//     };
-// }
