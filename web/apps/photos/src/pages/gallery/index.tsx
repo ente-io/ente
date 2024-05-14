@@ -84,7 +84,10 @@ import {
     getSectionSummaries,
 } from "services/collectionService";
 import downloadManager from "services/download";
-import { syncEmbeddings, syncFileEmbeddings } from "services/embeddingService";
+import {
+    syncCLIPEmbeddings,
+    syncFileEmbeddings,
+} from "services/embeddingService";
 import { syncEntities } from "services/entityService";
 import { getLocalFiles, syncFiles } from "services/fileService";
 import locationSearchService from "services/locationSearchService";
@@ -698,7 +701,7 @@ export default function Gallery() {
             await syncTrash(collections, setTrashedFiles);
             await syncEntities();
             await syncMapEnabled();
-            await syncEmbeddings();
+            await syncCLIPEmbeddings();
             const electron = globalThis.electron;
             if (electron) {
                 await syncFileEmbeddings();

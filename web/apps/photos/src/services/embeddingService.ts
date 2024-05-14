@@ -69,8 +69,11 @@ const setModelEmbeddingSyncTime = async (
     await localForage.setItem(`${model}-${embeddingSyncTimeLSKeySuffix}`, time);
 };
 
-export const syncEmbeddings = async () => {
-    const models: EmbeddingModel[] = ["onnx-clip"];
+/**
+ * Sync our locally available CLIP embeddings with the server.
+ */
+export const syncCLIPEmbeddings = async () => {
+    const model: EmbeddingModel = "onnx-clip";
     try {
         let allEmbeddings = await storedCLIPEmbeddings();
         const localFiles = await getAllLocalFiles();
@@ -87,69 +90,65 @@ export const syncEmbeddings = async () => {
             clipEmbeddingsLSKey,
         );
         log.info(`Syncing embeddings localCount: ${allEmbeddings.length}`);
-        for (const model of models) {
-            let modelLastSinceTime = await getModelEmbeddingSyncTime(model);
-            log.info(
-                `Syncing ${model} model's embeddings sinceTime: ${modelLastSinceTime}`,
-            );
-            let response: GetEmbeddingDiffResponse;
-            do {
-                response = await getEmbeddingsDiff(modelLastSinceTime, model);
-                if (!response.diff?.length) {
-                    return;
-                }
-                const newEmbeddings = await Promise.all(
-                    response.diff.map(async (embedding) => {
-                        try {
-                            const {
-                                encryptedEmbedding,
-                                decryptionHeader,
-                                ...rest
-                            } = embedding;
-                            const worker =
-                                await ComlinkCryptoWorker.getInstance();
-                            const fileKey = fileIdToKeyMap.get(
-                                embedding.fileID,
-                            );
-                            if (!fileKey) {
-                                throw Error(CustomError.FILE_NOT_FOUND);
-                            }
-                            const decryptedData = await worker.decryptEmbedding(
-                                encryptedEmbedding,
-                                decryptionHeader,
-                                fileIdToKeyMap.get(embedding.fileID),
-                            );
 
-                            return {
-                                ...rest,
-                                embedding: decryptedData,
-                            } as Embedding;
-                        } catch (e) {
-                            let hasHiddenAlbums = false;
-                            if (e.message === CustomError.FILE_NOT_FOUND) {
-                                hasHiddenAlbums = hiddenAlbums?.length > 0;
-                            }
-                            log.error(
-                                `decryptEmbedding failed for file (hasHiddenAlbums: ${hasHiddenAlbums})`,
-                                e,
-                            );
+        let modelLastSinceTime = await getModelEmbeddingSyncTime(model);
+        log.info(
+            `Syncing ${model} model's embeddings sinceTime: ${modelLastSinceTime}`,
+        );
+        let response: GetEmbeddingDiffResponse;
+        do {
+            response = await getEmbeddingsDiff(modelLastSinceTime, model);
+            if (!response.diff?.length) {
+                return;
+            }
+            const newEmbeddings = await Promise.all(
+                response.diff.map(async (embedding) => {
+                    try {
+                        const {
+                            encryptedEmbedding,
+                            decryptionHeader,
+                            ...rest
+                        } = embedding;
+                        const worker = await ComlinkCryptoWorker.getInstance();
+                        const fileKey = fileIdToKeyMap.get(embedding.fileID);
+                        if (!fileKey) {
+                            throw Error(CustomError.FILE_NOT_FOUND);
                         }
-                    }),
-                );
-                allEmbeddings = getLatestVersionEmbeddings([
-                    ...allEmbeddings,
-                    ...newEmbeddings,
-                ]);
-                if (response.diff.length) {
-                    modelLastSinceTime = response.diff.slice(-1)[0].updatedAt;
-                }
-                await localForage.setItem(clipEmbeddingsLSKey, allEmbeddings);
-                await setModelEmbeddingSyncTime(model, modelLastSinceTime);
-                log.info(
-                    `Syncing embeddings syncedEmbeddingsCount: ${allEmbeddings.length}`,
-                );
-            } while (response.diff.length === DIFF_LIMIT);
-        }
+                        const decryptedData = await worker.decryptEmbedding(
+                            encryptedEmbedding,
+                            decryptionHeader,
+                            fileIdToKeyMap.get(embedding.fileID),
+                        );
+
+                        return {
+                            ...rest,
+                            embedding: decryptedData,
+                        } as Embedding;
+                    } catch (e) {
+                        let hasHiddenAlbums = false;
+                        if (e.message === CustomError.FILE_NOT_FOUND) {
+                            hasHiddenAlbums = hiddenAlbums?.length > 0;
+                        }
+                        log.error(
+                            `decryptEmbedding failed for file (hasHiddenAlbums: ${hasHiddenAlbums})`,
+                            e,
+                        );
+                    }
+                }),
+            );
+            allEmbeddings = getLatestVersionEmbeddings([
+                ...allEmbeddings,
+                ...newEmbeddings,
+            ]);
+            if (response.diff.length) {
+                modelLastSinceTime = response.diff.slice(-1)[0].updatedAt;
+            }
+            await localForage.setItem(clipEmbeddingsLSKey, allEmbeddings);
+            await setModelEmbeddingSyncTime(model, modelLastSinceTime);
+            log.info(
+                `Syncing embeddings syncedEmbeddingsCount: ${allEmbeddings.length}`,
+            );
+        } while (response.diff.length === DIFF_LIMIT);
     } catch (e) {
         log.error("Sync embeddings failed", e);
     }
