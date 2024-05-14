@@ -46,6 +46,24 @@ type Controller struct {
 	CollectionRepo          *repo.CollectionRepository
 	HostName                string
 	cleanupCronRunning      bool
+	embeddingS3Client       *s3.S3
+	embeddingBucket         *string
+}
+
+func New(repo *embedding.Repository, accessCtrl access.Controller, objectCleanupController *controller.ObjectCleanupController, s3Config *s3config.S3Config, queueRepo *repo.QueueRepository, taskLockingRepo *repo.TaskLockRepository, fileRepo *repo.FileRepository, collectionRepo *repo.CollectionRepository, hostName string) *Controller {
+	return &Controller{
+		Repo:                    repo,
+		AccessCtrl:              accessCtrl,
+		ObjectCleanupController: objectCleanupController,
+		S3Config:                s3Config,
+		QueueRepo:               queueRepo,
+		TaskLockingRepo:         taskLockingRepo,
+		FileRepo:                fileRepo,
+		CollectionRepo:          collectionRepo,
+		HostName:                hostName,
+		embeddingS3Client:       s3Config.GetEmbeddingsS3Client(),
+		embeddingBucket:         s3Config.GetEmbeddingsBucket(),
+	}
 }
 
 func (c *Controller) InsertOrUpdate(ctx *gin.Context, req ente.InsertOrUpdateEmbeddingRequest) (*ente.Embedding, error) {
@@ -245,7 +263,7 @@ func (c *Controller) deleteEmbedding(qItem repo.QueueItem) {
 	}
 	prefix := c.getEmbeddingObjectPrefix(ownerID, fileID)
 
-	err = c.ObjectCleanupController.DeleteAllObjectsWithPrefix(prefix, c.S3Config.GetHotDataCenter())
+	err = c.ObjectCleanupController.DeleteAllObjectsWithPrefix(prefix, c.S3Config.GetEmbeddingsDataCenter())
 	if err != nil {
 		ctxLogger.WithError(err).Error("Failed to delete all objects")
 		return
@@ -277,9 +295,9 @@ func (c *Controller) getEmbeddingObjectPrefix(userID int64, fileID int64) string
 // uploadObject uploads the embedding object to the object store and returns the object size
 func (c *Controller) uploadObject(obj ente.EmbeddingObject, key string) (int, error) {
 	embeddingObj, _ := json.Marshal(obj)
-	uploader := s3manager.NewUploaderWithClient(c.S3Config.GetHotS3Client())
+	uploader := s3manager.NewUploaderWithClient(c.embeddingS3Client)
 	up := s3manager.UploadInput{
-		Bucket: c.S3Config.GetHotBucket(),
+		Bucket: c.embeddingBucket,
 		Key:    &key,
 		Body:   bytes.NewReader(embeddingObj),
 	}
@@ -301,7 +319,7 @@ func (c *Controller) getEmbeddingObjectsParallel(objectKeys []string) ([]ente.Em
 	var wg sync.WaitGroup
 	var errs []error
 	embeddingObjects := make([]ente.EmbeddingObject, len(objectKeys))
-	downloader := s3manager.NewDownloaderWithClient(c.S3Config.GetHotS3Client())
+	downloader := s3manager.NewDownloaderWithClient(c.embeddingS3Client)
 
 	for i, objectKey := range objectKeys {
 		wg.Add(1)
@@ -338,7 +356,7 @@ type embeddingObjectResult struct {
 func (c *Controller) getEmbeddingObjectsParallelV2(userID int64, dbEmbeddingRows []ente.Embedding) ([]embeddingObjectResult, error) {
 	var wg sync.WaitGroup
 	embeddingObjects := make([]embeddingObjectResult, len(dbEmbeddingRows))
-	downloader := s3manager.NewDownloaderWithClient(c.S3Config.GetHotS3Client())
+	downloader := s3manager.NewDownloaderWithClient(c.embeddingS3Client)
 
 	for i, dbEmbeddingRow := range dbEmbeddingRows {
 		wg.Add(1)
@@ -416,7 +434,7 @@ func (c *Controller) downloadObject(ctx context.Context, objectKey string, downl
 	var obj ente.EmbeddingObject
 	buff := &aws.WriteAtBuffer{}
 	_, err := downloader.DownloadWithContext(ctx, buff, &s3.GetObjectInput{
-		Bucket: c.S3Config.GetHotBucket(),
+		Bucket: c.embeddingBucket,
 		Key:    &objectKey,
 	})
 	if err != nil {

@@ -28,6 +28,8 @@ type S3Config struct {
 	hotDC string
 	// Secondary (hot) data center
 	secondaryHotDC string
+	// Bucket for storing ml embeddings & preview files
+	embeddingsDC string
 	// A map from data centers to S3 configurations
 	s3Configs map[string]*aws.Config
 	// A map from data centers to pre-created S3 clients
@@ -71,6 +73,7 @@ var (
 	dcWasabiEuropeCentralDeprecated   string = "wasabi-eu-central-2"
 	dcWasabiEuropeCentral_v3          string = "wasabi-eu-central-2-v3"
 	dcSCWEuropeFrance_v3              string = "scw-eu-fr-v3"
+	dcWasabiEuropeCentral             string = "wasabi-eu-central-2-embeddings"
 )
 
 // Number of days that the wasabi bucket is configured to retain objects.
@@ -86,9 +89,9 @@ func NewS3Config() *S3Config {
 }
 
 func (config *S3Config) initialize() {
-	dcs := [5]string{
+	dcs := [6]string{
 		dcB2EuropeCentral, dcSCWEuropeFranceLockedDeprecated, dcWasabiEuropeCentralDeprecated,
-		dcWasabiEuropeCentral_v3, dcSCWEuropeFrance_v3}
+		dcWasabiEuropeCentral_v3, dcSCWEuropeFrance_v3, dcWasabiEuropeCentral}
 
 	config.hotDC = dcB2EuropeCentral
 	config.secondaryHotDC = dcWasabiEuropeCentral_v3
@@ -98,6 +101,12 @@ func (config *S3Config) initialize() {
 		config.hotDC = hs1
 		config.secondaryHotDC = hs2
 		log.Infof("Hot storage: %s (secondary: %s)", hs1, hs2)
+	}
+	config.embeddingsDC = config.hotDC
+	embeddingsDC := viper.GetString("s3.embeddings-bucket")
+	if embeddingsDC != "" && array.StringInList(embeddingsDC, dcs[:]) {
+		config.embeddingsDC = embeddingsDC
+		log.Infof("Embeddings bucket: %s", embeddingsDC)
 	}
 
 	config.buckets = make(map[string]string)
@@ -168,6 +177,18 @@ func (config *S3Config) GetHotS3Config() *aws.Config {
 
 func (config *S3Config) GetHotS3Client() *s3.S3 {
 	s3Client := config.GetS3Client(config.hotDC)
+	return &s3Client
+}
+
+func (config *S3Config) GetEmbeddingsDataCenter() string {
+	return config.embeddingsDC
+}
+func (config *S3Config) GetEmbeddingsBucket() *string {
+	return config.GetBucket(config.embeddingsDC)
+}
+
+func (config *S3Config) GetEmbeddingsS3Client() *s3.S3 {
+	s3Client := config.GetS3Client(config.embeddingsDC)
 	return &s3Client
 }
 
