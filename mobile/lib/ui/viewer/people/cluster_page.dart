@@ -147,6 +147,19 @@ class _ClusterPageState extends State<ClusterPage> {
       ),
       body: Column(
         children: [
+          Expanded(
+            child: Stack(
+              alignment: Alignment.bottomCenter,
+              children: [
+                gallery,
+                FileSelectionOverlayBar(
+                  ClusterPage.overlayType,
+                  _selectedFiles,
+                  clusterID: widget.clusterID,
+                ),
+              ],
+            ),
+          ),
           showNamingBanner
               ? Dismissible(
                   key: const Key("namingBanner"),
@@ -196,19 +209,6 @@ class _ClusterPageState extends State<ClusterPage> {
                   ),
                 )
               : const SizedBox.shrink(),
-          Expanded(
-            child: Stack(
-              alignment: Alignment.bottomCenter,
-              children: [
-                gallery,
-                FileSelectionOverlayBar(
-                  ClusterPage.overlayType,
-                  _selectedFiles,
-                  clusterID: widget.clusterID,
-                ),
-              ],
-            ),
-          ),
         ],
       ),
     );

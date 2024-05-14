@@ -127,53 +127,6 @@ class _PeoplePageState extends State<PeoplePage> {
             final personFiles = snapshot.data as List<EnteFile>;
             return Column(
               children: [
-                showSuggestionBanner
-                    ? Dismissible(
-                        key: const Key("suggestionBanner"),
-                        direction: DismissDirection.horizontal,
-                        onDismissed: (direction) {
-                          setState(() {
-                            userDismissedSuggestionBanner = true;
-                          });
-                        },
-                        child: RepaintBoundary(
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                              vertical: 8.0,
-                              horizontal: 8.0,
-                            ),
-                            child: NotificationWidget(
-                              startIcon: Icons.star_border_rounded,
-                              actionIcon: Icons.search_outlined,
-                              text: "Review suggestions",
-                              subText:
-                                  "Improve the results",
-                              type: NotificationType.greenBanner,
-                              onTap: () async {
-                                unawaited(
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (context) =>
-                                          PersonReviewClusterSuggestion(
-                                        widget.person,
-                                      ),
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                          )
-                              .animate(
-                                onPlay: (controller) => controller.repeat(),
-                              )
-                              .shimmer(
-                                duration: 1000.ms,
-                                delay: 3200.ms,
-                                size: 0.6,
-                              ),
-                        ),
-                      )
-                    : const SizedBox.shrink(),
                 Expanded(
                   child: Stack(
                     alignment: Alignment.bottomCenter,
@@ -215,6 +168,52 @@ class _PeoplePageState extends State<PeoplePage> {
                     ],
                   ),
                 ),
+                showSuggestionBanner
+                    ? Dismissible(
+                        key: const Key("suggestionBanner"),
+                        direction: DismissDirection.horizontal,
+                        onDismissed: (direction) {
+                          setState(() {
+                            userDismissedSuggestionBanner = true;
+                          });
+                        },
+                        child: RepaintBoundary(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 8.0,
+                              horizontal: 8.0,
+                            ),
+                            child: NotificationWidget(
+                              startIcon: Icons.star_border_rounded,
+                              actionIcon: Icons.search_outlined,
+                              text: "Review suggestions",
+                              subText: "Improve the results",
+                              type: NotificationType.greenBanner,
+                              onTap: () async {
+                                unawaited(
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          PersonReviewClusterSuggestion(
+                                        widget.person,
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          )
+                              .animate(
+                                onPlay: (controller) => controller.repeat(),
+                              )
+                              .shimmer(
+                                duration: 1000.ms,
+                                delay: 3200.ms,
+                                size: 0.6,
+                              ),
+                        ),
+                      )
+                    : const SizedBox.shrink(),
               ],
             );
           } else if (snapshot.hasError) {
