@@ -348,7 +348,11 @@ class MachineLearningService {
 
     private async persistOnServer(mlFileData: MlFileData, enteFile: EnteFile) {
         const serverMl = LocalFileMlDataToServerFileMl(mlFileData);
-        log.info(mlFileData);
+        log.debug(() => ({ t: "Local ML file data", mlFileData }));
+        log.debug(() => ({
+            t: "Uploaded ML file data",
+            d: JSON.stringify(serverMl),
+        }));
 
         const comlinkCryptoWorker = await ComlinkCryptoWorker.getInstance();
         const { file: encryptedEmbeddingData } =
