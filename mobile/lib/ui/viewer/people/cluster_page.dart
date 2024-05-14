@@ -2,7 +2,6 @@ import "dart:async";
 
 import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
-import "package:flutter_animate/flutter_animate.dart";
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
@@ -14,12 +13,13 @@ import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/selected_files.dart';
 import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart";
-import "package:photos/ui/components/notification_widget.dart";
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import "package:photos/ui/viewer/people/add_person_action_sheet.dart";
 import "package:photos/ui/viewer/people/cluster_app_bar.dart";
+import "package:photos/ui/viewer/people/people_banner.dart";
 import "package:photos/ui/viewer/people/people_page.dart";
+import "package:photos/ui/viewer/search/result/person_face_widget.dart";
 import "package:photos/ui/viewer/search/result/search_result_page.dart";
 import "package:photos/utils/navigation_util.dart";
 import "package:photos/utils/toast_util.dart";
@@ -169,37 +169,30 @@ class _ClusterPageState extends State<ClusterPage> {
                       userDismissedNamingBanner = true;
                     });
                   },
-                  child: RepaintBoundary(
-                    child: NotificationWidget(
-                      startIcon: Icons.person_add_outlined,
-                      actionIcon: Icons.add_outlined,
-                      text: S.of(context).addAName,
-                      subText: S.of(context).findPeopleByName,
-                      // text: S.of(context).addAName,
-                      // subText: S.of(context).findPersonsByName,
-                      type: NotificationType.greenBanner,
-                      onTap: () async {
-                        if (widget.personID == null) {
-                          final result = await showAssignPersonAction(
-                            context,
-                            clusterID: widget.clusterID,
-                          );
-                          if (result != null && result is PersonEntity) {
-                            Navigator.pop(context);
-                            // ignore: unawaited_futures
-                            routeToPage(context, PeoplePage(person: result));
-                          }
-                        } else {
-                          showShortToast(context, "No personID or clusterID");
+                  child: PeopleBanner(
+                    type: PeopleBannerType.addName,
+                    faceWidget: PersonFaceWidget(
+                      files.first,
+                      clusterID: widget.clusterID,
+                    ),
+                    actionIcon: Icons.add_outlined,
+                    text: S.of(context).addAName,
+                    subText: S.of(context).findPeopleByName,
+                    onTap: () async {
+                      if (widget.personID == null) {
+                        final result = await showAssignPersonAction(
+                          context,
+                          clusterID: widget.clusterID,
+                        );
+                        if (result != null && result is PersonEntity) {
+                          Navigator.pop(context);
+                          // ignore: unawaited_futures
+                          routeToPage(context, PeoplePage(person: result));
                         }
-                      },
-                    )
-                        .animate(onPlay: (controller) => controller.repeat())
-                        .shimmer(
-                          duration: 1000.ms,
-                          delay: 3200.ms,
-                          size: 0.6,
-                        ),
+                      } else {
+                        showShortToast(context, "No personID or clusterID");
+                      }
+                    },
                   ),
                 )
               : const SizedBox.shrink(),
