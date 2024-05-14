@@ -2,7 +2,7 @@ import { DebugInfo } from "hdbscan";
 import PQueue from "p-queue";
 import { EnteFile } from "types/file";
 import { Dimensions } from "types/image";
-import { Box, Point } from "../../../thirdparty/face-api/classes";
+import { Box, Point } from "./geom";
 
 export interface MLSyncResult {
     nOutOfSyncFiles: number;

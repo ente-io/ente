@@ -4,6 +4,7 @@ import log from "@/next/log";
 import PQueue from "p-queue";
 import DownloadManager from "services/download";
 import { getLocalFiles } from "services/fileService";
+import { Box, Point, boxFromBoundingBox } from "services/ml/geom";
 import {
     DetectedFace,
     Face,
@@ -17,7 +18,6 @@ import { Dimensions } from "types/image";
 import { getRenderableImage } from "utils/file";
 import { clamp, warpAffineFloat32List } from "utils/image";
 import mlIDbStorage from "utils/storage/mlIDbStorage";
-import { Box, Point } from "../../../thirdparty/face-api/classes";
 
 export function newBox(x: number, y: number, width: number, height: number) {
     return new Box({ x, y, width, height });
@@ -36,7 +36,7 @@ export function enlargeBox(box: Box, factor: number = 1.5) {
     const size = new Point(box.width, box.height);
     const newHalfSize = new Point((factor * size.x) / 2, (factor * size.y) / 2);
 
-    return new Box({
+    return boxFromBoundingBox({
         left: center.x - newHalfSize.x,
         top: center.y - newHalfSize.y,
         right: center.x + newHalfSize.x,

@@ -1,7 +1,7 @@
 import { FaceAlignment, FaceCrop, FaceCropConfig } from "services/ml/types";
 import { cropWithRotation } from "utils/image";
 import { enlargeBox } from ".";
-import { Box } from "../../../thirdparty/face-api/classes";
+import { Box } from "services/ml/geom";
 
 export function getFaceCrop(
     imageBitmap: ImageBitmap,

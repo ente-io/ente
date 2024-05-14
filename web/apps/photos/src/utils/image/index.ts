@@ -4,7 +4,7 @@ import { Matrix, inverse } from "ml-matrix";
 import { FaceAlignment } from "services/ml/types";
 import { BlobOptions, Dimensions } from "types/image";
 import { enlargeBox } from "utils/machineLearning";
-import { Box } from "../../../thirdparty/face-api/classes";
+import { Box } from "services/ml/geom";
 
 export function normalizePixelBetween0And1(pixelValue: number) {
     return pixelValue / 255.0;
