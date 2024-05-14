@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/ente-io/museum/pkg/utils/array"
 	"strconv"
 	"sync"
@@ -397,6 +398,13 @@ func (c *Controller) getEmbeddingObject(ctx context.Context, objectKey string, d
 			if fetchCtx.Err() != nil {
 				ctxLogger.Error("Fetch timed out or cancelled: ", fetchCtx.Err())
 			} else {
+				// check if the error is due to object not found
+				if s3Err, ok := err.(awserr.Error); ok {
+					if s3Err.Code() == s3.ErrCodeNoSuchKey {
+						ctxLogger.Warn("Object not found: ", s3Err)
+						return ente.EmbeddingObject{}, stacktrace.Propagate(errors.New("object not found"), "")
+					}
+				}
 				ctxLogger.Error("Failed to fetch object: ", err)
 			}
 		}
