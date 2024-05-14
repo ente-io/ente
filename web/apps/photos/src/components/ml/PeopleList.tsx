@@ -3,9 +3,9 @@ import { Skeleton, styled } from "@mui/material";
 import { Legend } from "components/PhotoViewer/styledComponents/Legend";
 import { t } from "i18next";
 import React, { useEffect, useState } from "react";
+import mlIDbStorage from "services/ml/db";
 import { Face, Person, type MlFileData } from "services/ml/types";
 import { EnteFile } from "types/file";
-import mlIDbStorage from "utils/storage/mlIDbStorage";
 
 const FaceChipContainer = styled("div")`
     display: flex;

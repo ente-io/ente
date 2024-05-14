@@ -6,12 +6,12 @@ import { getToken, getUserID } from "@ente/shared/storage/localStorage/helpers";
 import debounce from "debounce";
 import PQueue from "p-queue";
 import { getMLSyncJobConfig } from "services/machineLearning/machineLearningService";
+import mlIDbStorage from "services/ml/db";
 import { MLSyncResult } from "services/ml/types";
 import { JobResult } from "types/common/job";
 import { EnteFile } from "types/file";
 import { getDedicatedMLWorker } from "utils/comlink/ComlinkMLWorker";
 import { SimpleJob } from "utils/common/job";
-import mlIDbStorage from "utils/storage/mlIDbStorage";
 import { DedicatedMLWorker } from "worker/ml.worker";
 import { logQueueStats } from "./machineLearningService";
 

@@ -5,6 +5,11 @@ import { CustomError, parseUploadErrorCodes } from "@ente/shared/error";
 import downloadManager from "services/download";
 import { putEmbedding } from "services/embeddingService";
 import { getLocalFiles } from "services/fileService";
+import mlIDbStorage, {
+    ML_SEARCH_CONFIG_NAME,
+    ML_SYNC_CONFIG_NAME,
+    ML_SYNC_JOB_CONFIG_NAME,
+} from "services/ml/db";
 import {
     ClipEmbedding,
     Face,
@@ -19,11 +24,6 @@ import {
 } from "services/ml/types";
 import { JobConfig } from "types/common/job";
 import { EnteFile } from "types/file";
-import mlIDbStorage, {
-    ML_SEARCH_CONFIG_NAME,
-    ML_SYNC_CONFIG_NAME,
-    ML_SYNC_JOB_CONFIG_NAME,
-} from "utils/storage/mlIDbStorage";
 import { isInternalUserForML } from "utils/user";
 import FaceService from "./faceService";
 import PeopleService from "./peopleService";

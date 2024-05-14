@@ -3,6 +3,7 @@ import log from "@/next/log";
 import * as chrono from "chrono-node";
 import { t } from "i18next";
 import { getMLSyncConfig } from "services/machineLearning/machineLearningService";
+import mlIDbStorage from "services/ml/db";
 import { Person } from "services/ml/types";
 import { Collection } from "types/collection";
 import { EntityType, LocationTag, LocationTagData } from "types/entity";
@@ -18,7 +19,6 @@ import {
 import ComlinkSearchWorker from "utils/comlink/ComlinkSearchWorker";
 import { getUniqueFiles } from "utils/file";
 import { getFormattedDate } from "utils/search";
-import mlIDbStorage from "utils/storage/mlIDbStorage";
 import { clipService, computeClipMatchScore } from "./clip-service";
 import { getLocalEmbeddings } from "./embeddingService";
 import { getLatestEntities } from "./entityService";

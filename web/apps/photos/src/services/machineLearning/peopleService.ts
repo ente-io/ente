@@ -1,6 +1,6 @@
 import log from "@/next/log";
+import mlIDbStorage from "services/ml/db";
 import { Face, MLSyncContext, Person } from "services/ml/types";
-import mlIDbStorage from "utils/storage/mlIDbStorage";
 import FaceService, { isDifferentOrOld } from "./faceService";
 import { getLocalFile, getOriginalImageBitmap } from "./readerService";
 

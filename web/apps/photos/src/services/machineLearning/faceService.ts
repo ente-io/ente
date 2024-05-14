@@ -1,5 +1,6 @@
 import { openCache } from "@/next/blob-cache";
 import log from "@/next/log";
+import mlIDbStorage from "services/ml/db";
 import {
     DetectedFace,
     Face,
@@ -9,7 +10,6 @@ import {
     type Versioned,
 } from "services/ml/types";
 import { imageBitmapToBlob, warpAffineFloat32List } from "utils/image";
-import mlIDbStorage from "utils/storage/mlIDbStorage";
 import ReaderService, {
     getFaceId,
     getLocalFile,

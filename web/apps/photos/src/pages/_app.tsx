@@ -53,6 +53,10 @@ import { createContext, useEffect, useRef, useState } from "react";
 import LoadingBar from "react-top-loading-bar";
 import DownloadManager from "services/download";
 import exportService, { resumeExportsIfNeeded } from "services/export";
+import {
+    getMLSearchConfig,
+    updateMLSearchConfig,
+} from "services/machineLearning/machineLearningService";
 import mlWorkManager from "services/machineLearning/mlWorkManager";
 import {
     getFamilyPortalRedirectURL,
@@ -64,10 +68,6 @@ import {
     NotificationAttributes,
     SetNotificationAttributes,
 } from "types/Notification";
-import {
-    getMLSearchConfig,
-    updateMLSearchConfig,
-} from "services/machineLearning/machineLearningService";
 import {
     getUpdateAvailableForDownloadMessage,
     getUpdateReadyToInstallMessage,
