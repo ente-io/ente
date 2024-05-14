@@ -1,7 +1,7 @@
 import { DebugInfo } from "hdbscan";
 import PQueue from "p-queue";
-import { EnteFile } from "types/file";
 import { Dimensions } from "services/ml/geom";
+import { EnteFile } from "types/file";
 import { Box, Point } from "./geom";
 
 export interface MLSyncResult {

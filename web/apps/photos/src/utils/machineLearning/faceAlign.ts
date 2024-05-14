@@ -1,7 +1,7 @@
 import { Matrix } from "ml-matrix";
+import { Point } from "services/ml/geom";
 import { FaceAlignment, FaceDetection } from "services/ml/types";
 import { getSimilarityTransformation } from "similarity-transformation";
-import { Point } from "services/ml/geom";
 
 const ARCFACE_LANDMARKS = [
     [38.2946, 51.6963],
