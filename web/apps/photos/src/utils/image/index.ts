@@ -1,9 +1,8 @@
 // these utils only work in env where OffscreenCanvas is available
 
 import { Matrix, inverse } from "ml-matrix";
-import { Box, Dimensions } from "services/ml/geom";
+import { Box, Dimensions, enlargeBox } from "services/ml/geom";
 import { FaceAlignment } from "services/ml/types";
-import { enlargeBox } from "utils/machineLearning";
 
 export function normalizePixelBetween0And1(pixelValue: number) {
     return pixelValue / 255.0;

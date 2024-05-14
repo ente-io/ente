@@ -323,14 +323,10 @@ function transformBox(box: Box, transform: Matrix) {
     const topLeft = transformPoint(box.topLeft, transform);
     const bottomRight = transformPoint(box.bottomRight, transform);
 
-    return newBoxFromPoints(topLeft.x, topLeft.y, bottomRight.x, bottomRight.y);
-}
-
-function newBoxFromPoints(
-    left: number,
-    top: number,
-    right: number,
-    bottom: number,
-) {
-    return boxFromBoundingBox({ left, top, right, bottom });
+    return boxFromBoundingBox({
+        left: topLeft.x,
+        top: topLeft.y,
+        right: bottomRight.x,
+        bottom: bottomRight.y,
+    });
 }

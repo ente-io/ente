@@ -84,7 +84,10 @@ import {
     getSectionSummaries,
 } from "services/collectionService";
 import downloadManager from "services/download";
-import { syncEmbeddings, syncFileEmbeddings } from "services/embeddingService";
+import {
+    syncCLIPEmbeddings,
+    syncFaceEmbeddings,
+} from "services/embeddingService";
 import { syncEntities } from "services/entityService";
 import { getLocalFiles, syncFiles } from "services/fileService";
 import locationSearchService from "services/locationSearchService";
@@ -130,6 +133,7 @@ import {
 } from "utils/file";
 import { isArchivedFile } from "utils/magicMetadata";
 import { getSessionExpiredMessage } from "utils/ui";
+import { isInternalUserForML } from "utils/user";
 import { getLocalFamilyData } from "utils/user/family";
 
 export const DeadCenter = styled("div")`
@@ -698,10 +702,10 @@ export default function Gallery() {
             await syncTrash(collections, setTrashedFiles);
             await syncEntities();
             await syncMapEnabled();
-            await syncEmbeddings();
+            await syncCLIPEmbeddings();
             const electron = globalThis.electron;
-            if (electron) {
-                await syncFileEmbeddings();
+            if (isInternalUserForML() && electron) {
+                await syncFaceEmbeddings();
             }
             if (clipService.isPlatformSupported()) {
                 void clipService.scheduleImageEmbeddingExtraction();

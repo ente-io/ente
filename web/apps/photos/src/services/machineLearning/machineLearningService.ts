@@ -1,25 +1,330 @@
+import { haveWindow } from "@/next/env";
 import log from "@/next/log";
+import { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { APPS } from "@ente/shared/apps/constants";
-import ComlinkCryptoWorker from "@ente/shared/crypto";
+import ComlinkCryptoWorker, {
+    getDedicatedCryptoWorker,
+} from "@ente/shared/crypto";
+import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
 import { CustomError, parseUploadErrorCodes } from "@ente/shared/error";
-import { MAX_ML_SYNC_ERROR_COUNT } from "constants/mlConfig";
+import PQueue from "p-queue";
 import downloadManager from "services/download";
 import { putEmbedding } from "services/embeddingService";
 import { getLocalFiles } from "services/fileService";
+import mlIDbStorage, {
+    ML_SEARCH_CONFIG_NAME,
+    ML_SYNC_CONFIG_NAME,
+    ML_SYNC_JOB_CONFIG_NAME,
+} from "services/ml/db";
 import {
+    BlurDetectionMethod,
+    BlurDetectionService,
+    ClusteringMethod,
+    ClusteringService,
+    Face,
+    FaceAlignmentMethod,
+    FaceAlignmentService,
+    FaceCropMethod,
+    FaceCropService,
+    FaceDetection,
+    FaceDetectionMethod,
+    FaceDetectionService,
+    FaceEmbeddingMethod,
+    FaceEmbeddingService,
+    Landmark,
+    MLLibraryData,
+    MLSearchConfig,
+    MLSyncConfig,
     MLSyncContext,
     MLSyncFileContext,
     MLSyncResult,
     MlFileData,
 } from "services/ml/types";
 import { EnteFile } from "types/file";
-import { getMLSyncConfig } from "utils/machineLearning/config";
-import { LocalFileMlDataToServerFileMl } from "utils/machineLearning/mldataMappers";
-import mlIDbStorage from "utils/storage/mlIDbStorage";
+import { isInternalUserForML } from "utils/user";
+import arcfaceAlignmentService from "./arcfaceAlignmentService";
+import arcfaceCropService from "./arcfaceCropService";
+import dbscanClusteringService from "./dbscanClusteringService";
 import FaceService from "./faceService";
-import { MLFactory } from "./machineLearningFactory";
+import hdbscanClusteringService from "./hdbscanClusteringService";
+import laplacianBlurDetectionService from "./laplacianBlurDetectionService";
+import type { JobConfig } from "./mlWorkManager";
+import mobileFaceNetEmbeddingService from "./mobileFaceNetEmbeddingService";
 import PeopleService from "./peopleService";
 import ReaderService from "./readerService";
+import yoloFaceDetectionService from "./yoloFaceDetectionService";
+
+export const DEFAULT_ML_SYNC_JOB_CONFIG: JobConfig = {
+    intervalSec: 5,
+    // TODO: finalize this after seeing effects on and from machine sleep
+    maxItervalSec: 960,
+    backoffMultiplier: 2,
+};
+
+export const DEFAULT_ML_SYNC_CONFIG: MLSyncConfig = {
+    batchSize: 200,
+    imageSource: "Original",
+    faceDetection: {
+        method: "YoloFace",
+    },
+    faceCrop: {
+        enabled: true,
+        method: "ArcFace",
+        padding: 0.25,
+        maxSize: 256,
+        blobOptions: {
+            type: "image/jpeg",
+            quality: 0.8,
+        },
+    },
+    faceAlignment: {
+        method: "ArcFace",
+    },
+    blurDetection: {
+        method: "Laplacian",
+        threshold: 15,
+    },
+    faceEmbedding: {
+        method: "MobileFaceNet",
+        faceSize: 112,
+        generateTsne: true,
+    },
+    faceClustering: {
+        method: "Hdbscan",
+        minClusterSize: 3,
+        minSamples: 5,
+        clusterSelectionEpsilon: 0.6,
+        clusterSelectionMethod: "leaf",
+        minInputSize: 50,
+        // maxDistanceInsideCluster: 0.4,
+        generateDebugInfo: true,
+    },
+    mlVersion: 3,
+};
+
+export const DEFAULT_ML_SEARCH_CONFIG: MLSearchConfig = {
+    enabled: false,
+};
+
+export const MAX_ML_SYNC_ERROR_COUNT = 1;
+
+export async function getMLSyncJobConfig() {
+    return mlIDbStorage.getConfig(
+        ML_SYNC_JOB_CONFIG_NAME,
+        DEFAULT_ML_SYNC_JOB_CONFIG,
+    );
+}
+
+export async function getMLSyncConfig() {
+    return mlIDbStorage.getConfig(ML_SYNC_CONFIG_NAME, DEFAULT_ML_SYNC_CONFIG);
+}
+
+export async function getMLSearchConfig() {
+    if (isInternalUserForML()) {
+        return mlIDbStorage.getConfig(
+            ML_SEARCH_CONFIG_NAME,
+            DEFAULT_ML_SEARCH_CONFIG,
+        );
+    }
+    // Force disabled for everyone else while we finalize it to avoid redundant
+    // reindexing for users.
+    return DEFAULT_ML_SEARCH_CONFIG;
+}
+
+export async function updateMLSyncJobConfig(newConfig: JobConfig) {
+    return mlIDbStorage.putConfig(ML_SYNC_JOB_CONFIG_NAME, newConfig);
+}
+
+export async function updateMLSyncConfig(newConfig: MLSyncConfig) {
+    return mlIDbStorage.putConfig(ML_SYNC_CONFIG_NAME, newConfig);
+}
+
+export async function updateMLSearchConfig(newConfig: MLSearchConfig) {
+    return mlIDbStorage.putConfig(ML_SEARCH_CONFIG_NAME, newConfig);
+}
+
+export class MLFactory {
+    public static getFaceDetectionService(
+        method: FaceDetectionMethod,
+    ): FaceDetectionService {
+        if (method === "YoloFace") {
+            return yoloFaceDetectionService;
+        }
+
+        throw Error("Unknon face detection method: " + method);
+    }
+
+    public static getFaceCropService(method: FaceCropMethod) {
+        if (method === "ArcFace") {
+            return arcfaceCropService;
+        }
+
+        throw Error("Unknon face crop method: " + method);
+    }
+
+    public static getFaceAlignmentService(
+        method: FaceAlignmentMethod,
+    ): FaceAlignmentService {
+        if (method === "ArcFace") {
+            return arcfaceAlignmentService;
+        }
+
+        throw Error("Unknon face alignment method: " + method);
+    }
+
+    public static getBlurDetectionService(
+        method: BlurDetectionMethod,
+    ): BlurDetectionService {
+        if (method === "Laplacian") {
+            return laplacianBlurDetectionService;
+        }
+
+        throw Error("Unknon blur detection method: " + method);
+    }
+
+    public static getFaceEmbeddingService(
+        method: FaceEmbeddingMethod,
+    ): FaceEmbeddingService {
+        if (method === "MobileFaceNet") {
+            return mobileFaceNetEmbeddingService;
+        }
+
+        throw Error("Unknon face embedding method: " + method);
+    }
+
+    public static getClusteringService(
+        method: ClusteringMethod,
+    ): ClusteringService {
+        if (method === "Hdbscan") {
+            return hdbscanClusteringService;
+        }
+        if (method === "Dbscan") {
+            return dbscanClusteringService;
+        }
+
+        throw Error("Unknon clustering method: " + method);
+    }
+
+    public static getMLSyncContext(
+        token: string,
+        userID: number,
+        config: MLSyncConfig,
+        shouldUpdateMLVersion: boolean = true,
+    ) {
+        return new LocalMLSyncContext(
+            token,
+            userID,
+            config,
+            shouldUpdateMLVersion,
+        );
+    }
+}
+
+export class LocalMLSyncContext implements MLSyncContext {
+    public token: string;
+    public userID: number;
+    public config: MLSyncConfig;
+    public shouldUpdateMLVersion: boolean;
+
+    public faceDetectionService: FaceDetectionService;
+    public faceCropService: FaceCropService;
+    public faceAlignmentService: FaceAlignmentService;
+    public blurDetectionService: BlurDetectionService;
+    public faceEmbeddingService: FaceEmbeddingService;
+    public faceClusteringService: ClusteringService;
+
+    public localFilesMap: Map<number, EnteFile>;
+    public outOfSyncFiles: EnteFile[];
+    public nSyncedFiles: number;
+    public nSyncedFaces: number;
+    public allSyncedFacesMap?: Map<number, Array<Face>>;
+
+    public error?: Error;
+
+    public mlLibraryData: MLLibraryData;
+
+    public syncQueue: PQueue;
+    // TODO: wheather to limit concurrent downloads
+    // private downloadQueue: PQueue;
+
+    private concurrency: number;
+    private comlinkCryptoWorker: Array<
+        ComlinkWorker<typeof DedicatedCryptoWorker>
+    >;
+    private enteWorkers: Array<any>;
+
+    constructor(
+        token: string,
+        userID: number,
+        config: MLSyncConfig,
+        shouldUpdateMLVersion: boolean = true,
+        concurrency?: number,
+    ) {
+        this.token = token;
+        this.userID = userID;
+        this.config = config;
+        this.shouldUpdateMLVersion = shouldUpdateMLVersion;
+
+        this.faceDetectionService = MLFactory.getFaceDetectionService(
+            this.config.faceDetection.method,
+        );
+        this.faceCropService = MLFactory.getFaceCropService(
+            this.config.faceCrop.method,
+        );
+        this.faceAlignmentService = MLFactory.getFaceAlignmentService(
+            this.config.faceAlignment.method,
+        );
+        this.blurDetectionService = MLFactory.getBlurDetectionService(
+            this.config.blurDetection.method,
+        );
+        this.faceEmbeddingService = MLFactory.getFaceEmbeddingService(
+            this.config.faceEmbedding.method,
+        );
+        this.faceClusteringService = MLFactory.getClusteringService(
+            this.config.faceClustering.method,
+        );
+
+        this.outOfSyncFiles = [];
+        this.nSyncedFiles = 0;
+        this.nSyncedFaces = 0;
+
+        this.concurrency = concurrency ?? getConcurrency();
+
+        log.info("Using concurrency: ", this.concurrency);
+        // timeout is added on downloads
+        // timeout on queue will keep the operation open till worker is terminated
+        this.syncQueue = new PQueue({ concurrency: this.concurrency });
+        logQueueStats(this.syncQueue, "sync");
+        // this.downloadQueue = new PQueue({ concurrency: 1 });
+        // logQueueStats(this.downloadQueue, 'download');
+
+        this.comlinkCryptoWorker = new Array(this.concurrency);
+        this.enteWorkers = new Array(this.concurrency);
+    }
+
+    public async getEnteWorker(id: number): Promise<any> {
+        const wid = id % this.enteWorkers.length;
+        console.log("getEnteWorker: ", id, wid);
+        if (!this.enteWorkers[wid]) {
+            this.comlinkCryptoWorker[wid] = getDedicatedCryptoWorker();
+            this.enteWorkers[wid] = await this.comlinkCryptoWorker[wid].remote;
+        }
+
+        return this.enteWorkers[wid];
+    }
+
+    public async dispose() {
+        this.localFilesMap = undefined;
+        await this.syncQueue.onIdle();
+        this.syncQueue.removeAllListeners();
+        for (const enteComlinkWorker of this.comlinkCryptoWorker) {
+            enteComlinkWorker?.terminate();
+        }
+    }
+}
+
+export const getConcurrency = () =>
+    haveWindow() && Math.max(2, Math.ceil(navigator.hardwareConcurrency / 2));
 
 class MachineLearningService {
     private localSyncContext: Promise<MLSyncContext>;
@@ -445,3 +750,160 @@ class MachineLearningService {
 }
 
 export default new MachineLearningService();
+
+export interface FileML extends ServerFileMl {
+    updatedAt: number;
+}
+
+class ServerFileMl {
+    public fileID: number;
+    public height?: number;
+    public width?: number;
+    public faceEmbedding: ServerFaceEmbeddings;
+
+    public constructor(
+        fileID: number,
+        faceEmbedding: ServerFaceEmbeddings,
+        height?: number,
+        width?: number,
+    ) {
+        this.fileID = fileID;
+        this.height = height;
+        this.width = width;
+        this.faceEmbedding = faceEmbedding;
+    }
+}
+
+class ServerFaceEmbeddings {
+    public faces: ServerFace[];
+    public version: number;
+    public client?: string;
+    public error?: boolean;
+
+    public constructor(
+        faces: ServerFace[],
+        version: number,
+        client?: string,
+        error?: boolean,
+    ) {
+        this.faces = faces;
+        this.version = version;
+        this.client = client;
+        this.error = error;
+    }
+}
+
+class ServerFace {
+    public faceID: string;
+    public embeddings: number[];
+    public detection: ServerDetection;
+    public score: number;
+    public blur: number;
+
+    public constructor(
+        faceID: string,
+        embeddings: number[],
+        detection: ServerDetection,
+        score: number,
+        blur: number,
+    ) {
+        this.faceID = faceID;
+        this.embeddings = embeddings;
+        this.detection = detection;
+        this.score = score;
+        this.blur = blur;
+    }
+}
+
+class ServerDetection {
+    public box: ServerFaceBox;
+    public landmarks: Landmark[];
+
+    public constructor(box: ServerFaceBox, landmarks: Landmark[]) {
+        this.box = box;
+        this.landmarks = landmarks;
+    }
+}
+
+class ServerFaceBox {
+    public xMin: number;
+    public yMin: number;
+    public width: number;
+    public height: number;
+
+    public constructor(
+        xMin: number,
+        yMin: number,
+        width: number,
+        height: number,
+    ) {
+        this.xMin = xMin;
+        this.yMin = yMin;
+        this.width = width;
+        this.height = height;
+    }
+}
+
+function LocalFileMlDataToServerFileMl(
+    localFileMlData: MlFileData,
+): ServerFileMl {
+    if (
+        localFileMlData.errorCount > 0 &&
+        localFileMlData.lastErrorMessage !== undefined
+    ) {
+        return null;
+    }
+    const imageDimensions = localFileMlData.imageDimensions;
+
+    const faces: ServerFace[] = [];
+    for (let i = 0; i < localFileMlData.faces.length; i++) {
+        const face: Face = localFileMlData.faces[i];
+        const faceID = face.id;
+        const embedding = face.embedding;
+        const score = face.detection.probability;
+        const blur = face.blurValue;
+        const detection: FaceDetection = face.detection;
+        const box = detection.box;
+        const landmarks = detection.landmarks;
+        const newBox = new ServerFaceBox(box.x, box.y, box.width, box.height);
+        const newLandmarks: Landmark[] = [];
+        for (let j = 0; j < landmarks.length; j++) {
+            newLandmarks.push({
+                x: landmarks[j].x,
+                y: landmarks[j].y,
+            } as Landmark);
+        }
+
+        const newFaceObject = new ServerFace(
+            faceID,
+            Array.from(embedding),
+            new ServerDetection(newBox, newLandmarks),
+            score,
+            blur,
+        );
+        faces.push(newFaceObject);
+    }
+    const faceEmbeddings = new ServerFaceEmbeddings(
+        faces,
+        1,
+        localFileMlData.lastErrorMessage,
+    );
+    return new ServerFileMl(
+        localFileMlData.fileId,
+        faceEmbeddings,
+        imageDimensions.height,
+        imageDimensions.width,
+    );
+}
+
+export function logQueueStats(queue: PQueue, name: string) {
+    queue.on("active", () =>
+        log.info(
+            `queuestats: ${name}: Active, Size: ${queue.size} Pending: ${queue.pending}`,
+        ),
+    );
+    queue.on("idle", () => log.info(`queuestats: ${name}: Idle`));
+    queue.on("error", (error) =>
+        console.error(`queuestats: ${name}: Error, `, error),
+    );
+}

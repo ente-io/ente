@@ -329,8 +329,3 @@ export interface MachineLearningWorker {
 
     close(): void;
 }
-
-export interface ClipEmbedding {
-    embedding: Float32Array;
-    model: "ggml-clip" | "onnx-clip";
-}
