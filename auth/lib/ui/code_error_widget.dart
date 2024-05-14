@@ -1,15 +1,18 @@
 import 'package:ente_auth/ente_theme_data.dart';
 import 'package:ente_auth/l10n/l10n.dart';
-import 'package:ente_auth/services/update_service.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/common/gradient_button.dart';
 import 'package:ente_auth/ui/linear_progress_widget.dart';
-import 'package:ente_auth/ui/settings/app_update_dialog.dart';
-import 'package:ente_auth/utils/toast_util.dart';
+import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:flutter/material.dart';
 
 class CodeErrorWidget extends StatelessWidget {
-  const CodeErrorWidget({super.key});
+  const CodeErrorWidget({
+    super.key,
+    required this.errors,
+  });
+
+  final int errors;
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +43,7 @@ class CodeErrorWidget extends StatelessWidget {
                 fractionOfStorage: 1,
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 16),
             Row(
               children: [
                 const SizedBox(width: 8),
@@ -67,44 +70,30 @@ class CodeErrorWidget extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8.0),
               child: Text(
-                context.l10n.somethingWentWrongUpdateApp,
+                context.l10n.somethingWentWrongParsingCode(errors),
                 style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                 ),
               ),
             ),
-            const SizedBox(height: 12),
+            const Spacer(),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 SizedBox(
-                  width: 76,
+                  width: 102,
                   height: 28,
                   child: GradientButton(
-                    text: context.l10n.update,
+                    text: context.l10n.contactSupport,
                     fontSize: 10,
                     onTap: () async {
-                      try {
-                        await UpdateService.instance.shouldUpdate();
-                        assert(
-                          UpdateService.instance.getLatestVersionInfo() != null,
-                        );
-                        await showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return AppUpdateDialog(
-                              UpdateService.instance.getLatestVersionInfo(),
-                            );
-                          },
-                          barrierColor: Colors.black.withOpacity(0.85),
-                        );
-                      } catch (e) {
-                        showToast(
-                          context,
-                          context.l10n.updateNotAvailable,
-                        );
-                      }
+                      await showErrorDialog(
+                        context,
+                        context.l10n.contactSupport,
+                        context.l10n
+                            .contactSupportViaEmailMessage("support@ente.io"),
+                      );
                     },
                     borderWidth: 0.6,
                     borderRadius: 6,
@@ -113,6 +102,7 @@ class CodeErrorWidget extends StatelessWidget {
                 const SizedBox(width: 6),
               ],
             ),
+            const SizedBox(height: 12),
           ],
         ),
       ),

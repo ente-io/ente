@@ -356,7 +356,12 @@ class _HomePageState extends State<HomePage> {
                 padding: const EdgeInsets.only(bottom: 80),
                 itemBuilder: ((context, index) {
                   if (index == 0 && anyCodeHasError) {
-                    return const CodeErrorWidget();
+                    return CodeErrorWidget(
+                      errors: _allCodes
+                              ?.where((element) => element.hasError)
+                              .length ??
+                          0,
+                    );
                   }
                   final newIndex = index - indexOffset;
 
