@@ -228,13 +228,13 @@ class MagicSearchIndexStatsWidget extends StatefulWidget {
 class _MagicSearchIndexStatsWidgetState
     extends State<MagicSearchIndexStatsWidget> {
   IndexStatus? _status;
-  late StreamSubscription<EmbeddingUpdatedEvent> _eventSubscription;
+  late StreamSubscription<EmbeddingCacheUpdatedEvent> _eventSubscription;
 
   @override
   void initState() {
     super.initState();
     _eventSubscription =
-        Bus.instance.on<EmbeddingUpdatedEvent>().listen((event) {
+        Bus.instance.on<EmbeddingCacheUpdatedEvent>().listen((event) {
       _fetchIndexStatus();
     });
     _fetchIndexStatus();
