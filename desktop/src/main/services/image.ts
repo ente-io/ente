@@ -45,6 +45,9 @@ const convertToJPEGCommand = (
             ];
 
         case "linux":
+            // The bundled binary is an ELF x86-64 executable.
+            if (process.arch != "x64")
+                throw new Error(CustomErrorMessage.NotAvailable);
             return [
                 imageMagickPath(),
                 inputFilePath,
@@ -90,6 +93,7 @@ export const generateImageThumbnail = async (
         let thumbnail: Uint8Array;
         do {
             await execAsync(command);
+            // TODO(MR): release 1.7
             // TODO(MR): imagemagick debugging. Remove me after verifying logs.
             log.info(`Generated thumbnail using ${command.join(" ")}`);
             thumbnail = new Uint8Array(await fs.readFile(outputFilePath));
