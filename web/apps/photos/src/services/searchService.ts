@@ -17,7 +17,7 @@ import {
 import ComlinkSearchWorker from "utils/comlink/ComlinkSearchWorker";
 import { getUniqueFiles } from "utils/file";
 import { getAllPeople } from "utils/machineLearning";
-import { getMLSyncConfig } from "utils/machineLearning/config";
+import { getMLSyncConfig } from "services/machineLearning/machineLearningService";
 import { getFormattedDate } from "utils/search";
 import mlIDbStorage from "utils/storage/mlIDbStorage";
 import { clipService, computeClipMatchScore } from "./clip-service";

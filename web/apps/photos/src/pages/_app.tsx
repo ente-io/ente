@@ -67,7 +67,7 @@ import {
 import {
     getMLSearchConfig,
     updateMLSearchConfig,
-} from "utils/machineLearning/config";
+} from "services/machineLearning/machineLearningService";
 import {
     getUpdateAvailableForDownloadMessage,
     getUpdateReadyToInstallMessage,

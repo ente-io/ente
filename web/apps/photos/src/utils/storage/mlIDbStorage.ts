@@ -1,12 +1,6 @@
 import { haveWindow } from "@/next/env";
 import log from "@/next/log";
 import {
-    DEFAULT_ML_SEARCH_CONFIG,
-    DEFAULT_ML_SYNC_CONFIG,
-    DEFAULT_ML_SYNC_JOB_CONFIG,
-    MAX_ML_SYNC_ERROR_COUNT,
-} from "constants/mlConfig";
-import {
     DBSchema,
     IDBPDatabase,
     IDBPTransaction,
@@ -15,6 +9,12 @@ import {
     openDB,
 } from "idb";
 import isElectron from "is-electron";
+import {
+    DEFAULT_ML_SEARCH_CONFIG,
+    DEFAULT_ML_SYNC_CONFIG,
+    DEFAULT_ML_SYNC_JOB_CONFIG,
+    MAX_ML_SYNC_ERROR_COUNT,
+} from "services/machineLearning/machineLearningService";
 import { Face, MLLibraryData, MlFileData, Person } from "services/ml/types";
 
 export interface IndexStatus {

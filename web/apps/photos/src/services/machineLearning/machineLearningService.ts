@@ -2,7 +2,6 @@ import log from "@/next/log";
 import { APPS } from "@ente/shared/apps/constants";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { CustomError, parseUploadErrorCodes } from "@ente/shared/error";
-import { MAX_ML_SYNC_ERROR_COUNT } from "constants/mlConfig";
 import downloadManager from "services/download";
 import { putEmbedding } from "services/embeddingService";
 import { getLocalFiles } from "services/fileService";
@@ -11,18 +10,114 @@ import {
     Face,
     FaceDetection,
     Landmark,
+    MLSearchConfig,
+    MLSyncConfig,
     MLSyncContext,
     MLSyncFileContext,
     MLSyncResult,
     MlFileData,
 } from "services/ml/types";
+import { JobConfig } from "types/common/job";
 import { EnteFile } from "types/file";
-import { getMLSyncConfig } from "utils/machineLearning/config";
-import mlIDbStorage from "utils/storage/mlIDbStorage";
+import mlIDbStorage, {
+    ML_SEARCH_CONFIG_NAME,
+    ML_SYNC_CONFIG_NAME,
+    ML_SYNC_JOB_CONFIG_NAME,
+} from "utils/storage/mlIDbStorage";
+import { isInternalUserForML } from "utils/user";
 import FaceService from "./faceService";
 import { MLFactory } from "./machineLearningFactory";
 import PeopleService from "./peopleService";
 import ReaderService from "./readerService";
+
+export const DEFAULT_ML_SYNC_JOB_CONFIG: JobConfig = {
+    intervalSec: 5,
+    // TODO: finalize this after seeing effects on and from machine sleep
+    maxItervalSec: 960,
+    backoffMultiplier: 2,
+};
+
+export const DEFAULT_ML_SYNC_CONFIG: MLSyncConfig = {
+    batchSize: 200,
+    imageSource: "Original",
+    faceDetection: {
+        method: "YoloFace",
+    },
+    faceCrop: {
+        enabled: true,
+        method: "ArcFace",
+        padding: 0.25,
+        maxSize: 256,
+        blobOptions: {
+            type: "image/jpeg",
+            quality: 0.8,
+        },
+    },
+    faceAlignment: {
+        method: "ArcFace",
+    },
+    blurDetection: {
+        method: "Laplacian",
+        threshold: 15,
+    },
+    faceEmbedding: {
+        method: "MobileFaceNet",
+        faceSize: 112,
+        generateTsne: true,
+    },
+    faceClustering: {
+        method: "Hdbscan",
+        minClusterSize: 3,
+        minSamples: 5,
+        clusterSelectionEpsilon: 0.6,
+        clusterSelectionMethod: "leaf",
+        minInputSize: 50,
+        // maxDistanceInsideCluster: 0.4,
+        generateDebugInfo: true,
+    },
+    mlVersion: 3,
+};
+
+export const DEFAULT_ML_SEARCH_CONFIG: MLSearchConfig = {
+    enabled: false,
+};
+
+export const MAX_ML_SYNC_ERROR_COUNT = 1;
+
+export async function getMLSyncJobConfig() {
+    return mlIDbStorage.getConfig(
+        ML_SYNC_JOB_CONFIG_NAME,
+        DEFAULT_ML_SYNC_JOB_CONFIG,
+    );
+}
+
+export async function getMLSyncConfig() {
+    return mlIDbStorage.getConfig(ML_SYNC_CONFIG_NAME, DEFAULT_ML_SYNC_CONFIG);
+}
+
+export async function getMLSearchConfig() {
+    if (isInternalUserForML()) {
+        return mlIDbStorage.getConfig(
+            ML_SEARCH_CONFIG_NAME,
+            DEFAULT_ML_SEARCH_CONFIG,
+        );
+    }
+    // Force disabled for everyone else while we finalize it to avoid redundant
+    // reindexing for users.
+    return DEFAULT_ML_SEARCH_CONFIG;
+}
+
+export async function updateMLSyncJobConfig(newConfig: JobConfig) {
+    return mlIDbStorage.putConfig(ML_SYNC_JOB_CONFIG_NAME, newConfig);
+}
+
+export async function updateMLSyncConfig(newConfig: MLSyncConfig) {
+    return mlIDbStorage.putConfig(ML_SYNC_CONFIG_NAME, newConfig);
+}
+
+export async function updateMLSearchConfig(newConfig: MLSearchConfig) {
+    return mlIDbStorage.putConfig(ML_SEARCH_CONFIG_NAME, newConfig);
+}
 
 class MachineLearningService {
     private localSyncContext: Promise<MLSyncContext>;
