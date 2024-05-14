@@ -9,13 +9,12 @@ import {
     type Versioned,
 } from "services/ml/types";
 import { imageBitmapToBlob, warpAffineFloat32List } from "utils/image";
-import {
+import mlIDbStorage from "utils/storage/mlIDbStorage";
+import ReaderService, {
     getFaceId,
     getLocalFile,
     getOriginalImageBitmap,
-} from "utils/machineLearning";
-import mlIDbStorage from "utils/storage/mlIDbStorage";
-import ReaderService from "./readerService";
+} from "./readerService";
 
 class FaceService {
     async syncFileFaceDetections(
