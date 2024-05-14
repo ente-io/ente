@@ -421,11 +421,11 @@ func (c *Controller) getEmbeddingObject(ctx context.Context, objectKey string, d
 				return obj, nil
 			}
 			// Check if the error is due to context timeout or cancellation
-			if fetchCtx.Err() != nil {
+			if err == nil && fetchCtx.Err() != nil {
 				ctxLogger.Error("Fetch timed out or cancelled: ", fetchCtx.Err())
 			} else {
 				// check if the error is due to object not found
-				if s3Err, ok := err.(awserr.Error); ok {
+				if s3Err, ok := errors.Unwrap(err).(awserr.Error); ok {
 					if s3Err.Code() == s3.ErrCodeNoSuchKey {
 						ctxLogger.Warn("Object not found: ", s3Err)
 						return ente.EmbeddingObject{}, stacktrace.Propagate(errors.New("object not found"), "")
@@ -446,7 +446,7 @@ func (c *Controller) downloadObject(ctx context.Context, objectKey string, downl
 		Key:    &objectKey,
 	})
 	if err != nil {
-		return obj, stacktrace.Propagate(err, "downloadFailed")
+		return obj, err
 	}
 	err = json.Unmarshal(buff.Bytes(), &obj)
 	if err != nil {
