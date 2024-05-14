@@ -942,7 +942,7 @@
   "thisActionCannotBeUndone": "此操作无法撤销",
   "emptyTrash": "要清空回收站吗？",
   "permDeleteWarning": "回收站中的所有项目将被永久删除\n\n此操作无法撤消",
-  "empty": "空的",
+  "empty": "清空",
   "couldNotFreeUpSpace": "无法释放空间",
   "permanentlyDeleteFromDevice": "要从设备中永久删除吗？",
   "someOfTheFilesYouAreTryingToDeleteAre": "您要删除的部分文件仅在您的设备上可用，且删除后无法恢复",
