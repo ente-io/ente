@@ -1,6 +1,12 @@
 import { workerBridge } from "@/next/worker/worker-bridge";
 import { euclidean } from "hdbscan";
-import { Box, Point, boxFromBoundingBox } from "services/ml/geom";
+import {
+    Box,
+    Dimensions,
+    Point,
+    boxFromBoundingBox,
+    newBox,
+} from "services/ml/geom";
 import {
     FaceDetection,
     FaceDetectionMethod,
@@ -14,13 +20,11 @@ import {
     scale,
     translate,
 } from "transformation-matrix";
-import { Dimensions } from "services/ml/geom";
 import {
     clamp,
     getPixelBilinear,
     normalizePixelBetween0And1,
 } from "utils/image";
-import { newBox } from "utils/machineLearning";
 
 class YoloFaceDetectionService implements FaceDetectionService {
     public method: Versioned<FaceDetectionMethod>;

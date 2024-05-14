@@ -21,8 +21,8 @@ export class Point {
 }
 
 export interface Dimensions {
-  width: number;
-  height: number;
+    width: number;
+    height: number;
 }
 
 export interface IBoundingBox {
@@ -37,6 +37,10 @@ export interface IRect {
     y: number;
     width: number;
     height: number;
+}
+
+export function newBox(x: number, y: number, width: number, height: number) {
+    return new Box({ x, y, width, height });
 }
 
 export const boxFromBoundingBox = ({
