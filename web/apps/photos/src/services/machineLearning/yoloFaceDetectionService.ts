@@ -300,7 +300,7 @@ function getDetectionCenter(detection: FaceDetection) {
         center.y += p.y;
     });
 
-    return center.div(new Point(4, 4));
+    return new Point(center.x / 4, center.y / 4);
 }
 
 function computeTransformToBox(inBox: Box, toBox: Box): Matrix {

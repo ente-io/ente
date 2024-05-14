@@ -6,10 +6,6 @@ export class Point {
         this.x = x;
         this.y = y;
     }
-
-    public div(pt: Point): Point {
-        return new Point(this.x / pt.x, this.y / pt.y);
-    }
 }
 
 export interface Dimensions {
