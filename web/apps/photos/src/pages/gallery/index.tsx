@@ -133,6 +133,7 @@ import {
 } from "utils/file";
 import { isArchivedFile } from "utils/magicMetadata";
 import { getSessionExpiredMessage } from "utils/ui";
+import { isInternalUserForML } from "utils/user";
 import { getLocalFamilyData } from "utils/user/family";
 
 export const DeadCenter = styled("div")`
@@ -703,7 +704,7 @@ export default function Gallery() {
             await syncMapEnabled();
             await syncCLIPEmbeddings();
             const electron = globalThis.electron;
-            if (electron) {
+            if (isInternalUserForML() && electron) {
                 await syncFileEmbeddings();
             }
             if (clipService.isPlatformSupported()) {
