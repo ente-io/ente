@@ -25,6 +25,8 @@ class MachineLearningController {
   bool _isRunningML = false;
   late Timer _userInteractionTimer;
 
+  get canRunML => _isDeviceHealthy && !_isUserInteracting;
+
   void init() {
     if (Platform.isAndroid) {
       _startInteractionTimer();
@@ -52,7 +54,7 @@ class MachineLearningController {
   }
 
   void _fireControlEvent() {
-    final shouldRunML = _isDeviceHealthy && !_isUserInteracting;
+    final shouldRunML = canRunML;
     if (shouldRunML != _isRunningML) {
       _isRunningML = shouldRunML;
       _logger.info(

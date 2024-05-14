@@ -1,6 +1,6 @@
 import "dart:async";
 import "dart:developer" as dev show log;
-import "dart:io" show File;
+import "dart:io" show File, Platform;
 import "dart:isolate";
 import "dart:math" show min;
 import "dart:typed_data" show Uint8List, Float32List, ByteData;
@@ -16,6 +16,7 @@ import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/events/diff_sync_complete_event.dart";
+import "package:photos/events/machine_learning_control_event.dart";
 import "package:photos/extensions/list.dart";
 import "package:photos/extensions/stop_watch.dart";
 import "package:photos/face/db.dart";
@@ -40,6 +41,7 @@ import 'package:photos/services/machine_learning/face_ml/face_ml_exceptions.dart
 import 'package:photos/services/machine_learning/face_ml/face_ml_result.dart';
 import 'package:photos/services/machine_learning/file_ml/file_ml.dart';
 import 'package:photos/services/machine_learning/file_ml/remote_fileml_service.dart';
+import "package:photos/services/machine_learning/machine_learning_controller.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/utils/file_util.dart";
 import 'package:photos/utils/image_ml_isolate.dart';
@@ -89,6 +91,9 @@ class FaceMlService {
   final int _remoteFetchLimit = 100;
 
   Future<void> init({bool initializeImageMlIsolate = false}) async {
+    if (LocalSettings.instance.isFaceIndexingEnabled == false) {
+      return;
+    }
     return _initLock.synchronized(() async {
       if (isInitialized) {
         return;
@@ -114,6 +119,19 @@ class FaceMlService {
       }
 
       isInitialized = true;
+
+      /// hooking FaceML into [MachineLearningController]
+      if (Platform.isAndroid) {
+        Bus.instance.on<MachineLearningControlEvent>().listen((event) {
+          if (event.shouldRun) {
+            unawaited(indexAllImages());
+          } else {
+            pauseIndexing();
+          }
+        });
+      } else {
+        unawaited(indexAllImages());
+      }
     });
   }
 
@@ -596,9 +614,10 @@ class FaceMlService {
               return;
             } else {
               _logger.severe(
-                  "Failed to fetch embeddings for files after multiple retries",
-                  e,
-                  s,);
+                "Failed to fetch embeddings for files after multiple retries",
+                e,
+                s,
+              );
               rethrow;
             }
           }
@@ -630,7 +649,7 @@ class FaceMlService {
 
       stopwatch.stop();
       _logger.info(
-        "`indexAllImages()` finished. Analyzed $fileAnalyzedCount images, in ${stopwatch.elapsed.inSeconds} seconds (avg of ${stopwatch.elapsed.inSeconds / fileAnalyzedCount} seconds per image, skipped $fileSkippedCount images)",
+        "`indexAllImages()` finished. Analyzed $fileAnalyzedCount images, in ${stopwatch.elapsed.inSeconds} seconds (avg of ${stopwatch.elapsed.inSeconds / fileAnalyzedCount} seconds per image, skipped $fileSkippedCount images. MLController status: ${MachineLearningController.instance.canRunML})",
       );
 
       // Dispose of all the isolates
@@ -1328,7 +1347,7 @@ class FaceMlService {
   }
 
   bool _skipAnalysisEnteFile(EnteFile enteFile, Map<int, int> indexedFileIds) {
-    if (isImageIndexRunning == false) {
+    if (isImageIndexRunning == false || MachineLearningController.instance.canRunML == false) {
       return true;
     }
     // Skip if the file is not uploaded or not owned by the user
