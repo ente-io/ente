@@ -20,7 +20,7 @@ import ComlinkSearchWorker from "utils/comlink/ComlinkSearchWorker";
 import { getUniqueFiles } from "utils/file";
 import { getFormattedDate } from "utils/search";
 import { clipService, computeClipMatchScore } from "./clip-service";
-import { getLocalEmbeddings } from "./embeddingService";
+import { localCLIPEmbeddings } from "./embeddingService";
 import { getLatestEntities } from "./entityService";
 import locationSearchService, { City } from "./locationSearchService";
 
@@ -375,7 +375,7 @@ const searchClip = async (
         await clipService.getTextEmbeddingIfAvailable(searchPhrase);
     if (!textEmbedding) return undefined;
 
-    const imageEmbeddings = await getLocalEmbeddings();
+    const imageEmbeddings = await localCLIPEmbeddings();
     const clipSearchResult = new Map<number, number>(
         (
             await Promise.all(
