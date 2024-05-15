@@ -27,8 +27,8 @@
         "dev:payments": "yarn workspace payments dev",
         "dev:photos": "yarn workspace photos next dev",
         "dev:staff": "yarn workspace staff dev",
-        "lint": "yarn prettier --check --log-level warn . && yarn workspaces run eslint --report-unused-disable-directives . && yarn workspaces run tsc",
-        "lint-fix": "yarn prettier --write --log-level warn . && yarn workspaces run eslint --fix . && yarn workspaces run tsc",
+        "lint": "concurrently --names 'prettier,eslint,tsc' \"yarn prettier --check --log-level warn .\" \"yarn workspaces run eslint --report-unused-disable-directives .\" \"yarn workspaces run tsc\"",
+        "lint-fix": "concurrently --names 'prettier,eslint,tsc' \"yarn prettier --write --log-level warn .\" \"yarn workspaces run eslint --report-unused-disable-directives --fix .\" \"yarn workspaces run tsc\"",
         "preview": "yarn preview:photos",
         "preview:accounts": "yarn build:accounts && python3 -m http.server -d apps/accounts/out 3001",
         "preview:auth": "yarn build:auth && python3 -m http.server -d apps/auth/out 3000",
@@ -41,6 +41,7 @@
         "libsodium": "0.7.9"
     },
     "devDependencies": {
+        "concurrently": "^8.2.2",
         "eslint": "^8",
         "prettier": "^3",
         "typescript": "^5"
