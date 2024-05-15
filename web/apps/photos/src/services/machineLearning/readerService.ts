@@ -40,7 +40,7 @@ class ReaderService {
                     fileContext.enteFile.metadata.fileType,
                 )
             ) {
-                fileContext.imageBitmap = await getOriginalImageBitmap(
+                fileContext.imageBitmap = await fetchImageBitmap(
                     fileContext.enteFile,
                 );
             } else {
@@ -105,17 +105,12 @@ export function getFaceId(detectedFace: DetectedFace, imageDims: Dimensions) {
     return faceID;
 }
 
-async function getImageBlobBitmap(blob: Blob): Promise<ImageBitmap> {
-    return await createImageBitmap(blob);
-}
+export const fetchImageBitmap = async (file: EnteFile) =>
+    fetchRenderableBlob(file).then(createImageBitmap);
 
-async function getOriginalFile(file: EnteFile) {
+async function fetchRenderableBlob(file: EnteFile) {
     const fileStream = await DownloadManager.getFile(file);
-    return new Response(fileStream).blob();
-}
-
-async function getOriginalConvertedFile(file: EnteFile) {
-    const fileBlob = await getOriginalFile(file);
+    const fileBlob = await new Response(fileStream).blob();
     if (file.metadata.fileType === FILE_TYPE.IMAGE) {
         return await getRenderableImage(file.metadata.title, fileBlob);
     } else {
@@ -127,17 +122,11 @@ async function getOriginalConvertedFile(file: EnteFile) {
     }
 }
 
-export async function getOriginalImageBitmap(file: EnteFile) {
-    const fileBlob = await getOriginalConvertedFile(file);
-    log.info("[MLService] Got file: ", file.id.toString());
-    return getImageBlobBitmap(fileBlob);
-}
-
 export async function getThumbnailImageBitmap(file: EnteFile) {
     const thumb = await DownloadManager.getThumbnail(file);
     log.info("[MLService] Got thumbnail: ", file.id.toString());
 
-    return getImageBlobBitmap(new Blob([thumb]));
+    return createImageBitmap(new Blob([thumb]));
 }
 
 export async function getLocalFileImageBitmap(
@@ -146,5 +135,5 @@ export async function getLocalFileImageBitmap(
 ) {
     let fileBlob = localFile as Blob;
     fileBlob = await getRenderableImage(enteFile.metadata.title, fileBlob);
-    return getImageBlobBitmap(fileBlob);
+    return createImageBitmap(fileBlob);
 }

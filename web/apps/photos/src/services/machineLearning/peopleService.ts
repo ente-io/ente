@@ -2,7 +2,7 @@ import log from "@/next/log";
 import mlIDbStorage from "services/ml/db";
 import { Face, MLSyncContext, Person } from "services/ml/types";
 import FaceService, { isDifferentOrOld } from "./faceService";
-import { getLocalFile, getOriginalImageBitmap } from "./readerService";
+import { fetchImageBitmap, getLocalFile } from "./readerService";
 
 class PeopleService {
     async syncPeopleIndex(syncContext: MLSyncContext) {
@@ -58,7 +58,7 @@ class PeopleService {
 
             if (personFace && !personFace.crop?.cacheKey) {
                 const file = await getLocalFile(personFace.fileId);
-                const imageBitmap = await getOriginalImageBitmap(file);
+                const imageBitmap = await fetchImageBitmap(file);
                 await FaceService.saveFaceCrop(
                     imageBitmap,
                     personFace,

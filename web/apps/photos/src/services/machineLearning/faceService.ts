@@ -11,9 +11,9 @@ import {
 } from "services/ml/types";
 import { imageBitmapToBlob, warpAffineFloat32List } from "utils/image";
 import ReaderService, {
+    fetchImageBitmap,
     getFaceId,
     getLocalFile,
-    getOriginalImageBitmap,
 } from "./readerService";
 
 class FaceService {
@@ -296,7 +296,7 @@ class FaceService {
         }
 
         const file = await getLocalFile(personFace.fileId);
-        const imageBitmap = await getOriginalImageBitmap(file);
+        const imageBitmap = await fetchImageBitmap(file);
         return await this.saveFaceCrop(imageBitmap, personFace, syncContext);
     }
 }
