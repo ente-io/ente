@@ -85,10 +85,12 @@ class FaceMlService {
   final _computer = Computer.shared();
 
   bool isInitialized = false;
+  
   bool canRunMLController = false;
   bool isImageIndexRunning = false;
   bool isClusteringRunning = false;
-  final int _parallelism = 10;
+
+  final int _parallelismML = 10;
   final int _remoteFetchLimit = 100;
 
   Future<void> init({bool initializeImageMlIsolate = false}) async {
@@ -259,8 +261,7 @@ class FaceMlService {
     return _functionLock.synchronized(() async {
       _resetInactivityTimer();
 
-      if (isImageIndexRunning == false ||
-          canRunMLController == false) {
+      if (isImageIndexRunning == false || canRunMLController == false) {
         return null;
       }
 
@@ -321,7 +322,26 @@ class FaceMlService {
     double minFaceScore = kMinimumQualityFaceScore,
     bool clusterInBuckets = true,
   }) async {
+    if (!canRunMLController) {
+      _logger
+          .info("MLController does not allow running ML, skipping clustering");
+      return;
+    }
+    if (isClusteringRunning) {
+      _logger.info("clusterAllImages is already running, skipping");
+      return;
+    }
+
+    final indexingCompleteRatio = await _getIndexedDoneRatio();
+    if (indexingCompleteRatio < 0.6) {
+      _logger.info(
+        "Indexing is not far enough, skipping clustering. Indexing is at $indexingCompleteRatio",
+      );
+      return;
+    }
+
     _logger.info("`clusterAllImages()` called");
+    isClusteringRunning = true;
     final clusterAllImagesTime = DateTime.now();
 
     try {
@@ -366,6 +386,12 @@ class FaceMlService {
         int bucket = 1;
 
         while (true) {
+          if (!canRunMLController) {
+            _logger.info(
+              "MLController does not allow running ML, stopping before clustering bucket $bucket",
+            );
+            break;
+          }
           if (offset > allFaceInfoForClustering.length - 1) {
             _logger.warning(
               'faceIdToEmbeddingBucket is empty, this should ideally not happen as it should have stopped earlier. offset: $offset, totalFaces: $totalFaces',
@@ -450,6 +476,7 @@ class FaceMlService {
       }
       _logger.info('clusterAllImages() finished, in '
           '${DateTime.now().difference(clusterAllImagesTime).inSeconds} seconds');
+      isClusteringRunning = false;
     } catch (e, s) {
       _logger.severe("`clusterAllImages` failed", e, s);
     }
@@ -512,7 +539,7 @@ class FaceMlService {
     }
     // verify indexing is enabled
     if (LocalSettings.instance.isFaceIndexingEnabled == false) {
-      _logger.warning("indexAllImages is disabled");
+      _logger.warning("indexing is disabled by user");
       return;
     }
     try {
@@ -625,7 +652,7 @@ class FaceMlService {
             }
           }
         }
-        final smallerChunks = chunk.chunks(_parallelism);
+        final smallerChunks = chunk.chunks(_parallelismML);
         for (final smallestChunk in smallerChunks) {
           for (final enteFile in smallestChunk) {
             if (isImageIndexRunning == false) {
@@ -654,6 +681,9 @@ class FaceMlService {
       _logger.info(
         "`indexAllImages()` finished. Analyzed $fileAnalyzedCount images, in ${stopwatch.elapsed.inSeconds} seconds (avg of ${stopwatch.elapsed.inSeconds / fileAnalyzedCount} seconds per image, skipped $fileSkippedCount images. MLController status: $canRunMLController)",
       );
+
+      // Cluster all the images after finishing indexing
+      unawaited(clusterAllImages());
 
       // Dispose of all the isolates
       // ImageMlIsolate.instance.dispose();
@@ -1353,9 +1383,32 @@ class FaceMlService {
     }
   }
 
+  Future<double> _getIndexedDoneRatio() async {
+    final w = (kDebugMode ? EnteWatch('_getIndexedDoneRatio') : null)?..start();
+    final List<EnteFile> enteFiles = await SearchService.instance.getAllFiles();
+    final List<EnteFile> indexableFiles = [];
+    for (final enteFile in enteFiles) {
+      if (!enteFile.isUploaded || enteFile.isOwner == false) {
+        continue;
+      }
+      if (enteFile.fileType == FileType.other) {
+        continue;
+      }
+      indexableFiles.add(enteFile);
+    }
+
+    final Map<int, int> alreadyIndexedFiles = await FaceMLDataDB.instance
+        .getIndexedFileIds(minimumMlVersion: faceMlVersion);
+    final int alreadyIndexedCount = alreadyIndexedFiles.length;
+    final int totalIndexableCount = indexableFiles.length;
+    final ratio = alreadyIndexedCount / totalIndexableCount;
+    w?.log('getIndexedDoneRatio');
+
+    return ratio;
+  }
+
   bool _skipAnalysisEnteFile(EnteFile enteFile, Map<int, int> indexedFileIds) {
-    if (isImageIndexRunning == false ||
-        canRunMLController == false) {
+    if (isImageIndexRunning == false || canRunMLController == false) {
       return true;
     }
     // Skip if the file is not uploaded or not owned by the user

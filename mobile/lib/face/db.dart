@@ -128,11 +128,22 @@ class FaceMLDataDB {
   }
 
   /// Returns a map of fileID to the indexed ML version
-  Future<Map<int, int>> getIndexedFileIds() async {
+  Future<Map<int, int>> getIndexedFileIds({int? minimumMlVersion}) async {
     final db = await instance.asyncDB;
-    final List<Map<String, dynamic>> maps = await db.getAll(
-      'SELECT $fileIDColumn, $mlVersionColumn FROM $facesTable',
-    );
+    late final String query;
+    if (minimumMlVersion != null) {
+      query = '''
+        SELECT $fileIDColumn, $mlVersionColumn
+        FROM $facesTable
+        WHERE $mlVersionColumn >= $minimumMlVersion
+      ''';
+    } else {
+      query = '''
+        SELECT $fileIDColumn, $mlVersionColumn
+        FROM $facesTable
+      ''';
+    }
+    final List<Map<String, dynamic>> maps = await db.getAll(query);
     final Map<int, int> result = {};
     for (final map in maps) {
       result[map[fileIDColumn] as int] = map[mlVersionColumn] as int;
