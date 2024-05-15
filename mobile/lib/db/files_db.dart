@@ -458,42 +458,6 @@ class FilesDB {
     ConflictAlgorithm conflictAlgorithm = ConflictAlgorithm.replace,
   }) async {
     final startTime = DateTime.now();
-    final db = await database;
-    var batch = db.batch();
-    int batchCounter = 0;
-    for (EnteFile file in files) {
-      if (batchCounter == 400) {
-        await batch.commit(noResult: true);
-        batch = db.batch();
-        batchCounter = 0;
-      }
-      batch.insert(
-        filesTable,
-        _getRowForFile(file),
-        conflictAlgorithm: conflictAlgorithm,
-      );
-      batchCounter++;
-    }
-    await batch.commit(noResult: true);
-    final endTime = DateTime.now();
-    final duration = Duration(
-      microseconds:
-          endTime.microsecondsSinceEpoch - startTime.microsecondsSinceEpoch,
-    );
-    _logger.info(
-      "Batch insert of " +
-          files.length.toString() +
-          " took " +
-          duration.inMilliseconds.toString() +
-          "ms.",
-    );
-  }
-
-  Future<void> insertMultipleNew(
-    List<EnteFile> files, {
-    ConflictAlgorithm conflictAlgorithm = ConflictAlgorithm.replace,
-  }) async {
-    final startTime = DateTime.now();
     final db = await sqliteAsyncDB;
 
     ///Strong batch counter in an object so that it gets passed by reference
@@ -1887,10 +1851,10 @@ class FilesDB {
       file.exif,
       file.hash,
       file.metadataVersion,
-      file.mMdEncodedJson ?? {},
+      file.mMdEncodedJson ?? '{}',
       file.mMdVersion,
       file.magicMetadata.visibility,
-      file.pubMmdEncodedJson ?? {},
+      file.pubMmdEncodedJson ?? '{}',
       file.pubMmdVersion,
       file.fileSize,
       file.addedTime ?? DateTime.now().microsecondsSinceEpoch,
