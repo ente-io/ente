@@ -12,7 +12,6 @@ import isElectron from "is-electron";
 import {
     DEFAULT_ML_SEARCH_CONFIG,
     DEFAULT_ML_SYNC_CONFIG,
-    DEFAULT_ML_SYNC_JOB_CONFIG,
     MAX_ML_SYNC_ERROR_COUNT,
 } from "services/machineLearning/machineLearningService";
 import { Face, MLLibraryData, MlFileData, Person } from "services/ml/types";
@@ -27,7 +26,6 @@ export interface IndexStatus {
 
 interface Config {}
 
-export const ML_SYNC_JOB_CONFIG_NAME = "ml-sync-job";
 export const ML_SYNC_CONFIG_NAME = "ml-sync";
 export const ML_SEARCH_CONFIG_NAME = "ml-search";
 
@@ -136,12 +134,14 @@ class MLIDbStorage {
                     // TODO: update configs if version is updated in defaults
                     db.createObjectStore("configs");
 
+                    /*
                     await tx
                         .objectStore("configs")
                         .add(
                             DEFAULT_ML_SYNC_JOB_CONFIG,
-                            ML_SYNC_JOB_CONFIG_NAME,
+                            "ml-sync-job",
                         );
+                    */
                     await tx
                         .objectStore("configs")
                         .add(DEFAULT_ML_SYNC_CONFIG, ML_SYNC_CONFIG_NAME);
@@ -162,6 +162,10 @@ class MLIDbStorage {
                         await tx
                             .objectStore("configs")
                             .delete(ML_SEARCH_CONFIG_NAME);
+
+                        await tx
+                            .objectStore("configs")
+                            .delete("ml-sync-job");
 
                         await tx
                             .objectStore("configs")

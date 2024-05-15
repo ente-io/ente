@@ -5,7 +5,6 @@ import { eventBus, Events } from "@ente/shared/events";
 import { getToken, getUserID } from "@ente/shared/storage/localStorage/helpers";
 import debounce from "debounce";
 import PQueue from "p-queue";
-import { getMLSyncJobConfig } from "services/machineLearning/machineLearningService";
 import mlIDbStorage from "services/ml/db";
 import { MLSyncResult } from "services/ml/types";
 import { EnteFile } from "types/file";
@@ -38,8 +37,14 @@ export class MLSyncJob {
     private intervalSec: number;
     private nextTimeoutId: ReturnType<typeof setTimeout>;
 
-    constructor(config: JobConfig, runCallback: () => Promise<MLSyncJobResult>) {
-        this.config = config;
+    constructor(runCallback: () => Promise<MLSyncJobResult>) {
+        this.config = {
+            intervalSec: 5,
+            // TODO: finalize this after seeing effects on and from machine sleep
+            maxItervalSec: 960,
+            backoffMultiplier: 2,
+        };
+
         this.runCallback = runCallback;
         this.state = "NotScheduled";
         this.stopped = true;
@@ -339,11 +344,8 @@ class MLWorkManager {
                 log.info("User not logged in, not starting ml sync job");
                 return;
             }
-            const mlSyncJobConfig = await getMLSyncJobConfig();
             if (!this.mlSyncJob) {
-                this.mlSyncJob = new MLSyncJob(mlSyncJobConfig, () =>
-                    this.runMLSyncJob(),
-                );
+                this.mlSyncJob = new MLSyncJob(() => this.runMLSyncJob());
             }
             this.mlSyncJob.start();
         } catch (e) {
