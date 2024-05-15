@@ -27,6 +27,7 @@ class _AddTagDialogState extends State<AddTagDialog> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             TextFormField(
+              maxLength: 100,
               decoration: InputDecoration(
                 hintText: l10n.tag,
                 hintStyle: const TextStyle(
