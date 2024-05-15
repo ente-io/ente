@@ -420,6 +420,9 @@ func (c *Controller) getEmbeddingObject(ctx context.Context, objectKey string, d
 			obj, err := c.downloadObject(fetchCtx, objectKey, downloader, c.embeddingBucket)
 			cancel() // Ensure cancel is called to release resources
 			if err == nil {
+				if i > 0 {
+					ctxLogger.Infof("Fetched object after %d attempts", i)
+				}
 				return obj, nil
 			}
 			// Check if the error is due to context timeout or cancellation
