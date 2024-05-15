@@ -127,6 +127,9 @@ class FaceMlService {
       /// hooking FaceML into [MachineLearningController]
       if (Platform.isAndroid) {
         Bus.instance.on<MachineLearningControlEvent>().listen((event) {
+          if (LocalSettings.instance.isFaceIndexingEnabled == false) {
+            return;
+          }
           canRunMLController = event.shouldRun;
           if (canRunMLController) {
             unawaited(indexAllImages());
@@ -330,6 +333,11 @@ class FaceMlService {
     }
     if (isClusteringRunning) {
       _logger.info("clusterAllImages is already running, skipping");
+      return;
+    }
+    // verify faces is enabled
+    if (LocalSettings.instance.isFaceIndexingEnabled == false) {
+      _logger.warning("clustering is disabled by user");
       return;
     }
 
@@ -538,7 +546,7 @@ class FaceMlService {
       _logger.warning("indexAllImages is already running, skipping");
       return;
     }
-    // verify indexing is enabled
+    // verify faces is enabled
     if (LocalSettings.instance.isFaceIndexingEnabled == false) {
       _logger.warning("indexing is disabled by user");
       return;

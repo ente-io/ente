@@ -64,8 +64,8 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
               if (snapshot.hasData) {
                 return CaptionedTextWidget(
                   title: LocalSettings.instance.isFaceIndexingEnabled
-                      ? "Disable indexing (${snapshot.data!})"
-                      : "Enable indexing (${snapshot.data!})",
+                      ? "Disable faces (${snapshot.data!})"
+                      : "Enable faces (${snapshot.data!})",
                 );
               }
               return const SizedBox.shrink();
@@ -78,9 +78,7 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
             try {
               final isEnabled =
                   await LocalSettings.instance.toggleFaceIndexing();
-              if (isEnabled) {
-                FaceMlService.instance.indexAllImages().ignore();
-              } else {
+              if (!isEnabled) {
                 FaceMlService.instance.pauseIndexing();
               }
               if (mounted) {

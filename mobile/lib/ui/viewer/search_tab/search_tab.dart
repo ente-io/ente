@@ -20,6 +20,7 @@ import "package:photos/ui/viewer/search_tab/file_type_section.dart";
 import "package:photos/ui/viewer/search_tab/locations_section.dart";
 import "package:photos/ui/viewer/search_tab/moments_section.dart";
 import "package:photos/ui/viewer/search_tab/people_section.dart";
+import "package:photos/utils/local_settings.dart";
 
 class SearchTab extends StatefulWidget {
   const SearchTab({Key? key}) : super(key: key);
@@ -114,6 +115,9 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
                   itemBuilder: (context, index) {
                     switch (searchTypes[index]) {
                       case SectionType.face:
+                        if (!LocalSettings.instance.isFaceIndexingEnabled) {
+                          return const SizedBox.shrink();
+                        }
                         return PeopleSection(
                           examples: snapshot.data!.elementAt(index)
                               as List<GenericSearchResult>,
