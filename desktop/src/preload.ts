@@ -63,10 +63,10 @@ const openLogDirectory = () => ipcRenderer.invoke("openLogDirectory");
 
 const selectDirectory = () => ipcRenderer.invoke("selectDirectory");
 
-const clearStores = () => ipcRenderer.send("clearStores");
-
-const clearConvertToMP4Results = () =>
-    ipcRenderer.send("clearConvertToMP4Results");
+const logout = () => {
+    watchRemoveListeners();
+    ipcRenderer.send("logout");
+};
 
 const encryptionKey = () => ipcRenderer.invoke("encryptionKey");
 
@@ -212,11 +212,10 @@ const watchOnRemoveDir = (f: (path: string, watch: FolderWatch) => void) => {
 const watchFindFiles = (folderPath: string) =>
     ipcRenderer.invoke("watchFindFiles", folderPath);
 
-const watchReset = async () => {
+const watchRemoveListeners = () => {
     ipcRenderer.removeAllListeners("watchAddFile");
     ipcRenderer.removeAllListeners("watchRemoveFile");
     ipcRenderer.removeAllListeners("watchRemoveDir");
-    await ipcRenderer.invoke("watchReset");
 };
 
 // - Upload
@@ -308,8 +307,7 @@ contextBridge.exposeInMainWorld("electron", {
     openDirectory,
     openLogDirectory,
     selectDirectory,
-    clearStores,
-    clearConvertToMP4Results,
+    logout,
     encryptionKey,
     saveEncryptionKey,
     onMainWindowFocus,
@@ -360,7 +358,6 @@ contextBridge.exposeInMainWorld("electron", {
         onRemoveFile: watchOnRemoveFile,
         onRemoveDir: watchOnRemoveDir,
         findFiles: watchFindFiles,
-        reset: watchReset,
     },
 
     // - Upload

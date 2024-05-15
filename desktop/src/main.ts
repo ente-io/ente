@@ -17,7 +17,11 @@ import { existsSync } from "node:fs";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { attachFSWatchIPCHandlers, attachIPCHandlers } from "./main/ipc";
+import {
+    attachFSWatchIPCHandlers,
+    attachIPCHandlers,
+    attachLogoutIPCHandler,
+} from "./main/ipc";
 import log, { initLogging } from "./main/log";
 import { createApplicationMenu, createTrayContextMenu } from "./main/menu";
 import { setupAutoUpdater } from "./main/services/app-update";
@@ -377,8 +381,12 @@ const main = () => {
         void (async () => {
             // Create window and prepare for the renderer.
             mainWindow = createMainWindow();
+
+            // Setup IPC and streams.
+            const watcher = createWatcher(mainWindow);
             attachIPCHandlers();
-            attachFSWatchIPCHandlers(createWatcher(mainWindow));
+            attachFSWatchIPCHandlers(watcher);
+            attachLogoutIPCHandler(watcher);
             registerStreamProtocol();
 
             // Configure the renderer's environment.

@@ -41,16 +41,13 @@ import {
     fsWriteFile,
 } from "./services/fs";
 import { convertToJPEG, generateImageThumbnail } from "./services/image";
+import { logout } from "./services/logout";
 import {
     clipImageEmbedding,
     clipTextEmbeddingIfAvailable,
 } from "./services/ml-clip";
 import { detectFaces, faceEmbedding } from "./services/ml-face";
-import {
-    clearStores,
-    encryptionKey,
-    saveEncryptionKey,
-} from "./services/store";
+import { encryptionKey, saveEncryptionKey } from "./services/store";
 import {
     clearPendingUploads,
     listZipItems,
@@ -65,11 +62,9 @@ import {
     watchFindFiles,
     watchGet,
     watchRemove,
-    watchReset,
     watchUpdateIgnoredFiles,
     watchUpdateSyncedFiles,
 } from "./services/watch";
-import { clearConvertToMP4Results } from "./stream";
 
 /**
  * Listen for IPC events sent/invoked by the renderer process, and route them to
@@ -106,10 +101,6 @@ export const attachIPCHandlers = () => {
     ipcMain.on("logToDisk", (_, message: string) => logToDisk(message));
 
     ipcMain.handle("selectDirectory", () => selectDirectory());
-
-    ipcMain.on("clearStores", () => clearStores());
-
-    ipcMain.on("clearConvertToMP4Results", () => clearConvertToMP4Results());
 
     ipcMain.handle("saveEncryptionKey", (_, encryptionKey: string) =>
         saveEncryptionKey(encryptionKey),
@@ -265,6 +256,12 @@ export const attachFSWatchIPCHandlers = (watcher: FSWatcher) => {
     ipcMain.handle("watchFindFiles", (_, folderPath: string) =>
         watchFindFiles(folderPath),
     );
+};
 
-    ipcMain.handle("watchReset", () => watchReset(watcher));
+/**
+ * Sibling of {@link attachIPCHandlers} specifically for use with the logout
+ * event with needs access to the {@link FSWatcher} instance.
+ */
+export const attachLogoutIPCHandler = (watcher: FSWatcher) => {
+    ipcMain.handle("logout", () => logout(watcher));
 };

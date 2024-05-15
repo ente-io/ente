@@ -101,7 +101,7 @@ type AppContextType = {
     setDialogBoxAttributesV2: SetDialogBoxAttributesV2;
     isCFProxyDisabled: boolean;
     setIsCFProxyDisabled: (disabled: boolean) => void;
-    logout: () => Promise<void>;
+    logout: () => void;
 };
 
 export const AppContext = createContext<AppContextType>(null);
