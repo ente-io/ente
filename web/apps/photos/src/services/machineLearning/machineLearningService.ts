@@ -14,7 +14,6 @@ import { getLocalFiles } from "services/fileService";
 import mlIDbStorage, {
     ML_SEARCH_CONFIG_NAME,
     ML_SYNC_CONFIG_NAME,
-    ML_SYNC_JOB_CONFIG_NAME,
 } from "services/ml/db";
 import {
     BlurDetectionMethod,
@@ -48,18 +47,10 @@ import dbscanClusteringService from "./dbscanClusteringService";
 import FaceService from "./faceService";
 import hdbscanClusteringService from "./hdbscanClusteringService";
 import laplacianBlurDetectionService from "./laplacianBlurDetectionService";
-import type { JobConfig } from "./mlWorkManager";
 import mobileFaceNetEmbeddingService from "./mobileFaceNetEmbeddingService";
 import PeopleService from "./peopleService";
 import ReaderService from "./readerService";
 import yoloFaceDetectionService from "./yoloFaceDetectionService";
-
-export const DEFAULT_ML_SYNC_JOB_CONFIG: JobConfig = {
-    intervalSec: 5,
-    // TODO: finalize this after seeing effects on and from machine sleep
-    maxItervalSec: 960,
-    backoffMultiplier: 2,
-};
 
 export const DEFAULT_ML_SYNC_CONFIG: MLSyncConfig = {
     batchSize: 200,
@@ -108,13 +99,6 @@ export const DEFAULT_ML_SEARCH_CONFIG: MLSearchConfig = {
 
 export const MAX_ML_SYNC_ERROR_COUNT = 1;
 
-export async function getMLSyncJobConfig() {
-    return mlIDbStorage.getConfig(
-        ML_SYNC_JOB_CONFIG_NAME,
-        DEFAULT_ML_SYNC_JOB_CONFIG,
-    );
-}
-
 export async function getMLSyncConfig() {
     return mlIDbStorage.getConfig(ML_SYNC_CONFIG_NAME, DEFAULT_ML_SYNC_CONFIG);
 }
@@ -129,14 +113,6 @@ export async function getMLSearchConfig() {
     // Force disabled for everyone else while we finalize it to avoid redundant
     // reindexing for users.
     return DEFAULT_ML_SEARCH_CONFIG;
-}
-
-export async function updateMLSyncJobConfig(newConfig: JobConfig) {
-    return mlIDbStorage.putConfig(ML_SYNC_JOB_CONFIG_NAME, newConfig);
-}
-
-export async function updateMLSyncConfig(newConfig: MLSyncConfig) {
-    return mlIDbStorage.putConfig(ML_SYNC_CONFIG_NAME, newConfig);
 }
 
 export async function updateMLSearchConfig(newConfig: MLSearchConfig) {

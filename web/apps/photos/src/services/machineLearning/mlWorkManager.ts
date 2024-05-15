@@ -5,12 +5,11 @@ import { eventBus, Events } from "@ente/shared/events";
 import { getToken, getUserID } from "@ente/shared/storage/localStorage/helpers";
 import debounce from "debounce";
 import PQueue from "p-queue";
-import { getMLSyncJobConfig } from "services/machineLearning/machineLearningService";
 import mlIDbStorage from "services/ml/db";
+import { createFaceComlinkWorker } from "services/ml/face";
+import type { DedicatedMLWorker } from "services/ml/face.worker";
 import { MLSyncResult } from "services/ml/types";
 import { EnteFile } from "types/file";
-import { getDedicatedMLWorker } from "utils/comlink/ComlinkMLWorker";
-import { DedicatedMLWorker } from "worker/ml.worker";
 import { logQueueStats } from "./machineLearningService";
 
 const LIVE_SYNC_IDLE_DEBOUNCE_SEC = 30;
@@ -21,32 +20,30 @@ export type JobState = "Scheduled" | "Running" | "NotScheduled";
 
 export interface JobConfig {
     intervalSec: number;
-    maxItervalSec: number;
     backoffMultiplier: number;
 }
 
-export interface JobResult {
+export interface MLSyncJobResult {
     shouldBackoff: boolean;
+    mlSyncResult: MLSyncResult;
 }
 
-export class SimpleJob<R extends JobResult> {
-    private config: JobConfig;
-    private runCallback: () => Promise<R>;
+export class MLSyncJob {
+    private runCallback: () => Promise<MLSyncJobResult>;
     private state: JobState;
     private stopped: boolean;
     private intervalSec: number;
     private nextTimeoutId: ReturnType<typeof setTimeout>;
 
-    constructor(config: JobConfig, runCallback: () => Promise<R>) {
-        this.config = config;
+    constructor(runCallback: () => Promise<MLSyncJobResult>) {
         this.runCallback = runCallback;
         this.state = "NotScheduled";
         this.stopped = true;
-        this.intervalSec = this.config.intervalSec;
+        this.resetInterval();
     }
 
     public resetInterval() {
-        this.intervalSec = this.config.intervalSec;
+        this.intervalSec = 5;
     }
 
     public start() {
@@ -79,10 +76,7 @@ export class SimpleJob<R extends JobResult> {
         try {
             const jobResult = await this.runCallback();
             if (jobResult && jobResult.shouldBackoff) {
-                this.intervalSec = Math.min(
-                    this.config.maxItervalSec,
-                    this.intervalSec * this.config.backoffMultiplier,
-                );
+                this.intervalSec = Math.min(960, this.intervalSec * 2);
             } else {
                 this.resetInterval();
             }
@@ -109,12 +103,6 @@ export class SimpleJob<R extends JobResult> {
     }
 }
 
-export interface MLSyncJobResult extends JobResult {
-    mlSyncResult: MLSyncResult;
-}
-
-export class MLSyncJob extends SimpleJob<MLSyncJobResult> {}
-
 class MLWorkManager {
     private mlSyncJob: MLSyncJob;
     private syncJobWorker: ComlinkWorker<typeof DedicatedMLWorker>;
@@ -135,7 +123,6 @@ class MLWorkManager {
         });
         this.mlSearchEnabled = false;
 
-        eventBus.on(Events.LOGOUT, this.logoutHandler.bind(this), this);
         this.debouncedLiveSyncIdle = debounce(
             () => this.onLiveSyncIdle(),
             LIVE_SYNC_IDLE_DEBOUNCE_SEC * 1000,
@@ -187,26 +174,12 @@ class MLWorkManager {
         }
     }
 
-    // Handlers
-    private async appStartHandler() {
-        log.info("appStartHandler");
-        try {
-            this.startSyncJob();
-        } catch (e) {
-            log.error("Failed in ML appStart Handler", e);
-        }
-    }
-
-    private async logoutHandler() {
-        log.info("logoutHandler");
-        try {
-            this.stopSyncJob();
-            this.mlSyncJob = undefined;
-            await this.terminateLiveSyncWorker();
-            await mlIDbStorage.clearMLDB();
-        } catch (e) {
-            log.error("Failed in ML logout Handler", e);
-        }
+    async logout() {
+        this.setMlSearchEnabled(false);
+        this.stopSyncJob();
+        this.mlSyncJob = undefined;
+        await this.terminateLiveSyncWorker();
+        await mlIDbStorage.clearMLDB();
     }
 
     private async fileUploadedHandler(arg: {
@@ -238,7 +211,7 @@ class MLWorkManager {
     // Live Sync
     private async getLiveSyncWorker() {
         if (!this.liveSyncWorker) {
-            this.liveSyncWorker = getDedicatedMLWorker("ml-sync-live");
+            this.liveSyncWorker = createFaceComlinkWorker("ml-sync-live");
         }
 
         return await this.liveSyncWorker.remote;
@@ -286,7 +259,7 @@ class MLWorkManager {
     // Sync Job
     private async getSyncJobWorker() {
         if (!this.syncJobWorker) {
-            this.syncJobWorker = getDedicatedMLWorker("ml-sync-job");
+            this.syncJobWorker = createFaceComlinkWorker("ml-sync-job");
         }
 
         return await this.syncJobWorker.remote;
@@ -344,11 +317,8 @@ class MLWorkManager {
                 log.info("User not logged in, not starting ml sync job");
                 return;
             }
-            const mlSyncJobConfig = await getMLSyncJobConfig();
             if (!this.mlSyncJob) {
-                this.mlSyncJob = new MLSyncJob(mlSyncJobConfig, () =>
-                    this.runMLSyncJob(),
-                );
+                this.mlSyncJob = new MLSyncJob(() => this.runMLSyncJob());
             }
             this.mlSyncJob.start();
         } catch (e) {

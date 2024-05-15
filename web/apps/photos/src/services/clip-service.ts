@@ -80,21 +80,20 @@ class CLIPService {
         this.liveEmbeddingExtractionQueue = new PQueue({
             concurrency: 1,
         });
-        eventBus.on(Events.LOGOUT, this.logoutHandler, this);
     }
 
     isPlatformSupported = () => {
         return isElectron();
     };
 
-    private logoutHandler = async () => {
+    async logout() {
         if (this.embeddingExtractionInProgress) {
             this.embeddingExtractionInProgress.abort();
         }
         if (this.onFileUploadedHandler) {
             await this.removeOnFileUploadListener();
         }
-    };
+    }
 
     setupOnFileUploadListener = async () => {
         try {

@@ -64,19 +64,9 @@ export interface Electron {
     selectDirectory: () => Promise<string | undefined>;
 
     /**
-     * Clear any stored data.
-     *
-     * This is a coarse single shot cleanup, meant for use in clearing any
-     * persisted Electron side state during logout.
+     * Perform any logout related cleanup of native side state.
      */
-    clearStores: () => void;
-
-    /**
-     * Clear an state corresponding to in-flight convert-to-mp4 requests.
-     *
-     * This is meant for use during logout.
-     */
-    clearConvertToMP4Results: () => void;
+    logout: () => Promise<void>;
 
     /**
      * Return the previously saved encryption key from persistent safe storage.
@@ -487,17 +477,6 @@ export interface Electron {
          * The returned paths are guaranteed to use POSIX separators ('/').
          */
         findFiles: (folderPath: string) => Promise<string[]>;
-
-        /**
-         * Stop watching all existing folder watches and remove any callbacks.
-         *
-         * This function is meant to be called when the user logs out. It stops
-         * all existing folder watches and forgets about any "on*" callback
-         * functions that have been registered.
-         *
-         * The persisted state itself gets cleared via {@link clearStores}.
-         */
-        reset: () => Promise<void>;
     };
 
     // - Upload

@@ -1,7 +1,6 @@
 import { FILE_TYPE } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
 import log from "@/next/log";
-import PQueue from "p-queue";
 import DownloadManager from "services/download";
 import { getLocalFiles } from "services/fileService";
 import { Dimensions } from "services/ml/geom";
@@ -41,7 +40,7 @@ class ReaderService {
                     fileContext.enteFile.metadata.fileType,
                 )
             ) {
-                fileContext.imageBitmap = await getOriginalImageBitmap(
+                fileContext.imageBitmap = await fetchImageBitmap(
                     fileContext.enteFile,
                 );
             } else {
@@ -106,22 +105,12 @@ export function getFaceId(detectedFace: DetectedFace, imageDims: Dimensions) {
     return faceID;
 }
 
-async function getImageBlobBitmap(blob: Blob): Promise<ImageBitmap> {
-    return await createImageBitmap(blob);
-}
+export const fetchImageBitmap = async (file: EnteFile) =>
+    fetchRenderableBlob(file).then(createImageBitmap);
 
-async function getOriginalFile(file: EnteFile, queue?: PQueue) {
-    let fileStream;
-    if (queue) {
-        fileStream = await queue.add(() => DownloadManager.getFile(file));
-    } else {
-        fileStream = await DownloadManager.getFile(file);
-    }
-    return new Response(fileStream).blob();
-}
-
-async function getOriginalConvertedFile(file: EnteFile, queue?: PQueue) {
-    const fileBlob = await getOriginalFile(file, queue);
+async function fetchRenderableBlob(file: EnteFile) {
+    const fileStream = await DownloadManager.getFile(file);
+    const fileBlob = await new Response(fileStream).blob();
     if (file.metadata.fileType === FILE_TYPE.IMAGE) {
         return await getRenderableImage(file.metadata.title, fileBlob);
     } else {
@@ -133,17 +122,11 @@ async function getOriginalConvertedFile(file: EnteFile, queue?: PQueue) {
     }
 }
 
-export async function getOriginalImageBitmap(file: EnteFile, queue?: PQueue) {
-    const fileBlob = await getOriginalConvertedFile(file, queue);
-    log.info("[MLService] Got file: ", file.id.toString());
-    return getImageBlobBitmap(fileBlob);
-}
-
 export async function getThumbnailImageBitmap(file: EnteFile) {
     const thumb = await DownloadManager.getThumbnail(file);
     log.info("[MLService] Got thumbnail: ", file.id.toString());
 
-    return getImageBlobBitmap(new Blob([thumb]));
+    return createImageBitmap(new Blob([thumb]));
 }
 
 export async function getLocalFileImageBitmap(
@@ -152,5 +135,5 @@ export async function getLocalFileImageBitmap(
 ) {
     let fileBlob = localFile as Blob;
     fileBlob = await getRenderableImage(enteFile.metadata.title, fileBlob);
-    return getImageBlobBitmap(fileBlob);
+    return createImageBitmap(fileBlob);
 }

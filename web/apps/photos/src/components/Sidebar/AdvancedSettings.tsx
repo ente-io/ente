@@ -1,18 +1,17 @@
+import { VerticallyCenteredFlex } from "@ente/shared/components/Container";
 import ChevronRight from "@mui/icons-material/ChevronRight";
 import ScienceIcon from "@mui/icons-material/Science";
 import { Box, DialogProps, Stack, Typography } from "@mui/material";
 import { EnteDrawer } from "components/EnteDrawer";
+import { EnteMenuItem } from "components/Menu/EnteMenuItem";
+import { MenuItemGroup } from "components/Menu/MenuItemGroup";
 import MenuSectionTitle from "components/Menu/MenuSectionTitle";
 import Titlebar from "components/Titlebar";
 import { MLSearchSettings } from "components/ml/MLSearchSettings";
 import { t } from "i18next";
-import { useContext, useEffect, useState } from "react";
-
-import { VerticallyCenteredFlex } from "@ente/shared/components/Container";
-import { EnteMenuItem } from "components/Menu/EnteMenuItem";
-import { MenuItemGroup } from "components/Menu/MenuItemGroup";
 import isElectron from "is-electron";
 import { AppContext } from "pages/_app";
+import { useContext, useEffect, useState } from "react";
 import { CLIPIndexingStatus, clipService } from "services/clip-service";
 import { formatNumber } from "utils/number/format";
 

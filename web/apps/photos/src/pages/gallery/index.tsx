@@ -3,6 +3,7 @@ import { APPS } from "@ente/shared/apps/constants";
 import { CenteredFlex } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
+import { getRecoveryKey } from "@ente/shared/crypto/helpers";
 import { CustomError } from "@ente/shared/error";
 import { useFileInput } from "@ente/shared/hooks/useFileInput";
 import useMemoSingleThreaded from "@ente/shared/hooks/useMemoSingleThreaded";
@@ -93,11 +94,7 @@ import { getLocalFiles, syncFiles } from "services/fileService";
 import locationSearchService from "services/locationSearchService";
 import { getLocalTrashedFiles, syncTrash } from "services/trashService";
 import uploadManager from "services/upload/uploadManager";
-import {
-    isTokenValid,
-    syncMapEnabled,
-    validateKey,
-} from "services/userService";
+import { isTokenValid, syncMapEnabled } from "services/userService";
 import { Collection, CollectionSummaries } from "types/collection";
 import { EnteFile } from "types/file";
 import {
@@ -249,8 +246,13 @@ export default function Gallery() {
     const [tempHiddenFileIds, setTempHiddenFileIds] = useState<Set<number>>(
         new Set<number>(),
     );
-    const { startLoading, finishLoading, setDialogMessage, ...appContext } =
-        useContext(AppContext);
+    const {
+        startLoading,
+        finishLoading,
+        setDialogMessage,
+        logout,
+        ...appContext
+    } = useContext(AppContext);
     const [collectionSummaries, setCollectionSummaries] =
         useState<CollectionSummaries>();
     const [hiddenCollectionSummaries, setHiddenCollectionSummaries] =
@@ -318,6 +320,19 @@ export default function Gallery() {
 
     const [isClipSearchResult, setIsClipSearchResult] =
         useState<boolean>(false);
+
+    // Ensure that the keys in local storage are not malformed by verifying that
+    // the recoveryKey can be decrypted with the masterKey.
+    // Note: This is not bullet-proof.
+    const validateKey = async () => {
+        try {
+            await getRecoveryKey();
+            return true;
+        } catch (e) {
+            logout();
+            return false;
+        }
+    };
 
     useEffect(() => {
         appContext.showNavBar(true);
@@ -672,7 +687,7 @@ export default function Gallery() {
     }, [collections, hiddenCollections]);
 
     const showSessionExpiredMessage = () => {
-        setDialogMessage(getSessionExpiredMessage());
+        setDialogMessage(getSessionExpiredMessage(logout));
     };
 
     const syncWithRemote = async (force = false, silent = false) => {
