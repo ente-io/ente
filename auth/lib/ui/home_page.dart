@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:app_links/app_links.dart';
+import 'package:collection/collection.dart';
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/core/event_bus.dart';
 import 'package:ente_auth/ente_theme_data.dart';
@@ -10,11 +11,15 @@ import 'package:ente_auth/events/icons_changed_event.dart';
 import 'package:ente_auth/events/trigger_logout_event.dart';
 import "package:ente_auth/l10n/l10n.dart";
 import 'package:ente_auth/models/code.dart';
+import 'package:ente_auth/onboarding/model/tag_enums.dart';
+import 'package:ente_auth/onboarding/view/common/tag_chip.dart';
 import 'package:ente_auth/onboarding/view/setup_enter_secret_key_page.dart';
 import 'package:ente_auth/services/preference_service.dart';
 import 'package:ente_auth/services/user_service.dart';
+import 'package:ente_auth/store/code_display_store.dart';
 import 'package:ente_auth/store/code_store.dart';
 import 'package:ente_auth/ui/account/logout_dialog.dart';
+import 'package:ente_auth/ui/code_error_widget.dart';
 import 'package:ente_auth/ui/code_widget.dart';
 import 'package:ente_auth/ui/common/loading_widget.dart';
 import 'package:ente_auth/ui/home/coach_mark_widget.dart';
@@ -54,11 +59,13 @@ class _HomePageState extends State<HomePage> {
   final FocusNode searchInputFocusNode = FocusNode();
   bool _showSearchBox = false;
   String _searchText = "";
-  List<Code> _codes = [];
+  List<Code>? _allCodes;
+  List<String> tags = [];
   List<Code> _filteredCodes = [];
   StreamSubscription<CodesUpdatedEvent>? _streamSubscription;
   StreamSubscription<TriggerLogoutEvent>? _triggerLogoutEvent;
   StreamSubscription<IconsChangedEvent>? _iconsChangedEvent;
+  String selectedTag = "";
 
   @override
   void initState() {
@@ -96,14 +103,26 @@ class _HomePageState extends State<HomePage> {
 
   void _loadCodes() {
     CodeStore.instance.getAllCodes().then((codes) {
-      _codes = codes;
-      _hasLoaded = true;
-      _applyFilteringAndRefresh();
+      _allCodes = codes;
+
+      CodeDisplayStore.instance.getAllTags(allCodes: _allCodes).then((value) {
+        tags = value;
+
+        if (mounted) {
+          if (!tags.contains(selectedTag)) {
+            selectedTag = "";
+          }
+          _hasLoaded = true;
+          _applyFilteringAndRefresh();
+        }
+      });
+    }).onError((error, stackTrace) {
+      _logger.severe('Error while loading codes', error, stackTrace);
     });
   }
 
   void _applyFilteringAndRefresh() {
-    if (_searchText.isNotEmpty && _showSearchBox) {
+    if (_searchText.isNotEmpty && _showSearchBox && _allCodes != null) {
       final String val = _searchText.toLowerCase();
       // Prioritize issuer match above account for better UX while searching
       // for a specific TOTP for email providers. Searching for "emailProvider" like (gmail, proton) should
@@ -112,17 +131,31 @@ class _HomePageState extends State<HomePage> {
       final List<Code> issuerMatch = [];
       final List<Code> accountMatch = [];
 
-      for (final Code code in _codes) {
-        if (code.issuer.toLowerCase().contains(val)) {
-          issuerMatch.add(code);
-        } else if (code.account.toLowerCase().contains(val)) {
-          accountMatch.add(code);
+      for (final Code codeState in _allCodes!) {
+        if (codeState.hasError ||
+            selectedTag != "" &&
+                !codeState.display.tags.contains(selectedTag)) {
+          continue;
+        }
+
+        if (codeState.issuer.toLowerCase().contains(val)) {
+          issuerMatch.add(codeState);
+        } else if (codeState.account.toLowerCase().contains(val)) {
+          accountMatch.add(codeState);
         }
       }
       _filteredCodes = issuerMatch;
       _filteredCodes.addAll(accountMatch);
     } else {
-      _filteredCodes = _codes;
+      _filteredCodes = _allCodes
+              ?.where(
+                (element) =>
+                    !element.hasError &&
+                    (selectedTag == "" ||
+                        element.display.tags.contains(selectedTag)),
+              )
+              .toList() ??
+          [];
     }
     if (mounted) {
       setState(() {});
@@ -149,7 +182,7 @@ class _HomePageState extends State<HomePage> {
     if (code != null) {
       await CodeStore.instance.addCode(code);
       // Focus the new code by searching
-      if (_codes.length > 2) {
+      if ((_allCodes?.where((e) => !e.hasError).length ?? 0) > 2) {
         _focusNewCode(code);
       }
     }
@@ -171,6 +204,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+
     return PopScope(
       onPopInvoked: (_) async {
         if (_isSettingsOpen) {
@@ -217,6 +251,7 @@ class _HomePageState extends State<HomePage> {
                     focusedBorder: InputBorder.none,
                   ),
                 ),
+          centerTitle: true,
           actions: <Widget>[
             IconButton(
               icon: _showSearchBox
@@ -241,7 +276,7 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
         floatingActionButton: !_hasLoaded ||
-                _codes.isEmpty ||
+                (_allCodes?.isEmpty ?? true) ||
                 !PreferenceService.instance.hasShownCoachMark()
             ? null
             : _getFab(),
@@ -258,18 +293,86 @@ class _HomePageState extends State<HomePage> {
           onManuallySetupTap: _redirectToManualEntryPage,
         );
       } else {
-        final list = AlignedGridView.count(
-          crossAxisCount: (MediaQuery.sizeOf(context).width ~/ 400)
-              .clamp(1, double.infinity)
-              .toInt(),
-          itemBuilder: ((context, index) {
-            try {
-              return ClipRect(child: CodeWidget(_filteredCodes[index]));
-            } catch (e) {
-              return const Text("Failed");
-            }
-          }),
-          itemCount: _filteredCodes.length,
+        final anyCodeHasError =
+            _allCodes?.firstWhereOrNull((element) => element.hasError) != null;
+        final indexOffset = anyCodeHasError ? 1 : 0;
+
+        final list = Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (!anyCodeHasError)
+              SizedBox(
+                height: 48,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+                  separatorBuilder: (context, index) =>
+                      const SizedBox(width: 8),
+                  itemCount: tags.length + 1,
+                  itemBuilder: (context, index) {
+                    if (index == 0) {
+                      return TagChip(
+                        label: "All",
+                        state: selectedTag == ""
+                            ? TagChipState.selected
+                            : TagChipState.unselected,
+                        onTap: () {
+                          selectedTag = "";
+                          setState(() {});
+                          _applyFilteringAndRefresh();
+                        },
+                      );
+                    }
+                    return TagChip(
+                      label: tags[index - 1],
+                      action: TagChipAction.menu,
+                      state: selectedTag == tags[index - 1]
+                          ? TagChipState.selected
+                          : TagChipState.unselected,
+                      onTap: () {
+                        if (selectedTag == tags[index - 1]) {
+                          selectedTag = "";
+                          setState(() {});
+                          _applyFilteringAndRefresh();
+                          return;
+                        }
+                        selectedTag = tags[index - 1];
+                        setState(() {});
+                        _applyFilteringAndRefresh();
+                      },
+                    );
+                  },
+                ),
+              ),
+            Expanded(
+              child: AlignedGridView.count(
+                crossAxisCount: (MediaQuery.sizeOf(context).width ~/ 400)
+                    .clamp(1, double.infinity)
+                    .toInt(),
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.only(bottom: 80),
+                itemBuilder: ((context, index) {
+                  if (index == 0 && anyCodeHasError) {
+                    return CodeErrorWidget(
+                      errors: _allCodes
+                              ?.where((element) => element.hasError)
+                              .length ??
+                          0,
+                    );
+                  }
+                  final newIndex = index - indexOffset;
+
+                  return ClipRect(
+                    child: CodeWidget(
+                      _filteredCodes[newIndex],
+                    ),
+                  );
+                }),
+                itemCount: _filteredCodes.length + indexOffset,
+              ),
+            ),
+          ],
         );
         if (!PreferenceService.instance.hasShownCoachMark()) {
           return Stack(
@@ -288,22 +391,12 @@ class _HomePageState extends State<HomePage> {
                             (MediaQuery.sizeOf(context).width ~/ 400)
                                 .clamp(1, double.infinity)
                                 .toInt(),
+                        padding: const EdgeInsets.only(bottom: 80),
                         itemBuilder: ((context, index) {
-                          Code? code;
-                          try {
-                            code = _filteredCodes[index];
-                            return CodeWidget(code);
-                          } catch (e, s) {
-                            _logger.severe("code widget error", e, s);
-                            return Center(
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text(
-                                  l10n.sorryUnableToGenCode(code?.issuer ?? ""),
-                                ),
-                              ),
-                            );
-                          }
+                          final codeState = _filteredCodes[index];
+                          return CodeWidget(
+                            codeState,
+                          );
                         }),
                         itemCount: _filteredCodes.length,
                       )
@@ -360,7 +453,7 @@ class _HomePageState extends State<HomePage> {
     }
     if (mounted && link.toLowerCase().startsWith("otpauth://")) {
       try {
-        final newCode = Code.fromRawData(link);
+        final newCode = Code.fromOTPAuthUrl(link);
         getNextTotp(newCode);
         CodeStore.instance.addCode(newCode);
         _focusNewCode(newCode);

@@ -158,7 +158,7 @@ Future<int?> _process2FasExportFile(
     } else {
       throw Exception('Invalid OTP type');
     }
-    parsedCodes.add(Code.fromRawData(otpUrl));
+    parsedCodes.add(Code.fromOTPAuthUrl(otpUrl));
   }
 
   for (final code in parsedCodes) {

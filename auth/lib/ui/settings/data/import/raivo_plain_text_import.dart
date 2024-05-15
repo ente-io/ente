@@ -57,7 +57,7 @@ Future<void> _pickRaivoJsonFile(BuildContext context) async {
     String path = result.files.single.path!;
     int? count = await _processRaivoExportFile(context, path);
     await progressDialog.hide();
-    if(count != null) {
+    if (count != null) {
       await importSuccessDialog(context, count);
     }
   } catch (e) {
@@ -70,9 +70,9 @@ Future<void> _pickRaivoJsonFile(BuildContext context) async {
   }
 }
 
-Future<int?> _processRaivoExportFile(BuildContext context,String path) async {
+Future<int?> _processRaivoExportFile(BuildContext context, String path) async {
   File file = File(path);
-  if(path.endsWith('.zip')) {
+  if (path.endsWith('.zip')) {
     await showErrorDialog(
       context,
       context.l10n.sorry,
@@ -105,7 +105,7 @@ Future<int?> _processRaivoExportFile(BuildContext context,String path) async {
     } else {
       throw Exception('Invalid OTP type');
     }
-    parsedCodes.add(Code.fromRawData(otpUrl));
+    parsedCodes.add(Code.fromOTPAuthUrl(otpUrl));
   }
 
   for (final code in parsedCodes) {
