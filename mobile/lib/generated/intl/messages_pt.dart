@@ -371,6 +371,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Certifique-se de que as permissões de Rede local estão ativadas para o aplicativo de Fotos Ente, em Configurações."),
         "autoPair":
             MessageLookupByLibrary.simpleMessage("Pareamento automático"),
+        "autoPairDesc": MessageLookupByLibrary.simpleMessage(
+            "O pareamento automático funciona apenas com dispositivos que suportam o Chromecast."),
         "available": MessageLookupByLibrary.simpleMessage("Disponível"),
         "backedUpFolders":
             MessageLookupByLibrary.simpleMessage("Backup de pastas concluído"),
@@ -629,8 +631,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Dobre seu armazenamento"),
         "download": MessageLookupByLibrary.simpleMessage("Baixar"),
         "downloadFailed":
-            MessageLookupByLibrary.simpleMessage("Falha ao baixar"),
-        "downloading": MessageLookupByLibrary.simpleMessage("Baixando..."),
+            MessageLookupByLibrary.simpleMessage("Falha no download"),
+        "downloading":
+            MessageLookupByLibrary.simpleMessage("Fazendo download..."),
         "dropSupportEmail": m17,
         "duplicateFileCountWithStorageSaved": m18,
         "duplicateItemsGroup": m19,
@@ -716,8 +719,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Falha ao aplicar o código"),
         "failedToCancel":
             MessageLookupByLibrary.simpleMessage("Falha ao cancelar"),
-        "failedToDownloadVideo":
-            MessageLookupByLibrary.simpleMessage("Falha ao baixar vídeo"),
+        "failedToDownloadVideo": MessageLookupByLibrary.simpleMessage(
+            "Falha ao fazer download do vídeo"),
         "failedToFetchOriginalForEdit": MessageLookupByLibrary.simpleMessage(
             "Falha ao obter original para edição"),
         "failedToFetchReferralDetails": MessageLookupByLibrary.simpleMessage(
@@ -735,7 +738,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "familyPlans": MessageLookupByLibrary.simpleMessage("Plano familiar"),
         "faq": MessageLookupByLibrary.simpleMessage("Perguntas frequentes"),
         "faqs": MessageLookupByLibrary.simpleMessage("Perguntas frequentes"),
-        "favorite": MessageLookupByLibrary.simpleMessage("Favoritar"),
+        "favorite": MessageLookupByLibrary.simpleMessage("Favorito"),
         "feedback": MessageLookupByLibrary.simpleMessage("Comentários"),
         "fileFailedToSaveToGallery": MessageLookupByLibrary.simpleMessage(
             "Falha ao salvar o arquivo na galeria"),
@@ -902,8 +905,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Carregando galeria..."),
         "loadingMessage":
             MessageLookupByLibrary.simpleMessage("Carregando suas fotos..."),
-        "loadingModel":
-            MessageLookupByLibrary.simpleMessage("Baixando modelos..."),
+        "loadingModel": MessageLookupByLibrary.simpleMessage(
+            "Fazendo download de modelos..."),
         "localGallery": MessageLookupByLibrary.simpleMessage("Galeria local"),
         "location": MessageLookupByLibrary.simpleMessage("Local"),
         "locationName": MessageLookupByLibrary.simpleMessage("Nome do Local"),
@@ -944,7 +947,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "manageSubscription":
             MessageLookupByLibrary.simpleMessage("Gerenciar assinatura"),
         "manualPairDesc": MessageLookupByLibrary.simpleMessage(
-            "Parear com o PIN funciona para qualquer dispositivo de tela grande onde você deseja reproduzir seu álbum."),
+            "Parear com o PIN funciona com qualquer tela que você deseja ver o seu álbum ativado."),
         "map": MessageLookupByLibrary.simpleMessage("Mapa"),
         "maps": MessageLookupByLibrary.simpleMessage("Mapas"),
         "mastodon": MessageLookupByLibrary.simpleMessage("Mastodon"),

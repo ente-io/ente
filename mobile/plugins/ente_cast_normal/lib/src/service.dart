@@ -24,7 +24,9 @@ class CastServiceImpl extends CastService {
           "got RECEIVER_STATUS, Send request to pair",
           name: "CastServiceImpl",
         );
-        session.sendMessage(_pairRequestNamespace, {});
+        session.sendMessage(_pairRequestNamespace, {
+          "collectionID": collectionID,
+        });
       } else {
         if (onMessage != null && message.containsKey("code")) {
           onMessage(
@@ -32,8 +34,9 @@ class CastServiceImpl extends CastService {
               CastMessageType.pairCode: message,
             },
           );
+        } else {
+          print('receive message: $message');
         }
-        print('receive message: $message');
       }
     });
 
@@ -56,7 +59,9 @@ class CastServiceImpl extends CastService {
 
   @override
   Future<List<(String, Object)>> searchDevices() {
-    return CastDiscoveryService().search().then((devices) {
+    return CastDiscoveryService()
+        .search(timeout: const Duration(seconds: 7))
+        .then((devices) {
       return devices.map((device) => (device.name, device)).toList();
     });
   }

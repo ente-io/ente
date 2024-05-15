@@ -10,6 +10,7 @@ import { components } from "react-select";
 import AsyncSelect from "react-select/async";
 import { InputActionMeta } from "react-select/src/types";
 import { City } from "services/locationSearchService";
+import { Person } from "services/ml/types";
 import {
     getAutoCompleteSuggestions,
     getDefaultOptions,
@@ -17,7 +18,6 @@ import {
 import { Collection } from "types/collection";
 import { LocationTagData } from "types/entity";
 import { EnteFile } from "types/file";
-import { Person } from "types/machineLearning";
 import {
     ClipSearchScores,
     DateValue,

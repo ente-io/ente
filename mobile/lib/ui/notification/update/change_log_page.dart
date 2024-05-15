@@ -124,7 +124,7 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
       ),
       ChangeLogEntry(
         "Organize shared photos",
-        "You can now add shared items to your favorites to any of your personal albums. Ente will create a copy that is fully owned by you and can be organized to your liking.",
+        "You can now add shared items to your favorites or to any of your personal albums. Ente will create a copy that is fully owned by you and can be organized to your liking.",
       ),
       ChangeLogEntry(
         "Download multiple items",

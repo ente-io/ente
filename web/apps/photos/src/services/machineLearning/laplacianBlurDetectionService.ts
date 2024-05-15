@@ -3,7 +3,7 @@ import {
     BlurDetectionService,
     Face,
     Versioned,
-} from "types/machineLearning";
+} from "services/ml/types";
 import { createGrayscaleIntMatrixFromNormalized2List } from "utils/image";
 import { mobileFaceNetFaceSize } from "./mobileFaceNetEmbeddingService";
 

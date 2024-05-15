@@ -2,12 +2,14 @@ package embedding
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/ente-io/museum/pkg/utils/array"
 	"strconv"
 	"sync"
+	gTime "time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
@@ -24,6 +26,12 @@ import (
 	"github.com/ente-io/stacktrace"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
+)
+
+const (
+	// maxEmbeddingDataSize is the min size of an embedding object in bytes
+	minEmbeddingDataSize  = 2048
+	embeddingFetchTimeout = 15 * gTime.Second
 )
 
 type Controller struct {
@@ -135,15 +143,23 @@ func (c *Controller) GetFilesEmbedding(ctx *gin.Context, req ente.GetFilesEmbedd
 		return nil, stacktrace.Propagate(err, "")
 	}
 
+	embeddingsWithData := make([]ente.Embedding, 0)
+	noEmbeddingFileIds := make([]int64, 0)
 	dbFileIds := make([]int64, 0)
-	for _, embedding := range userFileEmbeddings {
-		dbFileIds = append(dbFileIds, embedding.FileID)
+	// fileIDs that were indexed but they don't contain any embedding information
+	for i := range userFileEmbeddings {
+		dbFileIds = append(dbFileIds, userFileEmbeddings[i].FileID)
+		if userFileEmbeddings[i].Size != nil && *userFileEmbeddings[i].Size < minEmbeddingDataSize {
+			noEmbeddingFileIds = append(noEmbeddingFileIds, userFileEmbeddings[i].FileID)
+		} else {
+			embeddingsWithData = append(embeddingsWithData, userFileEmbeddings[i])
+		}
 	}
-	missingFileIds := array.FindMissingElementsInSecondList(req.FileIDs, dbFileIds)
+	pendingIndexFileIds := array.FindMissingElementsInSecondList(req.FileIDs, dbFileIds)
 	errFileIds := make([]int64, 0)
 
 	// Fetch missing userFileEmbeddings in parallel
-	embeddingObjects, err := c.getEmbeddingObjectsParallelV2(userID, userFileEmbeddings)
+	embeddingObjects, err := c.getEmbeddingObjectsParallelV2(userID, embeddingsWithData)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "")
 	}
@@ -166,9 +182,10 @@ func (c *Controller) GetFilesEmbedding(ctx *gin.Context, req ente.GetFilesEmbedd
 	}
 
 	return &ente.GetFilesEmbeddingResponse{
-		Embeddings:    fetchedEmbeddings,
-		NoDataFileIDs: missingFileIds,
-		ErrFileIDs:    errFileIds,
+		Embeddings:          fetchedEmbeddings,
+		PendingIndexFileIDs: pendingIndexFileIds,
+		ErrFileIDs:          errFileIds,
+		NoEmbeddingFileIDs:  noEmbeddingFileIds,
 	}, nil
 }
 
@@ -292,7 +309,7 @@ func (c *Controller) getEmbeddingObjectsParallel(objectKeys []string) ([]ente.Em
 			defer wg.Done()
 			defer func() { <-globalDiffFetchSemaphore }() // Release back to global semaphore
 
-			obj, err := c.getEmbeddingObject(objectKey, downloader)
+			obj, err := c.getEmbeddingObject(context.Background(), objectKey, downloader)
 			if err != nil {
 				errs = append(errs, err)
 				log.Error("error fetching embedding object: "+objectKey, err)
@@ -329,7 +346,9 @@ func (c *Controller) getEmbeddingObjectsParallelV2(userID int64, dbEmbeddingRows
 			defer wg.Done()
 			defer func() { <-globalFileFetchSemaphore }() // Release back to global semaphore
 			objectKey := c.getObjectKey(userID, dbEmbeddingRow.FileID, dbEmbeddingRow.Model)
-			obj, err := c.getEmbeddingObject(objectKey, downloader)
+			ctx, cancel := context.WithTimeout(context.Background(), embeddingFetchTimeout)
+			defer cancel()
+			obj, err := c.getEmbeddingObjectWithRetries(ctx, objectKey, downloader, 0)
 			if err != nil {
 				log.Error("error fetching embedding object: "+objectKey, err)
 				embeddingObjects[i] = embeddingObjectResult{
@@ -349,15 +368,22 @@ func (c *Controller) getEmbeddingObjectsParallelV2(userID int64, dbEmbeddingRows
 	return embeddingObjects, nil
 }
 
-func (c *Controller) getEmbeddingObject(objectKey string, downloader *s3manager.Downloader) (ente.EmbeddingObject, error) {
+func (c *Controller) getEmbeddingObject(ctx context.Context, objectKey string, downloader *s3manager.Downloader) (ente.EmbeddingObject, error) {
+	return c.getEmbeddingObjectWithRetries(ctx, objectKey, downloader, 3)
+}
+
+func (c *Controller) getEmbeddingObjectWithRetries(ctx context.Context, objectKey string, downloader *s3manager.Downloader, retryCount int) (ente.EmbeddingObject, error) {
 	var obj ente.EmbeddingObject
 	buff := &aws.WriteAtBuffer{}
-	_, err := downloader.Download(buff, &s3.GetObjectInput{
+	_, err := downloader.DownloadWithContext(ctx, buff, &s3.GetObjectInput{
 		Bucket: c.S3Config.GetHotBucket(),
 		Key:    &objectKey,
 	})
 	if err != nil {
 		log.Error(err)
+		if retryCount > 0 {
+			return c.getEmbeddingObjectWithRetries(ctx, objectKey, downloader, retryCount-1)
+		}
 		return obj, stacktrace.Propagate(err, "")
 	}
 	err = json.Unmarshal(buff.Bytes(), &obj)

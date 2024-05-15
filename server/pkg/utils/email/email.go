@@ -38,6 +38,7 @@ func sendViaSMTP(toEmails []string, fromName string, fromEmail string, subject s
 	smtpPort := viper.GetString("smtp.port")
 	smtpUsername := viper.GetString("smtp.username")
 	smtpPassword := viper.GetString("smtp.password")
+	smtpEmail := viper.GetString("smtp.email")
 
 	var emailMessage string
 
@@ -48,6 +49,11 @@ func sendViaSMTP(toEmails []string, fromName string, fromEmail string, subject s
 			emailAddresses += ","
 		}
 		emailAddresses += email
+	}
+
+	// If an sender email is provided use it instead of the fromEmail.
+	if smtpEmail != "" {
+		fromEmail = smtpEmail
 	}
 
 	header := "From: " + fromName + " <" + fromEmail + ">\n" +

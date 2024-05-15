@@ -180,6 +180,9 @@ smtp:
     port:
     username:
     password:
+    # The email address from which to send the email. Set this to an email
+    # address whose credentials you're providing.
+    email:
 
 # Zoho Zeptomail config (optional)
 #

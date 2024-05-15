@@ -1,22 +1,20 @@
 import { openCache } from "@/next/blob-cache";
 import log from "@/next/log";
+import mlIDbStorage from "services/ml/db";
 import {
     DetectedFace,
     Face,
     MLSyncContext,
     MLSyncFileContext,
-} from "types/machineLearning";
-import { imageBitmapToBlob } from "utils/image";
-import {
-    areFaceIdsSame,
-    extractFaceImagesToFloat32,
+    type FaceAlignment,
+    type Versioned,
+} from "services/ml/types";
+import { imageBitmapToBlob, warpAffineFloat32List } from "utils/image";
+import ReaderService, {
     getFaceId,
     getLocalFile,
     getOriginalImageBitmap,
-    isDifferentOrOld,
-} from "utils/machineLearning";
-import mlIDbStorage from "utils/storage/mlIDbStorage";
-import ReaderService from "./readerService";
+} from "./readerService";
 
 class FaceService {
     async syncFileFaceDetections(
@@ -304,3 +302,58 @@ class FaceService {
 }
 
 export default new FaceService();
+
+export function areFaceIdsSame(ofFaces: Array<Face>, toFaces: Array<Face>) {
+    if (
+        (ofFaces === null || ofFaces === undefined) &&
+        (toFaces === null || toFaces === undefined)
+    ) {
+        return true;
+    }
+    return primitiveArrayEquals(
+        ofFaces?.map((f) => f.id),
+        toFaces?.map((f) => f.id),
+    );
+}
+
+function primitiveArrayEquals(a, b) {
+    return (
+        Array.isArray(a) &&
+        Array.isArray(b) &&
+        a.length === b.length &&
+        a.every((val, index) => val === b[index])
+    );
+}
+
+export function isDifferentOrOld(
+    method: Versioned<string>,
+    thanMethod: Versioned<string>,
+) {
+    return (
+        !method ||
+        method.value !== thanMethod.value ||
+        method.version < thanMethod.version
+    );
+}
+
+async function extractFaceImagesToFloat32(
+    faceAlignments: Array<FaceAlignment>,
+    faceSize: number,
+    image: ImageBitmap,
+): Promise<Float32Array> {
+    const faceData = new Float32Array(
+        faceAlignments.length * faceSize * faceSize * 3,
+    );
+    for (let i = 0; i < faceAlignments.length; i++) {
+        const alignedFace = faceAlignments[i];
+        const faceDataOffset = i * faceSize * faceSize * 3;
+        warpAffineFloat32List(
+            image,
+            alignedFace,
+            faceSize,
+            faceData,
+            faceDataOffset,
+        );
+    }
+    return faceData;
+}

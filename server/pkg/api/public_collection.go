@@ -57,7 +57,7 @@ func (h *PublicCollectionHandler) GetUploadUrls(c *gin.Context) {
 	}
 	userID := collection.Owner.ID
 	count, _ := strconv.Atoi(c.Query("count"))
-	urls, err := h.FileCtrl.GetUploadURLs(c, userID, count, enteApp)
+	urls, err := h.FileCtrl.GetUploadURLs(c, userID, count, enteApp, false)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return

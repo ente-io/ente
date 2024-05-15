@@ -124,7 +124,7 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m37(providerName) => "如果您被收取费用，请用英语与 ${providerName} 的客服聊天";
 
-  static String m38(endDate) => "免费试用有效期至 ${endDate}。\n之后您可以选择付费计划。";
+  static String m38(endDate) => "免费试用有效期至 ${endDate}。\n您可以随后购买付费计划。";
 
   static String m39(toEmail) => "请给我们发送电子邮件至 ${toEmail}";
 
@@ -325,6 +325,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "autoCastiOSPermission": MessageLookupByLibrary.simpleMessage(
             "请确保已在“设置”中为 Ente Photos 应用打开本地网络权限。"),
         "autoPair": MessageLookupByLibrary.simpleMessage("自动配对"),
+        "autoPairDesc":
+            MessageLookupByLibrary.simpleMessage("自动配对仅适用于支持 Chromecast 的设备。"),
         "available": MessageLookupByLibrary.simpleMessage("可用"),
         "backedUpFolders": MessageLookupByLibrary.simpleMessage("已备份的文件夹"),
         "backup": MessageLookupByLibrary.simpleMessage("备份"),
@@ -777,7 +779,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "manageParticipants": MessageLookupByLibrary.simpleMessage("管理"),
         "manageSubscription": MessageLookupByLibrary.simpleMessage("管理订阅"),
         "manualPairDesc": MessageLookupByLibrary.simpleMessage(
-            "用 PIN 配对适用于任何大屏幕设备，您可以在这些设备上播放您的相册。"),
+            "用 PIN 码配对适用于您希望在其上查看相册的任何屏幕。"),
         "map": MessageLookupByLibrary.simpleMessage("地图"),
         "maps": MessageLookupByLibrary.simpleMessage("地图"),
         "mastodon": MessageLookupByLibrary.simpleMessage("Mastodon"),

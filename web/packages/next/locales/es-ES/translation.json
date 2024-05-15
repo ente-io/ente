@@ -418,7 +418,6 @@
     "ALL_HIDDEN_ALBUMS": "",
     "HIDDEN_ALBUMS": "",
     "HIDDEN_ITEMS": "",
-    "HIDDEN_ITEMS_SECTION_NAME": "",
     "ENTER_TWO_FACTOR_OTP": "Ingrese el código de seis dígitos de su aplicación de autenticación a continuación.",
     "CREATE_ACCOUNT": "Crear cuenta",
     "COPIED": "Copiado",
@@ -448,10 +447,9 @@
     "DOWNLOAD_LOGS_MESSAGE": "<p>Esto descargará los registros de depuración, que puede enviarnos por correo electrónico para ayudarnos a depurar su problema.</p><p> Tenga en cuenta que los nombres de los archivos se incluirán para ayudar al seguimiento de problemas con archivos específicos. </p>",
     "CHANGE_FOLDER": "Cambiar carpeta",
     "TWO_MONTHS_FREE": "Obtén 2 meses gratis en planes anuales",
-    "GB": "GB",
     "POPULAR": "Popular",
     "FREE_PLAN_OPTION_LABEL": "Continuar con el plan gratuito",
-    "FREE_PLAN_DESCRIPTION": "1 GB por 1 año",
+    "free_plan_description": "{{storage}} por 1 año",
     "CURRENT_USAGE": "El uso actual es <strong>{{usage}}</strong>",
     "WEAK_DEVICE": "El navegador web que está utilizando no es lo suficientemente poderoso para cifrar sus fotos. Por favor, intente iniciar sesión en ente en su computadora, o descargue la aplicación ente para móvil/escritorio.",
     "DRAG_AND_DROP_HINT": "O arrastre y suelte en la ventana ente",
@@ -495,12 +493,12 @@
     "EXPORT_DIRECTORY_DOES_NOT_EXIST": "Archivo de exportación inválido",
     "EXPORT_DIRECTORY_DOES_NOT_EXIST_MESSAGE": "<p>El directorio de exportación seleccionado no existe.</p><p> Por favor, seleccione un directorio válido.</p>",
     "SUBSCRIPTION_VERIFICATION_ERROR": "Falló la verificación de la suscripción",
-    "STORAGE_UNITS": {
-        "B": "B",
-        "KB": "KB",
-        "MB": "MB",
-        "GB": "GB",
-        "TB": "TB"
+    "storage_unit": {
+        "b": "B",
+        "kb": "KB",
+        "mb": "MB",
+        "gb": "GB",
+        "tb": "TB"
     },
     "AFTER_TIME": {
         "HOUR": "después de una hora",
@@ -567,6 +565,9 @@
     "IMAGE": "",
     "VIDEO": "Video",
     "LIVE_PHOTO": "",
+    "editor": {
+        "crop": ""
+    },
     "CONVERT": "",
     "CONFIRM_EDITOR_CLOSE_MESSAGE": "",
     "CONFIRM_EDITOR_CLOSE_DESCRIPTION": "",

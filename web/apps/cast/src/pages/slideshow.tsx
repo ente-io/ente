@@ -1,189 +1,192 @@
-import { FILE_TYPE } from "@/media/file-type";
 import log from "@/next/log";
-import PairedSuccessfullyOverlay from "components/PairedSuccessfullyOverlay";
-import { PhotoAuditorium } from "components/PhotoAuditorium";
+import { ensure } from "@/utils/ensure";
+import { styled } from "@mui/material";
+import { FilledCircleCheck } from "components/FilledCircleCheck";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import {
-    getCastCollection,
-    getLocalFiles,
-    syncPublicFiles,
-} from "services/cast/castService";
-import { Collection } from "types/collection";
-import { EnteFile } from "types/file";
-import { getPreviewableImage, isRawFileFromFileName } from "utils/file";
-
-const renderableFileURLCache = new Map<number, string>();
+import { readCastData } from "services/cast-data";
+import { isChromecast } from "services/chromecast";
+import { imageURLGenerator } from "services/render";
 
 export default function Slideshow() {
     const [loading, setLoading] = useState(true);
-    const [castToken, setCastToken] = useState<string>("");
-    const [castCollection, setCastCollection] = useState<
-        Collection | undefined
-    >();
-    const [collectionFiles, setCollectionFiles] = useState<EnteFile[]>([]);
-    const [currentFileId, setCurrentFileId] = useState<number | undefined>();
-    const [currentFileURL, setCurrentFileURL] = useState<string | undefined>();
-    const [nextFileURL, setNextFileURL] = useState<string | undefined>();
+    const [imageURL, setImageURL] = useState<string | undefined>();
+    const [isEmpty, setIsEmpty] = useState(false);
 
     const router = useRouter();
 
-    const syncCastFiles = async (token: string) => {
-        try {
-            console.log("syncCastFiles");
-            const castToken = window.localStorage.getItem("castToken");
-            const requestedCollectionKey =
-                window.localStorage.getItem("collectionKey");
-            const collection = await getCastCollection(
-                castToken,
-                requestedCollectionKey,
-            );
-            if (
-                castCollection === undefined ||
-                castCollection.updationTime !== collection.updationTime
-            ) {
-                setCastCollection(collection);
-                await syncPublicFiles(token, collection, () => {});
-                const files = await getLocalFiles(String(collection.id));
-                setCollectionFiles(
-                    files.filter((file) => isFileEligibleForCast(file)),
-                );
+    /** Go back to pairing page */
+    const pair = () => router.push("/");
+
+    useEffect(() => {
+        let stop = false;
+
+        const loop = async () => {
+            try {
+                const urlGenerator = imageURLGenerator(ensure(readCastData()));
+                while (!stop) {
+                    const { value: url, done } = await urlGenerator.next();
+                    if (done || !url) {
+                        // No items in this callection can be shown.
+                        setIsEmpty(true);
+                        // Go back to pairing screen after 5 seconds.
+                        setTimeout(pair, 5000);
+                        return;
+                    }
+
+                    setImageURL(url);
+                    setLoading(false);
+                }
+            } catch (e) {
+                log.error("Failed to prepare generator", e);
+                pair();
             }
-        } catch (e) {
-            log.error("error during sync", e);
-            // go back to preview page
-            router.push("/");
-        }
-    };
+        };
 
-    useEffect(() => {
-        if (castToken) {
-            const intervalId = setInterval(() => {
-                syncCastFiles(castToken);
-            }, 10000);
-            syncCastFiles(castToken);
+        void loop();
 
-            return () => clearInterval(intervalId);
-        }
-    }, [castToken]);
-
-    const isFileEligibleForCast = (file: EnteFile) => {
-        const fileType = file.metadata.fileType;
-        if (fileType !== FILE_TYPE.IMAGE && fileType !== FILE_TYPE.LIVE_PHOTO)
-            return false;
-
-        if (file.info.fileSize > 100 * 1024 * 1024) return false;
-
-        if (isRawFileFromFileName(file.metadata.title)) return false;
-
-        return true;
-    };
-
-    useEffect(() => {
-        try {
-            const castToken = window.localStorage.getItem("castToken");
-            // Wait 2 seconds to ensure the green tick and the confirmation
-            // message remains visible for at least 2 seconds before we start
-            // the slideshow.
-            const timeoutId = setTimeout(() => {
-                setCastToken(castToken);
-            }, 2000);
-
-            return () => clearTimeout(timeoutId);
-        } catch (e) {
-            log.error("error during sync", e);
-            router.push("/");
-        }
+        return () => {
+            stop = true;
+        };
     }, []);
 
-    useEffect(() => {
-        if (collectionFiles.length < 1) return;
-        showNextSlide();
-    }, [collectionFiles]);
+    if (loading) return <PairingComplete />;
+    if (isEmpty) return <NoItems />;
 
-    const showNextSlide = async () => {
-        try {
-            console.log("showNextSlide");
-            const currentIndex = collectionFiles.findIndex(
-                (file) => file.id === currentFileId,
-            );
-
-            console.log(
-                "showNextSlide-index",
-                currentIndex,
-                collectionFiles.length,
-            );
-
-            const nextIndex = (currentIndex + 1) % collectionFiles.length;
-            const nextNextIndex = (nextIndex + 1) % collectionFiles.length;
-
-            console.log(
-                "showNextSlide-nextIndex and nextNextIndex",
-                nextIndex,
-                nextNextIndex,
-            );
-
-            const nextFile = collectionFiles[nextIndex];
-            const nextNextFile = collectionFiles[nextNextIndex];
-
-            let nextURL = renderableFileURLCache.get(nextFile.id);
-            let nextNextURL = renderableFileURLCache.get(nextNextFile.id);
-
-            if (!nextURL) {
-                try {
-                    console.log("nextURL doesn't exist yet");
-                    const blob = await getPreviewableImage(nextFile, castToken);
-                    console.log("nextURL blobread");
-                    const url = URL.createObjectURL(blob);
-                    console.log("nextURL", url);
-                    renderableFileURLCache.set(nextFile.id, url);
-                    console.log("nextUrlCache set");
-                    nextURL = url;
-                } catch (e) {
-                    console.log("error in nextUrl", e);
-                    return;
-                }
-            } else {
-                console.log("nextURL already exists");
-            }
-
-            if (!nextNextURL) {
-                try {
-                    console.log("nextNextURL doesn't exist yet");
-                    const blob = await getPreviewableImage(
-                        nextNextFile,
-                        castToken,
-                    );
-                    console.log("nextNextURL blobread");
-                    const url = URL.createObjectURL(blob);
-                    console.log("nextNextURL", url);
-                    renderableFileURLCache.set(nextNextFile.id, url);
-                    console.log("nextNextURCacheL set");
-                    nextNextURL = url;
-                } catch (e) {
-                    console.log("error in nextNextURL", e);
-                    return;
-                }
-            } else {
-                console.log("nextNextURL already exists");
-            }
-
-            setLoading(false);
-            setCurrentFileId(nextFile.id);
-            setCurrentFileURL(nextURL);
-            setNextFileURL(nextNextURL);
-        } catch (e) {
-            console.log("error in showNextSlide", e);
-        }
-    };
-
-    if (loading) return <PairedSuccessfullyOverlay />;
-
-    return (
-        <PhotoAuditorium
-            url={currentFileURL}
-            nextSlideUrl={nextFileURL}
-            showNextSlide={showNextSlide}
-        />
+    return isChromecast() ? (
+        <SlideViewChromecast url={imageURL} />
+    ) : (
+        <SlideView url={imageURL} />
     );
 }
+
+const PairingComplete: React.FC = () => {
+    return (
+        <Message>
+            <FilledCircleCheck />
+            <h2>Pairing Complete</h2>
+            <p>
+                We're preparing your album.
+                <br /> This should only take a few seconds.
+            </p>
+        </Message>
+    );
+};
+
+const Message = styled("div")`
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+
+    line-height: 1.5rem;
+
+    h2 {
+        margin-block-end: 0;
+    }
+`;
+
+const NoItems: React.FC = () => {
+    return (
+        <Message>
+            <h2>Try another album</h2>
+            <p>
+                This album has no photos that can be shown here
+                <br /> Please try another album
+            </p>
+        </Message>
+    );
+};
+
+interface SlideViewProps {
+    /** The URL of the image to show. */
+    url: string;
+}
+
+const SlideView: React.FC<SlideViewProps> = ({ url }) => {
+    return (
+        <SlideView_ style={{ backgroundImage: `url(${url})` }}>
+            <img src={url} decoding="sync" alt="" />
+        </SlideView_>
+    );
+};
+
+const SlideView_ = styled("div")`
+    width: 100%;
+    height: 100%;
+
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-blend-mode: multiply;
+    background-color: rgba(0, 0, 0, 0.5);
+
+    /* Smooth out the transition a bit.
+     *
+     * For the img itself, we set decoding="sync" to have it switch seamlessly.
+     * But there does not seem to be a way of setting decoding sync for the
+     * background image, and for large (multi-MB) images the background image
+     * switch is still visually non-atomic.
+     *
+     * As a workaround, add a long transition so that the background image
+     * transitions in a more "fade-to" manner. This effect might or might not be
+     * visually the best though.
+     *
+     * Does not work in Firefox, but that's fine, this is only a slight tweak,
+     * not a functional requirement.
+     */
+    transition: all 2s;
+
+    img {
+        width: 100%;
+        height: 100%;
+        backdrop-filter: blur(10px);
+        object-fit: contain;
+    }
+`;
+
+/**
+ * Variant of {@link SlideView} for use when we're running on Chromecast.
+ *
+ * Chromecast devices have trouble with
+ *
+ *     backdrop-filter: blur(10px);
+ *
+ * So emulate a cheaper approximation for use on Chromecast.
+ */
+const SlideViewChromecast: React.FC<SlideViewProps> = ({ url }) => {
+    return (
+        <SlideViewChromecast_>
+            <img className="svc-bg" src={url} alt="" />
+            <img className="svc-content" src={url} decoding="sync" alt="" />
+        </SlideViewChromecast_>
+    );
+};
+
+const SlideViewChromecast_ = styled("div")`
+    width: 100%;
+    height: 100%;
+
+    /* We can't set opacity of background-image, so use a wrapper */
+    position: relative;
+    overflow: hidden;
+
+    img.svc-bg {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        opacity: 0.1;
+    }
+
+    img.svc-content {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
+`;

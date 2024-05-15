@@ -418,7 +418,6 @@
     "ALL_HIDDEN_ALBUMS": "All hidden albums",
     "HIDDEN_ALBUMS": "Hidden albums",
     "HIDDEN_ITEMS": "Hidden items",
-    "HIDDEN_ITEMS_SECTION_NAME": "Hidden_items",
     "ENTER_TWO_FACTOR_OTP": "Enter the 6-digit code from your authenticator app.",
     "CREATE_ACCOUNT": "Create account",
     "COPIED": "Copied",
@@ -448,10 +447,9 @@
     "DOWNLOAD_LOGS_MESSAGE": "<p>This will download debug logs, which you can email to us to help debug your issue.</p><p> Please note that file names will be included to help track issues with specific files. </p>",
     "CHANGE_FOLDER": "Change Folder",
     "TWO_MONTHS_FREE": "Get 2 months free on yearly plans",
-    "GB": "GB",
     "POPULAR": "Popular",
     "FREE_PLAN_OPTION_LABEL": "Continue with free trial",
-    "FREE_PLAN_DESCRIPTION": "1 GB for 1 year",
+    "free_plan_description": "{{storage}} for 1 year",
     "CURRENT_USAGE": "Current usage is <strong>{{usage}}</strong>",
     "WEAK_DEVICE": "The web browser you're using is not powerful enough to encrypt your photos. Please try to log in to Ente on your computer, or download the Ente mobile/desktop app.",
     "DRAG_AND_DROP_HINT": "Or drag and drop into the Ente window",
@@ -495,12 +493,12 @@
     "EXPORT_DIRECTORY_DOES_NOT_EXIST": "Invalid export directory",
     "EXPORT_DIRECTORY_DOES_NOT_EXIST_MESSAGE": "<p>The export directory you have selected does not exist.</p><p> Please select a valid directory.</p>",
     "SUBSCRIPTION_VERIFICATION_ERROR": "Subscription verification failed",
-    "STORAGE_UNITS": {
-        "B": "B",
-        "KB": "KB",
-        "MB": "MB",
-        "GB": "GB",
-        "TB": "TB"
+    "storage_unit": {
+        "b": "B",
+        "kb": "KB",
+        "mb": "MB",
+        "gb": "GB",
+        "tb": "TB"
     },
     "AFTER_TIME": {
         "HOUR": "after an hour",
@@ -567,6 +565,9 @@
     "IMAGE": "Image",
     "VIDEO": "Video",
     "LIVE_PHOTO": "Live Photo",
+    "editor": {
+        "crop": "Crop"
+    },
     "CONVERT": "Convert",
     "CONFIRM_EDITOR_CLOSE_MESSAGE": "Are you sure you want to close the editor?",
     "CONFIRM_EDITOR_CLOSE_DESCRIPTION": "Download your edited image or save a copy to Ente to persist your changes.",

@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:math';
+import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
@@ -28,6 +28,8 @@ import 'package:photos/models/file/file_type.dart';
 import "package:photos/models/metadata/file_magic.dart";
 import 'package:photos/models/upload_url.dart';
 import "package:photos/models/user_details.dart";
+import "package:photos/module/upload/service/multipart.dart";
+import "package:photos/service_locator.dart";
 import 'package:photos/services/collections_service.dart';
 import "package:photos/services/file_magic_service.dart";
 import 'package:photos/services/local_sync_service.dart';
@@ -37,7 +39,6 @@ import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_download_util.dart';
 import 'package:photos/utils/file_uploader_util.dart';
 import "package:photos/utils/file_util.dart";
-import "package:photos/utils/multipart_upload_util.dart";
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tuple/tuple.dart';
 import "package:uuid/uuid.dart";
@@ -51,7 +52,7 @@ class FileUploader {
   static const kBlockedUploadsPollFrequency = Duration(seconds: 2);
   static const kFileUploadTimeout = Duration(minutes: 50);
   static const k20MBStorageBuffer = 20 * 1024 * 1024;
-  static const kUploadTempPrefix = "upload_file_";
+  static const _lastStaleFileCleanupTime = "lastStaleFileCleanupTime";
 
   final _logger = Logger("FileUploader");
   final _dio = NetworkClient.instance.getDio();
@@ -79,6 +80,7 @@ class FileUploader {
   // cases, we don't want to clear the stale upload files. See #removeStaleFiles
   // as it can result in clearing files which are still being force uploaded.
   bool _hasInitiatedForceUpload = false;
+  late MultiPartUploader _multiPartUploader;
 
   FileUploader._privateConstructor() {
     Bus.instance.on<SubscriptionPurchasedEvent>().listen((event) {
@@ -113,6 +115,17 @@ class FileUploader {
       }
       // ignore: unawaited_futures
       _pollBackgroundUploadStatus();
+    }
+    _multiPartUploader = MultiPartUploader(
+      _enteDio,
+      _dio,
+      UploadLocksDB.instance,
+      flagService,
+    );
+    if (currentTime - (_prefs.getInt(_lastStaleFileCleanupTime) ?? 0) >
+        tempDirCleanUpInterval) {
+      await removeStaleFiles();
+      await _prefs.setInt(_lastStaleFileCleanupTime, currentTime);
     }
     Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
       if (event.type == EventType.deletedFromDevice ||
@@ -309,13 +322,28 @@ class FileUploader {
       // ends with .encrypted. Fetch files in async manner
       final files = await Directory(dir).list().toList();
       final filesToDelete = files.where((file) {
-        return file.path.contains(kUploadTempPrefix) &&
+        return file.path.contains(uploadTempFilePrefix) &&
             file.path.contains(".encrypted");
       });
       if (filesToDelete.isNotEmpty) {
-        _logger.info('cleaning up state files ${filesToDelete.length}');
+        _logger.info('Deleting ${filesToDelete.length} stale upload files ');
+        final fileNameToLastAttempt =
+            await _uploadLocks.getFileNameToLastAttemptedAtMap();
         for (final file in filesToDelete) {
-          await file.delete();
+          final fileName = file.path.split('/').last;
+          final lastAttemptTime = fileNameToLastAttempt[fileName] != null
+              ? DateTime.fromMillisecondsSinceEpoch(
+                  fileNameToLastAttempt[fileName]!,
+                )
+              : null;
+          if (lastAttemptTime == null ||
+              DateTime.now().difference(lastAttemptTime).inDays > 1) {
+            await file.delete();
+          } else {
+            _logger.info(
+              'Skipping file $fileName as it was attempted recently on $lastAttemptTime',
+            );
+          }
         }
       }
 
@@ -405,7 +433,7 @@ class FileUploader {
           (fileOnDisk.updationTime ?? -1) != -1 &&
           (fileOnDisk.collectionID ?? -1) == collectionID;
       if (wasAlreadyUploaded) {
-        debugPrint("File is already uploaded ${fileOnDisk.tag}");
+        _logger.info("File is already uploaded ${fileOnDisk.tag}");
         return fileOnDisk;
       }
     }
@@ -425,6 +453,7 @@ class FileUploader {
     }
 
     final String lockKey = file.localID!;
+    bool _isMultipartUpload = false;
 
     try {
       await _uploadLocks.acquireLock(
@@ -438,12 +467,27 @@ class FileUploader {
     }
 
     final tempDirectory = Configuration.instance.getTempDirectory();
-    final String uniqueID = const Uuid().v4().toString();
-    final encryptedFilePath =
-        '$tempDirectory$kUploadTempPrefix${uniqueID}_file.encrypted';
-    final encryptedThumbnailPath =
-        '$tempDirectory$kUploadTempPrefix${uniqueID}_thumb.encrypted';
     MediaUploadData? mediaUploadData;
+    mediaUploadData = await getUploadDataFromEnteFile(file);
+
+    final String? existingMultipartEncFileName =
+        mediaUploadData.hashData?.fileHash != null
+            ? await _uploadLocks.getEncryptedFileName(
+                lockKey,
+                mediaUploadData.hashData!.fileHash!,
+                collectionID,
+              )
+            : null;
+    bool multipartEntryExists = existingMultipartEncFileName != null;
+
+    final String uniqueID = const Uuid().v4().toString();
+
+    final encryptedFilePath = multipartEntryExists
+        ? '$tempDirectory$existingMultipartEncFileName'
+        : '$tempDirectory$uploadTempFilePrefix${uniqueID}_file.encrypted';
+    final encryptedThumbnailPath =
+        '$tempDirectory$uploadTempFilePrefix${uniqueID}_thumb.encrypted';
+
     var uploadCompleted = false;
     // This flag is used to decide whether to clear the iOS origin file cache
     // or not.
@@ -457,13 +501,18 @@ class FileUploader {
         '${isUpdatedFile ? 're-upload' : 'upload'} of ${file.toString()}',
       );
 
-      mediaUploadData = await getUploadDataFromEnteFile(file);
-
       Uint8List? key;
+      EncryptionResult? multiPartFileEncResult = multipartEntryExists
+          ? await _multiPartUploader.getEncryptionResult(
+              lockKey,
+              mediaUploadData.hashData!.fileHash!,
+              collectionID,
+            )
+          : null;
       if (isUpdatedFile) {
         key = getFileKey(file);
       } else {
-        key = null;
+        key = multiPartFileEncResult?.key;
         // check if the file is already uploaded and can be mapped to existing
         // uploaded file. If map is found, it also returns the corresponding
         // mapped or update file entry.
@@ -482,16 +531,40 @@ class FileUploader {
         }
       }
 
-      if (File(encryptedFilePath).existsSync()) {
+      final encryptedFileExists = File(encryptedFilePath).existsSync();
+
+      // If the multipart entry exists but the encrypted file doesn't, it means
+      // that we'll have to reupload as the nonce is lost
+      if (multipartEntryExists) {
+        final bool updateWithDiffKey = isUpdatedFile &&
+            multiPartFileEncResult != null &&
+            !listEquals(key, multiPartFileEncResult.key);
+        if (!encryptedFileExists || updateWithDiffKey) {
+          if (updateWithDiffKey) {
+            _logger.severe('multiPart update resumed with differentKey');
+          } else {
+            _logger.warning(
+              'multiPart EncryptedFile missing, discard multipart entry',
+            );
+          }
+          await _uploadLocks.deleteMultipartTrack(lockKey);
+          multipartEntryExists = false;
+          multiPartFileEncResult = null;
+        }
+      } else if (encryptedFileExists) {
+        // otherwise just delete the file for singlepart upload
         await File(encryptedFilePath).delete();
       }
       await _checkIfWithinStorageLimit(mediaUploadData.sourceFile!);
       final encryptedFile = File(encryptedFilePath);
-      final EncryptionResult fileAttributes = await CryptoUtil.encryptFile(
-        mediaUploadData.sourceFile!.path,
-        encryptedFilePath,
-        key: key,
-      );
+
+      final EncryptionResult fileAttributes = multiPartFileEncResult ??
+          await CryptoUtil.encryptFile(
+            mediaUploadData.sourceFile!.path,
+            encryptedFilePath,
+            key: key,
+          );
+
       late final Uint8List? thumbnailData;
       if (mediaUploadData.thumbnail == null &&
           file.fileType == FileType.video) {
@@ -512,31 +585,63 @@ class FileUploader {
       await encryptedThumbnailFile
           .writeAsBytes(encryptedThumbnailData.encryptedData!);
 
-      final thumbnailUploadURL = await _getUploadURL();
-      final String thumbnailObjectKey =
-          await _putFile(thumbnailUploadURL, encryptedThumbnailFile);
-
-      // Calculate the number of parts for the file. Multiple part upload
-      // is only enabled for internal users and debug builds till it's battle tested.
-      final count = kDebugMode
-          ? await calculatePartCount(
-              await encryptedFile.length(),
-            )
-          : 1;
+      // Calculate the number of parts for the file.
+      final count = await _multiPartUploader.calculatePartCount(
+        await encryptedFile.length(),
+      );
 
       late String fileObjectKey;
+      late String thumbnailObjectKey;
 
       if (count <= 1) {
+        final thumbnailUploadURL = await _getUploadURL();
+        thumbnailObjectKey =
+            await _putFile(thumbnailUploadURL, encryptedThumbnailFile);
         final fileUploadURL = await _getUploadURL();
         fileObjectKey = await _putFile(fileUploadURL, encryptedFile);
       } else {
-        final fileUploadURLs = await getMultipartUploadURLs(count);
-        fileObjectKey = await putMultipartFile(fileUploadURLs, encryptedFile);
+        _isMultipartUpload = true;
+        _logger.finest(
+          "Init multipartUpload $multipartEntryExists, isUpdate $isUpdatedFile",
+        );
+        if (multipartEntryExists) {
+          fileObjectKey = await _multiPartUploader.putExistingMultipartFile(
+            encryptedFile,
+            lockKey,
+            mediaUploadData.hashData!.fileHash!,
+            collectionID,
+          );
+        } else {
+          final fileUploadURLs =
+              await _multiPartUploader.getMultipartUploadURLs(count);
+          final encFileName = encryptedFile.path.split('/').last;
+          await _multiPartUploader.createTableEntry(
+            lockKey,
+            mediaUploadData.hashData!.fileHash!,
+            collectionID,
+            fileUploadURLs,
+            encFileName,
+            await encryptedFile.length(),
+            fileAttributes.key!,
+            fileAttributes.header!,
+          );
+          fileObjectKey = await _multiPartUploader.putMultipartFile(
+            fileUploadURLs,
+            encryptedFile,
+          );
+        }
+        // in case of multipart, upload the thumbnail towards the end to avoid
+        // re-uploading the thumbnail in case of failure.
+        // In regular upload, always upload the thumbnail first to keep existing behaviour
+        //
+        final thumbnailUploadURL = await _getUploadURL();
+        thumbnailObjectKey =
+            await _putFile(thumbnailUploadURL, encryptedThumbnailFile);
       }
 
       final metadata = await file.getMetadataForUpload(mediaUploadData);
       final encryptedMetadataResult = await CryptoUtil.encryptChaCha(
-        utf8.encode(jsonEncode(metadata)) as Uint8List,
+        utf8.encode(jsonEncode(metadata)),
         fileAttributes.key!,
       );
       final fileDecryptionHeader =
@@ -618,6 +723,8 @@ class FileUploader {
         }
         await FilesDB.instance.update(remoteFile);
       }
+      await UploadLocksDB.instance.deleteMultipartTrack(lockKey);
+
       if (!_isBackground) {
         Bus.instance.fire(
           LocalPhotosUpdatedEvent(
@@ -659,6 +766,7 @@ class FileUploader {
         encryptedFilePath,
         encryptedThumbnailPath,
         lockKey: lockKey,
+        isMultiPartUpload: _isMultipartUpload,
       );
     }
   }
@@ -803,6 +911,7 @@ class FileUploader {
     String encryptedFilePath,
     String encryptedThumbnailPath, {
     required String lockKey,
+    bool isMultiPartUpload = false,
   }) async {
     if (mediaUploadData != null && mediaUploadData.sourceFile != null) {
       // delete the file from app's internal cache if it was copied to app
@@ -816,7 +925,14 @@ class FileUploader {
       }
     }
     if (File(encryptedFilePath).existsSync()) {
-      await File(encryptedFilePath).delete();
+      if (isMultiPartUpload && !uploadCompleted) {
+        _logger.fine(
+          "skip delete for multipart encrypted file $encryptedFilePath",
+        );
+      } else {
+        _logger.fine("deleting encrypted file $encryptedFilePath");
+        await File(encryptedFilePath).delete();
+      }
     }
     if (File(encryptedThumbnailPath).existsSync()) {
       await File(encryptedThumbnailPath).delete();
@@ -1039,7 +1155,7 @@ class FileUploader {
     if (_uploadURLs.isEmpty) {
       // the queue is empty, fetch at least for one file to handle force uploads
       // that are not in the queue. This is to also avoid
-      await fetchUploadURLs(max(_queue.length, 1));
+      await fetchUploadURLs(math.max(_queue.length, 1));
     }
     try {
       return _uploadURLs.removeFirst();
@@ -1061,7 +1177,7 @@ class FileUploader {
         final response = await _enteDio.get(
           "/files/upload-urls",
           queryParameters: {
-            "count": min(42, fileCount * 2), // m4gic number
+            "count": math.min(42, fileCount * 2), // m4gic number
           },
         );
         final urls = (response.data["urls"] as List)

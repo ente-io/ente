@@ -48,6 +48,11 @@ export const logoutUser = async () => {
             log.error("Ignoring error when resetting native folder watches", e);
         }
         try {
+            await electron.clearConvertToMP4Results();
+        } catch (e) {
+            log.error("Ignoring error when clearing convert-to-mp4 results", e);
+        }
+        try {
             await electron.clearStores();
         } catch (e) {
             log.error("Ignoring error when clearing native stores", e);

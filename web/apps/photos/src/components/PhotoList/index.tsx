@@ -22,9 +22,9 @@ import {
     areEqual,
 } from "react-window";
 import { EnteFile } from "types/file";
-import { convertBytesToHumanReadable } from "utils/file";
 import { handleSelectCreator } from "utils/photoFrame";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
+import { formattedByteSize } from "utils/units";
 
 const A_DAY = 24 * 60 * 60 * 1000;
 const FOOTER_HEIGHT = 90;
@@ -829,8 +829,7 @@ export function PhotoList({
                 return (
                     <SizeAndCountContainer span={columns}>
                         {listItem.fileCount} {t("FILES")},{" "}
-                        {convertBytesToHumanReadable(listItem.fileSize || 0)}{" "}
-                        {t("EACH")}
+                        {formattedByteSize(listItem.fileSize || 0)} {t("EACH")}
                     </SizeAndCountContainer>
                 );
             case ITEM_TYPE.FILE: {

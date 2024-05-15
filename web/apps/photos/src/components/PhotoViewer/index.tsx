@@ -11,11 +11,11 @@ import {
     copyFileToClipboard,
     downloadSingleFile,
     getFileFromURL,
-    isRawFile,
     isSupportedRawFormat,
 } from "utils/file";
 
 import { FILE_TYPE } from "@/media/file-type";
+import { isNonWebImageFileExtension } from "@/media/formats";
 import { lowercaseExtension } from "@/next/file";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
@@ -350,7 +350,8 @@ function PhotoViewer(props: Iprops) {
     function updateShowEditButton(file: EnteFile) {
         const extension = lowercaseExtension(file.metadata.title);
         const isSupported =
-            !isRawFile(extension) || isSupportedRawFormat(extension);
+            !isNonWebImageFileExtension(extension) ||
+            isSupportedRawFormat(extension);
         setShowEditButton(
             file.metadata.fileType === FILE_TYPE.IMAGE && isSupported,
         );

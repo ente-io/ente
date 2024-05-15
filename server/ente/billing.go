@@ -11,7 +11,7 @@ import (
 
 const (
 	// FreePlanStorage is the amount of storage in free plan
-	FreePlanStorage = 1 * 1024 * 1024 * 1024
+	FreePlanStorage = 5 * 1024 * 1024 * 1024
 	// FreePlanProductID is the product ID of free plan
 	FreePlanProductID = "free"
 	// FreePlanTransactionID is the dummy transaction ID for the free plan

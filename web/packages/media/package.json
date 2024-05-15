@@ -5,6 +5,10 @@
     "dependencies": {
         "@/next": "*",
         "file-type": "16.5.4",
+        "heic-convert": "^2.1",
         "jszip": "^3.10"
+    },
+    "devDependencies": {
+        "@types/heic-convert": "^1.2.3"
     }
 }

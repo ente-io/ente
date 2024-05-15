@@ -8,7 +8,7 @@ import {
     ClusteringResults,
     HdbscanResults,
     Versioned,
-} from "types/machineLearning";
+} from "services/ml/types";
 
 class ClusteringService {
     private dbscan: DBSCAN;

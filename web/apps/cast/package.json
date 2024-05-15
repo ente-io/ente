@@ -8,5 +8,8 @@
         "@ente/accounts": "*",
         "@ente/eslint-config": "*",
         "@ente/shared": "*"
+    },
+    "devDependencies": {
+        "@types/chromecast-caf-receiver": "^6.0.14"
     }
 }

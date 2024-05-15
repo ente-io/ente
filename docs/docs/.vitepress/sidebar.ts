@@ -124,6 +124,10 @@ export const sidebar = [
                 collapsed: true,
                 items: [
                     {
+                        text: "Desktop install",
+                        link: "/photos/troubleshooting/desktop-install/",
+                    },
+                    {
                         text: "Files not uploading",
                         link: "/photos/troubleshooting/files-not-uploading",
                     },
@@ -196,6 +200,10 @@ export const sidebar = [
                     {
                         text: "System requirements",
                         link: "/self-hosting/guides/system-requirements",
+                    },
+                    {
+                        text: "Configuring S3",
+                        link: "/self-hosting/guides/configuring-s3",
                     },
                     {
                         text: "Using external S3",

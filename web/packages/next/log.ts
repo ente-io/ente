@@ -4,6 +4,19 @@ import { logToDisk as webLogToDisk } from "./log-web";
 import { workerBridge } from "./worker/worker-bridge";
 
 /**
+ * Whether logs go to disk or are always emitted to the console.
+ */
+let shouldLogToDisk = true;
+
+/**
+ * By default, logs get saved into a ring buffer in the browser's local storage.
+ * However, in some contexts, e.g. when we're running as the cast app, there is
+ * no mechanism for the user to retrieve these logs. So this function exists as
+ * a way to disable the on disk logging and always use the console.
+ */
+export const disableDiskLogs = () => (shouldLogToDisk = false);
+
+/**
  * Write a {@link message} to the on-disk log.
  *
  * This is used by the renderer process (via the contextBridge) to add entries
@@ -45,14 +58,14 @@ const messageWithError = (message: string, e?: unknown) => {
 
 const logError = (message: string, e?: unknown) => {
     const m = `[error] ${messageWithError(message, e)}`;
-    if (isDevBuild) console.error(m);
-    logToDisk(m);
+    console.error(m);
+    if (shouldLogToDisk) logToDisk(m);
 };
 
 const logWarn = (message: string, e?: unknown) => {
     const m = `[warn] ${messageWithError(message, e)}`;
-    if (isDevBuild) console.error(m);
-    logToDisk(m);
+    console.error(m);
+    if (shouldLogToDisk) logToDisk(m);
 };
 
 const logInfo = (...params: unknown[]) => {
@@ -60,8 +73,8 @@ const logInfo = (...params: unknown[]) => {
         .map((p) => (typeof p == "string" ? p : JSON.stringify(p)))
         .join(" ");
     const m = `[info] ${message}`;
-    if (isDevBuild) console.log(m);
-    logToDisk(m);
+    if (isDevBuild || !shouldLogToDisk) console.log(m);
+    if (shouldLogToDisk) logToDisk(m);
 };
 
 const logDebug = (param: () => unknown) => {
@@ -71,8 +84,8 @@ const logDebug = (param: () => unknown) => {
 /**
  * Ente's logger.
  *
- * This is an object that provides three functions to log at the corresponding
- * levels - error, info or debug.
+ * This is an object that provides functions to log at the corresponding levels:
+ * error, warn, info or debug.
  *
  * Whenever we need to save a log message to disk,
  *
@@ -89,8 +102,7 @@ export default {
      * any arbitrary object that we obtain, say, when in a try-catch handler (in
      * JavaScript any arbitrary value can be thrown).
      *
-     * The log is written to disk. In development builds, the log is also
-     * printed to the browser console.
+     * The log is written to disk and printed to the browser console.
      */
     error: logError,
     /**
@@ -104,8 +116,10 @@ export default {
      * This is meant as a replacement of {@link console.log}, and takes an
      * arbitrary number of arbitrary parameters that it then serializes.
      *
-     * The log is written to disk. In development builds, the log is also
-     * printed to the browser console.
+     * The log is written to disk. However, if logging to disk is disabled by
+     * using {@link disableDiskLogs}, then the log is printed to the console.
+     *
+     * In development builds, the log is always printed to the browser console.
      */
     info: logInfo,
     /**
@@ -118,8 +132,8 @@ export default {
      * The function can return an arbitrary value which is serialized before
      * being logged.
      *
-     * This log is NOT written to disk. And it is printed to the browser
-     * console, but only in development builds.
+     * This log is NOT written to disk. It is printed to the browser console,
+     * but only in development builds.
      */
     debug: logDebug,
 };

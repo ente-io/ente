@@ -1,5 +1,0 @@
-export * from './BoundingBox'
-export * from './Box'
-export * from './Dimensions'
-export * from './Point'
-export * from './Rect'

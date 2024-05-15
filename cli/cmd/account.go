@@ -27,7 +27,8 @@ var listAccCmd = &cobra.Command{
 // Subcommand for 'account add'
 var addAccCmd = &cobra.Command{
 	Use:   "add",
-	Short: "Add a new account",
+	Short: "login into existing account",
+	Long:  "Use this command to add an existing account to cli. For creating a new account, use the mobile,web or desktop app",
 	Run: func(cmd *cobra.Command, args []string) {
 		recoverWithLog()
 		ctrl.AddAccount(context.Background())

@@ -36,7 +36,7 @@ jobs:
                   upload_sources: true
                   upload_translations: false
                   download_translations: true
-                  localization_branch_name: crowdin-translations-web
+                  localization_branch_name: translations/web
                   create_pull_request: true
                   skip_untranslated_strings: true
                   pull_request_title: "[web] New translations"

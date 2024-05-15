@@ -11,7 +11,7 @@ import { Embedding } from "types/embedding";
 import { EnteFile } from "types/file";
 import { getPersonalFiles } from "utils/file";
 import downloadManager from "./download";
-import { getLocalEmbeddings, putEmbedding } from "./embeddingService";
+import { localCLIPEmbeddings, putEmbedding } from "./embeddingService";
 import { getAllLocalFiles, getLocalFiles } from "./fileService";
 
 /** Status of CLIP indexing on the images in the user's local library. */
@@ -195,7 +195,7 @@ class CLIPService {
                 return;
             }
             const localFiles = getPersonalFiles(await getAllLocalFiles(), user);
-            const existingEmbeddings = await getLocalEmbeddings();
+            const existingEmbeddings = await localCLIPEmbeddings();
             const pendingFiles = await getNonClipEmbeddingExtractedFiles(
                 localFiles,
                 existingEmbeddings,
@@ -394,7 +394,7 @@ export const computeClipMatchScore = async (
 const initialIndexingStatus = async (): Promise<CLIPIndexingStatus> => {
     const user = getData(LS_KEYS.USER);
     if (!user) throw new Error("Orphan CLIP indexing without a login");
-    const allEmbeddings = await getLocalEmbeddings();
+    const allEmbeddings = await localCLIPEmbeddings();
     const localFiles = getPersonalFiles(await getLocalFiles(), user);
     const pendingFiles = await getNonClipEmbeddingExtractedFiles(
         localFiles,

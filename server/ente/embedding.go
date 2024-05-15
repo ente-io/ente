@@ -7,6 +7,7 @@ type Embedding struct {
 	DecryptionHeader   string `json:"decryptionHeader"`
 	UpdatedAt          int64  `json:"updatedAt"`
 	Version            *int   `json:"version,omitempty"`
+	Size               *int64
 }
 
 type InsertOrUpdateEmbeddingRequest struct {
@@ -30,9 +31,10 @@ type GetFilesEmbeddingRequest struct {
 }
 
 type GetFilesEmbeddingResponse struct {
-	Embeddings    []Embedding `json:"embeddings"`
-	NoDataFileIDs []int64     `json:"noDataFileIDs"`
-	ErrFileIDs    []int64     `json:"errFileIDs"`
+	Embeddings          []Embedding `json:"embeddings"`
+	PendingIndexFileIDs []int64     `json:"pendingIndexFileIDs"`
+	ErrFileIDs          []int64     `json:"errFileIDs"`
+	NoEmbeddingFileIDs  []int64     `json:"noEmbeddingFileIDs"`
 }
 
 type Model string

@@ -1,238 +1,110 @@
 import log from "@/next/log";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
-import { boxSealOpen, toB64 } from "@ente/shared/crypto/internal/libsodium";
-import castGateway from "@ente/shared/network/cast";
-import LargeType from "components/LargeType";
-import _sodium from "libsodium-wrappers";
+import { styled } from "@mui/material";
+import { PairingCode } from "components/PairingCode";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { storeCastData } from "services/cast/castService";
-import { useCastReceiver } from "../utils/useCastReceiver";
+import { readCastData, storeCastData } from "services/cast-data";
+import { getCastData, register } from "services/pair";
+import { advertiseOnChromecast } from "../services/chromecast";
 
-export default function PairingMode() {
-    const [deviceCode, setDeviceCode] = useState("");
-    const [publicKeyB64, setPublicKeyB64] = useState("");
-    const [privateKeyB64, setPrivateKeyB64] = useState("");
-    const [codePending, setCodePending] = useState(true);
-    const [isCastReady, setIsCastReady] = useState(false);
-
-    const { cast } = useCastReceiver();
-
-    useEffect(() => {
-        init();
-    }, []);
-
-    const init = async () => {
-        try {
-            const keypair = await generateKeyPair();
-            setPublicKeyB64(await toB64(keypair.publicKey));
-            setPrivateKeyB64(await toB64(keypair.privateKey));
-        } catch (e) {
-            log.error("failed to generate keypair", e);
-            throw e;
-        }
-    };
-
-    useEffect(() => {
-        if (!cast) {
-            return;
-        }
-        if (isCastReady) {
-            return;
-        }
-        const context = cast.framework.CastReceiverContext.getInstance();
-
-        try {
-            const options = new cast.framework.CastReceiverOptions();
-            options.maxInactivity = 3600;
-            options.customNamespaces = Object.assign({});
-            options.customNamespaces["urn:x-cast:pair-request"] =
-                cast.framework.system.MessageType.JSON;
-
-            options.disableIdleTimeout = true;
-            context.set;
-
-            context.addCustomMessageListener(
-                "urn:x-cast:pair-request",
-                messageReceiveHandler,
-            );
-
-            // listen to close request and stop the context
-            context.addEventListener(
-                cast.framework.system.EventType.SENDER_DISCONNECTED,
-                // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                (_) => {
-                    context.stop();
-                },
-            );
-            context.start(options);
-            setIsCastReady(true);
-        } catch (e) {
-            log.error("failed to create cast context", e);
-        }
-
-        return () => {
-            // context.stop();
-        };
-    }, [cast]);
-
-    const messageReceiveHandler = (message: {
-        type: string;
-        senderId: string;
-        data: any;
-    }) => {
-        try {
-            cast.framework.CastReceiverContext.getInstance().sendCustomMessage(
-                "urn:x-cast:pair-request",
-                message.senderId,
-                {
-                    code: deviceCode,
-                },
-            );
-        } catch (e) {
-            log.error("failed to send message", e);
-        }
-    };
-
-    const generateKeyPair = async () => {
-        await _sodium.ready;
-        const keypair = _sodium.crypto_box_keypair();
-        return keypair;
-    };
-
-    const pollForCastData = async () => {
-        if (codePending) {
-            return;
-        }
-        // see if we were acknowledged on the client.
-        // the client will send us the encrypted payload using our public key that we advertised.
-        // then, we can decrypt this and store all the necessary info locally so we can play the collection slideshow.
-        let devicePayload = "";
-        try {
-            const encDastData = await castGateway.getCastData(`${deviceCode}`);
-            if (!encDastData) return;
-            devicePayload = encDastData;
-        } catch (e) {
-            setCodePending(true);
-            init();
-            return;
-        }
-
-        const decryptedPayload = await boxSealOpen(
-            devicePayload,
-            publicKeyB64,
-            privateKeyB64,
-        );
-
-        const decryptedPayloadObj = JSON.parse(atob(decryptedPayload));
-
-        return decryptedPayloadObj;
-    };
-
-    const advertisePublicKey = async (publicKeyB64: string) => {
-        // hey client, we exist!
-        try {
-            const codeValue = await castGateway.registerDevice(publicKeyB64);
-            setDeviceCode(codeValue);
-            setCodePending(false);
-        } catch (e) {
-            // schedule re-try after 5 seconds
-            setTimeout(() => {
-                init();
-            }, 5000);
-            return;
-        }
-    };
+export default function Index() {
+    const [publicKeyB64, setPublicKeyB64] = useState<string | undefined>();
+    const [privateKeyB64, setPrivateKeyB64] = useState<string | undefined>();
+    const [pairingCode, setPairingCode] = useState<string | undefined>();
 
     const router = useRouter();
 
     useEffect(() => {
-        console.log("useEffect for pairing called");
-        if (deviceCode.length < 1 || !publicKeyB64 || !privateKeyB64) return;
-
-        const interval = setInterval(async () => {
-            console.log("polling for cast data");
-            const data = await pollForCastData();
-            if (!data) {
-                console.log("no data");
-                return;
-            }
-            storeCastData(data);
-            console.log("pushing slideshow");
-            await router.push("/slideshow");
-        }, 1000);
-
-        return () => {
-            clearInterval(interval);
-        };
-    }, [deviceCode, publicKeyB64, privateKeyB64, codePending]);
+        if (!pairingCode) {
+            register().then((r) => {
+                setPublicKeyB64(r.publicKeyB64);
+                setPrivateKeyB64(r.privateKeyB64);
+                setPairingCode(r.pairingCode);
+            });
+        } else {
+            advertiseOnChromecast(
+                () => pairingCode,
+                () => readCastData()?.collectionID,
+            );
+        }
+    }, [pairingCode]);
 
     useEffect(() => {
-        if (!publicKeyB64) return;
-        advertisePublicKey(publicKeyB64);
-    }, [publicKeyB64]);
+        if (!publicKeyB64 || !privateKeyB64 || !pairingCode) return;
+
+        const interval = setInterval(pollTick, 2000);
+        return () => clearInterval(interval);
+    }, [publicKeyB64, privateKeyB64, pairingCode]);
+
+    const pollTick = async () => {
+        const registration = { publicKeyB64, privateKeyB64, pairingCode };
+        try {
+            const data = await getCastData(registration);
+            if (!data) {
+                // No one has connected yet.
+                return;
+            }
+
+            storeCastData(data);
+            await router.push("/slideshow");
+        } catch (e) {
+            // The pairing code becomes invalid after an hour, which will cause
+            // `getCastData` to fail. There might be other reasons this might
+            // fail too, but in all such cases, it is a reasonable idea to start
+            // again from the beginning.
+            log.warn("Failed to get cast data", e);
+            setPairingCode(undefined);
+        }
+    };
 
     return (
-        <>
-            <div
-                style={{
-                    height: "100%",
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                }}
-            >
-                <div
-                    style={{
-                        textAlign: "center",
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
-                    }}
-                >
-                    <img width={150} src="/images/ente.svg" />
-                    <h1
-                        style={{
-                            fontWeight: "normal",
-                        }}
-                    >
-                        Enter this code on <b>ente</b> to pair this TV
-                    </h1>
-                    <div
-                        style={{
-                            borderRadius: "10px",
-                            overflow: "hidden",
-                        }}
-                    >
-                        {codePending ? (
-                            <EnteSpinner />
-                        ) : (
-                            <>
-                                <LargeType chars={deviceCode.split("")} />
-                            </>
-                        )}
-                    </div>
-                    <p
-                        style={{
-                            fontSize: "1.2rem",
-                        }}
-                    >
-                        Visit{" "}
-                        <a
-                            style={{
-                                textDecoration: "none",
-                                color: "#87CEFA",
-                                fontWeight: "bold",
-                            }}
-                            href="https://ente.io/cast"
-                            target="_blank"
-                        >
-                            ente.io/cast
-                        </a>{" "}
-                        for help
-                    </p>
-                </div>
-            </div>
-        </>
+        <Container>
+            <img width={150} src="/images/ente.svg" />
+            <h1>
+                Enter this code on <b>Ente Photos</b> to pair this screen
+            </h1>
+            {pairingCode ? <PairingCode code={pairingCode} /> : <Spinner />}
+            <p>
+                Visit{" "}
+                <a href="https://ente.io/cast" target="_blank">
+                    ente.io/cast
+                </a>{" "}
+                for help
+            </p>
+        </Container>
     );
 }
+
+const Container = styled("div")`
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+
+    h1 {
+        font-weight: normal;
+    }
+
+    p {
+        font-size: 1.2rem;
+    }
+    a {
+        text-decoration: none;
+        color: #87cefa;
+        font-weight: bold;
+    }
+`;
+
+const Spinner: React.FC = () => (
+    <Spinner_>
+        <EnteSpinner />
+    </Spinner_>
+);
+
+const Spinner_ = styled("div")`
+    /* Roughly same height as the pairing code section to roduce layout shift */
+    margin-block: 1.7rem;
+`;

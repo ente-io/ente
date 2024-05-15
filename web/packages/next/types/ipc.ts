@@ -67,9 +67,16 @@ export interface Electron {
      * Clear any stored data.
      *
      * This is a coarse single shot cleanup, meant for use in clearing any
-     * Electron side state during logout.
+     * persisted Electron side state during logout.
      */
     clearStores: () => void;
+
+    /**
+     * Clear an state corresponding to in-flight convert-to-mp4 requests.
+     *
+     * This is meant for use during logout.
+     */
+    clearConvertToMP4Results: () => void;
 
     /**
      * Return the previously saved encryption key from persistent safe storage.
@@ -260,7 +267,7 @@ export interface Electron {
      * This executes the command using a FFmpeg executable we bundle with our
      * desktop app. We also have a wasm FFmpeg wasm implementation that we use
      * when running on the web, which has a sibling function with the same
-     * parameters. See [Note: ffmpeg in Electron].
+     * parameters. See [Note:FFmpeg in Electron].
      *
      * @param command An array of strings, each representing one positional
      * parameter in the command to execute. Placeholders for the input, output
@@ -280,9 +287,6 @@ export interface Electron {
      * just return its contents, for some FFmpeg command the extension matters
      * (e.g. conversion to a JPEG fails if the extension is arbitrary).
      *
-     * @param timeoutMS If non-zero, then abort and throw a timeout error if the
-     * ffmpeg command takes more than the given number of milliseconds.
-     *
      * @returns The contents of the output file produced by the ffmpeg command
      * (specified as {@link outputPathPlaceholder} in {@link command}).
      */
@@ -290,7 +294,6 @@ export interface Electron {
         command: string[],
         dataOrPathOrZipItem: Uint8Array | string | ZipItem,
         outputFileExtension: string,
-        timeoutMS: number,
     ) => Promise<Uint8Array>;
 
     // - ML
@@ -345,6 +348,28 @@ export interface Electron {
      * is specific to our implementation and the model (MobileFaceNet) we use.
      */
     faceEmbedding: (input: Float32Array) => Promise<Float32Array>;
+
+    /**
+     * Return a face crop stored by a previous version of ML.
+     *
+     * [Note: Legacy face crops]
+     *
+     * Older versions of ML generated and stored face crops in a "face-crops"
+     * cache directory on the Electron side. For the time being, we have
+     * disabled the face search whilst we put finishing touches to it. However,
+     * it'll be nice to still show the existing faces that have been clustered
+     * for people who opted in to the older beta.
+     *
+     * So we retain the older "face-crops" disk cache, and use this method to
+     * serve faces from it when needed.
+     *
+     * @param faceID An identifier corresponding to which the face crop had been
+     * stored by the older version of our app.
+     *
+     * @returns the JPEG data of the face crop if a file is found for the given
+     * {@link faceID}, otherwise undefined.
+     */
+    legacyFaceCrop: (faceID: string) => Promise<Uint8Array | undefined>;
 
     // - Watch
 

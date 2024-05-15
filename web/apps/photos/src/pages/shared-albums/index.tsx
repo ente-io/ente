@@ -1,15 +1,51 @@
 import log from "@/next/log";
+import { logoutUser } from "@ente/accounts/services/user";
+import { APPS } from "@ente/shared/apps/constants";
 import {
     CenteredFlex,
     SpaceBetweenFlex,
     VerticallyCentered,
 } from "@ente/shared/components/Container";
+import EnteSpinner from "@ente/shared/components/EnteSpinner";
+import FormPaper from "@ente/shared/components/Form/FormPaper";
+import FormPaperTitle from "@ente/shared/components/Form/FormPaper/Title";
+import OverflowMenu from "@ente/shared/components/OverflowMenu/menu";
+import { OverflowMenuOption } from "@ente/shared/components/OverflowMenu/option";
+import SingleInputForm, {
+    SingleInputFormProps,
+} from "@ente/shared/components/SingleInputForm";
+import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
+import { ENTE_WEBSITE_LINK } from "@ente/shared/constants/urls";
+import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { CustomError, parseSharingErrorCodes } from "@ente/shared/error";
+import { useFileInput } from "@ente/shared/hooks/useFileInput";
+import AddPhotoAlternateOutlined from "@mui/icons-material/AddPhotoAlternateOutlined";
+import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
+import MoreHoriz from "@mui/icons-material/MoreHoriz";
+import Typography from "@mui/material/Typography";
+import bs58 from "bs58";
+import { CollectionInfo } from "components/Collections/CollectionInfo";
+import { CollectionInfoBarWrapper } from "components/Collections/styledComponents";
+import {
+    FilesDownloadProgress,
+    FilesDownloadProgressAttributes,
+} from "components/FilesDownloadProgress";
+import FullScreenDropZone from "components/FullScreenDropZone";
+import { LoadingOverlay } from "components/LoadingOverlay";
 import PhotoFrame from "components/PhotoFrame";
+import { ITEM_TYPE, TimeStampListItem } from "components/PhotoList";
+import UploadButton from "components/Upload/UploadButton";
+import Uploader from "components/Upload/Uploader";
+import { UploadSelectorInputs } from "components/UploadSelectorInputs";
+import SharedAlbumNavbar from "components/pages/sharedAlbum/Navbar";
+import SelectedFileOptions from "components/pages/sharedAlbum/SelectedFileOptions";
 import { ALL_SECTION } from "constants/collection";
 import { t } from "i18next";
+import { useRouter } from "next/router";
 import { AppContext } from "pages/_app";
 import { useContext, useEffect, useMemo, useRef, useState } from "react";
+import { useDropzone } from "react-dropzone";
+import downloadManager from "services/download";
 import {
     getLocalPublicCollection,
     getLocalPublicCollectionPassword,
@@ -26,56 +62,19 @@ import {
 import { Collection } from "types/collection";
 import { EnteFile } from "types/file";
 import {
-    downloadSelectedFiles,
-    getSelectedFiles,
-    mergeMetadata,
-    sortFiles,
-} from "utils/file";
-import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
-
-import { logoutUser } from "@ente/accounts/services/user";
-import { APPS } from "@ente/shared/apps/constants";
-import EnteSpinner from "@ente/shared/components/EnteSpinner";
-import FormPaper from "@ente/shared/components/Form/FormPaper";
-import FormPaperTitle from "@ente/shared/components/Form/FormPaper/Title";
-import OverflowMenu from "@ente/shared/components/OverflowMenu/menu";
-import { OverflowMenuOption } from "@ente/shared/components/OverflowMenu/option";
-import SingleInputForm, {
-    SingleInputFormProps,
-} from "@ente/shared/components/SingleInputForm";
-import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
-import { ENTE_WEBSITE_LINK } from "@ente/shared/constants/urls";
-import ComlinkCryptoWorker from "@ente/shared/crypto";
-import useFileInput from "@ente/shared/hooks/useFileInput";
-import AddPhotoAlternateOutlined from "@mui/icons-material/AddPhotoAlternateOutlined";
-import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
-import MoreHoriz from "@mui/icons-material/MoreHoriz";
-import Typography from "@mui/material/Typography";
-import bs58 from "bs58";
-import { CollectionInfo } from "components/Collections/CollectionInfo";
-import { CollectionInfoBarWrapper } from "components/Collections/styledComponents";
-import {
-    FilesDownloadProgress,
-    FilesDownloadProgressAttributes,
-} from "components/FilesDownloadProgress";
-import FullScreenDropZone from "components/FullScreenDropZone";
-import { LoadingOverlay } from "components/LoadingOverlay";
-import { ITEM_TYPE, TimeStampListItem } from "components/PhotoList";
-import UploadButton from "components/Upload/UploadButton";
-import Uploader from "components/Upload/Uploader";
-import UploadSelectorInputs from "components/UploadSelectorInputs";
-import SharedAlbumNavbar from "components/pages/sharedAlbum/Navbar";
-import SelectedFileOptions from "components/pages/sharedAlbum/SelectedFileOptions";
-import { useRouter } from "next/router";
-import { useDropzone } from "react-dropzone";
-import downloadManager from "services/download";
-import {
     SelectedState,
     SetFilesDownloadProgressAttributes,
     SetFilesDownloadProgressAttributesCreator,
     UploadTypeSelectorIntent,
 } from "types/gallery";
 import { downloadCollectionFiles, isHiddenCollection } from "utils/collection";
+import {
+    downloadSelectedFiles,
+    getSelectedFiles,
+    mergeMetadata,
+    sortFiles,
+} from "utils/file";
+import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 
 export default function PublicCollectionGallery() {
     const token = useRef<string>(null);
@@ -118,16 +117,16 @@ export default function PublicCollectionGallery() {
         disabled: shouldDisableDropzone,
     });
     const {
-        selectedFiles: fileSelectorFiles,
-        open: openFileSelector,
         getInputProps: getFileSelectorInputProps,
+        openSelector: openFileSelector,
+        selectedFiles: fileSelectorFiles,
     } = useFileInput({
         directory: false,
     });
     const {
-        selectedFiles: folderSelectorFiles,
-        open: openFolderSelector,
         getInputProps: getFolderSelectorInputProps,
+        openSelector: openFolderSelector,
+        selectedFiles: folderSelectorFiles,
     } = useFileInput({
         directory: true,
     });
@@ -543,14 +542,13 @@ export default function PublicCollectionGallery() {
                 photoListFooter,
             }}
         >
-            <FullScreenDropZone
-                getDragAndDropRootProps={getDragAndDropRootProps}
-            >
+            <FullScreenDropZone {...{ getDragAndDropRootProps }}>
                 <UploadSelectorInputs
-                    getDragAndDropInputProps={getDragAndDropInputProps}
-                    getFileSelectorInputProps={getFileSelectorInputProps}
-                    getFolderSelectorInputProps={getFolderSelectorInputProps}
-                    getZipFileSelectorInputProps={undefined}
+                    {...{
+                        getDragAndDropInputProps,
+                        getFileSelectorInputProps,
+                        getFolderSelectorInputProps,
+                    }}
                 />
                 <SharedAlbumNavbar
                     showUploadButton={

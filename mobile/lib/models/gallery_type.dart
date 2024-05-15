@@ -32,12 +32,12 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.locationTag:
       case GalleryType.quickLink:
       case GalleryType.uncategorized:
+      case GalleryType.sharedCollection:
         return true;
 
       case GalleryType.hiddenSection:
       case GalleryType.hiddenOwnedCollection:
       case GalleryType.trash:
-      case GalleryType.sharedCollection:
         return false;
     }
   }

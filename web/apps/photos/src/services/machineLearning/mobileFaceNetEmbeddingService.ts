@@ -4,7 +4,7 @@ import {
     FaceEmbeddingMethod,
     FaceEmbeddingService,
     Versioned,
-} from "types/machineLearning";
+} from "services/ml/types";
 
 export const mobileFaceNetFaceSize = 112;
 

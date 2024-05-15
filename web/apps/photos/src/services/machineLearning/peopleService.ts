@@ -1,14 +1,8 @@
 import log from "@/next/log";
-import { Face, MLSyncContext, Person } from "types/machineLearning";
-import {
-    findFirstIfSorted,
-    getAllFacesFromMap,
-    getLocalFile,
-    getOriginalImageBitmap,
-    isDifferentOrOld,
-} from "utils/machineLearning";
-import mlIDbStorage from "utils/storage/mlIDbStorage";
-import FaceService from "./faceService";
+import mlIDbStorage from "services/ml/db";
+import { Face, MLSyncContext, Person } from "services/ml/types";
+import FaceService, { isDifferentOrOld } from "./faceService";
+import { getLocalFile, getOriginalImageBitmap } from "./readerService";
 
 class PeopleService {
     async syncPeopleIndex(syncContext: MLSyncContext) {
@@ -92,3 +86,28 @@ class PeopleService {
 }
 
 export default new PeopleService();
+
+function findFirstIfSorted<T>(
+    elements: Array<T>,
+    comparator: (a: T, b: T) => number,
+) {
+    if (!elements || elements.length < 1) {
+        return;
+    }
+    let first = elements[0];
+
+    for (let i = 1; i < elements.length; i++) {
+        const comp = comparator(elements[i], first);
+        if (comp < 0) {
+            first = elements[i];
+        }
+    }
+
+    return first;
+}
+
+function getAllFacesFromMap(allFacesMap: Map<number, Array<Face>>) {
+    const allFaces = [...allFacesMap.values()].flat();
+
+    return allFaces;
+}

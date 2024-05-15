@@ -9,6 +9,9 @@ import FileType from "file-type";
  *
  * It first peeks into the file's initial contents to detect the MIME type. If
  * that doesn't give any results, it tries to deduce it from the file's name.
+ *
+ * For the list of returned extensions, see (for our installed version):
+ * https://github.com/sindresorhus/file-type/blob/main/core.d.ts
  */
 export const detectMediaMIMEType = async (file: File): Promise<string> => {
     const chunkSizeForTypeDetection = 4100;

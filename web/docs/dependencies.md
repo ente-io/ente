@@ -133,17 +133,27 @@ some cases.
 
 ## Media
 
--   ["jszip"](https://github.com/Stuk/jszip) is used for reading zip files in
+-   [jszip](https://github.com/Stuk/jszip) is used for reading zip files in
     JavaScript (Live photos are zip files under the hood).
 
--   ["file-type"](https://github.com/sindresorhus/file-type) is used for MIME
-    type detection. We are at an old version 16.5.4 because v17 onwards the
-    package became ESM only - for our limited use case, the custom Webpack
-    configuration that entails is not worth the upgrade.
+-   [file-type](https://github.com/sindresorhus/file-type) is used for MIME type
+    detection. We are at an old version 16.5.4 because v17 onwards the package
+    became ESM only - for our limited use case, the custom Webpack configuration
+    that entails is not worth the upgrade.
+
+-   [heic-convert](https://github.com/catdad-experiments/heic-convert) is used
+    for converting HEIC files (which browsers don't natively support) into JPEG.
+
+## Processing
+
+-   [comlink](https://github.com/GoogleChromeLabs/comlink) provides a minimal
+    layer on top of Web Workers to make them more easier to use.
 
 ## Photos app specific
 
-### Misc
+-   [react-dropzone](https://github.com/react-dropzone/react-dropzone/) is a
+    React hook to create a drag-and-drop input zone.
 
--   "sanitize-filename" is for converting arbitrary strings into strings that
-    are suitable for being used as filenames.
+-   [sanitize-filename](https://github.com/parshap/node-sanitize-filename) is
+    for converting arbitrary strings into strings that are suitable for being
+    used as filenames.
