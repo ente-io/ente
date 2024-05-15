@@ -6969,10 +6969,10 @@ class S {
     );
   }
 
-  /// `Find all photos of a person`
+  /// `Persons will be shown here once local analysis is complete`
   String get searchFaceEmptySection {
     return Intl.message(
-      'Find all photos of a person',
+      'Persons will be shown here once local analysis is complete',
       name: 'searchFaceEmptySection',
       desc: '',
       args: [],
