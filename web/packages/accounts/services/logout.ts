@@ -20,31 +20,31 @@ export const accountLogout = async () => {
     try {
         await remoteLogout();
     } catch (e) {
-        log.error("Ignoring error during POST /users/logout", e);
+        log.error("Ignoring error during logout (remote)", e);
     }
     try {
         InMemoryStore.clear();
     } catch (e) {
-        log.error("Ignoring error when clearing in-memory store", e);
+        log.error("Ignoring error during logout (in-memory store)", e);
     }
     try {
         clearKeys();
     } catch (e) {
-        log.error("Ignoring error when clearing keys", e);
+        log.error("Ignoring error during logout (session store)", e);
     }
     try {
         clearData();
     } catch (e) {
-        log.error("Ignoring error when clearing data", e);
-    }
-    try {
-        await clearCaches();
-    } catch (e) {
-        log.error("Ignoring error when clearing caches", e);
+        log.error("Ignoring error during logout (local storage)", e);
     }
     try {
         await localForage.clear();
     } catch (e) {
-        log.error("Ignoring error when clearing local forage", e);
+        log.error("Ignoring error during logout (local forage)", e);
+    }
+    try {
+        await clearCaches();
+    } catch (e) {
+        log.error("Ignoring error during logout (cache)", e);
     }
 };
