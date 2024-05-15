@@ -457,6 +457,8 @@ class FilesDB {
     List<EnteFile> files, {
     ConflictAlgorithm conflictAlgorithm = ConflictAlgorithm.replace,
   }) async {
+    if (files.isEmpty) return;
+
     final startTime = DateTime.now();
     final db = await sqliteAsyncDB;
 
