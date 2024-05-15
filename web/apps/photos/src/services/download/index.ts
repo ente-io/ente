@@ -6,7 +6,6 @@ import { APPS } from "@ente/shared/apps/constants";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
 import { CustomError } from "@ente/shared/error";
-import { Events, eventBus } from "@ente/shared/events";
 import { isPlaybackPossible } from "@ente/shared/media/video-playback";
 import { Remote } from "comlink";
 import isElectron from "is-electron";
@@ -107,7 +106,6 @@ class DownloadManagerImpl {
         // }
         this.cryptoWorker = await ComlinkCryptoWorker.getInstance();
         this.ready = true;
-        eventBus.on(Events.LOGOUT, this.logoutHandler.bind(this), this);
     }
 
     private ensureInitialized() {
@@ -117,21 +115,15 @@ class DownloadManagerImpl {
             );
     }
 
-    private async logoutHandler() {
-        try {
-            log.info("downloadManger logoutHandler started");
-            this.ready = false;
-            this.cryptoWorker = null;
-            this.downloadClient = null;
-            this.fileObjectURLPromises.clear();
-            this.fileConversionPromises.clear();
-            this.thumbnailObjectURLPromises.clear();
-            this.fileDownloadProgress.clear();
-            this.progressUpdater = () => {};
-            log.info("downloadManager logoutHandler completed");
-        } catch (e) {
-            log.error("downloadManager logoutHandler failed", e);
-        }
+    async logout() {
+        this.ready = false;
+        this.cryptoWorker = null;
+        this.downloadClient = null;
+        this.fileObjectURLPromises.clear();
+        this.fileConversionPromises.clear();
+        this.thumbnailObjectURLPromises.clear();
+        this.fileDownloadProgress.clear();
+        this.progressUpdater = () => {};
     }
 
     updateToken(token: string, passwordToken?: string) {
