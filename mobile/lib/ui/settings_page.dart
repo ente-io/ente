@@ -55,9 +55,6 @@ class SettingsPage extends StatelessWidget {
     final enteTextTheme = getEnteTextTheme(context);
     final List<Widget> contents = [];
     const sectionSpacing = SizedBox(height: 8);
-    if (kDebugMode) {
-      contents.addAll([const FaceDebugSectionWidget(), sectionSpacing]);
-    }
     contents.add(
       GestureDetector(
         onDoubleTap: () {

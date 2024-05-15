@@ -47,7 +47,7 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
   @override
   Widget build(BuildContext context) {
     return ExpandableMenuItemWidget(
-      title: "Face Beta",
+      title: "Faces Debug",
       selectionOptionsWidget: _getSectionOptions(context),
       leadingIcon: Icons.bug_report_outlined,
     );
