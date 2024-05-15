@@ -6,12 +6,11 @@ import { getToken, getUserID } from "@ente/shared/storage/localStorage/helpers";
 import debounce from "debounce";
 import PQueue from "p-queue";
 import mlIDbStorage from "services/ml/db";
+import { createFaceComlinkWorker } from "services/ml/face";
+import type { DedicatedMLWorker } from "services/ml/face.worker";
 import { MLSyncResult } from "services/ml/types";
 import { EnteFile } from "types/file";
-import { getDedicatedMLWorker } from "utils/comlink/ComlinkMLWorker";
-import { DedicatedMLWorker } from "worker/ml.worker";
 import { logQueueStats } from "./machineLearningService";
-
 const LIVE_SYNC_IDLE_DEBOUNCE_SEC = 30;
 const LIVE_SYNC_QUEUE_TIMEOUT_SEC = 300;
 const LOCAL_FILES_UPDATED_DEBOUNCE_SEC = 30;
@@ -226,7 +225,7 @@ class MLWorkManager {
     // Live Sync
     private async getLiveSyncWorker() {
         if (!this.liveSyncWorker) {
-            this.liveSyncWorker = getDedicatedMLWorker("ml-sync-live");
+            this.liveSyncWorker = createFaceComlinkWorker("ml-sync-live");
         }
 
         return await this.liveSyncWorker.remote;
@@ -274,7 +273,7 @@ class MLWorkManager {
     // Sync Job
     private async getSyncJobWorker() {
         if (!this.syncJobWorker) {
-            this.syncJobWorker = getDedicatedMLWorker("ml-sync-job");
+            this.syncJobWorker = createFaceComlinkWorker("ml-sync-job");
         }
 
         return await this.syncJobWorker.remote;
