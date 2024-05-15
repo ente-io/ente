@@ -25,19 +25,20 @@ export interface JobConfig {
     backoffMultiplier: number;
 }
 
-export interface JobResult {
+export interface MLSyncJobResult {
     shouldBackoff: boolean;
+    mlSyncResult: MLSyncResult;
 }
 
-export class SimpleJob<R extends JobResult> {
+export class MLSyncJob {
     private config: JobConfig;
-    private runCallback: () => Promise<R>;
+    private runCallback: () => Promise<MLSyncJobResult>;
     private state: JobState;
     private stopped: boolean;
     private intervalSec: number;
     private nextTimeoutId: ReturnType<typeof setTimeout>;
 
-    constructor(config: JobConfig, runCallback: () => Promise<R>) {
+    constructor(config: JobConfig, runCallback: () => Promise<MLSyncJobResult>) {
         this.config = config;
         this.runCallback = runCallback;
         this.state = "NotScheduled";
@@ -108,12 +109,6 @@ export class SimpleJob<R extends JobResult> {
         log.info("Cleared next job");
     }
 }
-
-export interface MLSyncJobResult extends JobResult {
-    mlSyncResult: MLSyncResult;
-}
-
-export class MLSyncJob extends SimpleJob<MLSyncJobResult> {}
 
 class MLWorkManager {
     private mlSyncJob: MLSyncJob;
