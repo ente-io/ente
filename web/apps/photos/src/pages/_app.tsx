@@ -26,7 +26,6 @@ import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { MessageContainer } from "@ente/shared/components/MessageContainer";
 import AppNavbar from "@ente/shared/components/Navbar/app";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
-import { Events, eventBus } from "@ente/shared/events";
 import { useLocalState } from "@ente/shared/hooks/useLocalState";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
@@ -52,7 +51,7 @@ import "photoswipe/dist/photoswipe.css";
 import { createContext, useEffect, useRef, useState } from "react";
 import LoadingBar from "react-top-loading-bar";
 import DownloadManager from "services/download";
-import exportService, { resumeExportsIfNeeded } from "services/export";
+import { resumeExportsIfNeeded } from "services/export";
 import { photosLogout } from "services/logout";
 import {
     getMLSearchConfig,

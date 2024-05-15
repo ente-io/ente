@@ -3,7 +3,6 @@ import { putAttributes } from "@ente/accounts/api/user";
 import { ApiError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { getEndpoint, getFamilyPortalURL } from "@ente/shared/network/api";
-import localForage from "@ente/shared/storage/localForage";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import {
     getToken,

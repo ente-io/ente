@@ -329,7 +329,7 @@ export default function Gallery() {
             await getRecoveryKey();
             return true;
         } catch (e) {
-            await logout();
+            logout();
             return false;
         }
     };
