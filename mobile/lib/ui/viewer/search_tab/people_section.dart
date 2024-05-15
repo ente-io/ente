@@ -23,23 +23,22 @@ import 'package:photos/ui/viewer/search/result/search_section_all_page.dart';
 import "package:photos/ui/viewer/search/search_section_cta.dart";
 import "package:photos/utils/navigation_util.dart";
 
-class SearchSection extends StatefulWidget {
-  final SectionType sectionType;
+class PeopleSection extends StatefulWidget {
+  final SectionType sectionType = SectionType.face;
   final List<SearchResult> examples;
   final int limit;
 
-  const SearchSection({
+  const PeopleSection({
     Key? key,
-    required this.sectionType,
     required this.examples,
-    required this.limit,
+    this.limit = 7,
   }) : super(key: key);
 
   @override
-  State<SearchSection> createState() => _SearchSectionState();
+  State<PeopleSection> createState() => _PeopleSectionState();
 }
 
-class _SearchSectionState extends State<SearchSection> {
+class _PeopleSectionState extends State<PeopleSection> {
   late List<SearchResult> _examples;
   final streamSubscriptions = <StreamSubscription>[];
 
@@ -71,7 +70,7 @@ class _SearchSectionState extends State<SearchSection> {
   }
 
   @override
-  void didUpdateWidget(covariant SearchSection oldWidget) {
+  void didUpdateWidget(covariant PeopleSection oldWidget) {
     super.didUpdateWidget(oldWidget);
     _examples = widget.examples;
   }

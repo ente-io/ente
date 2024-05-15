@@ -114,10 +114,9 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
                   itemBuilder: (context, index) {
                     switch (searchTypes[index]) {
                       case SectionType.face:
-                        return SearchSection(
-                          sectionType: SectionType.face,
-                          examples: snapshot.data!.elementAt(index),
-                          limit: 7,
+                        return PeopleSection(
+                          examples: snapshot.data!.elementAt(index)
+                              as List<GenericSearchResult>,
                         );
                       case SectionType.album:
                         // return const SizedBox.shrink();
