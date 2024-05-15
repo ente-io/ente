@@ -31,7 +31,7 @@ export const photosLogout = async () => {
     const electron = globalThis.electron;
     if (electron) {
         try {
-            await mlWorkManager.setMlSearchEnabled(false);
+            await mlWorkManager.logout();
         } catch (e) {
             log.error("Ignoring error during logout (ML)", e);
         }

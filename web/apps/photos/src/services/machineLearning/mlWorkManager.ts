@@ -175,16 +175,12 @@ class MLWorkManager {
         }
     }
 
-    private async logoutHandler() {
-        log.info("logoutHandler");
-        try {
-            this.stopSyncJob();
-            this.mlSyncJob = undefined;
-            await this.terminateLiveSyncWorker();
-            await mlIDbStorage.clearMLDB();
-        } catch (e) {
-            log.error("Failed in ML logout Handler", e);
-        }
+    async logout() {
+        this.setMlSearchEnabled(false);
+        this.stopSyncJob();
+        this.mlSyncJob = undefined;
+        await this.terminateLiveSyncWorker();
+        await mlIDbStorage.clearMLDB();
     }
 
     private async fileUploadedHandler(arg: {
