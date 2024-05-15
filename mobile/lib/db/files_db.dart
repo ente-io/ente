@@ -15,6 +15,7 @@ import 'package:photos/models/location/location.dart';
 import "package:photos/models/metadata/common_keys.dart";
 import "package:photos/services/filter/db_filters.dart";
 import 'package:photos/utils/file_uploader_util.dart';
+import "package:photos/utils/primitive_wrapper.dart";
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_migration/sqflite_migration.dart';
 import 'package:sqlite_async/sqlite_async.dart' as sqlite_async;
@@ -89,6 +90,39 @@ class FilesDB {
     ...updateIndexes(),
     ...createEntityDataTable(),
     ...addAddedTime(),
+  ];
+
+  static const List<String> _columnNames = [
+    columnGeneratedID,
+    columnLocalID,
+    columnUploadedFileID,
+    columnOwnerID,
+    columnCollectionID,
+    columnTitle,
+    columnDeviceFolder,
+    columnLatitude,
+    columnLongitude,
+    columnFileType,
+    columnModificationTime,
+    columnEncryptedKey,
+    columnKeyDecryptionNonce,
+    columnFileDecryptionHeader,
+    columnThumbnailDecryptionHeader,
+    columnMetadataDecryptionHeader,
+    columnCreationTime,
+    columnUpdationTime,
+    columnFileSubType,
+    columnDuration,
+    columnExif,
+    columnHash,
+    columnMetadataVersion,
+    columnMMdEncodedJson,
+    columnMMdVersion,
+    columnMMdVisibility,
+    columnPubMMdEncodedJson,
+    columnPubMMdVersion,
+    columnFileSize,
+    columnAddedTime,
   ];
 
   final dbConfig = MigrationConfig(
@@ -455,6 +489,128 @@ class FilesDB {
     );
   }
 
+  Future<void> insertMultipleNew(
+    List<EnteFile> files, {
+    ConflictAlgorithm conflictAlgorithm = ConflictAlgorithm.replace,
+  }) async {
+    final startTime = DateTime.now();
+    final db = await sqliteAsyncDB;
+
+    ///Strong batch counter in an object so that it gets passed by reference
+    ///Primitives are passed by value
+    final genIdNotNullbatchCounter = PrimitiveWrapper(0);
+    final genIdNullbatchCounter = PrimitiveWrapper(0);
+    final genIdNullParameterSets = <List<Object?>>[];
+    final genIdNotNullParameterSets = <List<Object?>>[];
+
+    final genIdNullcolumnNames =
+        _columnNames.where((element) => element != columnGeneratedID);
+
+    for (EnteFile file in files) {
+      final fileGenIdIsNull = file.generatedID == null;
+
+      if (!fileGenIdIsNull) {
+        await _batchAndInsertFile(
+          file,
+          conflictAlgorithm,
+          db,
+          genIdNotNullParameterSets,
+          genIdNotNullbatchCounter,
+          isGenIdNull: fileGenIdIsNull,
+        );
+      } else {
+        await _batchAndInsertFile(
+          file,
+          conflictAlgorithm,
+          db,
+          genIdNullParameterSets,
+          genIdNullbatchCounter,
+          isGenIdNull: fileGenIdIsNull,
+        );
+      }
+    }
+
+    if (genIdNotNullbatchCounter.value > 0) {
+      await _insertBatch(
+        conflictAlgorithm,
+        _columnNames,
+        db,
+        genIdNotNullParameterSets,
+      );
+      genIdNotNullbatchCounter.value = 0;
+      genIdNotNullParameterSets.clear();
+    }
+    if (genIdNullbatchCounter.value > 0) {
+      await _insertBatch(
+        conflictAlgorithm,
+        genIdNullcolumnNames,
+        db,
+        genIdNullParameterSets,
+      );
+      genIdNullbatchCounter.value = 0;
+      genIdNullParameterSets.clear();
+    }
+
+    final endTime = DateTime.now();
+    final duration = Duration(
+      microseconds:
+          endTime.microsecondsSinceEpoch - startTime.microsecondsSinceEpoch,
+    );
+    _logger.info(
+      "Batch insert of " +
+          files.length.toString() +
+          " took " +
+          duration.inMilliseconds.toString() +
+          "ms.",
+    );
+  }
+
+  @pragma('vm:prefer-inline')
+  Future<void> _batchAndInsertFile(
+    EnteFile file,
+    ConflictAlgorithm conflictAlgorithm,
+    sqlite_async.SqliteDatabase db,
+    List<List<Object?>> parameterSets,
+    PrimitiveWrapper batchCounter, {
+    required bool isGenIdNull,
+  }) async {
+    parameterSets.add(_getParameterSetForFileV2(file));
+    batchCounter.value++;
+
+    final columnNames = isGenIdNull
+        ? _columnNames.where((column) => column != columnGeneratedID)
+        : _columnNames;
+    if (batchCounter.value == 400) {
+      _logger.info("Inserting batch with genIdNull: $isGenIdNull");
+      await _insertBatch(conflictAlgorithm, columnNames, db, parameterSets);
+      // await db.executeBatch(
+      //   '''
+      //     INSERT OR ${conflictAlgorithm.name.toUpperCase()} INTO $filesTable($columnNames) VALUES($valuesPlaceholders)
+      //                             ''',
+      //   parameterSets,
+      // );
+      batchCounter.value = 0;
+      parameterSets.clear();
+    }
+  }
+
+  Future<void> _insertBatch(
+    ConflictAlgorithm conflictAlgorithm,
+    Iterable<String> columnNames,
+    sqlite_async.SqliteDatabase db,
+    List<List<Object?>> parameterSets,
+  ) async {
+    final valuesPlaceholders = List.filled(columnNames.length, "?").join(",");
+    final columnNamesJoined = columnNames.join(",");
+    await db.executeBatch(
+      '''
+          INSERT OR ${conflictAlgorithm.name.toUpperCase()} INTO $filesTable($columnNamesJoined) VALUES($valuesPlaceholders)
+                                  ''',
+      parameterSets,
+    );
+  }
+
+  @pragma('vm:prefer-inline')
   Future<int> insert(EnteFile file) async {
     _logger.info("Inserting $file");
     final db = await instance.database;
@@ -1687,7 +1843,7 @@ class FilesDB {
     return values;
   }
 
-  List<Object?> _getParameterSetForFileNew(
+  List<Object?> _getParameterSetForFileV2(
     EnteFile file, {
     bool omitNullGenId = true,
   }) {
