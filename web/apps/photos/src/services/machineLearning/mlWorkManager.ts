@@ -123,7 +123,6 @@ class MLWorkManager {
         });
         this.mlSearchEnabled = false;
 
-        eventBus.on(Events.LOGOUT, this.logoutHandler.bind(this), this);
         this.debouncedLiveSyncIdle = debounce(
             () => this.onLiveSyncIdle(),
             LIVE_SYNC_IDLE_DEBOUNCE_SEC * 1000,

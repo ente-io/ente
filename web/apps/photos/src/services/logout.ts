@@ -1,6 +1,5 @@
 import log from "@/next/log";
 import { accountLogout } from "@ente/accounts/services/logout";
-import { Events, eventBus } from "@ente/shared/events";
 import { clipService } from "services/clip-service";
 import DownloadManager from "./download";
 import exportService from "./export";
@@ -47,11 +46,5 @@ export const photosLogout = async () => {
         } catch (e) {
             log.error("Ignoring error during logout (electron)", e);
         }
-    }
-
-    try {
-        eventBus.emit(Events.LOGOUT);
-    } catch (e) {
-        log.error("Ignoring error in event-bus logout handlers", e);
     }
 };
