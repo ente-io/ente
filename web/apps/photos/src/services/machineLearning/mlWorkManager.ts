@@ -20,7 +20,6 @@ export type JobState = "Scheduled" | "Running" | "NotScheduled";
 
 export interface JobConfig {
     intervalSec: number;
-    maxItervalSec: number;
     backoffMultiplier: number;
 }
 
@@ -30,7 +29,6 @@ export interface MLSyncJobResult {
 }
 
 export class MLSyncJob {
-    private config: JobConfig;
     private runCallback: () => Promise<MLSyncJobResult>;
     private state: JobState;
     private stopped: boolean;
@@ -38,21 +36,14 @@ export class MLSyncJob {
     private nextTimeoutId: ReturnType<typeof setTimeout>;
 
     constructor(runCallback: () => Promise<MLSyncJobResult>) {
-        this.config = {
-            intervalSec: 5,
-            // TODO: finalize this after seeing effects on and from machine sleep
-            maxItervalSec: 960,
-            backoffMultiplier: 2,
-        };
-
         this.runCallback = runCallback;
         this.state = "NotScheduled";
         this.stopped = true;
-        this.intervalSec = this.config.intervalSec;
+        this.resetInterval();
     }
 
     public resetInterval() {
-        this.intervalSec = this.config.intervalSec;
+        this.intervalSec = 5;
     }
 
     public start() {
@@ -85,10 +76,7 @@ export class MLSyncJob {
         try {
             const jobResult = await this.runCallback();
             if (jobResult && jobResult.shouldBackoff) {
-                this.intervalSec = Math.min(
-                    this.config.maxItervalSec,
-                    this.intervalSec * this.config.backoffMultiplier,
-                );
+                this.intervalSec = Math.min(960, this.intervalSec * 2);
             } else {
                 this.resetInterval();
             }
