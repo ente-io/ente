@@ -31,8 +31,9 @@ bip39.setDefaultWordlist("english");
 export default function Recover({
     appContext,
     twoFactorType = TwoFactorType.TOTP,
-    logout,
 }: PageProps) {
+    const { logout } = appContext;
+
     const [encryptedTwoFactorSecret, setEncryptedTwoFactorSecret] =
         useState<B64EncryptionResult>(null);
     const [sessionID, setSessionID] = useState(null);

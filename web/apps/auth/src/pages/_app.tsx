@@ -130,9 +130,8 @@ export default function App({ Component, pageProps }: AppProps) {
             content: t("UNKNOWN_ERROR"),
         });
 
-    const logout = async () => {
-        await accountLogout();
-        router.push(PAGES.ROOT);
+    const logout = () => {
+        void accountLogout().then(() => router.push(PAGES.ROOT));
     };
 
     const title = isI18nReady

@@ -29,7 +29,9 @@ import {
 import { KeyAttributes, User } from "@ente/shared/user/types";
 import { useRouter } from "next/router";
 
-export default function Generate({ appContext, appName, logout }: PageProps) {
+export default function Generate({ appContext, appName }: PageProps) {
+    const { logout } = appContext;
+
     const [token, setToken] = useState<string>();
     const [user, setUser] = useState<User>();
     const [recoverModalView, setRecoveryModalView] = useState(false);

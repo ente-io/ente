@@ -52,7 +52,9 @@ import {
 } from "../services/srp";
 import { SRPAttributes } from "../types/srp";
 
-export default function Credentials({ appContext, appName, logout }: PageProps) {
+export default function Credentials({ appContext, appName }: PageProps) {
+    const { logout } = appContext;
+
     const [srpAttributes, setSrpAttributes] = useState<SRPAttributes>();
     const [keyAttributes, setKeyAttributes] = useState<KeyAttributes>();
     const [user, setUser] = useState<User>();

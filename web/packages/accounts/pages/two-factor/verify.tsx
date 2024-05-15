@@ -19,7 +19,11 @@ import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 
-export const TwoFactorVerify: React.FC<PageProps> = ({ logout }: PageProps) => {
+export const TwoFactorVerify: React.FC<PageProps> = ({
+    appContext,
+}: PageProps) => {
+    const { logout } = appContext;
+
     const [sessionID, setSessionID] = useState("");
 
     const router = useRouter();

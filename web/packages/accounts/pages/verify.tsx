@@ -32,7 +32,9 @@ import { PAGES } from "../constants/pages";
 import { configureSRP } from "../services/srp";
 import { SRPSetupAttributes } from "../types/srp";
 
-export default function VerifyPage({ appContext, appName, logout }: PageProps) {
+export default function VerifyPage({ appContext, appName }: PageProps) {
+    const { logout } = appContext;
+
     const [email, setEmail] = useState("");
     const [resend, setResend] = useState(0);
 
