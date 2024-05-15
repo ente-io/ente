@@ -5,7 +5,6 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:collection/collection.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
@@ -38,6 +37,7 @@ import 'package:photos/utils/file_download_util.dart';
 import 'package:photos/utils/file_uploader_util.dart';
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/multipart_upload_util.dart";
+import "package:photos/utils/network_util.dart";
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tuple/tuple.dart';
 import "package:uuid/uuid.dart";
@@ -354,18 +354,7 @@ class FileUploader {
     if (isForceUpload) {
       return;
     }
-    final List<ConnectivityResult> connections =
-        await (Connectivity().checkConnectivity());
-    bool canUploadUnderCurrentNetworkConditions = true;
-    if (!Configuration.instance.shouldBackupOverMobileData()) {
-      if (connections.any((element) => element == ConnectivityResult.mobile)) {
-        canUploadUnderCurrentNetworkConditions = false;
-      } else {
-        _logger.info(
-          "mobileBackupDisabled, backing up with connections: ${connections.map((e) => e.name).toString()}",
-        );
-      }
-    }
+    final canUploadUnderCurrentNetworkConditions = await canUseHighBandwidth();
 
     if (!canUploadUnderCurrentNetworkConditions) {
       throw WiFiUnavailableError();

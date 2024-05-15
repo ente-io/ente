@@ -46,6 +46,7 @@ import "package:photos/utils/file_util.dart";
 import 'package:photos/utils/image_ml_isolate.dart';
 import "package:photos/utils/image_ml_util.dart";
 import "package:photos/utils/local_settings.dart";
+import "package:photos/utils/network_util.dart";
 import "package:photos/utils/thumbnail_util.dart";
 import "package:synchronized/synchronized.dart";
 
@@ -85,7 +86,7 @@ class FaceMlService {
   final _computer = Computer.shared();
 
   bool isInitialized = false;
-  
+
   bool canRunMLController = false;
   bool isImageIndexRunning = false;
   bool isClusteringRunning = false;
@@ -651,6 +652,9 @@ class FaceMlService {
               rethrow;
             }
           }
+        }
+        if (!await canUseHighBandwidth()) {
+          continue;
         }
         final smallerChunks = chunk.chunks(_parallelismML);
         for (final smallestChunk in smallerChunks) {
