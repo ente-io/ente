@@ -1,11 +1,10 @@
 import { clearCaches } from "@/next/blob-cache";
 import log from "@/next/log";
 import InMemoryStore from "@ente/shared/storage/InMemoryStore";
-import loc } from "@ente/shared/storage/localForage";
+import localForage from "@ente/shared/storage/localForage";
 import { clearData } from "@ente/shared/storage/localStorage";
 import { clearKeys } from "@ente/shared/storage/sessionStorage";
 import { logout as remoteLogout } from "../api/user";
-import localForage from "@ente/shared/storage/localForage";
 
 /**
  * Logout sequence common to all apps that rely on the accounts package.

@@ -80,7 +80,7 @@ class CLIPService {
         this.liveEmbeddingExtractionQueue = new PQueue({
             concurrency: 1,
         });
-        eventBus.on(Events.LOGOUT, this.logoutHandler, this);
+        eventBus.on(Events.LOGOUT, this.logout, this);
     }
 
     isPlatformSupported = () => {

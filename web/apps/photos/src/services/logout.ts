@@ -1,6 +1,7 @@
 import log from "@/next/log";
 import { accountLogout } from "@ente/accounts/services/logout";
 import { Events, eventBus } from "@ente/shared/events";
+import { clipService } from "services/clip-service";
 
 /**
  * Logout sequence for the photos app.
@@ -12,6 +13,12 @@ import { Events, eventBus } from "@ente/shared/events";
 export const photosLogout = async () => {
     await accountLogout();
 
+    try {
+        await clipService.logout();
+    } catch (e) {
+        log.error("Ignoring error in CLIP logout", e);
+    }
+
     const electron = globalThis.electron;
     if (electron) {
         try {
@@ -20,6 +27,7 @@ export const photosLogout = async () => {
             log.error("Ignoring error in native side logout sequence", e);
         }
     }
+
     try {
         eventBus.emit(Events.LOGOUT);
     } catch (e) {
