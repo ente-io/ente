@@ -401,11 +401,11 @@ class FilesDB {
   }
 
   Future<void> clearTable() async {
-    final db = await instance.database;
-    await db.delete(filesTable);
-    await db.delete("device_files");
-    await db.delete("device_collections");
-    await db.delete("entities");
+    final db = await instance.sqliteAsyncDB;
+    await db.execute('DELETE FROM $filesTable');
+    await db.execute('DELETE FROM device_files');
+    await db.execute('DELETE FROM device_collections');
+    await db.execute('DELETE FROM entities');
   }
 
   Future<void> deleteDB() async {
@@ -1668,29 +1668,6 @@ class FilesDB {
     return convertToFiles(results);
   }
 
-  ///For insertion, the syntax is as follows:
-  ///INSERT INTO table (column1,column2 ,..)
-  ///VALUES( value1,	value2 ,...);
-  ///This method returns:
-  ///{
-  ///  'columns': 'column1,column2 ,..',
-  /// 'values': 'value1,	value2 ,...'
-  /// }
-  Map<String, String> _getColumnsAndValuesForInsertion(EnteFile file) {
-    final row = _getRowForFile(file);
-    final columns = <String>[];
-    final values = <String>[];
-    for (int i = 0; i < row.entries.length; i++) {
-      final entry = row.entries.elementAt(i);
-      columns.add(entry.key);
-      values.add(entry.value.toString());
-    }
-    return {
-      'columns': columns.join(', '),
-      'values': values.join(', '),
-    };
-  }
-
   String _getSetClauseForFile(EnteFile file) {
     final row = _getRowForFile(file);
     final setClause = <String>[];
@@ -1699,6 +1676,71 @@ class FilesDB {
       setClause.add('${entry.key} = ${entry.value}');
     }
     return setClause.join(', ');
+  }
+
+  List<Object?> _getParameterSetForFile(EnteFile file) {
+    final row = _getRowForFile(file);
+    final values = <Object?>[];
+    for (int i = 0; i < row.entries.length; i++) {
+      values.add(row.entries.elementAt(i).value);
+    }
+    return values;
+  }
+
+  List<Object?> _getParameterSetForFileNew(
+    EnteFile file, {
+    bool omitNullGenId = true,
+  }) {
+    final values = <Object?>[];
+    double? latitude;
+    double? longitude;
+    int? creationTime = file.creationTime;
+    if (file.pubMagicMetadata != null) {
+      if (file.pubMagicMetadata!.editedTime != null) {
+        creationTime = file.pubMagicMetadata!.editedTime;
+      }
+      if (file.pubMagicMetadata!.lat != null &&
+          file.pubMagicMetadata!.long != null) {
+        latitude = file.pubMagicMetadata!.lat;
+        longitude = file.pubMagicMetadata!.long;
+      }
+    }
+    if (file.generatedID != null || !omitNullGenId) {
+      values.add(file.generatedID);
+    }
+    values.addAll([
+      file.localID,
+      file.uploadedFileID ?? -1,
+      file.ownerID,
+      file.collectionID ?? -1,
+      file.title,
+      file.deviceFolder,
+      latitude,
+      longitude,
+      getInt(file.fileType),
+      file.modificationTime,
+      file.encryptedKey,
+      file.keyDecryptionNonce,
+      file.fileDecryptionHeader,
+      file.thumbnailDecryptionHeader,
+      file.metadataDecryptionHeader,
+      creationTime,
+      file.updationTime,
+      file.fileSubType ?? -1,
+      file.duration ?? 0,
+      file.exif,
+      file.hash,
+      file.metadataVersion,
+      file.mMdEncodedJson ?? {},
+      file.mMdVersion,
+      file.magicMetadata.visibility,
+      file.pubMmdEncodedJson ?? {},
+      file.pubMmdVersion,
+      file.fileSize,
+      file.addedTime ?? DateTime.now().microsecondsSinceEpoch,
+    ]);
+
+    return values;
   }
 
   String _getSetClauseForFileWithoutCollection(EnteFile file) {
