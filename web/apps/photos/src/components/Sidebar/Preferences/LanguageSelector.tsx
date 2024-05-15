@@ -9,9 +9,7 @@ import { t } from "i18next";
 import { useRouter } from "next/router";
 
 /**
- * Human readable name for each supported locale
- *
- * TODO (MR): This names themselves should be localized.
+ * Human readable name for each supported locale.
  */
 export const localeName = (locale: SupportedLocale) => {
     switch (locale) {

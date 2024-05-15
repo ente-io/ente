@@ -137,12 +137,10 @@ const checkForUpdatesAndNotify = async (mainWindow: BrowserWindow) => {
     const showUpdateDialog = (update: AppUpdate) =>
         mainWindow.webContents.send("appUpdateAvailable", update);
 
-    log.debug(() => "Attempting auto update");
-    await autoUpdater.downloadUpdate();
-
     let timeout: ReturnType<typeof setTimeout>;
     const fiveMinutes = 5 * 60 * 1000;
     autoUpdater.on("update-downloaded", () => {
+        log.info(`Update downloaded ${version}`);
         timeout = setTimeout(
             () => showUpdateDialog({ autoUpdatable: true, version }),
             fiveMinutes,
@@ -154,6 +152,9 @@ const checkForUpdatesAndNotify = async (mainWindow: BrowserWindow) => {
         log.error("Auto update failed", error);
         showUpdateDialog({ autoUpdatable: false, version });
     });
+
+    log.info(`Downloading update ${version}`);
+    await autoUpdater.downloadUpdate();
 };
 
 /**
