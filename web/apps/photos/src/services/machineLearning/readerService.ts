@@ -1,7 +1,6 @@
 import { FILE_TYPE } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
 import log from "@/next/log";
-import PQueue from "p-queue";
 import DownloadManager from "services/download";
 import { getLocalFiles } from "services/fileService";
 import { Dimensions } from "services/ml/geom";
@@ -110,18 +109,13 @@ async function getImageBlobBitmap(blob: Blob): Promise<ImageBitmap> {
     return await createImageBitmap(blob);
 }
 
-async function getOriginalFile(file: EnteFile, queue?: PQueue) {
-    let fileStream;
-    if (queue) {
-        fileStream = await queue.add(() => DownloadManager.getFile(file));
-    } else {
-        fileStream = await DownloadManager.getFile(file);
-    }
+async function getOriginalFile(file: EnteFile) {
+    const fileStream = await DownloadManager.getFile(file);
     return new Response(fileStream).blob();
 }
 
-async function getOriginalConvertedFile(file: EnteFile, queue?: PQueue) {
-    const fileBlob = await getOriginalFile(file, queue);
+async function getOriginalConvertedFile(file: EnteFile) {
+    const fileBlob = await getOriginalFile(file);
     if (file.metadata.fileType === FILE_TYPE.IMAGE) {
         return await getRenderableImage(file.metadata.title, fileBlob);
     } else {
@@ -133,8 +127,8 @@ async function getOriginalConvertedFile(file: EnteFile, queue?: PQueue) {
     }
 }
 
-export async function getOriginalImageBitmap(file: EnteFile, queue?: PQueue) {
-    const fileBlob = await getOriginalConvertedFile(file, queue);
+export async function getOriginalImageBitmap(file: EnteFile) {
+    const fileBlob = await getOriginalConvertedFile(file);
     log.info("[MLService] Got file: ", file.id.toString());
     return getImageBlobBitmap(fileBlob);
 }
