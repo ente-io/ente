@@ -80,7 +80,6 @@ class CLIPService {
         this.liveEmbeddingExtractionQueue = new PQueue({
             concurrency: 1,
         });
-        eventBus.on(Events.LOGOUT, this.logout, this);
     }
 
     isPlatformSupported = () => {
@@ -95,7 +94,6 @@ class CLIPService {
             await this.removeOnFileUploadListener();
         }
     }
-
 
     setupOnFileUploadListener = async () => {
         try {

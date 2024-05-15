@@ -190,14 +190,6 @@ export default function App({ Component, pageProps }: AppProps) {
             }
         };
         loadMlSearchState();
-        try {
-            eventBus.on(Events.LOGOUT, () => {
-                setMlSearchEnabled(false);
-                mlWorkManager.setMlSearchEnabled(false);
-            });
-        } catch (e) {
-            log.error("Error while subscribing to logout event", e);
-        }
     }, []);
 
     useEffect(() => {
@@ -339,6 +331,7 @@ export default function App({ Component, pageProps }: AppProps) {
         });
 
     const logout = () => {
+        setMlSearchEnabled(false);
         void photosLogout().then(() => router.push(PAGES.ROOT));
     };
 
