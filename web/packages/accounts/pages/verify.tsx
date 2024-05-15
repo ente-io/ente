@@ -16,7 +16,7 @@ import SingleInputForm, {
 import { ApiError } from "@ente/shared/error";
 import { getAccountsURL } from "@ente/shared/network/api";
 import InMemoryStore, { MS_KEYS } from "@ente/shared/storage/InMemoryStore";
-import { clearFiles } from "@ente/shared/storage/localForage/helpers";
+import localForage from "@ente/shared/storage/localForage";
 import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
 import {
     getLocalReferralSource,
@@ -29,11 +29,10 @@ import { HttpStatusCode } from "axios";
 import { useRouter } from "next/router";
 import { putAttributes, sendOtt, verifyOtt } from "../api/user";
 import { PAGES } from "../constants/pages";
-import { logoutUser } from "../services/logout";
 import { configureSRP } from "../services/srp";
 import { SRPSetupAttributes } from "../types/srp";
 
-export default function VerifyPage({ appContext, appName }: PageProps) {
+export default function VerifyPage({ appContext, appName, logout }: PageProps) {
     const [email, setEmail] = useState("");
     const [resend, setResend] = useState(0);
 
@@ -121,7 +120,7 @@ export default function VerifyPage({ appContext, appName }: PageProps) {
                         await configureSRP(srpSetupAttributes);
                     }
                 }
-                clearFiles();
+                localForage.clear();
                 setIsFirstLogin(true);
                 const redirectURL = InMemoryStore.get(MS_KEYS.REDIRECT_URL);
                 InMemoryStore.delete(MS_KEYS.REDIRECT_URL);
@@ -191,7 +190,7 @@ export default function VerifyPage({ appContext, appName }: PageProps) {
                     )}
                     {resend === 1 && <span>{t("SENDING")}</span>}
                     {resend === 2 && <span>{t("SENT")}</span>}
-                    <LinkButton onClick={logoutUser}>
+                    <LinkButton onClick={logout}>
                         {t("CHANGE_EMAIL")}
                     </LinkButton>
                 </FormPaperFooter>

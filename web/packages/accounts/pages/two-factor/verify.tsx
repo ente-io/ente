@@ -3,7 +3,7 @@ import VerifyTwoFactor, {
     VerifyTwoFactorCallback,
 } from "@ente/accounts/components/two-factor/VerifyForm";
 import { PAGES } from "@ente/accounts/constants/pages";
-import { logoutUser } from "@ente/accounts/services/logout";
+
 import type { PageProps } from "@ente/shared/apps/types";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
@@ -19,7 +19,7 @@ import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 
-export const TwoFactorVerify: React.FC<PageProps> = () => {
+export const TwoFactorVerify: React.FC<PageProps> = ({ logout }: PageProps) => {
     const [sessionID, setSessionID] = useState("");
 
     const router = useRouter();
@@ -60,7 +60,7 @@ export const TwoFactorVerify: React.FC<PageProps> = () => {
                 e instanceof ApiError &&
                 e.httpStatusCode === HttpStatusCode.NotFound
             ) {
-                logoutUser();
+                logout();
             } else {
                 throw e;
             }
@@ -79,7 +79,7 @@ export const TwoFactorVerify: React.FC<PageProps> = () => {
                     >
                         {t("LOST_DEVICE")}
                     </LinkButton>
-                    <LinkButton onClick={logoutUser}>
+                    <LinkButton onClick={logout}>
                         {t("CHANGE_EMAIL")}
                     </LinkButton>
                 </FormPaperFooter>

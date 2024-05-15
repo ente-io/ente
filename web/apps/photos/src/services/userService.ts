@@ -1,7 +1,5 @@
 import log from "@/next/log";
 import { putAttributes } from "@ente/accounts/api/user";
-import { logoutUser } from "@ente/accounts/services/user";
-import { getRecoveryKey } from "@ente/shared/crypto/helpers";
 import { ApiError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { getEndpoint, getFamilyPortalURL } from "@ente/shared/network/api";
@@ -102,10 +100,6 @@ export const getRoadmapRedirectURL = async () => {
         log.error("failed to get roadmap url", e);
         throw e;
     }
-};
-
-export const clearFiles = async () => {
-    await localForage.clear();
 };
 
 export const isTokenValid = async (token: string) => {

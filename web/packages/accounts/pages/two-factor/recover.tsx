@@ -2,7 +2,6 @@ import log from "@/next/log";
 import { recoverTwoFactor, removeTwoFactor } from "@ente/accounts/api/user";
 import { PAGES } from "@ente/accounts/constants/pages";
 import { TwoFactorType } from "@ente/accounts/constants/twofactor";
-import { logoutUser } from "@ente/accounts/services/logout";
 import { PageProps } from "@ente/shared/apps/types";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import { DialogBoxAttributesV2 } from "@ente/shared/components/DialogBoxV2/types";
@@ -32,6 +31,7 @@ bip39.setDefaultWordlist("english");
 export default function Recover({
     appContext,
     twoFactorType = TwoFactorType.TOTP,
+    logout,
 }: PageProps) {
     const [encryptedTwoFactorSecret, setEncryptedTwoFactorSecret] =
         useState<B64EncryptionResult>(null);
@@ -77,7 +77,7 @@ export default function Recover({
                     e instanceof ApiError &&
                     e.httpStatusCode === HttpStatusCode.NotFound
                 ) {
-                    logoutUser();
+                    logout();
                 } else {
                     log.error("two factor recovery page setup failed", e);
                     setDoesHaveEncryptedRecoveryKey(false);

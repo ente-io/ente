@@ -687,7 +687,7 @@ export default function Gallery() {
     }, [collections, hiddenCollections]);
 
     const showSessionExpiredMessage = () => {
-        setDialogMessage(getSessionExpiredMessage());
+        setDialogMessage(getSessionExpiredMessage(logout));
     };
 
     const syncWithRemote = async (force = false, silent = false) => {

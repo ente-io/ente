@@ -1,10 +1,11 @@
 import { clearCaches } from "@/next/blob-cache";
 import log from "@/next/log";
 import InMemoryStore from "@ente/shared/storage/InMemoryStore";
-import { clearFiles } from "@ente/shared/storage/localForage";
+import loc } from "@ente/shared/storage/localForage";
 import { clearData } from "@ente/shared/storage/localStorage";
 import { clearKeys } from "@ente/shared/storage/sessionStorage";
 import { logout as remoteLogout } from "../api/user";
+import localForage from "@ente/shared/storage/localForage";
 
 /**
  * Logout sequence common to all apps that rely on the accounts package.
@@ -43,8 +44,8 @@ export const accountLogout = async () => {
         log.error("Ignoring error when clearing caches", e);
     }
     try {
-        await clearFiles();
+        await localForage.clear();
     } catch (e) {
-        log.error("Ignoring error when clearing files", e);
+        log.error("Ignoring error when clearing local forage", e);
     }
 };

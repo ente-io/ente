@@ -10,4 +10,5 @@ export interface PageProps {
     };
     appName: APPS;
     twoFactorType?: TwoFactorType;
+    logout: () => void;
 }

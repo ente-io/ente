@@ -11,7 +11,3 @@ if (haveWindow()) {
 }
 
 export default localForage;
-
-export const clearFiles = async () => {
-    await localForage.clear();
-};

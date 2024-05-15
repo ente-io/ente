@@ -45,7 +45,6 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { getSRPAttributes } from "../api/srp";
 import { PAGES } from "../constants/pages";
-import { logoutUser } from "../services/logout";
 import {
     configureSRP,
     generateSRPSetupAttributes,
@@ -53,7 +52,7 @@ import {
 } from "../services/srp";
 import { SRPAttributes } from "../types/srp";
 
-export default function Credentials({ appContext, appName }: PageProps) {
+export default function Credentials({ appContext, appName, logout }: PageProps) {
     const [srpAttributes, setSrpAttributes] = useState<SRPAttributes>();
     const [keyAttributes, setKeyAttributes] = useState<KeyAttributes>();
     const [user, setUser] = useState<User>();
@@ -275,7 +274,7 @@ export default function Credentials({ appContext, appName }: PageProps) {
                     <LinkButton onClick={redirectToRecoverPage}>
                         {t("FORGOT_PASSWORD")}
                     </LinkButton>
-                    <LinkButton onClick={logoutUser}>
+                    <LinkButton onClick={logout}>
                         {t("CHANGE_EMAIL")}
                     </LinkButton>
                 </FormPaperFooter>
