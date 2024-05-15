@@ -11,6 +11,7 @@ import type { DedicatedMLWorker } from "services/ml/face.worker";
 import { MLSyncResult } from "services/ml/types";
 import { EnteFile } from "types/file";
 import { logQueueStats } from "./machineLearningService";
+
 const LIVE_SYNC_IDLE_DEBOUNCE_SEC = 30;
 const LIVE_SYNC_QUEUE_TIMEOUT_SEC = 300;
 const LOCAL_FILES_UPDATED_DEBOUNCE_SEC = 30;
@@ -171,16 +172,6 @@ class MLWorkManager {
             );
 
             this.stopSyncJob();
-        }
-    }
-
-    // Handlers
-    private async appStartHandler() {
-        log.info("appStartHandler");
-        try {
-            this.startSyncJob();
-        } catch (e) {
-            log.error("Failed in ML appStart Handler", e);
         }
     }
 
