@@ -28,8 +28,8 @@ type S3Config struct {
 	hotDC string
 	// Secondary (hot) data center
 	secondaryHotDC string
-	// Bucket for storing ml embeddings & preview files
-	embeddingsDC string
+	//Derived data data center for derived files like ml embeddings & preview files
+	derivedStorageDC string
 	// A map from data centers to S3 configurations
 	s3Configs map[string]*aws.Config
 	// A map from data centers to pre-created S3 clients
@@ -102,10 +102,10 @@ func (config *S3Config) initialize() {
 		config.secondaryHotDC = hs2
 		log.Infof("Hot storage: %s (secondary: %s)", hs1, hs2)
 	}
-	config.embeddingsDC = config.hotDC
-	embeddingsDC := viper.GetString("s3.embeddings-bucket")
+	config.derivedStorageDC = config.hotDC
+	embeddingsDC := viper.GetString("s3.derived-storage")
 	if embeddingsDC != "" && array.StringInList(embeddingsDC, dcs[:]) {
-		config.embeddingsDC = embeddingsDC
+		config.derivedStorageDC = embeddingsDC
 		log.Infof("Embeddings bucket: %s", embeddingsDC)
 	}
 
@@ -180,15 +180,15 @@ func (config *S3Config) GetHotS3Client() *s3.S3 {
 	return &s3Client
 }
 
-func (config *S3Config) GetEmbeddingsDataCenter() string {
-	return config.embeddingsDC
+func (config *S3Config) GetDerivedStorageDataCenter() string {
+	return config.derivedStorageDC
 }
-func (config *S3Config) GetEmbeddingsBucket() *string {
-	return config.GetBucket(config.embeddingsDC)
+func (config *S3Config) GetDerivedStorageBucket() *string {
+	return config.GetBucket(config.derivedStorageDC)
 }
 
-func (config *S3Config) GetEmbeddingsS3Client() *s3.S3 {
-	s3Client := config.GetS3Client(config.embeddingsDC)
+func (config *S3Config) GetDerivedStorageS3Client() *s3.S3 {
+	s3Client := config.GetS3Client(config.derivedStorageDC)
 	return &s3Client
 }
 
