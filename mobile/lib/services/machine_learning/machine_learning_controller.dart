@@ -57,7 +57,7 @@ class MachineLearningController {
     if (shouldRunML != _canRunML) {
       _canRunML = shouldRunML;
       _logger.info(
-        "Firing event with device health: $_isDeviceHealthy and user interaction: $_isUserInteracting",
+        "Firing event with $shouldRunML, device health: $_isDeviceHealthy and user interaction: $_isUserInteracting",
       );
       Bus.instance.fire(MachineLearningControlEvent(shouldRunML));
     }
