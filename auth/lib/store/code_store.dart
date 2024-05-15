@@ -22,7 +22,10 @@ class CodeStore {
     _authenticatorService = AuthenticatorService.instance;
   }
 
-  Future<List<Code>> getAllCodes({AccountMode? accountMode}) async {
+  Future<List<Code>> getAllCodes({
+    AccountMode? accountMode,
+    bool sortCodes = true,
+  }) async {
     final mode = accountMode ?? _authenticatorService.getAccountMode();
     final List<EntityResult> entities =
         await _authenticatorService.getEntities(mode);
@@ -47,21 +50,23 @@ class CodeStore {
       codes.add(code);
     }
 
-    // sort codes by issuer,account
-    codes.sort((firstCode, secondCode) {
-      if (secondCode.isPinned && !firstCode.isPinned) return 1;
-      if (!secondCode.isPinned && firstCode.isPinned) return -1;
+    if (sortCodes) {
+      // sort codes by issuer,account
+      codes.sort((firstCode, secondCode) {
+        if (secondCode.isPinned && !firstCode.isPinned) return 1;
+        if (!secondCode.isPinned && firstCode.isPinned) return -1;
 
-      final issuerComparison =
-          compareAsciiLowerCaseNatural(firstCode.issuer, secondCode.issuer);
-      if (issuerComparison != 0) {
-        return issuerComparison;
-      }
-      return compareAsciiLowerCaseNatural(
-        firstCode.account,
-        secondCode.account,
-      );
-    });
+        final issuerComparison =
+            compareAsciiLowerCaseNatural(firstCode.issuer, secondCode.issuer);
+        if (issuerComparison != 0) {
+          return issuerComparison;
+        }
+        return compareAsciiLowerCaseNatural(
+          firstCode.account,
+          secondCode.account,
+        );
+      });
+    }
 
     return codes;
   }

@@ -1,14 +1,10 @@
-import 'dart:convert';
-
 import 'package:ente_auth/l10n/l10n.dart';
-import 'package:ente_auth/models/authenticator/entity_result.dart';
 import 'package:ente_auth/models/code.dart';
 import 'package:ente_auth/onboarding/view/common/edit_tag.dart';
 import 'package:ente_auth/services/authenticator_service.dart';
 import 'package:ente_auth/store/code_store.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:flutter/material.dart';
-import 'package:logging/logging.dart';
 
 class CodeDisplayStore {
   static final CodeDisplayStore instance =
@@ -18,37 +14,25 @@ class CodeDisplayStore {
 
   late CodeStore _codeStore;
 
-  late AuthenticatorService _authenticatorService;
-  final _logger = Logger("CodeDisplayStore");
-
   Future<void> init() async {
-    _authenticatorService = AuthenticatorService.instance;
     _codeStore = CodeStore.instance;
   }
 
-  Future<List<String>> getAllTags({AccountMode? accountMode}) async {
-    final mode = accountMode ?? _authenticatorService.getAccountMode();
-    final List<EntityResult> entities =
-        await _authenticatorService.getEntities(mode);
-    List<String> tags = [];
-
-    for (final entity in entities) {
-      try {
-        final decodeJson = jsonDecode(entity.rawData);
-
-        late Code code;
-        if (decodeJson is String && decodeJson.startsWith('otpauth://')) {
-          code = Code.fromOTPAuthUrl(decodeJson);
-        } else {
-          code = Code.fromExportJson(decodeJson);
-        }
-        tags.addAll(code.display.tags);
-      } catch (e) {
-        _logger.severe("Could not parse code", e);
-      }
+  Future<List<String>> getAllTags({
+    AccountMode? accountMode,
+    List<Code>? allCodes,
+  }) async {
+    final codes = allCodes ??
+        await _codeStore.getAllCodes(
+          accountMode: accountMode,
+          sortCodes: false,
+        );
+    final tags = <String>{};
+    for (final code in codes) {
+      if (code.hasError) continue;
+      tags.addAll(code.display.tags);
     }
-    tags = tags.toSet().toList();
-    return tags;
+    return tags.toList();
   }
 
   Future<void> showDeleteTagDialog(BuildContext context, String tag) async {
@@ -63,9 +47,7 @@ class CodeDisplayStore {
       isCritical: true,
       firstButtonOnTap: () async {
         // traverse through all the codes and edit this tag's value
-        final relevantCodes = (await CodeStore.instance.getAllCodes()).where(
-          (element) => !element.hasError && element.display.tags.contains(tag),
-        );
+        final relevantCodes = await _getCodesByTag(tag);
 
         final tasks = <Future>[];
 
@@ -97,12 +79,18 @@ class CodeDisplayStore {
     );
   }
 
+  Future<List<Code>> _getCodesByTag(String tag) async {
+    final codes = await _codeStore.getAllCodes(sortCodes: false);
+    return codes
+        .where(
+          (element) => !element.hasError && element.display.tags.contains(tag),
+        )
+        .toList();
+  }
+
   Future<void> editTag(String previousTag, String updatedTag) async {
     // traverse through all the codes and edit this tag's value
-    final relevantCodes = (await CodeStore.instance.getAllCodes()).where(
-      (element) =>
-          !element.hasError && element.display.tags.contains(previousTag),
-    );
+    final relevantCodes = await _getCodesByTag(previousTag);
 
     final tasks = <Future>[];
 

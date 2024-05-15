@@ -104,22 +104,20 @@ class _HomePageState extends State<HomePage> {
   void _loadCodes() {
     CodeStore.instance.getAllCodes().then((codes) {
       _allCodes = codes;
-      _hasLoaded = true;
-      _applyFilteringAndRefresh();
+
+      CodeDisplayStore.instance.getAllTags(allCodes: _allCodes).then((value) {
+        tags = value;
+
+        if (mounted) {
+          if (!tags.contains(selectedTag)) {
+            selectedTag = "";
+          }
+          _hasLoaded = true;
+          _applyFilteringAndRefresh();
+        }
+      });
     }).onError((error, stackTrace) {
       _logger.severe('Error while loading codes', error, stackTrace);
-    });
-    CodeDisplayStore.instance.getAllTags().then((value) {
-      tags = value;
-
-      if (mounted) {
-        if (!tags.contains(selectedTag)) {
-          selectedTag = "";
-        }
-        setState(() {});
-      }
-    }).onError((error, stackTrace) {
-      _logger.severe('Error while loading tags', error, stackTrace);
     });
   }
 
