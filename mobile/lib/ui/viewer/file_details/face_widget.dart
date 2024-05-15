@@ -233,6 +233,12 @@ class _FaceWidgetState extends State<FaceWidget> {
                       style: Theme.of(context).textTheme.bodySmall,
                       maxLines: 1,
                     ),
+                  if (kDebugMode && widget.face.score < 0.75)
+                    Text(
+                      '[Debug only]',
+                      style: Theme.of(context).textTheme.bodySmall,
+                      maxLines: 1,
+                    ),
                   // if (kDebugMode)
                   //   if (highlight)
                   //     const Text(

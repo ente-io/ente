@@ -79,6 +79,8 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
       // Remove faces with low scores
       if (!kDebugMode) {
         faces.removeWhere((face) => (face.score < 0.75));
+      } else {
+        faces.removeWhere((face) => (face.score < 0.5));
       }
 
       if (faces.isEmpty) {
