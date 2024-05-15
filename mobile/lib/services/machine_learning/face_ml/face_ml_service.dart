@@ -41,7 +41,6 @@ import 'package:photos/services/machine_learning/face_ml/face_ml_exceptions.dart
 import 'package:photos/services/machine_learning/face_ml/face_ml_result.dart';
 import 'package:photos/services/machine_learning/file_ml/file_ml.dart';
 import 'package:photos/services/machine_learning/file_ml/remote_fileml_service.dart';
-import "package:photos/services/machine_learning/machine_learning_controller.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/utils/file_util.dart";
 import 'package:photos/utils/image_ml_isolate.dart';
@@ -86,7 +85,9 @@ class FaceMlService {
   final _computer = Computer.shared();
 
   bool isInitialized = false;
+  bool canRunMLController = false;
   bool isImageIndexRunning = false;
+  bool isClusteringRunning = false;
   final int _parallelism = 10;
   final int _remoteFetchLimit = 100;
 
@@ -123,7 +124,8 @@ class FaceMlService {
       /// hooking FaceML into [MachineLearningController]
       if (Platform.isAndroid) {
         Bus.instance.on<MachineLearningControlEvent>().listen((event) {
-          if (event.shouldRun) {
+          canRunMLController = event.shouldRun;
+          if (canRunMLController) {
             unawaited(indexAllImages());
           } else {
             pauseIndexing();
@@ -257,7 +259,8 @@ class FaceMlService {
     return _functionLock.synchronized(() async {
       _resetInactivityTimer();
 
-      if (isImageIndexRunning == false || MachineLearningController.instance.canRunML == false) {
+      if (isImageIndexRunning == false ||
+          canRunMLController == false) {
         return null;
       }
 
@@ -649,7 +652,7 @@ class FaceMlService {
 
       stopwatch.stop();
       _logger.info(
-        "`indexAllImages()` finished. Analyzed $fileAnalyzedCount images, in ${stopwatch.elapsed.inSeconds} seconds (avg of ${stopwatch.elapsed.inSeconds / fileAnalyzedCount} seconds per image, skipped $fileSkippedCount images. MLController status: ${MachineLearningController.instance.canRunML})",
+        "`indexAllImages()` finished. Analyzed $fileAnalyzedCount images, in ${stopwatch.elapsed.inSeconds} seconds (avg of ${stopwatch.elapsed.inSeconds / fileAnalyzedCount} seconds per image, skipped $fileSkippedCount images. MLController status: $canRunMLController)",
       );
 
       // Dispose of all the isolates
@@ -1343,7 +1346,7 @@ class FaceMlService {
         '''Skipped analysis of image with enteFile, it might be the wrong format or has no uploadedFileID, or MLController doesn't allow it to run.
         enteFile: ${enteFile.toString()}
         isImageIndexRunning: $isImageIndexRunning
-        canRunML: ${MachineLearningController.instance.canRunML}
+        canRunML: $canRunMLController
         ''',
       );
       throw CouldNotRetrieveAnyFileData();
@@ -1351,7 +1354,8 @@ class FaceMlService {
   }
 
   bool _skipAnalysisEnteFile(EnteFile enteFile, Map<int, int> indexedFileIds) {
-    if (isImageIndexRunning == false || MachineLearningController.instance.canRunML == false) {
+    if (isImageIndexRunning == false ||
+        canRunMLController == false) {
       return true;
     }
     // Skip if the file is not uploaded or not owned by the user
