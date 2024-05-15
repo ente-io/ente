@@ -1,7 +1,7 @@
 import log from "@/next/log";
 import { putAttributes } from "@ente/accounts/api/user";
+import { logoutUser } from "@ente/accounts/services/logout";
 import { configureSRP } from "@ente/accounts/services/srp";
-import { logoutUser } from "@ente/accounts/services/user";
 import { generateKeyAndSRPAttributes } from "@ente/accounts/utils/srp";
 import {
     generateAndSaveIntermediateKeyAttributes,

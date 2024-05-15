@@ -1,4 +1,3 @@
-import { logoutUser } from "@ente/accounts/services/user";
 import { HorizontalFlex } from "@ente/shared/components/Container";
 import { EnteLogo } from "@ente/shared/components/EnteLogo";
 import NavbarBase from "@ente/shared/components/Navbar/base";
@@ -11,7 +10,7 @@ import { AppContext } from "pages/_app";
 import React from "react";
 
 export default function AuthNavbar() {
-    const { isMobile } = React.useContext(AppContext);
+    const { isMobile, logout } = React.useContext(AppContext);
     return (
         <NavbarBase isMobile={isMobile}>
             <HorizontalFlex flex={1} justifyContent={"center"}>
@@ -25,7 +24,7 @@ export default function AuthNavbar() {
                     <OverflowMenuOption
                         color="critical"
                         startIcon={<LogoutOutlined />}
-                        onClick={logoutUser}
+                        onClick={logout}
                     >
                         {t("LOGOUT")}
                     </OverflowMenuOption>

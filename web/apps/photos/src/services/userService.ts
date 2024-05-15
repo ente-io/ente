@@ -233,19 +233,6 @@ export const deleteAccount = async (
     }
 };
 
-// Ensure that the keys in local storage are not malformed by verifying that the
-// recoveryKey can be decrypted with the masterKey.
-// Note: This is not bullet-proof.
-export const validateKey = async () => {
-    try {
-        await getRecoveryKey();
-        return true;
-    } catch (e) {
-        await logoutUser();
-        return false;
-    }
-};
-
 export const getFaceSearchEnabledStatus = async () => {
     try {
         const token = getToken();

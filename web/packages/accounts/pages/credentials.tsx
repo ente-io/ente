@@ -45,12 +45,12 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { getSRPAttributes } from "../api/srp";
 import { PAGES } from "../constants/pages";
+import { logoutUser } from "../services/logout";
 import {
     configureSRP,
     generateSRPSetupAttributes,
     loginViaSRP,
 } from "../services/srp";
-import { logoutUser } from "../services/user";
 import { SRPAttributes } from "../types/srp";
 
 export default function Credentials({ appContext, appName }: PageProps) {

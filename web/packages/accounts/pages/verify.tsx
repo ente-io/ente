@@ -29,8 +29,8 @@ import { HttpStatusCode } from "axios";
 import { useRouter } from "next/router";
 import { putAttributes, sendOtt, verifyOtt } from "../api/user";
 import { PAGES } from "../constants/pages";
+import { logoutUser } from "../services/logout";
 import { configureSRP } from "../services/srp";
-import { logoutUser } from "../services/user";
 import { SRPSetupAttributes } from "../types/srp";
 
 export default function VerifyPage({ appContext, appName }: PageProps) {

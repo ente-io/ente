@@ -53,6 +53,7 @@ import { createContext, useEffect, useRef, useState } from "react";
 import LoadingBar from "react-top-loading-bar";
 import DownloadManager from "services/download";
 import exportService, { resumeExportsIfNeeded } from "services/export";
+import { photosLogout } from "services/logout";
 import {
     getMLSearchConfig,
     updateMLSearchConfig,
@@ -100,6 +101,7 @@ type AppContextType = {
     setDialogBoxAttributesV2: SetDialogBoxAttributesV2;
     isCFProxyDisabled: boolean;
     setIsCFProxyDisabled: (disabled: boolean) => void;
+    logout: () => Promise<void>;
 };
 
 export const AppContext = createContext<AppContextType>(null);
@@ -336,6 +338,11 @@ export default function App({ Component, pageProps }: AppProps) {
             content: t("UNKNOWN_ERROR"),
         });
 
+    const logout = async () => {
+        await photosLogout();
+        router.push(PAGES.ROOT);
+    };
+
     const title = isI18nReady
         ? t("TITLE", { context: APPS.PHOTOS })
         : APP_TITLES.get(APPS.PHOTOS);
@@ -394,6 +401,7 @@ export default function App({ Component, pageProps }: AppProps) {
                         updateMapEnabled,
                         isCFProxyDisabled,
                         setIsCFProxyDisabled,
+                        logout,
                     }}
                 >
                     {(loading || !isI18nReady) && (

@@ -2,7 +2,7 @@ import log from "@/next/log";
 import { recoverTwoFactor, removeTwoFactor } from "@ente/accounts/api/user";
 import { PAGES } from "@ente/accounts/constants/pages";
 import { TwoFactorType } from "@ente/accounts/constants/twofactor";
-import { logoutUser } from "@ente/accounts/services/user";
+import { logoutUser } from "@ente/accounts/services/logout";
 import { PageProps } from "@ente/shared/apps/types";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import { DialogBoxAttributesV2 } from "@ente/shared/components/DialogBoxV2/types";

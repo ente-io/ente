@@ -87,14 +87,15 @@ class CLIPService {
         return isElectron();
     };
 
-    private logoutHandler = async () => {
+    async logout() {
         if (this.embeddingExtractionInProgress) {
             this.embeddingExtractionInProgress.abort();
         }
         if (this.onFileUploadedHandler) {
             await this.removeOnFileUploadListener();
         }
-    };
+    }
+
 
     setupOnFileUploadListener = async () => {
         try {

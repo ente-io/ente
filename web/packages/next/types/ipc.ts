@@ -69,14 +69,14 @@ export interface Electron {
      * This is a coarse single shot cleanup, meant for use in clearing any
      * persisted Electron side state during logout.
      */
-    clearStores: () => void;
+    clearStores: () => Promise<void>;
 
     /**
      * Clear an state corresponding to in-flight convert-to-mp4 requests.
      *
      * This is meant for use during logout.
      */
-    clearConvertToMP4Results: () => void;
+    clearConvertToMP4Results: () => Promise<void>;
 
     /**
      * Return the previously saved encryption key from persistent safe storage.

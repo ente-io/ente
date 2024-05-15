@@ -3,7 +3,7 @@ import VerifyTwoFactor, {
     VerifyTwoFactorCallback,
 } from "@ente/accounts/components/two-factor/VerifyForm";
 import { PAGES } from "@ente/accounts/constants/pages";
-import { logoutUser } from "@ente/accounts/services/user";
+import { logoutUser } from "@ente/accounts/services/logout";
 import type { PageProps } from "@ente/shared/apps/types";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
