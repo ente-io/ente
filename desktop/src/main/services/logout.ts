@@ -15,16 +15,16 @@ export const logout = (watcher: FSWatcher) => {
     try {
         watchReset(watcher);
     } catch (e) {
-        log.error("Ignoring error when resetting native folder watches", e);
+        log.error("Ignoring error during logout (FS watch)", e);
     }
     try {
         clearConvertToMP4Results();
     } catch (e) {
-        log.error("Ignoring error when clearing convert-to-mp4 results", e);
+        log.error("Ignoring error during logout (convert-to-mp4)", e);
     }
     try {
         clearStores();
     } catch (e) {
-        log.error("Ignoring error when clearing native stores", e);
+        log.error("Ignoring error during logout (native stores)", e);
     }
-}
+};
