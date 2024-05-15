@@ -531,7 +531,6 @@ class FilesDB {
     );
   }
 
-  @pragma('vm:prefer-inline')
   Future<void> _batchAndInsertFile(
     EnteFile file,
     ConflictAlgorithm conflictAlgorithm,
@@ -549,12 +548,6 @@ class FilesDB {
     if (batchCounter.value == 400) {
       _logger.info("Inserting batch with genIdNull: $isGenIdNull");
       await _insertBatch(conflictAlgorithm, columnNames, db, parameterSets);
-      // await db.executeBatch(
-      //   '''
-      //     INSERT OR ${conflictAlgorithm.name.toUpperCase()} INTO $filesTable($columnNames) VALUES($valuesPlaceholders)
-      //                             ''',
-      //   parameterSets,
-      // );
       batchCounter.value = 0;
       parameterSets.clear();
     }
@@ -576,7 +569,6 @@ class FilesDB {
     );
   }
 
-  @pragma('vm:prefer-inline')
   Future<int> insert(EnteFile file) async {
     _logger.info("Inserting $file");
     final db = await instance.database;
