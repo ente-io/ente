@@ -207,13 +207,6 @@ export default function App({ Component, pageProps }: AppProps) {
             await resumeExportsIfNeeded();
         };
         initExport();
-        try {
-            eventBus.on(Events.LOGOUT, () => {
-                exportService.disableContinuousExport();
-            });
-        } catch (e) {
-            log.error("Error while subscribing to logout event", e);
-        }
     }, []);
 
     const setUserOnline = () => setOffline(false);

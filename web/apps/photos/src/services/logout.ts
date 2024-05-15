@@ -2,6 +2,7 @@ import log from "@/next/log";
 import { accountLogout } from "@ente/accounts/services/logout";
 import { Events, eventBus } from "@ente/shared/events";
 import { clipService } from "services/clip-service";
+import exportService from "./export";
 import mlWorkManager from "./machineLearning/mlWorkManager";
 
 /**
@@ -20,14 +21,20 @@ export const photosLogout = async () => {
         log.error("Ignoring error in CLIP logout", e);
     }
 
-    try {
-        await mlWorkManager.setMlSearchEnabled(false);
-    } catch (e) {
-        log.error("Ignoring error in ML logout", e);
-    }
-
     const electron = globalThis.electron;
     if (electron) {
+        try {
+            await mlWorkManager.setMlSearchEnabled(false);
+        } catch (e) {
+            log.error("Ignoring error in ML logout", e);
+        }
+
+        try {
+            exportService.disableContinuousExport();
+        } catch (e) {
+            log.error("Ignoring error when export logout", e);
+        }
+
         try {
             await electron?.logout();
         } catch (e) {
