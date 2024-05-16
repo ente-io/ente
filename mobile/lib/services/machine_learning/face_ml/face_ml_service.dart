@@ -352,7 +352,7 @@ class FaceMlService {
     }
 
     final indexingCompleteRatio = await _getIndexedDoneRatio();
-    if (indexingCompleteRatio < 0.6) {
+    if (indexingCompleteRatio < 0.8) {
       _logger.info(
         "Indexing is not far enough, skipping clustering. Indexing is at $indexingCompleteRatio",
       );
