@@ -12,6 +12,7 @@ import {
 import { EnteFile } from "types/file";
 import { getRenderableImage } from "utils/file";
 import { clamp } from "utils/image";
+import { DEFAULT_ML_SYNC_CONFIG } from "./machineLearningService";
 
 class ReaderService {
     async getImageBitmap(
@@ -35,7 +36,7 @@ class ReaderService {
                     fileContext.localFile,
                 );
             } else if (
-                syncContext.config.imageSource === "Original" &&
+                DEFAULT_ML_SYNC_CONFIG.imageSource === "Original" &&
                 [FILE_TYPE.IMAGE, FILE_TYPE.LIVE_PHOTO].includes(
                     fileContext.enteFile.metadata.fileType,
                 )
@@ -49,7 +50,8 @@ class ReaderService {
                 );
             }
 
-            fileContext.newMlFile.imageSource = syncContext.config.imageSource;
+            fileContext.newMlFile.imageSource =
+                DEFAULT_ML_SYNC_CONFIG.imageSource;
             const { width, height } = fileContext.imageBitmap;
             fileContext.newMlFile.imageDimensions = { width, height };
 

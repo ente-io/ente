@@ -15,6 +15,7 @@ import ReaderService, {
     getFaceId,
     getLocalFile,
 } from "./readerService";
+import { DEFAULT_ML_SYNC_CONFIG } from "./machineLearningService";
 
 class FaceService {
     async syncFileFaceDetections(
@@ -27,7 +28,7 @@ class FaceService {
                 oldMlFile?.faceDetectionMethod,
                 syncContext.faceDetectionService.method,
             ) &&
-            oldMlFile?.imageSource === syncContext.config.imageSource
+            oldMlFile?.imageSource === "Original"
         ) {
             newMlFile.faces = oldMlFile?.faces?.map((existingFace) => ({
                 id: existingFace.id,
@@ -223,10 +224,10 @@ class FaceService {
         const faceCrop = await syncContext.faceCropService.getFaceCrop(
             imageBitmap,
             face.detection,
-            syncContext.config.faceCrop,
+            DEFAULT_ML_SYNC_CONFIG.faceCrop,
         );
 
-        const blobOptions = syncContext.config.faceCrop.blobOptions;
+        const blobOptions = DEFAULT_ML_SYNC_CONFIG.faceCrop.blobOptions;
         const blob = await imageBitmapToBlob(faceCrop.image, blobOptions);
 
         const cache = await openCache("face-crops");
@@ -252,7 +253,7 @@ class FaceService {
     ) {
         // await this.init();
 
-        const clusteringConfig = syncContext.config.faceClustering;
+        const clusteringConfig = DEFAULT_ML_SYNC_CONFIG.faceClustering;
 
         if (!allFaces || allFaces.length < clusteringConfig.minInputSize) {
             log.info(
@@ -266,7 +267,7 @@ class FaceService {
         syncContext.mlLibraryData.faceClusteringResults =
             await syncContext.faceClusteringService.cluster(
                 allFaces.map((f) => Array.from(f.embedding)),
-                syncContext.config.faceClustering,
+                DEFAULT_ML_SYNC_CONFIG.faceClustering,
             );
         syncContext.mlLibraryData.faceClusteringMethod =
             syncContext.faceClusteringService.method;

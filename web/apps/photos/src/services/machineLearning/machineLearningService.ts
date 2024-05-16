@@ -55,7 +55,9 @@ import yoloFaceDetectionService from "./yoloFaceDetectionService";
  */
 export const defaultMLVersion = 3;
 
-const DEFAULT_ML_SYNC_CONFIG: MLSyncConfig = {
+const batchSize = 200;
+
+export const DEFAULT_ML_SYNC_CONFIG: MLSyncConfig = {
     batchSize: 200,
     imageSource: "Original",
     faceDetection: {
@@ -186,19 +188,13 @@ export class MLFactory {
         config: MLSyncConfig,
         shouldUpdateMLVersion: boolean = true,
     ) {
-        return new LocalMLSyncContext(
-            token,
-            userID,
-            config,
-            shouldUpdateMLVersion,
-        );
+        return new LocalMLSyncContext(token, userID, shouldUpdateMLVersion);
     }
 }
 
 export class LocalMLSyncContext implements MLSyncContext {
     public token: string;
     public userID: number;
-    public config: MLSyncConfig;
     public shouldUpdateMLVersion: boolean;
 
     public faceDetectionService: FaceDetectionService;
@@ -231,13 +227,11 @@ export class LocalMLSyncContext implements MLSyncContext {
     constructor(
         token: string,
         userID: number,
-        config: MLSyncConfig,
         shouldUpdateMLVersion: boolean = true,
         concurrency?: number,
     ) {
         this.token = token;
         this.userID = userID;
-        this.config = config;
         this.shouldUpdateMLVersion = shouldUpdateMLVersion;
 
         this.faceDetectionService =
@@ -318,8 +312,7 @@ class MachineLearningService {
         // may be need to just take synced files on latest ml version for indexing
         if (
             syncContext.outOfSyncFiles.length <= 0 ||
-            (syncContext.nSyncedFiles === syncContext.config.batchSize &&
-                Math.random() < 0.2)
+            (syncContext.nSyncedFiles === batchSize && Math.random() < 0.2)
         ) {
             await this.syncIndex(syncContext);
         }
@@ -425,8 +418,8 @@ class MachineLearningService {
     private async getOutOfSyncFiles(syncContext: MLSyncContext) {
         const startTime = Date.now();
         const fileIds = await mlIDbStorage.getFileIds(
-            syncContext.config.batchSize,
-            syncContext.config.mlVersion,
+            batchSize,
+            defaultMLVersion,
             MAX_ML_SYNC_ERROR_COUNT,
         );
 
@@ -535,7 +528,7 @@ class MachineLearningService {
                 localFile,
             );
 
-            if (syncContext.nSyncedFiles >= syncContext.config.batchSize) {
+            if (syncContext.nSyncedFiles >= batchSize) {
                 await this.closeLocalSyncContext();
             }
             // await syncContext.dispose();
@@ -603,7 +596,7 @@ class MachineLearningService {
             (fileContext.oldMlFile = await this.getMLFileData(enteFile.id)) ??
             this.newMlData(enteFile.id);
         if (
-            fileContext.oldMlFile?.mlVersion === syncContext.config.mlVersion
+            fileContext.oldMlFile?.mlVersion === defaultMLVersion
             // TODO: reset mlversion of all files when user changes image source
         ) {
             return fileContext.oldMlFile;
@@ -611,7 +604,7 @@ class MachineLearningService {
         const newMlFile = (fileContext.newMlFile = this.newMlData(enteFile.id));
 
         if (syncContext.shouldUpdateMLVersion) {
-            newMlFile.mlVersion = syncContext.config.mlVersion;
+            newMlFile.mlVersion = defaultMLVersion;
         } else if (fileContext.oldMlFile?.mlVersion) {
             newMlFile.mlVersion = fileContext.oldMlFile.mlVersion;
         }
