@@ -1,4 +1,3 @@
-import "dart:async" show unawaited;
 import "dart:convert";
 import "dart:developer";
 
@@ -181,32 +180,6 @@ class PersonService {
       clusterID: clusterID,
     );
     return PersonEntity(result.id, data);
-  }
-
-  Future<void> assignClusterToPerson({
-    required String personID,
-    required int clusterID,
-  }) async {
-    final person = (await getPerson(personID))!;
-    final personData = person.data;
-    final faceIds = await faceMLDataDB.getFaceIDsForCluster(clusterID);
-    final clusterInfo = ClusterInfo(
-      id: clusterID,
-      faces: faceIds.toSet(),
-    );
-    personData.assigned!.add(clusterInfo);
-    unawaited(
-      entityService.addOrUpdate(
-        EntityType.person,
-        json.encode(personData.toJson()),
-        id: personID,
-      ),
-    );
-    await faceMLDataDB.assignClusterToPerson(
-      personID: personID,
-      clusterID: clusterID,
-    );
-    personData.logStats();
   }
 
   Future<void> removeClusterToPerson({

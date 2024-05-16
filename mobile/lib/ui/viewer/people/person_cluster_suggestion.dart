@@ -10,7 +10,6 @@ import "package:photos/face/db.dart";
 import "package:photos/face/model/person.dart";
 import "package:photos/models/file/file.dart";
 import 'package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart';
-import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
@@ -169,7 +168,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
     }
     if (yesOrNo) {
       canGiveFeedback = false;
-      await PersonService.instance.assignClusterToPerson(
+      await FaceMLDataDB.instance.assignClusterToPerson(
         personID: widget.person.remoteID,
         clusterID: clusterID,
       );

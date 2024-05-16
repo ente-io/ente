@@ -242,8 +242,13 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     // unawaited(ObjectDetectionService.instance.init());
     unawaited(FaceMlService.instance.init());
     FaceMlService.instance.listenIndexOnDiffSync();
+    FaceMlService.instance.listenOnPeopleChangedSync();
   }
-  PersonService.init(EntityService.instance, FaceMLDataDB.instance, preferences);
+  PersonService.init(
+    EntityService.instance,
+    FaceMLDataDB.instance,
+    preferences,
+  );
 
   _logger.info("Initialization done");
 }

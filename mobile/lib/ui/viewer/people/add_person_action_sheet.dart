@@ -7,6 +7,7 @@ import "package:logging/logging.dart";
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/people_changed_event.dart";
+import "package:photos/face/db.dart";
 import "package:photos/face/model/person.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/file.dart";
@@ -233,7 +234,7 @@ class _PersonActionSheetState extends State<PersonActionSheet> {
                             return;
                           }
                           userAlreadyAssigned = true;
-                          await PersonService.instance.assignClusterToPerson(
+                          await FaceMLDataDB.instance.assignClusterToPerson(
                             personID: person.$1.remoteID,
                             clusterID: widget.cluserID,
                           );

@@ -298,7 +298,7 @@ class ClusterFeedbackService {
 
     for (final suggestion in suggestions) {
       final clusterID = suggestion.$1;
-      await PersonService.instance.assignClusterToPerson(
+      await FaceMLDataDB.instance.assignClusterToPerson(
         personID: p.remoteID,
         clusterID: clusterID,
       );

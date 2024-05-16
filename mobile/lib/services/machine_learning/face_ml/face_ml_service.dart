@@ -17,6 +17,7 @@ import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/events/diff_sync_complete_event.dart";
 import "package:photos/events/machine_learning_control_event.dart";
+import "package:photos/events/people_changed_event.dart";
 import "package:photos/extensions/list.dart";
 import "package:photos/extensions/stop_watch.dart";
 import "package:photos/face/db.dart";
@@ -39,6 +40,7 @@ import 'package:photos/services/machine_learning/face_ml/face_embedding/face_emb
 import 'package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart';
 import 'package:photos/services/machine_learning/face_ml/face_ml_exceptions.dart';
 import 'package:photos/services/machine_learning/face_ml/face_ml_result.dart';
+import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import 'package:photos/services/machine_learning/file_ml/file_ml.dart';
 import 'package:photos/services/machine_learning/file_ml/remote_fileml_service.dart';
 import "package:photos/services/search_service.dart";
@@ -90,6 +92,7 @@ class FaceMlService {
   bool canRunMLController = false;
   bool isImageIndexRunning = false;
   bool isClusteringRunning = false;
+  bool shouldSyncPeople = false;
 
   final int _parallelismML = 10;
   final int _remoteFetchLimit = 100;
@@ -155,9 +158,16 @@ class FaceMlService {
       // [neeraj] intentional delay in starting indexing on diff sync, this gives time for the user
       // to disable face-indexing in case it's causing crash. In the future, we
       // should have a better way to handle this.
+      shouldSyncPeople = true;
       Future.delayed(const Duration(seconds: 10), () {
         unawaited(indexAllImages());
       });
+    });
+  }
+
+  void listenOnPeopleChangedSync() {
+    Bus.instance.on<PeopleChangedEvent>().listen((event) {
+      shouldSyncPeople = true;
     });
   }
 
@@ -546,6 +556,11 @@ class FaceMlService {
       _logger.warning("indexAllImages is already running, skipping");
       return;
     }
+    if (shouldSyncPeople) {
+      await PersonService.instance.reconcileClusters();
+      shouldSyncPeople = false;
+    }
+
     // verify faces is enabled
     if (LocalSettings.instance.isFaceIndexingEnabled == false) {
       _logger.warning("indexing is disabled by user");
