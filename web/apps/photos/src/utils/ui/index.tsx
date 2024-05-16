@@ -68,6 +68,7 @@ export const getUpdateReadyToInstallMessage = ({
         variant: "secondary",
         action: () => ensureElectron().updateOnNextRestart(version),
     },
+    staticBackdrop: true,
 });
 
 export const getUpdateAvailableForDownloadMessage = ({
