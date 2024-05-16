@@ -136,60 +136,6 @@ export interface MlFileData {
     lastErrorMessage?: string;
 }
 
-export interface FaceDetectionConfig {
-    method: FaceDetectionMethod;
-}
-
-export interface FaceCropConfig {
-    enabled: boolean;
-    method: FaceCropMethod;
-    padding: number;
-    maxSize: number;
-    blobOptions: {
-        type: string;
-        quality: number;
-    };
-}
-
-export interface FaceAlignmentConfig {
-    method: FaceAlignmentMethod;
-}
-
-export interface BlurDetectionConfig {
-    method: BlurDetectionMethod;
-    threshold: number;
-}
-
-export interface FaceEmbeddingConfig {
-    method: FaceEmbeddingMethod;
-    faceSize: number;
-    generateTsne?: boolean;
-}
-
-export declare type TSNEMetric = "euclidean" | "manhattan";
-
-export interface TSNEConfig {
-    samples: number;
-    dim: number;
-    perplexity?: number;
-    earlyExaggeration?: number;
-    learningRate?: number;
-    nIter?: number;
-    metric?: TSNEMetric;
-}
-
-export interface MLSyncConfig {
-    batchSize: number;
-    imageSource: ImageType;
-    faceDetection: FaceDetectionConfig;
-    faceCrop: FaceCropConfig;
-    faceAlignment: FaceAlignmentConfig;
-    blurDetection: BlurDetectionConfig;
-    faceEmbedding: FaceEmbeddingConfig;
-    faceClustering: any;
-    mlVersion: number;
-}
-
 export interface MLSearchConfig {
     enabled: boolean;
 }

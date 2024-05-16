@@ -17,7 +17,6 @@ import {
     Landmark,
     MLLibraryData,
     MLSearchConfig,
-    MLSyncConfig,
     MLSyncContext,
     MLSyncFileContext,
     MLSyncResult,
@@ -37,47 +36,6 @@ import { syncPeopleIndex } from "../face/people";
 export const defaultMLVersion = 3;
 
 const batchSize = 200;
-
-export const DEFAULT_ML_SYNC_CONFIG: MLSyncConfig = {
-    batchSize: 200,
-    imageSource: "Original",
-    faceDetection: {
-        method: "YoloFace",
-    },
-    faceCrop: {
-        enabled: true,
-        method: "ArcFace",
-        padding: 0.25,
-        maxSize: 256,
-        blobOptions: {
-            type: "image/jpeg",
-            quality: 0.8,
-        },
-    },
-    faceAlignment: {
-        method: "ArcFace",
-    },
-    blurDetection: {
-        method: "Laplacian",
-        threshold: 15,
-    },
-    faceEmbedding: {
-        method: "MobileFaceNet",
-        faceSize: 112,
-        generateTsne: true,
-    },
-    faceClustering: {
-        method: "Hdbscan",
-        minClusterSize: 3,
-        minSamples: 5,
-        clusterSelectionEpsilon: 0.6,
-        clusterSelectionMethod: "leaf",
-        minInputSize: 50,
-        // maxDistanceInsideCluster: 0.4,
-        generateDebugInfo: true,
-    },
-    mlVersion: defaultMLVersion,
-};
 
 export const MAX_ML_SYNC_ERROR_COUNT = 1;
 
