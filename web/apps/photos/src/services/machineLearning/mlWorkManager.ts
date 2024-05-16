@@ -311,11 +311,11 @@ class MLWorkManager {
         }
     }
 
-    public stopSyncJob(terminateWorker: boolean = true) {
+    public stopSyncJob() {
         try {
             log.info("MLWorkManager.stopSyncJob");
             this.mlSyncJob?.stop();
-            terminateWorker && this.terminateSyncJobWorker();
+            this.terminateSyncJobWorker();
         } catch (e) {
             log.error("Failed to stop MLSync Job", e);
         }
