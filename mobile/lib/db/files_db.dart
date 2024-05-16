@@ -531,52 +531,33 @@ class FilesDB {
     );
   }
 
-  Future<void> _batchAndInsertFile(
-    EnteFile file,
-    ConflictAlgorithm conflictAlgorithm,
-    sqlite_async.SqliteDatabase db,
-    List<List<Object?>> parameterSets,
-    PrimitiveWrapper batchCounter, {
-    required bool isGenIdNull,
-  }) async {
-    parameterSets.add(_getParameterSetForFile(file));
-    batchCounter.value++;
-
-    final columnNames = isGenIdNull
-        ? _columnNames.where((column) => column != columnGeneratedID)
-        : _columnNames;
-    if (batchCounter.value == 400) {
-      _logger.info("Inserting batch with genIdNull: $isGenIdNull");
-      await _insertBatch(conflictAlgorithm, columnNames, db, parameterSets);
-      batchCounter.value = 0;
-      parameterSets.clear();
-    }
-  }
-
-  Future<void> _insertBatch(
-    ConflictAlgorithm conflictAlgorithm,
-    Iterable<String> columnNames,
-    sqlite_async.SqliteDatabase db,
-    List<List<Object?>> parameterSets,
-  ) async {
-    final valuesPlaceholders = List.filled(columnNames.length, "?").join(",");
-    final columnNamesJoined = columnNames.join(",");
-    await db.executeBatch(
-      '''
-          INSERT OR ${conflictAlgorithm.name.toUpperCase()} INTO $filesTable($columnNamesJoined) VALUES($valuesPlaceholders)
-                                  ''',
-      parameterSets,
-    );
-  }
-
-  Future<int> insert(EnteFile file) async {
+  Future<void> insert(EnteFile file) async {
     _logger.info("Inserting $file");
-    final db = await instance.database;
-    return db.insert(
-      filesTable,
-      _getRowForFile(file),
-      conflictAlgorithm: ConflictAlgorithm.replace,
+    final db = await instance.sqliteAsyncDB;
+    final columnsAndPlaceholders =
+        _generateColumnsAndPlaceholdersForInsert(fileGenId: file.generatedID);
+    final values = _getParameterSetForFile(file);
+
+    await db.execute(
+      'INSERT OR REPLACE INTO $filesTable (${columnsAndPlaceholders["columns"]}) VALUES (${columnsAndPlaceholders["placeholders"]})',
+      values,
     );
+  }
+
+  Future<int> insertAndGetId(EnteFile file) async {
+    _logger.info("Inserting $file");
+    final db = await instance.sqliteAsyncDB;
+    final columnsAndPlaceholders =
+        _generateColumnsAndPlaceholdersForInsert(fileGenId: file.generatedID);
+    final values = _getParameterSetForFile(file);
+    return await db.writeTransaction((tx) async {
+      await tx.execute(
+        'INSERT OR REPLACE INTO $filesTable (${columnsAndPlaceholders["columns"]}) VALUES (${columnsAndPlaceholders["placeholders"]})',
+        values,
+      );
+      final result = await tx.get('SELECT last_insert_rowid()');
+      return result["last_insert_rowid()"] as int;
+    });
   }
 
   Future<EnteFile?> getFile(int generatedID) async {
@@ -1790,22 +1771,12 @@ class FilesDB {
     return convertToFiles(results);
   }
 
-  String _getSetClauseForFileWithoutCollection(EnteFile file) {
-    final row = _getRowForFileWithoutCollection(file);
-    final setClause = <String>[];
-    for (int i = 0; i < row.entries.length; i++) {
-      final entry = row.entries.elementAt(i);
-      setClause.add('${entry.key} = ${entry.value}');
-    }
-    return setClause.join(', ');
-  }
-
   ///Returns "columnName1 = ?, columnName2 = ?, ..."
   String _generateUpdateAssignmentsWithPlaceholders({
     required int? fileGenId,
     bool omitCollectionId = false,
   }) {
-    final setClauses = <String>[];
+    final assignments = <String>[];
 
     for (String columnName in _columnNames) {
       if (columnName == columnGeneratedID && fileGenId == null) {
@@ -1814,10 +1785,29 @@ class FilesDB {
       if (columnName == columnCollectionID && omitCollectionId) {
         continue;
       }
-      setClauses.add("$columnName = ?");
+      assignments.add("$columnName = ?");
     }
 
-    return setClauses.join(",");
+    return assignments.join(",");
+  }
+
+  Map<String, String> _generateColumnsAndPlaceholdersForInsert({
+    required int? fileGenId,
+  }) {
+    final columnNames = <String>[];
+
+    for (String columnName in _columnNames) {
+      if (columnName == columnGeneratedID && fileGenId == null) {
+        continue;
+      }
+
+      columnNames.add(columnName);
+    }
+
+    return {
+      "columns": columnNames.join(","),
+      "placeholders": List.filled(columnNames.length, "?").join(","),
+    };
   }
 
   List<Object?> _getParameterSetForFile(
@@ -1825,8 +1815,10 @@ class FilesDB {
     bool omitCollectionId = false,
   }) {
     final values = <Object?>[];
+
     double? latitude;
     double? longitude;
+
     int? creationTime = file.creationTime;
     if (file.pubMagicMetadata != null) {
       if (file.pubMagicMetadata!.editedTime != null) {
@@ -1838,6 +1830,7 @@ class FilesDB {
         longitude = file.pubMagicMetadata!.long;
       }
     }
+
     if (file.generatedID != null) {
       values.add(file.generatedID);
     }
@@ -1878,6 +1871,44 @@ class FilesDB {
     }
 
     return values;
+  }
+
+  Future<void> _batchAndInsertFile(
+    EnteFile file,
+    ConflictAlgorithm conflictAlgorithm,
+    sqlite_async.SqliteDatabase db,
+    List<List<Object?>> parameterSets,
+    PrimitiveWrapper batchCounter, {
+    required bool isGenIdNull,
+  }) async {
+    parameterSets.add(_getParameterSetForFile(file));
+    batchCounter.value++;
+
+    final columnNames = isGenIdNull
+        ? _columnNames.where((column) => column != columnGeneratedID)
+        : _columnNames;
+    if (batchCounter.value == 400) {
+      _logger.info("Inserting batch with genIdNull: $isGenIdNull");
+      await _insertBatch(conflictAlgorithm, columnNames, db, parameterSets);
+      batchCounter.value = 0;
+      parameterSets.clear();
+    }
+  }
+
+  Future<void> _insertBatch(
+    ConflictAlgorithm conflictAlgorithm,
+    Iterable<String> columnNames,
+    sqlite_async.SqliteDatabase db,
+    List<List<Object?>> parameterSets,
+  ) async {
+    final valuesPlaceholders = List.filled(columnNames.length, "?").join(",");
+    final columnNamesJoined = columnNames.join(",");
+    await db.executeBatch(
+      '''
+          INSERT OR ${conflictAlgorithm.name.toUpperCase()} INTO $filesTable($columnNamesJoined) VALUES($valuesPlaceholders)
+                                  ''',
+      parameterSets,
+    );
   }
 
   Map<String, dynamic> _getRowForFile(EnteFile file) {
@@ -1931,47 +1962,6 @@ class FilesDB {
         row[columnLatitude] = file.pubMagicMetadata!.lat;
         row[columnLongitude] = file.pubMagicMetadata!.long;
       }
-    }
-    return row;
-  }
-
-  Map<String, dynamic> _getRowForFileWithoutCollection(EnteFile file) {
-    final row = <String, dynamic>{};
-    row[columnLocalID] = file.localID;
-    row[columnUploadedFileID] = file.uploadedFileID ?? -1;
-    row[columnOwnerID] = file.ownerID;
-    row[columnTitle] = file.title;
-    row[columnDeviceFolder] = file.deviceFolder;
-    if (file.location != null) {
-      row[columnLatitude] = file.location!.latitude;
-      row[columnLongitude] = file.location!.longitude;
-    }
-    row[columnFileType] = getInt(file.fileType);
-    row[columnCreationTime] = file.creationTime;
-    row[columnModificationTime] = file.modificationTime;
-    row[columnUpdationTime] = file.updationTime;
-    row[columnAddedTime] =
-        file.addedTime ?? DateTime.now().microsecondsSinceEpoch;
-    row[columnFileDecryptionHeader] = file.fileDecryptionHeader;
-    row[columnThumbnailDecryptionHeader] = file.thumbnailDecryptionHeader;
-    row[columnMetadataDecryptionHeader] = file.metadataDecryptionHeader;
-    row[columnFileSubType] = file.fileSubType ?? -1;
-    row[columnDuration] = file.duration ?? 0;
-    row[columnExif] = file.exif;
-    row[columnHash] = file.hash;
-    row[columnMetadataVersion] = file.metadataVersion;
-
-    row[columnMMdVersion] = file.mMdVersion;
-    row[columnMMdEncodedJson] = file.mMdEncodedJson ?? '{}';
-    row[columnMMdVisibility] = file.magicMetadata.visibility;
-
-    row[columnPubMMdVersion] = file.pubMmdVersion;
-    row[columnPubMMdEncodedJson] = file.pubMmdEncodedJson ?? '{}';
-    if (file.pubMagicMetadata != null &&
-        file.pubMagicMetadata!.editedTime != null) {
-      // override existing creationTime to avoid re-writing all queries related
-      // to loading the gallery
-      row[columnCreationTime] = file.pubMagicMetadata!.editedTime!;
     }
     return row;
   }
