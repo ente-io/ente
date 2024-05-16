@@ -450,17 +450,17 @@ export interface BlobOptions {
     quality?: number;
 }
 
-export async function imageBitmapToBlob(
-    imageBitmap: ImageBitmap,
-    options?: BlobOptions,
-) {
+export async function imageBitmapToBlob(imageBitmap: ImageBitmap) {
     const offscreen = new OffscreenCanvas(
         imageBitmap.width,
         imageBitmap.height,
     );
     offscreen.getContext("2d").drawImage(imageBitmap, 0, 0);
 
-    return offscreen.convertToBlob(options);
+    return offscreen.convertToBlob({
+        type: "image/jpeg",
+        quality: 0.8,
+    });
 }
 
 export async function imageBitmapFromBlob(blob: Blob) {

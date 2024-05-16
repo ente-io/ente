@@ -220,8 +220,7 @@ class FaceService {
             face.detection,
         );
 
-        const blobOptions = DEFAULT_ML_SYNC_CONFIG.faceCrop.blobOptions;
-        const blob = await imageBitmapToBlob(faceCrop.image, blobOptions);
+        const blob = await imageBitmapToBlob(faceCrop.image);
 
         const cache = await openCache("face-crops");
         await cache.put(face.id, blob);
