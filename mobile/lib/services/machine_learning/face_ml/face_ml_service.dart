@@ -1424,9 +1424,8 @@ class FaceMlService {
       indexableFiles.add(enteFile);
     }
 
-    final Map<int, int> alreadyIndexedFiles = await FaceMLDataDB.instance
-        .getIndexedFileIds(minimumMlVersion: faceMlVersion);
-    final int alreadyIndexedCount = alreadyIndexedFiles.length;
+    final int alreadyIndexedCount = await FaceMLDataDB.instance
+        .getIndexedFileCount(minimumMlVersion: faceMlVersion);
     final int totalIndexableCount = indexableFiles.length;
     final ratio = alreadyIndexedCount / totalIndexableCount;
     w?.log('getIndexedDoneRatio');
