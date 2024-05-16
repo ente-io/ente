@@ -36,7 +36,7 @@ import mobileFaceNetEmbeddingService from "./mobileFaceNetEmbeddingService";
 
 import { fetchImageBitmapForContext } from "../face/image";
 import { syncPeopleIndex } from "../face/people";
-import yoloFaceDetectionService from "./yoloFaceDetectionService";
+import yoloFaceDetectionService from "../face/detect-face";
 
 /**
  * TODO-ML(MR): What and why.
