@@ -34,33 +34,31 @@ const (
 )
 
 type Controller struct {
-	Repo                       *embedding.Repository
-	AccessCtrl                 access.Controller
-	ObjectCleanupController    *controller.ObjectCleanupController
-	S3Config                   *s3config.S3Config
-	QueueRepo                  *repo.QueueRepository
-	TaskLockingRepo            *repo.TaskLockRepository
-	FileRepo                   *repo.FileRepository
-	CollectionRepo             *repo.CollectionRepository
-	HostName                   string
-	cleanupCronRunning         bool
-	derivedStorageDataCenter   string
-	areDerivedAndHotBucketSame bool
+	Repo                     *embedding.Repository
+	AccessCtrl               access.Controller
+	ObjectCleanupController  *controller.ObjectCleanupController
+	S3Config                 *s3config.S3Config
+	QueueRepo                *repo.QueueRepository
+	TaskLockingRepo          *repo.TaskLockRepository
+	FileRepo                 *repo.FileRepository
+	CollectionRepo           *repo.CollectionRepository
+	HostName                 string
+	cleanupCronRunning       bool
+	derivedStorageDataCenter string
 }
 
 func New(repo *embedding.Repository, accessCtrl access.Controller, objectCleanupController *controller.ObjectCleanupController, s3Config *s3config.S3Config, queueRepo *repo.QueueRepository, taskLockingRepo *repo.TaskLockRepository, fileRepo *repo.FileRepository, collectionRepo *repo.CollectionRepository, hostName string) *Controller {
 	return &Controller{
-		Repo:                       repo,
-		AccessCtrl:                 accessCtrl,
-		ObjectCleanupController:    objectCleanupController,
-		S3Config:                   s3Config,
-		QueueRepo:                  queueRepo,
-		TaskLockingRepo:            taskLockingRepo,
-		FileRepo:                   fileRepo,
-		CollectionRepo:             collectionRepo,
-		HostName:                   hostName,
-		derivedStorageDataCenter:   s3Config.GetDerivedStorageDataCenter(),
-		areDerivedAndHotBucketSame: s3Config.GetDerivedStorageDataCenter() == s3Config.GetDerivedStorageDataCenter(),
+		Repo:                     repo,
+		AccessCtrl:               accessCtrl,
+		ObjectCleanupController:  objectCleanupController,
+		S3Config:                 s3Config,
+		QueueRepo:                queueRepo,
+		TaskLockingRepo:          taskLockingRepo,
+		FileRepo:                 fileRepo,
+		CollectionRepo:           collectionRepo,
+		HostName:                 hostName,
+		derivedStorageDataCenter: s3Config.GetDerivedStorageDataCenter(),
 	}
 }
 
