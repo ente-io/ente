@@ -264,33 +264,62 @@ func (c *Controller) deleteEmbedding(qItem repo.QueueItem) {
 		return
 	}
 	prefix := c.getEmbeddingObjectPrefix(ownerID, fileID)
-
-	err = c.ObjectCleanupController.DeleteAllObjectsWithPrefix(prefix, c.S3Config.GetDerivedStorageDataCenter())
+	datacenters, err := c.Repo.GetDatacenters(context.Background(), fileID)
 	if err != nil {
-		ctxLogger.WithError(err).Error("Failed to delete all objects")
+		ctxLogger.WithError(err).Error("Failed to fetch datacenters")
 		return
 	}
-	// if Embeddings DC is different from hot DC, delete from hot DC as well
-	if !c.areDerivedAndHotBucketSame {
-		err = c.ObjectCleanupController.DeleteAllObjectsWithPrefix(prefix, c.S3Config.GetHotDataCenter())
+	// Ensure that the object are deleted from active derived storage dc. Ideally, this section should never be executed
+	// unless there's a bug in storing the DC or the service restarts before removing the rows from the table
+	// todo:(neeraj): remove this section after a few weeks of deployment
+	if len(datacenters) == 0 {
+		ctxLogger.Warn("No datacenters found for file, ensuring deletion from derived storage  and hot DC")
+		err = c.ObjectCleanupController.DeleteAllObjectsWithPrefix(prefix, c.S3Config.GetDerivedStorageDataCenter())
 		if err != nil {
-			ctxLogger.WithError(err).Error("Failed to delete all objects from hot DC")
+			ctxLogger.WithError(err).Error("Failed to delete all objects")
 			return
+		}
+		// if Embeddings DC is different from hot DC, delete from hot DC as well
+		if !c.areDerivedAndHotBucketSame {
+			err = c.ObjectCleanupController.DeleteAllObjectsWithPrefix(prefix, c.S3Config.GetHotDataCenter())
+			if err != nil {
+				ctxLogger.WithError(err).Error("Failed to delete all objects from hot DC")
+				return
+			}
+		}
+	} else {
+		ctxLogger.Info("Deleting from all datacenters %v", datacenters)
+	}
+
+	for i := range datacenters {
+		err = c.ObjectCleanupController.DeleteAllObjectsWithPrefix(prefix, datacenters[i])
+		if err != nil {
+			ctxLogger.WithError(err).Errorf("Failed to delete all objects from %s", datacenters[i])
+			return
+		} else {
+			removeErr := c.Repo.RemoveDatacenter(context.Background(), fileID, datacenters[i])
+			if removeErr != nil {
+				ctxLogger.WithError(removeErr).Error("Failed to remove datacenter from db")
+				return
+			}
 		}
 	}
 
+	noDcs, noDcErr := c.Repo.GetDatacenters(context.Background(), fileID)
+	if len(noDcs) > 0 || noDcErr != nil {
+		ctxLogger.Errorf("Failed to delete from all datacenters %s", noDcs)
+		return
+	}
 	err = c.Repo.Delete(fileID)
 	if err != nil {
 		ctxLogger.WithError(err).Error("Failed to remove from db")
 		return
 	}
-
 	err = c.QueueRepo.DeleteItem(repo.DeleteEmbeddingsQueue, qItem.Item)
 	if err != nil {
 		ctxLogger.WithError(err).Error("Failed to remove item from the queue")
 		return
 	}
-
 	ctxLogger.Info("Successfully deleted all embeddings")
 }
 
