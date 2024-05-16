@@ -54,5 +54,6 @@
         "shx": "^0.3",
         "typescript": "^5"
     },
-    "productName": "ente"
+    "productName": "ente",
+    "packageManager": "yarn@1.22.21"
 }
