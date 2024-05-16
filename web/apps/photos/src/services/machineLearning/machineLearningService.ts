@@ -15,8 +15,6 @@ import {
     Face,
     FaceCropService,
     FaceDetection,
-    FaceDetectionMethod,
-    FaceDetectionService,
     FaceEmbeddingMethod,
     FaceEmbeddingService,
     Landmark,
@@ -31,12 +29,10 @@ import {
 import { getLocalFiles } from "services/fileService";
 import { EnteFile } from "types/file";
 import { isInternalUserForML } from "utils/user";
-import FaceService from "./faceService";
-import mobileFaceNetEmbeddingService from "./mobileFaceNetEmbeddingService";
-
 import { fetchImageBitmapForContext } from "../face/image";
 import { syncPeopleIndex } from "../face/people";
-import yoloFaceDetectionService from "../face/detect-face";
+import FaceService from "./faceService";
+import mobileFaceNetEmbeddingService from "./mobileFaceNetEmbeddingService";
 
 /**
  * TODO-ML(MR): What and why.
@@ -110,16 +106,6 @@ export async function updateMLSearchConfig(newConfig: MLSearchConfig) {
 }
 
 export class MLFactory {
-    public static getFaceDetectionService(
-        method: FaceDetectionMethod,
-    ): FaceDetectionService {
-        if (method === "YoloFace") {
-            return yoloFaceDetectionService;
-        }
-
-        throw Error("Unknon face detection method: " + method);
-    }
-
     public static getFaceEmbeddingService(
         method: FaceEmbeddingMethod,
     ): FaceEmbeddingService {
@@ -135,7 +121,6 @@ export class LocalMLSyncContext implements MLSyncContext {
     public token: string;
     public userID: number;
 
-    public faceDetectionService: FaceDetectionService;
     public faceCropService: FaceCropService;
     public faceEmbeddingService: FaceEmbeddingService;
 
@@ -163,8 +148,6 @@ export class LocalMLSyncContext implements MLSyncContext {
         this.token = token;
         this.userID = userID;
 
-        this.faceDetectionService =
-            MLFactory.getFaceDetectionService("YoloFace");
         this.faceEmbeddingService =
             MLFactory.getFaceEmbeddingService("MobileFaceNet");
 

@@ -198,7 +198,6 @@ export interface MLSyncContext {
     token: string;
     userID: number;
 
-    faceDetectionService: FaceDetectionService;
     faceCropService: FaceCropService;
     faceEmbeddingService: FaceEmbeddingService;
 
@@ -239,16 +238,6 @@ export interface MLLibraryData {
 }
 
 export declare type MLIndex = "files" | "people";
-
-export interface FaceDetectionService {
-    method: Versioned<FaceDetectionMethod>;
-
-    detectFaces(image: ImageBitmap): Promise<Array<FaceDetection>>;
-    getRelativeDetection(
-        faceDetection: FaceDetection,
-        imageDimensions: Dimensions,
-    ): FaceDetection;
-}
 
 export interface FaceCropService {
     method: Versioned<FaceCropMethod>;

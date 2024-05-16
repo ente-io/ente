@@ -2,6 +2,7 @@ import { openCache } from "@/next/blob-cache";
 import log from "@/next/log";
 import { faceAlignment } from "services/face/align";
 import mlIDbStorage from "services/face/db";
+import { detectFaces, getRelativeDetection } from "services/face/detect-face";
 import {
     DetectedFace,
     Face,
@@ -10,9 +11,9 @@ import {
     type FaceAlignment,
 } from "services/face/types";
 import { imageBitmapToBlob, warpAffineFloat32List } from "utils/image";
-import { detectBlur } from "../face/detect-blur";
 import { clusterFaces } from "../face/cluster";
 import { getFaceCrop } from "../face/crop";
+import { detectBlur } from "../face/detect-blur";
 import {
     fetchImageBitmap,
     fetchImageBitmapForContext,
@@ -26,11 +27,13 @@ class FaceService {
         fileContext: MLSyncFileContext,
     ) {
         const { newMlFile } = fileContext;
-        newMlFile.faceDetectionMethod = syncContext.faceDetectionService.method;
+        newMlFile.faceDetectionMethod = {
+            value: "YoloFace",
+            version: 1,
+        };
         fileContext.newDetection = true;
         const imageBitmap = await fetchImageBitmapForContext(fileContext);
-        const faceDetections =
-            await syncContext.faceDetectionService.detectFaces(imageBitmap);
+        const faceDetections = await detectFaces(imageBitmap);
         // TODO: reenable faces filtering based on width
         const detectedFaces = faceDetections?.map((detection) => {
             return {
@@ -123,11 +126,10 @@ class FaceService {
         for (let i = 0; i < newMlFile.faces.length; i++) {
             const face = newMlFile.faces[i];
             if (face.detection.box.x + face.detection.box.width < 2) continue; // Skip if somehow already relative
-            face.detection =
-                syncContext.faceDetectionService.getRelativeDetection(
-                    face.detection,
-                    newMlFile.imageDimensions,
-                );
+            face.detection = getRelativeDetection(
+                face.detection,
+                newMlFile.imageDimensions,
+            );
         }
     }
 
