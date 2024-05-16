@@ -38,9 +38,9 @@ import arcfaceCropService from "./arcfaceCropService";
 import FaceService from "./faceService";
 import laplacianBlurDetectionService from "./laplacianBlurDetectionService";
 import mobileFaceNetEmbeddingService from "./mobileFaceNetEmbeddingService";
-import PeopleService from "./peopleService";
 
 import { fetchImageBitmapForContext } from "../face/image";
+import { syncPeopleIndex } from "../face/people";
 import yoloFaceDetectionService from "./yoloFaceDetectionService";
 
 /**
@@ -628,7 +628,7 @@ class MachineLearningService {
     public async syncIndex(syncContext: MLSyncContext) {
         await this.getMLLibraryData(syncContext);
 
-        await PeopleService.syncPeopleIndex(syncContext);
+        await syncPeopleIndex(syncContext);
 
         await this.persistMLLibraryData(syncContext);
     }
