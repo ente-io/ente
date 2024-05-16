@@ -279,40 +279,47 @@ extension DeviceFiles on FilesDB {
     return result;
   }
 
-  Future<void> updateDevicePathSyncStatus(Map<String, bool> syncStatus) async {
-    final db = await database;
-    var batch = db.batch();
+  Future<void> updateDevicePathSyncStatus(
+    Map<String, bool> syncStatus,
+  ) async {
+    final db = await sqliteAsyncDB;
     int batchCounter = 0;
+    final parameterSets = <List<Object?>>[];
     for (MapEntry e in syncStatus.entries) {
       final String pathID = e.key;
+      parameterSets.add([e.value ? _sqlBoolTrue : _sqlBoolFalse, pathID]);
+      batchCounter++;
+
       if (batchCounter == 400) {
-        await batch.commit(noResult: true);
-        batch = db.batch();
+        await db.executeBatch(
+          '''
+          UPDATE device_collections SET should_backup = ? WHERE id = ?;
+        ''',
+          parameterSets,
+        );
+        parameterSets.clear();
         batchCounter = 0;
       }
-      batch.update(
-        "device_collections",
-        {
-          "should_backup": e.value ? _sqlBoolTrue : _sqlBoolFalse,
-        },
-        where: 'id = ?',
-        whereArgs: [pathID],
-      );
-      batchCounter++;
     }
-    await batch.commit(noResult: true);
+
+    await db.executeBatch(
+      '''
+          UPDATE device_collections SET should_backup = ? WHERE id = ?;
+        ''',
+      parameterSets,
+    );
   }
 
   Future<void> updateDeviceCollection(
     String pathID,
     int collectionID,
   ) async {
-    final db = await database;
-    await db.update(
-      "device_collections",
-      {"collection_id": collectionID},
-      where: 'id = ?',
-      whereArgs: [pathID],
+    final db = await sqliteAsyncDB;
+    await db.execute(
+      '''
+      UPDATE device_collections SET collection_id = ? WHERE id = ?;
+    ''',
+      [collectionID, pathID],
     );
     return;
   }
@@ -325,7 +332,7 @@ extension DeviceFiles on FilesDB {
     int? limit,
     bool? asc,
   }) async {
-    final db = await database;
+    final db = await sqliteAsyncDB;
     final order = (asc ?? false ? 'ASC' : 'DESC');
     final String rawQuery = '''
     SELECT *
@@ -340,7 +347,7 @@ extension DeviceFiles on FilesDB {
           ORDER BY ${FilesDB.columnCreationTime} $order , ${FilesDB.columnModificationTime} $order
          ''' +
         (limit != null ? ' limit $limit;' : ';');
-    final results = await db.rawQuery(rawQuery);
+    final results = await db.getAll(rawQuery);
     final files = convertToFiles(results);
     final dedupe = deduplicateByLocalID(files);
     return FileLoadResult(dedupe, files.length == limit);
@@ -350,7 +357,7 @@ extension DeviceFiles on FilesDB {
     String pathID,
     int ownerID,
   ) async {
-    final db = await database;
+    final db = await sqliteAsyncDB;
     const String rawQuery = '''
     SELECT ${FilesDB.columnLocalID}, ${FilesDB.columnUploadedFileID}, 
     ${FilesDB.columnFileSize} 
@@ -362,7 +369,7 @@ extension DeviceFiles on FilesDB {
           ${FilesDB.columnLocalID} IN 
           (SELECT id FROM device_files where path_id = ?)
           ''';
-    final results = await db.rawQuery(rawQuery, [ownerID, pathID]);
+    final results = await db.getAll(rawQuery, [ownerID, pathID]);
     final localIDs = <String>{};
     final uploadedIDs = <int>{};
     int localSize = 0;
@@ -386,17 +393,17 @@ extension DeviceFiles on FilesDB {
       "$includeCoverThumbnail",
     );
     try {
-      final db = await database;
+      final db = await sqliteAsyncDB;
       final coverFiles = <EnteFile>[];
       if (includeCoverThumbnail) {
-        final fileRows = await db.rawQuery(
+        final fileRows = await db.getAll(
           '''SELECT * FROM FILES where local_id in (select cover_id from device_collections) group by local_id;
           ''',
         );
         final files = convertToFiles(fileRows);
         coverFiles.addAll(files);
       }
-      final deviceCollectionRows = await db.rawQuery(
+      final deviceCollectionRows = await db.getAll(
         '''SELECT * from device_collections''',
       );
       final List<DeviceCollection> deviceCollections = [];
@@ -444,8 +451,8 @@ extension DeviceFiles on FilesDB {
 
   Future<EnteFile?> getDeviceCollectionThumbnail(String pathID) async {
     debugPrint("Call fallback method to get potential thumbnail");
-    final db = await database;
-    final fileRows = await db.rawQuery(
+    final db = await sqliteAsyncDB;
+    final fileRows = await db.getAll(
       '''SELECT * FROM FILES  f JOIN device_files df on f.local_id = df.id 
       and df.path_id= ? order by f.creation_time DESC limit 1;
           ''',
