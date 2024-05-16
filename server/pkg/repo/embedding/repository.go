@@ -3,6 +3,7 @@ package embedding
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"github.com/lib/pq"
 
@@ -122,6 +123,22 @@ func (r *Repository) RemoveDatacenter(ctx context.Context, fileID int64, dc stri
 	_, err := r.DB.ExecContext(ctx, `UPDATE embeddings SET datacenters = array_remove(datacenters, $1) WHERE file_id = $2`, dc, fileID)
 	if err != nil {
 		return stacktrace.Propagate(err, "")
+	}
+	return nil
+}
+
+// AddNewDC adds the dc name to the list of datacenters, if it doesn't exist already, for a given file, model and user. It also updates the size of the embedding
+func (r *Repository) AddNewDC(ctx context.Context, fileID int64, model ente.Model, userID int64, size int, dc string) error {
+	res, err := r.DB.ExecContext(ctx, `UPDATE embeddings SET size = $1, datacenters = array_append(COALESCE(datacenters, ARRAY[]::s3region[]), $2::s3region) WHERE file_id = $3 AND model = $4 AND owner_id = $5`, size, dc, fileID, model, userID)
+	if err != nil {
+		return stacktrace.Propagate(err, "")
+	}
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		return stacktrace.Propagate(err, "")
+	}
+	if rowsAffected == 0 {
+		return stacktrace.Propagate(errors.New("no  row got updated"), "")
 	}
 	return nil
 }
