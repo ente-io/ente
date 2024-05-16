@@ -210,7 +210,6 @@ export interface MLSyncContext {
 
     faceDetectionService: FaceDetectionService;
     faceCropService: FaceCropService;
-    faceAlignmentService: FaceAlignmentService;
     faceEmbeddingService: FaceEmbeddingService;
     blurDetectionService: BlurDetectionService;
     faceClusteringService: ClusteringService;
@@ -270,11 +269,6 @@ export interface FaceCropService {
         imageBitmap: ImageBitmap,
         face: FaceDetection,
     ): Promise<FaceCrop>;
-}
-
-export interface FaceAlignmentService {
-    method: Versioned<FaceAlignmentMethod>;
-    getFaceAlignment(faceDetection: FaceDetection): FaceAlignment;
 }
 
 export interface FaceEmbeddingService {

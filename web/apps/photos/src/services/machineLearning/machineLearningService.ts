@@ -17,8 +17,6 @@ import {
     ClusteringMethod,
     ClusteringService,
     Face,
-    FaceAlignmentMethod,
-    FaceAlignmentService,
     FaceCropMethod,
     FaceCropService,
     FaceDetection,
@@ -38,7 +36,6 @@ import {
 import { getLocalFiles } from "services/fileService";
 import { EnteFile } from "types/file";
 import { isInternalUserForML } from "utils/user";
-import arcfaceAlignmentService from "./arcfaceAlignmentService";
 import arcfaceCropService from "./arcfaceCropService";
 import FaceService from "./faceService";
 import hdbscanClusteringService from "./hdbscanClusteringService";
@@ -139,16 +136,6 @@ export class MLFactory {
         throw Error("Unknon face crop method: " + method);
     }
 
-    public static getFaceAlignmentService(
-        method: FaceAlignmentMethod,
-    ): FaceAlignmentService {
-        if (method === "ArcFace") {
-            return arcfaceAlignmentService;
-        }
-
-        throw Error("Unknon face alignment method: " + method);
-    }
-
     public static getBlurDetectionService(
         method: BlurDetectionMethod,
     ): BlurDetectionService {
@@ -187,7 +174,6 @@ export class LocalMLSyncContext implements MLSyncContext {
 
     public faceDetectionService: FaceDetectionService;
     public faceCropService: FaceCropService;
-    public faceAlignmentService: FaceAlignmentService;
     public blurDetectionService: BlurDetectionService;
     public faceEmbeddingService: FaceEmbeddingService;
     public faceClusteringService: ClusteringService;
@@ -225,8 +211,6 @@ export class LocalMLSyncContext implements MLSyncContext {
         this.faceDetectionService =
             MLFactory.getFaceDetectionService("YoloFace");
         this.faceCropService = MLFactory.getFaceCropService("ArcFace");
-        this.faceAlignmentService =
-            MLFactory.getFaceAlignmentService("ArcFace");
         this.blurDetectionService =
             MLFactory.getBlurDetectionService("Laplacian");
         this.faceEmbeddingService =

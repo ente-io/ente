@@ -8,7 +8,7 @@ import {
     Versioned,
 } from "services/face/types";
 import { cropWithRotation } from "utils/image";
-import { getArcfaceAlignment } from "./arcfaceAlignmentService";
+import { faceAlignment } from "../face/align";
 
 class ArcFaceCropService implements FaceCropService {
     public method: Versioned<FaceCropMethod>;
@@ -24,8 +24,8 @@ class ArcFaceCropService implements FaceCropService {
         imageBitmap: ImageBitmap,
         faceDetection: FaceDetection,
     ): Promise<FaceCrop> {
-        const alignedFace = getArcfaceAlignment(faceDetection);
-        const faceCrop = getFaceCrop(imageBitmap, alignedFace);
+        const alignment = faceAlignment(faceDetection);
+        const faceCrop = getFaceCrop(imageBitmap, alignment);
 
         return faceCrop;
     }

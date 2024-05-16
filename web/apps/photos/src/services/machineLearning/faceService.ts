@@ -1,5 +1,6 @@
 import { openCache } from "@/next/blob-cache";
 import log from "@/next/log";
+import { faceAlignment } from "services/face/align";
 import mlIDbStorage from "services/face/db";
 import {
     DetectedFace,
@@ -103,12 +104,14 @@ class FaceService {
         fileContext: MLSyncFileContext,
     ): Promise<Float32Array> {
         const { oldMlFile, newMlFile } = fileContext;
+        // TODO-ML(MR):
+        const method = {
+            value: "ArcFace",
+            version: 1,
+        };
         if (
             !fileContext.newDetection &&
-            !isDifferentOrOld(
-                oldMlFile?.faceAlignmentMethod,
-                syncContext.faceAlignmentService.method,
-            ) &&
+            !isDifferentOrOld(oldMlFile?.faceAlignmentMethod, method) &&
             areFaceIdsSame(newMlFile.faces, oldMlFile?.faces)
         ) {
             for (const [index, face] of newMlFile.faces.entries()) {
@@ -118,7 +121,10 @@ class FaceService {
             return;
         }
 
-        newMlFile.faceAlignmentMethod = syncContext.faceAlignmentService.method;
+        newMlFile.faceAlignmentMethod = {
+            value: "ArcFace",
+            version: 1,
+        };
         fileContext.newAlignment = true;
         const imageBitmap =
             fileContext.imageBitmap ||
@@ -126,9 +132,7 @@ class FaceService {
 
         // Execute the face alignment calculations
         for (const face of newMlFile.faces) {
-            face.alignment = syncContext.faceAlignmentService.getFaceAlignment(
-                face.detection,
-            );
+            face.alignment = faceAlignment(face.detection);
         }
         // Extract face images and convert to Float32Array
         const faceAlignments = newMlFile.faces.map((f) => f.alignment);

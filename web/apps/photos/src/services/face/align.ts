@@ -1,30 +1,7 @@
 import { Matrix } from "ml-matrix";
 import { Point } from "services/face/geom";
-import {
-    FaceAlignment,
-    FaceAlignmentMethod,
-    FaceAlignmentService,
-    FaceDetection,
-    Versioned,
-} from "services/face/types";
+import { FaceAlignment, FaceDetection } from "services/face/types";
 import { getSimilarityTransformation } from "similarity-transformation";
-
-class ArcfaceAlignmentService implements FaceAlignmentService {
-    public method: Versioned<FaceAlignmentMethod>;
-
-    constructor() {
-        this.method = {
-            value: "ArcFace",
-            version: 1,
-        };
-    }
-
-    public getFaceAlignment(faceDetection: FaceDetection): FaceAlignment {
-        return getArcfaceAlignment(faceDetection);
-    }
-}
-
-export default new ArcfaceAlignmentService();
 
 const ARCFACE_LANDMARKS = [
     [38.2946, 51.6963],
@@ -43,9 +20,12 @@ const ARC_FACE_5_LANDMARKS = [
     [70.7299, 92.2041],
 ] as Array<[number, number]>;
 
-export function getArcfaceAlignment(
-    faceDetection: FaceDetection,
-): FaceAlignment {
+/**
+ * Compute and return an {@link FaceAlignment} for the given face detection.
+ *
+ * @param faceDetection A geometry indicating a face detected in an image.
+ */
+export const faceAlignment = (faceDetection: FaceDetection): FaceAlignment => {
     const landmarkCount = faceDetection.landmarks.length;
     return getFaceAlignmentUsingSimilarityTransform(
         faceDetection,
@@ -54,12 +34,11 @@ export function getArcfaceAlignment(
             ARCFACE_LANDMARKS_FACE_SIZE,
         ),
     );
-}
+};
 
 function getFaceAlignmentUsingSimilarityTransform(
     faceDetection: FaceDetection,
     alignedLandmarks: Array<[number, number]>,
-    // alignmentMethod: Versioned<FaceAlignmentMethod>
 ): FaceAlignment {
     const landmarksMat = new Matrix(
         faceDetection.landmarks
@@ -90,7 +69,6 @@ function getFaceAlignmentUsingSimilarityTransform(
         simTransform.rotation.get(0, 1),
         simTransform.rotation.get(0, 0),
     );
-    // log.info({ affineMatrix, meanTranslation, centerMat, center, toMean: simTransform.toMean, fromMean: simTransform.fromMean, size });
 
     return {
         affineMatrix,
