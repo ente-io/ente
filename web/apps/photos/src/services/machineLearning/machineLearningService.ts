@@ -45,7 +45,8 @@ import hdbscanClusteringService from "./hdbscanClusteringService";
 import laplacianBlurDetectionService from "./laplacianBlurDetectionService";
 import mobileFaceNetEmbeddingService from "./mobileFaceNetEmbeddingService";
 import PeopleService from "./peopleService";
-import ReaderService from "./readerService";
+
+import { fetchImageBitmapForContext } from "./readerService";
 import yoloFaceDetectionService from "./yoloFaceDetectionService";
 
 /**
@@ -581,7 +582,7 @@ class MachineLearningService {
         }
 
         try {
-            await ReaderService.getImageBitmap(fileContext);
+            await fetchImageBitmapForContext(fileContext);
             await Promise.all([
                 this.syncFileAnalyzeFaces(syncContext, fileContext),
             ]);

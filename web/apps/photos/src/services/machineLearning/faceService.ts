@@ -10,8 +10,9 @@ import {
     type Versioned,
 } from "services/ml/types";
 import { imageBitmapToBlob, warpAffineFloat32List } from "utils/image";
-import ReaderService, {
+import {
     fetchImageBitmap,
+    fetchImageBitmapForContext,
     getFaceId,
     getLocalFile,
 } from "./readerService";
@@ -43,7 +44,7 @@ class FaceService {
 
         newMlFile.faceDetectionMethod = syncContext.faceDetectionService.method;
         fileContext.newDetection = true;
-        const imageBitmap = await ReaderService.getImageBitmap(fileContext);
+        const imageBitmap = await fetchImageBitmapForContext(fileContext);
         const timerId = `faceDetection-${fileContext.enteFile.id}`;
         console.time(timerId);
         const faceDetections =
@@ -89,7 +90,7 @@ class FaceService {
             return;
         }
 
-        const imageBitmap = await ReaderService.getImageBitmap(fileContext);
+        const imageBitmap = await fetchImageBitmapForContext(fileContext);
         newMlFile.faceCropMethod = syncContext.faceCropService.method;
 
         for (const face of newMlFile.faces) {
@@ -121,7 +122,7 @@ class FaceService {
         fileContext.newAlignment = true;
         const imageBitmap =
             fileContext.imageBitmap ||
-            (await ReaderService.getImageBitmap(fileContext));
+            (await fetchImageBitmapForContext(fileContext));
 
         // Execute the face alignment calculations
         for (const face of newMlFile.faces) {
