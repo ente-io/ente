@@ -7,13 +7,11 @@ import { faceEmbeddings, mobileFaceNetFaceSize } from "services/face/embed";
 import {
     DetectedFace,
     Face,
-    MLSyncContext,
     MLSyncFileContext,
     type FaceAlignment,
 } from "services/face/types";
 import { imageBitmapToBlob, warpAffineFloat32List } from "utils/image";
 import { detectBlur } from "./blur";
-import { clusterFaces } from "./cluster";
 import { getFaceCrop } from "./crop";
 import {
     fetchImageBitmap,
@@ -159,51 +157,6 @@ export const saveFaceCrop = async (imageBitmap: ImageBitmap, face: Face) => {
     faceCrop.image.close();
 
     return blob;
-};
-
-export const getAllSyncedFacesMap = async (syncContext: MLSyncContext) => {
-    if (syncContext.allSyncedFacesMap) {
-        return syncContext.allSyncedFacesMap;
-    }
-
-    syncContext.allSyncedFacesMap = await mlIDbStorage.getAllFacesMap();
-    return syncContext.allSyncedFacesMap;
-};
-
-export const runFaceClustering = async (
-    syncContext: MLSyncContext,
-    allFaces: Array<Face>,
-) => {
-    // await this.init();
-
-    if (!allFaces || allFaces.length < 50) {
-        log.info(
-            `Skipping clustering since number of faces (${allFaces.length}) is less than the clustering threshold (50)`,
-        );
-        return;
-    }
-
-    log.info("Running clustering allFaces: ", allFaces.length);
-    syncContext.mlLibraryData.faceClusteringResults = await clusterFaces(
-        allFaces.map((f) => Array.from(f.embedding)),
-    );
-    syncContext.mlLibraryData.faceClusteringMethod = {
-        value: "Hdbscan",
-        version: 1,
-    };
-    log.info(
-        "[MLService] Got face clustering results: ",
-        JSON.stringify(syncContext.mlLibraryData.faceClusteringResults),
-    );
-
-    // syncContext.faceClustersWithNoise = {
-    //     clusters: syncContext.faceClusteringResults.clusters.map(
-    //         (faces) => ({
-    //             faces,
-    //         })
-    //     ),
-    //     noise: syncContext.faceClusteringResults.noise,
-    // };
 };
 
 export const regenerateFaceCrop = async (faceID: string) => {

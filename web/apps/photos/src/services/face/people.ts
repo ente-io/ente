@@ -1,10 +1,8 @@
+import log from "@/next/log";
 import mlIDbStorage from "services/face/db";
 import { Face, MLSyncContext, Person } from "services/face/types";
-import {
-    getAllSyncedFacesMap,
-    runFaceClustering,
-    saveFaceCrop,
-} from "./f-index";
+import { clusterFaces } from "./cluster";
+import { saveFaceCrop } from "./f-index";
 import { fetchImageBitmap, getLocalFile } from "./image";
 
 export const syncPeopleIndex = async (syncContext: MLSyncContext) => {
@@ -16,13 +14,51 @@ export const syncPeopleIndex = async (syncContext: MLSyncContext) => {
     // TODO: have faces addresable through fileId + faceId
     // to avoid index based addressing, which is prone to wrong results
     // one way could be to match nearest face within threshold in the file
-    const allFacesMap = await getAllSyncedFacesMap(syncContext);
+    const allFacesMap =
+        syncContext.allSyncedFacesMap ??
+        (syncContext.allSyncedFacesMap = await mlIDbStorage.getAllFacesMap());
     const allFaces = [...allFacesMap.values()].flat();
 
     await runFaceClustering(syncContext, allFaces);
     await syncPeopleFromClusters(syncContext, allFacesMap, allFaces);
 
     await mlIDbStorage.setIndexVersion("people", filesVersion);
+};
+
+const runFaceClustering = async (
+    syncContext: MLSyncContext,
+    allFaces: Array<Face>,
+) => {
+    // await this.init();
+
+    if (!allFaces || allFaces.length < 50) {
+        log.info(
+            `Skipping clustering since number of faces (${allFaces.length}) is less than the clustering threshold (50)`,
+        );
+        return;
+    }
+
+    log.info("Running clustering allFaces: ", allFaces.length);
+    syncContext.mlLibraryData.faceClusteringResults = await clusterFaces(
+        allFaces.map((f) => Array.from(f.embedding)),
+    );
+    syncContext.mlLibraryData.faceClusteringMethod = {
+        value: "Hdbscan",
+        version: 1,
+    };
+    log.info(
+        "[MLService] Got face clustering results: ",
+        JSON.stringify(syncContext.mlLibraryData.faceClusteringResults),
+    );
+
+    // syncContext.faceClustersWithNoise = {
+    //     clusters: syncContext.faceClusteringResults.clusters.map(
+    //         (faces) => ({
+    //             faces,
+    //         })
+    //     ),
+    //     noise: syncContext.faceClusteringResults.noise,
+    // };
 };
 
 const syncPeopleFromClusters = async (
