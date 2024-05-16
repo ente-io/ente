@@ -13,7 +13,7 @@ import 'package:photos/services/machine_learning/face_ml/feedback/cluster_feedba
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
-import "package:photos/ui/viewer/people/add_person_action_sheet.dart";
+// import "package:photos/ui/viewer/people/add_person_action_sheet.dart";
 import "package:photos/ui/viewer/people/cluster_page.dart";
 import "package:photos/ui/viewer/people/person_clusters_page.dart";
 import "package:photos/ui/viewer/search/result/person_face_widget.dart";
@@ -289,26 +289,26 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
             ],
           ),
         ),
-        const SizedBox(
-          height: 24.0,
-        ),
-        ButtonWidget(
-          shouldSurfaceExecutionStates: false,
-          buttonType: ButtonType.neutral,
-          labelText: 'Assign different person',
-          buttonSize: ButtonSize.small,
-          onTap: () async {
-            final result = await showAssignPersonAction(
-              context,
-              clusterID: clusterID,
-            );
-            if (result != null &&
-                (result is (PersonEntity, EnteFile) ||
-                    result is PersonEntity)) {
-              await _rejectSuggestion(clusterID, numberOfSuggestions);
-            }
-          },
-        ),
+        // const SizedBox(
+        //   height: 24.0,
+        // ),
+        // ButtonWidget(
+        //   shouldSurfaceExecutionStates: false,
+        //   buttonType: ButtonType.neutral,
+        //   labelText: 'Assign different person',
+        //   buttonSize: ButtonSize.small,
+        //   onTap: () async {
+        //     final result = await showAssignPersonAction(
+        //       context,
+        //       clusterID: clusterID,
+        //     );
+        //     if (result != null &&
+        //         (result is (PersonEntity, EnteFile) ||
+        //             result is PersonEntity)) {
+        //       await _rejectSuggestion(clusterID, numberOfSuggestions);
+        //     }
+        //   },
+        // ),
       ],
     );
     // Precompute face thumbnails for next suggestions, in case there are
