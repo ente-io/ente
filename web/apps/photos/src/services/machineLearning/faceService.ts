@@ -245,12 +245,9 @@ class FaceService {
     ) {
         // await this.init();
 
-        const clusteringConfig = DEFAULT_ML_SYNC_CONFIG.faceClustering;
-
-        if (!allFaces || allFaces.length < clusteringConfig.minInputSize) {
+        if (!allFaces || allFaces.length < 50) {
             log.info(
-                "[MLService] Too few faces to cluster, not running clustering: ",
-                allFaces.length,
+                `Skipping clustering since number of faces (${allFaces.length}) is less than the clustering threshold (50)`,
             );
             return;
         }

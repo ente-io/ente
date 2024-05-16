@@ -26,11 +26,11 @@ class HdbscanClusteringService implements ClusteringService {
         const hdbscan = new Hdbscan({
             input,
 
-            minClusterSize: config.minClusterSize,
-            minSamples: config.minSamples,
-            clusterSelectionEpsilon: config.clusterSelectionEpsilon,
-            clusterSelectionMethod: config.clusterSelectionMethod,
-            debug: config.generateDebugInfo,
+            minClusterSize: 3,
+            minSamples: 5,
+            clusterSelectionEpsilon: 0.6,
+            clusterSelectionMethod: "leaf",
+            debug: true,
         });
 
         return {
