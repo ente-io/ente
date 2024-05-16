@@ -15,7 +15,6 @@ import {
     BlurDetectionMethod,
     BlurDetectionService,
     Face,
-    FaceCropMethod,
     FaceCropService,
     FaceDetection,
     FaceDetectionMethod,
@@ -34,7 +33,6 @@ import {
 import { getLocalFiles } from "services/fileService";
 import { EnteFile } from "types/file";
 import { isInternalUserForML } from "utils/user";
-import arcfaceCropService from "./arcfaceCropService";
 import FaceService from "./faceService";
 import laplacianBlurDetectionService from "./laplacianBlurDetectionService";
 import mobileFaceNetEmbeddingService from "./mobileFaceNetEmbeddingService";
@@ -125,14 +123,6 @@ export class MLFactory {
         throw Error("Unknon face detection method: " + method);
     }
 
-    public static getFaceCropService(method: FaceCropMethod) {
-        if (method === "ArcFace") {
-            return arcfaceCropService;
-        }
-
-        throw Error("Unknon face crop method: " + method);
-    }
-
     public static getBlurDetectionService(
         method: BlurDetectionMethod,
     ): BlurDetectionService {
@@ -189,7 +179,6 @@ export class LocalMLSyncContext implements MLSyncContext {
 
         this.faceDetectionService =
             MLFactory.getFaceDetectionService("YoloFace");
-        this.faceCropService = MLFactory.getFaceCropService("ArcFace");
         this.blurDetectionService =
             MLFactory.getBlurDetectionService("Laplacian");
         this.faceEmbeddingService =
@@ -288,8 +277,7 @@ class MachineLearningService {
         faceID: string,
     ) {
         await downloadManager.init(APPS.PHOTOS, { token });
-        const syncContext = await this.getSyncContext(token, userID);
-        return FaceService.regenerateFaceCrop(syncContext, faceID);
+        return FaceService.regenerateFaceCrop(faceID);
     }
 
     private newMlData(fileId: number) {

@@ -11,6 +11,7 @@ import {
 } from "services/face/types";
 import { imageBitmapToBlob, warpAffineFloat32List } from "utils/image";
 import { clusterFaces } from "../face/cluster";
+import { getFaceCrop } from "../face/crop";
 import {
     fetchImageBitmap,
     fetchImageBitmapForContext,
@@ -55,7 +56,7 @@ class FaceService {
         newMlFile.faceCropMethod = syncContext.faceCropService.method;
 
         for (const face of newMlFile.faces) {
-            await this.saveFaceCrop(imageBitmap, face, syncContext);
+            await this.saveFaceCrop(imageBitmap, face);
         }
     }
 
@@ -132,15 +133,8 @@ class FaceService {
         }
     }
 
-    async saveFaceCrop(
-        imageBitmap: ImageBitmap,
-        face: Face,
-        syncContext: MLSyncContext,
-    ) {
-        const faceCrop = await syncContext.faceCropService.getFaceCrop(
-            imageBitmap,
-            face.detection,
-        );
+    async saveFaceCrop(imageBitmap: ImageBitmap, face: Face) {
+        const faceCrop = getFaceCrop(imageBitmap, face.detection);
 
         const blob = await imageBitmapToBlob(faceCrop.image);
 
@@ -197,10 +191,7 @@ class FaceService {
         // };
     }
 
-    public async regenerateFaceCrop(
-        syncContext: MLSyncContext,
-        faceID: string,
-    ) {
+    public async regenerateFaceCrop(faceID: string) {
         const fileID = Number(faceID.split("-")[0]);
         const personFace = await mlIDbStorage.getFace(fileID, faceID);
         if (!personFace) {
@@ -209,7 +200,7 @@ class FaceService {
 
         const file = await getLocalFile(personFace.fileId);
         const imageBitmap = await fetchImageBitmap(file);
-        return await this.saveFaceCrop(imageBitmap, personFace, syncContext);
+        return await this.saveFaceCrop(imageBitmap, personFace);
     }
 }
 

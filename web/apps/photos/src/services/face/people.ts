@@ -48,11 +48,7 @@ const syncPeopleFromClusters = async (
         if (personFace && !personFace.crop?.cacheKey) {
             const file = await getLocalFile(personFace.fileId);
             const imageBitmap = await fetchImageBitmap(file);
-            await FaceService.saveFaceCrop(
-                imageBitmap,
-                personFace,
-                syncContext,
-            );
+            await FaceService.saveFaceCrop(imageBitmap, personFace);
         }
 
         const person: Person = {
