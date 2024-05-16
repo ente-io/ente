@@ -141,15 +141,16 @@ export const syncCLIPEmbeddings = async () => {
                 ...allEmbeddings,
                 ...newEmbeddings,
             ]);
-            if (response.diff.length) {
-                modelLastSinceTime = response.diff.slice(-1)[0].updatedAt;
-            }
+            modelLastSinceTime = response.diff.reduce(
+                (max, { updatedAt }) => Math.max(max, updatedAt),
+                modelLastSinceTime,
+            );
             await localForage.setItem(clipEmbeddingsLSKey, allEmbeddings);
             await setModelEmbeddingSyncTime(model, modelLastSinceTime);
             log.info(
                 `Syncing embeddings syncedEmbeddingsCount: ${allEmbeddings.length}`,
             );
-        } while (response.diff.length === DIFF_LIMIT);
+        } while (response.diff.length > 0);
     } catch (e) {
         log.error("Sync embeddings failed", e);
     }
@@ -218,15 +219,16 @@ export const syncFaceEmbeddings = async () => {
                 ...allEmbeddings,
                 ...newEmbeddings,
             ]);
-            if (response.diff.length) {
-                modelLastSinceTime = response.diff.slice(-1)[0].updatedAt;
-            }
+            modelLastSinceTime = response.diff.reduce(
+                (max, { updatedAt }) => Math.max(max, updatedAt),
+                modelLastSinceTime,
+            );
             await localForage.setItem(FILE_EMBEDING_TABLE, allEmbeddings);
             await setModelEmbeddingSyncTime(model, modelLastSinceTime);
             log.info(
                 `Syncing embeddings syncedEmbeddingsCount: ${allEmbeddings.length}`,
             );
-        } while (response.diff.length === DIFF_LIMIT);
+        } while (response.diff.length > 0);
     } catch (e) {
         log.error("Sync embeddings failed", e);
     }
