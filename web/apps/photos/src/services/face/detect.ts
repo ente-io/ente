@@ -39,7 +39,7 @@ export const detectFaces = async (
     const data = preprocessResult.data;
     const resized = preprocessResult.newSize;
     const outputData = await workerBridge.detectFaces(data);
-    const faces = getFacesFromYoloOutput(outputData as Float32Array, 0.7);
+    const faces = getFacesFromYOLOOutput(outputData as Float32Array, 0.7);
     const inBox = newBox(0, 0, resized.width, resized.height);
     const toBox = newBox(0, 0, imageBitmap.width, imageBitmap.height);
     const transform = computeTransformToBox(inBox, toBox);
@@ -63,7 +63,7 @@ const preprocessImageBitmapToFloat32ChannelsFirst = (
     maintainAspectRatio: boolean = true,
     normFunction: (pixelValue: number) => number = normalizePixelBetween0And1,
 ) => {
-    // Create an OffscreenCanvas and set its size
+    // Create an OffscreenCanvas and set its size.
     const offscreenCanvas = new OffscreenCanvas(
         imageBitmap.width,
         imageBitmap.height,
@@ -146,19 +146,25 @@ const preprocessImageBitmapToFloat32ChannelsFirst = (
     };
 };
 
-// The rowOutput is a Float32Array of shape [25200, 16], where each row represents a bounding box.
-const getFacesFromYoloOutput = (
+/**
+ * @param rowOutput A Float32Array of shape [25200, 16], where each row
+ * represents a bounding box.
+ */
+const getFacesFromYOLOOutput = (
     rowOutput: Float32Array,
     minScore: number,
 ): Array<FaceDetection> => {
     const faces: Array<FaceDetection> = [];
-    // iterate over each row
+    // Iterate over each row.
     for (let i = 0; i < rowOutput.length; i += 16) {
         const score = rowOutput[i + 4];
         if (score < minScore) {
             continue;
         }
-        // The first 4 values represent the bounding box's coordinates (x1, y1, x2, y2)
+        // The first 4 values represent the bounding box's coordinates:
+        //
+        //     (x1, y1, x2, y2)
+        //
         const xCenter = rowOutput[i];
         const yCenter = rowOutput[i + 1];
         const width = rowOutput[i + 2];
@@ -191,13 +197,7 @@ const getFacesFromYoloOutput = (
             new Point(leftMouthX, leftMouthY),
             new Point(rightMouthX, rightMouthY),
         ];
-        const face: FaceDetection = {
-            box,
-            landmarks,
-            probability,
-            // detectionMethod: this.method,
-        };
-        faces.push(face);
+        faces.push({ box, landmarks, probability });
     }
     return faces;
 };
@@ -217,30 +217,34 @@ export const getRelativeDetection = (
     const landmarks = oldLandmarks.map((l) => {
         return new Point(l.x / dimensions.width, l.y / dimensions.height);
     });
-    return {
-        box,
-        landmarks,
-        probability: faceDetection.probability,
-    };
+    const probability = faceDetection.probability;
+    return { box, landmarks, probability };
 };
 
 /**
  * Removes duplicate face detections from an array of detections.
  *
- * This function sorts the detections by their probability in descending order, then iterates over them.
- * For each detection, it calculates the Euclidean distance to all other detections.
- * If the distance is less than or equal to the specified threshold (`withinDistance`), the other detection is considered a duplicate and is removed.
+ * This function sorts the detections by their probability in descending order,
+ * then iterates over them.
+ *
+ * For each detection, it calculates the Euclidean distance to all other
+ * detections.
+ *
+ * If the distance is less than or equal to the specified threshold
+ * (`withinDistance`), the other detection is considered a duplicate and is
+ * removed.
  *
  * @param detections - An array of face detections to remove duplicates from.
- * @param withinDistance - The maximum Euclidean distance between two detections for them to be considered duplicates.
+ *
+ * @param withinDistance - The maximum Euclidean distance between two detections
+ * for them to be considered duplicates.
  *
  * @returns An array of face detections with duplicates removed.
  */
-function removeDuplicateDetections(
+const removeDuplicateDetections = (
     detections: Array<FaceDetection>,
     withinDistance: number,
-) {
-    // console.time('removeDuplicates');
+) => {
     detections.sort((a, b) => b.probability - a.probability);
     const isSelected = new Map<number, boolean>();
     for (let i = 0; i < detections.length; i++) {
@@ -268,9 +272,8 @@ function removeDuplicateDetections(
     for (let i = 0; i < detections.length; i++) {
         isSelected.get(i) && uniques.push(detections[i]);
     }
-    // console.timeEnd('removeDuplicates');
     return uniques;
-}
+};
 
 function getDetectionCenter(detection: FaceDetection) {
     const center = new Point(0, 0);
