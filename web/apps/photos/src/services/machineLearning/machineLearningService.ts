@@ -14,8 +14,6 @@ import mlIDbStorage, { ML_SEARCH_CONFIG_NAME } from "services/face/db";
 import {
     BlurDetectionMethod,
     BlurDetectionService,
-    ClusteringMethod,
-    ClusteringService,
     Face,
     FaceCropMethod,
     FaceCropService,
@@ -38,7 +36,6 @@ import { EnteFile } from "types/file";
 import { isInternalUserForML } from "utils/user";
 import arcfaceCropService from "./arcfaceCropService";
 import FaceService from "./faceService";
-import hdbscanClusteringService from "./hdbscanClusteringService";
 import laplacianBlurDetectionService from "./laplacianBlurDetectionService";
 import mobileFaceNetEmbeddingService from "./mobileFaceNetEmbeddingService";
 import PeopleService from "./peopleService";
@@ -155,16 +152,6 @@ export class MLFactory {
 
         throw Error("Unknon face embedding method: " + method);
     }
-
-    public static getClusteringService(
-        method: ClusteringMethod,
-    ): ClusteringService {
-        if (method === "Hdbscan") {
-            return hdbscanClusteringService;
-        }
-
-        throw Error("Unknon clustering method: " + method);
-    }
 }
 
 export class LocalMLSyncContext implements MLSyncContext {
@@ -176,7 +163,6 @@ export class LocalMLSyncContext implements MLSyncContext {
     public faceCropService: FaceCropService;
     public blurDetectionService: BlurDetectionService;
     public faceEmbeddingService: FaceEmbeddingService;
-    public faceClusteringService: ClusteringService;
 
     public localFilesMap: Map<number, EnteFile>;
     public outOfSyncFiles: EnteFile[];
@@ -215,7 +201,6 @@ export class LocalMLSyncContext implements MLSyncContext {
             MLFactory.getBlurDetectionService("Laplacian");
         this.faceEmbeddingService =
             MLFactory.getFaceEmbeddingService("MobileFaceNet");
-        this.faceClusteringService = MLFactory.getClusteringService("Hdbscan");
 
         this.outOfSyncFiles = [];
         this.nSyncedFiles = 0;

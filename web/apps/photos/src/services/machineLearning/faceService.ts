@@ -11,6 +11,7 @@ import {
     type Versioned,
 } from "services/face/types";
 import { imageBitmapToBlob, warpAffineFloat32List } from "utils/image";
+import { clusterFaces } from "../face/cluster";
 import {
     fetchImageBitmap,
     fetchImageBitmapForContext,
@@ -257,12 +258,13 @@ class FaceService {
         }
 
         log.info("Running clustering allFaces: ", allFaces.length);
-        syncContext.mlLibraryData.faceClusteringResults =
-            await syncContext.faceClusteringService.cluster(
-                allFaces.map((f) => Array.from(f.embedding)),
-            );
-        syncContext.mlLibraryData.faceClusteringMethod =
-            syncContext.faceClusteringService.method;
+        syncContext.mlLibraryData.faceClusteringResults = await clusterFaces(
+            allFaces.map((f) => Array.from(f.embedding)),
+        );
+        syncContext.mlLibraryData.faceClusteringMethod = {
+            value: "Hdbscan",
+            version: 1,
+        };
         log.info(
             "[MLService] Got face clustering results: ",
             JSON.stringify(syncContext.mlLibraryData.faceClusteringResults),

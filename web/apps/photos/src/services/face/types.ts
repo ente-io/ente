@@ -1,5 +1,5 @@
-import { DebugInfo } from "hdbscan";
 import PQueue from "p-queue";
+import type { ClusterFacesResult } from "services/face/cluster";
 import { Dimensions } from "services/face/geom";
 import { EnteFile } from "types/file";
 import { Box, Point } from "./geom";
@@ -16,15 +16,6 @@ export interface MLSyncResult {
 export declare type FaceDescriptor = Float32Array;
 
 export declare type Cluster = Array<number>;
-
-export interface ClusteringResults {
-    clusters: Array<Cluster>;
-    noise: Cluster;
-}
-
-export interface HdbscanResults extends ClusteringResults {
-    debugInfo?: DebugInfo;
-}
 
 export interface FacesCluster {
     faces: Cluster;
@@ -212,7 +203,6 @@ export interface MLSyncContext {
     faceCropService: FaceCropService;
     faceEmbeddingService: FaceEmbeddingService;
     blurDetectionService: BlurDetectionService;
-    faceClusteringService: ClusteringService;
 
     localFilesMap: Map<number, EnteFile>;
     outOfSyncFiles: EnteFile[];
@@ -246,7 +236,7 @@ export interface MLSyncFileContext {
 
 export interface MLLibraryData {
     faceClusteringMethod?: Versioned<ClusteringMethod>;
-    faceClusteringResults?: ClusteringResults;
+    faceClusteringResults?: ClusterFacesResult;
     faceClustersWithNoise?: FacesClustersWithNoise;
 }
 
@@ -282,14 +272,6 @@ export interface BlurDetectionService {
     method: Versioned<BlurDetectionMethod>;
     detectBlur(alignedFaces: Float32Array, faces: Face[]): number[];
 }
-
-export interface ClusteringService {
-    method: Versioned<ClusteringMethod>;
-
-    cluster(input: ClusteringInput): Promise<ClusteringResults>;
-}
-
-export declare type ClusteringInput = Array<Array<number>>;
 
 export interface MachineLearningWorker {
     closeLocalSyncContext(): Promise<void>;

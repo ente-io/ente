@@ -9,10 +9,10 @@ class PeopleService {
         const filesVersion = await mlIDbStorage.getIndexVersion("files");
         if (
             filesVersion <= (await mlIDbStorage.getIndexVersion("people")) &&
-            !isDifferentOrOld(
-                syncContext.mlLibraryData?.faceClusteringMethod,
-                syncContext.faceClusteringService.method,
-            )
+            !isDifferentOrOld(syncContext.mlLibraryData?.faceClusteringMethod, {
+                value: "Hdbscan",
+                version: 1,
+            })
         ) {
             log.info(
                 "[MLService] Skipping people index as already synced to latest version",
