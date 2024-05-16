@@ -1,14 +1,8 @@
-import log from "@/next/log";
 import { expose } from "comlink";
-import { MachineLearningWorker } from "services/face/types";
 import mlService from "services/machineLearning/machineLearningService";
 import { EnteFile } from "types/file";
 
-export class DedicatedMLWorker implements MachineLearningWorker {
-    constructor() {
-        log.info("DedicatedMLWorker constructor called");
-    }
-
+export class DedicatedMLWorker {
     public async closeLocalSyncContext() {
         return mlService.closeLocalSyncContext();
     }
@@ -32,10 +26,6 @@ export class DedicatedMLWorker implements MachineLearningWorker {
         faceID: string,
     ) {
         return mlService.regenerateFaceCrop(token, userID, faceID);
-    }
-
-    public close() {
-        self.close();
     }
 }
 

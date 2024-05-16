@@ -181,18 +181,3 @@ export interface MLLibraryData {
 }
 
 export declare type MLIndex = "files" | "people";
-
-export interface MachineLearningWorker {
-    closeLocalSyncContext(): Promise<void>;
-
-    syncLocalFile(
-        token: string,
-        userID: number,
-        enteFile: EnteFile,
-        localFile: globalThis.File,
-    );
-
-    sync(token: string, userID: number): Promise<MLSyncResult>;
-
-    close(): void;
-}
