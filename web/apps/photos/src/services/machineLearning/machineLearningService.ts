@@ -523,10 +523,10 @@ class MachineLearningService {
         enteFile: EnteFile,
         localFile?: globalThis.File,
     ) {
-        console.log("Syncing for file" + enteFile.title);
+        log.debug(() => ({ a: "Syncing file", enteFile }));
         const fileContext: MLSyncFileContext = { enteFile, localFile };
         const oldMlFile = await this.getMLFileData(enteFile.id);
-        if (oldMlFile) {
+        if (oldMlFile && oldMlFile.mlVersion) {
             return oldMlFile;
         }
 
