@@ -18,6 +18,7 @@ import {
     getFaceId,
     getLocalFile,
 } from "../face/image";
+import { detectBlur } from "./laplacianBlurDetectionService";
 
 class FaceService {
     async syncFileFaceDetections(
@@ -85,10 +86,7 @@ class FaceService {
             syncContext.faceEmbeddingService.faceSize,
             imageBitmap,
         );
-        const blurValues = syncContext.blurDetectionService.detectBlur(
-            faceImages,
-            newMlFile.faces,
-        );
+        const blurValues = detectBlur(faceImages, newMlFile.faces);
         newMlFile.faces.forEach((f, i) => (f.blurValue = blurValues[i]));
 
         imageBitmap.close();

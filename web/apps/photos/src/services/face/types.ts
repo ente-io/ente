@@ -201,7 +201,6 @@ export interface MLSyncContext {
     faceDetectionService: FaceDetectionService;
     faceCropService: FaceCropService;
     faceEmbeddingService: FaceEmbeddingService;
-    blurDetectionService: BlurDetectionService;
 
     localFilesMap: Map<number, EnteFile>;
     outOfSyncFiles: EnteFile[];
@@ -265,11 +264,6 @@ export interface FaceEmbeddingService {
     faceSize: number;
 
     getFaceEmbeddings(faceImages: Float32Array): Promise<Array<FaceEmbedding>>;
-}
-
-export interface BlurDetectionService {
-    method: Versioned<BlurDetectionMethod>;
-    detectBlur(alignedFaces: Float32Array, faces: Face[]): number[];
 }
 
 export interface MachineLearningWorker {

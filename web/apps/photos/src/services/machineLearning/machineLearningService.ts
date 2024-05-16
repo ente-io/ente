@@ -12,8 +12,6 @@ import downloadManager from "services/download";
 import { putEmbedding } from "services/embeddingService";
 import mlIDbStorage, { ML_SEARCH_CONFIG_NAME } from "services/face/db";
 import {
-    BlurDetectionMethod,
-    BlurDetectionService,
     Face,
     FaceCropService,
     FaceDetection,
@@ -34,7 +32,6 @@ import { getLocalFiles } from "services/fileService";
 import { EnteFile } from "types/file";
 import { isInternalUserForML } from "utils/user";
 import FaceService from "./faceService";
-import laplacianBlurDetectionService from "./laplacianBlurDetectionService";
 import mobileFaceNetEmbeddingService from "./mobileFaceNetEmbeddingService";
 
 import { fetchImageBitmapForContext } from "../face/image";
@@ -123,16 +120,6 @@ export class MLFactory {
         throw Error("Unknon face detection method: " + method);
     }
 
-    public static getBlurDetectionService(
-        method: BlurDetectionMethod,
-    ): BlurDetectionService {
-        if (method === "Laplacian") {
-            return laplacianBlurDetectionService;
-        }
-
-        throw Error("Unknon blur detection method: " + method);
-    }
-
     public static getFaceEmbeddingService(
         method: FaceEmbeddingMethod,
     ): FaceEmbeddingService {
@@ -150,7 +137,6 @@ export class LocalMLSyncContext implements MLSyncContext {
 
     public faceDetectionService: FaceDetectionService;
     public faceCropService: FaceCropService;
-    public blurDetectionService: BlurDetectionService;
     public faceEmbeddingService: FaceEmbeddingService;
 
     public localFilesMap: Map<number, EnteFile>;
@@ -179,8 +165,6 @@ export class LocalMLSyncContext implements MLSyncContext {
 
         this.faceDetectionService =
             MLFactory.getFaceDetectionService("YoloFace");
-        this.blurDetectionService =
-            MLFactory.getBlurDetectionService("Laplacian");
         this.faceEmbeddingService =
             MLFactory.getFaceEmbeddingService("MobileFaceNet");
 
