@@ -181,7 +181,7 @@ class _MachineLearningSettingsPageState
 class ModelLoadingState extends StatefulWidget {
   final InitializationState state;
 
-  ModelLoadingState(
+  const ModelLoadingState(
     this.state, {
     Key? key,
   }) : super(key: key);
