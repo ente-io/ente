@@ -1,8 +1,8 @@
+import { APPS } from "@ente/shared/apps/constants";
 import { expose } from "comlink";
+import downloadManager from "services/download";
 import mlService from "services/machineLearning/machineLearningService";
 import { EnteFile } from "types/file";
-import downloadManager from "services/download";
-import { APPS } from "@ente/shared/apps/constants";
 
 export class DedicatedMLWorker {
     public async closeLocalSyncContext() {
