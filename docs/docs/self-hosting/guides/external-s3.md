@@ -164,6 +164,27 @@ EOF
 RUN chmod +x /docker-entrypoint.d/replace_ente_endpoints.sh
 ```
 
+This runs nginx inside to handle both the web & album URLs so we don't have to
+make two web images with different port.
+
+* `DOCKER_RUNTIME_REPLACE_ENDPOINT` this is your public museum API URL.
+* `DOCKER_RUNTIME_REPLACE_ALBUMS_ENDPOINT` this is the shared albums URL (for
+  more details about configuring shared albums, see
+  [faq/sharing](/self-hosting/faq/sharing)).
+
+Note how above we had updated the `compose.yaml` file for the server with
+
+```yaml
+web:
+    build:
+        context: web
+    ports:
+        - 8081:80
+        - 8082:80
+```
+
+so that web and album both point to the same container and nginx will handle it.
+
 ## 2. Set up the `.credentials.env` file
 
 Create a `.credentials.env` file at the root of the project with the following
