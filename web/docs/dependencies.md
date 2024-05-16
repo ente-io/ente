@@ -174,3 +174,6 @@ some cases.
 -   [sanitize-filename](https://github.com/parshap/node-sanitize-filename) is
     for converting arbitrary strings into strings that are suitable for being
     used as filenames.
+
+-   [hdbscan](https://github.com/shaileshpandit/hdbscan-js) is used for face
+    clustering.

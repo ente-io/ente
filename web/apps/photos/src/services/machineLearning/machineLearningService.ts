@@ -40,7 +40,6 @@ import { EnteFile } from "types/file";
 import { isInternalUserForML } from "utils/user";
 import arcfaceAlignmentService from "./arcfaceAlignmentService";
 import arcfaceCropService from "./arcfaceCropService";
-import dbscanClusteringService from "./dbscanClusteringService";
 import FaceService from "./faceService";
 import hdbscanClusteringService from "./hdbscanClusteringService";
 import laplacianBlurDetectionService from "./laplacianBlurDetectionService";
@@ -174,9 +173,6 @@ export class MLFactory {
     ): ClusteringService {
         if (method === "Hdbscan") {
             return hdbscanClusteringService;
-        }
-        if (method === "Dbscan") {
-            return dbscanClusteringService;
         }
 
         throw Error("Unknon clustering method: " + method);
