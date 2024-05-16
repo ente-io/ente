@@ -258,11 +258,10 @@ class MachineLearningService {
             await this.syncFiles(syncContext);
         }
 
-        // TODO: running index before all files are on latest ml version
-        // may be need to just take synced files on latest ml version for indexing
         if (
             syncContext.outOfSyncFiles.length <= 0 ||
-            (syncContext.nSyncedFiles === batchSize && Math.random() < 0.2)
+            // TODO-ML(MR): Forced disable.
+            (syncContext.nSyncedFiles === batchSize && Math.random() < 0)
         ) {
             await this.syncIndex(syncContext);
         }
