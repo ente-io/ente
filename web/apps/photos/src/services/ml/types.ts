@@ -208,7 +208,6 @@ export interface MLSearchConfig {
 export interface MLSyncContext {
     token: string;
     userID: number;
-    config: MLSyncConfig;
     shouldUpdateMLVersion: boolean;
 
     faceDetectionService: FaceDetectionService;

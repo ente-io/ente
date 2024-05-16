@@ -4,21 +4,14 @@ import log from "@/next/log";
 import DownloadManager from "services/download";
 import { getLocalFiles } from "services/fileService";
 import { Dimensions } from "services/ml/geom";
-import {
-    DetectedFace,
-    MLSyncContext,
-    MLSyncFileContext,
-} from "services/ml/types";
+import { DetectedFace, MLSyncFileContext } from "services/ml/types";
 import { EnteFile } from "types/file";
 import { getRenderableImage } from "utils/file";
 import { clamp } from "utils/image";
 import { DEFAULT_ML_SYNC_CONFIG } from "./machineLearningService";
 
 class ReaderService {
-    async getImageBitmap(
-        syncContext: MLSyncContext,
-        fileContext: MLSyncFileContext,
-    ) {
+    async getImageBitmap(fileContext: MLSyncFileContext) {
         try {
             if (fileContext.imageBitmap) {
                 return fileContext.imageBitmap;

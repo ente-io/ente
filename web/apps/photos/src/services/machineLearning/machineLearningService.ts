@@ -181,15 +181,6 @@ export class MLFactory {
 
         throw Error("Unknon clustering method: " + method);
     }
-
-    public static getMLSyncContext(
-        token: string,
-        userID: number,
-        config: MLSyncConfig,
-        shouldUpdateMLVersion: boolean = true,
-    ) {
-        return new LocalMLSyncContext(token, userID, shouldUpdateMLVersion);
-    }
 }
 
 export class LocalMLSyncContext implements MLSyncContext {
@@ -465,17 +456,9 @@ class MachineLearningService {
         if (!this.syncContext) {
             log.info("Creating syncContext");
 
-            const mlSyncConfig = DEFAULT_ML_SYNC_CONFIG;
             // TODO-ML(MR): Keep as promise for now.
             this.syncContext = new Promise((resolve) => {
-                resolve(
-                    MLFactory.getMLSyncContext(
-                        token,
-                        userID,
-                        mlSyncConfig,
-                        true,
-                    ),
-                );
+                resolve(new LocalMLSyncContext(token, userID, true));
             });
         } else {
             log.info("reusing existing syncContext");
@@ -488,15 +471,7 @@ class MachineLearningService {
             log.info("Creating localSyncContext");
             // TODO-ML(MR):
             this.localSyncContext = new Promise((resolve) => {
-                const mlSyncConfig = DEFAULT_ML_SYNC_CONFIG;
-                resolve(
-                    MLFactory.getMLSyncContext(
-                        token,
-                        userID,
-                        mlSyncConfig,
-                        false,
-                    ),
-                );
+                resolve(new LocalMLSyncContext(token, userID, false));
             });
         } else {
             log.info("reusing existing localSyncContext");
@@ -610,7 +585,7 @@ class MachineLearningService {
         }
 
         try {
-            await ReaderService.getImageBitmap(syncContext, fileContext);
+            await ReaderService.getImageBitmap(fileContext);
             await Promise.all([
                 this.syncFileAnalyzeFaces(syncContext, fileContext),
             ]);

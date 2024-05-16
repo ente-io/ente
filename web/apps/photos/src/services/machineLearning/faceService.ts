@@ -10,12 +10,12 @@ import {
     type Versioned,
 } from "services/ml/types";
 import { imageBitmapToBlob, warpAffineFloat32List } from "utils/image";
+import { DEFAULT_ML_SYNC_CONFIG } from "./machineLearningService";
 import ReaderService, {
     fetchImageBitmap,
     getFaceId,
     getLocalFile,
 } from "./readerService";
-import { DEFAULT_ML_SYNC_CONFIG } from "./machineLearningService";
 
 class FaceService {
     async syncFileFaceDetections(
@@ -44,10 +44,7 @@ class FaceService {
 
         newMlFile.faceDetectionMethod = syncContext.faceDetectionService.method;
         fileContext.newDetection = true;
-        const imageBitmap = await ReaderService.getImageBitmap(
-            syncContext,
-            fileContext,
-        );
+        const imageBitmap = await ReaderService.getImageBitmap(fileContext);
         const timerId = `faceDetection-${fileContext.enteFile.id}`;
         console.time(timerId);
         const faceDetections =
@@ -93,10 +90,7 @@ class FaceService {
             return;
         }
 
-        const imageBitmap = await ReaderService.getImageBitmap(
-            syncContext,
-            fileContext,
-        );
+        const imageBitmap = await ReaderService.getImageBitmap(fileContext);
         newMlFile.faceCropMethod = syncContext.faceCropService.method;
 
         for (const face of newMlFile.faces) {
@@ -128,7 +122,7 @@ class FaceService {
         fileContext.newAlignment = true;
         const imageBitmap =
             fileContext.imageBitmap ||
-            (await ReaderService.getImageBitmap(syncContext, fileContext));
+            (await ReaderService.getImageBitmap(fileContext));
 
         // Execute the face alignment calculations
         for (const face of newMlFile.faces) {
@@ -179,7 +173,7 @@ class FaceService {
         newMlFile.faceEmbeddingMethod = syncContext.faceEmbeddingService.method;
         // TODO: when not storing face crops, image will be needed to extract faces
         // fileContext.imageBitmap ||
-        //     (await this.getImageBitmap(syncContext, fileContext));
+        //     (await this.getImageBitmap(fileContext));
 
         const embeddings =
             await syncContext.faceEmbeddingService.getFaceEmbeddings(
