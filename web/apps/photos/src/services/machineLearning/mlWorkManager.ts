@@ -18,11 +18,6 @@ const LOCAL_FILES_UPDATED_DEBOUNCE_SEC = 30;
 
 export type JobState = "Scheduled" | "Running" | "NotScheduled";
 
-export interface JobConfig {
-    intervalSec: number;
-    backoffMultiplier: number;
-}
-
 export interface MLSyncJobResult {
     shouldBackoff: boolean;
     mlSyncResult: MLSyncResult;
