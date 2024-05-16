@@ -1,4 +1,3 @@
-import PQueue from "p-queue";
 import type { ClusterFacesResult } from "services/face/cluster";
 import { Dimensions } from "services/face/geom";
 import { EnteFile } from "types/file";
@@ -138,27 +137,6 @@ export interface MlFileData {
 
 export interface MLSearchConfig {
     enabled: boolean;
-}
-
-export interface MLSyncContext {
-    token: string;
-    userID: number;
-
-    localFilesMap: Map<number, EnteFile>;
-    outOfSyncFiles: EnteFile[];
-    nSyncedFiles: number;
-    nSyncedFaces: number;
-    allSyncedFacesMap?: Map<number, Array<Face>>;
-
-    error?: Error;
-
-    // oldMLLibraryData: MLLibraryData;
-    mlLibraryData: MLLibraryData;
-
-    syncQueue: PQueue;
-
-    getEnteWorker(id: number): Promise<any>;
-    dispose(): Promise<void>;
 }
 
 export interface MLSyncFileContext {

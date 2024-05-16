@@ -1,6 +1,7 @@
 import log from "@/next/log";
 import mlIDbStorage from "services/face/db";
-import { Face, MLSyncContext, Person } from "services/face/types";
+import { Face, Person } from "services/face/types";
+import { type MLSyncContext } from "services/machineLearning/machineLearningService";
 import { clusterFaces } from "./cluster";
 import { saveFaceCrop } from "./f-index";
 import { fetchImageBitmap, getLocalFile } from "./image";

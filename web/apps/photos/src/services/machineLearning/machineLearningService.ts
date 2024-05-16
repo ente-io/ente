@@ -17,7 +17,6 @@ import {
     Landmark,
     MLLibraryData,
     MLSearchConfig,
-    MLSyncContext,
     MLSyncFileContext,
     MLSyncResult,
     MlFileData,
@@ -57,6 +56,27 @@ export async function getMLSearchConfig() {
 
 export async function updateMLSearchConfig(newConfig: MLSearchConfig) {
     return mlIDbStorage.putConfig(ML_SEARCH_CONFIG_NAME, newConfig);
+}
+
+export interface MLSyncContext {
+    token: string;
+    userID: number;
+
+    localFilesMap: Map<number, EnteFile>;
+    outOfSyncFiles: EnteFile[];
+    nSyncedFiles: number;
+    nSyncedFaces: number;
+    allSyncedFacesMap?: Map<number, Array<Face>>;
+
+    error?: Error;
+
+    // oldMLLibraryData: MLLibraryData;
+    mlLibraryData: MLLibraryData;
+
+    syncQueue: PQueue;
+
+    getEnteWorker(id: number): Promise<any>;
+    dispose(): Promise<void>;
 }
 
 export class LocalMLSyncContext implements MLSyncContext {
@@ -371,11 +391,7 @@ class MachineLearningService {
             console.log(
                 `Indexing ${enteFile.title ?? "<untitled>"} ${enteFile.id}`,
             );
-            const mlFileData = await this.syncFile(
-                syncContext,
-                enteFile,
-                localFile,
-            );
+            const mlFileData = await this.syncFile(enteFile, localFile);
             syncContext.nSyncedFaces += mlFileData.faces?.length || 0;
             syncContext.nSyncedFiles += 1;
             return mlFileData;
@@ -408,11 +424,7 @@ class MachineLearningService {
         }
     }
 
-    private async syncFile(
-        syncContext: MLSyncContext,
-        enteFile: EnteFile,
-        localFile?: globalThis.File,
-    ) {
+    private async syncFile(enteFile: EnteFile, localFile?: globalThis.File) {
         log.debug(() => ({ a: "Syncing file", enteFile }));
         const fileContext: MLSyncFileContext = { enteFile, localFile };
         const oldMlFile = await this.getMLFileData(enteFile.id);
