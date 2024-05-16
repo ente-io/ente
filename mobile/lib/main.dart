@@ -123,9 +123,8 @@ Future<void> _runBackgroundTask(String taskId, {String mode = 'normal'}) async {
   if (_isProcessRunning) {
     _logger.info("Background task triggered when process was already running");
     await _sync('bgTaskActiveProcess');
-    BackgroundFetch.finish(taskId);
+    BackgroundFetch.finish(taskId).ignore();
   } else {
-    // ignore: unawaited_futures
     _runWithLogs(
       () async {
         _logger.info("Starting background task in $mode mode");
@@ -133,7 +132,7 @@ Future<void> _runBackgroundTask(String taskId, {String mode = 'normal'}) async {
         _runInBackground(taskId);
       },
       prefix: "[bg]",
-    );
+    ).ignore();
   }
 }
 
@@ -141,7 +140,7 @@ Future<void> _runInBackground(String taskId) async {
   await Future.delayed(const Duration(seconds: 3));
   if (await _isRunningInForeground()) {
     _logger.info("FG task running, skipping BG taskID: $taskId");
-    BackgroundFetch.finish(taskId);
+    BackgroundFetch.finish(taskId).ignore();
     return;
   } else {
     _logger.info("FG task is not running");
@@ -161,7 +160,7 @@ Future<void> _runInBackground(String taskId) async {
       }(),
     ],
   );
-  BackgroundFetch.finish(taskId);
+  BackgroundFetch.finish(taskId).ignore();
 }
 
 // https://stackoverflow.com/a/73796478/546896
@@ -334,7 +333,7 @@ Future<void> _killBGTask([String? taskId]) async {
 
   await prefs.remove(kLastBGTaskHeartBeatTime);
   if (taskId != null) {
-    BackgroundFetch.finish(taskId);
+    BackgroundFetch.finish(taskId).ignore();
   }
 
   ///Band aid for background process not getting killed. Should migrate to using

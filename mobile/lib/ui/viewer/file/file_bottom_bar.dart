@@ -85,7 +85,8 @@ class FileBottomBarState extends State<FileBottomBar> {
 
     if (!widget.showOnlyInfoButton && widget.file is! TrashFile) {
       if (widget.file.fileType == FileType.image ||
-          widget.file.fileType == FileType.livePhoto) {
+          widget.file.fileType == FileType.livePhoto ||
+          widget.file.fileType == FileType.video) {
         children.add(
           Tooltip(
             message: "Edit",
