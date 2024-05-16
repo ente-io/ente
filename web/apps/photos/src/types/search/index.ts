@@ -1,7 +1,7 @@
 import { FILE_TYPE } from "@/media/file-type";
+import { IndexStatus } from "services/face/db";
+import { Person } from "services/face/types";
 import { City } from "services/locationSearchService";
-import { IndexStatus } from "services/ml/db";
-import { Person } from "services/ml/types";
 import { LocationTagData } from "types/entity";
 import { EnteFile } from "types/file";
 

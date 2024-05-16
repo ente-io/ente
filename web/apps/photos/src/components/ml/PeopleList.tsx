@@ -3,8 +3,8 @@ import { Skeleton, styled } from "@mui/material";
 import { Legend } from "components/PhotoViewer/styledComponents/Legend";
 import { t } from "i18next";
 import React, { useEffect, useState } from "react";
-import mlIDbStorage from "services/ml/db";
-import { Face, Person, type MlFileData } from "services/ml/types";
+import mlIDbStorage from "services/face/db";
+import { Face, Person, type MlFileData } from "services/face/types";
 import { EnteFile } from "types/file";
 
 const FaceChipContainer = styled("div")`
@@ -167,10 +167,7 @@ const FaceCropImageView: React.FC<FaceCropImageViewProps> = ({
                 .legacyFaceCrop(faceID)
                 /*
             cachedOrNew("face-crops", cacheKey, async () => {
-                const user = await ensureLocalUser();
                 return machineLearningService.regenerateFaceCrop(
-                    user.token,
-                    user.id,
                     faceId,
                 );
             })*/

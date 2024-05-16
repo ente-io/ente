@@ -1,14 +1,10 @@
-import log from "@/next/log";
+import { APPS } from "@ente/shared/apps/constants";
 import { expose } from "comlink";
+import downloadManager from "services/download";
 import mlService from "services/machineLearning/machineLearningService";
-import { MachineLearningWorker } from "services/ml/types";
 import { EnteFile } from "types/file";
 
-export class DedicatedMLWorker implements MachineLearningWorker {
-    constructor() {
-        log.info("DedicatedMLWorker constructor called");
-    }
-
+export class DedicatedMLWorker {
     public async closeLocalSyncContext() {
         return mlService.closeLocalSyncContext();
     }
@@ -19,23 +15,17 @@ export class DedicatedMLWorker implements MachineLearningWorker {
         enteFile: EnteFile,
         localFile: globalThis.File,
     ) {
-        return mlService.syncLocalFile(token, userID, enteFile, localFile);
+        mlService.syncLocalFile(token, userID, enteFile, localFile);
     }
 
     public async sync(token: string, userID: number) {
+        await downloadManager.init(APPS.PHOTOS, { token });
         return mlService.sync(token, userID);
     }
 
-    public async regenerateFaceCrop(
-        token: string,
-        userID: number,
-        faceID: string,
-    ) {
-        return mlService.regenerateFaceCrop(token, userID, faceID);
-    }
-
-    public close() {
-        self.close();
+    public async regenerateFaceCrop(token: string, faceID: string) {
+        await downloadManager.init(APPS.PHOTOS, { token });
+        return mlService.regenerateFaceCrop(faceID);
     }
 }
 

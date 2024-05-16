@@ -9,8 +9,8 @@ import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { components } from "react-select";
 import AsyncSelect from "react-select/async";
 import { InputActionMeta } from "react-select/src/types";
+import { Person } from "services/face/types";
 import { City } from "services/locationSearchService";
-import { Person } from "services/ml/types";
 import {
     getAutoCompleteSuggestions,
     getDefaultOptions,

@@ -2,65 +2,47 @@ import { FILE_TYPE } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
 import log from "@/next/log";
 import DownloadManager from "services/download";
+import { Dimensions } from "services/face/geom";
+import { DetectedFace, MLSyncFileContext } from "services/face/types";
 import { getLocalFiles } from "services/fileService";
-import { Dimensions } from "services/ml/geom";
-import {
-    DetectedFace,
-    MLSyncContext,
-    MLSyncFileContext,
-} from "services/ml/types";
 import { EnteFile } from "types/file";
 import { getRenderableImage } from "utils/file";
 import { clamp } from "utils/image";
 
-class ReaderService {
-    async getImageBitmap(
-        syncContext: MLSyncContext,
-        fileContext: MLSyncFileContext,
-    ) {
-        try {
-            if (fileContext.imageBitmap) {
-                return fileContext.imageBitmap;
-            }
-            if (fileContext.localFile) {
-                if (
-                    fileContext.enteFile.metadata.fileType !== FILE_TYPE.IMAGE
-                ) {
-                    throw new Error(
-                        "Local file of only image type is supported",
-                    );
-                }
-                fileContext.imageBitmap = await getLocalFileImageBitmap(
-                    fileContext.enteFile,
-                    fileContext.localFile,
-                );
-            } else if (
-                syncContext.config.imageSource === "Original" &&
-                [FILE_TYPE.IMAGE, FILE_TYPE.LIVE_PHOTO].includes(
-                    fileContext.enteFile.metadata.fileType,
-                )
-            ) {
-                fileContext.imageBitmap = await fetchImageBitmap(
-                    fileContext.enteFile,
-                );
-            } else {
-                fileContext.imageBitmap = await getThumbnailImageBitmap(
-                    fileContext.enteFile,
-                );
-            }
-
-            fileContext.newMlFile.imageSource = syncContext.config.imageSource;
-            const { width, height } = fileContext.imageBitmap;
-            fileContext.newMlFile.imageDimensions = { width, height };
-
-            return fileContext.imageBitmap;
-        } catch (e) {
-            log.error("failed to create image bitmap", e);
-            throw e;
-        }
+export const fetchImageBitmapForContext = async (
+    fileContext: MLSyncFileContext,
+) => {
+    if (fileContext.imageBitmap) {
+        return fileContext.imageBitmap;
     }
-}
-export default new ReaderService();
+    if (fileContext.localFile) {
+        if (fileContext.enteFile.metadata.fileType !== FILE_TYPE.IMAGE) {
+            throw new Error("Local file of only image type is supported");
+        }
+        fileContext.imageBitmap = await getLocalFileImageBitmap(
+            fileContext.enteFile,
+            fileContext.localFile,
+        );
+    } else if (
+        [FILE_TYPE.IMAGE, FILE_TYPE.LIVE_PHOTO].includes(
+            fileContext.enteFile.metadata.fileType,
+        )
+    ) {
+        fileContext.imageBitmap = await fetchImageBitmap(fileContext.enteFile);
+    } else {
+        // TODO-ML(MR): We don't do it on videos, when will we ever come
+        // here?
+        fileContext.imageBitmap = await getThumbnailImageBitmap(
+            fileContext.enteFile,
+        );
+    }
+
+    fileContext.newMlFile.imageSource = "Original";
+    const { width, height } = fileContext.imageBitmap;
+    fileContext.newMlFile.imageDimensions = { width, height };
+
+    return fileContext.imageBitmap;
+};
 
 export async function getLocalFile(fileId: number) {
     const localFiles = await getLocalFiles();

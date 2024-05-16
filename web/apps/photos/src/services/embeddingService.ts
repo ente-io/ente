@@ -102,6 +102,10 @@ export const syncCLIPEmbeddings = async () => {
             if (!response.diff?.length) {
                 return;
             }
+            // Note: in rare cases we might get a diff entry for an embedding
+            // corresponding to a file which has been deleted (but whose
+            // embedding is enqueued for deletion). Client should expect such a
+            // scenario (all it has to do is just ignore them).
             const newEmbeddings = await Promise.all(
                 response.diff.map(async (embedding) => {
                     try {
