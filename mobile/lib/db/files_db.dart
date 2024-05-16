@@ -606,13 +606,11 @@ class FilesDB {
   Future<(Set<int>, Map<String, int>)> getUploadAndHash(
     int collectionID,
   ) async {
-    final db = await instance.database;
-    final results = await db.query(
-      filesTable,
-      columns: [columnUploadedFileID, columnHash],
-      where:
-          '$columnCollectionID = ? AND ($columnUploadedFileID IS NOT NULL AND $columnUploadedFileID IS NOT -1)',
-      whereArgs: [
+    final db = await instance.sqliteAsyncDB;
+    final results = await db.getAll(
+      'SELECT $columnUploadedFileID, $columnHash FROM $filesTable'
+      ' WHERE $columnCollectionID = ? AND ($columnUploadedFileID IS NOT NULL AND $columnUploadedFileID IS NOT -1)',
+      [
         collectionID,
       ],
     );
@@ -1265,18 +1263,22 @@ class FilesDB {
     );
   }
 
-  /// Uses int in return value.
   Future<int> deleteFilesFromCollection(
     int collectionID,
     List<int> uploadedFileIDs,
   ) async {
-    final db = await instance.database;
-    return db.delete(
-      filesTable,
-      where:
-          '$columnCollectionID = ? AND $columnUploadedFileID IN (${uploadedFileIDs.join(', ')})',
-      whereArgs: [collectionID],
-    );
+    final db = await instance.sqliteAsyncDB;
+    return db.writeTransaction((tx) async {
+      await tx.execute(
+        '''
+      DELETE FROM $filesTable
+      WHERE $columnCollectionID = ? AND $columnUploadedFileID IN (${uploadedFileIDs.join(', ')});
+    ''',
+        [collectionID],
+      );
+      final res = await tx.get('SELECT changes()');
+      return res['changes()'] as int;
+    });
   }
 
   Future<int> collectionFileCount(int collectionID) async {
@@ -1909,61 +1911,6 @@ class FilesDB {
                                   ''',
       parameterSets,
     );
-  }
-
-  Map<String, dynamic> _getRowForFile(EnteFile file) {
-    final row = <String, dynamic>{};
-    if (file.generatedID != null) {
-      row[columnGeneratedID] = file.generatedID;
-    }
-    row[columnLocalID] = file.localID;
-    row[columnUploadedFileID] = file.uploadedFileID ?? -1;
-    row[columnOwnerID] = file.ownerID;
-    row[columnCollectionID] = file.collectionID ?? -1;
-    row[columnTitle] = file.title;
-    row[columnDeviceFolder] = file.deviceFolder;
-    // if (file.location == null ||
-    //     (file.location!.latitude == null && file.location!.longitude == null)) {
-    //   file.location = Location.randomLocation();
-    // }
-    if (file.location != null) {
-      row[columnLatitude] = file.location!.latitude;
-      row[columnLongitude] = file.location!.longitude;
-    }
-    row[columnFileType] = getInt(file.fileType);
-    row[columnCreationTime] = file.creationTime;
-    row[columnModificationTime] = file.modificationTime;
-    row[columnUpdationTime] = file.updationTime;
-    row[columnAddedTime] =
-        file.addedTime ?? DateTime.now().microsecondsSinceEpoch;
-    row[columnEncryptedKey] = file.encryptedKey;
-    row[columnKeyDecryptionNonce] = file.keyDecryptionNonce;
-    row[columnFileDecryptionHeader] = file.fileDecryptionHeader;
-    row[columnThumbnailDecryptionHeader] = file.thumbnailDecryptionHeader;
-    row[columnMetadataDecryptionHeader] = file.metadataDecryptionHeader;
-    row[columnFileSubType] = file.fileSubType ?? -1;
-    row[columnDuration] = file.duration ?? 0;
-    row[columnExif] = file.exif;
-    row[columnHash] = file.hash;
-    row[columnMetadataVersion] = file.metadataVersion;
-    row[columnFileSize] = file.fileSize;
-    row[columnMMdVersion] = file.mMdVersion;
-    row[columnMMdEncodedJson] = file.mMdEncodedJson ?? '{}';
-    row[columnMMdVisibility] = file.magicMetadata.visibility;
-    row[columnPubMMdVersion] = file.pubMmdVersion;
-    row[columnPubMMdEncodedJson] = file.pubMmdEncodedJson ?? '{}';
-    // override existing fields to avoid re-writing all queries and logic
-    if (file.pubMagicMetadata != null) {
-      if (file.pubMagicMetadata!.editedTime != null) {
-        row[columnCreationTime] = file.pubMagicMetadata!.editedTime;
-      }
-      if (file.pubMagicMetadata!.lat != null &&
-          file.pubMagicMetadata!.long != null) {
-        row[columnLatitude] = file.pubMagicMetadata!.lat;
-        row[columnLongitude] = file.pubMagicMetadata!.long;
-      }
-    }
-    return row;
   }
 
   EnteFile _getFileFromRow(Map<String, dynamic> row) {
