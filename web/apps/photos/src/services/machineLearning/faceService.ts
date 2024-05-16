@@ -10,6 +10,7 @@ import {
     type FaceAlignment,
 } from "services/face/types";
 import { imageBitmapToBlob, warpAffineFloat32List } from "utils/image";
+import { detectBlur } from "../face/detect-blur";
 import { clusterFaces } from "../face/cluster";
 import { getFaceCrop } from "../face/crop";
 import {
@@ -18,7 +19,6 @@ import {
     getFaceId,
     getLocalFile,
 } from "../face/image";
-import { detectBlur } from "./laplacianBlurDetectionService";
 
 class FaceService {
     async syncFileFaceDetections(

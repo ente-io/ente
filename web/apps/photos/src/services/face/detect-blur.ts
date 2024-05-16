@@ -1,6 +1,6 @@
 import { Face } from "services/face/types";
 import { createGrayscaleIntMatrixFromNormalized2List } from "utils/image";
-import { mobileFaceNetFaceSize } from "./mobileFaceNetEmbeddingService";
+import { mobileFaceNetFaceSize } from "../machineLearning/mobileFaceNetEmbeddingService";
 
 /**
  * Laplacian blur detection.
