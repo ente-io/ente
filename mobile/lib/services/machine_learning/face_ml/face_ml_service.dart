@@ -1412,6 +1412,18 @@ class FaceMlService {
 
   Future<double> _getIndexedDoneRatio() async {
     final w = (kDebugMode ? EnteWatch('_getIndexedDoneRatio') : null)?..start();
+
+    final int alreadyIndexedCount = await FaceMLDataDB.instance
+        .getIndexedFileCount(minimumMlVersion: faceMlVersion);
+    final int totalIndexableCount = await getIndexableFilesCount();
+    final ratio = alreadyIndexedCount / totalIndexableCount;
+
+    w?.log('getIndexedDoneRatio');
+
+    return ratio;
+  }
+
+  Future<int> getIndexableFilesCount() async {
     final List<EnteFile> enteFiles = await SearchService.instance.getAllFiles();
     final List<EnteFile> indexableFiles = [];
     for (final enteFile in enteFiles) {
@@ -1423,14 +1435,7 @@ class FaceMlService {
       }
       indexableFiles.add(enteFile);
     }
-
-    final int alreadyIndexedCount = await FaceMLDataDB.instance
-        .getIndexedFileCount(minimumMlVersion: faceMlVersion);
-    final int totalIndexableCount = indexableFiles.length;
-    final ratio = alreadyIndexedCount / totalIndexableCount;
-    w?.log('getIndexedDoneRatio');
-
-    return ratio;
+    return indexableFiles.length;
   }
 
   bool _skipAnalysisEnteFile(EnteFile enteFile, Map<int, int> indexedFileIds) {
