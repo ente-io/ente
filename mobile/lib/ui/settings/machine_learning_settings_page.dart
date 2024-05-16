@@ -1,10 +1,13 @@
 import "dart:async";
+import "dart:math" show max;
 
 import "package:flutter/material.dart";
 import "package:intl/intl.dart";
 import "package:photos/core/event_bus.dart";
 import 'package:photos/events/embedding_updated_event.dart';
+import "package:photos/face/db.dart";
 import "package:photos/generated/l10n.dart";
+import "package:photos/models/ml/ml_versions.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/machine_learning/face_ml/face_ml_service.dart";
 import 'package:photos/services/machine_learning/semantic_search/frameworks/ml_framework.dart';
@@ -216,6 +219,9 @@ class _MachineLearningSettingsPageState
         const SizedBox(
           height: 12,
         ),
+        hasEnabled
+            ? const FaceRecognitionStatusWidget()
+            : const SizedBox.shrink(),
       ],
     );
   }
@@ -343,6 +349,112 @@ class _MagicSearchIndexStatsWidgetState
           isGestureDetectorDisabled: true,
           // Setting a key here to ensure trailingWidget is refreshed
           key: ValueKey("pending_items_" + _status!.pendingItems.toString()),
+        ),
+      ],
+    );
+  }
+}
+
+class FaceRecognitionStatusWidget extends StatefulWidget {
+  const FaceRecognitionStatusWidget({
+    super.key,
+  });
+
+  @override
+  State<FaceRecognitionStatusWidget> createState() =>
+      FaceRecognitionStatusWidgetState();
+}
+
+class FaceRecognitionStatusWidgetState
+    extends State<FaceRecognitionStatusWidget> {
+  Timer? _timer;
+  @override
+  void initState() {
+    super.initState();
+    _timer = Timer.periodic(const Duration(seconds: 5), (timer) {
+      setState(() {
+        // Your state update logic here
+      });
+    });
+  }
+
+  Future<(int, int, int)> getIndexStatus() async {
+    final indexedFiles = await FaceMLDataDB.instance
+        .getIndexedFileCount(minimumMlVersion: faceMlVersion);
+    final indexableFiles = await FaceMlService.getIndexableFilesCount();
+    final pendingFiles = max(indexableFiles - indexedFiles, 0);
+    final foundFaces = await FaceMLDataDB.instance.getTotalFaceCount();
+
+    return (indexedFiles, pendingFiles, foundFaces);
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Row(
+          children: [
+            MenuSectionTitle(title: S.of(context).status),
+            Expanded(child: Container()),
+          ],
+        ),
+        FutureBuilder(
+          future: getIndexStatus(),
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              final int indexedFiles = snapshot.data!.$1;
+              final int pendingFiles = snapshot.data!.$2;
+              final int foundFaces = snapshot.data!.$3;
+
+              return Column(
+                children: [
+                  MenuItemWidget(
+                    captionedTextWidget: CaptionedTextWidget(
+                      title: S.of(context).indexedItems,
+                    ),
+                    trailingWidget: Text(
+                      NumberFormat().format(indexedFiles),
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                    singleBorderRadius: 8,
+                    alignCaptionedTextToLeft: true,
+                    isGestureDetectorDisabled: true,
+                  ),
+                  MenuItemWidget(
+                    captionedTextWidget: CaptionedTextWidget(
+                      title: S.of(context).pendingItems,
+                    ),
+                    trailingWidget: Text(
+                      NumberFormat().format(pendingFiles),
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                    singleBorderRadius: 8,
+                    alignCaptionedTextToLeft: true,
+                    isGestureDetectorDisabled: true,
+                  ),
+                  MenuItemWidget(
+                    captionedTextWidget: CaptionedTextWidget(
+                      title: S.of(context).foundFaces,
+                    ),
+                    trailingWidget: Text(
+                      NumberFormat().format(foundFaces),
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                    singleBorderRadius: 8,
+                    alignCaptionedTextToLeft: true,
+                    isGestureDetectorDisabled: true,
+                  ),
+                ],
+              );
+            }
+            return const SizedBox.shrink();
+          },
         ),
       ],
     );

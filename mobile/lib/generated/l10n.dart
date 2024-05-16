@@ -8773,6 +8773,16 @@ class S {
       args: [],
     );
   }
+
+  /// `Found faces`
+  String get foundFaces {
+    return Intl.message(
+      'Found faces',
+      name: 'foundFaces',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

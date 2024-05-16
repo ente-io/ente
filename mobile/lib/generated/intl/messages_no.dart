@@ -69,6 +69,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Please note that this will result in a higher bandwidth and battery usage until all items are indexed."),
         "feedback": MessageLookupByLibrary.simpleMessage("Tilbakemelding"),
         "fileTypes": MessageLookupByLibrary.simpleMessage("File types"),
+        "foundFaces": MessageLookupByLibrary.simpleMessage("Found faces"),
         "invalidEmailAddress":
             MessageLookupByLibrary.simpleMessage("Ugyldig e-postadresse"),
         "joinDiscord": MessageLookupByLibrary.simpleMessage("Join Discord"),

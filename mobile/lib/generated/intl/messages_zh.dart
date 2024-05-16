@@ -630,6 +630,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "flip": MessageLookupByLibrary.simpleMessage("上下翻转"),
         "forYourMemories": MessageLookupByLibrary.simpleMessage("为您的回忆"),
         "forgotPassword": MessageLookupByLibrary.simpleMessage("忘记密码"),
+        "foundFaces": MessageLookupByLibrary.simpleMessage("Found faces"),
         "freeStorageClaimed": MessageLookupByLibrary.simpleMessage("已领取的免费存储"),
         "freeStorageOnReferralSuccess": m24,
         "freeStorageSpace": m25,

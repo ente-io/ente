@@ -119,6 +119,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "fileTypes": MessageLookupByLibrary.simpleMessage("File types"),
         "forgotPassword":
             MessageLookupByLibrary.simpleMessage("Nie pamiętam hasła"),
+        "foundFaces": MessageLookupByLibrary.simpleMessage("Found faces"),
         "generatingEncryptionKeys": MessageLookupByLibrary.simpleMessage(
             "Generowanie kluczy szyfrujących..."),
         "howItWorks": MessageLookupByLibrary.simpleMessage("Jak to działa"),

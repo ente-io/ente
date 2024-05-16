@@ -1233,5 +1233,6 @@
   "autoPair": "Auto pair",
   "pairWithPin": "Pair with PIN",
   "faceRecognition": "Face recognition",
-  "faceRecognitionIndexingDescription": "Please note that this will result in a higher bandwidth and battery usage until all items are indexed."
+  "faceRecognitionIndexingDescription": "Please note that this will result in a higher bandwidth and battery usage until all items are indexed.",
+  "foundFaces": "Found faces"
 }

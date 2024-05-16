@@ -653,6 +653,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("para tus recuerdos"),
         "forgotPassword":
             MessageLookupByLibrary.simpleMessage("Olvidé mi contraseña"),
+        "foundFaces": MessageLookupByLibrary.simpleMessage("Found faces"),
         "freeStorageClaimed": MessageLookupByLibrary.simpleMessage(
             "Almacenamiento gratuito reclamado"),
         "freeStorageOnReferralSuccess": m24,

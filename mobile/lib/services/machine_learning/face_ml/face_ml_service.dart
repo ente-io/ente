@@ -1423,7 +1423,7 @@ class FaceMlService {
     return ratio;
   }
 
-  Future<int> getIndexableFilesCount() async {
+  static Future<int> getIndexableFilesCount() async {
     final List<EnteFile> enteFiles = await SearchService.instance.getAllFiles();
     final List<EnteFile> indexableFiles = [];
     for (final enteFile in enteFiles) {

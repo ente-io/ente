@@ -51,6 +51,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "faceRecognitionIndexingDescription": MessageLookupByLibrary.simpleMessage(
             "Please note that this will result in a higher bandwidth and battery usage until all items are indexed."),
         "fileTypes": MessageLookupByLibrary.simpleMessage("File types"),
+        "foundFaces": MessageLookupByLibrary.simpleMessage("Found faces"),
         "joinDiscord": MessageLookupByLibrary.simpleMessage("Join Discord"),
         "locations": MessageLookupByLibrary.simpleMessage("Locations"),
         "longPressAnEmailToVerifyEndToEndEncryption":
