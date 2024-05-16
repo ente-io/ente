@@ -175,8 +175,6 @@ export interface FaceEmbeddingConfig {
     generateTsne?: boolean;
 }
 
-export interface FaceClusteringConfig extends ClusteringConfig {}
-
 export declare type TSNEMetric = "euclidean" | "manhattan";
 
 export interface TSNEConfig {
@@ -197,7 +195,7 @@ export interface MLSyncConfig {
     faceAlignment: FaceAlignmentConfig;
     blurDetection: BlurDetectionConfig;
     faceEmbedding: FaceEmbeddingConfig;
-    faceClustering: FaceClusteringConfig;
+    faceClustering: any;
     mlVersion: number;
 }
 
@@ -294,21 +292,7 @@ export interface BlurDetectionService {
 export interface ClusteringService {
     method: Versioned<ClusteringMethod>;
 
-    cluster(
-        input: ClusteringInput,
-        config: ClusteringConfig,
-    ): Promise<ClusteringResults>;
-}
-
-export interface ClusteringConfig {
-    method: ClusteringMethod;
-    minClusterSize: number;
-    minSamples?: number;
-    clusterSelectionEpsilon?: number;
-    clusterSelectionMethod?: "eom" | "leaf";
-    maxDistanceInsideCluster?: number;
-    minInputSize?: number;
-    generateDebugInfo?: boolean;
+    cluster(input: ClusteringInput): Promise<ClusteringResults>;
 }
 
 export declare type ClusteringInput = Array<Array<number>>;

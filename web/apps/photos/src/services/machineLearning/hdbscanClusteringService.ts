@@ -1,6 +1,5 @@
 import { Hdbscan } from "hdbscan";
 import {
-    ClusteringConfig,
     ClusteringInput,
     ClusteringMethod,
     ClusteringService,
@@ -18,10 +17,7 @@ class HdbscanClusteringService implements ClusteringService {
         };
     }
 
-    public async cluster(
-        input: ClusteringInput,
-        config: ClusteringConfig,
-    ): Promise<HdbscanResults> {
+    public async cluster(input: ClusteringInput): Promise<HdbscanResults> {
         // log.info('Clustering input: ', input);
         const hdbscan = new Hdbscan({
             input,

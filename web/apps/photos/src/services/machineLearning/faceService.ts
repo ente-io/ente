@@ -10,7 +10,6 @@ import {
     type Versioned,
 } from "services/ml/types";
 import { imageBitmapToBlob, warpAffineFloat32List } from "utils/image";
-import { DEFAULT_ML_SYNC_CONFIG } from "./machineLearningService";
 import ReaderService, {
     fetchImageBitmap,
     getFaceId,
@@ -256,7 +255,6 @@ class FaceService {
         syncContext.mlLibraryData.faceClusteringResults =
             await syncContext.faceClusteringService.cluster(
                 allFaces.map((f) => Array.from(f.embedding)),
-                DEFAULT_ML_SYNC_CONFIG.faceClustering,
             );
         syncContext.mlLibraryData.faceClusteringMethod =
             syncContext.faceClusteringService.method;
