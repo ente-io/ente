@@ -194,11 +194,7 @@ class MachineLearningService {
         return mlSyncResult;
     }
 
-    public async regenerateFaceCrop(
-        token: string,
-        userID: number,
-        faceID: string,
-    ) {
+    public async regenerateFaceCrop(token: string, faceID: string) {
         await downloadManager.init(APPS.PHOTOS, { token });
         return regenerateFaceCrop(faceID);
     }
