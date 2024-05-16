@@ -40,6 +40,7 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
       leadingIcon: Icons.face_retouching_natural_outlined,
       subtitleSection: _faceWidgets(context, widget.file, editMode),
       hasChipButtons: true,
+      biggerSpinner: true,
       editOnTap: _toggleEditMode,
     );
   }
@@ -140,6 +141,10 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
       final lastViewedClusterID = ClusterFeedbackService.lastViewedClusterID;
 
       final faceWidgets = <FaceWidget>[];
+
+      // await generation of the face crops here, so that the file info shows one central loading spinner
+      final test = await getRelevantFaceCrops(faces);
+
       final faceCrops = getRelevantFaceCrops(faces);
       for (final Face face in faces) {
         final int? clusterID = faceIdsToClusterIds[face.faceID];
