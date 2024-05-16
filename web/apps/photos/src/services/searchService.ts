@@ -2,7 +2,7 @@ import { FILE_TYPE } from "@/media/file-type";
 import log from "@/next/log";
 import * as chrono from "chrono-node";
 import { t } from "i18next";
-import { getMLSyncConfig } from "services/machineLearning/machineLearningService";
+import { defaultMLVersion } from "services/machineLearning/machineLearningService";
 import mlIDbStorage from "services/ml/db";
 import { Person } from "services/ml/types";
 import { Collection } from "types/collection";
@@ -175,8 +175,7 @@ export async function getAllPeopleSuggestion(): Promise<Array<Suggestion>> {
 
 export async function getIndexStatusSuggestion(): Promise<Suggestion> {
     try {
-        const config = await getMLSyncConfig();
-        const indexStatus = await mlIDbStorage.getIndexStatus(config.mlVersion);
+        const indexStatus = await mlIDbStorage.getIndexStatus(defaultMLVersion);
 
         let label;
         if (!indexStatus.localFilesSynced) {

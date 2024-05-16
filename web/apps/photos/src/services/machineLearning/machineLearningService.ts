@@ -11,10 +11,7 @@ import PQueue from "p-queue";
 import downloadManager from "services/download";
 import { putEmbedding } from "services/embeddingService";
 import { getLocalFiles } from "services/fileService";
-import mlIDbStorage, {
-    ML_SEARCH_CONFIG_NAME,
-    ML_SYNC_CONFIG_NAME,
-} from "services/ml/db";
+import mlIDbStorage, { ML_SEARCH_CONFIG_NAME } from "services/ml/db";
 import {
     BlurDetectionMethod,
     BlurDetectionService,
@@ -52,7 +49,13 @@ import PeopleService from "./peopleService";
 import ReaderService from "./readerService";
 import yoloFaceDetectionService from "./yoloFaceDetectionService";
 
-export const DEFAULT_ML_SYNC_CONFIG: MLSyncConfig = {
+/**
+ * TODO-ML(MR): What and why.
+ * Also, needs to be 1 (in sync with mobile) when we move out of beta.
+ */
+export const defaultMLVersion = 3;
+
+const DEFAULT_ML_SYNC_CONFIG: MLSyncConfig = {
     batchSize: 200,
     imageSource: "Original",
     faceDetection: {
@@ -90,7 +93,7 @@ export const DEFAULT_ML_SYNC_CONFIG: MLSyncConfig = {
         // maxDistanceInsideCluster: 0.4,
         generateDebugInfo: true,
     },
-    mlVersion: 3,
+    mlVersion: defaultMLVersion,
 };
 
 export const DEFAULT_ML_SEARCH_CONFIG: MLSearchConfig = {
@@ -98,10 +101,6 @@ export const DEFAULT_ML_SEARCH_CONFIG: MLSearchConfig = {
 };
 
 export const MAX_ML_SYNC_ERROR_COUNT = 1;
-
-export async function getMLSyncConfig() {
-    return mlIDbStorage.getConfig(ML_SYNC_CONFIG_NAME, DEFAULT_ML_SYNC_CONFIG);
-}
 
 export async function getMLSearchConfig() {
     if (isInternalUserForML()) {
@@ -481,9 +480,18 @@ class MachineLearningService {
         if (!this.syncContext) {
             log.info("Creating syncContext");
 
-            this.syncContext = getMLSyncConfig().then((mlSyncConfig) =>
-                MLFactory.getMLSyncContext(token, userID, mlSyncConfig, true),
-            );
+            const mlSyncConfig = DEFAULT_ML_SYNC_CONFIG;
+            // TODO-ML(MR): Keep as promise for now.
+            this.syncContext = new Promise((resolve) => {
+                resolve(
+                    MLFactory.getMLSyncContext(
+                        token,
+                        userID,
+                        mlSyncConfig,
+                        true,
+                    ),
+                );
+            });
         } else {
             log.info("reusing existing syncContext");
         }
@@ -493,9 +501,18 @@ class MachineLearningService {
     private async getLocalSyncContext(token: string, userID: number) {
         if (!this.localSyncContext) {
             log.info("Creating localSyncContext");
-            this.localSyncContext = getMLSyncConfig().then((mlSyncConfig) =>
-                MLFactory.getMLSyncContext(token, userID, mlSyncConfig, false),
-            );
+            // TODO-ML(MR):
+            this.localSyncContext = new Promise((resolve) => {
+                const mlSyncConfig = DEFAULT_ML_SYNC_CONFIG;
+                resolve(
+                    MLFactory.getMLSyncContext(
+                        token,
+                        userID,
+                        mlSyncConfig,
+                        false,
+                    ),
+                );
+            });
         } else {
             log.info("reusing existing localSyncContext");
         }
