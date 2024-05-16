@@ -1162,16 +1162,6 @@ class FilesDB {
 
   Future<void> updateUploadedFileAcrossCollections(EnteFile file) async {
     final db = await instance.sqliteAsyncDB;
-    final setClause = _getSetClauseForFileWithoutCollection(file);
-    await db.execute(
-      'UPDATE $filesTable SET '
-      '$setClause WHERE $columnUploadedFileID = ?',
-      [file.uploadedFileID],
-    );
-  }
-
-  Future<void> updateUploadedFileAcrossCollectionsNew(EnteFile file) async {
-    final db = await instance.sqliteAsyncDB;
     final parameterSet = _getParameterSetForFile(file, omitCollectionId: true)
       ..add(file.uploadedFileID);
     final updateAssignments = _generateUpdateAssignmentsWithPlaceholders(
@@ -1832,7 +1822,6 @@ class FilesDB {
 
   List<Object?> _getParameterSetForFile(
     EnteFile file, {
-    bool omitNullGenId = true,
     bool omitCollectionId = false,
   }) {
     final values = <Object?>[];
@@ -1849,7 +1838,7 @@ class FilesDB {
         longitude = file.pubMagicMetadata!.long;
       }
     }
-    if (file.generatedID != null || !omitNullGenId) {
+    if (file.generatedID != null) {
       values.add(file.generatedID);
     }
     values.addAll([
