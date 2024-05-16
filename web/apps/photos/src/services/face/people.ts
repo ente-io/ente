@@ -1,6 +1,10 @@
 import mlIDbStorage from "services/face/db";
 import { Face, MLSyncContext, Person } from "services/face/types";
-import FaceService from "../machineLearning/faceService";
+import {
+    getAllSyncedFacesMap,
+    runFaceClustering,
+    saveFaceCrop,
+} from "./f-index";
 import { fetchImageBitmap, getLocalFile } from "./image";
 
 export const syncPeopleIndex = async (syncContext: MLSyncContext) => {
@@ -12,10 +16,10 @@ export const syncPeopleIndex = async (syncContext: MLSyncContext) => {
     // TODO: have faces addresable through fileId + faceId
     // to avoid index based addressing, which is prone to wrong results
     // one way could be to match nearest face within threshold in the file
-    const allFacesMap = await FaceService.getAllSyncedFacesMap(syncContext);
+    const allFacesMap = await getAllSyncedFacesMap(syncContext);
     const allFaces = [...allFacesMap.values()].flat();
 
-    await FaceService.runFaceClustering(syncContext, allFaces);
+    await runFaceClustering(syncContext, allFaces);
     await syncPeopleFromClusters(syncContext, allFacesMap, allFaces);
 
     await mlIDbStorage.setIndexVersion("people", filesVersion);
@@ -48,7 +52,7 @@ const syncPeopleFromClusters = async (
         if (personFace && !personFace.crop?.cacheKey) {
             const file = await getLocalFile(personFace.fileId);
             const imageBitmap = await fetchImageBitmap(file);
-            await FaceService.saveFaceCrop(imageBitmap, personFace);
+            await saveFaceCrop(imageBitmap, personFace);
         }
 
         const person: Person = {

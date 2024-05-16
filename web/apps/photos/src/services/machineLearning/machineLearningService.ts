@@ -26,9 +26,9 @@ import {
 import { getLocalFiles } from "services/fileService";
 import { EnteFile } from "types/file";
 import { isInternalUserForML } from "utils/user";
+import { regenerateFaceCrop, syncFileAnalyzeFaces } from "../face/f-index";
 import { fetchImageBitmapForContext } from "../face/image";
 import { syncPeopleIndex } from "../face/people";
-import FaceService from "./faceService";
 
 /**
  * TODO-ML(MR): What and why.
@@ -222,7 +222,7 @@ class MachineLearningService {
         faceID: string,
     ) {
         await downloadManager.init(APPS.PHOTOS, { token });
-        return FaceService.regenerateFaceCrop(faceID);
+        return regenerateFaceCrop(faceID);
     }
 
     private newMlData(fileId: number) {
@@ -467,9 +467,7 @@ class MachineLearningService {
 
         try {
             await fetchImageBitmapForContext(fileContext);
-            await Promise.all([
-                this.syncFileAnalyzeFaces(syncContext, fileContext),
-            ]);
+            await Promise.all([syncFileAnalyzeFaces(syncContext, fileContext)]);
             newMlFile.errorCount = 0;
             newMlFile.lastErrorMessage = undefined;
             await this.persistOnServer(newMlFile, enteFile);
@@ -547,40 +545,6 @@ class MachineLearningService {
         await syncPeopleIndex(syncContext);
 
         await this.persistMLLibraryData(syncContext);
-    }
-
-    private async syncFileAnalyzeFaces(
-        syncContext: MLSyncContext,
-        fileContext: MLSyncFileContext,
-    ) {
-        const { newMlFile } = fileContext;
-        const startTime = Date.now();
-        await FaceService.syncFileFaceDetections(syncContext, fileContext);
-
-        if (newMlFile.faces && newMlFile.faces.length > 0) {
-            await FaceService.syncFileFaceCrops(syncContext, fileContext);
-
-            const alignedFacesData = await FaceService.syncFileFaceAlignments(
-                syncContext,
-                fileContext,
-            );
-
-            await FaceService.syncFileFaceEmbeddings(
-                syncContext,
-                fileContext,
-                alignedFacesData,
-            );
-
-            await FaceService.syncFileFaceMakeRelativeDetections(
-                syncContext,
-                fileContext,
-            );
-        }
-        log.info(
-            `face detection time taken ${fileContext.enteFile.id}`,
-            Date.now() - startTime,
-            "ms",
-        );
     }
 }
 
