@@ -1,5 +1,5 @@
 import { ComlinkWorker } from "@/next/worker/comlink-worker";
-import type { DedicatedMLWorker } from "services/ml/face.worker";
+import type { DedicatedMLWorker } from "services/face/face.worker";
 
 const createFaceWebWorker = () =>
     new Worker(new URL("face.worker.ts", import.meta.url));

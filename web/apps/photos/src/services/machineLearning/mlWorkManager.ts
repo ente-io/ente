@@ -5,10 +5,10 @@ import { eventBus, Events } from "@ente/shared/events";
 import { getToken, getUserID } from "@ente/shared/storage/localStorage/helpers";
 import debounce from "debounce";
 import PQueue from "p-queue";
-import mlIDbStorage from "services/ml/db";
-import { createFaceComlinkWorker } from "services/ml/face";
-import type { DedicatedMLWorker } from "services/ml/face.worker";
-import { MLSyncResult } from "services/ml/types";
+import mlIDbStorage from "services/face/db";
+import { createFaceComlinkWorker } from "services/face";
+import type { DedicatedMLWorker } from "services/face/face.worker";
+import { MLSyncResult } from "services/face/types";
 import { EnteFile } from "types/file";
 import { logQueueStats } from "./machineLearningService";
 

@@ -5,7 +5,7 @@ import {
     ClusteringService,
     HdbscanResults,
     Versioned,
-} from "services/ml/types";
+} from "services/face/types";
 
 class HdbscanClusteringService implements ClusteringService {
     public method: Versioned<ClusteringMethod>;

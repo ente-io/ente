@@ -9,11 +9,11 @@ import {
     openDB,
 } from "idb";
 import isElectron from "is-electron";
+import { Face, MLLibraryData, MlFileData, Person } from "services/face/types";
 import {
     DEFAULT_ML_SEARCH_CONFIG,
     MAX_ML_SYNC_ERROR_COUNT,
 } from "services/machineLearning/machineLearningService";
-import { Face, MLLibraryData, MlFileData, Person } from "services/ml/types";
 
 export interface IndexStatus {
     outOfSyncFilesExists: boolean;

@@ -1,8 +1,8 @@
 import log from "@/next/log";
-import mlIDbStorage from "services/ml/db";
-import { Face, MLSyncContext, Person } from "services/ml/types";
+import mlIDbStorage from "services/face/db";
+import { Face, MLSyncContext, Person } from "services/face/types";
+import { fetchImageBitmap, getLocalFile } from "../face/image";
 import FaceService, { isDifferentOrOld } from "./faceService";
-import { fetchImageBitmap, getLocalFile } from "./readerService";
 
 class PeopleService {
     async syncPeopleIndex(syncContext: MLSyncContext) {

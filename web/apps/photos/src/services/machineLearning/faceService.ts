@@ -1,6 +1,6 @@
 import { openCache } from "@/next/blob-cache";
 import log from "@/next/log";
-import mlIDbStorage from "services/ml/db";
+import mlIDbStorage from "services/face/db";
 import {
     DetectedFace,
     Face,
@@ -8,14 +8,14 @@ import {
     MLSyncFileContext,
     type FaceAlignment,
     type Versioned,
-} from "services/ml/types";
+} from "services/face/types";
 import { imageBitmapToBlob, warpAffineFloat32List } from "utils/image";
 import {
     fetchImageBitmap,
     fetchImageBitmapForContext,
     getFaceId,
     getLocalFile,
-} from "./readerService";
+} from "../face/image";
 
 class FaceService {
     async syncFileFaceDetections(

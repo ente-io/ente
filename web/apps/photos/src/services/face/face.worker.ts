@@ -1,7 +1,7 @@
 import log from "@/next/log";
 import { expose } from "comlink";
+import { MachineLearningWorker } from "services/face/types";
 import mlService from "services/machineLearning/machineLearningService";
-import { MachineLearningWorker } from "services/ml/types";
 import { EnteFile } from "types/file";
 
 export class DedicatedMLWorker implements MachineLearningWorker {

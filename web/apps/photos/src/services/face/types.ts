@@ -1,6 +1,6 @@
 import { DebugInfo } from "hdbscan";
 import PQueue from "p-queue";
-import { Dimensions } from "services/ml/geom";
+import { Dimensions } from "services/face/geom";
 import { EnteFile } from "types/file";
 import { Box, Point } from "./geom";
 

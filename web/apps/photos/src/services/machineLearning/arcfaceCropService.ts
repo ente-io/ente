@@ -1,4 +1,4 @@
-import { Box, enlargeBox } from "services/ml/geom";
+import { Box, enlargeBox } from "services/face/geom";
 import {
     FaceAlignment,
     FaceCrop,
@@ -6,7 +6,7 @@ import {
     FaceCropService,
     FaceDetection,
     Versioned,
-} from "services/ml/types";
+} from "services/face/types";
 import { cropWithRotation } from "utils/image";
 import { getArcfaceAlignment } from "./arcfaceAlignmentService";
 

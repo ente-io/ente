@@ -6,13 +6,13 @@ import {
     Point,
     boxFromBoundingBox,
     newBox,
-} from "services/ml/geom";
+} from "services/face/geom";
 import {
     FaceDetection,
     FaceDetectionMethod,
     FaceDetectionService,
     Versioned,
-} from "services/ml/types";
+} from "services/face/types";
 import {
     Matrix,
     applyToPoint,

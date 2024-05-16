@@ -1,12 +1,12 @@
 import { Matrix } from "ml-matrix";
-import { Point } from "services/ml/geom";
+import { Point } from "services/face/geom";
 import {
     FaceAlignment,
     FaceAlignmentMethod,
     FaceAlignmentService,
     FaceDetection,
     Versioned,
-} from "services/ml/types";
+} from "services/face/types";
 import { getSimilarityTransformation } from "similarity-transformation";
 
 class ArcfaceAlignmentService implements FaceAlignmentService {

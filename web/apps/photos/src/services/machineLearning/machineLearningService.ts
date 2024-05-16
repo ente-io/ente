@@ -10,8 +10,7 @@ import { CustomError, parseUploadErrorCodes } from "@ente/shared/error";
 import PQueue from "p-queue";
 import downloadManager from "services/download";
 import { putEmbedding } from "services/embeddingService";
-import { getLocalFiles } from "services/fileService";
-import mlIDbStorage, { ML_SEARCH_CONFIG_NAME } from "services/ml/db";
+import mlIDbStorage, { ML_SEARCH_CONFIG_NAME } from "services/face/db";
 import {
     BlurDetectionMethod,
     BlurDetectionService,
@@ -35,7 +34,8 @@ import {
     MLSyncFileContext,
     MLSyncResult,
     MlFileData,
-} from "services/ml/types";
+} from "services/face/types";
+import { getLocalFiles } from "services/fileService";
 import { EnteFile } from "types/file";
 import { isInternalUserForML } from "utils/user";
 import arcfaceAlignmentService from "./arcfaceAlignmentService";
@@ -46,7 +46,7 @@ import laplacianBlurDetectionService from "./laplacianBlurDetectionService";
 import mobileFaceNetEmbeddingService from "./mobileFaceNetEmbeddingService";
 import PeopleService from "./peopleService";
 
-import { fetchImageBitmapForContext } from "./readerService";
+import { fetchImageBitmapForContext } from "../face/image";
 import yoloFaceDetectionService from "./yoloFaceDetectionService";
 
 /**
