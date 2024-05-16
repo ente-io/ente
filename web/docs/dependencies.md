@@ -175,5 +175,14 @@ some cases.
     for converting arbitrary strings into strings that are suitable for being
     used as filenames.
 
+## Face search
+
+-   [matrix](https://github.com/mljs/matrix) and
+    [similarity-transformation](https://github.com/shaileshpandit/similarity-transformation-js)
+    are used during face alignment.
+
+-   [transformation-matrix](https://github.com/chrvadala/transformation-matrix)
+    is used during face detection.
+
 -   [hdbscan](https://github.com/shaileshpandit/hdbscan-js) is used for face
     clustering.
