@@ -81,8 +81,8 @@ func (c *Controller) deleteEmbedding(qItem repo.QueueItem) {
 			ctxLogger.WithError(err).Error("Failed to delete all objects")
 			return
 		}
-		// if Embeddings DC is different from hot DC, delete from hot DC as well
-		if !c.areDerivedAndHotBucketSame {
+		// if Derived DC is different from hot DC, delete from hot DC as well
+		if c.derivedStorageDataCenter != c.S3Config.GetHotDataCenter() {
 			err = c.ObjectCleanupController.DeleteAllObjectsWithPrefix(prefix, c.S3Config.GetHotDataCenter())
 			if err != nil {
 				ctxLogger.WithError(err).Error("Failed to delete all objects from hot DC")
