@@ -425,7 +425,7 @@ class MachineLearningService {
 
         try {
             await fetchImageBitmapForContext(fileContext);
-            await Promise.all([syncFileAnalyzeFaces(syncContext, fileContext)]);
+            await Promise.all([syncFileAnalyzeFaces(fileContext)]);
             newMlFile.errorCount = 0;
             newMlFile.lastErrorMessage = undefined;
             await this.persistOnServer(newMlFile, enteFile);

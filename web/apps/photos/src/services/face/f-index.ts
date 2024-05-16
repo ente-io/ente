@@ -22,30 +22,20 @@ import {
     getLocalFile,
 } from "./image";
 
-export const syncFileAnalyzeFaces = async (
-    syncContext: MLSyncContext,
-    fileContext: MLSyncFileContext,
-) => {
+export const syncFileAnalyzeFaces = async (fileContext: MLSyncFileContext) => {
     const { newMlFile } = fileContext;
     const startTime = Date.now();
 
-    await syncFileFaceDetections(syncContext, fileContext);
+    await syncFileFaceDetections(fileContext);
 
     if (newMlFile.faces && newMlFile.faces.length > 0) {
-        await syncFileFaceCrops(syncContext, fileContext);
+        await syncFileFaceCrops(fileContext);
 
-        const alignedFacesData = await syncFileFaceAlignments(
-            syncContext,
-            fileContext,
-        );
+        const alignedFacesData = await syncFileFaceAlignments(fileContext);
 
-        await syncFileFaceEmbeddings(
-            syncContext,
-            fileContext,
-            alignedFacesData,
-        );
+        await syncFileFaceEmbeddings(fileContext, alignedFacesData);
 
-        await syncFileFaceMakeRelativeDetections(syncContext, fileContext);
+        await syncFileFaceMakeRelativeDetections(fileContext);
     }
     log.debug(
         () =>
@@ -53,10 +43,7 @@ export const syncFileAnalyzeFaces = async (
     );
 };
 
-const syncFileFaceDetections = async (
-    syncContext: MLSyncContext,
-    fileContext: MLSyncFileContext,
-) => {
+const syncFileFaceDetections = async (fileContext: MLSyncFileContext) => {
     const { newMlFile } = fileContext;
     newMlFile.faceDetectionMethod = {
         value: "YoloFace",
@@ -82,10 +69,7 @@ const syncFileFaceDetections = async (
     log.info("[MLService] Detected Faces: ", newMlFile.faces?.length);
 };
 
-const syncFileFaceCrops = async (
-    syncContext: MLSyncContext,
-    fileContext: MLSyncFileContext,
-) => {
+const syncFileFaceCrops = async (fileContext: MLSyncFileContext) => {
     const { newMlFile } = fileContext;
     const imageBitmap = await fetchImageBitmapForContext(fileContext);
     newMlFile.faceCropMethod = {
@@ -99,7 +83,6 @@ const syncFileFaceCrops = async (
 };
 
 const syncFileFaceAlignments = async (
-    syncContext: MLSyncContext,
     fileContext: MLSyncFileContext,
 ): Promise<Float32Array> => {
     const { newMlFile } = fileContext;
@@ -133,7 +116,6 @@ const syncFileFaceAlignments = async (
 };
 
 const syncFileFaceEmbeddings = async (
-    syncContext: MLSyncContext,
     fileContext: MLSyncFileContext,
     alignedFacesInput: Float32Array,
 ) => {
@@ -153,7 +135,6 @@ const syncFileFaceEmbeddings = async (
 };
 
 const syncFileFaceMakeRelativeDetections = async (
-    syncContext: MLSyncContext,
     fileContext: MLSyncFileContext,
 ) => {
     const { newMlFile } = fileContext;
