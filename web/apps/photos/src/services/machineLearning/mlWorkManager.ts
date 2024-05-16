@@ -12,10 +12,6 @@ import { MLSyncResult } from "services/ml/types";
 import { EnteFile } from "types/file";
 import { logQueueStats } from "./machineLearningService";
 
-const LIVE_SYNC_IDLE_DEBOUNCE_SEC = 30;
-const LIVE_SYNC_QUEUE_TIMEOUT_SEC = 300;
-const LOCAL_FILES_UPDATED_DEBOUNCE_SEC = 30;
-
 export type JobState = "Scheduled" | "Running" | "NotScheduled";
 
 export interface MLSyncJobResult {
@@ -113,18 +109,18 @@ class MLWorkManager {
         this.liveSyncQueue = new PQueue({
             concurrency: 1,
             // TODO: temp, remove
-            timeout: LIVE_SYNC_QUEUE_TIMEOUT_SEC * 1000,
+            timeout: 300 * 1000,
             throwOnTimeout: true,
         });
         this.mlSearchEnabled = false;
 
         this.debouncedLiveSyncIdle = debounce(
             () => this.onLiveSyncIdle(),
-            LIVE_SYNC_IDLE_DEBOUNCE_SEC * 1000,
+            30 * 1000,
         );
         this.debouncedFilesUpdated = debounce(
             () => this.mlSearchEnabled && this.localFilesUpdatedHandler(),
-            LOCAL_FILES_UPDATED_DEBOUNCE_SEC * 1000,
+            30 * 1000,
         );
     }
 
