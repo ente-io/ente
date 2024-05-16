@@ -44,7 +44,6 @@ type Controller struct {
 	CollectionRepo             *repo.CollectionRepository
 	HostName                   string
 	cleanupCronRunning         bool
-	derivedStorageS3Client     *s3.S3
 	derivedStorageDataCenter   string
 	areDerivedAndHotBucketSame bool
 }
@@ -60,7 +59,6 @@ func New(repo *embedding.Repository, accessCtrl access.Controller, objectCleanup
 		FileRepo:                   fileRepo,
 		CollectionRepo:             collectionRepo,
 		HostName:                   hostName,
-		derivedStorageS3Client:     s3Config.GetDerivedStorageS3Client(),
 		derivedStorageDataCenter:   s3Config.GetDerivedStorageDataCenter(),
 		areDerivedAndHotBucketSame: s3Config.GetDerivedStorageDataCenter() == s3Config.GetDerivedStorageDataCenter(),
 	}
@@ -245,7 +243,8 @@ func (c *Controller) getEmbeddingObjectsParallel(objectKeys []string) ([]ente.Em
 	var wg sync.WaitGroup
 	var errs []error
 	embeddingObjects := make([]ente.EmbeddingObject, len(objectKeys))
-	downloader := s3manager.NewDownloaderWithClient(c.derivedStorageS3Client)
+	s3Client := c.S3Config.GetS3Client(c.derivedStorageDataCenter)
+	downloader := s3manager.NewDownloaderWithClient(&s3Client)
 
 	for i, objectKey := range objectKeys {
 		wg.Add(1)
@@ -282,7 +281,8 @@ type embeddingObjectResult struct {
 func (c *Controller) getEmbeddingObjectsParallelV2(userID int64, dbEmbeddingRows []ente.Embedding) ([]embeddingObjectResult, error) {
 	var wg sync.WaitGroup
 	embeddingObjects := make([]embeddingObjectResult, len(dbEmbeddingRows))
-	downloader := s3manager.NewDownloaderWithClient(c.derivedStorageS3Client)
+	s3Client := c.S3Config.GetS3Client(c.derivedStorageDataCenter)
+	downloader := s3manager.NewDownloaderWithClient(&s3Client)
 
 	for i, dbEmbeddingRow := range dbEmbeddingRows {
 		wg.Add(1)
