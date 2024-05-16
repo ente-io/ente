@@ -8,7 +8,6 @@ import { DetectedFace, MLSyncFileContext } from "services/ml/types";
 import { EnteFile } from "types/file";
 import { getRenderableImage } from "utils/file";
 import { clamp } from "utils/image";
-import { DEFAULT_ML_SYNC_CONFIG } from "./machineLearningService";
 
 class ReaderService {
     async getImageBitmap(fileContext: MLSyncFileContext) {
@@ -29,7 +28,6 @@ class ReaderService {
                     fileContext.localFile,
                 );
             } else if (
-                DEFAULT_ML_SYNC_CONFIG.imageSource === "Original" &&
                 [FILE_TYPE.IMAGE, FILE_TYPE.LIVE_PHOTO].includes(
                     fileContext.enteFile.metadata.fileType,
                 )
@@ -38,13 +36,14 @@ class ReaderService {
                     fileContext.enteFile,
                 );
             } else {
+                // TODO-ML(MR): We don't do it on videos, when will we ever come
+                // here?
                 fileContext.imageBitmap = await getThumbnailImageBitmap(
                     fileContext.enteFile,
                 );
             }
 
-            fileContext.newMlFile.imageSource =
-                DEFAULT_ML_SYNC_CONFIG.imageSource;
+            fileContext.newMlFile.imageSource = "Original";
             const { width, height } = fileContext.imageBitmap;
             fileContext.newMlFile.imageDimensions = { width, height };
 
