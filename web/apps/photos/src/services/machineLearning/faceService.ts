@@ -218,7 +218,6 @@ class FaceService {
         const faceCrop = await syncContext.faceCropService.getFaceCrop(
             imageBitmap,
             face.detection,
-            DEFAULT_ML_SYNC_CONFIG.faceCrop,
         );
 
         const blobOptions = DEFAULT_ML_SYNC_CONFIG.faceCrop.blobOptions;

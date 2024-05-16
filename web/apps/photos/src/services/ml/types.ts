@@ -271,7 +271,6 @@ export interface FaceCropService {
     getFaceCrop(
         imageBitmap: ImageBitmap,
         face: FaceDetection,
-        config: FaceCropConfig,
     ): Promise<FaceCrop>;
 }
 
