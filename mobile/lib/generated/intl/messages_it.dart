@@ -667,6 +667,10 @@ class MessageLookup extends MessageLookupByLibrary {
             "Questo link è scaduto. Si prega di selezionare un nuovo orario di scadenza o disabilitare la scadenza del link."),
         "exportLogs": MessageLookupByLibrary.simpleMessage("Esporta log"),
         "exportYourData": MessageLookupByLibrary.simpleMessage("Esporta dati"),
+        "faceRecognition":
+            MessageLookupByLibrary.simpleMessage("Face recognition"),
+        "faceRecognitionIndexingDescription": MessageLookupByLibrary.simpleMessage(
+            "Please note that this will result in a higher bandwidth and battery usage until all items are indexed."),
         "failedToApplyCode": MessageLookupByLibrary.simpleMessage(
             "Impossibile applicare il codice"),
         "failedToCancel":

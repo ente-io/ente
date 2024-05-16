@@ -8753,6 +8753,26 @@ class S {
       args: [],
     );
   }
+
+  /// `Face recognition`
+  String get faceRecognition {
+    return Intl.message(
+      'Face recognition',
+      name: 'faceRecognition',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please note that this will result in a higher bandwidth and battery usage until all items are indexed.`
+  String get faceRecognitionIndexingDescription {
+    return Intl.message(
+      'Please note that this will result in a higher bandwidth and battery usage until all items are indexed.',
+      name: 'faceRecognitionIndexingDescription',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

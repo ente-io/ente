@@ -6,6 +6,7 @@ import "package:photos/core/event_bus.dart";
 import 'package:photos/events/embedding_updated_event.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/service_locator.dart";
+import "package:photos/services/machine_learning/face_ml/face_ml_service.dart";
 import 'package:photos/services/machine_learning/semantic_search/frameworks/ml_framework.dart';
 import 'package:photos/services/machine_learning/semantic_search/semantic_search_service.dart';
 import "package:photos/theme/ente_theme.dart";
@@ -89,6 +90,8 @@ class _MachineLearningSettingsPageState
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         _getMagicSearchSettings(context),
+                        const SizedBox(height: 12),
+                        _getFacesSearchSettings(context),
                       ],
                     ),
                   ),
@@ -147,7 +150,7 @@ class _MachineLearningSettingsPageState
                 children: [
                   _state == InitializationState.initialized
                       ? const MagicSearchIndexStatsWidget()
-                      : ModelLoadingState(_state),
+                      : MagicSearchModelLoadingState(_state),
                   const SizedBox(
                     height: 12,
                   ),
@@ -174,12 +177,54 @@ class _MachineLearningSettingsPageState
       ],
     );
   }
+
+  Widget _getFacesSearchSettings(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+    final hasEnabled = LocalSettings.instance.isFaceIndexingEnabled;
+    return Column(
+      children: [
+        MenuItemWidget(
+          captionedTextWidget: CaptionedTextWidget(
+            title: S.of(context).faceRecognition,
+          ),
+          menuItemColor: colorScheme.fillFaint,
+          trailingWidget: ToggleSwitchWidget(
+            value: () => LocalSettings.instance.isFaceIndexingEnabled,
+            onChanged: () async {
+              final isEnabled =
+                  await LocalSettings.instance.toggleFaceIndexing();
+              if (isEnabled) {
+                unawaited(FaceMlService.instance.ensureInitialized());
+              } else {
+                FaceMlService.instance.pauseIndexing();
+              }
+              if (mounted) {
+                setState(() {});
+              }
+            },
+          ),
+          singleBorderRadius: 8,
+          alignCaptionedTextToLeft: true,
+          isGestureDetectorDisabled: true,
+        ),
+        const SizedBox(
+          height: 4,
+        ),
+        MenuSectionDescriptionWidget(
+          content: S.of(context).faceRecognitionIndexingDescription,
+        ),
+        const SizedBox(
+          height: 12,
+        ),
+      ],
+    );
+  }
 }
 
-class ModelLoadingState extends StatelessWidget {
+class MagicSearchModelLoadingState extends StatelessWidget {
   final InitializationState state;
 
-  const ModelLoadingState(
+  const MagicSearchModelLoadingState(
     this.state, {
     Key? key,
   }) : super(key: key);

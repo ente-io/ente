@@ -46,6 +46,10 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Edits to location will only be seen within Ente"),
         "enterPersonName":
             MessageLookupByLibrary.simpleMessage("Enter person name"),
+        "faceRecognition":
+            MessageLookupByLibrary.simpleMessage("Face recognition"),
+        "faceRecognitionIndexingDescription": MessageLookupByLibrary.simpleMessage(
+            "Please note that this will result in a higher bandwidth and battery usage until all items are indexed."),
         "fileTypes": MessageLookupByLibrary.simpleMessage("File types"),
         "joinDiscord": MessageLookupByLibrary.simpleMessage("Join Discord"),
         "locations": MessageLookupByLibrary.simpleMessage("Locations"),
