@@ -1,14 +1,12 @@
 import { haveWindow } from "@/next/env";
 import log from "@/next/log";
 import { ComlinkWorker } from "@/next/worker/comlink-worker";
-import { APPS } from "@ente/shared/apps/constants";
 import ComlinkCryptoWorker, {
     getDedicatedCryptoWorker,
 } from "@ente/shared/crypto";
 import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
 import { CustomError, parseUploadErrorCodes } from "@ente/shared/error";
 import PQueue from "p-queue";
-import downloadManager from "services/download";
 import { putEmbedding } from "services/embeddingService";
 import mlIDbStorage, { ML_SEARCH_CONFIG_NAME } from "services/face/db";
 import {
@@ -158,8 +156,6 @@ class MachineLearningService {
             throw Error("Token needed by ml service to sync file");
         }
 
-        await downloadManager.init(APPS.PHOTOS, { token });
-
         const syncContext = await this.getSyncContext(token, userID);
 
         await this.syncLocalFiles(syncContext);
@@ -194,8 +190,7 @@ class MachineLearningService {
         return mlSyncResult;
     }
 
-    public async regenerateFaceCrop(token: string, faceID: string) {
-        await downloadManager.init(APPS.PHOTOS, { token });
+    public async regenerateFaceCrop(faceID: string) {
         return regenerateFaceCrop(faceID);
     }
 

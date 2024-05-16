@@ -167,10 +167,7 @@ const FaceCropImageView: React.FC<FaceCropImageViewProps> = ({
                 .legacyFaceCrop(faceID)
                 /*
             cachedOrNew("face-crops", cacheKey, async () => {
-                const user = await ensureLocalUser();
                 return machineLearningService.regenerateFaceCrop(
-                    user.token,
-                    user.id,
                     faceId,
                 );
             })*/

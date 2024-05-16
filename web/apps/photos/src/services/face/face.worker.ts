@@ -21,7 +21,7 @@ export class DedicatedMLWorker {
     }
 
     public async regenerateFaceCrop(token: string, faceID: string) {
-        return mlService.regenerateFaceCrop(token, faceID);
+        return mlService.regenerateFaceCrop(faceID);
     }
 }
 
