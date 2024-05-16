@@ -905,10 +905,12 @@ class FilesDB {
   Future<List<int>> getUploadedFileIDsToBeUpdated(int ownerID) async {
     final db = await instance.sqliteAsyncDB;
     final rows = await db.getAll(
-        'SELECT DISTINCT $columnUploadedFileID FROM $filesTable WHERE '
-        '($columnLocalID IS NOT NULL AND $columnOwnerID = ? AND '
-        '($columnUploadedFileID IS NOT NULL AND $columnUploadedFileID IS NOT -1) '
-        'AND $columnUpdationTime IS NULL) ORDER BY $columnCreationTime DESC ');
+      'SELECT DISTINCT $columnUploadedFileID FROM $filesTable WHERE '
+      '($columnLocalID IS NOT NULL AND $columnOwnerID = ? AND '
+      '($columnUploadedFileID IS NOT NULL AND $columnUploadedFileID IS NOT -1) '
+      'AND $columnUpdationTime IS NULL) ORDER BY $columnCreationTime DESC ',
+      [ownerID],
+    );
     final uploadedFileIDs = <int>[];
     for (final row in rows) {
       uploadedFileIDs.add(row[columnUploadedFileID] as int);
