@@ -58,7 +58,10 @@ class FaceService {
     ) {
         const { newMlFile } = fileContext;
         const imageBitmap = await fetchImageBitmapForContext(fileContext);
-        newMlFile.faceCropMethod = syncContext.faceCropService.method;
+        newMlFile.faceCropMethod = {
+            value: "ArcFace",
+            version: 1,
+        };
 
         for (const face of newMlFile.faces) {
             await this.saveFaceCrop(imageBitmap, face);

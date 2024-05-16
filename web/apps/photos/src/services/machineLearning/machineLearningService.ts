@@ -13,7 +13,6 @@ import { putEmbedding } from "services/embeddingService";
 import mlIDbStorage, { ML_SEARCH_CONFIG_NAME } from "services/face/db";
 import {
     Face,
-    FaceCropService,
     FaceDetection,
     Landmark,
     MLLibraryData,
@@ -105,8 +104,6 @@ export async function updateMLSearchConfig(newConfig: MLSearchConfig) {
 export class LocalMLSyncContext implements MLSyncContext {
     public token: string;
     public userID: number;
-
-    public faceCropService: FaceCropService;
 
     public localFilesMap: Map<number, EnteFile>;
     public outOfSyncFiles: EnteFile[];

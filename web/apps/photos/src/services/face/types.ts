@@ -198,8 +198,6 @@ export interface MLSyncContext {
     token: string;
     userID: number;
 
-    faceCropService: FaceCropService;
-
     localFilesMap: Map<number, EnteFile>;
     outOfSyncFiles: EnteFile[];
     nSyncedFiles: number;
@@ -237,15 +235,6 @@ export interface MLLibraryData {
 }
 
 export declare type MLIndex = "files" | "people";
-
-export interface FaceCropService {
-    method: Versioned<FaceCropMethod>;
-
-    getFaceCrop(
-        imageBitmap: ImageBitmap,
-        face: FaceDetection,
-    ): Promise<FaceCrop>;
-}
 
 export interface MachineLearningWorker {
     closeLocalSyncContext(): Promise<void>;
