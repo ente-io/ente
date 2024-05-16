@@ -41,7 +41,7 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
       subtitleSection: _faceWidgets(context, widget.file, editMode),
       hasChipButtons: true,
       biggerSpinner: true,
-      editOnTap: _toggleEditMode,
+      // editOnTap: _toggleEditMode, // TODO: re-enable at later time when the UI is less ugly
     );
   }
 
