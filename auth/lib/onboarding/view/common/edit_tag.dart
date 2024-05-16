@@ -29,6 +29,7 @@ class _EditTagDialogState extends State<EditTagDialog> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             TextFormField(
+              maxLength: 100,
               decoration: InputDecoration(
                 hintText: l10n.tag,
                 hintStyle: const TextStyle(
