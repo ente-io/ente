@@ -13,7 +13,7 @@ export const syncPeopleIndex = async (syncContext: MLSyncContext) => {
     // to avoid index based addressing, which is prone to wrong results
     // one way could be to match nearest face within threshold in the file
     const allFacesMap = await FaceService.getAllSyncedFacesMap(syncContext);
-    const allFaces = getAllFacesFromMap(allFacesMap);
+    const allFaces = [...allFacesMap.values()].flat();
 
     await FaceService.runFaceClustering(syncContext, allFaces);
     await syncPeopleFromClusters(syncContext, allFacesMap, allFaces);
@@ -72,10 +72,3 @@ const syncPeopleFromClusters = async (
 
     await mlIDbStorage.updateFaces(allFacesMap);
 };
-
-
-function getAllFacesFromMap(allFacesMap: Map<number, Array<Face>>) {
-    const allFaces = [...allFacesMap.values()].flat();
-
-    return allFaces;
-}
