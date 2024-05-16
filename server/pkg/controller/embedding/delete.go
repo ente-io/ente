@@ -90,7 +90,7 @@ func (c *Controller) deleteEmbedding(qItem repo.QueueItem) {
 			}
 		}
 	} else {
-		ctxLogger.Info("Deleting from all datacenters %v", datacenters)
+		ctxLogger.Infof("Deleting from all datacenters %v", datacenters)
 	}
 
 	for i := range datacenters {
