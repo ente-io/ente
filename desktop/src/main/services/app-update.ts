@@ -11,6 +11,11 @@ import { isDev } from "../utils/electron";
 export const setupAutoUpdater = (mainWindow: BrowserWindow) => {
     autoUpdater.logger = electronLog;
     autoUpdater.autoDownload = false;
+    // This is going to be the default at some point, right now if we don't
+    // explicitly set this to true then electron-builder prints a (harmless)
+    // warning when updating on Windows.
+    // See: https://github.com/electron-userland/electron-builder/pull/6575
+    autoUpdater.disableWebInstaller = true;
 
     /**
      * [Note: Testing auto updates]
