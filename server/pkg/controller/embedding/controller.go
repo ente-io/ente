@@ -103,7 +103,7 @@ func (c *Controller) InsertOrUpdate(ctx *gin.Context, req ente.InsertOrUpdateEmb
 		log.Error(uploadErr)
 		return nil, stacktrace.Propagate(uploadErr, "")
 	}
-	embedding, err := c.Repo.InsertOrUpdate(ctx, userID, req, size, version)
+	embedding, err := c.Repo.InsertOrUpdate(ctx, userID, req, size, version, c.S3Config.GetDerivedStorageDataCenter())
 	embedding.Version = &version
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "")
