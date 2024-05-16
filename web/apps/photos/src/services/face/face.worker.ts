@@ -19,7 +19,7 @@ export class DedicatedMLWorker implements MachineLearningWorker {
         enteFile: EnteFile,
         localFile: globalThis.File,
     ) {
-        return mlService.syncLocalFile(token, userID, enteFile, localFile);
+        mlService.syncLocalFile(token, userID, enteFile, localFile);
     }
 
     public async sync(token: string, userID: number) {

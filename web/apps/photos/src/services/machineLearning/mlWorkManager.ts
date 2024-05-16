@@ -5,8 +5,8 @@ import { eventBus, Events } from "@ente/shared/events";
 import { getToken, getUserID } from "@ente/shared/storage/localStorage/helpers";
 import debounce from "debounce";
 import PQueue from "p-queue";
-import mlIDbStorage from "services/face/db";
 import { createFaceComlinkWorker } from "services/face";
+import mlIDbStorage from "services/face/db";
 import type { DedicatedMLWorker } from "services/face/face.worker";
 import { MLSyncResult } from "services/face/types";
 import { EnteFile } from "types/file";
@@ -232,19 +232,13 @@ class MLWorkManager {
     }
 
     public async syncLocalFile(enteFile: EnteFile, localFile: globalThis.File) {
-        const result = await this.liveSyncQueue.add(async () => {
+        await this.liveSyncQueue.add(async () => {
             this.stopSyncJob();
             const token = getToken();
             const userID = getUserID();
             const mlWorker = await this.getLiveSyncWorker();
             return mlWorker.syncLocalFile(token, userID, enteFile, localFile);
         });
-
-        if (result instanceof Error) {
-            // TODO: redirect/refresh to gallery in case of session_expired
-            // may not be required as uploader should anyways take care of this
-            console.error("Error while syncing local file: ", result);
-        }
     }
 
     // Sync Job

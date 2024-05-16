@@ -157,7 +157,6 @@ export class MLFactory {
 export class LocalMLSyncContext implements MLSyncContext {
     public token: string;
     public userID: number;
-    public shouldUpdateMLVersion: boolean;
 
     public faceDetectionService: FaceDetectionService;
     public faceCropService: FaceCropService;
@@ -184,15 +183,9 @@ export class LocalMLSyncContext implements MLSyncContext {
     >;
     private enteWorkers: Array<any>;
 
-    constructor(
-        token: string,
-        userID: number,
-        shouldUpdateMLVersion: boolean = true,
-        concurrency?: number,
-    ) {
+    constructor(token: string, userID: number, concurrency?: number) {
         this.token = token;
         this.userID = userID;
-        this.shouldUpdateMLVersion = shouldUpdateMLVersion;
 
         this.faceDetectionService =
             MLFactory.getFaceDetectionService("YoloFace");
@@ -424,7 +417,7 @@ class MachineLearningService {
 
             // TODO-ML(MR): Keep as promise for now.
             this.syncContext = new Promise((resolve) => {
-                resolve(new LocalMLSyncContext(token, userID, true));
+                resolve(new LocalMLSyncContext(token, userID));
             });
         } else {
             log.info("reusing existing syncContext");
@@ -433,11 +426,12 @@ class MachineLearningService {
     }
 
     private async getLocalSyncContext(token: string, userID: number) {
+        // TODO-ML(MR): This is updating the file ML version. verify.
         if (!this.localSyncContext) {
             log.info("Creating localSyncContext");
             // TODO-ML(MR):
             this.localSyncContext = new Promise((resolve) => {
-                resolve(new LocalMLSyncContext(token, userID, false));
+                resolve(new LocalMLSyncContext(token, userID));
             });
         } else {
             log.info("reusing existing localSyncContext");
@@ -459,11 +453,11 @@ class MachineLearningService {
         userID: number,
         enteFile: EnteFile,
         localFile?: globalThis.File,
-    ): Promise<MlFileData | Error> {
+    ) {
         const syncContext = await this.getLocalSyncContext(token, userID);
 
         try {
-            const mlFileData = await this.syncFileWithErrorHandler(
+            await this.syncFileWithErrorHandler(
                 syncContext,
                 enteFile,
                 localFile,
@@ -473,10 +467,8 @@ class MachineLearningService {
                 await this.closeLocalSyncContext();
             }
             // await syncContext.dispose();
-            return mlFileData;
         } catch (e) {
             console.error("Error while syncing local file: ", enteFile.id, e);
-            return e;
         }
     }
 
@@ -484,7 +476,7 @@ class MachineLearningService {
         syncContext: MLSyncContext,
         enteFile: EnteFile,
         localFile?: globalThis.File,
-    ): Promise<MlFileData> {
+    ) {
         try {
             console.log(
                 `Indexing ${enteFile.title ?? "<untitled>"} ${enteFile.id}`,
@@ -533,22 +525,13 @@ class MachineLearningService {
     ) {
         console.log("Syncing for file" + enteFile.title);
         const fileContext: MLSyncFileContext = { enteFile, localFile };
-        const oldMlFile =
-            (fileContext.oldMlFile = await this.getMLFileData(enteFile.id)) ??
-            this.newMlData(enteFile.id);
-        if (
-            fileContext.oldMlFile?.mlVersion === defaultMLVersion
-            // TODO: reset mlversion of all files when user changes image source
-        ) {
-            return fileContext.oldMlFile;
+        const oldMlFile = await this.getMLFileData(enteFile.id);
+        if (oldMlFile) {
+            return oldMlFile;
         }
-        const newMlFile = (fileContext.newMlFile = this.newMlData(enteFile.id));
 
-        if (syncContext.shouldUpdateMLVersion) {
-            newMlFile.mlVersion = defaultMLVersion;
-        } else if (fileContext.oldMlFile?.mlVersion) {
-            newMlFile.mlVersion = fileContext.oldMlFile.mlVersion;
-        }
+        const newMlFile = (fileContext.newMlFile = this.newMlData(enteFile.id));
+        newMlFile.mlVersion = defaultMLVersion;
 
         try {
             await fetchImageBitmapForContext(fileContext);
@@ -628,6 +611,7 @@ class MachineLearningService {
     public async syncIndex(syncContext: MLSyncContext) {
         await this.getMLLibraryData(syncContext);
 
+        // TODO-ML(MR): Ensure this doesn't run until fixed.
         await syncPeopleIndex(syncContext);
 
         await this.persistMLLibraryData(syncContext);

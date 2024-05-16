@@ -8,7 +8,6 @@ import {
     MLSyncContext,
     MLSyncFileContext,
     type FaceAlignment,
-    type Versioned,
 } from "services/face/types";
 import { imageBitmapToBlob, warpAffineFloat32List } from "utils/image";
 import { clusterFaces } from "../face/cluster";
@@ -24,36 +23,12 @@ class FaceService {
         syncContext: MLSyncContext,
         fileContext: MLSyncFileContext,
     ) {
-        const { oldMlFile, newMlFile } = fileContext;
-        if (
-            !isDifferentOrOld(
-                oldMlFile?.faceDetectionMethod,
-                syncContext.faceDetectionService.method,
-            ) &&
-            oldMlFile?.imageSource === "Original"
-        ) {
-            newMlFile.faces = oldMlFile?.faces?.map((existingFace) => ({
-                id: existingFace.id,
-                fileId: existingFace.fileId,
-                detection: existingFace.detection,
-            }));
-
-            newMlFile.imageSource = oldMlFile.imageSource;
-            newMlFile.imageDimensions = oldMlFile.imageDimensions;
-            newMlFile.faceDetectionMethod = oldMlFile.faceDetectionMethod;
-            return;
-        }
-
+        const { newMlFile } = fileContext;
         newMlFile.faceDetectionMethod = syncContext.faceDetectionService.method;
         fileContext.newDetection = true;
         const imageBitmap = await fetchImageBitmapForContext(fileContext);
-        const timerId = `faceDetection-${fileContext.enteFile.id}`;
-        console.time(timerId);
         const faceDetections =
             await syncContext.faceDetectionService.detectFaces(imageBitmap);
-        console.timeEnd(timerId);
-        console.log("faceDetections: ", faceDetections?.length);
-
         // TODO: reenable faces filtering based on width
         const detectedFaces = faceDetections?.map((detection) => {
             return {
@@ -75,23 +50,7 @@ class FaceService {
         syncContext: MLSyncContext,
         fileContext: MLSyncFileContext,
     ) {
-        const { oldMlFile, newMlFile } = fileContext;
-        if (
-            // !syncContext.config.faceCrop.enabled ||
-            !fileContext.newDetection &&
-            !isDifferentOrOld(
-                oldMlFile?.faceCropMethod,
-                syncContext.faceCropService.method,
-            ) &&
-            areFaceIdsSame(newMlFile.faces, oldMlFile?.faces)
-        ) {
-            for (const [index, face] of newMlFile.faces.entries()) {
-                face.crop = oldMlFile.faces[index].crop;
-            }
-            newMlFile.faceCropMethod = oldMlFile.faceCropMethod;
-            return;
-        }
-
+        const { newMlFile } = fileContext;
         const imageBitmap = await fetchImageBitmapForContext(fileContext);
         newMlFile.faceCropMethod = syncContext.faceCropService.method;
 
@@ -104,24 +63,7 @@ class FaceService {
         syncContext: MLSyncContext,
         fileContext: MLSyncFileContext,
     ): Promise<Float32Array> {
-        const { oldMlFile, newMlFile } = fileContext;
-        // TODO-ML(MR):
-        const method = {
-            value: "ArcFace",
-            version: 1,
-        };
-        if (
-            !fileContext.newDetection &&
-            !isDifferentOrOld(oldMlFile?.faceAlignmentMethod, method) &&
-            areFaceIdsSame(newMlFile.faces, oldMlFile?.faces)
-        ) {
-            for (const [index, face] of newMlFile.faces.entries()) {
-                face.alignment = oldMlFile.faces[index].alignment;
-            }
-            newMlFile.faceAlignmentMethod = oldMlFile.faceAlignmentMethod;
-            return;
-        }
-
+        const { newMlFile } = fileContext;
         newMlFile.faceAlignmentMethod = {
             value: "ArcFace",
             version: 1,
@@ -159,22 +101,7 @@ class FaceService {
         fileContext: MLSyncFileContext,
         alignedFacesInput: Float32Array,
     ) {
-        const { oldMlFile, newMlFile } = fileContext;
-        if (
-            !fileContext.newAlignment &&
-            !isDifferentOrOld(
-                oldMlFile?.faceEmbeddingMethod,
-                syncContext.faceEmbeddingService.method,
-            ) &&
-            areFaceIdsSame(newMlFile.faces, oldMlFile?.faces)
-        ) {
-            for (const [index, face] of newMlFile.faces.entries()) {
-                face.embedding = oldMlFile.faces[index].embedding;
-            }
-            newMlFile.faceEmbeddingMethod = oldMlFile.faceEmbeddingMethod;
-            return;
-        }
-
+        const { newMlFile } = fileContext;
         newMlFile.faceEmbeddingMethod = syncContext.faceEmbeddingService.method;
         // TODO: when not storing face crops, image will be needed to extract faces
         // fileContext.imageBitmap ||
@@ -193,17 +120,7 @@ class FaceService {
         syncContext: MLSyncContext,
         fileContext: MLSyncFileContext,
     ) {
-        const { oldMlFile, newMlFile } = fileContext;
-        if (
-            !fileContext.newAlignment &&
-            !isDifferentOrOld(
-                oldMlFile?.faceEmbeddingMethod,
-                syncContext.faceEmbeddingService.method,
-            ) &&
-            areFaceIdsSame(newMlFile.faces, oldMlFile?.faces)
-        ) {
-            return;
-        }
+        const { newMlFile } = fileContext;
         for (let i = 0; i < newMlFile.faces.length; i++) {
             const face = newMlFile.faces[i];
             if (face.detection.box.x + face.detection.box.width < 2) continue; // Skip if somehow already relative
@@ -297,39 +214,6 @@ class FaceService {
 }
 
 export default new FaceService();
-
-export function areFaceIdsSame(ofFaces: Array<Face>, toFaces: Array<Face>) {
-    if (
-        (ofFaces === null || ofFaces === undefined) &&
-        (toFaces === null || toFaces === undefined)
-    ) {
-        return true;
-    }
-    return primitiveArrayEquals(
-        ofFaces?.map((f) => f.id),
-        toFaces?.map((f) => f.id),
-    );
-}
-
-function primitiveArrayEquals(a, b) {
-    return (
-        Array.isArray(a) &&
-        Array.isArray(b) &&
-        a.length === b.length &&
-        a.every((val, index) => val === b[index])
-    );
-}
-
-export function isDifferentOrOld(
-    method: Versioned<string>,
-    thanMethod: Versioned<string>,
-) {
-    return (
-        !method ||
-        method.value !== thanMethod.value ||
-        method.version < thanMethod.version
-    );
-}
 
 async function extractFaceImagesToFloat32(
     faceAlignments: Array<FaceAlignment>,

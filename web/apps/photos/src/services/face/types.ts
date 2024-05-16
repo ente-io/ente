@@ -197,7 +197,6 @@ export interface MLSearchConfig {
 export interface MLSyncContext {
     token: string;
     userID: number;
-    shouldUpdateMLVersion: boolean;
 
     faceDetectionService: FaceDetectionService;
     faceCropService: FaceCropService;
@@ -281,7 +280,7 @@ export interface MachineLearningWorker {
         userID: number,
         enteFile: EnteFile,
         localFile: globalThis.File,
-    ): Promise<MlFileData | Error>;
+    );
 
     sync(token: string, userID: number): Promise<MLSyncResult>;
 
