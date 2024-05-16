@@ -31,8 +31,8 @@ import { EnteFile } from "types/file";
 import { isInternalUserForML } from "utils/user";
 import { fetchImageBitmapForContext } from "../face/image";
 import { syncPeopleIndex } from "../face/people";
+import mobileFaceNetEmbeddingService from "./embed";
 import FaceService from "./faceService";
-import mobileFaceNetEmbeddingService from "./mobileFaceNetEmbeddingService";
 
 /**
  * TODO-ML(MR): What and why.

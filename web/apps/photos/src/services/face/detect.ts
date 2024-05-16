@@ -24,7 +24,7 @@ import {
 /**
  * Detect faces in the given {@link imageBitmap}.
  *
- * The ML model used is YOLO, running in an ONNX runtime.
+ * The model used is YOLO, running in an ONNX runtime.
  */
 export const detectFaces = async (
     imageBitmap: ImageBitmap,

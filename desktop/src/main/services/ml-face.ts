@@ -32,7 +32,7 @@ const cachedFaceEmbeddingSession = makeCachedInferenceSession(
     5286998 /* 5 MB */,
 );
 
-export const faceEmbedding = async (input: Float32Array) => {
+export const faceEmbeddings = async (input: Float32Array) => {
     // Dimension of each face (alias)
     const mobileFaceNetFaceSize = 112;
     // Smaller alias

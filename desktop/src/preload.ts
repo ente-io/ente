@@ -162,8 +162,8 @@ const clipTextEmbeddingIfAvailable = (text: string) =>
 const detectFaces = (input: Float32Array) =>
     ipcRenderer.invoke("detectFaces", input);
 
-const faceEmbedding = (input: Float32Array) =>
-    ipcRenderer.invoke("faceEmbedding", input);
+const faceEmbeddings = (input: Float32Array) =>
+    ipcRenderer.invoke("faceEmbeddings", input);
 
 const legacyFaceCrop = (faceID: string) =>
     ipcRenderer.invoke("legacyFaceCrop", faceID);
@@ -343,7 +343,7 @@ contextBridge.exposeInMainWorld("electron", {
     clipImageEmbedding,
     clipTextEmbeddingIfAvailable,
     detectFaces,
-    faceEmbedding,
+    faceEmbeddings,
     legacyFaceCrop,
 
     // - Watch

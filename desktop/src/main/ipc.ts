@@ -46,7 +46,7 @@ import {
     clipImageEmbedding,
     clipTextEmbeddingIfAvailable,
 } from "./services/ml-clip";
-import { detectFaces, faceEmbedding } from "./services/ml-face";
+import { detectFaces, faceEmbeddings } from "./services/ml-face";
 import { encryptionKey, saveEncryptionKey } from "./services/store";
 import {
     clearPendingUploads,
@@ -182,8 +182,8 @@ export const attachIPCHandlers = () => {
         detectFaces(input),
     );
 
-    ipcMain.handle("faceEmbedding", (_, input: Float32Array) =>
-        faceEmbedding(input),
+    ipcMain.handle("faceEmbeddings", (_, input: Float32Array) =>
+        faceEmbeddings(input),
     );
 
     ipcMain.handle("legacyFaceCrop", (_, faceID: string) =>

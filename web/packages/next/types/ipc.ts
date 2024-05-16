@@ -332,12 +332,12 @@ export interface Electron {
     detectFaces: (input: Float32Array) => Promise<Float32Array>;
 
     /**
-     * Return a MobileFaceNet embedding for the given face data.
+     * Return a MobileFaceNet embeddings for the given faces.
      *
      * Both the input and output are opaque binary data whose internal structure
      * is specific to our implementation and the model (MobileFaceNet) we use.
      */
-    faceEmbedding: (input: Float32Array) => Promise<Float32Array>;
+    faceEmbeddings: (input: Float32Array) => Promise<Float32Array>;
 
     /**
      * Return a face crop stored by a previous version of ML.
