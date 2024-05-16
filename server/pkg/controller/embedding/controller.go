@@ -350,6 +350,7 @@ func (c *Controller) getEmbeddingObject(ctx context.Context, objectKey string, d
 					if s3Err.Code() == s3.ErrCodeNoSuchKey {
 						if c.derivedStorageDataCenter == c.S3Config.GetHotDataCenter() {
 							ctxLogger.Error("Object not found: ", s3Err)
+							return ente.EmbeddingObject{}, stacktrace.Propagate(errors.New("object not found"), "")
 						} else {
 							// If derived and hot bucket are different, try to copy from hot bucket
 							copyEmbeddingObject, err := c.copyEmbeddingObject(ctx, objectKey)
