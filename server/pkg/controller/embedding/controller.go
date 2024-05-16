@@ -358,10 +358,9 @@ func (c *Controller) getEmbeddingObject(ctx context.Context, objectKey string, d
 				// check if the error is due to object not found
 				if s3Err, ok := err.(awserr.RequestFailure); ok {
 					if s3Err.Code() == s3.ErrCodeNoSuchKey {
-						if c.derivedStorageDataCenter == c.S3Config.GetHotBackblazeDC() {
-							ctxLogger.Error("Object not found: ", s3Err)
-							return ente.EmbeddingObject{}, stacktrace.Propagate(errors.New("object not found"), "")
-						} else {
+						if c.derivedStorageDataCenter != c.S3Config.GetHotBackblazeDC() {
+							// todo:(neeraj) Refactor this later to get available the DC from the DB and use that to
+							// copy the object to currently active DC for derived storage
 							// If derived and hot bucket are different, try to copy from hot bucket
 							copyEmbeddingObject, err := c.copyEmbeddingObject(ctx, objectKey, c.S3Config.GetHotBackblazeDC(), c.derivedStorageDataCenter)
 							if err == nil {
@@ -370,6 +369,9 @@ func (c *Controller) getEmbeddingObject(ctx context.Context, objectKey string, d
 							} else {
 								ctxLogger.WithError(err).Error("Failed to copy from hot bucket object")
 							}
+							return ente.EmbeddingObject{}, stacktrace.Propagate(errors.New("object not found"), "")
+						} else {
+							ctxLogger.Error("Object not found: ", s3Err)
 							return ente.EmbeddingObject{}, stacktrace.Propagate(errors.New("object not found"), "")
 						}
 					}
