@@ -539,7 +539,7 @@ class FilesDB {
     PrimitiveWrapper batchCounter, {
     required bool isGenIdNull,
   }) async {
-    parameterSets.add(_getParameterSetForFileV2(file));
+    parameterSets.add(_getParameterSetForFile(file));
     batchCounter.value++;
 
     final columnNames = isGenIdNull
@@ -1149,11 +1149,14 @@ class FilesDB {
 
   Future<void> update(EnteFile file) async {
     final db = await instance.sqliteAsyncDB;
-    final setClause = _getSetClauseForFile(file);
+    final parameterSet = _getParameterSetForFile(file)..add(file.generatedID);
+    final updateAssignments = _generateUpdateAssignmentsWithPlaceholders(
+      fileGenId: file.generatedID,
+    );
     await db.execute(
-      'UPDATE $filesTable SET '
-      '$setClause WHERE $columnGeneratedID = ?',
-      [file.generatedID],
+      'UPDATE $filesTable '
+      'SET $updateAssignments WHERE $columnGeneratedID = ?',
+      parameterSet,
     );
   }
 
@@ -1164,6 +1167,21 @@ class FilesDB {
       'UPDATE $filesTable SET '
       '$setClause WHERE $columnUploadedFileID = ?',
       [file.uploadedFileID],
+    );
+  }
+
+  Future<void> updateUploadedFileAcrossCollectionsNew(EnteFile file) async {
+    final db = await instance.sqliteAsyncDB;
+    final parameterSet = _getParameterSetForFile(file, omitCollectionId: true)
+      ..add(file.uploadedFileID);
+    final updateAssignments = _generateUpdateAssignmentsWithPlaceholders(
+      fileGenId: file.generatedID,
+      omitCollectionId: true,
+    );
+    await db.execute(
+      'UPDATE $filesTable'
+      'SET $updateAssignments WHERE $columnUploadedFileID = ?',
+      parameterSet,
     );
   }
 
@@ -1782,8 +1800,8 @@ class FilesDB {
     return convertToFiles(results);
   }
 
-  String _getSetClauseForFile(EnteFile file) {
-    final row = _getRowForFile(file);
+  String _getSetClauseForFileWithoutCollection(EnteFile file) {
+    final row = _getRowForFileWithoutCollection(file);
     final setClause = <String>[];
     for (int i = 0; i < row.entries.length; i++) {
       final entry = row.entries.elementAt(i);
@@ -1792,18 +1810,30 @@ class FilesDB {
     return setClause.join(', ');
   }
 
-  List<Object?> _getParameterSetForFile(EnteFile file) {
-    final row = _getRowForFile(file);
-    final values = <Object?>[];
-    for (int i = 0; i < row.entries.length; i++) {
-      values.add(row.entries.elementAt(i).value);
+  ///Returns "columnName1 = ?, columnName2 = ?, ..."
+  String _generateUpdateAssignmentsWithPlaceholders({
+    required int? fileGenId,
+    bool omitCollectionId = false,
+  }) {
+    final setClauses = <String>[];
+
+    for (String columnName in _columnNames) {
+      if (columnName == columnGeneratedID && fileGenId == null) {
+        continue;
+      }
+      if (columnName == columnCollectionID && omitCollectionId) {
+        continue;
+      }
+      setClauses.add("$columnName = ?");
     }
-    return values;
+
+    return setClauses.join(",");
   }
 
-  List<Object?> _getParameterSetForFileV2(
+  List<Object?> _getParameterSetForFile(
     EnteFile file, {
     bool omitNullGenId = true,
+    bool omitCollectionId = false,
   }) {
     final values = <Object?>[];
     double? latitude;
@@ -1854,17 +1884,11 @@ class FilesDB {
       file.addedTime ?? DateTime.now().microsecondsSinceEpoch,
     ]);
 
-    return values;
-  }
-
-  String _getSetClauseForFileWithoutCollection(EnteFile file) {
-    final row = _getRowForFileWithoutCollection(file);
-    final setClause = <String>[];
-    for (int i = 0; i < row.entries.length; i++) {
-      final entry = row.entries.elementAt(i);
-      setClause.add('${entry.key} = ${entry.value}');
+    if (omitCollectionId) {
+      values.removeAt(3);
     }
-    return setClause.join(', ');
+
+    return values;
   }
 
   Map<String, dynamic> _getRowForFile(EnteFile file) {
