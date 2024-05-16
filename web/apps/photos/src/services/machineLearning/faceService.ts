@@ -2,7 +2,7 @@ import { openCache } from "@/next/blob-cache";
 import log from "@/next/log";
 import { faceAlignment } from "services/face/align";
 import mlIDbStorage from "services/face/db";
-import { detectFaces, getRelativeDetection } from "services/face/detect-face";
+import { detectFaces, getRelativeDetection } from "services/face/detect";
 import {
     DetectedFace,
     Face,
@@ -13,7 +13,7 @@ import {
 import { imageBitmapToBlob, warpAffineFloat32List } from "utils/image";
 import { clusterFaces } from "../face/cluster";
 import { getFaceCrop } from "../face/crop";
-import { detectBlur } from "../face/detect-blur";
+import { detectBlur } from "../face/blur";
 import {
     fetchImageBitmap,
     fetchImageBitmapForContext,
