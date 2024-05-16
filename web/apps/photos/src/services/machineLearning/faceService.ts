@@ -3,6 +3,7 @@ import log from "@/next/log";
 import { faceAlignment } from "services/face/align";
 import mlIDbStorage from "services/face/db";
 import { detectFaces, getRelativeDetection } from "services/face/detect";
+import { faceEmbeddings, mobileFaceNetFaceSize } from "services/face/embed";
 import {
     DetectedFace,
     Face,
@@ -11,9 +12,9 @@ import {
     type FaceAlignment,
 } from "services/face/types";
 import { imageBitmapToBlob, warpAffineFloat32List } from "utils/image";
+import { detectBlur } from "../face/blur";
 import { clusterFaces } from "../face/cluster";
 import { getFaceCrop } from "../face/crop";
-import { detectBlur } from "../face/blur";
 import {
     fetchImageBitmap,
     fetchImageBitmapForContext,
@@ -86,7 +87,7 @@ class FaceService {
         const faceAlignments = newMlFile.faces.map((f) => f.alignment);
         const faceImages = await extractFaceImagesToFloat32(
             faceAlignments,
-            syncContext.faceEmbeddingService.faceSize,
+            mobileFaceNetFaceSize,
             imageBitmap,
         );
         const blurValues = detectBlur(faceImages, newMlFile.faces);
@@ -104,15 +105,15 @@ class FaceService {
         alignedFacesInput: Float32Array,
     ) {
         const { newMlFile } = fileContext;
-        newMlFile.faceEmbeddingMethod = syncContext.faceEmbeddingService.method;
+        newMlFile.faceEmbeddingMethod = {
+            value: "MobileFaceNet",
+            version: 2,
+        };
         // TODO: when not storing face crops, image will be needed to extract faces
         // fileContext.imageBitmap ||
         //     (await this.getImageBitmap(fileContext));
 
-        const embeddings =
-            await syncContext.faceEmbeddingService.getFaceEmbeddings(
-                alignedFacesInput,
-            );
+        const embeddings = await faceEmbeddings(alignedFacesInput);
         newMlFile.faces.forEach((f, i) => (f.embedding = embeddings[i]));
 
         log.info("[MLService] facesWithEmbeddings: ", newMlFile.faces.length);

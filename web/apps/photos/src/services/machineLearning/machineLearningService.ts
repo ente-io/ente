@@ -15,8 +15,6 @@ import {
     Face,
     FaceCropService,
     FaceDetection,
-    FaceEmbeddingMethod,
-    FaceEmbeddingService,
     Landmark,
     MLLibraryData,
     MLSearchConfig,
@@ -31,7 +29,6 @@ import { EnteFile } from "types/file";
 import { isInternalUserForML } from "utils/user";
 import { fetchImageBitmapForContext } from "../face/image";
 import { syncPeopleIndex } from "../face/people";
-import mobileFaceNetEmbeddingService from "./embed";
 import FaceService from "./faceService";
 
 /**
@@ -105,24 +102,11 @@ export async function updateMLSearchConfig(newConfig: MLSearchConfig) {
     return mlIDbStorage.putConfig(ML_SEARCH_CONFIG_NAME, newConfig);
 }
 
-export class MLFactory {
-    public static getFaceEmbeddingService(
-        method: FaceEmbeddingMethod,
-    ): FaceEmbeddingService {
-        if (method === "MobileFaceNet") {
-            return mobileFaceNetEmbeddingService;
-        }
-
-        throw Error("Unknon face embedding method: " + method);
-    }
-}
-
 export class LocalMLSyncContext implements MLSyncContext {
     public token: string;
     public userID: number;
 
     public faceCropService: FaceCropService;
-    public faceEmbeddingService: FaceEmbeddingService;
 
     public localFilesMap: Map<number, EnteFile>;
     public outOfSyncFiles: EnteFile[];
@@ -147,9 +131,6 @@ export class LocalMLSyncContext implements MLSyncContext {
     constructor(token: string, userID: number, concurrency?: number) {
         this.token = token;
         this.userID = userID;
-
-        this.faceEmbeddingService =
-            MLFactory.getFaceEmbeddingService("MobileFaceNet");
 
         this.outOfSyncFiles = [];
         this.nSyncedFiles = 0;

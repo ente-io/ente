@@ -199,7 +199,6 @@ export interface MLSyncContext {
     userID: number;
 
     faceCropService: FaceCropService;
-    faceEmbeddingService: FaceEmbeddingService;
 
     localFilesMap: Map<number, EnteFile>;
     outOfSyncFiles: EnteFile[];
@@ -246,13 +245,6 @@ export interface FaceCropService {
         imageBitmap: ImageBitmap,
         face: FaceDetection,
     ): Promise<FaceCrop>;
-}
-
-export interface FaceEmbeddingService {
-    method: Versioned<FaceEmbeddingMethod>;
-    faceSize: number;
-
-    getFaceEmbeddings(faceImages: Float32Array): Promise<Array<FaceEmbedding>>;
 }
 
 export interface MachineLearningWorker {

@@ -8,7 +8,7 @@ export const mobileFaceNetFaceSize = 112;
  *
  * The model used is MobileFaceNet, running in an ONNX runtime.
  */
-export const getFaceEmbeddings = async (
+export const faceEmbeddings = async (
     faceData: Float32Array,
 ): Promise<Array<FaceEmbedding>> => {
     const outputData = await workerBridge.faceEmbeddings(faceData);
