@@ -96,11 +96,11 @@ const DEFAULT_ML_SYNC_CONFIG: MLSyncConfig = {
     mlVersion: defaultMLVersion,
 };
 
+export const MAX_ML_SYNC_ERROR_COUNT = 1;
+
 export const DEFAULT_ML_SEARCH_CONFIG: MLSearchConfig = {
     enabled: false,
 };
-
-export const MAX_ML_SYNC_ERROR_COUNT = 1;
 
 export async function getMLSearchConfig() {
     if (isInternalUserForML()) {
@@ -240,24 +240,16 @@ export class LocalMLSyncContext implements MLSyncContext {
         this.config = config;
         this.shouldUpdateMLVersion = shouldUpdateMLVersion;
 
-        this.faceDetectionService = MLFactory.getFaceDetectionService(
-            this.config.faceDetection.method,
-        );
-        this.faceCropService = MLFactory.getFaceCropService(
-            this.config.faceCrop.method,
-        );
-        this.faceAlignmentService = MLFactory.getFaceAlignmentService(
-            this.config.faceAlignment.method,
-        );
-        this.blurDetectionService = MLFactory.getBlurDetectionService(
-            this.config.blurDetection.method,
-        );
-        this.faceEmbeddingService = MLFactory.getFaceEmbeddingService(
-            this.config.faceEmbedding.method,
-        );
-        this.faceClusteringService = MLFactory.getClusteringService(
-            this.config.faceClustering.method,
-        );
+        this.faceDetectionService =
+            MLFactory.getFaceDetectionService("YoloFace");
+        this.faceCropService = MLFactory.getFaceCropService("ArcFace");
+        this.faceAlignmentService =
+            MLFactory.getFaceAlignmentService("ArcFace");
+        this.blurDetectionService =
+            MLFactory.getBlurDetectionService("Laplacian");
+        this.faceEmbeddingService =
+            MLFactory.getFaceEmbeddingService("MobileFaceNet");
+        this.faceClusteringService = MLFactory.getClusteringService("Hdbscan");
 
         this.outOfSyncFiles = [];
         this.nSyncedFiles = 0;
