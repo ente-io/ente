@@ -570,12 +570,16 @@ class FaceMlService {
     try {
       isImageIndexRunning = true;
       _logger.info('starting image indexing');
+      final w = (kDebugMode ? EnteWatch('FacesGetAllFiles') : null)?..start();
       final uploadedFileIDs = await FilesDB.instance
           .getOwnedFileIDs(Configuration.instance.getUserID()!);
+      w?.log('getOwnedFileIDs');
       final enteFiles =
           await FilesDB.instance.getUploadedFiles(uploadedFileIDs);
+      w?.log('getUploadedFiles');
       final Map<int, int> alreadyIndexedFiles =
           await FaceMLDataDB.instance.getIndexedFileIds();
+      w?.log('getIndexedFileIds');
 
       // Make sure the image conversion isolate is spawned
       // await ImageMlIsolate.instance.ensureSpawned();
