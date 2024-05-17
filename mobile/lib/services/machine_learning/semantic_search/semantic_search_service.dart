@@ -15,15 +15,12 @@ import 'package:photos/events/embedding_updated_event.dart';
 import "package:photos/events/file_uploaded_event.dart";
 import "package:photos/events/machine_learning_control_event.dart";
 import "package:photos/models/embedding.dart";
-import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/models/file/file.dart";
-import "package:photos/models/file/file_type.dart";
 import "package:photos/services/collections_service.dart";
 import 'package:photos/services/machine_learning/semantic_search/embedding_store.dart';
 import 'package:photos/services/machine_learning/semantic_search/frameworks/ggml.dart';
 import 'package:photos/services/machine_learning/semantic_search/frameworks/ml_framework.dart';
 import 'package:photos/services/machine_learning/semantic_search/frameworks/onnx/onnx.dart';
-import "package:photos/services/search_service.dart";
 import "package:photos/utils/debouncer.dart";
 import "package:photos/utils/device_info.dart";
 import "package:photos/utils/local_settings.dart";
@@ -168,10 +165,11 @@ class SemanticSearchService {
   }
 
   Future<IndexStatus> getIndexStatus() async {
-    final indexableFiles = await _getIndexableFiles();
+    final indexableFileIDs = await FilesDB.instance
+        .getOwnedFileIDs(Configuration.instance.getUserID()!);
     return IndexStatus(
-      min(_cachedEmbeddings.length, indexableFiles.length),
-      (await _getFilesToBeIndexed()).length,
+      min(_cachedEmbeddings.length, indexableFileIDs.length),
+      (await _getFileIDsToBeIndexed()).length,
     );
   }
 
@@ -205,7 +203,8 @@ class SemanticSearchService {
     }
     await _frameworkInitialization.future;
     _logger.info("Attempting backfill for image embeddings");
-    final files = await _getFilesToBeIndexed();
+    final fileIDs = await _getFileIDsToBeIndexed();
+    final files = await FilesDB.instance.getUploadedFiles(fileIDs);
     _logger.info(files.length.toString() + " to be embedded");
     // await _cacheThumbnails(files);
     _queue.addAll(files);
@@ -226,29 +225,14 @@ class SemanticSearchService {
     }
   }
 
-  Future<List<EnteFile>> _getIndexableFiles() async {
-    final List<EnteFile> enteFiles = await SearchService.instance.getAllFiles();
-    final List<EnteFile> indexableFiles = [];
-    for (final enteFile in enteFiles) {
-      if (!enteFile.isUploaded || enteFile.isOwner == false) {
-        continue;
-      }
-      if (enteFile.fileType == FileType.other) {
-        continue;
-      }
-      indexableFiles.add(enteFile);
-    }
-    return indexableFiles;
-  }
-
-  Future<List<EnteFile>> _getFilesToBeIndexed() async {
-    final List<EnteFile> indexableFiles = await _getIndexableFiles();
+  Future<List<int>> _getFileIDsToBeIndexed() async {
+    final uploadedFileIDs = await FilesDB.instance
+        .getOwnedFileIDs(Configuration.instance.getUserID()!);
     final embeddedFileIDs = _cachedEmbeddings.map((e) => e.fileID).toSet();
-    indexableFiles.removeWhere(
-      (file) => embeddedFileIDs.contains(file.uploadedFileID),
+    uploadedFileIDs.removeWhere(
+      (id) => embeddedFileIDs.contains(id),
     );
-
-    return indexableFiles;
+    return uploadedFileIDs;
   }
 
   Future<void> clearQueue() async {
