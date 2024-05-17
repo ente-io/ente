@@ -452,7 +452,8 @@ class FilesDB {
 
   Future<void> insertMultiple(
     List<EnteFile> files, {
-    ConflictAlgorithm conflictAlgorithm = ConflictAlgorithm.replace,
+    SqliteAsyncConflictAlgorithm conflictAlgorithm =
+        SqliteAsyncConflictAlgorithm.replace,
   }) async {
     if (files.isEmpty) return;
 
@@ -1282,13 +1283,11 @@ class FilesDB {
 
   Future<int> collectionFileCount(int collectionID) async {
     final db = await instance.sqliteAsyncDB;
-    final count = Sqflite.firstIntValue(
-      await db.execute(
-        'SELECT COUNT(*) FROM $filesTable where $columnCollectionID = '
-        '$collectionID AND $columnUploadedFileID IS NOT -1',
-      ),
+    final row = await db.get(
+      'SELECT COUNT(*) FROM $filesTable where $columnCollectionID = '
+      '$collectionID AND $columnUploadedFileID IS NOT -1',
     );
-    return count ?? 0;
+    return row['COUNT(*)'] as int;
   }
 
   Future<int> archivedFilesCount(
@@ -1884,7 +1883,7 @@ class FilesDB {
 
   Future<void> _batchAndInsertFile(
     EnteFile file,
-    ConflictAlgorithm conflictAlgorithm,
+    SqliteAsyncConflictAlgorithm conflictAlgorithm,
     sqlite_async.SqliteDatabase db,
     List<List<Object?>> parameterSets,
     PrimitiveWrapper batchCounter, {
@@ -1905,7 +1904,7 @@ class FilesDB {
   }
 
   Future<void> _insertBatch(
-    ConflictAlgorithm conflictAlgorithm,
+    SqliteAsyncConflictAlgorithm conflictAlgorithm,
     Iterable<String> columnNames,
     sqlite_async.SqliteDatabase db,
     List<List<Object?>> parameterSets,

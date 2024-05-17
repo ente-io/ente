@@ -1,4 +1,4 @@
-enum ConflictAlgorithm {
+enum SqliteAsyncConflictAlgorithm {
   /// When a constraint violation occurs, an immediate ROLLBACK occurs,
   /// thus ending the current transaction, and the command aborts with a
   /// return code of SQLITE_CONSTRAINT. If no transaction is active
