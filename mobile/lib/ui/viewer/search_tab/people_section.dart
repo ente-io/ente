@@ -13,6 +13,7 @@ import "package:photos/models/search/search_constants.dart";
 import "package:photos/models/search/search_result.dart";
 import "package:photos/models/search/search_types.dart";
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/settings/machine_learning_settings_page.dart";
 import "package:photos/ui/viewer/file/no_thumbnail_widget.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/ui/viewer/people/add_person_action_sheet.dart";
@@ -122,32 +123,41 @@ class _PeopleSectionState extends State<PeopleSection> {
               ],
             ),
           )
-        : Padding(
-            padding: const EdgeInsets.only(left: 16, right: 8),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          widget.sectionType.sectionTitle(context),
-                          style: textTheme.largeBold,
-                        ),
-                        const SizedBox(height: 24),
-                        Text(
-                          widget.sectionType.getEmptyStateText(context),
-                          style: textTheme.smallMuted,
-                        ),
-                      ],
+        : GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () {
+              routeToPage(
+                context,
+                const MachineLearningSettingsPage(),
+              );
+            },
+            child: Padding(
+              padding: const EdgeInsets.only(left: 16, right: 8),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            widget.sectionType.sectionTitle(context),
+                            style: textTheme.largeBold,
+                          ),
+                          const SizedBox(height: 24),
+                          Text(
+                            widget.sectionType.getEmptyStateText(context),
+                            style: textTheme.smallMuted,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 8),
-                SearchSectionEmptyCTAIcon(widget.sectionType),
-              ],
+                  const SizedBox(width: 8),
+                  SearchSectionEmptyCTAIcon(widget.sectionType),
+                ],
+              ),
             ),
           );
   }
