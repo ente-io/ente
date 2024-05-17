@@ -293,8 +293,6 @@ extension SectionTypeExtensions on SectionType {
     switch (this) {
       case SectionType.location:
         return [Bus.instance.on<LocationTagUpdatedEvent>()];
-      case SectionType.face:
-        return [Bus.instance.on<PeopleChangedEvent>()];
       default:
         return [];
     }
