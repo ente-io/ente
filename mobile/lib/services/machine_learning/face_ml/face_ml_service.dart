@@ -142,7 +142,9 @@ class FaceMlService {
           }
         });
       } else {
-        unawaited(indexAllImages());
+        if (!kDebugMode) {
+          unawaited(indexAllImages());
+        }
       }
     });
   }
