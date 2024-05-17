@@ -371,7 +371,7 @@ class FaceRecognitionStatusWidgetState
   @override
   void initState() {
     super.initState();
-    _timer = Timer.periodic(const Duration(seconds: 5), (timer) {
+    _timer = Timer.periodic(const Duration(seconds: 10), (timer) {
       setState(() {
         // Your state update logic here
       });
@@ -431,6 +431,7 @@ class FaceRecognitionStatusWidgetState
                     singleBorderRadius: 8,
                     alignCaptionedTextToLeft: true,
                     isGestureDetectorDisabled: true,
+                    key: ValueKey("indexed_items_" + indexedFiles.toString()),
                   ),
                   MenuItemWidget(
                     captionedTextWidget: CaptionedTextWidget(
@@ -443,6 +444,7 @@ class FaceRecognitionStatusWidgetState
                     singleBorderRadius: 8,
                     alignCaptionedTextToLeft: true,
                     isGestureDetectorDisabled: true,
+                    key: ValueKey("pending_items_" + pendingFiles.toString()),
                   ),
                   MenuItemWidget(
                     captionedTextWidget: CaptionedTextWidget(
@@ -455,6 +457,7 @@ class FaceRecognitionStatusWidgetState
                     singleBorderRadius: 8,
                     alignCaptionedTextToLeft: true,
                     isGestureDetectorDisabled: true,
+                    key: ValueKey("found_faces_" + foundFaces.toString()),
                   ),
                   MenuItemWidget(
                     captionedTextWidget: CaptionedTextWidget(
@@ -467,6 +470,10 @@ class FaceRecognitionStatusWidgetState
                     singleBorderRadius: 8,
                     alignCaptionedTextToLeft: true,
                     isGestureDetectorDisabled: true,
+                    key: ValueKey(
+                      "clustering_progress_" +
+                          clusteringPercentage.toStringAsFixed(0),
+                    ),
                   ),
                 ],
               );
