@@ -30,6 +30,7 @@ import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
 import "package:photos/models/ml/ml_versions.dart";
 import "package:photos/service_locator.dart";
+import "package:photos/services/collections_service.dart";
 import 'package:photos/services/machine_learning/face_ml/face_clustering/face_clustering_service.dart';
 import "package:photos/services/machine_learning/face_ml/face_clustering/face_info_for_clustering.dart";
 import 'package:photos/services/machine_learning/face_ml/face_detection/detection.dart';
@@ -43,7 +44,6 @@ import 'package:photos/services/machine_learning/face_ml/face_ml_result.dart';
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import 'package:photos/services/machine_learning/file_ml/file_ml.dart';
 import 'package:photos/services/machine_learning/file_ml/remote_fileml_service.dart';
-import "package:photos/services/search_service.dart";
 import "package:photos/utils/file_util.dart";
 import 'package:photos/utils/image_ml_isolate.dart';
 import "package:photos/utils/image_ml_util.dart";
@@ -570,8 +570,10 @@ class FaceMlService {
     try {
       isImageIndexRunning = true;
       _logger.info('starting image indexing');
-      final List<EnteFile> enteFiles =
-          await SearchService.instance.getAllFiles();
+      final uploadedFileIDs = await FilesDB.instance
+          .getOwnedFileIDs(Configuration.instance.getUserID()!);
+      final enteFiles =
+          await FilesDB.instance.getUploadedFiles(uploadedFileIDs);
       final Map<int, int> alreadyIndexedFiles =
           await FaceMLDataDB.instance.getIndexedFileIds();
 
@@ -584,12 +586,17 @@ class FaceMlService {
       final stopwatch = Stopwatch()..start();
       final List<EnteFile> filesWithLocalID = <EnteFile>[];
       final List<EnteFile> filesWithoutLocalID = <EnteFile>[];
+      final List<EnteFile> hiddenFiles = <EnteFile>[];
+      final ignoredCollections =
+          CollectionsService.instance.getHiddenCollectionIds();
       for (final EnteFile enteFile in enteFiles) {
         if (_skipAnalysisEnteFile(enteFile, alreadyIndexedFiles)) {
           fileSkippedCount++;
           continue;
         }
-        if ((enteFile.localID ?? '').isEmpty) {
+        if (ignoredCollections.contains(enteFile.collectionID)) {
+          hiddenFiles.add(enteFile);
+        } else if ((enteFile.localID ?? '').isEmpty) {
           filesWithoutLocalID.add(enteFile);
         } else {
           filesWithLocalID.add(enteFile);
@@ -600,6 +607,7 @@ class FaceMlService {
       final sortedBylocalID = <EnteFile>[];
       sortedBylocalID.addAll(filesWithLocalID);
       sortedBylocalID.addAll(filesWithoutLocalID);
+      sortedBylocalID.addAll(hiddenFiles);
       final List<List<EnteFile>> chunks =
           sortedBylocalID.chunks(_remoteFetchLimit);
       outerLoop:
