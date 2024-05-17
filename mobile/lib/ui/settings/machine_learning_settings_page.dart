@@ -1,5 +1,5 @@
 import "dart:async";
-import "dart:math" show max;
+import "dart:math" show max, min;
 
 import "package:flutter/material.dart";
 import "package:intl/intl.dart";
@@ -382,12 +382,13 @@ class FaceRecognitionStatusWidgetState
     final indexedFiles = await FaceMLDataDB.instance
         .getIndexedFileCount(minimumMlVersion: faceMlVersion);
     final indexableFiles = await FaceMlService.getIndexableFilesCount();
+    final showIndexedFiles = min(indexedFiles, indexableFiles);
     final pendingFiles = max(indexableFiles - indexedFiles, 0);
     final foundFaces = await FaceMLDataDB.instance.getTotalFaceCount();
     final clusteredFaces = await FaceMLDataDB.instance.getClusteredFaceCount();
     final clusteringDoneRatio = clusteredFaces / foundFaces;
 
-    return (indexedFiles, pendingFiles, foundFaces, clusteringDoneRatio);
+    return (showIndexedFiles, pendingFiles, foundFaces, clusteringDoneRatio);
   }
 
   @override
