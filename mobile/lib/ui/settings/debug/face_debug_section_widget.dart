@@ -92,18 +92,10 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
         ),
         sectionOptionSpacing,
         MenuItemWidget(
-          captionedTextWidget: FutureBuilder<int>(
-            future: FaceMLDataDB.instance.getIndexedFileCount(),
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                return CaptionedTextWidget(
-                  title: LocalSettings.instance.remoteFetchEnabled
-                      ? "Remote fetch Enabled"
-                      : "Remote fetch Disabled",
-                );
-              }
-              return const SizedBox.shrink();
-            },
+          captionedTextWidget: CaptionedTextWidget(
+            title: LocalSettings.instance.remoteFetchEnabled
+                ? "Remote fetch enabled"
+                : "Remote fetch disabled",
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
@@ -116,6 +108,29 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
               }
             } catch (e, s) {
               _logger.warning('indexing failed ', e, s);
+              await showGenericErrorDialog(context: context, error: e);
+            }
+          },
+        ),
+        sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: CaptionedTextWidget(
+            title: FaceMlService.instance.canRunMLController
+                ? "canRunML enabled"
+                : "canRunML disabled",
+          ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async {
+            try {
+              FaceMlService.instance.canRunMLController =
+                  !FaceMlService.instance.canRunMLController;
+              if (mounted) {
+                setState(() {});
+              }
+            } catch (e, s) {
+              _logger.warning('canRunML toggle failed ', e, s);
               await showGenericErrorDialog(context: context, error: e);
             }
           },

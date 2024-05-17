@@ -126,10 +126,10 @@ class FaceMlService {
       }
 
       isInitialized = true;
-      canRunMLController = !Platform.isAndroid;
+      canRunMLController = !Platform.isAndroid || kDebugMode;
 
       /// hooking FaceML into [MachineLearningController]
-      if (Platform.isAndroid) {
+      if (Platform.isAndroid && !kDebugMode) {
         Bus.instance.on<MachineLearningControlEvent>().listen((event) {
           if (LocalSettings.instance.isFaceIndexingEnabled == false) {
             return;
@@ -153,7 +153,7 @@ class FaceMlService {
 
   void listenIndexOnDiffSync() {
     Bus.instance.on<DiffSyncCompleteEvent>().listen((event) async {
-      if (LocalSettings.instance.isFaceIndexingEnabled == false) {
+      if (LocalSettings.instance.isFaceIndexingEnabled == false || kDebugMode) {
         return;
       }
       // [neeraj] intentional delay in starting indexing on diff sync, this gives time for the user
