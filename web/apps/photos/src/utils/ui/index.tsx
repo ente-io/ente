@@ -1,6 +1,5 @@
 import { ensureElectron } from "@/next/electron";
 import { AppUpdate } from "@/next/types/ipc";
-import { logoutUser } from "@ente/accounts/services/user";
 import { DialogBoxAttributes } from "@ente/shared/components/DialogBox/types";
 import AutoAwesomeOutlinedIcon from "@mui/icons-material/AutoAwesomeOutlined";
 import InfoOutlined from "@mui/icons-material/InfoRounded";
@@ -69,6 +68,7 @@ export const getUpdateReadyToInstallMessage = ({
         variant: "secondary",
         action: () => ensureElectron().updateOnNextRestart(version),
     },
+    staticBackdrop: true,
 });
 
 export const getUpdateAvailableForDownloadMessage = ({
@@ -121,14 +121,16 @@ export const getSubscriptionPurchaseSuccessMessage = (
     ),
 });
 
-export const getSessionExpiredMessage = (): DialogBoxAttributes => ({
+export const getSessionExpiredMessage = (
+    action: () => void,
+): DialogBoxAttributes => ({
     title: t("SESSION_EXPIRED"),
     content: t("SESSION_EXPIRED_MESSAGE"),
 
     nonClosable: true,
     proceed: {
         text: t("LOGIN"),
-        action: logoutUser,
+        action,
         variant: "accent",
     },
 });

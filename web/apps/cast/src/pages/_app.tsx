@@ -1,4 +1,5 @@
 import { CustomHead } from "@/next/components/Head";
+import { disableDiskLogs } from "@/next/log";
 import { logUnhandledErrorsAndRejections } from "@/next/log-web";
 import { APPS, APP_TITLES } from "@ente/shared/apps/constants";
 import { getTheme } from "@ente/shared/themes";
@@ -11,6 +12,7 @@ import "styles/global.css";
 
 export default function App({ Component, pageProps }: AppProps) {
     useEffect(() => {
+        disableDiskLogs();
         logUnhandledErrorsAndRejections(true);
         return () => logUnhandledErrorsAndRejections(false);
     }, []);

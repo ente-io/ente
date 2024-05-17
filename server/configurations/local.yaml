@@ -125,6 +125,16 @@ s3:
         endpoint:
         region:
         bucket:
+    wasabi-eu-central-2-derived:
+        key:
+        secret:
+        endpoint:
+        region:
+        bucket:
+    # Derived storage bucket is used for storing derived data like embeddings, preview etc.
+    # By default, it is the same as the hot storage bucket.
+    # derived-storage: wasabi-eu-central-2-derived
+
     # If true, enable some workarounds to allow us to use a local minio instance
     # for object storage.
     #
@@ -180,6 +190,9 @@ smtp:
     port:
     username:
     password:
+    # The email address from which to send the email. Set this to an email
+    # address whose credentials you're providing.
+    email:
 
 # Zoho Zeptomail config (optional)
 #

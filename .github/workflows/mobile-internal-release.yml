@@ -1,4 +1,4 @@
-name: "Internal Release - Photos"
+name: "Internal release (photos)"
 
 on:
     workflow_dispatch: # Allow manually running the action
@@ -54,4 +54,3 @@ jobs:
                   packageName: io.ente.photos
                   releaseFiles: mobile/build/app/outputs/bundle/playstoreRelease/app-playstore-release.aab
                   track: internal
-                  changesNotSentForReview: true

@@ -24,3 +24,11 @@ const nonWebImageFileExtensions = [
  */
 export const isNonWebImageFileExtension = (extension: string) =>
     nonWebImageFileExtensions.includes(extension.toLowerCase());
+
+/**
+ * Return `true` if {@link extension} in for an HEIC-like file.
+ */
+export const isHEICExtension = (extension: string) => {
+    const ext = extension.toLowerCase();
+    return ext == "heic" || ext == "heif";
+};

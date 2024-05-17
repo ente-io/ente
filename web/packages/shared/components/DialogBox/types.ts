@@ -3,6 +3,10 @@ import { ButtonProps } from "@mui/material";
 export interface DialogBoxAttributes {
     icon?: React.ReactNode;
     title?: string;
+    /**
+     * Set this to `true` to prevent the dialog from being closed when the user
+     * clicks the backdrop outside the dialog.
+     */
     staticBackdrop?: boolean;
     nonClosable?: boolean;
     content?: any;

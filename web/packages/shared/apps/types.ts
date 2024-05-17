@@ -7,6 +7,7 @@ export interface PageProps {
         showNavBar: (show: boolean) => void;
         isMobile: boolean;
         setDialogBoxAttributesV2: SetDialogBoxAttributesV2;
+        logout: () => void;
     };
     appName: APPS;
     twoFactorType?: TwoFactorType;

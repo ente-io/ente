@@ -1,5 +1,4 @@
 import log from "@/next/log";
-import { withTimeout } from "@ente/shared/utils";
 import QueueProcessor from "@ente/shared/utils/queueProcessor";
 import { expose } from "comlink";
 import {
@@ -7,6 +6,24 @@ import {
     inputPathPlaceholder,
     outputPathPlaceholder,
 } from "constants/ffmpeg";
+
+// When we run tsc on CI, the line below errors out
+//
+// > Error: src/worker/ffmpeg.worker.ts(10,38): error TS2307: Cannot find module
+//   'ffmpeg-wasm' or its corresponding type declarations.
+//
+// Building and running works fine. And this error does not occur when running
+// tsc locally either.
+//
+// Of course, there is some misconfiguration, but we plan to move off our old
+// fork and onto upstream ffmpeg-wasm, and the reason can be figured out then.
+// For now, disable the error to allow the CI lint to complete.
+//
+// Note that we can't use @ts-expect-error since it doesn't error out when
+// actually building!
+//
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
 import { FFmpeg, createFFmpeg } from "ffmpeg-wasm";
 
 export class DedicatedFFmpegWorker {
@@ -30,15 +47,11 @@ export class DedicatedFFmpegWorker {
         command: string[],
         blob: Blob,
         outputFileExtension: string,
-        timeoutMs,
     ): Promise<Uint8Array> {
         if (!this.ffmpeg.isLoaded()) await this.ffmpeg.load();
 
-        const go = () =>
-            ffmpegExec(this.ffmpeg, command, outputFileExtension, blob);
-
         const request = this.ffmpegTaskQueue.queueUpRequest(() =>
-            timeoutMs ? withTimeout(go(), timeoutMs) : go(),
+            ffmpegExec(this.ffmpeg, command, outputFileExtension, blob),
         );
 
         return await request.promise;

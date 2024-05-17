@@ -1,16 +1,15 @@
-import { Formik, FormikHelpers } from "formik";
-import { t } from "i18next";
-import { useRef, useState } from "react";
-import OtpInput from "react-otp-input";
-
+import { wait } from "@/utils/promise";
 import InvalidInputMessage from "@ente/accounts/components/two-factor/InvalidInputMessage";
 import {
     CenteredFlex,
     VerticallyCentered,
 } from "@ente/shared/components/Container";
 import SubmitButton from "@ente/shared/components/SubmitButton";
-import { wait } from "@ente/shared/utils";
 import { Box, Typography } from "@mui/material";
+import { Formik, FormikHelpers } from "formik";
+import { t } from "i18next";
+import { useRef, useState } from "react";
+import OtpInput from "react-otp-input";
 
 interface formValues {
     otp: string;

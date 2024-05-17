@@ -34,16 +34,15 @@ The workflow for making such "rc" builds is:
     gh workflow run desktop-release.yml
     ```
 
-We can do steps 2 and 3 multiple times; each time it'll just update the
+We can do steps 2 and 3 multiple times: each time it'll just update the
 artifacts attached to the same draft.
 
 ## Workflow - Release
 
-1.  Update `package.json` in the source repo to use version `1.x.x`. Create a
-    new draft release in the release repo with tag `v1.x.x`.
+1.  Update source repo to set version `1.x.x` in `package.json` and finialize
+    the CHANGELOG.
 
-2.  Push code to the `desktop/rc` branch in the source repo. Remember to update
-    update the CHANGELOG.
+2.  Push code to the `desktop/rc` branch in the source repo.
 
 3.  In the release repo
 
@@ -51,15 +50,13 @@ artifacts attached to the same draft.
     ./.github/trigger-release.sh v1.x.x
     ```
 
-4.  If the build is successful, tag `desktop/rc` and merge it into main:
+4.  If the build is successful, tag `desktop/rc` in the source repo.
 
     ```sh
     # Assuming we're on desktop/rc that just got build
 
     git tag photosd-v1.x.x
     git push origin photosd-v1.x.x
-
-    # Now open a PR to merge it into main
     ```
 
 ## Post build

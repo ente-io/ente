@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+
 import 'package:base32/base32.dart';
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/models/code.dart';
@@ -124,7 +125,7 @@ List<Code> parseGoogleAuth(String qrCodeData) {
       } else {
         throw Exception('Invalid OTP type');
       }
-      codes.add(Code.fromRawData(otpUrl));
+      codes.add(Code.fromOTPAuthUrl(otpUrl));
     }
     return codes;
   } catch (e, s) {

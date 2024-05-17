@@ -2,11 +2,17 @@
 
 ## v1.7.0 (Unreleased)
 
-v1.7 is a major rewrite to improve the security of our app. We have enabled
-sandboxing and disabled node integration for the renderer process. All this
-required restructuring our IPC mechanisms, which resulted in a lot of under the
-hood changes. The outcome is a more secure app that also uses the latest and
-greatest Electron recommendations.
+v1.7 is a major rewrite to improve the security of our app. In particular, the
+UI and the native parts of the app now run isolated from each other and
+communicate only using a predefined IPC boundary.
+
+Other highlights:
+
+-   View your photos on big screens and Chromecast devices by using the "Play
+    album on TV" option in the album menu.
+-   Support Brazilian Portuguese, German and Russian.
+-   Provide a checkbox to select all photos in a day.
+-   Fix a case where the dedup screen would not refresh after removing items.
 
 ## v1.6.63
 

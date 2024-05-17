@@ -64,14 +64,18 @@ export const openLogDirectory = () => openDirectory(logDirectoryPath());
  * Note that Chromium also stores the browser state, e.g. localStorage or disk
  * caches, in userData.
  *
+ * https://www.electronjs.org/docs/latest/api/app
+ *
+ * [Note: App log path]
+ *
  * Finally, there is the "logs" directory. This is not within "appData" but has
  * a slightly different OS specific path. Since our log file is named
  * "ente.log", it can be found at:
  *
  * - macOS: ~/Library/Logs/ente/ente.log (production)
  * - macOS: ~/Library/Logs/Electron/ente.log    (dev)
- *
- * https://www.electronjs.org/docs/latest/api/app
+ * - Linux: ~/.config/ente/logs/ente.log
+ * - Windows: %USERPROFILE%\AppData\Roaming\ente\logs\ente.log
  */
 const logDirectoryPath = () => app.getPath("logs");
 

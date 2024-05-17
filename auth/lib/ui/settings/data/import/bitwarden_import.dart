@@ -86,7 +86,7 @@ Future<int?> _processBitwardenExportFile(
       Code code;
 
       if (totp.contains("otpauth://")) {
-        code = Code.fromRawData(totp);
+        code = Code.fromOTPAuthUrl(totp);
       } else {
         var issuer = item['name'];
         var account = item['login']['username'];
@@ -96,6 +96,7 @@ Future<int?> _processBitwardenExportFile(
           account,
           issuer,
           totp,
+          null,
           Code.defaultDigits,
         );
       }

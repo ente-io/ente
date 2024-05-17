@@ -63,7 +63,10 @@ const openLogDirectory = () => ipcRenderer.invoke("openLogDirectory");
 
 const selectDirectory = () => ipcRenderer.invoke("selectDirectory");
 
-const clearStores = () => ipcRenderer.send("clearStores");
+const logout = () => {
+    watchRemoveListeners();
+    ipcRenderer.send("logout");
+};
 
 const encryptionKey = () => ipcRenderer.invoke("encryptionKey");
 
@@ -140,14 +143,12 @@ const ffmpegExec = (
     command: string[],
     dataOrPathOrZipItem: Uint8Array | string | ZipItem,
     outputFileExtension: string,
-    timeoutMS: number,
 ) =>
     ipcRenderer.invoke(
         "ffmpegExec",
         command,
         dataOrPathOrZipItem,
         outputFileExtension,
-        timeoutMS,
     );
 
 // - ML
@@ -161,8 +162,8 @@ const clipTextEmbeddingIfAvailable = (text: string) =>
 const detectFaces = (input: Float32Array) =>
     ipcRenderer.invoke("detectFaces", input);
 
-const faceEmbedding = (input: Float32Array) =>
-    ipcRenderer.invoke("faceEmbedding", input);
+const faceEmbeddings = (input: Float32Array) =>
+    ipcRenderer.invoke("faceEmbeddings", input);
 
 const legacyFaceCrop = (faceID: string) =>
     ipcRenderer.invoke("legacyFaceCrop", faceID);
@@ -211,11 +212,10 @@ const watchOnRemoveDir = (f: (path: string, watch: FolderWatch) => void) => {
 const watchFindFiles = (folderPath: string) =>
     ipcRenderer.invoke("watchFindFiles", folderPath);
 
-const watchReset = async () => {
+const watchRemoveListeners = () => {
     ipcRenderer.removeAllListeners("watchAddFile");
     ipcRenderer.removeAllListeners("watchRemoveFile");
     ipcRenderer.removeAllListeners("watchRemoveDir");
-    await ipcRenderer.invoke("watchReset");
 };
 
 // - Upload
@@ -307,7 +307,7 @@ contextBridge.exposeInMainWorld("electron", {
     openDirectory,
     openLogDirectory,
     selectDirectory,
-    clearStores,
+    logout,
     encryptionKey,
     saveEncryptionKey,
     onMainWindowFocus,
@@ -343,7 +343,7 @@ contextBridge.exposeInMainWorld("electron", {
     clipImageEmbedding,
     clipTextEmbeddingIfAvailable,
     detectFaces,
-    faceEmbedding,
+    faceEmbeddings,
     legacyFaceCrop,
 
     // - Watch
@@ -358,7 +358,6 @@ contextBridge.exposeInMainWorld("electron", {
         onRemoveFile: watchOnRemoveFile,
         onRemoveDir: watchOnRemoveDir,
         findFiles: watchFindFiles,
-        reset: watchReset,
     },
 
     // - Upload

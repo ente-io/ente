@@ -7,7 +7,7 @@
     "HERO_SLIDE_3": "安卓, iOS, 网页端, 桌面端",
     "LOGIN": "登录",
     "SIGN_UP": "注册",
-    "NEW_USER": "刚来到 Ente",
+    "NEW_USER": "初来 Ente",
     "EXISTING_USER": "现有用户",
     "ENTER_NAME": "输入名字",
     "PUBLIC_UPLOADER_NAME_MESSAGE": "请添加一个名字，以便您的朋友知晓该感谢谁拍摄了这些精美的照片！",
@@ -565,6 +565,9 @@
     "IMAGE": "图像",
     "VIDEO": "视频",
     "LIVE_PHOTO": "实况照片",
+    "editor": {
+        "crop": "裁剪"
+    },
     "CONVERT": "转换",
     "CONFIRM_EDITOR_CLOSE_MESSAGE": "您确定要关闭编辑器吗？",
     "CONFIRM_EDITOR_CLOSE_DESCRIPTION": "下载已编辑的图片或将副本保存到 Ente 以保留您的更改。",

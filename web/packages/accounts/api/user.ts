@@ -43,7 +43,7 @@ export const putAttributes = (token: string, keyAttributes: KeyAttributes) =>
         },
     );
 
-export const _logout = async () => {
+export const logout = async () => {
     try {
         const token = getToken();
         await HTTPService.post(`${ENDPOINT}/users/logout`, null, undefined, {

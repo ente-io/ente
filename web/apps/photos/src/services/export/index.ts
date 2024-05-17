@@ -3,12 +3,12 @@ import { decodeLivePhoto } from "@/media/live-photo";
 import type { Metadata } from "@/media/types/file";
 import { ensureElectron } from "@/next/electron";
 import log from "@/next/log";
+import { wait } from "@/utils/promise";
 import { CustomError } from "@ente/shared/error";
 import { Events, eventBus } from "@ente/shared/events";
 import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
 import { formatDateTimeShort } from "@ente/shared/time/format";
 import { User } from "@ente/shared/user/types";
-import { wait } from "@ente/shared/utils";
 import QueueProcessor, {
     CancellationStatus,
     RequestCanceller,

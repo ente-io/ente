@@ -41,16 +41,13 @@ import {
     fsWriteFile,
 } from "./services/fs";
 import { convertToJPEG, generateImageThumbnail } from "./services/image";
+import { logout } from "./services/logout";
 import {
     clipImageEmbedding,
     clipTextEmbeddingIfAvailable,
 } from "./services/ml-clip";
-import { detectFaces, faceEmbedding } from "./services/ml-face";
-import {
-    clearStores,
-    encryptionKey,
-    saveEncryptionKey,
-} from "./services/store";
+import { detectFaces, faceEmbeddings } from "./services/ml-face";
+import { encryptionKey, saveEncryptionKey } from "./services/store";
 import {
     clearPendingUploads,
     listZipItems,
@@ -65,7 +62,6 @@ import {
     watchFindFiles,
     watchGet,
     watchRemove,
-    watchReset,
     watchUpdateIgnoredFiles,
     watchUpdateSyncedFiles,
 } from "./services/watch";
@@ -105,8 +101,6 @@ export const attachIPCHandlers = () => {
     ipcMain.on("logToDisk", (_, message: string) => logToDisk(message));
 
     ipcMain.handle("selectDirectory", () => selectDirectory());
-
-    ipcMain.on("clearStores", () => clearStores());
 
     ipcMain.handle("saveEncryptionKey", (_, encryptionKey: string) =>
         saveEncryptionKey(encryptionKey),
@@ -171,14 +165,7 @@ export const attachIPCHandlers = () => {
             command: string[],
             dataOrPathOrZipItem: Uint8Array | string | ZipItem,
             outputFileExtension: string,
-            timeoutMS: number,
-        ) =>
-            ffmpegExec(
-                command,
-                dataOrPathOrZipItem,
-                outputFileExtension,
-                timeoutMS,
-            ),
+        ) => ffmpegExec(command, dataOrPathOrZipItem, outputFileExtension),
     );
 
     // - ML
@@ -195,8 +182,8 @@ export const attachIPCHandlers = () => {
         detectFaces(input),
     );
 
-    ipcMain.handle("faceEmbedding", (_, input: Float32Array) =>
-        faceEmbedding(input),
+    ipcMain.handle("faceEmbeddings", (_, input: Float32Array) =>
+        faceEmbeddings(input),
     );
 
     ipcMain.handle("legacyFaceCrop", (_, faceID: string) =>
@@ -269,6 +256,12 @@ export const attachFSWatchIPCHandlers = (watcher: FSWatcher) => {
     ipcMain.handle("watchFindFiles", (_, folderPath: string) =>
         watchFindFiles(folderPath),
     );
+};
 
-    ipcMain.handle("watchReset", () => watchReset(watcher));
+/**
+ * Sibling of {@link attachIPCHandlers} specifically for use with the logout
+ * event with needs access to the {@link FSWatcher} instance.
+ */
+export const attachLogoutIPCHandler = (watcher: FSWatcher) => {
+    ipcMain.handle("logout", () => logout(watcher));
 };

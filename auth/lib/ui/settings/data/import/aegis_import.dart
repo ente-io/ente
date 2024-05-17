@@ -2,8 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
-import 'package:convert/convert.dart';
 
+import 'package:convert/convert.dart';
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/models/code.dart';
 import 'package:ente_auth/services/authenticator_service.dart';
@@ -150,7 +150,7 @@ Future<int?> _processAegisExportFile(
     } else {
       throw Exception('Invalid OTP type');
     }
-    parsedCodes.add(Code.fromRawData(otpUrl));
+    parsedCodes.add(Code.fromOTPAuthUrl(otpUrl));
   }
 
   for (final code in parsedCodes) {

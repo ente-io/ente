@@ -3,7 +3,7 @@
  */
 export const ensure = <T>(v: T | null | undefined): T => {
     if (v === null) throw new Error("Required value was null");
-    if (v === undefined) throw new Error("Required value was not found");
+    if (v === undefined) throw new Error("Required value was undefined");
     return v;
 };
 

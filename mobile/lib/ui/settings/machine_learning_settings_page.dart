@@ -12,6 +12,7 @@ import "package:photos/service_locator.dart";
 import "package:photos/services/machine_learning/face_ml/face_ml_service.dart";
 import 'package:photos/services/machine_learning/semantic_search/frameworks/ml_framework.dart';
 import 'package:photos/services/machine_learning/semantic_search/semantic_search_service.dart';
+import "package:photos/services/remote_assets_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
@@ -22,6 +23,7 @@ import "package:photos/ui/components/menu_section_title.dart";
 import "package:photos/ui/components/title_bar_title_widget.dart";
 import "package:photos/ui/components/title_bar_widget.dart";
 import "package:photos/ui/components/toggle_switch_widget.dart";
+import "package:photos/utils/data_util.dart";
 import "package:photos/utils/local_settings.dart";
 
 class MachineLearningSettingsPage extends StatefulWidget {
@@ -153,7 +155,7 @@ class _MachineLearningSettingsPageState
                 children: [
                   _state == InitializationState.initialized
                       ? const MagicSearchIndexStatsWidget()
-                      : MagicSearchModelLoadingState(_state),
+                      : ModelLoadingState(_state),
                   const SizedBox(
                     height: 12,
                   ),
@@ -227,13 +229,45 @@ class _MachineLearningSettingsPageState
   }
 }
 
-class MagicSearchModelLoadingState extends StatelessWidget {
+class ModelLoadingState extends StatefulWidget {
   final InitializationState state;
 
-  const MagicSearchModelLoadingState(
+  const ModelLoadingState(
     this.state, {
     Key? key,
   }) : super(key: key);
+
+  @override
+  State<ModelLoadingState> createState() => _ModelLoadingStateState();
+}
+
+class _ModelLoadingStateState extends State<ModelLoadingState> {
+  StreamSubscription<(String, int, int)>? _progressStream;
+  final Map<String, (int, int)> _progressMap = {};
+  @override
+  void initState() {
+    _progressStream =
+        RemoteAssetsService.instance.progressStream.listen((event) {
+      final String url = event.$1;
+      String title = "";
+      if (url.contains("clip-image")) {
+        title = "Image Model";
+      } else if (url.contains("clip-text")) {
+        title = "Text Model";
+      }
+      if (title.isNotEmpty) {
+        _progressMap[title] = (event.$2, event.$3);
+        setState(() {});
+      }
+    });
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _progressStream?.cancel();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -252,12 +286,31 @@ class MagicSearchModelLoadingState extends StatelessWidget {
           alignCaptionedTextToLeft: true,
           isGestureDetectorDisabled: true,
         ),
+        // show the progress map if in debug mode
+        if (flagService.internalUser)
+          ..._progressMap.entries.map((entry) {
+            return MenuItemWidget(
+              key: ValueKey(entry.value),
+              captionedTextWidget: CaptionedTextWidget(
+                title: entry.key,
+              ),
+              trailingWidget: Text(
+                entry.value.$1 == entry.value.$2
+                    ? "Done"
+                    : "${formatBytes(entry.value.$1)} / ${formatBytes(entry.value.$2)}",
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+              singleBorderRadius: 8,
+              alignCaptionedTextToLeft: true,
+              isGestureDetectorDisabled: true,
+            );
+          }).toList(),
       ],
     );
   }
 
   String _getTitle(BuildContext context) {
-    switch (state) {
+    switch (widget.state) {
       case InitializationState.waitingForNetwork:
         return S.of(context).waitingForWifi;
       default:
@@ -279,13 +332,13 @@ class MagicSearchIndexStatsWidget extends StatefulWidget {
 class _MagicSearchIndexStatsWidgetState
     extends State<MagicSearchIndexStatsWidget> {
   IndexStatus? _status;
-  late StreamSubscription<EmbeddingUpdatedEvent> _eventSubscription;
+  late StreamSubscription<EmbeddingCacheUpdatedEvent> _eventSubscription;
 
   @override
   void initState() {
     super.initState();
     _eventSubscription =
-        Bus.instance.on<EmbeddingUpdatedEvent>().listen((event) {
+        Bus.instance.on<EmbeddingCacheUpdatedEvent>().listen((event) {
       _fetchIndexStatus();
     });
     _fetchIndexStatus();
