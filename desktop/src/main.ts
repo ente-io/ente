@@ -253,6 +253,10 @@ export const allowExternalLinks = (webContents: WebContents) =>
     // Returning `action` "deny" accomplishes this.
     webContents.setWindowOpenHandler(({ url }) => {
         if (!url.startsWith(rendererURL)) {
+            // This does not work in Ubuntu currently: mailto links seem to just
+            // get ignored, and HTTP links open in the text editor instead of in
+            // the browser.
+            // https://github.com/electron/electron/issues/31485
             void shell.openExternal(url);
             return { action: "deny" };
         } else {
