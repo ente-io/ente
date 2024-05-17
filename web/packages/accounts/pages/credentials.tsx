@@ -1,3 +1,4 @@
+import { isDevBuild } from "@/next/env";
 import log from "@/next/log";
 import { APP_HOMES } from "@ente/shared/apps/constants";
 import { PageProps } from "@ente/shared/apps/types";
@@ -18,7 +19,7 @@ import {
 } from "@ente/shared/crypto/helpers";
 import { B64EncryptionResult } from "@ente/shared/crypto/types";
 import { CustomError } from "@ente/shared/error";
-import { getAccountsURL } from "@ente/shared/network/api";
+import { getAccountsURL, getEndpoint } from "@ente/shared/network/api";
 import InMemoryStore, { MS_KEYS } from "@ente/shared/storage/InMemoryStore";
 import {
     LS_KEYS,
@@ -49,10 +50,11 @@ import {
     generateSRPSetupAttributes,
     loginViaSRP,
 } from "../services/srp";
-import { logoutUser } from "../services/user";
 import { SRPAttributes } from "../types/srp";
 
 export default function Credentials({ appContext, appName }: PageProps) {
+    const { logout } = appContext;
+
     const [srpAttributes, setSrpAttributes] = useState<SRPAttributes>();
     const [keyAttributes, setKeyAttributes] = useState<KeyAttributes>();
     const [user, setUser] = useState<User>();
@@ -259,7 +261,7 @@ export default function Credentials({ appContext, appName }: PageProps) {
     return (
         <VerticallyCentered>
             <FormPaper style={{ minWidth: "320px" }}>
-                <Title>{user.email}</Title>
+                <Header>{user.email}</Header>
 
                 <VerifyMasterPasswordForm
                     buttonText={t("VERIFY_PASSPHRASE")}
@@ -269,31 +271,50 @@ export default function Credentials({ appContext, appName }: PageProps) {
                     getKeyAttributes={getKeyAttributes}
                     srpAttributes={srpAttributes}
                 />
+
                 <FormPaperFooter style={{ justifyContent: "space-between" }}>
                     <LinkButton onClick={redirectToRecoverPage}>
                         {t("FORGOT_PASSWORD")}
                     </LinkButton>
-                    <LinkButton onClick={logoutUser}>
+                    <LinkButton onClick={logout}>
                         {t("CHANGE_EMAIL")}
                     </LinkButton>
                 </FormPaperFooter>
+
+                {isDevBuild && <ConnectionDetails />}
             </FormPaper>
         </VerticallyCentered>
     );
 }
 
-const Title: React.FC<React.PropsWithChildren> = ({ children }) => {
+const Header: React.FC<React.PropsWithChildren> = ({ children }) => {
     return (
-        <Title_>
+        <Header_>
             <Typography variant="h2">{t("PASSWORD")}</Typography>
             <Typography color="text.faint">{children}</Typography>
-        </Title_>
+        </Header_>
     );
 };
 
-const Title_ = styled("div")`
+const Header_ = styled("div")`
     margin-block-end: 4rem;
     display: flex;
     flex-direction: column;
     gap: 8px;
+`;
+
+const ConnectionDetails: React.FC = () => {
+    const apiOrigin = new URL(getEndpoint());
+
+    return (
+        <ConnectionDetails_>
+            <Typography variant="small" color="text.faint">
+                {apiOrigin.host}
+            </Typography>
+        </ConnectionDetails_>
+    );
+};
+
+const ConnectionDetails_ = styled("div")`
+    margin-block-start: 1rem;
 `;

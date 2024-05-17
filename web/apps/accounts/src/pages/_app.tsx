@@ -1,6 +1,8 @@
 import { CustomHead } from "@/next/components/Head";
 import { setupI18n } from "@/next/i18n";
 import { logUnhandledErrorsAndRejections } from "@/next/log-web";
+import { PAGES } from "@ente/accounts/constants/pages";
+import { accountLogout } from "@ente/accounts/services/logout";
 import { APPS, APP_TITLES } from "@ente/shared/apps/constants";
 import { Overlay } from "@ente/shared/components/Container";
 import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
@@ -27,6 +29,7 @@ interface AppContextProps {
     isMobile: boolean;
     showNavBar: (show: boolean) => void;
     setDialogBoxAttributesV2: SetDialogBoxAttributesV2;
+    logout: () => void;
 }
 
 export const AppContext = createContext<AppContextProps>({} as AppContextProps);
@@ -78,6 +81,10 @@ export default function App({ Component, pageProps }: AppProps) {
 
     const theme = getTheme(themeColor, APPS.PHOTOS);
 
+    const logout = () => {
+        void accountLogout().then(() => router.push(PAGES.ROOT));
+    };
+
     const title = isI18nReady
         ? t("TITLE", { context: APPS.ACCOUNTS })
         : APP_TITLES.get(APPS.ACCOUNTS);
@@ -101,6 +108,7 @@ export default function App({ Component, pageProps }: AppProps) {
                         showNavBar,
                         setDialogBoxAttributesV2:
                             setDialogBoxAttributesV2 as any,
+                        logout,
                     }}
                 >
                     {!isI18nReady && (

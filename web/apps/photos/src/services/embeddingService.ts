@@ -7,6 +7,7 @@ import HTTPService from "@ente/shared/network/HTTPService";
 import { getEndpoint } from "@ente/shared/network/api";
 import localForage from "@ente/shared/storage/localForage";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
+import { FileML } from "services/machineLearning/machineLearningService";
 import type {
     Embedding,
     EmbeddingModel,
@@ -15,31 +16,30 @@ import type {
     PutEmbeddingRequest,
 } from "types/embedding";
 import { EnteFile } from "types/file";
-import {
-    getLatestVersionEmbeddings,
-    getLatestVersionFileEmbeddings,
-} from "utils/embedding";
-import { FileML } from "utils/machineLearning/mldataMappers";
 import { getLocalCollections } from "./collectionService";
 import { getAllLocalFiles } from "./fileService";
 import { getLocalTrashedFiles } from "./trashService";
 
-const ENDPOINT = getEndpoint();
-
 const DIFF_LIMIT = 500;
 
-const EMBEDDINGS_TABLE_V1 = "embeddings";
-const EMBEDDINGS_TABLE = "embeddings_v2";
+/** Local storage key suffix for embedding sync times */
+const embeddingSyncTimeLSKeySuffix = "embedding_sync_time";
+/** Local storage key for CLIP embeddings. */
+const clipEmbeddingsLSKey = "embeddings_v2";
 const FILE_EMBEDING_TABLE = "file_embeddings";
-const EMBEDDING_SYNC_TIME_TABLE = "embedding_sync_time";
 
-export const getAllLocalEmbeddings = async () => {
+/** Return all CLIP embeddings that we have available locally. */
+export const localCLIPEmbeddings = async () =>
+    (await storedCLIPEmbeddings()).filter(({ model }) => model === "onnx-clip");
+
+const storedCLIPEmbeddings = async () => {
     const embeddings: Array<Embedding> =
-        await localForage.getItem<Embedding[]>(EMBEDDINGS_TABLE);
+        await localForage.getItem<Embedding[]>(clipEmbeddingsLSKey);
     if (!embeddings) {
-        await localForage.removeItem(EMBEDDINGS_TABLE_V1);
-        await localForage.removeItem(EMBEDDING_SYNC_TIME_TABLE);
-        await localForage.setItem(EMBEDDINGS_TABLE, []);
+        // Migrate
+        await localForage.removeItem("embeddings");
+        await localForage.removeItem("embedding_sync_time");
+        await localForage.setItem(clipEmbeddingsLSKey, []);
         return [];
     }
     return embeddings;
@@ -54,15 +54,10 @@ export const getFileMLEmbeddings = async (): Promise<FileML[]> => {
     return embeddings;
 };
 
-export const getLocalEmbeddings = async () => {
-    const embeddings = await getAllLocalEmbeddings();
-    return embeddings.filter((embedding) => embedding.model === "onnx-clip");
-};
-
 const getModelEmbeddingSyncTime = async (model: EmbeddingModel) => {
     return (
         (await localForage.getItem<number>(
-            `${model}-${EMBEDDING_SYNC_TIME_TABLE}`,
+            `${model}-${embeddingSyncTimeLSKeySuffix}`,
         )) ?? 0
     );
 };
@@ -71,13 +66,17 @@ const setModelEmbeddingSyncTime = async (
     model: EmbeddingModel,
     time: number,
 ) => {
-    await localForage.setItem(`${model}-${EMBEDDING_SYNC_TIME_TABLE}`, time);
+    await localForage.setItem(`${model}-${embeddingSyncTimeLSKeySuffix}`, time);
 };
 
-export const syncEmbeddings = async () => {
-    const models: EmbeddingModel[] = ["onnx-clip"];
+/**
+ * Fetch new CLIP embeddings with the server and save them locally. Also prune
+ * local embeddings for any files no longer exist locally.
+ */
+export const syncCLIPEmbeddings = async () => {
+    const model: EmbeddingModel = "onnx-clip";
     try {
-        let allEmbeddings = await getAllLocalEmbeddings();
+        let allEmbeddings = await storedCLIPEmbeddings();
         const localFiles = await getAllLocalFiles();
         const hiddenAlbums = await getLocalCollections("hidden");
         const localTrashFiles = await getLocalTrashedFiles();
@@ -89,79 +88,80 @@ export const syncEmbeddings = async () => {
         await cleanupDeletedEmbeddings(
             allLocalFiles,
             allEmbeddings,
-            EMBEDDINGS_TABLE,
+            clipEmbeddingsLSKey,
         );
         log.info(`Syncing embeddings localCount: ${allEmbeddings.length}`);
-        for (const model of models) {
-            let modelLastSinceTime = await getModelEmbeddingSyncTime(model);
-            log.info(
-                `Syncing ${model} model's embeddings sinceTime: ${modelLastSinceTime}`,
-            );
-            let response: GetEmbeddingDiffResponse;
-            do {
-                response = await getEmbeddingsDiff(modelLastSinceTime, model);
-                if (!response.diff?.length) {
-                    return;
-                }
-                const newEmbeddings = await Promise.all(
-                    response.diff.map(async (embedding) => {
-                        try {
-                            const {
-                                encryptedEmbedding,
-                                decryptionHeader,
-                                ...rest
-                            } = embedding;
-                            const worker =
-                                await ComlinkCryptoWorker.getInstance();
-                            const fileKey = fileIdToKeyMap.get(
-                                embedding.fileID,
-                            );
-                            if (!fileKey) {
-                                throw Error(CustomError.FILE_NOT_FOUND);
-                            }
-                            const decryptedData = await worker.decryptEmbedding(
-                                encryptedEmbedding,
-                                decryptionHeader,
-                                fileIdToKeyMap.get(embedding.fileID),
-                            );
 
-                            return {
-                                ...rest,
-                                embedding: decryptedData,
-                            } as Embedding;
-                        } catch (e) {
-                            let hasHiddenAlbums = false;
-                            if (e.message === CustomError.FILE_NOT_FOUND) {
-                                hasHiddenAlbums = hiddenAlbums?.length > 0;
-                            }
-                            log.error(
-                                `decryptEmbedding failed for file (hasHiddenAlbums: ${hasHiddenAlbums})`,
-                                e,
-                            );
+        let modelLastSinceTime = await getModelEmbeddingSyncTime(model);
+        log.info(
+            `Syncing ${model} model's embeddings sinceTime: ${modelLastSinceTime}`,
+        );
+        let response: GetEmbeddingDiffResponse;
+        do {
+            response = await getEmbeddingsDiff(modelLastSinceTime, model);
+            if (!response.diff?.length) {
+                return;
+            }
+            // Note: in rare cases we might get a diff entry for an embedding
+            // corresponding to a file which has been deleted (but whose
+            // embedding is enqueued for deletion). Client should expect such a
+            // scenario (all it has to do is just ignore them).
+            const newEmbeddings = await Promise.all(
+                response.diff.map(async (embedding) => {
+                    try {
+                        const {
+                            encryptedEmbedding,
+                            decryptionHeader,
+                            ...rest
+                        } = embedding;
+                        const worker = await ComlinkCryptoWorker.getInstance();
+                        const fileKey = fileIdToKeyMap.get(embedding.fileID);
+                        if (!fileKey) {
+                            throw Error(CustomError.FILE_NOT_FOUND);
                         }
-                    }),
-                );
-                allEmbeddings = getLatestVersionEmbeddings([
-                    ...allEmbeddings,
-                    ...newEmbeddings,
-                ]);
-                if (response.diff.length) {
-                    modelLastSinceTime = response.diff.slice(-1)[0].updatedAt;
-                }
-                await localForage.setItem(EMBEDDINGS_TABLE, allEmbeddings);
-                await setModelEmbeddingSyncTime(model, modelLastSinceTime);
-                log.info(
-                    `Syncing embeddings syncedEmbeddingsCount: ${allEmbeddings.length}`,
-                );
-            } while (response.diff.length === DIFF_LIMIT);
-        }
+                        const decryptedData = await worker.decryptEmbedding(
+                            encryptedEmbedding,
+                            decryptionHeader,
+                            fileIdToKeyMap.get(embedding.fileID),
+                        );
+
+                        return {
+                            ...rest,
+                            embedding: decryptedData,
+                        } as Embedding;
+                    } catch (e) {
+                        let hasHiddenAlbums = false;
+                        if (e.message === CustomError.FILE_NOT_FOUND) {
+                            hasHiddenAlbums = hiddenAlbums?.length > 0;
+                        }
+                        log.error(
+                            `decryptEmbedding failed for file (hasHiddenAlbums: ${hasHiddenAlbums})`,
+                            e,
+                        );
+                    }
+                }),
+            );
+            allEmbeddings = getLatestVersionEmbeddings([
+                ...allEmbeddings,
+                ...newEmbeddings,
+            ]);
+            modelLastSinceTime = response.diff.reduce(
+                (max, { updatedAt }) => Math.max(max, updatedAt),
+                modelLastSinceTime,
+            );
+            await localForage.setItem(clipEmbeddingsLSKey, allEmbeddings);
+            await setModelEmbeddingSyncTime(model, modelLastSinceTime);
+            log.info(
+                `Syncing embeddings syncedEmbeddingsCount: ${allEmbeddings.length}`,
+            );
+        } while (response.diff.length > 0);
     } catch (e) {
         log.error("Sync embeddings failed", e);
     }
 };
 
-export const syncFileEmbeddings = async () => {
-    const models: EmbeddingModel[] = ["file-ml-clip-face"];
+export const syncFaceEmbeddings = async () => {
+    const model: EmbeddingModel = "file-ml-clip-face";
     try {
         let allEmbeddings: FileML[] = await getFileMLEmbeddings();
         const localFiles = await getAllLocalFiles();
@@ -178,67 +178,98 @@ export const syncFileEmbeddings = async () => {
             FILE_EMBEDING_TABLE,
         );
         log.info(`Syncing embeddings localCount: ${allEmbeddings.length}`);
-        for (const model of models) {
-            let modelLastSinceTime = await getModelEmbeddingSyncTime(model);
-            log.info(
-                `Syncing ${model} model's embeddings sinceTime: ${modelLastSinceTime}`,
-            );
-            let response: GetEmbeddingDiffResponse;
-            do {
-                response = await getEmbeddingsDiff(modelLastSinceTime, model);
-                if (!response.diff?.length) {
-                    return;
-                }
-                const newEmbeddings = await Promise.all(
-                    response.diff.map(async (embedding) => {
-                        try {
-                            const worker =
-                                await ComlinkCryptoWorker.getInstance();
-                            const fileKey = fileIdToKeyMap.get(
-                                embedding.fileID,
-                            );
-                            if (!fileKey) {
-                                throw Error(CustomError.FILE_NOT_FOUND);
-                            }
-                            const decryptedData = await worker.decryptMetadata(
-                                embedding.encryptedEmbedding,
-                                embedding.decryptionHeader,
-                                fileIdToKeyMap.get(embedding.fileID),
-                            );
 
-                            return {
-                                ...decryptedData,
-                                updatedAt: embedding.updatedAt,
-                            } as unknown as FileML;
-                        } catch (e) {
-                            let hasHiddenAlbums = false;
-                            if (e.message === CustomError.FILE_NOT_FOUND) {
-                                hasHiddenAlbums = hiddenAlbums?.length > 0;
-                            }
-                            log.error(
-                                `decryptEmbedding failed for file (hasHiddenAlbums: ${hasHiddenAlbums})`,
-                                e,
-                            );
+        let modelLastSinceTime = await getModelEmbeddingSyncTime(model);
+        log.info(
+            `Syncing ${model} model's embeddings sinceTime: ${modelLastSinceTime}`,
+        );
+        let response: GetEmbeddingDiffResponse;
+        do {
+            response = await getEmbeddingsDiff(modelLastSinceTime, model);
+            if (!response.diff?.length) {
+                return;
+            }
+            const newEmbeddings = await Promise.all(
+                response.diff.map(async (embedding) => {
+                    try {
+                        const worker = await ComlinkCryptoWorker.getInstance();
+                        const fileKey = fileIdToKeyMap.get(embedding.fileID);
+                        if (!fileKey) {
+                            throw Error(CustomError.FILE_NOT_FOUND);
                         }
-                    }),
-                );
-                allEmbeddings = getLatestVersionFileEmbeddings([
-                    ...allEmbeddings,
-                    ...newEmbeddings,
-                ]);
-                if (response.diff.length) {
-                    modelLastSinceTime = response.diff.slice(-1)[0].updatedAt;
-                }
-                await localForage.setItem(FILE_EMBEDING_TABLE, allEmbeddings);
-                await setModelEmbeddingSyncTime(model, modelLastSinceTime);
-                log.info(
-                    `Syncing embeddings syncedEmbeddingsCount: ${allEmbeddings.length}`,
-                );
-            } while (response.diff.length === DIFF_LIMIT);
-        }
+                        const decryptedData = await worker.decryptMetadata(
+                            embedding.encryptedEmbedding,
+                            embedding.decryptionHeader,
+                            fileIdToKeyMap.get(embedding.fileID),
+                        );
+
+                        return {
+                            ...decryptedData,
+                            updatedAt: embedding.updatedAt,
+                        } as unknown as FileML;
+                    } catch (e) {
+                        let hasHiddenAlbums = false;
+                        if (e.message === CustomError.FILE_NOT_FOUND) {
+                            hasHiddenAlbums = hiddenAlbums?.length > 0;
+                        }
+                        log.error(
+                            `decryptEmbedding failed for file (hasHiddenAlbums: ${hasHiddenAlbums})`,
+                            e,
+                        );
+                    }
+                }),
+            );
+            allEmbeddings = getLatestVersionFileEmbeddings([
+                ...allEmbeddings,
+                ...newEmbeddings,
+            ]);
+            modelLastSinceTime = response.diff.reduce(
+                (max, { updatedAt }) => Math.max(max, updatedAt),
+                modelLastSinceTime,
+            );
+            await localForage.setItem(FILE_EMBEDING_TABLE, allEmbeddings);
+            await setModelEmbeddingSyncTime(model, modelLastSinceTime);
+            log.info(
+                `Syncing embeddings syncedEmbeddingsCount: ${allEmbeddings.length}`,
+            );
+        } while (response.diff.length > 0);
     } catch (e) {
         log.error("Sync embeddings failed", e);
     }
+};
+
+const getLatestVersionEmbeddings = (embeddings: Embedding[]) => {
+    const latestVersionEntities = new Map<number, Embedding>();
+    embeddings.forEach((embedding) => {
+        if (!embedding?.fileID) {
+            return;
+        }
+        const existingEmbeddings = latestVersionEntities.get(embedding.fileID);
+        if (
+            !existingEmbeddings ||
+            existingEmbeddings.updatedAt < embedding.updatedAt
+        ) {
+            latestVersionEntities.set(embedding.fileID, embedding);
+        }
+    });
+    return Array.from(latestVersionEntities.values());
+};
+
+const getLatestVersionFileEmbeddings = (embeddings: FileML[]) => {
+    const latestVersionEntities = new Map<number, FileML>();
+    embeddings.forEach((embedding) => {
+        if (!embedding?.fileID) {
+            return;
+        }
+        const existingEmbeddings = latestVersionEntities.get(embedding.fileID);
+        if (
+            !existingEmbeddings ||
+            existingEmbeddings.updatedAt < embedding.updatedAt
+        ) {
+            latestVersionEntities.set(embedding.fileID, embedding);
+        }
+    });
+    return Array.from(latestVersionEntities.values());
 };
 
 export const getEmbeddingsDiff = async (
@@ -251,7 +282,7 @@ export const getEmbeddingsDiff = async (
             return;
         }
         const response = await HTTPService.get(
-            `${ENDPOINT}/embeddings/diff`,
+            `${getEndpoint()}/embeddings/diff`,
             {
                 sinceTime,
                 limit: DIFF_LIMIT,
@@ -280,7 +311,7 @@ export const putEmbedding = async (
             throw Error(CustomError.TOKEN_MISSING);
         }
         const resp = await HTTPService.put(
-            `${ENDPOINT}/embeddings`,
+            `${getEndpoint()}/embeddings`,
             putEmbeddingReq,
             null,
             {

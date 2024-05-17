@@ -10,5 +10,6 @@
     "devDependencies": {
         "prettier": "^3",
         "vitepress": "^1.0.0-rc.45"
-    }
+    },
+    "packageManager": "yarn@1.22.21"
 }

@@ -17,6 +17,7 @@ import 'package:ente_auth/services/update_service.dart';
 import 'package:ente_auth/services/user_remote_flag_service.dart';
 import 'package:ente_auth/services/user_service.dart';
 import 'package:ente_auth/services/window_listener_service.dart';
+import 'package:ente_auth/store/code_display_store.dart';
 import 'package:ente_auth/store/code_store.dart';
 import 'package:ente_auth/ui/tools/app_lock.dart';
 import 'package:ente_auth/ui/tools/lock_screen.dart';
@@ -145,6 +146,7 @@ Future<void> _init(bool bool, {String? via}) async {
 
   await PreferenceService.instance.init();
   await CodeStore.instance.init();
+  await CodeDisplayStore.instance.init();
   await Configuration.instance.init();
   await Network.instance.init();
   await UserService.instance.init();
@@ -157,7 +159,7 @@ Future<void> _init(bool bool, {String? via}) async {
 }
 
 Future<void> _setupPrivacyScreen() async {
-  if (!PlatformUtil.isMobile()) return;
+  if (!PlatformUtil.isMobile() || kDebugMode) return;
   final brightness =
       SchedulerBinding.instance.platformDispatcher.platformBrightness;
   bool isInDarkMode = brightness == Brightness.dark;

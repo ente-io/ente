@@ -73,8 +73,6 @@ class Configuration {
   static const anonymousUserIDKey = "anonymous_user_id";
   static const endPointKey = "endpoint";
 
-  final kTempFolderDeletionTimeBuffer = const Duration(hours: 6).inMicroseconds;
-
   static final _logger = Logger("Configuration");
 
   String? _cachedToken;
@@ -104,20 +102,7 @@ class Configuration {
     _documentsDirectory = (await getApplicationDocumentsDirectory()).path;
     _tempDocumentsDirPath = _documentsDirectory + "/temp/";
     final tempDocumentsDir = Directory(_tempDocumentsDirPath);
-    try {
-      final currentTime = DateTime.now().microsecondsSinceEpoch;
-      if (tempDocumentsDir.existsSync() &&
-          (_preferences.getInt(lastTempFolderClearTimeKey) ?? 0) <
-              (currentTime - kTempFolderDeletionTimeBuffer)) {
-        await tempDocumentsDir.delete(recursive: true);
-        await _preferences.setInt(lastTempFolderClearTimeKey, currentTime);
-        _logger.info("Cleared temp folder");
-      } else {
-        _logger.info("Skipping temp folder clear");
-      }
-    } catch (e) {
-      _logger.warning(e);
-    }
+    await _cleanUpStaleFiles(tempDocumentsDir);
     tempDocumentsDir.createSync(recursive: true);
     final tempDirectoryPath = (await getTemporaryDirectory()).path;
     _thumbnailCacheDirectory = tempDirectoryPath + "/thumbnail-cache";
@@ -143,6 +128,42 @@ class Configuration {
       await _migrateSecurityStorageToFirstUnlock();
     }
     SuperLogging.setUserID(await _getOrCreateAnonymousUserID()).ignore();
+  }
+
+  // _cleanUpStaleFiles deletes all files in the temp directory that are older
+  // than kTempFolderDeletionTimeBuffer except the the temp encrypted files for upload.
+  // Those file are deleted by file uploader after the upload is complete or those
+  // files are not being used / tracked.
+  Future<void> _cleanUpStaleFiles(Directory tempDocumentsDir) async {
+    try {
+      final currentTime = DateTime.now().microsecondsSinceEpoch;
+      if (tempDocumentsDir.existsSync() &&
+          (_preferences.getInt(lastTempFolderClearTimeKey) ?? 0) <
+              (currentTime - tempDirCleanUpInterval)) {
+        int skippedTempUploadFiles = 0;
+        final files = tempDocumentsDir.listSync();
+        for (final file in files) {
+          if (file is File) {
+            if (file.path.contains(uploadTempFilePrefix)) {
+              skippedTempUploadFiles++;
+              continue;
+            }
+            _logger.info("Deleting file: ${file.path}");
+            await file.delete();
+          } else if (file is Directory) {
+            await file.delete(recursive: true);
+          }
+        }
+        await _preferences.setInt(lastTempFolderClearTimeKey, currentTime);
+        _logger.info(
+          "Cleared temp folder except $skippedTempUploadFiles upload files",
+        );
+      } else {
+        _logger.info("Skipping temp folder clear");
+      }
+    } catch (e) {
+      _logger.warning(e);
+    }
   }
 
   Future<void> logout({bool autoLogout = false}) async {

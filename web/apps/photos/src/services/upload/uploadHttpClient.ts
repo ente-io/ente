@@ -1,9 +1,9 @@
 import log from "@/next/log";
+import { wait } from "@/utils/promise";
 import { CustomError, handleUploadError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { getEndpoint, getUploadEndpoint } from "@ente/shared/network/api";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
-import { wait } from "@ente/shared/utils";
 import { EnteFile } from "types/file";
 import { MultipartUploadURLs, UploadFile, UploadURL } from "./uploadService";
 

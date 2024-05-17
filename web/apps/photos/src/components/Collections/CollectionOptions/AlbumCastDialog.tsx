@@ -32,7 +32,11 @@ declare global {
     }
 }
 
-export default function AlbumCastDialog(props: Props) {
+export default function AlbumCastDialog({
+    show,
+    onHide,
+    currentCollection,
+}: Props) {
     const [view, setView] = useState<
         "choose" | "auto" | "pin" | "auto-cast-error"
     >("choose");
@@ -51,7 +55,7 @@ export default function AlbumCastDialog(props: Props) {
     ) => {
         try {
             await doCast(value.trim());
-            props.onHide();
+            onHide();
         } catch (e) {
             const error = e as Error;
             let fieldError: string;
@@ -80,8 +84,8 @@ export default function AlbumCastDialog(props: Props) {
         // ok, they exist. let's give them the good stuff.
         const payload = JSON.stringify({
             castToken: castToken,
-            collectionID: props.currentCollection.id,
-            collectionKey: props.currentCollection.key,
+            collectionID: currentCollection.id,
+            collectionKey: currentCollection.key,
         });
         const encryptedPayload = await boxSeal(btoa(payload), tvPublicKeyB64);
 
@@ -89,7 +93,7 @@ export default function AlbumCastDialog(props: Props) {
         await castGateway.publishCastPayload(
             pin,
             encryptedPayload,
-            props.currentCollection.id,
+            currentCollection.id,
             castToken,
         );
     };
@@ -119,7 +123,7 @@ export default function AlbumCastDialog(props: Props) {
                             doCast(code)
                                 .then(() => {
                                     setView("choose");
-                                    props.onHide();
+                                    onHide();
                                 })
                                 .catch((e) => {
                                     setView("auto-cast-error");
@@ -129,8 +133,9 @@ export default function AlbumCastDialog(props: Props) {
                     },
                 );
 
+                const collectionID = currentCollection.id;
                 session
-                    .sendMessage("urn:x-cast:pair-request", {})
+                    .sendMessage("urn:x-cast:pair-request", { collectionID })
                     .then(() => {
                         log.debug(() => "Message sent successfully");
                     })
@@ -142,16 +147,16 @@ export default function AlbumCastDialog(props: Props) {
     }, [view]);
 
     useEffect(() => {
-        if (props.show) {
+        if (show) {
             castGateway.revokeAllTokens();
         }
-    }, [props.show]);
+    }, [show]);
 
     return (
         <DialogBoxV2
             sx={{ zIndex: 1600 }}
-            open={props.show}
-            onClose={props.onHide}
+            open={show}
+            onClose={onHide}
             attributes={{
                 title: t("CAST_ALBUM_TO_TV"),
             }}

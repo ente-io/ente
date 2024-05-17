@@ -11,6 +11,11 @@ import { isDev } from "../utils/electron";
 export const setupAutoUpdater = (mainWindow: BrowserWindow) => {
     autoUpdater.logger = electronLog;
     autoUpdater.autoDownload = false;
+    // This is going to be the default at some point, right now if we don't
+    // explicitly set this to true then electron-builder prints a (harmless)
+    // warning when updating on Windows.
+    // See: https://github.com/electron-userland/electron-builder/pull/6575
+    autoUpdater.disableWebInstaller = true;
 
     /**
      * [Note: Testing auto updates]
@@ -137,23 +142,24 @@ const checkForUpdatesAndNotify = async (mainWindow: BrowserWindow) => {
     const showUpdateDialog = (update: AppUpdate) =>
         mainWindow.webContents.send("appUpdateAvailable", update);
 
-    log.debug(() => "Attempting auto update");
-    await autoUpdater.downloadUpdate();
-
-    let timeoutId: ReturnType<typeof setTimeout>;
+    let timeout: ReturnType<typeof setTimeout>;
     const fiveMinutes = 5 * 60 * 1000;
     autoUpdater.on("update-downloaded", () => {
-        timeoutId = setTimeout(
+        log.info(`Update downloaded ${version}`);
+        timeout = setTimeout(
             () => showUpdateDialog({ autoUpdatable: true, version }),
             fiveMinutes,
         );
     });
 
     autoUpdater.on("error", (error) => {
-        clearTimeout(timeoutId);
+        clearTimeout(timeout);
         log.error("Auto update failed", error);
         showUpdateDialog({ autoUpdatable: false, version });
     });
+
+    log.info(`Downloading update ${version}`);
+    await autoUpdater.downloadUpdate();
 };
 
 /**

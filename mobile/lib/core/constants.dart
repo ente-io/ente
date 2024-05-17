@@ -1,3 +1,5 @@
+import "package:flutter/foundation.dart";
+
 const int thumbnailSmallSize = 256;
 const int thumbnailQuality = 50;
 const int thumbnailLargeSize = 512;
@@ -41,6 +43,7 @@ const supportEmail = 'support@ente.io';
 
 // this is the chunk size of the un-encrypted file which is read and encrypted before uploading it as a single part.
 const multipartPartSize = 20 * 1024 * 1024;
+const multipartPartSizeInternal = 8 * 1024 * 1024;
 
 const kDefaultProductionEndpoint = 'https://api.ente.io';
 
@@ -98,3 +101,8 @@ const blackThumbnailBase64 = '/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAEBAQEBAQEB'
 
 const localFileServer =
     String.fromEnvironment("localFileServer", defaultValue: "");
+
+const uploadTempFilePrefix = "upload_file_";
+final tempDirCleanUpInterval = kDebugMode
+    ? const Duration(seconds: 30).inMicroseconds
+    : const Duration(hours: 6).inMicroseconds;

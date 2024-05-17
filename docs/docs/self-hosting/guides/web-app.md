@@ -1,6 +1,8 @@
 ---
 title: Hosting the web app
-description: Building and hosting Ente's web app, connecting it to your self-hosted server
+description:
+    Building and hosting Ente's web app, connecting it to your self-hosted
+    server
 ---
 
 # Web app

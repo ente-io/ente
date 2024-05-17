@@ -63,6 +63,19 @@ class EmbeddingsDB {
     return _convertToEmbeddings(results);
   }
 
+  // Get FileIDs for a specific model
+  Future<Set<int>> getFileIDs(Model model) async {
+    final db = await _database;
+    final results = await db.getAll(
+      'SELECT $columnFileID FROM $tableName WHERE $columnModel = ?',
+      [modelToInt(model)!],
+    );
+    if (results.isEmpty) {
+      return <int>{};
+    }
+    return results.map((e) => e[columnFileID] as int).toSet();
+  }
+
   Future<void> put(Embedding embedding) async {
     final db = await _database;
     await db.execute(

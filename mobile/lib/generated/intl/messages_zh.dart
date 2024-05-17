@@ -124,7 +124,7 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m37(providerName) => "如果您被收取费用，请用英语与 ${providerName} 的客服聊天";
 
-  static String m38(endDate) => "免费试用有效期至 ${endDate}。\n之后您可以选择付费计划。";
+  static String m38(endDate) => "免费试用有效期至 ${endDate}。\n您可以随后购买付费计划。";
 
   static String m39(toEmail) => "请给我们发送电子邮件至 ${toEmail}";
 

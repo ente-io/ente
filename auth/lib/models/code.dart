@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:ente_auth/models/code_display.dart';
 import 'package:ente_auth/utils/totp_util.dart';
 
 class Code {
@@ -13,9 +16,18 @@ class Code {
   final String secret;
   final Algorithm algorithm;
   final Type type;
+
+  /// otpauth url in the code
   final String rawData;
   final int counter;
   bool? hasSynced;
+
+  final CodeDisplay display;
+
+  bool get isPinned => display.pinned;
+
+  final Object? err;
+  bool get hasError => err != null;
 
   Code(
     this.account,
@@ -28,7 +40,25 @@ class Code {
     this.counter,
     this.rawData, {
     this.generatedID,
+    required this.display,
+    this.err,
   });
+
+  factory Code.withError(Object error, String rawData) {
+    return Code(
+      "",
+      "",
+      0,
+      0,
+      "",
+      Algorithm.sha1,
+      Type.totp,
+      0,
+      rawData,
+      err: error,
+      display: CodeDisplay(),
+    );
+  }
 
   Code copyWith({
     String? account,
@@ -39,6 +69,7 @@ class Code {
     Algorithm? algorithm,
     Type? type,
     int? counter,
+    CodeDisplay? display,
   }) {
     final String updateAccount = account ?? this.account;
     final String updateIssuer = issuer ?? this.issuer;
@@ -48,6 +79,7 @@ class Code {
     final Algorithm updatedAlgo = algorithm ?? this.algorithm;
     final Type updatedType = type ?? this.type;
     final int updatedCounter = counter ?? this.counter;
+    final CodeDisplay updatedDisplay = display ?? this.display;
 
     return Code(
       updateAccount,
@@ -62,6 +94,7 @@ class Code {
       "&digits=$updatedDigits&issuer=$updateIssuer"
       "&period=$updatePeriod&secret=$updatedSecret${updatedType == Type.hotp ? "&counter=$updatedCounter" : ""}",
       generatedID: generatedID,
+      display: updatedDisplay,
     );
   }
 
@@ -70,6 +103,7 @@ class Code {
     String account,
     String issuer,
     String secret,
+    CodeDisplay? display,
     int digits,
   ) {
     return Code(
@@ -82,10 +116,11 @@ class Code {
       type,
       0,
       "otpauth://${type.name}/$issuer:$account?algorithm=SHA1&digits=$digits&issuer=$issuer&period=30&secret=$secret",
+      display: display ?? CodeDisplay(),
     );
   }
 
-  static Code fromRawData(String rawData) {
+  static Code fromOTPAuthUrl(String rawData, {CodeDisplay? display}) {
     Uri uri = Uri.parse(rawData);
     final issuer = _getIssuer(uri);
 
@@ -100,12 +135,13 @@ class Code {
         _getType(uri),
         _getCounter(uri),
         rawData,
+        display: CodeDisplay.fromUri(uri) ?? CodeDisplay(),
       );
     } catch (e) {
       // if account name contains # without encoding,
       // rest of the url are treated as url fragment
       if (rawData.contains("#")) {
-        return Code.fromRawData(rawData.replaceAll("#", '%23'));
+        return Code.fromOTPAuthUrl(rawData.replaceAll("#", '%23'));
       } else {
         rethrow;
       }
@@ -127,6 +163,24 @@ class Code {
     } catch (e) {
       return "";
     }
+  }
+
+  static Code fromExportJson(Map rawJson) {
+    Code resultCode = Code.fromOTPAuthUrl(
+      rawJson['rawData'],
+      display: CodeDisplay.fromJson(rawJson['display']),
+    );
+    return resultCode;
+  }
+
+  String toOTPAuthUrlFormat() {
+    final uri = Uri.parse(rawData);
+    final query = {...uri.queryParameters};
+    query["codeDisplay"] = jsonEncode(display.toJson());
+
+    final newUri = uri.replace(queryParameters: query);
+
+    return jsonEncode(newUri.toString());
   }
 
   static String _getIssuer(Uri uri) {

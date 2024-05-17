@@ -1,6 +1,6 @@
 name: ente_auth
 description: ente two-factor authenticator
-version: 2.0.57+257
+version: 3.0.1+301
 publish_to: none
 
 environment:
@@ -14,7 +14,7 @@ dependencies:
   bip39: ^1.0.6 #done
   bloc: ^8.1.2
   clipboard: ^0.1.3
-  collection: # dart
+  collection: ^1.18.0 # dart
   confetti: ^0.7.0
   connectivity_plus: ^5.0.2
   convert: ^3.1.1
@@ -62,6 +62,7 @@ dependencies:
   flutter_svg: ^2.0.5
   fluttertoast: ^8.1.1
   google_nav_bar: ^5.0.5 #supported
+  gradient_borders: ^1.0.0
   http: ^1.1.0
   intl: ^0.18.0
   json_annotation: ^4.5.0
@@ -129,6 +130,7 @@ flutter:
     - assets/simple-icons/_data/
     - assets/custom-icons/icons/
     - assets/custom-icons/_data/
+    - assets/svg/
 
   fonts:
     - family: Inter
@@ -145,16 +147,38 @@ flutter:
 flutter_icons:
   android: "launcher_icon"
   adaptive_icon_foreground: "assets/generation-icons/icon-light-adaptive-fg.png"
-  adaptive_icon_background: "#ffffff"
+  adaptive_icon_background: "assets/generation-icons/icon-light-adaptive-bg.png"
   ios: true
   image_path: "assets/generation-icons/icon-light.png"
   remove_alpha_ios: true
 
 flutter_native_splash:
-  color: "#ffffff"
+  color: "#FFFFFF"
   color_dark: "#000000"
-  image: assets/splash-screen-light.png
-  image_dark: assets/splash-screen-dark.png
-  android_fullscreen: true
+  image: "assets/splash/splash-icon-fg.png"
   android_gravity: center
   ios_content_mode: center
+  android_12:
+    # The image parameter sets the splash screen icon image.  If this parameter is not specified,
+    # the app's launcher icon will be used instead.
+    # Please note that the splash screen will be clipped to a circle on the center of the screen.
+    # App icon with an icon background: This should be 960×960 pixels, and fit within a circle
+    # 640 pixels in diameter.
+    # App icon without an icon background: This should be 1152×1152 pixels, and fit within a circle
+    # 768 pixels in diameter.
+    image: "assets/splash/splash-icon-fg-12.png"
+
+    # Splash screen background color.
+    color: "#FFFFFF"
+
+    # App icon background color.
+    #icon_background_color: "#111111"
+
+    # The branding property allows you to specify an image used as branding in the splash screen.
+    #branding: assets/dart.png
+
+    # The image_dark, color_dark, icon_background_color_dark, and branding_dark set values that
+    # apply when the device is in dark mode. If they are not specified, the app will use the
+    # parameters from above.
+    color_dark: "#000000"
+    #icon_background_color_dark: "#eeeeee"

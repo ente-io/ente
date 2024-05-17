@@ -1,11 +1,8 @@
 import log from "@/next/log";
 import { putAttributes } from "@ente/accounts/api/user";
-import { logoutUser } from "@ente/accounts/services/user";
-import { getRecoveryKey } from "@ente/shared/crypto/helpers";
 import { ApiError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { getEndpoint, getFamilyPortalURL } from "@ente/shared/network/api";
-import localForage from "@ente/shared/storage/localForage";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import {
     getToken,
@@ -102,10 +99,6 @@ export const getRoadmapRedirectURL = async () => {
         log.error("failed to get roadmap url", e);
         throw e;
     }
-};
-
-export const clearFiles = async () => {
-    await localForage.clear();
 };
 
 export const isTokenValid = async (token: string) => {
@@ -230,19 +223,6 @@ export const deleteAccount = async (
     } catch (e) {
         log.error("deleteAccount api call failed", e);
         throw e;
-    }
-};
-
-// Ensure that the keys in local storage are not malformed by verifying that the
-// recoveryKey can be decrypted with the masterKey.
-// Note: This is not bullet-proof.
-export const validateKey = async () => {
-    try {
-        await getRecoveryKey();
-        return true;
-    } catch (e) {
-        await logoutUser();
-        return false;
     }
 };
 

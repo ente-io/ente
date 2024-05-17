@@ -6,11 +6,11 @@ import log from "@/next/log";
 import type { Electron } from "@/next/types/ipc";
 import { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { ensure } from "@/utils/ensure";
+import { wait } from "@/utils/promise";
 import { getDedicatedCryptoWorker } from "@ente/shared/crypto";
 import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
 import { CustomError } from "@ente/shared/error";
 import { Events, eventBus } from "@ente/shared/events";
-import { wait } from "@ente/shared/utils";
 import { Canceler } from "axios";
 import { Remote } from "comlink";
 import {
