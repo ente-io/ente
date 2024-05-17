@@ -3,7 +3,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { CustomErrorMessage, type ZipItem } from "../../types/ipc";
-import log from "../log";
 import { execAsync, isDev } from "../utils/electron";
 import {
     deleteTempFileIgnoringErrors,
@@ -93,9 +92,6 @@ export const generateImageThumbnail = async (
         let thumbnail: Uint8Array;
         do {
             await execAsync(command);
-            // TODO(MR): release 1.7
-            // TODO(MR): imagemagick debugging. Remove me after verifying logs.
-            log.info(`Generated thumbnail using ${command.join(" ")}`);
             thumbnail = new Uint8Array(await fs.readFile(outputFilePath));
             quality -= 10;
             command = generateImageThumbnailCommand(
