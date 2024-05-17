@@ -28,6 +28,7 @@ extension EntitiesDB on FilesDB {
           '''
           INSERT OR ${conflictAlgorithm.name.toUpperCase()} 
           INTO entities (id, type, ownerID, data, updatedAt)
+          VALUES (?, ?, ?, ?, ?)
 ''',
           parameterSets,
         );
@@ -39,6 +40,7 @@ extension EntitiesDB on FilesDB {
       '''
           INSERT OR ${conflictAlgorithm.name.toUpperCase()} 
           INTO entities (id, type, ownerID, data, updatedAt)
+          VALUES (?, ?, ?, ?, ?)
 ''',
       parameterSets,
     );
