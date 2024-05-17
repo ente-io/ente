@@ -94,8 +94,8 @@ class FaceMlService {
   bool isClusteringRunning = false;
   bool shouldSyncPeople = false;
 
-  final int _parallelismML = 10;
-  final int _remoteFetchLimit = 100;
+  final int _fileDownloadLimit = 15;
+  final int _embeddingFetchLimit = 100;
 
   Future<void> init({bool initializeImageMlIsolate = false}) async {
     if (LocalSettings.instance.isFaceIndexingEnabled == false) {
@@ -609,7 +609,7 @@ class FaceMlService {
       sortedBylocalID.addAll(filesWithoutLocalID);
       sortedBylocalID.addAll(hiddenFiles);
       final List<List<EnteFile>> chunks =
-          sortedBylocalID.chunks(_remoteFetchLimit);
+          sortedBylocalID.chunks(_embeddingFetchLimit);
       outerLoop:
       for (final chunk in chunks) {
         final futures = <Future<bool>>[];
@@ -688,7 +688,7 @@ class FaceMlService {
         if (!await canUseHighBandwidth()) {
           continue;
         }
-        final smallerChunks = chunk.chunks(_parallelismML);
+        final smallerChunks = chunk.chunks(_fileDownloadLimit);
         for (final smallestChunk in smallerChunks) {
           for (final enteFile in smallestChunk) {
             if (isImageIndexRunning == false) {
