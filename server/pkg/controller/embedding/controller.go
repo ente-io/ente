@@ -42,7 +42,7 @@ type _fetchConfig struct {
 	MaxTimeout     gTime.Duration
 }
 
-var _defaultFetchConfig = _fetchConfig{RetryCount: 3, InitialTimeout: 5 * gTime.Second, MaxTimeout: 30 * gTime.Second}
+var _defaultFetchConfig = _fetchConfig{RetryCount: 3, InitialTimeout: 10 * gTime.Second, MaxTimeout: 30 * gTime.Second}
 var _b2FetchConfig = _fetchConfig{RetryCount: 3, InitialTimeout: 15 * gTime.Second, MaxTimeout: 30 * gTime.Second}
 
 type Controller struct {
@@ -338,7 +338,7 @@ func (c *Controller) getEmbeddingObject(ctx context.Context, objectKey string, d
 	if dc == c.S3Config.GetHotBackblazeDC() {
 		opt = _b2FetchConfig
 	}
-	ctxLogger := log.WithField("objectKey", objectKey)
+	ctxLogger := log.WithField("objectKey", objectKey).WithField("dc", dc)
 	totalAttempts := opt.RetryCount + 1
 	timeout := opt.InitialTimeout
 	for i := 0; i < totalAttempts; i++ {
