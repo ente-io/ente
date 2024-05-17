@@ -93,7 +93,6 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
         ];
       }
 
-      // TODO: add deduplication of faces of same person
       final faceIdsToClusterIds = await FaceMLDataDB.instance
           .getFaceIdsToClusterIds(faces.map((face) => face.faceID));
       final Map<String, PersonEntity> persons =

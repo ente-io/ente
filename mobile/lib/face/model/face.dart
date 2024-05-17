@@ -26,8 +26,6 @@ class Face {
 
   bool get isHighQuality => (!isBlurry) && hasHighScore;
 
-  int get visibility => detection.getVisibilityScore();
-
   int area({int? w, int? h}) {
     return detection.getFaceArea(
       fileInfo?.imageWidth ?? w ?? 0,

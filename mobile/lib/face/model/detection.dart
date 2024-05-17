@@ -1,6 +1,5 @@
 import "dart:math" show min, max;
 
-import "package:logging/logging.dart";
 import "package:photos/face/model/box.dart";
 import "package:photos/face/model/landmark.dart";
 import "package:photos/services/machine_learning/face_ml/face_detection/detection.dart";
@@ -49,48 +48,6 @@ class Detection {
 
   int getFaceArea(int imageWidth, int imageHeight) {
     return (box.width * imageWidth * box.height * imageHeight).toInt();
-  }
-
-  // TODO: iterate on better scoring logic, current is a placeholder
-  int getVisibilityScore() {
-    try {
-      if (isEmpty) {
-        return -1;
-      }
-      final double aspectRatio = box.width / box.height;
-      final double eyeDistance = (landmarks[1].x - landmarks[0].x).abs();
-      final double mouthDistance = (landmarks[4].x - landmarks[3].x).abs();
-      final double noseEyeDistance =
-          (landmarks[2].y - ((landmarks[0].y + landmarks[1].y) / 2)).abs();
-
-      final double normalizedEyeDistance = eyeDistance / box.width;
-      final double normalizedMouthDistance = mouthDistance / box.width;
-      final double normalizedNoseEyeDistance = noseEyeDistance / box.height;
-
-      const double aspectRatioThreshold = 0.8;
-      const double eyeDistanceThreshold = 0.2;
-      const double mouthDistanceThreshold = 0.3;
-      const double noseEyeDistanceThreshold = 0.1;
-
-      double score = 0;
-      if (aspectRatio >= aspectRatioThreshold) {
-        score += 50;
-      }
-      if (normalizedEyeDistance >= eyeDistanceThreshold) {
-        score += 20;
-      }
-      if (normalizedMouthDistance >= mouthDistanceThreshold) {
-        score += 20;
-      }
-      if (normalizedNoseEyeDistance >= noseEyeDistanceThreshold) {
-        score += 10;
-      }
-
-      return score.clamp(0, 100).toInt();
-    } catch (e) {
-      Logger("FaceDetection").warning('Error calculating visibility score:', e);
-      return -1;
-    }
   }
 
   FaceDirection getFaceDirection() {
