@@ -734,10 +734,7 @@ class FaceMLDataDB {
   }
 
   Future<double> getClusteredToTotalFacesRatio() async {
-    final db = await instance.asyncDB;
-
     final int totalFaces = await getTotalFaceCount();
-
     final int clusteredFaces = await getClusteredFaceCount();
 
     return clusteredFaces / totalFaces;
