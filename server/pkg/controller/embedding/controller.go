@@ -61,7 +61,7 @@ type Controller struct {
 }
 
 func New(repo *embedding.Repository, accessCtrl access.Controller, objectCleanupController *controller.ObjectCleanupController, s3Config *s3config.S3Config, queueRepo *repo.QueueRepository, taskLockingRepo *repo.TaskLockRepository, fileRepo *repo.FileRepository, collectionRepo *repo.CollectionRepository, hostName string) *Controller {
-	embeddingDcs := []string{s3Config.GetHotBackblazeDC(), s3Config.GetHotWasabiDC(), s3Config.GetDerivedStorageDataCenter()}
+	embeddingDcs := []string{s3Config.GetHotBackblazeDC(), s3Config.GetHotWasabiDC(), s3Config.GetWasabiDerivedDC(), s3Config.GetDerivedStorageDataCenter()}
 	cache := make(map[string]*s3manager.Downloader, len(embeddingDcs))
 	for i := range embeddingDcs {
 		s3Client := s3Config.GetS3Client(embeddingDcs[i])
@@ -369,22 +369,37 @@ func (c *Controller) getEmbeddingObject(ctx context.Context, objectKey string, d
 				// check if the error is due to object not found
 				if s3Err, ok := err.(awserr.RequestFailure); ok {
 					if s3Err.Code() == s3.ErrCodeNoSuchKey {
+						var srcDc, destDc string
+						destDc = c.S3Config.GetDerivedStorageDataCenter()
+						// todo:(neeraj) Refactor this later to get available the DC from the DB instead of
+						// querying the DB. This will help in case of multiple DCs and avoid querying the DB
+						// for each object.
+						// For initial migration, as we know that original DC was b2, and if the embedding is not found
+						// in the new derived DC, we can try to fetch it from the B2 DC.
 						if c.derivedStorageDataCenter != c.S3Config.GetHotBackblazeDC() {
-							// todo:(neeraj) Refactor this later to get available the DC from the DB and use that to
-							// copy the object to currently active DC for derived storage
-							// If derived and hot bucket are different, try to copy from hot bucket
-							copyEmbeddingObject, err := c.copyEmbeddingObject(ctx, objectKey, c.S3Config.GetHotBackblazeDC(), c.derivedStorageDataCenter)
-							if err == nil {
-								ctxLogger.Info("Got the object from hot bucket object")
-								return *copyEmbeddingObject, nil
-							} else {
-								ctxLogger.WithError(err).Error("Failed to copy from hot bucket object")
-							}
-							return ente.EmbeddingObject{}, stacktrace.Propagate(errors.New("object not found"), "")
+							// embeddings ideally should ideally be in the default hot bucket b2
+							srcDc = c.S3Config.GetHotBackblazeDC()
 						} else {
-							ctxLogger.Error("Object not found: ", s3Err)
-							return ente.EmbeddingObject{}, stacktrace.Propagate(errors.New("object not found"), "")
+							_, modelName, fileID := c.getEmbeddingObjectDetails(objectKey)
+							activeDcs, err := c.Repo.GetOtherDCsForFileAndModel(context.Background(), fileID, modelName, c.derivedStorageDataCenter)
+							if err != nil {
+								return ente.EmbeddingObject{}, stacktrace.Propagate(err, "failed to get other dc")
+							}
+							if len(activeDcs) > 0 {
+								srcDc = activeDcs[0]
+							} else {
+								ctxLogger.Error("Object not found in any dc ", s3Err)
+								return ente.EmbeddingObject{}, stacktrace.Propagate(errors.New("object not found"), "")
+							}
 						}
+						copyEmbeddingObject, err := c.copyEmbeddingObject(ctx, objectKey, srcDc, destDc)
+						if err == nil {
+							ctxLogger.Infof("Got object from dc %s", srcDc)
+							return *copyEmbeddingObject, nil
+						} else {
+							ctxLogger.WithError(err).Errorf("Failed to get object from fallback dc %s", srcDc)
+						}
+						return ente.EmbeddingObject{}, stacktrace.Propagate(errors.New("object not found"), "")
 					}
 				}
 				ctxLogger.Error("Failed to fetch object: ", err)

@@ -5,10 +5,9 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/lib/pq"
-
 	"github.com/ente-io/museum/ente"
 	"github.com/ente-io/stacktrace"
+	"github.com/lib/pq"
 	"github.com/sirupsen/logrus"
 )
 
@@ -109,6 +108,33 @@ func (r *Repository) GetDatacenters(ctx context.Context, fileID int64) ([]string
 		}
 		for _, dc := range datacenters {
 			uniqueDatacenters[dc] = struct{}{}
+		}
+	}
+	datacenters := make([]string, 0, len(uniqueDatacenters))
+	for dc := range uniqueDatacenters {
+		datacenters = append(datacenters, dc)
+	}
+	return datacenters, nil
+}
+
+// GetOtherDCsForFileAndModel returns the list of datacenters where the embeddings are stored for a given file and model, excluding the ignoredDC
+func (r *Repository) GetOtherDCsForFileAndModel(ctx context.Context, fileID int64, model string, ignoredDC string) ([]string, error) {
+	rows, err := r.DB.QueryContext(ctx, `SELECT datacenters FROM embeddings WHERE file_id = $1 AND model = $2`, fileID, model)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
+	uniqueDatacenters := make(map[string]bool)
+	for rows.Next() {
+		var datacenters []string
+		err = rows.Scan(pq.Array(&datacenters))
+		if err != nil {
+			return nil, stacktrace.Propagate(err, "")
+		}
+		for _, dc := range datacenters {
+			// add to uniqueDatacenters if it is not the ignoredDC
+			if dc != ignoredDC {
+				uniqueDatacenters[dc] = true
+			}
 		}
 	}
 	datacenters := make([]string, 0, len(uniqueDatacenters))

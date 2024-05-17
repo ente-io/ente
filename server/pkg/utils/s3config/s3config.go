@@ -202,6 +202,10 @@ func (config *S3Config) GetHotWasabiDC() string {
 	return dcWasabiEuropeCentral_v3
 }
 
+func (config *S3Config) GetWasabiDerivedDC() string {
+	return dcWasabiEuropeCentralDerived
+}
+
 // Return the name of the cold Scaleway data center
 func (config *S3Config) GetColdScalewayDC() string {
 	return dcSCWEuropeFrance_v3
