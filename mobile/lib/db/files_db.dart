@@ -16,7 +16,8 @@ import "package:photos/models/metadata/common_keys.dart";
 import "package:photos/services/filter/db_filters.dart";
 import 'package:photos/utils/file_uploader_util.dart';
 import "package:photos/utils/primitive_wrapper.dart";
-import 'package:sqflite/sqflite.dart';
+import "package:photos/utils/sqlite_util.dart";
+// import 'package:sqflite/sqflite.dart';
 import 'package:sqlite_async/sqlite_async.dart' as sqlite_async;
 
 class FilesDB {
