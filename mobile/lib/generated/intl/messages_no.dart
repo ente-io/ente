@@ -39,6 +39,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "cancel": MessageLookupByLibrary.simpleMessage("Avbryt"),
         "changeLocationOfSelectedItems": MessageLookupByLibrary.simpleMessage(
             "Change location of selected items?"),
+        "clusteringProgress":
+            MessageLookupByLibrary.simpleMessage("Clustering progress"),
         "confirmAccountDeletion":
             MessageLookupByLibrary.simpleMessage("Bekreft sletting av konto"),
         "confirmDeletePrompt": MessageLookupByLibrary.simpleMessage(

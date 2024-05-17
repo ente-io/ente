@@ -411,6 +411,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Club per tempo di cattura"),
         "clubByFileName":
             MessageLookupByLibrary.simpleMessage("Unisci per nome file"),
+        "clusteringProgress":
+            MessageLookupByLibrary.simpleMessage("Clustering progress"),
         "codeAppliedPageTitle":
             MessageLookupByLibrary.simpleMessage("Codice applicato"),
         "codeCopiedToClipboard": MessageLookupByLibrary.simpleMessage(

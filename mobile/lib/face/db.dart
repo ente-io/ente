@@ -725,18 +725,20 @@ class FaceMLDataDB {
     return maps.first['count'] as int;
   }
 
+  Future<int> getClusteredFaceCount() async {
+    final db = await instance.asyncDB;
+    final List<Map<String, dynamic>> maps = await db.getAll(
+      'SELECT COUNT(DISTINCT $fcFaceId) as count FROM $faceClustersTable',
+    );
+    return maps.first['count'] as int;
+  }
+
   Future<double> getClusteredToTotalFacesRatio() async {
     final db = await instance.asyncDB;
 
-    final List<Map<String, dynamic>> totalFacesMaps = await db.getAll(
-      'SELECT COUNT(*) as count FROM $facesTable WHERE $faceScore > $kMinimumQualityFaceScore AND $faceBlur > $kLaplacianHardThreshold',
-    );
-    final int totalFaces = totalFacesMaps.first['count'] as int;
+    final int totalFaces = await getTotalFaceCount();
 
-    final List<Map<String, dynamic>> clusteredFacesMaps = await db.getAll(
-      'SELECT COUNT(DISTINCT $fcFaceId) as count FROM $faceClustersTable',
-    );
-    final int clusteredFaces = clusteredFacesMaps.first['count'] as int;
+    final int clusteredFaces = await getClusteredFaceCount();
 
     return clusteredFaces / totalFaces;
   }

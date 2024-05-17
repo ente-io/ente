@@ -8783,6 +8783,16 @@ class S {
       args: [],
     );
   }
+
+  /// `Clustering progress`
+  String get clusteringProgress {
+    return Intl.message(
+      'Clustering progress',
+      name: 'clusteringProgress',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

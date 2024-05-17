@@ -49,6 +49,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Zmień hasło"),
         "checkInboxAndSpamFolder": MessageLookupByLibrary.simpleMessage(
             "Sprawdź swoją skrzynkę odbiorczą (i spam), aby zakończyć weryfikację"),
+        "clusteringProgress":
+            MessageLookupByLibrary.simpleMessage("Clustering progress"),
         "codeCopiedToClipboard": MessageLookupByLibrary.simpleMessage(
             "Kod został skopiowany do schowka"),
         "confirm": MessageLookupByLibrary.simpleMessage("Potwierdź"),

@@ -378,14 +378,16 @@ class FaceRecognitionStatusWidgetState
     });
   }
 
-  Future<(int, int, int)> getIndexStatus() async {
+  Future<(int, int, int, double)> getIndexStatus() async {
     final indexedFiles = await FaceMLDataDB.instance
         .getIndexedFileCount(minimumMlVersion: faceMlVersion);
     final indexableFiles = await FaceMlService.getIndexableFilesCount();
     final pendingFiles = max(indexableFiles - indexedFiles, 0);
     final foundFaces = await FaceMLDataDB.instance.getTotalFaceCount();
+    final clusteredFaces = await FaceMLDataDB.instance.getClusteredFaceCount();
+    final clusteringDoneRatio = clusteredFaces / foundFaces;
 
-    return (indexedFiles, pendingFiles, foundFaces);
+    return (indexedFiles, pendingFiles, foundFaces, clusteringDoneRatio);
   }
 
   @override
@@ -411,6 +413,9 @@ class FaceRecognitionStatusWidgetState
               final int indexedFiles = snapshot.data!.$1;
               final int pendingFiles = snapshot.data!.$2;
               final int foundFaces = snapshot.data!.$3;
+              final double clusteringDoneRatio = snapshot.data!.$4;
+              final double clusteringPercentage =
+                  (clusteringDoneRatio * 100).clamp(0, 100);
 
               return Column(
                 children: [
@@ -444,6 +449,18 @@ class FaceRecognitionStatusWidgetState
                     ),
                     trailingWidget: Text(
                       NumberFormat().format(foundFaces),
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                    singleBorderRadius: 8,
+                    alignCaptionedTextToLeft: true,
+                    isGestureDetectorDisabled: true,
+                  ),
+                  MenuItemWidget(
+                    captionedTextWidget: CaptionedTextWidget(
+                      title: S.of(context).clusteringProgress,
+                    ),
+                    trailingWidget: Text(
+                      "${clusteringPercentage.toStringAsFixed(0)}%",
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
                     singleBorderRadius: 8,

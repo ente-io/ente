@@ -34,6 +34,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "addViewers": m1,
         "changeLocationOfSelectedItems": MessageLookupByLibrary.simpleMessage(
             "Change location of selected items?"),
+        "clusteringProgress":
+            MessageLookupByLibrary.simpleMessage("Clustering progress"),
         "contacts": MessageLookupByLibrary.simpleMessage("Contacts"),
         "createCollaborativeLink":
             MessageLookupByLibrary.simpleMessage("Create collaborative link"),

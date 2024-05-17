@@ -447,6 +447,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Samenvoegen op tijd"),
         "clubByFileName":
             MessageLookupByLibrary.simpleMessage("Samenvoegen op bestandsnaam"),
+        "clusteringProgress":
+            MessageLookupByLibrary.simpleMessage("Clustering progress"),
         "codeAppliedPageTitle":
             MessageLookupByLibrary.simpleMessage("Code toegepast"),
         "codeCopiedToClipboard": MessageLookupByLibrary.simpleMessage(

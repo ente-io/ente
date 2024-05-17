@@ -382,6 +382,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "close": MessageLookupByLibrary.simpleMessage("关闭"),
         "clubByCaptureTime": MessageLookupByLibrary.simpleMessage("按拍摄时间分组"),
         "clubByFileName": MessageLookupByLibrary.simpleMessage("按文件名排序"),
+        "clusteringProgress":
+            MessageLookupByLibrary.simpleMessage("Clustering progress"),
         "codeAppliedPageTitle": MessageLookupByLibrary.simpleMessage("代码已应用"),
         "codeCopiedToClipboard":
             MessageLookupByLibrary.simpleMessage("代码已复制到剪贴板"),
