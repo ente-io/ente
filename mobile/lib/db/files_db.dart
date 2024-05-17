@@ -139,14 +139,8 @@ class FilesDB {
   static Future<Database>? _dbFuture;
   static Future<sqlite_async.SqliteDatabase>? _sqliteAsyncDBFuture;
 
-  @Deprecated("Use sqliteAsyncDB instead (sqlite_async)")
-  Future<Database> get database async {
-    // lazily instantiate the db the first time it is accessed
-    _dbFuture ??= _initDatabase();
-    return _dbFuture!;
-  }
-
   Future<sqlite_async.SqliteDatabase> get sqliteAsyncDB async {
+    // lazily instantiate the db the first time it is accessed
     _sqliteAsyncDBFuture ??= _initSqliteAsyncDatabase();
     return _sqliteAsyncDBFuture!;
   }
@@ -1720,8 +1714,7 @@ class FilesDB {
   }) async {
     final db = await instance.sqliteAsyncDB;
     final order = (asc ?? false ? 'ASC' : 'DESC');
-    final results = await db.getAll(
-      '''
+    String query = '''
       SELECT * FROM $filesTable 
       WHERE $columnLatitude IS NOT NULL AND $columnLongitude IS NOT NULL AND
       ($columnLatitude IS NOT 0 OR $columnLongitude IS NOT 0) AND 
@@ -1729,9 +1722,18 @@ class FilesDB {
       ($columnLocalID IS NOT NULL OR ($columnCollectionID IS NOT NULL AND 
       $columnCollectionID IS NOT -1)) 
       ORDER BY $columnCreationTime $order, $columnModificationTime $order
-      LIMIT $limit
-      ''',
-      [startTime, endTime],
+      ''';
+
+    final args = [startTime, endTime];
+
+    if (limit != null) {
+      query += ' LIMIT ?';
+      args.add(limit);
+    }
+
+    final results = await db.getAll(
+      query,
+      args,
     );
     final files = convertToFiles(results);
     final List<EnteFile> filteredFiles =

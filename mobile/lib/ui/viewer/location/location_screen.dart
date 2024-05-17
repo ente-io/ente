@@ -146,6 +146,8 @@ class _LocationGalleryWidgetState extends State<LocationGalleryWidget> {
   late final StreamSubscription<LocalPhotosUpdatedEvent> _filesUpdateEvent;
   @override
   void initState() {
+    super.initState();
+
     final collectionsToHide =
         CollectionsService.instance.archivedOrHiddenCollectionIds();
     fileLoadResult = FilesDB.instance
@@ -179,8 +181,6 @@ class _LocationGalleryWidgetState extends State<LocationGalleryWidget> {
     });
 
     galleryHeaderWidget = const GalleryHeaderWidget();
-
-    super.initState();
   }
 
   @override
