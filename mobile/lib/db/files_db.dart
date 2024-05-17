@@ -1746,7 +1746,7 @@ class FilesDB {
     final results = await db.getAll(
       '''
       SELECT DISTINCT $columnUploadedFileID FROM $filesTable
-      WHERE $columnOwnerID = ? AND $columnUploadedFileID IS NOT NULL AND
+      WHERE ($columnOwnerID = ? AND $columnUploadedFileID IS NOT NULL AND
       $columnUploadedFileID IS NOT -1)    
     ''',
       [ownerID],
