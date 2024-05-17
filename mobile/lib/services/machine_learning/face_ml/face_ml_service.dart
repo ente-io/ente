@@ -1309,18 +1309,9 @@ class FaceMlService {
   }
 
   static Future<int> getIndexableFilesCount() async {
-    final List<EnteFile> enteFiles = await SearchService.instance.getAllFiles();
-    final List<EnteFile> indexableFiles = [];
-    for (final enteFile in enteFiles) {
-      if (!enteFile.isUploaded || enteFile.isOwner == false) {
-        continue;
-      }
-      if (enteFile.fileType == FileType.other) {
-        continue;
-      }
-      indexableFiles.add(enteFile);
-    }
-    return indexableFiles.length;
+    final indexableFileIDs = await FilesDB.instance
+        .getOwnedFileIDs(Configuration.instance.getUserID()!);
+    return indexableFileIDs.length;
   }
 
   bool _skipAnalysisEnteFile(EnteFile enteFile, Map<int, int> indexedFileIds) {
