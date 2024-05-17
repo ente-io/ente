@@ -470,7 +470,7 @@ class FaceRecognitionStatusWidgetState
                 ],
               );
             }
-            return const SizedBox.shrink();
+            return const EnteLoadingWidget();
           },
         ),
       ],
