@@ -17,7 +17,6 @@ import "package:photos/services/filter/db_filters.dart";
 import 'package:photos/utils/file_uploader_util.dart';
 import "package:photos/utils/primitive_wrapper.dart";
 import 'package:sqflite/sqflite.dart';
-import 'package:sqflite_migration/sqflite_migration.dart';
 import 'package:sqlite_async/sqlite_async.dart' as sqlite_async;
 
 class FilesDB {
@@ -74,10 +73,8 @@ class FilesDB {
   // we need to write query based on that field
   static const columnMMdVisibility = 'mmd_visibility';
 
-  static final initializationScript = [
-    ...createTable(filesTable),
-  ];
   static final migrationScripts = [
+    ...createTable(filesTable),
     ...alterDeviceFolderToAllowNULL(),
     ...alterTimestampColumnTypes(),
     ...addIndices(),
@@ -125,18 +122,12 @@ class FilesDB {
     columnAddedTime,
   ];
 
-  final dbConfig = MigrationConfig(
-    initializationScript: initializationScript,
-    migrationScripts: migrationScripts,
-  );
-
   // make this a singleton class
   FilesDB._privateConstructor();
 
   static final FilesDB instance = FilesDB._privateConstructor();
 
   // only have a single app-wide reference to the database
-  static Future<Database>? _dbFuture;
   static Future<sqlite_async.SqliteDatabase>? _sqliteAsyncDBFuture;
 
   Future<sqlite_async.SqliteDatabase> get sqliteAsyncDB async {
@@ -146,20 +137,31 @@ class FilesDB {
   }
 
   // this opens the database (and creates it if it doesn't exist)
-  Future<Database> _initDatabase() async {
-    final Directory documentsDirectory =
-        await getApplicationDocumentsDirectory();
-    final String path = join(documentsDirectory.path, _databaseName);
-    _logger.info("DB path " + path);
-    return await openDatabaseWithMigration(path, dbConfig);
-  }
-
   Future<sqlite_async.SqliteDatabase> _initSqliteAsyncDatabase() async {
     final Directory documentsDirectory =
         await getApplicationDocumentsDirectory();
     final String path = join(documentsDirectory.path, _databaseName);
     _logger.info("DB path " + path);
-    return sqlite_async.SqliteDatabase(path: path);
+    final migrations = getMigrations();
+    final database = sqlite_async.SqliteDatabase(path: path);
+    await migrations.migrate(database);
+    return database;
+  }
+
+  sqlite_async.SqliteMigrations getMigrations() {
+    final numberOfMigrationScripts = migrationScripts.length;
+    final migrations = sqlite_async.SqliteMigrations();
+    for (int i = 0; i < numberOfMigrationScripts; i++) {
+      migrations.add(
+        sqlite_async.SqliteMigration(
+          i + 1,
+          (tx) async {
+            await tx.execute(migrationScripts[i]);
+          },
+        ),
+      );
+    }
+    return migrations;
   }
 
   // SQL code to create the database table
@@ -443,7 +445,7 @@ class FilesDB {
           await getApplicationDocumentsDirectory();
       final String path = join(documentsDirectory.path, _databaseName);
       File(path).deleteSync(recursive: true);
-      _dbFuture = null;
+      _sqliteAsyncDBFuture = null;
     }
   }
 
