@@ -29,19 +29,15 @@ PODS:
   - ReachabilitySwift (5.2.2)
   - screen_retriever (0.0.1):
     - FlutterMacOS
-  - Sentry/HybridSDK (8.21.0):
-    - SentryPrivate (= 8.21.0)
-  - sentry_flutter (0.0.1):
+  - Sentry/HybridSDK (8.25.0)
+  - sentry_flutter (7.20.1):
     - Flutter
     - FlutterMacOS
-    - Sentry/HybridSDK (= 8.21.0)
-  - SentryPrivate (8.21.0)
+    - Sentry/HybridSDK (= 8.25.0)
   - share_plus (0.0.1):
     - FlutterMacOS
   - shared_preferences_foundation (0.0.1):
     - Flutter
-    - FlutterMacOS
-  - smart_auth (0.0.1):
     - FlutterMacOS
   - sodium_libs (2.2.1):
     - FlutterMacOS
@@ -59,7 +55,7 @@ PODS:
     - sqlite3/common
   - sqlite3_flutter_libs (0.0.1):
     - FlutterMacOS
-    - sqlite3 (~> 3.45.1)
+    - "sqlite3 (~> 3.45.3+1)"
     - sqlite3/fts5
     - sqlite3/perf-threadsafe
     - sqlite3/rtree
@@ -87,7 +83,6 @@ DEPENDENCIES:
   - sentry_flutter (from `Flutter/ephemeral/.symlinks/plugins/sentry_flutter/macos`)
   - share_plus (from `Flutter/ephemeral/.symlinks/plugins/share_plus/macos`)
   - shared_preferences_foundation (from `Flutter/ephemeral/.symlinks/plugins/shared_preferences_foundation/darwin`)
-  - smart_auth (from `Flutter/ephemeral/.symlinks/plugins/smart_auth/macos`)
   - sodium_libs (from `Flutter/ephemeral/.symlinks/plugins/sodium_libs/macos`)
   - sqflite (from `Flutter/ephemeral/.symlinks/plugins/sqflite/darwin`)
   - sqlite3_flutter_libs (from `Flutter/ephemeral/.symlinks/plugins/sqlite3_flutter_libs/macos`)
@@ -100,7 +95,6 @@ SPEC REPOS:
     - OrderedSet
     - ReachabilitySwift
     - Sentry
-    - SentryPrivate
     - sqlite3
 
 EXTERNAL SOURCES:
@@ -136,8 +130,6 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral/.symlinks/plugins/share_plus/macos
   shared_preferences_foundation:
     :path: Flutter/ephemeral/.symlinks/plugins/shared_preferences_foundation/darwin
-  smart_auth:
-    :path: Flutter/ephemeral/.symlinks/plugins/smart_auth/macos
   sodium_libs:
     :path: Flutter/ephemeral/.symlinks/plugins/sodium_libs/macos
   sqflite:
@@ -167,16 +159,14 @@ SPEC CHECKSUMS:
   path_provider_foundation: 3784922295ac71e43754bd15e0653ccfd36a147c
   ReachabilitySwift: 2128f3a8c9107e1ad33574c6e58e8285d460b149
   screen_retriever: 59634572a57080243dd1bf715e55b6c54f241a38
-  Sentry: ebc12276bd17613a114ab359074096b6b3725203
-  sentry_flutter: dff1df05dc39c83d04f9330b36360fc374574c5e
-  SentryPrivate: d651efb234cf385ec9a1cdd3eff94b5e78a0e0fe
+  Sentry: cd86fc55628f5b7c572cabe66cc8f95a9d2f165a
+  sentry_flutter: 4cb24c1055c556d7b27262ab2e179d1e5a0b9b0c
   share_plus: 76dd39142738f7a68dd57b05093b5e8193f220f7
   shared_preferences_foundation: b4c3b4cddf1c21f02770737f147a3f5da9d39695
-  smart_auth: b38e3ab4bfe089eacb1e233aca1a2340f96c28e9
   sodium_libs: d39bd76697736cb11ce4a0be73b9b4bc64466d6f
   sqflite: 673a0e54cc04b7d6dba8d24fb8095b31c3a99eec
   sqlite3: 02d1f07eaaa01f80a1c16b4b31dfcbb3345ee01a
-  sqlite3_flutter_libs: 06a05802529659a272beac4ee1350bfec294f386
+  sqlite3_flutter_libs: 8d204ef443cf0d5c1c8b058044eab53f3943a9c5
   tray_manager: 9064e219c56d75c476e46b9a21182087930baf90
   url_launcher_macos: d2691c7dd33ed713bf3544850a623080ec693d95
   window_manager: 3a1844359a6295ab1e47659b1a777e36773cd6e8
