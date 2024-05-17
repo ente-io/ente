@@ -126,6 +126,7 @@ class FaceMlService {
       }
 
       isInitialized = true;
+      canRunMLController = !Platform.isAndroid;
 
       /// hooking FaceML into [MachineLearningController]
       if (Platform.isAndroid) {
