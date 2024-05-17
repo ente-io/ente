@@ -987,7 +987,7 @@
   "fileTypesAndNames": "File types and names",
   "location": "Location",
   "moments": "Moments",
-  "searchFaceEmptySection": "Persons will be shown here once local analysis is complete",
+  "searchFaceEmptySection": "Persons will be shown here once indexing is done",
   "searchDatesEmptySection": "Search by a date, month or year",
   "searchLocationEmptySection": "Group photos that are taken within some radius of a photo",
   "searchPeopleEmptySection": "Invite people, and you'll see all photos shared by them here",

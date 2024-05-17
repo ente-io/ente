@@ -6969,10 +6969,10 @@ class S {
     );
   }
 
-  /// `Persons will be shown here once local analysis is complete`
+  /// `Persons will be shown here once indexing is done`
   String get searchFaceEmptySection {
     return Intl.message(
-      'Persons will be shown here once local analysis is complete',
+      'Persons will be shown here once indexing is done',
       name: 'searchFaceEmptySection',
       desc: '',
       args: [],

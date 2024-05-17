@@ -1224,7 +1224,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "searchDatesEmptySection": MessageLookupByLibrary.simpleMessage(
             "Search by a date, month or year"),
         "searchFaceEmptySection": MessageLookupByLibrary.simpleMessage(
-            "Persons will be shown here once local analysis is complete"),
+            "Persons will be shown here once indexing is done"),
         "searchFileTypesAndNamesEmptySection":
             MessageLookupByLibrary.simpleMessage("File types and names"),
         "searchHint1":
