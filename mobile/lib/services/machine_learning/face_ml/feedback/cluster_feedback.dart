@@ -463,7 +463,6 @@ class ClusterFeedbackService {
   Future<void> createFakeClustersByBlurValue() async {
     try {
       // Delete old clusters
-      await FaceMLDataDB.instance.resetClusterIDs();
       await FaceMLDataDB.instance.dropClustersAndPersonTable();
       final List<PersonEntity> persons =
           await PersonService.instance.getPersons();

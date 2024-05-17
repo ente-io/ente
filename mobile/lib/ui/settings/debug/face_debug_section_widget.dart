@@ -64,8 +64,8 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
               if (snapshot.hasData) {
                 return CaptionedTextWidget(
                   title: LocalSettings.instance.isFaceIndexingEnabled
-                      ? "Disable faces (${snapshot.data!})"
-                      : "Enable faces (${snapshot.data!})",
+                      ? "Disable faces (${snapshot.data!} files done)"
+                      : "Enable faces (${snapshot.data!} files done)",
                 );
               }
               return const SizedBox.shrink();
@@ -90,6 +90,7 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
             }
           },
         ),
+        sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: FutureBuilder<int>(
             future: FaceMLDataDB.instance.getIndexedFileCount(),
@@ -119,64 +120,7 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
             }
           },
         ),
-        // MenuItemWidget(
-        //   captionedTextWidget: FutureBuilder<int>(
-        //     future: FaceMLDataDB.instance.getTotalFaceCount(),
-        //     builder: (context, snapshot) {
-        //       if (snapshot.hasData) {
-        //         return CaptionedTextWidget(
-        //           title: "${snapshot.data!} high quality faces",
-        //         );
-        //       }
-        //       return const SizedBox.shrink();
-        //     },
-        //   ),
-        //   pressedColor: getEnteColorScheme(context).fillFaint,
-        //   trailingIcon: Icons.chevron_right_outlined,
-        //   trailingIconIsMuted: true,
-        //   onTap: () async {
-        //     final faces75 = await FaceMLDataDB.instance
-        //         .getTotalFaceCount(minFaceScore: 0.75);
-        //     final faces78 = await FaceMLDataDB.instance
-        //         .getTotalFaceCount(minFaceScore: kMinHighQualityFaceScore);
-        //     final blurryFaceCount =
-        //         await FaceMLDataDB.instance.getBlurryFaceCount(15);
-        //     showShortToast(context, "$blurryFaceCount blurry faces");
-        //   },
-        // ),
-        // MenuItemWidget(
-        //   captionedTextWidget: const CaptionedTextWidget(
-        //     title: "Analyze file ID 25728869",
-        //   ),
-        //   pressedColor: getEnteColorScheme(context).fillFaint,
-        //   trailingIcon: Icons.chevron_right_outlined,
-        //   trailingIconIsMuted: true,
-        //   onTap: () async {
-        //     try {
-        //       final enteFile = await SearchService.instance.getAllFiles().then(
-        //             (value) => value.firstWhere(
-        //               (element) => element.uploadedFileID == 25728869,
-        //             ),
-        //           );
-        //       _logger.info(
-        //         'File with ID ${enteFile.uploadedFileID} has name ${enteFile.displayName}',
-        //       );
-        //       FaceMlService.instance.isImageIndexRunning = true;
-        //       final result = await FaceMlService.instance
-        //           .analyzeImageInSingleIsolate(enteFile);
-        //       if (result != null) {
-        //         final resultJson = result.toJsonString();
-        //         _logger.info('result: $resultJson');
-        //       }
-        //       FaceMlService.instance.isImageIndexRunning = false;
-        //     } catch (e, s) {
-        //       _logger.severe('indexing failed ', e, s);
-        //       await showGenericErrorDialog(context: context, error: e);
-        //     } finally {
-        //       FaceMlService.instance.isImageIndexRunning = false;
-        //     }
-        //   },
-        // ),
+        sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: FutureBuilder<double>(
             future: FaceMLDataDB.instance.getClusteredToTotalFacesRatio(),
@@ -202,25 +146,6 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
               showShortToast(context, "Done");
             } catch (e, s) {
               _logger.warning('clustering failed ', e, s);
-              await showGenericErrorDialog(context: context, error: e);
-            }
-          },
-        ),
-        sectionOptionSpacing,
-        MenuItemWidget(
-          captionedTextWidget: const CaptionedTextWidget(
-            title: "Reset feedback",
-          ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
-          trailingIcon: Icons.chevron_right_outlined,
-          trailingIconIsMuted: true,
-          onTap: () async {
-            try {
-              await FaceMLDataDB.instance.dropFeedbackTables();
-              Bus.instance.fire(PeopleChangedEvent());
-              showShortToast(context, "Done");
-            } catch (e, s) {
-              _logger.warning('reset feedback failed ', e, s);
               await showGenericErrorDialog(context: context, error: e);
             }
           },
@@ -254,67 +179,6 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
-            title: "Reset feedback & clusters",
-          ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
-          trailingIcon: Icons.chevron_right_outlined,
-          trailingIconIsMuted: true,
-          alwaysShowSuccessState: true,
-          onTap: () async {
-            await showChoiceDialog(
-              context,
-              title: "Are you sure?",
-              body:
-                  "You will need to again cluster all the faces. You can drop feedback if you want to return to original cluster labels",
-              firstButtonLabel: "Yes, confirm",
-              firstButtonOnTap: () async {
-                try {
-                  await FaceMLDataDB.instance.resetClusterIDs();
-                  await FaceMLDataDB.instance.dropClustersAndPersonTable();
-                  Bus.instance.fire(PeopleChangedEvent());
-                  showShortToast(context, "Done");
-                } catch (e, s) {
-                  _logger.warning('reset feedback failed ', e, s);
-                  await showGenericErrorDialog(context: context, error: e);
-                }
-              },
-            );
-          },
-        ),
-        sectionOptionSpacing,
-        MenuItemWidget(
-          captionedTextWidget: const CaptionedTextWidget(
-            title: "Drop People and clusterMapping",
-          ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
-          trailingIcon: Icons.chevron_right_outlined,
-          trailingIconIsMuted: true,
-          onTap: () async {
-            await showChoiceDialog(
-              context,
-              title: "Are you sure?",
-              body:
-                  "This will delete the people and all respective mappings of people to clusters",
-              firstButtonLabel: "Yes, confirm",
-              firstButtonOnTap: () async {
-                try {
-                  final List<PersonEntity> persons =
-                      await PersonService.instance.getPersons();
-                  for (final PersonEntity p in persons) {
-                    await PersonService.instance.deletePerson(p.remoteID);
-                  }
-                  Bus.instance.fire(PeopleChangedEvent());
-                  showShortToast(context, "Done");
-                } catch (e, s) {
-                  _logger.warning('peopleToPersonMapping remove failed ', e, s);
-                  await showGenericErrorDialog(context: context, error: e);
-                }
-              },
-            );
-          },
-        ),
-        MenuItemWidget(
-          captionedTextWidget: const CaptionedTextWidget(
             title: "Sync person mappings ",
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
@@ -331,38 +195,72 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
             }
           },
         ),
-        // sectionOptionSpacing,
-        // MenuItemWidget(
-        //   captionedTextWidget: const CaptionedTextWidget(
-        //     title: "Rank blurs",
-        //   ),
-        //   pressedColor: getEnteColorScheme(context).fillFaint,
-        //   trailingIcon: Icons.chevron_right_outlined,
-        //   trailingIconIsMuted: true,
-        //   onTap: () async {
-        //     await showChoiceDialog(
-        //       context,
-        //       title: "Are you sure?",
-        //       body:
-        //           "This will delete all clusters and put blurry faces in separate clusters per ten points.",
-        //       firstButtonLabel: "Yes, confirm",
-        //       firstButtonOnTap: () async {
-        //         try {
-        //           await ClusterFeedbackService.instance
-        //               .createFakeClustersByBlurValue();
-        //           showShortToast(context, "Done");
-        //         } catch (e, s) {
-        //           _logger.warning('Failed to rank faces on blur values ', e, s);
-        //           await showGenericErrorDialog(context: context, error: e);
-        //         }
-        //       },
-        //     );
-        //   },
-        // ),
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
-            title: "Drop embeddings & feedback",
+            title: "Reset feedback",
+          ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          alwaysShowSuccessState: true,
+          onTap: () async {
+            await showChoiceDialog(
+              context,
+              title: "Are you sure?",
+              body:
+                  "This will drop all people and their related feedback. It will keep clustering labels and embeddings untouched.",
+              firstButtonLabel: "Yes, confirm",
+              firstButtonOnTap: () async {
+                try {
+                  await FaceMLDataDB.instance.dropFeedbackTables();
+                  Bus.instance.fire(PeopleChangedEvent());
+                  showShortToast(context, "Done");
+                } catch (e, s) {
+                  _logger.warning('reset feedback failed ', e, s);
+                  await showGenericErrorDialog(context: context, error: e);
+                }
+              },
+            );
+          },
+        ),
+        sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            title: "Reset feedback and clustering",
+          ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async {
+            await showChoiceDialog(
+              context,
+              title: "Are you sure?",
+              body:
+                  "This will delete all people, their related feedback and clustering labels. It will keep embeddings untouched.",
+              firstButtonLabel: "Yes, confirm",
+              firstButtonOnTap: () async {
+                try {
+                  final List<PersonEntity> persons =
+                      await PersonService.instance.getPersons();
+                  for (final PersonEntity p in persons) {
+                    await PersonService.instance.deletePerson(p.remoteID);
+                  }
+                  await FaceMLDataDB.instance.dropClustersAndPersonTable();
+                  Bus.instance.fire(PeopleChangedEvent());
+                  showShortToast(context, "Done");
+                } catch (e, s) {
+                  _logger.warning('peopleToPersonMapping remove failed ', e, s);
+                  await showGenericErrorDialog(context: context, error: e);
+                }
+              },
+            );
+          },
+        ),
+        sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            title: "Reset everything (embeddings)",
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
@@ -388,47 +286,6 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
             );
           },
         ),
-        if (kDebugMode) sectionOptionSpacing,
-        if (kDebugMode)
-          MenuItemWidget(
-            captionedTextWidget: FutureBuilder<int>(
-              future: FaceMLDataDB.instance.getIndexedFileCount(),
-              builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  return CaptionedTextWidget(
-                    title: "Read embeddings for ${snapshot.data!} files",
-                  );
-                }
-                return const CaptionedTextWidget(
-                  title: "Loading...",
-                );
-              },
-            ),
-            pressedColor: getEnteColorScheme(context).fillFaint,
-            trailingIcon: Icons.chevron_right_outlined,
-            trailingIconIsMuted: true,
-            onTap: () async {
-              final int totalFaces =
-                  await FaceMLDataDB.instance.getTotalFaceCount();
-              _logger.info('start reading embeddings for $totalFaces faces');
-              final time = DateTime.now();
-              try {
-                final result = await FaceMLDataDB.instance
-                    .getFaceEmbeddingMap(maxFaces: totalFaces);
-                final endTime = DateTime.now();
-                _logger.info(
-                  'Read embeddings of ${result.length} faces in ${time.difference(endTime).inSeconds} secs',
-                );
-                showShortToast(
-                  context,
-                  "Read embeddings of ${result.length} faces in ${time.difference(endTime).inSeconds} secs",
-                );
-              } catch (e, s) {
-                _logger.warning('read embeddings failed ', e, s);
-                await showGenericErrorDialog(context: context, error: e);
-              }
-            },
-          ),
       ],
     );
   }

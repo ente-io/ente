@@ -576,60 +576,6 @@ class FaceMLDataDB {
     }
   }
 
-  /// Returns a map of faceID to record of clusterId and faceEmbeddingBlob
-  ///
-  /// Only selects faces with score greater than [minScore] and blur score greater than [minClarity]
-  Future<Map<String, (int?, Uint8List)>> getFaceEmbeddingMap({
-    double minScore = kMinimumQualityFaceScore,
-    int minClarity = kLaplacianHardThreshold,
-    int maxFaces = 20000,
-    int offset = 0,
-    int batchSize = 10000,
-  }) async {
-    final EnteWatch w = EnteWatch("getFaceEmbeddingMap")..start();
-    w.logAndReset(
-      'reading as float offset: $offset, maxFaces: $maxFaces, batchSize: $batchSize',
-    );
-    final db = await instance.asyncDB;
-
-    final Map<String, (int?, Uint8List)> result = {};
-    while (true) {
-      // Query a batch of rows
-      final List<Map<String, dynamic>> maps = await db.getAll(
-        'SELECT $faceIDColumn, $faceEmbeddingBlob FROM $facesTable'
-        ' WHERE $faceScore > $minScore AND $faceBlur > $minClarity'
-        ' ORDER BY $faceIDColumn'
-        ' DESC LIMIT $batchSize OFFSET $offset',
-        // facesTable,
-        // columns: [faceIDColumn, faceEmbeddingBlob],
-        // where: '$faceScore > $minScore and $faceBlur > $minClarity',
-        // limit: batchSize,
-        // offset: offset,
-        // orderBy: '$faceIDColumn DESC',
-      );
-      // Break the loop if no more rows
-      if (maps.isEmpty) {
-        break;
-      }
-      final List<String> faceIds = [];
-      for (final map in maps) {
-        faceIds.add(map[faceIDColumn] as String);
-      }
-      final faceIdToClusterId = await getFaceIdsToClusterIds(faceIds);
-      for (final map in maps) {
-        final faceID = map[faceIDColumn] as String;
-        result[faceID] =
-            (faceIdToClusterId[faceID], map[faceEmbeddingBlob] as Uint8List);
-      }
-      if (result.length >= maxFaces) {
-        break;
-      }
-      offset += batchSize;
-    }
-    w.stopWithLog('done reading face embeddings ${result.length}');
-    return result;
-  }
-
   Future<Map<String, Uint8List>> getFaceEmbeddingMapForFile(
     List<int> fileIDs,
   ) async {
@@ -750,6 +696,7 @@ class FaceMLDataDB {
     return maps.first['count'] as int;
   }
 
+  /// WARNING: This method does not drop the persons and other feedback. Consider using [dropClustersAndPersonTable] instead.
   Future<void> resetClusterIDs() async {
     try {
       final db = await instance.asyncDB;
@@ -972,12 +919,15 @@ class FaceMLDataDB {
 
       await db.execute(deletePersonTable);
       await db.execute(dropClusterPersonTable);
-      await db.execute(dropClusterSummaryTable);
       await db.execute(dropNotPersonFeedbackTable);
-
+      await db.execute(dropClusterSummaryTable);
+      await db.execute(dropFaceClustersTable);
+      
       await db.execute(createClusterPersonTable);
       await db.execute(createNotPersonFeedbackTable);
       await db.execute(createClusterSummaryTable);
+      await db.execute(createFaceClustersTable);
+      await db.execute(fcClusterIDIndex);
     } catch (e, s) {
       _logger.severe('Error dropping clusters and person table', e, s);
     }
