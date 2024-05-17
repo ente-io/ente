@@ -241,7 +241,7 @@ const uniqueSavePath = (dirPath: string, fileName: string) => {
  *
  * @param webContents The renderer to configure.
  */
-export const allowExternalLinks = (webContents: WebContents) => {
+export const allowExternalLinks = (webContents: WebContents) =>
     // By default, if the user were open a link, say
     // https://github.com/ente-io/ente/discussions, then it would open a _new_
     // BrowserWindow within our app.
@@ -259,7 +259,27 @@ export const allowExternalLinks = (webContents: WebContents) => {
             return { action: "allow" };
         }
     });
-};
+
+/**
+ * Allow uploading to arbitrary S3 buckets.
+ *
+ * The files in the desktop app are served over the ente:// protocol. During
+ * testing or self-hosting, we might be using a S3 bucket that does not allow
+ * whitelisting a custom URI scheme. To avoid requiring the bucket to set an
+ * "Access-Control-Allow-Origin: *" or do a echo-back of `Origin`, we add a
+ * workaround here instead, intercepting the ACAO header and allowing `*`.
+ */
+export const allowAllCORSOrigins = (webContents: WebContents) =>
+    webContents.session.webRequest.onHeadersReceived(
+        ({ responseHeaders }, callback) => {
+            const headers: NonNullable<typeof responseHeaders> = {};
+            for (const [key, value] of Object.entries(responseHeaders ?? {}))
+                if (key.toLowerCase() != "access-control-allow-origin")
+                    headers[key] = value;
+            headers["Access-Control-Allow-Origin"] = ["*"];
+            callback({ responseHeaders: headers });
+        },
+    );
 
 /**
  * Add an icon for our app in the system tray.
@@ -390,8 +410,10 @@ const main = () => {
             registerStreamProtocol();
 
             // Configure the renderer's environment.
-            setDownloadPath(mainWindow.webContents);
-            allowExternalLinks(mainWindow.webContents);
+            const webContents = mainWindow.webContents;
+            setDownloadPath(webContents);
+            allowExternalLinks(webContents);
+            allowAllCORSOrigins(webContents);
 
             // Start loading the renderer.
             void mainWindow.loadURL(rendererURL);
