@@ -119,7 +119,6 @@ export interface MlFileData {
     imageDimensions?: Dimensions;
     mlVersion: number;
     errorCount: number;
-    lastErrorMessage?: string;
 }
 
 export interface MLSearchConfig {

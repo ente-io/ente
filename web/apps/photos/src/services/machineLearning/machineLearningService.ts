@@ -436,7 +436,6 @@ class MachineLearningService {
             await fetchImageBitmapForContext(fileContext);
             await syncFileAnalyzeFaces(fileContext);
             newMlFile.errorCount = 0;
-            newMlFile.lastErrorMessage = undefined;
             await this.persistOnServer(newMlFile, enteFile);
             await mlIDbStorage.putFile(newMlFile);
         } catch (e) {
@@ -484,7 +483,7 @@ class MachineLearningService {
                     mlFileData = this.newMlData(enteFile.id);
                 }
                 mlFileData.errorCount = (mlFileData.errorCount || 0) + 1;
-                mlFileData.lastErrorMessage = e.message;
+                console.error(`lastError for ${enteFile.id}`, e);
 
                 return mlFileData;
             });
@@ -543,19 +542,14 @@ class ServerFileMl {
 class ServerFaceEmbeddings {
     public faces: ServerFace[];
     public version: number;
+    /* TODO
     public client?: string;
     public error?: boolean;
+    */
 
-    public constructor(
-        faces: ServerFace[],
-        version: number,
-        client?: string,
-        error?: boolean,
-    ) {
+    public constructor(faces: ServerFace[], version: number) {
         this.faces = faces;
         this.version = version;
-        this.client = client;
-        this.error = error;
     }
 }
 
@@ -613,10 +607,7 @@ class ServerFaceBox {
 function LocalFileMlDataToServerFileMl(
     localFileMlData: MlFileData,
 ): ServerFileMl {
-    if (
-        localFileMlData.errorCount > 0 &&
-        localFileMlData.lastErrorMessage !== undefined
-    ) {
+    if (localFileMlData.errorCount > 0) {
         return null;
     }
     const imageDimensions = localFileMlData.imageDimensions;
@@ -640,6 +631,7 @@ function LocalFileMlDataToServerFileMl(
             } as Landmark);
         }
 
+        // TODO: Add client UA and version
         const newFaceObject = new ServerFace(
             faceID,
             Array.from(embedding),
@@ -649,11 +641,7 @@ function LocalFileMlDataToServerFileMl(
         );
         faces.push(newFaceObject);
     }
-    const faceEmbeddings = new ServerFaceEmbeddings(
-        faces,
-        1,
-        localFileMlData.lastErrorMessage,
-    );
+    const faceEmbeddings = new ServerFaceEmbeddings(faces, 1);
     return new ServerFileMl(
         localFileMlData.fileId,
         faceEmbeddings,
