@@ -21,7 +21,6 @@ import type { EnteFile } from "types/file";
 import {
     clamp,
     createGrayscaleIntMatrixFromNormalized2List,
-    cropWithRotation,
     fetchImageBitmap,
     getLocalFileImageBitmap,
     getThumbnailImageBitmap,
