@@ -558,14 +558,16 @@ const padImage = (image: number[][], direction: FaceDirection): number[][] => {
             }
         }
     } else if (direction === "left") {
-        // If the face is facing left, we only take the right side of the face image.
+        // If the face is facing left, we only take the right side of the face
+        // image.
         for (let i = 0; i < numRows; i++) {
             for (let j = 0; j < paddedNumCols - 2; j++) {
                 paddedImage[i + 1][j + 1] = image[i][j + removeSideColumns];
             }
         }
     } else if (direction === "right") {
-        // If the face is facing right, we only take the left side of the face image.
+        // If the face is facing right, we only take the left side of the face
+        // image.
         for (let i = 0; i < numRows; i++) {
             for (let j = 0; j < paddedNumCols - 2; j++) {
                 paddedImage[i + 1][j + 1] = image[i][j];
@@ -574,15 +576,19 @@ const padImage = (image: number[][], direction: FaceDirection): number[][] => {
     }
 
     // Reflect padding
-    // Top and bottom rows
+    // - Top and bottom rows
     for (let j = 1; j <= paddedNumCols - 2; j++) {
-        paddedImage[0][j] = paddedImage[2][j]; // Top row
-        paddedImage[numRows + 1][j] = paddedImage[numRows - 1][j]; // Bottom row
+        // Top row
+        paddedImage[0][j] = paddedImage[2][j];
+        // Bottom row
+        paddedImage[numRows + 1][j] = paddedImage[numRows - 1][j];
     }
-    // Left and right columns
+    // - Left and right columns
     for (let i = 0; i < numRows + 2; i++) {
-        paddedImage[i][0] = paddedImage[i][2]; // Left column
-        paddedImage[i][paddedNumCols - 1] = paddedImage[i][paddedNumCols - 3]; // Right column
+        // Left column
+        paddedImage[i][0] = paddedImage[i][2];
+        // Right column
+        paddedImage[i][paddedNumCols - 1] = paddedImage[i][paddedNumCols - 3];
     }
 
     return paddedImage;
