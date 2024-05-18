@@ -157,26 +157,24 @@ const detectFaces = async (
 ): Promise<Array<FaceDetection>> => {
     const maxFaceDistancePercent = Math.sqrt(2) / 100;
     const maxFaceDistance = imageBitmap.width * maxFaceDistancePercent;
-    const preprocessResult = preprocessImageBitmapToFloat32ChannelsFirst(
-        imageBitmap,
-        640,
-        640,
-    );
-    const data = preprocessResult.data;
-    const resized = preprocessResult.newSize;
-    const outputData = await workerBridge.detectFaces(data);
-    const faces = getFacesFromYOLOOutput(outputData as Float32Array, 0.7);
-    const inBox = newBox(0, 0, resized.width, resized.height);
+    const { yoloInput, yoloSize } =
+        convertToYOLOInputFloat32ChannelsFirst(imageBitmap);
+    const yoloOutput = await workerBridge.detectFaces(yoloInput);
+    const faces = getFacesFromYOLOOutput(yoloOutput, 0.7);
+    const inBox = newBox(0, 0, yoloSize.width, yoloSize.height);
     const toBox = newBox(0, 0, imageBitmap.width, imageBitmap.height);
     const faceDetections = transformFaceDetections(faces, inBox, toBox);
     return removeDuplicateDetections(faceDetections, maxFaceDistance);
 };
 
-const preprocessImageBitmapToFloat32ChannelsFirst = (
-    imageBitmap: ImageBitmap,
-    requiredWidth: number,
-    requiredHeight: number,
-) => {
+/**
+ * Convert {@link imageBitmap} into the format that the YOLO face detection
+ * model expects.
+ */
+const convertToYOLOInputFloat32ChannelsFirst = (imageBitmap: ImageBitmap) => {
+    const requiredWidth = 640;
+    const requiredHeight = 640;
+
     const width = imageBitmap.width;
     const height = imageBitmap.height;
 
@@ -193,9 +191,8 @@ const preprocessImageBitmapToFloat32ChannelsFirst = (
     const scaledWidth = clamp(Math.round(width * scale), 0, requiredWidth);
     const scaledHeight = clamp(Math.round(height * scale), 0, requiredHeight);
 
-    const processedImage = new Float32Array(
-        1 * 3 * requiredWidth * requiredHeight,
-    );
+    const yoloInput = new Float32Array(1 * 3 * requiredWidth * requiredHeight);
+    const yoloSize = { width: scaledWidth, height: scaledHeight };
 
     // Populate the Float32Array with normalized pixel values.
     let pixelIndex = 0;
@@ -213,20 +210,16 @@ const preprocessImageBitmapToFloat32ChannelsFirst = (
                           width,
                           height,
                       );
-            processedImage[pixelIndex] = normalizePixelBetween0And1(r);
-            processedImage[pixelIndex + channelOffsetGreen] =
+            yoloInput[pixelIndex] = normalizePixelBetween0And1(r);
+            yoloInput[pixelIndex + channelOffsetGreen] =
                 normalizePixelBetween0And1(g);
-            processedImage[pixelIndex + channelOffsetBlue] =
+            yoloInput[pixelIndex + channelOffsetBlue] =
                 normalizePixelBetween0And1(b);
             pixelIndex++;
         }
     }
 
-    return {
-        data: processedImage,
-        originalSize: { width: width, height: height },
-        newSize: { width: scaledWidth, height: scaledHeight },
-    };
+    return { yoloInput, yoloSize };
 };
 
 /**
