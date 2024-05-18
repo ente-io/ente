@@ -54,28 +54,7 @@ export async function updateMLSearchConfig(newConfig: MLSearchConfig) {
     return mlIDbStorage.putConfig(ML_SEARCH_CONFIG_NAME, newConfig);
 }
 
-export interface MLSyncContext {
-    token: string;
-    userID: number;
-
-    localFilesMap: Map<number, EnteFile>;
-    outOfSyncFiles: EnteFile[];
-    nSyncedFiles: number;
-    nSyncedFaces: number;
-    allSyncedFacesMap?: Map<number, Array<Face>>;
-
-    error?: Error;
-
-    // oldMLLibraryData: MLLibraryData;
-    mlLibraryData: MLLibraryData;
-
-    syncQueue: PQueue;
-
-    getEnteWorker(id: number): Promise<any>;
-    dispose(): Promise<void>;
-}
-
-export class LocalMLSyncContext implements MLSyncContext {
+class MLSyncContext {
     public token: string;
     public userID: number;
 
@@ -83,7 +62,6 @@ export class LocalMLSyncContext implements MLSyncContext {
     public outOfSyncFiles: EnteFile[];
     public nSyncedFiles: number;
     public nSyncedFaces: number;
-    public allSyncedFacesMap?: Map<number, Array<Face>>;
 
     public error?: Error;
 
@@ -297,7 +275,7 @@ class MachineLearningService {
 
             // TODO-ML(MR): Keep as promise for now.
             this.syncContext = new Promise((resolve) => {
-                resolve(new LocalMLSyncContext(token, userID));
+                resolve(new MLSyncContext(token, userID));
             });
         } else {
             log.info("reusing existing syncContext");
@@ -311,7 +289,7 @@ class MachineLearningService {
             log.info("Creating localSyncContext");
             // TODO-ML(MR):
             this.localSyncContext = new Promise((resolve) => {
-                resolve(new LocalMLSyncContext(token, userID));
+                resolve(new MLSyncContext(token, userID));
             });
         } else {
             log.info("reusing existing localSyncContext");
