@@ -14,14 +14,12 @@ import {
     FaceDetection,
     Landmark,
     MLSearchConfig,
-    MLSyncFileContext,
     MlFileData,
 } from "services/face/types";
 import { getLocalFiles } from "services/fileService";
 import { EnteFile } from "types/file";
 import { isInternalUserForML } from "utils/user";
-import { regenerateFaceCrop, syncFileAnalyzeFaces } from "../face/f-index";
-import { fetchImageBitmapForContext } from "../face/image";
+import { regenerateFaceCrop } from "../face/f-index";
 
 /**
  * TODO-ML(MR): What and why.
@@ -366,30 +364,14 @@ class MachineLearningService {
     }
 
     private async syncFile(enteFile: EnteFile, localFile?: globalThis.File) {
-        log.debug(() => ({ a: "Syncing file", enteFile }));
-        const fileContext: MLSyncFileContext = { enteFile, localFile };
         const oldMlFile = await this.getMLFileData(enteFile.id);
         if (oldMlFile && oldMlFile.mlVersion) {
             return oldMlFile;
         }
 
-        const newMlFile = (fileContext.newMlFile = this.newMlData(enteFile.id));
-        newMlFile.mlVersion = defaultMLVersion;
-
-        try {
-            await fetchImageBitmapForContext(fileContext);
-            await syncFileAnalyzeFaces(fileContext);
-            newMlFile.errorCount = 0;
-            await this.persistOnServer(newMlFile, enteFile);
-            await mlIDbStorage.putFile(newMlFile);
-        } catch (e) {
-            log.error("ml detection failed", e);
-            newMlFile.mlVersion = oldMlFile.mlVersion;
-            throw e;
-        } finally {
-            fileContext.imageBitmap && fileContext.imageBitmap.close();
-        }
-
+        const newMlFile = await indexFaces(enteFile, localFile);
+        await this.persistOnServer(newMlFile, enteFile);
+        await mlIDbStorage.putFile(newMlFile);
         return newMlFile;
     }
 

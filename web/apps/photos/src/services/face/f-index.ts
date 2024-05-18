@@ -9,7 +9,10 @@ import {
     Face,
     MLSyncFileContext,
     type FaceAlignment,
+    type MlFileData,
 } from "services/face/types";
+import { defaultMLVersion } from "services/machineLearning/machineLearningService";
+import type { EnteFile } from "types/file";
 import { imageBitmapToBlob, warpAffineFloat32List } from "utils/image";
 import { detectBlur } from "./blur";
 import { getFaceCrop } from "./crop";
@@ -19,6 +22,46 @@ import {
     getFaceId,
     getLocalFile,
 } from "./image";
+
+/**
+ * Index faces in the given file.
+ *
+ * This function is the entry point to the indexing pipeline. The file goes
+ * through various stages:
+ *
+ * 1. Downloading the original if needed.
+ * 2. Detect faces using ONNX/YOLO
+ * 3. Align the face rectangles, compute blur.
+ * 4. Compute embbeddings for the detected face (crops).
+ *
+ * Once all of it is done, it returns the face rectangles and embeddings to the
+ * higher layer (which saves them to locally for offline use, and encrypts and
+ * uploads them to the user's remote storage so that their other devices can
+ * download them instead of needing to reindex).
+ */
+export const indexFaces = async (
+    enteFile: EnteFile,
+    localFile?: globalThis.File,
+) => {
+    log.debug(() => ({ a: "Indexing faces in file", enteFile }));
+    const fileContext: MLSyncFileContext = { enteFile, localFile };
+
+    const newMlFile = (fileContext.newMlFile = {
+        fileId: enteFile.id,
+        mlVersion: defaultMLVersion,
+        errorCount: 0,
+    } as MlFileData);
+
+    try {
+        await fetchImageBitmapForContext(fileContext);
+        await syncFileAnalyzeFaces(fileContext);
+        newMlFile.errorCount = 0;
+    } finally {
+        fileContext.imageBitmap && fileContext.imageBitmap.close();
+    }
+
+    return newMlFile;
+};
 
 export const syncFileAnalyzeFaces = async (fileContext: MLSyncFileContext) => {
     const { newMlFile } = fileContext;
