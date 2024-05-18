@@ -1,5 +1,4 @@
 import { Box, Dimensions, Point } from "services/face/geom";
-import { EnteFile } from "types/file";
 
 export declare type Cluster = Array<number>;
 
@@ -76,9 +75,3 @@ export interface MlFileData {
     mlVersion: number;
     errorCount: number;
 }
-
-export interface MLSearchConfig {
-    enabled: boolean;
-}
-
-export declare type MLIndex = "files" | "people";

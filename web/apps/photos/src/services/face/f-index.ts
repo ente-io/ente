@@ -12,7 +12,6 @@ import {
     FaceCrop,
     FaceDetection,
     FaceEmbedding,
-    MLSyncFileContext,
     type MlFileData,
 } from "services/face/types";
 import { defaultMLVersion } from "services/machineLearning/machineLearningService";
@@ -78,8 +77,6 @@ interface MLSyncFileContext {
     newMlFile?: MlFileData;
 
     imageBitmap?: ImageBitmap;
-
-    newAlignment?: boolean;
 }
 
 const fetchImageBitmapForContext = async (fileContext: MLSyncFileContext) => {
@@ -366,7 +363,6 @@ const syncFileFaceAlignments = async (
     fileContext: MLSyncFileContext,
 ): Promise<Float32Array> => {
     const { newMlFile } = fileContext;
-    fileContext.newAlignment = true;
     const imageBitmap =
         fileContext.imageBitmap ||
         (await fetchImageBitmapForContext(fileContext));
