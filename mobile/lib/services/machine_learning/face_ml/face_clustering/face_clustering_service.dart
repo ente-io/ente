@@ -48,7 +48,7 @@ class ClusteringResult {
   final Map<int, (Uint8List, int)>? newClusterSummaries;
 
   bool get isEmpty => newFaceIdToCluster.isEmpty;
-  
+
   ClusteringResult({
     required this.newFaceIdToCluster,
     this.newClusterSummaries,
@@ -302,7 +302,7 @@ class FaceClusteringService {
           "input": clusteringInput,
           "fileIDToCreationTime": fileIDToCreationTime,
           "distanceThreshold": distanceThreshold,
-          "conservativeDistanceThreshold": distanceThreshold,
+          "conservativeDistanceThreshold": distanceThreshold - 0.08,
           "useDynamicThreshold": false,
         },
         taskName: "createImageEmbedding",
@@ -372,14 +372,14 @@ class FaceClusteringService {
     );
     try {
       if (input.length < 500) {
-        final mergeThreshold = distanceThreshold + 0.08;
+        final mergeThreshold = distanceThreshold;
         _logger.info(
           'Running complete clustering on ${input.length} faces with distance threshold $mergeThreshold',
         );
         final result = await predictCompleteComputer(
           input,
           fileIDToCreationTime: fileIDToCreationTime,
-          distanceThreshold: distanceThreshold,
+          distanceThreshold: distanceThreshold - 0.08,
           mergeThreshold: mergeThreshold,
         );
         if (result.newFaceIdToCluster.isEmpty) return null;
@@ -620,6 +620,17 @@ class FaceClusteringService {
       newFaceIdToCluster[faceInfo.faceID] = faceInfo.clusterId!;
     }
 
+    // Create a map of clusterId to faceIds
+    final Map<int, List<String>> clusterIdToFaceIds = {};
+    for (final entry in newFaceIdToCluster.entries) {
+      final clusterID = entry.value;
+      if (clusterIdToFaceIds.containsKey(clusterID)) {
+        clusterIdToFaceIds[clusterID]!.add(entry.key);
+      } else {
+        clusterIdToFaceIds[clusterID] = [entry.key];
+      }
+    }
+
     stopwatchClustering.stop();
     log(
       ' [ClusterIsolate] ${DateTime.now()} Clustering for ${sortedFaceInfos.length} embeddings executed in ${stopwatchClustering.elapsedMilliseconds}ms',
@@ -645,6 +656,7 @@ class FaceClusteringService {
     return ClusteringResult(
       newFaceIdToCluster: newFaceIdToCluster,
       newClusterSummaries: newClusterSummaries,
+      newClusterIdToFaceIds: clusterIdToFaceIds,
     );
   }
 

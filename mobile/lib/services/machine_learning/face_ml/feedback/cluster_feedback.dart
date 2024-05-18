@@ -429,11 +429,11 @@ class ClusterFeedbackService {
         await FaceClusteringService.instance.predictWithinClusterComputer(
       embeddings,
       fileIDToCreationTime: fileIDToCreationTime,
-      distanceThreshold: 0.14,
+      distanceThreshold: 0.22,
     );
 
-    if (clusterResult == null || clusterResult.isEmpty) {
-      _logger.info('No clusters found');
+    if (clusterResult == null || clusterResult.newClusterIdToFaceIds == null || clusterResult.isEmpty) {
+      _logger.warning('No clusters found or something went wrong');
       return ClusteringResult(newFaceIdToCluster: {});
     }
 
