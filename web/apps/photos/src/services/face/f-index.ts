@@ -287,7 +287,7 @@ const faceDetectionsFromYOLOOutput = (rows: Float32Array): FaceDetection[] => {
  * @returns An array of face detections with duplicates removed.
  */
 const removeDuplicateDetections = (
-    detections: Array<FaceDetection>,
+    detections: FaceDetection[],
     withinDistance: number,
 ) => {
     detections.sort((a, b) => b.probability - a.probability);
@@ -313,7 +313,7 @@ const removeDuplicateDetections = (
         }
     }
 
-    const uniques: Array<FaceDetection> = [];
+    const uniques: FaceDetection[] = [];
     for (let i = 0; i < detections.length; i++) {
         isSelected.get(i) && uniques.push(detections[i]);
     }
