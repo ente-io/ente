@@ -70,7 +70,7 @@ export const indexFaces = async (
     return newMlFile;
 };
 
-export const syncFileAnalyzeFaces = async (fileContext: MLSyncFileContext) => {
+const syncFileAnalyzeFaces = async (fileContext: MLSyncFileContext) => {
     const { newMlFile } = fileContext;
     const startTime = Date.now();
 
@@ -118,7 +118,7 @@ const syncFileFaceDetections = async (fileContext: MLSyncFileContext) => {
  *
  * The model used is YOLO, running in an ONNX runtime.
  */
-export const detectFaces = async (
+const detectFaces = async (
     imageBitmap: ImageBitmap,
 ): Promise<Array<FaceDetection>> => {
     const maxFaceDistancePercent = Math.sqrt(2) / 100;
@@ -284,7 +284,7 @@ const getFacesFromYOLOOutput = (
     return faces;
 };
 
-export const getRelativeDetection = (
+const getRelativeDetection = (
     faceDetection: FaceDetection,
     dimensions: Dimensions,
 ): FaceDetection => {
@@ -429,7 +429,7 @@ const ARC_FACE_5_LANDMARKS = [
  *
  * @param faceDetection A geometry indicating a face detected in an image.
  */
-export const faceAlignment = (faceDetection: FaceDetection): FaceAlignment => {
+const faceAlignment = (faceDetection: FaceDetection): FaceAlignment => {
     const landmarkCount = faceDetection.landmarks.length;
     return getFaceAlignmentUsingSimilarityTransform(
         faceDetection,
@@ -494,10 +494,7 @@ function normalizeLandmarks(
 /**
  * Laplacian blur detection.
  */
-export const detectBlur = (
-    alignedFaces: Float32Array,
-    faces: Face[],
-): number[] => {
+const detectBlur = (alignedFaces: Float32Array, faces: Face[]): number[] => {
     const numFaces = Math.round(
         alignedFaces.length /
             (mobileFaceNetFaceSize * mobileFaceNetFaceSize * 3),
@@ -690,14 +687,14 @@ const syncFileFaceEmbeddings = async (
     log.info("[MLService] facesWithEmbeddings: ", newMlFile.faces.length);
 };
 
-export const mobileFaceNetFaceSize = 112;
+const mobileFaceNetFaceSize = 112;
 
 /**
  * Compute embeddings for the given {@link faceData}.
  *
  * The model used is MobileFaceNet, running in an ONNX runtime.
  */
-export const faceEmbeddings = async (
+const faceEmbeddings = async (
     faceData: Float32Array,
 ): Promise<Array<FaceEmbedding>> => {
     const outputData = await workerBridge.faceEmbeddings(faceData);
@@ -741,7 +738,7 @@ export const saveFaceCrop = async (imageBitmap: ImageBitmap, face: Face) => {
     return blob;
 };
 
-export const getFaceCrop = (
+const getFaceCrop = (
     imageBitmap: ImageBitmap,
     faceDetection: FaceDetection,
 ): FaceCrop => {
