@@ -1,6 +1,5 @@
-import { Dimensions } from "services/face/geom";
+import { Box, Dimensions, Point } from "services/face/geom";
 import { EnteFile } from "types/file";
-import { Box, Point } from "./geom";
 
 export declare type FaceDescriptor = Float32Array;
 
