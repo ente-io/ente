@@ -95,7 +95,7 @@ const indexFaces_ = async (enteFile: EnteFile, imageBitmap: ImageBitmap) => {
     const fileContext: MLSyncFileContext = { enteFile };
 
     const fileID = enteFile.id;
-    const newMlFile = (fileContext.newMlFile = {
+    const mlFile = (fileContext.newMlFile = {
         fileId: fileID,
         mlVersion: defaultMLVersion,
         errorCount: 0,
@@ -107,26 +107,37 @@ const indexFaces_ = async (enteFile: EnteFile, imageBitmap: ImageBitmap) => {
 
     const faceDetections = await detectFaces(imageBitmap);
     const detectedFaces = faceDetections.map((detection) => ({
-        id: makeFaceID(fileID, detection, newMlFile.imageDimensions),
+        id: makeFaceID(fileID, detection, mlFile.imageDimensions),
         fileId: fileID,
         detection,
     }));
-    newMlFile.faces = detectedFaces;
+    mlFile.faces = detectedFaces;
 
     if (detectedFaces.length > 0) {
         await Promise.all(
             detectedFaces.map((face) => saveFaceCrop(imageBitmap, face)),
         );
 
-        const alignedFacesData = await syncFileFaceAlignments(fileContext);
+        // Execute the face alignment calculations
+        for (const face of mlFile.faces) {
+            face.alignment = faceAlignment(face.detection);
+        }
+        // Extract face images and convert to Float32Array
+        const faceAlignments = mlFile.faces.map((f) => f.alignment);
+        const alignedFacesData = await extractFaceImagesToFloat32(
+            faceAlignments,
+            mobileFaceNetFaceSize,
+            imageBitmap,
+        );
+        const blurValues = detectBlur(alignedFacesData, mlFile.faces);
+        mlFile.faces.forEach((f, i) => (f.blurValue = blurValues[i]));
 
         await syncFileFaceEmbeddings(fileContext, alignedFacesData);
 
         await syncFileFaceMakeRelativeDetections(fileContext);
     }
-    newMlFile.errorCount = 0;
 
-    return newMlFile;
+    return mlFile;
 };
 
 /**
@@ -339,32 +350,6 @@ const makeFaceID = (
         (detection.box.y + detection.box.height) / imageDims.height,
     );
     return [`${fileID}`, xMin, yMin, xMax, yMax].join("_");
-};
-
-const syncFileFaceAlignments = async (
-    fileContext: MLSyncFileContext,
-): Promise<Float32Array> => {
-    const { newMlFile } = fileContext;
-    const imageBitmap = fileContext.imageBitmap;
-
-    // Execute the face alignment calculations
-    for (const face of newMlFile.faces) {
-        face.alignment = faceAlignment(face.detection);
-    }
-    // Extract face images and convert to Float32Array
-    const faceAlignments = newMlFile.faces.map((f) => f.alignment);
-    const faceImages = await extractFaceImagesToFloat32(
-        faceAlignments,
-        mobileFaceNetFaceSize,
-        imageBitmap,
-    );
-    const blurValues = detectBlur(faceImages, newMlFile.faces);
-    newMlFile.faces.forEach((f, i) => (f.blurValue = blurValues[i]));
-
-    imageBitmap.close();
-    log.info("[MLService] alignedFaces: ", newMlFile.faces?.length);
-
-    return faceImages;
 };
 
 // TODO-ML(MR): When is this used or is it as Blazeface leftover?
