@@ -177,43 +177,27 @@ const preprocessImageBitmapToFloat32ChannelsFirst = (
     requiredWidth: number,
     requiredHeight: number,
 ) => {
+    const width = imageBitmap.width;
+    const height = imageBitmap.height;
+
     // Create an OffscreenCanvas and set its size.
-    const offscreenCanvas = new OffscreenCanvas(
-        imageBitmap.width,
-        imageBitmap.height,
-    );
+    const offscreenCanvas = new OffscreenCanvas(width, height);
     const ctx = offscreenCanvas.getContext("2d");
-    ctx.drawImage(imageBitmap, 0, 0, imageBitmap.width, imageBitmap.height);
-    const imageData = ctx.getImageData(
-        0,
-        0,
-        imageBitmap.width,
-        imageBitmap.height,
-    );
+    ctx.drawImage(imageBitmap, 0, 0, width, height);
+    const imageData = ctx.getImageData(0, 0, width, height);
     const pixelData = imageData.data;
 
-    // Maintain aspect ratio
-    const scale = Math.min(
-        requiredWidth / imageBitmap.width,
-        requiredHeight / imageBitmap.height,
-    );
+    // Maintain aspect ratio.
+    const scale = Math.min(requiredWidth / width, requiredHeight / height);
 
-    const scaledWidth = clamp(
-        Math.round(imageBitmap.width * scale),
-        0,
-        requiredWidth,
-    );
-    const scaledHeight = clamp(
-        Math.round(imageBitmap.height * scale),
-        0,
-        requiredHeight,
-    );
+    const scaledWidth = clamp(Math.round(width * scale), 0, requiredWidth);
+    const scaledHeight = clamp(Math.round(height * scale), 0, requiredHeight);
 
     const processedImage = new Float32Array(
         1 * 3 * requiredWidth * requiredHeight,
     );
 
-    // Populate the Float32Array with normalized pixel values
+    // Populate the Float32Array with normalized pixel values.
     let pixelIndex = 0;
     const channelOffsetGreen = requiredHeight * requiredWidth;
     const channelOffsetBlue = 2 * requiredHeight * requiredWidth;
@@ -231,8 +215,8 @@ const preprocessImageBitmapToFloat32ChannelsFirst = (
                     w / scale,
                     h / scale,
                     pixelData,
-                    imageBitmap.width,
-                    imageBitmap.height,
+                    width,
+                    height,
                 );
             }
             processedImage[pixelIndex] = normalizePixelBetween0And1(pixel.r);
@@ -246,10 +230,7 @@ const preprocessImageBitmapToFloat32ChannelsFirst = (
 
     return {
         data: processedImage,
-        originalSize: {
-            width: imageBitmap.width,
-            height: imageBitmap.height,
-        },
+        originalSize: { width: width, height: height },
         newSize: { width: scaledWidth, height: scaledHeight },
     };
 };
