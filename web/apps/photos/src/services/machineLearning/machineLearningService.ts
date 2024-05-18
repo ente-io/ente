@@ -9,6 +9,7 @@ import { CustomError, parseUploadErrorCodes } from "@ente/shared/error";
 import PQueue from "p-queue";
 import { putEmbedding } from "services/embeddingService";
 import mlIDbStorage, { ML_SEARCH_CONFIG_NAME } from "services/face/db";
+import { fetchImageBitmap, getLocalFile } from "services/face/image";
 import {
     Face,
     FaceDetection,
@@ -19,7 +20,7 @@ import {
 import { getLocalFiles } from "services/fileService";
 import { EnteFile } from "types/file";
 import { isInternalUserForML } from "utils/user";
-import { indexFaces, regenerateFaceCrop } from "../face/f-index";
+import { indexFaces, saveFaceCrop } from "../face/f-index";
 
 /**
  * TODO-ML(MR): What and why.
@@ -567,3 +568,15 @@ export function logQueueStats(queue: PQueue, name: string) {
         console.error(`queuestats: ${name}: Error, `, error),
     );
 }
+
+export const regenerateFaceCrop = async (faceID: string) => {
+    const fileID = Number(faceID.split("-")[0]);
+    const personFace = await mlIDbStorage.getFace(fileID, faceID);
+    if (!personFace) {
+        throw Error("Face not found");
+    }
+
+    const file = await getLocalFile(personFace.fileId);
+    const imageBitmap = await fetchImageBitmap(file);
+    return await saveFaceCrop(imageBitmap, personFace);
+};

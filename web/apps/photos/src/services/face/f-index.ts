@@ -3,7 +3,6 @@ import log from "@/next/log";
 import { workerBridge } from "@/next/worker/worker-bridge";
 import { euclidean } from "hdbscan";
 import { Matrix } from "ml-matrix";
-import mlIDbStorage from "services/face/db";
 import { Box, Dimensions, Point, enlargeBox, newBox } from "services/face/geom";
 import {
     DetectedFace,
@@ -22,10 +21,8 @@ import {
     clamp,
     createGrayscaleIntMatrixFromNormalized2List,
     cropWithRotation,
-    fetchImageBitmap,
     fetchImageBitmapForContext,
     getFaceId,
-    getLocalFile,
     getPixelBilinear,
     imageBitmapToBlob,
     normalizePixelBetween0And1,
@@ -770,18 +767,6 @@ export const getFaceCrop = (
         image: faceImageBitmap,
         imageBox: paddedBox,
     };
-};
-
-export const regenerateFaceCrop = async (faceID: string) => {
-    const fileID = Number(faceID.split("-")[0]);
-    const personFace = await mlIDbStorage.getFace(fileID, faceID);
-    if (!personFace) {
-        throw Error("Face not found");
-    }
-
-    const file = await getLocalFile(personFace.fileId);
-    const imageBitmap = await fetchImageBitmap(file);
-    return await saveFaceCrop(imageBitmap, personFace);
 };
 
 async function extractFaceImagesToFloat32(
