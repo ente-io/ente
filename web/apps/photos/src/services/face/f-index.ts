@@ -24,10 +24,10 @@ import {
     cropWithRotation,
     fetchImageBitmap,
     getLocalFileImageBitmap,
-    getPixelBilinear,
     getThumbnailImageBitmap,
     imageBitmapToBlob,
     normalizePixelBetween0And1,
+    pixelRGBBilinear,
     warpAffineFloat32List,
 } from "./image";
 import { transformFaceDetections } from "./transform-box";
@@ -204,7 +204,7 @@ const convertToYOLOInputFloat32ChannelsFirst = (imageBitmap: ImageBitmap) => {
             const { r, g, b } =
                 w >= scaledWidth || h >= scaledHeight
                     ? { r: 114, g: 114, b: 114 }
-                    : getPixelBilinear(
+                    : pixelRGBBilinear(
                           w / scale,
                           h / scale,
                           pixelData,
