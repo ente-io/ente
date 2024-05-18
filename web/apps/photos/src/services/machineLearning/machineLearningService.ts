@@ -10,13 +10,7 @@ import PQueue from "p-queue";
 import { putEmbedding } from "services/embeddingService";
 import mlIDbStorage, { ML_SEARCH_CONFIG_NAME } from "services/face/db";
 import { fetchImageBitmap, getLocalFile } from "services/face/image";
-import {
-    Face,
-    FaceDetection,
-    Landmark,
-    MLSearchConfig,
-    MlFileData,
-} from "services/face/types";
+import { Face, FaceDetection, Landmark, MlFileData } from "services/face/types";
 import { getLocalFiles } from "services/fileService";
 import { EnteFile } from "types/file";
 import { isInternalUserForML } from "utils/user";
@@ -31,6 +25,10 @@ export const defaultMLVersion = 3;
 const batchSize = 200;
 
 export const MAX_ML_SYNC_ERROR_COUNT = 1;
+
+export interface MLSearchConfig {
+    enabled: boolean;
+}
 
 export const DEFAULT_ML_SEARCH_CONFIG: MLSearchConfig = {
     enabled: false,

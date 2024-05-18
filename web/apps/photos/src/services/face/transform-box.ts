@@ -13,17 +13,17 @@ import {
 } from "transformation-matrix";
 
 /**
- * Detect faces in the given {@link imageBitmap}.
- *
- * The model used is YOLO, running in an ONNX runtime.
+ * Transform the given {@link faceDetections} from their coordinate system in
+ * which they were detected ({@link inBox}) back to the coordinate system of the
+ * original image ({@link toBox}).
  */
 export const transformFaceDetections = (
-    faces: FaceDetection[],
+    faceDetections: FaceDetection[],
     inBox: Box,
     toBox: Box,
 ): FaceDetection[] => {
     const transform = computeTransformToBox(inBox, toBox);
-    return faces.map((f) => {
+    return faceDetections.map((f) => {
         const box = transformBox(f.box, transform);
         const normLandmarks = f.landmarks;
         const landmarks = transformPoints(normLandmarks, transform);

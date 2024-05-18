@@ -27,10 +27,6 @@ export interface IRect {
     height: number;
 }
 
-export function newBox(x: number, y: number, width: number, height: number) {
-    return new Box({ x, y, width, height });
-}
-
 export const boxFromBoundingBox = ({
     left,
     top,
