@@ -137,7 +137,7 @@ const indexFaces_ = async (enteFile: EnteFile, imageBitmap: ImageBitmap) => {
         const embeddings = await faceEmbeddings(alignedFacesData);
         mlFile.faces.forEach((f, i) => (f.embedding = embeddings[i]));
 
-        await syncFileFaceMakeRelativeDetections(fileContext);
+        convertFaceDetectionsToRelative(mlFile);
     }
 
     return mlFile;
@@ -645,21 +645,19 @@ const faceEmbeddings = async (
     return embeddings;
 };
 
-const syncFileFaceMakeRelativeDetections = async (
-    fileContext: MLSyncFileContext,
-) => {
-    const { newMlFile } = fileContext;
-    for (let i = 0; i < newMlFile.faces.length; i++) {
-        const face = newMlFile.faces[i];
-        if (face.detection.box.x + face.detection.box.width < 2) continue; // Skip if somehow already relative
-        face.detection = getRelativeDetection(
+const convertFaceDetectionsToRelative = (mlFile: MlFileData) => {
+    for (let i = 0; i < mlFile.faces.length; i++) {
+        const face = mlFile.faces[i];
+        // Skip if somehow already relative.
+        if (face.detection.box.x + face.detection.box.width < 2) continue;
+        face.detection = relativeDetection(
             face.detection,
-            newMlFile.imageDimensions,
+            mlFile.imageDimensions,
         );
     }
 };
 
-const getRelativeDetection = (
+const relativeDetection = (
     faceDetection: FaceDetection,
     dimensions: Dimensions,
 ): FaceDetection => {
