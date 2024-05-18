@@ -165,20 +165,6 @@ class MachineLearningService {
             await this.syncFiles(syncContext);
         }
 
-        // TODO-ML(MR): Forced disable clustering. It doesn't currently work,
-        // need to finalize it before we move out of beta.
-        //
-        // > Error: Failed to execute 'transferToImageBitmap' on
-        // > 'OffscreenCanvas': ImageBitmap construction failed
-        /*
-        if (
-            syncContext.outOfSyncFiles.length <= 0 ||
-            (syncContext.nSyncedFiles === batchSize && Math.random() < 0)
-        ) {
-            await this.syncIndex(syncContext);
-        }
-        */
-
         const error = syncContext.error;
         const nOutOfSyncFiles = syncContext.outOfSyncFiles.length;
         return !error && nOutOfSyncFiles > 0;
@@ -490,15 +476,6 @@ class MachineLearningService {
 
     private async persistMLLibraryData(syncContext: MLSyncContext) {
         return mlIDbStorage.putLibraryData(syncContext.mlLibraryData);
-    }
-
-    public async syncIndex(syncContext: MLSyncContext) {
-        await this.getMLLibraryData(syncContext);
-
-        // TODO-ML(MR): Ensure this doesn't run until fixed.
-        await syncPeopleIndex(syncContext);
-
-        await this.persistMLLibraryData(syncContext);
     }
 }
 
