@@ -38,18 +38,18 @@ import { transformFaceDetections } from "./transform-box";
  * 1. Downloading the original if needed.
  * 2. Detect faces using ONNX/YOLO
  * 3. Align the face rectangles, compute blur.
- * 4. Compute embbeddings for the detected face (crops).
+ * 4. Compute embeddings for the detected face (crops).
  *
- * Once all of it is done, it returns the face rectangles and embeddings to the
- * higher layer (which saves them to locally for offline use, and encrypts and
- * uploads them to the user's remote storage so that their other devices can
- * download them instead of needing to reindex).
+ * Once all of it is done, it returns the face rectangles and embeddings so that
+ * they can be saved locally for offline use, and encrypts and uploads them to
+ * the user's remote storage so that their other devices can download them
+ * instead of needing to reindex.
  */
 export const indexFaces = async (
     enteFile: EnteFile,
     localFile?: globalThis.File,
 ) => {
-    log.debug(() => ({ a: "Indexing faces in file", enteFile }));
+    const startTime = Date.now();
     const fileContext: MLSyncFileContext = { enteFile, localFile };
 
     const newMlFile = (fileContext.newMlFile = {
@@ -66,6 +66,8 @@ export const indexFaces = async (
         fileContext.imageBitmap && fileContext.imageBitmap.close();
     }
 
+    const ms = Math.round(Date.now() - startTime);
+    log.debug(() => `Indexing faces in file ${enteFile.id} took ${ms} ms`);
     return newMlFile;
 };
 
@@ -103,8 +105,6 @@ const fetchImageBitmapForContext = async (fileContext: MLSyncFileContext) => {
 
 const syncFileAnalyzeFaces = async (fileContext: MLSyncFileContext) => {
     const { newMlFile } = fileContext;
-    const startTime = Date.now();
-
     await syncFileFaceDetections(fileContext);
 
     if (newMlFile.faces && newMlFile.faces.length > 0) {
@@ -116,10 +116,6 @@ const syncFileAnalyzeFaces = async (fileContext: MLSyncFileContext) => {
 
         await syncFileFaceMakeRelativeDetections(fileContext);
     }
-    log.debug(
-        () =>
-            `Face detection for file ${fileContext.enteFile.id} took ${Math.round(Date.now() - startTime)} ms`,
-    );
 };
 
 const syncFileFaceDetections = async (fileContext: MLSyncFileContext) => {
