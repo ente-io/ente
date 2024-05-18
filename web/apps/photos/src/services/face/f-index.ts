@@ -293,44 +293,35 @@ const removeDuplicateDetections = (
     detections.sort((a, b) => b.probability - a.probability);
     const isSelected = new Map<number, boolean>();
     for (let i = 0; i < detections.length; i++) {
-        if (isSelected.get(i) === false) {
-            continue;
-        }
+        if (!isSelected.get(i)) continue;
+
         isSelected.set(i, true);
         for (let j = i + 1; j < detections.length; j++) {
-            if (isSelected.get(j) === false) {
-                continue;
-            }
-            const centeri = getDetectionCenter(detections[i]);
-            const centerj = getDetectionCenter(detections[j]);
+            if (!isSelected.get(j)) continue;
+
+            const centeri = faceDetectionCenter(detections[i]);
+            const centerj = faceDetectionCenter(detections[j]);
             const dist = euclidean(
                 [centeri.x, centeri.y],
                 [centerj.x, centerj.y],
             );
-            if (dist <= withinDistance) {
-                isSelected.set(j, false);
-            }
+            if (dist <= withinDistance) isSelected.set(j, false);
         }
     }
 
-    const uniques: FaceDetection[] = [];
-    for (let i = 0; i < detections.length; i++) {
-        isSelected.get(i) && uniques.push(detections[i]);
-    }
-    return uniques;
+    return detections.filter((_, i) => isSelected.get(i));
 };
 
-function getDetectionCenter(detection: FaceDetection) {
+const faceDetectionCenter = (detection: FaceDetection) => {
     const center = new Point(0, 0);
-    // TODO: first 4 landmarks is applicable to blazeface only
-    // this needs to consider eyes, nose and mouth landmarks to take center
+    // TODO-ML: first 4 landmarks is applicable to blazeface only this needs to
+    // consider eyes, nose and mouth landmarks to take center
     detection.landmarks?.slice(0, 4).forEach((p) => {
         center.x += p.x;
         center.y += p.y;
     });
-
     return new Point(center.x / 4, center.y / 4);
-}
+};
 
 const syncFileFaceCrops = async (fileContext: MLSyncFileContext) => {
     const { newMlFile } = fileContext;
