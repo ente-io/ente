@@ -1,22 +1,9 @@
 import { workerBridge } from "@/next/worker/worker-bridge";
 import { euclidean } from "hdbscan";
-import {
-    Box,
-    Dimensions,
-    Point,
-    boxFromBoundingBox,
-    newBox,
-} from "services/face/geom";
+import { Box, Dimensions, Point, newBox } from "services/face/geom";
 import { FaceDetection } from "services/face/types";
-// TODO-ML(MR): Do we need two separate Matrix libraries?
-import {
-    Matrix,
-    applyToPoint,
-    compose,
-    scale,
-    translate,
-} from "transformation-matrix";
 import { clamp, getPixelBilinear, normalizePixelBetween0And1 } from "./image";
+import { transformFaceDetections } from "./transform-box";
 
 /**
  * Detect faces in the given {@link imageBitmap}.
@@ -39,17 +26,7 @@ export const detectFaces = async (
     const faces = getFacesFromYOLOOutput(outputData as Float32Array, 0.7);
     const inBox = newBox(0, 0, resized.width, resized.height);
     const toBox = newBox(0, 0, imageBitmap.width, imageBitmap.height);
-    const transform = computeTransformToBox(inBox, toBox);
-    const faceDetections: Array<FaceDetection> = faces?.map((f) => {
-        const box = transformBox(f.box, transform);
-        const normLandmarks = f.landmarks;
-        const landmarks = transformPoints(normLandmarks, transform);
-        return {
-            box,
-            landmarks,
-            probability: f.probability as number,
-        } as FaceDetection;
-    });
+    const faceDetections = transformFaceDetections(faces, inBox, toBox);
     return removeDuplicateDetections(faceDetections, maxFaceDistance);
 };
 
@@ -282,32 +259,4 @@ function getDetectionCenter(detection: FaceDetection) {
     });
 
     return new Point(center.x / 4, center.y / 4);
-}
-
-function computeTransformToBox(inBox: Box, toBox: Box): Matrix {
-    return compose(
-        translate(toBox.x, toBox.y),
-        scale(toBox.width / inBox.width, toBox.height / inBox.height),
-    );
-}
-
-function transformPoint(point: Point, transform: Matrix) {
-    const txdPoint = applyToPoint(transform, point);
-    return new Point(txdPoint.x, txdPoint.y);
-}
-
-function transformPoints(points: Point[], transform: Matrix) {
-    return points?.map((p) => transformPoint(p, transform));
-}
-
-function transformBox(box: Box, transform: Matrix) {
-    const topLeft = transformPoint(box.topLeft, transform);
-    const bottomRight = transformPoint(box.bottomRight, transform);
-
-    return boxFromBoundingBox({
-        left: topLeft.x,
-        top: topLeft.y,
-        right: bottomRight.x,
-        bottom: bottomRight.y,
-    });
 }
