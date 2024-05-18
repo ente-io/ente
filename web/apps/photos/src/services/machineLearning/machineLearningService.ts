@@ -23,7 +23,6 @@ import { EnteFile } from "types/file";
 import { isInternalUserForML } from "utils/user";
 import { regenerateFaceCrop, syncFileAnalyzeFaces } from "../face/f-index";
 import { fetchImageBitmapForContext } from "../face/image";
-import { syncPeopleIndex } from "../face/people";
 
 /**
  * TODO-ML(MR): What and why.
@@ -465,17 +464,6 @@ class MachineLearningService {
             // TODO: logError or stop sync job after most of the requests are failed
             console.error("Error while storing ml sync error", e);
         }
-    }
-
-    private async getMLLibraryData(syncContext: MLSyncContext) {
-        syncContext.mlLibraryData = await mlIDbStorage.getLibraryData();
-        if (!syncContext.mlLibraryData) {
-            syncContext.mlLibraryData = {};
-        }
-    }
-
-    private async persistMLLibraryData(syncContext: MLSyncContext) {
-        return mlIDbStorage.putLibraryData(syncContext.mlLibraryData);
     }
 }
 
