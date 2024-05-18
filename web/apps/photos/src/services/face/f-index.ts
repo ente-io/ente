@@ -105,7 +105,21 @@ const indexFaces_ = async (enteFile: EnteFile, imageBitmap: ImageBitmap) => {
     const { width, height } = imageBitmap;
     fileContext.newMlFile.imageDimensions = { width, height };
 
-    await syncFileFaceDetections(fileContext);
+    const faceDetections = await detectFaces(imageBitmap);
+    const detectedFaces = faceDetections?.map((detection) => {
+        return {
+            fileId: fileContext.enteFile.id,
+            detection,
+        } as DetectedFace;
+    });
+    newMlFile.faces = detectedFaces?.map((detectedFace) => ({
+        ...detectedFace,
+        id: makeFaceID(detectedFace, newMlFile.imageDimensions),
+    }));
+    // TODO-ML(MR): reenable faces filtering based on width
+    // ?.filter((f) =>
+    //     f.box.width > syncContext.config.faceDetection.minFaceSize
+    // );
 
     if (newMlFile.faces && newMlFile.faces.length > 0) {
         await syncFileFaceCrops(fileContext);
@@ -119,27 +133,6 @@ const indexFaces_ = async (enteFile: EnteFile, imageBitmap: ImageBitmap) => {
     newMlFile.errorCount = 0;
 
     return newMlFile;
-};
-
-const syncFileFaceDetections = async (fileContext: MLSyncFileContext) => {
-    const { newMlFile } = fileContext;
-    const imageBitmap = fileContext.imageBitmap;
-    const faceDetections = await detectFaces(imageBitmap);
-    // TODO-ML(MR): reenable faces filtering based on width
-    const detectedFaces = faceDetections?.map((detection) => {
-        return {
-            fileId: fileContext.enteFile.id,
-            detection,
-        } as DetectedFace;
-    });
-    newMlFile.faces = detectedFaces?.map((detectedFace) => ({
-        ...detectedFace,
-        id: makeFaceID(detectedFace, newMlFile.imageDimensions),
-    }));
-    // ?.filter((f) =>
-    //     f.box.width > syncContext.config.faceDetection.minFaceSize
-    // );
-    log.info("[MLService] Detected Faces: ", newMlFile.faces?.length);
 };
 
 /**
