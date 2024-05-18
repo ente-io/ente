@@ -4,7 +4,7 @@ import log from "@/next/log";
 import { workerBridge } from "@/next/worker/worker-bridge";
 import { euclidean } from "hdbscan";
 import { Matrix } from "ml-matrix";
-import { Box, Dimensions, Point, enlargeBox, newBox } from "services/face/geom";
+import { Box, Dimensions, Point, enlargeBox } from "services/face/geom";
 import {
     DetectedFace,
     Face,
@@ -143,13 +143,18 @@ const indexFaces_ = async (enteFile: EnteFile, imageBitmap: ImageBitmap) => {
 const detectFaces = async (
     imageBitmap: ImageBitmap,
 ): Promise<Array<FaceDetection>> => {
+    const rect = ({ width, height }: { width: number; height: number }) =>
+        new Box({ x: 0, y: 0, width, height });
+
     const { yoloInput, yoloSize } =
         convertToYOLOInputFloat32ChannelsFirst(imageBitmap);
     const yoloOutput = await workerBridge.detectFaces(yoloInput);
     const faces = faceDetectionsFromYOLOOutput(yoloOutput);
-    const inBox = newBox(0, 0, yoloSize.width, yoloSize.height);
-    const toBox = newBox(0, 0, imageBitmap.width, imageBitmap.height);
-    const faceDetections = transformFaceDetections(faces, inBox, toBox);
+    const faceDetections = transformFaceDetections(
+        faces,
+        rect(yoloSize),
+        rect(imageBitmap),
+    );
 
     const maxFaceDistancePercent = Math.sqrt(2) / 100;
     const maxFaceDistance = imageBitmap.width * maxFaceDistancePercent;
