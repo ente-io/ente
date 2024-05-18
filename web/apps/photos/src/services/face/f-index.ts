@@ -293,13 +293,12 @@ const removeDuplicateDetections = (
 ) => {
     detections.sort((a, b) => b.probability - a.probability);
 
-    const isSelected = new Map<number, boolean>();
+    const dupIndices = new Set<number>();
     for (let i = 0; i < detections.length; i++) {
-        if (!isSelected.get(i)) continue;
+        if (dupIndices.has(i)) continue;
 
-        isSelected.set(i, true);
         for (let j = i + 1; j < detections.length; j++) {
-            if (!isSelected.get(j)) continue;
+            if (dupIndices.has(j)) continue;
 
             const centeri = faceDetectionCenter(detections[i]);
             const centerj = faceDetectionCenter(detections[j]);
@@ -308,11 +307,11 @@ const removeDuplicateDetections = (
                 [centerj.x, centerj.y],
             );
 
-            if (dist <= withinDistance) isSelected.set(j, false);
+            if (dist <= withinDistance) dupIndices.add(j);
         }
     }
 
-    return detections.filter((_, i) => isSelected.get(i));
+    return detections.filter((_, i) => !dupIndices.has(i));
 };
 
 const faceDetectionCenter = (detection: FaceDetection) => {
