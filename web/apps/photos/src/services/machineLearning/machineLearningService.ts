@@ -16,7 +16,6 @@ import {
     MLLibraryData,
     MLSearchConfig,
     MLSyncFileContext,
-    MLSyncResult,
     MlFileData,
 } from "services/face/types";
 import { getLocalFiles } from "services/fileService";
@@ -151,7 +150,7 @@ class MachineLearningService {
     private localSyncContext: Promise<MLSyncContext>;
     private syncContext: Promise<MLSyncContext>;
 
-    public async sync(token: string, userID: number): Promise<MLSyncResult> {
+    public async sync(token: string, userID: number): Promise<boolean> {
         if (!token) {
             throw Error("Token needed by ml service to sync file");
         }
@@ -180,18 +179,9 @@ class MachineLearningService {
         }
         */
 
-        const mlSyncResult: MLSyncResult = {
-            nOutOfSyncFiles: syncContext.outOfSyncFiles.length,
-            nSyncedFiles: syncContext.nSyncedFiles,
-            nSyncedFaces: syncContext.nSyncedFaces,
-            nFaceClusters:
-                syncContext.mlLibraryData?.faceClusteringResults?.clusters
-                    .length,
-            error: syncContext.error,
-        };
-        // log.info('[MLService] sync results: ', mlSyncResult);
-
-        return mlSyncResult;
+        const error = syncContext.error;
+        const nOutOfSyncFiles = syncContext.outOfSyncFiles.length;
+        return !error && nOutOfSyncFiles > 0;
     }
 
     public async regenerateFaceCrop(faceID: string) {

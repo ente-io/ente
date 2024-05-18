@@ -3,14 +3,6 @@ import { Dimensions } from "services/face/geom";
 import { EnteFile } from "types/file";
 import { Box, Point } from "./geom";
 
-export interface MLSyncResult {
-    nOutOfSyncFiles: number;
-    nSyncedFiles: number;
-    nSyncedFaces: number;
-    nFaceClusters: number;
-    error?: Error;
-}
-
 export declare type FaceDescriptor = Float32Array;
 
 export declare type Cluster = Array<number>;

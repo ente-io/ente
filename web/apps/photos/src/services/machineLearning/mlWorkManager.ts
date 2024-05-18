@@ -269,11 +269,8 @@ class MLWorkManager {
             const userID = getUserID();
             const jobWorkerProxy = await this.getSyncJobWorker();
 
-            const mlSyncResult = await jobWorkerProxy.sync(token, userID);
-
+            return await jobWorkerProxy.sync(token, userID);
             // this.terminateSyncJobWorker();
-            return !mlSyncResult.error && mlSyncResult.nOutOfSyncFiles > 0;
-
             // TODO: redirect/refresh to gallery in case of session_expired, stop ml sync job
         } catch (e) {
             log.error("Failed to run MLSync Job", e);
