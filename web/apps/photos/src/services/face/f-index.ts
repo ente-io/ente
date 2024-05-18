@@ -291,6 +291,7 @@ const removeDuplicateDetections = (
     withinDistance: number,
 ) => {
     detections.sort((a, b) => b.probability - a.probability);
+
     const isSelected = new Map<number, boolean>();
     for (let i = 0; i < detections.length; i++) {
         if (!isSelected.get(i)) continue;
@@ -305,6 +306,7 @@ const removeDuplicateDetections = (
                 [centeri.x, centeri.y],
                 [centerj.x, centerj.y],
             );
+
             if (dist <= withinDistance) isSelected.set(j, false);
         }
     }
