@@ -158,7 +158,7 @@ const detectFaces = async (
     const { yoloInput, yoloSize } =
         convertToYOLOInputFloat32ChannelsFirst(imageBitmap);
     const yoloOutput = await workerBridge.detectFaces(yoloInput);
-    const faces = getFacesFromYOLOOutput(yoloOutput, 0.7);
+    const faces = faceDetectionsFromYOLOOutput(yoloOutput);
     const inBox = newBox(0, 0, yoloSize.width, yoloSize.height);
     const toBox = newBox(0, 0, imageBitmap.width, imageBitmap.height);
     const faceDetections = transformFaceDetections(faces, inBox, toBox);
@@ -224,41 +224,37 @@ const convertToYOLOInputFloat32ChannelsFirst = (imageBitmap: ImageBitmap) => {
 };
 
 /**
- * @param rowOutput A Float32Array of shape [25200, 16], where each row
+ * Extract detected faces from the YOLO's output.
+ *
+ * Only detections that exceed a minimum score are returned.
+ *
+ * @param rows A Float32Array of shape [25200, 16], where each row
  * represents a bounding box.
  */
-const getFacesFromYOLOOutput = (
-    rowOutput: Float32Array,
-    minScore: number,
-): Array<FaceDetection> => {
-    const faces: Array<FaceDetection> = [];
+const faceDetectionsFromYOLOOutput = (rows: Float32Array): FaceDetection[] => {
+    const faces: FaceDetection[] = [];
     // Iterate over each row.
-    for (let i = 0; i < rowOutput.length; i += 16) {
-        const score = rowOutput[i + 4];
-        if (score < minScore) {
-            continue;
-        }
-        // The first 4 values represent the bounding box's coordinates:
-        //
-        //     (x1, y1, x2, y2)
-        //
-        const xCenter = rowOutput[i];
-        const yCenter = rowOutput[i + 1];
-        const width = rowOutput[i + 2];
-        const height = rowOutput[i + 3];
+    for (let i = 0; i < rows.length; i += 16) {
+        const score = rows[i + 4];
+        if (score < 0.7) continue;
+
+        const xCenter = rows[i];
+        const yCenter = rows[i + 1];
+        const width = rows[i + 2];
+        const height = rows[i + 3];
         const xMin = xCenter - width / 2.0; // topLeft
         const yMin = yCenter - height / 2.0; // topLeft
 
-        const leftEyeX = rowOutput[i + 5];
-        const leftEyeY = rowOutput[i + 6];
-        const rightEyeX = rowOutput[i + 7];
-        const rightEyeY = rowOutput[i + 8];
-        const noseX = rowOutput[i + 9];
-        const noseY = rowOutput[i + 10];
-        const leftMouthX = rowOutput[i + 11];
-        const leftMouthY = rowOutput[i + 12];
-        const rightMouthX = rowOutput[i + 13];
-        const rightMouthY = rowOutput[i + 14];
+        const leftEyeX = rows[i + 5];
+        const leftEyeY = rows[i + 6];
+        const rightEyeX = rows[i + 7];
+        const rightEyeY = rows[i + 8];
+        const noseX = rows[i + 9];
+        const noseY = rows[i + 10];
+        const leftMouthX = rows[i + 11];
+        const leftMouthY = rows[i + 12];
+        const rightMouthX = rows[i + 13];
+        const rightMouthY = rows[i + 14];
 
         const box = new Box({
             x: xMin,
