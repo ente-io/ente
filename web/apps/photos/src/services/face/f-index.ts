@@ -1,9 +1,9 @@
 import { openCache } from "@/next/blob-cache";
 import log from "@/next/log";
+import { workerBridge } from "@/next/worker/worker-bridge";
 import { Matrix } from "ml-matrix";
 import mlIDbStorage from "services/face/db";
 import { detectFaces, getRelativeDetection } from "services/face/detect";
-import { faceEmbeddings, mobileFaceNetFaceSize } from "services/face/embed";
 import { Box, Point, enlargeBox } from "services/face/geom";
 import {
     DetectedFace,
@@ -11,6 +11,7 @@ import {
     FaceAlignment,
     FaceCrop,
     FaceDetection,
+    FaceEmbedding,
     MLSyncFileContext,
     type MlFileData,
 } from "services/face/types";
@@ -432,6 +433,30 @@ const syncFileFaceEmbeddings = async (
     newMlFile.faces.forEach((f, i) => (f.embedding = embeddings[i]));
 
     log.info("[MLService] facesWithEmbeddings: ", newMlFile.faces.length);
+};
+
+export const mobileFaceNetFaceSize = 112;
+
+/**
+ * Compute embeddings for the given {@link faceData}.
+ *
+ * The model used is MobileFaceNet, running in an ONNX runtime.
+ */
+export const faceEmbeddings = async (
+    faceData: Float32Array,
+): Promise<Array<FaceEmbedding>> => {
+    const outputData = await workerBridge.faceEmbeddings(faceData);
+
+    const embeddingSize = 192;
+    const embeddings = new Array<FaceEmbedding>(
+        outputData.length / embeddingSize,
+    );
+    for (let i = 0; i < embeddings.length; i++) {
+        embeddings[i] = new Float32Array(
+            outputData.slice(i * embeddingSize, (i + 1) * embeddingSize),
+        );
+    }
+    return embeddings;
 };
 
 const syncFileFaceMakeRelativeDetections = async (
