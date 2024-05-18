@@ -1,3 +1,4 @@
+import { FILE_TYPE } from "@/media/file-type";
 import { openCache } from "@/next/blob-cache";
 import log from "@/next/log";
 import { workerBridge } from "@/next/worker/worker-bridge";
@@ -20,12 +21,10 @@ import type { EnteFile } from "types/file";
 import {
     clamp,
     createGrayscaleIntMatrixFromNormalized2List,
-    cropWithRotation,
-    fetchImageBitmapForContext,
-    getFaceId,
-    getPixelBilinear,
-    imageBitmapToBlob,
-    normalizePixelBetween0And1,
+    fetchImageBitmap,
+    getLocalFileImageBitmap,
+    getThumbnailImageBitmap,
+    pixelRGBBilinear,
     warpAffineFloat32List,
 } from "./image";
 import { transformFaceDetections } from "./transform-box";
@@ -70,6 +69,38 @@ export const indexFaces = async (
     return newMlFile;
 };
 
+const fetchImageBitmapForContext = async (fileContext: MLSyncFileContext) => {
+    if (fileContext.imageBitmap) {
+        return fileContext.imageBitmap;
+    }
+    if (fileContext.localFile) {
+        if (fileContext.enteFile.metadata.fileType !== FILE_TYPE.IMAGE) {
+            throw new Error("Local file of only image type is supported");
+        }
+        fileContext.imageBitmap = await getLocalFileImageBitmap(
+            fileContext.enteFile,
+            fileContext.localFile,
+        );
+    } else if (
+        [FILE_TYPE.IMAGE, FILE_TYPE.LIVE_PHOTO].includes(
+            fileContext.enteFile.metadata.fileType,
+        )
+    ) {
+        fileContext.imageBitmap = await fetchImageBitmap(fileContext.enteFile);
+    } else {
+        // TODO-ML(MR): We don't do it on videos, when will we ever come
+        // here?
+        fileContext.imageBitmap = await getThumbnailImageBitmap(
+            fileContext.enteFile,
+        );
+    }
+
+    const { width, height } = fileContext.imageBitmap;
+    fileContext.newMlFile.imageDimensions = { width, height };
+
+    return fileContext.imageBitmap;
+};
+
 const syncFileAnalyzeFaces = async (fileContext: MLSyncFileContext) => {
     const { newMlFile } = fileContext;
     const startTime = Date.now();
@@ -96,7 +127,7 @@ const syncFileFaceDetections = async (fileContext: MLSyncFileContext) => {
     fileContext.newDetection = true;
     const imageBitmap = await fetchImageBitmapForContext(fileContext);
     const faceDetections = await detectFaces(imageBitmap);
-    // TODO: reenable faces filtering based on width
+    // TODO-ML(MR): reenable faces filtering based on width
     const detectedFaces = faceDetections?.map((detection) => {
         return {
             fileId: fileContext.enteFile.id,
@@ -105,7 +136,7 @@ const syncFileFaceDetections = async (fileContext: MLSyncFileContext) => {
     });
     newMlFile.faces = detectedFaces?.map((detectedFace) => ({
         ...detectedFace,
-        id: getFaceId(detectedFace, newMlFile.imageDimensions),
+        id: makeFaceID(detectedFace, newMlFile.imageDimensions),
     }));
     // ?.filter((f) =>
     //     f.box.width > syncContext.config.faceDetection.minFaceSize
@@ -121,149 +152,104 @@ const syncFileFaceDetections = async (fileContext: MLSyncFileContext) => {
 const detectFaces = async (
     imageBitmap: ImageBitmap,
 ): Promise<Array<FaceDetection>> => {
-    const maxFaceDistancePercent = Math.sqrt(2) / 100;
-    const maxFaceDistance = imageBitmap.width * maxFaceDistancePercent;
-    const preprocessResult = preprocessImageBitmapToFloat32ChannelsFirst(
-        imageBitmap,
-        640,
-        640,
-    );
-    const data = preprocessResult.data;
-    const resized = preprocessResult.newSize;
-    const outputData = await workerBridge.detectFaces(data);
-    const faces = getFacesFromYOLOOutput(outputData as Float32Array, 0.7);
-    const inBox = newBox(0, 0, resized.width, resized.height);
+    const { yoloInput, yoloSize } =
+        convertToYOLOInputFloat32ChannelsFirst(imageBitmap);
+    const yoloOutput = await workerBridge.detectFaces(yoloInput);
+    const faces = faceDetectionsFromYOLOOutput(yoloOutput);
+    const inBox = newBox(0, 0, yoloSize.width, yoloSize.height);
     const toBox = newBox(0, 0, imageBitmap.width, imageBitmap.height);
     const faceDetections = transformFaceDetections(faces, inBox, toBox);
+
+    const maxFaceDistancePercent = Math.sqrt(2) / 100;
+    const maxFaceDistance = imageBitmap.width * maxFaceDistancePercent;
     return removeDuplicateDetections(faceDetections, maxFaceDistance);
 };
 
-const preprocessImageBitmapToFloat32ChannelsFirst = (
-    imageBitmap: ImageBitmap,
-    requiredWidth: number,
-    requiredHeight: number,
-    maintainAspectRatio: boolean = true,
-    normFunction: (pixelValue: number) => number = normalizePixelBetween0And1,
-) => {
+/**
+ * Convert {@link imageBitmap} into the format that the YOLO face detection
+ * model expects.
+ */
+const convertToYOLOInputFloat32ChannelsFirst = (imageBitmap: ImageBitmap) => {
+    const requiredWidth = 640;
+    const requiredHeight = 640;
+
+    const width = imageBitmap.width;
+    const height = imageBitmap.height;
+
     // Create an OffscreenCanvas and set its size.
-    const offscreenCanvas = new OffscreenCanvas(
-        imageBitmap.width,
-        imageBitmap.height,
-    );
+    const offscreenCanvas = new OffscreenCanvas(width, height);
     const ctx = offscreenCanvas.getContext("2d");
-    ctx.drawImage(imageBitmap, 0, 0, imageBitmap.width, imageBitmap.height);
-    const imageData = ctx.getImageData(
-        0,
-        0,
-        imageBitmap.width,
-        imageBitmap.height,
-    );
+    ctx.drawImage(imageBitmap, 0, 0, width, height);
+    const imageData = ctx.getImageData(0, 0, width, height);
     const pixelData = imageData.data;
 
-    let scaleW = requiredWidth / imageBitmap.width;
-    let scaleH = requiredHeight / imageBitmap.height;
-    if (maintainAspectRatio) {
-        const scale = Math.min(
-            requiredWidth / imageBitmap.width,
-            requiredHeight / imageBitmap.height,
-        );
-        scaleW = scale;
-        scaleH = scale;
-    }
-    const scaledWidth = clamp(
-        Math.round(imageBitmap.width * scaleW),
-        0,
-        requiredWidth,
-    );
-    const scaledHeight = clamp(
-        Math.round(imageBitmap.height * scaleH),
-        0,
-        requiredHeight,
-    );
+    // Maintain aspect ratio.
+    const scale = Math.min(requiredWidth / width, requiredHeight / height);
 
-    const processedImage = new Float32Array(
-        1 * 3 * requiredWidth * requiredHeight,
-    );
+    const scaledWidth = clamp(Math.round(width * scale), 0, requiredWidth);
+    const scaledHeight = clamp(Math.round(height * scale), 0, requiredHeight);
 
-    // Populate the Float32Array with normalized pixel values
-    let pixelIndex = 0;
+    const yoloInput = new Float32Array(1 * 3 * requiredWidth * requiredHeight);
+    const yoloSize = { width: scaledWidth, height: scaledHeight };
+
+    // Populate the Float32Array with normalized pixel values.
+    let pi = 0;
     const channelOffsetGreen = requiredHeight * requiredWidth;
     const channelOffsetBlue = 2 * requiredHeight * requiredWidth;
     for (let h = 0; h < requiredHeight; h++) {
         for (let w = 0; w < requiredWidth; w++) {
-            let pixel: {
-                r: number;
-                g: number;
-                b: number;
-            };
-            if (w >= scaledWidth || h >= scaledHeight) {
-                pixel = { r: 114, g: 114, b: 114 };
-            } else {
-                pixel = getPixelBilinear(
-                    w / scaleW,
-                    h / scaleH,
-                    pixelData,
-                    imageBitmap.width,
-                    imageBitmap.height,
-                );
-            }
-            processedImage[pixelIndex] = normFunction(pixel.r);
-            processedImage[pixelIndex + channelOffsetGreen] = normFunction(
-                pixel.g,
-            );
-            processedImage[pixelIndex + channelOffsetBlue] = normFunction(
-                pixel.b,
-            );
-            pixelIndex++;
+            const { r, g, b } =
+                w >= scaledWidth || h >= scaledHeight
+                    ? { r: 114, g: 114, b: 114 }
+                    : pixelRGBBilinear(
+                          w / scale,
+                          h / scale,
+                          pixelData,
+                          width,
+                          height,
+                      );
+            yoloInput[pi] = r / 255.0;
+            yoloInput[pi + channelOffsetGreen] = g / 255.0;
+            yoloInput[pi + channelOffsetBlue] = b / 255.0;
+            pi++;
         }
     }
 
-    return {
-        data: processedImage,
-        originalSize: {
-            width: imageBitmap.width,
-            height: imageBitmap.height,
-        },
-        newSize: { width: scaledWidth, height: scaledHeight },
-    };
+    return { yoloInput, yoloSize };
 };
 
 /**
- * @param rowOutput A Float32Array of shape [25200, 16], where each row
+ * Extract detected faces from the YOLO's output.
+ *
+ * Only detections that exceed a minimum score are returned.
+ *
+ * @param rows A Float32Array of shape [25200, 16], where each row
  * represents a bounding box.
  */
-const getFacesFromYOLOOutput = (
-    rowOutput: Float32Array,
-    minScore: number,
-): Array<FaceDetection> => {
-    const faces: Array<FaceDetection> = [];
+const faceDetectionsFromYOLOOutput = (rows: Float32Array): FaceDetection[] => {
+    const faces: FaceDetection[] = [];
     // Iterate over each row.
-    for (let i = 0; i < rowOutput.length; i += 16) {
-        const score = rowOutput[i + 4];
-        if (score < minScore) {
-            continue;
-        }
-        // The first 4 values represent the bounding box's coordinates:
-        //
-        //     (x1, y1, x2, y2)
-        //
-        const xCenter = rowOutput[i];
-        const yCenter = rowOutput[i + 1];
-        const width = rowOutput[i + 2];
-        const height = rowOutput[i + 3];
+    for (let i = 0; i < rows.length; i += 16) {
+        const score = rows[i + 4];
+        if (score < 0.7) continue;
+
+        const xCenter = rows[i];
+        const yCenter = rows[i + 1];
+        const width = rows[i + 2];
+        const height = rows[i + 3];
         const xMin = xCenter - width / 2.0; // topLeft
         const yMin = yCenter - height / 2.0; // topLeft
 
-        const leftEyeX = rowOutput[i + 5];
-        const leftEyeY = rowOutput[i + 6];
-        const rightEyeX = rowOutput[i + 7];
-        const rightEyeY = rowOutput[i + 8];
-        const noseX = rowOutput[i + 9];
-        const noseY = rowOutput[i + 10];
-        const leftMouthX = rowOutput[i + 11];
-        const leftMouthY = rowOutput[i + 12];
-        const rightMouthX = rowOutput[i + 13];
-        const rightMouthY = rowOutput[i + 14];
+        const leftEyeX = rows[i + 5];
+        const leftEyeY = rows[i + 6];
+        const rightEyeX = rows[i + 7];
+        const rightEyeY = rows[i + 8];
+        const noseX = rows[i + 9];
+        const noseY = rows[i + 10];
+        const leftMouthX = rows[i + 11];
+        const leftMouthY = rows[i + 12];
+        const rightMouthX = rows[i + 13];
+        const rightMouthY = rows[i + 14];
 
         const box = new Box({
             x: xMin,
@@ -491,6 +477,43 @@ function normalizeLandmarks(
     ) as Array<[number, number]>;
 }
 
+async function extractFaceImagesToFloat32(
+    faceAlignments: Array<FaceAlignment>,
+    faceSize: number,
+    image: ImageBitmap,
+): Promise<Float32Array> {
+    const faceData = new Float32Array(
+        faceAlignments.length * faceSize * faceSize * 3,
+    );
+    for (let i = 0; i < faceAlignments.length; i++) {
+        const alignedFace = faceAlignments[i];
+        const faceDataOffset = i * faceSize * faceSize * 3;
+        warpAffineFloat32List(
+            image,
+            alignedFace,
+            faceSize,
+            faceData,
+            faceDataOffset,
+        );
+    }
+    return faceData;
+}
+
+const makeFaceID = (detectedFace: DetectedFace, imageDims: Dimensions) => {
+    const part = (v: number) => clamp(v, 0.0, 0.999999).toFixed(5).substring(2);
+    const xMin = part(detectedFace.detection.box.x / imageDims.width);
+    const yMin = part(detectedFace.detection.box.y / imageDims.height);
+    const xMax = part(
+        (detectedFace.detection.box.x + detectedFace.detection.box.width) /
+            imageDims.width,
+    );
+    const yMax = part(
+        (detectedFace.detection.box.y + detectedFace.detection.box.height) /
+            imageDims.height,
+    );
+    return [detectedFace.fileId, xMin, yMin, xMax, yMax].join("_");
+};
+
 /**
  * Laplacian blur detection.
  */
@@ -506,6 +529,8 @@ const detectBlur = (alignedFaces: Float32Array, faces: Face[]): number[] => {
         const faceImage = createGrayscaleIntMatrixFromNormalized2List(
             alignedFaces,
             i,
+            mobileFaceNetFaceSize,
+            mobileFaceNetFaceSize,
         );
         const laplacian = applyLaplacian(faceImage, direction);
         blurValues.push(matrixVariance(laplacian));
@@ -738,6 +763,12 @@ export const saveFaceCrop = async (imageBitmap: ImageBitmap, face: Face) => {
     return blob;
 };
 
+const imageBitmapToBlob = (imageBitmap: ImageBitmap) => {
+    const canvas = new OffscreenCanvas(imageBitmap.width, imageBitmap.height);
+    canvas.getContext("2d").drawImage(imageBitmap, 0, 0);
+    return canvas.convertToBlob({ type: "image/jpeg", quality: 0.8 });
+};
+
 const getFaceCrop = (
     imageBitmap: ImageBitmap,
     faceDetection: FaceDetection,
@@ -766,24 +797,68 @@ const getFaceCrop = (
     };
 };
 
-async function extractFaceImagesToFloat32(
-    faceAlignments: Array<FaceAlignment>,
-    faceSize: number,
-    image: ImageBitmap,
-): Promise<Float32Array> {
-    const faceData = new Float32Array(
-        faceAlignments.length * faceSize * faceSize * 3,
-    );
-    for (let i = 0; i < faceAlignments.length; i++) {
-        const alignedFace = faceAlignments[i];
-        const faceDataOffset = i * faceSize * faceSize * 3;
-        warpAffineFloat32List(
-            image,
-            alignedFace,
-            faceSize,
-            faceData,
-            faceDataOffset,
+export function cropWithRotation(
+    imageBitmap: ImageBitmap,
+    cropBox: Box,
+    rotation?: number,
+    maxSize?: Dimensions,
+    minSize?: Dimensions,
+) {
+    const box = cropBox.round();
+
+    const outputSize = { width: box.width, height: box.height };
+    if (maxSize) {
+        const minScale = Math.min(
+            maxSize.width / box.width,
+            maxSize.height / box.height,
         );
+        if (minScale < 1) {
+            outputSize.width = Math.round(minScale * box.width);
+            outputSize.height = Math.round(minScale * box.height);
+        }
     }
-    return faceData;
+
+    if (minSize) {
+        const maxScale = Math.max(
+            minSize.width / box.width,
+            minSize.height / box.height,
+        );
+        if (maxScale > 1) {
+            outputSize.width = Math.round(maxScale * box.width);
+            outputSize.height = Math.round(maxScale * box.height);
+        }
+    }
+
+    // log.info({ imageBitmap, box, outputSize });
+
+    const offscreen = new OffscreenCanvas(outputSize.width, outputSize.height);
+    const offscreenCtx = offscreen.getContext("2d");
+    offscreenCtx.imageSmoothingQuality = "high";
+
+    offscreenCtx.translate(outputSize.width / 2, outputSize.height / 2);
+    rotation && offscreenCtx.rotate(rotation);
+
+    const outputBox = new Box({
+        x: -outputSize.width / 2,
+        y: -outputSize.height / 2,
+        width: outputSize.width,
+        height: outputSize.height,
+    });
+
+    const enlargedBox = enlargeBox(box, 1.5);
+    const enlargedOutputBox = enlargeBox(outputBox, 1.5);
+
+    offscreenCtx.drawImage(
+        imageBitmap,
+        enlargedBox.x,
+        enlargedBox.y,
+        enlargedBox.width,
+        enlargedBox.height,
+        enlargedOutputBox.x,
+        enlargedOutputBox.y,
+        enlargedOutputBox.width,
+        enlargedOutputBox.height,
+    );
+
+    return offscreen.transferToImageBitmap();
 }
