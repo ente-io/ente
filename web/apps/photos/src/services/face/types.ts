@@ -1,61 +1,9 @@
-import type { ClusterFacesResult } from "services/face/cluster";
-import { Dimensions } from "services/face/geom";
+import { Box, Dimensions, Point } from "services/face/geom";
 import { EnteFile } from "types/file";
-import { Box, Point } from "./geom";
-
-export interface MLSyncResult {
-    nOutOfSyncFiles: number;
-    nSyncedFiles: number;
-    nSyncedFaces: number;
-    nFaceClusters: number;
-    nFaceNoise: number;
-    error?: Error;
-}
-
-export declare type FaceDescriptor = Float32Array;
 
 export declare type Cluster = Array<number>;
 
-export interface FacesCluster {
-    faces: Cluster;
-    summary?: FaceDescriptor;
-}
-
-export interface FacesClustersWithNoise {
-    clusters: Array<FacesCluster>;
-    noise: Cluster;
-}
-
-export interface NearestCluster {
-    cluster: FacesCluster;
-    distance: number;
-}
-
 export declare type Landmark = Point;
-
-export declare type ImageType = "Original" | "Preview";
-
-export declare type FaceDetectionMethod = "YoloFace";
-
-export declare type FaceCropMethod = "ArcFace";
-
-export declare type FaceAlignmentMethod = "ArcFace";
-
-export declare type FaceEmbeddingMethod = "MobileFaceNet";
-
-export declare type BlurDetectionMethod = "Laplacian";
-
-export declare type ClusteringMethod = "Hdbscan" | "Dbscan";
-
-export class AlignedBox {
-    box: Box;
-    rotation: number;
-}
-
-export interface Versioned<T> {
-    value: T;
-    version: number;
-}
 
 export interface FaceDetection {
     // box and landmarks is relative to image dimentions stored at mlFileData
@@ -124,15 +72,9 @@ export interface Person {
 export interface MlFileData {
     fileId: number;
     faces?: Face[];
-    imageSource?: ImageType;
     imageDimensions?: Dimensions;
-    faceDetectionMethod?: Versioned<FaceDetectionMethod>;
-    faceCropMethod?: Versioned<FaceCropMethod>;
-    faceAlignmentMethod?: Versioned<FaceAlignmentMethod>;
-    faceEmbeddingMethod?: Versioned<FaceEmbeddingMethod>;
     mlVersion: number;
     errorCount: number;
-    lastErrorMessage?: string;
 }
 
 export interface MLSearchConfig {
@@ -150,12 +92,6 @@ export interface MLSyncFileContext {
 
     newDetection?: boolean;
     newAlignment?: boolean;
-}
-
-export interface MLLibraryData {
-    faceClusteringMethod?: Versioned<ClusteringMethod>;
-    faceClusteringResults?: ClusterFacesResult;
-    faceClustersWithNoise?: FacesClustersWithNoise;
 }
 
 export declare type MLIndex = "files" | "people";

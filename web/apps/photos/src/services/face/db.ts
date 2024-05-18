@@ -9,7 +9,7 @@ import {
     openDB,
 } from "idb";
 import isElectron from "is-electron";
-import { Face, MLLibraryData, MlFileData, Person } from "services/face/types";
+import { Face, MlFileData, Person } from "services/face/types";
 import {
     DEFAULT_ML_SEARCH_CONFIG,
     MAX_ML_SYNC_ERROR_COUNT,
@@ -50,7 +50,7 @@ interface MLDb extends DBSchema {
     };
     library: {
         key: string;
-        value: MLLibraryData;
+        value: unknown;
     };
     configs: {
         key: string;
@@ -177,6 +177,7 @@ class MLIDbStorage {
                                 ML_SEARCH_CONFIG_NAME,
                             );
 
+                        db.deleteObjectStore("library");
                         db.deleteObjectStore("things");
                     } catch {
                         // TODO: ignore for now as we finalize the new version
@@ -398,16 +399,6 @@ class MLIDbStorage {
     public async setIndexVersion(index: string, version: number) {
         const db = await this.db;
         return db.put("versions", version, index);
-    }
-
-    public async getLibraryData() {
-        const db = await this.db;
-        return db.get("library", "data");
-    }
-
-    public async putLibraryData(data: MLLibraryData) {
-        const db = await this.db;
-        return db.put("library", data, "data");
     }
 
     public async getConfig<T extends Config>(name: string, def: T) {
