@@ -37,7 +37,6 @@ export const fetchImageBitmapForContext = async (
         );
     }
 
-    fileContext.newMlFile.imageSource = "Original";
     const { width, height } = fileContext.imageBitmap;
     fileContext.newMlFile.imageDimensions = { width, height };
 

@@ -35,14 +35,6 @@ export declare type Landmark = Point;
 
 export declare type ImageType = "Original" | "Preview";
 
-export declare type FaceDetectionMethod = "YoloFace";
-
-export declare type FaceCropMethod = "ArcFace";
-
-export declare type FaceAlignmentMethod = "ArcFace";
-
-export declare type FaceEmbeddingMethod = "MobileFaceNet";
-
 export declare type BlurDetectionMethod = "Laplacian";
 
 export declare type ClusteringMethod = "Hdbscan" | "Dbscan";
@@ -124,12 +116,7 @@ export interface Person {
 export interface MlFileData {
     fileId: number;
     faces?: Face[];
-    imageSource?: ImageType;
     imageDimensions?: Dimensions;
-    faceDetectionMethod?: Versioned<FaceDetectionMethod>;
-    faceCropMethod?: Versioned<FaceCropMethod>;
-    faceAlignmentMethod?: Versioned<FaceAlignmentMethod>;
-    faceEmbeddingMethod?: Versioned<FaceEmbeddingMethod>;
     mlVersion: number;
     errorCount: number;
     lastErrorMessage?: string;

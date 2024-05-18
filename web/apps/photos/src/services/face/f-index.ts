@@ -43,10 +43,6 @@ export const syncFileAnalyzeFaces = async (fileContext: MLSyncFileContext) => {
 
 const syncFileFaceDetections = async (fileContext: MLSyncFileContext) => {
     const { newMlFile } = fileContext;
-    newMlFile.faceDetectionMethod = {
-        value: "YoloFace",
-        version: 1,
-    };
     fileContext.newDetection = true;
     const imageBitmap = await fetchImageBitmapForContext(fileContext);
     const faceDetections = await detectFaces(imageBitmap);
@@ -70,11 +66,6 @@ const syncFileFaceDetections = async (fileContext: MLSyncFileContext) => {
 const syncFileFaceCrops = async (fileContext: MLSyncFileContext) => {
     const { newMlFile } = fileContext;
     const imageBitmap = await fetchImageBitmapForContext(fileContext);
-    newMlFile.faceCropMethod = {
-        value: "ArcFace",
-        version: 1,
-    };
-
     for (const face of newMlFile.faces) {
         await saveFaceCrop(imageBitmap, face);
     }
@@ -84,10 +75,6 @@ const syncFileFaceAlignments = async (
     fileContext: MLSyncFileContext,
 ): Promise<Float32Array> => {
     const { newMlFile } = fileContext;
-    newMlFile.faceAlignmentMethod = {
-        value: "ArcFace",
-        version: 1,
-    };
     fileContext.newAlignment = true;
     const imageBitmap =
         fileContext.imageBitmap ||
@@ -118,10 +105,6 @@ const syncFileFaceEmbeddings = async (
     alignedFacesInput: Float32Array,
 ) => {
     const { newMlFile } = fileContext;
-    newMlFile.faceEmbeddingMethod = {
-        value: "MobileFaceNet",
-        version: 2,
-    };
     // TODO: when not storing face crops, image will be needed to extract faces
     // fileContext.imageBitmap ||
     //     (await this.getImageBitmap(fileContext));
