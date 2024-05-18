@@ -21,14 +21,12 @@ import type { EnteFile } from "types/file";
 import {
     createGrayscaleIntMatrixFromNormalized2List,
     cropWithRotation,
-    imageBitmapToBlob,
-    warpAffineFloat32List,
-} from "utils/image";
-import {
     fetchImageBitmap,
     fetchImageBitmapForContext,
     getFaceId,
     getLocalFile,
+    imageBitmapToBlob,
+    warpAffineFloat32List,
 } from "./image";
 
 /**

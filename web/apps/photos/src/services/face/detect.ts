@@ -8,6 +8,7 @@ import {
     newBox,
 } from "services/face/geom";
 import { FaceDetection } from "services/face/types";
+// TODO-ML(MR): Do we need two separate Matrix libraries?
 import {
     Matrix,
     applyToPoint,
@@ -15,11 +16,7 @@ import {
     scale,
     translate,
 } from "transformation-matrix";
-import {
-    clamp,
-    getPixelBilinear,
-    normalizePixelBetween0And1,
-} from "utils/image";
+import { clamp, getPixelBilinear, normalizePixelBetween0And1 } from "./image";
 
 /**
  * Detect faces in the given {@link imageBitmap}.
