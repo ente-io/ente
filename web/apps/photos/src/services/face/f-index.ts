@@ -442,27 +442,19 @@ async function extractFaceImagesToFloat32(
 
 /**
  * Laplacian blur detection.
+ *
+ * Return an array of detected blur values, one for each face in {@link faces}.
  */
-const detectBlur = (alignedFaces: Float32Array, faces: Face[]): number[] => {
-    const numFaces = Math.round(
-        alignedFaces.length /
-            (mobileFaceNetFaceSize * mobileFaceNetFaceSize * 3),
-    );
-    const blurValues: number[] = [];
-    for (let i = 0; i < numFaces; i++) {
-        const face = faces[i];
-        const direction = faceDirection(face);
+const detectBlur = (alignedFaces: Float32Array, faces: Face[]): number[] =>
+    faces.map((face, i) => {
         const faceImage = createGrayscaleIntMatrixFromNormalized2List(
             alignedFaces,
             i,
             mobileFaceNetFaceSize,
             mobileFaceNetFaceSize,
         );
-        const laplacian = applyLaplacian(faceImage, direction);
-        blurValues.push(matrixVariance(laplacian));
-    }
-    return blurValues;
-};
+        return matrixVariance(applyLaplacian(faceImage, faceDirection(face)));
+    });
 
 type FaceDirection = "left" | "right" | "straight";
 
