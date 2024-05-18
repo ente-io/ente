@@ -52,14 +52,6 @@ export async function getLocalFileImageBitmap(
     return createImageBitmap(fileBlob);
 }
 
-export function normalizePixelBetweenMinus1And1(pixelValue: number) {
-    return pixelValue / 127.5 - 1.0;
-}
-
-export function unnormalizePixelFromBetweenMinus1And1(pixelValue: number) {
-    return clamp(Math.round((pixelValue + 1.0) * 127.5), 0, 255);
-}
-
 /**
  * Returns the pixel value (RGB) at the given coordinates ({@link fx},
  * {@link fy}) using bicubic interpolation.
@@ -323,11 +315,17 @@ export function warpAffineFloat32List(
     }
 }
 
+const normalizePixelBetweenMinus1And1 = (pixelValue: number) =>
+    pixelValue / 127.5 - 1.0;
+
+const unnormalizePixelFromBetweenMinus1And1 = (pixelValue: number) =>
+    clamp(Math.round((pixelValue + 1.0) * 127.5), 0, 255);
+
 export function createGrayscaleIntMatrixFromNormalized2List(
     imageList: Float32Array,
     faceNumber: number,
-    width: number = 112,
-    height: number = 112,
+    width: number,
+    height: number,
 ): number[][] {
     const startIndex = faceNumber * width * height * 3;
     return Array.from({ length: height }, (_, y) =>

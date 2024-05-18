@@ -529,6 +529,8 @@ const detectBlur = (alignedFaces: Float32Array, faces: Face[]): number[] => {
         const faceImage = createGrayscaleIntMatrixFromNormalized2List(
             alignedFaces,
             i,
+            mobileFaceNetFaceSize,
+            mobileFaceNetFaceSize,
         );
         const laplacian = applyLaplacian(faceImage, direction);
         blurValues.push(matrixVariance(laplacian));
