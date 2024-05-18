@@ -203,27 +203,21 @@ const preprocessImageBitmapToFloat32ChannelsFirst = (
     const channelOffsetBlue = 2 * requiredHeight * requiredWidth;
     for (let h = 0; h < requiredHeight; h++) {
         for (let w = 0; w < requiredWidth; w++) {
-            let pixel: {
-                r: number;
-                g: number;
-                b: number;
-            };
-            if (w >= scaledWidth || h >= scaledHeight) {
-                pixel = { r: 114, g: 114, b: 114 };
-            } else {
-                pixel = getPixelBilinear(
-                    w / scale,
-                    h / scale,
-                    pixelData,
-                    width,
-                    height,
-                );
-            }
-            processedImage[pixelIndex] = normalizePixelBetween0And1(pixel.r);
+            const { r, g, b } =
+                w >= scaledWidth || h >= scaledHeight
+                    ? { r: 114, g: 114, b: 114 }
+                    : getPixelBilinear(
+                          w / scale,
+                          h / scale,
+                          pixelData,
+                          width,
+                          height,
+                      );
+            processedImage[pixelIndex] = normalizePixelBetween0And1(r);
             processedImage[pixelIndex + channelOffsetGreen] =
-                normalizePixelBetween0And1(pixel.g);
+                normalizePixelBetween0And1(g);
             processedImage[pixelIndex + channelOffsetBlue] =
-                normalizePixelBetween0And1(pixel.b);
+                normalizePixelBetween0And1(b);
             pixelIndex++;
         }
     }
