@@ -6,7 +6,6 @@ import { euclidean } from "hdbscan";
 import { Matrix } from "ml-matrix";
 import { Box, Dimensions, Point, enlargeBox } from "services/face/geom";
 import {
-    DetectedFace,
     Face,
     FaceAlignment,
     FaceCrop,
@@ -95,8 +94,9 @@ const fetchOrCreateImageBitmap = async (
 const indexFaces_ = async (enteFile: EnteFile, imageBitmap: ImageBitmap) => {
     const fileContext: MLSyncFileContext = { enteFile };
 
+    const fileID = enteFile.id;
     const newMlFile = (fileContext.newMlFile = {
-        fileId: enteFile.id,
+        fileId: fileID,
         mlVersion: defaultMLVersion,
         errorCount: 0,
     } as MlFileData);
@@ -106,20 +106,12 @@ const indexFaces_ = async (enteFile: EnteFile, imageBitmap: ImageBitmap) => {
     fileContext.newMlFile.imageDimensions = { width, height };
 
     const faceDetections = await detectFaces(imageBitmap);
-    const detectedFaces = faceDetections?.map((detection) => {
-        return {
-            fileId: fileContext.enteFile.id,
-            detection,
-        } as DetectedFace;
-    });
-    newMlFile.faces = detectedFaces?.map((detectedFace) => ({
-        ...detectedFace,
-        id: makeFaceID(detectedFace, newMlFile.imageDimensions),
+    const detectedFaces = faceDetections.map((detection) => ({
+        id: makeFaceID(fileID, detection, newMlFile.imageDimensions),
+        fileId: fileID,
+        detection,
     }));
-    // TODO-ML(MR): reenable faces filtering based on width
-    // ?.filter((f) =>
-    //     f.box.width > syncContext.config.faceDetection.minFaceSize
-    // );
+    newMlFile.faces = detectedFaces;
 
     if (newMlFile.faces && newMlFile.faces.length > 0) {
         await syncFileFaceCrops(fileContext);
@@ -142,7 +134,7 @@ const indexFaces_ = async (enteFile: EnteFile, imageBitmap: ImageBitmap) => {
  */
 const detectFaces = async (
     imageBitmap: ImageBitmap,
-): Promise<Array<FaceDetection>> => {
+): Promise<FaceDetection[]> => {
     const rect = ({ width, height }: { width: number; height: number }) =>
         new Box({ x: 0, y: 0, width, height });
 
@@ -155,6 +147,11 @@ const detectFaces = async (
         rect(yoloSize),
         rect(imageBitmap),
     );
+
+    // TODO-ML: reenable faces filtering based on width ?? else remove me
+    // ?.filter((f) =>
+    //     f.box.width > syncContext.config.faceDetection.minFaceSize
+    // );
 
     const maxFaceDistancePercent = Math.sqrt(2) / 100;
     const maxFaceDistance = imageBitmap.width * maxFaceDistancePercent;
@@ -325,6 +322,23 @@ const faceDetectionCenter = (detection: FaceDetection) => {
     return new Point(center.x / 4, center.y / 4);
 };
 
+const makeFaceID = (
+    fileID: number,
+    detection: FaceDetection,
+    imageDims: Dimensions,
+) => {
+    const part = (v: number) => clamp(v, 0.0, 0.999999).toFixed(5).substring(2);
+    const xMin = part(detection.box.x / imageDims.width);
+    const yMin = part(detection.box.y / imageDims.height);
+    const xMax = part(
+        (detection.box.x + detection.box.width) / imageDims.width,
+    );
+    const yMax = part(
+        (detection.box.y + detection.box.height) / imageDims.height,
+    );
+    return [`${fileID}`, xMin, yMin, xMax, yMax].join("_");
+};
+
 const syncFileFaceCrops = async (fileContext: MLSyncFileContext) => {
     const { newMlFile } = fileContext;
     const imageBitmap = fileContext.imageBitmap;
@@ -465,21 +479,6 @@ async function extractFaceImagesToFloat32(
     }
     return faceData;
 }
-
-const makeFaceID = (detectedFace: DetectedFace, imageDims: Dimensions) => {
-    const part = (v: number) => clamp(v, 0.0, 0.999999).toFixed(5).substring(2);
-    const xMin = part(detectedFace.detection.box.x / imageDims.width);
-    const yMin = part(detectedFace.detection.box.y / imageDims.height);
-    const xMax = part(
-        (detectedFace.detection.box.x + detectedFace.detection.box.width) /
-            imageDims.width,
-    );
-    const yMax = part(
-        (detectedFace.detection.box.y + detectedFace.detection.box.height) /
-            imageDims.height,
-    );
-    return [detectedFace.fileId, xMin, yMin, xMax, yMax].join("_");
-};
 
 /**
  * Laplacian blur detection.
