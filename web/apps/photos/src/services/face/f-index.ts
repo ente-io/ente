@@ -25,7 +25,6 @@ import {
     fetchImageBitmap,
     getLocalFileImageBitmap,
     getThumbnailImageBitmap,
-    imageBitmapToBlob,
     normalizePixelBetween0And1,
     pixelRGBBilinear,
     warpAffineFloat32List,
@@ -742,6 +741,12 @@ export const saveFaceCrop = async (imageBitmap: ImageBitmap, face: Face) => {
     faceCrop.image.close();
 
     return blob;
+};
+
+const imageBitmapToBlob = (imageBitmap: ImageBitmap) => {
+    const canvas = new OffscreenCanvas(imageBitmap.width, imageBitmap.height);
+    canvas.getContext("2d").drawImage(imageBitmap, 0, 0);
+    return canvas.convertToBlob({ type: "image/jpeg", quality: 0.8 });
 };
 
 const getFaceCrop = (
