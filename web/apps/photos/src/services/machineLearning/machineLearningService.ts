@@ -61,7 +61,6 @@ class MLSyncContext {
     public localFilesMap: Map<number, EnteFile>;
     public outOfSyncFiles: EnteFile[];
     public nSyncedFiles: number;
-    public nSyncedFaces: number;
 
     public error?: Error;
 
@@ -83,7 +82,6 @@ class MLSyncContext {
 
         this.outOfSyncFiles = [];
         this.nSyncedFiles = 0;
-        this.nSyncedFaces = 0;
 
         this.concurrency = concurrency ?? getConcurrency();
 
@@ -260,7 +258,6 @@ class MachineLearningService {
             syncContext.error = error;
         }
         await syncContext.syncQueue.onIdle();
-        log.info("allFaces: ", syncContext.nSyncedFaces);
 
         // TODO: In case syncJob has to use multiple ml workers
         // do in same transaction with each file update
@@ -340,7 +337,6 @@ class MachineLearningService {
                 `Indexing ${enteFile.title ?? "<untitled>"} ${enteFile.id}`,
             );
             const mlFileData = await this.syncFile(enteFile, localFile);
-            syncContext.nSyncedFaces += mlFileData.faces?.length || 0;
             syncContext.nSyncedFiles += 1;
             return mlFileData;
         } catch (e) {
