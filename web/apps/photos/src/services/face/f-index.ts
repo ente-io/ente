@@ -48,29 +48,21 @@ export const indexFaces = async (
     localFile?: globalThis.File,
 ) => {
     const startTime = Date.now();
-    const fileContext: MLSyncFileContext = { enteFile, localFile };
 
-    const newMlFile = (fileContext.newMlFile = {
-        fileId: enteFile.id,
-        mlVersion: defaultMLVersion,
-        errorCount: 0,
-    } as MlFileData);
-
+    const imageBitmap = await fetchOrCreateImageBitmap(enteFile, localFile);
+    let mlFile: MlFileData;
     try {
-        const imageBitmap = await fetchOrCreateImageBitmap(enteFile, localFile);
-        fileContext.imageBitmap = imageBitmap;
-        const { width, height } = imageBitmap;
-        fileContext.newMlFile.imageDimensions = { width, height };
-
-        await syncFileAnalyzeFaces(fileContext);
-        newMlFile.errorCount = 0;
+        mlFile = await indexFaces_(enteFile, imageBitmap);
     } finally {
-        fileContext.imageBitmap && fileContext.imageBitmap.close();
+        imageBitmap.close();
     }
 
-    const ms = Math.round(Date.now() - startTime);
-    log.debug(() => `Indexing faces in file ${enteFile.id} took ${ms} ms`);
-    return newMlFile;
+    log.debug(() => {
+        const ms = Math.round(Date.now() - startTime);
+        const nf = mlFile.faces?.length ?? 0;
+        return `Indexed ${nf} faces in file ${enteFile.id} (${ms} ms)`;
+    });
+    return mlFile;
 };
 
 interface MLSyncFileContext {
@@ -105,8 +97,19 @@ const fetchOrCreateImageBitmap = async (
     }
 };
 
-const syncFileAnalyzeFaces = async (fileContext: MLSyncFileContext) => {
-    const { newMlFile } = fileContext;
+const indexFaces_ = async (enteFile: EnteFile, imageBitmap: ImageBitmap) => {
+    const fileContext: MLSyncFileContext = { enteFile };
+
+    const newMlFile = (fileContext.newMlFile = {
+        fileId: enteFile.id,
+        mlVersion: defaultMLVersion,
+        errorCount: 0,
+    } as MlFileData);
+
+    fileContext.imageBitmap = imageBitmap;
+    const { width, height } = imageBitmap;
+    fileContext.newMlFile.imageDimensions = { width, height };
+
     await syncFileFaceDetections(fileContext);
 
     if (newMlFile.faces && newMlFile.faces.length > 0) {
@@ -118,6 +121,9 @@ const syncFileAnalyzeFaces = async (fileContext: MLSyncFileContext) => {
 
         await syncFileFaceMakeRelativeDetections(fileContext);
     }
+    newMlFile.errorCount = 0;
+
+    return newMlFile;
 };
 
 const syncFileFaceDetections = async (fileContext: MLSyncFileContext) => {
