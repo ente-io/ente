@@ -81,17 +81,4 @@ export interface MLSearchConfig {
     enabled: boolean;
 }
 
-export interface MLSyncFileContext {
-    enteFile: EnteFile;
-    localFile?: globalThis.File;
-
-    oldMlFile?: MlFileData;
-    newMlFile?: MlFileData;
-
-    imageBitmap?: ImageBitmap;
-
-    newDetection?: boolean;
-    newAlignment?: boolean;
-}
-
 export declare type MLIndex = "files" | "people";

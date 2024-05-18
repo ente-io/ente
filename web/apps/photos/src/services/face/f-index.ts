@@ -70,11 +70,25 @@ export const indexFaces = async (
     return newMlFile;
 };
 
+export interface MLSyncFileContext {
+    enteFile: EnteFile;
+    localFile?: globalThis.File;
+
+    oldMlFile?: MlFileData;
+    newMlFile?: MlFileData;
+
+    imageBitmap?: ImageBitmap;
+
+    newDetection?: boolean;
+    newAlignment?: boolean;
+}
+
 const fetchImageBitmapForContext = async (fileContext: MLSyncFileContext) => {
     if (fileContext.imageBitmap) return fileContext.imageBitmap;
 
     const fileType = fileContext.enteFile.metadata.fileType;
     if (fileContext.localFile) {
+        // TODO-ML(MR): Could also be image part of live photo?
         if (fileType !== FILE_TYPE.IMAGE)
             throw new Error("Local file of only image type is supported");
 
