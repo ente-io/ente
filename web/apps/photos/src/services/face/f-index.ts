@@ -57,7 +57,11 @@ export const indexFaces = async (
     } as MlFileData);
 
     try {
-        await fetchImageBitmapForContext(fileContext);
+        const imageBitmap = await fetchOrCreateImageBitmap(enteFile, localFile);
+        fileContext.imageBitmap = imageBitmap;
+        const { width, height } = imageBitmap;
+        fileContext.newMlFile.imageDimensions = { width, height };
+
         await syncFileAnalyzeFaces(fileContext);
         newMlFile.errorCount = 0;
     } finally {
@@ -79,29 +83,26 @@ interface MLSyncFileContext {
     imageBitmap?: ImageBitmap;
 }
 
-const fetchImageBitmapForContext = async (fileContext: MLSyncFileContext) => {
-    if (fileContext.imageBitmap) return fileContext.imageBitmap;
-
-    const fileType = fileContext.enteFile.metadata.fileType;
-    if (fileContext.localFile) {
+/**
+ * Return a {@link ImageBitmap}, using {@link localFile} if present otherwise
+ * downloading the source image corresponding to {@link enteFile} from remote.
+ */
+const fetchOrCreateImageBitmap = async (
+    enteFile: EnteFile,
+    localFile: File,
+) => {
+    const fileType = enteFile.metadata.fileType;
+    if (localFile) {
         // TODO-ML(MR): Could also be image part of live photo?
         if (fileType !== FILE_TYPE.IMAGE)
             throw new Error("Local file of only image type is supported");
 
-        fileContext.imageBitmap = await getLocalFileImageBitmap(
-            fileContext.enteFile,
-            fileContext.localFile,
-        );
+        return await getLocalFileImageBitmap(enteFile, localFile);
     } else if ([FILE_TYPE.IMAGE, FILE_TYPE.LIVE_PHOTO].includes(fileType)) {
-        fileContext.imageBitmap = await fetchImageBitmap(fileContext.enteFile);
+        return await fetchImageBitmap(enteFile);
     } else {
         throw new Error(`Cannot index unsupported file type ${fileType}`);
     }
-
-    const { width, height } = fileContext.imageBitmap;
-    fileContext.newMlFile.imageDimensions = { width, height };
-
-    return fileContext.imageBitmap;
 };
 
 const syncFileAnalyzeFaces = async (fileContext: MLSyncFileContext) => {
@@ -121,7 +122,7 @@ const syncFileAnalyzeFaces = async (fileContext: MLSyncFileContext) => {
 
 const syncFileFaceDetections = async (fileContext: MLSyncFileContext) => {
     const { newMlFile } = fileContext;
-    const imageBitmap = await fetchImageBitmapForContext(fileContext);
+    const imageBitmap = fileContext.imageBitmap;
     const faceDetections = await detectFaces(imageBitmap);
     // TODO-ML(MR): reenable faces filtering based on width
     const detectedFaces = faceDetections?.map((detection) => {
@@ -353,7 +354,7 @@ function getDetectionCenter(detection: FaceDetection) {
 
 const syncFileFaceCrops = async (fileContext: MLSyncFileContext) => {
     const { newMlFile } = fileContext;
-    const imageBitmap = await fetchImageBitmapForContext(fileContext);
+    const imageBitmap = fileContext.imageBitmap;
     for (const face of newMlFile.faces) {
         await saveFaceCrop(imageBitmap, face);
     }
@@ -363,9 +364,7 @@ const syncFileFaceAlignments = async (
     fileContext: MLSyncFileContext,
 ): Promise<Float32Array> => {
     const { newMlFile } = fileContext;
-    const imageBitmap =
-        fileContext.imageBitmap ||
-        (await fetchImageBitmapForContext(fileContext));
+    const imageBitmap = fileContext.imageBitmap;
 
     // Execute the face alignment calculations
     for (const face of newMlFile.faces) {
@@ -697,9 +696,6 @@ const syncFileFaceEmbeddings = async (
     alignedFacesInput: Float32Array,
 ) => {
     const { newMlFile } = fileContext;
-    // TODO: when not storing face crops, image will be needed to extract faces
-    // fileContext.imageBitmap ||
-    //     (await this.getImageBitmap(fileContext));
 
     const embeddings = await faceEmbeddings(alignedFacesInput);
     newMlFile.faces.forEach((f, i) => (f.embedding = embeddings[i]));
