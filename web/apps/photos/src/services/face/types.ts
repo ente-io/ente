@@ -1,26 +1,9 @@
 import { Box, Dimensions, Point } from "services/face/geom";
 import { EnteFile } from "types/file";
 
-export declare type FaceDescriptor = Float32Array;
-
 export declare type Cluster = Array<number>;
 
-export interface FacesCluster {
-    faces: Cluster;
-    summary?: FaceDescriptor;
-}
-
-export interface NearestCluster {
-    cluster: FacesCluster;
-    distance: number;
-}
-
 export declare type Landmark = Point;
-
-export class AlignedBox {
-    box: Box;
-    rotation: number;
-}
 
 export interface FaceDetection {
     // box and landmarks is relative to image dimentions stored at mlFileData
