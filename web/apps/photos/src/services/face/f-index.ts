@@ -43,10 +43,7 @@ import { transformFaceDetections } from "./transform-box";
  * the user's remote storage so that their other devices can download them
  * instead of needing to reindex.
  */
-export const indexFaces = async (
-    enteFile: EnteFile,
-    localFile?: globalThis.File,
-) => {
+export const indexFaces = async (enteFile: EnteFile, localFile?: File) => {
     const startTime = Date.now();
 
     const imageBitmap = await fetchOrCreateImageBitmap(enteFile, localFile);
@@ -67,9 +64,7 @@ export const indexFaces = async (
 
 interface MLSyncFileContext {
     enteFile: EnteFile;
-    localFile?: globalThis.File;
 
-    oldMlFile?: MlFileData;
     newMlFile?: MlFileData;
 
     imageBitmap?: ImageBitmap;
