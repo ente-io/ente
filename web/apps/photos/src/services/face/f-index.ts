@@ -21,14 +21,17 @@ import {
     clamp,
     createGrayscaleIntMatrixFromNormalized2List,
     cropWithRotation,
-    fetchImageBitmapForContext,
+    fetchImageBitmap,
     getFaceId,
+    getLocalFileImageBitmap,
     getPixelBilinear,
+    getThumbnailImageBitmap,
     imageBitmapToBlob,
     normalizePixelBetween0And1,
     warpAffineFloat32List,
 } from "./image";
 import { transformFaceDetections } from "./transform-box";
+import { FILE_TYPE } from "@/media/file-type";
 
 /**
  * Index faces in the given file.
@@ -68,6 +71,38 @@ export const indexFaces = async (
     }
 
     return newMlFile;
+};
+
+const fetchImageBitmapForContext = async (fileContext: MLSyncFileContext) => {
+    if (fileContext.imageBitmap) {
+        return fileContext.imageBitmap;
+    }
+    if (fileContext.localFile) {
+        if (fileContext.enteFile.metadata.fileType !== FILE_TYPE.IMAGE) {
+            throw new Error("Local file of only image type is supported");
+        }
+        fileContext.imageBitmap = await getLocalFileImageBitmap(
+            fileContext.enteFile,
+            fileContext.localFile,
+        );
+    } else if (
+        [FILE_TYPE.IMAGE, FILE_TYPE.LIVE_PHOTO].includes(
+            fileContext.enteFile.metadata.fileType,
+        )
+    ) {
+        fileContext.imageBitmap = await fetchImageBitmap(fileContext.enteFile);
+    } else {
+        // TODO-ML(MR): We don't do it on videos, when will we ever come
+        // here?
+        fileContext.imageBitmap = await getThumbnailImageBitmap(
+            fileContext.enteFile,
+        );
+    }
+
+    const { width, height } = fileContext.imageBitmap;
+    fileContext.newMlFile.imageDimensions = { width, height };
+
+    return fileContext.imageBitmap;
 };
 
 const syncFileAnalyzeFaces = async (fileContext: MLSyncFileContext) => {
