@@ -136,14 +136,14 @@ class FaceMlService {
           }
           canRunMLController = event.shouldRun;
           if (canRunMLController) {
-            unawaited(indexAllImages());
+            unawaited(indexAndClusterAll());
           } else {
             pauseIndexing();
           }
         });
       } else {
         if (kDebugMode) {
-          unawaited(indexAllImages());
+          unawaited(indexAndClusterAll());
         }
       }
     });
@@ -163,7 +163,7 @@ class FaceMlService {
       // should have a better way to handle this.
       shouldSyncPeople = true;
       Future.delayed(const Duration(seconds: 10), () {
-        unawaited(indexAllImages());
+        unawaited(indexAndClusterAll());
       });
     });
   }
@@ -333,6 +333,27 @@ class FaceMlService {
     _isolate.kill();
     _receivePort.close();
     _inactivityTimer?.cancel();
+  }
+
+  Future<void> indexAndClusterAll() async {
+    if (isClusteringRunning || isImageIndexRunning) {
+      _logger.info("indexing or clustering is already running, skipping");
+      return;
+    }
+    if (shouldSyncPeople) {
+      await PersonService.instance.reconcileClusters();
+      shouldSyncPeople = false;
+    }
+    await indexAllImages();
+    final indexingCompleteRatio = await _getIndexedDoneRatio();
+    if (indexingCompleteRatio < 0.95) {
+      _logger.info(
+        "Indexing is not far enough, skipping clustering. Indexing is at $indexingCompleteRatio",
+      );
+      return;
+    } else {
+      await clusterAllImages();
+    }
   }
 
   Future<void> clusterAllImages({
@@ -505,53 +526,6 @@ class FaceMlService {
     }
   }
 
-  bool shouldDiscardRemoteEmbedding(FileMl fileMl) {
-    if (fileMl.faceEmbedding.version < faceMlVersion) {
-      debugPrint("Discarding remote embedding for fileID ${fileMl.fileID} "
-          "because version is ${fileMl.faceEmbedding.version} and we need $faceMlVersion");
-      return true;
-    }
-    if (fileMl.faceEmbedding.error ?? false) {
-      debugPrint("Discarding remote embedding for fileID ${fileMl.fileID} "
-          "because error is true");
-      return true;
-    }
-    // are all landmarks equal?
-    bool allLandmarksEqual = true;
-    if (fileMl.faceEmbedding.faces.isEmpty) {
-      debugPrint("No face for ${fileMl.fileID}");
-      allLandmarksEqual = false;
-    }
-    for (final face in fileMl.faceEmbedding.faces) {
-      if (face.detection.landmarks.isEmpty) {
-        allLandmarksEqual = false;
-        break;
-      }
-      if (face.detection.landmarks
-          .any((landmark) => landmark.x != landmark.y)) {
-        allLandmarksEqual = false;
-        break;
-      }
-    }
-    if (allLandmarksEqual) {
-      debugPrint("Discarding remote embedding for fileID ${fileMl.fileID} "
-          "because landmarks are equal");
-      debugPrint(
-        fileMl.faceEmbedding.faces
-            .map((e) => e.detection.landmarks.toString())
-            .toList()
-            .toString(),
-      );
-      return true;
-    }
-    if (fileMl.width == null || fileMl.height == null) {
-      debugPrint("Discarding remote embedding for fileID ${fileMl.fileID} "
-          "because width is null");
-      return true;
-    }
-    return false;
-  }
-
   /// Analyzes all the images in the database with the latest ml version and stores the results in the database.
   ///
   /// This function first checks if the image has already been analyzed with the lastest faceMlVersion and stored in the database. If so, it skips the image.
@@ -560,11 +534,6 @@ class FaceMlService {
       _logger.warning("indexAllImages is already running, skipping");
       return;
     }
-    if (shouldSyncPeople) {
-      await PersonService.instance.reconcileClusters();
-      shouldSyncPeople = false;
-    }
-
     // verify faces is enabled
     if (LocalSettings.instance.isFaceIndexingEnabled == false) {
       _logger.warning("indexing is disabled by user");
@@ -733,13 +702,6 @@ class FaceMlService {
       _logger.info(
         "`indexAllImages()` finished. Analyzed $fileAnalyzedCount images, in ${stopwatch.elapsed.inSeconds} seconds (avg of ${stopwatch.elapsed.inSeconds / fileAnalyzedCount} seconds per image, skipped $fileSkippedCount images. MLController status: $canRunMLController)",
       );
-
-      // Cluster all the images after finishing indexing
-      unawaited(clusterAllImages());
-
-      // Dispose of all the isolates
-      // ImageMlIsolate.instance.dispose();
-      // await release();
     } catch (e, s) {
       _logger.severe("indexAllImages failed", e, s);
     } finally {
@@ -747,9 +709,56 @@ class FaceMlService {
     }
   }
 
+  bool shouldDiscardRemoteEmbedding(FileMl fileMl) {
+    if (fileMl.faceEmbedding.version < faceMlVersion) {
+      debugPrint("Discarding remote embedding for fileID ${fileMl.fileID} "
+          "because version is ${fileMl.faceEmbedding.version} and we need $faceMlVersion");
+      return true;
+    }
+    if (fileMl.faceEmbedding.error ?? false) {
+      debugPrint("Discarding remote embedding for fileID ${fileMl.fileID} "
+          "because error is true");
+      return true;
+    }
+    // are all landmarks equal?
+    bool allLandmarksEqual = true;
+    if (fileMl.faceEmbedding.faces.isEmpty) {
+      debugPrint("No face for ${fileMl.fileID}");
+      allLandmarksEqual = false;
+    }
+    for (final face in fileMl.faceEmbedding.faces) {
+      if (face.detection.landmarks.isEmpty) {
+        allLandmarksEqual = false;
+        break;
+      }
+      if (face.detection.landmarks
+          .any((landmark) => landmark.x != landmark.y)) {
+        allLandmarksEqual = false;
+        break;
+      }
+    }
+    if (allLandmarksEqual) {
+      debugPrint("Discarding remote embedding for fileID ${fileMl.fileID} "
+          "because landmarks are equal");
+      debugPrint(
+        fileMl.faceEmbedding.faces
+            .map((e) => e.detection.landmarks.toString())
+            .toList()
+            .toString(),
+      );
+      return true;
+    }
+    if (fileMl.width == null || fileMl.height == null) {
+      debugPrint("Discarding remote embedding for fileID ${fileMl.fileID} "
+          "because width is null");
+      return true;
+    }
+    return false;
+  }
+
   Future<bool> processImage(EnteFile enteFile) async {
     _logger.info(
-      "`indexAllImages()` on file number  start processing image with uploadedFileID: ${enteFile.uploadedFileID}",
+      "`processImage` start processing image with uploadedFileID: ${enteFile.uploadedFileID}",
     );
 
     try {
