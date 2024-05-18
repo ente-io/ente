@@ -1,6 +1,5 @@
 import { FILE_TYPE } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
-import log from "@/next/log";
 import { Matrix, inverse } from "ml-matrix";
 import DownloadManager from "services/download";
 import { FaceAlignment } from "services/face/types";
@@ -34,13 +33,6 @@ async function fetchRenderableBlob(file: EnteFile) {
         );
         return await getRenderableImage(imageFileName, new Blob([imageData]));
     }
-}
-
-export async function getThumbnailImageBitmap(file: EnteFile) {
-    const thumb = await DownloadManager.getThumbnail(file);
-    log.info("[MLService] Got thumbnail: ", file.id.toString());
-
-    return createImageBitmap(new Blob([thumb]));
 }
 
 export async function getLocalFileImageBitmap(

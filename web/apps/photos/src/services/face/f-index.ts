@@ -23,7 +23,6 @@ import {
     createGrayscaleIntMatrixFromNormalized2List,
     fetchImageBitmap,
     getLocalFileImageBitmap,
-    getThumbnailImageBitmap,
     pixelRGBBilinear,
     warpAffineFloat32List,
 } from "./image";
@@ -72,29 +71,21 @@ export const indexFaces = async (
 };
 
 const fetchImageBitmapForContext = async (fileContext: MLSyncFileContext) => {
-    if (fileContext.imageBitmap) {
-        return fileContext.imageBitmap;
-    }
+    if (fileContext.imageBitmap) return fileContext.imageBitmap;
+
+    const fileType = fileContext.enteFile.metadata.fileType;
     if (fileContext.localFile) {
-        if (fileContext.enteFile.metadata.fileType !== FILE_TYPE.IMAGE) {
+        if (fileType !== FILE_TYPE.IMAGE)
             throw new Error("Local file of only image type is supported");
-        }
+
         fileContext.imageBitmap = await getLocalFileImageBitmap(
             fileContext.enteFile,
             fileContext.localFile,
         );
-    } else if (
-        [FILE_TYPE.IMAGE, FILE_TYPE.LIVE_PHOTO].includes(
-            fileContext.enteFile.metadata.fileType,
-        )
-    ) {
+    } else if ([FILE_TYPE.IMAGE, FILE_TYPE.LIVE_PHOTO].includes(fileType)) {
         fileContext.imageBitmap = await fetchImageBitmap(fileContext.enteFile);
     } else {
-        // TODO-ML(MR): We don't do it on videos, when will we ever come
-        // here?
-        fileContext.imageBitmap = await getThumbnailImageBitmap(
-            fileContext.enteFile,
-        );
+        throw new Error(`Cannot index unsupported file type ${fileType}`);
     }
 
     const { width, height } = fileContext.imageBitmap;
