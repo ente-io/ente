@@ -176,8 +176,6 @@ const preprocessImageBitmapToFloat32ChannelsFirst = (
     imageBitmap: ImageBitmap,
     requiredWidth: number,
     requiredHeight: number,
-    maintainAspectRatio: boolean = true,
-    normFunction: (pixelValue: number) => number = normalizePixelBetween0And1,
 ) => {
     // Create an OffscreenCanvas and set its size.
     const offscreenCanvas = new OffscreenCanvas(
@@ -194,23 +192,19 @@ const preprocessImageBitmapToFloat32ChannelsFirst = (
     );
     const pixelData = imageData.data;
 
-    let scaleW = requiredWidth / imageBitmap.width;
-    let scaleH = requiredHeight / imageBitmap.height;
-    if (maintainAspectRatio) {
-        const scale = Math.min(
-            requiredWidth / imageBitmap.width,
-            requiredHeight / imageBitmap.height,
-        );
-        scaleW = scale;
-        scaleH = scale;
-    }
+    // Maintain aspect ratio
+    const scale = Math.min(
+        requiredWidth / imageBitmap.width,
+        requiredHeight / imageBitmap.height,
+    );
+
     const scaledWidth = clamp(
-        Math.round(imageBitmap.width * scaleW),
+        Math.round(imageBitmap.width * scale),
         0,
         requiredWidth,
     );
     const scaledHeight = clamp(
-        Math.round(imageBitmap.height * scaleH),
+        Math.round(imageBitmap.height * scale),
         0,
         requiredHeight,
     );
@@ -234,20 +228,18 @@ const preprocessImageBitmapToFloat32ChannelsFirst = (
                 pixel = { r: 114, g: 114, b: 114 };
             } else {
                 pixel = getPixelBilinear(
-                    w / scaleW,
-                    h / scaleH,
+                    w / scale,
+                    h / scale,
                     pixelData,
                     imageBitmap.width,
                     imageBitmap.height,
                 );
             }
-            processedImage[pixelIndex] = normFunction(pixel.r);
-            processedImage[pixelIndex + channelOffsetGreen] = normFunction(
-                pixel.g,
-            );
-            processedImage[pixelIndex + channelOffsetBlue] = normFunction(
-                pixel.b,
-            );
+            processedImage[pixelIndex] = normalizePixelBetween0And1(pixel.r);
+            processedImage[pixelIndex + channelOffsetGreen] =
+                normalizePixelBetween0And1(pixel.g);
+            processedImage[pixelIndex + channelOffsetBlue] =
+                normalizePixelBetween0And1(pixel.b);
             pixelIndex++;
         }
     }
