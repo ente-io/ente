@@ -434,7 +434,7 @@ class FaceRecognitionStatusWidgetState
   Future<(int, int, int, double)> getIndexStatus() async {
     final indexedFiles = await FaceMLDataDB.instance
         .getIndexedFileCount(minimumMlVersion: faceMlVersion);
-    final indexableFiles = await FaceMlService.getIndexableFilesCount();
+    final indexableFiles = (await FaceMlService.getIndexableFileIDs()).length;
     final showIndexedFiles = min(indexedFiles, indexableFiles);
     final pendingFiles = max(indexableFiles - indexedFiles, 0);
     final foundFaces = await FaceMLDataDB.instance.getTotalFaceCount();

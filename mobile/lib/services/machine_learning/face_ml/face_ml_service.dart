@@ -573,13 +573,7 @@ class FaceMlService {
     try {
       isImageIndexRunning = true;
       _logger.info('starting image indexing');
-      // final w = (kDebugMode ? EnteWatch('FacesGetAllFiles') : null)?..start();
-      // final uploadedFileIDs = await FilesDB.instance
-      //     .getOwnedFileIDs(Configuration.instance.getUserID()!);
-      // w?.log('getOwnedFileIDs');
-      // final enteFiles =
-      //     await FilesDB.instance.getUploadedFiles(uploadedFileIDs);
-      // w?.log('getUploadedFiles');
+
       final Map<int, int> alreadyIndexedFiles =
           await FaceMLDataDB.instance.getIndexedFileIds();
       // w?.log('getIndexedFileIds');
@@ -596,20 +590,32 @@ class FaceMlService {
       final List<EnteFile> filesWithLocalID = <EnteFile>[];
       final List<EnteFile> filesWithoutLocalID = <EnteFile>[];
       final List<EnteFile> hiddenFiles = <EnteFile>[];
-      // final ignoredCollections =
-      //     CollectionsService.instance.getHiddenCollectionIds();
+      final List<int> allFileIDsToBeIndexed = await getIndexableFileIDs();
+
       for (final EnteFile enteFile in enteFiles) {
+        allFileIDsToBeIndexed.remove(enteFile.uploadedFileID);
         if (_skipAnalysisEnteFile(enteFile, alreadyIndexedFiles)) {
           fileSkippedCount++;
           continue;
         }
-        // if (ignoredCollections.contains(enteFile.collectionID)) {
-        //   hiddenFiles.add(enteFile);
-        // } else
         if ((enteFile.localID ?? '').isEmpty) {
           filesWithoutLocalID.add(enteFile);
         } else {
           filesWithLocalID.add(enteFile);
+        }
+      }
+      if (allFileIDsToBeIndexed.isNotEmpty) {
+        _logger.info(
+          'Found ${allFileIDsToBeIndexed.length} files outside searchable files',
+        );
+        final List<EnteFile> uploadFiles =
+            await FilesDB.instance.getUploadedFiles(allFileIDsToBeIndexed);
+        for (final EnteFile enteFile in uploadFiles) {
+          if (_skipAnalysisEnteFile(enteFile, alreadyIndexedFiles)) {
+            fileSkippedCount++;
+            continue;
+          }
+          hiddenFiles.add(enteFile);
         }
       }
 
@@ -1318,7 +1324,7 @@ class FaceMlService {
 
     final int alreadyIndexedCount = await FaceMLDataDB.instance
         .getIndexedFileCount(minimumMlVersion: faceMlVersion);
-    final int totalIndexableCount = await getIndexableFilesCount();
+    final int totalIndexableCount = (await getIndexableFileIDs()).length;
     final ratio = alreadyIndexedCount / totalIndexableCount;
 
     w?.log('getIndexedDoneRatio');
@@ -1326,15 +1332,9 @@ class FaceMlService {
     return ratio;
   }
 
-  static Future<int> getIndexableFilesCount() async {
-    // final indexableFileIDs = await FilesDB.instance
-    //     .getOwnedFileIDs(Configuration.instance.getUserID()!);
-    final allFiles = await SearchService.instance.getAllFiles();
-    final indexableFiles = allFiles.where((file) {
-      return file.isUploaded && file.isOwner;
-    }).toList();
-
-    return indexableFiles.length;
+  static Future<List<int>> getIndexableFileIDs() async {
+    return FilesDB.instance
+        .getOwnedFileIDs(Configuration.instance.getUserID()!);
   }
 
   bool _skipAnalysisEnteFile(EnteFile enteFile, Map<int, int> indexedFileIds) {
