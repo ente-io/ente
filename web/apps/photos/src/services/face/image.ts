@@ -9,6 +9,12 @@ import { getLocalFiles } from "services/fileService";
 import { EnteFile } from "types/file";
 import { getRenderableImage } from "utils/file";
 
+/**
+ * Clamp {@link value} to between {@link min} and {@link max}, inclusive.
+ */
+export const clamp = (value: number, min: number, max: number) =>
+    Math.min(max, Math.max(min, value));
+
 export async function getLocalFile(fileId: number) {
     const localFiles = await getLocalFiles();
     return localFiles.find((f) => f.id === fileId);
@@ -114,10 +120,6 @@ export function readPixelColor(
         b: imageData[index + 2],
         a: imageData[index + 3],
     };
-}
-
-export function clamp(value: number, min: number, max: number) {
-    return Math.min(max, Math.max(min, value));
 }
 
 export function getPixelBicubic(
