@@ -13,7 +13,6 @@ import {
     Face,
     FaceDetection,
     Landmark,
-    MLLibraryData,
     MLSearchConfig,
     MLSyncFileContext,
     MlFileData,
@@ -63,8 +62,6 @@ class MLSyncContext {
     public nSyncedFiles: number;
 
     public error?: Error;
-
-    public mlLibraryData: MLLibraryData;
 
     public syncQueue: PQueue;
     // TODO: wheather to limit concurrent downloads

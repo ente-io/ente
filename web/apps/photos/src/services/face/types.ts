@@ -1,4 +1,3 @@
-import type { ClusterFacesResult } from "services/face/cluster";
 import { Dimensions } from "services/face/geom";
 import { EnteFile } from "types/file";
 import { Box, Point } from "./geom";
@@ -111,10 +110,6 @@ export interface MLSyncFileContext {
 
     newDetection?: boolean;
     newAlignment?: boolean;
-}
-
-export interface MLLibraryData {
-    faceClusteringResults?: ClusterFacesResult;
 }
 
 export declare type MLIndex = "files" | "people";
