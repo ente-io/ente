@@ -8,7 +8,6 @@ export interface MLSyncResult {
     nSyncedFiles: number;
     nSyncedFaces: number;
     nFaceClusters: number;
-    nFaceNoise: number;
     error?: Error;
 }
 
@@ -19,11 +18,6 @@ export declare type Cluster = Array<number>;
 export interface FacesCluster {
     faces: Cluster;
     summary?: FaceDescriptor;
-}
-
-export interface FacesClustersWithNoise {
-    clusters: Array<FacesCluster>;
-    noise: Cluster;
 }
 
 export interface NearestCluster {
@@ -129,7 +123,6 @@ export interface MLSyncFileContext {
 
 export interface MLLibraryData {
     faceClusteringResults?: ClusterFacesResult;
-    faceClustersWithNoise?: FacesClustersWithNoise;
 }
 
 export declare type MLIndex = "files" | "people";

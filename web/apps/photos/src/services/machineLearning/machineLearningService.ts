@@ -187,8 +187,6 @@ class MachineLearningService {
             nFaceClusters:
                 syncContext.mlLibraryData?.faceClusteringResults?.clusters
                     .length,
-            nFaceNoise:
-                syncContext.mlLibraryData?.faceClusteringResults?.noise.length,
             error: syncContext.error,
         };
         // log.info('[MLService] sync results: ', mlSyncResult);

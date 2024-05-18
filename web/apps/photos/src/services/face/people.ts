@@ -47,15 +47,6 @@ const runFaceClustering = async (
         "[MLService] Got face clustering results: ",
         JSON.stringify(syncContext.mlLibraryData.faceClusteringResults),
     );
-
-    // syncContext.faceClustersWithNoise = {
-    //     clusters: syncContext.faceClusteringResults.clusters.map(
-    //         (faces) => ({
-    //             faces,
-    //         })
-    //     ),
-    //     noise: syncContext.faceClusteringResults.noise,
-    // };
 };
 
 const syncPeopleFromClusters = async (
