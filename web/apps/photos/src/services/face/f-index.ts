@@ -122,6 +122,7 @@ const indexFaces_ = async (enteFile: EnteFile, imageBitmap: ImageBitmap) => {
         for (const face of mlFile.faces) {
             face.alignment = faceAlignment(face.detection);
         }
+
         // Extract face images and convert to Float32Array
         const faceAlignments = mlFile.faces.map((f) => f.alignment);
         const alignedFacesData = await extractFaceImagesToFloat32(
@@ -129,10 +130,12 @@ const indexFaces_ = async (enteFile: EnteFile, imageBitmap: ImageBitmap) => {
             mobileFaceNetFaceSize,
             imageBitmap,
         );
+
         const blurValues = detectBlur(alignedFacesData, mlFile.faces);
         mlFile.faces.forEach((f, i) => (f.blurValue = blurValues[i]));
 
-        await syncFileFaceEmbeddings(fileContext, alignedFacesData);
+        const embeddings = await faceEmbeddings(alignedFacesData);
+        mlFile.faces.forEach((f, i) => (f.embedding = embeddings[i]));
 
         await syncFileFaceMakeRelativeDetections(fileContext);
     }
@@ -640,18 +643,6 @@ const matrixVariance = (matrix: number[][]): number => {
     variance /= totalElements;
 
     return variance;
-};
-
-const syncFileFaceEmbeddings = async (
-    fileContext: MLSyncFileContext,
-    alignedFacesInput: Float32Array,
-) => {
-    const { newMlFile } = fileContext;
-
-    const embeddings = await faceEmbeddings(alignedFacesInput);
-    newMlFile.faces.forEach((f, i) => (f.embedding = embeddings[i]));
-
-    log.info("[MLService] facesWithEmbeddings: ", newMlFile.faces.length);
 };
 
 const mobileFaceNetFaceSize = 112;
