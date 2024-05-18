@@ -24,7 +24,6 @@ import {
     fetchImageBitmap,
     getLocalFileImageBitmap,
     getThumbnailImageBitmap,
-    normalizePixelBetween0And1,
     pixelRGBBilinear,
     warpAffineFloat32List,
 } from "./image";
@@ -194,7 +193,7 @@ const convertToYOLOInputFloat32ChannelsFirst = (imageBitmap: ImageBitmap) => {
     const yoloSize = { width: scaledWidth, height: scaledHeight };
 
     // Populate the Float32Array with normalized pixel values.
-    let pixelIndex = 0;
+    let pi = 0;
     const channelOffsetGreen = requiredHeight * requiredWidth;
     const channelOffsetBlue = 2 * requiredHeight * requiredWidth;
     for (let h = 0; h < requiredHeight; h++) {
@@ -209,12 +208,10 @@ const convertToYOLOInputFloat32ChannelsFirst = (imageBitmap: ImageBitmap) => {
                           width,
                           height,
                       );
-            yoloInput[pixelIndex] = normalizePixelBetween0And1(r);
-            yoloInput[pixelIndex + channelOffsetGreen] =
-                normalizePixelBetween0And1(g);
-            yoloInput[pixelIndex + channelOffsetBlue] =
-                normalizePixelBetween0And1(b);
-            pixelIndex++;
+            yoloInput[pi] = r / 255.0;
+            yoloInput[pi + channelOffsetGreen] = g / 255.0;
+            yoloInput[pi + channelOffsetBlue] = b / 255.0;
+            pi++;
         }
     }
 

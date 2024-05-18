@@ -52,10 +52,6 @@ export async function getLocalFileImageBitmap(
     return createImageBitmap(fileBlob);
 }
 
-export function normalizePixelBetween0And1(pixelValue: number) {
-    return pixelValue / 255.0;
-}
-
 export function normalizePixelBetweenMinus1And1(pixelValue: number) {
     return pixelValue / 127.5 - 1.0;
 }
