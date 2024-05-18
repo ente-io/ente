@@ -4,7 +4,7 @@ import log from "@/next/log";
 import { Matrix, inverse } from "ml-matrix";
 import DownloadManager from "services/download";
 import { Box, Dimensions, enlargeBox } from "services/face/geom";
-import { DetectedFace, FaceAlignment } from "services/face/types";
+import { FaceAlignment } from "services/face/types";
 import { getLocalFiles } from "services/fileService";
 import { EnteFile } from "types/file";
 import { getRenderableImage } from "utils/file";
@@ -18,24 +18,6 @@ export const clamp = (value: number, min: number, max: number) =>
 export async function getLocalFile(fileId: number) {
     const localFiles = await getLocalFiles();
     return localFiles.find((f) => f.id === fileId);
-}
-
-export function getFaceId(detectedFace: DetectedFace, imageDims: Dimensions) {
-    const part = (v: number) => clamp(v, 0.0, 0.999999).toFixed(5).substring(2);
-
-    const xMin = part(detectedFace.detection.box.x / imageDims.width);
-    const yMin = part(detectedFace.detection.box.y / imageDims.height);
-    const xMax = part(
-        (detectedFace.detection.box.x + detectedFace.detection.box.width) /
-            imageDims.width,
-    );
-    const yMax = part(
-        (detectedFace.detection.box.y + detectedFace.detection.box.height) /
-            imageDims.height,
-    );
-
-    const rawFaceID = `${xMin}_${yMin}_${xMax}_${yMax}`;
-    return `${detectedFace.fileId}_${rawFaceID}`;
 }
 
 export const fetchImageBitmap = async (file: EnteFile) =>

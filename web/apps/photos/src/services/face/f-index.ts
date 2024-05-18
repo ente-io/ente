@@ -1,3 +1,4 @@
+import { FILE_TYPE } from "@/media/file-type";
 import { openCache } from "@/next/blob-cache";
 import log from "@/next/log";
 import { workerBridge } from "@/next/worker/worker-bridge";
@@ -22,7 +23,6 @@ import {
     createGrayscaleIntMatrixFromNormalized2List,
     cropWithRotation,
     fetchImageBitmap,
-    getFaceId,
     getLocalFileImageBitmap,
     getPixelBilinear,
     getThumbnailImageBitmap,
@@ -31,7 +31,6 @@ import {
     warpAffineFloat32List,
 } from "./image";
 import { transformFaceDetections } from "./transform-box";
-import { FILE_TYPE } from "@/media/file-type";
 
 /**
  * Index faces in the given file.
@@ -131,7 +130,7 @@ const syncFileFaceDetections = async (fileContext: MLSyncFileContext) => {
     fileContext.newDetection = true;
     const imageBitmap = await fetchImageBitmapForContext(fileContext);
     const faceDetections = await detectFaces(imageBitmap);
-    // TODO: reenable faces filtering based on width
+    // TODO-ML(MR): reenable faces filtering based on width
     const detectedFaces = faceDetections?.map((detection) => {
         return {
             fileId: fileContext.enteFile.id,
@@ -140,7 +139,7 @@ const syncFileFaceDetections = async (fileContext: MLSyncFileContext) => {
     });
     newMlFile.faces = detectedFaces?.map((detectedFace) => ({
         ...detectedFace,
-        id: getFaceId(detectedFace, newMlFile.imageDimensions),
+        id: makeFaceID(detectedFace, newMlFile.imageDimensions),
     }));
     // ?.filter((f) =>
     //     f.box.width > syncContext.config.faceDetection.minFaceSize
@@ -525,6 +524,21 @@ function normalizeLandmarks(
         landmark.map((p) => p / faceSize),
     ) as Array<[number, number]>;
 }
+
+const makeFaceID = (detectedFace: DetectedFace, imageDims: Dimensions) => {
+    const part = (v: number) => clamp(v, 0.0, 0.999999).toFixed(5).substring(2);
+    const xMin = part(detectedFace.detection.box.x / imageDims.width);
+    const yMin = part(detectedFace.detection.box.y / imageDims.height);
+    const xMax = part(
+        (detectedFace.detection.box.x + detectedFace.detection.box.width) /
+            imageDims.width,
+    );
+    const yMax = part(
+        (detectedFace.detection.box.y + detectedFace.detection.box.height) /
+            imageDims.height,
+    );
+    return [detectedFace.fileId, xMin, yMin, xMax, yMax].join("_");
+};
 
 /**
  * Laplacian blur detection.
