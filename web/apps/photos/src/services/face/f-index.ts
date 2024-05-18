@@ -355,23 +355,14 @@ const makeFaceID = (
     return [`${fileID}`, xMin, yMin, xMax, yMax].join("_");
 };
 
-// TODO-ML(MR): When is this used or is it as Blazeface leftover?
-const ARCFACE_LANDMARKS = [
-    [38.2946, 51.6963],
-    [73.5318, 51.5014],
-    [56.0252, 71.7366],
-    [56.1396, 92.2848],
-] as Array<[number, number]>;
-
-const ARCFACE_LANDMARKS_FACE_SIZE = 112;
-
-const ARC_FACE_5_LANDMARKS = [
+// TODO-ML: Rename?
+const arcFaceLandmarks: [number, number][] = [
     [38.2946, 51.6963],
     [73.5318, 51.5014],
     [56.0252, 71.7366],
     [41.5493, 92.3655],
     [70.7299, 92.2041],
-] as Array<[number, number]>;
+];
 
 /**
  * Compute and return an {@link FaceAlignment} for the given face detection.
@@ -379,13 +370,9 @@ const ARC_FACE_5_LANDMARKS = [
  * @param faceDetection A geometry indicating a face detected in an image.
  */
 const faceAlignment = (faceDetection: FaceDetection): FaceAlignment => {
-    const landmarkCount = faceDetection.landmarks.length;
     return getFaceAlignmentUsingSimilarityTransform(
         faceDetection,
-        normalizeLandmarks(
-            landmarkCount === 5 ? ARC_FACE_5_LANDMARKS : ARCFACE_LANDMARKS,
-            ARCFACE_LANDMARKS_FACE_SIZE,
-        ),
+        normalizeLandmarks(arcFaceLandmarks, mobileFaceNetFaceSize),
     );
 };
 
