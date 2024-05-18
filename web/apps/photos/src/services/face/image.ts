@@ -21,41 +21,21 @@ export async function getLocalFile(fileId: number) {
 }
 
 export function getFaceId(detectedFace: DetectedFace, imageDims: Dimensions) {
-    const xMin = clamp(
-        detectedFace.detection.box.x / imageDims.width,
-        0.0,
-        0.999999,
-    )
-        .toFixed(5)
-        .substring(2);
-    const yMin = clamp(
-        detectedFace.detection.box.y / imageDims.height,
-        0.0,
-        0.999999,
-    )
-        .toFixed(5)
-        .substring(2);
-    const xMax = clamp(
+    const part = (v: number) => clamp(v, 0.0, 0.999999).toFixed(5).substring(2);
+
+    const xMin = part(detectedFace.detection.box.x / imageDims.width);
+    const yMin = part(detectedFace.detection.box.y / imageDims.height);
+    const xMax = part(
         (detectedFace.detection.box.x + detectedFace.detection.box.width) /
             imageDims.width,
-        0.0,
-        0.999999,
-    )
-        .toFixed(5)
-        .substring(2);
-    const yMax = clamp(
+    );
+    const yMax = part(
         (detectedFace.detection.box.y + detectedFace.detection.box.height) /
             imageDims.height,
-        0.0,
-        0.999999,
-    )
-        .toFixed(5)
-        .substring(2);
+    );
 
     const rawFaceID = `${xMin}_${yMin}_${xMax}_${yMax}`;
-    const faceID = `${detectedFace.fileId}_${rawFaceID}`;
-
-    return faceID;
+    return `${detectedFace.fileId}_${rawFaceID}`;
 }
 
 export const fetchImageBitmap = async (file: EnteFile) =>
