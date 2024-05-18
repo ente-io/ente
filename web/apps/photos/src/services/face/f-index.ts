@@ -266,25 +266,6 @@ const faceDetectionsFromYOLOOutput = (rows: Float32Array): FaceDetection[] => {
     return faces;
 };
 
-const getRelativeDetection = (
-    faceDetection: FaceDetection,
-    dimensions: Dimensions,
-): FaceDetection => {
-    const oldBox: Box = faceDetection.box;
-    const box = new Box({
-        x: oldBox.x / dimensions.width,
-        y: oldBox.y / dimensions.height,
-        width: oldBox.width / dimensions.width,
-        height: oldBox.height / dimensions.height,
-    });
-    const oldLandmarks: Point[] = faceDetection.landmarks;
-    const landmarks = oldLandmarks.map((l) => {
-        return new Point(l.x / dimensions.width, l.y / dimensions.height);
-    });
-    const probability = faceDetection.probability;
-    return { box, landmarks, probability };
-};
-
 /**
  * Removes duplicate face detections from an array of detections.
  *
@@ -738,6 +719,25 @@ const syncFileFaceMakeRelativeDetections = async (
             newMlFile.imageDimensions,
         );
     }
+};
+
+const getRelativeDetection = (
+    faceDetection: FaceDetection,
+    dimensions: Dimensions,
+): FaceDetection => {
+    const oldBox: Box = faceDetection.box;
+    const box = new Box({
+        x: oldBox.x / dimensions.width,
+        y: oldBox.y / dimensions.height,
+        width: oldBox.width / dimensions.width,
+        height: oldBox.height / dimensions.height,
+    });
+    const oldLandmarks: Point[] = faceDetection.landmarks;
+    const landmarks = oldLandmarks.map((l) => {
+        return new Point(l.x / dimensions.width, l.y / dimensions.height);
+    });
+    const probability = faceDetection.probability;
+    return { box, landmarks, probability };
 };
 
 export const saveFaceCrop = async (imageBitmap: ImageBitmap, face: Face) => {
