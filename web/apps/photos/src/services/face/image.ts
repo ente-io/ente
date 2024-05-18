@@ -374,29 +374,6 @@ export function resizeToSquare(img: ImageBitmap, size: number) {
     return { image: resizedImage, width, height };
 }
 
-export function transform(
-    imageBitmap: ImageBitmap,
-    affineMat: number[][],
-    outputWidth: number,
-    outputHeight: number,
-) {
-    const offscreen = new OffscreenCanvas(outputWidth, outputHeight);
-    const context = offscreen.getContext("2d");
-    context.imageSmoothingQuality = "high";
-
-    context.transform(
-        affineMat[0][0],
-        affineMat[1][0],
-        affineMat[0][1],
-        affineMat[1][1],
-        affineMat[0][2],
-        affineMat[1][2],
-    );
-
-    context.drawImage(imageBitmap, 0, 0);
-    return offscreen.transferToImageBitmap();
-}
-
 export function crop(imageBitmap: ImageBitmap, cropBox: Box, size: number) {
     const dimensions: Dimensions = {
         width: size,
