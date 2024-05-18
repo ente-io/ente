@@ -142,7 +142,7 @@ class FaceMlService {
           }
         });
       } else {
-        if (!kDebugMode) {
+        if (kDebugMode) {
           unawaited(indexAllImages());
         }
       }
@@ -155,7 +155,7 @@ class FaceMlService {
 
   void listenIndexOnDiffSync() {
     Bus.instance.on<DiffSyncCompleteEvent>().listen((event) async {
-      if (LocalSettings.instance.isFaceIndexingEnabled == false || kDebugMode) {
+      if (LocalSettings.instance.isFaceIndexingEnabled == false) {
         return;
       }
       // [neeraj] intentional delay in starting indexing on diff sync, this gives time for the user
