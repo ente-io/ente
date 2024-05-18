@@ -61,14 +61,6 @@ export const indexFaces = async (enteFile: EnteFile, localFile?: File) => {
     return mlFile;
 };
 
-interface MLSyncFileContext {
-    enteFile: EnteFile;
-
-    newMlFile?: MlFileData;
-
-    imageBitmap?: ImageBitmap;
-}
-
 /**
  * Return a {@link ImageBitmap}, using {@link localFile} if present otherwise
  * downloading the source image corresponding to {@link enteFile} from remote.
@@ -92,18 +84,14 @@ const fetchOrCreateImageBitmap = async (
 };
 
 const indexFaces_ = async (enteFile: EnteFile, imageBitmap: ImageBitmap) => {
-    const fileContext: MLSyncFileContext = { enteFile };
-
     const fileID = enteFile.id;
-    const mlFile = (fileContext.newMlFile = {
+    const { width, height } = imageBitmap;
+    const mlFile: MlFileData = {
         fileId: fileID,
         mlVersion: defaultMLVersion,
+        imageDimensions: { width, height },
         errorCount: 0,
-    } as MlFileData);
-
-    fileContext.imageBitmap = imageBitmap;
-    const { width, height } = imageBitmap;
-    fileContext.newMlFile.imageDimensions = { width, height };
+    };
 
     const faceDetections = await detectFaces(imageBitmap);
     const detectedFaces = faceDetections.map((detection) => ({
