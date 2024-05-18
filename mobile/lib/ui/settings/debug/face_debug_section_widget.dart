@@ -137,6 +137,23 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
         ),
         sectionOptionSpacing,
         MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            title: "Run indexing",
+          ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async {
+            try {
+              unawaited(FaceMlService.instance.indexAllImages());
+            } catch (e, s) {
+              _logger.warning('indexing failed ', e, s);
+              await showGenericErrorDialog(context: context, error: e);
+            }
+          },
+        ),
+        sectionOptionSpacing,
+        MenuItemWidget(
           captionedTextWidget: FutureBuilder<double>(
             future: FaceMLDataDB.instance.getClusteredToTotalFacesRatio(),
             builder: (context, snapshot) {
