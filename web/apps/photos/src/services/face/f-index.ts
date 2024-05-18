@@ -151,7 +151,7 @@ const indexFaces_ = async (enteFile: EnteFile, imageBitmap: ImageBitmap) => {
 const detectFaces = async (
     imageBitmap: ImageBitmap,
 ): Promise<FaceDetection[]> => {
-    const rect = ({ width, height }: { width: number; height: number }) =>
+    const rect = ({ width, height }: Dimensions) =>
         new Box({ x: 0, y: 0, width, height });
 
     const { yoloInput, yoloSize } =
@@ -659,18 +659,17 @@ const convertFaceDetectionsToRelative = (mlFile: MlFileData) => {
 
 const relativeDetection = (
     faceDetection: FaceDetection,
-    dimensions: Dimensions,
+    { width, height }: Dimensions,
 ): FaceDetection => {
     const oldBox: Box = faceDetection.box;
     const box = new Box({
-        x: oldBox.x / dimensions.width,
-        y: oldBox.y / dimensions.height,
-        width: oldBox.width / dimensions.width,
-        height: oldBox.height / dimensions.height,
+        x: oldBox.x / width,
+        y: oldBox.y / height,
+        width: oldBox.width / width,
+        height: oldBox.height / height,
     });
-    const oldLandmarks: Point[] = faceDetection.landmarks;
-    const landmarks = oldLandmarks.map((l) => {
-        return new Point(l.x / dimensions.width, l.y / dimensions.height);
+    const landmarks = faceDetection.landmarks.map((l) => {
+        return new Point(l.x / width, l.y / height);
     });
     const probability = faceDetection.probability;
     return { box, landmarks, probability };
