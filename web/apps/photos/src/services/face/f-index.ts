@@ -355,6 +355,17 @@ const makeFaceID = (
     return [`${fileID}`, xMin, yMin, xMax, yMax].join("_");
 };
 
+/**
+ * Compute and return an {@link FaceAlignment} for the given face detection.
+ *
+ * @param faceDetection A geometry indicating a face detected in an image.
+ */
+const faceAlignment = (faceDetection: FaceDetection): FaceAlignment =>
+    faceAlignmentUsingSimilarityTransform(
+        faceDetection,
+        normalizeLandmarks(arcFaceLandmarks, mobileFaceNetFaceSize),
+    );
+
 // TODO-ML: Rename?
 const arcFaceLandmarks: [number, number][] = [
     [38.2946, 51.6963],
@@ -364,22 +375,16 @@ const arcFaceLandmarks: [number, number][] = [
     [70.7299, 92.2041],
 ];
 
-/**
- * Compute and return an {@link FaceAlignment} for the given face detection.
- *
- * @param faceDetection A geometry indicating a face detected in an image.
- */
-const faceAlignment = (faceDetection: FaceDetection): FaceAlignment => {
-    return getFaceAlignmentUsingSimilarityTransform(
-        faceDetection,
-        normalizeLandmarks(arcFaceLandmarks, mobileFaceNetFaceSize),
-    );
-};
+const normalizeLandmarks = (
+    landmarks: [number, number][],
+    faceSize: number,
+): [number, number][] =>
+    landmarks.map(([x, y]) => [x / faceSize, y / faceSize]);
 
-function getFaceAlignmentUsingSimilarityTransform(
+const faceAlignmentUsingSimilarityTransform = (
     faceDetection: FaceDetection,
-    alignedLandmarks: Array<[number, number]>,
-): FaceAlignment {
+    alignedLandmarks: [number, number][],
+): FaceAlignment => {
     const landmarksMat = new Matrix(
         faceDetection.landmarks
             .map((p) => [p.x, p.y])
@@ -410,22 +415,8 @@ function getFaceAlignmentUsingSimilarityTransform(
         simTransform.rotation.get(0, 0),
     );
 
-    return {
-        affineMatrix,
-        center,
-        size,
-        rotation,
-    };
-}
-
-function normalizeLandmarks(
-    landmarks: Array<[number, number]>,
-    faceSize: number,
-): Array<[number, number]> {
-    return landmarks.map((landmark) =>
-        landmark.map((p) => p / faceSize),
-    ) as Array<[number, number]>;
-}
+    return { affineMatrix, center, size, rotation };
+};
 
 async function extractFaceImagesToFloat32(
     faceAlignments: Array<FaceAlignment>,
