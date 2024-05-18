@@ -155,8 +155,6 @@ const syncFileFaceDetections = async (fileContext: MLSyncFileContext) => {
 const detectFaces = async (
     imageBitmap: ImageBitmap,
 ): Promise<Array<FaceDetection>> => {
-    const maxFaceDistancePercent = Math.sqrt(2) / 100;
-    const maxFaceDistance = imageBitmap.width * maxFaceDistancePercent;
     const { yoloInput, yoloSize } =
         convertToYOLOInputFloat32ChannelsFirst(imageBitmap);
     const yoloOutput = await workerBridge.detectFaces(yoloInput);
@@ -164,6 +162,9 @@ const detectFaces = async (
     const inBox = newBox(0, 0, yoloSize.width, yoloSize.height);
     const toBox = newBox(0, 0, imageBitmap.width, imageBitmap.height);
     const faceDetections = transformFaceDetections(faces, inBox, toBox);
+
+    const maxFaceDistancePercent = Math.sqrt(2) / 100;
+    const maxFaceDistance = imageBitmap.width * maxFaceDistancePercent;
     return removeDuplicateDetections(faceDetections, maxFaceDistance);
 };
 
