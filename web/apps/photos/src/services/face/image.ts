@@ -362,29 +362,6 @@ export function createGrayscaleIntMatrixFromNormalized2List(
     );
 }
 
-export function resizeToSquare(img: ImageBitmap, size: number) {
-    const scale = size / Math.max(img.height, img.width);
-    const width = scale * img.width;
-    const height = scale * img.height;
-    const offscreen = new OffscreenCanvas(size, size);
-    const ctx = offscreen.getContext("2d");
-    ctx.imageSmoothingQuality = "high";
-    ctx.drawImage(img, 0, 0, width, height);
-    const resizedImage = offscreen.transferToImageBitmap();
-    return { image: resizedImage, width, height };
-}
-
-export function crop(imageBitmap: ImageBitmap, cropBox: Box, size: number) {
-    const dimensions: Dimensions = {
-        width: size,
-        height: size,
-    };
-
-    return cropWithRotation(imageBitmap, cropBox, 0, dimensions, dimensions);
-}
-
-// these utils only work in env where OffscreenCanvas is available
-
 export function cropWithRotation(
     imageBitmap: ImageBitmap,
     cropBox: Box,
