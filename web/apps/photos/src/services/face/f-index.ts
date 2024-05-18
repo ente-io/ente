@@ -70,7 +70,7 @@ export const indexFaces = async (
     return newMlFile;
 };
 
-export interface MLSyncFileContext {
+interface MLSyncFileContext {
     enteFile: EnteFile;
     localFile?: globalThis.File;
 
@@ -79,7 +79,6 @@ export interface MLSyncFileContext {
 
     imageBitmap?: ImageBitmap;
 
-    newDetection?: boolean;
     newAlignment?: boolean;
 }
 
@@ -125,7 +124,6 @@ const syncFileAnalyzeFaces = async (fileContext: MLSyncFileContext) => {
 
 const syncFileFaceDetections = async (fileContext: MLSyncFileContext) => {
     const { newMlFile } = fileContext;
-    fileContext.newDetection = true;
     const imageBitmap = await fetchImageBitmapForContext(fileContext);
     const faceDetections = await detectFaces(imageBitmap);
     // TODO-ML(MR): reenable faces filtering based on width
