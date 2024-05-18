@@ -42,6 +42,7 @@ import 'package:tuple/tuple.dart';
 
 class SearchService {
   Future<List<EnteFile>>? _cachedFilesFuture;
+  Future<List<EnteFile>>? _cachedHiddenFilesFuture;
   final _logger = Logger((SearchService).toString());
   final _collectionService = CollectionsService.instance;
   static const _maximumResultsLimit = 20;
@@ -54,6 +55,7 @@ class SearchService {
     Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
       // only invalidate, let the load happen on demand
       _cachedFilesFuture = null;
+      _cachedHiddenFilesFuture = null;
     });
   }
 
@@ -73,8 +75,21 @@ class SearchService {
     return _cachedFilesFuture!;
   }
 
+  Future<List<EnteFile>> getHiddenFiles() async {
+    if (_cachedHiddenFilesFuture != null) {
+      return _cachedHiddenFilesFuture!;
+    }
+    _logger.fine("Reading hidden files from db");
+    final hiddenCollections =
+        CollectionsService.instance.getHiddenCollectionIds();
+    _cachedHiddenFilesFuture =
+        FilesDB.instance.getAllFilesFromCollections(hiddenCollections);
+    return _cachedHiddenFilesFuture!;
+  }
+
   void clearCache() {
     _cachedFilesFuture = null;
+    _cachedHiddenFilesFuture = null;
   }
 
   // getFilteredCollectionsWithThumbnail removes deleted or archived or

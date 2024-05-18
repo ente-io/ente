@@ -695,6 +695,17 @@ class FilesDB {
     return files;
   }
 
+  Future<List<EnteFile>> getAllFilesFromCollections(
+    Iterable<int> collectionID,
+  ) async {
+    final db = await instance.sqliteAsyncDB;
+    final String sql =
+        'SELECT * FROM $filesTable WHERE $columnCollectionID IN (${collectionID.join(',')})';
+    final results = await db.getAll(sql);
+    final files = convertToFiles(results);
+    return files;
+  }
+
   Future<List<EnteFile>> getNewFilesInCollection(
     int collectionID,
     int addedTime,

@@ -574,11 +574,14 @@ class FaceMlService {
       isImageIndexRunning = true;
       _logger.info('starting image indexing');
 
+      final w = (kDebugMode ? EnteWatch('prepare indexing files') : null)
+        ?..start();
       final Map<int, int> alreadyIndexedFiles =
           await FaceMLDataDB.instance.getIndexedFileIds();
-      // w?.log('getIndexedFileIds');
+      w?.log('getIndexedFileIds');
       final List<EnteFile> enteFiles =
           await SearchService.instance.getAllFiles();
+      w?.log('getAllFiles');
 
       // Make sure the image conversion isolate is spawned
       // await ImageMlIsolate.instance.ensureSpawned();
@@ -589,11 +592,10 @@ class FaceMlService {
       final stopwatch = Stopwatch()..start();
       final List<EnteFile> filesWithLocalID = <EnteFile>[];
       final List<EnteFile> filesWithoutLocalID = <EnteFile>[];
-      final List<EnteFile> hiddenFiles = <EnteFile>[];
-      final List<int> allFileIDsToBeIndexed = await getIndexableFileIDs();
+      final List<EnteFile> hiddenFilesToIndex = <EnteFile>[];
+      w?.log('getIndexableFileIDs');
 
       for (final EnteFile enteFile in enteFiles) {
-        allFileIDsToBeIndexed.remove(enteFile.uploadedFileID);
         if (_skipAnalysisEnteFile(enteFile, alreadyIndexedFiles)) {
           fileSkippedCount++;
           continue;
@@ -604,26 +606,24 @@ class FaceMlService {
           filesWithLocalID.add(enteFile);
         }
       }
-      if (allFileIDsToBeIndexed.isNotEmpty) {
-        _logger.info(
-          'Found ${allFileIDsToBeIndexed.length} files outside searchable files',
-        );
-        final List<EnteFile> uploadFiles =
-            await FilesDB.instance.getUploadedFiles(allFileIDsToBeIndexed);
-        for (final EnteFile enteFile in uploadFiles) {
-          if (_skipAnalysisEnteFile(enteFile, alreadyIndexedFiles)) {
-            fileSkippedCount++;
-            continue;
-          }
-          hiddenFiles.add(enteFile);
+      w?.log('sifting through all normal files');
+      final List<EnteFile> hiddenFiles =
+          await SearchService.instance.getHiddenFiles();
+      w?.log('getHiddenFiles: ${hiddenFiles.length} hidden files');
+      for (final EnteFile enteFile in hiddenFiles) {
+        if (_skipAnalysisEnteFile(enteFile, alreadyIndexedFiles)) {
+          fileSkippedCount++;
+          continue;
         }
+        hiddenFilesToIndex.add(enteFile);
       }
 
       // list of files where files with localID are first
       final sortedBylocalID = <EnteFile>[];
       sortedBylocalID.addAll(filesWithLocalID);
       sortedBylocalID.addAll(filesWithoutLocalID);
-      sortedBylocalID.addAll(hiddenFiles);
+      sortedBylocalID.addAll(hiddenFilesToIndex);
+      w?.log('preparing all files to index');
       final List<List<EnteFile>> chunks =
           sortedBylocalID.chunks(_embeddingFetchLimit);
       outerLoop:
