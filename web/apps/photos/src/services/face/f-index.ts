@@ -4,18 +4,24 @@ import { faceAlignment } from "services/face/align";
 import mlIDbStorage from "services/face/db";
 import { detectFaces, getRelativeDetection } from "services/face/detect";
 import { faceEmbeddings, mobileFaceNetFaceSize } from "services/face/embed";
+import { Box, enlargeBox } from "services/face/geom";
 import {
     DetectedFace,
     Face,
+    FaceCrop,
+    FaceDetection,
     MLSyncFileContext,
     type FaceAlignment,
     type MlFileData,
 } from "services/face/types";
 import { defaultMLVersion } from "services/machineLearning/machineLearningService";
 import type { EnteFile } from "types/file";
-import { imageBitmapToBlob, warpAffineFloat32List } from "utils/image";
+import {
+    cropWithRotation,
+    imageBitmapToBlob,
+    warpAffineFloat32List,
+} from "utils/image";
 import { detectBlur } from "./blur";
-import { getFaceCrop } from "./crop";
 import {
     fetchImageBitmap,
     fetchImageBitmapForContext,
@@ -183,6 +189,34 @@ export const saveFaceCrop = async (imageBitmap: ImageBitmap, face: Face) => {
     faceCrop.image.close();
 
     return blob;
+};
+
+export const getFaceCrop = (
+    imageBitmap: ImageBitmap,
+    faceDetection: FaceDetection,
+): FaceCrop => {
+    const alignment = faceAlignment(faceDetection);
+
+    const padding = 0.25;
+    const maxSize = 256;
+
+    const alignmentBox = new Box({
+        x: alignment.center.x - alignment.size / 2,
+        y: alignment.center.y - alignment.size / 2,
+        width: alignment.size,
+        height: alignment.size,
+    }).round();
+    const scaleForPadding = 1 + padding * 2;
+    const paddedBox = enlargeBox(alignmentBox, scaleForPadding).round();
+    const faceImageBitmap = cropWithRotation(imageBitmap, paddedBox, 0, {
+        width: maxSize,
+        height: maxSize,
+    });
+
+    return {
+        image: faceImageBitmap,
+        imageBox: paddedBox,
+    };
 };
 
 export const regenerateFaceCrop = async (faceID: string) => {

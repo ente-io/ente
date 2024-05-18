@@ -19,7 +19,7 @@ import {
 import { getLocalFiles } from "services/fileService";
 import { EnteFile } from "types/file";
 import { isInternalUserForML } from "utils/user";
-import { regenerateFaceCrop } from "../face/f-index";
+import { indexFaces, regenerateFaceCrop } from "../face/f-index";
 
 /**
  * TODO-ML(MR): What and why.
