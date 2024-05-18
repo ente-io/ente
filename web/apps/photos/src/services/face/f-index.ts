@@ -113,8 +113,10 @@ const indexFaces_ = async (enteFile: EnteFile, imageBitmap: ImageBitmap) => {
     }));
     newMlFile.faces = detectedFaces;
 
-    if (newMlFile.faces && newMlFile.faces.length > 0) {
-        await syncFileFaceCrops(fileContext);
+    if (detectedFaces.length > 0) {
+        await Promise.all(
+            detectedFaces.map((face) => saveFaceCrop(imageBitmap, face)),
+        );
 
         const alignedFacesData = await syncFileFaceAlignments(fileContext);
 
@@ -337,14 +339,6 @@ const makeFaceID = (
         (detection.box.y + detection.box.height) / imageDims.height,
     );
     return [`${fileID}`, xMin, yMin, xMax, yMax].join("_");
-};
-
-const syncFileFaceCrops = async (fileContext: MLSyncFileContext) => {
-    const { newMlFile } = fileContext;
-    const imageBitmap = fileContext.imageBitmap;
-    for (const face of newMlFile.faces) {
-        await saveFaceCrop(imageBitmap, face);
-    }
 };
 
 const syncFileFaceAlignments = async (
