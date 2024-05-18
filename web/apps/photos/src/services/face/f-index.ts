@@ -481,6 +481,28 @@ function normalizeLandmarks(
     ) as Array<[number, number]>;
 }
 
+async function extractFaceImagesToFloat32(
+    faceAlignments: Array<FaceAlignment>,
+    faceSize: number,
+    image: ImageBitmap,
+): Promise<Float32Array> {
+    const faceData = new Float32Array(
+        faceAlignments.length * faceSize * faceSize * 3,
+    );
+    for (let i = 0; i < faceAlignments.length; i++) {
+        const alignedFace = faceAlignments[i];
+        const faceDataOffset = i * faceSize * faceSize * 3;
+        warpAffineFloat32List(
+            image,
+            alignedFace,
+            faceSize,
+            faceData,
+            faceDataOffset,
+        );
+    }
+    return faceData;
+}
+
 const makeFaceID = (detectedFace: DetectedFace, imageDims: Dimensions) => {
     const part = (v: number) => clamp(v, 0.0, 0.999999).toFixed(5).substring(2);
     const xMin = part(detectedFace.detection.box.x / imageDims.width);
@@ -777,24 +799,68 @@ const getFaceCrop = (
     };
 };
 
-async function extractFaceImagesToFloat32(
-    faceAlignments: Array<FaceAlignment>,
-    faceSize: number,
-    image: ImageBitmap,
-): Promise<Float32Array> {
-    const faceData = new Float32Array(
-        faceAlignments.length * faceSize * faceSize * 3,
-    );
-    for (let i = 0; i < faceAlignments.length; i++) {
-        const alignedFace = faceAlignments[i];
-        const faceDataOffset = i * faceSize * faceSize * 3;
-        warpAffineFloat32List(
-            image,
-            alignedFace,
-            faceSize,
-            faceData,
-            faceDataOffset,
+export function cropWithRotation(
+    imageBitmap: ImageBitmap,
+    cropBox: Box,
+    rotation?: number,
+    maxSize?: Dimensions,
+    minSize?: Dimensions,
+) {
+    const box = cropBox.round();
+
+    const outputSize = { width: box.width, height: box.height };
+    if (maxSize) {
+        const minScale = Math.min(
+            maxSize.width / box.width,
+            maxSize.height / box.height,
         );
+        if (minScale < 1) {
+            outputSize.width = Math.round(minScale * box.width);
+            outputSize.height = Math.round(minScale * box.height);
+        }
     }
-    return faceData;
+
+    if (minSize) {
+        const maxScale = Math.max(
+            minSize.width / box.width,
+            minSize.height / box.height,
+        );
+        if (maxScale > 1) {
+            outputSize.width = Math.round(maxScale * box.width);
+            outputSize.height = Math.round(maxScale * box.height);
+        }
+    }
+
+    // log.info({ imageBitmap, box, outputSize });
+
+    const offscreen = new OffscreenCanvas(outputSize.width, outputSize.height);
+    const offscreenCtx = offscreen.getContext("2d");
+    offscreenCtx.imageSmoothingQuality = "high";
+
+    offscreenCtx.translate(outputSize.width / 2, outputSize.height / 2);
+    rotation && offscreenCtx.rotate(rotation);
+
+    const outputBox = new Box({
+        x: -outputSize.width / 2,
+        y: -outputSize.height / 2,
+        width: outputSize.width,
+        height: outputSize.height,
+    });
+
+    const enlargedBox = enlargeBox(box, 1.5);
+    const enlargedOutputBox = enlargeBox(outputBox, 1.5);
+
+    offscreenCtx.drawImage(
+        imageBitmap,
+        enlargedBox.x,
+        enlargedBox.y,
+        enlargedBox.width,
+        enlargedBox.height,
+        enlargedOutputBox.x,
+        enlargedOutputBox.y,
+        enlargedOutputBox.width,
+        enlargedOutputBox.height,
+    );
+
+    return offscreen.transferToImageBitmap();
 }
