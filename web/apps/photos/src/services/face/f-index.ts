@@ -503,7 +503,7 @@ const applyLaplacian = (
     image: number[][],
     direction: FaceDirection,
 ): number[][] => {
-    const paddedImage: number[][] = padImage(image, direction);
+    const paddedImage = padImage(image, direction);
     const numRows = paddedImage.length - 2;
     const numCols = paddedImage[0].length - 2;
 
@@ -513,7 +513,7 @@ const applyLaplacian = (
     );
 
     // Define the Laplacian kernel.
-    const kernel: number[][] = [
+    const kernel = [
         [0, 1, 0],
         [1, -4, 1],
         [0, 1, 0],
