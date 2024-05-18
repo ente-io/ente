@@ -43,10 +43,6 @@ const runFaceClustering = async (
     syncContext.mlLibraryData.faceClusteringResults = await clusterFaces(
         allFaces.map((f) => Array.from(f.embedding)),
     );
-    syncContext.mlLibraryData.faceClusteringMethod = {
-        value: "Hdbscan",
-        version: 1,
-    };
     log.info(
         "[MLService] Got face clustering results: ",
         JSON.stringify(syncContext.mlLibraryData.faceClusteringResults),

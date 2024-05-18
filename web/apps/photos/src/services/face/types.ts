@@ -33,20 +33,9 @@ export interface NearestCluster {
 
 export declare type Landmark = Point;
 
-export declare type ImageType = "Original" | "Preview";
-
-export declare type BlurDetectionMethod = "Laplacian";
-
-export declare type ClusteringMethod = "Hdbscan" | "Dbscan";
-
 export class AlignedBox {
     box: Box;
     rotation: number;
-}
-
-export interface Versioned<T> {
-    value: T;
-    version: number;
 }
 
 export interface FaceDetection {
@@ -139,7 +128,6 @@ export interface MLSyncFileContext {
 }
 
 export interface MLLibraryData {
-    faceClusteringMethod?: Versioned<ClusteringMethod>;
     faceClusteringResults?: ClusterFacesResult;
     faceClustersWithNoise?: FacesClustersWithNoise;
 }
