@@ -6,7 +6,6 @@ import { t } from "i18next";
 import React, { useEffect, useState } from "react";
 import mlIDbStorage from "services/face/db";
 import type { Person } from "services/face/people";
-import type { Face, MlFileData } from "services/face/types";
 import { EnteFile } from "types/file";
 
 const FaceChipContainer = styled("div")`
@@ -107,7 +106,7 @@ export function UnidentifiedFaces(props: {
     file: EnteFile;
     updateMLDataIndex: number;
 }) {
-    const [faces, setFaces] = useState<Face[]>([]);
+    const [faces, setFaces] = useState<{ id: string }[]>([]);
 
     useEffect(() => {
         let didCancel = false;
@@ -190,7 +189,7 @@ const FaceCropImageView: React.FC<FaceCropImageViewProps> = ({ faceID }) => {
 
 async function getPeopleList(file: EnteFile): Promise<Person[]> {
     let startTime = Date.now();
-    const mlFileData: MlFileData = await mlIDbStorage.getFile(file.id);
+    const mlFileData = await mlIDbStorage.getFile(file.id);
     log.info(
         "getPeopleList:mlFilesStore:getItem",
         Date.now() - startTime,
@@ -222,8 +221,8 @@ async function getPeopleList(file: EnteFile): Promise<Person[]> {
     return peopleList;
 }
 
-async function getUnidentifiedFaces(file: EnteFile): Promise<Array<Face>> {
-    const mlFileData: MlFileData = await mlIDbStorage.getFile(file.id);
+async function getUnidentifiedFaces(file: EnteFile): Promise<{ id: string }[]> {
+    const mlFileData = await mlIDbStorage.getFile(file.id);
 
     return mlFileData?.faces?.filter(
         (f) => f.personId === null || f.personId === undefined,

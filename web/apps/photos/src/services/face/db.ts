@@ -29,8 +29,9 @@ export interface IndexStatus {
  * and new types during the migration will have. Eventually we'll store the the
  * server ML data shape here exactly.
  */
-export interface MinimalFileData {
+export interface MinimalPersistedFileData {
     mlVersion: number;
+    faces?: { personId?: number; id: string }[];
 }
 
 interface Config {}
@@ -254,7 +255,7 @@ class MLIDbStorage {
         return fileIds;
     }
 
-    public async getFile(fileId: number) {
+    public async getFile(fileId: number): Promise<MinimalPersistedFileData> {
         const db = await this.db;
         return db.get("files", fileId);
     }
