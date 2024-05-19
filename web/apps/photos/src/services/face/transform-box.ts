@@ -52,8 +52,11 @@ function transformPoints(points: Point[], transform: Matrix) {
 }
 
 function transformBox(box: Box, transform: Matrix) {
-    const topLeft = transformPoint(box.topLeft, transform);
-    const bottomRight = transformPoint(box.bottomRight, transform);
+    const topLeft = transformPoint(new Point(box.x, box.y), transform);
+    const bottomRight = transformPoint(
+        new Point(box.x + box.width, box.y + box.height),
+        transform,
+    );
 
     return new Box({
         x: topLeft.x,

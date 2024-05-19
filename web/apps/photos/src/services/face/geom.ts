@@ -33,14 +33,6 @@ export class Box implements IRect {
         this.height = height;
     }
 
-    public get topLeft(): Point {
-        return new Point(this.x, this.y);
-    }
-
-    public get bottomRight(): Point {
-        return new Point(this.x + this.width, this.y + this.height);
-    }
-
     public round(): Box {
         const [x, y, width, height] = [
             this.x,
