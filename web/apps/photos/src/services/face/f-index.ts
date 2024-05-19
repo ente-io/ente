@@ -121,7 +121,7 @@ const indexFaces_ = async (enteFile: EnteFile, imageBitmap: ImageBitmap) => {
         const blurValues = detectBlur(alignedFacesData, mlFile.faces);
         mlFile.faces.forEach((f, i) => (f.blurValue = blurValues[i]));
 
-        const embeddings = await faceEmbeddings(alignedFacesData);
+        const embeddings = await computeEmbedding(alignedFacesData);
         mlFile.faces.forEach((f, i) => (f.embedding = embeddings[i]));
 
         convertFaceDetectionsToRelative(mlFile);
@@ -608,18 +608,19 @@ const matrixVariance = (matrix: number[][]): number => {
 };
 
 const mobileFaceNetFaceSize = 112;
+const mobileFaceNetEmbeddingSize = 192;
 
 /**
  * Compute embeddings for the given {@link faceData}.
  *
  * The model used is MobileFaceNet, running in an ONNX runtime.
  */
-const faceEmbeddings = async (
+const computeEmbedding = async (
     faceData: Float32Array,
-): Promise<Array<FaceEmbedding>> => {
+): Promise<FaceEmbedding[]> => {
     const outputData = await workerBridge.faceEmbeddings(faceData);
 
-    const embeddingSize = 192;
+    const embeddingSize = mobileFaceNetEmbeddingSize;
     const embeddings = new Array<FaceEmbedding>(
         outputData.length / embeddingSize,
     );
