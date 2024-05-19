@@ -58,10 +58,7 @@ export const PeopleList = React.memo((props: PeopleListProps) => {
                         props.onSelect && props.onSelect(person, index)
                     }
                 >
-                    <FaceCropImageView
-                        faceID={person.displayFaceId}
-                        cacheKey={person.faceCropCacheKey}
-                    />
+                    <FaceCropImageView faceID={person.displayFaceId} />
                 </FaceChip>
             ))}
         </FaceChipContainer>
@@ -109,7 +106,7 @@ export function UnidentifiedFaces(props: {
     file: EnteFile;
     updateMLDataIndex: number;
 }) {
-    const [faces, setFaces] = useState<Array<Face>>([]);
+    const [faces, setFaces] = useState<Face[]>([]);
 
     useEffect(() => {
         let didCancel = false;
@@ -137,10 +134,7 @@ export function UnidentifiedFaces(props: {
                 {faces &&
                     faces.map((face, index) => (
                         <FaceChip key={index}>
-                            <FaceCropImageView
-                                faceID={face.id}
-                                cacheKey={face.crop?.cacheKey}
-                            />
+                            <FaceCropImageView faceID={face.id} />
                         </FaceChip>
                     ))}
             </FaceChipContainer>
@@ -150,13 +144,9 @@ export function UnidentifiedFaces(props: {
 
 interface FaceCropImageViewProps {
     faceID: string;
-    cacheKey?: string;
 }
 
-const FaceCropImageView: React.FC<FaceCropImageViewProps> = ({
-    faceID,
-    cacheKey,
-}) => {
+const FaceCropImageView: React.FC<FaceCropImageViewProps> = ({ faceID }) => {
     const [objectURL, setObjectURL] = useState<string | undefined>();
 
     useEffect(() => {
@@ -190,7 +180,7 @@ const FaceCropImageView: React.FC<FaceCropImageViewProps> = ({
             didCancel = true;
             if (objectURL) URL.revokeObjectURL(objectURL);
         };
-    }, [faceID, cacheKey]);
+    }, [faceID]);
 
     return objectURL ? (
         <img src={objectURL} />
@@ -199,7 +189,7 @@ const FaceCropImageView: React.FC<FaceCropImageViewProps> = ({
     );
 };
 
-async function getPeopleList(file: EnteFile): Promise<Array<Person>> {
+async function getPeopleList(file: EnteFile): Promise<Person[]> {
     let startTime = Date.now();
     const mlFileData: MlFileData = await mlIDbStorage.getFile(file.id);
     log.info(

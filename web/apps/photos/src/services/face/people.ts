@@ -93,7 +93,6 @@ export const syncPeopleIndex = async () => {
             id: index,
             files: faces.map((f) => f.fileId),
             displayFaceId: personFace?.id,
-            faceCropCacheKey: personFace?.crop?.cacheKey,
         };
 
         await mlIDbStorage.putPerson(person);

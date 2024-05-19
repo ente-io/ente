@@ -9,7 +9,6 @@ import {
     Face,
     FaceAlignment,
     FaceDetection,
-    FaceEmbedding,
     type MlFileData,
 } from "services/face/types";
 import { defaultMLVersion } from "services/machineLearning/machineLearningService";
@@ -166,7 +165,7 @@ const convertToYOLOInputFloat32ChannelsFirst = (imageBitmap: ImageBitmap) => {
     const requiredWidth = 640;
     const requiredHeight = 640;
 
-    const { width, height }  = imageBitmap;
+    const { width, height } = imageBitmap;
 
     // Create an OffscreenCanvas and set its size.
     const offscreenCanvas = new OffscreenCanvas(width, height);
@@ -615,11 +614,11 @@ const mobileFaceNetEmbeddingSize = 192;
  */
 const computeEmbeddings = async (
     faceData: Float32Array,
-): Promise<FaceEmbedding[]> => {
+): Promise<Float32Array[]> => {
     const outputData = await workerBridge.faceEmbeddings(faceData);
 
     const embeddingSize = mobileFaceNetEmbeddingSize;
-    const embeddings = new Array<FaceEmbedding>(
+    const embeddings = new Array<Float32Array>(
         outputData.length / embeddingSize,
     );
     for (let i = 0; i < embeddings.length; i++) {
