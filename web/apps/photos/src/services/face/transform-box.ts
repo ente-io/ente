@@ -1,4 +1,4 @@
-import { Box, Point, boxFromBoundingBox } from "services/face/geom";
+import { Box, Point } from "services/face/geom";
 import type { FaceDetection } from "services/face/types";
 // TODO-ML: Do we need two separate Matrix libraries?
 //
@@ -55,10 +55,10 @@ function transformBox(box: Box, transform: Matrix) {
     const topLeft = transformPoint(box.topLeft, transform);
     const bottomRight = transformPoint(box.bottomRight, transform);
 
-    return boxFromBoundingBox({
-        left: topLeft.x,
-        top: topLeft.y,
-        right: bottomRight.x,
-        bottom: bottomRight.y,
+    return new Box({
+        x: topLeft.x,
+        y: topLeft.y,
+        width: bottomRight.x - topLeft.x,
+        height: bottomRight.y - topLeft.y,
     });
 }
