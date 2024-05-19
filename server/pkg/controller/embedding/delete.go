@@ -71,28 +71,7 @@ func (c *Controller) deleteEmbedding(qItem repo.QueueItem) {
 		ctxLogger.WithError(err).Error("Failed to fetch datacenters")
 		return
 	}
-	// Ensure that the object are deleted from active derived storage dc. Ideally, this section should never be executed
-	// unless there's a bug in storing the DC or the service restarts before removing the rows from the table
-	// todo:(neeraj): remove this section after a few weeks of deployment
-	if len(datacenters) == 0 {
-		ctxLogger.Warn("No datacenters found for file, ensuring deletion from derived storage  and hot DC")
-		err = c.ObjectCleanupController.DeleteAllObjectsWithPrefix(prefix, c.S3Config.GetDerivedStorageDataCenter())
-		if err != nil {
-			ctxLogger.WithError(err).Error("Failed to delete all objects")
-			return
-		}
-		// if Derived DC is different from hot DC, delete from hot DC as well
-		if c.derivedStorageDataCenter != c.S3Config.GetHotDataCenter() {
-			err = c.ObjectCleanupController.DeleteAllObjectsWithPrefix(prefix, c.S3Config.GetHotDataCenter())
-			if err != nil {
-				ctxLogger.WithError(err).Error("Failed to delete all objects from hot DC")
-				return
-			}
-		}
-	} else {
-		ctxLogger.Infof("Deleting from all datacenters %v", datacenters)
-	}
-
+	ctxLogger.Infof("Deleting from all datacenters %v", datacenters)
 	for i := range datacenters {
 		err = c.ObjectCleanupController.DeleteAllObjectsWithPrefix(prefix, datacenters[i])
 		if err != nil {
