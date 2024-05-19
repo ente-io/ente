@@ -22,36 +22,26 @@ export const transformFaceDetections = (
     inBox: Box,
     toBox: Box,
 ): FaceDetection[] => {
-    const transform = computeTransformToBox(inBox, toBox);
-    return faceDetections.map((f) => {
-        const box = transformBox(f.box, transform);
-        const normLandmarks = f.landmarks;
-        const landmarks = transformPoints(normLandmarks, transform);
-        return {
-            box,
-            landmarks,
-            probability: f.probability as number,
-        } as FaceDetection;
-    });
+    const transform = boxTransformationMatrix(inBox, toBox);
+    return faceDetections.map((f) => ({
+        box: transformBox(f.box, transform),
+        landmarks: f.landmarks.map((p) => transformPoint(p, transform)),
+        probability: f.probability,
+    }));
 };
 
-function computeTransformToBox(inBox: Box, toBox: Box): Matrix {
-    return compose(
+const boxTransformationMatrix = (inBox: Box, toBox: Box): Matrix =>
+    compose(
         translate(toBox.x, toBox.y),
         scale(toBox.width / inBox.width, toBox.height / inBox.height),
     );
-}
 
-function transformPoint(point: Point, transform: Matrix) {
+const transformPoint = (point: Point, transform: Matrix) => {
     const txdPoint = applyToPoint(transform, point);
     return new Point(txdPoint.x, txdPoint.y);
-}
+};
 
-function transformPoints(points: Point[], transform: Matrix) {
-    return points?.map((p) => transformPoint(p, transform));
-}
-
-function transformBox(box: Box, transform: Matrix) {
+const transformBox = (box: Box, transform: Matrix) => {
     const topLeft = transformPoint(new Point(box.x, box.y), transform);
     const bottomRight = transformPoint(
         new Point(box.x + box.width, box.y + box.height),
@@ -64,4 +54,4 @@ function transformBox(box: Box, transform: Matrix) {
         width: bottomRight.x - topLeft.x,
         height: bottomRight.y - topLeft.y,
     });
-}
+};
