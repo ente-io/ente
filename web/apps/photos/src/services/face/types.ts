@@ -36,9 +36,9 @@ export interface CroppedFace extends DetectedFaceWithId {
 }
 
 export interface FaceAlignment {
-    // TODO: remove affine matrix as rotation, size and center
+    // TODO-ML: remove affine matrix as rotation, size and center
     // are simple to store and use, affine matrix adds complexity while getting crop
-    affineMatrix: Array<Array<number>>;
+    affineMatrix: number[][];
     rotation: number;
     // size and center is relative to image dimentions stored at mlFileData
     size: number;

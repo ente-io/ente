@@ -1,5 +1,4 @@
 import { Matrix, inverse } from "ml-matrix";
-import { FaceAlignment } from "services/face/types";
 
 /**
  * Clamp {@link value} to between {@link min} and {@link max}, inclusive.
@@ -9,15 +8,81 @@ export const clamp = (value: number, min: number, max: number) =>
 
 /**
  * Returns the pixel value (RGB) at the given coordinates ({@link fx},
- * {@link fy}) using bicubic interpolation.
+ * {@link fy}) using bilinear interpolation.
  */
-export function pixelRGBBicubic(
+export function pixelRGBBilinear(
     fx: number,
     fy: number,
     imageData: Uint8ClampedArray,
     imageWidth: number,
     imageHeight: number,
 ) {
+    // Clamp to image boundaries.
+    fx = clamp(fx, 0, imageWidth - 1);
+    fy = clamp(fy, 0, imageHeight - 1);
+
+    // Get the surrounding coordinates and their weights.
+    const x0 = Math.floor(fx);
+    const x1 = Math.ceil(fx);
+    const y0 = Math.floor(fy);
+    const y1 = Math.ceil(fy);
+    const dx = fx - x0;
+    const dy = fy - y0;
+    const dx1 = 1.0 - dx;
+    const dy1 = 1.0 - dy;
+
+    // Get the original pixels.
+    const pixel1 = pixelRGBA(imageData, imageWidth, imageHeight, x0, y0);
+    const pixel2 = pixelRGBA(imageData, imageWidth, imageHeight, x1, y0);
+    const pixel3 = pixelRGBA(imageData, imageWidth, imageHeight, x0, y1);
+    const pixel4 = pixelRGBA(imageData, imageWidth, imageHeight, x1, y1);
+
+    const bilinear = (val1: number, val2: number, val3: number, val4: number) =>
+        Math.round(
+            val1 * dx1 * dy1 +
+                val2 * dx * dy1 +
+                val3 * dx1 * dy +
+                val4 * dx * dy,
+        );
+
+    // Return interpolated pixel colors.
+    return {
+        r: bilinear(pixel1.r, pixel2.r, pixel3.r, pixel4.r),
+        g: bilinear(pixel1.g, pixel2.g, pixel3.g, pixel4.g),
+        b: bilinear(pixel1.b, pixel2.b, pixel3.b, pixel4.b),
+    };
+}
+
+const pixelRGBA = (
+    imageData: Uint8ClampedArray,
+    width: number,
+    height: number,
+    x: number,
+    y: number,
+) => {
+    if (x < 0 || x >= width || y < 0 || y >= height) {
+        return { r: 0, g: 0, b: 0, a: 0 };
+    }
+    const index = (y * width + x) * 4;
+    return {
+        r: imageData[index],
+        g: imageData[index + 1],
+        b: imageData[index + 2],
+        a: imageData[index + 3],
+    };
+};
+
+/**
+ * Returns the pixel value (RGB) at the given coordinates ({@link fx},
+ * {@link fy}) using bicubic interpolation.
+ */
+const pixelRGBBicubic = (
+    fx: number,
+    fy: number,
+    imageData: Uint8ClampedArray,
+    imageWidth: number,
+    imageHeight: number,
+) => {
     // Clamp to image boundaries.
     fx = clamp(fx, 0, imageWidth - 1);
     fy = clamp(fy, 0, imageHeight - 1);
@@ -134,80 +199,14 @@ export function pixelRGBBicubic(
     // const c3 = cubic(dy, ip3, ic3, in3, ia3);
 
     return { r: c0, g: c1, b: c2 };
-}
-
-const pixelRGBA = (
-    imageData: Uint8ClampedArray,
-    width: number,
-    height: number,
-    x: number,
-    y: number,
-) => {
-    if (x < 0 || x >= width || y < 0 || y >= height) {
-        return { r: 0, g: 0, b: 0, a: 0 };
-    }
-    const index = (y * width + x) * 4;
-    return {
-        r: imageData[index],
-        g: imageData[index + 1],
-        b: imageData[index + 2],
-        a: imageData[index + 3],
-    };
 };
-
-/**
- * Returns the pixel value (RGB) at the given coordinates ({@link fx},
- * {@link fy}) using bilinear interpolation.
- */
-export function pixelRGBBilinear(
-    fx: number,
-    fy: number,
-    imageData: Uint8ClampedArray,
-    imageWidth: number,
-    imageHeight: number,
-) {
-    // Clamp to image boundaries.
-    fx = clamp(fx, 0, imageWidth - 1);
-    fy = clamp(fy, 0, imageHeight - 1);
-
-    // Get the surrounding coordinates and their weights.
-    const x0 = Math.floor(fx);
-    const x1 = Math.ceil(fx);
-    const y0 = Math.floor(fy);
-    const y1 = Math.ceil(fy);
-    const dx = fx - x0;
-    const dy = fy - y0;
-    const dx1 = 1.0 - dx;
-    const dy1 = 1.0 - dy;
-
-    // Get the original pixels.
-    const pixel1 = pixelRGBA(imageData, imageWidth, imageHeight, x0, y0);
-    const pixel2 = pixelRGBA(imageData, imageWidth, imageHeight, x1, y0);
-    const pixel3 = pixelRGBA(imageData, imageWidth, imageHeight, x0, y1);
-    const pixel4 = pixelRGBA(imageData, imageWidth, imageHeight, x1, y1);
-
-    const bilinear = (val1: number, val2: number, val3: number, val4: number) =>
-        Math.round(
-            val1 * dx1 * dy1 +
-                val2 * dx * dy1 +
-                val3 * dx1 * dy +
-                val4 * dx * dy,
-        );
-
-    // Return interpolated pixel colors.
-    return {
-        r: bilinear(pixel1.r, pixel2.r, pixel3.r, pixel4.r),
-        g: bilinear(pixel1.g, pixel2.g, pixel3.g, pixel4.g),
-        b: bilinear(pixel1.b, pixel2.b, pixel3.b, pixel4.b),
-    };
-}
 
 /**
  * Transform {@link inputData} starting at {@link inputStartIndex}.
  */
 export const warpAffineFloat32List = (
     imageBitmap: ImageBitmap,
-    faceAlignment: FaceAlignment,
+    faceAlignmentAffineMatrix: number[][],
     faceSize: number,
     inputData: Float32Array,
     inputStartIndex: number,
@@ -221,7 +220,7 @@ export const warpAffineFloat32List = (
     const imageData = ctx.getImageData(0, 0, width, height);
     const pixelData = imageData.data;
 
-    const transformationMatrix = faceAlignment.affineMatrix.map((row) =>
+    const transformationMatrix = faceAlignmentAffineMatrix.map((row) =>
         row.map((val) => (val != 1.0 ? val * faceSize : 1.0)),
     ); // 3x3
 

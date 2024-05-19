@@ -416,7 +416,7 @@ async function extractFaceImagesToFloat32(
         const faceDataOffset = i * faceSize * faceSize * 3;
         warpAffineFloat32List(
             image,
-            alignedFace,
+            alignedFace.affineMatrix,
             faceSize,
             faceData,
             faceDataOffset,
