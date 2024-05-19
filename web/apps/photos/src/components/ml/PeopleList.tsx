@@ -1,3 +1,4 @@
+import { openCache } from "@/next/blob-cache";
 import log from "@/next/log";
 import { Skeleton, styled } from "@mui/material";
 import { Legend } from "components/PhotoViewer/styledComponents/Legend";
@@ -165,12 +166,18 @@ const FaceCropImageView: React.FC<FaceCropImageViewProps> = ({
         if (faceID && electron) {
             electron
                 .legacyFaceCrop(faceID)
-                /*
-            cachedOrNew("face-crops", cacheKey, async () => {
+                .then(async (data) => {
+                    if (data) return data;
+                    /*
+                    TODO(MR): Also, get this to work on web too.
+                cachedOrNew("face-crops", cacheKey, async () => {
                 return machineLearningService.regenerateFaceCrop(
                     faceId,
                 );
-            })*/
+                })*/
+                    const cache = await openCache("face-crops");
+                    return await cache.get(faceID);
+                })
                 .then((data) => {
                     if (data) {
                         const blob = new Blob([data]);
