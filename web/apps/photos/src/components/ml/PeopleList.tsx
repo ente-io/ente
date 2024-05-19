@@ -1,4 +1,4 @@
-import { openCache } from "@/next/blob-cache";
+import { blobCache } from "@/next/blob-cache";
 import log from "@/next/log";
 import { Skeleton, styled } from "@mui/material";
 import { Legend } from "components/PhotoViewer/styledComponents/Legend";
@@ -175,7 +175,7 @@ const FaceCropImageView: React.FC<FaceCropImageViewProps> = ({
                     faceId,
                 );
                 })*/
-                    const cache = await openCache("face-crops");
+                    const cache = await blobCache("face-crops");
                     return await cache.get(faceID);
                 })
                 .then((data) => {

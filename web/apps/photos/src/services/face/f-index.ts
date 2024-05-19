@@ -1,5 +1,5 @@
 import { FILE_TYPE } from "@/media/file-type";
-import { openCache } from "@/next/blob-cache";
+import { blobCache } from "@/next/blob-cache";
 import log from "@/next/log";
 import { workerBridge } from "@/next/worker/worker-bridge";
 import { euclidean } from "hdbscan";
@@ -667,7 +667,7 @@ export const saveFaceCrop = async (imageBitmap: ImageBitmap, face: Face) => {
 
     const blob = await imageBitmapToBlob(faceCrop.image);
 
-    const cache = await openCache("face-crops");
+    const cache = await blobCache("face-crops");
     await cache.put(face.id, blob);
 
     faceCrop.image.close();

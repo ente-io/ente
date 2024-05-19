@@ -1,6 +1,6 @@
 import { FILE_TYPE } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
-import { openCache, type BlobCache } from "@/next/blob-cache";
+import { blobCache, type BlobCache } from "@/next/blob-cache";
 import log from "@/next/log";
 import { APPS } from "@ente/shared/apps/constants";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
@@ -91,7 +91,7 @@ class DownloadManagerImpl {
         }
         this.downloadClient = createDownloadClient(app, tokens);
         try {
-            this.thumbnailCache = await openCache("thumbs");
+            this.thumbnailCache = await blobCache("thumbs");
         } catch (e) {
             log.error(
                 "Failed to open thumbnail cache, will continue without it",
@@ -100,7 +100,7 @@ class DownloadManagerImpl {
         }
         // TODO (MR): Revisit full file caching cf disk space usage
         // try {
-        //     if (isElectron()) this.fileCache = await openCache("files");
+        //     if (isElectron()) this.fileCache = await cache("files");
         // } catch (e) {
         //     log.error("Failed to open file cache, will continue without it", e);
         // }
