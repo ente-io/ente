@@ -8,7 +8,6 @@ import { Box, Dimensions, Point, enlargeBox } from "services/face/geom";
 import {
     Face,
     FaceAlignment,
-    FaceCrop,
     FaceDetection,
     FaceEmbedding,
     type MlFileData,
@@ -663,14 +662,12 @@ const relativeDetection = (
 };
 
 export const saveFaceCrop = async (imageBitmap: ImageBitmap, face: Face) => {
-    const faceCrop = getFaceCrop(imageBitmap, face.detection);
-
-    const blob = await imageBitmapToBlob(faceCrop.image);
+    const faceCrop = extractFaceCrop(imageBitmap, face.detection);
+    const blob = await imageBitmapToBlob(faceCrop);
+    faceCrop.close();
 
     const cache = await blobCache("face-crops");
     await cache.put(face.id, blob);
-
-    faceCrop.image.close();
 
     return blob;
 };
@@ -681,10 +678,10 @@ const imageBitmapToBlob = (imageBitmap: ImageBitmap) => {
     return canvas.convertToBlob({ type: "image/jpeg", quality: 0.8 });
 };
 
-const getFaceCrop = (
+const extractFaceCrop = (
     imageBitmap: ImageBitmap,
     faceDetection: FaceDetection,
-): FaceCrop => {
+): ImageBitmap => {
     const alignment = faceAlignment(faceDetection);
 
     const padding = 0.25;
@@ -698,15 +695,10 @@ const getFaceCrop = (
     }).round();
     const scaleForPadding = 1 + padding * 2;
     const paddedBox = enlargeBox(alignmentBox, scaleForPadding).round();
-    const faceImageBitmap = cropWithRotation(imageBitmap, paddedBox, 0, {
+    return cropWithRotation(imageBitmap, paddedBox, 0, {
         width: maxSize,
         height: maxSize,
     });
-
-    return {
-        image: faceImageBitmap,
-        imageBox: paddedBox,
-    };
 };
 
 export function cropWithRotation(
