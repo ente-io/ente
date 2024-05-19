@@ -100,21 +100,19 @@ const indexFaces_ = async (enteFile: EnteFile, imageBitmap: ImageBitmap) => {
     mlFile.faces = detectedFaces;
 
     if (detectedFaces.length > 0) {
-        await Promise.all(
-            detectedFaces.map((face) => saveFaceCrop(imageBitmap, face)),
-        ).catch((e) => log.error("Ignoring error when saving face crop", e));
+        const alignments: FaceAlignment[] = [];
 
-        // Execute the face alignment calculations
         for (const face of mlFile.faces) {
-            face.alignment = faceAlignment(face.detection);
+            const alignment = faceAlignment(face.detection);
+            face.alignment = alignment;
+            alignments.push(alignment);
+
+            await saveFaceCrop(imageBitmap, face);
         }
 
-        // Extract face images and convert to Float32Array
-        const faceAlignments = mlFile.faces.map((f) => f.alignment);
-        const alignedFacesData = await extractFaceImagesToFloat32(
-            faceAlignments,
-            mobileFaceNetFaceSize,
+        const alignedFacesData = convertToMobileFaceNetInput(
             imageBitmap,
+            alignments,
         );
 
         const blurValues = detectBlur(alignedFacesData, mlFile.faces);
@@ -403,27 +401,27 @@ const faceAlignmentUsingSimilarityTransform = (
     return { affineMatrix, center, size, rotation };
 };
 
-async function extractFaceImagesToFloat32(
-    faceAlignments: Array<FaceAlignment>,
-    faceSize: number,
-    image: ImageBitmap,
-): Promise<Float32Array> {
+const convertToMobileFaceNetInput = (
+    imageBitmap: ImageBitmap,
+    faceAlignments: FaceAlignment[],
+): Float32Array => {
+    const faceSize = mobileFaceNetFaceSize;
     const faceData = new Float32Array(
         faceAlignments.length * faceSize * faceSize * 3,
     );
     for (let i = 0; i < faceAlignments.length; i++) {
-        const alignedFace = faceAlignments[i];
+        const { affineMatrix } = faceAlignments[i];
         const faceDataOffset = i * faceSize * faceSize * 3;
         warpAffineFloat32List(
-            image,
-            alignedFace.affineMatrix,
+            imageBitmap,
+            affineMatrix,
             faceSize,
             faceData,
             faceDataOffset,
         );
     }
     return faceData;
-}
+};
 
 /**
  * Laplacian blur detection.
