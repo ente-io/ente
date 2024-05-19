@@ -660,7 +660,7 @@ const relativeDetection = (
 };
 
 export const saveFaceCrop = async (imageBitmap: ImageBitmap, face: Face) => {
-    const faceCrop = extractFaceCrop(imageBitmap, face.detection);
+    const faceCrop = extractFaceCrop(imageBitmap, face.alignment);
     const blob = await imageBitmapToBlob(faceCrop);
     faceCrop.close();
 
@@ -678,60 +678,38 @@ const imageBitmapToBlob = (imageBitmap: ImageBitmap) => {
 
 const extractFaceCrop = (
     imageBitmap: ImageBitmap,
-    faceDetection: FaceDetection,
+    alignment: FaceAlignment,
 ): ImageBitmap => {
-    const alignment = faceAlignment(faceDetection);
-
-    const padding = 0.25;
-    const maxSize = 256;
-
     const alignmentBox = new Box({
         x: alignment.center.x - alignment.size / 2,
         y: alignment.center.y - alignment.size / 2,
         width: alignment.size,
         height: alignment.size,
     }).round();
+
+    const padding = 0.25;
     const scaleForPadding = 1 + padding * 2;
     const paddedBox = enlargeBox(alignmentBox, scaleForPadding).round();
-    return cropWithRotation(imageBitmap, paddedBox, 0, {
-        width: maxSize,
-        height: maxSize,
-    });
+
+    // TODO-ML: The rotation doesn't seem to be used? it's set to 0.
+    return cropWithRotation(imageBitmap, paddedBox, 0, 256);
 };
 
-export function cropWithRotation(
+const cropWithRotation = (
     imageBitmap: ImageBitmap,
     cropBox: Box,
-    rotation?: number,
-    maxSize?: Dimensions,
-    minSize?: Dimensions,
-) {
+    rotation: number,
+    maxDimension: number,
+) => {
     const box = cropBox.round();
 
     const outputSize = { width: box.width, height: box.height };
-    if (maxSize) {
-        const minScale = Math.min(
-            maxSize.width / box.width,
-            maxSize.height / box.height,
-        );
-        if (minScale < 1) {
-            outputSize.width = Math.round(minScale * box.width);
-            outputSize.height = Math.round(minScale * box.height);
-        }
-    }
 
-    if (minSize) {
-        const maxScale = Math.max(
-            minSize.width / box.width,
-            minSize.height / box.height,
-        );
-        if (maxScale > 1) {
-            outputSize.width = Math.round(maxScale * box.width);
-            outputSize.height = Math.round(maxScale * box.height);
-        }
+    const scale = Math.min(maxDimension / box.width, maxDimension / box.height);
+    if (scale < 1) {
+        outputSize.width = Math.round(scale * box.width);
+        outputSize.height = Math.round(scale * box.height);
     }
-
-    // log.info({ imageBitmap, box, outputSize });
 
     const offscreen = new OffscreenCanvas(outputSize.width, outputSize.height);
     const offscreenCtx = offscreen.getContext("2d");
@@ -763,4 +741,4 @@ export function cropWithRotation(
     );
 
     return offscreen.transferToImageBitmap();
-}
+};
