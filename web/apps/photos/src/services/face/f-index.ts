@@ -18,7 +18,7 @@ import type { EnteFile } from "types/file";
 import { fetchImageBitmap, getLocalFileImageBitmap } from "./file";
 import {
     clamp,
-    createGrayscaleIntMatrixFromNormalized2List,
+    grayscaleIntMatrixFromNormalized2List,
     pixelRGBBilinear,
     warpAffineFloat32List,
 } from "./image";
@@ -432,7 +432,7 @@ async function extractFaceImagesToFloat32(
  */
 const detectBlur = (alignedFaces: Float32Array, faces: Face[]): number[] =>
     faces.map((face, i) => {
-        const faceImage = createGrayscaleIntMatrixFromNormalized2List(
+        const faceImage = grayscaleIntMatrixFromNormalized2List(
             alignedFaces,
             i,
             mobileFaceNetFaceSize,

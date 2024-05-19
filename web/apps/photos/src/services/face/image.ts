@@ -202,26 +202,23 @@ export function pixelRGBBilinear(
     };
 }
 
-export function warpAffineFloat32List(
+/**
+ * Transform {@link inputData} starting at {@link inputStartIndex}.
+ */
+export const warpAffineFloat32List = (
     imageBitmap: ImageBitmap,
     faceAlignment: FaceAlignment,
     faceSize: number,
     inputData: Float32Array,
     inputStartIndex: number,
-): void {
+): void => {
+    const { width, height } = imageBitmap;
+
     // Get the pixel data.
-    const offscreenCanvas = new OffscreenCanvas(
-        imageBitmap.width,
-        imageBitmap.height,
-    );
+    const offscreenCanvas = new OffscreenCanvas(width, height);
     const ctx = offscreenCanvas.getContext("2d");
-    ctx.drawImage(imageBitmap, 0, 0, imageBitmap.width, imageBitmap.height);
-    const imageData = ctx.getImageData(
-        0,
-        0,
-        imageBitmap.width,
-        imageBitmap.height,
-    );
+    ctx.drawImage(imageBitmap, 0, 0, width, height);
+    const imageData = ctx.getImageData(0, 0, width, height);
     const pixelData = imageData.data;
 
     const transformationMatrix = faceAlignment.affineMatrix.map((row) =>
@@ -243,7 +240,7 @@ export function warpAffineFloat32List(
 
     for (let yTrans = 0; yTrans < faceSize; ++yTrans) {
         for (let xTrans = 0; xTrans < faceSize; ++xTrans) {
-            // Perform inverse affine transformation
+            // Perform inverse affine transformation.
             const xOrigin =
                 a00Prime * (xTrans - b00) + a01Prime * (yTrans - b10);
             const yOrigin =
@@ -254,34 +251,32 @@ export function warpAffineFloat32List(
                 xOrigin,
                 yOrigin,
                 pixelData,
-                imageBitmap.width,
-                imageBitmap.height,
+                width,
+                height,
             );
 
-            // Set the pixel in the input data
+            // Set the pixel in the input data.
             const index = (yTrans * faceSize + xTrans) * 3;
-            inputData[inputStartIndex + index] =
-                normalizePixelBetweenMinus1And1(r);
-            inputData[inputStartIndex + index + 1] =
-                normalizePixelBetweenMinus1And1(g);
-            inputData[inputStartIndex + index + 2] =
-                normalizePixelBetweenMinus1And1(b);
+            inputData[inputStartIndex + index] = rgbToBipolarFloat(r);
+            inputData[inputStartIndex + index + 1] = rgbToBipolarFloat(g);
+            inputData[inputStartIndex + index + 2] = rgbToBipolarFloat(b);
         }
     }
-}
+};
 
-const normalizePixelBetweenMinus1And1 = (pixelValue: number) =>
-    pixelValue / 127.5 - 1.0;
+/** Convert a RGB component 0-255 to a floating point value between -1 and 1. */
+const rgbToBipolarFloat = (pixelValue: number) => pixelValue / 127.5 - 1.0;
 
-const unnormalizePixelFromBetweenMinus1And1 = (pixelValue: number) =>
+/** Convert a floating point value between -1 and 1 to a RGB component 0-255. */
+const bipolarFloatToRGB = (pixelValue: number) =>
     clamp(Math.round((pixelValue + 1.0) * 127.5), 0, 255);
 
-export function createGrayscaleIntMatrixFromNormalized2List(
+export const grayscaleIntMatrixFromNormalized2List = (
     imageList: Float32Array,
     faceNumber: number,
     width: number,
     height: number,
-): number[][] {
+): number[][] => {
     const startIndex = faceNumber * width * height * 3;
     return Array.from({ length: height }, (_, y) =>
         Array.from({ length: width }, (_, x) => {
@@ -289,22 +284,13 @@ export function createGrayscaleIntMatrixFromNormalized2List(
             const pixelIndex = startIndex + 3 * (y * width + x);
             return clamp(
                 Math.round(
-                    0.299 *
-                        unnormalizePixelFromBetweenMinus1And1(
-                            imageList[pixelIndex],
-                        ) +
-                        0.587 *
-                            unnormalizePixelFromBetweenMinus1And1(
-                                imageList[pixelIndex + 1],
-                            ) +
-                        0.114 *
-                            unnormalizePixelFromBetweenMinus1And1(
-                                imageList[pixelIndex + 2],
-                            ),
+                    0.299 * bipolarFloatToRGB(imageList[pixelIndex]) +
+                        0.587 * bipolarFloatToRGB(imageList[pixelIndex + 1]) +
+                        0.114 * bipolarFloatToRGB(imageList[pixelIndex + 2]),
                 ),
                 0,
                 255,
             );
         }),
     );
-}
+};
