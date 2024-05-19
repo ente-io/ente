@@ -118,7 +118,7 @@ const indexFaces_ = async (enteFile: EnteFile, imageBitmap: ImageBitmap) => {
         const blurValues = detectBlur(alignedFacesData, mlFile.faces);
         mlFile.faces.forEach((f, i) => (f.blurValue = blurValues[i]));
 
-        const embeddings = await computeEmbedding(alignedFacesData);
+        const embeddings = await computeEmbeddings(alignedFacesData);
         mlFile.faces.forEach((f, i) => (f.embedding = embeddings[i]));
 
         convertFaceDetectionsToRelative(mlFile);
@@ -166,8 +166,7 @@ const convertToYOLOInputFloat32ChannelsFirst = (imageBitmap: ImageBitmap) => {
     const requiredWidth = 640;
     const requiredHeight = 640;
 
-    const width = imageBitmap.width;
-    const height = imageBitmap.height;
+    const { width, height }  = imageBitmap;
 
     // Create an OffscreenCanvas and set its size.
     const offscreenCanvas = new OffscreenCanvas(width, height);
@@ -427,11 +426,13 @@ const convertToMobileFaceNetInput = (
  * Laplacian blur detection.
  *
  * Return an array of detected blur values, one for each face in {@link faces}.
+ * The face data is taken from the slice of {@link alignedFacesData}
+ * corresponding to each face of {@link faces}.
  */
-const detectBlur = (alignedFaces: Float32Array, faces: Face[]): number[] =>
+const detectBlur = (alignedFacesData: Float32Array, faces: Face[]): number[] =>
     faces.map((face, i) => {
         const faceImage = grayscaleIntMatrixFromNormalized2List(
-            alignedFaces,
+            alignedFacesData,
             i,
             mobileFaceNetFaceSize,
             mobileFaceNetFaceSize,
@@ -612,7 +613,7 @@ const mobileFaceNetEmbeddingSize = 192;
  *
  * The model used is MobileFaceNet, running in an ONNX runtime.
  */
-const computeEmbedding = async (
+const computeEmbeddings = async (
     faceData: Float32Array,
 ): Promise<FaceEmbedding[]> => {
     const outputData = await workerBridge.faceEmbeddings(faceData);
