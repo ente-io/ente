@@ -1,5 +1,5 @@
 import { Box, Point, boxFromBoundingBox } from "services/face/geom";
-import { FaceDetection } from "services/face/types";
+import type { FaceDetection } from "services/face/types";
 // TODO-ML: Do we need two separate Matrix libraries?
 //
 // Keeping this in a separate file so that we can audit this. If these can be

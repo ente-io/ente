@@ -460,6 +460,7 @@ class ServerFaceEmbeddings {
 
 class ServerFace {
     public faceID: string;
+    // TODO-ML: singular?
     public embeddings: number[];
     public detection: ServerDetection;
     public score: number;
@@ -536,7 +537,7 @@ function LocalFileMlDataToServerFileMl(
             } as Landmark);
         }
 
-        // TODO: Add client UA and version
+        // TODO-ML: Add client UA and version
         const newFaceObject = new ServerFace(
             faceID,
             Array.from(embedding),

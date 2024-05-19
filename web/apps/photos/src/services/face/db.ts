@@ -9,7 +9,8 @@ import {
     openDB,
 } from "idb";
 import isElectron from "is-electron";
-import { Face, MlFileData, Person } from "services/face/types";
+import type { Person } from "services/face/people";
+import type { Face, MlFileData } from "services/face/types";
 import {
     DEFAULT_ML_SEARCH_CONFIG,
     MAX_ML_SYNC_ERROR_COUNT,

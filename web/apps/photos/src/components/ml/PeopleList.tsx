@@ -5,7 +5,8 @@ import { Legend } from "components/PhotoViewer/styledComponents/Legend";
 import { t } from "i18next";
 import React, { useEffect, useState } from "react";
 import mlIDbStorage from "services/face/db";
-import { Face, Person, type MlFileData } from "services/face/types";
+import type { Person } from "services/face/people";
+import type { Face, MlFileData } from "services/face/types";
 import { EnteFile } from "types/file";
 
 const FaceChipContainer = styled("div")`

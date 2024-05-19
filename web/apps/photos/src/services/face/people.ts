@@ -1,9 +1,13 @@
 import log from "@/next/log";
 import mlIDbStorage from "services/face/db";
-import { Person } from "services/face/types";
 import { clusterFaces } from "./cluster";
-import { saveFaceCrop } from "./f-index";
-import { fetchImageBitmap, getLocalFile } from "./file";
+
+export interface Person {
+    id: number;
+    name?: string;
+    files: Array<number>;
+    displayFaceId?: string;
+}
 
 export const syncPeopleIndex = async () => {
     // TODO-ML(MR): Forced disable clustering. It doesn't currently work,
@@ -83,11 +87,13 @@ export const syncPeopleIndex = async () => {
                 : best,
         );
 
+        /* Generate face crop
         if (personFace && !personFace.crop?.cacheKey) {
             const file = await getLocalFile(personFace.fileId);
             const imageBitmap = await fetchImageBitmap(file);
             await saveFaceCrop(imageBitmap, personFace);
         }
+        */
 
         const person: Person = {
             id: index,

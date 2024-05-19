@@ -3,7 +3,7 @@ import log from "@/next/log";
 import * as chrono from "chrono-node";
 import { t } from "i18next";
 import mlIDbStorage from "services/face/db";
-import { Person } from "services/face/types";
+import type { Person } from "services/face/people";
 import { defaultMLVersion } from "services/machineLearning/machineLearningService";
 import { Collection } from "types/collection";
 import { EntityType, LocationTag, LocationTagData } from "types/entity";

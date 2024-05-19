@@ -5,11 +5,11 @@ import { workerBridge } from "@/next/worker/worker-bridge";
 import { euclidean } from "hdbscan";
 import { Matrix } from "ml-matrix";
 import { Box, Dimensions, Point, enlargeBox } from "services/face/geom";
-import {
+import type {
     Face,
     FaceAlignment,
     FaceDetection,
-    type MlFileData,
+    MlFileData,
 } from "services/face/types";
 import { defaultMLVersion } from "services/machineLearning/machineLearningService";
 import { getSimilarityTransformation } from "similarity-transformation";

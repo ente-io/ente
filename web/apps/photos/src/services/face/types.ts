@@ -34,13 +34,6 @@ export interface Face {
     personId?: number;
 }
 
-export interface Person {
-    id: number;
-    name?: string;
-    files: Array<number>;
-    displayFaceId?: string;
-}
-
 export interface MlFileData {
     fileId: number;
     faces?: Face[];
