@@ -160,12 +160,10 @@ const FaceCropImageView: React.FC<FaceCropImageViewProps> = ({ faceID }) => {
                 .then(async (data) => {
                     if (data) return data;
                     /*
-                    TODO(MR): Also, get this to work on web too.
-                cachedOrNew("face-crops", cacheKey, async () => {
-                return machineLearningService.regenerateFaceCrop(
-                    faceId,
-                );
-                })*/
+                    TODO(MR): regen if needed and get this to work on web too.
+                    cachedOrNew("face-crops", cacheKey, async () => {
+                        return regenerateFaceCrop(faceId);
+                    })*/
                     const cache = await blobCache("face-crops");
                     return await cache.get(faceID);
                 })

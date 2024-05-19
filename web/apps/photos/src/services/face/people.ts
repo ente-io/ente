@@ -111,4 +111,21 @@ export const syncPeopleIndex = async () => {
 
     // await mlIDbStorage.setIndexVersion("people", filesVersion);
 };
+
+    public async regenerateFaceCrop(token: string, faceID: string) {
+        await downloadManager.init(APPS.PHOTOS, { token });
+        return mlService.regenerateFaceCrop(faceID);
+    }
+
+export const regenerateFaceCrop = async (faceID: string) => {
+    const fileID = Number(faceID.split("-")[0]);
+    const personFace = await mlIDbStorage.getFace(fileID, faceID);
+    if (!personFace) {
+        throw Error("Face not found");
+    }
+
+    const file = await getLocalFile(personFace.fileId);
+    const imageBitmap = await fetchImageBitmap(file);
+    return await saveFaceCrop(imageBitmap, personFace);
+};
 */

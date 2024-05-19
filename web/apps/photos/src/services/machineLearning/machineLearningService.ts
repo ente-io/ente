@@ -6,13 +6,12 @@ import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worke
 import { CustomError, parseUploadErrorCodes } from "@ente/shared/error";
 import PQueue from "p-queue";
 import mlIDbStorage, { ML_SEARCH_CONFIG_NAME } from "services/face/db";
-import { fetchImageBitmap, getLocalFile } from "services/face/file";
 import { putFaceEmbedding } from "services/face/remote";
 import { MlFileData } from "services/face/types";
 import { getLocalFiles } from "services/fileService";
 import { EnteFile } from "types/file";
 import { isInternalUserForML } from "utils/user";
-import { indexFaces, saveFaceCrop } from "../face/f-index";
+import { indexFaces } from "../face/f-index";
 
 /**
  * TODO-ML(MR): What and why.
@@ -135,10 +134,6 @@ class MachineLearningService {
         const error = syncContext.error;
         const nOutOfSyncFiles = syncContext.outOfSyncFiles.length;
         return !error && nOutOfSyncFiles > 0;
-    }
-
-    public async regenerateFaceCrop(faceID: string) {
-        return regenerateFaceCrop(faceID);
     }
 
     private newMlData(fileId: number) {
@@ -407,15 +402,3 @@ export function logQueueStats(queue: PQueue, name: string) {
         console.error(`queuestats: ${name}: Error, `, error),
     );
 }
-
-export const regenerateFaceCrop = async (faceID: string) => {
-    const fileID = Number(faceID.split("-")[0]);
-    const personFace = await mlIDbStorage.getFace(fileID, faceID);
-    if (!personFace) {
-        throw Error("Face not found");
-    }
-
-    const file = await getLocalFile(personFace.fileId);
-    const imageBitmap = await fetchImageBitmap(file);
-    return await saveFaceCrop(imageBitmap, personFace);
-};
