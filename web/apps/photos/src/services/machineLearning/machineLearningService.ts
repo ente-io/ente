@@ -10,7 +10,8 @@ import PQueue from "p-queue";
 import { putEmbedding } from "services/embeddingService";
 import mlIDbStorage, { ML_SEARCH_CONFIG_NAME } from "services/face/db";
 import { fetchImageBitmap, getLocalFile } from "services/face/file";
-import { Face, FaceDetection, Landmark, MlFileData } from "services/face/types";
+import type { Point } from "services/face/geom";
+import { Face, FaceDetection, MlFileData } from "services/face/types";
 import { getLocalFiles } from "services/fileService";
 import { EnteFile } from "types/file";
 import { isInternalUserForML } from "utils/user";
@@ -483,9 +484,9 @@ class ServerFace {
 
 class ServerDetection {
     public box: ServerFaceBox;
-    public landmarks: Landmark[];
+    public landmarks: Point[];
 
-    public constructor(box: ServerFaceBox, landmarks: Landmark[]) {
+    public constructor(box: ServerFaceBox, landmarks: Point[]) {
         this.box = box;
         this.landmarks = landmarks;
     }
@@ -529,19 +530,12 @@ function LocalFileMlDataToServerFileMl(
         const box = detection.box;
         const landmarks = detection.landmarks;
         const newBox = new ServerFaceBox(box.x, box.y, box.width, box.height);
-        const newLandmarks: Landmark[] = [];
-        for (let j = 0; j < landmarks.length; j++) {
-            newLandmarks.push({
-                x: landmarks[j].x,
-                y: landmarks[j].y,
-            } as Landmark);
-        }
 
         // TODO-ML: Add client UA and version
         const newFaceObject = new ServerFace(
             faceID,
             Array.from(embedding),
-            new ServerDetection(newBox, newLandmarks),
+            new ServerDetection(newBox, landmarks),
             score,
             blur,
         );
