@@ -82,17 +82,17 @@ const fetchOrCreateImageBitmap = async (
 
 const indexFaces_ = async (enteFile: EnteFile, imageBitmap: ImageBitmap) => {
     const fileID = enteFile.id;
-    const { width, height } = imageBitmap;
+    const imageDimensions: Dimensions = imageBitmap;
     const mlFile: MlFileData = {
         fileId: fileID,
         mlVersion: defaultMLVersion,
-        imageDimensions: { width, height },
+        imageDimensions,
         errorCount: 0,
     };
 
     const faceDetections = await detectFaces(imageBitmap);
     const detectedFaces = faceDetections.map((detection) => ({
-        id: makeFaceID(fileID, detection, mlFile.imageDimensions),
+        id: makeFaceID(fileID, detection, imageDimensions),
         fileId: fileID,
         detection,
     }));
@@ -120,7 +120,11 @@ const indexFaces_ = async (enteFile: EnteFile, imageBitmap: ImageBitmap) => {
         const embeddings = await computeEmbeddings(alignedFacesData);
         mlFile.faces.forEach((f, i) => (f.embedding = embeddings[i]));
 
-        convertFaceDetectionsToRelative(mlFile);
+        // TODO-ML: Skip if somehow already relative. But why would it be?
+        // if (face.detection.box.x + face.detection.box.width < 2) continue;
+        mlFile.faces.forEach((face) => {
+            face.detection = relativeDetection(face.detection, imageDimensions);
+        });
     }
 
     return mlFile;
@@ -629,18 +633,9 @@ const computeEmbeddings = async (
     return embeddings;
 };
 
-const convertFaceDetectionsToRelative = (mlFile: MlFileData) => {
-    for (let i = 0; i < mlFile.faces.length; i++) {
-        const face = mlFile.faces[i];
-        // Skip if somehow already relative.
-        if (face.detection.box.x + face.detection.box.width < 2) continue;
-        face.detection = relativeDetection(
-            face.detection,
-            mlFile.imageDimensions,
-        );
-    }
-};
-
+/**
+ * Convert the coordinates to between 0-1, normalized by the image's dimensions.
+ */
 const relativeDetection = (
     faceDetection: FaceDetection,
     { width, height }: Dimensions,
