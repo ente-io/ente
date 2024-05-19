@@ -73,14 +73,19 @@ func (c *Controller) deleteEmbedding(qItem repo.QueueItem) {
 	}
 	ctxLogger.Infof("Deleting from all datacenters %v", datacenters)
 	for i := range datacenters {
-		err = c.ObjectCleanupController.DeleteAllObjectsWithPrefix(prefix, datacenters[i])
+		dc := datacenters[i]
+		err = c.ObjectCleanupController.DeleteAllObjectsWithPrefix(prefix, dc)
 		if err != nil {
-			ctxLogger.WithError(err).Errorf("Failed to delete all objects from %s", datacenters[i])
+			ctxLogger.WithError(err).
+				WithField("dc", dc).
+				Errorf("Failed to delete all objects from %s", datacenters[i])
 			return
 		} else {
 			removeErr := c.Repo.RemoveDatacenter(context.Background(), fileID, datacenters[i])
 			if removeErr != nil {
-				ctxLogger.WithError(removeErr).Error("Failed to remove datacenter from db")
+				ctxLogger.WithError(removeErr).
+					WithField("dc", dc).
+					Error("Failed to remove datacenter from db")
 				return
 			}
 		}
