@@ -13,33 +13,12 @@ export interface Dimensions {
     height: number;
 }
 
-export interface IBoundingBox {
-    left: number;
-    top: number;
-    right: number;
-    bottom: number;
-}
-
 export interface IRect {
     x: number;
     y: number;
     width: number;
     height: number;
 }
-
-export const boxFromBoundingBox = ({
-    left,
-    top,
-    right,
-    bottom,
-}: IBoundingBox) => {
-    return new Box({
-        x: left,
-        y: top,
-        width: right - left,
-        height: bottom - top,
-    });
-};
 
 export class Box implements IRect {
     public x: number;
