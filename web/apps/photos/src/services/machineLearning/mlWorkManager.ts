@@ -9,7 +9,6 @@ import { createFaceComlinkWorker } from "services/face";
 import mlIDbStorage from "services/face/db";
 import type { DedicatedMLWorker } from "services/face/face.worker";
 import { EnteFile } from "types/file";
-import { logQueueStats } from "./machineLearningService";
 
 export type JobState = "Scheduled" | "Running" | "NotScheduled";
 
@@ -309,3 +308,15 @@ class MLWorkManager {
 }
 
 export default new MLWorkManager();
+
+export function logQueueStats(queue: PQueue, name: string) {
+    queue.on("active", () =>
+        log.info(
+            `queuestats: ${name}: Active, Size: ${queue.size} Pending: ${queue.pending}`,
+        ),
+    );
+    queue.on("idle", () => log.info(`queuestats: ${name}: Idle`));
+    queue.on("error", (error) =>
+        console.error(`queuestats: ${name}: Error, `, error),
+    );
+}

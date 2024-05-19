@@ -9,7 +9,8 @@ import {
     openDB,
 } from "idb";
 import isElectron from "is-electron";
-import { Face, MlFileData, Person } from "services/face/types";
+import type { Person } from "services/face/people";
+import type { MlFileData } from "services/face/types";
 import {
     DEFAULT_ML_SEARCH_CONFIG,
     MAX_ML_SYNC_ERROR_COUNT,
@@ -23,6 +24,18 @@ export interface IndexStatus {
     peopleIndexSynced: boolean;
 }
 
+/**
+ * TODO(MR): Transient type with an intersection of values that both existing
+ * and new types during the migration will have. Eventually we'll store the the
+ * server ML data shape here exactly.
+ */
+export interface MinimalPersistedFileData {
+    fileId: number;
+    mlVersion: number;
+    errorCount: number;
+    faces?: { personId?: number; id: string }[];
+}
+
 interface Config {}
 
 export const ML_SEARCH_CONFIG_NAME = "ml-search";
@@ -31,7 +44,7 @@ const MLDATA_DB_NAME = "mldata";
 interface MLDb extends DBSchema {
     files: {
         key: number;
-        value: MlFileData;
+        value: MinimalPersistedFileData;
         indexes: { mlVersion: [number, number] };
     };
     people: {
@@ -211,38 +224,6 @@ class MLIDbStorage {
         await this.db;
     }
 
-    public async getAllFileIds() {
-        const db = await this.db;
-        return db.getAllKeys("files");
-    }
-
-    public async putAllFilesInTx(mlFiles: Array<MlFileData>) {
-        const db = await this.db;
-        const tx = db.transaction("files", "readwrite");
-        await Promise.all(mlFiles.map((mlFile) => tx.store.put(mlFile)));
-        await tx.done;
-    }
-
-    public async removeAllFilesInTx(fileIds: Array<number>) {
-        const db = await this.db;
-        const tx = db.transaction("files", "readwrite");
-
-        await Promise.all(fileIds.map((fileId) => tx.store.delete(fileId)));
-        await tx.done;
-    }
-
-    public async newTransaction<
-        Name extends StoreNames<MLDb>,
-        Mode extends IDBTransactionMode = "readonly",
-    >(storeNames: Name, mode?: Mode) {
-        const db = await this.db;
-        return db.transaction(storeNames, mode);
-    }
-
-    public async commit(tx: IDBPTransaction<MLDb>) {
-        return tx.done;
-    }
-
     public async getAllFileIdsForUpdate(
         tx: IDBPTransaction<MLDb, ["files"], "readwrite">,
     ) {
@@ -276,14 +257,9 @@ class MLIDbStorage {
         return fileIds;
     }
 
-    public async getFile(fileId: number) {
+    public async getFile(fileId: number): Promise<MinimalPersistedFileData> {
         const db = await this.db;
         return db.get("files", fileId);
-    }
-
-    public async getAllFiles() {
-        const db = await this.db;
-        return db.getAll("files");
     }
 
     public async putFile(mlFile: MlFileData) {
@@ -293,7 +269,7 @@ class MLIDbStorage {
 
     public async upsertFileInTx(
         fileId: number,
-        upsert: (mlFile: MlFileData) => MlFileData,
+        upsert: (mlFile: MinimalPersistedFileData) => MinimalPersistedFileData,
     ) {
         const db = await this.db;
         const tx = db.transaction("files", "readwrite");
@@ -306,7 +282,7 @@ class MLIDbStorage {
     }
 
     public async putAllFiles(
-        mlFiles: Array<MlFileData>,
+        mlFiles: MinimalPersistedFileData[],
         tx: IDBPTransaction<MLDb, ["files"], "readwrite">,
     ) {
         await Promise.all(mlFiles.map((mlFile) => tx.store.put(mlFile)));
@@ -319,44 +295,6 @@ class MLIDbStorage {
         await Promise.all(fileIds.map((fileId) => tx.store.delete(fileId)));
     }
 
-    public async getFace(fileID: number, faceId: string) {
-        const file = await this.getFile(fileID);
-        const face = file.faces.filter((f) => f.id === faceId);
-        return face[0];
-    }
-
-    public async getAllFacesMap() {
-        const startTime = Date.now();
-        const db = await this.db;
-        const allFiles = await db.getAll("files");
-        const allFacesMap = new Map<number, Array<Face>>();
-        allFiles.forEach(
-            (mlFileData) =>
-                mlFileData.faces &&
-                allFacesMap.set(mlFileData.fileId, mlFileData.faces),
-        );
-        log.info("getAllFacesMap", Date.now() - startTime, "ms");
-
-        return allFacesMap;
-    }
-
-    public async updateFaces(allFacesMap: Map<number, Face[]>) {
-        const startTime = Date.now();
-        const db = await this.db;
-        const tx = db.transaction("files", "readwrite");
-        let cursor = await tx.store.openCursor();
-        while (cursor) {
-            if (allFacesMap.has(cursor.key)) {
-                const mlFileData = { ...cursor.value };
-                mlFileData.faces = allFacesMap.get(cursor.key);
-                cursor.update(mlFileData);
-            }
-            cursor = await cursor.continue();
-        }
-        await tx.done;
-        log.info("updateFaces", Date.now() - startTime, "ms");
-    }
-
     public async getPerson(id: number) {
         const db = await this.db;
         return db.get("people", id);
@@ -365,21 +303,6 @@ class MLIDbStorage {
     public async getAllPeople() {
         const db = await this.db;
         return db.getAll("people");
-    }
-
-    public async putPerson(person: Person) {
-        const db = await this.db;
-        return db.put("people", person);
-    }
-
-    public async clearAllPeople() {
-        const db = await this.db;
-        return db.clear("people");
-    }
-
-    public async getIndexVersion(index: string) {
-        const db = await this.db;
-        return db.get("versions", index);
     }
 
     public async incrementIndexVersion(index: StoreNames<MLDb>) {
@@ -394,11 +317,6 @@ class MLIDbStorage {
         await tx.done;
 
         return version;
-    }
-
-    public async setIndexVersion(index: string, version: number) {
-        const db = await this.db;
-        return db.put("versions", version, index);
     }
 
     public async getConfig<T extends Config>(name: string, def: T) {
@@ -463,66 +381,6 @@ class MLIDbStorage {
                 peopleIndexVersionExists &&
                 peopleIndexVersion === filesIndexVersion,
         };
-    }
-
-    // for debug purpose
-    public async getAllMLData() {
-        const db = await this.db;
-        const tx = db.transaction(db.objectStoreNames, "readonly");
-        const allMLData: any = {};
-        for (const store of tx.objectStoreNames) {
-            const keys = await tx.objectStore(store).getAllKeys();
-            const data = await tx.objectStore(store).getAll();
-
-            allMLData[store] = {};
-            for (let i = 0; i < keys.length; i++) {
-                allMLData[store][keys[i]] = data[i];
-            }
-        }
-        await tx.done;
-
-        const files = allMLData["files"];
-        for (const fileId of Object.keys(files)) {
-            const fileData = files[fileId];
-            fileData.faces?.forEach(
-                (f) => (f.embedding = Array.from(f.embedding)),
-            );
-        }
-
-        return allMLData;
-    }
-
-    // for debug purpose, this will overwrite all data
-    public async putAllMLData(allMLData: Map<string, any>) {
-        const db = await this.db;
-        const tx = db.transaction(db.objectStoreNames, "readwrite");
-        for (const store of tx.objectStoreNames) {
-            const records = allMLData[store];
-            if (!records) {
-                continue;
-            }
-            const txStore = tx.objectStore(store);
-
-            if (store === "files") {
-                const files = records;
-                for (const fileId of Object.keys(files)) {
-                    const fileData = files[fileId];
-                    fileData.faces?.forEach(
-                        (f) => (f.embedding = Float32Array.from(f.embedding)),
-                    );
-                }
-            }
-
-            await txStore.clear();
-            for (const key of Object.keys(records)) {
-                if (txStore.keyPath) {
-                    txStore.put(records[key]);
-                } else {
-                    txStore.put(records[key], key);
-                }
-            }
-        }
-        await tx.done;
     }
 }
 

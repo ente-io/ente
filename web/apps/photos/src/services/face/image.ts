@@ -1,11 +1,4 @@
-import { FILE_TYPE } from "@/media/file-type";
-import { decodeLivePhoto } from "@/media/live-photo";
 import { Matrix, inverse } from "ml-matrix";
-import DownloadManager from "services/download";
-import { FaceAlignment } from "services/face/types";
-import { getLocalFiles } from "services/fileService";
-import { EnteFile } from "types/file";
-import { getRenderableImage } from "utils/file";
 
 /**
  * Clamp {@link value} to between {@link min} and {@link max}, inclusive.
@@ -13,48 +6,83 @@ import { getRenderableImage } from "utils/file";
 export const clamp = (value: number, min: number, max: number) =>
     Math.min(max, Math.max(min, value));
 
-export async function getLocalFile(fileId: number) {
-    const localFiles = await getLocalFiles();
-    return localFiles.find((f) => f.id === fileId);
-}
-
-export const fetchImageBitmap = async (file: EnteFile) =>
-    fetchRenderableBlob(file).then(createImageBitmap);
-
-async function fetchRenderableBlob(file: EnteFile) {
-    const fileStream = await DownloadManager.getFile(file);
-    const fileBlob = await new Response(fileStream).blob();
-    if (file.metadata.fileType === FILE_TYPE.IMAGE) {
-        return await getRenderableImage(file.metadata.title, fileBlob);
-    } else {
-        const { imageFileName, imageData } = await decodeLivePhoto(
-            file.metadata.title,
-            fileBlob,
-        );
-        return await getRenderableImage(imageFileName, new Blob([imageData]));
-    }
-}
-
-export async function getLocalFileImageBitmap(
-    enteFile: EnteFile,
-    localFile: globalThis.File,
-) {
-    let fileBlob = localFile as Blob;
-    fileBlob = await getRenderableImage(enteFile.metadata.title, fileBlob);
-    return createImageBitmap(fileBlob);
-}
-
 /**
  * Returns the pixel value (RGB) at the given coordinates ({@link fx},
- * {@link fy}) using bicubic interpolation.
+ * {@link fy}) using bilinear interpolation.
  */
-export function pixelRGBBicubic(
+export function pixelRGBBilinear(
     fx: number,
     fy: number,
     imageData: Uint8ClampedArray,
     imageWidth: number,
     imageHeight: number,
 ) {
+    // Clamp to image boundaries.
+    fx = clamp(fx, 0, imageWidth - 1);
+    fy = clamp(fy, 0, imageHeight - 1);
+
+    // Get the surrounding coordinates and their weights.
+    const x0 = Math.floor(fx);
+    const x1 = Math.ceil(fx);
+    const y0 = Math.floor(fy);
+    const y1 = Math.ceil(fy);
+    const dx = fx - x0;
+    const dy = fy - y0;
+    const dx1 = 1.0 - dx;
+    const dy1 = 1.0 - dy;
+
+    // Get the original pixels.
+    const pixel1 = pixelRGBA(imageData, imageWidth, imageHeight, x0, y0);
+    const pixel2 = pixelRGBA(imageData, imageWidth, imageHeight, x1, y0);
+    const pixel3 = pixelRGBA(imageData, imageWidth, imageHeight, x0, y1);
+    const pixel4 = pixelRGBA(imageData, imageWidth, imageHeight, x1, y1);
+
+    const bilinear = (val1: number, val2: number, val3: number, val4: number) =>
+        Math.round(
+            val1 * dx1 * dy1 +
+                val2 * dx * dy1 +
+                val3 * dx1 * dy +
+                val4 * dx * dy,
+        );
+
+    // Return interpolated pixel colors.
+    return {
+        r: bilinear(pixel1.r, pixel2.r, pixel3.r, pixel4.r),
+        g: bilinear(pixel1.g, pixel2.g, pixel3.g, pixel4.g),
+        b: bilinear(pixel1.b, pixel2.b, pixel3.b, pixel4.b),
+    };
+}
+
+const pixelRGBA = (
+    imageData: Uint8ClampedArray,
+    width: number,
+    height: number,
+    x: number,
+    y: number,
+) => {
+    if (x < 0 || x >= width || y < 0 || y >= height) {
+        return { r: 0, g: 0, b: 0, a: 0 };
+    }
+    const index = (y * width + x) * 4;
+    return {
+        r: imageData[index],
+        g: imageData[index + 1],
+        b: imageData[index + 2],
+        a: imageData[index + 3],
+    };
+};
+
+/**
+ * Returns the pixel value (RGB) at the given coordinates ({@link fx},
+ * {@link fy}) using bicubic interpolation.
+ */
+const pixelRGBBicubic = (
+    fx: number,
+    fy: number,
+    imageData: Uint8ClampedArray,
+    imageWidth: number,
+    imageHeight: number,
+) => {
     // Clamp to image boundaries.
     fx = clamp(fx, 0, imageWidth - 1);
     fy = clamp(fy, 0, imageHeight - 1);
@@ -171,97 +199,28 @@ export function pixelRGBBicubic(
     // const c3 = cubic(dy, ip3, ic3, in3, ia3);
 
     return { r: c0, g: c1, b: c2 };
-}
-
-const pixelRGBA = (
-    imageData: Uint8ClampedArray,
-    width: number,
-    height: number,
-    x: number,
-    y: number,
-) => {
-    if (x < 0 || x >= width || y < 0 || y >= height) {
-        return { r: 0, g: 0, b: 0, a: 0 };
-    }
-    const index = (y * width + x) * 4;
-    return {
-        r: imageData[index],
-        g: imageData[index + 1],
-        b: imageData[index + 2],
-        a: imageData[index + 3],
-    };
 };
 
 /**
- * Returns the pixel value (RGB) at the given coordinates ({@link fx},
- * {@link fy}) using bilinear interpolation.
+ * Transform {@link inputData} starting at {@link inputStartIndex}.
  */
-export function pixelRGBBilinear(
-    fx: number,
-    fy: number,
-    imageData: Uint8ClampedArray,
-    imageWidth: number,
-    imageHeight: number,
-) {
-    // Clamp to image boundaries.
-    fx = clamp(fx, 0, imageWidth - 1);
-    fy = clamp(fy, 0, imageHeight - 1);
-
-    // Get the surrounding coordinates and their weights.
-    const x0 = Math.floor(fx);
-    const x1 = Math.ceil(fx);
-    const y0 = Math.floor(fy);
-    const y1 = Math.ceil(fy);
-    const dx = fx - x0;
-    const dy = fy - y0;
-    const dx1 = 1.0 - dx;
-    const dy1 = 1.0 - dy;
-
-    // Get the original pixels.
-    const pixel1 = pixelRGBA(imageData, imageWidth, imageHeight, x0, y0);
-    const pixel2 = pixelRGBA(imageData, imageWidth, imageHeight, x1, y0);
-    const pixel3 = pixelRGBA(imageData, imageWidth, imageHeight, x0, y1);
-    const pixel4 = pixelRGBA(imageData, imageWidth, imageHeight, x1, y1);
-
-    const bilinear = (val1: number, val2: number, val3: number, val4: number) =>
-        Math.round(
-            val1 * dx1 * dy1 +
-                val2 * dx * dy1 +
-                val3 * dx1 * dy +
-                val4 * dx * dy,
-        );
-
-    // Return interpolated pixel colors.
-    return {
-        r: bilinear(pixel1.r, pixel2.r, pixel3.r, pixel4.r),
-        g: bilinear(pixel1.g, pixel2.g, pixel3.g, pixel4.g),
-        b: bilinear(pixel1.b, pixel2.b, pixel3.b, pixel4.b),
-    };
-}
-
-export function warpAffineFloat32List(
+export const warpAffineFloat32List = (
     imageBitmap: ImageBitmap,
-    faceAlignment: FaceAlignment,
+    faceAlignmentAffineMatrix: number[][],
     faceSize: number,
     inputData: Float32Array,
     inputStartIndex: number,
-): void {
+): void => {
+    const { width, height } = imageBitmap;
+
     // Get the pixel data.
-    const offscreenCanvas = new OffscreenCanvas(
-        imageBitmap.width,
-        imageBitmap.height,
-    );
+    const offscreenCanvas = new OffscreenCanvas(width, height);
     const ctx = offscreenCanvas.getContext("2d");
-    ctx.drawImage(imageBitmap, 0, 0, imageBitmap.width, imageBitmap.height);
-    const imageData = ctx.getImageData(
-        0,
-        0,
-        imageBitmap.width,
-        imageBitmap.height,
-    );
+    ctx.drawImage(imageBitmap, 0, 0, width, height);
+    const imageData = ctx.getImageData(0, 0, width, height);
     const pixelData = imageData.data;
 
-    const transformationMatrix = faceAlignment.affineMatrix.map((row) =>
+    const transformationMatrix = faceAlignmentAffineMatrix.map((row) =>
         row.map((val) => (val != 1.0 ? val * faceSize : 1.0)),
     ); // 3x3
 
@@ -280,7 +239,7 @@ export function warpAffineFloat32List(
 
     for (let yTrans = 0; yTrans < faceSize; ++yTrans) {
         for (let xTrans = 0; xTrans < faceSize; ++xTrans) {
-            // Perform inverse affine transformation
+            // Perform inverse affine transformation.
             const xOrigin =
                 a00Prime * (xTrans - b00) + a01Prime * (yTrans - b10);
             const yOrigin =
@@ -291,34 +250,32 @@ export function warpAffineFloat32List(
                 xOrigin,
                 yOrigin,
                 pixelData,
-                imageBitmap.width,
-                imageBitmap.height,
+                width,
+                height,
             );
 
-            // Set the pixel in the input data
+            // Set the pixel in the input data.
             const index = (yTrans * faceSize + xTrans) * 3;
-            inputData[inputStartIndex + index] =
-                normalizePixelBetweenMinus1And1(r);
-            inputData[inputStartIndex + index + 1] =
-                normalizePixelBetweenMinus1And1(g);
-            inputData[inputStartIndex + index + 2] =
-                normalizePixelBetweenMinus1And1(b);
+            inputData[inputStartIndex + index] = rgbToBipolarFloat(r);
+            inputData[inputStartIndex + index + 1] = rgbToBipolarFloat(g);
+            inputData[inputStartIndex + index + 2] = rgbToBipolarFloat(b);
         }
     }
-}
+};
 
-const normalizePixelBetweenMinus1And1 = (pixelValue: number) =>
-    pixelValue / 127.5 - 1.0;
+/** Convert a RGB component 0-255 to a floating point value between -1 and 1. */
+const rgbToBipolarFloat = (pixelValue: number) => pixelValue / 127.5 - 1.0;
 
-const unnormalizePixelFromBetweenMinus1And1 = (pixelValue: number) =>
+/** Convert a floating point value between -1 and 1 to a RGB component 0-255. */
+const bipolarFloatToRGB = (pixelValue: number) =>
     clamp(Math.round((pixelValue + 1.0) * 127.5), 0, 255);
 
-export function createGrayscaleIntMatrixFromNormalized2List(
+export const grayscaleIntMatrixFromNormalized2List = (
     imageList: Float32Array,
     faceNumber: number,
     width: number,
     height: number,
-): number[][] {
+): number[][] => {
     const startIndex = faceNumber * width * height * 3;
     return Array.from({ length: height }, (_, y) =>
         Array.from({ length: width }, (_, x) => {
@@ -326,22 +283,13 @@ export function createGrayscaleIntMatrixFromNormalized2List(
             const pixelIndex = startIndex + 3 * (y * width + x);
             return clamp(
                 Math.round(
-                    0.299 *
-                        unnormalizePixelFromBetweenMinus1And1(
-                            imageList[pixelIndex],
-                        ) +
-                        0.587 *
-                            unnormalizePixelFromBetweenMinus1And1(
-                                imageList[pixelIndex + 1],
-                            ) +
-                        0.114 *
-                            unnormalizePixelFromBetweenMinus1And1(
-                                imageList[pixelIndex + 2],
-                            ),
+                    0.299 * bipolarFloatToRGB(imageList[pixelIndex]) +
+                        0.587 * bipolarFloatToRGB(imageList[pixelIndex + 1]) +
+                        0.114 * bipolarFloatToRGB(imageList[pixelIndex + 2]),
                 ),
                 0,
                 255,
             );
         }),
     );
-}
+};

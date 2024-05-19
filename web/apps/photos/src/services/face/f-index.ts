@@ -1,26 +1,29 @@
 import { FILE_TYPE } from "@/media/file-type";
-import { openCache } from "@/next/blob-cache";
+import { blobCache } from "@/next/blob-cache";
 import log from "@/next/log";
 import { workerBridge } from "@/next/worker/worker-bridge";
 import { euclidean } from "hdbscan";
 import { Matrix } from "ml-matrix";
-import { Box, Dimensions, Point, enlargeBox } from "services/face/geom";
 import {
+    Box,
+    Dimensions,
+    Point,
+    enlargeBox,
+    roundBox,
+} from "services/face/geom";
+import type {
     Face,
     FaceAlignment,
-    FaceCrop,
     FaceDetection,
-    FaceEmbedding,
-    type MlFileData,
+    MlFileData,
 } from "services/face/types";
 import { defaultMLVersion } from "services/machineLearning/machineLearningService";
 import { getSimilarityTransformation } from "similarity-transformation";
 import type { EnteFile } from "types/file";
+import { fetchImageBitmap, getLocalFileImageBitmap } from "./file";
 import {
     clamp,
-    createGrayscaleIntMatrixFromNormalized2List,
-    fetchImageBitmap,
-    getLocalFileImageBitmap,
+    grayscaleIntMatrixFromNormalized2List,
     pixelRGBBilinear,
     warpAffineFloat32List,
 } from "./image";
@@ -85,47 +88,49 @@ const fetchOrCreateImageBitmap = async (
 
 const indexFaces_ = async (enteFile: EnteFile, imageBitmap: ImageBitmap) => {
     const fileID = enteFile.id;
-    const { width, height } = imageBitmap;
+    const imageDimensions: Dimensions = imageBitmap;
     const mlFile: MlFileData = {
         fileId: fileID,
         mlVersion: defaultMLVersion,
-        imageDimensions: { width, height },
+        imageDimensions,
         errorCount: 0,
     };
 
     const faceDetections = await detectFaces(imageBitmap);
     const detectedFaces = faceDetections.map((detection) => ({
-        id: makeFaceID(fileID, detection, mlFile.imageDimensions),
+        id: makeFaceID(fileID, detection, imageDimensions),
         fileId: fileID,
         detection,
     }));
     mlFile.faces = detectedFaces;
 
     if (detectedFaces.length > 0) {
-        await Promise.all(
-            detectedFaces.map((face) => saveFaceCrop(imageBitmap, face)),
-        );
+        const alignments: FaceAlignment[] = [];
 
-        // Execute the face alignment calculations
         for (const face of mlFile.faces) {
-            face.alignment = faceAlignment(face.detection);
+            const alignment = faceAlignment(face.detection);
+            face.alignment = alignment;
+            alignments.push(alignment);
+
+            await saveFaceCrop(imageBitmap, face);
         }
 
-        // Extract face images and convert to Float32Array
-        const faceAlignments = mlFile.faces.map((f) => f.alignment);
-        const alignedFacesData = await extractFaceImagesToFloat32(
-            faceAlignments,
-            mobileFaceNetFaceSize,
+        const alignedFacesData = convertToMobileFaceNetInput(
             imageBitmap,
+            alignments,
         );
 
         const blurValues = detectBlur(alignedFacesData, mlFile.faces);
         mlFile.faces.forEach((f, i) => (f.blurValue = blurValues[i]));
 
-        const embeddings = await faceEmbeddings(alignedFacesData);
+        const embeddings = await computeEmbeddings(alignedFacesData);
         mlFile.faces.forEach((f, i) => (f.embedding = embeddings[i]));
 
-        convertFaceDetectionsToRelative(mlFile);
+        // TODO-ML: Skip if somehow already relative. But why would it be?
+        // if (face.detection.box.x + face.detection.box.width < 2) continue;
+        mlFile.faces.forEach((face) => {
+            face.detection = relativeDetection(face.detection, imageDimensions);
+        });
     }
 
     return mlFile;
@@ -170,8 +175,7 @@ const convertToYOLOInputFloat32ChannelsFirst = (imageBitmap: ImageBitmap) => {
     const requiredWidth = 640;
     const requiredHeight = 640;
 
-    const width = imageBitmap.width;
-    const height = imageBitmap.height;
+    const { width, height } = imageBitmap;
 
     // Create an OffscreenCanvas and set its size.
     const offscreenCanvas = new OffscreenCanvas(width, height);
@@ -405,37 +409,39 @@ const faceAlignmentUsingSimilarityTransform = (
     return { affineMatrix, center, size, rotation };
 };
 
-async function extractFaceImagesToFloat32(
-    faceAlignments: Array<FaceAlignment>,
-    faceSize: number,
-    image: ImageBitmap,
-): Promise<Float32Array> {
+const convertToMobileFaceNetInput = (
+    imageBitmap: ImageBitmap,
+    faceAlignments: FaceAlignment[],
+): Float32Array => {
+    const faceSize = mobileFaceNetFaceSize;
     const faceData = new Float32Array(
         faceAlignments.length * faceSize * faceSize * 3,
     );
     for (let i = 0; i < faceAlignments.length; i++) {
-        const alignedFace = faceAlignments[i];
+        const { affineMatrix } = faceAlignments[i];
         const faceDataOffset = i * faceSize * faceSize * 3;
         warpAffineFloat32List(
-            image,
-            alignedFace,
+            imageBitmap,
+            affineMatrix,
             faceSize,
             faceData,
             faceDataOffset,
         );
     }
     return faceData;
-}
+};
 
 /**
  * Laplacian blur detection.
  *
  * Return an array of detected blur values, one for each face in {@link faces}.
+ * The face data is taken from the slice of {@link alignedFacesData}
+ * corresponding to each face of {@link faces}.
  */
-const detectBlur = (alignedFaces: Float32Array, faces: Face[]): number[] =>
+const detectBlur = (alignedFacesData: Float32Array, faces: Face[]): number[] =>
     faces.map((face, i) => {
-        const faceImage = createGrayscaleIntMatrixFromNormalized2List(
-            alignedFaces,
+        const faceImage = grayscaleIntMatrixFromNormalized2List(
+            alignedFacesData,
             i,
             mobileFaceNetFaceSize,
             mobileFaceNetFaceSize,
@@ -609,19 +615,20 @@ const matrixVariance = (matrix: number[][]): number => {
 };
 
 const mobileFaceNetFaceSize = 112;
+const mobileFaceNetEmbeddingSize = 192;
 
 /**
  * Compute embeddings for the given {@link faceData}.
  *
  * The model used is MobileFaceNet, running in an ONNX runtime.
  */
-const faceEmbeddings = async (
+const computeEmbeddings = async (
     faceData: Float32Array,
-): Promise<Array<FaceEmbedding>> => {
+): Promise<Float32Array[]> => {
     const outputData = await workerBridge.faceEmbeddings(faceData);
 
-    const embeddingSize = 192;
-    const embeddings = new Array<FaceEmbedding>(
+    const embeddingSize = mobileFaceNetEmbeddingSize;
+    const embeddings = new Array<Float32Array>(
         outputData.length / embeddingSize,
     );
     for (let i = 0; i < embeddings.length; i++) {
@@ -632,18 +639,9 @@ const faceEmbeddings = async (
     return embeddings;
 };
 
-const convertFaceDetectionsToRelative = (mlFile: MlFileData) => {
-    for (let i = 0; i < mlFile.faces.length; i++) {
-        const face = mlFile.faces[i];
-        // Skip if somehow already relative.
-        if (face.detection.box.x + face.detection.box.width < 2) continue;
-        face.detection = relativeDetection(
-            face.detection,
-            mlFile.imageDimensions,
-        );
-    }
-};
-
+/**
+ * Convert the coordinates to between 0-1, normalized by the image's dimensions.
+ */
 const relativeDetection = (
     faceDetection: FaceDetection,
     { width, height }: Dimensions,
@@ -663,14 +661,12 @@ const relativeDetection = (
 };
 
 export const saveFaceCrop = async (imageBitmap: ImageBitmap, face: Face) => {
-    const faceCrop = getFaceCrop(imageBitmap, face.detection);
+    const faceCrop = extractFaceCrop(imageBitmap, face.alignment);
+    const blob = await imageBitmapToBlob(faceCrop);
+    faceCrop.close();
 
-    const blob = await imageBitmapToBlob(faceCrop.image);
-
-    const cache = await openCache("face-crops");
+    const cache = await blobCache("face-crops");
     await cache.put(face.id, blob);
-
-    faceCrop.image.close();
 
     return blob;
 };
@@ -681,67 +677,43 @@ const imageBitmapToBlob = (imageBitmap: ImageBitmap) => {
     return canvas.convertToBlob({ type: "image/jpeg", quality: 0.8 });
 };
 
-const getFaceCrop = (
+const extractFaceCrop = (
     imageBitmap: ImageBitmap,
-    faceDetection: FaceDetection,
-): FaceCrop => {
-    const alignment = faceAlignment(faceDetection);
+    alignment: FaceAlignment,
+): ImageBitmap => {
+    // TODO-ML: Do we need to round twice?
+    const alignmentBox = roundBox(
+        new Box({
+            x: alignment.center.x - alignment.size / 2,
+            y: alignment.center.y - alignment.size / 2,
+            width: alignment.size,
+            height: alignment.size,
+        }),
+    );
 
     const padding = 0.25;
-    const maxSize = 256;
-
-    const alignmentBox = new Box({
-        x: alignment.center.x - alignment.size / 2,
-        y: alignment.center.y - alignment.size / 2,
-        width: alignment.size,
-        height: alignment.size,
-    }).round();
     const scaleForPadding = 1 + padding * 2;
-    const paddedBox = enlargeBox(alignmentBox, scaleForPadding).round();
-    const faceImageBitmap = cropWithRotation(imageBitmap, paddedBox, 0, {
-        width: maxSize,
-        height: maxSize,
-    });
+    const paddedBox = roundBox(enlargeBox(alignmentBox, scaleForPadding));
 
-    return {
-        image: faceImageBitmap,
-        imageBox: paddedBox,
-    };
+    // TODO-ML: The rotation doesn't seem to be used? it's set to 0.
+    return cropWithRotation(imageBitmap, paddedBox, 0, 256);
 };
 
-export function cropWithRotation(
+const cropWithRotation = (
     imageBitmap: ImageBitmap,
     cropBox: Box,
-    rotation?: number,
-    maxSize?: Dimensions,
-    minSize?: Dimensions,
-) {
-    const box = cropBox.round();
+    rotation: number,
+    maxDimension: number,
+) => {
+    const box = roundBox(cropBox);
 
     const outputSize = { width: box.width, height: box.height };
-    if (maxSize) {
-        const minScale = Math.min(
-            maxSize.width / box.width,
-            maxSize.height / box.height,
-        );
-        if (minScale < 1) {
-            outputSize.width = Math.round(minScale * box.width);
-            outputSize.height = Math.round(minScale * box.height);
-        }
-    }
 
-    if (minSize) {
-        const maxScale = Math.max(
-            minSize.width / box.width,
-            minSize.height / box.height,
-        );
-        if (maxScale > 1) {
-            outputSize.width = Math.round(maxScale * box.width);
-            outputSize.height = Math.round(maxScale * box.height);
-        }
+    const scale = Math.min(maxDimension / box.width, maxDimension / box.height);
+    if (scale < 1) {
+        outputSize.width = Math.round(scale * box.width);
+        outputSize.height = Math.round(scale * box.height);
     }
-
-    // log.info({ imageBitmap, box, outputSize });
 
     const offscreen = new OffscreenCanvas(outputSize.width, outputSize.height);
     const offscreenCtx = offscreen.getContext("2d");
@@ -773,4 +745,4 @@ export function cropWithRotation(
     );
 
     return offscreen.transferToImageBitmap();
-}
+};
