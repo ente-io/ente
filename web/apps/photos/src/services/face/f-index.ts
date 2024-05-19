@@ -681,6 +681,7 @@ const extractFaceCrop = (
     imageBitmap: ImageBitmap,
     alignment: FaceAlignment,
 ): ImageBitmap => {
+    // TODO-ML: Do we need to round twice?
     const alignmentBox = roundBox(
         new Box({
             x: alignment.center.x - alignment.size / 2,

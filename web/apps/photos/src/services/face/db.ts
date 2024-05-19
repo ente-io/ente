@@ -283,12 +283,6 @@ class MLIDbStorage {
         await Promise.all(fileIds.map((fileId) => tx.store.delete(fileId)));
     }
 
-    public async getFace(fileID: number, faceId: string) {
-        const file = await this.getFile(fileID);
-        const face = file.faces.filter((f) => f.id === faceId);
-        return face[0];
-    }
-
     public async getPerson(id: number) {
         const db = await this.db;
         return db.get("people", id);
