@@ -30,7 +30,9 @@ export interface IndexStatus {
  * server ML data shape here exactly.
  */
 export interface MinimalPersistedFileData {
+    fileId: number;
     mlVersion: number;
+    errorCount: number;
     faces?: { personId?: number; id: string }[];
 }
 
@@ -42,7 +44,7 @@ const MLDATA_DB_NAME = "mldata";
 interface MLDb extends DBSchema {
     files: {
         key: number;
-        value: MlFileData;
+        value: MinimalPersistedFileData;
         indexes: { mlVersion: [number, number] };
     };
     people: {
@@ -267,7 +269,7 @@ class MLIDbStorage {
 
     public async upsertFileInTx(
         fileId: number,
-        upsert: (mlFile: MlFileData) => MlFileData,
+        upsert: (mlFile: MinimalPersistedFileData) => MinimalPersistedFileData,
     ) {
         const db = await this.db;
         const tx = db.transaction("files", "readwrite");
@@ -280,7 +282,7 @@ class MLIDbStorage {
     }
 
     public async putAllFiles(
-        mlFiles: Array<MlFileData>,
+        mlFiles: MinimalPersistedFileData[],
         tx: IDBPTransaction<MLDb, ["files"], "readwrite">,
     ) {
         await Promise.all(mlFiles.map((mlFile) => tx.store.put(mlFile)));

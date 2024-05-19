@@ -1,9 +1,11 @@
 import log from "@/next/log";
 import { CustomError, parseUploadErrorCodes } from "@ente/shared/error";
 import PQueue from "p-queue";
-import mlIDbStorage, { ML_SEARCH_CONFIG_NAME } from "services/face/db";
+import mlIDbStorage, {
+    ML_SEARCH_CONFIG_NAME,
+    type MinimalPersistedFileData,
+} from "services/face/db";
 import { putFaceEmbedding } from "services/face/remote";
-import { MlFileData } from "services/face/types";
 import { getLocalFiles } from "services/fileService";
 import { EnteFile } from "types/file";
 import { isInternalUserForML } from "utils/user";
@@ -104,7 +106,7 @@ class MachineLearningService {
             fileId,
             mlVersion: 0,
             errorCount: 0,
-        } as MlFileData;
+        } as MinimalPersistedFileData;
     }
 
     private async getLocalFilesMap(syncContext: MLSyncContext) {
