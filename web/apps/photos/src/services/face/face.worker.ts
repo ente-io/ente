@@ -22,8 +22,6 @@ export class DedicatedMLWorker {
         await downloadManager.init(APPS.PHOTOS, { token });
         return mlService.sync(token, userID);
     }
-
-
 }
 
 expose(DedicatedMLWorker, self);
