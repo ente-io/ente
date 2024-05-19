@@ -3,7 +3,7 @@ import mlIDbStorage from "services/face/db";
 import { Person } from "services/face/types";
 import { clusterFaces } from "./cluster";
 import { saveFaceCrop } from "./f-index";
-import { fetchImageBitmap, getLocalFile } from "./image";
+import { fetchImageBitmap, getLocalFile } from "./file";
 
 export const syncPeopleIndex = async () => {
     // TODO-ML(MR): Forced disable clustering. It doesn't currently work,

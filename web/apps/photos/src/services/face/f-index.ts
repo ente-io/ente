@@ -15,11 +15,10 @@ import {
 import { defaultMLVersion } from "services/machineLearning/machineLearningService";
 import { getSimilarityTransformation } from "similarity-transformation";
 import type { EnteFile } from "types/file";
+import { fetchImageBitmap, getLocalFileImageBitmap } from "./file";
 import {
     clamp,
     createGrayscaleIntMatrixFromNormalized2List,
-    fetchImageBitmap,
-    getLocalFileImageBitmap,
     pixelRGBBilinear,
     warpAffineFloat32List,
 } from "./image";
