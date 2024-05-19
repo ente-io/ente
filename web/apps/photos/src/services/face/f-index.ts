@@ -4,7 +4,13 @@ import log from "@/next/log";
 import { workerBridge } from "@/next/worker/worker-bridge";
 import { euclidean } from "hdbscan";
 import { Matrix } from "ml-matrix";
-import { Box, Dimensions, Point, enlargeBox } from "services/face/geom";
+import {
+    Box,
+    Dimensions,
+    Point,
+    enlargeBox,
+    roundBox,
+} from "services/face/geom";
 import type {
     Face,
     FaceAlignment,
@@ -675,16 +681,18 @@ const extractFaceCrop = (
     imageBitmap: ImageBitmap,
     alignment: FaceAlignment,
 ): ImageBitmap => {
-    const alignmentBox = new Box({
-        x: alignment.center.x - alignment.size / 2,
-        y: alignment.center.y - alignment.size / 2,
-        width: alignment.size,
-        height: alignment.size,
-    }).round();
+    const alignmentBox = roundBox(
+        new Box({
+            x: alignment.center.x - alignment.size / 2,
+            y: alignment.center.y - alignment.size / 2,
+            width: alignment.size,
+            height: alignment.size,
+        }),
+    );
 
     const padding = 0.25;
     const scaleForPadding = 1 + padding * 2;
-    const paddedBox = enlargeBox(alignmentBox, scaleForPadding).round();
+    const paddedBox = roundBox(enlargeBox(alignmentBox, scaleForPadding));
 
     // TODO-ML: The rotation doesn't seem to be used? it's set to 0.
     return cropWithRotation(imageBitmap, paddedBox, 0, 256);
@@ -696,7 +704,7 @@ const cropWithRotation = (
     rotation: number,
     maxDimension: number,
 ) => {
-    const box = cropBox.round();
+    const box = roundBox(cropBox);
 
     const outputSize = { width: box.width, height: box.height };
 

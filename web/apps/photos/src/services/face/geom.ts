@@ -32,18 +32,17 @@ export class Box implements IRect {
         this.width = width;
         this.height = height;
     }
-
-    public round(): Box {
-        const [x, y, width, height] = [
-            this.x,
-            this.y,
-            this.width,
-            this.height,
-        ].map((val) => Math.round(val));
-        return new Box({ x, y, width, height });
-    }
 }
 
+/** Round all the components of the box. */
+export const roundBox = (box: Box): Box => {
+    const [x, y, width, height] = [box.x, box.y, box.width, box.height].map(
+        (val) => Math.round(val),
+    );
+    return new Box({ x, y, width, height });
+};
+
+/** Increase the size of the given {@link box} by {@link factor}. */
 export const enlargeBox = (box: Box, factor: number) => {
     const center = new Point(box.x + box.width / 2, box.y + box.height / 2);
     const newWidth = factor * box.width;
