@@ -103,7 +103,7 @@ const indexFaces_ = async (enteFile: EnteFile, imageBitmap: ImageBitmap) => {
     if (detectedFaces.length > 0) {
         await Promise.all(
             detectedFaces.map((face) => saveFaceCrop(imageBitmap, face)),
-        );
+        ).catch((e) => log.error("Ignoring error when saving face crop", e));
 
         // Execute the face alignment calculations
         for (const face of mlFile.faces) {
