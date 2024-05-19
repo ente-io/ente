@@ -316,7 +316,7 @@ class MachineLearningService {
     }
 
     private async syncFile(enteFile: EnteFile, localFile?: globalThis.File) {
-        const oldMlFile = await this.getMLFileData(enteFile.id);
+        const oldMlFile = await mlIDbStorage.getFile(enteFile.id);
         if (oldMlFile && oldMlFile.mlVersion) {
             return oldMlFile;
         }
@@ -325,10 +325,6 @@ class MachineLearningService {
         await putFaceEmbedding(enteFile, newMlFile);
         await mlIDbStorage.putFile(newMlFile);
         return newMlFile;
-    }
-
-    private async getMLFileData(fileId: number) {
-        return mlIDbStorage.getFile(fileId);
     }
 
     private async persistMLFileSyncError(enteFile: EnteFile, e: Error) {

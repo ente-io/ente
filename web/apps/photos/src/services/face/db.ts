@@ -24,6 +24,15 @@ export interface IndexStatus {
     peopleIndexSynced: boolean;
 }
 
+/**
+ * TODO(MR): Transient type with an intersection of values that both existing
+ * and new types during the migration will have. Eventually we'll store the the
+ * server ML data shape here exactly.
+ */
+export interface MinimalFileData {
+    mlVersion: number;
+}
+
 interface Config {}
 
 export const ML_SEARCH_CONFIG_NAME = "ml-search";
