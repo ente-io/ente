@@ -7,7 +7,7 @@ import HTTPService from "@ente/shared/network/HTTPService";
 import { getEndpoint } from "@ente/shared/network/api";
 import localForage from "@ente/shared/storage/localForage";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
-import { FileML } from "services/machineLearning/machineLearningService";
+import { FileML } from "services/face/remote";
 import type {
     Embedding,
     EmbeddingModel,
