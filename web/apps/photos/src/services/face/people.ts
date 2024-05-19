@@ -1,7 +1,3 @@
-import log from "@/next/log";
-import mlIDbStorage from "services/face/db";
-import { clusterFaces } from "./cluster";
-
 export interface Person {
     id: number;
     name?: string;
@@ -9,13 +5,15 @@ export interface Person {
     displayFaceId?: string;
 }
 
+// TODO-ML(MR): Forced disable clustering. It doesn't currently work,
+// need to finalize it before we move out of beta.
+//
+// > Error: Failed to execute 'transferToImageBitmap' on
+// > 'OffscreenCanvas': ImageBitmap construction failed
+
+/*
 export const syncPeopleIndex = async () => {
-    // TODO-ML(MR): Forced disable clustering. It doesn't currently work,
-    // need to finalize it before we move out of beta.
-    //
-    // > Error: Failed to execute 'transferToImageBitmap' on
-    // > 'OffscreenCanvas': ImageBitmap construction failed
-    /*
+
         if (
             syncContext.outOfSyncFiles.length <= 0 ||
             (syncContext.nSyncedFiles === batchSize && Math.random() < 0)
@@ -36,16 +34,16 @@ export const syncPeopleIndex = async () => {
     if (filesVersion <= (await mlIDbStorage.getIndexVersion("people"))) {
         return;
     }
-    */
+
 
     // TODO: have faces addresable through fileId + faceId
     // to avoid index based addressing, which is prone to wrong results
     // one way could be to match nearest face within threshold in the file
-    /*
+
     const allFacesMap =
         syncContext.allSyncedFacesMap ??
         (syncContext.allSyncedFacesMap = await mlIDbStorage.getAllFacesMap());
-    */
+
 
     // await this.init();
 
@@ -87,13 +85,13 @@ export const syncPeopleIndex = async () => {
                 : best,
         );
 
-        /* Generate face crop
+
         if (personFace && !personFace.crop?.cacheKey) {
             const file = await getLocalFile(personFace.fileId);
             const imageBitmap = await fetchImageBitmap(file);
             await saveFaceCrop(imageBitmap, personFace);
         }
-        */
+
 
         const person: Person = {
             id: index,
@@ -113,3 +111,4 @@ export const syncPeopleIndex = async () => {
 
     // await mlIDbStorage.setIndexVersion("people", filesVersion);
 };
+*/
