@@ -1,7 +1,5 @@
 import { Box, Dimensions, Point } from "services/face/geom";
 
-export declare type Cluster = Array<number>;
-
 export interface FaceDetection {
     // box and landmarks is relative to image dimentions stored at mlFileData
     box: Box;
