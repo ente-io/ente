@@ -1,121 +1,295 @@
-import { FILE_TYPE } from "@/media/file-type";
-import { decodeLivePhoto } from "@/media/live-photo";
-import log from "@/next/log";
-import DownloadManager from "services/download";
-import { Dimensions } from "services/face/geom";
-import { DetectedFace, MLSyncFileContext } from "services/face/types";
-import { getLocalFiles } from "services/fileService";
-import { EnteFile } from "types/file";
-import { getRenderableImage } from "utils/file";
-import { clamp } from "utils/image";
+import { Matrix, inverse } from "ml-matrix";
 
-export const fetchImageBitmapForContext = async (
-    fileContext: MLSyncFileContext,
+/**
+ * Clamp {@link value} to between {@link min} and {@link max}, inclusive.
+ */
+export const clamp = (value: number, min: number, max: number) =>
+    Math.min(max, Math.max(min, value));
+
+/**
+ * Returns the pixel value (RGB) at the given coordinates ({@link fx},
+ * {@link fy}) using bilinear interpolation.
+ */
+export function pixelRGBBilinear(
+    fx: number,
+    fy: number,
+    imageData: Uint8ClampedArray,
+    imageWidth: number,
+    imageHeight: number,
+) {
+    // Clamp to image boundaries.
+    fx = clamp(fx, 0, imageWidth - 1);
+    fy = clamp(fy, 0, imageHeight - 1);
+
+    // Get the surrounding coordinates and their weights.
+    const x0 = Math.floor(fx);
+    const x1 = Math.ceil(fx);
+    const y0 = Math.floor(fy);
+    const y1 = Math.ceil(fy);
+    const dx = fx - x0;
+    const dy = fy - y0;
+    const dx1 = 1.0 - dx;
+    const dy1 = 1.0 - dy;
+
+    // Get the original pixels.
+    const pixel1 = pixelRGBA(imageData, imageWidth, imageHeight, x0, y0);
+    const pixel2 = pixelRGBA(imageData, imageWidth, imageHeight, x1, y0);
+    const pixel3 = pixelRGBA(imageData, imageWidth, imageHeight, x0, y1);
+    const pixel4 = pixelRGBA(imageData, imageWidth, imageHeight, x1, y1);
+
+    const bilinear = (val1: number, val2: number, val3: number, val4: number) =>
+        Math.round(
+            val1 * dx1 * dy1 +
+                val2 * dx * dy1 +
+                val3 * dx1 * dy +
+                val4 * dx * dy,
+        );
+
+    // Return interpolated pixel colors.
+    return {
+        r: bilinear(pixel1.r, pixel2.r, pixel3.r, pixel4.r),
+        g: bilinear(pixel1.g, pixel2.g, pixel3.g, pixel4.g),
+        b: bilinear(pixel1.b, pixel2.b, pixel3.b, pixel4.b),
+    };
+}
+
+const pixelRGBA = (
+    imageData: Uint8ClampedArray,
+    width: number,
+    height: number,
+    x: number,
+    y: number,
 ) => {
-    if (fileContext.imageBitmap) {
-        return fileContext.imageBitmap;
+    if (x < 0 || x >= width || y < 0 || y >= height) {
+        return { r: 0, g: 0, b: 0, a: 0 };
     }
-    if (fileContext.localFile) {
-        if (fileContext.enteFile.metadata.fileType !== FILE_TYPE.IMAGE) {
-            throw new Error("Local file of only image type is supported");
-        }
-        fileContext.imageBitmap = await getLocalFileImageBitmap(
-            fileContext.enteFile,
-            fileContext.localFile,
-        );
-    } else if (
-        [FILE_TYPE.IMAGE, FILE_TYPE.LIVE_PHOTO].includes(
-            fileContext.enteFile.metadata.fileType,
-        )
-    ) {
-        fileContext.imageBitmap = await fetchImageBitmap(fileContext.enteFile);
-    } else {
-        // TODO-ML(MR): We don't do it on videos, when will we ever come
-        // here?
-        fileContext.imageBitmap = await getThumbnailImageBitmap(
-            fileContext.enteFile,
-        );
-    }
-
-    fileContext.newMlFile.imageSource = "Original";
-    const { width, height } = fileContext.imageBitmap;
-    fileContext.newMlFile.imageDimensions = { width, height };
-
-    return fileContext.imageBitmap;
+    const index = (y * width + x) * 4;
+    return {
+        r: imageData[index],
+        g: imageData[index + 1],
+        b: imageData[index + 2],
+        a: imageData[index + 3],
+    };
 };
 
-export async function getLocalFile(fileId: number) {
-    const localFiles = await getLocalFiles();
-    return localFiles.find((f) => f.id === fileId);
-}
+/**
+ * Returns the pixel value (RGB) at the given coordinates ({@link fx},
+ * {@link fy}) using bicubic interpolation.
+ */
+const pixelRGBBicubic = (
+    fx: number,
+    fy: number,
+    imageData: Uint8ClampedArray,
+    imageWidth: number,
+    imageHeight: number,
+) => {
+    // Clamp to image boundaries.
+    fx = clamp(fx, 0, imageWidth - 1);
+    fy = clamp(fy, 0, imageHeight - 1);
 
-export function getFaceId(detectedFace: DetectedFace, imageDims: Dimensions) {
-    const xMin = clamp(
-        detectedFace.detection.box.x / imageDims.width,
-        0.0,
-        0.999999,
-    )
-        .toFixed(5)
-        .substring(2);
-    const yMin = clamp(
-        detectedFace.detection.box.y / imageDims.height,
-        0.0,
-        0.999999,
-    )
-        .toFixed(5)
-        .substring(2);
-    const xMax = clamp(
-        (detectedFace.detection.box.x + detectedFace.detection.box.width) /
-            imageDims.width,
-        0.0,
-        0.999999,
-    )
-        .toFixed(5)
-        .substring(2);
-    const yMax = clamp(
-        (detectedFace.detection.box.y + detectedFace.detection.box.height) /
-            imageDims.height,
-        0.0,
-        0.999999,
-    )
-        .toFixed(5)
-        .substring(2);
+    const x = Math.trunc(fx) - (fx >= 0.0 ? 0 : 1);
+    const px = x - 1;
+    const nx = x + 1;
+    const ax = x + 2;
+    const y = Math.trunc(fy) - (fy >= 0.0 ? 0 : 1);
+    const py = y - 1;
+    const ny = y + 1;
+    const ay = y + 2;
+    const dx = fx - x;
+    const dy = fy - y;
 
-    const rawFaceID = `${xMin}_${yMin}_${xMax}_${yMax}`;
-    const faceID = `${detectedFace.fileId}_${rawFaceID}`;
+    const cubic = (
+        dx: number,
+        ipp: number,
+        icp: number,
+        inp: number,
+        iap: number,
+    ) =>
+        icp +
+        0.5 *
+            (dx * (-ipp + inp) +
+                dx * dx * (2 * ipp - 5 * icp + 4 * inp - iap) +
+                dx * dx * dx * (-ipp + 3 * icp - 3 * inp + iap));
 
-    return faceID;
-}
+    const icc = pixelRGBA(imageData, imageWidth, imageHeight, x, y);
 
-export const fetchImageBitmap = async (file: EnteFile) =>
-    fetchRenderableBlob(file).then(createImageBitmap);
+    const ipp =
+        px < 0 || py < 0
+            ? icc
+            : pixelRGBA(imageData, imageWidth, imageHeight, px, py);
+    const icp =
+        px < 0 ? icc : pixelRGBA(imageData, imageWidth, imageHeight, x, py);
+    const inp =
+        py < 0 || nx >= imageWidth
+            ? icc
+            : pixelRGBA(imageData, imageWidth, imageHeight, nx, py);
+    const iap =
+        ax >= imageWidth || py < 0
+            ? icc
+            : pixelRGBA(imageData, imageWidth, imageHeight, ax, py);
 
-async function fetchRenderableBlob(file: EnteFile) {
-    const fileStream = await DownloadManager.getFile(file);
-    const fileBlob = await new Response(fileStream).blob();
-    if (file.metadata.fileType === FILE_TYPE.IMAGE) {
-        return await getRenderableImage(file.metadata.title, fileBlob);
-    } else {
-        const { imageFileName, imageData } = await decodeLivePhoto(
-            file.metadata.title,
-            fileBlob,
-        );
-        return await getRenderableImage(imageFileName, new Blob([imageData]));
+    const ip0 = cubic(dx, ipp.r, icp.r, inp.r, iap.r);
+    const ip1 = cubic(dx, ipp.g, icp.g, inp.g, iap.g);
+    const ip2 = cubic(dx, ipp.b, icp.b, inp.b, iap.b);
+    // const ip3 = cubic(dx, ipp.a, icp.a, inp.a, iap.a);
+
+    const ipc =
+        px < 0 ? icc : pixelRGBA(imageData, imageWidth, imageHeight, px, y);
+    const inc =
+        nx >= imageWidth
+            ? icc
+            : pixelRGBA(imageData, imageWidth, imageHeight, nx, y);
+    const iac =
+        ax >= imageWidth
+            ? icc
+            : pixelRGBA(imageData, imageWidth, imageHeight, ax, y);
+
+    const ic0 = cubic(dx, ipc.r, icc.r, inc.r, iac.r);
+    const ic1 = cubic(dx, ipc.g, icc.g, inc.g, iac.g);
+    const ic2 = cubic(dx, ipc.b, icc.b, inc.b, iac.b);
+    // const ic3 = cubic(dx, ipc.a, icc.a, inc.a, iac.a);
+
+    const ipn =
+        px < 0 || ny >= imageHeight
+            ? icc
+            : pixelRGBA(imageData, imageWidth, imageHeight, px, ny);
+    const icn =
+        ny >= imageHeight
+            ? icc
+            : pixelRGBA(imageData, imageWidth, imageHeight, x, ny);
+    const inn =
+        nx >= imageWidth || ny >= imageHeight
+            ? icc
+            : pixelRGBA(imageData, imageWidth, imageHeight, nx, ny);
+    const ian =
+        ax >= imageWidth || ny >= imageHeight
+            ? icc
+            : pixelRGBA(imageData, imageWidth, imageHeight, ax, ny);
+
+    const in0 = cubic(dx, ipn.r, icn.r, inn.r, ian.r);
+    const in1 = cubic(dx, ipn.g, icn.g, inn.g, ian.g);
+    const in2 = cubic(dx, ipn.b, icn.b, inn.b, ian.b);
+    // const in3 = cubic(dx, ipn.a, icn.a, inn.a, ian.a);
+
+    const ipa =
+        px < 0 || ay >= imageHeight
+            ? icc
+            : pixelRGBA(imageData, imageWidth, imageHeight, px, ay);
+    const ica =
+        ay >= imageHeight
+            ? icc
+            : pixelRGBA(imageData, imageWidth, imageHeight, x, ay);
+    const ina =
+        nx >= imageWidth || ay >= imageHeight
+            ? icc
+            : pixelRGBA(imageData, imageWidth, imageHeight, nx, ay);
+    const iaa =
+        ax >= imageWidth || ay >= imageHeight
+            ? icc
+            : pixelRGBA(imageData, imageWidth, imageHeight, ax, ay);
+
+    const ia0 = cubic(dx, ipa.r, ica.r, ina.r, iaa.r);
+    const ia1 = cubic(dx, ipa.g, ica.g, ina.g, iaa.g);
+    const ia2 = cubic(dx, ipa.b, ica.b, ina.b, iaa.b);
+    // const ia3 = cubic(dx, ipa.a, ica.a, ina.a, iaa.a);
+
+    const c0 = Math.trunc(clamp(cubic(dy, ip0, ic0, in0, ia0), 0, 255));
+    const c1 = Math.trunc(clamp(cubic(dy, ip1, ic1, in1, ia1), 0, 255));
+    const c2 = Math.trunc(clamp(cubic(dy, ip2, ic2, in2, ia2), 0, 255));
+    // const c3 = cubic(dy, ip3, ic3, in3, ia3);
+
+    return { r: c0, g: c1, b: c2 };
+};
+
+/**
+ * Transform {@link inputData} starting at {@link inputStartIndex}.
+ */
+export const warpAffineFloat32List = (
+    imageBitmap: ImageBitmap,
+    faceAlignmentAffineMatrix: number[][],
+    faceSize: number,
+    inputData: Float32Array,
+    inputStartIndex: number,
+): void => {
+    const { width, height } = imageBitmap;
+
+    // Get the pixel data.
+    const offscreenCanvas = new OffscreenCanvas(width, height);
+    const ctx = offscreenCanvas.getContext("2d");
+    ctx.drawImage(imageBitmap, 0, 0, width, height);
+    const imageData = ctx.getImageData(0, 0, width, height);
+    const pixelData = imageData.data;
+
+    const transformationMatrix = faceAlignmentAffineMatrix.map((row) =>
+        row.map((val) => (val != 1.0 ? val * faceSize : 1.0)),
+    ); // 3x3
+
+    const A: Matrix = new Matrix([
+        [transformationMatrix[0][0], transformationMatrix[0][1]],
+        [transformationMatrix[1][0], transformationMatrix[1][1]],
+    ]);
+    const Ainverse = inverse(A);
+
+    const b00 = transformationMatrix[0][2];
+    const b10 = transformationMatrix[1][2];
+    const a00Prime = Ainverse.get(0, 0);
+    const a01Prime = Ainverse.get(0, 1);
+    const a10Prime = Ainverse.get(1, 0);
+    const a11Prime = Ainverse.get(1, 1);
+
+    for (let yTrans = 0; yTrans < faceSize; ++yTrans) {
+        for (let xTrans = 0; xTrans < faceSize; ++xTrans) {
+            // Perform inverse affine transformation.
+            const xOrigin =
+                a00Prime * (xTrans - b00) + a01Prime * (yTrans - b10);
+            const yOrigin =
+                a10Prime * (xTrans - b00) + a11Prime * (yTrans - b10);
+
+            // Get the pixel RGB using bicubic interpolation.
+            const { r, g, b } = pixelRGBBicubic(
+                xOrigin,
+                yOrigin,
+                pixelData,
+                width,
+                height,
+            );
+
+            // Set the pixel in the input data.
+            const index = (yTrans * faceSize + xTrans) * 3;
+            inputData[inputStartIndex + index] = rgbToBipolarFloat(r);
+            inputData[inputStartIndex + index + 1] = rgbToBipolarFloat(g);
+            inputData[inputStartIndex + index + 2] = rgbToBipolarFloat(b);
+        }
     }
-}
+};
 
-export async function getThumbnailImageBitmap(file: EnteFile) {
-    const thumb = await DownloadManager.getThumbnail(file);
-    log.info("[MLService] Got thumbnail: ", file.id.toString());
+/** Convert a RGB component 0-255 to a floating point value between -1 and 1. */
+const rgbToBipolarFloat = (pixelValue: number) => pixelValue / 127.5 - 1.0;
 
-    return createImageBitmap(new Blob([thumb]));
-}
+/** Convert a floating point value between -1 and 1 to a RGB component 0-255. */
+const bipolarFloatToRGB = (pixelValue: number) =>
+    clamp(Math.round((pixelValue + 1.0) * 127.5), 0, 255);
 
-export async function getLocalFileImageBitmap(
-    enteFile: EnteFile,
-    localFile: globalThis.File,
-) {
-    let fileBlob = localFile as Blob;
-    fileBlob = await getRenderableImage(enteFile.metadata.title, fileBlob);
-    return createImageBitmap(fileBlob);
-}
+export const grayscaleIntMatrixFromNormalized2List = (
+    imageList: Float32Array,
+    faceNumber: number,
+    width: number,
+    height: number,
+): number[][] => {
+    const startIndex = faceNumber * width * height * 3;
+    return Array.from({ length: height }, (_, y) =>
+        Array.from({ length: width }, (_, x) => {
+            // 0.299 ∙ Red + 0.587 ∙ Green + 0.114 ∙ Blue
+            const pixelIndex = startIndex + 3 * (y * width + x);
+            return clamp(
+                Math.round(
+                    0.299 * bipolarFloatToRGB(imageList[pixelIndex]) +
+                        0.587 * bipolarFloatToRGB(imageList[pixelIndex + 1]) +
+                        0.114 * bipolarFloatToRGB(imageList[pixelIndex + 2]),
+                ),
+                0,
+                255,
+            );
+        }),
+    );
+};

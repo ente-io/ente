@@ -24,7 +24,6 @@ import {
     updateOnNextRestart,
 } from "./services/app-update";
 import {
-    legacyFaceCrop,
     openDirectory,
     openLogDirectory,
     selectDirectory,
@@ -43,10 +42,10 @@ import {
 import { convertToJPEG, generateImageThumbnail } from "./services/image";
 import { logout } from "./services/logout";
 import {
-    clipImageEmbedding,
-    clipTextEmbeddingIfAvailable,
+    computeCLIPImageEmbedding,
+    computeCLIPTextEmbeddingIfAvailable,
 } from "./services/ml-clip";
-import { detectFaces, faceEmbeddings } from "./services/ml-face";
+import { computeFaceEmbeddings, detectFaces } from "./services/ml-face";
 import { encryptionKey, saveEncryptionKey } from "./services/store";
 import {
     clearPendingUploads,
@@ -170,24 +169,22 @@ export const attachIPCHandlers = () => {
 
     // - ML
 
-    ipcMain.handle("clipImageEmbedding", (_, jpegImageData: Uint8Array) =>
-        clipImageEmbedding(jpegImageData),
+    ipcMain.handle(
+        "computeCLIPImageEmbedding",
+        (_, jpegImageData: Uint8Array) =>
+            computeCLIPImageEmbedding(jpegImageData),
     );
 
-    ipcMain.handle("clipTextEmbeddingIfAvailable", (_, text: string) =>
-        clipTextEmbeddingIfAvailable(text),
+    ipcMain.handle("computeCLIPTextEmbeddingIfAvailable", (_, text: string) =>
+        computeCLIPTextEmbeddingIfAvailable(text),
     );
 
     ipcMain.handle("detectFaces", (_, input: Float32Array) =>
         detectFaces(input),
     );
 
-    ipcMain.handle("faceEmbeddings", (_, input: Float32Array) =>
-        faceEmbeddings(input),
-    );
-
-    ipcMain.handle("legacyFaceCrop", (_, faceID: string) =>
-        legacyFaceCrop(faceID),
+    ipcMain.handle("computeFaceEmbeddings", (_, input: Float32Array) =>
+        computeFaceEmbeddings(input),
     );
 
     // - Upload

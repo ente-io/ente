@@ -1,10 +1,11 @@
+import { blobCache } from "@/next/blob-cache";
 import log from "@/next/log";
 import { Skeleton, styled } from "@mui/material";
 import { Legend } from "components/PhotoViewer/styledComponents/Legend";
 import { t } from "i18next";
 import React, { useEffect, useState } from "react";
 import mlIDbStorage from "services/face/db";
-import { Face, Person, type MlFileData } from "services/face/types";
+import type { Person } from "services/face/people";
 import { EnteFile } from "types/file";
 
 const FaceChipContainer = styled("div")`
@@ -57,10 +58,7 @@ export const PeopleList = React.memo((props: PeopleListProps) => {
                         props.onSelect && props.onSelect(person, index)
                     }
                 >
-                    <FaceCropImageView
-                        faceID={person.displayFaceId}
-                        cacheKey={person.faceCropCacheKey}
-                    />
+                    <FaceCropImageView faceID={person.displayFaceId} />
                 </FaceChip>
             ))}
         </FaceChipContainer>
@@ -108,7 +106,7 @@ export function UnidentifiedFaces(props: {
     file: EnteFile;
     updateMLDataIndex: number;
 }) {
-    const [faces, setFaces] = useState<Array<Face>>([]);
+    const [faces, setFaces] = useState<{ id: string }[]>([]);
 
     useEffect(() => {
         let didCancel = false;
@@ -136,10 +134,7 @@ export function UnidentifiedFaces(props: {
                 {faces &&
                     faces.map((face, index) => (
                         <FaceChip key={index}>
-                            <FaceCropImageView
-                                faceID={face.id}
-                                cacheKey={face.crop?.cacheKey}
-                            />
+                            <FaceCropImageView faceID={face.id} />
                         </FaceChip>
                     ))}
             </FaceChipContainer>
@@ -149,29 +144,22 @@ export function UnidentifiedFaces(props: {
 
 interface FaceCropImageViewProps {
     faceID: string;
-    cacheKey?: string;
 }
 
-const FaceCropImageView: React.FC<FaceCropImageViewProps> = ({
-    faceID,
-    cacheKey,
-}) => {
+const FaceCropImageView: React.FC<FaceCropImageViewProps> = ({ faceID }) => {
     const [objectURL, setObjectURL] = useState<string | undefined>();
 
     useEffect(() => {
         let didCancel = false;
-        const electron = globalThis.electron;
-
-        if (faceID && electron) {
-            electron
-                .legacyFaceCrop(faceID)
-                /*
-            cachedOrNew("face-crops", cacheKey, async () => {
-                return machineLearningService.regenerateFaceCrop(
-                    faceId,
-                );
-            })*/
+        if (faceID) {
+            blobCache("face-crops")
+                .then((cache) => cache.get(faceID))
                 .then((data) => {
+                    /*
+                    TODO(MR): regen if needed and get this to work on web too.
+                    cachedOrNew("face-crops", cacheKey, async () => {
+                        return regenerateFaceCrop(faceId);
+                    })*/
                     if (data) {
                         const blob = new Blob([data]);
                         if (!didCancel) setObjectURL(URL.createObjectURL(blob));
@@ -183,7 +171,7 @@ const FaceCropImageView: React.FC<FaceCropImageViewProps> = ({
             didCancel = true;
             if (objectURL) URL.revokeObjectURL(objectURL);
         };
-    }, [faceID, cacheKey]);
+    }, [faceID]);
 
     return objectURL ? (
         <img src={objectURL} />
@@ -192,9 +180,9 @@ const FaceCropImageView: React.FC<FaceCropImageViewProps> = ({
     );
 };
 
-async function getPeopleList(file: EnteFile): Promise<Array<Person>> {
+async function getPeopleList(file: EnteFile): Promise<Person[]> {
     let startTime = Date.now();
-    const mlFileData: MlFileData = await mlIDbStorage.getFile(file.id);
+    const mlFileData = await mlIDbStorage.getFile(file.id);
     log.info(
         "getPeopleList:mlFilesStore:getItem",
         Date.now() - startTime,
@@ -226,8 +214,8 @@ async function getPeopleList(file: EnteFile): Promise<Array<Person>> {
     return peopleList;
 }
 
-async function getUnidentifiedFaces(file: EnteFile): Promise<Array<Face>> {
-    const mlFileData: MlFileData = await mlIDbStorage.getFile(file.id);
+async function getUnidentifiedFaces(file: EnteFile): Promise<{ id: string }[]> {
+    const mlFileData = await mlIDbStorage.getFile(file.id);
 
     return mlFileData?.faces?.filter(
         (f) => f.personId === null || f.personId === undefined,

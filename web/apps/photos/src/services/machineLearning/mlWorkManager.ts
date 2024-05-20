@@ -1,6 +1,8 @@
 import { FILE_TYPE } from "@/media/file-type";
+import { ensureElectron } from "@/next/electron";
 import log from "@/next/log";
 import { ComlinkWorker } from "@/next/worker/comlink-worker";
+import { clientPackageNamePhotosDesktop } from "@ente/shared/apps/constants";
 import { eventBus, Events } from "@ente/shared/events";
 import { getToken, getUserID } from "@ente/shared/storage/localStorage/helpers";
 import debounce from "debounce";
@@ -8,25 +10,18 @@ import PQueue from "p-queue";
 import { createFaceComlinkWorker } from "services/face";
 import mlIDbStorage from "services/face/db";
 import type { DedicatedMLWorker } from "services/face/face.worker";
-import { MLSyncResult } from "services/face/types";
 import { EnteFile } from "types/file";
-import { logQueueStats } from "./machineLearningService";
 
 export type JobState = "Scheduled" | "Running" | "NotScheduled";
 
-export interface MLSyncJobResult {
-    shouldBackoff: boolean;
-    mlSyncResult: MLSyncResult;
-}
-
 export class MLSyncJob {
-    private runCallback: () => Promise<MLSyncJobResult>;
+    private runCallback: () => Promise<boolean>;
     private state: JobState;
     private stopped: boolean;
     private intervalSec: number;
     private nextTimeoutId: ReturnType<typeof setTimeout>;
 
-    constructor(runCallback: () => Promise<MLSyncJobResult>) {
+    constructor(runCallback: () => Promise<boolean>) {
         this.runCallback = runCallback;
         this.state = "NotScheduled";
         this.stopped = true;
@@ -65,13 +60,11 @@ export class MLSyncJob {
         this.state = "Running";
 
         try {
-            const jobResult = await this.runCallback();
-            if (jobResult && jobResult.shouldBackoff) {
-                this.intervalSec = Math.min(960, this.intervalSec * 2);
-            } else {
+            if (await this.runCallback()) {
                 this.resetInterval();
+            } else {
+                this.intervalSec = Math.min(960, this.intervalSec * 2);
             }
-            log.info("Job completed");
         } catch (e) {
             console.error("Error while running Job: ", e);
         } finally {
@@ -236,8 +229,15 @@ class MLWorkManager {
             this.stopSyncJob();
             const token = getToken();
             const userID = getUserID();
+            const userAgent = await getUserAgent();
             const mlWorker = await this.getLiveSyncWorker();
-            return mlWorker.syncLocalFile(token, userID, enteFile, localFile);
+            return mlWorker.syncLocalFile(
+                token,
+                userID,
+                userAgent,
+                enteFile,
+                localFile,
+            );
         });
     }
 
@@ -255,7 +255,14 @@ class MLWorkManager {
         this.syncJobWorker = undefined;
     }
 
-    private async runMLSyncJob(): Promise<MLSyncJobResult> {
+    /**
+     * Returns `false` to indicate that either an error occurred, or there are
+     * not more files to process, or that we cannot currently process files.
+     *
+     * Which means that when it returns true, all is well and there are more
+     * things pending to process, so we should chug along at full speed.
+     */
+    private async runMLSyncJob(): Promise<boolean> {
         try {
             // TODO: skipping is not required if we are caching chunks through service worker
             // currently worker chunk itself is not loaded when network is not there
@@ -263,29 +270,17 @@ class MLWorkManager {
                 log.info(
                     "Skipping ml-sync job run as not connected to internet.",
                 );
-                return {
-                    shouldBackoff: true,
-                    mlSyncResult: undefined,
-                };
+                return false;
             }
 
             const token = getToken();
             const userID = getUserID();
+            const userAgent = await getUserAgent();
             const jobWorkerProxy = await this.getSyncJobWorker();
 
-            const mlSyncResult = await jobWorkerProxy.sync(token, userID);
-
+            return await jobWorkerProxy.sync(token, userID, userAgent);
             // this.terminateSyncJobWorker();
-            const jobResult: MLSyncJobResult = {
-                shouldBackoff:
-                    !!mlSyncResult.error || mlSyncResult.nOutOfSyncFiles < 1,
-                mlSyncResult,
-            };
-            log.info("ML Sync Job result: ", JSON.stringify(jobResult));
-
             // TODO: redirect/refresh to gallery in case of session_expired, stop ml sync job
-
-            return jobResult;
         } catch (e) {
             log.error("Failed to run MLSync Job", e);
         }
@@ -323,3 +318,22 @@ class MLWorkManager {
 }
 
 export default new MLWorkManager();
+
+export function logQueueStats(queue: PQueue, name: string) {
+    queue.on("active", () =>
+        log.info(
+            `queuestats: ${name}: Active, Size: ${queue.size} Pending: ${queue.pending}`,
+        ),
+    );
+    queue.on("idle", () => log.info(`queuestats: ${name}: Idle`));
+    queue.on("error", (error) =>
+        console.error(`queuestats: ${name}: Error, `, error),
+    );
+}
+
+const getUserAgent = async () => {
+    const electron = ensureElectron();
+    const name = clientPackageNamePhotosDesktop;
+    const version = await electron.appVersion();
+    return `${name}/${version}`;
+};

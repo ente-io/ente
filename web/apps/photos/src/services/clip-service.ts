@@ -184,7 +184,7 @@ class CLIPService {
     };
 
     getTextEmbeddingIfAvailable = async (text: string) => {
-        return ensureElectron().clipTextEmbeddingIfAvailable(text);
+        return ensureElectron().computeCLIPTextEmbeddingIfAvailable(text);
     };
 
     private runClipEmbeddingExtraction = async (canceller: AbortController) => {
@@ -294,7 +294,7 @@ class CLIPService {
         const file = await localFile
             .arrayBuffer()
             .then((buffer) => new Uint8Array(buffer));
-        return await ensureElectron().clipImageEmbedding(file);
+        return await ensureElectron().computeCLIPImageEmbedding(file);
     };
 
     private encryptAndUploadEmbedding = async (
@@ -328,7 +328,8 @@ class CLIPService {
 
     private extractFileClipImageEmbedding = async (file: EnteFile) => {
         const thumb = await downloadManager.getThumbnail(file);
-        const embedding = await ensureElectron().clipImageEmbedding(thumb);
+        const embedding =
+            await ensureElectron().computeCLIPImageEmbedding(thumb);
         return embedding;
     };
 

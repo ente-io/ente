@@ -163,7 +163,7 @@ const checkForUpdatesAndNotify = async (mainWindow: BrowserWindow) => {
 };
 
 /**
- * Return the version of the desktop app
+ * Return the version of the desktop app.
  *
  * The return value is of the form `v1.2.3`.
  */

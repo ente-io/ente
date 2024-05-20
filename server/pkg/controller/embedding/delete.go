@@ -71,37 +71,21 @@ func (c *Controller) deleteEmbedding(qItem repo.QueueItem) {
 		ctxLogger.WithError(err).Error("Failed to fetch datacenters")
 		return
 	}
-	// Ensure that the object are deleted from active derived storage dc. Ideally, this section should never be executed
-	// unless there's a bug in storing the DC or the service restarts before removing the rows from the table
-	// todo:(neeraj): remove this section after a few weeks of deployment
-	if len(datacenters) == 0 {
-		ctxLogger.Warn("No datacenters found for file, ensuring deletion from derived storage  and hot DC")
-		err = c.ObjectCleanupController.DeleteAllObjectsWithPrefix(prefix, c.S3Config.GetDerivedStorageDataCenter())
-		if err != nil {
-			ctxLogger.WithError(err).Error("Failed to delete all objects")
-			return
-		}
-		// if Derived DC is different from hot DC, delete from hot DC as well
-		if c.derivedStorageDataCenter != c.S3Config.GetHotDataCenter() {
-			err = c.ObjectCleanupController.DeleteAllObjectsWithPrefix(prefix, c.S3Config.GetHotDataCenter())
-			if err != nil {
-				ctxLogger.WithError(err).Error("Failed to delete all objects from hot DC")
-				return
-			}
-		}
-	} else {
-		ctxLogger.Infof("Deleting from all datacenters %v", datacenters)
-	}
-
+	ctxLogger.Infof("Deleting from all datacenters %v", datacenters)
 	for i := range datacenters {
-		err = c.ObjectCleanupController.DeleteAllObjectsWithPrefix(prefix, datacenters[i])
+		dc := datacenters[i]
+		err = c.ObjectCleanupController.DeleteAllObjectsWithPrefix(prefix, dc)
 		if err != nil {
-			ctxLogger.WithError(err).Errorf("Failed to delete all objects from %s", datacenters[i])
+			ctxLogger.WithError(err).
+				WithField("dc", dc).
+				Errorf("Failed to delete all objects from %s", datacenters[i])
 			return
 		} else {
 			removeErr := c.Repo.RemoveDatacenter(context.Background(), fileID, datacenters[i])
 			if removeErr != nil {
-				ctxLogger.WithError(removeErr).Error("Failed to remove datacenter from db")
+				ctxLogger.WithError(removeErr).
+					WithField("dc", dc).
+					Error("Failed to remove datacenter from db")
 				return
 			}
 		}

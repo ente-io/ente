@@ -1,4 +1,4 @@
-import { clearCaches } from "@/next/blob-cache";
+import { clearBlobCaches } from "@/next/blob-cache";
 import log from "@/next/log";
 import InMemoryStore from "@ente/shared/storage/InMemoryStore";
 import localForage from "@ente/shared/storage/localForage";
@@ -43,7 +43,7 @@ export const accountLogout = async () => {
         log.error("Ignoring error during logout (local forage)", e);
     }
     try {
-        await clearCaches();
+        await clearBlobCaches();
     } catch (e) {
         log.error("Ignoring error during logout (cache)", e);
     }
