@@ -306,7 +306,7 @@ class _FaceWidgetState extends State<FaceWidget> {
         return {widget.face.faceID: data};
       }
 
-      final result = await pool.withResource(
+      final result = await poolFullFileFaceGenerations.withResource(
         () async => await getFaceCrops(
           widget.file,
           {

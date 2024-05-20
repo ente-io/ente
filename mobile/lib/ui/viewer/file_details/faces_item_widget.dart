@@ -198,7 +198,7 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
         return faceIdToCrop;
       }
 
-      final result = await pool.withResource(
+      final result = await poolFullFileFaceGenerations.withResource(
         () async => await getFaceCrops(
           widget.file,
           facesWithoutCrops,

@@ -13,13 +13,15 @@ import "package:pool/pool.dart";
 
 final LRUMap<String, Uint8List?> faceCropCache = LRUMap(1000);
 final LRUMap<String, Uint8List?> faceCropThumbnailCache = LRUMap(1000);
-final pool = Pool(10, timeout: const Duration(seconds: 15));
+final poolFullFileFaceGenerations =
+    Pool(20, timeout: const Duration(seconds: 15));
+final poolThumbnailFaceGenerations =
+    Pool(100, timeout: const Duration(seconds: 15));
 Future<Map<String, Uint8List>?> getFaceCrops(
   EnteFile file,
   Map<String, FaceBox> faceBoxeMap, {
   bool useFullFile = true,
-  }
-) async {
+}) async {
   late String? imagePath;
   if (useFullFile && file.fileType != FileType.video) {
     final File? ioFile = await getFile(file);
@@ -28,11 +30,11 @@ Future<Map<String, Uint8List>?> getFaceCrops(
     }
     imagePath = ioFile.path;
   } else {
-  final thumbnail = await getThumbnailForUploadedFile(file);
-  if (thumbnail == null) {
-    return null;
-  }
-  imagePath = thumbnail.path;
+    final thumbnail = await getThumbnailForUploadedFile(file);
+    if (thumbnail == null) {
+      return null;
+    }
+    imagePath = thumbnail.path;
   }
   final List<String> faceIds = [];
   final List<FaceBox> faceBoxes = [];
