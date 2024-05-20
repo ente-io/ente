@@ -55,9 +55,7 @@ export const execAsync = async (command: string | string[]) => {
         : command;
     const startTime = Date.now();
     const result = await execAsync_(escapedCommand);
-    log.debug(
-        () => `${escapedCommand} (${Math.round(Date.now() - startTime)} ms)`,
-    );
+    log.debug(() => `${escapedCommand} (${Date.now() - startTime} ms)`);
     return result;
 };
 

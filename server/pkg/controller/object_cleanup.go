@@ -260,7 +260,10 @@ func (c *ObjectCleanupController) DeleteAllObjectsWithPrefix(prefix string, dc s
 		Prefix: &prefix,
 	})
 	if err != nil {
-		log.Error(err)
+		log.WithFields(log.Fields{
+			"prefix": prefix,
+			"dc":     dc,
+		}).WithError(err).Error("Failed to list objects")
 		return stacktrace.Propagate(err, "")
 	}
 	var keys []string
@@ -270,7 +273,10 @@ func (c *ObjectCleanupController) DeleteAllObjectsWithPrefix(prefix string, dc s
 	for _, key := range keys {
 		err = c.DeleteObjectFromDataCenter(key, dc)
 		if err != nil {
-			log.Error(err)
+			log.WithFields(log.Fields{
+				"object_key": key,
+				"dc":         dc,
+			}).WithError(err).Error("Failed to delete object")
 			return stacktrace.Propagate(err, "")
 		}
 	}

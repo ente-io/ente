@@ -14,7 +14,7 @@
         "build:ci": "yarn build-renderer && tsc",
         "build:quick": "yarn build-renderer && yarn build-main:quick",
         "dev": "concurrently --kill-others --success first --names 'main,rndr' \"yarn dev-main\" \"yarn dev-renderer\"",
-        "dev-main": "tsc && electron app/main.js",
+        "dev-main": "tsc && electron .",
         "dev-renderer": "cd ../web && yarn install && yarn dev:photos",
         "postinstall": "electron-builder install-app-deps",
         "lint": "yarn prettier --check --log-level warn . && eslint --ext .ts src && yarn tsc",

@@ -1,8 +1,9 @@
 import { Hdbscan, type DebugInfo } from "hdbscan";
-import { type Cluster } from "services/face/types";
+
+export type Cluster = number[];
 
 export interface ClusterFacesResult {
-    clusters: Array<Cluster>;
+    clusters: Cluster[];
     noise: Cluster;
     debugInfo?: DebugInfo;
 }
