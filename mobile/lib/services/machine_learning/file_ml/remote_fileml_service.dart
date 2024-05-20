@@ -1,7 +1,6 @@
 import "dart:async";
 import "dart:convert";
 
-import "package:computer/computer.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/network/network.dart";
 import "package:photos/db/files_db.dart";
@@ -22,15 +21,8 @@ class RemoteFileMLService {
 
   final _logger = Logger("RemoteFileMLService");
   final _dio = NetworkClient.instance.enteDio;
-  final _computer = Computer.shared();
 
-  late SharedPreferences _preferences;
-
-  Completer<void>? _syncStatus;
-
-  void init(SharedPreferences prefs) {
-    _preferences = prefs;
-  }
+  void init(SharedPreferences prefs) {}
 
   Future<void> putFileEmbedding(EnteFile file, FileMl fileML) async {
     final encryptionKey = getFileKey(file);
