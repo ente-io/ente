@@ -29,19 +29,16 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
   final _isExporting = ValueNotifier<bool>(false);
   final double height = 60;
 
-  late final VideoEditorController _controller = VideoEditorController.file(
-    widget.ioFile,
-    minDuration: const Duration(seconds: 1),
-    maxDuration: const Duration(seconds: 10),
-  );
+  late final VideoEditorController _controller;
 
   @override
   void initState() {
     super.initState();
-    _controller
-        .initialize(aspectRatio: 9 / 16)
-        .then((_) => setState(() {}))
-        .catchError(
+    _controller = VideoEditorController.file(
+      widget.ioFile,
+      minDuration: const Duration(seconds: 1),
+    );
+    _controller.initialize().then((_) => setState(() {})).catchError(
       (error) {
         // handle minumum duration bigger than video duration error
         Navigator.pop(context);
@@ -186,50 +183,8 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
                                   height: 200,
                                   margin: const EdgeInsets.only(top: 10),
                                   child: Column(
-                                    children: [
-                                      const TabBar(
-                                        tabs: [
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: [
-                                              Padding(
-                                                padding: EdgeInsets.all(5),
-                                                child: Icon(
-                                                  Icons.content_cut,
-                                                ),
-                                              ),
-                                              Text('Trim'),
-                                            ],
-                                          ),
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: [
-                                              Padding(
-                                                padding: EdgeInsets.all(5),
-                                                child: Icon(Icons.video_label),
-                                              ),
-                                              Text('Cover'),
-                                            ],
-                                          ),
-                                        ],
-                                      ),
-                                      Expanded(
-                                        child: TabBarView(
-                                          physics:
-                                              const NeverScrollableScrollPhysics(),
-                                          children: [
-                                            Column(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              children: _trimSlider(),
-                                            ),
-                                            _coverSelection(),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: _trimSlider(),
                                   ),
                                 ),
                                 ValueListenableBuilder(

@@ -2487,10 +2487,11 @@ packages:
   video_editor:
     dependency: "direct main"
     description:
-      name: video_editor
-      sha256: "263be52e052118389f372f055f59c2fda5c7beecfdb706b899d2e05be8740c22"
-      url: "https://pub.dev"
-    source: hosted
+      path: "."
+      ref: HEAD
+      resolved-ref: "1eeb18e2b1ce36bd8ca70178c0d4b485e9982257"
+      url: "https://github.com/prateekmedia/video_editor.git"
+    source: git
     version: "3.0.0"
   video_player:
     dependency: "direct main"
