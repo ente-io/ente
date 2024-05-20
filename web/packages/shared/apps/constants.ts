@@ -14,6 +14,8 @@ export const CLIENT_PACKAGE_NAMES = new Map([
     [APPS.ACCOUNTS, "io.ente.accounts.web"],
 ]);
 
+export const clientPackageNamePhotosDesktop = "io.ente.photos.desktop";
+
 export const APP_TITLES = new Map([
     [APPS.ALBUMS, "Ente Albums"],
     [APPS.PHOTOS, "Ente Photos"],

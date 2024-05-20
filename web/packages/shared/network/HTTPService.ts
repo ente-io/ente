@@ -28,8 +28,8 @@ class HTTPService {
                         const responseData = response.data;
                         log.error(
                             `HTTP Service Error - ${JSON.stringify({
-                                url: config.url,
-                                method: config.method,
+                                url: config?.url,
+                                method: config?.method,
                                 xRequestId: response.headers["x-request-id"],
                                 httpStatus: response.status,
                                 errMessage: responseData.message,

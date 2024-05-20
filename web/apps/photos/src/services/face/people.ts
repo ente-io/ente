@@ -24,7 +24,6 @@ export const syncPeopleIndex = async () => {
         public async syncIndex(syncContext: MLSyncContext) {
             await this.getMLLibraryData(syncContext);
 
-            // TODO-ML(MR): Ensure this doesn't run until fixed.
             await syncPeopleIndex(syncContext);
 
             await this.persistMLLibraryData(syncContext);
