@@ -42,7 +42,7 @@ const clipImageEmbedding_ = async (jpegFilePath: string) => {
     const results = await session.run(feeds);
     log.debug(
         () =>
-            `onnx/clip image embedding took ${Date.now() - t1} ms (prep: ${t2 - t1} ms, inference: ${Date.now() - t2} ms)`,
+            `ONNX/CLIP image embedding took ${Date.now() - t1} ms (prep: ${t2 - t1} ms, inference: ${Date.now() - t2} ms)`,
     );
     /* Need these model specific casts to type the result */
     const imageEmbedding = ensure(results.output).data as Float32Array;
@@ -165,7 +165,7 @@ export const computeCLIPTextEmbeddingIfAvailable = async (text: string) => {
     const results = await session.run(feeds);
     log.debug(
         () =>
-            `onnx/clip text embedding took ${Date.now() - t1} ms (prep: ${t2 - t1} ms, inference: ${Date.now() - t2} ms)`,
+            `ONNX/CLIP text embedding took ${Date.now() - t1} ms (prep: ${t2 - t1} ms, inference: ${Date.now() - t2} ms)`,
     );
     const textEmbedding = ensure(results.output).data as Float32Array;
     return normalizeEmbedding(textEmbedding);
