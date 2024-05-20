@@ -13,3 +13,12 @@ export const ensure = <T>(v: T | null | undefined): T => {
     if (v === undefined) throw new Error("Required value was not found");
     return v;
 };
+
+/**
+ * Wait for {@link ms} milliseconds
+ *
+ * This function is a promisified `setTimeout`. It returns a promise that
+ * resolves after {@link ms} milliseconds.
+ */
+export const wait = (ms: number) =>
+    new Promise((resolve) => setTimeout(resolve, ms));

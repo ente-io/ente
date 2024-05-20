@@ -11,7 +11,7 @@ import * as ort from "onnxruntime-node";
 import Tokenizer from "../../thirdparty/clip-bpe-ts/mod";
 import log from "../log";
 import { writeStream } from "../stream";
-import { ensure } from "../utils/common";
+import { ensure, wait } from "../utils/common";
 import { deleteTempFile, makeTempFilePath } from "../utils/temp";
 import { makeCachedInferenceSession } from "./ml";
 
@@ -141,20 +141,22 @@ const getTokenizer = () => {
 };
 
 export const computeCLIPTextEmbeddingIfAvailable = async (text: string) => {
-    const sessionOrStatus = await Promise.race([
+    const sessionOrSkip = await Promise.race([
         cachedCLIPTextSession(),
-        "downloading-model",
+        // Wait for a tick to get the session promise to resolved the first time
+        // this code runs on each app start (and the model has been downloaded).
+        wait(0).then(() => 1),
     ]);
 
-    // Don't wait for the download to complete
-    if (typeof sessionOrStatus == "string") {
+    // Don't wait for the download to complete.
+    if (typeof sessionOrSkip == "number") {
         log.info(
             "Ignoring CLIP text embedding request because model download is pending",
         );
         return undefined;
     }
 
-    const session = sessionOrStatus;
+    const session = sessionOrSkip;
     const t1 = Date.now();
     const tokenizer = getTokenizer();
     const tokenizedText = Int32Array.from(tokenizer.encodeForCLIP(text));
