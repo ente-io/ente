@@ -1,8 +1,12 @@
 import 'package:ente_auth/models/code.dart';
 import 'package:flutter/foundation.dart';
 import 'package:otp/otp.dart' as otp;
+import 'package:steam_totp/steam_totp.dart';
 
 String getOTP(Code code) {
+  if (code.issuer.toLowerCase() == 'steam') {
+    return _getSteamCode(code);
+  }
   if (code.type == Type.hotp) {
     return _getHOTPCode(code);
   }
@@ -26,7 +30,18 @@ String _getHOTPCode(Code code) {
   );
 }
 
+String _getSteamCode(Code code, [bool isNext = false]) {
+  final SteamTOTP steamtotp = SteamTOTP(secret: code.secret);
+
+  return steamtotp.generate(
+    DateTime.now().millisecondsSinceEpoch ~/ 1000 + (isNext ? code.period : 0),
+  );
+}
+
 String getNextTotp(Code code) {
+  if (code.issuer.toLowerCase() == 'steam') {
+    return _getSteamCode(code, true);
+  }
   return otp.OTP.generateTOTPCodeString(
     getSanitizedSecret(code.secret),
     DateTime.now().millisecondsSinceEpoch + code.period * 1000,
