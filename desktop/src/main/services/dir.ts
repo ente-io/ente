@@ -51,14 +51,6 @@ export const openLogDirectory = () => openDirectory(logDirectoryPath());
  * "userData" directory. This is the **primary** place applications are meant to
  * store user's data, e.g. various configuration files and saved state.
  *
- * During development, our app name is "Electron", so this'd be, for example,
- * `~/Library/Application Support/Electron` if we run using `yarn dev`. For the
- * packaged production app, our app name is "ente", so this would be:
- *
- * - Windows: `%APPDATA%\ente`, e.g. `C:\Users\<username>\AppData\Local\ente`
- * - Linux: `~/.config/ente`
- * - macOS: `~/Library/Application Support/ente`
- *
  * Note that Chromium also stores the browser state, e.g. localStorage or disk
  * caches, in userData.
  *
@@ -71,7 +63,6 @@ export const openLogDirectory = () => openDirectory(logDirectoryPath());
  * "ente.log", it can be found at:
  *
  * - macOS: ~/Library/Logs/ente/ente.log (production)
- * - macOS: ~/Library/Logs/Electron/ente.log    (dev)
  * - Linux: ~/.config/ente/logs/ente.log
  * - Windows: %USERPROFILE%\AppData\Roaming\ente\logs\ente.log
  */

@@ -18,10 +18,7 @@ export const clearStores = () => {
  * [Note: Safe storage keys]
  *
  * On macOS, `safeStorage` stores our data under a Keychain entry named
- * "<app-name> Safe Storage". Which resolves to:
- *
- * - Electron Safe Storage (dev)
- * - ente Safe Storage    (prod)
+ * "<app-name> Safe Storage". In our case, "ente Safe Storage".
  */
 export const saveEncryptionKey = (encryptionKey: string) => {
     const encryptedKey = safeStorage.encryptString(encryptionKey);
