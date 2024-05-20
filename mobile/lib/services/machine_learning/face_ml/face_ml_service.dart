@@ -840,7 +840,8 @@ class FaceMlService {
         );
       } else {
         _logger.warning(
-            'Skipped putting embedding because of error ${result.toJsonString()}',);
+          'Skipped putting embedding because of error ${result.toJsonString()}',
+        );
       }
       await FaceMLDataDB.instance.bulkInsertFaces(faces);
       return true;
@@ -1339,7 +1340,7 @@ class FaceMlService {
 
     final int alreadyIndexedCount = await FaceMLDataDB.instance
         .getIndexedFileCount(minimumMlVersion: faceMlVersion);
-    final int totalIndexableCount = await getIndexableFilesCount();
+    final int totalIndexableCount = (await getIndexableFileIDs()).length;
     final ratio = alreadyIndexedCount / totalIndexableCount;
 
     w?.log('getIndexedDoneRatio');
@@ -1347,11 +1348,9 @@ class FaceMlService {
     return ratio;
   }
 
-  static Future<int> getIndexableFilesCount() async {
-    final List<EnteFile> enteFiles = await SearchService.instance.getAllFiles();
-    final List<EnteFile> hiddenFiles =
-        await SearchService.instance.getHiddenFiles();
-    return enteFiles.length + hiddenFiles.length;
+  static Future<List<int>> getIndexableFileIDs() async {
+    return FilesDB.instance
+        .getOwnedFileIDs(Configuration.instance.getUserID()!);
   }
 
   bool _skipAnalysisEnteFile(EnteFile enteFile, Map<int, int> indexedFileIds) {
