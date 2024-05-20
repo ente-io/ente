@@ -12,6 +12,7 @@ import "package:flutter/foundation.dart" show debugPrint, kDebugMode;
 import "package:flutter_image_compress/flutter_image_compress.dart";
 import "package:logging/logging.dart";
 import "package:onnxruntime/onnxruntime.dart";
+import "package:package_info_plus/package_info_plus.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
@@ -88,6 +89,7 @@ class FaceMlService {
   final _computer = Computer.shared();
 
   bool isInitialized = false;
+  late String client;
 
   bool canRunMLController = false;
   bool isImageIndexRunning = false;
@@ -124,6 +126,11 @@ class FaceMlService {
       } catch (e, s) {
         _logger.severe("Could not initialize mobilefacenet", e, s);
       }
+
+      // Get client name
+      final packageInfo = await PackageInfo.fromPlatform();
+      client = "${packageInfo.packageName}/${packageInfo.version}";
+      _logger.info("client: $client");
 
       isInitialized = true;
       canRunMLController = !Platform.isAndroid || kDebugMode;
@@ -621,7 +628,6 @@ class FaceMlService {
                 faces.add(
                   Face.empty(
                     fileMl.fileID,
-                    error: (fileMl.faceEmbedding.error ?? false),
                   ),
                 );
               } else {
@@ -713,11 +719,6 @@ class FaceMlService {
     if (fileMl.faceEmbedding.version < faceMlVersion) {
       debugPrint("Discarding remote embedding for fileID ${fileMl.fileID} "
           "because version is ${fileMl.faceEmbedding.version} and we need $faceMlVersion");
-      return true;
-    }
-    if (fileMl.faceEmbedding.error ?? false) {
-      debugPrint("Discarding remote embedding for fileID ${fileMl.fileID} "
-          "because error is true");
       return true;
     }
     // are all landmarks equal?
@@ -823,19 +824,24 @@ class FaceMlService {
         }
       }
       _logger.info("inserting ${faces.length} faces for ${result.fileId}");
-      await RemoteFileMLService.instance.putFileEmbedding(
-        enteFile,
-        FileMl(
-          enteFile.uploadedFileID!,
-          FaceEmbeddings(
-            faces,
-            result.mlVersion,
-            error: result.errorOccured ? true : null,
+      if (!result.errorOccured) {
+        await RemoteFileMLService.instance.putFileEmbedding(
+          enteFile,
+          FileMl(
+            enteFile.uploadedFileID!,
+            FaceEmbeddings(
+              faces,
+              result.mlVersion,
+              client: client,
+            ),
+            height: result.decodedImageSize.height,
+            width: result.decodedImageSize.width,
           ),
-          height: result.decodedImageSize.height,
-          width: result.decodedImageSize.width,
-        ),
-      );
+        );
+      } else {
+        _logger.warning(
+            'Skipped putting embedding because of error ${result.toJsonString()}',);
+      }
       await FaceMLDataDB.instance.bulkInsertFaces(faces);
       return true;
     } catch (e, s) {

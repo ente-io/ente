@@ -4,11 +4,8 @@ class FileMl {
   final int fileID;
   final int? height;
   final int? width;
-  // json: face
   final FaceEmbeddings faceEmbedding;
   final ClipEmbedding? clipEmbedding;
-  // int updationTime that is not serialized
-  int? updationTime;
 
   FileMl(
     this.fileID,
@@ -45,15 +42,13 @@ class FileMl {
 class FaceEmbeddings {
   final List<Face> faces;
   final int version;
-  // Platform: appVersion
-  final String? client;
-  final bool? error;
+  // pkgname/version
+  final String client;
 
   FaceEmbeddings(
     this.faces,
     this.version, {
-    this.client,
-    this.error,
+    required this.client,
   });
 
   // toJson
@@ -61,7 +56,6 @@ class FaceEmbeddings {
         'faces': faces.map((x) => x.toJson()).toList(),
         'version': version,
         'client': client,
-        'error': error,
       };
   // fromJson
   factory FaceEmbeddings.fromJson(Map<String, dynamic> json) {
@@ -70,8 +64,8 @@ class FaceEmbeddings {
         json['faces'].map((x) => Face.fromJson(x as Map<String, dynamic>)),
       ),
       json['version'] as int,
-      client: json['client'] as String?,
-      error: json['error'] as bool?,
+      client: json['client'] ??
+      'unknown',
     );
   }
 }

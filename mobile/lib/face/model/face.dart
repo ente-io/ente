@@ -1,5 +1,6 @@
 import "package:photos/face/model/detection.dart";
 import 'package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart';
+import "package:photos/services/machine_learning/face_ml/face_ml_result.dart";
 
 // FileInfo contains the image width and height of the image the face was detected in.
 class FileInfo {
@@ -12,13 +13,17 @@ class FileInfo {
 }
 
 class Face {
-  final int fileID;
   final String faceID;
   final List<double> embedding;
   Detection detection;
   final double score;
   final double blur;
+ 
+  ///#region Local DB fields
+  // This is not stored on the server, using it for local DB row
   FileInfo? fileInfo;
+  final int fileID;
+  ///#endregion
 
   bool get isBlurry => blur < kLaplacianHardThreshold;
 
@@ -55,10 +60,12 @@ class Face {
   }
 
   factory Face.fromJson(Map<String, dynamic> json) {
+    final String faceID = json['faceID'] as String;
+    final int fileID = getFileIdFromFaceId(faceID);
     return Face(
-      json['faceID'] as String,
-      json['fileID'] as int,
-      List<double>.from(json['embeddings'] as List),
+      faceID,
+      fileID,
+      List<double>.from((json['embedding'] ?? json['embeddings']) as List),
       json['score'] as double,
       Detection.fromJson(json['detection'] as Map<String, dynamic>),
       // high value means t
@@ -66,10 +73,11 @@ class Face {
     );
   }
 
+  // Note: Keep the information in toJson minimum. Keep in sync with desktop.
+  // Derive fields like fileID from other values whenever possible
   Map<String, dynamic> toJson() => {
         'faceID': faceID,
-        'fileID': fileID,
-        'embeddings': embedding,
+        'embedding': embedding,
         'detection': detection.toJson(),
         'score': score,
         'blur': blur,

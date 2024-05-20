@@ -1,6 +1,5 @@
 import "dart:async";
 import "dart:convert";
-import "dart:typed_data";
 
 import "package:computer/computer.dart";
 import "package:logging/logging.dart";
@@ -37,7 +36,7 @@ class RemoteFileMLService {
     final encryptionKey = getFileKey(file);
     final embeddingJSON = jsonEncode(fileML.toJson());
     final encryptedEmbedding = await CryptoUtil.encryptChaCha(
-      utf8.encode(embeddingJSON) as Uint8List,
+      utf8.encode(embeddingJSON),
       encryptionKey,
     );
     final encryptedData =
