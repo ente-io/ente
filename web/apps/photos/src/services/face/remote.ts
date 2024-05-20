@@ -8,8 +8,9 @@ import type { Face, FaceDetection, MlFileData } from "./types";
 export const putFaceEmbedding = async (
     enteFile: EnteFile,
     mlFileData: MlFileData,
+    userAgent: string,
 ) => {
-    const serverMl = LocalFileMlDataToServerFileMl(mlFileData);
+    const serverMl = LocalFileMlDataToServerFileMl(mlFileData, userAgent);
     log.debug(() => ({ t: "Local ML file data", mlFileData }));
     log.debug(() => ({
         t: "Uploaded ML file data",
@@ -57,13 +58,11 @@ class ServerFileMl {
 class ServerFaceEmbeddings {
     public faces: ServerFace[];
     public version: number;
-    /* TODO
-    public client?: string;
-    public error?: boolean;
-    */
+    public client: string;
 
-    public constructor(faces: ServerFace[], version: number) {
+    public constructor(faces: ServerFace[], client: string, version: number) {
         this.faces = faces;
+        this.client = client;
         this.version = version;
     }
 }
@@ -121,6 +120,7 @@ class ServerFaceBox {
 
 function LocalFileMlDataToServerFileMl(
     localFileMlData: MlFileData,
+    userAgent: string,
 ): ServerFileMl {
     if (localFileMlData.errorCount > 0) {
         return null;
@@ -139,7 +139,6 @@ function LocalFileMlDataToServerFileMl(
         const landmarks = detection.landmarks;
         const newBox = new ServerFaceBox(box.x, box.y, box.width, box.height);
 
-        // TODO-ML: Add client UA and version
         const newFaceObject = new ServerFace(
             faceID,
             Array.from(embedding),
@@ -149,7 +148,7 @@ function LocalFileMlDataToServerFileMl(
         );
         faces.push(newFaceObject);
     }
-    const faceEmbeddings = new ServerFaceEmbeddings(faces, 1);
+    const faceEmbeddings = new ServerFaceEmbeddings(faces, userAgent, 1);
     return new ServerFileMl(
         localFileMlData.fileId,
         faceEmbeddings,

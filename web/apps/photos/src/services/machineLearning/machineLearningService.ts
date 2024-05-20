@@ -44,6 +44,7 @@ export async function updateMLSearchConfig(newConfig: MLSearchConfig) {
 class MLSyncContext {
     public token: string;
     public userID: number;
+    public userAgent: string;
 
     public localFilesMap: Map<number, EnteFile>;
     public outOfSyncFiles: EnteFile[];
@@ -52,9 +53,10 @@ class MLSyncContext {
 
     public syncQueue: PQueue;
 
-    constructor(token: string, userID: number) {
+    constructor(token: string, userID: number, userAgent: string) {
         this.token = token;
         this.userID = userID;
+        this.userAgent = userAgent;
 
         this.outOfSyncFiles = [];
         this.nSyncedFiles = 0;
@@ -77,12 +79,16 @@ class MachineLearningService {
     private localSyncContext: Promise<MLSyncContext>;
     private syncContext: Promise<MLSyncContext>;
 
-    public async sync(token: string, userID: number): Promise<boolean> {
+    public async sync(
+        token: string,
+        userID: number,
+        userAgent: string,
+    ): Promise<boolean> {
         if (!token) {
             throw Error("Token needed by ml service to sync file");
         }
 
-        const syncContext = await this.getSyncContext(token, userID);
+        const syncContext = await this.getSyncContext(token, userID, userAgent);
 
         await this.syncLocalFiles(syncContext);
 
@@ -214,13 +220,17 @@ class MachineLearningService {
         // await this.disposeMLModels();
     }
 
-    private async getSyncContext(token: string, userID: number) {
+    private async getSyncContext(
+        token: string,
+        userID: number,
+        userAgent: string,
+    ) {
         if (!this.syncContext) {
             log.info("Creating syncContext");
 
             // TODO-ML(MR): Keep as promise for now.
             this.syncContext = new Promise((resolve) => {
-                resolve(new MLSyncContext(token, userID));
+                resolve(new MLSyncContext(token, userID, userAgent));
             });
         } else {
             log.info("reusing existing syncContext");
@@ -228,13 +238,17 @@ class MachineLearningService {
         return this.syncContext;
     }
 
-    private async getLocalSyncContext(token: string, userID: number) {
+    private async getLocalSyncContext(
+        token: string,
+        userID: number,
+        userAgent: string,
+    ) {
         // TODO-ML(MR): This is updating the file ML version. verify.
         if (!this.localSyncContext) {
             log.info("Creating localSyncContext");
             // TODO-ML(MR):
             this.localSyncContext = new Promise((resolve) => {
-                resolve(new MLSyncContext(token, userID));
+                resolve(new MLSyncContext(token, userID, userAgent));
             });
         } else {
             log.info("reusing existing localSyncContext");
@@ -254,10 +268,15 @@ class MachineLearningService {
     public async syncLocalFile(
         token: string,
         userID: number,
+        userAgent: string,
         enteFile: EnteFile,
         localFile?: globalThis.File,
     ) {
-        const syncContext = await this.getLocalSyncContext(token, userID);
+        const syncContext = await this.getLocalSyncContext(
+            token,
+            userID,
+            userAgent,
+        );
 
         try {
             await this.syncFileWithErrorHandler(
@@ -281,7 +300,11 @@ class MachineLearningService {
         localFile?: globalThis.File,
     ) {
         try {
-            const mlFileData = await this.syncFile(enteFile, localFile);
+            const mlFileData = await this.syncFile(
+                enteFile,
+                localFile,
+                syncContext.userAgent,
+            );
             syncContext.nSyncedFiles += 1;
             return mlFileData;
         } catch (e) {
@@ -313,14 +336,18 @@ class MachineLearningService {
         }
     }
 
-    private async syncFile(enteFile: EnteFile, localFile?: globalThis.File) {
+    private async syncFile(
+        enteFile: EnteFile,
+        localFile: globalThis.File | undefined,
+        userAgent: string,
+    ) {
         const oldMlFile = await mlIDbStorage.getFile(enteFile.id);
         if (oldMlFile && oldMlFile.mlVersion) {
             return oldMlFile;
         }
 
         const newMlFile = await indexFaces(enteFile, localFile);
-        await putFaceEmbedding(enteFile, newMlFile);
+        await putFaceEmbedding(enteFile, newMlFile, userAgent);
         await mlIDbStorage.putFile(newMlFile);
         return newMlFile;
     }
