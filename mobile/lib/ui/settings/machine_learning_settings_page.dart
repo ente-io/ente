@@ -64,6 +64,7 @@ class _MachineLearningSettingsPageState
 
   @override
   Widget build(BuildContext context) {
+    final bool facesFlag = flagService.faceSearchEnabled;
     return Scaffold(
       body: CustomScrollView(
         primary: false,
@@ -96,7 +97,9 @@ class _MachineLearningSettingsPageState
                       children: [
                         _getMagicSearchSettings(context),
                         const SizedBox(height: 12),
-                        _getFacesSearchSettings(context),
+                        facesFlag
+                            ? _getFacesSearchSettings(context)
+                            : const SizedBox.shrink(),
                       ],
                     ),
                   ),
