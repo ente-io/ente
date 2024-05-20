@@ -15,6 +15,7 @@ import "package:photos/ui/viewer/file_details/face_widget.dart";
 import "package:photos/ui/viewer/people/cropped_face_image_view.dart";
 import "package:photos/utils/face/face_box_crop.dart";
 import "package:photos/utils/thumbnail_util.dart";
+import "package:pool/pool.dart";
 
 class PersonFaceWidget extends StatelessWidget {
   final EnteFile file;
@@ -155,7 +156,13 @@ class PersonFaceWidget extends StatelessWidget {
         return null;
       }
 
-      final result = await pool.withResource(
+      late final Pool relevantResourcePool;
+      if (useFullFile) {
+        relevantResourcePool = poolFullFileFaceGenerations;
+      } else {
+        relevantResourcePool = poolThumbnailFaceGenerations;
+      }
+      final result = await relevantResourcePool.withResource(
         () async => await getFaceCrops(
           fileForFaceCrop!,
           {
@@ -226,7 +233,13 @@ class PersonFaceWidget extends StatelessWidget {
         return null;
       }
 
-      final result = await pool.withResource(
+      late final Pool relevantResourcePool;
+      if (useFullFile) {
+        relevantResourcePool = poolFullFileFaceGenerations;
+      } else {
+        relevantResourcePool = poolThumbnailFaceGenerations;
+      }
+      final result = await relevantResourcePool.withResource(
         () async => await getFaceCrops(
           fileForFaceCrop!,
           {
