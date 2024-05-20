@@ -86,7 +86,7 @@ class LocalSettings {
 
   //#region todo:(NG) remove this section, only needed for internal testing to see
   // if the OS stops the app during indexing
-  bool get remoteFetchEnabled => _prefs.getBool("remoteFetchEnabled") ?? false;
+  bool get remoteFetchEnabled => _prefs.getBool("remoteFetchEnabled") ?? true;
   Future<void> toggleRemoteFetch() async {
     await _prefs.setBool("remoteFetchEnabled", !remoteFetchEnabled);
   }
