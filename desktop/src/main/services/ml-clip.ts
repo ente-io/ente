@@ -20,7 +20,7 @@ const cachedCLIPImageSession = makeCachedInferenceSession(
     351468764 /* 335.2 MB */,
 );
 
-export const clipImageEmbedding = async (jpegImageData: Uint8Array) => {
+export const computeCLIPImageEmbedding = async (jpegImageData: Uint8Array) => {
     const tempFilePath = await makeTempFilePath();
     const imageStream = new Response(jpegImageData.buffer).body;
     await writeStream(tempFilePath, ensure(imageStream));
@@ -140,7 +140,7 @@ const getTokenizer = () => {
     return _tokenizer;
 };
 
-export const clipTextEmbeddingIfAvailable = async (text: string) => {
+export const computeCLIPTextEmbeddingIfAvailable = async (text: string) => {
     const sessionOrStatus = await Promise.race([
         cachedCLIPTextSession(),
         "downloading-model",

@@ -297,7 +297,9 @@ export interface Electron {
      *
      * @returns A CLIP embedding.
      */
-    clipImageEmbedding: (jpegImageData: Uint8Array) => Promise<Float32Array>;
+    computeCLIPImageEmbedding: (
+        jpegImageData: Uint8Array,
+    ) => Promise<Float32Array>;
 
     /**
      * Return a CLIP embedding of the given image if we already have the model
@@ -319,7 +321,7 @@ export interface Electron {
      *
      * @returns A CLIP embedding.
      */
-    clipTextEmbeddingIfAvailable: (
+    computeCLIPTextEmbeddingIfAvailable: (
         text: string,
     ) => Promise<Float32Array | undefined>;
 
@@ -337,7 +339,7 @@ export interface Electron {
      * Both the input and output are opaque binary data whose internal structure
      * is specific to our implementation and the model (MobileFaceNet) we use.
      */
-    faceEmbeddings: (input: Float32Array) => Promise<Float32Array>;
+    computeFaceEmbeddings: (input: Float32Array) => Promise<Float32Array>;
 
     // - Watch
 

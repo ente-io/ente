@@ -625,7 +625,7 @@ const mobileFaceNetEmbeddingSize = 192;
 const computeEmbeddings = async (
     faceData: Float32Array,
 ): Promise<Float32Array[]> => {
-    const outputData = await workerBridge.faceEmbeddings(faceData);
+    const outputData = await workerBridge.computeFaceEmbeddings(faceData);
 
     const embeddingSize = mobileFaceNetEmbeddingSize;
     const embeddings = new Array<Float32Array>(
