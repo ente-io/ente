@@ -19,6 +19,7 @@ import 'package:photos/db/upload_locks_db.dart';
 import "package:photos/events/endpoint_updated_event.dart";
 import 'package:photos/events/signed_in_event.dart';
 import 'package:photos/events/user_logged_out_event.dart';
+import "package:photos/face/db.dart";
 import 'package:photos/models/key_attributes.dart';
 import 'package:photos/models/key_gen_result.dart';
 import 'package:photos/models/private_key_attributes.dart';
@@ -187,6 +188,7 @@ class Configuration {
         : null;
     await CollectionsDB.instance.clearTable();
     await MemoriesDB.instance.clearTable();
+    await FaceMLDataDB.instance.clearTable();
 
     await UploadLocksDB.instance.clearTable();
     await IgnoredFilesService.instance.reset();

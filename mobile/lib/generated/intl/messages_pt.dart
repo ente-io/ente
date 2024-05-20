@@ -445,6 +445,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Agrupar por tempo de captura"),
         "clubByFileName": MessageLookupByLibrary.simpleMessage(
             "Agrupar pelo nome de arquivo"),
+        "clusteringProgress":
+            MessageLookupByLibrary.simpleMessage("Clustering progress"),
         "codeAppliedPageTitle":
             MessageLookupByLibrary.simpleMessage("Código aplicado"),
         "codeCopiedToClipboard": MessageLookupByLibrary.simpleMessage(
@@ -587,7 +589,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "descriptions": MessageLookupByLibrary.simpleMessage("Descrições"),
         "deselectAll": MessageLookupByLibrary.simpleMessage("Desmarcar todos"),
         "designedToOutlive":
-            MessageLookupByLibrary.simpleMessage("Feito para ter logenvidade"),
+            MessageLookupByLibrary.simpleMessage("Feito para ter longevidade"),
         "details": MessageLookupByLibrary.simpleMessage("Detalhes"),
         "devAccountChanged": MessageLookupByLibrary.simpleMessage(
             "A conta de desenvolvedor que usamos para publicar o Ente na App Store foi alterada. Por esse motivo, você precisará fazer entrar novamente.\n\nPedimos desculpas pelo inconveniente, mas isso era inevitável."),
@@ -714,6 +716,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "exportLogs": MessageLookupByLibrary.simpleMessage("Exportar logs"),
         "exportYourData":
             MessageLookupByLibrary.simpleMessage("Exportar seus dados"),
+        "faceRecognition":
+            MessageLookupByLibrary.simpleMessage("Face recognition"),
+        "faceRecognitionIndexingDescription": MessageLookupByLibrary.simpleMessage(
+            "Please note that this will result in a higher bandwidth and battery usage until all items are indexed."),
         "faces": MessageLookupByLibrary.simpleMessage("Rostos"),
         "failedToApplyCode":
             MessageLookupByLibrary.simpleMessage("Falha ao aplicar o código"),
@@ -760,6 +766,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("para suas memórias"),
         "forgotPassword":
             MessageLookupByLibrary.simpleMessage("Esqueceu sua senha"),
+        "foundFaces": MessageLookupByLibrary.simpleMessage("Found faces"),
         "freeStorageClaimed": MessageLookupByLibrary.simpleMessage(
             "Armazenamento gratuito reivindicado"),
         "freeStorageOnReferralSuccess": m24,

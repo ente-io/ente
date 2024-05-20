@@ -678,7 +678,7 @@ func main() {
 	pushHandler := &api.PushHandler{PushController: pushController}
 	privateAPI.POST("/push/token", pushHandler.AddToken)
 
-	embeddingController := &embeddingCtrl.Controller{Repo: embeddingRepo, AccessCtrl: accessCtrl, ObjectCleanupController: objectCleanupController, S3Config: s3Config, FileRepo: fileRepo, CollectionRepo: collectionRepo, QueueRepo: queueRepo, TaskLockingRepo: taskLockingRepo, HostName: hostName}
+	embeddingController := embeddingCtrl.New(embeddingRepo, accessCtrl, objectCleanupController, s3Config, queueRepo, taskLockingRepo, fileRepo, collectionRepo, hostName)
 	embeddingHandler := &api.EmbeddingHandler{Controller: embeddingController}
 
 	privateAPI.PUT("/embeddings", embeddingHandler.InsertOrUpdate)

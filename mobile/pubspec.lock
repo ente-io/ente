@@ -363,6 +363,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.3.2"
+  dart_ui_isolate:
+    dependency: "direct main"
+    description:
+      name: dart_ui_isolate
+      sha256: bd531558002a00de0ac7dd73c84887dd01e652bd254d3098d7763881535196d7
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.1"
   dbus:
     dependency: transitive
     description:
@@ -1380,6 +1388,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.5"
+  ml_linalg:
+    dependency: "direct main"
+    description:
+      name: ml_linalg
+      sha256: "304cb8a2a172f2303226d672d0b6f18dbfe558e2db49d27c8aa9f3e15475c0cd"
+      url: "https://pub.dev"
+    source: hosted
+    version: "13.12.2"
   modal_bottom_sheet:
     dependency: "direct main"
     description:
@@ -1712,7 +1728,7 @@ packages:
     source: hosted
     version: "1.0.1"
   pool:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: pool
       sha256: "20fe868b6314b322ea036ba325e6fc0711a22948856475e2c2b6306e8ab39c2a"
@@ -1736,7 +1752,7 @@ packages:
     source: hosted
     version: "2.1.0"
   protobuf:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: protobuf
       sha256: "68645b24e0716782e58948f8467fd42a880f255096a821f9e7d0ec625b00c84d"
@@ -1975,6 +1991,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.4"
+  simple_cluster:
+    dependency: "direct main"
+    description:
+      name: simple_cluster
+      sha256: "64d6b7d60d641299ad8c3f012417c711532792c1bc61ac6a7f52b942cdba65da"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.3.0"
   sky_engine:
     dependency: transitive
     description: flutter
@@ -2149,7 +2173,7 @@ packages:
     source: hosted
     version: "19.4.56"
   synchronized:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: synchronized
       sha256: "539ef412b170d65ecdafd780f924e5be3f60032a1128df156adad6c5b373d558"

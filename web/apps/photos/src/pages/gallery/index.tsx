@@ -717,10 +717,10 @@ export default function Gallery() {
             await syncTrash(collections, setTrashedFiles);
             await syncEntities();
             await syncMapEnabled();
-            await syncCLIPEmbeddings();
             const electron = globalThis.electron;
-            if (isInternalUserForML() && electron) {
-                await syncFaceEmbeddings();
+            if (electron) {
+                await syncCLIPEmbeddings();
+                if (isInternalUserForML()) await syncFaceEmbeddings();
             }
             if (clipService.isPlatformSupported()) {
                 void clipService.scheduleImageEmbeddingExtraction();

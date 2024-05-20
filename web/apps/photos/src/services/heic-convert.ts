@@ -51,9 +51,7 @@ class HEICConverter {
                                     const startTime = Date.now();
                                     const convertedHEIC =
                                         await worker.heicToJPEG(fileBlob);
-                                    const ms = Math.round(
-                                        Date.now() - startTime,
-                                    );
+                                    const ms = Date.now() - startTime;
                                     log.debug(() => `heic => jpeg (${ms} ms)`);
                                     clearTimeout(timeout);
                                     resolve(convertedHEIC);

@@ -270,14 +270,7 @@ function EnableMLSearch({ onClose, enableMlSearch, onRootClose }) {
                     {" "}
                     <Typography color="text.muted">
                         {/* <Trans i18nKey={"ENABLE_ML_SEARCH_DESCRIPTION"} /> */}
-                        <p>
-                            We're putting finishing touches, coming back soon!
-                        </p>
-                        <p>
-                            <small>
-                                Existing indexed faces will continue to show.
-                            </small>
-                        </p>
+                        We're putting finishing touches, coming back soon!
                     </Typography>
                 </Box>
                 {isInternalUserForML() && (

@@ -67,7 +67,7 @@ class FlagService {
 
   bool get mapEnabled => flags.mapEnabled;
 
-  bool get faceSearchEnabled => flags.faceSearchEnabled;
+  bool get faceSearchEnabled => internalUser || flags.faceSearchEnabled;
 
   bool get passKeyEnabled => flags.passKeyEnabled || internalOrBetaUser;
 
