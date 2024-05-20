@@ -1,9 +1,9 @@
 import { Box, Point } from "services/face/geom";
 import type { FaceDetection } from "services/face/types";
-// TODO-ML: Do we need two separate Matrix libraries?
+// TODO-ML(LAURENS): Do we need two separate Matrix libraries?
 //
 // Keeping this in a separate file so that we can audit this. If these can be
-// expressed using ml-matrix, then we can move the code to f-index.
+// expressed using ml-matrix, then we can move this code to f-index.ts
 import {
     Matrix,
     applyToPoint,

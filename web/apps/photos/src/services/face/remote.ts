@@ -70,21 +70,20 @@ class ServerFaceEmbeddings {
 
 class ServerFace {
     public faceID: string;
-    // TODO-ML: singular?
-    public embeddings: number[];
+    public embedding: number[];
     public detection: ServerDetection;
     public score: number;
     public blur: number;
 
     public constructor(
         faceID: string,
-        embeddings: number[],
+        embedding: number[],
         detection: ServerDetection,
         score: number,
         blur: number,
     ) {
         this.faceID = faceID;
-        this.embeddings = embeddings;
+        this.embedding = embedding;
         this.detection = detection;
         this.score = score;
         this.blur = blur;

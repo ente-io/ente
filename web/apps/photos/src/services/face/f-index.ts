@@ -127,8 +127,6 @@ const indexFaces_ = async (enteFile: EnteFile, imageBitmap: ImageBitmap) => {
         const embeddings = await computeEmbeddings(alignedFacesData);
         mlFile.faces.forEach((f, i) => (f.embedding = embeddings[i]));
 
-        // TODO-ML: Skip if somehow already relative. But why would it be?
-        // if (face.detection.box.x + face.detection.box.width < 2) continue;
         mlFile.faces.forEach((face) => {
             face.detection = relativeDetection(face.detection, imageDimensions);
         });
@@ -157,11 +155,6 @@ const detectFaces = async (
         rect(yoloSize),
         rect(imageBitmap),
     );
-
-    // TODO-ML: reenable faces filtering based on width ?? else remove me
-    // ?.filter((f) =>
-    //     f.box.width > syncContext.config.faceDetection.minFaceSize
-    // );
 
     const maxFaceDistancePercent = Math.sqrt(2) / 100;
     const maxFaceDistance = imageBitmap.width * maxFaceDistancePercent;
@@ -321,8 +314,8 @@ const removeDuplicateDetections = (
 
 const faceDetectionCenter = (detection: FaceDetection) => {
     const center = new Point(0, 0);
-    // TODO-ML: first 4 landmarks is applicable to blazeface only this needs to
-    // consider eyes, nose and mouth landmarks to take center
+    // TODO-ML(LAURENS): first 4 landmarks is applicable to blazeface only this
+    // needs to consider eyes, nose and mouth landmarks to take center
     detection.landmarks?.slice(0, 4).forEach((p) => {
         center.x += p.x;
         center.y += p.y;
@@ -355,11 +348,14 @@ const makeFaceID = (
 const faceAlignment = (faceDetection: FaceDetection): FaceAlignment =>
     faceAlignmentUsingSimilarityTransform(
         faceDetection,
-        normalizeLandmarks(arcFaceLandmarks, mobileFaceNetFaceSize),
+        normalizeLandmarks(idealMobileFaceNetLandmarks, mobileFaceNetFaceSize),
     );
 
-// TODO-ML: Rename?
-const arcFaceLandmarks: [number, number][] = [
+/**
+ * The ideal location of the landmarks (eye etc) that the MobileFaceNet
+ * embedding model expects.
+ */
+const idealMobileFaceNetLandmarks: [number, number][] = [
     [38.2946, 51.6963],
     [73.5318, 51.5014],
     [56.0252, 71.7366],
@@ -682,21 +678,18 @@ const extractFaceCrop = (
     imageBitmap: ImageBitmap,
     alignment: FaceAlignment,
 ): ImageBitmap => {
-    // TODO-ML: Do we need to round twice?
-    const alignmentBox = roundBox(
-        new Box({
-            x: alignment.center.x - alignment.size / 2,
-            y: alignment.center.y - alignment.size / 2,
-            width: alignment.size,
-            height: alignment.size,
-        }),
-    );
+    const alignmentBox = new Box({
+        x: alignment.center.x - alignment.size / 2,
+        y: alignment.center.y - alignment.size / 2,
+        width: alignment.size,
+        height: alignment.size,
+    });
 
     const padding = 0.25;
     const scaleForPadding = 1 + padding * 2;
     const paddedBox = roundBox(enlargeBox(alignmentBox, scaleForPadding));
 
-    // TODO-ML: The rotation doesn't seem to be used? it's set to 0.
+    // TODO-ML(LAURENS): The rotation doesn't seem to be used? it's set to 0.
     return cropWithRotation(imageBitmap, paddedBox, 0, 256);
 };
 

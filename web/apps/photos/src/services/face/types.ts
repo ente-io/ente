@@ -8,7 +8,7 @@ export interface FaceDetection {
 }
 
 export interface FaceAlignment {
-    // TODO-ML: remove affine matrix as rotation, size and center
+    // TODO-ML(MR): remove affine matrix as rotation, size and center
     // are simple to store and use, affine matrix adds complexity while getting crop
     affineMatrix: number[][];
     rotation: number;

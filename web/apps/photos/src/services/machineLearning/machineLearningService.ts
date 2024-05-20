@@ -11,11 +11,7 @@ import { EnteFile } from "types/file";
 import { isInternalUserForML } from "utils/user";
 import { indexFaces } from "../face/f-index";
 
-/**
- * TODO-ML(MR): What and why.
- * Also, needs to be 1 (in sync with mobile) when we move out of beta.
- */
-export const defaultMLVersion = 3;
+export const defaultMLVersion = 1;
 
 const batchSize = 200;
 
