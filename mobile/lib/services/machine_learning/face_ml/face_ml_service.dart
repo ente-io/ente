@@ -1333,7 +1333,7 @@ class FaceMlService {
 
     final int alreadyIndexedCount = await FaceMLDataDB.instance
         .getIndexedFileCount(minimumMlVersion: faceMlVersion);
-    final int totalIndexableCount = (await getIndexableFileIDs()).length;
+    final int totalIndexableCount = await getIndexableFilesCount();
     final ratio = alreadyIndexedCount / totalIndexableCount;
 
     w?.log('getIndexedDoneRatio');
@@ -1341,9 +1341,11 @@ class FaceMlService {
     return ratio;
   }
 
-  static Future<List<int>> getIndexableFileIDs() async {
-    return FilesDB.instance
-        .getOwnedFileIDs(Configuration.instance.getUserID()!);
+  static Future<int> getIndexableFilesCount() async {
+    final List<EnteFile> enteFiles = await SearchService.instance.getAllFiles();
+    final List<EnteFile> hiddenFiles =
+        await SearchService.instance.getHiddenFiles();
+    return enteFiles.length + hiddenFiles.length;
   }
 
   bool _skipAnalysisEnteFile(EnteFile enteFile, Map<int, int> indexedFileIds) {
