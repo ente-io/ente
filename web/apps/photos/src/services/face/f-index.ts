@@ -57,8 +57,8 @@ export const indexFaces = async (enteFile: EnteFile, localFile?: File) => {
     }
 
     log.debug(() => {
-        const ms = Math.round(Date.now() - startTime);
         const nf = mlFile.faces?.length ?? 0;
+        const ms = Date.now() - startTime;
         return `Indexed ${nf} faces in file ${enteFile.id} (${ms} ms)`;
     });
     return mlFile;
@@ -625,7 +625,7 @@ const mobileFaceNetEmbeddingSize = 192;
 const computeEmbeddings = async (
     faceData: Float32Array,
 ): Promise<Float32Array[]> => {
-    const outputData = await workerBridge.faceEmbeddings(faceData);
+    const outputData = await workerBridge.computeFaceEmbeddings(faceData);
 
     const embeddingSize = mobileFaceNetEmbeddingSize;
     const embeddings = new Array<Float32Array>(

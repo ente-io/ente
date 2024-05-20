@@ -315,32 +315,18 @@ const setupTrayItem = (mainWindow: BrowserWindow) => {
 
 /**
  * Older versions of our app used to maintain a cache dir using the main
- * process. This has been removed in favor of cache on the web layer.
+ * process. This has been removed in favor of cache on the web layer. Delete the
+ * old cache dir if it exists.
  *
- * Delete the old cache dir if it exists.
- *
- * This will happen in two phases. The cache had three subdirectories:
- *
- * - Two of them, "thumbs" and "files", will be removed now (v1.7.0, May 2024).
- *
- * - The third one, "face-crops" will be removed once we finish the face search
- *   changes. See: [Note: Legacy face crops].
- *
- * This migration code can be removed after some time once most people have
- * upgraded to newer versions.
+ * Added May 2024, v1.7.0. This migration code can be removed after some time
+ * once most people have upgraded to newer versions.
  */
 const deleteLegacyDiskCacheDirIfExists = async () => {
-    const removeIfExists = async (dirPath: string) => {
-        if (existsSync(dirPath)) {
-            log.info(`Removing legacy disk cache from ${dirPath}`);
-            await fs.rm(dirPath, { recursive: true });
-        }
-    };
     // [Note: Getting the cache path]
     //
     // The existing code was passing "cache" as a parameter to getPath.
     //
-    // However, "cache" is not a valid parameter to getPath. It works! (for
+    // However, "cache" is not a valid parameter to getPath. It works (for
     // example, on macOS I get `~/Library/Caches`), but it is intentionally not
     // documented as part of the public API:
     //
@@ -353,8 +339,8 @@ const deleteLegacyDiskCacheDirIfExists = async () => {
     // @ts-expect-error "cache" works but is not part of the public API.
     const cacheDir = path.join(app.getPath("cache"), "ente");
     if (existsSync(cacheDir)) {
-        await removeIfExists(path.join(cacheDir, "thumbs"));
-        await removeIfExists(path.join(cacheDir, "files"));
+        log.info(`Removing legacy disk cache from ${cacheDir}`);
+        await fs.rm(cacheDir, { recursive: true });
     }
 };
 

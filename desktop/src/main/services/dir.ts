@@ -1,7 +1,5 @@
 import { shell } from "electron/common";
 import { app, dialog } from "electron/main";
-import { existsSync } from "fs";
-import fs from "node:fs/promises";
 import path from "node:path";
 import { posixPath } from "../utils/electron";
 
@@ -78,16 +76,3 @@ export const openLogDirectory = () => openDirectory(logDirectoryPath());
  * - Windows: %USERPROFILE%\AppData\Roaming\ente\logs\ente.log
  */
 const logDirectoryPath = () => app.getPath("logs");
-
-/**
- * See: [Note: Legacy face crops]
- */
-export const legacyFaceCrop = async (
-    faceID: string,
-): Promise<Uint8Array | undefined> => {
-    // See: [Note: Getting the cache path]
-    // @ts-expect-error "cache" works but is not part of the public API.
-    const cacheDir = path.join(app.getPath("cache"), "ente");
-    const filePath = path.join(cacheDir, "face-crops", faceID);
-    return existsSync(filePath) ? await fs.readFile(filePath) : undefined;
-};

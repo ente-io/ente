@@ -151,22 +151,15 @@ const FaceCropImageView: React.FC<FaceCropImageViewProps> = ({ faceID }) => {
 
     useEffect(() => {
         let didCancel = false;
-        const electron = globalThis.electron;
-
-        if (faceID && electron) {
-            electron
-                .legacyFaceCrop(faceID)
-                .then(async (data) => {
-                    if (data) return data;
+        if (faceID) {
+            blobCache("face-crops")
+                .then((cache) => cache.get(faceID))
+                .then((data) => {
                     /*
                     TODO(MR): regen if needed and get this to work on web too.
                     cachedOrNew("face-crops", cacheKey, async () => {
                         return regenerateFaceCrop(faceId);
                     })*/
-                    const cache = await blobCache("face-crops");
-                    return await cache.get(faceID);
-                })
-                .then((data) => {
                     if (data) {
                         const blob = new Blob([data]);
                         if (!didCancel) setObjectURL(URL.createObjectURL(blob));
