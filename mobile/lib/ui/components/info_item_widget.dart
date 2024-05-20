@@ -11,6 +11,7 @@ class InfoItemWidget extends StatelessWidget {
   final Widget? endSection;
   final Future<List<Widget>> subtitleSection;
   final bool hasChipButtons;
+  final bool biggerSpinner;
   final VoidCallback? onTap;
   const InfoItemWidget({
     required this.leadingIcon,
@@ -19,6 +20,7 @@ class InfoItemWidget extends StatelessWidget {
     this.endSection,
     required this.subtitleSection,
     this.hasChipButtons = false,
+    this.biggerSpinner = false,
     this.onTap,
     super.key,
   });
@@ -57,10 +59,11 @@ class InfoItemWidget extends StatelessWidget {
               }
             } else {
               child = EnteLoadingWidget(
-                padding: 3,
-                size: 11,
+                padding: biggerSpinner ? 6 : 3,
+                size: biggerSpinner ? 20 : 11,
                 color: getEnteColorScheme(context).strokeMuted,
-                alignment: Alignment.centerLeft,
+                alignment:
+                    biggerSpinner ? Alignment.center : Alignment.centerLeft,
               );
             }
             return AnimatedSwitcher(

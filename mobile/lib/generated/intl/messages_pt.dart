@@ -445,6 +445,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Agrupar por tempo de captura"),
         "clubByFileName": MessageLookupByLibrary.simpleMessage(
             "Agrupar pelo nome de arquivo"),
+        "clusteringProgress":
+            MessageLookupByLibrary.simpleMessage("Clustering progress"),
         "codeAppliedPageTitle":
             MessageLookupByLibrary.simpleMessage("Código aplicado"),
         "codeCopiedToClipboard": MessageLookupByLibrary.simpleMessage(
@@ -714,6 +716,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "exportLogs": MessageLookupByLibrary.simpleMessage("Exportar logs"),
         "exportYourData":
             MessageLookupByLibrary.simpleMessage("Exportar seus dados"),
+        "faceRecognition":
+            MessageLookupByLibrary.simpleMessage("Face recognition"),
+        "faceRecognitionIndexingDescription": MessageLookupByLibrary.simpleMessage(
+            "Please note that this will result in a higher bandwidth and battery usage until all items are indexed."),
         "faces": MessageLookupByLibrary.simpleMessage("Rostos"),
         "failedToApplyCode":
             MessageLookupByLibrary.simpleMessage("Falha ao aplicar o código"),
@@ -760,6 +766,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("para suas memórias"),
         "forgotPassword":
             MessageLookupByLibrary.simpleMessage("Esqueceu sua senha"),
+        "foundFaces": MessageLookupByLibrary.simpleMessage("Found faces"),
         "freeStorageClaimed": MessageLookupByLibrary.simpleMessage(
             "Armazenamento gratuito reivindicado"),
         "freeStorageOnReferralSuccess": m24,

@@ -22,7 +22,7 @@ class MachineLearningController {
 
   bool _isDeviceHealthy = true;
   bool _isUserInteracting = true;
-  bool _isRunningML = false;
+  bool _canRunML = false;
   late Timer _userInteractionTimer;
 
   void init() {
@@ -35,6 +35,7 @@ class MachineLearningController {
       });
     } else {
       // Always run Machine Learning on iOS
+      _canRunML = true;
       Bus.instance.fire(MachineLearningControlEvent(true));
     }
   }
@@ -53,10 +54,10 @@ class MachineLearningController {
 
   void _fireControlEvent() {
     final shouldRunML = _isDeviceHealthy && !_isUserInteracting;
-    if (shouldRunML != _isRunningML) {
-      _isRunningML = shouldRunML;
+    if (shouldRunML != _canRunML) {
+      _canRunML = shouldRunML;
       _logger.info(
-        "Firing event with device health: $_isDeviceHealthy and user interaction: $_isUserInteracting",
+        "Firing event with $shouldRunML, device health: $_isDeviceHealthy and user interaction: $_isUserInteracting",
       );
       Bus.instance.fire(MachineLearningControlEvent(shouldRunML));
     }

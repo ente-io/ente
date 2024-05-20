@@ -109,7 +109,11 @@ String parseErrorForUI(
       errorInfo = "Reason: " + dioError.type.toString();
     }
   } else {
-    errorInfo = error.toString().split('Source stack')[0];
+    if (kDebugMode) {
+      errorInfo = error.toString();
+    } else {
+      errorInfo = error.toString().split('Source stack')[0];
+    }
   }
   if (errorInfo.isNotEmpty) {
     return "$genericError\n\n$errorInfo";

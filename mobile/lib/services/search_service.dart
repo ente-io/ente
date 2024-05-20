@@ -11,6 +11,8 @@ import 'package:photos/data/years.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import "package:photos/extensions/string_ext.dart";
+import "package:photos/face/db.dart";
+import "package:photos/face/model/person.dart";
 import "package:photos/models/api/collection/user.dart";
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/collection/collection_items.dart';
@@ -22,19 +24,25 @@ import "package:photos/models/location/location.dart";
 import "package:photos/models/location_tag/location_tag.dart";
 import 'package:photos/models/search/album_search_result.dart';
 import 'package:photos/models/search/generic_search_result.dart';
+import "package:photos/models/search/search_constants.dart";
 import "package:photos/models/search/search_types.dart";
 import 'package:photos/services/collections_service.dart';
 import "package:photos/services/location_service.dart";
+import "package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart";
+import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import 'package:photos/services/machine_learning/semantic_search/semantic_search_service.dart';
 import "package:photos/states/location_screen_state.dart";
 import "package:photos/ui/viewer/location/add_location_sheet.dart";
 import "package:photos/ui/viewer/location/location_screen.dart";
+import "package:photos/ui/viewer/people/cluster_page.dart";
+import "package:photos/ui/viewer/people/people_page.dart";
 import 'package:photos/utils/date_time_util.dart';
 import "package:photos/utils/navigation_util.dart";
 import 'package:tuple/tuple.dart';
 
 class SearchService {
   Future<List<EnteFile>>? _cachedFilesFuture;
+  Future<List<EnteFile>>? _cachedHiddenFilesFuture;
   final _logger = Logger((SearchService).toString());
   final _collectionService = CollectionsService.instance;
   static const _maximumResultsLimit = 20;
@@ -47,6 +55,7 @@ class SearchService {
     Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
       // only invalidate, let the load happen on demand
       _cachedFilesFuture = null;
+      _cachedHiddenFilesFuture = null;
     });
   }
 
@@ -66,8 +75,21 @@ class SearchService {
     return _cachedFilesFuture!;
   }
 
+  Future<List<EnteFile>> getHiddenFiles() async {
+    if (_cachedHiddenFilesFuture != null) {
+      return _cachedHiddenFilesFuture!;
+    }
+    _logger.fine("Reading hidden files from db");
+    final hiddenCollections =
+        CollectionsService.instance.getHiddenCollectionIds();
+    _cachedHiddenFilesFuture =
+        FilesDB.instance.getAllFilesFromCollections(hiddenCollections);
+    return _cachedHiddenFilesFuture!;
+  }
+
   void clearCache() {
     _cachedFilesFuture = null;
+    _cachedHiddenFilesFuture = null;
   }
 
   // getFilteredCollectionsWithThumbnail removes deleted or archived or
@@ -702,6 +724,169 @@ class SearchService {
       }
     }
     return searchResults;
+  }
+
+  Future<Map<int, List<EnteFile>>> getClusterFilesForPersonID(
+    String personID,
+  ) async {
+    _logger.info('getClusterFilesForPersonID $personID');
+    final Map<int, Set<int>> fileIdToClusterID =
+        await FaceMLDataDB.instance.getFileIdToClusterIDSet(personID);
+    _logger.info('faceDbDone getClusterFilesForPersonID $personID');
+    final Map<int, List<EnteFile>> clusterIDToFiles = {};
+    final allFiles = await getAllFiles();
+    for (final f in allFiles) {
+      if (!fileIdToClusterID.containsKey(f.uploadedFileID ?? -1)) {
+        continue;
+      }
+      final cluserIds = fileIdToClusterID[f.uploadedFileID ?? -1]!;
+      for (final cluster in cluserIds) {
+        if (clusterIDToFiles.containsKey(cluster)) {
+          clusterIDToFiles[cluster]!.add(f);
+        } else {
+          clusterIDToFiles[cluster] = [f];
+        }
+      }
+    }
+    _logger.info('done getClusterFilesForPersonID $personID');
+    return clusterIDToFiles;
+  }
+
+  Future<List<GenericSearchResult>> getAllFace(int? limit) async {
+    try {
+      // Don't return anything if clustering is not nearly complete yet
+      final foundFaces = await FaceMLDataDB.instance.getTotalFaceCount();
+      final clusteredFaces =
+          await FaceMLDataDB.instance.getClusteredFaceCount();
+      final clusteringDoneRatio = clusteredFaces / foundFaces;
+      if (clusteringDoneRatio < 0.9) {
+        return [];
+      }
+
+      debugPrint("getting faces");
+      final Map<int, Set<int>> fileIdToClusterID =
+          await FaceMLDataDB.instance.getFileIdToClusterIds();
+      final Map<String, PersonEntity> personIdToPerson =
+          await PersonService.instance.getPersonsMap();
+      final clusterIDToPersonID =
+          await FaceMLDataDB.instance.getClusterIDToPersonID();
+
+      final List<GenericSearchResult> facesResult = [];
+      final Map<int, List<EnteFile>> clusterIdToFiles = {};
+      final Map<String, List<EnteFile>> personIdToFiles = {};
+      final allFiles = await getAllFiles();
+      for (final f in allFiles) {
+        if (!fileIdToClusterID.containsKey(f.uploadedFileID ?? -1)) {
+          continue;
+        }
+        final cluserIds = fileIdToClusterID[f.uploadedFileID ?? -1]!;
+        for (final cluster in cluserIds) {
+          final PersonEntity? p =
+              personIdToPerson[clusterIDToPersonID[cluster] ?? ""];
+          if (p != null) {
+            if (personIdToFiles.containsKey(p.remoteID)) {
+              personIdToFiles[p.remoteID]!.add(f);
+            } else {
+              personIdToFiles[p.remoteID] = [f];
+            }
+          } else {
+            if (clusterIdToFiles.containsKey(cluster)) {
+              clusterIdToFiles[cluster]!.add(f);
+            } else {
+              clusterIdToFiles[cluster] = [f];
+            }
+          }
+        }
+      }
+      // get sorted personId by files count
+      final sortedPersonIds = personIdToFiles.keys.toList()
+        ..sort(
+          (a, b) => personIdToFiles[b]!.length.compareTo(
+                personIdToFiles[a]!.length,
+              ),
+        );
+      for (final personID in sortedPersonIds) {
+        final files = personIdToFiles[personID]!;
+        if (files.isEmpty) {
+          continue;
+        }
+        final PersonEntity p = personIdToPerson[personID]!;
+        if (p.data.isIgnored) continue;
+        facesResult.add(
+          GenericSearchResult(
+            ResultType.faces,
+            p.data.name,
+            files,
+            params: {
+              kPersonParamID: personID,
+              kFileID: files.first.uploadedFileID,
+            },
+            onResultTap: (ctx) {
+              routeToPage(
+                ctx,
+                PeoplePage(
+                  tagPrefix: "${ResultType.faces.toString()}_${p.data.name}",
+                  person: p,
+                ),
+              );
+            },
+          ),
+        );
+      }
+      final sortedClusterIds = clusterIdToFiles.keys.toList()
+        ..sort(
+          (a, b) => clusterIdToFiles[b]!
+              .length
+              .compareTo(clusterIdToFiles[a]!.length),
+        );
+
+      for (final clusterId in sortedClusterIds) {
+        final files = clusterIdToFiles[clusterId]!;
+        // final String clusterName = "ID:$clusterId,  ${files.length}";
+        // final String clusterName = "${files.length}";
+        // const String clusterName = "";
+        final String clusterName = "$clusterId";
+
+        if (clusterIDToPersonID[clusterId] != null) {
+          throw Exception(
+            "Cluster $clusterId should not have person id ${clusterIDToPersonID[clusterId]}",
+          );
+        }
+        if (files.length < kMinimumClusterSizeSearchResult &&
+            sortedClusterIds.length > 3) {
+          continue;
+        }
+        facesResult.add(
+          GenericSearchResult(
+            ResultType.faces,
+            clusterName,
+            files,
+            params: {
+              kClusterParamId: clusterId,
+              kFileID: files.first.uploadedFileID,
+            },
+            onResultTap: (ctx) {
+              routeToPage(
+                ctx,
+                ClusterPage(
+                  files,
+                  tagPrefix: "${ResultType.faces.toString()}_$clusterName",
+                  clusterID: clusterId,
+                ),
+              );
+            },
+          ),
+        );
+      }
+      if (limit != null) {
+        return facesResult.sublist(0, min(limit, facesResult.length));
+      } else {
+        return facesResult;
+      }
+    } catch (e, s) {
+      _logger.severe("Error in getAllFace", e, s);
+      rethrow;
+    }
   }
 
   Future<List<GenericSearchResult>> getAllLocationTags(int? limit) async {

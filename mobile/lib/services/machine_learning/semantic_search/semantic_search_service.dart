@@ -1,6 +1,7 @@
 import "dart:async";
 import "dart:collection";
 import "dart:io";
+import "dart:math" show min;
 
 import "package:computer/computer.dart";
 import "package:logging/logging.dart";
@@ -164,8 +165,10 @@ class SemanticSearchService {
   }
 
   Future<IndexStatus> getIndexStatus() async {
+    final indexableFileIDs = await FilesDB.instance
+        .getOwnedFileIDs(Configuration.instance.getUserID()!);
     return IndexStatus(
-      _cachedEmbeddings.length,
+      min(_cachedEmbeddings.length, indexableFileIDs.length),
       (await _getFileIDsToBeIndexed()).length,
     );
   }

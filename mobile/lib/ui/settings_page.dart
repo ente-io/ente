@@ -17,7 +17,8 @@ import 'package:photos/ui/settings/about_section_widget.dart';
 import 'package:photos/ui/settings/account_section_widget.dart';
 import 'package:photos/ui/settings/app_version_widget.dart';
 import 'package:photos/ui/settings/backup/backup_section_widget.dart';
-import 'package:photos/ui/settings/debug_section_widget.dart';
+import 'package:photos/ui/settings/debug/debug_section_widget.dart';
+import "package:photos/ui/settings/debug/face_debug_section_widget.dart";
 import "package:photos/ui/settings/developer_settings_widget.dart";
 import 'package:photos/ui/settings/general_section_widget.dart';
 import 'package:photos/ui/settings/inherited_settings_state.dart';
@@ -53,6 +54,7 @@ class SettingsPage extends StatelessWidget {
     final hasLoggedIn = Configuration.instance.isLoggedIn();
     final enteTextTheme = getEnteTextTheme(context);
     final List<Widget> contents = [];
+    const sectionSpacing = SizedBox(height: 8);
     contents.add(
       GestureDetector(
         onDoubleTap: () {
@@ -82,7 +84,7 @@ class SettingsPage extends StatelessWidget {
         ),
       ),
     );
-    const sectionSpacing = SizedBox(height: 8);
+
     contents.add(const SizedBox(height: 8));
     if (hasLoggedIn) {
       final showStorageBonusBanner =
@@ -142,6 +144,9 @@ class SettingsPage extends StatelessWidget {
 
     if (hasLoggedIn && flagService.internalUser) {
       contents.addAll([sectionSpacing, const DebugSectionWidget()]);
+      if (flagService.faceSearchEnabled) {
+        contents.addAll([sectionSpacing, const FaceDebugSectionWidget()]);
+      }
     }
     contents.add(const AppVersionWidget());
     contents.add(const DeveloperSettingsWidget());
