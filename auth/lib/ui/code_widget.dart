@@ -279,7 +279,7 @@ class _CodeWidgetState extends State<CodeWidget> {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            if (widget.code.type == Type.totp)
+            if (widget.code.type.isTOTPCompatible)
               CodeTimerProgress(
                 period: widget.code.period,
               ),
