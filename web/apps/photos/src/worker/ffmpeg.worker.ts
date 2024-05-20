@@ -82,7 +82,7 @@ const ffmpegExec = async (
 
         const result = ffmpeg.FS("readFile", outputPath);
 
-        const ms = Math.round(Date.now() - startTime);
+        const ms = Date.now() - startTime;
         log.debug(() => `[wasm] ffmpeg ${cmd.join(" ")} (${ms} ms)`);
         return result;
     } finally {
