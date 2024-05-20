@@ -88,7 +88,8 @@ const fetchOrCreateImageBitmap = async (
 
 const indexFaces_ = async (enteFile: EnteFile, imageBitmap: ImageBitmap) => {
     const fileID = enteFile.id;
-    const imageDimensions: Dimensions = imageBitmap;
+    const { width, height } = imageBitmap;
+    const imageDimensions = { width, height };
     const mlFile: MlFileData = {
         fileId: fileID,
         mlVersion: defaultMLVersion,
