@@ -24,7 +24,6 @@ import {
     updateOnNextRestart,
 } from "./services/app-update";
 import {
-    legacyFaceCrop,
     openDirectory,
     openLogDirectory,
     selectDirectory,
@@ -184,10 +183,6 @@ export const attachIPCHandlers = () => {
 
     ipcMain.handle("faceEmbeddings", (_, input: Float32Array) =>
         faceEmbeddings(input),
-    );
-
-    ipcMain.handle("legacyFaceCrop", (_, faceID: string) =>
-        legacyFaceCrop(faceID),
     );
 
     // - Upload
