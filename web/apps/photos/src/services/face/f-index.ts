@@ -2,7 +2,6 @@ import { FILE_TYPE } from "@/media/file-type";
 import { blobCache } from "@/next/blob-cache";
 import log from "@/next/log";
 import { workerBridge } from "@/next/worker/worker-bridge";
-import { euclidean } from "hdbscan";
 import { Matrix } from "ml-matrix";
 import {
     Box,
@@ -19,6 +18,13 @@ import type {
 } from "services/face/types";
 import { defaultMLVersion } from "services/machineLearning/machineLearningService";
 import { getSimilarityTransformation } from "similarity-transformation";
+import {
+    applyToPoint,
+    compose,
+    scale,
+    Matrix as transformMatrix,
+    translate,
+} from "transformation-matrix";
 import type { EnteFile } from "types/file";
 import { fetchImageBitmap, getLocalFileImageBitmap } from "./file";
 import {
@@ -27,13 +33,6 @@ import {
     pixelRGBBilinear,
     warpAffineFloat32List,
 } from "./image";
-import {
-    Matrix as transformMatrix,
-    applyToPoint,
-    compose,
-    scale,
-    translate,
-} from "transformation-matrix";
 /**
  * Index faces in the given file.
  *
@@ -316,17 +315,17 @@ const transformBox = (box: Box, transform: transformMatrix) => {
 
 /**
  * Remove overlapping faces from an array of face detections through non-maximum suppression algorithm.
- * 
+ *
  * This function sorts the detections by their probability in descending order, then iterates over them.
- * 
+ *
  * For each detection, it calculates the Intersection over Union (IoU) with all other detections.
- * 
+ *
  * If the IoU is greater than or equal to the specified threshold (`iouThreshold`), the other detection is considered overlapping and is removed.
- * 
+ *
  * @param detections - An array of face detections to remove overlapping faces from.
- * 
+ *
  * @param iouThreshold - The minimum IoU between two detections for them to be considered overlapping.
- * 
+ *
  * @returns An array of face detections with overlapping faces removed
  */
 const naiveNonMaxSuppression = (
