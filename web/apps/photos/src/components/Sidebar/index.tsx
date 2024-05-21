@@ -291,7 +291,7 @@ const SubscriptionStatus: React.FC<SubscriptionStatusProps> = ({
         return <></>;
     }
 
-    let message: React.ReactElement | undefined;
+    let message: React.ReactNode;
     if (!hasAddOnBonus(userDetails.bonusData)) {
         if (isSubscriptionActive(userDetails.subscription)) {
             if (isOnFreePlan(userDetails.subscription)) {
