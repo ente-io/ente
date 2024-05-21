@@ -33,6 +33,7 @@ import {
     pixelRGBBilinear,
     warpAffineFloat32List,
 } from "./image";
+
 /**
  * Index faces in the given file.
  *
@@ -325,17 +326,24 @@ const transformBox = (box: Box, transform: TransformationMatrix) => {
 };
 
 /**
- * Remove overlapping faces from an array of face detections through non-maximum suppression algorithm.
+ * Remove overlapping faces from an array of face detections through non-maximum
+ * suppression algorithm.
  *
- * This function sorts the detections by their probability in descending order, then iterates over them.
+ * This function sorts the detections by their probability in descending order,
+ * then iterates over them.
  *
- * For each detection, it calculates the Intersection over Union (IoU) with all other detections.
+ * For each detection, it calculates the Intersection over Union (IoU) with all
+ * other detections.
  *
- * If the IoU is greater than or equal to the specified threshold (`iouThreshold`), the other detection is considered overlapping and is removed.
+ * If the IoU is greater than or equal to the specified threshold
+ * (`iouThreshold`), the other detection is considered overlapping and is
+ * removed.
  *
- * @param detections - An array of face detections to remove overlapping faces from.
+ * @param detections - An array of face detections to remove overlapping faces
+ * from.
  *
- * @param iouThreshold - The minimum IoU between two detections for them to be considered overlapping.
+ * @param iouThreshold - The minimum IoU between two detections for them to be
+ * considered overlapping.
  *
  * @returns An array of face detections with overlapping faces removed
  */
@@ -343,13 +351,13 @@ const naiveNonMaxSuppression = (
     detections: FaceDetection[],
     iouThreshold: number,
 ): FaceDetection[] => {
-    // Sort the detections by score, the highest first
+    // Sort the detections by score, the highest first.
     detections.sort((a, b) => b.probability - a.probability);
 
-    // Loop through the detections and calculate the IOU
+    // Loop through the detections and calculate the IOU.
     for (let i = 0; i < detections.length - 1; i++) {
         for (let j = i + 1; j < detections.length; j++) {
-            const iou = calculateIOU(detections[i], detections[j]);
+            const iou = intersectionOverUnion(detections[i], detections[j]);
             if (iou >= iouThreshold) {
                 detections.splice(j, 1);
                 j--;
@@ -360,7 +368,7 @@ const naiveNonMaxSuppression = (
     return detections;
 };
 
-const calculateIOU = (a: FaceDetection, b: FaceDetection): number => {
+const intersectionOverUnion = (a: FaceDetection, b: FaceDetection): number => {
     const intersectionMinX = Math.max(a.box.x, b.box.x);
     const intersectionMinY = Math.max(a.box.y, b.box.y);
     const intersectionMaxX = Math.min(
