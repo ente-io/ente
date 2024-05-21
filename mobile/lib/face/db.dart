@@ -53,18 +53,12 @@ class FaceMLDataDB {
   }
 
   Future<void> _onCreate(SqliteDatabase asyncDBConnection) async {
-    final migrations = SqliteMigrations()
-      ..add(
-        SqliteMigration(_databaseVersion, (tx) async {
-          await tx.execute(createFacesTable);
-          await tx.execute(createFaceClustersTable);
-          await tx.execute(createClusterPersonTable);
-          await tx.execute(createClusterSummaryTable);
-          await tx.execute(createNotPersonFeedbackTable);
-          await tx.execute(fcClusterIDIndex);
-        }),
-      );
-    await migrations.migrate(asyncDBConnection);
+    await asyncDBConnection.execute(createFacesTable);
+    await asyncDBConnection.execute(createFaceClustersTable);
+    await asyncDBConnection.execute(createClusterPersonTable);
+    await asyncDBConnection.execute(createClusterSummaryTable);
+    await asyncDBConnection.execute(createNotPersonFeedbackTable);
+    await asyncDBConnection.execute(fcClusterIDIndex);
   }
 
   // bulkInsertFaces inserts the faces in the database in batches of 1000.
