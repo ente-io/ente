@@ -31,7 +31,7 @@ class _CastChooseDialogState extends State<CastChooseDialog> {
         children: [
           const SizedBox(height: 8),
           Text(
-            S.of(context).autoPairGoogle,
+            S.of(context).autoPairDesc,
             style: textStyle.bodyMuted,
           ),
           const SizedBox(height: 12),

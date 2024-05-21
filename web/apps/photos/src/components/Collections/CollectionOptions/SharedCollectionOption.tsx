@@ -1,6 +1,7 @@
 import { OverflowMenuOption } from "@ente/shared/components/OverflowMenu/option";
 import ArchiveOutlined from "@mui/icons-material/ArchiveOutlined";
 import LogoutIcon from "@mui/icons-material/Logout";
+import TvIcon from "@mui/icons-material/Tv";
 import Unarchive from "@mui/icons-material/Unarchive";
 import { t } from "i18next";
 import { CollectionActions } from ".";
@@ -44,6 +45,15 @@ export function SharedCollectionOption({
                 )}
             >
                 {t("LEAVE_ALBUM")}
+            </OverflowMenuOption>
+            <OverflowMenuOption
+                startIcon={<TvIcon />}
+                onClick={handleCollectionAction(
+                    CollectionActions.SHOW_ALBUM_CAST_DIALOG,
+                    false,
+                )}
+            >
+                {t("CAST_ALBUM_TO_TV")}
             </OverflowMenuOption>
         </>
     );

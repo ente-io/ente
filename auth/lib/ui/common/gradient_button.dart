@@ -1,7 +1,9 @@
+import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:gradient_borders/box_borders/gradient_box_border.dart';
 
-class GradientButton extends StatelessWidget {
-  final List<Color> linearGradientColors;
+class GradientButton extends StatefulWidget {
   final Function? onTap;
 
   // text is ignored if child is specified
@@ -13,33 +15,39 @@ class GradientButton extends StatelessWidget {
   // padding between the text and icon
   final double paddingValue;
 
-  // used when two icons are in row
-  final bool reversedGradient;
+  final double fontSize;
+  final double borderRadius;
+  final double borderWidth;
 
   const GradientButton({
     super.key,
-    this.linearGradientColors = const [
-      Color.fromARGB(255, 133, 44, 210),
-      Color.fromARGB(255, 187, 26, 93),
-    ],
-    this.reversedGradient = false,
     this.onTap,
     this.text = '',
     this.iconData,
     this.paddingValue = 0.0,
+    this.fontSize = 18,
+    this.borderRadius = 4,
+    this.borderWidth = 1,
   });
+
+  @override
+  State<GradientButton> createState() => _GradientButtonState();
+}
+
+class _GradientButtonState extends State<GradientButton> {
+  bool isTapped = false;
 
   @override
   Widget build(BuildContext context) {
     Widget buttonContent;
-    if (iconData == null) {
+    if (widget.iconData == null) {
       buttonContent = Text(
-        text,
-        style: const TextStyle(
+        widget.text,
+        style: TextStyle(
           color: Colors.white,
           fontWeight: FontWeight.w600,
           fontFamily: 'Inter-SemiBold',
-          fontSize: 18,
+          fontSize: widget.fontSize,
         ),
       );
     } else {
@@ -48,38 +56,79 @@ class GradientButton extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Icon(
-            iconData,
+            widget.iconData,
             size: 20,
             color: Colors.white,
           ),
           const Padding(padding: EdgeInsets.symmetric(horizontal: 6)),
           Text(
-            text,
-            style: const TextStyle(
+            widget.text,
+            style: TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.w600,
               fontFamily: 'Inter-SemiBold',
-              fontSize: 18,
+              fontSize: widget.fontSize,
             ),
           ),
         ],
       );
     }
+    final colorScheme = getEnteColorScheme(context);
+
     return InkWell(
-      onTap: onTap as void Function()?,
-      child: Container(
-        height: 56,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: const Alignment(0.1, -0.9),
-            end: const Alignment(-0.6, 0.9),
-            colors: reversedGradient
-                ? linearGradientColors.reversed.toList()
-                : linearGradientColors,
+      onTapDown: (_) {
+        setState(() {
+          isTapped = true;
+        });
+      },
+      onTapUp: (_) {
+        setState(() {
+          isTapped = false;
+        });
+      },
+      onTapCancel: () {
+        setState(() {
+          isTapped = false;
+        });
+      },
+      borderRadius: BorderRadius.circular(widget.borderRadius),
+      onTap: widget.onTap as void Function()?,
+      child: Stack(
+        children: [
+          Container(
+            height: 56,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(widget.borderRadius),
+              color: colorScheme.gradientButtonBgColor,
+            ),
           ),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Center(child: buttonContent),
+          if (!isTapped)
+            ClipRRect(
+              borderRadius: BorderRadius.circular(widget.borderRadius),
+              child: SvgPicture.asset(
+                'assets/svg/button-tint.svg',
+                fit: BoxFit.fill,
+                width: double.infinity,
+                height: 56,
+              ),
+            ),
+          Container(
+            height: 56,
+            decoration: BoxDecoration(
+              border: GradientBoxBorder(
+                width: widget.borderWidth,
+                gradient: LinearGradient(
+                  colors: colorScheme.gradientButtonBgColors,
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+              ),
+              borderRadius: BorderRadius.circular(widget.borderRadius),
+            ),
+            child: Center(child: buttonContent),
+          ),
+        ],
       ),
     );
   }

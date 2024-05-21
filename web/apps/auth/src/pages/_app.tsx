@@ -4,6 +4,7 @@ import {
     logStartupBanner,
     logUnhandledErrorsAndRejections,
 } from "@/next/log-web";
+import { accountLogout } from "@ente/accounts/services/logout";
 import {
     APPS,
     APP_TITLES,
@@ -44,6 +45,7 @@ type AppContextType = {
     setThemeColor: SetTheme;
     somethingWentWrong: () => void;
     setDialogBoxAttributesV2: SetDialogBoxAttributesV2;
+    logout: () => void;
 };
 
 export const AppContext = createContext<AppContextType>(null);
@@ -128,6 +130,10 @@ export default function App({ Component, pageProps }: AppProps) {
             content: t("UNKNOWN_ERROR"),
         });
 
+    const logout = () => {
+        void accountLogout().then(() => router.push(PAGES.ROOT));
+    };
+
     const title = isI18nReady
         ? t("TITLE", { context: APPS.AUTH })
         : APP_TITLES.get(APPS.AUTH);
@@ -162,6 +168,7 @@ export default function App({ Component, pageProps }: AppProps) {
                         setThemeColor,
                         somethingWentWrong,
                         setDialogBoxAttributesV2,
+                        logout,
                     }}
                 >
                     {(loading || !isI18nReady) && (

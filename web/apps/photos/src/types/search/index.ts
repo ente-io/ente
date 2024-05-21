@@ -1,9 +1,9 @@
 import { FILE_TYPE } from "@/media/file-type";
+import { IndexStatus } from "services/face/db";
+import type { Person } from "services/face/people";
 import { City } from "services/locationSearchService";
 import { LocationTagData } from "types/entity";
 import { EnteFile } from "types/file";
-import { Person } from "types/machineLearning";
-import { IndexStatus } from "types/machineLearning/ui";
 
 export enum SuggestionType {
     DATE = "DATE",

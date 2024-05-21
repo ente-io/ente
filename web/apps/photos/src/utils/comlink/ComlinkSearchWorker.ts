@@ -5,11 +5,13 @@ import { type DedicatedSearchWorker } from "worker/search.worker";
 
 class ComlinkSearchWorker {
     private comlinkWorkerInstance: Remote<DedicatedSearchWorker>;
+    private comlinkWorker: ComlinkWorker<typeof DedicatedSearchWorker>;
 
     async getInstance() {
         if (!this.comlinkWorkerInstance) {
-            this.comlinkWorkerInstance =
-                await getDedicatedSearchWorker().remote;
+            if (!this.comlinkWorker)
+                this.comlinkWorker = getDedicatedSearchWorker();
+            this.comlinkWorkerInstance = await this.comlinkWorker.remote;
         }
         return this.comlinkWorkerInstance;
     }

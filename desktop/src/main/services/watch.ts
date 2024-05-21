@@ -151,6 +151,15 @@ export const watchFindFiles = async (dirPath: string) => {
     return paths;
 };
 
+/**
+ * Stop watching all existing folder watches and remove any callbacks.
+ *
+ * This function is meant to be called when the user logs out. It stops
+ * all existing folder watches and forgets about any "on*" callback
+ * functions that have been registered.
+ *
+ * The persisted state itself gets cleared via {@link clearStores}.
+ */
 export const watchReset = (watcher: FSWatcher) => {
     watcher.unwatch(folderWatches().map((watch) => watch.folderPath));
 };

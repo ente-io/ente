@@ -8,8 +8,15 @@ class GenericSearchResult extends SearchResult {
   final List<EnteFile> _files;
   final ResultType _type;
   final Function(BuildContext context)? onResultTap;
+  final Map<String, dynamic> params;
 
-  GenericSearchResult(this._type, this._name, this._files, {this.onResultTap});
+  GenericSearchResult(
+    this._type,
+    this._name,
+    this._files, {
+    this.onResultTap,
+    this.params = const {},
+  });
 
   @override
   String name() {

@@ -54,13 +54,26 @@ class EmbeddingsDB {
 
   Future<void> clearTable() async {
     final db = await _database;
-    await db.execute('DELETE * FROM $tableName');
+    await db.execute('DELETE FROM $tableName');
   }
 
   Future<List<Embedding>> getAll(Model model) async {
     final db = await _database;
     final results = await db.getAll('SELECT * FROM $tableName');
     return _convertToEmbeddings(results);
+  }
+
+  // Get FileIDs for a specific model
+  Future<Set<int>> getFileIDs(Model model) async {
+    final db = await _database;
+    final results = await db.getAll(
+      'SELECT $columnFileID FROM $tableName WHERE $columnModel = ?',
+      [modelToInt(model)!],
+    );
+    if (results.isEmpty) {
+      return <int>{};
+    }
+    return results.map((e) => e[columnFileID] as int).toSet();
   }
 
   Future<void> put(Embedding embedding) async {

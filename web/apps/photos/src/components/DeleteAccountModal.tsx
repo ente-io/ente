@@ -1,5 +1,4 @@
 import log from "@/next/log";
-import { logoutUser } from "@ente/accounts/services/user";
 import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
 import EnteButton from "@ente/shared/components/EnteButton";
 import { DELETE_ACCOUNT_EMAIL } from "@ente/shared/constants/urls";
@@ -43,7 +42,8 @@ const getReasonOptions = (): DropdownOption<DELETE_REASON>[] => {
 };
 
 const DeleteAccountModal = ({ open, onClose }: Iprops) => {
-    const { setDialogBoxAttributesV2, isMobile } = useContext(AppContext);
+    const { setDialogBoxAttributesV2, isMobile, logout } =
+        useContext(AppContext);
     const { authenticateUser } = useContext(GalleryContext);
     const [loading, setLoading] = useState(false);
     const deleteAccountChallenge = useRef<string>();
@@ -145,7 +145,7 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
             );
             const { reason, feedback } = reasonAndFeedbackRef.current;
             await deleteAccount(decryptedChallenge, reason, feedback);
-            logoutUser();
+            logout();
         } catch (e) {
             log.error("solveChallengeAndDeleteAccount failed", e);
             somethingWentWrong();

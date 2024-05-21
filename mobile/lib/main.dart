@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import "dart:isolate";
 
 import "package:adaptive_theme/adaptive_theme.dart";
 import 'package:background_fetch/background_fetch.dart';
@@ -20,6 +21,7 @@ import 'package:photos/core/errors.dart';
 import 'package:photos/core/network/network.dart';
 import 'package:photos/db/upload_locks_db.dart';
 import 'package:photos/ente_theme_data.dart';
+import "package:photos/face/db.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/service_locator.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
@@ -31,6 +33,9 @@ import 'package:photos/services/home_widget_service.dart';
 import 'package:photos/services/local_file_update_service.dart';
 import 'package:photos/services/local_sync_service.dart';
 import "package:photos/services/location_service.dart";
+import 'package:photos/services/machine_learning/face_ml/face_ml_service.dart';
+import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
+import 'package:photos/services/machine_learning/file_ml/remote_fileml_service.dart';
 import "package:photos/services/machine_learning/machine_learning_controller.dart";
 import 'package:photos/services/machine_learning/semantic_search/semantic_search_service.dart';
 import 'package:photos/services/memories_service.dart';
@@ -212,6 +217,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
   LocalFileUpdateService.instance.init(preferences);
   SearchService.instance.init();
   StorageBonusService.instance.init(preferences);
+  RemoteFileMLService.instance.init(preferences);
   if (!isBackground &&
       Platform.isAndroid &&
       await HomeWidgetService.instance.countHomeWidgets() == 0) {
@@ -232,9 +238,23 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
   // Can not including existing tf/ml binaries as they are not being built
   // from source.
   // See https://gitlab.com/fdroid/fdroiddata/-/merge_requests/12671#note_1294346819
-  // if (!UpdateService.instance.isFdroidFlavor()) {
-  //   unawaited(ObjectDetectionService.instance.init());
-  // }
+  if (!UpdateService.instance.isFdroidFlavor()) {
+    // unawaited(ObjectDetectionService.instance.init());
+    if (flagService.faceSearchEnabled) {
+      unawaited(FaceMlService.instance.init());
+      FaceMlService.instance.listenIndexOnDiffSync();
+      FaceMlService.instance.listenOnPeopleChangedSync();
+    } else {
+      if (LocalSettings.instance.isFaceIndexingEnabled) {
+        unawaited(LocalSettings.instance.toggleFaceIndexing());
+      }
+    }
+  }
+  PersonService.init(
+    EntityService.instance,
+    FaceMLDataDB.instance,
+    preferences,
+  );
 
   _logger.info("Initialization done");
 }
@@ -330,10 +350,15 @@ Future<void> _killBGTask([String? taskId]) async {
     DateTime.now().microsecondsSinceEpoch,
   );
   final prefs = await SharedPreferences.getInstance();
+
   await prefs.remove(kLastBGTaskHeartBeatTime);
   if (taskId != null) {
     BackgroundFetch.finish(taskId);
   }
+
+  ///Band aid for background process not getting killed. Should migrate to using
+  ///workmanager instead of background_fetch.
+  Isolate.current.kill();
 }
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {

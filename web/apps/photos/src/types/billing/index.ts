@@ -14,6 +14,7 @@ export interface Subscription {
     price: string;
     period: PLAN_PERIOD;
 }
+
 export interface Plan {
     id: string;
     androidID: string;

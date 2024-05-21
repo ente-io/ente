@@ -225,6 +225,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "I understand that if I lose my password, I may lose my data since my data is <underline>end-to-end encrypted</underline>."),
         "activeSessions":
             MessageLookupByLibrary.simpleMessage("Active sessions"),
+        "addAName": MessageLookupByLibrary.simpleMessage("Add a name"),
         "addANewEmail": MessageLookupByLibrary.simpleMessage("Add a new email"),
         "addCollaborator":
             MessageLookupByLibrary.simpleMessage("Add collaborator"),
@@ -362,8 +363,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "autoCastiOSPermission": MessageLookupByLibrary.simpleMessage(
             "Make sure Local Network permissions are turned on for the Ente Photos app, in Settings."),
         "autoPair": MessageLookupByLibrary.simpleMessage("Auto pair"),
-        "autoPairGoogle": MessageLookupByLibrary.simpleMessage(
-            "Auto Pair requires connecting to Google servers and only works with Chromecast supported devices. Google will not receive sensitive data, such as your photos."),
+        "autoPairDesc": MessageLookupByLibrary.simpleMessage(
+            "Auto pair works only with devices that support Chromecast."),
         "available": MessageLookupByLibrary.simpleMessage("Available"),
         "backedUpFolders":
             MessageLookupByLibrary.simpleMessage("Backed up folders"),
@@ -434,6 +435,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Club by capture time"),
         "clubByFileName":
             MessageLookupByLibrary.simpleMessage("Club by file name"),
+        "clusteringProgress":
+            MessageLookupByLibrary.simpleMessage("Clustering progress"),
         "codeAppliedPageTitle":
             MessageLookupByLibrary.simpleMessage("Code applied"),
         "codeCopiedToClipboard":
@@ -675,6 +678,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "enterPassword": MessageLookupByLibrary.simpleMessage("Enter password"),
         "enterPasswordToEncrypt": MessageLookupByLibrary.simpleMessage(
             "Enter a password we can use to encrypt your data"),
+        "enterPersonName":
+            MessageLookupByLibrary.simpleMessage("Enter person name"),
         "enterReferralCode":
             MessageLookupByLibrary.simpleMessage("Enter referral code"),
         "enterThe6digitCodeFromnyourAuthenticatorApp":
@@ -697,6 +702,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "exportLogs": MessageLookupByLibrary.simpleMessage("Export logs"),
         "exportYourData":
             MessageLookupByLibrary.simpleMessage("Export your data"),
+        "faceRecognition":
+            MessageLookupByLibrary.simpleMessage("Face recognition"),
+        "faceRecognitionIndexingDescription": MessageLookupByLibrary.simpleMessage(
+            "Please note that this will result in a higher bandwidth and battery usage until all items are indexed."),
         "faces": MessageLookupByLibrary.simpleMessage("Faces"),
         "failedToApplyCode":
             MessageLookupByLibrary.simpleMessage("Failed to apply code"),
@@ -736,11 +745,14 @@ class MessageLookup extends MessageLookupByLibrary {
         "filesDeleted": MessageLookupByLibrary.simpleMessage("Files deleted"),
         "filesSavedToGallery":
             MessageLookupByLibrary.simpleMessage("Files saved to gallery"),
+        "findPeopleByName":
+            MessageLookupByLibrary.simpleMessage("Find people quickly by name"),
         "flip": MessageLookupByLibrary.simpleMessage("Flip"),
         "forYourMemories":
             MessageLookupByLibrary.simpleMessage("for your memories"),
         "forgotPassword":
             MessageLookupByLibrary.simpleMessage("Forgot password"),
+        "foundFaces": MessageLookupByLibrary.simpleMessage("Found faces"),
         "freeStorageClaimed":
             MessageLookupByLibrary.simpleMessage("Free storage claimed"),
         "freeStorageOnReferralSuccess": m24,
@@ -918,7 +930,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "manageSubscription":
             MessageLookupByLibrary.simpleMessage("Manage subscription"),
         "manualPairDesc": MessageLookupByLibrary.simpleMessage(
-            "Pair with PIN works for any large screen device you want to play your album on."),
+            "Pair with PIN works with any screen you wish to view your album on."),
         "map": MessageLookupByLibrary.simpleMessage("Map"),
         "maps": MessageLookupByLibrary.simpleMessage("Maps"),
         "mastodon": MessageLookupByLibrary.simpleMessage("Mastodon"),
@@ -1022,6 +1034,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "paymentFailedTalkToProvider": m37,
         "pendingItems": MessageLookupByLibrary.simpleMessage("Pending items"),
         "pendingSync": MessageLookupByLibrary.simpleMessage("Pending sync"),
+        "people": MessageLookupByLibrary.simpleMessage("People"),
         "peopleUsingYourCode":
             MessageLookupByLibrary.simpleMessage("People using your code"),
         "permDeleteWarning": MessageLookupByLibrary.simpleMessage(
@@ -1151,6 +1164,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "removeParticipant":
             MessageLookupByLibrary.simpleMessage("Remove participant"),
         "removeParticipantBody": m43,
+        "removePersonLabel":
+            MessageLookupByLibrary.simpleMessage("Remove person label"),
         "removePublicLink":
             MessageLookupByLibrary.simpleMessage("Remove public link"),
         "removeShareItemsWarning": MessageLookupByLibrary.simpleMessage(
@@ -1208,8 +1223,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Add descriptions like \"#trip\" in photo info to quickly find them here"),
         "searchDatesEmptySection": MessageLookupByLibrary.simpleMessage(
             "Search by a date, month or year"),
-        "searchFaceEmptySection":
-            MessageLookupByLibrary.simpleMessage("Find all photos of a person"),
+        "searchFaceEmptySection": MessageLookupByLibrary.simpleMessage(
+            "Persons will be shown here once indexing is done"),
         "searchFileTypesAndNamesEmptySection":
             MessageLookupByLibrary.simpleMessage("File types and names"),
         "searchHint1":

@@ -32,8 +32,11 @@ yarn dev
 
 That's it. The web app will automatically hot reload when you make changes.
 
-If you're new to web development and unsure about how to get started, or are
-facing some problems when running the above steps, see [docs/new](docs/new.md).
+> [!TIP]
+>
+> If you're new to web development and unsure about how to get started, or are
+> facing some problems when running the above steps, see
+> [docs/new](docs/new.md).
 
 ## Other apps
 
@@ -54,21 +57,22 @@ As a brief overview, this directory contains the following apps:
     your 2FA codes using this web app. For adding and editing your 2FA codes,
     please use the Ente Auth [mobile/desktop app](../auth/README.md) instead.
 
-These two are the public facing apps. There are other part of the code which are
+These are the public facing apps. There are other part of the code which are
 accessed as features within the main apps, but in terms of code are
 independently maintained and deployed:
 
 -   `apps/accounts`: Passkey support (Coming soon)
--   `apps/cast`: Chromecast support (Coming soon)
+-   `apps/cast`: Browser and Chromecast casting support.
+-   `apps/payments`: Handle subscription payments.
 
 > [!NOTE]
 >
-> This folder is supposed to contain all our web related code. Most of it is
-> already here, but some code which is being deployed from our other
-> repositories like the family portal (https://github.com/ente-io/families)
-> still needs to be brought here. Also, some of the Cloudflare workers we use
-> for fixing headers etc too. Hang tight, we're on it, will bring in the
-> remaining bits one by one.
+> Some older code is being deployed from our other repositories like the family
+> portal (https://github.com/ente-io/families) and still needs to be brought
+> here. Likewise, some of the Cloudflare workers we use for fixing headers etc.
+> We'll gradually bring all these into this monorepo one by one.
+
+The apps take use various `packages/` to share code amongst themselves.
 
 You might also find this [overview of dependencies](docs/dependencies.md)
 useful.

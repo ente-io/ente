@@ -1,13 +1,11 @@
-import { t } from "i18next";
-import { useContext, useState } from "react";
-
-import { logoutUser } from "@ente/accounts/services/user";
 import DeleteAccountModal from "components/DeleteAccountModal";
 import { EnteMenuItem } from "components/Menu/EnteMenuItem";
+import { t } from "i18next";
 import { AppContext } from "pages/_app";
+import { useContext, useState } from "react";
 
 export default function ExitSection() {
-    const { setDialogMessage } = useContext(AppContext);
+    const { setDialogMessage, logout } = useContext(AppContext);
 
     const [deleteAccountModalView, setDeleteAccountModalView] = useState(false);
 
@@ -19,7 +17,7 @@ export default function ExitSection() {
             title: t("LOGOUT_MESSAGE"),
             proceed: {
                 text: t("LOGOUT"),
-                action: logoutUser,
+                action: logout,
                 variant: "critical",
             },
             close: { text: t("CANCEL") },

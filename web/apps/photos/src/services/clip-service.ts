@@ -11,7 +11,7 @@ import { Embedding } from "types/embedding";
 import { EnteFile } from "types/file";
 import { getPersonalFiles } from "utils/file";
 import downloadManager from "./download";
-import { getLocalEmbeddings, putEmbedding } from "./embeddingService";
+import { localCLIPEmbeddings, putEmbedding } from "./embeddingService";
 import { getAllLocalFiles, getLocalFiles } from "./fileService";
 
 /** Status of CLIP indexing on the images in the user's local library. */
@@ -80,21 +80,20 @@ class CLIPService {
         this.liveEmbeddingExtractionQueue = new PQueue({
             concurrency: 1,
         });
-        eventBus.on(Events.LOGOUT, this.logoutHandler, this);
     }
 
     isPlatformSupported = () => {
         return isElectron();
     };
 
-    private logoutHandler = async () => {
+    async logout() {
         if (this.embeddingExtractionInProgress) {
             this.embeddingExtractionInProgress.abort();
         }
         if (this.onFileUploadedHandler) {
             await this.removeOnFileUploadListener();
         }
-    };
+    }
 
     setupOnFileUploadListener = async () => {
         try {
@@ -185,7 +184,7 @@ class CLIPService {
     };
 
     getTextEmbeddingIfAvailable = async (text: string) => {
-        return ensureElectron().clipTextEmbeddingIfAvailable(text);
+        return ensureElectron().computeCLIPTextEmbeddingIfAvailable(text);
     };
 
     private runClipEmbeddingExtraction = async (canceller: AbortController) => {
@@ -195,7 +194,7 @@ class CLIPService {
                 return;
             }
             const localFiles = getPersonalFiles(await getAllLocalFiles(), user);
-            const existingEmbeddings = await getLocalEmbeddings();
+            const existingEmbeddings = await localCLIPEmbeddings();
             const pendingFiles = await getNonClipEmbeddingExtractedFiles(
                 localFiles,
                 existingEmbeddings,
@@ -295,7 +294,7 @@ class CLIPService {
         const file = await localFile
             .arrayBuffer()
             .then((buffer) => new Uint8Array(buffer));
-        return await ensureElectron().clipImageEmbedding(file);
+        return await ensureElectron().computeCLIPImageEmbedding(file);
     };
 
     private encryptAndUploadEmbedding = async (
@@ -329,7 +328,8 @@ class CLIPService {
 
     private extractFileClipImageEmbedding = async (file: EnteFile) => {
         const thumb = await downloadManager.getThumbnail(file);
-        const embedding = await ensureElectron().clipImageEmbedding(thumb);
+        const embedding =
+            await ensureElectron().computeCLIPImageEmbedding(thumb);
         return embedding;
     };
 
@@ -394,7 +394,7 @@ export const computeClipMatchScore = async (
 const initialIndexingStatus = async (): Promise<CLIPIndexingStatus> => {
     const user = getData(LS_KEYS.USER);
     if (!user) throw new Error("Orphan CLIP indexing without a login");
-    const allEmbeddings = await getLocalEmbeddings();
+    const allEmbeddings = await localCLIPEmbeddings();
     const localFiles = getPersonalFiles(await getLocalFiles(), user);
     const pendingFiles = await getNonClipEmbeddingExtractedFiles(
         localFiles,

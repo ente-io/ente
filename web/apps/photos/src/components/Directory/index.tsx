@@ -1,8 +1,7 @@
 import { ensureElectron } from "@/next/electron";
 import log from "@/next/log";
 import LinkButton from "@ente/shared/components/LinkButton";
-import { Tooltip } from "@mui/material";
-import { styled } from "@mui/material/styles";
+import { Tooltip, styled } from "@mui/material";
 
 const DirectoryPathContainer = styled(LinkButton)(
     ({ width }) => `

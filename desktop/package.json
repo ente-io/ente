@@ -1,8 +1,9 @@
 {
     "name": "ente",
-    "version": "1.7.0-beta.0",
+    "version": "1.7.0-rc",
     "private": true,
     "description": "Desktop client for Ente Photos",
+    "repository": "github:ente-io/photos-desktop",
     "author": "Ente <code@ente.io>",
     "main": "app/main.js",
     "scripts": {
@@ -10,9 +11,10 @@
         "build-main": "tsc && electron-builder",
         "build-main:quick": "tsc && electron-builder --dir --config.compression=store --config.mac.identity=null",
         "build-renderer": "cd ../web && yarn install && yarn build:photos && cd ../desktop && shx rm -f out && shx ln -sf ../web/apps/photos/out out",
+        "build:ci": "yarn build-renderer && tsc",
         "build:quick": "yarn build-renderer && yarn build-main:quick",
         "dev": "concurrently --kill-others --success first --names 'main,rndr' \"yarn dev-main\" \"yarn dev-renderer\"",
-        "dev-main": "tsc && electron app/main.js",
+        "dev-main": "tsc && electron .",
         "dev-renderer": "cd ../web && yarn install && yarn dev:photos",
         "postinstall": "electron-builder install-app-deps",
         "lint": "yarn prettier --check --log-level warn . && eslint --ext .ts src && yarn tsc",
@@ -44,8 +46,7 @@
         "@typescript-eslint/parser": "^7",
         "concurrently": "^8",
         "electron": "^30",
-        "electron-builder": "^24",
-        "electron-builder-notarize": "^1.5",
+        "electron-builder": "25.0.0-alpha.6",
         "eslint": "^8",
         "prettier": "^3",
         "prettier-plugin-organize-imports": "^3",
@@ -53,5 +54,6 @@
         "shx": "^0.3",
         "typescript": "^5"
     },
+    "packageManager": "yarn@1.22.21",
     "productName": "ente"
 }

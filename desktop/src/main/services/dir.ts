@@ -38,14 +38,32 @@ export const openLogDirectory = () => openDirectory(logDirectoryPath());
  *
  * [Note: Electron app paths]
  *
- * By default, these paths are at the following locations:
+ * There are three paths we need to be aware of usually.
  *
- * - macOS: `~/Library/Application Support/ente`
- * - Linux: `~/.config/ente`
- * - Windows: `%APPDATA%`, e.g. `C:\Users\<username>\AppData\Local\ente`
- * - Windows: C:\Users\<you>\AppData\Local\<Your App Name>
+ * First is the "appData". We can obtain this with `app.getPath("appData")`.
+ * This is per-user application data directory. This is usually the following:
+ *
+ * - Windows: `%APPDATA%`, e.g. `C:\Users\<username>\AppData\Local`
+ * - Linux: `~/.config`
+ * - macOS: `~/Library/Application Support`
+ *
+ * Now, if we suffix the app's name onto the appData directory, we get the
+ * "userData" directory. This is the **primary** place applications are meant to
+ * store user's data, e.g. various configuration files and saved state.
+ *
+ * Note that Chromium also stores the browser state, e.g. localStorage or disk
+ * caches, in userData.
  *
  * https://www.electronjs.org/docs/latest/api/app
  *
+ * [Note: App log path]
+ *
+ * Finally, there is the "logs" directory. This is not within "appData" but has
+ * a slightly different OS specific path. Since our log file is named
+ * "ente.log", it can be found at:
+ *
+ * - macOS: ~/Library/Logs/ente/ente.log (production)
+ * - Linux: ~/.config/ente/logs/ente.log
+ * - Windows: %USERPROFILE%\AppData\Roaming\ente\logs\ente.log
  */
 const logDirectoryPath = () => app.getPath("logs");

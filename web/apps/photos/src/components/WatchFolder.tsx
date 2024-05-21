@@ -25,8 +25,8 @@ import {
     Stack,
     Tooltip,
     Typography,
+    styled,
 } from "@mui/material";
-import { styled } from "@mui/material/styles";
 import { CollectionMappingChoiceModal } from "components/Upload/CollectionMappingChoiceModal";
 import { t } from "i18next";
 import { AppContext } from "pages/_app";

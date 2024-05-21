@@ -22,7 +22,7 @@ import {
     getFaceSearchEnabledStatus,
     updateFaceSearchEnabledStatus,
 } from "services/userService";
-import { isInternalUser } from "utils/user";
+import { isInternalUserForML } from "utils/user";
 
 export const MLSearchSettings = ({ open, onClose, onRootClose }) => {
     const {
@@ -270,17 +270,10 @@ function EnableMLSearch({ onClose, enableMlSearch, onRootClose }) {
                     {" "}
                     <Typography color="text.muted">
                         {/* <Trans i18nKey={"ENABLE_ML_SEARCH_DESCRIPTION"} /> */}
-                        <p>
-                            We're putting finishing touches, coming back soon!
-                        </p>
-                        <p>
-                            <small>
-                                Existing indexed faces will continue to show.
-                            </small>
-                        </p>
+                        We're putting finishing touches, coming back soon!
                     </Typography>
                 </Box>
-                {isInternalUser() && (
+                {isInternalUserForML() && (
                     <Stack px={"8px"} spacing={"8px"}>
                         <Button
                             color={"accent"}

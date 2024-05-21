@@ -7,7 +7,6 @@ export enum LS_KEYS {
     ORIGINAL_KEY_ATTRIBUTES = "originalKeyAttributes",
     SUBSCRIPTION = "subscription",
     FAMILY_DATA = "familyData",
-    PLANS = "plans",
     IS_FIRST_LOGIN = "isFirstLogin",
     JUST_SIGNED_UP = "justSignedUp",
     SHOW_BACK_BUTTON = "showBackButton",

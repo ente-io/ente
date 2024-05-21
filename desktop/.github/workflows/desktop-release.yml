@@ -1,20 +1,12 @@
 name: "Release"
 
-# This will create a new draft release with public artifacts.
+# Build the ente-io/ente's desktop/rc branch and create/update a draft release.
 #
-# Note that a release will only get created if there is an associated tag
-# (GitHub releases need a corresponding tag).
-#
-# The canonical source for this action is in the repository where we keep the
-# source code for the Ente Photos desktop app: https://github.com/ente-io/ente
-#
-# However, it actually lives and runs in the repository that we use for making
-# releases: https://github.com/ente-io/photos-desktop
-#
-# We need two repositories because Electron updater currently doesn't work well
-# with monorepos. For more details, see `docs/release.md`.
+# For more details, see `docs/release.md` in ente-io/ente.
 
 on:
+    # Trigger manually or `gh workflow run desktop-release.yml`.
+    workflow_dispatch:
     push:
         # Run when a tag matching the pattern "v*"" is pushed.
         #
@@ -32,19 +24,15 @@ jobs:
 
         strategy:
             matrix:
-                os: [macos-latest]
-                # Commented for testing
-                # os: [macos-latest, ubuntu-latest, windows-latest]
+                os: [macos-latest, ubuntu-latest, windows-latest]
 
         steps:
             - name: Checkout code
               uses: actions/checkout@v4
               with:
-                  # Checkout the tag photosd-v1.x.x from the source code
-                  # repository when we're invoked for tag v1.x.x on the releases
-                  # repository.
+                  # Checkout the desktop/rc branch from the source repository.
                   repository: ente-io/ente
-                  ref: photosd-${{ github.ref_name }}
+                  ref: desktop/rc
                   submodules: recursive
 
             - name: Setup node
@@ -52,15 +40,13 @@ jobs:
               with:
                   node-version: 20
 
+            - name: Increase yarn timeout
+              # `yarn install` times out sometimes on the Windows runner,
+              # resulting in flaky builds.
+              run: yarn config set network-timeout 900000 -g
+
             - name: Install dependencies
               run: yarn install
-
-            - name: Prepare for app notarization
-              if: startsWith(matrix.os, 'macos')
-              # Import Apple API key for app notarization on macOS
-              run: |
-                  mkdir -p ~/private_keys/
-                  echo '${{ secrets.API_KEY }}' > ~/private_keys/AuthKey_${{ secrets.API_KEY_ID }}.p8
 
             - name: Install libarchive-tools for pacman build
               if: startsWith(matrix.os, 'ubuntu')
@@ -72,19 +58,23 @@ jobs:
               uses: ente-io/action-electron-builder@v1.0.0
               with:
                   package_root: desktop
+                  build_script_name: build:ci
 
                   # GitHub token, automatically provided to the action
                   # (No need to define this secret in the repo settings)
                   github_token: ${{ secrets.GITHUB_TOKEN }}
 
                   # If the commit is tagged with a version (e.g. "v1.0.0"),
-                  # release the app after building.
+                  # create a (draft) release after building. Otherwise upload
+                  # assets to the existing draft named after the version.
                   release: ${{ startsWith(github.ref, 'refs/tags/v') }}
 
                   mac_certs: ${{ secrets.MAC_CERTS }}
                   mac_certs_password: ${{ secrets.MAC_CERTS_PASSWORD }}
               env:
-                  # macOS notarization API key details
-                  API_KEY_ID: ${{ secrets.API_KEY_ID }}
-                  API_KEY_ISSUER_ID: ${{ secrets.API_KEY_ISSUER_ID }}
+                  # macOS notarization credentials key details
+                  APPLE_ID: ${{ secrets.APPLE_ID }}
+                  APPLE_APP_SPECIFIC_PASSWORD:
+                      ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+                  APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
                   USE_HARD_LINKS: false

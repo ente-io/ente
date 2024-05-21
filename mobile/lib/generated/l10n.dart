@@ -6969,10 +6969,10 @@ class S {
     );
   }
 
-  /// `Find all photos of a person`
+  /// `Persons will be shown here once indexing is done`
   String get searchFaceEmptySection {
     return Intl.message(
-      'Find all photos of a person',
+      'Persons will be shown here once indexing is done',
       name: 'searchFaceEmptySection',
       desc: '',
       args: [],
@@ -8168,6 +8168,16 @@ class S {
     );
   }
 
+  /// `People`
+  String get people {
+    return Intl.message(
+      'People',
+      name: 'people',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Contents`
   String get contents {
     return Intl.message(
@@ -8388,26 +8398,6 @@ class S {
     );
   }
 
-  /// `Auto pair`
-  String get autoPair {
-    return Intl.message(
-      'Auto pair',
-      name: 'autoPair',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Pair with PIN`
-  String get pairWithPin {
-    return Intl.message(
-      'Pair with PIN',
-      name: 'pairWithPin',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Device not found`
   String get deviceNotFound {
     return Intl.message(
@@ -8463,6 +8453,26 @@ class S {
     return Intl.message(
       'Descriptions',
       name: 'descriptions',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add a name`
+  String get addAName {
+    return Intl.message(
+      'Add a name',
+      name: 'addAName',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Find people quickly by name`
+  String get findPeopleByName {
+    return Intl.message(
+      'Find people quickly by name',
+      name: 'findPeopleByName',
       desc: '',
       args: [],
     );
@@ -8594,20 +8604,40 @@ class S {
     );
   }
 
-  /// `Auto Pair requires connecting to Google servers and only works with Chromecast supported devices. Google will not receive sensitive data, such as your photos.`
-  String get autoPairGoogle {
+  /// `Enter person name`
+  String get enterPersonName {
     return Intl.message(
-      'Auto Pair requires connecting to Google servers and only works with Chromecast supported devices. Google will not receive sensitive data, such as your photos.',
-      name: 'autoPairGoogle',
+      'Enter person name',
+      name: 'enterPersonName',
       desc: '',
       args: [],
     );
   }
 
-  /// `Pair with PIN works for any large screen device you want to play your album on.`
+  /// `Remove person label`
+  String get removePersonLabel {
+    return Intl.message(
+      'Remove person label',
+      name: 'removePersonLabel',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Auto pair works only with devices that support Chromecast.`
+  String get autoPairDesc {
+    return Intl.message(
+      'Auto pair works only with devices that support Chromecast.',
+      name: 'autoPairDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Pair with PIN works with any screen you wish to view your album on.`
   String get manualPairDesc {
     return Intl.message(
-      'Pair with PIN works for any large screen device you want to play your album on.',
+      'Pair with PIN works with any screen you wish to view your album on.',
       name: 'manualPairDesc',
       desc: '',
       args: [],
@@ -8699,6 +8729,66 @@ class S {
     return Intl.message(
       'Pairing complete',
       name: 'pairingComplete',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Auto pair`
+  String get autoPair {
+    return Intl.message(
+      'Auto pair',
+      name: 'autoPair',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Pair with PIN`
+  String get pairWithPin {
+    return Intl.message(
+      'Pair with PIN',
+      name: 'pairWithPin',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Face recognition`
+  String get faceRecognition {
+    return Intl.message(
+      'Face recognition',
+      name: 'faceRecognition',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please note that this will result in a higher bandwidth and battery usage until all items are indexed.`
+  String get faceRecognitionIndexingDescription {
+    return Intl.message(
+      'Please note that this will result in a higher bandwidth and battery usage until all items are indexed.',
+      name: 'faceRecognitionIndexingDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Found faces`
+  String get foundFaces {
+    return Intl.message(
+      'Found faces',
+      name: 'foundFaces',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Clustering progress`
+  String get clusteringProgress {
+    return Intl.message(
+      'Clustering progress',
+      name: 'clusteringProgress',
       desc: '',
       args: [],
     );

@@ -65,9 +65,9 @@
 		<key>ITSAppUsesNonExemptEncryption</key>
 		<false/>
 		 <key>FLTEnableImpeller</key>
-         <false />
+         <true />
          <key>FLTEnableWideGamut</key>
-         <false/>
+         <true/>
 		<key>NSFaceIDUsageDescription</key>
 		<string>Please allow ente to lock itself with FaceID or TouchID</string>
 		<key>NSCameraUsageDescription</key>
@@ -108,7 +108,7 @@
 		<key>NSBonjourServices</key>
                 <array>
                   <string>_googlecast._tcp</string>
-                  <string>F5BCEC64._googlecast._tcp</string>
+                  <string>_F5BCEC64._googlecast._tcp</string>
                 </array>
 
                 <key>NSLocalNetworkUsageDescription</key>

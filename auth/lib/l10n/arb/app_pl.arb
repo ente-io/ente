@@ -20,7 +20,6 @@
   "codeIssuerHint": "Wydawca",
   "codeSecretKeyHint": "Tajny klucz",
   "codeAccountHint": "Konto (ty@domena.com)",
-  "accountKeyType": "Rodzaj klucza",
   "sessionExpired": "Sesja wygasła",
   "@sessionExpired": {
     "description": "Title of the dialog when the users current session is invalid/expired"
@@ -186,6 +185,8 @@
   "recoveryKeySaveDescription": "Nie przechowujemy tego klucza, proszę zachować ten 24 wyrazowy klucz w bezpiecznym miejscu.",
   "doThisLater": "Zrób To Później",
   "saveKey": "Zapisz klucz",
+  "save": "Zapisz",
+  "send": "Wyślij",
   "back": "Wstecz",
   "createAccount": "Utwórz konto",
   "passwordStrength": "Siła hasła: {passwordStrengthValue}",
@@ -335,6 +336,10 @@
   "androidBiometricNotRecognized": "Nie rozpoznano. Spróbuj ponownie.",
   "@androidBiometricNotRecognized": {
     "description": "Message to let the user know that authentication was failed. It is used on Android side. Maximum 60 characters."
+  },
+  "androidCancelButton": "Anuluj",
+  "@androidCancelButton": {
+    "description": "Message showed on a button that the user can click to leave the current dialog. It is used on Android side. Maximum 30 characters."
   },
   "androidSignInTitle": "Wymagana autoryzacja",
   "@androidSignInTitle": {

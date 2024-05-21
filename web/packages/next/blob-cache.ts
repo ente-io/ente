@@ -20,8 +20,8 @@ export type BlobCacheNamespace = (typeof blobCacheNames)[number];
  *
  * This cache is suitable for storing large amounts of data (entire files).
  *
- * To obtain a cache for a given namespace, use {@link openCache}. To clear all
- * cached data (e.g. during logout), use {@link clearCaches}.
+ * To obtain a cache for a given namespace, use {@link openBlobCache}. To clear all
+ * cached data (e.g. during logout), use {@link clearBlobCaches}.
  *
  * [Note: Caching files]
  *
@@ -69,14 +69,31 @@ export interface BlobCache {
     delete: (key: string) => Promise<boolean>;
 }
 
+const cachedCaches = new Map<BlobCacheNamespace, BlobCache>();
+
 /**
  * Return the {@link BlobCache} corresponding to the given {@link name}.
+ *
+ * This is a wrapper over {@link openBlobCache} that caches (pun intended) the
+ * cache and returns the same one each time it is called with the same name.
+ * It'll open the cache lazily the first time it is invoked.
+ */
+export const blobCache = async (
+    name: BlobCacheNamespace,
+): Promise<BlobCache> => {
+    let c = cachedCaches.get(name);
+    if (!c) cachedCaches.set(name, (c = await openBlobCache(name)));
+    return c;
+};
+
+/**
+ * Create a new {@link BlobCache} corresponding to the given {@link name}.
  *
  * @param name One of the arbitrary but predefined namespaces of type
  * {@link BlobCacheNamespace} which group related data and allow us to use the
  * same key across namespaces.
  */
-export const openCache = async (
+export const openBlobCache = async (
     name: BlobCacheNamespace,
 ): Promise<BlobCache> =>
     isElectron() ? openOPFSCacheWeb(name) : openWebCache(name);
@@ -194,7 +211,7 @@ export const cachedOrNew = async (
     key: string,
     get: () => Promise<Blob>,
 ): Promise<Blob> => {
-    const cache = await openCache(cacheName);
+    const cache = await openBlobCache(cacheName);
     const cachedBlob = await cache.get(key);
     if (cachedBlob) return cachedBlob;
 
@@ -204,15 +221,17 @@ export const cachedOrNew = async (
 };
 
 /**
- * Delete all cached data.
+ * Delete all cached data, including cached caches.
  *
  * Meant for use during logout, to reset the state of the user's account.
  */
-export const clearCaches = async () =>
-    isElectron() ? clearOPFSCaches() : clearWebCaches();
+export const clearBlobCaches = async () => {
+    cachedCaches.clear();
+    return isElectron() ? clearOPFSCaches() : clearWebCaches();
+};
 
 const clearWebCaches = async () => {
-    await Promise.all(blobCacheNames.map((name) => caches.delete(name)));
+    await Promise.allSettled(blobCacheNames.map((name) => caches.delete(name)));
 };
 
 const clearOPFSCaches = async () => {

@@ -20,6 +20,7 @@
   "codeIssuerHint": "Issuer",
   "codeSecretKeyHint": "Secret Key",
   "codeAccountHint": "Account (you@domain.com)",
+  "codeTagHint": "Tag",
   "accountKeyType": "Type of key",
   "sessionExpired": "Session expired",
   "@sessionExpired": {
@@ -157,6 +158,7 @@
       }
     }
   },
+  "invalidQRCode": "Invalid QR code",
   "noRecoveryKeyTitle": "No recovery key?",
   "enterEmailHint": "Enter your email address",
   "invalidEmailTitle": "Invalid email address",
@@ -421,5 +423,18 @@
   "invalidEndpoint": "Invalid endpoint",
   "invalidEndpointMessage": "Sorry, the endpoint you entered is invalid. Please enter a valid endpoint and try again.",
   "endpointUpdatedMessage": "Endpoint updated successfully",
-  "customEndpoint": "Connected to {endpoint}"
+  "customEndpoint": "Connected to {endpoint}",
+  "pinText": "Pin",
+  "unpinText": "Unpin",
+  "pinnedCodeMessage": "{code} has been pinned",
+  "unpinnedCodeMessage": "{code} has been unpinned",
+  "tags": "Tags",
+  "createNewTag": "Create New Tag",
+  "tag": "Tag",
+  "create": "Create",
+  "editTag": "Edit Tag",
+  "deleteTagTitle": "Delete tag?",
+  "deleteTagMessage": "Are you sure you want to delete this tag? This action is irreversible.",
+  "somethingWentWrongParsingCode": "We were unable to parse {x} codes.",
+  "updateNotAvailable": "Update not available"
 }

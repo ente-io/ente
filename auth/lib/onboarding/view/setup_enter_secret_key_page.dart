@@ -1,5 +1,15 @@
+import 'dart:async';
+
+import 'package:ente_auth/core/event_bus.dart';
+import 'package:ente_auth/events/codes_updated_event.dart';
 import "package:ente_auth/l10n/l10n.dart";
 import 'package:ente_auth/models/code.dart';
+import 'package:ente_auth/models/code_display.dart';
+import 'package:ente_auth/onboarding/model/tag_enums.dart';
+import 'package:ente_auth/onboarding/view/common/add_chip.dart';
+import 'package:ente_auth/onboarding/view/common/add_tag.dart';
+import 'package:ente_auth/onboarding/view/common/tag_chip.dart';
+import 'package:ente_auth/store/code_display_store.dart';
 import 'package:ente_auth/ui/components/buttons/button_widget.dart';
 import 'package:ente_auth/ui/components/models/button_result.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
@@ -21,6 +31,9 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
   late TextEditingController _accountController;
   late TextEditingController _secretController;
   late bool _secretKeyObscured;
+  late List<String> tags = [...?widget.code?.display.tags];
+  List<String> allTags = [];
+  StreamSubscription<CodesUpdatedEvent>? _streamSubscription;
 
   @override
   void initState() {
@@ -35,7 +48,24 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
       text: widget.code?.secret,
     );
     _secretKeyObscured = widget.code != null;
+    _loadTags();
+    _streamSubscription = Bus.instance.on<CodesUpdatedEvent>().listen((event) {
+      _loadTags();
+    });
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _streamSubscription?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _loadTags() async {
+    allTags = await CodeDisplayStore.instance.getAllTags();
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   @override
@@ -50,6 +80,7 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 40.0, horizontal: 40),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 TextFormField(
                   // The validator receives the text that the user has entered.
@@ -61,6 +92,8 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
                   },
                   decoration: InputDecoration(
                     hintText: l10n.codeIssuerHint,
+                    floatingLabelBehavior: FloatingLabelBehavior.auto,
+                    labelText: l10n.codeIssuerHint,
                   ),
                   controller: _issuerController,
                   autofocus: true,
@@ -78,6 +111,8 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
                   },
                   decoration: InputDecoration(
                     hintText: l10n.codeSecretKeyHint,
+                    floatingLabelBehavior: FloatingLabelBehavior.auto,
+                    labelText: l10n.codeSecretKeyHint,
                     suffixIcon: IconButton(
                       onPressed: () {
                         setState(() {
@@ -105,8 +140,67 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
                   },
                   decoration: InputDecoration(
                     hintText: l10n.codeAccountHint,
+                    floatingLabelBehavior: FloatingLabelBehavior.auto,
+                    labelText: l10n.codeAccountHint,
                   ),
                   controller: _accountController,
+                ),
+                const SizedBox(height: 40),
+                const SizedBox(
+                  height: 20,
+                ),
+                Text(
+                  l10n.tags,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Wrap(
+                  spacing: 12,
+                  alignment: WrapAlignment.start,
+                  children: [
+                    ...allTags.map(
+                      (e) => TagChip(
+                        label: e,
+                        action: TagChipAction.check,
+                        state: tags.contains(e)
+                            ? TagChipState.selected
+                            : TagChipState.unselected,
+                        onTap: () {
+                          if (tags.contains(e)) {
+                            tags.remove(e);
+                          } else {
+                            tags.add(e);
+                          }
+                          setState(() {});
+                        },
+                      ),
+                    ),
+                    AddChip(
+                      onTap: () {
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AddTagDialog(
+                              onTap: (tag) {
+                                if (allTags.contains(tag) &&
+                                    tags.contains(tag)) {
+                                  return;
+                                }
+                                allTags.add(tag);
+                                tags.add(tag);
+                                setState(() {});
+                                Navigator.pop(context);
+                              },
+                            );
+                          },
+                          barrierColor: Colors.black.withOpacity(0.85),
+                          barrierDismissible: false,
+                        );
+                      },
+                    ),
+                  ],
                 ),
                 const SizedBox(
                   height: 40,
@@ -130,13 +224,7 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
                       }
                       await _saveCode();
                     },
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16.0,
-                        vertical: 4,
-                      ),
-                      child: Text(l10n.saveAction),
-                    ),
+                    child: Text(l10n.saveAction),
                   ),
                 ),
               ],
@@ -152,6 +240,7 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
       final account = _accountController.text.trim();
       final issuer = _issuerController.text.trim();
       final secret = _secretController.text.trim().replaceAll(' ', '');
+      final isStreamCode = issuer.toLowerCase() == "steam";
       if (widget.code != null && widget.code!.secret != secret) {
         ButtonResult? result = await showChoiceActionSheet(
           context,
@@ -166,16 +255,22 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
           return;
         }
       }
+      final CodeDisplay display =
+          widget.code?.display.copyWith(tags: tags) ?? CodeDisplay(tags: tags);
       final Code newCode = widget.code == null
           ? Code.fromAccountAndSecret(
+              isStreamCode ? Type.steam : Type.totp,
               account,
               issuer,
               secret,
+              display,
+              isStreamCode ? Code.steamDigits : Code.defaultDigits,
             )
           : widget.code!.copyWith(
               account: account,
               issuer: issuer,
               secret: secret,
+              display: display,
             );
       // Verify the validity of the code
       getOTP(newCode);

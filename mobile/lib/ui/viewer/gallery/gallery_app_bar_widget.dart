@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:math' as math;
 
 import "package:flutter/cupertino.dart";
+import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
@@ -90,8 +91,9 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   String? _appBarTitle;
   late CollectionActions collectionActions;
   bool isQuickLink = false;
-  late bool isInternalUser;
   late GalleryType galleryType;
+
+  final ValueNotifier<int> castNotifier = ValueNotifier<int>(0);
 
   @override
   void initState() {
@@ -99,7 +101,6 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     _selectedFilesListener = () {
       setState(() {});
     };
-    isInternalUser = flagService.internalUser;
     collectionActions = CollectionActions(CollectionsService.instance);
     widget.selectedFiles.addListener(_selectedFilesListener);
     _userAuthEventSubscription =
@@ -328,14 +329,16 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         Tooltip(
           message: "Cast album",
           child: IconButton(
-            icon: castService.getActiveSessions().isNotEmpty
-                ? const Icon(Icons.cast_connected_rounded)
-                : const Icon(Icons.cast_outlined),
+            icon: ValueListenableBuilder<int>(
+              valueListenable: castNotifier,
+              builder: (context, value, child) {
+                return castService.getActiveSessions().isNotEmpty
+                    ? const Icon(Icons.cast_connected_rounded)
+                    : const Icon(Icons.cast_outlined);
+              },
+            ),
             onPressed: () async {
               await _castChoiceDialog();
-              if (mounted) {
-                setState(() {});
-              }
             },
           ),
         ),
@@ -412,7 +415,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
                 ? Icons.visibility_outlined
                 : Icons.visibility_off_outlined,
           ),
-        if (widget.collection != null && isInternalUser)
+        if (widget.collection != null)
           EntePopupMenuItem(
             value: AlbumPopupAction.playOnTv,
             context.l10n.playOnTv,
@@ -728,38 +731,44 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           await castService.closeActiveCasts();
         },
       );
+      castNotifier.value++;
       return;
     }
 
     // stop any existing cast session
     gw.revokeAllTokens().ignore();
-    final result = await showDialog<ButtonAction?>(
-      context: context,
-      barrierDismissible: true,
-      builder: (BuildContext context) {
-        return const CastChooseDialog();
-      },
-    );
-    if (result == null) {
-      return;
-    }
-    // wait to allow the dialog to close
-    await Future.delayed(const Duration(milliseconds: 100));
-    if (result == ButtonAction.first) {
-      await showDialog(
+    if (!Platform.isAndroid && !kDebugMode) {
+      await _pairWithPin(gw, '');
+    } else {
+      final result = await showDialog<ButtonAction?>(
         context: context,
         barrierDismissible: true,
         builder: (BuildContext context) {
-          return AutoCastDialog(
-            (device) async {
-              await _castPair(gw, device);
-            },
-          );
+          return const CastChooseDialog();
         },
       );
-    }
-    if (result == ButtonAction.second) {
-      await _pairWithPin(gw, '');
+      if (result == null) {
+        return;
+      }
+      // wait to allow the dialog to close
+      await Future.delayed(const Duration(milliseconds: 100));
+      if (result == ButtonAction.first) {
+        await showDialog(
+          context: context,
+          barrierDismissible: true,
+          builder: (BuildContext bContext) {
+            return AutoCastDialog(
+              (device) async {
+                await _castPair(bContext, gw, device);
+                Navigator.pop(bContext);
+              },
+            );
+          },
+        );
+      }
+      if (result == ButtonAction.second) {
+        await _pairWithPin(gw, '');
+      }
     }
   }
 
@@ -775,7 +784,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       alwaysShowSuccessState: false,
       initialValue: code,
       onSubmit: (String text) async {
-        final bool paired = await _castPair(gw, text);
+        final bool paired = await _castPair(context, gw, text);
         if (!paired) {
           Future.delayed(Duration.zero, () => _pairWithPin(gw, code));
         }
@@ -783,8 +792,18 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     );
   }
 
-  Future<bool> _castPair(CastGateway gw, String code) async {
+  String lastCode = '';
+  Future<bool> _castPair(
+    BuildContext bContext,
+    CastGateway gw,
+    String code,
+  ) async {
     try {
+      if (lastCode == code) {
+        return false;
+      }
+      lastCode = code;
+      _logger.info("Casting album to device with code $code");
       final String? publicKey = await gw.getPublicKey(code);
       if (publicKey == null) {
         showToast(context, S.of(context).deviceNotFound);
@@ -800,9 +819,12 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         widget.collection!.id,
         castToken,
       );
-      showToast(context, S.of(context).pairingComplete);
+      _logger.info("cast album completed");
+      // showToast(bContext, S.of(context).pairingComplete);
+      castNotifier.value++;
       return true;
     } catch (e, s) {
+      lastCode = '';
       _logger.severe("Failed to cast album", e, s);
       if (e is CastIPMismatchException) {
         await showErrorDialog(
@@ -811,8 +833,9 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           S.of(context).castIPMismatchBody,
         );
       } else {
-        await showGenericErrorDialog(context: context, error: e);
+        await showGenericErrorDialog(context: bContext, error: e);
       }
+      castNotifier.value++;
       return false;
     }
   }

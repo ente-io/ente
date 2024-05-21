@@ -243,6 +243,9 @@ class EnteFile {
   }
 
   String get downloadUrl {
+    if (localFileServer.isNotEmpty) {
+      return "$localFileServer/$uploadedFileID";
+    }
     final endpoint = Configuration.instance.getHttpEndpoint();
     if (endpoint != kDefaultProductionEndpoint || flagService.disableCFWorker) {
       return endpoint + "/files/download/" + uploadedFileID.toString();
@@ -256,6 +259,9 @@ class EnteFile {
   }
 
   String get thumbnailUrl {
+    if (localFileServer.isNotEmpty) {
+      return "$localFileServer/thumb/$uploadedFileID";
+    }
     final endpoint = Configuration.instance.getHttpEndpoint();
     if (endpoint != kDefaultProductionEndpoint || flagService.disableCFWorker) {
       return endpoint + "/files/preview/" + uploadedFileID.toString();

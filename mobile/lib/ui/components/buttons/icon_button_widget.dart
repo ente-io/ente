@@ -17,6 +17,7 @@ class IconButtonWidget extends StatefulWidget {
   final Color? pressedColor;
   final Color? iconColor;
   final double size;
+  final bool roundedIcon;
   const IconButtonWidget({
     required this.icon,
     required this.iconButtonType,
@@ -26,6 +27,7 @@ class IconButtonWidget extends StatefulWidget {
     this.pressedColor,
     this.iconColor,
     this.size = 24,
+    this.roundedIcon = true,
     super.key,
   });
 
@@ -68,22 +70,31 @@ class _IconButtonWidgetState extends State<IconButtonWidget> {
   Widget _iconButton(EnteColorScheme colorTheme) {
     return Padding(
       padding: const EdgeInsets.all(4.0),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 20),
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(widget.size),
-          color: iconStateColor,
-        ),
-        child: Icon(
-          widget.icon,
-          color: widget.iconColor ??
-              (widget.iconButtonType == IconButtonType.secondary
-                  ? colorTheme.strokeMuted
-                  : colorTheme.strokeBase),
-          size: widget.size,
-        ),
-      ),
+      child: widget.roundedIcon
+          ? AnimatedContainer(
+              duration: const Duration(milliseconds: 20),
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(widget.size),
+                color: iconStateColor,
+              ),
+              child: Icon(
+                widget.icon,
+                color: widget.iconColor ??
+                    (widget.iconButtonType == IconButtonType.secondary
+                        ? colorTheme.strokeMuted
+                        : colorTheme.strokeBase),
+                size: widget.size,
+              ),
+            )
+          : Icon(
+              widget.icon,
+              color: widget.iconColor ??
+                  (widget.iconButtonType == IconButtonType.secondary
+                      ? colorTheme.strokeMuted
+                      : colorTheme.strokeBase),
+              size: widget.size,
+            ),
     );
   }
 

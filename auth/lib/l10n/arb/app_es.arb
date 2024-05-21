@@ -20,7 +20,6 @@
   "codeIssuerHint": "Emisor",
   "codeSecretKeyHint": "Llave Secreta",
   "codeAccountHint": "Cuenta (tu@dominio.com)",
-  "accountKeyType": "Tipo de llave",
   "sessionExpired": "La sesión ha expirado",
   "@sessionExpired": {
     "description": "Title of the dialog when the users current session is invalid/expired"
@@ -113,6 +112,7 @@
   "copied": "Copiado",
   "pleaseTryAgain": "Por favor, inténtalo nuevamente",
   "existingUser": "Usuario existente",
+  "newUser": "Nuevo a Ente",
   "delete": "Borrar",
   "enterYourPasswordHint": "Ingrese su contraseña",
   "forgotPassword": "Olvidé mi contraseña",
@@ -138,6 +138,8 @@
   "enterCodeHint": "Ingrese el código de seis dígitos de su aplicación de autenticación",
   "lostDeviceTitle": "¿Perdió su dispositivo?",
   "twoFactorAuthTitle": "Autenticación de dos factores",
+  "passkeyAuthTitle": "Verificación de llave de acceso",
+  "verifyPasskey": "Verificar llave de acceso",
   "recoverAccount": "Recuperar cuenta",
   "enterRecoveryKeyHint": "Introduzca su clave de recuperación",
   "recover": "Recuperar",
@@ -191,6 +193,8 @@
   "recoveryKeySaveDescription": "Nosotros no almacenamos esta clave, por favor guarde dicha clave de 24 palabras en un lugar seguro.",
   "doThisLater": "Hacer esto más tarde",
   "saveKey": "Guardar Clave",
+  "save": "Guardar",
+  "send": "Enviar",
   "back": "Atrás",
   "createAccount": "Crear cuenta",
   "passwordStrength": "Fortaleza de la contraseña: {passwordStrengthValue}",
@@ -397,5 +401,8 @@
   "signOutOtherDevices": "Cerrar la sesión de otros dispositivos",
   "doNotSignOut": "No cerrar la sesión",
   "hearUsWhereTitle": "¿Cómo conoció Ente? (opcional)",
-  "hearUsExplanation": "No rastreamos las aplicaciones instaladas. ¡Nos ayudaría si nos dijera dónde nos encontró!"
+  "hearUsExplanation": "No rastreamos las aplicaciones instaladas. ¡Nos ayudaría si nos dijera dónde nos encontró!",
+  "passkey": "Llave de acceso",
+  "developerSettingsWarning": "¿Estás seguro de que quieres modificar los ajustes de desarrollador?",
+  "developerSettings": "Ajustes de desarrollador"
 }

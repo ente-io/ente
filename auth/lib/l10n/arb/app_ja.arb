@@ -20,7 +20,6 @@
   "codeIssuerHint": "発行者",
   "codeSecretKeyHint": "秘密鍵",
   "codeAccountHint": "アカウント (you@domain.com)",
-  "accountKeyType": "鍵の種類",
   "sessionExpired": "セッションが失効しました",
   "@sessionExpired": {
     "description": "Title of the dialog when the users current session is invalid/expired"

@@ -425,6 +425,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Grouper par durée"),
         "clubByFileName":
             MessageLookupByLibrary.simpleMessage("Grouper par nom de fichier"),
+        "clusteringProgress":
+            MessageLookupByLibrary.simpleMessage("Clustering progress"),
         "codeAppliedPageTitle":
             MessageLookupByLibrary.simpleMessage("Code appliqué"),
         "codeCopiedToClipboard": MessageLookupByLibrary.simpleMessage(
@@ -665,6 +667,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Saisissez le mot de passe"),
         "enterPasswordToEncrypt": MessageLookupByLibrary.simpleMessage(
             "Entrez un mot de passe que nous pouvons utiliser pour chiffrer vos données"),
+        "enterPersonName":
+            MessageLookupByLibrary.simpleMessage("Enter person name"),
         "enterReferralCode": MessageLookupByLibrary.simpleMessage(
             "Entrez le code de parrainage"),
         "enterThe6digitCodeFromnyourAuthenticatorApp":
@@ -688,6 +692,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "exportLogs": MessageLookupByLibrary.simpleMessage("Exporter les logs"),
         "exportYourData":
             MessageLookupByLibrary.simpleMessage("Exportez vos données"),
+        "faceRecognition":
+            MessageLookupByLibrary.simpleMessage("Face recognition"),
+        "faceRecognitionIndexingDescription": MessageLookupByLibrary.simpleMessage(
+            "Please note that this will result in a higher bandwidth and battery usage until all items are indexed."),
         "faces": MessageLookupByLibrary.simpleMessage("Visages"),
         "failedToApplyCode": MessageLookupByLibrary.simpleMessage(
             "Impossible d\'appliquer le code"),
@@ -732,6 +740,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("pour vos souvenirs"),
         "forgotPassword":
             MessageLookupByLibrary.simpleMessage("Mot de passe oublié"),
+        "foundFaces": MessageLookupByLibrary.simpleMessage("Found faces"),
         "freeStorageClaimed":
             MessageLookupByLibrary.simpleMessage("Stockage gratuit réclamé"),
         "freeStorageOnReferralSuccess": m24,
@@ -1129,6 +1138,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "removeParticipant":
             MessageLookupByLibrary.simpleMessage("Supprimer le participant"),
         "removeParticipantBody": m43,
+        "removePersonLabel":
+            MessageLookupByLibrary.simpleMessage("Remove person label"),
         "removePublicLink":
             MessageLookupByLibrary.simpleMessage("Supprimer le lien public"),
         "removeShareItemsWarning": MessageLookupByLibrary.simpleMessage(

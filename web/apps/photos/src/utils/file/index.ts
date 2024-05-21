@@ -1,13 +1,15 @@
 import { FILE_TYPE } from "@/media/file-type";
+import { isNonWebImageFileExtension } from "@/media/formats";
 import { decodeLivePhoto } from "@/media/live-photo";
 import { lowercaseExtension } from "@/next/file";
 import log from "@/next/log";
 import { CustomErrorMessage, type Electron } from "@/next/types/ipc";
 import { workerBridge } from "@/next/worker/worker-bridge";
+import { withTimeout } from "@/utils/promise";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import { User } from "@ente/shared/user/types";
-import { downloadUsingAnchor, withTimeout } from "@ente/shared/utils";
+import { downloadUsingAnchor } from "@ente/shared/utils";
 import { t } from "i18next";
 import isElectron from "is-electron";
 import { moveToHiddenCollection } from "services/collectionService";
@@ -39,20 +41,6 @@ import { VISIBILITY_STATE } from "types/magicMetadata";
 import { isArchivedFile, updateMagicMetadata } from "utils/magicMetadata";
 import { safeFileName } from "utils/native-fs";
 import { writeStream } from "utils/native-stream";
-
-const RAW_FORMATS = [
-    "heic",
-    "rw2",
-    "tiff",
-    "arw",
-    "cr3",
-    "cr2",
-    "raf",
-    "nef",
-    "psd",
-    "dng",
-    "tif",
-];
 
 const SUPPORTED_RAW_FORMATS = [
     "heic",
@@ -114,19 +102,6 @@ export async function getUpdatedEXIFFileForDownload(
     } else {
         return fileStream;
     }
-}
-
-export function convertBytesToHumanReadable(
-    bytes: number,
-    precision = 2,
-): string {
-    if (bytes === 0 || isNaN(bytes)) {
-        return "0 MB";
-    }
-
-    const i = Math.floor(Math.log(bytes) / Math.log(1024));
-    const sizes = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
-    return (bytes / Math.pow(1024, i)).toFixed(precision) + " " + sizes[i];
 }
 
 export async function downloadFile(file: EnteFile) {
@@ -296,6 +271,10 @@ export function generateStreamFromArrayBuffer(data: Uint8Array) {
     });
 }
 
+/**
+ * The returned blob.type is filled in, whenever possible, with the MIME type of
+ * the data that we're dealing with.
+ */
 export const getRenderableImage = async (fileName: string, imageBlob: Blob) => {
     try {
         const tempFile = new File([imageBlob], fileName);
@@ -306,10 +285,19 @@ export const getRenderableImage = async (fileName: string, imageBlob: Blob) => {
         );
         const { extension } = fileTypeInfo;
 
-        if (!isRawFile(extension)) {
-            // Either it is not something we know how to handle yet, or
-            // something that the browser already knows how to render.
-            return imageBlob;
+        if (!isNonWebImageFileExtension(extension)) {
+            // Either it is something that the browser already knows how to
+            // render, or something we don't even about yet.
+            const mimeType = fileTypeInfo.mimeType;
+            if (!mimeType) {
+                log.info(
+                    "Trying to render a file without a MIME type",
+                    fileName,
+                );
+                return imageBlob;
+            } else {
+                return new Blob([imageBlob], { type: mimeType });
+            }
         }
 
         const available = !moduleState.isNativeJPEGConversionNotAvailable;
@@ -350,12 +338,8 @@ const nativeConvertToJPEG = async (imageBlob: Blob) => {
         ? await electron.convertToJPEG(imageData)
         : await workerBridge.convertToJPEG(imageData);
     log.debug(() => `Native JPEG conversion took ${Date.now() - startTime} ms`);
-    return new Blob([jpegData]);
+    return new Blob([jpegData], { type: "image/jpeg" });
 };
-
-export function isRawFile(exactType: string) {
-    return RAW_FORMATS.includes(exactType.toLowerCase());
-}
 
 export function isSupportedRawFormat(exactType: string) {
     return SUPPORTED_RAW_FORMATS.includes(exactType.toLowerCase());

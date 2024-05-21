@@ -1,9 +1,9 @@
 /**
- * The embeddings models that we support.
+ * The embeddings that we (the current client) knows how to handle.
  *
  * This is an exhaustive set of values we pass when PUT-ting encrypted
  * embeddings on the server. However, we should be prepared to receive an
- * {@link EncryptedEmbedding} with a model value distinct from one of these.
+ * {@link EncryptedEmbedding} with a model value different from these.
  */
 export type EmbeddingModel = "onnx-clip" | "file-ml-clip-face";
 
