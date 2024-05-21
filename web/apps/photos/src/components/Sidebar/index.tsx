@@ -1,27 +1,49 @@
 import log from "@/next/log";
 import { savedLogs } from "@/next/log-web";
+import {
+    configurePasskeyRecovery,
+    isPasskeyRecoveryEnabled,
+} from "@ente/accounts/services/passkey";
+import { APPS, CLIENT_PACKAGE_NAMES } from "@ente/shared/apps/constants";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
+import RecoveryKey from "@ente/shared/components/RecoveryKey";
+import ThemeSwitcher from "@ente/shared/components/ThemeSwitcher";
+import {
+    ACCOUNTS_PAGES,
+    PHOTOS_PAGES as PAGES,
+} from "@ente/shared/constants/pages";
+import { getRecoveryKey } from "@ente/shared/crypto/helpers";
+import {
+    encryptToB64,
+    generateEncryptionKey,
+} from "@ente/shared/crypto/internal/libsodium";
+import { getAccountsURL } from "@ente/shared/network/api";
+import { THEME_COLOR } from "@ente/shared/themes/constants";
 import { downloadAsFile } from "@ente/shared/utils";
 import { Divider, Stack } from "@mui/material";
 import Typography from "@mui/material/Typography";
 import DeleteAccountModal from "components/DeleteAccountModal";
 import { EnteMenuItem } from "components/Menu/EnteMenuItem";
+import TwoFactorModal from "components/TwoFactor/Modal";
+import { WatchFolder } from "components/WatchFolder";
 import { NoStyleAnchor } from "components/pages/sharedAlbum/GoToEnte";
 import { t } from "i18next";
 import isElectron from "is-electron";
+import { useRouter } from "next/router";
 import { AppContext } from "pages/_app";
 import { GalleryContext } from "pages/gallery";
 import { useContext, useEffect, useState } from "react";
 import { Trans } from "react-i18next";
 import exportService from "services/export";
+import { getAccountsToken } from "services/userService";
 import { CollectionSummaries } from "types/collection";
 import { openLink } from "utils/common";
 import { getDownloadAppMessage } from "utils/ui";
 import { isInternalUser } from "utils/user";
 import { testUpload } from "../../../tests/upload.test";
 import HeaderSection from "./Header";
+import Preferences from "./Preferences";
 import ShortcutSection from "./ShortcutSection";
-import UtilitySection from "./UtilitySection";
 import { DrawerSidebar } from "./styledComponents";
 import UserDetailsSection from "./userDetailsSection";
 
@@ -56,6 +78,200 @@ export default function Sidebar({
         </DrawerSidebar>
     );
 }
+
+interface UtilitySectionProps {
+    closeSidebar: () => void;
+}
+
+const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
+    const router = useRouter();
+    const appContext = useContext(AppContext);
+    const {
+        setDialogMessage,
+        startLoading,
+        watchFolderView,
+        setWatchFolderView,
+        themeColor,
+        setThemeColor,
+    } = appContext;
+
+    const [recoverModalView, setRecoveryModalView] = useState(false);
+    const [twoFactorModalView, setTwoFactorModalView] = useState(false);
+    const [preferencesView, setPreferencesView] = useState(false);
+
+    const openPreferencesOptions = () => setPreferencesView(true);
+    const closePreferencesOptions = () => setPreferencesView(false);
+
+    const openRecoveryKeyModal = () => setRecoveryModalView(true);
+    const closeRecoveryKeyModal = () => setRecoveryModalView(false);
+
+    const openTwoFactorModal = () => setTwoFactorModalView(true);
+    const closeTwoFactorModal = () => setTwoFactorModalView(false);
+
+    const openWatchFolder = () => {
+        if (isElectron()) {
+            setWatchFolderView(true);
+        } else {
+            setDialogMessage(getDownloadAppMessage());
+        }
+    };
+    const closeWatchFolder = () => setWatchFolderView(false);
+
+    const redirectToChangePasswordPage = () => {
+        closeSidebar();
+        router.push(PAGES.CHANGE_PASSWORD);
+    };
+
+    const redirectToChangeEmailPage = () => {
+        closeSidebar();
+        router.push(PAGES.CHANGE_EMAIL);
+    };
+
+    const redirectToAccountsPage = async () => {
+        closeSidebar();
+
+        try {
+            // check if the user has passkey recovery enabled
+            const recoveryEnabled = await isPasskeyRecoveryEnabled();
+            if (!recoveryEnabled) {
+                // let's create the necessary recovery information
+                const recoveryKey = await getRecoveryKey();
+
+                const resetSecret = await generateEncryptionKey();
+
+                const encryptionResult = await encryptToB64(
+                    resetSecret,
+                    recoveryKey,
+                );
+
+                await configurePasskeyRecovery(
+                    resetSecret,
+                    encryptionResult.encryptedData,
+                    encryptionResult.nonce,
+                );
+            }
+
+            const accountsToken = await getAccountsToken();
+
+            window.open(
+                `${getAccountsURL()}${
+                    ACCOUNTS_PAGES.ACCOUNT_HANDOFF
+                }?package=${CLIENT_PACKAGE_NAMES.get(
+                    APPS.PHOTOS,
+                )}&token=${accountsToken}`,
+            );
+        } catch (e) {
+            log.error("failed to redirect to accounts page", e);
+        }
+    };
+
+    const redirectToDeduplicatePage = () => router.push(PAGES.DEDUPLICATE);
+
+    const somethingWentWrong = () =>
+        setDialogMessage({
+            title: t("ERROR"),
+            content: t("RECOVER_KEY_GENERATION_FAILED"),
+            close: { variant: "critical" },
+        });
+
+    const toggleTheme = () => {
+        setThemeColor((themeColor) =>
+            themeColor === THEME_COLOR.DARK
+                ? THEME_COLOR.LIGHT
+                : THEME_COLOR.DARK,
+        );
+    };
+
+    return (
+        <>
+            {isElectron() && (
+                <EnteMenuItem
+                    onClick={openWatchFolder}
+                    variant="secondary"
+                    label={t("WATCH_FOLDERS")}
+                />
+            )}
+            <EnteMenuItem
+                variant="secondary"
+                onClick={openRecoveryKeyModal}
+                label={t("RECOVERY_KEY")}
+            />
+            {isInternalUser() && (
+                <EnteMenuItem
+                    onClick={toggleTheme}
+                    variant="secondary"
+                    label={t("CHOSE_THEME")}
+                    endIcon={
+                        <ThemeSwitcher
+                            themeColor={themeColor}
+                            setThemeColor={setThemeColor}
+                        />
+                    }
+                />
+            )}
+            <EnteMenuItem
+                variant="secondary"
+                onClick={openTwoFactorModal}
+                label={t("TWO_FACTOR")}
+            />
+
+            {isInternalUser() && (
+                <EnteMenuItem
+                    variant="secondary"
+                    onClick={redirectToAccountsPage}
+                    label={t("PASSKEYS")}
+                />
+            )}
+
+            <EnteMenuItem
+                variant="secondary"
+                onClick={redirectToChangePasswordPage}
+                label={t("CHANGE_PASSWORD")}
+            />
+
+            <EnteMenuItem
+                variant="secondary"
+                onClick={redirectToChangeEmailPage}
+                label={t("CHANGE_EMAIL")}
+            />
+
+            <EnteMenuItem
+                variant="secondary"
+                onClick={redirectToDeduplicatePage}
+                label={t("DEDUPLICATE_FILES")}
+            />
+
+            <EnteMenuItem
+                variant="secondary"
+                onClick={openPreferencesOptions}
+                label={t("PREFERENCES")}
+            />
+            <RecoveryKey
+                appContext={appContext}
+                show={recoverModalView}
+                onHide={closeRecoveryKeyModal}
+                somethingWentWrong={somethingWentWrong}
+            />
+            <TwoFactorModal
+                show={twoFactorModalView}
+                onHide={closeTwoFactorModal}
+                closeSidebar={closeSidebar}
+                setLoading={startLoading}
+            />
+            {isElectron() && (
+                <WatchFolder
+                    open={watchFolderView}
+                    onClose={closeWatchFolder}
+                />
+            )}
+            <Preferences
+                open={preferencesView}
+                onClose={closePreferencesOptions}
+                onRootClose={closeSidebar}
+            />
+        </>
+    );
+};
 
 const HelpSection: React.FC = () => {
     const { setDialogMessage } = useContext(AppContext);
