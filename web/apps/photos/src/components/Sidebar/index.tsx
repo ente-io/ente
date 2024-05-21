@@ -5,6 +5,8 @@ import {
     isPasskeyRecoveryEnabled,
 } from "@ente/accounts/services/passkey";
 import { APPS, CLIENT_PACKAGE_NAMES } from "@ente/shared/apps/constants";
+import { SpaceBetweenFlex } from "@ente/shared/components/Container";
+import { EnteLogo } from "@ente/shared/components/EnteLogo";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import RecoveryKey from "@ente/shared/components/RecoveryKey";
 import ThemeSwitcher from "@ente/shared/components/ThemeSwitcher";
@@ -24,10 +26,18 @@ import { THEME_COLOR } from "@ente/shared/themes/constants";
 import { downloadAsFile } from "@ente/shared/utils";
 import ArchiveOutlined from "@mui/icons-material/ArchiveOutlined";
 import CategoryIcon from "@mui/icons-material/Category";
+import CloseIcon from "@mui/icons-material/Close";
 import DeleteOutline from "@mui/icons-material/DeleteOutline";
 import LockOutlined from "@mui/icons-material/LockOutlined";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
-import { Box, Divider, Skeleton, Stack, styled } from "@mui/material";
+import {
+    Box,
+    Divider,
+    IconButton,
+    Skeleton,
+    Stack,
+    styled,
+} from "@mui/material";
 import Typography from "@mui/material/Typography";
 import DeleteAccountModal from "components/DeleteAccountModal";
 import { EnteDrawer } from "components/EnteDrawer";
@@ -60,7 +70,6 @@ import { isInternalUser } from "utils/user";
 import { isFamilyAdmin, isPartOfFamily } from "utils/user/family";
 import { testUpload } from "../../../tests/upload.test";
 import { MemberSubscriptionManage } from "../MemberSubscriptionManage";
-import HeaderSection from "./Header";
 import Preferences from "./Preferences";
 import SubscriptionCard from "./SubscriptionCard";
 import SubscriptionStatus from "./SubscriptionStatus";
@@ -104,6 +113,25 @@ const DrawerSidebar = styled(EnteDrawer)(({ theme }) => ({
 }));
 
 DrawerSidebar.defaultProps = { anchor: "left" };
+
+interface HeaderSectionProps {
+    closeSidebar: () => void;
+}
+
+const HeaderSection: React.FC<HeaderSectionProps> = ({ closeSidebar }) => {
+    return (
+        <SpaceBetweenFlex mt={0.5} mb={1} pl={1.5}>
+            <EnteLogo />
+            <IconButton
+                aria-label="close"
+                onClick={closeSidebar}
+                color="secondary"
+            >
+                <CloseIcon fontSize="small" />
+            </IconButton>
+        </SpaceBetweenFlex>
+    );
+};
 
 interface UserDetailsSectionProps {
     sidebarView: boolean;
