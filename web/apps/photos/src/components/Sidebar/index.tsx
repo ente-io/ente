@@ -20,6 +20,11 @@ import {
 import { getAccountsURL } from "@ente/shared/network/api";
 import { THEME_COLOR } from "@ente/shared/themes/constants";
 import { downloadAsFile } from "@ente/shared/utils";
+import ArchiveOutlined from "@mui/icons-material/ArchiveOutlined";
+import CategoryIcon from "@mui/icons-material/Category";
+import DeleteOutline from "@mui/icons-material/DeleteOutline";
+import LockOutlined from "@mui/icons-material/LockOutlined";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import { Divider, Stack } from "@mui/material";
 import Typography from "@mui/material/Typography";
 import DeleteAccountModal from "components/DeleteAccountModal";
@@ -27,6 +32,11 @@ import { EnteMenuItem } from "components/Menu/EnteMenuItem";
 import TwoFactorModal from "components/TwoFactor/Modal";
 import { WatchFolder } from "components/WatchFolder";
 import { NoStyleAnchor } from "components/pages/sharedAlbum/GoToEnte";
+import {
+    ARCHIVE_SECTION,
+    DUMMY_UNCATEGORIZED_COLLECTION,
+    TRASH_SECTION,
+} from "constants/collection";
 import { t } from "i18next";
 import isElectron from "is-electron";
 import { useRouter } from "next/router";
@@ -34,6 +44,7 @@ import { AppContext } from "pages/_app";
 import { GalleryContext } from "pages/gallery";
 import { useContext, useEffect, useState } from "react";
 import { Trans } from "react-i18next";
+import { getUncategorizedCollection } from "services/collectionService";
 import exportService from "services/export";
 import { getAccountsToken } from "services/userService";
 import { CollectionSummaries } from "types/collection";
@@ -43,7 +54,6 @@ import { isInternalUser } from "utils/user";
 import { testUpload } from "../../../tests/upload.test";
 import HeaderSection from "./Header";
 import Preferences from "./Preferences";
-import ShortcutSection from "./ShortcutSection";
 import { DrawerSidebar } from "./styledComponents";
 import UserDetailsSection from "./userDetailsSection";
 
@@ -78,6 +88,92 @@ export default function Sidebar({
         </DrawerSidebar>
     );
 }
+
+interface ShortcutSectionProps {
+    closeSidebar: () => void;
+    collectionSummaries: CollectionSummaries;
+}
+
+const ShortcutSection: React.FC<ShortcutSectionProps> = ({
+    closeSidebar,
+    collectionSummaries,
+}) => {
+    const galleryContext = useContext(GalleryContext);
+    const [uncategorizedCollectionId, setUncategorizedCollectionID] =
+        useState<number>();
+
+    useEffect(() => {
+        const main = async () => {
+            const unCategorizedCollection = await getUncategorizedCollection();
+            if (unCategorizedCollection) {
+                setUncategorizedCollectionID(unCategorizedCollection.id);
+            } else {
+                setUncategorizedCollectionID(DUMMY_UNCATEGORIZED_COLLECTION);
+            }
+        };
+        main();
+    }, []);
+
+    const openUncategorizedSection = () => {
+        galleryContext.setActiveCollectionID(uncategorizedCollectionId);
+        closeSidebar();
+    };
+
+    const openTrashSection = () => {
+        galleryContext.setActiveCollectionID(TRASH_SECTION);
+        closeSidebar();
+    };
+
+    const openArchiveSection = () => {
+        galleryContext.setActiveCollectionID(ARCHIVE_SECTION);
+        closeSidebar();
+    };
+
+    const openHiddenSection = () => {
+        galleryContext.openHiddenSection(() => {
+            closeSidebar();
+        });
+    };
+
+    return (
+        <>
+            <EnteMenuItem
+                startIcon={<CategoryIcon />}
+                onClick={openUncategorizedSection}
+                variant="captioned"
+                label={t("UNCATEGORIZED")}
+                subText={collectionSummaries
+                    .get(uncategorizedCollectionId)
+                    ?.fileCount.toString()}
+            />
+            <EnteMenuItem
+                startIcon={<ArchiveOutlined />}
+                onClick={openArchiveSection}
+                variant="captioned"
+                label={t("ARCHIVE_SECTION_NAME")}
+                subText={collectionSummaries
+                    .get(ARCHIVE_SECTION)
+                    ?.fileCount.toString()}
+            />
+            <EnteMenuItem
+                startIcon={<VisibilityOff />}
+                onClick={openHiddenSection}
+                variant="captioned"
+                label={t("HIDDEN")}
+                subIcon={<LockOutlined />}
+            />
+            <EnteMenuItem
+                startIcon={<DeleteOutline />}
+                onClick={openTrashSection}
+                variant="captioned"
+                label={t("TRASH")}
+                subText={collectionSummaries
+                    .get(TRASH_SECTION)
+                    ?.fileCount.toString()}
+            />
+        </>
+    );
+};
 
 interface UtilitySectionProps {
     closeSidebar: () => void;
