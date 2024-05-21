@@ -19,10 +19,10 @@ import type {
 import { defaultMLVersion } from "services/machineLearning/machineLearningService";
 import { getSimilarityTransformation } from "similarity-transformation";
 import {
+    Matrix as TransformationMatrix,
     applyToPoint,
     compose,
     scale,
-    Matrix as transformMatrix,
     translate,
 } from "transformation-matrix";
 import type { EnteFile } from "types/file";
@@ -295,18 +295,21 @@ const transformFaceDetections = (
     }));
 };
 
-const boxTransformationMatrix = (inBox: Box, toBox: Box): transformMatrix =>
+const boxTransformationMatrix = (
+    inBox: Box,
+    toBox: Box,
+): TransformationMatrix =>
     compose(
         translate(toBox.x, toBox.y),
         scale(toBox.width / inBox.width, toBox.height / inBox.height),
     );
 
-const transformPoint = (point: Point, transform: transformMatrix) => {
+const transformPoint = (point: Point, transform: TransformationMatrix) => {
     const txdPoint = applyToPoint(transform, point);
     return new Point(txdPoint.x, txdPoint.y);
 };
 
-const transformBox = (box: Box, transform: transformMatrix) => {
+const transformBox = (box: Box, transform: TransformationMatrix) => {
     const topLeft = transformPoint(new Point(box.x, box.y), transform);
     const bottomRight = transformPoint(
         new Point(box.x + box.width, box.y + box.height),
