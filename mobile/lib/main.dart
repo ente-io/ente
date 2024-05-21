@@ -47,6 +47,7 @@ import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/tools/app_lock.dart';
 import 'package:photos/ui/tools/lock_screen.dart';
 import 'package:photos/utils/crypto_util.dart';
+import "package:photos/utils/email_util.dart";
 import 'package:photos/utils/file_uploader.dart';
 import 'package:photos/utils/local_settings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -176,6 +177,16 @@ void _headlessTaskHandler(HeadlessTask task) {
 }
 
 Future<void> _init(bool isBackground, {String via = ''}) async {
+  bool initComplete = false;
+  Future.delayed(const Duration(seconds: 15), () {
+    if (!initComplete) {
+      sendLogsForInit(
+        "support@ente.io",
+        "Stuck on splash screen for >= 15 secons",
+        null,
+      );
+    }
+  });
   _isProcessRunning = true;
   _logger.info("Initializing...  inBG =$isBackground via: $via");
   final SharedPreferences preferences = await SharedPreferences.getInstance();
@@ -237,6 +248,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
   //   unawaited(ObjectDetectionService.instance.init());
   // }
 
+  initComplete = true;
   _logger.info("Initialization done");
 }
 
