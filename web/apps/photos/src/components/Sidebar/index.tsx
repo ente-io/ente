@@ -291,47 +291,47 @@ const SubscriptionStatus: React.FC<SubscriptionStatusProps> = ({
         return <></>;
     }
 
-    const messages = [];
+    let message: React.ReactElement | undefined;
     if (!hasAddOnBonus(userDetails.bonusData)) {
         if (isSubscriptionActive(userDetails.subscription)) {
             if (isOnFreePlan(userDetails.subscription)) {
-                messages.push(
+                message = (
                     <Trans
                         i18nKey={"FREE_SUBSCRIPTION_INFO"}
                         values={{
                             date: userDetails.subscription?.expiryTime,
                         }}
-                    />,
+                    />
                 );
             } else if (isSubscriptionCancelled(userDetails.subscription)) {
-                messages.push(
-                    t("RENEWAL_CANCELLED_SUBSCRIPTION_INFO", {
-                        date: userDetails.subscription?.expiryTime,
-                    }),
-                );
+                message = t("RENEWAL_CANCELLED_SUBSCRIPTION_INFO", {
+                    date: userDetails.subscription?.expiryTime,
+                });
             }
         } else {
-            messages.push(
+            message = (
                 <Trans
                     i18nKey={"SUBSCRIPTION_EXPIRED_MESSAGE"}
                     components={{
                         a: <LinkButton onClick={handleClick} />,
                     }}
-                />,
+                />
             );
         }
     }
 
-    if (hasExceededStorageQuota(userDetails) && messages.length === 0) {
-        messages.push(
+    if (!message && hasExceededStorageQuota(userDetails)) {
+        message = (
             <Trans
                 i18nKey={"STORAGE_QUOTA_EXCEEDED_SUBSCRIPTION_INFO"}
                 components={{
                     a: <LinkButton onClick={handleClick} />,
                 }}
-            />,
+            />
         );
     }
+
+    if (!message) return <></>;
 
     return (
         <Box px={1} pt={0.5}>
@@ -341,7 +341,7 @@ const SubscriptionStatus: React.FC<SubscriptionStatusProps> = ({
                 onClick={handleClick && handleClick}
                 sx={{ cursor: handleClick && "pointer" }}
             >
-                {messages}
+                {message}
             </Typography>
         </Box>
     );
