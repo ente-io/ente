@@ -179,7 +179,7 @@ void _headlessTaskHandler(HeadlessTask task) {
 Future<void> _init(bool isBackground, {String via = ''}) async {
   bool initComplete = false;
   Future.delayed(const Duration(seconds: 15), () {
-    if (!initComplete) {
+    if (!initComplete && !isBackground) {
       sendLogsForInit(
         "support@ente.io",
         "Stuck on splash screen for >= 15 secons",
