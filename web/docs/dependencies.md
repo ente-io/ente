@@ -5,23 +5,40 @@
 These are some global dev dependencies in the root `package.json`. These set the
 baseline for how our code be in all the workspaces in this (yarn) monorepo.
 
--   "prettier" - Formatter
--   "eslint" - Linter
--   "typescript" - Type checker
+-   [prettier](https://prettier.io) - Formatter
+
+-   [eslint](https://eslint.org) - Linter
+
+-   [typescript](https://www.typescriptlang.org/) - Type checker
 
 They also need some support packages, which come from the leaf `@/build-config`
 package:
 
--   "@typescript-eslint/parser" - Tells ESLint how to read TypeScript syntax
--   "@typescript-eslint/eslint-plugin" - Provides TypeScript rules and presets
--   "eslint-plugin-react-hooks", "eslint-plugin-react-namespace-import" - Some
-    React specific ESLint rules and configurations that are used by the
-    workspaces that have React code.
--   "eslint-plugin-react-refresh" - A plugin to ensure that React components are
-    exported in a way that they can be HMR-ed.
--   "prettier-plugin-organize-imports" - A Prettier plugin to sort imports.
--   "prettier-plugin-packagejson" - A Prettier plugin to also prettify
-    `package.json`.
+-   [@typescript-eslint/parser](https://typescript-eslint.io/packages/eslint-plugin/)
+    \- Tells ESLint how to read TypeScript syntax.
+
+-   [@typescript-eslint/eslint-plugin](https://typescript-eslint.io/packages/eslint-plugin/)
+    \- Provides TypeScript rules and presets
+
+-   [eslint-plugin-react-hooks](https://github.com/jsx-eslint/eslint-plugin-react),
+    [eslint-plugin-react-hooks](https://reactjs.org/) \- Some React specific
+    ESLint rules and configurations that are used by the workspaces that have
+    React code.
+
+-   [eslint-plugin-react-refresh](https://github.com/ArnaudBarre/eslint-plugin-react-refresh)
+    \- A plugin to ensure that React components are exported in a way that they
+    can be HMR-ed.
+
+-   [prettier-plugin-organize-imports](https://github.com/simonhaenisch/prettier-plugin-organize-imports)
+    \- A Prettier plugin to sort imports.
+
+-   [prettier-plugin-packagejson](https://github.com/matzkoh/prettier-plugin-packagejson)
+    \- A Prettier plugin to also prettify `package.json`.
+
+The root `package.json` also has a convenience dev dependency:
+
+-   [concurrently](https://github.com/open-cli-tools/concurrently) for spawning
+    parallel tasks when we invoke various yarn scripts.
 
 ## Utils
 
@@ -157,3 +174,22 @@ some cases.
 -   [sanitize-filename](https://github.com/parshap/node-sanitize-filename) is
     for converting arbitrary strings into strings that are suitable for being
     used as filenames.
+
+## Face search
+
+-   [transformation-matrix](https://github.com/chrvadala/transformation-matrix)
+    is used for performing 2D affine transformations using transformation
+    matrices. It is used during face detection.
+
+-   [matrix](https://github.com/mljs/matrix) is mathematical matrix abstraction.
+    It is used alongwith
+    [similarity-transformation](https://github.com/shaileshpandit/similarity-transformation-js)
+    during face alignment.
+
+    > Note that while both `transformation-matrix` and `matrix` are "matrix"
+    > libraries, they have different foci and purposes: `transformation-matrix`
+    > provides affine transforms, while `matrix` is for performing computations
+    > on matrices, say inverting them or performing their decomposition.
+
+-   [hdbscan](https://github.com/shaileshpandit/hdbscan-js) is used for face
+    clustering.

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:math' as math;
 
 import "package:flutter/cupertino.dart";
+import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
@@ -736,7 +737,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
 
     // stop any existing cast session
     gw.revokeAllTokens().ignore();
-    if (!Platform.isAndroid) {
+    if (!Platform.isAndroid && !kDebugMode) {
       await _pairWithPin(gw, '');
     } else {
       final result = await showDialog<ButtonAction?>(

@@ -1,5 +1,6 @@
-# Let folks use their custom .vscode settings
+# Let folks use their custom editor settings
 .vscode
+.idea
 
 # macOS
 .DS_Store

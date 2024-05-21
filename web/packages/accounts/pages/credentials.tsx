@@ -50,10 +50,11 @@ import {
     generateSRPSetupAttributes,
     loginViaSRP,
 } from "../services/srp";
-import { logoutUser } from "../services/user";
 import { SRPAttributes } from "../types/srp";
 
 export default function Credentials({ appContext, appName }: PageProps) {
+    const { logout } = appContext;
+
     const [srpAttributes, setSrpAttributes] = useState<SRPAttributes>();
     const [keyAttributes, setKeyAttributes] = useState<KeyAttributes>();
     const [user, setUser] = useState<User>();
@@ -275,7 +276,7 @@ export default function Credentials({ appContext, appName }: PageProps) {
                     <LinkButton onClick={redirectToRecoverPage}>
                         {t("FORGOT_PASSWORD")}
                     </LinkButton>
-                    <LinkButton onClick={logoutUser}>
+                    <LinkButton onClick={logout}>
                         {t("CHANGE_EMAIL")}
                     </LinkButton>
                 </FormPaperFooter>

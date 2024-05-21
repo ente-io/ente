@@ -1,12 +1,11 @@
 import { FILE_TYPE } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
-import { openCache, type BlobCache } from "@/next/blob-cache";
+import { blobCache, type BlobCache } from "@/next/blob-cache";
 import log from "@/next/log";
 import { APPS } from "@ente/shared/apps/constants";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
 import { CustomError } from "@ente/shared/error";
-import { Events, eventBus } from "@ente/shared/events";
 import { isPlaybackPossible } from "@ente/shared/media/video-playback";
 import { Remote } from "comlink";
 import isElectron from "is-electron";
@@ -92,7 +91,7 @@ class DownloadManagerImpl {
         }
         this.downloadClient = createDownloadClient(app, tokens);
         try {
-            this.thumbnailCache = await openCache("thumbs");
+            this.thumbnailCache = await blobCache("thumbs");
         } catch (e) {
             log.error(
                 "Failed to open thumbnail cache, will continue without it",
@@ -101,13 +100,12 @@ class DownloadManagerImpl {
         }
         // TODO (MR): Revisit full file caching cf disk space usage
         // try {
-        //     if (isElectron()) this.fileCache = await openCache("files");
+        //     if (isElectron()) this.fileCache = await cache("files");
         // } catch (e) {
         //     log.error("Failed to open file cache, will continue without it", e);
         // }
         this.cryptoWorker = await ComlinkCryptoWorker.getInstance();
         this.ready = true;
-        eventBus.on(Events.LOGOUT, this.logoutHandler.bind(this), this);
     }
 
     private ensureInitialized() {
@@ -117,21 +115,15 @@ class DownloadManagerImpl {
             );
     }
 
-    private async logoutHandler() {
-        try {
-            log.info("downloadManger logoutHandler started");
-            this.ready = false;
-            this.cryptoWorker = null;
-            this.downloadClient = null;
-            this.fileObjectURLPromises.clear();
-            this.fileConversionPromises.clear();
-            this.thumbnailObjectURLPromises.clear();
-            this.fileDownloadProgress.clear();
-            this.progressUpdater = () => {};
-            log.info("downloadManager logoutHandler completed");
-        } catch (e) {
-            log.error("downloadManager logoutHandler failed", e);
-        }
+    async logout() {
+        this.ready = false;
+        this.cryptoWorker = null;
+        this.downloadClient = null;
+        this.fileObjectURLPromises.clear();
+        this.fileConversionPromises.clear();
+        this.thumbnailObjectURLPromises.clear();
+        this.fileDownloadProgress.clear();
+        this.progressUpdater = () => {};
     }
 
     updateToken(token: string, passwordToken?: string) {
@@ -576,7 +568,6 @@ async function getPlayableVideo(
             if (!forceConvert && !runOnWeb && !isElectron()) {
                 return null;
             }
-            // TODO(MR): This might not work for very large (~ GB) videos. Test.
             log.info(`Converting video ${videoNameTitle} to mp4`);
             const convertedVideoData = await ffmpeg.convertToMP4(videoBlob);
             return new Blob([convertedVideoData], { type: "video/mp4" });

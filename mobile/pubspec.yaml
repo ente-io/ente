@@ -12,7 +12,7 @@ description: ente photos application
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 
-version: 0.8.94+614
+version: 0.8.97+617
 publish_to: none
 
 environment:
@@ -39,7 +39,8 @@ dependencies:
   connectivity_plus: ^6.0.2
   cross_file: ^0.3.3
   crypto: ^3.0.2
-  cupertino_icons: ^1.0.8
+  cupertino_icons: ^1.0.0
+  dart_ui_isolate: ^1.1.1
   defer_pointer: ^0.0.2
   device_info_plus: ^9.0.3
   dio: ^4.0.6
@@ -112,6 +113,7 @@ dependencies:
   media_kit: ^1.1.10+1
   media_kit_libs_video: ^1.0.4
   media_kit_video: ^1.2.4
+  ml_linalg: ^13.11.31
   modal_bottom_sheet: ^3.0.0-pre
   motion_photos:
     git: "https://github.com/ente-io/motion_photo.git"
@@ -134,6 +136,8 @@ dependencies:
   photo_view: ^0.14.0
   pinput: ^1.2.2
   pointycastle: ^3.7.3
+  pool: ^1.5.1
+  protobuf: ^3.1.0
   provider: ^6.0.0
   quiver: ^3.0.1
   receive_sharing_intent: ^1.7.0
@@ -142,6 +146,7 @@ dependencies:
   sentry_flutter: ^7.9.0
   share_plus: 7.2.2
   shared_preferences: ^2.0.5
+  simple_cluster: ^0.3.0
   sqflite: ^2.3.0
   sqflite_migration: ^0.3.0
   sqlite3_flutter_libs: ^0.5.20
@@ -150,11 +155,7 @@ dependencies:
   styled_text: ^7.0.0
   syncfusion_flutter_core: ^19.2.49
   syncfusion_flutter_sliders: ^19.2.49
-  # tflite_flutter: ^0.9.0
-  # tflite_flutter_helper:
-  #   git:
-  #     url: https://github.com/pnyompen/tflite_flutter_helper.git
-  #     ref: 43e87d4b9627539266dc20250beb35bf36320dce
+  synchronized: ^3.1.0
   tuple: ^2.0.0
   uni_links: ^0.5.1
   url_launcher: ^6.0.3
@@ -228,9 +229,6 @@ flutter_native_splash:
 flutter:
   assets:
     - assets/
-    - assets/models/cocossd/
-    - assets/models/mobilenet/
-    - assets/models/scenes/
     - assets/models/clip/
   fonts:
     - family: Inter

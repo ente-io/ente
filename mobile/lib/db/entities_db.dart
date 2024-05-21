@@ -9,7 +9,7 @@ extension EntitiesDB on FilesDB {
     List<LocalEntityData> data, {
     ConflictAlgorithm conflictAlgorithm = ConflictAlgorithm.replace,
   }) async {
-    debugPrint("Inserting missing PathIDToLocalIDMapping");
+    debugPrint("entitiesDB: upsertEntities ${data.length} entities");
     final db = await sqliteAsyncDB;
     final parameterSets = <List<Object?>>[];
     int batchCounter = 0;
@@ -86,5 +86,18 @@ extension EntitiesDB on FilesDB {
     return List.generate(maps.length, (i) {
       return LocalEntityData.fromJson(maps[i]);
     });
+  }
+
+  Future<LocalEntityData?> getEntity(EntityType type, String id) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      "entities",
+      where: "type = ? AND id = ?",
+      whereArgs: [type.typeToString(), id],
+    );
+    if (maps.isEmpty) {
+      return null;
+    }
+    return LocalEntityData.fromJson(maps.first);
   }
 }

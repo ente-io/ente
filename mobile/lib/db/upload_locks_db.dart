@@ -90,7 +90,7 @@ class UploadLocksDB {
   static List<String> _createTrackUploadsTable() {
     return [
       '''
-                CREATE TABLE ${_trackUploadTable.table} (
+                CREATE TABLE IF NOT EXISTS ${_trackUploadTable.table} (
                   ${_trackUploadTable.columnID} INTEGER PRIMARY KEY,
                   ${_trackUploadTable.columnLocalID} TEXT NOT NULL,
                   ${_trackUploadTable.columnFileHash} TEXT NOT NULL,
@@ -109,7 +109,7 @@ class UploadLocksDB {
                 )
                 ''',
       '''
-                CREATE TABLE ${_partsTable.table} (
+                CREATE TABLE IF NOT EXISTS ${_partsTable.table} (
                   ${_partsTable.columnObjectKey} TEXT NOT NULL REFERENCES ${_trackUploadTable.table}(${_trackUploadTable.columnObjectKey}) ON DELETE CASCADE,
                   ${_partsTable.columnPartNumber} INTEGER NOT NULL,
                   ${_partsTable.columnPartUrl} TEXT NOT NULL,

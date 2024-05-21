@@ -1,5 +1,4 @@
 import log from "@/next/log";
-import { logoutUser } from "@ente/accounts/services/user";
 import { APPS } from "@ente/shared/apps/constants";
 import {
     CenteredFlex,
@@ -185,7 +184,7 @@ export default function PublicCollectionGallery() {
             nonClosable: true,
             proceed: {
                 text: t("LOGIN"),
-                action: logoutUser,
+                action: () => router.push(PAGES.ROOT),
                 variant: "accent",
             },
         });

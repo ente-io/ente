@@ -585,6 +585,18 @@ class FilesDB {
     return convertToFiles(results)[0];
   }
 
+  Future<EnteFile?> getAnyUploadedFile(int uploadedID) async {
+    final db = await instance.sqliteAsyncDB;
+    final results = await db.getAll(
+      'SELECT * FROM $filesTable WHERE $columnUploadedFileID = ?',
+      [uploadedID],
+    );
+    if (results.isEmpty) {
+      return null;
+    }
+    return convertToFiles(results)[0];
+  }
+
   Future<Set<int>> getUploadedFileIDs(int collectionID) async {
     final db = await instance.sqliteAsyncDB;
     final results = await db.getAll(
@@ -771,6 +783,17 @@ class FilesDB {
       'SELECT * FROM $filesTable WHERE $whereClause',
       whereArgs,
     );
+    final files = convertToFiles(results);
+    return files;
+  }
+
+  Future<List<EnteFile>> getAllFilesFromCollections(
+    Iterable<int> collectionID,
+  ) async {
+    final db = await instance.sqliteAsyncDB;
+    final String sql =
+        'SELECT * FROM $filesTable WHERE $columnCollectionID IN (${collectionID.join(',')})';
+    final results = await db.getAll(sql);
     final files = convertToFiles(results);
     return files;
   }
@@ -1386,6 +1409,23 @@ class FilesDB {
       result[row[columnCollectionID] as int] = row['max_creation_time'] as int;
     }
     enteWatch.log("query done");
+    return result;
+  }
+
+  Future<Map<int, int>> getFileIDToCreationTime() async {
+    final db = await instance.sqliteAsyncDB;
+    final rows = await db.getAll(
+      '''
+      SELECT $columnUploadedFileID, $columnCreationTime
+      FROM $filesTable
+      WHERE 
+      ($columnUploadedFileID IS NOT NULL AND $columnUploadedFileID IS NOT -1);
+    ''',
+    );
+    final result = <int, int>{};
+    for (final row in rows) {
+      result[row[columnUploadedFileID] as int] = row[columnCreationTime] as int;
+    }
     return result;
   }
 

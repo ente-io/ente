@@ -38,36 +38,41 @@ export const logToDisk = (message: string) => {
     log.info(`[rndr] ${message}`);
 };
 
-const logError = (message: string, e?: unknown) => {
-    if (!e) {
-        logError_(message);
-        return;
-    }
+const messageWithError = (message: string, e?: unknown) => {
+    if (!e) return message;
 
     let es: string;
     if (e instanceof Error) {
         // In practice, we expect ourselves to be called with Error objects, so
         // this is the happy path so to say.
-        es = `${e.name}: ${e.message}\n${e.stack}`;
+        es = [`${e.name}: ${e.message}`, e.stack].filter((x) => x).join("\n");
     } else {
         // For the rest rare cases, use the default string serialization of e.
         es = String(e);
     }
 
-    logError_(`${message}: ${es}`);
+    return `${message}: ${es}`;
 };
 
-const logError_ = (message: string) => {
-    log.error(`[main] [error] ${message}`);
-    console.error(`[error] ${message}`);
+const logError = (message: string, e?: unknown) => {
+    const m = `[error] ${messageWithError(message, e)}`;
+    console.error(m);
+    log.error(`[main] ${m}`);
+};
+
+const logWarn = (message: string, e?: unknown) => {
+    const m = `[warn] ${messageWithError(message, e)}`;
+    console.error(m);
+    log.error(`[main] ${m}`);
 };
 
 const logInfo = (...params: unknown[]) => {
     const message = params
         .map((p) => (typeof p == "string" ? p : util.inspect(p)))
         .join(" ");
-    log.info(`[main] ${message}`);
-    if (isDev) console.log(`[info] ${message}`);
+    const m = `[info] ${message}`;
+    if (isDev) console.log(m);
+    log.info(`[main] ${m}`);
 };
 
 const logDebug = (param: () => unknown) => {
@@ -97,6 +102,11 @@ export default {
      * console.
      */
     error: logError,
+    /**
+     * Sibling of {@link error}, with the same parameters and behaviour, except
+     * it gets prefixed with a warning instead of an error tag.
+     */
+    warn: logWarn,
     /**
      * Log a message.
      *

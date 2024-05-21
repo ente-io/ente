@@ -49,15 +49,13 @@ export const posixPath = (platformPath: string) =>
  * > output, this might not be the best option and it might be better to use the
  * > underlying functions.
  */
-export const execAsync = (command: string | string[]) => {
+export const execAsync = async (command: string | string[]) => {
     const escapedCommand = Array.isArray(command)
         ? shellescape(command)
         : command;
     const startTime = Date.now();
-    const result = execAsync_(escapedCommand);
-    log.debug(
-        () => `${escapedCommand} (${Math.round(Date.now() - startTime)} ms)`,
-    );
+    const result = await execAsync_(escapedCommand);
+    log.debug(() => `${escapedCommand} (${Date.now() - startTime} ms)`);
     return result;
 };
 

@@ -1,5 +1,4 @@
 import log from "@/next/log";
-import { withTimeout } from "@/utils/promise";
 import QueueProcessor from "@ente/shared/utils/queueProcessor";
 import { expose } from "comlink";
 import {
@@ -48,15 +47,11 @@ export class DedicatedFFmpegWorker {
         command: string[],
         blob: Blob,
         outputFileExtension: string,
-        timeoutMs,
     ): Promise<Uint8Array> {
         if (!this.ffmpeg.isLoaded()) await this.ffmpeg.load();
 
-        const go = () =>
-            ffmpegExec(this.ffmpeg, command, outputFileExtension, blob);
-
         const request = this.ffmpegTaskQueue.queueUpRequest(() =>
-            timeoutMs ? withTimeout(go(), timeoutMs) : go(),
+            ffmpegExec(this.ffmpeg, command, outputFileExtension, blob),
         );
 
         return await request.promise;
@@ -87,7 +82,7 @@ const ffmpegExec = async (
 
         const result = ffmpeg.FS("readFile", outputPath);
 
-        const ms = Math.round(Date.now() - startTime);
+        const ms = Date.now() - startTime;
         log.debug(() => `[wasm] ffmpeg ${cmd.join(" ")} (${ms} ms)`);
         return result;
     } finally {

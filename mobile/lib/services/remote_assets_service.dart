@@ -1,5 +1,7 @@
+import "dart:async";
 import "dart:io";
 
+import "package:flutter/foundation.dart";
 import "package:logging/logging.dart";
 import "package:path_provider/path_provider.dart";
 import "package:photos/core/network/network.dart";
@@ -8,6 +10,10 @@ class RemoteAssetsService {
   static final _logger = Logger("RemoteAssetsService");
 
   RemoteAssetsService._privateConstructor();
+  final StreamController<(String, int, int)> _progressController =
+      StreamController<(String, int, int)>.broadcast();
+
+  Stream<(String, int, int)> get progressStream => _progressController.stream;
 
   static final RemoteAssetsService instance =
       RemoteAssetsService._privateConstructor();
@@ -57,7 +63,19 @@ class RemoteAssetsService {
     if (await existingFile.exists()) {
       await existingFile.delete();
     }
-    await NetworkClient.instance.getDio().download(url, savePath);
+
+    await NetworkClient.instance.getDio().download(
+      url,
+      savePath,
+      onReceiveProgress: (received, total) {
+        if (received > 0 && total > 0) {
+          _progressController.add((url, received, total));
+        } else if (kDebugMode) {
+          debugPrint("$url Received: $received, Total: $total");
+        }
+      },
+    );
+
     _logger.info("Downloaded " + url);
   }
 }

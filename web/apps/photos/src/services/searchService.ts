@@ -2,10 +2,12 @@ import { FILE_TYPE } from "@/media/file-type";
 import log from "@/next/log";
 import * as chrono from "chrono-node";
 import { t } from "i18next";
+import mlIDbStorage from "services/face/db";
+import type { Person } from "services/face/people";
+import { defaultMLVersion } from "services/machineLearning/machineLearningService";
 import { Collection } from "types/collection";
 import { EntityType, LocationTag, LocationTagData } from "types/entity";
 import { EnteFile } from "types/file";
-import { Person } from "types/machineLearning";
 import {
     ClipSearchScores,
     DateValue,
@@ -16,12 +18,9 @@ import {
 } from "types/search";
 import ComlinkSearchWorker from "utils/comlink/ComlinkSearchWorker";
 import { getUniqueFiles } from "utils/file";
-import { getAllPeople } from "utils/machineLearning";
-import { getMLSyncConfig } from "utils/machineLearning/config";
 import { getFormattedDate } from "utils/search";
-import mlIDbStorage from "utils/storage/mlIDbStorage";
 import { clipService, computeClipMatchScore } from "./clip-service";
-import { getLocalEmbeddings } from "./embeddingService";
+import { localCLIPEmbeddings } from "./embeddingService";
 import { getLatestEntities } from "./entityService";
 import locationSearchService, { City } from "./locationSearchService";
 
@@ -176,8 +175,7 @@ export async function getAllPeopleSuggestion(): Promise<Array<Suggestion>> {
 
 export async function getIndexStatusSuggestion(): Promise<Suggestion> {
     try {
-        const config = await getMLSyncConfig();
-        const indexStatus = await mlIDbStorage.getIndexStatus(config.mlVersion);
+        const indexStatus = await mlIDbStorage.getIndexStatus(defaultMLVersion);
 
         let label;
         if (!indexStatus.localFilesSynced) {
@@ -376,7 +374,7 @@ const searchClip = async (
         await clipService.getTextEmbeddingIfAvailable(searchPhrase);
     if (!textEmbedding) return undefined;
 
-    const imageEmbeddings = await getLocalEmbeddings();
+    const imageEmbeddings = await localCLIPEmbeddings();
     const clipSearchResult = new Map<number, number>(
         (
             await Promise.all(
@@ -429,4 +427,15 @@ function convertSuggestionToSearchQuery(option: Suggestion): Search {
         case SuggestionType.CLIP:
             return { clip: option.value as ClipSearchScores };
     }
+}
+
+async function getAllPeople(limit: number = undefined) {
+    let people: Array<Person> = await mlIDbStorage.getAllPeople();
+    // await mlPeopleStore.iterate<Person, void>((person) => {
+    //     people.push(person);
+    // });
+    people = people ?? [];
+    return people
+        .sort((p1, p2) => p2.files.length - p1.files.length)
+        .slice(0, limit);
 }

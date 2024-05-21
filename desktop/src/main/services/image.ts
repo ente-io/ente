@@ -3,10 +3,9 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { CustomErrorMessage, type ZipItem } from "../../types/ipc";
-import log from "../log";
 import { execAsync, isDev } from "../utils/electron";
 import {
-    deleteTempFile,
+    deleteTempFileIgnoringErrors,
     makeFileForDataOrPathOrZipItem,
     makeTempFilePath,
 } from "../utils/temp";
@@ -23,12 +22,8 @@ export const convertToJPEG = async (imageData: Uint8Array) => {
         await execAsync(command);
         return new Uint8Array(await fs.readFile(outputFilePath));
     } finally {
-        try {
-            await deleteTempFile(inputFilePath);
-            await deleteTempFile(outputFilePath);
-        } catch (e) {
-            log.error("Could not clean up temp files", e);
-        }
+        await deleteTempFileIgnoringErrors(inputFilePath);
+        await deleteTempFileIgnoringErrors(outputFilePath);
     }
 };
 
@@ -49,6 +44,9 @@ const convertToJPEGCommand = (
             ];
 
         case "linux":
+            // The bundled binary is an ELF x86-64 executable.
+            if (process.arch != "x64")
+                throw new Error(CustomErrorMessage.NotAvailable);
             return [
                 imageMagickPath(),
                 inputFilePath,
@@ -94,8 +92,6 @@ export const generateImageThumbnail = async (
         let thumbnail: Uint8Array;
         do {
             await execAsync(command);
-            // TODO(MR): imagemagick debugging. Remove me after verifying logs.
-            log.info(`Generated thumbnail using ${command.join(" ")}`);
             thumbnail = new Uint8Array(await fs.readFile(outputFilePath));
             quality -= 10;
             command = generateImageThumbnailCommand(
@@ -107,12 +103,9 @@ export const generateImageThumbnail = async (
         } while (thumbnail.length > maxSize && quality > 50);
         return thumbnail;
     } finally {
-        try {
-            if (isInputFileTemporary) await deleteTempFile(inputFilePath);
-            await deleteTempFile(outputFilePath);
-        } catch (e) {
-            log.error("Could not clean up temp files", e);
-        }
+        if (isInputFileTemporary)
+            await deleteTempFileIgnoringErrors(inputFilePath);
+        await deleteTempFileIgnoringErrors(outputFilePath);
     }
 };
 

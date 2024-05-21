@@ -3,6 +3,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { existsSync } from "original-fs";
 import type { PendingUploads, ZipItem } from "../../types/ipc";
+import log from "../log";
 import { uploadStatusStore } from "../stores/upload-status";
 
 export const listZipItems = async (zipPath: string): Promise<ZipItem[]> => {
@@ -64,11 +65,16 @@ export const pendingUploads = async (): Promise<PendingUploads | undefined> => {
     // file, but the dedup logic will kick in at that point so no harm will come
     // of it.
     if (allZipItems === undefined) {
-        const allZipPaths = uploadStatusStore.get("filePaths") ?? [];
+        const allZipPaths = uploadStatusStore.get("zipPaths") ?? [];
         const zipPaths = allZipPaths.filter((f) => existsSync(f));
         zipItems = [];
-        for (const zip of zipPaths)
-            zipItems = zipItems.concat(await listZipItems(zip));
+        for (const zip of zipPaths) {
+            try {
+                zipItems = zipItems.concat(await listZipItems(zip));
+            } catch (e) {
+                log.error("Ignoring items in malformed zip", e);
+            }
+        }
     } else {
         zipItems = allZipItems.filter(([z]) => existsSync(z));
     }

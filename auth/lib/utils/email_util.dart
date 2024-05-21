@@ -146,7 +146,7 @@ Future<String> getZippedLogsFile(BuildContext context) async {
   final encoder = ZipFileEncoder();
   encoder.create(zipFilePath);
   await encoder.addDirectory(logsDirectory);
-  encoder.close();
+  await encoder.close();
   await dialog.hide();
   return zipFilePath;
 }

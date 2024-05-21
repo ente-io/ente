@@ -1,7 +1,6 @@
 import log from "@/next/log";
 import { putAttributes } from "@ente/accounts/api/user";
 import { configureSRP } from "@ente/accounts/services/srp";
-import { logoutUser } from "@ente/accounts/services/user";
 import { generateKeyAndSRPAttributes } from "@ente/accounts/utils/srp";
 import {
     generateAndSaveIntermediateKeyAttributes,
@@ -31,6 +30,8 @@ import { KeyAttributes, User } from "@ente/shared/user/types";
 import { useRouter } from "next/router";
 
 export default function Generate({ appContext, appName }: PageProps) {
+    const { logout } = appContext;
+
     const [token, setToken] = useState<string>();
     const [user, setUser] = useState<User>();
     const [recoverModalView, setRecoveryModalView] = useState(false);
@@ -113,7 +114,7 @@ export default function Generate({ appContext, appName }: PageProps) {
                             buttonText={t("SET_PASSPHRASE")}
                         />
                         <FormPaperFooter>
-                            <LinkButton onClick={logoutUser}>
+                            <LinkButton onClick={logout}>
                                 {t("GO_BACK")}
                             </LinkButton>
                         </FormPaperFooter>

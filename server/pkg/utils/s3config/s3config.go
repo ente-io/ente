@@ -28,6 +28,8 @@ type S3Config struct {
 	hotDC string
 	// Secondary (hot) data center
 	secondaryHotDC string
+	//Derived data data center for derived files like ml embeddings & preview files
+	derivedStorageDC string
 	// A map from data centers to S3 configurations
 	s3Configs map[string]*aws.Config
 	// A map from data centers to pre-created S3 clients
@@ -71,6 +73,7 @@ var (
 	dcWasabiEuropeCentralDeprecated   string = "wasabi-eu-central-2"
 	dcWasabiEuropeCentral_v3          string = "wasabi-eu-central-2-v3"
 	dcSCWEuropeFrance_v3              string = "scw-eu-fr-v3"
+	dcWasabiEuropeCentralDerived      string = "wasabi-eu-central-2-derived"
 )
 
 // Number of days that the wasabi bucket is configured to retain objects.
@@ -86,9 +89,9 @@ func NewS3Config() *S3Config {
 }
 
 func (config *S3Config) initialize() {
-	dcs := [5]string{
+	dcs := [6]string{
 		dcB2EuropeCentral, dcSCWEuropeFranceLockedDeprecated, dcWasabiEuropeCentralDeprecated,
-		dcWasabiEuropeCentral_v3, dcSCWEuropeFrance_v3}
+		dcWasabiEuropeCentral_v3, dcSCWEuropeFrance_v3, dcWasabiEuropeCentralDerived}
 
 	config.hotDC = dcB2EuropeCentral
 	config.secondaryHotDC = dcWasabiEuropeCentral_v3
@@ -98,6 +101,12 @@ func (config *S3Config) initialize() {
 		config.hotDC = hs1
 		config.secondaryHotDC = hs2
 		log.Infof("Hot storage: %s (secondary: %s)", hs1, hs2)
+	}
+	config.derivedStorageDC = config.hotDC
+	embeddingsDC := viper.GetString("s3.derived-storage")
+	if embeddingsDC != "" && array.StringInList(embeddingsDC, dcs[:]) {
+		config.derivedStorageDC = embeddingsDC
+		log.Infof("Embeddings bucket: %s", embeddingsDC)
 	}
 
 	config.buckets = make(map[string]string)
@@ -171,6 +180,18 @@ func (config *S3Config) GetHotS3Client() *s3.S3 {
 	return &s3Client
 }
 
+func (config *S3Config) GetDerivedStorageDataCenter() string {
+	return config.derivedStorageDC
+}
+func (config *S3Config) GetDerivedStorageBucket() *string {
+	return config.GetBucket(config.derivedStorageDC)
+}
+
+func (config *S3Config) GetDerivedStorageS3Client() *s3.S3 {
+	s3Client := config.GetS3Client(config.derivedStorageDC)
+	return &s3Client
+}
+
 // Return the name of the hot Backblaze data center
 func (config *S3Config) GetHotBackblazeDC() string {
 	return dcB2EuropeCentral
@@ -179,6 +200,10 @@ func (config *S3Config) GetHotBackblazeDC() string {
 // Return the name of the hot Wasabi data center
 func (config *S3Config) GetHotWasabiDC() string {
 	return dcWasabiEuropeCentral_v3
+}
+
+func (config *S3Config) GetWasabiDerivedDC() string {
+	return dcWasabiEuropeCentralDerived
 }
 
 // Return the name of the cold Scaleway data center

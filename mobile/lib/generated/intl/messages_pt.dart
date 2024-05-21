@@ -445,6 +445,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Agrupar por tempo de captura"),
         "clubByFileName": MessageLookupByLibrary.simpleMessage(
             "Agrupar pelo nome de arquivo"),
+        "clusteringProgress":
+            MessageLookupByLibrary.simpleMessage("Clustering progress"),
         "codeAppliedPageTitle":
             MessageLookupByLibrary.simpleMessage("Código aplicado"),
         "codeCopiedToClipboard": MessageLookupByLibrary.simpleMessage(
@@ -587,7 +589,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "descriptions": MessageLookupByLibrary.simpleMessage("Descrições"),
         "deselectAll": MessageLookupByLibrary.simpleMessage("Desmarcar todos"),
         "designedToOutlive":
-            MessageLookupByLibrary.simpleMessage("Feito para ter logenvidade"),
+            MessageLookupByLibrary.simpleMessage("Feito para ter longevidade"),
         "details": MessageLookupByLibrary.simpleMessage("Detalhes"),
         "devAccountChanged": MessageLookupByLibrary.simpleMessage(
             "A conta de desenvolvedor que usamos para publicar o Ente na App Store foi alterada. Por esse motivo, você precisará fazer entrar novamente.\n\nPedimos desculpas pelo inconveniente, mas isso era inevitável."),
@@ -631,8 +633,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Dobre seu armazenamento"),
         "download": MessageLookupByLibrary.simpleMessage("Baixar"),
         "downloadFailed":
-            MessageLookupByLibrary.simpleMessage("Falha ao baixar"),
-        "downloading": MessageLookupByLibrary.simpleMessage("Baixando..."),
+            MessageLookupByLibrary.simpleMessage("Falha no download"),
+        "downloading":
+            MessageLookupByLibrary.simpleMessage("Fazendo download..."),
         "dropSupportEmail": m17,
         "duplicateFileCountWithStorageSaved": m18,
         "duplicateItemsGroup": m19,
@@ -713,13 +716,17 @@ class MessageLookup extends MessageLookupByLibrary {
         "exportLogs": MessageLookupByLibrary.simpleMessage("Exportar logs"),
         "exportYourData":
             MessageLookupByLibrary.simpleMessage("Exportar seus dados"),
+        "faceRecognition":
+            MessageLookupByLibrary.simpleMessage("Face recognition"),
+        "faceRecognitionIndexingDescription": MessageLookupByLibrary.simpleMessage(
+            "Please note that this will result in a higher bandwidth and battery usage until all items are indexed."),
         "faces": MessageLookupByLibrary.simpleMessage("Rostos"),
         "failedToApplyCode":
             MessageLookupByLibrary.simpleMessage("Falha ao aplicar o código"),
         "failedToCancel":
             MessageLookupByLibrary.simpleMessage("Falha ao cancelar"),
-        "failedToDownloadVideo":
-            MessageLookupByLibrary.simpleMessage("Falha ao baixar vídeo"),
+        "failedToDownloadVideo": MessageLookupByLibrary.simpleMessage(
+            "Falha ao fazer download do vídeo"),
         "failedToFetchOriginalForEdit": MessageLookupByLibrary.simpleMessage(
             "Falha ao obter original para edição"),
         "failedToFetchReferralDetails": MessageLookupByLibrary.simpleMessage(
@@ -737,7 +744,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "familyPlans": MessageLookupByLibrary.simpleMessage("Plano familiar"),
         "faq": MessageLookupByLibrary.simpleMessage("Perguntas frequentes"),
         "faqs": MessageLookupByLibrary.simpleMessage("Perguntas frequentes"),
-        "favorite": MessageLookupByLibrary.simpleMessage("Favoritar"),
+        "favorite": MessageLookupByLibrary.simpleMessage("Favorito"),
         "feedback": MessageLookupByLibrary.simpleMessage("Comentários"),
         "fileFailedToSaveToGallery": MessageLookupByLibrary.simpleMessage(
             "Falha ao salvar o arquivo na galeria"),
@@ -759,6 +766,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("para suas memórias"),
         "forgotPassword":
             MessageLookupByLibrary.simpleMessage("Esqueceu sua senha"),
+        "foundFaces": MessageLookupByLibrary.simpleMessage("Found faces"),
         "freeStorageClaimed": MessageLookupByLibrary.simpleMessage(
             "Armazenamento gratuito reivindicado"),
         "freeStorageOnReferralSuccess": m24,
@@ -904,8 +912,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Carregando galeria..."),
         "loadingMessage":
             MessageLookupByLibrary.simpleMessage("Carregando suas fotos..."),
-        "loadingModel":
-            MessageLookupByLibrary.simpleMessage("Baixando modelos..."),
+        "loadingModel": MessageLookupByLibrary.simpleMessage(
+            "Fazendo download de modelos..."),
         "localGallery": MessageLookupByLibrary.simpleMessage("Galeria local"),
         "location": MessageLookupByLibrary.simpleMessage("Local"),
         "locationName": MessageLookupByLibrary.simpleMessage("Nome do Local"),
