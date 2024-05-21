@@ -20,6 +20,8 @@
   "codeIssuerHint": "发行人",
   "codeSecretKeyHint": "私钥",
   "codeAccountHint": "账户 (you@domain.com)",
+  "codeTagHint": "标签",
+  "accountKeyType": "密钥类型",
   "sessionExpired": "会话已过期",
   "@sessionExpired": {
     "description": "Title of the dialog when the users current session is invalid/expired"
@@ -156,6 +158,7 @@
       }
     }
   },
+  "invalidQRCode": "二维码无效",
   "noRecoveryKeyTitle": "没有恢复密钥吗？",
   "enterEmailHint": "请输入您的电子邮件地址",
   "invalidEmailTitle": "无效的电子邮件地址",
@@ -420,5 +423,18 @@
   "invalidEndpoint": "端点无效",
   "invalidEndpointMessage": "抱歉，您输入的端点无效。请输入有效的端点，然后重试。",
   "endpointUpdatedMessage": "端点更新成功",
-  "customEndpoint": "已连接至 {endpoint}"
+  "customEndpoint": "已连接至 {endpoint}",
+  "pinText": "置顶",
+  "unpinText": "取消置顶",
+  "pinnedCodeMessage": "{code} 已被置顶",
+  "unpinnedCodeMessage": "{code} 已被取消置顶",
+  "tags": "标签",
+  "createNewTag": "创建新标签",
+  "tag": "标签",
+  "create": "创建",
+  "editTag": "编辑标签",
+  "deleteTagTitle": "要删除标签吗？",
+  "deleteTagMessage": "您确定要删除此标签吗？此操作是不可逆的。",
+  "somethingWentWrongParsingCode": "我们无法解析 {x} 代码。",
+  "updateNotAvailable": "更新不可用"
 }
