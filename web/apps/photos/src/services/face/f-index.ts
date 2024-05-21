@@ -744,10 +744,10 @@ const extractFaceCrop = (
     const scaleForPadding = 1 + padding * 2;
     const paddedBox = roundBox(enlargeBox(alignmentBox, scaleForPadding));
 
-    return cropWithRotation(imageBitmap, paddedBox, 256);
+    return cropImage(imageBitmap, paddedBox, 256);
 };
 
-const cropWithRotation = (
+const cropImage = (
     imageBitmap: ImageBitmap,
     cropBox: Box,
     maxDimension: number,
