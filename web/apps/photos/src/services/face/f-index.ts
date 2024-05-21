@@ -743,6 +743,10 @@ const extractFaceCrop = (
     imageBitmap: ImageBitmap,
     alignment: FaceAlignment,
 ): ImageBitmap => {
+    // TODO-ML: This algorithm is different from what is used by the mobile app.
+    // Also, it needs to be something that can work fully using the embedding we
+    // receive from remote - the `alignment.boundingBox` will not be available
+    // to us in such cases.
     const paddedBox = roundBox(enlargeBox(alignment.boundingBox, 1.5));
     const outputSize = { width: paddedBox.width, height: paddedBox.height };
 
