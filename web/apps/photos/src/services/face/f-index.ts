@@ -737,20 +737,17 @@ const extractFaceCrop = (
 
     const paddedBox = roundBox(enlargeBox(alignmentBox, 1.5));
 
-    return cropImage(imageBitmap, paddedBox, 256);
-};
+    const outputSize = { width: paddedBox.width, height: paddedBox.height };
 
-const cropImage = (
-    imageBitmap: ImageBitmap,
-    box: Box,
-    maxDimension: number,
-) => {
-    const outputSize = { width: box.width, height: box.height };
+    const maxDimension = 256;
+    const scale = Math.min(
+        maxDimension / paddedBox.width,
+        maxDimension / paddedBox.height,
+    );
 
-    const scale = Math.min(maxDimension / box.width, maxDimension / box.height);
     if (scale < 1) {
-        outputSize.width = Math.round(scale * box.width);
-        outputSize.height = Math.round(scale * box.height);
+        outputSize.width = Math.round(scale * paddedBox.width);
+        outputSize.height = Math.round(scale * paddedBox.height);
     }
 
     const offscreen = new OffscreenCanvas(outputSize.width, outputSize.height);
@@ -766,7 +763,7 @@ const cropImage = (
         height: outputSize.height,
     });
 
-    const enlargedBox = enlargeBox(box, 1.5);
+    const enlargedBox = enlargeBox(paddedBox, 1.5);
     const enlargedOutputBox = enlargeBox(outputBox, 1.5);
 
     offscreenCtx.drawImage(
