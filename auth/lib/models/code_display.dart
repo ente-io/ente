@@ -74,6 +74,7 @@ class CodeDisplay {
           .severe("Could not parse code display from json", e, s);
       // (ng/prateek) Handle the case where we have fragment in the rawDataUrl
       if (!json.endsWith("}") && json.contains("}#")) {
+        Logger("CodeDisplay").warning("ignoring code display as it's invalid");
         return CodeDisplay();
       }
       if (safeParsing) {
