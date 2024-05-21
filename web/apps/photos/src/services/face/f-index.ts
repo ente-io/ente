@@ -220,8 +220,16 @@ const convertToYOLOInputFloat32ChannelsFirst = (imageBitmap: ImageBitmap) => {
  *
  * Only detections that exceed a minimum score are returned.
  *
- * @param rows A Float32Array of shape [25200, 16], where each row
- * represents a bounding box.
+ * @param rows A Float32Array of shape [25200, 16], where each row represents a
+ * face detection.
+ *
+ * YOLO detects a fixed number of faces, 25200, always from the input it is
+ * given. Each detection is a "row" of 16 bytes, containing the bounding box,
+ * score, and landmarks of the detection.
+ *
+ * We prune out detections with a score lower than our threshold. However, we
+ * will still be left with some overlapping detections of the same face: these
+ * we will deduplicate in {@link removeDuplicateDetections}.
  */
 const filterExtractDetectionsFromYOLOOutput = (
     rows: Float32Array,
