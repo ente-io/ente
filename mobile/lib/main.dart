@@ -182,7 +182,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     if (!initComplete && !isBackground) {
       sendLogsForInit(
         "support@ente.io",
-        "Stuck on splash screen for >= 15 secons",
+        "Stuck on splash screen for >= 15 seconds",
         null,
       );
     }
