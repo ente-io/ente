@@ -452,12 +452,8 @@ const faceAlignmentUsingSimilarityTransform = (
     const meanTranslation = simTransform.toMean.sub(0.5).mul(size);
     const centerMat = simTransform.fromMean.sub(meanTranslation);
     const center = new Point(centerMat.get(0, 0), centerMat.get(1, 0));
-    const rotation = -Math.atan2(
-        simTransform.rotation.get(0, 1),
-        simTransform.rotation.get(0, 0),
-    );
 
-    return { affineMatrix, center, size, rotation };
+    return { affineMatrix, center, size };
 };
 
 const convertToMobileFaceNetInput = (
