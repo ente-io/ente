@@ -44,6 +44,7 @@ import { EnteDrawer } from "components/EnteDrawer";
 import { EnteMenuItem } from "components/Menu/EnteMenuItem";
 import TwoFactorModal from "components/TwoFactor/Modal";
 import { WatchFolder } from "components/WatchFolder";
+import LinkButton from "components/pages/gallery/LinkButton";
 import { NoStyleAnchor } from "components/pages/sharedAlbum/GoToEnte";
 import {
     ARCHIVE_SECTION,
@@ -55,7 +56,13 @@ import isElectron from "is-electron";
 import { useRouter } from "next/router";
 import { AppContext } from "pages/_app";
 import { GalleryContext } from "pages/gallery";
-import { useContext, useEffect, useMemo, useState } from "react";
+import {
+    MouseEventHandler,
+    useContext,
+    useEffect,
+    useMemo,
+    useState,
+} from "react";
 import { Trans } from "react-i18next";
 import billingService from "services/billingService";
 import { getUncategorizedCollection } from "services/collectionService";
@@ -63,7 +70,16 @@ import exportService from "services/export";
 import { getAccountsToken, getUserDetailsV2 } from "services/userService";
 import { CollectionSummaries } from "types/collection";
 import { UserDetails } from "types/user";
-import { hasStripeSubscription, isSubscriptionPastDue } from "utils/billing";
+import {
+    hasAddOnBonus,
+    hasExceededStorageQuota,
+    hasPaidSubscription,
+    hasStripeSubscription,
+    isOnFreePlan,
+    isSubscriptionActive,
+    isSubscriptionCancelled,
+    isSubscriptionPastDue,
+} from "utils/billing";
 import { openLink } from "utils/common";
 import { getDownloadAppMessage } from "utils/ui";
 import { isInternalUser } from "utils/user";
@@ -72,7 +88,6 @@ import { testUpload } from "../../../tests/upload.test";
 import { MemberSubscriptionManage } from "../MemberSubscriptionManage";
 import Preferences from "./Preferences";
 import SubscriptionCard from "./SubscriptionCard";
-import SubscriptionStatus from "./SubscriptionStatus";
 
 interface Iprops {
     collectionSummaries: CollectionSummaries;
@@ -218,6 +233,117 @@ const UserDetailsSection: React.FC<UserDetailsSectionProps> = ({
                 />
             )}
         </>
+    );
+};
+
+interface SubscriptionStatusProps {
+    userDetails: UserDetails;
+}
+
+const SubscriptionStatus: React.FC<SubscriptionStatusProps> = ({
+    userDetails,
+}) => {
+    const { showPlanSelectorModal } = useContext(GalleryContext);
+
+    const hasAMessage = useMemo(() => {
+        if (!userDetails) {
+            return false;
+        }
+        if (
+            isPartOfFamily(userDetails.familyData) &&
+            !isFamilyAdmin(userDetails.familyData)
+        ) {
+            return false;
+        }
+        if (
+            hasPaidSubscription(userDetails.subscription) &&
+            !isSubscriptionCancelled(userDetails.subscription)
+        ) {
+            return false;
+        }
+        return true;
+    }, [userDetails]);
+
+    const handleClick = useMemo(() => {
+        const eventHandler: MouseEventHandler<HTMLSpanElement> = (e) => {
+            e.stopPropagation();
+            if (userDetails) {
+                if (isSubscriptionActive(userDetails.subscription)) {
+                    if (hasExceededStorageQuota(userDetails)) {
+                        showPlanSelectorModal();
+                    }
+                } else {
+                    if (
+                        hasStripeSubscription(userDetails.subscription) &&
+                        isSubscriptionPastDue(userDetails.subscription)
+                    ) {
+                        billingService.redirectToCustomerPortal();
+                    } else {
+                        showPlanSelectorModal();
+                    }
+                }
+            }
+        };
+        return eventHandler;
+    }, [userDetails]);
+
+    if (!hasAMessage) {
+        return <></>;
+    }
+
+    const messages = [];
+    if (!hasAddOnBonus(userDetails.bonusData)) {
+        if (isSubscriptionActive(userDetails.subscription)) {
+            if (isOnFreePlan(userDetails.subscription)) {
+                messages.push(
+                    <Trans
+                        i18nKey={"FREE_SUBSCRIPTION_INFO"}
+                        values={{
+                            date: userDetails.subscription?.expiryTime,
+                        }}
+                    />,
+                );
+            } else if (isSubscriptionCancelled(userDetails.subscription)) {
+                messages.push(
+                    t("RENEWAL_CANCELLED_SUBSCRIPTION_INFO", {
+                        date: userDetails.subscription?.expiryTime,
+                    }),
+                );
+            }
+        } else {
+            messages.push(
+                <Trans
+                    i18nKey={"SUBSCRIPTION_EXPIRED_MESSAGE"}
+                    components={{
+                        a: <LinkButton onClick={handleClick} />,
+                    }}
+                />,
+            );
+        }
+    }
+
+    if (hasExceededStorageQuota(userDetails) && messages.length === 0) {
+        messages.push(
+            <Trans
+                i18nKey={"STORAGE_QUOTA_EXCEEDED_SUBSCRIPTION_INFO"}
+                components={{
+                    a: <LinkButton onClick={handleClick} />,
+                }}
+            />,
+        );
+    }
+
+    return (
+        <Box px={1} pt={0.5}>
+            <Typography
+                variant="small"
+                color={"text.muted"}
+                onClick={handleClick && handleClick}
+                sx={{ cursor: handleClick && "pointer" }}
+            >
+                {messages}
+            </Typography>
+        </Box>
     );
 };
 
