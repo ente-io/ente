@@ -1,16 +1,10 @@
 import { FILE_TYPE } from "@/media/file-type";
-import { blobCache } from "@/next/blob-cache";
 import log from "@/next/log";
 import { workerBridge } from "@/next/worker/worker-bridge";
 import { Matrix } from "ml-matrix";
-import {
+import type {
     Box,
     Dimensions,
-    Point,
-    enlargeBox,
-    roundBox,
-} from "services/face/geom";
-import type {
     Face,
     FaceAlignment,
     FaceDetection,
@@ -26,6 +20,7 @@ import {
     translate,
 } from "transformation-matrix";
 import type { EnteFile } from "types/file";
+import { saveFaceCrop } from "./crop";
 import { fetchImageBitmap, getLocalFileImageBitmap } from "./file";
 import {
     clamp,
@@ -148,8 +143,7 @@ const indexFaces_ = async (enteFile: EnteFile, imageBitmap: ImageBitmap) => {
 const detectFaces = async (
     imageBitmap: ImageBitmap,
 ): Promise<FaceDetection[]> => {
-    const rect = ({ width, height }: Dimensions) =>
-        new Box({ x: 0, y: 0, width, height });
+    const rect = ({ width, height }) => ({ x: 0, y: 0, width, height });
 
     const { yoloInput, yoloSize } =
         convertToYOLOInputFloat32ChannelsFirst(imageBitmap);
@@ -245,8 +239,8 @@ const filterExtractDetectionsFromYOLOOutput = (
         const yCenter = rows[i + 1];
         const width = rows[i + 2];
         const height = rows[i + 3];
-        const xMin = xCenter - width / 2.0; // topLeft
-        const yMin = yCenter - height / 2.0; // topLeft
+        const x = xCenter - width / 2.0; // topLeft
+        const y = yCenter - height / 2.0; // topLeft
 
         const leftEyeX = rows[i + 5];
         const leftEyeY = rows[i + 6];
@@ -259,19 +253,14 @@ const filterExtractDetectionsFromYOLOOutput = (
         const rightMouthX = rows[i + 13];
         const rightMouthY = rows[i + 14];
 
-        const box = new Box({
-            x: xMin,
-            y: yMin,
-            width: width,
-            height: height,
-        });
+        const box = { x, y, width, height };
         const probability = score as number;
         const landmarks = [
-            new Point(leftEyeX, leftEyeY),
-            new Point(rightEyeX, rightEyeY),
-            new Point(noseX, noseY),
-            new Point(leftMouthX, leftMouthY),
-            new Point(rightMouthX, rightMouthY),
+            { x: leftEyeX, y: leftEyeY },
+            { x: rightEyeX, y: rightEyeY },
+            { x: noseX, y: noseY },
+            { x: leftMouthX, y: leftMouthY },
+            { x: rightMouthX, y: rightMouthY },
         ];
         faces.push({ box, landmarks, probability });
     }
@@ -291,7 +280,7 @@ const transformFaceDetections = (
     const transform = boxTransformationMatrix(inBox, toBox);
     return faceDetections.map((f) => ({
         box: transformBox(f.box, transform),
-        landmarks: f.landmarks.map((p) => transformPoint(p, transform)),
+        landmarks: f.landmarks.map((p) => applyToPoint(transform, p)),
         probability: f.probability,
     }));
 };
@@ -305,24 +294,19 @@ const boxTransformationMatrix = (
         scale(toBox.width / inBox.width, toBox.height / inBox.height),
     );
 
-const transformPoint = (point: Point, transform: TransformationMatrix) => {
-    const txdPoint = applyToPoint(transform, point);
-    return new Point(txdPoint.x, txdPoint.y);
-};
+const transformBox = (box: Box, transform: TransformationMatrix): Box => {
+    const topLeft = applyToPoint(transform, { x: box.x, y: box.y });
+    const bottomRight = applyToPoint(transform, {
+        x: box.x + box.width,
+        y: box.y + box.height,
+    });
 
-const transformBox = (box: Box, transform: TransformationMatrix) => {
-    const topLeft = transformPoint(new Point(box.x, box.y), transform);
-    const bottomRight = transformPoint(
-        new Point(box.x + box.width, box.y + box.height),
-        transform,
-    );
-
-    return new Box({
+    return {
         x: topLeft.x,
         y: topLeft.y,
         width: bottomRight.x - topLeft.x,
         height: bottomRight.y - topLeft.y,
-    });
+    };
 };
 
 /**
@@ -398,18 +382,14 @@ const intersectionOverUnion = (a: FaceDetection, b: FaceDetection): number => {
 
 const makeFaceID = (
     fileID: number,
-    detection: FaceDetection,
-    imageDims: Dimensions,
+    { box }: FaceDetection,
+    image: Dimensions,
 ) => {
     const part = (v: number) => clamp(v, 0.0, 0.999999).toFixed(5).substring(2);
-    const xMin = part(detection.box.x / imageDims.width);
-    const yMin = part(detection.box.y / imageDims.height);
-    const xMax = part(
-        (detection.box.x + detection.box.width) / imageDims.width,
-    );
-    const yMax = part(
-        (detection.box.y + detection.box.height) / imageDims.height,
-    );
+    const xMin = part(box.x / image.width);
+    const yMin = part(box.y / image.height);
+    const xMax = part((box.x + box.width) / image.width);
+    const yMax = part((box.y + box.height) / image.height);
     return [`${fileID}`, xMin, yMin, xMax, yMax].join("_");
 };
 
@@ -470,14 +450,14 @@ const faceAlignmentUsingSimilarityTransform = (
     const size = 1 / simTransform.scale;
     const meanTranslation = simTransform.toMean.sub(0.5).mul(size);
     const centerMat = simTransform.fromMean.sub(meanTranslation);
-    const center = new Point(centerMat.get(0, 0), centerMat.get(1, 0));
+    const center = { x: centerMat.get(0, 0), y: centerMat.get(1, 0) };
 
-    const boundingBox = new Box({
+    const boundingBox = {
         x: center.x - size / 2,
         y: center.y - size / 2,
         width: size,
         height: size,
-    });
+    };
 
     return { affineMatrix, boundingBox };
 };
@@ -720,85 +700,16 @@ const relativeDetection = (
     { width, height }: Dimensions,
 ): FaceDetection => {
     const oldBox: Box = faceDetection.box;
-    const box = new Box({
+    const box = {
         x: oldBox.x / width,
         y: oldBox.y / height,
         width: oldBox.width / width,
         height: oldBox.height / height,
-    });
-    const landmarks = faceDetection.landmarks.map((l) => {
-        return new Point(l.x / width, l.y / height);
-    });
+    };
+    const landmarks = faceDetection.landmarks.map((l) => ({
+        x: l.x / width,
+        y: l.y / height,
+    }));
     const probability = faceDetection.probability;
     return { box, landmarks, probability };
-};
-
-export const saveFaceCrop = async (imageBitmap: ImageBitmap, face: Face) => {
-    const faceCrop = extractFaceCrop(imageBitmap, face.alignment);
-    const blob = await imageBitmapToBlob(faceCrop);
-    faceCrop.close();
-
-    const cache = await blobCache("face-crops");
-    await cache.put(face.id, blob);
-
-    return blob;
-};
-
-const imageBitmapToBlob = (imageBitmap: ImageBitmap) => {
-    const canvas = new OffscreenCanvas(imageBitmap.width, imageBitmap.height);
-    canvas.getContext("2d").drawImage(imageBitmap, 0, 0);
-    return canvas.convertToBlob({ type: "image/jpeg", quality: 0.8 });
-};
-
-const extractFaceCrop = (
-    imageBitmap: ImageBitmap,
-    alignment: FaceAlignment,
-): ImageBitmap => {
-    // TODO-ML: This algorithm is different from what is used by the mobile app.
-    // Also, it needs to be something that can work fully using the embedding we
-    // receive from remote - the `alignment.boundingBox` will not be available
-    // to us in such cases.
-    const paddedBox = roundBox(enlargeBox(alignment.boundingBox, 1.5));
-    const outputSize = { width: paddedBox.width, height: paddedBox.height };
-
-    const maxDimension = 256;
-    const scale = Math.min(
-        maxDimension / paddedBox.width,
-        maxDimension / paddedBox.height,
-    );
-
-    if (scale < 1) {
-        outputSize.width = Math.round(scale * paddedBox.width);
-        outputSize.height = Math.round(scale * paddedBox.height);
-    }
-
-    const offscreen = new OffscreenCanvas(outputSize.width, outputSize.height);
-    const offscreenCtx = offscreen.getContext("2d");
-    offscreenCtx.imageSmoothingQuality = "high";
-
-    offscreenCtx.translate(outputSize.width / 2, outputSize.height / 2);
-
-    const outputBox = new Box({
-        x: -outputSize.width / 2,
-        y: -outputSize.height / 2,
-        width: outputSize.width,
-        height: outputSize.height,
-    });
-
-    const enlargedBox = enlargeBox(paddedBox, 1.5);
-    const enlargedOutputBox = enlargeBox(outputBox, 1.5);
-
-    offscreenCtx.drawImage(
-        imageBitmap,
-        enlargedBox.x,
-        enlargedBox.y,
-        enlargedBox.width,
-        enlargedBox.height,
-        enlargedOutputBox.x,
-        enlargedOutputBox.y,
-        enlargedOutputBox.width,
-        enlargedOutputBox.height,
-    );
-
-    return offscreen.transferToImageBitmap();
 };
