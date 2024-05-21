@@ -17,8 +17,7 @@ import "package:photos/services/filter/db_filters.dart";
 import 'package:photos/utils/file_uploader_util.dart';
 import "package:photos/utils/primitive_wrapper.dart";
 import "package:photos/utils/sqlite_util.dart";
-// import 'package:sqflite/sqflite.dart';
-import 'package:sqlite_async/sqlite_async.dart' as sqlite_async;
+import 'package:sqlite_async/sqlite_async.dart';
 
 class FilesDB {
   /*
@@ -132,32 +131,32 @@ class FilesDB {
   static final FilesDB instance = FilesDB._privateConstructor();
 
   // only have a single app-wide reference to the database
-  static Future<sqlite_async.SqliteDatabase>? _sqliteAsyncDBFuture;
+  static Future<SqliteDatabase>? _sqliteAsyncDBFuture;
 
-  Future<sqlite_async.SqliteDatabase> get sqliteAsyncDB async {
+  Future<SqliteDatabase> get sqliteAsyncDB async {
     // lazily instantiate the db the first time it is accessed
     _sqliteAsyncDBFuture ??= _initSqliteAsyncDatabase();
     return _sqliteAsyncDBFuture!;
   }
 
   // this opens the database (and creates it if it doesn't exist)
-  Future<sqlite_async.SqliteDatabase> _initSqliteAsyncDatabase() async {
+  Future<SqliteDatabase> _initSqliteAsyncDatabase() async {
     final Directory documentsDirectory =
         await getApplicationDocumentsDirectory();
     final String path = join(documentsDirectory.path, _databaseName);
     _logger.info("DB path " + path);
     final migrations = getMigrations();
-    final database = sqlite_async.SqliteDatabase(path: path);
+    final database = SqliteDatabase(path: path);
     await migrations.migrate(database);
     return database;
   }
 
-  sqlite_async.SqliteMigrations getMigrations() {
+  SqliteMigrations getMigrations() {
     final numberOfMigrationScripts = migrationScripts.length;
-    final migrations = sqlite_async.SqliteMigrations();
+    final migrations = SqliteMigrations();
     for (int i = 0; i < numberOfMigrationScripts; i++) {
       migrations.add(
-        sqlite_async.SqliteMigration(
+        SqliteMigration(
           i + 1,
           (tx) async {
             await tx.execute(migrationScripts[i]);
@@ -1927,7 +1926,7 @@ class FilesDB {
   Future<void> _batchAndInsertFile(
     EnteFile file,
     SqliteAsyncConflictAlgorithm conflictAlgorithm,
-    sqlite_async.SqliteDatabase db,
+    SqliteDatabase db,
     List<List<Object?>> parameterSets,
     PrimitiveWrapper batchCounter, {
     required bool isGenIdNull,
@@ -1949,7 +1948,7 @@ class FilesDB {
   Future<void> _insertBatch(
     SqliteAsyncConflictAlgorithm conflictAlgorithm,
     Iterable<String> columnNames,
-    sqlite_async.SqliteDatabase db,
+    SqliteDatabase db,
     List<List<Object?>> parameterSets,
   ) async {
     final valuesPlaceholders = List.filled(columnNames.length, "?").join(",");
