@@ -3,6 +3,7 @@ import "dart:math" show max, min;
 
 import "package:flutter/material.dart";
 import "package:intl/intl.dart";
+import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import 'package:photos/events/embedding_updated_event.dart';
 import "package:photos/face/db.dart";
@@ -25,6 +26,8 @@ import "package:photos/ui/components/title_bar_widget.dart";
 import "package:photos/ui/components/toggle_switch_widget.dart";
 import "package:photos/utils/data_util.dart";
 import "package:photos/utils/local_settings.dart";
+
+final _logger = Logger("MachineLearningSettingsPage");
 
 class MachineLearningSettingsPage extends StatefulWidget {
   const MachineLearningSettingsPage({super.key});
@@ -65,6 +68,7 @@ class _MachineLearningSettingsPageState
   @override
   Widget build(BuildContext context) {
     final bool facesFlag = flagService.faceSearchEnabled;
+    _logger.info("On page open, facesFlag: $facesFlag");
     return Scaffold(
       body: CustomScrollView(
         primary: false,
@@ -435,16 +439,22 @@ class FaceRecognitionStatusWidgetState
   }
 
   Future<(int, int, int, double)> getIndexStatus() async {
-    final indexedFiles = await FaceMLDataDB.instance
-        .getIndexedFileCount(minimumMlVersion: faceMlVersion);
-    final indexableFiles = (await FaceMlService.getIndexableFileIDs()).length;
-    final showIndexedFiles = min(indexedFiles, indexableFiles);
-    final pendingFiles = max(indexableFiles - indexedFiles, 0);
-    final foundFaces = await FaceMLDataDB.instance.getTotalFaceCount();
-    final clusteredFaces = await FaceMLDataDB.instance.getClusteredFaceCount();
-    final clusteringDoneRatio = clusteredFaces / foundFaces;
+    try {
+      final indexedFiles = await FaceMLDataDB.instance
+          .getIndexedFileCount(minimumMlVersion: faceMlVersion);
+      final indexableFiles = (await FaceMlService.getIndexableFileIDs()).length;
+      final showIndexedFiles = min(indexedFiles, indexableFiles);
+      final pendingFiles = max(indexableFiles - indexedFiles, 0);
+      final foundFaces = await FaceMLDataDB.instance.getTotalFaceCount();
+      final clusteredFaces =
+          await FaceMLDataDB.instance.getClusteredFaceCount();
+      final clusteringDoneRatio = clusteredFaces / foundFaces;
 
-    return (showIndexedFiles, pendingFiles, foundFaces, clusteringDoneRatio);
+      return (showIndexedFiles, pendingFiles, foundFaces, clusteringDoneRatio);
+    } catch (e, s) {
+      _logger.severe('Error getting face recognition status', e, s);
+      rethrow;
+    }
   }
 
   @override
