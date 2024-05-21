@@ -125,7 +125,7 @@ class Code {
     final issuer = _getIssuer(uri);
 
     try {
-      return Code(
+      final code = Code(
         _getAccount(uri),
         issuer,
         _getDigits(uri, issuer),
@@ -137,6 +137,7 @@ class Code {
         rawData,
         display: CodeDisplay.fromUri(uri) ?? CodeDisplay(),
       );
+      return code;
     } catch (e) {
       // if account name contains # without encoding,
       // rest of the url are treated as url fragment
@@ -174,12 +175,11 @@ class Code {
   }
 
   String toOTPAuthUrlFormat() {
-    final uri = Uri.parse(rawData);
+    final uri = Uri.parse(rawData.replaceAll("#", '%23'));
     final query = {...uri.queryParameters};
     query["codeDisplay"] = jsonEncode(display.toJson());
 
     final newUri = uri.replace(queryParameters: query);
-
     return jsonEncode(newUri.toString());
   }
 
