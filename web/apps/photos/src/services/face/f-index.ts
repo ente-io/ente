@@ -2,7 +2,6 @@ import { FILE_TYPE } from "@/media/file-type";
 import { blobCache } from "@/next/blob-cache";
 import log from "@/next/log";
 import { workerBridge } from "@/next/worker/worker-bridge";
-import { euclidean } from "hdbscan";
 import { Matrix } from "ml-matrix";
 import {
     Box,
@@ -19,6 +18,13 @@ import type {
 } from "services/face/types";
 import { defaultMLVersion } from "services/machineLearning/machineLearningService";
 import { getSimilarityTransformation } from "similarity-transformation";
+import {
+    Matrix as TransformationMatrix,
+    applyToPoint,
+    compose,
+    scale,
+    translate,
+} from "transformation-matrix";
 import type { EnteFile } from "types/file";
 import { fetchImageBitmap, getLocalFileImageBitmap } from "./file";
 import {
@@ -27,13 +33,7 @@ import {
     pixelRGBBilinear,
     warpAffineFloat32List,
 } from "./image";
-import {
-    Matrix as transformMatrix,
-    applyToPoint,
-    compose,
-    scale,
-    translate,
-} from "transformation-matrix";
+
 /**
  * Index faces in the given file.
  *
@@ -221,8 +221,16 @@ const convertToYOLOInputFloat32ChannelsFirst = (imageBitmap: ImageBitmap) => {
  *
  * Only detections that exceed a minimum score are returned.
  *
- * @param rows A Float32Array of shape [25200, 16], where each row
- * represents a bounding box.
+ * @param rows A Float32Array of shape [25200, 16], where each row represents a
+ * face detection.
+ *
+ * YOLO detects a fixed number of faces, 25200, always from the input it is
+ * given. Each detection is a "row" of 16 bytes, containing the bounding box,
+ * score, and landmarks of the detection.
+ *
+ * We prune out detections with a score lower than our threshold. However, we
+ * will still be left with some overlapping detections of the same face: these
+ * we will deduplicate in {@link removeDuplicateDetections}.
  */
 const filterExtractDetectionsFromYOLOOutput = (
     rows: Float32Array,
@@ -288,18 +296,21 @@ const transformFaceDetections = (
     }));
 };
 
-const boxTransformationMatrix = (inBox: Box, toBox: Box): transformMatrix =>
+const boxTransformationMatrix = (
+    inBox: Box,
+    toBox: Box,
+): TransformationMatrix =>
     compose(
         translate(toBox.x, toBox.y),
         scale(toBox.width / inBox.width, toBox.height / inBox.height),
     );
 
-const transformPoint = (point: Point, transform: transformMatrix) => {
+const transformPoint = (point: Point, transform: TransformationMatrix) => {
     const txdPoint = applyToPoint(transform, point);
     return new Point(txdPoint.x, txdPoint.y);
 };
 
-const transformBox = (box: Box, transform: transformMatrix) => {
+const transformBox = (box: Box, transform: TransformationMatrix) => {
     const topLeft = transformPoint(new Point(box.x, box.y), transform);
     const bottomRight = transformPoint(
         new Point(box.x + box.width, box.y + box.height),
@@ -315,31 +326,38 @@ const transformBox = (box: Box, transform: transformMatrix) => {
 };
 
 /**
- * Remove overlapping faces from an array of face detections through non-maximum suppression algorithm.
- * 
- * This function sorts the detections by their probability in descending order, then iterates over them.
- * 
- * For each detection, it calculates the Intersection over Union (IoU) with all other detections.
- * 
- * If the IoU is greater than or equal to the specified threshold (`iouThreshold`), the other detection is considered overlapping and is removed.
- * 
- * @param detections - An array of face detections to remove overlapping faces from.
- * 
- * @param iouThreshold - The minimum IoU between two detections for them to be considered overlapping.
- * 
+ * Remove overlapping faces from an array of face detections through non-maximum
+ * suppression algorithm.
+ *
+ * This function sorts the detections by their probability in descending order,
+ * then iterates over them.
+ *
+ * For each detection, it calculates the Intersection over Union (IoU) with all
+ * other detections.
+ *
+ * If the IoU is greater than or equal to the specified threshold
+ * (`iouThreshold`), the other detection is considered overlapping and is
+ * removed.
+ *
+ * @param detections - An array of face detections to remove overlapping faces
+ * from.
+ *
+ * @param iouThreshold - The minimum IoU between two detections for them to be
+ * considered overlapping.
+ *
  * @returns An array of face detections with overlapping faces removed
  */
 const naiveNonMaxSuppression = (
     detections: FaceDetection[],
     iouThreshold: number,
 ): FaceDetection[] => {
-    // Sort the detections by score, the highest first
+    // Sort the detections by score, the highest first.
     detections.sort((a, b) => b.probability - a.probability);
 
-    // Loop through the detections and calculate the IOU
+    // Loop through the detections and calculate the IOU.
     for (let i = 0; i < detections.length - 1; i++) {
         for (let j = i + 1; j < detections.length; j++) {
-            const iou = calculateIOU(detections[i], detections[j]);
+            const iou = intersectionOverUnion(detections[i], detections[j]);
             if (iou >= iouThreshold) {
                 detections.splice(j, 1);
                 j--;
@@ -350,7 +368,7 @@ const naiveNonMaxSuppression = (
     return detections;
 };
 
-const calculateIOU = (a: FaceDetection, b: FaceDetection): number => {
+const intersectionOverUnion = (a: FaceDetection, b: FaceDetection): number => {
     const intersectionMinX = Math.max(a.box.x, b.box.x);
     const intersectionMinY = Math.max(a.box.y, b.box.y);
     const intersectionMaxX = Math.min(
@@ -453,12 +471,15 @@ const faceAlignmentUsingSimilarityTransform = (
     const meanTranslation = simTransform.toMean.sub(0.5).mul(size);
     const centerMat = simTransform.fromMean.sub(meanTranslation);
     const center = new Point(centerMat.get(0, 0), centerMat.get(1, 0));
-    const rotation = -Math.atan2(
-        simTransform.rotation.get(0, 1),
-        simTransform.rotation.get(0, 0),
-    );
 
-    return { affineMatrix, center, size, rotation };
+    const boundingBox = new Box({
+        x: center.x - size / 2,
+        y: center.y - size / 2,
+        width: size,
+        height: size,
+    });
+
+    return { affineMatrix, boundingBox };
 };
 
 const convertToMobileFaceNetInput = (
@@ -733,33 +754,22 @@ const extractFaceCrop = (
     imageBitmap: ImageBitmap,
     alignment: FaceAlignment,
 ): ImageBitmap => {
-    const alignmentBox = new Box({
-        x: alignment.center.x - alignment.size / 2,
-        y: alignment.center.y - alignment.size / 2,
-        width: alignment.size,
-        height: alignment.size,
-    });
+    // TODO-ML: This algorithm is different from what is used by the mobile app.
+    // Also, it needs to be something that can work fully using the embedding we
+    // receive from remote - the `alignment.boundingBox` will not be available
+    // to us in such cases.
+    const paddedBox = roundBox(enlargeBox(alignment.boundingBox, 1.5));
+    const outputSize = { width: paddedBox.width, height: paddedBox.height };
 
-    const padding = 0.25;
-    const scaleForPadding = 1 + padding * 2;
-    const paddedBox = roundBox(enlargeBox(alignmentBox, scaleForPadding));
+    const maxDimension = 256;
+    const scale = Math.min(
+        maxDimension / paddedBox.width,
+        maxDimension / paddedBox.height,
+    );
 
-    return cropImage(imageBitmap, paddedBox, 256);
-};
-
-const cropImage = (
-    imageBitmap: ImageBitmap,
-    cropBox: Box,
-    maxDimension: number,
-) => {
-    const box = roundBox(cropBox);
-
-    const outputSize = { width: box.width, height: box.height };
-
-    const scale = Math.min(maxDimension / box.width, maxDimension / box.height);
     if (scale < 1) {
-        outputSize.width = Math.round(scale * box.width);
-        outputSize.height = Math.round(scale * box.height);
+        outputSize.width = Math.round(scale * paddedBox.width);
+        outputSize.height = Math.round(scale * paddedBox.height);
     }
 
     const offscreen = new OffscreenCanvas(outputSize.width, outputSize.height);
@@ -775,7 +785,7 @@ const cropImage = (
         height: outputSize.height,
     });
 
-    const enlargedBox = enlargeBox(box, 1.5);
+    const enlargedBox = enlargeBox(paddedBox, 1.5);
     const enlargedOutputBox = enlargeBox(outputBox, 1.5);
 
     offscreenCtx.drawImage(

@@ -8,13 +8,20 @@ export interface FaceDetection {
 }
 
 export interface FaceAlignment {
-    // TODO-ML(MR): remove affine matrix as rotation, size and center
-    // are simple to store and use, affine matrix adds complexity while getting crop
+    /**
+     * An affine transformation matrix (rotation, translation, scaling) to align
+     * the face extracted from the image.
+     */
     affineMatrix: number[][];
-    rotation: number;
-    // size and center is relative to image dimentions stored at mlFileData
-    size: number;
-    center: Point;
+    /**
+     * The bounding box of the transformed box.
+     *
+     * The affine transformation shifts the original detection box a new,
+     * transformed, box (possibily rotated). This property is the bounding box
+     * of that transformed box. It is in the coordinate system of the original,
+     * full, image on which the detection occurred.
+     */
+    boundingBox: Box;
 }
 
 export interface Face {

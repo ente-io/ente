@@ -20,16 +20,18 @@ export const putFaceEmbedding = async (
     const comlinkCryptoWorker = await ComlinkCryptoWorker.getInstance();
     const { file: encryptedEmbeddingData } =
         await comlinkCryptoWorker.encryptMetadata(serverMl, enteFile.key);
-    log.info(
-        `putEmbedding embedding to server for file: ${enteFile.metadata.title} fileID: ${enteFile.id}`,
-    );
-    const res = await putEmbedding({
+    // TODO-ML(MR): Do we need any of these fields
+    // log.info(
+    //     `putEmbedding embedding to server for file: ${enteFile.metadata.title} fileID: ${enteFile.id}`,
+    // );
+    /*const res =*/ await putEmbedding({
         fileID: enteFile.id,
         encryptedEmbedding: encryptedEmbeddingData.encryptedData,
         decryptionHeader: encryptedEmbeddingData.decryptionHeader,
         model: "file-ml-clip-face",
     });
-    log.info("putEmbedding response: ", res);
+    // TODO-ML(MR): Do we need any of these fields
+    // log.info("putEmbedding response: ", res);
 };
 
 export interface FileML extends ServerFileMl {
