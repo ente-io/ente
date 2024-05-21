@@ -2,8 +2,7 @@ import log from "@/next/log";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { putEmbedding } from "services/embeddingService";
 import type { EnteFile } from "types/file";
-import type { Point } from "./crop";
-import type { Face, FaceDetection, MlFileData } from "./types";
+import type { Face, FaceDetection, MlFileData, Point } from "./types";
 
 export const putFaceEmbedding = async (
     enteFile: EnteFile,
@@ -20,18 +19,12 @@ export const putFaceEmbedding = async (
     const comlinkCryptoWorker = await ComlinkCryptoWorker.getInstance();
     const { file: encryptedEmbeddingData } =
         await comlinkCryptoWorker.encryptMetadata(serverMl, enteFile.key);
-    // TODO-ML(MR): Do we need any of these fields
-    // log.info(
-    //     `putEmbedding embedding to server for file: ${enteFile.metadata.title} fileID: ${enteFile.id}`,
-    // );
-    /*const res =*/ await putEmbedding({
+    await putEmbedding({
         fileID: enteFile.id,
         encryptedEmbedding: encryptedEmbeddingData.encryptedData,
         decryptionHeader: encryptedEmbeddingData.decryptionHeader,
         model: "file-ml-clip-face",
     });
-    // TODO-ML(MR): Do we need any of these fields
-    // log.info("putEmbedding response: ", res);
 };
 
 export interface FileML extends ServerFileMl {
