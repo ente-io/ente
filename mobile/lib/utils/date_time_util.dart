@@ -33,9 +33,9 @@ bool areDatesInSameWeek(DateTime date1, DateTime date2) {
   final int dayOfWeek2 = date2.weekday;
   // Calculate the start and end dates of the week for both dates
   final DateTime startOfWeek1 = date1.subtract(Duration(days: dayOfWeek1 - 1));
-  final DateTime endOfWeek1 = startOfWeek1.add(Duration(days: 6));
+  final DateTime endOfWeek1 = startOfWeek1.add(const Duration(days: 6));
   final DateTime startOfWeek2 = date2.subtract(Duration(days: dayOfWeek2 - 1));
-  final DateTime endOfWeek2 = startOfWeek2.add(Duration(days: 6));
+  final DateTime endOfWeek2 = startOfWeek2.add(const Duration(days: 6));
   // Check if the two dates fall within the same week range
   if ((date1.isAfter(startOfWeek2) && date1.isBefore(endOfWeek2)) ||
       (date2.isAfter(startOfWeek1) && date2.isBefore(endOfWeek1))) {
