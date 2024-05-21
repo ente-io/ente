@@ -20,6 +20,8 @@
   "codeIssuerHint": "Emissor",
   "codeSecretKeyHint": "Chave secreta",
   "codeAccountHint": "Conta (voce@dominio.com)",
+  "codeTagHint": "Etiqueta",
+  "accountKeyType": "Tipo de chave",
   "sessionExpired": "Sessão expirada",
   "@sessionExpired": {
     "description": "Title of the dialog when the users current session is invalid/expired"
@@ -156,6 +158,7 @@
       }
     }
   },
+  "invalidQRCode": "QR Code inválido",
   "noRecoveryKeyTitle": "Sem chave de recuperação?",
   "enterEmailHint": "Insira o seu endereço de e-mail",
   "invalidEmailTitle": "Endereço de e-mail inválido",
@@ -420,5 +423,16 @@
   "invalidEndpoint": "Endpoint inválido",
   "invalidEndpointMessage": "Desculpe, o endpoint que você inseriu é inválido. Por favor, insira um endpoint válido e tente novamente.",
   "endpointUpdatedMessage": "Endpoint atualizado com sucesso",
-  "customEndpoint": "Conectado a {endpoint}"
+  "customEndpoint": "Conectado a {endpoint}",
+  "pinText": "Fixar",
+  "pinnedCodeMessage": "{code} foi fixado",
+  "tags": "Etiquetas",
+  "createNewTag": "Criar etiqueta",
+  "tag": "Etiqueta",
+  "create": "Criar",
+  "editTag": "Editar etiqueta",
+  "deleteTagTitle": "Excluir etiqueta?",
+  "deleteTagMessage": "Tem certeza de que deseja excluir esta etiqueta? Essa ação é irreversível.",
+  "somethingWentWrongParsingCode": "Não foi possível analisar os códigos {x}.",
+  "updateNotAvailable": "Atualização não está disponível"
 }
