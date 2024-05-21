@@ -793,8 +793,8 @@ class FaceMlService {
           final FaceResult faceRes = result.faces[i];
           final detection = face_detection.Detection(
             box: FaceBox(
-              xMin: faceRes.detection.xMinBox,
-              yMin: faceRes.detection.yMinBox,
+              x: faceRes.detection.xMinBox,
+              y: faceRes.detection.yMinBox,
               width: faceRes.detection.width,
               height: faceRes.detection.height,
             ),

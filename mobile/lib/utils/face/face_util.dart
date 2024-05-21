@@ -110,8 +110,8 @@ FaceBoxImage _getSquareFaceBoxImage(img.Image image, FaceBox faceBox) {
   final width = (image.width * faceBox.width).round();
   final height = (image.height * faceBox.height).round();
   final side = max(width, height);
-  final xImage = (image.width * faceBox.xMin).round();
-  final yImage = (image.height * faceBox.yMin).round();
+  final xImage = (image.width * faceBox.x).round();
+  final yImage = (image.height * faceBox.y).round();
 
   if (height >= width) {
     final xImageAdj = (xImage - (height - width) / 2).round();

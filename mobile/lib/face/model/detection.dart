@@ -6,7 +6,7 @@ import "package:photos/services/machine_learning/face_ml/face_detection/detectio
 
 /// Stores the face detection data, notably the bounding box and landmarks.
 ///
-/// - Bounding box: [FaceBox] with xMin, yMin (so top left corner), width, height
+/// - Bounding box: [FaceBox] with x, y (minimum, so top left corner), width, height
 /// - Landmarks: list of [Landmark]s, namely leftEye, rightEye, nose, leftMouth, rightMouth
 ///
 /// WARNING: All coordinates are relative to the image size, so in the range [0, 1]!
@@ -24,8 +24,8 @@ class Detection {
   // empty box
   Detection.empty()
       : box = FaceBox(
-          xMin: 0,
-          yMin: 0,
+          x: 0,
+          y: 0,
           width: 0,
           height: 0,
         ),

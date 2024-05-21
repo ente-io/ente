@@ -559,6 +559,7 @@ Future<Image> cropImageWithCanvasSimple(
 }
 
 @Deprecated('Old image processing method, use `cropImage` instead!')
+
 /// Crops an [image] based on the specified [x], [y], [width] and [height].
 /// Optionally, the cropped image can be resized to comply with a [maxSize] and/or [minSize].
 /// Optionally, the cropped image can be rotated from the center by [rotation] radians.
@@ -1276,8 +1277,8 @@ Future<List<Uint8List>> generateFaceThumbnails(
 
     for (final faceBox in faceBoxes) {
       // Note that the faceBox values are relative to the image size, so we need to convert them to absolute values first
-      final double xMinAbs = faceBox.xMin * img.width;
-      final double yMinAbs = faceBox.yMin * img.height;
+      final double xMinAbs = faceBox.x * img.width;
+      final double yMinAbs = faceBox.y * img.height;
       final double widthAbs = faceBox.width * img.width;
       final double heightAbs = faceBox.height * img.height;
 
@@ -1323,8 +1324,8 @@ Future<List<Uint8List>> generateFaceThumbnailsUsingCanvas(
     final futureFaceThumbnails = <Future<Uint8List>>[];
     for (final faceBox in faceBoxes) {
       // Note that the faceBox values are relative to the image size, so we need to convert them to absolute values first
-      final double xMinAbs = faceBox.xMin * img.width;
-      final double yMinAbs = faceBox.yMin * img.height;
+      final double xMinAbs = faceBox.x * img.width;
+      final double yMinAbs = faceBox.y * img.height;
       final double widthAbs = faceBox.width * img.width;
       final double heightAbs = faceBox.height * img.height;
 
