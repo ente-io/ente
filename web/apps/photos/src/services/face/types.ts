@@ -1,4 +1,26 @@
-import { Box, Dimensions, Point } from "services/face/geom";
+/** The x and y coordinates of a point. */
+export interface Point {
+    x: number;
+    y: number;
+}
+
+/** The dimensions of something, say an image. */
+export interface Dimensions {
+    width: number;
+    height: number;
+}
+
+/** A rectangle given by its top left coordinates and dimensions. */
+export interface Box {
+    /** The x coordinate of the the top left (xMin). */
+    x: number;
+    /** The y coodinate of the top left (yMin). */
+    y: number;
+    /** The width of the box. */
+    width: number;
+    /** The height of the box. */
+    height: number;
+}
 
 export interface FaceDetection {
     // box and landmarks is relative to image dimentions stored at mlFileData
