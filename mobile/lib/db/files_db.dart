@@ -1120,7 +1120,7 @@ class FilesDB {
       return {};
     }
     final inParam = hashes.map((e) => "'$e'").join(',');
-    final rows = await db.execute('''
+    final rows = await db.getAll('''
       SELECT * FROM $filesTable WHERE $columnHash IN ($inParam) AND $columnOwnerID = $userID;
       ''');
     final matchedFiles = convertToFiles(rows);
@@ -1319,7 +1319,7 @@ class FilesDB {
     Set<int> hiddenCollections,
   ) async {
     final db = await instance.sqliteAsyncDB;
-    final count = await db.execute(
+    final count = await db.getAll(
       'SELECT COUNT(distinct($columnUploadedFileID)) as COUNT FROM $filesTable where '
       '$columnMMdVisibility'
       ' = $visibility AND $columnOwnerID = $ownerID AND $columnCollectionID NOT IN (${hiddenCollections.join(', ')})',
@@ -1373,7 +1373,7 @@ class FilesDB {
     }
     inParam = inParam.substring(0, inParam.length - 1);
     final db = await instance.sqliteAsyncDB;
-    final rows = await db.execute(
+    final rows = await db.getAll(
       '''
       SELECT $columnLocalID
       FROM $filesTable
@@ -1393,7 +1393,7 @@ class FilesDB {
   Future<Map<int, int>> getCollectionIDToMaxCreationTime() async {
     final enteWatch = EnteWatch("getCollectionIDToMaxCreationTime")..start();
     final db = await instance.sqliteAsyncDB;
-    final rows = await db.execute(
+    final rows = await db.getAll(
       '''
       SELECT $columnCollectionID, MAX($columnCreationTime) AS max_creation_time
       FROM $filesTable
@@ -1730,7 +1730,7 @@ class FilesDB {
 
   Future<Map<FileType, int>> fetchFilesCountbyType(int userID) async {
     final db = await instance.sqliteAsyncDB;
-    final result = await db.execute(
+    final result = await db.getAll(
       '''
       SELECT $columnFileType, COUNT(DISTINCT $columnUploadedFileID) 
          FROM $filesTable WHERE $columnUploadedFileID != -1 AND 
