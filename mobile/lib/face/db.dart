@@ -27,7 +27,7 @@ class FaceMLDataDB {
   static final Logger _logger = Logger("FaceMLDataDB");
 
   static const _databaseName = "ente.face_ml_db.db";
-  static const _databaseVersion = 1;
+  // static const _databaseVersion = 1;
 
   FaceMLDataDB._privateConstructor();
 
@@ -402,7 +402,7 @@ class FaceMLDataDB {
       final clusterID = map[fcClusterID] as int;
       final faceID = map[fcFaceId] as String;
       result.putIfAbsent(personID, () => {}).putIfAbsent(clusterID, () => {})
-        ..add(faceID);
+        .add(faceID);
     }
     return result;
   }
@@ -916,7 +916,7 @@ class FaceMLDataDB {
       await db.execute(dropNotPersonFeedbackTable);
       await db.execute(dropClusterSummaryTable);
       await db.execute(dropFaceClustersTable);
-      
+
       await db.execute(createClusterPersonTable);
       await db.execute(createNotPersonFeedbackTable);
       await db.execute(createClusterSummaryTable);
