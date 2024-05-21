@@ -55,19 +55,43 @@ class CodeDisplay {
     );
   }
 
-  static CodeDisplay? fromUri(Uri uri) {
+  /// Converts the [CodeDisplay] to a json object.
+  /// When [safeParsing] is true, the json will be parsed safely.
+  /// If we fail to parse the json, we will return an empty [CodeDisplay].
+  static CodeDisplay? fromUri(Uri uri, {bool safeParsing = true}) {
     try {
       if (!uri.queryParameters.containsKey("codeDisplay")) return null;
       final String codeDisplay =
           uri.queryParameters['codeDisplay']!.replaceAll('%2C', ',');
-      final decodedDisplay = jsonDecode(codeDisplay);
-
-      return CodeDisplay.fromJson(decodedDisplay);
+      return _parseCodeDisplayJson(codeDisplay, safeParsing);
     } catch (e, s) {
       Logger("CodeDisplay")
           .severe("Could not parse code display from uri", e, s);
-      // print("Could not parse code display from uri");
       return null;
+    }
+  }
+
+  static CodeDisplay _parseCodeDisplayJson(String json, bool safeParsing) {
+    try {
+      final decodedDisplay = jsonDecode(json);
+      return CodeDisplay.fromJson(decodedDisplay);
+    } catch (e, s) {
+      Logger("CodeDisplay")
+          .severe("Could not parse code display from json", e, s);
+      // if the json does not end with a }, it's likely bad data is attached.
+      // This is a workaround to prevent the app from crashing.
+      if (!json.endsWith("}")) {
+        final lastBracket = json.lastIndexOf("}");
+        if (lastBracket != -1) {
+          final validJson = json.substring(0, lastBracket + 1);
+          return _parseCodeDisplayJson(validJson, safeParsing);
+        }
+      }
+      if (safeParsing) {
+        return CodeDisplay();
+      } else {
+        rethrow;
+      }
     }
   }
 
