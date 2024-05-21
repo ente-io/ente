@@ -239,8 +239,8 @@ const filterExtractDetectionsFromYOLOOutput = (
         const yCenter = rows[i + 1];
         const width = rows[i + 2];
         const height = rows[i + 3];
-        const xMin = xCenter - width / 2.0; // topLeft
-        const yMin = yCenter - height / 2.0; // topLeft
+        const x = xCenter - width / 2.0; // topLeft
+        const y = yCenter - height / 2.0; // topLeft
 
         const leftEyeX = rows[i + 5];
         const leftEyeY = rows[i + 6];
@@ -253,12 +253,7 @@ const filterExtractDetectionsFromYOLOOutput = (
         const rightMouthX = rows[i + 13];
         const rightMouthY = rows[i + 14];
 
-        const box = {
-            x: xMin,
-            y: yMin,
-            width: width,
-            height: height,
-        };
+        const box = { x, y, width, height };
         const probability = score as number;
         const landmarks = [
             { x: leftEyeX, y: leftEyeY },
@@ -387,18 +382,14 @@ const intersectionOverUnion = (a: FaceDetection, b: FaceDetection): number => {
 
 const makeFaceID = (
     fileID: number,
-    detection: FaceDetection,
-    imageDims: Dimensions,
+    { box }: FaceDetection,
+    image: Dimensions,
 ) => {
     const part = (v: number) => clamp(v, 0.0, 0.999999).toFixed(5).substring(2);
-    const xMin = part(detection.box.x / imageDims.width);
-    const yMin = part(detection.box.y / imageDims.height);
-    const xMax = part(
-        (detection.box.x + detection.box.width) / imageDims.width,
-    );
-    const yMax = part(
-        (detection.box.y + detection.box.height) / imageDims.height,
-    );
+    const xMin = part(box.x / image.width);
+    const yMin = part(box.y / image.height);
+    const xMax = part((box.x + box.width) / image.width);
+    const yMax = part((box.y + box.height) / image.height);
     return [`${fileID}`, xMin, yMin, xMax, yMax].join("_");
 };
 
