@@ -74,6 +74,9 @@ class FilesDB {
   // we need to write query based on that field
   static const columnMMdVisibility = 'mmd_visibility';
 
+//If adding or removing a new column, make sure to update the `_columnNames` list
+//and update `_generateColumnsAndPlaceholdersForInsert` and
+//`_generateUpdateAssignmentsWithPlaceholders`
   static final migrationScripts = [
     ...createTable(filesTable),
     ...alterDeviceFolderToAllowNULL(),
