@@ -143,8 +143,10 @@ class FaceMlService {
           }
           canRunMLController = event.shouldRun;
           if (canRunMLController) {
+            _logger.info("MLController allowed running ML, faces indexing starting");
             unawaited(indexAndClusterAll());
           } else {
+            _logger.info("MLController stopped running ML, faces indexing paused");
             pauseIndexing();
           }
         });
