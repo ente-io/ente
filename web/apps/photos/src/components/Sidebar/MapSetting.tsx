@@ -8,8 +8,8 @@ import { t } from "i18next";
 import { AppContext } from "pages/_app";
 import { useContext, useEffect, useState } from "react";
 import { getMapEnabledStatus } from "services/userService";
-import DisableMap from "../DisableMap";
-import EnableMap from "../EnableMap";
+import DisableMap from "./DisableMap";
+import EnableMap from "./EnableMap";
 
 export default function MapSettings({ open, onClose, onRootClose }) {
     const { mapEnabled, updateMapEnabled } = useContext(AppContext);
