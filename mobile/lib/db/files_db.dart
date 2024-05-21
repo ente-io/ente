@@ -1824,8 +1824,8 @@ class FilesDB {
   }) {
     final values = <Object?>[];
 
-    double? latitude;
-    double? longitude;
+    double? latitude = file.location?.latitude;
+    double? longitude = file.location?.longitude;
 
     int? creationTime = file.creationTime;
     if (file.pubMagicMetadata != null) {
