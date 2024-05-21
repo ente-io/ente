@@ -142,7 +142,7 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
       final faceWidgets = <FaceWidget>[];
 
       // await generation of the face crops here, so that the file info shows one central loading spinner
-      final test = await getRelevantFaceCrops(faces);
+      final _ = await getRelevantFaceCrops(faces);
 
       final faceCrops = getRelevantFaceCrops(faces);
       for (final Face face in faces) {

@@ -65,7 +65,7 @@ const selectDirectory = () => ipcRenderer.invoke("selectDirectory");
 
 const logout = () => {
     watchRemoveListeners();
-    ipcRenderer.send("logout");
+    return ipcRenderer.invoke("logout");
 };
 
 const encryptionKey = () => ipcRenderer.invoke("encryptionKey");

@@ -177,12 +177,19 @@ some cases.
 
 ## Face search
 
--   [matrix](https://github.com/mljs/matrix) and
-    [similarity-transformation](https://github.com/shaileshpandit/similarity-transformation-js)
-    are used during face alignment.
-
 -   [transformation-matrix](https://github.com/chrvadala/transformation-matrix)
-    is used during face detection.
+    is used for performing 2D affine transformations using transformation
+    matrices. It is used during face detection.
+
+-   [matrix](https://github.com/mljs/matrix) is mathematical matrix abstraction.
+    It is used alongwith
+    [similarity-transformation](https://github.com/shaileshpandit/similarity-transformation-js)
+    during face alignment.
+
+    > Note that while both `transformation-matrix` and `matrix` are "matrix"
+    > libraries, they have different foci and purposes: `transformation-matrix`
+    > provides affine transforms, while `matrix` is for performing computations
+    > on matrices, say inverting them or performing their decomposition.
 
 -   [hdbscan](https://github.com/shaileshpandit/hdbscan-js) is used for face
     clustering.
