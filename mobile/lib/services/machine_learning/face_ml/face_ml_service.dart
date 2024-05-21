@@ -143,10 +143,13 @@ class FaceMlService {
           }
           canRunMLController = event.shouldRun;
           if (canRunMLController) {
-            _logger.info("MLController allowed running ML, faces indexing starting");
+            _logger.info(
+              "MLController allowed running ML, faces indexing starting",
+            );
             unawaited(indexAndClusterAll());
           } else {
-            _logger.info("MLController stopped running ML, faces indexing paused");
+            _logger
+                .info("MLController stopped running ML, faces indexing paused");
             pauseIndexing();
           }
         });
@@ -1014,6 +1017,7 @@ class FaceMlService {
           file = await getThumbnailForUploadedFile(enteFile);
         } else {
           file = await getFile(enteFile, isOrigin: true);
+          // TODO: This is returning null for Pragadees for all files, so something is wrong here!
         }
         if (file == null) {
           _logger.warning("Could not get file for $enteFile");
