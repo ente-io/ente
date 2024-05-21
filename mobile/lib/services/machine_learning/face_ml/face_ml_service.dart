@@ -527,9 +527,10 @@ class FaceMlService {
       Bus.instance.fire(PeopleChangedEvent());
       _logger.info('clusterAllImages() finished, in '
           '${DateTime.now().difference(clusterAllImagesTime).inSeconds} seconds');
-      isClusteringRunning = false;
     } catch (e, s) {
       _logger.severe("`clusterAllImages` failed", e, s);
+    } finally {
+      isClusteringRunning = false;
     }
   }
 
