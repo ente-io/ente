@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
+import 'package:logging/logging.dart';
 
 /// Used to store the display settings of a code.
 class CodeDisplay {
@@ -55,12 +56,19 @@ class CodeDisplay {
   }
 
   static CodeDisplay? fromUri(Uri uri) {
-    if (!uri.queryParameters.containsKey("codeDisplay")) return null;
-    final String codeDisplay =
-        uri.queryParameters['codeDisplay']!.replaceAll('%2C', ',');
-    final decodedDisplay = jsonDecode(codeDisplay);
+    try {
+      if (!uri.queryParameters.containsKey("codeDisplay")) return null;
+      final String codeDisplay =
+          uri.queryParameters['codeDisplay']!.replaceAll('%2C', ',');
+      final decodedDisplay = jsonDecode(codeDisplay);
 
-    return CodeDisplay.fromJson(decodedDisplay);
+      return CodeDisplay.fromJson(decodedDisplay);
+    } catch (e, s) {
+      Logger("CodeDisplay")
+          .severe("Could not parse code display from uri", e, s);
+      // print("Could not parse code display from uri");
+      return null;
+    }
   }
 
   Map<String, dynamic> toJson() {
