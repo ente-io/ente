@@ -1138,7 +1138,7 @@ class FilesDB {
     }
     final db = await instance.sqliteAsyncDB;
     final rows = await db.getAll(
-      'SELECT * FROM $filesTable WHERE $columnUploadedFileID != NULL OR '
+      'SELECT * FROM $filesTable WHERE ($columnUploadedFileID != NULL OR '
       '$columnUploadedFileID != -1) AND $columnOwnerID = ? AND '
       '$columnFileType = ? AND $columnHash IN ($inParam)',
       [
@@ -1734,7 +1734,7 @@ class FilesDB {
       '''
       SELECT $columnFileType, COUNT(DISTINCT $columnUploadedFileID) 
          FROM $filesTable WHERE $columnUploadedFileID != -1 AND 
-         $columnOwnerID == $userID GROUP BY $columnFileType
+         $columnOwnerID IS $userID GROUP BY $columnFileType
       ''',
     );
 
