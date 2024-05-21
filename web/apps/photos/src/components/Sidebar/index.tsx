@@ -1,23 +1,23 @@
+import log from "@/next/log";
+import { savedLogs } from "@/next/log-web";
+import { downloadAsFile } from "@ente/shared/utils";
 import { Divider, Stack } from "@mui/material";
+import Typography from "@mui/material/Typography";
+import DeleteAccountModal from "components/DeleteAccountModal";
+import { EnteMenuItem } from "components/Menu/EnteMenuItem";
+import { t } from "i18next";
+import { AppContext } from "pages/_app";
+import { useContext, useEffect, useState } from "react";
+import { Trans } from "react-i18next";
 import { CollectionSummaries } from "types/collection";
-import ExitSection from "./ExitSection";
+import { isInternalUser } from "utils/user";
+import { testUpload } from "../../../tests/upload.test";
 import HeaderSection from "./Header";
 import HelpSection from "./HelpSection";
 import ShortcutSection from "./ShortcutSection";
 import UtilitySection from "./UtilitySection";
 import { DrawerSidebar } from "./styledComponents";
 import UserDetailsSection from "./userDetailsSection";
-import log from "@/next/log";
-import { savedLogs } from "@/next/log-web";
-import { downloadAsFile } from "@ente/shared/utils";
-import Typography from "@mui/material/Typography";
-import { EnteMenuItem } from "components/Menu/EnteMenuItem";
-import { t } from "i18next";
-import { AppContext } from "pages/_app";
-import { useContext, useEffect, useState } from "react";
-import { Trans } from "react-i18next";
-import { isInternalUser } from "utils/user";
-import { testUpload } from "../../../tests/upload.test";
 
 interface Iprops {
     collectionSummaries: CollectionSummaries;
@@ -50,6 +50,48 @@ export default function Sidebar({
         </DrawerSidebar>
     );
 }
+
+const ExitSection: React.FC = () => {
+    const { setDialogMessage, logout } = useContext(AppContext);
+
+    const [deleteAccountModalView, setDeleteAccountModalView] = useState(false);
+
+    const closeDeleteAccountModal = () => setDeleteAccountModalView(false);
+    const openDeleteAccountModal = () => setDeleteAccountModalView(true);
+
+    const confirmLogout = () => {
+        setDialogMessage({
+            title: t("LOGOUT_MESSAGE"),
+            proceed: {
+                text: t("LOGOUT"),
+                action: logout,
+                variant: "critical",
+            },
+            close: { text: t("CANCEL") },
+        });
+    };
+
+    return (
+        <>
+            <EnteMenuItem
+                onClick={confirmLogout}
+                color="critical"
+                label={t("LOGOUT")}
+                variant="secondary"
+            />
+            <EnteMenuItem
+                onClick={openDeleteAccountModal}
+                color="critical"
+                variant="secondary"
+                label={t("DELETE_ACCOUNT")}
+            />
+            <DeleteAccountModal
+                open={deleteAccountModalView}
+                onClose={closeDeleteAccountModal}
+            />
+        </>
+    );
+};
 
 const DebugSection: React.FC = () => {
     const appContext = useContext(AppContext);
@@ -107,4 +149,4 @@ const DebugSection: React.FC = () => {
             )}
         </>
     );
-}
+};
