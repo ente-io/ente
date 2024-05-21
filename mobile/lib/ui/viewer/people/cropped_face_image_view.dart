@@ -49,10 +49,8 @@ class CroppedFaceImageView extends StatelessWidget {
 
               final faceBox = face.detection.box;
 
-              final double relativeFaceCenterX =
-                  faceBox.xMin + faceBox.width / 2;
-              final double relativeFaceCenterY =
-                  faceBox.yMin + faceBox.height / 2;
+              final double relativeFaceCenterX = faceBox.x + faceBox.width / 2;
+              final double relativeFaceCenterY = faceBox.y + faceBox.height / 2;
 
               const double desiredFaceHeightRelativeToWidget = 8 / 10;
               final double scale =

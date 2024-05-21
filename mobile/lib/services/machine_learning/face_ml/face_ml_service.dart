@@ -143,8 +143,13 @@ class FaceMlService {
           }
           canRunMLController = event.shouldRun;
           if (canRunMLController) {
+            _logger.info(
+              "MLController allowed running ML, faces indexing starting",
+            );
             unawaited(indexAndClusterAll());
           } else {
+            _logger
+                .info("MLController stopped running ML, faces indexing paused");
             pauseIndexing();
           }
         });
@@ -527,9 +532,10 @@ class FaceMlService {
       Bus.instance.fire(PeopleChangedEvent());
       _logger.info('clusterAllImages() finished, in '
           '${DateTime.now().difference(clusterAllImagesTime).inSeconds} seconds');
-      isClusteringRunning = false;
     } catch (e, s) {
       _logger.severe("`clusterAllImages` failed", e, s);
+    } finally {
+      isClusteringRunning = false;
     }
   }
 
@@ -793,8 +799,8 @@ class FaceMlService {
           final FaceResult faceRes = result.faces[i];
           final detection = face_detection.Detection(
             box: FaceBox(
-              xMin: faceRes.detection.xMinBox,
-              yMin: faceRes.detection.yMinBox,
+              x: faceRes.detection.xMinBox,
+              y: faceRes.detection.yMinBox,
               width: faceRes.detection.width,
               height: faceRes.detection.height,
             ),
@@ -1011,6 +1017,7 @@ class FaceMlService {
           file = await getThumbnailForUploadedFile(enteFile);
         } else {
           file = await getFile(enteFile, isOrigin: true);
+          // TODO: This is returning null for Pragadees for all files, so something is wrong here!
         }
         if (file == null) {
           _logger.warning("Could not get file for $enteFile");
