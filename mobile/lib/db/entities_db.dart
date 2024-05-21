@@ -89,11 +89,10 @@ extension EntitiesDB on FilesDB {
   }
 
   Future<LocalEntityData?> getEntity(EntityType type, String id) async {
-    final db = await database;
-    final List<Map<String, dynamic>> maps = await db.query(
-      "entities",
-      where: "type = ? AND id = ?",
-      whereArgs: [type.typeToString(), id],
+    final db = await sqliteAsyncDB;
+    final List<Map<String, dynamic>> maps = await db.getAll(
+      'SELECT * FROM entities WHERE type = ? AND id = ?',
+      [type.name, id],
     );
     if (maps.isEmpty) {
       return null;
