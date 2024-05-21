@@ -461,7 +461,14 @@ const faceAlignmentUsingSimilarityTransform = (
     const centerMat = simTransform.fromMean.sub(meanTranslation);
     const center = new Point(centerMat.get(0, 0), centerMat.get(1, 0));
 
-    return { affineMatrix, center, size };
+    const boundingBox = new Box({
+        x: center.x - size / 2,
+        y: center.y - size / 2,
+        width: size,
+        height: size,
+    });
+
+    return { affineMatrix, boundingBox };
 };
 
 const convertToMobileFaceNetInput = (
@@ -736,15 +743,7 @@ const extractFaceCrop = (
     imageBitmap: ImageBitmap,
     alignment: FaceAlignment,
 ): ImageBitmap => {
-    const alignmentBox = new Box({
-        x: alignment.center.x - alignment.size / 2,
-        y: alignment.center.y - alignment.size / 2,
-        width: alignment.size,
-        height: alignment.size,
-    });
-
-    const paddedBox = roundBox(enlargeBox(alignmentBox, 1.5));
-
+    const paddedBox = roundBox(enlargeBox(alignment.boundingBox, 1.5));
     const outputSize = { width: paddedBox.width, height: paddedBox.height };
 
     const maxDimension = 256;
