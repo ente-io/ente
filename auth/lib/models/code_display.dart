@@ -58,17 +58,11 @@ class CodeDisplay {
   /// Converts the [CodeDisplay] to a json object.
   /// When [safeParsing] is true, the json will be parsed safely.
   /// If we fail to parse the json, we will return an empty [CodeDisplay].
-  static CodeDisplay? fromUri(Uri uri, {bool safeParsing = true}) {
-    try {
-      if (!uri.queryParameters.containsKey("codeDisplay")) return null;
-      final String codeDisplay =
-          uri.queryParameters['codeDisplay']!.replaceAll('%2C', ',');
-      return _parseCodeDisplayJson(codeDisplay, safeParsing);
-    } catch (e, s) {
-      Logger("CodeDisplay")
-          .severe("Could not parse code display from uri", e, s);
-      return null;
-    }
+  static CodeDisplay? fromUri(Uri uri, {bool safeParsing = false}) {
+    if (!uri.queryParameters.containsKey("codeDisplay")) return null;
+    final String codeDisplay =
+        uri.queryParameters['codeDisplay']!.replaceAll('%2C', ',');
+    return _parseCodeDisplayJson(codeDisplay, safeParsing);
   }
 
   static CodeDisplay _parseCodeDisplayJson(String json, bool safeParsing) {
@@ -78,14 +72,9 @@ class CodeDisplay {
     } catch (e, s) {
       Logger("CodeDisplay")
           .severe("Could not parse code display from json", e, s);
-      // if the json does not end with a }, it's likely bad data is attached.
-      // This is a workaround to prevent the app from crashing.
-      if (!json.endsWith("}")) {
-        final lastBracket = json.lastIndexOf("}");
-        if (lastBracket != -1) {
-          final validJson = json.substring(0, lastBracket + 1);
-          return _parseCodeDisplayJson(validJson, safeParsing);
-        }
+      // (ng/prateek) Handle the case where we have fragment in the rawDataUrl
+      if (!json.endsWith("}") && json.contains("}#")) {
+        return CodeDisplay();
       }
       if (safeParsing) {
         return CodeDisplay();
