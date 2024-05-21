@@ -1,3 +1,4 @@
+import log from "@/next/log";
 import { Box, DialogProps, Stack } from "@mui/material";
 import { EnteDrawer } from "components/EnteDrawer";
 import { EnteMenuItem } from "components/Menu/EnteMenuItem";
@@ -7,7 +8,8 @@ import { t } from "i18next";
 import { AppContext } from "pages/_app";
 import { useContext, useEffect, useState } from "react";
 import { getMapEnabledStatus } from "services/userService";
-import ModifyMapEnabled from "./ModifyMapEnabled";
+import DisableMap from "../DisableMap";
+import EnableMap from "../EnableMap";
 
 export default function MapSettings({ open, onClose, onRootClose }) {
     const { mapEnabled, updateMapEnabled } = useContext(AppContext);
@@ -80,3 +82,70 @@ export default function MapSettings({ open, onClose, onRootClose }) {
         </EnteDrawer>
     );
 }
+
+const ModifyMapEnabled = ({ open, onClose, onRootClose, mapEnabled }) => {
+    const { somethingWentWrong, updateMapEnabled } = useContext(AppContext);
+
+    const disableMap = async () => {
+        try {
+            await updateMapEnabled(false);
+            onClose();
+        } catch (e) {
+            log.error("Disable Map failed", e);
+            somethingWentWrong();
+        }
+    };
+
+    const enableMap = async () => {
+        try {
+            await updateMapEnabled(true);
+            onClose();
+        } catch (e) {
+            log.error("Enable Map failed", e);
+            somethingWentWrong();
+        }
+    };
+
+    const handleRootClose = () => {
+        onClose();
+        onRootClose();
+    };
+
+    const handleDrawerClose: DialogProps["onClose"] = (_, reason) => {
+        if (reason === "backdropClick") {
+            handleRootClose();
+        } else {
+            onClose();
+        }
+    };
+
+    return (
+        <Box>
+            <EnteDrawer
+                anchor="left"
+                transitionDuration={0}
+                open={open}
+                onClose={handleDrawerClose}
+                slotProps={{
+                    backdrop: {
+                        sx: { "&&&": { backgroundColor: "transparent" } },
+                    },
+                }}
+            >
+                {mapEnabled ? (
+                    <DisableMap
+                        onClose={onClose}
+                        disableMap={disableMap}
+                        onRootClose={handleRootClose}
+                    />
+                ) : (
+                    <EnableMap
+                        onClose={onClose}
+                        enableMap={enableMap}
+                        onRootClose={handleRootClose}
+                    />
+                )}
+            </EnteDrawer>
+        </Box>
+    );
+};
