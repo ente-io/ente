@@ -1,5 +1,12 @@
 import log from "@/next/log";
-import { Box, DialogProps, Stack } from "@mui/material";
+import {
+    Box,
+    Button,
+    DialogProps,
+    Link,
+    Stack,
+    Typography,
+} from "@mui/material";
 import { EnteDrawer } from "components/EnteDrawer";
 import { EnteMenuItem } from "components/Menu/EnteMenuItem";
 import { MenuItemGroup } from "components/Menu/MenuItemGroup";
@@ -7,9 +14,8 @@ import Titlebar from "components/Titlebar";
 import { t } from "i18next";
 import { AppContext } from "pages/_app";
 import { useContext, useEffect, useState } from "react";
+import { Trans } from "react-i18next";
 import { getMapEnabledStatus } from "services/userService";
-import DisableMap from "./DisableMap";
-import EnableMap from "./EnableMap";
 
 export default function MapSettings({ open, onClose, onRootClose }) {
     const { mapEnabled, updateMapEnabled } = useContext(AppContext);
@@ -149,3 +155,72 @@ const ModifyMapEnabled = ({ open, onClose, onRootClose, mapEnabled }) => {
         </Box>
     );
 };
+
+function EnableMap({ onClose, enableMap, onRootClose }) {
+    return (
+        <Stack spacing={"4px"} py={"12px"}>
+            <Titlebar
+                onClose={onClose}
+                title={t("ENABLE_MAPS")}
+                onRootClose={onRootClose}
+            />
+            <Stack py={"20px"} px={"8px"} spacing={"32px"}>
+                <Box px={"8px"}>
+                    {" "}
+                    <Typography color="text.muted">
+                        <Trans
+                            i18nKey={"ENABLE_MAP_DESCRIPTION"}
+                            components={{
+                                a: (
+                                    <Link
+                                        target="_blank"
+                                        href="https://www.openstreetmap.org/"
+                                    />
+                                ),
+                            }}
+                        />
+                    </Typography>
+                </Box>
+                <Stack px={"8px"} spacing={"8px"}>
+                    <Button color={"accent"} size="large" onClick={enableMap}>
+                        {t("ENABLE")}
+                    </Button>
+                    <Button color={"secondary"} size="large" onClick={onClose}>
+                        {t("CANCEL")}
+                    </Button>
+                </Stack>
+            </Stack>
+        </Stack>
+    );
+}
+
+function DisableMap({ onClose, disableMap, onRootClose }) {
+    return (
+        <Stack spacing={"4px"} py={"12px"}>
+            <Titlebar
+                onClose={onClose}
+                title={t("DISABLE_MAPS")}
+                onRootClose={onRootClose}
+            />
+            <Stack py={"20px"} px={"8px"} spacing={"32px"}>
+                <Box px={"8px"}>
+                    <Typography color="text.muted">
+                        <Trans i18nKey={"DISABLE_MAP_DESCRIPTION"} />
+                    </Typography>
+                </Box>
+                <Stack px={"8px"} spacing={"8px"}>
+                    <Button
+                        color={"critical"}
+                        size="large"
+                        onClick={disableMap}
+                    >
+                        {t("DISABLE")}
+                    </Button>
+                    <Button color={"secondary"} size="large" onClick={onClose}>
+                        {t("CANCEL")}
+                    </Button>
+                </Stack>
+            </Stack>
+        </Stack>
+    );
+}
