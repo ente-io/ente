@@ -27,9 +27,10 @@ import CategoryIcon from "@mui/icons-material/Category";
 import DeleteOutline from "@mui/icons-material/DeleteOutline";
 import LockOutlined from "@mui/icons-material/LockOutlined";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
-import { Box, Divider, Skeleton, Stack } from "@mui/material";
+import { Box, Divider, Skeleton, Stack, styled } from "@mui/material";
 import Typography from "@mui/material/Typography";
 import DeleteAccountModal from "components/DeleteAccountModal";
+import { EnteDrawer } from "components/EnteDrawer";
 import { EnteMenuItem } from "components/Menu/EnteMenuItem";
 import TwoFactorModal from "components/TwoFactor/Modal";
 import { WatchFolder } from "components/WatchFolder";
@@ -63,7 +64,6 @@ import HeaderSection from "./Header";
 import Preferences from "./Preferences";
 import SubscriptionCard from "./SubscriptionCard";
 import SubscriptionStatus from "./SubscriptionStatus";
-import { DrawerSidebar } from "./styledComponents";
 
 interface Iprops {
     collectionSummaries: CollectionSummaries;
@@ -96,6 +96,14 @@ export default function Sidebar({
         </DrawerSidebar>
     );
 }
+
+const DrawerSidebar = styled(EnteDrawer)(({ theme }) => ({
+    "& .MuiPaper-root": {
+        padding: theme.spacing(1.5),
+    },
+}));
+
+DrawerSidebar.defaultProps = { anchor: "left" };
 
 interface UserDetailsSectionProps {
     sidebarView: boolean;
