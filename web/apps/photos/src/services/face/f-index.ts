@@ -735,20 +735,16 @@ const extractFaceCrop = (
         height: alignment.size,
     });
 
-    const padding = 0.25;
-    const scaleForPadding = 1 + padding * 2;
-    const paddedBox = roundBox(enlargeBox(alignmentBox, scaleForPadding));
+    const paddedBox = roundBox(enlargeBox(alignmentBox, 1.5));
 
     return cropImage(imageBitmap, paddedBox, 256);
 };
 
 const cropImage = (
     imageBitmap: ImageBitmap,
-    cropBox: Box,
+    box: Box,
     maxDimension: number,
 ) => {
-    const box = roundBox(cropBox);
-
     const outputSize = { width: box.width, height: box.height };
 
     const scale = Math.min(maxDimension / box.width, maxDimension / box.height);
