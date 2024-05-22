@@ -189,7 +189,7 @@ class _AppState extends State<App> with WindowListener, TrayListener {
         windowManager.show();
         break;
       case 'exit_app':
-        windowManager.close();
+        windowManager.destroy();
         break;
     }
   }
