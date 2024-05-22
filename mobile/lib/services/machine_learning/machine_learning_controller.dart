@@ -3,6 +3,7 @@ import "dart:io";
 
 import "package:battery_info/battery_info_plugin.dart";
 import "package:battery_info/model/android_battery_info.dart";
+import "package:battery_info/model/iso_battery_info.dart";
 import "package:flutter/foundation.dart" show kDebugMode;
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
@@ -33,13 +34,17 @@ class MachineLearningController {
       BatteryInfoPlugin()
           .androidBatteryInfoStream
           .listen((AndroidBatteryInfo? batteryInfo) {
-        _onBatteryStateUpdate(batteryInfo);
+        _onAndroidBatteryStateUpdate(batteryInfo);
       });
-    } else {
-      // Always run Machine Learning on iOS
-      _canRunML = true;
-      Bus.instance.fire(MachineLearningControlEvent(true));
     }
+    if (Platform.isIOS) {
+      BatteryInfoPlugin()
+          .iosBatteryInfoStream
+          .listen((IosBatteryInfo? batteryInfo) {
+        _oniOSBatteryStateUpdate(batteryInfo);
+      });
+    }
+    _fireControlEvent();
   }
 
   void onUserInteraction() {
@@ -55,7 +60,8 @@ class MachineLearningController {
   }
 
   void _fireControlEvent() {
-    final shouldRunML = _isDeviceHealthy && !_isUserInteracting;
+    final shouldRunML =
+        _isDeviceHealthy && (Platform.isAndroid ? !_isUserInteracting : true);
     if (shouldRunML != _canRunML) {
       _canRunML = shouldRunML;
       _logger.info(
@@ -78,16 +84,26 @@ class MachineLearningController {
     _startInteractionTimer();
   }
 
-  void _onBatteryStateUpdate(AndroidBatteryInfo? batteryInfo) {
+  void _onAndroidBatteryStateUpdate(AndroidBatteryInfo? batteryInfo) {
     _logger.info("Battery info: ${batteryInfo!.toJson()}");
-    _isDeviceHealthy = _computeIsDeviceHealthy(batteryInfo);
+    _isDeviceHealthy = _computeIsAndroidDeviceHealthy(batteryInfo);
     _fireControlEvent();
   }
 
-  bool _computeIsDeviceHealthy(AndroidBatteryInfo info) {
+  void _oniOSBatteryStateUpdate(IosBatteryInfo? batteryInfo) {
+    _logger.info("Battery info: ${batteryInfo!.toJson()}");
+    _isDeviceHealthy = _computeIsiOSDeviceHealthy(batteryInfo);
+    _fireControlEvent();
+  }
+
+  bool _computeIsAndroidDeviceHealthy(AndroidBatteryInfo info) {
     return _hasSufficientBattery(info.batteryLevel ?? kMinimumBatteryLevel) &&
         _isAcceptableTemperature(info.temperature ?? kMaximumTemperature) &&
         _isBatteryHealthy(info.health ?? "");
+  }
+
+  bool _computeIsiOSDeviceHealthy(IosBatteryInfo info) {
+    return _hasSufficientBattery(info.batteryLevel ?? kMinimumBatteryLevel);
   }
 
   bool _hasSufficientBattery(int batteryLevel) {

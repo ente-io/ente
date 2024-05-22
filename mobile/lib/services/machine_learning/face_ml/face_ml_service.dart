@@ -137,26 +137,22 @@ class FaceMlService {
       _mlControllerStatus = !Platform.isAndroid;
 
       /// hooking FaceML into [MachineLearningController]
-      if (Platform.isAndroid) {
-        Bus.instance.on<MachineLearningControlEvent>().listen((event) {
-          if (LocalSettings.instance.isFaceIndexingEnabled == false) {
-            return;
-          }
-          _mlControllerStatus = event.shouldRun;
-          if (_mlControllerStatus) {
-            _logger.info(
-              "MLController allowed running ML, faces indexing starting",
-            );
-            unawaited(indexAndClusterAll());
-          } else {
-            _logger
-                .info("MLController stopped running ML, faces indexing paused");
-            pauseIndexingAndClustering();
-          }
-        });
-      } else {
-        unawaited(indexAndClusterAll());
-      }
+      Bus.instance.on<MachineLearningControlEvent>().listen((event) {
+        if (LocalSettings.instance.isFaceIndexingEnabled == false) {
+          return;
+        }
+        _mlControllerStatus = event.shouldRun;
+        if (_mlControllerStatus) {
+          _logger.info(
+            "MLController allowed running ML, faces indexing starting",
+          );
+          unawaited(indexAndClusterAll());
+        } else {
+          _logger
+              .info("MLController stopped running ML, faces indexing paused");
+          pauseIndexingAndClustering();
+        }
+      });
 
       _listenIndexOnDiffSync();
       _listenOnPeopleChangedSync();
