@@ -128,7 +128,7 @@ class Code {
       final code = Code(
         _getAccount(uri),
         issuer,
-        _getDigits(uri, issuer),
+        _getDigits(uri),
         _getPeriod(uri),
         getSanitizedSecret(uri.queryParameters['secret']!),
         _getAlgorithm(uri),
@@ -201,11 +201,11 @@ class Code {
     }
   }
 
-  static int _getDigits(Uri uri, String issuer) {
+  static int _getDigits(Uri uri) {
     try {
       return int.parse(uri.queryParameters['digits']!);
     } catch (e) {
-      if (issuer.toLowerCase() == "steam" || issuer.toLowerCase().contains('steampowered.com')) {
+      if (uri.host == "steam") {
         return steamDigits;
       }
       return defaultDigits;
