@@ -145,16 +145,23 @@ class FilesDB {
         await getApplicationDocumentsDirectory();
     final String path = join(documentsDirectory.path, _databaseName);
     _logger.info("DB path " + path);
-    final migrations = getMigrations();
     final database = SqliteDatabase(path: path);
+    final versionRow = await database.execute('PRAGMA user_version');
+
+    //db version used to be stored in `user_version` when using sqflite.
+    //sqlite_async doesn't use `user_version` to store db version.
+    // `oldVersionNumber` = 0 for fresh install
+    final oldVersionNumber = versionRow[0]['user_version'] as int;
+    final migrations = getMigrations(oldVersionNumber);
+
     await migrations.migrate(database);
     return database;
   }
 
-  SqliteMigrations getMigrations() {
+  SqliteMigrations getMigrations(int oldSqfliteDBVersion) {
     final numberOfMigrationScripts = migrationScripts.length;
     final migrations = SqliteMigrations();
-    for (int i = 0; i < numberOfMigrationScripts; i++) {
+    for (int i = oldSqfliteDBVersion; i < numberOfMigrationScripts; i++) {
       migrations.add(
         SqliteMigration(
           i + 1,
