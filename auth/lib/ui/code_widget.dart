@@ -587,7 +587,7 @@ class _CodeWidgetState extends State<CodeWidget> {
   String _getFormattedCode(String code) {
     if (_hideCode) {
       // replace all digits with •
-      code = code.replaceAll(RegExp(r'\d'), '•');
+      code = code.replaceAll(RegExp(r'\S'), '•');
     }
     if (code.length == 6) {
       return "${code.substring(0, 3)} ${code.substring(3, 6)}";
