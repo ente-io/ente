@@ -9,7 +9,6 @@ import "dart:ui" show Image;
 import "package:computer/computer.dart";
 import "package:dart_ui_isolate/dart_ui_isolate.dart";
 import "package:flutter/foundation.dart" show debugPrint, kDebugMode;
-import "package:flutter_image_compress/flutter_image_compress.dart";
 import "package:logging/logging.dart";
 import "package:onnxruntime/onnxruntime.dart";
 import "package:package_info_plus/package_info_plus.dart";
@@ -326,12 +325,12 @@ class FaceMlService {
         _logger.info(
           'Clustering Isolate has been inactive for ${_inactivityDuration.inSeconds} seconds with no tasks running. Killing isolate.',
         );
-        disposeIsolate();
+        _disposeIsolate();
       }
     });
   }
 
-  void disposeIsolate() async {
+  void _disposeIsolate() async {
     if (!_isIsolateSpawned) return;
     await release();
 
@@ -750,7 +749,7 @@ class FaceMlService {
     );
 
     try {
-      final FaceMlResult? result = await analyzeImageInSingleIsolate(
+      final FaceMlResult? result = await _analyzeImageInSingleIsolate(
         enteFile,
         // preferUsingThumbnailForEverything: false,
         // disposeImageIsolateAfterUse: false,
@@ -843,7 +842,7 @@ class FaceMlService {
   }
 
   /// Analyzes the given image data by running the full pipeline for faces, using [analyzeImageSync] in the isolate.
-  Future<FaceMlResult?> analyzeImageInSingleIsolate(EnteFile enteFile) async {
+  Future<FaceMlResult?> _analyzeImageInSingleIsolate(EnteFile enteFile) async {
     _checkEnteFileForID(enteFile);
     await ensureInitialized();
 
@@ -1034,94 +1033,6 @@ class FaceMlService {
     return imagePath;
   }
 
-  @Deprecated('Deprecated in favor of `_getImagePathForML`')
-  Future<Uint8List?> _getDataForML(
-    EnteFile enteFile, {
-    FileDataForML typeOfData = FileDataForML.fileData,
-  }) async {
-    Uint8List? data;
-
-    switch (typeOfData) {
-      case FileDataForML.fileData:
-        final stopwatch = Stopwatch()..start();
-        final File? actualIoFile = await getFile(enteFile, isOrigin: true);
-        if (actualIoFile != null) {
-          data = await actualIoFile.readAsBytes();
-        }
-        stopwatch.stop();
-        _logger.info(
-          "Getting file data for uploadedFileID ${enteFile.uploadedFileID} took ${stopwatch.elapsedMilliseconds} ms",
-        );
-
-        break;
-
-      case FileDataForML.thumbnailData:
-        final stopwatch = Stopwatch()..start();
-        data = await getThumbnail(enteFile);
-        stopwatch.stop();
-        _logger.info(
-          "Getting thumbnail data for uploadedFileID ${enteFile.uploadedFileID} took ${stopwatch.elapsedMilliseconds} ms",
-        );
-        break;
-
-      case FileDataForML.compressedFileData:
-        final stopwatch = Stopwatch()..start();
-        final String tempPath = Configuration.instance.getTempDirectory() +
-            "${enteFile.uploadedFileID!}";
-        final File? actualIoFile = await getFile(enteFile);
-        if (actualIoFile != null) {
-          final compressResult = await FlutterImageCompress.compressAndGetFile(
-            actualIoFile.path,
-            tempPath + ".jpg",
-          );
-          if (compressResult != null) {
-            data = await compressResult.readAsBytes();
-          }
-        }
-        stopwatch.stop();
-        _logger.info(
-          "Getting compressed file data for uploadedFileID ${enteFile.uploadedFileID} took ${stopwatch.elapsedMilliseconds} ms",
-        );
-        break;
-    }
-
-    return data;
-  }
-
-  /// Detects faces in the given image data.
-  ///
-  /// `imageData`: The image data to analyze.
-  ///
-  /// Returns a list of face detection results.
-  ///
-  /// Throws [CouldNotInitializeFaceDetector], [CouldNotRunFaceDetector] or [GeneralFaceMlException] if something goes wrong.
-  Future<List<FaceDetectionRelative>> _detectFacesIsolate(
-    String imagePath,
-    // Uint8List fileData,
-    {
-    FaceMlResultBuilder? resultBuilder,
-  }) async {
-    try {
-      // Get the bounding boxes of the faces
-      final (List<FaceDetectionRelative> faces, dataSize) =
-          await FaceDetectionService.instance.predictInComputer(imagePath);
-
-      // Add detected faces to the resultBuilder
-      if (resultBuilder != null) {
-        resultBuilder.addNewlyDetectedFaces(faces, dataSize);
-      }
-
-      return faces;
-    } on YOLOFaceInterpreterInitializationException {
-      throw CouldNotInitializeFaceDetector();
-    } on YOLOFaceInterpreterRunException {
-      throw CouldNotRunFaceDetector();
-    } catch (e) {
-      _logger.severe('Face detection failed: $e');
-      throw GeneralFaceMlException('Face detection failed: $e');
-    }
-  }
-
   /// Detects faces in the given image data.
   ///
   /// `imageData`: The image data to analyze.
@@ -1168,38 +1079,6 @@ class FaceMlService {
   /// Returns a list of the aligned faces as image data.
   ///
   /// Throws [CouldNotWarpAffine] or [GeneralFaceMlException] if the face alignment fails.
-  Future<Float32List> _alignFaces(
-    String imagePath,
-    List<FaceDetectionRelative> faces, {
-    FaceMlResultBuilder? resultBuilder,
-  }) async {
-    try {
-      final (alignedFaces, alignmentResults, _, blurValues, _) =
-          await ImageMlIsolate.instance
-              .preprocessMobileFaceNetOnnx(imagePath, faces);
-
-      if (resultBuilder != null) {
-        resultBuilder.addAlignmentResults(
-          alignmentResults,
-          blurValues,
-        );
-      }
-
-      return alignedFaces;
-    } catch (e, s) {
-      _logger.severe('Face alignment failed: $e', e, s);
-      throw CouldNotWarpAffine();
-    }
-  }
-
-  /// Aligns multiple faces from the given image data.
-  ///
-  /// `imageData`: The image data in [Uint8List] that contains the faces.
-  /// `faces`: The face detection results in a list of [FaceDetectionAbsolute] for the faces to align.
-  ///
-  /// Returns a list of the aligned faces as image data.
-  ///
-  /// Throws [CouldNotWarpAffine] or [GeneralFaceMlException] if the face alignment fails.
   static Future<Float32List> alignFacesSync(
     Image image,
     ByteData imageByteData,
@@ -1230,45 +1109,6 @@ class FaceMlService {
     } catch (e, s) {
       dev.log('[SEVERE] Face alignment failed: $e $s');
       throw CouldNotWarpAffine();
-    }
-  }
-
-  /// Embeds multiple faces from the given input matrices.
-  ///
-  /// `facesMatrices`: The input matrices of the faces to embed.
-  ///
-  /// Returns a list of the face embeddings as lists of doubles.
-  ///
-  /// Throws [CouldNotInitializeFaceEmbeddor], [CouldNotRunFaceEmbeddor], [InputProblemFaceEmbeddor] or [GeneralFaceMlException] if the face embedding fails.
-  Future<List<List<double>>> _embedFaces(
-    Float32List facesList, {
-    FaceMlResultBuilder? resultBuilder,
-  }) async {
-    try {
-      // Get the embedding of the faces
-      final List<List<double>> embeddings =
-          await FaceEmbeddingService.instance.predictInComputer(facesList);
-
-      // Add the embeddings to the resultBuilder
-      if (resultBuilder != null) {
-        resultBuilder.addEmbeddingsToExistingFaces(embeddings);
-      }
-
-      return embeddings;
-    } on MobileFaceNetInterpreterInitializationException {
-      throw CouldNotInitializeFaceEmbeddor();
-    } on MobileFaceNetInterpreterRunException {
-      throw CouldNotRunFaceEmbeddor();
-    } on MobileFaceNetEmptyInput {
-      throw InputProblemFaceEmbeddor("Input is empty");
-    } on MobileFaceNetWrongInputSize {
-      throw InputProblemFaceEmbeddor("Input size is wrong");
-    } on MobileFaceNetWrongInputRange {
-      throw InputProblemFaceEmbeddor("Input range is wrong");
-      // ignore: avoid_catches_without_on_clauses
-    } catch (e) {
-      _logger.severe('Face embedding (batch) failed: $e');
-      throw GeneralFaceMlException('Face embedding (batch) failed: $e');
     }
   }
 
@@ -1311,10 +1151,9 @@ class FaceMlService {
       _logger.warning(
         '''Skipped analysis of image with enteFile, it might be the wrong format or has no uploadedFileID, or MLController doesn't allow it to run.
         enteFile: ${enteFile.toString()}
-        isImageIndexRunning: $_isIndexingOrClusteringRunning
-        canRunML: $_mlControllerStatus
         ''',
       );
+      _logStatus();
       throw CouldNotRetrieveAnyFileData();
     }
   }
