@@ -79,7 +79,7 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
               final isEnabled =
                   await LocalSettings.instance.toggleFaceIndexing();
               if (!isEnabled) {
-                FaceMlService.instance.pauseIndexing();
+                FaceMlService.instance.pauseIndexingAndClustering();
               }
               if (mounted) {
                 setState(() {});
@@ -107,7 +107,7 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
                 setState(() {});
               }
             } catch (e, s) {
-              _logger.warning('indexing failed ', e, s);
+              _logger.warning('Remote fetch toggle failed ', e, s);
               await showGenericErrorDialog(context: context, error: e);
             }
           },
@@ -115,22 +115,25 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: CaptionedTextWidget(
-            title: FaceMlService.instance.canRunMLController
-                ? "canRunML enabled"
-                : "canRunML disabled",
+            title: FaceMlService.instance.debugIndexingDisabled
+                ? "Debug enable indexing again"
+                : "Debug disable indexing",
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
             try {
-              FaceMlService.instance.canRunMLController =
-                  !FaceMlService.instance.canRunMLController;
+              FaceMlService.instance.debugIndexingDisabled =
+                  !FaceMlService.instance.debugIndexingDisabled;
+              if (FaceMlService.instance.debugIndexingDisabled) {
+                FaceMlService.instance.pauseIndexingAndClustering();
+              }
               if (mounted) {
                 setState(() {});
               }
             } catch (e, s) {
-              _logger.warning('canRunML toggle failed ', e, s);
+              _logger.warning('debugIndexingDisabled toggle failed ', e, s);
               await showGenericErrorDialog(context: context, error: e);
             }
           },
@@ -145,6 +148,7 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
           trailingIconIsMuted: true,
           onTap: () async {
             try {
+              FaceMlService.instance.debugIndexingDisabled = false;
               unawaited(FaceMlService.instance.indexAndClusterAll());
             } catch (e, s) {
               _logger.warning('indexAndClusterAll failed ', e, s);
@@ -162,6 +166,7 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
           trailingIconIsMuted: true,
           onTap: () async {
             try {
+              FaceMlService.instance.debugIndexingDisabled = false;
               unawaited(FaceMlService.instance.indexAllImages());
             } catch (e, s) {
               _logger.warning('indexing failed ', e, s);
@@ -189,6 +194,7 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
           onTap: () async {
             try {
               await PersonService.instance.storeRemoteFeedback();
+              FaceMlService.instance.debugIndexingDisabled = false;
               await FaceMlService.instance
                   .clusterAllImages(clusterInBuckets: true);
               Bus.instance.fire(PeopleChangedEvent());

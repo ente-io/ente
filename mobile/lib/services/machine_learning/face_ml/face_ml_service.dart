@@ -9,7 +9,6 @@ import "dart:ui" show Image;
 import "package:computer/computer.dart";
 import "package:dart_ui_isolate/dart_ui_isolate.dart";
 import "package:flutter/foundation.dart" show debugPrint, kDebugMode;
-import "package:flutter_image_compress/flutter_image_compress.dart";
 import "package:logging/logging.dart";
 import "package:onnxruntime/onnxruntime.dart";
 import "package:package_info_plus/package_info_plus.dart";
@@ -74,7 +73,7 @@ class FaceMlService {
   late ReceivePort _receivePort = ReceivePort();
   late SendPort _mainSendPort;
 
-  bool isIsolateSpawned = false;
+  bool _isIsolateSpawned = false;
 
   // singleton pattern
   FaceMlService._privateConstructor();
@@ -91,12 +90,14 @@ class FaceMlService {
   bool isInitialized = false;
   late String client;
 
-  bool canRunMLController = false;
-  bool isImageIndexRunning = false;
-  bool isClusteringRunning = false;
-  bool shouldSyncPeople = false;
+  bool debugIndexingDisabled = false;
+  bool _mlControllerStatus = false;
+  bool _isIndexingOrClusteringRunning = false;
+  bool _shouldPauseIndexingAndClustering = false;
+  bool _shouldSyncPeople = false;
+  bool _isSyncing = false;
 
-  final int _fileDownloadLimit = 15;
+  final int _fileDownloadLimit = 10;
   final int _embeddingFetchLimit = 200;
 
   Future<void> init({bool initializeImageMlIsolate = false}) async {
@@ -133,31 +134,28 @@ class FaceMlService {
       _logger.info("client: $client");
 
       isInitialized = true;
-      canRunMLController = !Platform.isAndroid || kDebugMode;
+      _mlControllerStatus = !Platform.isAndroid;
 
       /// hooking FaceML into [MachineLearningController]
-      if (Platform.isAndroid && !kDebugMode) {
-        Bus.instance.on<MachineLearningControlEvent>().listen((event) {
-          if (LocalSettings.instance.isFaceIndexingEnabled == false) {
-            return;
-          }
-          canRunMLController = event.shouldRun;
-          if (canRunMLController) {
-            _logger.info(
-              "MLController allowed running ML, faces indexing starting",
-            );
-            unawaited(indexAndClusterAll());
-          } else {
-            _logger
-                .info("MLController stopped running ML, faces indexing paused");
-            pauseIndexing();
-          }
-        });
-      } else {
-        if (!kDebugMode) {
-          unawaited(indexAndClusterAll());
+      Bus.instance.on<MachineLearningControlEvent>().listen((event) {
+        if (LocalSettings.instance.isFaceIndexingEnabled == false) {
+          return;
         }
-      }
+        _mlControllerStatus = event.shouldRun;
+        if (_mlControllerStatus) {
+          _logger.info(
+            "MLController allowed running ML, faces indexing starting (unless it's already fetching embeddings)",
+          );
+          unawaited(indexAndClusterAll());
+        } else {
+          _logger
+              .info("MLController stopped running ML, faces indexing will be paused (unless it's fetching embeddings)");
+          pauseIndexingAndClustering();
+        }
+      });
+
+      _listenIndexOnDiffSync();
+      _listenOnPeopleChangedSync();
     });
   }
 
@@ -165,24 +163,15 @@ class FaceMlService {
     OrtEnv.instance.init();
   }
 
-  void listenIndexOnDiffSync() {
+  void _listenIndexOnDiffSync() {
     Bus.instance.on<DiffSyncCompleteEvent>().listen((event) async {
-      if (LocalSettings.instance.isFaceIndexingEnabled == false || kDebugMode) {
-        return;
-      }
-      // [neeraj] intentional delay in starting indexing on diff sync, this gives time for the user
-      // to disable face-indexing in case it's causing crash. In the future, we
-      // should have a better way to handle this.
-      shouldSyncPeople = true;
-      Future.delayed(const Duration(seconds: 10), () {
-        unawaited(indexAndClusterAll());
-      });
+      unawaited(sync());
     });
   }
 
-  void listenOnPeopleChangedSync() {
+  void _listenOnPeopleChangedSync() {
     Bus.instance.on<PeopleChangedEvent>().listen((event) {
-      shouldSyncPeople = true;
+      _shouldSyncPeople = true;
     });
   }
 
@@ -218,9 +207,9 @@ class FaceMlService {
     });
   }
 
-  Future<void> initIsolate() async {
+  Future<void> _initIsolate() async {
     return _initLockIsolate.synchronized(() async {
-      if (isIsolateSpawned) return;
+      if (_isIsolateSpawned) return;
       _logger.info("initIsolate called");
 
       _receivePort = ReceivePort();
@@ -231,19 +220,19 @@ class FaceMlService {
           _receivePort.sendPort,
         );
         _mainSendPort = await _receivePort.first as SendPort;
-        isIsolateSpawned = true;
+        _isIsolateSpawned = true;
 
         _resetInactivityTimer();
       } catch (e) {
         _logger.severe('Could not spawn isolate', e);
-        isIsolateSpawned = false;
+        _isIsolateSpawned = false;
       }
     });
   }
 
-  Future<void> ensureSpawnedIsolate() async {
-    if (!isIsolateSpawned) {
-      await initIsolate();
+  Future<void> _ensureSpawnedIsolate() async {
+    if (!_isIsolateSpawned) {
+      await _initIsolate();
     }
   }
 
@@ -286,11 +275,11 @@ class FaceMlService {
   Future<dynamic> _runInIsolate(
     (FaceMlOperation, Map<String, dynamic>) message,
   ) async {
-    await ensureSpawnedIsolate();
+    await _ensureSpawnedIsolate();
     return _functionLock.synchronized(() async {
       _resetInactivityTimer();
 
-      if (isImageIndexRunning == false || canRunMLController == false) {
+      if (_shouldPauseIndexingAndClustering == false) {
         return null;
       }
 
@@ -332,35 +321,42 @@ class FaceMlService {
         _logger.info(
           'Clustering Isolate has been inactive for ${_inactivityDuration.inSeconds} seconds with no tasks running. Killing isolate.',
         );
-        disposeIsolate();
+        _disposeIsolate();
       }
     });
   }
 
-  void disposeIsolate() async {
-    if (!isIsolateSpawned) return;
+  void _disposeIsolate() async {
+    if (!_isIsolateSpawned) return;
     await release();
 
-    isIsolateSpawned = false;
+    _isIsolateSpawned = false;
     _isolate.kill();
     _receivePort.close();
     _inactivityTimer?.cancel();
   }
 
-  Future<void> indexAndClusterAll() async {
-    if (isClusteringRunning || isImageIndexRunning) {
-      _logger.info("indexing or clustering is already running, skipping");
+  Future<void> sync({bool forceSync = true}) async {
+    if (_isSyncing) {
       return;
     }
-    if (shouldSyncPeople) {
+    _isSyncing = true;
+    if (forceSync) {
       await PersonService.instance.reconcileClusters();
-      shouldSyncPeople = false;
+      _shouldSyncPeople = false;
     }
+    _isSyncing = false;
+  }
+
+  Future<void> indexAndClusterAll() async {
+    if (_cannotRunMLFunction()) return;
+
+    await sync(forceSync: _shouldSyncPeople);
     await indexAllImages();
     final indexingCompleteRatio = await _getIndexedDoneRatio();
     if (indexingCompleteRatio < 0.95) {
       _logger.info(
-        "Indexing is not far enough, skipping clustering. Indexing is at $indexingCompleteRatio",
+        "Indexing is not far enough to start clustering, skipping clustering. Indexing is at $indexingCompleteRatio",
       );
       return;
     } else {
@@ -368,35 +364,195 @@ class FaceMlService {
     }
   }
 
+  void pauseIndexingAndClustering() {
+    if (_isIndexingOrClusteringRunning) {
+      _shouldPauseIndexingAndClustering = true;
+    }
+  }
+
+  /// Analyzes all the images in the database with the latest ml version and stores the results in the database.
+  ///
+  /// This function first checks if the image has already been analyzed with the lastest faceMlVersion and stored in the database. If so, it skips the image.
+  Future<void> indexAllImages({int retryFetchCount = 10}) async {
+    if (_cannotRunMLFunction()) return;
+
+    try {
+      _isIndexingOrClusteringRunning = true;
+      _logger.info('starting image indexing');
+
+      final w = (kDebugMode ? EnteWatch('prepare indexing files') : null)
+        ?..start();
+      final Map<int, int> alreadyIndexedFiles =
+          await FaceMLDataDB.instance.getIndexedFileIds();
+      w?.log('getIndexedFileIds');
+      final List<EnteFile> enteFiles =
+          await SearchService.instance.getAllFiles();
+      w?.log('getAllFiles');
+
+      // Make sure the image conversion isolate is spawned
+      // await ImageMlIsolate.instance.ensureSpawned();
+      await ensureInitialized();
+
+      int fileAnalyzedCount = 0;
+      int fileSkippedCount = 0;
+      final stopwatch = Stopwatch()..start();
+      final List<EnteFile> filesWithLocalID = <EnteFile>[];
+      final List<EnteFile> filesWithoutLocalID = <EnteFile>[];
+      final List<EnteFile> hiddenFilesToIndex = <EnteFile>[];
+      w?.log('getIndexableFileIDs');
+
+      for (final EnteFile enteFile in enteFiles) {
+        if (_skipAnalysisEnteFile(enteFile, alreadyIndexedFiles)) {
+          fileSkippedCount++;
+          continue;
+        }
+        if ((enteFile.localID ?? '').isEmpty) {
+          filesWithoutLocalID.add(enteFile);
+        } else {
+          filesWithLocalID.add(enteFile);
+        }
+      }
+      w?.log('sifting through all normal files');
+      final List<EnteFile> hiddenFiles =
+          await SearchService.instance.getHiddenFiles();
+      w?.log('getHiddenFiles: ${hiddenFiles.length} hidden files');
+      for (final EnteFile enteFile in hiddenFiles) {
+        if (_skipAnalysisEnteFile(enteFile, alreadyIndexedFiles)) {
+          fileSkippedCount++;
+          continue;
+        }
+        hiddenFilesToIndex.add(enteFile);
+      }
+
+      // list of files where files with localID are first
+      final sortedBylocalID = <EnteFile>[];
+      sortedBylocalID.addAll(filesWithLocalID);
+      sortedBylocalID.addAll(filesWithoutLocalID);
+      sortedBylocalID.addAll(hiddenFilesToIndex);
+      w?.log('preparing all files to index');
+      final List<List<EnteFile>> chunks =
+          sortedBylocalID.chunks(_embeddingFetchLimit);
+      int fetchedCount = 0;
+      outerLoop:
+      for (final chunk in chunks) {
+        final futures = <Future<bool>>[];
+
+        if (LocalSettings.instance.remoteFetchEnabled) {
+          try {
+            final List<int> fileIds = [];
+            // Try to find embeddings on the remote server
+            for (final f in chunk) {
+              fileIds.add(f.uploadedFileID!);
+            }
+            _logger.info('starting remote fetch for ${fileIds.length} files');
+            final res =
+                await RemoteFileMLService.instance.getFilessEmbedding(fileIds);
+            _logger.info('fetched ${res.mlData.length} embeddings');
+            fetchedCount += res.mlData.length;
+            final List<Face> faces = [];
+            final remoteFileIdToVersion = <int, int>{};
+            for (FileMl fileMl in res.mlData.values) {
+              if (_shouldDiscardRemoteEmbedding(fileMl)) continue;
+              if (fileMl.faceEmbedding.faces.isEmpty) {
+                faces.add(
+                  Face.empty(
+                    fileMl.fileID,
+                  ),
+                );
+              } else {
+                for (final f in fileMl.faceEmbedding.faces) {
+                  f.fileInfo = FileInfo(
+                    imageHeight: fileMl.height,
+                    imageWidth: fileMl.width,
+                  );
+                  faces.add(f);
+                }
+              }
+              remoteFileIdToVersion[fileMl.fileID] =
+                  fileMl.faceEmbedding.version;
+            }
+            if (res.noEmbeddingFileIDs.isNotEmpty) {
+              _logger.info(
+                'No embeddings found for ${res.noEmbeddingFileIDs.length} files',
+              );
+              for (final fileID in res.noEmbeddingFileIDs) {
+                faces.add(Face.empty(fileID, error: false));
+                remoteFileIdToVersion[fileID] = faceMlVersion;
+              }
+            }
+
+            await FaceMLDataDB.instance.bulkInsertFaces(faces);
+            _logger.info('stored embeddings');
+            for (final entry in remoteFileIdToVersion.entries) {
+              alreadyIndexedFiles[entry.key] = entry.value;
+            }
+            _logger
+                .info('already indexed files ${remoteFileIdToVersion.length}');
+          } catch (e, s) {
+            _logger.severe("err while getting files embeddings", e, s);
+            if (retryFetchCount < 1000) {
+              Future.delayed(Duration(seconds: retryFetchCount), () {
+                unawaited(indexAllImages(retryFetchCount: retryFetchCount * 2));
+              });
+              return;
+            } else {
+              _logger.severe(
+                "Failed to fetch embeddings for files after multiple retries",
+                e,
+                s,
+              );
+              rethrow;
+            }
+          }
+        }
+        if (!await canUseHighBandwidth()) {
+          continue;
+        }
+        final smallerChunks = chunk.chunks(_fileDownloadLimit);
+        for (final smallestChunk in smallerChunks) {
+          for (final enteFile in smallestChunk) {
+            if (_shouldPauseIndexingAndClustering) {
+              _logger.info("indexAllImages() was paused, stopping");
+              break outerLoop;
+            }
+            if (_skipAnalysisEnteFile(
+              enteFile,
+              alreadyIndexedFiles,
+            )) {
+              fileSkippedCount++;
+              continue;
+            }
+            futures.add(processImage(enteFile));
+          }
+          final awaitedFutures = await Future.wait(futures);
+          final sumFutures = awaitedFutures.fold<int>(
+            0,
+            (previousValue, element) => previousValue + (element ? 1 : 0),
+          );
+          fileAnalyzedCount += sumFutures;
+        }
+      }
+
+      stopwatch.stop();
+      _logger.info(
+        "`indexAllImages()` finished. Fetched $fetchedCount and analyzed $fileAnalyzedCount images, in ${stopwatch.elapsed.inSeconds} seconds (avg of ${stopwatch.elapsed.inSeconds / fileAnalyzedCount} seconds per image, skipped $fileSkippedCount images. MLController status: $_mlControllerStatus)",
+      );
+    } catch (e, s) {
+      _logger.severe("indexAllImages failed", e, s);
+    } finally {
+      _isIndexingOrClusteringRunning = false;
+      _shouldPauseIndexingAndClustering = false;
+    }
+  }
+
   Future<void> clusterAllImages({
     double minFaceScore = kMinimumQualityFaceScore,
     bool clusterInBuckets = true,
   }) async {
-    if (!canRunMLController) {
-      _logger
-          .info("MLController does not allow running ML, skipping clustering");
-      return;
-    }
-    if (isClusteringRunning) {
-      _logger.info("clusterAllImages is already running, skipping");
-      return;
-    }
-    // verify faces is enabled
-    if (LocalSettings.instance.isFaceIndexingEnabled == false) {
-      _logger.warning("clustering is disabled by user");
-      return;
-    }
-
-    final indexingCompleteRatio = await _getIndexedDoneRatio();
-    if (indexingCompleteRatio < 0.95) {
-      _logger.info(
-        "Indexing is not far enough, skipping clustering. Indexing is at $indexingCompleteRatio",
-      );
-      return;
-    }
+    if (_cannotRunMLFunction()) return;
 
     _logger.info("`clusterAllImages()` called");
-    isClusteringRunning = true;
+    _isIndexingOrClusteringRunning = true;
     final clusterAllImagesTime = DateTime.now();
 
     try {
@@ -441,7 +597,7 @@ class FaceMlService {
         int bucket = 1;
 
         while (true) {
-          if (!canRunMLController) {
+          if (_shouldPauseIndexingAndClustering) {
             _logger.info(
               "MLController does not allow running ML, stopping before clustering bucket $bucket",
             );
@@ -535,193 +691,12 @@ class FaceMlService {
     } catch (e, s) {
       _logger.severe("`clusterAllImages` failed", e, s);
     } finally {
-      isClusteringRunning = false;
+      _isIndexingOrClusteringRunning = false;
+      _shouldPauseIndexingAndClustering = false;
     }
   }
 
-  /// Analyzes all the images in the database with the latest ml version and stores the results in the database.
-  ///
-  /// This function first checks if the image has already been analyzed with the lastest faceMlVersion and stored in the database. If so, it skips the image.
-  Future<void> indexAllImages({int retryFetchCount = 10}) async {
-    if (isImageIndexRunning) {
-      _logger.warning("indexAllImages is already running, skipping");
-      return;
-    }
-    // verify faces is enabled
-    if (LocalSettings.instance.isFaceIndexingEnabled == false) {
-      _logger.warning("indexing is disabled by user");
-      return;
-    }
-    try {
-      isImageIndexRunning = true;
-      _logger.info('starting image indexing');
-
-      final w = (kDebugMode ? EnteWatch('prepare indexing files') : null)
-        ?..start();
-      final Map<int, int> alreadyIndexedFiles =
-          await FaceMLDataDB.instance.getIndexedFileIds();
-      w?.log('getIndexedFileIds');
-      final List<EnteFile> enteFiles =
-          await SearchService.instance.getAllFiles();
-      w?.log('getAllFiles');
-
-      // Make sure the image conversion isolate is spawned
-      // await ImageMlIsolate.instance.ensureSpawned();
-      await ensureInitialized();
-
-      int fileAnalyzedCount = 0;
-      int fileSkippedCount = 0;
-      final stopwatch = Stopwatch()..start();
-      final List<EnteFile> filesWithLocalID = <EnteFile>[];
-      final List<EnteFile> filesWithoutLocalID = <EnteFile>[];
-      final List<EnteFile> hiddenFilesToIndex = <EnteFile>[];
-      w?.log('getIndexableFileIDs');
-
-      for (final EnteFile enteFile in enteFiles) {
-        if (_skipAnalysisEnteFile(enteFile, alreadyIndexedFiles)) {
-          fileSkippedCount++;
-          continue;
-        }
-        if ((enteFile.localID ?? '').isEmpty) {
-          filesWithoutLocalID.add(enteFile);
-        } else {
-          filesWithLocalID.add(enteFile);
-        }
-      }
-      w?.log('sifting through all normal files');
-      final List<EnteFile> hiddenFiles =
-          await SearchService.instance.getHiddenFiles();
-      w?.log('getHiddenFiles: ${hiddenFiles.length} hidden files');
-      for (final EnteFile enteFile in hiddenFiles) {
-        if (_skipAnalysisEnteFile(enteFile, alreadyIndexedFiles)) {
-          fileSkippedCount++;
-          continue;
-        }
-        hiddenFilesToIndex.add(enteFile);
-      }
-
-      // list of files where files with localID are first
-      final sortedBylocalID = <EnteFile>[];
-      sortedBylocalID.addAll(filesWithLocalID);
-      sortedBylocalID.addAll(filesWithoutLocalID);
-      sortedBylocalID.addAll(hiddenFilesToIndex);
-      w?.log('preparing all files to index');
-      final List<List<EnteFile>> chunks =
-          sortedBylocalID.chunks(_embeddingFetchLimit);
-      outerLoop:
-      for (final chunk in chunks) {
-        final futures = <Future<bool>>[];
-
-        if (LocalSettings.instance.remoteFetchEnabled) {
-          try {
-            final List<int> fileIds = [];
-            // Try to find embeddings on the remote server
-            for (final f in chunk) {
-              fileIds.add(f.uploadedFileID!);
-            }
-            final EnteWatch? w =
-                flagService.internalUser ? EnteWatch("face_em_fetch") : null;
-            w?.start();
-            w?.log('starting remote fetch for ${fileIds.length} files');
-            final res =
-                await RemoteFileMLService.instance.getFilessEmbedding(fileIds);
-            w?.logAndReset('fetched ${res.mlData.length} embeddings');
-            final List<Face> faces = [];
-            final remoteFileIdToVersion = <int, int>{};
-            for (FileMl fileMl in res.mlData.values) {
-              if (shouldDiscardRemoteEmbedding(fileMl)) continue;
-              if (fileMl.faceEmbedding.faces.isEmpty) {
-                faces.add(
-                  Face.empty(
-                    fileMl.fileID,
-                  ),
-                );
-              } else {
-                for (final f in fileMl.faceEmbedding.faces) {
-                  f.fileInfo = FileInfo(
-                    imageHeight: fileMl.height,
-                    imageWidth: fileMl.width,
-                  );
-                  faces.add(f);
-                }
-              }
-              remoteFileIdToVersion[fileMl.fileID] =
-                  fileMl.faceEmbedding.version;
-            }
-            if (res.noEmbeddingFileIDs.isNotEmpty) {
-              _logger.info(
-                'No embeddings found for ${res.noEmbeddingFileIDs.length} files',
-              );
-              for (final fileID in res.noEmbeddingFileIDs) {
-                faces.add(Face.empty(fileID, error: false));
-                remoteFileIdToVersion[fileID] = faceMlVersion;
-              }
-            }
-
-            await FaceMLDataDB.instance.bulkInsertFaces(faces);
-            w?.logAndReset('stored embeddings');
-            for (final entry in remoteFileIdToVersion.entries) {
-              alreadyIndexedFiles[entry.key] = entry.value;
-            }
-            _logger
-                .info('already indexed files ${remoteFileIdToVersion.length}');
-          } catch (e, s) {
-            _logger.severe("err while getting files embeddings", e, s);
-            if (retryFetchCount < 1000) {
-              Future.delayed(Duration(seconds: retryFetchCount), () {
-                unawaited(indexAllImages(retryFetchCount: retryFetchCount * 2));
-              });
-              return;
-            } else {
-              _logger.severe(
-                "Failed to fetch embeddings for files after multiple retries",
-                e,
-                s,
-              );
-              rethrow;
-            }
-          }
-        }
-        if (!await canUseHighBandwidth()) {
-          continue;
-        }
-        final smallerChunks = chunk.chunks(_fileDownloadLimit);
-        for (final smallestChunk in smallerChunks) {
-          for (final enteFile in smallestChunk) {
-            if (isImageIndexRunning == false) {
-              _logger.info("indexAllImages() was paused, stopping");
-              break outerLoop;
-            }
-            if (_skipAnalysisEnteFile(
-              enteFile,
-              alreadyIndexedFiles,
-            )) {
-              fileSkippedCount++;
-              continue;
-            }
-            futures.add(processImage(enteFile));
-          }
-          final awaitedFutures = await Future.wait(futures);
-          final sumFutures = awaitedFutures.fold<int>(
-            0,
-            (previousValue, element) => previousValue + (element ? 1 : 0),
-          );
-          fileAnalyzedCount += sumFutures;
-        }
-      }
-
-      stopwatch.stop();
-      _logger.info(
-        "`indexAllImages()` finished. Analyzed $fileAnalyzedCount images, in ${stopwatch.elapsed.inSeconds} seconds (avg of ${stopwatch.elapsed.inSeconds / fileAnalyzedCount} seconds per image, skipped $fileSkippedCount images. MLController status: $canRunMLController)",
-      );
-    } catch (e, s) {
-      _logger.severe("indexAllImages failed", e, s);
-    } finally {
-      isImageIndexRunning = false;
-    }
-  }
-
-  bool shouldDiscardRemoteEmbedding(FileMl fileMl) {
+  bool _shouldDiscardRemoteEmbedding(FileMl fileMl) {
     if (fileMl.faceEmbedding.version < faceMlVersion) {
       debugPrint("Discarding remote embedding for fileID ${fileMl.fileID} "
           "because version is ${fileMl.faceEmbedding.version} and we need $faceMlVersion");
@@ -769,7 +744,7 @@ class FaceMlService {
     );
 
     try {
-      final FaceMlResult? result = await analyzeImageInSingleIsolate(
+      final FaceMlResult? result = await _analyzeImageInSingleIsolate(
         enteFile,
         // preferUsingThumbnailForEverything: false,
         // disposeImageIsolateAfterUse: false,
@@ -861,12 +836,8 @@ class FaceMlService {
     }
   }
 
-  void pauseIndexing() {
-    isImageIndexRunning = false;
-  }
-
   /// Analyzes the given image data by running the full pipeline for faces, using [analyzeImageSync] in the isolate.
-  Future<FaceMlResult?> analyzeImageInSingleIsolate(EnteFile enteFile) async {
+  Future<FaceMlResult?> _analyzeImageInSingleIsolate(EnteFile enteFile) async {
     _checkEnteFileForID(enteFile);
     await ensureInitialized();
 
@@ -1057,94 +1028,6 @@ class FaceMlService {
     return imagePath;
   }
 
-  @Deprecated('Deprecated in favor of `_getImagePathForML`')
-  Future<Uint8List?> _getDataForML(
-    EnteFile enteFile, {
-    FileDataForML typeOfData = FileDataForML.fileData,
-  }) async {
-    Uint8List? data;
-
-    switch (typeOfData) {
-      case FileDataForML.fileData:
-        final stopwatch = Stopwatch()..start();
-        final File? actualIoFile = await getFile(enteFile, isOrigin: true);
-        if (actualIoFile != null) {
-          data = await actualIoFile.readAsBytes();
-        }
-        stopwatch.stop();
-        _logger.info(
-          "Getting file data for uploadedFileID ${enteFile.uploadedFileID} took ${stopwatch.elapsedMilliseconds} ms",
-        );
-
-        break;
-
-      case FileDataForML.thumbnailData:
-        final stopwatch = Stopwatch()..start();
-        data = await getThumbnail(enteFile);
-        stopwatch.stop();
-        _logger.info(
-          "Getting thumbnail data for uploadedFileID ${enteFile.uploadedFileID} took ${stopwatch.elapsedMilliseconds} ms",
-        );
-        break;
-
-      case FileDataForML.compressedFileData:
-        final stopwatch = Stopwatch()..start();
-        final String tempPath = Configuration.instance.getTempDirectory() +
-            "${enteFile.uploadedFileID!}";
-        final File? actualIoFile = await getFile(enteFile);
-        if (actualIoFile != null) {
-          final compressResult = await FlutterImageCompress.compressAndGetFile(
-            actualIoFile.path,
-            tempPath + ".jpg",
-          );
-          if (compressResult != null) {
-            data = await compressResult.readAsBytes();
-          }
-        }
-        stopwatch.stop();
-        _logger.info(
-          "Getting compressed file data for uploadedFileID ${enteFile.uploadedFileID} took ${stopwatch.elapsedMilliseconds} ms",
-        );
-        break;
-    }
-
-    return data;
-  }
-
-  /// Detects faces in the given image data.
-  ///
-  /// `imageData`: The image data to analyze.
-  ///
-  /// Returns a list of face detection results.
-  ///
-  /// Throws [CouldNotInitializeFaceDetector], [CouldNotRunFaceDetector] or [GeneralFaceMlException] if something goes wrong.
-  Future<List<FaceDetectionRelative>> _detectFacesIsolate(
-    String imagePath,
-    // Uint8List fileData,
-    {
-    FaceMlResultBuilder? resultBuilder,
-  }) async {
-    try {
-      // Get the bounding boxes of the faces
-      final (List<FaceDetectionRelative> faces, dataSize) =
-          await FaceDetectionService.instance.predictInComputer(imagePath);
-
-      // Add detected faces to the resultBuilder
-      if (resultBuilder != null) {
-        resultBuilder.addNewlyDetectedFaces(faces, dataSize);
-      }
-
-      return faces;
-    } on YOLOFaceInterpreterInitializationException {
-      throw CouldNotInitializeFaceDetector();
-    } on YOLOFaceInterpreterRunException {
-      throw CouldNotRunFaceDetector();
-    } catch (e) {
-      _logger.severe('Face detection failed: $e');
-      throw GeneralFaceMlException('Face detection failed: $e');
-    }
-  }
-
   /// Detects faces in the given image data.
   ///
   /// `imageData`: The image data to analyze.
@@ -1191,38 +1074,6 @@ class FaceMlService {
   /// Returns a list of the aligned faces as image data.
   ///
   /// Throws [CouldNotWarpAffine] or [GeneralFaceMlException] if the face alignment fails.
-  Future<Float32List> _alignFaces(
-    String imagePath,
-    List<FaceDetectionRelative> faces, {
-    FaceMlResultBuilder? resultBuilder,
-  }) async {
-    try {
-      final (alignedFaces, alignmentResults, _, blurValues, _) =
-          await ImageMlIsolate.instance
-              .preprocessMobileFaceNetOnnx(imagePath, faces);
-
-      if (resultBuilder != null) {
-        resultBuilder.addAlignmentResults(
-          alignmentResults,
-          blurValues,
-        );
-      }
-
-      return alignedFaces;
-    } catch (e, s) {
-      _logger.severe('Face alignment failed: $e', e, s);
-      throw CouldNotWarpAffine();
-    }
-  }
-
-  /// Aligns multiple faces from the given image data.
-  ///
-  /// `imageData`: The image data in [Uint8List] that contains the faces.
-  /// `faces`: The face detection results in a list of [FaceDetectionAbsolute] for the faces to align.
-  ///
-  /// Returns a list of the aligned faces as image data.
-  ///
-  /// Throws [CouldNotWarpAffine] or [GeneralFaceMlException] if the face alignment fails.
   static Future<Float32List> alignFacesSync(
     Image image,
     ByteData imageByteData,
@@ -1253,45 +1104,6 @@ class FaceMlService {
     } catch (e, s) {
       dev.log('[SEVERE] Face alignment failed: $e $s');
       throw CouldNotWarpAffine();
-    }
-  }
-
-  /// Embeds multiple faces from the given input matrices.
-  ///
-  /// `facesMatrices`: The input matrices of the faces to embed.
-  ///
-  /// Returns a list of the face embeddings as lists of doubles.
-  ///
-  /// Throws [CouldNotInitializeFaceEmbeddor], [CouldNotRunFaceEmbeddor], [InputProblemFaceEmbeddor] or [GeneralFaceMlException] if the face embedding fails.
-  Future<List<List<double>>> _embedFaces(
-    Float32List facesList, {
-    FaceMlResultBuilder? resultBuilder,
-  }) async {
-    try {
-      // Get the embedding of the faces
-      final List<List<double>> embeddings =
-          await FaceEmbeddingService.instance.predictInComputer(facesList);
-
-      // Add the embeddings to the resultBuilder
-      if (resultBuilder != null) {
-        resultBuilder.addEmbeddingsToExistingFaces(embeddings);
-      }
-
-      return embeddings;
-    } on MobileFaceNetInterpreterInitializationException {
-      throw CouldNotInitializeFaceEmbeddor();
-    } on MobileFaceNetInterpreterRunException {
-      throw CouldNotRunFaceEmbeddor();
-    } on MobileFaceNetEmptyInput {
-      throw InputProblemFaceEmbeddor("Input is empty");
-    } on MobileFaceNetWrongInputSize {
-      throw InputProblemFaceEmbeddor("Input size is wrong");
-    } on MobileFaceNetWrongInputRange {
-      throw InputProblemFaceEmbeddor("Input range is wrong");
-      // ignore: avoid_catches_without_on_clauses
-    } catch (e) {
-      _logger.severe('Face embedding (batch) failed: $e');
-      throw GeneralFaceMlException('Face embedding (batch) failed: $e');
     }
   }
 
@@ -1334,10 +1146,9 @@ class FaceMlService {
       _logger.warning(
         '''Skipped analysis of image with enteFile, it might be the wrong format or has no uploadedFileID, or MLController doesn't allow it to run.
         enteFile: ${enteFile.toString()}
-        isImageIndexRunning: $isImageIndexRunning
-        canRunML: $canRunMLController
         ''',
       );
+      _logStatus();
       throw CouldNotRetrieveAnyFileData();
     }
   }
@@ -1361,7 +1172,8 @@ class FaceMlService {
   }
 
   bool _skipAnalysisEnteFile(EnteFile enteFile, Map<int, int> indexedFileIds) {
-    if (isImageIndexRunning == false || canRunMLController == false) {
+    if (_isIndexingOrClusteringRunning == false ||
+        _mlControllerStatus == false) {
       return true;
     }
     // Skip if the file is not uploaded or not owned by the user
@@ -1377,5 +1189,51 @@ class FaceMlService {
 
     return indexedFileIds.containsKey(id) &&
         indexedFileIds[id]! >= faceMlVersion;
+  }
+
+  bool _cannotRunMLFunction({String function = ""}) {
+    if (_isIndexingOrClusteringRunning) {
+      _logger.info(
+        "Cannot run $function because indexing or clustering is already running",
+      );
+      _logStatus();
+      return true;
+    }
+    if (_mlControllerStatus == false) {
+      _logger.info(
+        "Cannot run $function because MLController does not allow it",
+      );
+      _logStatus();
+      return true;
+    }
+    if (debugIndexingDisabled) {
+      _logger.info(
+        "Cannot run $function because debugIndexingDisabled is true",
+      );
+      _logStatus();
+      return true;
+    }
+    if (_shouldPauseIndexingAndClustering) {
+      // This should ideally not be triggered, because one of the above should be triggered instead.
+      _logger.warning(
+        "Cannot run $function because indexing and clustering is being paused",
+      );
+      _logStatus();
+      return true;
+    }
+    return false;
+  }
+
+  void _logStatus() {
+    final String status = '''
+    isInternalUser: ${flagService.internalUser}
+    isFaceIndexingEnabled: ${LocalSettings.instance.isFaceIndexingEnabled}
+    canRunMLController: $_mlControllerStatus
+    isIndexingOrClusteringRunning: $_isIndexingOrClusteringRunning
+    shouldPauseIndexingAndClustering: $_shouldPauseIndexingAndClustering
+    debugIndexingDisabled: $debugIndexingDisabled
+    shouldSyncPeople: $_shouldSyncPeople
+    ''';
+    _logger.info(status);
   }
 }
