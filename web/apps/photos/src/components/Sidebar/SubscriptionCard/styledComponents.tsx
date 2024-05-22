@@ -1,5 +1,5 @@
+import CircleIcon from "@mui/icons-material/Circle";
 import { LinearProgress, styled } from "@mui/material";
-import { DotSeparator } from "../styledComponents";
 
 export const Progressbar = styled(LinearProgress)(() => ({
     ".MuiLinearProgress-bar": {
@@ -12,6 +12,12 @@ export const Progressbar = styled(LinearProgress)(() => ({
 Progressbar.defaultProps = {
     variant: "determinate",
 };
+
+const DotSeparator = styled(CircleIcon)`
+    font-size: 4px;
+    margin: 0 ${({ theme }) => theme.spacing(1)};
+    color: inherit;
+`;
 
 export const LegendIndicator = styled(DotSeparator)`
     font-size: 8.71px;
