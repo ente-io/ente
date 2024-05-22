@@ -88,7 +88,7 @@ class FaceMlService {
   final _computer = Computer.shared();
 
   bool isInitialized = false;
-  late final String client;
+  late String client;
 
   bool debugIndexingDisabled = false;
   bool _mlControllerStatus = false;
