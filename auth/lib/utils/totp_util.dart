@@ -4,7 +4,7 @@ import 'package:otp/otp.dart' as otp;
 import 'package:steam_totp/steam_totp.dart';
 
 String getOTP(Code code) {
-  if (['steam', 'steampowered.com'].contains(code.issuer.toLowerCase())) {
+  if (code.type == Type.steam) {
     return _getSteamCode(code);
   }
   if (code.type == Type.hotp) {
@@ -39,7 +39,7 @@ String _getSteamCode(Code code, [bool isNext = false]) {
 }
 
 String getNextTotp(Code code) {
-  if (['steam', 'steampowered.com'].contains(code.issuer.toLowerCase())) {
+  if (code.type == Type.steam) {
     return _getSteamCode(code, true);
   }
   return otp.OTP.generateTOTPCodeString(

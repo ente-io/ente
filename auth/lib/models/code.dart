@@ -205,7 +205,7 @@ class Code {
     try {
       return int.parse(uri.queryParameters['digits']!);
     } catch (e) {
-      if (issuer.toLowerCase() == "steam") {
+      if (issuer.toLowerCase() == "steam" || issuer.toLowerCase().contains('steampowered.com')) {
         return steamDigits;
       }
       return defaultDigits;
