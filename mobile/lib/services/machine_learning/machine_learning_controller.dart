@@ -19,7 +19,7 @@ class MachineLearningController {
   static const kMaximumTemperature = 42; // 42 degree celsius
   static const kMinimumBatteryLevel = 20; // 20%
   static const kDefaultInteractionTimeout =
-      kDebugMode ? Duration(seconds: 1) : Duration(seconds: 5);
+      kDebugMode ? Duration(seconds: 3) : Duration(seconds: 5);
   static const kUnhealthyStates = ["over_heat", "over_voltage", "dead"];
 
   bool _isDeviceHealthy = true;
