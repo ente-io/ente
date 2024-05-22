@@ -1231,6 +1231,7 @@ class FaceMlService {
     isFaceIndexingEnabled: ${LocalSettings.instance.isFaceIndexingEnabled}
     canRunMLController: $_mlControllerStatus
     isIndexingOrClusteringRunning: $_isIndexingOrClusteringRunning
+    shouldPauseIndexingAndClustering: $_shouldPauseIndexingAndClustering
     debugIndexingDisabled: $debugIndexingDisabled
     shouldSyncPeople: $_shouldSyncPeople
     ''';
