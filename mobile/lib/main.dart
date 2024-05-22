@@ -242,8 +242,6 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     // unawaited(ObjectDetectionService.instance.init());
     if (flagService.faceSearchEnabled) {
       unawaited(FaceMlService.instance.init());
-      FaceMlService.instance.listenIndexOnDiffSync();
-      FaceMlService.instance.listenOnPeopleChangedSync();
     } else {
       if (LocalSettings.instance.isFaceIndexingEnabled) {
         unawaited(LocalSettings.instance.toggleFaceIndexing());
