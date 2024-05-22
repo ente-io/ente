@@ -144,12 +144,12 @@ class FaceMlService {
         _mlControllerStatus = event.shouldRun;
         if (_mlControllerStatus) {
           _logger.info(
-            "MLController allowed running ML, faces indexing starting",
+            "MLController allowed running ML, faces indexing starting (unless it's already fetching embeddings)",
           );
           unawaited(indexAndClusterAll());
         } else {
           _logger
-              .info("MLController stopped running ML, faces indexing paused");
+              .info("MLController stopped running ML, faces indexing will be paused (unless it's fetching embeddings)");
           pauseIndexingAndClustering();
         }
       });
@@ -432,6 +432,7 @@ class FaceMlService {
       w?.log('preparing all files to index');
       final List<List<EnteFile>> chunks =
           sortedBylocalID.chunks(_embeddingFetchLimit);
+      int fetchedCount = 0;
       outerLoop:
       for (final chunk in chunks) {
         final futures = <Future<bool>>[];
@@ -447,6 +448,7 @@ class FaceMlService {
             final res =
                 await RemoteFileMLService.instance.getFilessEmbedding(fileIds);
             _logger.info('fetched ${res.mlData.length} embeddings');
+            fetchedCount += res.mlData.length;
             final List<Face> faces = [];
             final remoteFileIdToVersion = <int, int>{};
             for (FileMl fileMl in res.mlData.values) {
@@ -533,7 +535,7 @@ class FaceMlService {
 
       stopwatch.stop();
       _logger.info(
-        "`indexAllImages()` finished. Analyzed $fileAnalyzedCount images, in ${stopwatch.elapsed.inSeconds} seconds (avg of ${stopwatch.elapsed.inSeconds / fileAnalyzedCount} seconds per image, skipped $fileSkippedCount images. MLController status: $_mlControllerStatus)",
+        "`indexAllImages()` finished. Fetched $fetchedCount and analyzed $fileAnalyzedCount images, in ${stopwatch.elapsed.inSeconds} seconds (avg of ${stopwatch.elapsed.inSeconds / fileAnalyzedCount} seconds per image, skipped $fileSkippedCount images. MLController status: $_mlControllerStatus)",
       );
     } catch (e, s) {
       _logger.severe("indexAllImages failed", e, s);
