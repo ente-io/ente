@@ -356,7 +356,7 @@ class FaceMlService {
     final indexingCompleteRatio = await _getIndexedDoneRatio();
     if (indexingCompleteRatio < 0.95) {
       _logger.info(
-        "Indexing is not far enough, skipping clustering. Indexing is at $indexingCompleteRatio",
+        "Indexing is not far enough to start clustering, skipping clustering. Indexing is at $indexingCompleteRatio",
       );
       return;
     } else {
@@ -443,13 +443,10 @@ class FaceMlService {
             for (final f in chunk) {
               fileIds.add(f.uploadedFileID!);
             }
-            final EnteWatch? w =
-                flagService.internalUser ? EnteWatch("face_em_fetch") : null;
-            w?.start();
-            w?.log('starting remote fetch for ${fileIds.length} files');
+            _logger.info('starting remote fetch for ${fileIds.length} files');
             final res =
                 await RemoteFileMLService.instance.getFilessEmbedding(fileIds);
-            w?.logAndReset('fetched ${res.mlData.length} embeddings');
+            _logger.info('fetched ${res.mlData.length} embeddings');
             final List<Face> faces = [];
             final remoteFileIdToVersion = <int, int>{};
             for (FileMl fileMl in res.mlData.values) {
@@ -483,7 +480,7 @@ class FaceMlService {
             }
 
             await FaceMLDataDB.instance.bulkInsertFaces(faces);
-            w?.logAndReset('stored embeddings');
+            _logger.info('stored embeddings');
             for (final entry in remoteFileIdToVersion.entries) {
               alreadyIndexedFiles[entry.key] = entry.value;
             }
