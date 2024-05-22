@@ -240,7 +240,7 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
       final account = _accountController.text.trim();
       final issuer = _issuerController.text.trim();
       final secret = _secretController.text.trim().replaceAll(' ', '');
-      final isStreamCode = issuer.toLowerCase() == "steam";
+      final isStreamCode = issuer.toLowerCase() == "steam" || issuer.toLowerCase().contains('steampowered.com');
       if (widget.code != null && widget.code!.secret != secret) {
         ButtonResult? result = await showChoiceActionSheet(
           context,

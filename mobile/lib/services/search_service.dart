@@ -848,8 +848,9 @@ class SearchService {
         final String clusterName = "$clusterId";
 
         if (clusterIDToPersonID[clusterId] != null) {
-          throw Exception(
-            "Cluster $clusterId should not have person id ${clusterIDToPersonID[clusterId]}",
+          // This should not happen, means a faceID is assigned to multiple persons.
+          _logger.severe(
+            "`getAllFace`: Cluster $clusterId should not have person id ${clusterIDToPersonID[clusterId]}",
           );
         }
         if (files.length < kMinimumClusterSizeSearchResult &&

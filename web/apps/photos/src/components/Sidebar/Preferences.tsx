@@ -1,13 +1,20 @@
+import {
+    getLocaleInUse,
+    setLocaleInUse,
+    supportedLocales,
+    type SupportedLocale,
+} from "@/next/i18n";
 import ChevronRight from "@mui/icons-material/ChevronRight";
 import { Box, DialogProps, Stack } from "@mui/material";
+import DropdownInput from "components/DropdownInput";
 import { EnteDrawer } from "components/EnteDrawer";
 import { EnteMenuItem } from "components/Menu/EnteMenuItem";
 import Titlebar from "components/Titlebar";
 import { t } from "i18next";
+import { useRouter } from "next/router";
 import { useState } from "react";
-import AdvancedSettings from "../AdvancedSettings";
-import MapSettings from "../MapSetting";
-import { LanguageSelector } from "./LanguageSelector";
+import AdvancedSettings from "./AdvancedSettings";
+import MapSettings from "./MapSetting";
 
 export default function Preferences({ open, onClose, onRootClose }) {
     const [advancedSettingsView, setAdvancedSettingsView] = useState(false);
@@ -76,3 +83,53 @@ export default function Preferences({ open, onClose, onRootClose }) {
         </EnteDrawer>
     );
 }
+
+const LanguageSelector = () => {
+    const locale = getLocaleInUse();
+    // Enhancement: Is this full reload needed?
+    const router = useRouter();
+
+    const updateCurrentLocale = (newLocale: SupportedLocale) => {
+        setLocaleInUse(newLocale);
+        router.reload();
+    };
+
+    const options = supportedLocales.map((locale) => ({
+        label: localeName(locale),
+        value: locale,
+    }));
+
+    return (
+        <DropdownInput
+            options={options}
+            label={t("LANGUAGE")}
+            labelProps={{ color: "text.muted" }}
+            selected={locale}
+            setSelected={updateCurrentLocale}
+        />
+    );
+};
+
+/**
+ * Human readable name for each supported locale.
+ */
+const localeName = (locale: SupportedLocale) => {
+    switch (locale) {
+        case "en-US":
+            return "English";
+        case "fr-FR":
+            return "Français";
+        case "de-DE":
+            return "Deutsch";
+        case "zh-CN":
+            return "中文";
+        case "nl-NL":
+            return "Nederlands";
+        case "es-ES":
+            return "Español";
+        case "pt-BR":
+            return "Brazilian Portuguese";
+        case "ru-RU":
+            return "Russian";
+    }
+};
