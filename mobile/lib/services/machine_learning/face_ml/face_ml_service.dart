@@ -143,13 +143,21 @@ class FaceMlService {
         }
         _mlControllerStatus = event.shouldRun;
         if (_mlControllerStatus) {
-          _logger.info(
-            "MLController allowed running ML, faces indexing starting (unless it's already fetching embeddings)",
-          );
-          unawaited(indexAndClusterAll());
+          if (_shouldPauseIndexingAndClustering) {
+            _shouldPauseIndexingAndClustering = false;
+            _logger.info(
+              "MLController allowed running ML, faces indexing undoing previous pause",
+            );
+          } else {
+            _logger.info(
+              "MLController allowed running ML, faces indexing starting",
+            );
+            unawaited(indexAndClusterAll());
+          }
         } else {
-          _logger
-              .info("MLController stopped running ML, faces indexing will be paused (unless it's fetching embeddings)");
+          _logger.info(
+            "MLController stopped running ML, faces indexing will be paused (unless it's fetching embeddings)",
+          );
           pauseIndexingAndClustering();
         }
       });
