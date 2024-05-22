@@ -96,7 +96,7 @@ class FaceMlService {
   bool isClusteringRunning = false;
   bool shouldSyncPeople = false;
 
-  final int _fileDownloadLimit = 15;
+  final int _fileDownloadLimit = 10;
   final int _embeddingFetchLimit = 200;
 
   Future<void> init({bool initializeImageMlIsolate = false}) async {
