@@ -208,7 +208,7 @@ class _MachineLearningSettingsPageState
               if (isEnabled) {
                 unawaited(FaceMlService.instance.ensureInitialized());
               } else {
-                FaceMlService.instance.pauseIndexing();
+                FaceMlService.instance.pauseIndexingAndClustering();
               }
               if (mounted) {
                 setState(() {});

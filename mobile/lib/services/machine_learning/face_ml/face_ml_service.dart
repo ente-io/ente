@@ -74,7 +74,7 @@ class FaceMlService {
   late ReceivePort _receivePort = ReceivePort();
   late SendPort _mainSendPort;
 
-  bool isIsolateSpawned = false;
+  bool _isIsolateSpawned = false;
 
   // singleton pattern
   FaceMlService._privateConstructor();
@@ -89,12 +89,14 @@ class FaceMlService {
   final _computer = Computer.shared();
 
   bool isInitialized = false;
-  late String client;
+  late final String client;
 
-  bool canRunMLController = false;
-  bool isImageIndexRunning = false;
-  bool isClusteringRunning = false;
-  bool shouldSyncPeople = false;
+  bool debugIndexingDisabled = false;
+  bool _mlControllerStatus = false;
+  bool _isIndexingOrClusteringRunning = false;
+  bool _shouldPauseIndexingAndClustering = false;
+  bool _shouldSyncPeople = false;
+  bool _isSyncing = false;
 
   final int _fileDownloadLimit = 10;
   final int _embeddingFetchLimit = 200;
@@ -133,16 +135,16 @@ class FaceMlService {
       _logger.info("client: $client");
 
       isInitialized = true;
-      canRunMLController = !Platform.isAndroid || kDebugMode;
+      _mlControllerStatus = !Platform.isAndroid;
 
       /// hooking FaceML into [MachineLearningController]
-      if (Platform.isAndroid && !kDebugMode) {
+      if (Platform.isAndroid) {
         Bus.instance.on<MachineLearningControlEvent>().listen((event) {
           if (LocalSettings.instance.isFaceIndexingEnabled == false) {
             return;
           }
-          canRunMLController = event.shouldRun;
-          if (canRunMLController) {
+          _mlControllerStatus = event.shouldRun;
+          if (_mlControllerStatus) {
             _logger.info(
               "MLController allowed running ML, faces indexing starting",
             );
@@ -150,13 +152,11 @@ class FaceMlService {
           } else {
             _logger
                 .info("MLController stopped running ML, faces indexing paused");
-            pauseIndexing();
+            pauseIndexingAndClustering();
           }
         });
       } else {
-        if (!kDebugMode) {
-          unawaited(indexAndClusterAll());
-        }
+        unawaited(indexAndClusterAll());
       }
     });
   }
@@ -167,22 +167,13 @@ class FaceMlService {
 
   void listenIndexOnDiffSync() {
     Bus.instance.on<DiffSyncCompleteEvent>().listen((event) async {
-      if (LocalSettings.instance.isFaceIndexingEnabled == false || kDebugMode) {
-        return;
-      }
-      // [neeraj] intentional delay in starting indexing on diff sync, this gives time for the user
-      // to disable face-indexing in case it's causing crash. In the future, we
-      // should have a better way to handle this.
-      shouldSyncPeople = true;
-      Future.delayed(const Duration(seconds: 10), () {
-        unawaited(indexAndClusterAll());
-      });
+      unawaited(sync());
     });
   }
 
   void listenOnPeopleChangedSync() {
     Bus.instance.on<PeopleChangedEvent>().listen((event) {
-      shouldSyncPeople = true;
+      _shouldSyncPeople = true;
     });
   }
 
@@ -218,9 +209,9 @@ class FaceMlService {
     });
   }
 
-  Future<void> initIsolate() async {
+  Future<void> _initIsolate() async {
     return _initLockIsolate.synchronized(() async {
-      if (isIsolateSpawned) return;
+      if (_isIsolateSpawned) return;
       _logger.info("initIsolate called");
 
       _receivePort = ReceivePort();
@@ -231,19 +222,19 @@ class FaceMlService {
           _receivePort.sendPort,
         );
         _mainSendPort = await _receivePort.first as SendPort;
-        isIsolateSpawned = true;
+        _isIsolateSpawned = true;
 
         _resetInactivityTimer();
       } catch (e) {
         _logger.severe('Could not spawn isolate', e);
-        isIsolateSpawned = false;
+        _isIsolateSpawned = false;
       }
     });
   }
 
-  Future<void> ensureSpawnedIsolate() async {
-    if (!isIsolateSpawned) {
-      await initIsolate();
+  Future<void> _ensureSpawnedIsolate() async {
+    if (!_isIsolateSpawned) {
+      await _initIsolate();
     }
   }
 
@@ -286,11 +277,11 @@ class FaceMlService {
   Future<dynamic> _runInIsolate(
     (FaceMlOperation, Map<String, dynamic>) message,
   ) async {
-    await ensureSpawnedIsolate();
+    await _ensureSpawnedIsolate();
     return _functionLock.synchronized(() async {
       _resetInactivityTimer();
 
-      if (isImageIndexRunning == false || canRunMLController == false) {
+      if (_shouldPauseIndexingAndClustering == false) {
         return null;
       }
 
@@ -338,24 +329,31 @@ class FaceMlService {
   }
 
   void disposeIsolate() async {
-    if (!isIsolateSpawned) return;
+    if (!_isIsolateSpawned) return;
     await release();
 
-    isIsolateSpawned = false;
+    _isIsolateSpawned = false;
     _isolate.kill();
     _receivePort.close();
     _inactivityTimer?.cancel();
   }
 
-  Future<void> indexAndClusterAll() async {
-    if (isClusteringRunning || isImageIndexRunning) {
-      _logger.info("indexing or clustering is already running, skipping");
+  Future<void> sync({bool forceSync = true}) async {
+    if (_isSyncing) {
       return;
     }
-    if (shouldSyncPeople) {
+    _isSyncing = true;
+    if (forceSync) {
       await PersonService.instance.reconcileClusters();
-      shouldSyncPeople = false;
+      _shouldSyncPeople = false;
     }
+    _isSyncing = false;
+  }
+
+  Future<void> indexAndClusterAll() async {
+    if (_cannotRunMLFunction()) return;
+
+    await sync(forceSync: _shouldSyncPeople);
     await indexAllImages();
     final indexingCompleteRatio = await _getIndexedDoneRatio();
     if (indexingCompleteRatio < 0.95) {
@@ -368,35 +366,20 @@ class FaceMlService {
     }
   }
 
+  void pauseIndexingAndClustering() {
+    if (_isIndexingOrClusteringRunning) {
+      _shouldPauseIndexingAndClustering = true;
+    }
+  }
+
   Future<void> clusterAllImages({
     double minFaceScore = kMinimumQualityFaceScore,
     bool clusterInBuckets = true,
   }) async {
-    if (!canRunMLController) {
-      _logger
-          .info("MLController does not allow running ML, skipping clustering");
-      return;
-    }
-    if (isClusteringRunning) {
-      _logger.info("clusterAllImages is already running, skipping");
-      return;
-    }
-    // verify faces is enabled
-    if (LocalSettings.instance.isFaceIndexingEnabled == false) {
-      _logger.warning("clustering is disabled by user");
-      return;
-    }
-
-    final indexingCompleteRatio = await _getIndexedDoneRatio();
-    if (indexingCompleteRatio < 0.95) {
-      _logger.info(
-        "Indexing is not far enough, skipping clustering. Indexing is at $indexingCompleteRatio",
-      );
-      return;
-    }
+    if (_cannotRunMLFunction()) return;
 
     _logger.info("`clusterAllImages()` called");
-    isClusteringRunning = true;
+    _isIndexingOrClusteringRunning = true;
     final clusterAllImagesTime = DateTime.now();
 
     try {
@@ -441,7 +424,7 @@ class FaceMlService {
         int bucket = 1;
 
         while (true) {
-          if (!canRunMLController) {
+          if (_shouldPauseIndexingAndClustering) {
             _logger.info(
               "MLController does not allow running ML, stopping before clustering bucket $bucket",
             );
@@ -535,7 +518,8 @@ class FaceMlService {
     } catch (e, s) {
       _logger.severe("`clusterAllImages` failed", e, s);
     } finally {
-      isClusteringRunning = false;
+      _isIndexingOrClusteringRunning = false;
+      _shouldPauseIndexingAndClustering = false;
     }
   }
 
@@ -543,17 +527,10 @@ class FaceMlService {
   ///
   /// This function first checks if the image has already been analyzed with the lastest faceMlVersion and stored in the database. If so, it skips the image.
   Future<void> indexAllImages({int retryFetchCount = 10}) async {
-    if (isImageIndexRunning) {
-      _logger.warning("indexAllImages is already running, skipping");
-      return;
-    }
-    // verify faces is enabled
-    if (LocalSettings.instance.isFaceIndexingEnabled == false) {
-      _logger.warning("indexing is disabled by user");
-      return;
-    }
+    if (_cannotRunMLFunction()) return;
+
     try {
-      isImageIndexRunning = true;
+      _isIndexingOrClusteringRunning = true;
       _logger.info('starting image indexing');
 
       final w = (kDebugMode ? EnteWatch('prepare indexing files') : null)
@@ -629,7 +606,7 @@ class FaceMlService {
             final List<Face> faces = [];
             final remoteFileIdToVersion = <int, int>{};
             for (FileMl fileMl in res.mlData.values) {
-              if (shouldDiscardRemoteEmbedding(fileMl)) continue;
+              if (_shouldDiscardRemoteEmbedding(fileMl)) continue;
               if (fileMl.faceEmbedding.faces.isEmpty) {
                 faces.add(
                   Face.empty(
@@ -688,7 +665,7 @@ class FaceMlService {
         final smallerChunks = chunk.chunks(_fileDownloadLimit);
         for (final smallestChunk in smallerChunks) {
           for (final enteFile in smallestChunk) {
-            if (isImageIndexRunning == false) {
+            if (_shouldPauseIndexingAndClustering) {
               _logger.info("indexAllImages() was paused, stopping");
               break outerLoop;
             }
@@ -712,16 +689,17 @@ class FaceMlService {
 
       stopwatch.stop();
       _logger.info(
-        "`indexAllImages()` finished. Analyzed $fileAnalyzedCount images, in ${stopwatch.elapsed.inSeconds} seconds (avg of ${stopwatch.elapsed.inSeconds / fileAnalyzedCount} seconds per image, skipped $fileSkippedCount images. MLController status: $canRunMLController)",
+        "`indexAllImages()` finished. Analyzed $fileAnalyzedCount images, in ${stopwatch.elapsed.inSeconds} seconds (avg of ${stopwatch.elapsed.inSeconds / fileAnalyzedCount} seconds per image, skipped $fileSkippedCount images. MLController status: $_mlControllerStatus)",
       );
     } catch (e, s) {
       _logger.severe("indexAllImages failed", e, s);
     } finally {
-      isImageIndexRunning = false;
+      _isIndexingOrClusteringRunning = false;
+      _shouldPauseIndexingAndClustering = false;
     }
   }
 
-  bool shouldDiscardRemoteEmbedding(FileMl fileMl) {
+  bool _shouldDiscardRemoteEmbedding(FileMl fileMl) {
     if (fileMl.faceEmbedding.version < faceMlVersion) {
       debugPrint("Discarding remote embedding for fileID ${fileMl.fileID} "
           "because version is ${fileMl.faceEmbedding.version} and we need $faceMlVersion");
@@ -859,10 +837,6 @@ class FaceMlService {
       );
       return true;
     }
-  }
-
-  void pauseIndexing() {
-    isImageIndexRunning = false;
   }
 
   /// Analyzes the given image data by running the full pipeline for faces, using [analyzeImageSync] in the isolate.
@@ -1334,8 +1308,8 @@ class FaceMlService {
       _logger.warning(
         '''Skipped analysis of image with enteFile, it might be the wrong format or has no uploadedFileID, or MLController doesn't allow it to run.
         enteFile: ${enteFile.toString()}
-        isImageIndexRunning: $isImageIndexRunning
-        canRunML: $canRunMLController
+        isImageIndexRunning: $_isIndexingOrClusteringRunning
+        canRunML: $_mlControllerStatus
         ''',
       );
       throw CouldNotRetrieveAnyFileData();
@@ -1361,7 +1335,8 @@ class FaceMlService {
   }
 
   bool _skipAnalysisEnteFile(EnteFile enteFile, Map<int, int> indexedFileIds) {
-    if (isImageIndexRunning == false || canRunMLController == false) {
+    if (_isIndexingOrClusteringRunning == false ||
+        _mlControllerStatus == false) {
       return true;
     }
     // Skip if the file is not uploaded or not owned by the user
@@ -1377,5 +1352,50 @@ class FaceMlService {
 
     return indexedFileIds.containsKey(id) &&
         indexedFileIds[id]! >= faceMlVersion;
+  }
+
+  bool _cannotRunMLFunction({String function = ""}) {
+    if (_isIndexingOrClusteringRunning) {
+      _logger.info(
+        "Cannot run $function because indexing or clustering is already running",
+      );
+      _logStatus();
+      return true;
+    }
+    if (_mlControllerStatus == false) {
+      _logger.info(
+        "Cannot run $function because MLController does not allow it",
+      );
+      _logStatus();
+      return true;
+    }
+    if (debugIndexingDisabled) {
+      _logger.info(
+        "Cannot run $function because debugIndexingDisabled is true",
+      );
+      _logStatus();
+      return true;
+    }
+    if (_shouldPauseIndexingAndClustering) {
+      // This should ideally not be triggered, because one of the above should be triggered instead.
+      _logger.warning(
+        "Cannot run $function because indexing and clustering is being paused",
+      );
+      _logStatus();
+      return true;
+    }
+    return false;
+  }
+
+  void _logStatus() {
+    final String status = '''
+    isInternalUser: ${flagService.internalUser}
+    isFaceIndexingEnabled: ${LocalSettings.instance.isFaceIndexingEnabled}
+    canRunMLController: $_mlControllerStatus
+    isIndexingOrClusteringRunning: $_isIndexingOrClusteringRunning
+    debugIndexingDisabled: $debugIndexingDisabled
+    shouldSyncPeople: $_shouldSyncPeople
+    ''';
+    _logger.info(status);
   }
 }
