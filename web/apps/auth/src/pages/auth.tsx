@@ -122,7 +122,7 @@ const AuthenticatorCodesPage = () => {
                         </div>
                     ) : (
                         filteredCodes.map((code) => (
-                            <OTPDisplay codeInfo={code} key={code.id} />
+                            <CodeDisplay codeInfo={code} key={code.id} />
                         ))
                     )}
                 </div>
@@ -162,159 +162,13 @@ const AuthNavbar: React.FC = () => {
     );
 };
 
-const AuthFooter: React.FC = () => {
-    return (
-        <div
-            style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-            }}
-        >
-            <p>{t("AUTH_DOWNLOAD_MOBILE_APP")}</p>
-            <a
-                href="https://github.com/ente-io/ente/tree/main/auth#-download"
-                download
-            >
-                <Button color="accent">{t("DOWNLOAD")}</Button>
-            </a>
-        </div>
-    );
-};
-
-const TOTPDisplay = ({ issuer, account, code, nextCode, period }) => {
-    return (
-        <div
-            style={{
-                backgroundColor: "rgba(40, 40, 40, 0.6)",
-                borderRadius: "4px",
-                overflow: "hidden",
-            }}
-        >
-            <TimerProgress period={period ?? Code.defaultPeriod} />
-            <div
-                style={{
-                    padding: "12px 20px 0px 20px",
-                    display: "flex",
-                    alignItems: "flex-start",
-                    minWidth: "320px",
-                    minHeight: "120px",
-                    justifyContent: "space-between",
-                }}
-            >
-                <div
-                    style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "flex-start",
-                        minWidth: "200px",
-                    }}
-                >
-                    <p
-                        style={{
-                            fontWeight: "bold",
-                            margin: "0px",
-                            fontSize: "14px",
-                            textAlign: "left",
-                        }}
-                    >
-                        {issuer}
-                    </p>
-                    <p
-                        style={{
-                            marginTop: "0px",
-                            marginBottom: "8px",
-                            textAlign: "left",
-                            fontSize: "12px",
-                            maxWidth: "200px",
-                            minHeight: "16px",
-                            color: "grey",
-                        }}
-                    >
-                        {account}
-                    </p>
-                    <p
-                        style={{
-                            margin: "0px",
-                            marginBottom: "1rem",
-                            fontSize: "24px",
-                            fontWeight: "bold",
-                            textAlign: "left",
-                        }}
-                    >
-                        {code}
-                    </p>
-                </div>
-                <div style={{ flex: 1 }} />
-                <div
-                    style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "flex-end",
-                        minWidth: "120px",
-                        textAlign: "right",
-                        marginTop: "auto",
-                        marginBottom: "1rem",
-                    }}
-                >
-                    <p
-                        style={{
-                            fontWeight: "bold",
-                            marginBottom: "0px",
-                            fontSize: "10px",
-                            marginTop: "auto",
-                            textAlign: "right",
-                            color: "grey",
-                        }}
-                    >
-                        {t("AUTH_NEXT")}
-                    </p>
-                    <p
-                        style={{
-                            fontSize: "14px",
-                            fontWeight: "bold",
-                            marginBottom: "0px",
-                            marginTop: "auto",
-                            textAlign: "right",
-                            color: "grey",
-                        }}
-                    >
-                        {nextCode}
-                    </p>
-                </div>
-            </div>
-        </div>
-    );
-};
-
-function BadCodeInfo({ codeInfo, codeErr }) {
-    const [showRawData, setShowRawData] = useState(false);
-
-    return (
-        <div className="code-info">
-            <div>{codeInfo.title}</div>
-            <div>{codeErr}</div>
-            <div>
-                {showRawData ? (
-                    <div onClick={() => setShowRawData(false)}>
-                        {codeInfo.rawData ?? "no raw data"}
-                    </div>
-                ) : (
-                    <div onClick={() => setShowRawData(true)}>Show rawData</div>
-                )}
-            </div>
-        </div>
-    );
-}
-
-interface OTPDisplayProps {
+interface CodeDisplay {
     codeInfo: Code;
 }
 
-const OTPDisplay: React.FC<OTPDisplayProps> = ({ codeInfo }) => {
-    const [code, setCode] = useState("");
-    const [nextCode, setNextCode] = useState("");
+const CodeDisplay: React.FC<CodeDisplay> = ({ codeInfo }) => {
+    const [otp, setOTP] = useState("");
+    const [nextOTP, setNextOTP] = useState("");
     const [codeErr, setCodeErr] = useState("");
     const [hasCopied, setHasCopied] = useState(false);
 
@@ -328,8 +182,8 @@ const OTPDisplay: React.FC<OTPDisplayProps> = ({ codeInfo }) => {
                     period: codeInfo.period ?? Code.defaultPeriod,
                     digits: codeInfo.digits,
                 });
-                setCode(totp.generate());
-                setNextCode(
+                setOTP(totp.generate());
+                setNextOTP(
                     totp.generate({
                         timestamp: currentTime + codeInfo.period * 1000,
                     }),
@@ -340,8 +194,8 @@ const OTPDisplay: React.FC<OTPDisplayProps> = ({ codeInfo }) => {
                     counter: 0,
                     algorithm: codeInfo.algorithm,
                 });
-                setCode(hotp.generate());
-                setNextCode(hotp.generate({ counter: 1 }));
+                setOTP(hotp.generate());
+                setNextOTP(hotp.generate({ counter: 1 }));
             }
         } catch (err) {
             setCodeErr(err.message);
@@ -349,7 +203,7 @@ const OTPDisplay: React.FC<OTPDisplayProps> = ({ codeInfo }) => {
     };
 
     const copyCode = () => {
-        navigator.clipboard.writeText(code);
+        navigator.clipboard.writeText(otp);
         setHasCopied(true);
         setTimeout(() => {
             setHasCopied(false);
@@ -392,13 +246,7 @@ const OTPDisplay: React.FC<OTPDisplayProps> = ({ codeInfo }) => {
                         copyCode();
                     }}
                 >
-                    <TOTPDisplay
-                        period={codeInfo.period}
-                        issuer={codeInfo.issuer}
-                        account={codeInfo.account}
-                        code={code}
-                        nextCode={nextCode}
-                    />
+                    <OTPDisplay code={codeInfo} otp={otp} nextOTP={nextOTP} />
                     <Snackbar
                         open={hasCopied}
                         message="Code copied to clipboard"
@@ -411,31 +259,137 @@ const OTPDisplay: React.FC<OTPDisplayProps> = ({ codeInfo }) => {
     );
 };
 
+interface OTPDisplayProps {
+    code: Code;
+    otp: string;
+    nextOTP: string;
+}
+
+const OTPDisplay: React.FC<OTPDisplayProps> = ({ code, otp, nextOTP }) => {
+    return (
+        <div
+            style={{
+                backgroundColor: "rgba(40, 40, 40, 0.6)",
+                borderRadius: "4px",
+                overflow: "hidden",
+            }}
+        >
+            <TimerProgress period={code.period ?? Code.defaultPeriod} />
+            <div
+                style={{
+                    padding: "12px 20px 0px 20px",
+                    display: "flex",
+                    alignItems: "flex-start",
+                    minWidth: "320px",
+                    minHeight: "120px",
+                    justifyContent: "space-between",
+                }}
+            >
+                <div
+                    style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "flex-start",
+                        minWidth: "200px",
+                    }}
+                >
+                    <p
+                        style={{
+                            fontWeight: "bold",
+                            margin: "0px",
+                            fontSize: "14px",
+                            textAlign: "left",
+                        }}
+                    >
+                        {code.issuer}
+                    </p>
+                    <p
+                        style={{
+                            marginTop: "0px",
+                            marginBottom: "8px",
+                            textAlign: "left",
+                            fontSize: "12px",
+                            maxWidth: "200px",
+                            minHeight: "16px",
+                            color: "grey",
+                        }}
+                    >
+                        {code.account}
+                    </p>
+                    <p
+                        style={{
+                            margin: "0px",
+                            marginBottom: "1rem",
+                            fontSize: "24px",
+                            fontWeight: "bold",
+                            textAlign: "left",
+                        }}
+                    >
+                        {otp}
+                    </p>
+                </div>
+                <div style={{ flex: 1 }} />
+                <div
+                    style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "flex-end",
+                        minWidth: "120px",
+                        textAlign: "right",
+                        marginTop: "auto",
+                        marginBottom: "1rem",
+                    }}
+                >
+                    <p
+                        style={{
+                            fontWeight: "bold",
+                            marginBottom: "0px",
+                            fontSize: "10px",
+                            marginTop: "auto",
+                            textAlign: "right",
+                            color: "grey",
+                        }}
+                    >
+                        {t("AUTH_NEXT")}
+                    </p>
+                    <p
+                        style={{
+                            fontSize: "14px",
+                            fontWeight: "bold",
+                            marginBottom: "0px",
+                            marginTop: "auto",
+                            textAlign: "right",
+                            color: "grey",
+                        }}
+                    >
+                        {nextOTP}
+                    </p>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 interface TimerProgressProps {
     period: number;
 }
 
 const TimerProgress: React.FC<TimerProgressProps> = ({ period }) => {
     const [progress, setProgress] = useState(0);
-    const [ticker, setTicker] = useState(null);
     const microSecondsInPeriod = period * 1000000;
 
-    const startTicker = () => {
+    useEffect(() => {
+        const updateTimeRemaining = () => {
+            const timeRemaining =
+                microSecondsInPeriod -
+                ((new Date().getTime() * 1000) % microSecondsInPeriod);
+            setProgress(timeRemaining / microSecondsInPeriod);
+        };
+
         const ticker = setInterval(() => {
             updateTimeRemaining();
         }, 10);
-        setTicker(ticker);
-    };
 
-    const updateTimeRemaining = () => {
-        const timeRemaining =
-            microSecondsInPeriod -
-            ((new Date().getTime() * 1000) % microSecondsInPeriod);
-        setProgress(timeRemaining / microSecondsInPeriod);
-    };
-
-    useEffect(() => {
-        startTicker();
         return () => clearInterval(ticker);
     }, []);
 
@@ -450,5 +404,46 @@ const TimerProgress: React.FC<TimerProgressProps> = ({ period }) => {
                 backgroundColor: color,
             }}
         />
+    );
+};
+
+function BadCodeInfo({ codeInfo, codeErr }) {
+    const [showRawData, setShowRawData] = useState(false);
+
+    return (
+        <div className="code-info">
+            <div>{codeInfo.title}</div>
+            <div>{codeErr}</div>
+            <div>
+                {showRawData ? (
+                    <div onClick={() => setShowRawData(false)}>
+                        {codeInfo.rawData ?? "no raw data"}
+                    </div>
+                ) : (
+                    <div onClick={() => setShowRawData(true)}>Show rawData</div>
+                )}
+            </div>
+        </div>
+    );
+}
+
+const AuthFooter: React.FC = () => {
+    return (
+        <div
+            style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+            }}
+        >
+            <p>{t("AUTH_DOWNLOAD_MOBILE_APP")}</p>
+            <a
+                href="https://github.com/ente-io/ente/tree/main/auth#-download"
+                download
+            >
+                <Button color="accent">{t("DOWNLOAD")}</Button>
+            </a>
+        </div>
     );
 };
