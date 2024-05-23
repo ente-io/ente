@@ -41,19 +41,12 @@ export interface Code {
  *   otpauth://totp/account:user@example.org?algorithm=SHA1&digits=6&issuer=issuer&period=30&secret=ALPHANUM
  */
 export const codeFromURIString = (id: string, uriString: string): Code => {
-    let santizedRawData = uriString
-        .replace(/\+/g, "%2B")
-        .replace(/:/g, "%3A")
-        .replaceAll("\r", "");
-    if (santizedRawData.startsWith('"')) {
-        santizedRawData = santizedRawData.substring(1);
-    }
-    if (santizedRawData.endsWith('"')) {
-        santizedRawData = santizedRawData.substring(
-            0,
-            santizedRawData.length - 1,
-        );
-    }
+    const santizedRawData = uriString
+        .replaceAll("+", "%2B")
+        .replaceAll(":", "%3A")
+        .replaceAll("\r", "")
+        // trim quotes
+        .replace(/^"|"$/g, "");
 
     const uriParams = {};
     const searchParamsString =
