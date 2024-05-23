@@ -42,7 +42,7 @@ const AuthenticatorCodesPage = () => {
             }
             setHasFetched(true);
         };
-        fetchCodes();
+        void fetchCodes();
         appContext.showNavBar(false);
     }, []);
 
@@ -126,7 +126,7 @@ const AuthenticatorCodesPage = () => {
                     )}
                 </div>
                 <div style={{ marginBottom: "2rem" }} />
-                <AuthFooter />
+                <Footer />
                 <div style={{ marginBottom: "4rem" }} />
             </div>
         </>
@@ -217,14 +217,11 @@ const CodeDisplay: React.FC<CodeDisplay> = ({ code }) => {
     return (
         <div style={{ padding: "8px" }}>
             {errorMessage ? (
-                <BadCodeInfo codeInfo={code} codeErr={errorMessage} />
+                <UnparseableCode {...{ code, errorMessage }} />
             ) : (
                 <ButtonBase component="div" onClick={copyCode}>
-                    <OTPDisplay code={code} otp={otp} nextOTP={nextOTP} />
-                    <Snackbar
-                        open={hasCopied}
-                        message="Code copied to clipboard"
-                    />
+                    <OTPDisplay {...{ code, otp, nextOTP }} />
+                    <Snackbar open={hasCopied} message={t("COPIED")} />
                 </ButtonBase>
             )}
         </div>
@@ -348,19 +345,15 @@ interface TimerProgressProps {
 
 const TimerProgress: React.FC<TimerProgressProps> = ({ period }) => {
     const [progress, setProgress] = useState(0);
-    const microSecondsInPeriod = period * 1000000;
+    const us = period * 1e6;
 
     useEffect(() => {
-        const updateTimeRemaining = () => {
-            const timeRemaining =
-                microSecondsInPeriod -
-                ((new Date().getTime() * 1000) % microSecondsInPeriod);
-            setProgress(timeRemaining / microSecondsInPeriod);
+        const advance = () => {
+            const timeRemaining = us - ((new Date().getTime() * 1000) % us);
+            setProgress(timeRemaining / us);
         };
 
-        const ticker = setInterval(() => {
-            updateTimeRemaining();
-        }, 10);
+        const ticker = setInterval(advance, 10);
 
         return () => clearInterval(ticker);
     }, []);
@@ -379,17 +372,25 @@ const TimerProgress: React.FC<TimerProgressProps> = ({ period }) => {
     );
 };
 
-function BadCodeInfo({ codeInfo, codeErr }) {
+interface UnparseableCodeProps {
+    code: Code;
+    errorMessage: string;
+}
+
+const UnparseableCode: React.FC<UnparseableCodeProps> = ({
+    code,
+    errorMessage,
+}) => {
     const [showRawData, setShowRawData] = useState(false);
 
     return (
         <div className="code-info">
-            <div>{codeInfo.title}</div>
-            <div>{codeErr}</div>
+            <div>{code.issuer}</div>
+            <div>{errorMessage}</div>
             <div>
                 {showRawData ? (
                     <div onClick={() => setShowRawData(false)}>
-                        {codeInfo.uriString}
+                        {code.uriString}
                     </div>
                 ) : (
                     <div onClick={() => setShowRawData(true)}>Show rawData</div>
@@ -397,9 +398,9 @@ function BadCodeInfo({ codeInfo, codeErr }) {
             </div>
         </div>
     );
-}
+};
 
-const AuthFooter: React.FC = () => {
+const Footer: React.FC = () => {
     return (
         <div
             style={{
