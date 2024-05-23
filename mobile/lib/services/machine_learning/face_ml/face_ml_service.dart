@@ -7,8 +7,8 @@ import "dart:typed_data" show Uint8List, Float32List, ByteData;
 import "dart:ui" show Image;
 
 import "package:computer/computer.dart";
-import "package:dart_ui_isolate/dart_ui_isolate.dart";
 import "package:flutter/foundation.dart" show debugPrint, kDebugMode;
+import "package:flutter_isolate/flutter_isolate.dart";
 import "package:logging/logging.dart";
 import "package:onnxruntime/onnxruntime.dart";
 import "package:package_info_plus/package_info_plus.dart";
@@ -69,7 +69,7 @@ class FaceMlService {
   final Duration _inactivityDuration = const Duration(seconds: 120);
   int _activeTasks = 0;
   final _initLockIsolate = Lock();
-  late DartUiIsolate _isolate;
+  late FlutterIsolate _isolate;
   late ReceivePort _receivePort = ReceivePort();
   late SendPort _mainSendPort;
 
@@ -223,7 +223,7 @@ class FaceMlService {
       _receivePort = ReceivePort();
 
       try {
-        _isolate = await DartUiIsolate.spawn(
+        _isolate = await FlutterIsolate.spawn(
           _isolateMain,
           _receivePort.sendPort,
         );
