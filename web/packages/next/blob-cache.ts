@@ -136,6 +136,10 @@ export const openBlobCache = async (
  *
  *     new Blob([arrayBuffer, andOrAnyArray, andOrstring])
  *
+ * To convert from a Uint8Array/ArrayBuffer/Blob to a ReadableStream
+ *
+ *     new Response(array).body
+ *
  * Refs:
  * - https://github.com/yigitunallar/arraybuffer-vs-blob
  * - https://stackoverflow.com/questions/11821096/what-is-the-difference-between-an-arraybuffer-and-a-blob
