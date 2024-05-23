@@ -509,13 +509,13 @@ class FaceMlService {
             }
           }
         }
-        if (!await canUseHighBandwidth()) {
-          _logger
-              .info('stopping indexing because user is not connected to wifi');
-          continue;
-        }
         final smallerChunks = chunk.chunks(_fileDownloadLimit);
         for (final smallestChunk in smallerChunks) {
+          if (!await canUseHighBandwidth()) {
+            _logger.info(
+                'stopping indexing because user is not connected to wifi',);
+            break outerLoop;
+          }
           for (final enteFile in smallestChunk) {
             if (_shouldPauseIndexingAndClustering) {
               _logger.info("indexAllImages() was paused, stopping");
