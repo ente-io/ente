@@ -179,7 +179,7 @@ const CodeDisplay: React.FC<CodeDisplay> = ({ codeInfo }) => {
                 console.log({ codeInfo });
                 const totp = new TOTP({
                     secret: codeInfo.secret,
-                    algorithm: codeInfo.algorithm ?? Code.defaultAlgo,
+                    algorithm: codeInfo.algorithm,
                     period: codeInfo.period,
                     digits: codeInfo.digits,
                 });

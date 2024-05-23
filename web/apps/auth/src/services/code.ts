@@ -11,8 +11,6 @@ type AlgorithmType =
     | "SHA512";
 
 export class Code {
-    static readonly defaultAlgo = "sha1";
-
     // id for the corresponding auth entity
     id?: String;
     account: string;
@@ -81,8 +79,8 @@ export const codeFromRawData = (id: string, rawData: string): Code => {
     return new Code(
         _getAccount(uriPath),
         _getIssuer(uriPath, uriParams),
-        _getDigits(uriParams) || 6,
-        _getPeriod(uriParams) || 30,
+        _getDigits(uriParams),
+        _getPeriod(uriParams),
         getSanitizedSecret(uriParams),
         _getAlgorithm(uriParams),
         _getType(uriPath),
@@ -129,23 +127,23 @@ const _getIssuer = (uriPath: string, uriParams: { get?: any }): string => {
     }
 };
 
-const _getDigits = (uriParams): number | undefined => {
+const _getDigits = (uriParams): number => {
     try {
-        return parseInt(uriParams["digits"], 10);
-    } catch (e) {
-        return undefined;
+        return parseInt(uriParams["digits"], 10) || 6;
+    } catch {
+        return 6;
     }
 };
 
-const _getPeriod = (uriParams): number | undefined => {
+const _getPeriod = (uriParams): number => {
     try {
-        return parseInt(uriParams["period"], 10);
-    } catch (e) {
-        return undefined;
+        return parseInt(uriParams["period"], 10) || 30;
+    } catch {
+        return 30;
     }
 };
 
-const _getAlgorithm = (uriParams): AlgorithmType => {
+const _getAlgorithm = (uriParams): AlgorithmType | undefined => {
     try {
         const algorithm = uriParams["algorithm"].toLowerCase();
         if (algorithm === "sha256") {
