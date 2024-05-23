@@ -152,6 +152,7 @@ class FaceMlService {
             _logger.info(
               "MLController allowed running ML, faces indexing starting",
             );
+          }
             unawaited(indexAndClusterAll());
           }
         } else {
@@ -286,10 +287,6 @@ class FaceMlService {
     await _ensureSpawnedIsolate();
     return _functionLock.synchronized(() async {
       _resetInactivityTimer();
-
-      if (_shouldPauseIndexingAndClustering == false) {
-        return null;
-      }
 
       final completer = Completer<dynamic>();
       final answerPort = ReceivePort();
