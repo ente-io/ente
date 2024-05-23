@@ -13,6 +13,7 @@ import "package:photos/service_locator.dart";
 import 'package:photos/utils/date_time_util.dart';
 import 'package:photos/utils/exif_util.dart';
 import 'package:photos/utils/file_uploader_util.dart';
+import "package:photos/utils/parse.dart";
 
 //Todo: files with no location data have lat and long set to 0.0. This should ideally be null.
 class EnteFile {
@@ -131,8 +132,9 @@ class EnteFile {
     localID = metadata["localID"];
     title = metadata["title"];
     deviceFolder = metadata["deviceFolder"];
-    creationTime = metadata["creationTime"] ?? 0;
-    modificationTime = metadata["modificationTime"] ?? creationTime;
+    creationTime = parseKeyAsInt(metadata, "creationTime", 0);
+    modificationTime =
+        parseKeyAsInt(metadata, "modificationTime", creationTime!);
     final latitude = double.tryParse(metadata["latitude"].toString());
     final longitude = double.tryParse(metadata["longitude"].toString());
     if (latitude == null || longitude == null) {
