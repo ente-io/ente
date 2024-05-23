@@ -15,10 +15,9 @@ import MoreHoriz from "@mui/icons-material/MoreHoriz";
 import { Button, ButtonBase, Snackbar, TextField } from "@mui/material";
 import { t } from "i18next";
 import { useRouter } from "next/router";
-import { HOTP, TOTP } from "otpauth";
 import { AppContext } from "pages/_app";
 import React, { useContext, useEffect, useState } from "react";
-import { Code } from "services/code";
+import { generateOTPs, type Code } from "services/code";
 import { getAuthCodes } from "services/remote";
 
 const AuthenticatorCodesPage = () => {
@@ -172,33 +171,13 @@ const CodeDisplay: React.FC<CodeDisplay> = ({ codeInfo }) => {
     const [codeErr, setCodeErr] = useState("");
     const [hasCopied, setHasCopied] = useState(false);
 
-    const generateCodes = () => {
+    const regen = () => {
         try {
-            const currentTime = new Date().getTime();
-            if (codeInfo.type === "totp") {
-                const totp = new TOTP({
-                    secret: codeInfo.secret,
-                    algorithm: codeInfo.algorithm,
-                    period: codeInfo.period,
-                    digits: codeInfo.digits,
-                });
-                setOTP(totp.generate());
-                setNextOTP(
-                    totp.generate({
-                        timestamp: currentTime + codeInfo.period * 1000,
-                    }),
-                );
-            } else if (codeInfo.type === "hotp") {
-                const hotp = new HOTP({
-                    secret: codeInfo.secret,
-                    counter: 0,
-                    algorithm: codeInfo.algorithm,
-                });
-                setOTP(hotp.generate());
-                setNextOTP(hotp.generate({ counter: 1 }));
-            }
-        } catch (err) {
-            setCodeErr(err.message);
+            const [m, n] = generateOTPs(codeInfo);
+            setOTP(m);
+            setNextOTP(n);
+        } catch (e) {
+            setCodeErr(e.message);
         }
     };
 
@@ -211,29 +190,29 @@ const CodeDisplay: React.FC<CodeDisplay> = ({ codeInfo }) => {
     };
 
     useEffect(() => {
-        // this is to set the initial code and nextCode on component mount
-        generateCodes();
+        // Generate to set the initial otp and nextOTP on component mount.
+        regen();
         const codeType = codeInfo.type;
         const codePeriodInMs = codeInfo.period * 1000;
         const timeToNextCode =
             codePeriodInMs - (new Date().getTime() % codePeriodInMs);
-        const intervalId = null;
-        // wait until we are at the start of the next code period,
-        // and then start the interval loop
+        const interval = null;
+        // Wait until we are at the start of the next code period, and then
+        // start the interval loop.
         setTimeout(() => {
-            // we need to call generateCodes() once before the interval loop
-            // to set the initial code and nextCode
-            generateCodes();
+            // We need to call regen() once before the interval loop to set the
+            // initial otp and nextOTP.
+            regen();
             codeType.toLowerCase() === "totp" ||
             codeType.toLowerCase() === "hotp"
                 ? setInterval(() => {
-                      generateCodes();
+                      regen();
                   }, codePeriodInMs)
                 : null;
         }, timeToNextCode);
 
         return () => {
-            if (intervalId) clearInterval(intervalId);
+            if (interval) clearInterval(interval);
         };
     }, [codeInfo]);
 

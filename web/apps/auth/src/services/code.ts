@@ -1,3 +1,4 @@
+import { HOTP, TOTP } from "otpauth";
 import { URI } from "vscode-uri";
 
 /**
@@ -144,4 +145,44 @@ const _getType = (uriPath: string): Code["type"] => {
 
 const getSanitizedSecret = (uriParams): string => {
     return uriParams["secret"].replace(/ /g, "").toUpperCase();
+};
+
+/**
+ * Generate a pair of OTPs (one time passwords) from the given {@link code}.
+ *
+ * @param code The parsed code data, including the secret and code type.
+ *
+ * @returns a pair of OTPs, the current one and the next one, using the given
+ * {@link code}.
+ */
+export const generateOTPs = (code: Code): [otp: string, nextOTP: string] => {
+    let otp: string;
+    let nextOTP: string;
+    switch (code.type) {
+        case "totp": {
+            const totp = new TOTP({
+                secret: code.secret,
+                algorithm: code.algorithm,
+                period: code.period,
+                digits: code.digits,
+            });
+            otp = totp.generate();
+            nextOTP = totp.generate({
+                timestamp: new Date().getTime() + code.period * 1000,
+            });
+            break;
+        }
+
+        case "hotp": {
+            const hotp = new HOTP({
+                secret: code.secret,
+                counter: 0,
+                algorithm: code.algorithm,
+            });
+            otp = hotp.generate();
+            nextOTP = hotp.generate({ counter: 1 });
+            break;
+        }
+    }
+    return [otp, nextOTP];
 };
