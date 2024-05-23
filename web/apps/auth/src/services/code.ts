@@ -11,7 +11,6 @@ type AlgorithmType =
     | "SHA512";
 
 export class Code {
-    static readonly defaultDigits = 6;
     static readonly defaultAlgo = "sha1";
     static readonly defaultPeriod = 30;
 
@@ -19,7 +18,7 @@ export class Code {
     id?: String;
     account: string;
     issuer: string;
-    digits?: number;
+    digits: number;
     period: number;
     secret: string;
     algorithm: AlgorithmType;
@@ -49,7 +48,7 @@ export class Code {
     }
 }
 
-const codeFromRawData = (id: string, rawData: string): Code => {
+export const codeFromRawData = (id: string, rawData: string): Code => {
     let santizedRawData = rawData
         .replace(/\+/g, "%2B")
         .replace(/:/g, "%3A")
@@ -83,7 +82,7 @@ const codeFromRawData = (id: string, rawData: string): Code => {
     return new Code(
         _getAccount(uriPath),
         _getIssuer(uriPath, uriParams),
-        _getDigits(uriParams),
+        _getDigits(uriParams) ?? 6,
         _getPeriod(uriParams),
         getSanitizedSecret(uriParams),
         _getAlgorithm(uriParams),
@@ -131,11 +130,11 @@ const _getIssuer = (uriPath: string, uriParams: { get?: any }): string => {
     }
 };
 
-const _getDigits = (uriParams): number => {
+const _getDigits = (uriParams): number | undefined => {
     try {
-        return parseInt(uriParams["digits"], 10) || Code.defaultDigits;
+        return parseInt(uriParams["digits"], 10);
     } catch (e) {
-        return Code.defaultDigits;
+        return undefined;
     }
 };
 

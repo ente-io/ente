@@ -326,7 +326,7 @@ const OTPDisplay: React.FC<OTPDisplayProps> = ({ codeInfo }) => {
                     secret: codeInfo.secret,
                     algorithm: codeInfo.algorithm ?? Code.defaultAlgo,
                     period: codeInfo.period ?? Code.defaultPeriod,
-                    digits: codeInfo.digits ?? Code.defaultDigits,
+                    digits: codeInfo.digits,
                 });
                 setCode(totp.generate());
                 setNextCode(
