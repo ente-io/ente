@@ -77,11 +77,22 @@ export const codeFromURIString = (id: string, uriString: string): Code => {
         issuer: _getIssuer(uriPath, uriParams),
         digits: parseDigits(uriParams),
         period: parsePeriod(uriParams),
-        secret: getSanitizedSecret(uriParams),
+        secret: parseSecret(uriParams),
         algorithm: parseAlgorithm(uriParams),
         uriString,
     };
 };
+
+const _getType = (uriPath: string): Code["type"] => {
+    const oauthType = uriPath.split("/")[0].substring(0);
+    if (oauthType.toLowerCase() === "totp") {
+        return "totp";
+    } else if (oauthType.toLowerCase() === "hotp") {
+        return "hotp";
+    }
+    throw new Error(`Unsupported format with host ${oauthType}`);
+};
+
 
 const _getAccount = (uriPath: string): string => {
     try {
@@ -138,19 +149,8 @@ const parseAlgorithm = (uriParams): Code["algorithm"] => {
     }
 };
 
-const _getType = (uriPath: string): Code["type"] => {
-    const oauthType = uriPath.split("/")[0].substring(0);
-    if (oauthType.toLowerCase() === "totp") {
-        return "totp";
-    } else if (oauthType.toLowerCase() === "hotp") {
-        return "hotp";
-    }
-    throw new Error(`Unsupported format with host ${oauthType}`);
-};
-
-const getSanitizedSecret = (uriParams): string => {
-    return uriParams["secret"].replace(/ /g, "").toUpperCase();
-};
+const parseSecret = (uriParams): string =>
+    uriParams["secret"].replaceAll(" ", "").toUpperCase();
 
 /**
  * Generate a pair of OTPs (one time passwords) from the given {@link code}.
