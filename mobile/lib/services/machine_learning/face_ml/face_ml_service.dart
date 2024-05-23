@@ -109,6 +109,7 @@ class FaceMlService {
         return;
       }
       _logger.info("init called");
+      _logStatus();
       await _computer.compute(initOrtEnv);
       try {
         await FaceDetectionService.instance.init();
@@ -245,6 +246,7 @@ class FaceMlService {
   }
 
   /// The main execution function of the isolate.
+  @pragma('vm:entry-point')
   static void _isolateMain(SendPort mainSendPort) async {
     final receivePort = ReceivePort();
     mainSendPort.send(receivePort.sendPort);
@@ -517,7 +519,8 @@ class FaceMlService {
         for (final smallestChunk in smallerChunks) {
           if (!await canUseHighBandwidth()) {
             _logger.info(
-                'stopping indexing because user is not connected to wifi',);
+              'stopping indexing because user is not connected to wifi',
+            );
             break outerLoop;
           }
           for (final enteFile in smallestChunk) {
@@ -761,6 +764,9 @@ class FaceMlService {
         // disposeImageIsolateAfterUse: false,
       );
       if (result == null) {
+        _logger.severe(
+          "Failed to analyze image with uploadedFileID: ${enteFile.uploadedFileID}",
+        );
         return false;
       }
       final List<Face> faces = [];
@@ -880,6 +886,7 @@ class FaceMlService {
         ),
       ) as String?;
       if (resultJsonString == null) {
+        _logger.severe('Analyzing image in isolate is giving back null');
         return null;
       }
       result = FaceMlResult.fromJsonString(resultJsonString);
