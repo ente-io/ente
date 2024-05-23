@@ -18,8 +18,8 @@ import { useRouter } from "next/router";
 import { HOTP, TOTP } from "otpauth";
 import { AppContext } from "pages/_app";
 import React, { useContext, useEffect, useState } from "react";
-import { getAuthCodes } from "services";
-import { Code } from "types/code";
+import { Code } from "services/code";
+import { getAuthCodes } from "services/remote";
 
 const AuthenticatorCodesPage = () => {
     const appContext = useContext(AppContext);

@@ -6,7 +6,7 @@ import { getEndpoint } from "@ente/shared/network/api";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { getActualKey } from "@ente/shared/user";
 import { HttpStatusCode } from "axios";
-import { Code } from "types/code";
+import { Code } from "services/code";
 
 const ENDPOINT = getEndpoint();
 
