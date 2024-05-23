@@ -29,6 +29,11 @@ bool areFromSameDay(int firstCreationTime, int secondCreationTime) {
 }
 
 bool areDatesInSameWeek(DateTime date1, DateTime date2) {
+  if (date1.year == date2.year &&
+      date1.month == date2.month &&
+      date1.day == date2.day) {
+    return true;
+  }
   final int dayOfWeek1 = date1.weekday;
   final int dayOfWeek2 = date2.weekday;
   // Calculate the start and end dates of the week for both dates
