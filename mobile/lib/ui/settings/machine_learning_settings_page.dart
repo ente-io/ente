@@ -479,7 +479,6 @@ class FaceRecognitionStatusWidgetState
             if (snapshot.hasData) {
               final int indexedFiles = snapshot.data!.$1;
               final int pendingFiles = snapshot.data!.$2;
-              final int foundFaces = snapshot.data!.$3;
               final double clusteringDoneRatio = snapshot.data!.$4;
               final double clusteringPercentage =
                   (clusteringDoneRatio * 100).clamp(0, 100);
@@ -511,19 +510,6 @@ class FaceRecognitionStatusWidgetState
                     alignCaptionedTextToLeft: true,
                     isGestureDetectorDisabled: true,
                     key: ValueKey("pending_items_" + pendingFiles.toString()),
-                  ),
-                  MenuItemWidget(
-                    captionedTextWidget: CaptionedTextWidget(
-                      title: S.of(context).foundFaces,
-                    ),
-                    trailingWidget: Text(
-                      NumberFormat().format(foundFaces),
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                    singleBorderRadius: 8,
-                    alignCaptionedTextToLeft: true,
-                    isGestureDetectorDisabled: true,
-                    key: ValueKey("found_faces_" + foundFaces.toString()),
                   ),
                   MenuItemWidget(
                     captionedTextWidget: CaptionedTextWidget(
