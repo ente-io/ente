@@ -3,8 +3,7 @@ import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { AUTH_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { CustomError } from "@ente/shared/error";
 import InMemoryStore, { MS_KEYS } from "@ente/shared/storage/InMemoryStore";
-import { TextField } from "@mui/material";
-import { AuthFooter } from "components/AuthFooter";
+import { Button, TextField } from "@mui/material";
 import AuthNavbar from "components/Navbar";
 import OTPDisplay from "components/OTPDisplay";
 import { t } from "i18next";
@@ -127,3 +126,24 @@ const AuthenticatorCodesPage = () => {
 };
 
 export default AuthenticatorCodesPage;
+
+const AuthFooter: React.FC = () => {
+    return (
+        <div
+            style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+            }}
+        >
+            <p>{t("AUTH_DOWNLOAD_MOBILE_APP")}</p>
+            <a
+                href="https://github.com/ente-io/ente/tree/main/auth#-download"
+                download
+            >
+                <Button color="accent">{t("DOWNLOAD")}</Button>
+            </a>
+        </div>
+    );
+};
