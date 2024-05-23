@@ -105,32 +105,30 @@ class _LazyGroupGalleryState extends State<LazyGroupGallery> {
     if (_filesInGroup.isEmpty) {
       return;
     }
-    final DateTime groupDate =
-        DateTime.fromMicrosecondsSinceEpoch(_filesInGroup[0].creationTime!);
+    final galleryState = context.findAncestorStateOfType<GalleryState>();
+    final groupType = GalleryContextState.of(context)!.type;
+
     // iterate over  files and check if any of the belongs to this group
-    final anyCandidateForGroup = event.updatedFiles.any((file) {
-      final fileDate = DateTime.fromMicrosecondsSinceEpoch(file.creationTime!);
-      return fileDate.year == groupDate.year &&
-          fileDate.month == groupDate.month &&
-          fileDate.day == groupDate.day;
-    });
+    final anyCandidateForGroup = groupType.areModifiedFilesPartOfGroup(
+      event.updatedFiles,
+      _filesInGroup[0],
+      lastFile: _filesInGroup.last,
+    );
     if (anyCandidateForGroup) {
+      late int startRange, endRange;
+      (startRange, endRange) = groupType.getGroupRange(_filesInGroup[0]);
       if (kDebugMode) {
         _logger.info(
-          " files were updated due to ${event.reason} on " +
-              DateTime.fromMicrosecondsSinceEpoch(
-                groupDate.microsecondsSinceEpoch,
-              ).toIso8601String(),
+          " files were updated due to ${event.reason} on type ${groupType.name} from ${DateTime.fromMicrosecondsSinceEpoch(startRange).toIso8601String()}"
+          " to ${DateTime.fromMicrosecondsSinceEpoch(endRange).toIso8601String()}",
         );
       }
       if (event.type == EventType.addedOrUpdated ||
           widget.removalEventTypes.contains(event.type)) {
         // We are reloading the whole group
-        final dayStartTime =
-            DateTime(groupDate.year, groupDate.month, groupDate.day);
         final result = await widget.asyncLoader(
-          dayStartTime.microsecondsSinceEpoch,
-          dayStartTime.microsecondsSinceEpoch + microSecondsInDay - 1,
+          startRange,
+          endRange,
           asc: GalleryContextState.of(context)!.sortOrderAsc,
         );
 
@@ -145,7 +143,7 @@ class _LazyGroupGalleryState extends State<LazyGroupGallery> {
 
         //[galleryState] will never be null except when LazyLoadingGallery is
         //used without Gallery as an ancestor.
-        final galleryState = context.findAncestorStateOfType<GalleryState>();
+
         if (galleryState?.mounted ?? false) {
           galleryState!.setState(() {});
           _filesInGroup = result.files;

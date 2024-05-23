@@ -1,5 +1,6 @@
 import "package:flutter/widgets.dart";
 import "package:intl/intl.dart";
+import "package:photos/core/constants.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/utils/date_time_util.dart";
@@ -41,6 +42,91 @@ extension GroupTypeExtension on GroupType {
           .format(date);
     } else {
       throw UnimplementedError("not implemented for $this");
+    }
+  }
+
+  // returns true if the group should be refreshed.
+  // If groupType is day, it should return true if the list of modified files contains a file that was created on the same day as the first file.
+  // If groupType is week, it should return true if the list of modified files contains a file that was created in the same week as the first file.
+  // If groupType is month, it should return true if the list of modified files contains a file that was created in the same month as the first file.
+  // If groupType is year, it should return true if the list of modified files contains a file that was created in the same year as the first file.
+  bool areModifiedFilesPartOfGroup(
+    List<EnteFile> modifiedFiles,
+    EnteFile fistFile, {
+    EnteFile? lastFile,
+  }) {
+    switch (this) {
+      case GroupType.day:
+        return modifiedFiles.any(
+          (file) => areFromSameDay(fistFile.creationTime!, file.creationTime!),
+        );
+      case GroupType.week:
+        return modifiedFiles.any((file) {
+          final firstDate =
+              DateTime.fromMicrosecondsSinceEpoch(fistFile.creationTime!);
+          final fileDate =
+              DateTime.fromMicrosecondsSinceEpoch(file.creationTime!);
+          return areDatesInSameWeek(firstDate, fileDate);
+        });
+      case GroupType.month:
+        return modifiedFiles.any((file) {
+          final firstDate =
+              DateTime.fromMicrosecondsSinceEpoch(fistFile.creationTime!);
+          final fileDate =
+              DateTime.fromMicrosecondsSinceEpoch(file.creationTime!);
+          return firstDate.year == fileDate.year &&
+              firstDate.month == fileDate.month;
+        });
+      case GroupType.year:
+        return modifiedFiles.any((file) {
+          final firstDate =
+              DateTime.fromMicrosecondsSinceEpoch(fistFile.creationTime!);
+          final fileDate =
+              DateTime.fromMicrosecondsSinceEpoch(file.creationTime!);
+          return firstDate.year == fileDate.year;
+        });
+      default:
+        throw UnimplementedError("not implemented for $this");
+    }
+  }
+
+  // for day, year, month, year type, return the microsecond range of the group
+  (int, int) getGroupRange(EnteFile file) {
+    switch (this) {
+      case GroupType.day:
+        final date = DateTime.fromMicrosecondsSinceEpoch(file.creationTime!);
+        final startOfDay = DateTime(date.year, date.month, date.day);
+        return (
+          startOfDay.microsecondsSinceEpoch,
+          (startOfDay.microsecondsSinceEpoch + microSecondsInDay - 1),
+        );
+      case GroupType.week:
+        final date = DateTime.fromMicrosecondsSinceEpoch(file.creationTime!);
+        final startOfWeek = DateTime(date.year, date.month, date.day)
+            .subtract(Duration(days: date.weekday - 1));
+        final endOfWeek = startOfWeek.add(const Duration(days: 7));
+        return (
+          startOfWeek.microsecondsSinceEpoch,
+          endOfWeek.microsecondsSinceEpoch - 1
+        );
+      case GroupType.month:
+        final date = DateTime.fromMicrosecondsSinceEpoch(file.creationTime!);
+        final startOfMonth = DateTime(date.year, date.month);
+        final endOfMonth = DateTime(date.year, date.month + 1);
+        return (
+          startOfMonth.microsecondsSinceEpoch,
+          endOfMonth.microsecondsSinceEpoch - 1
+        );
+      case GroupType.year:
+        final date = DateTime.fromMicrosecondsSinceEpoch(file.creationTime!);
+        final startOfYear = DateTime(date.year);
+        final endOfYear = DateTime(date.year + 1);
+        return (
+          startOfYear.microsecondsSinceEpoch,
+          endOfYear.microsecondsSinceEpoch - 1
+        );
+      default:
+        throw UnimplementedError("not implemented for $this");
     }
   }
 
