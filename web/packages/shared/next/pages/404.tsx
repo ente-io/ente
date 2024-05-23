@@ -1,19 +1,30 @@
-import { VerticallyCentered } from "@ente/shared/components/Container";
-import { t } from "i18next";
-import { useEffect, useState } from "react";
+import { PAGES } from "@ente/accounts/constants/pages";
+import { useRouter } from "next/router";
+import { useEffect } from "react";
 
-import { PageProps } from "@ente/shared/apps/types";
-import EnteSpinner from "@ente/shared/components/EnteSpinner";
+const Page: React.FC = () => {
+    // [Note: 404 back to home]
+    //
+    // In the desktop app, if the user presses the refresh button when the URL
+    // has an attached query parameter, e.g. "/gallery?collectionId=xxx", then
+    // the code in next-electron-server blindly appends the html extension to
+    // this URL, resulting in it trying to open "gallery?collectionId=xxx.html"
+    // instead of "gallery.html". It doesn't find such a file, causing it open
+    // "404.html" (the static file generated from this file).
+    //
+    // One way around is to patch the package, e.g.
+    // https://github.com/ente-io/next-electron-server/pull/1/files
+    //
+    // However, redirecting back to the root is arguably a better fallback in
+    // all cases (even when running on our website), since our app is a SPA.
 
-export default function NotFound({ appContext }: PageProps) {
-    const [loading, setLoading] = useState(true);
+    const router = useRouter();
+
     useEffect(() => {
-        appContext.showNavBar(true);
-        setLoading(false);
+        router.push(PAGES.ROOT);
     }, []);
-    return (
-        <VerticallyCentered>
-            {loading ? <EnteSpinner /> : t("NOT_FOUND")}
-        </VerticallyCentered>
-    );
-}
+
+    return <></>;
+};
+
+export default Page;
