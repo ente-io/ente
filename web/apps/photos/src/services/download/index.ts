@@ -330,57 +330,66 @@ class DownloadManagerImpl {
 
         let leftoverBytes = new Uint8Array();
 
-        const stream = new ReadableStream({
+        return new ReadableStream({
             pull: async (controller) => {
-                // done is a boolean and value is an Uint8Array. When done is
-                // true value will be empty, otherwise present.
-                const { done, value } = await reader.read();
+                // Each time pull is called, we want to enqueue at least once.
+                let didEnqueue = false;
+                do {
+                    // done is a boolean and value is an Uint8Array. When done
+                    // is true value will be empty.
+                    const { done, value } = await reader.read();
 
-                let data: Uint8Array;
-                if (done) {
-                    data = leftoverBytes;
-                } else {
-                    downloadedBytes += value.length;
-                    onDownloadProgress({
-                        loaded: downloadedBytes,
-                        total: contentLength,
-                    });
+                    let data: Uint8Array;
+                    if (done) {
+                        data = leftoverBytes;
+                    } else {
+                        downloadedBytes += value.length;
+                        onDownloadProgress({
+                            loaded: downloadedBytes,
+                            total: contentLength,
+                        });
 
-                    data = new Uint8Array(leftoverBytes.length + value.length);
-                    data.set(new Uint8Array(leftoverBytes), 0);
-                    data.set(new Uint8Array(value), leftoverBytes.length);
-                }
-
-                // data.length might be a multiple of decryptionChunkSize, and
-                // we might need multiple iterations to drain it all.
-
-                while (data && data.length >= decryptionChunkSize) {
-                    const { decryptedData } =
-                        await this.cryptoWorker.decryptFileChunk(
-                            data.slice(0, decryptionChunkSize),
-                            pullState,
+                        data = new Uint8Array(
+                            leftoverBytes.length + value.length,
                         );
-                    controller.enqueue(decryptedData);
-                    data = data.slice(decryptionChunkSize);
-                }
+                        data.set(new Uint8Array(leftoverBytes), 0);
+                        data.set(new Uint8Array(value), leftoverBytes.length);
+                    }
 
-                if (done) {
-                    // Send off the last one, no more bytes are going to come.
-                    const { decryptedData } =
-                        await this.cryptoWorker.decryptFileChunk(
-                            data,
-                            pullState,
-                        );
-                    controller.enqueue(decryptedData);
-                    controller.close();
-                } else {
-                    // Save it for the next pull.
-                    leftoverBytes = data;
-                }
+                    // data.length might be a multiple of decryptionChunkSize,
+                    // and we might need multiple iterations to drain it all.
+                    while (data.length >= decryptionChunkSize) {
+                        const { decryptedData } =
+                            await this.cryptoWorker.decryptFileChunk(
+                                data.slice(0, decryptionChunkSize),
+                                pullState,
+                            );
+                        controller.enqueue(decryptedData);
+                        didEnqueue = true;
+                        data = data.slice(decryptionChunkSize);
+                    }
+
+                    if (done) {
+                        // Send off the remaining bytes without waiting for a
+                        // full chunk, no more bytes are going to come.
+                        if (data.length) {
+                            const { decryptedData } =
+                                await this.cryptoWorker.decryptFileChunk(
+                                    data,
+                                    pullState,
+                                );
+                            controller.enqueue(decryptedData);
+                        }
+                        // Don't loop again even if we didn't enqueue.
+                        didEnqueue = true;
+                        controller.close();
+                    } else {
+                        // Save it for the next pull.
+                        leftoverBytes = data;
+                    }
+                } while (!didEnqueue);
             },
         });
-
-        return stream;
     }
 
     trackDownloadProgress = (fileID: number, fileSize: number) => {
