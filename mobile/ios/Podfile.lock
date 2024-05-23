@@ -427,7 +427,7 @@ SPEC CHECKSUMS:
   home_widget: 0434835a4c9a75704264feff6be17ea40e0f0d57
   image_editor_common: d6f6644ae4a6de80481e89fe6d0a8c49e30b4b43
   in_app_purchase_storekit: 0e4b3c2e43ba1e1281f4f46dd71b0593ce529892
-  integration_test: 13825b8a9334a850581300559b8839134b124670
+  integration_test: ce0a3ffa1de96d1a89ca0ac26fca7ea18a749ef4
   libwebp: 1786c9f4ff8a279e4dac1e8f385004d5fc253009
   local_auth_darwin: c7e464000a6a89e952235699e32b329457608d98
   local_auth_ios: 5046a18c018dd973247a0564496c8898dbb5adf9
