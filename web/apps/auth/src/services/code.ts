@@ -2,13 +2,7 @@ import { URI } from "vscode-uri";
 
 type Type = "totp" | "TOTP" | "hotp" | "HOTP";
 
-type AlgorithmType =
-    | "sha1"
-    | "SHA1"
-    | "sha256"
-    | "SHA256"
-    | "sha512"
-    | "SHA512";
+type Algorithm = "sha1" | "sha256" | "sha512";
 
 export class Code {
     // id for the corresponding auth entity
@@ -18,7 +12,7 @@ export class Code {
     digits: number;
     period: number;
     secret: string;
-    algorithm: AlgorithmType;
+    algorithm: Algorithm;
     type: Type;
     rawData?: string;
 
@@ -28,7 +22,7 @@ export class Code {
         digits: number | undefined,
         period: number,
         secret: string,
-        algorithm: AlgorithmType,
+        algorithm: Algorithm,
         type: Type,
         rawData?: string,
         id?: string,
@@ -133,7 +127,7 @@ const parseDigits = (uriParams): number =>
 const parsePeriod = (uriParams): number =>
     parseInt(uriParams["period"] ?? "", 10) || 30;
 
-const parseAlgorithm = (uriParams): AlgorithmType => {
+const parseAlgorithm = (uriParams): Algorithm => {
     switch (uriParams["algorithm"]?.toLowerCase()) {
         case "sha256":
             return "sha256";
