@@ -12,7 +12,6 @@ type AlgorithmType =
 
 export class Code {
     static readonly defaultAlgo = "sha1";
-    static readonly defaultPeriod = 30;
 
     // id for the corresponding auth entity
     id?: String;
@@ -83,7 +82,7 @@ export const codeFromRawData = (id: string, rawData: string): Code => {
         _getAccount(uriPath),
         _getIssuer(uriPath, uriParams),
         _getDigits(uriParams) || 6,
-        _getPeriod(uriParams),
+        _getPeriod(uriParams) || 30,
         getSanitizedSecret(uriParams),
         _getAlgorithm(uriParams),
         _getType(uriPath),
@@ -138,11 +137,11 @@ const _getDigits = (uriParams): number | undefined => {
     }
 };
 
-const _getPeriod = (uriParams): number => {
+const _getPeriod = (uriParams): number | undefined => {
     try {
-        return parseInt(uriParams["period"], 10) || Code.defaultPeriod;
+        return parseInt(uriParams["period"], 10);
     } catch (e) {
-        return Code.defaultPeriod;
+        return undefined;
     }
 };
 

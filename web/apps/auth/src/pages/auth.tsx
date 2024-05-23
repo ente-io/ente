@@ -176,10 +176,11 @@ const CodeDisplay: React.FC<CodeDisplay> = ({ codeInfo }) => {
         try {
             const currentTime = new Date().getTime();
             if (codeInfo.type.toLowerCase() === "totp") {
+                console.log({ codeInfo });
                 const totp = new TOTP({
                     secret: codeInfo.secret,
                     algorithm: codeInfo.algorithm ?? Code.defaultAlgo,
-                    period: codeInfo.period ?? Code.defaultPeriod,
+                    period: codeInfo.period,
                     digits: codeInfo.digits,
                 });
                 setOTP(totp.generate());
@@ -274,7 +275,7 @@ const OTPDisplay: React.FC<OTPDisplayProps> = ({ code, otp, nextOTP }) => {
                 overflow: "hidden",
             }}
         >
-            <TimerProgress period={code.period ?? Code.defaultPeriod} />
+            <TimerProgress period={code.period} />
             <div
                 style={{
                     padding: "12px 20px 0px 20px",
