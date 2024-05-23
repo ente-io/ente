@@ -508,6 +508,10 @@ class FaceMlService {
               rethrow;
             }
           }
+        } else {
+          _logger.warning(
+            'Not fetching embeddings because user manually disabled it in debug options',
+          );
         }
         final smallerChunks = chunk.chunks(_fileDownloadLimit);
         for (final smallestChunk in smallerChunks) {
