@@ -37,7 +37,7 @@ extension GroupTypeExtension on GroupType {
           .format(date);
     } else if (this == GroupType.month) {
       final date = DateTime.fromMicrosecondsSinceEpoch(file.creationTime!);
-      return DateFormat.MMMd(Localizations.localeOf(context).languageCode)
+      return DateFormat.yMMM(Localizations.localeOf(context).languageCode)
           .format(date);
     } else {
       throw UnimplementedError("not implemented for $this");
