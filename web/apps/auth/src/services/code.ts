@@ -2,12 +2,12 @@ import { HOTP, TOTP } from "otpauth";
 import { URI } from "vscode-uri";
 
 /**
- * A parsed representation of an xOTP code URI.
+ * A parsed representation of an *OTP code URI.
  *
  * This is all the data we need to drive a OTP generator.
  */
 export interface Code {
-    /** The uniquue id for the corresponding auth entity. */
+    /** A unique id for the corresponding "auth entity" in our system. */
     id?: String;
     /** The type of the code. */
     type: "totp" | "hotp";
@@ -15,16 +15,21 @@ export interface Code {
     account: string;
     /** The name of the entity that issued this code. */
     issuer: string;
-    /** Number of digits in the code. */
+    /** Number of digits in the generated OTP. */
     digits: number;
     /**
      * The time period (in seconds) for which a single OTP generated from this
      * code remains valid.
      */
     period: number;
-    /** The secret that is used to drive the OTP generator. */
+    /**
+     * The secret that is used to drive the OTP generator.
+     *
+     * This is an arbitrary key encoded in Base32 that drives the HMAC (in a
+     * {@link type}-specific manner).
+     */
     secret: string;
-    /** The (hashing) algorithim used by the OTP generator. */
+    /** The (HMAC) algorithm used by the OTP generator. */
     algorithm: "sha1" | "sha256" | "sha512";
     /** The original string from which this code was generated. */
     uriString?: string;
@@ -39,7 +44,7 @@ export interface Code {
  * code. These strings are of the form:
  *
  * - (TOTP)
- *   otpauth://totp/account:user@example.org?algorithm=SHA1&digits=6&issuer=issuer&period=30&secret=ALPHANUM
+ *   otpauth://totp/ACME:user@example.org?algorithm=SHA1&digits=6&issuer=acme&period=30&secret=ALPHANUM
  */
 export const codeFromURIString = (id: string, uriString: string): Code => {
     const santizedRawData = uriString
