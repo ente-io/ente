@@ -79,10 +79,10 @@ export const codeFromRawData = (id: string, rawData: string): Code => {
     return new Code(
         _getAccount(uriPath),
         _getIssuer(uriPath, uriParams),
-        _getDigits(uriParams),
-        _getPeriod(uriParams),
+        parseDigits(uriParams),
+        parsePeriod(uriParams),
         getSanitizedSecret(uriParams),
-        _getAlgorithm(uriParams),
+        parseAlgorithm(uriParams),
         _getType(uriPath),
         rawData,
         id,
@@ -127,34 +127,21 @@ const _getIssuer = (uriPath: string, uriParams: { get?: any }): string => {
     }
 };
 
-const _getDigits = (uriParams): number => {
-    try {
-        return parseInt(uriParams["digits"], 10) || 6;
-    } catch {
-        return 6;
-    }
-};
+const parseDigits = (uriParams): number =>
+    parseInt(uriParams["digits"] ?? "", 10) || 6;
 
-const _getPeriod = (uriParams): number => {
-    try {
-        return parseInt(uriParams["period"], 10) || 30;
-    } catch {
-        return 30;
-    }
-};
+const parsePeriod = (uriParams): number =>
+    parseInt(uriParams["period"] ?? "", 10) || 30;
 
-const _getAlgorithm = (uriParams): AlgorithmType | undefined => {
-    try {
-        const algorithm = uriParams["algorithm"].toLowerCase();
-        if (algorithm === "sha256") {
-            return algorithm;
-        } else if (algorithm === "sha512") {
-            return algorithm;
-        }
-    } catch (e) {
-        // nothing
+const parseAlgorithm = (uriParams): AlgorithmType => {
+    switch (uriParams["algorithm"]?.toLowerCase()) {
+        case "sha256":
+            return "sha256";
+        case "sha512":
+            return "sha512";
+        default:
+            return "sha1";
     }
-    return "sha1";
 };
 
 const _getType = (uriPath: string): Type => {
