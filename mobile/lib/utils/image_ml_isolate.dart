@@ -4,7 +4,7 @@ import 'dart:isolate';
 import 'dart:typed_data' show Float32List, Uint8List;
 import 'dart:ui';
 
-import "package:flutter_isolate/flutter_isolate.dart";
+import "package:dart_ui_isolate/dart_ui_isolate.dart";
 import "package:logging/logging.dart";
 import "package:photos/face/model/box.dart";
 import "package:photos/face/model/dimension.dart";
@@ -45,7 +45,7 @@ class ImageMlIsolate {
   final _initLock = Lock();
   final _functionLock = Lock();
 
-  late FlutterIsolate _isolate;
+  late DartUiIsolate _isolate;
   late ReceivePort _receivePort = ReceivePort();
   late SendPort _mainSendPort;
 
@@ -69,7 +69,7 @@ class ImageMlIsolate {
       _receivePort = ReceivePort();
 
       try {
-        _isolate = await FlutterIsolate.spawn(
+        _isolate = await DartUiIsolate.spawn(
           _isolateMain,
           _receivePort.sendPort,
         );

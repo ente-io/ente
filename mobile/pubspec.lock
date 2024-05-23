@@ -363,6 +363,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.3.2"
+  dart_ui_isolate:
+    dependency: "direct main"
+    description:
+      name: dart_ui_isolate
+      sha256: bd531558002a00de0ac7dd73c84887dd01e652bd254d3098d7763881535196d7
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.1"
   dbus:
     dependency: transitive
     description:
@@ -707,14 +715,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "5.8.0"
-  flutter_isolate:
-    dependency: "direct main"
-    description:
-      name: flutter_isolate
-      sha256: "994ddec596da4ca12ca52154fd59404077584643eb7e3f1008a55fda9fe0b76b"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.0.4"
   flutter_launcher_icons:
     dependency: "direct main"
     description:
