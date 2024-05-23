@@ -93,7 +93,6 @@ const _getType = (uriPath: string): Code["type"] => {
     throw new Error(`Unsupported format with host ${oauthType}`);
 };
 
-
 const _getAccount = (uriPath: string): string => {
     try {
         const path = decodeURIComponent(uriPath);
