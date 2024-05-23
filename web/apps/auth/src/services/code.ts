@@ -1,5 +1,5 @@
+import { ensure } from "@/utils/ensure";
 import { HOTP, TOTP } from "otpauth";
-import { URI } from "vscode-uri";
 
 /**
  * A parsed representation of an *OTP code URI.
@@ -32,7 +32,7 @@ export interface Code {
     /** The (HMAC) algorithm used by the OTP generator. */
     algorithm: "sha1" | "sha256" | "sha512";
     /** The original string from which this code was generated. */
-    uriString?: string;
+    uriString: string;
 }
 
 /**
@@ -47,50 +47,25 @@ export interface Code {
  *   otpauth://totp/ACME:user@example.org?algorithm=SHA1&digits=6&issuer=acme&period=30&secret=ALPHANUM
  */
 export const codeFromURIString = (id: string, uriString: string): Code => {
-    const santizedRawData = uriString
-        .replaceAll("+", "%2B")
-        .replaceAll(":", "%3A")
-        .replaceAll("\r", "")
-        // trim quotes
-        .replace(/^"|"$/g, "");
-
-    const uriParams = {};
-    const searchParamsString =
-        decodeURIComponent(santizedRawData).split("?")[1];
-    searchParamsString.split("&").forEach((pair) => {
-        const [key, value] = pair.split("=");
-        uriParams[key] = value;
-    });
-
-    const uri = URI.parse(santizedRawData);
-    let uriPath = decodeURIComponent(uri.path);
-    if (uriPath.startsWith("/otpauth://") || uriPath.startsWith("otpauth://")) {
-        uriPath = uriPath.split("otpauth://")[1];
-    } else if (uriPath.startsWith("otpauth%3A//")) {
-        uriPath = uriPath.split("otpauth%3A//")[1];
-    }
+    const url = new URL(uriString);
 
     return {
         id,
-        type: _getType(uriPath),
+        type: parseType(url),
         account: _getAccount(uriPath),
         issuer: _getIssuer(uriPath, uriParams),
-        digits: parseDigits(uriParams),
-        period: parsePeriod(uriParams),
-        secret: parseSecret(uriParams),
-        algorithm: parseAlgorithm(uriParams),
+        digits: parseDigits(url),
+        period: parsePeriod(url),
+        secret: parseSecret(url),
+        algorithm: parseAlgorithm(url),
         uriString,
     };
 };
 
-const _getType = (uriPath: string): Code["type"] => {
-    const oauthType = uriPath.split("/")[0].substring(0);
-    if (oauthType.toLowerCase() === "totp") {
-        return "totp";
-    } else if (oauthType.toLowerCase() === "hotp") {
-        return "hotp";
-    }
-    throw new Error(`Unsupported format with host ${oauthType}`);
+const parseType = (url: URL): Code["type"] => {
+    const t = url.host.toLowerCase();
+    if (t == "totp" || t == "hotp") return t;
+    throw new Error(`Unsupported code with host ${t}`);
 };
 
 const _getAccount = (uriPath: string): string => {
@@ -131,14 +106,14 @@ const _getIssuer = (uriPath: string, uriParams: { get?: any }): string => {
     }
 };
 
-const parseDigits = (uriParams): number =>
-    parseInt(uriParams["digits"] ?? "", 10) || 6;
+const parseDigits = (url: URL): number =>
+    parseInt(url.searchParams.get("digits") ?? "", 10) || 6;
 
-const parsePeriod = (uriParams): number =>
-    parseInt(uriParams["period"] ?? "", 10) || 30;
+const parsePeriod = (url: URL): number =>
+    parseInt(url.searchParams.get("period") ?? "", 10) || 30;
 
-const parseAlgorithm = (uriParams): Code["algorithm"] => {
-    switch (uriParams["algorithm"]?.toLowerCase()) {
+const parseAlgorithm = (url: URL): Code["algorithm"] => {
+    switch (url.searchParams.get("algorithm")?.toLowerCase()) {
         case "sha256":
             return "sha256";
         case "sha512":
@@ -148,8 +123,8 @@ const parseAlgorithm = (uriParams): Code["algorithm"] => {
     }
 };
 
-const parseSecret = (uriParams): string =>
-    uriParams["secret"].replaceAll(" ", "").toUpperCase();
+const parseSecret = (url: URL): string =>
+    ensure(url.searchParams.get("secret")).replaceAll(" ", "").toUpperCase();
 
 /**
  * Generate a pair of OTPs (one time passwords) from the given {@link code}.
