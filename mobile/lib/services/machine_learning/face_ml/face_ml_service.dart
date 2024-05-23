@@ -153,8 +153,7 @@ class FaceMlService {
               "MLController allowed running ML, faces indexing starting",
             );
           }
-            unawaited(indexAndClusterAll());
-          }
+          unawaited(indexAndClusterAll());
         } else {
           _logger.info(
             "MLController stopped running ML, faces indexing will be paused (unless it's fetching embeddings)",
@@ -511,6 +510,8 @@ class FaceMlService {
           }
         }
         if (!await canUseHighBandwidth()) {
+          _logger
+              .info('stopping indexing because user is not connected to wifi');
           continue;
         }
         final smallerChunks = chunk.chunks(_fileDownloadLimit);
@@ -540,8 +541,9 @@ class FaceMlService {
 
       stopwatch.stop();
       _logger.info(
-        "`indexAllImages()` finished. Fetched $fetchedCount and analyzed $fileAnalyzedCount images, in ${stopwatch.elapsed.inSeconds} seconds (avg of ${stopwatch.elapsed.inSeconds / fileAnalyzedCount} seconds per image, skipped $fileSkippedCount images. MLController status: $_mlControllerStatus)",
+        "`indexAllImages()` finished. Fetched $fetchedCount and analyzed $fileAnalyzedCount images, in ${stopwatch.elapsed.inSeconds} seconds (avg of ${stopwatch.elapsed.inSeconds / fileAnalyzedCount} seconds per image, skipped $fileSkippedCount images)",
       );
+      _logStatus();
     } catch (e, s) {
       _logger.severe("indexAllImages failed", e, s);
     } finally {
