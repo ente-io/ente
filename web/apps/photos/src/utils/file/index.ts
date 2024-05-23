@@ -262,15 +262,6 @@ export async function decryptFile(
     }
 }
 
-export function generateStreamFromArrayBuffer(data: Uint8Array) {
-    return new ReadableStream({
-        async start(controller: ReadableStreamDefaultController) {
-            controller.enqueue(data);
-            controller.close();
-        },
-    });
-}
-
 /**
  * The returned blob.type is filled in, whenever possible, with the MIME type of
  * the data that we're dealing with.
@@ -649,7 +640,7 @@ async function downloadFileDesktop(
             imageFileName,
             fs.exists,
         );
-        const imageStream = generateStreamFromArrayBuffer(imageData);
+        const imageStream = new Response(imageData).body;
         await writeStream(
             electron,
             `${downloadDir}/${imageExportName}`,
@@ -661,7 +652,7 @@ async function downloadFileDesktop(
                 videoFileName,
                 fs.exists,
             );
-            const videoStream = generateStreamFromArrayBuffer(videoData);
+            const videoStream = new Response(videoData).body;
             await writeStream(
                 electron,
                 `${downloadDir}/${videoExportName}`,

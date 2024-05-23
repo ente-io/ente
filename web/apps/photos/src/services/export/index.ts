@@ -29,7 +29,6 @@ import {
     getNonEmptyPersonalCollections,
 } from "utils/collection";
 import {
-    generateStreamFromArrayBuffer,
     getPersonalFiles,
     getUpdatedEXIFFileForDownload,
     mergeMetadata,
@@ -1026,7 +1025,6 @@ class ExportService {
             videoExportName,
         );
 
-        const imageStream = generateStreamFromArrayBuffer(livePhoto.imageData);
         await this.saveMetadataFile(
             collectionExportPath,
             imageExportName,
@@ -1035,10 +1033,9 @@ class ExportService {
         await writeStream(
             electron,
             `${collectionExportPath}/${imageExportName}`,
-            imageStream,
+            new Response(livePhoto.imageData).body,
         );
 
-        const videoStream = generateStreamFromArrayBuffer(livePhoto.videoData);
         await this.saveMetadataFile(
             collectionExportPath,
             videoExportName,
@@ -1048,7 +1045,7 @@ class ExportService {
             await writeStream(
                 electron,
                 `${collectionExportPath}/${videoExportName}`,
-                videoStream,
+                new Response(livePhoto.videoData).body,
             );
         } catch (e) {
             await fs.rm(`${collectionExportPath}/${imageExportName}`);

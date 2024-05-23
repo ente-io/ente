@@ -97,7 +97,7 @@ class FaceMlService {
   bool _shouldSyncPeople = false;
   bool _isSyncing = false;
 
-  final int _fileDownloadLimit = 10;
+  final int _fileDownloadLimit = 5;
   final int _embeddingFetchLimit = 200;
 
   Future<void> init({bool initializeImageMlIsolate = false}) async {
@@ -109,6 +109,7 @@ class FaceMlService {
         return;
       }
       _logger.info("init called");
+      _logStatus();
       await _computer.compute(initOrtEnv);
       try {
         await FaceDetectionService.instance.init();
@@ -152,8 +153,8 @@ class FaceMlService {
             _logger.info(
               "MLController allowed running ML, faces indexing starting",
             );
-            unawaited(indexAndClusterAll());
           }
+          unawaited(indexAndClusterAll());
         } else {
           _logger.info(
             "MLController stopped running ML, faces indexing will be paused (unless it's fetching embeddings)",
@@ -245,6 +246,7 @@ class FaceMlService {
   }
 
   /// The main execution function of the isolate.
+  @pragma('vm:entry-point')
   static void _isolateMain(SendPort mainSendPort) async {
     final receivePort = ReceivePort();
     mainSendPort.send(receivePort.sendPort);
@@ -286,10 +288,6 @@ class FaceMlService {
     await _ensureSpawnedIsolate();
     return _functionLock.synchronized(() async {
       _resetInactivityTimer();
-
-      if (_shouldPauseIndexingAndClustering == false) {
-        return null;
-      }
 
       final completer = Completer<dynamic>();
       final answerPort = ReceivePort();
@@ -512,12 +510,19 @@ class FaceMlService {
               rethrow;
             }
           }
-        }
-        if (!await canUseHighBandwidth()) {
-          continue;
+        } else {
+          _logger.warning(
+            'Not fetching embeddings because user manually disabled it in debug options',
+          );
         }
         final smallerChunks = chunk.chunks(_fileDownloadLimit);
         for (final smallestChunk in smallerChunks) {
+          if (!await canUseHighBandwidth()) {
+            _logger.info(
+              'stopping indexing because user is not connected to wifi',
+            );
+            break outerLoop;
+          }
           for (final enteFile in smallestChunk) {
             if (_shouldPauseIndexingAndClustering) {
               _logger.info("indexAllImages() was paused, stopping");
@@ -543,8 +548,9 @@ class FaceMlService {
 
       stopwatch.stop();
       _logger.info(
-        "`indexAllImages()` finished. Fetched $fetchedCount and analyzed $fileAnalyzedCount images, in ${stopwatch.elapsed.inSeconds} seconds (avg of ${stopwatch.elapsed.inSeconds / fileAnalyzedCount} seconds per image, skipped $fileSkippedCount images. MLController status: $_mlControllerStatus)",
+        "`indexAllImages()` finished. Fetched $fetchedCount and analyzed $fileAnalyzedCount images, in ${stopwatch.elapsed.inSeconds} seconds (avg of ${stopwatch.elapsed.inSeconds / fileAnalyzedCount} seconds per image, skipped $fileSkippedCount images)",
       );
+      _logStatus();
     } catch (e, s) {
       _logger.severe("indexAllImages failed", e, s);
     } finally {
@@ -758,6 +764,9 @@ class FaceMlService {
         // disposeImageIsolateAfterUse: false,
       );
       if (result == null) {
+        _logger.severe(
+          "Failed to analyze image with uploadedFileID: ${enteFile.uploadedFileID}",
+        );
         return false;
       }
       final List<Face> faces = [];
@@ -877,6 +886,7 @@ class FaceMlService {
         ),
       ) as String?;
       if (resultJsonString == null) {
+        _logger.severe('Analyzing image in isolate is giving back null');
         return null;
       }
       result = FaceMlResult.fromJsonString(resultJsonString);

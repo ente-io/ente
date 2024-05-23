@@ -11,7 +11,7 @@ import { Remote } from "comlink";
 import isElectron from "is-electron";
 import * as ffmpeg from "services/ffmpeg";
 import { EnteFile } from "types/file";
-import { generateStreamFromArrayBuffer, getRenderableImage } from "utils/file";
+import { getRenderableImage } from "utils/file";
 import { PhotosDownloadClient } from "./clients/photos";
 import { PublicAlbumsDownloadClient } from "./clients/publicAlbums";
 
@@ -289,7 +289,7 @@ class DownloadManagerImpl {
                     await this.cryptoWorker.fromB64(file.file.decryptionHeader),
                     file.key,
                 );
-                return generateStreamFromArrayBuffer(decrypted);
+                return new Response(decrypted).body;
             } catch (e) {
                 if (e.message === CustomError.PROCESSING_FAILED) {
                     log.error(
@@ -318,81 +318,78 @@ class DownloadManagerImpl {
         const contentLength = +res.headers.get("Content-Length") ?? 0;
         let downloadedBytes = 0;
 
-        const stream = new ReadableStream({
-            start: async (controller) => {
-                try {
-                    const decryptionHeader = await this.cryptoWorker.fromB64(
-                        file.file.decryptionHeader,
-                    );
-                    const fileKey = await this.cryptoWorker.fromB64(file.key);
-                    const { pullState, decryptionChunkSize } =
-                        await this.cryptoWorker.initChunkDecryption(
-                            decryptionHeader,
-                            fileKey,
+        const decryptionHeader = await this.cryptoWorker.fromB64(
+            file.file.decryptionHeader,
+        );
+        const fileKey = await this.cryptoWorker.fromB64(file.key);
+        const { pullState, decryptionChunkSize } =
+            await this.cryptoWorker.initChunkDecryption(
+                decryptionHeader,
+                fileKey,
+            );
+
+        let leftoverBytes = new Uint8Array();
+
+        return new ReadableStream({
+            pull: async (controller) => {
+                // Each time pull is called, we want to enqueue at least once.
+                let didEnqueue = false;
+                do {
+                    // done is a boolean and value is an Uint8Array. When done
+                    // is true value will be empty.
+                    const { done, value } = await reader.read();
+
+                    let data: Uint8Array;
+                    if (done) {
+                        data = leftoverBytes;
+                    } else {
+                        downloadedBytes += value.length;
+                        onDownloadProgress({
+                            loaded: downloadedBytes,
+                            total: contentLength,
+                        });
+
+                        data = new Uint8Array(
+                            leftoverBytes.length + value.length,
                         );
-
-                    let data = new Uint8Array();
-                    let more = true;
-                    while (more) {
-                        more = false;
-
-                        // "done" is a Boolean and value a "Uint8Array"
-                        const { done, value } = await reader.read();
-
-                        // Is there more data to read?
-                        if (!done) {
-                            downloadedBytes += value.length;
-                            onDownloadProgress({
-                                loaded: downloadedBytes,
-                                total: contentLength,
-                            });
-
-                            const buffer = new Uint8Array(
-                                data.length + value.length,
-                            );
-                            buffer.set(new Uint8Array(data), 0);
-                            buffer.set(new Uint8Array(value), data.length);
-
-                            // Note that buffer.length might be a multiple of
-                            // decryptionChunkSize. We let these accumulate, and
-                            // drain it all with a nested while loop when done.
-
-                            if (buffer.length > decryptionChunkSize) {
-                                const { decryptedData } =
-                                    await this.cryptoWorker.decryptFileChunk(
-                                        buffer.slice(0, decryptionChunkSize),
-                                        pullState,
-                                    );
-                                controller.enqueue(decryptedData);
-                                data = buffer.slice(decryptionChunkSize);
-                            } else {
-                                data = buffer;
-                            }
-                            more = true;
-                        } else {
-                            while (data && data.length) {
-                                const { decryptedData } =
-                                    await this.cryptoWorker.decryptFileChunk(
-                                        data.slice(0, decryptionChunkSize),
-                                        pullState,
-                                    );
-                                controller.enqueue(decryptedData);
-                                data =
-                                    data.length > decryptionChunkSize
-                                        ? data.slice(decryptionChunkSize)
-                                        : undefined;
-                            }
-                            controller.close();
-                        }
+                        data.set(new Uint8Array(leftoverBytes), 0);
+                        data.set(new Uint8Array(value), leftoverBytes.length);
                     }
-                } catch (e) {
-                    log.error("Failed to process file stream", e);
-                    controller.error(e);
-                }
+
+                    // data.length might be a multiple of decryptionChunkSize,
+                    // and we might need multiple iterations to drain it all.
+                    while (data.length >= decryptionChunkSize) {
+                        const { decryptedData } =
+                            await this.cryptoWorker.decryptFileChunk(
+                                data.slice(0, decryptionChunkSize),
+                                pullState,
+                            );
+                        controller.enqueue(decryptedData);
+                        didEnqueue = true;
+                        data = data.slice(decryptionChunkSize);
+                    }
+
+                    if (done) {
+                        // Send off the remaining bytes without waiting for a
+                        // full chunk, no more bytes are going to come.
+                        if (data.length) {
+                            const { decryptedData } =
+                                await this.cryptoWorker.decryptFileChunk(
+                                    data,
+                                    pullState,
+                                );
+                            controller.enqueue(decryptedData);
+                        }
+                        // Don't loop again even if we didn't enqueue.
+                        didEnqueue = true;
+                        controller.close();
+                    } else {
+                        // Save it for the next pull.
+                        leftoverBytes = data;
+                    }
+                } while (!didEnqueue);
             },
         });
-
-        return stream;
     }
 
     trackDownloadProgress = (fileID: number, fileSize: number) => {
