@@ -15,10 +15,9 @@ import MoreHoriz from "@mui/icons-material/MoreHoriz";
 import { Button, ButtonBase, Snackbar, TextField } from "@mui/material";
 import { t } from "i18next";
 import { useRouter } from "next/router";
-import { HOTP, TOTP } from "otpauth";
 import { AppContext } from "pages/_app";
 import React, { useContext, useEffect, useState } from "react";
-import { Code } from "services/code";
+import { generateOTPs, type Code } from "services/code";
 import { getAuthCodes } from "services/remote";
 
 const AuthenticatorCodesPage = () => {
@@ -43,7 +42,7 @@ const AuthenticatorCodesPage = () => {
             }
             setHasFetched(true);
         };
-        fetchCodes();
+        void fetchCodes();
         appContext.showNavBar(false);
     }, []);
 
@@ -122,12 +121,12 @@ const AuthenticatorCodesPage = () => {
                         </div>
                     ) : (
                         filteredCodes.map((code) => (
-                            <CodeDisplay codeInfo={code} key={code.id} />
+                            <CodeDisplay key={code.id} code={code} />
                         ))
                     )}
                 </div>
                 <div style={{ marginBottom: "2rem" }} />
-                <AuthFooter />
+                <Footer />
                 <div style={{ marginBottom: "4rem" }} />
             </div>
         </>
@@ -163,97 +162,67 @@ const AuthNavbar: React.FC = () => {
 };
 
 interface CodeDisplay {
-    codeInfo: Code;
+    code: Code;
 }
 
-const CodeDisplay: React.FC<CodeDisplay> = ({ codeInfo }) => {
+const CodeDisplay: React.FC<CodeDisplay> = ({ code }) => {
     const [otp, setOTP] = useState("");
     const [nextOTP, setNextOTP] = useState("");
-    const [codeErr, setCodeErr] = useState("");
+    const [errorMessage, setErrorMessage] = useState("");
     const [hasCopied, setHasCopied] = useState(false);
 
-    const generateCodes = () => {
+    const regen = () => {
         try {
-            const currentTime = new Date().getTime();
-            if (codeInfo.type === "totp") {
-                const totp = new TOTP({
-                    secret: codeInfo.secret,
-                    algorithm: codeInfo.algorithm,
-                    period: codeInfo.period,
-                    digits: codeInfo.digits,
-                });
-                setOTP(totp.generate());
-                setNextOTP(
-                    totp.generate({
-                        timestamp: currentTime + codeInfo.period * 1000,
-                    }),
-                );
-            } else if (codeInfo.type === "hotp") {
-                const hotp = new HOTP({
-                    secret: codeInfo.secret,
-                    counter: 0,
-                    algorithm: codeInfo.algorithm,
-                });
-                setOTP(hotp.generate());
-                setNextOTP(hotp.generate({ counter: 1 }));
-            }
-        } catch (err) {
-            setCodeErr(err.message);
+            const [m, n] = generateOTPs(code);
+            setOTP(m);
+            setNextOTP(n);
+        } catch (e) {
+            setErrorMessage(e instanceof Error ? e.message : String(e));
         }
     };
 
     const copyCode = () => {
         navigator.clipboard.writeText(otp);
         setHasCopied(true);
-        setTimeout(() => {
-            setHasCopied(false);
-        }, 2000);
+        setTimeout(() => setHasCopied(false), 2000);
     };
 
     useEffect(() => {
-        // this is to set the initial code and nextCode on component mount
-        generateCodes();
-        const codeType = codeInfo.type;
-        const codePeriodInMs = codeInfo.period * 1000;
+        // Generate to set the initial otp and nextOTP on component mount.
+        regen();
+        const codeType = code.type;
+        const codePeriodInMs = code.period * 1000;
         const timeToNextCode =
             codePeriodInMs - (new Date().getTime() % codePeriodInMs);
-        const intervalId = null;
-        // wait until we are at the start of the next code period,
-        // and then start the interval loop
+        const interval = null;
+        // Wait until we are at the start of the next code period, and then
+        // start the interval loop.
         setTimeout(() => {
-            // we need to call generateCodes() once before the interval loop
-            // to set the initial code and nextCode
-            generateCodes();
+            // We need to call regen() once before the interval loop to set the
+            // initial otp and nextOTP.
+            regen();
             codeType.toLowerCase() === "totp" ||
             codeType.toLowerCase() === "hotp"
                 ? setInterval(() => {
-                      generateCodes();
+                      regen();
                   }, codePeriodInMs)
                 : null;
         }, timeToNextCode);
 
         return () => {
-            if (intervalId) clearInterval(intervalId);
+            if (interval) clearInterval(interval);
         };
-    }, [codeInfo]);
+    }, [code]);
 
     return (
         <div style={{ padding: "8px" }}>
-            {codeErr === "" ? (
-                <ButtonBase
-                    component="div"
-                    onClick={() => {
-                        copyCode();
-                    }}
-                >
-                    <OTPDisplay code={codeInfo} otp={otp} nextOTP={nextOTP} />
-                    <Snackbar
-                        open={hasCopied}
-                        message="Code copied to clipboard"
-                    />
-                </ButtonBase>
+            {errorMessage ? (
+                <UnparseableCode {...{ code, errorMessage }} />
             ) : (
-                <BadCodeInfo codeInfo={codeInfo} codeErr={codeErr} />
+                <ButtonBase component="div" onClick={copyCode}>
+                    <OTPDisplay {...{ code, otp, nextOTP }} />
+                    <Snackbar open={hasCopied} message={t("COPIED")} />
+                </ButtonBase>
             )}
         </div>
     );
@@ -376,19 +345,15 @@ interface TimerProgressProps {
 
 const TimerProgress: React.FC<TimerProgressProps> = ({ period }) => {
     const [progress, setProgress] = useState(0);
-    const microSecondsInPeriod = period * 1000000;
+    const us = period * 1e6;
 
     useEffect(() => {
-        const updateTimeRemaining = () => {
-            const timeRemaining =
-                microSecondsInPeriod -
-                ((new Date().getTime() * 1000) % microSecondsInPeriod);
-            setProgress(timeRemaining / microSecondsInPeriod);
+        const advance = () => {
+            const timeRemaining = us - ((new Date().getTime() * 1000) % us);
+            setProgress(timeRemaining / us);
         };
 
-        const ticker = setInterval(() => {
-            updateTimeRemaining();
-        }, 10);
+        const ticker = setInterval(advance, 10);
 
         return () => clearInterval(ticker);
     }, []);
@@ -407,17 +372,25 @@ const TimerProgress: React.FC<TimerProgressProps> = ({ period }) => {
     );
 };
 
-function BadCodeInfo({ codeInfo, codeErr }) {
+interface UnparseableCodeProps {
+    code: Code;
+    errorMessage: string;
+}
+
+const UnparseableCode: React.FC<UnparseableCodeProps> = ({
+    code,
+    errorMessage,
+}) => {
     const [showRawData, setShowRawData] = useState(false);
 
     return (
         <div className="code-info">
-            <div>{codeInfo.title}</div>
-            <div>{codeErr}</div>
+            <div>{code.issuer}</div>
+            <div>{errorMessage}</div>
             <div>
                 {showRawData ? (
                     <div onClick={() => setShowRawData(false)}>
-                        {codeInfo.uriString ?? "(no raw data)"}
+                        {code.uriString}
                     </div>
                 ) : (
                     <div onClick={() => setShowRawData(true)}>Show rawData</div>
@@ -425,9 +398,9 @@ function BadCodeInfo({ codeInfo, codeErr }) {
             </div>
         </div>
     );
-}
+};
 
-const AuthFooter: React.FC = () => {
+const Footer: React.FC = () => {
     return (
         <div
             style={{
