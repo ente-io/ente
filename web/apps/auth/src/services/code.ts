@@ -19,7 +19,7 @@ export class Code {
     constructor(
         account: string,
         issuer: string,
-        digits: number | undefined,
+        digits: number,
         period: number,
         secret: string,
         algorithm: Algorithm,
@@ -39,6 +39,14 @@ export class Code {
     }
 }
 
+/**
+ * Convert a "raw" OTP secret URL into its parse representation, a {@link Code}.
+ *
+ * An example {@link rawData}:
+ *
+ *     otpauth://totp/account:user@example.org?algorithm=SHA1&digits=6&issuer=issuer&period=30&secret=ALPHANUM
+ *
+ */
 export const codeFromRawData = (id: string, rawData: string): Code => {
     let santizedRawData = rawData
         .replace(/\+/g, "%2B")

@@ -176,7 +176,6 @@ const CodeDisplay: React.FC<CodeDisplay> = ({ codeInfo }) => {
         try {
             const currentTime = new Date().getTime();
             if (codeInfo.type.toLowerCase() === "totp") {
-                console.log({ codeInfo });
                 const totp = new TOTP({
                     secret: codeInfo.secret,
                     algorithm: codeInfo.algorithm,
