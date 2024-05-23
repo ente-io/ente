@@ -246,6 +246,7 @@ class FaceMlService {
   }
 
   /// The main execution function of the isolate.
+  @pragma('vm:entry-point')
   static void _isolateMain(SendPort mainSendPort) async {
     final receivePort = ReceivePort();
     mainSendPort.send(receivePort.sendPort);
