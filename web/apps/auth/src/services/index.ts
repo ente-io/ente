@@ -6,10 +6,10 @@ import { getEndpoint } from "@ente/shared/network/api";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { getActualKey } from "@ente/shared/user";
 import { HttpStatusCode } from "axios";
-import { AuthEntity, AuthKey } from "types/api";
 import { Code } from "types/code";
 
 const ENDPOINT = getEndpoint();
+
 export const getAuthCodes = async (): Promise<Code[]> => {
     const masterKey = await getActualKey();
     try {
@@ -64,6 +64,20 @@ export const getAuthCodes = async (): Promise<Code[]> => {
         throw e;
     }
 };
+
+interface AuthEntity {
+    id: string;
+    encryptedData: string | null;
+    header: string | null;
+    isDeleted: boolean;
+    createdAt: number;
+    updatedAt: number;
+}
+
+interface AuthKey {
+    encryptedKey: string;
+    header: string;
+}
 
 export const getAuthKey = async (): Promise<AuthKey> => {
     try {

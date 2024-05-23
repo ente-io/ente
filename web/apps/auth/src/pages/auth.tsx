@@ -1,15 +1,23 @@
-import { VerticallyCentered } from "@ente/shared/components/Container";
+import {
+    HorizontalFlex,
+    VerticallyCentered,
+} from "@ente/shared/components/Container";
+import { EnteLogo } from "@ente/shared/components/EnteLogo";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
+import NavbarBase from "@ente/shared/components/Navbar/base";
+import OverflowMenu from "@ente/shared/components/OverflowMenu/menu";
+import { OverflowMenuOption } from "@ente/shared/components/OverflowMenu/option";
 import { AUTH_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { CustomError } from "@ente/shared/error";
 import InMemoryStore, { MS_KEYS } from "@ente/shared/storage/InMemoryStore";
+import LogoutOutlined from "@mui/icons-material/LogoutOutlined";
+import MoreHoriz from "@mui/icons-material/MoreHoriz";
 import { Button, TextField } from "@mui/material";
-import AuthNavbar from "components/Navbar";
 import OTPDisplay from "components/OTPDisplay";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { AppContext } from "pages/_app";
-import { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { getAuthCodes } from "services";
 
 const AuthenticatorCodesPage = () => {
@@ -126,6 +134,32 @@ const AuthenticatorCodesPage = () => {
 };
 
 export default AuthenticatorCodesPage;
+
+const AuthNavbar: React.FC = () => {
+    const { isMobile, logout } = useContext(AppContext);
+
+    return (
+        <NavbarBase isMobile={isMobile}>
+            <HorizontalFlex flex={1} justifyContent={"center"}>
+                <EnteLogo />
+            </HorizontalFlex>
+            <HorizontalFlex position={"absolute"} right="24px">
+                <OverflowMenu
+                    ariaControls={"auth-options"}
+                    triggerButtonIcon={<MoreHoriz />}
+                >
+                    <OverflowMenuOption
+                        color="critical"
+                        startIcon={<LogoutOutlined />}
+                        onClick={logout}
+                    >
+                        {t("LOGOUT")}
+                    </OverflowMenuOption>
+                </OverflowMenu>
+            </HorizontalFlex>
+        </NavbarBase>
+    );
+};
 
 const AuthFooter: React.FC = () => {
     return (
