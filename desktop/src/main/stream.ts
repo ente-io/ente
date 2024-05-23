@@ -106,12 +106,7 @@ const handleRead = async (path: string) => {
         res.headers.set("Content-Length", `${fileSize}`);
 
         // Add the file's last modified time (as epoch milliseconds).
-        //
-        // [Note: Use integral epoch milliseconds]
-        //
-        // The `mtimeMs` returned by Node.js is a double, with sub-millisecond
-        // precision. Ente clients expect integral milliseconds, so truncate.
-        const mtimeMs = Math.trunc(stat.mtimeMs);
+        const mtimeMs = stat.mtime.getTime();
         res.headers.set("X-Last-Modified-Ms", `${mtimeMs}`);
     }
     return res;
@@ -142,11 +137,7 @@ const handleReadZip = async (zipPath: string, entryName: string) => {
     // verify that it is indeed epoch milliseconds. See `parseZipTime`
     // in the node-stream-zip source,
     // https://github.com/antelle/node-stream-zip/blob/master/node_stream_zip.js
-    //
-    // See also: [Note: Use integral epoch milliseconds]. In this case I didn't
-    // actually find an example of submillisecond precision, just being
-    // preemptively careful and this Math.trunc might not necessarily be needed.
-    const modifiedMs = Math.trunc(entry.time);
+    const modifiedMs = entry.time;
 
     return new Response(webReadableStream, {
         headers: {
