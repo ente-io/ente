@@ -175,7 +175,7 @@ const CodeDisplay: React.FC<CodeDisplay> = ({ codeInfo }) => {
     const generateCodes = () => {
         try {
             const currentTime = new Date().getTime();
-            if (codeInfo.type.toLowerCase() === "totp") {
+            if (codeInfo.type === "totp") {
                 const totp = new TOTP({
                     secret: codeInfo.secret,
                     algorithm: codeInfo.algorithm,
@@ -188,7 +188,7 @@ const CodeDisplay: React.FC<CodeDisplay> = ({ codeInfo }) => {
                         timestamp: currentTime + codeInfo.period * 1000,
                     }),
                 );
-            } else if (codeInfo.type.toLowerCase() === "hotp") {
+            } else if (codeInfo.type === "hotp") {
                 const hotp = new HOTP({
                     secret: codeInfo.secret,
                     counter: 0,
@@ -417,7 +417,7 @@ function BadCodeInfo({ codeInfo, codeErr }) {
             <div>
                 {showRawData ? (
                     <div onClick={() => setShowRawData(false)}>
-                        {codeInfo.rawData ?? "no raw data"}
+                        {codeInfo.uriString ?? "(no raw data)"}
                     </div>
                 ) : (
                     <div onClick={() => setShowRawData(true)}>Show rawData</div>

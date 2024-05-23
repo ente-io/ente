@@ -6,7 +6,7 @@ import { getEndpoint } from "@ente/shared/network/api";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { getActualKey } from "@ente/shared/user";
 import { HttpStatusCode } from "axios";
-import { Code, codeFromRawData } from "services/code";
+import { codeFromURIString, type Code } from "services/code";
 
 const ENDPOINT = getEndpoint();
 
@@ -33,7 +33,7 @@ export const getAuthCodes = async (): Promise<Code[]> => {
                                 entity.header,
                                 authenticatorKey,
                             );
-                        return codeFromRawData(entity.id, decryptedCode);
+                        return codeFromURIString(entity.id, decryptedCode);
                     } catch (e) {
                         log.error(`failed to parse codeId = ${entity.id}`);
                         return null;
