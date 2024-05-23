@@ -311,7 +311,12 @@ func (repo *FileRepository) Update(file ente.File, fileSize int64, thumbnailSize
 
 // UpdateMagicAttributes updates the magic attributes for the list of files and update collection_files & collection
 // which have this file.
-func (repo *FileRepository) UpdateMagicAttributes(ctx context.Context, fileUpdates []ente.UpdateMagicMetadata, isPublicMetadata bool) error {
+func (repo *FileRepository) UpdateMagicAttributes(
+	ctx context.Context,
+	fileUpdates []ente.UpdateMagicMetadata,
+	isPublicMetadata bool,
+	skipVersion *bool,
+) error {
 	updationTime := time.Microseconds()
 	tx, err := repo.DB.BeginTx(ctx, nil)
 	if err != nil {
@@ -335,6 +340,9 @@ func (repo *FileRepository) UpdateMagicAttributes(ctx context.Context, fileUpdat
 			}
 			return stacktrace.Propagate(err, "")
 		}
+	}
+	if skipVersion != nil && *skipVersion {
+		return tx.Commit()
 	}
 	// todo: full table scan, need to add index (for discussion: add user_id and idx {user_id, file_id}).
 	updatedRows, err := tx.QueryContext(ctx, `UPDATE collection_files 

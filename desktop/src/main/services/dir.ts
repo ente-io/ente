@@ -1,7 +1,5 @@
 import { shell } from "electron/common";
 import { app, dialog } from "electron/main";
-import { existsSync } from "fs";
-import fs from "node:fs/promises";
 import path from "node:path";
 import { posixPath } from "../utils/electron";
 
@@ -53,37 +51,19 @@ export const openLogDirectory = () => openDirectory(logDirectoryPath());
  * "userData" directory. This is the **primary** place applications are meant to
  * store user's data, e.g. various configuration files and saved state.
  *
- * During development, our app name is "Electron", so this'd be, for example,
- * `~/Library/Application Support/Electron` if we run using `yarn dev`. For the
- * packaged production app, our app name is "ente", so this would be:
- *
- * - Windows: `%APPDATA%\ente`, e.g. `C:\Users\<username>\AppData\Local\ente`
- * - Linux: `~/.config/ente`
- * - macOS: `~/Library/Application Support/ente`
- *
  * Note that Chromium also stores the browser state, e.g. localStorage or disk
  * caches, in userData.
+ *
+ * https://www.electronjs.org/docs/latest/api/app
+ *
+ * [Note: App log path]
  *
  * Finally, there is the "logs" directory. This is not within "appData" but has
  * a slightly different OS specific path. Since our log file is named
  * "ente.log", it can be found at:
  *
  * - macOS: ~/Library/Logs/ente/ente.log (production)
- * - macOS: ~/Library/Logs/Electron/ente.log    (dev)
- *
- * https://www.electronjs.org/docs/latest/api/app
+ * - Linux: ~/.config/ente/logs/ente.log
+ * - Windows: %USERPROFILE%\AppData\Roaming\ente\logs\ente.log
  */
 const logDirectoryPath = () => app.getPath("logs");
-
-/**
- * See: [Note: Legacy face crops]
- */
-export const legacyFaceCrop = async (
-    faceID: string,
-): Promise<Uint8Array | undefined> => {
-    // See: [Note: Getting the cache path]
-    // @ts-expect-error "cache" works but is not part of the public API.
-    const cacheDir = path.join(app.getPath("cache"), "ente");
-    const filePath = path.join(cacheDir, "face-crops", faceID);
-    return existsSync(filePath) ? await fs.readFile(filePath) : undefined;
-};

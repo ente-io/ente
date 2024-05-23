@@ -6,6 +6,8 @@ PODS:
   - connectivity_plus (0.0.1):
     - Flutter
     - FlutterMacOS
+  - dart_ui_isolate (0.0.1):
+    - Flutter
   - device_info_plus (0.0.1):
     - Flutter
   - file_saver (0.0.1):
@@ -226,6 +228,7 @@ DEPENDENCIES:
   - background_fetch (from `.symlinks/plugins/background_fetch/ios`)
   - battery_info (from `.symlinks/plugins/battery_info/ios`)
   - connectivity_plus (from `.symlinks/plugins/connectivity_plus/darwin`)
+  - dart_ui_isolate (from `.symlinks/plugins/dart_ui_isolate/ios`)
   - device_info_plus (from `.symlinks/plugins/device_info_plus/ios`)
   - file_saver (from `.symlinks/plugins/file_saver/ios`)
   - firebase_core (from `.symlinks/plugins/firebase_core/ios`)
@@ -302,6 +305,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/battery_info/ios"
   connectivity_plus:
     :path: ".symlinks/plugins/connectivity_plus/darwin"
+  dart_ui_isolate:
+    :path: ".symlinks/plugins/dart_ui_isolate/ios"
   device_info_plus:
     :path: ".symlinks/plugins/device_info_plus/ios"
   file_saver:
@@ -397,6 +402,7 @@ SPEC CHECKSUMS:
   background_fetch: 2319bf7e18237b4b269430b7f14d177c0df09c5a
   battery_info: 09f5c9ee65394f2291c8c6227bedff345b8a730c
   connectivity_plus: ddd7f30999e1faaef5967c23d5b6d503d10434db
+  dart_ui_isolate: d5bcda83ca4b04f129d70eb90110b7a567aece14
   device_info_plus: c6fb39579d0f423935b0c9ce7ee2f44b71b9fce6
   file_saver: 503e386464dbe118f630e17b4c2e1190fa0cf808
   Firebase: 91fefd38712feb9186ea8996af6cbdef41473442
@@ -421,7 +427,7 @@ SPEC CHECKSUMS:
   home_widget: 0434835a4c9a75704264feff6be17ea40e0f0d57
   image_editor_common: d6f6644ae4a6de80481e89fe6d0a8c49e30b4b43
   in_app_purchase_storekit: 0e4b3c2e43ba1e1281f4f46dd71b0593ce529892
-  integration_test: 13825b8a9334a850581300559b8839134b124670
+  integration_test: ce0a3ffa1de96d1a89ca0ac26fca7ea18a749ef4
   libwebp: 1786c9f4ff8a279e4dac1e8f385004d5fc253009
   local_auth_darwin: c7e464000a6a89e952235699e32b329457608d98
   local_auth_ios: 5046a18c018dd973247a0564496c8898dbb5adf9

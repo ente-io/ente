@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:ui' as ui;
 
 import 'package:clipboard/clipboard.dart';
 import 'package:ente_auth/core/configuration.dart';
@@ -11,6 +12,7 @@ import 'package:ente_auth/onboarding/view/view_qr_page.dart';
 import 'package:ente_auth/services/local_authentication_service.dart';
 import 'package:ente_auth/services/preference_service.dart';
 import 'package:ente_auth/store/code_store.dart';
+import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/code_timer_progress.dart';
 import 'package:ente_auth/ui/utils/icon_utils.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
@@ -20,13 +22,17 @@ import 'package:ente_auth/utils/totp_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_context_menu/flutter_context_menu.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:logging/logging.dart';
 import 'package:move_to_background/move_to_background.dart';
 
 class CodeWidget extends StatefulWidget {
   final Code code;
 
-  const CodeWidget(this.code, {super.key});
+  const CodeWidget(
+    this.code, {
+    super.key,
+  });
 
   @override
   State<CodeWidget> createState() => _CodeWidgetState();
@@ -71,6 +77,7 @@ class _CodeWidgetState extends State<CodeWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
     if (isMaskingEnabled != PreferenceService.instance.shouldHideCodes()) {
       isMaskingEnabled = PreferenceService.instance.shouldHideCodes();
       _hideCode = isMaskingEnabled;
@@ -84,6 +91,100 @@ class _CodeWidgetState extends State<CodeWidget> {
       _isInitialized = true;
     }
     final l10n = context.l10n;
+
+    Widget getCardContents(AppLocalizations l10n) {
+      return Stack(
+        children: [
+          if (widget.code.isPinned)
+            Align(
+              alignment: Alignment.topRight,
+              child: CustomPaint(
+                painter: PinBgPainter(
+                  color: colorScheme.pinnedBgColor,
+                ),
+                size: const Size(39, 39),
+              ),
+            ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              if (widget.code.type.isTOTPCompatible)
+                CodeTimerProgress(
+                  period: widget.code.period,
+                ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  _shouldShowLargeIcon ? _getIcon() : const SizedBox.shrink(),
+                  Expanded(
+                    child: Column(
+                      children: [
+                        _getTopRow(),
+                        const SizedBox(height: 4),
+                        _getBottomRow(l10n),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(
+                height: 20,
+              ),
+            ],
+          ),
+          if (widget.code.isPinned) ...[
+            Align(
+              alignment: Alignment.topRight,
+              child: Padding(
+                padding: const EdgeInsets.only(right: 6, top: 6),
+                child: SvgPicture.asset("assets/svg/pin-card.svg"),
+              ),
+            ),
+          ],
+        ],
+      );
+    }
+
+    Widget clippedCard(AppLocalizations l10n) {
+      return Container(
+        height: 132,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8),
+          color: Theme.of(context).colorScheme.codeCardBackgroundColor,
+          boxShadow:
+              widget.code.isPinned ? colorScheme.pinnedCardBoxShadow : [],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              customBorder: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              onTap: () {
+                _copyCurrentOTPToClipboard();
+              },
+              onDoubleTap: isMaskingEnabled
+                  ? () {
+                      setState(
+                        () {
+                          _hideCode = !_hideCode;
+                        },
+                      );
+                    }
+                  : null,
+              onLongPress: () {
+                _copyCurrentOTPToClipboard();
+              },
+              child: getCardContents(l10n),
+            ),
+          ),
+        ),
+      );
+    }
+
     return Container(
       margin: const EdgeInsets.only(left: 16, right: 16, bottom: 8, top: 8),
       child: Builder(
@@ -96,6 +197,13 @@ class _CodeWidgetState extends State<CodeWidget> {
                     label: 'QR',
                     icon: Icons.qr_code_2_outlined,
                     onSelected: () => _onShowQrPressed(null),
+                  ),
+                  MenuItem(
+                    label: widget.code.isPinned ? l10n.unpinText : l10n.pinText,
+                    icon: widget.code.isPinned
+                        ? Icons.push_pin
+                        : Icons.push_pin_outlined,
+                    onSelected: () => _onPinPressed(null),
                   ),
                   MenuItem(
                     label: l10n.edit,
@@ -112,23 +220,23 @@ class _CodeWidgetState extends State<CodeWidget> {
                 ],
                 padding: const EdgeInsets.all(8.0),
               ),
-              child: _clippedCard(l10n),
+              child: clippedCard(l10n),
             );
           }
 
           return Slidable(
             key: ValueKey(widget.code.hashCode),
             endActionPane: ActionPane(
-              extentRatio: 0.60,
+              extentRatio: 0.90,
               motion: const ScrollMotion(),
               children: [
                 const SizedBox(
-                  width: 4,
+                  width: 14,
                 ),
                 SlidableAction(
                   onPressed: _onShowQrPressed,
                   backgroundColor: Colors.grey.withOpacity(0.1),
-                  borderRadius: const BorderRadius.all(Radius.circular(12.0)),
+                  borderRadius: const BorderRadius.all(Radius.circular(8)),
                   foregroundColor:
                       Theme.of(context).colorScheme.inverseBackgroundColor,
                   icon: Icons.qr_code_2_outlined,
@@ -137,12 +245,48 @@ class _CodeWidgetState extends State<CodeWidget> {
                   spacing: 8,
                 ),
                 const SizedBox(
-                  width: 4,
+                  width: 14,
+                ),
+                CustomSlidableAction(
+                  onPressed: _onPinPressed,
+                  backgroundColor: Colors.grey.withOpacity(0.1),
+                  borderRadius: const BorderRadius.all(Radius.circular(8)),
+                  foregroundColor:
+                      Theme.of(context).colorScheme.inverseBackgroundColor,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      if (widget.code.isPinned)
+                        SvgPicture.asset(
+                          "assets/svg/pin-active.svg",
+                          colorFilter: ui.ColorFilter.mode(
+                            Theme.of(context).colorScheme.primary,
+                            BlendMode.srcIn,
+                          ),
+                        )
+                      else
+                        SvgPicture.asset(
+                          "assets/svg/pin-inactive.svg",
+                          colorFilter: ui.ColorFilter.mode(
+                            Theme.of(context).colorScheme.primary,
+                            BlendMode.srcIn,
+                          ),
+                        ),
+                      const SizedBox(height: 8),
+                      Text(
+                        widget.code.isPinned ? l10n.unpinText : l10n.pinText,
+                      ),
+                    ],
+                  ),
+                  padding: const EdgeInsets.only(left: 4, right: 0),
+                ),
+                const SizedBox(
+                  width: 14,
                 ),
                 SlidableAction(
                   onPressed: _onEditPressed,
                   backgroundColor: Colors.grey.withOpacity(0.1),
-                  borderRadius: const BorderRadius.all(Radius.circular(12.0)),
+                  borderRadius: const BorderRadius.all(Radius.circular(8)),
                   foregroundColor:
                       Theme.of(context).colorScheme.inverseBackgroundColor,
                   icon: Icons.edit_outlined,
@@ -151,13 +295,13 @@ class _CodeWidgetState extends State<CodeWidget> {
                   spacing: 8,
                 ),
                 const SizedBox(
-                  width: 4,
+                  width: 14,
                 ),
                 SlidableAction(
                   onPressed: _onDeletePressed,
                   backgroundColor: Colors.grey.withOpacity(0.1),
-                  borderRadius: const BorderRadius.all(Radius.circular(12.0)),
-                  foregroundColor: const Color(0xFFFE4A49),
+                  borderRadius: const BorderRadius.all(Radius.circular(8)),
+                  foregroundColor: colorScheme.deleteCodeTextColor,
                   icon: Icons.delete,
                   label: l10n.delete,
                   padding: const EdgeInsets.only(left: 0, right: 0),
@@ -166,78 +310,10 @@ class _CodeWidgetState extends State<CodeWidget> {
               ],
             ),
             child: Builder(
-              builder: (context) => _clippedCard(l10n),
+              builder: (context) => clippedCard(l10n),
             ),
           );
         },
-      ),
-    );
-  }
-
-  Widget _clippedCard(AppLocalizations l10n) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(8),
-      child: Container(
-        color: Theme.of(context).colorScheme.codeCardBackgroundColor,
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            customBorder: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-            onTap: () {
-              _copyCurrentOTPToClipboard();
-            },
-            onDoubleTap: isMaskingEnabled
-                ? () {
-                    setState(
-                      () {
-                        _hideCode = !_hideCode;
-                      },
-                    );
-                  }
-                : null,
-            onLongPress: () {
-              _copyCurrentOTPToClipboard();
-            },
-            child: _getCardContents(l10n),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _getCardContents(AppLocalizations l10n) {
-    return SizedBox(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          if (widget.code.type.isTOTPCompatible)
-            CodeTimerProgress(
-              period: widget.code.period,
-            ),
-          const SizedBox(
-            height: 16,
-          ),
-          Row(
-            children: [
-              _shouldShowLargeIcon ? _getIcon() : const SizedBox.shrink(),
-              Expanded(
-                child: Column(
-                  children: [
-                    _getTopRow(),
-                    const SizedBox(height: 4),
-                    _getBottomRow(l10n),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(
-            height: 20,
-          ),
-        ],
       ),
     );
   }
@@ -422,7 +498,9 @@ class _CodeWidgetState extends State<CodeWidget> {
     final Code? code = await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (BuildContext context) {
-          return SetupEnterSecretKeyPage(code: widget.code);
+          return SetupEnterSecretKeyPage(
+            code: widget.code,
+          );
         },
       ),
     );
@@ -445,6 +523,24 @@ class _CodeWidgetState extends State<CodeWidget> {
           return ViewQrPage(code: widget.code);
         },
       ),
+    );
+  }
+
+  Future<void> _onPinPressed(_) async {
+    bool currentlyPinned = widget.code.isPinned;
+    final display = widget.code.display;
+    final Code code = widget.code.copyWith(
+      display: display.copyWith(pinned: !currentlyPinned),
+    );
+    unawaited(
+      CodeStore.instance.addCode(code).then(
+            (value) => showToast(
+              context,
+              !currentlyPinned
+                  ? context.l10n.pinnedCodeMessage(widget.code.issuer)
+                  : context.l10n.unpinnedCodeMessage(widget.code.issuer),
+            ),
+          ),
     );
   }
 
@@ -491,11 +587,44 @@ class _CodeWidgetState extends State<CodeWidget> {
   String _getFormattedCode(String code) {
     if (_hideCode) {
       // replace all digits with •
-      code = code.replaceAll(RegExp(r'\d'), '•');
+      code = code.replaceAll(RegExp(r'\S'), '•');
     }
     if (code.length == 6) {
       return "${code.substring(0, 3)} ${code.substring(3, 6)}";
     }
     return code;
+  }
+}
+
+class PinBgPainter extends CustomPainter {
+  final Color color;
+  final PaintingStyle paintingStyle;
+
+  PinBgPainter({
+    this.color = Colors.black,
+    this.paintingStyle = PaintingStyle.fill,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    Paint paint = Paint()
+      ..color = color
+      ..style = paintingStyle;
+
+    canvas.drawPath(getTrianglePath(size.width, size.height), paint);
+  }
+
+  Path getTrianglePath(double x, double y) {
+    return Path()
+      ..moveTo(0, 0)
+      ..lineTo(x, 0)
+      ..lineTo(x, y)
+      ..lineTo(0, 0);
+  }
+
+  @override
+  bool shouldRepaint(PinBgPainter oldDelegate) {
+    return oldDelegate.color != color ||
+        oldDelegate.paintingStyle != paintingStyle;
   }
 }

@@ -1,11 +1,9 @@
 import { ensureElectron } from "@/next/electron";
 import { AppUpdate } from "@/next/types/ipc";
-import { logoutUser } from "@ente/accounts/services/user";
 import { DialogBoxAttributes } from "@ente/shared/components/DialogBox/types";
 import AutoAwesomeOutlinedIcon from "@mui/icons-material/AutoAwesomeOutlined";
 import InfoOutlined from "@mui/icons-material/InfoRounded";
 import { Link } from "@mui/material";
-import { OPEN_STREET_MAP_LINK } from "components/Sidebar/EnableMap";
 import { t } from "i18next";
 import { Trans } from "react-i18next";
 import { Subscription } from "types/billing";
@@ -69,6 +67,7 @@ export const getUpdateReadyToInstallMessage = ({
         variant: "secondary",
         action: () => ensureElectron().updateOnNextRestart(version),
     },
+    staticBackdrop: true,
 });
 
 export const getUpdateAvailableForDownloadMessage = ({
@@ -121,14 +120,16 @@ export const getSubscriptionPurchaseSuccessMessage = (
     ),
 });
 
-export const getSessionExpiredMessage = (): DialogBoxAttributes => ({
+export const getSessionExpiredMessage = (
+    action: () => void,
+): DialogBoxAttributes => ({
     title: t("SESSION_EXPIRED"),
     content: t("SESSION_EXPIRED_MESSAGE"),
 
     nonClosable: true,
     proceed: {
         text: t("LOGIN"),
-        action: logoutUser,
+        action,
         variant: "accent",
     },
 });
@@ -141,7 +142,12 @@ export const getMapEnableConfirmationDialog = (
         <Trans
             i18nKey={"ENABLE_MAP_DESCRIPTION"}
             components={{
-                a: <Link target="_blank" href={OPEN_STREET_MAP_LINK} />,
+                a: (
+                    <Link
+                        target="_blank"
+                        href="https://www.openstreetmap.org/"
+                    />
+                ),
             }}
         />
     ),

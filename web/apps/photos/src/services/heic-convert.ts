@@ -1,9 +1,10 @@
+import { createHEICConvertComlinkWorker } from "@/media/worker/heic-convert";
+import type { DedicatedHEICConvertWorker } from "@/media/worker/heic-convert.worker";
 import log from "@/next/log";
 import { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { CustomError } from "@ente/shared/error";
 import { retryAsyncFunction } from "@ente/shared/utils";
 import QueueProcessor from "@ente/shared/utils/queueProcessor";
-import { type DedicatedHEICConvertWorker } from "worker/heic-convert.worker";
 
 /**
  * Convert a HEIC image to a JPEG.
@@ -29,7 +30,7 @@ class HEICConverter {
         if (this.workerPool.length > 0) return;
         this.workerPool = [];
         for (let i = 0; i < WORKER_POOL_SIZE; i++)
-            this.workerPool.push(createComlinkWorker());
+            this.workerPool.push(createHEICConvertComlinkWorker());
     }
 
     async convert(fileBlob: Blob): Promise<Blob> {
@@ -50,9 +51,7 @@ class HEICConverter {
                                     const startTime = Date.now();
                                     const convertedHEIC =
                                         await worker.heicToJPEG(fileBlob);
-                                    const ms = Math.round(
-                                        Date.now() - startTime,
-                                    );
+                                    const ms = Date.now() - startTime;
                                     log.debug(() => `heic => jpeg (${ms} ms)`);
                                     clearTimeout(timeout);
                                     resolve(convertedHEIC);
@@ -79,7 +78,7 @@ class HEICConverter {
                 } catch (e) {
                     log.error("HEIC conversion failed", e);
                     convertWorker.terminate();
-                    this.workerPool.push(createComlinkWorker());
+                    this.workerPool.push(createHEICConvertComlinkWorker());
                     throw e;
                 }
             }, WAIT_TIME_BEFORE_NEXT_ATTEMPT_IN_MICROSECONDS),
@@ -99,9 +98,3 @@ class HEICConverter {
 
 /** The singleton instance of {@link HEICConverter}. */
 const converter = new HEICConverter();
-
-const createComlinkWorker = () =>
-    new ComlinkWorker<typeof DedicatedHEICConvertWorker>(
-        "heic-convert-worker",
-        new Worker(new URL("worker/heic-convert.worker.ts", import.meta.url)),
-    );

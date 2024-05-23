@@ -110,7 +110,7 @@ func (h *FileHandler) GetUploadURLs(c *gin.Context) {
 
 	userID := auth.GetUserID(c.Request.Header)
 	count, _ := strconv.Atoi(c.Query("count"))
-	urls, err := h.Controller.GetUploadURLs(c, userID, count, enteApp)
+	urls, err := h.Controller.GetUploadURLs(c, userID, count, enteApp, false)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return

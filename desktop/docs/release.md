@@ -1,44 +1,62 @@
 ## Releases
 
-Conceptually, the release is straightforward: We push a tag, a GitHub workflow
-gets triggered that creates a draft release with artifacts built from that tag.
-We then publish that release. The download links on our website, and existing
-apps already know how to check for the latest GitHub release and update
-accordingly.
+Conceptually, the release is straightforward: We trigger a GitHub workflow that
+creates a draft release with artifacts built. When ready, we publish that
+release. The download links on our website, and existing apps already check the
+latest GitHub release and update accordingly.
 
-The complication comes by the fact that Electron Updater (the mechanism that we
-use for auto updates) doesn't work well with monorepos. So we need to keep a
-separate (non-mono) repository just for doing releases.
+The complication comes by the fact that electron-builder's auto updaterr (the
+mechanism that we use for auto updates) doesn't work with monorepos. So we need
+to keep a separate (non-mono) repository just for doing releases.
 
 -   Source code lives here, in [ente-io/ente](https://github.com/ente-io/ente).
 
 -   Releases are done from
     [ente-io/photos-desktop](https://github.com/ente-io/photos-desktop).
 
-## Workflow
+## Workflow - Release Candidates
 
-The workflow is:
+Leading up to the release, we can make one or more draft releases that are not
+intended to be published, but serve as test release candidates.
 
-1.  Finalize the changes in the source repo.
+The workflow for making such "rc" builds is:
 
-    -   Update the CHANGELOG.
-    -   Update the version in `package.json`
-    -   `git commit -m "[photosd] Release v1.2.3"`
-    -   Open PR, merge into main.
+1.  Update `package.json` in the source repo to use version `1.x.x-rc`. Create a
+    new draft release in the release repo with title `1.x.x-rc`. In the tag
+    input enter `v1.x.x-rc` and select the option to "create a new tag on
+    publish".
 
-2.  Tag the merge commit with a tag matching the pattern `photosd-v1.2.3`, where
-    `1.2.3` is the version in `package.json`
+2.  Push code to the `desktop/rc` branch in the source repo.
+
+3.  Trigger the GitHub action in the release repo
 
     ```sh
-    git tag photosd-v1.x.x
-    git push origin photosd-v1.x.x
+    gh workflow run desktop-release.yml
     ```
 
-3.  Head over to the releases repository and run the trigger script, passing it
-    the tag _without_ the `photosd-` prefix.
+We can do steps 2 and 3 multiple times: each time it'll just update the
+artifacts attached to the same draft.
+
+## Workflow - Release
+
+1.  Update source repo to set version `1.x.x` in `package.json` and finialize
+    the CHANGELOG.
+
+2.  Push code to the `desktop/rc` branch in the source repo.
+
+3.  In the release repo
 
     ```sh
     ./.github/trigger-release.sh v1.x.x
+    ```
+
+4.  If the build is successful, tag `desktop/rc` in the source repo.
+
+    ```sh
+    # Assuming we're on desktop/rc that just got build
+
+    git tag photosd-v1.x.x
+    git push origin photosd-v1.x.x
     ```
 
 ## Post build

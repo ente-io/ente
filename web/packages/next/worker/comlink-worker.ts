@@ -47,8 +47,8 @@ const workerBridge = {
     convertToJPEG: (imageData: Uint8Array) =>
         ensureElectron().convertToJPEG(imageData),
     detectFaces: (input: Float32Array) => ensureElectron().detectFaces(input),
-    faceEmbedding: (input: Float32Array) =>
-        ensureElectron().faceEmbedding(input),
+    computeFaceEmbeddings: (input: Float32Array) =>
+        ensureElectron().computeFaceEmbeddings(input),
 };
 
 export type WorkerBridge = typeof workerBridge;

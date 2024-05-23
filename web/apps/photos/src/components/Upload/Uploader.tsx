@@ -1,6 +1,8 @@
 import { basename } from "@/next/file";
 import log from "@/next/log";
 import type { CollectionMapping, Electron, ZipItem } from "@/next/types/ipc";
+import { firstNonEmpty } from "@/utils/array";
+import { ensure } from "@/utils/ensure";
 import { CustomError } from "@ente/shared/error";
 import { isPromise } from "@ente/shared/utils";
 import DiscFullIcon from "@mui/icons-material/DiscFull";
@@ -324,17 +326,17 @@ export default function Uploader({
 
     // Trigger an upload when any of the dependencies change.
     useEffect(() => {
-        // Re the paths:
+        // About the paths:
         //
         // - These are not necessarily the full paths. In particular, when
         //   running on the browser they'll be the relative paths (at best) or
         //   just the file-name otherwise.
         //
         // - All the paths use POSIX separators. See inline comments.
+        //
         const allItemAndPaths = [
-            // See: [Note: webkitRelativePath]. In particular, they use POSIX
-            // separators.
-            webFiles.map((f) => [f, f.webkitRelativePath ?? f.name]),
+            // Relative path (using POSIX separators) or the file's name.
+            webFiles.map((f) => [f, pathLikeForWebFile(f)]),
             // The paths we get from the desktop app all eventually come either
             // from electron.selectDirectory or electron.pathForFile, both of
             // which return POSIX paths.
@@ -821,6 +823,37 @@ const desktopFilesAndZipItems = async (electron: Electron, files: File[]) => {
 
     return { fileAndPaths, zipItems };
 };
+
+/**
+ * Return the relative path or name of a File object selected or
+ * drag-and-dropped on the web.
+ *
+ * There are three cases here:
+ *
+ * 1. If the user selects individual file(s), then the returned File objects
+ *    will only have a `name`.
+ *
+ * 2. If the user selects directory(ies), then the returned File objects will
+ *    have a `webkitRelativePath`. For more details, see [Note:
+ *    webkitRelativePath]. In particular, these will POSIX separators.
+ *
+ * 3. If the user drags-and-drops, then the react-dropzone library that we use
+ *    will internally convert `webkitRelativePath` to `path`, but otherwise it
+ *    behaves same as case 2.
+ *    https://github.com/react-dropzone/file-selector/blob/master/src/file.ts#L1214
+ */
+const pathLikeForWebFile = (file: File): string =>
+    ensure(
+        firstNonEmpty([
+            // We need to check first, since path is not a property of
+            // the standard File objects.
+            "path" in file && typeof file.path == "string"
+                ? file.path
+                : undefined,
+            file.webkitRelativePath,
+            file.name,
+        ]),
+    );
 
 // This is used to prompt the user the make upload strategy choice
 interface ImportSuggestion {

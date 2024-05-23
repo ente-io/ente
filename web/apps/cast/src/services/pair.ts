@@ -1,9 +1,8 @@
 import log from "@/next/log";
+import { wait } from "@/utils/promise";
 import { boxSealOpen, toB64 } from "@ente/shared/crypto/internal/libsodium";
 import castGateway from "@ente/shared/network/cast";
-import { wait } from "@ente/shared/utils";
 import _sodium from "libsodium-wrappers";
-import { type Cast } from "../utils/cast-receiver";
 
 export interface Registration {
     /** A pairing code shown on the screen. A client can use this to connect. */
@@ -98,64 +97,6 @@ export const register = async (): Promise<Registration> => {
     }
 
     return { pairingCode, publicKeyB64, privateKeyB64 };
-};
-
-/**
- * Listen for incoming messages on the given {@link cast} receiver, replying to
- * each of them with a pairing code obtained using the given {@link pairingCode}
- * callback. Phase 2 of the pairing protocol.
- *
- * See: [Note: Pairing protocol].
- */
-export const advertiseCode = (
-    cast: Cast,
-    pairingCode: () => string | undefined,
-) => {
-    // Prepare the Chromecast "context".
-    const context = cast.framework.CastReceiverContext.getInstance();
-    const namespace = "urn:x-cast:pair-request";
-
-    const options = new cast.framework.CastReceiverOptions();
-    // Do not automatically close the connection when the sender disconnects.
-    options.maxInactivity = 3600; /* 1 hour */
-    // TODO:Is this required? The docs say "(The default type of a message bus
-    // is JSON; if not provided here)."
-    options.customNamespaces = Object.assign({});
-    options.customNamespaces[namespace] =
-        cast.framework.system.MessageType.JSON;
-    // TODO: This looks like the only one needed, but a comment with the reason
-    // might be good.
-    options.disableIdleTimeout = true;
-
-    // Reply with the code that we have if anyone asks over Chromecast.
-    const incomingMessageListener = ({ senderId }: { senderId: string }) => {
-        const code = pairingCode();
-        if (!code) {
-            log.warn(
-                "Ignoring incoming Chromecast message because we do not yet have a pairing code",
-            );
-            return;
-        }
-
-        context.sendCustomMessage(namespace, senderId, { code });
-    };
-
-    context.addCustomMessageListener(
-        namespace,
-        // We need to cast, the `senderId` is present in the message we get but
-        // not present in the TypeScript type.
-        incomingMessageListener as unknown as SystemEventHandler,
-    );
-
-    // Shutdown ourselves if the sender disconnects.
-    // TODO(MR): I assume the page reloads on shutdown. Is that correct?
-    context.addEventListener(
-        cast.framework.system.EventType.SENDER_DISCONNECTED,
-        () => context.stop(),
-    );
-
-    // Start listening for Chromecast connections.
-    context.start(options);
 };
 
 /**

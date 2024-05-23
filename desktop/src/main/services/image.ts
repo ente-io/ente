@@ -3,10 +3,9 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { CustomErrorMessage, type ZipItem } from "../../types/ipc";
-import log from "../log";
 import { execAsync, isDev } from "../utils/electron";
 import {
-    deleteTempFile,
+    deleteTempFileIgnoringErrors,
     makeFileForDataOrPathOrZipItem,
     makeTempFilePath,
 } from "../utils/temp";
@@ -23,12 +22,8 @@ export const convertToJPEG = async (imageData: Uint8Array) => {
         await execAsync(command);
         return new Uint8Array(await fs.readFile(outputFilePath));
     } finally {
-        try {
-            await deleteTempFile(inputFilePath);
-            await deleteTempFile(outputFilePath);
-        } catch (e) {
-            log.error("Could not clean up temp files", e);
-        }
+        await deleteTempFileIgnoringErrors(inputFilePath);
+        await deleteTempFileIgnoringErrors(outputFilePath);
     }
 };
 
@@ -49,6 +44,9 @@ const convertToJPEGCommand = (
             ];
 
         case "linux":
+            // The bundled binary is an ELF x86-64 executable.
+            if (process.arch != "x64")
+                throw new Error(CustomErrorMessage.NotAvailable);
             return [
                 imageMagickPath(),
                 inputFilePath,
@@ -79,7 +77,7 @@ export const generateImageThumbnail = async (
 
     const outputFilePath = await makeTempFilePath("jpeg");
 
-    // Construct the command first, it may throw `NotAvailable` on win32.
+    // Construct the command first, it may throw `NotAvailable`.
     let quality = 70;
     let command = generateImageThumbnailCommand(
         inputFilePath,
@@ -105,12 +103,9 @@ export const generateImageThumbnail = async (
         } while (thumbnail.length > maxSize && quality > 50);
         return thumbnail;
     } finally {
-        try {
-            if (isInputFileTemporary) await deleteTempFile(inputFilePath);
-            await deleteTempFile(outputFilePath);
-        } catch (e) {
-            log.error("Could not clean up temp files", e);
-        }
+        if (isInputFileTemporary)
+            await deleteTempFileIgnoringErrors(inputFilePath);
+        await deleteTempFileIgnoringErrors(outputFilePath);
     }
 };
 
@@ -138,14 +133,17 @@ const generateImageThumbnailCommand = (
             ];
 
         case "linux":
+            // The bundled binary is an ELF x86-64 executable.
+            if (process.arch != "x64")
+                throw new Error(CustomErrorMessage.NotAvailable);
             return [
                 imageMagickPath(),
-                inputFilePath,
-                "-auto-orient",
                 "-define",
                 `jpeg:size=${2 * maxDimension}x${2 * maxDimension}`,
+                inputFilePath,
+                "-auto-orient",
                 "-thumbnail",
-                `${maxDimension}x${maxDimension}>`,
+                `${maxDimension}x${maxDimension}`,
                 "-unsharp",
                 "0x.5",
                 "-quality",

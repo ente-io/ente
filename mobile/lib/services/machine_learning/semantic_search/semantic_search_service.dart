@@ -1,6 +1,6 @@
 import "dart:async";
 import "dart:collection";
-import "dart:io";
+import "dart:math" show min;
 
 import "package:computer/computer.dart";
 import "package:logging/logging.dart";
@@ -102,17 +102,13 @@ class SemanticSearchService {
     if (shouldSyncImmediately) {
       unawaited(sync());
     }
-    if (Platform.isAndroid) {
-      Bus.instance.on<MachineLearningControlEvent>().listen((event) {
-        if (event.shouldRun) {
-          _startIndexing();
-        } else {
-          _pauseIndexing();
-        }
-      });
-    } else {
-      _startIndexing();
-    }
+    Bus.instance.on<MachineLearningControlEvent>().listen((event) {
+      if (event.shouldRun) {
+        _startIndexing();
+      } else {
+        _pauseIndexing();
+      }
+    });
   }
 
   Future<void> release() async {
@@ -164,8 +160,10 @@ class SemanticSearchService {
   }
 
   Future<IndexStatus> getIndexStatus() async {
+    final indexableFileIDs = await FilesDB.instance
+        .getOwnedFileIDs(Configuration.instance.getUserID()!);
     return IndexStatus(
-      _cachedEmbeddings.length,
+      min(_cachedEmbeddings.length, indexableFileIDs.length),
       (await _getFileIDsToBeIndexed()).length,
     );
   }
@@ -190,6 +188,7 @@ class SemanticSearchService {
     _logger.info(
       "Loading ${_cachedEmbeddings.length} took: ${(endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch)}ms",
     );
+    Bus.instance.fire(EmbeddingCacheUpdatedEvent());
     _logger.info("Cached embeddings: " + _cachedEmbeddings.length.toString());
   }
 
@@ -225,7 +224,9 @@ class SemanticSearchService {
   Future<List<int>> _getFileIDsToBeIndexed() async {
     final uploadedFileIDs = await FilesDB.instance
         .getOwnedFileIDs(Configuration.instance.getUserID()!);
-    final embeddedFileIDs = _cachedEmbeddings.map((e) => e.fileID).toSet();
+    final embeddedFileIDs =
+        await EmbeddingsDB.instance.getFileIDs(_currentModel);
+
     uploadedFileIDs.removeWhere(
       (id) => embeddedFileIDs.contains(id),
     );

@@ -3,7 +3,7 @@ name: "Lint (desktop)"
 on:
     # Run on every push to a branch other than main that changes desktop/
     push:
-        branches-ignore: [main, "deploy/**"]
+        branches-ignore: [main]
         paths:
             - "desktop/**"
             - ".github/workflows/desktop-lint.yml"

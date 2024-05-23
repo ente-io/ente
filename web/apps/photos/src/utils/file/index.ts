@@ -5,10 +5,11 @@ import { lowercaseExtension } from "@/next/file";
 import log from "@/next/log";
 import { CustomErrorMessage, type Electron } from "@/next/types/ipc";
 import { workerBridge } from "@/next/worker/worker-bridge";
+import { withTimeout } from "@/utils/promise";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import { User } from "@ente/shared/user/types";
-import { downloadUsingAnchor, withTimeout } from "@ente/shared/utils";
+import { downloadUsingAnchor } from "@ente/shared/utils";
 import { t } from "i18next";
 import isElectron from "is-electron";
 import { moveToHiddenCollection } from "services/collectionService";
@@ -261,15 +262,10 @@ export async function decryptFile(
     }
 }
 
-export function generateStreamFromArrayBuffer(data: Uint8Array) {
-    return new ReadableStream({
-        async start(controller: ReadableStreamDefaultController) {
-            controller.enqueue(data);
-            controller.close();
-        },
-    });
-}
-
+/**
+ * The returned blob.type is filled in, whenever possible, with the MIME type of
+ * the data that we're dealing with.
+ */
 export const getRenderableImage = async (fileName: string, imageBlob: Blob) => {
     try {
         const tempFile = new File([imageBlob], fileName);
@@ -283,7 +279,16 @@ export const getRenderableImage = async (fileName: string, imageBlob: Blob) => {
         if (!isNonWebImageFileExtension(extension)) {
             // Either it is something that the browser already knows how to
             // render, or something we don't even about yet.
-            return imageBlob;
+            const mimeType = fileTypeInfo.mimeType;
+            if (!mimeType) {
+                log.info(
+                    "Trying to render a file without a MIME type",
+                    fileName,
+                );
+                return imageBlob;
+            } else {
+                return new Blob([imageBlob], { type: mimeType });
+            }
         }
 
         const available = !moduleState.isNativeJPEGConversionNotAvailable;
@@ -324,7 +329,7 @@ const nativeConvertToJPEG = async (imageBlob: Blob) => {
         ? await electron.convertToJPEG(imageData)
         : await workerBridge.convertToJPEG(imageData);
     log.debug(() => `Native JPEG conversion took ${Date.now() - startTime} ms`);
-    return new Blob([jpegData]);
+    return new Blob([jpegData], { type: "image/jpeg" });
 };
 
 export function isSupportedRawFormat(exactType: string) {
@@ -635,7 +640,7 @@ async function downloadFileDesktop(
             imageFileName,
             fs.exists,
         );
-        const imageStream = generateStreamFromArrayBuffer(imageData);
+        const imageStream = new Response(imageData).body;
         await writeStream(
             electron,
             `${downloadDir}/${imageExportName}`,
@@ -647,7 +652,7 @@ async function downloadFileDesktop(
                 videoFileName,
                 fs.exists,
             );
-            const videoStream = generateStreamFromArrayBuffer(videoData);
+            const videoStream = new Response(videoData).body;
             await writeStream(
                 electron,
                 `${downloadDir}/${videoExportName}`,

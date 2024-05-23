@@ -1,5 +1,11 @@
 import { t } from "i18next";
 
+/**
+ * Localized unit keys.
+ *
+ * For each of these, there is expected to be a localized key under
+ * "storage_unit". e.g. "storage_unit.tb".
+ */
 const units = ["b", "kb", "mb", "gb", "tb"];
 
 /**
@@ -21,13 +27,16 @@ export const bytesInGB = (bytes: number, precision = 0): string =>
  * Defaults to 2.
  */
 export function formattedByteSize(bytes: number, precision = 2): string {
-    if (bytes === 0 || isNaN(bytes)) {
-        return "0 MB";
-    }
+    if (bytes <= 0) return `0 ${t("storage_unit.mb")}`;
 
-    const i = Math.floor(Math.log(bytes) / Math.log(1024));
-    const sizes = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
-    return (bytes / Math.pow(1024, i)).toFixed(precision) + " " + sizes[i];
+    const i = Math.min(
+        Math.floor(Math.log(bytes) / Math.log(1024)),
+        units.length - 1,
+    );
+    const quantity = bytes / Math.pow(1024, i);
+    const unit = units[i];
+
+    return `${quantity.toFixed(precision)} ${t(`storage_unit.${unit}`)}`;
 }
 
 interface FormattedStorageByteSizeOptions {
@@ -50,7 +59,7 @@ interface FormattedStorageByteSizeOptions {
  * displaying the "storage size" (in different contexts) as opposed to, say, a
  * generic "file size".
  *
- * @param options
+ * @param options {@link FormattedStorageByteSizeOptions}.
  *
  * @return A user visible string, including the localized unit suffix.
  */
@@ -58,21 +67,27 @@ export const formattedStorageByteSize = (
     bytes: number,
     options?: FormattedStorageByteSizeOptions,
 ): string => {
-    if (bytes <= 0) {
-        return `0 ${t("storage_unit.mb")}`;
-    }
-    const i = Math.floor(Math.log(bytes) / Math.log(1024));
+    if (bytes <= 0) return `0 ${t("storage_unit.mb")}`;
+
+    const i = Math.min(
+        Math.floor(Math.log(bytes) / Math.log(1024)),
+        units.length - 1,
+    );
 
     let quantity = bytes / Math.pow(1024, i);
     let unit = units[i];
 
-    if (quantity > 100 && unit !== "GB") {
+    // Round up bytes, KBs and MBs to the bigger unit whenever they'll come of
+    // as more than 0.1.
+    if (quantity > 100 && i < units.length - 2) {
         quantity /= 1024;
         unit = units[i + 1];
     }
 
     quantity = Number(quantity.toFixed(1));
 
+    // Truncate or round storage sizes to trim off unnecessary and potentially
+    // obscuring precision when they are larger that 10 GB.
     if (bytes >= 10 * 1024 * 1024 * 1024 /* 10 GB */) {
         if (options?.round) {
             quantity = Math.ceil(quantity);

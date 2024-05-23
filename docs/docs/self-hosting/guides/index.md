@@ -16,5 +16,8 @@ See the sidebar for existing guides. In particular:
 -   For various admin related tasks, e.g. increasing the storage quota on your
     self hosted instance, see [administering your custom server](admin).
 
--   For self hosting both the server and web app using external S3 buckets for
-    object storage, see [using external S3](external-s3).
+-   For configuring your S3 buckets to get the object storage to work from your
+    mobile device or for fixing an upload errors, see
+    [configuring S3](configuring-s3). There is also a longer
+    [community contributed guide](external-s3) for a more self hosted setup of
+    both the server and web app using external S3 buckets for object storage.

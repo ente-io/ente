@@ -63,7 +63,10 @@ const openLogDirectory = () => ipcRenderer.invoke("openLogDirectory");
 
 const selectDirectory = () => ipcRenderer.invoke("selectDirectory");
 
-const clearStores = () => ipcRenderer.send("clearStores");
+const logout = () => {
+    watchRemoveListeners();
+    return ipcRenderer.invoke("logout");
+};
 
 const encryptionKey = () => ipcRenderer.invoke("encryptionKey");
 
@@ -140,32 +143,27 @@ const ffmpegExec = (
     command: string[],
     dataOrPathOrZipItem: Uint8Array | string | ZipItem,
     outputFileExtension: string,
-    timeoutMS: number,
 ) =>
     ipcRenderer.invoke(
         "ffmpegExec",
         command,
         dataOrPathOrZipItem,
         outputFileExtension,
-        timeoutMS,
     );
 
 // - ML
 
-const clipImageEmbedding = (jpegImageData: Uint8Array) =>
-    ipcRenderer.invoke("clipImageEmbedding", jpegImageData);
+const computeCLIPImageEmbedding = (jpegImageData: Uint8Array) =>
+    ipcRenderer.invoke("computeCLIPImageEmbedding", jpegImageData);
 
-const clipTextEmbeddingIfAvailable = (text: string) =>
-    ipcRenderer.invoke("clipTextEmbeddingIfAvailable", text);
+const computeCLIPTextEmbeddingIfAvailable = (text: string) =>
+    ipcRenderer.invoke("computeCLIPTextEmbeddingIfAvailable", text);
 
 const detectFaces = (input: Float32Array) =>
     ipcRenderer.invoke("detectFaces", input);
 
-const faceEmbedding = (input: Float32Array) =>
-    ipcRenderer.invoke("faceEmbedding", input);
-
-const legacyFaceCrop = (faceID: string) =>
-    ipcRenderer.invoke("legacyFaceCrop", faceID);
+const computeFaceEmbeddings = (input: Float32Array) =>
+    ipcRenderer.invoke("computeFaceEmbeddings", input);
 
 // - Watch
 
@@ -211,11 +209,10 @@ const watchOnRemoveDir = (f: (path: string, watch: FolderWatch) => void) => {
 const watchFindFiles = (folderPath: string) =>
     ipcRenderer.invoke("watchFindFiles", folderPath);
 
-const watchReset = async () => {
+const watchRemoveListeners = () => {
     ipcRenderer.removeAllListeners("watchAddFile");
     ipcRenderer.removeAllListeners("watchRemoveFile");
     ipcRenderer.removeAllListeners("watchRemoveDir");
-    await ipcRenderer.invoke("watchReset");
 };
 
 // - Upload
@@ -307,7 +304,7 @@ contextBridge.exposeInMainWorld("electron", {
     openDirectory,
     openLogDirectory,
     selectDirectory,
-    clearStores,
+    logout,
     encryptionKey,
     saveEncryptionKey,
     onMainWindowFocus,
@@ -340,11 +337,10 @@ contextBridge.exposeInMainWorld("electron", {
 
     // - ML
 
-    clipImageEmbedding,
-    clipTextEmbeddingIfAvailable,
+    computeCLIPImageEmbedding,
+    computeCLIPTextEmbeddingIfAvailable,
     detectFaces,
-    faceEmbedding,
-    legacyFaceCrop,
+    computeFaceEmbeddings,
 
     // - Watch
 
@@ -358,7 +354,6 @@ contextBridge.exposeInMainWorld("electron", {
         onRemoveFile: watchOnRemoveFile,
         onRemoveDir: watchOnRemoveDir,
         findFiles: watchFindFiles,
-        reset: watchReset,
     },
 
     // - Upload

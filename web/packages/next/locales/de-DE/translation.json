@@ -449,7 +449,7 @@
     "TWO_MONTHS_FREE": "Erhalte 2 Monate kostenlos bei Jahresabonnements",
     "POPULAR": "Beliebt",
     "FREE_PLAN_OPTION_LABEL": "Mit kostenloser Testversion fortfahren",
-    "FREE_PLAN_DESCRIPTION": "1 GB für 1 Jahr",
+    "free_plan_description": "{{storage}} für 1 Jahr",
     "CURRENT_USAGE": "Aktuelle Nutzung ist <strong>{{usage}}</strong>",
     "WEAK_DEVICE": "Dein Browser ist nicht leistungsstark genug, um deine Bilder zu verschlüsseln. Versuche, dich an einem Computer bei Ente anzumelden, oder lade dir die Ente-App für dein Gerät (Handy oder Desktop) herunter.",
     "DRAG_AND_DROP_HINT": "Oder ziehe Dateien per Drag-and-Drop in das Ente-Fenster",
@@ -565,6 +565,9 @@
     "IMAGE": "Bild",
     "VIDEO": "Video",
     "LIVE_PHOTO": "Live-Foto",
+    "editor": {
+        "crop": ""
+    },
     "CONVERT": "Konvertieren",
     "CONFIRM_EDITOR_CLOSE_MESSAGE": "Editor wirklich schließen?",
     "CONFIRM_EDITOR_CLOSE_DESCRIPTION": "Lade dein bearbeitetes Bild herunter oder speichere es in Ente, um die Änderungen nicht zu verlieren.",
@@ -588,7 +591,7 @@
     "ROTATION": "Drehen",
     "RESET": "Zurücksetzen",
     "PHOTO_EDITOR": "Foto-Editor",
-    "FASTER_UPLOAD": "Schnelleres hochladen",
+    "FASTER_UPLOAD": "Schnelleres Hochladen",
     "FASTER_UPLOAD_DESCRIPTION": "Uploads über nahegelegene Server leiten",
     "MAGIC_SEARCH_STATUS": "Status der magischen Suche",
     "INDEXED_ITEMS": "Indizierte Elemente",

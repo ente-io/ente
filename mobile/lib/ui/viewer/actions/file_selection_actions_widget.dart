@@ -1,11 +1,15 @@
 import "dart:async";
 
 import 'package:fast_base58/fast_base58.dart';
+import "package:flutter/cupertino.dart";
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import "package:logging/logging.dart";
 import "package:modal_bottom_sheet/modal_bottom_sheet.dart";
 import 'package:photos/core/configuration.dart';
+import "package:photos/core/event_bus.dart";
+import "package:photos/events/people_changed_event.dart";
+import "package:photos/face/model/person.dart";
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/device_collection.dart';
@@ -17,6 +21,8 @@ import "package:photos/models/metadata/common_keys.dart";
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/hidden_service.dart';
+import 'package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart';
+import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/actions/collection/collection_file_actions.dart';
@@ -42,12 +48,16 @@ class FileSelectionActionsWidget extends StatefulWidget {
   final Collection? collection;
   final DeviceCollection? deviceCollection;
   final SelectedFiles selectedFiles;
+  final PersonEntity? person;
+  final int? clusterID;
 
   const FileSelectionActionsWidget(
     this.type,
     this.selectedFiles, {
     Key? key,
     this.collection,
+    this.person,
+    this.clusterID,
     this.deviceCollection,
   }) : super(key: key);
 
@@ -123,7 +133,24 @@ class _FileSelectionActionsWidgetState
     //and set [shouldShow] to false for items that should not be shown and true
     //for items that should be shown.
     final List<SelectionActionButton> items = [];
-
+    if (widget.type == GalleryType.peopleTag && widget.person != null) {
+      items.add(
+        SelectionActionButton(
+          icon: Icons.remove_circle_outline,
+          labelText: 'Not ${widget.person!.data.name}?',
+          onTap: anyUploadedFiles ? _onNotpersonClicked : null,
+        ),
+      );
+      if (ownedFilesCount == 1) {
+        items.add(
+          SelectionActionButton(
+            icon: Icons.image_outlined,
+            labelText: 'Use as cover',
+            onTap: anyUploadedFiles ? _setPersonCover : null,
+          ),
+        );
+      }
+    }
     if (widget.type.showCreateLink()) {
       if (_cachedCollectionForSharedLink != null && anyUploadedFiles) {
         items.add(
@@ -390,36 +417,50 @@ class _FileSelectionActionsWidgetState
       ),
     );
 
-    final scrollController = ScrollController();
-    // h4ck: https://github.com/flutter/flutter/issues/57920#issuecomment-893970066
-    return MediaQuery(
-      data: MediaQuery.of(context).removePadding(removeBottom: true),
-      child: SafeArea(
-        child: Scrollbar(
-          radius: const Radius.circular(1),
-          thickness: 2,
-          controller: scrollController,
-          thumbVisibility: true,
-          child: SingleChildScrollView(
-            physics: const BouncingScrollPhysics(
-              decelerationRate: ScrollDecelerationRate.fast,
-            ),
-            scrollDirection: Axis.horizontal,
-            child: Container(
-              padding: const EdgeInsets.only(bottom: 24),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(width: 4),
-                  ...items,
-                  const SizedBox(width: 4),
-                ],
+    // if (widget.type == GalleryType.cluster && widget.clusterID != null) {
+    if (widget.type == GalleryType.cluster && widget.clusterID != null) {
+      items.add(
+        SelectionActionButton(
+          labelText: 'Remove',
+          icon: CupertinoIcons.minus,
+          onTap: anyUploadedFiles ? _onRemoveFromClusterClicked : null,
+        ),
+      );
+    }
+
+    if (items.isNotEmpty) {
+      final scrollController = ScrollController();
+      // h4ck: https://github.com/flutter/flutter/issues/57920#issuecomment-893970066
+      return MediaQuery(
+        data: MediaQuery.of(context).removePadding(removeBottom: true),
+        child: SafeArea(
+          child: Scrollbar(
+            radius: const Radius.circular(1),
+            thickness: 2,
+            controller: scrollController,
+            thumbVisibility: true,
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(
+                decelerationRate: ScrollDecelerationRate.fast,
+              ),
+              scrollDirection: Axis.horizontal,
+              child: Container(
+                padding: const EdgeInsets.only(bottom: 24),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(width: 4),
+                    ...items,
+                    const SizedBox(width: 4),
+                  ],
+                ),
               ),
             ),
           ),
         ),
-      ),
-    );
+      );
+    }
+    return const SizedBox();
   }
 
   Future<void> _moveFiles() async {
@@ -613,6 +654,101 @@ class _FileSelectionActionsWidgetState
           ManageSharedLinkWidget(collection: _cachedCollectionForSharedLink),
         );
       }
+    }
+    widget.selectedFiles.clearAll();
+    if (mounted) {
+      setState(() => {});
+    }
+  }
+
+  Future<void> _setPersonCover() async {
+    final EnteFile file = widget.selectedFiles.files.first;
+    await PersonService.instance.updateAttributes(
+      widget.person!.remoteID,
+      avatarFaceId: file.uploadedFileID.toString(),
+    );
+    widget.selectedFiles.clearAll();
+    if (mounted) {
+      setState(() => {});
+    }
+    Bus.instance.fire(PeopleChangedEvent());
+  }
+
+  Future<void> _onNotpersonClicked() async {
+    final actionResult = await showActionSheet(
+      context: context,
+      buttons: [
+        ButtonWidget(
+          labelText: S.of(context).yesRemove,
+          buttonType: ButtonType.neutral,
+          buttonSize: ButtonSize.large,
+          shouldStickToDarkTheme: true,
+          buttonAction: ButtonAction.first,
+          isInAlert: true,
+        ),
+        ButtonWidget(
+          labelText: S.of(context).cancel,
+          buttonType: ButtonType.secondary,
+          buttonSize: ButtonSize.large,
+          buttonAction: ButtonAction.second,
+          shouldStickToDarkTheme: true,
+          isInAlert: true,
+        ),
+      ],
+      title: "Remove these photos for ${widget.person!.data.name}?",
+      actionSheetType: ActionSheetType.defaultActionSheet,
+    );
+    if (actionResult?.action != null) {
+      if (actionResult!.action == ButtonAction.first) {
+        await ClusterFeedbackService.instance.removeFilesFromPerson(
+          widget.selectedFiles.files.toList(),
+          widget.person!,
+        );
+      }
+      Bus.instance.fire(PeopleChangedEvent());
+    }
+    widget.selectedFiles.clearAll();
+    if (mounted) {
+      setState(() => {});
+    }
+  }
+
+  Future<void> _onRemoveFromClusterClicked() async {
+    if (widget.clusterID == null) {
+      showShortToast(context, 'Cluster ID is null. Cannot remove files.');
+      return;
+    }
+    final actionResult = await showActionSheet(
+      context: context,
+      buttons: [
+        ButtonWidget(
+          labelText: S.of(context).yesRemove,
+          buttonType: ButtonType.neutral,
+          buttonSize: ButtonSize.large,
+          shouldStickToDarkTheme: true,
+          buttonAction: ButtonAction.first,
+          isInAlert: true,
+        ),
+        ButtonWidget(
+          labelText: S.of(context).cancel,
+          buttonType: ButtonType.secondary,
+          buttonSize: ButtonSize.large,
+          buttonAction: ButtonAction.second,
+          shouldStickToDarkTheme: true,
+          isInAlert: true,
+        ),
+      ],
+      title: "Remove these photos?",
+      actionSheetType: ActionSheetType.defaultActionSheet,
+    );
+    if (actionResult?.action != null) {
+      if (actionResult!.action == ButtonAction.first) {
+        await ClusterFeedbackService.instance.removeFilesFromCluster(
+          widget.selectedFiles.files.toList(),
+          widget.clusterID!,
+        );
+      }
+      Bus.instance.fire(PeopleChangedEvent());
     }
     widget.selectedFiles.clearAll();
     if (mounted) {

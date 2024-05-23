@@ -569,7 +569,7 @@
   "freeTrialValidTill": "免费试用有效期至 {endDate}",
   "validTill": "有效期至 {endDate}",
   "addOnValidTill": "您的 {storageAmount} 插件有效期至 {endDate}",
-  "playStoreFreeTrialValidTill": "免费试用有效期至 {endDate}。\n之后您可以选择付费计划。",
+  "playStoreFreeTrialValidTill": "免费试用有效期至 {endDate}。\n您可以随后购买付费计划。",
   "subWillBeCancelledOn": "您的订阅将于 {endDate} 取消",
   "subscription": "订阅",
   "paymentDetails": "付款明细",
@@ -942,7 +942,7 @@
   "thisActionCannotBeUndone": "此操作无法撤销",
   "emptyTrash": "要清空回收站吗？",
   "permDeleteWarning": "回收站中的所有项目将被永久删除\n\n此操作无法撤消",
-  "empty": "空的",
+  "empty": "清空",
   "couldNotFreeUpSpace": "无法释放空间",
   "permanentlyDeleteFromDevice": "要从设备中永久删除吗？",
   "someOfTheFilesYouAreTryingToDeleteAre": "您要删除的部分文件仅在您的设备上可用，且删除后无法恢复",
@@ -1226,5 +1226,9 @@
   "stopCastingBody": "您想停止投放吗？",
   "castIPMismatchTitle": "投放相册失败",
   "castIPMismatchBody": "请确保您的设备与电视处于同一网络。",
-  "pairingComplete": "配对完成"
+  "pairingComplete": "配对完成",
+  "faceRecognition": "Face recognition",
+  "faceRecognitionIndexingDescription": "Please note that this will result in a higher bandwidth and battery usage until all items are indexed.",
+  "foundFaces": "Found faces",
+  "clusteringProgress": "Clustering progress"
 }

@@ -145,9 +145,12 @@ class EmbeddingStore {
     }
 
     _logger.info("${remoteEmbeddings.length} embeddings fetched");
+
     return RemoteEmbeddings(
       remoteEmbeddings,
-      remoteEmbeddings.length == limit,
+      // keep fetching until we get all embeddings. Avoid limit check as
+      // some embedding fetch might fail on server
+      remoteEmbeddings.isNotEmpty,
     );
   }
 
