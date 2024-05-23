@@ -121,7 +121,7 @@ const AuthenticatorCodesPage = () => {
                         </div>
                     ) : (
                         filteredCodes.map((code) => (
-                            <CodeDisplay codeInfo={code} key={code.id} />
+                            <CodeDisplay key={code.id} code={code} />
                         ))
                     )}
                 </div>
@@ -162,38 +162,36 @@ const AuthNavbar: React.FC = () => {
 };
 
 interface CodeDisplay {
-    codeInfo: Code;
+    code: Code;
 }
 
-const CodeDisplay: React.FC<CodeDisplay> = ({ codeInfo }) => {
+const CodeDisplay: React.FC<CodeDisplay> = ({ code }) => {
     const [otp, setOTP] = useState("");
     const [nextOTP, setNextOTP] = useState("");
-    const [codeErr, setCodeErr] = useState("");
+    const [errorMessage, setErrorMessage] = useState("");
     const [hasCopied, setHasCopied] = useState(false);
 
     const regen = () => {
         try {
-            const [m, n] = generateOTPs(codeInfo);
+            const [m, n] = generateOTPs(code);
             setOTP(m);
             setNextOTP(n);
         } catch (e) {
-            setCodeErr(e.message);
+            setErrorMessage(e instanceof Error ? e.message : String(e));
         }
     };
 
     const copyCode = () => {
         navigator.clipboard.writeText(otp);
         setHasCopied(true);
-        setTimeout(() => {
-            setHasCopied(false);
-        }, 2000);
+        setTimeout(() => setHasCopied(false), 2000);
     };
 
     useEffect(() => {
         // Generate to set the initial otp and nextOTP on component mount.
         regen();
-        const codeType = codeInfo.type;
-        const codePeriodInMs = codeInfo.period * 1000;
+        const codeType = code.type;
+        const codePeriodInMs = code.period * 1000;
         const timeToNextCode =
             codePeriodInMs - (new Date().getTime() % codePeriodInMs);
         const interval = null;
@@ -214,25 +212,20 @@ const CodeDisplay: React.FC<CodeDisplay> = ({ codeInfo }) => {
         return () => {
             if (interval) clearInterval(interval);
         };
-    }, [codeInfo]);
+    }, [code]);
 
     return (
         <div style={{ padding: "8px" }}>
-            {codeErr === "" ? (
-                <ButtonBase
-                    component="div"
-                    onClick={() => {
-                        copyCode();
-                    }}
-                >
-                    <OTPDisplay code={codeInfo} otp={otp} nextOTP={nextOTP} />
+            {errorMessage ? (
+                <BadCodeInfo codeInfo={code} codeErr={errorMessage} />
+            ) : (
+                <ButtonBase component="div" onClick={copyCode}>
+                    <OTPDisplay code={code} otp={otp} nextOTP={nextOTP} />
                     <Snackbar
                         open={hasCopied}
                         message="Code copied to clipboard"
                     />
                 </ButtonBase>
-            ) : (
-                <BadCodeInfo codeInfo={codeInfo} codeErr={codeErr} />
             )}
         </div>
     );
@@ -396,7 +389,7 @@ function BadCodeInfo({ codeInfo, codeErr }) {
             <div>
                 {showRawData ? (
                     <div onClick={() => setShowRawData(false)}>
-                        {codeInfo.uriString ?? "(no raw data)"}
+                        {codeInfo.uriString}
                     </div>
                 ) : (
                     <div onClick={() => setShowRawData(true)}>Show rawData</div>
