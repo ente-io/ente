@@ -11,7 +11,7 @@ import { Remote } from "comlink";
 import isElectron from "is-electron";
 import * as ffmpeg from "services/ffmpeg";
 import { EnteFile } from "types/file";
-import { generateStreamFromArrayBuffer, getRenderableImage } from "utils/file";
+import { getRenderableImage } from "utils/file";
 import { PhotosDownloadClient } from "./clients/photos";
 import { PublicAlbumsDownloadClient } from "./clients/publicAlbums";
 
@@ -289,7 +289,7 @@ class DownloadManagerImpl {
                     await this.cryptoWorker.fromB64(file.file.decryptionHeader),
                     file.key,
                 );
-                return generateStreamFromArrayBuffer(decrypted);
+                return new Response(decrypted).body;
             } catch (e) {
                 if (e.message === CustomError.PROCESSING_FAILED) {
                     log.error(
