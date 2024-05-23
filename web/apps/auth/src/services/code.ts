@@ -82,7 +82,7 @@ export const codeFromRawData = (id: string, rawData: string): Code => {
     return new Code(
         _getAccount(uriPath),
         _getIssuer(uriPath, uriParams),
-        _getDigits(uriParams) ?? 6,
+        _getDigits(uriParams) || 6,
         _getPeriod(uriParams),
         getSanitizedSecret(uriParams),
         _getAlgorithm(uriParams),
