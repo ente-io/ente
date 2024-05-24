@@ -1,20 +1,12 @@
 {
-    "extends": "@/build-config/tsconfig-typecheck.json",
-    "include": [
-        "src/**/*.ts",
-        "src/**/*.tsx",
-        "src/**/*.d.ts",
-        "../../packages/shared/themes/mui-theme.d.ts"
-    ],
+    "extends": "@/build-config/tsconfig-next.json",
+    "include": ["src", "../../packages/shared/themes/mui-theme.d.ts"],
     // Temporarily disable some things to get the existing code to compile
     // without warnings.
     "compilerOptions": {
         "baseUrl": "./src",
 
         "jsxImportSource": "@emotion/react",
-
-        /* Also indicate expectation of a WebWorker runtime */
-        "lib": ["ESnext", "DOM", "DOM.Iterable", "WebWorker"],
 
         "verbatimModuleSyntax": false,
         "resolveJsonModule": false,

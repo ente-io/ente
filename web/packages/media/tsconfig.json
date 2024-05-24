@@ -1,9 +1,4 @@
 {
-    "extends": "@/build-config/tsconfig-typecheck.json",
-    "compilerOptions": {
-        /* Also indicate expectation of a WebWorker runtime */
-        "lib": ["ESnext", "DOM", "DOM.Iterable", "WebWorker"]
-    },
-    /* Typecheck all files with the given extensions (here or in subfolders) */
+    "extends": "@/build-config/tsconfig-next.json",
     "include": [".", "../../packages/next/global-electron.d.ts"]
 }
