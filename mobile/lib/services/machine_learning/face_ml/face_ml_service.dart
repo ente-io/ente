@@ -98,6 +98,7 @@ class FaceMlService {
 
   final int _fileDownloadLimit = 5;
   final int _embeddingFetchLimit = 200;
+  final int _kForceClusteringFaceCount = 4000;
 
   Future<void> init({bool initializeImageMlIsolate = false}) async {
     if (LocalSettings.instance.isFaceIndexingEnabled == false) {
@@ -357,6 +358,15 @@ class FaceMlService {
     if (_cannotRunMLFunction()) return;
 
     await sync(forceSync: _shouldSyncPeople);
+
+    final int unclusteredFacesCount =
+        await FaceMLDataDB.instance.getUnclusteredFaceCount();
+    if (unclusteredFacesCount > _kForceClusteringFaceCount) {
+      _logger.info(
+        "There are $unclusteredFacesCount unclustered faces, doing clustering first",
+      );
+      await clusterAllImages();
+    }
     await indexAllImages();
     await clusterAllImages();
   }

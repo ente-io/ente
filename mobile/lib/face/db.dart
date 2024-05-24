@@ -688,6 +688,20 @@ class FaceMLDataDB {
     return clusteredFiles / indexableFiles;
   }
 
+  Future<int> getUnclusteredFaceCount() async {
+    final db = await instance.asyncDB;
+    const String query = '''
+      SELECT f.$faceIDColumn
+      FROM $facesTable f
+      LEFT JOIN $faceClustersTable fc ON f.$faceIDColumn = fc.$fcFaceId
+      WHERE f.$faceScore > $kMinimumQualityFaceScore
+      AND f.$faceBlur > $kLaplacianHardThreshold
+      AND fc.$fcFaceId IS NULL
+    ''';
+    final List<Map<String, dynamic>> maps = await db.getAll(query);
+    return maps.length;
+  }
+
   Future<int> getBlurryFaceCount([
     int blurThreshold = kLaplacianHardThreshold,
   ]) async {
