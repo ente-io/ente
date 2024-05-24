@@ -193,3 +193,8 @@ some cases.
 
 -   [hdbscan](https://github.com/shaileshpandit/hdbscan-js) is used for face
     clustering.
+
+## Auth app specific
+
+-   [otpauth](https://github.com/hectorm/otpauth) is used for the generation of
+    the actual OTP from the user's TOTP/HOTP secret.

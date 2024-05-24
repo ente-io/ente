@@ -6,6 +6,7 @@
         "@/next": "*",
         "@ente/accounts": "*",
         "@ente/eslint-config": "*",
-        "@ente/shared": "*"
+        "@ente/shared": "*",
+        "otpauth": "^9"
     }
 }
