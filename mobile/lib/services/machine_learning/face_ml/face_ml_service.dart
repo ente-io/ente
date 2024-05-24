@@ -9,6 +9,7 @@ import "dart:ui" show Image;
 import "package:computer/computer.dart";
 import "package:dart_ui_isolate/dart_ui_isolate.dart";
 import "package:flutter/foundation.dart" show debugPrint, kDebugMode;
+import "package:flutter/services.dart";
 import "package:logging/logging.dart";
 import "package:onnxruntime/onnxruntime.dart";
 import "package:package_info_plus/package_info_plus.dart";
@@ -446,7 +447,8 @@ class FaceMlService {
 
         if (LocalSettings.instance.remoteFetchEnabled) {
           try {
-            final Set<int> fileIds = {}; // if there are duplicates here server returns 400
+            final Set<int> fileIds =
+                {}; // if there are duplicates here server returns 400
             // Try to find embeddings on the remote server
             for (final f in chunk) {
               fileIds.add(f.uploadedFileID!);
@@ -844,13 +846,22 @@ class FaceMlService {
       }
       await FaceMLDataDB.instance.bulkInsertFaces(faces);
       return true;
+    } on ThumbnailRetrievalException catch (e, s) {
+      _logger.severe(
+        'ThumbnailRetrievalException while processing image with ID ${enteFile.uploadedFileID}, storing empty face so indexing does not get stuck',
+        e,
+        s,
+      );
+      await FaceMLDataDB.instance
+          .bulkInsertFaces([Face.empty(enteFile.uploadedFileID!, error: true)]);
+      return true;
     } catch (e, s) {
       _logger.severe(
         "Failed to analyze using FaceML for image with ID: ${enteFile.uploadedFileID}",
         e,
         s,
       );
-      return true;
+      return false;
     }
   }
 
@@ -1004,7 +1015,12 @@ class FaceMlService {
         final stopwatch = Stopwatch()..start();
         File? file;
         if (enteFile.fileType == FileType.video) {
+          try {
           file = await getThumbnailForUploadedFile(enteFile);
+          } on PlatformException catch (e, s) {
+            _logger.severe("Could not get thumbnail for $enteFile due to PlatformException", e, s);
+            throw ThumbnailRetrievalException(e.toString(), s);
+          }
         } else {
           file = await getFile(enteFile, isOrigin: true);
           // TODO: This is returning null for Pragadees for all files, so something is wrong here!

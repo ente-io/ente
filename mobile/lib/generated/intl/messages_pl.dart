@@ -131,6 +131,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Kod jest nieprawidłowy"),
         "incorrectRecoveryKeyTitle": MessageLookupByLibrary.simpleMessage(
             "Nieprawidłowy klucz odzyskiwania"),
+        "indexingIsPaused": MessageLookupByLibrary.simpleMessage(
+            "Indexing is paused, will automatically resume when device is ready"),
         "invalidEmailAddress":
             MessageLookupByLibrary.simpleMessage("Nieprawidłowy adres e-mail"),
         "joinDiscord": MessageLookupByLibrary.simpleMessage("Join Discord"),

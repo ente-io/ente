@@ -38,5 +38,6 @@
   "faceRecognition": "Face recognition",
   "faceRecognitionIndexingDescription": "Please note that this will result in a higher bandwidth and battery usage until all items are indexed.",
   "foundFaces": "Found faces",
-  "clusteringProgress": "Clustering progress"
+  "clusteringProgress": "Clustering progress",
+  "indexingIsPaused": "Indexing is paused, will automatically resume when device is ready"
 }
