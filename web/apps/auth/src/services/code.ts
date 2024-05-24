@@ -69,8 +69,12 @@ const parseType = (url: URL): Code["type"] => {
 };
 
 /** Convert the pathname from "/ACME:user@example.org" => "user@example.org" */
-const parseAccount = (url: URL): string =>
-    url.pathname.split(":").at(-1).split("/").at(-1);
+const parseAccount = (url: URL): string => {
+    let p = url.pathname;
+    if (p.startsWith("/")) p = p.slice(1);
+    if (p.includes(":")) p = p.split(":").slice(1).join(":");
+    return p;
+};
 
 const _getIssuer = (uriPath: string, uriParams: { get?: any }): string => {
     try {
