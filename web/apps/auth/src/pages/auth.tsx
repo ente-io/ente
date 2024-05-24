@@ -46,14 +46,11 @@ const AuthenticatorCodesPage = () => {
         appContext.showNavBar(false);
     }, []);
 
+    const lcSearch = searchTerm.toLowerCase();
     const filteredCodes = codes.filter(
-        (secret) =>
-            (secret.issuer ?? "")
-                .toLowerCase()
-                .includes(searchTerm.toLowerCase()) ||
-            (secret.account ?? "")
-                .toLowerCase()
-                .includes(searchTerm.toLowerCase()),
+        (code) =>
+            code.issuer?.toLowerCase().includes(lcSearch) ||
+            code.account?.toLowerCase().includes(lcSearch),
     );
 
     if (!hasFetched) {
@@ -270,7 +267,7 @@ const OTPDisplay: React.FC<OTPDisplayProps> = ({ code, otp, nextOTP }) => {
                             textAlign: "left",
                         }}
                     >
-                        {code.issuer}
+                        {code.issuer ?? ""}
                     </p>
                     <p
                         style={{
@@ -283,7 +280,7 @@ const OTPDisplay: React.FC<OTPDisplayProps> = ({ code, otp, nextOTP }) => {
                             color: "grey",
                         }}
                     >
-                        {code.account}
+                        {code.account ?? ""}
                     </p>
                     <p
                         style={{

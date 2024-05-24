@@ -12,7 +12,7 @@ export interface Code {
     /** The type of the code. */
     type: "totp" | "hotp";
     /** The user's account or email for which this code is used. */
-    account: string;
+    account?: string;
     /** The name of the entity that issued this code. */
     issuer: string;
     /** Number of digits in the generated OTP. */
@@ -52,7 +52,7 @@ export const codeFromURIString = (id: string, uriString: string): Code => {
     return {
         id,
         type: parseType(url),
-        account: _getAccount(uriPath),
+        account: parseAccount(url),
         issuer: _getIssuer(uriPath, uriParams),
         digits: parseDigits(url),
         period: parsePeriod(url),
@@ -68,18 +68,9 @@ const parseType = (url: URL): Code["type"] => {
     throw new Error(`Unsupported code with host ${t}`);
 };
 
-const _getAccount = (uriPath: string): string => {
-    try {
-        const path = decodeURIComponent(uriPath);
-        if (path.includes(":")) {
-            return path.split(":")[1];
-        } else if (path.includes("/")) {
-            return path.split("/")[1];
-        }
-    } catch (e) {
-        return "";
-    }
-};
+/** Convert the pathname from "/ACME:user@example.org" => "user@example.org" */
+const parseAccount = (url: URL): string =>
+    url.pathname.split(":").at(-1).split("/").at(-1);
 
 const _getIssuer = (uriPath: string, uriParams: { get?: any }): string => {
     try {
