@@ -233,7 +233,7 @@ const OTPDisplay: React.FC<OTPDisplayProps> = ({ code, otp, nextOTP }) => {
                 overflow: "hidden",
             }}
         >
-            <TimerProgress period={code.period} />
+            <CodeValidityBar code={code} />
             <div
                 style={{
                     padding: "12px 20px 0px 20px",
@@ -329,24 +329,25 @@ const OTPDisplay: React.FC<OTPDisplayProps> = ({ code, otp, nextOTP }) => {
     );
 };
 
-interface TimerProgressProps {
-    period: number;
+interface CodeValidityBarProps {
+    code: Code;
 }
 
-const TimerProgress: React.FC<TimerProgressProps> = ({ period }) => {
-    const [progress, setProgress] = useState(0);
-    const us = period * 1e6;
+const CodeValidityBar: React.FC<CodeValidityBarProps> = ({ code }) => {
+    const [progress, setProgress] = useState(code.type == "hotp" ? 1 : 0);
 
     useEffect(() => {
         const advance = () => {
+            const us = code.period * 1e6;
             const timeRemaining = us - ((Date.now() * 1000) % us);
             setProgress(timeRemaining / us);
         };
 
-        const ticker = setInterval(advance, 10);
+        const ticker =
+            code.type == "hotp" ? undefined : setInterval(advance, 10);
 
-        return () => clearInterval(ticker);
-    }, []);
+        return () => ticker && clearInterval(ticker);
+    }, [code]);
 
     const color = progress > 0.4 ? "green" : "orange";
 
