@@ -80,7 +80,7 @@ const _codeFromURIString = (id: string, uriString: string): Code => {
 const parseType = (url: URL): Code["type"] => {
     const t = url.host.toLowerCase();
     if (t == "totp" || t == "hotp") return t;
-    throw new Error(`Unsupported code with host ${t}`);
+    throw new Error(`Unsupported code with host "${t}"`);
 };
 
 const parseAccount = (url: URL): string | undefined => {
