@@ -167,7 +167,9 @@ class FilesDB {
         await tx.execute('PRAGMA user_version = $toVersion');
       });
     } else if (currentVersion > toVersion) {
-      throw AssertionError("currentVersion cannot be greater than toVersion");
+      throw AssertionError(
+        "currentVersion($currentVersion) cannot be greater than toVersion($toVersion)",
+      );
     }
   }
 
