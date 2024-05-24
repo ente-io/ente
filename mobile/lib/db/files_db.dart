@@ -146,32 +146,34 @@ class FilesDB {
     final String path = join(documentsDirectory.path, _databaseName);
     _logger.info("DB path " + path);
     final database = SqliteDatabase(path: path);
-    final versionRow = await database.execute('PRAGMA user_version');
+    await _migrate(database);
 
-    //db version used to be stored in `user_version` when using sqflite.
-    //sqlite_async doesn't use `user_version` to store db version.
-    // `oldVersionNumber` = 0 for fresh install
-    final oldVersionNumber = versionRow[0]['user_version'] as int;
-    final migrations = getMigrations(oldVersionNumber);
-
-    await migrations.migrate(database);
     return database;
   }
 
-  SqliteMigrations getMigrations(int oldSqfliteDBVersion) {
-    final numberOfMigrationScripts = migrationScripts.length;
-    final migrations = SqliteMigrations();
-    for (int i = oldSqfliteDBVersion; i < numberOfMigrationScripts; i++) {
-      migrations.add(
-        SqliteMigration(
-          i + 1,
-          (tx) async {
-            await tx.execute(migrationScripts[i]);
-          },
-        ),
-      );
+  Future<void> _migrate(
+    SqliteDatabase database,
+  ) async {
+    final result = await database.execute('PRAGMA user_version');
+    final currentVersion = result[0]['user_version'] as int;
+    final toVersion = migrationScripts.length;
+
+    _logger.info("currentVersion: $currentVersion");
+    _logger.info("toVersion: $toVersion");
+
+    if (currentVersion < toVersion) {
+      _logger.info("Migrating database from $currentVersion to $toVersion");
+      await database.writeTransaction((tx) async {
+        for (int i = currentVersion + 1; i <= toVersion; i++) {
+          await tx.execute(migrationScripts[i - 1]);
+        }
+        await tx.execute('PRAGMA user_version = $toVersion');
+      });
+    } else if (currentVersion > toVersion) {
+      throw AssertionError("currentVersion cannot be greater than toVersion");
+    } else {
+      _logger.info("Database is already at version $toVersion");
     }
-    return migrations;
   }
 
   // SQL code to create the database table
