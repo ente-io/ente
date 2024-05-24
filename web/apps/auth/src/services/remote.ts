@@ -35,7 +35,7 @@ export const getAuthCodes = async (): Promise<Code[]> => {
                             );
                         return codeFromURIString(entity.id, decryptedCode);
                     } catch (e) {
-                        log.error(`failed to parse codeId = ${entity.id}`);
+                        log.error(`Failed to parse codeID ${entity.id}`, e);
                         return null;
                     }
                 }),

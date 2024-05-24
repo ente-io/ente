@@ -1,5 +1,5 @@
+import { ensure } from "@/utils/ensure";
 import { HOTP, TOTP } from "otpauth";
-import { URI } from "vscode-uri";
 
 /**
  * A parsed representation of an *OTP code URI.
@@ -12,7 +12,7 @@ export interface Code {
     /** The type of the code. */
     type: "totp" | "hotp";
     /** The user's account or email for which this code is used. */
-    account: string;
+    account?: string;
     /** The name of the entity that issued this code. */
     issuer: string;
     /** Number of digits in the generated OTP. */
@@ -32,7 +32,7 @@ export interface Code {
     /** The (HMAC) algorithm used by the OTP generator. */
     algorithm: "sha1" | "sha256" | "sha512";
     /** The original string from which this code was generated. */
-    uriString?: string;
+    uriString: string;
 }
 
 /**
@@ -45,100 +45,99 @@ export interface Code {
  *
  * - (TOTP)
  *   otpauth://totp/ACME:user@example.org?algorithm=SHA1&digits=6&issuer=acme&period=30&secret=ALPHANUM
+ *
+ * See also `auth/test/models/code_test.dart`.
  */
 export const codeFromURIString = (id: string, uriString: string): Code => {
-    const santizedRawData = uriString
-        .replaceAll("+", "%2B")
-        .replaceAll(":", "%3A")
-        .replaceAll("\r", "")
-        // trim quotes
-        .replace(/^"|"$/g, "");
-
-    const uriParams = {};
-    const searchParamsString =
-        decodeURIComponent(santizedRawData).split("?")[1];
-    searchParamsString.split("&").forEach((pair) => {
-        const [key, value] = pair.split("=");
-        uriParams[key] = value;
-    });
-
-    const uri = URI.parse(santizedRawData);
-    let uriPath = decodeURIComponent(uri.path);
-    if (uriPath.startsWith("/otpauth://") || uriPath.startsWith("otpauth://")) {
-        uriPath = uriPath.split("otpauth://")[1];
-    } else if (uriPath.startsWith("otpauth%3A//")) {
-        uriPath = uriPath.split("otpauth%3A//")[1];
+    try {
+        return _codeFromURIString(id, uriString);
+    } catch (e) {
+        // We might have legacy encodings of account names that contain a "#",
+        // which causes the rest of the URL to be treated as a fragment, and
+        // ignored. See if this was potentially such a case, otherwise rethrow.
+        if (uriString.includes("#"))
+            return _codeFromURIString(id, uriString.replaceAll("#", "%23"));
+        throw e;
     }
+};
+
+const _codeFromURIString = (id: string, uriString: string): Code => {
+    const url = new URL(uriString);
+
+    // A URL like
+    //
+    // new URL("otpauth://hotp/Test?secret=AAABBBCCCDDDEEEFFF&issuer=Test&counter=0")
+    //
+    // is parsed differently by the browser and Node depending on the scheme.
+    // When the scheme is http(s), then both of them consider "hotp" as the
+    // `host`. However, when the scheme is "otpauth", as is our case, the
+    // browser considers the entire thing as part of the pathname. so we get.
+    //
+    //     host: ""
+    //     pathname: "//hotp/Test"
+    //
+    // Since this code run on browsers only, we parse as per that behaviour.
+
+    const [type, path] = parsePathname(url);
 
     return {
         id,
-        type: _getType(uriPath),
-        account: _getAccount(uriPath),
-        issuer: _getIssuer(uriPath, uriParams),
-        digits: parseDigits(uriParams),
-        period: parsePeriod(uriParams),
-        secret: parseSecret(uriParams),
-        algorithm: parseAlgorithm(uriParams),
+        type,
+        account: parseAccount(path),
+        issuer: parseIssuer(url, path),
+        digits: parseDigits(url),
+        period: parsePeriod(url),
+        secret: parseSecret(url),
+        algorithm: parseAlgorithm(url),
         uriString,
     };
 };
 
-const _getType = (uriPath: string): Code["type"] => {
-    const oauthType = uriPath.split("/")[0].substring(0);
-    if (oauthType.toLowerCase() === "totp") {
-        return "totp";
-    } else if (oauthType.toLowerCase() === "hotp") {
-        return "hotp";
-    }
-    throw new Error(`Unsupported format with host ${oauthType}`);
+const parsePathname = (url: URL): [type: Code["type"], path: string] => {
+    const p = url.pathname.toLowerCase();
+    if (p.startsWith("//totp")) return ["totp", url.pathname.slice(6)];
+    if (p.startsWith("//hotp")) return ["hotp", url.pathname.slice(6)];
+    throw new Error(`Unsupported code or unparseable path "${url.pathname}"`);
 };
 
-const _getAccount = (uriPath: string): string => {
-    try {
-        const path = decodeURIComponent(uriPath);
-        if (path.includes(":")) {
-            return path.split(":")[1];
-        } else if (path.includes("/")) {
-            return path.split("/")[1];
-        }
-    } catch (e) {
-        return "";
-    }
+const parseAccount = (path: string): string | undefined => {
+    // "/ACME:user@example.org" => "user@example.org"
+    let p = decodeURIComponent(path);
+    if (p.startsWith("/")) p = p.slice(1);
+    if (p.includes(":")) p = p.split(":").slice(1).join(":");
+    return p;
 };
 
-const _getIssuer = (uriPath: string, uriParams: { get?: any }): string => {
-    try {
-        if (uriParams["issuer"] !== undefined) {
-            let issuer = uriParams["issuer"];
-            // This is to handle bug in the ente auth app
-            if (issuer.endsWith("period")) {
-                issuer = issuer.substring(0, issuer.length - 6);
-            }
-            return issuer;
+const parseIssuer = (url: URL, path: string): string => {
+    // If there is a "issuer" search param, use that.
+    let issuer = url.searchParams.get("issuer");
+    if (issuer) {
+        // This is to handle bug in old versions of Ente Auth app.
+        if (issuer.endsWith("period")) {
+            issuer = issuer.substring(0, issuer.length - 6);
         }
-        let path = decodeURIComponent(uriPath);
-        if (path.startsWith("totp/") || path.startsWith("hotp/")) {
-            path = path.substring(5);
-        }
-        if (path.includes(":")) {
-            return path.split(":")[0];
-        } else if (path.includes("-")) {
-            return path.split("-")[0];
-        }
-        return path;
-    } catch (e) {
-        return "";
+        return issuer;
     }
+
+    // Otherwise use the `prefix:` from the account as the issuer.
+    // "/ACME:user@example.org" => "ACME"
+    let p = decodeURIComponent(path);
+    if (p.startsWith("/")) p = p.slice(1);
+
+    if (p.includes(":")) p = p.split(":")[0];
+    else if (p.includes("-")) p = p.split("-")[0];
+
+    return p;
 };
 
-const parseDigits = (uriParams): number =>
-    parseInt(uriParams["digits"] ?? "", 10) || 6;
+const parseDigits = (url: URL): number =>
+    parseInt(url.searchParams.get("digits") ?? "", 10) || 6;
 
-const parsePeriod = (uriParams): number =>
-    parseInt(uriParams["period"] ?? "", 10) || 30;
+const parsePeriod = (url: URL): number =>
+    parseInt(url.searchParams.get("period") ?? "", 10) || 30;
 
-const parseAlgorithm = (uriParams): Code["algorithm"] => {
-    switch (uriParams["algorithm"]?.toLowerCase()) {
+const parseAlgorithm = (url: URL): Code["algorithm"] => {
+    switch (url.searchParams.get("algorithm")?.toLowerCase()) {
         case "sha256":
             return "sha256";
         case "sha512":
@@ -148,8 +147,8 @@ const parseAlgorithm = (uriParams): Code["algorithm"] => {
     }
 };
 
-const parseSecret = (uriParams): string =>
-    uriParams["secret"].replaceAll(" ", "").toUpperCase();
+const parseSecret = (url: URL): string =>
+    ensure(url.searchParams.get("secret")).replaceAll(" ", "").toUpperCase();
 
 /**
  * Generate a pair of OTPs (one time passwords) from the given {@link code}.
