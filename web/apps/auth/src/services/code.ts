@@ -79,7 +79,7 @@ const parseAccount = (url: URL): string | undefined => {
 const parseIssuer = (url: URL): string => {
     // If there is a "issuer" search param, use that.
     let issuer = url.searchParams.get("issuer");
-    if (issuer !== undefined) {
+    if (issuer) {
         // This is to handle bug in old versions of Ente Auth app.
         if (issuer.endsWith("period")) {
             issuer = issuer.substring(0, issuer.length - 6);
