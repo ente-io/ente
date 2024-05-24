@@ -12,7 +12,6 @@ import "package:flutter/foundation.dart" show debugPrint, kDebugMode;
 import "package:logging/logging.dart";
 import "package:onnxruntime/onnxruntime.dart";
 import "package:package_info_plus/package_info_plus.dart";
-import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/events/diff_sync_complete_event.dart";
@@ -48,6 +47,7 @@ import "package:photos/utils/file_util.dart";
 import 'package:photos/utils/image_ml_isolate.dart';
 import "package:photos/utils/image_ml_util.dart";
 import "package:photos/utils/local_settings.dart";
+import "package:photos/utils/ml_util.dart";
 import "package:photos/utils/network_util.dart";
 import "package:photos/utils/thumbnail_util.dart";
 import "package:synchronized/synchronized.dart";
@@ -1182,11 +1182,6 @@ class FaceMlService {
     w?.log('getIndexedDoneRatio');
 
     return ratio;
-  }
-
-  static Future<List<int>> getIndexableFileIDs() async {
-    return FilesDB.instance
-        .getOwnedFileIDs(Configuration.instance.getUserID()!);
   }
 
   bool _skipAnalysisEnteFile(EnteFile enteFile, Map<int, int> indexedFileIds) {

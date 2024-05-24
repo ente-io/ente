@@ -26,6 +26,7 @@ import "package:photos/ui/components/title_bar_widget.dart";
 import "package:photos/ui/components/toggle_switch_widget.dart";
 import "package:photos/utils/data_util.dart";
 import "package:photos/utils/local_settings.dart";
+import "package:photos/utils/ml_util.dart";
 
 final _logger = Logger("MachineLearningSettingsPage");
 
@@ -442,7 +443,7 @@ class FaceRecognitionStatusWidgetState
     try {
       final indexedFiles = await FaceMLDataDB.instance
           .getIndexedFileCount(minimumMlVersion: faceMlVersion);
-      final indexableFiles = (await FaceMlService.getIndexableFileIDs()).length;
+      final indexableFiles = (await getIndexableFileIDs()).length;
       final showIndexedFiles = min(indexedFiles, indexableFiles);
       final pendingFiles = max(indexableFiles - indexedFiles, 0);
       final foundFaces = await FaceMLDataDB.instance.getTotalFaceCount();
