@@ -53,7 +53,7 @@ export const codeFromURIString = (id: string, uriString: string): Code => {
         id,
         type: parseType(url),
         account: parseAccount(url),
-        issuer: _getIssuer(uriPath, uriParams),
+        issuer: parseIssuer(url),
         digits: parseDigits(url),
         period: parsePeriod(url),
         secret: parseSecret(url),
@@ -68,37 +68,34 @@ const parseType = (url: URL): Code["type"] => {
     throw new Error(`Unsupported code with host ${t}`);
 };
 
-/** Convert the pathname from "/ACME:user@example.org" => "user@example.org" */
-const parseAccount = (url: URL): string => {
+const parseAccount = (url: URL): string | undefined => {
+    // "/ACME:user@example.org" => "user@example.org"
     let p = url.pathname;
     if (p.startsWith("/")) p = p.slice(1);
     if (p.includes(":")) p = p.split(":").slice(1).join(":");
     return p;
 };
 
-const _getIssuer = (uriPath: string, uriParams: { get?: any }): string => {
-    try {
-        if (uriParams["issuer"] !== undefined) {
-            let issuer = uriParams["issuer"];
-            // This is to handle bug in the ente auth app
-            if (issuer.endsWith("period")) {
-                issuer = issuer.substring(0, issuer.length - 6);
-            }
-            return issuer;
+const parseIssuer = (url: URL): string => {
+    // If there is a "issuer" search param, use that.
+    let issuer = url.searchParams.get("issuer");
+    if (issuer !== undefined) {
+        // This is to handle bug in old versions of Ente Auth app.
+        if (issuer.endsWith("period")) {
+            issuer = issuer.substring(0, issuer.length - 6);
         }
-        let path = decodeURIComponent(uriPath);
-        if (path.startsWith("totp/") || path.startsWith("hotp/")) {
-            path = path.substring(5);
-        }
-        if (path.includes(":")) {
-            return path.split(":")[0];
-        } else if (path.includes("-")) {
-            return path.split("-")[0];
-        }
-        return path;
-    } catch (e) {
-        return "";
+        return issuer;
     }
+
+    // Otherwise use the `prefix:` from the account as the issuer.
+    // "/ACME:user@example.org" => "ACME"
+    let p = url.pathname;
+    if (p.startsWith("/")) p = p.slice(1);
+
+    if (p.includes(":")) p = p.split(":")[0];
+    else if (p.includes("-")) p = p.split("-")[0];
+
+    return p;
 };
 
 const parseDigits = (url: URL): number =>
