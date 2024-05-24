@@ -49,6 +49,19 @@ export interface Code {
  * See also `auth/test/models/code_test.dart`.
  */
 export const codeFromURIString = (id: string, uriString: string): Code => {
+    try {
+        return _codeFromURIString(id, uriString);
+    } catch (e) {
+        // We might have legacy encodings of account names that contain a "#",
+        // which causes the rest of the URL to be treated as a fragment, and
+        // ignored. See if this was potentially such a case, otherwise rethrow.
+        if (uriString.includes("#"))
+            return _codeFromURIString(id, uriString.replaceAll("#", "%23"));
+        throw e;
+    }
+};
+
+const _codeFromURIString = (id: string, uriString: string): Code => {
     const url = new URL(uriString);
 
     return {
