@@ -1,4 +1,4 @@
-import {
+import type {
     UpdatedKey,
     UserVerificationResponse,
 } from "@ente/accounts/types/user";

@@ -1,4 +1,4 @@
-import { PageProps } from "@ente/shared/apps/types";
+import type { PageProps } from "@ente/shared/apps/types";
 import CodeBlock from "@ente/shared/components/CodeBlock";
 import DialogTitleWithCloseButton from "@ente/shared/components/DialogBox/TitleWithCloseButton";
 import { getRecoveryKey } from "@ente/shared/crypto/helpers";

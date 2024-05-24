@@ -1,13 +1,13 @@
 import log from "@/next/log";
-import { SRPAttributes } from "@ente/accounts/types/srp";
-import { ButtonProps, Input } from "@mui/material";
+import type { SRPAttributes } from "@ente/accounts/types/srp";
+import { Input, type ButtonProps } from "@mui/material";
 import { t } from "i18next";
 import SingleInputForm, {
-    SingleInputFormProps,
+    type SingleInputFormProps,
 } from "../components/SingleInputForm";
 import ComlinkCryptoWorker from "../crypto";
 import { CustomError } from "../error";
-import { KeyAttributes, User } from "../user/types";
+import type { KeyAttributes, User } from "../user/types";
 
 export interface VerifyMasterPasswordFormProps {
     user: User;

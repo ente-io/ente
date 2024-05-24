@@ -1,4 +1,4 @@
-import {
+import type {
     RecoveryKey,
     TwoFactorRecoveryResponse,
     TwoFactorSecret,
@@ -6,12 +6,12 @@ import {
     UserVerificationResponse,
 } from "@ente/accounts/types/user";
 import { APPS, OTT_CLIENTS } from "@ente/shared/apps/constants";
-import { B64EncryptionResult } from "@ente/shared/crypto/types";
+import type { B64EncryptionResult } from "@ente/shared/crypto/types";
 import { ApiError, CustomError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { getEndpoint } from "@ente/shared/network/api";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
-import { KeyAttributes } from "@ente/shared/user/types";
+import type { KeyAttributes } from "@ente/shared/user/types";
 import { HttpStatusCode } from "axios";
 import { TwoFactorType } from "../constants/twofactor";
 

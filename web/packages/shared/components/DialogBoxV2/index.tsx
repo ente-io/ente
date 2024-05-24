@@ -4,13 +4,13 @@ import {
     Box,
     Button,
     Dialog,
-    DialogProps,
     Stack,
     Typography,
+    type DialogProps,
 } from "@mui/material";
 import { t } from "i18next";
 import React, { useState } from "react";
-import { DialogBoxAttributesV2 } from "./types";
+import type { DialogBoxAttributesV2 } from "./types";
 
 type IProps = React.PropsWithChildren<
     Omit<DialogProps, "onClose"> & {

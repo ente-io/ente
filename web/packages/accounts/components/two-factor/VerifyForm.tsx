@@ -6,7 +6,7 @@ import {
 } from "@ente/shared/components/Container";
 import SubmitButton from "@ente/shared/components/SubmitButton";
 import { Box, Typography } from "@mui/material";
-import { Formik, FormikHelpers } from "formik";
+import { Formik, type FormikHelpers } from "formik";
 import { t } from "i18next";
 import { useRef, useState } from "react";
 import OtpInput from "react-otp-input";

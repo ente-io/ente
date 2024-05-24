@@ -1,6 +1,6 @@
 import ChangeEmailForm from "@ente/accounts/components/ChangeEmail";
 import { PAGES } from "@ente/accounts/constants/pages";
-import { PageProps } from "@ente/shared/apps/types";
+import type { PageProps } from "@ente/shared/apps/types";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
 import FormPaperTitle from "@ente/shared/components/Form/FormPaper/Title";

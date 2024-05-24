@@ -1,6 +1,6 @@
 import { verifyTwoFactor } from "@ente/accounts/api/user";
 import VerifyTwoFactor, {
-    VerifyTwoFactorCallback,
+    type VerifyTwoFactorCallback,
 } from "@ente/accounts/components/two-factor/VerifyForm";
 import { PAGES } from "@ente/accounts/constants/pages";
 
@@ -13,7 +13,7 @@ import LinkButton from "@ente/shared/components/LinkButton";
 import { ApiError } from "@ente/shared/error";
 import InMemoryStore, { MS_KEYS } from "@ente/shared/storage/InMemoryStore";
 import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
-import { User } from "@ente/shared/user/types";
+import type { User } from "@ente/shared/user/types";
 import { HttpStatusCode } from "axios";
 import { t } from "i18next";
 import { useRouter } from "next/router";

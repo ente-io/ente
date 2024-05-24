@@ -1,10 +1,10 @@
 import { SpaceBetweenFlex } from "@ente/shared/components/Container";
 import CloseIcon from "@mui/icons-material/Close";
 import {
-    DialogProps,
     DialogTitle,
     IconButton,
     Typography,
+    type DialogProps,
 } from "@mui/material";
 
 const DialogTitleWithCloseButton = (props) => {

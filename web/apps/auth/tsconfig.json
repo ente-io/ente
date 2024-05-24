@@ -8,9 +8,6 @@
 
         "jsxImportSource": "@emotion/react",
 
-        "verbatimModuleSyntax": false,
-        "resolveJsonModule": false,
-
         "strict": false,
         /* Stricter than strict */
         "noImplicitReturns": false,

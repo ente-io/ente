@@ -18,7 +18,7 @@ import {
     SetDialogBoxAttributes,
 } from "@ente/shared/components/DialogBox/types";
 import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
-import {
+import type {
     DialogBoxAttributesV2,
     SetDialogBoxAttributesV2,
 } from "@ente/shared/components/DialogBoxV2/types";
@@ -36,7 +36,7 @@ import {
 } from "@ente/shared/storage/localStorage/helpers";
 import { getTheme } from "@ente/shared/themes";
 import { THEME_COLOR } from "@ente/shared/themes/constants";
-import { SetTheme } from "@ente/shared/themes/types";
+import type { SetTheme } from "@ente/shared/themes/types";
 import type { User } from "@ente/shared/user/types";
 import ArrowForward from "@mui/icons-material/ArrowForward";
 import { CssBaseline, useMediaQuery } from "@mui/material";
@@ -45,7 +45,7 @@ import Notification from "components/Notification";
 import { REDIRECTS } from "constants/redirects";
 import { t } from "i18next";
 import isElectron from "is-electron";
-import { AppProps } from "next/app";
+import type { AppProps } from "next/app";
 import { useRouter } from "next/router";
 import "photoswipe/dist/photoswipe.css";
 import { createContext, useEffect, useRef, useState } from "react";

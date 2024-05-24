@@ -1,9 +1,5 @@
-import { t } from "i18next";
-import { useEffect, useState } from "react";
-import { Trans } from "react-i18next";
-
-import { UserVerificationResponse } from "@ente/accounts/types/user";
-import { PageProps } from "@ente/shared/apps/types";
+import type { UserVerificationResponse } from "@ente/accounts/types/user";
+import type { PageProps } from "@ente/shared/apps/types";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
@@ -11,7 +7,7 @@ import FormPaperFooter from "@ente/shared/components/Form/FormPaper/Footer";
 import FormPaperTitle from "@ente/shared/components/Form/FormPaper/Title";
 import LinkButton from "@ente/shared/components/LinkButton";
 import SingleInputForm, {
-    SingleInputFormProps,
+    type SingleInputFormProps,
 } from "@ente/shared/components/SingleInputForm";
 import { ApiError } from "@ente/shared/error";
 import { getAccountsURL } from "@ente/shared/network/api";
@@ -23,14 +19,17 @@ import {
     setIsFirstLogin,
 } from "@ente/shared/storage/localStorage/helpers";
 import { clearKeys } from "@ente/shared/storage/sessionStorage";
-import { KeyAttributes, User } from "@ente/shared/user/types";
+import type { KeyAttributes, User } from "@ente/shared/user/types";
 import { Box, Typography } from "@mui/material";
 import { HttpStatusCode } from "axios";
+import { t } from "i18next";
 import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
+import { Trans } from "react-i18next";
 import { putAttributes, sendOtt, verifyOtt } from "../api/user";
 import { PAGES } from "../constants/pages";
 import { configureSRP } from "../services/srp";
-import { SRPSetupAttributes } from "../types/srp";
+import type { SRPSetupAttributes } from "../types/srp";
 
 export default function VerifyPage({ appContext, appName }: PageProps) {
     const { logout } = appContext;

@@ -1,5 +1,5 @@
 import { FluidContainer } from "@ente/shared/components/Container";
-import { Box, ButtonProps, MenuItem, Typography } from "@mui/material";
+import { Box, MenuItem, Typography, type ButtonProps } from "@mui/material";
 import React, { useContext } from "react";
 import { OverflowMenuContext } from "./context";
 

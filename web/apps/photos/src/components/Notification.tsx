@@ -2,7 +2,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import {
     Box,
     Button,
-    ButtonProps,
+    type ButtonProps,
     Snackbar,
     Stack,
     SxProps,

@@ -1,5 +1,6 @@
 import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import type { Dispatch, SetStateAction } from "react";
+import { useEffect, useState } from "react";
 
 export function useLocalState<T>(
     key: LS_KEYS,

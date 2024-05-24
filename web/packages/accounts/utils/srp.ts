@@ -1,8 +1,8 @@
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { generateLoginSubKey } from "@ente/shared/crypto/helpers";
-import { KeyAttributes } from "@ente/shared/user/types";
+import type { KeyAttributes } from "@ente/shared/user/types";
 import { generateSRPSetupAttributes } from "../services/srp";
-import { SRPSetupAttributes } from "../types/srp";
+import type { SRPSetupAttributes } from "../types/srp";
 
 export async function generateKeyAndSRPAttributes(passphrase: string): Promise<{
     keyAttributes: KeyAttributes;
