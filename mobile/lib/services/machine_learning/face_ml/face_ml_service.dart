@@ -590,8 +590,8 @@ class FaceMlService {
           allFaceInfoForClustering.add(faceInfo);
         }
       }
-      // sort the embeddings based on file creation time, oldest first
-      allFaceInfoForClustering.sort((a, b) {
+      // sort the embeddings based on file creation time, newest first
+      allFaceInfoForClustering.sort((b, a) {
         return fileIDToCreationTime[a.fileID]!
             .compareTo(fileIDToCreationTime[b.fileID]!);
       });
