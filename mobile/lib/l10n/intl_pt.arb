@@ -1235,5 +1235,6 @@
   "faceRecognition": "Reconhecimento facial",
   "faceRecognitionIndexingDescription": "Por favor, note que isso resultará em uma largura de banda maior e uso de bateria até que todos os itens sejam indexados.",
   "foundFaces": "Rostos encontrados",
-  "clusteringProgress": "Progresso de agrupamento"
+  "clusteringProgress": "Progresso de agrupamento",
+  "indexingIsPaused": "Indexing is paused, will automatically resume when device is ready"
 }

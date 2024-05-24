@@ -813,6 +813,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "incorrectRecoveryKeyTitle":
             MessageLookupByLibrary.simpleMessage("Incorrect recovery key"),
         "indexedItems": MessageLookupByLibrary.simpleMessage("Indexed items"),
+        "indexingIsPaused": MessageLookupByLibrary.simpleMessage(
+            "Indexing is paused, will automatically resume when device is ready"),
         "insecureDevice":
             MessageLookupByLibrary.simpleMessage("Insecure device"),
         "installManually":

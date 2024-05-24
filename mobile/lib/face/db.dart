@@ -668,22 +668,39 @@ class FaceMLDataDB {
     return maps.first['count'] as int;
   }
 
-  Future<int> getClusteredFileCount() async {
+  Future<int> getClusteredOrFacelessFileCount() async {
     final db = await instance.asyncDB;
-    final List<Map<String, dynamic>> maps = await db.getAll(
+    final List<Map<String, dynamic>> clustered = await db.getAll(
       'SELECT $fcFaceId FROM $faceClustersTable',
     );
-    final Set<int> fileIDs = {};
-    for (final map in maps) {
+    final Set<int> clusteredFileIDs = {};
+    for (final map in clustered) {
       final int fileID = getFileIdFromFaceId(map[fcFaceId] as String);
-      fileIDs.add(fileID);
+      clusteredFileIDs.add(fileID);
     }
-    return fileIDs.length;
+
+    final List<Map<String, dynamic>> badFacesFiles = await db.getAll(
+      'SELECT DISTINCT $fileIDColumn FROM $facesTable WHERE $faceScore <= $kMinimumQualityFaceScore OR $faceBlur <= $kLaplacianHardThreshold',
+    );
+    final Set<int> badFileIDs = {};
+    for (final map in badFacesFiles) {
+      badFileIDs.add(map[fileIDColumn] as int);
+    }
+
+    final List<Map<String, dynamic>> goodFacesFiles = await db.getAll(
+      'SELECT DISTINCT $fileIDColumn FROM $facesTable WHERE $faceScore > $kMinimumQualityFaceScore AND $faceBlur > $kLaplacianHardThreshold',
+    );
+    final Set<int> goodFileIDs = {};
+    for (final map in goodFacesFiles) {
+      goodFileIDs.add(map[fileIDColumn] as int);
+    }
+    final trulyFacelessFiles = badFileIDs.difference(goodFileIDs);
+    return clusteredFileIDs.length + trulyFacelessFiles.length;
   }
 
   Future<double> getClusteredToIndexableFilesRatio() async {
     final int indexableFiles = (await getIndexableFileIDs()).length;
-    final int clusteredFiles = await getClusteredFileCount();
+    final int clusteredFiles = await getClusteredOrFacelessFileCount();
 
     return clusteredFiles / indexableFiles;
   }
