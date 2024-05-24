@@ -669,14 +669,6 @@ class FaceMLDataDB {
     return maps.first['count'] as int;
   }
 
-  Future<int> getClusteredFaceCount() async {
-    final db = await instance.asyncDB;
-    final List<Map<String, dynamic>> maps = await db.getAll(
-      'SELECT COUNT(DISTINCT $fcFaceId) as count FROM $faceClustersTable',
-    );
-    return maps.first['count'] as int;
-  }
-
   Future<int> getClusteredFileCount() async {
     final db = await instance.asyncDB;
     final List<Map<String, dynamic>> maps = await db.getAll(
