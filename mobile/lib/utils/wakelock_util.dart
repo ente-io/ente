@@ -31,4 +31,8 @@ class EnteWakeLock {
       );
     }
   }
+
+  static Future<void> toggle({required bool enable}) async {
+    await WakelockPlus.toggle(enable: enable);
+  }
 }
