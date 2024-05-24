@@ -64,11 +64,27 @@ export const codeFromURIString = (id: string, uriString: string): Code => {
 const _codeFromURIString = (id: string, uriString: string): Code => {
     const url = new URL(uriString);
 
+    // A URL like
+    //
+    // new URL("otpauth://hotp/Test?secret=AAABBBCCCDDDEEEFFF&issuer=Test&counter=0")
+    //
+    // is parsed differently by the browser and Node depending on the scheme.
+    // When the scheme is http(s), then both of them consider "hotp" as the
+    // `host`. However, when the scheme is "otpauth", as is our case, the
+    // browser considers the entire thing as part of the pathname. so we get.
+    //
+    //     host: ""
+    //     pathname: "//hotp/Test"
+    //
+    // Since this code run on browsers only, we parse as per that behaviour.
+
+    const [type, path] = parsePathname(url);
+
     return {
         id,
-        type: parseType(url),
-        account: parseAccount(url),
-        issuer: parseIssuer(url),
+        type,
+        account: parseAccount(path),
+        issuer: parseIssuer(url, path),
         digits: parseDigits(url),
         period: parsePeriod(url),
         secret: parseSecret(url),
@@ -77,21 +93,22 @@ const _codeFromURIString = (id: string, uriString: string): Code => {
     };
 };
 
-const parseType = (url: URL): Code["type"] => {
-    const t = url.host.toLowerCase();
-    if (t == "totp" || t == "hotp") return t;
-    throw new Error(`Unsupported code with host "${t}"`);
+const parsePathname = (url: URL): [type: Code["type"], path: string] => {
+    const p = url.pathname.toLowerCase();
+    if (p.startsWith("//totp")) return ["totp", url.pathname.slice(6)];
+    if (p.startsWith("//hotp")) return ["hotp", url.pathname.slice(6)];
+    throw new Error(`Unsupported code or unparseable path "${url.pathname}"`);
 };
 
-const parseAccount = (url: URL): string | undefined => {
+const parseAccount = (path: string): string | undefined => {
     // "/ACME:user@example.org" => "user@example.org"
-    let p = decodeURIComponent(url.pathname);
+    let p = decodeURIComponent(path);
     if (p.startsWith("/")) p = p.slice(1);
     if (p.includes(":")) p = p.split(":").slice(1).join(":");
     return p;
 };
 
-const parseIssuer = (url: URL): string => {
+const parseIssuer = (url: URL, path: string): string => {
     // If there is a "issuer" search param, use that.
     let issuer = url.searchParams.get("issuer");
     if (issuer) {
@@ -104,7 +121,7 @@ const parseIssuer = (url: URL): string => {
 
     // Otherwise use the `prefix:` from the account as the issuer.
     // "/ACME:user@example.org" => "ACME"
-    let p = decodeURIComponent(url.pathname);
+    let p = decodeURIComponent(path);
     if (p.startsWith("/")) p = p.slice(1);
 
     if (p.includes(":")) p = p.split(":")[0];
