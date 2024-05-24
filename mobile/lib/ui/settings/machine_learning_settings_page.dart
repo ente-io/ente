@@ -26,6 +26,7 @@ import "package:photos/ui/components/title_bar_widget.dart";
 import "package:photos/ui/components/toggle_switch_widget.dart";
 import "package:photos/utils/data_util.dart";
 import "package:photos/utils/local_settings.dart";
+import "package:photos/utils/ml_util.dart";
 
 final _logger = Logger("MachineLearningSettingsPage");
 
@@ -438,19 +439,16 @@ class FaceRecognitionStatusWidgetState
     });
   }
 
-  Future<(int, int, int, double)> getIndexStatus() async {
+  Future<(int, int, double)> getIndexStatus() async {
     try {
       final indexedFiles = await FaceMLDataDB.instance
           .getIndexedFileCount(minimumMlVersion: faceMlVersion);
-      final indexableFiles = (await FaceMlService.getIndexableFileIDs()).length;
+      final indexableFiles = (await getIndexableFileIDs()).length;
       final showIndexedFiles = min(indexedFiles, indexableFiles);
       final pendingFiles = max(indexableFiles - indexedFiles, 0);
-      final foundFaces = await FaceMLDataDB.instance.getTotalFaceCount();
-      final clusteredFaces =
-          await FaceMLDataDB.instance.getClusteredFaceCount();
-      final clusteringDoneRatio = clusteredFaces / foundFaces;
+      final clusteringDoneRatio = await FaceMLDataDB.instance.getClusteredToIndexableFilesRatio();
 
-      return (showIndexedFiles, pendingFiles, foundFaces, clusteringDoneRatio);
+      return (showIndexedFiles, pendingFiles, clusteringDoneRatio);
     } catch (e, s) {
       _logger.severe('Error getting face recognition status', e, s);
       rethrow;
@@ -479,8 +477,7 @@ class FaceRecognitionStatusWidgetState
             if (snapshot.hasData) {
               final int indexedFiles = snapshot.data!.$1;
               final int pendingFiles = snapshot.data!.$2;
-              final int foundFaces = snapshot.data!.$3;
-              final double clusteringDoneRatio = snapshot.data!.$4;
+              final double clusteringDoneRatio = snapshot.data!.$3;
               final double clusteringPercentage =
                   (clusteringDoneRatio * 100).clamp(0, 100);
 
@@ -511,19 +508,6 @@ class FaceRecognitionStatusWidgetState
                     alignCaptionedTextToLeft: true,
                     isGestureDetectorDisabled: true,
                     key: ValueKey("pending_items_" + pendingFiles.toString()),
-                  ),
-                  MenuItemWidget(
-                    captionedTextWidget: CaptionedTextWidget(
-                      title: S.of(context).foundFaces,
-                    ),
-                    trailingWidget: Text(
-                      NumberFormat().format(foundFaces),
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                    singleBorderRadius: 8,
-                    alignCaptionedTextToLeft: true,
-                    isGestureDetectorDisabled: true,
-                    key: ValueKey("found_faces_" + foundFaces.toString()),
                   ),
                   MenuItemWidget(
                     captionedTextWidget: CaptionedTextWidget(

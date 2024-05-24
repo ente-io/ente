@@ -12,7 +12,6 @@ import "package:flutter/foundation.dart" show debugPrint, kDebugMode;
 import "package:logging/logging.dart";
 import "package:onnxruntime/onnxruntime.dart";
 import "package:package_info_plus/package_info_plus.dart";
-import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/events/diff_sync_complete_event.dart";
@@ -99,6 +98,7 @@ class FaceMlService {
 
   final int _fileDownloadLimit = 5;
   final int _embeddingFetchLimit = 200;
+  final int _kForceClusteringFaceCount = 4000;
 
   Future<void> init({bool initializeImageMlIsolate = false}) async {
     if (LocalSettings.instance.isFaceIndexingEnabled == false) {
@@ -358,16 +358,17 @@ class FaceMlService {
     if (_cannotRunMLFunction()) return;
 
     await sync(forceSync: _shouldSyncPeople);
-    await indexAllImages();
-    final indexingCompleteRatio = await _getIndexedDoneRatio();
-    if (indexingCompleteRatio < 0.95) {
+
+    final int unclusteredFacesCount =
+        await FaceMLDataDB.instance.getUnclusteredFaceCount();
+    if (unclusteredFacesCount > _kForceClusteringFaceCount) {
       _logger.info(
-        "Indexing is not far enough to start clustering, skipping clustering. Indexing is at $indexingCompleteRatio",
+        "There are $unclusteredFacesCount unclustered faces, doing clustering first",
       );
-      return;
-    } else {
       await clusterAllImages();
     }
+    await indexAllImages();
+    await clusterAllImages();
   }
 
   void pauseIndexingAndClustering() {
@@ -445,7 +446,7 @@ class FaceMlService {
 
         if (LocalSettings.instance.remoteFetchEnabled) {
           try {
-            final List<int> fileIds = [];
+            final Set<int> fileIds = {}; // if there are duplicates here server returns 400
             // Try to find embeddings on the remote server
             for (final f in chunk) {
               fileIds.add(f.uploadedFileID!);
@@ -590,8 +591,8 @@ class FaceMlService {
           allFaceInfoForClustering.add(faceInfo);
         }
       }
-      // sort the embeddings based on file creation time, oldest first
-      allFaceInfoForClustering.sort((a, b) {
+      // sort the embeddings based on file creation time, newest first
+      allFaceInfoForClustering.sort((b, a) {
         return fileIDToCreationTime[a.fileID]!
             .compareTo(fileIDToCreationTime[b.fileID]!);
       });
@@ -1169,24 +1170,6 @@ class FaceMlService {
       _logStatus();
       throw CouldNotRetrieveAnyFileData();
     }
-  }
-
-  Future<double> _getIndexedDoneRatio() async {
-    final w = (kDebugMode ? EnteWatch('_getIndexedDoneRatio') : null)?..start();
-
-    final int alreadyIndexedCount = await FaceMLDataDB.instance
-        .getIndexedFileCount(minimumMlVersion: faceMlVersion);
-    final int totalIndexableCount = (await getIndexableFileIDs()).length;
-    final ratio = alreadyIndexedCount / totalIndexableCount;
-
-    w?.log('getIndexedDoneRatio');
-
-    return ratio;
-  }
-
-  static Future<List<int>> getIndexableFileIDs() async {
-    return FilesDB.instance
-        .getOwnedFileIDs(Configuration.instance.getUserID()!);
   }
 
   bool _skipAnalysisEnteFile(EnteFile enteFile, Map<int, int> indexedFileIds) {
