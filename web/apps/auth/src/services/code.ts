@@ -91,7 +91,7 @@ const _codeFromURIString = (id: string, uriString: string): Code => {
         type,
         account: parseAccount(path),
         issuer: parseIssuer(url, path),
-        length: parseLength(url),
+        length: parseLength(url, type),
         period: parsePeriod(url),
         secret: parseSecret(url),
         algorithm: parseAlgorithm(url),
@@ -182,7 +182,7 @@ export const generateOTPs = (code: Code): [otp: string, nextOTP: string] => {
                 secret: code.secret,
                 algorithm: code.algorithm,
                 period: code.period,
-                digits: code.digits,
+                digits: code.length,
             });
             otp = totp.generate();
             nextOTP = totp.generate({
@@ -238,7 +238,7 @@ class Steam {
         this.period = 30;
     }
 
-    generate({ timestamp = Date.now() }: { timestamp: number }) {
+    generate({ timestamp }: { timestamp: number } = { timestamp: Date.now() }) {
         return `${timestamp}`;
     }
 }
