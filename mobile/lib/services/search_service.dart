@@ -754,15 +754,6 @@ class SearchService {
 
   Future<List<GenericSearchResult>> getAllFace(int? limit) async {
     try {
-      // Don't return anything if clustering is not nearly complete yet
-      final foundFaces = await FaceMLDataDB.instance.getTotalFaceCount();
-      final clusteredFaces =
-          await FaceMLDataDB.instance.getClusteredFaceCount();
-      final clusteringDoneRatio = clusteredFaces / foundFaces;
-      if (clusteringDoneRatio < 0.9) {
-        return [];
-      }
-
       debugPrint("getting faces");
       final Map<int, Set<int>> fileIdToClusterID =
           await FaceMLDataDB.instance.getFileIdToClusterIds();

@@ -1,6 +1,7 @@
 import "dart:async";
 import "dart:convert";
 
+import "package:computer/computer.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/network/network.dart";
 import "package:photos/db/files_db.dart";
@@ -15,6 +16,8 @@ import "package:shared_preferences/shared_preferences.dart";
 
 class RemoteFileMLService {
   RemoteFileMLService._privateConstructor();
+
+  static final Computer _computer = Computer.shared();
 
   static final RemoteFileMLService instance =
       RemoteFileMLService._privateConstructor();
@@ -52,13 +55,13 @@ class RemoteFileMLService {
   }
 
   Future<FilesMLDataResponse> getFilessEmbedding(
-    List<int> fileIds,
+    Set<int> fileIds,
   ) async {
     try {
       final res = await _dio.post(
         "/embeddings/files",
         data: {
-          "fileIDs": fileIds,
+          "fileIDs": fileIds.toList(),
           "model": 'file-ml-clip-face',
         },
       );
@@ -107,15 +110,17 @@ class RemoteFileMLService {
       final input = EmbeddingsDecoderInput(embedding, fileKey);
       inputs.add(input);
     }
-    // todo: use compute or isolate
-    return decryptFileMLComputer(
-      {
+    return _computer.compute<Map<String, dynamic>, Map<int, FileMl>>(
+      _decryptFileMLComputer,
+      param: {
         "inputs": inputs,
       },
     );
   }
 
-  Future<Map<int, FileMl>> decryptFileMLComputer(
+}
+
+Future<Map<int, FileMl>> _decryptFileMLComputer(
     Map<String, dynamic> args,
   ) async {
     final result = <int, FileMl>{};
@@ -135,4 +140,3 @@ class RemoteFileMLService {
     }
     return result;
   }
-}

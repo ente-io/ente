@@ -13,6 +13,8 @@ import "package:photos/face/model/face.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/services/machine_learning/face_ml/face_clustering/face_info_for_clustering.dart";
 import 'package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart';
+import "package:photos/services/machine_learning/face_ml/face_ml_result.dart";
+import "package:photos/utils/ml_util.dart";
 import 'package:sqlite_async/sqlite_async.dart';
 
 /// Stores all data for the FacesML-related features. The database can be accessed by `FaceMLDataDB.instance.database`.
@@ -249,7 +251,7 @@ class FaceMLDataDB {
       final List<int> fileId = [recentFileID];
       int? avatarFileId;
       if (avatarFaceId != null) {
-        avatarFileId = int.tryParse(avatarFaceId.split('_')[0]);
+        avatarFileId = tryGetFileIdFromFaceId(avatarFaceId);
         if (avatarFileId != null) {
           fileId.add(avatarFileId);
         }
@@ -401,8 +403,10 @@ class FaceMLDataDB {
       final personID = map[personIdColumn] as String;
       final clusterID = map[fcClusterID] as int;
       final faceID = map[fcFaceId] as String;
-      result.putIfAbsent(personID, () => {}).putIfAbsent(clusterID, () => {})
-        .add(faceID);
+      result
+          .putIfAbsent(personID, () => {})
+          .putIfAbsent(clusterID, () => {})
+          .add(faceID);
     }
     return result;
   }
@@ -476,8 +480,7 @@ class FaceMLDataDB {
     for (final map in maps) {
       final clusterID = map[fcClusterID] as int;
       final faceID = map[fcFaceId] as String;
-      final x = faceID.split('_').first;
-      final fileID = int.parse(x);
+      final fileID = getFileIdFromFaceId(faceID);
       result[fileID] = (result[fileID] ?? {})..add(clusterID);
     }
     return result;
@@ -665,19 +668,38 @@ class FaceMLDataDB {
     return maps.first['count'] as int;
   }
 
-  Future<int> getClusteredFaceCount() async {
+  Future<int> getClusteredFileCount() async {
     final db = await instance.asyncDB;
     final List<Map<String, dynamic>> maps = await db.getAll(
-      'SELECT COUNT(DISTINCT $fcFaceId) as count FROM $faceClustersTable',
+      'SELECT $fcFaceId FROM $faceClustersTable',
     );
-    return maps.first['count'] as int;
+    final Set<int> fileIDs = {};
+    for (final map in maps) {
+      final int fileID = getFileIdFromFaceId(map[fcFaceId] as String);
+      fileIDs.add(fileID);
+    }
+    return fileIDs.length;
   }
 
-  Future<double> getClusteredToTotalFacesRatio() async {
-    final int totalFaces = await getTotalFaceCount();
-    final int clusteredFaces = await getClusteredFaceCount();
+  Future<double> getClusteredToIndexableFilesRatio() async {
+    final int indexableFiles = (await getIndexableFileIDs()).length;
+    final int clusteredFiles = await getClusteredFileCount();
 
-    return clusteredFaces / totalFaces;
+    return clusteredFiles / indexableFiles;
+  }
+
+  Future<int> getUnclusteredFaceCount() async {
+    final db = await instance.asyncDB;
+    const String query = '''
+      SELECT f.$faceIDColumn
+      FROM $facesTable f
+      LEFT JOIN $faceClustersTable fc ON f.$faceIDColumn = fc.$fcFaceId
+      WHERE f.$faceScore > $kMinimumQualityFaceScore
+      AND f.$faceBlur > $kLaplacianHardThreshold
+      AND fc.$fcFaceId IS NULL
+    ''';
+    final List<Map<String, dynamic>> maps = await db.getAll(query);
+    return maps.length;
   }
 
   Future<int> getBlurryFaceCount([
@@ -795,7 +817,7 @@ class FaceMLDataDB {
       for (final map in maps) {
         final clusterID = map[clusterIDColumn] as int;
         final String faceID = map[fcFaceId] as String;
-        final fileID = int.parse(faceID.split('_').first);
+        final fileID = getFileIdFromFaceId(faceID);
         result[fileID] = (result[fileID] ?? {})..add(clusterID);
       }
       return result;
@@ -814,8 +836,8 @@ class FaceMLDataDB {
       final Map<int, Set<int>> result = {};
       for (final map in maps) {
         final clusterID = map[fcClusterID] as int;
-        final faceId = map[fcFaceId] as String;
-        final fileID = int.parse(faceId.split("_").first);
+        final faceID = map[fcFaceId] as String;
+        final fileID = getFileIdFromFaceId(faceID);
         result[fileID] = (result[fileID] ?? {})..add(clusterID);
       }
       return result;
@@ -964,7 +986,7 @@ class FaceMLDataDB {
     final Map<String, int> faceIDToClusterID = {};
     for (final row in faceIdsResult) {
       final faceID = row[fcFaceId] as String;
-      if (fileIds.contains(faceID.split('_').first)) {
+      if (fileIds.contains(getFileIdFromFaceId(faceID))) {
         maxClusterID += 1;
         faceIDToClusterID[faceID] = maxClusterID;
       }
@@ -990,7 +1012,7 @@ class FaceMLDataDB {
     final Map<String, int> faceIDToClusterID = {};
     for (final row in faceIdsResult) {
       final faceID = row[fcFaceId] as String;
-      if (fileIds.contains(faceID.split('_').first)) {
+      if (fileIds.contains(getFileIdFromFaceId(faceID))) {
         maxClusterID += 1;
         faceIDToClusterID[faceID] = maxClusterID;
       }

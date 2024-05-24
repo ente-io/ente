@@ -310,5 +310,9 @@ class FaceResultBuilder {
 }
 
 int getFileIdFromFaceId(String faceId) {
-  return int.parse(faceId.split("_")[0]);
+  return int.parse(faceId.split("_").first);
+}
+
+int? tryGetFileIdFromFaceId(String faceId) {
+  return int.tryParse(faceId.split("_").first);
 }
