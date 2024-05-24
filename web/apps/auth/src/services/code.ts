@@ -171,7 +171,7 @@ export const generateOTPs = (code: Code): [otp: string, nextOTP: string] => {
             });
             otp = totp.generate();
             nextOTP = totp.generate({
-                timestamp: new Date().getTime() + code.period * 1000,
+                timestamp: Date.now() + code.period * 1000,
             });
             break;
         }
@@ -186,6 +186,44 @@ export const generateOTPs = (code: Code): [otp: string, nextOTP: string] => {
             nextOTP = hotp.generate({ counter: 1 });
             break;
         }
+
+        case "steam": {
+            const steam = new Steam({
+                secret: code.secret,
+            });
+            otp = steam.generate();
+            nextOTP = steam.generate({
+                timestamp: Date.now() + code.period * 1000,
+            });
+            break;
+        }
     }
     return [otp, nextOTP];
 };
+
+/**
+ * Steam OTPs.
+ *
+ * Steam's algorithm is a custom variant of TOTP that uses a 26-character
+ * alphabet instead of digits.
+ *
+ * A Dart implementation of the algorithm can be found in
+ * https://github.com/elliotwutingfeng/steam_totp/blob/main/lib/src/steam_totp_base.dart
+ * (MIT license), and we use that as a reference. Our implementation is written
+ * in the style of the other TOTP/HOTP classes that are provided by the otpauth
+ * JS library that we use for the normal TOTP/HOTP generation
+ * https://github.com/hectorm/otpauth/blob/master/src/hotp.js (MIT license).
+ */
+class Steam {
+    secret: string;
+    period: number;
+
+    constructor({ secret }: { secret: string }) {
+        this.secret = secret;
+        this.period = 30;
+    }
+
+    generate({ timestamp = Date.now() }: { timestamp: number }) {
+        return `${timestamp}`;
+    }
+}
