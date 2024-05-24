@@ -439,19 +439,16 @@ class FaceRecognitionStatusWidgetState
     });
   }
 
-  Future<(int, int, int, double)> getIndexStatus() async {
+  Future<(int, int, double)> getIndexStatus() async {
     try {
       final indexedFiles = await FaceMLDataDB.instance
           .getIndexedFileCount(minimumMlVersion: faceMlVersion);
       final indexableFiles = (await getIndexableFileIDs()).length;
       final showIndexedFiles = min(indexedFiles, indexableFiles);
       final pendingFiles = max(indexableFiles - indexedFiles, 0);
-      final foundFaces = await FaceMLDataDB.instance.getTotalFaceCount();
-      final clusteredFaces =
-          await FaceMLDataDB.instance.getClusteredFaceCount();
-      final clusteringDoneRatio = clusteredFaces / foundFaces;
+      final clusteringDoneRatio = await FaceMLDataDB.instance.getClusteredToIndexableFilesRatio();
 
-      return (showIndexedFiles, pendingFiles, foundFaces, clusteringDoneRatio);
+      return (showIndexedFiles, pendingFiles, clusteringDoneRatio);
     } catch (e, s) {
       _logger.severe('Error getting face recognition status', e, s);
       rethrow;
@@ -480,7 +477,7 @@ class FaceRecognitionStatusWidgetState
             if (snapshot.hasData) {
               final int indexedFiles = snapshot.data!.$1;
               final int pendingFiles = snapshot.data!.$2;
-              final double clusteringDoneRatio = snapshot.data!.$4;
+              final double clusteringDoneRatio = snapshot.data!.$3;
               final double clusteringPercentage =
                   (clusteringDoneRatio * 100).clamp(0, 100);
 

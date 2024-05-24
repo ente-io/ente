@@ -13,6 +13,8 @@ import "package:photos/face/model/face.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/services/machine_learning/face_ml/face_clustering/face_info_for_clustering.dart";
 import 'package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart';
+import "package:photos/services/machine_learning/face_ml/face_ml_result.dart";
+import "package:photos/utils/ml_util.dart";
 import 'package:sqlite_async/sqlite_async.dart';
 
 /// Stores all data for the FacesML-related features. The database can be accessed by `FaceMLDataDB.instance.database`.
@@ -401,8 +403,10 @@ class FaceMLDataDB {
       final personID = map[personIdColumn] as String;
       final clusterID = map[fcClusterID] as int;
       final faceID = map[fcFaceId] as String;
-      result.putIfAbsent(personID, () => {}).putIfAbsent(clusterID, () => {})
-        .add(faceID);
+      result
+          .putIfAbsent(personID, () => {})
+          .putIfAbsent(clusterID, () => {})
+          .add(faceID);
     }
     return result;
   }
@@ -673,11 +677,24 @@ class FaceMLDataDB {
     return maps.first['count'] as int;
   }
 
-  Future<double> getClusteredToTotalFacesRatio() async {
-    final int totalFaces = await getTotalFaceCount();
-    final int clusteredFaces = await getClusteredFaceCount();
+  Future<int> getClusteredFileCount() async {
+    final db = await instance.asyncDB;
+    final List<Map<String, dynamic>> maps = await db.getAll(
+      'SELECT COUNT(DISTINCT $fcFaceId) as count FROM $faceClustersTable',
+    );
+    final Set<int> fileIDs = {};
+    for (final map in maps) {
+      final int fileID = getFileIdFromFaceId(map[fcFaceId] as String);
+      fileIDs.add(fileID);
+    }
+    return fileIDs.length;
+  }
 
-    return clusteredFaces / totalFaces;
+  Future<double> getClusteredToIndexableFilesRatio() async {
+    final int indexableFiles = (await getIndexableFileIDs()).length;
+    final int clusteredFiles = await getClusteredFileCount();
+
+    return clusteredFiles / indexableFiles;
   }
 
   Future<int> getBlurryFaceCount([

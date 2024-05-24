@@ -177,7 +177,7 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: FutureBuilder<double>(
-            future: FaceMLDataDB.instance.getClusteredToTotalFacesRatio(),
+            future: FaceMLDataDB.instance.getClusteredToIndexableFilesRatio(),
             builder: (context, snapshot) {
               if (snapshot.hasData) {
                 return CaptionedTextWidget(
