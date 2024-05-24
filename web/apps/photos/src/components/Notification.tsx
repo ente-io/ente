@@ -2,12 +2,12 @@ import CloseIcon from "@mui/icons-material/Close";
 import {
     Box,
     Button,
-    type ButtonProps,
     Snackbar,
     Stack,
     SxProps,
     Theme,
     Typography,
+    type ButtonProps,
 } from "@mui/material";
 import { NotificationAttributes } from "types/Notification";
 
