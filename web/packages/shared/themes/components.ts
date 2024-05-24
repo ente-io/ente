@@ -200,7 +200,15 @@ const getDropShadowStyle = (shadows: Shadow[]) => {
         .join(" ");
 };
 
-function getIconColor(ownerState, colors: ThemeColorsOptions) {
+interface IconColorableOwnerState {
+    color?: string;
+    disabled?: boolean;
+}
+
+function getIconColor(
+    ownerState: IconColorableOwnerState,
+    colors: ThemeColorsOptions,
+) {
     switch (ownerState.color) {
         case "primary":
             return {
