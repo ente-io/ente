@@ -104,6 +104,7 @@ const parsePathname = (url: URL): [type: Code["type"], path: string] => {
     const p = url.pathname.toLowerCase();
     if (p.startsWith("//totp")) return ["totp", url.pathname.slice(6)];
     if (p.startsWith("//hotp")) return ["hotp", url.pathname.slice(6)];
+    if (p.startsWith("//steam")) return ["steam", url.pathname.slice(7)];
     throw new Error(`Unsupported code or unparseable path "${url.pathname}"`);
 };
 
