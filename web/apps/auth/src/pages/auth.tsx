@@ -32,8 +32,11 @@ const AuthenticatorCodesPage = () => {
             try {
                 const res = await getAuthCodes();
                 setCodes(res);
-            } catch (err) {
-                if (err.message === CustomError.KEY_MISSING) {
+            } catch (e) {
+                if (
+                    e instanceof Error &&
+                    e.message === CustomError.KEY_MISSING
+                ) {
                     InMemoryStore.set(MS_KEYS.REDIRECT_URL, PAGES.AUTH);
                     router.push(PAGES.ROOT);
                 } else {

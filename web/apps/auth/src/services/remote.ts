@@ -58,7 +58,10 @@ export const getAuthCodes = async (): Promise<Code[]> => {
         });
         return filteredAuthCodes;
     } catch (e) {
-        if (e.message !== CustomError.AUTH_KEY_NOT_FOUND) {
+        if (
+            e instanceof Error &&
+            e.message !== CustomError.AUTH_KEY_NOT_FOUND
+        ) {
             log.error("get authenticator entities failed", e);
         }
         throw e;
