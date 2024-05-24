@@ -3,7 +3,7 @@ import { SetDialogBoxAttributes } from "@ente/shared/components/DialogBox/types"
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import { REDIRECTS, getRedirectURL } from "constants/redirects";
 import { t } from "i18next";
-import { NextRouter } from "next/router";
+import type { NextRouter } from "next/router";
 import billingService from "services/billingService";
 import { Plan, Subscription } from "types/billing";
 import { SetLoading } from "types/gallery";

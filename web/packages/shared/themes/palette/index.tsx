@@ -1,4 +1,4 @@
-import { PaletteOptions, ThemeColorsOptions } from "@mui/material";
+import type { PaletteOptions, ThemeColorsOptions } from "@mui/material";
 import { THEME_COLOR } from "../constants";
 
 export const getPallette = (

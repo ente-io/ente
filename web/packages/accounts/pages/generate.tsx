@@ -14,7 +14,7 @@ import { useEffect, useState } from "react";
 import SetPasswordForm from "@ente/accounts/components/SetPasswordForm";
 import { PAGES } from "@ente/accounts/constants/pages";
 import { APP_HOMES } from "@ente/shared/apps/constants";
-import { PageProps } from "@ente/shared/apps/types";
+import type { PageProps } from "@ente/shared/apps/types";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
@@ -26,7 +26,7 @@ import {
     justSignedUp,
     setJustSignedUp,
 } from "@ente/shared/storage/localStorage/helpers";
-import { KeyAttributes, User } from "@ente/shared/user/types";
+import type { KeyAttributes, User } from "@ente/shared/user/types";
 import { useRouter } from "next/router";
 
 export default function Generate({ appContext, appName }: PageProps) {

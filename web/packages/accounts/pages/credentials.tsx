@@ -1,14 +1,14 @@
 import { isDevBuild } from "@/next/env";
 import log from "@/next/log";
 import { APP_HOMES } from "@ente/shared/apps/constants";
-import { PageProps } from "@ente/shared/apps/types";
+import type { PageProps } from "@ente/shared/apps/types";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
 import FormPaperFooter from "@ente/shared/components/Form/FormPaper/Footer";
 import LinkButton from "@ente/shared/components/LinkButton";
 import VerifyMasterPasswordForm, {
-    VerifyMasterPasswordFormProps,
+    type VerifyMasterPasswordFormProps,
 } from "@ente/shared/components/VerifyMasterPasswordForm";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import {
@@ -17,7 +17,7 @@ import {
     generateLoginSubKey,
     saveKeyInSessionStore,
 } from "@ente/shared/crypto/helpers";
-import { B64EncryptionResult } from "@ente/shared/crypto/types";
+import type { B64EncryptionResult } from "@ente/shared/crypto/types";
 import { CustomError } from "@ente/shared/error";
 import { getAccountsURL, getEndpoint } from "@ente/shared/network/api";
 import InMemoryStore, { MS_KEYS } from "@ente/shared/storage/InMemoryStore";
@@ -38,7 +38,7 @@ import {
     removeKey,
     setKey,
 } from "@ente/shared/storage/sessionStorage";
-import { KeyAttributes, User } from "@ente/shared/user/types";
+import type { KeyAttributes, User } from "@ente/shared/user/types";
 import { Typography, styled } from "@mui/material";
 import { t } from "i18next";
 import { useRouter } from "next/router";
@@ -50,7 +50,7 @@ import {
     generateSRPSetupAttributes,
     loginViaSRP,
 } from "../services/srp";
-import { SRPAttributes } from "../types/srp";
+import type { SRPAttributes } from "../types/srp";
 
 export default function Credentials({ appContext, appName }: PageProps) {
     const { logout } = appContext;

@@ -11,7 +11,12 @@ import localForage from "@ente/shared/storage/localForage";
 import { getData, LS_KEYS } from "@ente/shared/storage/localStorage";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { getKey, SESSION_KEYS } from "@ente/shared/storage/sessionStorage";
-import { Button, styled, Typography, TypographyProps } from "@mui/material";
+import {
+    Button,
+    styled,
+    Typography,
+    type TypographyProps,
+} from "@mui/material";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { CarouselProvider, DotGroup, Slide, Slider } from "pure-react-carousel";

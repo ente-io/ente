@@ -1,4 +1,4 @@
-import { User } from "@ente/shared/user/types";
+import type { User } from "@ente/shared/user/types";
 import { CollectionSelectorAttributes } from "components/Collections/CollectionSelector";
 import { FilesDownloadProgressAttributes } from "components/FilesDownloadProgress";
 import { TimeStampListItem } from "components/PhotoList";

@@ -34,9 +34,9 @@ import {
     Tooltip,
     Typography,
 } from "@mui/material";
-import { Formik, FormikHelpers } from "formik";
+import { Formik, type FormikHelpers } from "formik";
 import { t } from "i18next";
-import { NextRouter } from "next/router";
+import type { NextRouter } from "next/router";
 import React, { useState } from "react";
 import { Trans } from "react-i18next";
 import * as Yup from "yup";

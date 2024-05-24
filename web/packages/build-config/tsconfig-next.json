@@ -1,0 +1,8 @@
+{
+    /* A base TSConfig for typechecking our Next.js apps and packages. */
+    "extends": "@/build-config/tsconfig-typecheck.json",
+    "compilerOptions": {
+        /* Also indicate expectation of a WebWorker runtime */
+        "lib": ["ESnext", "DOM", "DOM.Iterable", "WebWorker"]
+    }
+}

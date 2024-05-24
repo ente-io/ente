@@ -8,7 +8,7 @@ import { workerBridge } from "@/next/worker/worker-bridge";
 import { withTimeout } from "@/utils/promise";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
-import { User } from "@ente/shared/user/types";
+import type { User } from "@ente/shared/user/types";
 import { downloadUsingAnchor } from "@ente/shared/utils";
 import { t } from "i18next";
 import isElectron from "is-electron";

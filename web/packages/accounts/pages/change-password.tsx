@@ -1,41 +1,38 @@
-import { t } from "i18next";
-import { useEffect, useState } from "react";
-
+import { startSRPSetup, updateSRPAndKeys } from "@ente/accounts/api/srp";
+import SetPasswordForm, {
+    type SetPasswordFormProps,
+} from "@ente/accounts/components/SetPasswordForm";
+import { PAGES } from "@ente/accounts/constants/pages";
 import {
     generateSRPClient,
     generateSRPSetupAttributes,
 } from "@ente/accounts/services/srp";
-import {
-    generateAndSaveIntermediateKeyAttributes,
-    generateLoginSubKey,
-    saveKeyInSessionStore,
-} from "@ente/shared/crypto/helpers";
-import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
-
-import { startSRPSetup, updateSRPAndKeys } from "@ente/accounts/api/srp";
-import SetPasswordForm, {
-    SetPasswordFormProps,
-} from "@ente/accounts/components/SetPasswordForm";
-import { PAGES } from "@ente/accounts/constants/pages";
-import { UpdatedKey } from "@ente/accounts/types/user";
-import { SESSION_KEYS } from "@ente/shared/storage/sessionStorage";
-import { getActualKey } from "@ente/shared/user";
-import { KEK, KeyAttributes, User } from "@ente/shared/user/types";
-
+import type { UpdatedKey } from "@ente/accounts/types/user";
 import {
     convertBase64ToBuffer,
     convertBufferToBase64,
 } from "@ente/accounts/utils";
 import { APP_HOMES } from "@ente/shared/apps/constants";
-import { PageProps } from "@ente/shared/apps/types";
+import type { PageProps } from "@ente/shared/apps/types";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
 import FormPaperFooter from "@ente/shared/components/Form/FormPaper/Footer";
 import FormPaperTitle from "@ente/shared/components/Form/FormPaper/Title";
 import LinkButton from "@ente/shared/components/LinkButton";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
+import {
+    generateAndSaveIntermediateKeyAttributes,
+    generateLoginSubKey,
+    saveKeyInSessionStore,
+} from "@ente/shared/crypto/helpers";
 import InMemoryStore, { MS_KEYS } from "@ente/shared/storage/InMemoryStore";
+import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
+import { SESSION_KEYS } from "@ente/shared/storage/sessionStorage";
+import { getActualKey } from "@ente/shared/user";
+import type { KEK, KeyAttributes, User } from "@ente/shared/user/types";
+import { t } from "i18next";
 import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
 
 export default function ChangePassword({ appName }: PageProps) {
     const [token, setToken] = useState<string>();

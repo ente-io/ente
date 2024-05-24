@@ -6,7 +6,7 @@ import { accountLogout } from "@ente/accounts/services/logout";
 import { APPS, APP_TITLES } from "@ente/shared/apps/constants";
 import { Overlay } from "@ente/shared/components/Container";
 import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
-import {
+import type {
     DialogBoxAttributesV2,
     SetDialogBoxAttributesV2,
 } from "@ente/shared/components/DialogBoxV2/types";

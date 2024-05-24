@@ -1,6 +1,6 @@
-import { Shadow, ThemeColorsOptions } from "@mui/material";
-import { Components } from "@mui/material/styles/components";
-import { TypographyOptions } from "@mui/material/styles/createTypography";
+import type { Shadow, ThemeColorsOptions } from "@mui/material";
+import type { Components } from "@mui/material/styles/components";
+import type { TypographyOptions } from "@mui/material/styles/createTypography";
 
 export const getComponents = (
     colors: ThemeColorsOptions,

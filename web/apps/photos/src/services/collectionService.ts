@@ -8,7 +8,7 @@ import { CustomError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { getActualKey } from "@ente/shared/user";
-import { User } from "@ente/shared/user/types";
+import type { User } from "@ente/shared/user/types";
 import { REQUEST_BATCH_SIZE } from "constants/api";
 import {
     ALL_SECTION,

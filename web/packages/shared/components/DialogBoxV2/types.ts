@@ -1,4 +1,4 @@
-import { ButtonProps } from "@mui/material";
+import type { ButtonProps } from "@mui/material";
 
 export interface DialogBoxAttributesV2 {
     icon?: React.ReactNode;

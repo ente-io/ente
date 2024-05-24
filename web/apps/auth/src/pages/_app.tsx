@@ -12,7 +12,7 @@ import {
 } from "@ente/shared/apps/constants";
 import { Overlay } from "@ente/shared/components/Container";
 import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
-import {
+import type {
     DialogBoxAttributesV2,
     SetDialogBoxAttributesV2,
 } from "@ente/shared/components/DialogBoxV2/types";
@@ -25,12 +25,12 @@ import HTTPService from "@ente/shared/network/HTTPService";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import { getTheme } from "@ente/shared/themes";
 import { THEME_COLOR } from "@ente/shared/themes/constants";
-import { SetTheme } from "@ente/shared/themes/types";
+import type { SetTheme } from "@ente/shared/themes/types";
 import type { User } from "@ente/shared/user/types";
 import { CssBaseline, useMediaQuery } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
 import { t } from "i18next";
-import { AppProps } from "next/app";
+import type { AppProps } from "next/app";
 import { useRouter } from "next/router";
 import { createContext, useEffect, useRef, useState } from "react";
 import LoadingBar from "react-top-loading-bar";

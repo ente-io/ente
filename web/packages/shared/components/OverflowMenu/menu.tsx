@@ -1,4 +1,4 @@
-import { IconButton, PaperProps, styled } from "@mui/material";
+import { IconButton, styled, type PaperProps } from "@mui/material";
 import Menu from "@mui/material/Menu";
 import React, { useState } from "react";
 import { OverflowMenuContext } from "./context";

@@ -1,14 +1,14 @@
 import { wait } from "@/utils/promise";
 import { changeEmail, sendOTTForEmailChange } from "@ente/accounts/api/user";
 import { APP_HOMES } from "@ente/shared/apps/constants";
-import { PageProps } from "@ente/shared/apps/types";
+import type { PageProps } from "@ente/shared/apps/types";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import FormPaperFooter from "@ente/shared/components/Form/FormPaper/Footer";
 import LinkButton from "@ente/shared/components/LinkButton";
 import SubmitButton from "@ente/shared/components/SubmitButton";
 import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
 import { Alert, Box, TextField } from "@mui/material";
-import { Formik, FormikHelpers } from "formik";
+import { Formik, type FormikHelpers } from "formik";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useRef, useState } from "react";

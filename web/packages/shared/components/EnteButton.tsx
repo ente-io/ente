@@ -1,9 +1,9 @@
 import Done from "@mui/icons-material/Done";
 import {
     Button,
-    ButtonProps,
     CircularProgress,
-    PaletteColor,
+    type ButtonProps,
+    type PaletteColor,
 } from "@mui/material";
 
 interface Iprops extends ButtonProps {
