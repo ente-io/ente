@@ -26,19 +26,30 @@ export class Steam {
     generate({ timestamp }: { timestamp: number } = { timestamp: Date.now() }) {
         const counter = Math.floor(timestamp / 1000 / this.period);
         const digest = new Uint8Array(
-            sha1HMACDigest(this.secret.buffer), uintToBuf(counter)),
+            sha1HMACDigest(this.secret.buffer, uintToArray(counter)),
         );
 
         return `${timestamp}`;
     }
 }
 
+// Equivalent to
+// https://github.com/hectorm/otpauth/blob/master/src/utils/encoding/uint.js
+const uintToArray = (n: number): Uint8Array => {
+    const result = new Uint8Array(8);
+    for (let i = 7; i >= 0; i--) {
+        result[i] = n & 0xff;
+        n >>= 8;
+    }
+    return result;
+};
+
 // We don't necessarily need this dependency, we could use SubtleCrypto here
 // instead too. However, SubtleCrypto has an async interface, and we already
 // have a transitive dependency on jssha via otpauth, so just using it here
 // doesn't increase our bundle size any further.
-const sha1HMACDigest = (key: ArrayBuffer, message: ArrayBuffer) => {
-    const hmac = new jsSHA("SHA-1", "ARRAYBUFFER");
+const sha1HMACDigest = (key: ArrayBuffer, message: Uint8Array) => {
+    const hmac = new jsSHA("SHA-1", "UINT8ARRAY");
     hmac.setHMACKey(key, "ARRAYBUFFER");
     hmac.update(message);
     return hmac.getHMAC("ARRAYBUFFER");
