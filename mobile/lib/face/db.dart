@@ -251,7 +251,7 @@ class FaceMLDataDB {
       final List<int> fileId = [recentFileID];
       int? avatarFileId;
       if (avatarFaceId != null) {
-        avatarFileId = int.tryParse(avatarFaceId.split('_')[0]);
+        avatarFileId = tryGetFileIdFromFaceId(avatarFaceId);
         if (avatarFileId != null) {
           fileId.add(avatarFileId);
         }
@@ -480,8 +480,7 @@ class FaceMLDataDB {
     for (final map in maps) {
       final clusterID = map[fcClusterID] as int;
       final faceID = map[fcFaceId] as String;
-      final x = faceID.split('_').first;
-      final fileID = int.parse(x);
+      final fileID = getFileIdFromFaceId(faceID);
       result[fileID] = (result[fileID] ?? {})..add(clusterID);
     }
     return result;
@@ -804,7 +803,7 @@ class FaceMLDataDB {
       for (final map in maps) {
         final clusterID = map[clusterIDColumn] as int;
         final String faceID = map[fcFaceId] as String;
-        final fileID = int.parse(faceID.split('_').first);
+        final fileID = getFileIdFromFaceId(faceID);
         result[fileID] = (result[fileID] ?? {})..add(clusterID);
       }
       return result;
@@ -823,8 +822,8 @@ class FaceMLDataDB {
       final Map<int, Set<int>> result = {};
       for (final map in maps) {
         final clusterID = map[fcClusterID] as int;
-        final faceId = map[fcFaceId] as String;
-        final fileID = int.parse(faceId.split("_").first);
+        final faceID = map[fcFaceId] as String;
+        final fileID = getFileIdFromFaceId(faceID);
         result[fileID] = (result[fileID] ?? {})..add(clusterID);
       }
       return result;
@@ -973,7 +972,7 @@ class FaceMLDataDB {
     final Map<String, int> faceIDToClusterID = {};
     for (final row in faceIdsResult) {
       final faceID = row[fcFaceId] as String;
-      if (fileIds.contains(faceID.split('_').first)) {
+      if (fileIds.contains(getFileIdFromFaceId(faceID))) {
         maxClusterID += 1;
         faceIDToClusterID[faceID] = maxClusterID;
       }
@@ -999,7 +998,7 @@ class FaceMLDataDB {
     final Map<String, int> faceIDToClusterID = {};
     for (final row in faceIdsResult) {
       final faceID = row[fcFaceId] as String;
-      if (fileIds.contains(faceID.split('_').first)) {
+      if (fileIds.contains(getFileIdFromFaceId(faceID))) {
         maxClusterID += 1;
         faceIDToClusterID[faceID] = maxClusterID;
       }
