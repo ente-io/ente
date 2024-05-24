@@ -47,7 +47,6 @@ import "package:photos/utils/file_util.dart";
 import 'package:photos/utils/image_ml_isolate.dart';
 import "package:photos/utils/image_ml_util.dart";
 import "package:photos/utils/local_settings.dart";
-import "package:photos/utils/ml_util.dart";
 import "package:photos/utils/network_util.dart";
 import "package:photos/utils/thumbnail_util.dart";
 import "package:synchronized/synchronized.dart";
@@ -359,15 +358,7 @@ class FaceMlService {
 
     await sync(forceSync: _shouldSyncPeople);
     await indexAllImages();
-    final indexingCompleteRatio = await _getIndexedDoneRatio();
-    if (indexingCompleteRatio < 0.95) {
-      _logger.info(
-        "Indexing is not far enough to start clustering, skipping clustering. Indexing is at $indexingCompleteRatio",
-      );
-      return;
-    } else {
-      await clusterAllImages();
-    }
+    await clusterAllImages();
   }
 
   void pauseIndexingAndClustering() {
@@ -1169,19 +1160,6 @@ class FaceMlService {
       _logStatus();
       throw CouldNotRetrieveAnyFileData();
     }
-  }
-
-  Future<double> _getIndexedDoneRatio() async {
-    final w = (kDebugMode ? EnteWatch('_getIndexedDoneRatio') : null)?..start();
-
-    final int alreadyIndexedCount = await FaceMLDataDB.instance
-        .getIndexedFileCount(minimumMlVersion: faceMlVersion);
-    final int totalIndexableCount = (await getIndexableFileIDs()).length;
-    final ratio = alreadyIndexedCount / totalIndexableCount;
-
-    w?.log('getIndexedDoneRatio');
-
-    return ratio;
   }
 
   bool _skipAnalysisEnteFile(EnteFile enteFile, Map<int, int> indexedFileIds) {
