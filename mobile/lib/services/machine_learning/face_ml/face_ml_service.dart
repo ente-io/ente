@@ -446,7 +446,7 @@ class FaceMlService {
 
         if (LocalSettings.instance.remoteFetchEnabled) {
           try {
-            final List<int> fileIds = [];
+            final Set<int> fileIds = {}; // if there are duplicates here server returns 400
             // Try to find embeddings on the remote server
             for (final f in chunk) {
               fileIds.add(f.uploadedFileID!);

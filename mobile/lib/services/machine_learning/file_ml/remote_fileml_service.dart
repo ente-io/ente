@@ -55,13 +55,13 @@ class RemoteFileMLService {
   }
 
   Future<FilesMLDataResponse> getFilessEmbedding(
-    List<int> fileIds,
+    Set<int> fileIds,
   ) async {
     try {
       final res = await _dio.post(
         "/embeddings/files",
         data: {
-          "fileIDs": fileIds,
+          "fileIDs": fileIds.toList(),
           "model": 'file-ml-clip-face',
         },
       );
