@@ -167,7 +167,13 @@ class AddPhotosPhotoWidget extends StatelessWidget {
 
   Future<void> _onPickFromDeviceClicked(BuildContext context) async {
     try {
-      final List<AssetEntity>? result = await AssetPicker.pickAssets(context);
+      final assetPickerTextDelegate = await _getAssetPickerTextDelegate();
+      final List<AssetEntity>? result = await AssetPicker.pickAssets(
+        context,
+        pickerConfig: AssetPickerConfig(
+          textDelegate: assetPickerTextDelegate,
+        ),
+      );
       if (result != null && result.isNotEmpty) {
         final ca = CollectionActions(
           CollectionsService.instance,
@@ -202,6 +208,39 @@ class AddPhotosPhotoWidget extends StatelessWidget {
           );
         }
       }
+    }
+  }
+
+  // _getAssetPickerTextDelegate returns the text delegate for the asset picker
+  // This custom method is required to enforce English as the default fallback
+  // instead of Chinese.
+  Future<AssetPickerTextDelegate> _getAssetPickerTextDelegate() async {
+    final Locale locale = await getLocale();
+    switch (locale.languageCode.toLowerCase()) {
+      case "en":
+        return const EnglishAssetPickerTextDelegate();
+      case "he":
+        return const HebrewAssetPickerTextDelegate();
+      case "de":
+        return const GermanAssetPickerTextDelegate();
+      case "ru":
+        return const RussianAssetPickerTextDelegate();
+      case "ja":
+        return const JapaneseAssetPickerTextDelegate();
+      case "ar":
+        return const ArabicAssetPickerTextDelegate();
+      case "fr":
+        return const FrenchAssetPickerTextDelegate();
+      case "vi":
+        return const VietnameseAssetPickerTextDelegate();
+      case "tr":
+        return const TurkishAssetPickerTextDelegate();
+      case "ko":
+        return const KoreanAssetPickerTextDelegate();
+      case "zh":
+        return const AssetPickerTextDelegate();
+      default:
+        return const EnglishAssetPickerTextDelegate();
     }
   }
 }
