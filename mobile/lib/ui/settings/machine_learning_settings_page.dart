@@ -27,7 +27,7 @@ import "package:photos/ui/components/toggle_switch_widget.dart";
 import "package:photos/utils/data_util.dart";
 import "package:photos/utils/local_settings.dart";
 import "package:photos/utils/ml_util.dart";
-import "package:wakelock_plus/wakelock_plus.dart";
+import "package:photos/utils/wakelock_util.dart";
 
 final _logger = Logger("MachineLearningSettingsPage");
 
@@ -42,6 +42,7 @@ class MachineLearningSettingsPage extends StatefulWidget {
 class _MachineLearningSettingsPageState
     extends State<MachineLearningSettingsPage> {
   late InitializationState _state;
+  final EnteWakeLock _wakeLock = EnteWakeLock();
 
   late StreamSubscription<MLFrameworkInitializationUpdateEvent>
       _eventSubscription;
@@ -55,9 +56,7 @@ class _MachineLearningSettingsPageState
       setState(() {});
     });
     _fetchState();
-    if (flagService.internalUser) {
-      unawaited(WakelockPlus.enable());
-    }
+    _wakeLock.enable();
   }
 
   void _fetchState() {
@@ -68,9 +67,7 @@ class _MachineLearningSettingsPageState
   void dispose() {
     super.dispose();
     _eventSubscription.cancel();
-    if (flagService.internalUser) {
-      unawaited(WakelockPlus.disable());
-    }
+    _wakeLock.disable();
   }
 
   @override
