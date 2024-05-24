@@ -1,12 +1,13 @@
+import { HOTP, TOTP } from "otpauth";
 import { URI } from "vscode-uri";
 
 /**
- * A parsed representation of an xOTP code URI.
+ * A parsed representation of an *OTP code URI.
  *
  * This is all the data we need to drive a OTP generator.
  */
 export interface Code {
-    /** The uniquue id for the corresponding auth entity. */
+    /** A unique id for the corresponding "auth entity" in our system. */
     id?: String;
     /** The type of the code. */
     type: "totp" | "hotp";
@@ -14,16 +15,21 @@ export interface Code {
     account: string;
     /** The name of the entity that issued this code. */
     issuer: string;
-    /** Number of digits in the code. */
+    /** Number of digits in the generated OTP. */
     digits: number;
     /**
      * The time period (in seconds) for which a single OTP generated from this
      * code remains valid.
      */
     period: number;
-    /** The secret that is used to drive the OTP generator. */
+    /**
+     * The secret that is used to drive the OTP generator.
+     *
+     * This is an arbitrary key encoded in Base32 that drives the HMAC (in a
+     * {@link type}-specific manner).
+     */
     secret: string;
-    /** The (hashing) algorithim used by the OTP generator. */
+    /** The (HMAC) algorithm used by the OTP generator. */
     algorithm: "sha1" | "sha256" | "sha512";
     /** The original string from which this code was generated. */
     uriString?: string;
@@ -38,22 +44,15 @@ export interface Code {
  * code. These strings are of the form:
  *
  * - (TOTP)
- *   otpauth://totp/account:user@example.org?algorithm=SHA1&digits=6&issuer=issuer&period=30&secret=ALPHANUM
+ *   otpauth://totp/ACME:user@example.org?algorithm=SHA1&digits=6&issuer=acme&period=30&secret=ALPHANUM
  */
 export const codeFromURIString = (id: string, uriString: string): Code => {
-    let santizedRawData = uriString
-        .replace(/\+/g, "%2B")
-        .replace(/:/g, "%3A")
-        .replaceAll("\r", "");
-    if (santizedRawData.startsWith('"')) {
-        santizedRawData = santizedRawData.substring(1);
-    }
-    if (santizedRawData.endsWith('"')) {
-        santizedRawData = santizedRawData.substring(
-            0,
-            santizedRawData.length - 1,
-        );
-    }
+    const santizedRawData = uriString
+        .replaceAll("+", "%2B")
+        .replaceAll(":", "%3A")
+        .replaceAll("\r", "")
+        // trim quotes
+        .replace(/^"|"$/g, "");
 
     const uriParams = {};
     const searchParamsString =
@@ -78,10 +77,20 @@ export const codeFromURIString = (id: string, uriString: string): Code => {
         issuer: _getIssuer(uriPath, uriParams),
         digits: parseDigits(uriParams),
         period: parsePeriod(uriParams),
-        secret: getSanitizedSecret(uriParams),
+        secret: parseSecret(uriParams),
         algorithm: parseAlgorithm(uriParams),
         uriString,
     };
+};
+
+const _getType = (uriPath: string): Code["type"] => {
+    const oauthType = uriPath.split("/")[0].substring(0);
+    if (oauthType.toLowerCase() === "totp") {
+        return "totp";
+    } else if (oauthType.toLowerCase() === "hotp") {
+        return "hotp";
+    }
+    throw new Error(`Unsupported format with host ${oauthType}`);
 };
 
 const _getAccount = (uriPath: string): string => {
@@ -139,16 +148,45 @@ const parseAlgorithm = (uriParams): Code["algorithm"] => {
     }
 };
 
-const _getType = (uriPath: string): Code["type"] => {
-    const oauthType = uriPath.split("/")[0].substring(0);
-    if (oauthType.toLowerCase() === "totp") {
-        return "totp";
-    } else if (oauthType.toLowerCase() === "hotp") {
-        return "hotp";
-    }
-    throw new Error(`Unsupported format with host ${oauthType}`);
-};
+const parseSecret = (uriParams): string =>
+    uriParams["secret"].replaceAll(" ", "").toUpperCase();
 
-const getSanitizedSecret = (uriParams): string => {
-    return uriParams["secret"].replace(/ /g, "").toUpperCase();
+/**
+ * Generate a pair of OTPs (one time passwords) from the given {@link code}.
+ *
+ * @param code The parsed code data, including the secret and code type.
+ *
+ * @returns a pair of OTPs, the current one and the next one, using the given
+ * {@link code}.
+ */
+export const generateOTPs = (code: Code): [otp: string, nextOTP: string] => {
+    let otp: string;
+    let nextOTP: string;
+    switch (code.type) {
+        case "totp": {
+            const totp = new TOTP({
+                secret: code.secret,
+                algorithm: code.algorithm,
+                period: code.period,
+                digits: code.digits,
+            });
+            otp = totp.generate();
+            nextOTP = totp.generate({
+                timestamp: new Date().getTime() + code.period * 1000,
+            });
+            break;
+        }
+
+        case "hotp": {
+            const hotp = new HOTP({
+                secret: code.secret,
+                counter: 0,
+                algorithm: code.algorithm,
+            });
+            otp = hotp.generate();
+            nextOTP = hotp.generate({ counter: 1 });
+            break;
+        }
+    }
+    return [otp, nextOTP];
 };
