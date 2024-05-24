@@ -1,5 +1,6 @@
 import { ensure } from "@/utils/ensure";
 import { HOTP, TOTP } from "otpauth";
+import { Steam } from "./steam";
 
 /**
  * A parsed representation of an *OTP code URI.

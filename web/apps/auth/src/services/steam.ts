@@ -1,4 +1,5 @@
 import jsSHA from "jssha";
+import { Secret } from "otpauth";
 
 /**
  * Steam OTPs.
@@ -14,21 +15,19 @@ import jsSHA from "jssha";
  * https://github.com/hectorm/otpauth/blob/master/src/hotp.js (MIT license).
  */
 export class Steam {
-    secret: string;
+    secret: Secret;
     period: number;
 
     constructor({ secret }: { secret: string }) {
-        this.secret = secret;
+        this.secret = Secret.fromBase32(secret);
         this.period = 30;
     }
 
-    async generate(
-        { timestamp }: { timestamp: number } = { timestamp: Date.now() },
-    ) {
+    generate({ timestamp }: { timestamp: number } = { timestamp: Date.now() }) {
         const counter = Math.floor(timestamp / 1000 / this.period);
-        // const digest = new Uint8Array(
-        //     sha1HMACDigest(this.secret, uintToBuf(counter)),
-        // );
+        const digest = new Uint8Array(
+            sha1HMACDigest(this.secret.buffer), uintToBuf(counter)),
+        );
 
         return `${timestamp}`;
     }
@@ -38,7 +37,7 @@ export class Steam {
 // instead too. However, SubtleCrypto has an async interface, and we already
 // have a transitive dependency on jssha via otpauth, so just using it here
 // doesn't increase our bundle size any further.
-const sha1HMACDiggest = (key: ArrayBuffer, message: ArrayBuffer) => {
+const sha1HMACDigest = (key: ArrayBuffer, message: ArrayBuffer) => {
     const hmac = new jsSHA("SHA-1", "ARRAYBUFFER");
     hmac.setHMACKey(key, "ARRAYBUFFER");
     hmac.update(message);
