@@ -15,9 +15,9 @@
         "strict": false,
         /* Stricter than strict */
         "noImplicitReturns": true,
-        "noUnusedParameters": false,
-        "noUnusedLocals": false,
-        "noFallthroughCasesInSwitch": false,
+        "noUnusedParameters": true,
+        "noUnusedLocals": true,
+        "noFallthroughCasesInSwitch": true,
         /* e.g. makes array indexing returns undefined */
         "noUncheckedIndexedAccess": false,
         "exactOptionalPropertyTypes": false
