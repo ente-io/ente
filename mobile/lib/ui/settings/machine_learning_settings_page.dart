@@ -27,6 +27,7 @@ import "package:photos/ui/components/toggle_switch_widget.dart";
 import "package:photos/utils/data_util.dart";
 import "package:photos/utils/local_settings.dart";
 import "package:photos/utils/ml_util.dart";
+import "package:wakelock_plus/wakelock_plus.dart";
 
 final _logger = Logger("MachineLearningSettingsPage");
 
@@ -54,6 +55,9 @@ class _MachineLearningSettingsPageState
       setState(() {});
     });
     _fetchState();
+    if (flagService.internalUser) {
+      unawaited(WakelockPlus.enable());
+    }
   }
 
   void _fetchState() {
@@ -64,6 +68,9 @@ class _MachineLearningSettingsPageState
   void dispose() {
     super.dispose();
     _eventSubscription.cancel();
+    if (flagService.internalUser) {
+      unawaited(WakelockPlus.disable());
+    }
   }
 
   @override
@@ -446,7 +453,8 @@ class FaceRecognitionStatusWidgetState
       final indexableFiles = (await getIndexableFileIDs()).length;
       final showIndexedFiles = min(indexedFiles, indexableFiles);
       final pendingFiles = max(indexableFiles - indexedFiles, 0);
-      final clusteringDoneRatio = await FaceMLDataDB.instance.getClusteredToIndexableFilesRatio();
+      final clusteringDoneRatio =
+          await FaceMLDataDB.instance.getClusteredToIndexableFilesRatio();
 
       return (showIndexedFiles, pendingFiles, clusteringDoneRatio);
     } catch (e, s) {
