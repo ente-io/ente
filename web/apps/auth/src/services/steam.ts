@@ -62,10 +62,10 @@ const uintToArray = (n: number): Uint8Array => {
     return result;
 };
 
-// We don't necessarily need this dependency, we could use SubtleCrypto here
-// instead too. However, SubtleCrypto has an async interface, and we already
-// have a transitive dependency on jssha via otpauth, so just using it here
-// doesn't increase our bundle size any further.
+// We don't necessarily need a dependency on `jssha`, we could use SubtleCrypto
+// here too. However, SubtleCrypto has an async interface, and we already have a
+// transitive dependency on `jssha` via `otpauth`, so just using it here doesn't
+// increase our bundle size any further.
 const sha1HMACDigest = (key: ArrayBuffer, message: Uint8Array) => {
     const hmac = new jsSHA("SHA-1", "UINT8ARRAY");
     hmac.setHMACKey(key, "ARRAYBUFFER");
