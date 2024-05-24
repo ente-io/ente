@@ -198,7 +198,7 @@ const CodeDisplay: React.FC<CodeDisplay> = ({ code }) => {
             // We need to call regen() once before the interval loop to set the
             // initial otp and nextOTP.
             regen();
-            interval = setInterval(() => regen, periodMs);
+            interval = setInterval(regen, periodMs);
         }, timeToNextCode);
 
         return () => interval && clearInterval(interval);
