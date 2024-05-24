@@ -60,6 +60,12 @@ export interface Code {
  * - (TOTP)
  *   otpauth://totp/ACME:user@example.org?algorithm=SHA1&digits=6&issuer=acme&period=30&secret=ALPHANUM
  *
+ * - (HOTP)
+ *   otpauth://hotp/Test?secret=AAABBBCCCDDDEEEFFF&issuer=Test&counter=0
+ *
+ * - (Steam)
+ *   otpauth://steam/Steam:SteamAccount?algorithm=SHA1&digits=5&issuer=Steam&period=30&secret=AAABBBCCCDDDEEEFFF
+ *
  * See also `auth/test/models/code_test.dart`.
  */
 export const codeFromURIString = (id: string, uriString: string): Code => {
