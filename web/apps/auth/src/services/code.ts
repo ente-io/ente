@@ -45,6 +45,8 @@ export interface Code {
  *
  * - (TOTP)
  *   otpauth://totp/ACME:user@example.org?algorithm=SHA1&digits=6&issuer=acme&period=30&secret=ALPHANUM
+ *
+ * See also `auth/test/models/code_test.dart`.
  */
 export const codeFromURIString = (id: string, uriString: string): Code => {
     const url = new URL(uriString);
@@ -70,7 +72,7 @@ const parseType = (url: URL): Code["type"] => {
 
 const parseAccount = (url: URL): string | undefined => {
     // "/ACME:user@example.org" => "user@example.org"
-    let p = url.pathname;
+    let p = decodeURIComponent(url.pathname);
     if (p.startsWith("/")) p = p.slice(1);
     if (p.includes(":")) p = p.split(":").slice(1).join(":");
     return p;
@@ -89,7 +91,7 @@ const parseIssuer = (url: URL): string => {
 
     // Otherwise use the `prefix:` from the account as the issuer.
     // "/ACME:user@example.org" => "ACME"
-    let p = url.pathname;
+    let p = decodeURIComponent(url.pathname);
     if (p.startsWith("/")) p = p.slice(1);
 
     if (p.includes(":")) p = p.split(":")[0];
