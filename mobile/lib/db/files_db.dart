@@ -158,9 +158,6 @@ class FilesDB {
     final currentVersion = result[0]['user_version'] as int;
     final toVersion = migrationScripts.length;
 
-    _logger.info("currentVersion: $currentVersion");
-    _logger.info("toVersion: $toVersion");
-
     if (currentVersion < toVersion) {
       _logger.info("Migrating database from $currentVersion to $toVersion");
       await database.writeTransaction((tx) async {
@@ -171,8 +168,6 @@ class FilesDB {
       });
     } else if (currentVersion > toVersion) {
       throw AssertionError("currentVersion cannot be greater than toVersion");
-    } else {
-      _logger.info("Database is already at version $toVersion");
     }
   }
 
