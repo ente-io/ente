@@ -308,6 +308,7 @@ export async function deriveSensitiveKey(passphrase: string, salt: string) {
             memLimit /= 2;
         }
     }
+    throw new Error("Failed to derive key: Memory limit exceeded");
 }
 
 export async function deriveInteractiveKey(passphrase: string, salt: string) {

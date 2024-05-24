@@ -14,7 +14,7 @@
 
         "strict": false,
         /* Stricter than strict */
-        "noImplicitReturns": false,
+        "noImplicitReturns": true,
         "noUnusedParameters": false,
         "noUnusedLocals": false,
         "noFallthroughCasesInSwitch": false,

@@ -216,4 +216,5 @@ function getIconColor(ownerState, colors: ThemeColorsOptions) {
             color: colors.stroke.faint,
         };
     }
+    return {};
 }

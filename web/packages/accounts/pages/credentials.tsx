@@ -168,7 +168,7 @@ export default function Credentials({ appContext, appName }: PageProps) {
                     window.location.href = `${getAccountsURL()}/passkeys/flow?passkeySessionID=${passkeySessionID}&redirect=${
                         window.location.origin
                     }/passkeys/finish`;
-                    return;
+                    return undefined;
                 } else if (twoFactorSessionID) {
                     const sessionKeyAttributes =
                         await cryptoWorker.generateKeyAndEncryptToB64(kek);
