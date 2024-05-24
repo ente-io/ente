@@ -187,28 +187,21 @@ const CodeDisplay: React.FC<CodeDisplay> = ({ code }) => {
     useEffect(() => {
         // Generate to set the initial otp and nextOTP on component mount.
         regen();
-        const codeType = code.type;
-        const codePeriodInMs = code.period * 1000;
-        const timeToNextCode =
-            codePeriodInMs - (new Date().getTime() % codePeriodInMs);
-        const interval = null;
+
+        const periodMs = code.period * 1000;
+        const timeToNextCode = periodMs - (Date.now() % periodMs);
+
+        let interval: ReturnType<typeof setInterval> | undefined;
         // Wait until we are at the start of the next code period, and then
         // start the interval loop.
         setTimeout(() => {
             // We need to call regen() once before the interval loop to set the
             // initial otp and nextOTP.
             regen();
-            codeType.toLowerCase() === "totp" ||
-            codeType.toLowerCase() === "hotp"
-                ? setInterval(() => {
-                      regen();
-                  }, codePeriodInMs)
-                : null;
+            interval = setInterval(() => regen, periodMs);
         }, timeToNextCode);
 
-        return () => {
-            if (interval) clearInterval(interval);
-        };
+        return () => interval && clearInterval(interval);
     }, [code]);
 
     return (
@@ -346,7 +339,7 @@ const TimerProgress: React.FC<TimerProgressProps> = ({ period }) => {
 
     useEffect(() => {
         const advance = () => {
-            const timeRemaining = us - ((new Date().getTime() * 1000) % us);
+            const timeRemaining = us - ((Date.now() * 1000) % us);
             setProgress(timeRemaining / us);
         };
 

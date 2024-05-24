@@ -1,5 +1,6 @@
 import { ensure } from "@/utils/ensure";
 import { HOTP, TOTP } from "otpauth";
+import { Steam } from "./steam";
 
 /**
  * A parsed representation of an *OTP code URI.
@@ -10,13 +11,19 @@ export interface Code {
     /** A unique id for the corresponding "auth entity" in our system. */
     id?: String;
     /** The type of the code. */
-    type: "totp" | "hotp";
+    type: "totp" | "hotp" | "steam";
     /** The user's account or email for which this code is used. */
     account?: string;
     /** The name of the entity that issued this code. */
     issuer: string;
-    /** Number of digits in the generated OTP. */
-    digits: number;
+    /**
+     * Length of the generated OTP.
+     *
+     * This is vernacularly called "digits", which is an accurate description
+     * for the OG TOTP/HOTP codes. However, steam codes are not just digits, so
+     * we name this as a content-neutral "length".
+     */
+    length: number;
     /**
      * The time period (in seconds) for which a single OTP generated from this
      * code remains valid.
@@ -85,7 +92,7 @@ const _codeFromURIString = (id: string, uriString: string): Code => {
         type,
         account: parseAccount(path),
         issuer: parseIssuer(url, path),
-        digits: parseDigits(url),
+        length: parseLength(url, type),
         period: parsePeriod(url),
         secret: parseSecret(url),
         algorithm: parseAlgorithm(url),
@@ -97,6 +104,7 @@ const parsePathname = (url: URL): [type: Code["type"], path: string] => {
     const p = url.pathname.toLowerCase();
     if (p.startsWith("//totp")) return ["totp", url.pathname.slice(6)];
     if (p.startsWith("//hotp")) return ["hotp", url.pathname.slice(6)];
+    if (p.startsWith("//steam")) return ["steam", url.pathname.slice(7)];
     throw new Error(`Unsupported code or unparseable path "${url.pathname}"`);
 };
 
@@ -130,8 +138,17 @@ const parseIssuer = (url: URL, path: string): string => {
     return p;
 };
 
-const parseDigits = (url: URL): number =>
-    parseInt(url.searchParams.get("digits") ?? "", 10) || 6;
+/**
+ * Parse the length of the generated code.
+ *
+ * The URI query param is called digits since originally TOTP/HOTP codes used
+ * this for generating numeric codes. Now we also support steam, which instead
+ * shows non-numeric codes, and also with a different default length of 5.
+ */
+const parseLength = (url: URL, type: Code["type"]): number => {
+    const defaultLength = type == "steam" ? 5 : 6;
+    return parseInt(url.searchParams.get("digits") ?? "", 10) || defaultLength;
+};
 
 const parsePeriod = (url: URL): number =>
     parseInt(url.searchParams.get("period") ?? "", 10) || 30;
@@ -167,11 +184,11 @@ export const generateOTPs = (code: Code): [otp: string, nextOTP: string] => {
                 secret: code.secret,
                 algorithm: code.algorithm,
                 period: code.period,
-                digits: code.digits,
+                digits: code.length,
             });
             otp = totp.generate();
             nextOTP = totp.generate({
-                timestamp: new Date().getTime() + code.period * 1000,
+                timestamp: Date.now() + code.period * 1000,
             });
             break;
         }
@@ -184,6 +201,17 @@ export const generateOTPs = (code: Code): [otp: string, nextOTP: string] => {
             });
             otp = hotp.generate();
             nextOTP = hotp.generate({ counter: 1 });
+            break;
+        }
+
+        case "steam": {
+            const steam = new Steam({
+                secret: code.secret,
+            });
+            otp = steam.generate();
+            nextOTP = steam.generate({
+                timestamp: Date.now() + code.period * 1000,
+            });
             break;
         }
     }

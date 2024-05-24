@@ -198,3 +198,7 @@ some cases.
 
 -   [otpauth](https://github.com/hectorm/otpauth) is used for the generation of
     the actual OTP from the user's TOTP/HOTP secret.
+
+-   However, otpauth doesn't support steam OTPs. For these, we need to compute
+    the SHA-1, and we use the same library, `jssha` that `otpauth` uses (since
+    it is already part of our bundle).
