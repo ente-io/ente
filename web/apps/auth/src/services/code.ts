@@ -179,7 +179,7 @@ const parseAlgorithm = (url: URL): Code["algorithm"] => {
 };
 
 const parseCounter = (url: URL): number | undefined => {
-    const c = url.searchParams.get("period");
+    const c = url.searchParams.get("counter");
     return c ? parseInt(c, 10) : undefined;
 };
 
