@@ -29,6 +29,15 @@ export interface Code {
      * code remains valid.
      */
     period: number;
+    /** The (HMAC) algorithm used by the OTP generator. */
+    algorithm: "sha1" | "sha256" | "sha512";
+    /**
+     * HOTP counter.
+     *
+     * Only valid for HOTP codes. It might be even missing for HOTP codes, in
+     * which case we should start from 0.
+     */
+    counter?: number;
     /**
      * The secret that is used to drive the OTP generator.
      *
@@ -36,8 +45,6 @@ export interface Code {
      * {@link type}-specific manner).
      */
     secret: string;
-    /** The (HMAC) algorithm used by the OTP generator. */
-    algorithm: "sha1" | "sha256" | "sha512";
     /** The original string from which this code was generated. */
     uriString: string;
 }
@@ -94,8 +101,9 @@ const _codeFromURIString = (id: string, uriString: string): Code => {
         issuer: parseIssuer(url, path),
         length: parseLength(url, type),
         period: parsePeriod(url),
-        secret: parseSecret(url),
         algorithm: parseAlgorithm(url),
+        counter: parseCounter(url),
+        secret: parseSecret(url),
         uriString,
     };
 };
@@ -164,6 +172,11 @@ const parseAlgorithm = (url: URL): Code["algorithm"] => {
     }
 };
 
+const parseCounter = (url: URL): number | undefined => {
+    const c = url.searchParams.get("period");
+    return c ? parseInt(c, 10) : undefined;
+};
+
 const parseSecret = (url: URL): string =>
     ensure(url.searchParams.get("secret")).replaceAll(" ", "").toUpperCase();
 
@@ -194,13 +207,14 @@ export const generateOTPs = (code: Code): [otp: string, nextOTP: string] => {
         }
 
         case "hotp": {
+            const counter = code.counter || 0;
             const hotp = new HOTP({
                 secret: code.secret,
-                counter: 0,
+                counter: counter,
                 algorithm: code.algorithm,
             });
-            otp = hotp.generate();
-            nextOTP = hotp.generate({ counter: 1 });
+            otp = hotp.generate({ counter });
+            nextOTP = hotp.generate({ counter: counter + 1 });
             break;
         }
 
