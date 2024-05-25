@@ -1,11 +1,11 @@
 import { FluidContainer } from "@ente/shared/components/Container";
-import { Box, MenuItem, Typography } from "@mui/material";
+import { Box, MenuItem, Typography, type ButtonProps } from "@mui/material";
 import React, { useContext } from "react";
 import { OverflowMenuContext } from "./context";
 
 interface Iprops {
     onClick: () => void;
-    color?: "primary" | "secondary" | "critical";
+    color?: ButtonProps["color"];
     startIcon?: React.ReactNode;
     endIcon?: React.ReactNode;
     keepOpenAfterClick?: boolean;
@@ -32,7 +32,7 @@ export function OverflowMenuOption({
             onClick={handleClick}
             sx={{
                 minWidth: 220,
-                color: (theme) => theme.palette[color]?.main,
+                color: (theme) => theme.palette[color].main,
                 padding: 1.5,
                 "& .MuiSvgIcon-root": {
                     fontSize: "20px",

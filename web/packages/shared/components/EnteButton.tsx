@@ -1,10 +1,5 @@
 import Done from "@mui/icons-material/Done";
-import {
-    Button,
-    CircularProgress,
-    type ButtonProps,
-    type PaletteColor,
-} from "@mui/material";
+import { Button, CircularProgress, type ButtonProps } from "@mui/material";
 
 interface Iprops extends ButtonProps {
     loading?: boolean;
@@ -26,11 +21,8 @@ export default function EnteButton({
                 ...sx,
                 ...((loading || success) && {
                     "&.Mui-disabled": (theme) => ({
-                        backgroundColor: (
-                            theme.palette[props.color] as PaletteColor
-                        ).main,
-                        color: (theme.palette[props.color] as PaletteColor)
-                            .contrastText,
+                        backgroundColor: theme.palette[props.color].main,
+                        color: theme.palette[props.color].contrastText,
                     }),
                 }),
             }}

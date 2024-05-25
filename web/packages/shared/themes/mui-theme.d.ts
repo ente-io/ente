@@ -70,6 +70,7 @@ declare module "@mui/material/Button" {
         success: false;
         info: false;
         warning: false;
+        inherit: false;
     }
 }
 declare module "@mui/material/Checkbox" {
