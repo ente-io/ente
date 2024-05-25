@@ -146,8 +146,8 @@ const parseIssuer = (url: URL, path: string): string => {
     let p = decodeURIComponent(path);
     if (p.startsWith("/")) p = p.slice(1);
 
-    if (p.includes(":")) p = p.split(":")[0];
-    else if (p.includes("-")) p = p.split("-")[0];
+    if (p.includes(":")) p = ensure(p.split(":")[0]);
+    else if (p.includes("-")) p = ensure(p.split("-")[0]);
 
     return p;
 };
