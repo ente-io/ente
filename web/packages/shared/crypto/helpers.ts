@@ -116,7 +116,6 @@ export async function encryptWithRecoveryKey(key: string) {
 }
 
 export const getRecoveryKey = async () => {
-    let recoveryKey: string = null;
     try {
         const cryptoWorker = await ComlinkCryptoWorker.getInstance();
 
@@ -126,6 +125,7 @@ export const getRecoveryKey = async () => {
             recoveryKeyDecryptionNonce,
         } = keyAttributes;
         const masterKey = await getActualKey();
+        let recoveryKey: string;
         if (recoveryKeyEncryptedWithMasterKey) {
             recoveryKey = await cryptoWorker.decryptB64(
                 recoveryKeyEncryptedWithMasterKey,
