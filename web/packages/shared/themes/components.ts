@@ -72,14 +72,14 @@ export const getComponents = (
     },
     MuiLink: {
         defaultProps: {
-            color: colors.accent.A500,
+            color: colors.accent?.A500,
             underline: "none",
         },
         styleOverrides: {
             root: {
                 "&:hover": {
                     underline: "always",
-                    color: colors.accent.A500,
+                    color: colors.accent?.A500,
                 },
             },
         },
@@ -95,8 +95,8 @@ export const getComponents = (
                 borderRadius: "4px",
                 textTransform: "none",
                 fontWeight: "bold",
-                fontSize: typography.body.fontSize,
-                lineHeight: typography.body.lineHeight,
+                fontSize: typography.body?.fontSize,
+                lineHeight: typography.body?.lineHeight,
             },
             startIcon: {
                 marginRight: "12px",
@@ -212,16 +212,16 @@ function getIconColor(
     switch (ownerState.color) {
         case "primary":
             return {
-                color: colors.stroke.base,
+                color: colors.stroke?.base,
             };
         case "secondary":
             return {
-                color: colors.stroke.muted,
+                color: colors.stroke?.muted,
             };
     }
     if (ownerState.disabled) {
         return {
-            color: colors.stroke.faint,
+            color: colors.stroke?.faint,
         };
     }
     return {};
