@@ -33,7 +33,7 @@ export const getComponents = (
         styleOverrides: {
             root: {
                 ".MuiBackdrop-root": {
-                    backgroundColor: colors.backdrop.faint,
+                    backgroundColor: colors.backdrop?.faint,
                 },
             },
         },
@@ -42,10 +42,10 @@ export const getComponents = (
         styleOverrides: {
             root: {
                 ".MuiBackdrop-root": {
-                    backgroundColor: colors.backdrop.faint,
+                    backgroundColor: colors.backdrop?.faint,
                 },
                 "& .MuiDialog-paper": {
-                    filter: getDropShadowStyle(colors.shadows.float),
+                    filter: getDropShadowStyle(colors.shadows?.float),
                 },
                 "& .MuiDialogTitle-root": {
                     padding: "16px",
@@ -191,8 +191,8 @@ export const getComponents = (
     },
 });
 
-const getDropShadowStyle = (shadows: Shadow[]) => {
-    return shadows
+const getDropShadowStyle = (shadows: Shadow[] | undefined) => {
+    return (shadows ?? [])
         .map(
             (shadow) =>
                 `drop-shadow(${shadow.x}px ${shadow.y}px ${shadow.blur}px ${shadow.color})`,
