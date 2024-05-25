@@ -13,7 +13,7 @@ authentication, whereas archiving only removes them from the home timeline and
 memories sections.
 
 -   Hidden photos and albums will be removed from home timelines, memories,
-    albums tab, search results, and any other visable place in the app.
+    albums tab, search results, and any other visible place in the app.
 
 -   Hidden photos will be removed from all regular albums. If you want to unhide
     again you will have to specify the album to move it to.

@@ -33,7 +33,7 @@ and put your custom configuration there (in your case, you can put an entire
 
 > [!TIP]
 >
-> For more details about these configuration objects, see the documentaion for
+> For more details about these configuration objects, see the documentation for
 > the `s3` object in
 > [configurations/local.yaml](https://github.com/ente-io/ente/blob/main/server/configurations/local.yaml).
 
