@@ -1,4 +1,5 @@
 import log from "@/next/log";
+import { ensure } from "@/utils/ensure";
 import { sendOtt } from "@ente/accounts/api/user";
 import { PAGES } from "@ente/accounts/constants/pages";
 import { APP_HOMES } from "@ente/shared/apps/constants";
@@ -29,7 +30,9 @@ const bip39 = require("bip39");
 bip39.setDefaultWordlist("english");
 
 export default function Recover({ appContext, appName }: PageProps) {
-    const [keyAttributes, setKeyAttributes] = useState<KeyAttributes>();
+    const [keyAttributes, setKeyAttributes] = useState<
+        KeyAttributes | undefined
+    >();
 
     const router = useRouter();
 
@@ -76,13 +79,14 @@ export default function Recover({ appContext, appName }: PageProps) {
                 recoveryKey = bip39.mnemonicToEntropy(recoveryKey);
             }
             const cryptoWorker = await ComlinkCryptoWorker.getInstance();
+            const keyAttr = ensure(keyAttributes);
             const masterKey = await cryptoWorker.decryptB64(
-                keyAttributes.masterKeyEncryptedWithRecoveryKey,
-                keyAttributes.masterKeyDecryptionNonce,
+                keyAttr.masterKeyEncryptedWithRecoveryKey,
+                keyAttr.masterKeyDecryptionNonce,
                 await cryptoWorker.fromHex(recoveryKey),
             );
             await saveKeyInSessionStore(SESSION_KEYS.ENCRYPTION_KEY, masterKey);
-            await decryptAndStoreToken(keyAttributes, masterKey);
+            await decryptAndStoreToken(keyAttr, masterKey);
 
             setData(LS_KEYS.SHOW_BACK_BUTTON, { value: false });
             router.push(PAGES.CHANGE_PASSWORD);
