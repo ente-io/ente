@@ -78,7 +78,9 @@ const Page: React.FC = () => {
                 }}
             >
                 <div style={{ marginBottom: "1rem" }} />
-                {(filteredCodes.length || searchTerm.length) && (
+                {filteredCodes.length == 0 && searchTerm.length == 0 ? (
+                    <></>
+                ) : (
                     <TextField
                         id="search"
                         name="search"
@@ -100,11 +102,7 @@ const Page: React.FC = () => {
                         justifyContent: "center",
                     }}
                 >
-                    {filteredCodes.length ? (
-                        filteredCodes.map((code) => (
-                            <CodeDisplay key={code.id} code={code} />
-                        ))
-                    ) : (
+                    {filteredCodes.length == 0 ? (
                         <div
                             style={{
                                 alignItems: "center",
@@ -113,8 +111,16 @@ const Page: React.FC = () => {
                                 marginTop: "32px",
                             }}
                         >
-                            {searchTerm.length && <p>{t("NO_RESULTS")}</p>}
+                            {searchTerm.length > 0 ? (
+                                <p>{t("NO_RESULTS")}</p>
+                            ) : (
+                                <></>
+                            )}
                         </div>
+                    ) : (
+                        filteredCodes.map((code) => (
+                            <CodeDisplay key={code.id} code={code} />
+                        ))
                     )}
                 </div>
                 <Footer />
