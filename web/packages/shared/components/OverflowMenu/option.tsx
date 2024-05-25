@@ -5,7 +5,7 @@ import { OverflowMenuContext } from "./context";
 
 interface Iprops {
     onClick: () => void;
-    color?: "primary" | "secondary" | "critical",
+    color?: "primary" | "secondary" | "critical";
     startIcon?: React.ReactNode;
     endIcon?: React.ReactNode;
     keepOpenAfterClick?: boolean;
