@@ -1,3 +1,4 @@
+import { ensure } from "@/utils/ensure";
 import Done from "@mui/icons-material/Done";
 import { Button, CircularProgress, type ButtonProps } from "@mui/material";
 
@@ -21,8 +22,10 @@ export default function EnteButton({
                 ...sx,
                 ...((loading || success) && {
                     "&.Mui-disabled": (theme) => ({
-                        backgroundColor: theme.palette[props.color].main,
-                        color: theme.palette[props.color].contrastText,
+                        // TODO: Refactor to not need this ensure.
+                        backgroundColor:
+                            theme.palette[ensure(props.color)].main,
+                        color: theme.palette[ensure(props.color)].contrastText,
                     }),
                 }),
             }}
