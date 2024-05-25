@@ -14,7 +14,7 @@
         "jsxImportSource": "@emotion/react",
 
         "strict": true,
-        "strictNullChecks": false,
+        "strictNullChecks": true,
         /* Stricter than strict */
         "noImplicitReturns": true,
         "noUnusedParameters": true,
