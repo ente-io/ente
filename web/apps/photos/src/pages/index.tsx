@@ -115,7 +115,9 @@ export default function LandingPage() {
             ) : (
                 <>
                     <SlideContainer>
-                        <EnteLogo height={24} sx={{ mb: 8 }} />
+                        <Logo_>
+                            <EnteLogo height={24} />
+                        </Logo_>
                         <Slideshow />
                     </SlideContainer>
                     <MobileBox>
@@ -173,6 +175,10 @@ const SlideContainer = styled("div")`
         flex-grow: 0;
     }
 `;
+
+const Logo_ = styled("div")`
+    margin-block-end: 64px;
+`
 
 const DesktopBox = styled("div")`
     flex: 1;
