@@ -102,7 +102,8 @@ export default function Generate({ appContext, appName }: PageProps) {
                         setRecoveryModalView(false);
                         router.push(APP_HOMES.get(appName));
                     }}
-                    somethingWentWrong={() => null}
+                    /* TODO: Why is this error being ignored */
+                    somethingWentWrong={() => {}}
                 />
             ) : (
                 <VerticallyCentered>
