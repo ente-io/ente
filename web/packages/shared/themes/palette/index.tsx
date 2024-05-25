@@ -1,6 +1,6 @@
+import { ensure } from "@/utils/ensure";
 import type { PaletteOptions, ThemeColorsOptions } from "@mui/material";
 import { THEME_COLOR } from "../constants";
-import { ensure } from "@/utils/ensure";
 
 export const getPallette = (
     themeColor: THEME_COLOR,

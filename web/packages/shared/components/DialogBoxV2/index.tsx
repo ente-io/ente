@@ -96,7 +96,9 @@ export default function DialogBoxV2({
                                 size="large"
                                 color={attributes.proceed?.variant}
                                 onClick={async () => {
-                                    await attributes.proceed?.action(setLoading);
+                                    await attributes.proceed?.action(
+                                        setLoading,
+                                    );
 
                                     onClose();
                                 }}

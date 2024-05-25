@@ -157,9 +157,9 @@ const UserDetailsSection: React.FC<UserDetailsSectionProps> = ({
 }) => {
     const galleryContext = useContext(GalleryContext);
 
-    const [userDetails, setUserDetails] = useLocalState<UserDetails>(
-        LS_KEYS.USER_DETAILS,
-    );
+    const [userDetails, setUserDetails] = useLocalState<
+        UserDetails | undefined
+    >(LS_KEYS.USER_DETAILS, undefined);
     const [memberSubscriptionManageView, setMemberSubscriptionManageView] =
         useState(false);
 
@@ -198,6 +198,7 @@ const UserDetailsSection: React.FC<UserDetailsSectionProps> = ({
             openMemberSubscriptionManage();
         } else {
             if (
+                userDetails &&
                 hasStripeSubscription(userDetails.subscription) &&
                 isSubscriptionPastDue(userDetails.subscription)
             ) {

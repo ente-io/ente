@@ -7,6 +7,6 @@ import React, { useContext } from "react";
 const Page: React.FC = () => {
     const appContext = ensure(useContext(AppContext));
     return <ChangePasswordPage appContext={appContext} appName={APPS.AUTH} />;
-}
+};
 
 export default Page;
