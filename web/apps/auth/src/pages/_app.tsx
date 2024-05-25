@@ -61,7 +61,7 @@ export default function App({ Component, pageProps }: AppProps) {
     const isLoadingBarRunning = useRef<boolean>(false);
     const loadingBar = useRef<LoadingBarRef>(null);
     const [dialogBoxAttributeV2, setDialogBoxAttributesV2] =
-        useState<DialogBoxAttributesV2>();
+        useState<DialogBoxAttributesV2>({});
     const [dialogBoxV2View, setDialogBoxV2View] = useState(false);
     const isMobile = useMediaQuery("(max-width:428px)");
     const [themeColor, setThemeColor] = useLocalState(
@@ -134,9 +134,10 @@ export default function App({ Component, pageProps }: AppProps) {
         void accountLogout().then(() => router.push(PAGES.ROOT));
     };
 
+    // TODO: Refactor this to have a fallback
     const title = isI18nReady
         ? t("TITLE", { context: APPS.AUTH })
-        : APP_TITLES.get(APPS.AUTH);
+        : APP_TITLES.get(APPS.AUTH) ?? "";
 
     return (
         <>
