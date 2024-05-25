@@ -26,6 +26,8 @@ export const getAuthCodes = async (): Promise<Code[]> => {
             authEntity
                 .filter((f) => !f.isDeleted)
                 .map(async (entity) => {
+                    if (!entity.encryptedData) return undefined;
+                    if (!entity.header) return undefined;
                     try {
                         const decryptedCode =
                             await cryptoWorker.decryptMetadata(
@@ -36,14 +38,12 @@ export const getAuthCodes = async (): Promise<Code[]> => {
                         return codeFromURIString(entity.id, decryptedCode);
                     } catch (e) {
                         log.error(`Failed to parse codeID ${entity.id}`, e);
-                        return null;
+                        return undefined;
                     }
                 }),
         );
-        // Remove null and undefined values
-        const filteredAuthCodes = authCodes.filter(
-            (f) => f !== null && f !== undefined,
-        );
+        // Remove undefined values
+        const filteredAuthCodes = authCodes.filter((f): f is Code => !!f);
         filteredAuthCodes.sort((a, b) => {
             if (a.issuer && b.issuer) {
                 return a.issuer.localeCompare(b.issuer);
