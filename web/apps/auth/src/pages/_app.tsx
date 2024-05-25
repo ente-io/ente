@@ -25,7 +25,6 @@ import HTTPService from "@ente/shared/network/HTTPService";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import { getTheme } from "@ente/shared/themes";
 import { THEME_COLOR } from "@ente/shared/themes/constants";
-import type { SetTheme } from "@ente/shared/themes/types";
 import type { User } from "@ente/shared/user/types";
 import { CssBaseline, useMediaQuery } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
@@ -42,7 +41,7 @@ type AppContextType = {
     finishLoading: () => void;
     isMobile: boolean;
     themeColor: THEME_COLOR;
-    setThemeColor: SetTheme;
+    setThemeColor: (themeColor: THEME_COLOR) => void;
     somethingWentWrong: () => void;
     setDialogBoxAttributesV2: SetDialogBoxAttributesV2;
     logout: () => void;

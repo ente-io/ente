@@ -36,7 +36,6 @@ import {
 } from "@ente/shared/storage/localStorage/helpers";
 import { getTheme } from "@ente/shared/themes";
 import { THEME_COLOR } from "@ente/shared/themes/constants";
-import type { SetTheme } from "@ente/shared/themes/types";
 import type { User } from "@ente/shared/user/types";
 import ArrowForward from "@mui/icons-material/ArrowForward";
 import { CssBaseline, useMediaQuery } from "@mui/material";
@@ -95,7 +94,7 @@ type AppContextType = {
     setWatchFolderFiles: (files: FileList) => void;
     isMobile: boolean;
     themeColor: THEME_COLOR;
-    setThemeColor: SetTheme;
+    setThemeColor: (themeColor: THEME_COLOR) => void;
     somethingWentWrong: () => void;
     setDialogBoxAttributesV2: SetDialogBoxAttributesV2;
     isCFProxyDisabled: boolean;

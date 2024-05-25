@@ -529,7 +529,7 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
         });
 
     const toggleTheme = () => {
-        setThemeColor((themeColor) =>
+        setThemeColor(
             themeColor === THEME_COLOR.DARK
                 ? THEME_COLOR.LIGHT
                 : THEME_COLOR.DARK,
