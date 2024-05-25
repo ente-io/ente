@@ -25,7 +25,6 @@ import { useContext, useEffect, useState } from "react";
 import { Trans } from "react-i18next";
 import { AppContext } from "./_app";
 
-
 export default function LandingPage() {
     const router = useRouter();
     const appContext = useContext(AppContext);
@@ -178,7 +177,7 @@ const SlideContainer = styled("div")`
 
 const Logo_ = styled("div")`
     margin-block-end: 64px;
-`
+`;
 
 const DesktopBox = styled("div")`
     flex: 1;
@@ -265,7 +264,6 @@ const Slideshow: React.FC = () => {
         </CarouselProvider>
     );
 };
-
 
 const TextContainer = (props: TypographyProps) => (
     <Typography color={"text.muted"} mt={2} mb={3} {...props} />
