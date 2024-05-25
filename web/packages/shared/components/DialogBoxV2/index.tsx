@@ -15,7 +15,7 @@ import type { DialogBoxAttributesV2 } from "./types";
 type IProps = React.PropsWithChildren<
     Omit<DialogProps, "onClose"> & {
         onClose: () => void;
-        attributes: DialogBoxAttributesV2;
+        attributes?: DialogBoxAttributesV2;
     }
 >;
 

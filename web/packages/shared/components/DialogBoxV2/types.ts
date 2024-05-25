@@ -39,7 +39,3 @@ export interface DialogBoxAttributesV2 {
     }[];
     buttonDirection?: "row" | "column";
 }
-
-export type SetDialogBoxAttributesV2 = React.Dispatch<
-    React.SetStateAction<DialogBoxAttributesV2>
->;

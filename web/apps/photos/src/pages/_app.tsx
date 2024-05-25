@@ -18,10 +18,7 @@ import {
     SetDialogBoxAttributes,
 } from "@ente/shared/components/DialogBox/types";
 import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
-import type {
-    DialogBoxAttributesV2,
-    SetDialogBoxAttributesV2,
-} from "@ente/shared/components/DialogBoxV2/types";
+import type { DialogBoxAttributesV2 } from "@ente/shared/components/DialogBoxV2/types";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { MessageContainer } from "@ente/shared/components/MessageContainer";
 import { AppNavbar } from "@ente/shared/components/Navbar/app";
@@ -96,7 +93,7 @@ type AppContextType = {
     themeColor: THEME_COLOR;
     setThemeColor: (themeColor: THEME_COLOR) => void;
     somethingWentWrong: () => void;
-    setDialogBoxAttributesV2: SetDialogBoxAttributesV2;
+    setDialogBoxAttributesV2: (attrs: DialogBoxAttributesV2) => void;
     isCFProxyDisabled: boolean;
     setIsCFProxyDisabled: (disabled: boolean) => void;
     logout: () => void;
@@ -118,8 +115,9 @@ export default function App({ Component, pageProps }: AppProps) {
     const isLoadingBarRunning = useRef(false);
     const loadingBar = useRef(null);
     const [dialogMessage, setDialogMessage] = useState<DialogBoxAttributes>();
-    const [dialogBoxAttributeV2, setDialogBoxAttributesV2] =
-        useState<DialogBoxAttributesV2>();
+    const [dialogBoxAttributeV2, setDialogBoxAttributesV2] = useState<
+        DialogBoxAttributesV2 | undefined
+    >();
     useState<DialogBoxAttributes>(null);
     const [messageDialogView, setMessageDialogView] = useState(false);
     const [dialogBoxV2View, setDialogBoxV2View] = useState(false);

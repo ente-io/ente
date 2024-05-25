@@ -12,10 +12,7 @@ import {
 } from "@ente/shared/apps/constants";
 import { Overlay } from "@ente/shared/components/Container";
 import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
-import type {
-    DialogBoxAttributesV2,
-    SetDialogBoxAttributesV2,
-} from "@ente/shared/components/DialogBoxV2/types";
+import type { DialogBoxAttributesV2 } from "@ente/shared/components/DialogBoxV2/types";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { MessageContainer } from "@ente/shared/components/MessageContainer";
 import { AppNavbar } from "@ente/shared/components/Navbar/app";
@@ -43,7 +40,7 @@ type AppContextType = {
     themeColor: THEME_COLOR;
     setThemeColor: (themeColor: THEME_COLOR) => void;
     somethingWentWrong: () => void;
-    setDialogBoxAttributesV2: SetDialogBoxAttributesV2;
+    setDialogBoxAttributesV2: (attrs: DialogBoxAttributesV2) => void;
     logout: () => void;
 };
 
@@ -59,8 +56,9 @@ export default function App({ Component, pageProps }: AppProps) {
     const [showNavbar, setShowNavBar] = useState(false);
     const isLoadingBarRunning = useRef<boolean>(false);
     const loadingBar = useRef<LoadingBarRef>(null);
-    const [dialogBoxAttributeV2, setDialogBoxAttributesV2] =
-        useState<DialogBoxAttributesV2>({});
+    const [dialogBoxAttributeV2, setDialogBoxAttributesV2] = useState<
+        DialogBoxAttributesV2 | undefined
+    >();
     const [dialogBoxV2View, setDialogBoxV2View] = useState(false);
     const isMobile = useMediaQuery("(max-width:428px)");
     const [themeColor, setThemeColor] = useLocalState(

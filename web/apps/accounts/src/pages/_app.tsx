@@ -6,10 +6,7 @@ import { accountLogout } from "@ente/accounts/services/logout";
 import { APPS, APP_TITLES } from "@ente/shared/apps/constants";
 import { Overlay } from "@ente/shared/components/Container";
 import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
-import type {
-    DialogBoxAttributesV2,
-    SetDialogBoxAttributesV2,
-} from "@ente/shared/components/DialogBoxV2/types";
+import type { DialogBoxAttributesV2 } from "@ente/shared/components/DialogBoxV2/types";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { AppNavbar } from "@ente/shared/components/Navbar/app";
 import { useLocalState } from "@ente/shared/hooks/useLocalState";
@@ -28,7 +25,7 @@ import "styles/global.css";
 interface AppContextProps {
     isMobile: boolean;
     showNavBar: (show: boolean) => void;
-    setDialogBoxAttributesV2: SetDialogBoxAttributesV2;
+    setDialogBoxAttributesV2: (attrs: DialogBoxAttributesV2) => void;
     logout: () => void;
 }
 
@@ -39,8 +36,9 @@ export default function App({ Component, pageProps }: AppProps) {
 
     const [showNavbar, setShowNavBar] = useState(false);
 
-    const [dialogBoxAttributeV2, setDialogBoxAttributesV2] =
-        useState<DialogBoxAttributesV2>();
+    const [dialogBoxAttributeV2, setDialogBoxAttributesV2] = useState<
+        DialogBoxAttributesV2 | undefined
+    >();
 
     const [dialogBoxV2View, setDialogBoxV2View] = useState(false);
 
@@ -106,8 +104,7 @@ export default function App({ Component, pageProps }: AppProps) {
                     value={{
                         isMobile,
                         showNavBar,
-                        setDialogBoxAttributesV2:
-                            setDialogBoxAttributesV2 as any,
+                        setDialogBoxAttributesV2,
                         logout,
                     }}
                 >
