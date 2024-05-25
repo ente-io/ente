@@ -6,12 +6,17 @@ import {
     Typography,
     type DialogProps,
 } from "@mui/material";
+import React from "react";
 
-const DialogTitleWithCloseButton = (props) => {
-    const { children, onClose, ...other } = props;
+interface DialogTitleWithCloseButtonProps {
+    onClose: () => void;
+}
 
+const DialogTitleWithCloseButton: React.FC<
+    React.PropsWithChildren<DialogTitleWithCloseButtonProps>
+> = ({ children, onClose }) => {
     return (
-        <DialogTitle {...other}>
+        <DialogTitle>
             <SpaceBetweenFlex>
                 <Typography variant="h3" fontWeight={"bold"}>
                     {children}
