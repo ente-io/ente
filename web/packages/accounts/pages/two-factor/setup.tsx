@@ -56,7 +56,8 @@ export default function SetupTwoFactor({ appName }: PageProps) {
             ...getData(LS_KEYS.USER),
             isTwoFactorEnabled: true,
         });
-        router.push(APP_HOMES.get(appName));
+        // TODO: Refactor the type of APP_HOMES to not require the ??
+        router.push(APP_HOMES.get(appName) ?? "/");
     };
 
     return (
