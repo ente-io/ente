@@ -8794,10 +8794,10 @@ class S {
     );
   }
 
-  /// `Indexing is paused, will automatically resume when device is ready`
+  /// `Indexing is paused. It will automatically resume when device is ready`
   String get indexingIsPaused {
     return Intl.message(
-      'Indexing is paused, will automatically resume when device is ready',
+      'Indexing is paused. It will automatically resume when device is ready',
       name: 'indexingIsPaused',
       desc: '',
       args: [],
