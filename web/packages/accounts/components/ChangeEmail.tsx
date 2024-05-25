@@ -24,7 +24,7 @@ interface formValues {
 function ChangeEmailForm({ appName }: PageProps) {
     const [loading, setLoading] = useState(false);
     const [ottInputVisible, setShowOttInputVisibility] = useState(false);
-    const [email, setEmail] = useState(null);
+    const [email, setEmail] = useState<string | null>(null);
     const [showMessage, setShowMessage] = useState(false);
     const [success, setSuccess] = useState(false);
 
