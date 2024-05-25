@@ -1,18 +1,11 @@
 import log from "@/next/log";
 import { putAttributes } from "@ente/accounts/api/user";
+import SetPasswordForm, {
+    type SetPasswordFormProps,
+} from "@ente/accounts/components/SetPasswordForm";
+import { PAGES } from "@ente/accounts/constants/pages";
 import { configureSRP } from "@ente/accounts/services/srp";
 import { generateKeyAndSRPAttributes } from "@ente/accounts/utils/srp";
-import {
-    generateAndSaveIntermediateKeyAttributes,
-    saveKeyInSessionStore,
-} from "@ente/shared/crypto/helpers";
-import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
-import { SESSION_KEYS, getKey } from "@ente/shared/storage/sessionStorage";
-import { t } from "i18next";
-import { useEffect, useState } from "react";
-
-import SetPasswordForm from "@ente/accounts/components/SetPasswordForm";
-import { PAGES } from "@ente/accounts/constants/pages";
 import { APP_HOMES } from "@ente/shared/apps/constants";
 import type { PageProps } from "@ente/shared/apps/types";
 import { VerticallyCentered } from "@ente/shared/components/Container";
@@ -23,11 +16,19 @@ import FormTitle from "@ente/shared/components/Form/FormPaper/Title";
 import LinkButton from "@ente/shared/components/LinkButton";
 import RecoveryKey from "@ente/shared/components/RecoveryKey";
 import {
+    generateAndSaveIntermediateKeyAttributes,
+    saveKeyInSessionStore,
+} from "@ente/shared/crypto/helpers";
+import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
+import {
     justSignedUp,
     setJustSignedUp,
 } from "@ente/shared/storage/localStorage/helpers";
+import { SESSION_KEYS, getKey } from "@ente/shared/storage/sessionStorage";
 import type { KeyAttributes, User } from "@ente/shared/user/types";
+import { t } from "i18next";
 import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
 
 export default function Generate({ appContext, appName }: PageProps) {
     const { logout } = appContext;
@@ -67,7 +68,10 @@ export default function Generate({ appContext, appName }: PageProps) {
         appContext.showNavBar(true);
     }, []);
 
-    const onSubmit = async (passphrase, setFieldError) => {
+    const onSubmit: SetPasswordFormProps["callback"] = async (
+        passphrase,
+        setFieldError,
+    ) => {
         try {
             const { keyAttributes, masterKey, srpSetupAttributes } =
                 await generateKeyAndSRPAttributes(passphrase);
