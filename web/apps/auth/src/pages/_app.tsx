@@ -33,7 +33,7 @@ import { t } from "i18next";
 import type { AppProps } from "next/app";
 import { useRouter } from "next/router";
 import { createContext, useEffect, useRef, useState } from "react";
-import LoadingBar from "react-top-loading-bar";
+import LoadingBar, { type LoadingBarRef } from "react-top-loading-bar";
 import "../../public/css/global.css";
 
 type AppContextType = {
@@ -58,8 +58,8 @@ export default function App({ Component, pageProps }: AppProps) {
         typeof window !== "undefined" && !window.navigator.onLine,
     );
     const [showNavbar, setShowNavBar] = useState(false);
-    const isLoadingBarRunning = useRef(false);
-    const loadingBar = useRef(null);
+    const isLoadingBarRunning = useRef<boolean>(false);
+    const loadingBar = useRef<LoadingBarRef>(null);
     const [dialogBoxAttributeV2, setDialogBoxAttributesV2] =
         useState<DialogBoxAttributesV2>();
     const [dialogBoxV2View, setDialogBoxV2View] = useState(false);
