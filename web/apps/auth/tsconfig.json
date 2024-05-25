@@ -6,22 +6,13 @@
         "../../packages/next/global-electron.d.ts",
         "../../packages/shared/themes/mui-theme.d.ts"
     ],
-    // Temporarily disable some things to get the existing code to compile
-    // without warnings.
     "compilerOptions": {
+        /* Set the base directory from which to resolve bare module names */
         "baseUrl": "./src",
 
-        "jsxImportSource": "@emotion/react",
-
-        "strict": true,
-        "strictNullChecks": true,
-        /* Stricter than strict */
-        "noImplicitReturns": true,
-        "noUnusedParameters": true,
-        "noUnusedLocals": true,
-        "noFallthroughCasesInSwitch": true,
-        /* e.g. makes array indexing returns undefined */
+        /* TODO: Enable these */
         "noUncheckedIndexedAccess": false,
+        /* MUI doesn't play great with exactOptionalPropertyTypes currently */
         "exactOptionalPropertyTypes": false
     }
 }
