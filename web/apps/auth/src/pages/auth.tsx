@@ -23,7 +23,7 @@ import { getAuthCodes } from "services/remote";
 const AuthenticatorCodesPage = () => {
     const appContext = useContext(AppContext);
     const router = useRouter();
-    const [codes, setCodes] = useState([]);
+    const [codes, setCodes] = useState<Code[]>([]);
     const [hasFetched, setHasFetched] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
 
