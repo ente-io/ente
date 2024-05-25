@@ -47,7 +47,7 @@ type AppContextType = {
     logout: () => void;
 };
 
-export const AppContext = createContext<AppContextType>(null);
+export const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export default function App({ Component, pageProps }: AppProps) {
     const router = useRouter();

@@ -1,3 +1,4 @@
+import { ensure } from "@/utils/ensure";
 import {
     HorizontalFlex,
     VerticallyCentered,
@@ -20,8 +21,8 @@ import React, { useContext, useEffect, useState } from "react";
 import { generateOTPs, type Code } from "services/code";
 import { getAuthCodes } from "services/remote";
 
-const AuthenticatorCodesPage = () => {
-    const appContext = useContext(AppContext);
+const Page: React.FC = () => {
+    const appContext = ensure(useContext(AppContext));
     const router = useRouter();
     const [codes, setCodes] = useState<Code[]>([]);
     const [hasFetched, setHasFetched] = useState(false);
@@ -122,10 +123,10 @@ const AuthenticatorCodesPage = () => {
     );
 };
 
-export default AuthenticatorCodesPage;
+export default Page;
 
 const AuthNavbar: React.FC = () => {
-    const { isMobile, logout } = useContext(AppContext);
+    const { isMobile, logout } = ensure(useContext(AppContext));
 
     return (
         <NavbarBase isMobile={isMobile}>

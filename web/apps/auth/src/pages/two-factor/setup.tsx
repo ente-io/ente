@@ -1,9 +1,12 @@
+import { ensure } from "@/utils/ensure";
 import TwoFactorSetupPage from "@ente/accounts/pages/two-factor/setup";
 import { APPS } from "@ente/shared/apps/constants";
 import { AppContext } from "pages/_app";
-import { useContext } from "react";
+import React, { useContext } from "react";
 
-export default function TwoFactorSetup() {
-    const appContext = useContext(AppContext);
+const Page: React.FC = () => {
+    const appContext = ensure(useContext(AppContext));
     return <TwoFactorSetupPage appContext={appContext} appName={APPS.AUTH} />;
 }
+
+export default Page;

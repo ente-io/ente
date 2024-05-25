@@ -1,11 +1,3 @@
-import PasskeysFinishPage from "@ente/accounts/pages/passkeys/finish";
+import Page from "@ente/accounts/pages/passkeys/finish";
 
-const PasskeysFinish = () => {
-    return (
-        <>
-            <PasskeysFinishPage />
-        </>
-    );
-};
-
-export default PasskeysFinish;
+export default Page;
