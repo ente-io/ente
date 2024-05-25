@@ -96,7 +96,7 @@ export default function DialogBoxV2({
                                 size="large"
                                 color={attributes.proceed?.variant}
                                 onClick={async () => {
-                                    await attributes.proceed.action(setLoading);
+                                    await attributes.proceed?.action(setLoading);
 
                                     onClose();
                                 }}
@@ -110,7 +110,7 @@ export default function DialogBoxV2({
                                 size="large"
                                 color={attributes.close?.variant ?? "secondary"}
                                 onClick={() => {
-                                    attributes.close.action &&
+                                    attributes.close?.action &&
                                         attributes.close?.action();
                                     onClose();
                                 }}
