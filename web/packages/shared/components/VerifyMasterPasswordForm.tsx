@@ -10,7 +10,7 @@ import { CustomError } from "../error";
 import type { KeyAttributes, User } from "../user/types";
 
 export interface VerifyMasterPasswordFormProps {
-    user: User;
+    user: User | undefined;
     keyAttributes: KeyAttributes | undefined;
     callback: (
         key: string,

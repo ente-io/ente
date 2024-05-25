@@ -1,5 +1,6 @@
 import { isDevBuild } from "@/next/env";
 import log from "@/next/log";
+import { ensure } from "@/utils/ensure";
 import { APP_HOMES } from "@ente/shared/apps/constants";
 import type { PageProps } from "@ente/shared/apps/types";
 import { VerticallyCentered } from "@ente/shared/components/Container";
@@ -194,7 +195,7 @@ export default function Credentials({ appContext, appName }: PageProps) {
                         id,
                         isTwoFactorEnabled: false,
                     });
-                    setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes);
+                    setData(LS_KEYS.KEY_ATTRIBUTES, ensure(keyAttributes));
                     return keyAttributes;
                 }
             } catch (e) {
@@ -225,10 +226,10 @@ export default function Credentials({ appContext, appName }: PageProps) {
             await saveKeyInSessionStore(SESSION_KEYS.ENCRYPTION_KEY, key);
             await decryptAndStoreToken(keyAttributes, key);
             try {
-                let srpAttributes: SRPAttributes = getData(
+                let srpAttributes: SRPAttributes | null = getData(
                     LS_KEYS.SRP_ATTRIBUTES,
                 );
-                if (!srpAttributes) {
+                if (!srpAttributes && user) {
                     srpAttributes = await getSRPAttributes(user.email);
                     if (srpAttributes) {
                         setData(LS_KEYS.SRP_ATTRIBUTES, srpAttributes);
@@ -262,10 +263,12 @@ export default function Credentials({ appContext, appName }: PageProps) {
         );
     }
 
+    // TODO: Handle the case when user is not present, or exclude that
+    // possibility using types.
     return (
         <VerticallyCentered>
             <FormPaper style={{ minWidth: "320px" }}>
-                <Header>{user.email}</Header>
+                <Header>{user?.email ?? ""}</Header>
 
                 <VerifyMasterPasswordForm
                     buttonText={t("VERIFY_PASSPHRASE")}
