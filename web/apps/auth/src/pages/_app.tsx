@@ -18,7 +18,7 @@ import type {
 } from "@ente/shared/components/DialogBoxV2/types";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { MessageContainer } from "@ente/shared/components/MessageContainer";
-import AppNavbar from "@ente/shared/components/Navbar/app";
+import { AppNavbar } from "@ente/shared/components/Navbar/app";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { useLocalState } from "@ente/shared/hooks/useLocalState";
 import HTTPService from "@ente/shared/network/HTTPService";

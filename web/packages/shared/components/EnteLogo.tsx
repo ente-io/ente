@@ -10,9 +10,11 @@ interface EnteLogoProps {
     height?: number;
 }
 
-export const EnteLogo: React.FC<EnteLogoProps> = ({ height }) => (
-    <LogoImage height={height ?? 18} alt="logo" src="/images/ente.svg" />
-);
+export const EnteLogo: React.FC<EnteLogoProps> = ({ height }) => {
+    return (
+        <LogoImage height={height ?? 18} alt="logo" src="/images/ente.svg" />
+    );
+};
 
 const LogoImage = styled("img")`
     margin: 3px 0;

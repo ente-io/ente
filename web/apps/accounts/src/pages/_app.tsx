@@ -11,7 +11,7 @@ import type {
     SetDialogBoxAttributesV2,
 } from "@ente/shared/components/DialogBoxV2/types";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
-import AppNavbar from "@ente/shared/components/Navbar/app";
+import { AppNavbar } from "@ente/shared/components/Navbar/app";
 import { useLocalState } from "@ente/shared/hooks/useLocalState";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
