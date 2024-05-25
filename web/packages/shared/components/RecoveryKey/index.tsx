@@ -1,3 +1,4 @@
+import { ensure } from "@/utils/ensure";
 import type { PageProps } from "@ente/shared/apps/types";
 import CodeBlock from "@ente/shared/components/CodeBlock";
 import DialogTitleWithCloseButton from "@ente/shared/components/DialogBox/TitleWithCloseButton";
@@ -28,7 +29,7 @@ interface Props {
 }
 
 function RecoveryKey({ somethingWentWrong, appContext, ...props }: Props) {
-    const [recoveryKey, setRecoveryKey] = useState(null);
+    const [recoveryKey, setRecoveryKey] = useState<string | null>(null);
 
     useEffect(() => {
         if (!props.show) {
@@ -47,7 +48,7 @@ function RecoveryKey({ somethingWentWrong, appContext, ...props }: Props) {
     }, [props.show]);
 
     function onSaveClick() {
-        downloadAsFile(RECOVERY_KEY_FILE_NAME, recoveryKey);
+        downloadAsFile(RECOVERY_KEY_FILE_NAME, ensure(recoveryKey));
         props.onHide();
     }
 
