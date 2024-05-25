@@ -6,7 +6,7 @@ import { t } from "i18next";
 import LinkButton from "@ente/shared/components/LinkButton";
 
 interface Iprops {
-    twoFactorSecret: TwoFactorSecret;
+    twoFactorSecret?: TwoFactorSecret;
     changeToQRMode: () => void;
 }
 export default function SetupManualMode({
