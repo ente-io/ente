@@ -20,7 +20,7 @@ export interface VerifyMasterPasswordFormProps {
     ) => void;
     buttonText: string;
     submitButtonProps?: ButtonProps;
-    getKeyAttributes?: (kek: string) => Promise<KeyAttributes>;
+    getKeyAttributes?: (kek: string) => Promise<KeyAttributes | undefined>;
     srpAttributes?: SRPAttributes;
 }
 

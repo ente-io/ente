@@ -150,7 +150,7 @@ export default function Credentials({ appContext, appName }: PageProps) {
                     id,
                     twoFactorSessionID,
                     passkeySessionID,
-                } = await loginViaSRP(srpAttributes, kek);
+                } = await loginViaSRP(ensure(srpAttributes), kek);
                 setIsFirstLogin(true);
                 if (passkeySessionID) {
                     const sessionKeyAttributes =
@@ -195,7 +195,8 @@ export default function Credentials({ appContext, appName }: PageProps) {
                         id,
                         isTwoFactorEnabled: false,
                     });
-                    setData(LS_KEYS.KEY_ATTRIBUTES, ensure(keyAttributes));
+                    if (keyAttributes)
+                        setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes);
                     return keyAttributes;
                 }
             } catch (e) {
