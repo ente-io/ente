@@ -91,5 +91,11 @@ To fix these, you should ensure the following:
 
 1.  The bucket CORS rules do not allow museum to access these objects.
 
+    > For viewing the uploaded files from the browser, you will need to
+    > currently set allowedOrigins to "*", and allow the "X-Auth-Token",
+    > "X-Client-Package" headers configuration too. [Here is an example of a
+    > working
+    > configuration](https://github.com/ente-io/ente/discussions/1764#discussioncomment-9478204).
+
 2.  The credentials are not being picked up (you might be setting the correct
     creds, but not in the place where museum picks them from).
