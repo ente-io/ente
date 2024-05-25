@@ -12,7 +12,7 @@ import { CustomError } from "@ente/shared/error";
 import InMemoryStore, { MS_KEYS } from "@ente/shared/storage/InMemoryStore";
 import LogoutOutlined from "@mui/icons-material/LogoutOutlined";
 import MoreHoriz from "@mui/icons-material/MoreHoriz";
-import { Button, ButtonBase, Snackbar, TextField } from "@mui/material";
+import { Button, ButtonBase, Snackbar, TextField, styled } from "@mui/material";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { AppContext } from "pages/_app";
@@ -30,8 +30,7 @@ const AuthenticatorCodesPage = () => {
     useEffect(() => {
         const fetchCodes = async () => {
             try {
-                const res = await getAuthCodes();
-                setCodes(res);
+                setCodes(await getAuthCodes());
             } catch (e) {
                 if (
                     e instanceof Error &&
@@ -58,11 +57,9 @@ const AuthenticatorCodesPage = () => {
 
     if (!hasFetched) {
         return (
-            <>
-                <VerticallyCentered>
-                    <EnteSpinner></EnteSpinner>
-                </VerticallyCentered>
-            </>
+            <VerticallyCentered>
+                <EnteSpinner />
+            </VerticallyCentered>
         );
     }
 
@@ -80,9 +77,7 @@ const AuthenticatorCodesPage = () => {
                 }}
             >
                 <div style={{ marginBottom: "1rem" }} />
-                {filteredCodes.length === 0 && searchTerm.length === 0 ? (
-                    <></>
-                ) : (
+                {(filteredCodes.length || searchTerm.length) && (
                     <TextField
                         id="search"
                         name="search"
@@ -104,7 +99,11 @@ const AuthenticatorCodesPage = () => {
                         justifyContent: "center",
                     }}
                 >
-                    {filteredCodes.length === 0 ? (
+                    {filteredCodes.length ? (
+                        filteredCodes.map((code) => (
+                            <CodeDisplay key={code.id} code={code} />
+                        ))
+                    ) : (
                         <div
                             style={{
                                 alignItems: "center",
@@ -113,21 +112,11 @@ const AuthenticatorCodesPage = () => {
                                 marginTop: "32px",
                             }}
                         >
-                            {searchTerm.length !== 0 ? (
-                                <p>{t("NO_RESULTS")}</p>
-                            ) : (
-                                <div />
-                            )}
+                            {searchTerm.length && <p>{t("NO_RESULTS")}</p>}
                         </div>
-                    ) : (
-                        filteredCodes.map((code) => (
-                            <CodeDisplay key={code.id} code={code} />
-                        ))
                     )}
                 </div>
-                <div style={{ marginBottom: "2rem" }} />
                 <Footer />
-                <div style={{ marginBottom: "4rem" }} />
             </div>
         </>
     );
@@ -396,14 +385,7 @@ const UnparseableCode: React.FC<UnparseableCodeProps> = ({
 
 const Footer: React.FC = () => {
     return (
-        <div
-            style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-            }}
-        >
+        <Footer_>
             <p>{t("AUTH_DOWNLOAD_MOBILE_APP")}</p>
             <a
                 href="https://github.com/ente-io/ente/tree/main/auth#-download"
@@ -411,6 +393,15 @@ const Footer: React.FC = () => {
             >
                 <Button color="accent">{t("DOWNLOAD")}</Button>
             </a>
-        </div>
+        </Footer_>
     );
 };
+
+const Footer_ = styled("div")`
+    margin-block-start: 2rem;
+    margin-block-end: 4rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+`;
