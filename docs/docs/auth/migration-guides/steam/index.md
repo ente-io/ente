@@ -10,7 +10,7 @@ A guide written by an ente.io lover
 > [!WARNING]
 >
 > Steam Authenticator code is only supported after auth-v3.0.3, check the app's
-> version number before migration
+> version number before migration.
 
 One way to migrate is to
 [use this tool by dyc3](https://github.com/dyc3/steamguard-cli/releases/latest)
