@@ -119,12 +119,11 @@ export const WatchFolder: React.FC<WatchFolderProps> = ({ open, onClose }) => {
                 onClose={onClose}
                 PaperProps={{ sx: { height: "448px", maxWidth: "414px" } }}
             >
-                <DialogTitleWithCloseButton
-                    onClose={onClose}
-                    sx={{ "&&&": { padding: "32px 16px 16px 24px" } }}
-                >
-                    {t("WATCHED_FOLDERS")}
-                </DialogTitleWithCloseButton>
+                <Title_>
+                    <DialogTitleWithCloseButton onClose={onClose}>
+                        {t("WATCHED_FOLDERS")}
+                    </DialogTitleWithCloseButton>
+                </Title_>
                 <DialogContent sx={{ flex: 1 }}>
                     <Stack spacing={1} p={1.5} height={"100%"}>
                         <WatchList {...{ watches, removeWatch }} />
@@ -148,6 +147,10 @@ export const WatchFolder: React.FC<WatchFolderProps> = ({ open, onClose }) => {
         </>
     );
 };
+
+const Title_ = styled("div")`
+    padding: 32px 16px 16px 24px;
+`;
 
 interface WatchList {
     watches: FolderWatch[];
