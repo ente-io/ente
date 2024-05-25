@@ -9,7 +9,7 @@ import { Steam } from "./steam";
  */
 export interface Code {
     /** A unique id for the corresponding "auth entity" in our system. */
-    id?: String;
+    id: string;
     /** The type of the code. */
     type: "totp" | "hotp" | "steam";
     /** The user's account or email for which this code is used. */

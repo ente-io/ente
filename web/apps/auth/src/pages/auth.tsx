@@ -161,11 +161,11 @@ const AuthNavbar: React.FC = () => {
     );
 };
 
-interface CodeDisplay {
+interface CodeDisplayProps {
     code: Code;
 }
 
-const CodeDisplay: React.FC<CodeDisplay> = ({ code }) => {
+const CodeDisplay: React.FC<CodeDisplayProps> = ({ code }) => {
     const [otp, setOTP] = useState("");
     const [nextOTP, setNextOTP] = useState("");
     const [errorMessage, setErrorMessage] = useState("");

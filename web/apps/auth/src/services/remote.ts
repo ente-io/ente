@@ -26,6 +26,7 @@ export const getAuthCodes = async (): Promise<Code[]> => {
             authEntity
                 .filter((f) => !f.isDeleted)
                 .map(async (entity) => {
+                    if (!entity.id) return undefined;
                     if (!entity.encryptedData) return undefined;
                     if (!entity.header) return undefined;
                     try {
