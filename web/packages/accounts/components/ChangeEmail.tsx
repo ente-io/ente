@@ -12,9 +12,8 @@ import { Alert, Box, TextField } from "@mui/material";
 import { Formik, type FormikHelpers } from "formik";
 import { t } from "i18next";
 import { useRouter } from "next/router";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { Trans } from "react-i18next";
-import OtpInput from "react-otp-input";
 import * as Yup from "yup";
 
 interface formValues {
@@ -25,7 +24,6 @@ interface formValues {
 function ChangeEmailForm({ appName }: PageProps) {
     const [loading, setLoading] = useState(false);
     const [ottInputVisible, setShowOttInputVisibility] = useState(false);
-    const ottInputRef = useRef<OtpInput>(null);
     const [email, setEmail] = useState(null);
     const [showMessage, setShowMessage] = useState(false);
     const [success, setSuccess] = useState(false);
@@ -42,9 +40,11 @@ function ChangeEmailForm({ appName }: PageProps) {
             setEmail(email);
             setShowOttInputVisibility(true);
             setShowMessage(true);
-            setTimeout(() => {
-                ottInputRef.current?.focus();
-            }, 250);
+            // TODO: What was this meant to focus on? The ref referred to an
+            // Form element that was removed. Is this still needed.
+            // setTimeout(() => {
+            //     ottInputRef.current?.focus();
+            // }, 250);
         } catch (e) {
             setFieldError("email", t("EMAIl_ALREADY_OWNED"));
         }
