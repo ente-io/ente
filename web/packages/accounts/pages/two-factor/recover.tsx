@@ -1,4 +1,5 @@
 import log from "@/next/log";
+import { ensure } from "@/utils/ensure";
 import { recoverTwoFactor, removeTwoFactor } from "@ente/accounts/api/user";
 import { PAGES } from "@ente/accounts/constants/pages";
 import { TwoFactorType } from "@ente/accounts/constants/twofactor";
@@ -35,8 +36,8 @@ export default function Recover({
     const { logout } = appContext;
 
     const [encryptedTwoFactorSecret, setEncryptedTwoFactorSecret] =
-        useState<B64EncryptionResult>(null);
-    const [sessionID, setSessionID] = useState(null);
+        useState<Omit<B64EncryptionResult, "key"> | null>(null);
+    const [sessionID, setSessionID] = useState<string | null>(null);
     const [doesHaveEncryptedRecoveryKey, setDoesHaveEncryptedRecoveryKey] =
         useState(false);
 
@@ -70,7 +71,6 @@ export default function Recover({
                     setEncryptedTwoFactorSecret({
                         encryptedData: resp.encryptedSecret,
                         nonce: resp.secretDecryptionNonce,
-                        key: null,
                     });
                 }
             } catch (e) {
@@ -111,13 +111,14 @@ export default function Recover({
                 recoveryKey = bip39.mnemonicToEntropy(recoveryKey);
             }
             const cryptoWorker = await ComlinkCryptoWorker.getInstance();
+            const { encryptedData, nonce } = ensure(encryptedTwoFactorSecret);
             const twoFactorSecret = await cryptoWorker.decryptB64(
-                encryptedTwoFactorSecret.encryptedData,
-                encryptedTwoFactorSecret.nonce,
+                encryptedData,
+                nonce,
                 await cryptoWorker.fromHex(recoveryKey),
             );
             const resp = await removeTwoFactor(
-                sessionID,
+                ensure(sessionID),
                 twoFactorSecret,
                 twoFactorType,
             );
