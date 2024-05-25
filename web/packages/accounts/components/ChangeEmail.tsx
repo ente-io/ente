@@ -68,7 +68,8 @@ function ChangeEmailForm({ appName }: PageProps) {
     };
 
     const goToApp = () => {
-        router.push(APP_HOMES.get(appName));
+        // TODO: Refactor the type of APP_HOMES to not require the ??
+        router.push(APP_HOMES.get(appName) ?? "/");
     };
 
     return (

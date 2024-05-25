@@ -1,4 +1,5 @@
 import log from "@/next/log";
+import { ensure } from "@/utils/ensure";
 import { putAttributes } from "@ente/accounts/api/user";
 import SetPasswordForm, {
     type SetPasswordFormProps,
@@ -55,7 +56,8 @@ export default function Generate({ appContext, appName }: PageProps) {
                     setRecoveryModalView(true);
                     setLoading(false);
                 } else {
-                    router.push(APP_HOMES.get(appName));
+                    // TODO: Refactor the type of APP_HOMES to not require the ??
+                    router.push(APP_HOMES.get(appName) ?? "/");
                 }
             } else if (keyAttributes?.encryptedKey) {
                 router.push(PAGES.CREDENTIALS);
@@ -76,7 +78,8 @@ export default function Generate({ appContext, appName }: PageProps) {
             const { keyAttributes, masterKey, srpSetupAttributes } =
                 await generateKeyAndSRPAttributes(passphrase);
 
-            await putAttributes(token, keyAttributes);
+            // TODO: Refactor the code to not require this ensure
+            await putAttributes(ensure(token), keyAttributes);
             await configureSRP(srpSetupAttributes);
             await generateAndSaveIntermediateKeyAttributes(
                 passphrase,
@@ -94,7 +97,7 @@ export default function Generate({ appContext, appName }: PageProps) {
 
     return (
         <>
-            {loading ? (
+            {loading || !user ? (
                 <VerticallyCentered>
                     <EnteSpinner />
                 </VerticallyCentered>
@@ -104,7 +107,8 @@ export default function Generate({ appContext, appName }: PageProps) {
                     show={recoverModalView}
                     onHide={() => {
                         setRecoveryModalView(false);
-                        router.push(APP_HOMES.get(appName));
+                        // TODO: Refactor the type of APP_HOMES to not require the ??
+                        router.push(APP_HOMES.get(appName) ?? "/");
                     }}
                     /* TODO: Why is this error being ignored */
                     somethingWentWrong={() => {}}
@@ -114,7 +118,7 @@ export default function Generate({ appContext, appName }: PageProps) {
                     <FormPaper>
                         <FormTitle>{t("SET_PASSPHRASE")}</FormTitle>
                         <SetPasswordForm
-                            userEmail={user?.email}
+                            userEmail={user.email}
                             callback={onSubmit}
                             buttonText={t("SET_PASSPHRASE")}
                         />

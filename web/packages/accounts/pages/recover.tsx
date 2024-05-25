@@ -53,7 +53,8 @@ export default function Recover({ appContext, appName }: PageProps) {
         if (!keyAttributes) {
             router.push(PAGES.GENERATE);
         } else if (key) {
-            router.push(APP_HOMES.get(appName));
+            // TODO: Refactor the type of APP_HOMES to not require the ??
+            router.push(APP_HOMES.get(appName) ?? "/");
         } else {
             setKeyAttributes(keyAttributes);
         }

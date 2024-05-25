@@ -86,7 +86,8 @@ export default function Credentials({ appContext, appName }: PageProps) {
             }
             const token = getToken();
             if (key && token) {
-                router.push(APP_HOMES.get(appName));
+                // TODO: Refactor the type of APP_HOMES to not require the ??
+                router.push(APP_HOMES.get(appName) ?? "/");
                 return;
             }
             const kekEncryptedAttributes: B64EncryptionResult = getKey(
