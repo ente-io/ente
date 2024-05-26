@@ -29,10 +29,10 @@ const bip39 = require("bip39");
 // mobile client library only supports english.
 bip39.setDefaultWordlist("english");
 
-export default function Recover({
+const Page: React.FC<PageProps> = ({
     appContext,
     twoFactorType = TwoFactorType.TOTP,
-}: PageProps) {
+}) => {
     const { logout } = appContext;
 
     const [encryptedTwoFactorSecret, setEncryptedTwoFactorSecret] =
@@ -182,4 +182,6 @@ export default function Recover({
             </FormPaper>
         </VerticallyCentered>
     );
-}
+};
+
+export default Page;

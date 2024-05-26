@@ -6,7 +6,7 @@ import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
 
-const PasskeysFinishPage = () => {
+const Page = () => {
     const router = useRouter();
 
     const init = async () => {
@@ -43,4 +43,4 @@ const PasskeysFinishPage = () => {
     );
 };
 
-export default PasskeysFinishPage;
+export default Page;
