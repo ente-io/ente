@@ -4,6 +4,6 @@ import { APPS } from "./constants";
 
 export interface PageProps {
     appContext: BaseAppContextT;
-    appName: APPS;
+    appName?: APPS;
     twoFactorType?: TwoFactorType;
 }
