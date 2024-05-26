@@ -1,14 +1,16 @@
-import type { PageProps } from "@ente/shared/apps/types";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
-import Login from "../components/Login";
+import React, { useEffect, useState } from "react";
+import { Login } from "../components/Login";
 import { PAGES } from "../constants/pages";
+import type { PageProps } from "../types/page";
 
-export default function LoginPage({ appContext, appName }: PageProps) {
+const Page: React.FC<PageProps> = ({ appContext }) => {
+    const { appName, showNavBar } = appContext;
+
     const [loading, setLoading] = useState(true);
 
     const router = useRouter();
@@ -19,7 +21,7 @@ export default function LoginPage({ appContext, appName }: PageProps) {
             router.push(PAGES.VERIFY);
         }
         setLoading(false);
-        appContext.showNavBar(true);
+        showNavBar(true);
     }, []);
 
     const register = () => {
@@ -37,4 +39,6 @@ export default function LoginPage({ appContext, appName }: PageProps) {
             </FormPaper>
         </VerticallyCentered>
     );
-}
+};
+
+export default Page;

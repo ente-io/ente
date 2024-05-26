@@ -4,6 +4,8 @@ import {
     logStartupBanner,
     logUnhandledErrorsAndRejections,
 } from "@/next/log-web";
+import type { AppName, BaseAppContextT } from "@/next/types/app";
+import { ensure } from "@/utils/ensure";
 import { accountLogout } from "@ente/accounts/services/logout";
 import {
     APPS,
@@ -28,25 +30,30 @@ import { ThemeProvider } from "@mui/material/styles";
 import { t } from "i18next";
 import type { AppProps } from "next/app";
 import { useRouter } from "next/router";
-import { createContext, useEffect, useRef, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import LoadingBar, { type LoadingBarRef } from "react-top-loading-bar";
 import "../../public/css/global.css";
 
-type AppContextType = {
-    showNavBar: (show: boolean) => void;
+/**
+ * Properties available via the {@link AppContext} to the Auth app's React tree.
+ */
+type AppContextT = BaseAppContextT & {
     startLoading: () => void;
     finishLoading: () => void;
-    isMobile: boolean;
     themeColor: THEME_COLOR;
     setThemeColor: (themeColor: THEME_COLOR) => void;
     somethingWentWrong: () => void;
-    setDialogBoxAttributesV2: (attrs: DialogBoxAttributesV2) => void;
-    logout: () => void;
 };
 
-export const AppContext = createContext<AppContextType | undefined>(undefined);
+/** The React {@link Context} available to all pages. */
+export const AppContext = createContext<AppContextT | undefined>(undefined);
+
+/** Utility hook to reduce amount of boilerplate in account related pages. */
+export const useAppContext = () => ensure(useContext(AppContext));
 
 export default function App({ Component, pageProps }: AppProps) {
+    const appName: AppName = "auth";
+
     const router = useRouter();
     const [isI18nReady, setIsI18nReady] = useState<boolean>(false);
     const [loading, setLoading] = useState(false);
@@ -131,6 +138,19 @@ export default function App({ Component, pageProps }: AppProps) {
         void accountLogout().then(() => router.push(PAGES.ROOT));
     };
 
+    const appContext = {
+        appName,
+        logout,
+        showNavBar,
+        isMobile,
+        setDialogBoxAttributesV2,
+        startLoading,
+        finishLoading,
+        themeColor,
+        setThemeColor,
+        somethingWentWrong,
+    };
+
     // TODO: Refactor this to have a fallback
     const title = isI18nReady
         ? t("title", { context: "auth" })
@@ -156,19 +176,7 @@ export default function App({ Component, pageProps }: AppProps) {
                     attributes={dialogBoxAttributeV2}
                 />
 
-                <AppContext.Provider
-                    value={{
-                        showNavBar,
-                        startLoading,
-                        finishLoading,
-                        isMobile,
-                        themeColor,
-                        setThemeColor,
-                        somethingWentWrong,
-                        setDialogBoxAttributesV2,
-                        logout,
-                    }}
-                >
+                <AppContext.Provider value={appContext}>
                     {(loading || !isI18nReady) && (
                         <Overlay
                             sx={(theme) => ({

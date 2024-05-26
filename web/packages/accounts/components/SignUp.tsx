@@ -1,11 +1,13 @@
 import log from "@/next/log";
+import type { AppName } from "@/next/types/app";
 import { sendOtt } from "@ente/accounts/api/user";
 import { PasswordStrengthHint } from "@ente/accounts/components/PasswordStrength";
 import { PAGES } from "@ente/accounts/constants/pages";
 import { isWeakPassword } from "@ente/accounts/utils";
 import { generateKeyAndSRPAttributes } from "@ente/accounts/utils/srp";
-import { APPS } from "@ente/shared/apps/constants";
-import { VerticallyCentered } from "@ente/shared/components//Container";
+import { LS_KEYS } from "@ente/shared//storage/localStorage";
+import { appNameToAppNameOld } from "@ente/shared/apps/constants";
+import { VerticallyCentered } from "@ente/shared/components/Container";
 import FormPaperFooter from "@ente/shared/components/Form/FormPaper/Footer";
 import FormPaperTitle from "@ente/shared/components/Form/FormPaper/Title";
 import ShowHidePassword from "@ente/shared/components/Form/ShowHidePassword";
@@ -15,7 +17,7 @@ import {
     generateAndSaveIntermediateKeyAttributes,
     saveKeyInSessionStore,
 } from "@ente/shared/crypto/helpers";
-import { LS_KEYS, setData } from "@ente/shared/storage/localStorage";
+import { setData } from "@ente/shared/storage/localStorage";
 import {
     setJustSignedUp,
     setLocalReferralSource,
@@ -51,10 +53,12 @@ interface FormValues {
 interface SignUpProps {
     router: NextRouter;
     login: () => void;
-    appName: APPS;
+    appName: AppName;
 }
 
-export default function SignUp({ router, appName, login }: SignUpProps) {
+export function SignUp({ router, appName, login }: SignUpProps) {
+    const appNameOld = appNameToAppNameOld(appName);
+
     const [acceptTerms, setAcceptTerms] = useState(false);
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
@@ -82,7 +86,7 @@ export default function SignUp({ router, appName, login }: SignUpProps) {
             try {
                 setData(LS_KEYS.USER, { email });
                 setLocalReferralSource(referral);
-                await sendOtt(appName, email);
+                await sendOtt(appNameOld, email);
             } catch (e) {
                 const message = e instanceof Error ? e.message : "";
                 setFieldError("confirm", `${t("UNKNOWN_ERROR")} ${message}`);

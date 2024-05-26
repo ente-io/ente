@@ -13,8 +13,7 @@ import {
     convertBase64ToBuffer,
     convertBufferToBase64,
 } from "@ente/accounts/utils";
-import { APP_HOMES } from "@ente/shared/apps/constants";
-import type { PageProps } from "@ente/shared/apps/types";
+import { APP_HOMES, appNameToAppNameOld } from "@ente/shared/apps/constants";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
 import FormPaperFooter from "@ente/shared/components/Form/FormPaper/Footer";
@@ -34,8 +33,13 @@ import type { KEK, KeyAttributes, User } from "@ente/shared/user/types";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import type { PageProps } from "../types/page";
 
-export default function ChangePassword({ appName }: PageProps) {
+const Page: React.FC<PageProps> = ({ appContext }) => {
+    const { appName } = appContext;
+
+    const appNameOld = appNameToAppNameOld(appName);
+
     const [token, setToken] = useState<string>();
     const [user, setUser] = useState<User>();
 
@@ -123,7 +127,7 @@ export default function ChangePassword({ appName }: PageProps) {
     const redirectToAppHome = () => {
         setData(LS_KEYS.SHOW_BACK_BUTTON, { value: true });
         // TODO: Refactor the type of APP_HOMES to not require the ??
-        router.push(APP_HOMES.get(appName) ?? "/");
+        router.push(APP_HOMES.get(appNameOld) ?? "/");
     };
 
     // TODO: Handle the case where user is not loaded yet.
@@ -146,4 +150,6 @@ export default function ChangePassword({ appName }: PageProps) {
             </FormPaper>
         </VerticallyCentered>
     );
-}
+};
+
+export default Page;

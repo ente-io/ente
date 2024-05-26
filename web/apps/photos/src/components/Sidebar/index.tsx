@@ -604,7 +604,7 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
                 label={t("PREFERENCES")}
             />
             <RecoveryKey
-                appContext={appContext}
+                isMobile={appContext.isMobile}
                 show={recoverModalView}
                 onHide={closeRecoveryKeyModal}
                 somethingWentWrong={somethingWentWrong}

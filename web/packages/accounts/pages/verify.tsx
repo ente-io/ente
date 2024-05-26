@@ -1,6 +1,6 @@
 import { ensure } from "@/utils/ensure";
 import type { UserVerificationResponse } from "@ente/accounts/types/user";
-import type { PageProps } from "@ente/shared/apps/types";
+import { appNameToAppNameOld } from "@ente/shared/apps/constants";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
@@ -30,10 +30,13 @@ import { Trans } from "react-i18next";
 import { putAttributes, sendOtt, verifyOtt } from "../api/user";
 import { PAGES } from "../constants/pages";
 import { configureSRP } from "../services/srp";
+import type { PageProps } from "../types/page";
 import type { SRPSetupAttributes } from "../types/srp";
 
-export default function VerifyPage({ appContext, appName }: PageProps) {
-    const { logout } = appContext;
+const Page: React.FC<PageProps> = ({ appContext }) => {
+    const { appName, logout } = appContext;
+
+    const appNameOld = appNameToAppNameOld(appName);
 
     const [email, setEmail] = useState("");
     const [resend, setResend] = useState(0);
@@ -148,7 +151,7 @@ export default function VerifyPage({ appContext, appName }: PageProps) {
 
     const resendEmail = async () => {
         setResend(1);
-        await sendOtt(appName, email);
+        await sendOtt(appNameOld, email);
         setResend(2);
         setTimeout(() => setResend(0), 3000);
     };
@@ -199,4 +202,6 @@ export default function VerifyPage({ appContext, appName }: PageProps) {
             </FormPaper>
         </VerticallyCentered>
     );
-}
+};
+
+export default Page;

@@ -1,5 +1,6 @@
 import log from "@/next/log";
-import { APPS } from "@ente/shared/apps/constants";
+import type { AppName } from "@/next/types/app";
+import { appNameToAppNameOld } from "@ente/shared/apps/constants";
 import FormPaperFooter from "@ente/shared/components/Form/FormPaper/Footer";
 import FormPaperTitle from "@ente/shared/components/Form/FormPaper/Title";
 import LinkButton from "@ente/shared/components/LinkButton";
@@ -16,10 +17,12 @@ import { PAGES } from "../constants/pages";
 
 interface LoginProps {
     signUp: () => void;
-    appName: APPS;
+    appName: AppName;
 }
 
-export default function Login(props: LoginProps) {
+export function Login(props: LoginProps) {
+    const appNameOld = appNameToAppNameOld(props.appName);
+
     const router = useRouter();
 
     const loginUser: SingleInputFormProps["callback"] = async (
@@ -31,7 +34,7 @@ export default function Login(props: LoginProps) {
             const srpAttributes = await getSRPAttributes(email);
             log.debug(() => ` srpAttributes: ${JSON.stringify(srpAttributes)}`);
             if (!srpAttributes || srpAttributes.isEmailMFAEnabled) {
-                await sendOtt(props.appName, email);
+                await sendOtt(appNameOld, email);
                 router.push(PAGES.VERIFY);
             } else {
                 setData(LS_KEYS.SRP_ATTRIBUTES, srpAttributes);

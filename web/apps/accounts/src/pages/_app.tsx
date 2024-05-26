@@ -1,6 +1,8 @@
 import { CustomHead } from "@/next/components/Head";
 import { setupI18n } from "@/next/i18n";
 import { logUnhandledErrorsAndRejections } from "@/next/log-web";
+import type { AppName, BaseAppContextT } from "@/next/types/app";
+import { ensure } from "@/utils/ensure";
 import { PAGES } from "@ente/accounts/constants/pages";
 import { accountLogout } from "@ente/accounts/services/logout";
 import { APPS, APP_TITLES } from "@ente/shared/apps/constants";
@@ -19,19 +21,21 @@ import { ThemeProvider } from "@mui/material/styles";
 import { t } from "i18next";
 import { AppProps } from "next/app";
 import { useRouter } from "next/router";
-import { createContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import "styles/global.css";
 
-interface AppContextProps {
-    isMobile: boolean;
-    showNavBar: (show: boolean) => void;
-    setDialogBoxAttributesV2: (attrs: DialogBoxAttributesV2) => void;
-    logout: () => void;
-}
+/** The accounts app has no extra properties on top of the base context. */
+type AppContextT = BaseAppContextT;
 
-export const AppContext = createContext<AppContextProps>({} as AppContextProps);
+/** The React {@link Context} available to all pages. */
+export const AppContext = createContext<AppContextT | undefined>(undefined);
+
+/** Utility hook to reduce amount of boilerplate in account related pages. */
+export const useAppContext = () => ensure(useContext(AppContext));
 
 export default function App({ Component, pageProps }: AppProps) {
+    const appName: AppName = "account";
+
     const [isI18nReady, setIsI18nReady] = useState<boolean>(false);
 
     const [showNavbar, setShowNavBar] = useState(false);
@@ -83,6 +87,14 @@ export default function App({ Component, pageProps }: AppProps) {
         void accountLogout().then(() => router.push(PAGES.ROOT));
     };
 
+    const appContext = {
+        appName,
+        logout,
+        showNavBar,
+        isMobile,
+        setDialogBoxAttributesV2,
+    };
+
     // TODO: This string doesn't actually exist
     const title = isI18nReady
         ? t("title", { context: "accounts" })
@@ -101,14 +113,7 @@ export default function App({ Component, pageProps }: AppProps) {
                     attributes={dialogBoxAttributeV2 as any}
                 />
 
-                <AppContext.Provider
-                    value={{
-                        isMobile,
-                        showNavBar,
-                        setDialogBoxAttributesV2,
-                        logout,
-                    }}
-                >
+                <AppContext.Provider value={appContext}>
                     {!isI18nReady && (
                         <Overlay
                             sx={(theme) => ({

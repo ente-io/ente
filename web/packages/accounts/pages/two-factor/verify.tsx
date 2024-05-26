@@ -1,11 +1,9 @@
+import { ensure } from "@/utils/ensure";
 import { verifyTwoFactor } from "@ente/accounts/api/user";
 import VerifyTwoFactor, {
     type VerifyTwoFactorCallback,
 } from "@ente/accounts/components/two-factor/VerifyForm";
 import { PAGES } from "@ente/accounts/constants/pages";
-
-import { ensure } from "@/utils/ensure";
-import type { PageProps } from "@ente/shared/apps/types";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
 import FormPaperFooter from "@ente/shared/components/Form/FormPaper/Footer";
@@ -19,10 +17,9 @@ import { HttpStatusCode } from "axios";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import type { PageProps } from "../../types/page";
 
-export const TwoFactorVerify: React.FC<PageProps> = ({
-    appContext,
-}: PageProps) => {
+const Page: React.FC<PageProps> = ({ appContext }) => {
     const { logout } = appContext;
 
     const [sessionID, setSessionID] = useState("");
@@ -93,4 +90,4 @@ export const TwoFactorVerify: React.FC<PageProps> = ({
     );
 };
 
-export default TwoFactorVerify;
+export default Page;
