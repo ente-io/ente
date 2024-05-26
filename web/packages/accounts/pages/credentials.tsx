@@ -202,7 +202,7 @@ export default function Credentials({ appContext, appName }: PageProps) {
             } catch (e) {
                 if (
                     e instanceof Error &&
-                    e.message !== CustomError.TWO_FACTOR_ENABLED
+                    e.message != CustomError.TWO_FACTOR_ENABLED
                 ) {
                     log.error("getKeyAttributes failed", e);
                 }
