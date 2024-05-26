@@ -7,7 +7,6 @@ import VerifyTwoFactor, {
 import { TwoFactorSetup } from "@ente/accounts/components/two-factor/setup";
 import type { TwoFactorSecret } from "@ente/accounts/types/user";
 import { APP_HOMES, appNameToAppNameOld } from "@ente/shared/apps/constants";
-import type { PageProps } from "@ente/shared/apps/types";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import LinkButton from "@ente/shared/components/LinkButton";
 import { encryptWithRecoveryKey } from "@ente/shared/crypto/helpers";
@@ -17,6 +16,7 @@ import Card from "@mui/material/Card";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import type { PageProps } from "../../types/page";
 
 export enum SetupMode {
     QR_CODE,

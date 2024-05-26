@@ -8,7 +8,6 @@ import { PAGES } from "@ente/accounts/constants/pages";
 import { configureSRP } from "@ente/accounts/services/srp";
 import { generateKeyAndSRPAttributes } from "@ente/accounts/utils/srp";
 import { APP_HOMES, appNameToAppNameOld } from "@ente/shared/apps/constants";
-import type { PageProps } from "@ente/shared/apps/types";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
@@ -30,6 +29,7 @@ import type { KeyAttributes, User } from "@ente/shared/user/types";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import type { PageProps } from "../types/page";
 
 const Page: React.FC<PageProps> = ({ appContext }) => {
     const { appName, logout } = appContext;
@@ -105,7 +105,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                 </VerticallyCentered>
             ) : recoverModalView ? (
                 <RecoveryKey
-                    appContext={appContext}
+                    isMobile={appContext.isMobile}
                     show={recoverModalView}
                     onHide={() => {
                         setRecoveryModalView(false);

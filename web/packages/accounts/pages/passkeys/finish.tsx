@@ -4,9 +4,9 @@ import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import InMemoryStore, { MS_KEYS } from "@ente/shared/storage/InMemoryStore";
 import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
 import { useRouter } from "next/router";
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 
-const Page = () => {
+const Page: React.FC = () => {
     const router = useRouter();
 
     const init = async () => {

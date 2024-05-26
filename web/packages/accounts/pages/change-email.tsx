@@ -7,7 +7,6 @@ import {
     appNameToAppNameOld,
     type APPS,
 } from "@ente/shared/apps/constants";
-import type { PageProps } from "@ente/shared/apps/types";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
 import FormPaperFooter from "@ente/shared/components/Form/FormPaper/Footer";
@@ -22,6 +21,7 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { Trans } from "react-i18next";
 import * as Yup from "yup";
+import type { PageProps } from "../types/page";
 
 const Page: React.FC<PageProps> = ({ appContext }) => {
     const { appName } = appContext;

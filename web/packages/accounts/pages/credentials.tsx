@@ -2,7 +2,6 @@ import { isDevBuild } from "@/next/env";
 import log from "@/next/log";
 import { ensure } from "@/utils/ensure";
 import { APP_HOMES, appNameToAppNameOld } from "@ente/shared/apps/constants";
-import type { PageProps } from "@ente/shared/apps/types";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
@@ -51,6 +50,7 @@ import {
     generateSRPSetupAttributes,
     loginViaSRP,
 } from "../services/srp";
+import type { PageProps } from "../types/page";
 import type { SRPAttributes } from "../types/srp";
 
 const Page: React.FC<PageProps> = ({ appContext }) => {

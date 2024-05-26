@@ -1,16 +1,12 @@
 import { TwoFactorType } from "@ente/accounts/constants/twofactor";
-import RecoverPage from "@ente/accounts/pages/recover";
-import { APPS } from "@ente/shared/apps/constants";
-import { AppContext } from "pages/_app";
-import { useContext } from "react";
+import RecoverPage from "@ente/accounts/pages/two-factor/recover";
+import { useAppContext } from "../../_app";
 
-export default function Recover() {
-    const appContext = useContext(AppContext);
-    return (
-        <RecoverPage
-            appContext={appContext}
-            appName={APPS.PHOTOS}
-            twoFactorType={TwoFactorType.PASSKEY}
-        />
-    );
-}
+const Page = () => (
+    <RecoverPage
+        appContext={useAppContext()}
+        twoFactorType={TwoFactorType.PASSKEY}
+    />
+);
+
+export default Page;

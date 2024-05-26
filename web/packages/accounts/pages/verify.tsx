@@ -1,7 +1,6 @@
 import { ensure } from "@/utils/ensure";
 import type { UserVerificationResponse } from "@ente/accounts/types/user";
 import { appNameToAppNameOld } from "@ente/shared/apps/constants";
-import type { PageProps } from "@ente/shared/apps/types";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
@@ -31,6 +30,7 @@ import { Trans } from "react-i18next";
 import { putAttributes, sendOtt, verifyOtt } from "../api/user";
 import { PAGES } from "../constants/pages";
 import { configureSRP } from "../services/srp";
+import type { PageProps } from "../types/page";
 import type { SRPSetupAttributes } from "../types/srp";
 
 const Page: React.FC<PageProps> = ({ appContext }) => {

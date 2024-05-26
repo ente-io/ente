@@ -3,7 +3,6 @@ import { ensure } from "@/utils/ensure";
 import { sendOtt } from "@ente/accounts/api/user";
 import { PAGES } from "@ente/accounts/constants/pages";
 import { APP_HOMES, appNameToAppNameOld } from "@ente/shared/apps/constants";
-import type { PageProps } from "@ente/shared/apps/types";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
 import FormPaperFooter from "@ente/shared/components/Form/FormPaper/Footer";
@@ -24,6 +23,7 @@ import type { KeyAttributes, User } from "@ente/shared/user/types";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import type { PageProps } from "../types/page";
 
 const bip39 = require("bip39");
 // mobile client library only supports english.

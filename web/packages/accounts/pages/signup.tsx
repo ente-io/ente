@@ -1,12 +1,12 @@
 import { PAGES } from "@ente/accounts/constants/pages";
 import { LS_KEYS, getData } from "@ente/shared//storage/localStorage";
-import type { PageProps } from "@ente/shared/apps/types";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import { SignUp } from "../components/SignUp";
+import type { PageProps } from "../types/page";
 
 const Page: React.FC<PageProps> = ({ appContext }) => {
     const { appName } = appContext;
