@@ -42,6 +42,7 @@ export const configurePasskeyRecovery = async (
                 userSecretCipher,
                 userSecretNonce,
             },
+            undefined,
             {
                 "X-Auth-Token": token,
             },
