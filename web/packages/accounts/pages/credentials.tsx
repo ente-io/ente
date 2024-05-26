@@ -1,7 +1,7 @@
 import { isDevBuild } from "@/next/env";
 import log from "@/next/log";
 import { ensure } from "@/utils/ensure";
-import { APP_HOMES } from "@ente/shared/apps/constants";
+import { APP_HOMES, appNameToAppNameOld } from "@ente/shared/apps/constants";
 import type { PageProps } from "@ente/shared/apps/types";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
@@ -53,8 +53,10 @@ import {
 } from "../services/srp";
 import type { SRPAttributes } from "../types/srp";
 
-export default function Credentials({ appContext, appName }: PageProps) {
-    const { logout } = appContext;
+const Page: React.FC<PageProps> = ({ appContext }) => {
+    const { appName, logout } = appContext;
+
+    const appNameOld = appNameToAppNameOld(appName);
 
     const [srpAttributes, setSrpAttributes] = useState<SRPAttributes>();
     const [keyAttributes, setKeyAttributes] = useState<KeyAttributes>();
@@ -88,7 +90,7 @@ export default function Credentials({ appContext, appName }: PageProps) {
             const token = getToken();
             if (key && token) {
                 // TODO: Refactor the type of APP_HOMES to not require the ??
-                router.push(APP_HOMES.get(appName) ?? "/");
+                router.push(APP_HOMES.get(appNameOld) ?? "/");
                 return;
             }
             const kekEncryptedAttributes: B64EncryptionResult = getKey(
@@ -248,7 +250,7 @@ export default function Credentials({ appContext, appName }: PageProps) {
             }
             const redirectURL = InMemoryStore.get(MS_KEYS.REDIRECT_URL);
             InMemoryStore.delete(MS_KEYS.REDIRECT_URL);
-            router.push(redirectURL ?? APP_HOMES.get(appName));
+            router.push(redirectURL ?? APP_HOMES.get(appNameOld));
         } catch (e) {
             log.error("useMasterPassword failed", e);
         }
@@ -294,6 +296,8 @@ export default function Credentials({ appContext, appName }: PageProps) {
         </VerticallyCentered>
     );
 }
+
+export default Page;
 
 const Header: React.FC<React.PropsWithChildren> = ({ children }) => {
     return (
