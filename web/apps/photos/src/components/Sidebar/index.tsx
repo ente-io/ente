@@ -14,6 +14,7 @@ import {
     ACCOUNTS_PAGES,
     PHOTOS_PAGES as PAGES,
 } from "@ente/shared/constants/pages";
+import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { getRecoveryKey } from "@ente/shared/crypto/helpers";
 import {
     encryptToB64,
@@ -494,9 +495,10 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
 
                 const resetSecret = await generateEncryptionKey();
 
+                const cryptoWorker = await ComlinkCryptoWorker.getInstance();
                 const encryptionResult = await encryptToB64(
                     resetSecret,
-                    recoveryKey,
+                    await cryptoWorker.fromHex(recoveryKey),
                 );
 
                 await configurePasskeyRecovery(
