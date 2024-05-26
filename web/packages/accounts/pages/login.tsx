@@ -61,9 +61,9 @@ interface LoginProps {
 }
 
 function Login(props: LoginProps) {
-    const router = useRouter();
-
     const appNameOld = appNameToAppNameOld(props.appName);
+
+    const router = useRouter();
 
     const loginUser: SingleInputFormProps["callback"] = async (
         email,

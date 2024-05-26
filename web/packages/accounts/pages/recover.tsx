@@ -30,14 +30,13 @@ const bip39 = require("bip39");
 bip39.setDefaultWordlist("english");
 
 const Page: React.FC<PageProps> = ({ appContext }) => {
+    const appNameOld = appNameToAppNameOld(appContext.appName);
+
     const [keyAttributes, setKeyAttributes] = useState<
         KeyAttributes | undefined
     >();
 
     const router = useRouter();
-
-    const appNameOld = appNameToAppNameOld(appContext.appName);
-
 
     useEffect(() => {
         const user: User = getData(LS_KEYS.USER);
