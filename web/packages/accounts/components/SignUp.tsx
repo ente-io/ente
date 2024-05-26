@@ -1,4 +1,5 @@
 import log from "@/next/log";
+import type { AppName } from "@/next/types/app";
 import { sendOtt } from "@ente/accounts/api/user";
 import { PasswordStrengthHint } from "@ente/accounts/components/PasswordStrength";
 import { PAGES } from "@ente/accounts/constants/pages";
@@ -38,7 +39,6 @@ import {
 import { Formik, type FormikHelpers } from "formik";
 import { t } from "i18next";
 import type { NextRouter } from "next/router";
-import type { AppName } from "packages/next/types/app";
 import React, { useState } from "react";
 import { Trans } from "react-i18next";
 import * as Yup from "yup";

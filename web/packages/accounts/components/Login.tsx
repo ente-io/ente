@@ -1,4 +1,5 @@
 import log from "@/next/log";
+import type { AppName } from "@/next/types/app";
 import { appNameToAppNameOld } from "@ente/shared/apps/constants";
 import FormPaperFooter from "@ente/shared/components/Form/FormPaper/Footer";
 import FormPaperTitle from "@ente/shared/components/Form/FormPaper/Title";
@@ -10,7 +11,6 @@ import { LS_KEYS, setData } from "@ente/shared/storage/localStorage";
 import { Input } from "@mui/material";
 import { t } from "i18next";
 import { useRouter } from "next/router";
-import type { AppName } from "packages/next/types/app";
 import { getSRPAttributes } from "../api/srp";
 import { sendOtt } from "../api/user";
 import { PAGES } from "../constants/pages";

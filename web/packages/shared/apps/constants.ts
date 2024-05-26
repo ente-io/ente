@@ -1,4 +1,4 @@
-import type { AppName } from "packages/next/types/app";
+import type { AppName } from "@/next/types/app";
 import { ACCOUNTS_PAGES, AUTH_PAGES, PHOTOS_PAGES } from "../constants/pages";
 
 export enum APPS {

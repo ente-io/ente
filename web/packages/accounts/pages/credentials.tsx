@@ -295,7 +295,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
             </FormPaper>
         </VerticallyCentered>
     );
-}
+};
 
 export default Page;
 
