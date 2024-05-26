@@ -1,5 +1,6 @@
 import { isDevBuild } from "@/next/env";
 import log from "@/next/log";
+import { ensure } from "@/utils/ensure";
 import { APP_HOMES } from "@ente/shared/apps/constants";
 import type { PageProps } from "@ente/shared/apps/types";
 import { VerticallyCentered } from "@ente/shared/components/Container";
@@ -86,7 +87,8 @@ export default function Credentials({ appContext, appName }: PageProps) {
             }
             const token = getToken();
             if (key && token) {
-                router.push(APP_HOMES.get(appName));
+                // TODO: Refactor the type of APP_HOMES to not require the ??
+                router.push(APP_HOMES.get(appName) ?? "/");
                 return;
             }
             const kekEncryptedAttributes: B64EncryptionResult = getKey(
@@ -148,7 +150,7 @@ export default function Credentials({ appContext, appName }: PageProps) {
                     id,
                     twoFactorSessionID,
                     passkeySessionID,
-                } = await loginViaSRP(srpAttributes, kek);
+                } = await loginViaSRP(ensure(srpAttributes), kek);
                 setIsFirstLogin(true);
                 if (passkeySessionID) {
                     const sessionKeyAttributes =
@@ -168,7 +170,7 @@ export default function Credentials({ appContext, appName }: PageProps) {
                     window.location.href = `${getAccountsURL()}/passkeys/flow?passkeySessionID=${passkeySessionID}&redirect=${
                         window.location.origin
                     }/passkeys/finish`;
-                    return;
+                    return undefined;
                 } else if (twoFactorSessionID) {
                     const sessionKeyAttributes =
                         await cryptoWorker.generateKeyAndEncryptToB64(kek);
@@ -193,11 +195,15 @@ export default function Credentials({ appContext, appName }: PageProps) {
                         id,
                         isTwoFactorEnabled: false,
                     });
-                    setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes);
+                    if (keyAttributes)
+                        setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes);
                     return keyAttributes;
                 }
             } catch (e) {
-                if (e.message !== CustomError.TWO_FACTOR_ENABLED) {
+                if (
+                    e instanceof Error &&
+                    e.message != CustomError.TWO_FACTOR_ENABLED
+                ) {
                     log.error("getKeyAttributes failed", e);
                 }
                 throw e;
@@ -221,10 +227,10 @@ export default function Credentials({ appContext, appName }: PageProps) {
             await saveKeyInSessionStore(SESSION_KEYS.ENCRYPTION_KEY, key);
             await decryptAndStoreToken(keyAttributes, key);
             try {
-                let srpAttributes: SRPAttributes = getData(
+                let srpAttributes: SRPAttributes | null = getData(
                     LS_KEYS.SRP_ATTRIBUTES,
                 );
-                if (!srpAttributes) {
+                if (!srpAttributes && user) {
                     srpAttributes = await getSRPAttributes(user.email);
                     if (srpAttributes) {
                         setData(LS_KEYS.SRP_ATTRIBUTES, srpAttributes);
@@ -258,10 +264,12 @@ export default function Credentials({ appContext, appName }: PageProps) {
         );
     }
 
+    // TODO: Handle the case when user is not present, or exclude that
+    // possibility using types.
     return (
         <VerticallyCentered>
             <FormPaper style={{ minWidth: "320px" }}>
-                <Header>{user.email}</Header>
+                <Header>{user?.email ?? ""}</Header>
 
                 <VerifyMasterPasswordForm
                     buttonText={t("VERIFY_PASSPHRASE")}

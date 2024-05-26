@@ -26,7 +26,7 @@ export type VerifyTwoFactorCallback = (
 
 export default function VerifyTwoFactor(props: Props) {
     const [waiting, setWaiting] = useState(false);
-    const otpInputRef = useRef(null);
+    const otpInputRef = useRef<OtpInput>(null);
     const [success, setSuccess] = useState(false);
 
     const markSuccessful = async () => {
@@ -47,7 +47,8 @@ export default function VerifyTwoFactor(props: Props) {
             for (let i = 0; i < 6; i++) {
                 otpInputRef.current?.focusPrevInput();
             }
-            setFieldError("otp", `${t("UNKNOWN_ERROR")} ${e.message}`);
+            const message = e instanceof Error ? e.message : "";
+            setFieldError("otp", `${t("UNKNOWN_ERROR")} ${message}`);
         }
         setWaiting(false);
     };

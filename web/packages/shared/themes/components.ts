@@ -33,7 +33,7 @@ export const getComponents = (
         styleOverrides: {
             root: {
                 ".MuiBackdrop-root": {
-                    backgroundColor: colors.backdrop.faint,
+                    backgroundColor: colors.backdrop?.faint,
                 },
             },
         },
@@ -42,10 +42,10 @@ export const getComponents = (
         styleOverrides: {
             root: {
                 ".MuiBackdrop-root": {
-                    backgroundColor: colors.backdrop.faint,
+                    backgroundColor: colors.backdrop?.faint,
                 },
                 "& .MuiDialog-paper": {
-                    filter: getDropShadowStyle(colors.shadows.float),
+                    filter: getDropShadowStyle(colors.shadows?.float),
                 },
                 "& .MuiDialogTitle-root": {
                     padding: "16px",
@@ -72,14 +72,14 @@ export const getComponents = (
     },
     MuiLink: {
         defaultProps: {
-            color: colors.accent.A500,
+            color: colors.accent?.A500,
             underline: "none",
         },
         styleOverrides: {
             root: {
                 "&:hover": {
                     underline: "always",
-                    color: colors.accent.A500,
+                    color: colors.accent?.A500,
                 },
             },
         },
@@ -95,8 +95,8 @@ export const getComponents = (
                 borderRadius: "4px",
                 textTransform: "none",
                 fontWeight: "bold",
-                fontSize: typography.body.fontSize,
-                lineHeight: typography.body.lineHeight,
+                fontSize: typography.body?.fontSize,
+                lineHeight: typography.body?.lineHeight,
             },
             startIcon: {
                 marginRight: "12px",
@@ -191,8 +191,8 @@ export const getComponents = (
     },
 });
 
-const getDropShadowStyle = (shadows: Shadow[]) => {
-    return shadows
+const getDropShadowStyle = (shadows: Shadow[] | undefined) => {
+    return (shadows ?? [])
         .map(
             (shadow) =>
                 `drop-shadow(${shadow.x}px ${shadow.y}px ${shadow.blur}px ${shadow.color})`,
@@ -200,20 +200,29 @@ const getDropShadowStyle = (shadows: Shadow[]) => {
         .join(" ");
 };
 
-function getIconColor(ownerState, colors: ThemeColorsOptions) {
+interface IconColorableOwnerState {
+    color?: string;
+    disabled?: boolean;
+}
+
+function getIconColor(
+    ownerState: IconColorableOwnerState,
+    colors: ThemeColorsOptions,
+) {
     switch (ownerState.color) {
         case "primary":
             return {
-                color: colors.stroke.base,
+                color: colors.stroke?.base,
             };
         case "secondary":
             return {
-                color: colors.stroke.muted,
+                color: colors.stroke?.muted,
             };
     }
     if (ownerState.disabled) {
         return {
-            color: colors.stroke.faint,
+            color: colors.stroke?.faint,
         };
     }
+    return {};
 }

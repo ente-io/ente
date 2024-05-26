@@ -10,8 +10,8 @@ import { CustomError } from "../error";
 import type { KeyAttributes, User } from "../user/types";
 
 export interface VerifyMasterPasswordFormProps {
-    user: User;
-    keyAttributes: KeyAttributes;
+    user: User | undefined;
+    keyAttributes: KeyAttributes | undefined;
     callback: (
         key: string,
         kek: string,
@@ -20,7 +20,7 @@ export interface VerifyMasterPasswordFormProps {
     ) => void;
     buttonText: string;
     submitButtonProps?: ButtonProps;
-    getKeyAttributes?: (kek: string) => Promise<KeyAttributes>;
+    getKeyAttributes?: (kek: string) => Promise<KeyAttributes | undefined>;
     srpAttributes?: SRPAttributes;
 }
 
@@ -48,14 +48,15 @@ export default function VerifyMasterPasswordForm({
                         srpAttributes.opsLimit,
                         srpAttributes.memLimit,
                     );
-                } else {
+                } else if (keyAttributes) {
                     kek = await cryptoWorker.deriveKey(
                         passphrase,
                         keyAttributes.kekSalt,
                         keyAttributes.opsLimit,
                         keyAttributes.memLimit,
                     );
-                }
+                } else
+                    throw new Error("Both SRP and key attributes are missing");
             } catch (e) {
                 log.error("failed to derive key", e);
                 throw Error(CustomError.WEAK_DEVICE);

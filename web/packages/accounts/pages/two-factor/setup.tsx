@@ -1,4 +1,5 @@
 import log from "@/next/log";
+import { ensure } from "@/utils/ensure";
 import { enableTwoFactor, setupTwoFactor } from "@ente/accounts/api/user";
 import VerifyTwoFactor, {
     type VerifyTwoFactorCallback,
@@ -23,8 +24,9 @@ export enum SetupMode {
 }
 
 export default function SetupTwoFactor({ appName }: PageProps) {
-    const [twoFactorSecret, setTwoFactorSecret] =
-        useState<TwoFactorSecret>(null);
+    const [twoFactorSecret, setTwoFactorSecret] = useState<
+        TwoFactorSecret | undefined
+    >();
 
     const router = useRouter();
 
@@ -48,7 +50,7 @@ export default function SetupTwoFactor({ appName }: PageProps) {
         markSuccessful,
     ) => {
         const recoveryEncryptedTwoFactorSecret = await encryptWithRecoveryKey(
-            twoFactorSecret.secretCode,
+            ensure(twoFactorSecret).secretCode,
         );
         await enableTwoFactor(otp, recoveryEncryptedTwoFactorSecret);
         await markSuccessful();
@@ -56,7 +58,8 @@ export default function SetupTwoFactor({ appName }: PageProps) {
             ...getData(LS_KEYS.USER),
             isTwoFactorEnabled: true,
         });
-        router.push(APP_HOMES.get(appName));
+        // TODO: Refactor the type of APP_HOMES to not require the ??
+        router.push(APP_HOMES.get(appName) ?? "/");
     };
 
     return (

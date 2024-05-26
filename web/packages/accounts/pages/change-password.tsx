@@ -1,3 +1,4 @@
+import { ensure } from "@/utils/ensure";
 import { startSRPSetup, updateSRPAndKeys } from "@ente/accounts/api/srp";
 import SetPasswordForm, {
     type SetPasswordFormProps,
@@ -91,7 +92,7 @@ export default function ChangePassword({ appName }: PageProps) {
 
         const srpA = convertBufferToBase64(srpClient.computeA());
 
-        const { setupID, srpB } = await startSRPSetup(token, {
+        const { setupID, srpB } = await startSRPSetup(ensure(token), {
             srpUserID,
             srpSalt,
             srpVerifier,
@@ -102,7 +103,7 @@ export default function ChangePassword({ appName }: PageProps) {
 
         const srpM1 = convertBufferToBase64(srpClient.computeM1());
 
-        await updateSRPAndKeys(token, {
+        await updateSRPAndKeys(ensure(token), {
             setupID,
             srpM1,
             updatedKeyAttr: updatedKey,
@@ -121,15 +122,17 @@ export default function ChangePassword({ appName }: PageProps) {
 
     const redirectToAppHome = () => {
         setData(LS_KEYS.SHOW_BACK_BUTTON, { value: true });
-        router.push(APP_HOMES.get(appName));
+        // TODO: Refactor the type of APP_HOMES to not require the ??
+        router.push(APP_HOMES.get(appName) ?? "/");
     };
 
+    // TODO: Handle the case where user is not loaded yet.
     return (
         <VerticallyCentered>
             <FormPaper>
                 <FormPaperTitle>{t("CHANGE_PASSWORD")}</FormPaperTitle>
                 <SetPasswordForm
-                    userEmail={user?.email}
+                    userEmail={user?.email ?? ""}
                     callback={onSubmit}
                     buttonText={t("CHANGE_PASSWORD")}
                 />

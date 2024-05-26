@@ -1,3 +1,4 @@
+import { ensure } from "@/utils/ensure";
 import { wait } from "@/utils/promise";
 import { changeEmail, sendOTTForEmailChange } from "@ente/accounts/api/user";
 import { APP_HOMES } from "@ente/shared/apps/constants";
@@ -11,7 +12,7 @@ import { Alert, Box, TextField } from "@mui/material";
 import { Formik, type FormikHelpers } from "formik";
 import { t } from "i18next";
 import { useRouter } from "next/router";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { Trans } from "react-i18next";
 import * as Yup from "yup";
 
@@ -23,8 +24,7 @@ interface formValues {
 function ChangeEmailForm({ appName }: PageProps) {
     const [loading, setLoading] = useState(false);
     const [ottInputVisible, setShowOttInputVisibility] = useState(false);
-    const ottInputRef = useRef(null);
-    const [email, setEmail] = useState(null);
+    const [email, setEmail] = useState<string | null>(null);
     const [showMessage, setShowMessage] = useState(false);
     const [success, setSuccess] = useState(false);
 
@@ -40,9 +40,11 @@ function ChangeEmailForm({ appName }: PageProps) {
             setEmail(email);
             setShowOttInputVisibility(true);
             setShowMessage(true);
-            setTimeout(() => {
-                ottInputRef.current?.focus();
-            }, 250);
+            // TODO: What was this meant to focus on? The ref referred to an
+            // Form element that was removed. Is this still needed.
+            // setTimeout(() => {
+            //     ottInputRef.current?.focus();
+            // }, 250);
         } catch (e) {
             setFieldError("email", t("EMAIl_ALREADY_OWNED"));
         }
@@ -55,7 +57,7 @@ function ChangeEmailForm({ appName }: PageProps) {
     ) => {
         try {
             setLoading(true);
-            await changeEmail(email, ott);
+            await changeEmail(email, ensure(ott));
             setData(LS_KEYS.USER, { ...getData(LS_KEYS.USER), email });
             setLoading(false);
             setSuccess(true);
@@ -68,18 +70,27 @@ function ChangeEmailForm({ appName }: PageProps) {
     };
 
     const goToApp = () => {
-        router.push(APP_HOMES.get(appName));
+        // TODO: Refactor the type of APP_HOMES to not require the ??
+        router.push(APP_HOMES.get(appName) ?? "/");
     };
 
     return (
         <Formik<formValues>
             initialValues={{ email: "" }}
-            validationSchema={Yup.object().shape({
-                email: Yup.string()
-                    .email(t("EMAIL_ERROR"))
-                    .required(t("REQUIRED")),
-                ott: ottInputVisible && Yup.string().required(t("REQUIRED")),
-            })}
+            validationSchema={
+                ottInputVisible
+                    ? Yup.object().shape({
+                          email: Yup.string()
+                              .email(t("EMAIL_ERROR"))
+                              .required(t("REQUIRED")),
+                          ott: Yup.string().required(t("REQUIRED")),
+                      })
+                    : Yup.object().shape({
+                          email: Yup.string()
+                              .email(t("EMAIL_ERROR"))
+                              .required(t("REQUIRED")),
+                      })
+            }
             validateOnChange={false}
             validateOnBlur={false}
             onSubmit={!ottInputVisible ? requestOTT : requestEmailChange}
@@ -148,7 +159,9 @@ function ChangeEmailForm({ appName }: PageProps) {
 
                     <FormPaperFooter
                         style={{
-                            justifyContent: ottInputVisible && "space-between",
+                            justifyContent: ottInputVisible
+                                ? "space-between"
+                                : "normal",
                         }}
                     >
                         {ottInputVisible && (

@@ -6,7 +6,7 @@ import { VerticallyCentered } from "@ente/shared/components/Container";
 import { useState } from "react";
 
 interface Iprops {
-    twoFactorSecret: TwoFactorSecret;
+    twoFactorSecret?: TwoFactorSecret;
 }
 export function TwoFactorSetup({ twoFactorSecret }: Iprops) {
     const [setupMode, setSetupMode] = useState<SetupMode>(SetupMode.QR_CODE);

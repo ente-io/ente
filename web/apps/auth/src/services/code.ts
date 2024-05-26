@@ -9,7 +9,7 @@ import { Steam } from "./steam";
  */
 export interface Code {
     /** A unique id for the corresponding "auth entity" in our system. */
-    id?: String;
+    id: string;
     /** The type of the code. */
     type: "totp" | "hotp" | "steam";
     /** The user's account or email for which this code is used. */
@@ -146,8 +146,8 @@ const parseIssuer = (url: URL, path: string): string => {
     let p = decodeURIComponent(path);
     if (p.startsWith("/")) p = p.slice(1);
 
-    if (p.includes(":")) p = p.split(":")[0];
-    else if (p.includes("-")) p = p.split("-")[0];
+    if (p.includes(":")) p = ensure(p.split(":")[0]);
+    else if (p.includes("-")) p = ensure(p.split("-")[0]);
 
     return p;
 };

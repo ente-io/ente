@@ -12,20 +12,16 @@ import {
 } from "@ente/shared/apps/constants";
 import { Overlay } from "@ente/shared/components/Container";
 import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
-import type {
-    DialogBoxAttributesV2,
-    SetDialogBoxAttributesV2,
-} from "@ente/shared/components/DialogBoxV2/types";
+import type { DialogBoxAttributesV2 } from "@ente/shared/components/DialogBoxV2/types";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { MessageContainer } from "@ente/shared/components/MessageContainer";
-import AppNavbar from "@ente/shared/components/Navbar/app";
+import { AppNavbar } from "@ente/shared/components/Navbar/app";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { useLocalState } from "@ente/shared/hooks/useLocalState";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import { getTheme } from "@ente/shared/themes";
 import { THEME_COLOR } from "@ente/shared/themes/constants";
-import type { SetTheme } from "@ente/shared/themes/types";
 import type { User } from "@ente/shared/user/types";
 import { CssBaseline, useMediaQuery } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
@@ -33,7 +29,7 @@ import { t } from "i18next";
 import type { AppProps } from "next/app";
 import { useRouter } from "next/router";
 import { createContext, useEffect, useRef, useState } from "react";
-import LoadingBar from "react-top-loading-bar";
+import LoadingBar, { type LoadingBarRef } from "react-top-loading-bar";
 import "../../public/css/global.css";
 
 type AppContextType = {
@@ -42,13 +38,13 @@ type AppContextType = {
     finishLoading: () => void;
     isMobile: boolean;
     themeColor: THEME_COLOR;
-    setThemeColor: SetTheme;
+    setThemeColor: (themeColor: THEME_COLOR) => void;
     somethingWentWrong: () => void;
-    setDialogBoxAttributesV2: SetDialogBoxAttributesV2;
+    setDialogBoxAttributesV2: (attrs: DialogBoxAttributesV2) => void;
     logout: () => void;
 };
 
-export const AppContext = createContext<AppContextType>(null);
+export const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export default function App({ Component, pageProps }: AppProps) {
     const router = useRouter();
@@ -58,10 +54,11 @@ export default function App({ Component, pageProps }: AppProps) {
         typeof window !== "undefined" && !window.navigator.onLine,
     );
     const [showNavbar, setShowNavBar] = useState(false);
-    const isLoadingBarRunning = useRef(false);
-    const loadingBar = useRef(null);
-    const [dialogBoxAttributeV2, setDialogBoxAttributesV2] =
-        useState<DialogBoxAttributesV2>();
+    const isLoadingBarRunning = useRef<boolean>(false);
+    const loadingBar = useRef<LoadingBarRef>(null);
+    const [dialogBoxAttributeV2, setDialogBoxAttributesV2] = useState<
+        DialogBoxAttributesV2 | undefined
+    >();
     const [dialogBoxV2View, setDialogBoxV2View] = useState(false);
     const isMobile = useMediaQuery("(max-width:428px)");
     const [themeColor, setThemeColor] = useLocalState(
@@ -134,9 +131,10 @@ export default function App({ Component, pageProps }: AppProps) {
         void accountLogout().then(() => router.push(PAGES.ROOT));
     };
 
+    // TODO: Refactor this to have a fallback
     const title = isI18nReady
         ? t("TITLE", { context: APPS.AUTH })
-        : APP_TITLES.get(APPS.AUTH);
+        : APP_TITLES.get(APPS.AUTH) ?? "";
 
     return (
         <>

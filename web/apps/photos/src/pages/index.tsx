@@ -25,81 +25,6 @@ import { useContext, useEffect, useState } from "react";
 import { Trans } from "react-i18next";
 import { AppContext } from "./_app";
 
-const Container = styled("div")`
-    display: flex;
-    flex: 1;
-    align-items: center;
-    justify-content: center;
-    background-color: #000;
-
-    @media (max-width: 1024px) {
-        flex-direction: column;
-    }
-`;
-
-const SlideContainer = styled("div")`
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-
-    @media (max-width: 1024px) {
-        flex-grow: 0;
-    }
-`;
-
-const DesktopBox = styled("div")`
-    flex: 1;
-    height: 100%;
-    padding: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: #242424;
-
-    @media (max-width: 1024px) {
-        display: none;
-    }
-`;
-
-const MobileBox = styled("div")`
-    display: none;
-
-    @media (max-width: 1024px) {
-        max-width: 375px;
-        width: 100%;
-        padding: 12px;
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-    }
-`;
-
-const SideBox = styled("div")`
-    display: flex;
-    flex-direction: column;
-    min-width: 320px;
-`;
-
-const TextContainer = (props: TypographyProps) => (
-    <Typography color={"text.muted"} mt={2} mb={3} {...props} />
-);
-
-const FeatureText = (props: TypographyProps) => (
-    <Typography variant="h3" mt={4} {...props} />
-);
-
-const Img = styled("img")`
-    height: 250px;
-    object-fit: contain;
-
-    @media (max-width: 400px) {
-        height: 180px;
-    }
-`;
-
 export default function LandingPage() {
     const router = useRouter();
     const appContext = useContext(AppContext);
@@ -189,7 +114,9 @@ export default function LandingPage() {
             ) : (
                 <>
                     <SlideContainer>
-                        <EnteLogo height={24} sx={{ mb: 8 }} />
+                        <Logo_>
+                            <EnteLogo height={24} />
+                        </Logo_>
                         <Slideshow />
                     </SlideContainer>
                     <MobileBox>
@@ -222,6 +149,68 @@ export default function LandingPage() {
         </Container>
     );
 }
+
+const Container = styled("div")`
+    display: flex;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+    background-color: #000;
+
+    @media (max-width: 1024px) {
+        flex-direction: column;
+    }
+`;
+
+const SlideContainer = styled("div")`
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+
+    @media (max-width: 1024px) {
+        flex-grow: 0;
+    }
+`;
+
+const Logo_ = styled("div")`
+    margin-block-end: 64px;
+`;
+
+const DesktopBox = styled("div")`
+    flex: 1;
+    height: 100%;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #242424;
+
+    @media (max-width: 1024px) {
+        display: none;
+    }
+`;
+
+const MobileBox = styled("div")`
+    display: none;
+
+    @media (max-width: 1024px) {
+        max-width: 375px;
+        width: 100%;
+        padding: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+`;
+
+const SideBox = styled("div")`
+    display: flex;
+    flex-direction: column;
+    min-width: 320px;
+`;
 
 const Slideshow: React.FC = () => {
     return (
@@ -275,6 +264,23 @@ const Slideshow: React.FC = () => {
         </CarouselProvider>
     );
 };
+
+const TextContainer = (props: TypographyProps) => (
+    <Typography color={"text.muted"} mt={2} mb={3} {...props} />
+);
+
+const FeatureText = (props: TypographyProps) => (
+    <Typography variant="h3" mt={4} {...props} />
+);
+
+const Img = styled("img")`
+    height: 250px;
+    object-fit: contain;
+
+    @media (max-width: 400px) {
+        height: 180px;
+    }
+`;
 
 const CustomDotGroup = styled(DotGroup)`
     margin-block-start: 2px;

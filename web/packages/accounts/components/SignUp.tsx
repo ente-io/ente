@@ -84,7 +84,8 @@ export default function SignUp({ router, appName, login }: SignUpProps) {
                 setLocalReferralSource(referral);
                 await sendOtt(appName, email);
             } catch (e) {
-                setFieldError("confirm", `${t("UNKNOWN_ERROR")} ${e.message}`);
+                const message = e instanceof Error ? e.message : "";
+                setFieldError("confirm", `${t("UNKNOWN_ERROR")} ${message}`);
                 throw e;
             }
             try {

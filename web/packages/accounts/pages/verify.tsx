@@ -1,3 +1,4 @@
+import { ensure } from "@/utils/ensure";
 import type { UserVerificationResponse } from "@ente/accounts/types/user";
 import type { PageProps } from "@ente/shared/apps/types";
 import { VerticallyCentered } from "@ente/shared/components/Container";
@@ -110,7 +111,7 @@ export default function VerifyPage({ appContext, appName }: PageProps) {
                 } else {
                     if (getData(LS_KEYS.ORIGINAL_KEY_ATTRIBUTES)) {
                         await putAttributes(
-                            token,
+                            ensure(token),
                             getData(LS_KEYS.ORIGINAL_KEY_ATTRIBUTES),
                         );
                     }

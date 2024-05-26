@@ -7,7 +7,7 @@ import { Typography } from "@mui/material";
 import { LoadingQRCode, QRCode } from "../styledComponents";
 
 interface Iprops {
-    twoFactorSecret: TwoFactorSecret;
+    twoFactorSecret?: TwoFactorSecret;
     changeToManualMode: () => void;
 }
 

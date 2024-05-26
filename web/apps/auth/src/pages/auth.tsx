@@ -1,3 +1,4 @@
+import { ensure } from "@/utils/ensure";
 import {
     HorizontalFlex,
     VerticallyCentered,
@@ -12,7 +13,7 @@ import { CustomError } from "@ente/shared/error";
 import InMemoryStore, { MS_KEYS } from "@ente/shared/storage/InMemoryStore";
 import LogoutOutlined from "@mui/icons-material/LogoutOutlined";
 import MoreHoriz from "@mui/icons-material/MoreHoriz";
-import { Button, ButtonBase, Snackbar, TextField } from "@mui/material";
+import { Button, ButtonBase, Snackbar, TextField, styled } from "@mui/material";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { AppContext } from "pages/_app";
@@ -20,20 +21,22 @@ import React, { useContext, useEffect, useState } from "react";
 import { generateOTPs, type Code } from "services/code";
 import { getAuthCodes } from "services/remote";
 
-const AuthenticatorCodesPage = () => {
-    const appContext = useContext(AppContext);
+const Page: React.FC = () => {
+    const appContext = ensure(useContext(AppContext));
     const router = useRouter();
-    const [codes, setCodes] = useState([]);
+    const [codes, setCodes] = useState<Code[]>([]);
     const [hasFetched, setHasFetched] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
 
     useEffect(() => {
         const fetchCodes = async () => {
             try {
-                const res = await getAuthCodes();
-                setCodes(res);
-            } catch (err) {
-                if (err.message === CustomError.KEY_MISSING) {
+                setCodes(await getAuthCodes());
+            } catch (e) {
+                if (
+                    e instanceof Error &&
+                    e.message == CustomError.KEY_MISSING
+                ) {
                     InMemoryStore.set(MS_KEYS.REDIRECT_URL, PAGES.AUTH);
                     router.push(PAGES.ROOT);
                 } else {
@@ -55,11 +58,9 @@ const AuthenticatorCodesPage = () => {
 
     if (!hasFetched) {
         return (
-            <>
-                <VerticallyCentered>
-                    <EnteSpinner></EnteSpinner>
-                </VerticallyCentered>
-            </>
+            <VerticallyCentered>
+                <EnteSpinner />
+            </VerticallyCentered>
         );
     }
 
@@ -77,7 +78,7 @@ const AuthenticatorCodesPage = () => {
                 }}
             >
                 <div style={{ marginBottom: "1rem" }} />
-                {filteredCodes.length === 0 && searchTerm.length === 0 ? (
+                {filteredCodes.length == 0 && searchTerm.length == 0 ? (
                     <></>
                 ) : (
                     <TextField
@@ -101,7 +102,7 @@ const AuthenticatorCodesPage = () => {
                         justifyContent: "center",
                     }}
                 >
-                    {filteredCodes.length === 0 ? (
+                    {filteredCodes.length == 0 ? (
                         <div
                             style={{
                                 alignItems: "center",
@@ -110,10 +111,10 @@ const AuthenticatorCodesPage = () => {
                                 marginTop: "32px",
                             }}
                         >
-                            {searchTerm.length !== 0 ? (
+                            {searchTerm.length > 0 ? (
                                 <p>{t("NO_RESULTS")}</p>
                             ) : (
-                                <div />
+                                <></>
                             )}
                         </div>
                     ) : (
@@ -122,18 +123,16 @@ const AuthenticatorCodesPage = () => {
                         ))
                     )}
                 </div>
-                <div style={{ marginBottom: "2rem" }} />
                 <Footer />
-                <div style={{ marginBottom: "4rem" }} />
             </div>
         </>
     );
 };
 
-export default AuthenticatorCodesPage;
+export default Page;
 
 const AuthNavbar: React.FC = () => {
-    const { isMobile, logout } = useContext(AppContext);
+    const { isMobile, logout } = ensure(useContext(AppContext));
 
     return (
         <NavbarBase isMobile={isMobile}>
@@ -158,11 +157,11 @@ const AuthNavbar: React.FC = () => {
     );
 };
 
-interface CodeDisplay {
+interface CodeDisplayProps {
     code: Code;
 }
 
-const CodeDisplay: React.FC<CodeDisplay> = ({ code }) => {
+const CodeDisplay: React.FC<CodeDisplayProps> = ({ code }) => {
     const [otp, setOTP] = useState("");
     const [nextOTP, setNextOTP] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
@@ -393,14 +392,7 @@ const UnparseableCode: React.FC<UnparseableCodeProps> = ({
 
 const Footer: React.FC = () => {
     return (
-        <div
-            style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-            }}
-        >
+        <Footer_>
             <p>{t("AUTH_DOWNLOAD_MOBILE_APP")}</p>
             <a
                 href="https://github.com/ente-io/ente/tree/main/auth#-download"
@@ -408,6 +400,15 @@ const Footer: React.FC = () => {
             >
                 <Button color="accent">{t("DOWNLOAD")}</Button>
             </a>
-        </div>
+        </Footer_>
     );
 };
+
+const Footer_ = styled("div")`
+    margin-block-start: 2rem;
+    margin-block-end: 4rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+`;

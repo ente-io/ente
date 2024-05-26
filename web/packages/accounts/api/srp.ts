@@ -127,7 +127,7 @@ export const updateSRPAndKeys = async (
         const resp = await HTTPService.post(
             `${ENDPOINT}/users/srp/update`,
             updateSRPAndKeyRequest,
-            null,
+            undefined,
             {
                 "X-Auth-Token": token,
             },

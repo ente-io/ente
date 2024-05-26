@@ -4,6 +4,7 @@ import VerifyTwoFactor, {
 } from "@ente/accounts/components/two-factor/VerifyForm";
 import { PAGES } from "@ente/accounts/constants/pages";
 
+import { ensure } from "@/utils/ensure";
 import type { PageProps } from "@ente/shared/apps/types";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
@@ -55,7 +56,7 @@ export const TwoFactorVerify: React.FC<PageProps> = ({
                 encryptedToken,
                 id,
             });
-            setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes);
+            setData(LS_KEYS.KEY_ATTRIBUTES, ensure(keyAttributes));
             const redirectURL = InMemoryStore.get(MS_KEYS.REDIRECT_URL);
             InMemoryStore.delete(MS_KEYS.REDIRECT_URL);
             router.push(redirectURL ?? PAGES.CREDENTIALS);
