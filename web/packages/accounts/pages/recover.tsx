@@ -30,7 +30,9 @@ const bip39 = require("bip39");
 bip39.setDefaultWordlist("english");
 
 const Page: React.FC<PageProps> = ({ appContext }) => {
-    const appNameOld = appNameToAppNameOld(appContext.appName);
+    const { appName } = appContext;
+
+    const appNameOld = appNameToAppNameOld(appName);
 
     const [keyAttributes, setKeyAttributes] = useState<
         KeyAttributes | undefined
