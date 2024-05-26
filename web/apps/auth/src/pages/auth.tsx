@@ -35,7 +35,7 @@ const Page: React.FC = () => {
             } catch (e) {
                 if (
                     e instanceof Error &&
-                    e.message === CustomError.KEY_MISSING
+                    e.message == CustomError.KEY_MISSING
                 ) {
                     InMemoryStore.set(MS_KEYS.REDIRECT_URL, PAGES.AUTH);
                     router.push(PAGES.ROOT);
