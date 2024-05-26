@@ -1,4 +1,5 @@
 import log from "@/next/log";
+import { appNameToAppNameOld } from "@ente/shared/apps/constants";
 import type { PageProps } from "@ente/shared/apps/types";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
@@ -18,7 +19,6 @@ import React, { useEffect, useState } from "react";
 import { getSRPAttributes } from "../api/srp";
 import { sendOtt } from "../api/user";
 import { PAGES } from "../constants/pages";
-import { appNameToAppNameOld } from "@ente/shared/apps/constants";
 
 const Page: React.FC<PageProps> = ({ appContext }) => {
     const { appName, showNavBar } = appContext;

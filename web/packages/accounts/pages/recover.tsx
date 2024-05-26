@@ -2,7 +2,7 @@ import log from "@/next/log";
 import { ensure } from "@/utils/ensure";
 import { sendOtt } from "@ente/accounts/api/user";
 import { PAGES } from "@ente/accounts/constants/pages";
-import { APP_HOMES } from "@ente/shared/apps/constants";
+import { APP_HOMES, appNameToAppNameOld } from "@ente/shared/apps/constants";
 import type { PageProps } from "@ente/shared/apps/types";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
@@ -29,12 +29,15 @@ const bip39 = require("bip39");
 // mobile client library only supports english.
 bip39.setDefaultWordlist("english");
 
-export default function Recover({ appContext, appName }: PageProps) {
+const Page: React.FC<PageProps> = ({ appContext }) => {
     const [keyAttributes, setKeyAttributes] = useState<
         KeyAttributes | undefined
     >();
 
     const router = useRouter();
+
+    const appNameOld = appNameToAppNameOld(appContext.appName);
+
 
     useEffect(() => {
         const user: User = getData(LS_KEYS.USER);
@@ -45,7 +48,7 @@ export default function Recover({ appContext, appName }: PageProps) {
             return;
         }
         if (!user?.encryptedToken && !user?.token) {
-            sendOtt(appName, user.email);
+            sendOtt(appNameOld, user.email);
             InMemoryStore.set(MS_KEYS.REDIRECT_URL, PAGES.RECOVER);
             router.push(PAGES.VERIFY);
             return;
@@ -54,7 +57,7 @@ export default function Recover({ appContext, appName }: PageProps) {
             router.push(PAGES.GENERATE);
         } else if (key) {
             // TODO: Refactor the type of APP_HOMES to not require the ??
-            router.push(APP_HOMES.get(appName) ?? "/");
+            router.push(APP_HOMES.get(appNameOld) ?? "/");
         } else {
             setKeyAttributes(keyAttributes);
         }
@@ -127,4 +130,6 @@ export default function Recover({ appContext, appName }: PageProps) {
             </FormPaper>
         </VerticallyCentered>
     );
-}
+};
+
+export default Page;
