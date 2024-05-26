@@ -83,8 +83,9 @@ export default function App({ Component, pageProps }: AppProps) {
         void accountLogout().then(() => router.push(PAGES.ROOT));
     };
 
+    // TODO: This string doesn't actually exist
     const title = isI18nReady
-        ? t("TITLE", { context: APPS.ACCOUNTS })
+        ? t("title", { context: "accounts" })
         : APP_TITLES.get(APPS.ACCOUNTS);
 
     return (

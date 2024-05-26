@@ -325,7 +325,7 @@ export default function App({ Component, pageProps }: AppProps) {
     };
 
     const title = isI18nReady
-        ? t("TITLE", { context: APPS.PHOTOS })
+        ? t("title", { context: "photos" })
         : APP_TITLES.get(APPS.PHOTOS);
 
     return (

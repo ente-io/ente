@@ -133,7 +133,7 @@ export default function App({ Component, pageProps }: AppProps) {
 
     // TODO: Refactor this to have a fallback
     const title = isI18nReady
-        ? t("TITLE", { context: APPS.AUTH })
+        ? t("title", { context: "auth" })
         : APP_TITLES.get(APPS.AUTH) ?? "";
 
     return (
