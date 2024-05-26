@@ -1,7 +1,6 @@
 import log from "@/next/log";
 import { Login } from "@ente/accounts/components/Login";
 import { SignUp } from "@ente/accounts/components/SignUp";
-import { APPS } from "@ente/shared/apps/constants";
 import { EnteLogo } from "@ente/shared/components/EnteLogo";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
@@ -21,18 +20,18 @@ import { t } from "i18next";
 import { useRouter } from "next/router";
 import { CarouselProvider, DotGroup, Slide, Slider } from "pure-react-carousel";
 import "pure-react-carousel/dist/react-carousel.es.css";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Trans } from "react-i18next";
-import { AppContext } from "./_app";
+import { useAppContext } from "./_app";
 
 export default function LandingPage() {
+    const { appName, showNavBar, setDialogMessage } = useAppContext();
     const router = useRouter();
-    const appContext = useContext(AppContext);
     const [loading, setLoading] = useState(true);
     const [showLogin, setShowLogin] = useState(true);
 
     useEffect(() => {
-        appContext.showNavBar(false);
+        showNavBar(false);
         const currentURL = new URL(window.location.href);
         const albumsURL = new URL(getAlbumsURL());
         currentURL.pathname = router.pathname;
@@ -90,7 +89,7 @@ export default function LandingPage() {
             await localForage.ready();
         } catch (e) {
             log.error("usage in incognito mode tried", e);
-            appContext.setDialogMessage({
+            setDialogMessage({
                 title: t("LOCAL_STORAGE_NOT_ACCESSIBLE"),
 
                 nonClosable: true,
@@ -134,13 +133,9 @@ export default function LandingPage() {
                     <DesktopBox>
                         <SideBox>
                             {showLogin ? (
-                                <Login signUp={signUp} appName={APPS.PHOTOS} />
+                                <Login {...{ signUp, appName }} />
                             ) : (
-                                <SignUp
-                                    router={router}
-                                    appName={APPS.PHOTOS}
-                                    login={login}
-                                />
+                                <SignUp {...{ router, appName, login }} />
                             )}
                         </SideBox>
                     </DesktopBox>
