@@ -1,6 +1,6 @@
 import log from "@/next/log";
-import Login from "@ente/accounts/components/Login";
-import SignUp from "@ente/accounts/components/SignUp";
+import { Login } from "@ente/accounts/components/Login";
+import { SignUp } from "@ente/accounts/components/SignUp";
 import { APPS } from "@ente/shared/apps/constants";
 import { EnteLogo } from "@ente/shared/components/EnteLogo";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
