@@ -5,6 +5,7 @@ import {
     logUnhandledErrorsAndRejections,
 } from "@/next/log-web";
 import type { AppName, BaseAppContextT } from "@/next/types/app";
+import { ensure } from "@/utils/ensure";
 import { accountLogout } from "@ente/accounts/services/logout";
 import {
     APPS,
@@ -29,7 +30,7 @@ import { ThemeProvider } from "@mui/material/styles";
 import { t } from "i18next";
 import type { AppProps } from "next/app";
 import { useRouter } from "next/router";
-import { createContext, useEffect, useRef, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import LoadingBar, { type LoadingBarRef } from "react-top-loading-bar";
 import "../../public/css/global.css";
 
@@ -46,6 +47,9 @@ type AppContextT = BaseAppContextT & {
 
 /** The React {@link Context} available to all pages. */
 export const AppContext = createContext<AppContextT | undefined>(undefined);
+
+/** Utility hook to reduce amount of boilerplate in account related pages. */
+export const useAppContext = () => ensure(useContext(AppContext));
 
 export default function App({ Component, pageProps }: AppProps) {
     const appName: AppName = "auth";
