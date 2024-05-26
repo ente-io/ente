@@ -7,6 +7,7 @@ import {
 } from "@/next/log-web";
 import type { AppName, BaseAppContextT } from "@/next/types/app";
 import { AppUpdate } from "@/next/types/ipc";
+import { ensure } from "@/utils/ensure";
 import {
     APPS,
     APP_TITLES,
@@ -45,7 +46,7 @@ import isElectron from "is-electron";
 import type { AppProps } from "next/app";
 import { useRouter } from "next/router";
 import "photoswipe/dist/photoswipe.css";
-import { createContext, useEffect, useRef, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import LoadingBar from "react-top-loading-bar";
 import DownloadManager from "services/download";
 import { resumeExportsIfNeeded } from "services/export";
@@ -102,6 +103,9 @@ type AppContextT = BaseAppContextT & {
 
 /** The React {@link Context} available to all pages. */
 export const AppContext = createContext<AppContextT | undefined>(undefined);
+
+/** Utility hook to reduce amount of boilerplate in account related pages. */
+export const useAppContext = () => ensure(useContext(AppContext));
 
 export default function App({ Component, pageProps }: AppProps) {
     const appName: AppName = "photos";
