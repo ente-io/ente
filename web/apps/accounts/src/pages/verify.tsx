@@ -1,8 +1,6 @@
-import { ensure } from "@/utils/ensure";
 import Page_ from "@ente/accounts/pages/verify";
-import { useContext } from "react";
-import { AppContext } from "./_app";
+import { useAppContext } from "./_app";
 
-const Page = () => <Page_ appContext={ensure(useContext(AppContext))} />;
+const Page = () => <Page_ appContext={useAppContext()} />;
 
 export default Page;

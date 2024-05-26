@@ -2,6 +2,7 @@ import { CustomHead } from "@/next/components/Head";
 import { setupI18n } from "@/next/i18n";
 import { logUnhandledErrorsAndRejections } from "@/next/log-web";
 import type { AppName, BaseAppContextT } from "@/next/types/app";
+import { ensure } from "@/utils/ensure";
 import { PAGES } from "@ente/accounts/constants/pages";
 import { accountLogout } from "@ente/accounts/services/logout";
 import { APPS, APP_TITLES } from "@ente/shared/apps/constants";
@@ -20,7 +21,7 @@ import { ThemeProvider } from "@mui/material/styles";
 import { t } from "i18next";
 import { AppProps } from "next/app";
 import { useRouter } from "next/router";
-import { createContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import "styles/global.css";
 
 /** The accounts app has no extra properties on top of the base context. */
@@ -28,6 +29,9 @@ type AppContextT = BaseAppContextT;
 
 /** The React {@link Context} available to all pages. */
 export const AppContext = createContext<AppContextT | undefined>(undefined);
+
+/** Utility hook to reduce amount of boilerplate in account related pages. */
+export const useAppContext = () => ensure(useContext(AppContext));
 
 export default function App({ Component, pageProps }: AppProps) {
     const appName: AppName = "account";
