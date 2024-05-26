@@ -29,7 +29,7 @@ export const isPasskeyRecoveryEnabled = async () => {
 
 export const configurePasskeyRecovery = async (
     secret: string,
-    userEncryptedSecret: string,
+    userSecretCipher: string,
     userSecretNonce: string,
 ) => {
     try {
@@ -39,7 +39,7 @@ export const configurePasskeyRecovery = async (
             `${getEndpoint()}/users/two-factor/passkeys/configure-recovery`,
             {
                 secret,
-                userEncryptedSecret,
+                userSecretCipher,
                 userSecretNonce,
             },
             {
