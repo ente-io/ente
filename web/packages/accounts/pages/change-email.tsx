@@ -2,7 +2,11 @@ import { ensure } from "@/utils/ensure";
 import { wait } from "@/utils/promise";
 import { changeEmail, sendOTTForEmailChange } from "@ente/accounts/api/user";
 import { PAGES } from "@ente/accounts/constants/pages";
-import { APP_HOMES } from "@ente/shared/apps/constants";
+import {
+    APP_HOMES,
+    appNameToAppNameOld,
+    type APPS,
+} from "@ente/shared/apps/constants";
 import type { PageProps } from "@ente/shared/apps/types";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
@@ -19,7 +23,11 @@ import { useEffect, useState } from "react";
 import { Trans } from "react-i18next";
 import * as Yup from "yup";
 
-function ChangeEmailPage({ appName, appContext }: PageProps) {
+const Page: React.FC<PageProps> = ({ appContext }) => {
+    const { appName } = appContext;
+
+    const appNameOld = appNameToAppNameOld(appName);
+
     const router = useRouter();
 
     useEffect(() => {
@@ -33,20 +41,20 @@ function ChangeEmailPage({ appName, appContext }: PageProps) {
         <VerticallyCentered>
             <FormPaper>
                 <FormPaperTitle>{t("CHANGE_EMAIL")}</FormPaperTitle>
-                <ChangeEmailForm appName={appName} appContext={appContext} />
+                <ChangeEmailForm appName={appNameOld} />
             </FormPaper>
         </VerticallyCentered>
     );
-}
+};
 
-export default ChangeEmailPage;
+export default Page;
 
 interface formValues {
     email: string;
     ott?: string;
 }
 
-function ChangeEmailForm({ appName }: PageProps) {
+function ChangeEmailForm({ appName }: { appName: APPS }) {
     const [loading, setLoading] = useState(false);
     const [ottInputVisible, setShowOttInputVisibility] = useState(false);
     const [email, setEmail] = useState<string | null>(null);
