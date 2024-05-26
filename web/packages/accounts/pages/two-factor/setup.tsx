@@ -6,7 +6,7 @@ import VerifyTwoFactor, {
 } from "@ente/accounts/components/two-factor/VerifyForm";
 import { TwoFactorSetup } from "@ente/accounts/components/two-factor/setup";
 import type { TwoFactorSecret } from "@ente/accounts/types/user";
-import { APP_HOMES } from "@ente/shared/apps/constants";
+import { APP_HOMES, appNameToAppNameOld } from "@ente/shared/apps/constants";
 import type { PageProps } from "@ente/shared/apps/types";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import LinkButton from "@ente/shared/components/LinkButton";
@@ -23,7 +23,11 @@ export enum SetupMode {
     MANUAL_CODE,
 }
 
-export default function SetupTwoFactor({ appName }: PageProps) {
+const Page: React.FC<PageProps> = ({ appContext }) => {
+    const { appName } = appContext;
+
+    const appNameOld = appNameToAppNameOld(appName);
+
     const [twoFactorSecret, setTwoFactorSecret] = useState<
         TwoFactorSecret | undefined
     >();
@@ -59,7 +63,7 @@ export default function SetupTwoFactor({ appName }: PageProps) {
             isTwoFactorEnabled: true,
         });
         // TODO: Refactor the type of APP_HOMES to not require the ??
-        router.push(APP_HOMES.get(appName) ?? "/");
+        router.push(APP_HOMES.get(appNameOld) ?? "/");
     };
 
     return (
@@ -85,4 +89,6 @@ export default function SetupTwoFactor({ appName }: PageProps) {
             </Card>
         </VerticallyCentered>
     );
-}
+};
+
+export default Page;
