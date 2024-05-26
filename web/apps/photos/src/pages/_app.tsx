@@ -5,6 +5,7 @@ import {
     logStartupBanner,
     logUnhandledErrorsAndRejections,
 } from "@/next/log-web";
+import type { AppName, BaseAppContextT } from "@/next/types/app";
 import { AppUpdate } from "@/next/types/ipc";
 import {
     APPS,
@@ -74,8 +75,11 @@ const redirectMap = new Map([
     [REDIRECTS.FAMILIES, getFamilyPortalRedirectURL],
 ]);
 
-type AppContextType = {
-    showNavBar: (show: boolean) => void;
+/**
+ * Properties available via the {@link AppContext} to the Photos app's React
+ * tree.
+ */
+type AppContextT = BaseAppContextT & {
     mlSearchEnabled: boolean;
     mapEnabled: boolean;
     updateMlSearchEnabled: (enabled: boolean) => Promise<void>;
@@ -89,19 +93,19 @@ type AppContextType = {
     setWatchFolderView: (isOpen: boolean) => void;
     watchFolderFiles: FileList;
     setWatchFolderFiles: (files: FileList) => void;
-    isMobile: boolean;
     themeColor: THEME_COLOR;
     setThemeColor: (themeColor: THEME_COLOR) => void;
     somethingWentWrong: () => void;
-    setDialogBoxAttributesV2: (attrs: DialogBoxAttributesV2) => void;
     isCFProxyDisabled: boolean;
     setIsCFProxyDisabled: (disabled: boolean) => void;
-    logout: () => void;
 };
 
-export const AppContext = createContext<AppContextType>(null);
+/** The React {@link Context} available to all pages. */
+export const AppContext = createContext<AppContextT | undefined>(undefined);
 
 export default function App({ Component, pageProps }: AppProps) {
+    const appName: AppName = "photos";
+
     const router = useRouter();
     const [isI18nReady, setIsI18nReady] = useState<boolean>(false);
     const [loading, setLoading] = useState(false);
@@ -324,6 +328,32 @@ export default function App({ Component, pageProps }: AppProps) {
         void photosLogout().then(() => router.push(PAGES.ROOT));
     };
 
+    const appContext = {
+        appName,
+        showNavBar,
+        mlSearchEnabled,
+        updateMlSearchEnabled,
+        startLoading,
+        finishLoading,
+        closeMessageDialog,
+        setDialogMessage,
+        watchFolderView,
+        setWatchFolderView,
+        watchFolderFiles,
+        setWatchFolderFiles,
+        isMobile,
+        setNotificationAttributes,
+        themeColor,
+        setThemeColor,
+        somethingWentWrong,
+        setDialogBoxAttributesV2,
+        mapEnabled,
+        updateMapEnabled,
+        isCFProxyDisabled,
+        setIsCFProxyDisabled,
+        logout,
+    };
+
     const title = isI18nReady
         ? t("title", { context: "photos" })
         : APP_TITLES.get(APPS.PHOTOS);
@@ -359,32 +389,7 @@ export default function App({ Component, pageProps }: AppProps) {
                     attributes={notificationAttributes}
                 />
 
-                <AppContext.Provider
-                    value={{
-                        showNavBar,
-                        mlSearchEnabled,
-                        updateMlSearchEnabled,
-                        startLoading,
-                        finishLoading,
-                        closeMessageDialog,
-                        setDialogMessage,
-                        watchFolderView,
-                        setWatchFolderView,
-                        watchFolderFiles,
-                        setWatchFolderFiles,
-                        isMobile,
-                        setNotificationAttributes,
-                        themeColor,
-                        setThemeColor,
-                        somethingWentWrong,
-                        setDialogBoxAttributesV2,
-                        mapEnabled,
-                        updateMapEnabled,
-                        isCFProxyDisabled,
-                        setIsCFProxyDisabled,
-                        logout,
-                    }}
-                >
+                <AppContext.Provider value={appContext}>
                     {(loading || !isI18nReady) && (
                         <Overlay
                             sx={(theme) => ({
