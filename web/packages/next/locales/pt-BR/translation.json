@@ -314,7 +314,7 @@
     "REMOVE_FROM_COLLECTION": "Remover do álbum",
     "TRASH": "Lixeira",
     "MOVE_TO_TRASH": "Mover para a lixeira",
-    "TRASH_FILES_MESSAGE": "Os itens selecionados serão excluídos de todos os álbuns e movidos para o lixo.",
+    "TRASH_FILES_MESSAGE": "Os itens selecionados serão excluídos de todos os álbuns e movidos para a lixeira.",
     "TRASH_FILE_MESSAGE": "Os itens selecionados serão excluídos de todos os álbuns e movidos para o lixo.",
     "DELETE_PERMANENTLY": "Excluir permanentemente",
     "RESTORE": "Restaurar",
