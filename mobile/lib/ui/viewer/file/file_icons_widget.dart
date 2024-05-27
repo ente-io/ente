@@ -367,25 +367,11 @@ class _BottomRightOverlayText extends StatelessWidget {
       builder: (context, constraints) {
         const double inset = 4;
 
-        return Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.bottomRight,
-              end: Alignment.center,
-              colors: [
-                Color.fromRGBO(0, 0, 0, 0.14),
-                Color.fromRGBO(0, 0, 0, 0.05),
-                Color.fromRGBO(0, 0, 0, 0.0),
-              ],
-              stops: [0, 0.6, 1],
-            ),
-          ),
-          child: Align(
-            alignment: Alignment.bottomRight,
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: inset, right: inset),
-              child: text,
-            ),
+        return Align(
+          alignment: Alignment.bottomRight,
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: inset, right: inset),
+            child: text,
           ),
         );
       },
