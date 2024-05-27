@@ -99,7 +99,7 @@ class FaceMlService {
 
   final int _fileDownloadLimit = 5;
   final int _embeddingFetchLimit = 200;
-  final int _kForceClusteringFaceCount = 4000;
+  final int _kForceClusteringFaceCount = 8000;
 
   Future<void> init({bool initializeImageMlIsolate = false}) async {
     if (LocalSettings.instance.isFaceIndexingEnabled == false) {
