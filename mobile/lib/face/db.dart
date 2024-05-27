@@ -35,6 +35,15 @@ class FaceMLDataDB {
 
   static final FaceMLDataDB instance = FaceMLDataDB._privateConstructor();
 
+  static final _migrationScripts = [
+    createFacesTable,
+    createFaceClustersTable,
+    createClusterPersonTable,
+    createClusterSummaryTable,
+    createNotPersonFeedbackTable,
+    fcClusterIDIndex,
+  ];
+
   // only have a single app-wide reference to the database
   static Future<SqliteDatabase>? _sqliteAsyncDBFuture;
 
@@ -50,25 +59,30 @@ class FaceMLDataDB {
     _logger.info("Opening sqlite_async access: DB path " + databaseDirectory);
     final asyncDBConnection =
         SqliteDatabase(path: databaseDirectory, maxReaders: 2);
-    await _onCreate(asyncDBConnection);
+    await _migrate(asyncDBConnection);
+
     return asyncDBConnection;
   }
 
-  Future<void> _onCreate(SqliteDatabase asyncDBConnection) async {
-    try {
-      final startTime = DateTime.now();
-      await asyncDBConnection.execute(createFacesTable);
-      await asyncDBConnection.execute(createFaceClustersTable);
-      await asyncDBConnection.execute(createClusterPersonTable);
-      await asyncDBConnection.execute(createClusterSummaryTable);
-      await asyncDBConnection.execute(createNotPersonFeedbackTable);
-      await asyncDBConnection.execute(fcClusterIDIndex);
-      _logger.info(
-        'FaceMLDataDB tables created in ${DateTime.now().difference(startTime).inMilliseconds}ms',
+  Future<void> _migrate(
+    SqliteDatabase database,
+  ) async {
+    final result = await database.execute('PRAGMA user_version');
+    final currentVersion = result[0]['user_version'] as int;
+    final toVersion = _migrationScripts.length;
+
+    if (currentVersion < toVersion) {
+      _logger.info("Migrating database from $currentVersion to $toVersion");
+      await database.writeTransaction((tx) async {
+        for (int i = currentVersion + 1; i <= toVersion; i++) {
+          await tx.execute(_migrationScripts[i - 1]);
+        }
+        await tx.execute('PRAGMA user_version = $toVersion');
+      });
+    } else if (currentVersion > toVersion) {
+      throw AssertionError(
+        "currentVersion($currentVersion) cannot be greater than toVersion($toVersion)",
       );
-    } catch (e, s) {
-      _logger.severe("Error creating FaceMLDataDB tables", e, s);
-      rethrow;
     }
   }
 
