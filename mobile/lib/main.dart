@@ -235,10 +235,6 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
 
   unawaited(SemanticSearchService.instance.init());
   MachineLearningController.instance.init();
-  // Can not including existing tf/ml binaries as they are not being built
-  // from source.
-  // See https://gitlab.com/fdroid/fdroiddata/-/merge_requests/12671#note_1294346819
-  // unawaited(ObjectDetectionService.instance.init());
   if (flagService.faceSearchEnabled) {
     unawaited(FaceMlService.instance.init());
   } else {
