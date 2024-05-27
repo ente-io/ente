@@ -5,6 +5,7 @@ import "package:flutter/material.dart";
 import "package:flutter_animate/flutter_animate.dart";
 import "package:modal_bottom_sheet/modal_bottom_sheet.dart";
 import "package:photos/core/configuration.dart";
+import "package:photos/core/constants.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
@@ -171,6 +172,7 @@ class AddPhotosPhotoWidget extends StatelessWidget {
       final List<AssetEntity>? result = await AssetPicker.pickAssets(
         context,
         pickerConfig: AssetPickerConfig(
+          maxAssets: maxPickAssetLimit,
           textDelegate: assetPickerTextDelegate,
         ),
       );
