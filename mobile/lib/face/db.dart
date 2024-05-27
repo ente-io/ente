@@ -55,12 +55,21 @@ class FaceMLDataDB {
   }
 
   Future<void> _onCreate(SqliteDatabase asyncDBConnection) async {
-    await asyncDBConnection.execute(createFacesTable);
-    await asyncDBConnection.execute(createFaceClustersTable);
-    await asyncDBConnection.execute(createClusterPersonTable);
-    await asyncDBConnection.execute(createClusterSummaryTable);
-    await asyncDBConnection.execute(createNotPersonFeedbackTable);
-    await asyncDBConnection.execute(fcClusterIDIndex);
+    try {
+      final startTime = DateTime.now();
+      await asyncDBConnection.execute(createFacesTable);
+      await asyncDBConnection.execute(createFaceClustersTable);
+      await asyncDBConnection.execute(createClusterPersonTable);
+      await asyncDBConnection.execute(createClusterSummaryTable);
+      await asyncDBConnection.execute(createNotPersonFeedbackTable);
+      await asyncDBConnection.execute(fcClusterIDIndex);
+      _logger.info(
+        'FaceMLDataDB tables created in ${DateTime.now().difference(startTime).inMilliseconds}ms',
+      );
+    } catch (e, s) {
+      _logger.severe("Error creating FaceMLDataDB tables", e, s);
+      rethrow;
+    }
   }
 
   // bulkInsertFaces inserts the faces in the database in batches of 1000.
