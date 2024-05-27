@@ -290,6 +290,12 @@ class GalleryState extends State<Gallery> {
         }
       });
     }
+    // todo:(neeraj) Stick to default group behaviour for magicSearch and editLocationGallery
+    // In case of Magic search, we need to hide the scrollbar title (can be done
+    // by specifying none as groupType)
+    if (widget.groupType != GroupType.size) {
+      return [files];
+    }
 
     final List<List<EnteFile>> resultGroupedFiles = [];
     List<EnteFile> singleGroupFile = [];
