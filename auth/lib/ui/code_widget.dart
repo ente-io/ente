@@ -48,7 +48,6 @@ class _CodeWidgetState extends State<CodeWidget> {
   late bool _shouldShowLargeIcon;
   late bool _hideCode;
   bool isMaskingEnabled = false;
-  late final colorScheme = getEnteColorScheme(context);
 
   @override
   void initState() {
@@ -78,6 +77,7 @@ class _CodeWidgetState extends State<CodeWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
     if (isMaskingEnabled != PreferenceService.instance.shouldHideCodes()) {
       isMaskingEnabled = PreferenceService.instance.shouldHideCodes();
       _hideCode = isMaskingEnabled;
@@ -91,6 +91,100 @@ class _CodeWidgetState extends State<CodeWidget> {
       _isInitialized = true;
     }
     final l10n = context.l10n;
+
+    Widget getCardContents(AppLocalizations l10n) {
+      return Stack(
+        children: [
+          if (widget.code.isPinned)
+            Align(
+              alignment: Alignment.topRight,
+              child: CustomPaint(
+                painter: PinBgPainter(
+                  color: colorScheme.pinnedBgColor,
+                ),
+                size: const Size(39, 39),
+              ),
+            ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              if (widget.code.type.isTOTPCompatible)
+                CodeTimerProgress(
+                  period: widget.code.period,
+                ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  _shouldShowLargeIcon ? _getIcon() : const SizedBox.shrink(),
+                  Expanded(
+                    child: Column(
+                      children: [
+                        _getTopRow(),
+                        const SizedBox(height: 4),
+                        _getBottomRow(l10n),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(
+                height: 20,
+              ),
+            ],
+          ),
+          if (widget.code.isPinned) ...[
+            Align(
+              alignment: Alignment.topRight,
+              child: Padding(
+                padding: const EdgeInsets.only(right: 6, top: 6),
+                child: SvgPicture.asset("assets/svg/pin-card.svg"),
+              ),
+            ),
+          ],
+        ],
+      );
+    }
+
+    Widget clippedCard(AppLocalizations l10n) {
+      return Container(
+        height: 132,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8),
+          color: Theme.of(context).colorScheme.codeCardBackgroundColor,
+          boxShadow:
+              widget.code.isPinned ? colorScheme.pinnedCardBoxShadow : [],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              customBorder: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              onTap: () {
+                _copyCurrentOTPToClipboard();
+              },
+              onDoubleTap: isMaskingEnabled
+                  ? () {
+                      setState(
+                        () {
+                          _hideCode = !_hideCode;
+                        },
+                      );
+                    }
+                  : null,
+              onLongPress: () {
+                _copyCurrentOTPToClipboard();
+              },
+              child: getCardContents(l10n),
+            ),
+          ),
+        ),
+      );
+    }
+
     return Container(
       margin: const EdgeInsets.only(left: 16, right: 16, bottom: 8, top: 8),
       child: Builder(
@@ -126,7 +220,7 @@ class _CodeWidgetState extends State<CodeWidget> {
                 ],
                 padding: const EdgeInsets.all(8.0),
               ),
-              child: _clippedCard(l10n),
+              child: clippedCard(l10n),
             );
           }
 
@@ -216,103 +310,11 @@ class _CodeWidgetState extends State<CodeWidget> {
               ],
             ),
             child: Builder(
-              builder: (context) => _clippedCard(l10n),
+              builder: (context) => clippedCard(l10n),
             ),
           );
         },
       ),
-    );
-  }
-
-  Widget _clippedCard(AppLocalizations l10n) {
-    return Container(
-      height: 132,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(8),
-        color: Theme.of(context).colorScheme.codeCardBackgroundColor,
-        boxShadow: widget.code.isPinned ? colorScheme.pinnedCardBoxShadow : [],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(8),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            customBorder: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-            onTap: () {
-              _copyCurrentOTPToClipboard();
-            },
-            onDoubleTap: isMaskingEnabled
-                ? () {
-                    setState(
-                      () {
-                        _hideCode = !_hideCode;
-                      },
-                    );
-                  }
-                : null,
-            onLongPress: () {
-              _copyCurrentOTPToClipboard();
-            },
-            child: _getCardContents(l10n),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _getCardContents(AppLocalizations l10n) {
-    return Stack(
-      children: [
-        if (widget.code.isPinned)
-          Align(
-            alignment: Alignment.topRight,
-            child: CustomPaint(
-              painter: PinBgPainter(
-                color: colorScheme.pinnedBgColor,
-              ),
-              size: const Size(39, 39),
-            ),
-          ),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            if (widget.code.type == Type.totp)
-              CodeTimerProgress(
-                period: widget.code.period,
-              ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                _shouldShowLargeIcon ? _getIcon() : const SizedBox.shrink(),
-                Expanded(
-                  child: Column(
-                    children: [
-                      _getTopRow(),
-                      const SizedBox(height: 4),
-                      _getBottomRow(l10n),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(
-              height: 20,
-            ),
-          ],
-        ),
-        if (widget.code.isPinned) ...[
-          Align(
-            alignment: Alignment.topRight,
-            child: Padding(
-              padding: const EdgeInsets.only(right: 6, top: 6),
-              child: SvgPicture.asset("assets/svg/pin-card.svg"),
-            ),
-          ),
-        ],
-      ],
     );
   }
 
@@ -585,7 +587,7 @@ class _CodeWidgetState extends State<CodeWidget> {
   String _getFormattedCode(String code) {
     if (_hideCode) {
       // replace all digits with •
-      code = code.replaceAll(RegExp(r'\d'), '•');
+      code = code.replaceAll(RegExp(r'\S'), '•');
     }
     if (code.length == 6) {
       return "${code.substring(0, 3)} ${code.substring(3, 6)}";

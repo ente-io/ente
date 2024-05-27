@@ -1226,5 +1226,10 @@
   "stopCastingBody": "您想停止投放吗？",
   "castIPMismatchTitle": "投放相册失败",
   "castIPMismatchBody": "请确保您的设备与电视处于同一网络。",
-  "pairingComplete": "配对完成"
+  "pairingComplete": "配对完成",
+  "faceRecognition": "Face recognition",
+  "faceRecognitionIndexingDescription": "Please note that this will result in a higher bandwidth and battery usage until all items are indexed.",
+  "foundFaces": "Found faces",
+  "clusteringProgress": "Clustering progress",
+  "indexingIsPaused": "Indexing is paused, will automatically resume when device is ready"
 }

@@ -21,7 +21,7 @@ import {
     clearKeys,
     getKey,
 } from "@ente/shared/storage/sessionStorage";
-import { User } from "@ente/shared/user/types";
+import type { User } from "@ente/shared/user/types";
 import { isPromise } from "@ente/shared/utils";
 import { Typography, styled } from "@mui/material";
 import AuthenticateUserModal from "components/AuthenticateUserModal";
@@ -717,10 +717,10 @@ export default function Gallery() {
             await syncTrash(collections, setTrashedFiles);
             await syncEntities();
             await syncMapEnabled();
-            await syncCLIPEmbeddings();
             const electron = globalThis.electron;
-            if (isInternalUserForML() && electron) {
-                await syncFaceEmbeddings();
+            if (electron) {
+                await syncCLIPEmbeddings();
+                if (isInternalUserForML()) await syncFaceEmbeddings();
             }
             if (clipService.isPlatformSupported()) {
                 void clipService.scheduleImageEmbeddingExtraction();

@@ -23,7 +23,7 @@ export const detectFaces = async (input: Float32Array) => {
         input: new ort.Tensor("float32", input, [1, 3, 640, 640]),
     };
     const results = await session.run(feeds);
-    log.debug(() => `onnx/yolo face detection took ${Date.now() - t} ms`);
+    log.debug(() => `ONNX/YOLO face detection took ${Date.now() - t} ms`);
     return ensure(results.output).data;
 };
 
@@ -32,7 +32,7 @@ const cachedFaceEmbeddingSession = makeCachedInferenceSession(
     5286998 /* 5 MB */,
 );
 
-export const faceEmbeddings = async (input: Float32Array) => {
+export const computeFaceEmbeddings = async (input: Float32Array) => {
     // Dimension of each face (alias)
     const mobileFaceNetFaceSize = 112;
     // Smaller alias
@@ -45,7 +45,7 @@ export const faceEmbeddings = async (input: Float32Array) => {
     const t = Date.now();
     const feeds = { img_inputs: inputTensor };
     const results = await session.run(feeds);
-    log.debug(() => `onnx/yolo face embedding took ${Date.now() - t} ms`);
+    log.debug(() => `ONNX/MFNT face embedding took ${Date.now() - t} ms`);
     /* Need these model specific casts to extract and type the result */
     return (results.embeddings as unknown as Record<string, unknown>)
         .cpuData as Float32Array;

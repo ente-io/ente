@@ -1,7 +1,6 @@
 import log from "@/next/log";
-import Login from "@ente/accounts/components/Login";
-import SignUp from "@ente/accounts/components/SignUp";
-import { APPS } from "@ente/shared/apps/constants";
+import { Login } from "@ente/accounts/components/Login";
+import { SignUp } from "@ente/accounts/components/SignUp";
 import { EnteLogo } from "@ente/shared/components/EnteLogo";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
@@ -11,98 +10,28 @@ import localForage from "@ente/shared/storage/localForage";
 import { getData, LS_KEYS } from "@ente/shared/storage/localStorage";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { getKey, SESSION_KEYS } from "@ente/shared/storage/sessionStorage";
-import { Button, styled, Typography, TypographyProps } from "@mui/material";
+import {
+    Button,
+    styled,
+    Typography,
+    type TypographyProps,
+} from "@mui/material";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { CarouselProvider, DotGroup, Slide, Slider } from "pure-react-carousel";
 import "pure-react-carousel/dist/react-carousel.es.css";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Trans } from "react-i18next";
-import { AppContext } from "./_app";
-
-const Container = styled("div")`
-    display: flex;
-    flex: 1;
-    align-items: center;
-    justify-content: center;
-    background-color: #000;
-
-    @media (max-width: 1024px) {
-        flex-direction: column;
-    }
-`;
-
-const SlideContainer = styled("div")`
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-
-    @media (max-width: 1024px) {
-        flex-grow: 0;
-    }
-`;
-
-const DesktopBox = styled("div")`
-    flex: 1;
-    height: 100%;
-    padding: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: #242424;
-
-    @media (max-width: 1024px) {
-        display: none;
-    }
-`;
-
-const MobileBox = styled("div")`
-    display: none;
-
-    @media (max-width: 1024px) {
-        max-width: 375px;
-        width: 100%;
-        padding: 12px;
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-    }
-`;
-
-const SideBox = styled("div")`
-    display: flex;
-    flex-direction: column;
-    min-width: 320px;
-`;
-
-const TextContainer = (props: TypographyProps) => (
-    <Typography color={"text.muted"} mt={2} mb={3} {...props} />
-);
-
-const FeatureText = (props: TypographyProps) => (
-    <Typography variant="h3" mt={4} {...props} />
-);
-
-const Img = styled("img")`
-    height: 250px;
-    object-fit: contain;
-
-    @media (max-width: 400px) {
-        height: 180px;
-    }
-`;
+import { useAppContext } from "./_app";
 
 export default function LandingPage() {
+    const { appName, showNavBar, setDialogMessage } = useAppContext();
     const router = useRouter();
-    const appContext = useContext(AppContext);
     const [loading, setLoading] = useState(true);
     const [showLogin, setShowLogin] = useState(true);
 
     useEffect(() => {
-        appContext.showNavBar(false);
+        showNavBar(false);
         const currentURL = new URL(window.location.href);
         const albumsURL = new URL(getAlbumsURL());
         currentURL.pathname = router.pathname;
@@ -160,7 +89,7 @@ export default function LandingPage() {
             await localForage.ready();
         } catch (e) {
             log.error("usage in incognito mode tried", e);
-            appContext.setDialogMessage({
+            setDialogMessage({
                 title: t("LOCAL_STORAGE_NOT_ACCESSIBLE"),
 
                 nonClosable: true,
@@ -184,7 +113,9 @@ export default function LandingPage() {
             ) : (
                 <>
                     <SlideContainer>
-                        <EnteLogo height={24} sx={{ mb: 8 }} />
+                        <Logo_>
+                            <EnteLogo height={24} />
+                        </Logo_>
                         <Slideshow />
                     </SlideContainer>
                     <MobileBox>
@@ -202,13 +133,9 @@ export default function LandingPage() {
                     <DesktopBox>
                         <SideBox>
                             {showLogin ? (
-                                <Login signUp={signUp} appName={APPS.PHOTOS} />
+                                <Login {...{ signUp, appName }} />
                             ) : (
-                                <SignUp
-                                    router={router}
-                                    appName={APPS.PHOTOS}
-                                    login={login}
-                                />
+                                <SignUp {...{ router, appName, login }} />
                             )}
                         </SideBox>
                     </DesktopBox>
@@ -217,6 +144,68 @@ export default function LandingPage() {
         </Container>
     );
 }
+
+const Container = styled("div")`
+    display: flex;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+    background-color: #000;
+
+    @media (max-width: 1024px) {
+        flex-direction: column;
+    }
+`;
+
+const SlideContainer = styled("div")`
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+
+    @media (max-width: 1024px) {
+        flex-grow: 0;
+    }
+`;
+
+const Logo_ = styled("div")`
+    margin-block-end: 64px;
+`;
+
+const DesktopBox = styled("div")`
+    flex: 1;
+    height: 100%;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #242424;
+
+    @media (max-width: 1024px) {
+        display: none;
+    }
+`;
+
+const MobileBox = styled("div")`
+    display: none;
+
+    @media (max-width: 1024px) {
+        max-width: 375px;
+        width: 100%;
+        padding: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+`;
+
+const SideBox = styled("div")`
+    display: flex;
+    flex-direction: column;
+    min-width: 320px;
+`;
 
 const Slideshow: React.FC = () => {
     return (
@@ -270,6 +259,23 @@ const Slideshow: React.FC = () => {
         </CarouselProvider>
     );
 };
+
+const TextContainer = (props: TypographyProps) => (
+    <Typography color={"text.muted"} mt={2} mb={3} {...props} />
+);
+
+const FeatureText = (props: TypographyProps) => (
+    <Typography variant="h3" mt={4} {...props} />
+);
+
+const Img = styled("img")`
+    height: 250px;
+    object-fit: contain;
+
+    @media (max-width: 400px) {
+        height: 180px;
+    }
+`;
 
 const CustomDotGroup = styled(DotGroup)`
     margin-block-start: 2px;

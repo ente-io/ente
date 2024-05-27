@@ -6,6 +6,7 @@ import "package:photos/core/event_bus.dart";
 import "package:photos/events/collection_updated_event.dart";
 import "package:photos/events/event.dart";
 import "package:photos/events/location_tag_updated_event.dart";
+import "package:photos/events/people_changed_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/collection/collection.dart";
 import "package:photos/models/collection/collection_items.dart";
@@ -33,6 +34,7 @@ enum ResultType {
   fileCaption,
   event,
   shared,
+  faces,
   magic,
 }
 
@@ -55,7 +57,7 @@ extension SectionTypeExtensions on SectionType {
   String sectionTitle(BuildContext context) {
     switch (this) {
       case SectionType.face:
-        return S.of(context).faces;
+        return S.of(context).people;
       case SectionType.content:
         return S.of(context).contents;
       case SectionType.moment:
@@ -117,10 +119,12 @@ extension SectionTypeExtensions on SectionType {
     }
   }
 
+  bool get sortByName => this != SectionType.face;
+
   bool get isEmptyCTAVisible {
     switch (this) {
       case SectionType.face:
-        return true;
+        return false;
       case SectionType.content:
         return false;
       case SectionType.moment:
@@ -245,8 +249,7 @@ extension SectionTypeExtensions on SectionType {
   }) {
     switch (this) {
       case SectionType.face:
-        return Future.value(List<GenericSearchResult>.empty());
-
+        return SearchService.instance.getAllFace(limit);
       case SectionType.content:
         return Future.value(List<GenericSearchResult>.empty());
 
@@ -277,6 +280,8 @@ extension SectionTypeExtensions on SectionType {
         return [Bus.instance.on<LocationTagUpdatedEvent>()];
       case SectionType.album:
         return [Bus.instance.on<CollectionUpdatedEvent>()];
+      case SectionType.face:
+        return [Bus.instance.on<PeopleChangedEvent>()];
       default:
         return [];
     }

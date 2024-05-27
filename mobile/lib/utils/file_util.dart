@@ -37,25 +37,30 @@ Future<File?> getFile(
   bool isOrigin = false,
 } // only relevant for live photos
     ) async {
-  if (file.isRemoteFile) {
-    return getFileFromServer(file, liveVideo: liveVideo);
-  } else {
-    final String key = file.tag + liveVideo.toString() + isOrigin.toString();
-    final cachedFile = FileLruCache.get(key);
-    if (cachedFile == null) {
-      final diskFile = await _getLocalDiskFile(
-        file,
-        liveVideo: liveVideo,
-        isOrigin: isOrigin,
-      );
-      // do not cache origin file for IOS as they are immediately deleted
-      // after usage
-      if (!(isOrigin && Platform.isIOS) && diskFile != null) {
-        FileLruCache.put(key, diskFile);
+  try {
+    if (file.isRemoteFile) {
+      return getFileFromServer(file, liveVideo: liveVideo);
+    } else {
+      final String key = file.tag + liveVideo.toString() + isOrigin.toString();
+      final cachedFile = FileLruCache.get(key);
+      if (cachedFile == null) {
+        final diskFile = await _getLocalDiskFile(
+          file,
+          liveVideo: liveVideo,
+          isOrigin: isOrigin,
+        );
+        // do not cache origin file for IOS as they are immediately deleted
+        // after usage
+        if (!(isOrigin && Platform.isIOS) && diskFile != null) {
+          FileLruCache.put(key, diskFile);
+        }
+        return diskFile;
       }
-      return diskFile;
+      return cachedFile;
     }
-    return cachedFile;
+  } catch (e, s) {
+    _logger.warning("Failed to get file", e, s);
+    return null;
   }
 }
 
@@ -278,7 +283,9 @@ Future<_LivePhoto?> _downloadLivePhoto(
     if (imageFileCache != null && videoFileCache != null) {
       return _LivePhoto(imageFileCache, videoFileCache);
     } else {
-      debugPrint("Warning: Either image or video is missing from remoteLive");
+      debugPrint(
+        "Warning: ${file.tag} either image ${imageFileCache == null} or video ${videoFileCache == null} is missing from remoteLive",
+      );
       return null;
     }
   }).catchError((e) {

@@ -34,6 +34,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "addViewers": m1,
         "changeLocationOfSelectedItems": MessageLookupByLibrary.simpleMessage(
             "Change location of selected items?"),
+        "clusteringProgress":
+            MessageLookupByLibrary.simpleMessage("Clustering progress"),
         "contacts": MessageLookupByLibrary.simpleMessage("Contacts"),
         "createCollaborativeLink":
             MessageLookupByLibrary.simpleMessage("Create collaborative link"),
@@ -44,7 +46,16 @@ class MessageLookup extends MessageLookupByLibrary {
         "editsToLocationWillOnlyBeSeenWithinEnte":
             MessageLookupByLibrary.simpleMessage(
                 "Edits to location will only be seen within Ente"),
+        "enterPersonName":
+            MessageLookupByLibrary.simpleMessage("Enter person name"),
+        "faceRecognition":
+            MessageLookupByLibrary.simpleMessage("Face recognition"),
+        "faceRecognitionIndexingDescription": MessageLookupByLibrary.simpleMessage(
+            "Please note that this will result in a higher bandwidth and battery usage until all items are indexed."),
         "fileTypes": MessageLookupByLibrary.simpleMessage("File types"),
+        "foundFaces": MessageLookupByLibrary.simpleMessage("Found faces"),
+        "indexingIsPaused": MessageLookupByLibrary.simpleMessage(
+            "Indexing is paused, will automatically resume when device is ready"),
         "joinDiscord": MessageLookupByLibrary.simpleMessage("Join Discord"),
         "locations": MessageLookupByLibrary.simpleMessage("Locations"),
         "longPressAnEmailToVerifyEndToEndEncryption":
@@ -55,6 +66,8 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Modify your query, or try searching for"),
         "moveToHiddenAlbum":
             MessageLookupByLibrary.simpleMessage("Move to hidden album"),
+        "removePersonLabel":
+            MessageLookupByLibrary.simpleMessage("Remove person label"),
         "search": MessageLookupByLibrary.simpleMessage("Search"),
         "selectALocation":
             MessageLookupByLibrary.simpleMessage("Select a location"),

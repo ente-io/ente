@@ -1,72 +1,62 @@
-import { Box, Dimensions, Point } from "services/face/geom";
-import { EnteFile } from "types/file";
+/** The x and y coordinates of a point. */
+export interface Point {
+    x: number;
+    y: number;
+}
 
-export declare type Cluster = Array<number>;
+/** The dimensions of something, say an image. */
+export interface Dimensions {
+    width: number;
+    height: number;
+}
 
-export declare type Landmark = Point;
+/** A rectangle given by its top left coordinates and dimensions. */
+export interface Box {
+    /** The x coordinate of the the top left (xMin). */
+    x: number;
+    /** The y coodinate of the top left (yMin). */
+    y: number;
+    /** The width of the box. */
+    width: number;
+    /** The height of the box. */
+    height: number;
+}
 
 export interface FaceDetection {
     // box and landmarks is relative to image dimentions stored at mlFileData
     box: Box;
-    landmarks?: Array<Landmark>;
+    landmarks?: Point[];
     probability?: number;
 }
 
-export interface DetectedFace {
+export interface FaceAlignment {
+    /**
+     * An affine transformation matrix (rotation, translation, scaling) to align
+     * the face extracted from the image.
+     */
+    affineMatrix: number[][];
+    /**
+     * The bounding box of the transformed box.
+     *
+     * The affine transformation shifts the original detection box a new,
+     * transformed, box (possibily rotated). This property is the bounding box
+     * of that transformed box. It is in the coordinate system of the original,
+     * full, image on which the detection occurred.
+     */
+    boundingBox: Box;
+}
+
+export interface Face {
     fileId: number;
     detection: FaceDetection;
-}
-
-export interface DetectedFaceWithId extends DetectedFace {
     id: string;
-}
 
-export interface FaceCrop {
-    image: ImageBitmap;
-    // imageBox is relative to image dimentions stored at mlFileData
-    imageBox: Box;
-}
-
-export interface StoredFaceCrop {
-    cacheKey: string;
-    imageBox: Box;
-}
-
-export interface CroppedFace extends DetectedFaceWithId {
-    crop?: StoredFaceCrop;
-}
-
-export interface FaceAlignment {
-    // TODO: remove affine matrix as rotation, size and center
-    // are simple to store and use, affine matrix adds complexity while getting crop
-    affineMatrix: Array<Array<number>>;
-    rotation: number;
-    // size and center is relative to image dimentions stored at mlFileData
-    size: number;
-    center: Point;
-}
-
-export interface AlignedFace extends CroppedFace {
     alignment?: FaceAlignment;
     blurValue?: number;
-}
 
-export declare type FaceEmbedding = Float32Array;
+    embedding?: Float32Array;
 
-export interface FaceWithEmbedding extends AlignedFace {
-    embedding?: FaceEmbedding;
-}
-
-export interface Face extends FaceWithEmbedding {
     personId?: number;
-}
-
-export interface Person {
-    id: number;
-    name?: string;
-    files: Array<number>;
-    displayFaceId?: string;
-    faceCropCacheKey?: string;
 }
 
 export interface MlFileData {
@@ -76,22 +66,3 @@ export interface MlFileData {
     mlVersion: number;
     errorCount: number;
 }
-
-export interface MLSearchConfig {
-    enabled: boolean;
-}
-
-export interface MLSyncFileContext {
-    enteFile: EnteFile;
-    localFile?: globalThis.File;
-
-    oldMlFile?: MlFileData;
-    newMlFile?: MlFileData;
-
-    imageBitmap?: ImageBitmap;
-
-    newDetection?: boolean;
-    newAlignment?: boolean;
-}
-
-export declare type MLIndex = "files" | "people";

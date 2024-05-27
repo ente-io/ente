@@ -1,6 +1,7 @@
 import "package:equatable/equatable.dart";
 import "package:photos/models/api/entity/type.dart";
 
+// LocalEntityData is a class that represents the data of an entity stored locally.
 class LocalEntityData {
   final String id;
   final EntityType type;

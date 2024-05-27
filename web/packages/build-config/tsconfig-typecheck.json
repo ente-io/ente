@@ -67,8 +67,10 @@
         "noUnusedParameters": true,
         "noUnusedLocals": true,
         "noFallthroughCasesInSwitch": true,
-        /* e.g. makes array indexing returns undefined */
+        /* e.g. makes array indexing returns undefined. */
         "noUncheckedIndexedAccess": true,
+        /* Treat optional (?) properties and properties where undefined is a
+           valid value separately */
         "exactOptionalPropertyTypes": true
     }
 }

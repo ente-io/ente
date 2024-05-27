@@ -106,7 +106,7 @@ const handleRead = async (path: string) => {
         res.headers.set("Content-Length", `${fileSize}`);
 
         // Add the file's last modified time (as epoch milliseconds).
-        const mtimeMs = stat.mtimeMs;
+        const mtimeMs = stat.mtime.getTime();
         res.headers.set("X-Last-Modified-Ms", `${mtimeMs}`);
     }
     return res;
@@ -132,6 +132,13 @@ const handleReadZip = async (zipPath: string, entryName: string) => {
     // Close the zip handle when the underlying stream closes.
     stream.on("end", () => void zip.close());
 
+    // While it is documented that entry.time is the modification time,
+    // the units are not mentioned. By seeing the source code, we can
+    // verify that it is indeed epoch milliseconds. See `parseZipTime`
+    // in the node-stream-zip source,
+    // https://github.com/antelle/node-stream-zip/blob/master/node_stream_zip.js
+    const modifiedMs = entry.time;
+
     return new Response(webReadableStream, {
         headers: {
             // We don't know the exact type, but it doesn't really matter, just
@@ -139,12 +146,7 @@ const handleReadZip = async (zipPath: string, entryName: string) => {
             // doesn't tinker with it thinking of it as text.
             "Content-Type": "application/octet-stream",
             "Content-Length": `${entry.size}`,
-            // While it is documented that entry.time is the modification time,
-            // the units are not mentioned. By seeing the source code, we can
-            // verify that it is indeed epoch milliseconds. See `parseZipTime`
-            // in the node-stream-zip source,
-            // https://github.com/antelle/node-stream-zip/blob/master/node_stream_zip.js
-            "X-Last-Modified-Ms": `${entry.time}`,
+            "X-Last-Modified-Ms": `${modifiedMs}`,
         },
     });
 };

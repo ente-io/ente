@@ -227,6 +227,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Ich verstehe, dass ich meine Daten verlieren kann, wenn ich mein Passwort vergesse, da meine Daten <underline>Ende-zu-Ende-verschlüsselt</underline> sind."),
         "activeSessions":
             MessageLookupByLibrary.simpleMessage("Aktive Sitzungen"),
+        "addAName": MessageLookupByLibrary.simpleMessage("Add a name"),
         "addANewEmail": MessageLookupByLibrary.simpleMessage(
             "Neue E-Mail-Adresse hinzufügen"),
         "addCollaborator":
@@ -435,6 +436,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Nach Aufnahmezeit gruppieren"),
         "clubByFileName":
             MessageLookupByLibrary.simpleMessage("Nach Dateiname gruppieren"),
+        "clusteringProgress":
+            MessageLookupByLibrary.simpleMessage("Clustering progress"),
         "codeAppliedPageTitle":
             MessageLookupByLibrary.simpleMessage("Code eingelöst"),
         "codeCopiedToClipboard": MessageLookupByLibrary.simpleMessage(
@@ -675,6 +678,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Passwort eingeben"),
         "enterPasswordToEncrypt": MessageLookupByLibrary.simpleMessage(
             "Gib ein Passwort ein, mit dem wir deine Daten verschlüsseln können"),
+        "enterPersonName":
+            MessageLookupByLibrary.simpleMessage("Enter person name"),
         "enterReferralCode": MessageLookupByLibrary.simpleMessage(
             "Gib den Weiterempfehlungs-Code ein"),
         "enterThe6digitCodeFromnyourAuthenticatorApp":
@@ -699,6 +704,10 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Protokolle exportieren"),
         "exportYourData":
             MessageLookupByLibrary.simpleMessage("Daten exportieren"),
+        "faceRecognition":
+            MessageLookupByLibrary.simpleMessage("Face recognition"),
+        "faceRecognitionIndexingDescription": MessageLookupByLibrary.simpleMessage(
+            "Please note that this will result in a higher bandwidth and battery usage until all items are indexed."),
         "faces": MessageLookupByLibrary.simpleMessage("Gesichter"),
         "failedToApplyCode": MessageLookupByLibrary.simpleMessage(
             "Der Code konnte nicht aktiviert werden"),
@@ -738,11 +747,14 @@ class MessageLookup extends MessageLookupByLibrary {
         "filesBackedUpInAlbum": m23,
         "filesDeleted":
             MessageLookupByLibrary.simpleMessage("Dateien gelöscht"),
+        "findPeopleByName": MessageLookupByLibrary.simpleMessage(
+            "Find people quickly by searching by name"),
         "flip": MessageLookupByLibrary.simpleMessage("Spiegeln"),
         "forYourMemories":
             MessageLookupByLibrary.simpleMessage("Als Erinnerung"),
         "forgotPassword":
             MessageLookupByLibrary.simpleMessage("Passwort vergessen"),
+        "foundFaces": MessageLookupByLibrary.simpleMessage("Found faces"),
         "freeStorageClaimed": MessageLookupByLibrary.simpleMessage(
             "Kostenlos hinzugefügter Speicherplatz"),
         "freeStorageOnReferralSuccess": m24,
@@ -807,6 +819,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Falscher Wiederherstellungs-Schlüssel"),
         "indexedItems":
             MessageLookupByLibrary.simpleMessage("Indizierte Elemente"),
+        "indexingIsPaused": MessageLookupByLibrary.simpleMessage(
+            "Indexing is paused, will automatically resume when device is ready"),
         "insecureDevice":
             MessageLookupByLibrary.simpleMessage("Unsicheres Gerät"),
         "installManually":
@@ -1164,6 +1178,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "removeParticipant":
             MessageLookupByLibrary.simpleMessage("Teilnehmer entfernen"),
         "removeParticipantBody": m43,
+        "removePersonLabel":
+            MessageLookupByLibrary.simpleMessage("Remove person label"),
         "removePublicLink":
             MessageLookupByLibrary.simpleMessage("Öffentlichen Link entfernen"),
         "removeShareItemsWarning": MessageLookupByLibrary.simpleMessage(

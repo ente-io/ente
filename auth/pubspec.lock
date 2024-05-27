@@ -745,6 +745,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.0"
+  hashlib:
+    dependency: transitive
+    description:
+      name: hashlib
+      sha256: "67e640e19cc33070113acab3125cd48ebe480a0300e15554dec089b8878a729f"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.16.0"
+  hashlib_codecs:
+    dependency: transitive
+    description:
+      name: hashlib_codecs
+      sha256: "49e2a471f74b15f1854263e58c2ac11f2b631b5b12c836f9708a35397d36d626"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.2.0"
   hex:
     dependency: transitive
     description:
@@ -1439,6 +1455,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.11.1"
+  steam_totp:
+    dependency: "direct main"
+    description:
+      name: steam_totp
+      sha256: "3c09143c983f6bb05bb53e9232f9d40bbcc01c596ba0273c3e6bb246729abfa1"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.1"
   step_progress_indicator:
     dependency: "direct main"
     description:

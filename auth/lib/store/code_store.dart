@@ -41,9 +41,9 @@ class CodeStore {
         } else {
           code = Code.fromExportJson(decodeJson);
         }
-      } catch (e) {
+      } catch (e, s) {
         code = Code.withError(e, entity.rawData);
-        _logger.severe("Could not parse code", code.err);
+        _logger.severe("Could not parse code", e, s);
       }
       code.generatedID = entity.generatedID;
       code.hasSynced = entity.hasSynced;

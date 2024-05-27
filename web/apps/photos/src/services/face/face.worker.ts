@@ -12,20 +12,16 @@ export class DedicatedMLWorker {
     public async syncLocalFile(
         token: string,
         userID: number,
+        userAgent: string,
         enteFile: EnteFile,
         localFile: globalThis.File,
     ) {
-        mlService.syncLocalFile(token, userID, enteFile, localFile);
+        mlService.syncLocalFile(token, userID, userAgent, enteFile, localFile);
     }
 
-    public async sync(token: string, userID: number) {
+    public async sync(token: string, userID: number, userAgent: string) {
         await downloadManager.init(APPS.PHOTOS, { token });
-        return mlService.sync(token, userID);
-    }
-
-    public async regenerateFaceCrop(token: string, faceID: string) {
-        await downloadManager.init(APPS.PHOTOS, { token });
-        return mlService.regenerateFaceCrop(faceID);
+        return mlService.sync(token, userID, userAgent);
     }
 }
 

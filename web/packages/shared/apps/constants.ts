@@ -1,3 +1,4 @@
+import type { AppName } from "@/next/types/app";
 import { ACCOUNTS_PAGES, AUTH_PAGES, PHOTOS_PAGES } from "../constants/pages";
 
 export enum APPS {
@@ -7,12 +8,27 @@ export enum APPS {
     ACCOUNTS = "ACCOUNTS",
 }
 
+export const appNameToAppNameOld = (appName: AppName): APPS => {
+    switch (appName) {
+        case "account":
+            return APPS.ACCOUNTS;
+        case "albums":
+            return APPS.ALBUMS;
+        case "photos":
+            return APPS.PHOTOS;
+        case "auth":
+            return APPS.AUTH;
+    }
+};
+
 export const CLIENT_PACKAGE_NAMES = new Map([
     [APPS.ALBUMS, "io.ente.albums.web"],
     [APPS.PHOTOS, "io.ente.photos.web"],
     [APPS.AUTH, "io.ente.auth.web"],
     [APPS.ACCOUNTS, "io.ente.accounts.web"],
 ]);
+
+export const clientPackageNamePhotosDesktop = "io.ente.photos.desktop";
 
 export const APP_TITLES = new Map([
     [APPS.ALBUMS, "Ente Albums"],

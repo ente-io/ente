@@ -980,5 +980,12 @@
   "addCollaborators": "{count, plural, zero {Add collaborator} one {Add collaborator} other {Add collaborators}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "Long press an email to verify end to end encryption.",
   "createCollaborativeLink": "Create collaborative link",
-  "search": "Search"
+  "search": "Search",
+  "enterPersonName": "Enter person name",
+  "removePersonLabel": "Remove person label",
+  "faceRecognition": "Face recognition",
+  "faceRecognitionIndexingDescription": "Please note that this will result in a higher bandwidth and battery usage until all items are indexed.",
+  "foundFaces": "Found faces",
+  "clusteringProgress": "Clustering progress",
+  "indexingIsPaused": "Indexing is paused, will automatically resume when device is ready"
 }

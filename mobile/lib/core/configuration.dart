@@ -19,6 +19,7 @@ import 'package:photos/db/upload_locks_db.dart';
 import "package:photos/events/endpoint_updated_event.dart";
 import 'package:photos/events/signed_in_event.dart';
 import 'package:photos/events/user_logged_out_event.dart';
+import "package:photos/face/db.dart";
 import 'package:photos/models/key_attributes.dart';
 import 'package:photos/models/key_gen_result.dart';
 import 'package:photos/models/private_key_attributes.dart';
@@ -34,10 +35,10 @@ import 'package:photos/services/sync_service.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_uploader.dart';
 import 'package:photos/utils/validator_util.dart';
+import "package:photos/utils/wakelock_util.dart";
 import 'package:shared_preferences/shared_preferences.dart';
 import "package:tuple/tuple.dart";
 import 'package:uuid/uuid.dart';
-import 'package:wakelock_plus/wakelock_plus.dart';
 
 class Configuration {
   Configuration._privateConstructor();
@@ -187,6 +188,7 @@ class Configuration {
         : null;
     await CollectionsDB.instance.clearTable();
     await MemoriesDB.instance.clearTable();
+    await FaceMLDataDB.instance.clearTable();
 
     await UploadLocksDB.instance.clearTable();
     await IgnoredFilesService.instance.reset();
@@ -583,7 +585,7 @@ class Configuration {
 
   Future<void> setShouldKeepDeviceAwake(bool value) async {
     await _preferences.setBool(keyShouldKeepDeviceAwake, value);
-    await WakelockPlus.toggle(enable: value);
+    await EnteWakeLock.toggle(enable: value);
   }
 
   Future<void> setShouldBackupVideos(bool value) async {

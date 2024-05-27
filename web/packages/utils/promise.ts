@@ -10,6 +10,10 @@ export const wait = (ms: number) =>
 /**
  * Await the given {@link promise} for {@link timeoutMS} milliseconds. If it
  * does not resolve within {@link timeoutMS}, then reject with a timeout error.
+ *
+ * Note that this does not abort {@link promise} itself - it will still get
+ * resolved to completion, just its result will be ignored if it gets resolved
+ * after we've already timed out.
  */
 export const withTimeout = async <T>(promise: Promise<T>, ms: number) => {
     let timeoutId: ReturnType<typeof setTimeout>;

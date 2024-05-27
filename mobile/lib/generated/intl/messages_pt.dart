@@ -98,7 +98,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "${storageAmountInGB} GB cada vez que alguém se inscrever para um plano pago e aplica o seu código";
 
   static String m25(freeAmount, storageUnit) =>
-      "${freeAmount} ${storageUnit} grátis";
+      "${freeAmount} ${storageUnit} livre";
 
   static String m26(endDate) => "Teste gratuito acaba em ${endDate}";
 
@@ -225,6 +225,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Eu entendo que se eu perder minha senha, posso perder meus dados, já que meus dados são <underline>criptografados de ponta a ponta</underline>."),
         "activeSessions":
             MessageLookupByLibrary.simpleMessage("Sessões ativas"),
+        "addAName": MessageLookupByLibrary.simpleMessage("Adicione um nome"),
         "addANewEmail":
             MessageLookupByLibrary.simpleMessage("Adicionar um novo email"),
         "addCollaborator":
@@ -445,6 +446,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Agrupar por tempo de captura"),
         "clubByFileName": MessageLookupByLibrary.simpleMessage(
             "Agrupar pelo nome de arquivo"),
+        "clusteringProgress":
+            MessageLookupByLibrary.simpleMessage("Progresso de agrupamento"),
         "codeAppliedPageTitle":
             MessageLookupByLibrary.simpleMessage("Código aplicado"),
         "codeCopiedToClipboard": MessageLookupByLibrary.simpleMessage(
@@ -587,7 +590,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "descriptions": MessageLookupByLibrary.simpleMessage("Descrições"),
         "deselectAll": MessageLookupByLibrary.simpleMessage("Desmarcar todos"),
         "designedToOutlive":
-            MessageLookupByLibrary.simpleMessage("Feito para ter logenvidade"),
+            MessageLookupByLibrary.simpleMessage("Feito para ter longevidade"),
         "details": MessageLookupByLibrary.simpleMessage("Detalhes"),
         "devAccountChanged": MessageLookupByLibrary.simpleMessage(
             "A conta de desenvolvedor que usamos para publicar o Ente na App Store foi alterada. Por esse motivo, você precisará fazer entrar novamente.\n\nPedimos desculpas pelo inconveniente, mas isso era inevitável."),
@@ -690,6 +693,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "enterPassword": MessageLookupByLibrary.simpleMessage("Digite a senha"),
         "enterPasswordToEncrypt": MessageLookupByLibrary.simpleMessage(
             "Insira a senha para criptografar seus dados"),
+        "enterPersonName":
+            MessageLookupByLibrary.simpleMessage("Inserir nome da pessoa"),
         "enterReferralCode": MessageLookupByLibrary.simpleMessage(
             "Insira o código de referência"),
         "enterThe6digitCodeFromnyourAuthenticatorApp":
@@ -714,6 +719,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "exportLogs": MessageLookupByLibrary.simpleMessage("Exportar logs"),
         "exportYourData":
             MessageLookupByLibrary.simpleMessage("Exportar seus dados"),
+        "faceRecognition":
+            MessageLookupByLibrary.simpleMessage("Reconhecimento facial"),
+        "faceRecognitionIndexingDescription": MessageLookupByLibrary.simpleMessage(
+            "Por favor, note que isso resultará em uma largura de banda maior e uso de bateria até que todos os itens sejam indexados."),
         "faces": MessageLookupByLibrary.simpleMessage("Rostos"),
         "failedToApplyCode":
             MessageLookupByLibrary.simpleMessage("Falha ao aplicar o código"),
@@ -755,11 +764,15 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Arquivos excluídos"),
         "filesSavedToGallery":
             MessageLookupByLibrary.simpleMessage("Arquivos salvos na galeria"),
+        "findPeopleByName": MessageLookupByLibrary.simpleMessage(
+            "Encontre pessoas rapidamente por nome"),
         "flip": MessageLookupByLibrary.simpleMessage("Inverter"),
         "forYourMemories":
             MessageLookupByLibrary.simpleMessage("para suas memórias"),
         "forgotPassword":
             MessageLookupByLibrary.simpleMessage("Esqueceu sua senha"),
+        "foundFaces":
+            MessageLookupByLibrary.simpleMessage("Rostos encontrados"),
         "freeStorageClaimed": MessageLookupByLibrary.simpleMessage(
             "Armazenamento gratuito reivindicado"),
         "freeStorageOnReferralSuccess": m24,
@@ -823,6 +836,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "incorrectRecoveryKeyTitle": MessageLookupByLibrary.simpleMessage(
             "Chave de recuperação incorreta"),
         "indexedItems": MessageLookupByLibrary.simpleMessage("Itens indexados"),
+        "indexingIsPaused": MessageLookupByLibrary.simpleMessage(
+            "Indexing is paused, will automatically resume when device is ready"),
         "insecureDevice":
             MessageLookupByLibrary.simpleMessage("Dispositivo não seguro"),
         "installManually":
@@ -1057,6 +1072,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "pendingItems": MessageLookupByLibrary.simpleMessage("Itens pendentes"),
         "pendingSync":
             MessageLookupByLibrary.simpleMessage("Sincronização pendente"),
+        "people": MessageLookupByLibrary.simpleMessage("Pessoas"),
         "peopleUsingYourCode":
             MessageLookupByLibrary.simpleMessage("Pessoas que usam seu código"),
         "permDeleteWarning": MessageLookupByLibrary.simpleMessage(
@@ -1190,6 +1206,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "removeParticipant":
             MessageLookupByLibrary.simpleMessage("Remover participante"),
         "removeParticipantBody": m43,
+        "removePersonLabel":
+            MessageLookupByLibrary.simpleMessage("Remover etiqueta da pessoa"),
         "removePublicLink":
             MessageLookupByLibrary.simpleMessage("Remover link público"),
         "removeShareItemsWarning": MessageLookupByLibrary.simpleMessage(
@@ -1253,7 +1271,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "searchDatesEmptySection": MessageLookupByLibrary.simpleMessage(
             "Pesquisar por data, mês ou ano"),
         "searchFaceEmptySection": MessageLookupByLibrary.simpleMessage(
-            "Encontre todas as fotos de uma pessoa"),
+            "Pessoas serão exibidas aqui uma vez que a indexação é feita"),
         "searchFileTypesAndNamesEmptySection":
             MessageLookupByLibrary.simpleMessage("Tipos de arquivo e nomes"),
         "searchHint1": MessageLookupByLibrary.simpleMessage(

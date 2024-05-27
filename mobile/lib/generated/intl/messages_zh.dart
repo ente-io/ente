@@ -382,6 +382,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "close": MessageLookupByLibrary.simpleMessage("关闭"),
         "clubByCaptureTime": MessageLookupByLibrary.simpleMessage("按拍摄时间分组"),
         "clubByFileName": MessageLookupByLibrary.simpleMessage("按文件名排序"),
+        "clusteringProgress":
+            MessageLookupByLibrary.simpleMessage("Clustering progress"),
         "codeAppliedPageTitle": MessageLookupByLibrary.simpleMessage("代码已应用"),
         "codeCopiedToClipboard":
             MessageLookupByLibrary.simpleMessage("代码已复制到剪贴板"),
@@ -543,7 +545,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "emailVerificationToggle":
             MessageLookupByLibrary.simpleMessage("电子邮件验证"),
         "emailYourLogs": MessageLookupByLibrary.simpleMessage("通过电子邮件发送您的日志"),
-        "empty": MessageLookupByLibrary.simpleMessage("空的"),
+        "empty": MessageLookupByLibrary.simpleMessage("清空"),
         "emptyTrash": MessageLookupByLibrary.simpleMessage("要清空回收站吗？"),
         "enableMaps": MessageLookupByLibrary.simpleMessage("启用地图"),
         "enableMapsDesc": MessageLookupByLibrary.simpleMessage(
@@ -592,6 +594,10 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("此链接已过期。请选择新的过期时间或禁用链接有效期。"),
         "exportLogs": MessageLookupByLibrary.simpleMessage("导出日志"),
         "exportYourData": MessageLookupByLibrary.simpleMessage("导出您的数据"),
+        "faceRecognition":
+            MessageLookupByLibrary.simpleMessage("Face recognition"),
+        "faceRecognitionIndexingDescription": MessageLookupByLibrary.simpleMessage(
+            "Please note that this will result in a higher bandwidth and battery usage until all items are indexed."),
         "faces": MessageLookupByLibrary.simpleMessage("人脸"),
         "failedToApplyCode": MessageLookupByLibrary.simpleMessage("无法使用此代码"),
         "failedToCancel": MessageLookupByLibrary.simpleMessage("取消失败"),
@@ -626,6 +632,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "flip": MessageLookupByLibrary.simpleMessage("上下翻转"),
         "forYourMemories": MessageLookupByLibrary.simpleMessage("为您的回忆"),
         "forgotPassword": MessageLookupByLibrary.simpleMessage("忘记密码"),
+        "foundFaces": MessageLookupByLibrary.simpleMessage("Found faces"),
         "freeStorageClaimed": MessageLookupByLibrary.simpleMessage("已领取的免费存储"),
         "freeStorageOnReferralSuccess": m24,
         "freeStorageSpace": m25,
@@ -679,6 +686,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "incorrectRecoveryKeyTitle":
             MessageLookupByLibrary.simpleMessage("不正确的恢复密钥"),
         "indexedItems": MessageLookupByLibrary.simpleMessage("已索引项目"),
+        "indexingIsPaused": MessageLookupByLibrary.simpleMessage(
+            "Indexing is paused, will automatically resume when device is ready"),
         "insecureDevice": MessageLookupByLibrary.simpleMessage("设备不安全"),
         "installManually": MessageLookupByLibrary.simpleMessage("手动安装"),
         "invalidEmailAddress":

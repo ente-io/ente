@@ -39,6 +39,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "cancel": MessageLookupByLibrary.simpleMessage("Avbryt"),
         "changeLocationOfSelectedItems": MessageLookupByLibrary.simpleMessage(
             "Change location of selected items?"),
+        "clusteringProgress":
+            MessageLookupByLibrary.simpleMessage("Clustering progress"),
         "confirmAccountDeletion":
             MessageLookupByLibrary.simpleMessage("Bekreft sletting av konto"),
         "confirmDeletePrompt": MessageLookupByLibrary.simpleMessage(
@@ -57,12 +59,21 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage(
                 "Edits to location will only be seen within Ente"),
         "email": MessageLookupByLibrary.simpleMessage("E-post"),
+        "enterPersonName":
+            MessageLookupByLibrary.simpleMessage("Enter person name"),
         "enterValidEmail": MessageLookupByLibrary.simpleMessage(
             "Vennligst skriv inn en gyldig e-postadresse."),
         "enterYourEmailAddress": MessageLookupByLibrary.simpleMessage(
             "Skriv inn e-postadressen din"),
+        "faceRecognition":
+            MessageLookupByLibrary.simpleMessage("Face recognition"),
+        "faceRecognitionIndexingDescription": MessageLookupByLibrary.simpleMessage(
+            "Please note that this will result in a higher bandwidth and battery usage until all items are indexed."),
         "feedback": MessageLookupByLibrary.simpleMessage("Tilbakemelding"),
         "fileTypes": MessageLookupByLibrary.simpleMessage("File types"),
+        "foundFaces": MessageLookupByLibrary.simpleMessage("Found faces"),
+        "indexingIsPaused": MessageLookupByLibrary.simpleMessage(
+            "Indexing is paused, will automatically resume when device is ready"),
         "invalidEmailAddress":
             MessageLookupByLibrary.simpleMessage("Ugyldig e-postadresse"),
         "joinDiscord": MessageLookupByLibrary.simpleMessage("Join Discord"),
@@ -77,6 +88,8 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Modify your query, or try searching for"),
         "moveToHiddenAlbum":
             MessageLookupByLibrary.simpleMessage("Move to hidden album"),
+        "removePersonLabel":
+            MessageLookupByLibrary.simpleMessage("Remove person label"),
         "search": MessageLookupByLibrary.simpleMessage("Search"),
         "selectALocation":
             MessageLookupByLibrary.simpleMessage("Select a location"),

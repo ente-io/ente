@@ -10,6 +10,7 @@ import 'package:photos/ui/components/buttons/icon_button_widget.dart';
 enum NotificationType {
   warning,
   banner,
+  greenBanner,
   goldenBanner,
   notice,
 }
@@ -61,6 +62,18 @@ class NotificationWidget extends StatelessWidget {
       case NotificationType.goldenBanner:
         backgroundGradient = LinearGradient(
           colors: [colorScheme.golden700, colorScheme.golden500],
+          stops: const [0.25, 1],
+          begin: Alignment.bottomCenter,
+          end: Alignment.topCenter,
+        );
+        boxShadow = Theme.of(context).colorScheme.enteTheme.shadowMenu;
+        break;
+      case NotificationType.greenBanner:
+        backgroundGradient = LinearGradient(
+          colors: [
+            getEnteColorScheme(context).primary700,
+            getEnteColorScheme(context).primary500,
+          ],
           stops: const [0.25, 1],
           begin: Alignment.bottomCenter,
           end: Alignment.topCenter,

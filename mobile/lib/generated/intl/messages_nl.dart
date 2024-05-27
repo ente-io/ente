@@ -447,6 +447,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Samenvoegen op tijd"),
         "clubByFileName":
             MessageLookupByLibrary.simpleMessage("Samenvoegen op bestandsnaam"),
+        "clusteringProgress":
+            MessageLookupByLibrary.simpleMessage("Clustering progress"),
         "codeAppliedPageTitle":
             MessageLookupByLibrary.simpleMessage("Code toegepast"),
         "codeCopiedToClipboard": MessageLookupByLibrary.simpleMessage(
@@ -723,6 +725,10 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Logboek exporteren"),
         "exportYourData":
             MessageLookupByLibrary.simpleMessage("Exporteer je gegevens"),
+        "faceRecognition":
+            MessageLookupByLibrary.simpleMessage("Face recognition"),
+        "faceRecognitionIndexingDescription": MessageLookupByLibrary.simpleMessage(
+            "Please note that this will result in a higher bandwidth and battery usage until all items are indexed."),
         "faces": MessageLookupByLibrary.simpleMessage("Gezichten"),
         "failedToApplyCode":
             MessageLookupByLibrary.simpleMessage("Code toepassen mislukt"),
@@ -771,6 +777,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("voor uw herinneringen"),
         "forgotPassword":
             MessageLookupByLibrary.simpleMessage("Wachtwoord vergeten"),
+        "foundFaces": MessageLookupByLibrary.simpleMessage("Found faces"),
         "freeStorageClaimed":
             MessageLookupByLibrary.simpleMessage("Gratis opslag geclaimd"),
         "freeStorageOnReferralSuccess": m24,
@@ -833,6 +840,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Onjuiste herstelsleutel"),
         "indexedItems":
             MessageLookupByLibrary.simpleMessage("Geïndexeerde bestanden"),
+        "indexingIsPaused": MessageLookupByLibrary.simpleMessage(
+            "Indexing is paused, will automatically resume when device is ready"),
         "insecureDevice":
             MessageLookupByLibrary.simpleMessage("Onveilig apparaat"),
         "installManually":

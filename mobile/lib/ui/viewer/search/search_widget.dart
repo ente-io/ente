@@ -2,10 +2,12 @@ import "dart:async";
 
 import "package:flutter/material.dart";
 import "package:flutter/scheduler.dart";
+import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/clear_and_unfocus_search_bar_event.dart";
 import "package:photos/events/tab_changed_event.dart";
 import "package:photos/generated/l10n.dart";
+import "package:photos/models/search/generic_search_result.dart";
 import "package:photos/models/search/index_of_indexed_stack.dart";
 import "package:photos/models/search/search_result.dart";
 import "package:photos/services/search_service.dart";
@@ -41,6 +43,7 @@ class SearchWidgetState extends State<SearchWidget> {
   TextEditingController textController = TextEditingController();
   late final StreamSubscription<ClearAndUnfocusSearchBar>
       _clearAndUnfocusSearchBar;
+  late final Logger _logger = Logger("SearchWidgetState");
 
   @override
   void initState() {
@@ -200,7 +203,7 @@ class SearchWidgetState extends State<SearchWidget> {
     String query,
   ) {
     int resultCount = 0;
-    final maxResultCount = _isYearValid(query) ? 11 : 10;
+    final maxResultCount = _isYearValid(query) ? 12 : 11;
     final streamController = StreamController<List<SearchResult>>();
 
     if (query.isEmpty) {
@@ -214,6 +217,11 @@ class SearchWidgetState extends State<SearchWidget> {
       resultCount++;
       if (resultCount == maxResultCount) {
         streamController.close();
+      }
+      if (resultCount > maxResultCount) {
+        _logger.warning(
+          "More results than expected. Expected: $maxResultCount, actual: $resultCount",
+        );
       }
     }
 
@@ -250,6 +258,18 @@ class SearchWidgetState extends State<SearchWidget> {
     _searchService.getLocationResults(query).then(
       (locationResult) {
         onResultsReceived(locationResult);
+      },
+    );
+
+    _searchService.getAllFace(null).then(
+      (faceResult) {
+        final List<GenericSearchResult> filteredResults = [];
+        for (final result in faceResult) {
+          if (result.name().toLowerCase().contains(query.toLowerCase())) {
+            filteredResults.add(result);
+          }
+        }
+        onResultsReceived(filteredResults);
       },
     );
 

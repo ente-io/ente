@@ -13,12 +13,14 @@ class SearchResultWidget extends StatelessWidget {
   final SearchResult searchResult;
   final Future<int>? resultCount;
   final Function? onResultTap;
+  final Map<String, dynamic>? params;
 
   const SearchResultWidget(
     this.searchResult, {
     Key? key,
     this.resultCount,
     this.onResultTap,
+    this.params,
   }) : super(key: key);
 
   @override
@@ -42,6 +44,7 @@ class SearchResultWidget extends StatelessWidget {
             SearchThumbnailWidget(
               searchResult.previewThumbnail(),
               heroTagPrefix,
+              searchResult: searchResult,
             ),
             const SizedBox(width: 12),
             Padding(
@@ -143,6 +146,8 @@ class SearchResultWidget extends StatelessWidget {
         return "Magic";
       case ResultType.shared:
         return "Shared";
+      case ResultType.faces:
+        return "Person";
       default:
         return type.name.toUpperCase();
     }

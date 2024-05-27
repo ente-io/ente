@@ -1,6 +1,8 @@
 import { FILE_TYPE } from "@/media/file-type";
+import { ensureElectron } from "@/next/electron";
 import log from "@/next/log";
 import { ComlinkWorker } from "@/next/worker/comlink-worker";
+import { clientPackageNamePhotosDesktop } from "@ente/shared/apps/constants";
 import { eventBus, Events } from "@ente/shared/events";
 import { getToken, getUserID } from "@ente/shared/storage/localStorage/helpers";
 import debounce from "debounce";
@@ -9,7 +11,6 @@ import { createFaceComlinkWorker } from "services/face";
 import mlIDbStorage from "services/face/db";
 import type { DedicatedMLWorker } from "services/face/face.worker";
 import { EnteFile } from "types/file";
-import { logQueueStats } from "./machineLearningService";
 
 export type JobState = "Scheduled" | "Running" | "NotScheduled";
 
@@ -228,8 +229,15 @@ class MLWorkManager {
             this.stopSyncJob();
             const token = getToken();
             const userID = getUserID();
+            const userAgent = await getUserAgent();
             const mlWorker = await this.getLiveSyncWorker();
-            return mlWorker.syncLocalFile(token, userID, enteFile, localFile);
+            return mlWorker.syncLocalFile(
+                token,
+                userID,
+                userAgent,
+                enteFile,
+                localFile,
+            );
         });
     }
 
@@ -267,9 +275,10 @@ class MLWorkManager {
 
             const token = getToken();
             const userID = getUserID();
+            const userAgent = await getUserAgent();
             const jobWorkerProxy = await this.getSyncJobWorker();
 
-            return await jobWorkerProxy.sync(token, userID);
+            return await jobWorkerProxy.sync(token, userID, userAgent);
             // this.terminateSyncJobWorker();
             // TODO: redirect/refresh to gallery in case of session_expired, stop ml sync job
         } catch (e) {
@@ -309,3 +318,22 @@ class MLWorkManager {
 }
 
 export default new MLWorkManager();
+
+export function logQueueStats(queue: PQueue, name: string) {
+    queue.on("active", () =>
+        log.info(
+            `queuestats: ${name}: Active, Size: ${queue.size} Pending: ${queue.pending}`,
+        ),
+    );
+    queue.on("idle", () => log.info(`queuestats: ${name}: Idle`));
+    queue.on("error", (error) =>
+        console.error(`queuestats: ${name}: Error, `, error),
+    );
+}
+
+const getUserAgent = async () => {
+    const electron = ensureElectron();
+    const name = clientPackageNamePhotosDesktop;
+    const version = await electron.appVersion();
+    return `${name}/${version}`;
+};

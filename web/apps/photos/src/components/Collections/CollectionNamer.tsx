@@ -1,6 +1,6 @@
 import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
 import SingleInputForm, {
-    SingleInputFormProps,
+    type SingleInputFormProps,
 } from "@ente/shared/components/SingleInputForm";
 import { t } from "i18next";
 import React from "react";

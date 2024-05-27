@@ -47,9 +47,9 @@ Future<File?> downloadAndDecrypt(
       ),
       onReceiveProgress: (a, b) {
         if (kDebugMode && a >= 0 && b >= 0) {
-          _logger.fine(
-            "$logPrefix download progress: ${formatBytes(a)} / ${formatBytes(b)}",
-          );
+          // _logger.fine(
+          //   "$logPrefix download progress: ${formatBytes(a)} / ${formatBytes(b)}",
+          // );
         }
         progressCallback?.call(a, b);
       },
@@ -89,7 +89,8 @@ Future<File?> downloadAndDecrypt(
         getFileKey(file),
       );
       fakeProgress?.stop();
-      _logger.info('$logPrefix decryption completed');
+      _logger
+          .info('$logPrefix decryption completed (genID ${file.generatedID})');
     } catch (e, s) {
       fakeProgress?.stop();
       _logger.severe("Critical: $logPrefix failed to decrypt", e, s);

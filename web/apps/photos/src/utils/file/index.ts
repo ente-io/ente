@@ -8,7 +8,7 @@ import { workerBridge } from "@/next/worker/worker-bridge";
 import { withTimeout } from "@/utils/promise";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
-import { User } from "@ente/shared/user/types";
+import type { User } from "@ente/shared/user/types";
 import { downloadUsingAnchor } from "@ente/shared/utils";
 import { t } from "i18next";
 import isElectron from "is-electron";
@@ -260,15 +260,6 @@ export async function decryptFile(
         log.error("file decryption failed", e);
         throw e;
     }
-}
-
-export function generateStreamFromArrayBuffer(data: Uint8Array) {
-    return new ReadableStream({
-        async start(controller: ReadableStreamDefaultController) {
-            controller.enqueue(data);
-            controller.close();
-        },
-    });
 }
 
 /**
@@ -649,7 +640,7 @@ async function downloadFileDesktop(
             imageFileName,
             fs.exists,
         );
-        const imageStream = generateStreamFromArrayBuffer(imageData);
+        const imageStream = new Response(imageData).body;
         await writeStream(
             electron,
             `${downloadDir}/${imageExportName}`,
@@ -661,7 +652,7 @@ async function downloadFileDesktop(
                 videoFileName,
                 fs.exists,
             );
-            const videoStream = generateStreamFromArrayBuffer(videoData);
+            const videoStream = new Response(videoData).body;
             await writeStream(
                 electron,
                 `${downloadDir}/${videoExportName}`,

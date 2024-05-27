@@ -4034,10 +4034,10 @@ class S {
     );
   }
 
-  /// `Free trial valid till {endDate}.\nYou can purchase a paid plan afterwards.`
+  /// `Free trial valid till {endDate}.\nYou can choose a paid plan afterwards.`
   String playStoreFreeTrialValidTill(Object endDate) {
     return Intl.message(
-      'Free trial valid till $endDate.\nYou can purchase a paid plan afterwards.',
+      'Free trial valid till $endDate.\nYou can choose a paid plan afterwards.',
       name: 'playStoreFreeTrialValidTill',
       desc: '',
       args: [endDate],
@@ -6969,10 +6969,10 @@ class S {
     );
   }
 
-  /// `Find all photos of a person`
+  /// `Persons will be shown here once indexing is done`
   String get searchFaceEmptySection {
     return Intl.message(
-      'Find all photos of a person',
+      'Persons will be shown here once indexing is done',
       name: 'searchFaceEmptySection',
       desc: '',
       args: [],
@@ -8168,6 +8168,16 @@ class S {
     );
   }
 
+  /// `People`
+  String get people {
+    return Intl.message(
+      'People',
+      name: 'people',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Contents`
   String get contents {
     return Intl.message(
@@ -8388,26 +8398,6 @@ class S {
     );
   }
 
-  /// `Auto pair`
-  String get autoPair {
-    return Intl.message(
-      'Auto pair',
-      name: 'autoPair',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Pair with PIN`
-  String get pairWithPin {
-    return Intl.message(
-      'Pair with PIN',
-      name: 'pairWithPin',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Device not found`
   String get deviceNotFound {
     return Intl.message(
@@ -8463,6 +8453,26 @@ class S {
     return Intl.message(
       'Descriptions',
       name: 'descriptions',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add a name`
+  String get addAName {
+    return Intl.message(
+      'Add a name',
+      name: 'addAName',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Find people quickly by name`
+  String get findPeopleByName {
+    return Intl.message(
+      'Find people quickly by name',
+      name: 'findPeopleByName',
       desc: '',
       args: [],
     );
@@ -8594,6 +8604,26 @@ class S {
     );
   }
 
+  /// `Enter person name`
+  String get enterPersonName {
+    return Intl.message(
+      'Enter person name',
+      name: 'enterPersonName',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Remove person label`
+  String get removePersonLabel {
+    return Intl.message(
+      'Remove person label',
+      name: 'removePersonLabel',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Auto pair works only with devices that support Chromecast.`
   String get autoPairDesc {
     return Intl.message(
@@ -8699,6 +8729,76 @@ class S {
     return Intl.message(
       'Pairing complete',
       name: 'pairingComplete',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Auto pair`
+  String get autoPair {
+    return Intl.message(
+      'Auto pair',
+      name: 'autoPair',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Pair with PIN`
+  String get pairWithPin {
+    return Intl.message(
+      'Pair with PIN',
+      name: 'pairWithPin',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Face recognition`
+  String get faceRecognition {
+    return Intl.message(
+      'Face recognition',
+      name: 'faceRecognition',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please note that this will result in a higher bandwidth and battery usage until all items are indexed.`
+  String get faceRecognitionIndexingDescription {
+    return Intl.message(
+      'Please note that this will result in a higher bandwidth and battery usage until all items are indexed.',
+      name: 'faceRecognitionIndexingDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Found faces`
+  String get foundFaces {
+    return Intl.message(
+      'Found faces',
+      name: 'foundFaces',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Clustering progress`
+  String get clusteringProgress {
+    return Intl.message(
+      'Clustering progress',
+      name: 'clusteringProgress',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Indexing is paused, will automatically resume when device is ready`
+  String get indexingIsPaused {
+    return Intl.message(
+      'Indexing is paused, will automatically resume when device is ready',
+      name: 'indexingIsPaused',
       desc: '',
       args: [],
     );

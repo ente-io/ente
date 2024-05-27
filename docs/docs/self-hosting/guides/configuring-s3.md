@@ -78,3 +78,23 @@ To summarize:
 Set the S3 bucket `endpoint` in `credentials.yaml` to a `yourserverip:3200` or
 some such IP/hostname that accessible from both where you are running the Ente
 clients (e.g. the mobile app) and also from within the Docker compose cluster.
+
+### 403 Forbidden
+
+If museum (`2`) is able to make a network connection to your S3 bucket (`3`) but
+uploads are still failing, it could be a credentials or permissions issue. A
+telltale sign of this is that in the museum logs you can see `403 Forbidden`
+errors about it not able to find the size of a file even though the
+corresponding object exists in the S3 bucket.
+
+To fix these, you should ensure the following:
+
+1.  The bucket CORS rules do not allow museum to access these objects.
+
+    > For uploading files from the browser, you will need to currently set
+    > allowedOrigins to "\*", and allow the "X-Auth-Token", "X-Client-Package"
+    > headers configuration too.
+    > [Here is an example of a working configuration](https://github.com/ente-io/ente/discussions/1764#discussioncomment-9478204).
+
+2.  The credentials are not being picked up (you might be setting the correct
+    creds, but not in the place where museum picks them from).

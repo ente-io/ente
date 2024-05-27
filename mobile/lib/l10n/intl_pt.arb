@@ -987,7 +987,7 @@
   "fileTypesAndNames": "Tipos de arquivo e nomes",
   "location": "Local",
   "moments": "Momentos",
-  "searchFaceEmptySection": "Encontre todas as fotos de uma pessoa",
+  "searchFaceEmptySection": "Pessoas serão exibidas aqui uma vez que a indexação é feita",
   "searchDatesEmptySection": "Pesquisar por data, mês ou ano",
   "searchLocationEmptySection": "Fotos de grupo que estão sendo tiradas em algum raio da foto",
   "searchPeopleEmptySection": "Convide pessoas e você verá todas as fotos compartilhadas por elas aqui",
@@ -1042,7 +1042,7 @@
   "@storageUsageInfo": {
     "description": "Example: 1.2 GB of 2 GB used or 100 GB or 2TB used"
   },
-  "freeStorageSpace": "{freeAmount} {storageUnit} grátis",
+  "freeStorageSpace": "{freeAmount} {storageUnit} livre",
   "appVersion": "Versão: {versionValue}",
   "verifyIDLabel": "Verificar",
   "fileInfoAddDescHint": "Adicionar descrição...",
@@ -1171,6 +1171,7 @@
     }
   },
   "faces": "Rostos",
+  "people": "Pessoas",
   "contents": "Conteúdos",
   "addNew": "Adicionar novo",
   "@addNew": {
@@ -1196,14 +1197,14 @@
   "verifyPasskey": "Verificar chave de acesso",
   "playOnTv": "Reproduzir álbum na TV",
   "pair": "Parear",
-  "autoPair": "Pareamento automático",
-  "pairWithPin": "Parear com PIN",
   "deviceNotFound": "Dispositivo não encontrado",
   "castInstruction": "Visite cast.ente.io no dispositivo que você deseja parear.\n\ndigite o código abaixo para reproduzir o álbum em sua TV.",
   "deviceCodeHint": "Insira o código",
   "joinDiscord": "Junte-se ao Discord",
   "locations": "Locais",
   "descriptions": "Descrições",
+  "addAName": "Adicione um nome",
+  "findPeopleByName": "Encontre pessoas rapidamente por nome",
   "addViewers": "{count, plural, zero {Adicionar visualizador} one {Adicionar visualizador} other {Adicionar Visualizadores}}",
   "addCollaborators": "{count, plural, zero {Adicionar colaborador} one {Adicionar coloborador} other {Adicionar colaboradores}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "Pressione e segure um e-mail para verificar a criptografia de ponta a ponta.",
@@ -1216,6 +1217,8 @@
   "customEndpoint": "Conectado a {endpoint}",
   "createCollaborativeLink": "Criar link colaborativo",
   "search": "Pesquisar",
+  "enterPersonName": "Inserir nome da pessoa",
+  "removePersonLabel": "Remover etiqueta da pessoa",
   "autoPairDesc": "O pareamento automático funciona apenas com dispositivos que suportam o Chromecast.",
   "manualPairDesc": "Parear com o PIN funciona com qualquer tela que você deseja ver o seu álbum ativado.",
   "connectToDevice": "Conectar ao dispositivo",
@@ -1226,5 +1229,12 @@
   "stopCastingBody": "Você quer parar a transmissão?",
   "castIPMismatchTitle": "Falha ao transmitir álbum",
   "castIPMismatchBody": "Certifique-se de estar na mesma rede que a TV.",
-  "pairingComplete": "Pareamento concluído"
+  "pairingComplete": "Pareamento concluído",
+  "autoPair": "Pareamento automático",
+  "pairWithPin": "Parear com PIN",
+  "faceRecognition": "Reconhecimento facial",
+  "faceRecognitionIndexingDescription": "Por favor, note que isso resultará em uma largura de banda maior e uso de bateria até que todos os itens sejam indexados.",
+  "foundFaces": "Rostos encontrados",
+  "clusteringProgress": "Progresso de agrupamento",
+  "indexingIsPaused": "Indexing is paused, will automatically resume when device is ready"
 }

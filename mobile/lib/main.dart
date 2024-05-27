@@ -21,6 +21,7 @@ import 'package:photos/core/errors.dart';
 import 'package:photos/core/network/network.dart';
 import 'package:photos/db/upload_locks_db.dart';
 import 'package:photos/ente_theme_data.dart';
+import "package:photos/face/db.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/service_locator.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
@@ -32,6 +33,9 @@ import 'package:photos/services/home_widget_service.dart';
 import 'package:photos/services/local_file_update_service.dart';
 import 'package:photos/services/local_sync_service.dart';
 import "package:photos/services/location_service.dart";
+import 'package:photos/services/machine_learning/face_ml/face_ml_service.dart';
+import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
+import 'package:photos/services/machine_learning/file_ml/remote_fileml_service.dart';
 import "package:photos/services/machine_learning/machine_learning_controller.dart";
 import 'package:photos/services/machine_learning/semantic_search/semantic_search_service.dart';
 import 'package:photos/services/memories_service.dart';
@@ -47,6 +51,7 @@ import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/tools/app_lock.dart';
 import 'package:photos/ui/tools/lock_screen.dart';
 import 'package:photos/utils/crypto_util.dart';
+import "package:photos/utils/email_util.dart";
 import 'package:photos/utils/file_uploader.dart';
 import 'package:photos/utils/local_settings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -176,6 +181,16 @@ void _headlessTaskHandler(HeadlessTask task) {
 }
 
 Future<void> _init(bool isBackground, {String via = ''}) async {
+  bool initComplete = false;
+  Future.delayed(const Duration(seconds: 15), () {
+    if (!initComplete && !isBackground) {
+      sendLogsForInit(
+        "support@ente.io",
+        "Stuck on splash screen for >= 15 seconds",
+        null,
+      );
+    }
+  });
   _isProcessRunning = true;
   _logger.info("Initializing...  inBG =$isBackground via: $via");
   final SharedPreferences preferences = await SharedPreferences.getInstance();
@@ -213,6 +228,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
   LocalFileUpdateService.instance.init(preferences);
   SearchService.instance.init();
   StorageBonusService.instance.init(preferences);
+  RemoteFileMLService.instance.init(preferences);
   if (!isBackground &&
       Platform.isAndroid &&
       await HomeWidgetService.instance.countHomeWidgets() == 0) {
@@ -233,10 +249,23 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
   // Can not including existing tf/ml binaries as they are not being built
   // from source.
   // See https://gitlab.com/fdroid/fdroiddata/-/merge_requests/12671#note_1294346819
-  // if (!UpdateService.instance.isFdroidFlavor()) {
-  //   unawaited(ObjectDetectionService.instance.init());
-  // }
+  if (!UpdateService.instance.isFdroidFlavor()) {
+    // unawaited(ObjectDetectionService.instance.init());
+    if (flagService.faceSearchEnabled) {
+      unawaited(FaceMlService.instance.init());
+    } else {
+      if (LocalSettings.instance.isFaceIndexingEnabled) {
+        unawaited(LocalSettings.instance.toggleFaceIndexing());
+      }
+    }
+  }
+  PersonService.init(
+    EntityService.instance,
+    FaceMLDataDB.instance,
+    preferences,
+  );
 
+  initComplete = true;
   _logger.info("Initialization done");
 }
 

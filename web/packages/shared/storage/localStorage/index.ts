@@ -29,19 +29,10 @@ export enum LS_KEYS {
     CLIENT_PACKAGE = "clientPackage",
 }
 
-export const setData = (key: LS_KEYS, value: object) => {
-    if (typeof localStorage === "undefined") {
-        return null;
-    }
+export const setData = (key: LS_KEYS, value: object) =>
     localStorage.setItem(key, JSON.stringify(value));
-};
 
-export const removeData = (key: LS_KEYS) => {
-    if (typeof localStorage === "undefined") {
-        return null;
-    }
-    localStorage.removeItem(key);
-};
+export const removeData = (key: LS_KEYS) => localStorage.removeItem(key);
 
 export const getData = (key: LS_KEYS) => {
     try {
@@ -60,9 +51,4 @@ export const getData = (key: LS_KEYS) => {
     }
 };
 
-export const clearData = () => {
-    if (typeof localStorage === "undefined") {
-        return null;
-    }
-    localStorage.clear();
-};
+export const clearData = () => localStorage.clear();

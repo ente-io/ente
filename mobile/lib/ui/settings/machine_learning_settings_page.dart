@@ -1,11 +1,17 @@
 import "dart:async";
+import "dart:math" show max, min;
 
 import "package:flutter/material.dart";
 import "package:intl/intl.dart";
+import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import 'package:photos/events/embedding_updated_event.dart';
+import "package:photos/face/db.dart";
 import "package:photos/generated/l10n.dart";
+import "package:photos/models/ml/ml_versions.dart";
 import "package:photos/service_locator.dart";
+import "package:photos/services/machine_learning/face_ml/face_ml_service.dart";
+import "package:photos/services/machine_learning/machine_learning_controller.dart";
 import 'package:photos/services/machine_learning/semantic_search/frameworks/ml_framework.dart';
 import 'package:photos/services/machine_learning/semantic_search/semantic_search_service.dart';
 import "package:photos/services/remote_assets_service.dart";
@@ -21,6 +27,10 @@ import "package:photos/ui/components/title_bar_widget.dart";
 import "package:photos/ui/components/toggle_switch_widget.dart";
 import "package:photos/utils/data_util.dart";
 import "package:photos/utils/local_settings.dart";
+import "package:photos/utils/ml_util.dart";
+import "package:photos/utils/wakelock_util.dart";
+
+final _logger = Logger("MachineLearningSettingsPage");
 
 class MachineLearningSettingsPage extends StatefulWidget {
   const MachineLearningSettingsPage({super.key});
@@ -33,6 +43,7 @@ class MachineLearningSettingsPage extends StatefulWidget {
 class _MachineLearningSettingsPageState
     extends State<MachineLearningSettingsPage> {
   late InitializationState _state;
+  final EnteWakeLock _wakeLock = EnteWakeLock();
 
   late StreamSubscription<MLFrameworkInitializationUpdateEvent>
       _eventSubscription;
@@ -46,6 +57,7 @@ class _MachineLearningSettingsPageState
       setState(() {});
     });
     _fetchState();
+    _wakeLock.enable();
   }
 
   void _fetchState() {
@@ -56,10 +68,13 @@ class _MachineLearningSettingsPageState
   void dispose() {
     super.dispose();
     _eventSubscription.cancel();
+    _wakeLock.disable();
   }
 
   @override
   Widget build(BuildContext context) {
+    final bool facesFlag = flagService.faceSearchEnabled;
+    _logger.info("On page open, facesFlag: $facesFlag");
     return Scaffold(
       body: CustomScrollView(
         primary: false,
@@ -91,6 +106,10 @@ class _MachineLearningSettingsPageState
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         _getMagicSearchSettings(context),
+                        const SizedBox(height: 12),
+                        facesFlag
+                            ? _getFacesSearchSettings(context)
+                            : const SizedBox.shrink(),
                       ],
                     ),
                   ),
@@ -172,6 +191,51 @@ class _MachineLearningSettingsPageState
                       : const SizedBox.shrink(),
                 ],
               )
+            : const SizedBox.shrink(),
+      ],
+    );
+  }
+
+  Widget _getFacesSearchSettings(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+    final hasEnabled = LocalSettings.instance.isFaceIndexingEnabled;
+    return Column(
+      children: [
+        MenuItemWidget(
+          captionedTextWidget: CaptionedTextWidget(
+            title: S.of(context).faceRecognition,
+          ),
+          menuItemColor: colorScheme.fillFaint,
+          trailingWidget: ToggleSwitchWidget(
+            value: () => LocalSettings.instance.isFaceIndexingEnabled,
+            onChanged: () async {
+              final isEnabled =
+                  await LocalSettings.instance.toggleFaceIndexing();
+              if (isEnabled) {
+                unawaited(FaceMlService.instance.ensureInitialized());
+              } else {
+                FaceMlService.instance.pauseIndexingAndClustering();
+              }
+              if (mounted) {
+                setState(() {});
+              }
+            },
+          ),
+          singleBorderRadius: 8,
+          alignCaptionedTextToLeft: true,
+          isGestureDetectorDisabled: true,
+        ),
+        const SizedBox(
+          height: 4,
+        ),
+        MenuSectionDescriptionWidget(
+          content: S.of(context).faceRecognitionIndexingDescription,
+        ),
+        const SizedBox(
+          height: 12,
+        ),
+        hasEnabled
+            ? const FaceRecognitionStatusWidget()
             : const SizedBox.shrink(),
       ],
     );
@@ -351,6 +415,142 @@ class _MagicSearchIndexStatsWidgetState
           isGestureDetectorDisabled: true,
           // Setting a key here to ensure trailingWidget is refreshed
           key: ValueKey("pending_items_" + _status!.pendingItems.toString()),
+        ),
+      ],
+    );
+  }
+}
+
+class FaceRecognitionStatusWidget extends StatefulWidget {
+  const FaceRecognitionStatusWidget({
+    super.key,
+  });
+
+  @override
+  State<FaceRecognitionStatusWidget> createState() =>
+      FaceRecognitionStatusWidgetState();
+}
+
+class FaceRecognitionStatusWidgetState
+    extends State<FaceRecognitionStatusWidget> {
+  Timer? _timer;
+  @override
+  void initState() {
+    super.initState();
+    _timer = Timer.periodic(const Duration(seconds: 10), (timer) {
+      setState(() {
+        // Your state update logic here
+      });
+    });
+  }
+
+  Future<(int, int, double, bool)> getIndexStatus() async {
+    try {
+      final indexedFiles = await FaceMLDataDB.instance
+          .getIndexedFileCount(minimumMlVersion: faceMlVersion);
+      final indexableFiles = (await getIndexableFileIDs()).length;
+      final showIndexedFiles = min(indexedFiles, indexableFiles);
+      final pendingFiles = max(indexableFiles - indexedFiles, 0);
+      final clusteringDoneRatio =
+          await FaceMLDataDB.instance.getClusteredToIndexableFilesRatio();
+      final bool deviceIsHealthy =
+          MachineLearningController.instance.isDeviceHealthy;
+
+      return (
+        showIndexedFiles,
+        pendingFiles,
+        clusteringDoneRatio,
+        deviceIsHealthy
+      );
+    } catch (e, s) {
+      _logger.severe('Error getting face recognition status', e, s);
+      rethrow;
+    }
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Row(
+          children: [
+            MenuSectionTitle(title: S.of(context).status),
+            Expanded(child: Container()),
+          ],
+        ),
+        FutureBuilder(
+          future: getIndexStatus(),
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              final int indexedFiles = snapshot.data!.$1;
+              final int pendingFiles = snapshot.data!.$2;
+              final double clusteringDoneRatio = snapshot.data!.$3;
+              final double clusteringPercentage =
+                  (clusteringDoneRatio * 100).clamp(0, 100);
+              final bool isDeviceHealthy = snapshot.data!.$4;
+
+              if (!isDeviceHealthy &&
+                  (pendingFiles > 0 || clusteringPercentage < 99)) {
+                return MenuSectionDescriptionWidget(
+                  content: S.of(context).indexingIsPaused,
+                );
+              }
+
+              return Column(
+                children: [
+                  MenuItemWidget(
+                    captionedTextWidget: CaptionedTextWidget(
+                      title: S.of(context).indexedItems,
+                    ),
+                    trailingWidget: Text(
+                      NumberFormat().format(indexedFiles),
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                    singleBorderRadius: 8,
+                    alignCaptionedTextToLeft: true,
+                    isGestureDetectorDisabled: true,
+                    key: ValueKey("indexed_items_" + indexedFiles.toString()),
+                  ),
+                  MenuItemWidget(
+                    captionedTextWidget: CaptionedTextWidget(
+                      title: S.of(context).pendingItems,
+                    ),
+                    trailingWidget: Text(
+                      NumberFormat().format(pendingFiles),
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                    singleBorderRadius: 8,
+                    alignCaptionedTextToLeft: true,
+                    isGestureDetectorDisabled: true,
+                    key: ValueKey("pending_items_" + pendingFiles.toString()),
+                  ),
+                  MenuItemWidget(
+                    captionedTextWidget: CaptionedTextWidget(
+                      title: S.of(context).clusteringProgress,
+                    ),
+                    trailingWidget: Text(
+                      "${clusteringPercentage.toStringAsFixed(0)}%",
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                    singleBorderRadius: 8,
+                    alignCaptionedTextToLeft: true,
+                    isGestureDetectorDisabled: true,
+                    key: ValueKey(
+                      "clustering_progress_" +
+                          clusteringPercentage.toStringAsFixed(0),
+                    ),
+                  ),
+                ],
+              );
+            }
+            return const EnteLoadingWidget();
+          },
         ),
       ],
     );

@@ -411,6 +411,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Club per tempo di cattura"),
         "clubByFileName":
             MessageLookupByLibrary.simpleMessage("Unisci per nome file"),
+        "clusteringProgress":
+            MessageLookupByLibrary.simpleMessage("Clustering progress"),
         "codeAppliedPageTitle":
             MessageLookupByLibrary.simpleMessage("Codice applicato"),
         "codeCopiedToClipboard": MessageLookupByLibrary.simpleMessage(
@@ -644,6 +646,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Inserisci password"),
         "enterPasswordToEncrypt": MessageLookupByLibrary.simpleMessage(
             "Inserisci una password per criptare i tuoi dati"),
+        "enterPersonName":
+            MessageLookupByLibrary.simpleMessage("Enter person name"),
         "enterReferralCode": MessageLookupByLibrary.simpleMessage(
             "Inserisci il codice di invito"),
         "enterThe6digitCodeFromnyourAuthenticatorApp":
@@ -665,6 +669,10 @@ class MessageLookup extends MessageLookupByLibrary {
             "Questo link è scaduto. Si prega di selezionare un nuovo orario di scadenza o disabilitare la scadenza del link."),
         "exportLogs": MessageLookupByLibrary.simpleMessage("Esporta log"),
         "exportYourData": MessageLookupByLibrary.simpleMessage("Esporta dati"),
+        "faceRecognition":
+            MessageLookupByLibrary.simpleMessage("Face recognition"),
+        "faceRecognitionIndexingDescription": MessageLookupByLibrary.simpleMessage(
+            "Please note that this will result in a higher bandwidth and battery usage until all items are indexed."),
         "failedToApplyCode": MessageLookupByLibrary.simpleMessage(
             "Impossibile applicare il codice"),
         "failedToCancel":
@@ -704,6 +712,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("per i tuoi ricordi"),
         "forgotPassword":
             MessageLookupByLibrary.simpleMessage("Password dimenticata"),
+        "foundFaces": MessageLookupByLibrary.simpleMessage("Found faces"),
         "freeStorageClaimed":
             MessageLookupByLibrary.simpleMessage("Spazio gratuito richiesto"),
         "freeStorageOnReferralSuccess": m24,
@@ -764,6 +773,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Il codice che hai inserito non è corretto"),
         "incorrectRecoveryKeyTitle":
             MessageLookupByLibrary.simpleMessage("Chiave di recupero errata"),
+        "indexingIsPaused": MessageLookupByLibrary.simpleMessage(
+            "Indexing is paused, will automatically resume when device is ready"),
         "insecureDevice":
             MessageLookupByLibrary.simpleMessage("Dispositivo non sicuro"),
         "installManually":
@@ -1090,6 +1101,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "removeParticipant":
             MessageLookupByLibrary.simpleMessage("Rimuovi partecipante"),
         "removeParticipantBody": m43,
+        "removePersonLabel":
+            MessageLookupByLibrary.simpleMessage("Remove person label"),
         "removePublicLink":
             MessageLookupByLibrary.simpleMessage("Rimuovi link pubblico"),
         "removeShareItemsWarning": MessageLookupByLibrary.simpleMessage(
