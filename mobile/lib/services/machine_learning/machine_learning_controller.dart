@@ -31,6 +31,7 @@ class MachineLearningController {
   bool get isDeviceHealthy => _isDeviceHealthy;
 
   void init() {
+    _logger.info('init called');
     if (Platform.isAndroid) {
       _startInteractionTimer();
       BatteryInfoPlugin()
@@ -47,6 +48,7 @@ class MachineLearningController {
       });
     }
     _fireControlEvent();
+    _logger.info('init done');
   }
 
   void onUserInteraction() {
