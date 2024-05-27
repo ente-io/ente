@@ -110,6 +110,7 @@ class CollectionActions {
     BuildContext context,
     List<EnteFile> files,
   ) async {
+    print("CREATED LINK");
     final dialog = createProgressDialog(
       context,
       S.of(context).creatingLink,

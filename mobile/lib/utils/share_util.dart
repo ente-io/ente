@@ -218,3 +218,11 @@ void shareSelected(
     shareButtonKey: shareButtonKey,
   );
 }
+
+Future<void> shareImageAndUrl(
+  BuildContext context,
+  String imagePath,
+  String url,
+) async {
+  await Share.shareFiles([imagePath], text: url);
+}

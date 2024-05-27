@@ -19,6 +19,7 @@ import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/hidden_service.dart';
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/TEMP/show_images_prevew.dart";
 import 'package:photos/ui/actions/collection/collection_file_actions.dart';
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
 import 'package:photos/ui/collections/collection_action_sheet.dart';
@@ -561,6 +562,25 @@ class _FileSelectionActionsWidgetState
     }
   }
 
+  ValueNotifier<String?> generatedPathNotifier = ValueNotifier<String?>(null);
+//Future function to go to next page
+  Future<String?> _nextPageForTesting(List<EnteFile> tempfile) async {
+    final String? tempImagePath = await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => ShowImagePreviewFromTap(
+          tempEnteFile: tempfile,
+        ),
+      ),
+    );
+
+    if (tempImagePath != null) {
+      print("Temp image path: $tempImagePath");
+
+      return tempImagePath;
+    }
+    return tempImagePath;
+  }
+
   Future<void> _onCreatedSharedLinkClicked() async {
     if (split.ownedByCurrentUser.isEmpty) {
       showShortToast(
@@ -571,16 +591,26 @@ class _FileSelectionActionsWidgetState
     }
     _cachedCollectionForSharedLink ??= await collectionActions
         .createSharedCollectionLink(context, split.ownedByCurrentUser);
+
+    final List<EnteFile> tempEnteFile = split.ownedByCurrentUser;
+
     final actionResult = await showActionSheet(
       context: context,
       buttons: [
         ButtonWidget(
-          labelText: S.of(context).copyLink,
+          labelText: S.of(context).shareLink,
           buttonType: ButtonType.neutral,
           buttonSize: ButtonSize.large,
           shouldStickToDarkTheme: true,
           buttonAction: ButtonAction.first,
           isInAlert: true,
+          // onTap: () async {
+          //   // Add a return statement at the end of the function
+          //   generatedPathNotifier.value =
+          //       await _nextPageForTesting(tempEnteFile);
+          //   await shareText(generatedPathNotifier.value!);
+          //   return Future<void>.value();
+          // },
         ),
         ButtonWidget(
           labelText: S.of(context).manageLink,
@@ -605,6 +635,7 @@ class _FileSelectionActionsWidgetState
     );
     if (actionResult?.action != null) {
       if (actionResult!.action == ButtonAction.first) {
+        //generatedPathNotifier.value = await _nextPageForTesting(tempEnteFile);
         await _copyLink();
       }
       if (actionResult.action == ButtonAction.second) {
@@ -621,6 +652,7 @@ class _FileSelectionActionsWidgetState
   }
 
   Future<void> _copyLink() async {
+    print("INSIDE COPY LINK");
     if (_cachedCollectionForSharedLink != null) {
       final String collectionKey = Base58Encode(
         CollectionsService.instance
@@ -628,6 +660,8 @@ class _FileSelectionActionsWidgetState
       );
       final String url =
           "${_cachedCollectionForSharedLink!.publicURLs?.first?.url}#$collectionKey";
+      await shareText(url);
+      //await shareImageAndUrl(context, generatedPathNotifier.value!, url);
       await Clipboard.setData(ClipboardData(text: url));
       showShortToast(context, S.of(context).linkCopiedToClipboard);
     }
