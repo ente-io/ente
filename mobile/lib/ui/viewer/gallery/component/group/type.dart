@@ -5,7 +5,14 @@ import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/utils/date_time_util.dart";
 
-enum GroupType { day, week, month, size, year }
+enum GroupType {
+  day,
+  week,
+  month,
+  size,
+  year,
+  none,
+}
 
 extension GroupTypeExtension on GroupType {
   String get name {
@@ -20,7 +27,23 @@ extension GroupTypeExtension on GroupType {
         return "size";
       case GroupType.year:
         return "year";
+      case GroupType.none:
+        return "none";
     }
+  }
+
+  bool timeGrouping() {
+    return this == GroupType.day ||
+        this == GroupType.week ||
+        this == GroupType.month ||
+        this == GroupType.year;
+  }
+
+  bool showGroupHeader() {
+    if (this == GroupType.size || this == GroupType.none) {
+      return false;
+    }
+    return true;
   }
 
   String getTitle(BuildContext context, EnteFile file, {EnteFile? lastFile}) {
@@ -41,7 +64,7 @@ extension GroupTypeExtension on GroupType {
       return DateFormat.yMMM(Localizations.localeOf(context).languageCode)
           .format(date);
     } else {
-      throw UnimplementedError("not implemented for $this");
+      throw UnimplementedError("getTitle not implemented for $this");
     }
   }
 
