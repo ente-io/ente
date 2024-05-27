@@ -229,10 +229,10 @@ class FaceMLDataDB {
     final db = await instance.asyncDB;
 
     await db.execute(deleteFacesTable);
-    await db.execute(dropClusterPersonTable);
-    await db.execute(dropClusterSummaryTable);
-    await db.execute(deletePersonTable);
-    await db.execute(dropNotPersonFeedbackTable);
+    await db.execute(deleteFaceClustersTable);
+    await db.execute(deleteClusterPersonTable);
+    await db.execute(deleteClusterSummaryTable);
+    await db.execute(deleteNotPersonFeedbackTable);
   }
 
   Future<Iterable<Uint8List>> getFaceEmbeddingsForCluster(
@@ -768,7 +768,7 @@ class FaceMLDataDB {
     try {
       final db = await instance.asyncDB;
 
-      await db.execute(dropFaceClustersTable);
+      await db.execute(deleteFaceClustersTable);
       await db.execute(createFaceClustersTable);
       await db.execute(fcClusterIDIndex);
     } catch (e, s) {
@@ -979,16 +979,15 @@ class FaceMLDataDB {
       if (faces) {
         await db.execute(deleteFacesTable);
         await db.execute(createFacesTable);
-        await db.execute(dropFaceClustersTable);
+        await db.execute(deleteFaceClustersTable);
         await db.execute(createFaceClustersTable);
         await db.execute(fcClusterIDIndex);
       }
 
-      await db.execute(deletePersonTable);
-      await db.execute(dropClusterPersonTable);
-      await db.execute(dropNotPersonFeedbackTable);
-      await db.execute(dropClusterSummaryTable);
-      await db.execute(dropFaceClustersTable);
+      await db.execute(deleteClusterPersonTable);
+      await db.execute(deleteNotPersonFeedbackTable);
+      await db.execute(deleteClusterSummaryTable);
+      await db.execute(deleteFaceClustersTable);
 
       await db.execute(createClusterPersonTable);
       await db.execute(createNotPersonFeedbackTable);
@@ -1006,9 +1005,8 @@ class FaceMLDataDB {
       final db = await instance.asyncDB;
 
       // Drop the tables
-      await db.execute(deletePersonTable);
-      await db.execute(dropClusterPersonTable);
-      await db.execute(dropNotPersonFeedbackTable);
+      await db.execute(deleteClusterPersonTable);
+      await db.execute(deleteNotPersonFeedbackTable);
 
       // Recreate the tables
       await db.execute(createClusterPersonTable);
