@@ -121,6 +121,33 @@ class VideoOverlayIcon extends StatelessWidget {
   }
 }
 
+class VideoOverlayDuration extends StatelessWidget {
+  final int duration;
+  const VideoOverlayDuration({Key? key, required this.duration})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final String formattedDuration =
+        Duration(seconds: duration).toString().split('.').first;
+    final List<String> separated = formattedDuration.split(':');
+    final String hour =
+        (separated[0] == '0') ? '' : int.parse(separated[0]).toString() + ':';
+    final String minute = int.parse(separated[1]).toString() + ':';
+    final String second = int.parse(separated[2]).toString();
+    final String strippedDuration = hour + minute + second;
+    return _BottomRightOverlayText(
+      Text(
+        strippedDuration,
+        style: Theme.of(context)
+            .textTheme
+            .titleSmall!
+            .copyWith(color: Colors.white),
+      ),
+    );
+  }
+}
+
 class OwnerAvatarOverlayIcon extends StatelessWidget {
   final User user;
   const OwnerAvatarOverlayIcon(this.user, {Key? key}) : super(key: key);
@@ -318,6 +345,46 @@ class _BottomRightOverlayIcon extends StatelessWidget {
                         color: color,
                       ),
                     ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _BottomRightOverlayText extends StatelessWidget {
+  final Text text;
+
+  const _BottomRightOverlayText(
+    this.text, {
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        const double inset = 4;
+
+        return Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.bottomRight,
+              end: Alignment.center,
+              colors: [
+                Color.fromRGBO(0, 0, 0, 0.14),
+                Color.fromRGBO(0, 0, 0, 0.05),
+                Color.fromRGBO(0, 0, 0, 0.0),
+              ],
+              stops: [0, 0.6, 1],
+            ),
+          ),
+          child: Align(
+            alignment: Alignment.bottomRight,
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: inset, right: inset),
+              child: text,
             ),
           ),
         );

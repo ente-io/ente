@@ -19,6 +19,7 @@ import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/favorites_service.dart';
 import 'package:photos/ui/viewer/file/file_icons_widget.dart';
 import 'package:photos/utils/file_util.dart';
+import "package:photos/utils/local_settings.dart";
 import 'package:photos/utils/thumbnail_util.dart';
 
 class ThumbnailWidget extends StatefulWidget {
@@ -140,7 +141,14 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
       }
 
       if (widget.file.fileType == FileType.video) {
-        contentChildren.add(const VideoOverlayIcon());
+        if (widget.file.duration == null ||
+            widget.file.duration! < 10 ||
+            LocalSettings.instance.getPhotoGridSize() > 4) {
+          contentChildren.add(const VideoOverlayIcon());
+        } else {
+          contentChildren
+              .add(VideoOverlayDuration(duration: widget.file.duration!));
+        }
       } else if (widget.shouldShowLivePhotoOverlay &&
           widget.file.isLiveOrMotionPhoto) {
         contentChildren.add(const LivePhotoOverlayIcon());
