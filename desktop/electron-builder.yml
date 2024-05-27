@@ -7,8 +7,9 @@ extraFiles:
     - from: build
       to: resources
 win:
-    # prettier-ignore
-    publisherName: "C=US, ST=Delaware, L=Dover, O=Ente Technologies, Inc., CN=Ente, emailAddress=code@ente.io"
+    publisherName:
+        "C=US, ST=Delaware, L=Dover, O=Ente Technologies, Inc., CN=Ente,
+        emailAddress=code@ente.io"
     target:
         - target: nsis
           arch: [x64, arm64]
