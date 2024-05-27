@@ -412,6 +412,14 @@
         "Яндекс"
       ],
       "slug": "Yandex"
+    },
+    {
+      "title": "YNAB",
+      "altNames": [
+        "You Need A Budget"
+      ],
+      "slug": "ynab",
+      "hex": "3B5EDA"
     }
   ]
 }
