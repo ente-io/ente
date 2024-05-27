@@ -59,7 +59,13 @@ class FaceMLDataDB {
     _logger.info("Opening sqlite_async access: DB path " + databaseDirectory);
     final asyncDBConnection =
         SqliteDatabase(path: databaseDirectory, maxReaders: 2);
+    final stopwatch = Stopwatch()..start();
+    _logger.info("FaceMLDataDB: Starting migration");
     await _migrate(asyncDBConnection);
+    _logger.info(
+      "FaceMLDataDB Migration took ${stopwatch.elapsedMilliseconds} ms",
+    );
+    stopwatch.stop();
 
     return asyncDBConnection;
   }
@@ -75,7 +81,12 @@ class FaceMLDataDB {
       _logger.info("Migrating database from $currentVersion to $toVersion");
       await database.writeTransaction((tx) async {
         for (int i = currentVersion + 1; i <= toVersion; i++) {
-          await tx.execute(_migrationScripts[i - 1]);
+          try {
+            await tx.execute(_migrationScripts[i - 1]);
+          } catch (e) {
+            _logger.severe("Error running migration script index ${i - 1}", e);
+            rethrow;
+          }
         }
         await tx.execute('PRAGMA user_version = $toVersion');
       });
