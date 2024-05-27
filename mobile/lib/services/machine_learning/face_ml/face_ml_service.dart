@@ -580,6 +580,9 @@ class FaceMlService {
     _isIndexingOrClusteringRunning = true;
     final clusterAllImagesTime = DateTime.now();
 
+    _logger.info('Pulling remote feedback before actually clustering');
+    await PersonService.instance.fetchRemoteClusterFeedback();
+
     try {
       // Get a sense of the total number of faces in the database
       final int totalFaces = await FaceMLDataDB.instance
