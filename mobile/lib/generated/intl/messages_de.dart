@@ -819,6 +819,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Falscher Wiederherstellungs-Schlüssel"),
         "indexedItems":
             MessageLookupByLibrary.simpleMessage("Indizierte Elemente"),
+        "indexingIsPaused": MessageLookupByLibrary.simpleMessage(
+            "Indexing is paused, will automatically resume when device is ready"),
         "insecureDevice":
             MessageLookupByLibrary.simpleMessage("Unsicheres Gerät"),
         "installManually":

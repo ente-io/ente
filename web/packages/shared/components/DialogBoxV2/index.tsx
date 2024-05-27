@@ -4,18 +4,18 @@ import {
     Box,
     Button,
     Dialog,
-    DialogProps,
     Stack,
     Typography,
+    type DialogProps,
 } from "@mui/material";
 import { t } from "i18next";
 import React, { useState } from "react";
-import { DialogBoxAttributesV2 } from "./types";
+import type { DialogBoxAttributesV2 } from "./types";
 
 type IProps = React.PropsWithChildren<
     Omit<DialogProps, "onClose"> & {
         onClose: () => void;
-        attributes: DialogBoxAttributesV2;
+        attributes?: DialogBoxAttributesV2;
     }
 >;
 
@@ -96,7 +96,9 @@ export default function DialogBoxV2({
                                 size="large"
                                 color={attributes.proceed?.variant}
                                 onClick={async () => {
-                                    await attributes.proceed.action(setLoading);
+                                    await attributes.proceed?.action(
+                                        setLoading,
+                                    );
 
                                     onClose();
                                 }}
@@ -110,7 +112,7 @@ export default function DialogBoxV2({
                                 size="large"
                                 color={attributes.close?.variant ?? "secondary"}
                                 onClick={() => {
-                                    attributes.close.action &&
+                                    attributes.close?.action &&
                                         attributes.close?.action();
                                     onClose();
                                 }}

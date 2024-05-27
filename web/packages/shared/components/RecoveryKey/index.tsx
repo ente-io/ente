@@ -1,4 +1,4 @@
-import { PageProps } from "@ente/shared/apps/types";
+import { ensure } from "@/utils/ensure";
 import CodeBlock from "@ente/shared/components/CodeBlock";
 import DialogTitleWithCloseButton from "@ente/shared/components/DialogBox/TitleWithCloseButton";
 import { getRecoveryKey } from "@ente/shared/crypto/helpers";
@@ -21,14 +21,14 @@ bip39.setDefaultWordlist("english");
 const RECOVERY_KEY_FILE_NAME = "ente-recovery-key.txt";
 
 interface Props {
-    appContext: PageProps["appContext"];
+    isMobile: boolean;
     show: boolean;
     onHide: () => void;
     somethingWentWrong: any;
 }
 
-function RecoveryKey({ somethingWentWrong, appContext, ...props }: Props) {
-    const [recoveryKey, setRecoveryKey] = useState(null);
+function RecoveryKey({ somethingWentWrong, isMobile, ...props }: Props) {
+    const [recoveryKey, setRecoveryKey] = useState<string | null>(null);
 
     useEffect(() => {
         if (!props.show) {
@@ -47,13 +47,13 @@ function RecoveryKey({ somethingWentWrong, appContext, ...props }: Props) {
     }, [props.show]);
 
     function onSaveClick() {
-        downloadAsFile(RECOVERY_KEY_FILE_NAME, recoveryKey);
+        downloadAsFile(RECOVERY_KEY_FILE_NAME, ensure(recoveryKey));
         props.onHide();
     }
 
     return (
         <Dialog
-            fullScreen={appContext.isMobile}
+            fullScreen={isMobile}
             open={props.show}
             onClose={props.onHide}
             maxWidth="xs"

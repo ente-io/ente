@@ -54,9 +54,7 @@ export default function DialogBox({
             {attributes.title && (
                 <DialogTitleWithCloseButton
                     onClose={
-                        titleCloseButton &&
-                        !attributes.nonClosable &&
-                        handleClose
+                        titleCloseButton && !attributes.nonClosable && onClose
                     }
                 >
                     {attributes.title}

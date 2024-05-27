@@ -3,7 +3,7 @@ import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
 import EnteButton from "@ente/shared/components/EnteButton";
 import { DELETE_ACCOUNT_EMAIL } from "@ente/shared/constants/urls";
 import { Button, Link, Stack } from "@mui/material";
-import { Formik, FormikHelpers } from "formik";
+import { Formik, type FormikHelpers } from "formik";
 import { t } from "i18next";
 import { AppContext } from "pages/_app";
 import { GalleryContext } from "pages/gallery";

@@ -1,5 +1,5 @@
 import { APPS } from "@ente/shared/apps/constants";
-import { ThemeColorsOptions } from "@mui/material";
+import type { ThemeColorsOptions } from "@mui/material";
 import { THEME_COLOR } from "../constants";
 import darkThemeColors from "./dark";
 import { getFixesColors } from "./fixed";

@@ -2,9 +2,9 @@ import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import DoneIcon from "@mui/icons-material/Done";
 import {
     IconButton,
-    IconButtonProps,
-    SvgIconProps,
     Tooltip,
+    type IconButtonProps,
+    type SvgIconProps,
 } from "@mui/material";
 import { t } from "i18next";
 import { useState } from "react";

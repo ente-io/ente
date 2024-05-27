@@ -8,7 +8,7 @@ import MenuItemDivider from "components/Menu/MenuItemDivider";
 import { MenuItemGroup } from "components/Menu/MenuItemGroup";
 import MenuSectionTitle from "components/Menu/MenuSectionTitle";
 import Avatar from "components/pages/gallery/Avatar";
-import { Formik, FormikHelpers } from "formik";
+import { Formik, type FormikHelpers } from "formik";
 import { t } from "i18next";
 import { useMemo, useState } from "react";
 import * as Yup from "yup";

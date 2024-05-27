@@ -1,7 +1,7 @@
-import { Typography, TypographyProps } from "@mui/material";
-import { FC } from "react";
+import { Typography, type TypographyProps } from "@mui/material";
+import React from "react";
 
-const InvalidInputMessage: FC<TypographyProps> = (props) => {
+const InvalidInputMessage: React.FC<TypographyProps> = (props) => {
     return (
         <Typography
             variant="mini"

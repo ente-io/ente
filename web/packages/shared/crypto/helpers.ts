@@ -4,7 +4,7 @@ import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { SESSION_KEYS, setKey } from "@ente/shared/storage/sessionStorage";
 import { getActualKey } from "@ente/shared/user";
-import { KeyAttributes } from "@ente/shared/user/types";
+import type { KeyAttributes } from "@ente/shared/user/types";
 import ComlinkCryptoWorker from ".";
 
 const LOGIN_SUB_KEY_LENGTH = 32;
@@ -116,7 +116,6 @@ export async function encryptWithRecoveryKey(key: string) {
 }
 
 export const getRecoveryKey = async () => {
-    let recoveryKey: string = null;
     try {
         const cryptoWorker = await ComlinkCryptoWorker.getInstance();
 
@@ -126,6 +125,7 @@ export const getRecoveryKey = async () => {
             recoveryKeyDecryptionNonce,
         } = keyAttributes;
         const masterKey = await getActualKey();
+        let recoveryKey: string;
         if (recoveryKeyEncryptedWithMasterKey) {
             recoveryKey = await cryptoWorker.decryptB64(
                 recoveryKeyEncryptedWithMasterKey,

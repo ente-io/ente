@@ -1,5 +1,5 @@
 import CircularProgress, {
-    CircularProgressProps,
+    type CircularProgressProps,
 } from "@mui/material/CircularProgress";
 
 export default function EnteSpinner(props: CircularProgressProps) {

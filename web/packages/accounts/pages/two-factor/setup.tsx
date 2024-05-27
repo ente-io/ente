@@ -1,12 +1,12 @@
 import log from "@/next/log";
+import { ensure } from "@/utils/ensure";
 import { enableTwoFactor, setupTwoFactor } from "@ente/accounts/api/user";
 import VerifyTwoFactor, {
-    VerifyTwoFactorCallback,
+    type VerifyTwoFactorCallback,
 } from "@ente/accounts/components/two-factor/VerifyForm";
 import { TwoFactorSetup } from "@ente/accounts/components/two-factor/setup";
-import { TwoFactorSecret } from "@ente/accounts/types/user";
-import { APP_HOMES } from "@ente/shared/apps/constants";
-import { PageProps } from "@ente/shared/apps/types";
+import type { TwoFactorSecret } from "@ente/accounts/types/user";
+import { APP_HOMES, appNameToAppNameOld } from "@ente/shared/apps/constants";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import LinkButton from "@ente/shared/components/LinkButton";
 import { encryptWithRecoveryKey } from "@ente/shared/crypto/helpers";
@@ -16,15 +16,21 @@ import Card from "@mui/material/Card";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import type { PageProps } from "../../types/page";
 
 export enum SetupMode {
     QR_CODE,
     MANUAL_CODE,
 }
 
-export default function SetupTwoFactor({ appName }: PageProps) {
-    const [twoFactorSecret, setTwoFactorSecret] =
-        useState<TwoFactorSecret>(null);
+const Page: React.FC<PageProps> = ({ appContext }) => {
+    const { appName } = appContext;
+
+    const appNameOld = appNameToAppNameOld(appName);
+
+    const [twoFactorSecret, setTwoFactorSecret] = useState<
+        TwoFactorSecret | undefined
+    >();
 
     const router = useRouter();
 
@@ -48,7 +54,7 @@ export default function SetupTwoFactor({ appName }: PageProps) {
         markSuccessful,
     ) => {
         const recoveryEncryptedTwoFactorSecret = await encryptWithRecoveryKey(
-            twoFactorSecret.secretCode,
+            ensure(twoFactorSecret).secretCode,
         );
         await enableTwoFactor(otp, recoveryEncryptedTwoFactorSecret);
         await markSuccessful();
@@ -56,7 +62,8 @@ export default function SetupTwoFactor({ appName }: PageProps) {
             ...getData(LS_KEYS.USER),
             isTwoFactorEnabled: true,
         });
-        router.push(APP_HOMES.get(appName));
+        // TODO: Refactor the type of APP_HOMES to not require the ??
+        router.push(APP_HOMES.get(appNameOld) ?? "/");
     };
 
     return (
@@ -82,4 +89,6 @@ export default function SetupTwoFactor({ appName }: PageProps) {
             </Card>
         </VerticallyCentered>
     );
-}
+};
+
+export default Page;

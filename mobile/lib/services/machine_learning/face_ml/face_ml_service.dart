@@ -9,10 +9,10 @@ import "dart:ui" show Image;
 import "package:computer/computer.dart";
 import "package:dart_ui_isolate/dart_ui_isolate.dart";
 import "package:flutter/foundation.dart" show debugPrint, kDebugMode;
+import "package:flutter/services.dart";
 import "package:logging/logging.dart";
 import "package:onnxruntime/onnxruntime.dart";
 import "package:package_info_plus/package_info_plus.dart";
-import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/events/diff_sync_complete_event.dart";
@@ -97,8 +97,9 @@ class FaceMlService {
   bool _shouldSyncPeople = false;
   bool _isSyncing = false;
 
-  final int _fileDownloadLimit = 10;
+  final int _fileDownloadLimit = 5;
   final int _embeddingFetchLimit = 200;
+  final int _kForceClusteringFaceCount = 4000;
 
   Future<void> init({bool initializeImageMlIsolate = false}) async {
     if (LocalSettings.instance.isFaceIndexingEnabled == false) {
@@ -109,6 +110,7 @@ class FaceMlService {
         return;
       }
       _logger.info("init called");
+      _logStatus();
       await _computer.compute(initOrtEnv);
       try {
         await FaceDetectionService.instance.init();
@@ -152,8 +154,8 @@ class FaceMlService {
             _logger.info(
               "MLController allowed running ML, faces indexing starting",
             );
-            unawaited(indexAndClusterAll());
           }
+          unawaited(indexAndClusterAll());
         } else {
           _logger.info(
             "MLController stopped running ML, faces indexing will be paused (unless it's fetching embeddings)",
@@ -245,6 +247,7 @@ class FaceMlService {
   }
 
   /// The main execution function of the isolate.
+  @pragma('vm:entry-point')
   static void _isolateMain(SendPort mainSendPort) async {
     final receivePort = ReceivePort();
     mainSendPort.send(receivePort.sendPort);
@@ -286,10 +289,6 @@ class FaceMlService {
     await _ensureSpawnedIsolate();
     return _functionLock.synchronized(() async {
       _resetInactivityTimer();
-
-      if (_shouldPauseIndexingAndClustering == false) {
-        return null;
-      }
 
       final completer = Completer<dynamic>();
       final answerPort = ReceivePort();
@@ -360,16 +359,17 @@ class FaceMlService {
     if (_cannotRunMLFunction()) return;
 
     await sync(forceSync: _shouldSyncPeople);
-    await indexAllImages();
-    final indexingCompleteRatio = await _getIndexedDoneRatio();
-    if (indexingCompleteRatio < 0.95) {
+
+    final int unclusteredFacesCount =
+        await FaceMLDataDB.instance.getUnclusteredFaceCount();
+    if (unclusteredFacesCount > _kForceClusteringFaceCount) {
       _logger.info(
-        "Indexing is not far enough to start clustering, skipping clustering. Indexing is at $indexingCompleteRatio",
+        "There are $unclusteredFacesCount unclustered faces, doing clustering first",
       );
-      return;
-    } else {
       await clusterAllImages();
     }
+    await indexAllImages();
+    await clusterAllImages();
   }
 
   void pauseIndexingAndClustering() {
@@ -447,7 +447,8 @@ class FaceMlService {
 
         if (LocalSettings.instance.remoteFetchEnabled) {
           try {
-            final List<int> fileIds = [];
+            final Set<int> fileIds =
+                {}; // if there are duplicates here server returns 400
             // Try to find embeddings on the remote server
             for (final f in chunk) {
               fileIds.add(f.uploadedFileID!);
@@ -512,12 +513,19 @@ class FaceMlService {
               rethrow;
             }
           }
-        }
-        if (!await canUseHighBandwidth()) {
-          continue;
+        } else {
+          _logger.warning(
+            'Not fetching embeddings because user manually disabled it in debug options',
+          );
         }
         final smallerChunks = chunk.chunks(_fileDownloadLimit);
         for (final smallestChunk in smallerChunks) {
+          if (!await canUseHighBandwidth()) {
+            _logger.info(
+              'stopping indexing because user is not connected to wifi',
+            );
+            break outerLoop;
+          }
           for (final enteFile in smallestChunk) {
             if (_shouldPauseIndexingAndClustering) {
               _logger.info("indexAllImages() was paused, stopping");
@@ -543,8 +551,9 @@ class FaceMlService {
 
       stopwatch.stop();
       _logger.info(
-        "`indexAllImages()` finished. Fetched $fetchedCount and analyzed $fileAnalyzedCount images, in ${stopwatch.elapsed.inSeconds} seconds (avg of ${stopwatch.elapsed.inSeconds / fileAnalyzedCount} seconds per image, skipped $fileSkippedCount images. MLController status: $_mlControllerStatus)",
+        "`indexAllImages()` finished. Fetched $fetchedCount and analyzed $fileAnalyzedCount images, in ${stopwatch.elapsed.inSeconds} seconds (avg of ${stopwatch.elapsed.inSeconds / fileAnalyzedCount} seconds per image, skipped $fileSkippedCount images)",
       );
+      _logStatus();
     } catch (e, s) {
       _logger.severe("indexAllImages failed", e, s);
     } finally {
@@ -584,8 +593,8 @@ class FaceMlService {
           allFaceInfoForClustering.add(faceInfo);
         }
       }
-      // sort the embeddings based on file creation time, oldest first
-      allFaceInfoForClustering.sort((a, b) {
+      // sort the embeddings based on file creation time, newest first
+      allFaceInfoForClustering.sort((b, a) {
         return fileIDToCreationTime[a.fileID]!
             .compareTo(fileIDToCreationTime[b.fileID]!);
       });
@@ -758,6 +767,9 @@ class FaceMlService {
         // disposeImageIsolateAfterUse: false,
       );
       if (result == null) {
+        _logger.severe(
+          "Failed to analyze image with uploadedFileID: ${enteFile.uploadedFileID}",
+        );
         return false;
       }
       final List<Face> faces = [];
@@ -834,13 +846,22 @@ class FaceMlService {
       }
       await FaceMLDataDB.instance.bulkInsertFaces(faces);
       return true;
+    } on ThumbnailRetrievalException catch (e, s) {
+      _logger.severe(
+        'ThumbnailRetrievalException while processing image with ID ${enteFile.uploadedFileID}, storing empty face so indexing does not get stuck',
+        e,
+        s,
+      );
+      await FaceMLDataDB.instance
+          .bulkInsertFaces([Face.empty(enteFile.uploadedFileID!, error: true)]);
+      return true;
     } catch (e, s) {
       _logger.severe(
         "Failed to analyze using FaceML for image with ID: ${enteFile.uploadedFileID}",
         e,
         s,
       );
-      return true;
+      return false;
     }
   }
 
@@ -877,6 +898,7 @@ class FaceMlService {
         ),
       ) as String?;
       if (resultJsonString == null) {
+        _logger.severe('Analyzing image in isolate is giving back null');
         return null;
       }
       result = FaceMlResult.fromJsonString(resultJsonString);
@@ -993,7 +1015,12 @@ class FaceMlService {
         final stopwatch = Stopwatch()..start();
         File? file;
         if (enteFile.fileType == FileType.video) {
+          try {
           file = await getThumbnailForUploadedFile(enteFile);
+          } on PlatformException catch (e, s) {
+            _logger.severe("Could not get thumbnail for $enteFile due to PlatformException", e, s);
+            throw ThumbnailRetrievalException(e.toString(), s);
+          }
         } else {
           file = await getFile(enteFile, isOrigin: true);
           // TODO: This is returning null for Pragadees for all files, so something is wrong here!
@@ -1159,24 +1186,6 @@ class FaceMlService {
       _logStatus();
       throw CouldNotRetrieveAnyFileData();
     }
-  }
-
-  Future<double> _getIndexedDoneRatio() async {
-    final w = (kDebugMode ? EnteWatch('_getIndexedDoneRatio') : null)?..start();
-
-    final int alreadyIndexedCount = await FaceMLDataDB.instance
-        .getIndexedFileCount(minimumMlVersion: faceMlVersion);
-    final int totalIndexableCount = (await getIndexableFileIDs()).length;
-    final ratio = alreadyIndexedCount / totalIndexableCount;
-
-    w?.log('getIndexedDoneRatio');
-
-    return ratio;
-  }
-
-  static Future<List<int>> getIndexableFileIDs() async {
-    return FilesDB.instance
-        .getOwnedFileIDs(Configuration.instance.getUserID()!);
   }
 
   bool _skipAnalysisEnteFile(EnteFile enteFile, Map<int, int> indexedFileIds) {

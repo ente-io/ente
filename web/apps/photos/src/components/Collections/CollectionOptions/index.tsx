@@ -11,7 +11,8 @@ import {
 import { t } from "i18next";
 import { AppContext } from "pages/_app";
 import { GalleryContext } from "pages/gallery";
-import { Dispatch, SetStateAction, useContext, useRef, useState } from "react";
+import type { Dispatch, SetStateAction } from "react";
+import { useContext, useRef, useState } from "react";
 import { Trans } from "react-i18next";
 import * as CollectionAPI from "services/collectionService";
 import * as TrashService from "services/trashService";

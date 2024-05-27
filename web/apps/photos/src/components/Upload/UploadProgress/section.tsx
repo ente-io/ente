@@ -1,4 +1,4 @@
-import { Typography, TypographyProps, styled } from "@mui/material";
+import { Typography, styled, type TypographyProps } from "@mui/material";
 import MuiAccordion, { AccordionProps } from "@mui/material/Accordion";
 import MuiAccordionDetails from "@mui/material/AccordionDetails";
 import MuiAccordionSummary from "@mui/material/AccordionSummary";

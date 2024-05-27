@@ -686,6 +686,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "incorrectRecoveryKeyTitle":
             MessageLookupByLibrary.simpleMessage("不正确的恢复密钥"),
         "indexedItems": MessageLookupByLibrary.simpleMessage("已索引项目"),
+        "indexingIsPaused": MessageLookupByLibrary.simpleMessage(
+            "Indexing is paused, will automatically resume when device is ready"),
         "insecureDevice": MessageLookupByLibrary.simpleMessage("设备不安全"),
         "installManually": MessageLookupByLibrary.simpleMessage("手动安装"),
         "invalidEmailAddress":

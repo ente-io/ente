@@ -95,6 +95,15 @@ db:
 # Map of data centers
 #
 # Each data center also specifies which bucket in that provider should be used.
+#
+# If you're not using replication (it is off by default), you only need to
+# provide valid credentials for the first entry (the default hot storage,
+# "b2-eu-cen").
+#
+# Note that you need to use the same key names (e.g. "b2-eu-cen") as below. The
+# values and the S3 provider itself can any arbitrary S3 storage, it is not tied
+# to the region (eu-cen) or provider (b2, wasabi), but for historical reasons
+# the key names have to be one of those in the list below.
 s3:
     # Override the primary and secondary hot storage. The commented out values
     # are the defaults.

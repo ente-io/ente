@@ -1,5 +1,5 @@
-import { IconButton, PaperProps, styled } from "@mui/material";
-import Menu from "@mui/material/Menu";
+import { IconButton, styled, type PaperProps } from "@mui/material";
+import Menu, { type MenuProps } from "@mui/material/Menu";
 import React, { useState } from "react";
 import { OverflowMenuContext } from "./context";
 
@@ -31,7 +31,9 @@ export default function OverflowMenu({
     triggerButtonProps,
     menuPaperProps,
 }: Iprops) {
-    const [sortByEl, setSortByEl] = useState(null);
+    const [sortByEl, setSortByEl] = useState<MenuProps["anchorEl"] | null>(
+        null,
+    );
     const handleClose = () => setSortByEl(null);
     return (
         <OverflowMenuContext.Provider value={{ close: handleClose }}>

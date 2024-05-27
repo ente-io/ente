@@ -804,6 +804,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "La clé de secours que vous avez entrée est incorrecte"),
         "incorrectRecoveryKeyTitle":
             MessageLookupByLibrary.simpleMessage("Clé de secours non valide"),
+        "indexingIsPaused": MessageLookupByLibrary.simpleMessage(
+            "Indexing is paused, will automatically resume when device is ready"),
         "insecureDevice":
             MessageLookupByLibrary.simpleMessage("Appareil non sécurisé"),
         "installManually":

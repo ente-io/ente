@@ -1,5 +1,5 @@
 import { APPS } from "@ente/shared/apps/constants";
-import { FixedColors, ThemeColorsOptions } from "@mui/material";
+import type { FixedColors, ThemeColorsOptions } from "@mui/material";
 
 export const getFixesColors = (
     appName: APPS,

@@ -28,6 +28,8 @@ class MachineLearningController {
   bool _canRunML = false;
   late Timer _userInteractionTimer;
 
+  bool get isDeviceHealthy => _isDeviceHealthy;
+
   void init() {
     if (Platform.isAndroid) {
       _startInteractionTimer();

@@ -3,7 +3,7 @@ import log from "@/next/log";
 import { CustomError } from "@ente/shared/error";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import { getUnixTimeInMicroSecondsWithDelta } from "@ente/shared/time";
-import { User } from "@ente/shared/user/types";
+import type { User } from "@ente/shared/user/types";
 import bs58 from "bs58";
 import {
     ADD_TO_NOT_ALLOWED_COLLECTION,

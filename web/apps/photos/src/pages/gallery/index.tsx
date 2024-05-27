@@ -21,7 +21,7 @@ import {
     clearKeys,
     getKey,
 } from "@ente/shared/storage/sessionStorage";
-import { User } from "@ente/shared/user/types";
+import type { User } from "@ente/shared/user/types";
 import { isPromise } from "@ente/shared/utils";
 import { Typography, styled } from "@mui/material";
 import AuthenticateUserModal from "components/AuthenticateUserModal";
