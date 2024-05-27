@@ -1,43 +1,45 @@
-import { t } from "i18next";
-import { useEffect, useState } from "react";
-
+import { ensure } from "@/utils/ensure";
+import { startSRPSetup, updateSRPAndKeys } from "@ente/accounts/api/srp";
+import SetPasswordForm, {
+    type SetPasswordFormProps,
+} from "@ente/accounts/components/SetPasswordForm";
+import { PAGES } from "@ente/accounts/constants/pages";
 import {
     generateSRPClient,
     generateSRPSetupAttributes,
 } from "@ente/accounts/services/srp";
-import {
-    generateAndSaveIntermediateKeyAttributes,
-    generateLoginSubKey,
-    saveKeyInSessionStore,
-} from "@ente/shared/crypto/helpers";
-import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
-
-import { startSRPSetup, updateSRPAndKeys } from "@ente/accounts/api/srp";
-import SetPasswordForm, {
-    SetPasswordFormProps,
-} from "@ente/accounts/components/SetPasswordForm";
-import { PAGES } from "@ente/accounts/constants/pages";
-import { UpdatedKey } from "@ente/accounts/types/user";
-import { SESSION_KEYS } from "@ente/shared/storage/sessionStorage";
-import { getActualKey } from "@ente/shared/user";
-import { KEK, KeyAttributes, User } from "@ente/shared/user/types";
-
+import type { UpdatedKey } from "@ente/accounts/types/user";
 import {
     convertBase64ToBuffer,
     convertBufferToBase64,
 } from "@ente/accounts/utils";
-import { APP_HOMES } from "@ente/shared/apps/constants";
-import { PageProps } from "@ente/shared/apps/types";
+import { APP_HOMES, appNameToAppNameOld } from "@ente/shared/apps/constants";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
 import FormPaperFooter from "@ente/shared/components/Form/FormPaper/Footer";
 import FormPaperTitle from "@ente/shared/components/Form/FormPaper/Title";
 import LinkButton from "@ente/shared/components/LinkButton";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
+import {
+    generateAndSaveIntermediateKeyAttributes,
+    generateLoginSubKey,
+    saveKeyInSessionStore,
+} from "@ente/shared/crypto/helpers";
 import InMemoryStore, { MS_KEYS } from "@ente/shared/storage/InMemoryStore";
+import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
+import { SESSION_KEYS } from "@ente/shared/storage/sessionStorage";
+import { getActualKey } from "@ente/shared/user";
+import type { KEK, KeyAttributes, User } from "@ente/shared/user/types";
+import { t } from "i18next";
 import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
+import type { PageProps } from "../types/page";
 
-export default function ChangePassword({ appName }: PageProps) {
+const Page: React.FC<PageProps> = ({ appContext }) => {
+    const { appName } = appContext;
+
+    const appNameOld = appNameToAppNameOld(appName);
+
     const [token, setToken] = useState<string>();
     const [user, setUser] = useState<User>();
 
@@ -94,7 +96,7 @@ export default function ChangePassword({ appName }: PageProps) {
 
         const srpA = convertBufferToBase64(srpClient.computeA());
 
-        const { setupID, srpB } = await startSRPSetup(token, {
+        const { setupID, srpB } = await startSRPSetup(ensure(token), {
             srpUserID,
             srpSalt,
             srpVerifier,
@@ -105,7 +107,7 @@ export default function ChangePassword({ appName }: PageProps) {
 
         const srpM1 = convertBufferToBase64(srpClient.computeM1());
 
-        await updateSRPAndKeys(token, {
+        await updateSRPAndKeys(ensure(token), {
             setupID,
             srpM1,
             updatedKeyAttr: updatedKey,
@@ -124,15 +126,17 @@ export default function ChangePassword({ appName }: PageProps) {
 
     const redirectToAppHome = () => {
         setData(LS_KEYS.SHOW_BACK_BUTTON, { value: true });
-        router.push(APP_HOMES.get(appName));
+        // TODO: Refactor the type of APP_HOMES to not require the ??
+        router.push(APP_HOMES.get(appNameOld) ?? "/");
     };
 
+    // TODO: Handle the case where user is not loaded yet.
     return (
         <VerticallyCentered>
             <FormPaper>
                 <FormPaperTitle>{t("CHANGE_PASSWORD")}</FormPaperTitle>
                 <SetPasswordForm
-                    userEmail={user?.email}
+                    userEmail={user?.email ?? ""}
                     callback={onSubmit}
                     buttonText={t("CHANGE_PASSWORD")}
                 />
@@ -146,4 +150,6 @@ export default function ChangePassword({ appName }: PageProps) {
             </FormPaper>
         </VerticallyCentered>
     );
-}
+};
+
+export default Page;

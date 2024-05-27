@@ -1,4 +1,4 @@
-import {
+import type {
     RecoveryKey,
     TwoFactorRecoveryResponse,
     TwoFactorSecret,
@@ -6,12 +6,12 @@ import {
     UserVerificationResponse,
 } from "@ente/accounts/types/user";
 import { APPS, OTT_CLIENTS } from "@ente/shared/apps/constants";
-import { B64EncryptionResult } from "@ente/shared/crypto/types";
+import type { B64EncryptionResult } from "@ente/shared/crypto/types";
 import { ApiError, CustomError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { getEndpoint } from "@ente/shared/network/api";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
-import { KeyAttributes } from "@ente/shared/user/types";
+import type { KeyAttributes } from "@ente/shared/user/types";
 import { HttpStatusCode } from "axios";
 import { TwoFactorType } from "../constants/twofactor";
 
@@ -66,14 +66,10 @@ export const logout = async () => {
 };
 
 export const verifyTwoFactor = async (code: string, sessionID: string) => {
-    const resp = await HTTPService.post(
-        `${ENDPOINT}/users/two-factor/verify`,
-        {
-            code,
-            sessionID,
-        },
-        null,
-    );
+    const resp = await HTTPService.post(`${ENDPOINT}/users/two-factor/verify`, {
+        code,
+        sessionID,
+    });
     return resp.data as UserVerificationResponse;
 };
 
@@ -108,7 +104,7 @@ export const changeEmail = async (email: string, ott: string) => {
             email,
             ott,
         },
-        null,
+        undefined,
         {
             "X-Auth-Token": getToken(),
         },
@@ -127,7 +123,7 @@ export const setupTwoFactor = async () => {
     const resp = await HTTPService.post(
         `${ENDPOINT}/users/two-factor/setup`,
         null,
-        null,
+        undefined,
         {
             "X-Auth-Token": getToken(),
         },
@@ -148,7 +144,7 @@ export const enableTwoFactor = async (
             twoFactorSecretDecryptionNonce:
                 recoveryEncryptedTwoFactorSecret.nonce,
         },
-        null,
+        undefined,
         {
             "X-Auth-Token": getToken(),
         },
@@ -156,12 +152,17 @@ export const enableTwoFactor = async (
 };
 
 export const setRecoveryKey = (token: string, recoveryKey: RecoveryKey) =>
-    HTTPService.put(`${ENDPOINT}/users/recovery-key`, recoveryKey, null, {
+    HTTPService.put(`${ENDPOINT}/users/recovery-key`, recoveryKey, undefined, {
         "X-Auth-Token": token,
     });
 
 export const disableTwoFactor = async () => {
-    await HTTPService.post(`${ENDPOINT}/users/two-factor/disable`, null, null, {
-        "X-Auth-Token": getToken(),
-    });
+    await HTTPService.post(
+        `${ENDPOINT}/users/two-factor/disable`,
+        null,
+        undefined,
+        {
+            "X-Auth-Token": getToken(),
+        },
+    );
 };

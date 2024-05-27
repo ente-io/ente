@@ -14,6 +14,7 @@ import {
     ACCOUNTS_PAGES,
     PHOTOS_PAGES as PAGES,
 } from "@ente/shared/constants/pages";
+import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { getRecoveryKey } from "@ente/shared/crypto/helpers";
 import {
     encryptToB64,
@@ -157,9 +158,9 @@ const UserDetailsSection: React.FC<UserDetailsSectionProps> = ({
 }) => {
     const galleryContext = useContext(GalleryContext);
 
-    const [userDetails, setUserDetails] = useLocalState<UserDetails>(
-        LS_KEYS.USER_DETAILS,
-    );
+    const [userDetails, setUserDetails] = useLocalState<
+        UserDetails | undefined
+    >(LS_KEYS.USER_DETAILS, undefined);
     const [memberSubscriptionManageView, setMemberSubscriptionManageView] =
         useState(false);
 
@@ -198,6 +199,7 @@ const UserDetailsSection: React.FC<UserDetailsSectionProps> = ({
             openMemberSubscriptionManage();
         } else {
             if (
+                userDetails &&
                 hasStripeSubscription(userDetails.subscription) &&
                 isSubscriptionPastDue(userDetails.subscription)
             ) {
@@ -493,9 +495,10 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
 
                 const resetSecret = await generateEncryptionKey();
 
+                const cryptoWorker = await ComlinkCryptoWorker.getInstance();
                 const encryptionResult = await encryptToB64(
                     resetSecret,
-                    recoveryKey,
+                    await cryptoWorker.fromHex(recoveryKey),
                 );
 
                 await configurePasskeyRecovery(
@@ -529,7 +532,7 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
         });
 
     const toggleTheme = () => {
-        setThemeColor((themeColor) =>
+        setThemeColor(
             themeColor === THEME_COLOR.DARK
                 ? THEME_COLOR.LIGHT
                 : THEME_COLOR.DARK,
@@ -601,7 +604,7 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
                 label={t("PREFERENCES")}
             />
             <RecoveryKey
-                appContext={appContext}
+                isMobile={appContext.isMobile}
                 show={recoverModalView}
                 onHide={closeRecoveryKeyModal}
                 somethingWentWrong={somethingWentWrong}

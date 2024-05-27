@@ -8,7 +8,7 @@ import { CustomError } from "@ente/shared/error";
 import { Events, eventBus } from "@ente/shared/events";
 import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
 import { formatDateTimeShort } from "@ente/shared/time/format";
-import { User } from "@ente/shared/user/types";
+import type { User } from "@ente/shared/user/types";
 import QueueProcessor, {
     CancellationStatus,
     RequestCanceller,

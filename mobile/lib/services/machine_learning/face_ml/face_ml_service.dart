@@ -43,6 +43,7 @@ import 'package:photos/services/machine_learning/face_ml/face_ml_result.dart';
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import 'package:photos/services/machine_learning/file_ml/file_ml.dart';
 import 'package:photos/services/machine_learning/file_ml/remote_fileml_service.dart';
+import "package:photos/services/machine_learning/machine_learning_controller.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/utils/file_util.dart";
 import 'package:photos/utils/image_ml_isolate.dart';
@@ -99,7 +100,7 @@ class FaceMlService {
 
   final int _fileDownloadLimit = 5;
   final int _embeddingFetchLimit = 200;
-  final int _kForceClusteringFaceCount = 4000;
+  final int _kForceClusteringFaceCount = 8000;
 
   Future<void> init({bool initializeImageMlIsolate = false}) async {
     if (LocalSettings.instance.isFaceIndexingEnabled == false) {
@@ -163,9 +164,16 @@ class FaceMlService {
           pauseIndexingAndClustering();
         }
       });
+      if (Platform.isIOS &&
+          MachineLearningController.instance.isDeviceHealthy) {
+        _logger.info("Starting face indexing and clustering on iOS from init");
+        unawaited(indexAndClusterAll());
+      }
 
       _listenIndexOnDiffSync();
       _listenOnPeopleChangedSync();
+
+      _logger.info('init done');
     });
   }
 
@@ -1016,9 +1024,13 @@ class FaceMlService {
         File? file;
         if (enteFile.fileType == FileType.video) {
           try {
-          file = await getThumbnailForUploadedFile(enteFile);
+            file = await getThumbnailForUploadedFile(enteFile);
           } on PlatformException catch (e, s) {
-            _logger.severe("Could not get thumbnail for $enteFile due to PlatformException", e, s);
+            _logger.severe(
+              "Could not get thumbnail for $enteFile due to PlatformException",
+              e,
+              s,
+            );
             throw ThumbnailRetrievalException(e.toString(), s);
           }
         } else {

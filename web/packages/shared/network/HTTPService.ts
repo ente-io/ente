@@ -1,5 +1,5 @@
 import log from "@/next/log";
-import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
+import axios, { type AxiosRequestConfig, type AxiosResponse } from "axios";
 import { ApiError, CustomError, isApiErrorResponse } from "../error";
 
 interface IHTTPHeaders {

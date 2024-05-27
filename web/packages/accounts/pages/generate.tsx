@@ -1,20 +1,13 @@
 import log from "@/next/log";
+import { ensure } from "@/utils/ensure";
 import { putAttributes } from "@ente/accounts/api/user";
+import SetPasswordForm, {
+    type SetPasswordFormProps,
+} from "@ente/accounts/components/SetPasswordForm";
+import { PAGES } from "@ente/accounts/constants/pages";
 import { configureSRP } from "@ente/accounts/services/srp";
 import { generateKeyAndSRPAttributes } from "@ente/accounts/utils/srp";
-import {
-    generateAndSaveIntermediateKeyAttributes,
-    saveKeyInSessionStore,
-} from "@ente/shared/crypto/helpers";
-import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
-import { SESSION_KEYS, getKey } from "@ente/shared/storage/sessionStorage";
-import { t } from "i18next";
-import { useEffect, useState } from "react";
-
-import SetPasswordForm from "@ente/accounts/components/SetPasswordForm";
-import { PAGES } from "@ente/accounts/constants/pages";
-import { APP_HOMES } from "@ente/shared/apps/constants";
-import { PageProps } from "@ente/shared/apps/types";
+import { APP_HOMES, appNameToAppNameOld } from "@ente/shared/apps/constants";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
@@ -23,14 +16,25 @@ import FormTitle from "@ente/shared/components/Form/FormPaper/Title";
 import LinkButton from "@ente/shared/components/LinkButton";
 import RecoveryKey from "@ente/shared/components/RecoveryKey";
 import {
+    generateAndSaveIntermediateKeyAttributes,
+    saveKeyInSessionStore,
+} from "@ente/shared/crypto/helpers";
+import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
+import {
     justSignedUp,
     setJustSignedUp,
 } from "@ente/shared/storage/localStorage/helpers";
-import { KeyAttributes, User } from "@ente/shared/user/types";
+import { SESSION_KEYS, getKey } from "@ente/shared/storage/sessionStorage";
+import type { KeyAttributes, User } from "@ente/shared/user/types";
+import { t } from "i18next";
 import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
+import type { PageProps } from "../types/page";
 
-export default function Generate({ appContext, appName }: PageProps) {
-    const { logout } = appContext;
+const Page: React.FC<PageProps> = ({ appContext }) => {
+    const { appName, logout } = appContext;
+
+    const appNameOld = appNameToAppNameOld(appName);
 
     const [token, setToken] = useState<string>();
     const [user, setUser] = useState<User>();
@@ -54,7 +58,8 @@ export default function Generate({ appContext, appName }: PageProps) {
                     setRecoveryModalView(true);
                     setLoading(false);
                 } else {
-                    router.push(APP_HOMES.get(appName));
+                    // TODO: Refactor the type of APP_HOMES to not require the ??
+                    router.push(APP_HOMES.get(appNameOld) ?? "/");
                 }
             } else if (keyAttributes?.encryptedKey) {
                 router.push(PAGES.CREDENTIALS);
@@ -67,12 +72,16 @@ export default function Generate({ appContext, appName }: PageProps) {
         appContext.showNavBar(true);
     }, []);
 
-    const onSubmit = async (passphrase, setFieldError) => {
+    const onSubmit: SetPasswordFormProps["callback"] = async (
+        passphrase,
+        setFieldError,
+    ) => {
         try {
             const { keyAttributes, masterKey, srpSetupAttributes } =
                 await generateKeyAndSRPAttributes(passphrase);
 
-            await putAttributes(token, keyAttributes);
+            // TODO: Refactor the code to not require this ensure
+            await putAttributes(ensure(token), keyAttributes);
             await configureSRP(srpSetupAttributes);
             await generateAndSaveIntermediateKeyAttributes(
                 passphrase,
@@ -90,26 +99,28 @@ export default function Generate({ appContext, appName }: PageProps) {
 
     return (
         <>
-            {loading ? (
+            {loading || !user ? (
                 <VerticallyCentered>
                     <EnteSpinner />
                 </VerticallyCentered>
             ) : recoverModalView ? (
                 <RecoveryKey
-                    appContext={appContext}
+                    isMobile={appContext.isMobile}
                     show={recoverModalView}
                     onHide={() => {
                         setRecoveryModalView(false);
-                        router.push(APP_HOMES.get(appName));
+                        // TODO: Refactor the type of APP_HOMES to not require the ??
+                        router.push(APP_HOMES.get(appNameOld) ?? "/");
                     }}
-                    somethingWentWrong={() => null}
+                    /* TODO: Why is this error being ignored */
+                    somethingWentWrong={() => {}}
                 />
             ) : (
                 <VerticallyCentered>
                     <FormPaper>
                         <FormTitle>{t("SET_PASSPHRASE")}</FormTitle>
                         <SetPasswordForm
-                            userEmail={user?.email}
+                            userEmail={user.email}
                             callback={onSubmit}
                             buttonText={t("SET_PASSPHRASE")}
                         />
@@ -123,4 +134,6 @@ export default function Generate({ appContext, appName }: PageProps) {
             )}
         </>
     );
-}
+};
+
+export default Page;

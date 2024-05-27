@@ -1,6 +1,6 @@
 import * as libsodium from "@ente/shared/crypto/internal/libsodium";
 import * as Comlink from "comlink";
-import { StateAddress } from "libsodium-wrappers";
+import type { StateAddress } from "libsodium-wrappers";
 
 const textDecoder = new TextDecoder();
 const textEncoder = new TextEncoder();

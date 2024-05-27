@@ -3,7 +3,7 @@ import {
     FormControlLabel,
     FormGroup,
     Typography,
-    TypographyProps,
+    type TypographyProps,
 } from "@mui/material";
 
 interface Iprops {

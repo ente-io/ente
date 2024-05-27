@@ -89,8 +89,8 @@ class _MachineLearningSettingsPageState
                 iconButtonType: IconButtonType.secondary,
                 onTap: () {
                   Navigator.pop(context);
-                  Navigator.pop(context);
-                  Navigator.pop(context);
+                  if (Navigator.canPop(context)) Navigator.pop(context);
+                  if (Navigator.canPop(context)) Navigator.pop(context);
                 },
               ),
             ],

@@ -7,7 +7,7 @@ import {
     ButtonProps,
     MenuItem,
     Typography,
-    TypographyProps,
+    type TypographyProps,
 } from "@mui/material";
 import React from "react";
 import { CaptionedText } from "../CaptionedText";

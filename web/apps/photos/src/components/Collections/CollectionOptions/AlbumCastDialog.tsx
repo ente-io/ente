@@ -4,7 +4,7 @@ import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
 import EnteButton from "@ente/shared/components/EnteButton";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import SingleInputForm, {
-    SingleInputFormProps,
+    type SingleInputFormProps,
 } from "@ente/shared/components/SingleInputForm";
 import { boxSeal } from "@ente/shared/crypto/internal/libsodium";
 import castGateway from "@ente/shared/network/cast";

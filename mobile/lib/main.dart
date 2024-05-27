@@ -51,6 +51,7 @@ import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/tools/app_lock.dart';
 import 'package:photos/ui/tools/lock_screen.dart';
 import 'package:photos/utils/crypto_util.dart';
+import "package:photos/utils/email_util.dart";
 import 'package:photos/utils/file_uploader.dart';
 import 'package:photos/utils/local_settings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -180,6 +181,16 @@ void _headlessTaskHandler(HeadlessTask task) {
 }
 
 Future<void> _init(bool isBackground, {String via = ''}) async {
+  bool initComplete = false;
+  Future.delayed(const Duration(seconds: 15), () {
+    if (!initComplete && !isBackground) {
+      sendLogsForInit(
+        "support@ente.io",
+        "Stuck on splash screen for >= 15 seconds",
+        null,
+      );
+    }
+  });
   _isProcessRunning = true;
   _logger.info("Initializing...  inBG =$isBackground via: $via");
   final SharedPreferences preferences = await SharedPreferences.getInstance();
@@ -235,17 +246,11 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
 
   unawaited(SemanticSearchService.instance.init());
   MachineLearningController.instance.init();
-  // Can not including existing tf/ml binaries as they are not being built
-  // from source.
-  // See https://gitlab.com/fdroid/fdroiddata/-/merge_requests/12671#note_1294346819
-  if (!UpdateService.instance.isFdroidFlavor()) {
-    // unawaited(ObjectDetectionService.instance.init());
-    if (flagService.faceSearchEnabled) {
-      unawaited(FaceMlService.instance.init());
-    } else {
-      if (LocalSettings.instance.isFaceIndexingEnabled) {
-        unawaited(LocalSettings.instance.toggleFaceIndexing());
-      }
+  if (flagService.faceSearchEnabled) {
+    unawaited(FaceMlService.instance.init());
+  } else {
+    if (LocalSettings.instance.isFaceIndexingEnabled) {
+      unawaited(LocalSettings.instance.toggleFaceIndexing());
     }
   }
   PersonService.init(
@@ -254,6 +259,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     preferences,
   );
 
+  initComplete = true;
   _logger.info("Initialization done");
 }
 

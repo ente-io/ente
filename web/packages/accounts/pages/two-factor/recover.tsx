@@ -1,20 +1,22 @@
 import log from "@/next/log";
+import type { BaseAppContextT } from "@/next/types/app";
+import { ensure } from "@/utils/ensure";
 import { recoverTwoFactor, removeTwoFactor } from "@ente/accounts/api/user";
 import { PAGES } from "@ente/accounts/constants/pages";
 import { TwoFactorType } from "@ente/accounts/constants/twofactor";
-import { PageProps } from "@ente/shared/apps/types";
+import { APPS } from "@ente/shared/apps/constants";
 import { VerticallyCentered } from "@ente/shared/components/Container";
-import { DialogBoxAttributesV2 } from "@ente/shared/components/DialogBoxV2/types";
+import type { DialogBoxAttributesV2 } from "@ente/shared/components/DialogBoxV2/types";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
 import FormPaperFooter from "@ente/shared/components/Form/FormPaper/Footer";
 import FormPaperTitle from "@ente/shared/components/Form/FormPaper/Title";
 import LinkButton from "@ente/shared/components/LinkButton";
 import SingleInputForm, {
-    SingleInputFormProps,
+    type SingleInputFormProps,
 } from "@ente/shared/components/SingleInputForm";
 import { SUPPORT_EMAIL } from "@ente/shared/constants/urls";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
-import { B64EncryptionResult } from "@ente/shared/crypto/types";
+import type { B64EncryptionResult } from "@ente/shared/crypto/types";
 import { ApiError } from "@ente/shared/error";
 import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
 import { Link } from "@mui/material";
@@ -28,15 +30,21 @@ const bip39 = require("bip39");
 // mobile client library only supports english.
 bip39.setDefaultWordlist("english");
 
-export default function Recover({
+export interface RecoverPageProps {
+    appContext: BaseAppContextT;
+    appName?: APPS;
+    twoFactorType?: TwoFactorType;
+}
+
+const Page: React.FC<RecoverPageProps> = ({
     appContext,
     twoFactorType = TwoFactorType.TOTP,
-}: PageProps) {
+}) => {
     const { logout } = appContext;
 
     const [encryptedTwoFactorSecret, setEncryptedTwoFactorSecret] =
-        useState<B64EncryptionResult>(null);
-    const [sessionID, setSessionID] = useState(null);
+        useState<Omit<B64EncryptionResult, "key"> | null>(null);
+    const [sessionID, setSessionID] = useState<string | null>(null);
     const [doesHaveEncryptedRecoveryKey, setDoesHaveEncryptedRecoveryKey] =
         useState(false);
 
@@ -70,7 +78,6 @@ export default function Recover({
                     setEncryptedTwoFactorSecret({
                         encryptedData: resp.encryptedSecret,
                         nonce: resp.secretDecryptionNonce,
-                        key: null,
                     });
                 }
             } catch (e) {
@@ -111,13 +118,14 @@ export default function Recover({
                 recoveryKey = bip39.mnemonicToEntropy(recoveryKey);
             }
             const cryptoWorker = await ComlinkCryptoWorker.getInstance();
+            const { encryptedData, nonce } = ensure(encryptedTwoFactorSecret);
             const twoFactorSecret = await cryptoWorker.decryptB64(
-                encryptedTwoFactorSecret.encryptedData,
-                encryptedTwoFactorSecret.nonce,
+                encryptedData,
+                nonce,
                 await cryptoWorker.fromHex(recoveryKey),
             );
             const resp = await removeTwoFactor(
-                sessionID,
+                ensure(sessionID),
                 twoFactorSecret,
                 twoFactorType,
             );
@@ -181,4 +189,6 @@ export default function Recover({
             </FormPaper>
         </VerticallyCentered>
     );
-}
+};
+
+export default Page;
