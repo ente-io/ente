@@ -35,6 +35,15 @@ class FaceMLDataDB {
 
   static final FaceMLDataDB instance = FaceMLDataDB._privateConstructor();
 
+  static final _migrationScripts = [
+    createFacesTable,
+    createFaceClustersTable,
+    createClusterPersonTable,
+    createClusterSummaryTable,
+    createNotPersonFeedbackTable,
+    fcClusterIDIndex,
+  ];
+
   // only have a single app-wide reference to the database
   static Future<SqliteDatabase>? _sqliteAsyncDBFuture;
 
@@ -50,17 +59,42 @@ class FaceMLDataDB {
     _logger.info("Opening sqlite_async access: DB path " + databaseDirectory);
     final asyncDBConnection =
         SqliteDatabase(path: databaseDirectory, maxReaders: 2);
-    await _onCreate(asyncDBConnection);
+    final stopwatch = Stopwatch()..start();
+    _logger.info("FaceMLDataDB: Starting migration");
+    await _migrate(asyncDBConnection);
+    _logger.info(
+      "FaceMLDataDB Migration took ${stopwatch.elapsedMilliseconds} ms",
+    );
+    stopwatch.stop();
+
     return asyncDBConnection;
   }
 
-  Future<void> _onCreate(SqliteDatabase asyncDBConnection) async {
-    await asyncDBConnection.execute(createFacesTable);
-    await asyncDBConnection.execute(createFaceClustersTable);
-    await asyncDBConnection.execute(createClusterPersonTable);
-    await asyncDBConnection.execute(createClusterSummaryTable);
-    await asyncDBConnection.execute(createNotPersonFeedbackTable);
-    await asyncDBConnection.execute(fcClusterIDIndex);
+  Future<void> _migrate(
+    SqliteDatabase database,
+  ) async {
+    final result = await database.execute('PRAGMA user_version');
+    final currentVersion = result[0]['user_version'] as int;
+    final toVersion = _migrationScripts.length;
+
+    if (currentVersion < toVersion) {
+      _logger.info("Migrating database from $currentVersion to $toVersion");
+      await database.writeTransaction((tx) async {
+        for (int i = currentVersion + 1; i <= toVersion; i++) {
+          try {
+            await tx.execute(_migrationScripts[i - 1]);
+          } catch (e) {
+            _logger.severe("Error running migration script index ${i - 1}", e);
+            rethrow;
+          }
+        }
+        await tx.execute('PRAGMA user_version = $toVersion');
+      });
+    } else if (currentVersion > toVersion) {
+      throw AssertionError(
+        "currentVersion($currentVersion) cannot be greater than toVersion($toVersion)",
+      );
+    }
   }
 
   // bulkInsertFaces inserts the faces in the database in batches of 1000.
@@ -195,10 +229,10 @@ class FaceMLDataDB {
     final db = await instance.asyncDB;
 
     await db.execute(deleteFacesTable);
-    await db.execute(dropClusterPersonTable);
-    await db.execute(dropClusterSummaryTable);
-    await db.execute(deletePersonTable);
-    await db.execute(dropNotPersonFeedbackTable);
+    await db.execute(deleteFaceClustersTable);
+    await db.execute(deleteClusterPersonTable);
+    await db.execute(deleteClusterSummaryTable);
+    await db.execute(deleteNotPersonFeedbackTable);
   }
 
   Future<Iterable<Uint8List>> getFaceEmbeddingsForCluster(
@@ -734,7 +768,7 @@ class FaceMLDataDB {
     try {
       final db = await instance.asyncDB;
 
-      await db.execute(dropFaceClustersTable);
+      await db.execute(deleteFaceClustersTable);
       await db.execute(createFaceClustersTable);
       await db.execute(fcClusterIDIndex);
     } catch (e, s) {
@@ -945,16 +979,15 @@ class FaceMLDataDB {
       if (faces) {
         await db.execute(deleteFacesTable);
         await db.execute(createFacesTable);
-        await db.execute(dropFaceClustersTable);
+        await db.execute(deleteFaceClustersTable);
         await db.execute(createFaceClustersTable);
         await db.execute(fcClusterIDIndex);
       }
 
-      await db.execute(deletePersonTable);
-      await db.execute(dropClusterPersonTable);
-      await db.execute(dropNotPersonFeedbackTable);
-      await db.execute(dropClusterSummaryTable);
-      await db.execute(dropFaceClustersTable);
+      await db.execute(deleteClusterPersonTable);
+      await db.execute(deleteNotPersonFeedbackTable);
+      await db.execute(deleteClusterSummaryTable);
+      await db.execute(deleteFaceClustersTable);
 
       await db.execute(createClusterPersonTable);
       await db.execute(createNotPersonFeedbackTable);
@@ -972,9 +1005,8 @@ class FaceMLDataDB {
       final db = await instance.asyncDB;
 
       // Drop the tables
-      await db.execute(deletePersonTable);
-      await db.execute(dropClusterPersonTable);
-      await db.execute(dropNotPersonFeedbackTable);
+      await db.execute(deleteClusterPersonTable);
+      await db.execute(deleteNotPersonFeedbackTable);
 
       // Recreate the tables
       await db.execute(createClusterPersonTable);
