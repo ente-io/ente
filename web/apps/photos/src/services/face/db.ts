@@ -30,6 +30,7 @@ interface FaceDBSchema extends DBSchema {
     "file-status": {
         key: string;
         value: FileStatus;
+        indexes: { isIndexed: number };
     };
 }
 
@@ -41,6 +42,11 @@ interface FileStatus {
      *
      * It is guaranteed that "face-index" will have an entry for the same
      * {@link fileID} if and only if {@link isIndexed} is `1`.
+     *
+     * > Somewhat confusingly, we also have a (IndexedDB) "index" on this field.
+     *   That (IDB) index allows us to effectively select {@link fileIDs} that
+     *   still need indexing (where {@link isIndexed} is not `1`), so there is
+     *   utility, it is just that if I say the word "index" one more time...
      *
      * [Note: Boolean IndexedDB indexes].
      *
@@ -64,10 +70,15 @@ interface FileStatus {
 const openFaceDB = () =>
     openDB<FaceDBSchema>("face", 1, {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        upgrade(db, oldVersion, newVersion, tx) {
+        upgrade(db, oldVersion, newVersion) {
             log.info(`Upgrading face DB ${oldVersion} => ${newVersion}`);
             if (oldVersion < 1) {
-                // db.createObjectStore();
+                db.createObjectStore("face-index", { keyPath: "fileID" });
+
+                const statusStore = db.createObjectStore("file-status", {
+                    keyPath: "fileID",
+                });
+                statusStore.createIndex("isIndexed", "isIndexed");
             }
         },
         // TODO: FDB
@@ -86,8 +97,8 @@ const openFaceDB = () =>
 export const saveFaceIndex = (faceIndex: FaceIndex) => {};
 
 /**
- * Record the existence of a fileID so that entities in the face indexing
- * universe know about it.
+ * Record the existence of a file so that entities in the face indexing universe
+ * know about it (e.g. can index it if it is new and it needs indexing).
  *
  * @param fileID The ID of an {@link EnteFile}.
  *
