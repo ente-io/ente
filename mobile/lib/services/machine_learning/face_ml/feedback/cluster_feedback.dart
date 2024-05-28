@@ -13,7 +13,6 @@ import "package:photos/face/db.dart";
 import "package:photos/face/model/person.dart";
 import "package:photos/generated/protos/ente/common/vector.pb.dart";
 import "package:photos/models/file/file.dart";
-import "package:photos/services/machine_learning/face_ml/face_clustering/cosine_distance.dart";
 import "package:photos/services/machine_learning/face_ml/face_clustering/face_clustering_service.dart";
 import "package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart";
 import "package:photos/services/machine_learning/face_ml/face_ml_result.dart";
@@ -434,7 +433,9 @@ class ClusterFeedbackService {
       distanceThreshold: 0.22,
     );
 
-    if (clusterResult == null || clusterResult.newClusterIdToFaceIds == null || clusterResult.isEmpty) {
+    if (clusterResult == null ||
+        clusterResult.newClusterIdToFaceIds == null ||
+        clusterResult.isEmpty) {
       _logger.warning('No clusters found or something went wrong');
       return ClusteringResult(newFaceIdToCluster: {});
     }
@@ -537,8 +538,7 @@ class ClusterFeedbackService {
           EVector.fromBuffer(clusterSummary.$1).values,
           dtype: DType.float32,
         );
-        final bigClustersMeanDistance =
-            cosineDistanceSIMD(biggestMean, currentMean);
+        final bigClustersMeanDistance = 1 - biggestMean.dot(currentMean);
         _logger.info(
           "Mean distance between biggest cluster and current cluster: $bigClustersMeanDistance",
         );
@@ -595,8 +595,7 @@ class ClusterFeedbackService {
         final List<double> trueDistances = [];
         for (final biggestEmbedding in biggestSampledEmbeddings) {
           for (final currentEmbedding in currentSampledEmbeddings) {
-            distances
-                .add(cosineDistanceSIMD(biggestEmbedding, currentEmbedding));
+            distances.add(1 - biggestEmbedding.dot(currentEmbedding));
             trueDistances.add(
               biggestEmbedding.distanceTo(
                 currentEmbedding,
@@ -789,7 +788,7 @@ class ClusterFeedbackService {
       final List<double> distances = [];
       for (final otherEmbedding in sampledOtherEmbeddings) {
         for (final embedding in sampledEmbeddings) {
-          distances.add(cosineDistanceSIMD(embedding, otherEmbedding));
+          distances.add(1 - embedding.dot(otherEmbedding));
         }
       }
       distances.sort();
@@ -1086,7 +1085,7 @@ class ClusterFeedbackService {
       final fileIdToDistanceMap = {};
       for (final entry in faceIdToVectorMap.entries) {
         fileIdToDistanceMap[getFileIdFromFaceId(entry.key)] =
-            cosineDistanceSIMD(personAvg, entry.value);
+            1 - personAvg.dot(entry.value);
       }
       w?.log('calculated distances for cluster $clusterID');
       suggestion.filesInCluster.sort((b, a) {
@@ -1141,7 +1140,7 @@ List<(int, double)> _calcSuggestionsMean(Map<String, dynamic> args) {
         continue;
       }
       final Vector avg = clusterAvg[personCluster]!;
-      final distance = cosineDistanceSIMD(avg, otherAvg);
+      final distance = 1 - avg.dot(otherAvg);
       comparisons++;
       if (distance < maxClusterDistance) {
         if (minDistance == null || distance < minDistance) {

@@ -3,7 +3,6 @@ import 'dart:async';
 import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-import "package:ml_linalg/linalg.dart";
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import "package:photos/db/files_db.dart";
@@ -11,12 +10,10 @@ import "package:photos/events/people_changed_event.dart";
 import 'package:photos/events/subscription_purchased_event.dart';
 import "package:photos/face/db.dart";
 import "package:photos/face/model/person.dart";
-import "package:photos/generated/protos/ente/common/vector.pb.dart";
 import "package:photos/models/file/file.dart";
 import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
-import "package:photos/services/machine_learning/face_ml/face_clustering/cosine_distance.dart";
 import "package:photos/services/machine_learning/face_ml/face_ml_result.dart";
 import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart";
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
@@ -158,58 +155,6 @@ class _AppBarWidgetState extends State<ClusterAppBar> {
     }
 
     return actions;
-  }
-
-  @Deprecated(
-    'Used for debugging an issue with conflicts on cluster IDs, resolved now',
-  )
-  Future<void> _validateCluster(BuildContext context) async {
-    _logger.info('_validateCluster called');
-    final faceMlDb = FaceMLDataDB.instance;
-
-    final faceIDs = await faceMlDb.getFaceIDsForCluster(widget.clusterID);
-    final fileIDs = faceIDs.map((e) => getFileIdFromFaceId(e)).toList();
-
-    final embeddingsBlobs = await faceMlDb.getFaceEmbeddingMapForFile(fileIDs);
-    embeddingsBlobs.removeWhere((key, value) => !faceIDs.contains(key));
-    final embeddings = embeddingsBlobs
-        .map((key, value) => MapEntry(key, EVector.fromBuffer(value).values));
-
-    for (final MapEntry<String, List<double>> embedding in embeddings.entries) {
-      double closestDistance = double.infinity;
-      double closestDistance32 = double.infinity;
-      double closestDistance64 = double.infinity;
-      String? closestFaceID;
-      for (final MapEntry<String, List<double>> otherEmbedding
-          in embeddings.entries) {
-        if (embedding.key == otherEmbedding.key) {
-          continue;
-        }
-        final distance64 = cosineDistanceSIMD(
-          Vector.fromList(embedding.value, dtype: DType.float64),
-          Vector.fromList(otherEmbedding.value, dtype: DType.float64),
-        );
-        final distance32 = cosineDistanceSIMD(
-          Vector.fromList(embedding.value, dtype: DType.float32),
-          Vector.fromList(otherEmbedding.value, dtype: DType.float32),
-        );
-        final distance = cosineDistForNormVectors(
-          embedding.value,
-          otherEmbedding.value,
-        );
-        if (distance < closestDistance) {
-          closestDistance = distance;
-          closestDistance32 = distance32;
-          closestDistance64 = distance64;
-          closestFaceID = otherEmbedding.key;
-        }
-      }
-      if (closestDistance > 0.3) {
-        _logger.severe(
-          "Face ${embedding.key} is similar to $closestFaceID with distance $closestDistance, and float32 distance $closestDistance32, and float64 distance $closestDistance64",
-        );
-      }
-    }
   }
 
   Future<void> _onIgnoredClusterClicked(BuildContext context) async {
