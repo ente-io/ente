@@ -193,7 +193,7 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
           trailingIconIsMuted: true,
           onTap: () async {
             try {
-              await PersonService.instance.storeRemoteFeedback();
+              await PersonService.instance.fetchRemoteClusterFeedback();
               FaceMlService.instance.debugIndexingDisabled = false;
               await FaceMlService.instance
                   .clusterAllImages(clusterInBuckets: true);
