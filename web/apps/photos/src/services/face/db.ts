@@ -1,5 +1,6 @@
+import log from "@/next/log";
+import { openDB, type DBSchema } from "idb";
 import type { FaceIndex } from "./types";
-// import { openDB } from "idb";
 
 /**
  * [Note: Face DB schema]
@@ -21,8 +22,56 @@ import type { FaceIndex } from "./types";
  * In tandem, these serve as the underlying storage for the functions exposed by
  * this file.
  */
+interface FaceDBSchema extends DBSchema {
+    "face-index": {
+        key: string;
+        value: FaceIndex;
+    };
+    "file-status": {
+        key: string;
+        value: FileStatus;
+    };
+}
+
+interface FileStatus {
+    /** The ID of the {@link EnteFile} whose indexing status we represent. */
+    fileID: string;
+    /**
+     * `1` if we have indexed a file with this {@link fileID}, `0` otherwise.
+     *
+     * It is guaranteed that "face-index" will have an entry for the same
+     * {@link fileID} if and only if {@link isIndexed} is `1`.
+     *
+     * [Note: Boolean IndexedDB indexes].
+     *
+     * IndexedDB does not (currently) supported indexes on boolean fields.
+     * https://github.com/w3c/IndexedDB/issues/76
+     *
+     * As a workaround, we use numeric fields where `0` denotes `false` and `1`
+     * denotes `true`.
+     */
+    isIndexed: number;
+    /**
+     * The number of times attempts to index this file failed.
+     *
+     * This is guaranteed to be `0` for files which have already been
+     * sucessfully indexed (i.e. files for which `isIndexed` is true).
+     */
+    failureCount: number;
+}
+
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const openFaceDB = () => {};
+const openFaceDB = () =>
+    openDB<FaceDBSchema>("face", 1, {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        upgrade(db, oldVersion, newVersion, tx) {
+            log.info(`Upgrading face DB ${oldVersion} => ${newVersion}`);
+            if (oldVersion < 1) {
+                // db.createObjectStore();
+            }
+        },
+        // TODO: FDB
+    });
 
 /**
  * Save the given {@link faceIndex} locally.
