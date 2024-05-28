@@ -651,6 +651,18 @@ class FaceMlService {
             min(offset + bucketSize, allFaceInfoForClustering.length),
           );
 
+          if (faceInfoForClustering.every((face) => face.clusterId != null)) {
+            _logger.info('Everything in bucket $bucket is already clustered');
+            if (offset + bucketSize >= totalFaces) {
+              _logger.info('All faces clustered');
+              break;
+            } else {
+              _logger.info('Skipping to next bucket');
+              offset += offsetIncrement;
+              bucket++;
+            }
+          }
+
           final clusteringResult =
               await FaceClusteringService.instance.predictLinear(
             faceInfoForClustering.toSet(),

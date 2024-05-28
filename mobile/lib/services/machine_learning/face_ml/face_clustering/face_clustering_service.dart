@@ -506,9 +506,7 @@ class FaceClusteringService {
       // WARNING: The loop below is now O(n^2) so be very careful with anything you put in there!
       for (int j = i - 1; j >= 0; j--) {
         final double distance = 1 -
-              sortedFaceInfos[i]
-                  .vEmbedding!
-                  .dot(sortedFaceInfos[j].vEmbedding!);
+            sortedFaceInfos[i].vEmbedding!.dot(sortedFaceInfos[j].vEmbedding!);
         if (distance < closestDistance) {
           if (sortedFaceInfos[j].badFace! &&
               distance > conservativeDistanceThreshold) {
