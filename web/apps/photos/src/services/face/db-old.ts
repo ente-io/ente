@@ -10,7 +10,7 @@ import {
 } from "idb";
 import isElectron from "is-electron";
 import type { Person } from "services/face/people";
-import type { MlFileData } from "services/face/types";
+import type { MlFileData } from "services/face/types-old";
 import {
     DEFAULT_ML_SEARCH_CONFIG,
     MAX_ML_SYNC_ERROR_COUNT,
