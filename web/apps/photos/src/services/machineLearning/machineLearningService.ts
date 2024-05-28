@@ -4,7 +4,7 @@ import PQueue from "p-queue";
 import mlIDbStorage, {
     ML_SEARCH_CONFIG_NAME,
     type MinimalPersistedFileData,
-} from "services/face/db";
+} from "services/face/db-old";
 import { putFaceEmbedding } from "services/face/remote";
 import { getLocalFiles } from "services/fileService";
 import { EnteFile } from "types/file";

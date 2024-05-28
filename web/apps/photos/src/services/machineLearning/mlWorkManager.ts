@@ -8,7 +8,7 @@ import { getToken, getUserID } from "@ente/shared/storage/localStorage/helpers";
 import debounce from "debounce";
 import PQueue from "p-queue";
 import { createFaceComlinkWorker } from "services/face";
-import mlIDbStorage from "services/face/db";
+import mlIDbStorage from "services/face/db-old";
 import type { DedicatedMLWorker } from "services/face/face.worker";
 import { EnteFile } from "types/file";
 
