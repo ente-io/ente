@@ -10,11 +10,9 @@ import "package:logging/logging.dart";
 import "package:ml_linalg/dtype.dart";
 import "package:ml_linalg/vector.dart";
 import "package:photos/generated/protos/ente/common/vector.pb.dart";
-import 'package:photos/services/machine_learning/face_ml/face_clustering/cosine_distance.dart';
 import "package:photos/services/machine_learning/face_ml/face_clustering/face_info_for_clustering.dart";
 import "package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart";
 import "package:photos/services/machine_learning/face_ml/face_ml_result.dart";
-import "package:simple_cluster/simple_cluster.dart";
 import "package:synchronized/synchronized.dart";
 
 class FaceInfo {
@@ -22,7 +20,6 @@ class FaceInfo {
   final double? faceScore;
   final double? blurValue;
   final bool? badFace;
-  final List<double>? embedding;
   final Vector? vEmbedding;
   int? clusterId;
   String? closestFaceId;
@@ -33,14 +30,13 @@ class FaceInfo {
     this.faceScore,
     this.blurValue,
     this.badFace,
-    this.embedding,
     this.vEmbedding,
     this.clusterId,
     this.fileCreationTime,
   });
 }
 
-enum ClusterOperation { linearIncrementalClustering, dbscanClustering }
+enum ClusterOperation { linearIncrementalClustering }
 
 class ClusteringResult {
   final Map<String, int> newFaceIdToCluster;
@@ -129,10 +125,6 @@ class FaceClusteringService {
             final result = FaceClusteringService.runLinearClustering(args);
             sendPort.send(result);
             break;
-          case ClusterOperation.dbscanClustering:
-            final result = FaceClusteringService._runDbscanClustering(args);
-            sendPort.send(result);
-            break;
         }
       } catch (e, stackTrace) {
         sendPort
@@ -203,8 +195,6 @@ class FaceClusteringService {
   /// Runs the clustering algorithm [runLinearClustering] on the given [input], in an isolate.
   ///
   /// Returns the clustering result, which is a list of clusters, where each cluster is a list of indices of the dataset.
-  ///
-  /// WARNING: Make sure to always input data in the same ordering, otherwise the clustering can less less deterministic.
   Future<ClusteringResult?> predictLinear(
     Set<FaceInfoForClustering> input, {
     Map<int, int>? fileIDToCreationTime,
@@ -401,55 +391,6 @@ class FaceClusteringService {
     }
   }
 
-  Future<List<List<String>>> predictDbscan(
-    Map<String, Uint8List> input, {
-    Map<int, int>? fileIDToCreationTime,
-    double eps = 0.3,
-    int minPts = 5,
-  }) async {
-    if (input.isEmpty) {
-      _logger.warning(
-        "DBSCAN Clustering dataset of embeddings is empty, returning empty list.",
-      );
-      return [];
-    }
-    if (isRunning) {
-      _logger.warning(
-        "DBSCAN Clustering is already running, returning empty list.",
-      );
-      return [];
-    }
-
-    isRunning = true;
-
-    // Clustering inside the isolate
-    _logger.info(
-      "Start DBSCAN clustering on ${input.length} embeddings inside computer isolate",
-    );
-    final stopwatchClustering = Stopwatch()..start();
-    // final Map<String, int> faceIdToCluster =
-    //     await _runLinearClusteringInComputer(input);
-    final List<List<String>> clusterFaceIDs = await _runInIsolate(
-      (
-        ClusterOperation.dbscanClustering,
-        {
-          'input': input,
-          'fileIDToCreationTime': fileIDToCreationTime,
-          'eps': eps,
-          'minPts': minPts,
-        }
-      ),
-    );
-    // return _runLinearClusteringInComputer(input);
-    _logger.info(
-      'DBSCAN Clustering executed in ${stopwatchClustering.elapsed.inSeconds} seconds',
-    );
-
-    isRunning = false;
-
-    return clusterFaceIDs;
-  }
-
   static ClusteringResult? runLinearClustering(Map args) {
     // final input = args['input'] as Map<String, (int?, Uint8List)>;
     final input = args['input'] as Set<FaceInfoForClustering>;
@@ -563,18 +504,10 @@ class FaceClusteringService {
         log("[ClusterIsolate] ${DateTime.now()} Processed ${offset != null ? i + offset : i} faces");
       }
       for (int j = i - 1; j >= 0; j--) {
-        late double distance;
-        if (sortedFaceInfos[i].vEmbedding != null) {
-          distance = 1 -
+        final double distance = 1 -
               sortedFaceInfos[i]
                   .vEmbedding!
                   .dot(sortedFaceInfos[j].vEmbedding!);
-        } else {
-          distance = cosineDistForNormVectors(
-            sortedFaceInfos[i].embedding!,
-            sortedFaceInfos[j].embedding!,
-          );
-        }
         if (distance < closestDistance) {
           if (sortedFaceInfos[j].badFace! &&
               distance > conservativeDistanceThreshold) {
@@ -941,55 +874,6 @@ class FaceClusteringService {
       newClusterSummaries: newClusterSummaries,
       newClusterIdToFaceIds: clusterIdToFaceIds,
     );
-  }
-
-  static List<List<String>> _runDbscanClustering(Map args) {
-    final input = args['input'] as Map<String, Uint8List>;
-    final fileIDToCreationTime = args['fileIDToCreationTime'] as Map<int, int>?;
-    final eps = args['eps'] as double;
-    final minPts = args['minPts'] as int;
-
-    log(
-      "[ClusterIsolate] ${DateTime.now()} Copied to isolate ${input.length} faces",
-    );
-
-    final DBSCAN dbscan = DBSCAN(
-      epsilon: eps,
-      minPoints: minPts,
-      distanceMeasure: cosineDistForNormVectors,
-    );
-
-    // Organize everything into a list of FaceInfo objects
-    final List<FaceInfo> faceInfos = [];
-    for (final entry in input.entries) {
-      faceInfos.add(
-        FaceInfo(
-          faceID: entry.key,
-          embedding: EVector.fromBuffer(entry.value).values,
-          fileCreationTime:
-              fileIDToCreationTime?[getFileIdFromFaceId(entry.key)],
-        ),
-      );
-    }
-
-    if (fileIDToCreationTime != null) {
-      _sortFaceInfosOnCreationTime(faceInfos);
-    }
-
-    // Get the embeddings
-    final List<List<double>> embeddings =
-        faceInfos.map((faceInfo) => faceInfo.embedding!).toList();
-
-    // Run the DBSCAN clustering
-    final List<List<int>> clusterOutput = dbscan.run(embeddings);
-    // final List<List<FaceInfo>> clusteredFaceInfos = clusterOutput
-    //     .map((cluster) => cluster.map((idx) => faceInfos[idx]).toList())
-    //     .toList();
-    final List<List<String>> clusteredFaceIDs = clusterOutput
-        .map((cluster) => cluster.map((idx) => faceInfos[idx].faceID).toList())
-        .toList();
-
-    return clusteredFaceIDs;
   }
 }
 
