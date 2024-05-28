@@ -20,6 +20,8 @@ import type { FaceIndex } from "./types";
  * In tandem, these serve as the underlying storage for the functions exposed by
  * this file.
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const openFaceDB = () => {};
 
 /**
  * Save the given {@link faceIndex} locally.
@@ -58,3 +60,10 @@ export const addFileEntry = (fileID: string) => {};
  */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const markIndexingFailed = (fileID: string) => {};
+
+/**
+ * Clear any data stored by the face module.
+ *
+ * Meant to be called during logout.
+ */
+export const clearFaceData = () => {};

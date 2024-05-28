@@ -1,9 +1,15 @@
 # Storage
 
+## Session Storage
+
+Data tied to the browser tab's lifetime.
+
+We store the user's encryption key here.
+
 ## Local Storage
 
-Data in the local storage is persisted even after the user closes the tab (or
-the browser itself). This is in contrast with session storage, where the data is
+Data in the local storage is persisted even after the user closes the tab, or
+the browser itself. This is in contrast with session storage, where the data is
 cleared when the browser tab is closed.
 
 The data in local storage is tied to the Document's origin (scheme + host).
@@ -15,19 +21,23 @@ Some things that get stored here are:
 
 -   Various user preferences
 
-## Session Storage
+## IndexedDB
 
-Data tied to the browser tab's lifetime.
+IndexedDB is a transactional NoSQL store provided by browsers. It has quite
+large storage limits, and data is stored per origin (and remains persistent
+across tab restarts).
 
-We store the user's encryption key here.
+Older code used the LocalForage library for storing things in Indexed DB. This
+library falls back to localStorage in case Indexed DB storage is not available.
 
-## Indexed DB
+Newer code uses the idb library which provides a promise API over the IndexedDB,
+but otherwise does not introduce any new abstractions.
 
-We use the LocalForage library for storing things in Indexed DB. This library
-falls back to localStorage in case Indexed DB storage is not available.
+For more details, see:
 
-Indexed DB allows for larger sizes than local/session storage, and is generally
-meant for larger, tabular data.
+-   https://web.dev/articles/indexeddb
+-   https://github.com/jakearchibald/idb
+
 
 ## OPFS
 
