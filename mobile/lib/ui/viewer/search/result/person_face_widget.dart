@@ -121,7 +121,7 @@ class PersonFaceWidget extends StatelessWidget {
     );
   }
 
-  Future<Uint8List?> getFaceCrop() async {
+  Future<Uint8List?> getFaceCrop({int fetchAttempt = 1}) async {
     try {
       final Face? face = await _getFace();
       if (face == null) {
@@ -187,6 +187,10 @@ class PersonFaceWidget extends StatelessWidget {
         error: e,
         stackTrace: s,
       );
+      resetPool(fullFile: useFullFile);
+      if(fetchAttempt <= retryLimit) {
+        return getFaceCrop(fetchAttempt: fetchAttempt + 1);
+      }
       return null;
     }
   }
