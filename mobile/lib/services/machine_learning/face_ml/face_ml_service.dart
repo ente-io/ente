@@ -358,6 +358,7 @@ class FaceMlService {
     _isSyncing = true;
     if (forceSync) {
       await PersonService.instance.reconcileClusters();
+      Bus.instance.fire(PeopleChangedEvent());
       _shouldSyncPeople = false;
     }
     _isSyncing = false;
