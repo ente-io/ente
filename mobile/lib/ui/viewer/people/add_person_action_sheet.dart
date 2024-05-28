@@ -320,7 +320,8 @@ class _PersonActionSheetState extends State<PersonActionSheet> {
       final files = clustersToFiles.values.expand((e) => e).toList();
       if (files.isEmpty) {
         debugPrint(
-            "Person ${kDebugMode ? person.data.name : person.remoteID} has no files");
+          "Person ${kDebugMode ? person.data.name : person.remoteID} has no files",
+        );
         continue;
       }
       personAndFileID.add((person, files.first));
