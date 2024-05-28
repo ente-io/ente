@@ -188,7 +188,16 @@ class _PersonActionSheetState extends State<PersonActionSheet> {
             if (snapshot.hasError) {
               log("Error: ${snapshot.error} ${snapshot.stackTrace}}");
               //Need to show an error on the UI here
-              return const SizedBox.shrink();
+              if (kDebugMode) {
+                return Column(
+                  children: [
+                    Text('${snapshot.error}'),
+                    Text('${snapshot.stackTrace}'),
+                  ],
+                );
+              } else {
+                return const SizedBox.shrink();
+              }
             } else if (snapshot.hasData) {
               final persons = snapshot.data!;
               final searchResults = _searchQuery.isNotEmpty
@@ -320,7 +329,8 @@ class _PersonActionSheetState extends State<PersonActionSheet> {
       final files = clustersToFiles.values.expand((e) => e).toList();
       if (files.isEmpty) {
         debugPrint(
-            "Person ${kDebugMode ? person.data.name : person.remoteID} has no files");
+          "Person ${kDebugMode ? person.data.name : person.remoteID} has no files",
+        );
         continue;
       }
       personAndFileID.add((person, files.first));
