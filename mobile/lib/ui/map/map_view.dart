@@ -60,11 +60,6 @@ class _MapViewState extends State<MapView> {
     _markers = _buildMakers();
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
   void onChange(LatLngBounds bounds) {
     _debouncer.run(
       () async {
@@ -85,37 +80,31 @@ class _MapViewState extends State<MapView> {
                     widget.onTap!.call();
                   }
                 : null,
-            center: widget.center,
+            initialCenter: widget.center,
             minZoom: widget.minZoom,
             maxZoom: widget.maxZoom,
-            enableMultiFingerGestureRace: true,
-            zoom: widget.initialZoom,
-            maxBounds: LatLngBounds(
-              const LatLng(-90, -180),
-              const LatLng(90, 180),
+            interactionOptions: InteractionOptions(
+              flags: widget.interactiveFlags,
+              enableMultiFingerGestureRace: true,
+            ),
+            initialZoom: widget.initialZoom,
+            cameraConstraint: CameraConstraint.contain(
+              bounds: LatLngBounds(
+                const LatLng(-90, -180),
+                const LatLng(90, 180),
+              ),
             ),
             onPositionChanged: (position, hasGesture) {
               if (position.bounds != null) {
                 onChange(position.bounds!);
               }
             },
-            interactiveFlags: widget.interactiveFlags,
           ),
-          nonRotatedChildren: [
-            Padding(
-              padding: EdgeInsets.only(
-                bottom: widget.bottomSheetDraggableAreaHeight,
-              ),
-              child: OSMFranceTileAttributes(
-                options: widget.mapAttributionOptions,
-              ),
-            ),
-          ],
           children: [
             const OSMFranceTileLayer(),
             MarkerClusterLayerWidget(
               options: MarkerClusterLayerOptions(
-                anchorPos: AnchorPos.align(AnchorAlign.top),
+                alignment: Alignment.topCenter,
                 maxClusterRadius: 100,
                 showPolygon: false,
                 size: widget.markerSize,
