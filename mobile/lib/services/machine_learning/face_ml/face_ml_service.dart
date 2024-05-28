@@ -660,6 +660,7 @@ class FaceMlService {
               _logger.info('Skipping to next bucket');
               offset += offsetIncrement;
               bucket++;
+              continue;
             }
           }
 
