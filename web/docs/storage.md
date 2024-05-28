@@ -38,7 +38,6 @@ For more details, see:
 -   https://web.dev/articles/indexeddb
 -   https://github.com/jakearchibald/idb
 
-
 ## OPFS
 
 OPFS is used for caching entire files when we're running under Electron (the Web

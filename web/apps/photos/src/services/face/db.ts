@@ -69,7 +69,6 @@ interface FileStatus {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const openFaceDB = () =>
     openDB<FaceDBSchema>("face", 1, {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         upgrade(db, oldVersion, newVersion) {
             log.info(`Upgrading face DB ${oldVersion} => ${newVersion}`);
             if (oldVersion < 1) {
