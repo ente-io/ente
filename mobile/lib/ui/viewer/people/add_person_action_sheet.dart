@@ -2,6 +2,7 @@ import "dart:async";
 import "dart:developer";
 import "dart:math" as math;
 
+import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
 import "package:logging/logging.dart";
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
@@ -182,7 +183,7 @@ class _PersonActionSheetState extends State<PersonActionSheet> {
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 24, 4, 0),
         child: FutureBuilder<List<(PersonEntity, EnteFile)>>(
-          future: _getPersons(),
+          future: _getPersonsWithRecentFile(),
           builder: (context, snapshot) {
             if (snapshot.hasError) {
               log("Error: ${snapshot.error} ${snapshot.stackTrace}}");
@@ -303,7 +304,7 @@ class _PersonActionSheetState extends State<PersonActionSheet> {
     }
   }
 
-  Future<List<(PersonEntity, EnteFile)>> _getPersons({
+  Future<List<(PersonEntity, EnteFile)>> _getPersonsWithRecentFile({
     bool excludeHidden = true,
   }) async {
     final persons = await PersonService.instance.getPersons();
@@ -317,6 +318,11 @@ class _PersonActionSheetState extends State<PersonActionSheet> {
         person.remoteID,
       );
       final files = clustersToFiles.values.expand((e) => e).toList();
+      if (files.isEmpty) {
+        debugPrint(
+            "Person ${kDebugMode ? person.data.name : person.remoteID} has no files");
+        continue;
+      }
       personAndFileID.add((person, files.first));
     }
     return personAndFileID;
