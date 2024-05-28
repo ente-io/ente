@@ -39,8 +39,8 @@ artifacts attached to the same draft.
 
 ## Workflow - Release
 
-1.  Update source repo to set version `1.x.x` in `package.json` and finialize
-    the CHANGELOG.
+1.  Update source repo to set version `1.x.x` in `package.json` and finalize the
+    CHANGELOG.
 
 2.  Push code to the `desktop/rc` branch in the source repo.
 
@@ -53,7 +53,7 @@ artifacts attached to the same draft.
 4.  If the build is successful, tag `desktop/rc` in the source repo.
 
     ```sh
-    # Assuming we're on desktop/rc that just got build
+    # Assuming we're on desktop/rc that just got built
 
     git tag photosd-v1.x.x
     git push origin photosd-v1.x.x
