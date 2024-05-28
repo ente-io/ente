@@ -35,10 +35,10 @@ import 'package:photos/services/sync_service.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_uploader.dart';
 import 'package:photos/utils/validator_util.dart';
+import "package:photos/utils/wakelock_util.dart";
 import 'package:shared_preferences/shared_preferences.dart';
 import "package:tuple/tuple.dart";
 import 'package:uuid/uuid.dart';
-import 'package:wakelock_plus/wakelock_plus.dart';
 
 class Configuration {
   Configuration._privateConstructor();
@@ -585,7 +585,7 @@ class Configuration {
 
   Future<void> setShouldKeepDeviceAwake(bool value) async {
     await _preferences.setBool(keyShouldKeepDeviceAwake, value);
-    await WakelockPlus.toggle(enable: value);
+    await EnteWakeLock.toggle(enable: value);
   }
 
   Future<void> setShouldBackupVideos(bool value) async {

@@ -498,19 +498,8 @@ class FaceClusteringService {
       }
     }
 
-    // Sort the faceInfos based on fileCreationTime, in ascending order, so oldest faces are first
     if (fileIDToCreationTime != null) {
-      faceInfos.sort((a, b) {
-        if (a.fileCreationTime == null && b.fileCreationTime == null) {
-          return 0;
-        } else if (a.fileCreationTime == null) {
-          return 1;
-        } else if (b.fileCreationTime == null) {
-          return -1;
-        } else {
-          return a.fileCreationTime!.compareTo(b.fileCreationTime!);
-        }
-      });
+      _sortFaceInfosOnCreationTime(faceInfos);
     }
 
     // Sort the faceInfos such that the ones with null clusterId are at the end
@@ -796,19 +785,8 @@ class FaceClusteringService {
       );
     }
 
-    // Sort the faceInfos based on fileCreationTime, in ascending order, so oldest faces are first
     if (fileIDToCreationTime != null) {
-      faceInfos.sort((a, b) {
-        if (a.fileCreationTime == null && b.fileCreationTime == null) {
-          return 0;
-        } else if (a.fileCreationTime == null) {
-          return 1;
-        } else if (b.fileCreationTime == null) {
-          return -1;
-        } else {
-          return a.fileCreationTime!.compareTo(b.fileCreationTime!);
-        }
-      });
+      _sortFaceInfosOnCreationTime(faceInfos);
     }
 
     if (faceInfos.isEmpty) {
@@ -996,19 +974,8 @@ class FaceClusteringService {
       );
     }
 
-    // Sort the faceInfos based on fileCreationTime, in ascending order, so oldest faces are first
     if (fileIDToCreationTime != null) {
-      faceInfos.sort((a, b) {
-        if (a.fileCreationTime == null && b.fileCreationTime == null) {
-          return 0;
-        } else if (a.fileCreationTime == null) {
-          return 1;
-        } else if (b.fileCreationTime == null) {
-          return -1;
-        } else {
-          return a.fileCreationTime!.compareTo(b.fileCreationTime!);
-        }
-      });
+      _sortFaceInfosOnCreationTime(faceInfos);
     }
 
     // Get the embeddings
@@ -1026,4 +993,21 @@ class FaceClusteringService {
 
     return clusteredFaceIDs;
   }
+}
+
+/// Sort the faceInfos based on fileCreationTime, in descending order, so newest faces are first
+void _sortFaceInfosOnCreationTime(
+  List<FaceInfo> faceInfos,
+) {
+  faceInfos.sort((b, a) {
+    if (a.fileCreationTime == null && b.fileCreationTime == null) {
+      return 0;
+    } else if (a.fileCreationTime == null) {
+      return 1;
+    } else if (b.fileCreationTime == null) {
+      return -1;
+    } else {
+      return a.fileCreationTime!.compareTo(b.fileCreationTime!);
+    }
+  });
 }

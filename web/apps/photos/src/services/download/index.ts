@@ -7,7 +7,7 @@ import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
 import { CustomError } from "@ente/shared/error";
 import { isPlaybackPossible } from "@ente/shared/media/video-playback";
-import { Remote } from "comlink";
+import type { Remote } from "comlink";
 import isElectron from "is-electron";
 import * as ffmpeg from "services/ffmpeg";
 import { EnteFile } from "types/file";

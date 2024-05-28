@@ -2,7 +2,7 @@ import log from "@/next/log";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { getEndpoint } from "@ente/shared/network/api";
 
-import {
+import type {
     CompleteSRPSetupRequest,
     CompleteSRPSetupResponse,
     CreateSRPSessionResponse,
@@ -127,7 +127,7 @@ export const updateSRPAndKeys = async (
         const resp = await HTTPService.post(
             `${ENDPOINT}/users/srp/update`,
             updateSRPAndKeyRequest,
-            null,
+            undefined,
             {
                 "X-Auth-Token": token,
             },

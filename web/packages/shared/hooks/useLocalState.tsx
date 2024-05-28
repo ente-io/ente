@@ -1,10 +1,10 @@
 import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 export function useLocalState<T>(
     key: LS_KEYS,
-    initialValue?: T,
-): [T, Dispatch<SetStateAction<T>>] {
+    initialValue: T,
+): [T, (newValue: T) => void] {
     const [value, setValue] = useState<T>(initialValue);
 
     useEffect(() => {

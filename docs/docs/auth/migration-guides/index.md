@@ -7,4 +7,5 @@ description:
 # Migrating to/from Ente Auth
 
 -   [Migrating from Authy](authy/)
+-   [Importing codes from Steam](steam/)
 -   [Exporting your data out of Ente Auth](export)

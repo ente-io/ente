@@ -9,9 +9,9 @@ import { CustomErrorMessage } from "@/next/types/ipc";
 import { ensure } from "@/utils/ensure";
 import { ENCRYPTION_CHUNK_SIZE } from "@ente/shared/crypto/constants";
 import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
-import { B64EncryptionResult } from "@ente/shared/crypto/types";
+import type { B64EncryptionResult } from "@ente/shared/crypto/types";
 import { CustomError, handleUploadError } from "@ente/shared/error";
-import { Remote } from "comlink";
+import type { Remote } from "comlink";
 import {
     NULL_LOCATION,
     RANDOM_PERCENTAGE_PROGRESS_FOR_PUT,

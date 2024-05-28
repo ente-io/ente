@@ -3700,10 +3700,10 @@ optionator@^0.9.3:
     prelude-ls "^1.2.1"
     type-check "^0.4.0"
 
-otpauth@^9.0.2:
-  version "9.2.2"
-  resolved "https://registry.yarnpkg.com/otpauth/-/otpauth-9.2.2.tgz#64bda9ea501a5d86e69a964a45062f1f17f740f4"
-  integrity sha512-2VcnYRUmq1dNckIfySNYP32ITWp1bvTeAEW0BSCR6G3GBf3a5zb9E+ubY62t3Dma9RjoHlvd7QpmzHfJZRkiNg==
+otpauth@^9:
+  version "9.2.4"
+  resolved "https://registry.yarnpkg.com/otpauth/-/otpauth-9.2.4.tgz#3b7941a689f63c31db43ab2494d3c2d90bc1f150"
+  integrity sha512-t0Nioq2Up2ZaT5AbpXZLTjrsNtLc/g/rVSaEThmKLErAuT9mrnAKJryiPOKc3rCH+3ycWBgKpRHYn+DHqfaPiQ==
   dependencies:
     jssha "~3.3.1"
 
@@ -4803,11 +4803,6 @@ void-elements@3.1.0:
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/void-elements/-/void-elements-3.1.0.tgz#614f7fbf8d801f0bb5f0661f5b2f5785750e4f09"
   integrity sha512-Dhxzh5HZuiHQhbvTW9AMetFfBHDMYpo23Uo9btPXgdYP+3T5S+p+jgNy7spra+veYhBP2dCSgxR/i2Y02h5/6w==
-
-vscode-uri@^3.0.7:
-  version "3.0.8"
-  resolved "https://registry.yarnpkg.com/vscode-uri/-/vscode-uri-3.0.8.tgz#1770938d3e72588659a172d0fd4642780083ff9f"
-  integrity sha512-AyFQ0EVmsOZOlAnxoFOGOq1SQDWAB7C6aqMGS23svWAllfOaxbuFvcT8D1i8z3Gyn8fraVeZNNmN6e9bxxXkKw==
 
 webidl-conversions@^3.0.0:
   version "3.0.1"

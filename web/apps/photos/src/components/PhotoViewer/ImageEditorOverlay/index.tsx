@@ -31,16 +31,8 @@ import MenuSectionTitle from "components/Menu/MenuSectionTitle";
 import { CORNER_THRESHOLD, FILTER_DEFAULT_VALUES } from "constants/photoEditor";
 import { t } from "i18next";
 import { AppContext } from "pages/_app";
-import {
-    Dispatch,
-    MutableRefObject,
-    SetStateAction,
-    createContext,
-    useContext,
-    useEffect,
-    useRef,
-    useState,
-} from "react";
+import type { Dispatch, MutableRefObject, SetStateAction } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { getLocalCollections } from "services/collectionService";
 import downloadManager from "services/download";
 import uploadManager from "services/upload/uploadManager";

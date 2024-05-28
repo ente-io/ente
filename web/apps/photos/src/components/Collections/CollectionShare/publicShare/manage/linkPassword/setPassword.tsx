@@ -1,5 +1,5 @@
 import SingleInputForm, {
-    SingleInputFormProps,
+    type SingleInputFormProps,
 } from "@ente/shared/components/SingleInputForm";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { Dialog, Stack, Typography } from "@mui/material";

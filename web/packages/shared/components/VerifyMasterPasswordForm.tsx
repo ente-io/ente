@@ -1,17 +1,17 @@
 import log from "@/next/log";
-import { SRPAttributes } from "@ente/accounts/types/srp";
-import { ButtonProps, Input } from "@mui/material";
+import type { SRPAttributes } from "@ente/accounts/types/srp";
+import { Input, type ButtonProps } from "@mui/material";
 import { t } from "i18next";
 import SingleInputForm, {
-    SingleInputFormProps,
+    type SingleInputFormProps,
 } from "../components/SingleInputForm";
 import ComlinkCryptoWorker from "../crypto";
 import { CustomError } from "../error";
-import { KeyAttributes, User } from "../user/types";
+import type { KeyAttributes, User } from "../user/types";
 
 export interface VerifyMasterPasswordFormProps {
-    user: User;
-    keyAttributes: KeyAttributes;
+    user: User | undefined;
+    keyAttributes: KeyAttributes | undefined;
     callback: (
         key: string,
         kek: string,
@@ -20,7 +20,7 @@ export interface VerifyMasterPasswordFormProps {
     ) => void;
     buttonText: string;
     submitButtonProps?: ButtonProps;
-    getKeyAttributes?: (kek: string) => Promise<KeyAttributes>;
+    getKeyAttributes?: (kek: string) => Promise<KeyAttributes | undefined>;
     srpAttributes?: SRPAttributes;
 }
 
@@ -48,14 +48,15 @@ export default function VerifyMasterPasswordForm({
                         srpAttributes.opsLimit,
                         srpAttributes.memLimit,
                     );
-                } else {
+                } else if (keyAttributes) {
                     kek = await cryptoWorker.deriveKey(
                         passphrase,
                         keyAttributes.kekSalt,
                         keyAttributes.opsLimit,
                         keyAttributes.memLimit,
                     );
-                }
+                } else
+                    throw new Error("Both SRP and key attributes are missing");
             } catch (e) {
                 log.error("failed to derive key", e);
                 throw Error(CustomError.WEAK_DEVICE);

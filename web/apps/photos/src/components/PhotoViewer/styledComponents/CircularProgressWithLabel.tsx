@@ -1,8 +1,8 @@
 import { Overlay } from "@ente/shared/components/Container";
 import {
     CircularProgress,
-    CircularProgressProps,
     Typography,
+    type CircularProgressProps,
 } from "@mui/material";
 
 function CircularProgressWithLabel(

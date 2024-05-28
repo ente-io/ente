@@ -22,7 +22,7 @@ export const CollectionMappingChoiceModal: React.FC<
 
     return (
         <Dialog open={open} onClose={handleClose}>
-            <DialogTitleWithCloseButton onClose={handleClose}>
+            <DialogTitleWithCloseButton onClose={onClose}>
                 {t("MULTI_FOLDER_UPLOAD")}
             </DialogTitleWithCloseButton>
             <DialogContent>

@@ -9,14 +9,8 @@ import { t } from "i18next";
 import _sodium from "libsodium-wrappers";
 import { useRouter } from "next/router";
 import { AppContext } from "pages/_app";
-import {
-    Dispatch,
-    SetStateAction,
-    createContext,
-    useContext,
-    useEffect,
-    useState,
-} from "react";
+import type { Dispatch, SetStateAction } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { Passkey } from "types/passkey";
 import {
     finishPasskeyRegistration,

@@ -97,7 +97,7 @@ class _AppBarWidgetState extends State<ClusterAppBar> {
         maxLines: 2,
         overflow: TextOverflow.ellipsis,
       ),
-      actions: kDebugMode ? _getDefaultActions(context) : null,
+      actions: _getDefaultActions(context),
     );
   }
 

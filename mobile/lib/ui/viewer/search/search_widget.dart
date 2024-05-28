@@ -203,7 +203,7 @@ class SearchWidgetState extends State<SearchWidget> {
     String query,
   ) {
     int resultCount = 0;
-    final maxResultCount = _isYearValid(query) ? 13 : 12;
+    final maxResultCount = _isYearValid(query) ? 12 : 11;
     final streamController = StreamController<List<SearchResult>>();
 
     if (query.isEmpty) {
@@ -260,10 +260,11 @@ class SearchWidgetState extends State<SearchWidget> {
         onResultsReceived(locationResult);
       },
     );
+
     _searchService.getAllFace(null).then(
-      (locationResult) {
+      (faceResult) {
         final List<GenericSearchResult> filteredResults = [];
-        for (final result in locationResult) {
+        for (final result in faceResult) {
           if (result.name().toLowerCase().contains(query.toLowerCase())) {
             filteredResults.add(result);
           }

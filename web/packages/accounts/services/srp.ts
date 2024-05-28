@@ -1,5 +1,5 @@
 import log from "@/next/log";
-import { UserVerificationResponse } from "@ente/accounts/types/user";
+import type { UserVerificationResponse } from "@ente/accounts/types/user";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { generateLoginSubKey } from "@ente/shared/crypto/helpers";
 import InMemoryStore, { MS_KEYS } from "@ente/shared/storage/InMemoryStore";
@@ -12,7 +12,7 @@ import {
     startSRPSetup,
     verifySRPSession,
 } from "../api/srp";
-import { SRPAttributes, SRPSetupAttributes } from "../types/srp";
+import type { SRPAttributes, SRPSetupAttributes } from "../types/srp";
 import { convertBase64ToBuffer, convertBufferToBase64 } from "../utils";
 
 const SRP_PARAMS = SRP.params["4096"];

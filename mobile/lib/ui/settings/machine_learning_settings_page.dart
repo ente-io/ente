@@ -11,6 +11,7 @@ import "package:photos/generated/l10n.dart";
 import "package:photos/models/ml/ml_versions.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/machine_learning/face_ml/face_ml_service.dart";
+import "package:photos/services/machine_learning/machine_learning_controller.dart";
 import 'package:photos/services/machine_learning/semantic_search/frameworks/ml_framework.dart';
 import 'package:photos/services/machine_learning/semantic_search/semantic_search_service.dart';
 import "package:photos/services/remote_assets_service.dart";
@@ -26,6 +27,8 @@ import "package:photos/ui/components/title_bar_widget.dart";
 import "package:photos/ui/components/toggle_switch_widget.dart";
 import "package:photos/utils/data_util.dart";
 import "package:photos/utils/local_settings.dart";
+import "package:photos/utils/ml_util.dart";
+import "package:photos/utils/wakelock_util.dart";
 
 final _logger = Logger("MachineLearningSettingsPage");
 
@@ -40,6 +43,7 @@ class MachineLearningSettingsPage extends StatefulWidget {
 class _MachineLearningSettingsPageState
     extends State<MachineLearningSettingsPage> {
   late InitializationState _state;
+  final EnteWakeLock _wakeLock = EnteWakeLock();
 
   late StreamSubscription<MLFrameworkInitializationUpdateEvent>
       _eventSubscription;
@@ -53,6 +57,7 @@ class _MachineLearningSettingsPageState
       setState(() {});
     });
     _fetchState();
+    _wakeLock.enable();
   }
 
   void _fetchState() {
@@ -63,6 +68,7 @@ class _MachineLearningSettingsPageState
   void dispose() {
     super.dispose();
     _eventSubscription.cancel();
+    _wakeLock.disable();
   }
 
   @override
@@ -83,8 +89,8 @@ class _MachineLearningSettingsPageState
                 iconButtonType: IconButtonType.secondary,
                 onTap: () {
                   Navigator.pop(context);
-                  Navigator.pop(context);
-                  Navigator.pop(context);
+                  if (Navigator.canPop(context)) Navigator.pop(context);
+                  if (Navigator.canPop(context)) Navigator.pop(context);
                 },
               ),
             ],
@@ -438,19 +444,24 @@ class FaceRecognitionStatusWidgetState
     });
   }
 
-  Future<(int, int, int, double)> getIndexStatus() async {
+  Future<(int, int, double, bool)> getIndexStatus() async {
     try {
       final indexedFiles = await FaceMLDataDB.instance
           .getIndexedFileCount(minimumMlVersion: faceMlVersion);
-      final indexableFiles = (await FaceMlService.getIndexableFileIDs()).length;
+      final indexableFiles = (await getIndexableFileIDs()).length;
       final showIndexedFiles = min(indexedFiles, indexableFiles);
       final pendingFiles = max(indexableFiles - indexedFiles, 0);
-      final foundFaces = await FaceMLDataDB.instance.getTotalFaceCount();
-      final clusteredFaces =
-          await FaceMLDataDB.instance.getClusteredFaceCount();
-      final clusteringDoneRatio = clusteredFaces / foundFaces;
+      final clusteringDoneRatio =
+          await FaceMLDataDB.instance.getClusteredToIndexableFilesRatio();
+      final bool deviceIsHealthy =
+          MachineLearningController.instance.isDeviceHealthy;
 
-      return (showIndexedFiles, pendingFiles, foundFaces, clusteringDoneRatio);
+      return (
+        showIndexedFiles,
+        pendingFiles,
+        clusteringDoneRatio,
+        deviceIsHealthy
+      );
     } catch (e, s) {
       _logger.severe('Error getting face recognition status', e, s);
       rethrow;
@@ -479,10 +490,17 @@ class FaceRecognitionStatusWidgetState
             if (snapshot.hasData) {
               final int indexedFiles = snapshot.data!.$1;
               final int pendingFiles = snapshot.data!.$2;
-              final int foundFaces = snapshot.data!.$3;
-              final double clusteringDoneRatio = snapshot.data!.$4;
+              final double clusteringDoneRatio = snapshot.data!.$3;
               final double clusteringPercentage =
                   (clusteringDoneRatio * 100).clamp(0, 100);
+              final bool isDeviceHealthy = snapshot.data!.$4;
+
+              if (!isDeviceHealthy &&
+                  (pendingFiles > 0 || clusteringPercentage < 99)) {
+                return MenuSectionDescriptionWidget(
+                  content: S.of(context).indexingIsPaused,
+                );
+              }
 
               return Column(
                 children: [
@@ -511,19 +529,6 @@ class FaceRecognitionStatusWidgetState
                     alignCaptionedTextToLeft: true,
                     isGestureDetectorDisabled: true,
                     key: ValueKey("pending_items_" + pendingFiles.toString()),
-                  ),
-                  MenuItemWidget(
-                    captionedTextWidget: CaptionedTextWidget(
-                      title: S.of(context).foundFaces,
-                    ),
-                    trailingWidget: Text(
-                      NumberFormat().format(foundFaces),
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                    singleBorderRadius: 8,
-                    alignCaptionedTextToLeft: true,
-                    isGestureDetectorDisabled: true,
-                    key: ValueKey("found_faces_" + foundFaces.toString()),
                   ),
                   MenuItemWidget(
                     captionedTextWidget: CaptionedTextWidget(

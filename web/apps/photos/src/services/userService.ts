@@ -8,7 +8,7 @@ import {
     getToken,
     setLocalMapEnabled,
 } from "@ente/shared/storage/localStorage/helpers";
-import { AxiosResponse, HttpStatusCode } from "axios";
+import { HttpStatusCode, type AxiosResponse } from "axios";
 import {
     DeleteChallengeResponse,
     GetFeatureFlagResponse,

@@ -5,7 +5,9 @@ import {
     logStartupBanner,
     logUnhandledErrorsAndRejections,
 } from "@/next/log-web";
+import type { AppName, BaseAppContextT } from "@/next/types/app";
 import { AppUpdate } from "@/next/types/ipc";
+import { ensure } from "@/utils/ensure";
 import {
     APPS,
     APP_TITLES,
@@ -18,13 +20,10 @@ import {
     SetDialogBoxAttributes,
 } from "@ente/shared/components/DialogBox/types";
 import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
-import {
-    DialogBoxAttributesV2,
-    SetDialogBoxAttributesV2,
-} from "@ente/shared/components/DialogBoxV2/types";
+import type { DialogBoxAttributesV2 } from "@ente/shared/components/DialogBoxV2/types";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { MessageContainer } from "@ente/shared/components/MessageContainer";
-import AppNavbar from "@ente/shared/components/Navbar/app";
+import { AppNavbar } from "@ente/shared/components/Navbar/app";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { useLocalState } from "@ente/shared/hooks/useLocalState";
 import HTTPService from "@ente/shared/network/HTTPService";
@@ -36,7 +35,6 @@ import {
 } from "@ente/shared/storage/localStorage/helpers";
 import { getTheme } from "@ente/shared/themes";
 import { THEME_COLOR } from "@ente/shared/themes/constants";
-import { SetTheme } from "@ente/shared/themes/types";
 import type { User } from "@ente/shared/user/types";
 import ArrowForward from "@mui/icons-material/ArrowForward";
 import { CssBaseline, useMediaQuery } from "@mui/material";
@@ -45,10 +43,10 @@ import Notification from "components/Notification";
 import { REDIRECTS } from "constants/redirects";
 import { t } from "i18next";
 import isElectron from "is-electron";
-import { AppProps } from "next/app";
+import type { AppProps } from "next/app";
 import { useRouter } from "next/router";
 import "photoswipe/dist/photoswipe.css";
-import { createContext, useEffect, useRef, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import LoadingBar from "react-top-loading-bar";
 import DownloadManager from "services/download";
 import { resumeExportsIfNeeded } from "services/export";
@@ -78,8 +76,11 @@ const redirectMap = new Map([
     [REDIRECTS.FAMILIES, getFamilyPortalRedirectURL],
 ]);
 
-type AppContextType = {
-    showNavBar: (show: boolean) => void;
+/**
+ * Properties available via the {@link AppContext} to the Photos app's React
+ * tree.
+ */
+type AppContextT = BaseAppContextT & {
     mlSearchEnabled: boolean;
     mapEnabled: boolean;
     updateMlSearchEnabled: (enabled: boolean) => Promise<void>;
@@ -93,19 +94,22 @@ type AppContextType = {
     setWatchFolderView: (isOpen: boolean) => void;
     watchFolderFiles: FileList;
     setWatchFolderFiles: (files: FileList) => void;
-    isMobile: boolean;
     themeColor: THEME_COLOR;
-    setThemeColor: SetTheme;
+    setThemeColor: (themeColor: THEME_COLOR) => void;
     somethingWentWrong: () => void;
-    setDialogBoxAttributesV2: SetDialogBoxAttributesV2;
     isCFProxyDisabled: boolean;
     setIsCFProxyDisabled: (disabled: boolean) => void;
-    logout: () => void;
 };
 
-export const AppContext = createContext<AppContextType>(null);
+/** The React {@link Context} available to all pages. */
+export const AppContext = createContext<AppContextT | undefined>(undefined);
+
+/** Utility hook to reduce amount of boilerplate in account related pages. */
+export const useAppContext = () => ensure(useContext(AppContext));
 
 export default function App({ Component, pageProps }: AppProps) {
+    const appName: AppName = "photos";
+
     const router = useRouter();
     const [isI18nReady, setIsI18nReady] = useState<boolean>(false);
     const [loading, setLoading] = useState(false);
@@ -119,8 +123,9 @@ export default function App({ Component, pageProps }: AppProps) {
     const isLoadingBarRunning = useRef(false);
     const loadingBar = useRef(null);
     const [dialogMessage, setDialogMessage] = useState<DialogBoxAttributes>();
-    const [dialogBoxAttributeV2, setDialogBoxAttributesV2] =
-        useState<DialogBoxAttributesV2>();
+    const [dialogBoxAttributeV2, setDialogBoxAttributesV2] = useState<
+        DialogBoxAttributesV2 | undefined
+    >();
     useState<DialogBoxAttributes>(null);
     const [messageDialogView, setMessageDialogView] = useState(false);
     const [dialogBoxV2View, setDialogBoxV2View] = useState(false);
@@ -327,8 +332,34 @@ export default function App({ Component, pageProps }: AppProps) {
         void photosLogout().then(() => router.push(PAGES.ROOT));
     };
 
+    const appContext = {
+        appName,
+        showNavBar,
+        mlSearchEnabled,
+        updateMlSearchEnabled,
+        startLoading,
+        finishLoading,
+        closeMessageDialog,
+        setDialogMessage,
+        watchFolderView,
+        setWatchFolderView,
+        watchFolderFiles,
+        setWatchFolderFiles,
+        isMobile,
+        setNotificationAttributes,
+        themeColor,
+        setThemeColor,
+        somethingWentWrong,
+        setDialogBoxAttributesV2,
+        mapEnabled,
+        updateMapEnabled,
+        isCFProxyDisabled,
+        setIsCFProxyDisabled,
+        logout,
+    };
+
     const title = isI18nReady
-        ? t("TITLE", { context: APPS.PHOTOS })
+        ? t("title", { context: "photos" })
         : APP_TITLES.get(APPS.PHOTOS);
 
     return (
@@ -362,32 +393,7 @@ export default function App({ Component, pageProps }: AppProps) {
                     attributes={notificationAttributes}
                 />
 
-                <AppContext.Provider
-                    value={{
-                        showNavBar,
-                        mlSearchEnabled,
-                        updateMlSearchEnabled,
-                        startLoading,
-                        finishLoading,
-                        closeMessageDialog,
-                        setDialogMessage,
-                        watchFolderView,
-                        setWatchFolderView,
-                        watchFolderFiles,
-                        setWatchFolderFiles,
-                        isMobile,
-                        setNotificationAttributes,
-                        themeColor,
-                        setThemeColor,
-                        somethingWentWrong,
-                        setDialogBoxAttributesV2,
-                        mapEnabled,
-                        updateMapEnabled,
-                        isCFProxyDisabled,
-                        setIsCFProxyDisabled,
-                        logout,
-                    }}
-                >
+                <AppContext.Provider value={appContext}>
                     {(loading || !isI18nReady) && (
                         <Overlay
                             sx={(theme) => ({

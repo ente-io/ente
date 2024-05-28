@@ -4,10 +4,10 @@ import {
 } from "@ente/shared/components/Container";
 import {
     Box,
-    ButtonProps,
     MenuItem,
     Typography,
-    TypographyProps,
+    type ButtonProps,
+    type TypographyProps,
 } from "@mui/material";
 import { CaptionedText } from "components/CaptionedText";
 import PublicShareSwitch from "components/Collections/CollectionShare/publicShare/switch";

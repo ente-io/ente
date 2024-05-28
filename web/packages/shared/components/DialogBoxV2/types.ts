@@ -1,4 +1,4 @@
-import { ButtonProps } from "@mui/material";
+import type { ButtonProps } from "@mui/material";
 
 export interface DialogBoxAttributesV2 {
     icon?: React.ReactNode;
@@ -39,7 +39,3 @@ export interface DialogBoxAttributesV2 {
     }[];
     buttonDirection?: "row" | "column";
 }
-
-export type SetDialogBoxAttributesV2 = React.Dispatch<
-    React.SetStateAction<DialogBoxAttributesV2>
->;

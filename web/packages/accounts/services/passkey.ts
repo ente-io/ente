@@ -1,6 +1,7 @@
 import log from "@/next/log";
 import { CustomError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
+import { getEndpoint } from "@ente/shared/network/api";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 
 export const isPasskeyRecoveryEnabled = async () => {
@@ -8,7 +9,7 @@ export const isPasskeyRecoveryEnabled = async () => {
         const token = getToken();
 
         const resp = await HTTPService.get(
-            "/users/two-factor/recovery-status",
+            `${getEndpoint()}/users/two-factor/recovery-status`,
             {},
             {
                 "X-Auth-Token": token,
@@ -28,19 +29,20 @@ export const isPasskeyRecoveryEnabled = async () => {
 
 export const configurePasskeyRecovery = async (
     secret: string,
-    userEncryptedSecret: string,
+    userSecretCipher: string,
     userSecretNonce: string,
 ) => {
     try {
         const token = getToken();
 
         const resp = await HTTPService.post(
-            "/users/two-factor/passkeys/configure-recovery",
+            `${getEndpoint()}/users/two-factor/passkeys/configure-recovery`,
             {
                 secret,
-                userEncryptedSecret,
+                userSecretCipher,
                 userSecretNonce,
             },
+            undefined,
             {
                 "X-Auth-Token": token,
             },

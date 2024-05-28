@@ -11,7 +11,7 @@ import FormPaperTitle from "@ente/shared/components/Form/FormPaper/Title";
 import OverflowMenu from "@ente/shared/components/OverflowMenu/menu";
 import { OverflowMenuOption } from "@ente/shared/components/OverflowMenu/option";
 import SingleInputForm, {
-    SingleInputFormProps,
+    type SingleInputFormProps,
 } from "@ente/shared/components/SingleInputForm";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { ENTE_WEBSITE_LINK } from "@ente/shared/constants/urls";

@@ -699,6 +699,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "La clave de recuperación introducida es incorrecta"),
         "incorrectRecoveryKeyTitle": MessageLookupByLibrary.simpleMessage(
             "Clave de recuperación incorrecta"),
+        "indexingIsPaused": MessageLookupByLibrary.simpleMessage(
+            "Indexing is paused, will automatically resume when device is ready"),
         "insecureDevice":
             MessageLookupByLibrary.simpleMessage("Dispositivo inseguro"),
         "installManually":

@@ -1,6 +1,6 @@
 {
     "name": "ente",
-    "version": "1.7.0-rc",
+    "version": "1.7.1-rc",
     "private": true,
     "description": "Desktop client for Ente Photos",
     "repository": "github:ente-io/photos-desktop",
@@ -30,7 +30,7 @@
         "compare-versions": "^6.1",
         "electron-log": "^5.1",
         "electron-store": "^8.2",
-        "electron-updater": "^6.1",
+        "electron-updater": "^6.2",
         "ffmpeg-static": "^5.2",
         "html-entities": "^2.5",
         "jpeg-js": "^0.4",

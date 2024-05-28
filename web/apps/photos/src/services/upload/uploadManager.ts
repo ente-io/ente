@@ -12,7 +12,7 @@ import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worke
 import { CustomError } from "@ente/shared/error";
 import { Events, eventBus } from "@ente/shared/events";
 import { Canceler } from "axios";
-import { Remote } from "comlink";
+import type { Remote } from "comlink";
 import {
     RANDOM_PERCENTAGE_PROGRESS_FOR_PUT,
     UPLOAD_RESULT,

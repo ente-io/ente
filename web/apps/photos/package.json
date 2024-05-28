@@ -28,7 +28,6 @@
         "localforage": "^1.9.0",
         "memoize-one": "^6.0.0",
         "ml-matrix": "^6.11",
-        "otpauth": "^9.0.2",
         "p-debounce": "^4.0.0",
         "p-queue": "^7.1.0",
         "photoswipe": "file:./thirdparty/photoswipe",
@@ -44,7 +43,6 @@
         "similarity-transformation": "^0.0.1",
         "transformation-matrix": "^2.16",
         "uuid": "^9.0.1",
-        "vscode-uri": "^3.0.7",
         "xml-js": "^1.6.11",
         "zxcvbn": "^4.4.2"
     },
