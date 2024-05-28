@@ -303,6 +303,10 @@
       "slug": "rockstar_games"
     },
     {
+      "title": "RuneMate",
+      "hex": "2ECC71"
+    },
+    {
       "title": "Rust Language Forum",
       "slug": "rust_language_forum",
       "hex": "000000"
@@ -412,6 +416,14 @@
         "Яндекс"
       ],
       "slug": "Yandex"
+    },
+    {
+      "title": "YNAB",
+      "altNames": [
+        "You Need A Budget"
+      ],
+      "slug": "ynab",
+      "hex": "3B5EDA"
     }
   ]
 }

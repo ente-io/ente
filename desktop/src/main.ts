@@ -322,6 +322,13 @@ const setupTrayItem = (mainWindow: BrowserWindow) => {
  * once most people have upgraded to newer versions.
  */
 const deleteLegacyDiskCacheDirIfExists = async () => {
+    const removeIfExists = async (dirPath: string) => {
+        if (existsSync(dirPath)) {
+            log.info(`Removing legacy disk cache from ${dirPath}`);
+            await fs.rm(dirPath, { recursive: true });
+        }
+    };
+
     // [Note: Getting the cache path]
     //
     // The existing code was passing "cache" as a parameter to getPath.
@@ -338,9 +345,18 @@ const deleteLegacyDiskCacheDirIfExists = async () => {
     //
     // @ts-expect-error "cache" works but is not part of the public API.
     const cacheDir = path.join(app.getPath("cache"), "ente");
-    if (existsSync(cacheDir)) {
-        log.info(`Removing legacy disk cache from ${cacheDir}`);
-        await fs.rm(cacheDir, { recursive: true });
+    if (process.platform == "win32") {
+        // On Windows the cache dir is the same as the app data (!). So deleting
+        // the ente subfolder of the cache dir is equivalent to deleting the
+        // user data dir.
+        //
+        // Obviously, that's not good. So instead of Windows we explicitly
+        // delete the named cache directories.
+        await removeIfExists(path.join(cacheDir, "thumbs"));
+        await removeIfExists(path.join(cacheDir, "files"));
+        await removeIfExists(path.join(cacheDir, "face-crops"));
+    } else {
+        await removeIfExists(cacheDir);
     }
 };
 

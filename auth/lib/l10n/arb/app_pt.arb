@@ -31,7 +31,7 @@
   "timeBasedKeyType": "Baseado no horário (TOTP)",
   "counterBasedKeyType": "Baseado em um contador (HOTP)",
   "saveAction": "Salvar",
-  "nextTotpTitle": "próximo",
+  "nextTotpTitle": "avançar",
   "deleteCodeTitle": "Excluir código?",
   "deleteCodeMessage": "Tem certeza de que deseja excluir este código? Esta ação é irreversível.",
   "viewLogsAction": "Ver logs",
@@ -105,7 +105,7 @@
   "authToChangeYourPassword": "Por favor, autentique-se para alterar sua senha",
   "authToViewSecrets": "Por favor, autentique-se para ver as suas chaves secretas",
   "authToInitiateSignIn": "Por favor, autentique-se para iniciar o login para um backup.",
-  "ok": "Ok",
+  "ok": "OK",
   "cancel": "Cancelar",
   "yes": "Sim",
   "no": "Não",
@@ -120,7 +120,7 @@
   "delete": "Excluir",
   "enterYourPasswordHint": "Insira sua senha",
   "forgotPassword": "Esqueci a senha",
-  "oops": "Oops",
+  "oops": "Opa",
   "suggestFeatures": "Sugerir funcionalidades",
   "faq": "Perguntas frequentes",
   "faq_q_1": "Quão seguro é o Auth?",
@@ -239,8 +239,8 @@
   "howItWorks": "Como funciona",
   "ackPasswordLostWarning": "Eu entendo que se eu perder minha senha, posso perder meus dados, já que meus dados são <underline>criptografados de ponta a ponta</underline>.",
   "loginTerms": "Ao clicar em login, eu concordo com os <u-terms>termos de serviço</u-terms> e a <u-policy>política de privacidade</u-policy>",
-  "logInLabel": "Login",
-  "logout": "Encerrar sessão",
+  "logInLabel": "Entrar",
+  "logout": "Sair",
   "areYouSureYouWantToLogout": "Você tem certeza que deseja encerrar a sessão?",
   "yesLogout": "Sim, encerrar sessão",
   "exit": "Sair",
@@ -282,7 +282,7 @@
     "description": "Text for the button to confirm the user understands the warning"
   },
   "authToExportCodes": "Por favor, autentique-se para exportar seus códigos",
-  "importSuccessTitle": "Yay!",
+  "importSuccessTitle": "Oba!",
   "importSuccessDesc": "Você importou {count} códigos!",
   "@importSuccessDesc": {
     "placeholders": {
@@ -401,7 +401,7 @@
   "@iOSGoToSettingsDescription": {
     "description": "Message advising the user to go to the settings and configure Biometrics for their device. It shows in a dialog on iOS side."
   },
-  "iOSOkButton": "Ok",
+  "iOSOkButton": "OK",
   "@iOSOkButton": {
     "description": "Message showed on a button that the user can click to leave the current dialog. It is used on iOS side. Maximum 30 characters."
   },
@@ -425,7 +425,9 @@
   "endpointUpdatedMessage": "Endpoint atualizado com sucesso",
   "customEndpoint": "Conectado a {endpoint}",
   "pinText": "Fixar",
+  "unpinText": "Desafixar",
   "pinnedCodeMessage": "{code} foi fixado",
+  "unpinnedCodeMessage": "{code} foi desafixado",
   "tags": "Etiquetas",
   "createNewTag": "Criar etiqueta",
   "tag": "Etiqueta",
