@@ -1,4 +1,5 @@
 import type { FaceIndex } from "./types";
+// import { openDB } from "idb";
 
 /**
  * [Note: Face DB schema]
