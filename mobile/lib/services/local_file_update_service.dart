@@ -193,7 +193,7 @@ class LocalFileUpdateService {
           } else if (e.reason == InvalidReason.imageToLivePhotoTypeChanged) {
             fileType = FileType.livePhoto;
           }
-          final int count = await FilesDB.instance.markFilesForReUpload(
+          await FilesDB.instance.markFilesForReUpload(
             userID,
             file.localID!,
             file.title,
@@ -202,8 +202,7 @@ class LocalFileUpdateService {
             file.modificationTime!,
             fileType,
           );
-          _logger.fine('fileType changed for ${file.tag} to ${e.reason} for '
-              '$count files');
+          _logger.fine('fileType changed for ${file.tag} to ${e.reason} for ');
         } else {
           _logger.severe("failed to check hash: invalid file ${file.tag}", e);
         }

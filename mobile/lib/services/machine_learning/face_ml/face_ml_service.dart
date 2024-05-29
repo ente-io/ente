@@ -43,6 +43,7 @@ import 'package:photos/services/machine_learning/face_ml/face_ml_result.dart';
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import 'package:photos/services/machine_learning/file_ml/file_ml.dart';
 import 'package:photos/services/machine_learning/file_ml/remote_fileml_service.dart';
+import "package:photos/services/machine_learning/machine_learning_controller.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/utils/file_util.dart";
 import 'package:photos/utils/image_ml_isolate.dart';
@@ -99,7 +100,7 @@ class FaceMlService {
 
   final int _fileDownloadLimit = 5;
   final int _embeddingFetchLimit = 200;
-  final int _kForceClusteringFaceCount = 4000;
+  final int _kForceClusteringFaceCount = 8000;
 
   Future<void> init({bool initializeImageMlIsolate = false}) async {
     if (LocalSettings.instance.isFaceIndexingEnabled == false) {
@@ -163,9 +164,16 @@ class FaceMlService {
           pauseIndexingAndClustering();
         }
       });
+      if (Platform.isIOS &&
+          MachineLearningController.instance.isDeviceHealthy) {
+        _logger.info("Starting face indexing and clustering on iOS from init");
+        unawaited(indexAndClusterAll());
+      }
 
       _listenIndexOnDiffSync();
       _listenOnPeopleChangedSync();
+
+      _logger.info('init done');
     });
   }
 
@@ -350,6 +358,7 @@ class FaceMlService {
     _isSyncing = true;
     if (forceSync) {
       await PersonService.instance.reconcileClusters();
+      Bus.instance.fire(PeopleChangedEvent());
       _shouldSyncPeople = false;
     }
     _isSyncing = false;
@@ -572,6 +581,9 @@ class FaceMlService {
     _isIndexingOrClusteringRunning = true;
     final clusterAllImagesTime = DateTime.now();
 
+    _logger.info('Pulling remote feedback before actually clustering');
+    await PersonService.instance.fetchRemoteClusterFeedback();
+
     try {
       // Get a sense of the total number of faces in the database
       final int totalFaces = await FaceMLDataDB.instance
@@ -639,6 +651,19 @@ class FaceMlService {
             min(offset + bucketSize, allFaceInfoForClustering.length),
           );
 
+          if (faceInfoForClustering.every((face) => face.clusterId != null)) {
+            _logger.info('Everything in bucket $bucket is already clustered');
+            if (offset + bucketSize >= totalFaces) {
+              _logger.info('All faces clustered');
+              break;
+            } else {
+              _logger.info('Skipping to next bucket');
+              offset += offsetIncrement;
+              bucket++;
+              continue;
+            }
+          }
+
           final clusteringResult =
               await FaceClusteringService.instance.predictLinear(
             faceInfoForClustering.toSet(),
@@ -655,6 +680,7 @@ class FaceMlService {
               .updateFaceIdToClusterId(clusteringResult.newFaceIdToCluster);
           await FaceMLDataDB.instance
               .clusterSummaryUpdate(clusteringResult.newClusterSummaries!);
+          Bus.instance.fire(PeopleChangedEvent());
           for (final faceInfo in faceInfoForClustering) {
             faceInfo.clusterId ??=
                 clusteringResult.newFaceIdToCluster[faceInfo.faceID];
@@ -699,10 +725,10 @@ class FaceMlService {
             .updateFaceIdToClusterId(clusteringResult.newFaceIdToCluster);
         await FaceMLDataDB.instance
             .clusterSummaryUpdate(clusteringResult.newClusterSummaries!);
+        Bus.instance.fire(PeopleChangedEvent());
         _logger.info('Done updating FaceIDs with clusterIDs in the DB, in '
             '${DateTime.now().difference(clusterDoneTime).inSeconds} seconds');
       }
-      Bus.instance.fire(PeopleChangedEvent());
       _logger.info('clusterAllImages() finished, in '
           '${DateTime.now().difference(clusterAllImagesTime).inSeconds} seconds');
     } catch (e, s) {
@@ -1016,9 +1042,13 @@ class FaceMlService {
         File? file;
         if (enteFile.fileType == FileType.video) {
           try {
-          file = await getThumbnailForUploadedFile(enteFile);
+            file = await getThumbnailForUploadedFile(enteFile);
           } on PlatformException catch (e, s) {
-            _logger.severe("Could not get thumbnail for $enteFile due to PlatformException", e, s);
+            _logger.severe(
+              "Could not get thumbnail for $enteFile due to PlatformException",
+              e,
+              s,
+            );
             throw ThumbnailRetrievalException(e.toString(), s);
           }
         } else {

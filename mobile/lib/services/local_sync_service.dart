@@ -21,8 +21,8 @@ import "package:photos/services/ignored_files_service.dart";
 import 'package:photos/services/local/local_sync_util.dart';
 import "package:photos/utils/debouncer.dart";
 import "package:photos/utils/photo_manager_util.dart";
+import "package:photos/utils/sqlite_util.dart";
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:sqflite/sqflite.dart';
 import 'package:tuple/tuple.dart';
 
 class LocalSyncService {
@@ -184,7 +184,7 @@ class LocalSyncService {
     if (hasUnsyncedFiles) {
       await _db.insertMultiple(
         localDiffResult.uniqueLocalFiles!,
-        conflictAlgorithm: ConflictAlgorithm.ignore,
+        conflictAlgorithm: SqliteAsyncConflictAlgorithm.ignore,
       );
       _logger.info(
         "Inserted ${localDiffResult.uniqueLocalFiles?.length} "
@@ -321,7 +321,7 @@ class LocalSyncService {
       files.removeWhere((file) => existingLocalDs.contains(file.localID));
       await _db.insertMultiple(
         files,
-        conflictAlgorithm: ConflictAlgorithm.ignore,
+        conflictAlgorithm: SqliteAsyncConflictAlgorithm.ignore,
       );
       _logger.info('Inserted ${files.length} files');
       Bus.instance.fire(

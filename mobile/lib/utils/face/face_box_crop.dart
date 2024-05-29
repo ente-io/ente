@@ -11,11 +11,20 @@ import "package:photos/utils/image_ml_isolate.dart";
 import "package:photos/utils/thumbnail_util.dart";
 import "package:pool/pool.dart";
 
+void resetPool({required bool fullFile}) {
+  if (fullFile) {
+    poolFullFileFaceGenerations = Pool(20, timeout: const Duration(seconds: 15));
+  } else {
+    poolThumbnailFaceGenerations = Pool(100, timeout: const Duration(seconds: 15));
+  }
+}
+
+const int retryLimit = 3;
 final LRUMap<String, Uint8List?> faceCropCache = LRUMap(1000);
 final LRUMap<String, Uint8List?> faceCropThumbnailCache = LRUMap(1000);
-final poolFullFileFaceGenerations =
+Pool poolFullFileFaceGenerations =
     Pool(20, timeout: const Duration(seconds: 15));
-final poolThumbnailFaceGenerations =
+Pool poolThumbnailFaceGenerations =
     Pool(100, timeout: const Duration(seconds: 15));
 Future<Map<String, Uint8List>?> getFaceCrops(
   EnteFile file,
