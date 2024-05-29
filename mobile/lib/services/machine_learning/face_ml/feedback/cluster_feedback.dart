@@ -434,7 +434,7 @@ class ClusterFeedbackService {
     );
 
     if (clusterResult == null ||
-        clusterResult.newClusterIdToFaceIds == null ||
+        !clusterResult.hasAllResults ||
         clusterResult.isEmpty) {
       _logger.warning('No clusters found or something went wrong');
       return ClusteringResult(newFaceIdToCluster: {});
