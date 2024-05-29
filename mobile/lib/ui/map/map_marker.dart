@@ -11,8 +11,7 @@ Marker mapMarker(
   Size markerSize = MapView.defaultMarkerSize,
 }) {
   return Marker(
-    //-6.5 is for taking in the height of the MarkerPointer
-    alignment: Alignment(markerSize.height / 2, -6.5),
+    alignment: Alignment.topCenter,
     key: Key(key),
     width: markerSize.width,
     height: markerSize.height,
