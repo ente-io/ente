@@ -191,6 +191,15 @@
       "title": "Letterboxd"
     },
     {
+      "title": "Local",
+      "slug": "local_wp",
+      "altNames": [
+        "LocalWP",
+        "Local WP",
+        "Local Wordpress"
+      ]
+    },
+    {
       "title": "Mastodon",
       "altNames": [
         "mstdn",
@@ -203,7 +212,12 @@
     },
     {
       "title": "Mercado Livre",
-      "slug": "mercado_livre"
+      "slug": "mercado_livre",
+      "altNames": [
+        "Mercado Libre",
+        "MercadoLibre",
+        "MercadoLivre"
+      ]
     },
     {
       "title": "Murena",
