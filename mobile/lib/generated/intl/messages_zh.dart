@@ -495,8 +495,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "deselectAll": MessageLookupByLibrary.simpleMessage("取消全选"),
         "designedToOutlive": MessageLookupByLibrary.simpleMessage("经久耐用"),
         "details": MessageLookupByLibrary.simpleMessage("详情"),
-        "devAccountChanged": MessageLookupByLibrary.simpleMessage(
-            "我们用于在 App Store 上发布 Ente 的开发者账户已更改。因此，您需要重新登录。\n\n对于给您带来的不便，我们深表歉意，但这是不可避免的。"),
         "developerSettings": MessageLookupByLibrary.simpleMessage("开发者设置"),
         "developerSettingsWarning":
             MessageLookupByLibrary.simpleMessage("您确定要修改开发者设置吗？"),
