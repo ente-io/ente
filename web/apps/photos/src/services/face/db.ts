@@ -66,9 +66,26 @@ interface FileStatus {
     failureCount: number;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const openFaceDB = () =>
-    openDB<FaceDBSchema>("face", 1, {
+/**
+ * A promise to the face DB.
+ *
+ * We open the database once (lazily), and thereafter save and reuse the promise
+ * each time something wants to connect to it.
+ *
+ * This promise can subsequently get cleared if we need to relinquish our
+ * connection (e.g. if another client wants to open the face DB with a newer
+ * version of the schema).
+ *
+ * Note that this is module specific state, so the main thread and each worker
+ * thread that calls the functions in this module will get their own independent
+ * connection. When we logout, the workers will presumably get resurrected and
+ * close their connections, while the connection kept by the main thread will be
+ * used to delete the database in {@link clearFaceData}.
+ */
+let _faceDB: ReturnType<typeof openFaceDB> | undefined;
+
+const openFaceDB = async () => {
+    const db = await openDB<FaceDBSchema>("face", 1, {
         upgrade(db, oldVersion, newVersion) {
             log.info(`Upgrading face DB ${oldVersion} => ${newVersion}`);
             if (oldVersion < 1) {
@@ -84,8 +101,8 @@ const openFaceDB = () =>
             log.info(
                 "Another client is attempting to open a new version of face DB",
             );
-            // TODO: FBD: close via our promise
-            // TODO: FBD: clear our promise
+            db.close();
+            _faceDB = undefined;
         },
         blocked() {
             log.warn(
@@ -94,9 +111,17 @@ const openFaceDB = () =>
         },
         terminated() {
             log.warn("Our connection to face DB was unexpectedly terminated");
-            // TODO: FBD: clear our promise
+            _faceDB = undefined;
         },
     });
+    return db;
+};
+
+/**
+ * @returns a lazily created, cached connection to the face DB.
+ */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const faceDB = () => (_faceDB ??= openFaceDB());
 
 /**
  * Save the given {@link faceIndex} locally.
