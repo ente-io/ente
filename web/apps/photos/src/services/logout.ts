@@ -14,7 +14,7 @@ import mlWorkManager from "./machineLearning/mlWorkManager";
  * See: [Note: Do not throw during logout].
  */
 export const photosLogout = async () => {
-    const ignoreError = (e: unknown, label: string) =>
+    const ignoreError = (label: string, e: unknown) =>
         log.error(`Ignoring error during logout (${label})`, e);
 
     await accountLogout();

@@ -17,7 +17,7 @@ import { logout as remoteLogout } from "../api/user";
  * gets in an unexpected state.
  */
 export const accountLogout = async () => {
-    const ignoreError = (e: unknown, label: string) =>
+    const ignoreError = (label: string, e: unknown) =>
         log.error(`Ignoring error during logout (${label})`, e);
 
     try {
