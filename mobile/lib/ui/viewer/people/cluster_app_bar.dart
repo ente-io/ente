@@ -191,14 +191,14 @@ class _AppBarWidgetState extends State<ClusterAppBar> {
           final breakupResult = await ClusterFeedbackService.instance
               .breakUpCluster(widget.clusterID);
           final Map<int, List<String>> newClusterIDToFaceIDs =
-              breakupResult.newClusterIdToFaceIds!;
+              breakupResult.newClusterIdToFaceIds;
           final Map<String, int> newFaceIdToClusterID =
               breakupResult.newFaceIdToCluster;
 
           // Update to delete the old clusters and save the new clusters
           await FaceMLDataDB.instance.deleteClusterSummary(widget.clusterID);
           await FaceMLDataDB.instance
-              .clusterSummaryUpdate(breakupResult.newClusterSummaries!);
+              .clusterSummaryUpdate(breakupResult.newClusterSummaries);
           await FaceMLDataDB.instance
               .updateFaceIdToClusterId(newFaceIdToClusterID);
 
@@ -254,7 +254,7 @@ class _AppBarWidgetState extends State<ClusterAppBar> {
         await ClusterFeedbackService.instance.breakUpCluster(widget.clusterID);
 
     final Map<int, List<String>> newClusterIDToFaceIDs =
-        breakupResult.newClusterIdToFaceIds!;
+        breakupResult.newClusterIdToFaceIds;
 
     final allFileIDs = newClusterIDToFaceIDs.values
         .expand((e) => e)
