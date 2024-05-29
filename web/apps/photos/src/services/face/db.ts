@@ -24,11 +24,11 @@ import type { FaceIndex } from "./types";
  */
 interface FaceDBSchema extends DBSchema {
     "face-index": {
-        key: string;
+        key: number;
         value: FaceIndex;
     };
     "file-status": {
-        key: string;
+        key: number;
         value: FileStatus;
         indexes: { isIndexed: number };
     };
@@ -173,10 +173,10 @@ export const saveFaceIndex = async (faceIndex: FaceIndex) => {
         statusStore.put({
             fileID: faceIndex.fileID,
             isIndexed: 1,
-            failureCount: 0
+            failureCount: 0,
         }),
-        tx.done
-    ])
+        tx.done,
+    ]);
 };
 
 /**
@@ -190,8 +190,18 @@ export const saveFaceIndex = async (faceIndex: FaceIndex) => {
  * {@link saveFaceIndex} called with the result), its existing status remains
  * unperturbed.
  */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const addFileEntry = (fileID: string) => {};
+export const addFileEntry = async (fileID: number) => {
+    const db = await faceDB();
+    const tx = db.transaction("file-status", "readwrite");
+    if ((await tx.store.getKey(fileID)) === undefined) {
+        await tx.store.put({
+            fileID,
+            isIndexed: 0,
+            failureCount: 0,
+        });
+    }
+    return tx.done;
+};
 
 /**
  * Increment the failure count associated with the given {@link fileID}.
