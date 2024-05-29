@@ -1,5 +1,5 @@
 import { FILE_TYPE } from "@/media/file-type";
-import { IndexStatus } from "services/face/db";
+import { IndexStatus } from "services/face/db-old";
 import type { Person } from "services/face/people";
 import { City } from "services/locationSearchService";
 import { LocationTagData } from "types/entity";

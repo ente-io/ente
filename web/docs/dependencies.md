@@ -161,10 +161,15 @@ some cases.
 -   [heic-convert](https://github.com/catdad-experiments/heic-convert) is used
     for converting HEIC files (which browsers don't natively support) into JPEG.
 
-## Processing
+## General
 
 -   [comlink](https://github.com/GoogleChromeLabs/comlink) provides a minimal
     layer on top of Web Workers to make them more easier to use.
+
+-   [idb](https://github.com/jakearchibald/idb) provides a promise API over the
+    browser-native IndexedDB APIs.
+
+    > For more details about IDB and its role, see [storage.md](storage.md).
 
 ## Photos app specific
 

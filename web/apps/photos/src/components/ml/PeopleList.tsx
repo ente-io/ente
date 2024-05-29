@@ -4,7 +4,7 @@ import { Skeleton, styled } from "@mui/material";
 import { Legend } from "components/PhotoViewer/styledComponents/Legend";
 import { t } from "i18next";
 import React, { useEffect, useState } from "react";
-import mlIDbStorage from "services/face/db";
+import mlIDbStorage from "services/face/db-old";
 import type { Person } from "services/face/people";
 import { EnteFile } from "types/file";
 
