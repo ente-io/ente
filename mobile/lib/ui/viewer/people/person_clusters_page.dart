@@ -9,7 +9,6 @@ import "package:photos/services/machine_learning/face_ml/person/person_service.d
 import "package:photos/services/search_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/viewer/file/no_thumbnail_widget.dart";
-// import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/ui/viewer/people/cluster_page.dart";
 import "package:photos/ui/viewer/search/result/person_face_widget.dart";
 
@@ -34,8 +33,7 @@ class _PersonClustersPageState extends State<PersonClustersPage> {
         title: Text(widget.person.data.name),
       ),
       body: FutureBuilder<Map<int, List<EnteFile>>>(
-        future: SearchService.instance
-            .getClusterFilesForPersonID(widget.person.remoteID),
+        future: SearchService.instance.getClusterFilesForPersonID(widget.person.remoteID),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             final clusters = snapshot.data!;
@@ -57,6 +55,7 @@ class _PersonClustersPageState extends State<PersonClustersPage> {
                           files,
                           personID: widget.person,
                           clusterID: index,
+                          showNamingBanner: false,
                         ),
                       ),
                     );
@@ -92,8 +91,7 @@ class _PersonClustersPageState extends State<PersonClustersPage> {
                         ), // Add some spacing between the thumbnail and the text
                         Expanded(
                           child: Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 8.0),
+                            padding: const EdgeInsets.symmetric(horizontal: 8.0),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: <Widget>[
@@ -105,16 +103,14 @@ class _PersonClustersPageState extends State<PersonClustersPage> {
                                     ? GestureDetector(
                                         onTap: () async {
                                           try {
-                                            await PersonService.instance
-                                                .removeClusterToPerson(
+                                            await PersonService.instance.removeClusterToPerson(
                                               personID: widget.person.remoteID,
                                               clusterID: clusterID,
                                             );
                                             _logger.info(
                                               "Removed cluster $clusterID from person ${widget.person.remoteID}",
                                             );
-                                            Bus.instance
-                                                .fire(PeopleChangedEvent());
+                                            Bus.instance.fire(PeopleChangedEvent());
                                             setState(() {});
                                           } catch (e) {
                                             _logger.severe(
