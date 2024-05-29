@@ -1,49 +1,54 @@
-import { ComlinkWorker } from "@/next/worker/comlink-worker";
-import { type Remote } from "comlink";
-import mlWorkManager from "services/machineLearning/mlWorkManager";
-import type { EnteFile } from "types/file";
-import { FaceIndexerWorker } from "./indexer.worker";
-
 import log from "@/next/log";
+import { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { wait } from "@/utils/promise";
+import { type Remote } from "comlink";
 import type { EnteFile } from "types/file";
 import { markIndexingFailed } from "./db";
 import { indexFaces } from "./f-index";
+import { FaceIndexerWorker } from "./indexer.worker";
+import mlWorkManager from "services/machineLearning/mlWorkManager";
 
 /**
  * Face indexing orchestrator.
  *
- * This is class that drives the face indexing process across all files that
- * need to still be indexed. It runs in a Web Worker so as to not get in the way
- * of the main thread.
+ * This module exposes a singleton instance of this class which drives the face
+ * indexing process on the user's library.
  *
- * It operates in two modes - live indexing and backfill.
+ * The indexer operates in two modes - live indexing and backfill.
  *
- * In live indexing, any files that are being uploaded from the current client
+ * When live indexing, any files that are being uploaded from the current client
  * are provided to the indexer, which puts them in a queue and indexes them one
  * by one. This is more efficient since we already have the file's content at
  * hand and do not have to download and decrypt it.
  *
- * In backfill, the indexer figures out if any of the user's files (irrespective
- * of where they were uploaded from) still need to be indexed, and if so,
- * downloads, decrypts and indexes them.
+ * When backfilling, the indexer figures out if any of the user's files
+ * (irrespective of where they were uploaded from) still need to be indexed, and
+ * if so, downloads, decrypts and indexes them.
  *
- * Live indexing has higher priority, backfill runs otherwise.
- *
- * If nothing needs to be indexed, the indexer goes to sleep for a while.
+ * Live indexing has higher priority, backfilling runs otherwise. If nothing
+ * remains to be indexed, the indexer goes to sleep for a while.
  */
-export class FaceIndexerWorker {
+class FaceIndexer {
     /** Live indexing queue. */
-    private liveItems: { file: File; enteFile: EnteFile }[];
+    private liveItems: { enteFile: EnteFile; file: File | undefined }[];
     /** Timeout for when the next time we will wake up. */
     private wakeTimeout: ReturnType<typeof setTimeout> | undefined;
 
     /**
-     * Add {@link file} associated with {@link enteFile} to the live indexing
-     * queue.
+     * Add a file to the live indexing queue.
+     *
+     * @param enteFile An {@link EnteFile} that should be indexed.
+     *
+     * @param file The contents of {@link enteFile} as a web {@link File}
+     * object, if available.
      */
-    enqueueFile(file: File, enteFile: EnteFile) {
-        this.liveItems.push({ file, enteFile });
+    enqueueFile(enteFile: EnteFile, file: File | undefined) {
+        // If face indexing is not enabled, don't enqueue anything. Later on if
+        // the user turns on face indexing these files will get indexed as part
+        // of the backfilling anyway, the live indexing is just an optimization.
+        if (!mlWorkManager.isMlSearchEnabled) return;
+
+        this.liveItems.push({ enteFile, file });
         this.wakeUpIfNeeded();
     }
 
@@ -56,6 +61,20 @@ export class FaceIndexerWorker {
         // Get to work.
         this.tick();
     }
+
+    /**
+     * A promise for the lazily created singleton {@link FaceIndexerWorker} remote
+     * exposed by this module.
+     */
+    _faceIndexer: Promise<Remote<FaceIndexerWorker>>;
+    /**
+     * Main thread interface to the face indexer.
+     *
+     * This function provides a promise that resolves to a lazily created singleton
+     * remote with a {@link FaceIndexerWorker} at the other end.
+     */
+    faceIndexer = (): Promise<Remote<FaceIndexerWorker>> =>
+        (this._faceIndexer ??= createFaceIndexerComlinkWorker().remote);
 
     private async tick() {
         console.log("tick");
@@ -84,39 +103,29 @@ export class FaceIndexerWorker {
         // Run again.
         this.tick();
     }
+
+    /**
+     * Add a newly uploaded file to the face indexing queue.
+     *
+     * @param enteFile The {@link EnteFile} that was uploaded.
+     * @param file
+     */
+    /*
+    indexFacesInFile = (enteFile: EnteFile, file: File) => {
+        if (!mlWorkManager.isMlSearchEnabled) return;
+
+        faceIndexer().then((indexer) => {
+            indexer.enqueueFile(file, enteFile);
+        });
+    };
+    */
 }
 
-/**
- * A promise for the lazily created singleton {@link FaceIndexerWorker} remote
- * exposed by this module.
- */
-let _faceIndexer: Promise<Remote<FaceIndexerWorker>>;
+/** The singleton instance of {@link FaceIndexer}. */
+export default new FaceIndexer();
 
 const createFaceIndexerComlinkWorker = () =>
     new ComlinkWorker<typeof FaceIndexerWorker>(
         "face-indexer",
         new Worker(new URL("indexer.worker.ts", import.meta.url)),
     );
-
-/**
- * Main thread interface to the face indexer.
- *
- * This function provides a promise that resolves to a lazily created singleton
- * remote with a {@link FaceIndexerWorker} at the other end.
- */
-const faceIndexer = (): Promise<Remote<FaceIndexerWorker>> =>
-    (_faceIndexer ??= createFaceIndexerComlinkWorker().remote);
-
-/**
- * Add a newly uploaded file to the face indexing queue.
- *
- * @param enteFile The {@link EnteFile} that was uploaded.
- * @param file
- */
-export const indexFacesInFile = (enteFile: EnteFile, file: File) => {
-    if (!mlWorkManager.isMlSearchEnabled) return;
-
-    faceIndexer().then((indexer) => {
-        indexer.enqueueFile(file, enteFile);
-    });
-};
