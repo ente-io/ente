@@ -30,7 +30,7 @@ interface FaceDBSchema extends DBSchema {
     "file-status": {
         key: number;
         value: FileStatus;
-        indexes: { isIndexed: number };
+        indexes: { isIndexable: number };
     };
 }
 
@@ -38,15 +38,11 @@ interface FileStatus {
     /** The ID of the {@link EnteFile} whose indexing status we represent. */
     fileID: number;
     /**
-     * `1` if we have indexed a file with this {@link fileID}, `0` otherwise.
-     *
-     * It is guaranteed that "face-index" will have an entry for the same
-     * {@link fileID} if and only if {@link isIndexed} is `1`.
+     * `1` if this file needs to be indexed, `0` otherwise.
      *
      * > Somewhat confusingly, we also have a (IndexedDB) "index" on this field.
-     *   That (IDB) index allows us to effectively select {@link fileIDs} that
-     *   still need indexing (where {@link isIndexed} is not `1`), so it is all
-     *   sensible, just that if I say the word "index" one more time...
+     *   That (IDB) index allows us to efficiently select {@link fileIDs} that
+     *   still need indexing (i.e. entries where {@link isIndexed} is `1`).
      *
      * [Note: Boolean IndexedDB indexes].
      *
@@ -56,12 +52,13 @@ interface FileStatus {
      * As a workaround, we use numeric fields where `0` denotes `false` and `1`
      * denotes `true`.
      */
-    isIndexed: number;
+    isIndexable: number;
     /**
      * The number of times attempts to index this file failed.
      *
      * This is guaranteed to be `0` for files which have already been
-     * sucessfully indexed (i.e. files for which `isIndexed` is true).
+     * sucessfully indexed (i.e. files for which `isIndexable` is 0 and which
+     * have a corresponding entry in the "face-index" object store).
      */
     failureCount: number;
 }
@@ -77,10 +74,10 @@ interface FileStatus {
  * version of the schema).
  *
  * Note that this is module specific state, so the main thread and each worker
- * thread that calls the functions in this module will get their own independent
- * connection. To ensure that all connections get torn down correctly, we need
- * to call {@link closeFaceDBConnectionsIfNeeded} from both the main thread and
- * all the worker threads that use this module.
+ * thread that calls the functions in this module will have their own promises.
+ * To ensure that all connections get torn down correctly, we need to call
+ * {@link closeFaceDBConnectionsIfNeeded} from both the main thread and all the
+ * worker threads that use this module.
  */
 let _faceDB: ReturnType<typeof openFaceDB> | undefined;
 
@@ -90,11 +87,9 @@ const openFaceDB = async () => {
             log.info(`Upgrading face DB ${oldVersion} => ${newVersion}`);
             if (oldVersion < 1) {
                 db.createObjectStore("face-index", { keyPath: "fileID" });
-
-                const statusStore = db.createObjectStore("file-status", {
+                db.createObjectStore("file-status", {
                     keyPath: "fileID",
-                });
-                statusStore.createIndex("isIndexed", "isIndexed");
+                }).createIndex("isIndexable", "isIndexable");
             }
         },
         blocking() {
@@ -172,7 +167,7 @@ export const saveFaceIndex = async (faceIndex: FaceIndex) => {
         indexStore.put(faceIndex),
         statusStore.put({
             fileID: faceIndex.fileID,
-            isIndexed: 1,
+            isIndexable: 0,
             failureCount: 0,
         }),
         tx.done,
@@ -196,11 +191,25 @@ export const addFileEntry = async (fileID: number) => {
     if ((await tx.store.getKey(fileID)) === undefined) {
         await tx.store.put({
             fileID,
-            isIndexed: 0,
+            isIndexable: 1,
             failureCount: 0,
         });
     }
     return tx.done;
+};
+
+/**
+ * Return a list of fileIDs that need to be indexed.
+ *
+ * This list is from the universe of the file IDs that the face DB knows about
+ * (can use {@link addFileEntry} to inform it about new files). From this
+ * universe, we filter out fileIDs the files corresponding to which have already
+ * been indexed, or for which we attempted indexing but failed.
+ */
+export const unindexedFileIDs = async () => {
+    const db = await faceDB();
+    const tx = db.transaction("file-status", "readonly");
+    return tx.store.index("isIndexable").getAllKeys(IDBKeyRange.only(1));
 };
 
 /**
@@ -215,12 +224,11 @@ export const addFileEntry = async (fileID: number) => {
 export const markIndexingFailed = async (fileID: number) => {
     const db = await faceDB();
     const tx = db.transaction("file-status", "readwrite");
-    const status = (await tx.store.get(fileID)) ?? {
+    const failureCount = ((await tx.store.get(fileID)).failureCount ?? 0) + 1;
+    await tx.store.put({
         fileID,
-        isIndexed: 0,
-        failureCount: 0,
-    };
-    status.failureCount = status.failureCount + 1;
-    await tx.store.put(status);
+        isIndexable: 0,
+        failureCount,
+    });
     return tx.done;
 };
