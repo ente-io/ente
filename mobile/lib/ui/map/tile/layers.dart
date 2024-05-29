@@ -1,6 +1,11 @@
 import "package:flutter/material.dart";
 import "package:flutter_map/flutter_map.dart";
+import "package:photos/generated/l10n.dart";
+import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/map/tile/attribution/map_attribution.dart";
 import "package:photos/ui/map/tile/cache.dart";
+import "package:url_launcher/url_launcher.dart";
+import "package:url_launcher/url_launcher_string.dart";
 
 const String _userAgent = "io.ente.photos";
 
@@ -57,33 +62,32 @@ class OSMFranceTileAttributes extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // final textTheme = getEnteTextTheme(context).tinyBold;
-    // return MapAttributionWidget(
-    //   alignment: AttributionAlignment.bottomLeft,
-    //   showFlutterMapAttribution: false,
-    //   permanentHeight: options.permanentHeight,
-    //   popupBackgroundColor: getEnteColorScheme(context).backgroundElevated,
-    //   popupBorderRadius: options.popupBorderRadius,
-    //   iconSize: options.iconSize,
-    //   attributions: [
-    //     TextSourceAttribution(
-    //       S.of(context).openstreetmapContributors,
-    //       textStyle: textTheme,
-    //       onTap: () => launchUrlString('https://openstreetmap.org/copyright'),
-    //     ),
-    //     TextSourceAttribution(
-    //       'HOT Tiles',
-    //       textStyle: textTheme,
-    //       onTap: () => launchUrl(Uri.parse('https://www.hotosm.org/')),
-    //     ),
-    //     TextSourceAttribution(
-    //       S.of(context).hostedAtOsmFrance,
-    //       textStyle: textTheme,
-    //       onTap: () => launchUrl(Uri.parse('https://www.openstreetmap.fr/')),
-    //     ),
-    //   ],
-    // );
-    return const SizedBox.shrink();
+    final textTheme = getEnteTextTheme(context).tinyBold;
+    return MapAttributionWidget(
+      alignment: AttributionAlignment.bottomLeft,
+      showFlutterMapAttribution: false,
+      permanentHeight: options.permanentHeight,
+      popupBackgroundColor: getEnteColorScheme(context).backgroundElevated,
+      popupBorderRadius: options.popupBorderRadius,
+      iconSize: options.iconSize,
+      attributions: [
+        TextSourceAttribution(
+          S.of(context).openstreetmapContributors,
+          textStyle: textTheme,
+          onTap: () => launchUrlString('https://openstreetmap.org/copyright'),
+        ),
+        TextSourceAttribution(
+          'HOT Tiles',
+          textStyle: textTheme,
+          onTap: () => launchUrl(Uri.parse('https://www.hotosm.org/')),
+        ),
+        TextSourceAttribution(
+          S.of(context).hostedAtOsmFrance,
+          textStyle: textTheme,
+          onTap: () => launchUrl(Uri.parse('https://www.openstreetmap.fr/')),
+        ),
+      ],
+    );
   }
 }
 

@@ -135,6 +135,14 @@ class _MapViewState extends State<MapView> {
                 },
               ),
             ),
+            Padding(
+              padding: EdgeInsets.only(
+                bottom: widget.bottomSheetDraggableAreaHeight,
+              ),
+              child: OSMFranceTileAttributes(
+                options: widget.mapAttributionOptions,
+              ),
+            ),
           ],
         ),
         widget.showControls
