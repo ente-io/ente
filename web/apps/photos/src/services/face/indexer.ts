@@ -1,6 +1,8 @@
+import log from "@/next/log";
+import { wait } from "@/utils/promise";
 import type { EnteFile } from "types/file";
+import { markIndexingFailed } from "./db";
 import { indexFaces } from "./f-index";
-import type { MlFileData } from "./types-old";
 
 /**
  * Face indexing orchestrator.
@@ -27,7 +29,7 @@ import type { MlFileData } from "./types-old";
 export class FaceIndexer {
     /** Live indexing queue. */
     private liveItems: { file: File; enteFile: EnteFile }[];
-    /** True when we are sleeping. */
+    /** True when we have been paused externally. */
     private isPaused = false;
     /** Timeout for when the next time we will wake up. */
     private wakeTimeout: ReturnType<typeof setTimeout> | undefined;
@@ -38,28 +40,45 @@ export class FaceIndexer {
      */
     enqueueFile(file: File, enteFile: EnteFile) {
         this.liveItems.push({ file, enteFile });
-        this.isPaused = false;
-        this.wakeUpIfNeeded()
+        this.wakeUpIfNeeded();
     }
 
     private wakeUpIfNeeded() {
-        // Already awake
+        // If we were asked to pause, don't do anything.
+        if (this.isPaused) return;
+        // Already awake.
         if (!this.wakeTimeout) return;
         // Cancel the alarm, wake up now.
         clearTimeout(this.wakeTimeout);
         this.wakeTimeout = undefined;
+        // Get to work.
         this.tick();
     }
 
     private async tick() {
         const item = this.liveItems.pop();
-        let faceIndex: MlFileData | undefined;
-        if (item) {
-            faceIndex = await indexFaces(item.enteFile, item.file);
-        } else {
-            // backfill
+        if (!item) {
+            // TODO-ML: backfill instead if needed here.
+            if (!this.isPaused) {
+                this.wakeTimeout = setTimeout(() => {
+                    this.wakeTimeout = undefined;
+                    this.wakeUpIfNeeded();
+                }, 30 * 1000);
+            }
+            return;
         }
-        console.log("indexed face", faceIndex);
 
+        const fileID = item.enteFile.id;
+        try {
+            const faceIndex = await indexFaces(item.enteFile, item.file);
+        } catch (e) {
+            log.error(`Failed to index faces in file ${fileID}`, e);
+            markIndexingFailed(item.enteFile.id);
+        }
+
+        // Let the runloop drain.
+        await wait(0);
+        // Run again.
+        this.tick();
     }
 }
