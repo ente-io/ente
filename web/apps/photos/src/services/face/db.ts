@@ -45,8 +45,8 @@ interface FileStatus {
      *
      * > Somewhat confusingly, we also have a (IndexedDB) "index" on this field.
      *   That (IDB) index allows us to effectively select {@link fileIDs} that
-     *   still need indexing (where {@link isIndexed} is not `1`), so there is
-     *   utility, it is just that if I say the word "index" one more time...
+     *   still need indexing (where {@link isIndexed} is not `1`), so it is all
+     *   sensible, just that if I say the word "index" one more time...
      *
      * [Note: Boolean IndexedDB indexes].
      *
@@ -80,7 +80,22 @@ const openFaceDB = () =>
                 statusStore.createIndex("isIndexed", "isIndexed");
             }
         },
-        // TODO: FDB
+        blocking() {
+            log.info(
+                "Another client is attempting to open a new version of face DB",
+            );
+            // TODO: FBD: close via our promise
+            // TODO: FBD: clear our promise
+        },
+        blocked() {
+            log.warn(
+                "Waiting for an existing client to close their connection so that we can update the face DB version",
+            );
+        },
+        terminated() {
+            log.warn("Our connection to face DB was unexpectedly terminated");
+            // TODO: FBD: clear our promise
+        },
     });
 
 /**
