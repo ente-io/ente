@@ -212,5 +212,15 @@ export const addFileEntry = async (fileID: number) => {
  * and its failure count is set to 1. Otherwise the failure count of the
  * existing entry is incremented.
  */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const markIndexingFailed = (fileID: string) => {};
+export const markIndexingFailed = async (fileID: number) => {
+    const db = await faceDB();
+    const tx = db.transaction("file-status", "readwrite");
+    const status = (await tx.store.get(fileID)) ?? {
+        fileID,
+        isIndexed: 0,
+        failureCount: 0,
+    };
+    status.failureCount = status.failureCount + 1;
+    await tx.store.put(status);
+    return tx.done;
+};
