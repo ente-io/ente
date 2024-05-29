@@ -12,6 +12,7 @@ import {
     translate,
 } from "transformation-matrix";
 import type { EnteFile } from "types/file";
+import { logIdentifier } from "utils/file";
 import { saveFaceCrop } from "./crop";
 import { fetchImageBitmap, getLocalFileImageBitmap } from "./file";
 import {
@@ -58,7 +59,7 @@ export const indexFaces = async (enteFile: EnteFile, localFile?: File) => {
     log.debug(() => {
         const nf = mlFile.faces?.length ?? 0;
         const ms = Date.now() - startTime;
-        return `Indexed ${nf} faces in file ${enteFile.id} (${ms} ms)`;
+        return `Indexed ${nf} faces in file ${logIdentifier(enteFile)} (${ms} ms)`;
     });
     return mlFile;
 };
