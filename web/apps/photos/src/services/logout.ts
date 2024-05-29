@@ -3,6 +3,7 @@ import { accountLogout } from "@ente/accounts/services/logout";
 import { clipService } from "services/clip-service";
 import DownloadManager from "./download";
 import exportService from "./export";
+import { clearFaceData } from "./face/db";
 import mlWorkManager from "./machineLearning/mlWorkManager";
 
 /**
@@ -33,6 +34,12 @@ export const photosLogout = async () => {
             await mlWorkManager.logout();
         } catch (e) {
             log.error("Ignoring error during logout (ML)", e);
+        }
+
+        try {
+            await clearFaceData();
+        } catch (e) {
+            log.error("Ignoring error during logout (face)", e);
         }
 
         try {

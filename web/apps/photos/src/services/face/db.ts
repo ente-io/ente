@@ -79,8 +79,8 @@ interface FileStatus {
  * Note that this is module specific state, so the main thread and each worker
  * thread that calls the functions in this module will get their own independent
  * connection. To ensure that all connections get torn down correctly, we need
- * to call closeFaceDBConnection
- * used to delete the database in {@link clearFaceData}.
+ * to call {@link closeFaceDBConnectionsIfNeeded} from both the main thread and
+ * all the worker threads that use this module.
  */
 let _faceDB: ReturnType<typeof openFaceDB> | undefined;
 
@@ -143,14 +143,16 @@ export const closeFaceDBConnectionsIfNeeded = async () => {
  *
  * Meant to be called during logout.
  */
-export const clearFaceData = () =>
-    deleteDB("face", {
+export const clearFaceData = async () => {
+    await closeFaceDBConnectionsIfNeeded();
+    return deleteDB("face", {
         blocked() {
             log.warn(
                 "Waiting for an existing client to close their connection so that we can delete the face DB",
             );
         },
     });
+};
 
 /**
  * Save the given {@link faceIndex} locally.
