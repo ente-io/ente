@@ -17,34 +17,37 @@ import { logout as remoteLogout } from "../api/user";
  * gets in an unexpected state.
  */
 export const accountLogout = async () => {
+    const ignoreError = (e: unknown, label: string) =>
+        log.error(`Ignoring error during logout (${label})`, e);
+
     try {
         await remoteLogout();
     } catch (e) {
-        log.error("Ignoring error during logout (remote)", e);
+        ignoreError("remote", e);
     }
     try {
         InMemoryStore.clear();
     } catch (e) {
-        log.error("Ignoring error during logout (in-memory store)", e);
+        ignoreError("in-memory store", e);
     }
     try {
         clearKeys();
     } catch (e) {
-        log.error("Ignoring error during logout (session store)", e);
+        ignoreError("session store", e);
     }
     try {
         clearData();
     } catch (e) {
-        log.error("Ignoring error during logout (local storage)", e);
+        ignoreError("local storage", e);
     }
     try {
         await localForage.clear();
     } catch (e) {
-        log.error("Ignoring error during logout (local forage)", e);
+        ignoreError("local forage", e);
     }
     try {
         await clearBlobCaches();
     } catch (e) {
-        log.error("Ignoring error during logout (cache)", e);
+        ignoreError("cache", e);
     }
 };
