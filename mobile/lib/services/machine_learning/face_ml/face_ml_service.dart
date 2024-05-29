@@ -661,12 +661,12 @@ class FaceMlService {
           }
 
           await FaceMLDataDB.instance.updateFaceIdToClusterId(clusteringResult.newFaceIdToCluster);
-          await FaceMLDataDB.instance.clusterSummaryUpdate(clusteringResult.newClusterSummaries!);
+          await FaceMLDataDB.instance.clusterSummaryUpdate(clusteringResult.newClusterSummaries);
           Bus.instance.fire(PeopleChangedEvent());
           for (final faceInfo in faceInfoForClustering) {
             faceInfo.clusterId ??= clusteringResult.newFaceIdToCluster[faceInfo.faceID];
           }
-          for (final clusterUpdate in clusteringResult.newClusterSummaries!.entries) {
+          for (final clusterUpdate in clusteringResult.newClusterSummaries.entries) {
             oldClusterSummaries[clusterUpdate.key] = clusterUpdate.value;
           }
           _logger.info(
@@ -701,7 +701,7 @@ class FaceMlService {
           'Updating ${clusteringResult.newFaceIdToCluster.length} FaceIDs with clusterIDs in the DB',
         );
         await FaceMLDataDB.instance.updateFaceIdToClusterId(clusteringResult.newFaceIdToCluster);
-        await FaceMLDataDB.instance.clusterSummaryUpdate(clusteringResult.newClusterSummaries!);
+        await FaceMLDataDB.instance.clusterSummaryUpdate(clusteringResult.newClusterSummaries);
         Bus.instance.fire(PeopleChangedEvent());
         _logger.info('Done updating FaceIDs with clusterIDs in the DB, in '
             '${DateTime.now().difference(clusterDoneTime).inSeconds} seconds');
