@@ -1,81 +1,26 @@
 import log from "@/next/log";
-import { wait } from "@/utils/promise";
 import type { EnteFile } from "types/file";
 import { markIndexingFailed } from "./db";
 import { indexFaces } from "./f-index";
 
 /**
- * Face indexing orchestrator.
+ * Index faces in a file, save the persist the results locally, and put them on
+ * remote.
  *
- * This is class that drives the face indexing process across all files that
- * need to still be indexed. It runs in a Web Worker so as to not get in the way
- * of the main thread.
- *
- * It operates in two modes - live indexing and backfill.
- *
- * In live indexing, any files that are being uploaded from the current client
- * are provided to the indexer, which puts them in a queue and indexes them one
- * by one. This is more efficient since we already have the file's content at
- * hand and do not have to download and decrypt it.
- *
- * In backfill, the indexer figures out if any of the user's files (irrespective
- * of where they were uploaded from) still need to be indexed, and if so,
- * downloads, decrypts and indexes them.
- *
- * Live indexing has higher priority, backfill runs otherwise.
- *
- * If nothing needs to be indexed, the indexer goes to sleep for a while.
+ * This class is instantiated in a Web Worker so as to not get in the way of the
+ * main thread. It could've been a bunch of free standing functions too, it is
+ * just a class for convenience of compatibility with how the rest of our
+ * comlink workers are structured.
  */
 export class FaceIndexerWorker {
-    /** Live indexing queue. */
-    private liveItems: { file: File; enteFile: EnteFile }[];
-    /** Timeout for when the next time we will wake up. */
-    private wakeTimeout: ReturnType<typeof setTimeout> | undefined;
-
-    /**
-     * Add {@link file} associated with {@link enteFile} to the live indexing
-     * queue.
-     */
-    enqueueFile(file: File, enteFile: EnteFile) {
-        this.liveItems.push({ file, enteFile });
-        this.wakeUpIfNeeded();
-    }
-
-    private wakeUpIfNeeded() {
-        // Already awake.
-        if (!this.wakeTimeout) return;
-        // Cancel the alarm, wake up now.
-        clearTimeout(this.wakeTimeout);
-        this.wakeTimeout = undefined;
-        // Get to work.
-        this.tick();
-    }
-
-    private async tick() {
-        console.log("tick");
-
-        const item = this.liveItems.pop();
-        if (!item) {
-            // TODO-ML: backfill instead if needed here.
-            this.wakeTimeout = setTimeout(() => {
-                this.wakeTimeout = undefined;
-                this.wakeUpIfNeeded();
-            }, 30 * 1000);
-            return;
-        }
-
-        const fileID = item.enteFile.id;
+    async index(enteFile: EnteFile, file: File | undefined) {
+        const fileID = enteFile.id;
         try {
-            const faceIndex = await indexFaces(item.enteFile, item.file);
+            const faceIndex = await indexFaces(enteFile, file);
             log.info(`faces in file ${fileID}`, faceIndex);
         } catch (e) {
             log.error(`Failed to index faces in file ${fileID}`, e);
-            markIndexingFailed(item.enteFile.id);
+            markIndexingFailed(enteFile.id);
         }
-
-        // Let the runloop drain.
-        await wait(0);
-        // Run again.
-        this.tick();
     }
 }
