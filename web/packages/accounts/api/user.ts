@@ -43,6 +43,34 @@ export const putAttributes = (token: string, keyAttributes: KeyAttributes) =>
         },
     );
 
+/**
+ * Verify that the given auth {@link token} is still valid.
+ *
+ * If the user changes their password on another device, then all existing
+ * auth tokens get invalidated. Existing clients should at opportune times
+ * make an API call with the auth token that they have saved locally to see
+ * if the session should be invalidated. When this happens, we inform the
+ * user with a dialog and prompt them to logout.
+ */
+export const validateAuthToken = async (token: string) => {
+    try {
+        await HTTPService.get(`${ENDPOINT}/users/session-validity/v2`, null, {
+            "X-Auth-Token": token,
+        });
+        return true;
+    } catch (e) {
+        // We get back a 401 Unauthorized if the token is not valid.
+        if (
+            e instanceof ApiError &&
+            e.httpStatusCode == HttpStatusCode.Unauthorized
+        ) {
+            return false;
+        } else {
+            throw e;
+        }
+    }
+};
+
 export const logout = async () => {
     try {
         const token = getToken();
