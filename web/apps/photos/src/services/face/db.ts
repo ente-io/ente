@@ -115,7 +115,6 @@ const openFaceDB = async () => {
 /**
  * @returns a lazily created, cached connection to the face DB.
  */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const faceDB = () => (_faceDB ??= openFaceDB());
 
 /**
