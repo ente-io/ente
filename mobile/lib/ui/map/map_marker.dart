@@ -12,7 +12,7 @@ Marker mapMarker(
 }) {
   return Marker(
     //-6.5 is for taking in the height of the MarkerPointer
-    anchorPos: AnchorPos.exactly(Anchor(markerSize.height / 2, -6.5)),
+    alignment: Alignment(markerSize.height / 2, -6.5),
     key: Key(key),
     width: markerSize.width,
     height: markerSize.height,
@@ -20,7 +20,7 @@ Marker mapMarker(
       imageMarker.latitude,
       imageMarker.longitude,
     ),
-    builder: (context) => MarkerImage(
+    child: MarkerImage(
       file: imageMarker.imageFile,
       seperator: (MapView.defaultMarkerSize.height + 10) -
           (MapView.defaultMarkerSize.height - markerSize.height),

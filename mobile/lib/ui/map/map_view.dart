@@ -108,12 +108,10 @@ class _MapViewState extends State<MapView> {
                 maxClusterRadius: 100,
                 showPolygon: false,
                 size: widget.markerSize,
-                fitBoundsOptions: const FitBoundsOptions(
-                  padding: EdgeInsets.all(80),
-                ),
+                padding: const EdgeInsets.all(80),
                 markers: _markers,
                 onClusterTap: (_) {
-                  onChange(widget.controller.bounds!);
+                  onChange(widget.controller.camera.visibleBounds);
                 },
                 builder: (context, List<Marker> markers) {
                   final index = int.parse(
@@ -164,8 +162,8 @@ class _MapViewState extends State<MapView> {
                       icon: Icons.add,
                       onPressed: () {
                         widget.controller.move(
-                          widget.controller.center,
-                          widget.controller.zoom + 1,
+                          widget.controller.camera.center,
+                          widget.controller.camera.zoom + 1,
                         );
                       },
                       heroTag: 'zoom-in',
@@ -174,8 +172,8 @@ class _MapViewState extends State<MapView> {
                       icon: Icons.remove,
                       onPressed: () {
                         widget.controller.move(
-                          widget.controller.center,
-                          widget.controller.zoom - 1,
+                          widget.controller.camera.center,
+                          widget.controller.camera.zoom - 1,
                         );
                       },
                       heroTag: 'zoom-out',
