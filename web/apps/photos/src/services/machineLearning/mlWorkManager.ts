@@ -117,6 +117,10 @@ class MLWorkManager {
         );
     }
 
+    public isMlSearchEnabled() {
+        return this.mlSearchEnabled;
+    }
+
     public async setMlSearchEnabled(enabled: boolean) {
         if (!this.mlSearchEnabled && enabled) {
             log.info("Enabling MLWorkManager");

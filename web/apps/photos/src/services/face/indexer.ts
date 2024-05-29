@@ -1,5 +1,7 @@
 import { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { type Remote } from "comlink";
+import mlWorkManager from "services/machineLearning/mlWorkManager";
+import type { EnteFile } from "types/file";
 import { FaceIndexerWorker } from "./indexer.worker";
 
 /**
@@ -20,5 +22,19 @@ const createFaceIndexerComlinkWorker = () =>
  * This function provides a promise that resolves to a lazily created singleton
  * remote with a {@link FaceIndexerWorker} at the other end.
  */
-export const faceIndexer = (): Promise<Remote<FaceIndexerWorker>> =>
+const faceIndexer = (): Promise<Remote<FaceIndexerWorker>> =>
     (_faceIndexer ??= createFaceIndexerComlinkWorker().remote);
+
+/**
+ * Add a newly uploaded file to the face indexing queue.
+ *
+ * @param enteFile The {@link EnteFile} that was uploaded.
+ * @param file
+ */
+export const indexFacesInFile = (enteFile: EnteFile, file: File) => {
+    if (!mlWorkManager.isMlSearchEnabled) return;
+
+    faceIndexer().then((indexer) => {
+        indexer.enqueueFile(file, enteFile);
+    });
+};
