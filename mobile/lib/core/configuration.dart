@@ -191,14 +191,16 @@ class Configuration {
   }
 
   Future<void> logout({bool autoLogout = false}) async {
-    if (SyncService.instance.isSyncInProgress()) {
-      SyncService.instance.stopSync();
-      try {
-        await SyncService.instance
-            .existingSync()
-            .timeout(const Duration(seconds: 5));
-      } catch (e) {
-        // ignore
+    if (!autoLogout) {
+      if (SyncService.instance.isSyncInProgress()) {
+        SyncService.instance.stopSync();
+        try {
+          await SyncService.instance
+              .existingSync()
+              .timeout(const Duration(seconds: 5));
+        } catch (e) {
+          // ignore
+        }
       }
     }
     await _preferences.clear();
