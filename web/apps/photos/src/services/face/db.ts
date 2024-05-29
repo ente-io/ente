@@ -36,7 +36,7 @@ interface FaceDBSchema extends DBSchema {
 
 interface FileStatus {
     /** The ID of the {@link EnteFile} whose indexing status we represent. */
-    fileID: string;
+    fileID: number;
     /**
      * `1` if we have indexed a file with this {@link fileID}, `0` otherwise.
      *
@@ -163,8 +163,21 @@ export const clearFaceData = async () => {
  * This function adds a new entry, overwriting any existing ones (No merging is
  * performed, the existing entry is unconditionally overwritten).
  */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const saveFaceIndex = async (faceIndex: FaceIndex) => {};
+export const saveFaceIndex = async (faceIndex: FaceIndex) => {
+    const db = await faceDB();
+    const tx = db.transaction(["face-index", "file-status"], "readwrite");
+    const indexStore = tx.objectStore("face-index");
+    const statusStore = tx.objectStore("file-status");
+    return Promise.all([
+        indexStore.put(faceIndex),
+        statusStore.put({
+            fileID: faceIndex.fileID,
+            isIndexed: 1,
+            failureCount: 0
+        }),
+        tx.done
+    ])
+};
 
 /**
  * Record the existence of a file so that entities in the face indexing universe
