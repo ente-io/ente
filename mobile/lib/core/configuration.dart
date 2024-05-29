@@ -145,7 +145,8 @@ class Configuration {
           await logout(autoLogout: true);
         } else {
           _logger.warning(
-              'Platform error ${error.message} with string ${error.toString()}');
+            'Platform error ${error.message} with string ${error.toString()}',
+          );
           rethrow;
         }
       } else {
