@@ -1,9 +1,9 @@
 import "dart:async";
 import 'dart:convert';
 import "dart:io";
-import 'dart:typed_data';
 
 import 'package:bip39/bip39.dart' as bip39;
+import "package:flutter/services.dart";
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
@@ -97,37 +97,61 @@ class Configuration {
   );
 
   Future<void> init() async {
-    _preferences = await SharedPreferences.getInstance();
-    _secureStorage = const FlutterSecureStorage();
-    _documentsDirectory = (await getApplicationDocumentsDirectory()).path;
-    _tempDocumentsDirPath = _documentsDirectory + "/temp/";
-    final tempDocumentsDir = Directory(_tempDocumentsDirPath);
-    await _cleanUpStaleFiles(tempDocumentsDir);
-    tempDocumentsDir.createSync(recursive: true);
-    final tempDirectoryPath = (await getTemporaryDirectory()).path;
-    _thumbnailCacheDirectory = tempDirectoryPath + "/thumbnail-cache";
-    Directory(_thumbnailCacheDirectory).createSync(recursive: true);
-    _sharedTempMediaDirectory = tempDirectoryPath + "/ente-shared-media";
-    Directory(_sharedTempMediaDirectory).createSync(recursive: true);
-    _sharedDocumentsMediaDirectory = _documentsDirectory + "/ente-shared-media";
-    Directory(_sharedDocumentsMediaDirectory).createSync(recursive: true);
-    if (!_preferences.containsKey(tokenKey)) {
-      await _secureStorage.deleteAll(iOptions: _secureStorageOptionsIOS);
-    } else {
-      _key = await _secureStorage.read(
-        key: keyKey,
-        iOptions: _secureStorageOptionsIOS,
-      );
-      _secretKey = await _secureStorage.read(
-        key: secretKeyKey,
-        iOptions: _secureStorageOptionsIOS,
-      );
-      if (_key == null) {
-        await logout(autoLogout: true);
+    try {
+      _preferences = await SharedPreferences.getInstance();
+      _secureStorage = const FlutterSecureStorage();
+      _documentsDirectory = (await getApplicationDocumentsDirectory()).path;
+      _tempDocumentsDirPath = _documentsDirectory + "/temp/";
+      final tempDocumentsDir = Directory(_tempDocumentsDirPath);
+      await _cleanUpStaleFiles(tempDocumentsDir);
+      tempDocumentsDir.createSync(recursive: true);
+      final tempDirectoryPath = (await getTemporaryDirectory()).path;
+      _thumbnailCacheDirectory = tempDirectoryPath + "/thumbnail-cache";
+      Directory(_thumbnailCacheDirectory).createSync(recursive: true);
+      _sharedTempMediaDirectory = tempDirectoryPath + "/ente-shared-media";
+      Directory(_sharedTempMediaDirectory).createSync(recursive: true);
+      _sharedDocumentsMediaDirectory =
+          _documentsDirectory + "/ente-shared-media";
+      Directory(_sharedDocumentsMediaDirectory).createSync(recursive: true);
+      if (!_preferences.containsKey(tokenKey)) {
+        await _secureStorage.deleteAll(iOptions: _secureStorageOptionsIOS);
+      } else {
+        _key = await _secureStorage.read(
+          key: keyKey,
+          iOptions: _secureStorageOptionsIOS,
+        );
+        _secretKey = await _secureStorage.read(
+          key: secretKeyKey,
+          iOptions: _secureStorageOptionsIOS,
+        );
+        if (_key == null) {
+          await logout(autoLogout: true);
+        }
+        await _migrateSecurityStorageToFirstUnlock();
       }
-      await _migrateSecurityStorageToFirstUnlock();
+      SuperLogging.setUserID(await _getOrCreateAnonymousUserID()).ignore();
+    } catch (e, s) {
+      _logger.severe("Configuration init failed", e, s);
+      /*
+      Check if it's a known is related to reading secret from secure storage
+      on android https://github.com/mogol/flutter_secure_storage/issues/541
+       */
+      if (e is PlatformException) {
+        final PlatformException error = e;
+        final bool isBadPaddingError =
+            error.toString().contains('BadPaddingException') ||
+                (error.message ?? '').contains('BadPaddingException');
+        if (isBadPaddingError) {
+          await logout(autoLogout: true);
+        } else {
+          _logger.warning(
+              'Platform error ${error.message} with string ${error.toString()}');
+          rethrow;
+        }
+      } else {
+        rethrow;
+      }
     }
-    SuperLogging.setUserID(await _getOrCreateAnonymousUserID()).ignore();
   }
 
   // _cleanUpStaleFiles deletes all files in the temp directory that are older
