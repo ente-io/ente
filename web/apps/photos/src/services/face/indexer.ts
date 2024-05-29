@@ -1,5 +1,7 @@
+import type { EnteFile } from "types/file";
+
 /**
- * Face indexer
+ * Face indexing orchestrator.
  *
  * This is class that drives the face indexing process, across all files that
  * need to still be indexed. This usually runs in a Web Worker so as to not get
@@ -18,6 +20,20 @@
  *
  * Live indexing has higher priority, backfill runs otherwise.
  *
- * If nothing needs to be indexed, the indexer goes to sleep.
+ * If nothing needs to be indexed, the indexer goes to sleep for a while.
  */
-export class Indexer {}
+export class FaceIndexer {
+    private liveItems: [file: File, enteFile: EnteFile][];
+
+    /**
+     * Add {@link file} associated with {@link enteFile} to the live indexing
+     * queue.
+     */
+    enqueueFile(file: File, enteFile: EnteFile) {
+        this.liveItems.push([file, enteFile]);
+    }
+
+    tick() {
+
+    }
+}
