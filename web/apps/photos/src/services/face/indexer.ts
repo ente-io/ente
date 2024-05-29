@@ -6,7 +6,7 @@ import { FaceIndexerWorker } from "./indexer.worker";
  * A promise for the lazily created singleton {@link FaceIndexerWorker} remote
  * exposed by this module.
  */
-let _faceIndexerWorker: Promise<Remote<FaceIndexerWorker>>;
+let _faceIndexer: Promise<Remote<FaceIndexerWorker>>;
 
 const createFaceIndexerComlinkWorker = () =>
     new ComlinkWorker<typeof FaceIndexerWorker>(
@@ -19,8 +19,6 @@ const createFaceIndexerComlinkWorker = () =>
  *
  * This function provides a promise that resolves to a lazily created singleton
  * remote with a {@link FaceIndexerWorker} at the other end.
- *
- * For more details, see the documentation for {@link FaceIndexerWorker}.
  */
-export const faceIndexerWorker = (): Promise<Remote<FaceIndexerWorker>> =>
-    (_faceIndexerWorker ??= createFaceIndexerComlinkWorker().remote);
+export const faceIndexer = (): Promise<Remote<FaceIndexerWorker>> =>
+    (_faceIndexer ??= createFaceIndexerComlinkWorker().remote);
