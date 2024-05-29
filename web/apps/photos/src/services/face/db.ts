@@ -1,5 +1,5 @@
 import log from "@/next/log";
-import { openDB, type DBSchema } from "idb";
+import { deleteDB, openDB, type DBSchema } from "idb";
 import type { FaceIndex } from "./types";
 
 /**
@@ -78,8 +78,8 @@ interface FileStatus {
  *
  * Note that this is module specific state, so the main thread and each worker
  * thread that calls the functions in this module will get their own independent
- * connection. When we logout, the workers will presumably get resurrected and
- * close their connections, while the connection kept by the main thread will be
+ * connection. To ensure that all connections get torn down correctly, we need
+ * to call closeFaceDBConnection
  * used to delete the database in {@link clearFaceData}.
  */
 let _faceDB: ReturnType<typeof openFaceDB> | undefined;
@@ -124,6 +124,35 @@ const openFaceDB = async () => {
 const faceDB = () => (_faceDB ??= openFaceDB());
 
 /**
+ * Close the face DB connection (if any) opened by this module.
+ *
+ * To ensure proper teardown of the DB connections, this function must be called
+ * at least once by any execution context that has called any of the other
+ * functions in this module.
+ */
+export const closeFaceDBConnectionsIfNeeded = async () => {
+    try {
+        if (_faceDB) (await _faceDB).close();
+    } finally {
+        _faceDB = undefined;
+    }
+};
+
+/**
+ * Clear any data stored by the face module.
+ *
+ * Meant to be called during logout.
+ */
+export const clearFaceData = () =>
+    deleteDB("face", {
+        blocked() {
+            log.warn(
+                "Waiting for an existing client to close their connection so that we can delete the face DB",
+            );
+        },
+    });
+
+/**
  * Save the given {@link faceIndex} locally.
  *
  * @param faceIndex A {@link FaceIndex} representing the faces that we detected
@@ -133,7 +162,7 @@ const faceDB = () => (_faceDB ??= openFaceDB());
  * performed, the existing entry is unconditionally overwritten).
  */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const saveFaceIndex = (faceIndex: FaceIndex) => {};
+export const saveFaceIndex = async (faceIndex: FaceIndex) => {};
 
 /**
  * Record the existence of a file so that entities in the face indexing universe
@@ -160,10 +189,3 @@ export const addFileEntry = (fileID: string) => {};
  */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const markIndexingFailed = (fileID: string) => {};
-
-/**
- * Clear any data stored by the face module.
- *
- * Meant to be called during logout.
- */
-export const clearFaceData = () => {};
