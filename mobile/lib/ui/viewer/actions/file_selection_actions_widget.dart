@@ -170,7 +170,7 @@ class _FileSelectionActionsWidgetState
           SelectionActionButton(
             icon: Icons.link_outlined,
             labelText: S.of(context).shareLink,
-            onTap: anyUploadedFiles ? _onCreatedSharedLinkClicked : null,
+            onTap: anyUploadedFiles ? _onCreateLinkTapped : null,
             shouldShow: ownedFilesCount > 0,
           ),
         );
@@ -612,7 +612,6 @@ class _FileSelectionActionsWidgetState
     try {
       final Directory root = await getTemporaryDirectory();
       final String directoryPath = '${root.path}/enteTempFiles';
-      // Create the directory if it doesn't exist
       final DateTime timeStamp = DateTime.now();
       await Directory(directoryPath).create(recursive: true);
       final String filePath = '$directoryPath/$timeStamp.jpg';
@@ -629,8 +628,8 @@ class _FileSelectionActionsWidgetState
   Future<String?> _selectedFilePlaceholderPath(
     List<EnteFile> ownedSelectedFiles,
   ) async {
-    final Widget imageWidget = ShowImagePreviewFromTap(
-      ownedSelectedFiles: ownedSelectedFiles,
+    final Widget imageWidget = LinkPlaceholder(
+      files: ownedSelectedFiles,
     );
     await Future.delayed(const Duration(milliseconds: 100));
     final double pixelRatio = MediaQuery.of(context).devicePixelRatio;
@@ -645,7 +644,7 @@ class _FileSelectionActionsWidgetState
     return onCreateLinkTapped;
   }
 
-  Future<void> _onCreatedSharedLinkClicked() async {
+  Future<void> _onCreateLinkTapped() async {
     if (split.ownedByCurrentUser.isEmpty) {
       showShortToast(
         context,
@@ -815,6 +814,18 @@ class _FileSelectionActionsWidgetState
       await shareImageAndUrl(generatedPathNotifier.value!, url);
       await Clipboard.setData(ClipboardData(text: url));
       showShortToast(context, S.of(context).linkCopiedToClipboard);
+      if (generatedPathNotifier.value != null) {
+        final file = File(generatedPathNotifier.value!);
+        try {
+          if (await file.exists()) {
+            await file.delete();
+          }
+        } catch (e) {
+          debugPrint("Failed to delete the file: $e");
+        } finally {
+          generatedPathNotifier.value = null;
+        }
+      }
     }
   }
 

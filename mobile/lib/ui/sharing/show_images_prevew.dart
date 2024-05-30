@@ -5,34 +5,33 @@ import "package:flutter/material.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 
-class ShowImagePreviewFromTap extends StatelessWidget {
-  const ShowImagePreviewFromTap({
-    required this.ownedSelectedFiles,
+class LinkPlaceholder extends StatelessWidget {
+  const LinkPlaceholder({
+    required this.files,
     super.key,
   });
 
-  final List<EnteFile> ownedSelectedFiles;
+  final List<EnteFile> files;
 
   @override
   Widget build(BuildContext context) {
-    final int length = ownedSelectedFiles.length;
+    final int length = files.length;
     Widget placeholderWidget = const SizedBox(
-      height: 300, // Adjusted height
-      width: 300, // Adjusted width
+      height: 300,
+      width: 300,
     );
 
     if (length == 1) {
       placeholderWidget = AspectRatio(
         aspectRatio: 1,
-        child: BackDrop(
-          backDropImage: ownedSelectedFiles[0],
+        child: _BackDrop(
+          backDropImage: files[0],
           children: [
             Padding(
               padding: const EdgeInsets.all(18.0),
               child: Container(
                 decoration: BoxDecoration(
-                  borderRadius:
-                      BorderRadius.circular(20.0), // Increased border radius
+                  borderRadius: BorderRadius.circular(20.0),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.5),
@@ -54,7 +53,7 @@ class ShowImagePreviewFromTap extends StatelessWidget {
                     cornerSmoothing: 1,
                   ),
                   child: ThumbnailWidget(
-                    ownedSelectedFiles[0],
+                    files[0],
                     shouldShowArchiveStatus: false,
                     shouldShowSyncStatus: false,
                   ),
@@ -67,26 +66,26 @@ class ShowImagePreviewFromTap extends StatelessWidget {
     } else if (length == 2) {
       placeholderWidget = AspectRatio(
         aspectRatio: 1,
-        child: BackDrop(
-          backDropImage: ownedSelectedFiles[0],
+        child: _BackDrop(
+          backDropImage: files[0],
           children: [
             Positioned(
               right: 20,
               bottom: 50,
-              child: CustomImage(
+              child: _CustomImage(
                 height: 190,
                 width: 190,
-                collages: ownedSelectedFiles[1],
+                collages: files[1],
                 zIndex: 0.2,
               ),
             ),
             Positioned(
               top: 50,
               left: 20,
-              child: CustomImage(
+              child: _CustomImage(
                 height: 190,
                 width: 190,
-                collages: ownedSelectedFiles[0],
+                collages: files[0],
                 zIndex: -0.2,
               ),
             ),
@@ -96,39 +95,36 @@ class ShowImagePreviewFromTap extends StatelessWidget {
     } else if (length == 3) {
       placeholderWidget = AspectRatio(
         aspectRatio: 1,
-        child: BackDrop(
-          backDropImage: ownedSelectedFiles[0],
+        child: _BackDrop(
+          backDropImage: files[0],
           children: [
-            //left image
             Positioned(
               top: 55,
               left: 10,
-              child: CustomImage(
+              child: _CustomImage(
                 height: 160,
                 width: 160,
-                collages: ownedSelectedFiles[1],
+                collages: files[1],
                 zIndex: -0.3,
               ),
             ),
-            //right image
             Positioned(
               right: 10,
               bottom: 50,
-              child: CustomImage(
+              child: _CustomImage(
                 height: 160,
                 width: 160,
-                collages: ownedSelectedFiles[2],
+                collages: files[2],
                 zIndex: 0.3,
               ),
             ),
-            //center image
             Positioned(
               top: 100,
               left: 100,
-              child: CustomImage(
+              child: _CustomImage(
                 height: 175,
                 width: 175,
-                collages: ownedSelectedFiles[0],
+                collages: files[0],
                 zIndex: 0.0,
               ),
             ),
@@ -140,36 +136,36 @@ class ShowImagePreviewFromTap extends StatelessWidget {
         padding: const EdgeInsets.all(8.0),
         child: AspectRatio(
           aspectRatio: 1,
-          child: BackDrop(
-            backDropImage: ownedSelectedFiles[0],
+          child: _BackDrop(
+            backDropImage: files[0],
             children: [
               Positioned(
                 top: 20,
                 left: 20,
-                child: CustomImage(
+                child: _CustomImage(
                   height: 160,
                   width: 160,
-                  collages: ownedSelectedFiles[1],
+                  collages: files[1],
                   zIndex: 0,
                 ),
               ),
               Positioned(
                 bottom: 15,
                 left: 40,
-                child: CustomImage(
+                child: _CustomImage(
                   height: 160,
                   width: 160,
-                  collages: ownedSelectedFiles[2],
+                  collages: files[2],
                   zIndex: 0,
                 ),
               ),
               Positioned(
                 top: 75,
                 right: 30,
-                child: CustomImage(
+                child: _CustomImage(
                   height: 175,
                   width: 175,
-                  collages: ownedSelectedFiles[0],
+                  collages: files[0],
                   zIndex: 0.0,
                 ),
               ),
@@ -208,8 +204,8 @@ class ShowImagePreviewFromTap extends StatelessWidget {
   }
 }
 
-class BackDrop extends StatelessWidget {
-  const BackDrop({
+class _BackDrop extends StatelessWidget {
+  const _BackDrop({
     super.key,
     required this.backDropImage,
     required this.children,
@@ -228,7 +224,7 @@ class BackDrop extends StatelessWidget {
           shouldShowSyncStatus: false,
         ),
         BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12), // Increased blur
+          filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
           child: Container(
             color: Colors.transparent,
           ),
@@ -239,8 +235,8 @@ class BackDrop extends StatelessWidget {
   }
 }
 
-class CustomImage extends StatelessWidget {
-  const CustomImage({
+class _CustomImage extends StatelessWidget {
+  const _CustomImage({
     required this.width,
     required this.height,
     super.key,
@@ -260,7 +256,7 @@ class CustomImage extends StatelessWidget {
       height: height,
       width: width,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20.0), // Increased border radius
+        borderRadius: BorderRadius.circular(20.0),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.5),
@@ -278,7 +274,7 @@ class CustomImage extends StatelessWidget {
       ),
       child: ClipSmoothRect(
         radius: SmoothBorderRadius(
-          cornerRadius: 20.0, // Increased corner radius
+          cornerRadius: 20.0,
           cornerSmoothing: 1,
         ),
         clipBehavior: Clip.antiAliasWithSaveLayer,
