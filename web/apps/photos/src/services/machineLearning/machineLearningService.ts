@@ -2,7 +2,7 @@ import log from "@/next/log";
 import { CustomError, parseUploadErrorCodes } from "@ente/shared/error";
 import PQueue from "p-queue";
 import mlIDbStorage from "services/face/db-old";
-import { syncLocalFiles } from "services/face/indexer";
+import { getFilesToIndex } from "services/face/indexer";
 import { FaceIndexerWorker } from "services/face/indexer.worker";
 import { EnteFile } from "types/file";
 
@@ -63,10 +63,7 @@ class MachineLearningService {
 
         const syncContext = await this.getSyncContext(token, userID, userAgent);
 
-        const localFiles = await syncLocalFiles(userID);
-        syncContext.localFilesMap = localFiles;
-
-        await this.getOutOfSyncFiles(syncContext);
+        syncContext.outOfSyncFiles = await getFilesToIndex(userID, batchSize);
 
         if (syncContext.outOfSyncFiles.length > 0) {
             await this.syncFiles(syncContext);
@@ -75,23 +72,6 @@ class MachineLearningService {
         const error = syncContext.error;
         const nOutOfSyncFiles = syncContext.outOfSyncFiles.length;
         return !error && nOutOfSyncFiles > 0;
-    }
-
-    private async getOutOfSyncFiles(syncContext: MLSyncContext) {
-        const startTime = Date.now();
-        const fileIds = await mlIDbStorage.getFileIds(
-            batchSize,
-            defaultMLVersion,
-            MAX_ML_SYNC_ERROR_COUNT,
-        );
-
-        log.info("fileIds: ", JSON.stringify(fileIds));
-
-        const localFilesMap = syncContext.localFilesMap;
-        syncContext.outOfSyncFiles = fileIds.map((fileId) =>
-            localFilesMap.get(fileId),
-        );
-        log.info("getOutOfSyncFiles", Date.now() - startTime, "ms");
     }
 
     private async syncFiles(syncContext: MLSyncContext) {

@@ -1,6 +1,7 @@
 import { FILE_TYPE } from "@/media/file-type";
 import log from "@/next/log";
 import { ComlinkWorker } from "@/next/worker/comlink-worker";
+import { ensure } from "@/utils/ensure";
 import { wait } from "@/utils/promise";
 import { type Remote } from "comlink";
 import mlIDbStorage, { ML_SEARCH_CONFIG_NAME } from "services/face/db-old";
@@ -11,8 +12,12 @@ import machineLearningService, {
 import mlWorkManager from "services/machineLearning/mlWorkManager";
 import type { EnteFile } from "types/file";
 import { isInternalUserForML } from "utils/user";
-import { indexedAndIndexableCounts } from "./db";
-import type { IndexStatus, MinimalPersistedFileData } from "./db-old";
+import {
+    indexedAndIndexableCounts,
+    syncWithLocalIndexableFileIDs,
+    unindexedFileIDs,
+} from "./db";
+import type { IndexStatus } from "./db-old";
 import { FaceIndexerWorker } from "./indexer.worker";
 
 /**
@@ -245,73 +250,18 @@ export const setIsFaceIndexingEnabled = async (enabled: boolean) => {
     return mlIDbStorage.putConfig(ML_SEARCH_CONFIG_NAME, { enabled });
 };
 
-export const syncLocalFiles = async (userID: number) => {
-    const localFilesMap = await localIndexableFilesByID(userID);
-
-    // const localFileIDs = new Set(localFilesMap.keys());
-
-    const db = await mlIDbStorage.db;
-    const tx = db.transaction("files", "readwrite");
-    const mlFileIdsArr = await mlIDbStorage.getAllFileIdsForUpdate(tx);
-    const mlFileIds = new Set<number>();
-    mlFileIdsArr.forEach((mlFileId) => mlFileIds.add(mlFileId));
-
-    const newFileIds: Array<number> = [];
-    for (const localFileId of localFilesMap.keys()) {
-        if (!mlFileIds.has(localFileId)) {
-            newFileIds.push(localFileId);
-        }
-    }
-
-    let updated = false;
-    if (newFileIds.length > 0) {
-        log.info("newFiles: ", newFileIds.length);
-        const newFiles = newFileIds.map(
-            (fileID) =>
-                ({
-                    fileID,
-                    mlVersion: 0,
-                    errorCount: 0,
-                    faceEmbedding: { faces: [] },
-                }) as MinimalPersistedFileData,
-        );
-        await mlIDbStorage.putAllFiles(newFiles, tx);
-        updated = true;
-    }
-
-    const removedFileIds: Array<number> = [];
-    for (const mlFileId of mlFileIds) {
-        if (!localFilesMap.has(mlFileId)) {
-            removedFileIds.push(mlFileId);
-        }
-    }
-
-    if (removedFileIds.length > 0) {
-        log.info("removedFiles: ", removedFileIds.length);
-        await mlIDbStorage.removeAllFiles(removedFileIds, tx);
-        updated = true;
-    }
-
-    await tx.done;
-
-    if (updated) {
-        // TODO: should do in same transaction
-        await mlIDbStorage.incrementIndexVersion("files");
-    }
-
-    return localFilesMap;
-};
-
 /**
- * Return a map of all {@link EnteFile}s owned by {@link userID} that we know
- * about locally, indexed by their {@link fileID}.
+ * Sync face DB with the local indexable files that we know about. Then return
+ * the next {@link count} files that still need to be indexed.
  *
- * @param userID Restrict the returned files to those owned by a {@link userID}.
+ * For more specifics of what a "sync" entails, see
+ * {@link syncWithLocalIndexableFileIDs}.
+ *
+ * @param userID Limit indexing to files owned by a {@link userID}.
+ *
+ * @param count Limit the resulting list of files to {@link count}.
  */
-const localIndexableFilesByID = async (
-    userID: number,
-): Promise<Map<number, EnteFile>> => {
-    const result = new Map<number, EnteFile>();
+export const getFilesToIndex = async (userID: number, count: number) => {
     const localFiles = await getLocalFiles();
     const indexableTypes = [FILE_TYPE.IMAGE, FILE_TYPE.LIVE_PHOTO];
     const indexableFiles = localFiles.filter(
@@ -319,6 +269,10 @@ const localIndexableFilesByID = async (
             f.ownerID == userID && indexableTypes.includes(f.metadata.fileType),
     );
 
-    indexableFiles.forEach((f) => result.set(f.id, f));
-    return result;
+    const filesByID = new Map(indexableFiles.map((f) => [f.id, f]));
+
+    await syncWithLocalIndexableFileIDs([...filesByID.keys()]);
+
+    const fileIDsToIndex = await unindexedFileIDs(count);
+    return fileIDsToIndex.map((id) => ensure(filesByID.get(id)));
 };

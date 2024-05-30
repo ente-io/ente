@@ -264,11 +264,13 @@ export const indexedAndIndexableCounts = async () => {
  * (can use {@link addFileEntry} to inform it about new files). From this
  * universe, we filter out fileIDs the files corresponding to which have already
  * been indexed, or for which we attempted indexing but failed.
+ *
+ * @param count Limit the result to up to {@link count} items.
  */
-export const unindexedFileIDs = async () => {
+export const unindexedFileIDs = async (count?: number) => {
     const db = await faceDB();
     const tx = db.transaction("file-status", "readonly");
-    return tx.store.index("isIndexable").getAllKeys(IDBKeyRange.only(1));
+    return tx.store.index("isIndexable").getAllKeys(IDBKeyRange.only(1), count);
 };
 
 /**
