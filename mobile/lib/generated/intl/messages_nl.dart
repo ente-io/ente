@@ -727,8 +727,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Exporteer je gegevens"),
         "faceRecognition":
             MessageLookupByLibrary.simpleMessage("Face recognition"),
-        "faceRecognitionIndexingDescription": MessageLookupByLibrary.simpleMessage(
-            "Please note that this will result in a higher bandwidth and battery usage until all items are indexed."),
         "faces": MessageLookupByLibrary.simpleMessage("Gezichten"),
         "failedToApplyCode":
             MessageLookupByLibrary.simpleMessage("Code toepassen mislukt"),
@@ -952,8 +950,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Machine Learning"),
         "magicSearch":
             MessageLookupByLibrary.simpleMessage("Magische zoekfunctie"),
-        "magicSearchDescription": MessageLookupByLibrary.simpleMessage(
-            "Houd er rekening mee dat dit zal resulteren in een hoger internet- en batterijverbruik totdat alle items zijn geïndexeerd."),
         "manage": MessageLookupByLibrary.simpleMessage("Beheren"),
         "manageDeviceStorage":
             MessageLookupByLibrary.simpleMessage("Apparaatopslag beheren"),

@@ -2876,11 +2876,11 @@ class S {
     );
   }
 
-  /// `Please note that this will result in a higher bandwidth and battery usage until all items are indexed.`
-  String get magicSearchDescription {
+  /// `Please note that ML indexing will result in a higher bandwidth and battery usage until all items are indexed.`
+  String get mlIndexingDescription {
     return Intl.message(
-      'Please note that this will result in a higher bandwidth and battery usage until all items are indexed.',
-      name: 'magicSearchDescription',
+      'Please note that ML indexing will result in a higher bandwidth and battery usage until all items are indexed.',
+      name: 'mlIndexingDescription',
       desc: '',
       args: [],
     );
@@ -8759,16 +8759,6 @@ class S {
     return Intl.message(
       'Face recognition',
       name: 'faceRecognition',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Please note that this will result in a higher bandwidth and battery usage until all items are indexed.`
-  String get faceRecognitionIndexingDescription {
-    return Intl.message(
-      'Please note that this will result in a higher bandwidth and battery usage until all items are indexed.',
-      name: 'faceRecognitionIndexingDescription',
       desc: '',
       args: [],
     );

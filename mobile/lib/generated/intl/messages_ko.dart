@@ -50,8 +50,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Enter person name"),
         "faceRecognition":
             MessageLookupByLibrary.simpleMessage("Face recognition"),
-        "faceRecognitionIndexingDescription": MessageLookupByLibrary.simpleMessage(
-            "Please note that this will result in a higher bandwidth and battery usage until all items are indexed."),
         "fileTypes": MessageLookupByLibrary.simpleMessage("File types"),
         "foundFaces": MessageLookupByLibrary.simpleMessage("Found faces"),
         "indexingIsPaused": MessageLookupByLibrary.simpleMessage(

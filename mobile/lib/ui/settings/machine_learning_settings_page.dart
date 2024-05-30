@@ -36,23 +36,19 @@ class MachineLearningSettingsPage extends StatefulWidget {
   const MachineLearningSettingsPage({super.key});
 
   @override
-  State<MachineLearningSettingsPage> createState() =>
-      _MachineLearningSettingsPageState();
+  State<MachineLearningSettingsPage> createState() => _MachineLearningSettingsPageState();
 }
 
-class _MachineLearningSettingsPageState
-    extends State<MachineLearningSettingsPage> {
+class _MachineLearningSettingsPageState extends State<MachineLearningSettingsPage> {
   late InitializationState _state;
   final EnteWakeLock _wakeLock = EnteWakeLock();
 
-  late StreamSubscription<MLFrameworkInitializationUpdateEvent>
-      _eventSubscription;
+  late StreamSubscription<MLFrameworkInitializationUpdateEvent> _eventSubscription;
 
   @override
   void initState() {
     super.initState();
-    _eventSubscription =
-        Bus.instance.on<MLFrameworkInitializationUpdateEvent>().listen((event) {
+    _eventSubscription = Bus.instance.on<MLFrameworkInitializationUpdateEvent>().listen((event) {
       _fetchState();
       setState(() {});
     });
@@ -97,6 +93,21 @@ class _MachineLearningSettingsPageState
           ),
           SliverList(
             delegate: SliverChildBuilderDelegate(
+              (delegateBuildContext, index) => Padding(
+                padding: const EdgeInsets.only(left: 16, right: 16),
+                child: Text(
+                  S.of(context).mlIndexingDescription,
+                  textAlign: TextAlign.left,
+                  style: getEnteTextTheme(context)
+                      .mini
+                      .copyWith(color: getEnteColorScheme(context).textMuted),
+                ),
+              ),
+              childCount: 1,
+            ),
+          ),
+          SliverList(
+            delegate: SliverChildBuilderDelegate(
               (delegateBuildContext, index) {
                 return Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -107,9 +118,7 @@ class _MachineLearningSettingsPageState
                       children: [
                         _getMagicSearchSettings(context),
                         const SizedBox(height: 12),
-                        facesFlag
-                            ? _getFacesSearchSettings(context)
-                            : const SizedBox.shrink(),
+                        facesFlag ? _getFacesSearchSettings(context) : const SizedBox.shrink(),
                       ],
                     ),
                   ),
@@ -141,8 +150,7 @@ class _MachineLearningSettingsPageState
               );
               if (LocalSettings.instance.hasEnabledMagicSearch()) {
                 unawaited(
-                  SemanticSearchService.instance
-                      .init(shouldSyncImmediately: true),
+                  SemanticSearchService.instance.init(shouldSyncImmediately: true),
                 );
               } else {
                 await SemanticSearchService.instance.clearQueue();
@@ -153,12 +161,6 @@ class _MachineLearningSettingsPageState
           singleBorderRadius: 8,
           alignCaptionedTextToLeft: true,
           isGestureDetectorDisabled: true,
-        ),
-        const SizedBox(
-          height: 4,
-        ),
-        MenuSectionDescriptionWidget(
-          content: S.of(context).magicSearchDescription,
         ),
         const SizedBox(
           height: 12,
@@ -209,8 +211,7 @@ class _MachineLearningSettingsPageState
           trailingWidget: ToggleSwitchWidget(
             value: () => LocalSettings.instance.isFaceIndexingEnabled,
             onChanged: () async {
-              final isEnabled =
-                  await LocalSettings.instance.toggleFaceIndexing();
+              final isEnabled = await LocalSettings.instance.toggleFaceIndexing();
               if (isEnabled) {
                 unawaited(FaceMlService.instance.ensureInitialized());
               } else {
@@ -226,17 +227,9 @@ class _MachineLearningSettingsPageState
           isGestureDetectorDisabled: true,
         ),
         const SizedBox(
-          height: 4,
-        ),
-        MenuSectionDescriptionWidget(
-          content: S.of(context).faceRecognitionIndexingDescription,
-        ),
-        const SizedBox(
           height: 12,
         ),
-        hasEnabled
-            ? const FaceRecognitionStatusWidget()
-            : const SizedBox.shrink(),
+        hasEnabled ? const FaceRecognitionStatusWidget() : const SizedBox.shrink(),
       ],
     );
   }
@@ -259,8 +252,7 @@ class _ModelLoadingStateState extends State<ModelLoadingState> {
   final Map<String, (int, int)> _progressMap = {};
   @override
   void initState() {
-    _progressStream =
-        RemoteAssetsService.instance.progressStream.listen((event) {
+    _progressStream = RemoteAssetsService.instance.progressStream.listen((event) {
       final String url = event.$1;
       String title = "";
       if (url.contains("clip-image")) {
@@ -338,20 +330,17 @@ class MagicSearchIndexStatsWidget extends StatefulWidget {
   });
 
   @override
-  State<MagicSearchIndexStatsWidget> createState() =>
-      _MagicSearchIndexStatsWidgetState();
+  State<MagicSearchIndexStatsWidget> createState() => _MagicSearchIndexStatsWidgetState();
 }
 
-class _MagicSearchIndexStatsWidgetState
-    extends State<MagicSearchIndexStatsWidget> {
+class _MagicSearchIndexStatsWidgetState extends State<MagicSearchIndexStatsWidget> {
   IndexStatus? _status;
   late StreamSubscription<EmbeddingCacheUpdatedEvent> _eventSubscription;
 
   @override
   void initState() {
     super.initState();
-    _eventSubscription =
-        Bus.instance.on<EmbeddingCacheUpdatedEvent>().listen((event) {
+    _eventSubscription = Bus.instance.on<EmbeddingCacheUpdatedEvent>().listen((event) {
       _fetchIndexStatus();
     });
     _fetchIndexStatus();
@@ -427,12 +416,10 @@ class FaceRecognitionStatusWidget extends StatefulWidget {
   });
 
   @override
-  State<FaceRecognitionStatusWidget> createState() =>
-      FaceRecognitionStatusWidgetState();
+  State<FaceRecognitionStatusWidget> createState() => FaceRecognitionStatusWidgetState();
 }
 
-class FaceRecognitionStatusWidgetState
-    extends State<FaceRecognitionStatusWidget> {
+class FaceRecognitionStatusWidgetState extends State<FaceRecognitionStatusWidget> {
   Timer? _timer;
   @override
   void initState() {
@@ -446,22 +433,15 @@ class FaceRecognitionStatusWidgetState
 
   Future<(int, int, double, bool)> getIndexStatus() async {
     try {
-      final indexedFiles = await FaceMLDataDB.instance
-          .getIndexedFileCount(minimumMlVersion: faceMlVersion);
+      final indexedFiles =
+          await FaceMLDataDB.instance.getIndexedFileCount(minimumMlVersion: faceMlVersion);
       final indexableFiles = (await getIndexableFileIDs()).length;
       final showIndexedFiles = min(indexedFiles, indexableFiles);
       final pendingFiles = max(indexableFiles - indexedFiles, 0);
-      final clusteringDoneRatio =
-          await FaceMLDataDB.instance.getClusteredToIndexableFilesRatio();
-      final bool deviceIsHealthy =
-          MachineLearningController.instance.isDeviceHealthy;
+      final clusteringDoneRatio = await FaceMLDataDB.instance.getClusteredToIndexableFilesRatio();
+      final bool deviceIsHealthy = MachineLearningController.instance.isDeviceHealthy;
 
-      return (
-        showIndexedFiles,
-        pendingFiles,
-        clusteringDoneRatio,
-        deviceIsHealthy
-      );
+      return (showIndexedFiles, pendingFiles, clusteringDoneRatio, deviceIsHealthy);
     } catch (e, s) {
       _logger.severe('Error getting face recognition status', e, s);
       rethrow;
@@ -491,12 +471,10 @@ class FaceRecognitionStatusWidgetState
               final int indexedFiles = snapshot.data!.$1;
               final int pendingFiles = snapshot.data!.$2;
               final double clusteringDoneRatio = snapshot.data!.$3;
-              final double clusteringPercentage =
-                  (clusteringDoneRatio * 100).clamp(0, 100);
+              final double clusteringPercentage = (clusteringDoneRatio * 100).clamp(0, 100);
               final bool isDeviceHealthy = snapshot.data!.$4;
 
-              if (!isDeviceHealthy &&
-                  (pendingFiles > 0 || clusteringPercentage < 99)) {
+              if (!isDeviceHealthy && (pendingFiles > 0 || clusteringPercentage < 99)) {
                 return MenuSectionDescriptionWidget(
                   content: S.of(context).indexingIsPaused,
                 );
@@ -542,8 +520,7 @@ class FaceRecognitionStatusWidgetState
                     alignCaptionedTextToLeft: true,
                     isGestureDetectorDisabled: true,
                     key: ValueKey(
-                      "clustering_progress_" +
-                          clusteringPercentage.toStringAsFixed(0),
+                      "clustering_progress_" + clusteringPercentage.toStringAsFixed(0),
                     ),
                   ),
                 ],
