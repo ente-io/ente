@@ -111,7 +111,7 @@ const indexFaces_ = async (
     const { width, height } = imageBitmap;
     const imageBox = { width, height };
     const mlFile: MlFileData = {
-        fileID: fileID,
+        fileID,
         width,
         height,
         faceEmbedding: {
@@ -129,6 +129,7 @@ const indexFaces_ = async (
             faceID: makeFaceID(fileID, box, imageBox),
             detection: { box, landmarks },
             score,
+            blur: 0,
         }),
     );
     mlFile.faceEmbedding.faces = detectedFaces;
@@ -150,13 +151,8 @@ const indexFaces_ = async (
             alignments,
         );
 
-        const blurValues = detectBlur(
-            alignedFacesData,
-            mlFile.faceEmbedding.faces,
-        );
-        mlFile.faceEmbedding.faces.forEach(
-            (f, i) => (f.blurValue = blurValues[i]),
-        );
+        const blurs = detectBlur(alignedFacesData, mlFile.faceEmbedding.faces);
+        mlFile.faceEmbedding.faces.forEach((f, i) => (f.blur = blurs[i]));
 
         const embeddings = await computeEmbeddings(alignedFacesData);
         mlFile.faceEmbedding.faces.forEach(

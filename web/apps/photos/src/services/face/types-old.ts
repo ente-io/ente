@@ -10,7 +10,7 @@ export interface Face {
     faceID: string;
     detection: FaceDetection;
     score: number;
-    blurValue?: number;
+    blur: number;
 
     embedding?: Float32Array;
 }
