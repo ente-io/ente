@@ -32,7 +32,10 @@
     },
     {
       "title": "Bloom Host",
-      "slug": "bloom_host"
+      "slug": "bloom_host",
+      "altNames": [
+        "Bloom Host Billing"
+      ]
     },
     {
       "title": "BorgBase",
@@ -345,7 +348,10 @@
       "hex": "FFFFFF"
     },
     {
-      "title": "Techlore"
+      "title": "Techlore",
+      "altNames": [
+        "Techlore Courses"
+      ]
     },
     {
       "title": "Termius",
