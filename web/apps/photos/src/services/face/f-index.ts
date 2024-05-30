@@ -53,7 +53,7 @@ export const indexFaces = async (
 ) => {
     const startTime = Date.now();
 
-    const imageBitmap = await fetchOrCreateImageBitmap(enteFile, file);
+    const imageBitmap = await fetchAndCreateImageBitmap(enteFile, file);
     let mlFile: MlFileData;
     try {
         mlFile = await indexFaces_(enteFile, imageBitmap);
@@ -73,31 +73,26 @@ export const indexFaces = async (
  * Return a {@link ImageBitmap}, using {@link file} if present otherwise
  * downloading the source image corresponding to {@link enteFile} from remote.
  */
-const fetchOrCreateImageBitmap = async (enteFile: EnteFile, file: File) => {
-    const fileType = enteFile.metadata.fileType;
-    if (file) {
-        return await getLocalFileImageBitmap(enteFile, file);
-    } else if ([FILE_TYPE.IMAGE, FILE_TYPE.LIVE_PHOTO].includes(fileType)) {
-        return await fetchImageBitmap(enteFile);
-    } else {
-        throw new Error(`Cannot index unsupported file type ${fileType}`);
-    }
-};
+const fetchAndCreateImageBitmap = async (enteFile: EnteFile, file: File) =>
+    file ? getLocalFileImageBitmap(enteFile, file) : fetchImageBitmap(enteFile);
 
 const fetchImageBitmap = async (enteFile: EnteFile) =>
     fetchRenderableBlob(enteFile).then(createImageBitmap);
 
 const fetchRenderableBlob = async (enteFile: EnteFile) => {
+    const fileType = enteFile.metadata.fileType;
     const fileStream = await DownloadManager.getFile(enteFile);
     const fileBlob = await new Response(fileStream).blob();
-    if (enteFile.metadata.fileType === FILE_TYPE.IMAGE) {
+    if (enteFile.metadata.fileType == FILE_TYPE.IMAGE) {
         return getRenderableImage(enteFile.metadata.title, fileBlob);
-    } else {
+    } else if (enteFile.metadata.fileType == FILE_TYPE.LIVE_PHOTO) {
         const { imageFileName, imageData } = await decodeLivePhoto(
             enteFile.metadata.title,
             fileBlob,
         );
         return getRenderableImage(imageFileName, new Blob([imageData]));
+    } else {
+        throw new Error(`Cannot index unsupported file type ${fileType}`);
     }
 };
 
