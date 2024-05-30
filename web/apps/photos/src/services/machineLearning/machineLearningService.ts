@@ -1,12 +1,9 @@
 import log from "@/next/log";
 import { CustomError, parseUploadErrorCodes } from "@ente/shared/error";
 import PQueue from "p-queue";
-import mlIDbStorage, {
-    type MinimalPersistedFileData,
-} from "services/face/db-old";
+import mlIDbStorage from "services/face/db-old";
 import { syncLocalFiles } from "services/face/indexer";
 import { FaceIndexerWorker } from "services/face/indexer.worker";
-import { getLocalFiles } from "services/fileService";
 import { EnteFile } from "types/file";
 
 export const defaultMLVersion = 1;
@@ -80,31 +77,6 @@ class MachineLearningService {
         return !error && nOutOfSyncFiles > 0;
     }
 
-    private newMlData(fileID: number) {
-        return {
-            fileID,
-            mlVersion: 0,
-            errorCount: 0,
-            faceEmbedding: { faces: [] },
-        } as MinimalPersistedFileData;
-    }
-
-    private async getLocalFilesMap(syncContext: MLSyncContext) {
-        if (!syncContext.localFilesMap) {
-            const localFiles = await getLocalFiles();
-
-            const personalFiles = localFiles.filter(
-                (f) => f.ownerID === syncContext.userID,
-            );
-            syncContext.localFilesMap = new Map<number, EnteFile>();
-            personalFiles.forEach((f) =>
-                syncContext.localFilesMap.set(f.id, f),
-            );
-        }
-
-        return syncContext.localFilesMap;
-    }
-
     private async getOutOfSyncFiles(syncContext: MLSyncContext) {
         const startTime = Date.now();
         const fileIds = await mlIDbStorage.getFileIds(
@@ -115,7 +87,7 @@ class MachineLearningService {
 
         log.info("fileIds: ", JSON.stringify(fileIds));
 
-        const localFilesMap = await this.getLocalFilesMap(syncContext);
+        const localFilesMap = syncContext.localFilesMap;
         syncContext.outOfSyncFiles = fileIds.map((fileId) =>
             localFilesMap.get(fileId),
         );
