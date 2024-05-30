@@ -19,6 +19,8 @@ class PersonRowItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       dense: false,
+      minLeadingWidth: 0,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 0),
       leading: SizedBox(
         width: 56,
         height: 56,
