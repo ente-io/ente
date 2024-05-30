@@ -225,16 +225,17 @@ export const unidentifiedFaceIDs = async (
  * on any client. This {@link isFaceIndexingEnabled} property, on the other
  * hand, denotes whether or not indexing is enabled on the current client.
  */
-export const isFaceIndexingEnabled = () => {
+export const isFaceIndexingEnabled = async () => {
     if (isInternalUserForML()) {
-        return mlIDbStorage.getConfig(
+        const config = await mlIDbStorage.getConfig(
             ML_SEARCH_CONFIG_NAME,
             DEFAULT_ML_SEARCH_CONFIG,
         );
+        return config.enabled;
     }
     // Force disabled for everyone else while we finalize it to avoid redundant
     // reindexing for users.
-    return DEFAULT_ML_SEARCH_CONFIG;
+    return false;
 };
 
 export const setIsFaceIndexingEnabled = (enabled: boolean) => {

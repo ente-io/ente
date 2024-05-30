@@ -50,11 +50,9 @@ import { createContext, useContext, useEffect, useRef, useState } from "react";
 import LoadingBar from "react-top-loading-bar";
 import DownloadManager from "services/download";
 import { resumeExportsIfNeeded } from "services/export";
+import { isFaceIndexingEnabled } from "services/face/indexer";
 import { photosLogout } from "services/logout";
-import {
-    getMLSearchConfig,
-    updateMLSearchConfig,
-} from "services/machineLearning/machineLearningService";
+import { updateMLSearchConfig } from "services/machineLearning/machineLearningService";
 import mlWorkManager from "services/machineLearning/mlWorkManager";
 import {
     getFamilyPortalRedirectURL,
@@ -186,9 +184,9 @@ export default function App({ Component, pageProps }: AppProps) {
         }
         const loadMlSearchState = async () => {
             try {
-                const mlSearchConfig = await getMLSearchConfig();
-                setMlSearchEnabled(mlSearchConfig.enabled);
-                mlWorkManager.setMlSearchEnabled(mlSearchConfig.enabled);
+                const enabled = await isFaceIndexingEnabled();
+                setMlSearchEnabled(enabled);
+                mlWorkManager.setMlSearchEnabled(enabled);
             } catch (e) {
                 log.error("Error while loading mlSearchEnabled", e);
             }
@@ -286,8 +284,7 @@ export default function App({ Component, pageProps }: AppProps) {
     const showNavBar = (show: boolean) => setShowNavBar(show);
     const updateMlSearchEnabled = async (enabled: boolean) => {
         try {
-            const mlSearchConfig = await getMLSearchConfig();
-            mlSearchConfig.enabled = enabled;
+            const mlSearchConfig = { enabled };
             await updateMLSearchConfig(mlSearchConfig);
             setMlSearchEnabled(enabled);
             mlWorkManager.setMlSearchEnabled(enabled);

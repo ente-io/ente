@@ -5,7 +5,6 @@ import mlIDbStorage, {
     ML_SEARCH_CONFIG_NAME,
     type MinimalPersistedFileData,
 } from "services/face/db-old";
-import { isFaceIndexingEnabled } from "services/face/indexer";
 import { FaceIndexerWorker } from "services/face/indexer.worker";
 import { getLocalFiles } from "services/fileService";
 import { EnteFile } from "types/file";
@@ -23,10 +22,6 @@ export interface MLSearchConfig {
 export const DEFAULT_ML_SEARCH_CONFIG: MLSearchConfig = {
     enabled: false,
 };
-
-export async function getMLSearchConfig() {
-    return isFaceIndexingEnabled();
-}
 
 export async function updateMLSearchConfig(newConfig: MLSearchConfig) {
     return mlIDbStorage.putConfig(ML_SEARCH_CONFIG_NAME, newConfig);
