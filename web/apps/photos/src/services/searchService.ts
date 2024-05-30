@@ -181,16 +181,21 @@ export async function getIndexStatusSuggestion(): Promise<Suggestion> {
         const indexStatus = convertToNewInterface(indexStatus0);
 
         let label;
-        if (!indexStatus.localFilesSynced) {
-            label = t("INDEXING_SCHEDULED");
-        } else if (indexStatus.outOfSyncFilesExists) {
-            label = t("ANALYZING_PHOTOS", {
-                indexStatus,
-            });
-        } else if (!indexStatus.peopleIndexSynced) {
-            label = t("INDEXING_PEOPLE", { indexStatus });
-        } else {
-            label = t("INDEXING_DONE", { indexStatus });
+        switch (indexStatus.phase) {
+            case "scheduled":
+                label = t("INDEXING_SCHEDULED");
+                break;
+            case "indexing":
+                label = t("ANALYZING_PHOTOS", {
+                    indexStatus,
+                });
+                break;
+            case "clustering":
+                label = t("INDEXING_PEOPLE", { indexStatus });
+                break;
+            case "done":
+                label = t("INDEXING_DONE", { indexStatus });
+                break;
         }
 
         return {
