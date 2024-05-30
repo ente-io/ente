@@ -2,9 +2,7 @@ import { FILE_TYPE } from "@/media/file-type";
 import log from "@/next/log";
 import * as chrono from "chrono-node";
 import { t } from "i18next";
-import mlIDbStorage from "services/face/db-old";
 import type { Person } from "services/face/people";
-import { defaultMLVersion } from "services/machineLearning/machineLearningService";
 import { Collection } from "types/collection";
 import { EntityType, LocationTag, LocationTagData } from "types/entity";
 import { EnteFile } from "types/file";
@@ -22,6 +20,7 @@ import { getFormattedDate } from "utils/search";
 import { clipService, computeClipMatchScore } from "./clip-service";
 import { localCLIPEmbeddings } from "./embeddingService";
 import { getLatestEntities } from "./entityService";
+import { faceIndexingStatus } from "./face/indexer";
 import locationSearchService, { City } from "./locationSearchService";
 
 const DIGITS = new Set(["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]);
@@ -175,19 +174,24 @@ export async function getAllPeopleSuggestion(): Promise<Array<Suggestion>> {
 
 export async function getIndexStatusSuggestion(): Promise<Suggestion> {
     try {
-        const indexStatus = await mlIDbStorage.getIndexStatus(defaultMLVersion);
+        const indexStatus = await faceIndexingStatus();
 
-        let label;
-        if (!indexStatus.localFilesSynced) {
-            label = t("INDEXING_SCHEDULED");
-        } else if (indexStatus.outOfSyncFilesExists) {
-            label = t("ANALYZING_PHOTOS", {
-                indexStatus,
-            });
-        } else if (!indexStatus.peopleIndexSynced) {
-            label = t("INDEXING_PEOPLE", { indexStatus });
-        } else {
-            label = t("INDEXING_DONE", { indexStatus });
+        let label: string;
+        switch (indexStatus.phase) {
+            case "scheduled":
+                label = t("INDEXING_SCHEDULED");
+                break;
+            case "indexing":
+                label = t("ANALYZING_PHOTOS", {
+                    indexStatus,
+                });
+                break;
+            case "clustering":
+                label = t("INDEXING_PEOPLE", { indexStatus });
+                break;
+            case "done":
+                label = t("INDEXING_DONE", { indexStatus });
+                break;
         }
 
         return {
@@ -430,7 +434,7 @@ function convertSuggestionToSearchQuery(option: Suggestion): Search {
 }
 
 async function getAllPeople(limit: number = undefined) {
-    let people: Array<Person> = await mlIDbStorage.getAllPeople();
+    let people: Array<Person> = []; // await mlIDbStorage.getAllPeople();
     // await mlPeopleStore.iterate<Person, void>((person) => {
     //     people.push(person);
     // });

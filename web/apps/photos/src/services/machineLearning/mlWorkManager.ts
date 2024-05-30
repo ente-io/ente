@@ -8,7 +8,6 @@ import { getToken, getUserID } from "@ente/shared/storage/localStorage/helpers";
 import debounce from "debounce";
 import PQueue from "p-queue";
 import { createFaceComlinkWorker } from "services/face";
-import mlIDbStorage from "services/face/db-old";
 import type { DedicatedMLWorker } from "services/face/face.worker";
 import { EnteFile } from "types/file";
 
@@ -117,6 +116,10 @@ class MLWorkManager {
         );
     }
 
+    public isMlSearchEnabled() {
+        return this.mlSearchEnabled;
+    }
+
     public async setMlSearchEnabled(enabled: boolean) {
         if (!this.mlSearchEnabled && enabled) {
             log.info("Enabling MLWorkManager");
@@ -163,7 +166,6 @@ class MLWorkManager {
         this.stopSyncJob();
         this.mlSyncJob = undefined;
         await this.terminateLiveSyncWorker();
-        await mlIDbStorage.clearMLDB();
     }
 
     private async fileUploadedHandler(arg: {
@@ -224,7 +226,11 @@ class MLWorkManager {
         this.mlSearchEnabled && this.startSyncJob();
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     public async syncLocalFile(enteFile: EnteFile, localFile: globalThis.File) {
+        return;
+        /*
+        TODO-ML(MR): Disable live sync for now
         await this.liveSyncQueue.add(async () => {
             this.stopSyncJob();
             const token = getToken();
@@ -239,6 +245,7 @@ class MLWorkManager {
                 localFile,
             );
         });
+        */
     }
 
     // Sync Job

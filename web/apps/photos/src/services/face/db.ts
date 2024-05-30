@@ -82,6 +82,8 @@ interface FileStatus {
 let _faceDB: ReturnType<typeof openFaceDB> | undefined;
 
 const openFaceDB = async () => {
+    deleteLegacyDB();
+
     const db = await openDB<FaceDBSchema>("face", 1, {
         upgrade(db, oldVersion, newVersion) {
             log.info(`Upgrading face DB ${oldVersion} => ${newVersion}`);
@@ -112,6 +114,13 @@ const openFaceDB = async () => {
     return db;
 };
 
+const deleteLegacyDB = () => {
+    // Delete the legacy face DB.
+    // This code was added June 2024 (v1.7.1-rc) and can be removed once clients
+    // have migrated over.
+    void deleteDB("mldata");
+};
+
 /**
  * @returns a lazily created, cached connection to the face DB.
  */
@@ -138,6 +147,7 @@ export const closeFaceDBConnectionsIfNeeded = async () => {
  * Meant to be called during logout.
  */
 export const clearFaceData = async () => {
+    deleteLegacyDB();
     await closeFaceDBConnectionsIfNeeded();
     return deleteDB("face", {
         blocked() {
@@ -174,6 +184,14 @@ export const saveFaceIndex = async (faceIndex: FaceIndex) => {
 };
 
 /**
+ * Return the {@link FaceIndex}, if any, for {@link fileID}.
+ */
+export const faceIndex = async (fileID: number) => {
+    const db = await faceDB();
+    return db.get("face-index", fileID);
+};
+
+/**
  * Record the existence of a file so that entities in the face indexing universe
  * know about it (e.g. can index it if it is new and it needs indexing).
  *
@@ -198,17 +216,79 @@ export const addFileEntry = async (fileID: number) => {
 };
 
 /**
+ * Sync entries in the face DB to align with the given list of local indexable
+ * file IDs.
+ *
+ * @param localFileIDs The IDs of all the files that the client is aware of,
+ * filtered to only keep the files that the user owns and the formats that can
+ * be indexed by our current face indexing pipeline.
+ *
+ * This function syncs the state of file entries in face DB to the state of file
+ * entries stored otherwise by the local client.
+ *
+ * - Files (identified by their ID) that are present locally but are not yet in
+ *   face DB get a fresh entry in face DB (and are marked as indexable).
+ *
+ * - Files that are not present locally but still exist in face DB are removed
+ *   from face DB (including its face index, if any).
+ */
+export const syncWithLocalIndexableFileIDs = async (localFileIDs: number[]) => {
+    const db = await faceDB();
+    const tx = db.transaction(["face-index", "file-status"], "readwrite");
+    const fdbFileIDs = await tx.objectStore("file-status").getAllKeys();
+
+    const local = new Set(localFileIDs);
+    const fdb = new Set(fdbFileIDs);
+
+    const newFileIDs = localFileIDs.filter((id) => !fdb.has(id));
+    const removedFileIDs = fdbFileIDs.filter((id) => !local.has(id));
+
+    return Promise.all(
+        [
+            newFileIDs.map((id) =>
+                tx.objectStore("file-status").put({
+                    fileID: id,
+                    isIndexable: 1,
+                    failureCount: 0,
+                }),
+            ),
+            removedFileIDs.map((id) =>
+                tx.objectStore("file-status").delete(id),
+            ),
+            removedFileIDs.map((id) => tx.objectStore("face-index").delete(id)),
+            tx.done,
+        ].flat(),
+    );
+};
+
+/**
+ * Return the count of files that can be, and that have been, indexed.
+ */
+export const indexedAndIndexableCounts = async () => {
+    const db = await faceDB();
+    const tx = db.transaction(["face-index", "file-status"], "readwrite");
+    const indexedCount = await tx.objectStore("face-index").count();
+    const indexableCount = await tx
+        .objectStore("file-status")
+        .index("isIndexable")
+        .count(IDBKeyRange.only(1));
+    return { indexedCount, indexableCount };
+};
+
+/**
  * Return a list of fileIDs that need to be indexed.
  *
  * This list is from the universe of the file IDs that the face DB knows about
  * (can use {@link addFileEntry} to inform it about new files). From this
  * universe, we filter out fileIDs the files corresponding to which have already
  * been indexed, or for which we attempted indexing but failed.
+ *
+ * @param count Limit the result to up to {@link count} items.
  */
-export const unindexedFileIDs = async () => {
+export const unindexedFileIDs = async (count?: number) => {
     const db = await faceDB();
     const tx = db.transaction("file-status", "readonly");
-    return tx.store.index("isIndexable").getAllKeys(IDBKeyRange.only(1));
+    return tx.store.index("isIndexable").getAllKeys(IDBKeyRange.only(1), count);
 };
 
 /**

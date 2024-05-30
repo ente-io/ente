@@ -5,7 +5,6 @@ import { t } from "i18next";
 import { AppContext } from "pages/_app";
 import { useContext } from "react";
 import { components } from "react-select";
-import { IndexStatus } from "services/face/db-old";
 import { Suggestion, SuggestionType } from "types/search";
 
 const { Menu } = components;
@@ -35,7 +34,7 @@ const MenuWithPeople = (props) => {
         (o) => o.type === SuggestionType.INDEX_STATUS,
     )[0] as Suggestion;
 
-    const indexStatus = indexStatusSuggestion?.value as IndexStatus;
+    const indexStatus = indexStatusSuggestion?.value;
     return (
         <Menu {...props}>
             <Box my={1}>
