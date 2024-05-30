@@ -4,8 +4,8 @@ import "package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart";
 import "package:latlong2/latlong.dart";
 import "package:photos/ui/map/image_marker.dart";
 import "package:photos/ui/map/map_button.dart";
-import 'package:photos/ui/map/map_gallery_tile.dart';
-import 'package:photos/ui/map/map_gallery_tile_badge.dart';
+import "package:photos/ui/map/map_gallery_tile.dart";
+import "package:photos/ui/map/map_gallery_tile_badge.dart";
 import "package:photos/ui/map/map_marker.dart";
 import "package:photos/ui/map/tile/layers.dart";
 import "package:photos/utils/debouncer.dart";
@@ -114,13 +114,10 @@ class _MapViewState extends State<MapView> {
                   onChange(widget.controller.camera.visibleBounds);
                 },
                 builder: (context, List<Marker> markers) {
-                  final index = int.parse(
-                    markers.first.key
-                        .toString()
-                        .replaceAll(RegExp(r'[^0-9]'), ''),
-                  );
-                  final String clusterKey =
-                      'map-badge-$index-len-${markers.length}';
+                  final valueKey = markers.first.key as ValueKey;
+                  final index = valueKey.value as int;
+
+                  final clusterKey = 'map-badge-$index-len-${markers.length}';
 
                   return Stack(
                     key: ValueKey(clusterKey),
@@ -199,7 +196,7 @@ class _MapViewState extends State<MapView> {
       final imageMarker = widget.imageMarkers[index];
       return mapMarker(
         imageMarker,
-        index.toString(),
+        ValueKey(index),
         markerSize: widget.markerSize,
       );
     });

@@ -7,12 +7,12 @@ import "package:photos/ui/map/marker_image.dart";
 
 Marker mapMarker(
   ImageMarker imageMarker,
-  String key, {
+  ValueKey<int> key, {
   Size markerSize = MapView.defaultMarkerSize,
 }) {
   return Marker(
     alignment: Alignment.topCenter,
-    key: Key(key),
+    key: key,
     width: markerSize.width,
     height: markerSize.height,
     point: LatLng(
