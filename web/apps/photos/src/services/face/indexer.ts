@@ -3,7 +3,6 @@ import { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { ensure } from "@/utils/ensure";
 import { wait } from "@/utils/promise";
 import { type Remote } from "comlink";
-import mlIDbStorage, { ML_SEARCH_CONFIG_NAME } from "services/face/db-old";
 import { getLocalFiles } from "services/fileService";
 import machineLearningService from "services/machineLearning/machineLearningService";
 import mlWorkManager from "services/machineLearning/mlWorkManager";
@@ -206,10 +205,7 @@ export const unidentifiedFaceIDs = async (
  */
 export const isFaceIndexingEnabled = async () => {
     if (isInternalUserForML()) {
-        const config = await mlIDbStorage.getConfig(ML_SEARCH_CONFIG_NAME, {
-            enabled: false,
-        });
-        return config.enabled;
+        return localStorage.getItem("faceIndexingEnabled") == "1";
     }
     // Force disabled for everyone else while we finalize it to avoid redundant
     // reindexing for users.
@@ -220,7 +216,8 @@ export const isFaceIndexingEnabled = async () => {
  * Update the (locally stored) value of {@link isFaceIndexingEnabled}.
  */
 export const setIsFaceIndexingEnabled = async (enabled: boolean) => {
-    return mlIDbStorage.putConfig(ML_SEARCH_CONFIG_NAME, { enabled });
+    if (enabled) localStorage.setItem("faceIndexingEnabled", "1");
+    else localStorage.removeItem("faceIndexingEnabled");
 };
 
 /**
