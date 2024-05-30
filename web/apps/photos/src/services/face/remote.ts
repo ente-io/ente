@@ -3,7 +3,7 @@ import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { putEmbedding } from "services/embeddingService";
 import type { EnteFile } from "types/file";
 import type { Point } from "./types";
-import type { Face, FaceDetection, MlFileData } from "./types-old";
+import type { MlFileData } from "./types-old";
 
 export const putFaceEmbedding = async (
     enteFile: EnteFile,
@@ -117,24 +117,24 @@ function LocalFileMlDataToServerFileMl(
 
     const faces: ServerFace[] = [];
     for (let i = 0; i < localFileMlData.faceEmbedding.faces.length; i++) {
-        const face: Face = localFileMlData.faceEmbedding.faces[i];
+        const face = localFileMlData.faceEmbedding.faces[i];
         const faceID = face.faceID;
         const embedding = face.embedding;
         const score = face.score;
         const blur = face.blur;
-        const detection: FaceDetection = face.detection;
+        const detection = face.detection;
         const box = detection.box;
         const landmarks = detection.landmarks;
-        const newBox = new ServerFaceBox(box.x, box.y, box.width, box.height);
 
-        const newFaceObject = new ServerFace(
-            faceID,
-            Array.from(embedding),
-            new ServerDetection(newBox, landmarks),
-            score,
-            blur,
+        faces.push(
+            new ServerFace(
+                faceID,
+                Array.from(embedding),
+                new ServerDetection(box, landmarks),
+                score,
+                blur,
+            ),
         );
-        faces.push(newFaceObject);
     }
     const faceEmbedding = new ServerFaceEmbedding(
         faces,

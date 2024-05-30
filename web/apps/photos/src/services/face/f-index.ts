@@ -22,7 +22,7 @@ import {
     pixelRGBBilinear,
     warpAffineFloat32List,
 } from "./image";
-import type { Box, Dimensions, Point } from "./types";
+import type { Box, Dimensions, Face, Point } from "./types";
 import type { MlFileData } from "./types-old";
 
 /**
@@ -126,7 +126,7 @@ const indexFaces_ = async (
 const indexFacesInBitmap = async (
     fileID: number,
     imageBitmap: ImageBitmap,
-): Promise<MlFileData["faceEmbedding"]["faces"]> => {
+): Promise<Face[]> => {
     const { width, height } = imageBitmap;
     const imageBox = { width, height };
 
@@ -166,22 +166,13 @@ const indexFacesInBitmap = async (
         partialResult.map((f) => f.detection),
     );
 
-    const faces = [];
-
-    for (let i = 0; i < partialResult.length; i++) {
-        const { faceID, detection, score } = partialResult[i];
-        const blur = blurs[i];
-        const embedding = embeddings[i];
-        faces.push({
-            faceID,
-            detection: relativeDetection(detection, imageBox),
-            score,
-            blur,
-            embedding,
-        });
-    }
-
-    return faces;
+    return partialResult.map(({ faceID, detection, score }, i) => ({
+        faceID,
+        detection: relativeDetection(detection, imageBox),
+        score,
+        blur: blurs[i],
+        embedding: Array.from(embeddings[i]),
+    }));
 };
 
 /**
