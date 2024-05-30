@@ -95,7 +95,8 @@ more, see [docs/adding-icons](docs/adding-icons.md).
 
 ## 💚 Contribute
 
-The best way to support this project is by checking out [Ente Photos](../mobile/README.md) or spreading the word.
+The best way to support this project is by checking out [Ente
+Photos](../mobile/README.md) or spreading the word.
 
 For more ways to contribute, see [../CONTRIBUTING.md](../CONTRIBUTING.md).
 
