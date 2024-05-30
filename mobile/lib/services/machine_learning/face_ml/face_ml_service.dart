@@ -854,7 +854,7 @@ class FaceMlService {
       return true;
     } catch (e, s) {
       _logger.severe(
-        "Failed to analyze using FaceML for image with ID: ${enteFile.uploadedFileID}",
+        "Failed to analyze using FaceML for image with ID: ${enteFile.uploadedFileID}. Not storing any faces, which means it will be automatically retried later.",
         e,
         s,
       );
