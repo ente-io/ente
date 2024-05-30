@@ -10,7 +10,6 @@ on:
         inputs:
             source:
                 description: "Branch (ente-io/ente) to build"
-                required: true
                 type: string
     schedule:
         # Run everyday at ~8:00 AM IST (except Sundays).
