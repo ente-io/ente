@@ -246,7 +246,7 @@ export const setIsFaceIndexingEnabled = async (enabled: boolean) => {
 
 export const syncLocalFiles = async (userID: number) => {
     const startTime = Date.now();
-    const localFilesMap = await getLocalFilesMap(userID);
+    const localFilesMap = await localUserOwnedFilesByID(userID);
 
     const db = await mlIDbStorage.db;
     const tx = db.transaction("files", "readwrite");
@@ -301,12 +301,18 @@ export const syncLocalFiles = async (userID: number) => {
     return localFilesMap;
 };
 
-const getLocalFilesMap = async (userID: number) => {
+/**
+ * Return a map of all {@link EnteFile}s owned by {@link userID} that we know
+ * about locally, indexed by their {@link fileID}.
+ *
+ * @param userID Restrict the returned files to those owned by a {@link userID}.
+ */
+const localUserOwnedFilesByID = async (
+    userID: number,
+): Promise<Map<number, EnteFile>> => {
+    const result = new Map<number, EnteFile>();
     const localFiles = await getLocalFiles();
-
     const personalFiles = localFiles.filter((f) => f.ownerID === userID);
-    const localFilesMap = new Map<number, EnteFile>();
-    personalFiles.forEach((f) => localFilesMap.set(f.id, f));
-
-    return localFilesMap;
+    personalFiles.forEach((f) => result.set(f.id, f));
+    return result;
 };
