@@ -871,7 +871,7 @@ class FaceMlService {
 
     if (filePath == null) {
       _logger.severe(
-        "Failed to get any data for enteFile with uploadedFileID ${enteFile.uploadedFileID}",
+        "Failed to get any data for enteFile with uploadedFileID ${enteFile.uploadedFileID} since its file path is null",
       );
       throw CouldNotRetrieveAnyFileData();
     }
@@ -1018,11 +1018,20 @@ class FaceMlService {
             throw ThumbnailRetrievalException(e.toString(), s);
           }
         } else {
-          file = await getFile(enteFile, isOrigin: true);
+          try {
+            file = await getFile(enteFile, isOrigin: true);
+          } catch (e, s) {
+            _logger.severe(
+              "Could not get file for $enteFile",
+              e,
+              s,
+            );
+          }
           // TODO: This is returning null for Pragadees for all files, so something is wrong here!
         }
         if (file == null) {
-          _logger.warning("Could not get file for $enteFile");
+          _logger
+              .warning("Could not get file for $enteFile of type ${enteFile.fileType.toString()}");
           imagePath = null;
           break;
         }
@@ -1173,13 +1182,13 @@ class FaceMlService {
   /// Checks if the ente file to be analyzed actually can be analyzed: it must be uploaded and in the correct format.
   void _checkEnteFileForID(EnteFile enteFile) {
     if (_skipAnalysisEnteFile(enteFile, <int, int>{})) {
-      _logger.warning(
-        '''Skipped analysis of image with enteFile, it might be the wrong format or has no uploadedFileID, or MLController doesn't allow it to run.
+      final String logString =
+          '''Skipped analysis of image with enteFile, it might be the wrong format or has no uploadedFileID, or MLController doesn't allow it to run.
         enteFile: ${enteFile.toString()}
-        ''',
-      );
+        ''';
+      _logger.warning(logString);
       _logStatus();
-      throw CouldNotRetrieveAnyFileData();
+      throw GeneralFaceMlException(logString);
     }
   }
 
