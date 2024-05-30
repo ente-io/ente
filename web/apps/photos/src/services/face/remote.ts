@@ -36,11 +36,11 @@ class ServerFileMl {
     public fileID: number;
     public height?: number;
     public width?: number;
-    public faceEmbedding: ServerFaceEmbeddings;
+    public faceEmbedding: ServerFaceEmbedding;
 
     public constructor(
         fileID: number,
-        faceEmbedding: ServerFaceEmbeddings,
+        faceEmbedding: ServerFaceEmbedding,
         height?: number,
         width?: number,
     ) {
@@ -51,7 +51,7 @@ class ServerFileMl {
     }
 }
 
-class ServerFaceEmbeddings {
+class ServerFaceEmbedding {
     public faces: ServerFace[];
     public version: number;
     public client: string;
@@ -138,10 +138,10 @@ function LocalFileMlDataToServerFileMl(
         );
         faces.push(newFaceObject);
     }
-    const faceEmbeddings = new ServerFaceEmbeddings(faces, userAgent, 1);
+    const faceEmbedding = new ServerFaceEmbedding(faces, userAgent, 1);
     return new ServerFileMl(
         localFileMlData.fileID,
-        faceEmbeddings,
+        faceEmbedding,
         localFileMlData.height,
         localFileMlData.width,
     );
