@@ -198,6 +198,20 @@ export const addFileEntry = async (fileID: number) => {
 };
 
 /**
+ * Return the count of files that can be, and that have been, indexed.
+ */
+export const indexableAndIndexedCounts = async () => {
+    const db = await faceDB();
+    const tx = db.transaction(["file-status", "face-index"], "readonly");
+    const indexableCount = await tx
+        .objectStore("file-status")
+        .index("isIndexable")
+        .count(IDBKeyRange.only(1));
+    const indexedCount = await tx.objectStore("face-index").count();
+    return { indexableCount, indexedCount };
+};
+
+/**
  * Return a list of fileIDs that need to be indexed.
  *
  * This list is from the universe of the file IDs that the face DB knows about

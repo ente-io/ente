@@ -8,7 +8,7 @@ import machineLearningService, {
 } from "services/machineLearning/machineLearningService";
 import mlWorkManager from "services/machineLearning/mlWorkManager";
 import type { EnteFile } from "types/file";
-import { markIndexingFailed } from "./db";
+import { indexableAndIndexedCounts, markIndexingFailed } from "./db";
 import type { IndexStatus } from "./db-old";
 import { indexFaces } from "./f-index";
 import { FaceIndexerWorker } from "./indexer.worker";
@@ -159,7 +159,7 @@ export interface FaceIndexingStatus {
 
 export const faceIndexingStatus = async (): Promise<FaceIndexingStatus> => {
     const isSyncing = machineLearningService.isSyncing;
-    const [indexableCount, indexedCount] = [0, 0];
+    const { indexableCount, indexedCount } = await indexableAndIndexedCounts();
 
     let phase: FaceIndexingStatus["phase"];
     if (indexableCount > 0 && indexableCount > indexedCount) {
