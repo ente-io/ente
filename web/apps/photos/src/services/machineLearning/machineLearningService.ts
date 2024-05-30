@@ -5,8 +5,6 @@ import { getFilesToIndex } from "services/face/indexer";
 import { FaceIndexerWorker } from "services/face/indexer.worker";
 import { EnteFile } from "types/file";
 
-export const defaultMLVersion = 1;
-
 const batchSize = 200;
 
 class MLSyncContext {

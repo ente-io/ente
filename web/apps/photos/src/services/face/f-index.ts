@@ -4,7 +4,6 @@ import log from "@/next/log";
 import { workerBridge } from "@/next/worker/worker-bridge";
 import { Matrix } from "ml-matrix";
 import DownloadManager from "services/download";
-import { defaultMLVersion } from "services/machineLearning/machineLearningService";
 import { getSimilarityTransformation } from "similarity-transformation";
 import {
     Matrix as TransformationMatrix,
@@ -70,8 +69,6 @@ export const indexFaces = async (
                 client: userAgent,
                 faces: await indexFacesInBitmap(fileID, imageBitmap),
             },
-            mlVersion: defaultMLVersion,
-            errorCount: 0,
         };
     } finally {
         imageBitmap.close();
