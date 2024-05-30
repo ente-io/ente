@@ -174,6 +174,14 @@ export const saveFaceIndex = async (faceIndex: FaceIndex) => {
 };
 
 /**
+ * Return the {@link FaceIndex}, if any, for {@link fileID}.
+ */
+export const faceIndex = async (fileID: number) => {
+    const db = await faceDB();
+    return db.get("face-index", fileID);
+};
+
+/**
  * Record the existence of a file so that entities in the face indexing universe
  * know about it (e.g. can index it if it is new and it needs indexing).
  *

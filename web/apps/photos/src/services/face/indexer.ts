@@ -10,6 +10,7 @@ import mlWorkManager from "services/machineLearning/mlWorkManager";
 import type { EnteFile } from "types/file";
 import { isInternalUserForML } from "utils/user";
 import {
+    faceIndex,
     indexedAndIndexableCounts,
     syncWithLocalIndexableFileIDs,
     unindexedFileIDs,
@@ -190,8 +191,8 @@ export const faceIndexingStatus = async (): Promise<FaceIndexingStatus> => {
 export const unidentifiedFaceIDs = async (
     enteFile: EnteFile,
 ): Promise<string[]> => {
-    const mlFileData = await mlIDbStorage.getFile(enteFile.id);
-    return mlFileData?.faceEmbedding.faces.map((f) => f.faceID) ?? [];
+    const index = await faceIndex(enteFile.id);
+    return index?.faceEmbedding.faces.map((f) => f.faceID) ?? [];
 };
 
 /**
