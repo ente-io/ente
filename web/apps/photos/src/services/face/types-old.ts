@@ -8,8 +8,8 @@ export interface FaceDetection {
 }
 
 export interface Face {
+    faceID: string;
     detection: FaceDetection;
-    id: string;
     blurValue?: number;
 
     embedding?: Float32Array;

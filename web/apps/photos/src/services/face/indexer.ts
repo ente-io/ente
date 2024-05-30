@@ -212,9 +212,9 @@ const convertToNewInterface = (indexStatus: IndexStatus) => {
  */
 export const unidentifiedFaceIDs = async (
     enteFile: EnteFile,
-): Promise<{ id: string }[]> => {
+): Promise<string[]> => {
     const mlFileData = await mlIDbStorage.getFile(enteFile.id);
-    return mlFileData?.faceEmbedding.faces ?? [];
+    return mlFileData?.faceEmbedding.faces.map((f) => f.faceID) ?? [];
 };
 
 /**

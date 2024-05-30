@@ -13,7 +13,7 @@ export const saveFaceCrop = async (
     faceCrop.close();
 
     const cache = await blobCache("face-crops");
-    await cache.put(face.id, blob);
+    await cache.put(face.faceID, blob);
 
     return blob;
 };

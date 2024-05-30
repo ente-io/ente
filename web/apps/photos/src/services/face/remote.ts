@@ -118,7 +118,7 @@ function LocalFileMlDataToServerFileMl(
     const faces: ServerFace[] = [];
     for (let i = 0; i < localFileMlData.faceEmbedding.faces.length; i++) {
         const face: Face = localFileMlData.faceEmbedding.faces[i];
-        const faceID = face.id;
+        const faceID = face.faceID;
         const embedding = face.embedding;
         const score = face.detection.probability;
         const blur = face.blurValue;

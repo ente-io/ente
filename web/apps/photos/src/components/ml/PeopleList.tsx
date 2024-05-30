@@ -73,14 +73,14 @@ export function PhotoPeopleList() {
 }
 
 export function UnidentifiedFaces({ file }: { file: EnteFile }) {
-    const [faces, setFaces] = useState<{ id: string }[]>([]);
+    const [faceIDs, setFaceIDs] = useState<string[]>([]);
 
     useEffect(() => {
         let didCancel = false;
 
         (async () => {
-            const faces = await unidentifiedFaceIDs(file);
-            !didCancel && setFaces(faces);
+            const faceIDs = await unidentifiedFaceIDs(file);
+            !didCancel && setFaceIDs(faceIDs);
         })();
 
         return () => {
@@ -88,7 +88,7 @@ export function UnidentifiedFaces({ file }: { file: EnteFile }) {
         };
     }, [file]);
 
-    if (faces.length == 0) return <></>;
+    if (faceIDs.length == 0) return <></>;
 
     return (
         <>
@@ -96,9 +96,9 @@ export function UnidentifiedFaces({ file }: { file: EnteFile }) {
                 <Legend>{t("UNIDENTIFIED_FACES")}</Legend>
             </div>
             <FaceChipContainer>
-                {faces.map((face) => (
-                    <FaceChip key={face.id}>
-                        <FaceCropImageView faceID={face.id} />
+                {faceIDs.map((faceID) => (
+                    <FaceChip key={faceID}>
+                        <FaceCropImageView {...{ faceID }} />
                     </FaceChip>
                 ))}
             </FaceChipContainer>
