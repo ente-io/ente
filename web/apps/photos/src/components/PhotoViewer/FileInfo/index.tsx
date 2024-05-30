@@ -96,8 +96,6 @@ export function FileInfo({
 
     const [parsedExifData, setParsedExifData] = useState<Record<string, any>>();
     const [showExif, setShowExif] = useState(false);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const [updateMLDataIndex, setUpdateMLDataIndex] = useState(0);
 
     const openExif = () => setShowExif(true);
     const closeExif = () => setShowExif(false);
@@ -332,14 +330,8 @@ export function FileInfo({
 
                 {appContext.mlSearchEnabled && (
                     <>
-                        {/* <PhotoPeopleList
-                            file={file}
-                            updateMLDataIndex={updateMLDataIndex}
-                        /> */}
-                        <UnidentifiedFaces
-                            file={file}
-                            updateMLDataIndex={updateMLDataIndex}
-                        />
+                        {/* <PhotoPeopleList file={file} /> */}
+                        <UnidentifiedFaces file={file} />
                     </>
                 )}
             </Stack>

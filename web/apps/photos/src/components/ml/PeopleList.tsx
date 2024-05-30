@@ -66,35 +66,29 @@ export const PeopleList = React.memo((props: PeopleListProps) => {
 
 export interface PhotoPeopleListProps extends PeopleListPropsBase {
     file: EnteFile;
-    updateMLDataIndex: number;
 }
 
 export function PhotoPeopleList() {
     return <></>;
 }
 
-export function UnidentifiedFaces(props: {
-    file: EnteFile;
-    updateMLDataIndex: number;
-}) {
+export function UnidentifiedFaces({ file }: { file: EnteFile }) {
     const [faces, setFaces] = useState<{ id: string }[]>([]);
 
     useEffect(() => {
         let didCancel = false;
 
-        async function updateFaceImages() {
-            const faces = await getUnidentifiedFaces(props.file);
+        (async () => {
+            const faces = await unidentifiedFaceIDs(file);
             !didCancel && setFaces(faces);
-        }
-
-        updateFaceImages();
+        })();
 
         return () => {
             didCancel = true;
         };
-    }, [props.file, props.updateMLDataIndex]);
+    }, [file]);
 
-    if (!faces || faces.length === 0) return <></>;
+    if (faces.length == 0) return <></>;
 
     return (
         <>
@@ -102,12 +96,11 @@ export function UnidentifiedFaces(props: {
                 <Legend>{t("UNIDENTIFIED_FACES")}</Legend>
             </div>
             <FaceChipContainer>
-                {faces &&
-                    faces.map((face, index) => (
-                        <FaceChip key={index}>
-                            <FaceCropImageView faceID={face.id} />
-                        </FaceChip>
-                    ))}
+                {faces.map((face) => (
+                    <FaceChip key={face.id}>
+                        <FaceCropImageView faceID={face.id} />
+                    </FaceChip>
+                ))}
             </FaceChipContainer>
         </>
     );
@@ -151,10 +144,9 @@ const FaceCropImageView: React.FC<FaceCropImageViewProps> = ({ faceID }) => {
     );
 };
 
-async function getUnidentifiedFaces(file: EnteFile): Promise<{ id: string }[]> {
+const unidentifiedFaceIDs = async (
+    file: EnteFile,
+): Promise<{ id: string }[]> => {
     const mlFileData = await mlIDbStorage.getFile(file.id);
-
-    return mlFileData?.faces?.filter(
-        (f) => f.personId === null || f.personId === undefined,
-    );
-}
+    return mlFileData?.faces;
+};
