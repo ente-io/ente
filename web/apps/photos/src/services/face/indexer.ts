@@ -1,14 +1,11 @@
 import { FILE_TYPE } from "@/media/file-type";
-import log from "@/next/log";
 import { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { ensure } from "@/utils/ensure";
 import { wait } from "@/utils/promise";
 import { type Remote } from "comlink";
 import mlIDbStorage, { ML_SEARCH_CONFIG_NAME } from "services/face/db-old";
 import { getLocalFiles } from "services/fileService";
-import machineLearningService, {
-    defaultMLVersion,
-} from "services/machineLearning/machineLearningService";
+import machineLearningService from "services/machineLearning/machineLearningService";
 import mlWorkManager from "services/machineLearning/mlWorkManager";
 import type { EnteFile } from "types/file";
 import { isInternalUserForML } from "utils/user";
@@ -17,7 +14,6 @@ import {
     syncWithLocalIndexableFileIDs,
     unindexedFileIDs,
 } from "./db";
-import type { IndexStatus } from "./db-old";
 import { FaceIndexerWorker } from "./indexer.worker";
 
 /**
@@ -180,34 +176,10 @@ export const faceIndexingStatus = async (): Promise<FaceIndexingStatus> => {
         phase = "done";
     }
 
-    const indexingStatus = {
+    return {
         phase,
         nSyncedFiles: indexedCount,
         nTotalFiles: indexableCount,
-    };
-
-    const indexStatus0 = await mlIDbStorage.getIndexStatus(defaultMLVersion);
-    const indexStatus = convertToNewInterface(indexStatus0);
-
-    log.debug(() => ({ indexStatus, indexingStatus }));
-
-    return indexStatus;
-};
-
-const convertToNewInterface = (indexStatus: IndexStatus) => {
-    let phase: FaceIndexingStatus["phase"];
-    if (!indexStatus.localFilesSynced) {
-        phase = "scheduled";
-    } else if (indexStatus.outOfSyncFilesExists) {
-        phase = "indexing";
-    } else if (!indexStatus.peopleIndexSynced) {
-        phase = "clustering";
-    } else {
-        phase = "done";
-    }
-    return {
-        ...indexStatus,
-        phase,
     };
 };
 
