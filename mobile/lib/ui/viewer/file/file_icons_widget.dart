@@ -123,26 +123,20 @@ class VideoOverlayIcon extends StatelessWidget {
 
 class VideoOverlayDuration extends StatelessWidget {
   final int duration;
-  const VideoOverlayDuration({Key? key, required this.duration})
-      : super(key: key);
+  const VideoOverlayDuration({Key? key, required this.duration}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final String formattedDuration =
-        Duration(seconds: duration).toString().split('.').first;
+    final String formattedDuration = Duration(seconds: duration).toString().split('.').first;
     final List<String> separated = formattedDuration.split(':');
-    final String hour =
-        (separated[0] == '0') ? '' : int.parse(separated[0]).toString() + ':';
+    final String hour = (separated[0] == '0') ? '' : separated[0] + ':';
     final String minute = int.parse(separated[1]).toString() + ':';
-    final String second = int.parse(separated[2]).toString();
+    final String second = separated[2];
     final String strippedDuration = hour + minute + second;
     return _BottomRightOverlayText(
       Text(
         strippedDuration,
-        style: Theme.of(context)
-            .textTheme
-            .titleSmall!
-            .copyWith(color: Colors.white),
+        style: Theme.of(context).textTheme.titleSmall!.copyWith(color: Colors.white),
       ),
     );
   }
@@ -176,8 +170,7 @@ class TrashedFileOverlayText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final int daysLeft =
-        ((file.deleteBy - DateTime.now().microsecondsSinceEpoch) /
-                Duration.microsecondsPerDay)
+        ((file.deleteBy - DateTime.now().microsecondsSinceEpoch) / Duration.microsecondsPerDay)
             .ceil();
     return Container(
       decoration: BoxDecoration(
