@@ -5,7 +5,7 @@ creates a draft release with artifacts built. When ready, we publish that
 release. The download links on our website, and existing apps already check the
 latest GitHub release and update accordingly.
 
-The complication comes by the fact that electron-builder's auto updaterr (the
+The complication comes by the fact that electron-builder's auto updater (the
 mechanism that we use for auto updates) doesn't work with monorepos. So we need
 to keep a separate (non-mono) repository just for doing releases.
 
@@ -16,48 +16,45 @@ to keep a separate (non-mono) repository just for doing releases.
 
 ## Workflow - Release Candidates
 
-Leading up to the release, we can make one or more draft releases that are not
-intended to be published, but serve as test release candidates.
+Nightly RC builds of `main` are published by a scheduled workflow automatically.
+If needed, these builds can also be manually triggered, including specifying the
+source repository branch to build:
 
-The workflow for making such "rc" builds is:
+```sh
+gh workflow run desktop-release.yml --source=<branch>
+```
 
-1.  Update `package.json` in the source repo to use version `1.x.x-rc`. Create a
-    new draft release in the release repo with title `1.x.x-rc`. In the tag
-    input enter `v1.x.x-rc` and select the option to "create a new tag on
-    publish".
-
-2.  Push code to the `desktop/rc` branch in the source repo.
-
-3.  Trigger the GitHub action in the release repo
-
-    ```sh
-    gh workflow run desktop-release.yml
-    ```
-
-We can do steps 2 and 3 multiple times: each time it'll just update the
-artifacts attached to the same draft.
+Each such workflow run will update the artifacts attached to the same
+(pre-existing) pre-release.
 
 ## Workflow - Release
 
 1.  Update source repo to set version `1.x.x` in `package.json` and finalize the
     CHANGELOG.
 
-2.  Push code to the `desktop/rc` branch in the source repo.
+2.  Merge PR then tag the merge commit on `main` in the source repo:
 
-3.  In the release repo
+    ```sh
+    git tag photosd-v1.x.x
+    git push origin photosd-v1.x.x
+    ```
+
+3.  In the release repo:
 
     ```sh
     ./.github/trigger-release.sh v1.x.x
     ```
 
-4.  If the build is successful, tag `desktop/rc` in the source repo.
+This'll trigger the workflow and create a new draft release, which you can
+publish after adding the release notes.
 
-    ```sh
-    # Assuming we're on desktop/rc that just got built
+The release is done at this point, and we can now start a new RC train for
+subsequent nightly builds.
 
-    git tag photosd-v1.x.x
-    git push origin photosd-v1.x.x
-    ```
+1.  Update `package.json` in the source repo to use version `1.x.x-rc`. Create a
+    new draft release in the release repo with title `1.x.x-rc`. In the tag
+    input enter `v1.x.x-rc` and select the option to "create a new tag on
+    publish".
 
 ## Post build
 
@@ -87,8 +84,3 @@ everything is automated:
     now their maintainers automatically bump the SHA, version number and the
     (derived from the version) URL in the formula when their tools notice a new
     release on our GitHub.
-
-We can also publish the draft releases by checking the "pre-release" option.
-Such releases don't cause any of the channels (our website, or the desktop app
-auto updater, or brew) to be notified, instead these are useful for giving links
-to pre-release builds to customers.
