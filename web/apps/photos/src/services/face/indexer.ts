@@ -147,11 +147,8 @@ export interface FaceIndexingStatus {
      *   library.
      */
     phase: "scheduled" | "indexing" | "clustering" | "done";
-    outOfSyncFilesExists: boolean;
     nSyncedFiles: number;
     nTotalFiles: number;
-    localFilesSynced: boolean;
-    peopleIndexSynced: boolean;
 }
 
 export const convertToNewInterface = (indexStatus: IndexStatus) => {
