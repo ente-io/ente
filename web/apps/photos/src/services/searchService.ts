@@ -2,7 +2,6 @@ import { FILE_TYPE } from "@/media/file-type";
 import log from "@/next/log";
 import * as chrono from "chrono-node";
 import { t } from "i18next";
-import mlIDbStorage from "services/face/db-old";
 import type { Person } from "services/face/people";
 import { Collection } from "types/collection";
 import { EntityType, LocationTag, LocationTagData } from "types/entity";
@@ -435,7 +434,7 @@ function convertSuggestionToSearchQuery(option: Suggestion): Search {
 }
 
 async function getAllPeople(limit: number = undefined) {
-    let people: Array<Person> = await mlIDbStorage.getAllPeople();
+    let people: Array<Person> = []; // await mlIDbStorage.getAllPeople();
     // await mlPeopleStore.iterate<Person, void>((person) => {
     //     people.push(person);
     // });
