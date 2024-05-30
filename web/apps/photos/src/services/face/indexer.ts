@@ -147,7 +147,9 @@ export interface FaceIndexingStatus {
      *   library.
      */
     phase: "scheduled" | "indexing" | "clustering" | "done";
+    /** The number of files that have already been indexed. */
     nSyncedFiles: number;
+    /** The total number of files that are eligible for indexing. */
     nTotalFiles: number;
 }
 
