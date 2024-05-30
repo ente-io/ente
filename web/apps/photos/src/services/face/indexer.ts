@@ -3,6 +3,7 @@ import { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { wait } from "@/utils/promise";
 import { type Remote } from "comlink";
 import mlIDbStorage, { ML_SEARCH_CONFIG_NAME } from "services/face/db-old";
+import { getLocalFiles } from "services/fileService";
 import machineLearningService, {
     defaultMLVersion,
 } from "services/machineLearning/machineLearningService";
@@ -10,7 +11,7 @@ import mlWorkManager from "services/machineLearning/mlWorkManager";
 import type { EnteFile } from "types/file";
 import { isInternalUserForML } from "utils/user";
 import { indexableAndIndexedCounts, markIndexingFailed } from "./db";
-import type { IndexStatus } from "./db-old";
+import type { IndexStatus, MinimalPersistedFileData } from "./db-old";
 import { indexFaces } from "./f-index";
 import { FaceIndexerWorker } from "./indexer.worker";
 
@@ -241,4 +242,71 @@ export const isFaceIndexingEnabled = async () => {
  */
 export const setIsFaceIndexingEnabled = async (enabled: boolean) => {
     return mlIDbStorage.putConfig(ML_SEARCH_CONFIG_NAME, { enabled });
+};
+
+export const syncLocalFiles = async (userID: number) => {
+    const startTime = Date.now();
+    const localFilesMap = await getLocalFilesMap(userID);
+
+    const db = await mlIDbStorage.db;
+    const tx = db.transaction("files", "readwrite");
+    const mlFileIdsArr = await mlIDbStorage.getAllFileIdsForUpdate(tx);
+    const mlFileIds = new Set<number>();
+    mlFileIdsArr.forEach((mlFileId) => mlFileIds.add(mlFileId));
+
+    const newFileIds: Array<number> = [];
+    for (const localFileId of localFilesMap.keys()) {
+        if (!mlFileIds.has(localFileId)) {
+            newFileIds.push(localFileId);
+        }
+    }
+
+    let updated = false;
+    if (newFileIds.length > 0) {
+        log.info("newFiles: ", newFileIds.length);
+        const newFiles = newFileIds.map(
+            (fileId) =>
+                ({
+                    fileId,
+                    mlVersion: 0,
+                    errorCount: 0,
+                }) as MinimalPersistedFileData,
+        );
+        await mlIDbStorage.putAllFiles(newFiles, tx);
+        updated = true;
+    }
+
+    const removedFileIds: Array<number> = [];
+    for (const mlFileId of mlFileIds) {
+        if (!localFilesMap.has(mlFileId)) {
+            removedFileIds.push(mlFileId);
+        }
+    }
+
+    if (removedFileIds.length > 0) {
+        log.info("removedFiles: ", removedFileIds.length);
+        await mlIDbStorage.removeAllFiles(removedFileIds, tx);
+        updated = true;
+    }
+
+    await tx.done;
+
+    if (updated) {
+        // TODO: should do in same transaction
+        await mlIDbStorage.incrementIndexVersion("files");
+    }
+
+    log.info("syncLocalFiles", Date.now() - startTime, "ms");
+
+    return localFilesMap;
+};
+
+const getLocalFilesMap = async (userID: number) => {
+    const localFiles = await getLocalFiles();
+
+    const personalFiles = localFiles.filter((f) => f.ownerID === userID);
+    const localFilesMap = new Map<number, EnteFile>();
+    personalFiles.forEach((f) => localFilesMap.set(f.id, f));
+
+    return localFilesMap;
 };

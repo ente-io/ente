@@ -4,6 +4,7 @@ import PQueue from "p-queue";
 import mlIDbStorage, {
     type MinimalPersistedFileData,
 } from "services/face/db-old";
+import { syncLocalFiles } from "services/face/indexer";
 import { FaceIndexerWorker } from "services/face/indexer.worker";
 import { getLocalFiles } from "services/fileService";
 import { EnteFile } from "types/file";
@@ -65,7 +66,8 @@ class MachineLearningService {
 
         const syncContext = await this.getSyncContext(token, userID, userAgent);
 
-        await this.syncLocalFiles(syncContext);
+        const localFiles = await syncLocalFiles(userID);
+        syncContext.localFilesMap = localFiles;
 
         await this.getOutOfSyncFiles(syncContext);
 
@@ -102,53 +104,6 @@ class MachineLearningService {
         return syncContext.localFilesMap;
     }
 
-    private async syncLocalFiles(syncContext: MLSyncContext) {
-        const startTime = Date.now();
-        const localFilesMap = await this.getLocalFilesMap(syncContext);
-
-        const db = await mlIDbStorage.db;
-        const tx = db.transaction("files", "readwrite");
-        const mlFileIdsArr = await mlIDbStorage.getAllFileIdsForUpdate(tx);
-        const mlFileIds = new Set<number>();
-        mlFileIdsArr.forEach((mlFileId) => mlFileIds.add(mlFileId));
-
-        const newFileIds: Array<number> = [];
-        for (const localFileId of localFilesMap.keys()) {
-            if (!mlFileIds.has(localFileId)) {
-                newFileIds.push(localFileId);
-            }
-        }
-
-        let updated = false;
-        if (newFileIds.length > 0) {
-            log.info("newFiles: ", newFileIds.length);
-            const newFiles = newFileIds.map((fileId) => this.newMlData(fileId));
-            await mlIDbStorage.putAllFiles(newFiles, tx);
-            updated = true;
-        }
-
-        const removedFileIds: Array<number> = [];
-        for (const mlFileId of mlFileIds) {
-            if (!localFilesMap.has(mlFileId)) {
-                removedFileIds.push(mlFileId);
-            }
-        }
-
-        if (removedFileIds.length > 0) {
-            log.info("removedFiles: ", removedFileIds.length);
-            await mlIDbStorage.removeAllFiles(removedFileIds, tx);
-            updated = true;
-        }
-
-        await tx.done;
-
-        if (updated) {
-            // TODO: should do in same transaction
-            await mlIDbStorage.incrementIndexVersion("files");
-        }
-
-        log.info("syncLocalFiles", Date.now() - startTime, "ms");
-    }
 
     private async getOutOfSyncFiles(syncContext: MLSyncContext) {
         const startTime = Date.now();
