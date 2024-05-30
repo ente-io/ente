@@ -2,23 +2,20 @@ import log from "@/next/log";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { putEmbedding } from "services/embeddingService";
 import type { EnteFile } from "types/file";
-import type { Point } from "./types";
-import type { MlFileData } from "./types-old";
+import type { FaceIndex } from "./types";
 
-export const putFaceEmbedding = async (
+export const putFaceIndex = async (
     enteFile: EnteFile,
-    mlFileData: MlFileData,
+    faceIndex: FaceIndex,
 ) => {
-    const serverMl = LocalFileMlDataToServerFileMl(mlFileData);
-    log.debug(() => ({ t: "Local ML file data", mlFileData }));
     log.debug(() => ({
-        t: "Uploaded ML file data",
-        d: JSON.stringify(serverMl),
+        t: "Uploading faceEmbedding",
+        d: JSON.stringify(faceIndex),
     }));
 
     const comlinkCryptoWorker = await ComlinkCryptoWorker.getInstance();
     const { file: encryptedEmbeddingData } =
-        await comlinkCryptoWorker.encryptMetadata(serverMl, enteFile.key);
+        await comlinkCryptoWorker.encryptMetadata(faceIndex, enteFile.key);
     await putEmbedding({
         fileID: enteFile.id,
         encryptedEmbedding: encryptedEmbeddingData.encryptedData,
@@ -26,125 +23,3 @@ export const putFaceEmbedding = async (
         model: "file-ml-clip-face",
     });
 };
-
-export interface FileML extends ServerFileMl {
-    updatedAt: number;
-}
-
-class ServerFileMl {
-    public fileID: number;
-    public height?: number;
-    public width?: number;
-    public faceEmbedding: ServerFaceEmbedding;
-
-    public constructor(
-        fileID: number,
-        faceEmbedding: ServerFaceEmbedding,
-        height?: number,
-        width?: number,
-    ) {
-        this.fileID = fileID;
-        this.height = height;
-        this.width = width;
-        this.faceEmbedding = faceEmbedding;
-    }
-}
-
-class ServerFaceEmbedding {
-    public faces: ServerFace[];
-    public version: number;
-    public client: string;
-
-    public constructor(faces: ServerFace[], client: string, version: number) {
-        this.faces = faces;
-        this.client = client;
-        this.version = version;
-    }
-}
-
-class ServerFace {
-    public faceID: string;
-    public embedding: number[];
-    public detection: ServerDetection;
-    public score: number;
-    public blur: number;
-
-    public constructor(
-        faceID: string,
-        embedding: number[],
-        detection: ServerDetection,
-        score: number,
-        blur: number,
-    ) {
-        this.faceID = faceID;
-        this.embedding = embedding;
-        this.detection = detection;
-        this.score = score;
-        this.blur = blur;
-    }
-}
-
-class ServerDetection {
-    public box: ServerFaceBox;
-    public landmarks: Point[];
-
-    public constructor(box: ServerFaceBox, landmarks: Point[]) {
-        this.box = box;
-        this.landmarks = landmarks;
-    }
-}
-
-class ServerFaceBox {
-    public x: number;
-    public y: number;
-    public width: number;
-    public height: number;
-
-    public constructor(x: number, y: number, width: number, height: number) {
-        this.x = x;
-        this.y = y;
-        this.width = width;
-        this.height = height;
-    }
-}
-
-function LocalFileMlDataToServerFileMl(
-    localFileMlData: MlFileData,
-): ServerFileMl {
-    if (localFileMlData.errorCount > 0) {
-        return null;
-    }
-
-    const faces: ServerFace[] = [];
-    for (let i = 0; i < localFileMlData.faceEmbedding.faces.length; i++) {
-        const face = localFileMlData.faceEmbedding.faces[i];
-        const faceID = face.faceID;
-        const embedding = face.embedding;
-        const score = face.score;
-        const blur = face.blur;
-        const detection = face.detection;
-        const box = detection.box;
-        const landmarks = detection.landmarks;
-
-        faces.push(
-            new ServerFace(
-                faceID,
-                Array.from(embedding),
-                new ServerDetection(box, landmarks),
-                score,
-                blur,
-            ),
-        );
-    }
-    const faceEmbedding = new ServerFaceEmbedding(
-        faces,
-        localFileMlData.faceEmbedding.client,
-        localFileMlData.faceEmbedding.version,
-    );
-    return new ServerFileMl(
-        localFileMlData.fileID,
-        faceEmbedding,
-        localFileMlData.height,
-        localFileMlData.width,
-    );
-}

@@ -14,7 +14,7 @@ import {
     translate,
 } from "transformation-matrix";
 import type { EnteFile } from "types/file";
-import { getRenderableImage, logIdentifier } from "utils/file";
+import { fileLogID, getRenderableImage } from "utils/file";
 import { saveFaceCrop } from "./crop";
 import {
     clamp,
@@ -22,8 +22,7 @@ import {
     pixelRGBBilinear,
     warpAffineFloat32List,
 } from "./image";
-import type { Box, Dimensions, Face, Point } from "./types";
-import type { MlFileData } from "./types-old";
+import type { Box, Dimensions, Face, FaceIndex, Point } from "./types";
 
 /**
  * Index faces in the given file.
@@ -60,19 +59,20 @@ export const indexFaces = async (
     const imageBitmap = await renderableImageBlob(enteFile, file).then(
         createImageBitmap,
     );
-    let mlFile: MlFileData;
+
+    let index: FaceIndex;
     try {
-        mlFile = await indexFaces_(enteFile, imageBitmap, userAgent);
+        index = await indexFaces_(enteFile, imageBitmap, userAgent);
     } finally {
         imageBitmap.close();
     }
 
     log.debug(() => {
-        const nf = mlFile.faceEmbedding.faces?.length ?? 0;
+        const nf = index.faceEmbedding.faces.length;
         const ms = Date.now() - startTime;
-        return `Indexed ${nf} faces in file ${logIdentifier(enteFile)} (${ms} ms)`;
+        return `Indexed ${nf} faces in ${fileLogID(enteFile)} (${ms} ms)`;
     });
-    return mlFile;
+    return index;
 };
 
 /**
@@ -145,9 +145,9 @@ const indexFacesInBitmap = async (
         const alignment = computeFaceAlignment(detection);
         alignments.push(alignment);
 
-        // This step is not really part of the indexing pipeline, we just do
-        // it here since we have already computed the face alignment. Ignore
-        // errors that happen during this though.
+        // This step is not part of the indexing pipeline, we just do it here
+        // since we have already computed the face alignment. Ignore errors that
+        // happen during this since it does not impact the generated face index.
         try {
             await saveFaceCrop(imageBitmap, faceID, alignment);
         } catch (e) {

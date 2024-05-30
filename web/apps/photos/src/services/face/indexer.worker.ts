@@ -1,10 +1,14 @@
 import log from "@/next/log";
-import { putFaceEmbedding } from "services/face/remote";
 import type { EnteFile } from "types/file";
-import { logIdentifier } from "utils/file";
-import { closeFaceDBConnectionsIfNeeded, markIndexingFailed } from "./db";
+import { fileLogID } from "utils/file";
+import {
+    closeFaceDBConnectionsIfNeeded,
+    markIndexingFailed,
+    saveFaceIndex,
+} from "./db";
 import { indexFaces } from "./f-index";
-import type { MlFileData } from "./types-old";
+import { putFaceIndex } from "./remote";
+import type { FaceIndex } from "./types";
 
 /**
  * Index faces in a file, save the persist the results locally, and put them on
@@ -29,22 +33,21 @@ export class FaceIndexerWorker {
      * downloaded and decrypted from remote.
      */
     async index(enteFile: EnteFile, file: File | undefined, userAgent: string) {
-        const f = logIdentifier(enteFile);
-
-        let faceIndex: MlFileData;
+        let faceIndex: FaceIndex;
         try {
             faceIndex = await indexFaces(enteFile, file, userAgent);
-            log.debug(() => ({ f, faceIndex }));
         } catch (e) {
             // Mark indexing as having failed only if the indexing itself
             // failed, not if there were subsequent failures (like when trying
             // to put the result to remote or save it to the local face DB).
-            log.error(`Failed to index faces in file ${f}`, e);
+            log.error(`Failed to index faces in ${fileLogID(enteFile)}`, e);
             markIndexingFailed(enteFile.id);
             throw e;
         }
 
-        await putFaceEmbedding(enteFile, faceIndex);
+        await putFaceIndex(enteFile, faceIndex);
+        await saveFaceIndex(faceIndex);
+
         return faceIndex;
     }
 

@@ -86,8 +86,8 @@ const moduleState = new ModuleState();
  * given {@link enteFile}. The returned string contains the file name (for ease
  * of debugging) and the file ID (for exactness).
  */
-export const logIdentifier = (enteFile: EnteFile) =>
-    `${enteFile.metadata.title ?? "-"} (${enteFile.id})`;
+export const fileLogID = (enteFile: EnteFile) =>
+    `file ${enteFile.metadata.title ?? "-"} (${enteFile.id})`;
 
 export async function getUpdatedEXIFFileForDownload(
     fileReader: FileReader,
