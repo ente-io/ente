@@ -17,7 +17,7 @@ export interface Face {
 }
 
 export interface MlFileData {
-    fileId: number;
+    fileID: number;
     faces?: Face[];
     imageDimensions?: Dimensions;
     mlVersion: number;

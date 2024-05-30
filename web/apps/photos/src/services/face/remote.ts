@@ -141,7 +141,7 @@ function LocalFileMlDataToServerFileMl(
     }
     const faceEmbeddings = new ServerFaceEmbeddings(faces, userAgent, 1);
     return new ServerFileMl(
-        localFileMlData.fileId,
+        localFileMlData.fileID,
         faceEmbeddings,
         imageDimensions.height,
         imageDimensions.width,

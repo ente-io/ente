@@ -103,7 +103,7 @@ const indexFaces_ = async (enteFile: EnteFile, imageBitmap: ImageBitmap) => {
     const { width, height } = imageBitmap;
     const imageDimensions = { width, height };
     const mlFile: MlFileData = {
-        fileId: fileID,
+        fileID: fileID,
         mlVersion: defaultMLVersion,
         imageDimensions,
         errorCount: 0,
