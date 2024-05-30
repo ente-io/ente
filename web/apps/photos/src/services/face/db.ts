@@ -198,21 +198,47 @@ export const addFileEntry = async (fileID: number) => {
 };
 
 /**
- * Remove a file's entry and face index (if any) from the face DB.
+ * Sync entries in the face DB to match the given list of local file IDs.
  *
- * @param fileID The ID of an {@link EnteFile}
+ * @param localFileIDs The IDs of all the files that the client is aware of,
+ * filtered to only keep the files that the user owns.
  *
- * This function is invoked when the user has deleted a file, and we want to
- * also prune that file's data from the face DB.
+ * This function syncs the state of file entries in face DB to the state of file
+ * entries stored otherwise by the local client.
+ *
+ * - Files (identified by their ID) that are present locally but are not yet in
+ *   face DB get a fresh entry in face DB (and are marked as indexable).
+ *
+ * - Files that are not present locally but still exist in face DB are removed
+ *   from face DB (including its face index, if any).
  */
-export const removeFile = async (fileID: number) => {
+export const syncWithLocalUserOwnedFileIDs = async (localFileIDs: number[]) => {
     const db = await faceDB();
     const tx = db.transaction(["face-index", "file-status"], "readwrite");
-    return Promise.all([
-        tx.objectStore("face-index").delete(fileID),
-        tx.objectStore("file-status").delete(fileID),
-        tx.done,
-    ]);
+    const fdbFileIDs = await tx.objectStore("file-status").getAllKeys();
+
+    const local = new Set(localFileIDs);
+    const fdb = new Set(fdbFileIDs);
+
+    const newFileIDs = localFileIDs.filter((id) => !fdb.has(id));
+    const removedFileIDs = fdbFileIDs.filter((id) => !local.has(id));
+
+    return Promise.all(
+        [
+            newFileIDs.map((id) =>
+                tx.objectStore("file-status").put({
+                    fileID: id,
+                    isIndexable: 1,
+                    failureCount: 0,
+                }),
+            ),
+            removedFileIDs.map((id) =>
+                tx.objectStore("file-status").delete(id),
+            ),
+            removedFileIDs.map((id) => tx.objectStore("face-index").delete(id)),
+            tx.done,
+        ].flat(),
+    );
 };
 
 /**
