@@ -11,10 +11,7 @@ import {
 import isElectron from "is-electron";
 import type { Person } from "services/face/people";
 import type { MlFileData } from "services/face/types-old";
-import {
-    DEFAULT_ML_SEARCH_CONFIG,
-    MAX_ML_SYNC_ERROR_COUNT,
-} from "services/machineLearning/machineLearningService";
+import { MAX_ML_SYNC_ERROR_COUNT } from "services/machineLearning/machineLearningService";
 
 export interface IndexStatus {
     outOfSyncFilesExists: boolean;
@@ -159,6 +156,10 @@ class MLIDbStorage {
                     */
                 }
                 if (oldVersion < 3) {
+                    const DEFAULT_ML_SEARCH_CONFIG = {
+                        enabled: false,
+                    };
+
                     await tx
                         .objectStore("configs")
                         .add(DEFAULT_ML_SEARCH_CONFIG, ML_SEARCH_CONFIG_NAME);

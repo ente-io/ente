@@ -4,7 +4,6 @@ import { wait } from "@/utils/promise";
 import { type Remote } from "comlink";
 import mlIDbStorage, { ML_SEARCH_CONFIG_NAME } from "services/face/db-old";
 import machineLearningService, {
-    DEFAULT_ML_SEARCH_CONFIG,
     defaultMLVersion,
 } from "services/machineLearning/machineLearningService";
 import mlWorkManager from "services/machineLearning/mlWorkManager";
@@ -227,10 +226,9 @@ export const unidentifiedFaceIDs = async (
  */
 export const isFaceIndexingEnabled = async () => {
     if (isInternalUserForML()) {
-        const config = await mlIDbStorage.getConfig(
-            ML_SEARCH_CONFIG_NAME,
-            DEFAULT_ML_SEARCH_CONFIG,
-        );
+        const config = await mlIDbStorage.getConfig(ML_SEARCH_CONFIG_NAME, {
+            enabled: false,
+        });
         return config.enabled;
     }
     // Force disabled for everyone else while we finalize it to avoid redundant

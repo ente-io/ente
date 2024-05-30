@@ -14,14 +14,6 @@ const batchSize = 200;
 
 export const MAX_ML_SYNC_ERROR_COUNT = 1;
 
-export interface MLSearchConfig {
-    enabled: boolean;
-}
-
-export const DEFAULT_ML_SEARCH_CONFIG: MLSearchConfig = {
-    enabled: false,
-};
-
 class MLSyncContext {
     public token: string;
     public userID: number;
