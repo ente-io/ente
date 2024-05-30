@@ -122,23 +122,36 @@ class VideoOverlayIcon extends StatelessWidget {
 }
 
 class VideoOverlayDuration extends StatelessWidget {
-  final int duration;
+  final int? duration;
   const VideoOverlayDuration({Key? key, required this.duration}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final String formattedDuration = getFormattedDuration(duration);
+    late Widget onDarkBackground;
+    final bool iconFallback = (duration == null || duration! == 0);
+
+    if (iconFallback || duration! == 0) {
+      onDarkBackground = const Icon(Icons.play_arrow, color: Colors.white, size: 24);
+    } else {
+      final String formattedDuration = getFormattedDuration(duration!);
+      onDarkBackground = Text(
+        formattedDuration,
+        style: Theme.of(context)
+            .textTheme
+            .titleSmall!
+            .copyWith(color: Colors.white, fontSize: 14.0), // Default font size is 14
+      );
+    }
+
     return _BottomRightOverlay(
       Container(
         decoration: BoxDecoration(
           color: Colors.black.withOpacity(0.3),
-          borderRadius: BorderRadius.circular(8.0),
+          borderRadius: iconFallback ? null : BorderRadius.circular(8.0),
+          shape: iconFallback ? BoxShape.circle : BoxShape.rectangle,
         ),
         padding: const EdgeInsets.symmetric(horizontal: 4),
-        child: Text(
-          formattedDuration,
-          style: Theme.of(context).textTheme.titleSmall!.copyWith(color: Colors.white),
-        ),
+        child: onDarkBackground,
       ),
     );
   }
