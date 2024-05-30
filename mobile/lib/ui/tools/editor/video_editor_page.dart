@@ -61,6 +61,10 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
         selectedBoundariesColor:
             const ColorScheme.dark().videoPlayerPrimaryColor,
       ),
+      trimStyle: TrimSliderStyle(
+        onTrimmedColor: const ColorScheme.dark().videoPlayerPrimaryColor,
+        onTrimmingColor: const ColorScheme.dark().videoPlayerPrimaryColor,
+      ),
     );
     _controller.initialize().then((_) => setState(() {})).catchError(
       (error) {
