@@ -68,7 +68,7 @@ export const indexFaces = async (
     }
 
     log.debug(() => {
-        const nf = mlFile.faces?.length ?? 0;
+        const nf = mlFile.faceEmbedding.faces?.length ?? 0;
         const ms = Date.now() - startTime;
         return `Indexed ${nf} faces in file ${logIdentifier(enteFile)} (${ms} ms)`;
     });
@@ -128,12 +128,12 @@ const indexFaces_ = async (
         fileId: fileID,
         detection,
     }));
-    mlFile.faces = detectedFaces;
+    mlFile.faceEmbedding.faces = detectedFaces;
 
     if (detectedFaces.length > 0) {
         const alignments: FaceAlignment[] = [];
 
-        for (const face of mlFile.faces) {
+        for (const face of mlFile.faceEmbedding.faces) {
             const alignment = computeFaceAlignment(face.detection);
             alignments.push(alignment);
 
@@ -147,13 +147,20 @@ const indexFaces_ = async (
             alignments,
         );
 
-        const blurValues = detectBlur(alignedFacesData, mlFile.faces);
-        mlFile.faces.forEach((f, i) => (f.blurValue = blurValues[i]));
+        const blurValues = detectBlur(
+            alignedFacesData,
+            mlFile.faceEmbedding.faces,
+        );
+        mlFile.faceEmbedding.faces.forEach(
+            (f, i) => (f.blurValue = blurValues[i]),
+        );
 
         const embeddings = await computeEmbeddings(alignedFacesData);
-        mlFile.faces.forEach((f, i) => (f.embedding = embeddings[i]));
+        mlFile.faceEmbedding.faces.forEach(
+            (f, i) => (f.embedding = embeddings[i]),
+        );
 
-        mlFile.faces.forEach((face) => {
+        mlFile.faceEmbedding.faces.forEach((face) => {
             face.detection = relativeDetection(face.detection, imageDimensions);
         });
     }

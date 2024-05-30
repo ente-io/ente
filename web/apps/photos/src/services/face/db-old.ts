@@ -30,7 +30,7 @@ export interface MinimalPersistedFileData {
     fileID: number;
     mlVersion: number;
     errorCount: number;
-    faces?: { personId?: number; id: string }[];
+    faceEmbedding: { faces?: { id: string }[] };
 }
 
 interface Config {}

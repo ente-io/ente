@@ -11,9 +11,8 @@ import machineLearningService, {
 import mlWorkManager from "services/machineLearning/mlWorkManager";
 import type { EnteFile } from "types/file";
 import { isInternalUserForML } from "utils/user";
-import { indexedAndIndexableCounts, markIndexingFailed } from "./db";
+import { indexedAndIndexableCounts } from "./db";
 import type { IndexStatus, MinimalPersistedFileData } from "./db-old";
-import { indexFaces } from "./f-index";
 import { FaceIndexerWorker } from "./indexer.worker";
 
 /**
@@ -96,20 +95,21 @@ class FaceIndexer {
             }, 30 * 1000);
             return;
         }
-
+        /*
         const fileID = item.enteFile.id;
         try {
-            const faceIndex = await indexFaces(item.enteFile, item.file);
+            const faceIndex = await indexFaces(item.enteFile, item.file, userAgent);
             log.info(`faces in file ${fileID}`, faceIndex);
         } catch (e) {
             log.error(`Failed to index faces in file ${fileID}`, e);
             markIndexingFailed(item.enteFile.id);
         }
-
+*/
         // Let the runloop drain.
         await wait(0);
         // Run again.
-        this.tick();
+        // TODO
+        // this.tick();
     }
 
     /**
@@ -214,7 +214,7 @@ export const unidentifiedFaceIDs = async (
     enteFile: EnteFile,
 ): Promise<{ id: string }[]> => {
     const mlFileData = await mlIDbStorage.getFile(enteFile.id);
-    return mlFileData?.faces ?? [];
+    return mlFileData?.faceEmbedding.faces ?? [];
 };
 
 /**

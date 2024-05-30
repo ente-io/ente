@@ -18,12 +18,12 @@ export interface Face {
 
 export interface MlFileData {
     fileID: number;
-    faces?: Face[];
     width: number;
     height: number;
     faceEmbedding: {
         version: number;
         client: string;
+        faces?: Face[];
     };
     mlVersion: number;
     errorCount: number;
