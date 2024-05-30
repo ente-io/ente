@@ -180,7 +180,7 @@ export async function getIndexStatusSuggestion(): Promise<Suggestion> {
             await mlIDbStorage.getIndexStatus(defaultMLVersion);
         const indexStatus = convertToNewInterface(indexStatus0);
 
-        let label;
+        let label: string;
         switch (indexStatus.phase) {
             case "scheduled":
                 label = t("INDEXING_SCHEDULED");
