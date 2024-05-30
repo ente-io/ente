@@ -32,7 +32,10 @@
     },
     {
       "title": "Bloom Host",
-      "slug": "bloom_host"
+      "slug": "bloom_host",
+      "altNames": [
+        "Bloom Host Billing"
+      ]
     },
     {
       "title": "BorgBase",
@@ -191,6 +194,15 @@
       "title": "Letterboxd"
     },
     {
+      "title": "Local",
+      "slug": "local_wp",
+      "altNames": [
+        "LocalWP",
+        "Local WP",
+        "Local Wordpress"
+      ]
+    },
+    {
       "title": "Mastodon",
       "altNames": [
         "mstdn",
@@ -203,7 +215,12 @@
     },
     {
       "title": "Mercado Livre",
-      "slug": "mercado_livre"
+      "slug": "mercado_livre",
+      "altNames": [
+        "Mercado Libre",
+        "MercadoLibre",
+        "MercadoLivre"
+      ]
     },
     {
       "title": "Murena",
@@ -345,7 +362,10 @@
       "hex": "FFFFFF"
     },
     {
-      "title": "Techlore"
+      "title": "Techlore",
+      "altNames": [
+        "Techlore Courses"
+      ]
     },
     {
       "title": "Termius",

@@ -3,6 +3,7 @@ import { accountLogout } from "@ente/accounts/services/logout";
 import { clipService } from "services/clip-service";
 import DownloadManager from "./download";
 import exportService from "./export";
+import { clearFaceData } from "./face/db";
 import mlWorkManager from "./machineLearning/mlWorkManager";
 
 /**
@@ -13,18 +14,21 @@ import mlWorkManager from "./machineLearning/mlWorkManager";
  * See: [Note: Do not throw during logout].
  */
 export const photosLogout = async () => {
+    const ignoreError = (label: string, e: unknown) =>
+        log.error(`Ignoring error during logout (${label})`, e);
+
     await accountLogout();
 
     try {
         await DownloadManager.logout();
     } catch (e) {
-        log.error("Ignoring error during logout (download)", e);
+        ignoreError("download", e);
     }
 
     try {
         await clipService.logout();
     } catch (e) {
-        log.error("Ignoring error during logout (CLIP)", e);
+        ignoreError("CLIP", e);
     }
 
     const electron = globalThis.electron;
@@ -32,19 +36,25 @@ export const photosLogout = async () => {
         try {
             await mlWorkManager.logout();
         } catch (e) {
-            log.error("Ignoring error during logout (ML)", e);
+            ignoreError("ML", e);
+        }
+
+        try {
+            await clearFaceData();
+        } catch (e) {
+            ignoreError("face", e);
         }
 
         try {
             exportService.disableContinuousExport();
         } catch (e) {
-            log.error("Ignoring error during logout (export)", e);
+            ignoreError("export", e);
         }
 
         try {
             await electron?.logout();
         } catch (e) {
-            log.error("Ignoring error during logout (electron)", e);
+            ignoreError("electron", e);
         }
     }
 };

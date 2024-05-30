@@ -721,8 +721,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Exportar seus dados"),
         "faceRecognition":
             MessageLookupByLibrary.simpleMessage("Reconhecimento facial"),
-        "faceRecognitionIndexingDescription": MessageLookupByLibrary.simpleMessage(
-            "Por favor, note que isso resultará em uma largura de banda maior e uso de bateria até que todos os itens sejam indexados."),
         "faces": MessageLookupByLibrary.simpleMessage("Rostos"),
         "failedToApplyCode":
             MessageLookupByLibrary.simpleMessage("Falha ao aplicar o código"),
@@ -950,8 +948,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "machineLearning":
             MessageLookupByLibrary.simpleMessage("Aprendizagem de máquina"),
         "magicSearch": MessageLookupByLibrary.simpleMessage("Busca mágica"),
-        "magicSearchDescription": MessageLookupByLibrary.simpleMessage(
-            "Por favor, note que isso resultará em uma largura de banda maior e uso de bateria até que todos os itens sejam indexados."),
         "manage": MessageLookupByLibrary.simpleMessage("Gerenciar"),
         "manageDeviceStorage": MessageLookupByLibrary.simpleMessage(
             "Gerenciar o armazenamento do dispositivo"),

@@ -704,8 +704,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Export your data"),
         "faceRecognition":
             MessageLookupByLibrary.simpleMessage("Face recognition"),
-        "faceRecognitionIndexingDescription": MessageLookupByLibrary.simpleMessage(
-            "Please note that this will result in a higher bandwidth and battery usage until all items are indexed."),
         "faces": MessageLookupByLibrary.simpleMessage("Faces"),
         "failedToApplyCode":
             MessageLookupByLibrary.simpleMessage("Failed to apply code"),
@@ -921,8 +919,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "machineLearning":
             MessageLookupByLibrary.simpleMessage("Machine learning"),
         "magicSearch": MessageLookupByLibrary.simpleMessage("Magic search"),
-        "magicSearchDescription": MessageLookupByLibrary.simpleMessage(
-            "Please note that this will result in a higher bandwidth and battery usage until all items are indexed."),
         "manage": MessageLookupByLibrary.simpleMessage("Manage"),
         "manageDeviceStorage":
             MessageLookupByLibrary.simpleMessage("Manage device storage"),
@@ -939,6 +935,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "matrix": MessageLookupByLibrary.simpleMessage("Matrix"),
         "memoryCount": m33,
         "merchandise": MessageLookupByLibrary.simpleMessage("Merchandise"),
+        "mlIndexingDescription": MessageLookupByLibrary.simpleMessage(
+            "Please note that ML indexing will result in a higher bandwidth and battery usage until all items are indexed."),
         "mobileWebDesktop":
             MessageLookupByLibrary.simpleMessage("Mobile, Web, Desktop"),
         "moderateStrength": MessageLookupByLibrary.simpleMessage("Moderate"),

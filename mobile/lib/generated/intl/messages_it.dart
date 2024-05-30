@@ -671,8 +671,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "exportYourData": MessageLookupByLibrary.simpleMessage("Esporta dati"),
         "faceRecognition":
             MessageLookupByLibrary.simpleMessage("Face recognition"),
-        "faceRecognitionIndexingDescription": MessageLookupByLibrary.simpleMessage(
-            "Please note that this will result in a higher bandwidth and battery usage until all items are indexed."),
         "failedToApplyCode": MessageLookupByLibrary.simpleMessage(
             "Impossibile applicare il codice"),
         "failedToCancel":

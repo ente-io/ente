@@ -11,7 +11,7 @@ import { Box, DialogProps, Link, Stack, styled } from "@mui/material";
 import { Chip } from "components/Chip";
 import { EnteDrawer } from "components/EnteDrawer";
 import Titlebar from "components/Titlebar";
-import { PhotoPeopleList, UnidentifiedFaces } from "components/ml/PeopleList";
+import { UnidentifiedFaces } from "components/ml/PeopleList";
 import LinkButton from "components/pages/gallery/LinkButton";
 import { t } from "i18next";
 import { AppContext } from "pages/_app";
@@ -96,8 +96,6 @@ export function FileInfo({
 
     const [parsedExifData, setParsedExifData] = useState<Record<string, any>>();
     const [showExif, setShowExif] = useState(false);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const [updateMLDataIndex, setUpdateMLDataIndex] = useState(0);
 
     const openExif = () => setShowExif(true);
     const closeExif = () => setShowExif(false);
@@ -332,14 +330,8 @@ export function FileInfo({
 
                 {appContext.mlSearchEnabled && (
                     <>
-                        <PhotoPeopleList
-                            file={file}
-                            updateMLDataIndex={updateMLDataIndex}
-                        />
-                        <UnidentifiedFaces
-                            file={file}
-                            updateMLDataIndex={updateMLDataIndex}
-                        />
+                        {/* <PhotoPeopleList file={file} /> */}
+                        <UnidentifiedFaces file={file} />
                     </>
                 )}
             </Stack>

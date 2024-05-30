@@ -12,9 +12,10 @@ There are many ways to contribute, and most of them don't require writing code.
 
 ## Spread the word
 
-This is perhaps the most impactful contribution you can make. Spread the word.
-Online on your favorite social media channels. Offline to your friends and
-family who are looking for a privacy-friendly alternative to big tech.
+This is perhaps the most impactful contribution you can make. [Spread the
+word](https://help.ente.io/photos/features/referral-program/). Online on your
+favorite social media channels. Offline to your friends and family who are
+looking for a privacy-friendly alternative to big tech.
 
 ## Engage with the community
 
@@ -76,7 +77,10 @@ us](https://github.com/ente-io/ente/discussions). Discussing your idea with us
 first ensures that everyone is on the same page before you start working on your
 change.
 
-## Star
+## Leave a review or star
 
 If you haven't already done so, consider [starring this
-repository](https://github.com/ente-io/ente/stargazers).
+repository](https://github.com/ente-io/ente/stargazers) or leaving a review on
+[PlayStore](https://play.google.com/store/apps/details?id=io.ente.auth),
+[AppStore](https://apps.apple.com/us/app/ente-authenticator/id6444121398) or
+[AlternativeTo](https://alternativeto.net/software/ente-authenticator/).

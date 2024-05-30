@@ -49,14 +49,14 @@ Future<dynamic> showAssignPersonAction(
   BuildContext context, {
   required int clusterID,
   PersonActionType actionType = PersonActionType.assignPerson,
-  bool showOptionToCreateNewAlbum = true,
+  bool showOptionToAddNewPerson = true,
 }) {
   return showBarModalBottomSheet(
     context: context,
     builder: (context) {
       return PersonActionSheet(
         actionType: actionType,
-        showOptionToCreateNewPerson: showOptionToCreateNewAlbum,
+        showOptionToCreateNewPerson: showOptionToAddNewPerson,
         cluserID: clusterID,
       );
     },
@@ -188,7 +188,16 @@ class _PersonActionSheetState extends State<PersonActionSheet> {
             if (snapshot.hasError) {
               log("Error: ${snapshot.error} ${snapshot.stackTrace}}");
               //Need to show an error on the UI here
-              return const SizedBox.shrink();
+              if (kDebugMode) {
+                return Column(
+                  children: [
+                    Text('${snapshot.error}'),
+                    Text('${snapshot.stackTrace}'),
+                  ],
+                );
+              } else {
+                return const SizedBox.shrink();
+              }
             } else if (snapshot.hasData) {
               final persons = snapshot.data!;
               final searchResults = _searchQuery.isNotEmpty

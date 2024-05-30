@@ -115,8 +115,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Wprowadź swój klucz odzyskiwania"),
         "faceRecognition":
             MessageLookupByLibrary.simpleMessage("Face recognition"),
-        "faceRecognitionIndexingDescription": MessageLookupByLibrary.simpleMessage(
-            "Please note that this will result in a higher bandwidth and battery usage until all items are indexed."),
         "feedback": MessageLookupByLibrary.simpleMessage("Informacja zwrotna"),
         "fileTypes": MessageLookupByLibrary.simpleMessage("File types"),
         "forgotPassword":
