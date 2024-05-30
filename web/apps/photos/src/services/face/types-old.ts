@@ -8,7 +8,6 @@ export interface FaceDetection {
 }
 
 export interface Face {
-    fileId: number;
     detection: FaceDetection;
     id: string;
     blurValue?: number;
