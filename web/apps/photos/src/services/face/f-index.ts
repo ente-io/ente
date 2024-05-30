@@ -22,7 +22,7 @@ import {
     pixelRGBBilinear,
     warpAffineFloat32List,
 } from "./image";
-import type { Box, Dimensions } from "./types";
+import type { Box, Dimensions, Point } from "./types";
 import type { Face, FaceDetection, MlFileData } from "./types-old";
 
 /**
@@ -109,7 +109,7 @@ const indexFaces_ = async (
 ) => {
     const fileID = enteFile.id;
     const { width, height } = imageBitmap;
-    const imageDimensions = { width, height };
+    const imageBox = { width, height };
     const mlFile: MlFileData = {
         fileID: fileID,
         width,
@@ -123,11 +123,14 @@ const indexFaces_ = async (
         errorCount: 0,
     };
 
-    const faceDetections = await detectFaces(imageBitmap);
-    const detectedFaces = faceDetections.map((detection) => ({
-        faceID: makeFaceID(fileID, detection, imageDimensions),
-        detection,
-    }));
+    const yoloFaceDetections = await detectFaces(imageBitmap);
+    const detectedFaces = yoloFaceDetections.map(
+        ({ box, landmarks, score }) => ({
+            faceID: makeFaceID(fileID, box, imageBox),
+            detection: { box, landmarks },
+            score,
+        }),
+    );
     mlFile.faceEmbedding.faces = detectedFaces;
 
     if (detectedFaces.length > 0) {
@@ -161,7 +164,7 @@ const indexFaces_ = async (
         );
 
         mlFile.faceEmbedding.faces.forEach((face) => {
-            face.detection = relativeDetection(face.detection, imageDimensions);
+            face.detection = relativeDetection(face.detection, imageBox);
         });
     }
 
@@ -175,14 +178,14 @@ const indexFaces_ = async (
  */
 const detectFaces = async (
     imageBitmap: ImageBitmap,
-): Promise<FaceDetection[]> => {
+): Promise<YOLOFaceDetection[]> => {
     const rect = ({ width, height }) => ({ x: 0, y: 0, width, height });
 
     const { yoloInput, yoloSize } =
         convertToYOLOInputFloat32ChannelsFirst(imageBitmap);
     const yoloOutput = await workerBridge.detectFaces(yoloInput);
     const faces = filterExtractDetectionsFromYOLOOutput(yoloOutput);
-    const faceDetections = transformFaceDetections(
+    const faceDetections = transformYOLOFaceDetections(
         faces,
         rect(yoloSize),
         rect(imageBitmap),
@@ -243,6 +246,12 @@ const convertToYOLOInputFloat32ChannelsFirst = (imageBitmap: ImageBitmap) => {
     return { yoloInput, yoloSize };
 };
 
+export interface YOLOFaceDetection {
+    box: Box;
+    landmarks: Point[];
+    score: number;
+}
+
 /**
  * Extract detected faces from the YOLOv5Face's output.
  *
@@ -261,8 +270,8 @@ const convertToYOLOInputFloat32ChannelsFirst = (imageBitmap: ImageBitmap) => {
  */
 const filterExtractDetectionsFromYOLOOutput = (
     rows: Float32Array,
-): FaceDetection[] => {
-    const faces: FaceDetection[] = [];
+): YOLOFaceDetection[] => {
+    const faces: YOLOFaceDetection[] = [];
     // Iterate over each row.
     for (let i = 0; i < rows.length; i += 16) {
         const score = rows[i + 4];
@@ -287,7 +296,6 @@ const filterExtractDetectionsFromYOLOOutput = (
         const rightMouthY = rows[i + 14];
 
         const box = { x, y, width, height };
-        const probability = score as number;
         const landmarks = [
             { x: leftEyeX, y: leftEyeY },
             { x: rightEyeX, y: rightEyeY },
@@ -295,26 +303,26 @@ const filterExtractDetectionsFromYOLOOutput = (
             { x: leftMouthX, y: leftMouthY },
             { x: rightMouthX, y: rightMouthY },
         ];
-        faces.push({ box, landmarks, probability });
+        faces.push({ box, landmarks, score });
     }
     return faces;
 };
 
 /**
- * Transform the given {@link faceDetections} from their coordinate system in
+ * Transform the given {@link yoloFaceDetections} from their coordinate system in
  * which they were detected ({@link inBox}) back to the coordinate system of the
  * original image ({@link toBox}).
  */
-const transformFaceDetections = (
-    faceDetections: FaceDetection[],
+const transformYOLOFaceDetections = (
+    yoloFaceDetections: YOLOFaceDetection[],
     inBox: Box,
     toBox: Box,
-): FaceDetection[] => {
+): YOLOFaceDetection[] => {
     const transform = boxTransformationMatrix(inBox, toBox);
-    return faceDetections.map((f) => ({
+    return yoloFaceDetections.map((f) => ({
         box: transformBox(f.box, transform),
         landmarks: f.landmarks.map((p) => applyToPoint(transform, p)),
-        probability: f.probability,
+        score: f.score,
     }));
 };
 
@@ -346,8 +354,8 @@ const transformBox = (box: Box, transform: TransformationMatrix): Box => {
  * Remove overlapping faces from an array of face detections through non-maximum
  * suppression algorithm.
  *
- * This function sorts the detections by their probability in descending order,
- * then iterates over them.
+ * This function sorts the detections by their score in descending order, then
+ * iterates over them.
  *
  * For each detection, it calculates the Intersection over Union (IoU) with all
  * other detections.
@@ -356,8 +364,8 @@ const transformBox = (box: Box, transform: TransformationMatrix): Box => {
  * (`iouThreshold`), the other detection is considered overlapping and is
  * removed.
  *
- * @param detections - An array of face detections to remove overlapping faces
- * from.
+ * @param detections - An array of YOLO face detections to remove overlapping
+ * faces from.
  *
  * @param iouThreshold - The minimum IoU between two detections for them to be
  * considered overlapping.
@@ -365,11 +373,11 @@ const transformBox = (box: Box, transform: TransformationMatrix): Box => {
  * @returns An array of face detections with overlapping faces removed
  */
 const naiveNonMaxSuppression = (
-    detections: FaceDetection[],
+    detections: YOLOFaceDetection[],
     iouThreshold: number,
-): FaceDetection[] => {
+): YOLOFaceDetection[] => {
     // Sort the detections by score, the highest first.
-    detections.sort((a, b) => b.probability - a.probability);
+    detections.sort((a, b) => b.score - a.score);
 
     // Loop through the detections and calculate the IOU.
     for (let i = 0; i < detections.length - 1; i++) {
@@ -413,11 +421,7 @@ const intersectionOverUnion = (a: FaceDetection, b: FaceDetection): number => {
     return intersectionArea / unionArea;
 };
 
-const makeFaceID = (
-    fileID: number,
-    { box }: FaceDetection,
-    image: Dimensions,
-) => {
+const makeFaceID = (fileID: number, box: Box, image: Dimensions) => {
     const part = (v: number) => clamp(v, 0.0, 0.999999).toFixed(5).substring(2);
     const xMin = part(box.x / image.width);
     const yMin = part(box.y / image.height);
@@ -760,6 +764,5 @@ const relativeDetection = (
         x: l.x / width,
         y: l.y / height,
     }));
-    const probability = faceDetection.probability;
-    return { box, landmarks, probability };
+    return { box, landmarks };
 };
