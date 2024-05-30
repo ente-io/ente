@@ -235,15 +235,7 @@ class MachineLearningService {
             await this.syncFile(enteFile, localFile, syncContext.userAgent);
             syncContext.nSyncedFiles += 1;
         } catch (e) {
-            log.error("ML syncFile failed", e);
             let error = e;
-            console.error(
-                "Error in ml sync, fileId: ",
-                enteFile.id,
-                "name: ",
-                enteFile.metadata.title,
-                error,
-            );
             if ("status" in error) {
                 const parsedMessage = parseUploadErrorCodes(error);
                 error = parsedMessage;
@@ -258,7 +250,6 @@ class MachineLearningService {
                     throw error;
             }
 
-            await this.persistMLFileSyncError(enteFile, error);
             syncContext.nSyncedFiles += 1;
         }
     }
@@ -275,25 +266,7 @@ class MachineLearningService {
 
         const worker = new FaceIndexerWorker();
 
-        const newMlFile = await worker.index(enteFile, localFile, userAgent);
-        await mlIDbStorage.putFile(newMlFile);
-    }
-
-    private async persistMLFileSyncError(enteFile: EnteFile, e: Error) {
-        try {
-            await mlIDbStorage.upsertFileInTx(enteFile.id, (mlFileData) => {
-                if (!mlFileData) {
-                    mlFileData = this.newMlData(enteFile.id);
-                }
-                mlFileData.errorCount = (mlFileData.errorCount || 0) + 1;
-                console.error(`lastError for ${enteFile.id}`, e);
-
-                return mlFileData;
-            });
-        } catch (e) {
-            // TODO: logError or stop sync job after most of the requests are failed
-            console.error("Error while storing ml sync error", e);
-        }
+        await worker.index(enteFile, localFile, userAgent);
     }
 }
 

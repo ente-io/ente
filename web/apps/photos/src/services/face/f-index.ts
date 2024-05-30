@@ -14,7 +14,7 @@ import {
     translate,
 } from "transformation-matrix";
 import type { EnteFile } from "types/file";
-import { fileLogID, getRenderableImage } from "utils/file";
+import { getRenderableImage } from "utils/file";
 import { saveFaceCrop } from "./crop";
 import {
     clamp,
@@ -22,7 +22,7 @@ import {
     pixelRGBBilinear,
     warpAffineFloat32List,
 } from "./image";
-import type { Box, Dimensions, Face, FaceIndex, Point } from "./types";
+import type { Box, Dimensions, Face, Point } from "./types";
 
 /**
  * Index faces in the given file.
@@ -54,25 +54,28 @@ export const indexFaces = async (
     file: File | undefined,
     userAgent: string,
 ) => {
-    const startTime = Date.now();
-
     const imageBitmap = await renderableImageBlob(enteFile, file).then(
         createImageBitmap,
     );
+    const { width, height } = imageBitmap;
+    const fileID = enteFile.id;
 
-    let index: FaceIndex;
     try {
-        index = await indexFaces_(enteFile, imageBitmap, userAgent);
+        return {
+            fileID,
+            width,
+            height,
+            faceEmbedding: {
+                version: 1,
+                client: userAgent,
+                faces: await indexFacesInBitmap(fileID, imageBitmap),
+            },
+            mlVersion: defaultMLVersion,
+            errorCount: 0,
+        };
     } finally {
         imageBitmap.close();
     }
-
-    log.debug(() => {
-        const nf = index.faceEmbedding.faces.length;
-        const ms = Date.now() - startTime;
-        return `Indexed ${nf} faces in ${fileLogID(enteFile)} (${ms} ms)`;
-    });
-    return index;
 };
 
 /**
@@ -100,27 +103,6 @@ const fetchRenderableBlob = async (enteFile: EnteFile) => {
         // A layer above us should've already filtered these out.
         throw new Error(`Cannot index unsupported file type ${fileType}`);
     }
-};
-
-const indexFaces_ = async (
-    enteFile: EnteFile,
-    imageBitmap: ImageBitmap,
-    userAgent: string,
-) => {
-    const { width, height } = imageBitmap;
-    const fileID = enteFile.id;
-    return {
-        fileID,
-        width,
-        height,
-        faceEmbedding: {
-            version: 1,
-            client: userAgent,
-            faces: await indexFacesInBitmap(fileID, imageBitmap),
-        },
-        mlVersion: defaultMLVersion,
-        errorCount: 0,
-    };
 };
 
 const indexFacesInBitmap = async (

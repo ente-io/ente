@@ -33,6 +33,9 @@ export class FaceIndexerWorker {
      * downloaded and decrypted from remote.
      */
     async index(enteFile: EnteFile, file: File | undefined, userAgent: string) {
+        const f = fileLogID(enteFile);
+        const startTime = Date.now();
+
         let faceIndex: FaceIndex;
         try {
             faceIndex = await indexFaces(enteFile, file, userAgent);
@@ -40,13 +43,24 @@ export class FaceIndexerWorker {
             // Mark indexing as having failed only if the indexing itself
             // failed, not if there were subsequent failures (like when trying
             // to put the result to remote or save it to the local face DB).
-            log.error(`Failed to index faces in ${fileLogID(enteFile)}`, e);
+            log.error(`Failed to index faces in ${f}`, e);
             markIndexingFailed(enteFile.id);
             throw e;
         }
 
-        await putFaceIndex(enteFile, faceIndex);
-        await saveFaceIndex(faceIndex);
+        try {
+            await putFaceIndex(enteFile, faceIndex);
+            await saveFaceIndex(faceIndex);
+        } catch (e) {
+            log.error(`Failed to put/save face index for ${f}`, e);
+            throw e;
+        }
+
+        log.debug(() => {
+            const nf = faceIndex.faceEmbedding.faces.length;
+            const ms = Date.now() - startTime;
+            return `Indexed ${nf} faces in ${f} (${ms} ms)`;
+        });
 
         return faceIndex;
     }
