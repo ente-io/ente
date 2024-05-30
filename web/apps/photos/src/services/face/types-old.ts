@@ -1,4 +1,4 @@
-import type { Box, Dimensions, Point } from "./types";
+import type { Box, Point } from "./types";
 
 export interface FaceDetection {
     // box and landmarks is relative to image dimentions stored at mlFileData
@@ -19,7 +19,8 @@ export interface Face {
 export interface MlFileData {
     fileID: number;
     faces?: Face[];
-    imageDimensions?: Dimensions;
+    width: number;
+    height: number;
     mlVersion: number;
     errorCount: number;
 }

@@ -116,7 +116,6 @@ function LocalFileMlDataToServerFileMl(
     if (localFileMlData.errorCount > 0) {
         return null;
     }
-    const imageDimensions = localFileMlData.imageDimensions;
 
     const faces: ServerFace[] = [];
     for (let i = 0; i < localFileMlData.faces.length; i++) {
@@ -143,7 +142,7 @@ function LocalFileMlDataToServerFileMl(
     return new ServerFileMl(
         localFileMlData.fileID,
         faceEmbeddings,
-        imageDimensions.height,
-        imageDimensions.width,
+        localFileMlData.height,
+        localFileMlData.width,
     );
 }
