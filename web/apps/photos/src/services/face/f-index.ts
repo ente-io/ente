@@ -23,7 +23,7 @@ import {
     warpAffineFloat32List,
 } from "./image";
 import type { Box, Dimensions, Point } from "./types";
-import type { Face, FaceDetection, MlFileData } from "./types-old";
+import type { MlFileData } from "./types-old";
 
 /**
  * Index faces in the given file.
@@ -107,64 +107,81 @@ const indexFaces_ = async (
     imageBitmap: ImageBitmap,
     userAgent: string,
 ) => {
-    const fileID = enteFile.id;
     const { width, height } = imageBitmap;
-    const imageBox = { width, height };
-    const mlFile: MlFileData = {
+    const fileID = enteFile.id;
+    return {
         fileID,
         width,
         height,
         faceEmbedding: {
             version: 1,
             client: userAgent,
-            faces: [],
+            faces: await indexFacesInBitmap(fileID, imageBitmap),
         },
         mlVersion: defaultMLVersion,
         errorCount: 0,
     };
+};
+
+const indexFacesInBitmap = async (
+    fileID: number,
+    imageBitmap: ImageBitmap,
+): Promise<MlFileData["faceEmbedding"]["faces"]> => {
+    const { width, height } = imageBitmap;
+    const imageBox = { width, height };
 
     const yoloFaceDetections = await detectFaces(imageBitmap);
-    const detectedFaces = yoloFaceDetections.map(
-        ({ box, landmarks, score }) => ({
-            faceID: makeFaceID(fileID, box, imageBox),
-            detection: { box, landmarks },
-            score,
-            blur: 0,
-        }),
+    const partialResult = yoloFaceDetections.map(
+        ({ box, landmarks, score }) => {
+            const faceID = makeFaceID(fileID, box, imageBox);
+            const detection = { box, landmarks };
+            return { faceID, detection, score };
+        },
     );
-    mlFile.faceEmbedding.faces = detectedFaces;
 
-    if (detectedFaces.length > 0) {
-        const alignments: FaceAlignment[] = [];
+    const alignments: FaceAlignment[] = [];
 
-        for (const face of mlFile.faceEmbedding.faces) {
-            const alignment = computeFaceAlignment(face.detection);
-            alignments.push(alignment);
+    for (const { faceID, detection } of partialResult) {
+        const alignment = computeFaceAlignment(detection);
+        alignments.push(alignment);
 
-            // This step is not really part of the indexing pipeline, we just do
-            // it here since we have already computed the face alignment.
-            await saveFaceCrop(imageBitmap, face, alignment);
+        // This step is not really part of the indexing pipeline, we just do
+        // it here since we have already computed the face alignment. Ignore
+        // errors that happen during this though.
+        try {
+            await saveFaceCrop(imageBitmap, faceID, alignment);
+        } catch (e) {
+            log.error(`Failed to save face crop for faceID ${faceID}`, e);
         }
+    }
 
-        const alignedFacesData = convertToMobileFaceNetInput(
-            imageBitmap,
-            alignments,
-        );
+    const alignedFacesData = convertToMobileFaceNetInput(
+        imageBitmap,
+        alignments,
+    );
 
-        const blurs = detectBlur(alignedFacesData, mlFile.faceEmbedding.faces);
-        mlFile.faceEmbedding.faces.forEach((f, i) => (f.blur = blurs[i]));
+    const embeddings = await computeEmbeddings(alignedFacesData);
+    const blurs = detectBlur(
+        alignedFacesData,
+        partialResult.map((f) => f.detection),
+    );
 
-        const embeddings = await computeEmbeddings(alignedFacesData);
-        mlFile.faceEmbedding.faces.forEach(
-            (f, i) => (f.embedding = embeddings[i]),
-        );
+    const faces = [];
 
-        mlFile.faceEmbedding.faces.forEach((face) => {
-            face.detection = relativeDetection(face.detection, imageBox);
+    for (let i = 0; i < partialResult.length; i++) {
+        const { faceID, detection, score } = partialResult[i];
+        const blur = blurs[i];
+        const embedding = embeddings[i];
+        faces.push({
+            faceID,
+            detection: relativeDetection(detection, imageBox),
+            score,
+            blur,
+            embedding,
         });
     }
 
-    return mlFile;
+    return faces;
 };
 
 /**
@@ -534,28 +551,35 @@ const convertToMobileFaceNetInput = (
     return faceData;
 };
 
+interface FaceDetection {
+    box: Box;
+    landmarks: Point[];
+}
+
 /**
  * Laplacian blur detection.
  *
- * Return an array of detected blur values, one for each face in {@link faces}.
- * The face data is taken from the slice of {@link alignedFacesData}
- * corresponding to each face of {@link faces}.
+ * Return an array of detected blur values, one for each face detection in
+ * {@link faceDetections}. The face data is taken from the slice of
+ * {@link alignedFacesData} corresponding to the face of {@link faceDetections}.
  */
-const detectBlur = (alignedFacesData: Float32Array, faces: Face[]): number[] =>
-    faces.map((face, i) => {
+const detectBlur = (
+    alignedFacesData: Float32Array,
+    faceDetections: FaceDetection[],
+): number[] =>
+    faceDetections.map((d, i) => {
         const faceImage = grayscaleIntMatrixFromNormalized2List(
             alignedFacesData,
             i,
             mobileFaceNetFaceSize,
             mobileFaceNetFaceSize,
         );
-        return matrixVariance(applyLaplacian(faceImage, faceDirection(face)));
+        return matrixVariance(applyLaplacian(faceImage, faceDirection(d)));
     });
 
 type FaceDirection = "left" | "right" | "straight";
 
-const faceDirection = (face: Face): FaceDirection => {
-    const landmarks = face.detection.landmarks;
+const faceDirection = ({ landmarks }: FaceDetection): FaceDirection => {
     const leftEye = landmarks[0];
     const rightEye = landmarks[1];
     const nose = landmarks[2];

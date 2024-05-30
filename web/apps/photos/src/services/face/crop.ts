@@ -1,11 +1,10 @@
 import { blobCache } from "@/next/blob-cache";
 import type { FaceAlignment } from "./f-index";
 import type { Box } from "./types";
-import type { Face } from "./types-old";
 
 export const saveFaceCrop = async (
     imageBitmap: ImageBitmap,
-    face: Face,
+    faceID: string,
     alignment: FaceAlignment,
 ) => {
     const faceCrop = extractFaceCrop(imageBitmap, alignment);
@@ -13,7 +12,7 @@ export const saveFaceCrop = async (
     faceCrop.close();
 
     const cache = await blobCache("face-crops");
-    await cache.put(face.faceID, blob);
+    await cache.put(faceID, blob);
 
     return blob;
 };
