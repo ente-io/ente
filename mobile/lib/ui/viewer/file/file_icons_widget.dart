@@ -127,18 +127,29 @@ class VideoOverlayDuration extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final String formattedDuration = getFormattedDuration(duration);
+    return _BottomRightOverlay(
+      Container(
+        decoration: BoxDecoration(
+          color: Colors.black.withOpacity(0.3),
+          borderRadius: BorderRadius.circular(8.0),
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 4),
+        child: Text(
+          formattedDuration,
+          style: Theme.of(context).textTheme.titleSmall!.copyWith(color: Colors.white),
+        ),
+      ),
+    );
+  }
+
+  String getFormattedDuration(int duration) {
     final String formattedDuration = Duration(seconds: duration).toString().split('.').first;
     final List<String> separated = formattedDuration.split(':');
     final String hour = (separated[0] == '0') ? '' : separated[0] + ':';
     final String minute = int.parse(separated[1]).toString() + ':';
     final String second = separated[2];
-    final String strippedDuration = hour + minute + second;
-    return _BottomRightOverlayText(
-      Text(
-        strippedDuration,
-        style: Theme.of(context).textTheme.titleSmall!.copyWith(color: Colors.white),
-      ),
-    );
+    return hour + minute + second;
   }
 }
 
@@ -346,11 +357,11 @@ class _BottomRightOverlayIcon extends StatelessWidget {
   }
 }
 
-class _BottomRightOverlayText extends StatelessWidget {
-  final Text text;
+class _BottomRightOverlay extends StatelessWidget {
+  final Widget overlayWidget;
 
-  const _BottomRightOverlayText(
-    this.text, {
+  const _BottomRightOverlay(
+    this.overlayWidget, {
     Key? key,
   }) : super(key: key);
 
@@ -364,7 +375,7 @@ class _BottomRightOverlayText extends StatelessWidget {
           alignment: Alignment.bottomRight,
           child: Padding(
             padding: const EdgeInsets.only(bottom: inset, right: inset),
-            child: text,
+            child: overlayWidget,
           ),
         );
       },
