@@ -184,7 +184,7 @@ Future<void> _downloadAndDecryptThumbnail(FileDownloadItem item) async {
       CryptoUtil.base642bin(file.thumbnailDecryptionHeader!),
     );
   } catch (e, s) {
-    _logger.severe("Failed to decrypt thumbnail", e, s);
+    _logger.severe("Failed to decrypt thumbnail ${item.file.toString()}", e, s);
     item.completer.completeError(e);
     return;
   }
