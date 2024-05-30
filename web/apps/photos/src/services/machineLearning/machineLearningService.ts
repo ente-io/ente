@@ -277,13 +277,8 @@ class MachineLearningService {
         localFile?: globalThis.File,
     ) {
         try {
-            const mlFileData = await this.syncFile(
-                enteFile,
-                localFile,
-                syncContext.userAgent,
-            );
+            await this.syncFile(enteFile, localFile, syncContext.userAgent);
             syncContext.nSyncedFiles += 1;
-            return mlFileData;
         } catch (e) {
             log.error("ML syncFile failed", e);
             let error = e;
@@ -320,14 +315,13 @@ class MachineLearningService {
     ) {
         const oldMlFile = await mlIDbStorage.getFile(enteFile.id);
         if (oldMlFile && oldMlFile.mlVersion) {
-            return oldMlFile;
+            return;
         }
 
         const worker = new FaceIndexerWorker();
 
         const newMlFile = await worker.index(enteFile, localFile, userAgent);
         await mlIDbStorage.putFile(newMlFile);
-        return newMlFile;
     }
 
     private async persistMLFileSyncError(enteFile: EnteFile, e: Error) {
