@@ -2,7 +2,8 @@ import log from "@/next/log";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { putEmbedding } from "services/embeddingService";
 import type { EnteFile } from "types/file";
-import type { Face, FaceDetection, MlFileData, Point } from "./types";
+import type { Point } from "./types";
+import type { Face, FaceDetection, MlFileData } from "./types-old";
 
 export const putFaceEmbedding = async (
     enteFile: EnteFile,

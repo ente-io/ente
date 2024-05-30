@@ -2,14 +2,6 @@ import { FILE_TYPE } from "@/media/file-type";
 import log from "@/next/log";
 import { workerBridge } from "@/next/worker/worker-bridge";
 import { Matrix } from "ml-matrix";
-import type {
-    Box,
-    Dimensions,
-    Face,
-    FaceAlignment,
-    FaceDetection,
-    MlFileData,
-} from "services/face/types";
 import { defaultMLVersion } from "services/machineLearning/machineLearningService";
 import { getSimilarityTransformation } from "similarity-transformation";
 import {
@@ -28,6 +20,13 @@ import {
     pixelRGBBilinear,
     warpAffineFloat32List,
 } from "./image";
+import type { Box, Dimensions } from "./types";
+import type {
+    Face,
+    FaceAlignment,
+    FaceDetection,
+    MlFileData,
+} from "./types-old";
 
 /**
  * Index faces in the given file.
