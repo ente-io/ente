@@ -33,8 +33,6 @@ export interface Face {
     blurValue?: number;
 
     embedding?: Float32Array;
-
-    personId?: number;
 }
 
 export interface MlFileData {
