@@ -119,7 +119,10 @@ class MLIDbStorage {
 
                 if (oldVersion < 1) {
                     const filesStore = db.createObjectStore("files", {
-                        keyPath: "fileId",
+                        // keyPath: "fileId", TODO(MR): Changing this, since
+                        // we're going to be deleting this DB before this PR is
+                        // merged.
+                        keyPath: "fileID",
                     });
                     filesStore.createIndex("mlVersion", [
                         "mlVersion",
