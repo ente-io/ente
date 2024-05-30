@@ -1,7 +1,6 @@
 import log from "@/next/log";
 import { CustomError, parseUploadErrorCodes } from "@ente/shared/error";
 import PQueue from "p-queue";
-import mlIDbStorage from "services/face/db-old";
 import { getFilesToIndex } from "services/face/indexer";
 import { FaceIndexerWorker } from "services/face/indexer.worker";
 import { EnteFile } from "types/file";
@@ -96,12 +95,6 @@ class MachineLearningService {
         }
         await syncContext.syncQueue.onIdle();
         this.isSyncing = false;
-
-        // TODO: In case syncJob has to use multiple ml workers
-        // do in same transaction with each file update
-        // or keep in files store itself
-        await mlIDbStorage.incrementIndexVersion("files");
-        // await this.disposeMLModels();
     }
 
     private async getSyncContext(
@@ -208,17 +201,12 @@ class MachineLearningService {
 
     private async syncFile(
         enteFile: EnteFile,
-        localFile: globalThis.File | undefined,
+        file: File | undefined,
         userAgent: string,
     ) {
-        const oldMlFile = await mlIDbStorage.getFile(enteFile.id);
-        if (oldMlFile && oldMlFile.mlVersion) {
-            return;
-        }
-
         const worker = new FaceIndexerWorker();
 
-        await worker.index(enteFile, localFile, userAgent);
+        await worker.index(enteFile, file, userAgent);
     }
 }
 

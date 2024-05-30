@@ -228,7 +228,11 @@ class MLWorkManager {
         this.mlSearchEnabled && this.startSyncJob();
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     public async syncLocalFile(enteFile: EnteFile, localFile: globalThis.File) {
+        return;
+        /*
+        TODO-ML(MR): Disable live sync for now
         await this.liveSyncQueue.add(async () => {
             this.stopSyncJob();
             const token = getToken();
@@ -243,6 +247,7 @@ class MLWorkManager {
                 localFile,
             );
         });
+        */
     }
 
     // Sync Job
