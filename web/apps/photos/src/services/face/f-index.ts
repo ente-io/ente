@@ -76,10 +76,6 @@ export const indexFaces = async (
 const fetchOrCreateImageBitmap = async (enteFile: EnteFile, file: File) => {
     const fileType = enteFile.metadata.fileType;
     if (file) {
-        // TODO-ML(MR): Could also be image part of live photo?
-        if (fileType !== FILE_TYPE.IMAGE)
-            throw new Error("Local file of only image type is supported");
-
         return await getLocalFileImageBitmap(enteFile, file);
     } else if ([FILE_TYPE.IMAGE, FILE_TYPE.LIVE_PHOTO].includes(fileType)) {
         return await fetchImageBitmap(enteFile);
