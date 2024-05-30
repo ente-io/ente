@@ -49,14 +49,14 @@ Future<dynamic> showAssignPersonAction(
   BuildContext context, {
   required int clusterID,
   PersonActionType actionType = PersonActionType.assignPerson,
-  bool showOptionToCreateNewAlbum = true,
+  bool showOptionToAddNewPerson = true,
 }) {
   return showBarModalBottomSheet(
     context: context,
     builder: (context) {
       return PersonActionSheet(
         actionType: actionType,
-        showOptionToCreateNewPerson: showOptionToCreateNewAlbum,
+        showOptionToCreateNewPerson: showOptionToAddNewPerson,
         cluserID: clusterID,
       );
     },
