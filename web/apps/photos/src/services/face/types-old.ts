@@ -21,6 +21,9 @@ export interface MlFileData {
     faces?: Face[];
     width: number;
     height: number;
+    faceEmbedding: {
+        version: number;
+    };
     mlVersion: number;
     errorCount: number;
 }

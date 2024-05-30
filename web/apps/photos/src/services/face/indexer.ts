@@ -267,9 +267,9 @@ export const syncLocalFiles = async (userID: number) => {
     if (newFileIds.length > 0) {
         log.info("newFiles: ", newFileIds.length);
         const newFiles = newFileIds.map(
-            (fileId) =>
+            (fileID) =>
                 ({
-                    fileId,
+                    fileID,
                     mlVersion: 0,
                     errorCount: 0,
                 }) as MinimalPersistedFileData,

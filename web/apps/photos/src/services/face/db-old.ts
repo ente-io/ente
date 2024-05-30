@@ -27,7 +27,7 @@ export interface IndexStatus {
  * server ML data shape here exactly.
  */
 export interface MinimalPersistedFileData {
-    fileId: number;
+    fileID: number;
     mlVersion: number;
     errorCount: number;
     faces?: { personId?: number; id: string }[];

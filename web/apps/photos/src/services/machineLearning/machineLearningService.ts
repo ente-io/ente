@@ -80,9 +80,9 @@ class MachineLearningService {
         return !error && nOutOfSyncFiles > 0;
     }
 
-    private newMlData(fileId: number) {
+    private newMlData(fileID: number) {
         return {
-            fileId,
+            fileID,
             mlVersion: 0,
             errorCount: 0,
         } as MinimalPersistedFileData;
