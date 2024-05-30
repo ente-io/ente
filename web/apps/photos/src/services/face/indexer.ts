@@ -245,8 +245,9 @@ export const setIsFaceIndexingEnabled = async (enabled: boolean) => {
 };
 
 export const syncLocalFiles = async (userID: number) => {
-    const startTime = Date.now();
     const localFilesMap = await localUserOwnedFilesByID(userID);
+
+    // const localFileIDs = new Set(localFilesMap.keys());
 
     const db = await mlIDbStorage.db;
     const tx = db.transaction("files", "readwrite");
@@ -295,8 +296,6 @@ export const syncLocalFiles = async (userID: number) => {
         // TODO: should do in same transaction
         await mlIDbStorage.incrementIndexVersion("files");
     }
-
-    log.info("syncLocalFiles", Date.now() - startTime, "ms");
 
     return localFilesMap;
 };

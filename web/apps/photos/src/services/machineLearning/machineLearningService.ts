@@ -104,7 +104,6 @@ class MachineLearningService {
         return syncContext.localFilesMap;
     }
 
-
     private async getOutOfSyncFiles(syncContext: MLSyncContext) {
         const startTime = Date.now();
         const fileIds = await mlIDbStorage.getFileIds(
