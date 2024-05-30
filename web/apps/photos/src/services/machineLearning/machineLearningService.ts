@@ -6,7 +6,6 @@ import mlIDbStorage, {
     type MinimalPersistedFileData,
 } from "services/face/db-old";
 import { FaceIndexerWorker } from "services/face/indexer.worker";
-import { putFaceEmbedding } from "services/face/remote";
 import { getLocalFiles } from "services/fileService";
 import { EnteFile } from "types/file";
 import { isInternalUserForML } from "utils/user";
@@ -348,8 +347,7 @@ class MachineLearningService {
 
         const worker = new FaceIndexerWorker();
 
-        const newMlFile = await worker.index(enteFile, localFile);
-        await putFaceEmbedding(enteFile, newMlFile, userAgent);
+        const newMlFile = await worker.index(enteFile, localFile, userAgent);
         await mlIDbStorage.putFile(newMlFile);
         return newMlFile;
     }
