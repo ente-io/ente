@@ -162,7 +162,7 @@ export const faceIndexingStatus = async (): Promise<FaceIndexingStatus> => {
     const { indexableCount, indexedCount } = await indexableAndIndexedCounts();
 
     let phase: FaceIndexingStatus["phase"];
-    if (indexableCount > 0 && indexableCount > indexedCount) {
+    if (indexedCount < indexableCount) {
         if (!isSyncing) {
             phase = "scheduled";
         } else {
