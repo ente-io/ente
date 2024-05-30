@@ -7,15 +7,15 @@ import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 
 class ShowImagePreviewFromTap extends StatelessWidget {
   const ShowImagePreviewFromTap({
-    required this.tempEnteFile,
+    required this.ownedSelectedFiles,
     super.key,
   });
 
-  final List<EnteFile> tempEnteFile;
+  final List<EnteFile> ownedSelectedFiles;
 
   @override
   Widget build(BuildContext context) {
-    final int length = tempEnteFile.length;
+    final int length = ownedSelectedFiles.length;
     Widget placeholderWidget = const SizedBox(
       height: 300, // Adjusted height
       width: 300, // Adjusted width
@@ -25,7 +25,7 @@ class ShowImagePreviewFromTap extends StatelessWidget {
       placeholderWidget = AspectRatio(
         aspectRatio: 1,
         child: BackDrop(
-          backDropImage: tempEnteFile[0],
+          backDropImage: ownedSelectedFiles[0],
           children: [
             Padding(
               padding: const EdgeInsets.all(18.0),
@@ -54,7 +54,7 @@ class ShowImagePreviewFromTap extends StatelessWidget {
                     cornerSmoothing: 1,
                   ),
                   child: ThumbnailWidget(
-                    tempEnteFile[0],
+                    ownedSelectedFiles[0],
                     shouldShowArchiveStatus: false,
                     shouldShowSyncStatus: false,
                   ),
@@ -68,7 +68,7 @@ class ShowImagePreviewFromTap extends StatelessWidget {
       placeholderWidget = AspectRatio(
         aspectRatio: 1,
         child: BackDrop(
-          backDropImage: tempEnteFile[0],
+          backDropImage: ownedSelectedFiles[0],
           children: [
             Positioned(
               right: 20,
@@ -76,7 +76,7 @@ class ShowImagePreviewFromTap extends StatelessWidget {
               child: CustomImage(
                 height: 190,
                 width: 190,
-                collages: tempEnteFile[1],
+                collages: ownedSelectedFiles[1],
                 zIndex: 0.2,
               ),
             ),
@@ -86,7 +86,7 @@ class ShowImagePreviewFromTap extends StatelessWidget {
               child: CustomImage(
                 height: 190,
                 width: 190,
-                collages: tempEnteFile[0],
+                collages: ownedSelectedFiles[0],
                 zIndex: -0.2,
               ),
             ),
@@ -97,7 +97,7 @@ class ShowImagePreviewFromTap extends StatelessWidget {
       placeholderWidget = AspectRatio(
         aspectRatio: 1,
         child: BackDrop(
-          backDropImage: tempEnteFile[0],
+          backDropImage: ownedSelectedFiles[0],
           children: [
             //left image
             Positioned(
@@ -106,7 +106,7 @@ class ShowImagePreviewFromTap extends StatelessWidget {
               child: CustomImage(
                 height: 160,
                 width: 160,
-                collages: tempEnteFile[1],
+                collages: ownedSelectedFiles[1],
                 zIndex: -0.3,
               ),
             ),
@@ -117,7 +117,7 @@ class ShowImagePreviewFromTap extends StatelessWidget {
               child: CustomImage(
                 height: 160,
                 width: 160,
-                collages: tempEnteFile[2],
+                collages: ownedSelectedFiles[2],
                 zIndex: 0.3,
               ),
             ),
@@ -128,7 +128,7 @@ class ShowImagePreviewFromTap extends StatelessWidget {
               child: CustomImage(
                 height: 175,
                 width: 175,
-                collages: tempEnteFile[0],
+                collages: ownedSelectedFiles[0],
                 zIndex: 0.0,
               ),
             ),
@@ -141,7 +141,7 @@ class ShowImagePreviewFromTap extends StatelessWidget {
         child: AspectRatio(
           aspectRatio: 1,
           child: BackDrop(
-            backDropImage: tempEnteFile[0],
+            backDropImage: ownedSelectedFiles[0],
             children: [
               Positioned(
                 top: 20,
@@ -149,7 +149,7 @@ class ShowImagePreviewFromTap extends StatelessWidget {
                 child: CustomImage(
                   height: 160,
                   width: 160,
-                  collages: tempEnteFile[1],
+                  collages: ownedSelectedFiles[1],
                   zIndex: 0,
                 ),
               ),
@@ -159,7 +159,7 @@ class ShowImagePreviewFromTap extends StatelessWidget {
                 child: CustomImage(
                   height: 160,
                   width: 160,
-                  collages: tempEnteFile[2],
+                  collages: ownedSelectedFiles[2],
                   zIndex: 0,
                 ),
               ),
@@ -169,7 +169,7 @@ class ShowImagePreviewFromTap extends StatelessWidget {
                 child: CustomImage(
                   height: 175,
                   width: 175,
-                  collages: tempEnteFile[0],
+                  collages: ownedSelectedFiles[0],
                   zIndex: 0.0,
                 ),
               ),

@@ -99,6 +99,7 @@ class _FileSelectionActionsWidgetState
   @override
   void dispose() {
     widget.selectedFiles.removeListener(_selectFileChangeListener);
+    generatedPathNotifier.dispose();
     super.dispose();
   }
 
@@ -615,7 +616,7 @@ class _FileSelectionActionsWidgetState
       final DateTime timeStamp = DateTime.now();
       await Directory(directoryPath).create(recursive: true);
       final String filePath = '$directoryPath/$timeStamp.jpg';
-      final file = await File(filePath).writeAsBytes(bytes!);
+      final file = await File(filePath).writeAsBytes(bytes);
       path = file.path;
     } catch (e) {
       debugPrint(e.toString());
@@ -624,22 +625,24 @@ class _FileSelectionActionsWidgetState
   }
 
   ValueNotifier<String?> generatedPathNotifier = ValueNotifier<String?>(null);
-//Future function to go to next page
-  Future<String?> _nextPageForTesting(List<EnteFile> tempfile) async {
+
+  Future<String?> _selectedFilePlaceholderPath(
+    List<EnteFile> ownedSelectedFiles,
+  ) async {
     final Widget imageWidget = ShowImagePreviewFromTap(
-      tempEnteFile: tempfile,
+      ownedSelectedFiles: ownedSelectedFiles,
     );
     await Future.delayed(const Duration(milliseconds: 100));
     final double pixelRatio = MediaQuery.of(context).devicePixelRatio;
     final bytesOfImageToWidget = await screenshotController.captureFromWidget(
       imageWidget,
       pixelRatio: pixelRatio,
-      targetSize: MediaQuery.of(context).size,
+      targetSize: MediaQuery.sizeOf(context),
       delay: const Duration(milliseconds: 100),
     );
 
-    final String tempImagePath = await saveImage(bytesOfImageToWidget);
-    return tempImagePath;
+    final String onCreateLinkTapped = await saveImage(bytesOfImageToWidget);
+    return onCreateLinkTapped;
   }
 
   Future<void> _onCreatedSharedLinkClicked() async {
@@ -653,7 +656,7 @@ class _FileSelectionActionsWidgetState
     _cachedCollectionForSharedLink ??= await collectionActions
         .createSharedCollectionLink(context, split.ownedByCurrentUser);
 
-    final List<EnteFile> tempEnteFile = split.ownedByCurrentUser;
+    final List<EnteFile> ownedSelectedFiles = split.ownedByCurrentUser;
 
     final actionResult = await showActionSheet(
       context: context,
@@ -689,7 +692,8 @@ class _FileSelectionActionsWidgetState
     );
     if (actionResult?.action != null) {
       if (actionResult!.action == ButtonAction.first) {
-        generatedPathNotifier.value = await _nextPageForTesting(tempEnteFile);
+        generatedPathNotifier.value =
+            await _selectedFilePlaceholderPath(ownedSelectedFiles);
         await _copyLink();
       }
       if (actionResult.action == ButtonAction.second) {
@@ -801,7 +805,6 @@ class _FileSelectionActionsWidgetState
   }
 
   Future<void> _copyLink() async {
-    print("INSIDE COPY LINK");
     if (_cachedCollectionForSharedLink != null) {
       final String collectionKey = Base58Encode(
         CollectionsService.instance
@@ -809,8 +812,7 @@ class _FileSelectionActionsWidgetState
       );
       final String url =
           "${_cachedCollectionForSharedLink!.publicURLs?.first?.url}#$collectionKey";
-      //await shareText(url);
-      await shareImageAndUrl(context, generatedPathNotifier.value!, url);
+      await shareImageAndUrl(generatedPathNotifier.value!, url);
       await Clipboard.setData(ClipboardData(text: url));
       showShortToast(context, S.of(context).linkCopiedToClipboard);
     }

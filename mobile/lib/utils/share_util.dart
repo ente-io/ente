@@ -220,7 +220,6 @@ void shareSelected(
 }
 
 Future<void> shareImageAndUrl(
-  BuildContext context,
   String imagePath,
   String url,
 ) async {
