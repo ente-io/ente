@@ -1,7 +1,9 @@
 import { FILE_TYPE } from "@/media/file-type";
+import { decodeLivePhoto } from "@/media/live-photo";
 import log from "@/next/log";
 import { workerBridge } from "@/next/worker/worker-bridge";
 import { Matrix } from "ml-matrix";
+import DownloadManager from "services/download";
 import { defaultMLVersion } from "services/machineLearning/machineLearningService";
 import { getSimilarityTransformation } from "similarity-transformation";
 import {
@@ -12,9 +14,8 @@ import {
     translate,
 } from "transformation-matrix";
 import type { EnteFile } from "types/file";
-import { logIdentifier } from "utils/file";
+import { getRenderableImage, logIdentifier } from "utils/file";
 import { saveFaceCrop } from "./crop";
-import { fetchImageBitmap, getLocalFileImageBitmap } from "./file";
 import {
     clamp,
     grayscaleIntMatrixFromNormalized2List,
@@ -39,11 +40,20 @@ import type { Face, FaceDetection, MlFileData } from "./types-old";
  * they can be saved locally for offline use, and encrypts and uploads them to
  * the user's remote storage so that their other devices can download them
  * instead of needing to reindex.
+ *
+ * @param enteFile The {@link EnteFile} to index.
+ *
+ * @param file The contents of {@link enteFile} as a web {@link File}, if
+ * available. These are used when they are provided, otherwise the file is
+ * downloaded and decrypted from remote.
  */
-export const indexFaces = async (enteFile: EnteFile, localFile?: File) => {
+export const indexFaces = async (
+    enteFile: EnteFile,
+    file: File | undefined,
+) => {
     const startTime = Date.now();
 
-    const imageBitmap = await fetchOrCreateImageBitmap(enteFile, localFile);
+    const imageBitmap = await fetchOrCreateImageBitmap(enteFile, file);
     let mlFile: MlFileData;
     try {
         mlFile = await indexFaces_(enteFile, imageBitmap);
@@ -60,26 +70,45 @@ export const indexFaces = async (enteFile: EnteFile, localFile?: File) => {
 };
 
 /**
- * Return a {@link ImageBitmap}, using {@link localFile} if present otherwise
+ * Return a {@link ImageBitmap}, using {@link file} if present otherwise
  * downloading the source image corresponding to {@link enteFile} from remote.
  */
-const fetchOrCreateImageBitmap = async (
-    enteFile: EnteFile,
-    localFile: File,
-) => {
+const fetchOrCreateImageBitmap = async (enteFile: EnteFile, file: File) => {
     const fileType = enteFile.metadata.fileType;
-    if (localFile) {
+    if (file) {
         // TODO-ML(MR): Could also be image part of live photo?
         if (fileType !== FILE_TYPE.IMAGE)
             throw new Error("Local file of only image type is supported");
 
-        return await getLocalFileImageBitmap(enteFile, localFile);
+        return await getLocalFileImageBitmap(enteFile, file);
     } else if ([FILE_TYPE.IMAGE, FILE_TYPE.LIVE_PHOTO].includes(fileType)) {
         return await fetchImageBitmap(enteFile);
     } else {
         throw new Error(`Cannot index unsupported file type ${fileType}`);
     }
 };
+
+const fetchImageBitmap = async (enteFile: EnteFile) =>
+    fetchRenderableBlob(enteFile).then(createImageBitmap);
+
+const fetchRenderableBlob = async (enteFile: EnteFile) => {
+    const fileStream = await DownloadManager.getFile(enteFile);
+    const fileBlob = await new Response(fileStream).blob();
+    if (enteFile.metadata.fileType === FILE_TYPE.IMAGE) {
+        return getRenderableImage(enteFile.metadata.title, fileBlob);
+    } else {
+        const { imageFileName, imageData } = await decodeLivePhoto(
+            enteFile.metadata.title,
+            fileBlob,
+        );
+        return getRenderableImage(imageFileName, new Blob([imageData]));
+    }
+};
+
+const getLocalFileImageBitmap = async (enteFile: EnteFile, localFile: File) =>
+    createImageBitmap(
+        await getRenderableImage(enteFile.metadata.title, localFile),
+    );
 
 const indexFaces_ = async (enteFile: EnteFile, imageBitmap: ImageBitmap) => {
     const fileID = enteFile.id;
