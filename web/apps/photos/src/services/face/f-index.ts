@@ -93,6 +93,7 @@ const fetchRenderableBlob = async (enteFile: EnteFile) => {
         );
         return getRenderableImage(imageFileName, new Blob([imageData]));
     } else {
+        // A layer above us should've already filtered these out.
         throw new Error(`Cannot index unsupported file type ${fileType}`);
     }
 };

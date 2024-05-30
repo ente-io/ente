@@ -198,10 +198,12 @@ export const addFileEntry = async (fileID: number) => {
 };
 
 /**
- * Sync entries in the face DB to match the given list of local file IDs.
+ * Sync entries in the face DB to align with the given list of local indexable
+ * file IDs.
  *
  * @param localFileIDs The IDs of all the files that the client is aware of,
- * filtered to only keep the files that the user owns.
+ * filtered to only keep the files that the user owns and the formats that can
+ * be indexed by our current face indexing pipeline.
  *
  * This function syncs the state of file entries in face DB to the state of file
  * entries stored otherwise by the local client.
@@ -212,7 +214,7 @@ export const addFileEntry = async (fileID: number) => {
  * - Files that are not present locally but still exist in face DB are removed
  *   from face DB (including its face index, if any).
  */
-export const syncWithLocalUserOwnedFileIDs = async (localFileIDs: number[]) => {
+export const syncWithLocalIndexableFileIDs = async (localFileIDs: number[]) => {
     const db = await faceDB();
     const tx = db.transaction(["face-index", "file-status"], "readwrite");
     const fdbFileIDs = await tx.objectStore("file-status").getAllKeys();

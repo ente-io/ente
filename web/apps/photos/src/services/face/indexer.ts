@@ -1,3 +1,4 @@
+import { FILE_TYPE } from "@/media/file-type";
 import log from "@/next/log";
 import { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { wait } from "@/utils/promise";
@@ -245,7 +246,7 @@ export const setIsFaceIndexingEnabled = async (enabled: boolean) => {
 };
 
 export const syncLocalFiles = async (userID: number) => {
-    const localFilesMap = await localUserOwnedFilesByID(userID);
+    const localFilesMap = await localIndexableFilesByID(userID);
 
     // const localFileIDs = new Set(localFilesMap.keys());
 
@@ -306,12 +307,17 @@ export const syncLocalFiles = async (userID: number) => {
  *
  * @param userID Restrict the returned files to those owned by a {@link userID}.
  */
-const localUserOwnedFilesByID = async (
+const localIndexableFilesByID = async (
     userID: number,
 ): Promise<Map<number, EnteFile>> => {
     const result = new Map<number, EnteFile>();
     const localFiles = await getLocalFiles();
-    const personalFiles = localFiles.filter((f) => f.ownerID === userID);
-    personalFiles.forEach((f) => result.set(f.id, f));
+    const indexableTypes = [FILE_TYPE.IMAGE, FILE_TYPE.LIVE_PHOTO];
+    const indexableFiles = localFiles.filter(
+        (f) =>
+            f.ownerID == userID && indexableTypes.includes(f.metadata.fileType),
+    );
+
+    indexableFiles.forEach((f) => result.set(f.id, f));
     return result;
 };
