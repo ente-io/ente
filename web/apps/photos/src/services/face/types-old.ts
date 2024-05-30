@@ -23,6 +23,7 @@ export interface MlFileData {
     height: number;
     faceEmbedding: {
         version: number;
+        client: string;
     };
     mlVersion: number;
     errorCount: number;

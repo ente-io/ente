@@ -33,7 +33,7 @@ export class FaceIndexerWorker {
 
         let faceIndex: MlFileData;
         try {
-            faceIndex = await indexFaces(enteFile, file);
+            faceIndex = await indexFaces(enteFile, file, userAgent);
             log.debug(() => ({ f, faceIndex }));
         } catch (e) {
             // Mark indexing as having failed only if the indexing itself
@@ -44,7 +44,7 @@ export class FaceIndexerWorker {
             throw e;
         }
 
-        await putFaceEmbedding(enteFile, faceIndex, userAgent);
+        await putFaceEmbedding(enteFile, faceIndex);
         return faceIndex;
     }
 

@@ -8,9 +8,8 @@ import type { Face, FaceDetection, MlFileData } from "./types-old";
 export const putFaceEmbedding = async (
     enteFile: EnteFile,
     mlFileData: MlFileData,
-    userAgent: string,
 ) => {
-    const serverMl = LocalFileMlDataToServerFileMl(mlFileData, userAgent);
+    const serverMl = LocalFileMlDataToServerFileMl(mlFileData);
     log.debug(() => ({ t: "Local ML file data", mlFileData }));
     log.debug(() => ({
         t: "Uploaded ML file data",
@@ -111,7 +110,6 @@ class ServerFaceBox {
 
 function LocalFileMlDataToServerFileMl(
     localFileMlData: MlFileData,
-    userAgent: string,
 ): ServerFileMl {
     if (localFileMlData.errorCount > 0) {
         return null;
@@ -138,7 +136,11 @@ function LocalFileMlDataToServerFileMl(
         );
         faces.push(newFaceObject);
     }
-    const faceEmbedding = new ServerFaceEmbedding(faces, userAgent, 1);
+    const faceEmbedding = new ServerFaceEmbedding(
+        faces,
+        localFileMlData.faceEmbedding.client,
+        localFileMlData.faceEmbedding.version,
+    );
     return new ServerFileMl(
         localFileMlData.fileID,
         faceEmbedding,

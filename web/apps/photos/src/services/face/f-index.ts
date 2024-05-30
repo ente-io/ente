@@ -46,10 +46,14 @@ import type { Face, FaceDetection, MlFileData } from "./types-old";
  * @param file The contents of {@link enteFile} as a web {@link File}, if
  * available. These are used when they are provided, otherwise the file is
  * downloaded and decrypted from remote.
+ *
+ * @param userAgent The UA of the current client (the client that is generating
+ * the embedding).
  */
 export const indexFaces = async (
     enteFile: EnteFile,
     file: File | undefined,
+    userAgent: string,
 ) => {
     const startTime = Date.now();
 
@@ -58,7 +62,7 @@ export const indexFaces = async (
     );
     let mlFile: MlFileData;
     try {
-        mlFile = await indexFaces_(enteFile, imageBitmap);
+        mlFile = await indexFaces_(enteFile, imageBitmap, userAgent);
     } finally {
         imageBitmap.close();
     }
@@ -98,7 +102,11 @@ const fetchRenderableBlob = async (enteFile: EnteFile) => {
     }
 };
 
-const indexFaces_ = async (enteFile: EnteFile, imageBitmap: ImageBitmap) => {
+const indexFaces_ = async (
+    enteFile: EnteFile,
+    imageBitmap: ImageBitmap,
+    userAgent: string,
+) => {
     const fileID = enteFile.id;
     const { width, height } = imageBitmap;
     const imageDimensions = { width, height };
@@ -108,6 +116,7 @@ const indexFaces_ = async (enteFile: EnteFile, imageBitmap: ImageBitmap) => {
         height,
         faceEmbedding: {
             version: 1,
+            client: userAgent,
         },
         mlVersion: defaultMLVersion,
         errorCount: 0,
