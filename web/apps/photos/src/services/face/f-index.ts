@@ -22,12 +22,7 @@ import {
     warpAffineFloat32List,
 } from "./image";
 import type { Box, Dimensions } from "./types";
-import type {
-    Face,
-    FaceAlignment,
-    FaceDetection,
-    MlFileData,
-} from "./types-old";
+import type { Face, FaceDetection, MlFileData } from "./types-old";
 
 /**
  * Index faces in the given file.
@@ -109,11 +104,12 @@ const indexFaces_ = async (enteFile: EnteFile, imageBitmap: ImageBitmap) => {
         const alignments: FaceAlignment[] = [];
 
         for (const face of mlFile.faces) {
-            const alignment = faceAlignment(face.detection);
-            face.alignment = alignment;
+            const alignment = computeFaceAlignment(face.detection);
             alignments.push(alignment);
 
-            await saveFaceCrop(imageBitmap, face);
+            // This step is not really part of the indexing pipeline, we just do
+            // it here since we have already computed the face alignment.
+            await saveFaceCrop(imageBitmap, face, alignment);
         }
 
         const alignedFacesData = convertToMobileFaceNetInput(
@@ -393,13 +389,30 @@ const makeFaceID = (
     return [`${fileID}`, xMin, yMin, xMax, yMax].join("_");
 };
 
+export interface FaceAlignment {
+    /**
+     * An affine transformation matrix (rotation, translation, scaling) to align
+     * the face extracted from the image.
+     */
+    affineMatrix: number[][];
+    /**
+     * The bounding box of the transformed box.
+     *
+     * The affine transformation shifts the original detection box a new,
+     * transformed, box (possibily rotated). This property is the bounding box
+     * of that transformed box. It is in the coordinate system of the original,
+     * full, image on which the detection occurred.
+     */
+    boundingBox: Box;
+}
+
 /**
  * Compute and return an {@link FaceAlignment} for the given face detection.
  *
  * @param faceDetection A geometry indicating a face detected in an image.
  */
-const faceAlignment = (faceDetection: FaceDetection): FaceAlignment =>
-    faceAlignmentUsingSimilarityTransform(
+const computeFaceAlignment = (faceDetection: FaceDetection): FaceAlignment =>
+    computeFaceAlignmentUsingSimilarityTransform(
         faceDetection,
         normalizeLandmarks(idealMobileFaceNetLandmarks, mobileFaceNetFaceSize),
     );
@@ -422,7 +435,7 @@ const normalizeLandmarks = (
 ): [number, number][] =>
     landmarks.map(([x, y]) => [x / faceSize, y / faceSize]);
 
-const faceAlignmentUsingSimilarityTransform = (
+const computeFaceAlignmentUsingSimilarityTransform = (
     faceDetection: FaceDetection,
     alignedLandmarks: [number, number][],
 ): FaceAlignment => {
