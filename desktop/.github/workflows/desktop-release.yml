@@ -5,12 +5,20 @@ name: "Release"
 # For more details, see `docs/release.md` in ente-io/ente.
 
 on:
-    # Trigger manually or `gh workflow run desktop-release.yml`.
+    # Trigger manually or `gh workflow run desktop-release.yml --source=foo`.
     workflow_dispatch:
+        inputs:
+            source:
+                description: "Branch (ente-io/ente) to build"
+                required: true
+                type: string
+    schedule:
+        # Run everyday at ~8:00 AM IST (except Sundays).
+        # See: [Note: Run workflow every 24 hours]
+        #
+        - cron: "45 2 * * 1-6"
     push:
         # Run when a tag matching the pattern "v*"" is pushed.
-        #
-        # See: [Note: Testing release workflows that are triggered by tags].
         tags:
             - "v*"
 
@@ -30,9 +38,13 @@ jobs:
             - name: Checkout code
               uses: actions/checkout@v4
               with:
-                  # Checkout the desktop/rc branch from the source repository.
+                  # If triggered by a tag, checkout photosd-$tag from the source
+                  # repository. Otherwise checkout $source (default: "main").
                   repository: ente-io/ente
-                  ref: desktop/rc
+                  ref:
+                      "${{ startsWith(github.ref, 'refs/tags/v') &&
+                      format('photosd-{0}', github.ref_name) || ( inputs.source
+                      || 'main' ) }}"
                   submodules: recursive
 
             - name: Setup node
