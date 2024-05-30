@@ -186,7 +186,7 @@ export const faceIndexingStatus = async (): Promise<FaceIndexingStatus> => {
     return indexStatus;
 };
 
-export const convertToNewInterface = (indexStatus: IndexStatus) => {
+const convertToNewInterface = (indexStatus: IndexStatus) => {
     let phase: FaceIndexingStatus["phase"];
     if (!indexStatus.localFilesSynced) {
         phase = "scheduled";
@@ -201,4 +201,15 @@ export const convertToNewInterface = (indexStatus: IndexStatus) => {
         ...indexStatus,
         phase,
     };
+};
+
+/**
+ * Return the IDs of all the faces in the given {@link enteFile} that are not
+ * associated with a person cluster.
+ */
+export const unidentifiedFaceIDs = async (
+    enteFile: EnteFile,
+): Promise<{ id: string }[]> => {
+    const mlFileData = await mlIDbStorage.getFile(enteFile.id);
+    return mlFileData?.faces ?? [];
 };

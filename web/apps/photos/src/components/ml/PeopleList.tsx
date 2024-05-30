@@ -3,7 +3,7 @@ import { Skeleton, styled } from "@mui/material";
 import { Legend } from "components/PhotoViewer/styledComponents/Legend";
 import { t } from "i18next";
 import React, { useEffect, useState } from "react";
-import mlIDbStorage from "services/face/db-old";
+import { unidentifiedFaceIDs } from "services/face/indexer";
 import type { Person } from "services/face/people";
 import { EnteFile } from "types/file";
 
@@ -142,11 +142,4 @@ const FaceCropImageView: React.FC<FaceCropImageViewProps> = ({ faceID }) => {
     ) : (
         <Skeleton variant="circular" height={120} width={120} />
     );
-};
-
-const unidentifiedFaceIDs = async (
-    file: EnteFile,
-): Promise<{ id: string }[]> => {
-    const mlFileData = await mlIDbStorage.getFile(file.id);
-    return mlFileData?.faces;
 };
