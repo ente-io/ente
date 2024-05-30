@@ -53,7 +53,9 @@ export const indexFaces = async (
 ) => {
     const startTime = Date.now();
 
-    const imageBitmap = await fetchAndCreateImageBitmap(enteFile, file);
+    const imageBitmap = await renderableImageBlob(enteFile, file).then(
+        createImageBitmap,
+    );
     let mlFile: MlFileData;
     try {
         mlFile = await indexFaces_(enteFile, imageBitmap);
@@ -70,22 +72,21 @@ export const indexFaces = async (
 };
 
 /**
- * Return a {@link ImageBitmap}, using {@link file} if present otherwise
+ * Return a "renderable" image blob, using {@link file} if present otherwise
  * downloading the source image corresponding to {@link enteFile} from remote.
  */
-const fetchAndCreateImageBitmap = async (enteFile: EnteFile, file: File) =>
-    file ? getLocalFileImageBitmap(enteFile, file) : fetchImageBitmap(enteFile);
-
-const fetchImageBitmap = async (enteFile: EnteFile) =>
-    fetchRenderableBlob(enteFile).then(createImageBitmap);
+const renderableImageBlob = async (enteFile: EnteFile, file: File) =>
+    file
+        ? getRenderableImage(enteFile.metadata.title, file)
+        : fetchRenderableBlob(enteFile);
 
 const fetchRenderableBlob = async (enteFile: EnteFile) => {
-    const fileType = enteFile.metadata.fileType;
     const fileStream = await DownloadManager.getFile(enteFile);
     const fileBlob = await new Response(fileStream).blob();
-    if (enteFile.metadata.fileType == FILE_TYPE.IMAGE) {
+    const fileType = enteFile.metadata.fileType;
+    if (fileType == FILE_TYPE.IMAGE) {
         return getRenderableImage(enteFile.metadata.title, fileBlob);
-    } else if (enteFile.metadata.fileType == FILE_TYPE.LIVE_PHOTO) {
+    } else if (fileType == FILE_TYPE.LIVE_PHOTO) {
         const { imageFileName, imageData } = await decodeLivePhoto(
             enteFile.metadata.title,
             fileBlob,
@@ -95,11 +96,6 @@ const fetchRenderableBlob = async (enteFile: EnteFile) => {
         throw new Error(`Cannot index unsupported file type ${fileType}`);
     }
 };
-
-const getLocalFileImageBitmap = async (enteFile: EnteFile, localFile: File) =>
-    createImageBitmap(
-        await getRenderableImage(enteFile.metadata.title, localFile),
-    );
 
 const indexFaces_ = async (enteFile: EnteFile, imageBitmap: ImageBitmap) => {
     const fileID = enteFile.id;
