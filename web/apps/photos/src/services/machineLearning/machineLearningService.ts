@@ -9,8 +9,6 @@ export const defaultMLVersion = 1;
 
 const batchSize = 200;
 
-export const MAX_ML_SYNC_ERROR_COUNT = 1;
-
 class MLSyncContext {
     public token: string;
     public userID: number;

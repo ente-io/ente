@@ -82,6 +82,8 @@ interface FileStatus {
 let _faceDB: ReturnType<typeof openFaceDB> | undefined;
 
 const openFaceDB = async () => {
+    deleteLegacyDB();
+
     const db = await openDB<FaceDBSchema>("face", 1, {
         upgrade(db, oldVersion, newVersion) {
             log.info(`Upgrading face DB ${oldVersion} => ${newVersion}`);
@@ -112,6 +114,13 @@ const openFaceDB = async () => {
     return db;
 };
 
+const deleteLegacyDB = () => {
+    // Delete the legacy face DB.
+    // This code was added June 2024 (v1.7.1-rc) and can be removed once clients
+    // have migrated over.
+    void deleteDB("mldata");
+};
+
 /**
  * @returns a lazily created, cached connection to the face DB.
  */
@@ -138,6 +147,7 @@ export const closeFaceDBConnectionsIfNeeded = async () => {
  * Meant to be called during logout.
  */
 export const clearFaceData = async () => {
+    deleteLegacyDB();
     await closeFaceDBConnectionsIfNeeded();
     return deleteDB("face", {
         blocked() {
