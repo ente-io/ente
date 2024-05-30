@@ -194,13 +194,6 @@ class MapAttributionWidgetState extends State<MapAttributionWidget> {
                 context,
                 () {
                   setState(() => popupExpanded = true);
-                  // mapEventSubscription = FlutterMapState.of(context)
-                  //     .mapController
-                  //     .mapEventStream
-                  //     .listen((e) {
-                  //   setState(() => popupExpanded = false);
-                  //   mapEventSubscription?.cancel();
-                  // });
                   mapEventSubscription =
                       MapController().mapEventStream.listen((e) {
                     setState(() => popupExpanded = false);
