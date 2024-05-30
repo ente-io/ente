@@ -198,17 +198,35 @@ export const addFileEntry = async (fileID: number) => {
 };
 
 /**
+ * Remove a file's entry and face index (if any) from the face DB.
+ *
+ * @param fileID The ID of an {@link EnteFile}
+ *
+ * This function is invoked when the user has deleted a file, and we want to
+ * also prune that file's data from the face DB.
+ */
+export const removeFile = async (fileID: number) => {
+    const db = await faceDB();
+    const tx = db.transaction(["face-index", "file-status"], "readwrite");
+    return Promise.all([
+        tx.objectStore("face-index").delete(fileID),
+        tx.objectStore("file-status").delete(fileID),
+        tx.done,
+    ]);
+};
+
+/**
  * Return the count of files that can be, and that have been, indexed.
  */
-export const indexableAndIndexedCounts = async () => {
+export const indexedAndIndexableCounts = async () => {
     const db = await faceDB();
-    const tx = db.transaction(["file-status", "face-index"], "readonly");
+    const tx = db.transaction(["face-index", "file-status"], "readwrite");
+    const indexedCount = await tx.objectStore("face-index").count();
     const indexableCount = await tx
         .objectStore("file-status")
         .index("isIndexable")
         .count(IDBKeyRange.only(1));
-    const indexedCount = await tx.objectStore("face-index").count();
-    return { indexableCount, indexedCount };
+    return { indexedCount, indexableCount };
 };
 
 /**

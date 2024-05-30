@@ -10,7 +10,7 @@ import machineLearningService, {
 import mlWorkManager from "services/machineLearning/mlWorkManager";
 import type { EnteFile } from "types/file";
 import { isInternalUserForML } from "utils/user";
-import { indexableAndIndexedCounts, markIndexingFailed } from "./db";
+import { indexedAndIndexableCounts, markIndexingFailed } from "./db";
 import type { IndexStatus, MinimalPersistedFileData } from "./db-old";
 import { indexFaces } from "./f-index";
 import { FaceIndexerWorker } from "./indexer.worker";
@@ -161,7 +161,7 @@ export interface FaceIndexingStatus {
 
 export const faceIndexingStatus = async (): Promise<FaceIndexingStatus> => {
     const isSyncing = machineLearningService.isSyncing;
-    const { indexableCount, indexedCount } = await indexableAndIndexedCounts();
+    const { indexedCount, indexableCount } = await indexedAndIndexableCounts();
 
     let phase: FaceIndexingStatus["phase"];
     if (indexedCount < indexableCount) {
@@ -176,8 +176,8 @@ export const faceIndexingStatus = async (): Promise<FaceIndexingStatus> => {
 
     const indexingStatus = {
         phase,
-        nTotalFiles: indexableCount,
         nSyncedFiles: indexedCount,
+        nTotalFiles: indexableCount,
     };
 
     const indexStatus0 = await mlIDbStorage.getIndexStatus(defaultMLVersion);
