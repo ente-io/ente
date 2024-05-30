@@ -110,12 +110,12 @@ const indexFacesInBitmap = async (
     imageBitmap: ImageBitmap,
 ): Promise<Face[]> => {
     const { width, height } = imageBitmap;
-    const imageBox = { width, height };
+    const imageDimensions = { width, height };
 
     const yoloFaceDetections = await detectFaces(imageBitmap);
     const partialResult = yoloFaceDetections.map(
         ({ box, landmarks, score }) => {
-            const faceID = makeFaceID(fileID, box, imageBox);
+            const faceID = makeFaceID(fileID, box, imageDimensions);
             const detection = { box, landmarks };
             return { faceID, detection, score };
         },
@@ -150,7 +150,7 @@ const indexFacesInBitmap = async (
 
     return partialResult.map(({ faceID, detection, score }, i) => ({
         faceID,
-        detection: relativeDetection(detection, imageBox),
+        detection: normalizeToImageDimensions(detection, imageDimensions),
         score,
         blur: blurs[i],
         embedding: Array.from(embeddings[i]),
@@ -742,7 +742,7 @@ const computeEmbeddings = async (
 /**
  * Convert the coordinates to between 0-1, normalized by the image's dimensions.
  */
-const relativeDetection = (
+const normalizeToImageDimensions = (
     faceDetection: FaceDetection,
     { width, height }: Dimensions,
 ): FaceDetection => {
