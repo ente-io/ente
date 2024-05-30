@@ -22,7 +22,7 @@ export interface MlFileData {
     faceEmbedding: {
         version: number;
         client: string;
-        faces?: Face[];
+        faces: Face[];
     };
     mlVersion: number;
     errorCount: number;

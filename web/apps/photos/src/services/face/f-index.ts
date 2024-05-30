@@ -117,6 +117,7 @@ const indexFaces_ = async (
         faceEmbedding: {
             version: 1,
             client: userAgent,
+            faces: [],
         },
         mlVersion: defaultMLVersion,
         errorCount: 0,
@@ -124,8 +125,7 @@ const indexFaces_ = async (
 
     const faceDetections = await detectFaces(imageBitmap);
     const detectedFaces = faceDetections.map((detection) => ({
-        id: makeFaceID(fileID, detection, imageDimensions),
-        fileId: fileID,
+        faceID: makeFaceID(fileID, detection, imageDimensions),
         detection,
     }));
     mlFile.faceEmbedding.faces = detectedFaces;

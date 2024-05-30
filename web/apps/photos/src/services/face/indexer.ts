@@ -272,6 +272,7 @@ export const syncLocalFiles = async (userID: number) => {
                     fileID,
                     mlVersion: 0,
                     errorCount: 0,
+                    faceEmbedding: { faces: [] },
                 }) as MinimalPersistedFileData,
         );
         await mlIDbStorage.putAllFiles(newFiles, tx);

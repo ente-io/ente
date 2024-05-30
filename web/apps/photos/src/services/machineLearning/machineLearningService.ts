@@ -85,6 +85,7 @@ class MachineLearningService {
             fileID,
             mlVersion: 0,
             errorCount: 0,
+            faceEmbedding: { faces: [] },
         } as MinimalPersistedFileData;
     }
 
