@@ -2,12 +2,14 @@ import log from "@/next/log";
 import { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { wait } from "@/utils/promise";
 import { type Remote } from "comlink";
-import mlIDbStorage from "services/face/db-old";
+import mlIDbStorage, { ML_SEARCH_CONFIG_NAME } from "services/face/db-old";
 import machineLearningService, {
+    DEFAULT_ML_SEARCH_CONFIG,
     defaultMLVersion,
 } from "services/machineLearning/machineLearningService";
 import mlWorkManager from "services/machineLearning/mlWorkManager";
 import type { EnteFile } from "types/file";
+import { isInternalUserForML } from "utils/user";
 import { indexableAndIndexedCounts, markIndexingFailed } from "./db";
 import type { IndexStatus } from "./db-old";
 import { indexFaces } from "./f-index";
@@ -212,4 +214,29 @@ export const unidentifiedFaceIDs = async (
 ): Promise<{ id: string }[]> => {
     const mlFileData = await mlIDbStorage.getFile(enteFile.id);
     return mlFileData?.faces ?? [];
+};
+
+/**
+ * Return true if the user has enabled face indexing in the app's settings.
+ *
+ * This setting is persisted locally (in local storage) and is not synced with
+ * remote. There is a separate setting, "faceSearchEnabled" that is synced with
+ * remote, but that tracks whether or not the user has enabled face search once
+ * on any client. This {@link isFaceIndexingEnabled} property, on the other
+ * hand, denotes whether or not indexing is enabled on the current client.
+ */
+export const isFaceIndexingEnabled = () => {
+    if (isInternalUserForML()) {
+        return mlIDbStorage.getConfig(
+            ML_SEARCH_CONFIG_NAME,
+            DEFAULT_ML_SEARCH_CONFIG,
+        );
+    }
+    // Force disabled for everyone else while we finalize it to avoid redundant
+    // reindexing for users.
+    return DEFAULT_ML_SEARCH_CONFIG;
+};
+
+export const setIsFaceIndexingEnabled = (enabled: boolean) => {
+    return mlIDbStorage.putConfig(ML_SEARCH_CONFIG_NAME, { enabled });
 };
