@@ -31,6 +31,7 @@ export class FaceIndexerWorker {
         try {
             const faceIndex = await indexFaces(enteFile, file);
             log.info(`faces in file ${f}`, faceIndex);
+            return faceIndex;
         } catch (e) {
             log.error(`Failed to index faces in file ${f}`, e);
             markIndexingFailed(enteFile.id);

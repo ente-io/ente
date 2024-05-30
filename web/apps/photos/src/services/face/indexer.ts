@@ -2,11 +2,11 @@ import log from "@/next/log";
 import { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { wait } from "@/utils/promise";
 import { type Remote } from "comlink";
+import mlWorkManager from "services/machineLearning/mlWorkManager";
 import type { EnteFile } from "types/file";
 import { markIndexingFailed } from "./db";
 import { indexFaces } from "./f-index";
 import { FaceIndexerWorker } from "./indexer.worker";
-import mlWorkManager from "services/machineLearning/mlWorkManager";
 
 /**
  * Face indexing orchestrator.
