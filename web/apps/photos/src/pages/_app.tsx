@@ -50,9 +50,11 @@ import { createContext, useContext, useEffect, useRef, useState } from "react";
 import LoadingBar from "react-top-loading-bar";
 import DownloadManager from "services/download";
 import { resumeExportsIfNeeded } from "services/export";
-import { isFaceIndexingEnabled } from "services/face/indexer";
+import {
+    isFaceIndexingEnabled,
+    setIsFaceIndexingEnabled,
+} from "services/face/indexer";
 import { photosLogout } from "services/logout";
-import { updateMLSearchConfig } from "services/machineLearning/machineLearningService";
 import mlWorkManager from "services/machineLearning/mlWorkManager";
 import {
     getFamilyPortalRedirectURL,
@@ -284,8 +286,7 @@ export default function App({ Component, pageProps }: AppProps) {
     const showNavBar = (show: boolean) => setShowNavBar(show);
     const updateMlSearchEnabled = async (enabled: boolean) => {
         try {
-            const mlSearchConfig = { enabled };
-            await updateMLSearchConfig(mlSearchConfig);
+            await setIsFaceIndexingEnabled(enabled);
             setMlSearchEnabled(enabled);
             mlWorkManager.setMlSearchEnabled(enabled);
         } catch (e) {

@@ -238,6 +238,9 @@ export const isFaceIndexingEnabled = async () => {
     return false;
 };
 
-export const setIsFaceIndexingEnabled = (enabled: boolean) => {
+/**
+ * Update the (locally stored) value of {@link isFaceIndexingEnabled}.
+ */
+export const setIsFaceIndexingEnabled = async (enabled: boolean) => {
     return mlIDbStorage.putConfig(ML_SEARCH_CONFIG_NAME, { enabled });
 };

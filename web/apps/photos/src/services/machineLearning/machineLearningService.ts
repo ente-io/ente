@@ -2,7 +2,6 @@ import log from "@/next/log";
 import { CustomError, parseUploadErrorCodes } from "@ente/shared/error";
 import PQueue from "p-queue";
 import mlIDbStorage, {
-    ML_SEARCH_CONFIG_NAME,
     type MinimalPersistedFileData,
 } from "services/face/db-old";
 import { FaceIndexerWorker } from "services/face/indexer.worker";
@@ -22,10 +21,6 @@ export interface MLSearchConfig {
 export const DEFAULT_ML_SEARCH_CONFIG: MLSearchConfig = {
     enabled: false,
 };
-
-export async function updateMLSearchConfig(newConfig: MLSearchConfig) {
-    return mlIDbStorage.putConfig(ML_SEARCH_CONFIG_NAME, newConfig);
-}
 
 class MLSyncContext {
     public token: string;
