@@ -1,5 +1,5 @@
 import { FILE_TYPE } from "@/media/file-type";
-import { IndexStatus } from "services/face/db-old";
+import type { FaceIndexingStatus } from "services/face/indexer";
 import type { Person } from "services/face/people";
 import { City } from "services/locationSearchService";
 import { LocationTagData } from "types/entity";
@@ -31,7 +31,7 @@ export interface Suggestion {
         | DateValue
         | number[]
         | Person
-        | IndexStatus
+        | FaceIndexingStatus
         | LocationTagData
         | City
         | FILE_TYPE

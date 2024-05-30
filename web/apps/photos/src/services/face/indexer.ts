@@ -2,6 +2,8 @@ import log from "@/next/log";
 import { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { wait } from "@/utils/promise";
 import { type Remote } from "comlink";
+import mlIDbStorage from "services/face/db-old";
+import { defaultMLVersion } from "services/machineLearning/machineLearningService";
 import mlWorkManager from "services/machineLearning/mlWorkManager";
 import type { EnteFile } from "types/file";
 import { markIndexingFailed } from "./db";
@@ -153,8 +155,14 @@ export interface FaceIndexingStatus {
     nTotalFiles: number;
 }
 
+export const faceIndexingStatus = async (): Promise<FaceIndexingStatus> => {
+    const indexStatus0 = await mlIDbStorage.getIndexStatus(defaultMLVersion);
+    const indexStatus = convertToNewInterface(indexStatus0);
+    return indexStatus;
+};
+
 export const convertToNewInterface = (indexStatus: IndexStatus) => {
-    let phase: string;
+    let phase: FaceIndexingStatus["phase"];
     if (!indexStatus.localFilesSynced) {
         phase = "scheduled";
     } else if (indexStatus.outOfSyncFilesExists) {

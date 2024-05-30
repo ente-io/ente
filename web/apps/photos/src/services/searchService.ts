@@ -4,7 +4,6 @@ import * as chrono from "chrono-node";
 import { t } from "i18next";
 import mlIDbStorage from "services/face/db-old";
 import type { Person } from "services/face/people";
-import { defaultMLVersion } from "services/machineLearning/machineLearningService";
 import { Collection } from "types/collection";
 import { EntityType, LocationTag, LocationTagData } from "types/entity";
 import { EnteFile } from "types/file";
@@ -22,7 +21,7 @@ import { getFormattedDate } from "utils/search";
 import { clipService, computeClipMatchScore } from "./clip-service";
 import { localCLIPEmbeddings } from "./embeddingService";
 import { getLatestEntities } from "./entityService";
-import { convertToNewInterface } from "./face/indexer";
+import { faceIndexingStatus } from "./face/indexer";
 import locationSearchService, { City } from "./locationSearchService";
 
 const DIGITS = new Set(["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]);
@@ -176,9 +175,7 @@ export async function getAllPeopleSuggestion(): Promise<Array<Suggestion>> {
 
 export async function getIndexStatusSuggestion(): Promise<Suggestion> {
     try {
-        const indexStatus0 =
-            await mlIDbStorage.getIndexStatus(defaultMLVersion);
-        const indexStatus = convertToNewInterface(indexStatus0);
+        const indexStatus = await faceIndexingStatus();
 
         let label: string;
         switch (indexStatus.phase) {
