@@ -543,7 +543,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "emailVerificationToggle":
             MessageLookupByLibrary.simpleMessage("电子邮件验证"),
         "emailYourLogs": MessageLookupByLibrary.simpleMessage("通过电子邮件发送您的日志"),
-        "empty": MessageLookupByLibrary.simpleMessage("空的"),
+        "empty": MessageLookupByLibrary.simpleMessage("清空"),
         "emptyTrash": MessageLookupByLibrary.simpleMessage("要清空回收站吗？"),
         "enableMaps": MessageLookupByLibrary.simpleMessage("启用地图"),
         "enableMapsDesc": MessageLookupByLibrary.simpleMessage(

@@ -1,0 +1,67 @@
+import 'package:flutter/material.dart';
+import "package:photos/ui/tools/editor/video_editor/video_editor_bottom_action.dart";
+import "package:photos/ui/tools/editor/video_editor/video_editor_main_actions.dart";
+import "package:photos/ui/tools/editor/video_editor/video_editor_navigation_options.dart";
+import "package:photos/ui/tools/editor/video_editor/video_editor_player_control.dart";
+import 'package:video_editor/video_editor.dart';
+
+class VideoRotatePage extends StatelessWidget {
+  const VideoRotatePage({super.key, required this.controller});
+
+  final VideoEditorController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final rotation = controller.rotation;
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: SafeArea(
+        child: Column(
+          children: [
+            Expanded(
+              child: Hero(
+                tag: "video-editor-preview",
+                child: CropGridViewer.preview(
+                  controller: controller,
+                ),
+              ),
+            ),
+            VideoEditorPlayerControl(
+              controller: controller,
+            ),
+            VideoEditorMainActions(
+              children: [
+                VideoEditorBottomAction(
+                  label: "Left",
+                  onPressed: () =>
+                      controller.rotate90Degrees(RotateDirection.left),
+                  icon: Icons.rotate_left,
+                ),
+                const SizedBox(width: 40),
+                VideoEditorBottomAction(
+                  label: "Right",
+                  onPressed: () =>
+                      controller.rotate90Degrees(RotateDirection.right),
+                  icon: Icons.rotate_right,
+                ),
+              ],
+            ),
+            const SizedBox(height: 40),
+            VideoEditorNavigationOptions(
+              secondaryText: "Done",
+              onPrimaryPressed: () {
+                while (controller.rotation != rotation) {
+                  controller.rotate90Degrees(RotateDirection.left);
+                }
+                Navigator.pop(context);
+              },
+              onSecondaryPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

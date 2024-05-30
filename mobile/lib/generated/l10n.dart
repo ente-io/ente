@@ -8703,6 +8703,16 @@ class S {
       args: [],
     );
   }
+
+  /// `Saving Edits!`
+  String get savingEdits {
+    return Intl.message(
+      'Saving Edits!',
+      name: 'savingEdits',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
