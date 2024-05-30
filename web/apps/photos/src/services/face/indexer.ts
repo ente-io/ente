@@ -5,6 +5,7 @@ import { type Remote } from "comlink";
 import mlWorkManager from "services/machineLearning/mlWorkManager";
 import type { EnteFile } from "types/file";
 import { markIndexingFailed } from "./db";
+import type { IndexStatus } from "./db-old";
 import { indexFaces } from "./f-index";
 import { FaceIndexerWorker } from "./indexer.worker";
 
@@ -129,3 +130,43 @@ const createFaceIndexerComlinkWorker = () =>
         "face-indexer",
         new Worker(new URL("indexer.worker.ts", import.meta.url)),
     );
+
+export interface FaceIndexingStatus {
+    /**
+     * Which phase we are in within the indexing pipeline when viewed across the
+     * user's entire library:
+     *
+     * - "scheduled": There are files we know of that have not been indexed.
+     *
+     * - "indexing": The face indexer is currently running.
+     *
+     * - "clustering": All files we know of have been indexed, and we are now
+     *   clustering the faces that were found.
+     *
+     * - "done": Face indexing and clustering is complete for the user's
+     *   library.
+     */
+    phase: "scheduled" | "indexing" | "clustering" | "done";
+    outOfSyncFilesExists: boolean;
+    nSyncedFiles: number;
+    nTotalFiles: number;
+    localFilesSynced: boolean;
+    peopleIndexSynced: boolean;
+}
+
+export const convertToNewInterface = (indexStatus: IndexStatus) => {
+    let phase: string;
+    if (!indexStatus.localFilesSynced) {
+        phase = "scheduled";
+    } else if (indexStatus.outOfSyncFilesExists) {
+        phase = "indexing";
+    } else if (!indexStatus.peopleIndexSynced) {
+        phase = "clustering";
+    } else {
+        phase = "done";
+    }
+    return {
+        ...indexStatus,
+        phase,
+    };
+};
