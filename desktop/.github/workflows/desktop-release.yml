@@ -75,10 +75,8 @@ jobs:
                   # (No need to define this secret in the repo settings)
                   github_token: ${{ secrets.GITHUB_TOKEN }}
 
-                  # If the commit is tagged with a version (e.g. "v1.0.0"),
-                  # create a (draft) release after building. Otherwise upload
-                  # assets to the existing draft named after the version.
-                  release: ${{ startsWith(github.ref, 'refs/tags/v') }}
+                  # Passes `--publish always` to electron-builder
+                  release: true
 
                   mac_certs: ${{ secrets.MAC_CERTS }}
                   mac_certs_password: ${{ secrets.MAC_CERTS_PASSWORD }}
@@ -88,4 +86,9 @@ jobs:
                   APPLE_APP_SPECIFIC_PASSWORD:
                       ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
                   APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+                  # Default is "draft", but since our nightly builds update
+                  # existing pre-releases, set this to "prerelease".
+                  EP_PRE_RELEASE: prerelease
+                  # Workaround recommended in
+                  # https://github.com/electron-userland/electron-builder/issues/3179
                   USE_HARD_LINKS: false
