@@ -97,6 +97,8 @@ class MLWorkManager {
     private liveSyncWorker: ComlinkWorker<typeof DedicatedMLWorker>;
     private mlSearchEnabled: boolean;
 
+    public isSyncing = false;
+
     constructor() {
         this.liveSyncQueue = new PQueue({
             concurrency: 1,
@@ -270,6 +272,7 @@ class MLWorkManager {
      * things pending to process, so we should chug along at full speed.
      */
     private async runMLSyncJob(): Promise<boolean> {
+        this.isSyncing = true;
         try {
             // TODO: skipping is not required if we are caching chunks through service worker
             // currently worker chunk itself is not loaded when network is not there
@@ -290,6 +293,8 @@ class MLWorkManager {
             // TODO: redirect/refresh to gallery in case of session_expired, stop ml sync job
         } catch (e) {
             log.error("Failed to run MLSync Job", e);
+        } finally {
+            this.isSyncing = false;
         }
     }
 

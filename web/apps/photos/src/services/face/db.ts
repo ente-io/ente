@@ -46,20 +46,13 @@ interface FileStatus {
      * - "indexed" - We have a corresponding entry for this file in the
      *   "face-index" object (either indexed locally or fetched from remote).
      *
-     * - "ignored" - Ignore this file when considering indexes. Some reasons
-     *   include:
-     *
-     *    - Indexeing might've failed (in which case there won't even be a
-     *      corresponding entry for this file in "face-index").
-     *
-     *    - We might have a "face-index" for this file, but we should not use it
-     *      because, say, the file is currently hidden.
+     * - "failed" - Indexing was attempted but failed.
      *
      * We also have a (IndexedDB) "index" on this field to allow us to
      * efficiently select or count {@link fileIDs} that fall into various
      * buckets.
      */
-    status: "indexable" | "indexed" | "ignored";
+    status: "indexable" | "indexed" | "failed";
     /**
      * The number of times attempts to index this file failed.
      *
@@ -185,7 +178,7 @@ export const saveFaceIndex = async (faceIndex: FaceIndex) => {
             failureCount: 0,
         }),
         tx.done,
-    ]);
+    ]).then(() => {} /* convert result to void */);
 };
 
 /**
@@ -221,15 +214,16 @@ export const addFileEntry = async (fileID: number) => {
 };
 
 /**
- * Sync entries in the face DB to align with the given list of local indexable
- * file IDs.
+ * Sync entries in the face DB to align with the state of local files outside
+ * face DB.
  *
- * @param localFileIDs The IDs of all the files that the client is aware of,
- * filtered to only keep the files that the user owns and the formats that can
- * be indexed by our current face indexing pipeline.
+ * @param localFileIDs Local {@link EnteFile}s, keyed by their IDs. These are
+ * all the files that the client is aware of, filtered to only keep the files
+ * that the user owns and the formats that can be indexed by our current face
+ * indexing pipeline.
  *
  * This function syncs the state of file entries in face DB to the state of file
- * entries stored otherwise by the local client.
+ * entries stored otherwise by the client locally.
  *
  * - Files (identified by their ID) that are present locally but are not yet in
  *   face DB get a fresh entry in face DB (and are marked as indexable).
@@ -237,7 +231,7 @@ export const addFileEntry = async (fileID: number) => {
  * - Files that are not present locally but still exist in face DB are removed
  *   from face DB (including its face index, if any).
  */
-export const syncWithLocalIndexableFileIDs = async (localFileIDs: number[]) => {
+export const syncWithLocalFiles = async (localFileIDs: number[]) => {
     const db = await faceDB();
     const tx = db.transaction(["face-index", "file-status"], "readwrite");
     const fdbFileIDs = await tx.objectStore("file-status").getAllKeys();
@@ -263,7 +257,7 @@ export const syncWithLocalIndexableFileIDs = async (localFileIDs: number[]) => {
             removedFileIDs.map((id) => tx.objectStore("face-index").delete(id)),
             tx.done,
         ].flat(),
-    );
+    ).then(() => {} /* convert result to void */);
 };
 
 /**
@@ -314,10 +308,10 @@ export const indexableFileIDs = async (count?: number) => {
 export const markIndexingFailed = async (fileID: number) => {
     const db = await faceDB();
     const tx = db.transaction("file-status", "readwrite");
-    const failureCount = ((await tx.store.get(fileID)).failureCount ?? 0) + 1;
+    const failureCount = ((await tx.store.get(fileID))?.failureCount ?? 0) + 1;
     await tx.store.put({
         fileID,
-        status: "ignored",
+        status: "failed",
         failureCount,
     });
     return tx.done;

@@ -45,8 +45,7 @@ import type { Box, Dimensions, Face, Point } from "./types";
  * available. These are used when they are provided, otherwise the file is
  * downloaded and decrypted from remote.
  *
- * @param userAgent The UA of the current client (the client that is generating
- * the embedding).
+ * @param userAgent The UA of the client that is doing the indexing (us).
  */
 export const indexFaces = async (
     enteFile: EnteFile,
@@ -78,11 +77,20 @@ export const indexFaces = async (
 /**
  * Return a "renderable" image blob, using {@link file} if present otherwise
  * downloading the source image corresponding to {@link enteFile} from remote.
+ *
+ * For videos their thumbnail is used.
  */
-const renderableImageBlob = async (enteFile: EnteFile, file: File) =>
-    file
-        ? getRenderableImage(enteFile.metadata.title, file)
-        : fetchRenderableBlob(enteFile);
+const renderableImageBlob = async (enteFile: EnteFile, file: File) => {
+    const fileType = enteFile.metadata.fileType;
+    if (fileType == FILE_TYPE.VIDEO) {
+        const thumbnailData = await DownloadManager.getThumbnail(enteFile);
+        return new Blob([thumbnailData]);
+    } else {
+        return file
+            ? getRenderableImage(enteFile.metadata.title, file)
+            : fetchRenderableBlob(enteFile);
+    }
+};
 
 const fetchRenderableBlob = async (enteFile: EnteFile) => {
     const fileStream = await DownloadManager.getFile(enteFile);
