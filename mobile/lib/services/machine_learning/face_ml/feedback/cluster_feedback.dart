@@ -117,7 +117,11 @@ class ClusterFeedbackService {
 
       final sortingStartTime = DateTime.now();
       if (extremeFilesFirst) {
-        await _sortSuggestionsOnDistanceToPerson(person, finalSuggestions);
+        try {
+          await _sortSuggestionsOnDistanceToPerson(person, finalSuggestions);
+        } catch (e, s) {
+          _logger.severe("Error in sorting suggestions", e, s);
+        }
       }
       _logger.info(
         'getSuggestionForPerson post-processing suggestions took ${DateTime.now().difference(findSuggestionsTime).inMilliseconds} ms, of which sorting took ${DateTime.now().difference(sortingStartTime).inMilliseconds} ms and getting files took ${getFilesTime.difference(findSuggestionsTime).inMilliseconds} ms',
