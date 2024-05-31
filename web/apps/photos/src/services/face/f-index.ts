@@ -84,8 +84,7 @@ const renderableImageBlob = async (enteFile: EnteFile, file: File) => {
     const fileType = enteFile.metadata.fileType;
     if (fileType == FILE_TYPE.VIDEO) {
         const thumbnailData = await DownloadManager.getThumbnail(enteFile);
-        const thumbnailBlob = new Blob([thumbnailData]);
-        return getRenderableImage(enteFile.metadata.title, thumbnailBlob);
+        return new Blob([thumbnailData]);
     } else {
         return file
             ? getRenderableImage(enteFile.metadata.title, file)
