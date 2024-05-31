@@ -45,8 +45,6 @@ class MachineLearningService {
     private localSyncContext: Promise<MLSyncContext>;
     private syncContext: Promise<MLSyncContext>;
 
-    public isSyncing = false;
-
     public async sync(
         token: string,
         userID: number,
@@ -70,7 +68,6 @@ class MachineLearningService {
     }
 
     private async syncFiles(syncContext: MLSyncContext) {
-        this.isSyncing = true;
         try {
             const functions = syncContext.outOfSyncFiles.map(
                 (outOfSyncfile) => async () => {
@@ -90,7 +87,6 @@ class MachineLearningService {
             syncContext.error = error;
         }
         await syncContext.syncQueue.onIdle();
-        this.isSyncing = false;
     }
 
     private async getSyncContext(

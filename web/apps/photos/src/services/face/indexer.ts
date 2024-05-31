@@ -4,7 +4,6 @@ import { ensure } from "@/utils/ensure";
 import { wait } from "@/utils/promise";
 import { type Remote } from "comlink";
 import { getLocalFiles } from "services/fileService";
-import machineLearningService from "services/machineLearning/machineLearningService";
 import mlWorkManager from "services/machineLearning/mlWorkManager";
 import type { EnteFile } from "types/file";
 import { isInternalUserForML } from "utils/user";
@@ -162,7 +161,7 @@ export interface FaceIndexingStatus {
 }
 
 export const faceIndexingStatus = async (): Promise<FaceIndexingStatus> => {
-    const isSyncing = machineLearningService.isSyncing;
+    const isSyncing = mlWorkManager.isSyncing;
     const { indexedCount, indexableCount } = await indexedAndIndexableCounts();
 
     let phase: FaceIndexingStatus["phase"];
