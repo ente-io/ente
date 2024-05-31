@@ -4,6 +4,7 @@ import { clipService } from "services/clip-service";
 import DownloadManager from "./download";
 import exportService from "./export";
 import { clearFaceData } from "./face/db";
+import { clearFeatureFlagSessionState } from "./feature-flag";
 import mlWorkManager from "./machineLearning/mlWorkManager";
 
 /**
@@ -18,6 +19,12 @@ export const photosLogout = async () => {
         log.error(`Ignoring error during logout (${label})`, e);
 
     await accountLogout();
+
+    try {
+        clearFeatureFlagSessionState();
+    } catch (e) {
+        ignoreError("feature-flag", e);
+    }
 
     try {
         await DownloadManager.logout();

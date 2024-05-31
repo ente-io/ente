@@ -384,7 +384,6 @@ export default function Gallery() {
             syncInterval.current = setInterval(() => {
                 syncWithRemote(false, true);
             }, SYNC_INTERVAL_IN_MICROSECONDS);
-            fetchAndSaveFeatureFlagsIfNeeded();
             if (electron) {
                 // void clipService.setupOnFileUploadListener();
                 electron.onMainWindowFocus(() => syncWithRemote(false, true));
@@ -715,6 +714,7 @@ export default function Gallery() {
             await syncTrash(collections, setTrashedFiles);
             await syncEntities();
             await syncMapEnabled();
+            fetchAndSaveFeatureFlagsIfNeeded();
             const electron = globalThis.electron;
             if (electron) {
                 await syncCLIPEmbeddings();
