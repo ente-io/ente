@@ -88,7 +88,7 @@ jobs:
                   APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
                   # Default is "draft", but since our nightly builds update
                   # existing pre-releases, set this to "prerelease".
-                  EP_PRE_RELEASE: prerelease
+                  EP_PRE_RELEASE: true
                   # Workaround recommended in
                   # https://github.com/electron-userland/electron-builder/issues/3179
                   USE_HARD_LINKS: false
