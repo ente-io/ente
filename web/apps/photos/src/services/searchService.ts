@@ -20,7 +20,7 @@ import { getFormattedDate } from "utils/search";
 import { clipService, computeClipMatchScore } from "./clip-service";
 import { localCLIPEmbeddings } from "./embeddingService";
 import { getLatestEntities } from "./entityService";
-import { faceIndexingStatus } from "./face/indexer";
+import { faceIndexingStatus, isFaceIndexingEnabled } from "./face/indexer";
 import locationSearchService, { City } from "./locationSearchService";
 
 const DIGITS = new Set(["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]);
@@ -29,7 +29,9 @@ const CLIP_SCORE_THRESHOLD = 0.23;
 
 export const getDefaultOptions = async () => {
     return [
-        await getIndexStatusSuggestion(),
+        // TODO-ML(MR): Skip this for now if indexing is disabled (eventually
+        // the indexing status should not be tied to results).
+        ...(await isFaceIndexingEnabled() ? [await getIndexStatusSuggestion()] : []),
         ...(await convertSuggestionsToOptions(await getAllPeopleSuggestion())),
     ].filter((t) => !!t);
 };
