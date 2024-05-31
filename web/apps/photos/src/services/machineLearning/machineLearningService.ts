@@ -1,7 +1,7 @@
 import log from "@/next/log";
 import { CustomError, parseUploadErrorCodes } from "@ente/shared/error";
 import PQueue from "p-queue";
-import { getFilesToIndex } from "services/face/indexer";
+import { syncAndGetFilesToIndex } from "services/face/indexer";
 import { FaceIndexerWorker } from "services/face/indexer.worker";
 import { EnteFile } from "types/file";
 
@@ -45,8 +45,6 @@ class MachineLearningService {
     private localSyncContext: Promise<MLSyncContext>;
     private syncContext: Promise<MLSyncContext>;
 
-    public isSyncing = false;
-
     public async sync(
         token: string,
         userID: number,
@@ -58,7 +56,10 @@ class MachineLearningService {
 
         const syncContext = await this.getSyncContext(token, userID, userAgent);
 
-        syncContext.outOfSyncFiles = await getFilesToIndex(userID, batchSize);
+        syncContext.outOfSyncFiles = await syncAndGetFilesToIndex(
+            userID,
+            batchSize,
+        );
 
         if (syncContext.outOfSyncFiles.length > 0) {
             await this.syncFiles(syncContext);
@@ -70,7 +71,6 @@ class MachineLearningService {
     }
 
     private async syncFiles(syncContext: MLSyncContext) {
-        this.isSyncing = true;
         try {
             const functions = syncContext.outOfSyncFiles.map(
                 (outOfSyncfile) => async () => {
@@ -90,7 +90,6 @@ class MachineLearningService {
             syncContext.error = error;
         }
         await syncContext.syncQueue.onIdle();
-        this.isSyncing = false;
     }
 
     private async getSyncContext(
@@ -139,12 +138,18 @@ class MachineLearningService {
     }
 
     public async syncLocalFile(
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         token: string,
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         userID: number,
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         userAgent: string,
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         enteFile: EnteFile,
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         localFile?: globalThis.File,
     ) {
+        /* TODO-ML(MR): Currently not used
         const syncContext = await this.getLocalSyncContext(
             token,
             userID,
@@ -165,6 +170,7 @@ class MachineLearningService {
         } catch (e) {
             console.error("Error while syncing local file: ", enteFile.id, e);
         }
+        */
     }
 
     private async syncFileWithErrorHandler(

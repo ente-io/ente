@@ -1,18 +1,16 @@
-import { FILE_TYPE } from "@/media/file-type";
 import { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { ensure } from "@/utils/ensure";
 import { wait } from "@/utils/promise";
 import { type Remote } from "comlink";
-import { getLocalFiles } from "services/fileService";
-import machineLearningService from "services/machineLearning/machineLearningService";
+import { getAllLocalFiles } from "services/fileService";
 import mlWorkManager from "services/machineLearning/mlWorkManager";
 import type { EnteFile } from "types/file";
 import { isInternalUserForML } from "utils/user";
 import {
     faceIndex,
+    indexableFileIDs,
     indexedAndIndexableCounts,
-    syncWithLocalIndexableFileIDs,
-    unindexedFileIDs,
+    syncWithLocalFiles,
 } from "./db";
 import { FaceIndexerWorker } from "./indexer.worker";
 
@@ -69,6 +67,8 @@ class FaceIndexer {
         // Get to work.
         this.tick();
     }
+
+    /* TODO-ML(MR): This code is not currently in use */
 
     /**
      * A promise for the lazily created singleton {@link FaceIndexerWorker} remote
@@ -162,11 +162,11 @@ export interface FaceIndexingStatus {
 }
 
 export const faceIndexingStatus = async (): Promise<FaceIndexingStatus> => {
-    const isSyncing = machineLearningService.isSyncing;
+    const isSyncing = mlWorkManager.isSyncing;
     const { indexedCount, indexableCount } = await indexedAndIndexableCounts();
 
     let phase: FaceIndexingStatus["phase"];
-    if (indexedCount < indexableCount) {
+    if (indexableCount > 0) {
         if (!isSyncing) {
             phase = "scheduled";
         } else {
@@ -179,7 +179,7 @@ export const faceIndexingStatus = async (): Promise<FaceIndexingStatus> => {
     return {
         phase,
         nSyncedFiles: indexedCount,
-        nTotalFiles: indexableCount,
+        nTotalFiles: indexableCount + indexedCount,
     };
 };
 
@@ -221,28 +221,29 @@ export const setIsFaceIndexingEnabled = async (enabled: boolean) => {
 };
 
 /**
- * Sync face DB with the local indexable files that we know about. Then return
- * the next {@link count} files that still need to be indexed.
+ * Sync face DB with the local (and potentially indexable) files that we know
+ * about. Then return the next {@link count} files that still need to be
+ * indexed.
  *
- * For more specifics of what a "sync" entails, see
- * {@link syncWithLocalIndexableFileIDs}.
+ * For more specifics of what a "sync" entails, see {@link syncWithLocalFiles}.
  *
- * @param userID Limit indexing to files owned by a {@link userID}.
+ * @param userID Sync only files owned by a {@link userID} with the face DB.
  *
- * @param count Limit the resulting list of files to {@link count}.
+ * @param count Limit the resulting list of indexable files to {@link count}.
  */
-export const getFilesToIndex = async (userID: number, count: number) => {
-    const localFiles = await getLocalFiles();
-    const indexableTypes = [FILE_TYPE.IMAGE, FILE_TYPE.LIVE_PHOTO];
-    const indexableFiles = localFiles.filter(
-        (f) =>
-            f.ownerID == userID && indexableTypes.includes(f.metadata.fileType),
+export const syncAndGetFilesToIndex = async (
+    userID: number,
+    count: number,
+): Promise<EnteFile[]> => {
+    const isIndexable = (f: EnteFile) => f.ownerID == userID;
+
+    const localFiles = await getAllLocalFiles();
+    const localFilesByID = new Map(
+        localFiles.filter(isIndexable).map((f) => [f.id, f]),
     );
 
-    const filesByID = new Map(indexableFiles.map((f) => [f.id, f]));
+    await syncWithLocalFiles([...localFilesByID.keys()]);
 
-    await syncWithLocalIndexableFileIDs([...filesByID.keys()]);
-
-    const fileIDsToIndex = await unindexedFileIDs(count);
-    return fileIDsToIndex.map((id) => ensure(filesByID.get(id)));
+    const fileIDsToIndex = await indexableFileIDs(count);
+    return fileIDsToIndex.map((id) => ensure(localFilesByID.get(id)));
 };

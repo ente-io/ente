@@ -20,7 +20,7 @@ import type { FaceIndex } from "./types";
  * comlink workers are structured.
  */
 export class FaceIndexerWorker {
-    /*
+    /**
      * Index faces in a file, save the persist the results locally, and put them
      * on remote.
      *
@@ -31,6 +31,8 @@ export class FaceIndexerWorker {
      * cases, pass a web {@link File} object to use that its data directly for
      * face indexing. If this is not provided, then the file's contents will be
      * downloaded and decrypted from remote.
+     *
+     * @param userAgent The UA of the client that is doing the indexing (us).
      */
     async index(enteFile: EnteFile, file: File | undefined, userAgent: string) {
         const f = fileLogID(enteFile);

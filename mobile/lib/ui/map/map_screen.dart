@@ -114,7 +114,7 @@ class _MapScreenState extends State<MapScreen> {
     );
 
     Timer(Duration(milliseconds: debounceDuration), () {
-      calculateVisibleMarkers(mapController.bounds!);
+      calculateVisibleMarkers(mapController.camera.visibleBounds);
       setState(() {
         isLoading = false;
       });
