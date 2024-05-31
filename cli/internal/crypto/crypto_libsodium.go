@@ -88,6 +88,23 @@ func decryptChaCha20poly1305(data []byte, key []byte, nonce []byte) ([]byte, err
 	return decoded, nil
 }
 
+// decryptChaCha20poly1305V2 is used only to decrypt Ente Auth data. Ente Auth use new version of LibSodium.
+// In that version, the final tag value is 0x0 instead of TagFinal.
+func decryptChaCha20poly1305V2(data []byte, key []byte, nonce []byte) ([]byte, error) {
+	decryptor, err := NewDecryptor(key, nonce)
+	if err != nil {
+		return nil, err
+	}
+	decoded, tag, err := decryptor.Pull(data)
+	if tag != TagFinal && tag != TagMessage {
+		return nil, errors.New("invalid tag")
+	}
+	if err != nil {
+		return nil, err
+	}
+	return decoded, nil
+}
+
 //func SecretBoxOpenLibSodium(c []byte, n []byte, k []byte) ([]byte, error) {
 //	var cp sodium.Bytes = c
 //	res, err := cp.SecretBoxOpen(sodium.SecretBoxNonce{Bytes: n}, sodium.SecretBoxKey{Bytes: k})
