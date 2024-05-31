@@ -60,6 +60,7 @@ export const MLSearchSettings = ({ open, onClose, onRootClose }) => {
     const enableFaceSearch = async () => {
         try {
             startLoading();
+            // Update the consent flag.
             await updateFaceSearchEnabledStatus(true);
             updateMlSearchEnabled(true);
             closeEnableFaceSearch();
@@ -83,7 +84,6 @@ export const MLSearchSettings = ({ open, onClose, onRootClose }) => {
     const disableFaceSearch = async () => {
         try {
             startLoading();
-            await updateFaceSearchEnabledStatus(false);
             await disableMlSearch();
             finishLoading();
         } catch (e) {
