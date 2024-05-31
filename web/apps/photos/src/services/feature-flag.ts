@@ -24,7 +24,7 @@ export const fetchAndSaveFeatureFlagsIfNeeded = () => {
         void fetchAndSaveFeatureFlags().then(() => {
             _haveFetched = true;
         });
-    }, 5000);
+    }, 2000);
 };
 
 export const clearFeatureFlagSessionState = () => {
