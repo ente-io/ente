@@ -89,6 +89,10 @@ jobs:
                   # Default is "draft", but since our nightly builds update
                   # existing pre-releases, set this to "prerelease".
                   EP_PRE_RELEASE: true
+                  # By default, electron-builder does not update releases that
+                  # were more than 2 hours ago. Override this to allow us to
+                  # continually update our nightly pre-releases.
+                  EP_GH_IGNORE_TIME: true
                   # Workaround recommended in
                   # https://github.com/electron-userland/electron-builder/issues/3179
                   USE_HARD_LINKS: false
