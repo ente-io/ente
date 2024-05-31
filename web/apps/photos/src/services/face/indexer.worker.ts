@@ -32,17 +32,9 @@ export class FaceIndexerWorker {
      * face indexing. If this is not provided, then the file's contents will be
      * downloaded and decrypted from remote.
      *
-     * @param isHidden `true` if the file we're trying to index is currently
-     * hidden.
-     *
      * @param userAgent The UA of the client that is doing the indexing (us).
      */
-    async index(
-        enteFile: EnteFile,
-        file: File | undefined,
-        isHidden: boolean,
-        userAgent: string,
-    ) {
+    async index(enteFile: EnteFile, file: File | undefined, userAgent: string) {
         const f = fileLogID(enteFile);
         const startTime = Date.now();
 
@@ -54,13 +46,13 @@ export class FaceIndexerWorker {
             // failed, not if there were subsequent failures (like when trying
             // to put the result to remote or save it to the local face DB).
             log.error(`Failed to index faces in ${f}`, e);
-            markIndexingFailed(enteFile.id, isHidden);
+            markIndexingFailed(enteFile.id);
             throw e;
         }
 
         try {
             await putFaceIndex(enteFile, faceIndex);
-            await saveFaceIndex(faceIndex, isHidden);
+            await saveFaceIndex(faceIndex);
         } catch (e) {
             log.error(`Failed to put/save face index for ${f}`, e);
             throw e;

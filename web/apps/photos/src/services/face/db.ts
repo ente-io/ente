@@ -1,6 +1,5 @@
 import log from "@/next/log";
 import { deleteDB, openDB, type DBSchema } from "idb";
-import type { EnteFile } from "types/file";
 import type { FaceIndex } from "./types";
 
 /**
@@ -49,26 +48,11 @@ interface FileStatus {
      *
      * - "failed" - Indexing was attempted but failed.
      *
-     *    - We might have a "face-index" for this file, but we should not use it
-     *      because, say, the file is currently hidden.
-     *
      * We also have a (IndexedDB) "index" on this field to allow us to
      * efficiently select or count {@link fileIDs} that fall into various
      * buckets.
      */
     status: "indexable" | "indexed" | "failed";
-    /**
-     * `1` if this file is currently hidden, `0` otherwise.
-     *
-     * [Note: Boolean IndexedDB indexes].
-     *
-     * IndexedDB does not (currently) supported indexes on boolean fields.
-     * https://github.com/w3c/IndexedDB/issues/76
-     *
-     * As a workaround, we use numeric fields where `0` denotes `false` and `1`
-     * denotes `true`.
-     */
-    isHidden: number;
     /**
      * The number of times attempts to index this file failed.
      *
@@ -178,15 +162,10 @@ export const clearFaceData = async () => {
  * @param faceIndex A {@link FaceIndex} representing the faces that we detected
  * (and their corresponding embeddings) in some file.
  *
- * @param isHidden `true` if the file is currently hidden.
- *
  * This function adds a new entry, overwriting any existing ones (No merging is
  * performed, the existing entry is unconditionally overwritten).
  */
-export const saveFaceIndex = async (
-    faceIndex: FaceIndex,
-    isHidden: boolean,
-) => {
+export const saveFaceIndex = async (faceIndex: FaceIndex) => {
     const db = await faceDB();
     const tx = db.transaction(["face-index", "file-status"], "readwrite");
     const indexStore = tx.objectStore("face-index");
@@ -196,11 +175,10 @@ export const saveFaceIndex = async (
         statusStore.put({
             fileID: faceIndex.fileID,
             status: "indexed",
-            isHidden: isHidden ? 1 : 0,
             failureCount: 0,
         }),
         tx.done,
-    ]).then(() => {});
+    ]).then(() => {} /* convert result to void */);
 };
 
 /**
@@ -217,21 +195,18 @@ export const faceIndex = async (fileID: number) => {
  *
  * @param fileID The ID of an {@link EnteFile}.
  *
- * @param isHidden `true` if the file is currently hidden.
- *
  * This function does not overwrite existing entries. If an entry already exists
  * for the given {@link fileID} (e.g. if it was indexed and
  * {@link saveFaceIndex} called with the result), its existing status remains
  * unperturbed.
  */
-export const addFileEntry = async (fileID: number, isHidden: boolean) => {
+export const addFileEntry = async (fileID: number) => {
     const db = await faceDB();
     const tx = db.transaction("file-status", "readwrite");
     if ((await tx.store.getKey(fileID)) === undefined) {
         await tx.store.put({
             fileID,
             status: "indexable",
-            isHidden: isHidden ? 1 : 0,
             failureCount: 0,
         });
     }
@@ -242,13 +217,10 @@ export const addFileEntry = async (fileID: number, isHidden: boolean) => {
  * Sync entries in the face DB to align with the state of local files outside
  * face DB.
  *
- * @param indexableNormalFilesByID Local {@link EnteFile}s, keyed by their IDs.
- * These are all the (non-hidden) files that the client is aware of, filtered to
- * only keep the files that the user owns and the formats that can be indexed by
- * our current face indexing pipeline.
- *
- * @param indexableHiddenFilesByID Similar to {@link indexableNormalFilesByID}
- * except for hidden files.
+ * @param localFileIDs Local {@link EnteFile}s, keyed by their IDs. These are
+ * all the files that the client is aware of, filtered to only keep the files
+ * that the user owns and the formats that can be indexed by our current face
+ * indexing pipeline.
  *
  * This function syncs the state of file entries in face DB to the state of file
  * entries stored otherwise by the client locally.
@@ -259,22 +231,16 @@ export const addFileEntry = async (fileID: number, isHidden: boolean) => {
  * - Files that are not present locally but still exist in face DB are removed
  *   from face DB (including its face index, if any).
  */
-export const syncWithLocalFiles = async (
-    indexableNormalFilesByID: Map<number, EnteFile>,
-    indexableHiddenFilesByID: Map<number, EnteFile>,
-) => {
+export const syncWithLocalFiles = async (localFileIDs: number[]) => {
     const db = await faceDB();
     const tx = db.transaction(["face-index", "file-status"], "readwrite");
     const fdbFileIDs = await tx.objectStore("file-status").getAllKeys();
 
-    const normal = new Set(indexableNormalFilesByID.keys());
-    const hidden = new Set(indexableHiddenFilesByID.keys());
-    const all = new Set([...normal, ...hidden]);
+    const local = new Set(localFileIDs);
     const fdb = new Set(fdbFileIDs);
 
-    const localFileIDs = [...all];
     const newFileIDs = localFileIDs.filter((id) => !fdb.has(id));
-    const removedFileIDs = fdbFileIDs.filter((id) => !all.has(id));
+    const removedFileIDs = fdbFileIDs.filter((id) => !local.has(id));
 
     return Promise.all(
         [
@@ -282,7 +248,6 @@ export const syncWithLocalFiles = async (
                 tx.objectStore("file-status").put({
                     fileID: id,
                     status: "indexable",
-                    isHidden: hidden.has(id) ? 1 : 0,
                     failureCount: 0,
                 }),
             ),
@@ -292,7 +257,7 @@ export const syncWithLocalFiles = async (
             removedFileIDs.map((id) => tx.objectStore("face-index").delete(id)),
             tx.done,
         ].flat(),
-    );
+    ).then(() => {} /* convert result to void */);
 };
 
 /**
@@ -336,20 +301,17 @@ export const indexableFileIDs = async (count?: number) => {
  *
  * @param fileID The ID of an {@link EnteFile}.
  *
- * @param isHidden `true` if the file is currently hidden.
- *
  * If an entry does not exist yet for the given file, then a new one is created
  * and its failure count is set to 1. Otherwise the failure count of the
  * existing entry is incremented.
  */
-export const markIndexingFailed = async (fileID: number, isHidden: boolean) => {
+export const markIndexingFailed = async (fileID: number) => {
     const db = await faceDB();
     const tx = db.transaction("file-status", "readwrite");
     const failureCount = ((await tx.store.get(fileID))?.failureCount ?? 0) + 1;
     await tx.store.put({
         fileID,
         status: "failed",
-        isHidden: isHidden ? 1 : 0,
         failureCount,
     });
     return tx.done;

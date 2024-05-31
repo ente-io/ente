@@ -3,7 +3,7 @@ import { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { ensure } from "@/utils/ensure";
 import { wait } from "@/utils/promise";
 import { type Remote } from "comlink";
-import { getLocalFiles } from "services/fileService";
+import { getAllLocalFiles } from "services/fileService";
 import mlWorkManager from "services/machineLearning/mlWorkManager";
 import type { EnteFile } from "types/file";
 import { isInternalUserForML } from "utils/user";
@@ -221,15 +221,11 @@ export const setIsFaceIndexingEnabled = async (enabled: boolean) => {
     else localStorage.removeItem("faceIndexingEnabled");
 };
 
-export type IndexableEnteFile = { enteFile: EnteFile; isHidden: boolean };
-
 /**
  * Sync face DB with the local indexable files that we know about. Then return
- * the next {@link count} files that still need to be indexed alongwith a flag
- * for whether they are currently hidden.
+ * the next {@link count} files that still need to be indexed.
  *
- * For more specifics of what a "sync" entails, see
- * {@link syncWithLocalFiles}.
+ * For more specifics of what a "sync" entails, see {@link syncWithLocalFiles}.
  *
  * @param userID Limit indexing to files owned by a {@link userID}.
  *
@@ -238,33 +234,18 @@ export type IndexableEnteFile = { enteFile: EnteFile; isHidden: boolean };
 export const syncAndGetFilesToIndex = async (
     userID: number,
     count: number,
-): Promise<IndexableEnteFile[]> => {
+): Promise<EnteFile[]> => {
     const indexableTypes = [FILE_TYPE.IMAGE, FILE_TYPE.LIVE_PHOTO];
     const isIndexable = (f: EnteFile) =>
         f.ownerID == userID && indexableTypes.includes(f.metadata.fileType);
 
-    const normalFiles = await getLocalFiles("normal");
-    const hiddenFiles = await getLocalFiles("hidden");
-
-    const indexableNormalFilesByID = new Map(
-        normalFiles.filter(isIndexable).map((f) => [f.id, f]),
-    );
-    const indexableHiddenFilesByID = new Map(
-        hiddenFiles.filter(isIndexable).map((f) => [f.id, f]),
+    const localFiles = await getAllLocalFiles();
+    const localFilesByID = new Map(
+        localFiles.filter(isIndexable).map((f) => [f.id, f]),
     );
 
-    await syncWithLocalFiles(
-        indexableNormalFilesByID,
-        indexableHiddenFilesByID,
-    );
+    await syncWithLocalFiles([...localFilesByID.keys()]);
 
     const fileIDsToIndex = await indexableFileIDs(count);
-    return fileIDsToIndex.map((id) => {
-        const f = indexableNormalFilesByID.get(id);
-        if (f) return { enteFile: f, isHidden: false };
-        return {
-            enteFile: ensure(indexableHiddenFilesByID.get(id)),
-            isHidden: true,
-        };
-    });
+    return fileIDsToIndex.map((id) => ensure(localFilesByID.get(id)));
 };

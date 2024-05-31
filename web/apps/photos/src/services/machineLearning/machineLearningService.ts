@@ -1,10 +1,7 @@
 import log from "@/next/log";
 import { CustomError, parseUploadErrorCodes } from "@ente/shared/error";
 import PQueue from "p-queue";
-import {
-    syncAndGetFilesToIndex,
-    type IndexableEnteFile,
-} from "services/face/indexer";
+import { syncAndGetFilesToIndex } from "services/face/indexer";
 import { FaceIndexerWorker } from "services/face/indexer.worker";
 import { EnteFile } from "types/file";
 
@@ -16,7 +13,7 @@ class MLSyncContext {
     public userAgent: string;
 
     public localFilesMap: Map<number, EnteFile>;
-    public outOfSyncFiles: IndexableEnteFile[];
+    public outOfSyncFiles: EnteFile[];
     public nSyncedFiles: number;
     public error?: Error;
 
@@ -178,16 +175,11 @@ class MachineLearningService {
 
     private async syncFileWithErrorHandler(
         syncContext: MLSyncContext,
-        { enteFile, isHidden }: IndexableEnteFile,
+        enteFile: EnteFile,
         localFile?: globalThis.File,
     ) {
         try {
-            await this.syncFile(
-                enteFile,
-                localFile,
-                isHidden,
-                syncContext.userAgent,
-            );
+            await this.syncFile(enteFile, localFile, syncContext.userAgent);
             syncContext.nSyncedFiles += 1;
         } catch (e) {
             let error = e;
@@ -212,12 +204,11 @@ class MachineLearningService {
     private async syncFile(
         enteFile: EnteFile,
         file: File | undefined,
-        isHidden: boolean,
         userAgent: string,
     ) {
         const worker = new FaceIndexerWorker();
 
-        await worker.index(enteFile, file, isHidden, userAgent);
+        await worker.index(enteFile, file, userAgent);
     }
 }
 
