@@ -1,3 +1,8 @@
+import log from "@/next/log";
+import { ensure } from "@/utils/ensure";
+import { apiOrigin } from "@ente/shared/network/api";
+import { getToken } from "@ente/shared/storage/localStorage/helpers";
+
 let _fetchTimeout: ReturnType<typeof setTimeout> | undefined;
 let _haveFetched = false;
 
@@ -34,7 +39,43 @@ export const clearFeatureFlagSessionState = () => {
  * Fetch feature flags (potentially user specific) from remote and save them in
  * local storage for subsequent lookup.
  */
-const fetchAndSaveFeatureFlags = async () => {};
+const fetchAndSaveFeatureFlags = () =>
+    fetchFeatureFlags()
+        .then((res) => res.text())
+        .then(saveFlagJSONString);
+
+const fetchFeatureFlags = async () => {
+    const url = `${apiOrigin}/remote-store/feature-flags`;
+    const res = await fetch(url, {
+        headers: {
+            "X-Auth-Token": ensure(getToken()),
+        },
+    });
+    if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
+    return res;
+};
+
+const saveFlagJSONString = (s: string) =>
+    localStorage.setItem("remoteFeatureFlags", s);
+
+const remoteFeatureFlags = () => {
+    const s = localStorage.getItem("remoteFeatureFlags");
+    if (!s) return undefined;
+    return JSON.parse(s);
+};
+
+const remoteFeatureFlagsFetchingIfNeeded = async () => {
+    let ff = await remoteFeatureFlags();
+    if (!ff) {
+        try {
+            await fetchAndSaveFeatureFlags();
+            ff = await remoteFeatureFlags();
+        } catch (e) {
+            log.warn("Ignoring error when fetching feature flags", e);
+        }
+    }
+    return ff;
+};
 
 /**
  * Return `true` if the current user is marked as an "internal" user.
@@ -42,6 +83,17 @@ const fetchAndSaveFeatureFlags = async () => {};
 export const isInternalUser = async () => {};
 
 /**
- * Return `true` if the current user is marked as an "beta" user.
+ * Return `true` if the current user is marked as a "beta" user.
  */
-export const isBetaUser = async () => {};
+export const isBetaUser = async () => {
+    const flags = await remoteFeatureFlagsFetchingIfNeeded();
+    // TODO(MR): Use Yup here
+    if (
+        flags &&
+        typeof flags === "object" &&
+        "betaUser" in flags &&
+        typeof flags.betaUser == "boolean"
+    )
+        return flags.betaUser;
+    return false;
+};
