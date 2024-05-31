@@ -1,13 +1,17 @@
 ## Releases
 
-Conceptually, the release is straightforward: We trigger a GitHub workflow that
-creates a draft release with artifacts built. When ready, we publish that
-release. The download links on our website, and existing apps already check the
-latest GitHub release and update accordingly.
+Conceptually, the release is straightforward:
+
+1.  We trigger a GitHub workflow that creates a draft release with the build.
+
+2.  When ready, we publish that release.
+
+3.  The download links on our website, and existing apps already check the
+    latest GitHub release and update automatically.
 
 The complication comes by the fact that electron-builder's auto updater (the
 mechanism that we use for auto updates) doesn't work with monorepos. So we need
-to keep a separate (non-mono) repository just for doing releases.
+to keep a separate repository just for holding the releases.
 
 -   Source code lives here, in [ente-io/ente](https://github.com/ente-io/ente).
 
@@ -61,15 +65,14 @@ host subsequent nightly builds.
     git push origin 1.x.x-rc
     ```
 
-3. Once the draft release is created, edit its description to "Nightly builds",
-   set it as a pre-release and publish.
+3.  Once the workflow finishes and the draft release is created, edit its
+    description to "Nightly builds", set it as a pre-release and publish.
 
-4. Delete the pre-release for the previous (already released) version.
+4.  Delete the pre-release for the previous (already released) version.
 
-## Workflow - Extra Pre-releases
+## Workflow - Extra pre-releases
 
-If you want to create extra pre-releases in addition to the nightly `1.x.x-rc`
-ones,
+To create extro one off pre-releases in addition to the nightly `1.x.x-rc` ones,
 
 1.  In your branch in the source repository, set the version in `package.json`
     to something different, say `1.x.x-my-test`.
@@ -78,7 +81,7 @@ ones,
     the tag input enter `v1.x.x-test` and select the option to "create a new tag
     on publish".
 
-3. Trigger the workflow in the release repo:
+3.  Trigger the workflow in the release repo:
 
     ```sh
     gh workflow run desktop-release.yml --source=my-branch
