@@ -1,7 +1,10 @@
 import log from "@/next/log";
 import { CustomError, parseUploadErrorCodes } from "@ente/shared/error";
 import PQueue from "p-queue";
-import { syncAndGetFilesToIndex } from "services/face/indexer";
+import {
+    syncAndGetFilesToIndex,
+    type IndexableEnteFile,
+} from "services/face/indexer";
 import { FaceIndexerWorker } from "services/face/indexer.worker";
 import { EnteFile } from "types/file";
 
@@ -13,7 +16,7 @@ class MLSyncContext {
     public userAgent: string;
 
     public localFilesMap: Map<number, EnteFile>;
-    public outOfSyncFiles: EnteFile[];
+    public outOfSyncFiles: IndexableEnteFile[];
     public nSyncedFiles: number;
     public error?: Error;
 
@@ -138,12 +141,18 @@ class MachineLearningService {
     }
 
     public async syncLocalFile(
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         token: string,
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         userID: number,
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         userAgent: string,
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         enteFile: EnteFile,
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         localFile?: globalThis.File,
     ) {
+        /* TODO-ML(MR): Currently not used
         const syncContext = await this.getLocalSyncContext(
             token,
             userID,
@@ -164,15 +173,21 @@ class MachineLearningService {
         } catch (e) {
             console.error("Error while syncing local file: ", enteFile.id, e);
         }
+        */
     }
 
     private async syncFileWithErrorHandler(
         syncContext: MLSyncContext,
-        enteFile: EnteFile,
+        { enteFile, isHidden }: IndexableEnteFile,
         localFile?: globalThis.File,
     ) {
         try {
-            await this.syncFile(enteFile, localFile, syncContext.userAgent);
+            await this.syncFile(
+                enteFile,
+                localFile,
+                isHidden,
+                syncContext.userAgent,
+            );
             syncContext.nSyncedFiles += 1;
         } catch (e) {
             let error = e;
@@ -197,11 +212,12 @@ class MachineLearningService {
     private async syncFile(
         enteFile: EnteFile,
         file: File | undefined,
+        isHidden: boolean,
         userAgent: string,
     ) {
         const worker = new FaceIndexerWorker();
 
-        await worker.index(enteFile, file, userAgent);
+        await worker.index(enteFile, file, isHidden, userAgent);
     }
 }
 

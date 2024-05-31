@@ -221,9 +221,12 @@ export const setIsFaceIndexingEnabled = async (enabled: boolean) => {
     else localStorage.removeItem("faceIndexingEnabled");
 };
 
+export type IndexableEnteFile = { enteFile: EnteFile; isHidden: boolean };
+
 /**
  * Sync face DB with the local indexable files that we know about. Then return
- * the next {@link count} files that still need to be indexed.
+ * the next {@link count} files that still need to be indexed alongwith a flag
+ * for whether they are currently hidden.
  *
  * For more specifics of what a "sync" entails, see
  * {@link syncWithLocalFiles}.
@@ -232,7 +235,10 @@ export const setIsFaceIndexingEnabled = async (enabled: boolean) => {
  *
  * @param count Limit the resulting list of files to {@link count}.
  */
-export const syncAndGetFilesToIndex = async (userID: number, count: number) => {
+export const syncAndGetFilesToIndex = async (
+    userID: number,
+    count: number,
+): Promise<IndexableEnteFile[]> => {
     const indexableTypes = [FILE_TYPE.IMAGE, FILE_TYPE.LIVE_PHOTO];
     const isIndexable = (f: EnteFile) =>
         f.ownerID == userID && indexableTypes.includes(f.metadata.fileType);
@@ -253,10 +259,12 @@ export const syncAndGetFilesToIndex = async (userID: number, count: number) => {
     );
 
     const fileIDsToIndex = await indexableFileIDs(count);
-    return fileIDsToIndex.map((id) =>
-        ensure(
-            indexableNormalFilesByID.get(id) ??
-                indexableHiddenFilesByID.get(id),
-        ),
-    );
+    return fileIDsToIndex.map((id) => {
+        const f = indexableNormalFilesByID.get(id);
+        if (f) return { enteFile: f, isHidden: false };
+        return {
+            enteFile: ensure(indexableHiddenFilesByID.get(id)),
+            isHidden: true,
+        };
+    });
 };
