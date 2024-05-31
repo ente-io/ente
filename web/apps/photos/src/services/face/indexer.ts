@@ -1,4 +1,3 @@
-import { FILE_TYPE } from "@/media/file-type";
 import { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { ensure } from "@/utils/ensure";
 import { wait } from "@/utils/promise";
@@ -222,22 +221,21 @@ export const setIsFaceIndexingEnabled = async (enabled: boolean) => {
 };
 
 /**
- * Sync face DB with the local indexable files that we know about. Then return
- * the next {@link count} files that still need to be indexed.
+ * Sync face DB with the local (and potentially indexable) files that we know
+ * about. Then return the next {@link count} files that still need to be
+ * indexed.
  *
  * For more specifics of what a "sync" entails, see {@link syncWithLocalFiles}.
  *
- * @param userID Limit indexing to files owned by a {@link userID}.
+ * @param userID Sync only files owned by a {@link userID} with the face DB.
  *
- * @param count Limit the resulting list of files to {@link count}.
+ * @param count Limit the resulting list of indexable files to {@link count}.
  */
 export const syncAndGetFilesToIndex = async (
     userID: number,
     count: number,
 ): Promise<EnteFile[]> => {
-    const indexableTypes = [FILE_TYPE.IMAGE, FILE_TYPE.LIVE_PHOTO];
-    const isIndexable = (f: EnteFile) =>
-        f.ownerID == userID && indexableTypes.includes(f.metadata.fileType);
+    const isIndexable = (f: EnteFile) => f.ownerID == userID;
 
     const localFiles = await getAllLocalFiles();
     const localFilesByID = new Map(
