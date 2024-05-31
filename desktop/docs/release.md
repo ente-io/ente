@@ -14,7 +14,7 @@ to keep a separate (non-mono) repository just for doing releases.
 -   Releases are done from
     [ente-io/photos-desktop](https://github.com/ente-io/photos-desktop).
 
-## Workflow - Release Candidates
+## Workflow - Release candidates
 
 Nightly RC builds of `main` are published by a scheduled workflow automatically.
 If needed, these builds can also be manually triggered, and the branch of the
@@ -65,6 +65,24 @@ host subsequent nightly builds.
    set it as a pre-release and publish.
 
 4. Delete the pre-release for the previous (already released) version.
+
+## Workflow - Extra Pre-releases
+
+If you want to create extra pre-releases in addition to the nightly `1.x.x-rc`
+ones,
+
+1.  In your branch in the source repository, set the version in `package.json`
+    to something different, say `1.x.x-my-test`.
+
+2.  Create a new draft release in the release repo with title `1.x.x-test`. In
+    the tag input enter `v1.x.x-test` and select the option to "create a new tag
+    on publish".
+
+3. Trigger the workflow in the release repo:
+
+    ```sh
+    gh workflow run desktop-release.yml --source=my-branch
+    ```
 
 ## Details
 
