@@ -91,7 +91,10 @@ class FaceMlService {
   bool isInitialized = false;
   late String client;
 
+  bool get showClusteringIsHappening => _showClusteringIsHappening;
+
   bool debugIndexingDisabled = false;
+  bool _showClusteringIsHappening = false;
   bool _mlControllerStatus = false;
   bool _isIndexingOrClusteringRunning = false;
   bool _shouldPauseIndexingAndClustering = false;
@@ -572,6 +575,8 @@ class FaceMlService {
     await PersonService.instance.fetchRemoteClusterFeedback();
 
     try {
+      _showClusteringIsHappening = true;
+
       // Get a sense of the total number of faces in the database
       final int totalFaces =
           await FaceMLDataDB.instance.getTotalFaceCount(minFaceScore: minFaceScore);
@@ -711,6 +716,7 @@ class FaceMlService {
     } catch (e, s) {
       _logger.severe("`clusterAllImages` failed", e, s);
     } finally {
+      _showClusteringIsHappening = false;
       _isIndexingOrClusteringRunning = false;
       _shouldPauseIndexingAndClustering = false;
     }
