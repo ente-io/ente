@@ -272,14 +272,7 @@ function EnableMLSearch({ onClose, enableMlSearch, onRootClose }) {
                 onRootClose={onRootClose}
             />
             <Stack py={"20px"} px={"8px"} spacing={"32px"}>
-                <Box px={"8px"}>
-                    {" "}
-                    <Typography color="text.muted">
-                        {/* <Trans i18nKey={"ENABLE_ML_SEARCH_DESCRIPTION"} /> */}
-                        We're putting finishing touches, coming back soon!
-                    </Typography>
-                </Box>
-                {canEnable && (
+                {canEnable ? (
                     <Stack px={"8px"} spacing={"8px"}>
                         <Button
                             color={"accent"}
@@ -298,6 +291,14 @@ function EnableMLSearch({ onClose, enableMlSearch, onRootClose }) {
                         </Button>
                         */}
                     </Stack>
+                ) : (
+                    <Box px={"8px"}>
+                        {" "}
+                        <Typography color="text.muted">
+                            {/* <Trans i18nKey={"ENABLE_ML_SEARCH_DESCRIPTION"} /> */}
+                            We're putting finishing touches, coming back soon!
+                        </Typography>
+                    </Box>
                 )}
             </Stack>
         </Stack>
