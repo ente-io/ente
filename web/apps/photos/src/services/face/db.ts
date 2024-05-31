@@ -269,10 +269,12 @@ export const syncWithLocalFiles = async (
 
     const normal = new Set(indexableNormalFilesByID.keys());
     const hidden = new Set(indexableHiddenFilesByID.keys());
+    const all = new Set([...normal, ...hidden]);
     const fdb = new Set(fdbFileIDs);
 
+    const localFileIDs = [...all];
     const newFileIDs = localFileIDs.filter((id) => !fdb.has(id));
-    const removedFileIDs = fdbFileIDs.filter((id) => !local.has(id));
+    const removedFileIDs = fdbFileIDs.filter((id) => !all.has(id));
 
     return Promise.all(
         [
@@ -280,6 +282,7 @@ export const syncWithLocalFiles = async (
                 tx.objectStore("file-status").put({
                     fileID: id,
                     status: "indexable",
+                    isHidden: hidden.has(id) ? 1 : 0,
                     failureCount: 0,
                 }),
             ),

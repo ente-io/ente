@@ -45,8 +45,7 @@ import type { Box, Dimensions, Face, Point } from "./types";
  * available. These are used when they are provided, otherwise the file is
  * downloaded and decrypted from remote.
  *
- * @param userAgent The UA of the current client (the client that is generating
- * the embedding).
+ * @param userAgent The UA of the client that is doing the indexing (us).
  */
 export const indexFaces = async (
     enteFile: EnteFile,

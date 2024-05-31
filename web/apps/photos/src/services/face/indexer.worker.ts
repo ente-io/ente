@@ -20,7 +20,7 @@ import type { FaceIndex } from "./types";
  * comlink workers are structured.
  */
 export class FaceIndexerWorker {
-    /*
+    /**
      * Index faces in a file, save the persist the results locally, and put them
      * on remote.
      *
@@ -31,8 +31,18 @@ export class FaceIndexerWorker {
      * cases, pass a web {@link File} object to use that its data directly for
      * face indexing. If this is not provided, then the file's contents will be
      * downloaded and decrypted from remote.
+     *
+     * @param isHidden `true` if the file we're trying to index is currently
+     * hidden.
+     *
+     * @param userAgent The UA of the client that is doing the indexing (us).
      */
-    async index(enteFile: EnteFile, file: File | undefined, userAgent: string) {
+    async index(
+        enteFile: EnteFile,
+        file: File | undefined,
+        isHidden: boolean,
+        userAgent: string,
+    ) {
         const f = fileLogID(enteFile);
         const startTime = Date.now();
 
@@ -44,13 +54,13 @@ export class FaceIndexerWorker {
             // failed, not if there were subsequent failures (like when trying
             // to put the result to remote or save it to the local face DB).
             log.error(`Failed to index faces in ${f}`, e);
-            markIndexingFailed(enteFile.id);
+            markIndexingFailed(enteFile.id, isHidden);
             throw e;
         }
 
         try {
             await putFaceIndex(enteFile, faceIndex);
-            await saveFaceIndex(faceIndex);
+            await saveFaceIndex(faceIndex, isHidden);
         } catch (e) {
             log.error(`Failed to put/save face index for ${f}`, e);
             throw e;
