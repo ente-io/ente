@@ -45,7 +45,7 @@ const fetchAndSaveFeatureFlags = () =>
         .then(saveFlagJSONString);
 
 const fetchFeatureFlags = async () => {
-    const url = `${apiOrigin}/remote-store/feature-flags`;
+    const url = `${apiOrigin()}/remote-store/feature-flags`;
     const res = await fetch(url, {
         headers: {
             "X-Auth-Token": ensure(getToken()),
