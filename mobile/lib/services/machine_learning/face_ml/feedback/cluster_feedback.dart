@@ -40,7 +40,8 @@ class ClusterFeedbackService {
   final _computer = Computer.shared();
   ClusterFeedbackService._privateConstructor();
 
-  static final ClusterFeedbackService instance = ClusterFeedbackService._privateConstructor();
+  static final ClusterFeedbackService instance =
+      ClusterFeedbackService._privateConstructor();
 
   static int lastViewedClusterID = -1;
   static setLastViewedClusterID(int clusterID) {
@@ -686,7 +687,7 @@ class ClusterFeedbackService {
           clusterAvgBigClusters,
           personClusters,
           ignoredClusters,
-          (minimumSize == 100) ? goodMeanDistance + 0.15 : goodMeanDistance,
+          goodMeanDistance,
         );
         w?.log(
           'Calculate suggestions using mean for ${clusterAvgBigClusters.length} clusters of min size $minimumSize',
@@ -1165,7 +1166,9 @@ List<(int, double)> _calcSuggestionsMean(Map<String, dynamic> args) {
       }
     }
     if (nearestPersonCluster != null && minDistance != null) {
-      suggestions.putIfAbsent(nearestPersonCluster, () => []).add((otherClusterID, minDistance));
+      suggestions
+          .putIfAbsent(nearestPersonCluster, () => [])
+          .add((otherClusterID, minDistance));
       suggestionCount++;
     }
     if (suggestionCount >= suggestionMax) {
@@ -1195,7 +1198,8 @@ List<(int, double)> _calcSuggestionsMean(Map<String, dynamic> args) {
   }
 }
 
-Future<(Map<int, Vector>, Set<int>, int, int, int)> checkAndSerializeCurrentClusterMeans(
+Future<(Map<int, Vector>, Set<int>, int, int, int)>
+    checkAndSerializeCurrentClusterMeans(
   Map args,
 ) async {
   final Map<int, int> allClusterIdsToCountMap = args['allClusterIdsToCountMap'];
