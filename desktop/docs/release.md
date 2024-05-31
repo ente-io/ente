@@ -2,9 +2,9 @@
 
 Conceptually, the release is straightforward:
 
-1.  We trigger a GitHub workflow that creates a draft release with the build.
+1.  We trigger a GitHub workflow that creates a (pre-)release with the build.
 
-2.  When ready, we publish that release.
+2.  When ready, we make that release the latest.
 
 3.  The download links on our website, and existing apps already check the
     latest GitHub release and update automatically.
@@ -21,7 +21,7 @@ to keep a separate repository just for holding the releases.
 ## Workflow - Release candidates
 
 Nightly RC builds of `main` are published by a scheduled workflow automatically.
-If needed, these builds can also be manually triggered, and the branch of the
+If needed, these builds can also be manually updated, and the branch of the
 source repository to build (default "main") also specified:
 
 ```sh
@@ -49,11 +49,12 @@ Each such workflow run will update the artifacts attached to the same
     ./.github/trigger-release.sh v1.x.x
     ```
 
-This'll trigger the workflow and create a new draft release, which you can
-publish after adding the release notes. Once you publish, the release goes live.
+This'll trigger the workflow and create a new pre-release. We can edit this to
+add the release notes, convert it to a release. Once it is marked as latest, the
+release goes live.
 
-The release is done at this point, and we can now create a new pre-release to
-host subsequent nightly builds.
+We are done at this point, and can now create a new pre-release to host
+subsequent nightly builds.
 
 1.  Update `package.json` in the source repo to use version `1.x.x-rc`, and
     merge these changes into `main`.
@@ -65,21 +66,21 @@ host subsequent nightly builds.
     git push origin 1.x.x-rc
     ```
 
-3.  Once the workflow finishes and the draft release is created, edit its
-    description to "Nightly builds", set it as a pre-release and publish.
+3.  Once the workflow finishes and the pre-release is created, edit its
+    description to "Nightly builds".
 
 4.  Delete the pre-release for the previous (already released) version.
 
 ## Workflow - Extra pre-releases
 
-To create extro one off pre-releases in addition to the nightly `1.x.x-rc` ones,
+To create extra one off pre-releases in addition to the nightly `1.x.x-rc` ones,
 
 1.  In your branch in the source repository, set the version in `package.json`
     to something different, say `1.x.x-my-test`.
 
-2.  Create a new draft release in the release repo with title `1.x.x-test`. In
-    the tag input enter `v1.x.x-test` and select the option to "create a new tag
-    on publish".
+2.  Create a new pre-release in the release repo with title `1.x.x-test`. In the
+    tag input enter `v1.x.x-test` and select the option to "create a new tag on
+    publish".
 
 3.  Trigger the workflow in the release repo:
 

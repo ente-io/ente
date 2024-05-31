@@ -87,6 +87,7 @@ import {
 import downloadManager from "services/download";
 import { syncCLIPEmbeddings } from "services/embeddingService";
 import { syncEntities } from "services/entityService";
+import { fetchAndSaveFeatureFlagsIfNeeded } from "services/feature-flag";
 import { getLocalFiles, syncFiles } from "services/fileService";
 import locationSearchService from "services/locationSearchService";
 import { getLocalTrashedFiles, syncTrash } from "services/trashService";
@@ -713,6 +714,7 @@ export default function Gallery() {
             await syncTrash(collections, setTrashedFiles);
             await syncEntities();
             await syncMapEnabled();
+            fetchAndSaveFeatureFlagsIfNeeded();
             const electron = globalThis.electron;
             if (electron) {
                 await syncCLIPEmbeddings();

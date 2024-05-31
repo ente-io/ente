@@ -2,6 +2,7 @@ import { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { ensure } from "@/utils/ensure";
 import { wait } from "@/utils/promise";
 import { type Remote } from "comlink";
+import { isBetaUser, isInternalUser } from "services/feature-flag";
 import { getAllLocalFiles } from "services/fileService";
 import mlWorkManager from "services/machineLearning/mlWorkManager";
 import type { EnteFile } from "types/file";
@@ -195,6 +196,13 @@ export const unidentifiedFaceIDs = async (
 };
 
 /**
+ * Return true if we should show an option to the user to allow them to enable
+ * face search in the UI.
+ */
+export const canEnableFaceIndexing = async () =>
+    isInternalUserForML() || (await isInternalUser()) || (await isBetaUser());
+
+/**
  * Return true if the user has enabled face indexing in the app's settings.
  *
  * This setting is persisted locally (in local storage) and is not synced with
@@ -204,12 +212,7 @@ export const unidentifiedFaceIDs = async (
  * hand, denotes whether or not indexing is enabled on the current client.
  */
 export const isFaceIndexingEnabled = async () => {
-    if (isInternalUserForML()) {
-        return localStorage.getItem("faceIndexingEnabled") == "1";
-    }
-    // Force disabled for everyone else while we finalize it to avoid redundant
-    // reindexing for users.
-    return false;
+    return localStorage.getItem("faceIndexingEnabled") == "1";
 };
 
 /**
