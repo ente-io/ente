@@ -2876,10 +2876,10 @@ class S {
     );
   }
 
-  /// `Please note that ML indexing will result in a higher bandwidth and battery usage until all items are indexed.`
+  /// `Please note that machine learning will result in a higher bandwidth and battery usage until all items are indexed.`
   String get mlIndexingDescription {
     return Intl.message(
-      'Please note that ML indexing will result in a higher bandwidth and battery usage until all items are indexed.',
+      'Please note that machine learning will result in a higher bandwidth and battery usage until all items are indexed.',
       name: 'mlIndexingDescription',
       desc: '',
       args: [],
