@@ -513,14 +513,18 @@ class FaceRecognitionStatusWidgetState extends State<FaceRecognitionStatusWidget
                       title: S.of(context).clusteringProgress,
                     ),
                     trailingWidget: Text(
-                      "${clusteringPercentage.toStringAsFixed(0)}%",
+                      FaceMlService.instance.showClusteringIsHappening
+                          ? "currently running"
+                          : "${clusteringPercentage.toStringAsFixed(0)}%",
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
                     singleBorderRadius: 8,
                     alignCaptionedTextToLeft: true,
                     isGestureDetectorDisabled: true,
                     key: ValueKey(
-                      "clustering_progress_" + clusteringPercentage.toStringAsFixed(0),
+                      FaceMlService.instance.showClusteringIsHappening
+                          ? "currently running"
+                          : "clustering_progress_" + clusteringPercentage.toStringAsFixed(0),
                     ),
                   ),
                 ],
