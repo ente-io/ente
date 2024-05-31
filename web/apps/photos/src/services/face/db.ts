@@ -30,7 +30,7 @@ interface FaceDBSchema extends DBSchema {
     "file-status": {
         key: number;
         value: FileStatus;
-        indexes: { isIndexable: number };
+        indexes: { status: FileStatus["status"] };
     };
 }
 
@@ -38,27 +38,32 @@ interface FileStatus {
     /** The ID of the {@link EnteFile} whose indexing status we represent. */
     fileID: number;
     /**
-     * `1` if this file needs to be indexed, `0` otherwise.
+     * The status of the file.
      *
-     * > Somewhat confusingly, we also have a (IndexedDB) "index" on this field.
-     *   That (IDB) index allows us to efficiently select {@link fileIDs} that
-     *   still need indexing (i.e. entries where {@link isIndexed} is `1`).
+     * - "indexable" - This file is something that we can index, but it is yet
+     *   to be indexed.
      *
-     * [Note: Boolean IndexedDB indexes].
+     * - "indexed" - We have a corresponding entry for this file in the
+     *   "face-index" object (either indexed locally or fetched from remote).
      *
-     * IndexedDB does not (currently) supported indexes on boolean fields.
-     * https://github.com/w3c/IndexedDB/issues/76
+     * - "ignored" - Ignore this file when considering indexes. Some reasons
+     *   include:
      *
-     * As a workaround, we use numeric fields where `0` denotes `false` and `1`
-     * denotes `true`.
+     *    - Indexeing might've failed (in which case there won't even be a
+     *      corresponding entry for this file in "face-index").
+     *
+     *    - We might have a "face-index" for this file, but we should not use it
+     *      because, say, the file is currently hidden.
+     *
+     * We also have a (IndexedDB) "index" on this field to allow us to
+     * efficiently select or count {@link fileIDs} that fall into various
+     * buckets.
      */
-    isIndexable: number;
+    status: "indexable" | "indexed" | "ignored";
     /**
      * The number of times attempts to index this file failed.
      *
-     * This is guaranteed to be `0` for files which have already been
-     * sucessfully indexed (i.e. files for which `isIndexable` is 0 and which
-     * have a corresponding entry in the "face-index" object store).
+     * This is guaranteed to be `0` for files with status "indexed".
      */
     failureCount: number;
 }
@@ -91,7 +96,7 @@ const openFaceDB = async () => {
                 db.createObjectStore("face-index", { keyPath: "fileID" });
                 db.createObjectStore("file-status", {
                     keyPath: "fileID",
-                }).createIndex("isIndexable", "isIndexable");
+                }).createIndex("status", "status");
             }
         },
         blocking() {
@@ -176,7 +181,7 @@ export const saveFaceIndex = async (faceIndex: FaceIndex) => {
         indexStore.put(faceIndex),
         statusStore.put({
             fileID: faceIndex.fileID,
-            isIndexable: 0,
+            status: "indexed",
             failureCount: 0,
         }),
         tx.done,
@@ -208,7 +213,7 @@ export const addFileEntry = async (fileID: number) => {
     if ((await tx.store.getKey(fileID)) === undefined) {
         await tx.store.put({
             fileID,
-            isIndexable: 1,
+            status: "indexable",
             failureCount: 0,
         });
     }
@@ -248,7 +253,7 @@ export const syncWithLocalIndexableFileIDs = async (localFileIDs: number[]) => {
             newFileIDs.map((id) =>
                 tx.objectStore("file-status").put({
                     fileID: id,
-                    isIndexable: 1,
+                    status: "indexable",
                     failureCount: 0,
                 }),
             ),
@@ -263,16 +268,20 @@ export const syncWithLocalIndexableFileIDs = async (localFileIDs: number[]) => {
 
 /**
  * Return the count of files that can be, and that have been, indexed.
+ *
+ * These counts are mutually exclusive. The total number of files that fall
+ * within the purview of the indexer is thus indexable + indexed.
  */
 export const indexedAndIndexableCounts = async () => {
     const db = await faceDB();
-    const tx = db.transaction(["face-index", "file-status"], "readwrite");
-    const indexedCount = await tx.objectStore("face-index").count();
-    const indexableCount = await tx
-        .objectStore("file-status")
-        .index("isIndexable")
-        .count(IDBKeyRange.only(1));
-    return { indexedCount, indexableCount };
+    const tx = db.transaction("file-status", "readwrite");
+    const indexableCount = await tx.store
+        .index("status")
+        .count(IDBKeyRange.only("indexable"));
+    const indexedCount = await tx.store
+        .index("status")
+        .count(IDBKeyRange.only("indexed"));
+    return { indexableCount, indexedCount };
 };
 
 /**
@@ -281,14 +290,16 @@ export const indexedAndIndexableCounts = async () => {
  * This list is from the universe of the file IDs that the face DB knows about
  * (can use {@link addFileEntry} to inform it about new files). From this
  * universe, we filter out fileIDs the files corresponding to which have already
- * been indexed, or for which we attempted indexing but failed.
+ * been indexed, or which should be ignored.
  *
  * @param count Limit the result to up to {@link count} items.
  */
-export const unindexedFileIDs = async (count?: number) => {
+export const indexableFileIDs = async (count?: number) => {
     const db = await faceDB();
     const tx = db.transaction("file-status", "readonly");
-    return tx.store.index("isIndexable").getAllKeys(IDBKeyRange.only(1), count);
+    return tx.store
+        .index("status")
+        .getAllKeys(IDBKeyRange.only("indexable"), count);
 };
 
 /**
@@ -306,7 +317,7 @@ export const markIndexingFailed = async (fileID: number) => {
     const failureCount = ((await tx.store.get(fileID)).failureCount ?? 0) + 1;
     await tx.store.put({
         fileID,
-        isIndexable: 0,
+        status: "ignored",
         failureCount,
     });
     return tx.done;
