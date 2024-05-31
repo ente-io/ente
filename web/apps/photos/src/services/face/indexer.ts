@@ -69,6 +69,8 @@ class FaceIndexer {
         this.tick();
     }
 
+    /* TODO-ML(MR): This code is not currently in use */
+
     /**
      * A promise for the lazily created singleton {@link FaceIndexerWorker} remote
      * exposed by this module.
@@ -231,17 +233,22 @@ export const setIsFaceIndexingEnabled = async (enabled: boolean) => {
  * @param count Limit the resulting list of files to {@link count}.
  */
 export const getFilesToIndex = async (userID: number, count: number) => {
-    const localFiles = await getLocalFiles();
     const indexableTypes = [FILE_TYPE.IMAGE, FILE_TYPE.LIVE_PHOTO];
-    const indexableFiles = localFiles.filter(
-        (f) =>
-            f.ownerID == userID && indexableTypes.includes(f.metadata.fileType),
-    );
+    const isIndexable = (f: EnteFile) =>
+        f.ownerID == userID && indexableTypes.includes(f.metadata.fileType);
 
-    const filesByID = new Map(indexableFiles.map((f) => [f.id, f]));
+    const normalFiles = await getLocalFiles("normal");
+    const hiddenFiles = await getLocalFiles("hidden");
+    const indexableNormalFiles = normalFiles.filter(isIndexable);
+    const indexableHiddenFiles = hiddenFiles.filter(isIndexable);
+
+    const normalFilesByID = new Map(indexableNormalFiles.map((f) => [f.id, f]));
+    const hiddenFilesByID = new Map(indexableHiddenFiles.map((f) => [f.id, f]));
 
     await syncWithLocalIndexableFileIDs([...filesByID.keys()]);
 
     const fileIDsToIndex = await indexableFileIDs(count);
-    return fileIDsToIndex.map((id) => ensure(filesByID.get(id)));
+    return fileIDsToIndex.map((id) =>
+        ensure(normalFilesByID.get(id) ?? hiddenFilesByID.get(id)),
+    );
 };
