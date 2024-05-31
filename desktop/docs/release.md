@@ -1,24 +1,28 @@
 ## Releases
 
-Conceptually, the release is straightforward: We trigger a GitHub workflow that
-creates a draft release with artifacts built. When ready, we publish that
-release. The download links on our website, and existing apps already check the
-latest GitHub release and update accordingly.
+Conceptually, the release is straightforward:
+
+1.  We trigger a GitHub workflow that creates a draft release with the build.
+
+2.  When ready, we publish that release.
+
+3.  The download links on our website, and existing apps already check the
+    latest GitHub release and update automatically.
 
 The complication comes by the fact that electron-builder's auto updater (the
 mechanism that we use for auto updates) doesn't work with monorepos. So we need
-to keep a separate (non-mono) repository just for doing releases.
+to keep a separate repository just for holding the releases.
 
 -   Source code lives here, in [ente-io/ente](https://github.com/ente-io/ente).
 
 -   Releases are done from
     [ente-io/photos-desktop](https://github.com/ente-io/photos-desktop).
 
-## Workflow - Release Candidates
+## Workflow - Release candidates
 
 Nightly RC builds of `main` are published by a scheduled workflow automatically.
-If needed, these builds can also be manually triggered, including specifying the
-source repository branch to build:
+If needed, these builds can also be manually triggered, and the branch of the
+source repository to build (default "main") also specified:
 
 ```sh
 gh workflow run desktop-release.yml --source=<branch>
@@ -46,17 +50,44 @@ Each such workflow run will update the artifacts attached to the same
     ```
 
 This'll trigger the workflow and create a new draft release, which you can
-publish after adding the release notes.
+publish after adding the release notes. Once you publish, the release goes live.
 
-The release is done at this point, and we can now start a new RC train for
-subsequent nightly builds.
+The release is done at this point, and we can now create a new pre-release to
+host subsequent nightly builds.
 
-1.  Update `package.json` in the source repo to use version `1.x.x-rc`. Create a
-    new draft release in the release repo with title `1.x.x-rc`. In the tag
-    input enter `v1.x.x-rc` and select the option to "create a new tag on
-    publish".
+1.  Update `package.json` in the source repo to use version `1.x.x-rc`, and
+    merge these changes into `main`.
 
-## Post build
+2.  In the release repo:
+
+    ```sh
+    git tag 1.x.x-rc
+    git push origin 1.x.x-rc
+    ```
+
+3.  Once the workflow finishes and the draft release is created, edit its
+    description to "Nightly builds", set it as a pre-release and publish.
+
+4.  Delete the pre-release for the previous (already released) version.
+
+## Workflow - Extra pre-releases
+
+To create extro one off pre-releases in addition to the nightly `1.x.x-rc` ones,
+
+1.  In your branch in the source repository, set the version in `package.json`
+    to something different, say `1.x.x-my-test`.
+
+2.  Create a new draft release in the release repo with title `1.x.x-test`. In
+    the tag input enter `v1.x.x-test` and select the option to "create a new tag
+    on publish".
+
+3.  Trigger the workflow in the release repo:
+
+    ```sh
+    gh workflow run desktop-release.yml --source=my-branch
+    ```
+
+## Details
 
 The GitHub Action runs on Windows, Linux and macOS. It produces the artifacts
 defined in the `build` value in `package.json`.
