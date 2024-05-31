@@ -77,11 +77,21 @@ export const indexFaces = async (
 /**
  * Return a "renderable" image blob, using {@link file} if present otherwise
  * downloading the source image corresponding to {@link enteFile} from remote.
+ *
+ * For videos their thumbnail is used.
  */
-const renderableImageBlob = async (enteFile: EnteFile, file: File) =>
-    file
-        ? getRenderableImage(enteFile.metadata.title, file)
-        : fetchRenderableBlob(enteFile);
+const renderableImageBlob = async (enteFile: EnteFile, file: File) => {
+    const fileType = enteFile.metadata.fileType;
+    if (fileType == FILE_TYPE.VIDEO) {
+        const thumbnailData = await DownloadManager.getThumbnail(enteFile);
+        const thumbnailBlob = new Blob([thumbnailData]);
+        return getRenderableImage(enteFile.metadata.title, thumbnailBlob);
+    } else {
+        return file
+            ? getRenderableImage(enteFile.metadata.title, file)
+            : fetchRenderableBlob(enteFile);
+    }
+};
 
 const fetchRenderableBlob = async (enteFile: EnteFile) => {
     const fileStream = await DownloadManager.getFile(enteFile);
