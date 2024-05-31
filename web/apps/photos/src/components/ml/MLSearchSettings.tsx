@@ -18,11 +18,11 @@ import { t } from "i18next";
 import { AppContext } from "pages/_app";
 import { useContext, useEffect, useState } from "react";
 import { Trans } from "react-i18next";
+import { canEnableFaceIndexing } from "services/face/indexer";
 import {
     getFaceSearchEnabledStatus,
     updateFaceSearchEnabledStatus,
 } from "services/userService";
-import { isInternalUserForML } from "utils/user";
 
 export const MLSearchSettings = ({ open, onClose, onRootClose }) => {
     const {
@@ -258,6 +258,12 @@ function EnableMLSearch({ onClose, enableMlSearch, onRootClose }) {
     // const showDetails = () =>
     //     openLink("https://ente.io/blog/desktop-ml-beta", true);
 
+    const [canEnable, setCanEnable] = useState(false);
+
+    useEffect(() => {
+        canEnableFaceIndexing().then((v) => setCanEnable(v));
+    }, []);
+
     return (
         <Stack spacing={"4px"} py={"12px"}>
             <Titlebar
@@ -273,7 +279,7 @@ function EnableMLSearch({ onClose, enableMlSearch, onRootClose }) {
                         We're putting finishing touches, coming back soon!
                     </Typography>
                 </Box>
-                {isInternalUserForML() && (
+                {canEnable && (
                     <Stack px={"8px"} spacing={"8px"}>
                         <Button
                             color={"accent"}

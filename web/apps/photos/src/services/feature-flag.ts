@@ -80,7 +80,19 @@ const remoteFeatureFlagsFetchingIfNeeded = async () => {
 /**
  * Return `true` if the current user is marked as an "internal" user.
  */
-export const isInternalUser = async () => {};
+export const isInternalUser = async () => {
+    // TODO: Dedup
+    const flags = await remoteFeatureFlagsFetchingIfNeeded();
+    // TODO(MR): Use Yup here
+    if (
+        flags &&
+        typeof flags === "object" &&
+        "internalUser" in flags &&
+        typeof flags.internalUser == "boolean"
+    )
+        return flags.internalUser;
+    return false;
+};
 
 /**
  * Return `true` if the current user is marked as a "beta" user.
