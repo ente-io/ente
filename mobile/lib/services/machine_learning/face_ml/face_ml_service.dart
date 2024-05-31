@@ -1027,7 +1027,6 @@ class FaceMlService {
               s,
             );
           }
-          // TODO: This is returning null for Pragadees for all files, so something is wrong here!
         }
         if (file == null) {
           _logger

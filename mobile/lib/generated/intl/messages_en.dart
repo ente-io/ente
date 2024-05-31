@@ -936,7 +936,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "memoryCount": m33,
         "merchandise": MessageLookupByLibrary.simpleMessage("Merchandise"),
         "mlIndexingDescription": MessageLookupByLibrary.simpleMessage(
-            "Please note that ML indexing will result in a higher bandwidth and battery usage until all items are indexed."),
+            "Please note that machine learning will result in a higher bandwidth and battery usage until all items are indexed."),
         "mobileWebDesktop":
             MessageLookupByLibrary.simpleMessage("Mobile, Web, Desktop"),
         "moderateStrength": MessageLookupByLibrary.simpleMessage("Moderate"),
