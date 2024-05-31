@@ -10,9 +10,9 @@ import type { EnteFile } from "types/file";
 import { isInternalUserForML } from "utils/user";
 import {
     faceIndex,
+    indexableFileIDs,
     indexedAndIndexableCounts,
     syncWithLocalIndexableFileIDs,
-    unindexedFileIDs,
 } from "./db";
 import { FaceIndexerWorker } from "./indexer.worker";
 
@@ -166,7 +166,7 @@ export const faceIndexingStatus = async (): Promise<FaceIndexingStatus> => {
     const { indexedCount, indexableCount } = await indexedAndIndexableCounts();
 
     let phase: FaceIndexingStatus["phase"];
-    if (indexedCount < indexableCount) {
+    if (indexableCount > 0) {
         if (!isSyncing) {
             phase = "scheduled";
         } else {
@@ -179,7 +179,7 @@ export const faceIndexingStatus = async (): Promise<FaceIndexingStatus> => {
     return {
         phase,
         nSyncedFiles: indexedCount,
-        nTotalFiles: indexableCount,
+        nTotalFiles: indexableCount + indexedCount,
     };
 };
 
@@ -243,6 +243,6 @@ export const getFilesToIndex = async (userID: number, count: number) => {
 
     await syncWithLocalIndexableFileIDs([...filesByID.keys()]);
 
-    const fileIDsToIndex = await unindexedFileIDs(count);
+    const fileIDsToIndex = await indexableFileIDs(count);
     return fileIDsToIndex.map((id) => ensure(filesByID.get(id)));
 };
